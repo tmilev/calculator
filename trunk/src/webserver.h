@@ -102,6 +102,7 @@ public:
   int ProcessPauseWorker();
   int ProcessMonitor();
   int ProcessUnknown();
+  int Run();
   bool CheckConsistency();
   void PipeProgressReportToParentProcess(const std::string& input);
   void WriteProgressReportToFile(const std::string& input);
@@ -160,9 +161,6 @@ int recursionDepth=0)
   std::string GetAddUserEmails();
   static std::string GetJavaScriptIndicatorFromHD();
   static std::string GetJavascriptSubmitLoginInfo();
-  std::string GetHtmlHiddenInputAddressAsRequest();
-  std::string GetHtmlHiddenInputExercise();
-  std::string GetHtmlHiddenInputComputation();
   std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);
   void SetHeaderOKNoContentLength();
   void SetHeader(const std::string& httpResponse, const std::string& remainingHeader);

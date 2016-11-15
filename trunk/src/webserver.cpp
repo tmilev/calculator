@@ -1033,12 +1033,12 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   if (includeAuthenticationToken)
     out << "<input type=\"hidden\" id=\"authenticationToken\" name=\"authenticationToken\">\n";
   if (includeUserName)
-    out  << "<input type=\"hidden\" id=\"username\" name=\"username\">\n";
+    out << "<input type=\"hidden\" id=\"username\" name=\"username\">\n";
   //the values of the hidden inputs will be filled in via javascript
   if (this->flagFoundMalformedFormInput)
     out << "<b>Your input formed had malformed entries.</b>";
   out
-  << "<input type=\"hidden\" id=\"debugFlag\" name=\"debugFlag\">\n"
+//  << "<input type=\"hidden\" id=\"debugFlag\" name=\"debugFlag\">\n"
   << "<input type=\"hidden\" id=\"studentView\" name=\"studentView\">\n"
   << "<input type=\"hidden\" id=\"studentSection\" name=\"studentSection\">\n"
   << "<input type=\"hidden\" id=\"courseHome\" name=\"courseHome\">\n"
@@ -1064,7 +1064,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
     << "of your input has been modified. More precisely, &lt; and &gt;  are "
     << " modified due to a javascript hijack issue. <br>";
   stOutput << this->GetHtmlHiddenInputs(true, true);
-  stOutput << this->GetHtmlHiddenInputComputation();
+  stOutput << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"compute\">\n";
   stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"mainInput\" id=\"mainInputID\" "
   << "style=\"white-space:normal\" "
   << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
@@ -2133,17 +2133,8 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 { MacroRegisterFunctionWithName("WebWorker::GetLoginHTMLinternal");
   std::stringstream out;
   out << reasonForLogin;
-  out << "<form name=\"login\" id=\"login\" action=\"";
-  if (theGlobalVariables.userCalculatorRequestType=="logout" && !theGlobalVariables.flagRunningApache)
-    out << "/";
-  else if (theGlobalVariables.userCalculatorRequestType=="logout" && theGlobalVariables.flagRunningApache)
-    out << theGlobalVariables.DisplayNameExecutable;
-  else if (theGlobalVariables.userCalculatorRequestType!="logout" && theGlobalVariables.flagRunningApache)
-    out << theGlobalVariables.DisplayNameExecutable;
-  else if (theGlobalVariables.userCalculatorRequestType!="logout" && !theGlobalVariables.flagRunningApache)
-    out << "";
-  out << "\" method=\"POST\" accept-charset=\"utf-8\">\n"
-  <<  "User name:\n"
+  out << "<form name=\"login\">";
+  out <<  "User name:\n"
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
   if (theGlobalVariables.GetWebInput("username")!="")
     out << "value=\"" << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("username")) << "\"";
@@ -2152,9 +2143,16 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "<br>Password: ";
   out << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">";
   out << this->GetHtmlHiddenInputs(false, false);
-  //out << this->GetHtmlHiddenInputAddressAsRequest();
+  if (theGlobalVariables.userCalculatorRequestType!="logout" &&
+      theGlobalVariables.userCalculatorRequestType!="login")
+  { out << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\""
+    << theGlobalVariables.userCalculatorRequestType << "\">";
+  }
   out << "<button type=\"submit\" value=\"Submit\" ";
-  out << "action=\"" << theGlobalVariables.DisplayNameExecutable << "\"";
+  out << "action=\"" << theWebServer.GetActiveWorker().addressComputed;
+//  if (theWebServer.GetActiveWorker().argumentComputed!="")
+//    out << "?" << theWebServer.GetActiveWorker().argumentComputed;
+  out << "\"";
   out << ">Login</button>";
 //  if (theGlobalVariables.flagRunningApache)
 //    out << "action=\"" << theGlobalVariables.DisplayNameCalculatorApacheQ
@@ -2164,21 +2162,6 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "<span id=\"loginResult\"></span>";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   //out << "<hr><hr>DEBUG: " << this->ToStringMessageFullUnsafe();
-  return out.str();
-}
-
-std::string WebWorker::GetHtmlHiddenInputComputation()
-{ return "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"compute\">\n";
-}
-
-std::string WebWorker::GetHtmlHiddenInputExercise()
-{ return "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"exercise\">";
-}
-
-std::string WebWorker::GetHtmlHiddenInputAddressAsRequest()
-{ std::stringstream out;
-  out << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\""
-  << CGI::StringToURLString(this->addressComputed) << "\">";
   return out.str();
 }
 
@@ -2543,8 +2526,8 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   out << "<html>"
   << HtmlSnippets::GetJavascriptStandardCookies()
   << WebWorker::GetJavascriptSubmitLoginInfo()
-  << "<body ";
-  out << "onload=\"loadSettings();  ";
+  << "<body";
+/*  out << " onload=\"loadSettings();  ";
   if (!this->flagAuthenticationTokenWasSubmitted && theGlobalVariables.flagUsingSSLinCurrentConnection)
     if (theGlobalVariables.GetWebInput("username")=="")
       out
@@ -2554,8 +2537,9 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
       << "    document.getElementById('login').submit();"
 //      << "alert('was about to submit');"
     ;
-//    << "  window.location='calculator?username='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
-  out << "\">\n";
+  out << "\"";
+*/
+  out << ">\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
 //  out << WebWorker::ToStringCalculatorArgumentsHumanReadable();
   out << WebWorker::GetLoginHTMLinternal(reasonForLogin) << "</body></html>";
@@ -2688,14 +2672,14 @@ int WebWorker::ServeClient()
     << "<body>Click <a href=\"" << redirectedAddress.str() << "\">"
     << " here " << "</a> if your browser does not redirect the page automatically. ";
 
-//    stOutput << "<hr>DEBUG: addressComputed: <br>" << CGI::StringToHtmlString( this->addressComputed)
-//    << "<hr>addressToRedirectTo: <br>\n" << CGI::StringToHtmlString( redirectedAddress.str())
-//    << "<hr>argumentComputed: <br>\n" << CGI::StringToHtmlString( this->argumentComputed)
-//    << "<hr>addressGetOrPost: <br>" << CGI::StringToHtmlString( this->addressGetOrPost )
-//    << "<hr>MessageBody: <br>\n" << CGI::StringToHtmlString( this->messageBody)
-//    << " <br>MessageHead: <br>\n" << CGI::StringToHtmlString(this->messageHead)
-//    << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
-//    << this->ToStringMessageFullUnsafe();
+    //stOutput << "<hr>DEBUG: addressComputed: <br>" << CGI::StringToHtmlString(this->addressComputed)
+    //<< "<hr>addressToRedirectTo: <br>\n" << CGI::StringToHtmlString(redirectedAddress.str())
+    //<< "<hr>argumentComputed: <br>\n" << CGI::StringToHtmlString(this->argumentComputed)
+    //<< "<hr>addressGetOrPost: <br>" << CGI::StringToHtmlString(this->addressGetOrPost)
+    //<< "<hr>MessageBody: <br>\n" << CGI::StringToHtmlString(this->messageBody)
+    //<< " <br>MessageHead: <br>\n" << CGI::StringToHtmlString(this->messageHead)
+    //<< HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
+    //<< this->ToStringMessageFullUnsafe();
     stOutput << "</body></html>";
     return 0;
   }
@@ -3599,6 +3583,8 @@ void WebServer::initPrepareSignals()
 extern void MonitorWebServer();
 
 #include <sys/time.h>
+timeval timeBeforeProcessFork;
+
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
@@ -3626,7 +3612,6 @@ int WebServer::Run()
   this->NumFailedSelectsSoFar=0;
   long long previousReportedNumberOfSelects=0;
   int previousServerStatReport=0;
-  timeval timeBeforeFork;
   while(true)
   { // main accept() loop
     //    theLog << logger::red << "select returned!" << logger::endL;
@@ -3643,7 +3628,7 @@ int WebServer::Run()
         << strerror(errno) << logger::endL;
       this->NumFailedSelectsSoFar++;
     }
-    gettimeofday(&timeBeforeFork, NULL);
+    gettimeofday(&timeBeforeProcessFork, NULL);
     this->NumSuccessfulSelectsSoFar++;
     if ((this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar)-previousReportedNumberOfSelects>100)
     { logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and " << this->NumFailedSelectsSoFar << "="
@@ -3684,8 +3669,6 @@ int WebServer::Run()
       << "but I found no set socket. " << logger::endL;
     if (newConnectedSocket <0)
       continue;
-//    theLog << logger::purple << "NewconnectedSocket: " << newConnectedSocket << ", listeningSocket: "
-//    << theListeningSocket << logger::endL;
     inet_ntop
     (their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), userAddressBuffer, sizeof userAddressBuffer);
     this->RecycleChildrenIfPossible(userAddressBuffer);
@@ -3710,48 +3693,8 @@ int WebServer::Run()
       logProcessKills << logger::red << "FAILED to spawn a child process. " << logger::endL;
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
-      this->flagThisIsWorkerProcess=true;
-      //theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
-      theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
-      crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
-      InitializeTimer(&timeBeforeFork);
-      CreateTimerThread();
-      this->SSLServerSideHandShake();
-      if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection &&
-          !this->flagSSLHandshakeSuccessful)
-      { theGlobalVariables.flagUsingSSLinCurrentConnection=false;
-        this->SignalActiveWorkerDoneReleaseEverything();
-        this->ReleaseEverything();
-        logOpenSSL << logger::red << "ssl fail #: " << this->NumConnectionsSoFar << logger::endL;
-        return -1;
-      }
-      if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection)
-        logOpenSSL << logger::green << "ssl success #: " << this->NumConnectionsSoFar << ". " << logger::endL;
-      /////////////////////////////////////////////////////////////////////////
-      stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
-      this->GetActiveWorker().CheckConsistency();
-      if (!this->GetActiveWorker().ReceiveAll())
-      { this->GetActiveWorker().SetHeader("HTTP/1.0 400 Bad request", "Content-type: text/html");
-        stOutput << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
-        << "One possibility is that the input was too large. "
-        << "<br>The error message returned was:<br>"
-        << this->GetActiveWorker().error
-        << " <hr><hr>The message (part) that was received is: "
-        << this->GetActiveWorker().ToStringMessageFullUnsafe()
-        << "</body></html>";
-        this->SignalActiveWorkerDoneReleaseEverything();
-        this->ReleaseEverything();
-        return -1;
-      }
-      //theLog << logger::red << "DEBUG: got to here, pt 1" << logger::endL;
-      int result= this->GetActiveWorker().ServeClient();
-      //theLog << logger::red << "DEBUG: got to here, pt 2" << logger::endL;
-      this->ReleaseNonActiveWorkers();
-      //theLog << logger::red << "DEBUG: got to here, pt 3" << logger::endL;
-      this->GetActiveWorker().SendAllAndWrapUp();
-      //theLog << logger::red << "DEBUG: got to here, pt 4" << logger::endL;
+      int result=this->GetActiveWorker().Run();
       this->ReleaseEverything();
-      //theLog << logger::red << "DEBUG: got to here, pt 5" << logger::endL;
       return result;
     }
     this->ReleaseWorkerSideResources();
@@ -3759,6 +3702,46 @@ int WebServer::Run()
   this->ReleaseEverything();
   this->SSLfreeEverythingShutdownSSL();
   return 0;
+}
+
+int WebWorker::Run()
+{ MacroRegisterFunctionWithName("WebWorker::Run");
+  this->CheckConsistency();
+  this->parent->flagThisIsWorkerProcess=true;
+  //theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
+  theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
+  crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
+  InitializeTimer(&timeBeforeProcessFork);
+  CreateTimerThread();
+  theWebServer.SSLServerSideHandShake();
+  if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection &&
+      !this->parent->flagSSLHandshakeSuccessful)
+  { theGlobalVariables.flagUsingSSLinCurrentConnection=false;
+    this->parent->SignalActiveWorkerDoneReleaseEverything();
+    this->parent->ReleaseEverything();
+    logOpenSSL << logger::red << "ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
+    return -1;
+  }
+  if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection)
+    logOpenSSL << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
+  /////////////////////////////////////////////////////////////////////////
+  stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
+  if (!this->ReceiveAll())
+  { this->SetHeader("HTTP/1.0 400 Bad request", "Content-type: text/html");
+    stOutput << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
+    << "One possibility is that the input was too large. "
+    << "<br>The error message returned was:<br>"
+    << this->error
+    << " <hr><hr>The message (part) that was received is: "
+    << this->ToStringMessageFullUnsafe()
+    << "</body></html>";
+    this->SendAllAndWrapUp();
+    return -1;
+  }
+  int result= this->ServeClient();
+  this->SendAllAndWrapUp();
+  //theLog << logger::red << "DEBUG: got to here, pt 4" << logger::endL;
+  return result;
 }
 
 void WebServer::Release(int& theDescriptor)

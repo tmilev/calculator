@@ -1317,7 +1317,7 @@ function calculatorCanvasMouseMoveRedraw(inputCanvas, x, y)
     //console.log(theCanvas.theIIIdObjects.thePatches);
     theCanvas.redraw();
   }
-  if (theCanvas!=null && theCanvas!=undefined)
+  if (theCanvas!==null && theCanvas!==undefined)
     theCanvas.mouseMove(x,y);
 }
 
@@ -1327,7 +1327,7 @@ function calculatorCanvasMouseWheel(theCanvasContainer, theEvent)
   theEvent.stopPropagation();
   var theWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;
   var theCanvas=calculatorCanvases[theCanvasContainer.id];
-  if (theCanvas==undefined || theCanvas==null)
+  if (theCanvas===undefined || theCanvas===null)
     return;
   theCanvas.scale+= theWheelDelta *3;
   if (theCanvas.scale<=0)

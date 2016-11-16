@@ -23,6 +23,7 @@ public:
   std::string hostNoPort;
   std::string cookiesApache;
   List<std::string> cookies;
+  List<std::string> connectionFlags;
   std::string addressGetOrPost;
   std::string lastHeadMessage;
   std::string addressComputed;
@@ -34,6 +35,7 @@ public:
   double timeOfLastPingServerSideOnly;
   bool flagInUse;
   bool flagDeallocated;
+  bool flagKeepAlive;
   bool flagFileNameSanitized;
   bool flagAuthenticationTokenWasSubmitted;
   bool flagPasswordWasSubmitted;
@@ -130,9 +132,9 @@ int recursionDepth=0)
   static void OutputCrashAfterTimeout();
   void OutputShowIndicatorOnTimeout();
   static std::string GetInsecureConnectionAngryMessage();
-  void QueueStringForSendingWithHeader(const std::string& stringToSend, bool MustSendAll=false);
-  void QueueStringForSendingNoHeader(const std::string& stringToSend, bool MustSendAll=false);
-  void QueueBytesForSendingNoHeader
+  void QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll=false);
+  void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll=false);
+  void QueueBytesForSendingNoHeadeR
   (const List<char>& bytesToSend, bool MustSendAll=false)
   ;
   bool ShouldDisplayLoginPage();
@@ -163,8 +165,8 @@ int recursionDepth=0)
   static std::string GetJavascriptSubmitLoginInfo();
   std::string GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken);
   void SetHeaderOKNoContentLength();
-  void SetHeader(const std::string& httpResponse, const std::string& remainingHeader);
-  std::string GetHeaderConnection();
+  void SetHeadeR(const std::string& httpResponseNoTermination, const std::string& remainingHeaderNoTermination);
+  std::string GetHeaderConnectionClose();
   std::string GetHeaderSetCookie();
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   WebWorker();

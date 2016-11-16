@@ -54,10 +54,10 @@ bool CalculatorHTML::ReadProblemInfoAppend
   std::string currentProbName, currentProbString;
   ProblemData emptyData;
   for (int i=0; i<CGIedProbs.size(); i++)
-  { currentProbName=MathRoutines::StringTrimWhiteSpace(CGI::URLStringToNormal(CGIedProbs.theKeys[i]));
+  { currentProbName=MathRoutines::StringTrimWhiteSpace(CGI::URLStringToNormal(CGIedProbs.theKeys[i], false));
     if (currentProbName=="")
       continue;
-    currentProbString=CGI::URLStringToNormal(CGIedProbs.theValues[i]);
+    currentProbString=CGI::URLStringToNormal(CGIedProbs.theValues[i], false);
     if (!outputProblemInfo.Contains(currentProbName))
       outputProblemInfo.GetValueCreateIfNotPresent(currentProbName)=emptyData;
     ProblemData& currentProblemValue=
@@ -66,23 +66,23 @@ bool CalculatorHTML::ReadProblemInfoAppend
       return false;
     //stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
     //<< currentKeyValues.ToStringHtml();
-    std::string deadlineString=CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("deadlines"));
-    std::string problemWeightsCollectionString=CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("weights"));
+    std::string deadlineString=CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("deadlines"), false);
+    std::string problemWeightsCollectionString=CGI::URLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("weights"), false);
     if (problemWeightsCollectionString!="")
     { if (!CGI::ChopCGIString(problemWeightsCollectionString, sectionProblemInfo, commentsOnFailure))
         return false;
       for (int j=0; j<sectionProblemInfo.size(); j++)
         currentProblemValue.adminData.problemWeightsPerSectionDB.SetKeyValue
-        (CGI::URLStringToNormal(sectionProblemInfo.theKeys[j]),
-         CGI::URLStringToNormal(sectionProblemInfo.theValues[j]));
+        (CGI::URLStringToNormal(sectionProblemInfo.theKeys[j],false),
+         CGI::URLStringToNormal(sectionProblemInfo.theValues[j],false));
     }
     if (deadlineString!="")
     { if (!CGI::ChopCGIString(deadlineString, sectionDeadlineInfo, commentsOnFailure))
         return false;
       for (int j=0; j<sectionDeadlineInfo.size(); j++)
         currentProblemValue.adminData.deadlinesPerSection.SetKeyValue
-        (CGI::URLStringToNormal(sectionDeadlineInfo.theKeys[j]),
-         CGI::URLStringToNormal(sectionDeadlineInfo.theValues[j]));
+        (CGI::URLStringToNormal(sectionDeadlineInfo.theKeys[j], false),
+         CGI::URLStringToNormal(sectionDeadlineInfo.theValues[j], false));
     }
     std::string problemWeightNoSectionsString=MathRoutines::StringTrimWhiteSpace
     (currentKeyValues.GetValueCreateIfNotPresent("weight"));
@@ -95,8 +95,8 @@ bool CalculatorHTML::ReadProblemInfoAppend
       }
       for (int j=0; j<this->databaseStudentSections.size; j++)
         currentProblemValue.adminData.problemWeightsPerSectionDB.SetKeyValue
-        (CGI::URLStringToNormal(this->databaseStudentSections[j]),
-         CGI::URLStringToNormal(problemWeightNoSectionsString));
+        (CGI::URLStringToNormal(this->databaseStudentSections[j], false),
+         CGI::URLStringToNormal(problemWeightNoSectionsString, false));
     }
 
   }
@@ -395,7 +395,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   this->inputHtml=contentStream.str();
   this->flagIsForReal=theGlobalVariables.UserRequestRequiresLoadingRealExamData();
 #ifdef MACRO_use_MySQL
-  this->topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
+  this->topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
 //  stOutput << "Debug: got to here pt2";
 //  this->theProblemData.CheckConsistency();
 //  stOutput << "Debug: got to here pt3";
@@ -450,9 +450,9 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
 }
 
 void CalculatorHTML::LoadFileNames()
-{ this->fileName = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
-  this->courseHome = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
-  this->topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
+{ this->fileName = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
+  this->courseHome = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
+  this->topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
 }
 
 void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore)
@@ -1003,7 +1003,7 @@ std::string CalculatorHTML::PrepareUserInputBoxes()
       if (inputNonAnswerReader!="" && theArgs.theValues[i]!="")
       { out << "setInputBox(name="
         << inputNonAnswerReader
-        << ", value=" << CGI::URLStringToNormal(theArgs.theValues[i])
+        << ", value=" << CGI::URLStringToNormal(theArgs.theValues[i], false)
         << "); ";
       }
   return out.str();
@@ -1536,7 +1536,7 @@ std::string CalculatorHTML::ToStringDeadline
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringDeadlineWithModifyButton");
 #ifdef MACRO_use_MySQL
   if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserStudentViewOn())
-  { std::string sectionNum=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection"));
+  { std::string sectionNum=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
     return this->ToStringOnEDeadlineFormatted
     (inputFileName, sectionNum, problemAlreadySolved, returnEmptyStringIfNoDeadline);
   } else
@@ -1725,7 +1725,7 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
   if (this->flagParentInvestigated)
     return;
   this->flagParentInvestigated=true;
-  this->topicListFileName = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
+  this->topicListFileName = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
   this->LoadAndParseTopicList(comments);
 }
 
@@ -3160,7 +3160,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   bool sectionStarted=false;
   bool subSectionStarted=false;
   bool chapterStarted=false;
-  std::string desiredChapter= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("chapter"));
+  std::string desiredChapter= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("chapter"), false);
   std::string currentChapter="";
   out << "<!--Topic list automatically generated from topic list: " << this->topicListFileName
   << ".-->";

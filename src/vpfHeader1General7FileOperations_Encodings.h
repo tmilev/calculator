@@ -73,13 +73,9 @@ public:
   static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
   static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
   static std::string URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth=0);
-  static void URLStringToNormal(const std::string& input, std::string& output);
-  static std::string URLStringToNormal(const std::string& input)
-  { std::string output;
-    CGI::URLStringToNormal(input, output);
-    return output;
-  }
-  static bool URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out);
+  static void URLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace);
+  static std::string URLStringToNormal(const std::string& input, bool replacePlusBySpace);
+  static bool URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out, bool replacePlusBySpace);
   static std::string StringToURLString(const std::string& input, bool usePlusesForSpacebars=true);
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);

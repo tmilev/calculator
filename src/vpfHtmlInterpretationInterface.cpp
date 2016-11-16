@@ -103,8 +103,8 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "<b>Only admins may set problem weights.</b>";
   CalculatorHTML theProblem;
-  std::string inputProblemInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-  theProblem.topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
+  std::string inputProblemInfo=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  theProblem.topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
   std::stringstream commentsOnFailure;
   if (!theProblem.LoadAndParseTopicList(commentsOnFailure))
     return "Failed to load topic list from file name: " + theProblem.topicListFileName + ". "+ commentsOnFailure.str();
@@ -150,7 +150,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   for (int i=0; i<theArgs.size(); i++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID))
-      lastAnswer= "("+ CGI::URLStringToNormal(theArgs[i]) + "); ";
+      lastAnswer= "("+ CGI::URLStringToNormal(theArgs[i], false) + "); ";
   studentInterpretation << lastAnswer;
   out << "Your answer(s): \\(" << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
@@ -267,8 +267,8 @@ std::string HtmlInterpretation::ClonePageResult()
   if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights() ||
       !theGlobalVariables.flagUsingSSLinCurrentConnection)
     return "<b>Cloning problems allowed only for logged-in admins under ssl connection. </b>";
-  std::string fileNameResulT = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
-  std::string fileNameToBeCloned = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"));
+  std::string fileNameResulT = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  std::string fileNameToBeCloned = CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
   std::stringstream out;
   std::string startingFileString;
   if (!FileOperations::LoadFileToStringVirtual(fileNameToBeCloned, startingFileString, out))
@@ -349,7 +349,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   std::stringstream comments;
   bool includeDeadlineJavascript=
   theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn();
-  thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
+  thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   if (!thePage.LoadMe(true, comments))
   { out << "<html><body><b>Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
@@ -572,7 +572,7 @@ std::string HtmlInterpretation::SubmitProblem()
   ProblemData& currentProblemData=theProblem.theProblemData;
   Answer& currentA=currentProblemData.theAnswers[answerIdIndex];
 
-  currentA.currentAnswerClean=CGI::URLStringToNormal(currentA.currentAnswerURLed);
+  currentA.currentAnswerClean=CGI::URLStringToNormal(currentA.currentAnswerURLed, false);
   currentA.currentAnswerURLed=CGI::StringToURLString(currentA.currentAnswerClean);//<-encoding back to overwrite malformed input
   //stOutput << "<hr>DEBUG: Processing answer: " << currentA.currentAnswerClean << " to answer object: " << currentA.ToString();
   theProblem.studentTagsAnswered.AddSelectionAppendNewIndex(answerIdIndex);
@@ -746,16 +746,16 @@ std::string HtmlInterpretation::AddTeachersSections()
   { out << "<b>Only admins may assign sections to teachers.</b>";
     return out.str();
   }
-  std::string mainInput=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"));
+  std::string mainInput=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!CGI::ChopCGIString(mainInput, theMap, out))
   { out << "<b>Failed to extract input from: " << mainInput << ".</b>";
     return out.str();
   }
   std::string desiredUsers=
-  CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent("teachers"));
+  CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent("teachers"), false);
   std::string desiredSections=
-  CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent("sections"));
+  CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent("sections"), false);
   List<std::string> theDelimiters;
 #ifdef MACRO_use_MySQL
   List<std::string> theTeachers, theSections;
@@ -800,12 +800,12 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   { out << "<b>Only admins may add users, under ssl connection. </b>";
     return out.str();
   }
-  std::string inputEmails=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userList"));
-  std::string userPasswords=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("passwordList"));
+  std::string inputEmails=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userList"), false);
+  std::string userPasswords=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("passwordList"), false);
   std::string userGroup=
   MathRoutines::StringTrimWhiteSpace(CGI::URLStringToNormal(
-  theGlobalVariables.GetWebInput(DatabaseStrings::userGroupLabel)));
-  std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"));
+  theGlobalVariables.GetWebInput(DatabaseStrings::userGroupLabel), false));
+  std::string userRole=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("userRole"), false);
 
   if (inputEmails=="")
   { out << "<b>No emails to add</b>";
@@ -1046,8 +1046,16 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
-  std::string accountsPageBody= HtmlInterpretation::GetAccountsPageBody(hostWebAddressWithPort);
+  bool isOK=theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
+  std::string accountsPageBody;
+  if (isOK)
+    accountsPageBody= HtmlInterpretation::GetAccountsPageBody(hostWebAddressWithPort);
   out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
+  if (!isOK)
+  { out << "<b>Viewing accounts is allowed for logged-in admins only</b>"
+    << "</body></html>";
+    return out.str();
+  }
   out << accountsPageBody;
 //  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
@@ -1119,7 +1127,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   for (int i=0; i<userTable.size; i++)
   { std::stringstream failureStream;
     currentUser.username=userTable[i][indexUser];
-    currentUser.userGroup=CGI::URLStringToNormal( userTable[i][indexExtraInfo]);
+    currentUser.userGroup=CGI::URLStringToNormal(userTable[i][indexExtraInfo], false);
     currentUser.email=userTable[i][indexEmail];
     currentUser.actualActivationToken=userTable[i][indexActivationToken];
     currentUser.userRole=userTable[i][indexUserRole];
@@ -1479,11 +1487,11 @@ std::string HtmlInterpretation::ToStringNavigation()
   if (theGlobalVariables.userCalculatorRequestType=="template")
     out << "<b>Home</b>" << linkSeparator;
   else
-  { std::string topicList=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"));
-    std::string courseHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"));
+  { std::string topicList=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
+    std::string courseHome=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
     if (topicList!="" && courseHome!="")
-    { std::string studentView=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentView"));
-      std::string section=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection"));
+    { std::string studentView=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentView"), false);
+      std::string section=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=template"
       << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
       << "studentView=" << studentView << "&";

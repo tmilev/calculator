@@ -426,7 +426,7 @@ bool DatabaseRoutines::FetchTableNames(List<std::string>& output, std::stringstr
 std::string DatabaseRoutines::ToStringCurrentTableHTML ()
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringCurrentTableHTML");
   std::string currentTable=
-  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"));
+  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"), false);
   if (currentTable.find("`")!=std::string::npos)
   { std::stringstream out;
     out << "<b>The table identifier: " << currentTable << " contains the ` character and is invalid. </b>";
@@ -446,7 +446,7 @@ std::string DatabaseRoutines::ToStringOneEntry()
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringOneEntry");
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   std::stringstream out;
-  if (!CGI::ChopCGIString(CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput")), theMap, out))
+  if (!CGI::ChopCGIString(CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false), theMap, out))
   { out << "Failed to extract input arguments. ";
     return out.str();
   }
@@ -454,13 +454,13 @@ std::string DatabaseRoutines::ToStringOneEntry()
 //  out << "DEBUG: getting info from: " << theGlobalVariables.GetWebInput("mainInput")
 //  << "<br> got: <hr>" << theMap.ToStringHtml();
   std::string currentTable=CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent
-  ("currentDatabaseTable"));
+  ("currentDatabaseTable"), false);
   std::string currentRow = CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent
-  ("currentDatabaseRow"));
+  ("currentDatabaseRow"), false);
   std::string currentKeyColumn = CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent
-  ("currentDatabaseKeyColumn"));
+  ("currentDatabaseKeyColumn"), false);
   std::string currentDesiredColumn = CGI::URLStringToNormal(theMap.GetValueCreateIfNotPresent
-  ("currentDatabaseDesiredColumn"));
+  ("currentDatabaseDesiredColumn"), false);
 
   if (currentTable.find("`")!=std::string::npos ||
       currentRow.find("`")!=std::string::npos ||
@@ -702,7 +702,7 @@ bool UserCalculator::FetchOneUserRow
   }
   this->selectedRowFieldsUnsafe.SetSize(theQuery.allQueryResultStrings[0].size);
   for (int i=0; i<this->selectedRowFieldsUnsafe.size; i++)
-    this->selectedRowFieldsUnsafe[i]=CGI::URLStringToNormal(theQuery.allQueryResultStrings[0][i]);
+    this->selectedRowFieldsUnsafe[i]=CGI::URLStringToNormal(theQuery.allQueryResultStrings[0][i], false);
   theQuery.close();
   std::stringstream queryStreamFields;
   queryStreamFields
@@ -718,7 +718,7 @@ bool UserCalculator::FetchOneUserRow
   this->selectedRowFieldNamesUnsafe.SetSize(theFieldQuery.allQueryResultStrings.size);
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
-      this->selectedRowFieldNamesUnsafe[i]=CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0]);
+      this->selectedRowFieldNamesUnsafe[i]=CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0], false);
   if (this->currentTable!=DatabaseStrings::usersTableName)
     return true;
   this->actualActivationToken= this->GetSelectedRowEntry("activationToken");
@@ -1147,9 +1147,9 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
   for (int i=0; i<theMap.size(); i++)
   { if (theMap.theKeys[i]=="randomSeed")
       continue;
-    this->AddEmptyAnswerIdOnTop(CGI::URLStringToNormal(theMap.theKeys[i]));
+    this->AddEmptyAnswerIdOnTop(CGI::URLStringToNormal(theMap.theKeys[i], false));
     Answer& currentA=*this->theAnswers.LastObject();
-    std::string currentQuestion=CGI::URLStringToNormal(theMap.theValues[i]);
+    std::string currentQuestion=CGI::URLStringToNormal(theMap.theValues[i], false);
     result=CGI::ChopCGIString(currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result)
     { commentsOnFailure << "Failed to interpret as key-value pair: "
@@ -1164,7 +1164,7 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
       atoi(currentQuestionMap.GetValueCreateIfNotPresent("numSubmissions").c_str());
     if (currentQuestionMap.Contains("firstCorrectAnswer"))
     { currentA.firstCorrectAnswerURLed=currentQuestionMap.GetValueCreateIfNotPresent("firstCorrectAnswer");
-      currentA.firstCorrectAnswerClean= CGI::URLStringToNormal(currentA.firstCorrectAnswerURLed);
+      currentA.firstCorrectAnswerClean= CGI::URLStringToNormal(currentA.firstCorrectAnswerURLed, false);
       currentA.firstCorrectAnswerURLed=CGI::StringToURLString(currentA.firstCorrectAnswerClean); //url-encoding back the cleaned up answer:
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly.
     }
@@ -1234,11 +1234,11 @@ bool UserCalculator::InterpretDatabaseProblemData
   for (int i=0; i<theMap.size(); i++)
   { //stOutput << "<hr>Reading data: " << theMap.theKeys[i] << ", value: "
     //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(theMap[i]);
-    if (!reader.LoadFrom(CGI::URLStringToNormal(theMap[i]), commentsOnFailure))
+    if (!reader.LoadFrom(CGI::URLStringToNormal(theMap[i], false), commentsOnFailure))
     { result=false;
       continue;
     }
-    probNameNoWhiteSpace=MathRoutines::StringTrimWhiteSpace(CGI::URLStringToNormal(theMap.theKeys[i]));
+    probNameNoWhiteSpace=MathRoutines::StringTrimWhiteSpace(CGI::URLStringToNormal(theMap.theKeys[i], false));
     if (probNameNoWhiteSpace=="")
       continue;
     this->theProblemData.SetKeyValue(probNameNoWhiteSpace, reader);
@@ -1838,7 +1838,7 @@ std::string DatabaseRoutines::ToStringAllTables()
     linkStream << theGlobalVariables.DisplayNameExecutable
     << "?request=database&currentDatabaseTable="
     << CGI::StringToURLString(tableNames[i]) << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true);
-    out << "<tr><td><a href=\"" << linkStream.str() << "\">" << CGI::URLStringToNormal(tableNames[i])
+    out << "<tr><td><a href=\"" << linkStream.str() << "\">" << CGI::URLStringToNormal(tableNames[i], false)
     << "</a></td></tr>";
   }
   out << "</table>";
@@ -1862,7 +1862,7 @@ bool DatabaseRoutines::FetchTableFromDatabaseIdentifier
   for (int i=0; i<theQuery.allQueryResultStrings.size; i++)
   { output[i].SetSize(theQuery.allQueryResultStrings[i].size);
     for (int j=0; j<theQuery.allQueryResultStrings[i].size; j++)
-      output[i][j]=CGI::URLStringToNormal(theQuery.allQueryResultStrings[i][j]);
+      output[i][j]=CGI::URLStringToNormal(theQuery.allQueryResultStrings[i][j], false);
   }
   outputWasTruncated=theQuery.flagOutputWasTruncated;
   if (outputWasTruncated)
@@ -1886,7 +1886,7 @@ bool DatabaseRoutines::FetchTableFromDatabaseIdentifier
   outputColumnLabels.SetSize(theFieldQuery.allQueryResultStrings.size);
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
-      outputColumnLabels[i]= CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0]);
+      outputColumnLabels[i]= CGI::URLStringToNormal(theFieldQuery.allQueryResultStrings[i][0], false);
   return true;
 }
 
@@ -1914,7 +1914,7 @@ bool DatabaseRoutines::FetchEntry
   //stOutput << "<hr>DEBUG: Query did not return a result - column may not exist. <hr>";
     return false;
   }
-  outputUnsafe= CGI::URLStringToNormal(theQuery.firstResultString);
+  outputUnsafe= CGI::URLStringToNormal(theQuery.firstResultString, false);
 //  stOutput << "Input entry as fetched from the system: " <<  theQuery.firstResultString
 //  << "<br>When made unsafe: " << outputUnsafe << "<br>";
   return true;

@@ -76,7 +76,7 @@ public:
   static void URLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace);
   static std::string URLStringToNormal(const std::string& input, bool replacePlusBySpace);
   static bool URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out, bool replacePlusBySpace);
-  static std::string StringToURLString(const std::string& input, bool usePlusesForSpacebars=true);
+  static std::string StringToURLString(const std::string& input, bool usePlusesForSpacebars);
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
   static std::string GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input);

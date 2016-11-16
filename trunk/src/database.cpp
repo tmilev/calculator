@@ -236,11 +236,11 @@ std::string MySQLdata::GetDatA()const
 }
 
 std::string MySQLdata::GetDataNoQuotes()const
-{ return CGI::StringToURLString(this->value);
+{ return CGI::StringToURLString(this->value, false);
 }
 
 std::string MySQLdata::GetIdentifierNoQuotes()const
-{ std::string result=CGI::StringToURLString(this->value);
+{ std::string result=CGI::StringToURLString(this->value, false);
   if (result.size()<=30)
     return result;
   return result.substr(0,30)+ Crypto::computeSha1outputBase64(this->value);
@@ -387,10 +387,10 @@ std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string
         std::stringstream spanId;
         std::stringstream theRequest;
         theRequest
-        << "currentDatabaseTable=" << CGI::StringToURLString(tableIdentifier) << "&"
-        << "currentDatabaseRow=" << CGI::StringToURLString(theTable[i][0]) << "&"
-        << "currentDatabaseKeyColumn=" << CGI::StringToURLString(columnLabels[0]) << "&"
-        << "currentDatabaseDesiredColumn=" << CGI::StringToURLString(columnLabels[indexToBeReplacedWithLinks])
+        << "currentDatabaseTable=" << CGI::StringToURLString(tableIdentifier, false) << "&"
+        << "currentDatabaseRow=" << CGI::StringToURLString(theTable[i][0], false) << "&"
+        << "currentDatabaseKeyColumn=" << CGI::StringToURLString(columnLabels[0], false) << "&"
+        << "currentDatabaseDesiredColumn=" << CGI::StringToURLString(columnLabels[indexToBeReplacedWithLinks], false)
         ;
         spanId << "spanRow" << i << "Col" << j;
         out << "<span class=\"linkLike\"  "
@@ -1165,7 +1165,7 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
     if (currentQuestionMap.Contains("firstCorrectAnswer"))
     { currentA.firstCorrectAnswerURLed=currentQuestionMap.GetValueCreateIfNotPresent("firstCorrectAnswer");
       currentA.firstCorrectAnswerClean= CGI::URLStringToNormal(currentA.firstCorrectAnswerURLed, false);
-      currentA.firstCorrectAnswerURLed=CGI::StringToURLString(currentA.firstCorrectAnswerClean); //url-encoding back the cleaned up answer:
+      currentA.firstCorrectAnswerURLed=CGI::StringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly.
     }
   }
@@ -1206,13 +1206,13 @@ std::string ProblemData::Store()
   { Answer& currentA=this->theAnswers[i];
     if (this->flagRandomSeedGiven || i!=0)
       out << "&";
-    out << CGI::StringToURLString(currentA.answerId) << "=";
+    out << CGI::StringToURLString(currentA.answerId, false) << "=";
     std::stringstream questionsStream;
     questionsStream
     << "numCorrectSubmissions=" << currentA.numCorrectSubmissions
     << "&numSubmissions=" << currentA.numSubmissions
-    << "&firstCorrectAnswer=" << CGI::StringToURLString(currentA.firstCorrectAnswerClean);
-    out << CGI::StringToURLString(questionsStream.str());
+    << "&firstCorrectAnswer=" << CGI::StringToURLString(currentA.firstCorrectAnswerClean, false);
+    out << CGI::StringToURLString(questionsStream.str(), false);
   }
   return out.str();
 }
@@ -1258,8 +1258,8 @@ bool UserCalculator::StoreProblemDataToDatabase
 { MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabase");
   std::stringstream problemDataStream;
   for (int i=0; i<this->theProblemData.size(); i++)
-    problemDataStream << CGI::StringToURLString(this->theProblemData.theKeys[i]) << "="
-    << CGI::StringToURLString(this->theProblemData.theValues[i].Store()) << "&";
+    problemDataStream << CGI::StringToURLString(this->theProblemData.theKeys[i], false) << "="
+    << CGI::StringToURLString(this->theProblemData.theValues[i].Store(), false) << "&";
 //  stOutput << "DEBUG: storing in database ... stack trace: "
 //  << crash.GetStackTraceEtcErrorMessage();
   //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
@@ -1837,7 +1837,7 @@ std::string DatabaseRoutines::ToStringAllTables()
   { std::stringstream linkStream;
     linkStream << theGlobalVariables.DisplayNameExecutable
     << "?request=database&currentDatabaseTable="
-    << CGI::StringToURLString(tableNames[i]) << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true);
+    << CGI::StringToURLString(tableNames[i], false) << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true);
     out << "<tr><td><a href=\"" << linkStream.str() << "\">" << CGI::URLStringToNormal(tableNames[i], false)
     << "</a></td></tr>";
   }
@@ -2081,8 +2081,8 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   (void) calculatorBase;
   std::stringstream out;
   out << theGlobalVariables.DisplayPathExecutable
-  << "?request=activateAccount&username=" << CGI::StringToURLString(inputUserNameUnsafe)
-  << "&activationToken=" << CGI::StringToURLString(theActivationToken)
+  << "?request=activateAccount&username=" << CGI::StringToURLString(inputUserNameUnsafe, false)
+  << "&activationToken=" << CGI::StringToURLString(theActivationToken, false)
   ;
   return out.str();
 }

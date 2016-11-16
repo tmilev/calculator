@@ -40,7 +40,7 @@ function calculatorError(x)
 
 function vectorScalarVector(s,t)
 { var result=0;
-  if (s.length!=t.length)
+  if (s.length!==t.length)
     calculatorError("Scalar product of vectors of different length: " + s + " and " + t+ ".");
   for (var i=0; i<s.length; i++)
     result+=s[i]*t[i];

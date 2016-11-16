@@ -2346,11 +2346,11 @@ std::string CGI::URLKeyValuePairsToNormalRecursiveHtml(const std::string& input,
   for (int i=0; i<currentMap.size(); i++)
   { out << "<tr>";
     out << "<td>"
-    << CGI::URLStringToNormal(currentMap.theKeys[i]) << " </td>";
+    << CGI::URLStringToNormal(currentMap.theKeys[i], false) << " </td>";
     if (currentMap[i]!="")
     { out << "<td>=</td><td>";
       if (currentMap[i]!="")
-        out << CGI::URLKeyValuePairsToNormalRecursiveHtml(CGI::URLStringToNormal(currentMap.theValues[i]), recursionDepth+1);
+        out << CGI::URLKeyValuePairsToNormalRecursiveHtml(CGI::URLStringToNormal(currentMap.theValues[i], true), recursionDepth+1);
       out << "</td>";
     }
     out << "</tr>";
@@ -2359,7 +2359,13 @@ std::string CGI::URLKeyValuePairsToNormalRecursiveHtml(const std::string& input,
   return out.str();
 }
 
-void CGI::URLStringToNormal(const std::string& input, std::string& output)
+std::string CGI::URLStringToNormal(const std::string& input, bool replacePlusBySpace)
+{ std::string output;
+  CGI::URLStringToNormal(input, output, replacePlusBySpace);
+  return output;
+}
+
+void CGI::URLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace)
 { std::string readAhead;
   std::stringstream out;
   int inputSize=(signed) input.size();
@@ -2368,11 +2374,7 @@ void CGI::URLStringToNormal(const std::string& input, std::string& output)
     for (int j=0; j<6; j++)
     { if (i+j<inputSize)
         readAhead.push_back(input[i+j]);
-      if (readAhead=="+")
-      { out << " ";
-        break;
-      }
-      if (CGI::URLStringToNormalOneStep(readAhead, out))
+      if (CGI::URLStringToNormalOneStep(readAhead, out, replacePlusBySpace))
       { i+=j;
         break;
       }
@@ -2560,16 +2562,18 @@ bool CGI::ChopCGIStringAppend(const std::string& input, MapLisT<std::string, std
   return CGI::AccountOneInputCGIString(currentFieldName, currentFieldValue, outputMap, commentsOnFailure);
 }
 
-bool CGI::URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out)
-{ if (readAhead[0]!='%' && readAhead[0]!='&' && readAhead[0]!='+')
+bool CGI::URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out, bool replacePlusBySpace)
+{ if (replacePlusBySpace)
+    if (readAhead[0]=='+')
+      { out << " ";
+        return true;
+      }
+  bool isOK=readAhead[0]!='%' && readAhead[0]!='&';
+  if (isOK)
   { out << readAhead[0];
     return true;
   }
   if (readAhead=="&")
-  { out << " ";
-    return true;
-  }
-  if (readAhead=="+")
   { out << " ";
     return true;
   }

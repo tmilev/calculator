@@ -2230,7 +2230,8 @@ std::string Function::ToStringFull()const
     if (this->theExample!="")
       out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=compute&showExamples=true&mainInput="
-      << CGI::StringToURLString(this->theExample) << "\"> " << " Example" << "</a>" ;
+      << CGI::StringToURLString(this->theExample, false)
+      << "\"> " << " Example" << "</a>" ;
   } else
     out2 << "<b>Experimental, please don't use.</b>";
   return out2.str();

@@ -1795,7 +1795,7 @@ int WebWorker::ProcessFolder()
   { std::stringstream currentStream;
     bool isDir= (theFileTypes[i]==".d");
 //    theLog << logger::red << "Current file name: " << CGI::StringToURLString(theFileNames[i]) << logger::endL;
-    currentStream << "<a href=\"" << this->addressGetOrPost << CGI::StringToURLString(theFileNames[i]);
+    currentStream << "<a href=\"" << this->addressGetOrPost << CGI::StringToURLString(theFileNames[i], false);
     if (isDir)
       currentStream << "/";
 //    else

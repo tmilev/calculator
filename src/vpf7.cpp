@@ -891,7 +891,8 @@ std::string& CGI::GetJavascriptSha1()
 
 std::string CGI::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)
 { std::stringstream out;
-  out << "<a href=\"" << DisplayNameCalculator << "?request=compute&mainInput=" << CGI::StringToURLString(input) << "\"> " << input << "</a>";
+  out << "<a href=\"" << DisplayNameCalculator << "?request=compute&mainInput="
+  << CGI::StringToURLString(input, false) << "\"> " << input << "</a>";
   return out.str();
 }
 
@@ -907,7 +908,7 @@ std::string CGI::GetCalculatorLinkUnclosedPostArguments(const std::string& Displ
   //used by more than one thread.
   out << "<form id=\"submissionForm" << linkCounter << "\" method=\"POST\" action=\"" << DisplayNameCalculator << "\">";
   out << "<input type=\"hidden\" name=\"doubleURLencodedInput\" value=\""
-  << CGI::StringToURLString(input) << "\">";
+  << CGI::StringToURLString(input, false) << "\">";
   out << "</form>";
   out << "<a href=\"document.getElementById('submissionForm" << linkCounter << "').submit();\"> ";
   return out.str();

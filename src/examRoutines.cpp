@@ -123,14 +123,14 @@ void CalculatorHTML::StoreProblemWeightInfo
       std::string currentSection=MathRoutines::StringTrimWhiteSpace
       (currentProblem.problemWeightsPerSectionDB.theKeys[j]);
       currentWeightStream
-      << CGI::StringToURLString(currentSection)
+      << CGI::StringToURLString(currentSection, false)
       << "="
-      << CGI::StringToURLString(currentWeight)
+      << CGI::StringToURLString(currentWeight, false)
       << "&";
     }
-    currentProblemStream << "weights=" << CGI::StringToURLString(currentWeightStream.str()) << "&";
-    out << CGI::StringToURLString(currentProbName) << "="
-    << CGI::StringToURLString(currentProblemStream.str()) << "&";
+    currentProblemStream << "weights=" << CGI::StringToURLString(currentWeightStream.str(), false) << "&";
+    out << CGI::StringToURLString(currentProbName, false) << "="
+    << CGI::StringToURLString(currentProblemStream.str(), false) << "&";
   }
   outputString= out.str();
 }
@@ -152,14 +152,14 @@ void CalculatorHTML::StoreDeadlineInfo
       if (currentDeadline=="")
         continue;
       std::string currentSection=MathRoutines::StringTrimWhiteSpace(currentProblem.deadlinesPerSection.theKeys[j]);
-      currentDeadlineStream << CGI::StringToURLString(currentSection)
+      currentDeadlineStream << CGI::StringToURLString(currentSection, false)
       << "="
-      << CGI::StringToURLString(currentDeadline)
+      << CGI::StringToURLString(currentDeadline, false)
       << "&";
     }
-    currentProblemStream << "deadlines=" << CGI::StringToURLString(currentDeadlineStream.str()) << "&";
-    out << CGI::StringToURLString(currentProbName) << "="
-    << CGI::StringToURLString(currentProblemStream.str()) << "&";
+    currentProblemStream << "deadlines=" << CGI::StringToURLString(currentDeadlineStream.str(), false) << "&";
+    out << CGI::StringToURLString(currentProbName, false) << "="
+    << CGI::StringToURLString(currentProblemStream.str(), false) << "&";
   }
   outputString= out.str();
 }
@@ -490,7 +490,7 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
   if (tagClass=="setCalculatorExamHome")
   { this->flagIsExamHome=true;
     this->flagIsExamProblem=false;
-    theGlobalVariables.SetWebInpuT("courseHome", CGI::StringToURLString(this->fileName));
+    theGlobalVariables.SetWebInpuT("courseHome", CGI::StringToURLString(this->fileName, false));
   }
   if (tagClass=="setCalculatorExamProblem")
   { this->flagIsExamHome=false;
@@ -649,7 +649,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkFromFileName");
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
-  std::string urledProblem=CGI::StringToURLString(theFileName);
+  std::string urledProblem=CGI::StringToURLString(theFileName, false);
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
   << "fileName=" << urledProblem << "&";
   if (theGlobalVariables.UserStudentViewOn())
@@ -1570,9 +1570,9 @@ std::string CalculatorHTML::ToStringDeadlineModifyButton
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);
     bool deadlineInherited=false;
-    std::string sectionNumber;
-    std::string currentDeadline =
-    this->GetDeadline(inputFileName, sectionNumber, deadlineInherited);
+//    std::string sectionNumber;
+//    std::string currentDeadline =
+//    this->GetDeadline(inputFileName, sectionNumber, deadlineInherited);
     deadlineStream << "<tr>";
     deadlineStream << "<td>" << this->databaseStudentSections[i] << "</td>";
     deadlineStream << "<td> <input type=\"text\" id=\"" << currentDeadlineId << "\" value=\""
@@ -1590,7 +1590,7 @@ std::string CalculatorHTML::ToStringDeadlineModifyButton
   if (deadlineIdReport[deadlineIdReport.size()-1]=='=')
     deadlineIdReport.resize(deadlineIdReport.size()-1);
   deadlineStream << "<button onclick=\"";
-  deadlineStream << "submitStringAsMainInput('" << CGI::StringToURLString(inputFileName)
+  deadlineStream << "submitStringAsMainInput('" << CGI::StringToURLString(inputFileName, false)
   << "='+encodeURIComponent('deadlines='+encodeURIComponent(";
   bool isFirst=true;
   for (int i=0; i<this->databaseStudentSections.size; i++)
@@ -1599,7 +1599,7 @@ std::string CalculatorHTML::ToStringDeadlineModifyButton
     if (!isFirst)
       deadlineStream << "+";
     isFirst=false;
-    deadlineStream << "'" << CGI::StringToURLString(this->databaseStudentSections[i]) << "='";
+    deadlineStream << "'" << CGI::StringToURLString(this->databaseStudentSections[i], false) << "='";
     deadlineStream << "+ encodeURIComponent(document.getElementById('"
     << deadlineIds[i] << "').value)+'&'";
   }
@@ -2393,7 +2393,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
   out << "];\n";
   out << "answerIdsPureLatex = [";
   for (int i=0; i<this->theProblemData.theAnswers.size; i++)
-  { out << "\"" << CGI::StringToURLString( this->theProblemData.theAnswers[i].answerId ) << "\"";
+  { out << "\"" << CGI::StringToURLString(this->theProblemData.theAnswers[i].answerId, false) << "\"";
     if (i!=this->theProblemData.theAnswers.size-1)
       out << ", ";
   }
@@ -2659,9 +2659,9 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection")!="")
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out << "topicList=" << CGI::StringToURLString(this->topicListFileName) << "&";
-        out << "courseHome=" << CGI::StringToURLString(this->courseHome) << "&";
-        out << "fileName=" << CGI::StringToURLString(this->problemNamesNoTopics[indexInParent-1])
+        out << "topicList=" << CGI::StringToURLString(this->topicListFileName, false) << "&";
+        out << "courseHome=" << CGI::StringToURLString(this->courseHome, false) << "&";
+        out << "fileName=" << CGI::StringToURLString(this->problemNamesNoTopics[indexInParent-1], false)
         << "\">&#8592;</a>" << linkSeparator;
       } else
         out << "<a disabled=\"disabled\">&#8592;</a>" << linkSeparator;
@@ -2672,9 +2672,9 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection")!="")
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out << "topicList=" << CGI::StringToURLString(this->topicListFileName) << "&";
-        out << "courseHome=" << CGI::StringToURLString(this->courseHome) << "&";
-        out << "fileName=" << CGI::StringToURLString(this->problemNamesNoTopics[indexInParent+1] )
+        out << "topicList=" << CGI::StringToURLString(this->topicListFileName, false) << "&";
+        out << "courseHome=" << CGI::StringToURLString(this->courseHome, false) << "&";
+        out << "fileName=" << CGI::StringToURLString(this->problemNamesNoTopics[indexInParent+1], false)
         << "\">&#8594;</a>" << linkSeparator;
       } else
         out << "<a disabled=\"disabled\">&#8594;</a>" << linkSeparator;
@@ -2704,15 +2704,15 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
   out << theGlobalVariables.ToStringCalcArgsNoNavigation(true, &excludedTags)
   << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
   if  (!theGlobalVariables.flagRunningApache && this->fileName!="")
-    out << "fileName=" << CGI::StringToURLString(this->fileName) << "&";
+    out << "fileName=" << CGI::StringToURLString(this->fileName, false) << "&";
   else
-    out << "fileName=" << CGI::StringToURLString(theGlobalVariables.GetWebInput("fileName") )
+    out << "fileName=" << CGI::StringToURLString(theGlobalVariables.GetWebInput("fileName"), false)
     << "&";
   out << "topicList=" << theGlobalVariables.GetWebInput("topicList") << "&";
   if (!theGlobalVariables.UserGuestMode())
   { out << "studentView=" << studentView << "&";
     if (studentSection!="")
-      out << "studentSection=" << CGI::StringToURLString(studentSection) << "&";
+      out << "studentSection=" << CGI::StringToURLString(studentSection, false) << "&";
   }
   if (includeRandomSeedIfAppropriate)
     out << "randomSeed=" << this->theProblemData.randomSeed << "&";
@@ -2724,7 +2724,7 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
   out << "\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
-  std::string urledProblem=CGI::StringToURLString(desiredFileName);
+  std::string urledProblem=CGI::StringToURLString(desiredFileName, false);
   std::stringstream refStreamNoRequest;
   std::string spanCloningAttemptResultID="spanCloningAttemptResultID"+desiredFileName;
   std::string clonePageAreaID="clonePageAreaID"+desiredFileName;
@@ -2873,7 +2873,7 @@ std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemWeighT");
   if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
     return "";
-  std::string urledProblem=CGI::StringToURLString(theFileName);
+  std::string urledProblem=CGI::StringToURLString(theFileName, false);
   std::stringstream out;
   //stOutput << "<hr>this->databaseProblemList is: " << this->databaseProblemList.ToStringCommaDelimited();
   //stOutput << "<br>this->databaseProblemWeights is: " << this->databaseProblemWeights.ToStringCommaDelimited();

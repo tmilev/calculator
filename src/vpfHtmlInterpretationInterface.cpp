@@ -573,7 +573,7 @@ std::string HtmlInterpretation::SubmitProblem()
   Answer& currentA=currentProblemData.theAnswers[answerIdIndex];
 
   currentA.currentAnswerClean=CGI::URLStringToNormal(currentA.currentAnswerURLed, false);
-  currentA.currentAnswerURLed=CGI::StringToURLString(currentA.currentAnswerClean);//<-encoding back to overwrite malformed input
+  currentA.currentAnswerURLed=CGI::StringToURLString(currentA.currentAnswerClean, false);//<-encoding back to overwrite malformed input
   //stOutput << "<hr>DEBUG: Processing answer: " << currentA.currentAnswerClean << " to answer object: " << currentA.ToString();
   theProblem.studentTagsAnswered.AddSelectionAppendNewIndex(answerIdIndex);
   std::stringstream studentAnswerStream, completedProblemStream;
@@ -1163,17 +1163,17 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       std::stringstream emailBody;
       emailBody << "Dear student,\n you have not activated your homework server account yet. \n"
       << "To activate your account and set your password please use the link: "
-      << CGI::StringToURLString("\n\n")
+      << CGI::StringToURLString("\n\n", false)
       << CGI::StringToURLString( UserCalculator::GetActivationAddressFromActivationToken
         (currentUser.actualActivationToken.value, webAddress,
-         userTable[i][indexUser]) )
-      << CGI::StringToURLString("\n\n")
+         userTable[i][indexUser]), false )
+      << CGI::StringToURLString("\n\n", false)
       << "The link does not work with apple safari; if you use safari, please contact us by email"
       << " and we will activate your account manually. "
       << " Once you activate your account, you can log in safely here: \n"
-      << CGI::StringToURLString("\n\n")
+      << CGI::StringToURLString("\n\n", false)
       << webAddress
-      << CGI::StringToURLString("\n\n")
+      << CGI::StringToURLString("\n\n", false)
       << "Best regards, \n your Math 140 instructors."
       ;
       oneTableLineStream << emailBody.str() << "\">Send email manually.</a> "

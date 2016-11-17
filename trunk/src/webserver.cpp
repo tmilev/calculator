@@ -781,11 +781,11 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat)c
     out << "POST " << "(from calculator)";
   else
     out << "Request type undefined.";
-  out << "<hr>Address get or post:\n" << CGI::StringToHtmlString(this->addressGetOrPost);
-  out << lineBreak << "\nAddress computed:\n" << CGI::StringToHtmlString(this->addressComputed);
-  out << lineBreak << "\nArgument computed:\n" << CGI::StringToHtmlString(this->argumentComputed);
-  out << lineBreak << "\nVirtual file/directory name:\n" << CGI::StringToHtmlString(this->VirtualFileName);
-  out << lineBreak << "\nRelative physical file/directory name:\n" << CGI::StringToHtmlString(this->RelativePhysicalFileNamE);
+  out << "<hr>Address get or post:\n" << CGI::StringToHtmlString(this->addressGetOrPost, true);
+  out << lineBreak << "\nAddress computed:\n" << CGI::StringToHtmlString(this->addressComputed, true);
+  out << lineBreak << "\nArgument computed:\n" << CGI::StringToHtmlString(this->argumentComputed, true);
+  out << lineBreak << "\nVirtual file/directory name:\n" << CGI::StringToHtmlString(this->VirtualFileName, true);
+  out << lineBreak << "\nRelative physical file/directory name:\n" << CGI::StringToHtmlString(this->RelativePhysicalFileNamE, true);
   out << lineBreak << "\nExecutable url:\n" << theGlobalVariables.DisplayNameExecutable;
   out << lineBreak << "\nPhysical address project base:\n" << theGlobalVariables.PhysicalPathProjectBase;
   out << lineBreak << "\nPhysical address server base:\n" << theGlobalVariables.PhysicalPathServerBasE;
@@ -814,11 +814,11 @@ std::string WebWorker::ToStringMessageUnsafe()const
   tempFormat.flagUseHTML=true;
   out << this->ToStringMessageShortUnsafe(&tempFormat);
   out << "<hr>";
-  out << "Main address: " << CGI::StringToHtmlString(this->addressGetOrPost) << "<br>";
+  out << "Main address: " << CGI::StringToHtmlString(this->addressGetOrPost, true) << "<br>";
   if (this->requestTypE==this->requestGet)
-    out << "GET " << CGI::StringToHtmlString(this->addressGetOrPost);
+    out << "GET " << CGI::StringToHtmlString(this->addressGetOrPost, true);
   if (this->requestTypE==this->requestPost)
-    out << "POST " << CGI::StringToHtmlString(this->addressGetOrPost);
+    out << "POST " << CGI::StringToHtmlString(this->addressGetOrPost, true);
   if (this->flagKeepAlive)
     out << "<br><b>Keeping alive.</b><br>";
   else
@@ -826,8 +826,8 @@ std::string WebWorker::ToStringMessageUnsafe()const
   out << "<br>Cookies (" << this->cookies.size << " total):";
   for (int i=0; i<this->cookies.size; i++)
     out << "<br>" << this->cookies[i];
-  out << "\n<hr>\nFull message head:<br>\n" << CGI::StringToHtmlString(this->messageHead);
-  out << "\n<hr>\nFull message body:<br>\n" << CGI::StringToHtmlString(this->messageBody);
+  out << "\n<hr>\nFull message head:<br>\n" << CGI::StringToHtmlString(this->messageHead, true);
+  out << "\n<hr>\nFull message body:<br>\n" << CGI::StringToHtmlString(this->messageBody, true);
   return out.str();
 }
 
@@ -1063,7 +1063,7 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
   << theGlobalVariables.DisplayNameExecutable << "\">\n";
   std::string civilizedInputSafish;
-  if (CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish))
+  if (CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish, false))
     stOutput << "Your input has been treated normally, however the return string "
     << "of your input has been modified. More precisely, &lt; and &gt;  are "
     << " modified due to a javascript hijack issue. <br>";
@@ -1837,10 +1837,10 @@ int WebWorker::ProcessFile()
       << " Therefore I have sanitized the address to a relative physical address: " << this->RelativePhysicalFileNamE;
     }
     stOutput << "<br><b> Address:</b> "
-    << CGI::StringToHtmlString(this->addressGetOrPost) << "<br><b>Virtual file name:</b> "
-    << CGI::StringToHtmlString(this->VirtualFileName)
+    << CGI::StringToHtmlString(this->addressGetOrPost, true) << "<br><b>Virtual file name:</b> "
+    << CGI::StringToHtmlString(this->VirtualFileName, true)
     << "<br><b>Computed relative physical file name:</b> "
-    << CGI::StringToHtmlString(this->RelativePhysicalFileNamE)
+    << CGI::StringToHtmlString(this->RelativePhysicalFileNamE, true)
     ;
     stOutput << "<hr><hr><hr>Message details:<br>"
     << this->ToStringMessageUnsafe()
@@ -4032,7 +4032,7 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
   out << "Default user: " << theGlobalVariables.userDefault.username.value;
   if (theGlobalVariables.flagLoggedIn)
     out << "\n<br>\nLogged in.";
-  out << "\n<br>\nAddress:\n" << CGI::StringToHtmlString(theWebServer.GetActiveWorker().addressComputed);
+  out << "\n<br>\nAddress:\n" << CGI::StringToHtmlString(theWebServer.GetActiveWorker().addressComputed, true);
   out << "\n<br>\nRequest:\n" << theGlobalVariables.userCalculatorRequestType;
   if (theGlobalVariables.UserDefaultHasAdminRights())
     out << "\n<br>\n<b>User has admin rights</b>";
@@ -4043,7 +4043,7 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
   out << "\n<hr>\n";
   for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
   { out << theGlobalVariables.webArguments.theKeys[i] << ": "
-    << CGI::StringToHtmlString(theGlobalVariables.webArguments[i]);
+    << CGI::StringToHtmlString(theGlobalVariables.webArguments[i], true);
     if (i!=theGlobalVariables.webArguments.size()-1)
       out << "\n<br>\n";
   }

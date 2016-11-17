@@ -1906,8 +1906,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
         out << this->GetValue<std::string>();
       else
         out << CGI::StringToHtmlString(this->GetValue<std::string>(), false);
-    }
-    else
+    } else
       out << "\"" << this->GetValue<std::string>() << "\"";
     result=true;
   } else if (this->IsOfType<Rational>())

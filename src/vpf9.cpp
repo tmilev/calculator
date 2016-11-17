@@ -330,9 +330,9 @@ std::string CGI::GetStyleButtonLikeHtml()
 { return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";
 }
 
-std::string CGI::StringToHtmlString(const std::string& theString)
+std::string CGI::StringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr)
 { std::string result;
-  CGI::StringToHtmlStringReturnTrueIfModified(theString, result);
+  CGI::StringToHtmlStringReturnTrueIfModified(theString, result, doReplaceNewLineByBr);
   return result;
 }
 
@@ -7947,7 +7947,7 @@ bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective
   return result;
 }
 
-bool CGI::StringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output)
+bool CGI::StringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr)
 { std::stringstream out;
   bool modified=false;
   for (unsigned int i=0; i<input.size(); i++)
@@ -7955,7 +7955,7 @@ bool CGI::StringToHtmlStringReturnTrueIfModified(const std::string& input, std::
     bool isReturnNewLine=false;
     if (i+1<input.size())
       isReturnNewLine= input[i]=='\r' && input[i+1]=='\n';
-    if (isReturnNewLine)
+    if (doReplaceNewLineByBr && isReturnNewLine)
     { out << "<br>";
       i++;
     } else if (input[i]=='<')

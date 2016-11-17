@@ -85,8 +85,8 @@ public:
   (const std::string& fileName, const std::string& fileDesc="", int line=-1);
   static std::string GetHtmlSwitchMenuDoNotEncloseInTags();
   static std::string GetLatexEmbeddableLinkFromCalculatorInput(const std::string& address, const std::string& display);
-  static bool StringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output);
-  static std::string StringToHtmlString(const std::string& theString);
+  static bool StringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr);
+  static std::string StringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr);
   static std::string DoubleBackslashes(const std::string& input);
   static std::string& GetMathQuillStyleSheetWithTags();
   static std::string& GetJavascriptInitilizeButtons();

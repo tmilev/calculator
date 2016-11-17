@@ -813,12 +813,12 @@ std::string SyntacticElementHTML::ToStringTagAndContent()
 std::string SyntacticElementHTML::ToStringDebug()
 { MacroRegisterFunctionWithName("SyntacticElementHTML::ToString");
   if (this->syntacticRole=="")
-    return CGI::StringToHtmlString(this->ToStringTagAndContent());
+    return CGI::StringToHtmlString(this->ToStringTagAndContent(), false);
   std::stringstream out;
   out << "<span style=\"color:green\">";
-  out << CGI::StringToHtmlString(this->syntacticRole);
+  out << CGI::StringToHtmlString(this->syntacticRole, false);
   out << "</span>";
-  out << "[" << CGI::StringToHtmlString(this->ToStringTagAndContent()) << "]";
+  out << "[" << CGI::StringToHtmlString(this->ToStringTagAndContent(), false) << "]";
   return out.str();
 }
 
@@ -2505,7 +2505,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     << this->theProblemData.flagRandomSeedGiven
     << "<br>flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven
     << "\n<br>\n"
-    << CGI::StringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"));
+    << CGI::StringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"), true);
 
     #ifdef MACRO_use_MySQL
     outBody << "<br>Problem names: " << this->currentUseR.theProblemData.theKeys.ToStringCommaDelimited();

@@ -2477,7 +2477,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
         outBody <<this->GetEditPageButton(this->topicListFileName);
       outBody << "<br>";
     }
-  if (this->flagIsExamProblem)
+  if (this->flagIsExamProblem && this->flagIsForReal &&
+      !this->flagIsExamHome && theGlobalVariables.userCalculatorRequestType!="template")
   { bool problemAlreadySolved=false;
 #ifdef MACRO_use_MySQL
     if (this->currentUseR.theProblemData.Contains(this->fileName))
@@ -2486,12 +2487,16 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
         problemAlreadySolved=true;
     }
     std::string theDeadlineString=this->ToStringDeadline(this->fileName, problemAlreadySolved, true);
-    if (theDeadlineString!="")
-      theDeadlineString+="\n<hr>\n";
-    outBody << theDeadlineString;
+    if (theDeadlineString=="")
+      outBody << "<span style=\"color:orange\"><b>No deadline yet but scores are recorded. </b></span>";
+    else
+      outBody << "<span style=\"color:brown\"><b>Scores are recorded. </b></span>";
+    outBody << theDeadlineString << "\n<hr>\n";
 #endif
     //outBody << "<br>";
-  }
+  } else if (!this->flagIsExamHome && !this->flagIsForReal &&
+             theGlobalVariables.userCalculatorRequestType!="template")
+    outBody << "<span style=\"color:green\"><b>Practice mode.</b></span><hr>";
 
   //////////////////////////////
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);

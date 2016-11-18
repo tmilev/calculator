@@ -1549,7 +1549,7 @@ std::string HtmlInterpretation::ToStringNavigation()
       out << "<b>Database</b>" << linkBigSeparator;
   }
   if (theGlobalVariables.userCalculatorRequestType!="compute")
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=compute&"
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=calculator&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << " \">Calculator</a>" << linkBigSeparator;
   else
     out << "<b>Calculator</b> " << linkBigSeparator;

@@ -122,7 +122,7 @@ std::string HtmlSnippets::GetJavascriptStandardCookies()
   if (WebWorker::IsAllowedAsRequestCookie(theGlobalVariables.userCalculatorRequestType))
     out << "  addCookie(\"request\", \"" << theGlobalVariables.userCalculatorRequestType << "\", 100, false);\n";
   if ( theGlobalVariables.userCalculatorRequestType!="" &&
-       theGlobalVariables.userCalculatorRequestType!="compute")
+       theGlobalVariables.userCalculatorRequestType!="calculator")
   { if (theGlobalVariables.GetWebInput("fileName")!="")
       out << "  addCookie(\"fileName\", \""
       << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false)
@@ -864,7 +864,7 @@ std::string WebWorker::GetNavigationPage()
   out << "<br>";
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=statusPublic" << "\">Server status</a>";
   out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=compute" << "\">Calculator</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=calculator" << "\">Calculator</a>";
   out << "</body></html>";
   return out.str();
 }
@@ -1098,9 +1098,6 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
   stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" "
   << "name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" ";
   stOutput << "> ";
-  if (theParser.inputString!="")
-    stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
   stOutput << "\n</FORM>\n";
   stOutput << this->closeIndentTag("</td>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
@@ -2313,27 +2310,167 @@ int WebWorker::ProcessCalculator()
   this->SetHeaderOKNoContentLength();
   theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
   theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
+  stOutput << "<html><head> <title>calculator version  "
+  << __DATE__ << ", " << __TIME__ << "</title>";
+  stOutput << CGI::GetJavascriptMathjax();
+  stOutput << CGI::GetJavascriptInjectCalculatorResponseInNode();
+  stOutput << CGI::GetCalculatorStyleSheetWithTags();
+  stOutput << HtmlSnippets::GetJavascriptHideHtml();
+  stOutput << HtmlSnippets::GetJavascriptStandardCookies();
+  stOutput << "\n</head>\n<body onload=\"loadSettings();\">\n";
+  stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
+  << "</problemNavigation>\n";
 
-  theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=
-  theWebServer.ReturnActiveIndicatorAlthoughComputationIsNotDone;
-  this->OutputBeforeComputation();
-  theWebServer.CheckExecutableVersionAndRestartIfNeeded(false);
-  ////////////////////////////////////////////////
-  //  the initialization below moved to the start of the web server!
-  //  theParser.init();
-  ////////////////////////////////////////////////
-  this->flagProgressReportAllowed=true;
+  theGlobalVariables.initOutputReportAndCrashFileNames
+  (theParser.inputStringRawestOfTheRaw, theParser.inputString);
+
+  stOutput << this->openIndentTag("<table><!-- Outermost table, 3 cells (3 columns 1 row)-->");
+  stOutput << this->openIndentTag("<tr style=\"vertical-align:top\">");
+  stOutput << this->openIndentTag("<td><!-- Cell containing the output table-->");
+  stOutput << this->openIndentTag("<table><!-- Output table, 2 cells (1 column 2-3 rows) -->");
+
+  int startingIndent=this->indentationLevelHTML;
+  stOutput << this->openIndentTag("<tr style=\"vertical-align:top\">");
+  stOutput << this->openIndentTag("<td><!-- cell with input, autocomplete space and output-->");
+  stOutput << this->openIndentTag("<table><!--table with input, autocomplete space and output-->");
+  stOutput << this->openIndentTag("<tr>");
+  stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
+  //stOutput << this->ToStringCalculatorArgumentsHumanReadable();
+  stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
+  << theGlobalVariables.DisplayNameExecutable << "\">\n";
+  std::string civilizedInputSafish;
+  if (CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish, false))
+    stOutput << "Your input has been treated normally, however the return string "
+    << "of your input has been modified. More precisely, &lt; and &gt;  are "
+    << " modified due to a javascript hijack issue. <br>";
+  stOutput << this->GetHtmlHiddenInputs(true, true);
+  stOutput << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"compute\">\n";
+  stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"mainInput\" id=\"mainInputID\" "
+  << "style=\"white-space:normal\" "
+  << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
+  << " this.form.submit(); return false;}\" "
+  << "onkeyup=\"suggestWord();\", onkeydown=\"suggestWord(); "
+  << "arrowAction(event);\", onmouseup=\"suggestWord();\", oninput=\"suggestWord();\""
+  << ">";
+  stOutput << civilizedInputSafish;
+  stOutput << "</textarea>\n<br>\n";
+  stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" "
+  << "name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" ";
+  stOutput << "> ";
   if (theParser.inputString!="")
-    theParser.Evaluate(theParser.inputString);
-  this->flagProgressReportAllowed=false;
+    stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
+  stOutput << "\n</FORM>\n";
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
+  stOutput << this->openIndentTag("<table><!-- Autocomplete table 2 cells (2 rows 1 column)-->");
+  stOutput << this->openIndentTag("<tr>");
+  stOutput << this->openIndentTag("<td nowrap>");
+  stOutput << "<span \"style:nowrap\" id=\"idAutocompleteHints\">"
+  << "Ctrl+space autocompletes, ctrl+arrow selects word</span>";
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << this->closeIndentTag("</tr>");
+  stOutput << this->openIndentTag("<tr>");
+  stOutput << this->openIndentTag("<td id=\"idAutocompleteSpan\">");
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << this->closeIndentTag("</tr>");
+  stOutput << this->openIndentTag("<tr>");
+  stOutput << this->openIndentTag("<td id=\"idAutocompleteDebug\">");
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << this->closeIndentTag("</tr>");
+  stOutput << this->closeIndentTag("</table><!--Autocomplete table end-->");
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << CGI::GetJavascriptAutocompleteWithTags();
+  stOutput << this->closeIndentTag("</tr>");
+  stOutput << this->closeIndentTag("</table>");
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << this->closeIndentTag("</tr>");
+  if (startingIndent!=this->indentationLevelHTML)
+    crash << "Non-balanced html tags. " << crash;
+  if (theGlobalVariables.UserDebugFlagOn())
+    stOutput << "<tr><td>"
+    << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
+    << "</td></tr>";
+
+
+  theWebServer.CheckExecutableVersionAndRestartIfNeeded(false);
   theGlobalVariables.flagComputationCompletE=true;
-  if (theGlobalVariables.flagRunningBuiltInWebServer)
-    if (theGlobalVariables.flagOutputTimedOut)
-    { this->OutputResultAfterTimeout();
-      stOutput.Flush();
-      return 0;
+  stOutput << this->openIndentTag("<tr>");
+  stOutput << this->openIndentTag("<td>");
+  stOutput << "<span id=\"calculatorOutput\"></span>";
+  stOutput << this->closeIndentTag("</td>");
+  stOutput << this->closeIndentTag("</tr>");
+  stOutput << this->closeIndentTag("</table><!--table with input, autocomplete space and output-->");
+  stOutput << this->closeIndentTag("</td>");
+
+//  bool displayClientMessage=theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!=-1;
+  //displayClientMessage=false;
+  if (theParser.outputCommentsString!="")
+  { stOutput << "<td valign=\"top\">";
+//    if (displayClientMessage)
+//      stOutput << "<b>Message from client: </b>" << theWebServer.GetActiveWorker().ToStringMessageFull() << "<hr>";
+    //if (theParser.outputCommentsString.size()<10000)
+    stOutput << theParser.outputCommentsString;
+    //else
+    //stOutput << "The comments generated by your computation are a bit too long. If you want to see them click the show/hide button below.<br>"
+    //<< CGI::GetHtmlSpanHidableStartsHiddeN(theParser.outputCommentsString);
+    stOutput << "</td>";
+  }
+  stOutput << "<td valign=\"top\">";
+  theGlobalVariables.theSourceCodeFiles().QuickSortAscending();
+  stOutput << theGlobalVariables.ToStringSourceCodeInfo();
+  stOutput << "<hr><b>Calculator status. </b><br>";
+  stOutput << theParser.ToString();
+
+  stOutput << "</td></tr></table>";
+  std::stringstream tempStream3;
+  HashedList<std::string, MathRoutines::hashString> autocompleteKeyWords;
+  autocompleteKeyWords.SetExpectedSize(theParser.theAtoms.size*2);
+  for (int i=0; i<theParser.theAtoms.size; i++)
+    autocompleteKeyWords.AddOnTopNoRepetition(theParser.theAtoms[i]);
+  for (int i=0; i<theParser.namedRules.size; i++)
+    autocompleteKeyWords.AddOnTopNoRepetition(theParser.namedRules[i]);
+  autocompleteKeyWords.AddOnTopNoRepetition("NoFrac");
+  autocompleteKeyWords.AddOnTopNoRepetition("NoApproximations");
+  autocompleteKeyWords.AddOnTopNoRepetition("ShowContext");
+  autocompleteKeyWords.AddOnTopNoRepetition("LogParsing");
+  autocompleteKeyWords.AddOnTopNoRepetition("LogEvaluation");
+  autocompleteKeyWords.AddOnTopNoRepetition("NumberColors");
+  autocompleteKeyWords.AddOnTopNoRepetition("LogRules");
+  autocompleteKeyWords.AddOnTopNoRepetition("LogCache");
+  autocompleteKeyWords.AddOnTopNoRepetition("LogFull");
+  autocompleteKeyWords.AddOnTopNoRepetition("LatexLink");
+  autocompleteKeyWords.AddOnTopNoRepetition("UseLnInsteadOfLog");
+  autocompleteKeyWords.AddOnTopNoRepetition("UseLnAbsInsteadOfLog");
+  autocompleteKeyWords.AddOnTopNoRepetition("CalculatorStatus");
+  autocompleteKeyWords.AddOnTopNoRepetition("FullTree");
+  autocompleteKeyWords.AddOnTopNoRepetition("HideLHS");
+  autocompleteKeyWords.AddOnTopNoRepetition("DontUsePredefinedWordSplits");
+  autocompleteKeyWords.AddOnTopNoRepetition("PlotShowJavascriptOnly");
+  autocompleteKeyWords.AddOnTopNoRepetition("PlotNoCoordinateDetails");
+  stOutput << "\n\n<script language=\"javascript\">\n" << "  var theAutocompleteDictionary = [\n  ";
+  for (int i=0; i<autocompleteKeyWords.size; i++)
+    if (autocompleteKeyWords[i].size()>2)
+    { stOutput << "\"" << autocompleteKeyWords[i] << "\"";
+      if (i!=autocompleteKeyWords.size-1)
+        stOutput << ", ";
     }
-  WebWorker::OutputStandardResult();
+  stOutput << "];\n";
+  stOutput << "</script>\n";
+  stOutput << "</body></html>";
+  stOutput << "<!--";
+  ProgressReport theReport;
+  for(int i=0; i<theParser.SystemCommands.size; i++)
+  { std::stringstream out;
+    out << "\n\ncommand: " << theParser.SystemCommands[i] << "\n" ;
+    theReport.Report(out.str());
+    theGlobalVariables.CallSystemNoOutput(theParser.SystemCommands[i]);
+  }
+  stOutput << "-->";
+
+
+
+
   return 0;
 }
 
@@ -2596,8 +2733,9 @@ int WebWorker::ServeClient()
   if (this->addressComputed==theGlobalVariables.DisplayNameExecutable)
   { theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
   }
-  bool needLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
-  if (needLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
+  bool mustLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
+  bool shouldLogin=true;
+  if (mustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
   { std::stringstream redirectStream, newAddressStream;
     newAddressStream << "https://" << this->hostNoPort;
     if (!this->parent->flagPort8155)
@@ -2620,7 +2758,7 @@ int WebWorker::ServeClient()
     stOutput << "</body></html>";
     return 0;
   }
-  if (needLogin)
+  if (shouldLogin)
   { if (!this->ProcessWebArguments(argumentProcessingFailureComments))
       this->flagArgumentsAreOK=false;
     if (!this->Login(argumentProcessingFailureComments))
@@ -2632,13 +2770,15 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType=="databaseOneEntry")
     return this->ProcessDatabaseOneEntry();
-  else if (theGlobalVariables.userCalculatorRequestType=="accounts")
+  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType=="accounts")
     return this->ProcessAccounts();
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType=="navigation")
     return this->ProcessNavigation();
-  if (!theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection &&
-      this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed))
+  if (!theGlobalVariables.flagLoggedIn &&
+       theGlobalVariables.flagUsingSSLinCurrentConnection &&
+       mustLogin
+      )
   { if(theGlobalVariables.userCalculatorRequestType!="logout" &&
        theGlobalVariables.userCalculatorRequestType!="login")
     { argumentProcessingFailureComments << "<b>Accessing: ";
@@ -2658,19 +2798,15 @@ int WebWorker::ServeClient()
        theGlobalVariables.userCalculatorRequestType==""))
       && !theGlobalVariables.flagSSLisAvailable)
   { this->addressComputed=theGlobalVariables.DisplayNameExecutable;
-    theGlobalVariables.userCalculatorRequestType="compute";
-    needLogin=false;
+    theGlobalVariables.userCalculatorRequestType="calculator";
+    mustLogin=false;
   }
   if ((this->addressComputed=="/" || this->addressComputed=="" ||
       (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
        theGlobalVariables.userCalculatorRequestType==""))
       && theGlobalVariables.flagLoggedIn)
-  {
-
-    this->addressComputed="/html/selectCourse.html";
+  { this->addressComputed="/html/selectCourse.html";
     theGlobalVariables.userCalculatorRequestType="selectCourse";
-//    theGlobalVariables.SetWebInpuT("topicList", "topiclists/Singapore-H2-2017.txt");
-//    theGlobalVariables.SetWebInpuT("fileName", "pagetemplates/ace-learning-Singapore-H2.html");
   }
   if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount")
@@ -2788,7 +2924,7 @@ int WebWorker::ServeClient()
     return this->ProcessModifyPage();
   else if (theGlobalVariables.userCalculatorRequestType=="clonePage")
     return this->ProcessClonePage();
-  else if (theGlobalVariables.userCalculatorRequestType=="compute")
+  else if (theGlobalVariables.userCalculatorRequestType=="calculator")
     return this->ProcessCalculator();
 //  stOutput << "<html><body> got to here pt 2";
   this->VirtualFileName=this->addressComputed;
@@ -3015,6 +3151,8 @@ WebServer::WebServer()
   this->NumWorkersNormallyExited=0;
   this->WebServerPingIntervalInSeconds=20;
   this->flagThisIsWorkerProcess=false;
+  this->requestStartsNotNeedingLogin.AddOnTop("compute");
+  this->requestStartsNotNeedingLogin.AddOnTop("calculator");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.6-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("MathJax-2.6-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery.min.js");

@@ -2229,7 +2229,7 @@ std::string Function::ToStringFull()const
     out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample!="")
       out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request=compute&showExamples=true&mainInput="
+      << "?request=false&showExamples=true&mainInput="
       << CGI::StringToURLString(this->theExample, false)
       << "\"> " << " Example" << "</a>" ;
   } else
@@ -2265,6 +2265,10 @@ std::string Calculator::ToStringOutputAndSpecials()
   if (this->inputString=="")
     return "";
   std::stringstream out;
+  if (this->inputString!="")
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?" << this->inputStringRawestOfTheRaw << "\">Link to your input.</a><br>";
+
   out << this->outputString;
   if (this->flagProduceLatexLink)
     out << "<br>LaTeX link (\\usepackage{hyperref}):<br> "

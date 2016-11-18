@@ -891,7 +891,7 @@ std::string& CGI::GetJavascriptSha1()
 
 std::string CGI::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)
 { std::stringstream out;
-  out << "<a href=\"" << DisplayNameCalculator << "?request=compute&mainInput="
+  out << "<a href=\"" << DisplayNameCalculator << "?request=calculator&mainInput="
   << CGI::StringToURLString(input, false) << "\"> " << input << "</a>";
   return out.str();
 }

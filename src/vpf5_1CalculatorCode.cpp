@@ -377,7 +377,7 @@ std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType
   std::string theTitlePageFileNameNoPathSlowLoad= "SemisimpleSubalgebras_" + theType.ToString() + ".html";
   std::string theTitlePageFileNameNoPathFastLoad= "SemisimpleSubalgebras_FastLoad_" + theType.ToString() + ".html";
   out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=compute&mainInput=printSemisimpleLieAlgebra%7B%7D"
+  << "?request=calculator&mainInput=printSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">"
   << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras())
@@ -391,10 +391,10 @@ std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType
   else
     out << "<td>Not available</td>\n";
   out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=compute&mainInput=printSlTwoSubalgebras%7B%7D%28"
+  << "?request=calculator&mainInput=printSlTwoSubalgebras%7B%7D%28"
   << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
   out << "<td><a href=\""
-  << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=compute&mainInput=printRootSubalgebras%7B%7D%28"
+  << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=calculator&mainInput=printRootSubalgebras%7B%7D%28"
   << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }
@@ -403,16 +403,16 @@ std::string Calculator::ToStringLinksToCalculator(const DynkinType& theType, For
 { (void) theFormat;//avoid unused parameter warning, portable
   std::stringstream out;
   out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=compute&mainInput=printSemisimpleLieAlgebra%7B%7D"
+  << "?request=calculator&mainInput=printSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras())
-    out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=compute&mainInput=printSemisimpleSubalgebras%7B%7D%28"
+    out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=calculator&mainInput=printSemisimpleSubalgebras%7B%7D%28"
     << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a></td>\n ";
   else
     out << "<td>Not available</td>\n";
-  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=compute&mainInput=printSlTwoSubalgebras%7B%7D%28"
+  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=calculator&mainInput=printSlTwoSubalgebras%7B%7D%28"
   << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
-  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=compute&mainInput=printRootSubalgebras%7B%7D%28"
+  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=calculator&mainInput=printRootSubalgebras%7B%7D%28"
   << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }

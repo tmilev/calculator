@@ -926,13 +926,30 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
   for (int i=0; i<newlyFoundArgs.size(); i++)
   { if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i]))
       continue; //<-if a key is already given cookie entries are ignored.
-//    argumentProcessingFailureComments << "Found new cookie key: " << newlyFoundArgs.theKeys[i] << "<br>";
+    //argumentProcessingFailureComments << "Found new cookie key: " << newlyFoundArgs.theKeys[i] << "<br>";
     std::string trimmed=newlyFoundArgs.theValues[i];
     if (trimmed.size()>0)
       if (trimmed[trimmed.size()-1]==';')
         trimmed= trimmed.substr(0,trimmed.size()-1);
     //<-except the last cookie, cookies have extra semicolumn at the end, trimming.
-    theGlobalVariables.webArguments.SetKeyValue(newlyFoundArgs.theKeys[i], trimmed);
+    bool isGood=true;
+    if (newlyFoundArgs.theKeys[i]=="request") //<- we are careful about
+    { //reading arbitrary requests from the cookie. Those may effectively deny login
+      //to a person who does not know to change the request type from the web address.
+      //To prevent that we refuse to read requests from cookies except for the
+      //whitelist below.
+      isGood=false;
+      if (trimmed=="template" ||
+          trimmed=="exercise" ||
+          trimmed=="database" ||
+          trimmed=="accounts" ||
+          trimmed=="calculator" ||
+          trimmed=="scoredQuiz"
+          )
+        isGood=true;
+    }
+    if (isGood)
+      theGlobalVariables.webArguments.SetKeyValue(newlyFoundArgs.theKeys[i], trimmed);
   }
   return result;
 }
@@ -1115,11 +1132,8 @@ void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
 
 void WebWorker::OutputBeforeComputation()
 { MacroRegisterFunctionWithName("WebServer::OutputBeforeComputation");
-  stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
-  << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
-  << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  "
+  stOutput << "<html><head> <title>calculator version  "
   << __DATE__ << ", " << __TIME__ << "</title>";
-//  if (theGlobalVariables.flagUsingBuiltInWebServer)
   stOutput << CGI::GetJavascriptMathjax();
   stOutput << CGI::GetJavascriptInjectCalculatorResponseInNode();
   stOutput << CGI::GetCalculatorStyleSheetWithTags();
@@ -2576,12 +2590,12 @@ int WebWorker::ServeClient()
   this->flagArgumentsAreOK=true;
   if (!this->ExtractArgumentsFromMessage(this->argumentComputed, argumentProcessingFailureComments))
     this->flagArgumentsAreOK=false;
+  if (!this->ExtractArgumentsFromCookies(argumentProcessingFailureComments))
+    this->flagArgumentsAreOK=false;
   theGlobalVariables.userCalculatorRequestType="";
   if (this->addressComputed==theGlobalVariables.DisplayNameExecutable)
   { theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
   }
-  if (!this->ExtractArgumentsFromCookies(argumentProcessingFailureComments))
-    this->flagArgumentsAreOK=false;
   bool needLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
   if (needLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
   { std::stringstream redirectStream, newAddressStream;
@@ -2651,7 +2665,9 @@ int WebWorker::ServeClient()
       (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
        theGlobalVariables.userCalculatorRequestType==""))
       && theGlobalVariables.flagLoggedIn)
-  { this->addressComputed="/html/selectCourse.html";
+  {
+
+    this->addressComputed="/html/selectCourse.html";
     theGlobalVariables.userCalculatorRequestType="selectCourse";
 //    theGlobalVariables.SetWebInpuT("topicList", "topiclists/Singapore-H2-2017.txt");
 //    theGlobalVariables.SetWebInpuT("fileName", "pagetemplates/ace-learning-Singapore-H2.html");

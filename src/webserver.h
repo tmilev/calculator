@@ -96,6 +96,7 @@ public:
   int ProcessLoginPage(const std::string& reasonForLogin="");
   int ProcessLogout();
   int ProcessNavigation();
+  int ProcessCompute();
   int ProcessCalculatorExamples();
   int ProcessSubmitProblem();
   int ProcessSubmitProblemPreview();

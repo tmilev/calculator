@@ -2305,6 +2305,45 @@ int WebWorker::ProcessChangePassword()
   return 0;
 }
 
+int WebWorker::ProcessCompute()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessCompute");
+  this->SetHeaderOKNoContentLength();
+  theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone;
+  std::cout << "DEBUG: input string: " << theParser.inputString;
+  std::cout.flush();
+  ////////////////////////////////////////////////
+  //  the initialization below moved to the start of the web server!
+  //  theParser.init();
+  ////////////////////////////////////////////////
+  this->flagProgressReportAllowed=true;
+  theParser.Evaluate(theParser.inputString);
+  this->flagProgressReportAllowed=false;
+  std::cout << "DEBUG: EvaluateD! ";
+  std::cout.flush();
+  if (theGlobalVariables.flagRunningBuiltInWebServer)
+    if (theGlobalVariables.flagOutputTimedOut)
+    { this->OutputResultAfterTimeout();
+      return 0;
+    }
+  std::cout << "DEBUG: got to before output and specials! ";
+  std::cout.flush();
+  if (theParser.inputString!="")
+    stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a><br>";
+
+  stOutput << theParser.outputString;
+  if (theParser.flagProduceLatexLink)
+    stOutput << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
+    << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw, theParser.inputString)
+    << "<br>Input string raw: <br>" << theParser.inputStringRawestOfTheRaw;
+  if (theParser.parsingLog!="")
+    stOutput << "<b> As requested, here is a calculator parsing log</b><br>" << theParser.parsingLog;
+
+  theGlobalVariables.flagComputationCompletE=true;
+  return 0;
+}
+
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   this->SetHeaderOKNoContentLength();
@@ -2317,6 +2356,7 @@ int WebWorker::ProcessCalculator()
   stOutput << CGI::GetCalculatorStyleSheetWithTags();
   stOutput << HtmlSnippets::GetJavascriptHideHtml();
   stOutput << HtmlSnippets::GetJavascriptStandardCookies();
+  stOutput << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile();
   stOutput << "\n</head>\n<body onload=\"loadSettings();\">\n";
   stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</problemNavigation>\n";
@@ -2361,6 +2401,9 @@ int WebWorker::ProcessCalculator()
     stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
   stOutput << "\n</FORM>\n";
+  stOutput << "<button title=\"Shift+Enter=shortcut from input text box. \" "
+  << "name=\"Go\" onmousedown=\"submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction);\"> ";
+  stOutput << "Go" << "</button>";
   stOutput << this->closeIndentTag("</td>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
   stOutput << this->openIndentTag("<table><!-- Autocomplete table 2 cells (2 rows 1 column)-->");
@@ -2926,6 +2969,11 @@ int WebWorker::ServeClient()
     return this->ProcessClonePage();
   else if (theGlobalVariables.userCalculatorRequestType=="calculator")
     return this->ProcessCalculator();
+  else if (theGlobalVariables.userCalculatorRequestType=="compute")
+  { //std::cout << "DEBUG: got to here!";
+    //std::cout.flush();
+    return this->ProcessCompute();
+  }
 //  stOutput << "<html><body> got to here pt 2";
   this->VirtualFileName=this->addressComputed;
   this->SanitizeVirtualFileName();
@@ -3519,9 +3567,10 @@ void WebServer::ReleaseWorkerSideResources()
 
 bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string& inputAddress)
 { MacroRegisterFunctionWithName("WebServer::AddressRequiresLogin");
-  for (int i=0; i<this->requestStartsNotNeedingLogin.size; i++)
-    if (MathRoutines::StringBeginsWith(inputRequest, this->requestStartsNotNeedingLogin[i]))
-      return false;
+  if (inputAddress==theGlobalVariables.DisplayNameExecutable)
+    for (int i=0; i<this->requestStartsNotNeedingLogin.size; i++)
+      if (MathRoutines::StringBeginsWith(inputRequest, this->requestStartsNotNeedingLogin[i]))
+        return false;
   for (int i=0; i<this->addressStartsNotNeedingLogin.size; i++)
     if (MathRoutines::StringBeginsWith(inputAddress, this->addressStartsNotNeedingLogin[i]))
       return false;

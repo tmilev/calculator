@@ -2752,7 +2752,26 @@ std::string HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
-  << "function submitStringAsMainInput(theString, idOutput, requestType){\n"
+
+  << "function onLoadDefaultFunction(idElement) {\n"
+  << "  //var scripts = spanVerification.getElementsByTagName('script');\n"
+  << "  //for (i=0; i<numInsertedJavascriptChildren; i++)\n"
+  << "  //{ document.getElementsByTagName( 'head' )[0].removeChild(document.getElementsByTagName( 'head' )[0].lastChild);\n"
+  << "  //   document.getElementsByTagName( 'head' )[0].appendChild(scriptChild);\n"
+  << "  // }\n"
+  << "  //numInsertedJavascriptChildren=0;\n"
+  << "  //for (i=0; i<scripts.length; i++){\n"
+  << "  //  scriptChild= document.createElement('script');\n"
+  << "  //  scriptChild.innerHTML=scripts[i].innerHTML;\n"
+  << "  //  scriptChild.type='text/javascript';\n"
+  << "  //  document.getElementsByTagName( 'head' )[0].appendChild(scriptChild);\n"
+  << "  //  numInsertedJavascriptChildren++;\n "
+  << "  //}\n"
+  << "  //JavascriptInsertionAlreadyCalled=true;\n"
+  << "    MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById('idElement')]);\n"
+  << "  }\n"
+
+  << "function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction){\n"
   << "  spanOutput = document.getElementById(idOutput);\n"
   << "  if (spanOutput==null){\n"
   << "    spanOutput = document.createElement('span');\n"
@@ -2771,6 +2790,8 @@ std::string HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   << "  https.onload = function() {\n"
   << "    spanOutput.innerHTML=https.responseText;\n"
+  << "    if(onLoadFunction!==undefined && onLoadFunction!==null && onLoadFunction!==0)\n"
+  << "      onLoadFunction(idOutput);\n"
   << "  }\n"
   ////////////////////////////////////////////
   << "  https.send(inputParams);\n"

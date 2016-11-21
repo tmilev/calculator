@@ -2376,8 +2376,8 @@ int WebWorker::ProcessCalculator()
   stOutput << this->openIndentTag("<tr>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
   //stOutput << this->ToStringCalculatorArgumentsHumanReadable();
-  stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
-  << theGlobalVariables.DisplayNameExecutable << "\">\n";
+//  stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
+//  << theGlobalVariables.DisplayNameExecutable << "\">\n";
   std::string civilizedInputSafish;
   if (CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish, false))
     stOutput << "Your input has been treated normally, however the return string "
@@ -2387,22 +2387,20 @@ int WebWorker::ProcessCalculator()
   stOutput << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"compute\">\n";
   stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"mainInput\" id=\"mainInputID\" "
   << "style=\"white-space:normal\" "
-  << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
-  << " this.form.submit(); return false;}\" "
+  << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {"
+  << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction);"
+  << " event.preventDefault();"
+  << "}\" "
   << "onkeyup=\"suggestWord();\", onkeydown=\"suggestWord(); "
   << "arrowAction(event);\", onmouseup=\"suggestWord();\", oninput=\"suggestWord();\""
   << ">";
   stOutput << civilizedInputSafish;
-  stOutput << "</textarea>\n<br>\n";
-  stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" "
-  << "name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" ";
-  stOutput << "> ";
-  if (theParser.inputString!="")
-    stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
-  stOutput << "\n</FORM>\n";
+  stOutput << "</textarea>\n";
+//  stOutput << "\n</FORM>\n";
   stOutput << "<button title=\"Shift+Enter=shortcut from input text box. \" "
-  << "name=\"Go\" onmousedown=\"submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction);\"> ";
+  << "name=\"Go\" onmousedown=\""
+  << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction); event.preventDefault();"
+  << "\"> ";
   stOutput << "Go" << "</button>";
   stOutput << this->closeIndentTag("</td>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
@@ -2434,9 +2432,7 @@ int WebWorker::ProcessCalculator()
     stOutput << "<tr><td>"
     << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
     << "</td></tr>";
-
-
-  theWebServer.CheckExecutableVersionAndRestartIfNeeded(false);
+  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
   theGlobalVariables.flagComputationCompletE=true;
   stOutput << this->openIndentTag("<tr>");
   stOutput << this->openIndentTag("<td>");
@@ -2510,10 +2506,6 @@ int WebWorker::ProcessCalculator()
     theGlobalVariables.CallSystemNoOutput(theParser.SystemCommands[i]);
   }
   stOutput << "-->";
-
-
-
-
   return 0;
 }
 

@@ -2229,7 +2229,7 @@ std::string Function::ToStringFull()const
     out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample!="")
       out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request=false&showExamples=true&mainInput="
+      << "?request=calculator&showExamples=true&mainInput="
       << CGI::StringToURLString(this->theExample, false)
       << "\"> " << " Example" << "</a>" ;
   } else

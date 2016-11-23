@@ -2265,15 +2265,16 @@ std::string Calculator::ToStringOutputAndSpecials()
   if (this->inputString=="")
     return "";
   std::stringstream out;
+  std::string urledInput=CGI::StringToURLString(this->inputString, false);
   if (this->inputString!="")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?" << this->inputStringRawestOfTheRaw << "\">Link to your input.</a><br>";
+    << "?request=compute&mainInput=" << urledInput << "\">Link to your input.</a><br>";
 
   out << this->outputString;
   if (this->flagProduceLatexLink)
     out << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
-    << CGI::GetLatexEmbeddableLinkFromCalculatorInput(this->inputStringRawestOfTheRaw, this->inputString)
-    << "<br>Input string raw: <br>" << this->inputStringRawestOfTheRaw;
+    << CGI::GetLatexEmbeddableLinkFromCalculatorInput(urledInput, this->inputString)
+    << "<br>Input string raw: <br>" << urledInput;
   if (this->parsingLog!="")
     out << "<b> As requested, here is a calculator parsing log</b><br>" << this->parsingLog;
   return out.str();

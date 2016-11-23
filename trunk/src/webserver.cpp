@@ -1140,7 +1140,7 @@ void WebWorker::OutputBeforeComputation()
     << "</problemNavigation>\n" << "<section>";
 
   theGlobalVariables.initOutputReportAndCrashFileNames
-  (theParser.inputStringRawestOfTheRaw, theParser.inputString);
+  (CGI::StringToURLString(theParser.inputString, false), theParser.inputString);
 
   stOutput << HtmlSnippets::GetJavascriptHideHtml();
   stOutput << HtmlSnippets::GetJavascriptStandardCookies();
@@ -2310,8 +2310,8 @@ int WebWorker::ProcessCompute()
   this->SetHeaderOKNoContentLength();
   theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone;
-  std::cout << "DEBUG: input string: " << theParser.inputString;
-  std::cout.flush();
+  //std::cout << "DEBUG: input string: " << theParser.inputString;
+  //std::cout.flush();
   ////////////////////////////////////////////////
   //  the initialization below moved to the start of the web server!
   //  theParser.init();
@@ -2319,24 +2319,25 @@ int WebWorker::ProcessCompute()
   this->flagProgressReportAllowed=true;
   theParser.Evaluate(theParser.inputString);
   this->flagProgressReportAllowed=false;
-  std::cout << "DEBUG: EvaluateD! ";
-  std::cout.flush();
+  //std::cout << "DEBUG: EvaluateD! ";
+  //std::cout.flush();
+  std::string urledInput=CGI::StringToURLString(theParser.inputString, false);
   if (theGlobalVariables.flagRunningBuiltInWebServer)
     if (theGlobalVariables.flagOutputTimedOut)
     { this->OutputResultAfterTimeout();
       return 0;
     }
-  std::cout << "DEBUG: got to before output and specials! ";
-  std::cout.flush();
+  //std::cout << "DEBUG: got to before output and specials! ";
+  //std::cout.flush();
   if (theParser.inputString!="")
     stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a><br>";
+    << "?request=calculator&mainInput=" << urledInput << "\">Link to your input.</a><br>";
 
   stOutput << theParser.outputString;
   if (theParser.flagProduceLatexLink)
     stOutput << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
-    << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw, theParser.inputString)
-    << "<br>Input string raw: <br>" << theParser.inputStringRawestOfTheRaw;
+    << CGI::GetLatexEmbeddableLinkFromCalculatorInput(urledInput, theParser.inputString)
+    ;
   if (theParser.parsingLog!="")
     stOutput << "<b> As requested, here is a calculator parsing log</b><br>" << theParser.parsingLog;
 
@@ -2357,12 +2358,16 @@ int WebWorker::ProcessCalculator()
   stOutput << HtmlSnippets::GetJavascriptHideHtml();
   stOutput << HtmlSnippets::GetJavascriptStandardCookies();
   stOutput << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile();
-  stOutput << "\n</head>\n<body onload=\"loadSettings();\">\n";
+  theGlobalVariables.initOutputReportAndCrashFileNames
+  (CGI::StringToURLString(theParser.inputString, false), theParser.inputString);
+  stOutput << "\n</head>\n<body onload=\"loadSettings(); ";
+  if (theParser.inputString!="")
+  { stOutput << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction);";
+  }
+  stOutput << "\">\n";
   stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</problemNavigation>\n";
 
-  theGlobalVariables.initOutputReportAndCrashFileNames
-  (theParser.inputStringRawestOfTheRaw, theParser.inputString);
 
   stOutput << this->openIndentTag("<table><!-- Outermost table, 3 cells (3 columns 1 row)-->");
   stOutput << this->openIndentTag("<tr style=\"vertical-align:top\">");
@@ -4127,9 +4132,9 @@ int WebServer::mainCommandLine()
   //  return 0;
 //std::cout << "Running cmd line. \n";
   theParser.init();
-  theParser.inputStringRawestOfTheRaw =theGlobalVariables.programArguments[0];
+  theParser.inputString=theGlobalVariables.programArguments[0];
   theParser.flagUseHtml=false;
-  theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
+  theParser.Evaluate(theParser.inputString);
   std::fstream outputFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual
   (outputFile, "output/outputFileCommandLine.html", false, true, false);

@@ -3,8 +3,6 @@
 #ifndef vpfHeaderHtmlSnippetsAlreadyDefined
 #define vpfHeaderHtmlSnippetsAlreadyDefined
 #include "vpfMacros.h"
-#include <ctime>
-
 
 static ProjectInformationInstance ProjectInfoHeaderHtmlSnippets(__FILE__, "Html snippets header.");
 
@@ -19,6 +17,4 @@ public:
   static std::string GetDatePickerJavascriptInit();
   static std::string GetDatePickerStart(const std::string& theId);
 };
-
-
 #endif

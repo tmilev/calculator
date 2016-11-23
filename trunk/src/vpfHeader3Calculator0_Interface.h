@@ -940,7 +940,7 @@ public:
 
   std::string syntaxErrors;
   List<std::string> evaluationErrors;
-  std::string inputStringRawestOfTheRaw;
+  //std::string inputStringRawestOfTheRaw;
   std::string inputString;
   std::string outputString;
   std::string outputCommentsString;

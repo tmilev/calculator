@@ -2331,9 +2331,12 @@ int WebWorker::ProcessCompute()
   //std::cout.flush();
   if (theParser.inputString!="")
     stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=calculator&mainInput=" << urledInput << "\">Link to your input.</a><br>";
-
-  stOutput << theParser.outputString;
+    << "?request=calculator&mainInput=" << urledInput << "\">Link to your input (reloads page).</a><br>";
+  if (theParser.outputCommentsString=="")
+    stOutput << theParser.outputString;
+  else
+    stOutput <<  "<table style=\"vertical-align: top\"><tr><td style=\"vertical-align: top\">" << theParser.outputString << "</td>"
+    << "<td style=\"vertical-align: top\"><b>Comments.</b><br>" << theParser.outputCommentsString << "</td></tr></table>";
   if (theParser.flagProduceLatexLink)
     stOutput << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
     << CGI::GetLatexEmbeddableLinkFromCalculatorInput(urledInput, theParser.inputString)

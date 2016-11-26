@@ -2268,8 +2268,7 @@ std::string Calculator::ToStringOutputAndSpecials()
   std::string urledInput=CGI::StringToURLString(this->inputString, false);
   if (this->inputString!="")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=compute&mainInput=" << urledInput << "\">Link to your input.</a><br>";
-
+    << "?request=compute&mainInput=" << urledInput << "\">Link to your input (reloads page).</a><br>";
   out << this->outputString;
   if (this->flagProduceLatexLink)
     out << "<br>LaTeX link (\\usepackage{hyperref}):<br> "

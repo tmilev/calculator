@@ -2361,9 +2361,13 @@ int WebWorker::ProcessCalculator()
   stOutput << HtmlSnippets::GetJavascriptHideHtml();
   stOutput << HtmlSnippets::GetJavascriptStandardCookies();
   stOutput << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile();
+  stOutput << CGI::GetJavascriptAutocompleteWithTags();
+  stOutput << CGI::GetJavascriptInitilizeButtons();
+  stOutput << CGI::GetJavascriptMathQuillMatrixSupport();
+
   theGlobalVariables.initOutputReportAndCrashFileNames
   (CGI::StringToURLString(theParser.inputString, false), theParser.inputString);
-  stOutput << "\n</head>\n<body onload=\"loadSettings(); ";
+  stOutput << "\n</head>\n<body onload=\"loadSettings(); initializeButtons();";
   if (theParser.inputString!="")
   { stOutput << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction);";
   }
@@ -2429,7 +2433,6 @@ int WebWorker::ProcessCalculator()
   stOutput << this->closeIndentTag("</tr>");
   stOutput << this->closeIndentTag("</table><!--Autocomplete table end-->");
   stOutput << this->closeIndentTag("</td>");
-  stOutput << CGI::GetJavascriptAutocompleteWithTags();
   stOutput << this->closeIndentTag("</tr>");
   stOutput << this->closeIndentTag("</table>");
   stOutput << this->closeIndentTag("</td>");

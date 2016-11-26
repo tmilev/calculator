@@ -177,7 +177,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("makeInputBox", CalculatorHtmlFunctions::innerUserInputBox, "",
    "Creates an user input text box. ",
-   " makeInputBox(name=a, default=randomInteger((-5,-1), (1,5)));", true, false,
+   " makeInputBox(name=a, value=randomInteger((-5,-1), (1,5)));", true, false,
    "CalculatorHtmlFunctions::innerUserInputBox", "makeInputBox");
   this->AddOperationInnerHandler
   ("setInputBox", CalculatorHtmlFunctions::innerSetInputBox, "",

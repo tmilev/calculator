@@ -93,7 +93,23 @@ bool CalculatorHtmlFunctions::innerSetInputBox
 std::string CalculatorHtmlFunctions::GetUserInputBox(const Expression& theBox)
 { MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetUserInputBox");
   std::stringstream out;
-  out << "\\FormInput{" << CalculatorHtmlFunctions::GetUserInputBoxName(theBox) << "}" ;
+  if (theBox.owner==0)
+    return "non-initialized-expression";
+  Calculator& theCommands=*theBox.owner;
+  MapLisT<std::string, Expression, MathRoutines::hashString> theArguments;
+  if (!CalculatorConversions::innerLoadKeysFromStatementList
+      (theCommands, theBox, theArguments))
+    return "(corrupt-box)";
+  if (!theArguments.Contains("name"))
+    return "(box-without-name)";
+  std::string theBoxName="faultyBoxName";
+  std::string boxValue;
+  if (!theArguments.GetValueCreateIfNotPresent("name").IsOfType<std::string>(&theBoxName))
+    theBoxName=theArguments.GetValueCreateIfNotPresent("name").ToString();
+  if (theArguments.Contains("value"))
+    if (!theArguments.GetValueCreateIfNotPresent("value").IsOfType<std::string>(&theBoxName))
+      boxValue=theArguments.GetValueCreateIfNotPresent("value").ToString();
+  out << "\\FormInput" << "[" << boxValue << "]" << "{" << theBoxName << "}" ;
   return out.str();
 }
 

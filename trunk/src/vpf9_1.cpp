@@ -238,8 +238,8 @@ bool GlobalVariables::UserDefaultHasProblemComposingRights()
 }
 
 bool GlobalVariables::UserGuestMode()
-{ if (this->flagUsingSSLinCurrentConnection)
-    return false;
+{ if (!this->flagUsingSSLinCurrentConnection)
+    return true;
   return this->userCalculatorRequestType=="exerciseNoLogin" ||
   this->userCalculatorRequestType=="problemGiveUpNoLogin" ||
   this->userCalculatorRequestType=="submitExerciseNoLogin" ||

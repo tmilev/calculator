@@ -2603,7 +2603,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (theGlobalVariables.UserGuestMode())
     exerciseRequest="exerciseNoLogin";
   if (theGlobalVariables.UserGuestMode())
-    out << "<b>Guest mode</b>" << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    out << "<b>Guest mode</b>" << linkSeparator << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=login\">Log in</a> ";
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");

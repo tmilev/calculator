@@ -115,7 +115,6 @@ public:
   bool IsFileServedRaw();
 
   static bool IsAllowedAsRequestCookie(const std::string& input);
-  bool ProcessWebArguments(std::stringstream& argumentProcessingFailureComments);
   bool Login(std::stringstream& argumentProcessingFailureComments);
   bool ExtractArgumentsFromMessage
 (const std::string& input, std::stringstream& argumentProcessingFailureComments,

@@ -1035,17 +1035,6 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   return true;
 }
 
-bool WebWorker::ProcessWebArguments(std::stringstream& argumentProcessingFailureComments)
-{ MacroRegisterFunctionWithName("WebWorker::ProcessWebArguments");
-  (void) argumentProcessingFailureComments;
-  if (theGlobalVariables.flagUsingSSLinCurrentConnection &&
-      theGlobalVariables.userCalculatorRequestType=="exerciseNoLogin")
-  { theGlobalVariables.userCalculatorRequestType="exercise";
-    theGlobalVariables.SetWebInpuT("request", "exercise");
-  }
-  return true;
-}
-
 std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAuthenticationToken)
 { MacroRegisterFunctionWithName("WebWorker::GetHtmlHiddenInputs");
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
@@ -2190,6 +2179,8 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "</form>";
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
+//  out << "<br><br><small>No account yet? We are sorry but automatic registration has not been implemented yet.<br>"
+//  << " If you are our students please contact us by email and we'll register you.<br>Everyone else, please che.</small>";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   //out << "<hr><hr>DEBUG: " << this->ToStringMessageFullUnsafe();
   return out.str();
@@ -2779,8 +2770,9 @@ int WebWorker::ServeClient()
   if (this->addressComputed==theGlobalVariables.DisplayNameExecutable)
   { theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
   }
-  bool mustLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
   bool shouldLogin=true;
+  bool mustLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
+  //stOutput << "DEBUG: mustlogin: " << mustLogin << " request: " << theGlobalVariables.userCalculatorRequestType;
   if (mustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
   { std::stringstream redirectStream, newAddressStream;
     newAddressStream << "https://" << this->hostNoPort;
@@ -2804,12 +2796,12 @@ int WebWorker::ServeClient()
     stOutput << "</body></html>";
     return 0;
   }
+  //stOutput << "<br>  DEbug: got to very here 3.30. reqwest: " << theGlobalVariables.userCalculatorRequestType;
   if (shouldLogin)
-  { if (!this->ProcessWebArguments(argumentProcessingFailureComments))
-      this->flagArgumentsAreOK=false;
-    if (!this->Login(argumentProcessingFailureComments))
+  { if (!this->Login(argumentProcessingFailureComments))
       this->flagArgumentsAreOK=false;
   }
+  //stOutput << "<br>  DEbug: got to very here 3.31. reqwest: " << theGlobalVariables.userCalculatorRequestType;
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType=="database")
     return this->ProcessDatabase();
@@ -2821,11 +2813,13 @@ int WebWorker::ServeClient()
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType=="navigation")
     return this->ProcessNavigation();
+  //stOutput << "<br>  DEbug: got to very here 3.32. reqwest: " << theGlobalVariables.userCalculatorRequestType;
   if (!theGlobalVariables.flagLoggedIn &&
        theGlobalVariables.flagUsingSSLinCurrentConnection &&
        mustLogin
       )
-  { if(theGlobalVariables.userCalculatorRequestType!="logout" &&
+  { //stOutput << "<br>DEBUG: mustlogin2: " << mustLogin << " request: " << theGlobalVariables.userCalculatorRequestType;
+    if(theGlobalVariables.userCalculatorRequestType!="logout" &&
        theGlobalVariables.userCalculatorRequestType!="login")
     { argumentProcessingFailureComments << "<b>Accessing: ";
       if (theGlobalVariables.userCalculatorRequestType!="")
@@ -2836,6 +2830,8 @@ int WebWorker::ServeClient()
     }
     return this->ProcessLoginPage(argumentProcessingFailureComments.str());
   }
+  //stOutput << "  DEbug: got to very here 3.33. reqwest: " << theGlobalVariables.userCalculatorRequestType;
+
   if (argumentProcessingFailureComments.str()!="")
     theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
   this->errorCalculatorArguments=argumentProcessingFailureComments.str();
@@ -2854,6 +2850,7 @@ int WebWorker::ServeClient()
   { this->addressComputed="/html/selectCourse.html";
     theGlobalVariables.userCalculatorRequestType="selectCourse";
   }
+  //stOutput << "<br>  DEbug: got to very here 3.34. reqwest: " << theGlobalVariables.userCalculatorRequestType;
   if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount")
   { std::stringstream redirectedAddress;
@@ -2889,6 +2886,7 @@ int WebWorker::ServeClient()
     stOutput << "</body></html>";
     return 0;
   }
+  //stOutput << "DEbug: got to very here 3. reqwest: " << theGlobalVariables.userCalculatorRequestType;
   if (theGlobalVariables.userCalculatorRequestType=="calculatorExamples")
     return this->ProcessCalculatorExamples();
   if (theGlobalVariables.GetWebInput("error")!="")
@@ -2959,8 +2957,9 @@ int WebWorker::ServeClient()
     else
       return this->ProcessLoginPage();
   } else if (theGlobalVariables.userCalculatorRequestType=="exerciseNoLogin")
+  { //stOutput << "DEBUG: Got to here; exerciseNoLogin";
     return this->ProcessExamPage();
-  else if (theGlobalVariables.userCalculatorRequestType=="template")
+  } else if (theGlobalVariables.userCalculatorRequestType=="template")
     return this->ProcessTemplate();
   else if (theGlobalVariables.userCalculatorRequestType=="topicTable")
     return this->ProcessTopicTable();
@@ -3204,6 +3203,10 @@ WebServer::WebServer()
   this->flagThisIsWorkerProcess=false;
   this->requestStartsNotNeedingLogin.AddOnTop("compute");
   this->requestStartsNotNeedingLogin.AddOnTop("calculator");
+  this->requestStartsNotNeedingLogin.AddOnTop("exerciseNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("submitExerciseNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.6-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("MathJax-2.6-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery.min.js");

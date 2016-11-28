@@ -2603,8 +2603,10 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (theGlobalVariables.UserGuestMode())
     exerciseRequest="exerciseNoLogin";
   if (theGlobalVariables.UserGuestMode())
-    out << "<b>Guest mode</b>" << linkSeparator << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=login\">Log in</a> ";
+    out << "<b>Guest mode</b>" << linkSeparator;
+  if (!theGlobalVariables.flagLoggedIn)
+     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+     << "?request=login\">Log in</a> " << linkSeparator;
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
   std::string calcArgsNoPassExamDetails=
@@ -2714,7 +2716,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
     out << "fileName=" << CGI::StringToURLString(theGlobalVariables.GetWebInput("fileName"), false)
     << "&";
   out << "topicList=" << theGlobalVariables.GetWebInput("topicList") << "&";
-  if (!theGlobalVariables.UserGuestMode())
+  //if (!theGlobalVariables.UserGuestMode())
   { out << "studentView=" << studentView << "&";
     if (studentSection!="")
       out << "studentSection=" << CGI::StringToURLString(studentSection, false) << "&";

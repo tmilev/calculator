@@ -985,8 +985,6 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   //Returning true does not necessarily mean the login information was accepted.
   //Returning false guarantees the login information was not accepted.
   theGlobalVariables.flagLoggedIn=false;
-  if (theGlobalVariables.UserGuestMode())
-    return true;
   MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs= theGlobalVariables.webArguments;
   UserCalculatorData& theUser= theGlobalVariables.userDefault;
   theUser.username= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("username"), false);
@@ -2755,8 +2753,6 @@ bool WebWorker::CheckRequestsAddressesReturnFalseIfModified()
       && !theGlobalVariables.flagSSLisAvailable)
   { this->addressComputed=theGlobalVariables.DisplayNameExecutable;
     theGlobalVariables.userCalculatorRequestType="calculator";
-    if (!this->flagPasswordWasSubmitted)
-      this->flagMustLogin=false;
     stateNotModified=false;
   }
   bool shouldFallBackToDefaultPage=false;
@@ -2830,25 +2826,7 @@ int WebWorker::ServeClient()
     return 0;
   }
   this->flagArgumentsAreOK=this->Login(argumentProcessingFailureComments);
-  if (!theGlobalVariables.flagLoggedIn &&
-       theGlobalVariables.flagUsingSSLinCurrentConnection &&
-       this->flagMustLogin
-      )
-  { if(theGlobalVariables.userCalculatorRequestType!="logout" &&
-       theGlobalVariables.userCalculatorRequestType!="login")
-    { argumentProcessingFailureComments << "<b>Accessing: ";
-      if (theGlobalVariables.userCalculatorRequestType!="")
-        argumentProcessingFailureComments << theGlobalVariables.userCalculatorRequestType;
-      else
-        argumentProcessingFailureComments << "[html base folder]";
-      argumentProcessingFailureComments << " requires login. </b>";
-    }
-    return this->ProcessLoginPage(argumentProcessingFailureComments.str());
-  }
-  if (argumentProcessingFailureComments.str()!="")
-    theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
-  this->errorCalculatorArguments=argumentProcessingFailureComments.str();
-  this->CheckRequestsAddressesReturnFalseIfModified();
+  //stOutput << "DEBUG: this->flagPasswordWasSubmitted: " << this->flagPasswordWasSubmitted;
   if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount")
   { std::stringstream redirectedAddress;
@@ -2884,6 +2862,26 @@ int WebWorker::ServeClient()
     stOutput << "</body></html>";
     return 0;
   }
+  if (!theGlobalVariables.flagLoggedIn &&
+       theGlobalVariables.flagUsingSSLinCurrentConnection &&
+       this->flagMustLogin
+      )
+  { if(theGlobalVariables.userCalculatorRequestType!="logout" &&
+       theGlobalVariables.userCalculatorRequestType!="login")
+    { argumentProcessingFailureComments << "<b>Accessing: ";
+      if (theGlobalVariables.userCalculatorRequestType!="")
+        argumentProcessingFailureComments << theGlobalVariables.userCalculatorRequestType;
+      else
+        argumentProcessingFailureComments << "[html base folder]";
+      argumentProcessingFailureComments << " requires login. </b>";
+    }
+    return this->ProcessLoginPage(argumentProcessingFailureComments.str());
+  }
+  if (argumentProcessingFailureComments.str()!="")
+    theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
+  this->errorCalculatorArguments=argumentProcessingFailureComments.str();
+  this->CheckRequestsAddressesReturnFalseIfModified();
+
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType=="database")
     return this->ProcessDatabase();

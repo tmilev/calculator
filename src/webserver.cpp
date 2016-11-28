@@ -1002,8 +1002,10 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   //already are in big trouble - so this really shouldn't be such a big deal.
   /////////////////////////////////////////////
   this->flagPasswordWasSubmitted=(theUser.enteredPassword!="");
+  if (this->flagPasswordWasSubmitted)
+    this->flagMustLogin=true;
   if (!this->flagPasswordWasSubmitted && !this->flagAuthenticationTokenWasSubmitted)
-    return false;
+    return !this->flagMustLogin;
   if (this->flagPasswordWasSubmitted)
   { this->flagAuthenticationTokenWasSubmitted=false;
     theUser.enteredAuthenticationToken="";
@@ -1954,6 +1956,7 @@ void WebWorker::reset()
   this->flagPasswordWasSubmitted=false;
   this->flagProgressReportAllowed=false;
   this->flagKeepAlive=false;
+  this->flagMustLogin=true;
   theGlobalVariables.flagUsingSSLinCurrentConnection=false;
   theGlobalVariables.flagLoggedIn=false;
   theGlobalVariables.userDefault.reset();
@@ -2743,9 +2746,42 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   return out.str();
 }
 
+bool WebWorker::CheckRequestsAddressesReturnFalseIfModified()
+{ MacroRegisterFunctionWithName("WebWorker::CheckRequestsAddressesReturnFalseIfModified");
+  bool stateNotModified=true;
+  if ((this->addressComputed=="/" || this->addressComputed=="" ||
+      (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
+       theGlobalVariables.userCalculatorRequestType==""))
+      && !theGlobalVariables.flagSSLisAvailable)
+  { this->addressComputed=theGlobalVariables.DisplayNameExecutable;
+    theGlobalVariables.userCalculatorRequestType="calculator";
+    if (!this->flagPasswordWasSubmitted)
+      this->flagMustLogin=false;
+    stateNotModified=false;
+  }
+  bool shouldFallBackToDefaultPage=false;
+  if (theGlobalVariables.flagLoggedIn)
+  { if (this->addressComputed=="/" || this->addressComputed=="")
+      shouldFallBackToDefaultPage=true;
+    else if (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
+             theGlobalVariables.userCalculatorRequestType=="")
+      shouldFallBackToDefaultPage=true;
+    else if (theGlobalVariables.userCalculatorRequestType=="template" &&
+             theGlobalVariables.GetWebInput("courseHome")=="")
+      shouldFallBackToDefaultPage=true;
+  }
+  if (shouldFallBackToDefaultPage)
+  { this->addressComputed="/html/selectCourse.html";
+    theGlobalVariables.userCalculatorRequestType="selectCourse";
+    stateNotModified=false;
+  }
+  return stateNotModified;
+}
+
 int WebWorker::ServeClient()
 { MacroRegisterFunctionWithName("WebWorker::ServeClient");
   theGlobalVariables.flagComputationStarted=true;
+  this->flagMustLogin=true;
   theGlobalVariables.IndicatorStringOutputFunction=WebServer::PipeProgressReportToParentProcess;
 //  std::cout << "GOT TO HERE 0" << std::endl;
   if (this->requestTypE!=this->requestGet && this->requestTypE!=this->requestPost)
@@ -2768,12 +2804,9 @@ int WebWorker::ServeClient()
     this->flagArgumentsAreOK=false;
   theGlobalVariables.userCalculatorRequestType="";
   if (this->addressComputed==theGlobalVariables.DisplayNameExecutable)
-  { theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
-  }
-  bool shouldLogin=true;
-  bool mustLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
-  //stOutput << "DEBUG: mustlogin: " << mustLogin << " request: " << theGlobalVariables.userCalculatorRequestType;
-  if (mustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
+    theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
+  this->flagMustLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
+  if (this->flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
   { std::stringstream redirectStream, newAddressStream;
     newAddressStream << "https://" << this->hostNoPort;
     if (!this->parent->flagPort8155)
@@ -2796,30 +2829,12 @@ int WebWorker::ServeClient()
     stOutput << "</body></html>";
     return 0;
   }
-  //stOutput << "<br>  DEbug: got to very here 3.30. reqwest: " << theGlobalVariables.userCalculatorRequestType;
-  if (shouldLogin)
-  { if (!this->Login(argumentProcessingFailureComments))
-      this->flagArgumentsAreOK=false;
-  }
-  //stOutput << "<br>  DEbug: got to very here 3.31. reqwest: " << theGlobalVariables.userCalculatorRequestType;
-  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-      theGlobalVariables.userCalculatorRequestType=="database")
-    return this->ProcessDatabase();
-  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-      theGlobalVariables.userCalculatorRequestType=="databaseOneEntry")
-    return this->ProcessDatabaseOneEntry();
-  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType=="accounts")
-    return this->ProcessAccounts();
-  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-      theGlobalVariables.userCalculatorRequestType=="navigation")
-    return this->ProcessNavigation();
-  //stOutput << "<br>  DEbug: got to very here 3.32. reqwest: " << theGlobalVariables.userCalculatorRequestType;
+  this->flagArgumentsAreOK=this->Login(argumentProcessingFailureComments);
   if (!theGlobalVariables.flagLoggedIn &&
        theGlobalVariables.flagUsingSSLinCurrentConnection &&
-       mustLogin
+       this->flagMustLogin
       )
-  { //stOutput << "<br>DEBUG: mustlogin2: " << mustLogin << " request: " << theGlobalVariables.userCalculatorRequestType;
-    if(theGlobalVariables.userCalculatorRequestType!="logout" &&
+  { if(theGlobalVariables.userCalculatorRequestType!="logout" &&
        theGlobalVariables.userCalculatorRequestType!="login")
     { argumentProcessingFailureComments << "<b>Accessing: ";
       if (theGlobalVariables.userCalculatorRequestType!="")
@@ -2830,27 +2845,10 @@ int WebWorker::ServeClient()
     }
     return this->ProcessLoginPage(argumentProcessingFailureComments.str());
   }
-  //stOutput << "  DEbug: got to very here 3.33. reqwest: " << theGlobalVariables.userCalculatorRequestType;
-
   if (argumentProcessingFailureComments.str()!="")
     theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
   this->errorCalculatorArguments=argumentProcessingFailureComments.str();
-  if ((this->addressComputed=="/" || this->addressComputed=="" ||
-      (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
-       theGlobalVariables.userCalculatorRequestType==""))
-      && !theGlobalVariables.flagSSLisAvailable)
-  { this->addressComputed=theGlobalVariables.DisplayNameExecutable;
-    theGlobalVariables.userCalculatorRequestType="calculator";
-    mustLogin=false;
-  }
-  if ((this->addressComputed=="/" || this->addressComputed=="" ||
-      (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
-       theGlobalVariables.userCalculatorRequestType==""))
-      && theGlobalVariables.flagLoggedIn)
-  { this->addressComputed="/html/selectCourse.html";
-    theGlobalVariables.userCalculatorRequestType="selectCourse";
-  }
-  //stOutput << "<br>  DEbug: got to very here 3.34. reqwest: " << theGlobalVariables.userCalculatorRequestType;
+  this->CheckRequestsAddressesReturnFalseIfModified();
   if (this->flagPasswordWasSubmitted && theGlobalVariables.userCalculatorRequestType!="changePassword" &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount")
   { std::stringstream redirectedAddress;
@@ -2886,10 +2884,20 @@ int WebWorker::ServeClient()
     stOutput << "</body></html>";
     return 0;
   }
-  //stOutput << "DEbug: got to very here 3. reqwest: " << theGlobalVariables.userCalculatorRequestType;
-  if (theGlobalVariables.userCalculatorRequestType=="calculatorExamples")
+  if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
+      theGlobalVariables.userCalculatorRequestType=="database")
+    return this->ProcessDatabase();
+  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
+           theGlobalVariables.userCalculatorRequestType=="databaseOneEntry")
+    return this->ProcessDatabaseOneEntry();
+  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType=="accounts")
+    return this->ProcessAccounts();
+  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
+           theGlobalVariables.userCalculatorRequestType=="navigation")
+    return this->ProcessNavigation();
+  else if (theGlobalVariables.userCalculatorRequestType=="calculatorExamples")
     return this->ProcessCalculatorExamples();
-  if (theGlobalVariables.GetWebInput("error")!="")
+  else if (theGlobalVariables.GetWebInput("error")!="")
     stOutput << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"), false);
   else if (this->errorCalculatorArguments!="")
     stOutput << this->errorCalculatorArguments;

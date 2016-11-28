@@ -43,6 +43,7 @@ public:
   bool flagProgressReportAllowed;
   bool flagArgumentsAreOK;
   bool flagDoAddContentLength;
+  bool flagMustLogin;
   List<std::string> theStrings;
   int ContentLength;
   int requestTypE;
@@ -116,6 +117,8 @@ public:
 
   static bool IsAllowedAsRequestCookie(const std::string& input);
   bool Login(std::stringstream& argumentProcessingFailureComments);
+  bool CheckRequestsAddressesReturnFalseIfModified();
+
   bool ExtractArgumentsFromMessage
 (const std::string& input, std::stringstream& argumentProcessingFailureComments,
 int recursionDepth=0)

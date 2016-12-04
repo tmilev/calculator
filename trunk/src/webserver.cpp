@@ -336,7 +336,9 @@ void WebServer::initSSL()
   const SSL_METHOD *meth;
   SSL_load_error_strings();
   OpenSSL_add_ssl_algorithms();
-  meth = TLSv1_2_server_method();
+  meth = SSLv23_method();
+  //TLSv1_2_server_method();
+
   theSSLdata.ctx = SSL_CTX_new (meth);
   if (!theSSLdata.ctx)
   { ERR_print_errors_fp(stderr);
@@ -2353,6 +2355,7 @@ int WebWorker::ProcessCalculator()
   stOutput << HtmlSnippets::GetJavascriptHideHtml();
   stOutput << HtmlSnippets::GetJavascriptStandardCookies();
   stOutput << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile();
+  stOutput << HtmlSnippets::GetJavascriptCanvasGraphics();
   stOutput << CGI::GetJavascriptAutocompleteWithTags();
   stOutput << CGI::GetJavascriptInitilizeButtons();
   stOutput << CGI::GetJavascriptMathQuillMatrixSupport();

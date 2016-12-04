@@ -1117,7 +1117,16 @@ D-B;\
   ("suffixNotationForPostScript", this->innerSuffixNotationForPostScript, "",
    "Suffix notation. for postscript, used to quickly generate pstricks drawings in LaTeX.  \
    ",
-   "suffixNotationForPostScript{}((1/3 +a+b)*c)")
+   "suffixNotationForPostScript{}((1/3 +a+b)*c)", true, false,
+   "Calculator::innerSuffixNotationForPostScript", "suffixNotationForPostScript")
+   ;
+  this->AddOperationInnerHandler
+  ("MakeJavascriptExpression", CalculatorFunctionsGeneral::innerMakeJavascriptExpression, "",
+   "Attempts to construct a javascript translation of the input. \
+    If not successful leaves the expression unchanged. \
+   ",
+   "MakeJavascriptExpression(a(b+c))", true, false,
+   "Calculator::innerMakeJavascriptExpression", "MakeJavascriptExpression")
    ;
   this->AddOperationInnerHandler ("DFQEuler", CalculatorFunctionsGeneral::innerDFQsEulersMethod, "",
    "<b>Calculus teaching function.</b> Iterates Euler's method to approximate solutions of first order ordinary DFQ's. \
@@ -1205,6 +1214,14 @@ D-B;\
    "plotImplicitShowGrid((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))", true, false,
    "CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction", "plotImplicitShowGrid")
    ;
+  this->AddOperationInnerHandler ("plotSurface", CalculatorFunctionsGeneral::innerPlotSurface, "",
+   " Plots a surface. \
+   ",
+   "plotSurface(((2+v*cos(u/2))*cos(u),(2+v*cos(u/2))*sin(u), v*sin(u/2) ),\
+    u\\in(0, 2\\pi), v\\in(-0.6,0.6)); ", true, false, "CalculatorFunctionsGeneral::innerPlotSurface",
+   "PlotSurface")
+   ;
+
   this->AddOperationInnerHandler ("plotCurve", CalculatorFunctionsGeneral::innerPlotParametricCurve, "",
    " Plots a curve sitting in 2-dimensional space. \
     The first and second argument give the x and y coordinate functions; the curve parameter must be t.\
@@ -1238,7 +1255,8 @@ D-B;\
    ",
    "GetVariablesExcludeNamedConstants{}(e^x + x+5 +\\arctan x + x *y +x^y+x^{y^z});\
     GetVariablesIncludeNamedConstants{}(e^x + x+5 +\\arctan x + x *y +x^y+x^{y^z})", true,
-   false, "CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants", "GetVariablesIncludeNamedConstants")
+   false, "CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants",
+   "GetVariablesIncludeNamedConstants")
    ;
   this->AddOperationInnerHandler ("plotPoint", CalculatorFunctionsGeneral::innerPlotPoint, "",
    "<b>Calculus teaching function.</b> Plots a point from x and y coordinate.\

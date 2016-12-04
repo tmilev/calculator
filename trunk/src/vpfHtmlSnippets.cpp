@@ -100,6 +100,19 @@ std::string HtmlSnippets::GetDatePickerStart(const std::string& theId)
   return out.str();
 }
 
+std::string HtmlSnippets::GetJavascriptCanvasGraphics()
+{ MacroRegisterFunctionWithName("HtmlSnippets::GetJavascriptCanvasGraphics");
+  std::stringstream out, commentsOnFailure;
+  std::string fileReader;
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/three-d.js", fileReader, commentsOnFailure))
+    out << "Javascript file three-d.js not found. ";
+  else
+    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
+//  CGI::JavascriptAceEditorScript=out.str();
+//  return CGI::JavascriptAceEditorScript;
+  return out.str();
+}
+
 std::string HtmlSnippets::GetDatePickerJavascriptInit()
 { std::stringstream out;
   if (!theGlobalVariables.flagAceIsAvailable)

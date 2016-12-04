@@ -1215,3 +1215,201 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
   output=intPartE+logPartE;
   return true;
 }
+
+bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMakeJavascriptExpression");
+  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
+  if (theCommands.RecursionDepthExceededHandleRoughly())
+    return false;
+  std::string atomString;
+
+  if (input.IsAtom(&atomString))
+  { if (input.ToString()=="e")
+      return output.AssignValue<std::string>(" 2.718281828 ", theCommands);
+    if (input.ToString()=="\\pi")
+      return output.AssignValue<std::string>("3.141592654", theCommands);
+    if (input.theData>=theCommands.NumPredefinedAtoms)
+      return output.AssignValue(atomString, theCommands);
+    if (atomString=="+" || atomString=="*" || atomString=="/" || atomString=="-")
+      return output.AssignValue(atomString, theCommands);
+    return output.AssignValue(atomString, theCommands);
+  }
+  std::stringstream out;
+  out.precision(7);
+  bool hasDoubleValue=false;;
+  double theDoubleValue=-1;
+  if (input.IsOfType<Rational>())
+  { hasDoubleValue=true;
+    theDoubleValue=input.GetValue<Rational>().GetDoubleValue();
+  }
+  if (input.IsOfType<AlgebraicNumber>())
+    hasDoubleValue=input.GetValue<AlgebraicNumber>().EvaluatesToDouble(&theDoubleValue);
+  if (input.IsOfType<double>())
+  { hasDoubleValue=true;
+    theDoubleValue=input.GetValue<double>();
+  }
+  if (hasDoubleValue)
+  { out << " " << FloatingPoint::DoubleToString(theDoubleValue);
+    return output.AssignValue(out.str(), theCommands);
+  }
+  Expression opE, leftE, rightE;
+  std::string opString, leftString, rightString;
+  if (input.size()==3 || input.size()==2)
+  { Expression* currentE=&opE;
+    std::string* currentString=&opString;
+    for (int i=0; i<input.size(); i++)
+    { if (!CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[i], *currentE))
+        return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
+      if (!currentE->IsOfType(currentString))
+        return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
+      if (i==0)
+      { currentE=&leftE;
+        currentString=&leftString;
+      }
+      if (i==1)
+      { currentE=&rightE;
+        currentString=&rightString;
+      }
+    }
+    if (input.size()==3)
+    { if (opString=="+" || opString=="-" || opString=="/" || opString=="*")
+      { out << "(" << leftString <<  " " << opString << " " << rightString << ")";
+        return output.AssignValue(out.str(), theCommands);
+      }
+      if (opString=="\\sqrt")
+      { out << "Math.pow(" << rightString << ", 1/" << leftString << ")";
+        return output.AssignValue(out.str(), theCommands);
+      }
+      if (opString=="^")
+      { out << "Math.pow(" << leftString << ", " << rightString << ")";
+        return output.AssignValue(out.str(), theCommands);
+      }
+    }
+    if (input.size()==2)
+    { if (opString=="\\sin" || opString == "\\cos" || opString=="\\log")
+      { std::string chopped=opString.substr(1);
+        out << "(Math." << chopped << "( " << leftString << "))";
+        return output.AssignValue(out.str(), theCommands);
+      }
+    }
+  }
+  return theCommands << "Failed to make expression from " << input.ToString();
+}
+
+bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSurface");
+//  MapLisT<Expression, Expression> theKeys;
+  //if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theKeys, &theCommands.Comments))
+  //  return false;
+  Expression theSurface;
+  bool found=false;
+  for (int i=0; i<input.size(); i++)
+    if (input[i].IsSequenceNElementS(3))
+    { theSurface=input[i];
+      found=true;
+      break;
+    }
+  if (!found)
+    return theCommands << "Could not find a triple of functions expressions to use for "
+    << " the surface. ";
+  HashedList<Expression> theVars;
+//  for (int i=1; i<theSurface.size(); i++)
+  theSurface.GetFreeVariables(theVars, true);
+  if (theVars.size>2)
+    return theCommands << "Got a surface with "
+    << theVars.size
+    << " variables, namely: "
+    << theVars.ToStringCommaDelimited()
+    << ". I've been taught to plot 2d surfaces only. "
+    << " Please reduce the number of variables to 2. ";
+  theVars.QuickSortAscending();
+  static int canvasCounter=0;
+  canvasCounter++;
+  std::stringstream out;
+  out << "Variables: " << theVars.ToStringCommaDelimited();
+  List<std::string> theCoordinateFunctions;
+  theCoordinateFunctions.SetSize(theSurface.size()-1);
+  List<List<std::string> > varRanges;
+  varRanges.SetSize(2);
+  varRanges[0].SetSize(2);
+  varRanges[1].SetSize(2);
+  Expression jsConverter;
+  for (int i=1;i<theSurface.size(); i++)
+  { bool isGood=CalculatorFunctionsGeneral::innerMakeJavascriptExpression
+    (theCommands, theSurface[i], jsConverter);
+    if (isGood )
+      isGood= jsConverter.IsOfType<std::string>(&theCoordinateFunctions[i-1]);
+    if (!isGood)
+      return theCommands << "Failed to convert " << theSurface[i].ToString() << " to a javascript expression. ";
+  }
+  for (int i =1; i<input.size(); i++)
+    if (input[i].StartsWith(theCommands.opIn(), 3))
+    { int theIndex=theVars.GetIndex(input[i][1]);
+      if (theIndex<0 || theIndex>2) //theIndex>2 should never happen
+        continue;
+      if (input[i][2].size()!=3)
+        continue;
+      for (int j=0; j<2; j++)
+      { bool isGood=CalculatorFunctionsGeneral::innerMakeJavascriptExpression
+        (theCommands, input[i][2][j+1], jsConverter);
+        if (isGood)
+          isGood=jsConverter.IsOfType<std::string>(&varRanges[theIndex][j]);
+        if (!isGood)
+          return theCommands << "Failed to convert "
+          << input[i][2][j+1].ToString() << " to a javascript expression. ";
+      }
+    }
+  if (varRanges[0][0]=="" || varRanges[0][1]=="" ||
+      varRanges[1][0]=="" || varRanges[1][1]=="")
+  { return theCommands << "Could not extract variable ranges, got the var ranges: "
+    << varRanges;
+  }
+  out << "<canvas width=\"300\" height=\"300\" "
+  << "style=\"border:solid 1px\" id=\"theCanvas"
+  << canvasCounter
+  << "\" "
+  << "onmousedown=\"calculatorCanvasClick(this, event);\" "
+  << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
+  << "onmousemove=\"calculatorCanvasMouseMoveRedraw"
+  << "(this, event.clientX, event.clientY);\""
+  << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
+  << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
+  << "<span id=\"theCanvas" << canvasCounter << "Messages\"></span>"
+  << "<script>\n";
+  if (theVars.size==1)
+  { if (theVars.Contains((std::string)"v"))
+      theVars.AddOnTop((std::string)"u");
+    else
+      theVars.AddOnTop((std::string) "v");
+  }
+  if (theVars.size==0)
+  { theVars.AddOnTop((std::string) "u");
+    theVars.AddOnTop((std::string) "v");
+  }
+  out << "function " << "theCanvasSurfaceFn" << canvasCounter
+  << " (" << theVars[0] << "," << theVars[1] << "){\n";
+  out << "return [ " << theCoordinateFunctions[0] << ", " << theCoordinateFunctions[1]
+  << ", " << theCoordinateFunctions[2] << "];\n";
+  out << "}\n";
+  out << "var theCanvas=calculatorGetCanvas(document.getElementById('theCanvas"
+  << canvasCounter
+  << "'));\n"
+  << "theCanvas.init();\n"
+//  << "theCanvas.drawLine([-1,0,0],[1,0,0],    'black');\n"
+//  << "theCanvas.drawLine([0,-1,0],[0,1,0],    'black');\n"
+//  << "theCanvas.drawLine([0,0,-1],[0,0,1],    'black');\n"
+//  << "theCanvas.drawLine([0,0,0] ,[1,0.5,0.5],'red')  ;\n"
+//  << "theCanvas.drawLine([0,0,0] ,[-2,0,1],   'blue') ;\n"
+  << "theCanvas.drawSurface(new Surface("
+  << "theCanvasSurfaceFn" << canvasCounter
+  << ", [[" << varRanges[0][0] << "," << varRanges[1][0] << "],"
+  << " [" << varRanges[0][1] << ", " << varRanges[1][1] << "]], [22,4], "
+  << "{colorContour: \"black\", colorUV: \"red\", colorVU: \"pink\"}"
+  << "));\n"
+//  << "theCanvas.drawPoint([1,0,0], 'red');            \n"
+//  << "theCanvas.drawPoint([0,1,0], 'green');          \n"
+//  << "theCanvas.drawPoint([0,0,1], 'blue');           \n"
+  << "theCanvas.redraw();\n"
+  << "</script>";
+  return output.AssignValue(out.str(), theCommands);
+}

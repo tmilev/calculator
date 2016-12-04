@@ -1346,7 +1346,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
   }
   bool success=false;
   if ((*this->CurrentSyntacticStacK).size==this->numEmptyTokensStart)
-    errorLog << "Non-meaningful input detected (spacebar, enter characters only?).";
+    errorLog << "Non-meaningful/empty input detected (spacebar, enter characters only?).";
   else if ((*this->CurrentSyntacticStacK).size==this->numEmptyTokensStart+1)
   { SyntacticElement& result=(*this->CurrentSyntacticStacK)[this->numEmptyTokensStart];
     if (result.errorString=="" && result.controlIndex==this->conExpression())

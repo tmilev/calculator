@@ -105,10 +105,6 @@ public:
 
   static bool innerGetPointsImplicitly(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerPlotImplicitFunctionFull(Calculator& theCommands, const Expression& input, Expression& output, bool showGrid);
-  static bool innerPlotImplicitFunction(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPlotImplicitShowGridFunction(Calculator& theCommands, const Expression& input, Expression& output);
-
   static bool innerDifferentiateTrigAndInverseTrig(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateChainRule(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateAplusB(Calculator& theCommands, const Expression& input, Expression& output);
@@ -223,6 +219,12 @@ public:
 
   static bool innerSolveUnivariatePolynomialWithRadicalsWRT
   (Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerMakeJavascriptExpression(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotSurface(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotImplicitFunctionFull(Calculator& theCommands, const Expression& input, Expression& output, bool showGrid);
+  static bool innerPlotImplicitFunction(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotImplicitShowGridFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotConeUsualProjection(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotSegment(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output);

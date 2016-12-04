@@ -1194,12 +1194,16 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   //stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
   bool result=!theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors=="";
   if (!result)
-    comments << "Failed to interpret your file. The interpretation input was:<br> "
-    << this->theProblemData.commandsGenerateProblem << "<br>"
-    << "The result of the interpretation attempt is:<br>"
-    << theInterpreter.outputString << "<br><b>Comments</b><br>"
-    << theInterpreter.outputCommentsString;
-
+  { comments << "Failed to interpret your file. The interpretation input was:<br> "
+    << this->theProblemData.commandsGenerateProblem << "<br>";
+    if (theGlobalVariables.UserDefaultHasAdminRights())
+      comments << "The result of the interpretation attempt is:<br>"
+      << theInterpreter.outputString << "<br><b>Comments</b><br>"
+      << theInterpreter.outputCommentsString;
+    else
+      comments << "This may be a bug with the problem. Feel free to take a screenshot of the issue and "
+      << "email it to the site admin(s). ";
+  }
   for (int i=0; i<theInterpreter.theObjectContainer.theUserInputTextBoxes.size; i++)
     this->theProblemData.inputNonAnswerIds.AddOnTop
     (theInterpreter.theObjectContainer.theUserInputTextBoxes[i]);

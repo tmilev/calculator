@@ -258,7 +258,7 @@ function colorToHex(color)
 }
 
 function calculatorGetCanvas(inputCanvas)
-{ if (calculatorCanvases[inputCanvas.id]==undefined)
+{ if (calculatorCanvases[inputCanvas.id]===undefined)
   { calculatorCanvases[inputCanvas.id]=
     { theIIIdObjects:
       { thePatches: [],
@@ -1247,11 +1247,12 @@ function calculatorGetCanvas(inputCanvas)
           if (i!=thePatches.length-1)
             this.textPatchInfo+="<br>";
         }
-        this.textPatchInfo+="<style>table, th, td { border: 1px solid black;}</style><table>";
+        this.textPatchInfo+="<style>#patchInfo{ border: 1px solid black;}</style>";
+        this.textPatchInfo+="<table id=\"patchInfo\">";
         for (i=this.zBuffer.length-1; i>=0; i--)
-        { this.textPatchInfo+="<tr>";
+        { this.textPatchInfo+="<tr id=\"patchInfo\">";
           for (j=0; j< this.zBuffer[i].length; j++)
-          { this.textPatchInfo+="<td>";
+          { this.textPatchInfo+="<td id=\"patchInfo\">";
             for (var k=0; k<this.zBuffer[i][j].length; k++)
             { this.textPatchInfo+=this.zBuffer[i][j][k];
               if (k!==this.zBuffer[i][j].length-1)
@@ -1296,27 +1297,29 @@ function calculatorGetCanvas(inputCanvas)
   return calculatorCanvases[inputCanvas.id];
 }
 
-function calculatorCanvasMouseMoveRedraw(inputCanvas, x, y)
-{ var theCanvas=calculatorGetCanvas(inputCanvas);
-  if (theCanvas.theIIIdObjects.theContours.length==0)
-  { theCanvas.init();
-    theCanvas.drawLine([-1,0,0],[1,0,0], 'black');
-    theCanvas.drawLine([0,-1,0],[0,1,0], 'black');
-    theCanvas.drawLine([0,0,-1],[0,0,1], 'black');
-    theCanvas.drawLine([0,0,0] ,[1,0.5,0.5], 'red');
-    theCanvas.drawLine([0,0,0] ,[-2,0,1], 'blue');
+function testPicture(inputCanvas)
+{ var theCanvas=calculatorGetCanvas(document.getElementById(inputCanvas));
+  theCanvas.init();
+  theCanvas.drawLine([-1,0,0],[1,0,0], 'black');
+  theCanvas.drawLine([0,-1,0],[0,1,0], 'black');
+  theCanvas.drawLine([0,0,-1],[0,0,1], 'black');
+  theCanvas.drawLine([0,0,0] ,[1,0.5,0.5], 'red');
+  theCanvas.drawLine([0,0,0] ,[-2,0,1], 'blue');
 //    theCanvas.drawSurface(testGetTestPlane());
 //    theCanvas.drawPatchStraight([1,0,0], [0,1,0], [0,0,1], 'cyan');
 //    theCanvas.drawPatchStraight([-3,0,0], [0,2,0.4], [0,0,2], 'green');
-    theCanvas.drawSurface(testGetMoebiusSurface());
-    theCanvas.drawSurface(testGetMoebiusSurface2());
-    theCanvas.drawPoint([1,0,0], 'red');
-    theCanvas.drawPoint([0,1,0], 'green');
-    theCanvas.drawPoint([0,0,1], 'blue');
+  theCanvas.drawSurface(testGetMoebiusSurface());
+  theCanvas.drawSurface(testGetMoebiusSurface2());
+  theCanvas.drawPoint([1,0,0], 'red');
+  theCanvas.drawPoint([0,1,0], 'green');
+  theCanvas.drawPoint([0,0,1], 'blue');
 
-    //console.log(theCanvas.theIIIdObjects.thePatches);
-    theCanvas.redraw();
-  }
+  //console.log(theCanvas.theIIIdObjects.thePatches);
+  theCanvas.redraw();
+}
+
+function calculatorCanvasMouseMoveRedraw(inputCanvas, x, y)
+{ var theCanvas=calculatorGetCanvas(inputCanvas);
   if (theCanvas!==null && theCanvas!==undefined)
     theCanvas.mouseMove(x,y);
 }

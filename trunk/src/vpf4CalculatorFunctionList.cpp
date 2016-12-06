@@ -1220,8 +1220,8 @@ D-B;\
    "%HideLHS R=2; r=0.6; x=(R+v*cos(u/2))*cos(u);\n y=(R+v*cos(u/2))*sin(u);\nz=v*sin(u/2); \n\
 plotSurface((x,y,z  ),\
     u\\in(0, 2\\pi), v\\in(-r,r), color1=blue, color2=cyan)+\n\
-plotSurface(( x, z+2, y ),\
-    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=cyan); ",
+plotSurface(( x+2, z, y ),\
+    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=pink); ",
     true, false, "CalculatorFunctionsGeneral::innerPlotSurface",
    "PlotSurface")
    ;

@@ -632,7 +632,7 @@ void Calculator::EvaluateCommands()
   if (this->theObjectContainer.theAlgebraicClosure.theBasisMultiplicative.size>1)
     commentsStream << "<b>Algebraic number closure status. </b><br>" << this->theObjectContainer.theAlgebraicClosure.ToString() << "<hr>";
   if (this->Comments.str()!="")
-    commentsStream << "<b>Comments.</b><br><span>" << this->Comments.str() << "</span>";
+    commentsStream << "<br><span>" << this->Comments.str() << "</span>";
   this->outputCommentsString=commentsStream.str();
   if(theGlobalVariables.flagRunningCommandLine && this->Comments.str()!="")
     this->outputString+=this->outputCommentsString;

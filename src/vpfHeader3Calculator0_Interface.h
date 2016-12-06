@@ -659,6 +659,9 @@ public:
   Expression theSurface;
   List<std::string> theCoordinateFunctionsJS;
   List<List<std::string> > theVarRangesJS;
+  std::string colorUV;
+  std::string colorVU;
+  PlotObject3d();
   std::string GetJavascriptSurfaceImmersion(std::string& outputSurfaceInstantiationJS);
   std::string ToStringDebug();
 };
@@ -1978,10 +1981,10 @@ public:
   static bool innerLoadKey(Calculator& theCommands, const Expression& inputStatementList, const std::string& inputKey, Expression& output);
   static bool innerLoadKeysFromStatementList
   (Calculator& theCommands, const Expression& input,
-  MapLisT<std::string, Expression, MathRoutines::hashString>& output, std::stringstream* commentsOnFailure=0);
+  MapLisT<std::string, Expression, MathRoutines::hashString>& output, std::stringstream* commentsOnFailure=0, bool allowFailure=false);
   static bool innerLoadKeysFromStatementList
   (Calculator& theCommands, const Expression& input,
-  MapLisT<Expression, Expression>& output, std::stringstream* commentsOnFailure=0);
+  MapLisT<Expression, Expression>& output, std::stringstream* commentsOnFailure=0, bool allowFailure=false);
 
   static bool innerStoreSemisimpleSubalgebras
   (Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);

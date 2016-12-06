@@ -1217,8 +1217,12 @@ D-B;\
   this->AddOperationInnerHandler ("plotSurface", CalculatorFunctionsGeneral::innerPlotSurface, "",
    " Plots a surface. \
    ",
-   "plotSurface(((2+v*cos(u/2))*cos(u),(2+v*cos(u/2))*sin(u), v*sin(u/2) ),\
-    u\\in(0, 2\\pi), v\\in(-0.6,0.6)); ", true, false, "CalculatorFunctionsGeneral::innerPlotSurface",
+   "%HideLHS R=2; r=0.6; x=(R+v*cos(u/2))*cos(u);\n y=(R+v*cos(u/2))*sin(u);\nz=v*sin(u/2); \n\
+plotSurface((x,y,z  ),\
+    u\\in(0, 2\\pi), v\\in(-r,r), color1=blue, color2=cyan)+\n\
+plotSurface(( x, z+2, y ),\
+    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=cyan); ",
+    true, false, "CalculatorFunctionsGeneral::innerPlotSurface",
    "PlotSurface")
    ;
 

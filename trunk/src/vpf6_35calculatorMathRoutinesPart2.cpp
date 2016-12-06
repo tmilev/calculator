@@ -1298,9 +1298,6 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
 
 bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSurface");
-//  MapLisT<Expression, Expression> theKeys;
-  //if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theKeys, &theCommands.Comments))
-  //  return false;
   PlotObject3d thePlot;
   bool found=false;
   for (int i=0; i<input.size(); i++)
@@ -1362,6 +1359,13 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
           << input[i][2][j+1].ToString() << " to a javascript expression. ";
       }
     }
+  MapLisT<std::string, Expression, MathRoutines::hashString> theKeys;
+  if (CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theKeys, &theCommands.Comments, true))
+  { if (theKeys.Contains("color1"))
+      thePlot.colorUV=theKeys.GetValueCreateIfNotPresent("color1").ToString();
+    if (theKeys.Contains("color2"))
+      thePlot.colorVU=theKeys.GetValueCreateIfNotPresent("color2").ToString();
+  }
   if (thePlot.theVarRangesJS[0][0]=="" || thePlot.theVarRangesJS[0][1]=="" ||
       thePlot.theVarRangesJS[1][0]=="" || thePlot.theVarRangesJS[1][1]=="")
   { return theCommands << "Could not extract variable ranges, got the var ranges: "

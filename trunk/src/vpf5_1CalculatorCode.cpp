@@ -1129,11 +1129,12 @@ std::string Plot::GetPlotHtml3d_New()
   std::stringstream out;
   static int canvasCounter=0;
   canvasCounter++;
-  out << this->ToStringDebug();
+  //out << this->ToStringDebug();
   std::stringstream canvasNameStream;
   canvasNameStream << "theCanvas" << canvasCounter;
   std::string canvasName=canvasNameStream.str();
-  out << "<canvas width=\"300\" height=\"300\" "
+  out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
+  << "\" height=\"" << this->DesiredHtmlHeightInPixels << "\" "
   << "style=\"border:solid 1px\" id=\"theCanvas"
   << canvasCounter
   << "\" "
@@ -1188,13 +1189,19 @@ std::string Plot::ToStringDebug()
   return out.str();
 }
 
+PlotObject3d::PlotObject3d()
+{
+}
+
 std::string PlotObject3d::ToStringDebug()
 { MacroRegisterFunctionWithName("PlotSurfaceIn3d::ToStringDebug");
   std::stringstream out;
-  out << "Surface: " << this->theSurface.ToString() << "<br>";
-  out << "Coord f-ns: " << this->theCoordinateFunctionsJS;
-  out << "Vars: " << this->theVars;
-  out << "Var ranges: " << this->theVarRangesJS;
+//  out << "Surface: " << this->theSurface.ToString() << "<br>";
+  out << "colorUV: " << this->colorUV << "<br>";
+  out << "colorVU: " << this->colorVU << "<br>";
+  out << "Coord f-ns: " << this->theCoordinateFunctionsJS << "<br>";
+  out << "Vars: " << this->theVars << "<br>";
+  out << "Var ranges: " << this->theVarRangesJS << "<br>";
   return out.str();
 }
 
@@ -1227,7 +1234,16 @@ std::string PlotObject3d::GetJavascriptSurfaceImmersion(std::string& outputSurfa
     << fnName
     << ", [[" << this->theVarRangesJS[0][0] << "," << this->theVarRangesJS[1][0] << "],"
     << " [" << this->theVarRangesJS[0][1] << ", " << this->theVarRangesJS[1][1] << "]], [22,4], "
-    << "{colorContour: \"black\", colorUV: \"red\", colorVU: \"pink\"}"
+    << "{colorContour: \"black\", ";
+    if (this->colorUV!="")
+      surfaceInstStream << "colorUV: \"" << this->colorUV << "\",";
+    else
+      surfaceInstStream << "colorUV: \"red\",";
+    if (this->colorVU!="")
+      surfaceInstStream << "colorVU: \"" << this->colorVU << "\"";
+    else
+      surfaceInstStream << "colorVU: \"pink\"";
+    surfaceInstStream << "}"
     << ")"
     ;
     outputSurfaceInstantiationJS=surfaceInstStream.str();

@@ -88,6 +88,11 @@ function deepCopy(from, to)
       to[i]=from[i];
 }
 
+function vectorRound(vector)
+{ for (var i=0; i<vector.length; i++)
+    vector[i]=Math.round(vector[i]);
+}
+
 function vectorNormalize(vector)
 { vectorTimesScalar(vector, 1/vectorLength(vector));
 }
@@ -324,6 +329,8 @@ function calculatorGetCanvas(inputCanvas)
       redrawFinish: 0,
       redrawTime: 0,
       defaultNumSegmentsPerContour: 10,
+      flagRoundContours: false,
+      flagRoundPatches: true,
       drawSurface: function(theSurface)
       { var numUsegments=theSurface.patchDimensions[0];
         var numVsegments=theSurface.patchDimensions[1];
@@ -494,8 +501,8 @@ function calculatorGetCanvas(inputCanvas)
           return;
         if (this.selectedVector.length===0 || this.selectedVector.length===undefined)
           return;
-        if (true)
-          return;
+//        if (true)
+//          return;
         var currentPt;
         this.surface.beginPath();
         this.surface.setLineDash([4,4]);
@@ -523,6 +530,8 @@ function calculatorGetCanvas(inputCanvas)
         var thePts=theContour.thePoints;
         //console.log("line start\n");
         var currentPt=this.coordsMathToScreen(thePts[0]);
+        if (this.flagRoundContours)
+          vectorRound(currentPt);
         var oldIsInForeGround=this.pointIsInForeGround(theContour.thePoints[0], theContour.adjacentPatches);
         var newIsInForeground;
         var dashIsOn=false;
@@ -560,6 +569,8 @@ function calculatorGetCanvas(inputCanvas)
             dashIsOn=false;
           }
           currentPt=this.coordsMathToScreen(thePts[i]);
+          if (this.flagRoundContours)
+            vectorRound(currentPt);
           theSurface.lineTo(currentPt[0], currentPt[1]);
           oldIsInForeGround=newIsInForeground;
         }
@@ -567,6 +578,8 @@ function calculatorGetCanvas(inputCanvas)
         /////////////////
         if (0)
         { currentPt=this.coordsMathToScreen(thePts[4]);
+          if (this.flagRoundContours)
+            vectorRound(currentPt);
           theSurface.fillText(theContour.index, currentPt[0], currentPt[1]);
         }
         //console.log("line end\n");
@@ -605,10 +618,12 @@ function calculatorGetCanvas(inputCanvas)
           for (var j=0; j<currentContour.thePoints.length; j++)
           { var theIndex=(thePatch.traversalOrder[i]===-1) ? j : currentContour.thePoints.length-j-1;
             var theCoords=this.coordsMathToScreen(currentContour.thePoints[theIndex]);
+            if (this.flagRoundPatches)
+              vectorRound(theCoords);
             if (first)
-              theSurface.moveTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
+              theSurface.moveTo(theCoords[0], theCoords[1]);
             else
-              theSurface.lineTo(Math.round(theCoords[0]), Math.round(theCoords[1]));
+              theSurface.lineTo(theCoords[0], theCoords[1]);
             first=false;
           }
         }
@@ -1351,6 +1366,7 @@ function calculatorCanvasMouseWheel(theCanvasContainer, theEvent)
 function calculatorCanvasMouseUp(inputCanvas)
 { var theCanvas=calculatorGetCanvas(inputCanvas);
   theCanvas.selectEmpty();
+  theCanvas.redraw();
 }
 
 function calculatorCanvasClick(theCanvasContainer, theEvent)

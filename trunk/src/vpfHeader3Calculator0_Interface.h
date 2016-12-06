@@ -649,10 +649,25 @@ public:
   bool operator==(const PlotObject& other)const;
 };
 
+class PlotObject3d
+{
+public:
+  std::string thePlotType;
+  bool operator==(const PlotObject3d& other)const;
+////////////////
+  HashedList<Expression> theVars;
+  Expression theSurface;
+  List<std::string> theCoordinateFunctionsJS;
+  List<List<std::string> > theVarRangesJS;
+  std::string GetJavascriptSurfaceImmersion(std::string& outputSurfaceInstantiationJS);
+  std::string ToStringDebug();
+};
+
 //the following class is meant to use to draw plots for calculus students.
 class Plot
 { public:
   List<PlotObject> thePlots;
+  List<PlotObject3d> the3dObjects;
   double theLowerBoundAxes;
   double theUpperBoundAxes;
   double lowBoundY;
@@ -663,12 +678,15 @@ class Plot
   bool flagIncludeExtraHtmlDescriptions;
   bool flagPlotShowJavascriptOnly;
   bool flagIs3d;
+  bool flagIs3dNewLibrary;
   int viewWindowPriority; //0 or less: compute the view Window. If this quantity is greater than zero,
   //the user-given bounding box will overwrite any computations.
   //When adding two plots with positive viewing window priorities, the window with the larger priority is used.
   //If the priorities are equal, the windows are combined to the smallest window that fits both.
+  std::string ToStringDebug();
   std::string GetPlotHtml();
   std::string GetPlotHtml3d();
+  std::string GetPlotHtml3d_New();
   std::string GetPlotHtml2d();
   std::string GetPlotStringAddLatexCommands(bool useHtml);
   bool IsOKVector(const Vector<double>& input);
@@ -681,6 +699,7 @@ class Plot
    int* colorRGB=0, double penWidth=1, std::string* inputFillStyle=0);
   void operator+=(const Plot& other);
   void operator+=(const PlotObject& other);
+  void operator+=(const PlotObject3d& other);
   bool operator==(const Plot& other)const;
 };
 

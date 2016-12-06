@@ -779,6 +779,7 @@ void Plot::operator+=(const Plot& other)
   }
   this->viewWindowPriority=MathRoutines::Maximum(this->viewWindowPriority, other.viewWindowPriority);
   this->thePlots.AddListOnTop(other.thePlots);
+  this->the3dObjects.AddListOnTop(other.the3dObjects);
   if (this->DesiredHtmlHeightInPixels<other.DesiredHtmlHeightInPixels)
     this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
   if (this->DesiredHtmlWidthInPixels<other.DesiredHtmlWidthInPixels)
@@ -791,13 +792,26 @@ bool Plot::operator==(const Plot& other)const
   if (this->DesiredHtmlHeightInPixels!=other.DesiredHtmlHeightInPixels ||
       this->DesiredHtmlWidthInPixels!=other.DesiredHtmlWidthInPixels)
     return false;
-  return this->thePlots==other.thePlots;
+  return this->thePlots==other.thePlots && this->the3dObjects==other.the3dObjects;
+}
+
+void Plot::operator+=(const PlotObject3d& other)
+{ this->flagIs3dNewLibrary=true;
+  this->the3dObjects.AddOnTop(other);
 }
 
 void Plot::operator+=(const PlotObject& other)
 { if (this->thePlots.size==0)
     this->flagIs3d=other.flagIs3d;
   this->thePlots.AddOnTop(other);
+}
+
+bool PlotObject3d::operator==(const PlotObject3d& other)const
+{ MacroRegisterFunctionWithName("PlotObject3d::operator ==");
+  if (this->thePlotType!=other.thePlotType)
+    return false;
+  return this->theCoordinateFunctionsJS==other.theCoordinateFunctionsJS &&
+  this->theVarRangesJS==other.theVarRangesJS;
 }
 
 void PlotObject::CreatePlotFunction
@@ -906,6 +920,7 @@ Plot::Plot()
   this->flagPlotShowJavascriptOnly=false;
   this->viewWindowPriority=0;
   this->flagIs3d=false;
+  this->flagIs3dNewLibrary=false;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
@@ -1109,9 +1124,122 @@ std::string Plot::GetPlotHtml3d()
   return resultStream.str();
 }
 
+std::string Plot::GetPlotHtml3d_New()
+{ MacroRegisterFunctionWithName("Plot::GetPlotHtml3d_New");
+  std::stringstream out;
+  static int canvasCounter=0;
+  canvasCounter++;
+  out << this->ToStringDebug();
+  std::stringstream canvasNameStream;
+  canvasNameStream << "theCanvas" << canvasCounter;
+  std::string canvasName=canvasNameStream.str();
+  out << "<canvas width=\"300\" height=\"300\" "
+  << "style=\"border:solid 1px\" id=\"theCanvas"
+  << canvasCounter
+  << "\" "
+  << "onmousedown=\"calculatorCanvasClick(this, event);\" "
+  << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
+  << "onmousemove=\"calculatorCanvasMouseMoveRedraw"
+  << "(this, event.clientX, event.clientY);\""
+  << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
+  << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
+  << "<span id=\"" << canvasName << "Messages\"></span>"
+  << "<script>\n";
+  List<std::string> theSurfaces;
+  theSurfaces.SetSize(this->the3dObjects.size);
+  for (int i=0; i<this->the3dObjects.size; i++)
+  { if (this->the3dObjects[i].thePlotType=="surface")
+    { PlotObject3d& theSurface= this->the3dObjects[i];
+      out << theSurface.GetJavascriptSurfaceImmersion(theSurfaces[i]) << "\n "
+      ;
+    }
+  }
+  out << "calculatorDeleteCanvas(document.getElementById('"  << canvasName << "'));\n";
+  out << "var theCanvas=calculatorGetCanvas(document.getElementById('"
+  << canvasName
+  << "'));\n"
+  << "theCanvas.init();\n";
+  for (int i=0; i<this->the3dObjects.size; i++)
+  { if (this->the3dObjects[i].thePlotType=="surface")
+    { out
+      << "theCanvas.drawSurface("
+      <<  theSurfaces[i]
+      << ");\n"
+      ;
+    }
+  }
+  out
+  << "theCanvas.redraw();\n"
+  << "</script>"
+  ;
+  return out.str();
+}
+
+std::string Plot::ToStringDebug()
+{ std::stringstream out;
+  out <<  "Objects: " << this->the3dObjects.size << "<br>";
+  for (int i=0; i<this->the3dObjects.size; i++)
+  { if (this->the3dObjects[i].thePlotType=="surface")
+    { PlotObject3d& theSurface= this->the3dObjects[i];
+      out << theSurface.ToStringDebug();
+      ;
+    }
+  }
+  return out.str();
+}
+
+std::string PlotObject3d::ToStringDebug()
+{ MacroRegisterFunctionWithName("PlotSurfaceIn3d::ToStringDebug");
+  std::stringstream out;
+  out << "Surface: " << this->theSurface.ToString() << "<br>";
+  out << "Coord f-ns: " << this->theCoordinateFunctionsJS;
+  out << "Vars: " << this->theVars;
+  out << "Var ranges: " << this->theVarRangesJS;
+  return out.str();
+}
+
+std::string PlotObject3d::GetJavascriptSurfaceImmersion(std::string& outputSurfaceInstantiationJS)
+{ MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptSurfaceImmersion");
+  std::stringstream out;
+  static int canvasFunctionCounteR=0;
+  canvasFunctionCounteR++;
+  std::stringstream fnNameStream;
+  fnNameStream << "theCanvasSurfaceFn" << canvasFunctionCounteR;
+  std::string fnName=fnNameStream.str();
+
+  if (this->theCoordinateFunctionsJS.size==3)
+  { out << "function " << fnName
+    << " (" << theVars[0] << "," << theVars[1] << "){\n";
+    out << "return [ " << this->theCoordinateFunctionsJS[0] << ", " << this->theCoordinateFunctionsJS[1]
+    << ", " << this->theCoordinateFunctionsJS[2] << "];\n";
+    out << "}\n";
+  } else
+  out << "//this->theCoordinateFunctionsJS has " << this->theCoordinateFunctionsJS.size
+  << " elements instead of 3 (expected).\n";
+  if (this->theVarRangesJS.size!=2)
+    out << "//this->theVarRangesJS has " << this->theVarRangesJS.size << " elements instead of 2 (expected).";
+  else if (this->theVarRangesJS[0].size!=2 || this->theVarRangesJS[1].size!=2)
+    out << "//this->theVarRangesJS had unexpected value: "
+    << this->theVarRangesJS.size;
+  else
+  { std::stringstream surfaceInstStream;
+    surfaceInstStream << "new Surface("
+    << fnName
+    << ", [[" << this->theVarRangesJS[0][0] << "," << this->theVarRangesJS[1][0] << "],"
+    << " [" << this->theVarRangesJS[0][1] << ", " << this->theVarRangesJS[1][1] << "]], [22,4], "
+    << "{colorContour: \"black\", colorUV: \"red\", colorVU: \"pink\"}"
+    << ")"
+    ;
+    outputSurfaceInstantiationJS=surfaceInstStream.str();
+  }
+  return out.str();
+}
+
 std::string Plot::GetPlotHtml()
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml");
-  if (this->flagIs3d)
+  if (this->flagIs3dNewLibrary)
+    return this->GetPlotHtml3d_New();
+  else if (this->flagIs3d)
     return this->GetPlotHtml3d();
   else
     return this->GetPlotHtml2d();

@@ -257,6 +257,13 @@ function colorToHex(color)
   return color;
 }
 
+function calculatorDeleteCanvas(inputCanvas)
+{ if(calculatorCanvases[inputCanvas.id]!==undefined &&
+     calculatorCanvases[inputCanvas.id]!==null)
+  { delete calculatorCanvases[inputCanvas.id];
+  }
+}
+
 function calculatorGetCanvas(inputCanvas)
 { if (calculatorCanvases[inputCanvas.id]===undefined)
   { calculatorCanvases[inputCanvas.id]=
@@ -1024,6 +1031,9 @@ function calculatorGetCanvas(inputCanvas)
         document.getElementById(this.canvasId).addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
         this.spanMessages=document.getElementById(this.canvasId+"Messages");
         this.spanCriticalErrors=document.getElementById(this.canvasId+"CriticalErrors");
+        this.theIIIdObjects.thePatches= [];
+        this.theIIIdObjects.theContours= [];
+        this.theIIIdObjects.thePoints= [];
         this.computeBasis();
         if (this.zBuffer.length===0)
           this.allocateZbuffer();

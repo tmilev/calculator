@@ -1155,11 +1155,11 @@ std::string Plot::GetPlotHtml3d_New()
       ;
     }
   }
-  out << "calculatorDeleteCanvas(document.getElementById('"  << canvasName << "'));\n";
+  out << "calculatorResetCanvas(document.('"  << canvasName << "'));\n";
   out << "var theCanvas=calculatorGetCanvas(document.getElementById('"
   << canvasName
   << "'));\n"
-  << "theCanvas.init();\n";
+  << "theCanvas.init('" << canvasName << "');\n";
   for (int i=0; i<this->the3dObjects.size; i++)
   { if (this->the3dObjects[i].thePlotType=="surface")
     { out
@@ -1190,7 +1190,8 @@ std::string Plot::ToStringDebug()
 }
 
 PlotObject3d::PlotObject3d()
-{
+{ this->numSegmentsU=22;
+  this->numSegmentsV=4;
 }
 
 std::string PlotObject3d::ToStringDebug()
@@ -1233,8 +1234,10 @@ std::string PlotObject3d::GetJavascriptSurfaceImmersion(std::string& outputSurfa
     surfaceInstStream << "new Surface("
     << fnName
     << ", [[" << this->theVarRangesJS[0][0] << "," << this->theVarRangesJS[1][0] << "],"
-    << " [" << this->theVarRangesJS[0][1] << ", " << this->theVarRangesJS[1][1] << "]], [22,4], "
-    << "{colorContour: \"black\", ";
+    << " [" << this->theVarRangesJS[0][1] << ", " << this->theVarRangesJS[1][1] << "]], ";
+    surfaceInstStream << "[" << this->numSegmentsU << ","
+    << this->numSegmentsV << "], ";
+    surfaceInstStream << "{colorContour: \"black\", ";
     if (this->colorUV!="")
       surfaceInstStream << "colorUV: \"" << this->colorUV << "\",";
     else

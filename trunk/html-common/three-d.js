@@ -269,6 +269,13 @@ function calculatorDeleteCanvas(inputCanvas)
   }
 }
 
+function calculatorResetCanvas(inputCanvas)
+{ if(calculatorCanvases[inputCanvas.id]!==undefined &&
+     calculatorCanvases[inputCanvas.id]!==null)
+  { calculatorCanvases[inputCanvas.id].init(inputCanvas.id);
+  }
+}
+
 function calculatorGetCanvas(inputCanvas)
 { if (calculatorCanvases[inputCanvas.id]===undefined)
   { calculatorCanvases[inputCanvas.id]=
@@ -283,9 +290,9 @@ function calculatorGetCanvas(inputCanvas)
       numContourPoints: 0,
       numContourPaths: 0,
       patchIsAccounted: [],
-      surface: inputCanvas.getContext("2d"),
-      canvasContainer: inputCanvas,
-      canvasId: inputCanvas.id,
+      surface: null,
+      canvasContainer: null,
+      canvasId: null,
       screenBasisUser: [[2,1,0],[0,1,1]],
       screenNormal: [],
       screenBasisOrthonormal: [],
@@ -1041,9 +1048,12 @@ function calculatorGetCanvas(inputCanvas)
         "<br>selected e2: "+ this.selectedScreenBasis[1]
         ;
       },
-      init: function()
-      { document.getElementById(this.canvasId).addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
-        document.getElementById(this.canvasId).addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
+      init: function(inputCanvasId)
+      { this.canvasId=inputCanvasId;
+        this.canvasContainer= document.getElementById(inputCanvasId);
+        this.surface=this.canvasContainer.getContext("2d");
+        this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
+        this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
         this.spanMessages=document.getElementById(this.canvasId+"Messages");
         this.spanCriticalErrors=document.getElementById(this.canvasId+"CriticalErrors");
         this.theIIIdObjects.thePatches= [];
@@ -1324,7 +1334,7 @@ function calculatorGetCanvas(inputCanvas)
 
 function testPicture(inputCanvas)
 { var theCanvas=calculatorGetCanvas(document.getElementById(inputCanvas));
-  theCanvas.init();
+  theCanvas.init(inputCanvas);
   theCanvas.drawLine([-1,0,0],[1,0,0], 'black');
   theCanvas.drawLine([0,-1,0],[0,1,0], 'black');
   theCanvas.drawLine([0,0,-1],[0,0,1], 'black');

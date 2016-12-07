@@ -1365,6 +1365,10 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
       thePlot.colorUV=theKeys.GetValueCreateIfNotPresent("color1").ToString();
     if (theKeys.Contains("color2"))
       thePlot.colorVU=theKeys.GetValueCreateIfNotPresent("color2").ToString();
+    if (theKeys.Contains("numSegments1"))
+      theKeys.GetValueCreateIfNotPresent("numSegments1").IsSmallInteger(&thePlot.numSegmentsU);
+    if (theKeys.Contains("numSegments2"))
+      theKeys.GetValueCreateIfNotPresent("numSegments2").IsSmallInteger(&thePlot.numSegmentsV);
   }
   if (thePlot.theVarRangesJS[0][0]=="" || thePlot.theVarRangesJS[0][1]=="" ||
       thePlot.theVarRangesJS[1][0]=="" || thePlot.theVarRangesJS[1][1]=="")

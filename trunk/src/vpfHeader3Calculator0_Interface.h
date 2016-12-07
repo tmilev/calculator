@@ -661,6 +661,8 @@ public:
   List<List<std::string> > theVarRangesJS;
   std::string colorUV;
   std::string colorVU;
+  int numSegmentsU;
+  int numSegmentsV;
   PlotObject3d();
   std::string GetJavascriptSurfaceImmersion(std::string& outputSurfaceInstantiationJS);
   std::string ToStringDebug();

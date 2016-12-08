@@ -318,16 +318,16 @@ void WebServer::initSSL()
   singedFileCertificate1Physical, signedFileCertificate3Physical,
   signedFileKeyPhysical;
 
-  FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate1, singedFileCertificate1Physical, true);
-  FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate3, signedFileCertificate3Physical, true);
-  FileOperations::GetPhysicalFileNameFromVirtual (fileCertificate, fileCertificatePhysical, true);
-  FileOperations::GetPhysicalFileNameFromVirtual(fileKey, fileKeyPhysical, true);
-  FileOperations::GetPhysicalFileNameFromVirtual(signedFileKey, signedFileKeyPhysical, true);
+  FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate1, singedFileCertificate1Physical, true, true);
+  FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate3, signedFileCertificate3Physical, true, true);
+  FileOperations::GetPhysicalFileNameFromVirtual (fileCertificate, fileCertificatePhysical, true, true);
+  FileOperations::GetPhysicalFileNameFromVirtual(fileKey, fileKeyPhysical, true, true);
+  FileOperations::GetPhysicalFileNameFromVirtual(signedFileKey, signedFileKeyPhysical, true, true);
   //std::cout << "\n\nproject base: " << theGlobalVariables.PhysicalPathProjectBase;
   //std::cout << "\n\nfileKey physical: " << fileKeyPhysical;
   //////////////////////////////////////////////////////////
-  if (!FileOperations::FileExistsVirtual(fileCertificate, true) ||
-      !FileOperations::FileExistsVirtual(fileKey, true))
+  if (!FileOperations::FileExistsVirtual(fileCertificate, true, true) ||
+      !FileOperations::FileExistsVirtual(fileKey, true, true))
   { theLog << logger::red << "SSL is available but CERTIFICATE files are missing." << logger::endL;
     theGlobalVariables.flagSSLisAvailable=false;
     return;
@@ -2986,7 +2986,7 @@ int WebWorker::ServeClient()
     return this->ProcessCompute();
   }
 //  stOutput << "<html><body> got to here pt 2";
-  this->VirtualFileName=this->addressComputed;
+  this->VirtualFileName=CGI::URLStringToNormal(this->addressComputed,true);
   this->SanitizeVirtualFileName();
 //    std::cout << "GOT TO file names!" << std::endl;
   if (!FileOperations::GetPhysicalFileNameFromVirtual
@@ -4057,10 +4057,10 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive=FileOperations::FolderVirtualLinksNonSensitive();
   MapLisT<std::string, std::string, MathRoutines::hashString>&
   folderSubstitutionsSensitive=FileOperations::FolderVirtualLinksSensitive();
-
+  FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
   folderSubstitutionsNonSensitive.Clear();
-  folderSubstitutionsSensitive.SetKeyValue("output/", "output/");//<-coming from webserver
-  folderSubstitutionsSensitive.SetKeyValue("/output/", "output/");//<-internal use
+  folderSubstitutionsNonSensitive.SetKeyValue("output/", "output/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("ProblemCollections/", "ProblemCollections/");
   folderSubstitutionsNonSensitive.SetKeyValue("problemtemplates/", "../problemtemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");
@@ -4082,7 +4082,6 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");//<-internal use
   folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");//<-coming from webserver
   folderSubstitutionsSensitive.SetKeyValue("crashes/", "LogFiles/crashes/");
-  folderSubstitutionsSensitive.SetKeyValue("certificates/", "certificates/");
 }
 
 int main(int argc, char **argv)

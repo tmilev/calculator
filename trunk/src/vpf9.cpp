@@ -595,16 +595,28 @@ FileOperations::FolderVirtualLinksSensitive()
   { firstRun=true;
     MutexRecursiveWrapper theMutex;
     MutexLockGuard theGuard(theMutex);
-    result.SetKeyValue("certificates/", "certificates/");
     result.SetKeyValue("LogFiles/", "LogFiles/");
     result.SetKeyValue("crashes/", "LogFiles/crashes/");
   }
   return result;
 }
 
-bool FileOperations::FileExistsVirtual(const std::string& theFileName, bool accessSensitiveFolders)
+MapLisT<std::string, std::string, MathRoutines::hashString>&
+FileOperations::FolderVirtualLinksULTRASensitive()
+{ static MapLisT<std::string, std::string, MathRoutines::hashString> result;
+  static bool firstRun=false;
+  if (!firstRun)
+  { firstRun=true;
+    MutexRecursiveWrapper theMutex;
+    MutexLockGuard theGuard(theMutex);
+    result.SetKeyValue("certificates/", "certificates/");
+  }
+  return result;
+}
+
+bool FileOperations::FileExistsVirtual(const std::string& theFileName, bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
 { std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders))
     return false;
   return FileOperations::FileExistsUnsecure(computedFileName);
 }
@@ -660,7 +672,7 @@ bool FileOperations::OpenFileUnsecureReadOnly(std::ifstream& theFile, const std:
   return theFile.is_open();
 }
 
-bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFileName, std::string& output, bool accessSensitiveFolders)
+bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFileName, std::string& output, bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
 { MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtual");
 //  stOutput << "<br>DEBUG: processing " << inputFileName << " -> ... <br>";
   if (!FileOperations::IsOKfileNameVirtual(inputFileName, accessSensitiveFolders))
@@ -680,6 +692,13 @@ bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFile
     for (int i=0; i<FileOperations::FolderVirtualLinksSensitive().size(); i++)
       if (MathRoutines::StringBeginsWith(inputFileName, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd))
       { output=theGlobalVariables.PhysicalPathProjectBase+FileOperations::FolderVirtualLinksSensitive().theValues[i]+folderEnd;
+        //stOutput << inputFileName << " transformed to: " << output;
+        return true;
+      }
+  if (accessULTRASensitiveFolders)
+    for (int i=0; i<FileOperations::FolderVirtualLinksULTRASensitive().size(); i++)
+      if (MathRoutines::StringBeginsWith(inputFileName, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd))
+      { output=theGlobalVariables.PhysicalPathProjectBase+FileOperations::FolderVirtualLinksULTRASensitive().theValues[i]+folderEnd;
         //stOutput << inputFileName << " transformed to: " << output;
         return true;
       }

@@ -296,6 +296,10 @@ bool Calculator::GetVectorDoubles(const Expression& input, Vector<double>& outpu
 { return this->GetVectoR(input, output, 0, DesiredDimensionNonMandatory, CalculatorFunctionsGeneral::innerEvaluateToDouble);
 }
 
+bool Calculator::GetVectorDoublesFromFunctionArguments(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory)
+{ return this->GetVectorFromFunctionArguments(input, output, 0, DesiredDimensionNonMandatory, CalculatorFunctionsGeneral::innerEvaluateToDouble);
+}
+
 bool CalculatorFunctionsGeneral::innerGetPointsImplicitly
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetPointsImplicitly");

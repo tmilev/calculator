@@ -1306,6 +1306,14 @@ plotSurface(( x+2, z, y ),\
    "plot2D{}(1/x, -30, 30, 300, 300, \"red\") + plotViewRectangle((-5,-5), (5,5))", true, false,
    "CalculatorFunctionsGeneral::plotViewRectangle", "plotViewRectangle")
    ;
+  this->AddOperationInnerHandler ("plotWindow", CalculatorFunctionsGeneral::innerPlotViewWindow, "",
+   "Creates an empty plot whose sole purpose is to fix the dimensions (in pixels) of the image in the format\
+(pixelwidth, pixelHeight). \
+   To modify the dimensions (in pixels) of another plot, add to it the plotWindow ``plot''.\
+   ",
+   "plot2D{}(1/x, -30, 30, 300, 300, \"red\") + plotWindow(400,400)+ plotViewRectangle((-5,-5), (5,5))", true, false,
+   "CalculatorFunctionsGeneral::innerPlotWindow", "plotWindow")
+   ;
   this->AddOperationInnerHandler ("plot2DWithBars", CalculatorFunctionsGeneral::innerPlot2DWithBars, "",
    "<b>Calculus teaching function.</b> Same as plot2D but plots two functions with bars locked between the two functions; \
    , used to illustrate approximations to definite integrals.",

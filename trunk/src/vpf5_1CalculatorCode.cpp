@@ -780,10 +780,15 @@ void Plot::operator+=(const Plot& other)
   this->viewWindowPriority=MathRoutines::Maximum(this->viewWindowPriority, other.viewWindowPriority);
   this->thePlots.AddListOnTop(other.thePlots);
   this->the3dObjects.AddListOnTop(other.the3dObjects);
-  if (this->DesiredHtmlHeightInPixels<other.DesiredHtmlHeightInPixels)
-    this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
-  if (this->DesiredHtmlWidthInPixels<other.DesiredHtmlWidthInPixels)
+  if (other.viewWindowPriority>this->viewWindowPriority)
+  { this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
     this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
+  } else if (this->viewWindowPriority==other.viewWindowPriority)
+  { if (this->DesiredHtmlHeightInPixels<other.DesiredHtmlHeightInPixels)
+      this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
+    if (this->DesiredHtmlWidthInPixels<other.DesiredHtmlWidthInPixels)
+      this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
+  }
 }
 
 bool Plot::operator==(const Plot& other)const
@@ -791,6 +796,11 @@ bool Plot::operator==(const Plot& other)const
     return false;
   if (this->DesiredHtmlHeightInPixels!=other.DesiredHtmlHeightInPixels ||
       this->DesiredHtmlWidthInPixels!=other.DesiredHtmlWidthInPixels)
+    return false;
+  if (this->highBoundY!=other.highBoundY ||
+      this->lowBoundY!=other.lowBoundY ||
+      this->theLowerBoundAxes!=other.theLowerBoundAxes ||
+      this->theUpperBoundAxes!=other.theUpperBoundAxes)
     return false;
   return this->thePlots==other.thePlots && this->the3dObjects==other.the3dObjects;
 }
@@ -1155,7 +1165,7 @@ std::string Plot::GetPlotHtml3d_New()
       ;
     }
   }
-  out << "calculatorResetCanvas(document.('"  << canvasName << "'));\n";
+  out << "calculatorResetCanvas(document.getElementById('"  << canvasName << "'));\n";
   out << "var theCanvas=calculatorGetCanvas(document.getElementById('"
   << canvasName
   << "'));\n"

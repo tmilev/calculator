@@ -6279,7 +6279,7 @@ void LaTeXcrawler::Crawl()
   this->CrawlRecursive(this->theFileToCrawlPhysical);
   std::fstream outputFile;
   std::string outputFileName = "latexOutput.tex";
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(outputFile,"output/"+ outputFileName, false, true, false))
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(outputFile, "output/"+ outputFileName, false, true, false, true))
   { this->displayResult << "Failed to open output file: " << outputFileName << ", check write permissions. ";
     //this->displayResult << "The crawling appears to have been successful, below is the crawled file.<hr>"
     //<< this->crawlingResult.str();

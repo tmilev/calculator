@@ -3984,6 +3984,40 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
   return output.AssignValue(thePlot, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerPlotViewWindow
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotViewWindow");
+  if (input.children.size<3)
+    return false;
+  Vector<double> widthHeight;
+  Plot emptyPlot;
+  emptyPlot.viewWindowPriority=1;
+  bool isGood=false;
+  if (theCommands.GetVectorDoublesFromFunctionArguments(input, widthHeight, 2) )
+  { isGood=true;
+  } else
+  { widthHeight.SetSize(2);
+    widthHeight[0]=100;
+    widthHeight[1]=100;
+    MapLisT<std::string, Expression, MathRoutines::hashString> theMap;
+    if (! CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theMap, 0, false) )
+      isGood=false;
+    else
+    { if (theMap.Contains("width"))
+        if (!theMap.GetValueCreateIfNotPresent("width").EvaluatesToDouble(&widthHeight[0]))
+         isGood=false;
+      if (theMap.Contains("height"))
+        if (!theMap.GetValueCreateIfNotPresent("height").EvaluatesToDouble(&widthHeight[1]))
+         isGood=false;
+    }
+  }
+  if (!isGood)
+    return theCommands << "Failed to extract a pair of positive numbers from: " << input.ToString();
+  emptyPlot.DesiredHtmlWidthInPixels=(int) widthHeight[0];
+  emptyPlot.DesiredHtmlHeightInPixels=(int) widthHeight[1];
+  return output.AssignValue(emptyPlot, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerPlotViewRectangle
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotViewRectangle");

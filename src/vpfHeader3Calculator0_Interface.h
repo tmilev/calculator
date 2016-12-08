@@ -1734,6 +1734,7 @@ public:
   bool GetVectoRInt(const Expression& input, List<int>& output);
   bool GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInt>& output);
   bool GetVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory=-1);
+  bool GetVectorDoublesFromFunctionArguments(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory=-1);
   template <class theType>
   bool GetVectoR
   (const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,

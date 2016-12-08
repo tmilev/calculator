@@ -998,6 +998,7 @@ function calculatorGetCanvas(inputCanvas)
       paintZbuffer: function()
       { var theSurface=this.surface;
         theSurface.strokeStyle="gray";
+        theSurface.fillStyle="black";
         theSurface.setLineDash([]);
         for (var i=0; i<this.zBuffer.length; i++)
           for (var j=0; j< this.zBuffer[i].length; j++)

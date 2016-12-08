@@ -2989,8 +2989,8 @@ int WebWorker::ServeClient()
   this->VirtualFileName=this->addressComputed;
   this->SanitizeVirtualFileName();
 //    std::cout << "GOT TO file names!" << std::endl;
-
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(this->VirtualFileName, this->RelativePhysicalFileNamE))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual
+      (this->VirtualFileName, this->RelativePhysicalFileNamE, theGlobalVariables.UserDefaultHasAdminRights()))
   { //  std::cout << "GOT TO not found!" << std::endl;
     this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
     stOutput << "<html><body><b>File name deemed unsafe. "
@@ -4059,6 +4059,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsSensitive=FileOperations::FolderVirtualLinksSensitive();
 
   folderSubstitutionsNonSensitive.Clear();
+  folderSubstitutionsSensitive.SetKeyValue("output/", "output/");//<-coming from webserver
+  folderSubstitutionsSensitive.SetKeyValue("/output/", "output/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("ProblemCollections/", "ProblemCollections/");
   folderSubstitutionsNonSensitive.SetKeyValue("problemtemplates/", "../problemtemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");
@@ -4077,8 +4079,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
 
   folderSubstitutionsSensitive.Clear();
-  folderSubstitutionsSensitive.SetKeyValue("output/", "LogFiles/");
-  folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");
+  folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");//<-internal use
+  folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");//<-coming from webserver
   folderSubstitutionsSensitive.SetKeyValue("crashes/", "LogFiles/crashes/");
   folderSubstitutionsSensitive.SetKeyValue("certificates/", "certificates/");
 }

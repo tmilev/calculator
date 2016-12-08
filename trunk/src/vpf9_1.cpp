@@ -54,12 +54,14 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   if (!theGlobalVariables.flagNotAllocated)
   { std::fstream theFile;
     bool succeededToOpen=FileOperations::OpenFileCreateIfNotPresentVirtual
-    (theFile, "crashes/"+theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false);
+    (theFile, "crashes/"+theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false, true);
     if (succeededToOpen)
-      stOutput << "<hr>Crash dumped in file " << theGlobalVariables.RelativePhysicalNameCrashLog << " located inside the output folder.";
+      stOutput << "<hr>Crash dumped in file " << theGlobalVariables.RelativePhysicalNameCrashLog
+      << " located inside the output folder.";
     else
       stOutput << "<hr>Failed to create a crash report: check if folder exists and the "
-      << "executable has file permissions for file " << theGlobalVariables.RelativePhysicalNameCrashLog << " located inside the output folder.";
+      << "executable has file permissions for file " << theGlobalVariables.RelativePhysicalNameCrashLog
+      << " located inside the output folder.";
     theFile << this->theCrashReport.str();
     theFile.close();
   } else

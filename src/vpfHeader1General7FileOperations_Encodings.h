@@ -12,7 +12,9 @@ public:
   static MapLisT<std::string, std::string, MathRoutines::hashString>&
   FolderVirtualLinksNonSensitive();
   static MapLisT<std::string, std::string, MathRoutines::hashString>&
-  FolderVirtualLinksSensitive();
+  FolderVirtualLinksSensitive(); //<- admin access only
+  static MapLisT<std::string, std::string, MathRoutines::hashString>&
+  FolderVirtualLinksULTRASensitive(); //<- no access allowed through web server
 
   static bool LoadFileToStringUnsecure
   (const std::string& fileNameUnsecure, std::string& output, std::stringstream& commentsOnFailure);
@@ -24,7 +26,7 @@ public:
   static std::string GetPathFromFileNameWithPath(const std::string& fileName);
   static std::string GetFileExtensionWithDot(const std::string& theFileName);
   static bool FileExistsUnsecure(const std::string& theFileName);
-  static bool FileExistsVirtual(const std::string& theFileName, bool accessSensitiveFolders=false);
+  static bool FileExistsVirtual(const std::string& theFileName, bool accessSensitiveFolders=false, bool accessULTRASensitiveFolders=false);
   static bool IsFolderUnsecure(const std::string& theFolderName);
   static bool GetFolderFileNamesUnsecure
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
@@ -35,7 +37,7 @@ public:
    List<std::string>* outputFileTypes=0, bool accessSensitiveFolders=false)
    ;
   static bool GetPhysicalFileNameFromVirtual
-  (const std::string& inputFileName, std::string& output, bool accessSensitiveFolders=false);
+  (const std::string& inputFileName, std::string& output, bool accessSensitiveFolders=false, bool accessULTRASensitiveFolders=false);
 
   static bool OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
   static bool OpenFileCreateIfNotPresentVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders=false);

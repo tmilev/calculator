@@ -202,7 +202,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
     this->PhysicalPathProjectBase="./../";
   this->PhysicalPathHtmlFolder = this->PhysicalPathProjectBase + "../public_html/";
   this->PhysicalPathServerBasE=this->PhysicalPathHtmlFolder;
-  this->DisplayPathOutputFolder ="/";
+  this->DisplayPathOutputFolder ="/output/";
 
   this->PhysicalNameExtraOutputNoPatH="defaultoutput";
   this->RelativePhysicalNameExtraOutputWithPath = this->PhysicalNameExtraOutputNoPatH;

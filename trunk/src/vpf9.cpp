@@ -21,6 +21,9 @@ bool ParallelComputing::flagUngracefulExitInitiated=false;
 
 long long ParallelComputing::GlobalPointerCounter=0;
 long long ParallelComputing::PointerCounterPeakRamUse=0;
+unsigned int ParallelComputing::NumHashResizes=0;
+unsigned int ParallelComputing::NumListResizesTotal=0;
+unsigned int ParallelComputing::NumListsCreated=0;
 
 //CombinatorialChamberContainer GlobalCollectorChambers;
 //FacetPointers GlobalCollectorFacets;
@@ -343,22 +346,7 @@ uint32_t CGI::RedGreenBlue(unsigned int r, unsigned int g, unsigned int b)
   return r*65536+g*256+b;
 }
 
-std::string CGI::GetHtmlSwitchMenuDoNotEncloseInTags()
-{ std::stringstream output;
-  output << " <script type=\"text/javascript\"> \n";
-  output << " function switchMenu(obj)\n";
-  output << " { var el = document.getElementById(obj);	\n";
-  output << "   if ( el.style.display != \"none\" ) \n";
-  output << "     el.style.display = 'none';\n";
-  output << "   else \n";
-  output << "     el.style.display = '';\n";
-  output << " }\n";
-  output << "</script>";
-  return output.str();
-}
-
-std::string CGI::GetJavascriptInjectCalculatorResponseInNode
-()
+std::string CGI::GetJavascriptInjectCalculatorResponseInNode()
 { MacroRegisterFunctionWithName("CGI::GetJavascriptInjectCalculatorResponseInNode");
   std::stringstream out;
   out

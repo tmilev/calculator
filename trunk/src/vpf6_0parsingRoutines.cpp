@@ -40,6 +40,15 @@ void Calculator::reset()
   this->MaxRecursionDeptH=10000;
   this->RecursionDeptH=0;
   this->NumErrors=0;
+  this->NumListsStart               =-1;
+  this->NumListResizesStart         =-1;
+  this->NumHashResizesStart         =-1;
+  this->NumSmallAdditionsStart      =-1;
+  this->NumSmallMultiplicationsStart=-1;
+  this->NumSmallGCDcallsStart       =-1;
+  this->NumLargeAdditionsStart      =-1;
+  this->NumLargeMultiplicationsStart=-1;
+  this->NumLargeGCDcallsStart       =-1;
   this->DepthRecursionReached=0;
   this->flagWriteLatexPlots=false;
   this->flagLogSyntaxRules=false;

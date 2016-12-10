@@ -817,6 +817,7 @@ public:
   HashedList<std::string, MathRoutines::hashString> atomsNotInterpretedAsFunctions;
   HashedList<std::string, MathRoutines::hashString> atomsThatMustNotBeCached;
   HashedList<std::string, MathRoutines::hashString> operationsComposite;
+  HashedList<std::string, MathRoutines::hashString> autoCompleteKeyWords;
 
   HashedList<std::string, MathRoutines::hashString> stringsThatSplitIfFollowedByDigit;
 
@@ -936,6 +937,16 @@ public:
 
   bool flagForkingProcessAllowed;
   ///////////////////////////////////////////////////////////////////////////
+  int NumListsStart;
+  int NumListResizesStart;
+  int NumHashResizesStart;
+  long long int NumSmallAdditionsStart;
+  long long int NumSmallMultiplicationsStart;
+  long long int NumSmallGCDcallsStart;
+  long long int NumLargeAdditionsStart;
+  long long int NumLargeMultiplicationsStart;
+  long long int NumLargeGCDcallsStart;
+  ////////////////////////////////////////////////
   int TotalNumPatternMatchedPerformed;
   int NumPredefinedAtoms;
   int numEmptyTokensStart;
@@ -984,6 +995,8 @@ public:
 
   List<std::string> SystemCommands;
   std::string ToString();
+  std::string ToStringPerformance();
+  void ComputeAutoCompleteKeyWords();
   std::string ElementToStringNonBoundVars();
   std::string ToStringOutputAndSpecials();
   std::string ToStringFunctionHandlers();
@@ -1925,6 +1938,7 @@ public:
   void initCalculusTestingFunctions();
   void initAdminFunctions();
   void initPredefinedOperationsComposite();
+  void initComputationStats();
   bool ExtractExpressions(Expression& outputExpression, std::string* outputErrors);
   void EvaluateCommands();
   static bool EvaluateExpression

@@ -570,9 +570,23 @@ bool Calculator::ParseAndExtractExpressions
   return result;
 }
 
+
+void Calculator::initComputationStats()
+{ this->StartTimeEvaluationInSecondS=theGlobalVariables.GetElapsedSeconds();
+  this->NumListsStart               =ParallelComputing::NumListsCreated;
+  this->NumListResizesStart         =ParallelComputing::NumListResizesTotal;
+  this->NumHashResizesStart         =ParallelComputing::NumHashResizes;
+  this->NumSmallAdditionsStart      =Rational::TotalSmallAdditions;
+  this->NumSmallMultiplicationsStart=Rational::TotalSmallMultiplications;
+  this->NumSmallGCDcallsStart       =Rational::TotalSmallGCDcalls;
+  this->NumLargeAdditionsStart      =Rational::TotalLargeAdditions;
+  this->NumLargeMultiplicationsStart=Rational::TotalLargeMultiplications;
+  this->NumLargeGCDcallsStart       =Rational::TotalLargeGCDcalls;
+}
+
 void Calculator::Evaluate(const std::string& theInput)
 { MacroRegisterFunctionWithName("Calculator::Evaluate");
-  this->StartTimeEvaluationInSecondS=theGlobalVariables.GetElapsedSeconds();
+  this->initComputationStats();
   this->inputString=theInput;
   this->ParseAndExtractExpressions(theInput, this->theProgramExpression, this->syntacticSouP, this->syntacticStacK, &this->syntaxErrors);
   this->EvaluateCommands();

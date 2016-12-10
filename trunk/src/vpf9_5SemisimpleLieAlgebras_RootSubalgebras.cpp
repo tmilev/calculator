@@ -1102,7 +1102,6 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat)
     output << ", exceptional Lie algebra";
   output << " \">";
   output << CGI::GetJavascriptMathjax();
-  //  output << CGI::GetHtmlSwitchMenuDoNotEncloseInTags();
   output << "<body>" << this->ToString(theFormat) << "</body></html>";
   output.close();
 }

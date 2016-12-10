@@ -151,6 +151,10 @@ public:
   static ControllerStartsRunning controllerSignalPauseUseForNonGraciousExitOnly;
   static long long cgiLimitRAMuseNumPointersInList;
   static bool flagUngracefulExitInitiated;
+  static unsigned int NumListsCreated;
+  static unsigned int NumListResizesTotal;
+  static unsigned int NumHashResizes;
+
   static void CheckPointerCounters();
   inline static void SafePointDontCallMeFromDestructors()
   { ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly.SafePointDontCallMeFromDestructors();
@@ -723,8 +727,6 @@ std::iostream& operator>>(std::iostream& input, List<Object>& theList)
   return input;
 }
 
-static unsigned int NumListsCreated=0;
-static unsigned int NumListResizesTotal=0;
 //List serves the same purpose as std::vector
 //List is not thread safe!!!!
 //Lists are used in the implementation of mutexes!!!
@@ -748,7 +750,7 @@ private:
     this->ActualSize=0;
     this->size=0;
     this->flagDeallocated=false;
-    MacroIncrementCounter(NumListsCreated);
+    MacroIncrementCounter(ParallelComputing::NumListsCreated);
   }
   int ActualSize;
 public:
@@ -1163,7 +1165,6 @@ public:
 };
 typedef Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> PairInts;
 
-static unsigned int NumHashResizes=0;
 
 template <class Object, class TemplateList, unsigned int hashFunction(const Object&)=Object::HashFunction>
 class HashTemplate: public TemplateList
@@ -1418,7 +1419,7 @@ public:
   void SetHashSizE(unsigned int HS)
   { if (HS==(unsigned) this->TheHashedArrays.size)
       return;
-    MacroIncrementCounter(NumHashResizes);
+    MacroIncrementCounter(ParallelComputing::NumHashResizes);
     List<int> emptyList; //<-empty list has size 0
     this->TheHashedArrays.initFillInObject(HS, emptyList);
     if (this->size>0)
@@ -2049,7 +2050,7 @@ void List<Object>::ExpandArrayOnTop(int increase)
 {// <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (increase<=0)
     return;
-  MacroIncrementCounter(NumListResizesTotal);
+  MacroIncrementCounter(ParallelComputing::NumListResizesTotal);
   Object* newArray =0;
   try
   { newArray= new Object[this->ActualSize+increase];

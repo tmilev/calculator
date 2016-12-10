@@ -2279,47 +2279,94 @@ std::string Calculator::ToStringOutputAndSpecials()
   return out.str();
 }
 
+void Calculator::ComputeAutoCompleteKeyWords()
+{ MacroRegisterFunctionWithName("Calculator::ComputeAutoCompleteKeyWords");
+  this->autoCompleteKeyWords.SetExpectedSize(this->theAtoms.size*2);
+  for (int i=0; i<this->theAtoms.size; i++)
+    this->autoCompleteKeyWords.AddOnTopNoRepetition(this->theAtoms[i]);
+  for (int i=0; i<this->namedRules.size; i++)
+    this->autoCompleteKeyWords.AddOnTopNoRepetition(this->namedRules[i]);
+  autoCompleteKeyWords.AddOnTopNoRepetition("NoFrac");
+  autoCompleteKeyWords.AddOnTopNoRepetition("NoApproximations");
+  autoCompleteKeyWords.AddOnTopNoRepetition("ShowContext");
+  autoCompleteKeyWords.AddOnTopNoRepetition("LogParsing");
+  autoCompleteKeyWords.AddOnTopNoRepetition("LogEvaluation");
+  autoCompleteKeyWords.AddOnTopNoRepetition("NumberColors");
+  autoCompleteKeyWords.AddOnTopNoRepetition("LogRules");
+  autoCompleteKeyWords.AddOnTopNoRepetition("LogCache");
+  autoCompleteKeyWords.AddOnTopNoRepetition("LogFull");
+  autoCompleteKeyWords.AddOnTopNoRepetition("LatexLink");
+  autoCompleteKeyWords.AddOnTopNoRepetition("UseLnInsteadOfLog");
+  autoCompleteKeyWords.AddOnTopNoRepetition("UseLnAbsInsteadOfLog");
+  autoCompleteKeyWords.AddOnTopNoRepetition("CalculatorStatus");
+  autoCompleteKeyWords.AddOnTopNoRepetition("FullTree");
+  autoCompleteKeyWords.AddOnTopNoRepetition("HideLHS");
+  autoCompleteKeyWords.AddOnTopNoRepetition("DontUsePredefinedWordSplits");
+  autoCompleteKeyWords.AddOnTopNoRepetition("PlotShowJavascriptOnly");
+  autoCompleteKeyWords.AddOnTopNoRepetition("PlotNoCoordinateDetails");
+
+}
+
+std::string Calculator::ToStringPerformance()
+{ MacroRegisterFunctionWithName("Calculator::ToStringPerformance");
+  std::stringstream out;
+  double elapsedSecs=theGlobalVariables.GetElapsedSeconds();
+  out << "<br>Time: computation: " << (elapsedSecs-this->StartTimeEvaluationInSecondS)
+  << " (" << (elapsedSecs-this->StartTimeEvaluationInSecondS)*1000
+  << " ms), total: " << elapsedSecs << " ("
+  << ((elapsedSecs)*1000) << " ms).";
+  out << "<br>";
+  std::stringstream moreDetails;
+  moreDetails << "Total number of pattern matches performed: "
+  << this->TotalNumPatternMatchedPerformed << "";
+  if (this->DepthRecursionReached>0)
+    moreDetails << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
+  #ifdef MacroIncrementCounter
+  moreDetails << "<br>Lists created: " << "computation: "
+  << (ParallelComputing::NumListsCreated-this->NumListsStart)
+  << ", total: " << ParallelComputing::NumListsCreated;
+  moreDetails << "<br> # List resizes: computation: "
+  << (ParallelComputing::NumListResizesTotal -this->NumListResizesStart)
+  << ", total: " << ParallelComputing::NumListResizesTotal
+  << "<br> # hash resizing: computation: " << (ParallelComputing::NumHashResizes- this->NumHashResizesStart)
+  << ", total: " << ParallelComputing::NumHashResizes;
+  if (Rational::TotalSmallAdditions>0)
+    moreDetails << "<br>Small rational additions: computation: "
+    << Rational::TotalSmallAdditions- this->NumSmallAdditionsStart
+    << ", total: " << Rational::TotalSmallAdditions;
+  if (Rational::TotalSmallMultiplications>0)
+    moreDetails << "<br>Small rational multiplications: computation: "
+    << Rational::TotalSmallMultiplications - this->NumSmallMultiplicationsStart
+    << ", total: " << Rational::TotalSmallMultiplications;
+  if (Rational::TotalSmallGCDcalls>0)
+    moreDetails << "<br>Small gcd calls: computation: "
+    << Rational::TotalSmallGCDcalls - this->NumSmallGCDcallsStart
+    << ", total: " << Rational::TotalSmallGCDcalls;
+  if (Rational::TotalLargeAdditions>0)
+    moreDetails << "<br>Large integer additions: "
+    << Rational::TotalLargeAdditions - this->NumLargeAdditionsStart
+    << ", total: "
+    << Rational::TotalLargeAdditions;
+  if (Rational::TotalLargeMultiplications>0)
+    moreDetails << "<br>Large integer multiplications: computation: "
+    << Rational::TotalLargeMultiplications - this->NumLargeMultiplicationsStart
+    << ", total: " << Rational::TotalLargeMultiplications;
+  if (Rational::TotalLargeGCDcalls>0)
+    moreDetails << "<br>Large gcd calls: "
+    << Rational::TotalLargeGCDcalls - this->NumLargeGCDcallsStart
+    << ", total: " << Rational::TotalLargeGCDcalls;
+  out << CGI::GetHtmlSpanHidableStartsHiddeN(moreDetails.str(), "More details");
+  #endif
+  return out.str();
+}
+
 std::string Calculator::ToString()
 { MacroRegisterFunctionWithName("Calculator::ToString");
   std::stringstream out2;
   std::string openTag1="<span style=\"color:#0000FF\">";
   std::string closeTag1="</span>";
-  std::string openTag2="<span style=\"color:#FF0000\">";
-  std::string closeTag2="</span>";
-  std::string openTag3="<span style=\"color:#00FF00\">";
-  std::string closeTag3="</span>";
-  out2 << " Total number of pattern matches performed: " << this->TotalNumPatternMatchedPerformed << "";
-  double elapsedSecs=theGlobalVariables.GetElapsedSeconds();
-  out2 << "<br>Computation time: " << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).<br>";
-  out2 << "<br>Computation time: " << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).<br>";
-  std::stringstream tempStreamTime;
-  tempStreamTime << " Of them " << this->StartTimeEvaluationInSecondS << " seconds (" << this->StartTimeEvaluationInSecondS*1000
-  << " millisecond(s)) boot + " << elapsedSecs-this->StartTimeEvaluationInSecondS << " (" << (elapsedSecs-this->StartTimeEvaluationInSecondS)*1000
-  << " milliseconds) user computation.<br>Boot time is measured from start of main() until evaluation start and excludes static initializations "
-  << "+ executable load. Computation time excludes the time needed to compute the strings that follow below (which might take a while).";
-  out2 << CGI::GetHtmlSpanHidableStartsHiddeN(tempStreamTime.str());
-  out2 << "<br>Maximum computation time: " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << " seconds. ";
-  if (this->DepthRecursionReached>0)
-    out2 << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
-  #ifdef MacroIncrementCounter
-  out2 << "<br>Number of Lists created: " << NumListsCreated << "<br> Number of List resizes: " << NumListResizesTotal
-  << "<br> Number HashedList hash resizing: " << NumHashResizes;
-  if (Rational::TotalSmallAdditions>0)
-    out2 << "<br>Number small rational number additions: " << Rational::TotalSmallAdditions << " (# successful calls Rational::TryToAddQuickly)";
-  if (Rational::TotalSmallMultiplications>0)
-    out2 << "<br>Number small rational number multiplications: " << Rational::TotalSmallMultiplications << " (# successful calls Rational::TryToMultiplyQuickly)";
-  if (Rational::TotalSmallGCDcalls>0)
-    out2 << "<br>Number small number gcd calls: " << Rational::TotalSmallGCDcalls << " (# calls of Rational::gcd)";
-  if (Rational::TotalLargeAdditions>0)
-    out2 << "<br>Number large integer additions: " << Rational::TotalLargeAdditions << " (# calls LargeIntUnsigned::AddNoFitSize)";
-  if (Rational::TotalLargeMultiplications>0)
-    out2 << "<br>Number large integer multiplications: " << Rational::TotalLargeMultiplications << " (# calls LargeIntUnsigned::MultiplyBy)";
-  if (Rational::TotalLargeGCDcalls>0)
-    out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls << " (# calls LargeIntUnsigned::gcd)";
-//  out2 << ThreadData::ToStringAllThreads();
-  #endif
-  if (this->RuleStack.children.size>0)
-  { out2 << "<hr><b>Predefined rules.</b><br>";
+  if (this->RuleStack.children.size>1)
+  { out2 << "<b>Predefined rules.</b><br>";
     for (int i=1; i<this->RuleStack.children.size; i++)
     { out2 << this->RuleStack[i].ToString();
       if (i!=this->RuleStack.children.size-1)
@@ -2327,13 +2374,16 @@ std::string Calculator::ToString()
     }
   }
   if (this->flagShowCalculatorExamples)
-    out2 << "<hr>" << this->ToStringFunctionHandlers();
+    out2 << this->ToStringFunctionHandlers();
   else
   { std::stringstream theExampleInjector;
-    theExampleInjector << "InjectCalculatorResponse("
-    << "'calculatorExamples', '', 'calculatorExamples');";
-    out2 << "<hr>" << CGI::GetHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Show calculator examples.");
-    out2 << "<span id=\"calculatorExamples\"></span>";
+    theExampleInjector
+    << "if (document.getElementById('calculatorExamples').innerHTML=='')"
+    << "  InjectCalculatorResponse('calculatorExamples', '', 'calculatorExamples'); "
+//    << "else alert('innerHTML: '+ document.getElementById('calculatorExamples').innerHTML); "
+    << "switchMenu('calculatorExamples')";
+    out2 << CGI::GetHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Examples.");
+    out2 << "<span style=\"display:none\" id=\"calculatorExamples\"></span>";
   }
   if (!this->flagShowCalculatorInternalStatus)
     return out2.str();

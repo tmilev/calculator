@@ -85,7 +85,6 @@ public:
   static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label="Expand/collapse", const std::string& desiredID="");
   static std::string GetHtmlLinkFromProjectFileName
   (const std::string& fileName, const std::string& fileDesc="", int line=-1);
-  static std::string GetHtmlSwitchMenuDoNotEncloseInTags();
   static std::string GetLatexEmbeddableLinkFromCalculatorInput(const std::string& address, const std::string& display);
   static bool StringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr);
   static std::string StringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr);

@@ -337,7 +337,7 @@ void FileInformation::AddProjectInfo(const std::string& fileName, const std::str
 
 std::string GlobalVariables::ToStringSourceCodeInfo()
 { std::stringstream out;
-  out << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator " << "(expand/collapse)</button>";
+  out << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >Source code</button>";
   out << "<div id=\"sourceDetails\" style=\"display: none\">";
   out << "<br>The calculator is a standalone application that can either be used "
   << " as a web server (similarly to SAGE) or "

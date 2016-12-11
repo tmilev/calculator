@@ -32,6 +32,7 @@ public:
   std::string RelativePhysicalFileNamE;
   std::string status;
   std::string pingMessage;
+  double timeServerAtWorkerStart;
   double timeOfLastPingServerSideOnly;
   bool flagInUse;
   bool flagDeallocated;
@@ -44,6 +45,7 @@ public:
   bool flagArgumentsAreOK;
   bool flagDoAddContentLength;
   bool flagMustLogin;
+  bool flagUsingSSLInWorkerProcess;
   List<std::string> theStrings;
   int ContentLength;
   int requestTypE;
@@ -127,9 +129,6 @@ int recursionDepth=0)
   bool ExtractArgumentsFromCookies
   (std::stringstream& argumentProcessingFailureComments)
   ;
-  void OutputBeforeComputation();
-  void OutputBeforeComputationUserInputAndAutoComplete();
-  void OutputStandardResult();
   static void OutputSendAfterTimeout(const std::string& input);
   void OutputResultAfterTimeout();
   static void OutputCrashAfterTimeout();
@@ -151,7 +150,7 @@ int recursionDepth=0)
   void SendAllBytesHttp();
   void SendAllBytesHttpSSL();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
-  std::string GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool callProgressReport);
+  std::string GetJavaScriptIndicatorBuiltInServer();
   std::string GetChangePasswordPage();
   std::string GetClonePageResult();
   std::string GetModifyProblemReport();
@@ -266,7 +265,8 @@ public:
   void SSLServerSideHandShake();
   void SSLfreeEverythingShutdownSSL();
   void TerminateChildSystemCall(int i);
-  void RecycleChildrenIfPossible(const std::string& incomingUserAddress);
+  void RecycleChildrenIfPossible();
+  void HandleTooManyConnections(const std::string& incomingUserAddress);
   void Restart();
   void CheckExecutableVersionAndRestartIfNeeded(bool callReload);
   void initDates();

@@ -149,9 +149,21 @@ void TimerThreadData::Run()
   this->computationStartTime=-1;
   this->counter=0;
   this->microsecondsleep=100000;
+  ProgressReport theReport;
 //  std::cout << "Got thus far RunTimerVoidPtr - 2" << std::endl;
   for (; ;)
   { this->counter++;
+    std::stringstream reportStream;
+    reportStream << theGlobalVariables.GetElapsedSeconds()
+    << " second(s) passed. ";
+    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
+      reportStream << "<br>Hard limit: "
+      << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
+      << " second(s) [system crash if limit exceeded]."
+      << "<br> Soft limit: "
+      << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2
+      << " second(s) [computation error if limit exceeded].";
+    theReport.Report(reportStream.str());
     this->HandleComputationTimer();
     SleepFunction(microsecondsleep);
     this->HandleComputationCompleteStandard();

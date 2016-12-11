@@ -197,21 +197,15 @@ std::string HtmlSnippets::GetJavascriptStandardCookies()
   return out.str();
 }
 
-std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool callProgressReport)
+std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
 { MacroRegisterFunctionWithName("WebWorker::GetJavaScriptIndicatorBuiltInServer");
   std::stringstream out;
-  out << " <!>\n";
-//  out << "\n<br>\n<button onclick=\"progressReport()\">Manual report</button>";
-  out << "\n<br>\n<button id=\"idButtonSendTogglePauseRequest\" onclick=\"SendTogglePauseRequest()\">Pause</button>";
-  out << "<span id=\"idPauseToggleServerResponse\"></span>\n";
-  out << "<span id=\"idProgressReportTimer\"></span>\n";
-  out << "\n<br>\n<div id=\"idProgressReport\"></div>\n";
   out << "\n<script type=\"text/javascript\" id=\"progressReportJavascript\"> \n";
   out << "var isPaused=false;\n";
   out << "var isFinished=false;\n";
-  out << "var timeIncrementInTenthsOfSecond=4;//measured in tenths of a second\n";
+  out << "var timeIncrementInTenthsOfSecond=20;//measured in tenths of a second\n";
   out << "var timeOutCounter=0;//measured in tenths of a second\n";
-  out << "\nfunction progressReport()\n";
+  out << "\nfunction progressReport(workerNumber)\n";
   out << "{ if (isFinished)\n";
   out << "    return;\n";
   out << "  clearTimeout(progressReport);\n";
@@ -223,13 +217,10 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool 
   out << "  progReportTimer.style.display = '';\n";
   out << "  progReport.style.display = '';\n";
   out << "  timeOutCounter+=timeIncrementInTenthsOfSecond;\n";
-  if (inputIndex==-1)
-    theLog << logger::red << "Worker index in parent is -1!!!" << logger::endL;
-  else
-    theLog << "Worker index: " << inputIndex << logger::endL;
-  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable << "?request=indicator&mainInput="
-  << inputIndex+1 << "\";\n";
+  out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable
+  << "?request=indicator&mainInput=\"+workerNumber;\n";
   out << "  var https = new XMLHttpRequest();\n";
+  //out << "alert(sURL);\n";
   out << "  https.open(\"GET\",sURL,true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   << "  https.onload = function() {\n"
@@ -251,10 +242,10 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool 
   out << "{ if (isFinished)\n";
   out << "    return;\n";
   out << "  var pauseRequest = new XMLHttpRequest();\n";
-  theLog << "Generating indicator address for worker number " << inputIndex+1 << "." << logger::endL;
   out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameExecutable
-  << "?request=pause&mainInput=" << inputIndex+1 << "\";\n";
-  out << "  pauseRequest.open(\"GET\",pauseURL,false);\n";
+  << "?request=pause&mainInput=\"+workerNumber;\n";
+//  out << "alert(pauseURL);\n";
+  out << "  pauseRequest.open(\"GET\",pauseURL,true);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
   out << "  pauseRequest.send(null)\n";
   out << "  if (pauseRequest.status!=200)\n";
@@ -273,8 +264,6 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer(int inputIndex, bool 
   out << "}\n";
 //  out << " progressReport();";
 //  out << " var newReportString=\"\";\n";
-  if (callProgressReport)
-    out << "progressReport();\n";
   out << " </script>\n";
   out << " \n";
   out << " \n";
@@ -1059,112 +1048,15 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   return out.str();
 }
 
-void WebWorker::OutputBeforeComputationUserInputAndAutoComplete()
-{ MacroRegisterFunctionWithName("WebWorker::OutputBeforeComputationUserInputAndAutoComplete");
-  int startingIndent=this->indentationLevelHTML;
-  stOutput << this->openIndentTag("<tr style=\"vertical-align:top\">");
-  stOutput << this->openIndentTag("<td><!-- cell with input, autocomplete space and output-->");
-  stOutput << this->openIndentTag("<table><!--table with input, autocomplete space and output-->");
-  stOutput << this->openIndentTag("<tr>");
-  stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
-  //stOutput << this->ToStringCalculatorArgumentsHumanReadable();
-  stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
-  << theGlobalVariables.DisplayNameExecutable << "\">\n";
-  std::string civilizedInputSafish;
-  if (CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish, false))
-    stOutput << "Your input has been treated normally, however the return string "
-    << "of your input has been modified. More precisely, &lt; and &gt;  are "
-    << " modified due to a javascript hijack issue. <br>";
-  stOutput << this->GetHtmlHiddenInputs(true, true);
-  stOutput << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"compute\">\n";
-  stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"mainInput\" id=\"mainInputID\" "
-  << "style=\"white-space:normal\" "
-  << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
-  << " this.form.submit(); return false;}\" "
-  << "onkeyup=\"suggestWord();\", onkeydown=\"suggestWord(); "
-  << "arrowAction(event);\", onmouseup=\"suggestWord();\", oninput=\"suggestWord();\""
-  << ">";
-  stOutput << civilizedInputSafish;
-  stOutput << "</textarea>\n<br>\n";
-  stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" "
-  << "name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" ";
-  stOutput << "> ";
-  stOutput << "\n</FORM>\n";
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
-  stOutput << this->openIndentTag("<table><!-- Autocomplete table 2 cells (2 rows 1 column)-->");
-  stOutput << this->openIndentTag("<tr>");
-  stOutput << this->openIndentTag("<td nowrap>");
-  stOutput << "<span \"style:nowrap\" id=\"idAutocompleteHints\">"
-  << "Ctrl+space autocompletes, ctrl+arrow selects word</span>";
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << this->closeIndentTag("</tr>");
-  stOutput << this->openIndentTag("<tr>");
-  stOutput << this->openIndentTag("<td id=\"idAutocompleteSpan\">");
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << this->closeIndentTag("</tr>");
-  stOutput << this->openIndentTag("<tr>");
-  stOutput << this->openIndentTag("<td id=\"idAutocompleteDebug\">");
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << this->closeIndentTag("</tr>");
-  stOutput << this->closeIndentTag("</table><!--Autocomplete table end-->");
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << CGI::GetJavascriptAutocompleteWithTags();
-  stOutput << this->closeIndentTag("</tr>");
-  stOutput << this->closeIndentTag("</table>");
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << this->closeIndentTag("</tr>");
-  if (startingIndent!=this->indentationLevelHTML)
-    crash << "Non-balanced html tags. " << crash;
-}
-
-void WebWorker::OutputBeforeComputation()
-{ MacroRegisterFunctionWithName("WebServer::OutputBeforeComputation");
-  stOutput << "<html><head> <title>calculator version  "
-  << __DATE__ << ", " << __TIME__ << "</title>";
-  stOutput << CGI::GetJavascriptMathjax();
-  stOutput << CGI::GetJavascriptInjectCalculatorResponseInNode();
-  stOutput << CGI::GetCalculatorStyleSheetWithTags();
-  stOutput << "\n</head>\n<body onload=\"loadSettings();\">\n";
-  if (theGlobalVariables.flagLoggedIn)
-    stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
-    << "</problemNavigation>\n" << "<section>";
-
-  theGlobalVariables.initOutputReportAndCrashFileNames
-  (CGI::StringToURLString(theParser.inputString, false), theParser.inputString);
-
-  stOutput << HtmlSnippets::GetJavascriptHideHtml();
-  stOutput << HtmlSnippets::GetJavascriptStandardCookies();
-  stOutput << this->openIndentTag("<table><!-- Outermost table, 3 cells (3 columns 1 row)-->");
-  stOutput << this->openIndentTag("<tr style=\"vertical-align:top\">");
-  stOutput << this->openIndentTag("<td><!-- Cell containing the output table-->");
-  stOutput << this->openIndentTag("<table><!-- Output table, 2 cells (1 column 2-3 rows) -->");
-  this->OutputBeforeComputationUserInputAndAutoComplete();
-  if (theGlobalVariables.UserDebugFlagOn())
-    stOutput << "<tr><td>"
-    << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
-    << "</td></tr>";
-}
-
 void WebWorker::OutputResultAfterTimeout()
 { MacroRegisterFunctionWithName("WebWorker::OutputResultAfterTimeout");
   std::stringstream out;
 //  out << theParser.ToStringOutputSpecials();
-  out << this->openIndentTag("<tr>");
-  out << this->openIndentTag("<td>");
   if (standardOutputStreamAfterTimeout.str().size()!=0)
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
   out << theParser.ToStringOutputAndSpecials();
-  out << this->closeIndentTag("</td>");
-  out << this->closeIndentTag("</tr>");
-  out << this->closeIndentTag("</table>");
-  out << this->closeIndentTag("</td>");
 
-  out << this->openIndentTag("<td>");
   out << theParser.outputCommentsString;
-  out << this->closeIndentTag("</td>");
-  out << this->closeIndentTag("</tr>");
-  out << this->closeIndentTag("</table>");
   std::fstream outputTimeOutFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual
   (outputTimeOutFile, "output/" + theGlobalVariables.RelativePhysicalNameOutpuT, false, true, false);
@@ -1206,86 +1098,6 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
   theReport.SetStatus(" \"finished\" sent through indicator pipe, waiting.");
   theLog << logger::red << "\"finished\" sent through indicator pipe, waiting." << logger::endL;
   theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut();
-}
-
-void WebWorker::OutputStandardResult()
-{ MacroRegisterFunctionWithName("WebServer::OutputStandardResult");
-  stOutput << this->openIndentTag("<tr>");
-  stOutput << this->openIndentTag("<td>");
-  stOutput << theParser.ToStringOutputAndSpecials();
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << this->closeIndentTag("</tr>");
-  stOutput << this->closeIndentTag("</table><!--table with input, autocomplete space and output-->");
-  stOutput << this->closeIndentTag("</td>");
-
-//  bool displayClientMessage=theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!=-1;
-  //displayClientMessage=false;
-  if (theParser.outputCommentsString!="")
-  { stOutput << "<td valign=\"top\">";
-//    if (displayClientMessage)
-//      stOutput << "<b>Message from client: </b>" << theWebServer.GetActiveWorker().ToStringMessageFull() << "<hr>";
-    //if (theParser.outputCommentsString.size()<10000)
-    stOutput << theParser.outputCommentsString;
-    //else
-    //stOutput << "The comments generated by your computation are a bit too long. If you want to see them click the show/hide button below.<br>"
-    //<< CGI::GetHtmlSpanHidableStartsHiddeN(theParser.outputCommentsString);
-    stOutput << "</td>";
-  }
-  stOutput << "<td valign=\"top\">";
-  theGlobalVariables.theSourceCodeFiles().QuickSortAscending();
-  stOutput << theGlobalVariables.ToStringSourceCodeInfo();
-  stOutput << "<hr><b>Calculator status. </b><br>";
-  stOutput << theParser.ToString();
-
-  stOutput << "</td></tr></table>";
-  if (theGlobalVariables.flagLoggedIn)
-    stOutput << "</section>";
-  std::stringstream tempStream3;
-  HashedList<std::string, MathRoutines::hashString> autocompleteKeyWords;
-  autocompleteKeyWords.SetExpectedSize(theParser.theAtoms.size*2);
-  for (int i=0; i<theParser.theAtoms.size; i++)
-    autocompleteKeyWords.AddOnTopNoRepetition(theParser.theAtoms[i]);
-  for (int i=0; i<theParser.namedRules.size; i++)
-    autocompleteKeyWords.AddOnTopNoRepetition(theParser.namedRules[i]);
-  autocompleteKeyWords.AddOnTopNoRepetition("NoFrac");
-  autocompleteKeyWords.AddOnTopNoRepetition("NoApproximations");
-  autocompleteKeyWords.AddOnTopNoRepetition("ShowContext");
-  autocompleteKeyWords.AddOnTopNoRepetition("LogParsing");
-  autocompleteKeyWords.AddOnTopNoRepetition("LogEvaluation");
-  autocompleteKeyWords.AddOnTopNoRepetition("NumberColors");
-  autocompleteKeyWords.AddOnTopNoRepetition("LogRules");
-  autocompleteKeyWords.AddOnTopNoRepetition("LogCache");
-  autocompleteKeyWords.AddOnTopNoRepetition("LogFull");
-  autocompleteKeyWords.AddOnTopNoRepetition("LatexLink");
-  autocompleteKeyWords.AddOnTopNoRepetition("UseLnInsteadOfLog");
-  autocompleteKeyWords.AddOnTopNoRepetition("UseLnAbsInsteadOfLog");
-  autocompleteKeyWords.AddOnTopNoRepetition("CalculatorStatus");
-  autocompleteKeyWords.AddOnTopNoRepetition("FullTree");
-  autocompleteKeyWords.AddOnTopNoRepetition("HideLHS");
-  autocompleteKeyWords.AddOnTopNoRepetition("DontUsePredefinedWordSplits");
-  autocompleteKeyWords.AddOnTopNoRepetition("PlotShowJavascriptOnly");
-  autocompleteKeyWords.AddOnTopNoRepetition("PlotNoCoordinateDetails");
-  stOutput << "\n\n<script language=\"javascript\">\n" << "  var theAutocompleteDictionary = [\n  ";
-  for (int i=0; i<autocompleteKeyWords.size; i++)
-    if (autocompleteKeyWords[i].size()>2)
-    { stOutput << "\"" << autocompleteKeyWords[i] << "\"";
-      if (i!=autocompleteKeyWords.size-1)
-        stOutput << ", ";
-    }
-  stOutput << "];\n";
-  stOutput << "</script>\n";
-  stOutput << "</body></html>";
-  stOutput << "<!--";
-  ProgressReport theReport;
-  for(int i=0; i<theParser.SystemCommands.size; i++)
-  { std::stringstream out;
-    out << "\n\ncommand: " << theParser.SystemCommands[i] << "\n" ;
-    theReport.Report(out.str());
-    theGlobalVariables.CallSystemNoOutput(theParser.SystemCommands[i]);
-  }
-  stOutput << "-->";
-
-  //close()
 }
 
 void WebWorker::ParseMessageHead()
@@ -1653,7 +1465,10 @@ int WebWorker::ProcessMonitor()
     return 0;
   }
   int inputWebWorkerNumber= atoi(theMainInput.c_str());
-  stOutput << "<html><body>" << this->GetJavaScriptIndicatorBuiltInServer(inputWebWorkerNumber-1, true)
+  stOutput << "<html><body>"
+  << this->GetJavaScriptIndicatorBuiltInServer()
+  << "<script language=\"javascript\">progressReport("
+  << inputWebWorkerNumber << "); </script>"
   << "</body></html>";
   return 0;
 }
@@ -1686,17 +1501,30 @@ int WebWorker::ProcessComputationIndicator()
   << "most recent error message reported by the worker you want to monitor is: "
   << this->parent->theWorkers[inputWebWorkerIndex].pingMessage;
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
-  { stOutput << "<b>Indicator error. Worker number " << inputWebWorkerNumber << " is not in use. "
+  { stOutput << "<b>Indicator error. Worker number "
+    << inputWebWorkerNumber << " is not in use. "
     << theErrorMessageStream.str()
-    << " Total number of workers: " << this->parent->theWorkers.size << ". </b>";
+    << " Total number of workers: "
+    << this->parent->theWorkers.size << ". </b>";
     return 0;
   }
   if (inputWebWorkerIndex==this->indexInParent)
-  { stOutput << "<b>Indicator error. Worker number " << inputWebWorkerNumber << " requested to monitor itself. "
+  { stOutput << "<b>Indicator error. Worker number "
+    << inputWebWorkerNumber << " requested to monitor itself. "
     << " This is not allowed. " << theErrorMessageStream.str() << "</b>";
     return 0;
   }
   WebWorker& otherWorker=this->parent->theWorkers[inputWebWorkerIndex];
+  if (otherWorker.userAddress.theObject!=this->userAddress.theObject)
+  { stOutput << "User address: " << this->userAddress.theObject
+    << " does not coincide with the monitored address, this is not allowed. ";
+    return 0;
+  }
+  if (otherWorker.flagUsingSSLInWorkerProcess!=this->flagUsingSSLInWorkerProcess)
+  { stOutput << "Monitoring https connections over http, "
+    << "http connection over http is not allowed. ";
+    return 0;
+  }
 //  theLog << "Worker " << this->parent->activeWorker
 //  << consoleYellow(" piping 'indicator'" ) << logger::endL;
   otherWorker.pipeServerToWorkerRequestIndicator.WriteAfterEmptying("!");
@@ -1951,12 +1779,14 @@ void WebWorker::reset()
   this->flagDoAddContentLength=false;
   this->flagFileNameSanitized=false;
   this->timeOfLastPingServerSideOnly=-1;
+  this->timeServerAtWorkerStart=-1;
   this->flagAuthenticationTokenWasSubmitted=false;
   this->flagFoundMalformedFormInput=false;
   this->flagPasswordWasSubmitted=false;
   this->flagProgressReportAllowed=false;
   this->flagKeepAlive=false;
   this->flagMustLogin=true;
+  this->flagUsingSSLInWorkerProcess=false;
   theGlobalVariables.flagUsingSSLinCurrentConnection=false;
   theGlobalVariables.flagLoggedIn=false;
   theGlobalVariables.userDefault.reset();
@@ -2351,7 +2181,8 @@ int WebWorker::ProcessCompute()
 
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
-  this->SetHeaderOKNoContentLength();
+//  this->SetHeaderOKNoContentLength();
+  this->SetHeadeR("HTTP/1.0 200 OK", "Access-Control-Allow-Origin: *");
   theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
   theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
   stOutput << "<html><head> <title>calculator version  "
@@ -2366,6 +2197,7 @@ int WebWorker::ProcessCalculator()
   stOutput << CGI::GetJavascriptAutocompleteWithTags();
   stOutput << CGI::GetJavascriptInitilizeButtons();
   stOutput << CGI::GetJavascriptMathQuillMatrixSupport();
+  stOutput << this->GetJavaScriptIndicatorBuiltInServer();
 
   stOutput << "\n\n<script language=\"javascript\">\n"
   << "  var theAutocompleteDictionary = [\n  ";
@@ -3006,38 +2838,26 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   theGlobalVariables.flagTimedOutComputationIsDone=false;
   ProgressReportWebServer theReport("WebServer::OutputShowIndicatorOnTimeout");
   theLog << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
-  bool useTableTags=(theGlobalVariables.userCalculatorRequestType!="addEmails");
-  if (useTableTags)
-    stOutput << "</td></tr>";
-  else
-    stOutput << "Not using table tags, calc request type: " << theGlobalVariables.userCalculatorRequestType;
   if (theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed)
-  { if (useTableTags)
-      stOutput << "<tr><td>";
-    stOutput << "Your computation is taking more than " << theGlobalVariables.MaxComputationTimeBeforeWeTakeAction
+  { stOutput << "Your computation is taking more than " << theGlobalVariables.MaxComputationTimeBeforeWeTakeAction
     << " seconds. ";
-    if (useTableTags)
-      stOutput << "</td></tr>";
   }
-  if (useTableTags)
-    stOutput << "<tr><td>";
-  if (theGlobalVariables.flagAllowProcessMonitoring)
-  { stOutput << "A progress indicator, as reported by your current computation, is displayed below. "
-    << "When done, your computation result will be displayed below. ";
-  } else
-    stOutput << "Monitoring computations is not allowed on this server (to avoid server load).<br> "
+  if (!theGlobalVariables.flagAllowProcessMonitoring)
+  { stOutput << "Monitoring computations is not allowed on this server (to avoid server load).<br> "
     << "If you want to carry out a long computation you will need to install the calculator on your own machine.<br> "
-    << "At the moment, the only way to do that is by compiling the calculator from source.<br> "
-    << "This meant for linux experts only. Instructions follow. <br> "
-    << theGlobalVariables.ToStringSourceCodeInfo();
-  if (useTableTags)
-    stOutput << "</td></tr>";
-  if (useTableTags)
-    stOutput << "<tr><td>";
-  if (theGlobalVariables.flagAllowProcessMonitoring)
-    stOutput << this->GetJavaScriptIndicatorBuiltInServer(this->indexInParent, useTableTags);
-  if (useTableTags)
-    stOutput << "</td></tr>" << "</table></body></html>";
+    << "At the moment, the only way to do that is by setting the variable "
+    << "theGlobalVariables.flagAllowProcessMonitoring to true, "
+    << "achieved through manually compiling the calculator from source.<br> ";
+    return;
+  }
+  stOutput << "A progress indicator, as reported by your current computation, is displayed below. "
+  << "When done, your computation result will be displayed below. ";
+  stOutput << " <!>\n";
+//  out << "\n<br>\n<button onclick=\"progressReport()\">Manual report</button>";
+  stOutput << "\n<br>\n<button id=\"idButtonSendTogglePauseRequest\" onclick=\"SendTogglePauseRequest()\">Pause</button>";
+  stOutput << "<span id=\"idPauseToggleServerResponse\"></span>\n";
+  stOutput << "<span id=\"idProgressReportTimer\"></span>\n";
+  stOutput << "\n<br>\n<div id=\"idProgressReport\"></div>\n";
 
 //  theLog << logger::red << "Indicator: sending all bytes" << logger::endL;
   theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: sending all bytes.");
@@ -3312,7 +3132,6 @@ bool WebServer::CreateNewActiveWorker()
   }
   this->GetActiveWorker().indexInParent=this->activeWorker;
   this->GetActiveWorker().parent=this;
-  this->GetActiveWorker().timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
   this->GetActiveWorker().pingMessage="";
   if (found)
   { this->theWorkers[this->activeWorker].flagInUse=true;
@@ -3586,20 +3405,48 @@ void WebServer::TerminateChildSystemCall(int i)
   kill(this->theWorkers[i].ProcessPID, SIGKILL);
 }
 
-void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress)
+void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
+{ MacroRegisterFunctionWithName("WebServer::HandleTooManyConnections");
+  MonomialWrapper<std::string, MathRoutines::hashString>
+  incomingAddress(incomingUserAddress);
+  bool purgeIncomingAddress=
+  (this->currentlyConnectedAddresses.GetMonomialCoefficient(incomingAddress)>
+   this->MaxNumWorkersPerIPAdress);
+  if (!purgeIncomingAddress)
+    return;
+  List<double> theTimes;
+  List<int> theIndices;
+  for (int i=0; i<this->theWorkers.size; i++)
+    if (this->theWorkers[i].flagInUse)
+      if (this->theWorkers[i].userAddress==incomingAddress)
+      { theTimes.AddOnTop(this->theWorkers[i].timeServerAtWorkerStart);
+        theIndices.AddOnTop(i);
+      }
+  theTimes.QuickSortAscending(0, &theIndices);
+  for (int j=2; j<theTimes.size; j++)
+  { this->TerminateChildSystemCall(theIndices[j]);
+    std::stringstream errorStream;
+    errorStream
+    << "Terminating child " << theIndices[j]+1 << " with PID "
+    << this->theWorkers[theIndices[j]].ProcessPID
+    << ": address: " << incomingAddress << " opened more than "
+    << this->MaxNumWorkersPerIPAdress << " simultaneous connections. ";
+    this->theWorkers[theIndices[j]].pingMessage=errorStream.str();
+    logProcessKills << logger::red  << errorStream.str() << logger::endL;
+    this->NumProcessAssassinated++;
+  }
+}
+
+void WebServer::RecycleChildrenIfPossible()
 { //Listen for children who have exited properly.
   //This might need to be rewritten: I wasn't able to make this work with any
   //mechanism other than pipes.
   MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
 //  this->ReapChildren();
-  MonomialWrapper<std::string, MathRoutines::hashString> incomingAddress(incomingUserAddress);
   int numInUse=0;
   for (int i=0; i<this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
       numInUse++;
-  bool purgeIncomingAddress=
-  (this->currentlyConnectedAddresses.GetMonomialCoefficient(incomingAddress)>this->MaxNumWorkersPerIPAdress);
-
   for (int i=0; i<this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
     { this->theWorkers[i].pipeWorkerToServerControls.ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY();
@@ -3618,21 +3465,6 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
         (this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.TheObjects,
           this->theWorkers[i].pipeWorkerToServerUserInput.lastRead.size);
       this->theWorkers[i].pipeWorkerToServerTimerPing.ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY();
-      if (purgeIncomingAddress)
-        if (this->theWorkers[i].userAddress==incomingAddress)
-        { this->TerminateChildSystemCall(i);
-          std::stringstream errorStream;
-          errorStream
-          << "Terminating child " << i+1 << " with PID "
-          << this->theWorkers[i].ProcessPID
-          << ": purging all connections from " << incomingUserAddress
-          << ": address opened more than " << this->MaxNumWorkersPerIPAdress << " simultaneous connections. ";
-          this->theWorkers[i].pingMessage=errorStream.str();
-          logProcessKills << logger::red  << errorStream.str() << logger::endL;
-          numInUse--;
-          this->NumProcessAssassinated++;
-          continue;
-        }
       if (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.size>0)
       { this->theWorkers[i].pingMessage.assign
         (this->theWorkers[i].pipeWorkerToServerTimerPing.lastRead.TheObjects,
@@ -3641,20 +3473,26 @@ void WebServer::RecycleChildrenIfPossible(const std::string& incomingUserAddress
       } else if (this->theWorkers[i].PauseWorker.CheckPauseIsRequested_UNSAFE_SERVER_USE_ONLY())
       { this->theWorkers[i].pingMessage="worker paused, no pings.";
         this->theWorkers[i].timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
-      } else if (theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead>0 &&
-                 theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly>
-                 theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead &&
-                 this->theWorkers[i].flagInUse)
-      { this->TerminateChildSystemCall(i);
-        std::stringstream pingTimeoutStream;
-        pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
-        << " seconds passed since worker " << i+1
-        << " last pinged the server; killing pid: "
-        << this->theWorkers[i].ProcessPID << ". ";
-        logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
-        this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
-        numInUse--;
-        this->NumProcessAssassinated++;
+      } else
+      { bool presumedDead=false;
+        if (this->theWorkers[i].flagInUse)
+          if (theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead>0)
+            if (theGlobalVariables.GetElapsedSeconds()-
+                this->theWorkers[i].timeOfLastPingServerSideOnly>
+                theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead)
+              presumedDead=true;
+        if (presumedDead)
+        { this->TerminateChildSystemCall(i);
+          std::stringstream pingTimeoutStream;
+          pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
+          << " seconds passed since worker " << i+1
+          << " last pinged the server; killing pid: "
+          << this->theWorkers[i].ProcessPID << ". ";
+          logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
+          this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
+          numInUse--;
+          this->NumProcessAssassinated++;
+        }
       }
     }
   if (numInUse<=this->MaxTotalUsedWorkers)
@@ -3873,7 +3711,8 @@ int WebServer::Run()
       continue;
     inet_ntop
     (their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), userAddressBuffer, sizeof userAddressBuffer);
-    this->RecycleChildrenIfPossible(userAddressBuffer);
+    this->HandleTooManyConnections(userAddressBuffer);
+    this->RecycleChildrenIfPossible();
     if (!this->CreateNewActiveWorker())
     { logPlumbing << logger::purple << "Failed to create an active worker. System error string: "
       << strerror(errno) << logger::endL;
@@ -3881,13 +3720,20 @@ int WebServer::Run()
       close (newConnectedSocket);
       continue;
     }
+    /////////////
     this->GetActiveWorker().connectedSocketID=newConnectedSocket;
+    this->GetActiveWorker().flagUsingSSLInWorkerProcess=theGlobalVariables.flagUsingSSLinCurrentConnection;
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease=newConnectedSocket;
+    this->GetActiveWorker().timeServerAtWorkerStart=
+    theGlobalVariables.GetElapsedSeconds();
+    this->GetActiveWorker().timeOfLastPingServerSideOnly=
+    this->GetActiveWorker().timeServerAtWorkerStart;
     this->NumConnectionsSoFar++;
     this->GetActiveWorker().connectionID=this->NumConnectionsSoFar;
     this->GetActiveWorker().userAddress.theObject=userAddressBuffer;
     this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1 );
 //    theLog << this->ToStringStatus();
+    /////////////
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
@@ -4075,12 +3921,12 @@ int WebServer::main(int argc, char **argv)
   InitializeGlobalObjects();
   theWebServer.AnalyzeMainArguments(argc, argv);
   theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit-2;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit+20;
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
   theGlobalVariables.flagAceIsAvailable=
   FileOperations::FileExistsVirtual("MathJax-2.6-latest/", false);
-  if ( false &&
+  if ( true &&
       theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
     << logger::purple << "************************" << logger::endL
@@ -4090,7 +3936,7 @@ int WebServer::main(int argc, char **argv)
     theGlobalVariables.flagAllowProcessMonitoring=true;
   }
   if (theGlobalVariables.flagRunningBuiltInWebServer)
-  {  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)
+  { if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)
       theLog
       << logger::purple << "************************" << logger::endL
       << logger::red << "WARNING: no computation time limit set. " << logger::endL

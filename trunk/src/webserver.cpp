@@ -1055,8 +1055,6 @@ void WebWorker::OutputResultAfterTimeout()
   if (standardOutputStreamAfterTimeout.str().size()!=0)
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
   out << theParser.ToStringOutputAndSpecials();
-
-  out << theParser.outputCommentsString;
   std::fstream outputTimeOutFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual
   (outputTimeOutFile, "output/" + theGlobalVariables.RelativePhysicalNameOutpuT, false, true, false);
@@ -2147,34 +2145,12 @@ int WebWorker::ProcessCompute()
   this->flagProgressReportAllowed=true;
   theParser.Evaluate(theParser.inputString);
   this->flagProgressReportAllowed=false;
-  //std::cout << "DEBUG: EvaluateD! ";
-  //std::cout.flush();
-  std::string urledInput=CGI::StringToURLString(theParser.inputString, false);
   if (theGlobalVariables.flagRunningBuiltInWebServer)
     if (theGlobalVariables.flagOutputTimedOut)
     { this->OutputResultAfterTimeout();
       return 0;
     }
-  //std::cout << "DEBUG: got to before output and specials! ";
-  //std::cout.flush();
-  if (theParser.inputString!="")
-    stOutput << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=calculator&mainInput=" << urledInput << "\">Link to your input (reloads page).</a><br>";
-  stOutput <<  "<table style=\"vertical-align: top\"><tr><td style=\"vertical-align: top\">" << theParser.outputString << "</td>"
-  << "<td style=\"vertical-align: top\">"
-  ;
-
-  stOutput << theParser.ToStringPerformance();
-  if(theParser.outputCommentsString!="")
-    stOutput << "<br><b>Comments.</b><br>" << theParser.outputCommentsString;
-  stOutput << "</td></tr></table>";
-  if (theParser.flagProduceLatexLink)
-    stOutput << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
-    << CGI::GetLatexEmbeddableLinkFromCalculatorInput(urledInput, theParser.inputString)
-    ;
-  if (theParser.parsingLog!="")
-    stOutput << "<b> As requested, here is a calculator parsing log</b><br>" << theParser.parsingLog;
-
+  stOutput << theParser.ToStringOutputAndSpecials();
   theGlobalVariables.flagComputationCompletE=true;
   return 0;
 }

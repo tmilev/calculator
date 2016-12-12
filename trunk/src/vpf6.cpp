@@ -2268,14 +2268,24 @@ std::string Calculator::ToStringOutputAndSpecials()
   std::string urledInput=CGI::StringToURLString(this->inputString, false);
   if (this->inputString!="")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=compute&mainInput=" << urledInput << "\">Link to your input (reloads page).</a><br>";
-  out << this->outputString;
+    << "?request=calculator&mainInput="
+    << urledInput << "\">Link to your input (reloads page).</a><br>";
+  out <<  "<table style=\"vertical-align: top\"><tr><td style=\"vertical-align: top\">"
+  << this->outputString << "</td>"
+  << "<td style=\"vertical-align: top\">"
+  ;
+
+  out << this->ToStringPerformance();
+  if(this->outputCommentsString!="")
+    out << "<br><b>Comments.</b><br>" << this->outputCommentsString;
+  out << "</td></tr></table>";
   if (this->flagProduceLatexLink)
     out << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
     << CGI::GetLatexEmbeddableLinkFromCalculatorInput(urledInput, this->inputString)
-    << "<br>Input string raw: <br>" << urledInput;
+    ;
   if (this->parsingLog!="")
-    out << "<b> As requested, here is a calculator parsing log</b><br>" << this->parsingLog;
+    out << "<b> As requested, here is a calculator parsing log</b><br>"
+    << this->parsingLog;
   return out.str();
 }
 

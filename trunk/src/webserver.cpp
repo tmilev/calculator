@@ -203,9 +203,10 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "\n<script type=\"text/javascript\" id=\"progressReportJavascript\"> \n";
   out << "var isPaused=false;\n";
   out << "var isFinished=false;\n";
-  out << "var timeIncrementInTenthsOfSecond=20;//measured in tenths of a second\n";
+  out << "var timeIncrementInTenthsOfSecond=4;//measured in tenths of a second\n";
   out << "var timeOutCounter=0;//measured in tenths of a second\n";
-  out << "\nfunction progressReport(workerNumber)\n";
+  out << "var currentWorkerNumber=-1;//\n";
+  out << "\nfunction progressReport()\n";
   out << "{ if (isFinished)\n";
   out << "    return;\n";
   out << "  clearTimeout(progressReport);\n";
@@ -218,7 +219,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "  progReport.style.display = '';\n";
   out << "  timeOutCounter+=timeIncrementInTenthsOfSecond;\n";
   out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable
-  << "?request=indicator&mainInput=\"+workerNumber;\n";
+  << "?request=indicator&mainInput=\"+currentWorkerNumber;\n";
   out << "  var https = new XMLHttpRequest();\n";
   //out << "alert(sURL);\n";
   out << "  https.open(\"GET\",sURL,true);\n"
@@ -243,7 +244,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "    return;\n";
   out << "  var pauseRequest = new XMLHttpRequest();\n";
   out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameExecutable
-  << "?request=pause&mainInput=\"+workerNumber;\n";
+  << "?request=pause&mainInput=\"+currentWorkerNumber;\n";
 //  out << "alert(pauseURL);\n";
   out << "  pauseRequest.open(\"GET\",pauseURL,true);\n";
 //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
@@ -1465,8 +1466,10 @@ int WebWorker::ProcessMonitor()
   int inputWebWorkerNumber= atoi(theMainInput.c_str());
   stOutput << "<html><body>"
   << this->GetJavaScriptIndicatorBuiltInServer()
-  << "<script language=\"javascript\">progressReport("
-  << inputWebWorkerNumber << "); </script>"
+  << "<script language=\"javascript\">\n"
+  << "currentWorkerNumber=" << inputWebWorkerNumber << ";\n"
+  << "progressReport();\n"
+  <<" </script>"
   << "</body></html>";
   return 0;
 }
@@ -2171,7 +2174,7 @@ int WebWorker::ProcessCalculator()
   stOutput << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile();
   stOutput << HtmlSnippets::GetJavascriptCanvasGraphics();
   stOutput << CGI::GetJavascriptAutocompleteWithTags();
-  stOutput << CGI::GetJavascriptInitilizeButtons();
+  stOutput << CGI::GetJavascriptInitializeButtons();
   stOutput << CGI::GetJavascriptMathQuillMatrixSupport();
   stOutput << this->GetJavaScriptIndicatorBuiltInServer();
 
@@ -2830,6 +2833,14 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   << "When done, your computation result will be displayed below. ";
   stOutput << " <!>\n";
 //  out << "\n<br>\n<button onclick=\"progressReport()\">Manual report</button>";
+  if (this->indexInParent<0)
+    crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
+  stOutput << "\n<script language=\"javascript\">\n"
+  << "currentWorkerNumber=" << this->indexInParent+1 << ";\n "
+  << "progressReport();\n"
+  << "</script>"
+//  << "DEBUG: javascript: " << "progressReport();"
+  ;
   stOutput << "\n<br>\n<button id=\"idButtonSendTogglePauseRequest\" onclick=\"SendTogglePauseRequest()\">Pause</button>";
   stOutput << "<span id=\"idPauseToggleServerResponse\"></span>\n";
   stOutput << "<span id=\"idProgressReportTimer\"></span>\n";
@@ -2943,6 +2954,7 @@ WebServer::~WebServer()
 void WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone()
 { //theLog << logger::red << ("Got THUS far") << logger::endL;
 //  theLog << "here am i";
+  MacroRegisterFunctionWithName("WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone");
   theWebServer.GetActiveWorker().OutputShowIndicatorOnTimeout();
 //  stOutput << "What the hell";
 //  stOutput.Flush();
@@ -3399,7 +3411,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
         theIndices.AddOnTop(i);
       }
   theTimes.QuickSortAscending(0, &theIndices);
-  for (int j=2; j<theTimes.size; j++)
+  for (int j=0; j<theTimes.size; j++)
   { this->TerminateChildSystemCall(theIndices[j]);
     std::stringstream errorStream;
     errorStream

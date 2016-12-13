@@ -90,7 +90,7 @@ public:
   static std::string StringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr);
   static std::string DoubleBackslashes(const std::string& input);
   static std::string& GetMathQuillStyleSheetWithTags();
-  static std::string& GetJavascriptInitilizeButtons();
+  static std::string& GetJavascriptInitializeButtons();
   static std::string& GetJavascriptAceEditorScript();
   static std::string& GetCalculatorStyleSheetWithTags();
   static std::string& GetJavascriptAutocompleteWithTags();

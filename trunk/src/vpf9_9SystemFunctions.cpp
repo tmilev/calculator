@@ -115,13 +115,14 @@ bool TimerThreadData::HandleComputationTimeout()
     return false;
   if (elapsedComputationTime<=theGlobalVariables.MaxComputationTimeBeforeWeTakeAction)
     return false;
+  MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
 //  std::cout << "GOT TO HERE\n";
   if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection==0)
     return false;
 //  std::cout << "GOT TO HERE pt 2\n";
   if (theGlobalVariables.flagOutputTimedOut )
     return false;
-  std::cout << "GOT TO HERE pt 3\n";
+//  std::cout << "GOT TO HERE pt 3\n";
   theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed=true;
   //theReport2.SetStatus("Starting timer cycle displaying time out explanation.");
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();

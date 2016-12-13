@@ -757,7 +757,7 @@ void CGI::LoadStrings()
   CGI::GetJavascriptMathQuillDefault();
   CGI::GetCalculatorStyleSheetWithTags();
   CGI::GetMathQuillStyleSheetWithTags();
-  CGI::GetJavascriptInitilizeButtons();
+  CGI::GetJavascriptInitializeButtons();
   CGI::GetJavascriptAceEditorScript();
 }
 
@@ -782,7 +782,7 @@ std::string& CGI::GetJavascriptAceEditorScript()
   return CGI::JavascriptAceEditorScript;
 }
 
-std::string& CGI::GetJavascriptInitilizeButtons()
+std::string& CGI::GetJavascriptInitializeButtons()
 { if (CGI::JavascriptInitializeButtons!="")
     return CGI::JavascriptInitializeButtons;
   std::stringstream out, commentsOnFailure;

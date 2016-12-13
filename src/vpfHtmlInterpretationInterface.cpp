@@ -370,7 +370,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   out << thePage.outputHtmlHeadNoTag;
   out << HtmlSnippets::GetJavascriptStandardCookies();
   if (includeDeadlineJavascript)
-    out << CGI::GetJavascriptInitilizeButtons();
+    out << CGI::GetJavascriptInitializeButtons();
   out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << "<body" //<< ">"
   << " onload=\"loadSettings();";
@@ -407,7 +407,7 @@ std::string HtmlInterpretation::GetExamPage()
     out << CGI::GetJavascriptMathQuillDefault() << "\n";
   out << CGI::GetMathQuillStyleSheetWithTags() << "\n"
   << CGI::GetCalculatorStyleSheetWithTags() << "\n"  ;
-  out << CGI::GetJavascriptInitilizeButtons() << "\n";
+  out << CGI::GetJavascriptInitializeButtons() << "\n";
   if (theFile.flagLoadedSuccessfully)
     out << theFile.outputHtmlHeadNoTag;
   //<- ?????must come after theFile.outputHtmlHeadNoTag
@@ -1484,6 +1484,8 @@ std::string HtmlInterpretation::ToStringNavigation()
   //out << "<table>";
   std::string linkSeparator=" | ";
   std::string linkBigSeparator=" || ";
+  if (theGlobalVariables.flagAllowProcessMonitoring)
+    out << "<span style=\"color:red\"><b>Monitoring on</b></span>" << linkSeparator;
   if (theGlobalVariables.userCalculatorRequestType=="template")
     out << "<b>Home</b>" << linkSeparator;
   else

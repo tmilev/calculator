@@ -12,9 +12,10 @@ static ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogist
 //this class is similar to the controller class but coordinates across different processes,
 //rather than across different threads.
 //inter-process communication is achieved via pipes.
-class PauseController
+class PauseProcess
 {
 public:
+  static std::string currentProcessName;
   List<int> thePausePipe; //thePipe[0] is the read end; thePipe[1] is the write end.
   List<int> mutexPipe;
   List<char> buffer;
@@ -24,6 +25,7 @@ public:
   std::string ToString()const;
   void Release();
   bool CreateMe(const std::string& inputName);
+  void ResetNoAllocation();
 
   bool CheckConsistency();
   bool CheckPauseIsRequested();
@@ -37,8 +39,8 @@ public:
   void LoCkMe();
   void UnloCkMe();
   static void Release(int& theDescriptor);
-  PauseController();
-  ~PauseController();
+  PauseProcess();
+  ~PauseProcess();
 };
 
 class Pipe
@@ -48,7 +50,7 @@ private:
   void WriteNoLocks(const std::string& toBeSent);
 public:
   List<int> thePipe; //thePipe[0] is the read end; thePipe[1] is the write end.
-  PauseController pipeAvailable;
+  PauseProcess pipeAvailable;
   List<char> lastRead;
   List<char> pipeBuffer;
   bool flagDeallocated;
@@ -69,6 +71,7 @@ public:
   void Release();
   bool CheckConsistency();
   bool CreateMe(const std::string& inputPipeName);
+  void ResetNoAllocation();
   ~Pipe();
   Pipe();
 };

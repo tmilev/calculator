@@ -5990,8 +5990,8 @@ class ConeLatticeAndShiftMaxComputation
 
   std::string ToString(FormatExpressions* theFormat=0);
   void init(Vector<Rational>& theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational> & startingShift);
-  void FindExtremaParametricStep1(Controller& thePauseController);
-  void FindExtremaParametricStep2TrimChamberForMultOne(Controller& thePauseController);
+  void FindExtremaParametricStep1(PauseThread& thePauseController);
+  void FindExtremaParametricStep2TrimChamberForMultOne(PauseThread& thePauseController);
   void FindExtremaParametricStep3();
   void FindExtremaParametricStep4();
   void FindExtremaParametricStep5();

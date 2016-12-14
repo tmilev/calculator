@@ -209,14 +209,13 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "\nfunction progressReport()\n";
   out << "{ if (isFinished)\n";
   out << "    return;\n";
-  out << "  clearTimeout(progressReport);\n";
+  out << "  clearTimeout(this.timeoutID);\n";
   out << "  var progReport = document.getElementById(\"idProgressReport\");	\n";
+  out << "  var requestStatus = document.getElementById(\"idProgressReportRequestStatus\");	\n";
   out << "  var progReportTimer = document.getElementById(\"idProgressReportTimer\");	\n";
   out << "  if(isPaused)\n";
   out << "    return;\n";
   out << "  progReportTimer.innerHTML =\"<hr>Refreshing every \"+timeIncrementInTenthsOfSecond/10+\" second(s). Client time: ~\"+ Math.floor(timeOutCounter/10)+\" second(s)<br>\";\n";
-  out << "  progReportTimer.style.display = '';\n";
-  out << "  progReport.style.display = '';\n";
   out << "  timeOutCounter+=timeIncrementInTenthsOfSecond;\n";
   out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable
   << "?request=indicator&mainInput=\"+currentWorkerNumber;\n";
@@ -228,29 +227,33 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   << "    newReportString= https.responseText;\n"
   << "    if (https.responseText==\"finished\")\n"
   << "    { isFinished=true;\n"
-  << "      document.getElementById(\"idPauseToggleServerResponse\").innerHTML=\"Computation finished.\";\n"
+  << "      requestStatus.innerHTML=\"<span style='color:green'><b>Computation finished.</b></span>\";\n"
   << "      return;\n"
   << "    }\n"
   << "    if (https.responseText!=\"\")\n"
-  << "      progReport.innerHTML=newReportString+\"<hr>\";\n"
+  << "    { progReport.innerHTML=newReportString+\"<hr>\";\n"
+  << "      requestStatus.innerHTML='';"
+  << "    }else"
+  << "      requestStatus.innerHTML=\"<span style='color:red'><b>Empty response</b></span>\";"
   << "  }\n"
   ////////////////////////////////////////////
+  << "  requestStatus.innerHTML = \"<span style='color:orange'><b>Request sent</b></span>\";\n"
   << "  https.send(null);\n";
 //  out << "  if (oRequest.status==200)\n";
-  out << "   window.setTimeout(\"progressReport()\",timeIncrementInTenthsOfSecond*100);\n";
+  out << "   this.timeoutID =window.setTimeout(\"progressReport()\",timeIncrementInTenthsOfSecond*100);\n";
   out << " }\n";
   out << "function SendTogglePauseRequest()\n";
   out << "{ if (isFinished)\n";
   out << "    return;\n";
+  out << "  var requestStatus = document.getElementById(\"idProgressReportRequestStatus\");	\n";
   out << "  var pauseRequest = new XMLHttpRequest();\n";
   out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameExecutable
   << "?request=pause&mainInput=\"+currentWorkerNumber;\n";
-//  out << "alert(pauseURL);\n";
   out << "  pauseRequest.open(\"GET\",pauseURL,true);\n";
-//  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
   out << "  pauseRequest.send(null)\n";
   out << "  if (pauseRequest.status!=200)\n";
   out << "    return;\n";
+  out << "  requestStatus.innerHTML=pauseRequest.responseText;\n";
   out << "  if(pauseRequest.responseText==\"paused\")\n";
   out << "    isPaused=true;\n";
   out << "  if(pauseRequest.responseText==\"unpaused\")\n";
@@ -259,7 +262,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "    document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Continue\";\n";
   out << "  else\n";
   out << "    document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Pause\";\n";
-  out << "  document.getElementById(\"idPauseToggleServerResponse\").innerHTML=pauseRequest.responseText;\n";
+  out << "  document.getElementById(\"idProgressReportRequestStatus\").innerHTML=pauseRequest.responseText;\n";
   out << "  if (!isPaused)\n";
   out << "    progressReport();\n";
   out << "}\n";
@@ -1079,22 +1082,18 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
   //requesting pause which will be cleared by the receiver of pipeWorkerToServerIndicatorData
   theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked();
   theLog << logger::blue << "Sending result through indicator pipe." << logger::endL;
-  ProgressReportWebServer theReport("Sending result through indicator pipe.");
 
   theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterEmptying(input);
   logBlock << logger::blue << "Final output written to indicator, blocking until data "
   << "is received on the other end." << logger::endL;
-  theReport.SetStatus("Blocking until result data is received.");
   if(!theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut())
-    theReport.SetStatus("Computation report NOT RECEIVED (timed out).");
+  {}
   else
-  { theReport.SetStatus("Computation report received.");
-  //requesting pause which will be cleared by the receiver of pipeWorkerToServerIndicatorData
+  {//requesting pause which will be cleared by the receiver of pipeWorkerToServerIndicatorData
     theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked();
   }
 //  theLog << logger::red << "Result data is received, sending \"finished\"." << logger::endL;
   theWebServer.GetActiveWorker().pipeWorkerToServerIndicatorData.WriteAfterEmptying("finished");
-  theReport.SetStatus(" \"finished\" sent through indicator pipe, waiting.");
   theLog << logger::red << "\"finished\" sent through indicator pipe, waiting." << logger::endL;
   theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut();
 }
@@ -1423,7 +1422,6 @@ int WebWorker::ProcessServerStatus()
 int WebWorker::ProcessPauseWorker()
 { MacroRegisterFunctionWithName("WebWorker::ProcessPauseWorker");
   this->SetHeaderOKNoContentLength();
-  theLog << "Proceeding to toggle worker pause." << logger::endL;
   std::string theMainInput=theGlobalVariables.GetWebInput("mainInput");
   if (theMainInput=="")
   { stOutput << "<b>To pause a worker please provide the worker number in the mainInput field.</b>";
@@ -1441,6 +1439,12 @@ int WebWorker::ProcessPauseWorker()
     << this->parent->theWorkers.size << ". </b>";
     return 0;
   }
+  if (inputWebWorkerIndex==this->indexInParent)
+  { stOutput << "Worker " << inputWebWorkerIndex
+    << " attempts to pause itself, this is not allowed.";
+    return 0;
+  }
+  theLog << "Proceeding to toggle worker pause." << logger::endL;
   WebWorker& otherWorker=this->parent->theWorkers[inputWebWorkerIndex];
 //  if (theGlobalVariables.flagLogInterProcessCommunication)
 //  theLog << "About to read pipeServerToWorker..." << logger::endL;
@@ -1488,18 +1492,21 @@ int WebWorker::ProcessComputationIndicator()
   int inputWebWorkerIndex= inputWebWorkerNumber-1;
   if (inputWebWorkerIndex<0 || inputWebWorkerIndex>=this->parent->theWorkers.size)
   { stOutput << "<b>Indicator error. Worker number "
-    << inputWebWorkerNumber << " is out of range: there are " << this->parent->theWorkers.size
+    << inputWebWorkerNumber << " is out of range: there are "
+    << this->parent->theWorkers.size
     << " workers. </b>";
     return 0;
   }
   std::stringstream theErrorMessageStream;
   theErrorMessageStream
   << "<span style=\"color:red\">Your computation may have terminated unexpectedly. The maximum number of "
-  << " connections/computations you can run is: " << theWebServer.MaxNumWorkersPerIPAdress << ". </span>"
+  << " connections/computations you can run is: "
+  << theWebServer.MaxNumWorkersPerIPAdress << ". </span>"
   << "At the time of writing, you use up 1 connection per computation, "
   << "1 - 4 connections for each web browser request (depending on the browser) "
   << "and 1 per computation window request. The "
-  << "most recent error message reported by the worker you want to monitor is: "
+  << "most recent error message reported by the "
+  << "worker you want to monitor is: "
   << this->parent->theWorkers[inputWebWorkerIndex].pingMessage;
   if (!this->parent->theWorkers[inputWebWorkerIndex].flagInUse)
   { stOutput << "<b>Indicator error. Worker number "
@@ -1523,7 +1530,7 @@ int WebWorker::ProcessComputationIndicator()
   }
   if (otherWorker.flagUsingSSLInWorkerProcess!=this->flagUsingSSLInWorkerProcess)
   { stOutput << "Monitoring https connections over http, "
-    << "http connection over http is not allowed. ";
+    << "http connection over https is not allowed. ";
     return 0;
   }
 //  theLog << "Worker " << this->parent->activeWorker
@@ -1564,19 +1571,21 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   static int counter=0;
   counter++;
   std::stringstream debugStream1, debugStream2;
-  debugStream1 << "PipeProgressReportToParentProcess called " << counter << " times. Calling pause...";
-  ProgressReportWebServer theReport(debugStream1.str());
+  //debugStream1 << "PipeProgressReportToParentProcess called " << counter << " times. Calling pause...";
+  //ProgressReportWebServer theReport(debugStream1.str());
   this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
 //    theLog << "about to potentially block " << logger::endL;
-  debugStream2 << "PipeProgressReportToParentProcess called " << counter << " times. Pause passed...";
-  theReport.SetStatus(debugStream2.str());
+  //debugStream2 << "PipeProgressReportToParentProcess called "
+  //<< counter << " times. Pause passed...";
+  //std::cout << debugStream2.str();
+  //theReport.SetStatus(debugStream2.str());
   if (this->PauseWorker.CheckPauseIsRequested())
-  { theReport.SetStatus("PipeProgressReportToParentProcess: pausing as requested...");
+  { std::cout << "DEBUG: PipeProgressReportToParentProcess: pausing as requested...";
     this->WriteProgressReportToFile(input);
   }
   this->PauseWorker.PauseIfRequested();     //if pause was requested, here we block
 //    theLog << "(possible) block passed" << logger::endL;
-  theReport.SetStatus("PipeProgressReportToParentProcess: computing...");
+//  theReport.SetStatus("PipeProgressReportToParentProcess: computing...");
   this->pipeServerToWorkerRequestIndicator.Read();
   if (this->pipeServerToWorkerRequestIndicator.lastRead.size==0)
   { this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny();
@@ -1588,11 +1597,11 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   }
 //  if (theGlobalVariables.flagLogInterProcessCommunication)
 //  theLog << " data written!";
-  theReport.SetStatus("PipeProgressReportToParentProcess: piping computation process...");
+  //theReport.SetStatus("PipeProgressReportToParentProcess: piping computation process...");
   this->pipeWorkerToServerIndicatorData.WriteAfterEmptying(input);
-  theReport.SetStatus("PipeProgressReportToParentProcess: exiting 1...");
+  //theReport.SetStatus("PipeProgressReportToParentProcess: exiting 1...");
   this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny();
-  theReport.SetStatus("PipeProgressReportToParentProcess: exiting 2...");
+  //theReport.SetStatus("PipeProgressReportToParentProcess: exiting 2...");
 }
 
 int WebWorker::ProcessFolder()
@@ -2790,6 +2799,19 @@ int WebWorker::ServeClient()
   return this->ProcessFile();
 }
 
+void WebWorker::ResetPipesNoAllocation()
+{ MacroRegisterFunctionWithName("WebWorker::ResetPipesNoAllocation");
+  this->PauseComputationReportReceived.ResetNoAllocation();
+  this->PauseWorker.ResetNoAllocation();
+  this->PauseIndicatorPipeInUse.ResetNoAllocation();
+  this->pipeWorkerToServerTimerPing.ResetNoAllocation();
+  this->pipeWorkerToServerControls.ResetNoAllocation();
+  this->pipeServerToWorkerRequestIndicator.ResetNoAllocation();
+  this->pipeWorkerToServerIndicatorData.ResetNoAllocation();
+  this->pipeWorkerToServerUserInput.ResetNoAllocation();
+  this->pipeWorkerToServerWorkerStatus.ResetNoAllocation();
+}
+
 void WebWorker::ReleaseKeepInUseFlag()
 { MacroRegisterFunctionWithName("WebWorker::ReleaseMyPipe");
   this->pipeWorkerToServerTimerPing.Release();
@@ -2812,10 +2834,11 @@ void WebWorker::Release()
 
 void WebWorker::OutputShowIndicatorOnTimeout()
 { MacroRegisterFunctionWithName("WebWorker::OutputShowIndicatorOnTimeout");
-  this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
+  MutexLockGuard theLock(this->PauseIndicatorPipeInUse.mutexForProcessBlocking.GetElement());
+//  this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
   theGlobalVariables.flagOutputTimedOut=true;
   theGlobalVariables.flagTimedOutComputationIsDone=false;
-  ProgressReportWebServer theReport("WebServer::OutputShowIndicatorOnTimeout");
+  //  ProgressReportWebServer theReport("WebServer::OutputShowIndicatorOnTimeout");
   theLog << logger::blue << "Computation timeout, sending progress indicator instead of output. " << logger::endL;
   if (theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed)
   { stOutput << "Your computation is taking more than " << theGlobalVariables.MaxComputationTimeBeforeWeTakeAction
@@ -2836,20 +2859,21 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   if (this->indexInParent<0)
     crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
   stOutput << "\n<script language=\"javascript\">\n"
+  << "isFinished=false;\n "
   << "currentWorkerNumber=" << this->indexInParent+1 << ";\n "
   << "progressReport();\n"
   << "</script>"
 //  << "DEBUG: javascript: " << "progressReport();"
   ;
   stOutput << "\n<br>\n<button id=\"idButtonSendTogglePauseRequest\" onclick=\"SendTogglePauseRequest()\">Pause</button>";
-  stOutput << "<span id=\"idPauseToggleServerResponse\"></span>\n";
+  stOutput << "\n<span id=\"idProgressReportRequestStatus\"></span>";
   stOutput << "<span id=\"idProgressReportTimer\"></span>\n";
   stOutput << "\n<br>\n<div id=\"idProgressReport\"></div>\n";
 
 //  theLog << logger::red << "Indicator: sending all bytes" << logger::endL;
-  theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: sending all bytes.");
+  //theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: sending all bytes.");
   this->SendAllBytesWithHeaders();
-  theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: all bytes sent.");
+  //theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: all bytes sent.");
 //  theLog << logger::blue << "Indicator: sending all bytes DONE" << logger::endL;
   for (int i=0; i<this->parent->theWorkers.size; i++)
     if (i!=this->indexInParent)
@@ -2868,9 +2892,9 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   crash.CleanUpFunction=WebWorker::OutputCrashAfterTimeout;
   //note that standard output cannot be rewired in the beginning of the function as we use the old stOutput
   stOutput.theOutputFunction=WebWorker::StandardOutputAfterTimeOut;
-  theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: continuing computation.");
-  this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny();
-  theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: exiting function.");
+  //theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: continuing computation.");
+  this->PauseIndicatorPipeInUse.mutexForProcessBlocking.GetElement().UnlockMe();
+  //theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: exiting function.");
 //  this->SignalIamDoneReleaseEverything();
 //  theLog << consoleGreen("Indicator: released everything and signalled end.") << logger::endL;
 }
@@ -3127,26 +3151,32 @@ bool WebServer::CreateNewActiveWorker()
   }
   this->GetActiveWorker().Release();
   this->theWorkers[this->activeWorker].flagInUse=false; //<-until everything is initialized, we cannot be in use.
-  if (!this->GetActiveWorker().PauseComputationReportReceived.CreateMe("server to worker computation report received"))
+  std::stringstream stowstream, wtosStream;
+  stowstream << "S->W" << this->activeWorker+1 << ": ";
+  wtosStream << "W" << this->activeWorker+1 << "->S: ";
+  std::string stow = stowstream.str();
+  std::string wtos = wtosStream.str();
+  if (!this->GetActiveWorker().PauseComputationReportReceived.CreateMe(stow+"report received"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (!this->GetActiveWorker().PauseWorker.CreateMe("server to worker pause"))
+  if (!this->GetActiveWorker().PauseWorker.CreateMe(stow+"pause"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (!this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe("server to worker indicator pipe in use"))
+  if (!this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe(stow+"ind. pipe busy"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (!this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe("server to worker request indicator"))
+  if (!this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe(stow+"request indicator"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (!this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe("worker to server timer ping"))
+  if (!this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe(wtos+"ping"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (!this->GetActiveWorker().pipeWorkerToServerControls.CreateMe("worker to server controls"))
+  if (!this->GetActiveWorker().pipeWorkerToServerControls.CreateMe(wtos+"controls"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (!this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe("worker to server indicator data"))
+  if (!this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe(wtos+"indicator data"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (!this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe("worker to server user input"))
+  if (!this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe(wtos+"user input"))
     return this->EmergencyRemoval_LastCreatedWorker();
-  if (!this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe("worker to server worker status"))
+  if (!this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe(wtos+"worker status"))
     return this->EmergencyRemoval_LastCreatedWorker();
   logPlumbing << logger::green
-  << "Allocated new worker & plumbing data structures. Total worker data structures: " << this->theWorkers.size << ". "
+  << "Allocated new worker & plumbing data structures. Total worker data structures: "
+  << this->theWorkers.size << ". "
   << logger::endL;
   this->theWorkers[this->activeWorker].flagInUse=true;
   return true;
@@ -3391,6 +3421,7 @@ void WebServer::TerminateChildSystemCall(int i)
 { this->theWorkers[i].flagInUse=false;
   this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
   kill(this->theWorkers[i].ProcessPID, SIGKILL);
+  this->theWorkers[i].ResetPipesNoAllocation();
 }
 
 void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
@@ -3441,7 +3472,8 @@ void WebServer::RecycleChildrenIfPossible()
       if (this->theWorkers[i].pipeWorkerToServerControls.lastRead.size>0)
       { this->theWorkers[i].flagInUse=false;
         this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
-        theLog << logger::green << "Worker " << i+1 << " done, marking for reuse. " << logger::endL;
+        theLog << logger::green << "Worker "
+        << i+1 << " done, marking for reuse. " << logger::endL;
         numInUse--;
         this->NumWorkersNormallyExited++;
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
@@ -3630,7 +3662,7 @@ int WebServer::Run()
   theParser.flagShowCalculatorExamples=false;
   if (!this->initPrepareWebServerALL())
     return 1;
-  theLog << logger::purple <<  "server: waiting for connections...\r\n" << logger::endL;
+  theLog << logger::purple << "server: waiting for connections...\r\n" << logger::endL;
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size = sizeof their_addr;
   char userAddressBuffer[INET6_ADDRSTRLEN];
@@ -3744,6 +3776,10 @@ int WebWorker::Run()
 { MacroRegisterFunctionWithName("WebWorker::Run");
   this->CheckConsistency();
   this->parent->flagThisIsWorkerProcess=true;
+  this->ResetPipesNoAllocation();
+  std::stringstream processNameStream;
+  processNameStream << "W" << this->indexInParent+1 << ": ";
+  PauseProcess::currentProcessName=processNameStream.str();
   //theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
   crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
@@ -3781,7 +3817,7 @@ int WebWorker::Run()
 }
 
 void WebServer::Release(int& theDescriptor)
-{ PauseController::Release(theDescriptor);
+{ PauseProcess::Release(theDescriptor);
 }
 
 extern int mainTest(List<std::string>& remainingArgs);
@@ -4128,8 +4164,8 @@ void WebWorker::SendAllBytesHttp()
   theLog.flush();
   double startTime=theGlobalVariables.GetElapsedSeconds();
   struct timeval tv; //<- code involving tv taken from stackexchange
-  tv.tv_sec = 5;  // 5 Secs Timeout
-  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  tv.tv_sec = 5; // 5 Secs Timeout
+  tv.tv_usec = 0; // Not init'ing this can cause strange errors
   int numTimesRunWithoutSending=0;
   int timeOutInSeconds =20;
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));

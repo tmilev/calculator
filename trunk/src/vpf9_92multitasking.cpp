@@ -99,14 +99,14 @@ void MutexRecursiveWrapper::UnlockMe()
   this->flagUnsafeFlagForDebuggingIsLocked=false;
 }
 
-void Controller::SafePointDontCallMeFromDestructors()
+void PauseThread::SafePointDontCallMeFromDestructors()
 { this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
   this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
   this->mutexSignalMeWhenReachingSafePoint.LockMe();
   this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
 }
 
-void Controller::SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint()
+void PauseThread::SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint()
 { this->mutexHoldMeWhenReadingOrWritingInternalFlags.LockMe();
   if (this->flagIsPausedWhileRunning)
   { this->mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
@@ -119,35 +119,35 @@ void Controller::SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSa
   this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
 }
 
-void Controller::UnlockSafePoint()
+void PauseThread::UnlockSafePoint()
 { this->flagIsPausedWhileRunning=false;
   this->mutexLockMeToPauseCallersOfSafePoint.UnlockMe();
 }
 
-void Controller::InitComputation()
+void PauseThread::InitComputation()
 { this->mutexSignalMeWhenReachingSafePoint.LockMe();
   this->flagIsRunning=true;
 }
 
-void Controller::ExitComputation()
+void PauseThread::ExitComputation()
 { this->flagIsRunning=false;
   this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
 }
 
-bool& Controller::GetFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe()
+bool& PauseThread::GetFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe()
 { return this->flagIsPausedWhileRunning;
 }
 
-bool& Controller::GetFlagIsRunningUnsafeUseWithMutexHoldMe()
+bool& PauseThread::GetFlagIsRunningUnsafeUseWithMutexHoldMe()
 { return this->flagIsRunning;
 }
 
-Controller::Controller()
+PauseThread::PauseThread()
 { this->flagIsRunning=false;
   this->flagIsPausedWhileRunning=false;
 }
 
-bool Controller::IsPausedWhileRunning()const
+bool PauseThread::IsPausedWhileRunning()const
 { return this->flagIsPausedWhileRunning;
 }
 

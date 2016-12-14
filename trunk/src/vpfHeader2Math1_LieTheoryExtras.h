@@ -105,7 +105,7 @@ class GeneralizedVermaModuleCharacters
 {
 public:
   inline static const std::string GetXMLClassName(){ return "GeneralizedVermaCharacters";}
-  Controller thePauseControlleR;
+  PauseThread thePauseControlleR;
   List<Matrix<Rational> > theLinearOperators;
   //the first k variables correspond to the Cartan of the smaller Lie algebra
   //the next l variables correspond to the Cartan of the larger Lie algebra

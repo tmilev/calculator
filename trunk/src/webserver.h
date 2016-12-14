@@ -57,9 +57,9 @@ public:
   List<char> remainingHeaderToSend;
   List<char> remainingBodyToSend;
   List<char> bufferFileIO;
-  PauseController PauseComputationReportReceived;
-  PauseController PauseWorker;
-  PauseController PauseIndicatorPipeInUse;
+  PauseProcess PauseComputationReportReceived;
+  PauseProcess PauseWorker;
+  PauseProcess PauseIndicatorPipeInUse;
   Pipe pipeServerToWorkerRequestIndicator;
   Pipe pipeWorkerToServerControls;
   Pipe pipeWorkerToServerTimerPing;
@@ -141,6 +141,7 @@ int recursionDepth=0)
   ;
   bool ShouldDisplayLoginPage();
   void SendAllAndWrapUp();
+  void ResetPipesNoAllocation();
   void reset();
   void resetMessageComponentsExceptRawMessage();
   void Release();

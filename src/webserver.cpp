@@ -203,7 +203,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "\n<script type=\"text/javascript\" id=\"progressReportJavascript\"> \n";
   out << "var isPaused=false;\n";
   out << "var isFinished=false;\n";
-  out << "var timeIncrementInTenthsOfSecond=4;//measured in tenths of a second\n";
+  out << "var timeIncrementInTenthsOfSecond=20;//measured in tenths of a second\n";
   out << "var timeOutCounter=0;//measured in tenths of a second\n";
   out << "var currentWorkerNumber=-1;//\n";
   out << "\nfunction progressReport()\n";
@@ -237,7 +237,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   << "      requestStatus.innerHTML=\"<span style='color:red'><b>Empty response</b></span>\";"
   << "  }\n"
   ////////////////////////////////////////////
-  << "  requestStatus.innerHTML = \"<span style='color:orange'><b>Request sent</b></span>\";\n"
+//  << "  requestStatus.innerHTML = \"<span style='color:orange'><b>Request sent</b></span>\";\n"
   << "  https.send(null);\n";
 //  out << "  if (oRequest.status==200)\n";
   out << "   this.timeoutID =window.setTimeout(\"progressReport()\",timeIncrementInTenthsOfSecond*100);\n";
@@ -250,21 +250,23 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameExecutable
   << "?request=pause&mainInput=\"+currentWorkerNumber;\n";
   out << "  pauseRequest.open(\"GET\",pauseURL,true);\n";
-  out << "  pauseRequest.send(null)\n";
-  out << "  if (pauseRequest.status!=200)\n";
-  out << "    return;\n";
-  out << "  requestStatus.innerHTML=pauseRequest.responseText;\n";
-  out << "  if(pauseRequest.responseText==\"paused\")\n";
-  out << "    isPaused=true;\n";
-  out << "  if(pauseRequest.responseText==\"unpaused\")\n";
-  out << "    isPaused=false;\n";
-  out << "  if (isPaused)\n";
-  out << "    document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Continue\";\n";
-  out << "  else\n";
-  out << "    document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Pause\";\n";
-  out << "  document.getElementById(\"idProgressReportRequestStatus\").innerHTML=pauseRequest.responseText;\n";
-  out << "  if (!isPaused)\n";
-  out << "    progressReport();\n";
+  out << "  pauseRequest.onload = function() {\n";
+  out << "    if (pauseRequest.status!=200)\n";
+  out << "      return;\n";
+  out << "    requestStatus.innerHTML=pauseRequest.responseText;\n";
+  out << "    if(pauseRequest.responseText==\"paused\")\n";
+  out << "      isPaused=true;\n";
+  out << "    if(pauseRequest.responseText==\"unpaused\")\n";
+  out << "      isPaused=false;\n";
+  out << "    if (isPaused)\n";
+  out << "      document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Continue\";\n";
+  out << "    else\n";
+  out << "      document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Pause\";\n";
+  out << "    document.getElementById(\"idProgressReportRequestStatus\").innerHTML=pauseRequest.responseText;\n";
+  out << "    if (!isPaused)\n";
+  out << "      progressReport();\n";
+  out << "   }\n";
+  out << "  pauseRequest.send(null);\n";
   out << "}\n";
 //  out << " progressReport();";
 //  out << " var newReportString=\"\";\n";
@@ -2860,6 +2862,7 @@ void WebWorker::OutputShowIndicatorOnTimeout()
     crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
   stOutput << "\n<script language=\"javascript\">\n"
   << "isFinished=false;\n "
+  << "isPaused=false;\n "
   << "currentWorkerNumber=" << this->indexInParent+1 << ";\n "
   << "progressReport();\n"
   << "</script>"

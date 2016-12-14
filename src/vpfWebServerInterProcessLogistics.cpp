@@ -8,35 +8,37 @@
 ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation
 (__FILE__, "Web server interprocess communication implementation.");
 
-void PauseController::Release(int& theDescriptor)
+std::string PauseProcess::currentProcessName="S: ";
+
+void PauseProcess::Release(int& theDescriptor)
 { close(theDescriptor);
   theDescriptor=-1;
 }
 
-void PauseController::Release()
-{ PauseController::Release(this->mutexPipe[0]);
-  PauseController::Release(this->mutexPipe[1]);
-  PauseController::Release(this->thePausePipe[0]);
-  PauseController::Release(this->thePausePipe[1]);
+void PauseProcess::Release()
+{ PauseProcess::Release(this->mutexPipe[0]);
+  PauseProcess::Release(this->mutexPipe[1]);
+  PauseProcess::Release(this->thePausePipe[0]);
+  PauseProcess::Release(this->thePausePipe[1]);
 }
 
-bool PauseController::CheckConsistency()
+bool PauseProcess::CheckConsistency()
 { if (this->flagDeallocated)
     crash << "Use after free of " << this->ToString() << crash;
   return true;
 }
 
-PauseController::PauseController()
+PauseProcess::PauseProcess()
 { this->thePausePipe.initFillInObject(2, -1);
   this->mutexPipe.initFillInObject(2, -1);
   this->flagDeallocated=false;
 }
 
-PauseController::~PauseController()
+PauseProcess::~PauseProcess()
 { this->flagDeallocated=true;
 }
 
-bool PauseController::CreateMe(const std::string& inputName)
+bool PauseProcess::CreateMe(const std::string& inputName)
 { this->Release();
 
   this->name=inputName;
@@ -64,21 +66,25 @@ bool PauseController::CreateMe(const std::string& inputName)
   }
 //  write (this->thePausePipe[1], "!", 1);
 //  write (this->mutexPipe[1], "!", 1);
-  Pipe::WriteNoInterrupts(this->thePausePipe[1], "!");
-  Pipe::WriteNoInterrupts(this->mutexPipe[1], "!");
+  this->ResetNoAllocation();
   return true;
 }
 
-void PauseController::PauseIfRequested()
+void PauseProcess::ResetNoAllocation()
+{ Pipe::WriteNoInterrupts(this->thePausePipe[1], "!");
+  Pipe::WriteNoInterrupts(this->mutexPipe[1], "!");
+}
+
+void PauseProcess::PauseIfRequested()
 { this->CheckConsistency();
   if (this->CheckPauseIsRequested())
-    logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
+    logBlock << logger::blue << this->currentProcessName << "blocking on " << this->ToString() << logger::endL;
   bool pauseWasRequested= !((read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size))>0);
   if (!pauseWasRequested)
     Pipe::WriteNoInterrupts(this->thePausePipe[1], "!");
 }
 
-bool PauseController::PauseIfRequestedWithTimeOut()
+bool PauseProcess::PauseIfRequestedWithTimeOut()
 { this->CheckConsistency();
   fd_set read_fds, write_fds, except_fds;
   FD_ZERO(&read_fds);
@@ -89,10 +95,10 @@ bool PauseController::PauseIfRequestedWithTimeOut()
   timeout.tv_sec = 10;
   timeout.tv_usec = 0;
   if (this->CheckPauseIsRequested())
-    logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
+    logBlock << logger::blue << this->currentProcessName << "Blocking on " << this->ToString() << logger::endL;
   bool pauseWasRequested=false;
   if (!(select(this->thePausePipe[0]+1, &read_fds, &write_fds, &except_fds, &timeout) == 1))
-  { logBlock << logger::green << "Blocking on " << this->ToString() << logger::green
+  { logBlock << logger::green << this->currentProcessName << "Blocking on " << this->ToString() << logger::green
     << " timed out. " << logger::endL;
     return false;
   }
@@ -102,12 +108,12 @@ bool PauseController::PauseIfRequestedWithTimeOut()
   return true;
 }
 
-void PauseController::RequestPausePauseIfLocked()
+void PauseProcess::RequestPausePauseIfLocked()
 { this->CheckConsistency();
   this->mutexForProcessBlocking.GetElement().LockMe();//<- make sure the pause controller is not locking itself
   //through competing threads
   if (this->CheckPauseIsRequested())
-    logBlock << logger::blue << "Blocking on " << this->ToString() << logger::endL;
+    logBlock << logger::blue << this->currentProcessName << "Blocking on " << this->ToString() << logger::endL;
   int counter =0;
   while(read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size)==-1)
   { counter++;
@@ -118,7 +124,7 @@ void PauseController::RequestPausePauseIfLocked()
   this->mutexForProcessBlocking.GetElement().UnlockMe();
 }
 
-bool PauseController::CheckPauseIsRequested_UNSAFE_SERVER_USE_ONLY()
+bool PauseProcess::CheckPauseIsRequested_UNSAFE_SERVER_USE_ONLY()
 { this->CheckConsistency();
   if (fcntl(this->thePausePipe[0], F_SETFL, O_NONBLOCK)<0)
     return false;
@@ -129,14 +135,14 @@ bool PauseController::CheckPauseIsRequested_UNSAFE_SERVER_USE_ONLY()
   return result;
 }
 
-bool PauseController::CheckPauseIsRequested()
+bool PauseProcess::CheckPauseIsRequested()
 { this->CheckConsistency();
   bool result=false;
   if (read (this->mutexPipe[0], this->buffer.TheObjects, this->buffer.size)>=0)
   { if (fcntl(this->thePausePipe[0], F_SETFL, O_NONBLOCK)>=0)
     { result= !(read (this->thePausePipe[0], this->buffer.TheObjects, this->buffer.size)>0);
       if (!result)
-        Pipe::WriteNoInterrupts (this->thePausePipe[1], "!");
+        Pipe::WriteNoInterrupts(this->thePausePipe[1], "!");
       fcntl(this->thePausePipe[0], F_SETFL, 0);
     }
     Pipe::WriteNoInterrupts(this->mutexPipe[1], "!");
@@ -144,14 +150,14 @@ bool PauseController::CheckPauseIsRequested()
   return result;
 }
 
-void PauseController::ResumePausedProcessesIfAny()
+void PauseProcess::ResumePausedProcessesIfAny()
 { MacroRegisterFunctionWithName("PauseController::ResumePausedProcessesIfAny");
 //  theLog << crash.GetStackTraceShort() << logger::endL;
   Pipe::WriteNoInterrupts(this->thePausePipe[1], "!");
 //  theLog << "Unlocking done!" << logger::endL;
 }
 
-std::string PauseController::ToString()const
+std::string PauseProcess::ToString()const
 { std::stringstream out;
   if (this->name!="")
     out << this->name << ": ";
@@ -295,6 +301,11 @@ std::string Pipe::ToString()const
   return out.str();
 }
 
+void Pipe::ResetNoAllocation()
+{ this->pipeAvailable.ResetNoAllocation();
+  this->ReadNoLocks();
+}
+
 bool Pipe::CreateMe(const std::string& inputPipeName)
 { this->CheckConsistency();
   this->Release();
@@ -342,8 +353,8 @@ Pipe::Pipe()
 
 void Pipe::Release()
 { this->CheckConsistency();
-  PauseController::Release(this->thePipe[0]);
-  PauseController::Release(this->thePipe[1]);
+  PauseProcess::Release(this->thePipe[0]);
+  PauseProcess::Release(this->thePipe[1]);
   this->pipeAvailable.Release();
   this->lastRead.SetSize(0);
 }
@@ -359,7 +370,7 @@ void Pipe::ReadNoLocksUNSAFE_FOR_USE_BY_WEBSERVER_ONLY()
 }
 
 void Pipe::ReadNoLocks()
-{ MacroRegisterFunctionWithName("Pipe::ReadFileDescriptor");
+{ MacroRegisterFunctionWithName("Pipe::ReadNoLocks");
   this->CheckConsistency();
   this->lastRead.SetSize(0);
   if (this->thePipe[0]==-1)

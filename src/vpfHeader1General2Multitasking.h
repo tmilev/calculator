@@ -74,7 +74,7 @@ public:
   }
 };
 
-class Controller
+class PauseThread
 {
   private:
   MutexRecursiveWrapper mutexLockMeToPauseCallersOfSafePoint;
@@ -82,8 +82,8 @@ class Controller
   bool flagIsRunning;
   bool flagIsPausedWhileRunning;
   bool IsPausedWhileRunning()const;
-  void operator=(const Controller& other);
-  Controller(const Controller& other);
+  void operator=(const PauseThread& other);
+  PauseThread(const PauseThread& other);
 public:
   MutexRecursiveWrapper mutexHoldMeWhenReadingOrWritingInternalFlags;
   void SafePointDontCallMeFromDestructors();
@@ -93,10 +93,10 @@ public:
   void ExitComputation();
   bool& GetFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe();
   bool& GetFlagIsRunningUnsafeUseWithMutexHoldMe();
-  Controller();
+  PauseThread();
 };
 
-class ControllerStartsRunning: public Controller
+class ControllerStartsRunning: public PauseThread
 {
   public:
     ControllerStartsRunning()

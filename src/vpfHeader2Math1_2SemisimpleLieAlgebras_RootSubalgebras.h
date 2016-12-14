@@ -219,8 +219,8 @@ public:
   bool IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth, List<List<List<int> > >& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner);
   bool IsAnIsomorphism(Vectors<Rational>& domain, Vectors<Rational>& range, SubgroupWeylGroupOLD* outputAutomorphisms, Vectors<Rational>* additionalDomain, Vectors<Rational>* additionalRange);
   bool ListHasNonSelectedIndexLowerThanGiven(int index, List<int>& tempList, Selection& tempSel);
-  void GeneratePossibleNilradicalsRecursive(Controller& PauseMutex, List<List<List<int> > >& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
-  void GeneratePossibleNilradicals(Controller& PauseMutex, List<Selection>& impliedSelections, int& parabolicsCounter, bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner);
+  void GeneratePossibleNilradicalsRecursive(PauseThread& PauseMutex, List<List<List<int> > >& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
+  void GeneratePossibleNilradicals(PauseThread& PauseMutex, List<Selection>& impliedSelections, int& parabolicsCounter, bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner);
   void GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter);
   void WriteToFileNilradicalGeneration(std::fstream& output);
   void ReadFromFileNilradicalGeneration(std::fstream& input, rootSubalgebras& owner);

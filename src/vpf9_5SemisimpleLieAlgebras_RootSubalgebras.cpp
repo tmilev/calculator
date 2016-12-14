@@ -254,7 +254,7 @@ bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveS
   return false;
 }
 
-void rootSubalgebra::GeneratePossibleNilradicalsRecursive(Controller& PauseMutex, List<List<List<int> > >& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::GeneratePossibleNilradicalsRecursive(PauseThread& PauseMutex, List<List<List<int> > >& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner)
 { int& RecursionDepth=owner.RecursionDepthNilradicalsGeneration;
   std::string tempSsel, tempSopposite;
   List<int>& counters=owner.CountersNilradicalsGeneration;
@@ -1554,7 +1554,7 @@ void rootSubalgebra::GeneratePossibleNilradicalsInit(List<Selection>& impliedSel
 }
 
 void rootSubalgebra::GeneratePossibleNilradicals
-(Controller& PauseMutex, List<Selection>& impliedSelections, int& parabolicsCounter,
+(PauseThread& PauseMutex, List<Selection>& impliedSelections, int& parabolicsCounter,
  bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner)
 {  //this->ComputeAll();
   this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods);
@@ -2600,7 +2600,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
 }
 
 void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(int StartingIndex, int NumToBeProcessed)
-{ static Controller localController;
+{ static PauseThread localController;
   this->NumSubalgebrasProcessed=0;
   this->NumConeConditionFailures=0;
   this->NumSubalgebrasCounted=0;
@@ -2622,7 +2622,7 @@ SemisimpleLieAlgebra& rootSubalgebras::GetOwnerSSalgebra()const
 }
 
 void rootSubalgebras::ComputeLProhibitingRelations()
-{ static Controller localController;
+{ static PauseThread localController;
   if (this->flagStoringNilradicals)
   { this->storedNilradicals.SetSize(this->theSubalgebras.size);
   }

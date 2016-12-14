@@ -366,13 +366,8 @@ std::string CGI::GetJavascriptInjectCalculatorResponseInNode()
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   << "  https.onload = function() {\n"
   << "    spanOutput.innerHTML=https.responseText;\n"
-//  << "    code=document.getElementById('progressReportJavascript').innerHTML;"
-//  << "    eval.call(code);\n"
-  //<< "    p();\n"
-//  << "    eval(spanOutput.innerHTML);\n"
-//  << "    if (typeof progressReport == 'function')\n"
-//  << "      progressReport();\n"
   << "  }\n"
+  << "  spanOutput.innerHTML='<span style=\"color:orange\"><b>Request sent</b></span>';\n"
   << "  https.send(inputParams);\n"
   << "}\n"
   << "</script>";
@@ -9921,7 +9916,7 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep5()
 }
 
 void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1
-(Controller& thePauseController)
+(PauseThread& thePauseController)
 { //stOutput << "<hr>starting complex: " << this->ToString();
   FormatExpressions tempFormat;
   ProgressReport theReport1;

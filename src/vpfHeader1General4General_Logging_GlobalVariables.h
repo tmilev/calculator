@@ -121,7 +121,7 @@ public:
   UserCalculatorData userDefault;
   std::string userCalculatorRequestType;
 
-  Controller theLocalPauseController;
+  PauseThread theLocalPauseController;
 
   static const std::string hopefullyPermanentWebAdressOfServerExecutable;
   static const std::string hopefullyPermanent_HTTPS_WebAdressOfServerExecutable;

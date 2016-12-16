@@ -1255,11 +1255,12 @@ void UserCalculator::ComputePointsEarned
  )
 { MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
   this->pointsEarned=0;
+  this->pointsMax=0;
   if (theTopics!=0)
     for (int i=0; i<theTopics->size(); i++)
     { (*theTopics).theValues[i].totalPointsEarned=0;
       (*theTopics).theValues[i].pointsEarnedInProblemsThatAreImmediateChildren=0;
-      (*theTopics).theValues[i].maxPointsInAllChildren=0;
+      (*theTopics).theValues[i].maxPointsInAllChildren=0;  
     }
   for (int i=0; i<this->theProblemData.size(); i++)
   { const std::string problemName=this->theProblemData.theKeys[i];
@@ -1271,7 +1272,8 @@ void UserCalculator::ComputePointsEarned
     currentP.numCorrectlyAnswered=0;
     Rational currentWeight;
     currentP.flagProblemWeightIsOK=
-    currentP.adminData.GetWeightFromSection(this->userGroup.value, currentWeight);
+    currentP.adminData.GetWeightFromSection
+    (this->userGroup.value, currentWeight);
     if (!currentP.flagProblemWeightIsOK)
       currentWeight=0;
 //    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
@@ -1283,10 +1285,13 @@ void UserCalculator::ComputePointsEarned
     if (currentP.flagProblemWeightIsOK && currentP.theAnswers.size>0)
     { currentP.Points=(currentWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size;
       this->pointsEarned+= currentP.Points;
+      //stOutput << "<br>DEBUG: Accounting points: " << currentP.Points
+      //<< " to get: " << this->pointsEarned ;
     }
     if (theTopics!=0)
       if (theTopics->Contains(problemName))
       { TopicElement& currentElt=theTopics->GetValueCreateIfNotPresent(problemName);
+        this->pointsMax+=currentWeight;
         for (int j=0; j<currentElt.parentTopics.size; j++)
         { (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned+=currentP.Points;
           (*theTopics).theValues[currentElt.parentTopics[j]].maxPointsInAllChildren+=currentWeight;
@@ -1303,6 +1308,7 @@ std::string HtmlInterpretation::ToStringUserScores()
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "only admins are allowed to view scores";
   std::stringstream out;
+  out.precision(4);
   CalculatorHTML theProblem;
   theProblem.currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   theProblem.LoadFileNames();
@@ -1310,6 +1316,9 @@ std::string HtmlInterpretation::ToStringUserScores()
     return out.str();
   if (!theProblem.PrepareSectionList(out))
     return out.str();
+  if (!theProblem.LoadDatabaseInfo(out))
+    out << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
+  theProblem.currentUseR.ComputePointsEarned(theProblem.currentUseR.theProblemData.theKeys, &theProblem.theTopicS);
   List<List<std::string> > userTable;
   List<std::string> userLabels;
   DatabaseRoutines theRoutines;
@@ -1398,7 +1407,8 @@ std::string HtmlInterpretation::ToStringUserScores()
 
   out << "<tr><td><b>Maximum score</b></td>"
   << "<td>-</td>"
-  << "<td>-</td>";
+  << "<td>" << theProblem.currentUseR.pointsMax.GetDoubleValue()
+  << "</td>";
   for (int j=0; j< theProblem.theTopicS.size(); j++)
   { TopicElement& currentElt=theProblem.theTopicS.theValues[j];
     if (currentElt.problem!="")
@@ -1419,7 +1429,7 @@ std::string HtmlInterpretation::ToStringUserScores()
       if (!currentElt.flagIsSubSection && !currentElt.flagContainsProblemsNotInSubsection)
         continue;
       if (scoresBreakdown[i].Contains(theProblem.theTopicS.theKeys[j]))
-        out << "<td>" << scoresBreakdown[i].theValues[j] << "</td>";
+        out << "<td>" << scoresBreakdown[i].theValues[j].GetDoubleValue() << "</td>";
       else
         out << "<td></td>";
     }

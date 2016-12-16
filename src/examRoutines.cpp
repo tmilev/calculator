@@ -3185,7 +3185,16 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   //out << "DEBUG: sections: " << this->databaseStudentSections.ToStringCommaDelimited();
   //out << "DEBUG: prob data: " << this->currentUseR.theProblemData.ToStringHtml();
   #ifdef MACRO_use_MySQL
-  this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys, 0);
+  this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys, &this->theTopicS);
+  if (this->currentUseR.pointsMax!=0)
+  { double percent=100*this->currentUseR.pointsEarned.GetDoubleValue()/
+    this->currentUseR.pointsMax.GetDoubleValue();
+    out.precision(2);
+    out << percent << "% = ";
+    out << this->currentUseR.pointsEarned.GetDoubleValue()
+    << " out of " << this->currentUseR.pointsMax.GetDoubleValue()
+    << " points earned. " ;
+  }
   #endif
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
   bool tableStarted=false;

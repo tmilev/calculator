@@ -1363,7 +1363,7 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
 
 void WebWorker::SetHeaderOKNoContentLength()
 { MacroRegisterFunctionWithName("WebWorker::SetHeaderOKNoContentLength");
-  this->SetHeadeR("HTTP/1.1 200 OK", "Content-Type: text/html; charset=utf-8");
+  this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: text/html; charset=utf-8");
   this->flagDoAddContentLength=true;
 }
 
@@ -1677,7 +1677,7 @@ int WebWorker::ProcessFile()
 { MacroRegisterFunctionWithName("WebWorker::ProcessFile");
   if (!FileOperations::FileExistsUnsecure(this->RelativePhysicalFileNamE))
   { //std::cout << "ere be i: file name not found" << std::endl;
-    this->SetHeadeR("HTTP/1.1 404 Object not found", "Content-Type: text/html");
+    this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
 //    if (stOutput.theOutputFunction==0)
     stOutput << "<html><body>";
     stOutput << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
@@ -1720,7 +1720,7 @@ int WebWorker::ProcessFile()
   theFile.seekp(0, std::ifstream::end);
   unsigned int fileSize=theFile.tellp();
   if (fileSize>50000000)
-  { this->SetHeadeR( "HTTP/1.1 413 Payload Too Large", "");
+  { this->SetHeadeR( "HTTP/1.0 413 Payload Too Large", "");
     stOutput << "<html><body><b>Error: user requested file: "
     << this->VirtualFileName
     << " but it is too large, namely, " << fileSize
@@ -1729,7 +1729,7 @@ int WebWorker::ProcessFile()
   }
   std::stringstream theHeader;
   bool withCacheHeader=false;
-  theHeader << "HTTP/1.1 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension);
+  theHeader << "HTTP/1.0 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension);
   for (int i=0; i<this->parent->addressStartsSentWithCacheMaxAge.size; i++)
     if (MathRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i]))
     { theHeader << "Cache-Control: max-age=12960000\r\n";
@@ -1893,7 +1893,7 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
 
 int WebWorker::ProcessUnknown()
 { MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
-  this->SetHeadeR("HTTP/1.1 501 Method Not Implemented", "Content-Type: text/html");
+  this->SetHeadeR("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
   stOutput << "<b>Requested method is not implemented. </b> <hr>The original message received from the server follows."
   << "<hr>\n" << this->ToStringMessageUnsafe();
 
@@ -2189,7 +2189,7 @@ int WebWorker::ProcessCompute()
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   this->SetHeaderOKNoContentLength();
-  //this->SetHeadeR("HTTP/1.1 200 OK", "Access-Control-Allow-Origin: *");
+  //this->SetHeadeR("HTTP/1.0 200 OK", "Access-Control-Allow-Origin: *");
   std::cout << "DEBUG: got to here";
   theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
   theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
@@ -2634,7 +2634,7 @@ int WebWorker::ServeClient()
       redirectStream << "Content-Type: text/html\r\n";
     redirectStream << "Location: " << newAddressStream.str();
     //double fixme;
-    this->SetHeadeR("HTTP/1.1 301 Moved Permanently", redirectStream.str());
+    this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectStream.str());
     //this->SetHeaderOKNoContentLength();
     stOutput << "<html><body>Address available through secure (SSL) connection only. "
     << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
@@ -2664,7 +2664,7 @@ int WebWorker::ServeClient()
     std::stringstream headerStream;
     headerStream << "Location: " << redirectedAddress.str();
     //double fixme;
-    this->SetHeadeR("HTTP/1.1 303 See other", headerStream.str());
+    this->SetHeadeR("HTTP/1.0 303 See other", headerStream.str());
     //this->SetHeaderOKNoContentLength();
     stOutput << "<html><head>"
     << "<meta http-equiv=\"refresh\" content=\"0; url='" << redirectedAddress.str()
@@ -2811,7 +2811,7 @@ int WebWorker::ServeClient()
   if (!FileOperations::GetPhysicalFileNameFromVirtual
       (this->VirtualFileName, this->RelativePhysicalFileNamE, theGlobalVariables.UserDefaultHasAdminRights()))
   { //  std::cout << "GOT TO not found!" << std::endl;
-    this->SetHeadeR("HTTP/1.1 404 Object not found", "Content-Type: text/html");
+    this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
     stOutput << "<html><body><b>File name deemed unsafe. "
     << "Please note that folder names are not allowed to contain dots and file names "
     << "are not allowed to start with dots.</b> There may be additional restrictions "
@@ -3821,7 +3821,7 @@ int WebWorker::Run()
   /////////////////////////////////////////////////////////////////////////
   stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
   if (!this->ReceiveAll())
-  { this->SetHeadeR("HTTP/1.1 400 Bad request", "Content-type: text/html");
+  { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
     stOutput << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
     << "One possibility is that the input was too large. "
     << "<br>The error message returned was:<br>"

@@ -573,7 +573,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     this->displayUserInput=this->error;
     return false;
   }
-  this->remainingBytesToSenD=(std::string) "HTTP/1.0 100 Continue\r\n";
+  this->remainingBytesToSenD=(std::string) "HTTP/1.1 100 Continue\r\n\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
@@ -1147,6 +1147,11 @@ void WebWorker::ParseMessageHead()
         else
           this->messageBody="";
       }
+    } else if (this->theStrings[i]=="HEAD")
+    { this->requestTypE=this->requestHead;
+      i++;
+      if (i<this->theStrings.size)
+        this->addressGetOrPost=this->theStrings[i];
     } else if ((this->theStrings[i]=="Content-Length:" || this->theStrings[i]=="Content-length:" ||
                 this->theStrings[i]=="content-length:")
                && i+1<this->theStrings.size)
@@ -1223,10 +1228,7 @@ bool WebWorker::ReceiveAllHttp()
     return false;
   }
   //theLog << logger::red << "DEBUG: got to before continue, worker: " << this->indexInParent+1 << " " << logger::endL;
-
-
-
-  this->remainingBytesToSenD=(std::string) "HTTP/1.0 100 Continue\r\n";
+  this->remainingBytesToSenD=(std::string) "HTTP/1.1 100 Continue\r\n\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
@@ -1347,7 +1349,7 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
   }
   std::stringstream out;
   out << httpResponseNoTermination << "\r\n";
-//  out << this->GetHeaderConnectionClose() << "\r\n";
+  out << this->GetHeaderConnectionClose() << "\r\n";
   if (remainingHeaderNoTermination!="")
     out << remainingHeaderNoTermination << "\r\n";
   if (theGlobalVariables.flagLoggedIn && WebWorker::GetHeaderSetCookie()!="")
@@ -1361,7 +1363,7 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
 
 void WebWorker::SetHeaderOKNoContentLength()
 { MacroRegisterFunctionWithName("WebWorker::SetHeaderOKNoContentLength");
-  this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: text/html; charset=utf-8");
+  this->SetHeadeR("HTTP/1.1 200 OK", "Content-Type: text/html; charset=utf-8");
   this->flagDoAddContentLength=true;
 }
 
@@ -1579,7 +1581,7 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
   static int counter=0;
   counter++;
-  std::stringstream debugStream1, debugStream2;
+//  std::stringstream debugStream1, debugStream2;
   //debugStream1 << "PipeProgressReportToParentProcess called " << counter << " times. Calling pause...";
   //ProgressReportWebServer theReport(debugStream1.str());
   this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
@@ -1675,7 +1677,7 @@ int WebWorker::ProcessFile()
 { MacroRegisterFunctionWithName("WebWorker::ProcessFile");
   if (!FileOperations::FileExistsUnsecure(this->RelativePhysicalFileNamE))
   { //std::cout << "ere be i: file name not found" << std::endl;
-    this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
+    this->SetHeadeR("HTTP/1.1 404 Object not found", "Content-Type: text/html");
 //    if (stOutput.theOutputFunction==0)
     stOutput << "<html><body>";
     stOutput << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
@@ -1718,7 +1720,7 @@ int WebWorker::ProcessFile()
   theFile.seekp(0, std::ifstream::end);
   unsigned int fileSize=theFile.tellp();
   if (fileSize>50000000)
-  { this->SetHeadeR( "HTTP/1.0 413 Payload Too Large", "");
+  { this->SetHeadeR( "HTTP/1.1 413 Payload Too Large", "");
     stOutput << "<html><body><b>Error: user requested file: "
     << this->VirtualFileName
     << " but it is too large, namely, " << fileSize
@@ -1727,7 +1729,7 @@ int WebWorker::ProcessFile()
   }
   std::stringstream theHeader;
   bool withCacheHeader=false;
-  theHeader << "HTTP/1.0 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension);
+  theHeader << "HTTP/1.1 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension);
   for (int i=0; i<this->parent->addressStartsSentWithCacheMaxAge.size; i++)
     if (MathRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i]))
     { theHeader << "Cache-Control: max-age=12960000\r\n";
@@ -1761,6 +1763,11 @@ int WebWorker::ProcessFile()
     theHeader << theCookie << "\r\n";
   theHeader << "\r\n";
   this->QueueStringForSendingNoHeadeR(theHeader.str());
+  if (this->requestTypE==this->requestHead)
+  { this->SendAllBytesNoHeaders();
+    return 0;
+
+  }
   const int bufferSize=64*1024;
   this->bufferFileIO.SetSize(bufferSize);
   theFile.seekg(0);
@@ -1805,6 +1812,7 @@ void WebWorker::reset()
   this->flagProgressReportAllowed=false;
   this->flagKeepAlive=false;
   this->flagMustLogin=true;
+  this->flagDidSendAll=false;
   this->flagUsingSSLInWorkerProcess=false;
   theGlobalVariables.flagUsingSSLinCurrentConnection=false;
   theGlobalVariables.flagLoggedIn=false;
@@ -1885,10 +1893,12 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
 
 int WebWorker::ProcessUnknown()
 { MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
-  this->SetHeadeR("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
+  this->SetHeadeR("HTTP/1.1 501 Method Not Implemented", "Content-Type: text/html");
   stOutput << "<b>Requested method is not implemented. </b> <hr>The original message received from the server follows."
   << "<hr>\n" << this->ToStringMessageUnsafe();
-  theLog << logger::red << "Method not implemented. " << logger::endL;
+
+  logHttpErrors << logger::red << "Method not implemented. Message follows. " << logger::endL
+  << this->ToStringMessageFullUnsafe() << logger::endL;
   return 0;
 }
 
@@ -2179,7 +2189,7 @@ int WebWorker::ProcessCompute()
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   this->SetHeaderOKNoContentLength();
-  //this->SetHeadeR("HTTP/1.0 200 OK", "Access-Control-Allow-Origin: *");
+  //this->SetHeadeR("HTTP/1.1 200 OK", "Access-Control-Allow-Origin: *");
   std::cout << "DEBUG: got to here";
   theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
   theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
@@ -2588,7 +2598,8 @@ int WebWorker::ServeClient()
   this->flagMustLogin=true;
   theGlobalVariables.IndicatorStringOutputFunction=WebServer::PipeProgressReportToParentProcess;
 //  std::cout << "GOT TO HERE 0" << std::endl;
-  if (this->requestTypE!=this->requestGet && this->requestTypE!=this->requestPost)
+  if (this->requestTypE!=this->requestGet && this->requestTypE!=this->requestPost
+      && this->requestTypE!=this->requestHead)
   { if (this->requestTypE!=this->requestUnknown)
       crash << "Something is wrong: request type does not have any of the expected values. " << crash;
     this->ProcessUnknown();
@@ -2623,7 +2634,7 @@ int WebWorker::ServeClient()
       redirectStream << "Content-Type: text/html\r\n";
     redirectStream << "Location: " << newAddressStream.str();
     //double fixme;
-    this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectStream.str());
+    this->SetHeadeR("HTTP/1.1 301 Moved Permanently", redirectStream.str());
     //this->SetHeaderOKNoContentLength();
     stOutput << "<html><body>Address available through secure (SSL) connection only. "
     << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
@@ -2653,7 +2664,7 @@ int WebWorker::ServeClient()
     std::stringstream headerStream;
     headerStream << "Location: " << redirectedAddress.str();
     //double fixme;
-    this->SetHeadeR("HTTP/1.0 303 See other", headerStream.str());
+    this->SetHeadeR("HTTP/1.1 303 See other", headerStream.str());
     //this->SetHeaderOKNoContentLength();
     stOutput << "<html><head>"
     << "<meta http-equiv=\"refresh\" content=\"0; url='" << redirectedAddress.str()
@@ -2800,7 +2811,7 @@ int WebWorker::ServeClient()
   if (!FileOperations::GetPhysicalFileNameFromVirtual
       (this->VirtualFileName, this->RelativePhysicalFileNamE, theGlobalVariables.UserDefaultHasAdminRights()))
   { //  std::cout << "GOT TO not found!" << std::endl;
-    this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
+    this->SetHeadeR("HTTP/1.1 404 Object not found", "Content-Type: text/html");
     stOutput << "<html><body><b>File name deemed unsafe. "
     << "Please note that folder names are not allowed to contain dots and file names "
     << "are not allowed to start with dots.</b> There may be additional restrictions "
@@ -2884,11 +2895,7 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   stOutput << "<span id=\"idProgressReportTimer\"></span>\n";
   stOutput << "\n<br>\n<div id=\"idProgressReport\"></div>\n";
 
-//  theLog << logger::red << "Indicator: sending all bytes" << logger::endL;
-  //theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: sending all bytes.");
   this->SendAllBytesWithHeaders();
-  //theReport.SetStatus("WebServer::OutputShowIndicatorOnTimeout: all bytes sent.");
-//  theLog << logger::blue << "Indicator: sending all bytes DONE" << logger::endL;
   for (int i=0; i<this->parent->theWorkers.size; i++)
     if (i!=this->indexInParent)
       this->parent->theWorkers[i].Release();
@@ -3814,7 +3821,7 @@ int WebWorker::Run()
   /////////////////////////////////////////////////////////////////////////
   stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
   if (!this->ReceiveAll())
-  { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
+  { this->SetHeadeR("HTTP/1.1 400 Bad request", "Content-type: text/html");
     stOutput << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
     << "One possibility is that the input was too large. "
     << "<br>The error message returned was:<br>"
@@ -4138,7 +4145,8 @@ void WebWorker::PrepareFullMessageHeaderAndFooter()
   this->remainingBytesToSenD.SetSize(0);
   this->remainingBytesToSenD.SetExpectedSize(this->remainingBodyToSend.size+this->remainingHeaderToSend.size+30);
   if (this->remainingHeaderToSend.size==0)
-  { this->remainingBytesToSenD=this->remainingBodyToSend;
+  { if (this->requestTypE!=this->requestHead)
+      this->remainingBytesToSenD=this->remainingBodyToSend;
     this->remainingBodyToSend.SetSize(0);
     return;
   }
@@ -4157,12 +4165,18 @@ void WebWorker::PrepareFullMessageHeaderAndFooter()
   //std::cout << "DEBUG: headers+ body="
   //<< this->remainingBytesToSenD.size << " + "
   //<< this->remainingBodyToSend.size << "\n" << debugString;
-  this->remainingBytesToSenD.AddListOnTop(this->remainingBodyToSend);
+  if (this->requestTypE!=this->requestHead)
+    this->remainingBytesToSenD.AddListOnTop(this->remainingBodyToSend);
   this->remainingBodyToSend.SetSize(0);
 }
 
 void WebWorker::SendAllBytesWithHeaders()
 { MacroRegisterFunctionWithName("WebWorker::SendAllBytesWithHeaders");
+  static bool calledOnce=false;
+  if (calledOnce)
+  { crash << "WebWorker::SendAllBytesNoHeaders called more than once" << crash;
+  }
+  calledOnce=true;
   this->PrepareFullMessageHeaderAndFooter();
   //std::string tempS(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
   //theLog << logger::red << "DEBUG Message:\n" << logger::normalColor << tempS << logger::endL;
@@ -4174,6 +4188,25 @@ void WebWorker::SendAllBytesHttp()
   if (this->remainingBytesToSenD.size==0)
     return;
   this->CheckConsistency();
+//  firstCallStream << "WebWorker::SendAllBytesHttp called once. Input: \n "
+//  << this->ToStringMessageFullUnsafe() << "\nStack trace:\n"
+//  << crash.GetStackTraceEtcErrorMessage() ;
+//  if (this->flagDidSendAll)
+//  { static std::stringstream firstCallStream;
+//    firstCallStream
+//    << "\n<br>\n"
+//    << "WebWorker::SendAllBytesHttp called more than once. "
+//    << "Input: \n "
+//    << this->ToStringMessageFullUnsafe() << "\nStack trace:\n"
+//    << crash.GetStackTraceEtcErrorMessage()
+//    << "\n<hr>Sending back:<hr>\n";
+//
+//    std::string theBytes(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
+//    ;
+//    firstCallStream << theBytes;
+//    logHttpErrors << firstCallStream.str() << logger::endL;
+//  }
+  this->flagDidSendAll=true;
   //std::string tempS(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
   //theLog << logger::green << "Sending: " << tempS << logger::endL;
   if (this->connectedSocketID==-1)
@@ -4249,6 +4282,7 @@ void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, b
 
 void WebWorker::SendAllBytesNoHeaders()
 { MacroRegisterFunctionWithName("WebWorker::SendAllBytesNoHeaders");
+
   if (theGlobalVariables.flagUsingSSLinCurrentConnection)
   { this->SendAllBytesHttpSSL();
     return;

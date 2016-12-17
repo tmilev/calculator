@@ -20,6 +20,7 @@ std::string GetDateForLogFiles()
   return tempDate;
 }
 
+logger logHttpErrors("LogFiles/LogHttpErrors"+GetDateForLogFiles()+".html");
 logger theLog("LogFiles/LogStandard"+GetDateForLogFiles()+".html");
 logger logBlock( "LogFiles/LogBlockingEvents"+GetDateForLogFiles()+".html");
 logger logIO( "LogFiles/LogIOErrorsEvents"+GetDateForLogFiles()+".html");

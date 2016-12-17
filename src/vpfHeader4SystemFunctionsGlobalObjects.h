@@ -14,6 +14,7 @@ static ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystemHe
 class logger;
 class Calculator;
 extern logger theLog  ;
+extern logger logHttpErrors;
 extern logger logBlock;
 extern logger logIO   ;
 extern logger logOpenSSL   ;

@@ -86,11 +86,11 @@ function accountCalculatorDelimiterReturnMustEndSelection(text, calculatorSepara
 function chopCalculatorStrings()
 { if (calculatorRightPosition-calculatorLeftPosition>1000)
   { calculatorMQStringIsOK=false;
-    mqProblemSpan.innerHTML="<span style='color:red'><b>formula too big </b></span>";
+    mqProblemSpan.innerHTML="<span style='color:red'><b>Formula too big </b></span>";
     return;
   }
   calculatorMQStringIsOK=true;
-  mqProblemSpan.innerHTML="";
+  mqProblemSpan.innerHTML="Equation assistant";
   calculatorMQString= calculatorInput.value.
   substring(calculatorLeftPosition, calculatorRightPosition+1);
   calculatorLeftString=calculatorInput.value.

@@ -2262,8 +2262,6 @@ int WebWorker::ProcessCalculator()
   << ">";
   stOutput << civilizedInputSafish;
   stOutput << "</textarea>\n";
-  stOutput << "<span id=\"mqProblemSpan\"></span>";
-  stOutput << "<span style=\"vertical-align:top\" id=\"mainInputMQfield\"></span>";
   stOutput << "<br>";
   stOutput << "<button title=\"Shift+Enter=shortcut from input text box. \" "
   << "name=\"Go\" onmousedown=\""
@@ -2271,6 +2269,16 @@ int WebWorker::ProcessCalculator()
   << "\"> ";
   stOutput << "Go" << "</button>";
   stOutput << this->closeIndentTag("</td>");
+
+  stOutput << this->openIndentTag("<td>");
+  stOutput << "<table><tr><td>";
+  stOutput << "<span id=\"mqProblemSpan\"></span>";
+  stOutput << "</td></tr><tr><td>";
+  stOutput << "<span style=\"vertical-align:top\" id=\"mainInputMQfield\"></span>";
+  stOutput << "</td></tr></table>";
+  stOutput << this->closeIndentTag("</td>");
+
+
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
   stOutput << this->openIndentTag("<table><!-- Autocomplete table 2 cells (2 rows 1 column)-->");
   stOutput << this->openIndentTag("<tr>");

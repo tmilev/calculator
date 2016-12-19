@@ -83,8 +83,6 @@ function getLastWord()
   lastWordStart=-1;
   lastWordLength=0;
 
-//  for (i=theText.value.length-1; i>=0; i--)
-	
   for (i=cursorPosition-1; i>=0; i--)
   { if (isSeparator(theText.value[i]))
       break;

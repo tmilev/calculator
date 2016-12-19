@@ -748,6 +748,7 @@ std::string CGI::JavascriptMathQuillMatrixSupport;
 std::string CGI::JavascriptMathQuillDefault;
 std::string CGI::JavascriptInitializeButtons;
 std::string CGI::JavascriptAceEditorScript;
+std::string CGI::JavascriptCalculatorPage;
 
 void CGI::LoadStrings()
 { CGI::GetJavascriptSha1();
@@ -762,6 +763,22 @@ void CGI::LoadStrings()
 }
 
 extern logger theLog;
+
+std::string& CGI::GetJavascriptCalculatorPage()
+{ //if (CGI::JavascriptAceEditorScript!="")
+  //  return CGI::JavascriptAceEditorScript;
+  std::stringstream out, commentsOnFailure;
+  std::string fileReader;
+  bool found=true;
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/calculatorPage.js", fileReader, commentsOnFailure))
+  { theLog << logger::red  << "Javascript file calculatorPage.js not found. " << logger::endL;
+    found=false;
+  }
+  if (found)
+    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
+  CGI::JavascriptCalculatorPage=out.str();
+  return CGI::JavascriptCalculatorPage;
+}
 
 std::string& CGI::GetJavascriptAceEditorScript()
 { if (CGI::JavascriptAceEditorScript!="")

@@ -2205,7 +2205,10 @@ int WebWorker::ProcessCalculator()
   stOutput << CGI::GetJavascriptAutocompleteWithTags();
   stOutput << CGI::GetJavascriptInitializeButtons();
   stOutput << CGI::GetJavascriptMathQuillMatrixSupport();
+  stOutput << CGI::GetMathQuillStyleSheetWithTags();
+
   stOutput << this->GetJavaScriptIndicatorBuiltInServer();
+  stOutput << CGI::GetJavascriptCalculatorPage();
 
   stOutput << "\n\n<script language=\"javascript\">\n"
   << "  var theAutocompleteDictionary = [\n  ";
@@ -2218,8 +2221,7 @@ int WebWorker::ProcessCalculator()
   stOutput << "];\n";
   stOutput << "</script>\n";
 
-
-  stOutput << "\n</head>\n<body onload=\"loadSettings(); initializeButtons();";
+  stOutput << "\n</head>\n<body onload=\"loadSettings(); initializeButtons(); initializeCalculatorPage();";
   if (theParser.inputString!="")
   { stOutput << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction);";
   }
@@ -2239,9 +2241,6 @@ int WebWorker::ProcessCalculator()
   stOutput << this->openIndentTag("<table><!--table with input, autocomplete space and output-->");
   stOutput << this->openIndentTag("<tr>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
-  //stOutput << this->ToStringCalculatorArgumentsHumanReadable();
-//  stOutput << "\n<FORM method=\"POST\" id=\"formCalculator\" name=\"formCalculator\" action=\""
-//  << theGlobalVariables.DisplayNameExecutable << "\">\n";
   std::string civilizedInputSafish;
   if (CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish, false))
     stOutput << "Your input has been treated normally, however the return string "
@@ -2252,15 +2251,20 @@ int WebWorker::ProcessCalculator()
   stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"mainInput\" id=\"mainInputID\" "
   << "style=\"white-space:normal\" "
   << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {"
-  << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction);"
+  << "submitStringAsMainInput(document.getElementById('mainInputID').value,"
+  << " 'calculatorOutput', 'compute', onLoadDefaultFunction);"
   << " event.preventDefault();"
   << "}\" "
-  << "onkeyup=\"suggestWord();\", onkeydown=\"suggestWord(); "
-  << "arrowAction(event);\", onmouseup=\"suggestWord();\", oninput=\"suggestWord();\""
+  << "onkeyup=  \"suggestWord(); MQHelpCalculator();\", "
+  << "onkeydown=\"suggestWord(); MQHelpCalculator(); arrowAction(event); \", "
+  << "onmouseup=\"suggestWord(); MQHelpCalculator();\", "
+  << "oninput=  \"suggestWord(); MQHelpCalculator();\""
   << ">";
   stOutput << civilizedInputSafish;
   stOutput << "</textarea>\n";
-//  stOutput << "\n</FORM>\n";
+  stOutput << "<span id=\"mqProblemSpan\"></span>";
+  stOutput << "<span style=\"vertical-align:top\" id=\"mainInputMQfield\"></span>";
+  stOutput << "<br>";
   stOutput << "<button title=\"Shift+Enter=shortcut from input text box. \" "
   << "name=\"Go\" onmousedown=\""
   << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction); event.preventDefault();"
@@ -2272,7 +2276,7 @@ int WebWorker::ProcessCalculator()
   stOutput << this->openIndentTag("<tr>");
   stOutput << this->openIndentTag("<td nowrap>");
   stOutput << "<span \"style:nowrap\" id=\"idAutocompleteHints\">"
-  << "Ctrl+space autocompletes, ctrl+arrow selects word</span>";
+  << "Ctrl+space = autocomplete<br>ctrl+arrow = select</span>";
   stOutput << this->closeIndentTag("</td>");
   stOutput << this->closeIndentTag("</tr>");
   stOutput << this->openIndentTag("<tr>");

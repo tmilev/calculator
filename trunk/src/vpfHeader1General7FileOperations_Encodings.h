@@ -60,6 +60,7 @@ public:
   static std::string JavascriptSha1;
   static std::string JavascriptInitializeButtons;
   static std::string JavascriptAceEditorScript;
+  static std::string JavascriptCalculatorPage;
   static std::stringstream outputStream;
   static int GlobalMathSpanID;
   static int GlobalCanvasID;
@@ -92,6 +93,7 @@ public:
   static std::string& GetMathQuillStyleSheetWithTags();
   static std::string& GetJavascriptInitializeButtons();
   static std::string& GetJavascriptAceEditorScript();
+  static std::string& GetJavascriptCalculatorPage();
   static std::string& GetCalculatorStyleSheetWithTags();
   static std::string& GetJavascriptAutocompleteWithTags();
   static std::string& GetJavascriptSha1();

@@ -174,6 +174,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("\\lim");
   this->AddOperationNoRepetitionAllowed("logBase");
   this->AddOperationNoRepetitionAllowed("userInputTextBox");
+  this->AddOperationNoRepetitionAllowed("\\int");
 
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("EltZmodP");
@@ -792,6 +793,18 @@ bool Calculator::ReplaceXXbyE(int inputFormat)
 bool Calculator::ReplaceXXXbyE(int inputFormat)
 { this->ReplaceXXbyEX(inputFormat);
   return this->ReplaceXEXByE(inputFormat);
+}
+
+bool Calculator::ReplaCeOXdotsXbyEXdotsX(int numXs)
+{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1-numXs];
+  theElt.theData.MakeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
+  if (this->flagLogSyntaxRules)
+  { std::stringstream out;
+    out << "[Rule: Calculator::ReplaCeOXdotsXbyEXdotsX: " << numXs << "]";
+    this->parsingLog+=out.str();
+  }
+  theElt.controlIndex=this->conExpression();
+  return true;
 }
 
 bool Calculator::ReplaCeOXbyEX(int inputFormat)
@@ -1620,6 +1633,21 @@ bool Calculator::ApplyOneRule()
   if (this->atomsWhoseExponentsAreInterpretedAsFunctions.Contains(fifthToLastS) && fourthToLastS=="^" && thirdToLastS=="Expression"
       && secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceOOEEXbyEXpowerLike();
+  if (secondToLastS=="\\int" && lastS!="_")
+    return this->ReplaCeOXbyEX();
+  if (thirdToLastS=="\\int" && secondToLastS=="_" && lastS=="Expression")
+    return this->ReplaCeOXdotsXbyEXdotsX(2);
+  if (fourthToLastS=="\\int" && thirdToLastS=="_" &&
+      secondToLastS=="Expression" && lastS=="^")
+    return this->ReplaCeOXdotsXbyEXdotsX(3);
+  if (fifthToLastS=="\\int" && fourthToLastS=="_" && thirdToLastS=="{}" &&
+      secondToLastS=="^" && lastS=="{}")
+  { this->PopTopSyntacticStack();
+    this->PopTopSyntacticStack();
+    this->PopTopSyntacticStack();
+    this->ReplaCeOXbyEX();
+    return this->PopTopSyntacticStack();
+  }
   if (fifthToLastS=="logBase" && fourthToLastS=="_" && thirdToLastS=="Expression" &&
       secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceOXEEXByEX();

@@ -1446,9 +1446,9 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
   return true;
 }
 
-bool Expression::IsIntegralfdx
+bool Expression::IsIntegraLfdx
 (Expression* differentialVariable, Expression* functionToIntegrate, Expression* integrationSet)const
-{ MacroRegisterFunctionWithName("Expression::IsIntegralfdx");
+{ MacroRegisterFunctionWithName("Expression::IsIndefiniteIntegralfdx");
   if (this->owner==0)
     return false;
   if (!this->StartsWith(this->owner->opIntegral(), 3))
@@ -1458,6 +1458,30 @@ bool Expression::IsIntegralfdx
   if (integrationSet!=0)
     *integrationSet=(*this)[1];
   return true;
+}
+
+bool Expression::IsIndefiniteIntegralfdx
+(Expression* differentialVariable, Expression* functionToIntegrate, Expression* integrationSet)const
+{ MacroRegisterFunctionWithName("Expression::IsIndefiniteIntegralfdx");
+  this->CheckConsistency();
+  Expression tempE;
+  if (integrationSet==0)
+    integrationSet=&tempE;
+  if (!this->IsIntegraLfdx(differentialVariable, functionToIntegrate, integrationSet))
+    return false;
+  return integrationSet->IsAtomGivenData(this->owner->opIndefiniteIntegralIndicator());
+}
+
+bool Expression::IsDefiniteIntegralOverIntervalfdx
+(Expression* differentialVariable, Expression* functionToIntegrate, Expression* integrationSet)const
+{ MacroRegisterFunctionWithName("Expression::IsIndefiniteIntegralfdx");
+  this->CheckConsistency();
+  Expression tempE;
+  if (integrationSet==0)
+    integrationSet=&tempE;
+  if (!this->IsIntegraLfdx(differentialVariable, functionToIntegrate, integrationSet))
+    return false;
+  return integrationSet->IsSequenceNElementS(2);
 }
 
 bool Expression::IsDifferentialOneFormOneVariablE(Expression* outputDifferentialOfWhat, Expression* outputCoeffInFrontOfDifferential)const

@@ -225,7 +225,9 @@ class Expression
   bool IsAtomGivenData(int desiredDataUseMinusOneForAny=-1)const;
   bool IsBuiltInAtom(std::string* outputWhichOperation=0)const;
   bool IsGoodForChainRuleFunction(std::string* outputWhichOperation=0)const;
-  bool IsIntegralfdx(Expression* differentialVariable=0, Expression* functionToIntegrate=0, Expression* integrationSet=0)const;
+  bool IsIntegraLfdx(Expression* differentialVariable=0, Expression* functionToIntegrate=0, Expression* integrationSet=0)const;
+  bool IsIndefiniteIntegralfdx(Expression* differentialVariable=0, Expression* functionToIntegrate=0, Expression* integrationSet=0)const;
+  bool IsDefiniteIntegralOverIntervalfdx(Expression* differentialVariable=0, Expression* functionToIntegrate=0, Expression* integrationSet=0)const;
   bool IsDifferentialOneFormOneVariablE(Expression* outputDifferentialOfWhat=0, Expression* outputCoeffInFrontOfDifferential=0)const;
   bool IsKnownFunctionWithComplexRange(std::string* outputWhichOperation=0)const;
   bool IsArithmeticOperation(std::string* outputWhichOperation=0)const;
@@ -1198,6 +1200,7 @@ public:
   bool ReplaceVbyVdotsVAccordingToPredefinedWordSplits();
   bool ReplaceAXbyEX();
   bool ReplaceXXByEEmptySequence();
+  bool ReplaCeOXdotsXbyEXdotsX(int numXs);
   bool ReplaCeOXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceXXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceXEXByEcontainingOE(int inputOpIndex, int inputFormat=Expression::formatDefault);

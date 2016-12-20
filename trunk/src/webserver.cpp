@@ -2255,10 +2255,10 @@ int WebWorker::ProcessCalculator()
   << " 'calculatorOutput', 'compute', onLoadDefaultFunction);"
   << " event.preventDefault();"
   << "}\" "
-  << "onkeyup=  \"suggestWord(); MQHelpCalculator();\", "
-  << "onkeydown=\"suggestWord(); MQHelpCalculator(); arrowAction(event); \", "
-  << "onmouseup=\"suggestWord(); MQHelpCalculator();\", "
-  << "oninput=  \"suggestWord(); MQHelpCalculator();\""
+  << "onkeyup=  \"suggestWord(); mQHelpCalculator();\", "
+  << "onkeydown=\"suggestWord(); mQHelpCalculator(); arrowAction(event); \", "
+  << "onmouseup=\"suggestWord(); mQHelpCalculator();\", "
+  << "oninput=  \"suggestWord(); mQHelpCalculator();\""
   << ">";
   stOutput << civilizedInputSafish;
   stOutput << "</textarea>\n";
@@ -2270,9 +2270,9 @@ int WebWorker::ProcessCalculator()
   stOutput << "Go" << "</button>";
   stOutput << this->closeIndentTag("</td>");
 
-  stOutput << this->openIndentTag("<td>");
-  stOutput << "<table><tr><td>";
-  stOutput << "<span id=\"mqProblemSpan\"></span>";
+  stOutput << this->openIndentTag("<td style=\"vertical-align:top\">");
+  stOutput << "<table style=\"vertical-align:top\"><tr><td style=\"vertical-align:top\">";
+  stOutput << "<span id=\"mqProblemSpan\" style=\"white-space:nowrap\">Equation assistant</span>";
   stOutput << "</td></tr><tr><td>";
   stOutput << "<span style=\"vertical-align:top\" id=\"mainInputMQfield\"></span>";
   stOutput << "</td></tr></table>";
@@ -2280,22 +2280,14 @@ int WebWorker::ProcessCalculator()
 
 
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
-  stOutput << this->openIndentTag("<table><!-- Autocomplete table 2 cells (2 rows 1 column)-->");
-  stOutput << this->openIndentTag("<tr>");
-  stOutput << this->openIndentTag("<td nowrap>");
-  stOutput << "<span \"style:nowrap\" id=\"idAutocompleteHints\">"
+  stOutput << "<span style=\"white-space:nowrap\" id=\"idAutocompleteHints\">"
   << "Ctrl+space = autocomplete<br>ctrl+arrow = select</span>";
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << this->closeIndentTag("</tr>");
-  stOutput << this->openIndentTag("<tr>");
-  stOutput << this->openIndentTag("<td id=\"idAutocompleteSpan\">");
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << this->closeIndentTag("</tr>");
-  stOutput << this->openIndentTag("<tr>");
-  stOutput << this->openIndentTag("<td id=\"idAutocompleteDebug\">");
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << this->closeIndentTag("</tr>");
-  stOutput << this->closeIndentTag("</table><!--Autocomplete table end-->");
+  stOutput << "<br>";
+  stOutput << "<div id=\"idAutocompleteSpan\" "
+  << "style=\"vertical-align:top; display:block; overflow:auto;\" "
+  << " height=\"100px\" "
+  << "></div>";
+  stOutput << "<span id=\"idAutocompleteDebug\"></span>";
   stOutput << this->closeIndentTag("</td>");
   stOutput << this->closeIndentTag("</tr>");
   stOutput << this->closeIndentTag("</table>");

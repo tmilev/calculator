@@ -2701,7 +2701,7 @@ bool CalculatorFunctionsGeneral::outerPolynomialize(Calculator& theCommands, con
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks");
   Expression theFunctionE, theVariableE, integrationSetE;
-  if (!input.IsIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE))
+  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE))
     return false;
   //stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, input: " << input.ToString();
   IntegralRFComputation theComputation(&theCommands);
@@ -2772,7 +2772,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa");
   Expression theFunctionE, theVariableE, integralE(theCommands);
-  if (!input.IsIntegralfdx(&theVariableE, &theFunctionE))
+  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE))
     return false;
 //  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
@@ -2801,7 +2801,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa");
   Expression theFunctionE, theVariableE, integralE(theCommands);
-  if (!input.IsIntegralfdx(&theVariableE, &theFunctionE))
+  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE))
     return false;
 //  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
@@ -2883,7 +2883,7 @@ bool CalculatorFunctionsGeneral::extractLinearCoeffsWRTvariable
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa");
   Expression theFunctionE, x, integralE(theCommands);
-  if (!input.IsIntegralfdx(&x, &theFunctionE))
+  if (!input.IsIndefiniteIntegralfdx(&x, &theFunctionE))
     return false;
 //  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
@@ -2941,7 +2941,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaan
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb");
   Expression theFunctionE, x, integrationSetE;
-  if (!input.IsIntegralfdx(&x, &theFunctionE, &integrationSetE))
+  if (!input.IsIndefiniteIntegralfdx(&x, &theFunctionE, &integrationSetE))
     return false;
   //stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
@@ -3004,7 +3004,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb");
   Expression theFunctionE, x, integrationSetE;
-  if (!input.IsIntegralfdx(&x, &theFunctionE, &integrationSetE))
+  if (!input.IsIndefiniteIntegralfdx(&x, &theFunctionE, &integrationSetE))
     return false;
 //  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
@@ -3080,7 +3080,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
 bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst");
   Expression theFunctionE, integrandE, newIntegralE, theVariableE, integrationSetE;
-  if (!input.IsIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE))
+  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE))
     return false;
 //  stOutput << "<br>innerIntegratePowerByUncoveringParenthesisFirst: Integrating function " << theFunctionE.ToString();
   if (!theFunctionE.StartsWith(theCommands.opThePower()))
@@ -3121,7 +3121,7 @@ bool Expression::MakeIntegral
 bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateSum");
   Expression theFunctionE, theVariableE, integrationSetE;
-  if (!input.IsIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE))
+  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE))
     return false;
 //  stOutput << "<br>innerIntegrateSum: Integrating function " << theFunctionE.ToString();
   if (!theFunctionE.StartsWith(theCommands.opPlus()))
@@ -3150,7 +3150,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, cons
 bool CalculatorFunctionsGeneral::innerIntegrateXnDiffX(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateXnDiffX");
   Expression theFunctionE, theVariableE;
-  if (!input.IsIntegralfdx(&theVariableE, &theFunctionE))
+  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE))
     return false;
 //  stOutput << "<br>innerIntegrateXnDiffX: Integrating function " << theFunctionE.ToString();
   Expression theFunCoeff, theFunNoCoeff, outputNoCoeff;

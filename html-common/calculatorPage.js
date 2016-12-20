@@ -3,17 +3,25 @@ var calculatorInput;
 var calculatorMQfield;
 var calculatorMQobject;
 var mqProblemSpan;
-var calculatorLeftString;
-var calculatorRightString;
+var calculatorLeftString=undefined;
+var calculatorRightString=undefined;
 var calculatorMQString;
 var calculatorMQStringIsOK=true;
 var ignoreNextMathQuillUpdateEvent=false;
 var calculatorLeftPosition=0;
 var calculatorRightPosition=0;
-function initializeCalculatorPage()
-{ calculatorInput=document.getElementById('mainInputID');
+function initializeCalculatorVariables()
+{ mqProblemSpan=document.getElementById('mqProblemSpan');
+  calculatorInput=document.getElementById('mainInputID');
   calculatorMQfield=document.getElementById('mainInputMQfield');
-  mqProblemSpan=document.getElementById('mqProblemSpan');
+
+}
+var calculatorMQobjectsInitialized=false;
+function initializeCalculatorPage()
+{ if (calculatorMQobjectsInitialized===true)
+    return;
+  calculatorMQobjectsInitialized=true;
+  initializeCalculatorVariables();
   ////////////////////////
   globalMQ.config({autoFunctionize: 'sin cos tan sec csc cot log ln'});
   calculatorMQobject = globalMQ.MathField
@@ -30,17 +38,23 @@ function initializeCalculatorPage()
           if (!calculatorMQStringIsOK)
             return;
           var theBoxContent=calculatorMQobject.latex();
+          if (calculatorLeftString===undefined ||
+              calculatorRightString===undefined)
+            mQHelpCalculator();
           calculatorInput.value =calculatorLeftString+
           processMathQuillLatex(theBoxContent)+
           calculatorRightString
           ;
+        },
+        focus: function()
+        { mQHelpCalculator();
         }
       }
     }
    );
 }
 
-function MQHelpCalculator()
+function mQHelpCalculator()
 { //event.preventDefault();
   getSemiColumnEnclosure();
   ignoreNextMathQuillUpdateEvent=true;
@@ -84,13 +98,16 @@ function accountCalculatorDelimiterReturnMustEndSelection(text, calculatorSepara
 }
 
 function chopCalculatorStrings()
-{ if (calculatorRightPosition-calculatorLeftPosition>1000)
+{ if (mqProblemSpan===undefined)
+    initializeCalculatorPage();
+  if (calculatorRightPosition-calculatorLeftPosition>1000)
   { calculatorMQStringIsOK=false;
     mqProblemSpan.innerHTML="<span style='color:red'><b>Formula too big </b></span>";
     return;
   }
   calculatorMQStringIsOK=true;
   mqProblemSpan.innerHTML="Equation assistant";
+  calculatorMQfield.style.visibility="visible";
   calculatorMQString= calculatorInput.value.
   substring(calculatorLeftPosition, calculatorRightPosition+1);
   calculatorLeftString=calculatorInput.value.
@@ -100,8 +117,10 @@ function chopCalculatorStrings()
 }
 
 function getSemiColumnEnclosure()
-{ if (calculatorInput.selectionEnd===undefined)
-    return;
+{ if (calculatorInput===undefined)
+    initializeCalculatorPage();
+  if (calculatorInput.selectionEnd===undefined)
+    calculatorInput.selectionEnd=0;
   var rightPos=calculatorInput.selectionEnd;
   for (; rightPos<calculatorInput.value.length; rightPos++)
     if (calculatorInput.value[rightPos]===';')

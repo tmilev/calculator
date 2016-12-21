@@ -669,7 +669,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(Calculator& theCo
     return output.AssignValue(base, theCommands);
   }
   if (input[1].IsOfType<Matrix<AlgebraicNumber> >())
-  { Matrix<AlgebraicNumber> base=
+  { //theCommands << "DEBUG: Here be I!";
+    Matrix<AlgebraicNumber> base=
     input[1].GetValue<Matrix<AlgebraicNumber> >();
     if (!base.IsSquare() || base.NumCols==0)
       return output.MakeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", theCommands);
@@ -898,29 +899,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceByT(Calculator& theCommands
   return theCommands.innerTranspose(theCommands, input[1], output);
 }
 
-template <class coefficient>
-bool Expression::AssignMatrix(const Matrix<coefficient>& input, Calculator& owner)
-{ MacroRegisterFunctionWithName("Expression::AssignMatrix");
-  this->reset(owner, input.NumRows+1);
-  this->AddChildAtomOnTop(owner.opSequence());
-  Expression currentRow, currentElt;
-  for (int i=0; i<input.NumRows; i++)
-  { currentRow.reset(owner);
-    currentRow.children.Reserve(input.NumCols+1);
-    currentRow.AddChildAtomOnTop(owner.opSequence());
-    for (int j=0; j<input.NumCols; j++)
-    { currentElt.AssignValue(input(i,j), owner);
-      currentRow.AddChildOnTop(currentElt);
-    }
-    currentRow.format=this->formatMatrixRow;
-    this->AddChildOnTop(currentRow);
-  }
-  this->format=this->formatMatrix;
-  return true;
-}
-
 bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat");
+  stOutput << "DEBUG: here be be be i i i ";
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -928,8 +909,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
     return false;
   Matrix<Rational> theMatRat;
 //  stOutput << "raising " << input[1].ToString() << " to " << input[2].ToString();
-  if (theCommands.GetMatrix<Rational>(input[1], theMatRat))
-  { Expression inputCopy, baseRatMat, outputMatRat;
+  if (theCommands.GetMatrix(input[1], theMatRat))
+  { stOutput << "DEBUG: here be be be i i i part 2 ";
+    Expression inputCopy, baseRatMat, outputMatRat;
     baseRatMat.AssignValue(theMatRat, theCommands);
     inputCopy.reset(theCommands);
     inputCopy.AddChildOnTop(input[0]);
@@ -937,11 +919,28 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
     inputCopy.AddChildOnTop(input[2]);
     if (!CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(theCommands, inputCopy, outputMatRat))
       return false;
-    if (!outputMatRat.IsOfType<Matrix<Rational> >(&theMatRat))//<- probably outputMatRat is of type Error.
+    if (!outputMatRat.IsOfType(&theMatRat))//<- probably outputMatRat is of type Error.
     { output=outputMatRat;
       return true;
     }
     return output.AssignMatrix(theMatRat, theCommands);
+  }
+  Matrix<AlgebraicNumber> theMatAlg;
+  if (theCommands.GetMatrix(input[1], theMatAlg, 0,-1, CalculatorConversions::innerAlgebraicNumber))
+  { //stOutput << "DEBUG: here be be be i i i part 2 ";
+    Expression inputCopy, baseRatMat, outputMatRat;
+    baseRatMat.AssignValue(theMatAlg, theCommands);
+    inputCopy.reset(theCommands);
+    inputCopy.AddChildOnTop(input[0]);
+    inputCopy.AddChildOnTop(baseRatMat);
+    inputCopy.AddChildOnTop(input[2]);
+    if (!CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(theCommands, inputCopy, outputMatRat))
+      return false;
+    if (!outputMatRat.IsOfType(&theMatAlg))//<- probably outputMatRat is of type Error.
+    { output=outputMatRat;
+      return true;
+    }
+    return output.AssignMatrix(theMatAlg, theCommands);
   }
   int thePower=0;
   if (!input[2].IsSmallInteger(&thePower))

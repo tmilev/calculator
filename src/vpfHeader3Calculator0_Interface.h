@@ -2257,4 +2257,25 @@ bool Calculator::GetTypeHighestWeightParabolic
 //  stOutput << "final context of GetTypeHighestWeightParabolic: " << outputHWContext.ToString();
   return true;
 }
+
+template <class coefficient>
+bool Expression::AssignMatrix(const Matrix<coefficient>& input, Calculator& owner)
+{ MacroRegisterFunctionWithName("Expression::AssignMatrix");
+  this->reset(owner, input.NumRows+1);
+  this->AddChildAtomOnTop(owner.opSequence());
+  Expression currentRow, currentElt;
+  for (int i=0; i<input.NumRows; i++)
+  { currentRow.reset(owner);
+    currentRow.children.Reserve(input.NumCols+1);
+    currentRow.AddChildAtomOnTop(owner.opSequence());
+    for (int j=0; j<input.NumCols; j++)
+    { currentElt.AssignValue(input(i,j), owner);
+      currentRow.AddChildOnTop(currentElt);
+    }
+    currentRow.format=this->formatMatrixRow;
+    this->AddChildOnTop(currentRow);
+  }
+  this->format=this->formatMatrix;
+  return true;
+}
 #endif

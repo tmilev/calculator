@@ -2902,12 +2902,19 @@ void Calculator::initPredefinedStandardOperations()
    "X=(1,2)^t; X-Transpose{}(1,2)  ",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerSequenceByT");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat, this->opSequence(), this->opRational(), //-1= any type
-   "If the base is a matrix and the exponent is a rational number: 1. If the base is not square, returns error. 2. If the base is square and consists of \
-   rational numbers and the exponent is a small integer, raises the base to the corresponding power. If the power is 0 or negative and the determinant of\
+  ("^", CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat,
+    this->opSequence(), this->opRational(), //-1= any type
+   "If the base is a matrix and the exponent is a rational number: \
+   1. If the base is not square, returns error. \
+   2. If the base is square and consists of \
+   rational or algebraic numbers and the exponent is a \
+   small integer, raises the base to the corresponding power. \
+   If the power is 0 or negative and the determinant of\
    the matrix is zero, returns error. ",
    "X=\\begin{array}{cc}0 & 1 \\\\ 1 &1\\end{array}; X^5; X^{-5}  ",
-   true, false, "CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat");
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat",
+   "PowerSequenceMatrixByInteger");
   this->AddOperationInnerHandler
   ("^", CalculatorFunctionsGeneral::innerPowerExponentToLog, "",
    "Replaces e^{\\ln x} by x.",
@@ -2936,7 +2943,7 @@ void Calculator::initPredefinedStandardOperations()
    "Raises matrix rationals to small integer power. ",
    "X=MakeMatrix((0,1),(1,1)); q=100; \nX^q; \nFibonacci{}0=1; \nFibonacci{}1=1; \nFibonacci{}{{n}}:if((n>0)* (IsInteger{}n))=Fibonacci{}(n-1)+Fibonacci{}(n-2); \
    \nMakeMatrix((Fibonacci{}(q-2), Fibonacci{}(q-1)), (Fibonacci{}q-1, Fibonacci{}q))",
-   true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger");
+   true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger", "PowerMatrixByInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger, this->opMatRF(), this->opRational(),
    "Raises a polynomial matrix to small integer power. ",
@@ -2946,7 +2953,7 @@ void Calculator::initPredefinedStandardOperations()
   ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger, this->opMatAlgebraic(), this->opRational(),
    "Raises algebraic number matrix to small integer power. ",
    "X=MakeMatrix((\\sqrt{}2,1),(\\sqrt{}3,3)); X^100",
-   true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger");
+   true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger", "PowerMatrixByInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger, this->opPolyOverANs(), this->opRational(),
    "Raises poly over algebraic numbers to small integer power. ",

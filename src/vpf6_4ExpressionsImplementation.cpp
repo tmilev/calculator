@@ -8,6 +8,7 @@
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader3Calculator4HtmlFunctions.h"
+#include "vpfHeader5Crypto.h"
 ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp(__FILE__, "Calculator expression implementation. ");
 
 Expression operator*(const Expression& left, const Expression& right)
@@ -2364,8 +2365,16 @@ std::string Expression::ToStringAllSlidersInExpression()const
     if (this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex])
       continue;
     this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex]=true;
-    out << "<input name=\"" << boxNames[i]
-    << "\" type=\"range\" min=\"1\" max = \"5\"/>";
+    std::string sliderName=
+    boxNames[i]+ Crypto::computeSha1outputBase64(boxNames[i]);
+    out << "<input id=\""
+    << sliderName
+    << "\" type=\"range\" min=\"1\" max = \"5\" "
+    << "oninput=\"updateCalculatorSlider('"
+    << boxNames[i]
+    << "','"
+    << sliderName
+    << "');\"/>";
   }
   return out.str();
 }
@@ -2806,18 +2815,20 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           out << ";";
         out << "</td><td valign=\"top\"><hr>";
         if ((*this)[i].IsOfType<std::string>() && isFinal)
-          out << (*this)[i].GetValue<std::string>();
-        else if (((*this)[i].IsOfType<Plot> () || (*this)[i].IsOfType<SemisimpleSubalgebras>() || (*this)[i].IsOfType<WeylGroupData>()
-                  || (*this)[i].IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) && isFinal)
-          out << (*this)[i].ToString(theFormat);
+          out << currentE.GetValue<std::string>();
+        else if ((currentE.IsOfType<Plot> () ||
+                  currentE.IsOfType<SemisimpleSubalgebras>() ||
+                  currentE.IsOfType<WeylGroupData>()
+                  || currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) && isFinal)
+          out << currentE.ToString(theFormat);
         else
-          out << CGI::GetMathSpanBeginArrayL((*this)[i].ToString(theFormat), 1700);
+          out << CGI::GetMathSpanBeginArrayL(currentE.ToString(theFormat), 1700);
         if (i!=this->children.size-1)
           out << ";";
         out << this->ToStringAllSlidersInExpression();
         out << "</td></tr>";
       } else
-      { out << (*this)[i].ToString(theFormat);
+      { out << currentE.ToString(theFormat);
         if (i!=this->children.size-1)
           out << ";";
       }

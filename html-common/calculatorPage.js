@@ -54,6 +54,13 @@ function initializeCalculatorPage()
    );
 }
 
+function updateCalculatorSlider(boxName, sliderName)
+{ var theBoxes= document.getElementsByName(boxName);
+  var theSlider=document.getElementById(sliderName);
+  for (var i=0; i<theBoxes.length; i++)
+    theBoxes[i].value=theSlider.value;
+}
+
 function mQHelpCalculator()
 { //event.preventDefault();
   getSemiColumnEnclosure();

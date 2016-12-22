@@ -398,6 +398,7 @@ class Expression
   bool ToStringData(std::string& output, FormatExpressions* theFormat=0)const;
   std::string ToStringSemiFull()const;
   std::string ToStringFull()const;
+  std::string ToStringAllSlidersInExpression()const;
   std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0, bool unfoldCommandEnclosures=true)const;
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();
@@ -462,6 +463,7 @@ bool EvaluatesToDoubleUnderSubstitutions
   ;
 
   bool HasBoundVariables()const;
+  bool HasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames=0)const;
   bool IsMeltable(int* numResultingChildren=0)const;
   bool AreEqualExcludingChildren(const Expression& other) const
   { return this->owner==other.owner && this->theData==other.theData && this->children.size==other.children.size;
@@ -748,8 +750,9 @@ public:
   HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
   ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
   ListReferences<Plot> thePlots;
+  List<bool> userInputBoxSliderDisplayed;
   MapReferenceS<std::string, Expression, MathRoutines::hashString> theUserInputTextBoxesWithValues;
-  HashedList<std::string, MathRoutines::hashString> theUserInputTextBoxes;
+//  HashedList<std::string, MathRoutines::hashString> theUserInputTextBoxes;
 
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
@@ -762,6 +765,7 @@ public:
   SemisimpleSubalgebras& GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input);
   int CurrentRandomSeed;
   void reset();
+  void resetSliders();
   std::string ToString();
 };
 

@@ -628,16 +628,19 @@ void Calculator::EvaluateCommands()
     theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
     out << "Input: " << "\e[1;32m" << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
     theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
+    this->theObjectContainer.resetSliders();
     out << "Output: " << "\e[1;33m" << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
   } else if (!this->flagDisplayFullExpressionTree)
   { std::string badCharsString=this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharsString!="")
       out << badCharsString << "<hr>";
+    this->theObjectContainer.resetSliders();
     out << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression);
   } else
   { std::string badCharsString=this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharsString!="")
       out << badCharsString << "<hr>";
+    this->theObjectContainer.resetSliders();
     out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"
     << "Output:<br>" << this->theProgramExpression.ToStringFull();
   }

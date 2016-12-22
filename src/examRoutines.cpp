@@ -1204,9 +1204,9 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
       comments << "This may be a bug with the problem. Feel free to take a screenshot of the issue and "
       << "email it to the site admin(s). ";
   }
-  for (int i=0; i<theInterpreter.theObjectContainer.theUserInputTextBoxes.size; i++)
+  for (int i=0; i<theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.size(); i++)
     this->theProblemData.inputNonAnswerIds.AddOnTop
-    (theInterpreter.theObjectContainer.theUserInputTextBoxes[i]);
+    (theInterpreter.theObjectContainer.theUserInputTextBoxesWithValues.theKeys[i]);
   return result;
 }
 

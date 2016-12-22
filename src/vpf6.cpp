@@ -1170,6 +1170,48 @@ bool Expression::CheckInitialization()const
   return true;
 }
 
+bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames)const
+{ MacroRegisterFunctionWithName("Expression::HasInputBoxVariables");
+  if (this->owner==0)
+    return false;
+  RecursionDepthCounter recursionCounter(&this->owner->RecursionDeptH);
+  if (this->owner->RecursionDeptH>this->owner->MaxRecursionDeptH)
+    crash << "This is a programming error: "
+    << "function HasInputBoxVariables has exceeded "
+    << "recursion depth limit. " << crash;
+  bool result=false;
+  if (this->StartsWith(this->owner->opUserInputTextBox()))
+  {// stOutput << "DEBUG: Processing: " << this->ToString()
+   // << " lispified " << this->ToStringSemiFull();
+    if (boxNames==0)
+      return true;
+    else
+    { result=true;
+      std::string keyString;
+      for (int i=1; i<this->size(); i++)
+        if ((*this)[i].StartsWith(this->owner->opDefine(),3))
+        { if ((*this)[i][1].IsAtom(&keyString))
+          { if (keyString=="name")
+              boxNames->AddOnTopNoRepetition((*this)[i][2].ToString());
+//            stOutput << "DEBUG: keystring: " << keyString;
+          }
+//          stOutput << "DEBUG: HERE I AM, this[i][1] is: "
+//          << (*this)[i][1].ToString() << " or: "
+//          << (*this)[i][1].ToStringSemiFull()
+//          ;
+        }
+    }
+  }
+  for (int i=0; i<this->size(); i++)
+    if ((*this)[i].HasInputBoxVariables(boxNames))
+    { if (boxNames==0)
+        return true;
+      else
+        result=true;
+    }
+  return result;
+}
+
 bool Expression::HasBoundVariables()const
 { if (this->owner==0)
     crash << "This is a programming error: calling function HasBoundVariables on non-initialized expression. " << crash;
@@ -2665,6 +2707,10 @@ WeylGroupData& ObjectContainer::GetWeylGroupDataCreateIfNotPresent(const DynkinT
   return this->GetLieAlgebraCreateIfNotPresent(input).theWeyl;
 }
 
+void ObjectContainer::resetSliders()
+{ this->userInputBoxSliderDisplayed.initFillInObject(this->theUserInputTextBoxesWithValues.size(), false);
+}
+
 void ObjectContainer::reset()
 { MacroRegisterFunctionWithName("ObjectContainer::reset");
   this->theWeylGroupElements.Clear();
@@ -2703,6 +2749,7 @@ void ObjectContainer::reset()
   this->theHyperOctahedralGroups.SetSize(0);
   this->theElementsHyperOctGroup.Clear();
   this->CurrentRandomSeed=  time(NULL);
+  this->theUserInputTextBoxesWithValues.Clear();
    //Setting up a random seed.
   srand (this->CurrentRandomSeed);
 }

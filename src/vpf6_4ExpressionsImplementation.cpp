@@ -2345,6 +2345,31 @@ bool Calculator::innerFlattenCommandEnclosuresOneLayer(Calculator& theCommands, 
   return true;
 }
 
+std::string Expression::ToStringAllSlidersInExpression()const
+{ HashedList<std::string, MathRoutines::hashString> boxNames;
+  if (!this->HasInputBoxVariables(&boxNames))
+    return "";
+  if (this->owner->theObjectContainer.userInputBoxSliderDisplayed.size <
+      this->owner->theObjectContainer.theUserInputTextBoxesWithValues.size())
+    this->owner->theObjectContainer.resetSliders();
+  MapReferenceS<std::string, Expression, MathRoutines::hashString>&
+  theSliders=this->owner->theObjectContainer.theUserInputTextBoxesWithValues;
+  std::stringstream out;
+  for (int i=0; i<boxNames.size; i++)
+  { if (!theSliders.Contains(boxNames[i]))
+    { out << boxNames[i] << " not found. ";
+      continue;
+    }
+    int theIndex=theSliders.GetIndex(boxNames[i]);
+    if (this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex])
+      continue;
+    this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex]=true;
+    out << "<input name=\"" << boxNames[i]
+    << "\" type=\"range\" min=\"1\" max = \"5\"/>";
+  }
+  return out.str();
+}
+
 std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression, bool unfoldCommandEnclosures)const
 { MacroRegisterFunctionWithName("Expression::ToString");
   if (this==0)
@@ -2766,7 +2791,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if (!createTable && this->size()>2)
       out << "(";
     for (int i=1; i<this->children.size; i++)
-    { if (createTable)
+    { const Expression currentE=(*this)[i];
+      if (createTable)
       { out << "<tr><td valign=\"top\">";
         out << "<hr> ";
         if (!this->owner->flagHideLHS)
@@ -2788,6 +2814,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           out << CGI::GetMathSpanBeginArrayL((*this)[i].ToString(theFormat), 1700);
         if (i!=this->children.size-1)
           out << ";";
+        out << this->ToStringAllSlidersInExpression();
         out << "</td></tr>";
       } else
       { out << (*this)[i].ToString(theFormat);

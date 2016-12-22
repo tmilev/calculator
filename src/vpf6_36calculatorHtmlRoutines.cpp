@@ -13,7 +13,6 @@ bool CalculatorHtmlFunctions::innerUserInputBox
   MapLisT<std::string, Expression, MathRoutines::hashString> theArguments;
   if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theArguments, &theCommands.Comments))
     return false;
-  std::stringstream out;
   if (!theArguments.Contains("name"))
     return theCommands << "User input name not specified in: " << input.ToString();
   std::string boxName= CalculatorHtmlFunctions::GetUserInputBoxName(input);
@@ -26,11 +25,12 @@ bool CalculatorHtmlFunctions::innerUserInputBox
   Expression nextParamE(theCommands);
   Expression theKeyE;
   for (int i=0; i<theArguments.theKeys.size; i++ )
-  { theKeyE.AssignValue(theArguments.theKeys[i], theCommands);
+  { theKeyE.MakeAtom(theArguments.theKeys[i], theCommands);
     nextParamE.MakeXOX(theCommands, theCommands.opDefine(), theKeyE, theArguments.theValues[i]);
     output.AddChildOnTop(nextParamE);
   }
-  theCommands.theObjectContainer.theUserInputTextBoxes.AddOnTopNoRepetition(boxName);
+  theCommands.theObjectContainer.theUserInputTextBoxesWithValues.
+  GetValueCreateIfNotPresent(boxName)=output;
   return true;
 }
 
@@ -88,7 +88,6 @@ bool CalculatorHtmlFunctions::innerSetInputBox
   out << "Set value to input box name: " << boxName;
   return output.AssignValue(out.str(), theCommands);
 }
-
 
 std::string CalculatorHtmlFunctions::GetUserInputBox(const Expression& theBox)
 { MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetUserInputBox");

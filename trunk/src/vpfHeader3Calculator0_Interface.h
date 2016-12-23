@@ -665,8 +665,8 @@ public:
   List<List<std::string> > theVarRangesJS;
   std::string colorUV;
   std::string colorVU;
-  int numSegmentsU;
-  int numSegmentsV;
+  std::string numSegmentsU;
+  std::string numSegmentsV;
   PlotObject3d();
   std::string GetJavascriptSurfaceImmersion(std::string& outputSurfaceInstantiationJS);
   std::string ToStringDebug();
@@ -712,6 +712,14 @@ class Plot
   bool operator==(const Plot& other)const;
 };
 
+struct InputBox
+{
+  std::string name;
+  Expression value;
+  std::string GetSliderName()const;
+  std::string GetUserInputBox()const;
+};
+
 class ObjectContainer
 { //Following are containers for data structures that are implemented in C++.
   //These objects are dynamically allocated and used by the calculator as requested
@@ -751,8 +759,7 @@ public:
   ListReferences<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational > > theHyperoctahedralReps;
   ListReferences<Plot> thePlots;
   List<bool> userInputBoxSliderDisplayed;
-  MapReferenceS<std::string, Expression, MathRoutines::hashString> theUserInputTextBoxesWithValues;
-//  HashedList<std::string, MathRoutines::hashString> theUserInputTextBoxes;
+  MapReferenceS<std::string, InputBox, MathRoutines::hashString> theUserInputTextBoxesWithValues;
 
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;

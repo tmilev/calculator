@@ -1200,8 +1200,8 @@ std::string Plot::ToStringDebug()
 }
 
 PlotObject3d::PlotObject3d()
-{ this->numSegmentsU=22;
-  this->numSegmentsV=4;
+{ this->numSegmentsU="22";
+  this->numSegmentsV="4";
 }
 
 std::string PlotObject3d::ToStringDebug()

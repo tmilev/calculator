@@ -1180,26 +1180,15 @@ bool Expression::HasInputBoxVariables(HashedList<std::string, MathRoutines::hash
     << "function HasInputBoxVariables has exceeded "
     << "recursion depth limit. " << crash;
   bool result=false;
-  if (this->StartsWith(this->owner->opUserInputTextBox()))
+  InputBox tempBox;
+  if (this->IsOfType<InputBox>(&tempBox))
   {// stOutput << "DEBUG: Processing: " << this->ToString()
    // << " lispified " << this->ToStringSemiFull();
     if (boxNames==0)
       return true;
     else
     { result=true;
-      std::string keyString;
-      for (int i=1; i<this->size(); i++)
-        if ((*this)[i].StartsWith(this->owner->opDefine(),3))
-        { if ((*this)[i][1].IsAtom(&keyString))
-          { if (keyString=="name")
-              boxNames->AddOnTopNoRepetition((*this)[i][2].ToString());
-//            stOutput << "DEBUG: keystring: " << keyString;
-          }
-//          stOutput << "DEBUG: HERE I AM, this[i][1] is: "
-//          << (*this)[i][1].ToString() << " or: "
-//          << (*this)[i][1].ToStringSemiFull()
-//          ;
-        }
+      boxNames->AddOnTopNoRepetition(tempBox.name);
     }
   }
   for (int i=0; i<this->size(); i++)

@@ -4,7 +4,8 @@
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfHeader3Calculator1_InnerTypedFunctions.h"
 #include "vpfHeader2Math9DrawingVariables.h"
-
+#include "vpfHeader3Calculator4HtmlFunctions.h"
+#include "vpfHeader5Crypto.h"
 ProjectInformationInstance ProjectInfoVpf6_35cpp(__FILE__, "More calculator built-in functions. ");
 
 struct MeshTriangles{
@@ -1220,13 +1221,24 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
   return true;
 }
 
+std::string InputBox::GetSliderName()const
+{ return this->name+ Crypto::computeSha1outputBase64(this->name);
+}
+
+std::string InputBox::GetUserInputBox()const
+{ MacroRegisterFunctionWithName("InputBox::GetUserInputBox");
+  std::stringstream out;
+  out << "\\FormInput" << "[" << this->value.ToString()
+  << "]" << "{" << this->name << "}" ;
+  return out.str();
+}
+
 bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMakeJavascriptExpression");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   if (theCommands.RecursionDepthExceededHandleRoughly())
     return false;
   std::string atomString;
-
   if (input.IsAtom(&atomString))
   { if (input.ToString()=="e")
       return output.AssignValue<std::string>(" 2.718281828 ", theCommands);
@@ -1239,6 +1251,12 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
     return output.AssignValue(atomString, theCommands);
   }
   std::stringstream out;
+  InputBox theBox;
+  if (input.IsOfType(&theBox))
+  { out << "parseInt(document.getElementById('"
+    << theBox.GetSliderName() << "').value)";
+    return output.AssignValue(out.str(),theCommands);
+  }
   out.precision(7);
   bool hasDoubleValue=false;;
   double theDoubleValue=-1;
@@ -1340,7 +1358,7 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
   for (int i=1; i<thePlot.theSurface.size(); i++)
   { bool isGood=CalculatorFunctionsGeneral::innerMakeJavascriptExpression
     (theCommands, thePlot.theSurface[i], jsConverter);
-    if (isGood )
+    if (isGood)
       isGood= jsConverter.IsOfType<std::string>(&thePlot.theCoordinateFunctionsJS[i-1]);
     if (!isGood)
       return theCommands << "Failed to convert " << thePlot.theSurface[i].ToString()
@@ -1369,10 +1387,27 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
       thePlot.colorUV=theKeys.GetValueCreateIfNotPresent("color1").ToString();
     if (theKeys.Contains("color2"))
       thePlot.colorVU=theKeys.GetValueCreateIfNotPresent("color2").ToString();
-    if (theKeys.Contains("numSegments1"))
-      theKeys.GetValueCreateIfNotPresent("numSegments1").IsSmallInteger(&thePlot.numSegmentsU);
-    if (theKeys.Contains("numSegments2"))
-      theKeys.GetValueCreateIfNotPresent("numSegments2").IsSmallInteger(&thePlot.numSegmentsV);
+    MapLisT<std::string, std::string, MathRoutines::hashString>
+    keysToConvert;
+    keysToConvert.GetValueCreateIfNotPresent("numSegments1");
+    keysToConvert.GetValueCreateIfNotPresent("numSegments2");
+    for (int i=0; i<keysToConvert.size(); i++)
+    { if (!theKeys.Contains(keysToConvert.theKeys[i]))
+        continue;
+      Expression expressionToConvert=theKeys.GetValueCreateIfNotPresent(keysToConvert.theKeys[i]);
+      bool isGood=CalculatorFunctionsGeneral::innerMakeJavascriptExpression
+      (theCommands, expressionToConvert, jsConverter);
+      if (isGood )
+        isGood= jsConverter.IsOfType<std::string>(&keysToConvert.theValues[i]);
+      if (!isGood)
+        return theCommands << "Failed to convert "
+        << expressionToConvert.ToString()
+        << " to a javascript expression. ";
+    }
+    if(keysToConvert.GetValueCreateIfNotPresent("numSegments1")!="")
+      thePlot.numSegmentsU=keysToConvert.GetValueCreateIfNotPresent("numSegments1");
+    if(keysToConvert.GetValueCreateIfNotPresent("numSegments2")!="")
+      thePlot.numSegmentsV=keysToConvert.GetValueCreateIfNotPresent("numSegments2");
   }
   if (thePlot.theVarRangesJS[0][0]=="" || thePlot.theVarRangesJS[0][1]=="" ||
       thePlot.theVarRangesJS[1][0]=="" || thePlot.theVarRangesJS[1][1]=="")

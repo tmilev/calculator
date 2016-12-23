@@ -17,21 +17,13 @@ bool CalculatorHtmlFunctions::innerUserInputBox
     return theCommands << "User input name not specified in: " << input.ToString();
   std::string boxName= CalculatorHtmlFunctions::GetUserInputBoxName(input);
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName))
-  { output=theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreateIfNotPresent(boxName);
-    return true;
-  }
-  output.reset(theCommands);
-  output.AddChildAtomOnTop(theCommands.opUserInputTextBox());
-  Expression nextParamE(theCommands);
-  Expression theKeyE;
+    return output.AssignValue(theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreateIfNotPresent(boxName), theCommands);
+  InputBox newBox;
+  newBox.name=boxName;
   for (int i=0; i<theArguments.theKeys.size; i++ )
-  { theKeyE.MakeAtom(theArguments.theKeys[i], theCommands);
-    nextParamE.MakeXOX(theCommands, theCommands.opDefine(), theKeyE, theArguments.theValues[i]);
-    output.AddChildOnTop(nextParamE);
-  }
-  theCommands.theObjectContainer.theUserInputTextBoxesWithValues.
-  GetValueCreateIfNotPresent(boxName)=output;
-  return true;
+    if (theArguments.theKeys[i]=="value")
+      newBox.value=theArguments.theValues[i];
+  return output.AssignValue(newBox, theCommands);
 }
 
 bool CalculatorHtmlFunctions::innerEvaluateSymbols
@@ -82,34 +74,12 @@ bool CalculatorHtmlFunctions::innerSetInputBox
   std::string boxName= CalculatorHtmlFunctions::GetUserInputBoxName(input);
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName))
     return theCommands << "Input box with name: " << boxName << " already has value.";
-  theCommands.theObjectContainer.theUserInputTextBoxesWithValues.SetKeyValue
-  (boxName, theArguments.GetValueCreateIfNotPresent("value"));
+  InputBox& theBox=
+  theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreateIfNotPresent(boxName);
+  theBox.value=theArguments.GetValueCreateIfNotPresent("value");
   std::stringstream out;
   out << "Set value to input box name: " << boxName;
   return output.AssignValue(out.str(), theCommands);
-}
-
-std::string CalculatorHtmlFunctions::GetUserInputBox(const Expression& theBox)
-{ MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetUserInputBox");
-  std::stringstream out;
-  if (theBox.owner==0)
-    return "non-initialized-expression";
-  Calculator& theCommands=*theBox.owner;
-  MapLisT<std::string, Expression, MathRoutines::hashString> theArguments;
-  if (!CalculatorConversions::innerLoadKeysFromStatementList
-      (theCommands, theBox, theArguments))
-    return "(corrupt-box)";
-  if (!theArguments.Contains("name"))
-    return "(box-without-name)";
-  std::string theBoxName="faultyBoxName";
-  std::string boxValue;
-  if (!theArguments.GetValueCreateIfNotPresent("name").IsOfType<std::string>(&theBoxName))
-    theBoxName=theArguments.GetValueCreateIfNotPresent("name").ToString();
-  if (theArguments.Contains("value"))
-    if (!theArguments.GetValueCreateIfNotPresent("value").IsOfType<std::string>(&theBoxName))
-      boxValue=theArguments.GetValueCreateIfNotPresent("value").ToString();
-  out << "\\FormInput" << "[" << boxValue << "]" << "{" << theBoxName << "}" ;
-  return out.str();
 }
 
 std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBox)

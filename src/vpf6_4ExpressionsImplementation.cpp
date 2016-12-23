@@ -61,6 +61,12 @@ int Expression::GetTypeOperation<RationalFunctionOld>()const
 }
 
 template < >
+int Expression::GetTypeOperation<InputBox>()const
+{ this->CheckInitialization();
+  return this->owner->opUserInputTextBox();
+}
+
+template < >
 int Expression::GetTypeOperation<Rational>()const
 { this->CheckInitialization();
   return this->owner->opRational();
@@ -298,6 +304,17 @@ ElementHyperoctahedralGroupR2
 { this->CheckInitialization();
   return this->owner->theObjectContainer.theElementsHyperOctGroup
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+InputBox
+& inputValue)const
+{ this->CheckInitialization();
+  this->owner->theObjectContainer.theUserInputTextBoxesWithValues
+  .SetKeyValue(inputValue.name, inputValue);
+  return this->owner->theObjectContainer.theUserInputTextBoxesWithValues
+  .GetIndex(inputValue.name);
 }
 
 template < >
@@ -598,6 +615,13 @@ ElementHyperoctahedralGroupR2& Expression::GetValueNonConst()const
 { if (!this->IsOfType<ElementHyperoctahedralGroupR2>())
     crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theElementsHyperOctGroup.GetElement(this->GetLastChild().theData);
+}
+
+template < >
+InputBox& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<InputBox>())
+    crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
+  return this->owner->theObjectContainer.theUserInputTextBoxesWithValues.theValues[this->GetLastChild().theData];
 }
 
 template < >
@@ -1947,6 +1971,10 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<ElementZmodP>())
   { out << this->GetValue<ElementZmodP>().ToString();
     result=true;
+  }
+  else if (this->IsOfType<InputBox>())
+  { out << this->GetValue<InputBox>().GetUserInputBox();
+    result=true;
   } else if (this->IsOfType<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >())
   { out << this->GetValue<GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> >().ToString();
     result=true;
@@ -2353,7 +2381,7 @@ std::string Expression::ToStringAllSlidersInExpression()const
   if (this->owner->theObjectContainer.userInputBoxSliderDisplayed.size <
       this->owner->theObjectContainer.theUserInputTextBoxesWithValues.size())
     this->owner->theObjectContainer.resetSliders();
-  MapReferenceS<std::string, Expression, MathRoutines::hashString>&
+  MapReferenceS<std::string, InputBox, MathRoutines::hashString>&
   theSliders=this->owner->theObjectContainer.theUserInputTextBoxesWithValues;
   std::stringstream out;
   for (int i=0; i<boxNames.size; i++)
@@ -2365,15 +2393,16 @@ std::string Expression::ToStringAllSlidersInExpression()const
     if (this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex])
       continue;
     this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex]=true;
-    std::string sliderName=
-    boxNames[i]+ Crypto::computeSha1outputBase64(boxNames[i]);
+    InputBox& theBox=theSliders.theValues[theIndex];
+    std::string theSliderName=theBox.GetSliderName();
     out << "<input id=\""
-    << sliderName
+    << theSliderName
     << "\" type=\"range\" min=\"1\" max = \"5\" "
+    << "value=\"" << theBox.value.ToString() << "\" "
     << "oninput=\"updateCalculatorSlider('"
     << boxNames[i]
     << "','"
-    << sliderName
+    << theSliderName
     << "');\"/>";
   }
   return out.str();
@@ -2451,8 +2480,6 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "(Corrupt string)";
   } else if (this->IsListStartingWithAtom(this->owner->opDefineConditional()))
     out << (*this)[1].ToString(theFormat) << " :if " << (*this)[2].ToString(theFormat) << "=" << (*this)[3].ToString(theFormat);
-  else if (this->StartsWith(this->owner->opUserInputTextBox()))
-    out << CalculatorHtmlFunctions::GetUserInputBox(*this);
   else if (this->StartsWith(this->owner->opDivide(), 3))
   { bool doUseFrac= this->formatUseFrac || this->owner->flagUseFracInRationalLaTeX;
     if (doUseFrac && ((*this)[1].StartsWith(this->owner->opTimes()) ||
@@ -2825,7 +2852,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           out << CGI::GetMathSpanBeginArrayL(currentE.ToString(theFormat), 1700);
         if (i!=this->children.size-1)
           out << ";";
-        out << this->ToStringAllSlidersInExpression();
+        out << currentE.ToStringAllSlidersInExpression();
         out << "</td></tr>";
       } else
       { out << currentE.ToString(theFormat);

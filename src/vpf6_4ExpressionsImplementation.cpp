@@ -2399,9 +2399,14 @@ std::string Expression::ToStringAllSlidersInExpression()const
     std::string theSliderName=theBox.GetSliderName();
     out << "<input id=\""
     << theSliderName
-    << "\" type=\"range\""
-    //<< " min=\"1\" max = \"5\" "
-    << "value=\"" << theBox.value.ToString() << "\" "
+    << "\" type=\"range\"";
+    if (theBox.min.ToString()!="")
+      out << "min=\"" << theBox.min.ToString() << "\" ";
+    if (theBox.max.ToString()!="")
+      out << "max=\"" << theBox.max.ToString() << "\" ";
+    if (theBox.step.ToString()!="")
+      out << "step=\"" << theBox.step.ToString() << "\" ";
+    out << "value=\"" << theBox.value.ToString() << "\" "
     << "oninput=\"updateCalculatorSliderToInputBox('"
     << boxNames[i]
     << "','"

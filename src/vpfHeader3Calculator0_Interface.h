@@ -717,6 +717,9 @@ struct InputBox
 {
   std::string name;
   Expression value;
+  Expression min;
+  Expression max;
+  Expression step;
   std::string GetSliderName()const;
   std::string GetUserInputBox()const;
 };

@@ -21,8 +21,15 @@ bool CalculatorHtmlFunctions::innerUserInputBox
   InputBox newBox;
   newBox.name=boxName;
   for (int i=0; i<theArguments.theKeys.size; i++ )
-    if (theArguments.theKeys[i]=="value")
+  { if (theArguments.theKeys[i]=="value")
       newBox.value=theArguments.theValues[i];
+    if (theArguments.theKeys[i]=="min")
+      newBox.min=theArguments.theValues[i];
+    if (theArguments.theKeys[i]=="max")
+      newBox.max=theArguments.theValues[i];
+    if (theArguments.theKeys[i]=="step")
+      newBox.step=theArguments.theValues[i];
+  }
   return output.AssignValue(newBox, theCommands);
 }
 

@@ -775,6 +775,7 @@ public:
   void reset();
   void resetSliders();
   std::string ToString();
+  std::string ToStringJavascriptForUserInputBoxes();
 };
 
 struct ExpressionTripleCrunchers

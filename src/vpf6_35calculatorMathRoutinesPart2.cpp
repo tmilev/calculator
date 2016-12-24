@@ -1417,5 +1417,6 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
   thePlot.thePlotType="surface";
   Plot result;
   result+=thePlot;
+  input.HasInputBoxVariables(&result.boxesThatUpdateMe);
   return output.AssignValue(result, theCommands);
 }

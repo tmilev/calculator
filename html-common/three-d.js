@@ -279,7 +279,8 @@ function calculatorResetCanvas(inputCanvas)
 function calculatorGetCanvas(inputCanvas)
 { if (calculatorCanvases[inputCanvas.id]===undefined)
   { calculatorCanvases[inputCanvas.id]=
-    { theIIIdObjects:
+    { canvasResetFunction: null,
+      theIIIdObjects:
       { thePatches: [],
         theContours: [],
         thePoints: [],

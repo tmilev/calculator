@@ -789,6 +789,7 @@ void Plot::operator+=(const Plot& other)
     if (this->DesiredHtmlWidthInPixels<other.DesiredHtmlWidthInPixels)
       this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
   }
+  this->boxesThatUpdateMe.AddOnTopNoRepetition(other.boxesThatUpdateMe);
 }
 
 bool Plot::operator==(const Plot& other)const
@@ -802,7 +803,9 @@ bool Plot::operator==(const Plot& other)const
       this->theLowerBoundAxes!=other.theLowerBoundAxes ||
       this->theUpperBoundAxes!=other.theUpperBoundAxes)
     return false;
-  return this->thePlots==other.thePlots && this->the3dObjects==other.the3dObjects;
+  return this->thePlots==other.thePlots &&
+  this->the3dObjects==other.the3dObjects &&
+  this->boxesThatUpdateMe==other.boxesThatUpdateMe;
 }
 
 void Plot::operator+=(const PlotObject3d& other)
@@ -1134,7 +1137,7 @@ std::string Plot::GetPlotHtml3d()
   return resultStream.str();
 }
 
-std::string Plot::GetPlotHtml3d_New()
+std::string Plot::GetPlotHtml3d_New(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml3d_New");
   std::stringstream out;
   static int canvasCounter=0;
@@ -1156,6 +1159,16 @@ std::string Plot::GetPlotHtml3d_New()
   << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
   << "<span id=\"" << canvasName << "Messages\"></span>"
   << "<script>\n";
+  std::string canvasFunctionName="functionMake"+ canvasName;
+  out << "function " << canvasFunctionName << "()\n"
+  << "{ ";
+  for (int i=0; i<this->boxesThatUpdateMe.size; i++)
+  { InputBox& currentBox=owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreateIfNotPresent
+    (this->boxesThatUpdateMe[i]);
+    out << " calculatorPlotUpdaters['"
+    << currentBox.GetSliderName() << "']=" << "'" << canvasName << "'"
+    << ";\n";
+  }
   List<std::string> theSurfaces;
   theSurfaces.SetSize(this->the3dObjects.size);
   for (int i=0; i<this->the3dObjects.size; i++)
@@ -1181,6 +1194,11 @@ std::string Plot::GetPlotHtml3d_New()
   }
   out
   << "theCanvas.redraw();\n"
+  << "}\n"
+  << "calculatorGetCanvas(document.getElementById('"
+  << canvasName
+  << "')).canvasResetFunction=" << canvasFunctionName << ";\n"
+  << canvasFunctionName << "();\n"
   << "</script>"
   ;
   return out.str();
@@ -1264,10 +1282,10 @@ std::string PlotObject3d::GetJavascriptSurfaceImmersion(std::string& outputSurfa
   return out.str();
 }
 
-std::string Plot::GetPlotHtml()
+std::string Plot::GetPlotHtml(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml");
   if (this->flagIs3dNewLibrary)
-    return this->GetPlotHtml3d_New();
+    return this->GetPlotHtml3d_New(owner);
   else if (this->flagIs3d)
     return this->GetPlotHtml3d();
   else

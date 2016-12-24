@@ -2402,7 +2402,7 @@ std::string Expression::ToStringAllSlidersInExpression()const
     << "\" type=\"range\""
     //<< " min=\"1\" max = \"5\" "
     << "value=\"" << theBox.value.ToString() << "\" "
-    << "oninput=\"updateCalculatorSlider('"
+    << "oninput=\"updateCalculatorSliderToInputBox('"
     << boxNames[i]
     << "','"
     << theSliderName

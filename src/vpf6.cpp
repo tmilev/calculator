@@ -2696,6 +2696,28 @@ WeylGroupData& ObjectContainer::GetWeylGroupDataCreateIfNotPresent(const DynkinT
   return this->GetLieAlgebraCreateIfNotPresent(input).theWeyl;
 }
 
+std::string ObjectContainer::ToStringJavascriptForUserInputBoxes()
+{ std::stringstream out;
+  out << "<script>\n";
+  out << "calculatorInputBoxNames=[";
+  for (int i=0; i<this->theUserInputTextBoxesWithValues.size(); i++)
+  { InputBox& currentBox=this->theUserInputTextBoxesWithValues.theValues[i];
+    out << "'" << currentBox.name << "'";
+    if (i!=this->theUserInputTextBoxesWithValues.size()-1)
+      out << ", ";
+  }
+  out << "];\n";
+  out << "calculatorInputBoxToSliderUpdaters= new Object;";
+  for (int i=0; i<this->theUserInputTextBoxesWithValues.size(); i++)
+  { InputBox& currentBox=this->theUserInputTextBoxesWithValues.theValues[i];
+    out << "calculatorInputBoxToSliderUpdaters['"
+    << currentBox.name << "']='"
+    << currentBox.GetSliderName() << "';\n";
+  }
+  out << "</script>";
+  return out.str();
+}
+
 void ObjectContainer::resetSliders()
 { this->userInputBoxSliderDisplayed.initFillInObject(this->theUserInputTextBoxesWithValues.size(), false);
 }

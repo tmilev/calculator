@@ -11,6 +11,8 @@ var ignoreNextMathQuillUpdateEvent=false;
 var calculatorLeftPosition=0;
 var calculatorRightPosition=0;
 var calculatorPlotUpdaters= new Object;
+var calculatorInputBoxToSliderUpdaters=new Object;
+var calculatorInputBoxNames=[];
 var numInsertedJavascriptChildren=0;
 function initializeCalculatorVariables()
 { mqProblemSpan=document.getElementById('mqProblemSpan');
@@ -61,7 +63,7 @@ function onLoadDefaultFunction(idElement)
   var scripts = spanVerification.getElementsByTagName('script');
   for (var i=0; i<numInsertedJavascriptChildren; i++)
   { document.getElementsByTagName('head')[0].removeChild(document.getElementsByTagName('head')[0].lastChild);
-    document.getElementsByTagName('head')[0].appendChild(scriptChild);
+//    document.getElementsByTagName('head')[0].appendChild(scriptChild);
   }
   numInsertedJavascriptChildren=0;
   for (i=0; i<scripts.length; i++)
@@ -71,13 +73,29 @@ function onLoadDefaultFunction(idElement)
     document.getElementsByTagName('head')[0].appendChild(scriptChild);
     numInsertedJavascriptChildren++;
   }
-  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById('idElement')]);
+  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById(idElement)]);
+  MathJax.Hub.Queue([calculatorAddListendersToInputBoxes]);
+
+//  alert(theString);
 }
 
-function updateCalculatorInputBoxes()
-{alert("i be called");
+function calculatorAddListendersToInputBoxes()
+{ //var theString=" updating: box names, slider names: ";
+  for (var i=0; i<calculatorInputBoxNames.length; i++)
+  { var theBoxes=document.getElementsByName(calculatorInputBoxNames[i]);
+    for (var j=0; j<theBoxes.length; j++)
+      theBoxes[j].addEventListener("input",
+      function()
+      { var sliderName=calculatorInputBoxToSliderUpdaters[this.name];
+        document.getElementById(sliderName).value=this.value;
+        event.preventDefault();
+        updateCalculatorSliderToInputBox(this.name, sliderName);
+      }
+      );
+  }
 }
-function updateCalculatorSlider(boxName, sliderName)
+
+function updateCalculatorSliderToInputBox(boxName, sliderName)
 { var theBoxes= document.getElementsByName(boxName);
   var theSlider=document.getElementById(sliderName);
   for (var i=0; i<theBoxes.length; i++)
@@ -86,7 +104,7 @@ function updateCalculatorSlider(boxName, sliderName)
   { var theCanvas=calculatorCanvases[calculatorPlotUpdaters[sliderName]];
     if (theCanvas!==undefined)
     { if (theCanvas.canvasResetFunction!==null)
-       theCanvas.canvasResetFunction();
+        theCanvas.canvasResetFunction();
     }
   }
 }

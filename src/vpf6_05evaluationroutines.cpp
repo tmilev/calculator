@@ -635,6 +635,7 @@ void Calculator::EvaluateCommands()
     if (badCharsString!="")
       out << badCharsString << "<hr>";
     this->theObjectContainer.resetSliders();
+    out << this->theObjectContainer.ToStringJavascriptForUserInputBoxes();
     out << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression);
   } else
   { std::string badCharsString=this->ToStringIsCorrectAsciiCalculatorString(this->inputString);

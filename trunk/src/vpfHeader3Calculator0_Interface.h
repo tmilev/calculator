@@ -677,6 +677,7 @@ class Plot
 { public:
   List<PlotObject> thePlots;
   List<PlotObject3d> the3dObjects;
+  HashedList<std::string, MathRoutines::hashString> boxesThatUpdateMe;
   double theLowerBoundAxes;
   double theUpperBoundAxes;
   double lowBoundY;
@@ -693,9 +694,9 @@ class Plot
   //When adding two plots with positive viewing window priorities, the window with the larger priority is used.
   //If the priorities are equal, the windows are combined to the smallest window that fits both.
   std::string ToStringDebug();
-  std::string GetPlotHtml();
+  std::string GetPlotHtml(Calculator& owner);
   std::string GetPlotHtml3d();
-  std::string GetPlotHtml3d_New();
+  std::string GetPlotHtml3d_New(Calculator& owner);
   std::string GetPlotHtml2d();
   std::string GetPlotStringAddLatexCommands(bool useHtml);
   bool IsOKVector(const Vector<double>& input);

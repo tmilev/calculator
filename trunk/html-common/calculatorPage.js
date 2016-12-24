@@ -10,12 +10,14 @@ var calculatorMQStringIsOK=true;
 var ignoreNextMathQuillUpdateEvent=false;
 var calculatorLeftPosition=0;
 var calculatorRightPosition=0;
+var calculatorPlotUpdaters= new Object;
+var numInsertedJavascriptChildren=0;
 function initializeCalculatorVariables()
 { mqProblemSpan=document.getElementById('mqProblemSpan');
   calculatorInput=document.getElementById('mainInputID');
   calculatorMQfield=document.getElementById('mainInputMQfield');
-
 }
+
 var calculatorMQobjectsInitialized=false;
 function initializeCalculatorPage()
 { if (calculatorMQobjectsInitialized===true)
@@ -54,11 +56,39 @@ function initializeCalculatorPage()
    );
 }
 
+function onLoadDefaultFunction(idElement)
+{ var spanVerification=document.getElementById(idElement);
+  var scripts = spanVerification.getElementsByTagName('script');
+  for (var i=0; i<numInsertedJavascriptChildren; i++)
+  { document.getElementsByTagName('head')[0].removeChild(document.getElementsByTagName('head')[0].lastChild);
+    document.getElementsByTagName('head')[0].appendChild(scriptChild);
+  }
+  numInsertedJavascriptChildren=0;
+  for (i=0; i<scripts.length; i++)
+  { var scriptChild= document.createElement('script');
+    scriptChild.innerHTML=scripts[i].innerHTML;
+    scriptChild.type='text/javascript';
+    document.getElementsByTagName('head')[0].appendChild(scriptChild);
+    numInsertedJavascriptChildren++;
+  }
+  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById('idElement')]);
+}
+
+function updateCalculatorInputBoxes()
+{alert("i be called");
+}
 function updateCalculatorSlider(boxName, sliderName)
 { var theBoxes= document.getElementsByName(boxName);
   var theSlider=document.getElementById(sliderName);
   for (var i=0; i<theBoxes.length; i++)
     theBoxes[i].value=theSlider.value;
+  if (calculatorPlotUpdaters[sliderName]!==undefined)
+  { var theCanvas=calculatorCanvases[calculatorPlotUpdaters[sliderName]];
+    if (theCanvas!==undefined)
+    { if (theCanvas.canvasResetFunction!==null)
+       theCanvas.canvasResetFunction();
+    }
+  }
 }
 
 function mQHelpCalculator()

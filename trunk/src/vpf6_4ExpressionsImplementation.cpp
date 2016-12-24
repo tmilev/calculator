@@ -1451,6 +1451,8 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
     return false;
   if (this->IsBuiltInType()) //<- this may need to be rewritten as some built in types will store free variables in their context.
     return true;
+  if (this->IsOfType<InputBox>())
+    return true;
   std::string atomName;
   if (this->IsAtom(&atomName))
   { bool doAddExpression=!this->IsKnownFunctionWithComplexRange();
@@ -2072,7 +2074,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
       thePlot.flagIncludeExtraHtmlDescriptions=
       (theFormat==0) ? true : theFormat->flagIncludeExtraHtmlDescriptionsInPlots;
       thePlot.flagPlotShowJavascriptOnly=this->owner->flagPlotShowJavascriptOnly;
-      out << thePlot.GetPlotHtml();
+      out << thePlot.GetPlotHtml(*this->owner);
       if (this->owner->flagWriteLatexPlots)
       { out << this->owner->WriteDefaultLatexFileReturnHtmlLink
         (thePlot.GetPlotStringAddLatexCommands(false), true);
@@ -2397,7 +2399,8 @@ std::string Expression::ToStringAllSlidersInExpression()const
     std::string theSliderName=theBox.GetSliderName();
     out << "<input id=\""
     << theSliderName
-    << "\" type=\"range\" min=\"1\" max = \"5\" "
+    << "\" type=\"range\""
+    //<< " min=\"1\" max = \"5\" "
     << "value=\"" << theBox.value.ToString() << "\" "
     << "oninput=\"updateCalculatorSlider('"
     << boxNames[i]

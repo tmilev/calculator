@@ -1217,11 +1217,15 @@ D-B;\
   this->AddOperationInnerHandler ("plotSurface", CalculatorFunctionsGeneral::innerPlotSurface, "",
    " Plots a surface. \
    ",
-   "%HideLHS R=2; r=0.6; x=(R+v*cos(u/2))*cos(u);\n y=(R+v*cos(u/2))*sin(u);\nz=v*sin(u/2); \n\
-plotSurface((x,y,z  ),\
-    u\\in(0, 2\\pi), v\\in(-r,r), color1=blue, color2=cyan, numSegments1=22, numSegments2=4)+\n\
-plotSurface(( x+2, z, y ),\
-    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=pink, numSegments1=22, numSegments2=4); ",
+   "%HideLHS x=(R+v*cos(u/2))*cos(u);\
+y=(R+v*cos(u/2))*sin(u);\
+z=v*sin(u/2); \
+R=makeInputBox (name =radiusBig, value=2, min =2, max=5) ;\
+r=makeInputBox (name =radiusSmall, value=0.6, min =0.2, max=1, step=0.2) ;\
+uSegments = makeInputBox(name = uSegments, value = 22, min = 8, max =40) ;\
+vSegments = makeInputBox(name = vSegments, value = 4, min = 2, max =10) ;\
+plotSurface((x,y,z  ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=blue, color2=cyan, numSegments1=uSegments, numSegments2=vSegments)+\
+plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=pink, numSegments1=uSegments, numSegments2=vSegments); ",
     true, false, "CalculatorFunctionsGeneral::innerPlotSurface",
    "PlotSurface")
    ;

@@ -1195,7 +1195,7 @@ bool WebWorker::ReceiveAllHttp()
     crash << "Attempting to receive on a socket with ID equal to -1. " << crash;
 //  std::cout << "Got thus far 10" << std::endl;
   struct timeval tv; //<- code involving tv taken from stackexchange
-  tv.tv_sec = 30;  // 30 Secs Timeout
+  tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
@@ -2270,7 +2270,7 @@ int WebWorker::ProcessCalculator()
   stOutput << "</textarea>\n";
   stOutput << "<br>";
   stOutput << "<button title=\"Shift+Enter=shortcut from input text box. \" "
-  << "name=\"Go\" onmousedown=\""
+  << "name=\"Go\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction); event.preventDefault();"
   << "\"> ";
   stOutput << "Go" << "</button>";
@@ -3831,19 +3831,22 @@ int WebWorker::Run()
     logOpenSSL << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
   /////////////////////////////////////////////////////////////////////////
   stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
-  if (!this->ReceiveAll())
-  { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
-    stOutput << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
-    << "One possibility is that the input was too large. "
-    << "<br>The error message returned was:<br>"
-    << this->error
-    << " <hr><hr>The message (part) that was received is: "
-    << this->ToStringMessageFullUnsafe()
-    << "</body></html>";
-    this->SendAllAndWrapUp();
-    return -1;
+  int result=0;
+//  while (true)
+  { if (!this->ReceiveAll())
+    { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
+      stOutput << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
+      << "One possibility is that the input was too large. "
+      << "<br>The error message returned was:<br>"
+      << this->error
+      << " <hr><hr>The message (part) that was received is: "
+      << this->ToStringMessageFullUnsafe()
+      << "</body></html>";
+      this->SendAllAndWrapUp();
+      return -1;
+    }
+    result=this->ServeClient();
   }
-  int result= this->ServeClient();
   this->SendAllAndWrapUp();
   //theLog << logger::red << "DEBUG: got to here, pt 4" << logger::endL;
   return result;

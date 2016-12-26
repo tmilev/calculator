@@ -2768,6 +2768,7 @@ std::string HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "  inputParams='';\n"
   << "  inputParams+='request='+requestType+'&';\n"
   << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << "';\n"
+  << "  inputParams+='&debugFlag=true';\n"
   << "  inputParams+='&fileName=" << theGlobalVariables.GetWebInput("fileName") << "';\n"
   << "  inputParams+='&topicList=" << theGlobalVariables.GetWebInput("topicList") << "';\n"
   << "  inputParams+='&courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "';\n"

@@ -2188,9 +2188,9 @@ int WebWorker::ProcessCompute()
 
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
-  this->SetHeaderOKNoContentLength();
-  //this->SetHeadeR("HTTP/1.0 200 OK", "Access-Control-Allow-Origin: *");
-  std::cout << "DEBUG: got to here";
+  this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: text/html; charset=utf-8\r\nAccess-Control-Allow-Origin: *");
+  //this->SetHeaderOKNoContentLength();
+  //std::cout << "DEBUG: got to here";
   theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
   theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
   stOutput << "<html><head> <title>calculator version  "

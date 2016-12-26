@@ -1228,8 +1228,15 @@ std::string InputBox::GetSliderName()const
 std::string InputBox::GetUserInputBox()const
 { MacroRegisterFunctionWithName("InputBox::GetUserInputBox");
   std::stringstream out;
-  out << "\\FormInput" << "[" << this->value.ToString()
-  << "]" << "{" << this->name << "}" ;
+  double theReader=0;
+  out.precision(4);
+  out << std::fixed;
+  if (this->value.EvaluatesToDouble(&theReader))
+    out << "\\FormInput" << "[" << theReader
+    << "]" << "{" << this->name << "}" ;
+  else
+    out << "\\FormInput" << "[" << this->value.ToString()
+    << "]" << "{" << this->name << "}" ;
   return out.str();
 }
 
@@ -1253,7 +1260,7 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
   std::stringstream out;
   InputBox theBox;
   if (input.IsOfType(&theBox))
-  { out << "parseInt(document.getElementById('"
+  { out << "parseFloat(document.getElementById('"
     << theBox.GetSliderName() << "').value)";
     return output.AssignValue(out.str(),theCommands);
   }

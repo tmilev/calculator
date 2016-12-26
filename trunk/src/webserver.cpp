@@ -2184,6 +2184,9 @@ int WebWorker::ProcessCompute()
       return 0;
     }
   stOutput << theParser.ToStringOutputAndSpecials();
+  if (theGlobalVariables.UserDebugFlagOn())
+    stOutput << this->ToStringMessageFullUnsafe();
+
   theGlobalVariables.flagComputationCompletE=true;
   return 0;
 }

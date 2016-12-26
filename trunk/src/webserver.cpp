@@ -2227,7 +2227,9 @@ int WebWorker::ProcessCalculator()
 
   stOutput << "\n</head>\n<body onload=\"loadSettings(); initializeButtons(); initializeCalculatorPage();";
   if (theParser.inputString!="")
-  { stOutput << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction);";
+  { stOutput << "submitStringAsMainInput"
+    << "(document.getElementById('mainInputID').value, "
+    << " 'calculatorOutput', 'compute', onLoadDefaultFunction);";
   }
   stOutput << "\">\n";
   stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
@@ -2565,6 +2567,7 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   out << "\"";
   out << ">\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
+  out << "DEBUG: " << this->ToStringMessageFullUnsafe();
 //  out << WebWorker::ToStringCalculatorArgumentsHumanReadable();
   out << WebWorker::GetLoginHTMLinternal(reasonForLogin) << "</body></html>";
   return out.str();

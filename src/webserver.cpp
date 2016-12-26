@@ -573,7 +573,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     this->displayUserInput=this->error;
     return false;
   }
-  this->remainingBytesToSenD=(std::string) "HTTP/1.1 100 Continue\r\nConnection: close\r\n\r\n";
+  this->remainingBytesToSenD=(std::string) "HTTP/1.0 100 Continue\r\n\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
@@ -1228,7 +1228,7 @@ bool WebWorker::ReceiveAllHttp()
     return false;
   }
   //theLog << logger::red << "DEBUG: got to before continue, worker: " << this->indexInParent+1 << " " << logger::endL;
-  this->remainingBytesToSenD=(std::string) "HTTP/1.1 100 Continue\r\nConnection: close\r\n\r\n";
+  this->remainingBytesToSenD=(std::string) "HTTP/1.0 100 Continue\r\n\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;

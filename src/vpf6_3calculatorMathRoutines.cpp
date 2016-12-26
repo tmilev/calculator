@@ -5669,8 +5669,6 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
 (const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble)const
 { MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleUnderSubstitutions");
   if (this->owner==0)
-    stOutput << "<br>Evaluating, but owner is zero!!! " << this->ToString();
-  if (this->owner==0)
     return false;
 //  stOutput << "<br>DEBUG: Evaluating to double: " << this->ToString();
   Calculator& theCommands=*this->owner;

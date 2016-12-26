@@ -1363,7 +1363,7 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
 
 void WebWorker::SetHeaderOKNoContentLength()
 { MacroRegisterFunctionWithName("WebWorker::SetHeaderOKNoContentLength");
-  this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: text/html; charset=utf-8");
+  this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: text/html; charset=utf-8\r\nAccess-Control-Allow-Origin: *");
   this->flagDoAddContentLength=true;
 }
 
@@ -1729,7 +1729,9 @@ int WebWorker::ProcessFile()
   }
   std::stringstream theHeader;
   bool withCacheHeader=false;
-  theHeader << "HTTP/1.0 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension);
+  theHeader << "HTTP/1.0 200 OK\r\n"
+  << this->GetMIMEtypeFromFileExtension(fileExtension)
+  << "Access-Control-Allow-Origin: *\r\n";
   for (int i=0; i<this->parent->addressStartsSentWithCacheMaxAge.size; i++)
     if (MathRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i]))
     { theHeader << "Cache-Control: max-age=12960000\r\n";
@@ -2188,8 +2190,7 @@ int WebWorker::ProcessCompute()
 
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
-  this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: text/html; charset=utf-8\r\nAccess-Control-Allow-Origin: *");
-  //this->SetHeaderOKNoContentLength();
+  this->SetHeaderOKNoContentLength();
   //std::cout << "DEBUG: got to here";
   theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
   theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");

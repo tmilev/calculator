@@ -1216,6 +1216,7 @@ bool WebWorker::ReceiveAllHttp()
   double numSecondsAtStart=theGlobalVariables.GetElapsedSeconds();
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   int numFailedReceives=0;
+  bool result=false;
   while (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
   { std::stringstream out;
     out << "Socket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
@@ -1226,7 +1227,8 @@ bool WebWorker::ReceiveAllHttp()
       this->displayUserInput=out.str();
       this->error=out.str();
       logIO << out.str() << logger::endL;
-      return false;
+      result=false;
+      break;
     }
     logIO << out.str() << logger::endL;
     numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
@@ -1298,7 +1300,7 @@ bool WebWorker::ReceiveAllHttp()
     this->error=out.str();
     logIO << out.str() << logger::endL;
   }
-  return true;
+  return result;
 }
 
 void WebWorker::SendDisplayUserInputToServer()

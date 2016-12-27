@@ -1948,8 +1948,12 @@ int WebWorker::ProcessUnknown()
   stOutput << "<b>Requested method is not implemented. </b> <hr>The original message received from the server follows."
   << "<hr>\n" << this->ToStringMessageUnsafe();
 
-  logHttpErrors << logger::red << "Method not implemented. Message follows. " << logger::endL
-  << this->ToStringMessageFullUnsafe() << logger::endL;
+  if (this->requestTypE==this->requestChunked)
+    logHttpErrors << logger::red << "Chunked messaging not implemented. Message follows. " << logger::endL
+    << this->ToStringMessageFullUnsafe() << logger::endL;
+  else
+    logHttpErrors << logger::red << "Method not implemented. Message follows. " << logger::endL
+    << this->ToStringMessageFullUnsafe() << logger::endL;
   return 0;
 }
 

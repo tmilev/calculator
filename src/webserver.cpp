@@ -4236,11 +4236,11 @@ void WebWorker::PrepareFullMessageHeaderAndFooter()
 
 void WebWorker::SendAllBytesWithHeaders()
 { MacroRegisterFunctionWithName("WebWorker::SendAllBytesWithHeaders");
-  static bool calledOnce=false;
-  if (calledOnce)
-  { crash << "WebWorker::SendAllBytesNoHeaders called more than once" << crash;
-  }
-  calledOnce=true;
+//  static bool calledOnce=false;
+//  if (calledOnce)
+//  { crash << "WebWorker::SendAllBytesNoHeaders called more than once" << crash;
+//  }
+//  calledOnce=true;
   this->PrepareFullMessageHeaderAndFooter();
   //std::string tempS(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
   //theLog << logger::red << "DEBUG Message:\n" << logger::normalColor << tempS << logger::endL;

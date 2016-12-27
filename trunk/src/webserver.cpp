@@ -608,6 +608,10 @@ bool WebWorker::ReceiveAllHttpSSL()
     this->messageBody+=bufferString;
   }
   if ((signed) this->messageBody.size()!=this->ContentLength)
+  { this->messageHead+=this->messageBody;
+    this->ParseMessageHead();
+  }
+  if ((signed) this->messageBody.size()!=this->ContentLength)
   { std::stringstream out;
     out << "The message-body received by me had length " << this->messageBody.size()
     << " yet I expected a message of length " << this->ContentLength << ". More details follow. "
@@ -1304,6 +1308,10 @@ bool WebWorker::ReceiveAllHttp()
     }
     bufferString.assign(buffer, numBytesInBuffer);
     this->messageBody+=bufferString;
+  }
+  if ((signed) this->messageBody.size()!=this->ContentLength)
+  { this->messageHead+=this->messageBody;
+    this->ParseMessageHead();
   }
   if ((signed) this->messageBody.size()!=this->ContentLength)
   { std::stringstream out;

@@ -1121,6 +1121,8 @@ void WebWorker::ParseMessageHead()
   this->messageBody="";
   this->flagKeepAlive=false;
   this->ContentLength=-1;
+  this->addressGetOrPost="";
+  this->hostWithPort="";
   for (unsigned i =0; i<this->messageHead.size(); i++)
     if (this->messageHead[i]!=' ' && this->messageHead[i]!='\n' && this->messageHead[i]!='\r')
     { buffer.push_back(this->messageHead[i]);

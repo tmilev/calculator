@@ -1231,6 +1231,7 @@ bool WebWorker::ReceiveAllHttp()
       this->displayUserInput=out.str();
       this->error=out.str();
       logIO << out.str() << logger::endL;
+      numBytesInBuffer=0;
       result=false;
       break;
     }
@@ -1240,8 +1241,6 @@ bool WebWorker::ReceiveAllHttp()
   this->messageHead.assign(buffer, numBytesInBuffer);
   if (numBytesInBuffer==0)
     return true;
-  if (this->messageHead.size()==0)
-    return false;
   this->ParseMessageHead();
   if (this->requestTypE==WebWorker::requestTypes::requestPost)
     this->displayUserInput="POST " + this->addressGetOrPost;

@@ -531,6 +531,8 @@ bool WebWorker::ReceiveAllHttpSSL()
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     return true;
 #ifdef MACRO_use_open_ssl
+  this->messageBody="";
+  this->messageHead="";
   unsigned const int bufferSize=60000;
   char buffer[bufferSize];
 //  std::cout << "Got thus far 9" << std::endl;
@@ -1207,6 +1209,8 @@ void WebWorker::ParseMessageHead()
 
 bool WebWorker::ReceiveAllHttp()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttp");
+  this->messageBody="";
+  this->messageHead="";
   unsigned const int bufferSize=60000;
   char buffer[bufferSize];
   //theLog << logger::red << "DEBUG: got to here: worker" << this->indexInParent+1 << " " << logger::endL;

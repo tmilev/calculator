@@ -1234,6 +1234,10 @@ bool WebWorker::ReceiveAllHttp()
     numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);
+  if (numBytesInBuffer==0)
+    return true;
+  if (this->messageHead.size()==0)
+    return false;
   this->ParseMessageHead();
   if (this->requestTypE==WebWorker::requestTypes::requestPost)
     this->displayUserInput="POST " + this->addressGetOrPost;
@@ -1880,6 +1884,14 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
   return false;
 }
 
+void WebWorker::WrapUpConnection()
+{ MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
+  this->pipeWorkerToServerControls.WriteAfterEmptying("close");
+  this->Release();
+  theGlobalVariables.flagComputationCompletE=true;
+  theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
+}
+
 void WebWorker::SendAllAndWrapUp()
 { MacroRegisterFunctionWithName("WebWorker::SendAllAndWrapUp");
   if (!this->IamActive())
@@ -1887,10 +1899,7 @@ void WebWorker::SendAllAndWrapUp()
     return;
   }
   this->SendAllBytesWithHeaders();
-  this->pipeWorkerToServerControls.WriteAfterEmptying("close");
-  this->Release();
-  theGlobalVariables.flagComputationCompletE=true;
-  theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
+  this->WrapUpConnection();
 }
 
 WebWorker::~WebWorker()
@@ -3867,7 +3876,7 @@ int WebWorker::Run()
   /////////////////////////////////////////////////////////////////////////
   stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
   int result=0;
-//  while (true)
+  while (true)
   { if (!this->ReceiveAll())
     { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
       stOutput << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
@@ -3880,9 +3889,15 @@ int WebWorker::Run()
       this->SendAllAndWrapUp();
       return -1;
     }
+    if (this->messageHead.size()==0)
+      break;
     result=this->ServeClient();
+    this->SendAllBytesWithHeaders();
+    if (!this->flagKeepAlive)
+      break;
   }
-  this->SendAllAndWrapUp();
+  this->WrapUpConnection();
+//  this->SendAllAndWrapUp();
   //theLog << logger::red << "DEBUG: got to here, pt 4" << logger::endL;
   return result;
 }

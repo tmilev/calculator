@@ -563,7 +563,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   }
   if (this->messageBody.size()==(unsigned) this->ContentLength)
     return true;
-  this->messageBody.clear();
+//  this->messageBody.clear();
 //  theLog << "Content-length parsed to be: " << this->ContentLength
 //  << "However the size of mainArgumentRAW is: " << this->mainArgumentRAW.size();
   if (this->ContentLength>10000000)
@@ -1253,7 +1253,7 @@ bool WebWorker::ReceiveAllHttp()
     return true;
   if (this->messageBody.size()==(unsigned) this->ContentLength)
     return true;
-  this->messageBody.clear();
+  //this->messageBody.clear();
 
   if (this->ContentLength>10000000)
   { this->CheckConsistency();

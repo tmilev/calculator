@@ -608,7 +608,8 @@ bool WebWorker::ReceiveAllHttpSSL()
   if ((signed) this->messageBody.size()!=this->ContentLength)
   { std::stringstream out;
     out << "The message-body received by me had length " << this->messageBody.size()
-    << " yet I expected a message of length " << this->ContentLength << ".";
+    << " yet I expected a message of length " << this->ContentLength << ". More details follow. "
+    << this->ToStringMessageFullUnsafe();
     logIO << out.str() << logger::endL;
   }
   return true;
@@ -1119,6 +1120,7 @@ void WebWorker::ParseMessageHead()
   this->connectionFlags.size=0;
   this->messageBody="";
   this->flagKeepAlive=false;
+  this->ContentLength=-1;
   for (unsigned i =0; i<this->messageHead.size(); i++)
     if (this->messageHead[i]!=' ' && this->messageHead[i]!='\n' && this->messageHead[i]!='\r')
     { buffer.push_back(this->messageHead[i]);

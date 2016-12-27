@@ -47,6 +47,7 @@ std::string HtmlSnippets::GetJavascriptHideHtml()
 { std::stringstream output;
   output << " <!>\n";
   output << " <script type=\"text/javascript\"> \n";
+  output << "\"use strict\";\n";
   output << " function switchMenu(obj)\n";
   output << " { var el = document.getElementById(obj);	\n";
   output << "   if ( el.style.display != \"none\" ) \n";

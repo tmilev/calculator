@@ -2749,7 +2749,8 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   << desiredFileName.size()+4 << "\">" << desiredFileName << "</textarea>\n"
   << "<button class=\"normalButton\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('"
-  << clonePageAreaID << "').value, '" << spanCloningAttemptResultID << "', 'clonePage');"
+  << clonePageAreaID << "').value, '" << spanCloningAttemptResultID << "', 'clonePage'"
+  << spanCloningAttemptResultID << ");"
   << "\" >Clone</button> <span id=\"" << spanCloningAttemptResultID <<"\"></span>";
   return out.str();
 }
@@ -2759,7 +2760,7 @@ std::string HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   out
   << "<script type=\"text/javascript\"> \n"
   << "\"use srict\";"
-  << "function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction){\n"
+  << "function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus){\n"
   << "  var spanOutput = document.getElementById(idOutput);\n"
   << "  if (spanOutput==null){\n"
   << "    spanOutput = document.createElement('span');\n"
@@ -2778,12 +2779,17 @@ std::string HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   ////////////////////////////////////////////
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutable << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
-  << "  https.onload = function() {\n"
+  << "  https.onload = function()\n"
+  << "  { document.getElementById(idStatus).innerHTML='Received: '+ document.getElementById(idStatus).innerHTML;\n"
   << "    spanOutput.innerHTML=https.responseText;\n"
   << "    if(onLoadFunction!==undefined && onLoadFunction!==null && onLoadFunction!==0)\n"
   << "      onLoadFunction(idOutput);\n"
   << "  }\n"
   ////////////////////////////////////////////
+  << "  document.getElementById(idStatus).innerHTML='Request: POST "
+  << theGlobalVariables.DisplayNameExecutable
+  << "'+ '<br>'"
+  << "+ inputParams;\n"
   << "  https.send(inputParams);\n"
   /////////////////or/////////////////////////
   //  << "  https.send();\n"
@@ -2915,7 +2921,8 @@ std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName
   << "='+encodeURIComponent('weight='+  getElementById('" << idPoints << "').value)"
 //  << "  +encodeURIComponent('numTries='+getElementById('"
   << ", '"
-  << idPointsModOutput << "', 'setProblemData');"
+  << idPointsModOutput << "', 'setProblemData', "
+  << idPointsModOutput << ");"
   << "\""
   << ">";
   out << "Modify";

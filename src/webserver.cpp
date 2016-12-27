@@ -2231,7 +2231,7 @@ int WebWorker::ProcessCalculator()
   if (theParser.inputString!="")
   { stOutput << "submitStringAsMainInput"
     << "(document.getElementById('mainInputID').value, "
-    << " 'calculatorOutput', 'compute', onLoadDefaultFunction);";
+    << " 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus');";
   }
   stOutput << "\">\n";
   stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
@@ -2260,7 +2260,7 @@ int WebWorker::ProcessCalculator()
   << "style=\"white-space:normal\" "
   << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {"
   << "submitStringAsMainInput(document.getElementById('mainInputID').value,"
-  << " 'calculatorOutput', 'compute', onLoadDefaultFunction);"
+  << " 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus');"
   << " event.preventDefault();"
   << "}\" "
   << "onkeyup=  \"suggestWord(); mQHelpCalculator();\", "
@@ -2273,9 +2273,10 @@ int WebWorker::ProcessCalculator()
   stOutput << "<br>";
   stOutput << "<button title=\"Shift+Enter=shortcut from input text box. \" "
   << "name=\"Go\" onclick=\""
-  << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction); event.preventDefault();"
+  << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus'); event.preventDefault();"
   << "\"> ";
-  stOutput << "Go" << "</button>";
+  stOutput << "Go" << "</button>"
+  << "<span id=\"mainComputationStatus\"></span>";
   stOutput << this->closeIndentTag("</td>");
 
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\">");

@@ -462,7 +462,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   std::stringstream buttonStream, submitModPageJS;
   submitModPageJS
   //  << "submitStringAsMainInput(document.getElementById('mainInput').value, 'spanSubmitReport', 'modifyPage');"
-  << "submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage');"
+  << "submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage', 'spanSubmitReport');"
   ;
   buttonStream
   << "<button "
@@ -1242,7 +1242,7 @@ std::string HtmlInterpretation::ToStringAssignSection()
   << " + '&sections=' + "
   << "encodeURIComponent(document.getElementById('" << idExtraTextarea << "').value),"
   << "'" << idOutput << "',"
-  << " 'setTeacher'"
+  << " 'setTeacher', '" << idOutput << "'"
   << " )\"> Set teacher</button> ";
   out << "<br><span id=\"" << idOutput << "\">\n";
   out << "</span>";

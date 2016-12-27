@@ -37,7 +37,7 @@ function initializeAutocomplete()
   ignoreOninput=false;
   DebugCounter=0;
   //theAutoCompleteHints.style.visibility="hidden";
-  for(i=0; i<theAutocompleteDictionary.length; i++)
+  for (var i=0; i<theAutocompleteDictionary.length; i++)
     theAutocompleteDictionaryLowerCase.push(theAutocompleteDictionary[i].toLowerCase());
   for (i=0; i<theAutocompleteDictionary.length; i++)
     theAutocompleteDictionaryByKey[theAutocompleteDictionary[i]]=1;
@@ -83,7 +83,7 @@ function getLastWord()
   var cursorPosition=theText.selectionEnd;
   lastWordStart=-1;
 
-  for (i=cursorPosition-1; i>=0; i--)
+  for (var i=cursorPosition-1; i>=0; i--)
   { if (isSeparator(theText.value[i]))
       break;
     theLastWordReversed+=(theText.value[i]);
@@ -126,7 +126,7 @@ function suggestWord()
   { clearAutocompleteTab();
     return;
   }  
-  for (i=0; i<theAutocompleteDictionary.length; i++)
+  for (var i=0; i<theAutocompleteDictionary.length; i++)
   { if (theLastWord==theAutocompleteDictionary[i])
     { clearAutocompleteTab();
       return;

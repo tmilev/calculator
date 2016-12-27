@@ -1205,6 +1205,7 @@ bool WebWorker::ReceiveAllHttp()
     out << "Socket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
     << this->parent->ToStringLastErrorDescription();
     this->displayUserInput=out.str();
+    this->error=out.str();
     logIO << out.str() << logger::endL;
     return false;
   }
@@ -1266,6 +1267,7 @@ bool WebWorker::ReceiveAllHttp()
   { std::stringstream out;
     out << "The message-body received by me had length " << this->addressGetOrPost.size()
     << " yet I expected a message of length " << this->ContentLength << ".";
+    this->error=out.str();
     logIO << out.str() << logger::endL;
   }
   return true;

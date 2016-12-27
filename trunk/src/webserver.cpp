@@ -4346,7 +4346,6 @@ void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, b
 
 void WebWorker::SendAllBytesNoHeaders()
 { MacroRegisterFunctionWithName("WebWorker::SendAllBytesNoHeaders");
-
   if (theGlobalVariables.flagUsingSSLinCurrentConnection)
   { this->SendAllBytesHttpSSL();
     return;

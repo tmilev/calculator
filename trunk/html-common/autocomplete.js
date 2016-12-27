@@ -154,8 +154,8 @@ function displaySuggestions()
     if (indexInAutocomplete>=theSuggestionsHighlighted.length)
       indexInAutocomplete=0;
   }
-  for (i=0; i<theSuggestionsHighlighted.length; i++)
-    if (i== indexInAutocomplete)
+  for (var i=0; i<theSuggestionsHighlighted.length; i++)
+    if (i=== indexInAutocomplete)
       theAutoComplete.innerHTML+="<span style='background:gray'>"+theSuggestionsHighlighted[i]+"</span><br>";
     else  
       theAutoComplete.innerHTML+=theSuggestionsHighlighted[i] + "<br>";

@@ -538,7 +538,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   if (this->connectedSocketID==-1)
     crash << "Attempting to receive on a socket with ID equal to -1. " << crash;
   struct timeval tv; //<- code involving tv taken from stackexchange
-  tv.tv_sec = 30;  // 30 Secs Timeout
+  tv.tv_sec = 5;  // 30 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
   int numBytesInBuffer= SSL_read(theSSLdata.ssl, &buffer, bufferSize-1);
@@ -1198,16 +1198,23 @@ bool WebWorker::ReceiveAllHttp()
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
-  int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   double numSecondsAtStart=theGlobalVariables.GetElapsedSeconds();
-  if (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
+  int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
+  int numFailedReceives=0;
+  while (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
   { std::stringstream out;
     out << "Socket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
     << this->parent->ToStringLastErrorDescription();
-    this->displayUserInput=out.str();
-    this->error=out.str();
+    numFailedReceives++;
+    if (numFailedReceives>5)
+    { out << ". 5+ failed receives so far, aborting. ";
+      this->displayUserInput=out.str();
+      this->error=out.str();
+      logIO << out.str() << logger::endL;
+      return false;
+    }
     logIO << out.str() << logger::endL;
-    return false;
+    numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);
   this->ParseMessageHead();

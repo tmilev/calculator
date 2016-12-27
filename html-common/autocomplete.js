@@ -1,3 +1,4 @@
+"use strict";
 var minLengthAutocompleteTrigger=2;
 var DebugCounter=0;
 var AutocompleteIsInitialized=false;
@@ -81,7 +82,6 @@ function getLastWord()
   theLastWordReversed="";
   var cursorPosition=theText.selectionEnd;
   lastWordStart=-1;
-  lastWordLength=0;
 
   for (i=cursorPosition-1; i>=0; i--)
   { if (isSeparator(theText.value[i]))
@@ -132,10 +132,10 @@ function suggestWord()
       return;
     }
     var lastWordLowerCase=theLastWord.toLowerCase();
-    startpos=theAutocompleteDictionaryLowerCase[i].indexOf(lastWordLowerCase);
-    if (startpos==-1)
+    var startpos=theAutocompleteDictionaryLowerCase[i].indexOf(lastWordLowerCase);
+    if (startpos===-1)
       continue;
-    currentString=theAutocompleteDictionary[i].substr(0, startpos);
+    var currentString=theAutocompleteDictionary[i].substr(0, startpos);
     currentString+="<b>"+ theLastWord+ "</b>"+ theAutocompleteDictionary[i].substr(startpos+theLastWord.length);
     theSuggestions.push(theAutocompleteDictionary[i]);
     theSuggestionsHighlighted.push(currentString);

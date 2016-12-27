@@ -351,14 +351,15 @@ std::string CGI::GetJavascriptInjectCalculatorResponseInNode()
   std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
+  << "\"use strict\";\n"
   << "function InjectCalculatorResponse(requestType, mainInput, idOutput){\n"
-  << "  spanOutput = document.getElementById(idOutput);\n"
+  << "  var spanOutput = document.getElementById(idOutput);\n"
   << "  if (spanOutput==null){\n"
   << "    spanOutput = document.createElement('span');\n"
   << "    document.body.appendChild(spanOutput);\n"
   << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
   << "  }\n"
-  << "  inputParams='request='+requestType;\n"
+  << "  var inputParams='request='+requestType;\n"
 //  << "  inputParams+='&tmp=asdf';\n"
   << "  inputParams+='&mainInput=' + encodeURIComponent(mainInput);\n"
 //  << "  inputParams+='&courseHome=' + problemCollectionName;\n"

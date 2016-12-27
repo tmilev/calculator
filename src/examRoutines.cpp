@@ -2758,6 +2758,7 @@ std::string HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
+  << "\"use srict\";"
   << "function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction){\n"
   << "  var spanOutput = document.getElementById(idOutput);\n"
   << "  if (spanOutput==null){\n"

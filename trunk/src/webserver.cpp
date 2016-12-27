@@ -573,7 +573,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     this->displayUserInput=this->error;
     return false;
   }
-  this->remainingBytesToSenD=(std::string) "HTTP/1.0 100 Continue\r\n\r\n";
+  this->remainingBytesToSenD=(std::string) "HTTP/1.1 100 Continue\r\n\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
@@ -1216,7 +1216,7 @@ bool WebWorker::ReceiveAllHttp()
   double numSecondsAtStart=theGlobalVariables.GetElapsedSeconds();
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   int numFailedReceives=0;
-  bool result=false;
+  bool result=true;
   while (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
   { std::stringstream out;
     out << "Socket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
@@ -1259,7 +1259,7 @@ bool WebWorker::ReceiveAllHttp()
     return false;
   }
   //theLog << logger::red << "DEBUG: got to before continue, worker: " << this->indexInParent+1 << " " << logger::endL;
-  this->remainingBytesToSenD=(std::string) "HTTP/1.0 100 Continue\r\n\r\n";
+  this->remainingBytesToSenD=(std::string) "HTTP/1.1 100 Continue\r\n\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
@@ -1276,6 +1276,7 @@ bool WebWorker::ReceiveAllHttp()
     if (numBytesInBuffer==0)
     { this->error= "While trying to fetch message-body, received 0 bytes. " +
       this->parent->ToStringLastErrorDescription();
+      logIO << this->error << logger::endL;
       this->displayUserInput=this->error;
       return false;
     }

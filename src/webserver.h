@@ -142,6 +142,7 @@ int recursionDepth=0)
   ;
   bool ShouldDisplayLoginPage();
   void SendAllAndWrapUp();
+  void WrapUpConnection();
   void ResetPipesNoAllocation();
   void reset();
   void resetMessageComponentsExceptRawMessage();

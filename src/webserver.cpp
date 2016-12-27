@@ -1308,7 +1308,8 @@ bool WebWorker::ReceiveAllHttp()
   if ((signed) this->messageBody.size()!=this->ContentLength)
   { std::stringstream out;
     out << "The message-body received by me had length " << this->addressGetOrPost.size()
-    << " yet I expected a message of length " << this->ContentLength << ".";
+    << " yet I expected a message of length " << this->ContentLength << ". The message body was: "
+    << this->messageBody;
     this->error=out.str();
     logIO << out.str() << logger::endL;
   }

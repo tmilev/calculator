@@ -776,9 +776,11 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat)c
   std::string lineBreak= useHtml ? "<br>\n" : "\r\n";
   out << lineBreak;
   if (this->requestTypE==this->requestGet)
-    out << "GET " << "(from calculator)";
+    out << "GET ";
   else if (this->requestTypE==this->requestPost)
-    out << "POST " << "(from calculator)";
+    out << "POST ";
+  else if (this->requestTypE==this->requestChunked)
+    out << "GET or POST **chunked** " ;
   else
     out << "Request type undefined.";
   out << "<hr>Address get or post:\n" << CGI::StringToHtmlString(this->addressGetOrPost, true);
@@ -819,6 +821,8 @@ std::string WebWorker::ToStringMessageUnsafe()const
     out << "GET " << CGI::StringToHtmlString(this->addressGetOrPost, true);
   if (this->requestTypE==this->requestPost)
     out << "POST " << CGI::StringToHtmlString(this->addressGetOrPost, true);
+  if (this->requestTypE==this->requestChunked)
+    out << "POST or GET **chunked** " << CGI::StringToHtmlString(this->addressGetOrPost, true);
   if (this->flagKeepAlive)
     out << "<br><b>Keeping alive.</b><br>";
   else
@@ -1152,6 +1156,17 @@ void WebWorker::ParseMessageHead()
       i++;
       if (i<this->theStrings.size)
         this->addressGetOrPost=this->theStrings[i];
+    } else if ( this->theStrings[i]=="transfer-coding:" ||
+                this->theStrings[i]=="Transfer-coding:" ||
+                this->theStrings[i]=="Transfer-Coding:" )
+    { i++;
+      if (i<this->theStrings.size)
+        if(this->theStrings[i]=="chunked" ||
+           this->theStrings[i]=="chunked;"||
+           this->theStrings[i]=="Chunked"||
+           this->theStrings[i]=="Chunked;"
+           )
+          this->requestTypE=this->requestChunked;
     } else if ((this->theStrings[i]=="Content-Length:" || this->theStrings[i]=="Content-length:" ||
                 this->theStrings[i]=="content-length:")
                && i+1<this->theStrings.size)
@@ -1220,8 +1235,14 @@ bool WebWorker::ReceiveAllHttp()
   this->ParseMessageHead();
   if (this->requestTypE==WebWorker::requestTypes::requestPost)
     this->displayUserInput="POST " + this->addressGetOrPost;
-  else
+  else if (this->requestTypE==WebWorker::requestTypes::requestGet)
     this->displayUserInput="GET " + this->addressGetOrPost;
+  else if (this->requestTypE==WebWorker::requestTypes::requestHead)
+    this->displayUserInput="HEAD " + this->addressGetOrPost;
+  else if (this->requestTypE==WebWorker::requestTypes::requestChunked)
+    this->displayUserInput="GET or POST **chunked** " + this->addressGetOrPost;
+  else
+    this->displayUserInput="UNKNOWN REQUEST " + this->addressGetOrPost;
   if (this->ContentLength<=0)
     return true;
   if (this->messageBody.size()==(unsigned) this->ContentLength)
@@ -2621,7 +2642,8 @@ int WebWorker::ServeClient()
 //  std::cout << "GOT TO HERE 0" << std::endl;
   if (this->requestTypE!=this->requestGet && this->requestTypE!=this->requestPost
       && this->requestTypE!=this->requestHead)
-  { if (this->requestTypE!=this->requestUnknown)
+  { if (this->requestTypE!=this->requestUnknown &&
+        this->requestTypE!=this->requestChunked)
       crash << "Something is wrong: request type does not have any of the expected values. " << crash;
     this->ProcessUnknown();
     return 0;

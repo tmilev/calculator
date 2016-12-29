@@ -1607,7 +1607,10 @@ std::string CalculatorHTML::ToStringDeadlineModifyButton
     deadlineStream << "+ encodeURIComponent(document.getElementById('"
     << deadlineIds[i] << "').value)+'&'";
   }
-  deadlineStream << ")), '" << deadlineIdReport << "', 'setProblemData' );"
+  deadlineStream << ")), '" << deadlineIdReport << "',"
+  << " 'setProblemData', "
+  << "null, "
+  << "'" << deadlineIdReport << "' );"
   << "\""
   << ">\n";
   deadlineStream << "Set</button>";
@@ -2759,7 +2762,8 @@ std::string HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
-  << "\"use srict\";"
+  << "\"use srict\";\n"
+  << "var GlobalSubmitStringAsMainInputCounter=0;\n"
   << "function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus){\n"
   << "  var spanOutput = document.getElementById(idOutput);\n"
   << "  if (spanOutput==null){\n"
@@ -2779,17 +2783,39 @@ std::string HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   ////////////////////////////////////////////
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutable << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
+  << "  if (idStatus===undefined)\n"
+  << "    idStatus=idOutput;\n"
+  << "  var statusSpan=document.getElementById(idStatus);\n "
+  << "  GlobalSubmitStringAsMainInputCounter++;\n"
+  << "  var addressDetailsIndicatorID=\"addressDetailsID\"+GlobalSubmitStringAsMainInputCounter;\n"
+  << "  var tranmissionIndicatorID=\"transmissionIndicatorID\"+GlobalSubmitStringAsMainInputCounter;\n"
+  << "  var postRequest="
+  << "'<br>"
+  << theGlobalVariables.DisplayNameExecutable
+  << "'+\n '<br>'"
+  << "+\n inputParams;\n"
+  << "  var stringSwitchMenu='switchMenu(\\\"'+"
+  << "  addressDetailsIndicatorID+'\\\");';\n"
+  << "  statusSpan.innerHTML="
+  << "\"<button style='background:none; border:0; cursor:pointer' id='\"+tranmissionIndicatorID + \"'' "
+  << "onclick='\"+ stringSwitchMenu+\"'>Connection details</button>\""
+  << "+ \"<span style='display:none' id='\"+ addressDetailsIndicatorID + \"'>\"+"
+  << "postRequest+ \"</span>\""
+  << ";\n"
+  << "  var buttonHandle=document.getElementById(tranmissionIndicatorID);"
+  << "  var lastRequestCounter=GlobalSubmitStringAsMainInputCounter;\n"
   << "  https.onload = function()\n"
-  << "  { document.getElementById(idStatus).innerHTML='Received: '+ document.getElementById(idStatus).innerHTML;\n"
+  << "  { if (lastRequestCounter!==GlobalSubmitStringAsMainInputCounter)\n"
+  << "    { statusSpan.innerHTML+=\"<br><span style='color:red'><b>Old request number \" + lastRequestCounter +\" just received, output suppressed.</b></span>\" \n"
+  << "      return;\n"
+  << "    }\n"
+  << "    buttonHandle.innerHTML=\"<span style='color:green'><b>Received</b></span>\";\n"
   << "    spanOutput.innerHTML=https.responseText;\n"
   << "    if(onLoadFunction!==undefined && onLoadFunction!==null && onLoadFunction!==0)\n"
   << "      onLoadFunction(idOutput);\n"
   << "  }\n"
+  << " buttonHandle.innerHTML=\"<span style='color:orange'><b>Sent</b></span>\";\n"
   ////////////////////////////////////////////
-  << "  document.getElementById(idStatus).innerHTML='Request: POST "
-  << theGlobalVariables.DisplayNameExecutable
-  << "'+ '<br>'"
-  << "+ inputParams;\n"
   << "  https.send(inputParams);\n"
   /////////////////or/////////////////////////
   //  << "  https.send();\n"

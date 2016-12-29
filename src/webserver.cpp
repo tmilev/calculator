@@ -2336,7 +2336,7 @@ int WebWorker::ProcessCalculator()
   << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus'); event.preventDefault();"
   << "\"> ";
   stOutput << "Go" << "</button>"
-  << CGI::GetHtmlSpanHidableStartsHiddeN("<span id=\"mainComputationStatus\"></span>", "connection details");
+  << "<span id=\"mainComputationStatus\"></span>";
   stOutput << this->closeIndentTag("</td>");
 
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\">");

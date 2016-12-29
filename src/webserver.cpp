@@ -2262,7 +2262,6 @@ int WebWorker::ProcessCalculator()
   stOutput << "<html><head> <title>calculator version  "
   << __DATE__ << ", " << __TIME__ << "</title>";
   stOutput << CGI::GetJavascriptMathjax();
-  stOutput << CGI::GetJavascriptInjectCalculatorResponseInNode();
   stOutput << CGI::GetCalculatorStyleSheetWithTags();
   stOutput << HtmlSnippets::GetJavascriptHideHtml();
   stOutput << HtmlSnippets::GetJavascriptStandardCookies();

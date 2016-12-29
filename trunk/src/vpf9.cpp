@@ -346,39 +346,6 @@ uint32_t CGI::RedGreenBlue(unsigned int r, unsigned int g, unsigned int b)
   return r*65536+g*256+b;
 }
 
-std::string CGI::GetJavascriptInjectCalculatorResponseInNode()
-{ MacroRegisterFunctionWithName("CGI::GetJavascriptInjectCalculatorResponseInNode");
-  std::stringstream out;
-  out
-  << "<script type=\"text/javascript\"> \n"
-  << "\"use strict\";\n"
-  << "function InjectCalculatorResponse(requestType, mainInput, idOutput){\n"
-  << "  var spanOutput = document.getElementById(idOutput);\n"
-  << "  if (spanOutput==null){\n"
-  << "    spanOutput = document.createElement('span');\n"
-  << "    document.body.appendChild(spanOutput);\n"
-  << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
-  << "  }\n"
-  << "  var inputParams='request='+requestType;\n"
-//  << "  inputParams+='&tmp=asdf';\n"
-  << "  inputParams+='&mainInput=' + encodeURIComponent(mainInput);\n"
-//  << "  inputParams+='&courseHome=' + problemCollectionName;\n"
-  << "  var https = new XMLHttpRequest();\n"
-  << "  https.open(\"GET\", \"" << theGlobalVariables.DisplayNameExecutable << "\""
-  << "+'?' + inputParams"
-  << ", true);\n"
-  << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
-  << "  https.onload = function() {\n"
-  << "    spanOutput.innerHTML=https.responseText;\n"
-  << "  }\n"
-  << "  spanOutput.innerHTML=\"<span style='color:orange'><b>Request sent</b></span>\";\n"
-  << "  https.send(inputParams);\n"
-//  << "  alert(https.getAllResponseHeaders());"
-  << "}\n"
-  << "</script>";
-  return out.str();
-}
-
 void CGI::FormatCPPSourceCode(const std::string& FileName)
 { std::fstream fileIn, fileOut;
   FileOperations::OpenFileCreateIfNotPresentVirtual(fileIn, "output/"+ FileName, false, false, false);

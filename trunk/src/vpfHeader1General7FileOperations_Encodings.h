@@ -132,10 +132,9 @@ public:
 (const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
  std::stringstream& commentsOnFailure)
   ;
-  static std::string GetJavascriptInjectCalculatorResponseInNode();
   static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
-  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGI::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
-  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGI::ElementToStringTooltip(input, inputTooltip, true); };
+  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGI::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; }
+  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGI::ElementToStringTooltip(input, inputTooltip, true); }
   static uint32_t RedGreenBlue(unsigned int r, unsigned int g, unsigned int b);
   static void MakeStdCoutReport(const std::string& input);
   static void MakeReportIndicatorFile(const std::string& input);

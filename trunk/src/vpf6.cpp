@@ -2420,12 +2420,12 @@ std::string Calculator::ToString()
   { std::stringstream theExampleInjector;
     theExampleInjector
     << "if (document.getElementById('calculatorExamples').innerHTML.length<300)"
-    << "  InjectCalculatorResponse('calculatorExamples', '', 'calculatorExamples'); "
-//    << "else alert('innerHTML: '+ document.getElementById('calculatorExamples').innerHTML); "
-    << "switchMenu('calculatorExamples')"
+    << "  submitStringAsMainInput('', 'calculatorExamples', 'calculatorExamples', null); "
+    << "else"
+    << "  switchMenu('calculatorExamples');"
     ;
     out2 << CGI::GetHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Examples.");
-    out2 << "<span style=\"display:none\" id=\"calculatorExamples\"></span>";
+    out2 << "<span id=\"calculatorExamples\"></span>";
   }
   if (!this->flagShowCalculatorInternalStatus)
     return out2.str();

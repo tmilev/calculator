@@ -398,8 +398,7 @@ std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string
         << "'" << theRequest.str() << "', "
         << "'" << spanId.str() << "', "
         << "'databaseOneEntry',"
-        << "'null',"
-        << "'mainComputationStatus'"
+        << "null"
         << "); return true;\">More info</span> <span id=\""
         << spanId.str() << "\"></span>";
         out << "</td>";

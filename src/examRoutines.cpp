@@ -2947,8 +2947,7 @@ std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName
   << "='+encodeURIComponent('weight='+  getElementById('" << idPoints << "').value)"
 //  << "  +encodeURIComponent('numTries='+getElementById('"
   << ", '"
-  << idPointsModOutput << "', 'setProblemData', "
-  << idPointsModOutput << ");"
+  << idPointsModOutput << "', 'setProblemData');"
   << "\""
   << ">";
   out << "Modify";

@@ -1231,11 +1231,13 @@ bool WebWorker::ReceiveAllHttp()
   bool result=true;
   while (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
   { std::stringstream out;
+    numFailedReceives++;
     out << "Socket::ReceiveAll on socket " << this->connectedSocketID
-    << " failed, with return value: " << numBytesInBuffer
+    << " failed (so far "
+    << numFailedReceives << " fails on this connection). "
+    << "Return value: " << numBytesInBuffer
     << ". Error description: "
     << this->parent->ToStringLastErrorDescription();
-    numFailedReceives++;
     if (numFailedReceives>5)
     { out << ". 5+ failed receives so far, aborting. ";
       this->displayUserInput=out.str();
@@ -1245,7 +1247,7 @@ bool WebWorker::ReceiveAllHttp()
       result=false;
       break;
     }
-    logIO << out.str() << logger::endL;
+    logIO << logger::orange << out.str() << logger::endL;
     numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);

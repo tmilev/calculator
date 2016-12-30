@@ -1221,12 +1221,12 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
   if (this->requestTypE!=this->requestUnknown)
     return;
   logIO << logger::green
-  << "Attempting to correct unknown request:\n "
-  << "request set to: GET\n"
-  << "address set to:"
+  << "Attempting to correct unknown request:\n"
+  << "request set to: POST\n"
+  << "address set to: "
   << theGlobalVariables.DisplayNameExecutable
   << logger::endL;
-  this->requestTypE=this->requestGet;
+  this->requestTypE=this->requestPost;
   this->addressGetOrPost=theGlobalVariables.DisplayNameExecutable;
 }
 

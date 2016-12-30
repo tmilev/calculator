@@ -178,6 +178,7 @@ int recursionDepth=0)
   ~WebWorker();
   bool IamActive();
   bool ReceiveAll();
+  void AttemptUnknownRequestErrorCorrection();
   bool ReceiveAllHttp();
   bool ReceiveAllHttpSSL();
   void SendDisplayUserInputToServer();

@@ -7930,7 +7930,7 @@ bool CGI::StringToHtmlStringReturnTrueIfModified(const std::string& input, std::
     if (i+1<input.size())
       isReturnNewLine= input[i]=='\r' && input[i+1]=='\n';
     if (doReplaceNewLineByBr && isReturnNewLine)
-    { out << "<br>";
+    { out << "<br>\n";
       i++;
     } else if (input[i]=='<')
       out << "&lt;";

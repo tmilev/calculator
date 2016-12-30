@@ -183,9 +183,9 @@ int recursionDepth=0)
   void SendDisplayUserInputToServer();
   enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
   std::string ToStringStatus()const;
-  std::string ToStringMessageUnsafe()const;
+  std::string ToStringMessageUnsafe(bool useHTML=true)const;
   std::string ToStringMessageShortUnsafe(FormatExpressions* theFormat=0)const;
-  std::string ToStringMessageFullUnsafe()const;
+  std::string ToStringMessageFullUnsafe(bool useHTML=true)const;
   void ParseMessageHead();
   void ExtractHostInfo();
   void ExtractAddressParts();

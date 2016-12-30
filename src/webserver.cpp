@@ -533,6 +533,7 @@ bool WebWorker::ReceiveAllHttpSSL()
 #ifdef MACRO_use_open_ssl
   this->messageBody="";
   this->messageHead="";
+  this->requestTypE=this->requestUnknown;
   unsigned const int bufferSize=60000;
   char buffer[bufferSize];
 //  std::cout << "Got thus far 9" << std::endl;
@@ -1221,23 +1222,39 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
   if (this->requestTypE!=this->requestUnknown)
     return;
   logIO << logger::green
-  << "Attempting to correct unknown request:\n"
-  << "request set to: POST\n"
-  << "address set to: "
-  << theGlobalVariables.DisplayNameExecutable
-  << logger::endL;
-  this->requestTypE=this->requestPost;
-  this->addressGetOrPost=theGlobalVariables.DisplayNameExecutable;
+  << "Attempting to correct unknown request:\n";
+  if (this->messageBody.size()==0)
+    if (*this->theStrings.LastObject()!="\n")
+    { logIO << logger::green
+      << "Message body set to last message chunk.\n";
+      this->messageBody=*this->theStrings.LastObject();
+    }
+  if (this->messageBody.size()!=0)
+  { logIO << "request set to: POST\n";
+    this->requestTypE=this->requestPost;
+  }
+  else
+  { logIO << "request set to: GET\n";
+    this->requestTypE=this->requestGet;
+  }
+  if (this->addressGetOrPost=="")
+  { logIO << "address set to: "
+    << theGlobalVariables.DisplayNameExecutable
+    ;
+    this->addressGetOrPost=theGlobalVariables.DisplayNameExecutable;
+  }
+  logIO << logger::endL;
   logIO << logger::red << "Full message head: " << logger::endL;
-  logIO << this->messageHead;
+  logIO << this->messageHead << logger::endL;
   logIO << logger::red << "Full message body: " << logger::endL;
-  logIO << this->messageBody;
+  logIO << this->messageBody << logger::endL;
 }
 
 bool WebWorker::ReceiveAllHttp()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttp");
   this->messageBody="";
   this->messageHead="";
+  this->requestTypE=this->requestUnknown;
   unsigned const int bufferSize=60000;
   char buffer[bufferSize];
   //theLog << logger::red << "DEBUG: got to here: worker" << this->indexInParent+1 << " " << logger::endL;

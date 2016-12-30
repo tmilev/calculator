@@ -1232,8 +1232,7 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
   if (this->messageBody.size()!=0)
   { logIO << "request set to: POST\n";
     this->requestTypE=this->requestPost;
-  }
-  else
+  } else
   { logIO << "request set to: GET\n";
     this->requestTypE=this->requestGet;
   }
@@ -3548,7 +3547,9 @@ void WebServer::ReleaseWorkerSideResources()
 }
 
 bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string& inputAddress)
-{ MacroRegisterFunctionWithName("WebServer::AddressRequiresLogin");
+{ MacroRegisterFunctionWithName("WebServer::RequiresLogin");
+  logIO << logger::blue << "DEBUG: Requires login: request:" << inputRequest
+  << " address: " << inputAddress << logger::endL;
   if (inputAddress==theGlobalVariables.DisplayNameExecutable)
     for (int i=0; i<this->requestStartsNotNeedingLogin.size; i++)
       if (MathRoutines::StringBeginsWith(inputRequest, this->requestStartsNotNeedingLogin[i]))

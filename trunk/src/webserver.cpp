@@ -2753,6 +2753,7 @@ int WebWorker::ServeClient()
   if (this->addressComputed==theGlobalVariables.DisplayNameExecutable)
     theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
   this->flagMustLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
+  logIO << logger::blue << "DEBUG: mustlogin: " << this->flagMustLogin << logger::endL;
   if (this->flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
   { std::stringstream redirectStream, newAddressStream;
     newAddressStream << "https://" << this->hostNoPort;

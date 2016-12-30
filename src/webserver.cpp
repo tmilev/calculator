@@ -1228,6 +1228,10 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
   << logger::endL;
   this->requestTypE=this->requestPost;
   this->addressGetOrPost=theGlobalVariables.DisplayNameExecutable;
+  logIO << logger::red << "Full message head: " << logger::endL;
+  logIO << this->messageHead;
+  logIO << logger::red << "Full message body: " << logger::endL;
+  logIO << this->messageBody;
 }
 
 bool WebWorker::ReceiveAllHttp()

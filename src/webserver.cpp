@@ -2687,7 +2687,7 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   out << "\"";
   out << ">\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-  //out << "DEBUG: " << this->ToStringMessageFullUnsafe();
+  out << "DEBUG: " << this->ToStringMessageFullUnsafe();
 //  out << WebWorker::ToStringCalculatorArgumentsHumanReadable();
   out << WebWorker::GetLoginHTMLinternal(reasonForLogin) << "</body></html>";
   return out.str();
@@ -2868,7 +2868,8 @@ int WebWorker::ServeClient()
   }
   //unless the worker is an server monitor, it has no access to communication channels of the other workers
   this->parent->ReleaseNonActiveWorkers();
-  theLog << logger::blue << "DEBUG: " << "got to here" << logger::endL;
+  theLog << logger::blue << "DEBUG: " << "got to here, request: "
+  << theGlobalVariables.userCalculatorRequestType << logger::endL;
   //stOutput << this->GetHeaderOKNoContentLength();
   //stOutput << "<html><body> got to here pt 1";
   if (theGlobalVariables.userCalculatorRequestType=="setProblemData")

@@ -1231,7 +1231,9 @@ bool WebWorker::ReceiveAllHttp()
   bool result=true;
   while (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
   { std::stringstream out;
-    out << "Socket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
+    out << "Socket::ReceiveAll on socket " << this->connectedSocketID
+    << " failed, with return value: " << numBytesInBuffer
+    << ". Error description: "
     << this->parent->ToStringLastErrorDescription();
     numFailedReceives++;
     if (numFailedReceives>5)

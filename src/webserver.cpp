@@ -2868,6 +2868,7 @@ int WebWorker::ServeClient()
   }
   //unless the worker is an server monitor, it has no access to communication channels of the other workers
   this->parent->ReleaseNonActiveWorkers();
+  theLog << logger::blue << "DEBUG: " << "got to here" << logger::endL;
   //stOutput << this->GetHeaderOKNoContentLength();
   //stOutput << "<html><body> got to here pt 1";
   if (theGlobalVariables.userCalculatorRequestType=="setProblemData")

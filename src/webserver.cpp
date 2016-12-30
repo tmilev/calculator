@@ -1256,7 +1256,6 @@ bool WebWorker::ReceiveAllHttp()
   this->requestTypE=this->requestUnknown;
   unsigned const int bufferSize=60000;
   char buffer[bufferSize];
-  //theLog << logger::red << "DEBUG: got to here: worker" << this->indexInParent+1 << " " << logger::endL;
   if (this->connectedSocketID==-1)
     crash << "Attempting to receive on a socket with ID equal to -1. " << crash;
 //  std::cout << "Got thus far 10" << std::endl;
@@ -1321,7 +1320,6 @@ bool WebWorker::ReceiveAllHttp()
     this->displayUserInput=this->error;
     return false;
   }
-  //theLog << logger::red << "DEBUG: got to before continue, worker: " << this->indexInParent+1 << " " << logger::endL;
   this->remainingBytesToSenD=(std::string) "HTTP/1.1 100 Continue\r\n\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
@@ -2314,7 +2312,6 @@ int WebWorker::ProcessCompute()
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   this->SetHeaderOKNoContentLength();
-  //std::cout << "DEBUG: got to here";
   theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
   theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
   stOutput << "<html><head> <title>calculator version  "
@@ -2868,7 +2865,7 @@ int WebWorker::ServeClient()
   }
   //unless the worker is an server monitor, it has no access to communication channels of the other workers
   this->parent->ReleaseNonActiveWorkers();
-  theLog << logger::blue << "DEBUG: " << "got to here, request: "
+  theLog << logger::blue << "DEBUG: " << this->requestTypE << " got to here, request: "
   << theGlobalVariables.userCalculatorRequestType << logger::endL;
   //stOutput << this->GetHeaderOKNoContentLength();
   //stOutput << "<html><body> got to here pt 1";
@@ -2920,8 +2917,7 @@ int WebWorker::ServeClient()
     else
       return this->ProcessLoginPage();
   } else if (theGlobalVariables.userCalculatorRequestType=="exerciseNoLogin")
-  { //stOutput << "DEBUG: Got to here; exerciseNoLogin";
-    return this->ProcessExamPage();
+  { return this->ProcessExamPage();
   } else if (theGlobalVariables.userCalculatorRequestType=="template")
     return this->ProcessTemplate();
   else if (theGlobalVariables.userCalculatorRequestType=="topicTable")
@@ -2935,9 +2931,7 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType=="calculator")
     return this->ProcessCalculator();
   else if (theGlobalVariables.userCalculatorRequestType=="compute")
-  { //std::cout << "DEBUG: got to here!";
-    //std::cout.flush();
-    return this->ProcessCompute();
+  { return this->ProcessCompute();
   }
 //  stOutput << "<html><body> got to here pt 2";
   this->VirtualFileName=CGI::URLStringToNormal(this->addressComputed,true);
@@ -3979,8 +3973,6 @@ int WebWorker::Run()
       break;
   }
   this->WrapUpConnection();
-//  this->SendAllAndWrapUp();
-  //theLog << logger::red << "DEBUG: got to here, pt 4" << logger::endL;
   return result;
 }
 

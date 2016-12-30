@@ -1216,6 +1216,20 @@ void WebWorker::ParseMessageHead()
 //  std::cout << "Got thus far 14" << std::endl;
 }
 
+void WebWorker::AttemptUnknownRequestErrorCorrection()
+{ MacroRegisterFunctionWithName("WebWorker::AttemptUnknownRequestErrorCorrection");
+  if (this->requestTypE!=this->requestUnknown)
+    return;
+  logIO << logger::green
+  << "Attempting to correct unknown request:\n "
+  << "request set to: GET\n"
+  << "address set to:"
+  << theGlobalVariables.DisplayNameExecutable
+  << logger::endL;
+  this->requestTypE=this->requestGet;
+  this->addressGetOrPost=theGlobalVariables.DisplayNameExecutable;
+}
+
 bool WebWorker::ReceiveAllHttp()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttp");
   this->messageBody="";
@@ -1270,11 +1284,16 @@ bool WebWorker::ReceiveAllHttp()
   else
     this->displayUserInput="UNKNOWN REQUEST " + this->addressGetOrPost;
   if (this->ContentLength<=0)
+  { if (this->requestTypE==this->requestUnknown)
+      this->AttemptUnknownRequestErrorCorrection();
     return true;
+  }
   if (this->messageBody.size()==(unsigned) this->ContentLength)
+  { if (this->requestTypE==this->requestUnknown)
+      this->AttemptUnknownRequestErrorCorrection();
     return true;
+  }
   this->messageBody.clear();//<-needed else the length error check won't work out.
-
   if (this->ContentLength>10000000)
   { this->CheckConsistency();
     error="Content-length parsed to be more than 10 million bytes, aborting.";
@@ -1327,16 +1346,7 @@ bool WebWorker::ReceiveAllHttp()
       << ". Perhaps very long headers got truncated? "
       << logger::endL; this->messageHead+=this->messageBody;
       this->ParseMessageHead();
-      if (this->requestTypE==this->requestUnknown)
-      { logIO << logger::green
-        << "Attempting to correct:\n "
-        << "request set to: GET\n"
-        << "address set to:"
-        << theGlobalVariables.DisplayNameExecutable
-        << logger::endL;
-        this->requestTypE=this->requestGet;
-        this->addressGetOrPost=theGlobalVariables.DisplayNameExecutable;
-      }
+      this->AttemptUnknownRequestErrorCorrection();
     }
   if ((signed) this->messageBody.size()!=this->ContentLength)
   { std::stringstream out;
@@ -1347,6 +1357,7 @@ bool WebWorker::ReceiveAllHttp()
     << this->messageBody;
     this->error=out.str();
     logIO << out.str() << logger::endL;
+    this->AttemptUnknownRequestErrorCorrection();
   }
   return result;
 }

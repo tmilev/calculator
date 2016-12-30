@@ -200,7 +200,7 @@ void WebCrawler::PingCalculatorStatus()
       continue;
     } else
       reportStream << "<br>connected: " << this->addressToConnectTo << " port: " << this->portOrService << ". ";
-    std::string getMessage=  "GET /calculator?request=statusPublic";
+    std::string getMessage=  "GET /cgi-bin/calculator?request=statusPublic";
     int numBytes =Pipe::WriteWithTimeoutViaSelect(this->theSocket,getMessage, 1, 10, &reportStream);
     if ((unsigned) numBytes !=getMessage.size())
     { this->lastTransactionErrors+= "\nERROR writing to socket";

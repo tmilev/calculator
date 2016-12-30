@@ -802,11 +802,11 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat)c
   return out.str();
 }
 
-std::string WebWorker::ToStringMessageFullUnsafe()const
+std::string WebWorker::ToStringMessageFullUnsafe(bool useHTML)const
 { //if (theGlobalVariables.flagUsingSSLinCurrentConnection)
   //  return "Message cannot be viewed when using SSL";
   std::stringstream out;
-  out << this->ToStringMessageUnsafe();
+  out << this->ToStringMessageUnsafe(useHTML);
   if (this->theStrings.size>0)
   { out << "<hr>\nStrings extracted from message: ";
     for (int i =0; i<this->theStrings.size; i++)
@@ -815,7 +815,7 @@ std::string WebWorker::ToStringMessageFullUnsafe()const
   return out.str();
 }
 
-std::string WebWorker::ToStringMessageUnsafe()const
+std::string WebWorker::ToStringMessageUnsafe(bool useHTML)const
 { //if (theGlobalVariables.flagUsingSSLinCurrentConnection)
   //  return "Message cannot be viewed when using SSL";
   std::stringstream out;
@@ -837,8 +837,13 @@ std::string WebWorker::ToStringMessageUnsafe()const
   out << "<br>Cookies (" << this->cookies.size << " total):";
   for (int i=0; i<this->cookies.size; i++)
     out << "<br>" << this->cookies[i];
-  out << "\n<hr>\nFull message head:<br>\n" << CGI::StringToHtmlString(this->messageHead, true);
-  out << "\n<hr>\nFull message body:<br>\n" << CGI::StringToHtmlString(this->messageBody, true);
+  if (useHTML)
+  { out << "\n<hr>\nFull message head:<br>\n" << CGI::StringToHtmlString(this->messageHead, true);
+    out << "\n<hr>\nFull message body:<br>\n" << CGI::StringToHtmlString(this->messageBody, true);
+  } else
+  { out << "\nFull message head:\n" << this->messageHead;
+    out << "\nFull message body:\n" << this->messageBody;
+  }
   return out.str();
 }
 
@@ -1966,7 +1971,7 @@ int WebWorker::ProcessUnknown()
     << this->ToStringMessageFullUnsafe() << logger::endL;
   else
     logHttpErrors << logger::red << "Method not implemented. Message follows. " << logger::endL
-    << this->ToStringMessageFullUnsafe() << logger::endL;
+    << this->ToStringMessageFullUnsafe(false) << logger::endL;
   return 0;
 }
 

@@ -2790,7 +2790,7 @@ std::string HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "  var addressDetailsIndicatorID=\"addressDetailsID\"+GlobalSubmitStringAsMainInputCounter;\n"
   << "  var tranmissionIndicatorID=\"transmissionIndicatorID\"+GlobalSubmitStringAsMainInputCounter;\n"
   << "  var postRequest="
-  << "'<br>"
+  << "'<br>POST "
   << theGlobalVariables.DisplayNameExecutable
   << "'+\n '<br>'"
   << "+\n inputParams;\n"

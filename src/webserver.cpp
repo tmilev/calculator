@@ -1229,7 +1229,7 @@ bool WebWorker::ReceiveAllHttp()
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   int numFailedReceives=0;
   bool result=true;
-  while (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
+  while ((numBytesInBuffer<0) || (numBytesInBuffer>((signed)bufferSize)))
   { std::stringstream out;
     numFailedReceives++;
     out << "Socket::ReceiveAll on socket " << this->connectedSocketID

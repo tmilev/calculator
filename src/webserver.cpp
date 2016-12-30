@@ -3814,8 +3814,8 @@ int WebServer::Run()
     gettimeofday(&timeBeforeProcessFork, NULL);
     this->NumSuccessfulSelectsSoFar++;
     if ((this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar)-previousReportedNumberOfSelects>100)
-    { logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and " << this->NumFailedSelectsSoFar << "="
-      << this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar << " total selects. " << logger::endL;
+    { logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and " << this->NumFailedSelectsSoFar << " bad ("
+      << this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar << " total) selects. " << logger::endL;
       previousReportedNumberOfSelects=this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar;
     }
     if (this->NumProcessAssassinated+this->NumProcessesReaped+this->NumWorkersNormallyExited+this->NumConnectionsSoFar-previousServerStatReport>99)

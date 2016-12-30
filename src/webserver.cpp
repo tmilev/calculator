@@ -1319,13 +1319,31 @@ bool WebWorker::ReceiveAllHttp()
     this->messageBody+=bufferString;
   }
   if ((signed) this->messageBody.size()!=this->ContentLength)
-  { this->messageHead+=this->messageBody;
-    this->ParseMessageHead();
-  }
+    if (this->requestTypE!=this->requestChunked)
+    { logIO << logger::red
+      << "Message body is of length: " << this->messageBody.size()
+      << " yet this->ContentLength equals: "
+      << this->ContentLength
+      << ". Perhaps very long headers got truncated? "
+      << logger::endL; this->messageHead+=this->messageBody;
+      this->ParseMessageHead();
+      if (this->requestTypE==this->requestUnknown)
+      { logIO << logger::green
+        << "Attempting to correct:\n "
+        << "request set to: GET\n"
+        << "address set to:"
+        << theGlobalVariables.DisplayNameExecutable
+        << logger::endL;
+        this->requestTypE=this->requestGet;
+        this->addressGetOrPost=theGlobalVariables.DisplayNameExecutable;
+      }
+    }
   if ((signed) this->messageBody.size()!=this->ContentLength)
   { std::stringstream out;
-    out << "The message-body received by me had length " << this->messageBody.size()
-    << " yet I expected a message of length " << this->ContentLength << ". The message body was: "
+    out << "The message-body received by me had length "
+    << this->messageBody.size()
+    << " yet I expected a message of length "
+    << this->ContentLength << ". The message body was: "
     << this->messageBody;
     this->error=out.str();
     logIO << out.str() << logger::endL;

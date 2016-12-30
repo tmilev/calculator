@@ -1690,9 +1690,6 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
   static int counter=0;
   counter++;
-//  std::stringstream debugStream1, debugStream2;
-  //debugStream1 << "PipeProgressReportToParentProcess called " << counter << " times. Calling pause...";
-  //ProgressReportWebServer theReport(debugStream1.str());
   this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked();
 //    theLog << "about to potentially block " << logger::endL;
   //debugStream2 << "PipeProgressReportToParentProcess called "
@@ -2750,7 +2747,7 @@ int WebWorker::ServeClient()
   if (this->addressComputed==theGlobalVariables.DisplayNameExecutable)
     theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
   this->flagMustLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
-  logIO << logger::blue << "DEBUG: mustlogin: " << this->flagMustLogin << logger::endL;
+  //logIO << logger::blue << "DEBUG: mustlogin: " << this->flagMustLogin << logger::endL;
   if (this->flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
   { std::stringstream redirectStream, newAddressStream;
     newAddressStream << "https://" << this->hostNoPort;
@@ -2865,8 +2862,6 @@ int WebWorker::ServeClient()
   }
   //unless the worker is an server monitor, it has no access to communication channels of the other workers
   this->parent->ReleaseNonActiveWorkers();
-  theLog << logger::blue << "DEBUG: " << this->requestTypE << " got to here, request: "
-  << theGlobalVariables.userCalculatorRequestType << logger::endL;
   //stOutput << this->GetHeaderOKNoContentLength();
   //stOutput << "<html><body> got to here pt 1";
   if (theGlobalVariables.userCalculatorRequestType=="setProblemData")
@@ -3017,7 +3012,6 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   << "currentWorkerNumber=" << this->indexInParent+1 << ";\n "
   << "progressReport();\n"
   << "</script>"
-//  << "DEBUG: javascript: " << "progressReport();"
   ;
   stOutput << "\n<br>\n<button id=\"idButtonSendTogglePauseRequest\" onclick=\"SendTogglePauseRequest()\">Pause</button>";
   stOutput << "\n<span id=\"idProgressReportRequestStatus\"></span>";
@@ -3545,8 +3539,6 @@ void WebServer::ReleaseWorkerSideResources()
 
 bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string& inputAddress)
 { MacroRegisterFunctionWithName("WebServer::RequiresLogin");
-  logIO << logger::blue << "DEBUG: Requires login: request:" << inputRequest
-  << " address: " << inputAddress << logger::endL;
   if (inputAddress==theGlobalVariables.DisplayNameExecutable)
     for (int i=0; i<this->requestStartsNotNeedingLogin.size; i++)
       if (MathRoutines::StringBeginsWith(inputRequest, this->requestStartsNotNeedingLogin[i]))
@@ -3984,7 +3976,6 @@ extern int mainTest(List<std::string>& remainingArgs);
 
 void WebServer::AnalyzeMainArguments(int argC, char **argv)
 { MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
-  //std::cout << "Content-Type: text/html\r\n\r\n<html><body>DEBUG: ";
   if (argC<0)
     argC=0;
   theGlobalVariables.programArguments.SetSize(argC);

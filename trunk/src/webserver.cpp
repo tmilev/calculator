@@ -1291,6 +1291,9 @@ bool WebWorker::ReceiveAllHttp()
       break;
     }
     logIO << logger::orange << out.str() << logger::endL;
+    std::string bufferCopy(buffer, bufferSize);
+    logIO << this->parent->ToStringConnection()
+    << "Bytes in buffer so far: " << bufferCopy;
     numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);

@@ -1224,7 +1224,8 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
   logIO << logger::red << this->parent->ToStringConnection()
   << " Unknown connection. " << logger::endL;
   logIO << logger::blue << this->parent->ToStringConnection()
-  << " Message head: " << this->messageHead << logger::endL;
+  << " Message head (length " << this->messageHead.size()
+  << "): " << this->messageHead << logger::endL;
   logIO << logger::orange << this->parent->ToStringConnection()
   << " Message body: " << this->messageBody << logger::endL;
   logIO << logger::green << "Attempting to correct unknown request.\n";

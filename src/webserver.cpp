@@ -2007,6 +2007,12 @@ std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExten
 int WebWorker::ProcessUnknown()
 { MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   this->SetHeadeR("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
+  stOutput << "<html><head>"
+  << CGI::GetCalculatorStyleSheetWithTags()
+  << "</head>";
+  stOutput << "<body>";
+  stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
+  << "</problemNavigation>\n";
   stOutput << "<b>Requested method is not implemented. </b> <hr>The original message received from the server follows."
   << "<hr>\n" << this->ToStringMessageUnsafe();
 
@@ -2016,6 +2022,7 @@ int WebWorker::ProcessUnknown()
   else
     logHttpErrors << logger::red << "Method not implemented. Message follows. " << logger::endL
     << this->ToStringMessageFullUnsafe(false) << logger::endL;
+  stOutput << "</body></html>";
   return 0;
 }
 

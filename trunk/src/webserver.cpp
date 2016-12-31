@@ -2681,7 +2681,7 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   out << "\"";
   out << ">\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-  out << "DEBUG: " << this->ToStringMessageFullUnsafe();
+//  out << "DEBUG: " << this->ToStringMessageFullUnsafe();
 //  out << WebWorker::ToStringCalculatorArgumentsHumanReadable();
   out << WebWorker::GetLoginHTMLinternal(reasonForLogin) << "</body></html>";
   return out.str();

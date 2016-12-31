@@ -1221,8 +1221,13 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
 { MacroRegisterFunctionWithName("WebWorker::AttemptUnknownRequestErrorCorrection");
   if (this->requestTypE!=this->requestUnknown)
     return;
-  logIO << logger::green << this->parent->ToStringConnection()
-  << "Attempting to correct unknown request:\n";
+  logIO << logger::red << this->parent->ToStringConnection()
+  << " Unknown connection. " << logger::endL;
+  logIO << logger::blue << this->parent->ToStringConnection()
+  << " Message head: " << this->messageHead << logger::endL;
+  logIO << logger::orange << this->parent->ToStringConnection()
+  << " Message body: " << this->messageBody << logger::endL;
+  logIO << logger::green << "Attempting to correct unknown request.\n";
   if (this->messageBody.size()==0)
     if (*this->theStrings.LastObject()!="\n")
     { logIO << logger::green

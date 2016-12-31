@@ -3904,7 +3904,9 @@ int WebServer::Run()
       { //if (this->theListeningSockets[i]==this->listeningSocketHTTP)
         newConnectedSocket=accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
         if (newConnectedSocket>=0)
-        { logIO << logger::green << "Connected via listening socket " << this->theListeningSockets[i]
+        { logIO << logger::green << "Connection candidate  "
+          << this->NumConnectionsSoFar+1 << ". "
+          << "Connected via listening socket " << this->theListeningSockets[i]
           << " on socket: " << newConnectedSocket;
           if (this->theListeningSockets[i]==this->listeningSocketHttpSSL)
           { theGlobalVariables.flagUsingSSLinCurrentConnection=true;

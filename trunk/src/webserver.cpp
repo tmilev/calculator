@@ -842,8 +842,10 @@ std::string WebWorker::ToStringMessageUnsafe(bool useHTML)const
   { out << "\n<hr>\nFull message head:<br>\n" << CGI::StringToHtmlString(this->messageHead, true);
     out << "\n<hr>\nFull message body:<br>\n" << CGI::StringToHtmlString(this->messageBody, true);
   } else
-  { out << "\nFull message head:\n" << this->messageHead;
-    out << "\nFull message body:\n" << this->messageBody;
+  { out << "\nFull message head (length " << this->messageHead.size()
+    << "):\n" << this->messageHead;
+    out << "\nFull message body (length " << this->messageBody.size()
+    << "):\n" << this->messageBody;
   }
   return out.str();
 }
@@ -1252,12 +1254,12 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
     this->addressGetOrPost=theGlobalVariables.DisplayNameExecutable;
   }
   logIO << logger::endL;
+  logIO << logger::blue << this->parent->ToStringConnection()
+  << "Full message head (length " << this->messageHead.size() << "): "
+  << this->messageHead << logger::endL;
   logIO << logger::red << this->parent->ToStringConnection()
-  << "Full message head: " << logger::endL;
-  logIO << this->messageHead << logger::endL;
-  logIO << logger::red << this->parent->ToStringConnection()
-  << "Full message body: " << logger::endL;
-  logIO << this->messageBody << logger::endL;
+  << "Full message body: (length " << this->messageBody.size() << "): "
+  << this->messageBody << logger::endL;
 }
 
 bool WebWorker::ReceiveAllHttp()

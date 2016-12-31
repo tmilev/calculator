@@ -1227,20 +1227,22 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
     if (*this->theStrings.LastObject()!="\n")
     { logIO << logger::green
       << this->parent->ToStringConnection()
-      << "Message body set to last message chunk.\n";
+      << "Message body set to last message chunk." << logger::endL;
       this->messageBody=*this->theStrings.LastObject();
     }
   if (this->messageBody.size()!=0)
-  { logIO << this->parent->ToStringConnection() << "Request set to: POST\n";
+  { logIO << this->parent->ToStringConnection() << "Request set to: POST"
+    << logger::endL;
     this->requestTypE=this->requestPost;
   } else
-  { logIO << this->parent->ToStringConnection() << "Request set to: GET\n";
+  { logIO << this->parent->ToStringConnection() << "Request set to: GET"
+    << logger::endL;
     this->requestTypE=this->requestGet;
   }
   if (this->addressGetOrPost=="")
   { logIO << this->parent->ToStringConnection() << "Address set to: "
     << theGlobalVariables.DisplayNameExecutable
-    ;
+    << logger::endL;
     this->addressGetOrPost=theGlobalVariables.DisplayNameExecutable;
   }
   logIO << logger::endL;

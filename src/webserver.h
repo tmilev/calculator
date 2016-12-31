@@ -274,6 +274,7 @@ public:
   void Restart();
   void CheckExecutableVersionAndRestartIfNeeded(bool callReload);
   void initDates();
+  std::string ToStringConnection();
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();
   std::string ToStringStatusAll();

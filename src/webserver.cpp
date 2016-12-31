@@ -1221,31 +1221,34 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
 { MacroRegisterFunctionWithName("WebWorker::AttemptUnknownRequestErrorCorrection");
   if (this->requestTypE!=this->requestUnknown)
     return;
-  logIO << logger::green
+  logIO << logger::green << this->parent->ToStringConnection()
   << "Attempting to correct unknown request:\n";
   if (this->messageBody.size()==0)
     if (*this->theStrings.LastObject()!="\n")
     { logIO << logger::green
+      << this->parent->ToStringConnection()
       << "Message body set to last message chunk.\n";
       this->messageBody=*this->theStrings.LastObject();
     }
   if (this->messageBody.size()!=0)
-  { logIO << "request set to: POST\n";
+  { logIO << this->parent->ToStringConnection() << "Request set to: POST\n";
     this->requestTypE=this->requestPost;
   } else
-  { logIO << "request set to: GET\n";
+  { logIO << this->parent->ToStringConnection() << "Request set to: GET\n";
     this->requestTypE=this->requestGet;
   }
   if (this->addressGetOrPost=="")
-  { logIO << "address set to: "
+  { logIO << this->parent->ToStringConnection() << "Address set to: "
     << theGlobalVariables.DisplayNameExecutable
     ;
     this->addressGetOrPost=theGlobalVariables.DisplayNameExecutable;
   }
   logIO << logger::endL;
-  logIO << logger::red << "Full message head: " << logger::endL;
+  logIO << logger::red << this->parent->ToStringConnection()
+  << "Full message head: " << logger::endL;
   logIO << this->messageHead << logger::endL;
-  logIO << logger::red << "Full message body: " << logger::endL;
+  logIO << logger::red << this->parent->ToStringConnection()
+  << "Full message body: " << logger::endL;
   logIO << this->messageBody << logger::endL;
 }
 
@@ -1270,14 +1273,16 @@ bool WebWorker::ReceiveAllHttp()
   while ((numBytesInBuffer<0) || (numBytesInBuffer>((signed)bufferSize)))
   { std::stringstream out;
     numFailedReceives++;
-    out << "Socket::ReceiveAll on socket " << this->connectedSocketID
+    out << this->parent->ToStringConnection()
+    << "WebWorker::ReceiveAllHttp on socket " << this->connectedSocketID
     << " failed (so far "
     << numFailedReceives << " fails on this connection). "
     << "Return value: " << numBytesInBuffer
     << ". Error description: "
     << this->parent->ToStringLastErrorDescription();
     if (numFailedReceives>5)
-    { out << ". 5+ failed receives so far, aborting. ";
+    { out << this->parent->ToStringConnection()
+      << ". 5+ failed receives so far, aborting. ";
       this->displayUserInput=out.str();
       this->error=out.str();
       logIO << out.str() << logger::endL;
@@ -3360,6 +3365,12 @@ bool WebServer::CreateNewActiveWorker()
   << logger::endL;
   this->theWorkers[this->activeWorker].flagInUse=true;
   return true;
+}
+
+std::string WebServer::ToStringConnection()
+{ std::stringstream out;
+  out << "Connection " << this->NumConnectionsSoFar << ". ";
+  return out.str();
 }
 
 std::string WebServer::ToStringLastErrorDescription()

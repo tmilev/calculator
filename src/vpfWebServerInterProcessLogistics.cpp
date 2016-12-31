@@ -11,7 +11,9 @@ ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImpl
 std::string PauseProcess::currentProcessName="S: ";
 
 void PauseProcess::Release(int& theDescriptor)
-{ close(theDescriptor);
+{ if (theDescriptor==-1)
+    return;
+  close(theDescriptor);
   theDescriptor=-1;
 }
 

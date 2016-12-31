@@ -1362,7 +1362,7 @@ bool WebWorker::ReceiveAllHttp()
   }
   if ((signed) this->messageBody.size()!=this->ContentLength)
     if (this->requestTypE!=this->requestChunked)
-    { logIO << logger::red
+    { logIO << logger::red << this->parent->ToStringConnection()
       << "Message body is of length: " << this->messageBody.size()
       << " yet this->ContentLength equals: "
       << this->ContentLength

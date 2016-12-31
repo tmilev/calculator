@@ -3311,47 +3311,47 @@ bool WebServer::CreateNewActiveWorker()
   std::string wtos = wtosStream.str();
   if (!this->GetActiveWorker().PauseComputationReportReceived.CreateMe(stow+"report received"))
   { logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().PauseComputationReportReceived.name;
+    << this->GetActiveWorker().PauseComputationReportReceived.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   if (!this->GetActiveWorker().PauseWorker.CreateMe(stow+"pause"))
   { logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().PauseWorker.name;
+    << this->GetActiveWorker().PauseWorker.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   if (!this->GetActiveWorker().PauseIndicatorPipeInUse.CreateMe(stow+"ind. pipe busy"))
   { logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().PauseIndicatorPipeInUse.name;
+    << this->GetActiveWorker().PauseIndicatorPipeInUse.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   if (!this->GetActiveWorker().pipeServerToWorkerRequestIndicator.CreateMe(stow+"request indicator"))
   { logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().pipeServerToWorkerRequestIndicator.name;
+    << this->GetActiveWorker().pipeServerToWorkerRequestIndicator.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   if (!this->GetActiveWorker().pipeWorkerToServerTimerPing.CreateMe(wtos+"ping"))
   { logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().pipeWorkerToServerTimerPing.name;
+    << this->GetActiveWorker().pipeWorkerToServerTimerPing.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   if (!this->GetActiveWorker().pipeWorkerToServerControls.CreateMe(wtos+"controls"))
   { logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().pipeWorkerToServerControls.name;
+    << this->GetActiveWorker().pipeWorkerToServerControls.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   if (!this->GetActiveWorker().pipeWorkerToServerIndicatorData.CreateMe(wtos+"indicator data"))
   { logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().pipeWorkerToServerIndicatorData.name;
+    << this->GetActiveWorker().pipeWorkerToServerIndicatorData.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   if (!this->GetActiveWorker().pipeWorkerToServerUserInput.CreateMe(wtos+"user input"))
   { logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().pipeWorkerToServerUserInput.name;
+    << this->GetActiveWorker().pipeWorkerToServerUserInput.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   if (!this->GetActiveWorker().pipeWorkerToServerWorkerStatus.CreateMe(wtos+"worker status"))
   { logPlumbing << "Failed to create pipe: "
-    << this->GetActiveWorker().pipeWorkerToServerWorkerStatus.name;
+    << this->GetActiveWorker().pipeWorkerToServerWorkerStatus.name << "\n";
     return this->EmergencyRemoval_LastCreatedWorker();
   }
   logPlumbing << logger::green

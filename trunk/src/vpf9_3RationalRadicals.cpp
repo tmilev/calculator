@@ -794,6 +794,18 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
     *this*=tempRat;
     return;
   }
+  bool doReport=false;
+  if (theGlobalVariables.flagReportEverything)
+    if (this->theElT.size()*other.theElT.size()>100)
+      doReport=true;
+  ProgressReport theReport;
+  std::stringstream reportStream;
+  if (doReport)
+  { reportStream << "Multiplying "
+    << this->ToString() << "\n<br>by<br>\n" << other.ToString()
+    << "\n<br>...";
+    theReport.Report(reportStream.str());
+  }
   this->CheckCommonOwner(other);
 //  AlgebraicNumber otherCopy=other;
 //  stOutput << "Converting <hr>" << CGI::GetMathSpanPure(this->ToString()) << " and <br><br>\n\n\n\n<br><br>"
@@ -807,9 +819,16 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
 //  tempformat.flagUseHTML=false;
   this->owner->GetMultiplicationBy(*this, leftMat);
   this->owner->GetMultiplicationBy(other, rightMat);
+  leftMat.CheckConsistencyGrandMaster();
+  rightMat.CheckConsistencyGrandMaster();
 //  stOutput << "<br><br>\n\n\n\n<br><br> in matrix form: " << CGI::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat)) << " by "
 //  << CGI::GetMathSpanPure(rightMat.ToStringMatForm(&tempformat));
   leftMat*=rightMat;
+  if (doReport)
+  { reportStream << "<b>DONE</b>.";
+    theReport.Report(reportStream.str());
+  }
+
   this->basisIndex=this->owner->theBasesAdditive.size-1;
   this->theElT.MaKeEi(0);
   //stOutput << "matrix " << CGI::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat));

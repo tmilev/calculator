@@ -371,6 +371,9 @@ public:
       }
     return (*whichLetter)!=-1;
   }
+  bool CheckConsistency()const
+  { return true;
+  }
   template <class coefficient>
   bool SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output)const;
   void MakeEi(int LetterIndex, int Power=1, int ExpectedNumVars=0);
@@ -1859,11 +1862,15 @@ public:
   { if (this->theMonomials.flagDeallocated || this->theCoeffs.flagDeallocated)
       crash << "Use after free of monomial collection. " << crash;
   }
-  void checkConsistency()const
-  { this->theMonomials.GrandMasterConsistencyCheck();
-    this->CheckNumCoeffsConsistency();
+  void CheckConsistencyGrandMaster()const
+  { this->CheckConsistency();
+    this->theMonomials.GrandMasterConsistencyCheck();
     for (int i =0; i<this->size(); i++)
       this->theCoeffs[i].checkConsistency();
+  }
+  void CheckConsistency()const
+  { this->CheckFlagDeallocated();
+    this->CheckNumCoeffsConsistency();
   }
   template <class baseRing>
   baseRing FindGCDCoefficientNumerators()const
@@ -3544,7 +3551,8 @@ public:
 template <class coefficient, typename theIntegerType>
 void MathRoutines::RaiseToPower
 (coefficient& theElement, const theIntegerType& thePower, const coefficient& theRingUnit)
-{ theIntegerType thePowerCopy;
+{ MacroRegisterFunctionWithName("MathRoutines::RaiseToPower");
+  theIntegerType thePowerCopy;
   thePowerCopy=thePower;
   if (thePowerCopy<0)
     return;
@@ -3554,6 +3562,8 @@ void MathRoutines::RaiseToPower
   { theElement=theRingUnit;
     return;
   }
+  ProgressReport theReport;
+  std::stringstream reportStream;
   coefficient squares;
 	squares=theElement;
 	if (thePowerCopy<4)
@@ -3562,11 +3572,36 @@ void MathRoutines::RaiseToPower
     return;
   }
   theElement=theRingUnit;
-	while (thePowerCopy>0)
-	{	if (thePowerCopy%2==1)
-			theElement*=squares;
-		squares*=squares;
-		thePowerCopy/=2;
+  if (theGlobalVariables.flagReportEverything)
+  { reportStream << "Raising " << theElement.ToString()
+    << " to power: " << thePowerCopy;
+    theReport.Report(reportStream.str());
+  }
+  int counter=0;
+  while (thePowerCopy>0)
+  { counter++;
+    bool doReport=false;
+    if (theGlobalVariables.flagReportEverything)
+      if (counter>3)
+        doReport=true;
+    if (thePowerCopy%2==1)
+    { if (doReport)
+      { std::stringstream reportStream2;
+        reportStream2 << "Multiplying " << theElement.ToString()
+        << " by " << squares.ToString();
+        theReport.Report(reportStream2.str());
+      }
+      theElement*=squares;
+    }
+    thePowerCopy/=2;
+    if (thePowerCopy>0)
+    { if (doReport)
+      { std::stringstream reportStream2;
+        reportStream2 << "Squaring: " << squares.ToString();
+        theReport.Report(reportStream2.str());
+      }
+      squares*=squares;
+    }
 	}
 }
 
@@ -3600,13 +3635,19 @@ void Matrix<coefficient>::NonPivotPointsToEigenVector(Selection& TheNonPivotPoin
 }
 
 template <class templateMonomial, class coefficient>
-inline void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy
+void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy
 (const ElementMonomialAlgebra<templateMonomial, coefficient>& other, ElementMonomialAlgebra<templateMonomial, coefficient>& output,
  ElementMonomialAlgebra<templateMonomial, coefficient>& bufferPoly, templateMonomial& bufferMon)const
-{ if (other.IsEqualToZero())
+{ MacroRegisterFunctionWithName("ElementMonomialAlgebra::MultiplyBy");
+  if (other.IsEqualToZero())
   { output.MakeZero();
     return;
   }
+  if (&bufferPoly==this || &bufferPoly==&other)
+  { crash << "Bad buffer in ElementMonomialAlgebra::MultiplyBy." << crash;
+  }
+  this->CheckConsistency();
+  other.CheckConsistency();
   int maxNumMonsFinal=this->size()*other.size();
   if (maxNumMonsFinal>2000000)
     maxNumMonsFinal=2000000;
@@ -3623,13 +3664,27 @@ inline void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy
     reportStream << "Large polynomial computation: " << this->size() << " x " << other.size() << "=" << totalMonPairs << " monomials:\n<br>\n"
     << this->ToString() << " times " << other.ToString()
     ;
-    theReport2.Report(reportStream.str());
+    theReport1.Report(reportStream.str());
   }
+  bufferPoly.MakeZero();
   bufferPoly.SetExpectedSize(maxNumMonsFinal);
+  bufferPoly.CheckConsistency();
+  bufferMon.CheckConsistency();
   coefficient theCoeff;
+  int counter=0;
   for (int i=0; i<other.size(); i++)
     for (int j=0; j<this->size(); j++)
-    { bufferMon=(*this)[j];
+    { if (shouldReport)
+      { counter++;
+        if (counter%400==0)
+        { std::stringstream reportStream2;
+          reportStream2 << "Multiplying monomials: "
+          << i+1 << " out of " << other.size() << " by " << j+1
+          << " out of " << this->size() << ". ";
+          theReport2.Report(reportStream2.str());
+        }
+      }
+      bufferMon=(*this)[j];
       bufferMon*=(other[i]);
       theCoeff=this->theCoeffs[j];
       theCoeff*=other.theCoeffs[i];
@@ -4753,7 +4808,7 @@ std::string MonomialCollection<templateMonomial, coefficient>::ToString(FormatEx
             out << "&";
           out << " ";
         }
-        if (flagUseHTML && !flagUseLaTeX)
+        if (flagUseHTML && !flagUseLaTeX && (i!=sortedMons.size-1))
           out << " <br>";
       }
   }
@@ -6021,6 +6076,9 @@ class PiecewiseQuasipolynomial
   inline void MakeCommonRefinement(const PiecewiseQuasipolynomial& other)
   { this->MakeCommonRefinement(other.theProjectivizedComplex);
   }
+  bool CheckConsistency()const
+  { return true;
+  }
   void MakeCommonRefinement(const ConeComplex& other);
   void TranslateArgument(Vector<Rational>& translateToBeAddedToArgument);
   bool MakeVPF(Vectors<Rational>& theRoots, std::string& outputstring);
@@ -6071,6 +6129,9 @@ class MonomialMatrix
     this->vIndex=-1;
     this->dualIndex=-1;
   }
+  bool CheckConsistency()const
+  { return true;
+  }
   bool IsMonEqualToZero()const
   { return !this->IsId && this->vIndex==-1 && this->dualIndex==-1;
   }
@@ -6105,7 +6166,7 @@ class MonomialMatrix
     return out.str();
   }
   void operator*=(const MonomialMatrix& other)
-  { MacroRegisterFunctionWithName("MonomialMatrix<coefficient>::operator*=");
+  { MacroRegisterFunctionWithName("MonomialMatrix::operator*=");
     if (this==&other)
     { MonomialMatrix otherCopy;
       otherCopy=other;

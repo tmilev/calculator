@@ -31,6 +31,10 @@ public:
   friend bool operator <(int left, const LargeIntUnsigned& right)
   { return right>left;
   }
+  friend std::ostream& operator << (std::ostream& output, const LargeIntUnsigned& theLIU)
+  { output << theLIU.ToString();
+    return output;
+  }
   void SubtractSmallerPositive(const LargeIntUnsigned& x);
   void ToString(std::string& output)const;
   void ElementToStringLargeElementDecimal(std::string& output)const;

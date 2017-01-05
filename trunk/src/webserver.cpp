@@ -1683,7 +1683,8 @@ int WebWorker::ProcessComputationIndicator()
     //theLog << logger::yellow << "Indicator string read: " << logger::blue << outputString << logger::endL;
     stOutput << outputString;
     otherWorker.PauseComputationReportReceived.ResumePausedProcessesIfAny();
-  }
+  } else
+    stOutput << "No report available.";
 //  stOutput << "<b>Not implemented: request for indicator for worker " << inputWebWorkerNumber
 //  << " out of " << this->parent->theWorkers.size << ".</b>";
   return 0;
@@ -3708,9 +3709,12 @@ void WebServer::RecycleChildrenIfPossible()
         if (presumedDead)
         { this->TerminateChildSystemCall(i);
           std::stringstream pingTimeoutStream;
-          pingTimeoutStream << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
+          pingTimeoutStream
+          << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
           << " seconds passed since worker " << i+1
-          << " last pinged the server; killing pid: "
+          << " last pinged the server; killing connection "
+          << this->theWorkers[i].connectionID
+          << ", pid: "
           << this->theWorkers[i].ProcessPID << ". ";
           logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
           this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
@@ -4156,13 +4160,16 @@ int WebServer::main(int argc, char **argv)
   try {
   InitializeGlobalObjects();
   theWebServer.AnalyzeMainArguments(argc, argv);
-  theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit+20;
+  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
+    theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=
+    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit+20;
+  else
+    theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=-1;
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
   theGlobalVariables.flagAceIsAvailable=
   FileOperations::FileExistsVirtual("MathJax-2.6-latest/", false);
-  if ( false &&
+  if ( true &&
       theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
     << logger::purple << "************************" << logger::endL

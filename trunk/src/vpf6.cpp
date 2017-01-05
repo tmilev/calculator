@@ -2358,7 +2358,10 @@ std::string Calculator::ToStringPerformance()
   << ((elapsedSecs)*1000) << " ms).";
   out << "<br>";
   std::stringstream moreDetails;
-  moreDetails << "Total number of pattern matches performed: "
+  moreDetails << "Max computation time: "
+  << (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
+  << " second(s). <br>"
+  << "Total number of pattern matches performed: "
   << this->TotalNumPatternMatchedPerformed << "";
   if (this->DepthRecursionReached>0)
     moreDetails << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";

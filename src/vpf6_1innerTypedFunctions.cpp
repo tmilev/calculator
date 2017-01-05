@@ -901,7 +901,6 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceByT(Calculator& theCommands
 
 bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat");
-  stOutput << "DEBUG: here be be be i i i ";
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -910,8 +909,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
   Matrix<Rational> theMatRat;
 //  stOutput << "raising " << input[1].ToString() << " to " << input[2].ToString();
   if (theCommands.GetMatrix(input[1], theMatRat))
-  { stOutput << "DEBUG: here be be be i i i part 2 ";
-    Expression inputCopy, baseRatMat, outputMatRat;
+  { Expression inputCopy, baseRatMat, outputMatRat;
     baseRatMat.AssignValue(theMatRat, theCommands);
     inputCopy.reset(theCommands);
     inputCopy.AddChildOnTop(input[0]);
@@ -927,8 +925,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
   }
   Matrix<AlgebraicNumber> theMatAlg;
   if (theCommands.GetMatrix(input[1], theMatAlg, 0,-1, CalculatorConversions::innerAlgebraicNumber))
-  { //stOutput << "DEBUG: here be be be i i i part 2 ";
-    Expression inputCopy, baseRatMat, outputMatRat;
+  { Expression inputCopy, baseRatMat, outputMatRat;
     baseRatMat.AssignValue(theMatAlg, theCommands);
     inputCopy.reset(theCommands);
     inputCopy.AddChildOnTop(input[0]);

@@ -157,10 +157,11 @@ std::string GlobalVariables::ToStringProgressReportHtml()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtml");
   std::stringstream reportStream;
   for (int threadIndex=0; threadIndex<this->ProgressReportStringS.size; threadIndex++)
-  { reportStream << "<b>" << this->theThreadData[threadIndex].ToStringHtml() << "</b><br>";
+  { reportStream << "<hr><b>" << this->theThreadData[threadIndex].ToStringHtml() << "</b><br>";
     for (int i=0; i<this->ProgressReportStringS[threadIndex].size; i++)
-      reportStream << "\n<div id=\"divProgressReport" << i << "\">"
-      << this->ProgressReportStringS[threadIndex][i] << "\n</div>";
+      if (this->ProgressReportStringS[threadIndex][i]!="")
+        reportStream << "\n<div id=\"divProgressReport" << i << "\">"
+        << this->ProgressReportStringS[threadIndex][i] << "\n</div>\n<hr>";
   }
   return reportStream.str();
 }

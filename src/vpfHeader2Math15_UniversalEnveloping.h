@@ -165,7 +165,7 @@ public:
     }
     return result;
   }
-  inline void MultiplyBy(const MonomialUniversalEnveloping<coefficient>& standsOnTheRight, const coefficient& theCoeff);
+  void MultiplyBy(const MonomialUniversalEnveloping<coefficient>& standsOnTheRight, const coefficient& theCoeff);
   void ModToMinDegreeFormFDRels(const Vector<Rational> & theHWinSimpleCoords, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
   void ModOutVermaRelations(const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
   static void GetCoordinateFormOfSpanOfElements

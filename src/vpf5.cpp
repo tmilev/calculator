@@ -10,7 +10,7 @@
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Calculator built-in functions. ");
 
-//If you get a the C++ multiple definition error:
+//If you get the C++ multiple definition error:
 //- Try moving template *EXPLICIT* specializations (i.e. template <>)
 //  to the *beginning* (!) of .cpp files.
 //- Try moving template generics into .h files.
@@ -918,8 +918,8 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   *theG2B3Data.theEigenVectorS.LastObject()=theHWV;
   Vector<RationalFunctionOld> weightDifference, weightDifferenceDualCoords;
   theG2B3Data.theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3);
-  theG2Casimir.checkConsistency();
-  imageCasimirInB3.checkConsistency();
+  theG2Casimir.CheckConsistency();
+  imageCasimirInB3.CheckConsistency();
   RationalFunctionOld charDiff;
   theG2B3Data.theHmm.theRange().OrderNilradical
   (theMod.parabolicSelectionNonSelectedAreElementsLevi, theG2B3Data.flagUseNilWeightGeneratorOrder,

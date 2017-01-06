@@ -2703,6 +2703,7 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   out << "<html>"
   << HtmlSnippets::GetJavascriptStandardCookies()
   << WebWorker::GetJavascriptSubmitLoginInfo()
+  << CGI::GetCalculatorStyleSheetWithTags()
   << "<body";
   out << " onload=\"loadSettings();";
   out << "\"";
@@ -2710,6 +2711,8 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
 //  out << "DEBUG: " << this->ToStringMessageFullUnsafe();
 //  out << WebWorker::ToStringCalculatorArgumentsHumanReadable();
+  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
+  << "</problemNavigation>\n";
   out << WebWorker::GetLoginHTMLinternal(reasonForLogin) << "</body></html>";
   return out.str();
 }

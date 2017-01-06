@@ -4587,17 +4587,23 @@ std::string Matrix<coefficient>::ToString(FormatExpressions* theFormat)const
   std::string tempS;
   bool useHtml= theFormat==0 ? true : theFormat->flagUseHTML;
   bool useLatex= theFormat==0 ? false : theFormat->flagUseLatex;
+  bool usePmatrix=theFormat==0 ? true : theFormat->flagUsePmatrix;
   if (useHtml)
     out << "<table>";
   if (useLatex)
   { int verticalLineIndex= theFormat==0 ? -1 : theFormat->MatrixColumnVerticalLineIndex;
-    out << "\\left(\\begin{array}{";
-    for (int j=0; j<this->NumCols; j++)
-    { out << "c";
-      if (verticalLineIndex==j)
-        out << "|";
+    if (usePmatrix)
+      out << "\\begin{pmatrix}";
+    else
+    { out << "\\left(";
+      out << "\\begin{array}{";
+      for (int j=0; j<this->NumCols; j++)
+      { out << "c";
+        if (verticalLineIndex==j)
+          out << "|";
+      }
+      out << "}";
     }
-    out << "}";
   }
   for (int i=0; i<this->NumRows; i++)
   { if (useHtml)
@@ -4625,7 +4631,13 @@ std::string Matrix<coefficient>::ToString(FormatExpressions* theFormat)const
   if (useHtml)
     out << "</table>";
   if (useLatex)
-    out << "\\end{array}\\right)";
+  { if (usePmatrix)
+      out << "\\end{pmatrix}";
+    else
+    { out << "\\end{array}";
+      out << "\\right)";
+    }
+  }
   return out.str();
 }
 

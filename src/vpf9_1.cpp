@@ -155,6 +155,11 @@ std::string GlobalVariables::ToStringFolderInfo()const
 
 std::string GlobalVariables::ToStringProgressReportHtml()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtml");
+  while (theGlobalVariables.flagPreparingReport)
+  //<-Trying to make this work without mutexes.
+  //Reason: this has to be fast, and is expected to lock very rarely.
+  {}
+  this->flagPreparingReport=true;
   std::stringstream reportStream;
   for (int threadIndex=0; threadIndex<this->ProgressReportStringS.size; threadIndex++)
   { reportStream << "<hr><b>" << this->theThreadData[threadIndex].ToStringHtml() << "</b><br>";
@@ -163,6 +168,7 @@ std::string GlobalVariables::ToStringProgressReportHtml()
         reportStream << "\n<div id=\"divProgressReport" << i << "\">"
         << this->ProgressReportStringS[threadIndex][i] << "\n</div>\n<hr>";
   }
+  this->flagPreparingReport=false;
   return reportStream.str();
 }
 

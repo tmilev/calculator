@@ -1089,9 +1089,9 @@ public:
     return true;
   }
   inline Object& operator[](int i)const
-  { if (i>=this->size || i<0)
+  { this->CheckConsistency();
+    if (i>=this->size || i<0)
       crash << "Programming error: attempting to access the entry of index " << i << " in an array of " << this->size << " elements. " << crash;
-    this->CheckConsistency();
     return this->TheObjects[i];
   }
   inline bool operator!=(const List<Object>& other)const

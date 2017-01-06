@@ -1664,9 +1664,16 @@ private:
 public:
   HashedList<templateMonomial> theMonomials;
   List<coefficient> theCoeffs;
-  MonomialCollection(){}
+  bool flagDeallocated;
+  MonomialCollection()
+  { this->flagDeallocated=false;
+  }
   MonomialCollection(const MonomialCollection& other)
-  { this->operator=(other);
+  { this->flagDeallocated=false;
+    this->operator=(other);
+  }
+  ~MonomialCollection()
+  { this->flagDeallocated=true;
   }
   bool NeedsParenthesisForMultiplication()const
   { return this->size()>1;
@@ -1736,8 +1743,13 @@ public:
   inline bool CleanupMonIndex(int theIndex)
   { if (theIndex!=-1)
       if (this->theCoeffs[theIndex]==0)
-      { this->theMonomials.RemoveIndexSwapWithLast(theIndex);
+      { if (this->flagDeallocated)
+          crash << "Use after free or race condition on monomial collection. " << crash;
+        bool oldFlagDeallocated=this->flagDeallocated;
+        this->flagDeallocated=true;
+        this->theMonomials.RemoveIndexSwapWithLast(theIndex);
         this->theCoeffs.RemoveIndexSwapWithLast(theIndex);
+        this->flagDeallocated=oldFlagDeallocated;
         return true;
       }
     return false;
@@ -1859,7 +1871,9 @@ public:
   }
   int TotalDegree();
   void CheckFlagDeallocated()const
-  { if (this->theMonomials.flagDeallocated || this->theCoeffs.flagDeallocated)
+  { if (this->theMonomials.flagDeallocated ||
+        this->theCoeffs.flagDeallocated ||
+        this->flagDeallocated)
       crash << "Use after free of monomial collection. " << crash;
   }
   void CheckConsistencyGrandMaster()const
@@ -3385,15 +3399,20 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
 
 template <class templateMonomial, class coefficient>
 int MonomialCollection<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUpReturnsCoeffIndex(const templateMonomial& inputMon, const coefficient& inputCoeff)
-{ ///
-//  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
-  ///
+{ this->CheckConsistency();
   if (inputCoeff==0 || inputMon.IsMonEqualToZero())
     return -1;
+  if (this->flagDeallocated)
+    crash << "Use after free or race condition on monomial collection. " << crash;
+  bool oldFlagDeallocated=this->flagDeallocated;
+  this->flagDeallocated=true;
   int j= this->theMonomials.GetIndex(inputMon);
   if (j>=this->size())
-  { crash.theCrashReport << "This is a programming error: function GetIndex evaluated on " << inputMon << " with hash function " << inputMon.HashFunction(inputMon)
-    << " returns index " << j << " but I have only " << this->size() << " elements ";
+  { crash.theCrashReport << "Error: function GetIndex evaluated on "
+    << inputMon << " with hash function "
+    << inputMon.HashFunction(inputMon)
+    << " returns index " << j << " but I have only "
+    << this->size() << " elements. ";
     crash << crash;
   }
   if (j==-1)
@@ -3401,14 +3420,14 @@ int MonomialCollection<templateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
     this->theCoeffs.AddOnTop(inputCoeff);
     j=this->size()-1;
   } else
-  { ///
-//    this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
-    if (j>=this->theCoeffs.size)
-      crash << "This is a programming error. Looking for coefficient index " << j << " when number of coefficients is "
+  { if (j>=this->theCoeffs.size)
+      crash << "This is a programming error. "
+      << "Looking for coefficient index " << j
+      << " when number of coefficients is "
       << this->theCoeffs.size <<  ". " << crash;
-    ///
     this->theCoeffs[j]+=inputCoeff;
   }
+  this->flagDeallocated=oldFlagDeallocated;
   return j;
 }
 
@@ -3571,12 +3590,12 @@ void MathRoutines::RaiseToPower
       theElement*=squares;
     return;
   }
-  theElement=theRingUnit;
   if (theGlobalVariables.flagReportEverything)
   { reportStream << "Raising " << theElement.ToString()
     << " to power: " << thePowerCopy;
     theReport.Report(reportStream.str());
   }
+  theElement=theRingUnit;
   int counter=0;
   while (thePowerCopy>0)
   { counter++;
@@ -3587,6 +3606,7 @@ void MathRoutines::RaiseToPower
     if (thePowerCopy%2==1)
     { if (doReport)
       { std::stringstream reportStream2;
+        reportStream2 << "Remaining exponent: " << thePowerCopy << "<br>";
         reportStream2 << "Multiplying " << theElement.ToString()
         << " by " << squares.ToString();
         theReport.Report(reportStream2.str());
@@ -3597,6 +3617,7 @@ void MathRoutines::RaiseToPower
     if (thePowerCopy>0)
     { if (doReport)
       { std::stringstream reportStream2;
+        reportStream2 << "Remaining exponent: " << thePowerCopy << "<br>";
         reportStream2 << "Squaring: " << squares.ToString();
         theReport.Report(reportStream2.str());
       }

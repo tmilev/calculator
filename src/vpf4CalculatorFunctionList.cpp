@@ -832,7 +832,7 @@ D-B;\
   this->AddOperationInnerHandler
   ("CharPoly", CalculatorFunctionsGeneral::innerCharPolyMatrix, "",
    "Computes the characteristic polynomial of a matrix (=det(A-q*Id)), provided that the matrix is not too large.",
-   "A=\\begin{array}{cc}2 & 3& 5\\\\ 7& 11& 13\\\\ 17&19 &23 \\end{array}; p=MinPoly{}A", true, false)
+   "A=\\begin{pmatrix}2 & 3& 5\\\\ 7& 11& 13\\\\ 17&19 &23\\end{pmatrix}; p=MinPoly{}A", true, false)
    ;
   this->AddOperationInnerHandler
   ("MakeCharacterLieAlg", this->innerCharacterSSLieAlgFD, "",
@@ -2944,7 +2944,9 @@ void Calculator::initPredefinedStandardOperations()
    true, false, "CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger, this->opMatRat(), this->opRational(),
-   "Raises matrix rationals to small integer power. ",
+   "Raises matrix of rationals to small integer power. \
+    Will also attempt to exponentiate if the matrix has determinant +/-1 or 0, independend of\
+    how large is the exponent. ",
    "X=MakeMatrix((0,1),(1,1)); q=100; \nX^q; \nFibonacci{}0=1; \nFibonacci{}1=1; \nFibonacci{}{{n}}:if((n>0)* (IsInteger{}n))=Fibonacci{}(n-1)+Fibonacci{}(n-2); \
    \nMakeMatrix((Fibonacci{}(q-2), Fibonacci{}(q-1)), (Fibonacci{}q-1, Fibonacci{}q))",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger", "PowerMatrixByInteger");

@@ -104,6 +104,7 @@ public:
 //experimental flags, known to cause stability issues when set to true:
   bool flagAllowProcessMonitoring;
 //progress report flags:  
+  bool flagPreparingReport;
   bool flagReportEverything;
   bool flagReportFileIO;
   bool flagReportLargeIntArithmetic;
@@ -114,7 +115,7 @@ public:
   ListReferences<std::thread>theThreads;
   ListReferences<ThreadData> theThreadData;
   ListReferences<List<stackInfo> > CustomStackTrace;
-  ListReferences<List<std::string> > ProgressReportStringS;
+  ListReferences<ListReferences<std::string> > ProgressReportStringS;
   List<std::string> programArguments;
 
   MapLisT<std::string, std::string, MathRoutines::hashString> webArguments;

@@ -93,6 +93,7 @@ void GlobalVariables::ChDir(const std::string& systemCommand)
 
 GlobalVariables::GlobalVariables()
 { this->flagNotAllocated=false;
+  this->flagPreparingReport=false;
   this->flagAllowProcessMonitoring=false;
   this->flagCertificatesAreOfficiallySigned=false;
   this->IndicatorStringOutputFunction=0;
@@ -148,7 +149,14 @@ void ProgressReport::Report(const std::string& theReport)
 void ProgressReport::init()
 { this->threadIndex=ThreadData::getCurrentThreadId();
   this->currentLevel=theGlobalVariables.ProgressReportStringS[this->threadIndex].size;
+  while (theGlobalVariables.flagPreparingReport)
+  //<-Trying to make this work without mutexes.
+  //Reason: this has to be fast, and is expected to lock
+  //very rarely and for very short periods.
+  {}
+  theGlobalVariables.flagPreparingReport=true;
   theGlobalVariables.ProgressReportStringS[this->threadIndex].AddOnTop((std::string)"");
+  theGlobalVariables.flagPreparingReport=false;
 }
 
 ProgressReport::~ProgressReport()

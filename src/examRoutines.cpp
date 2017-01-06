@@ -2786,6 +2786,7 @@ std::string HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "  if (idStatus===undefined)\n"
   << "    idStatus=idOutput;\n"
   << "  var statusSpan=document.getElementById(idStatus);\n "
+  << "  timeOutCounter=0;"
   << "  GlobalSubmitStringAsMainInputCounter++;\n"
   << "  var addressDetailsIndicatorID=\"addressDetailsID\"+GlobalSubmitStringAsMainInputCounter;\n"
   << "  var tranmissionIndicatorID=\"transmissionIndicatorID\"+GlobalSubmitStringAsMainInputCounter;\n"

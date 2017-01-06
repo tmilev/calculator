@@ -2424,10 +2424,6 @@ std::string& CGI::GetJavascriptMathjax()
     << "//mathjax configuration comes before loading the mathjax script, as requested by the documentation.\n"
     << "MathJax.Hub.Config({\n"
     << "  extensions: [\"tex2jax.js\""
-    //  ", \""
-    //<< theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressJavascriptFolder
-    //<< "/html-common-calculator/forminput.js\"],\n"
-    //<< "/forminput.js\"
     << "],\n"
     << "  jax: [\"input/TeX\", \"output/HTML-CSS\"],\n"
     << "  tex2jax: {\n"

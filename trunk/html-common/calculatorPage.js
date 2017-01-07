@@ -15,7 +15,9 @@ var calculatorInputBoxToSliderUpdaters=new Object;
 var calculatorInputBoxNames=[];
 var numInsertedJavascriptChildren=0;
 function initializeCalculatorVariables()
-{ mqProblemSpan=document.getElementById('mqProblemSpan');
+{ answerIdsPureLatex=['mainInputID'];
+  answerMQspanIds=['mainInputMQfield'];
+  mqProblemSpan=document.getElementById('mqProblemSpan');
   calculatorInput=document.getElementById('mainInputID');
   calculatorMQfield=document.getElementById('mainInputMQfield');
 }
@@ -45,9 +47,18 @@ function initializeCalculatorPage()
           if (calculatorLeftString===undefined ||
               calculatorRightString===undefined)
             mQHelpCalculator();
-          calculatorInput.value =calculatorLeftString+"\n"+
-          processMathQuillLatex(theBoxContent)+
-          calculatorRightString;
+          var addNewLine=false;
+          if (calculatorLeftString instanceof String)
+            if (calculatorLeftString[calculatorLeftString.length-1]!=="\n")
+              addNewLine=true;
+          if (addNewLine)
+            calculatorInput.value =calculatorLeftString+"\n"+
+            processMathQuillLatex(theBoxContent)+
+            calculatorRightString;
+          else
+            calculatorInput.value =calculatorLeftString+
+            processMathQuillLatex(theBoxContent)+
+            calculatorRightString;
         },
         focus: function()
         { mQHelpCalculator();
@@ -55,6 +66,9 @@ function initializeCalculatorPage()
       }
     }
    );
+  answerMathQuillObjects=[calculatorMQobject];
+  preferredButtonContainers=['mainInputMQfieldButtons'];
+  initializeButtons();
 }
 
 function onLoadDefaultFunction(idElement)

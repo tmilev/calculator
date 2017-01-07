@@ -2422,6 +2422,7 @@ int WebWorker::ProcessCalculator()
   stOutput << "<span id=\"mqProblemSpan\" style=\"white-space:nowrap\">Equation assistant</span>";
   stOutput << "</td></tr><tr><td>";
   stOutput << "<span style=\"vertical-align:top\" id=\"mainInputMQfield\"></span>";
+  stOutput << "<span style=\"vertical-align:top\" id=\"mainInputMQfieldButtons\"></span>";
   stOutput << "</td></tr></table>";
   stOutput << this->closeIndentTag("</td>");
 

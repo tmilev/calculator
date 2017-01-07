@@ -4172,7 +4172,7 @@ int WebServer::main(int argc, char **argv)
   theWebServer.InitializeGlobalVariables();
   theGlobalVariables.flagAceIsAvailable=
   FileOperations::FileExistsVirtual("MathJax-2.6-latest/", false);
-  if ( false &&
+  if ( true &&
       theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
     << logger::purple << "************************" << logger::endL

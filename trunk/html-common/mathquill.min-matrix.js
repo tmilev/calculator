@@ -1,12 +1,5522 @@
 /**
- * MathQuill v0.10.1               http://mathquill.com
- * by Han, Jeanine, and Mary  maintainers@mathquill.com
+ * MathQuill v0.10.1, by Han, Jeanine, and Mary
+ * http://mathquill.com | maintainers@mathquill.com
  *
  * This Source Code Form is subject to the terms of the
  * Mozilla Public License, v. 2.0. If a copy of the MPL
  * was not distributed with this file, You can obtain
  * one at http://mozilla.org/MPL/2.0/.
  */
-!function(){function t(){}function e(t){var e=t.length-1;return function(){var n=g.call(arguments,0,e),i=g.call(arguments,e);return t.apply(this,n.concat([i]))}}function n(t){return e(function(e,n){"function"!=typeof e&&(e=b(e));var i=function(t){return e.apply(t,[t].concat(n))};return t.call(this,i)})}function i(t){var e=g.call(arguments,1);return function(){return t.apply(this,e)}}function s(t,e){if(!e)throw new Error("prayer failed: "+t)}function r(t){s("a direction was passed",t===w||t===x)}function o(t,e,n){s("a parent is always present",t),s("leftward is properly set up",function(){return e?e[x]===n&&e.parent===t:t.ends[w]===n}()),s("rightward is properly set up",function(){return n?n[w]===e&&n.parent===t:t.ends[x]===e}())}function a(){window.console&&console.warn('You are using the MathQuill API without specifying an interface version, which will fail in v1.0.0. Easiest fix is to do the following before doing anything else:\n\n    MathQuill = MathQuill.getInterface(1);\n    // now MathQuill.MathField() works like it used to\n\nSee also the "`dev` branch (2014–2015) → v0.10.0 Migration Guide" at\n  https://github.com/mathquill/mathquill/wiki/%60dev%60-branch-(2014%E2%80%932015)-%E2%86%92-v0.10.0-Migration-Guide')}function l(t){return a(),Ft(t)}function c(e){function n(t){var e,n;return t&&t.nodeType?(e=q(t).children(".mq-root-block").attr(Ut),n=e&&O.byId[e].controller,n?s[n.KIND_OF_MQ](n):null):null}function i(t,e){var n,i,r;e&&e.handlers&&(e.handlers={fns:e.handlers,APIClasses:s});for(n in e)e.hasOwnProperty(n)&&(i=e[n],r=E[n],t[n]=r?r(i):i)}var s,r,o;if(!(R<=e&&e<=z))throw"Only interface versions between "+R+" and "+z+" supported. You specified: "+e;s={},n.L=w,n.R=x,n.config=function(t){return i(S.p,t),this},n.registerEmbed=function(t,e){if(!/^[a-z][a-z0-9]*$/i.test(t))throw"Embed name must start with letter and be only letters and digits";A[t]=e},r=s.AbstractMathQuill=v(L,function(t){t.init=function(t){this.__controller=t,this.__options=t.options,this.id=t.id,this.data=t.data},t.__mathquillify=function(t){var e,n=this.__controller,i=n.root,s=n.container;n.createTextarea(),e=s.addClass(t).contents().detach(),i.jQ=q('<span class="mq-root-block"/>').attr(Ut,i.id).appendTo(s),this.latex(e.text()),this.revert=function(){return s.empty().unbind(".mathquill").removeClass("mq-editable-field mq-math-mode mq-text-mode").append(e)}},t.config=function(t){return i(this.__options,t),this},t.el=function(){return this.__controller.container[0]},t.text=function(){return this.__controller.exportText()},t.latex=function(t){return arguments.length>0?(this.__controller.renderLatexMath(t),this.__controller.blurred&&this.__controller.cursor.hide().parent.blur(),this):this.__controller.exportLatex()},t.html=function(){return this.__controller.root.jQ.html().replace(/ mathquill-(?:command|block)-id="?\d+"?/g,"").replace(/<span class="?mq-cursor( mq-blink)?"?>.?<\/span>/i,"").replace(/ mq-hasCursor|mq-hasCursor ?/,"").replace(/ class=(""|(?= |>))/g,"")},t.reflow=function(){return this.__controller.root.postOrder("reflow"),this}}),n.prototype=r.prototype,s.EditableField=v(r,function(e,n){e.__mathquillify=function(){return n.__mathquillify.apply(this,arguments),this.__controller.editable=!0,this.__controller.delegateMouseEvents(),this.__controller.editablesTextareaEvents(),this},e.focus=function(){return this.__controller.textarea.focus(),this},e.blur=function(){return this.__controller.textarea.blur(),this},e.write=function(t){return this.__controller.writeLatex(t),this.__controller.scrollHoriz(),this.__controller.blurred&&this.__controller.cursor.hide().parent.blur(),this},e.cmd=function(t){var e,n=this.__controller.notify(),i=n.cursor;return/^\\[a-z]+$/i.test(t)?(t=t.slice(1),e=j[t]||qt[t],e&&(t=e(t),i.selection&&t.replaces(i.replaceSelection()),t.createLeftOf(i.show()),this.__controller.scrollHoriz())):i.parent.write(i,t),n.blurred&&i.hide().parent.blur(),this},e.select=function(){var t=this.__controller;for(t.notify("move").cursor.insAtRightEnd(t.root);t.cursor[w];)t.selectLeft();return this},e.clearSelection=function(){return this.__controller.cursor.clearSelection(),this},e.moveToDirEnd=function(t){return this.__controller.notify("move").cursor.insAtDirEnd(t,this.__controller.root),this},e.moveToLeftEnd=function(){return this.moveToDirEnd(w)},e.moveToRightEnd=function(){return this.moveToDirEnd(x)},e.keystroke=function(e){var n;for(e=e.replace(/^\s+|\s+$/g,"").split(/\s+/),n=0;n<e.length;n+=1)this.__controller.keystroke(e[n],{preventDefault:t});return this},e.typedText=function(t){for(var e=0;e<t.length;e+=1)this.__controller.typedText(t.charAt(e));return this},e.dropEmbedded=function(t,e,n){var i,s=t-q(window).scrollLeft(),r=e-q(window).scrollTop(),o=document.elementFromPoint(s,r);this.__controller.seek(q(o),t,e),i=xt().setOptions(n),i.createLeftOf(this.__controller.cursor)},e.clickAt=function(t,e,n){n=n||document.elementFromPoint(t,e);var i=this.__controller,s=i.root;return Nt.contains(s.jQ[0],n)||(n=s.jQ[0]),i.seek(q(n),t+pageXOffset,e+pageYOffset),i.blurred&&this.focus(),this},e.ignoreNextMousedown=function(t){return this.__controller.cursor.options.ignoreNextMousedown=t,this}}),n.EditableField=function(){throw"wtf don't call me, I'm 'abstract'"},n.EditableField.prototype=s.EditableField.prototype;for(o in D)(function(t,i){var r=s[t]=i(s);n[t]=function(i,s){var o,a=n(i);return a instanceof r||!i||!i.nodeType?a:(o=_(r.RootBlock(),q(i),S()),o.KIND_OF_MQ=t,r(o).__mathquillify(s,e))},n[t].prototype=r.prototype})(o,D[o]);return n}function h(t){var e,n="moveOutOf deleteOutOf selectOutOf upOutOf downOutOf".split(" ");for(e=0;e<n.length;e+=1)(function(e){t[e]=function(t){this.controller.handle(e,t)}})(n[e]);t.reflow=function(){this.controller.handle("reflow"),this.controller.handle("edited"),this.controller.handle("edit")}}function u(t,e,n){return v(K,{ctrlSeq:t,htmlTemplate:"<"+e+" "+n+">&0</"+e+">"})}function f(t){var e=this.parent,n=t;do{if(n[x])return t.insLeftOf(e);n=n.parent.parent}while(n!==e);t.insRightOf(e)}function p(t,e){t.jQadd=function(){e.jQadd.apply(this,arguments),this.delimjQs=this.jQ.children(":first").add(this.jQ.children(":last")),this.contentjQ=this.jQ.children(":eq(1)")},t.reflow=function(){var t=this.contentjQ.outerHeight()/parseFloat(this.contentjQ.css("fontSize"));J(this.delimjQs,Wt(1+.2*(t-1),1.2),1.2*t)}}function d(t,e){var e=e||t,n=bt[t],s=bt[e];Q[t]=i(gt,w,t,n,e,s),Q[n]=i(gt,x,t,n,e,s)}var m,g,b,v,w,x,q,y,O,k,j,Q,T,C,_,D,S,E,L,A,R,z,I,M,B,F,$,N,P,U,W,H,G,K,Y,X,V,Z,J,tt,et,nt,it,st,rt,ot,at,lt,ct,ht,ut,ft,pt,dt,mt,gt,bt,vt,wt,xt,qt,yt,Ot,kt,jt,Qt,Tt,Ct,_t,Dt,St,Et,Lt,At,Rt,zt,It,Mt,Bt,Ft,$t,Nt=window.jQuery,Pt="mathquill-command-id",Ut="mathquill-block-id",Wt=Math.min,Ht=Math.max;if(!Nt)throw"MathQuill requires jQuery 1.4.3+ to be loaded first";g=[].slice,b=e(function(t,n){return e(function(e,i){if(t in e)return e[t].apply(e,n.concat(i))})}),v=function(t,e,n){function i(t){return"object"==typeof t}function s(t){return"function"==typeof t}function r(){}return function o(a,l){function c(){var t=new h;return s(t.init)&&t.init.apply(t,arguments),t}function h(){}var u,f,p;return l===n&&(l=a,a=Object),c.Bare=h,u=r[t]=a[t],f=h[t]=c[t]=c.p=new r,f.constructor=c,c.extend=function(t){return o(c,t)},(c.open=function(t){if(p={},s(t)?p=t.call(c,f,u,c,a):i(t)&&(p=t),i(p))for(var n in p)e.call(p,n)&&(f[n]=p[n]);return s(f.init)||(f.init=a),c})(l)}}("prototype",{}.hasOwnProperty),w=-1,x=1,q=v(Nt,function(t){t.insDirOf=function(t,e){return t===w?this.insertBefore(e.first()):this.insertAfter(e.last())},t.insAtDirEnd=function(t,e){return t===w?this.prependTo(e):this.appendTo(e)}}),y=v(function(t){t.parent=0,t[w]=0,t[x]=0,t.init=function(t,e,n){this.parent=t,this[w]=e,this[x]=n},this.copy=function(t){return y(t.parent,t[w],t[x])}}),O=v(function(t){function e(){return i+=1}t[w]=0,t[x]=0,t.parent=0;var i=0;this.byId={},t.init=function(){this.id=e(),O.byId[this.id]=this,this.ends={},this.ends[w]=0,this.ends[x]=0},t.dispose=function(){delete O.byId[this.id]},t.toString=function(){return"{{ MathQuill Node #"+this.id+" }}"},t.jQ=q(),t.jQadd=function(t){return this.jQ=this.jQ.add(t)},t.jQize=function(t){function e(t){var n,i;for(t.getAttribute&&(n=t.getAttribute("mathquill-command-id"),i=t.getAttribute("mathquill-block-id"),n&&O.byId[n].jQadd(t),i&&O.byId[i].jQadd(t)),t=t.firstChild;t;t=t.nextSibling)e(t)}var n;for(t=q(t||this.html()),n=0;n<t.length;n+=1)e(t[n]);return t},t.createDir=function(t,e){r(t);var n=this;return n.jQize(),n.jQ.insDirOf(t,e.jQ),e[t]=n.adopt(e.parent,e[w],e[x]),n},t.createLeftOf=function(t){return this.createDir(w,t)},t.selectChildren=function(t,e){return C(t,e)},t.bubble=n(function(t){var e,n;for(e=this;e&&(n=t(e),n!==!1);e=e.parent);return this}),t.postOrder=n(function(t){return function e(n){n.eachChild(e),t(n)}(this),this}),t.isEmpty=function(){return 0===this.ends[w]&&0===this.ends[x]},t.children=function(){return k(this.ends[w],this.ends[x])},t.eachChild=function(){var t=this.children();return t.each.apply(t,arguments),this},t.foldChildren=function(t,e){return this.children().fold(t,e)},t.withDirAdopt=function(t,e,n,i){return k(this,this).withDirAdopt(t,e,n,i),this},t.adopt=function(t,e,n){return k(this,this).adopt(t,e,n),this},t.disown=function(){return k(this,this).disown(),this},t.remove=function(){return this.jQ.remove(),this.postOrder("dispose"),this.disown()}}),k=v(function(t){t.init=function(t,e,n){if(n===m&&(n=w),r(n),s("no half-empty fragments",!t==!e),this.ends={},t){s("withDir is passed to Fragment",t instanceof O),s("oppDir is passed to Fragment",e instanceof O),s("withDir and oppDir have the same parent",t.parent===e.parent),this.ends[n]=t,this.ends[-n]=e;var i=this.fold([],function(t,e){return t.push.apply(t,e.jQ.get()),t});this.jQ=this.jQ.add(i)}},t.jQ=q(),t.withDirAdopt=function(t,e,n,i){return t===w?this.adopt(e,n,i):this.adopt(e,i,n)},t.adopt=function(t,e,n){var i,s,r;return o(t,e,n),i=this,i.disowned=!1,(s=i.ends[w])?(r=i.ends[x],e||(t.ends[w]=s),n?n[w]=r:t.ends[x]=r,i.ends[x][x]=n,i.each(function(n){n[w]=e,n.parent=t,e&&(e[x]=n),e=n}),i):this},t.disown=function(){var t,e,n=this,i=n.ends[w];return!i||n.disowned?n:(n.disowned=!0,t=n.ends[x],e=i.parent,o(e,i[w],i),o(e,t,t[x]),i[w]?i[w][x]=t[x]:e.ends[w]=t[x],t[x]?t[x][w]=i[w]:e.ends[x]=i[w],n)},t.remove=function(){return this.jQ.remove(),this.each("postOrder","dispose"),this.disown()},t.each=n(function(t){var e,n=this,i=n.ends[w];if(!i)return n;for(;i!==n.ends[x][x]&&(e=t(i),e!==!1);i=i[x]);return n}),t.fold=function(t,e){return this.each(function(n){t=e.call(this,t,n)}),t}}),j={},Q={},T=v(y,function(t){t.init=function(t,e){this.parent=t,this.options=e;var n=this.jQ=this._jQ=q('<span class="mq-cursor">&#8203;</span>');this.blink=function(){n.toggleClass("mq-blink")},this.upDownCache={}},t.show=function(){return this.jQ=this._jQ.removeClass("mq-blink"),"intervalId"in this?clearInterval(this.intervalId):(this[x]?this.selection&&this.selection.ends[w][w]===this[w]?this.jQ.insertBefore(this.selection.jQ):this.jQ.insertBefore(this[x].jQ.first()):this.jQ.appendTo(this.parent.jQ),this.parent.focus()),this.intervalId=setInterval(this.blink,500),this},t.hide=function(){return"intervalId"in this&&clearInterval(this.intervalId),delete this.intervalId,this.jQ.detach(),this.jQ=q(),this},t.withDirInsertAt=function(t,e,n,i){var s=this.parent;this.parent=e,this[t]=n,this[-t]=i,s!==e&&s.blur&&s.blur(this)},t.insDirOf=function(t,e){return r(t),this.jQ.insDirOf(t,e.jQ),this.withDirInsertAt(t,e.parent,e[t],e),this.parent.jQ.addClass("mq-hasCursor"),this},t.insLeftOf=function(t){return this.insDirOf(w,t)},t.insRightOf=function(t){return this.insDirOf(x,t)},t.insAtDirEnd=function(t,e){return r(t),this.jQ.insAtDirEnd(t,e.jQ),this.withDirInsertAt(t,e,0,e.ends[t]),e.focus(),this},t.insAtLeftEnd=function(t){return this.insAtDirEnd(w,t)},t.insAtRightEnd=function(t){return this.insAtDirEnd(x,t)},t.jumpUpDown=function(t,e){var n,i,s=this;s.upDownCache[t.id]=y.copy(s),n=s.upDownCache[e.id],n?n[x]?s.insLeftOf(n[x]):s.insAtRightEnd(n.parent):(i=s.offset().left,e.seek(i,s))},t.offset=function(){var t=this,e=t.jQ.removeClass("mq-cursor").offset();return t.jQ.addClass("mq-cursor"),e},t.unwrapGramp=function(){var t=this.parent.parent,e=t.parent,n=t[x],i=this,s=t[w];if(t.disown().eachChild(function(i){i.isEmpty()||(i.children().adopt(e,s,n).each(function(e){e.jQ.insertBefore(t.jQ.first())}),s=i.ends[x])}),!this[x])if(this[w])this[x]=this[w][x];else for(;!this[x];){if(this.parent=this.parent[x],!this.parent){this[x]=t[x],this.parent=e;break}this[x]=this.parent.ends[w]}this[x]?this.insLeftOf(this[x]):this.insAtRightEnd(e),t.jQ.remove(),t[w].siblingDeleted&&t[w].siblingDeleted(i.options,x),t[x].siblingDeleted&&t[x].siblingDeleted(i.options,w)},t.startSelection=function(){var t,e=this.anticursor=y.copy(this),n=e.ancestors={};for(t=e;t.parent;t=t.parent)n[t.parent.id]=t},t.endSelection=function(){delete this.anticursor},t.select=function(){var t,e,n,i,r,o,a,l=this.anticursor;if(this[w]===l[w]&&this.parent===l.parent)return!1;for(t=this;t.parent;t=t.parent)if(t.parent.id in l.ancestors){e=t.parent;break}if(s("cursor and anticursor in the same tree",e),n=l.ancestors[e.id],o=x,t[w]!==n)for(a=t;a;a=a[x])if(a[x]===n[x]){o=w,i=t,r=n;break}return o===x&&(i=n,r=t),i instanceof y&&(i=i[x]),r instanceof y&&(r=r[w]),this.hide().selection=e.selectChildren(i,r),this.insDirOf(o,this.selection.ends[o]),this.selectionChanged(),!0},t.clearSelection=function(){return this.selection&&(this.selection.clear(),delete this.selection,this.selectionChanged()),this},t.deleteSelection=function(){this.selection&&(this[w]=this.selection.ends[w][w],this[x]=this.selection.ends[x][x],this.selection.remove(),this.selectionChanged(),delete this.selection)},t.replaceSelection=function(){var t=this.selection;return t&&(this[w]=t.ends[w][w],this[x]=t.ends[x][x],delete this.selection),t}}),C=v(k,function(t,e){t.init=function(){e.init.apply(this,arguments),this.jQ=this.jQ.wrapAll('<span class="mq-selection"></span>').parent()},t.adopt=function(){return this.jQ.replaceWith(this.jQ=this.jQ.children()),e.adopt.apply(this,arguments)},t.clear=function(){return this.jQ.replaceWith(this.jQ[0].childNodes),this},t.join=function(t){return this.fold("",function(e,n){return e+n[t]()})}}),_=v(function(t){t.init=function(t,e,n){this.id=t.id,this.data={},this.root=t,this.container=e,this.options=n,t.controller=this,this.cursor=t.cursor=T(t,n)},t.handle=function(t,e){var n,i=this.options.handlers;i&&i.fns[t]&&(n=i.APIClasses[this.KIND_OF_MQ](this),e===w||e===x?i.fns[t](e,n):i.fns[t](n))};var e=[];this.onNotify=function(t){e.push(t)},t.notify=function(){for(var t=0;t<e.length;t+=1)e[t].apply(this.cursor,arguments);return this}}),D={},S=v(),E={},L=v(),A={},l.prototype=L.p,l.interfaceVersion=function(t){if(1!==t)throw"Only interface version 1 supported. You specified: "+t;return a=function(){window.console&&console.warn('You called MathQuill.interfaceVersion(1); to specify the interface version, which will fail in v1.0.0. You can fix this easily by doing this before doing anything else:\n\n    MathQuill = MathQuill.getInterface(1);\n    // now MathQuill.MathField() works like it used to\n\nSee also the "`dev` branch (2014–2015) → v0.10.0 Migration Guide" at\n  https://github.com/mathquill/mathquill/wiki/%60dev%60-branch-(2014%E2%80%932015)-%E2%86%92-v0.10.0-Migration-Guide')},a(),l},l.getInterface=c,R=c.MIN=1,z=c.MAX=2,l.noConflict=function(){return window.MathQuill=I,l},I=window.MathQuill,window.MathQuill=l,M=function(){function e(t){var e,i=t.which||t.keyCode,s=n[i],r=[];return t.ctrlKey&&r.push("Ctrl"),t.originalEvent&&t.originalEvent.metaKey&&r.push("Meta"),t.altKey&&r.push("Alt"),t.shiftKey&&r.push("Shift"),e=s||String.fromCharCode(i),r.length||s?(r.push(e),r.join("-")):e}var n={8:"Backspace",9:"Tab",10:"Enter",13:"Enter",16:"Shift",17:"Control",18:"Alt",20:"CapsLock",27:"Esc",32:"Spacebar",33:"PageUp",34:"PageDown",35:"End",36:"Home",37:"Left",38:"Up",39:"Right",40:"Down",45:"Insert",46:"Del",144:"NumLock"};return function(n,i){function s(t){x=t,clearTimeout(d),d=setTimeout(t)}function r(e){x(),x=t,clearTimeout(d),v.val(e),e&&v[0].select&&v[0].select(),m=!!e}function o(){var t=v[0];return"selectionStart"in t&&t.selectionStart!==t.selectionEnd}function a(){i.keystroke(e(g),g)}function l(e){g=e,b=null,m&&s(function(e){e&&"focusout"===e.type||!v[0].select||v[0].select(),x=t,clearTimeout(d)}),a()}function c(t){g&&b&&a(),b=t,s(h)}function h(){if(!o()){var t=v.val();1===t.length?(v.val(""),i.typedText(t)):t&&v[0].select&&v[0].select()}}function u(){g=b=null}function f(t){v.focus(),s(p)}function p(){var t=v.val();v.val(""),t&&i.paste(t)}var d,m,g=null,b=null,v=Nt(n),w=Nt(i.container||v),x=t;return w.bind("keydown keypress input keyup focusout paste",function(t){x(t)}),m=!1,w.bind({keydown:l,keypress:c,focusout:u,paste:f}),{select:r}}}(),B=v(function(t,e,n){function i(t,e){throw t=t?"'"+t+"'":"EOF","Parse Error: "+e+" at "+t}var r,o,a,l,c,h,u,f,p,d,m,g,b;t.init=function(t){this._=t},t.parse=function(t){function e(t,e){return e}return this.skip(b)._(""+t,e,i)},t.or=function(t){s("or is passed a parser",t instanceof n);var e=this;return n(function(n,i,s){function r(e){return t._(n,i,s)}return e._(n,i,r)})},t.then=function(t){var e=this;return n(function(i,r,o){function a(e,i){var a=t instanceof n?t:t(i);return s("a parser is returned",a instanceof n),a._(e,r,o)}return e._(i,a,o)})},t.many=function(){var t=this;return n(function(e,n,i){function s(t,n){return e=t,o.push(n),!0}function r(){return!1}for(var o=[];t._(e,s,r););return n(e,o)})},t.times=function(t,e){arguments.length<2&&(e=t);var i=this;return n(function(n,s,r){function o(t,e){return u.push(e),n=t,!0}function a(t,e){return c=e,n=t,!1}function l(t,e){return!1}var c,h,u=[],f=!0;for(h=0;h<t;h+=1)if(f=i._(n,o,a),!f)return r(n,c);for(;h<e&&f;h+=1)f=i._(n,o,l);return s(n,u)})},t.result=function(t){return this.then(a(t))},t.atMost=function(t){return this.times(0,t)},t.atLeast=function(t){var e=this;return e.times(t).then(function(t){return e.many().map(function(e){return t.concat(e)})})},t.map=function(t){return this.then(function(e){return a(t(e))})},t.skip=function(t){return this.then(function(e){return t.result(e)})},r=this.string=function(t){var e=t.length,i="expected '"+t+"'";return n(function(n,s,r){var o=n.slice(0,e);return o===t?s(n.slice(e),o):r(n,i)})},o=this.regex=function(t){s("regexp parser is anchored","^"===t.toString().charAt(1));var e="expected "+t;return n(function(n,i,s){var r,o=t.exec(n);return o?(r=o[0],i(n.slice(r.length),r)):s(n,e)})},a=n.succeed=function(t){return n(function(e,n){return n(e,t)})},l=n.fail=function(t){return n(function(e,n,i){return i(e,t)})},c=n.letter=o(/^[a-z]/i),h=n.letters=o(/^[a-z]*/i),u=n.digit=o(/^[0-9]/),f=n.digits=o(/^[0-9]*/),p=n.whitespace=o(/^\s+/),d=n.optWhitespace=o(/^\s*/),m=n.any=n(function(t,e,n){return t?e(t.slice(1),t.charAt(0)):n(t,"expected any character")}),g=n.all=n(function(t,e,n){return e("",t)}),b=n.eof=n(function(t,e,n){return t?n(t,"expected EOF"):e(t,t)})}),F=function(){function t(t){var e=H();return t.adopt(e,0,0),e}function e(t){var e,n=t[0]||H();for(e=1;e<t.length;e+=1)t[e].children().adopt(n,n.ends[x],0);return n}var n=B.string,i=B.regex,s=B.letter,r=B.any,o=B.optWhitespace,a=B.succeed,l=B.fail,c=s.map(function(t){return Tt(t)}),h=i(/^[^${}\\_^]/).map(function(t){return U(t)}),u=i(/^[^\\a-eg-zA-Z]/).or(n("\\").then(i(/^[a-z]+/i).or(i(/^\s+/).result(" ")).or(r))).then(function(t){var e=j[t];return e?e(t).parser():l("unknown command: \\"+t)}),f=u.or(c).or(h),p=n("{").then(function(){return m}).skip(n("}")),d=o.then(p.or(f.map(t))),m=d.many().map(e).skip(o),g=n("[").then(d.then(function(t){return"]"!==t.join("latex")?a(t):l()}).many().map(e).skip(o)).skip(n("]")),b=m;return b.block=d,b.optBlock=g,b}(),_.open(function(t,e){t.exportLatex=function(){return this.root.latex().replace(/(\\[a-z]+) (?![a-z])/gi,"$1")},t.writeLatex=function(t){var e,n=this.notify("edit").cursor,i=B.all,s=B.eof,r=F.skip(s).or(i.result(!1)).parse(t);return r&&!r.isEmpty()&&(r.children().adopt(n.parent,n[w],n[x]),e=r.jQize(),e.insertBefore(n.jQ),n[w]=r.ends[x],r.finalizeInsert(n.options,n),r.ends[x][x].siblingCreated&&r.ends[x][x].siblingCreated(n.options,w),r.ends[w][w].siblingCreated&&r.ends[w][w].siblingCreated(n.options,x),n.parent.bubble("reflow")),this},t.renderLatexMath=function(t){var e,n,i=this.root,s=this.cursor,r=B.all,o=B.eof,a=F.skip(o).or(r.result(!1)).parse(t);i.eachChild("postOrder","dispose"),i.ends[w]=i.ends[x]=0,a&&a.children().adopt(i,0,0),e=i.jQ,a?(n=a.join("html"),e.html(n),i.jQize(e.children()),i.finalizeInsert(s.options)):e.empty(),delete s.selection,s.insAtRightEnd(i)},t.renderLatexText=function(t){var e,n,i,s,r,o,a,l,c,h,u=this.root,f=this.cursor;if(u.jQ.children().slice(1).remove(),u.eachChild("postOrder","dispose"),u.ends[w]=u.ends[x]=0,delete f.selection,f.show().insAtRightEnd(u),e=B.regex,n=B.string,i=B.eof,s=B.all,r=n("$").then(F).skip(n("$").or(i)).map(function(t){var e,n=X(f);return n.createBlocks(),e=n.ends[w],t.children().adopt(e,0,0),n}),o=n("\\$").result("$"),a=o.or(e(/^[^$]/)).map(U),l=r.or(a).many(),c=l.skip(i).or(s.result(!1)).parse(t)){for(h=0;h<c.length;h+=1)c[h].adopt(u,u.ends[x],0);u.jQize().appendTo(u.jQ),u.finalizeInsert(f.options)}}}),_.open(function(t){t.focusBlurEvents=function(){function t(){clearTimeout(n),r.selection&&r.selection.jQ.addClass("mq-blur"),e()}function e(){r.hide().parent.blur(),i.container.removeClass("mq-focused"),q(window).off("blur",t)}var n,i=this,s=i.root,r=i.cursor;i.textarea.focus(function(){i.blurred=!1,clearTimeout(n),i.container.addClass("mq-focused"),r.parent||r.insAtRightEnd(s),r.selection?(r.selection.jQ.removeClass("mq-blur"),i.selectionChanged()):r.show()}).blur(function(){i.blurred=!0,n=setTimeout(function(){s.postOrder("intentionalBlur"),r.clearSelection().endSelection(),e()}),q(window).on("blur",t)}),i.blurred=!0,r.hide().parent.blur()}}),_.open(function(t,e){t.exportText=function(){return this.root.foldChildren("",function(t,e){return t+e.text()})}}),_.open(function(t){t.keystroke=function(t,e){this.cursor.parent.keystroke(t,e,this)}}),O.open(function(t){t.keystroke=function(t,e,n){var i=n.cursor;switch(t){case"Ctrl-Shift-Backspace":case"Ctrl-Backspace":n.ctrlDeleteDir(w);break;case"Shift-Backspace":case"Backspace":n.backspace();break;case"Esc":case"Tab":return void n.escapeDir(x,t,e);case"Shift-Tab":case"Shift-Esc":return void n.escapeDir(w,t,e);case"End":n.notify("move").cursor.insAtRightEnd(i.parent);break;case"Ctrl-End":n.notify("move").cursor.insAtRightEnd(n.root);break;case"Shift-End":for(;i[x];)n.selectRight();break;case"Ctrl-Shift-End":for(;i[x]||i.parent!==n.root;)n.selectRight();break;case"Home":n.notify("move").cursor.insAtLeftEnd(i.parent);break;case"Ctrl-Home":n.notify("move").cursor.insAtLeftEnd(n.root);break;case"Shift-Home":for(;i[w];)n.selectLeft();break;case"Ctrl-Shift-Home":for(;i[w]||i.parent!==n.root;)n.selectLeft();break;case"Left":n.moveLeft();break;case"Shift-Left":n.selectLeft();break;case"Ctrl-Left":break;case"Right":n.moveRight();break;case"Shift-Right":n.selectRight();break;case"Ctrl-Right":break;case"Up":n.moveUp();break;case"Down":n.moveDown();break;case"Shift-Up":if(i[w])for(;i[w];)n.selectLeft();else n.selectLeft();case"Shift-Down":if(i[x])for(;i[x];)n.selectRight();else n.selectRight();case"Ctrl-Up":break;case"Ctrl-Down":break;case"Ctrl-Shift-Del":case"Ctrl-Del":n.ctrlDeleteDir(x);break;case"Shift-Del":case"Del":n.deleteForward();break;case"Meta-A":case"Ctrl-A":for(n.notify("move").cursor.insAtRightEnd(n.root);i[w];)n.selectLeft();break;default:return}e.preventDefault(),n.scrollHoriz()},t.moveOutOf=t.moveTowards=t.deleteOutOf=t.deleteTowards=t.unselectInto=t.selectOutOf=t.selectTowards=function(){s("overridden or never called on this node")}}),_.open(function(t){function e(t,e){var n=t.notify("upDown").cursor,i=e+"Into",s=e+"OutOf";return n[x][i]?n.insAtLeftEnd(n[x][i]):n[w][i]?n.insAtRightEnd(n[w][i]):n.parent.bubble(function(t){var e=t[s];if(e&&("function"==typeof e&&(e=t[s](n)),e instanceof O&&n.jumpUpDown(t,e),e!==!0))return!1}),t}this.onNotify(function(t){"move"!==t&&"upDown"!==t||this.show().clearSelection()}),t.escapeDir=function(t,e,n){r(t);var i=this.cursor;if(i.parent!==this.root&&n.preventDefault(),i.parent!==this.root)return i.parent.moveOutOf(t,i),this.notify("move")},E.leftRightIntoCmdGoes=function(t){if(t&&"up"!==t&&"down"!==t)throw'"up" or "down" required for leftRightIntoCmdGoes option, got "'+t+'"';return t},t.moveDir=function(t){r(t);var e=this.cursor,n=e.options.leftRightIntoCmdGoes;return e.selection?e.insDirOf(t,e.selection.ends[t]):e[t]?e[t].moveTowards(t,e,n):e.parent.moveOutOf(t,e,n),this.notify("move")},t.moveLeft=function(){return this.moveDir(w)},t.moveRight=function(){return this.moveDir(x)},t.moveUp=function(){return e(this,"up")},t.moveDown=function(){return e(this,"down")},this.onNotify(function(t){"upDown"!==t&&(this.upDownCache={})}),this.onNotify(function(t){"edit"===t&&this.show().deleteSelection()}),t.deleteDir=function(t){var e,n;return r(t),e=this.cursor,n=e.selection,this.notify("edit"),n||(e[t]?e[t].deleteTowards(t,e):e.parent.deleteOutOf(t,e)),e[w].siblingDeleted&&e[w].siblingDeleted(e.options,x),e[x].siblingDeleted&&e[x].siblingDeleted(e.options,w),e.parent.bubble("reflow"),this},t.ctrlDeleteDir=function(t){r(t);var e=this.cursor;return!e[w]||e.selection?ctrlr.deleteDir():(this.notify("edit"),k(e.parent.ends[w],e[w]).remove(),e.insAtDirEnd(w,e.parent),e[w].siblingDeleted&&e[w].siblingDeleted(e.options,x),e[x].siblingDeleted&&e[x].siblingDeleted(e.options,w),e.parent.bubble("reflow"),this)},t.backspace=function(){return this.deleteDir(w)},t.deleteForward=function(){return this.deleteDir(x)},this.onNotify(function(t){"select"!==t&&this.endSelection()}),t.selectDir=function(t){var e,n=this.notify("select").cursor,i=n.selection;r(t),n.anticursor||n.startSelection(),e=n[t],e?i&&i.ends[t]===e&&n.anticursor[-t]!==e?e.unselectInto(t,n):e.selectTowards(t,n):n.parent.selectOutOf(t,n),n.clearSelection(),n.select()||n.show()},t.selectLeft=function(){return this.selectDir(w)},t.selectRight=function(){return this.selectDir(x)}}),_.open(function(t){S.p.substituteTextarea=function(){return q("<textarea autocapitalize=off autocomplete=off autocorrect=off spellcheck=false x-palm-disable-ste-all=true />")[0]},t.createTextarea=function(){var t,e=this.textareaSpan=q('<span class="mq-textarea"></span>'),n=this.options.substituteTextarea();if(!n.nodeType)throw"substituteTextarea() must return a DOM element, got "+n;n=this.textarea=q(n).appendTo(e),t=this,t.cursor.selectionChanged=function(){t.selectionChanged()},t.container.bind("copy",function(){t.setTextareaSelection()})},t.selectionChanged=function(){var t=this;tt(t.container[0]),t.textareaSelectionTimeout===m&&(t.textareaSelectionTimeout=setTimeout(function(){t.setTextareaSelection()}))},t.setTextareaSelection=function(){this.textareaSelectionTimeout=m;var t="";this.cursor.selection&&(t=this.cursor.selection.join("latex"),this.options.statelessClipboard&&(t="$"+t+"$")),this.selectFn(t)},t.staticMathTextareaEvents=function(){function t(){s.detach(),e.blurred=!0}var e=this,n=(e.root,e.cursor),i=e.textarea,s=e.textareaSpan;this.container.prepend('<span class="mq-selectable">$'+e.exportLatex()+"$</span>"),e.blurred=!0,i.bind("cut paste",!1).focus(function(){e.blurred=!1}).blur(function(){n.selection&&n.selection.clear(),setTimeout(t)}),e.selectFn=function(t){i.val(t),t&&i.select()}},t.editablesTextareaEvents=function(){var t=this,e=(t.root,t.cursor),n=t.textarea,i=t.textareaSpan,s=M(n,this);this.selectFn=function(t){s.select(t)},this.container.prepend(i).on("cut",function(n){e.selection&&setTimeout(function(){t.notify("edit"),e.parent.bubble("reflow")})}),this.focusBlurEvents()},t.typedText=function(t){if("\n"===t)return this.handle("enter");var e=this.notify().cursor;e.parent.write(e,t),this.scrollHoriz()},t.paste=function(t){this.options.statelessClipboard&&(t="$"===t.slice(0,1)&&"$"===t.slice(-1)?t.slice(1,-1):"\\text{"+t+"}"),this.writeLatex(t).cursor.show()}}),_.open(function(e){S.p.ignoreNextMousedown=t,e.delegateMouseEvents=function(){var e=this.root.jQ;this.container.bind("mousedown.mathquill",function(n){function i(t){o=q(t.target)}function s(t){h.anticursor||h.startSelection(),c.seek(o,t.pageX,t.pageY).cursor.select(),o=m}function r(t){h.blink=u,h.selection||(c.editable?h.show():f.detach()),a.unbind("mousemove",i),q(t.target.ownerDocument).unbind("mousemove",s).unbind("mouseup",r)}var o,a=q(n.target).closest(".mq-root-block"),l=O.byId[a.attr(Ut)||e.attr(Ut)],c=l.controller,h=c.cursor,u=h.blink,f=c.textareaSpan,p=c.textarea;n.preventDefault(),n.target.unselectable=!0,h.options.ignoreNextMousedown(n)||(h.options.ignoreNextMousedown=t,c.blurred&&(c.editable||a.prepend(f),p.focus()),h.blink=t,c.seek(q(n.target),n.pageX,n.pageY).cursor.startSelection(),a.mousemove(i),q(n.target.ownerDocument).mousemove(s).mouseup(r))})}}),_.open(function(t){t.seek=function(t,e,n){var i,r,o,a=this.notify("select").cursor;return t&&(i=t.attr(Ut)||t.attr(Pt),i||(r=t.parent(),i=r.attr(Ut)||r.attr(Pt))),o=i?O.byId[i]:this.root,s("nodeId is the id of some Node that exists",o),a.clearSelection().show(),o.seek(e,a),this.scrollHoriz(),this}}),_.open(function(t){t.scrollHoriz=function(){var t,e,n,i,s,r=this.cursor,o=r.selection,a=this.root.jQ[0].getBoundingClientRect();if(o)if(n=o.jQ[0].getBoundingClientRect(),i=n.left-(a.left+20),s=n.right-(a.right-20),o.ends[w]===r[x])if(i<0)e=i;else{if(!(s>0))return;e=n.left-s<a.left+20?i:s}else if(s>0)e=s;else{if(!(i<0))return;e=n.right-i>a.right-20?s:i}else if(t=r.jQ[0].getBoundingClientRect().left,t>a.right-20)e=t-(a.right-20);else{if(!(t<a.left+20))return;e=t-(a.left+20)}this.root.jQ.stop().animate({scrollLeft:"+="+e},100)}}),$=v(O,function(t,e){t.finalizeInsert=function(t,e){var n=this;n.postOrder("finalizeTree",t),n.postOrder("contactWeld",e),n.postOrder("blur"),n.postOrder("reflow"),n[x].siblingCreated&&n[x].siblingCreated(t,w),n[w].siblingCreated&&n[w].siblingCreated(t,x),n.bubble("reflow")}}),N=v($,function(t,e){t.init=function(t,n,i){var s=this;e.init.call(s),s.ctrlSeq||(s.ctrlSeq=t),n&&(s.htmlTemplate=n),i&&(s.textTemplate=i)},t.replaces=function(t){t.disown(),this.replacedFragment=t},t.isEmpty=function(){return this.foldChildren(!0,function(t,e){return t&&e.isEmpty()})},t.parser=function(){var t=F.block,e=this;return t.times(e.numBlocks()).map(function(t){e.blocks=t;for(var n=0;n<t.length;n+=1)t[n].adopt(e,e.ends[x],0);return e})},t.createLeftOf=function(t){var n=this,i=n.replacedFragment;n.createBlocks(),e.createLeftOf.call(n,t),i&&(i.adopt(n.ends[w],0,0),i.jQ.appendTo(n.ends[w].jQ)),n.finalizeInsert(t.options),n.placeCursor(t)},t.createBlocks=function(){var t,e,n=this,i=n.numBlocks(),s=n.blocks=Array(i);for(t=0;t<i;t+=1)e=s[t]=H(),e.adopt(n,n.ends[x],0)},t.placeCursor=function(t){t.insAtRightEnd(this.foldChildren(this.ends[w],function(t,e){return t.isEmpty()?t:e}))},t.moveTowards=function(t,e,n){var i=n&&this[n+"Into"];e.insAtDirEnd(-t,i||this.ends[-t])},t.deleteTowards=function(t,e){this.isEmpty()?e[t]=this.remove()[t]:this.moveTowards(t,e,null)},t.selectTowards=function(t,e){e[-t]=this,e[t]=this[t]},t.selectChildren=function(){return C(this,this)},t.unselectInto=function(t,e){e.insAtDirEnd(-t,e.anticursor.ancestors[this.id])},t.seek=function(t,e){function n(t){var e={};return e[w]=t.jQ.offset().left,e[x]=e[w]+t.jQ.outerWidth(),e}var i,s=this,r=n(s);return t<r[w]?e.insLeftOf(s):t>r[x]?e.insRightOf(s):(i=r[w],void s.eachChild(function(o){var a=n(o);return t<a[w]?(t-i<a[w]-t?o[w]?e.insAtRightEnd(o[w]):e.insLeftOf(s):e.insAtLeftEnd(o),!1):t>a[x]?void(o[x]?i=a[x]:r[x]-t<t-a[x]?e.insRightOf(s):e.insAtRightEnd(o)):(o.seek(t,e),!1)}))},t.numBlocks=function(){var t=this.htmlTemplate.match(/&\d+/g);return t?t.length:0},t.html=function(){var t,e,n,i=this,r=i.blocks,o=" mathquill-command-id="+i.id,a=i.htmlTemplate.match(/<[^<>]+>|[^<>]+/g);for(s("no unmatched angle brackets",a.join("")===this.htmlTemplate),
-t=0,e=a[0];e;t+=1,e=a[t])if("/>"===e.slice(-2))a[t]=e.slice(0,-2)+o+"/>";else if("<"===e.charAt(0)){s("not an unmatched top-level close tag","/"!==e.charAt(1)),a[t]=e.slice(0,-1)+o+">",n=1;do t+=1,e=a[t],s("no missing close tags",e),"</"===e.slice(0,2)?n-=1:"<"===e.charAt(0)&&"/>"!==e.slice(-2)&&(n+=1);while(n>0)}return a.join("").replace(/>&(\d+)/g,function(t,e){return" mathquill-block-id="+r[e].id+">"+r[e].join("html")})},t.latex=function(){return this.foldChildren(this.ctrlSeq,function(t,e){return t+"{"+(e.latex()||" ")+"}"})},t.textTemplate=[""],t.text=function(){var t=this,e=0;return t.foldChildren(t.textTemplate[e],function(n,i){e+=1;var s=i.text();return n&&"("===t.textTemplate[e]&&"("===s[0]&&")"===s.slice(-1)?n+s.slice(1,-1)+t.textTemplate[e]:n+i.text()+(t.textTemplate[e]||"")})}}),P=v(N,function(e,n){e.init=function(t,e,i){i||(i=t&&t.length>1?t.slice(1):t),n.init.call(this,t,e,[i])},e.parser=function(){return B.succeed(this)},e.numBlocks=function(){return 0},e.replaces=function(t){t.remove()},e.createBlocks=t,e.moveTowards=function(t,e){e.jQ.insDirOf(t,this.jQ),e[-t]=this,e[t]=this[t]},e.deleteTowards=function(t,e){e[t]=this.remove()[t]},e.seek=function(t,e){t-this.jQ.offset().left<this.jQ.outerWidth()/2?e.insLeftOf(this):e.insRightOf(this)},e.latex=function(){return this.ctrlSeq},e.text=function(){return this.textTemplate},e.placeCursor=t,e.isEmpty=function(){return!0}}),U=v(P,function(t,e){t.init=function(t,n){e.init.call(this,t,"<span>"+(n||t)+"</span>")}}),W=v(P,function(t,e){t.init=function(t,n,i){e.init.call(this,t,'<span class="mq-binary-operator">'+n+"</span>",i)}}),H=v($,function(t,e){t.join=function(t){return this.foldChildren("",function(e,n){return e+n[t]()})},t.html=function(){return this.join("html")},t.latex=function(){return this.join("latex")},t.text=function(){return this.ends[w]===this.ends[x]&&0!==this.ends[w]?this.ends[w].text():this.join("text")},t.keystroke=function(t,n,i){return!i.options.spaceBehavesLikeTab||"Spacebar"!==t&&"Shift-Spacebar"!==t?e.keystroke.apply(this,arguments):(n.preventDefault(),void i.escapeDir("Shift-Spacebar"===t?w:x,t,n))},t.moveOutOf=function(t,e,n){var i=n&&this.parent[n+"Into"];!i&&this[t]?e.insAtDirEnd(-t,this[t]):e.insDirOf(t,this.parent)},t.selectOutOf=function(t,e){e.insDirOf(t,this.parent)},t.deleteOutOf=function(t,e){e.unwrapGramp()},t.seek=function(t,e){var n=this.ends[x];if(!n||n.jQ.offset().left+n.jQ.outerWidth()<t)return e.insAtRightEnd(this);if(t<this.ends[w].jQ.offset().left)return e.insAtLeftEnd(this);for(;t<n.jQ.offset().left;)n=n[w];return n.seek(t,e)},t.chToCmd=function(t){var e;return t.match(/^[a-eg-zA-Z]$/)?Tt(t):/^\d$/.test(t)?jt(t):(e=Q[t]||j[t])?e(t):U(t)},t.write=function(t,e){var n=this.chToCmd(e);t.selection&&n.replaces(t.replaceSelection()),n.createLeftOf(t.show())},t.focus=function(){return this.jQ.addClass("mq-hasCursor"),this.jQ.removeClass("mq-empty"),this},t.blur=function(){return this.jQ.removeClass("mq-hasCursor"),this.isEmpty()&&this.jQ.addClass("mq-empty"),this}}),D.StaticMath=function(t){return v(t.AbstractMathQuill,function(e,n){this.RootBlock=H,e.__mathquillify=function(){return n.__mathquillify.call(this,"mq-math-mode"),this.__controller.delegateMouseEvents(),this.__controller.staticMathTextareaEvents(),this},e.init=function(){n.init.apply(this,arguments),this.__controller.root.postOrder("registerInnerField",this.innerFields=[],t.MathField)},e.latex=function(){var e=n.latex.apply(this,arguments);return arguments.length>0&&this.__controller.root.postOrder("registerInnerField",this.innerFields=[],t.MathField),e}})},G=v(H,h),D.MathField=function(e){return v(e.EditableField,function(e,n){this.RootBlock=G,e.__mathquillify=function(e,i){return this.config(e),i>1&&(this.__controller.root.reflow=t),n.__mathquillify.call(this,"mq-editable-field mq-math-mode"),delete this.__controller.root.reflow,this}})},K=v(O,function(t,e){function n(t){var e,n;if(t.jQ[0].normalize(),e=t.jQ[0].firstChild)return s("only node in TextBlock span is Text node",3===e.nodeType),n=Y(e.data),n.jQadd(e),t.children().disown(),n.adopt(t,0,0)}t.ctrlSeq="\\text",t.replaces=function(t){t instanceof k?this.replacedText=t.remove().jQ.text():"string"==typeof t&&(this.replacedText=t)},t.jQadd=function(t){e.jQadd.call(this,t),this.ends[w]&&this.ends[w].jQadd(this.jQ[0].firstChild)},t.createLeftOf=function(t){var n,i=this;if(e.createLeftOf.call(this,t),i[x].siblingCreated&&i[x].siblingCreated(t.options,w),i[w].siblingCreated&&i[w].siblingCreated(t.options,x),i.bubble("reflow"),t.insAtRightEnd(i),i.replacedText)for(n=0;n<i.replacedText.length;n+=1)i.write(t,i.replacedText.charAt(n))},t.parser=function(){var t=this,e=B.string,n=B.regex,i=B.optWhitespace;return i.then(e("{")).then(n(/^[^}]*/)).skip(e("}")).map(function(e){return 0===e.length?k():(Y(e).adopt(t,0,0),t)})},t.textContents=function(){return this.foldChildren("",function(t,e){return t+e.text})},t.text=function(){return'"'+this.textContents()+'"'},t.latex=function(){var t=this.textContents();return 0===t.length?"":"\\text{"+t+"}"},t.html=function(){return'<span class="mq-text-mode" mathquill-command-id='+this.id+">"+this.textContents()+"</span>"},t.moveTowards=function(t,e){e.insAtDirEnd(-t,this)},t.moveOutOf=function(t,e){e.insDirOf(t,this)},t.unselectInto=t.moveTowards,t.selectTowards=N.prototype.selectTowards,t.deleteTowards=N.prototype.deleteTowards,t.selectOutOf=function(t,e){e.insDirOf(t,this)},t.deleteOutOf=function(t,e){this.isEmpty()&&e.insRightOf(this)},t.write=function(t,n){var i,s;t.show().deleteSelection(),"$"!==n?t[w]?t[w].appendText(n):Y(n).createLeftOf(t):this.isEmpty()?(t.insRightOf(this),U("\\$","$").createLeftOf(t)):t[x]?t[w]?(i=K(),s=this.ends[w],s.disown().jQ.detach(),s.adopt(i,0,0),t.insLeftOf(this),e.createLeftOf.call(i,t)):t.insLeftOf(this):t.insRightOf(this)},t.seek=function(t,e){var i,s,r,o,a,l,c,h;for(e.hide(),i=n(this),s=this.jQ.width()/this.text.length,r=Math.round((t-this.jQ.offset().left)/s),r<=0?e.insAtLeftEnd(this):r>=i.text.length?e.insAtRightEnd(this):e.insLeftOf(i.splitRight(r)),o=t-e.show().offset().left,a=o&&o<0?w:x,l=a;e[a]&&o*l>0;)e[a].moveTowards(a,e),l=o,o=t-e.offset().left;a*o<-a*l&&e[-a].moveTowards(-a,e),e.anticursor?e.anticursor.parent===this&&(c=e[w]&&e[w].text.length,this.anticursorPosition===c?e.anticursor=y.copy(e):(this.anticursorPosition<c?(h=e[w].splitRight(this.anticursorPosition),e[w]=h):h=e[x].splitRight(this.anticursorPosition-c),e.anticursor=y(this,h[w],h))):this.anticursorPosition=e[w]&&e[w].text.length},t.blur=function(t){H.prototype.blur.call(this),t&&(""===this.textContents()?(this.remove(),t[w]===this?t[w]=this[w]:t[x]===this&&(t[x]=this[x])):n(this))},t.focus=H.prototype.focus}),Y=v(O,function(t,e){function n(t,e){return e.charAt(t===w?0:-1+e.length)}t.init=function(t){e.init.call(this),this.text=t},t.jQadd=function(t){this.dom=t,this.jQ=q(t)},t.jQize=function(){return this.jQadd(document.createTextNode(this.text))},t.appendText=function(t){this.text+=t,this.dom.appendData(t)},t.prependText=function(t){this.text=t+this.text,this.dom.insertData(0,t)},t.insTextAtDirEnd=function(t,e){r(e),e===x?this.appendText(t):this.prependText(t)},t.splitRight=function(t){var e=Y(this.text.slice(t)).adopt(this.parent,this,this[x]);return e.jQadd(this.dom.splitText(t)),this.text=this.text.slice(0,t),e},t.moveTowards=function(t,e){var i,s;return r(t),i=n(-t,this.text),s=this[-t],s?s.insTextAtDirEnd(i,t):Y(i).createDir(-t,e),this.deleteTowards(t,e)},t.latex=function(){return this.text},t.deleteTowards=function(t,e){this.text.length>1?t===x?(this.dom.deleteData(0,1),this.text=this.text.slice(1)):(this.dom.deleteData(-1+this.text.length,1),this.text=this.text.slice(0,-1)):(this.remove(),this.jQ.remove(),e[t]=this[t])},t.selectTowards=function(t,e){var i,s,o,a;return r(t),i=e.anticursor,s=n(-t,this.text),i[t]===this?(o=Y(s).createDir(t,e),i[t]=o,e.insDirOf(t,o)):(a=this[-t],a?a.insTextAtDirEnd(s,t):(o=Y(s).createDir(-t,e),o.jQ.insDirOf(-t,e.selection.jQ)),1===this.text.length&&i[-t]===this&&(i[-t]=this[-t])),this.deleteTowards(t,e)}}),j.text=j.textnormal=j.textrm=j.textup=j.textmd=K,j.em=j.italic=j.italics=j.emph=j.textit=j.textsl=u("\\textit","i",'class="mq-text-mode"'),j.strong=j.bold=j.textbf=u("\\textbf","b",'class="mq-text-mode"'),j.sf=j.textsf=u("\\textsf","span",'class="mq-sans-serif mq-text-mode"'),j.tt=j.texttt=u("\\texttt","span",'class="mq-monospace mq-text-mode"'),j.textsc=u("\\textsc","span",'style="font-variant:small-caps" class="mq-text-mode"'),j.uppercase=u("\\uppercase","span",'style="text-transform:uppercase" class="mq-text-mode"'),j.lowercase=u("\\lowercase","span",'style="text-transform:lowercase" class="mq-text-mode"'),X=v(N,function(t,e){t.init=function(t){e.init.call(this,"$"),this.cursor=t},t.htmlTemplate='<span class="mq-math-mode">&0</span>',t.createBlocks=function(){e.createBlocks.call(this),this.ends[w].cursor=this.cursor,this.ends[w].write=function(t,e){"$"!==e?H.prototype.write.call(this,t,e):this.isEmpty()?(t.insRightOf(this.parent),this.parent.deleteTowards(dir,t),U("\\$","$").createLeftOf(t.show())):t[x]?t[w]?H.prototype.write.call(this,t,e):t.insLeftOf(this.parent):t.insRightOf(this.parent)}},t.latex=function(){return"$"+this.ends[w].latex()+"$"}}),V=v(G,function(t,e){t.keystroke=function(t){if("Spacebar"!==t&&"Shift-Spacebar"!==t)return e.keystroke.apply(this,arguments)},t.write=function(t,e){if(t.show().deleteSelection(),"$"===e)X(t).createLeftOf(t);else{var n;"<"===e?n="&lt;":">"===e&&(n="&gt;"),U(e,n).createLeftOf(t)}}}),D.TextField=function(t){return v(t.EditableField,function(t,e){this.RootBlock=V,t.__mathquillify=function(){return e.__mathquillify.call(this,"mq-editable-field mq-text-mode")},t.latex=function(t){return arguments.length>0?(this.__controller.renderLatexText(t),this.__controller.blurred&&this.__controller.cursor.hide().parent.blur(),this):this.__controller.exportLatex()}})},Z=Q["\\"]=v(N,function(t,e){t.ctrlSeq="\\",t.replaces=function(t){this._replacedFragment=t.disown(),this.isEmpty=function(){return!1}},t.htmlTemplate='<span class="mq-latex-command-input mq-non-leaf">\\<span>&0</span></span>',t.textTemplate=["\\"],t.createBlocks=function(){e.createBlocks.call(this),this.ends[w].focus=function(){return this.parent.jQ.addClass("mq-hasCursor"),this.isEmpty()&&this.parent.jQ.removeClass("mq-empty"),this},this.ends[w].blur=function(){return this.parent.jQ.removeClass("mq-hasCursor"),this.isEmpty()&&this.parent.jQ.addClass("mq-empty"),this},this.ends[w].write=function(t,e){t.show().deleteSelection(),e.match(/[a-z]/i)?U(e).createLeftOf(t):(this.parent.renderCommand(t),"\\"===e&&this.isEmpty()||this.parent.parent.write(t,e))},this.ends[w].keystroke=function(t,n,i){return"Tab"===t||"Enter"===t||"Spacebar"===t?(this.parent.renderCommand(i.cursor),void n.preventDefault()):e.keystroke.apply(this,arguments)}},t.createLeftOf=function(t){if(e.createLeftOf.call(this,t),this._replacedFragment){var n=this.jQ[0];this.jQ=this._replacedFragment.jQ.addClass("mq-blur").bind("mousedown mousemove",function(t){return q(t.target=n).trigger(t),!1}).insertBefore(this.jQ).add(this.jQ)}},t.latex=function(){return"\\"+this.ends[w].latex()+" "},t.renderCommand=function(t){var e,n;this.jQ=this.jQ.last(),this.remove(),this[x]?t.insLeftOf(this[x]):t.insAtRightEnd(this.parent),e=this.ends[w].latex(),e||(e=" "),n=j[e]||qt[e],n?(n=n(e),this._replacedFragment&&n.replaces(this._replacedFragment),n.createLeftOf(t)):(n=K(),n.replaces(e),n.createLeftOf(t),t.insRightOf(n),this._replacedFragment&&this._replacedFragment.remove())}}),tt=t,et=document.createElement("div"),nt=et.style,it={transform:1,WebkitTransform:1,MozTransform:1,OTransform:1,msTransform:1};for(rt in it)if(rt in nt){st=rt;break}st?J=function(t,e,n){t.css(st,"scale("+e+","+n+")")}:"filter"in nt?(tt=function(t){t.className=t.className},J=function(t,e,n){function i(){t.css("marginRight",(s.width()-1)*(e-1)/e+"px")}var s,r;e/=1+(n-1)/2,t.css("fontSize",n+"em"),t.hasClass("mq-matrixed-container")||t.addClass("mq-matrixed-container").wrapInner('<span class="mq-matrixed"></span>'),s=t.children().css("filter","progid:DXImageTransform.Microsoft.Matrix(M11="+e+",SizingMethod='auto expand')"),i(),r=setInterval(i),q(window).load(function(){clearTimeout(r),i()})}):J=function(t,e,n){t.css("fontSize",n+"em")},ot=v(N,function(t,e){t.init=function(t,n,i){e.init.call(this,t,"<"+n+" "+i+">&0</"+n+">")}}),j.mathrm=i(ot,"\\mathrm","span",'class="mq-roman mq-font"'),j.mathit=i(ot,"\\mathit","i",'class="mq-font"'),j.mathbf=i(ot,"\\mathbf","b",'class="mq-font"'),j.mathsf=i(ot,"\\mathsf","span",'class="mq-sans-serif mq-font"'),j.mathtt=i(ot,"\\mathtt","span",'class="mq-monospace mq-font"'),j.underline=i(ot,"\\underline","span",'class="mq-non-leaf mq-underline"'),j.overline=j.bar=i(ot,"\\overline","span",'class="mq-non-leaf mq-overline"'),j.overrightarrow=i(ot,"\\overrightarrow","span",'class="mq-non-leaf mq-overarrow mq-arrow-right"'),j.overleftarrow=i(ot,"\\overleftarrow","span",'class="mq-non-leaf mq-overarrow mq-arrow-left"'),at=j.textcolor=v(N,function(t,e){t.setColor=function(t){this.color=t,this.htmlTemplate='<span class="mq-textcolor" style="color:'+t+'">&0</span>'},t.latex=function(){return"\\textcolor{"+this.color+"}{"+this.blocks[0].latex()+"}"},t.parser=function(){var t=this,n=B.optWhitespace,i=B.string,s=B.regex;return n.then(i("{")).then(s(/^[#\w\s.,()%-]*/)).skip(i("}")).then(function(n){return t.setColor(n),e.parser.call(t)})}}),lt=j.class=v(N,function(t,e){t.parser=function(){var t=this,n=B.string,i=B.regex;return B.optWhitespace.then(n("{")).then(i(/^[-\w\s\\\xA0-\xFF]*/)).skip(n("}")).then(function(n){return t.htmlTemplate='<span class="mq-class '+n+'">&0</span>',e.parser.call(t)})}}),ct=v(N,function(t,e){t.ctrlSeq="_{...}^{...}",t.createLeftOf=function(t){if(this.replacedFragment||t[w]||!t.options.supSubsRequireOperand)return e.createLeftOf.apply(this,arguments)},t.contactWeld=function(t){var e,n,i,s,r,o;for(e=w;e;e=e===w&&x)if(this[e]instanceof ct){for(n="sub";n;n="sub"===n&&"sup")i=this[n],s=this[e][n],i&&(s?i.isEmpty()?o=y(s,0,s.ends[w]):(i.jQ.children().insAtDirEnd(-e,s.jQ),r=i.children().disown(),o=y(s,r.ends[x],s.ends[w]),e===w?r.adopt(s,s.ends[x],0):r.adopt(s,0,s.ends[w])):this[e].addBlock(i.disown()),this.placeCursor=function(t,n){return function(i){i.insAtDirEnd(-e,t||n)}}(s,i));this.remove(),t&&t[w]===this&&(e===x&&o?o[w]?t.insRightOf(o[w]):t.insAtLeftEnd(o.parent):t.insRightOf(this[e]));break}},S.p.charsThatBreakOutOfSupSub="",t.finalizeTree=function(){this.ends[w].write=function(t,e){if(t.options.autoSubscriptNumerals&&this===this.parent.sub){if("_"===e)return;var n=this.chToCmd(e);return n instanceof P?t.deleteSelection():t.clearSelection().insRightOf(this.parent),n.createLeftOf(t.show())}t[w]&&!t[x]&&!t.selection&&t.options.charsThatBreakOutOfSupSub.indexOf(e)>-1&&t.insRightOf(this.parent),H.p.write.apply(this,arguments)}},t.moveTowards=function(t,n,i){n.options.autoSubscriptNumerals&&!this.sup?n.insDirOf(t,this):e.moveTowards.apply(this,arguments)},t.deleteTowards=function(t,n){if(n.options.autoSubscriptNumerals&&this.sub){var i=this.sub.ends[-t];i instanceof P?i.remove():i&&i.deleteTowards(t,n.insAtDirEnd(-t,this.sub)),this.sub.isEmpty()&&(this.sub.deleteOutOf(w,n.insAtLeftEnd(this.sub)),this.sup&&n.insDirOf(-t,this))}else e.deleteTowards.apply(this,arguments)},t.latex=function(){function t(t,e){var n=e&&e.latex();return e?t+(1===n.length?n:"{"+(n||" ")+"}"):""}return t("_",this.sub)+t("^",this.sup)},t.addBlock=function(t){"sub"===this.supsub?(this.sup=this.upInto=this.sub.upOutOf=t,t.adopt(this,this.sub,0).downOutOf=this.sub,t.jQ=q('<span class="mq-sup"/>').append(t.jQ.children()).attr(Ut,t.id).prependTo(this.jQ)):(this.sub=this.downInto=this.sup.downOutOf=t,t.adopt(this,0,this.sup).upOutOf=this.sup,t.jQ=q('<span class="mq-sub"></span>').append(t.jQ.children()).attr(Ut,t.id).appendTo(this.jQ.removeClass("mq-sup-only")),this.jQ.append('<span style="display:inline-block;width:0">&#8203;</span>'));for(var e=0;e<2;e+=1)(function(t,e,n,i){t[e].deleteOutOf=function(s,r){if(r.insDirOf(this[s]?-s:s,this.parent),!this.isEmpty()){var o=this.ends[s];this.children().disown().withDirAdopt(s,r.parent,r[s],r[-s]).jQ.insDirOf(-s,r.jQ),r[-s]=o}t.supsub=n,delete t[e],delete t[i+"Into"],t[n][i+"OutOf"]=f,delete t[n].deleteOutOf,"sub"===e&&q(t.jQ.addClass("mq-sup-only")[0].lastChild).remove(),this.remove()}})(this,"sub sup".split(" ")[e],"sup sub".split(" ")[e],"down up".split(" ")[e])}}),j.subscript=j._=v(ct,function(t,e){t.supsub="sub",t.htmlTemplate='<span class="mq-supsub mq-non-leaf"><span class="mq-sub">&0</span><span style="display:inline-block;width:0">&#8203;</span></span>',t.textTemplate=["_"],t.finalizeTree=function(){this.downInto=this.sub=this.ends[w],this.sub.upOutOf=f,e.finalizeTree.call(this)}}),j.superscript=j.supscript=j["^"]=v(ct,function(t,e){t.supsub="sup",t.htmlTemplate='<span class="mq-supsub mq-non-leaf mq-sup-only"><span class="mq-sup">&0</span></span>',t.textTemplate=["^"],t.finalizeTree=function(){this.upInto=this.sup=this.ends[x],this.sup.downOutOf=f,e.finalizeTree.call(this)}}),ht=v(N,function(t,e){t.init=function(t,e){var n='<span class="mq-large-operator mq-non-leaf"><span class="mq-to"><span>&1</span></span><big>'+e+'</big><span class="mq-from"><span>&0</span></span></span>';P.prototype.init.call(this,t,n)},t.createLeftOf=function(t){e.createLeftOf.apply(this,arguments),t.options.sumStartsWithNEquals&&(Tt("n").createLeftOf(t),Bt().createLeftOf(t))},t.latex=function(){function t(t){return 1===t.length?t:"{"+(t||" ")+"}"}return this.ctrlSeq+"_"+t(this.ends[w].latex())+"^"+t(this.ends[x].latex())},t.parser=function(){var t,e=B.string,n=B.optWhitespace,i=B.succeed,s=F.block,r=this,o=r.blocks=[H(),H()];for(t=0;t<o.length;t+=1)o[t].adopt(r,r.ends[x],0);return n.then(e("_").or(e("^"))).then(function(t){var e=o["_"===t?0:1];return s.then(function(t){return t.children().adopt(e,e.ends[x],0),i(r)})}).many().result(r)},t.finalizeTree=function(){this.downInto=this.ends[w],this.upInto=this.ends[x],this.ends[w].upOutOf=this.ends[x],this.ends[x].downOutOf=this.ends[w]}}),j["∑"]=j.sum=j.summation=i(ht,"\\sum ","&sum;"),j["∏"]=j.prod=j.product=i(ht,"\\prod ","&prod;"),j.coprod=j.coproduct=i(ht,"\\coprod ","&#8720;"),j["∫"]=j.int=j.integral=v(ht,function(t,e){t.init=function(){var t='<span class="mq-int mq-non-leaf"><big>&int;</big><span class="mq-supsub mq-non-leaf"><span class="mq-sup"><span class="mq-sup-inner">&1</span></span><span class="mq-sub">&0</span><span style="display:inline-block;width:0">&#8203</span></span></span>';P.prototype.init.call(this,"\\int ",t)},t.createLeftOf=N.p.createLeftOf}),ut=j.frac=j.dfrac=j.cfrac=j.fraction=v(N,function(t,e){t.ctrlSeq="\\frac",t.htmlTemplate='<span class="mq-fraction mq-non-leaf"><span class="mq-numerator">&0</span><span class="mq-denominator">&1</span><span style="display:inline-block;width:0">&#8203;</span></span>',t.textTemplate=["(",")/(",")"],t.finalizeTree=function(){this.upInto=this.ends[x].upOutOf=this.ends[w],this.downInto=this.ends[w].downOutOf=this.ends[x]}}),ft=j.over=Q["/"]=v(ut,function(e,n){e.createLeftOf=function(e){if(!this.replacedFragment){for(var i=e[w];i&&!(i instanceof W||i instanceof(j.text||t)||i instanceof ht||"\\ "===i.ctrlSeq||/^[,;:]$/.test(i.ctrlSeq));)i=i[w];i instanceof ht&&i[x]instanceof ct&&(i=i[x],i[x]instanceof ct&&i[x].ctrlSeq!=i.ctrlSeq&&(i=i[x])),i!==e[w]&&(this.replaces(k(i[x]||e.parent.ends[w],e[w])),e[w]=i)}n.createLeftOf.call(this,e)}}),pt=j.sqrt=j["√"]=v(N,function(t,e){t.ctrlSeq="\\sqrt",t.htmlTemplate='<span class="mq-non-leaf"><span class="mq-scaled mq-sqrt-prefix">&radic;</span><span class="mq-non-leaf mq-sqrt-stem">&0</span></span>',t.textTemplate=["sqrt(",")"],t.parser=function(){return F.optBlock.then(function(t){return F.block.map(function(e){var n=mt();return n.blocks=[t,e],t.adopt(n,0,0),e.adopt(n,t,0),n})}).or(e.parser.call(this))},t.reflow=function(){var t=this.ends[x].jQ;J(t.prev(),1,t.innerHeight()/+t.css("fontSize").slice(0,-2)-.1)}}),dt=j.vec=v(N,function(t,e){t.ctrlSeq="\\vec",t.htmlTemplate='<span class="mq-non-leaf"><span class="mq-vector-prefix">&rarr;</span><span class="mq-vector-stem">&0</span></span>',t.textTemplate=["vec(",")"]}),mt=j.nthroot=v(pt,function(t,e){t.htmlTemplate='<sup class="mq-nthroot mq-non-leaf">&0</sup><span class="mq-scaled"><span class="mq-sqrt-prefix mq-scaled">&radic;</span><span class="mq-sqrt-stem mq-non-leaf">&1</span></span>',t.textTemplate=["sqrt[","](",")"],t.latex=function(){return"\\sqrt["+this.ends[w].latex()+"]{"+this.ends[x].latex()+"}"}}),gt=v(v(N,p),function(e,n){e.init=function(t,e,i,s,r){n.init.call(this,"\\left"+s,m,[e,i]),this.side=t,this.sides={},this.sides[w]={ch:e,ctrlSeq:s},this.sides[x]={ch:i,ctrlSeq:r}},e.numBlocks=function(){return 1},e.html=function(){return this.htmlTemplate='<span class="mq-non-leaf"><span class="mq-scaled mq-paren'+(this.side===x?" mq-ghost":"")+'">'+this.sides[w].ch+'</span><span class="mq-non-leaf">&0</span><span class="mq-scaled mq-paren'+(this.side===w?" mq-ghost":"")+'">'+this.sides[x].ch+"</span></span>",n.html.call(this)},e.latex=function(){return"\\left"+this.sides[w].ctrlSeq+this.ends[w].latex()+"\\right"+this.sides[x].ctrlSeq},e.oppBrack=function(t,e,n){return e instanceof gt&&e.side&&e.side!==-n&&("|"===this.sides[this.side].ch||e.side===-this.side)&&(!t.restrictMismatchedBrackets||bt[this.sides[this.side].ch]===e.sides[e.side].ch||{"(":"]","[":")"}[this.sides[w].ch]===e.sides[x].ch)&&e},e.closeOpposing=function(t){t.side=0,t.sides[this.side]=this.sides[this.side],t.delimjQs.eq(this.side===w?0:1).removeClass("mq-ghost").html(this.sides[this.side].ch)},e.createLeftOf=function(t){var e,i,s;this.replacedFragment||(e=t.options,i=this.oppBrack(e,t[w],w)||this.oppBrack(e,t[x],x)||this.oppBrack(e,t.parent.parent)),i?(s=this.side=-i.side,this.closeOpposing(i),i===t.parent.parent&&t[s]&&(k(t[s],t.parent.ends[s],-s).disown().withDirAdopt(-s,i.parent,i,i[s]).jQ.insDirOf(s,i.jQ),i.bubble("reflow"))):(i=this,s=i.side,i.replacedFragment?i.side=0:t[-s]&&(i.replaces(k(t[-s],t.parent.ends[-s],s)),t[-s]=0),n.createLeftOf.call(i,t)),s===w?t.insAtLeftEnd(i.ends[w]):t.insRightOf(i)},e.placeCursor=t,e.unwrap=function(){this.ends[w].children().disown().adopt(this.parent,this,this[x]).jQ.insertAfter(this.jQ),this.remove()},e.deleteSide=function(t,e,n){var i,s,r,o=this.parent,a=this[t],l=o.ends[t];if(t===this.side)return this.unwrap(),void(a?n.insDirOf(-t,a):n.insAtDirEnd(t,o));if(i=n.options,s=!this.side,this.side=-t,this.oppBrack(i,this.ends[w].ends[this.side],t))this.closeOpposing(this.ends[w].ends[this.side]),r=this.ends[w].ends[t],this.unwrap(),r.siblingCreated&&r.siblingCreated(n.options,t),a?n.insDirOf(-t,a):n.insAtDirEnd(t,o);else{if(this.oppBrack(i,this.parent.parent,t))this.parent.parent.closeOpposing(this),this.parent.parent.unwrap();else{if(e&&s)return this.unwrap(),void(a?n.insDirOf(-t,a):n.insAtDirEnd(t,o));this.sides[t]={ch:bt[this.sides[this.side].ch],ctrlSeq:bt[this.sides[this.side].ctrlSeq]},this.delimjQs.removeClass("mq-ghost").eq(t===w?0:1).addClass("mq-ghost").html(this.sides[t].ch)}a?(r=this.ends[w].ends[t],k(a,l,-t).disown().withDirAdopt(-t,this.ends[w],r,0).jQ.insAtDirEnd(t,this.ends[w].jQ.removeClass("mq-empty")),r.siblingCreated&&r.siblingCreated(n.options,t),n.insDirOf(-t,a)):e?n.insDirOf(t,this):n.insAtDirEnd(t,this.ends[w])}},e.deleteTowards=function(t,e){this.deleteSide(-t,!1,e)},e.finalizeTree=function(){this.ends[w].deleteOutOf=function(t,e){this.parent.deleteSide(t,!0,e)},this.finalizeTree=this.intentionalBlur=function(){this.delimjQs.eq(this.side===w?1:0).removeClass("mq-ghost"),this.side=0}},e.siblingCreated=function(t,e){e===-this.side&&this.finalizeTree()}}),bt={"(":")",")":"(","[":"]","]":"[","{":"}","}":"{","\\{":"\\}","\\}":"\\{","&lang;":"&rang;","&rang;":"&lang;","\\langle ":"\\rangle ","\\rangle ":"\\langle ","|":"|"},d("("),d("["),d("{","\\{"),j.langle=i(gt,w,"&lang;","&rang;","\\langle ","\\rangle "),j.rangle=i(gt,x,"&lang;","&rang;","\\langle ","\\rangle "),Q["|"]=i(gt,w,"|","|","|","|"),j.left=v(N,function(t){t.parser=function(){var t=B.regex,e=B.string,n=(B.succeed,B.optWhitespace);return n.then(t(/^(?:[([|]|\\\{)/)).then(function(i){var s="\\"===i.charAt(0)?i.slice(1):i;return F.then(function(r){return e("\\right").skip(n).then(t(/^(?:[\])|]|\\\})/)).map(function(t){var e="\\"===t.charAt(0)?t.slice(1):t,n=gt(0,s,e,i,t);return n.blocks=[r],r.adopt(n,0,0),n})})})}}),j.right=v(N,function(t){t.parser=function(){return B.fail("unmatched \\right")}}),vt=j.binom=j.binomial=v(v(N,p),function(t,e){t.ctrlSeq="\\binom",t.htmlTemplate='<span class="mq-non-leaf"><span class="mq-paren mq-scaled">(</span><span class="mq-non-leaf"><span class="mq-array mq-non-leaf"><span>&0</span><span>&1</span></span></span><span class="mq-paren mq-scaled">)</span></span>',t.textTemplate=["choose(",",",")"]}),wt=j.choose=v(vt,function(t){t.createLeftOf=ft.prototype.createLeftOf}),j.editable=j.MathQuillMathField=v(N,function(t,e){t.ctrlSeq="\\MathQuillMathField",t.htmlTemplate='<span class="mq-editable-field"><span class="mq-root-block">&0</span></span>',t.parser=function(){var t=this,n=B.string,i=B.regex,s=B.succeed;return n("[").then(i(/^[a-z][a-z0-9]*/i)).skip(n("]")).map(function(e){t.name=e}).or(s()).then(e.parser.call(t))},t.finalizeTree=function(){var t=_(this.ends[w],this.jQ,S());t.KIND_OF_MQ="MathField",t.editable=!0,t.createTextarea(),t.editablesTextareaEvents(),t.cursor.insAtRightEnd(t.root),h(t.root)},t.registerInnerField=function(t,e){t.push(t[this.name]=e(this.ends[w].controller))},t.latex=function(){return this.ends[w].latex()},t.text=function(){return this.ends[w].text()}}),xt=j.embed=v(P,function(t,e){t.setOptions=function(t){function e(){return""}return this.text=t.text||e,this.htmlTemplate=t.htmlString||"",this.latex=t.latex||e,this},t.parser=function(){var t=this;return string=B.string,regex=B.regex,succeed=B.succeed,string("{").then(regex(/^[a-z][a-z0-9]*/i)).skip(string("}")).then(function(e){return string("[").then(regex(/^[-\w\s]*/)).skip(string("]")).or(succeed()).map(function(n){return t.setOptions(A[e](n))})})}}),qt={},j.begin=v(N,function(t,e){t.parser=function(){var t=B.string,e=B.regex;return t("{").then(e(/^[a-z]+/i)).skip(t("}")).then(function(e){return(qt[e]?qt[e]().parser():B.fail("unknown environment type: "+e)).skip(t("\\end{"+e+"}"))})}}),yt=v(N,function(t,e){t.template=[["\\begin{","}"],["\\end{","}"]],t.wrappers=function(){return[t.template[0].join(this.environment),t.template[1].join(this.environment)]}}),Ot=qt.matrix=v(yt,function(t,e){var n={column:"&",row:"\\\\"};t.parentheses={left:null,right:null},t.environment="matrix",t.reflow=function(){var t=this.jQ.children("table"),e=t.outerHeight()/+t.css("fontSize").slice(0,-2),n=this.jQ.children(".mq-paren");n.length&&J(n,Wt(1+.2*(e-1),1.2),1.05*e)},t.latex=function(){var t,e="";return this.eachChild(function(i){"undefined"!=typeof t&&(e+=t!==i.row?n.row:n.column),t=i.row,e+=i.latex()}),this.wrappers().join(e)},t.html=function(){function t(t){return t?'<span class="mq-scaled mq-paren">'+t+"</span>":""}var n,i=[],s="",r=0;return this.eachChild(function(t){n!==t.row&&(n=t.row,s+="<tr>$tds</tr>",i[n]=[]),i[n].push("<td>&"+r++ +"</td>")}),this.htmlTemplate='<span class="mq-matrix mq-non-leaf">'+t(this.parentheses.left)+'<table class="mq-non-leaf">'+s.replace(/\$tds/g,function(){return i.shift().join("")})+"</table>"+t(this.parentheses.right)+"</span>",e.html.call(this)},t.createBlocks=function(){this.blocks=[kt(0,this),kt(0,this),kt(1,this),kt(1,this)]},t.parser=function(){var t=this,e=B.optWhitespace,i=B.string;return e.then(i(n.column).or(i(n.row)).or(F.block)).many().skip(e).then(function(e){function i(){t.blocks.push(kt(o,t,r)),r=[]}var s,r=[],o=0;for(t.blocks=[],s=0;s<e.length;s+=1)e[s]instanceof H?r.push(e[s]):(i(),e[s]===n.row&&(o+=1));return i(),t.autocorrect(),B.succeed(t)})},t.finalizeTree=function(){var t=this.jQ.find("table");t.toggleClass("mq-rows-1",1===t.find("tr").length),this.relink()},t.relink=function(){var t,e,n,i,s=this.blocks,r=[];for(i=0;i<s.length;i+=1)n=s[i],t!==n.row&&(t=n.row,r[t]=[],e=0),r[t][e]=n,n[x]=s[i+1],n[w]=s[i-1],r[t-1]&&r[t-1][e]&&(n.upOutOf=r[t-1][e],r[t-1][e].downOutOf=n),e+=1;this.ends[w]=s[0],this.ends[x]=s[s.length-1]},t.autocorrect=function(t){var e,n,i,s,r,o,a=[];for(t=[],e=this.blocks,o=0;o<e.length;o+=1)r=e[o].row,t[r]=t[r]||[],t[r].push(e[o]),a[r]=t[r].length;if(n=Math.max.apply(null,a),n!==Math.min.apply(null,a)){for(o=0;o<t.length;o+=1)for(i=n-t[o].length;i;)s=n*o+t[o].length,e.splice(s,0,kt(o,this)),i-=1;this.relink()}},t.deleteCell=function(t){function e(t){var e,n=[];for(e=0;e<t.length;e+=1)t[e].isEmpty()&&n.push(t[e]);return n.length===t.length}function n(t){for(var e=0;e<t.length;e+=1)c.indexOf(t[e])>-1&&(t[e].remove(),c.splice(c.indexOf(t[e]),1))}var i,s,r=[],o=[],a=[],l=[],c=this.blocks;this.eachChild(function(e){i!==e.row&&(i=e.row,r[i]=[],s=0),o[s]=o[s]||[],o[s].push(e),r[i].push(e),e===t&&(a=r[i],l=o[s]),s+=1}),e(a)&&l.length>1&&(i=r.indexOf(a),this.eachChild(function(t){t.row>i&&(t.row-=1)}),n(a),this.jQ.find("tr").eq(i).remove()),e(l)&&a.length>1&&n(l),this.finalizeTree()},t.addRow=function(t){var e,n,i,s=[],r=[],o=[],a=q("<tr></tr>"),l=t.row,c=0;for(this.eachChild(function(e){e.row<=l&&s.push(e),e.row===l&&(e===t&&(n=c),c+=1),e.row>l&&(e.row+=1,o.push(e))}),i=0;i<c;i+=1)e=kt(l+1),e.parent=this,r.push(e),e.jQ=q('<td class="mq-empty">').attr(Ut,e.id).appendTo(a);return this.jQ.find("tr").eq(l).after(a),this.blocks=s.concat(r,o),r[n]},t.addColumn=function(t){var e,n,i,s=[],r=[];for(this.eachChild(function(n){s[n.row]=s[n.row]||[],s[n.row].push(n),n===t&&(e=s[n.row].length)}),i=0;i<s.length;i+=1)n=kt(i),n.parent=this,r.push(n),s[i].splice(e,0,n),n.jQ=q('<td class="mq-empty">').attr(Ut,n.id);return this.jQ.find("tr").each(function(t){q(this).find("td").eq(e-1).after(s[t][e].jQ)}),this.blocks=[].concat.apply([],s),r[t.row]},t.insert=function(t,e){var n=this[t](e);this.cursor=this.cursor||this.parent.cursor,this.finalizeTree(),this.bubble("reflow").cursor.insAtRightEnd(n)},t.backspace=function(t,e,n,i){var s=t[e];if(t.isEmpty()){for(this.deleteCell(t);s&&s[e]&&this.blocks.indexOf(s)===-1;)s=s[e];s&&n.insAtDirEnd(-e,s),1===this.blocks.length&&this.blocks[0].isEmpty()&&(i(),this.finalizeTree()),this.bubble("edited")}}}),qt.pmatrix=v(Ot,function(t,e){t.environment="pmatrix",t.parentheses={left:"(",right:")"}}),qt.bmatrix=v(Ot,function(t,e){t.environment="bmatrix",t.parentheses={left:"[",right:"]"}}),qt.Bmatrix=v(Ot,function(t,e){t.environment="Bmatrix",t.parentheses={left:"{",right:"}"}}),qt.vmatrix=v(Ot,function(t,e){t.environment="vmatrix",t.parentheses={left:"|",right:"|"}}),qt.Vmatrix=v(Ot,function(t,e){t.environment="Vmatrix",t.parentheses={left:"&#8214;",right:"&#8214;"}}),kt=v(H,function(t,e){t.init=function(t,n,i){if(e.init.call(this),this.row=t,n&&this.adopt(n,n.ends[x],0),i)for(var s=0;s<i.length;s++)i[s].children().adopt(this,this.ends[x],0)},t.keystroke=function(t,n,i){switch(t){case"Shift-Spacebar":return n.preventDefault(),this.parent.insert("addColumn",this);case"Shift-Enter":return this.parent.insert("addRow",this)}return e.keystroke.apply(this,arguments)},t.deleteOutOf=function(t,n){var i=this,s=arguments;this.parent.backspace(this,t,n,function(){return e.deleteOutOf.apply(i,s)})}}),j.notin=j.cong=j.equiv=j.oplus=j.otimes=v(W,function(t,e){t.init=function(t){e.init.call(this,"\\"+t+" ","&"+t+";")}}),j["≠"]=j.ne=j.neq=i(W,"\\ne ","&ne;"),j.ast=j.star=j.loast=j.lowast=i(W,"\\ast ","&lowast;"),j.therefor=j.therefore=i(W,"\\therefore ","&there4;"),j.cuz=j.because=i(W,"\\because ","&#8757;"),j.prop=j.propto=i(W,"\\propto ","&prop;"),j["≈"]=j.asymp=j.approx=i(W,"\\approx ","&asymp;"),j.isin=j.in=i(W,"\\in ","&isin;"),j.ni=j.contains=i(W,"\\ni ","&ni;"),j.notni=j.niton=j.notcontains=j.doesnotcontain=i(W,"\\not\\ni ","&#8716;"),j.sub=j.subset=i(W,"\\subset ","&sub;"),j.sup=j.supset=j.superset=i(W,"\\supset ","&sup;"),j.nsub=j.notsub=j.nsubset=j.notsubset=i(W,"\\not\\subset ","&#8836;"),j.nsup=j.notsup=j.nsupset=j.notsupset=j.nsuperset=j.notsuperset=i(W,"\\not\\supset ","&#8837;"),
-j.sube=j.subeq=j.subsete=j.subseteq=i(W,"\\subseteq ","&sube;"),j.supe=j.supeq=j.supsete=j.supseteq=j.supersete=j.superseteq=i(W,"\\supseteq ","&supe;"),j.nsube=j.nsubeq=j.notsube=j.notsubeq=j.nsubsete=j.nsubseteq=j.notsubsete=j.notsubseteq=i(W,"\\not\\subseteq ","&#8840;"),j.nsupe=j.nsupeq=j.notsupe=j.notsupeq=j.nsupsete=j.nsupseteq=j.notsupsete=j.notsupseteq=j.nsupersete=j.nsuperseteq=j.notsupersete=j.notsuperseteq=i(W,"\\not\\supseteq ","&#8841;"),j.N=j.naturals=j.Naturals=i(U,"\\mathbb{N}","&#8469;"),j.P=j.primes=j.Primes=j.projective=j.Projective=j.probability=j.Probability=i(U,"\\mathbb{P}","&#8473;"),j.Z=j.integers=j.Integers=i(U,"\\mathbb{Z}","&#8484;"),j.Q=j.rationals=j.Rationals=i(U,"\\mathbb{Q}","&#8474;"),j.R=j.reals=j.Reals=i(U,"\\mathbb{R}","&#8477;"),j.C=j.complex=j.Complex=j.complexes=j.Complexes=j.complexplane=j.Complexplane=j.ComplexPlane=i(U,"\\mathbb{C}","&#8450;"),j.H=j.Hamiltonian=j.quaternions=j.Quaternions=i(U,"\\mathbb{H}","&#8461;"),j.quad=j.emsp=i(U,"\\quad ","    "),j.qquad=i(U,"\\qquad ","        "),j.diamond=i(U,"\\diamond ","&#9671;"),j.bigtriangleup=i(U,"\\bigtriangleup ","&#9651;"),j.ominus=i(U,"\\ominus ","&#8854;"),j.uplus=i(U,"\\uplus ","&#8846;"),j.bigtriangledown=i(U,"\\bigtriangledown ","&#9661;"),j.sqcap=i(U,"\\sqcap ","&#8851;"),j.triangleleft=i(U,"\\triangleleft ","&#8882;"),j.sqcup=i(U,"\\sqcup ","&#8852;"),j.triangleright=i(U,"\\triangleright ","&#8883;"),j.odot=j.circledot=i(U,"\\odot ","&#8857;"),j.bigcirc=i(U,"\\bigcirc ","&#9711;"),j.dagger=i(U,"\\dagger ","&#0134;"),j.ddagger=i(U,"\\ddagger ","&#135;"),j.wr=i(U,"\\wr ","&#8768;"),j.amalg=i(U,"\\amalg ","&#8720;"),j.models=i(U,"\\models ","&#8872;"),j.prec=i(U,"\\prec ","&#8826;"),j.succ=i(U,"\\succ ","&#8827;"),j.preceq=i(U,"\\preceq ","&#8828;"),j.succeq=i(U,"\\succeq ","&#8829;"),j.simeq=i(U,"\\simeq ","&#8771;"),j.mid=i(U,"\\mid ","&#8739;"),j.ll=i(U,"\\ll ","&#8810;"),j.gg=i(U,"\\gg ","&#8811;"),j.parallel=i(U,"\\parallel ","&#8741;"),j.nparallel=i(U,"\\nparallel ","&#8742;"),j.bowtie=i(U,"\\bowtie ","&#8904;"),j.sqsubset=i(U,"\\sqsubset ","&#8847;"),j.sqsupset=i(U,"\\sqsupset ","&#8848;"),j.smile=i(U,"\\smile ","&#8995;"),j.sqsubseteq=i(U,"\\sqsubseteq ","&#8849;"),j.sqsupseteq=i(U,"\\sqsupseteq ","&#8850;"),j.doteq=i(U,"\\doteq ","&#8784;"),j.frown=i(U,"\\frown ","&#8994;"),j.vdash=i(U,"\\vdash ","&#8870;"),j.dashv=i(U,"\\dashv ","&#8867;"),j.nless=i(U,"\\nless ","&#8814;"),j.ngtr=i(U,"\\ngtr ","&#8815;"),j.longleftarrow=i(U,"\\longleftarrow ","&#8592;"),j.longrightarrow=i(U,"\\longrightarrow ","&#8594;"),j.Longleftarrow=i(U,"\\Longleftarrow ","&#8656;"),j.Longrightarrow=i(U,"\\Longrightarrow ","&#8658;"),j.longleftrightarrow=i(U,"\\longleftrightarrow ","&#8596;"),j.updownarrow=i(U,"\\updownarrow ","&#8597;"),j.Longleftrightarrow=i(U,"\\Longleftrightarrow ","&#8660;"),j.Updownarrow=i(U,"\\Updownarrow ","&#8661;"),j.mapsto=i(U,"\\mapsto ","&#8614;"),j.nearrow=i(U,"\\nearrow ","&#8599;"),j.hookleftarrow=i(U,"\\hookleftarrow ","&#8617;"),j.hookrightarrow=i(U,"\\hookrightarrow ","&#8618;"),j.searrow=i(U,"\\searrow ","&#8600;"),j.leftharpoonup=i(U,"\\leftharpoonup ","&#8636;"),j.rightharpoonup=i(U,"\\rightharpoonup ","&#8640;"),j.swarrow=i(U,"\\swarrow ","&#8601;"),j.leftharpoondown=i(U,"\\leftharpoondown ","&#8637;"),j.rightharpoondown=i(U,"\\rightharpoondown ","&#8641;"),j.nwarrow=i(U,"\\nwarrow ","&#8598;"),j.ldots=i(U,"\\ldots ","&#8230;"),j.cdots=i(U,"\\cdots ","&#8943;"),j.vdots=i(U,"\\vdots ","&#8942;"),j.ddots=i(U,"\\ddots ","&#8945;"),j.surd=i(U,"\\surd ","&#8730;"),j.triangle=i(U,"\\triangle ","&#9651;"),j.ell=i(U,"\\ell ","&#8467;"),j.top=i(U,"\\top ","&#8868;"),j.flat=i(U,"\\flat ","&#9837;"),j.natural=i(U,"\\natural ","&#9838;"),j.sharp=i(U,"\\sharp ","&#9839;"),j.wp=i(U,"\\wp ","&#8472;"),j.bot=i(U,"\\bot ","&#8869;"),j.clubsuit=i(U,"\\clubsuit ","&#9827;"),j.diamondsuit=i(U,"\\diamondsuit ","&#9826;"),j.heartsuit=i(U,"\\heartsuit ","&#9825;"),j.spadesuit=i(U,"\\spadesuit ","&#9824;"),j.parallelogram=i(U,"\\parallelogram ","&#9649;"),j.square=i(U,"\\square ","&#11036;"),j.oint=i(U,"\\oint ","&#8750;"),j.bigcap=i(U,"\\bigcap ","&#8745;"),j.bigcup=i(U,"\\bigcup ","&#8746;"),j.bigsqcup=i(U,"\\bigsqcup ","&#8852;"),j.bigvee=i(U,"\\bigvee ","&#8744;"),j.bigwedge=i(U,"\\bigwedge ","&#8743;"),j.bigodot=i(U,"\\bigodot ","&#8857;"),j.bigotimes=i(U,"\\bigotimes ","&#8855;"),j.bigoplus=i(U,"\\bigoplus ","&#8853;"),j.biguplus=i(U,"\\biguplus ","&#8846;"),j.lfloor=i(U,"\\lfloor ","&#8970;"),j.rfloor=i(U,"\\rfloor ","&#8971;"),j.lceil=i(U,"\\lceil ","&#8968;"),j.rceil=i(U,"\\rceil ","&#8969;"),j.opencurlybrace=j.lbrace=i(U,"\\lbrace ","{"),j.closecurlybrace=j.rbrace=i(U,"\\rbrace ","}"),j.lbrack=i(U,"["),j.rbrack=i(U,"]"),j.slash=i(U,"/"),j.vert=i(U,"|"),j.perp=j.perpendicular=i(U,"\\perp ","&perp;"),j.nabla=j.del=i(U,"\\nabla ","&nabla;"),j.hbar=i(U,"\\hbar ","&#8463;"),j.AA=j.Angstrom=j.angstrom=i(U,"\\text\\AA ","&#8491;"),j.ring=j.circ=j.circle=i(U,"\\circ ","&#8728;"),j.bull=j.bullet=i(U,"\\bullet ","&bull;"),j.setminus=j.smallsetminus=i(U,"\\setminus ","&#8726;"),j.not=j["¬"]=j.neg=i(U,"\\neg ","&not;"),j["…"]=j.dots=j.ellip=j.hellip=j.ellipsis=j.hellipsis=i(U,"\\dots ","&hellip;"),j.converges=j.darr=j.dnarr=j.dnarrow=j.downarrow=i(U,"\\downarrow ","&darr;"),j.dArr=j.dnArr=j.dnArrow=j.Downarrow=i(U,"\\Downarrow ","&dArr;"),j.diverges=j.uarr=j.uparrow=i(U,"\\uparrow ","&uarr;"),j.uArr=j.Uparrow=i(U,"\\Uparrow ","&uArr;"),j.to=i(W,"\\to ","&rarr;"),j.rarr=j.rightarrow=i(U,"\\rightarrow ","&rarr;"),j.implies=i(W,"\\Rightarrow ","&rArr;"),j.rArr=j.Rightarrow=i(U,"\\Rightarrow ","&rArr;"),j.gets=i(W,"\\gets ","&larr;"),j.larr=j.leftarrow=i(U,"\\leftarrow ","&larr;"),j.impliedby=i(W,"\\Leftarrow ","&lArr;"),j.lArr=j.Leftarrow=i(U,"\\Leftarrow ","&lArr;"),j.harr=j.lrarr=j.leftrightarrow=i(U,"\\leftrightarrow ","&harr;"),j.iff=i(W,"\\Leftrightarrow ","&hArr;"),j.hArr=j.lrArr=j.Leftrightarrow=i(U,"\\Leftrightarrow ","&hArr;"),j.Re=j.Real=j.real=i(U,"\\Re ","&real;"),j.Im=j.imag=j.image=j.imagin=j.imaginary=j.Imaginary=i(U,"\\Im ","&image;"),j.part=j.partial=i(U,"\\partial ","&part;");j.infty=j.infin=j.infinity=i(U,"\\infty ","&infin;");j.alef=j.alefsym=j.aleph=j.alephsym=i(U,"\\aleph ","&alefsym;"),j.xist=j.xists=j.exist=j.exists=i(U,"\\exists ","&exist;"),j.nexists=j.nexist=i(U,"\\nexists ","&#8708;"),j.and=j.land=j.wedge=i(U,"\\wedge ","&and;"),j.or=j.lor=j.vee=i(U,"\\vee ","&or;"),j.o=j.O=j.empty=j.emptyset=j.oslash=j.Oslash=j.nothing=j.varnothing=i(W,"\\varnothing ","&empty;"),j.cup=j.union=i(W,"\\cup ","&cup;"),j.cap=j.intersect=j.intersection=i(W,"\\cap ","&cap;"),j.deg=j.degree=i(U,"\\degree ","&deg;"),j.ang=j.angle=i(U,"\\angle ","&ang;"),j.measuredangle=i(U,"\\measuredangle ","&#8737;"),jt=v(U,function(t,e){t.createLeftOf=function(t){t.options.autoSubscriptNumerals&&t.parent!==t.parent.parent.sub&&(t[w]instanceof Qt&&t[w].isItalic!==!1||t[w]instanceof ct&&t[w][w]instanceof Qt&&t[w][w].isItalic!==!1)?(j._().createLeftOf(t),e.createLeftOf.call(this,t),t.insRightOf(t.parent.parent)):e.createLeftOf.call(this,t)}}),Qt=v(P,function(t,e){t.init=function(t,n){e.init.call(this,t,"<var>"+(n||t)+"</var>")},t.text=function(){var t=this.ctrlSeq;return!this[w]||this[w]instanceof Qt||this[w]instanceof W||"\\ "===this[w].ctrlSeq||(t="*"+t),!this[x]||this[x]instanceof W||this[x]instanceof ct||(t+="*"),t}}),S.p.autoCommands={_maxLength:0},E.autoCommands=function(t){var e,n,i,s,r;if(!/^[a-z]+(?: [a-z]+)*$/i.test(t))throw'"'+t+'" not a space-delimited list of only letters';for(e=t.split(" "),n={},i=0,s=0;s<e.length;s+=1){if(r=e[s],r.length<2)throw'autocommand "'+r+'" not minimum length of 2';if(j[r]===St)throw'"'+r+'" is a built-in operator name';n[r]=1,i=Ht(i,r.length)}return n._maxLength=i,n},Tt=v(Qt,function(t,e){function n(t){return!t||t instanceof W||t instanceof ht}t.init=function(t){return e.init.call(this,this.letter=t)},t.createLeftOf=function(t){var n,i,s,r,o;if(e.createLeftOf.apply(this,arguments),n=t.options.autoCommands,i=n._maxLength,i>0){for(s="",r=this,o=0;r instanceof Tt&&r.ctrlSeq===r.letter&&o<i;)s=r.letter+s,r=r[w],o+=1;for(;s.length;){if(n.hasOwnProperty(s)){for(o=1,r=this;o<s.length;o+=1,r=r[w]);return k(r,this).remove(),t[w]=r[w],j[s](s).createLeftOf(t)}s=s.slice(1)}}},t.italicize=function(t){return this.isItalic=t,this.jQ.toggleClass("mq-operator-name",!t),this},t.finalizeTree=t.siblingDeleted=t.siblingCreated=function(t,e){e!==w&&this[x]instanceof Tt||this.autoUnItalicize(t)},t.autoUnItalicize=function(t){var e,i,s,r,o,a,l,c,h,u,f,p,d,m=t.autoOperatorNames;if(0!==m._maxLength){for(e=this.letter,i=this[w];i instanceof Tt;i=i[w])e=i.letter+e;for(s=this[x];s instanceof Tt;s=s[x])e+=s.letter;k(i[x]||this.parent.ends[w],s[w]||this.parent.ends[x]).each(function(t){t.italicize(!0).jQ.removeClass("mq-first mq-last mq-followed-by-supsub"),t.ctrlSeq=t.letter});t:for(r=0,o=i[x]||this.parent.ends[w];r<e.length;r+=1,o=o[x])for(a=Wt(m._maxLength,e.length-r);a>0;a-=1)if(l=e.slice(r,r+a),m.hasOwnProperty(l)){for(c=0,h=o;c<a;c+=1,h=h[x])h.italicize(!1),u=h;f=Ct.hasOwnProperty(l),o.ctrlSeq=(f?"\\":"\\operatorname{")+o.ctrlSeq,u.ctrlSeq+=f?" ":"}",Dt.hasOwnProperty(l)&&u[w][w][w].jQ.addClass("mq-last"),n(o[w])||o.jQ.addClass("mq-first"),n(u[x])||(u[x]instanceof ct?(p=u[x],(d=p.siblingCreated=p.siblingDeleted=function(){p.jQ.toggleClass("mq-after-operator-name",!(p[x]instanceof gt))})()):u.jQ.toggleClass("mq-last",!(u[x]instanceof gt))),r+=a-1,o=u;continue t}}}}),Ct={},_t=S.p.autoOperatorNames={_maxLength:9},Dt={limsup:1,liminf:1,projlim:1,injlim:1},function(){var t,e,n,i,s="arg deg det dim exp gcd hom inf ker lg lim ln log max min sup limsup liminf injlim projlim Pr".split(" ");for(t=0;t<s.length;t+=1)Ct[s[t]]=_t[s[t]]=1;for(e="sin cos tan arcsin arccos arctan sinh cosh tanh sec csc cot coth".split(" "),t=0;t<e.length;t+=1)Ct[e[t]]=1;for(n="sin cos tan sec cosec csc cotan cot ctg".split(" "),t=0;t<n.length;t+=1)_t[n[t]]=_t["arc"+n[t]]=_t[n[t]+"h"]=_t["ar"+n[t]+"h"]=_t["arc"+n[t]+"h"]=1;for(i="gcf hcf lcm proj span".split(" "),t=0;t<i.length;t+=1)_t[i[t]]=1}(),E.autoOperatorNames=function(t){var e,n,i,s,r;if(!/^[a-z]+(?: [a-z]+)*$/i.test(t))throw'"'+t+'" not a space-delimited list of only letters';for(e=t.split(" "),n={},i=0,s=0;s<e.length;s+=1){if(r=e[s],r.length<2)throw'"'+r+'" not minimum length of 2';n[r]=1,i=Ht(i,r.length)}return n._maxLength=i,n},St=v(P,function(t,e){t.init=function(t){this.ctrlSeq=t},t.createLeftOf=function(t){var e,n=this.ctrlSeq;for(e=0;e<n.length;e+=1)Tt(n.charAt(e)).createLeftOf(t)},t.parser=function(){var t,e=this.ctrlSeq,n=H();for(t=0;t<e.length;t+=1)Tt(e.charAt(t)).adopt(n,n.ends[x],0);return B.succeed(n.children())}});for(Et in _t)_t.hasOwnProperty(Et)&&(j[Et]=St);j.operatorname=v(N,function(e){e.createLeftOf=t,e.numBlocks=function(){return 1},e.parser=function(){return F.block.map(function(t){return t.children()})}}),j.f=v(Tt,function(t,e){t.init=function(){P.p.init.call(this,this.letter="f",'<var class="mq-f">f</var>')},t.italicize=function(t){return this.jQ.html("f").toggleClass("mq-f",t),e.italicize.apply(this,arguments)}}),j[" "]=j.space=i(U,"\\ ","&nbsp;"),j["'"]=j.prime=i(U,"'","&prime;"),j.backslash=i(U,"\\backslash ","\\"),Q["\\"]||(Q["\\"]=j.backslash),j.$=i(U,"\\$","$"),Lt=v(P,function(t,e){t.init=function(t,n){e.init.call(this,t,'<span class="mq-nonSymbola">'+(n||t)+"</span>")}}),j["@"]=Lt,j["&"]=i(Lt,"\\&","&amp;"),j["%"]=i(Lt,"\\%","%"),j.alpha=j.beta=j.gamma=j.delta=j.zeta=j.eta=j.theta=j.iota=j.kappa=j.mu=j.nu=j.xi=j.rho=j.sigma=j.tau=j.chi=j.psi=j.omega=v(Qt,function(t,e){t.init=function(t){e.init.call(this,"\\"+t+" ","&"+t+";")}}),j.phi=i(Qt,"\\phi ","&#981;"),j.phiv=j.varphi=i(Qt,"\\varphi ","&phi;"),j.epsilon=i(Qt,"\\epsilon ","&#1013;"),j.epsiv=j.varepsilon=i(Qt,"\\varepsilon ","&epsilon;"),j.piv=j.varpi=i(Qt,"\\varpi ","&piv;"),j.sigmaf=j.sigmav=j.varsigma=i(Qt,"\\varsigma ","&sigmaf;"),j.thetav=j.vartheta=j.thetasym=i(Qt,"\\vartheta ","&thetasym;"),j.upsilon=j.upsi=i(Qt,"\\upsilon ","&upsilon;"),j.gammad=j.Gammad=j.digamma=i(Qt,"\\digamma ","&#989;"),j.kappav=j.varkappa=i(Qt,"\\varkappa ","&#1008;"),j.rhov=j.varrho=i(Qt,"\\varrho ","&#1009;"),j.pi=j["π"]=i(Lt,"\\pi ","&pi;"),j.lambda=i(Lt,"\\lambda ","&lambda;"),j.Upsilon=j.Upsi=j.upsih=j.Upsih=i(P,"\\Upsilon ",'<var style="font-family: serif">&upsih;</var>'),j.Gamma=j.Delta=j.Theta=j.Lambda=j.Xi=j.Pi=j.Sigma=j.Phi=j.Psi=j.Omega=j.forall=v(U,function(t,e){t.init=function(t){e.init.call(this,"\\"+t+" ","&"+t+";")}}),At=v(N,function(t){t.init=function(t){this.latex=t},t.createLeftOf=function(t){var e=F.parse(this.latex);e.children().adopt(t.parent,t[w],t[x]),t[w]=e.ends[x],e.jQize().insertBefore(t.jQ),e.finalizeInsert(t.options,t),e.ends[x][x].siblingCreated&&e.ends[x][x].siblingCreated(t.options,w),e.ends[w][w].siblingCreated&&e.ends[w][w].siblingCreated(t.options,x),t.parent.bubble("reflow")},t.parser=function(){var t=F.parse(this.latex).children();return B.succeed(t)}}),j["¹"]=i(At,"^1"),j["²"]=i(At,"^2"),j["³"]=i(At,"^3"),j["¼"]=i(At,"\\frac14"),j["½"]=i(At,"\\frac12"),j["¾"]=i(At,"\\frac34"),Rt=v(W,function(t){t.init=U.prototype.init,t.contactWeld=t.siblingCreated=t.siblingDeleted=function(t,e){if(e!==x)return this.jQ[0].className=!this[w]||this[w]instanceof W||/^[,;:\(\[]$/.test(this[w].ctrlSeq)?"":"mq-binary-operator",this}}),j["+"]=i(Rt,"+","+"),j["–"]=j["-"]=i(Rt,"-","&minus;"),j["±"]=j.pm=j.plusmn=j.plusminus=i(Rt,"\\pm ","&plusmn;"),j.mp=j.mnplus=j.minusplus=i(Rt,"\\mp ","&#8723;"),Q["*"]=j.sdot=j.cdot=i(W,"\\cdot ","&middot;","*"),zt=v(W,function(t,e){t.init=function(t,n){this.data=t,this.strict=n;var i=n?"Strict":"";e.init.call(this,t["ctrlSeq"+i],t["html"+i],t["text"+i])},t.swap=function(t){this.strict=t;var e=t?"Strict":"";this.ctrlSeq=this.data["ctrlSeq"+e],this.jQ.html(this.data["html"+e]),this.textTemplate=[this.data["text"+e]]},t.deleteTowards=function(t,n){return t!==w||this.strict?void e.deleteTowards.apply(this,arguments):(this.swap(!0),void this.bubble("reflow"))}}),It={ctrlSeq:"\\le ",html:"&le;",text:"≤",ctrlSeqStrict:"<",htmlStrict:"&lt;",textStrict:"<"},Mt={ctrlSeq:"\\ge ",html:"&ge;",text:"≥",ctrlSeqStrict:">",htmlStrict:"&gt;",textStrict:">"},j["<"]=j.lt=i(zt,It,!0),j[">"]=j.gt=i(zt,Mt,!0),j["≤"]=j.le=j.leq=i(zt,It,!1),j["≥"]=j.ge=j.geq=i(zt,Mt,!1),Bt=v(W,function(t,e){t.init=function(){e.init.call(this,"=","=")},t.createLeftOf=function(t){return t[w]instanceof zt&&t[w].strict?(t[w].swap(!1),void t[w].bubble("reflow")):void e.createLeftOf.apply(this,arguments)}}),j["="]=Bt,j["×"]=j.times=i(W,"\\times ","&times;","[x]"),j["÷"]=j.div=j.divide=j.divides=i(W,"\\div ","&divide;","[/]"),Q["~"]=j.sim=i(W,"\\sim ","~","~"),Ft=c(1);for($t in Ft)(function(t,e){"function"==typeof e?(l[t]=function(){return a(),e.apply(this,arguments)},l[t].prototype=e.prototype):l[t]=e})($t,Ft[$t])}();
+
+(function() {
+
+var jQuery = window.jQuery,
+  undefined,
+  mqCmdId = 'mathquill-command-id',
+  mqBlockId = 'mathquill-block-id',
+  min = Math.min,
+  max = Math.max;
+
+if (!jQuery) throw 'MathQuill requires jQuery 1.5.2+ to be loaded first';
+
+function noop() {}
+
+/**
+ * A utility higher-order function that makes defining variadic
+ * functions more convenient by letting you essentially define functions
+ * with the last argument as a splat, i.e. the last argument "gathers up"
+ * remaining arguments to the function:
+ *   var doStuff = variadic(function(first, rest) { return rest; });
+ *   doStuff(1, 2, 3); // => [2, 3]
+ */
+var __slice = [].slice;
+function variadic(fn) {
+  var numFixedArgs = fn.length - 1;
+  return function() {
+    var args = __slice.call(arguments, 0, numFixedArgs);
+    var varArg = __slice.call(arguments, numFixedArgs);
+    return fn.apply(this, args.concat([ varArg ]));
+  };
+}
+
+/**
+ * A utility higher-order function that makes combining object-oriented
+ * programming and functional programming techniques more convenient:
+ * given a method name and any number of arguments to be bound, returns
+ * a function that calls it's first argument's method of that name (if
+ * it exists) with the bound arguments and any additional arguments that
+ * are passed:
+ *   var sendMethod = send('method', 1, 2);
+ *   var obj = { method: function() { return Array.apply(this, arguments); } };
+ *   sendMethod(obj, 3, 4); // => [1, 2, 3, 4]
+ *   // or more specifically,
+ *   var obj2 = { method: function(one, two, three) { return one*two + three; } };
+ *   sendMethod(obj2, 3); // => 5
+ *   sendMethod(obj2, 4); // => 6
+ */
+var send = variadic(function(method, args) {
+  return variadic(function(obj, moreArgs) {
+    if (method in obj) return obj[method].apply(obj, args.concat(moreArgs));
+  });
+});
+
+/**
+ * A utility higher-order function that creates "implicit iterators"
+ * from "generators": given a function that takes in a sole argument,
+ * a "yield_" function, that calls "yield_" repeatedly with an object as
+ * a sole argument (presumably objects being iterated over), returns
+ * a function that calls it's first argument on each of those objects
+ * (if the first argument is a function, it is called repeatedly with
+ * each object as the first argument, otherwise it is stringified and
+ * the method of that name is called on each object (if such a method
+ * exists)), passing along all additional arguments:
+ *   var a = [
+ *     { method: function(list) { list.push(1); } },
+ *     { method: function(list) { list.push(2); } },
+ *     { method: function(list) { list.push(3); } }
+ *   ];
+ *   a.each = iterator(function(yield_) {
+ *     for (var i in this) yield_(this[i]);
+ *   });
+ *   var list = [];
+ *   a.each('method', list);
+ *   list; // => [1, 2, 3]
+ *   // Note that the for-in loop will yield 'each', but 'each' maps to
+ *   // the function object created by iterator() which does not have a
+ *   // .method() method, so that just fails silently.
+ */
+function iterator(generator) {
+  return variadic(function(fn, args) {
+    if (typeof fn !== 'function') fn = send(fn);
+    var yield_ = function(obj) { return fn.apply(obj, [ obj ].concat(args)); };
+    return generator.call(this, yield_);
+  });
+}
+
+/**
+ * sugar to make defining lots of commands easier.
+ * TODO: rethink this.
+ */
+function bind(cons /*, args... */) {
+  var args = __slice.call(arguments, 1);
+  return function() {
+    return cons.apply(this, args);
+  };
+}
+
+/**
+ * a development-only debug method.  This definition and all
+ * calls to `pray` will be stripped from the minified
+ * build of mathquill.
+ *
+ * This function must be called by name to be removed
+ * at compile time.  Do not define another function
+ * with the same name, and only call this function by
+ * name.
+ */
+function pray(message, cond) {
+  if (!cond) throw new Error('prayer failed: '+message);
+}
+var P = (function(prototype, ownProperty, undefined) {
+  // helper functions that also help minification
+  function isObject(o) { return typeof o === 'object'; }
+  function isFunction(f) { return typeof f === 'function'; }
+
+  // used to extend the prototypes of superclasses (which might not
+  // have `.Bare`s)
+  function SuperclassBare() {}
+
+  return function P(_superclass /* = Object */, definition) {
+    // handle the case where no superclass is given
+    if (definition === undefined) {
+      definition = _superclass;
+      _superclass = Object;
+    }
+
+    // C is the class to be returned.
+    //
+    // It delegates to instantiating an instance of `Bare`, so that it
+    // will always return a new instance regardless of the calling
+    // context.
+    //
+    //  TODO: the Chrome inspector shows all created objects as `C`
+    //        rather than `Object`.  Setting the .name property seems to
+    //        have no effect.  Is there a way to override this behavior?
+    function C() {
+      var self = new Bare;
+      if (isFunction(self.init)) self.init.apply(self, arguments);
+      return self;
+    }
+
+    // C.Bare is a class with a noop constructor.  Its prototype is the
+    // same as C, so that instances of C.Bare are also instances of C.
+    // New objects can be allocated without initialization by calling
+    // `new MyClass.Bare`.
+    function Bare() {}
+    C.Bare = Bare;
+
+    // Set up the prototype of the new class.
+    var _super = SuperclassBare[prototype] = _superclass[prototype];
+    var proto = Bare[prototype] = C[prototype] = C.p = new SuperclassBare;
+
+    // other variables, as a minifier optimization
+    var extensions;
+
+
+    // set the constructor property on the prototype, for convenience
+    proto.constructor = C;
+
+    C.extend = function(def) { return P(C, def); }
+
+    return (C.open = function(def) {
+      extensions = {};
+
+      if (isFunction(def)) {
+        // call the defining function with all the arguments you need
+        // extensions captures the return value.
+        extensions = def.call(C, proto, _super, C, _superclass);
+      }
+      else if (isObject(def)) {
+        // if you passed an object instead, we'll take it
+        extensions = def;
+      }
+
+      // ...and extend it
+      if (isObject(extensions)) {
+        for (var ext in extensions) {
+          if (ownProperty.call(extensions, ext)) {
+            proto[ext] = extensions[ext];
+          }
+        }
+      }
+
+      // if there's no init, we assume we're inheriting a non-pjs class, so
+      // we default to applying the superclass's constructor.
+      if (!isFunction(proto.init)) {
+        proto.init = _superclass;
+      }
+
+      return C;
+    })(definition);
+  }
+
+  // as a minifier optimization, we've closured in a few helper functions
+  // and the string 'prototype' (C[p] is much shorter than C.prototype)
+})('prototype', ({}).hasOwnProperty);
+/*************************************************
+ * Base classes of edit tree-related objects
+ *
+ * Only doing tree node manipulation via these
+ * adopt/ disown methods guarantees well-formedness
+ * of the tree.
+ ************************************************/
+
+// L = 'left'
+// R = 'right'
+//
+// the contract is that they can be used as object properties
+// and (-L) === R, and (-R) === L.
+var L = -1;
+var R = 1;
+
+function prayDirection(dir) {
+  pray('a direction was passed', dir === L || dir === R);
+}
+
+/**
+ * Tiny extension of jQuery adding directionalized DOM manipulation methods.
+ *
+ * Funny how Pjs v3 almost just works with `jQuery.fn.init`.
+ *
+ * jQuery features that don't work on $:
+ *   - jQuery.*, like jQuery.ajax, obviously (Pjs doesn't and shouldn't
+ *                                            copy constructor properties)
+ *
+ *   - jQuery(function), the shortcut for `jQuery(document).ready(function)`,
+ *     because `jQuery.fn.init` is idiosyncratic and Pjs doing, essentially,
+ *     `jQuery.fn.init.apply(this, arguments)` isn't quite right, you need:
+ *
+ *       _.init = function(s, c) { jQuery.fn.init.call(this, s, c, $(document)); };
+ *
+ *     if you actually give a shit (really, don't bother),
+ *     see https://github.com/jquery/jquery/blob/1.7.2/src/core.js#L889
+ *
+ *   - jQuery(selector), because jQuery translates that to
+ *     `jQuery(document).find(selector)`, but Pjs doesn't (should it?) let
+ *     you override the result of a constructor call
+ *       + note that because of the jQuery(document) shortcut-ness, there's also
+ *         the 3rd-argument-needs-to-be-`$(document)` thing above, but the fix
+ *         for that (as can be seen above) is really easy. This problem requires
+ *         a way more intrusive fix
+ *
+ * And that's it! Everything else just magically works because jQuery internally
+ * uses `this.constructor()` everywhere (hence calling `$`), but never ever does
+ * `this.constructor.find` or anything like that, always doing `jQuery.find`.
+ */
+var $ = P(jQuery, function(_) {
+  _.insDirOf = function(dir, el) {
+    return dir === L ?
+      this.insertBefore(el.first()) : this.insertAfter(el.last());
+  };
+  _.insAtDirEnd = function(dir, el) {
+    return dir === L ? this.prependTo(el) : this.appendTo(el);
+  };
+});
+
+var Point = P(function(_) {
+  _.parent = 0;
+  _[L] = 0;
+  _[R] = 0;
+
+  _.init = function(parent, leftward, rightward) {
+    this.parent = parent;
+    this[L] = leftward;
+    this[R] = rightward;
+  };
+
+  this.copy = function(pt) {
+    return Point(pt.parent, pt[L], pt[R]);
+  };
+});
+
+/**
+ * MathQuill virtual-DOM tree-node abstract base class
+ */
+var Node = P(function(_) {
+  _[L] = 0;
+  _[R] = 0
+  _.parent = 0;
+
+  var id = 0;
+  function uniqueNodeId() { return id += 1; }
+  this.byId = {};
+
+  _.init = function() {
+    this.id = uniqueNodeId();
+    Node.byId[this.id] = this;
+
+    this.ends = {};
+    this.ends[L] = 0;
+    this.ends[R] = 0;
+  };
+
+  _.dispose = function() { delete Node.byId[this.id]; };
+
+  _.toString = function() { return '{{ MathQuill Node #'+this.id+' }}'; };
+
+  _.jQ = $();
+  _.jQadd = function(jQ) { return this.jQ = this.jQ.add(jQ); };
+  _.jQize = function(jQ) {
+    // jQuery-ifies this.html() and links up the .jQ of all corresponding Nodes
+    var jQ = $(jQ || this.html());
+
+    function jQadd(el) {
+      if (el.getAttribute) {
+        var cmdId = el.getAttribute('mathquill-command-id');
+        var blockId = el.getAttribute('mathquill-block-id');
+        if (cmdId) Node.byId[cmdId].jQadd(el);
+        if (blockId) Node.byId[blockId].jQadd(el);
+      }
+      for (el = el.firstChild; el; el = el.nextSibling) {
+        jQadd(el);
+      }
+    }
+
+    for (var i = 0; i < jQ.length; i += 1) jQadd(jQ[i]);
+    return jQ;
+  };
+
+  _.createDir = function(dir, cursor) {
+    prayDirection(dir);
+    var node = this;
+    node.jQize();
+    node.jQ.insDirOf(dir, cursor.jQ);
+    cursor[dir] = node.adopt(cursor.parent, cursor[L], cursor[R]);
+    return node;
+  };
+  _.createLeftOf = function(el) { return this.createDir(L, el); };
+
+  _.selectChildren = function(leftEnd, rightEnd) {
+    return Selection(leftEnd, rightEnd);
+  };
+
+  _.bubble = iterator(function(yield_) {
+    for (var ancestor = this; ancestor; ancestor = ancestor.parent) {
+      var result = yield_(ancestor);
+      if (result === false) break;
+    }
+
+    return this;
+  });
+
+  _.postOrder = iterator(function(yield_) {
+    (function recurse(descendant) {
+      descendant.eachChild(recurse);
+      yield_(descendant);
+    })(this);
+
+    return this;
+  });
+
+  _.isEmpty = function() {
+    return this.ends[L] === 0 && this.ends[R] === 0;
+  };
+  
+  _.isStyleBlock = function() {
+    return false;
+  };
+
+  _.children = function() {
+    return Fragment(this.ends[L], this.ends[R]);
+  };
+
+  _.eachChild = function() {
+    var children = this.children();
+    children.each.apply(children, arguments);
+    return this;
+  };
+
+  _.foldChildren = function(fold, fn) {
+    return this.children().fold(fold, fn);
+  };
+
+  _.withDirAdopt = function(dir, parent, withDir, oppDir) {
+    Fragment(this, this).withDirAdopt(dir, parent, withDir, oppDir);
+    return this;
+  };
+
+  _.adopt = function(parent, leftward, rightward) {
+    Fragment(this, this).adopt(parent, leftward, rightward);
+    return this;
+  };
+
+  _.disown = function() {
+    Fragment(this, this).disown();
+    return this;
+  };
+
+  _.remove = function() {
+    this.jQ.remove();
+    this.postOrder('dispose');
+    return this.disown();
+  };
+});
+
+function prayWellFormed(parent, leftward, rightward) {
+  pray('a parent is always present', parent);
+  pray('leftward is properly set up', (function() {
+    // either it's empty and `rightward` is the left end child (possibly empty)
+    if (!leftward) return parent.ends[L] === rightward;
+
+    // or it's there and its [R] and .parent are properly set up
+    return leftward[R] === rightward && leftward.parent === parent;
+  })());
+
+  pray('rightward is properly set up', (function() {
+    // either it's empty and `leftward` is the right end child (possibly empty)
+    if (!rightward) return parent.ends[R] === leftward;
+
+    // or it's there and its [L] and .parent are properly set up
+    return rightward[L] === leftward && rightward.parent === parent;
+  })());
+}
+
+
+/**
+ * An entity outside the virtual tree with one-way pointers (so it's only a
+ * "view" of part of the tree, not an actual node/entity in the tree) that
+ * delimits a doubly-linked list of sibling nodes.
+ * It's like a fanfic love-child between HTML DOM DocumentFragment and the Range
+ * classes: like DocumentFragment, its contents must be sibling nodes
+ * (unlike Range, whose contents are arbitrary contiguous pieces of subtrees),
+ * but like Range, it has only one-way pointers to its contents, its contents
+ * have no reference to it and in fact may still be in the visible tree (unlike
+ * DocumentFragment, whose contents must be detached from the visible tree
+ * and have their 'parent' pointers set to the DocumentFragment).
+ */
+var Fragment = P(function(_) {
+  _.init = function(withDir, oppDir, dir) {
+    if (dir === undefined) dir = L;
+    prayDirection(dir);
+
+    pray('no half-empty fragments', !withDir === !oppDir);
+
+    this.ends = {};
+
+    if (!withDir) return;
+
+    pray('withDir is passed to Fragment', withDir instanceof Node);
+    pray('oppDir is passed to Fragment', oppDir instanceof Node);
+    pray('withDir and oppDir have the same parent',
+         withDir.parent === oppDir.parent);
+
+    this.ends[dir] = withDir;
+    this.ends[-dir] = oppDir;
+
+    // To build the jquery collection for a fragment, accumulate elements
+    // into an array and then call jQ.add once on the result. jQ.add sorts the
+    // collection according to document order each time it is called, so
+    // building a collection by folding jQ.add directly takes more than
+    // quadratic time in the number of elements.
+    //
+    // https://github.com/jquery/jquery/blob/2.1.4/src/traversing.js#L112
+    var accum = this.fold([], function (accum, el) {
+      accum.push.apply(accum, el.jQ.get());
+      return accum;
+    });
+
+    this.jQ = this.jQ.add(accum);
+  };
+  _.jQ = $();
+
+  // like Cursor::withDirInsertAt(dir, parent, withDir, oppDir)
+  _.withDirAdopt = function(dir, parent, withDir, oppDir) {
+    return (dir === L ? this.adopt(parent, withDir, oppDir)
+                      : this.adopt(parent, oppDir, withDir));
+  };
+  _.adopt = function(parent, leftward, rightward) {
+    prayWellFormed(parent, leftward, rightward);
+
+    var self = this;
+    self.disowned = false;
+
+    var leftEnd = self.ends[L];
+    if (!leftEnd) return this;
+
+    var rightEnd = self.ends[R];
+
+    if (leftward) {
+      // NB: this is handled in the ::each() block
+      // leftward[R] = leftEnd
+    } else {
+      parent.ends[L] = leftEnd;
+    }
+
+    if (rightward) {
+      rightward[L] = rightEnd;
+    } else {
+      parent.ends[R] = rightEnd;
+    }
+
+    self.ends[R][R] = rightward;
+
+    self.each(function(el) {
+      el[L] = leftward;
+      el.parent = parent;
+      if (leftward) leftward[R] = el;
+
+      leftward = el;
+    });
+
+    return self;
+  };
+
+  _.disown = function() {
+    var self = this;
+    var leftEnd = self.ends[L];
+
+    // guard for empty and already-disowned fragments
+    if (!leftEnd || self.disowned) return self;
+
+    self.disowned = true;
+
+    var rightEnd = self.ends[R]
+    var parent = leftEnd.parent;
+
+    prayWellFormed(parent, leftEnd[L], leftEnd);
+    prayWellFormed(parent, rightEnd, rightEnd[R]);
+
+    if (leftEnd[L]) {
+      leftEnd[L][R] = rightEnd[R];
+    } else {
+      parent.ends[L] = rightEnd[R];
+    }
+
+    if (rightEnd[R]) {
+      rightEnd[R][L] = leftEnd[L];
+    } else {
+      parent.ends[R] = leftEnd[L];
+    }
+
+    return self;
+  };
+
+  _.remove = function() {
+    this.jQ.remove();
+    this.each('postOrder', 'dispose');
+    return this.disown();
+  };
+
+  _.each = iterator(function(yield_) {
+    var self = this;
+    var el = self.ends[L];
+    if (!el) return self;
+
+    for (; el !== self.ends[R][R]; el = el[R]) {
+      var result = yield_(el);
+      if (result === false) break;
+    }
+
+    return self;
+  });
+
+  _.fold = function(fold, fn) {
+    this.each(function(el) {
+      fold = fn.call(this, fold, el);
+    });
+
+    return fold;
+  };
+});
+
+
+/**
+ * Registry of LaTeX commands and commands created when typing
+ * a single character.
+ *
+ * (Commands are all subclasses of Node.)
+ */
+var LatexCmds = {}, CharCmds = {};
+/********************************************
+ * Cursor and Selection "singleton" classes
+ *******************************************/
+
+/* The main thing that manipulates the Math DOM. Makes sure to manipulate the
+HTML DOM to match. */
+
+/* Sort of singletons, since there should only be one per editable math
+textbox, but any one HTML document can contain many such textboxes, so any one
+JS environment could actually contain many instances. */
+
+//A fake cursor in the fake textbox that the math is rendered in.
+var Cursor = P(Point, function(_) {
+  _.init = function(initParent, options) {
+    this.parent = initParent;
+    this.options = options;
+
+    var jQ = this.jQ = this._jQ = $('<span class="mq-cursor">&#8203;</span>');
+    //closured for setInterval
+    this.blink = function(){ jQ.toggleClass('mq-blink'); };
+
+    this.upDownCache = {};
+  };
+
+  _.show = function() {
+    this.jQ = this._jQ.removeClass('mq-blink');
+    if ('intervalId' in this) //already was shown, just restart interval
+      clearInterval(this.intervalId);
+    else { //was hidden and detached, insert this.jQ back into HTML DOM
+      if (this[R]) {
+        if (this.selection && this.selection.ends[L][L] === this[L])
+          this.jQ.insertBefore(this.selection.jQ);
+        else
+          this.jQ.insertBefore(this[R].jQ.first());
+      }
+      else
+        this.jQ.appendTo(this.parent.jQ);
+      this.parent.focus();
+    }
+    this.intervalId = setInterval(this.blink, 500);
+    return this;
+  };
+  _.hide = function() {
+    if ('intervalId' in this)
+      clearInterval(this.intervalId);
+    delete this.intervalId;
+    this.jQ.detach();
+    this.jQ = $();
+    return this;
+  };
+
+  _.withDirInsertAt = function(dir, parent, withDir, oppDir) {
+    var oldParent = this.parent;
+    this.parent = parent;
+    this[dir] = withDir;
+    this[-dir] = oppDir;
+    // by contract, .blur() is called after all has been said and done
+    // and the cursor has actually been moved
+    // FIXME pass cursor to .blur() so text can fix cursor pointers when removing itself
+    if (oldParent !== parent && oldParent.blur) oldParent.blur(this);
+  };
+  _.insDirOf = function(dir, el) {
+    prayDirection(dir);
+    this.jQ.insDirOf(dir, el.jQ);
+    this.withDirInsertAt(dir, el.parent, el[dir], el);
+    this.parent.jQ.addClass('mq-hasCursor');
+    return this;
+  };
+  _.insLeftOf = function(el) { return this.insDirOf(L, el); };
+  _.insRightOf = function(el) { return this.insDirOf(R, el); };
+
+  _.insAtDirEnd = function(dir, el) {
+    prayDirection(dir);
+    this.jQ.insAtDirEnd(dir, el.jQ);
+    this.withDirInsertAt(dir, el, 0, el.ends[dir]);
+    el.focus();
+    return this;
+  };
+  _.insAtLeftEnd = function(el) { return this.insAtDirEnd(L, el); };
+  _.insAtRightEnd = function(el) { return this.insAtDirEnd(R, el); };
+
+  /**
+   * jump up or down from one block Node to another:
+   * - cache the current Point in the node we're jumping from
+   * - check if there's a Point in it cached for the node we're jumping to
+   *   + if so put the cursor there,
+   *   + if not seek a position in the node that is horizontally closest to
+   *     the cursor's current position
+   */
+  _.jumpUpDown = function(from, to) {
+    var self = this;
+    self.upDownCache[from.id] = Point.copy(self);
+    var cached = self.upDownCache[to.id];
+    if (cached) {
+      cached[R] ? self.insLeftOf(cached[R]) : self.insAtRightEnd(cached.parent);
+    }
+    else {
+      var pageX = self.offset().left;
+      to.seek(pageX, self);
+    }
+  };
+  _.offset = function() {
+    //in Opera 11.62, .getBoundingClientRect() and hence jQuery::offset()
+    //returns all 0's on inline elements with negative margin-right (like
+    //the cursor) at the end of their parent, so temporarily remove the
+    //negative margin-right when calling jQuery::offset()
+    //Opera bug DSK-360043
+    //http://bugs.jquery.com/ticket/11523
+    //https://github.com/jquery/jquery/pull/717
+    var self = this, offset = self.jQ.removeClass('mq-cursor').offset();
+    self.jQ.addClass('mq-cursor');
+    return offset;
+  }
+  _.unwrapGramp = function() {
+    var gramp = this.parent.parent;
+    var greatgramp = gramp.parent;
+    var rightward = gramp[R];
+    var cursor = this;
+
+    var leftward = gramp[L];
+    gramp.disown().eachChild(function(uncle) {
+      if (uncle.isEmpty()) return;
+
+      uncle.children()
+        .adopt(greatgramp, leftward, rightward)
+        .each(function(cousin) {
+          cousin.jQ.insertBefore(gramp.jQ.first());
+        })
+      ;
+
+      leftward = uncle.ends[R];
+    });
+
+    if (!this[R]) { //then find something to be rightward to insLeftOf
+      if (this[L])
+        this[R] = this[L][R];
+      else {
+        while (!this[R]) {
+          this.parent = this.parent[R];
+          if (this.parent)
+            this[R] = this.parent.ends[L];
+          else {
+            this[R] = gramp[R];
+            this.parent = greatgramp;
+            break;
+          }
+        }
+      }
+    }
+    if (this[R])
+      this.insLeftOf(this[R]);
+    else
+      this.insAtRightEnd(greatgramp);
+
+    gramp.jQ.remove();
+
+    if (gramp[L].siblingDeleted) gramp[L].siblingDeleted(cursor.options, R);
+    if (gramp[R].siblingDeleted) gramp[R].siblingDeleted(cursor.options, L);
+  };
+  _.startSelection = function() {
+    var anticursor = this.anticursor = Point.copy(this);
+    var ancestors = anticursor.ancestors = {}; // a map from each ancestor of
+      // the anticursor, to its child that is also an ancestor; in other words,
+      // the anticursor's ancestor chain in reverse order
+    for (var ancestor = anticursor; ancestor.parent; ancestor = ancestor.parent) {
+      ancestors[ancestor.parent.id] = ancestor;
+    }
+  };
+  _.endSelection = function() {
+    delete this.anticursor;
+  };
+  _.select = function() {
+    var anticursor = this.anticursor;
+    if (this[L] === anticursor[L] && this.parent === anticursor.parent) return false;
+
+    // Find the lowest common ancestor (`lca`), and the ancestor of the cursor
+    // whose parent is the LCA (which'll be an end of the selection fragment).
+    for (var ancestor = this; ancestor.parent; ancestor = ancestor.parent) {
+      if (ancestor.parent.id in anticursor.ancestors) {
+        var lca = ancestor.parent;
+        break;
+      }
+    }
+    pray('cursor and anticursor in the same tree', lca);
+    // The cursor and the anticursor should be in the same tree, because the
+    // mousemove handler attached to the document, unlike the one attached to
+    // the root HTML DOM element, doesn't try to get the math tree node of the
+    // mousemove target, and Cursor::seek() based solely on coordinates stays
+    // within the tree of `this` cursor's root.
+
+    // The other end of the selection fragment, the ancestor of the anticursor
+    // whose parent is the LCA.
+    var antiAncestor = anticursor.ancestors[lca.id];
+
+    // Now we have two either Nodes or Points, guaranteed to have a common
+    // parent and guaranteed that if both are Points, they are not the same,
+    // and we have to figure out which is the left end and which the right end
+    // of the selection.
+    var leftEnd, rightEnd, dir = R;
+
+    // This is an extremely subtle algorithm.
+    // As a special case, `ancestor` could be a Point and `antiAncestor` a Node
+    // immediately to `ancestor`'s left.
+    // In all other cases,
+    // - both Nodes
+    // - `ancestor` a Point and `antiAncestor` a Node
+    // - `ancestor` a Node and `antiAncestor` a Point
+    // `antiAncestor[R] === rightward[R]` for some `rightward` that is
+    // `ancestor` or to its right, if and only if `antiAncestor` is to
+    // the right of `ancestor`.
+    if (ancestor[L] !== antiAncestor) {
+      for (var rightward = ancestor; rightward; rightward = rightward[R]) {
+        if (rightward[R] === antiAncestor[R]) {
+          dir = L;
+          leftEnd = ancestor;
+          rightEnd = antiAncestor;
+          break;
+        }
+      }
+    }
+    if (dir === R) {
+      leftEnd = antiAncestor;
+      rightEnd = ancestor;
+    }
+
+    // only want to select Nodes up to Points, can't select Points themselves
+    if (leftEnd instanceof Point) leftEnd = leftEnd[R];
+    if (rightEnd instanceof Point) rightEnd = rightEnd[L];
+
+    this.hide().selection = lca.selectChildren(leftEnd, rightEnd);
+    this.insDirOf(dir, this.selection.ends[dir]);
+    this.selectionChanged();
+    return true;
+  };
+
+  _.clearSelection = function() {
+    if (this.selection) {
+      this.selection.clear();
+      delete this.selection;
+      this.selectionChanged();
+    }
+    return this;
+  };
+  _.deleteSelection = function() {
+    if (!this.selection) return;
+
+    this[L] = this.selection.ends[L][L];
+    this[R] = this.selection.ends[R][R];
+    this.selection.remove();
+    this.selectionChanged();
+    delete this.selection;
+  };
+  _.replaceSelection = function() {
+    var seln = this.selection;
+    if (seln) {
+      this[L] = seln.ends[L][L];
+      this[R] = seln.ends[R][R];
+      delete this.selection;
+    }
+    return seln;
+  };
+});
+
+var Selection = P(Fragment, function(_, super_) {
+  _.init = function() {
+    super_.init.apply(this, arguments);
+    this.jQ = this.jQ.wrapAll('<span class="mq-selection"></span>').parent();
+      //can't do wrapAll(this.jQ = $(...)) because wrapAll will clone it
+  };
+  _.adopt = function() {
+    this.jQ.replaceWith(this.jQ = this.jQ.children());
+    return super_.adopt.apply(this, arguments);
+  };
+  _.clear = function() {
+    // using the browser's native .childNodes property so that we
+    // don't discard text nodes.
+    this.jQ.replaceWith(this.jQ[0].childNodes);
+    return this;
+  };
+  _.join = function(methodName) {
+    return this.fold('', function(fold, child) {
+      return fold + child[methodName]();
+    });
+  };
+});
+/*********************************************
+ * Controller for a MathQuill instance,
+ * on which services are registered with
+ *
+ *   Controller.open(function(_) { ... });
+ *
+ ********************************************/
+
+var Controller = P(function(_) {
+  _.init = function(root, container, options) {
+    this.id = root.id;
+    this.data = {};
+
+    this.root = root;
+    this.container = container;
+    this.options = options;
+
+    root.controller = this;
+
+    this.cursor = root.cursor = Cursor(root, options);
+    // TODO: stop depending on root.cursor, and rm it
+  };
+
+  _.handle = function(name, dir) {
+    var handlers = this.options.handlers;
+    if (handlers && handlers.fns[name]) {
+      var mq = handlers.APIClasses[this.KIND_OF_MQ](this);
+      if (dir === L || dir === R) handlers.fns[name](dir, mq);
+      else handlers.fns[name](mq);
+    }
+  };
+
+  var notifyees = [];
+  this.onNotify = function(f) { notifyees.push(f); };
+  _.notify = function() {
+    for (var i = 0; i < notifyees.length; i += 1) {
+      notifyees[i].apply(this.cursor, arguments);
+    }
+    return this;
+  };
+});
+/*********************************************************
+ * The publicly exposed MathQuill API.
+ ********************************************************/
+
+var API = {}, Options = P(), optionProcessors = {}, Progenote = P(), EMBEDS = {};
+
+/**
+ * Interface Versioning (#459, #495) to allow us to virtually guarantee
+ * backcompat. v0.10.x introduces it, so for now, don't completely break the
+ * API for people who don't know about it, just complain with console.warn().
+ *
+ * The methods are shimmed in outro.js so that MQ.MathField.prototype etc can
+ * be accessed.
+ */
+function insistOnInterVer() {
+  if (window.console) console.warn(
+    'You are using the MathQuill API without specifying an interface version, ' +
+    'which will fail in v1.0.0. Easiest fix is to do the following before ' +
+    'doing anything else:\n' +
+    '\n' +
+    '    MathQuill = MathQuill.getInterface(1);\n' +
+    '    // now MathQuill.MathField() works like it used to\n' +
+    '\n' +
+    'See also the "`dev` branch (2014\u20132015) \u2192 v0.10.0 Migration Guide" at\n' +
+    '  https://github.com/mathquill/mathquill/wiki/%60dev%60-branch-(2014%E2%80%932015)-%E2%86%92-v0.10.0-Migration-Guide'
+  );
+}
+// globally exported API object
+function MathQuill(el) {
+  insistOnInterVer();
+  return MQ1(el);
+};
+MathQuill.prototype = Progenote.p;
+MathQuill.VERSION = "v0.10.1";
+MathQuill.interfaceVersion = function(v) {
+  // shim for #459-era interface versioning (ended with #495)
+  if (v !== 1) throw 'Only interface version 1 supported. You specified: ' + v;
+  insistOnInterVer = function() {
+    if (window.console) console.warn(
+      'You called MathQuill.interfaceVersion(1); to specify the interface ' +
+      'version, which will fail in v1.0.0. You can fix this easily by doing ' +
+      'this before doing anything else:\n' +
+      '\n' +
+      '    MathQuill = MathQuill.getInterface(1);\n' +
+      '    // now MathQuill.MathField() works like it used to\n' +
+      '\n' +
+      'See also the "`dev` branch (2014\u20132015) \u2192 v0.10.0 Migration Guide" at\n' +
+      '  https://github.com/mathquill/mathquill/wiki/%60dev%60-branch-(2014%E2%80%932015)-%E2%86%92-v0.10.0-Migration-Guide'
+    );
+  };
+  insistOnInterVer();
+  return MathQuill;
+};
+MathQuill.getInterface = getInterface;
+
+var MIN = getInterface.MIN = 1, MAX = getInterface.MAX = 2;
+function getInterface(v) {
+  if (!(MIN <= v && v <= MAX)) throw 'Only interface versions between ' +
+    MIN + ' and ' + MAX + ' supported. You specified: ' + v;
+
+  /**
+   * Function that takes an HTML element and, if it's the root HTML element of a
+   * static math or math or text field, returns an API object for it (else, null).
+   *
+   *   var mathfield = MQ.MathField(mathFieldSpan);
+   *   assert(MQ(mathFieldSpan).id === mathfield.id);
+   *   assert(MQ(mathFieldSpan).id === MQ(mathFieldSpan).id);
+   *
+   */
+  function MQ(el) {
+    if (!el || !el.nodeType) return null; // check that `el` is a HTML element, using the
+      // same technique as jQuery: https://github.com/jquery/jquery/blob/679536ee4b7a92ae64a5f58d90e9cc38c001e807/src/core/init.js#L92
+    var blockId = $(el).children('.mq-root-block').attr(mqBlockId);
+    var ctrlr = blockId && Node.byId[blockId].controller;
+    return ctrlr ? APIClasses[ctrlr.KIND_OF_MQ](ctrlr) : null;
+  };
+  var APIClasses = {};
+
+  MQ.L = L;
+  MQ.R = R;
+  MQ.saneKeyboardEvents = saneKeyboardEvents;
+
+  function config(currentOptions, newOptions) {
+    if (newOptions && newOptions.handlers) {
+      newOptions.handlers = { fns: newOptions.handlers, APIClasses: APIClasses };
+    }
+    for (var name in newOptions) if (newOptions.hasOwnProperty(name)) {
+      var value = newOptions[name], processor = optionProcessors[name];
+      currentOptions[name] = (processor ? processor(value) : value);
+    }
+  }
+  MQ.config = function(opts) { config(Options.p, opts); return this; };
+  MQ.registerEmbed = function(name, options) {
+    if (!/^[a-z][a-z0-9]*$/i.test(name)) {
+      throw 'Embed name must start with letter and be only letters and digits';
+    }
+    EMBEDS[name] = options;
+  };
+
+  var AbstractMathQuill = APIClasses.AbstractMathQuill = P(Progenote, function(_) {
+    _.init = function(ctrlr) {
+      this.__controller = ctrlr;
+      this.__options = ctrlr.options;
+      this.id = ctrlr.id;
+      this.data = ctrlr.data;
+    };
+    _.__mathquillify = function(classNames) {
+      var ctrlr = this.__controller, root = ctrlr.root, el = ctrlr.container;
+      ctrlr.createTextarea();
+
+      var contents = el.addClass(classNames).contents().detach();
+      root.jQ =
+        $('<span class="mq-root-block"/>').attr(mqBlockId, root.id).appendTo(el);
+      this.latex(contents.text());
+
+      this.revert = function() {
+        return el.empty().unbind('.mathquill')
+        .removeClass('mq-editable-field mq-math-mode mq-text-mode')
+        .append(contents);
+      };
+    };
+    _.config = function(opts) { config(this.__options, opts); return this; };
+    _.el = function() { return this.__controller.container[0]; };
+    _.text = function() { return this.__controller.exportText(); };
+    _.latex = function(latex) {
+      if (arguments.length > 0) {
+        this.__controller.renderLatexMath(latex);
+        if (this.__controller.blurred) this.__controller.cursor.hide().parent.blur();
+        return this;
+      }
+      return this.__controller.exportLatex();
+    };
+    _.html = function() {
+      return this.__controller.root.jQ.html()
+        .replace(/ mathquill-(?:command|block)-id="?\d+"?/g, '')
+        .replace(/<span class="?mq-cursor( mq-blink)?"?>.?<\/span>/i, '')
+        .replace(/ mq-hasCursor|mq-hasCursor ?/, '')
+        .replace(/ class=(""|(?= |>))/g, '');
+    };
+    _.reflow = function() {
+      this.__controller.root.postOrder('reflow');
+      return this;
+    };
+  });
+  MQ.prototype = AbstractMathQuill.prototype;
+
+  APIClasses.EditableField = P(AbstractMathQuill, function(_, super_) {
+    _.__mathquillify = function() {
+      super_.__mathquillify.apply(this, arguments);
+      this.__controller.editable = true;
+      this.__controller.delegateMouseEvents();
+      this.__controller.editablesTextareaEvents();
+      return this;
+    };
+    _.focus = function() { this.__controller.textarea.focus(); return this; };
+    _.blur = function() { this.__controller.textarea.blur(); return this; };
+    _.write = function(latex) {
+      this.__controller.writeLatex(latex);
+      this.__controller.scrollHoriz();
+      if (this.__controller.blurred) this.__controller.cursor.hide().parent.blur();
+      return this;
+    };
+    _.cmd = function(cmd) {
+      var ctrlr = this.__controller.notify(), cursor = ctrlr.cursor;
+      if (/^\\[a-z]+$/i.test(cmd)) {
+        cmd = cmd.slice(1);
+        var klass = LatexCmds[cmd] || Environments[cmd];
+        if (klass) {
+          cmd = klass(cmd);
+          if (cursor.selection) cmd.replaces(cursor.replaceSelection());
+          cmd.createLeftOf(cursor.show());
+          this.__controller.scrollHoriz();
+        }
+        else /* TODO: API needs better error reporting */;
+      }
+      else cursor.parent.write(cursor, cmd);
+      if (ctrlr.blurred) cursor.hide().parent.blur();
+      return this;
+    };
+    _.select = function() {
+      var ctrlr = this.__controller;
+      ctrlr.notify('move').cursor.insAtRightEnd(ctrlr.root);
+      while (ctrlr.cursor[L]) ctrlr.selectLeft();
+      return this;
+    };
+    _.clearSelection = function() {
+      this.__controller.cursor.clearSelection();
+      return this;
+    };
+
+    _.moveToDirEnd = function(dir) {
+      this.__controller.notify('move').cursor.insAtDirEnd(dir, this.__controller.root);
+      return this;
+    };
+    _.moveToLeftEnd = function() { return this.moveToDirEnd(L); };
+    _.moveToRightEnd = function() { return this.moveToDirEnd(R); };
+
+    _.keystroke = function(keys) {
+      var keys = keys.replace(/^\s+|\s+$/g, '').split(/\s+/);
+      for (var i = 0; i < keys.length; i += 1) {
+        this.__controller.keystroke(keys[i], { preventDefault: noop });
+      }
+      return this;
+    };
+    _.typedText = function(text) {
+      for (var i = 0; i < text.length; i += 1) this.__controller.typedText(text.charAt(i));
+      return this;
+    };
+    _.dropEmbedded = function(pageX, pageY, options) {
+      var clientX = pageX - $(window).scrollLeft();
+      var clientY = pageY - $(window).scrollTop();
+
+      var el = document.elementFromPoint(clientX, clientY);
+      this.__controller.seek($(el), pageX, pageY);
+      var cmd = Embed().setOptions(options);
+      cmd.createLeftOf(this.__controller.cursor);
+    };
+    _.clickAt = function(clientX, clientY, target) {
+      target = target || document.elementFromPoint(clientX, clientY);
+
+      var ctrlr = this.__controller, root = ctrlr.root;
+      if (!jQuery.contains(root.jQ[0], target)) target = root.jQ[0];
+      ctrlr.seek($(target), clientX + pageXOffset, clientY + pageYOffset);
+      if (ctrlr.blurred) this.focus();
+      return this;
+    };
+    _.ignoreNextMousedown = function(fn) {
+      this.__controller.cursor.options.ignoreNextMousedown = fn;
+      return this;
+    };
+  });
+  MQ.EditableField = function() { throw "wtf don't call me, I'm 'abstract'"; };
+  MQ.EditableField.prototype = APIClasses.EditableField.prototype;
+
+  /**
+   * Export the API functions that MathQuill-ify an HTML element into API objects
+   * of each class. If the element had already been MathQuill-ified but into a
+   * different kind (or it's not an HTML element), return null.
+   */
+  for (var kind in API) (function(kind, defAPIClass) {
+    var APIClass = APIClasses[kind] = defAPIClass(APIClasses);
+    MQ[kind] = function(el, opts) {
+      var mq = MQ(el);
+      if (mq instanceof APIClass || !el || !el.nodeType) return mq;
+      var ctrlr = Controller(APIClass.RootBlock(), $(el), Options());
+      ctrlr.KIND_OF_MQ = kind;
+      return APIClass(ctrlr).__mathquillify(opts, v);
+    };
+    MQ[kind].prototype = APIClass.prototype;
+  }(kind, API[kind]));
+
+  return MQ;
+}
+
+MathQuill.noConflict = function() {
+  window.MathQuill = origMathQuill;
+  return MathQuill;
+};
+var origMathQuill = window.MathQuill;
+window.MathQuill = MathQuill;
+
+function RootBlockMixin(_) {
+  var names = 'moveOutOf deleteOutOf selectOutOf upOutOf downOutOf'.split(' ');
+  for (var i = 0; i < names.length; i += 1) (function(name) {
+    _[name] = function(dir) { this.controller.handle(name, dir); };
+  }(names[i]));
+  _.reflow = function() {
+    this.controller.handle('reflow');
+    this.controller.handle('edited');
+    this.controller.handle('edit');
+  };
+}
+/*************************************************
+ * Sane Keyboard Events Shim
+ *
+ * An abstraction layer wrapping the textarea in
+ * an object with methods to manipulate and listen
+ * to events on, that hides all the nasty cross-
+ * browser incompatibilities behind a uniform API.
+ *
+ * Design goal: This is a *HARD* internal
+ * abstraction barrier. Cross-browser
+ * inconsistencies are not allowed to leak through
+ * and be dealt with by event handlers. All future
+ * cross-browser issues that arise must be dealt
+ * with here, and if necessary, the API updated.
+ *
+ * Organization:
+ * - key values map and stringify()
+ * - saneKeyboardEvents()
+ *    + defer() and flush()
+ *    + event handler logic
+ *    + attach event handlers and export methods
+ ************************************************/
+
+var saneKeyboardEvents = (function() {
+  // The following [key values][1] map was compiled from the
+  // [DOM3 Events appendix section on key codes][2] and
+  // [a widely cited report on cross-browser tests of key codes][3],
+  // except for 10: 'Enter', which I've empirically observed in Safari on iOS
+  // and doesn't appear to conflict with any other known key codes.
+  //
+  // [1]: http://www.w3.org/TR/2012/WD-DOM-Level-3-Events-20120614/#keys-keyvalues
+  // [2]: http://www.w3.org/TR/2012/WD-DOM-Level-3-Events-20120614/#fixed-virtual-key-codes
+  // [3]: http://unixpapa.com/js/key.html
+  var KEY_VALUES = {
+    8: 'Backspace',
+    9: 'Tab',
+
+    10: 'Enter', // for Safari on iOS
+
+    13: 'Enter',
+
+    16: 'Shift',
+    17: 'Control',
+    18: 'Alt',
+    20: 'CapsLock',
+
+    27: 'Esc',
+
+    32: 'Spacebar',
+
+    33: 'PageUp',
+    34: 'PageDown',
+    35: 'End',
+    36: 'Home',
+
+    37: 'Left',
+    38: 'Up',
+    39: 'Right',
+    40: 'Down',
+
+    45: 'Insert',
+
+    46: 'Del',
+
+    144: 'NumLock'
+  };
+
+  // To the extent possible, create a normalized string representation
+  // of the key combo (i.e., key code and modifier keys).
+  function stringify(evt) {
+    var which = evt.which || evt.keyCode;
+    var keyVal = KEY_VALUES[which];
+    var key;
+    var modifiers = [];
+
+    if (evt.ctrlKey) modifiers.push('Ctrl');
+    if (evt.originalEvent && evt.originalEvent.metaKey) modifiers.push('Meta');
+    if (evt.altKey) modifiers.push('Alt');
+    if (evt.shiftKey) modifiers.push('Shift');
+
+    key = keyVal || String.fromCharCode(which);
+
+    if (!modifiers.length && !keyVal) return key;
+
+    modifiers.push(key);
+    return modifiers.join('-');
+  }
+
+  // create a keyboard events shim that calls callbacks at useful times
+  // and exports useful public methods
+  return function saneKeyboardEvents(el, handlers) {
+    var keydown = null;
+    var keypress = null;
+
+    var textarea = jQuery(el);
+    var target = jQuery(handlers.container || textarea);
+
+    // checkTextareaFor() is called after key or clipboard events to
+    // say "Hey, I think something was just typed" or "pasted" etc,
+    // so that at all subsequent opportune times (next event or timeout),
+    // will check for expected typed or pasted text.
+    // Need to check repeatedly because #135: in Safari 5.1 (at least),
+    // after selecting something and then typing, the textarea is
+    // incorrectly reported as selected during the input event (but not
+    // subsequently).
+    var checkTextarea = noop, timeoutId;
+    function checkTextareaFor(checker) {
+      checkTextarea = checker;
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checker);
+    }
+    function checkTextareaOnce(checker) {
+      checkTextareaFor(function(e) {
+        checkTextarea = noop;
+        clearTimeout(timeoutId);
+        checker(e);
+      });
+    }
+    target.bind('keydown keypress input keyup focusout paste', function(e) { checkTextarea(e); });
+
+
+    // -*- public methods -*- //
+    function select(text) {
+      // check textarea at least once/one last time before munging (so
+      // no race condition if selection happens after keypress/paste but
+      // before checkTextarea), then never again ('cos it's been munged)
+      checkTextarea();
+      checkTextarea = noop;
+      clearTimeout(timeoutId);
+
+      textarea.val(text);
+      if (text && textarea[0].select) textarea[0].select();
+      shouldBeSelected = !!text;
+    }
+    var shouldBeSelected = false;
+
+    // -*- helper subroutines -*- //
+
+    // Determine whether there's a selection in the textarea.
+    // This will always return false in IE < 9, which don't support
+    // HTMLTextareaElement::selection{Start,End}.
+    function hasSelection() {
+      var dom = textarea[0];
+
+      if (!('selectionStart' in dom)) return false;
+      return dom.selectionStart !== dom.selectionEnd;
+    }
+
+    function handleKey() {
+      handlers.keystroke(stringify(keydown), keydown);
+    }
+
+    // -*- event handlers -*- //
+    function onKeydown(e) {
+      keydown = e;
+      keypress = null;
+
+      if (shouldBeSelected) checkTextareaOnce(function(e) {
+        if (!(e && e.type === 'focusout') && textarea[0].select) {
+          // re-select textarea in case it's an unrecognized key that clears
+          // the selection, then never again, 'cos next thing might be blur
+          textarea[0].select();
+        }
+      });
+
+      handleKey();
+    }
+
+    function onKeypress(e) {
+      // call the key handler for repeated keypresses.
+      // This excludes keypresses that happen directly
+      // after keydown.  In that case, there will be
+      // no previous keypress, so we skip it here
+      if (keydown && keypress) handleKey();
+
+      keypress = e;
+
+      checkTextareaFor(typedText);
+    }
+    function onKeyup(e) {
+      // Handle case of no keypress event being sent
+      if (!!keydown && !keypress) checkTextareaFor(typedText);
+    }
+    function typedText() {
+      // If there is a selection, the contents of the textarea couldn't
+      // possibly have just been typed in.
+      // This happens in browsers like Firefox and Opera that fire
+      // keypress for keystrokes that are not text entry and leave the
+      // selection in the textarea alone, such as Ctrl-C.
+      // Note: we assume that browsers that don't support hasSelection()
+      // also never fire keypress on keystrokes that are not text entry.
+      // This seems reasonably safe because:
+      // - all modern browsers including IE 9+ support hasSelection(),
+      //   making it extremely unlikely any browser besides IE < 9 won't
+      // - as far as we know IE < 9 never fires keypress on keystrokes
+      //   that aren't text entry, which is only as reliable as our
+      //   tests are comprehensive, but the IE < 9 way to do
+      //   hasSelection() is poorly documented and is also only as
+      //   reliable as our tests are comprehensive
+      // If anything like #40 or #71 is reported in IE < 9, see
+      // b1318e5349160b665003e36d4eedd64101ceacd8
+      if (hasSelection()) return;
+
+      var text = textarea.val();
+      if (text.length === 1) {
+        textarea.val('');
+        handlers.typedText(text);
+      } // in Firefox, keys that don't type text, just clear seln, fire keypress
+      // https://github.com/mathquill/mathquill/issues/293#issuecomment-40997668
+      else if (text && textarea[0].select) textarea[0].select(); // re-select if that's why we're here
+    }
+
+    function onBlur() { keydown = keypress = null; }
+
+    function onPaste(e) {
+      // browsers are dumb.
+      //
+      // In Linux, middle-click pasting causes onPaste to be called,
+      // when the textarea is not necessarily focused.  We focus it
+      // here to ensure that the pasted text actually ends up in the
+      // textarea.
+      //
+      // It's pretty nifty that by changing focus in this handler,
+      // we can change the target of the default action.  (This works
+      // on keydown too, FWIW).
+      //
+      // And by nifty, we mean dumb (but useful sometimes).
+      textarea.focus();
+
+      checkTextareaFor(pastedText);
+    }
+    function pastedText() {
+      var text = textarea.val();
+      textarea.val('');
+      if (text) handlers.paste(text);
+    }
+
+    // -*- attach event handlers -*- //
+    target.bind({
+      keydown: onKeydown,
+      keypress: onKeypress,
+      keyup: onKeyup,
+      focusout: onBlur,
+      cut: function() { checkTextareaOnce(function() { handlers.cut(); }); },
+      copy: function() { checkTextareaOnce(function() { handlers.copy(); }); },
+      paste: onPaste
+    });
+
+    // -*- export public methods -*- //
+    return {
+      select: select
+    };
+  };
+}());
+var Parser = P(function(_, super_, Parser) {
+  // The Parser object is a wrapper for a parser function.
+  // Externally, you use one to parse a string by calling
+  //   var result = SomeParser.parse('Me Me Me! Parse Me!');
+  // You should never call the constructor, rather you should
+  // construct your Parser from the base parsers and the
+  // parser combinator methods.
+
+  function parseError(stream, message) {
+    if (stream) {
+      stream = "'"+stream+"'";
+    }
+    else {
+      stream = 'EOF';
+    }
+
+    throw 'Parse Error: '+message+' at '+stream;
+  }
+
+  _.init = function(body) { this._ = body; };
+
+  _.parse = function(stream) {
+    return this.skip(eof)._(''+stream, success, parseError);
+
+    function success(stream, result) { return result; }
+  };
+
+  // -*- primitive combinators -*- //
+  _.or = function(alternative) {
+    pray('or is passed a parser', alternative instanceof Parser);
+
+    var self = this;
+
+    return Parser(function(stream, onSuccess, onFailure) {
+      return self._(stream, onSuccess, failure);
+
+      function failure(newStream) {
+        return alternative._(stream, onSuccess, onFailure);
+      }
+    });
+  };
+
+  _.then = function(next) {
+    var self = this;
+
+    return Parser(function(stream, onSuccess, onFailure) {
+      return self._(stream, success, onFailure);
+
+      function success(newStream, result) {
+        var nextParser = (next instanceof Parser ? next : next(result));
+        pray('a parser is returned', nextParser instanceof Parser);
+        return nextParser._(newStream, onSuccess, onFailure);
+      }
+    });
+  };
+
+  // -*- optimized iterative combinators -*- //
+  _.many = function() {
+    var self = this;
+
+    return Parser(function(stream, onSuccess, onFailure) {
+      var xs = [];
+      while (self._(stream, success, failure));
+      return onSuccess(stream, xs);
+
+      function success(newStream, x) {
+        stream = newStream;
+        xs.push(x);
+        return true;
+      }
+
+      function failure() {
+        return false;
+      }
+    });
+  };
+
+  _.times = function(min, max) {
+    if (arguments.length < 2) max = min;
+    var self = this;
+
+    return Parser(function(stream, onSuccess, onFailure) {
+      var xs = [];
+      var result = true;
+      var failure;
+
+      for (var i = 0; i < min; i += 1) {
+        result = self._(stream, success, firstFailure);
+        if (!result) return onFailure(stream, failure);
+      }
+
+      for (; i < max && result; i += 1) {
+        result = self._(stream, success, secondFailure);
+      }
+
+      return onSuccess(stream, xs);
+
+      function success(newStream, x) {
+        xs.push(x);
+        stream = newStream;
+        return true;
+      }
+
+      function firstFailure(newStream, msg) {
+        failure = msg;
+        stream = newStream;
+        return false;
+      }
+
+      function secondFailure(newStream, msg) {
+        return false;
+      }
+    });
+  };
+
+  // -*- higher-level combinators -*- //
+  _.result = function(res) { return this.then(succeed(res)); };
+  _.atMost = function(n) { return this.times(0, n); };
+  _.atLeast = function(n) {
+    var self = this;
+    return self.times(n).then(function(start) {
+      return self.many().map(function(end) {
+        return start.concat(end);
+      });
+    });
+  };
+
+  _.map = function(fn) {
+    return this.then(function(result) { return succeed(fn(result)); });
+  };
+
+  _.skip = function(two) {
+    return this.then(function(result) { return two.result(result); });
+  };
+
+  // -*- primitive parsers -*- //
+  var string = this.string = function(str) {
+    var len = str.length;
+    var expected = "expected '"+str+"'";
+
+    return Parser(function(stream, onSuccess, onFailure) {
+      var head = stream.slice(0, len);
+
+      if (head === str) {
+        return onSuccess(stream.slice(len), head);
+      }
+      else {
+        return onFailure(stream, expected);
+      }
+    });
+  };
+
+  var regex = this.regex = function(re) {
+    pray('regexp parser is anchored', re.toString().charAt(1) === '^');
+
+    var expected = 'expected '+re;
+
+    return Parser(function(stream, onSuccess, onFailure) {
+      var match = re.exec(stream);
+
+      if (match) {
+        var result = match[0];
+        return onSuccess(stream.slice(result.length), result);
+      }
+      else {
+        return onFailure(stream, expected);
+      }
+    });
+  };
+
+  var succeed = Parser.succeed = function(result) {
+    return Parser(function(stream, onSuccess) {
+      return onSuccess(stream, result);
+    });
+  };
+
+  var fail = Parser.fail = function(msg) {
+    return Parser(function(stream, _, onFailure) {
+      return onFailure(stream, msg);
+    });
+  };
+
+  var letter = Parser.letter = regex(/^[a-z]/i);
+  var letters = Parser.letters = regex(/^[a-z]*/i);
+  var digit = Parser.digit = regex(/^[0-9]/);
+  var digits = Parser.digits = regex(/^[0-9]*/);
+  var whitespace = Parser.whitespace = regex(/^\s+/);
+  var optWhitespace = Parser.optWhitespace = regex(/^\s*/);
+
+  var any = Parser.any = Parser(function(stream, onSuccess, onFailure) {
+    if (!stream) return onFailure(stream, 'expected any character');
+
+    return onSuccess(stream.slice(1), stream.charAt(0));
+  });
+
+  var all = Parser.all = Parser(function(stream, onSuccess, onFailure) {
+    return onSuccess('', stream);
+  });
+
+  var eof = Parser.eof = Parser(function(stream, onSuccess, onFailure) {
+    if (stream) return onFailure(stream, 'expected EOF');
+
+    return onSuccess(stream, stream);
+  });
+});
+// Parser MathBlock
+var latexMathParser = (function() {
+  function commandToBlock(cmd) { // can also take in a Fragment
+    var block = MathBlock();
+    cmd.adopt(block, 0, 0);
+    return block;
+  }
+  function joinBlocks(blocks) {
+    var firstBlock = blocks[0] || MathBlock();
+
+    for (var i = 1; i < blocks.length; i += 1) {
+      blocks[i].children().adopt(firstBlock, firstBlock.ends[R], 0);
+    }
+
+    return firstBlock;
+  }
+
+  var string = Parser.string;
+  var regex = Parser.regex;
+  var letter = Parser.letter;
+  var any = Parser.any;
+  var optWhitespace = Parser.optWhitespace;
+  var succeed = Parser.succeed;
+  var fail = Parser.fail;
+
+  // Parsers yielding either MathCommands, or Fragments of MathCommands
+  //   (either way, something that can be adopted by a MathBlock)
+  var variable = letter.map(function(c) { return Letter(c); });
+  var symbol = regex(/^[^${}\\_^]/).map(function(c) { return VanillaSymbol(c); });
+
+  var controlSequence =
+    regex(/^[^\\a-eg-zA-Z]/) // hotfix #164; match MathBlock::write
+    .or(string('\\').then(
+      regex(/^[a-z]+/i)
+      .or(regex(/^\s+/).result(' '))
+      .or(any)
+    )).then(function(ctrlSeq) {
+      var cmdKlass = LatexCmds[ctrlSeq];
+
+      if (cmdKlass) {
+        return cmdKlass(ctrlSeq).parser();
+      }
+      else {
+        return fail('unknown command: \\'+ctrlSeq);
+      }
+    })
+  ;
+
+  var command =
+    controlSequence
+    .or(variable)
+    .or(symbol)
+  ;
+
+  // Parsers yielding MathBlocks
+  var mathGroup = string('{').then(function() { return mathSequence; }).skip(string('}'));
+  var mathBlock = optWhitespace.then(mathGroup.or(command.map(commandToBlock)));
+  var mathSequence = mathBlock.many().map(joinBlocks).skip(optWhitespace);
+
+  var optMathBlock =
+    string('[').then(
+      mathBlock.then(function(block) {
+        return block.join('latex') !== ']' ? succeed(block) : fail();
+      })
+      .many().map(joinBlocks).skip(optWhitespace)
+    ).skip(string(']'))
+  ;
+
+  var latexMath = mathSequence;
+
+  latexMath.block = mathBlock;
+  latexMath.optBlock = optMathBlock;
+  return latexMath;
+})();
+
+Controller.open(function(_, super_) {
+  _.exportLatex = function() {
+    return this.root.latex().replace(/(\\[a-z]+) (?![a-z])/ig,'$1');
+  };
+  _.writeLatex = function(latex) {
+    var cursor = this.notify('edit').cursor;
+
+    var all = Parser.all;
+    var eof = Parser.eof;
+
+    var block = latexMathParser.skip(eof).or(all.result(false)).parse(latex);
+
+    if (block && !block.isEmpty()) {
+      block.children().adopt(cursor.parent, cursor[L], cursor[R]);
+      var jQ = block.jQize();
+      jQ.insertBefore(cursor.jQ);
+      cursor[L] = block.ends[R];
+      block.finalizeInsert(cursor.options, cursor);
+      if (block.ends[R][R].siblingCreated) block.ends[R][R].siblingCreated(cursor.options, L);
+      if (block.ends[L][L].siblingCreated) block.ends[L][L].siblingCreated(cursor.options, R);
+      cursor.parent.bubble('reflow');
+    }
+
+    return this;
+  };
+  _.renderLatexMath = function(latex) {
+    var root = this.root, cursor = this.cursor;
+
+    var all = Parser.all;
+    var eof = Parser.eof;
+
+    var block = latexMathParser.skip(eof).or(all.result(false)).parse(latex);
+
+    root.eachChild('postOrder', 'dispose');
+    root.ends[L] = root.ends[R] = 0;
+
+    if (block) {
+      block.children().adopt(root, 0, 0);
+    }
+
+    var jQ = root.jQ;
+
+    if (block) {
+      var html = block.join('html');
+      jQ.html(html);
+      root.jQize(jQ.children());
+      root.finalizeInsert(cursor.options);
+    }
+    else {
+      jQ.empty();
+    }
+
+    delete cursor.selection;
+    cursor.insAtRightEnd(root);
+  };
+  _.renderLatexText = function(latex) {
+    var root = this.root, cursor = this.cursor;
+
+    root.jQ.children().slice(1).remove();
+    root.eachChild('postOrder', 'dispose');
+    root.ends[L] = root.ends[R] = 0;
+    delete cursor.selection;
+    cursor.show().insAtRightEnd(root);
+
+    var regex = Parser.regex;
+    var string = Parser.string;
+    var eof = Parser.eof;
+    var all = Parser.all;
+
+    // Parser RootMathCommand
+    var mathMode = string('$').then(latexMathParser)
+      // because TeX is insane, math mode doesn't necessarily
+      // have to end.  So we allow for the case that math mode
+      // continues to the end of the stream.
+      .skip(string('$').or(eof))
+      .map(function(block) {
+        // HACK FIXME: this shouldn't have to have access to cursor
+        var rootMathCommand = RootMathCommand(cursor);
+
+        rootMathCommand.createBlocks();
+        var rootMathBlock = rootMathCommand.ends[L];
+        block.children().adopt(rootMathBlock, 0, 0);
+
+        return rootMathCommand;
+      })
+    ;
+
+    var escapedDollar = string('\\$').result('$');
+    var textChar = escapedDollar.or(regex(/^[^$]/)).map(VanillaSymbol);
+    var latexText = mathMode.or(textChar).many();
+    var commands = latexText.skip(eof).or(all.result(false)).parse(latex);
+
+    if (commands) {
+      for (var i = 0; i < commands.length; i += 1) {
+        commands[i].adopt(root, root.ends[R], 0);
+      }
+
+      root.jQize().appendTo(root.jQ);
+
+      root.finalizeInsert(cursor.options);
+    }
+  };
+});
+Controller.open(function(_) {
+  _.focusBlurEvents = function() {
+    var ctrlr = this, root = ctrlr.root, cursor = ctrlr.cursor;
+    var blurTimeout;
+    ctrlr.textarea.focus(function() {
+      ctrlr.blurred = false;
+      clearTimeout(blurTimeout);
+      ctrlr.container.addClass('mq-focused');
+      if (!cursor.parent)
+        cursor.insAtRightEnd(root);
+      if (cursor.selection) {
+        cursor.selection.jQ.removeClass('mq-blur');
+        ctrlr.selectionChanged(); //re-select textarea contents after tabbing away and back
+      }
+      else
+        cursor.show();
+    }).blur(function() {
+      ctrlr.blurred = true;
+      blurTimeout = setTimeout(function() { // wait for blur on window; if
+        root.postOrder('intentionalBlur'); // none, intentional blur: #264
+        cursor.clearSelection().endSelection();
+        blur();
+      });
+      $(window).bind('blur', windowBlur);
+    });
+    function windowBlur() { // blur event also fired on window, just switching
+      clearTimeout(blurTimeout); // tabs/windows, not intentional blur
+      if (cursor.selection) cursor.selection.jQ.addClass('mq-blur');
+      blur();
+    }
+    function blur() { // not directly in the textarea blur handler so as to be
+      cursor.hide().parent.blur(); // synchronous with/in the same frame as
+      ctrlr.container.removeClass('mq-focused'); // clearing/blurring selection
+      $(window).unbind('blur', windowBlur);
+    }
+    ctrlr.blurred = true;
+    cursor.hide().parent.blur();
+  };
+});
+
+/**
+ * TODO: I wanted to move MathBlock::focus and blur here, it would clean
+ * up lots of stuff like, TextBlock::focus is set to MathBlock::focus
+ * and TextBlock::blur calls MathBlock::blur, when instead they could
+ * use inheritance and super_.
+ *
+ * Problem is, there's lots of calls to .focus()/.blur() on nodes
+ * outside Controller::focusBlurEvents(), such as .postOrder('blur') on
+ * insertion, which if MathBlock::blur becomes Node::blur, would add the
+ * 'blur' CSS class to all Symbol's (because .isEmpty() is true for all
+ * of them).
+ *
+ * I'm not even sure there aren't other troublesome calls to .focus() or
+ * .blur(), so this is TODO for now.
+ */
+/***********************************************
+ * Export math in a human-readable text format
+ * As you can see, only half-baked so far.
+ **********************************************/
+
+Controller.open(function(_, super_) {
+  _.exportText = function() {
+    return this.root.foldChildren('', function(text, child) {
+      return text + child.text();
+    });
+  };
+});
+/*****************************************
+ * Deals with the browser DOM events from
+ * interaction with the typist.
+ ****************************************/
+
+Controller.open(function(_) {
+  _.keystroke = function(key, evt) {
+    this.cursor.parent.keystroke(key, evt, this);
+  };
+});
+
+Node.open(function(_) {
+  _.keystroke = function(key, e, ctrlr) {
+    var cursor = ctrlr.cursor;
+
+    switch (key) {
+    case 'Ctrl-Shift-Backspace':
+    case 'Ctrl-Backspace':
+      ctrlr.ctrlDeleteDir(L);
+      break;
+
+    case 'Shift-Backspace':
+    case 'Backspace':
+      ctrlr.backspace();
+      break;
+
+    // Tab or Esc -> go one block right if it exists, else escape right.
+    case 'Esc':
+    case 'Tab':
+      ctrlr.escapeDir(R, key, e);
+      return;
+
+    // Shift-Tab -> go one block left if it exists, else escape left.
+    case 'Shift-Tab':
+    case 'Shift-Esc':
+      ctrlr.escapeDir(L, key, e);
+      return;
+
+    // End -> move to the end of the current block.
+    case 'End':
+      ctrlr.notify('move').cursor.insAtRightEnd(cursor.parent);
+      break;
+
+    // Ctrl-End -> move all the way to the end of the root block.
+    case 'Ctrl-End':
+      ctrlr.notify('move').cursor.insAtRightEnd(ctrlr.root);
+      break;
+
+    // Shift-End -> select to the end of the current block.
+    case 'Shift-End':
+      while (cursor[R]) {
+        ctrlr.selectRight();
+      }
+      break;
+
+    // Ctrl-Shift-End -> select to the end of the root block.
+    case 'Ctrl-Shift-End':
+      while (cursor[R] || cursor.parent !== ctrlr.root) {
+        ctrlr.selectRight();
+      }
+      break;
+
+    // Home -> move to the start of the root block or the current block.
+    case 'Home':
+      ctrlr.notify('move').cursor.insAtLeftEnd(cursor.parent);
+      break;
+
+    // Ctrl-Home -> move to the start of the current block.
+    case 'Ctrl-Home':
+      ctrlr.notify('move').cursor.insAtLeftEnd(ctrlr.root);
+      break;
+
+    // Shift-Home -> select to the start of the current block.
+    case 'Shift-Home':
+      while (cursor[L]) {
+        ctrlr.selectLeft();
+      }
+      break;
+
+    // Ctrl-Shift-Home -> move to the start of the root block.
+    case 'Ctrl-Shift-Home':
+      while (cursor[L] || cursor.parent !== ctrlr.root) {
+        ctrlr.selectLeft();
+      }
+      break;
+
+    case 'Left': ctrlr.moveLeft(); break;
+    case 'Shift-Left': ctrlr.selectLeft(); break;
+    case 'Ctrl-Left': break;
+
+    case 'Right': ctrlr.moveRight(); break;
+    case 'Shift-Right': ctrlr.selectRight(); break;
+    case 'Ctrl-Right': break;
+
+    case 'Up': ctrlr.moveUp(); break;
+    case 'Down': ctrlr.moveDown(); break;
+
+    case 'Shift-Up':
+      if (cursor[L]) {
+        while (cursor[L]) ctrlr.selectLeft();
+      } else {
+        ctrlr.selectLeft();
+      }
+
+    case 'Shift-Down':
+      if (cursor[R]) {
+        while (cursor[R]) ctrlr.selectRight();
+      }
+      else {
+        ctrlr.selectRight();
+      }
+
+    case 'Ctrl-Up': break;
+    case 'Ctrl-Down': break;
+
+    case 'Ctrl-Shift-Del':
+    case 'Ctrl-Del':
+      ctrlr.ctrlDeleteDir(R);
+      break;
+
+    case 'Shift-Del':
+    case 'Del':
+      ctrlr.deleteForward();
+      break;
+
+    case 'Meta-A':
+    case 'Ctrl-A':
+      ctrlr.notify('move').cursor.insAtRightEnd(ctrlr.root);
+      while (cursor[L]) ctrlr.selectLeft();
+      break;
+
+    default:
+      return;
+    }
+    e.preventDefault();
+    ctrlr.scrollHoriz();
+  };
+
+  _.moveOutOf = // called by Controller::escapeDir, moveDir
+  _.moveTowards = // called by Controller::moveDir
+  _.deleteOutOf = // called by Controller::deleteDir
+  _.deleteTowards = // called by Controller::deleteDir
+  _.unselectInto = // called by Controller::selectDir
+  _.selectOutOf = // called by Controller::selectDir
+  _.selectTowards = // called by Controller::selectDir
+    function() { pray('overridden or never called on this node'); };
+});
+
+Controller.open(function(_) {
+  this.onNotify(function(e) {
+    if (e === 'move' || e === 'upDown') this.show().clearSelection();
+  });
+  _.escapeDir = function(dir, key, e) {
+    prayDirection(dir);
+    var cursor = this.cursor;
+
+    // only prevent default of Tab if not in the root editable
+    if (cursor.parent !== this.root) e.preventDefault();
+
+    // want to be a noop if in the root editable (in fact, Tab has an unrelated
+    // default browser action if so)
+    if (cursor.parent === this.root) return;
+
+    cursor.parent.moveOutOf(dir, cursor);
+    return this.notify('move');
+  };
+
+  optionProcessors.leftRightIntoCmdGoes = function(updown) {
+    if (updown && updown !== 'up' && updown !== 'down') {
+      throw '"up" or "down" required for leftRightIntoCmdGoes option, '
+            + 'got "'+updown+'"';
+    }
+    return updown;
+  };
+  _.moveDir = function(dir) {
+    prayDirection(dir);
+    var cursor = this.cursor, updown = cursor.options.leftRightIntoCmdGoes;
+
+    if (cursor.selection) {
+      cursor.insDirOf(dir, cursor.selection.ends[dir]);
+    }
+    else if (cursor[dir]) cursor[dir].moveTowards(dir, cursor, updown);
+    else cursor.parent.moveOutOf(dir, cursor, updown);
+
+    return this.notify('move');
+  };
+  _.moveLeft = function() { return this.moveDir(L); };
+  _.moveRight = function() { return this.moveDir(R); };
+
+  /**
+   * moveUp and moveDown have almost identical algorithms:
+   * - first check left and right, if so insAtLeft/RightEnd of them
+   * - else check the parent's 'upOutOf'/'downOutOf' property:
+   *   + if it's a function, call it with the cursor as the sole argument and
+   *     use the return value as if it were the value of the property
+   *   + if it's a Node, jump up or down into it:
+   *     - if there is a cached Point in the block, insert there
+   *     - else, seekHoriz within the block to the current x-coordinate (to be
+   *       as close to directly above/below the current position as possible)
+   *   + unless it's exactly `true`, stop bubbling
+   */
+  _.moveUp = function() { return moveUpDown(this, 'up'); };
+  _.moveDown = function() { return moveUpDown(this, 'down'); };
+  function moveUpDown(self, dir) {
+    var cursor = self.notify('upDown').cursor;
+    var dirInto = dir+'Into', dirOutOf = dir+'OutOf';
+    if (cursor[R][dirInto]) cursor.insAtLeftEnd(cursor[R][dirInto]);
+    else if (cursor[L][dirInto]) cursor.insAtRightEnd(cursor[L][dirInto]);
+    else {
+      cursor.parent.bubble(function(ancestor) {
+        var prop = ancestor[dirOutOf];
+        if (prop) {
+          if (typeof prop === 'function') prop = ancestor[dirOutOf](cursor);
+          if (prop instanceof Node) cursor.jumpUpDown(ancestor, prop);
+          if (prop !== true) return false;
+        }
+      });
+    }
+    return self;
+  }
+  this.onNotify(function(e) { if (e !== 'upDown') this.upDownCache = {}; });
+
+  this.onNotify(function(e) { if (e === 'edit') this.show().deleteSelection(); });
+  _.deleteDir = function(dir) {
+    prayDirection(dir);
+    var cursor = this.cursor;
+
+    var hadSelection = cursor.selection;
+    this.notify('edit'); // deletes selection if present
+    if (!hadSelection) {
+      if (cursor[dir]) cursor[dir].deleteTowards(dir, cursor);
+      else cursor.parent.deleteOutOf(dir, cursor);
+    }
+
+    if (cursor[L].siblingDeleted) cursor[L].siblingDeleted(cursor.options, R);
+    if (cursor[R].siblingDeleted) cursor[R].siblingDeleted(cursor.options, L);
+    cursor.parent.bubble('reflow');
+
+    return this;
+  };
+  _.ctrlDeleteDir = function(dir) {
+    prayDirection(dir);
+    var cursor = this.cursor;
+    if (!cursor[L] || cursor.selection) return this.deleteDir();
+
+    this.notify('edit');
+    Fragment(cursor.parent.ends[L], cursor[L]).remove();
+    cursor.insAtDirEnd(L, cursor.parent);
+
+    if (cursor[L].siblingDeleted) cursor[L].siblingDeleted(cursor.options, R);
+    if (cursor[R].siblingDeleted) cursor[R].siblingDeleted(cursor.options, L);
+    cursor.parent.bubble('reflow');
+
+    return this;
+  };
+  _.backspace = function() { return this.deleteDir(L); };
+  _.deleteForward = function() { return this.deleteDir(R); };
+
+  this.onNotify(function(e) { if (e !== 'select') this.endSelection(); });
+  _.selectDir = function(dir) {
+    var cursor = this.notify('select').cursor, seln = cursor.selection;
+    prayDirection(dir);
+
+    if (!cursor.anticursor) cursor.startSelection();
+
+    var node = cursor[dir];
+    if (node) {
+      // "if node we're selecting towards is inside selection (hence retracting)
+      // and is on the *far side* of the selection (hence is only node selected)
+      // and the anticursor is *inside* that node, not just on the other side"
+      if (seln && seln.ends[dir] === node && cursor.anticursor[-dir] !== node) {
+        node.unselectInto(dir, cursor);
+      }
+      else node.selectTowards(dir, cursor);
+    }
+    else cursor.parent.selectOutOf(dir, cursor);
+
+    cursor.clearSelection();
+    cursor.select() || cursor.show();
+  };
+  _.selectLeft = function() { return this.selectDir(L); };
+  _.selectRight = function() { return this.selectDir(R); };
+});
+/*********************************************
+ * Manage the MathQuill instance's textarea
+ * (as owned by the Controller)
+ ********************************************/
+
+Controller.open(function(_) {
+  Options.p.substituteTextarea = function() {
+    return $('<textarea autocapitalize=off autocomplete=off autocorrect=off ' +
+               'spellcheck=false x-palm-disable-ste-all=true />')[0];
+  };
+  _.createTextarea = function() {
+    var textareaSpan = this.textareaSpan = $('<span class="mq-textarea"></span>'),
+      textarea = this.options.substituteTextarea();
+    if (!textarea.nodeType) {
+      throw 'substituteTextarea() must return a DOM element, got ' + textarea;
+    }
+    textarea = this.textarea = $(textarea).appendTo(textareaSpan);
+
+    var ctrlr = this;
+    ctrlr.cursor.selectionChanged = function() { ctrlr.selectionChanged(); };
+    ctrlr.container.bind('copy', function() { ctrlr.setTextareaSelection(); });
+  };
+  _.selectionChanged = function() {
+    var ctrlr = this;
+    forceIERedraw(ctrlr.container[0]);
+
+    // throttle calls to setTextareaSelection(), because setting textarea.value
+    // and/or calling textarea.select() can have anomalously bad performance:
+    // https://github.com/mathquill/mathquill/issues/43#issuecomment-1399080
+    if (ctrlr.textareaSelectionTimeout === undefined) {
+      ctrlr.textareaSelectionTimeout = setTimeout(function() {
+        ctrlr.setTextareaSelection();
+      });
+    }
+  };
+  _.setTextareaSelection = function() {
+    this.textareaSelectionTimeout = undefined;
+    var latex = '';
+    if (this.cursor.selection) {
+      latex = this.cursor.selection.join('latex');
+      if (this.options.statelessClipboard) {
+        // FIXME: like paste, only this works for math fields; should ask parent
+        latex = '$' + latex + '$';
+      }
+    }
+    this.selectFn(latex);
+  };
+  _.staticMathTextareaEvents = function() {
+    var ctrlr = this, root = ctrlr.root, cursor = ctrlr.cursor,
+      textarea = ctrlr.textarea, textareaSpan = ctrlr.textareaSpan;
+
+    this.container.prepend('<span class="mq-selectable">$'+ctrlr.exportLatex()+'$</span>');
+    ctrlr.blurred = true;
+    textarea.bind('cut paste', false)
+    .bind('copy', function() { ctrlr.setTextareaSelection(); })
+    .focus(function() { ctrlr.blurred = false; }).blur(function() {
+      if (cursor.selection) cursor.selection.clear();
+      setTimeout(detach); //detaching during blur explodes in WebKit
+    });
+    function detach() {
+      textareaSpan.detach();
+      ctrlr.blurred = true;
+    }
+
+    ctrlr.selectFn = function(text) {
+      textarea.val(text);
+      if (text) textarea.select();
+    };
+  };
+  Options.p.substituteKeyboardEvents = saneKeyboardEvents;
+  _.editablesTextareaEvents = function() {
+    var ctrlr = this, textarea = ctrlr.textarea, textareaSpan = ctrlr.textareaSpan;
+
+    var keyboardEventsShim = this.options.substituteKeyboardEvents(textarea, this);
+    this.selectFn = function(text) { keyboardEventsShim.select(text); };
+    this.container.prepend(textareaSpan);
+    this.focusBlurEvents();
+  };
+  _.typedText = function(ch) {
+    if (ch === '\n') return this.handle('enter');
+    var cursor = this.notify().cursor;
+    cursor.parent.write(cursor, ch);
+    this.scrollHoriz();
+  };
+  _.cut = function() {
+    var ctrlr = this, cursor = ctrlr.cursor;
+    if (cursor.selection) {
+      setTimeout(function() {
+        ctrlr.notify('edit'); // deletes selection if present
+        cursor.parent.bubble('reflow');
+      });
+    }
+  };
+  _.copy = function() {
+    this.setTextareaSelection();
+  };
+  _.paste = function(text) {
+    // TODO: document `statelessClipboard` config option in README, after
+    // making it work like it should, that is, in both text and math mode
+    // (currently only works in math fields, so worse than pointless, it
+    //  only gets in the way by \text{}-ifying pasted stuff and $-ifying
+    //  cut/copied LaTeX)
+    if (this.options.statelessClipboard) {
+      if (text.slice(0,1) === '$' && text.slice(-1) === '$') {
+        text = text.slice(1, -1);
+      }
+      else {
+        text = '\\text{'+text+'}';
+      }
+    }
+    // FIXME: this always inserts math or a TextBlock, even in a RootTextBlock
+    this.writeLatex(text).cursor.show();
+  };
+});
+/********************************************************
+ * Deals with mouse events for clicking, drag-to-select
+ *******************************************************/
+
+Controller.open(function(_) {
+  Options.p.ignoreNextMousedown = noop;
+  _.delegateMouseEvents = function() {
+    var ultimateRootjQ = this.root.jQ;
+    //drag-to-select event handling
+    this.container.bind('mousedown.mathquill', function(e) {
+      var rootjQ = $(e.target).closest('.mq-root-block');
+      var root = Node.byId[rootjQ.attr(mqBlockId) || ultimateRootjQ.attr(mqBlockId)];
+      var ctrlr = root.controller, cursor = ctrlr.cursor, blink = cursor.blink;
+      var textareaSpan = ctrlr.textareaSpan, textarea = ctrlr.textarea;
+
+      e.preventDefault(); // doesn't work in IE\u22648, but it's a one-line fix:
+      e.target.unselectable = true; // http://jsbin.com/yagekiji/1
+
+      if (cursor.options.ignoreNextMousedown(e)) return;
+      else cursor.options.ignoreNextMousedown = noop;
+
+      var target;
+      function mousemove(e) { target = $(e.target); }
+      function docmousemove(e) {
+        if (!cursor.anticursor) cursor.startSelection();
+        ctrlr.seek(target, e.pageX, e.pageY).cursor.select();
+        target = undefined;
+      }
+      // outside rootjQ, the MathQuill node corresponding to the target (if any)
+      // won't be inside this root, so don't mislead Controller::seek with it
+
+      function mouseup(e) {
+        cursor.blink = blink;
+        if (!cursor.selection) {
+          if (ctrlr.editable) {
+            cursor.show();
+          }
+          else {
+            textareaSpan.detach();
+          }
+        }
+
+        // delete the mouse handlers now that we're not dragging anymore
+        rootjQ.unbind('mousemove', mousemove);
+        $(e.target.ownerDocument).unbind('mousemove', docmousemove).unbind('mouseup', mouseup);
+      }
+
+      if (ctrlr.blurred) {
+        if (!ctrlr.editable) rootjQ.prepend(textareaSpan);
+        textarea.focus();
+      }
+
+      cursor.blink = noop;
+      ctrlr.seek($(e.target), e.pageX, e.pageY).cursor.startSelection();
+
+      rootjQ.mousemove(mousemove);
+      $(e.target.ownerDocument).mousemove(docmousemove).mouseup(mouseup);
+      // listen on document not just body to not only hear about mousemove and
+      // mouseup on page outside field, but even outside page, except iframes: https://github.com/mathquill/mathquill/commit/8c50028afcffcace655d8ae2049f6e02482346c5#commitcomment-6175800
+    });
+  }
+});
+
+Controller.open(function(_) {
+  _.seek = function(target, pageX, pageY) {
+    var cursor = this.notify('select').cursor;
+
+    if (target) {
+      var nodeId = target.attr(mqBlockId) || target.attr(mqCmdId);
+      if (!nodeId) {
+        var targetParent = target.parent();
+        nodeId = targetParent.attr(mqBlockId) || targetParent.attr(mqCmdId);
+      }
+    }
+    var node = nodeId ? Node.byId[nodeId] : this.root;
+    pray('nodeId is the id of some Node that exists', node);
+
+    // don't clear selection until after getting node from target, in case
+    // target was selection span, otherwise target will have no parent and will
+    // seek from root, which is less accurate (e.g. fraction)
+    cursor.clearSelection().show();
+
+    node.seek(pageX, cursor);
+    this.scrollHoriz(); // before .selectFrom when mouse-selecting, so
+                        // always hits no-selection case in scrollHoriz and scrolls slower
+    return this;
+  };
+});
+/***********************************************
+ * Horizontal panning for editable fields that
+ * overflow their width
+ **********************************************/
+
+Controller.open(function(_) {
+  _.scrollHoriz = function() {
+    var cursor = this.cursor, seln = cursor.selection;
+    var rootRect = this.root.jQ[0].getBoundingClientRect();
+    if (!seln) {
+      var x = cursor.jQ[0].getBoundingClientRect().left;
+      if (x > rootRect.right - 20) var scrollBy = x - (rootRect.right - 20);
+      else if (x < rootRect.left + 20) var scrollBy = x - (rootRect.left + 20);
+      else return;
+    }
+    else {
+      var rect = seln.jQ[0].getBoundingClientRect();
+      var overLeft = rect.left - (rootRect.left + 20);
+      var overRight = rect.right - (rootRect.right - 20);
+      if (seln.ends[L] === cursor[R]) {
+        if (overLeft < 0) var scrollBy = overLeft;
+        else if (overRight > 0) {
+          if (rect.left - overRight < rootRect.left + 20) var scrollBy = overLeft;
+          else var scrollBy = overRight;
+        }
+        else return;
+      }
+      else {
+        if (overRight > 0) var scrollBy = overRight;
+        else if (overLeft < 0) {
+          if (rect.right - overLeft > rootRect.right - 20) var scrollBy = overRight;
+          else var scrollBy = overLeft;
+        }
+        else return;
+      }
+    }
+    this.root.jQ.stop().animate({ scrollLeft: '+=' + scrollBy}, 100);
+  };
+});
+/*************************************************
+ * Abstract classes of math blocks and commands.
+ ************************************************/
+
+/**
+ * Math tree node base class.
+ * Some math-tree-specific extensions to Node.
+ * Both MathBlock's and MathCommand's descend from it.
+ */
+var MathElement = P(Node, function(_, super_) {
+  _.finalizeInsert = function(options, cursor) { // `cursor` param is only for
+      // SupSub::contactWeld, and is deliberately only passed in by writeLatex,
+      // see ea7307eb4fac77c149a11ffdf9a831df85247693
+    var self = this;
+    self.postOrder('finalizeTree', options);
+    self.postOrder('contactWeld', cursor);
+
+    // note: this order is important.
+    // empty elements need the empty box provided by blur to
+    // be present in order for their dimensions to be measured
+    // correctly by 'reflow' handlers.
+    self.postOrder('blur');
+
+    self.postOrder('reflow');
+    if (self[R].siblingCreated) self[R].siblingCreated(options, L);
+    if (self[L].siblingCreated) self[L].siblingCreated(options, R);
+    self.bubble('reflow');
+  };
+});
+
+/**
+ * Commands and operators, like subscripts, exponents, or fractions.
+ * Descendant commands are organized into blocks.
+ */
+var MathCommand = P(MathElement, function(_, super_) {
+  _.init = function(ctrlSeq, htmlTemplate, textTemplate) {
+    var cmd = this;
+    super_.init.call(cmd);
+
+    if (!cmd.ctrlSeq) cmd.ctrlSeq = ctrlSeq;
+    if (htmlTemplate) cmd.htmlTemplate = htmlTemplate;
+    if (textTemplate) cmd.textTemplate = textTemplate;
+  };
+
+  // obvious methods
+  _.replaces = function(replacedFragment) {
+    replacedFragment.disown();
+    this.replacedFragment = replacedFragment;
+  };
+  _.isEmpty = function() {
+    return this.foldChildren(true, function(isEmpty, child) {
+      return isEmpty && child.isEmpty();
+    });
+  };
+
+  _.parser = function() {
+    var block = latexMathParser.block;
+    var self = this;
+
+    return block.times(self.numBlocks()).map(function(blocks) {
+      self.blocks = blocks;
+
+      for (var i = 0; i < blocks.length; i += 1) {
+        blocks[i].adopt(self, self.ends[R], 0);
+      }
+
+      return self;
+    });
+  };
+
+  // createLeftOf(cursor) and the methods it calls
+  _.createLeftOf = function(cursor) {
+    var cmd = this;
+    var replacedFragment = cmd.replacedFragment;
+
+    cmd.createBlocks();
+    super_.createLeftOf.call(cmd, cursor);
+    if (replacedFragment) {
+      replacedFragment.adopt(cmd.ends[L], 0, 0);
+      replacedFragment.jQ.appendTo(cmd.ends[L].jQ);
+    }
+    cmd.finalizeInsert(cursor.options);
+    cmd.placeCursor(cursor);
+  };
+  _.createBlocks = function() {
+    var cmd = this,
+      numBlocks = cmd.numBlocks(),
+      blocks = cmd.blocks = Array(numBlocks);
+
+    for (var i = 0; i < numBlocks; i += 1) {
+      var newBlock = blocks[i] = MathBlock();
+      newBlock.adopt(cmd, cmd.ends[R], 0);
+    }
+  };
+  _.placeCursor = function(cursor) {
+    //insert the cursor at the right end of the first empty child, searching
+    //left-to-right, or if none empty, the right end child
+    cursor.insAtRightEnd(this.foldChildren(this.ends[L], function(leftward, child) {
+      return leftward.isEmpty() ? leftward : child;
+    }));
+  };
+
+  // editability methods: called by the cursor for editing, cursor movements,
+  // and selection of the MathQuill tree, these all take in a direction and
+  // the cursor
+  _.moveTowards = function(dir, cursor, updown) {
+    var updownInto = updown && this[updown+'Into'];
+    cursor.insAtDirEnd(-dir, updownInto || this.ends[-dir]);
+  };
+  _.deleteTowards = function(dir, cursor) {
+    if (this.isEmpty()) cursor[dir] = this.remove()[dir];
+    else this.moveTowards(dir, cursor, null);
+  };
+  _.selectTowards = function(dir, cursor) {
+    cursor[-dir] = this;
+    cursor[dir] = this[dir];
+  };
+  _.selectChildren = function() {
+    return Selection(this, this);
+  };
+  _.unselectInto = function(dir, cursor) {
+    cursor.insAtDirEnd(-dir, cursor.anticursor.ancestors[this.id]);
+  };
+  _.seek = function(pageX, cursor) {
+    function getBounds(node) {
+      var bounds = {}
+      bounds[L] = node.jQ.offset().left;
+      bounds[R] = bounds[L] + node.jQ.outerWidth();
+      return bounds;
+    }
+
+    var cmd = this;
+    var cmdBounds = getBounds(cmd);
+
+    if (pageX < cmdBounds[L]) return cursor.insLeftOf(cmd);
+    if (pageX > cmdBounds[R]) return cursor.insRightOf(cmd);
+
+    var leftLeftBound = cmdBounds[L];
+    cmd.eachChild(function(block) {
+      var blockBounds = getBounds(block);
+      if (pageX < blockBounds[L]) {
+        // closer to this block's left bound, or the bound left of that?
+        if (pageX - leftLeftBound < blockBounds[L] - pageX) {
+          if (block[L]) cursor.insAtRightEnd(block[L]);
+          else cursor.insLeftOf(cmd);
+        }
+        else cursor.insAtLeftEnd(block);
+        return false;
+      }
+      else if (pageX > blockBounds[R]) {
+        if (block[R]) leftLeftBound = blockBounds[R]; // continue to next block
+        else { // last (rightmost) block
+          // closer to this block's right bound, or the cmd's right bound?
+          if (cmdBounds[R] - pageX < pageX - blockBounds[R]) {
+            cursor.insRightOf(cmd);
+          }
+          else cursor.insAtRightEnd(block);
+        }
+      }
+      else {
+        block.seek(pageX, cursor);
+        return false;
+      }
+    });
+  }
+
+  // methods involved in creating and cross-linking with HTML DOM nodes
+  /*
+    They all expect an .htmlTemplate like
+      '<span>&0</span>'
+    or
+      '<span><span>&0</span><span>&1</span></span>'
+
+    See html.test.js for more examples.
+
+    Requirements:
+    - For each block of the command, there must be exactly one "block content
+      marker" of the form '&<number>' where <number> is the 0-based index of the
+      block. (Like the LaTeX \newcommand syntax, but with a 0-based rather than
+      1-based index, because JavaScript because C because Dijkstra.)
+    - The block content marker must be the sole contents of the containing
+      element, there can't even be surrounding whitespace, or else we can't
+      guarantee sticking to within the bounds of the block content marker when
+      mucking with the HTML DOM.
+    - The HTML not only must be well-formed HTML (of course), but also must
+      conform to the XHTML requirements on tags, specifically all tags must
+      either be self-closing (like '<br/>') or come in matching pairs.
+      Close tags are never optional.
+
+    Note that &<number> isn't well-formed HTML; if you wanted a literal '&123',
+    your HTML template would have to have '&amp;123'.
+  */
+  _.numBlocks = function() {
+    var matches = this.htmlTemplate.match(/&\d+/g);
+    return matches ? matches.length : 0;
+  };
+  _.html = function() {
+    // Render the entire math subtree rooted at this command, as HTML.
+    // Expects .createBlocks() to have been called already, since it uses the
+    // .blocks array of child blocks.
+    //
+    // See html.test.js for example templates and intended outputs.
+    //
+    // Given an .htmlTemplate as described above,
+    // - insert the mathquill-command-id attribute into all top-level tags,
+    //   which will be used to set this.jQ in .jQize().
+    //   This is straightforward:
+    //     * tokenize into tags and non-tags
+    //     * loop through top-level tokens:
+    //         * add #cmdId attribute macro to top-level self-closing tags
+    //         * else add #cmdId attribute macro to top-level open tags
+    //             * skip the matching top-level close tag and all tag pairs
+    //               in between
+    // - for each block content marker,
+    //     + replace it with the contents of the corresponding block,
+    //       rendered as HTML
+    //     + insert the mathquill-block-id attribute into the containing tag
+    //   This is even easier, a quick regex replace, since block tags cannot
+    //   contain anything besides the block content marker.
+    //
+    // Two notes:
+    // - The outermost loop through top-level tokens should never encounter any
+    //   top-level close tags, because we should have first encountered a
+    //   matching top-level open tag, all inner tags should have appeared in
+    //   matching pairs and been skipped, and then we should have skipped the
+    //   close tag in question.
+    // - All open tags should have matching close tags, which means our inner
+    //   loop should always encounter a close tag and drop nesting to 0. If
+    //   a close tag is missing, the loop will continue until i >= tokens.length
+    //   and token becomes undefined. This will not infinite loop, even in
+    //   production without pray(), because it will then TypeError on .slice().
+
+    var cmd = this;
+    var blocks = cmd.blocks;
+    var cmdId = ' mathquill-command-id=' + cmd.id;
+    var tokens = cmd.htmlTemplate.match(/<[^<>]+>|[^<>]+/g);
+
+    pray('no unmatched angle brackets', tokens.join('') === this.htmlTemplate);
+
+    // add cmdId to all top-level tags
+    for (var i = 0, token = tokens[0]; token; i += 1, token = tokens[i]) {
+      // top-level self-closing tags
+      if (token.slice(-2) === '/>') {
+        tokens[i] = token.slice(0,-2) + cmdId + '/>';
+      }
+      // top-level open tags
+      else if (token.charAt(0) === '<') {
+        pray('not an unmatched top-level close tag', token.charAt(1) !== '/');
+
+        tokens[i] = token.slice(0,-1) + cmdId + '>';
+
+        // skip matching top-level close tag and all tag pairs in between
+        var nesting = 1;
+        do {
+          i += 1, token = tokens[i];
+          pray('no missing close tags', token);
+          // close tags
+          if (token.slice(0,2) === '</') {
+            nesting -= 1;
+          }
+          // non-self-closing open tags
+          else if (token.charAt(0) === '<' && token.slice(-2) !== '/>') {
+            nesting += 1;
+          }
+        } while (nesting > 0);
+      }
+    }
+    return tokens.join('').replace(/>&(\d+)/g, function($0, $1) {
+      return ' mathquill-block-id=' + blocks[$1].id + '>' + blocks[$1].join('html');
+    });
+  };
+
+  // methods to export a string representation of the math tree
+  _.latex = function() {
+    return this.foldChildren(this.ctrlSeq, function(latex, child) {
+      return latex + '{' + (child.latex() || ' ') + '}';
+    });
+  };
+  _.textTemplate = [''];
+  _.text = function() {
+    var cmd = this, i = 0;
+    return cmd.foldChildren(cmd.textTemplate[i], function(text, child) {
+      i += 1;
+      var child_text = child.text();
+      if (text && cmd.textTemplate[i] === '('
+          && child_text[0] === '(' && child_text.slice(-1) === ')')
+        return text + child_text.slice(1, -1) + cmd.textTemplate[i];
+      return text + child.text() + (cmd.textTemplate[i] || '');
+    });
+  };
+});
+
+/**
+ * Lightweight command without blocks or children.
+ */
+var Symbol = P(MathCommand, function(_, super_) {
+  _.init = function(ctrlSeq, html, text) {
+    if (!text) text = ctrlSeq && ctrlSeq.length > 1 ? ctrlSeq.slice(1) : ctrlSeq;
+
+    super_.init.call(this, ctrlSeq, html, [ text ]);
+  };
+
+  _.parser = function() { return Parser.succeed(this); };
+  _.numBlocks = function() { return 0; };
+
+  _.replaces = function(replacedFragment) {
+    replacedFragment.remove();
+  };
+  _.createBlocks = noop;
+
+  _.moveTowards = function(dir, cursor) {
+    cursor.jQ.insDirOf(dir, this.jQ);
+    cursor[-dir] = this;
+    cursor[dir] = this[dir];
+  };
+  _.deleteTowards = function(dir, cursor) {
+    cursor[dir] = this.remove()[dir];
+  };
+  _.seek = function(pageX, cursor) {
+    // insert at whichever side the click was closer to
+    if (pageX - this.jQ.offset().left < this.jQ.outerWidth()/2)
+      cursor.insLeftOf(this);
+    else
+      cursor.insRightOf(this);
+  };
+
+  _.latex = function(){ return this.ctrlSeq; };
+  _.text = function(){ return this.textTemplate; };
+  _.placeCursor = noop;
+  _.isEmpty = function(){ return true; };
+});
+var VanillaSymbol = P(Symbol, function(_, super_) {
+  _.init = function(ch, html) {
+    super_.init.call(this, ch, '<span>'+(html || ch)+'</span>');
+  };
+});
+var BinaryOperator = P(Symbol, function(_, super_) {
+  _.init = function(ctrlSeq, html, text) {
+    super_.init.call(this,
+      ctrlSeq, '<span class="mq-binary-operator">'+html+'</span>', text
+    );
+  };
+});
+
+/**
+ * Children and parent of MathCommand's. Basically partitions all the
+ * symbols and operators that descend (in the Math DOM tree) from
+ * ancestor operators.
+ */
+var MathBlock = P(MathElement, function(_, super_) {
+  _.join = function(methodName) {
+    return this.foldChildren('', function(fold, child) {
+      return fold + child[methodName]();
+    });
+  };
+  _.html = function() { return this.join('html'); };
+  _.latex = function() { return this.join('latex'); };
+  _.text = function() {
+    return (this.ends[L] === this.ends[R] && this.ends[L] !== 0) ?
+      this.ends[L].text() :
+      this.join('text')
+    ;
+  };
+
+  _.keystroke = function(key, e, ctrlr) {
+    if (ctrlr.options.spaceBehavesLikeTab
+        && (key === 'Spacebar' || key === 'Shift-Spacebar')) {
+      e.preventDefault();
+      ctrlr.escapeDir(key === 'Shift-Spacebar' ? L : R, key, e);
+      return;
+    }
+    return super_.keystroke.apply(this, arguments);
+  };
+
+  // editability methods: called by the cursor for editing, cursor movements,
+  // and selection of the MathQuill tree, these all take in a direction and
+  // the cursor
+  _.moveOutOf = function(dir, cursor, updown) {
+    var updownInto = updown && this.parent[updown+'Into'];
+    if (!updownInto && this[dir]) cursor.insAtDirEnd(-dir, this[dir]);
+    else cursor.insDirOf(dir, this.parent);
+  };
+  _.selectOutOf = function(dir, cursor) {
+    cursor.insDirOf(dir, this.parent);
+  };
+  _.deleteOutOf = function(dir, cursor) {
+    cursor.unwrapGramp();
+  };
+  _.seek = function(pageX, cursor) {
+    var node = this.ends[R];
+    if (!node || node.jQ.offset().left + node.jQ.outerWidth() < pageX) {
+      return cursor.insAtRightEnd(this);
+    }
+    if (pageX < this.ends[L].jQ.offset().left) return cursor.insAtLeftEnd(this);
+    while (pageX < node.jQ.offset().left) node = node[L];
+    return node.seek(pageX, cursor);
+  };
+  _.chToCmd = function(ch, options) {
+    var cons;
+    // exclude f because it gets a dedicated command with more spacing
+    if (ch.match(/^[a-eg-zA-Z]$/))
+      return Letter(ch);
+    else if (/^\d$/.test(ch))
+      return Digit(ch);
+    else if (options && options.typingSlashWritesDivisionSymbol && ch === '/')
+      return LatexCmds['\u00f7'](ch);
+    else if (options && options.typingAsteriskWritesTimesSymbol && ch === '*')
+      return LatexCmds['\u00d7'](ch);
+    else if (cons = CharCmds[ch] || LatexCmds[ch])
+      return cons(ch);
+    else
+      return VanillaSymbol(ch);
+  };
+  _.write = function(cursor, ch) {
+    var cmd = this.chToCmd(ch, cursor.options);
+    if (cursor.selection) cmd.replaces(cursor.replaceSelection());
+    cmd.createLeftOf(cursor.show());
+  };
+
+  _.focus = function() {
+    this.jQ.addClass('mq-hasCursor');
+    this.jQ.removeClass('mq-empty');
+
+    return this;
+  };
+  _.blur = function() {
+    this.jQ.removeClass('mq-hasCursor');
+    if (this.isEmpty())
+      this.jQ.addClass('mq-empty');
+
+    return this;
+  };
+});
+
+API.StaticMath = function(APIClasses) {
+  return P(APIClasses.AbstractMathQuill, function(_, super_) {
+    this.RootBlock = MathBlock;
+    _.__mathquillify = function(opts, interfaceVersion) {
+      this.config(opts);
+      super_.__mathquillify.call(this, 'mq-math-mode');
+      this.__controller.delegateMouseEvents();
+      this.__controller.staticMathTextareaEvents();
+      return this;
+    };
+    _.init = function() {
+      super_.init.apply(this, arguments);
+      this.__controller.root.postOrder(
+        'registerInnerField', this.innerFields = [], APIClasses.MathField);
+    };
+    _.latex = function() {
+      var returned = super_.latex.apply(this, arguments);
+      if (arguments.length > 0) {
+        this.__controller.root.postOrder(
+          'registerInnerField', this.innerFields = [], APIClasses.MathField);
+      }
+      return returned;
+    };
+  });
+};
+
+var RootMathBlock = P(MathBlock, RootBlockMixin);
+API.MathField = function(APIClasses) {
+  return P(APIClasses.EditableField, function(_, super_) {
+    this.RootBlock = RootMathBlock;
+    _.__mathquillify = function(opts, interfaceVersion) {
+      this.config(opts);
+      if (interfaceVersion > 1) this.__controller.root.reflow = noop;
+      super_.__mathquillify.call(this, 'mq-editable-field mq-math-mode');
+      delete this.__controller.root.reflow;
+      return this;
+    };
+  });
+};
+/*************************************************
+ * Abstract classes of text blocks
+ ************************************************/
+
+/**
+ * Blocks of plain text, with one or two TextPiece's as children.
+ * Represents flat strings of typically serif-font Roman characters, as
+ * opposed to hierchical, nested, tree-structured math.
+ * Wraps a single HTMLSpanElement.
+ */
+var TextBlock = P(Node, function(_, super_) {
+  _.ctrlSeq = '\\text';
+
+  _.replaces = function(replacedText) {
+    if (replacedText instanceof Fragment)
+      this.replacedText = replacedText.remove().jQ.text();
+    else if (typeof replacedText === 'string')
+      this.replacedText = replacedText;
+  };
+
+  _.jQadd = function(jQ) {
+    super_.jQadd.call(this, jQ);
+    if (this.ends[L]) this.ends[L].jQadd(this.jQ[0].firstChild);
+  };
+
+  _.createLeftOf = function(cursor) {
+    var textBlock = this;
+    super_.createLeftOf.call(this, cursor);
+
+    if (textBlock[R].siblingCreated) textBlock[R].siblingCreated(cursor.options, L);
+    if (textBlock[L].siblingCreated) textBlock[L].siblingCreated(cursor.options, R);
+    textBlock.bubble('reflow');
+
+    cursor.insAtRightEnd(textBlock);
+
+    if (textBlock.replacedText)
+      for (var i = 0; i < textBlock.replacedText.length; i += 1)
+        textBlock.write(cursor, textBlock.replacedText.charAt(i));
+  };
+
+  _.parser = function() {
+    var textBlock = this;
+
+    // TODO: correctly parse text mode
+    var string = Parser.string;
+    var regex = Parser.regex;
+    var optWhitespace = Parser.optWhitespace;
+    return optWhitespace
+      .then(string('{')).then(regex(/^[^}]*/)).skip(string('}'))
+      .map(function(text) {
+        if (text.length === 0) return Fragment();
+
+        TextPiece(text).adopt(textBlock, 0, 0);
+        return textBlock;
+      })
+    ;
+  };
+
+  _.textContents = function() {
+    return this.foldChildren('', function(text, child) {
+      return text + child.text;
+    });
+  };
+  _.text = function() { return '"' + this.textContents() + '"'; };
+  _.latex = function() {
+    var contents = this.textContents();
+    if (contents.length === 0) return '';
+    return '\\text{' + contents + '}';
+  };
+  _.html = function() {
+    return (
+        '<span class="mq-text-mode" mathquill-command-id='+this.id+'>'
+      +   this.textContents()
+      + '</span>'
+    );
+  };
+
+  // editability methods: called by the cursor for editing, cursor movements,
+  // and selection of the MathQuill tree, these all take in a direction and
+  // the cursor
+  _.moveTowards = function(dir, cursor) { cursor.insAtDirEnd(-dir, this); };
+  _.moveOutOf = function(dir, cursor) { cursor.insDirOf(dir, this); };
+  _.unselectInto = _.moveTowards;
+
+  // TODO: make these methods part of a shared mixin or something.
+  _.selectTowards = MathCommand.prototype.selectTowards;
+  _.deleteTowards = MathCommand.prototype.deleteTowards;
+
+  _.selectOutOf = function(dir, cursor) {
+    cursor.insDirOf(dir, this);
+  };
+  _.deleteOutOf = function(dir, cursor) {
+    // backspace and delete at ends of block don't unwrap
+    if (this.isEmpty()) cursor.insRightOf(this);
+  };
+  _.write = function(cursor, ch) {
+    cursor.show().deleteSelection();
+
+    if (ch !== '$') {
+      if (!cursor[L]) TextPiece(ch).createLeftOf(cursor);
+      else cursor[L].appendText(ch);
+    }
+    else if (this.isEmpty()) {
+      cursor.insRightOf(this);
+      VanillaSymbol('\\$','$').createLeftOf(cursor);
+    }
+    else if (!cursor[R]) cursor.insRightOf(this);
+    else if (!cursor[L]) cursor.insLeftOf(this);
+    else { // split apart
+      var leftBlock = TextBlock();
+      var leftPc = this.ends[L];
+      leftPc.disown().jQ.detach();
+      leftPc.adopt(leftBlock, 0, 0);
+
+      cursor.insLeftOf(this);
+      super_.createLeftOf.call(leftBlock, cursor);
+    }
+  };
+
+  _.seek = function(pageX, cursor) {
+    cursor.hide();
+    var textPc = fuseChildren(this);
+
+    // insert cursor at approx position in DOMTextNode
+    var avgChWidth = this.jQ.width()/this.text.length;
+    var approxPosition = Math.round((pageX - this.jQ.offset().left)/avgChWidth);
+    if (approxPosition <= 0) cursor.insAtLeftEnd(this);
+    else if (approxPosition >= textPc.text.length) cursor.insAtRightEnd(this);
+    else cursor.insLeftOf(textPc.splitRight(approxPosition));
+
+    // move towards mousedown (pageX)
+    var displ = pageX - cursor.show().offset().left; // displacement
+    var dir = displ && displ < 0 ? L : R;
+    var prevDispl = dir;
+    // displ * prevDispl > 0 iff displacement direction === previous direction
+    while (cursor[dir] && displ * prevDispl > 0) {
+      cursor[dir].moveTowards(dir, cursor);
+      prevDispl = displ;
+      displ = pageX - cursor.offset().left;
+    }
+    if (dir*displ < -dir*prevDispl) cursor[-dir].moveTowards(-dir, cursor);
+
+    if (!cursor.anticursor) {
+      // about to start mouse-selecting, the anticursor is gonna get put here
+      this.anticursorPosition = cursor[L] && cursor[L].text.length;
+      // ^ get it? 'cos if there's no cursor[L], it's 0... I'm a terrible person.
+    }
+    else if (cursor.anticursor.parent === this) {
+      // mouse-selecting within this TextBlock, re-insert the anticursor
+      var cursorPosition = cursor[L] && cursor[L].text.length;;
+      if (this.anticursorPosition === cursorPosition) {
+        cursor.anticursor = Point.copy(cursor);
+      }
+      else {
+        if (this.anticursorPosition < cursorPosition) {
+          var newTextPc = cursor[L].splitRight(this.anticursorPosition);
+          cursor[L] = newTextPc;
+        }
+        else {
+          var newTextPc = cursor[R].splitRight(this.anticursorPosition - cursorPosition);
+        }
+        cursor.anticursor = Point(this, newTextPc[L], newTextPc);
+      }
+    }
+  };
+
+  _.blur = function(cursor) {
+    MathBlock.prototype.blur.call(this);
+    if (!cursor) return;
+    if (this.textContents() === '') {
+      this.remove();
+      if (cursor[L] === this) cursor[L] = this[L];
+      else if (cursor[R] === this) cursor[R] = this[R];
+    }
+    else fuseChildren(this);
+  };
+
+  function fuseChildren(self) {
+    self.jQ[0].normalize();
+
+    var textPcDom = self.jQ[0].firstChild;
+    if (!textPcDom) return;
+    pray('only node in TextBlock span is Text node', textPcDom.nodeType === 3);
+    // nodeType === 3 has meant a Text node since ancient times:
+    //   http://reference.sitepoint.com/javascript/Node/nodeType
+
+    var textPc = TextPiece(textPcDom.data);
+    textPc.jQadd(textPcDom);
+
+    self.children().disown();
+    return textPc.adopt(self, 0, 0);
+  }
+
+  _.focus = MathBlock.prototype.focus;
+});
+
+/**
+ * Piece of plain text, with a TextBlock as a parent and no children.
+ * Wraps a single DOMTextNode.
+ * For convenience, has a .text property that's just a JavaScript string
+ * mirroring the text contents of the DOMTextNode.
+ * Text contents must always be nonempty.
+ */
+var TextPiece = P(Node, function(_, super_) {
+  _.init = function(text) {
+    super_.init.call(this);
+    this.text = text;
+  };
+  _.jQadd = function(dom) { this.dom = dom; this.jQ = $(dom); };
+  _.jQize = function() {
+    return this.jQadd(document.createTextNode(this.text));
+  };
+  _.appendText = function(text) {
+    this.text += text;
+    this.dom.appendData(text);
+  };
+  _.prependText = function(text) {
+    this.text = text + this.text;
+    this.dom.insertData(0, text);
+  };
+  _.insTextAtDirEnd = function(text, dir) {
+    prayDirection(dir);
+    if (dir === R) this.appendText(text);
+    else this.prependText(text);
+  };
+  _.splitRight = function(i) {
+    var newPc = TextPiece(this.text.slice(i)).adopt(this.parent, this, this[R]);
+    newPc.jQadd(this.dom.splitText(i));
+    this.text = this.text.slice(0, i);
+    return newPc;
+  };
+
+  function endChar(dir, text) {
+    return text.charAt(dir === L ? 0 : -1 + text.length);
+  }
+
+  _.moveTowards = function(dir, cursor) {
+    prayDirection(dir);
+
+    var ch = endChar(-dir, this.text)
+
+    var from = this[-dir];
+    if (from) from.insTextAtDirEnd(ch, dir);
+    else TextPiece(ch).createDir(-dir, cursor);
+
+    return this.deleteTowards(dir, cursor);
+  };
+
+  _.latex = function() { return this.text; };
+
+  _.deleteTowards = function(dir, cursor) {
+    if (this.text.length > 1) {
+      if (dir === R) {
+        this.dom.deleteData(0, 1);
+        this.text = this.text.slice(1);
+      }
+      else {
+        // note that the order of these 2 lines is annoyingly important
+        // (the second line mutates this.text.length)
+        this.dom.deleteData(-1 + this.text.length, 1);
+        this.text = this.text.slice(0, -1);
+      }
+    }
+    else {
+      this.remove();
+      this.jQ.remove();
+      cursor[dir] = this[dir];
+    }
+  };
+
+  _.selectTowards = function(dir, cursor) {
+    prayDirection(dir);
+    var anticursor = cursor.anticursor;
+
+    var ch = endChar(-dir, this.text)
+
+    if (anticursor[dir] === this) {
+      var newPc = TextPiece(ch).createDir(dir, cursor);
+      anticursor[dir] = newPc;
+      cursor.insDirOf(dir, newPc);
+    }
+    else {
+      var from = this[-dir];
+      if (from) from.insTextAtDirEnd(ch, dir);
+      else {
+        var newPc = TextPiece(ch).createDir(-dir, cursor);
+        newPc.jQ.insDirOf(-dir, cursor.selection.jQ);
+      }
+
+      if (this.text.length === 1 && anticursor[-dir] === this) {
+        anticursor[-dir] = this[-dir]; // `this` will be removed in deleteTowards
+      }
+    }
+
+    return this.deleteTowards(dir, cursor);
+  };
+});
+
+LatexCmds.text =
+LatexCmds.textnormal =
+LatexCmds.textrm =
+LatexCmds.textup =
+LatexCmds.textmd = TextBlock;
+
+function makeTextBlock(latex, tagName, attrs) {
+  return P(TextBlock, {
+    ctrlSeq: latex,
+    htmlTemplate: '<'+tagName+' '+attrs+'>&0</'+tagName+'>'
+  });
+}
+
+LatexCmds.em = LatexCmds.italic = LatexCmds.italics =
+LatexCmds.emph = LatexCmds.textit = LatexCmds.textsl =
+  makeTextBlock('\\textit', 'i', 'class="mq-text-mode"');
+LatexCmds.strong = LatexCmds.bold = LatexCmds.textbf =
+  makeTextBlock('\\textbf', 'b', 'class="mq-text-mode"');
+LatexCmds.sf = LatexCmds.textsf =
+  makeTextBlock('\\textsf', 'span', 'class="mq-sans-serif mq-text-mode"');
+LatexCmds.tt = LatexCmds.texttt =
+  makeTextBlock('\\texttt', 'span', 'class="mq-monospace mq-text-mode"');
+LatexCmds.textsc =
+  makeTextBlock('\\textsc', 'span', 'style="font-variant:small-caps" class="mq-text-mode"');
+LatexCmds.uppercase =
+  makeTextBlock('\\uppercase', 'span', 'style="text-transform:uppercase" class="mq-text-mode"');
+LatexCmds.lowercase =
+  makeTextBlock('\\lowercase', 'span', 'style="text-transform:lowercase" class="mq-text-mode"');
+
+
+var RootMathCommand = P(MathCommand, function(_, super_) {
+  _.init = function(cursor) {
+    super_.init.call(this, '$');
+    this.cursor = cursor;
+  };
+  _.htmlTemplate = '<span class="mq-math-mode">&0</span>';
+  _.createBlocks = function() {
+    super_.createBlocks.call(this);
+
+    this.ends[L].cursor = this.cursor;
+    this.ends[L].write = function(cursor, ch) {
+      if (ch !== '$')
+        MathBlock.prototype.write.call(this, cursor, ch);
+      else if (this.isEmpty()) {
+        cursor.insRightOf(this.parent);
+        this.parent.deleteTowards(dir, cursor);
+        VanillaSymbol('\\$','$').createLeftOf(cursor.show());
+      }
+      else if (!cursor[R])
+        cursor.insRightOf(this.parent);
+      else if (!cursor[L])
+        cursor.insLeftOf(this.parent);
+      else
+        MathBlock.prototype.write.call(this, cursor, ch);
+    };
+  };
+  _.latex = function() {
+    return '$' + this.ends[L].latex() + '$';
+  };
+});
+
+var RootTextBlock = P(RootMathBlock, function(_, super_) {
+  _.keystroke = function(key) {
+    if (key === 'Spacebar' || key === 'Shift-Spacebar') return;
+    return super_.keystroke.apply(this, arguments);
+  };
+  _.write = function(cursor, ch) {
+    cursor.show().deleteSelection();
+    if (ch === '$')
+      RootMathCommand(cursor).createLeftOf(cursor);
+    else {
+      var html;
+      if (ch === '<') html = '&lt;';
+      else if (ch === '>') html = '&gt;';
+      VanillaSymbol(ch, html).createLeftOf(cursor);
+    }
+  };
+});
+API.TextField = function(APIClasses) {
+  return P(APIClasses.EditableField, function(_, super_) {
+    this.RootBlock = RootTextBlock;
+    _.__mathquillify = function() {
+      return super_.__mathquillify.call(this, 'mq-editable-field mq-text-mode');
+    };
+    _.latex = function(latex) {
+      if (arguments.length > 0) {
+        this.__controller.renderLatexText(latex);
+        if (this.__controller.blurred) this.__controller.cursor.hide().parent.blur();
+        return this;
+      }
+      return this.__controller.exportLatex();
+    };
+  });
+};
+/****************************************
+ * Input box to type backslash commands
+ ***************************************/
+
+var LatexCommandInput =
+CharCmds['\\'] = P(MathCommand, function(_, super_) {
+  _.ctrlSeq = '\\';
+  _.replaces = function(replacedFragment) {
+    this._replacedFragment = replacedFragment.disown();
+    this.isEmpty = function() { return false; };
+  };
+  _.htmlTemplate = '<span class="mq-latex-command-input mq-non-leaf">\\<span>&0</span></span>';
+  _.textTemplate = ['\\'];
+  _.createBlocks = function() {
+    super_.createBlocks.call(this);
+    this.ends[L].focus = function() {
+      this.parent.jQ.addClass('mq-hasCursor');
+      if (this.isEmpty())
+        this.parent.jQ.removeClass('mq-empty');
+
+      return this;
+    };
+    this.ends[L].blur = function() {
+      this.parent.jQ.removeClass('mq-hasCursor');
+      if (this.isEmpty())
+        this.parent.jQ.addClass('mq-empty');
+
+      return this;
+    };
+    this.ends[L].write = function(cursor, ch) {
+      cursor.show().deleteSelection();
+
+      if (ch.match(/[a-z]/i)) VanillaSymbol(ch).createLeftOf(cursor);
+      else {
+        this.parent.renderCommand(cursor);
+        if (ch !== '\\' || !this.isEmpty()) this.parent.parent.write(cursor, ch);
+      }
+    };
+    this.ends[L].keystroke = function(key, e, ctrlr) {
+      if (key === 'Tab' || key === 'Enter' || key === 'Spacebar') {
+        this.parent.renderCommand(ctrlr.cursor);
+        e.preventDefault();
+        return;
+      }
+      return super_.keystroke.apply(this, arguments);
+    };
+  };
+  _.createLeftOf = function(cursor) {
+    super_.createLeftOf.call(this, cursor);
+
+    if (this._replacedFragment) {
+      var el = this.jQ[0];
+      this.jQ =
+        this._replacedFragment.jQ.addClass('mq-blur').bind(
+          'mousedown mousemove', //FIXME: is monkey-patching the mousedown and mousemove handlers the right way to do this?
+          function(e) {
+            $(e.target = el).trigger(e);
+            return false;
+          }
+        ).insertBefore(this.jQ).add(this.jQ);
+    }
+  };
+  _.latex = function() {
+    return '\\' + this.ends[L].latex() + ' ';
+  };
+  _.renderCommand = function(cursor) {
+    this.jQ = this.jQ.last();
+    this.remove();
+    if (this[R]) {
+      cursor.insLeftOf(this[R]);
+    } else {
+      cursor.insAtRightEnd(this.parent);
+    }
+
+    var latex = this.ends[L].latex();
+    if (!latex) latex = ' ';
+    var cmd = LatexCmds[latex] || Environments[latex];
+    if (cmd) {
+      cmd = cmd(latex);
+      if (this._replacedFragment) cmd.replaces(this._replacedFragment);
+      cmd.createLeftOf(cursor);
+    }
+    else {
+      cmd = TextBlock();
+      cmd.replaces(latex);
+      cmd.createLeftOf(cursor);
+      cursor.insRightOf(cmd);
+      if (this._replacedFragment)
+        this._replacedFragment.remove();
+    }
+  };
+});
+
+/***************************
+ * Commands and Operators.
+ **************************/
+
+var scale, // = function(jQ, x, y) { ... }
+//will use a CSS 2D transform to scale the jQuery-wrapped HTML elements,
+//or the filter matrix transform fallback for IE 5.5-8, or gracefully degrade to
+//increasing the fontSize to match the vertical Y scaling factor.
+
+//ideas from http://github.com/louisremi/jquery.transform.js
+//see also http://msdn.microsoft.com/en-us/library/ms533014(v=vs.85).aspx
+
+  forceIERedraw = noop,
+  div = document.createElement('div'),
+  div_style = div.style,
+  transformPropNames = {
+    transform:1,
+    WebkitTransform:1,
+    MozTransform:1,
+    OTransform:1,
+    msTransform:1
+  },
+  transformPropName;
+
+for (var prop in transformPropNames) {
+  if (prop in div_style) {
+    transformPropName = prop;
+    break;
+  }
+}
+
+if (transformPropName) {
+  scale = function(jQ, x, y) {
+    jQ.css(transformPropName, 'scale('+x+','+y+')');
+  };
+}
+else if ('filter' in div_style) { //IE 6, 7, & 8 fallback, see https://github.com/laughinghan/mathquill/wiki/Transforms
+  forceIERedraw = function(el){ el.className = el.className; };
+  scale = function(jQ, x, y) { //NOTE: assumes y > x
+    x /= (1+(y-1)/2);
+    jQ.css('fontSize', y + 'em');
+    if (!jQ.hasClass('mq-matrixed-container')) {
+      jQ.addClass('mq-matrixed-container')
+      .wrapInner('<span class="mq-matrixed"></span>');
+    }
+    var innerjQ = jQ.children()
+    .css('filter', 'progid:DXImageTransform.Microsoft'
+        + '.Matrix(M11=' + x + ",SizingMethod='auto expand')"
+    );
+    function calculateMarginRight() {
+      jQ.css('marginRight', (innerjQ.width()-1)*(x-1)/x + 'px');
+    }
+    calculateMarginRight();
+    var intervalId = setInterval(calculateMarginRight);
+    $(window).load(function() {
+      clearTimeout(intervalId);
+      calculateMarginRight();
+    });
+  };
+}
+else {
+  scale = function(jQ, x, y) {
+    jQ.css('fontSize', y + 'em');
+  };
+}
+
+var Style = P(MathCommand, function(_, super_) {
+  _.init = function(ctrlSeq, tagName, attrs) {
+    super_.init.call(this, ctrlSeq, '<'+tagName+' '+attrs+'>&0</'+tagName+'>');
+  };
+});
+
+//fonts
+LatexCmds.mathrm = bind(Style, '\\mathrm', 'span', 'class="mq-roman mq-font"');
+LatexCmds.mathit = bind(Style, '\\mathit', 'i', 'class="mq-font"');
+LatexCmds.mathbf = bind(Style, '\\mathbf', 'b', 'class="mq-font"');
+LatexCmds.mathsf = bind(Style, '\\mathsf', 'span', 'class="mq-sans-serif mq-font"');
+LatexCmds.mathtt = bind(Style, '\\mathtt', 'span', 'class="mq-monospace mq-font"');
+//text-decoration
+LatexCmds.underline = bind(Style, '\\underline', 'span', 'class="mq-non-leaf mq-underline"');
+LatexCmds.overline = LatexCmds.bar = bind(Style, '\\overline', 'span', 'class="mq-non-leaf mq-overline"');
+LatexCmds.overrightarrow = bind(Style, '\\overrightarrow', 'span', 'class="mq-non-leaf mq-overarrow mq-arrow-right"');
+LatexCmds.overleftarrow = bind(Style, '\\overleftarrow', 'span', 'class="mq-non-leaf mq-overarrow mq-arrow-left"');
+
+// `\textcolor{color}{math}` will apply a color to the given math content, where
+// `color` is any valid CSS Color Value (see [SitePoint docs][] (recommended),
+// [Mozilla docs][], or [W3C spec][]).
+//
+// [SitePoint docs]: http://reference.sitepoint.com/css/colorvalues
+// [Mozilla docs]: https://developer.mozilla.org/en-US/docs/CSS/color_value#Values
+// [W3C spec]: http://dev.w3.org/csswg/css3-color/#colorunits
+var TextColor = LatexCmds.textcolor = P(MathCommand, function(_, super_) {
+  _.setColor = function(color) {
+    this.color = color;
+    this.htmlTemplate =
+      '<span class="mq-textcolor" style="color:' + color + '">&0</span>';
+  };
+  _.latex = function() {
+    return '\\textcolor{' + this.color + '}{' + this.blocks[0].latex() + '}';
+  };
+  _.parser = function() {
+    var self = this;
+    var optWhitespace = Parser.optWhitespace;
+    var string = Parser.string;
+    var regex = Parser.regex;
+
+    return optWhitespace
+      .then(string('{'))
+      .then(regex(/^[#\w\s.,()%-]*/))
+      .skip(string('}'))
+      .then(function(color) {
+        self.setColor(color);
+        return super_.parser.call(self);
+      })
+    ;
+  };
+  _.isStyleBlock = function() {
+    return true;
+  };
+});
+
+// Very similar to the \textcolor command, but will add the given CSS class.
+// Usage: \class{classname}{math}
+// Note regex that whitelists valid CSS classname characters:
+// https://github.com/mathquill/mathquill/pull/191#discussion_r4327442
+var Class = LatexCmds['class'] = P(MathCommand, function(_, super_) {
+  _.parser = function() {
+    var self = this, string = Parser.string, regex = Parser.regex;
+    return Parser.optWhitespace
+      .then(string('{'))
+      .then(regex(/^[-\w\s\\\xA0-\xFF]*/))
+      .skip(string('}'))
+      .then(function(cls) {
+        self.cls = cls || '';
+        self.htmlTemplate = '<span class="mq-class '+cls+'">&0</span>';
+        return super_.parser.call(self);
+      })
+    ;
+  };
+  _.latex = function() {
+    return '\\class{' + this.cls + '}{' + this.blocks[0].latex() + '}';
+  };
+  _.isStyleBlock = function() {
+    return true;
+  };
+});
+
+var SupSub = P(MathCommand, function(_, super_) {
+  _.ctrlSeq = '_{...}^{...}';
+  _.createLeftOf = function(cursor) {
+    if (!this.replacedFragment && !cursor[L] && cursor.options.supSubsRequireOperand) return;
+    return super_.createLeftOf.apply(this, arguments);
+  };
+  _.contactWeld = function(cursor) {
+    // Look on either side for a SupSub, if one is found compare my
+    // .sub, .sup with its .sub, .sup. If I have one that it doesn't,
+    // then call .addBlock() on it with my block; if I have one that
+    // it also has, then insert my block's children into its block,
+    // unless my block has none, in which case insert the cursor into
+    // its block (and not mine, I'm about to remove myself) in the case
+    // I was just typed.
+    // TODO: simplify
+
+    // equiv. to [L, R].forEach(function(dir) { ... });
+    for (var dir = L; dir; dir = (dir === L ? R : false)) {
+      if (this[dir] instanceof SupSub) {
+        // equiv. to 'sub sup'.split(' ').forEach(function(supsub) { ... });
+        for (var supsub = 'sub'; supsub; supsub = (supsub === 'sub' ? 'sup' : false)) {
+          var src = this[supsub], dest = this[dir][supsub];
+          if (!src) continue;
+          if (!dest) this[dir].addBlock(src.disown());
+          else if (!src.isEmpty()) { // ins src children at -dir end of dest
+            src.jQ.children().insAtDirEnd(-dir, dest.jQ);
+            var children = src.children().disown();
+            var pt = Point(dest, children.ends[R], dest.ends[L]);
+            if (dir === L) children.adopt(dest, dest.ends[R], 0);
+            else children.adopt(dest, 0, dest.ends[L]);
+          }
+          else var pt = Point(dest, 0, dest.ends[L]);
+          this.placeCursor = (function(dest, src) { // TODO: don't monkey-patch
+            return function(cursor) { cursor.insAtDirEnd(-dir, dest || src); };
+          }(dest, src));
+        }
+        this.remove();
+        if (cursor && cursor[L] === this) {
+          if (dir === R && pt) {
+            pt[L] ? cursor.insRightOf(pt[L]) : cursor.insAtLeftEnd(pt.parent);
+          }
+          else cursor.insRightOf(this[dir]);
+        }
+        break;
+      }
+    }
+  };
+  Options.p.charsThatBreakOutOfSupSub = '';
+  _.finalizeTree = function() {
+    this.ends[L].write = function(cursor, ch) {
+      if (cursor.options.autoSubscriptNumerals && this === this.parent.sub) {
+        if (ch === '_') return;
+        var cmd = this.chToCmd(ch, cursor.options);
+        if (cmd instanceof Symbol) cursor.deleteSelection();
+        else cursor.clearSelection().insRightOf(this.parent);
+        return cmd.createLeftOf(cursor.show());
+      }
+      if (cursor[L] && !cursor[R] && !cursor.selection
+          && cursor.options.charsThatBreakOutOfSupSub.indexOf(ch) > -1) {
+        cursor.insRightOf(this.parent);
+      }
+      MathBlock.p.write.apply(this, arguments);
+    };
+  };
+  _.moveTowards = function(dir, cursor, updown) {
+    if (cursor.options.autoSubscriptNumerals && !this.sup) {
+      cursor.insDirOf(dir, this);
+    }
+    else super_.moveTowards.apply(this, arguments);
+  };
+  _.deleteTowards = function(dir, cursor) {
+    if (cursor.options.autoSubscriptNumerals && this.sub) {
+      var cmd = this.sub.ends[-dir];
+      if (cmd instanceof Symbol) cmd.remove();
+      else if (cmd) cmd.deleteTowards(dir, cursor.insAtDirEnd(-dir, this.sub));
+
+      // TODO: factor out a .removeBlock() or something
+      if (this.sub.isEmpty()) {
+        this.sub.deleteOutOf(L, cursor.insAtLeftEnd(this.sub));
+        if (this.sup) cursor.insDirOf(-dir, this);
+        // Note `-dir` because in e.g. x_1^2| want backspacing (leftward)
+        // to delete the 1 but to end up rightward of x^2; with non-negated
+        // `dir` (try it), the cursor appears to have gone "through" the ^2.
+      }
+    }
+    else super_.deleteTowards.apply(this, arguments);
+  };
+  _.latex = function() {
+    function latex(prefix, block) {
+      var l = block && block.latex();
+      return block ? prefix + (l.length === 1 ? l : '{' + (l || ' ') + '}') : '';
+    }
+    return latex('_', this.sub) + latex('^', this.sup);
+  };
+  _.addBlock = function(block) {
+    if (this.supsub === 'sub') {
+      this.sup = this.upInto = this.sub.upOutOf = block;
+      block.adopt(this, this.sub, 0).downOutOf = this.sub;
+      block.jQ = $('<span class="mq-sup"/>').append(block.jQ.children())
+        .attr(mqBlockId, block.id).prependTo(this.jQ);
+    }
+    else {
+      this.sub = this.downInto = this.sup.downOutOf = block;
+      block.adopt(this, 0, this.sup).upOutOf = this.sup;
+      block.jQ = $('<span class="mq-sub"></span>').append(block.jQ.children())
+        .attr(mqBlockId, block.id).appendTo(this.jQ.removeClass('mq-sup-only'));
+      this.jQ.append('<span style="display:inline-block;width:0">&#8203;</span>');
+    }
+    // like 'sub sup'.split(' ').forEach(function(supsub) { ... });
+    for (var i = 0; i < 2; i += 1) (function(cmd, supsub, oppositeSupsub, updown) {
+      cmd[supsub].deleteOutOf = function(dir, cursor) {
+        cursor.insDirOf((this[dir] ? -dir : dir), this.parent);
+        if (!this.isEmpty()) {
+          var end = this.ends[dir];
+          this.children().disown()
+            .withDirAdopt(dir, cursor.parent, cursor[dir], cursor[-dir])
+            .jQ.insDirOf(-dir, cursor.jQ);
+          cursor[-dir] = end;
+        }
+        cmd.supsub = oppositeSupsub;
+        delete cmd[supsub];
+        delete cmd[updown+'Into'];
+        cmd[oppositeSupsub][updown+'OutOf'] = insLeftOfMeUnlessAtEnd;
+        delete cmd[oppositeSupsub].deleteOutOf;
+        if (supsub === 'sub') $(cmd.jQ.addClass('mq-sup-only')[0].lastChild).remove();
+        this.remove();
+      };
+    }(this, 'sub sup'.split(' ')[i], 'sup sub'.split(' ')[i], 'down up'.split(' ')[i]));
+  };
+});
+
+function insLeftOfMeUnlessAtEnd(cursor) {
+  // cursor.insLeftOf(cmd), unless cursor at the end of block, and every
+  // ancestor cmd is at the end of every ancestor block
+  var cmd = this.parent, ancestorCmd = cursor;
+  do {
+    if (ancestorCmd[R]) return cursor.insLeftOf(cmd);
+    ancestorCmd = ancestorCmd.parent.parent;
+  } while (ancestorCmd !== cmd);
+  cursor.insRightOf(cmd);
+}
+
+LatexCmds.subscript =
+LatexCmds._ = P(SupSub, function(_, super_) {
+  _.supsub = 'sub';
+  _.htmlTemplate =
+      '<span class="mq-supsub mq-non-leaf">'
+    +   '<span class="mq-sub">&0</span>'
+    +   '<span style="display:inline-block;width:0">&#8203;</span>'
+    + '</span>'
+  ;
+  _.textTemplate = [ '_' ];
+  _.finalizeTree = function() {
+    this.downInto = this.sub = this.ends[L];
+    this.sub.upOutOf = insLeftOfMeUnlessAtEnd;
+    super_.finalizeTree.call(this);
+  };
+});
+
+LatexCmds.superscript =
+LatexCmds.supscript =
+LatexCmds['^'] = P(SupSub, function(_, super_) {
+  _.supsub = 'sup';
+  _.htmlTemplate =
+      '<span class="mq-supsub mq-non-leaf mq-sup-only">'
+    +   '<span class="mq-sup">&0</span>'
+    + '</span>'
+  ;
+  _.textTemplate = [ '^' ];
+  _.finalizeTree = function() {
+    this.upInto = this.sup = this.ends[R];
+    this.sup.downOutOf = insLeftOfMeUnlessAtEnd;
+    super_.finalizeTree.call(this);
+  };
+});
+
+var SummationNotation = P(MathCommand, function(_, super_) {
+  _.init = function(ch, html) {
+    var htmlTemplate =
+      '<span class="mq-large-operator mq-non-leaf">'
+    +   '<span class="mq-to"><span>&1</span></span>'
+    +   '<big>'+html+'</big>'
+    +   '<span class="mq-from"><span>&0</span></span>'
+    + '</span>'
+    ;
+    Symbol.prototype.init.call(this, ch, htmlTemplate);
+  };
+  _.createLeftOf = function(cursor) {
+    super_.createLeftOf.apply(this, arguments);
+    if (cursor.options.sumStartsWithNEquals) {
+      Letter('n').createLeftOf(cursor);
+      Equality().createLeftOf(cursor);
+    }
+  };
+  _.latex = function() {
+    function simplify(latex) {
+      return latex.length === 1 ? latex : '{' + (latex || ' ') + '}';
+    }
+    return this.ctrlSeq + '_' + simplify(this.ends[L].latex()) +
+      '^' + simplify(this.ends[R].latex());
+  };
+  _.parser = function() {
+    var string = Parser.string;
+    var optWhitespace = Parser.optWhitespace;
+    var succeed = Parser.succeed;
+    var block = latexMathParser.block;
+
+    var self = this;
+    var blocks = self.blocks = [ MathBlock(), MathBlock() ];
+    for (var i = 0; i < blocks.length; i += 1) {
+      blocks[i].adopt(self, self.ends[R], 0);
+    }
+
+    return optWhitespace.then(string('_').or(string('^'))).then(function(supOrSub) {
+      var child = blocks[supOrSub === '_' ? 0 : 1];
+      return block.then(function(block) {
+        block.children().adopt(child, child.ends[R], 0);
+        return succeed(self);
+      });
+    }).many().result(self);
+  };
+  _.finalizeTree = function() {
+    this.downInto = this.ends[L];
+    this.upInto = this.ends[R];
+    this.ends[L].upOutOf = this.ends[R];
+    this.ends[R].downOutOf = this.ends[L];
+  };
+});
+
+LatexCmds['\u2211'] =
+LatexCmds.sum =
+LatexCmds.summation = bind(SummationNotation,'\\sum ','&sum;');
+
+LatexCmds['\u220f'] =
+LatexCmds.prod =
+LatexCmds.product = bind(SummationNotation,'\\prod ','&prod;');
+
+LatexCmds.coprod =
+LatexCmds.coproduct = bind(SummationNotation,'\\coprod ','&#8720;');
+
+LatexCmds['\u222b'] =
+LatexCmds['int'] =
+LatexCmds.integral = P(SummationNotation, function(_, super_) {
+  _.init = function() {
+    var htmlTemplate =
+      '<span class="mq-int mq-non-leaf">'
+    +   '<big>&int;</big>'
+    +   '<span class="mq-supsub mq-non-leaf">'
+    +     '<span class="mq-sup"><span class="mq-sup-inner">&1</span></span>'
+    +     '<span class="mq-sub">&0</span>'
+    +     '<span style="display:inline-block;width:0">&#8203</span>'
+    +   '</span>'
+    + '</span>'
+    ;
+    Symbol.prototype.init.call(this, '\\int ', htmlTemplate);
+  };
+  // FIXME: refactor rather than overriding
+  _.createLeftOf = MathCommand.p.createLeftOf;
+});
+
+var Fraction =
+LatexCmds.frac =
+LatexCmds.dfrac =
+LatexCmds.cfrac =
+LatexCmds.fraction = P(MathCommand, function(_, super_) {
+  _.ctrlSeq = '\\frac';
+  _.htmlTemplate =
+      '<span class="mq-fraction mq-non-leaf">'
+    +   '<span class="mq-numerator">&0</span>'
+    +   '<span class="mq-denominator">&1</span>'
+    +   '<span style="display:inline-block;width:0">&#8203;</span>'
+    + '</span>'
+  ;
+  _.textTemplate = ['(', ')/(', ')'];
+  _.finalizeTree = function() {
+    this.upInto = this.ends[R].upOutOf = this.ends[L];
+    this.downInto = this.ends[L].downOutOf = this.ends[R];
+  };
+});
+
+var LiveFraction =
+LatexCmds.over =
+CharCmds['/'] = P(Fraction, function(_, super_) {
+  _.createLeftOf = function(cursor) {
+    if (!this.replacedFragment) {
+      var leftward = cursor[L];
+      while (leftward &&
+        !(
+          leftward instanceof BinaryOperator ||
+          leftward instanceof (LatexCmds.text || noop) ||
+          leftward instanceof SummationNotation ||
+          leftward.ctrlSeq === '\\ ' ||
+          /^[,;:]$/.test(leftward.ctrlSeq)
+        ) //lookbehind for operator
+      ) leftward = leftward[L];
+
+      if (leftward instanceof SummationNotation && leftward[R] instanceof SupSub) {
+        leftward = leftward[R];
+        if (leftward[R] instanceof SupSub && leftward[R].ctrlSeq != leftward.ctrlSeq)
+          leftward = leftward[R];
+      }
+
+      if (leftward !== cursor[L]) {
+        this.replaces(Fragment(leftward[R] || cursor.parent.ends[L], cursor[L]));
+        cursor[L] = leftward;
+      }
+    }
+    super_.createLeftOf.call(this, cursor);
+  };
+});
+
+var SquareRoot =
+LatexCmds.sqrt =
+LatexCmds['\u221a'] = P(MathCommand, function(_, super_) {
+  _.ctrlSeq = '\\sqrt';
+  _.htmlTemplate =
+      '<span class="mq-non-leaf">'
+    +   '<span class="mq-scaled mq-sqrt-prefix">&radic;</span>'
+    +   '<span class="mq-non-leaf mq-sqrt-stem">&0</span>'
+    + '</span>'
+  ;
+  _.textTemplate = ['sqrt(', ')'];
+  _.parser = function() {
+    return latexMathParser.optBlock.then(function(optBlock) {
+      return latexMathParser.block.map(function(block) {
+        var nthroot = NthRoot();
+        nthroot.blocks = [ optBlock, block ];
+        optBlock.adopt(nthroot, 0, 0);
+        block.adopt(nthroot, optBlock, 0);
+        return nthroot;
+      });
+    }).or(super_.parser.call(this));
+  };
+  _.reflow = function() {
+    var block = this.ends[R].jQ;
+    scale(block.prev(), 1, block.innerHeight()/+block.css('fontSize').slice(0,-2) - .1);
+  };
+});
+
+var Hat = LatexCmds.hat = P(MathCommand, function(_, super_) {
+  _.ctrlSeq = '\\hat';
+  _.htmlTemplate =
+      '<span class="mq-non-leaf">'
+    +   '<span class="mq-hat-prefix">^</span>'
+    +   '<span class="mq-hat-stem">&0</span>'
+    + '</span>'
+  ;
+  _.textTemplate = ['hat(', ')'];
+});
+
+var NthRoot =
+LatexCmds.nthroot = P(SquareRoot, function(_, super_) {
+  _.htmlTemplate =
+      '<sup class="mq-nthroot mq-non-leaf">&0</sup>'
+    + '<span class="mq-scaled">'
+    +   '<span class="mq-sqrt-prefix mq-scaled">&radic;</span>'
+    +   '<span class="mq-sqrt-stem mq-non-leaf">&1</span>'
+    + '</span>'
+  ;
+  _.textTemplate = ['sqrt[', '](', ')'];
+  _.latex = function() {
+    return '\\sqrt['+this.ends[L].latex()+']{'+this.ends[R].latex()+'}';
+  };
+});
+
+var DiacriticAbove = P(MathCommand, function(_, super_) {
+  _.init = function(ctrlSeq, symbol, textTemplate) {
+    var htmlTemplate =
+      '<span class="mq-non-leaf">'
+      +   '<span class="mq-diacritic-above">'+symbol+'</span>'
+      +   '<span class="mq-diacritic-stem">&0</span>'
+      + '</span>'
+    ;
+
+    super_.init.call(this, ctrlSeq, htmlTemplate, textTemplate);
+  };
+});
+LatexCmds.vec = bind(DiacriticAbove, '\\vec', '&rarr;', ['vec(', ')']);
+LatexCmds.tilde = bind(DiacriticAbove, '\\tilde', '~', ['tilde(', ')']);
+
+function DelimsMixin(_, super_) {
+  _.jQadd = function() {
+    super_.jQadd.apply(this, arguments);
+    this.delimjQs = this.jQ.children(':first').add(this.jQ.children(':last'));
+    this.contentjQ = this.jQ.children(':eq(1)');
+  };
+  _.reflow = function() {
+    var height = this.contentjQ.outerHeight()
+                 / parseFloat(this.contentjQ.css('fontSize'));
+    scale(this.delimjQs, min(1 + .2*(height - 1), 1.2), 1.2*height);
+  };
+}
+
+// Round/Square/Curly/Angle Brackets (aka Parens/Brackets/Braces)
+//   first typed as one-sided bracket with matching "ghost" bracket at
+//   far end of current block, until you type an opposing one
+var Bracket = P(P(MathCommand, DelimsMixin), function(_, super_) {
+  _.init = function(side, open, close, ctrlSeq, end) {
+    super_.init.call(this, '\\left'+ctrlSeq, undefined, [open, close]);
+    this.side = side;
+    this.sides = {};
+    this.sides[L] = { ch: open, ctrlSeq: ctrlSeq };
+    this.sides[R] = { ch: close, ctrlSeq: end };
+  };
+  _.numBlocks = function() { return 1; };
+  _.html = function() { // wait until now so that .side may
+    this.htmlTemplate = // be set by createLeftOf or parser
+        '<span class="mq-non-leaf">'
+      +   '<span class="mq-scaled mq-paren'+(this.side === R ? ' mq-ghost' : '')+'">'
+      +     this.sides[L].ch
+      +   '</span>'
+      +   '<span class="mq-non-leaf">&0</span>'
+      +   '<span class="mq-scaled mq-paren'+(this.side === L ? ' mq-ghost' : '')+'">'
+      +     this.sides[R].ch
+      +   '</span>'
+      + '</span>'
+    ;
+    return super_.html.call(this);
+  };
+  _.latex = function() {
+    return '\\left'+this.sides[L].ctrlSeq+this.ends[L].latex()+'\\right'+this.sides[R].ctrlSeq;
+  };
+  _.matchBrack = function(opts, expectedSide, node) {
+    // return node iff it's a matching 1-sided bracket of expected side (if any)
+    return node instanceof Bracket && node.side && node.side !== -expectedSide
+      && (this.sides[this.side].ch === '|' || node.side === -this.side)
+      && (!opts.restrictMismatchedBrackets
+        || OPP_BRACKS[this.sides[this.side].ch] === node.sides[node.side].ch
+        || { '(': ']', '[': ')' }[this.sides[L].ch] === node.sides[R].ch) && node;
+  };
+  _.closeOpposing = function(brack) {
+    brack.side = 0;
+    brack.sides[this.side] = this.sides[this.side]; // copy over my info (may be
+    brack.delimjQs.eq(this.side === L ? 0 : 1) // mismatched, like [a, b))
+      .removeClass('mq-ghost').html(this.sides[this.side].ch);
+  };
+  _.createLeftOf = function(cursor) {
+    if (!this.replacedFragment) { // unless wrapping seln in brackets,
+        // check if next to or inside an opposing one-sided bracket
+      var opts = cursor.options;
+      if (this.sides[L].ch === '|') { // check both sides if I'm a pipe
+        var brack = this.matchBrack(opts, R, cursor[R])
+                 || this.matchBrack(opts, L, cursor[L])
+                 || this.matchBrack(opts, 0, cursor.parent.parent);
+      }
+      else {
+        var brack = this.matchBrack(opts, -this.side, cursor[-this.side])
+                 || this.matchBrack(opts, -this.side, cursor.parent.parent);
+      }
+    }
+    if (brack) {
+      var side = this.side = -brack.side; // may be pipe with .side not yet set
+      this.closeOpposing(brack);
+      if (brack === cursor.parent.parent && cursor[side]) { // move the stuff between
+        Fragment(cursor[side], cursor.parent.ends[side], -side) // me and ghost outside
+          .disown().withDirAdopt(-side, brack.parent, brack, brack[side])
+          .jQ.insDirOf(side, brack.jQ);
+      }
+      brack.bubble('reflow');
+    }
+    else {
+      brack = this, side = brack.side;
+      if (brack.replacedFragment) brack.side = 0; // wrapping seln, don't be one-sided
+      else if (cursor[-side]) { // elsewise, auto-expand so ghost is at far end
+        brack.replaces(Fragment(cursor[-side], cursor.parent.ends[-side], side));
+        cursor[-side] = 0;
+      }
+      super_.createLeftOf.call(brack, cursor);
+    }
+    if (side === L) cursor.insAtLeftEnd(brack.ends[L]);
+    else cursor.insRightOf(brack);
+  };
+  _.placeCursor = noop;
+  _.unwrap = function() {
+    this.ends[L].children().disown().adopt(this.parent, this, this[R])
+      .jQ.insertAfter(this.jQ);
+    this.remove();
+  };
+  _.deleteSide = function(side, outward, cursor) {
+    var parent = this.parent, sib = this[side], farEnd = parent.ends[side];
+
+    if (side === this.side) { // deleting non-ghost of one-sided bracket, unwrap
+      this.unwrap();
+      sib ? cursor.insDirOf(-side, sib) : cursor.insAtDirEnd(side, parent);
+      return;
+    }
+
+    var opts = cursor.options, wasSolid = !this.side;
+    this.side = -side;
+    // if deleting like, outer close-brace of [(1+2)+3} where inner open-paren
+    if (this.matchBrack(opts, side, this.ends[L].ends[this.side])) { // is ghost,
+      this.closeOpposing(this.ends[L].ends[this.side]); // then become [1+2)+3
+      var origEnd = this.ends[L].ends[side];
+      this.unwrap();
+      if (origEnd.siblingCreated) origEnd.siblingCreated(cursor.options, side);
+      sib ? cursor.insDirOf(-side, sib) : cursor.insAtDirEnd(side, parent);
+    }
+    else { // if deleting like, inner close-brace of ([1+2}+3) where outer
+      if (this.matchBrack(opts, side, this.parent.parent)) { // open-paren is
+        this.parent.parent.closeOpposing(this); // ghost, then become [1+2+3)
+        this.parent.parent.unwrap();
+      } // else if deleting outward from a solid pair, unwrap
+      else if (outward && wasSolid) {
+        this.unwrap();
+        sib ? cursor.insDirOf(-side, sib) : cursor.insAtDirEnd(side, parent);
+        return;
+      }
+      else { // else deleting just one of a pair of brackets, become one-sided
+        this.sides[side] = { ch: OPP_BRACKS[this.sides[this.side].ch],
+                             ctrlSeq: OPP_BRACKS[this.sides[this.side].ctrlSeq] };
+        this.delimjQs.removeClass('mq-ghost')
+          .eq(side === L ? 0 : 1).addClass('mq-ghost').html(this.sides[side].ch);
+      }
+      if (sib) { // auto-expand so ghost is at far end
+        var origEnd = this.ends[L].ends[side];
+        Fragment(sib, farEnd, -side).disown()
+          .withDirAdopt(-side, this.ends[L], origEnd, 0)
+          .jQ.insAtDirEnd(side, this.ends[L].jQ.removeClass('mq-empty'));
+        if (origEnd.siblingCreated) origEnd.siblingCreated(cursor.options, side);
+        cursor.insDirOf(-side, sib);
+      } // didn't auto-expand, cursor goes just outside or just inside parens
+      else (outward ? cursor.insDirOf(side, this)
+                    : cursor.insAtDirEnd(side, this.ends[L]));
+    }
+  };
+  _.deleteTowards = function(dir, cursor) {
+    this.deleteSide(-dir, false, cursor);
+  };
+  _.finalizeTree = function() {
+    this.ends[L].deleteOutOf = function(dir, cursor) {
+      this.parent.deleteSide(dir, true, cursor);
+    };
+    // FIXME HACK: after initial creation/insertion, finalizeTree would only be
+    // called if the paren is selected and replaced, e.g. by LiveFraction
+    this.finalizeTree = this.intentionalBlur = function() {
+      this.delimjQs.eq(this.side === L ? 1 : 0).removeClass('mq-ghost');
+      this.side = 0;
+    };
+  };
+  _.siblingCreated = function(opts, dir) { // if something typed between ghost and far
+    if (dir === -this.side) this.finalizeTree(); // end of its block, solidify
+  };
+});
+
+var OPP_BRACKS = {
+  '(': ')',
+  ')': '(',
+  '[': ']',
+  ']': '[',
+  '{': '}',
+  '}': '{',
+  '\\{': '\\}',
+  '\\}': '\\{',
+  '&lang;': '&rang;',
+  '&rang;': '&lang;',
+  '\\langle ': '\\rangle ',
+  '\\rangle ': '\\langle ',
+  '|': '|',
+  '\\lVert ' : '\\rVert ',
+  '\\rVert ' : '\\lVert ',
+};
+
+function bindCharBracketPair(open, ctrlSeq) {
+  var ctrlSeq = ctrlSeq || open, close = OPP_BRACKS[open], end = OPP_BRACKS[ctrlSeq];
+  CharCmds[open] = bind(Bracket, L, open, close, ctrlSeq, end);
+  CharCmds[close] = bind(Bracket, R, open, close, ctrlSeq, end);
+}
+bindCharBracketPair('(');
+bindCharBracketPair('[');
+bindCharBracketPair('{', '\\{');
+LatexCmds.langle = bind(Bracket, L, '&lang;', '&rang;', '\\langle ', '\\rangle ');
+LatexCmds.rangle = bind(Bracket, R, '&lang;', '&rang;', '\\langle ', '\\rangle ');
+CharCmds['|'] = bind(Bracket, L, '|', '|', '|', '|');
+LatexCmds.lVert = bind(Bracket, L, '&#8741;', '&#8741;', '\\lVert ', '\\rVert ');
+LatexCmds.rVert = bind(Bracket, R, '&#8741;', '&#8741;', '\\lVert ', '\\rVert ');
+
+LatexCmds.left = P(MathCommand, function(_) {
+  _.parser = function() {
+    var regex = Parser.regex;
+    var string = Parser.string;
+    var succeed = Parser.succeed;
+    var optWhitespace = Parser.optWhitespace;
+
+    return optWhitespace.then(regex(/^(?:[([|]|\\\{|\\langle\b|\\lVert\b)/))
+      .then(function(ctrlSeq) {
+        var open = (ctrlSeq.charAt(0) === '\\' ? ctrlSeq.slice(1) : ctrlSeq);
+	if (ctrlSeq=="\\langle") { open = '&lang;'; ctrlSeq = ctrlSeq + ' '; }
+	if (ctrlSeq=="\\lVert") { open = '&#8741;'; ctrlSeq = ctrlSeq + ' '; }
+        return latexMathParser.then(function (block) {
+          return string('\\right').skip(optWhitespace)
+            .then(regex(/^(?:[\])|]|\\\}|\\rangle\b|\\rVert\b)/)).map(function(end) {
+              var close = (end.charAt(0) === '\\' ? end.slice(1) : end);
+	      if (end=="\\rangle") { close = '&rang;'; end = end + ' '; }
+	      if (end=="\\rVert") { close = '&#8741;'; end = end + ' '; }
+              var cmd = Bracket(0, open, close, ctrlSeq, end);
+              cmd.blocks = [ block ];
+              block.adopt(cmd, 0, 0);
+              return cmd;
+            })
+          ;
+        });
+      })
+    ;
+  };
+});
+
+LatexCmds.right = P(MathCommand, function(_) {
+  _.parser = function() {
+    return Parser.fail('unmatched \\right');
+  };
+});
+
+var Binomial =
+LatexCmds.binom =
+LatexCmds.binomial = P(P(MathCommand, DelimsMixin), function(_, super_) {
+  _.ctrlSeq = '\\binom';
+  _.htmlTemplate =
+      '<span class="mq-non-leaf">'
+    +   '<span class="mq-paren mq-scaled">(</span>'
+    +   '<span class="mq-non-leaf">'
+    +     '<span class="mq-array mq-non-leaf">'
+    +       '<span>&0</span>'
+    +       '<span>&1</span>'
+    +     '</span>'
+    +   '</span>'
+    +   '<span class="mq-paren mq-scaled">)</span>'
+    + '</span>'
+  ;
+  _.textTemplate = ['choose(',',',')'];
+});
+
+var Choose =
+LatexCmds.choose = P(Binomial, function(_) {
+  _.createLeftOf = LiveFraction.prototype.createLeftOf;
+});
+
+LatexCmds.editable = // backcompat with before cfd3620 on #233
+LatexCmds.MathQuillMathField = P(MathCommand, function(_, super_) {
+  _.ctrlSeq = '\\MathQuillMathField';
+  _.htmlTemplate =
+      '<span class="mq-editable-field">'
+    +   '<span class="mq-root-block">&0</span>'
+    + '</span>'
+  ;
+  _.parser = function() {
+    var self = this,
+      string = Parser.string, regex = Parser.regex, succeed = Parser.succeed;
+    return string('[').then(regex(/^[a-z][a-z0-9]*/i)).skip(string(']'))
+      .map(function(name) { self.name = name; }).or(succeed())
+      .then(super_.parser.call(self));
+  };
+  _.finalizeTree = function(options) {
+    var ctrlr = Controller(this.ends[L], this.jQ, options);
+    ctrlr.KIND_OF_MQ = 'MathField';
+    ctrlr.editable = true;
+    ctrlr.createTextarea();
+    ctrlr.editablesTextareaEvents();
+    ctrlr.cursor.insAtRightEnd(ctrlr.root);
+    RootBlockMixin(ctrlr.root);
+  };
+  _.registerInnerField = function(innerFields, MathField) {
+    innerFields.push(innerFields[this.name] = MathField(this.ends[L].controller));
+  };
+  _.latex = function(){ return this.ends[L].latex(); };
+  _.text = function(){ return this.ends[L].text(); };
+});
+
+// Embed arbitrary things
+// Probably the closest DOM analogue would be an iframe?
+// From MathQuill's perspective, it's a Symbol, it can be
+// anywhere and the cursor can go around it but never in it.
+// Create by calling public API method .dropEmbedded(),
+// or by calling the global public API method .registerEmbed()
+// and rendering LaTeX like \embed{registeredName} (see test).
+var Embed = LatexCmds.embed = P(Symbol, function(_, super_) {
+  _.setOptions = function(options) {
+    function noop () { return ""; }
+    this.text = options.text || noop;
+    this.htmlTemplate = options.htmlString || "";
+    this.latex = options.latex || noop;
+    return this;
+  };
+  _.parser = function() {
+    var self = this,
+      string = Parser.string, regex = Parser.regex, succeed = Parser.succeed;
+    return string('{').then(regex(/^[a-z][a-z0-9]*/i)).skip(string('}'))
+      .then(function(name) {
+        // the chars allowed in the optional data block are arbitrary other than
+        // excluding curly braces and square brackets (which'd be too confusing)
+        return string('[').then(regex(/^[-\w\s]*/)).skip(string(']'))
+          .or(succeed()).map(function(data) {
+            return self.setOptions(EMBEDS[name](data));
+          })
+        ;
+      })
+    ;
+  };
+});
+
+// LaTeX environments
+// Environments are delimited by an opening \begin{} and a closing
+// \end{}. Everything inside those tags will be formatted in a
+// special manner depending on the environment type.
+var Environments = {};
+
+LatexCmds.begin = P(MathCommand, function(_, super_) {
+  _.parser = function() {
+    var string = Parser.string;
+    var regex = Parser.regex;
+    return string('{')
+      .then(regex(/^[a-z]+/i))
+      .skip(string('}'))
+      .then(function (env) {
+          return (Environments[env] ?
+            Environments[env]().parser() :
+            Parser.fail('unknown environment type: '+env)
+          ).skip(string('\\end{'+env+'}'));
+      })
+    ;
+  };
+});
+
+var Environment = P(MathCommand, function(_, super_) {
+  _.template = [['\\begin{', '}'], ['\\end{', '}']];
+  _.wrappers = function () {
+    return [
+      _.template[0].join(this.environment),
+      _.template[1].join(this.environment)
+    ];
+  };
+});
+
+var Matrix =
+Environments.matrix = P(Environment, function(_, super_) {
+
+  var delimiters = {
+    column: '&',
+    row: '\\\\'
+  };
+  _.parentheses = {
+    left: null,
+    right: null
+  };
+  _.environment = 'matrix';
+
+  _.reflow = function() {
+    var blockjQ = this.jQ.children('table');
+
+    var height = blockjQ.outerHeight()/+blockjQ.css('fontSize').slice(0,-2);
+
+    var parens = this.jQ.children('.mq-paren');
+    if (parens.length) {
+      scale(parens, min(1 + .2*(height - 1), 1.2), 1.05*height);
+    }
+  };
+  _.latex = function() {
+    var latex = '';
+    var row;
+
+    this.eachChild(function (cell) {
+      if (typeof row !== 'undefined') {
+        latex += (row !== cell.row) ?
+          delimiters.row :
+          delimiters.column;
+      }
+      row = cell.row;
+      latex += cell.latex();
+    });
+
+    return this.wrappers().join(latex);
+  };
+  _.html = function() {
+    var cells = [], trs = '', i=0, row;
+
+    function parenHtml(paren) {
+      return (paren) ?
+          '<span class="mq-scaled mq-paren">'
+        +   paren
+        + '</span>' : '';
+    }
+
+    // Build <tr><td>.. structure from cells
+    this.eachChild(function (cell) {
+      if (row !== cell.row) {
+        row = cell.row;
+        trs += '<tr>$tds</tr>';
+        cells[row] = [];
+      }
+      cells[row].push('<td>&'+(i++)+'</td>');
+    });
+
+    this.htmlTemplate =
+        '<span class="mq-matrix mq-non-leaf">'
+      +   parenHtml(this.parentheses.left)
+      +   '<table class="mq-non-leaf">'
+      +     trs.replace(/\$tds/g, function () {
+              return cells.shift().join('');
+            })
+      +   '</table>'
+      +   parenHtml(this.parentheses.right)
+      + '</span>'
+    ;
+
+    return super_.html.call(this);
+  };
+  // Create default 4-cell matrix
+  _.createBlocks = function() {
+    this.blocks = [
+      MatrixCell(0, this),
+      MatrixCell(0, this),
+      MatrixCell(1, this),
+      MatrixCell(1, this)
+    ];
+  };
+  _.parser = function() {
+    var self = this;
+    var optWhitespace = Parser.optWhitespace;
+    var string = Parser.string;
+
+    return optWhitespace
+    .then(string(delimiters.column)
+      .or(string(delimiters.row))
+      .or(latexMathParser.block))
+    .many()
+    .skip(optWhitespace)
+    .then(function(items) {
+      var blocks = [];
+      var row = 0;
+      self.blocks = [];
+
+      function addCell() {
+        self.blocks.push(MatrixCell(row, self, blocks));
+        blocks = [];
+      }
+
+      for (var i=0; i<items.length; i+=1) {
+        if (items[i] instanceof MathBlock) {
+          blocks.push(items[i]);
+        } else {
+          addCell();
+          if (items[i] === delimiters.row) row+=1;
+        }
+      }
+      addCell();
+      self.autocorrect();
+      return Parser.succeed(self);
+    });
+  };
+  // Relink all the cells after parsing
+  _.finalizeTree = function() {
+    var table = this.jQ.find('table');
+    table.toggleClass('mq-rows-1', table.find('tr').length === 1);
+    this.relink();
+  };
+  // Set up directional pointers between cells
+  _.relink = function() {
+    var blocks = this.blocks;
+    var rows = [];
+    var row, column, cell;
+
+    // Use a for loop rather than eachChild
+    // as we're still making sure children()
+    // is set up properly
+    for (var i=0; i<blocks.length; i+=1) {
+      cell = blocks[i];
+      if (row !== cell.row) {
+        row = cell.row;
+        rows[row] = [];
+        column = 0;
+      }
+      rows[row][column] = cell;
+
+      // Set up horizontal linkage
+      cell[R] = blocks[i+1];
+      cell[L] = blocks[i-1];
+
+      // Set up vertical linkage
+      if (rows[row-1] && rows[row-1][column]) {
+        cell.upOutOf = rows[row-1][column];
+        rows[row-1][column].downOutOf = cell;
+      }
+
+      column+=1;
+    }
+
+    // set start and end blocks of matrix
+    this.ends[L] = blocks[0];
+    this.ends[R] = blocks[blocks.length-1];
+  };
+  // Ensure consistent row lengths
+  _.autocorrect = function(rows) {
+    var lengths = [], rows = [];
+    var blocks = this.blocks;
+    var maxLength, shortfall, position, row, i;
+
+    for (i=0; i<blocks.length; i+=1) {
+      row = blocks[i].row;
+      rows[row] = rows[row] || [];
+      rows[row].push(blocks[i]);
+      lengths[row] = rows[row].length;
+    }
+
+    maxLength = Math.max.apply(null, lengths);
+    if (maxLength !== Math.min.apply(null, lengths)) {
+      // Pad shorter rows to correct length
+      for (i=0; i<rows.length; i+=1) {
+        shortfall = maxLength - rows[i].length;
+        while (shortfall) {
+          position = maxLength*i + rows[i].length;
+          blocks.splice(position, 0, MatrixCell(i, this));
+          shortfall-=1;
+        }
+      }
+      this.relink();
+    }
+  };
+  // Deleting a cell will also delete the current row and
+  // column if they are empty, and relink the matrix.
+  _.deleteCell = function(currentCell) {
+    var rows = [], columns = [], myRow = [], myColumn = [];
+    var blocks = this.blocks, row, column;
+
+    // Create arrays for cells in the current row / column
+    this.eachChild(function (cell) {
+      if (row !== cell.row) {
+        row = cell.row;
+        rows[row] = [];
+        column = 0;
+      }
+      columns[column] = columns[column] || [];
+      columns[column].push(cell);
+      rows[row].push(cell);
+
+      if (cell === currentCell) {
+        myRow = rows[row];
+        myColumn = columns[column];
+      }
+
+      column+=1;
+    });
+
+    function isEmpty(cells) {
+      var empties = [];
+      for (var i=0; i<cells.length; i+=1) {
+        if (cells[i].isEmpty()) empties.push(cells[i]);
+      }
+      return empties.length === cells.length;
+    }
+
+    function remove(cells) {
+      for (var i=0; i<cells.length; i+=1) {
+        if (blocks.indexOf(cells[i]) > -1) {
+          cells[i].remove();
+          blocks.splice(blocks.indexOf(cells[i]), 1);
+        }
+      }
+    }
+
+    if (isEmpty(myRow) && myColumn.length > 1) {
+      row = rows.indexOf(myRow);
+      // Decrease all following row numbers
+      this.eachChild(function (cell) {
+        if (cell.row > row) cell.row-=1;
+      });
+      // Dispose of cells and remove <tr>
+      remove(myRow);
+      this.jQ.find('tr').eq(row).remove();
+    }
+    if (isEmpty(myColumn) && myRow.length > 1) {
+      remove(myColumn);
+    }
+    this.finalizeTree();
+  };
+  _.addRow = function(afterCell) {
+    var previous = [], newCells = [], next = [];
+    var newRow = $('<tr></tr>'), row = afterCell.row;
+    var columns = 0, block, column;
+
+    this.eachChild(function (cell) {
+      // Cache previous rows
+      if (cell.row <= row) {
+        previous.push(cell);
+      }
+      // Work out how many columns
+      if (cell.row === row) {
+        if (cell === afterCell) column = columns;
+        columns+=1;
+      }
+      // Cache cells after new row
+      if (cell.row > row) {
+        cell.row+=1;
+        next.push(cell);
+      }
+    });
+
+    // Add new cells, one for each column
+    for (var i=0; i<columns; i+=1) {
+      block = MatrixCell(row+1);
+      block.parent = this;
+      newCells.push(block);
+
+      // Create cell <td>s and add to new row
+      block.jQ = $('<td class="mq-empty">')
+        .attr(mqBlockId, block.id)
+        .appendTo(newRow);
+    }
+
+    // Insert the new row
+    this.jQ.find('tr').eq(row).after(newRow);
+    this.blocks = previous.concat(newCells, next);
+    return newCells[column];
+  };
+  _.addColumn = function(afterCell) {
+    var rows = [], newCells = [];
+    var column, block;
+
+    // Build rows array and find new column index
+    this.eachChild(function (cell) {
+      rows[cell.row] = rows[cell.row] || [];
+      rows[cell.row].push(cell);
+      if (cell === afterCell) column = rows[cell.row].length;
+    });
+
+    // Add new cells, one for each row
+    for (var i=0; i<rows.length; i+=1) {
+      block = MatrixCell(i);
+      block.parent = this;
+      newCells.push(block);
+      rows[i].splice(column, 0, block);
+
+      block.jQ = $('<td class="mq-empty">')
+        .attr(mqBlockId, block.id);
+    }
+
+    // Add cell <td> elements in correct positions
+    this.jQ.find('tr').each(function (i) {
+      $(this).find('td').eq(column-1).after(rows[i][column].jQ);
+    });
+
+    // Flatten the rows array-of-arrays
+    this.blocks = [].concat.apply([], rows);
+    return newCells[afterCell.row];
+  };
+  _.insert = function(method, afterCell) {
+    var cellToFocus = this[method](afterCell);
+    this.cursor = this.cursor || this.parent.cursor;
+    this.finalizeTree();
+    this.bubble('reflow').cursor.insAtRightEnd(cellToFocus);
+  };
+  _.backspace = function(cell, dir, cursor, finalDeleteCallback) {
+    var dirwards = cell[dir];
+    if (cell.isEmpty()) {
+      this.deleteCell(cell);
+      while (dirwards &&
+        dirwards[dir] &&
+        this.blocks.indexOf(dirwards) === -1) {
+          dirwards = dirwards[dir];
+      }
+      if (dirwards) {
+        cursor.insAtDirEnd(-dir, dirwards);
+      }
+      if (this.blocks.length === 1 && this.blocks[0].isEmpty()) {
+        finalDeleteCallback();
+        this.finalizeTree();
+      }
+      this.bubble('edited');
+    }
+  };
+});
+
+Environments.pmatrix = P(Matrix, function(_, super_) {
+  _.environment = 'pmatrix';
+  _.parentheses = {
+    left: '(',
+    right: ')'
+  };
+});
+
+Environments.bmatrix = P(Matrix, function(_, super_) {
+  _.environment = 'bmatrix';
+  _.parentheses = {
+    left: '[',
+    right: ']'
+  };
+});
+
+Environments.Bmatrix = P(Matrix, function(_, super_) {
+  _.environment = 'Bmatrix';
+  _.parentheses = {
+    left: '{',
+    right: '}'
+  };
+});
+
+Environments.vmatrix = P(Matrix, function(_, super_) {
+  _.environment = 'vmatrix';
+  _.parentheses = {
+    left: '|',
+    right: '|'
+  };
+});
+
+Environments.Vmatrix = P(Matrix, function(_, super_) {
+  _.environment = 'Vmatrix';
+  _.parentheses = {
+    left: '&#8214;',
+    right: '&#8214;'
+  };
+});
+
+// Replacement for mathblocks inside matrix cells
+// Adds matrix-specific keyboard commands
+var MatrixCell = P(MathBlock, function(_, super_) {
+  _.init = function(row, parent, replaces) {
+    super_.init.call(this);
+    this.row = row;
+    if (parent) {
+      this.adopt(parent, parent.ends[R], 0);
+    }
+    if (replaces) {
+      for (var i=0; i<replaces.length; i++) {
+        replaces[i].children().adopt(this, this.ends[R], 0);
+      }
+    }
+  };
+  _.keystroke = function(key, e, ctrlr) {
+    switch (key) {
+    case 'Shift-Spacebar':
+      e.preventDefault();
+      return this.parent.insert('addColumn', this);
+      break;
+    case 'Shift-Enter':
+    return this.parent.insert('addRow', this);
+      break;
+    }
+    return super_.keystroke.apply(this, arguments);
+  };
+  _.deleteOutOf = function(dir, cursor) {
+    var self = this, args = arguments;
+    this.parent.backspace(this, dir, cursor, function () {
+      // called when last cell gets deleted
+      return super_.deleteOutOf.apply(self, args);
+    });
+  }
+});
+/************************************
+ * Symbols for Advanced Mathematics
+ ***********************************/
+
+LatexCmds.notin =
+LatexCmds.cong =
+LatexCmds.equiv =
+LatexCmds.oplus =
+LatexCmds.otimes = P(BinaryOperator, function(_, super_) {
+  _.init = function(latex) {
+    super_.init.call(this, '\\'+latex+' ', '&'+latex+';');
+  };
+});
+
+LatexCmds['\u2260'] = LatexCmds.ne = LatexCmds.neq = bind(BinaryOperator,'\\ne ','&ne;');
+
+LatexCmds['\u2217'] = LatexCmds.ast = LatexCmds.star = LatexCmds.loast = LatexCmds.lowast =
+  bind(BinaryOperator,'\\ast ','&lowast;');
+  //case 'there4 = // a special exception for this one, perhaps?
+LatexCmds.therefor = LatexCmds.therefore =
+  bind(BinaryOperator,'\\therefore ','&there4;');
+
+LatexCmds.cuz = // l33t
+LatexCmds.because = bind(BinaryOperator,'\\because ','&#8757;');
+
+LatexCmds.prop = LatexCmds.propto = bind(BinaryOperator,'\\propto ','&prop;');
+
+LatexCmds['\u2248'] = LatexCmds.asymp = LatexCmds.approx = bind(BinaryOperator,'\\approx ','&asymp;');
+
+LatexCmds.isin = LatexCmds['in'] = bind(BinaryOperator,'\\in ','&isin;');
+
+LatexCmds.ni = LatexCmds.contains = bind(BinaryOperator,'\\ni ','&ni;');
+
+LatexCmds.notni = LatexCmds.niton = LatexCmds.notcontains = LatexCmds.doesnotcontain =
+  bind(BinaryOperator,'\\not\\ni ','&#8716;');
+
+LatexCmds.sub = LatexCmds.subset = bind(BinaryOperator,'\\subset ','&sub;');
+
+LatexCmds.sup = LatexCmds.supset = LatexCmds.superset =
+  bind(BinaryOperator,'\\supset ','&sup;');
+
+LatexCmds.nsub = LatexCmds.notsub =
+LatexCmds.nsubset = LatexCmds.notsubset =
+  bind(BinaryOperator,'\\not\\subset ','&#8836;');
+
+LatexCmds.nsup = LatexCmds.notsup =
+LatexCmds.nsupset = LatexCmds.notsupset =
+LatexCmds.nsuperset = LatexCmds.notsuperset =
+  bind(BinaryOperator,'\\not\\supset ','&#8837;');
+
+LatexCmds.sube = LatexCmds.subeq = LatexCmds.subsete = LatexCmds.subseteq =
+  bind(BinaryOperator,'\\subseteq ','&sube;');
+
+LatexCmds.supe = LatexCmds.supeq =
+LatexCmds.supsete = LatexCmds.supseteq =
+LatexCmds.supersete = LatexCmds.superseteq =
+  bind(BinaryOperator,'\\supseteq ','&supe;');
+
+LatexCmds.nsube = LatexCmds.nsubeq =
+LatexCmds.notsube = LatexCmds.notsubeq =
+LatexCmds.nsubsete = LatexCmds.nsubseteq =
+LatexCmds.notsubsete = LatexCmds.notsubseteq =
+  bind(BinaryOperator,'\\not\\subseteq ','&#8840;');
+
+LatexCmds.nsupe = LatexCmds.nsupeq =
+LatexCmds.notsupe = LatexCmds.notsupeq =
+LatexCmds.nsupsete = LatexCmds.nsupseteq =
+LatexCmds.notsupsete = LatexCmds.notsupseteq =
+LatexCmds.nsupersete = LatexCmds.nsuperseteq =
+LatexCmds.notsupersete = LatexCmds.notsuperseteq =
+  bind(BinaryOperator,'\\not\\supseteq ','&#8841;');
+
+
+//the canonical sets of numbers
+LatexCmds.N = LatexCmds.naturals = LatexCmds.Naturals =
+  bind(VanillaSymbol,'\\mathbb{N}','&#8469;');
+
+LatexCmds.P =
+LatexCmds.primes = LatexCmds.Primes =
+LatexCmds.projective = LatexCmds.Projective =
+LatexCmds.probability = LatexCmds.Probability =
+  bind(VanillaSymbol,'\\mathbb{P}','&#8473;');
+
+LatexCmds.Z = LatexCmds.integers = LatexCmds.Integers =
+  bind(VanillaSymbol,'\\mathbb{Z}','&#8484;');
+
+LatexCmds.Q = LatexCmds.rationals = LatexCmds.Rationals =
+  bind(VanillaSymbol,'\\mathbb{Q}','&#8474;');
+
+LatexCmds.R = LatexCmds.reals = LatexCmds.Reals =
+  bind(VanillaSymbol,'\\mathbb{R}','&#8477;');
+
+LatexCmds.C =
+LatexCmds.complex = LatexCmds.Complex =
+LatexCmds.complexes = LatexCmds.Complexes =
+LatexCmds.complexplane = LatexCmds.Complexplane = LatexCmds.ComplexPlane =
+  bind(VanillaSymbol,'\\mathbb{C}','&#8450;');
+
+LatexCmds.H = LatexCmds.Hamiltonian = LatexCmds.quaternions = LatexCmds.Quaternions =
+  bind(VanillaSymbol,'\\mathbb{H}','&#8461;');
+
+//spacing
+LatexCmds.quad = LatexCmds.emsp = bind(VanillaSymbol,'\\quad ','    ');
+LatexCmds.qquad = bind(VanillaSymbol,'\\qquad ','        ');
+/* spacing special characters, gonna have to implement this in LatexCommandInput::onText somehow
+case ',':
+  return VanillaSymbol('\\, ',' ');
+case ':':
+  return VanillaSymbol('\\: ','  ');
+case ';':
+  return VanillaSymbol('\\; ','   ');
+case '!':
+  return Symbol('\\! ','<span style="margin-right:-.2em"></span>');
+*/
+
+//binary operators
+LatexCmds.diamond = bind(VanillaSymbol, '\\diamond ', '&#9671;');
+LatexCmds.bigtriangleup = bind(VanillaSymbol, '\\bigtriangleup ', '&#9651;');
+LatexCmds.ominus = bind(VanillaSymbol, '\\ominus ', '&#8854;');
+LatexCmds.uplus = bind(VanillaSymbol, '\\uplus ', '&#8846;');
+LatexCmds.bigtriangledown = bind(VanillaSymbol, '\\bigtriangledown ', '&#9661;');
+LatexCmds.sqcap = bind(VanillaSymbol, '\\sqcap ', '&#8851;');
+LatexCmds.triangleleft = bind(VanillaSymbol, '\\triangleleft ', '&#8882;');
+LatexCmds.sqcup = bind(VanillaSymbol, '\\sqcup ', '&#8852;');
+LatexCmds.triangleright = bind(VanillaSymbol, '\\triangleright ', '&#8883;');
+//circledot is not a not real LaTex command see https://github.com/mathquill/mathquill/pull/552 for more details
+LatexCmds.odot = LatexCmds.circledot = bind(VanillaSymbol, '\\odot ', '&#8857;');
+LatexCmds.bigcirc = bind(VanillaSymbol, '\\bigcirc ', '&#9711;');
+LatexCmds.dagger = bind(VanillaSymbol, '\\dagger ', '&#0134;');
+LatexCmds.ddagger = bind(VanillaSymbol, '\\ddagger ', '&#135;');
+LatexCmds.wr = bind(VanillaSymbol, '\\wr ', '&#8768;');
+LatexCmds.amalg = bind(VanillaSymbol, '\\amalg ', '&#8720;');
+
+//relationship symbols
+LatexCmds.models = bind(VanillaSymbol, '\\models ', '&#8872;');
+LatexCmds.prec = bind(VanillaSymbol, '\\prec ', '&#8826;');
+LatexCmds.succ = bind(VanillaSymbol, '\\succ ', '&#8827;');
+LatexCmds.preceq = bind(VanillaSymbol, '\\preceq ', '&#8828;');
+LatexCmds.succeq = bind(VanillaSymbol, '\\succeq ', '&#8829;');
+LatexCmds.simeq = bind(VanillaSymbol, '\\simeq ', '&#8771;');
+LatexCmds.mid = bind(VanillaSymbol, '\\mid ', '&#8739;');
+LatexCmds.ll = bind(VanillaSymbol, '\\ll ', '&#8810;');
+LatexCmds.gg = bind(VanillaSymbol, '\\gg ', '&#8811;');
+LatexCmds.parallel = bind(VanillaSymbol, '\\parallel ', '&#8741;');
+LatexCmds.nparallel = bind(VanillaSymbol, '\\nparallel ', '&#8742;');
+LatexCmds.bowtie = bind(VanillaSymbol, '\\bowtie ', '&#8904;');
+LatexCmds.sqsubset = bind(VanillaSymbol, '\\sqsubset ', '&#8847;');
+LatexCmds.sqsupset = bind(VanillaSymbol, '\\sqsupset ', '&#8848;');
+LatexCmds.smile = bind(VanillaSymbol, '\\smile ', '&#8995;');
+LatexCmds.sqsubseteq = bind(VanillaSymbol, '\\sqsubseteq ', '&#8849;');
+LatexCmds.sqsupseteq = bind(VanillaSymbol, '\\sqsupseteq ', '&#8850;');
+LatexCmds.doteq = bind(VanillaSymbol, '\\doteq ', '&#8784;');
+LatexCmds.frown = bind(VanillaSymbol, '\\frown ', '&#8994;');
+LatexCmds.vdash = bind(VanillaSymbol, '\\vdash ', '&#8870;');
+LatexCmds.dashv = bind(VanillaSymbol, '\\dashv ', '&#8867;');
+LatexCmds.nless = bind(VanillaSymbol, '\\nless ', '&#8814;');
+LatexCmds.ngtr = bind(VanillaSymbol, '\\ngtr ', '&#8815;');
+
+//arrows
+LatexCmds.longleftarrow = bind(VanillaSymbol, '\\longleftarrow ', '&#8592;');
+LatexCmds.longrightarrow = bind(VanillaSymbol, '\\longrightarrow ', '&#8594;');
+LatexCmds.Longleftarrow = bind(VanillaSymbol, '\\Longleftarrow ', '&#8656;');
+LatexCmds.Longrightarrow = bind(VanillaSymbol, '\\Longrightarrow ', '&#8658;');
+LatexCmds.longleftrightarrow = bind(VanillaSymbol, '\\longleftrightarrow ', '&#8596;');
+LatexCmds.updownarrow = bind(VanillaSymbol, '\\updownarrow ', '&#8597;');
+LatexCmds.Longleftrightarrow = bind(VanillaSymbol, '\\Longleftrightarrow ', '&#8660;');
+LatexCmds.Updownarrow = bind(VanillaSymbol, '\\Updownarrow ', '&#8661;');
+LatexCmds.mapsto = bind(VanillaSymbol, '\\mapsto ', '&#8614;');
+LatexCmds.nearrow = bind(VanillaSymbol, '\\nearrow ', '&#8599;');
+LatexCmds.hookleftarrow = bind(VanillaSymbol, '\\hookleftarrow ', '&#8617;');
+LatexCmds.hookrightarrow = bind(VanillaSymbol, '\\hookrightarrow ', '&#8618;');
+LatexCmds.searrow = bind(VanillaSymbol, '\\searrow ', '&#8600;');
+LatexCmds.leftharpoonup = bind(VanillaSymbol, '\\leftharpoonup ', '&#8636;');
+LatexCmds.rightharpoonup = bind(VanillaSymbol, '\\rightharpoonup ', '&#8640;');
+LatexCmds.swarrow = bind(VanillaSymbol, '\\swarrow ', '&#8601;');
+LatexCmds.leftharpoondown = bind(VanillaSymbol, '\\leftharpoondown ', '&#8637;');
+LatexCmds.rightharpoondown = bind(VanillaSymbol, '\\rightharpoondown ', '&#8641;');
+LatexCmds.nwarrow = bind(VanillaSymbol, '\\nwarrow ', '&#8598;');
+
+//Misc
+LatexCmds.ldots = bind(VanillaSymbol, '\\ldots ', '&#8230;');
+LatexCmds.cdots = bind(VanillaSymbol, '\\cdots ', '&#8943;');
+LatexCmds.vdots = bind(VanillaSymbol, '\\vdots ', '&#8942;');
+LatexCmds.ddots = bind(VanillaSymbol, '\\ddots ', '&#8945;');
+LatexCmds.surd = bind(VanillaSymbol, '\\surd ', '&#8730;');
+LatexCmds.triangle = bind(VanillaSymbol, '\\triangle ', '&#9651;');
+LatexCmds.ell = bind(VanillaSymbol, '\\ell ', '&#8467;');
+LatexCmds.top = bind(VanillaSymbol, '\\top ', '&#8868;');
+LatexCmds.flat = bind(VanillaSymbol, '\\flat ', '&#9837;');
+LatexCmds.natural = bind(VanillaSymbol, '\\natural ', '&#9838;');
+LatexCmds.sharp = bind(VanillaSymbol, '\\sharp ', '&#9839;');
+LatexCmds.wp = bind(VanillaSymbol, '\\wp ', '&#8472;');
+LatexCmds.bot = bind(VanillaSymbol, '\\bot ', '&#8869;');
+LatexCmds.clubsuit = bind(VanillaSymbol, '\\clubsuit ', '&#9827;');
+LatexCmds.diamondsuit = bind(VanillaSymbol, '\\diamondsuit ', '&#9826;');
+LatexCmds.heartsuit = bind(VanillaSymbol, '\\heartsuit ', '&#9825;');
+LatexCmds.spadesuit = bind(VanillaSymbol, '\\spadesuit ', '&#9824;');
+//not real LaTex command see https://github.com/mathquill/mathquill/pull/552 for more details
+LatexCmds.parallelogram = bind(VanillaSymbol, '\\parallelogram ', '&#9649;');
+LatexCmds.square = bind(VanillaSymbol, '\\square ', '&#11036;');
+
+//variable-sized
+LatexCmds.oint = bind(VanillaSymbol, '\\oint ', '&#8750;');
+LatexCmds.bigcap = bind(VanillaSymbol, '\\bigcap ', '&#8745;');
+LatexCmds.bigcup = bind(VanillaSymbol, '\\bigcup ', '&#8746;');
+LatexCmds.bigsqcup = bind(VanillaSymbol, '\\bigsqcup ', '&#8852;');
+LatexCmds.bigvee = bind(VanillaSymbol, '\\bigvee ', '&#8744;');
+LatexCmds.bigwedge = bind(VanillaSymbol, '\\bigwedge ', '&#8743;');
+LatexCmds.bigodot = bind(VanillaSymbol, '\\bigodot ', '&#8857;');
+LatexCmds.bigotimes = bind(VanillaSymbol, '\\bigotimes ', '&#8855;');
+LatexCmds.bigoplus = bind(VanillaSymbol, '\\bigoplus ', '&#8853;');
+LatexCmds.biguplus = bind(VanillaSymbol, '\\biguplus ', '&#8846;');
+
+//delimiters
+LatexCmds.lfloor = bind(VanillaSymbol, '\\lfloor ', '&#8970;');
+LatexCmds.rfloor = bind(VanillaSymbol, '\\rfloor ', '&#8971;');
+LatexCmds.lceil = bind(VanillaSymbol, '\\lceil ', '&#8968;');
+LatexCmds.rceil = bind(VanillaSymbol, '\\rceil ', '&#8969;');
+LatexCmds.opencurlybrace = LatexCmds.lbrace = bind(VanillaSymbol, '\\lbrace ', '{');
+LatexCmds.closecurlybrace = LatexCmds.rbrace = bind(VanillaSymbol, '\\rbrace ', '}');
+LatexCmds.lbrack = bind(VanillaSymbol, '[');
+LatexCmds.rbrack = bind(VanillaSymbol, ']');
+
+//various symbols
+LatexCmds.slash = bind(VanillaSymbol, '/');
+LatexCmds.vert = bind(VanillaSymbol,'|');
+LatexCmds.perp = LatexCmds.perpendicular = bind(VanillaSymbol,'\\perp ','&perp;');
+LatexCmds.nabla = LatexCmds.del = bind(VanillaSymbol,'\\nabla ','&nabla;');
+LatexCmds.hbar = bind(VanillaSymbol,'\\hbar ','&#8463;');
+
+LatexCmds.AA = LatexCmds.Angstrom = LatexCmds.angstrom =
+  bind(VanillaSymbol,'\\text\\AA ','&#8491;');
+
+LatexCmds.ring = LatexCmds.circ = LatexCmds.circle =
+  bind(VanillaSymbol,'\\circ ','&#8728;');
+
+LatexCmds.bull = LatexCmds.bullet = bind(VanillaSymbol,'\\bullet ','&bull;');
+
+LatexCmds.setminus = LatexCmds.smallsetminus =
+  bind(VanillaSymbol,'\\setminus ','&#8726;');
+
+LatexCmds.not = //bind(Symbol,'\\not ','<span class="not">/</span>');
+LatexCmds['\u00ac'] = LatexCmds.neg = bind(VanillaSymbol,'\\neg ','&not;');
+
+LatexCmds['\u2026'] = LatexCmds.dots = LatexCmds.ellip = LatexCmds.hellip =
+LatexCmds.ellipsis = LatexCmds.hellipsis =
+  bind(VanillaSymbol,'\\dots ','&hellip;');
+
+LatexCmds.converges =
+LatexCmds.darr = LatexCmds.dnarr = LatexCmds.dnarrow = LatexCmds.downarrow =
+  bind(VanillaSymbol,'\\downarrow ','&darr;');
+
+LatexCmds.dArr = LatexCmds.dnArr = LatexCmds.dnArrow = LatexCmds.Downarrow =
+  bind(VanillaSymbol,'\\Downarrow ','&dArr;');
+
+LatexCmds.diverges = LatexCmds.uarr = LatexCmds.uparrow =
+  bind(VanillaSymbol,'\\uparrow ','&uarr;');
+
+LatexCmds.uArr = LatexCmds.Uparrow = bind(VanillaSymbol,'\\Uparrow ','&uArr;');
+
+LatexCmds.to = bind(BinaryOperator,'\\to ','&rarr;');
+
+LatexCmds.rarr = LatexCmds.rightarrow = bind(VanillaSymbol,'\\rightarrow ','&rarr;');
+
+LatexCmds.implies = bind(BinaryOperator,'\\Rightarrow ','&rArr;');
+
+LatexCmds.rArr = LatexCmds.Rightarrow = bind(VanillaSymbol,'\\Rightarrow ','&rArr;');
+
+LatexCmds.gets = bind(BinaryOperator,'\\gets ','&larr;');
+
+LatexCmds.larr = LatexCmds.leftarrow = bind(VanillaSymbol,'\\leftarrow ','&larr;');
+
+LatexCmds.impliedby = bind(BinaryOperator,'\\Leftarrow ','&lArr;');
+
+LatexCmds.lArr = LatexCmds.Leftarrow = bind(VanillaSymbol,'\\Leftarrow ','&lArr;');
+
+LatexCmds.harr = LatexCmds.lrarr = LatexCmds.leftrightarrow =
+  bind(VanillaSymbol,'\\leftrightarrow ','&harr;');
+
+LatexCmds.iff = bind(BinaryOperator,'\\Leftrightarrow ','&hArr;');
+
+LatexCmds.hArr = LatexCmds.lrArr = LatexCmds.Leftrightarrow =
+  bind(VanillaSymbol,'\\Leftrightarrow ','&hArr;');
+
+LatexCmds.Re = LatexCmds.Real = LatexCmds.real = bind(VanillaSymbol,'\\Re ','&real;');
+
+LatexCmds.Im = LatexCmds.imag =
+LatexCmds.image = LatexCmds.imagin = LatexCmds.imaginary = LatexCmds.Imaginary =
+  bind(VanillaSymbol,'\\Im ','&image;');
+
+LatexCmds.part = LatexCmds.partial = bind(VanillaSymbol,'\\partial ','&part;');
+
+LatexCmds.infty = LatexCmds.infin = LatexCmds.infinity =
+  bind(VanillaSymbol,'\\infty ','&infin;');
+
+LatexCmds.alef = LatexCmds.alefsym = LatexCmds.aleph = LatexCmds.alephsym =
+  bind(VanillaSymbol,'\\aleph ','&alefsym;');
+
+LatexCmds.xist = //LOL
+LatexCmds.xists = LatexCmds.exist = LatexCmds.exists =
+  bind(VanillaSymbol,'\\exists ','&exist;');
+  
+LatexCmds.nexists = LatexCmds.nexist =
+      bind(VanillaSymbol, '\\nexists ', '&#8708;');
+
+LatexCmds.and = LatexCmds.land = LatexCmds.wedge =
+  bind(VanillaSymbol,'\\wedge ','&and;');
+
+LatexCmds.or = LatexCmds.lor = LatexCmds.vee = bind(VanillaSymbol,'\\vee ','&or;');
+
+LatexCmds.o = LatexCmds.O =
+LatexCmds.empty = LatexCmds.emptyset =
+LatexCmds.oslash = LatexCmds.Oslash =
+LatexCmds.nothing = LatexCmds.varnothing =
+  bind(BinaryOperator,'\\varnothing ','&empty;');
+
+LatexCmds.cup = LatexCmds.union = bind(BinaryOperator,'\\cup ','&cup;');
+
+LatexCmds.cap = LatexCmds.intersect = LatexCmds.intersection =
+  bind(BinaryOperator,'\\cap ','&cap;');
+
+// FIXME: the correct LaTeX would be ^\circ but we can't parse that
+LatexCmds.deg = LatexCmds.degree = bind(VanillaSymbol,'\\degree ','&deg;');
+
+LatexCmds.ang = LatexCmds.angle = bind(VanillaSymbol,'\\angle ','&ang;');
+LatexCmds.measuredangle = bind(VanillaSymbol,'\\measuredangle ','&#8737;');
+/*********************************
+ * Symbols for Basic Mathematics
+ ********************************/
+
+var Digit = P(VanillaSymbol, function(_, super_) {
+  _.createLeftOf = function(cursor) {
+    if (cursor.options.autoSubscriptNumerals
+        && cursor.parent !== cursor.parent.parent.sub
+        && ((cursor[L] instanceof Variable && cursor[L].isItalic !== false)
+            || (cursor[L] instanceof SupSub
+                && cursor[L][L] instanceof Variable
+                && cursor[L][L].isItalic !== false))) {
+      LatexCmds._().createLeftOf(cursor);
+      super_.createLeftOf.call(this, cursor);
+      cursor.insRightOf(cursor.parent.parent);
+    }
+    else super_.createLeftOf.call(this, cursor);
+  };
+});
+
+var Variable = P(Symbol, function(_, super_) {
+  _.init = function(ch, html) {
+    super_.init.call(this, ch, '<var>'+(html || ch)+'</var>');
+  };
+  _.text = function() {
+    var text = this.ctrlSeq;
+    if (this.isPartOfOperator) {
+      if (text[0] == '\\') {
+        text = text.slice(1, text.length);
+      }
+      else if (text[text.length-1] == ' ') {
+        text = text.slice (0, -1);
+      }
+    } else {
+      if (this[L] && !(this[L] instanceof Variable)
+          && !(this[L] instanceof BinaryOperator)
+          && this[L].ctrlSeq !== '\\ ')
+        text = '*' + text;
+      if (this[R] && !(this[R] instanceof BinaryOperator)
+          && !(this[R] instanceof SupSub))
+        text += '*';
+    }
+    return text;
+  };
+});
+
+Options.p.autoCommands = { _maxLength: 0 };
+optionProcessors.autoCommands = function(cmds) {
+  if (!/^[a-z]+(?: [a-z]+)*$/i.test(cmds)) {
+    throw '"'+cmds+'" not a space-delimited list of only letters';
+  }
+  var list = cmds.split(' '), dict = {}, maxLength = 0;
+  for (var i = 0; i < list.length; i += 1) {
+    var cmd = list[i];
+    if (cmd.length < 2) {
+      throw 'autocommand "'+cmd+'" not minimum length of 2';
+    }
+    if (LatexCmds[cmd] === OperatorName) {
+      throw '"' + cmd + '" is a built-in operator name';
+    }
+    dict[cmd] = 1;
+    maxLength = max(maxLength, cmd.length);
+  }
+  dict._maxLength = maxLength;
+  return dict;
+};
+
+var Letter = P(Variable, function(_, super_) {
+  _.init = function(ch) { return super_.init.call(this, this.letter = ch); };
+  _.createLeftOf = function(cursor) {
+    super_.createLeftOf.apply(this, arguments);
+    var autoCmds = cursor.options.autoCommands, maxLength = autoCmds._maxLength;
+    if (maxLength > 0) {
+      // want longest possible autocommand, so join together longest
+      // sequence of letters
+      var str = '', l = this, i = 0;
+      // FIXME: l.ctrlSeq === l.letter checks if first or last in an operator name
+      while (l instanceof Letter && l.ctrlSeq === l.letter && i < maxLength) {
+        str = l.letter + str, l = l[L], i += 1;
+      }
+      // check for an autocommand, going thru substrings longest to shortest
+      while (str.length) {
+        if (autoCmds.hasOwnProperty(str)) {
+          for (var i = 1, l = this; i < str.length; i += 1, l = l[L]);
+          Fragment(l, this).remove();
+          cursor[L] = l[L];
+          return LatexCmds[str](str).createLeftOf(cursor);
+        }
+        str = str.slice(1);
+      }
+    }
+  };
+  _.italicize = function(bool) {
+    this.isItalic = bool;
+    this.isPartOfOperator = !bool;
+    this.jQ.toggleClass('mq-operator-name', !bool);
+    return this;
+  };
+  _.finalizeTree = _.siblingDeleted = _.siblingCreated = function(opts, dir) {
+    // don't auto-un-italicize if the sibling to my right changed (dir === R or
+    // undefined) and it's now a Letter, it will un-italicize everyone
+    if (dir !== L && this[R] instanceof Letter) return;
+    this.autoUnItalicize(opts);
+  };
+  _.autoUnItalicize = function(opts) {
+    var autoOps = opts.autoOperatorNames;
+    if (autoOps._maxLength === 0) return;
+    // want longest possible operator names, so join together entire contiguous
+    // sequence of letters
+    var str = this.letter;
+    for (var l = this[L]; l instanceof Letter; l = l[L]) str = l.letter + str;
+    for (var r = this[R]; r instanceof Letter; r = r[R]) str += r.letter;
+
+    // removeClass and delete flags from all letters before figuring out
+    // which, if any, are part of an operator name
+    Fragment(l[R] || this.parent.ends[L], r[L] || this.parent.ends[R]).each(function(el) {
+      el.italicize(true).jQ.removeClass('mq-first mq-last mq-followed-by-supsub');
+      el.ctrlSeq = el.letter;
+    });
+
+    // check for operator names: at each position from left to right, check
+    // substrings from longest to shortest
+    outer: for (var i = 0, first = l[R] || this.parent.ends[L]; i < str.length; i += 1, first = first[R]) {
+      for (var len = min(autoOps._maxLength, str.length - i); len > 0; len -= 1) {
+        var word = str.slice(i, i + len);
+        if (autoOps.hasOwnProperty(word)) {
+          for (var j = 0, letter = first; j < len; j += 1, letter = letter[R]) {
+            letter.italicize(false);
+            var last = letter;
+          }
+
+          var isBuiltIn = BuiltInOpNames.hasOwnProperty(word);
+          first.ctrlSeq = (isBuiltIn ? '\\' : '\\operatorname{') + first.ctrlSeq;
+          last.ctrlSeq += (isBuiltIn ? ' ' : '}');
+          if (TwoWordOpNames.hasOwnProperty(word)) last[L][L][L].jQ.addClass('mq-last');
+          if (!shouldOmitPadding(first[L])) first.jQ.addClass('mq-first');
+          if (!shouldOmitPadding(last[R])) {
+            if (last[R] instanceof SupSub) {
+              var supsub = last[R]; // XXX monkey-patching, but what's the right thing here?
+              // Have operatorname-specific code in SupSub? A CSS-like language to style the
+              // math tree, but which ignores cursor and selection (which CSS can't)?
+              var respace = supsub.siblingCreated = supsub.siblingDeleted = function() {
+                supsub.jQ.toggleClass('mq-after-operator-name', !(supsub[R] instanceof Bracket));
+              };
+              respace();
+            }
+            else {
+              last.jQ.toggleClass('mq-last', !(last[R] instanceof Bracket));
+            }
+          }
+
+          i += len - 1;
+          first = last;
+          continue outer;
+        }
+      }
+    }
+  };
+  function shouldOmitPadding(node) {
+    // omit padding if no node, or if node already has padding (to avoid double-padding)
+    return !node || (node instanceof BinaryOperator) || (node instanceof SummationNotation);
+  }
+});
+var BuiltInOpNames = {}; // the set of operator names like \sin, \cos, etc that
+  // are built-into LaTeX, see Section 3.17 of the Short Math Guide: http://tinyurl.com/jm9okjc
+  // MathQuill auto-unitalicizes some operator names not in that set, like 'hcf'
+  // and 'arsinh', which must be exported as \operatorname{hcf} and
+  // \operatorname{arsinh}. Note: over/under line/arrow \lim variants like
+  // \varlimsup are not supported
+var AutoOpNames = Options.p.autoOperatorNames = { _maxLength: 9 }; // the set
+  // of operator names that MathQuill auto-unitalicizes by default; overridable
+var TwoWordOpNames = { limsup: 1, liminf: 1, projlim: 1, injlim: 1 };
+(function() {
+  var mostOps = ('arg deg det dim exp gcd hom inf ker lg lim ln log max min sup'
+                 + ' limsup liminf injlim projlim Pr').split(' ');
+  for (var i = 0; i < mostOps.length; i += 1) {
+    BuiltInOpNames[mostOps[i]] = AutoOpNames[mostOps[i]] = 1;
+  }
+
+  var builtInTrigs = // why coth but not sech and csch, LaTeX?
+    'sin cos tan arcsin arccos arctan sinh cosh tanh sec csc cot coth'.split(' ');
+  for (var i = 0; i < builtInTrigs.length; i += 1) {
+    BuiltInOpNames[builtInTrigs[i]] = 1;
+  }
+
+  var autoTrigs = 'sin cos tan sec cosec csc cotan cot ctg'.split(' ');
+  for (var i = 0; i < autoTrigs.length; i += 1) {
+    AutoOpNames[autoTrigs[i]] =
+    AutoOpNames['arc'+autoTrigs[i]] =
+    AutoOpNames[autoTrigs[i]+'h'] =
+    AutoOpNames['ar'+autoTrigs[i]+'h'] =
+    AutoOpNames['arc'+autoTrigs[i]+'h'] = 1;
+  }
+
+  // compat with some of the nonstandard LaTeX exported by MathQuill
+  // before #247. None of these are real LaTeX commands so, seems safe
+  var moreNonstandardOps = 'gcf hcf lcm proj span'.split(' ');
+  for (var i = 0; i < moreNonstandardOps.length; i += 1) {
+    AutoOpNames[moreNonstandardOps[i]] = 1;
+  }
+}());
+optionProcessors.autoOperatorNames = function(cmds) {
+  if (!/^[a-z]+(?: [a-z]+)*$/i.test(cmds)) {
+    throw '"'+cmds+'" not a space-delimited list of only letters';
+  }
+  var list = cmds.split(' '), dict = {}, maxLength = 0;
+  for (var i = 0; i < list.length; i += 1) {
+    var cmd = list[i];
+    if (cmd.length < 2) {
+      throw '"'+cmd+'" not minimum length of 2';
+    }
+    dict[cmd] = 1;
+    maxLength = max(maxLength, cmd.length);
+  }
+  dict._maxLength = maxLength;
+  return dict;
+};
+var OperatorName = P(Symbol, function(_, super_) {
+  _.init = function(fn) { this.ctrlSeq = fn; };
+  _.createLeftOf = function(cursor) {
+    var fn = this.ctrlSeq;
+    for (var i = 0; i < fn.length; i += 1) {
+      Letter(fn.charAt(i)).createLeftOf(cursor);
+    }
+  };
+  _.parser = function() {
+    var fn = this.ctrlSeq;
+    var block = MathBlock();
+    for (var i = 0; i < fn.length; i += 1) {
+      Letter(fn.charAt(i)).adopt(block, block.ends[R], 0);
+    }
+    return Parser.succeed(block.children());
+  };
+});
+for (var fn in AutoOpNames) if (AutoOpNames.hasOwnProperty(fn)) {
+  LatexCmds[fn] = OperatorName;
+}
+LatexCmds.operatorname = P(MathCommand, function(_) {
+  _.createLeftOf = noop;
+  _.numBlocks = function() { return 1; };
+  _.parser = function() {
+    return latexMathParser.block.map(function(b) { return b.children(); });
+  };
+});
+
+LatexCmds.f = P(Letter, function(_, super_) {
+  _.init = function() {
+    Symbol.p.init.call(this, this.letter = 'f', '<var class="mq-f">f</var>');
+  };
+  _.italicize = function(bool) {
+    this.jQ.html('f').toggleClass('mq-f', bool);
+    return super_.italicize.apply(this, arguments);
+  };
+});
+
+// VanillaSymbol's
+LatexCmds[' '] = LatexCmds.space = bind(VanillaSymbol, '\\ ', '&nbsp;');
+
+LatexCmds["'"] = LatexCmds.prime = bind(VanillaSymbol, "'", '&prime;');
+LatexCmds['\u2033'] = LatexCmds.dprime = bind(VanillaSymbol, '\u2033', '&Prime;');
+
+LatexCmds.backslash = bind(VanillaSymbol,'\\backslash ','\\');
+if (!CharCmds['\\']) CharCmds['\\'] = LatexCmds.backslash;
+
+LatexCmds.$ = bind(VanillaSymbol, '\\$', '$');
+
+// does not use Symbola font
+var NonSymbolaSymbol = P(Symbol, function(_, super_) {
+  _.init = function(ch, html) {
+    super_.init.call(this, ch, '<span class="mq-nonSymbola">'+(html || ch)+'</span>');
+  };
+});
+
+LatexCmds['@'] = NonSymbolaSymbol;
+LatexCmds['&'] = bind(NonSymbolaSymbol, '\\&', '&amp;');
+LatexCmds['%'] = bind(NonSymbolaSymbol, '\\%', '%');
+
+//the following are all Greek to me, but this helped a lot: http://www.ams.org/STIX/ion/stixsig03.html
+
+//lowercase Greek letter variables
+LatexCmds.alpha =
+LatexCmds.beta =
+LatexCmds.gamma =
+LatexCmds.delta =
+LatexCmds.zeta =
+LatexCmds.eta =
+LatexCmds.theta =
+LatexCmds.iota =
+LatexCmds.kappa =
+LatexCmds.mu =
+LatexCmds.nu =
+LatexCmds.xi =
+LatexCmds.rho =
+LatexCmds.sigma =
+LatexCmds.tau =
+LatexCmds.chi =
+LatexCmds.psi =
+LatexCmds.omega = P(Variable, function(_, super_) {
+  _.init = function(latex) {
+    super_.init.call(this,'\\'+latex+' ','&'+latex+';');
+  };
+});
+
+//why can't anybody FUCKING agree on these
+LatexCmds.phi = //W3C or Unicode?
+  bind(Variable,'\\phi ','&#981;');
+
+LatexCmds.phiv = //Elsevier and 9573-13
+LatexCmds.varphi = //AMS and LaTeX
+  bind(Variable,'\\varphi ','&phi;');
+
+LatexCmds.epsilon = //W3C or Unicode?
+  bind(Variable,'\\epsilon ','&#1013;');
+
+LatexCmds.epsiv = //Elsevier and 9573-13
+LatexCmds.varepsilon = //AMS and LaTeX
+  bind(Variable,'\\varepsilon ','&epsilon;');
+
+LatexCmds.piv = //W3C/Unicode and Elsevier and 9573-13
+LatexCmds.varpi = //AMS and LaTeX
+  bind(Variable,'\\varpi ','&piv;');
+
+LatexCmds.sigmaf = //W3C/Unicode
+LatexCmds.sigmav = //Elsevier
+LatexCmds.varsigma = //LaTeX
+  bind(Variable,'\\varsigma ','&sigmaf;');
+
+LatexCmds.thetav = //Elsevier and 9573-13
+LatexCmds.vartheta = //AMS and LaTeX
+LatexCmds.thetasym = //W3C/Unicode
+  bind(Variable,'\\vartheta ','&thetasym;');
+
+LatexCmds.upsilon = //AMS and LaTeX and W3C/Unicode
+LatexCmds.upsi = //Elsevier and 9573-13
+  bind(Variable,'\\upsilon ','&upsilon;');
+
+//these aren't even mentioned in the HTML character entity references
+LatexCmds.gammad = //Elsevier
+LatexCmds.Gammad = //9573-13 -- WTF, right? I dunno if this was a typo in the reference (see above)
+LatexCmds.digamma = //LaTeX
+  bind(Variable,'\\digamma ','&#989;');
+
+LatexCmds.kappav = //Elsevier
+LatexCmds.varkappa = //AMS and LaTeX
+  bind(Variable,'\\varkappa ','&#1008;');
+
+LatexCmds.rhov = //Elsevier and 9573-13
+LatexCmds.varrho = //AMS and LaTeX
+  bind(Variable,'\\varrho ','&#1009;');
+
+//Greek constants, look best in non-italicized Times New Roman
+LatexCmds.pi = LatexCmds['\u03c0'] = bind(NonSymbolaSymbol,'\\pi ','&pi;');
+LatexCmds.lambda = bind(NonSymbolaSymbol,'\\lambda ','&lambda;');
+
+//uppercase greek letters
+
+LatexCmds.Upsilon = //LaTeX
+LatexCmds.Upsi = //Elsevier and 9573-13
+LatexCmds.upsih = //W3C/Unicode "upsilon with hook"
+LatexCmds.Upsih = //'cos it makes sense to me
+  bind(Symbol,'\\Upsilon ','<var style="font-family: serif">&upsih;</var>'); //Symbola's 'upsilon with a hook' is a capital Y without hooks :(
+
+//other symbols with the same LaTeX command and HTML character entity reference
+LatexCmds.Gamma =
+LatexCmds.Delta =
+LatexCmds.Theta =
+LatexCmds.Lambda =
+LatexCmds.Xi =
+LatexCmds.Pi =
+LatexCmds.Sigma =
+LatexCmds.Phi =
+LatexCmds.Psi =
+LatexCmds.Omega =
+LatexCmds.forall = P(VanillaSymbol, function(_, super_) {
+  _.init = function(latex) {
+    super_.init.call(this,'\\'+latex+' ','&'+latex+';');
+  };
+});
+
+// symbols that aren't a single MathCommand, but are instead a whole
+// Fragment. Creates the Fragment from a LaTeX string
+var LatexFragment = P(MathCommand, function(_) {
+  _.init = function(latex) { this.latex = latex; };
+  _.createLeftOf = function(cursor) {
+    var block = latexMathParser.parse(this.latex);
+    block.children().adopt(cursor.parent, cursor[L], cursor[R]);
+    cursor[L] = block.ends[R];
+    block.jQize().insertBefore(cursor.jQ);
+    block.finalizeInsert(cursor.options, cursor);
+    if (block.ends[R][R].siblingCreated) block.ends[R][R].siblingCreated(cursor.options, L);
+    if (block.ends[L][L].siblingCreated) block.ends[L][L].siblingCreated(cursor.options, R);
+    cursor.parent.bubble('reflow');
+  };
+  _.parser = function() {
+    var frag = latexMathParser.parse(this.latex).children();
+    return Parser.succeed(frag);
+  };
+});
+
+// for what seems to me like [stupid reasons][1], Unicode provides
+// subscripted and superscripted versions of all ten Arabic numerals,
+// as well as [so-called "vulgar fractions"][2].
+// Nobody really cares about most of them, but some of them actually
+// predate Unicode, dating back to [ISO-8859-1][3], apparently also
+// known as "Latin-1", which among other things [Windows-1252][4]
+// largely coincides with, so Microsoft Word sometimes inserts them
+// and they get copy-pasted into MathQuill.
+//
+// (Irrelevant but funny story: though not a superset of Latin-1 aka
+// ISO-8859-1, Windows-1252 **is** a strict superset of the "closely
+// related but distinct"[3] "ISO 8859-1" -- see the lack of a dash
+// after "ISO"? Completely different character set, like elephants vs
+// elephant seals, or "Zombies" vs "Zombie Redneck Torture Family".
+// What kind of idiot would get them confused.
+// People in fact got them confused so much, it was so common to
+// mislabel Windows-1252 text as ISO-8859-1, that most modern web
+// browsers and email clients treat the MIME charset of ISO-8859-1
+// as actually Windows-1252, behavior now standard in the HTML5 spec.)
+//
+// [1]: http://en.wikipedia.org/wiki/Unicode_subscripts_andsuper_scripts
+// [2]: http://en.wikipedia.org/wiki/Number_Forms
+// [3]: http://en.wikipedia.org/wiki/ISO/IEC_8859-1
+// [4]: http://en.wikipedia.org/wiki/Windows-1252
+LatexCmds['\u00b9'] = bind(LatexFragment, '^1');
+LatexCmds['\u00b2'] = bind(LatexFragment, '^2');
+LatexCmds['\u00b3'] = bind(LatexFragment, '^3');
+LatexCmds['\u00bc'] = bind(LatexFragment, '\\frac14');
+LatexCmds['\u00bd'] = bind(LatexFragment, '\\frac12');
+LatexCmds['\u00be'] = bind(LatexFragment, '\\frac34');
+
+var PlusMinus = P(BinaryOperator, function(_) {
+  _.init = VanillaSymbol.prototype.init;
+
+  _.contactWeld = _.siblingCreated = _.siblingDeleted = function(opts, dir) {
+    function determineOpClassType(node) {
+      if (node[L]) {
+        // If the left sibling is a binary operator or a separator (comma, semicolon, colon)
+        // or an open bracket (open parenthesis, open square bracket)
+        // consider the operator to be unary
+        if (node[L] instanceof BinaryOperator || /^[,;:\(\[]$/.test(node[L].ctrlSeq)) {
+          return '';
+        }
+      } else if (node.parent && node.parent.parent && node.parent.parent.isStyleBlock()) {
+        //if we are in a style block at the leftmost edge, determine unary/binary based on
+        //the style block
+        //this allows style blocks to be transparent for unary/binary purposes
+        return determineOpClassType(node.parent.parent);
+      } else {
+        return '';
+      }
+
+      return 'mq-binary-operator';
+    };
+    
+    if (dir === R) return; // ignore if sibling only changed on the right
+    this.jQ[0].className = determineOpClassType(this);
+    return this;
+  };
+});
+
+LatexCmds['+'] = bind(PlusMinus, '+', '+');
+//yes, these are different dashes, I think one is an en dash and the other is a hyphen
+LatexCmds['\u2013'] = LatexCmds['-'] = bind(PlusMinus, '-', '&minus;');
+LatexCmds['\u00b1'] = LatexCmds.pm = LatexCmds.plusmn = LatexCmds.plusminus =
+  bind(PlusMinus,'\\pm ','&plusmn;');
+LatexCmds.mp = LatexCmds.mnplus = LatexCmds.minusplus =
+  bind(PlusMinus,'\\mp ','&#8723;');
+
+CharCmds['*'] = LatexCmds.sdot = LatexCmds.cdot =
+  bind(BinaryOperator, '\\cdot ', '&middot;', '*');
+//semantically should be &sdot;, but &middot; looks better
+
+var Inequality = P(BinaryOperator, function(_, super_) {
+  _.init = function(data, strict) {
+    this.data = data;
+    this.strict = strict;
+    var strictness = (strict ? 'Strict' : '');
+    super_.init.call(this, data['ctrlSeq'+strictness], data['html'+strictness],
+                     data['text'+strictness]);
+  };
+  _.swap = function(strict) {
+    this.strict = strict;
+    var strictness = (strict ? 'Strict' : '');
+    this.ctrlSeq = this.data['ctrlSeq'+strictness];
+    this.jQ.html(this.data['html'+strictness]);
+    this.textTemplate = [ this.data['text'+strictness] ];
+  };
+  _.deleteTowards = function(dir, cursor) {
+    if (dir === L && !this.strict) {
+      this.swap(true);
+      this.bubble('reflow');
+      return;
+    }
+    super_.deleteTowards.apply(this, arguments);
+  };
+});
+
+var less = { ctrlSeq: '\\le ', html: '&le;', text: '\u2264',
+             ctrlSeqStrict: '<', htmlStrict: '&lt;', textStrict: '<' };
+var greater = { ctrlSeq: '\\ge ', html: '&ge;', text: '\u2265',
+                ctrlSeqStrict: '>', htmlStrict: '&gt;', textStrict: '>' };
+
+LatexCmds['<'] = LatexCmds.lt = bind(Inequality, less, true);
+LatexCmds['>'] = LatexCmds.gt = bind(Inequality, greater, true);
+LatexCmds['\u2264'] = LatexCmds.le = LatexCmds.leq = bind(Inequality, less, false);
+LatexCmds['\u2265'] = LatexCmds.ge = LatexCmds.geq = bind(Inequality, greater, false);
+
+var Equality = P(BinaryOperator, function(_, super_) {
+  _.init = function() {
+    super_.init.call(this, '=', '=');
+  };
+  _.createLeftOf = function(cursor) {
+    if (cursor[L] instanceof Inequality && cursor[L].strict) {
+      cursor[L].swap(false);
+      cursor[L].bubble('reflow');
+      return;
+    }
+    super_.createLeftOf.apply(this, arguments);
+  };
+});
+LatexCmds['='] = Equality;
+
+LatexCmds['\u00d7'] = LatexCmds.times = bind(BinaryOperator, '\\times ', '&times;', '[x]');
+
+LatexCmds['\u00f7'] = LatexCmds.div = LatexCmds.divide = LatexCmds.divides =
+  bind(BinaryOperator,'\\div ','&divide;', '[/]');
+
+CharCmds['~'] = LatexCmds.sim = bind(BinaryOperator, '\\sim ', '~', '~');
+var MQ1 = getInterface(1);
+for (var key in MQ1) (function(key, val) {
+  if (typeof val === 'function') {
+    MathQuill[key] = function() {
+      insistOnInterVer();
+      return val.apply(this, arguments);
+    };
+    MathQuill[key].prototype = val.prototype;
+  }
+  else MathQuill[key] = val;
+}(key, MQ1[key]));
+
+}());

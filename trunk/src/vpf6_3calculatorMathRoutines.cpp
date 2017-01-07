@@ -654,6 +654,8 @@ bool CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC(Calculator& t
   const Expression& firstE=input[0];
   if (!firstE.StartsWith(theCommands.opThePower(), 3))
     return false;
+  if (firstE[1].IsSequenceNElementS())
+    return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
   Expression finalBase;
   finalBase.reset(theCommands, input.children.size);

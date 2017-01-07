@@ -155,7 +155,7 @@ std::string GlobalVariables::ToStringFolderInfo()const
 
 std::string GlobalVariables::ToStringProgressReportHtml()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtml");
-  while (theGlobalVariables.flagPreparingReport)
+  while (this->flagPreparingReport)
   //<-Trying to make this work without mutexes.
   //Reason: this has to be fast, and is expected to lock very rarely.
   {}

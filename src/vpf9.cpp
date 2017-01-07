@@ -160,7 +160,14 @@ void ProgressReport::init()
 }
 
 ProgressReport::~ProgressReport()
-{ theGlobalVariables.ProgressReportStringS[this->threadIndex].size--;
+{ while (theGlobalVariables.flagPreparingReport)
+  //<-Trying to make this work without mutexes.
+  //Reason: this has to be fast, and is expected to lock
+  //very rarely and for very short periods.
+  {}
+  theGlobalVariables.flagPreparingReport=true;
+  theGlobalVariables.ProgressReportStringS[this->threadIndex].size--;
+  theGlobalVariables.flagPreparingReport=false;
 }
 
 ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription)

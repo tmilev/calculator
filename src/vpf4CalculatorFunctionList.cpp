@@ -3231,7 +3231,7 @@ void Calculator::initPredefinedOperationsComposite()
    "ConstTimesAnyAction");
   this->AddOperationComposite
   ("^", CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC, "",
-   "Provided that n is not equal to -1, use the rule ({{f}}^{{n}}){}{{x}}=(f{}x)^n.",
+   "Provided that n is not equal to -1 and f is not a sequence, use the rule ({{f}}^{{n}}){}{{x}}=(f{}x)^n.",
    "\\tan^2 x; (f^-2) {}x ; (f^-1){}x ",
    true, true, false, "CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC",
    "ApowerBevaluatedAtC");

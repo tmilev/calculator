@@ -80,7 +80,7 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
   for (int threadCounter=0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter++)
   { if (threadCounter>= theGlobalVariables.theThreadData.size)
     { out << "<td><b>WARNING: the stack trace reports " << theGlobalVariables.CustomStackTrace.size
-      <<  " threads but the thread data array has record of only " << theGlobalVariables.theThreadData.size
+      << " threads but the thread data array has record of only " << theGlobalVariables.theThreadData.size
       << " threads. " << "</b></td>";
       break;
     }

@@ -210,12 +210,17 @@ int ThreadData::getCurrentThreadId(const std::string& inputName)
 
 std::string ThreadData::ToStringHtml()const
 { std::stringstream out;
-  out << "Thread <span style=\"color:#FF0000\">";
+  if (this->getCurrentThreadId()==this->index)
+    out << "<span style=\"color:green\"><b>Current thread </b></span> ";
+  else
+    out << "Thread ";
+  out << "<span style=\"color:red\">";
   if (this->name=="")
     out << "(thread name not set)";
   else
     out << this->name;
-  out << "</span>. Index: " << this->index << ", id: " <<  this->theId << ".";
+  out << "</span>.";
+  out << " Index: " << this->index << ", id: " <<  this->theId << ".";
   return out.str();
 }
 

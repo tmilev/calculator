@@ -45,10 +45,9 @@ function initializeCalculatorPage()
           if (calculatorLeftString===undefined ||
               calculatorRightString===undefined)
             mQHelpCalculator();
-          calculatorInput.value =calculatorLeftString+
+          calculatorInput.value =calculatorLeftString+"\n"+
           processMathQuillLatex(theBoxContent)+
-          calculatorRightString
-          ;
+          calculatorRightString;
         },
         focus: function()
         { mQHelpCalculator();

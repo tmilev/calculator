@@ -2420,10 +2420,14 @@ int WebWorker::ProcessCalculator()
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\">");
   stOutput << "<table style=\"vertical-align:top\"><tr><td style=\"vertical-align:top\">";
   stOutput << "<span id=\"mqProblemSpan\" style=\"white-space:nowrap\">Equation assistant</span>";
-  stOutput << "</td></tr><tr><td>";
+  stOutput << "</td></tr><tr>";
+  stOutput << "<td style=\"vertical-align:top\">";
   stOutput << "<span style=\"vertical-align:top\" id=\"mainInputMQfield\"></span>";
+  stOutput << "</td>";
+  stOutput << "<td style=\"vertical-align:top\">";
   stOutput << "<span style=\"vertical-align:top\" id=\"mainInputMQfieldButtons\"></span>";
-  stOutput << "</td></tr></table>";
+  stOutput << "</td>";
+  stOutput << "</tr></table>";
   stOutput << this->closeIndentTag("</td>");
 
 

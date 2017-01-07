@@ -30,8 +30,8 @@ function initializeCalculatorPage()
   initializeCalculatorVariables();
   ////////////////////////
   globalMQ.config({autoFunctionize: 'sin cos tan sec csc cot log ln'});
-  calculatorMQobject = globalMQ.MathField
-  ( calculatorMQfield,
+  calculatorMQobject =
+  globalMQ.MathField( calculatorMQfield,
     { spaceBehavesLikeTab: true, // configurable
       supSubsRequireOperand: true, // configurable
       autoSubscriptNumerals: true, // configurable
@@ -59,16 +59,19 @@ function initializeCalculatorPage()
             calculatorInput.value =calculatorLeftString+
             processMathQuillLatex(theBoxContent)+
             calculatorRightString;
-        },
-        focus: function()
-        { mQHelpCalculator();
         }
       }
     }
    );
   answerMathQuillObjects=[calculatorMQobject];
   preferredButtonContainers=['mainInputMQfieldButtons'];
-  initializeButtons();
+  initializeButtonsMatrixSupport();
+  mQHelpCalculator();
+  //I am getting mq errors if calculatorMQobject.write()
+  //is called before mQHelpCalculator() is called.
+  //I don't quite know what causes this behavior, so
+  //for the time being please leave the code above as is.
+  //I will resolve the issue later.
 }
 
 function onLoadDefaultFunction(idElement)

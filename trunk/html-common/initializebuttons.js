@@ -71,8 +71,8 @@ function initializeButtons()
 }
 
 function initializeButtonsMatrixSupport(){
-  for (i=0; i<answerIdsPureLatex.length; i++){ 
-    currentButtonPanel=document.getElementById(preferredButtonContainers[i]);	
+  for (i=0; i<answerIdsPureLatex.length; i++)
+  { var currentButtonPanel=document.getElementById(preferredButtonContainers[i]);
     currentButtonPanel.innerHTML=
 "<table><tr>"+
 "<td>" + getSqrtButton(i)+ "</td><td>"+getSqrt_N_Button(i) + "</td>"+ "<td>"+getPowerButton(i) + "</td>"+ 

@@ -95,6 +95,29 @@ function initializeButtonsMatrixSupport(){
   initializeButtonsCommon();
 }
 
+function initializeButtonsCalculator(){
+  for (i=0; i<answerIdsPureLatex.length; i++)
+  { var currentButtonPanel=document.getElementById(preferredButtonContainers[i]);
+    currentButtonPanel.innerHTML=
+"<table><tr>"+
+"<td>" + getSqrtButton(i)+ "</td><td>"+getSqrt_N_Button(i) + "</td>"+ "<td>"+getPowerButton(i) + "</td>"+
+"</tr>"+
+"<tr>"+
+"<td>" + getDivideButton(i)+ "</td>"+ "<td>" + getPlusButton(i)+ "</td><td>"+getTimesButton(i) + "</td>"+
+"</tr>"+
+"<tr>"+
+"<td>" + getInftyButton(i)+ "</td><td>" + getPiButton(i) + "</td>"+ "<td>" + getTwoByTwoMatButton(i)+ "</td>"+
+"</tr>"+
+"<tr>"+
+"<td>" + getTwoByOneMatButton(i)+ "</td>"+ "<td>" + getThreeByOneMatButton(i) + "</td>"+ "<td>" + getThreeByThreeMatButton(i)+ "</td>"+
+"</tr>"+
+"</table>"
+;
+  }
+  initializeButtonsCommon();
+}
+
+
 function getSqrt_N_Button(indexMathField){
   return "<button style='width:25' onmousedown='sqrt_N_Click(answerMathQuillObjects[" + indexMathField + "]);'>&#8731;</button>";
 }

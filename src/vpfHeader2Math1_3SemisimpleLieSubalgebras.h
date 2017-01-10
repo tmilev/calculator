@@ -350,8 +350,8 @@ public:
   std::string DisplayNameMainFile1WithPath;
   std::string DisplayNameMainFile2FastLoadWithPath;
 
-  std::string RelativePhysicalNameRelativeMainFile1;
-  std::string RelativePhysicalNameRelativeMainFile2FastLoad;
+  std::string VirtualNameMainFile1;
+  std::string VirtualNameMainFile2FastLoad;
 
   std::string (*ToStringExpressionString)(SemisimpleSubalgebras& input);
   bool LoadState

@@ -90,7 +90,7 @@ void SemisimpleLieAlgebra::ComputeFolderNames()
   std::stringstream outMainDisplayPath;
   this->CheckConsistency();
   DynkinType& theType=this->theWeyl.theDynkinType;
-  this->RelativePhysicalNameSSAlgOutputFolder= CGI::CleanUpForFileNameUse(theType.ToString()) + "/";
+  this->VirtualNameSSAlgOutputFolder="output/"+ CGI::CleanUpForFileNameUse(theType.ToString()) + "/";
   outMainDisplayPath << theGlobalVariables.DisplayPathOutputFolder
   << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
   this->DisplayNameSSalgOutputFolder=outMainDisplayPath.str();

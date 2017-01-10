@@ -232,14 +232,14 @@ int SemisimpleSubalgebras::GetDisplayIndexFromActual(int ActualIndexSubalgebra)c
 
 std::string SemisimpleSubalgebras::GetRelativePhysicalFileNameSubalgebra(int ActualIndexSubalgebra)const
 { std::stringstream out;
-  out << this->owner->RelativePhysicalNameSSAlgOutputFolder;
+  out << this->owner->VirtualNameSSAlgOutputFolder;
   out << CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
 
 std::string SemisimpleSubalgebras::GetRelativePhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra)const
 { std::stringstream out;
-  out << this->owner->RelativePhysicalNameSSAlgOutputFolder;
+  out << this->owner->VirtualNameSSAlgOutputFolder;
   out << CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
@@ -280,13 +280,15 @@ void SemisimpleSubalgebras::CheckFileWritePermissions()
   this->ComputeFolderNames(this->currentFormat);
   std::fstream testFile;
   std::string testFileNameRelative=
-  this->owner->RelativePhysicalNameSSAlgOutputFolder+ "testFileWritePermissionsSSsas.txt";
-  theGlobalVariables.CallSystemNoOutput
-  ("mkdir " +theGlobalVariables.PhysicalPathHtmlFolder+ this->owner->RelativePhysicalNameSSAlgOutputFolder);
+  this->owner->VirtualNameSSAlgOutputFolder+ "testFileWritePermissionsSSsas.txt";
+  std::string testFileFolderPhysical;
+  FileOperations::GetPhysicalFileNameFromVirtual
+  (this->owner->VirtualNameSSAlgOutputFolder, testFileFolderPhysical,false, false);
+  theGlobalVariables.CallSystemNoOutput("mkdir " +testFileFolderPhysical);
 
-  if(!FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, "output/"+testFileNameRelative, false, true, false))
+  if(!FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, testFileNameRelative, false, true, false))
     crash << "<br>This may or may not be a programming error. I requested to create file "
-    << this->RelativePhysicalNameRelativeMainFile1
+    << this->VirtualNameMainFile1
     << " for output. However, the file failed to create. Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
     << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
   FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, "output/"+testFileNameRelative, false, true, false);
@@ -303,9 +305,9 @@ void SemisimpleSubalgebras::WriteReportToFiles()
   this->currentFormat.flagUseMathSpanPureVsMouseHover=true;
   std::fstream fileSlowLoad, fileFastLoad;
   FileOperations::OpenFileCreateIfNotPresentVirtual
-  (fileSlowLoad, "output/"+this->RelativePhysicalNameRelativeMainFile1, false, true, false);
+  (fileSlowLoad, this->VirtualNameMainFile1, false, true, false);
   FileOperations::OpenFileCreateIfNotPresentVirtual
-  (fileFastLoad, "output/"+this->RelativePhysicalNameRelativeMainFile1, false, true, false);
+  (fileFastLoad, this->VirtualNameMainFile1, false, true, false);
   fileSlowLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owner->theWeyl.theDynkinType.ToString()
   << "</title>"
@@ -335,10 +337,10 @@ void SemisimpleSubalgebras::ComputeFolderNames(FormatExpressions& inputFormat)
   this->DisplayNameMainFile1WithPath=this->owner->DisplayNameSSalgOutputFolder+this->DisplayNameMainFile1NoPath;
   this->DisplayNameMainFile2FastLoadWithPath= this->owner->DisplayNameSSalgOutputFolder+ this->DisplayNameMainFile2FastLoadNoPath;
 
-  this->RelativePhysicalNameRelativeMainFile1=
-  this->owner->RelativePhysicalNameSSAlgOutputFolder + this->DisplayNameMainFile1NoPath;
-  this->RelativePhysicalNameRelativeMainFile2FastLoad=
-  this->owner->RelativePhysicalNameSSAlgOutputFolder + this->DisplayNameMainFile2FastLoadNoPath;
+  this->VirtualNameMainFile1=
+  this->owner->VirtualNameSSAlgOutputFolder + this->DisplayNameMainFile1NoPath;
+  this->VirtualNameMainFile2FastLoad=
+  this->owner->VirtualNameSSAlgOutputFolder + this->DisplayNameMainFile2FastLoadNoPath;
 
 }
 
@@ -538,7 +540,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
       if (!this->theSubalgebras[i].flagSystemProvedToHaveNoSolution)
       { std::fstream outputFileSubalgebra;
         if (!FileOperations::OpenFileCreateIfNotPresentVirtual
-            (outputFileSubalgebra, "output/"+this->GetRelativePhysicalFileNameSubalgebra(i), false, true, false))
+            (outputFileSubalgebra, this->GetRelativePhysicalFileNameSubalgebra(i), false, true, false))
         { crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i << " and display index "
           << this->GetDisplayIndexFromActual(i) << ", I requested to create file "
           << this->GetRelativePhysicalFileNameSubalgebra(i)
@@ -3819,7 +3821,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   //bool usePNG=false;
   bool useHtml=true;
   bool useLatex=false;
-  physicalPath=this->owner->RelativePhysicalNameSSAlgOutputFolder+ "sl2s/";
+  physicalPath=this->owner->VirtualNameSSAlgOutputFolder+ "sl2s/";
   htmlPathServer=this->owner->DisplayNameSSalgOutputFolder+ "sl2s/";
   if (physicalPath=="" || htmlPathServer=="")
   { //usePNG=false;
@@ -4333,7 +4335,7 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat)
   *with respect to another basis* (namely, with respect to an h-positive simple basis). I will fix this in the future (email me if you want that done sooner).";
   bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
   std::string physicalPath, displayPath;
-  physicalPath=this->owner->RelativePhysicalNameSSAlgOutputFolder;
+  physicalPath=this->owner->VirtualNameSSAlgOutputFolder;
   displayPath=this->owner->DisplayNameSSalgOutputFolder;
   out << "Number of sl(2) subalgebras " << this->size << ".\n";
   std::stringstream out2;
@@ -4369,7 +4371,7 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat)
   }
   if(useHtml)
     out << "<br><br><table><tr><td style=\"padding-right:20px\">" << CGI::ElementToStringTooltip("Characteristic", tooltipHchar)
-    << "</td><td align=\"center\" title=\"" << tooltipHvalue << "\"> h</td><td style=\"padding-left:20px\" title=\""
+    << "</td><td align=\"center\" style=\"white-space: nowrap\" title=\"" << tooltipHvalue << "\"> h</td><td style=\"padding-left:20px\" title=\""
     << tooltipVDecomposition << "\"> Decomposition of ambient Lie algebra: \\psi stands for the fundamental sl(2)-weight. </td>"
     << "<td>Centralizer dimension</td>"
     << "<td>Centralizer type if known</td>"
@@ -4453,9 +4455,9 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
 
 void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SltwoSubalgebras::ToHTML");
-  std::string physicalPathSAs= this->owner->RelativePhysicalNameSSAlgOutputFolder;
+  std::string physicalPathSAs= this->owner->VirtualNameSSAlgOutputFolder;
   std::string htmlPathServerSAs= this->owner->DisplayNameSSalgOutputFolder;
-  std::string RelativePhysicalPathSl2s= this->owner->RelativePhysicalNameSSAlgOutputFolder+"sl2s/";
+  std::string RelativePhysicalPathSl2s= this->owner->VirtualNameSSAlgOutputFolder+"sl2s/";
   std::string htmlPathServerSl2s= this->owner->DisplayNameSSalgOutputFolder+"sl2s/";
   ProgressReport theReport;
   theReport.Report("Preparing html pages for sl(2) subalgebras. This might take a while.");

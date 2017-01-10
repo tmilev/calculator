@@ -1091,9 +1091,9 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat)
   this->CheckInitialization();
   std::fstream output;
   std::stringstream myPath;
-  myPath << this->ownEr->owner->RelativePhysicalNameSSAlgOutputFolder;
+  myPath << this->ownEr->owner->VirtualNameSSAlgOutputFolder;
   myPath << "rootSubalgebra_" << index+1 << ".html";
-  FileOperations::OpenFileCreateIfNotPresentVirtual(output, "output/"+myPath.str(), false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(output, myPath.str(), false, true, false);
   output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName() << " root subalgebra of type "
   << this->theDynkinDiagram.ToString() << "</title>";
   output << "<meta name=\"keywords\" content=\"" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName()
@@ -2669,10 +2669,10 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
 void rootSubalgebras::ToHTML(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("rootSubalgebras::ToHTML");
   this->CheckInitialization();
-  std::string MyPathPhysical=this->owner->RelativePhysicalNameSSAlgOutputFolder+"rootSubalgebras.html";
+  std::string MyPathPhysical=this->owner->VirtualNameSSAlgOutputFolder+"rootSubalgebras.html";
   std::fstream output;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(output, "output/"+MyPathPhysical, false, true, false);
-  if (!FileOperations::FileExistsVirtual("output/"+MyPathPhysical))
+  FileOperations::OpenFileCreateIfNotPresentVirtual(output, MyPathPhysical, false, true, false);
+  if (!FileOperations::FileExistsVirtual(MyPathPhysical))
   { crash << "This may or may not be a programming error. Failed to create file " << MyPathPhysical
     << ". Possible explanations. 1. File permissions - can I write in that folder? 2. Programming error (less likely). "
     << crash;

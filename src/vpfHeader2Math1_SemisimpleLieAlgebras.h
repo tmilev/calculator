@@ -34,7 +34,7 @@ public:
   Matrix<ElementSemisimpleLieAlgebra<Rational> > theLiebrackets;
 //  List<int> OppositeRootSpaces;
   List<int> UEGeneratorOrderIncludingCartanElts;
-  std::string RelativePhysicalNameSSAlgOutputFolder;
+  std::string VirtualNameSSAlgOutputFolder;
   std::string DisplayNameSSalgOutputFolder;
 
   bool flagHasNilradicalOrder;

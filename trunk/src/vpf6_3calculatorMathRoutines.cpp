@@ -5951,16 +5951,19 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   outSltwoPath << ownerSS->VirtualNameSSAlgOutputFolder << "sl2s/";
   outSltwoDisplayPath << ownerSS->VirtualNameSSAlgOutputFolder << "sl2s/";
   outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
-  outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s.html";
+  outSltwoFileDisplayName << "/" << outSltwoDisplayPath.str() << "sl2s.html";
   outRootHtmlFileName << ownerSS->VirtualNameSSAlgOutputFolder << "rootSubalgebras.html";
   outRootHtmlDisplayName << ownerSS->DisplayNameSSalgOutputFolder << "rootSubalgebras.html";
   bool NeedToCreateFolders=!FileOperations::FileExistsVirtual(outSltwoMainFile.str());
   if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
-    outMkDirCommand1 << "mkdir " << theGlobalVariables.PhysicalPathHtmlFolder
-    << ownerSS->VirtualNameSSAlgOutputFolder;
-    outMkDirCommand2 << "mkdir " << theGlobalVariables.PhysicalPathHtmlFolder
-    << outSltwoPath.str();
+    std::string baseFolder, outSl2Folder;
+    FileOperations::GetPhysicalFileNameFromVirtual
+    (ownerSS->VirtualNameSSAlgOutputFolder, baseFolder, false, false);
+    FileOperations::GetPhysicalFileNameFromVirtual
+    (outSltwoPath.str(), outSl2Folder, false, false);
+    outMkDirCommand1 << "mkdir " << baseFolder;
+    outMkDirCommand2 << "mkdir " << outSl2Folder;
     theGlobalVariables.CallSystemNoOutput(outMkDirCommand1.str());
     theGlobalVariables.CallSystemNoOutput(outMkDirCommand2.str());
   }
@@ -5990,8 +5993,6 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
 //    stOutput << "ChangeME";
 //    theSl2s.theRootSAs.flagPrintParabolicPseudoParabolicInfo=false;
     ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s);
-    std::string PathSl2= outSltwoPath.str();
-    std::string DisplayPathSl2=outSltwoDisplayPath.str();
     theSl2s.ToHTML(&theFormat);
   } else
     out << "The table is precomputed and served from the hard disk. <br>";

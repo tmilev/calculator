@@ -1806,7 +1806,9 @@ int WebWorker::ProcessFile()
   { //std::cout << "ere be i: file name not found" << std::endl;
     this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
 //    if (stOutput.theOutputFunction==0)
-    stOutput << "<html><body>";
+    stOutput << "<html>"
+    << CGI::GetCalculatorStyleSheetWithTags()
+    << "<body>";
     stOutput << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
     stOutput << "<b>File does not exist.</b>";
     if (this->flagFileNameSanitized)

@@ -4456,7 +4456,7 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
 void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SltwoSubalgebras::ToHTML");
   std::string physicalPathSAs= this->owner->VirtualNameSSAlgOutputFolder;
-  std::string htmlPathServerSAs= this->owner->DisplayNameSSalgOutputFolder;
+  //std::string htmlPathServerSAs= this->owner->DisplayNameSSalgOutputFolder;
   std::string RelativePhysicalPathSl2s= this->owner->VirtualNameSSAlgOutputFolder+"sl2s/";
   std::string htmlPathServerSl2s= this->owner->DisplayNameSSalgOutputFolder+"sl2s/";
   ProgressReport theReport;
@@ -4467,7 +4467,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
     usePNG=false;
   std::stringstream out, outNotation, outNotationCommand;
   std::string fileName;
-  std::fstream theFile, fileFlas;
+  std::fstream theFile;
   outNotationCommand << "printSemisimpleLieAlgebra{}("
   << this->GetOwnerWeyl().theDynkinType.ToString() << ")" ;
   outNotation << "Notation, structure constants and Weyl group info: "
@@ -4481,7 +4481,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
   if(usePNG)
   { fileName= RelativePhysicalPathSl2s;
     fileName.append("sl2s.html");
-    FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/"+fileName, false, true, false);
+    FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, fileName, false, true, false);
     tempS= out.str();
     theFile << "<html><title>sl(2)-subalgebras of "
     << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString() << "</title>";
@@ -4503,7 +4503,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
   theFormat->flagUsePNG=false;
   tempS = this->ToString(theFormat);
   theFormat->flagUsePNG=tempB;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/" + fileName, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, fileName, false, true, false);
   theFile << "<html><body>" << notation << "<a href=\"" << htmlPathServerSl2s
   << "sl2s.html\"> Math formulas rendered via javascript.</a><br>\n"
   << tempS << "</html></body>";

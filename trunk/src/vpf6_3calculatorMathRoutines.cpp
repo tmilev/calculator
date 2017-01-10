@@ -5948,25 +5948,25 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
 
   std::stringstream outSltwoPath, outSltwoDisplayPath;
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
-  outSltwoPath << ownerSS->RelativePhysicalNameSSAlgOutputFolder << "sl2s/";
-  outSltwoDisplayPath << ownerSS->DisplayNameSSalgOutputFolder << "sl2s/";
+  outSltwoPath << ownerSS->VirtualNameSSAlgOutputFolder << "sl2s/";
+  outSltwoDisplayPath << ownerSS->VirtualNameSSAlgOutputFolder << "sl2s/";
   outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
   outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s.html";
-  outRootHtmlFileName << ownerSS->RelativePhysicalNameSSAlgOutputFolder << "rootSubalgebras.html";
+  outRootHtmlFileName << ownerSS->VirtualNameSSAlgOutputFolder << "rootSubalgebras.html";
   outRootHtmlDisplayName << ownerSS->DisplayNameSSalgOutputFolder << "rootSubalgebras.html";
-  bool NeedToCreateFolders=!FileOperations::FileExistsVirtual("output/"+outSltwoMainFile.str());
+  bool NeedToCreateFolders=!FileOperations::FileExistsVirtual(outSltwoMainFile.str());
   if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
     outMkDirCommand1 << "mkdir " << theGlobalVariables.PhysicalPathHtmlFolder
-    << ownerSS->RelativePhysicalNameSSAlgOutputFolder;
+    << ownerSS->VirtualNameSSAlgOutputFolder;
     outMkDirCommand2 << "mkdir " << theGlobalVariables.PhysicalPathHtmlFolder
     << outSltwoPath.str();
     theGlobalVariables.CallSystemNoOutput(outMkDirCommand1.str());
     theGlobalVariables.CallSystemNoOutput(outMkDirCommand2.str());
   }
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
-  if (!FileOperations::FileExistsVirtual("output/"+outSltwoMainFile.str()) ||
-      !FileOperations::FileExistsVirtual("output/"+outRootHtmlFileName.str()))
+  if (!FileOperations::FileExistsVirtual(outSltwoMainFile.str()) ||
+      !FileOperations::FileExistsVirtual(outRootHtmlFileName.str()))
     MustRecompute=true;
   std::stringstream out;
   if (MustRecompute)

@@ -66,6 +66,8 @@ bool WebWorker::CheckConsistency()
 
 bool WebWorker::ReceiveAll()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
+  if (this->connectedSocketID==-1)
+    crash << "Attempting to receive on a socket with ID equal to -1. " << crash;
   if (theGlobalVariables.flagUsingSSLinCurrentConnection)
     return this->ReceiveAllHttpSSL();
   //theLog << logger::red << "DEBUG: Worker " << this->indexInParent+1 << " receiving all. " << logger::endL;
@@ -2895,10 +2897,10 @@ int WebWorker::ServeClient()
     else if (theGlobalVariables.userCalculatorRequestType=="indicator")
       return this->ProcessComputationIndicator();
   }
-  //unless the worker is an server monitor, it has no access to communication channels of the other workers
-  this->parent->ReleaseNonActiveWorkers();
-  //stOutput << this->GetHeaderOKNoContentLength();
-  //stOutput << "<html><body> got to here pt 1";
+  //The following line is NOT ALLOWED:
+  //this->parent->ReleaseNonActiveWorkers();
+  //Reason: the architecture changed, now multiple requests
+  //can be piped through one worker.
   if (theGlobalVariables.userCalculatorRequestType=="setProblemData")
     return this->ProcessSetProblemDatabaseInfo();
   else if (theGlobalVariables.userCalculatorRequestType=="changePassword")
@@ -3172,7 +3174,9 @@ void WebServer::SendStringThroughActiveWorker(const std::string& theString)
 }
 
 void WebServer::PipeProgressReportToParentProcess(const std::string& theString)
-{ theWebServer.GetActiveWorker().PipeProgressReportToParentProcess(theString);
+{ if (theWebServer.activeWorker==-1)
+    return;
+  theWebServer.GetActiveWorker().PipeProgressReportToParentProcess(theString);
 }
 
 WebServer::WebServer()
@@ -3993,6 +3997,8 @@ int WebServer::Run()
 int WebWorker::Run()
 { MacroRegisterFunctionWithName("WebWorker::Run");
   this->CheckConsistency();
+  if (this->connectedSocketID==-1)
+    crash << "Worker::Run() started on a connecting with ID equal to -1. " << crash;
   this->parent->flagThisIsWorkerProcess=true;
   this->ResetPipesNoAllocation();
   std::stringstream processNameStream;
@@ -4017,6 +4023,7 @@ int WebWorker::Run()
   /////////////////////////////////////////////////////////////////////////
   stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
   int result=0;
+  int numReceivesThisConnection=0;
   while (true)
   { if (!this->ReceiveAll())
     { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
@@ -4030,9 +4037,12 @@ int WebWorker::Run()
       this->SendAllAndWrapUp();
       return -1;
     }
+    numReceivesThisConnection++;
     if (this->messageHead.size()==0)
       break;
     result=this->ServeClient();
+    if (this->connectedSocketID==-1)
+      break;
     this->SendAllBytesWithHeaders();
     if (!this->flagKeepAlive)
       break;
@@ -4177,7 +4187,7 @@ int WebServer::main(int argc, char **argv)
   theWebServer.InitializeGlobalVariables();
   theGlobalVariables.flagAceIsAvailable=
   FileOperations::FileExistsVirtual("MathJax-2.6-latest/", false);
-  if ( false &&
+  if (true &&
       theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
     << logger::purple << "************************" << logger::endL

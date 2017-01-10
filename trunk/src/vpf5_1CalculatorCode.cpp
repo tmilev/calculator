@@ -528,7 +528,7 @@ bool Calculator::innerPrintSSsubalgebras
   //<< displayFolder << theTitlePageFileNameNoPath
   //<< "\">"
   ;
-  if (!FileOperations::FileExistsVirtual("output/"+theSSsubalgebras.RelativePhysicalNameRelativeMainFile1)|| doForceRecompute)
+  if (!FileOperations::FileExistsVirtual(theSSsubalgebras.VirtualNameMainFile1)|| doForceRecompute)
   { if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.timeComputationStartInSeconds=theGlobalVariables.GetElapsedSeconds();
     theSSsubalgebras.flagComputeNilradicals=doComputeNilradicals;

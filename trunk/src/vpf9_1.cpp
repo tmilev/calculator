@@ -312,7 +312,9 @@ void GlobalVariables::MakeReport()
 void GlobalVariables::initOutputReportAndCrashFileNames
 (const std::string& inputUserStringRAW, const std::string& inputUserStringCivilized)
 { std::string inputAbbreviated;
-  this->userInputStringIfAvailable=inputUserStringCivilized;
+  this->userInputStringIfAvailable=
+  CGI::CleanUpForFileNameUse
+  (CGI::StringToURLString(inputUserStringCivilized,false));
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
   { this->userInputStringRAWIfAvailable=inputUserStringRAW;
     inputAbbreviated=this->userInputStringRAWIfAvailable;

@@ -47,6 +47,7 @@ public:
   bool flagMustLogin;
   bool flagUsingSSLInWorkerProcess;
   bool flagDidSendAll;
+  bool flagToggleMonitoring;
   List<std::string> theStrings;
   int ContentLength;
   int requestTypE;
@@ -78,6 +79,7 @@ public:
   int ProcessModifyPage();
   int ProcessAddUserEmails();
   int ProcessServerStatus();
+  int ProcessToggleMonitoring();
   int ProcessServerStatusPublic();
   int ProcessComputationIndicator();
   int ProcessEditPage();
@@ -280,6 +282,9 @@ public:
   std::string ToStringStatusAll();
   std::string ToStringStatusPublic();
   std::string ToStringStatusPublicNoTop();
+  static void TurnProcessMonitoringOn();
+  static void TurnProcessMonitoringOff();
+  static void ToggleProcessMonitoring();
   static std::string GetEnvironment(const std::string& envVarName);
   static int main(int argc, char **argv);
   static int mainApache();

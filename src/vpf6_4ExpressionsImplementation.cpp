@@ -2077,7 +2077,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
       out << thePlot.GetPlotHtml(*this->owner);
       if (this->owner->flagWriteLatexPlots)
       { out << this->owner->WriteDefaultLatexFileReturnHtmlLink
-        (thePlot.GetPlotStringAddLatexCommands(false), true);
+        (thePlot.GetPlotStringAddLatexCommands(false), 0, true);
         out << "<br><b>LaTeX code used to generate the output. </b><br>"
         << thePlot.GetPlotStringAddLatexCommands(true);
       }

@@ -26,36 +26,40 @@ std::string Calculator::GetCalculatorLink(const std::string& input)
 }
 
 std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
-(const std::string& fileContent, bool useLatexDviPSpsToPNG)
+(const std::string& fileContent, std::string* outputFileNameNoExtension, bool useLatexDviPSpsToPNG)
 { std::fstream theFile;
-  std::stringstream fileNameRelative;
+  std::stringstream fileName;
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
-  unsigned int fileIdentifier=MathRoutines::hashString(fileContent);
-
-  fileNameRelative << theGlobalVariables.RelativePhysicalNameExtraOutputWithPath << fileIdentifier;
-  std::string fileNamePhysical=theGlobalVariables.PhysicalPathHtmlFolder + fileNameRelative.str();
-  if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "output/"+fileNameRelative.str()+".tex", false, true, false))
-    return "failed to create file: " + fileNameRelative.str() + ".tex";
+  fileName << "defaultOutput" << MathRoutines::hashString(fileContent);
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtual
+       (theFile, theGlobalVariables.DisplayPathOutputFolder+fileName.str()+".tex", false, true, false))
+    return "failed to create file: " + fileName.str() + ".tex";
+  std::string baseFolder;
+  std::string fileNameWithPathPhysical;
+  FileOperations::GetPhysicalFileNameFromVirtual("output/", baseFolder, false, false);
+  FileOperations::GetPhysicalFileNameFromVirtual
+  ("output/"+fileName.str(), fileNameWithPathPhysical, false, false);
   theFile << fileContent;
   theFile.flush();
   theFile.close();
-  systemCommand1 << " latex -output-directory=" << theGlobalVariables.PhysicalPathHtmlFolder << " "
-  << fileNamePhysical << ".tex";
-  //stOutput << "<br>system command:<br>" << systemCommand1.str();
-  this->SystemCommands.AddOnTop(systemCommand1.str());
+  systemCommand1 << " latex -output-directory=" << baseFolder << " " << fileName.str() << ".tex";
+  theGlobalVariables.CallSystemNoOutput(systemCommand1.str());
   if (useLatexDviPSpsToPNG)
-  { systemCommand2 << " dvips -o " << fileNamePhysical << ".ps " << fileNamePhysical << ".dvi";
-    //stOutput << "<br>system command:<br>" << systemCommand2.str();
-    this->SystemCommands.AddOnTop(systemCommand2.str());
-    systemCommand3 << " convert " << fileNamePhysical << ".ps " << fileNamePhysical << ".png";
-    //stOutput << "<br>system command:<br>" << systemCommand3.str();
-    this->SystemCommands.AddOnTop(systemCommand3.str());
+  { systemCommand2 << " dvips -o " << fileNameWithPathPhysical << ".ps "
+    << fileNameWithPathPhysical << ".dvi";
+    theGlobalVariables.CallSystemNoOutput(systemCommand2.str());
+    systemCommand3 << " convert " << fileNameWithPathPhysical
+    << ".ps " << fileNameWithPathPhysical << ".png";
+    theGlobalVariables.CallSystemNoOutput(systemCommand3.str());
   }
   std::stringstream out;
   out << "<img src=\"" << theGlobalVariables.DisplayPathOutputFolder
-  << fileNameRelative.str() << ".png\"></img><a href=\"" << theGlobalVariables.DisplayPathOutputFolder
-  << fileNameRelative.str() << ".tex\">" << theGlobalVariables.DisplayPathOutputFolder
-  << fileNameRelative.str() << ".tex</a>";
+  << fileName.str() << ".png\"></img><a href=\""
+  << theGlobalVariables.DisplayPathOutputFolder
+  << fileName.str() << ".tex\">" << theGlobalVariables.DisplayPathOutputFolder
+  << fileName.str() << ".tex</a>";
+  if (outputFileNameNoExtension!=0)
+    *outputFileNameNoExtension=theGlobalVariables.DisplayPathOutputFolder+fileName.str();
   this->numOutputFileS++;
   return out.str();
 }

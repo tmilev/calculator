@@ -2478,15 +2478,6 @@ int WebWorker::ProcessCalculator()
   stOutput << this->closeIndentTag("</table><!-- outermost table-->");
 
   stOutput << "</body></html>";
-  stOutput << "<!--";
-  ProgressReport theReport;
-  for(int i=0; i<theParser.SystemCommands.size; i++)
-  { std::stringstream out;
-    out << "\n\ncommand: " << theParser.SystemCommands[i] << "\n" ;
-    theReport.Report(out.str());
-    theGlobalVariables.CallSystemNoOutput(theParser.SystemCommands[i]);
-  }
-  stOutput << "-->";
   return 0;
 }
 
@@ -2786,7 +2777,6 @@ int WebWorker::ServeClient()
   if (this->addressComputed==theGlobalVariables.DisplayNameExecutable)
     theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
   this->flagMustLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
-  //logIO << logger::blue << "DEBUG: mustlogin: " << this->flagMustLogin << logger::endL;
   if (this->flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
   { std::stringstream redirectStream, newAddressStream;
     newAddressStream << "https://" << this->hostNoPort;
@@ -4132,7 +4122,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
 }
 
 void WebServer::InitializeGlobalVariables()
-{ theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
+{ theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=0;
   theGlobalVariables.flagReportEverything=true;
   ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
   MapLisT<std::string, std::string, MathRoutines::hashString>&
@@ -4197,6 +4187,7 @@ int WebServer::main(int argc, char **argv)
     << logger::purple << "************************" << logger::endL
     ;
     theGlobalVariables.flagAllowProcessMonitoring=true;
+    theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
   }
   if (theGlobalVariables.flagRunningBuiltInWebServer)
   { if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)

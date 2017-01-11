@@ -1010,8 +1010,6 @@ public:
   std::string userLabel;
   std::stringstream Comments;
   FormatExpressions formatVisibleStrings;
-
-  List<std::string> SystemCommands;
   std::string ToString();
   std::string ToStringPerformance();
   void ComputeAutoCompleteKeyWords();
@@ -1062,7 +1060,8 @@ public:
   bool DecreaseStackExceptLastTwo(int decrease);
   std::string ToStringSyntacticStackHTMLTable();
   std::string ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions);
-  std::string WriteDefaultLatexFileReturnHtmlLink(const std::string& fileContent, bool useLatexDviPSpsToPNG=false);
+  std::string WriteDefaultLatexFileReturnHtmlLink
+  (const std::string& fileContent, std::string* outputFileNameNoExtension, bool useLatexDviPSpsToPNG=false);
   std::string GetCalculatorLink(const std::string& input);
   std::string ToStringIsCorrectAsciiCalculatorString(const std::string& input);
   bool isInterpretedAsEmptySpace(const std::string& input);

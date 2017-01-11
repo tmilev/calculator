@@ -1742,7 +1742,8 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
 
    this->AddOperationInnerHandler
   ("parabolicsInfoBruhatGraph", CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph, "",
-   " Makes a table with information about the Weyl group of a parabolic subalgebra of the ambient Lie algebra, \
+   " Makes a table with information about the Weyl group of a \
+   parabolic subalgebra of the ambient Lie algebra, \
    as well as the cosets \
    (given by minimal coset representatives) of the Weyl subgroup in question. \
    The input must have as many integers as there are simple roots in the ambient \

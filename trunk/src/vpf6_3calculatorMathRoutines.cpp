@@ -4792,48 +4792,55 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   WeylGroupData& theAmbientWeyl=theSSalgebra.theWeyl;
   SubgroupWeylGroupOLD theSubgroup;
   std::stringstream out;
-  std::stringstream outputFileContent, outputFileContent2;
   if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, 500))
     return output.MakeError("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit", theCommands);
   theSubgroup.FindQuotientRepresentatives(2000);
-  out << "<br>Number elements of the coset: " << theSubgroup.RepresentativesQuotientAmbientOrder.size;
+  out << "<br>Number elements of the coset: "
+  << theSubgroup.RepresentativesQuotientAmbientOrder.size;
   out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.size;
-  out << "<br>Number of elements of the ambient Weyl: " << theSubgroup.AmbientWeyl->theGroup.theElements.size;
-  outputFileContent << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
-  outputFileContent2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
+  out << "<br>Number of elements of the ambient Weyl: "
+  << theSubgroup.AmbientWeyl->theGroup.theElements.size;
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
   if (theSubgroup.size>498)
   { if (theSubgroup.AmbientWeyl->SizeByFormulaOrNeg1('E', 6) <= theSubgroup.AmbientWeyl->theGroup.GetSize())
-      out << "Even I can't handle the truth, when it is so large. <br>";
+      out << "Weyl group is too large. <br>";
     else
-      out << "LaTeX can't handle handle the truth, when it is so large. <br>";
+      out << "Weyl group is too large for LaTeX. <br>";
   } else
-  { bool useJavascript=theSubgroup.size<100;
+  { std::stringstream outputFileContent, outputFileContent2;
+    std::string fileHasse, fileCosetGraph;
+    bool useJavascript=theSubgroup.size<100;
+    outputFileContent << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
     outputFileContent << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
     outputFileContent << "\n\\end{document}";
+    outputFileContent2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
     outputFileContent2 << "\\[" << theSubgroup.ElementToStringCosetGraph() << "\\]";
     outputFileContent2 << "\n\\end{document}";
+    theCommands.WriteDefaultLatexFileReturnHtmlLink(outputFileContent.str(), &fileHasse, true);
+    theCommands.WriteDefaultLatexFileReturnHtmlLink(outputFileContent2.str(), &fileCosetGraph, true);
     out << "<hr>"
     << " The Hasse graph of the Weyl group of the Levi part follows. <a href=\""
-    << theGlobalVariables.DisplayNameExtraOutputNoPath << "1.tex\"> "
-    << theGlobalVariables.DisplayNameExtraOutputNoPath << "1.tex</a>";
-    out << ", <iframe src=\"" << theGlobalVariables.DisplayNameExtraOutputNoPath
-    << "1.png\" width=\"800\" height=\"600\">"
-    << theGlobalVariables.DisplayNameExtraOutputNoPath << "1.png</iframe>";
-    out << "<hr> The coset graph of the Weyl group of the Levi part follows. The cosets are right, i.e. a coset "
+    << fileHasse << ".tex\"> "
+    << fileHasse << ".tex</a>";
+    out << ", <iframe src=\"" << fileHasse
+    << ".png\" width=\"800\" height=\"600\">"
+    << fileHasse << ".png</iframe>";
+    out << "<hr> The coset graph of the Weyl group of the Levi part follows. "
+    << "The cosets are right, i.e. a coset "
     << " of the subgroup X is written in the form Xw, where w is one of the elements below. "
     << "<a href=\""
-    << theGlobalVariables.DisplayNameExtraOutputNoPath
-    << "2.tex\"> " << theGlobalVariables.DisplayNameExtraOutputNoPath << "2.tex</a>";
-    out << ", <iframe src=\"" << theGlobalVariables.DisplayNameExtraOutputNoPath
-    << "2.png\" width=\"800\" height=\"600\"> "
-    << theGlobalVariables.DisplayNameExtraOutputNoPath << "2.png</iframe>";
+    << fileCosetGraph
+    << ".tex\"> " << fileCosetGraph << ".tex</a>";
+    out << ", <iframe src=\"" << fileCosetGraph
+    << ".png\" width=\"800\" height=\"600\"> " << fileCosetGraph << ".png</iframe>";
     out <<"<b>The .png file might be bad if LaTeX crashed while trying to process it; "
     << "please check whether the .tex corresponds to the .png.</b>";
     out << "<hr>Additional printout follows.<br> ";
-    out << "<br>Representatives of the coset follow. Below them you can find the elements of the subgroup. <br>";
-    out << "<table><tr><td>Element</td><td>weight simple coords</td><td>weight fund. coords</td></tr>";
+    out << "<br>Representatives of the coset follow. Below them you can find "
+    << "the elements of the subgroup. <br>";
+    out << "<table><tr><td>Element</td><td>weight simple coords</td>"
+    << "<td>weight fund. coords</td></tr>";
     theFormat.fundamentalWeightLetter="\\omega";
     for (int i=0; i<theSubgroup.RepresentativesQuotientAmbientOrder.size; i++)
     { ElementWeylGroup<WeylGroupData>& current=theSubgroup.RepresentativesQuotientAmbientOrder[i];
@@ -4858,8 +4865,6 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
     out << "</table><hr>";
     out << theSubgroup.ToString();
   }
-  out << theCommands.WriteDefaultLatexFileReturnHtmlLink(outputFileContent.str(), true);
-  out << theCommands.WriteDefaultLatexFileReturnHtmlLink(outputFileContent2.str(), true);
   return output.AssignValue(out.str(), theCommands);
 }
 

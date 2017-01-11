@@ -1532,6 +1532,31 @@ int WebWorker::ProcessServerStatusPublic()
   return 0;
 }
 
+int WebWorker::ProcessToggleMonitoring()
+{ MacroRegisterFunctionWithName("WebWorker::ToggleMonitoring");
+  this->SetHeaderOKNoContentLength();
+  stOutput << "<html><head> ";
+  stOutput << CGI::GetCalculatorStyleSheetWithTags();
+  stOutput << "</head>";
+  stOutput << "<body>";
+  stOutput << "<problemNavigation>"
+  << theGlobalVariables.ToStringNavigation()
+  << "</problemNavigation>\n";
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+  { this->flagToggleMonitoring=true;
+    if (theGlobalVariables.flagAllowProcessMonitoring)
+      stOutput << "Attemping to turn monitoring <b>off</b>. ";
+    else
+      stOutput << "Attemping to turn monitoring <b>on</b>. ";
+    stOutput << "The changes, if successful, will take effect "
+    << "with the next link you click.";
+  } else
+    stOutput << "Toggling process monitoring is allowed only for admins.";
+  stOutput << "</body></html>";
+  return 0;
+}
+
+
 int WebWorker::ProcessServerStatus()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestServerStatus");
   this->SetHeaderOKNoContentLength();
@@ -1933,6 +1958,7 @@ void WebWorker::reset()
   this->indentationLevelHTML=0;
   this->displayUserInput="";
   this->requestTypE=this->requestUnknown;
+  this->flagToggleMonitoring=false;
   this->flagDoAddContentLength=false;
   this->flagFileNameSanitized=false;
   this->timeOfLastPingServerSideOnly=-1;
@@ -1978,7 +2004,10 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
 
 void WebWorker::WrapUpConnection()
 { MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
-  this->pipeWorkerToServerControls.WriteAfterEmptying("close");
+  if (this->flagToggleMonitoring)
+    this->pipeWorkerToServerControls.WriteAfterEmptying("toggleMonitoring");
+  else
+    this->pipeWorkerToServerControls.WriteAfterEmptying("close");
   this->Release();
   theGlobalVariables.flagComputationCompletE=true;
   theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
@@ -2877,6 +2906,8 @@ int WebWorker::ServeClient()
     stOutput << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"), false);
   else if (this->errorCalculatorArguments!="")
     stOutput << this->errorCalculatorArguments;
+  else if (theGlobalVariables.userCalculatorRequestType=="toggleMonitoring")
+    return this->ProcessToggleMonitoring();
   else if (theGlobalVariables.userCalculatorRequestType=="status")
     return this->ProcessServerStatus();
   else if (theGlobalVariables.userCalculatorRequestType=="statusPublic")
@@ -3681,10 +3712,17 @@ void WebServer::RecycleChildrenIfPossible()
       if (this->theWorkers[i].pipeWorkerToServerControls.lastRead.size>0)
       { this->theWorkers[i].flagInUse=false;
         this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
+        std::string messageStr
+        (this->theWorkers[i].pipeWorkerToServerControls.lastRead.TheObjects,
+         this->theWorkers[i].pipeWorkerToServerControls.lastRead.size);
         theLog << logger::green << "Worker "
-        << i+1 << " done, marking for reuse. " << logger::endL;
+        << i+1 << " done with message: "
+        << messageStr
+        << ". Marking for reuse. " << logger::endL;
         numInUse--;
         this->NumWorkersNormallyExited++;
+        if (messageStr=="toggleMonitoring")
+          this->ToggleProcessMonitoring();
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
         theLog << logger::orange << "Worker " << i+1 << " not done yet. " << logger::endL;
@@ -4162,6 +4200,36 @@ int main(int argc, char **argv)
 
 extern int mainTest(List<std::string>& remainingArgs);
 
+void WebServer::ToggleProcessMonitoring()
+{ MacroRegisterFunctionWithName("WebServer::ToggleProcessMonitoring");
+  if (theGlobalVariables.flagAllowProcessMonitoring)
+    WebServer::TurnProcessMonitoringOff();
+  else
+    WebServer::TurnProcessMonitoringOn();
+}
+
+void WebServer::TurnProcessMonitoringOn()
+{ MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOn");
+  theLog
+  << logger::purple << "************************" << logger::endL
+  << logger::red << "WARNING: process monitoring IS ON. " << logger::endL
+  << logger::purple << "************************" << logger::endL
+  ;
+  theGlobalVariables.flagAllowProcessMonitoring=true;
+  theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
+}
+
+void WebServer::TurnProcessMonitoringOff()
+{ MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOn");
+  theLog
+  << logger::green << "************************" << logger::endL
+  << logger::green << "Process monitoring is now off. " << logger::endL
+  << logger::green << "************************" << logger::endL
+  ;
+  theGlobalVariables.flagAllowProcessMonitoring=false;
+  theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=0;
+}
+
 int WebServer::main(int argc, char **argv)
 { theGlobalVariables.InitThreadsExecutableStart();
   //use of loggers forbidden before calling   theWebServer.AnalyzeMainArguments(...):
@@ -4181,13 +4249,7 @@ int WebServer::main(int argc, char **argv)
   FileOperations::FileExistsVirtual("MathJax-2.6-latest/", false);
   if (false &&
       theGlobalVariables.flagRunningBuiltInWebServer)
-  { theLog
-    << logger::purple << "************************" << logger::endL
-    << logger::red << "WARNING: theGlobalVariables.flagAllowProcessMonitoring is set to TRUE. " << logger::endL
-    << logger::purple << "************************" << logger::endL
-    ;
-    theGlobalVariables.flagAllowProcessMonitoring=true;
-    theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
+  { theWebServer.TurnProcessMonitoringOn();
   }
   if (theGlobalVariables.flagRunningBuiltInWebServer)
   { if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)

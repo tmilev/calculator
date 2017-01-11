@@ -1494,8 +1494,22 @@ std::string HtmlInterpretation::ToStringNavigation()
   //out << "<table>";
   std::string linkSeparator=" | ";
   std::string linkBigSeparator=" || ";
-  if (theGlobalVariables.flagAllowProcessMonitoring)
-    out << "<span style=\"color:red\"><b>Monitoring on</b></span>" << linkSeparator;
+  if (!theGlobalVariables.flagRunningApache)
+  { if (theGlobalVariables.flagAllowProcessMonitoring)
+    { if (!theGlobalVariables.UserDefaultHasAdminRights())
+        out << "<span style=\"color:red\" ><b>Monitoring on</b></span>" << linkSeparator;
+      else
+        out << "<a style=\"color:red\" href=\""
+        << theGlobalVariables.DisplayNameExecutable
+        << "?request=toggleMonitoring\""
+        << "><b>Monitoring on</b></a>" << linkSeparator;
+    } else
+      if (theGlobalVariables.UserDefaultHasAdminRights())
+        out << "<a style=\"color:green\" href=\""
+        << theGlobalVariables.DisplayNameExecutable
+        << "?request=toggleMonitoring\""
+        << "><b>Monitoring off</b></a>" << linkSeparator;
+  }
   if (theGlobalVariables.userCalculatorRequestType=="template")
     out << "<b>Home</b>" << linkSeparator;
   else

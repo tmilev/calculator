@@ -390,7 +390,6 @@ bool charSSAlgMod<coefficient>::DrawMe
   charSSAlgMod<coefficient> CharCartan;
   bool result= this->FreudenthalEvalMeDominantWeightsOnly(CharCartan, upperBoundWeights, &outputDetails);
   std::stringstream out;
-  Vectors<Rational> currentOrbit;
   WeylGroupData& theWeyl=this->GetOwner()->theWeyl;
   theWeyl.DrawRootSystem(theDrawingVars, false, true);
   int totalNumWeights=0;

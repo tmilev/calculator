@@ -2219,7 +2219,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
   /////////////////////////
-  out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
+/*  out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
   out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
   out << "<b>Please do not use the following button</b>.";
   out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div>";
@@ -2232,6 +2232,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "console.log('Email: ' + profile.getEmail());\n"
   << "}\n"
   << "</script>";
+  */
 ///////////////////////////////////////
 //  out << "<br><br><small>No account yet? We are sorry but automatic registration has not been implemented yet.<br>"
 //  << " If you are our students please contact us by email and we'll register you.<br>Everyone else, please che.</small>";

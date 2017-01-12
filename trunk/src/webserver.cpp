@@ -2220,7 +2220,8 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "<span id=\"loginResult\"></span>";
   /////////////////////////
   out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
-  out << "<meta name=\"google-signin-client_id\" content=\"account-1@calculator-1137.iam.gserviceaccount.com\">";
+  out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
+  out << "<b>Please do not use the following button</b>.";
   out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div>";
   out << "<script language=\"javascript\">"
   << " function onSignIn(googleUser) {\n"

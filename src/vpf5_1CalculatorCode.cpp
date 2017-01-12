@@ -488,11 +488,9 @@ bool Calculator::innerPrintSSsubalgebras
  bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals, bool doAdjustCentralizers)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
-//  stOutput << "Does this show in the output? ";
-  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection!=0)
-    theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
-//  stOutput << "After changing, does this show in output? ";
-//  crash << crash;
+  if (theGlobalVariables.flagAllowProcessMonitoring)
+    if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection!=0)
+      theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
   std::stringstream out;
   SemisimpleLieAlgebra* ownerSSPointer=0;
   bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();
@@ -504,7 +502,7 @@ bool Calculator::innerPrintSSsubalgebras
     { out << "<b>This code is completely experimental and has been set to run up to rank 6. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
       return output.AssignValue(out.str(), theCommands);
     } else
-      out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
+      out << "<b>This code is completely experimental. Use the following printouts on your own risk.</b><br>";
   } else
     ownerSSPointer=input.GetValue<SemisimpleSubalgebras>().owner;
   if (ownerSSPointer==0)
@@ -515,11 +513,6 @@ bool Calculator::innerPrintSSsubalgebras
 
   theSSsubalgebras.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
   theSSsubalgebras.ComputeFolderNames(theSSsubalgebras.currentFormat);
-  out << "<br>Output file: <a href= \""
-  << theSSsubalgebras.DisplayNameMainFile1WithPath << "\"> " << theSSsubalgebras.DisplayNameMainFile1NoPath << "</a>";
-  out << "<br>Output file, fast load, hover mouse over math expressions to get formulas: <a href= \""
-  << theSSsubalgebras.DisplayNameMainFile2FastLoadWithPath << "\"> "
-  << theSSsubalgebras.DisplayNameMainFile2FastLoadNoPath << "</a>";
   //  out << "<script> var ReservedCountDownToRefresh = 5; setInterval(function(){document.getElementById('ReservedCountDownToRefresh').innerHTML "
   //  << "= --ReservedCountDownToRefresh;}, 1000); </script>";
   //  out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"ReservedCountDownToRefresh\">5</span></span> "
@@ -542,7 +535,14 @@ bool Calculator::innerPrintSSsubalgebras
       theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS);
     }
     theSSsubalgebras.WriteReportToFiles();
-  }
+  } else
+    out << "Files precomputed, serving from HD. ";
+  out << "<br>Output file: <a href= \""
+  << theSSsubalgebras.DisplayNameMainFile1WithPath << "\"> " << theSSsubalgebras.DisplayNameMainFile1NoPath << "</a>";
+  out << "<br>Output file, fast load, hover mouse over math expressions to get formulas: <a href= \""
+  << theSSsubalgebras.DisplayNameMainFile2FastLoadWithPath << "\"> "
+  << theSSsubalgebras.DisplayNameMainFile2FastLoadNoPath << "</a>";
+
   return output.AssignValue(out.str(), theCommands);
 }
 

@@ -2018,10 +2018,12 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CentralizerChains (ComputeSemisimpleSubalgebras{}(B_3))");
 
   this->AddOperationInnerHandler
-  ("printSemisimpleSubalgebras", this->innerPrintSSsubalgebrasRegular, "",
+  ("printSemisimpleSubalgebras", Calculator::innerPrintSSsubalgebrasRegular, "",
    " <b>This function is being developed and is not implemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "printSemisimpleSubalgebras(B_3)", true, false);
+   "printSemisimpleSubalgebras(B_3)", true, false,
+   "Calculator::innerPrintSSsubalgebrasRegular",
+   "printSemisimpleSubalgebras");
   this->AddOperationInnerHandler
   ("printSemisimpleSubalgebrasRecompute", Calculator::innerPrintSSsubalgebrasRecompute, "",
    " <b>This function is being developed and is not implemented fully yet. </b> \

@@ -1491,9 +1491,9 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
       hoursTillDeadlineStream << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false)
       << " left. ";
   } else
-    hoursTillDeadlineStream << "[passed].";
+    hoursTillDeadlineStream << "[passed]. ";
   if (deadlineHasPassed && !problemAlreadySolved)
-    out << "<span style=\"red\"><b>[Deadline passed].</b></span>"
+    out << "<span style=\"red\"><b>[Deadline passed]. </b></span>"
     << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
   else
   { out << "Deadline: ";

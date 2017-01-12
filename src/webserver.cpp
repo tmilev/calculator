@@ -2218,9 +2218,24 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "</form>";
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
+  /////////////////////////
+  out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
+  out << "<meta name=\"google-signin-client_id\" content=\"account-1@calculator-1137.iam.gserviceaccount.com\">";
+  out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div>";
+  out << "<script language=\"javascript\">"
+  << " function onSignIn(googleUser) {\n"
+  << "var profile = googleUser.getBasicProfile();\n"
+  << "console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.\n"
+  << "console.log('Name: ' + profile.getName());\n"
+  << "console.log('Image URL: ' + profile.getImageUrl());\n"
+  << "console.log('Email: ' + profile.getEmail());\n"
+  << "}\n"
+  << "</script>";
+///////////////////////////////////////
 //  out << "<br><br><small>No account yet? We are sorry but automatic registration has not been implemented yet.<br>"
 //  << " If you are our students please contact us by email and we'll register you.<br>Everyone else, please che.</small>";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+
   //out << "<hr><hr>DEBUG: " << this->ToStringMessageFullUnsafe();
   return out.str();
 }
@@ -4057,7 +4072,15 @@ int WebWorker::Run()
   while (true)
   { if (!this->ReceiveAll())
     { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
-      stOutput << "<html><body><b>HTTP error 400 (bad request). </b> There was an error with the request. "
+      stOutput << "<html>"
+      << "<head>"
+      << CGI::GetCalculatorStyleSheetWithTags()
+      << "</head>"
+      << "<body>"
+      << "<problemNavigation>"
+      << theGlobalVariables.ToStringNavigation()
+      << "</problemNavigation>"
+      << "<b>HTTP error 400 (bad request). </b> There was an error with the request. "
       << "One possibility is that the input was too large. "
       << "<br>The error message returned was:<br>"
       << this->error

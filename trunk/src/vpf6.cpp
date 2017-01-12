@@ -2413,6 +2413,12 @@ std::string Calculator::ToString()
   std::stringstream out2;
   std::string openTag1="<span style=\"color:#0000FF\">";
   std::string closeTag1="</span>";
+  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
+    out2 << "Computation time limit: "
+    << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
+    << " second(s).<hr>";
+  else
+    out2 << "No computation time limit.<hr> ";
   if (this->RuleStack.children.size>1)
   { out2 << "<b>Predefined rules.</b><br>";
     for (int i=1; i<this->RuleStack.children.size; i++)

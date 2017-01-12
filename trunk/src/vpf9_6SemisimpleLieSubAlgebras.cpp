@@ -5775,7 +5775,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   } else
     out << this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst);
   if (this->CartanOfCentralizer.size>0)
-  { out << "<br>Primal decomposition of the ambient Lie algebra (refining the above decomposition; the order from the above decomposition is not pReserved): ";
+  { out << "<br>Primal decomposition of the ambient Lie algebra (refining the above decomposition; the order from the above decomposition is not preserved): ";
     if (useLaTeX)
     { if (useMouseHover)
         out << CGI::GetMathMouseHover(this->thePrimalChaR.ToString(&charFormatNonConst), 20000);

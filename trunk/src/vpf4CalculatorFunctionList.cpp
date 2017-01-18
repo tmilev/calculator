@@ -677,6 +677,14 @@ D-B;\
    "WeylGroupConjugacyClassesFromAllElements");
    ;
   this->AddOperationInnerHandler
+  ("WeylGroupOuterConjugacyClassesFromAllElements",
+    CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements, "",
+   "Computes conjugacy classes, identifying classes that are conjugate using outer automorphisms.",
+   "WeylGroupOuterConjugacyClassesFromAllElements{}(D_4);", true, false,
+   "CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements",
+   "WeylGroupOuterConjugacyClassesFromAllElements");
+   ;
+  this->AddOperationInnerHandler
   ("WeylGroupConjugacyClassesRepresentatives",
    CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives, "",
    "Computes a representative in each conjugacy classes of a \

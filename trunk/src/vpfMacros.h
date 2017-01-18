@@ -78,7 +78,8 @@ class Crasher
   public:
   std::stringstream theCrashReport;
   void (*CleanUpFunction)();
-  bool flagCrashInitiated; //<-we crash only once, and we do not resume execution after a crash
+  bool flagCrashInitiateD; //<-we crash only once, and we do not resume execution after a crash
+  bool flagFinishingCrash; //<-we crash only once, and we do not resume execution after a crash
   Crasher();
   void FirstRun();
   static std::string GetStackTraceEtcErrorMessage();

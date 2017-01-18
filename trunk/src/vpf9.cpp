@@ -140,7 +140,7 @@ HashedList<FileInformation>& GlobalVariables::theSourceCodeFiles()
 }
 
 void ProgressReport::Report(const std::string& theReport)
-{ if (crash.flagCrashInitiated)
+{ if (crash.flagCrashInitiateD)
   { this->threadIndex=-1;
     return;
   }
@@ -153,7 +153,7 @@ void ProgressReport::Report(const std::string& theReport)
 }
 
 void ProgressReport::init()
-{ if (crash.flagCrashInitiated)
+{ if (crash.flagCrashInitiateD)
   { this->threadIndex=-1;
     return;
   }
@@ -165,13 +165,13 @@ void ProgressReport::init()
 }
 
 ProgressReport::~ProgressReport()
-{ if (crash.flagCrashInitiated)
+{ if (crash.flagCrashInitiateD)
   { this->threadIndex=-1;
     return;
   }
   if (this->threadIndex==-1)
     return;
-  if (crash.flagCrashInitiated)
+  if (crash.flagCrashInitiateD)
     return;
   theGlobalVariables.ProgressReportStringS[this->threadIndex].size--;
 }

@@ -25,6 +25,7 @@ public:
   static bool innerWeylGroupConjugacyClasseS(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupConjugacyClassesLoad(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupConjugacyClassesFromAllElements(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerWeylGroupOuterConjugacyClassesFromAllElements(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupConjugacyClassesRepresentatives(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerSpechtModule(Calculator& theCommands, const Expression& input, Expression& out);

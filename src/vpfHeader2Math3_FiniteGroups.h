@@ -533,7 +533,7 @@ class WeylGroupData
   bool flagFundamentalToSimpleMatricesAreComputed;
   bool flagOuterAutosGeneratorsComputed;
   bool flagAllOuterAutosComputed;
-  inline void ComputeFundamentalToSimpleMatrices()
+  void ComputeFundamentalToSimpleMatrices()
   { if (this->flagFundamentalToSimpleMatricesAreComputed)
       return;
     Vectors<Rational> fundamentalBasis;
@@ -573,7 +573,6 @@ public:
   static void GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output);
   void ComputeSquares();
   void ComputeInitialIrreps();
-  void ComputeConjugacyClassesThomasVersion();
   void GetSignSignatureParabolics(List<SubgroupDataRootReflections>& outputSubgroups);
   void GetSignSignatureExtendedParabolics(List<SubgroupDataRootReflections>& outputSubgroups);
   void GetSignSignatureAllRootSubsystems(List<SubgroupDataRootReflections>& outputSubgroups);
@@ -716,7 +715,6 @@ public:
     output=input;
     this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement().ActOnVectorColumn(output);
   }
-
   void GetEpsilonCoords(const List<Vector<Rational> >& input, Vectors<Rational>& output);
   template <class coefficient>
   Vector<coefficient> GetEpsilonCoords(const Vector<coefficient>& input)
@@ -799,7 +797,6 @@ public:
       outputWeylElt.generatorsLastAppliedFirst[i].MakeSimpleReflection(i);
   }
   Vector<Rational> ApplyReflectionList(const List<int>& rightReflectionsActFirst, const Vector<Rational> &vv) const;
-
   template <class coefficient>
   void ActOn(const ElementWeylGroup<WeylGroupData>& theGroupElement, Vector<coefficient>& inputOutput)const
   { this->ActOn(theGroupElement, inputOutput, inputOutput);

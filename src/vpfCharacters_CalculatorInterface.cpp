@@ -685,20 +685,65 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(Calculator& th
   return output.AssignValue(theGroup, theCommands);
 }
 
+bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements");
+  if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
+       (theCommands, input, output))
+    return false;
+  WeylGroupData& theGroupData=output.GetValueNonConst<WeylGroupData>();
+  char theType='X';
+  int theRank=-1;
+  bool hasOuterAutosAndIsSimple=false;
+  if (theGroupData.theDynkinType.IsSimple(&theType, &theRank))
+  { if (theType=='D' || theType=='A')
+      hasOuterAutosAndIsSimple=true;
+    if(theType=='E' && theRank==6)
+      hasOuterAutosAndIsSimple=true;
+  }
+  if (!hasOuterAutosAndIsSimple)
+    return false;
+  FiniteGroup<Matrix<Rational> > groupWithOuterAutos;
+  theGroupData.ComputeOuterAutoGenerators();
+  groupWithOuterAutos.generators.SetSize
+  (theGroupData.GetDim()+theGroupData.theOuterAutos.GetElement().theGenerators.size);
+  Vector<Rational> simpleRoot;
+  for (int i=0; i<theGroupData.GetDim(); i++)
+  { simpleRoot.MakeEi(theGroupData.GetDim(),i);
+    theGroupData.GetMatrixReflection(simpleRoot, groupWithOuterAutos.generators[i]);
+  }
+  if (false)
+  for (int i=0; i<theGroupData.theOuterAutos.GetElement().theGenerators.size; i++)
+  { theGroupData.theOuterAutos.GetElement().theGenerators[i].GetMatrix
+    (groupWithOuterAutos.generators[i+theGroupData.GetDim()],theGroupData.GetDim());
+  }
+//  groupWithOuterAutos.Com
+  theCommands << "<hr>";
+  for (int i=0; i<groupWithOuterAutos.generators.size; i++)
+    theCommands << "<br>Generator " << i+1 << ": "
+    << groupWithOuterAutos.generators[i].ToString();
+  //for (int i=0; i<groupWithOuterAutos.unionGeneratorsCC();)
+  groupWithOuterAutos.ComputeAllElements(false, -1);
+  theCommands << groupWithOuterAutos.ToString();
+  return output.AssignValue(theGroupData, theCommands);
+}
+
 bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements");
   if (!CalculatorConversions::innerLoadWeylGroup(theCommands, input, output))
     return false;
   WeylGroupData& theGroupData=output.GetValueNonConst<WeylGroupData>();
   if (theGroupData.GetDim()>7)
-  { theCommands << "<hr>Loaded Dynkin type " << theGroupData.theDynkinType.ToString() << " of rank " << theGroupData.GetDim() << " but I've been told "
+  { theCommands << "<hr>Loaded Dynkin type "
+    << theGroupData.theDynkinType.ToString() << " of rank "
+    << theGroupData.GetDim() << " but I've been told "
     << "not to compute when the rank is larger than 7. ";
     return false;
   }
   double timeStart1=theGlobalVariables.GetElapsedSeconds();
   theGroupData.theGroup.ComputeCCfromAllElements();
   //std::stringstream out;
-  theCommands << "<hr> Computed conjugacy classes of " << theGroupData.ToString() << " in " << theGlobalVariables.GetElapsedSeconds()-timeStart1
+  theCommands << "<hr> Computed conjugacy classes of "
+  << theGroupData.ToString() << " in " << theGlobalVariables.GetElapsedSeconds()-timeStart1
   << " second(s). ";
   return output.AssignValue(theGroupData, theCommands);
 }

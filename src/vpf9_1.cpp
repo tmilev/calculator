@@ -10,30 +10,33 @@
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
 Crasher::Crasher()
-{ this->flagCrashInitiated=false;
+{ this->flagCrashInitiateD=false;
+  this->flagFinishingCrash=false;
   this->CleanUpFunction=0;
 }
 
 void Crasher::FirstRun()
-{ if (!this->flagCrashInitiated && (theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer) )
-    this->theCrashReport << "\n<tr><td>";
-  if (this->flagCrashInitiated)
-  { std::cout << "Recursion within the crashing mechanism detected! Something is very wrong. Crash report so far: " << this->theCrashReport.str() << std::endl;
-    assert(false);
-  }
-  this->flagCrashInitiated=true;
+{ if (!this->flagCrashInitiateD && (theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer) )
+    this->theCrashReport << "\n<span style=\"color:red\"><b>Crash</b></span> "
+    << theGlobalVariables.GetElapsedSeconds() << " second(s) from the start.<hr>";
+  this->flagCrashInitiateD=true;
 }
 
 Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
 { (void) dummyCrasherSignalsActualCrash;
   this->FirstRun();
-  this->theCrashReport << "<hr>This is a program crash";
+  if (this->flagFinishingCrash)
+  { std::cout << "Recursion within the crashing mechanism detected. "
+    << "Something is very wrong. "
+    << "Crash report so far: " << this->theCrashReport.str() << std::endl;
+    assert(false);
+  }
+  this->flagFinishingCrash=true;
   if (!theGlobalVariables.flagNotAllocated)
-    this->theCrashReport << " " << theGlobalVariables.GetElapsedSeconds() << " second(s) from the start";
-  this->theCrashReport << ". ";
+    this->theCrashReport << " ";
   if (!theGlobalVariables.flagNotAllocated)
     if (theGlobalVariables.userInputStringIfAvailable!="")
-      this->theCrashReport << " The user input that caused the crash was: <hr> "
+      this->theCrashReport << "<hr>User input: <br> "
       << theGlobalVariables.userInputStringIfAvailable << "<hr>";
   this->theCrashReport << Crasher::GetStackTraceEtcErrorMessage();
   if (!theGlobalVariables.flagNotAllocated)
@@ -41,8 +44,6 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     { this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>"
       << theGlobalVariables.ToStringProgressReportHtml();
     }
-  if (theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer)
-    this->theCrashReport << "</td></tr></table></td></table>";
   if (stOutput.theOutputFunction!=0)
     std::cout << this->theCrashReport.str() << std::endl;
   stOutput << this->theCrashReport.str();
@@ -182,16 +183,18 @@ std::string GlobalVariables::ToStringProgressReportHtml()
         reportStream << "\n<div id=\"divProgressReport" << i << "\">"
         << this->ProgressReportStringS[threadIndex][i] << "\n</div>\n<hr>";
   }
-  reportStream << crash.GetStackTraceEtcErrorMessage();
-  reportStream << theGlobalVariables.GetElapsedSeconds()
-  << " second(s) passed. ";
-  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
-    reportStream << "<br>Hard limit: "
-    << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
-    << " second(s) [system crash if limit exceeded]."
-    << "<br> Soft limit: "
-    << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2
-    << " second(s) [computation error if limit exceeded].";
+  if (!crash.flagCrashInitiateD)
+  { reportStream << crash.GetStackTraceEtcErrorMessage();
+    reportStream << theGlobalVariables.GetElapsedSeconds()
+    << " second(s) passed. ";
+    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
+      reportStream << "<br>Hard limit: "
+      << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
+      << " second(s) [system crash if limit exceeded]."
+      << "<br> Soft limit: "
+      << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2
+      << " second(s) [computation error if limit exceeded].";
+  }
   return reportStream.str();
 }
 

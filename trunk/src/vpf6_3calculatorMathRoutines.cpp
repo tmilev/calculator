@@ -179,6 +179,25 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerJWTverity(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverity");
+  if (!input.IsOfType<std::string>())
+    return false;
+  const std::string& inputString=input.GetValue<std::string>();
+  List<std::string> theStrings;
+  MathRoutines::StringSplitExcludeDelimiter(inputString,'.', theStrings);
+  std::stringstream out;
+  if (theStrings.size!=3)
+  { out << "JWT does not appear to have 3 parts";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  out << "<br>Input: " << inputString;
+  std::string stringNormal;
+  if (Crypto::StringBase64ToString(theStrings[0], stringNormal, &theCommands.Comments))
+    out << "<br>un-base64:" << stringNormal;
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerSha1OfString(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha1OfString");
   if (!input.IsOfType<std::string>())

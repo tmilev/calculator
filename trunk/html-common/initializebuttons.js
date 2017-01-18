@@ -96,7 +96,7 @@ function initializeButtonsMatrixSupport(){
 }
 
 function initializeButtonsCalculator(){
-  for (i=0; i<answerIdsPureLatex.length; i++)
+  for (var i=0; i<answerIdsPureLatex.length; i++)
   { var currentButtonPanel=document.getElementById(preferredButtonContainers[i]);
     currentButtonPanel.innerHTML=
 "<table><tr>"+

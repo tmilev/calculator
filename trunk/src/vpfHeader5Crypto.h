@@ -14,6 +14,7 @@ public:
   (const List<unsigned char>& input, List<uint32_t>& output);
   static void ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output);
   static bool StringBase64ToBitStream(const std::string& input, List<unsigned char>& output, std::stringstream* comments=0);
+  static bool StringBase64ToString(const std::string& input, std::string& output, std::stringstream* comments=0);
 
   static bool Get6bitFromChar(char input, uint32_t& output);
   static unsigned char GetCharFrom6bit(uint32_t input);

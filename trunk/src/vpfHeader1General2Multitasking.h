@@ -33,6 +33,7 @@ class MutexRecursiveWrapper
 {
 private:
   bool flagUnsafeFlagForDebuggingIsLocked;
+  int lastLockerThread;
   bool flagDeallocated;
   bool flagInitialized;
   void operator=(const MutexRecursiveWrapper& other);

@@ -42,6 +42,8 @@ public:
   static bool innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBase64ToCharToBase64Test(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerJWTverity(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerSha1OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerX509certificateCrunch(Calculator& theCommands, const Expression& input, Expression& output);
 

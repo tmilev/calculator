@@ -145,6 +145,14 @@ bool Crypto::Get6bitFromChar(char input, uint32_t& output)
   return false;
 }
 
+bool Crypto::StringBase64ToString(const std::string& input, std::string& output, std::stringstream* comments)
+{ List<unsigned char> byteList;
+  if (!Crypto::StringBase64ToBitStream(input, byteList, comments))
+    return false;
+  Crypto::ConvertBitStreamToString(byteList, output);
+  return true;
+}
+
 bool Crypto::StringBase64ToBitStream(const std::string& input, List<unsigned char>& output, std::stringstream* comments)
 { MacroRegisterFunctionWithName("Crypto::StringBase64ToBitStream");
   output.Reserve((3*input.size())/4+1);

@@ -150,21 +150,10 @@ void TimerThreadData::Run()
   this->computationStartTime=-1;
   this->counter=0;
   this->microsecondsleep=100000;
-  ProgressReport theReport;
+//  ProgressReport theReport;
 //  std::cout << "Got thus far RunTimerVoidPtr - 2" << std::endl;
   for (; ;)
   { this->counter++;
-    std::stringstream reportStream;
-    reportStream << theGlobalVariables.GetElapsedSeconds()
-    << " second(s) passed. ";
-    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
-      reportStream << "<br>Hard limit: "
-      << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
-      << " second(s) [system crash if limit exceeded]."
-      << "<br> Soft limit: "
-      << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2
-      << " second(s) [computation error if limit exceeded].";
-    theReport.Report(reportStream.str());
     this->HandleComputationTimer();
     SleepFunction(microsecondsleep);
     this->HandleComputationCompleteStandard();
@@ -177,8 +166,9 @@ void TimerThreadData::Run()
   }
 }
 
-void RunTimerThread()
-{ ThreadData::RegisterCurrentThread("timer");
+void RunTimerThread(int threadIndex)
+{ theGlobalVariables.theThreadData[threadIndex].theId=
+  std::this_thread::get_id();
   MacroRegisterFunctionWithName("RunTimerThread");
 //  std::cout << "Got thus far RunTimerVoidPtr" << std::endl;
   TimerThreadData theThread;
@@ -186,8 +176,7 @@ void RunTimerThread()
 }
 
 void CreateTimerThread()
-{
-  ThreadData::CreateThread(RunTimerThread);
+{ ThreadData::CreateThread(RunTimerThread, "timer");
 }
 
 void CallSystemWrapperNoOutput(const std::string& theCommand)

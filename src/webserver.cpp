@@ -1226,7 +1226,7 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
   if (this->requestTypE!=this->requestUnknown)
     return;
   logIO << logger::red << this->parent->ToStringConnection()
-  << " Unknown connection. " << logger::endL;
+  << " Unknown request. " << logger::endL;
   logIO << logger::blue << this->parent->ToStringConnection()
   << " Message head (length " << this->messageHead.size()
   << "): " << this->messageHead << logger::endL;
@@ -1710,8 +1710,9 @@ int WebWorker::ProcessComputationIndicator()
     //theLog << logger::yellow << "Indicator string read: " << logger::blue << outputString << logger::endL;
     stOutput << outputString;
     otherWorker.PauseComputationReportReceived.ResumePausedProcessesIfAny();
-  } else
-    stOutput << "No report available.";
+  } //else
+  //Empty response
+  //will not be displayed, keeping the previous response displayed.
 //  stOutput << "<b>Not implemented: request for indicator for worker " << inputWebWorkerNumber
 //  << " out of " << this->parent->theWorkers.size << ".</b>";
   return 0;
@@ -2219,7 +2220,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
   /////////////////////////
-/*  out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
+  out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
   out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
   out << "<b>Please do not use the following button</b>.";
   out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div>";
@@ -2230,9 +2231,10 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "console.log('Name: ' + profile.getName());\n"
   << "console.log('Image URL: ' + profile.getImageUrl());\n"
   << "console.log('Email: ' + profile.getEmail());\n"
+  << "console.log('id_token: '+googleUser.getAuthResponse().id_token);\n"
   << "}\n"
   << "</script>";
-  */
+
 ///////////////////////////////////////
 //  out << "<br><br><small>No account yet? We are sorry but automatic registration has not been implemented yet.<br>"
 //  << " If you are our students please contact us by email and we'll register you.<br>Everyone else, please che.</small>";

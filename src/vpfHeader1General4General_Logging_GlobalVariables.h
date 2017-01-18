@@ -19,9 +19,10 @@ public:
   std::string name;
   std::string ToStringHtml()const;
   std::string ToStringConsole()const;
-  static int getCurrentThreadId(const std::string& inputName="");
-  static void RegisterCurrentThread(const std::string& inputName="");
-  static void CreateThread(void (*InputFunction)());
+  static int getCurrentThreadId();
+  static void RegisterFirstThread(const std::string& inputName="");
+  static ThreadData& RegisterNewThread(const std::string& inputName="");
+  static void CreateThread(void (*InputFunction)(int), const std::string& inputName);
   static std::string ToStringAllThreadsHtml();
   static std::string ToStringAllThreadsConsole();
   ThreadData();
@@ -85,6 +86,7 @@ public:
   bool flagUsingSSLinCurrentConnection;
   bool flagSSLisAvailable;
   bool flagCertificatesAreOfficiallySigned;
+  bool flagCrashInitiated;
   std::string hostWithPort;
   std::string hostNoPort;
 
@@ -104,7 +106,7 @@ public:
 //experimental flags, known to cause stability issues when set to true:
   bool flagAllowProcessMonitoring;
 //progress report flags:  
-  bool flagPreparingReport;
+//  bool flagPreparingReport;
   bool flagReportEverything;
   bool flagReportFileIO;
   bool flagReportLargeIntArithmetic;
@@ -114,7 +116,7 @@ public:
   MutexRecursiveWrapper infoIsInitialized;
   ListReferences<std::thread>theThreads;
   ListReferences<ThreadData> theThreadData;
-  ListReferences<List<stackInfo> > CustomStackTrace;
+  ListReferences<ListReferences<stackInfo> > CustomStackTrace;
   ListReferences<ListReferences<std::string> > ProgressReportStringS;
   List<std::string> programArguments;
 
@@ -161,7 +163,7 @@ public:
   MutexRecursiveWrapper MutexWebWorkerStaticFiasco;
   MutexRecursiveWrapper MutexRegisterFunctionStaticFiasco;
   MutexRecursiveWrapper MutexParallelComputingStaticFiasco;
-  MutexRecursiveWrapper MutexProgressReporting;
+  MutexRecursiveWrapper MutexProgressReportinG;
   MutexRecursiveWrapper MutexRegisterNewThread;
 
   MemorySaving<Matrix<Rational> > matIdMatrix;

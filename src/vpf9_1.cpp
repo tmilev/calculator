@@ -10,27 +10,23 @@
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
 Crasher::Crasher()
-{ this->flagFirstRun=true;
+{ this->flagCrashInitiated=false;
   this->CleanUpFunction=0;
 }
 
 void Crasher::FirstRun()
-{ if (this->flagFirstRun && (theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer) )
+{ if (!this->flagCrashInitiated && (theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer) )
     this->theCrashReport << "\n<tr><td>";
-  this->flagFirstRun=false;
+  if (this->flagCrashInitiated)
+  { std::cout << "Recursion within the crashing mechanism detected! Something is very wrong. Crash report so far: " << this->theCrashReport.str() << std::endl;
+    assert(false);
+  }
+  this->flagCrashInitiated=true;
 }
 
 Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
 { (void) dummyCrasherSignalsActualCrash;
   this->FirstRun();
-  static bool ThisCodeHasntRunYet=true;
-  if (!ThisCodeHasntRunYet)
-  //this would mean one of the crash-processing functions below has requested a crash, which is an
-  //unbounded recursion.
-  { std::cout << "Recursion within the crashing mechanism detected! Something is very wrong. Crash report so far: " << this->theCrashReport.str() << std::endl;
-    assert(false);
-  }
-  ThisCodeHasntRunYet=false;
   this->theCrashReport << "<hr>This is a program crash";
   if (!theGlobalVariables.flagNotAllocated)
     this->theCrashReport << " " << theGlobalVariables.GetElapsedSeconds() << " second(s) from the start";
@@ -79,8 +75,10 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
   out << "<table><tr>";
   for (int threadCounter=0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter++)
   { if (threadCounter>= theGlobalVariables.theThreadData.size)
-    { out << "<td><b>WARNING: the stack trace reports " << theGlobalVariables.CustomStackTrace.size
-      << " threads but the thread data array has record of only " << theGlobalVariables.theThreadData.size
+    { out << "<td><b>WARNING: the stack trace reports "
+      << theGlobalVariables.CustomStackTrace.size
+      << " threads but the thread data array has record of only "
+      << theGlobalVariables.theThreadData.size
       << " threads. " << "</b></td>";
       break;
     }
@@ -90,8 +88,14 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
   for (int threadCounter=0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter++)
   { if (threadCounter>= theGlobalVariables.theThreadData.size)
       break;
-    List<stackInfo>& currentInfo=theGlobalVariables.CustomStackTrace[threadCounter];
-    out << "<td> <table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
+    if (ThreadData::getCurrentThreadId()!=threadCounter)
+    { out << "<td>Stack trace available only for current thread.</td>";
+      //<-to avoid coordinating threads
+      continue;
+    }
+    ListReferences<stackInfo>& currentInfo=
+    theGlobalVariables.CustomStackTrace[threadCounter];
+    out << "<td><table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
     for (int i=currentInfo.size-1; i>=0; i--)
     { out << "<tr><td>" << CGI::GetHtmlLinkFromProjectFileName(currentInfo[i].fileName, "", currentInfo[i].line)
       << "</td><td>" << currentInfo[i].line << "</td>";
@@ -114,9 +118,14 @@ std::string Crasher::GetStackTraceShort()
       break;
     }
     out << "********************\r\nThread index " << threadCounter << ": \r\n";
-    List<stackInfo>& currentInfo=theGlobalVariables.CustomStackTrace[threadCounter];
+    if (ThreadData::getCurrentThreadId()!=threadCounter)
+    { out << "Stack trace available only for current thread.\n";
+      //<-to avoid coordinating threads
+      continue;
+    }
+    ListReferences<stackInfo>& currentInfo=theGlobalVariables.CustomStackTrace[threadCounter];
     for (int i=currentInfo.size-1; i>=0; i--)
-      out << currentInfo[i].functionName << "\r\n";
+      out << currentInfo[i].functionName << "\n";
   }
   return out.str();
 }
@@ -155,20 +164,34 @@ std::string GlobalVariables::ToStringFolderInfo()const
 
 std::string GlobalVariables::ToStringProgressReportHtml()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtml");
-  while (this->flagPreparingReport)
-  //<-Trying to make this work without mutexes.
-  //Reason: this has to be fast, and is expected to lock very rarely.
-  {}
-  this->flagPreparingReport=true;
   std::stringstream reportStream;
   for (int threadIndex=0; threadIndex<this->ProgressReportStringS.size; threadIndex++)
-  { reportStream << "<hr><b>" << this->theThreadData[threadIndex].ToStringHtml() << "</b><br>";
+  { reportStream << "<hr><b>" << this->theThreadData[threadIndex].ToStringHtml()
+    << "</b><br>";
+    int currentThreadID=ThreadData::getCurrentThreadId();
+    if (currentThreadID!=threadIndex)
+    { reportStream << "<b>Progress report available only "
+      << "for the current thread of index: "
+      << currentThreadID
+      << ".</b>";
+      //<-to avoid coordinating threads
+      continue;
+    }
     for (int i=0; i<this->ProgressReportStringS[threadIndex].size; i++)
       if (this->ProgressReportStringS[threadIndex][i]!="")
         reportStream << "\n<div id=\"divProgressReport" << i << "\">"
         << this->ProgressReportStringS[threadIndex][i] << "\n</div>\n<hr>";
   }
-  this->flagPreparingReport=false;
+  reportStream << crash.GetStackTraceEtcErrorMessage();
+  reportStream << theGlobalVariables.GetElapsedSeconds()
+  << " second(s) passed. ";
+  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
+    reportStream << "<br>Hard limit: "
+    << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
+    << " second(s) [system crash if limit exceeded]."
+    << "<br> Soft limit: "
+    << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2
+    << " second(s) [computation error if limit exceeded].";
   return reportStream.str();
 }
 
@@ -176,7 +199,12 @@ std::string GlobalVariables::ToStringProgressReportConsole()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportConsole");
   std::stringstream reportStream;
   for (int threadIndex=0; threadIndex<this->ProgressReportStringS.size; threadIndex++)
-  { reportStream << this->theThreadData[threadIndex].ToStringConsole();
+  { if (ThreadData::getCurrentThreadId()!=threadIndex)
+    { reportStream << "<b>Progress report available only for current thread.</b>";
+      //<-to avoid coordinating threads
+      continue;
+    }
+    reportStream << this->theThreadData[threadIndex].ToStringConsole();
     for (int i=0; i<this->ProgressReportStringS[threadIndex].size; i++)
       reportStream << this->ProgressReportStringS[threadIndex][i];
   }
@@ -186,8 +214,7 @@ std::string GlobalVariables::ToStringProgressReportConsole()
 
 void GlobalVariables::InitThreadsExecutableStart()
 { //<-Stack trace forbidden this is running before anything has been initialized!
-  ThreadData::RegisterCurrentThread("main");
-  theGlobalVariables.theThreads.SetSize(1); //<- the main thread has an empty thread object.
+  ThreadData::RegisterFirstThread("main");
 }
 
 void GlobalVariables::initDefaultFolderAndFileNames
@@ -301,7 +328,8 @@ std::string GlobalVariables::GetWebInput(const std::string& inputName)
 }
 
 void GlobalVariables::MakeReport()
-{ if (this->IndicatorStringOutputFunction==0)
+{ MacroRegisterFunctionWithName("GlobalVariables::MakeReport");
+  if (this->IndicatorStringOutputFunction==0)
     return;
   if (this->flagRunningCommandLine || this->flagRunningConsoleTest)
     this->MakeReport(this->ToStringProgressReportConsole());

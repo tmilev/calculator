@@ -295,6 +295,11 @@ void Calculator::initPredefinedInnerFunctions()
    will be documented at a later time (if at all). Please do not use this function. ",
    "x509CertificateCrunch(\"certificates\");\
    ", false, true, "CalculatorFunctionsGeneral::innerX509certificateCrunch");
+  this->AddOperationInnerHandler
+  ("JWTverify", CalculatorFunctionsGeneral::innerJWTverity, "",
+   "Tries to verify a Json Web Token.",
+   "JWTverify(\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImEwZjMxYjMzMmYyODE2YTllMTlmYzZkMDM1OWMzNmE1N2RjODJjMTIifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiaWF0IjoxNDg0MjAxMzk1LCJleHAiOjE0ODQyMDQ5OTUsImF0X2hhc2giOiJ6SmdyckhYM0xJWnlzVGUwcFZ0Rm1BIiwiYXVkIjoiNTM4NjA1MzA2NTk0LW40Mzc1NHZiMG00OGlyODRnOHZwNXVqMnU3a2xlcm4zLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTAzODQ1NzIyNTcxOTcxMzE0NTUyIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF6cCI6IjUzODYwNTMwNjU5NC1uNDM3NTR2YjBtNDhpcjg0Zzh2cDV1ajJ1N2tsZXJuMy5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImVtYWlsIjoidG9kb3IubWlsZXZAZ21haWwuY29tIiwibmFtZSI6IlRvZG9yIE1pbGV2IiwicGljdHVyZSI6Imh0dHBzOi8vbGg1Lmdvb2dsZXVzZXJjb250ZW50LmNvbS8tdmN2YWVzbE9RSm8vQUFBQUFBQUFBQUkvQUFBQUFBQUFBRk0veDJCU0pVVjUwa28vczk2LWMvcGhvdG8uanBnIiwiZ2l2ZW5fbmFtZSI6IlRvZG9yIiwiZmFtaWx5X25hbWUiOiJNaWxldiIsImxvY2FsZSI6ImVuIn0.k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9-FL9p-z_u_6rC_RoUta-S0nLZ_boGqCsonyQbussPHTLRKqRQanJ6MWZinKWjRPZvkx6ZnplqSAY9_uHwqZTwzeeXnOThxA1x-UvwLzGZcJDy8mF9yWj5YIQ7hvcWFwmQrEUUa9s7pSQzZ_hfFNELFFLxjT9TPRP4g3WBp6758ninMGHP_iBfWbPw7ZgNc6Wl9n8WGCzGlSpmM--wZFigPHPFA99cwmlhPK9sWgXMznzNuigQZRsiw\");\
+   ", true, false, "CalculatorFunctionsGeneral::innerJWTverity", "JWTverify");
 
   this->AddOperationInnerHandler
   ("Sha1", CalculatorFunctionsGeneral::innerSha1OfString, "",
@@ -663,21 +668,33 @@ D-B;\
    ;
 
   this->AddOperationInnerHandler
-  ("WeylGroupConjugacyClassesFromAllElements", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements, "",
+  ("WeylGroupConjugacyClassesFromAllElements",
+    CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements, "",
    "For small ranks, computes the conjugacy classes of a Weyl \
    group by enumerating all elements of the group. ",
-   "WeylGroupConjugacyClassesFromAllElements{}(A_2);", true, true,
-   "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements");
+   "WeylGroupConjugacyClassesFromAllElements{}(A_2);", true, false,
+   "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements",
+   "WeylGroupConjugacyClassesFromAllElements");
    ;
   this->AddOperationInnerHandler
-  ("WeylGroupConjugacyClassesRepresentatives", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives, "",
-   "Computes a representative in each conjugacy classes of a Weyl group by comparing conjugacy classes invariants and by enumerating conjugacy class orbits. ",
-   "WeylGroupConjugacyClassesRepresentatives{}(A_2);", true, true)
+  ("WeylGroupConjugacyClassesRepresentatives",
+   CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives, "",
+   "Computes a representative in each conjugacy classes of a \
+    Weyl group by comparing conjugacy classes invariants and by \
+    enumerating conjugacy class orbits. ",
+   "WeylGroupConjugacyClassesRepresentatives{}(A_2);", true, true,
+   "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives",
+   "WeylGroupConjugacyClassesRepresentatives"
+   )
    ;
   this->AddOperationInnerHandler
-  ("WeylGroupConjugacyClasses", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS, "",
-   "Loads the conjugacy classes of a Weyl group (hard-coded), or computes them if rank<=6. ",
-   "WeylGroupConjugacyClasses{}(f_4);", true, true)
+  ("WeylGroupConjugacyClasses",
+    CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS, "",
+   "Loads the conjugacy classes of a Weyl group (hard-coded), \
+    or computes them if rank<=6. ",
+   "WeylGroupConjugacyClasses{}(f_4);", true, false,
+   "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS",
+   "WeylGroupConjugacyClasses")
    ;
   this->AddOperationInnerHandler
   ("WeylGroupCharTable", CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable, "",

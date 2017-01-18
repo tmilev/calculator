@@ -673,8 +673,10 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(Calculator& th
   WeylGroupData& theGroup=output.GetValueNonConst<WeylGroupData>();
 //  stOutput << "got ere4!";
   if (theGroup.GetDim()>8)
-  { theCommands << "Conjugacy classes computation disabled for rank >8. Modify source code "
-    << "file " << __FILE__ << " line " << __LINE__ << " and rebuild the calculator to change that.";
+  { theCommands << "Conjugacy classes computation disabled for rank >8. "
+    << "Modify source code "
+    << "file " << __FILE__ << " line " << __LINE__
+    << " and rebuild the calculator to change that.";
     return false;
   }
   std::stringstream out;

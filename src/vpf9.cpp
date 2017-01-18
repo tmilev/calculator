@@ -93,7 +93,6 @@ void GlobalVariables::ChDir(const std::string& systemCommand)
 
 GlobalVariables::GlobalVariables()
 { this->flagNotAllocated=false;
-  this->flagPreparingReport=false;
   this->flagAllowProcessMonitoring=false;
   this->flagCertificatesAreOfficiallySigned=false;
   this->IndicatorStringOutputFunction=0;
@@ -128,6 +127,7 @@ GlobalVariables::GlobalVariables()
   this->flagSSLisAvailable=false;
   this->MaxTimeNoPingBeforeChildIsPresumedDead= 10;
   this->flagAceIsAvailable=false;
+  this->MutexProgressReportinG.mutexName="ProgressReport";
 //  this->flagIgnoreSecurityToWorkaroundSafarisBugs=false;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
@@ -140,34 +140,40 @@ HashedList<FileInformation>& GlobalVariables::theSourceCodeFiles()
 }
 
 void ProgressReport::Report(const std::string& theReport)
-{ if (theGlobalVariables.ProgressReportStringS[this->threadIndex].size>this->currentLevel)
+{ if (crash.flagCrashInitiated)
+  { this->threadIndex=-1;
+    return;
+  }
+  if (this->threadIndex==-1)
+    return;
+  if (theGlobalVariables.ProgressReportStringS[this->threadIndex].size>this->currentLevel)
   { theGlobalVariables.ProgressReportStringS[this->threadIndex][this->currentLevel]=theReport;
     theGlobalVariables.MakeReport();
   }
 }
 
 void ProgressReport::init()
-{ this->threadIndex=ThreadData::getCurrentThreadId();
+{ if (crash.flagCrashInitiated)
+  { this->threadIndex=-1;
+    return;
+  }
+  this->threadIndex=ThreadData::getCurrentThreadId();
+  if (this->threadIndex==-1)
+    return;
   this->currentLevel=theGlobalVariables.ProgressReportStringS[this->threadIndex].size;
-  while (theGlobalVariables.flagPreparingReport)
-  //<-Trying to make this work without mutexes.
-  //Reason: this has to be fast, and is expected to lock
-  //very rarely and for very short periods.
-  {}
-  theGlobalVariables.flagPreparingReport=true;
   theGlobalVariables.ProgressReportStringS[this->threadIndex].AddOnTop((std::string)"");
-  theGlobalVariables.flagPreparingReport=false;
 }
 
 ProgressReport::~ProgressReport()
-{ while (theGlobalVariables.flagPreparingReport)
-  //<-Trying to make this work without mutexes.
-  //Reason: this has to be fast, and is expected to lock
-  //very rarely and for very short periods.
-  {}
-  theGlobalVariables.flagPreparingReport=true;
+{ if (crash.flagCrashInitiated)
+  { this->threadIndex=-1;
+    return;
+  }
+  if (this->threadIndex==-1)
+    return;
+  if (crash.flagCrashInitiated)
+    return;
   theGlobalVariables.ProgressReportStringS[this->threadIndex].size--;
-  theGlobalVariables.flagPreparingReport=false;
 }
 
 ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription)
@@ -176,10 +182,11 @@ ProjectInformationInstance::ProjectInformationInstance(const char* fileName, con
 
 RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName)
 { this->threadIndex= ThreadData::getCurrentThreadId();
-
-  List<stackInfo>& theStack=theGlobalVariables.CustomStackTrace[this->threadIndex];
+  if (this->threadIndex==-1)
+    return;
+  ListReferences<stackInfo>& theStack=theGlobalVariables.CustomStackTrace[this->threadIndex];
   theStack.SetSize(theStack.size+1);
-  stackInfo& stackTop=*theStack.LastObject();
+  stackInfo& stackTop=theStack.LastObject();
   stackTop.fileName=fileName;
   stackTop.line=line;
   stackTop.functionName=functionName;
@@ -188,7 +195,9 @@ RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const
 }
 
 RegisterFunctionCall::~RegisterFunctionCall()
-{ theGlobalVariables.CustomStackTrace[this->threadIndex].size--;
+{ if (this->threadIndex==-1)
+    return;
+  theGlobalVariables.CustomStackTrace[this->threadIndex].size--;
 }
 
 int DrawingVariables::GetColorFromChamberIndex(int index)
@@ -546,7 +555,7 @@ FileOperations::FolderVirtualLinksNonSensitive()
   static bool firstRun=false;
   if (!firstRun)
   { firstRun=true;
-    MutexRecursiveWrapper theMutex;
+    static MutexRecursiveWrapper theMutex;
     MutexLockGuard theGuard(theMutex);
     result.SetKeyValue("output/", "output/");
     result.SetKeyValue("problemtemplates/", "../problemtemplates/");
@@ -563,7 +572,7 @@ FileOperations::FolderVirtualLinksSensitive()
   static bool firstRun=false;
   if (!firstRun)
   { firstRun=true;
-    MutexRecursiveWrapper theMutex;
+    static MutexRecursiveWrapper theMutex;
     MutexLockGuard theGuard(theMutex);
     result.SetKeyValue("LogFiles/", "LogFiles/");
     result.SetKeyValue("crashes/", "LogFiles/crashes/");
@@ -577,7 +586,7 @@ FileOperations::FolderVirtualLinksULTRASensitive()
   static bool firstRun=false;
   if (!firstRun)
   { firstRun=true;
-    MutexRecursiveWrapper theMutex;
+    static MutexRecursiveWrapper theMutex;
     MutexLockGuard theGuard(theMutex);
     result.SetKeyValue("certificates/", "certificates/");
   }

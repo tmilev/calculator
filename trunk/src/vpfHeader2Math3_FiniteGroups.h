@@ -272,7 +272,8 @@ public:
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
   bool AreConjugate_OLD_Deprecated_Version_By_Todor(const elementSomeGroup& left, const elementSomeGroup& right);
 
-  bool ComputeAllElements(bool andWords, int MaxElements=1000000);
+  bool ComputeAllElements
+  (bool andWords, int MaxElements=1000000);
   //MaxElements gives an upper bound to the number of elements this function will try to find.
   //Set MaxElements=-1 for "unlimited" upper bound.
   bool ComputeAllElementsLargeGroup(bool andWords, int MaxElements=1000000);
@@ -281,7 +282,8 @@ public:
 
   // Historical note: this was from Thomas' second finite group class, and is
   // as of 2015-11 the only way to generate the words and conjugacy information
-  void ComputeCCfromAllElements();
+  void ComputeCCfromAllElements
+  ();
   void ComputeCCfromCCindicesInAllElements(const List<List<int> >& ccIndices);
 
   void ComputeCCSizeOrCCFromRepresentative
@@ -296,7 +298,7 @@ public:
   void ComputeGeneratorsConjugacyClasses
   ()
   ;
-  void ComputeCCSizesAndRepresentatives();
+  void ComputeCCSizesAndRepresentatives(bool useComputeCCSizesRepresentativesWords=true);
   void ComputeCCSizesAndRepresentativesWithOrbitIterator();
   void ComputeCCSizesRepresentativesWords();
   bool CheckInitializationFDrepComputation()const;

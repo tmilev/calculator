@@ -52,12 +52,13 @@ void WeylGroupData::ComputeOrLoadCharacterTable(std::stringstream* reportStream)
 }
 
 void WeylGroupData::ComputeOrLoadConjugacyClasses(std::stringstream* reportStream)
-{ MacroRegisterFunctionWithName("WeylGroup::ComputeOrLoadCharacterTable");
+{ MacroRegisterFunctionWithName("WeylGroupData::ComputeOrLoadConjugacyClasses");
   if (this->theGroup.flagCCRepresentativesComputed)
     return;
   if (this->LoadConjugacyClasses())
   { if (reportStream!=0)
-      *reportStream << "The conjugacy classes of " << this->theDynkinType.ToString()
+      *reportStream << "The conjugacy classes of "
+      << this->theDynkinType.ToString()
       << " are precomputed (hard-coded in c++), loading directly. ";
     this->theGroup.flagCCRepresentativesComputed=true;
     return;

@@ -203,7 +203,7 @@ std::string GlobalVariables::ToStringProgressReportConsole()
   std::stringstream reportStream;
   for (int threadIndex=0; threadIndex<this->ProgressReportStringS.size; threadIndex++)
   { if (ThreadData::getCurrentThreadId()!=threadIndex)
-    { reportStream << "<b>Progress report available only for current thread.</b>";
+    { reportStream << "Progress report available only for current thread.<br>";
       //<-to avoid coordinating threads
       continue;
     }

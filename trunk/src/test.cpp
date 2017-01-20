@@ -2555,6 +2555,7 @@ void TestPermutationWords()
   PG.MakeSymmetricGroupGeneratorsjjPlus1(5);
   FiniteGroup<PermutationR2>* G = PG.theGroup;
   G->ComputeAllElements(true, -1);
+  G->ComputeCCSizesRepresentativesWords();
   for(int i=0; i<G->theElements.size; i++)
   { List<int> word;
     G->GetWord(G->theElements[i],word);

@@ -213,16 +213,21 @@ void Calculator::initPredefinedInnerFunctions()
    ;
   this->AddOperationInnerHandler
   ("crash", CalculatorFunctionsGeneral::innerCrash, "",
-   "Crashes the calculator: tests the crashing mechanism (are crash logs properly created, etc.).",
-   "crash(0)");
+   "Crashes the calculator: tests the \
+    crashing mechanism (are crash logs properly created, etc.).",
+   "crash(0)",true, false, "CalculatorFunctionsGeneral::innerCrash", "crash");
   this->AddOperationInnerHandler
   ("crashListOutOfBounds", CalculatorFunctionsGeneral::innerCrashByListOutOfBounds, "",
    "Crashes the calculator by attempting to use data out-of-bounds in a List data structure.",
-   "crashListOutOfBounds(0)");
+   "crashListOutOfBounds(0)", true, false,
+   "CalculatorFunctionsGeneral::innerCrashByListOutOfBounds",
+   "crashListOutOfBounds");
   this->AddOperationInnerHandler
   ("crashVectorOutOfBounds", CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds, "",
-   "Crashes the calculator by attempting to use data out-of-bounds in a std::vector.",
-   "crashVectorOutOfBounds(0)");
+   "Crashes the calculator by attempting to use data \
+    out-of-bounds in a std::vector.",
+   "crashVectorOutOfBounds(0)", "CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds",
+   "crashVectorOutOfBounds");
   this->AddOperationInnerHandler
   ("DrawExpressionTree", CalculatorFunctionsGeneral::innerDrawExpressionGraph, "",
    "Draws the internal tree structure of an expression. Does not unfold built-in types.",
@@ -655,16 +660,17 @@ D-B;\
     \nWeylGroupClassicalSignMultiplicities{}(d_6);\
     \nWeylGroupClassicalSignMultiplicities{}(a_2);\
     \nWeylGroupClassicalSignMultiplicities{}(a_3);\
-    \nWeylGroupClassicalSignMultiplicities{}(a_4);\
-", true, false,
+    \nWeylGroupClassicalSignMultiplicities{}(a_4);", true, false,
    "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers", "WeylGroupClassicalSignMultiplicities")
    ;
   this->AddOperationInnerHandler
-  ("WeylGroupTauSignatures", CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems, "",
+  ("WeylGroupTauSignatures",
+    CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems, "",
    "Prints the tau signatures of a Weyl group. See a common article by \
    T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
-   "WeylGroupTauSignatures{}(b_3);", true, false,
-   "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems", "WeylGroupTauSignatures")
+   "WeylGroupTauSignatures{}(b_3);", true, true,
+   "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems",
+   "WeylGroupTauSignatures")
    ;
 
   this->AddOperationInnerHandler
@@ -672,7 +678,7 @@ D-B;\
     CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements, "",
    "For small ranks, computes the conjugacy classes of a Weyl \
    group by enumerating all elements of the group. ",
-   "WeylGroupConjugacyClassesFromAllElements{}(A_2);", true, false,
+   "WeylGroupConjugacyClassesFromAllElements{}(A_2);", true, true,
    "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements",
    "WeylGroupConjugacyClassesFromAllElements");
    ;
@@ -680,7 +686,7 @@ D-B;\
   ("WeylGroupOuterConjugacyClassesFromAllElements",
     CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements, "",
    "Computes conjugacy classes, identifying classes that are conjugate using outer automorphisms.",
-   "WeylGroupOuterConjugacyClassesFromAllElements{}(D_4);", true, false,
+   "WeylGroupOuterConjugacyClassesFromAllElements{}(D_4);", true, true,
    "CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements",
    "WeylGroupOuterConjugacyClassesFromAllElements");
    ;
@@ -707,7 +713,9 @@ D-B;\
   this->AddOperationInnerHandler
   ("WeylGroupCharTable", CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable, "",
    "Loads the character table of a Weyl group. The character tables are hard-coded.",
-   "WeylGroupCharTable{}(b_3);", true, false)
+   "WeylGroupCharTable{}(b_3);", true, false,
+   "CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable",
+   "WeylGroupCharTable")
    ;
   this->AddOperationInnerHandler
   ("WeylGroupIrrepsAndCharTableComputeFromScratch", CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromScratch, "",

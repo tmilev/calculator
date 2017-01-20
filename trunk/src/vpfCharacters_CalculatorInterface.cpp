@@ -702,29 +702,60 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllEle
   }
   if (!hasOuterAutosAndIsSimple)
     return false;
-  FiniteGroup<Matrix<Rational> > groupWithOuterAutos;
+//  FiniteGroup<Matrix<Rational> > groupWithOuterAutos;
+  FiniteGroup<Matrix<Rational> > groupNoOuterAutos;
   theGroupData.ComputeOuterAutoGenerators();
-  groupWithOuterAutos.generators.SetSize
-  (theGroupData.GetDim()+theGroupData.theOuterAutos.GetElement().theGenerators.size);
+//  groupWithOuterAutos.generators.SetSize
+//  (theGroupData.GetDim());
+  groupNoOuterAutos.generators.SetSize(theGroupData.GetDim());
   Vector<Rational> simpleRoot;
   for (int i=0; i<theGroupData.GetDim(); i++)
   { simpleRoot.MakeEi(theGroupData.GetDim(),i);
-    theGroupData.GetMatrixReflection(simpleRoot, groupWithOuterAutos.generators[i]);
+    theGroupData.GetMatrixReflection(simpleRoot, groupNoOuterAutos.generators[i]);
   }
-  if (false)
+  //if (false)
+  Matrix<Rational> currentAuto;
+  List<Matrix<Rational> > outerAutos;
   for (int i=0; i<theGroupData.theOuterAutos.GetElement().theGenerators.size; i++)
   { theGroupData.theOuterAutos.GetElement().theGenerators[i].GetMatrix
-    (groupWithOuterAutos.generators[i+theGroupData.GetDim()],theGroupData.GetDim());
+    (currentAuto,theGroupData.GetDim());
+    //groupWithOuterAutos.generators.AddOnTop(currentAuto);
+    outerAutos.AddOnTop(currentAuto);
   }
 //  groupWithOuterAutos.Com
-  theCommands << "<hr>";
-  for (int i=0; i<groupWithOuterAutos.generators.size; i++)
-    theCommands << "<br>Generator " << i+1 << ": "
-    << groupWithOuterAutos.generators[i].ToString();
-  //for (int i=0; i<groupWithOuterAutos.unionGeneratorsCC();)
-  groupWithOuterAutos.ComputeAllElements(false, -1);
-  theCommands << groupWithOuterAutos.ToString();
-  return output.AssignValue(theGroupData, theCommands);
+  std::stringstream out;
+  out << "Weyl group generators. <br>";
+  for (int i=0; i<groupNoOuterAutos.generators.size; i++)
+    out << "Generator " << i+1 << ": "
+    << groupNoOuterAutos.generators[i].ToString() << "<br>";
+//  out << "Outer automorphism realizations:<br>";
+//  for (int i=0; i<outerAutossize; i++)
+//    out << "Generator " << i << ": "
+//    << outerAutossize[i].ToString() << "<br>";
+//  groupWithOuterAutos.ComputeAllElements(false, -1);
+  groupNoOuterAutos.ComputeAllElements(false, -1);
+  groupNoOuterAutos.ComputeCCfromAllElements();
+  out << "Weyl group matrix realization: " << groupNoOuterAutos.ToString();
+  Matrix<Rational> conjugatedMat, invertedOuterAuto;
+  for (int j=0; j<outerAutos.size; j++)
+  { out << "Outer automorphism " << j << ": "
+    << outerAutos[j].ToString() << "<br>";
+    invertedOuterAuto=outerAutos[j];
+    invertedOuterAuto.Invert();
+    for (int i=0; i<groupNoOuterAutos.conjugacyClasseS.size; i++)
+    { conjugatedMat=outerAutos[j];
+      conjugatedMat*=groupNoOuterAutos.conjugacyClasseS[i].representative;
+      conjugatedMat*=invertedOuterAuto;
+      int found=-1;
+      for (int k=0; k<groupNoOuterAutos.conjugacyClasseS.size; k++)
+        if (groupNoOuterAutos.conjugacyClasseS[k].theElements.Contains(conjugatedMat))
+        { found=k;
+          break;
+        }
+      out << "Maps conj. class " << i+1 << " -> " << found+1 << "<br>";
+    }
+  }
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements(Calculator& theCommands, const Expression& input, Expression& output)
@@ -740,7 +771,8 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
     return false;
   }
   double timeStart1=theGlobalVariables.GetElapsedSeconds();
-  theGroupData.theGroup.ComputeCCfromAllElements();
+  theGroupData.theGroup.ComputeCCfromAllElements
+  ();
   //std::stringstream out;
   theCommands << "<hr> Computed conjugacy classes of "
   << theGroupData.ToString() << " in " << theGlobalVariables.GetElapsedSeconds()-timeStart1
@@ -1151,8 +1183,30 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNum
   if (type!='A' && type!='B' && type!='C' && type!='D')
     return theCommands << "You requested computation for type " << type
     << " but our formulas work only for classical types: A, B-C and D. ";
+  if (type=='B' || type=='C')
+  { List<Pair<Partition, Partition> > partitionPairs;
+    List<Partition> partitionsLeft, partitionsRight;
+    Pair<Partition, Partition> currentPartition;
+    for (int i=0; i<=rank; i++)
+    { Partition::GetPartitions(partitionsLeft, i);
+      Partition::GetPartitions(partitionsRight, rank-i);
+      for (int j=0; j<partitionsLeft.size; j++)
+        for (int k=0; k<partitionsRight.size; k++)
+        { currentPartition.Object1=partitionsLeft[j];
+          currentPartition.Object2=partitionsRight[k];
+          partitionPairs.AddOnTop(currentPartition);
+        }
+    }
+    out << partitionPairs.size << " partition pairs. <br>";
+    for (int i=0; i<partitionPairs.size; i++)
+    { out << partitionPairs[i].Object1.ToString()
+      << "," << partitionPairs[i].Object2.ToString() << "<br>";
+    }
+
+  }
   if (type=='A')
-  { int permutationSize=rank+1;
+  { return theCommands << "Not implemented yet.";
+    int permutationSize=rank+1;
     List<Partition> thePartitions, partitionsTransposed;
     Partition::GetPartitions(thePartitions, permutationSize);
     partitionsTransposed.SetSize(thePartitions.size);
@@ -1178,7 +1232,8 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
     return false;
   }
   std::stringstream out;
-  List<SubgroupDataRootReflections> parabolicSubgroupS, extendedParabolicSubgroups, allRootSubgroups, finalSubGroups;
+  List<SubgroupDataRootReflections> parabolicSubgroupS, extendedParabolicSubgroups,
+  allRootSubgroups, finalSubGroups;
   if (!theWeyl.LoadSignSignatures(finalSubGroups))
   { theWeyl.GetSignSignatureParabolics(parabolicSubgroupS);
     theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups);

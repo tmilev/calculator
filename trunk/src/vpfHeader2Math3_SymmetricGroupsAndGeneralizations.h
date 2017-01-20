@@ -132,6 +132,9 @@ class Partition
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
   std::string ToString() const;
+  std::string ToStringForArticles
+  (const std::string& leftParenthesis="[",
+   const std::string& rightParenthesis="]") const;
   friend std::ostream& operator<<(std::ostream& out, const Partition& data)
   { return data.IntoStream(out);
   }

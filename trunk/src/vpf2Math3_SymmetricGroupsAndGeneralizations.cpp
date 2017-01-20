@@ -253,13 +253,27 @@ bool Partition::operator>(const Partition& right) const
   return false;
 }
 
-
 std::string Partition::ToString() const
 { std::stringstream out;
   this->IntoStream(out);
   return out.str();
 }
 
+std::string Partition::ToStringForArticles
+(const std::string& leftParenthesis,
+ const std::string& rightParenthesis) const
+{ if (this->n==0)
+    return "\\emptyset";
+  std::stringstream out;
+  out << leftParenthesis;
+  for (int i=0; i<this->p.size; i++)
+  { out << this->p[i];
+    if (i!=this->n-1)
+      out << ", ";
+  }
+  out << rightParenthesis;
+  return out.str();
+}
 
 // Tableau implementation
 

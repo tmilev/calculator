@@ -1440,7 +1440,7 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "AllVectorPartitions((10,11), ((1,2), (2,3), (4,5), (2,1), (3,2), (5,4))) ", true, false,
    "CalculatorFunctionsGeneral::innerAllVectorPartitions", "AllVectorPartitions");
   this->AddOperationInnerHandler
-  ("AllSelectionsFixedRank", CalculatorFunctionsGeneral::innerAllSelectionsFixedRank, "",
+  ("AllSelectionsFixedRank", CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank, "",
    "Prints all selections of fixed size (given by first argument) from a \
     collection of objects with multiplicities (given as a non-negative integer \
     vector by the second argument). ",
@@ -1454,7 +1454,7 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerAllSelectionsFixedRank",
    "AllSelectionsFixedRank");
   this->AddOperationInnerHandler
-  ("KostkaNumber", CalculatorFunctionsGeneral::innerKostkaNumber, "",
+  ("KostkaNumber", CalculatorFunctionsWeylGroup::innerKostkaNumber, "",
    "Computes a Kostka number. First argument= partition given as a tuple\
     a_1, ..., a_n with a_1>a_2> ...> a_n. Second argument = tableaux content = arbitrary tuple of \
     positive integers. \

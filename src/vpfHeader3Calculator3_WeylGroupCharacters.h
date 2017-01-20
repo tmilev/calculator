@@ -29,6 +29,8 @@ public:
   static bool innerWeylGroupConjugacyClassesRepresentatives(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerSpechtModule(Calculator& theCommands, const Expression& input, Expression& out);
+  static bool innerKostkaNumber(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAllSelectionsFixedRank(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerRepresentElementHyperOctahedral(Calculator& theCommands, const Expression& input, Expression& output);
 

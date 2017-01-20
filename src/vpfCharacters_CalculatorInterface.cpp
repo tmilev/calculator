@@ -1166,6 +1166,387 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
   return out.str();
 }
 
+class KostkaNumber
+{
+public:
+  List<int> partition;
+  List<int> tuple;
+  int sumTuple;
+  int sumPartition;
+  int MaxNumCachedKostkaNumbers;
+  LargeInt value;
+//  bool IncrementReturnFalseIfPastLast();
+  bool initTableaux(std::stringstream* comments=0);
+  bool operator==(const KostkaNumber& other)const;
+  static Rational ComputeTypeBParabolicSignMultiplicity
+  (const Partition& parabolicPartition, const Partition& leftPartition,
+   const Partition& rightPartition, std::stringstream* comments);
+  static std::string GetTypeBParabolicSignMultiplicityTable
+  (int rank
+  );
+  static unsigned int HashFunction(const KostkaNumber& input);
+  std::string ToString();
+  KostkaNumber();
+  bool Compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments=0);
+};
+
+class SelectionFixedRankDifferentMaxMultiplicities
+{
+public:
+  List<int> Multiplicities;
+  List<int> MaxMultiplicities;
+  int rank;
+  bool flagFirstComputed;
+  bool init();
+  bool firstIncrement();
+  bool IncrementReturnFalseIfPastLast();
+  SelectionFixedRankDifferentMaxMultiplicities();
+  std::string ToString();
+  std::string ToStringFull();
+};
+
+unsigned int KostkaNumber::HashFunction(const KostkaNumber& input)
+{ return  MathRoutines::HashListInts(input.partition)+
+          MathRoutines::HashListInts(input.tuple);
+}
+
+bool KostkaNumber::operator ==(const KostkaNumber& other)const
+{ return this->partition==other.partition && this->tuple==other.tuple;
+}
+
+KostkaNumber::KostkaNumber()
+{ this->MaxNumCachedKostkaNumbers=10000;
+}
+
+std::string KostkaNumber::ToString()
+{ std::stringstream out;
+  out << "KostkaNumber" << "((";
+  for (int i=0; i<this->partition.size; i++)
+  { out << this->partition[i];
+    if (i!=this->partition.size-1)
+      out << ", ";
+  }
+  out << "), (";
+  for (int i=0; i<this->tuple.size; i++)
+  { out << this->tuple[i];
+    if (i!=this->tuple.size-1)
+      out << ", ";
+  }
+  out << "))";
+  return out.str();
+}
+
+bool KostkaNumber::initTableaux(std::stringstream* comments)
+{ for (int i=0; i<this->partition.size-1; i++)
+    if (this->partition[i]<this->partition[i+1])
+    { if (comments!=0)
+        *comments << "Partition is supposed to be a non-decreasing sequence of integers, instead it is: "
+        << this->partition;
+      return false;
+    }
+  this->sumTuple=0;
+  this->sumPartition=0;
+  for (int i=0; i<this->tuple.size; i++)
+  { this->sumTuple+=this->tuple[i];
+    if (this->sumTuple>10000000 || this->tuple[i]>10000000 || this->tuple[i]<0)
+    { if (comments!=0)
+        *comments << "Failed to compute Kostka number: the tuple "
+        << this->tuple << " is too large or negative. ";
+      return false;
+    }
+  }
+  for (int i=0; i<this->partition.size; i++)
+  { this->sumPartition+=this->partition[i];
+    if (this->sumPartition>10000000 || this->partition[i]>10000000 || this->partition[i]<0)
+    { if (comments!=0)
+        *comments << "Failed to compute Kostka number: the partition: "
+        << this->partition << " is too large or negative. ";
+      return false;
+    }
+  }
+  return true;
+}
+
+bool KostkaNumber::Compute(HashedList<KostkaNumber>* KNcache, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("KostkaNumber::Compute");
+  this->value=-1;
+  if (!this->initTableaux(comments))
+    return false;
+  if (this->sumTuple!=this->sumPartition)
+  { this->value=0;
+    return true;
+  }
+  if (this->sumTuple==0)
+  { if (this->sumPartition==0)
+      this->value=1;
+    else
+      this->value=0;
+    return true;
+  } //we are now guaranteed each of the tuple and the partition has at least one entry.
+//  stOutput << "<br>Computing: " << this->ToString();
+
+  SelectionFixedRankDifferentMaxMultiplicities theSel;
+  theSel.init();
+  theSel.MaxMultiplicities.SetSize(this->partition.size);
+  for (int i=0; i<this->partition.size; i++)
+    if (i!=this->partition.size-1)
+      theSel.MaxMultiplicities[i]=this->partition[i]-this->partition[i+1];
+    else
+      theSel.MaxMultiplicities[i]=this->partition[i];
+  theSel.rank=*this->tuple.LastObject();
+  this->value=0;
+//  stOutput << "<br>Selection before start: " << theSel.ToStringFull();
+  while (theSel.IncrementReturnFalseIfPastLast())
+  { //stOutput << "<br>current selection: " << theSel.ToStringFull();
+    KostkaNumber ancestor;
+    ancestor.partition=this->partition;
+    ancestor.tuple=this->tuple;
+    ancestor.tuple.SetSize(ancestor.tuple.size-1);
+    for (int i=0; i<theSel.Multiplicities.size; i++)
+      ancestor.partition[i]-=theSel.Multiplicities[i];
+    if (KNcache!=0)
+    { int ancestorIndex=KNcache->GetIndex(ancestor);
+      if (ancestorIndex!=-1)
+        ancestor=KNcache->GetElement(ancestorIndex);
+      else
+        if (!ancestor.Compute(KNcache, comments))
+          return false;
+        else
+          if (KNcache->size<this->MaxNumCachedKostkaNumbers)
+            KNcache->AddOnTop(ancestor);
+    } else
+      if (!ancestor.Compute(KNcache, comments))
+        return false;
+    this->value+=ancestor.value;
+  }
+//  stOutput << "<hr>" << this->ToString() << " = "
+//            << this->value.ToString() << "<hr>";
+  return true;
+}
+
+std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank)
+{ MacroRegisterFunctionWithName("KostkaNumber::GetTypeBParabolicSignMultiplicityTable");
+  std::stringstream out;
+  List<Pair<Partition, Partition> > partitionPairs;
+  List<Partition> partitionsLeft, partitionsRight;
+  List<Partition> partitionsParabolics;
+  Pair<Partition, Partition> currentPartition;
+  for (int i=0; i<=rank; i++)
+  { Partition::GetPartitions(partitionsLeft, i);
+    Partition::GetPartitions(partitionsRight, rank-i);
+    partitionsParabolics.AddListOnTop(partitionsRight);
+    for (int j=0; j<partitionsLeft.size; j++)
+    { partitionsParabolics.AddListOnTop(partitionsLeft);
+      for (int k=0; k<partitionsRight.size; k++)
+      { currentPartition.Object1=partitionsLeft[j];
+        currentPartition.Object2=partitionsRight[k];
+        partitionPairs.AddOnTop(currentPartition);
+      }
+    }
+  }
+  out << partitionPairs.size << " partition pairs. <br>";
+  for (int i=0; i<partitionPairs.size; i++)
+  { out << partitionPairs[i].Object1.ToString()
+    << "," << partitionPairs[i].Object2.ToString() << "<br>";
+  }
+  Matrix<Rational> theMultTable;
+  theMultTable.init(partitionPairs.size, partitionsParabolics.size);
+  for (int j=0; j<partitionPairs.size; j++)
+  { out << "V_{\\lambda, \\mu}, "
+    << "<br>\\lambda=" << partitionPairs[j].Object1.p
+    << "<br>\\mu=" << partitionPairs[j].Object2.p;
+    for (int i=0; i<partitionsParabolics.size; i++)
+    { theMultTable(j,i)= KostkaNumber::ComputeTypeBParabolicSignMultiplicity
+      (partitionsParabolics[i], partitionPairs[j].Object1,
+       partitionPairs[j].Object2, &out);
+    }
+  }
+  out << "<table><tr><td><td>";
+  for(int i=0; i<partitionsParabolics.size; i++)
+  { out << "<td>" << "P_{";
+    out << partitionsParabolics[i].ToStringForArticles("(", ")");
+    int typeBsize=rank-partitionsParabolics[i].n;
+    if (typeBsize==0)
+      out << "\\emptyset";
+    else
+      out << "(" << typeBsize << ")";
+    out << "</td>";
+  }
+  out << "</tr>";
+  for (int i=0; i<partitionPairs.size; i++)
+  { out << "<tr><td>";
+    out << "V_{"
+    << partitionPairs[i].Object1.ToStringForArticles("[", "]")
+    << ", "
+    << partitionPairs[2].Object1.ToStringForArticles("[", "]")
+    << "}";
+    out << "</td>";
+    for (int j=0; j<partitionsParabolics.size; j++)
+      out << "<td>" << theMultTable(i,j) << "</td>";
+    out << "</tr>";
+  }
+  out << "</table>";
+  return out.str();
+}
+
+Rational KostkaNumber::ComputeTypeBParabolicSignMultiplicity
+(const Partition& parabolicPartition, const Partition& leftPartition,
+ const Partition& rightPartition, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("KostkaNumber::ComputeTypeBParabolicSignMultiplicity");
+  int rank=leftPartition.n+rightPartition.n;
+  int BcomponentSize=rank-parabolicPartition.n;
+  if(comments!=0)
+    *comments << "<br>dim Hom_P(Sign P_{("
+    << parabolicPartition.p << "), ("
+    << BcomponentSize << ")}, V_{"
+    << leftPartition.p.ToStringCommaDelimited()
+    << ", "
+    << rightPartition.p.ToStringCommaDelimited()
+    << "} )=";
+  Rational result=0;
+  SelectionWithDifferentMaxMultiplicities theSelection;
+  List<int> complementSelection;
+  HashedList<KostkaNumber> KNcache;
+  KostkaNumber leftKN, rightKN;
+  Partition tempP;
+  tempP=leftPartition;
+  tempP.Transpose();
+  leftKN.partition=tempP.p;
+  tempP=rightPartition;
+  tempP.Transpose();
+  rightKN.partition=tempP.p;
+  theSelection.initFromInts(parabolicPartition.p);
+  do
+  { complementSelection.SetSize(parabolicPartition.p.size);
+    for (int k=0; k<theSelection.MaxMultiplicities.size; k++)
+      complementSelection[k]=
+      parabolicPartition.p[k]-theSelection.Multiplicities[k];
+//    out << "<br>K_{\\lambda^*, ("
+//    << theSelection.Multiplicities << ")} "
+//    << "K_{\\mu^*,("
+//    << complementSelection << ") \\oplus (" << BcomponentSize
+//    << ")}";
+    leftKN.tuple=theSelection.Multiplicities;
+    leftKN.Compute(&KNcache, 0);
+    rightKN.tuple=complementSelection;
+    rightKN.tuple.AddOnTop(BcomponentSize);
+    rightKN.Compute(&KNcache, 0);
+    result+=leftKN.value*rightKN.value;
+  } while (theSelection.IncrementReturnFalseIfPastLast());
+  if (comments!=0)
+    *comments << result.ToString();
+  return result;
+}
+
+std::string SelectionFixedRankDifferentMaxMultiplicities::ToString()
+{ std::stringstream out;
+  Vector<int> theMults;
+  theMults=this->Multiplicities;
+  out << theMults;
+  return out.str();
+}
+
+std::string SelectionFixedRankDifferentMaxMultiplicities::ToStringFull()
+{ std::stringstream out;
+  Vector<int> theMults, theMaxMults;
+  theMaxMults=this->MaxMultiplicities;
+  theMults=this->Multiplicities;
+  out << "Multiplicities: " << theMults << "; max: " << theMaxMults
+  << "; rank: " << this->rank;
+  return out.str();
+}
+
+SelectionFixedRankDifferentMaxMultiplicities::SelectionFixedRankDifferentMaxMultiplicities()
+{ this->flagFirstComputed=false;
+}
+
+bool SelectionFixedRankDifferentMaxMultiplicities::init()
+{ this->flagFirstComputed=false;
+  return true;
+}
+
+bool SelectionFixedRankDifferentMaxMultiplicities::firstIncrement()
+{ MacroRegisterFunctionWithName("SelectionFixedRankDifferentMaxMultiplicities::firstIncrement");
+  this->flagFirstComputed=true;
+  this->Multiplicities.SetSize(this->MaxMultiplicities.size);
+  int remainingRank=this->rank;
+  for (int i=this->MaxMultiplicities.size-1; i>=0; i--)
+  { if (this->MaxMultiplicities[i]<remainingRank)
+      this->Multiplicities[i]=this->MaxMultiplicities[i];
+    else
+      this->Multiplicities[i]=remainingRank;
+    remainingRank-=this->Multiplicities[i];
+  }
+  if (remainingRank>0)
+    return false;
+  return true;
+}
+
+bool SelectionFixedRankDifferentMaxMultiplicities::IncrementReturnFalseIfPastLast()
+{ MacroRegisterFunctionWithName("SelectionFixedRankDifferentMaxMultiplicities::IncrementReturnFalseIfPastLast");
+  if (this->rank<0)
+    return false;
+  if (!this->flagFirstComputed)
+    return this->firstIncrement();
+  int rankToRedistribute=0;
+  for (int i=this->Multiplicities.size-2; i>=0; i--)
+  { rankToRedistribute+=this->Multiplicities[i+1];
+    this->Multiplicities[i+1]=0;
+    if (this->Multiplicities[i]<this->MaxMultiplicities[i] && rankToRedistribute>0)
+    { this->Multiplicities[i]++;
+      rankToRedistribute--;
+      for (int j=this->Multiplicities.size-1; j>i; j--)
+      { if (this->MaxMultiplicities[j]<=rankToRedistribute)
+          this->Multiplicities[j]=this->MaxMultiplicities[j];
+        else
+          this->Multiplicities[j]=rankToRedistribute;
+        rankToRedistribute-=this->Multiplicities[j];
+        if (rankToRedistribute==0)
+          return true;
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+bool CalculatorFunctionsWeylGroup::innerKostkaNumber(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerKostkaNumber");
+  if (input.size()!=3)
+    return false;
+  KostkaNumber theKN;
+  if (!theCommands.GetVectoRInt(input[1], theKN.partition) ||
+      !theCommands.GetVectoRInt(input[2], theKN.tuple))
+    return theCommands << "Failed to extract partition and tuple from input: " << input.ToString();
+  std::stringstream out;
+  HashedList<KostkaNumber> theKNs;
+  if (theKN.Compute(&theKNs, &out))
+    out << "<br>Final result: " << theKN.value.ToString();
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerKostkaNumber");
+  if (input.size()!=3)
+    return false;
+  SelectionFixedRankDifferentMaxMultiplicities theSel;
+  if (!input[1].IsSmallInteger(&theSel.rank))
+    return false;
+  if (!theCommands.GetVectoRInt(input[2], theSel.MaxMultiplicities))
+    return theCommands << "Failed to extract list of multiplicities from "
+    << input[2].ToString();
+  if (theSel.rank<0)
+    return output.AssignValue(0, theCommands);
+  theSel.init();
+  std::stringstream out;
+  out << "Max multiplicities: " << theSel.MaxMultiplicities << " rank: "
+  << theSel.rank;
+  while (theSel.IncrementReturnFalseIfPastLast())
+  { out << "<br>" << theSel.ToString();
+  }
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems");
   std::stringstream out;
@@ -1184,25 +1565,7 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNum
     return theCommands << "You requested computation for type " << type
     << " but our formulas work only for classical types: A, B-C and D. ";
   if (type=='B' || type=='C')
-  { List<Pair<Partition, Partition> > partitionPairs;
-    List<Partition> partitionsLeft, partitionsRight;
-    Pair<Partition, Partition> currentPartition;
-    for (int i=0; i<=rank; i++)
-    { Partition::GetPartitions(partitionsLeft, i);
-      Partition::GetPartitions(partitionsRight, rank-i);
-      for (int j=0; j<partitionsLeft.size; j++)
-        for (int k=0; k<partitionsRight.size; k++)
-        { currentPartition.Object1=partitionsLeft[j];
-          currentPartition.Object2=partitionsRight[k];
-          partitionPairs.AddOnTop(currentPartition);
-        }
-    }
-    out << partitionPairs.size << " partition pairs. <br>";
-    for (int i=0; i<partitionPairs.size; i++)
-    { out << partitionPairs[i].Object1.ToString()
-      << "," << partitionPairs[i].Object2.ToString() << "<br>";
-    }
-
+  { out << KostkaNumber::GetTypeBParabolicSignMultiplicityTable(rank);
   }
   if (type=='A')
   { return theCommands << "Not implemented yet.";

@@ -74,11 +74,13 @@ void Partition::GetPartitions(List<Partition>& out, int n)
   if(n==0)
   { out.SetSize(1);
     out[0].n = 0;
+    out[0].p.SetSize(0);
     return;
   }
   if(n==1)
   { out.SetSize(1);
     out[0].n = 1;
+    out[0].p.SetSize(0);
     out[0].p.AddOnTop(1);
     return;
   }

@@ -23,17 +23,16 @@ std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressio
 }
 
 template <typename elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::ComputeAllElements(bool andWords, int MaxElements)
+bool FiniteGroup<elementSomeGroup>::ComputeAllElements
+(bool andWords, int MaxElements)
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeAllElements");
   this->CheckConsistency();
-//  double startTimeDebug=theGlobalVariables.GetElapsedSeconds();
+  //double startTimeDebug=theGlobalVariables.GetElapsedSeconds();
   this->sizePrivate = this->SizeByFormulaOrNeg1();
   if (this->sizePrivate>0 && MaxElements>0 && this->sizePrivate>MaxElements)
     return false;
   if(!this->ComputeAllElementsLargeGroup(andWords, MaxElements))
     return false;
-  if (this->sizePrivate<100000)
-    this->ComputeCCSizesAndRepresentatives();
   return true;
 }
 
@@ -92,26 +91,6 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
     this->flagWordsComputed=true;
   return true;
 }
-
-/*template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::Conjugate
-(const ElementWeylGroup& conjugateMe, const ElementWeylGroup& conjugateBy, ElementWeylGroup& output)
-{ if (conjugateMe.owner!=conjugateBy.owner)
-    crash << "Attempting to multiply elements belonging to different Weyl groups." << crash;
-  if (&conjugateMe==&output || &conjugateBy==&output)
-  { ElementWeylGroup copyActingElement=conjugateBy;
-    ElementWeylGroup copyToBeConjugated=conjugateMe;
-    ElementWeylGroup<templateWeylGroup>::Conjugate(copyToBeConjugated, copyActingElement, output);
-    return;
-  }
-  output.owner=conjugateMe.owner;
-  output.generatorsLastAppliedFirst.Reserve(conjugateBy.generatorsLastAppliedFirst.size*2+conjugateMe.generatorsLastAppliedFirst.size);
-  output.generatorsLastAppliedFirst=conjugateBy.generatorsLastAppliedFirst;
-  output.generatorsLastAppliedFirst.AddListOnTop(conjugateMe.generatorsLastAppliedFirst);
-  for (int i=conjugateMe.generatorsLastAppliedFirst.size-1; i>=0; i--)
-    output.generatorsLastAppliedFirst.AddOnTop(conjugateBy.generatorsLastAppliedFirst[i]);
-  output.MakeCanonical();
-}*/
 
 template <class templateWeylGroup>
 ElementWeylGroup<templateWeylGroup> ElementWeylGroup<templateWeylGroup>::operator^(const ElementWeylGroup<templateWeylGroup>& right) const
@@ -849,7 +828,8 @@ bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives()
 }
 
 template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives()
+void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives
+(bool useComputeCCSizesRepresentativesWords)
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesAndRepresentatives");
   this->CheckConsistency();
   if(this->GetSizeByFormula!=0)
@@ -861,7 +841,8 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives()
         return;
       }
   }
-  this->ComputeCCSizesRepresentativesWords();
+  if (useComputeCCSizesRepresentativesWords)
+    this->ComputeCCSizesRepresentativesWords();
 }
 
 template <class elementSomeGroup>
@@ -911,9 +892,10 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromCCindicesInAllElements(const Li
 }
 
 template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements()
-{ MacroRegisterFunctionWithName("Subgroup::ComputeCCfromAllElements");
-  this->ComputeAllElements(-1);
+void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements
+()
+{ MacroRegisterFunctionWithName("FiniteGroup::ComputeCCfromAllElements");
+  this->ComputeAllElements(false, -1);
   List<bool> Accounted;
   Accounted.initFillInObject(this->theElements.size, false);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
@@ -2229,7 +2211,7 @@ void FiniteGroup<elementSomeGroup>::AddCharacter(const ClassFunction<FiniteGroup
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsTodorsVersion()
-{ MacroRegisterFunctionWithName("WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion");
+{ MacroRegisterFunctionWithName("FiniteGroup::ComputeIrreducibleRepresentationsTodorsVersion");
   if(this->irreps_grcam.size == 0)
   { if(this->irreps.size == 0)
       crash << "Need an initial irrep.  Check up the call chain and find out where it should be provided" << crash;

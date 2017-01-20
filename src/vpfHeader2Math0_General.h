@@ -815,6 +815,12 @@ public:
 //  bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
 //    (Matrix<coefficient>& inputColumn, Matrix<coefficient>* outputTheGaussianTransformations Matrix<coefficient>& outputColumn);
   bool Invert();
+  Matrix<coefficient> Inverse()
+  { Matrix<coefficient> copy=*this;
+    if (!copy.Invert())
+      crash << "Request to invert " << copy.ToString() << " failed. " << crash;
+    return copy;
+  }
   Matrix<coefficient> operator^(const Matrix<coefficient>& right) const;
   static void ConjugationAction(const Matrix<coefficient>& conjugateMe, const Matrix<coefficient>& conjugateBy, Matrix<coefficient>& out);
   void MakeZero(const coefficient& theRingZero=0);

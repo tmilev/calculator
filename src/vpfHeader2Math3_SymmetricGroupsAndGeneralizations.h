@@ -135,6 +135,12 @@ class Partition
   friend std::ostream& operator<<(std::ostream& out, const Partition& data)
   { return data.IntoStream(out);
   }
+  unsigned int HashFunction() const
+  { return MathRoutines::HashListInts(this->p);
+  }
+  static inline unsigned int HashFunction(const Partition& input)
+  { return input.HashFunction();
+  }
 };
 
 // Tableau methods assume the partition ordering from largest to smallest
@@ -202,6 +208,11 @@ public:
   void MakeID(const PermutationR2& unused);
   // the purpose of this is compat with other element classes that need
   // to see some things before they can be a proper identity element
+  PermutationR2 Inverse()
+  { PermutationR2 copy=*this;
+    copy.Invert();
+    return copy;
+  }
   void Invert();
   // some day i'm going to move the out to the first parameter everywhere
   // after i find out why it was put last this time
@@ -294,6 +305,11 @@ class SemidirectProductElement
   { this->h.Invert();
     this->k = oa::oa(this->h,this->k);
     this->k.Invert();
+  }
+  SemidirectProductElement<helt,kelt,oa> Inverse()
+  { SemidirectProductElement<helt,kelt,oa> copy=*this;
+    copy.Invert();
+    return copy;
   }
 
   SemidirectProductElement<helt,kelt,oa> operator^(const SemidirectProductElement<helt, kelt, oa>& right) const

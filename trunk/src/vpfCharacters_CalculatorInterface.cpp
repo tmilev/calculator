@@ -1336,19 +1336,19 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank)
     Partition::GetPartitions(partitionsRight, rank-i);
     partitionsParabolics.AddListOnTop(partitionsRight);
     for (int j=0; j<partitionsLeft.size; j++)
-    { partitionsParabolics.AddListOnTop(partitionsLeft);
       for (int k=0; k<partitionsRight.size; k++)
       { currentPartition.Object1=partitionsLeft[j];
         currentPartition.Object2=partitionsRight[k];
         partitionPairs.AddOnTop(currentPartition);
       }
-    }
   }
   out << partitionPairs.size << " partition pairs. <br>";
   for (int i=0; i<partitionPairs.size; i++)
   { out << partitionPairs[i].Object1.ToString()
     << "," << partitionPairs[i].Object2.ToString() << "<br>";
   }
+  partitionPairs.QuickSortAscending();
+  partitionsParabolics.QuickSortAscending();
   Matrix<Rational> theMultTable;
   theMultTable.init(partitionPairs.size, partitionsParabolics.size);
   for (int j=0; j<partitionPairs.size; j++)
@@ -1361,31 +1361,94 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank)
        partitionPairs[j].Object2, &out);
     }
   }
-  out << "<table><tr><td><td>";
+  std::stringstream outLaTeX;
+  out << "<table><tr><td></td>";
+  outLaTeX << "\\begin{tabular}{c|";
+  for (int i=0; i<partitionsParabolics.size; i++)
+  { outLaTeX << "\n>{\\centering\\arraybackslash} p{1cm}";
+  }
+  outLaTeX << "}";
   for(int i=0; i<partitionsParabolics.size; i++)
-  { out << "<td>" << "P_{";
-    out << partitionsParabolics[i].ToStringForArticles("(", ")");
+  { std::stringstream parStream;
+    parStream << "P_{";
+    parStream << partitionsParabolics[i].ToStringForArticles("(", ")")
+    << ", ";
     int typeBsize=rank-partitionsParabolics[i].n;
     if (typeBsize==0)
-      out << "\\emptyset";
+      parStream << "\\emptyset";
     else
-      out << "(" << typeBsize << ")";
+      parStream << "(" << typeBsize << ")";
+    parStream << "}";
+    outLaTeX << "&$" << parStream.str() << "$";
+    out << "<td>" << parStream.str();
     out << "</td>";
   }
+  outLaTeX << "\\\\";
   out << "</tr>";
+  ///////////////////////////////////////
+  FormatExpressions theFormat;
+  theFormat.flagSupressDynkinIndexOne=true;
+  for(int i=0; i<partitionsParabolics.size; i++)
+  { int typeBsize=rank-partitionsParabolics[i].n;
+    DynkinType theType;
+    DynkinSimpleType theSimpleType;
+    for (int j=0; j<partitionsParabolics[i].p.size; j++)
+    { if (partitionsParabolics[i].p[j]<=1)
+        continue;
+      theSimpleType.MakeArbitrary('A',partitionsParabolics[i].p[j]-1,1);
+      theType.AddMonomial(theSimpleType,1);
+    }
+    if (typeBsize==1)
+    { theSimpleType.MakeArbitrary('A', 1, 2);
+      theType.AddMonomial(theSimpleType,1);
+    } else if (typeBsize>1)
+    { theSimpleType.MakeArbitrary('B', typeBsize, 1);
+      theType.AddMonomial(theSimpleType,1);
+    }
+    outLaTeX << "&$" << theType.ToString(&theFormat) << "$";
+  }
+  outLaTeX << "\\\\";
+  ///////////////////////////////////////
+  ///////////////////////////////////////
+  for(int i=0; i<partitionsParabolics.size; i++)
+  { int typeBsize=rank-partitionsParabolics[i].n;
+    outLaTeX << "&$";
+    for (int j=0; j<partitionsParabolics[i].p.size; j++)
+    { if (j>0)
+        outLaTeX << "\\times ";
+      outLaTeX << "S_{" << partitionsParabolics[i].p[j] << "}";
+    }
+    if (typeBsize>0)
+    { if(partitionsParabolics[i].n>0)
+        outLaTeX << "\\times ";
+      outLaTeX << "B_{" << typeBsize << "}";
+    }
+    outLaTeX << "$";
+  }
+  outLaTeX << "\\\\";
+  ///////////////////////////////////////
   for (int i=0; i<partitionPairs.size; i++)
-  { out << "<tr><td>";
-    out << "V_{"
+  { std::stringstream Vstream;
+    Vstream << "V_{"
     << partitionPairs[i].Object1.ToStringForArticles("[", "]")
     << ", "
-    << partitionPairs[2].Object1.ToStringForArticles("[", "]")
+    << partitionPairs[i].Object2.ToStringForArticles("[", "]")
     << "}";
+    out << "<tr><td>";
+    out << Vstream.str();
     out << "</td>";
+    outLaTeX << "$" << Vstream.str() << "$";
     for (int j=0; j<partitionsParabolics.size; j++)
-      out << "<td>" << theMultTable(i,j) << "</td>";
+    { out << "<td>" << theMultTable(i,j) << "</td>";
+      outLaTeX << "&" << "$" << theMultTable(i,j) << "$";
+    }
+    outLaTeX << "\\\\";
     out << "</tr>";
   }
   out << "</table>";
+  outLaTeX << "\\end{tabular}";
+  out << "<br>LaTeX'ed table follows. <br>";
+  out << outLaTeX.str();
   return out.str();
 }
 

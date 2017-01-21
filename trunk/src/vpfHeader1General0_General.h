@@ -1162,6 +1162,17 @@ public:
   bool operator==(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other)const
   { return this->Object1==other.Object1 && this->Object2==other.Object2;
   }
+  bool operator>(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other)
+  { if (this->Object1>other.Object1)
+      return true;
+    if (other.Object1>this->Object1)
+      return false;
+    if (this->Object2>other.Object2)
+      return true;
+    if (other.Object2>this->Object2)
+      return false;
+    return false;
+  }
 };
 typedef Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> PairInts;
 

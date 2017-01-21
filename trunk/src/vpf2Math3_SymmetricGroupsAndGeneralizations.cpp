@@ -268,7 +268,7 @@ std::string Partition::ToStringForArticles
   out << leftParenthesis;
   for (int i=0; i<this->p.size; i++)
   { out << this->p[i];
-    if (i!=this->n-1)
+    if (i!=this->p.size-1)
       out << ", ";
   }
   out << rightParenthesis;

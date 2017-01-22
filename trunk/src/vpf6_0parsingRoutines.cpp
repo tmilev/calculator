@@ -195,6 +195,7 @@ void Calculator::init()
   this->AddOperationBuiltInType("MatrixAlgebraic");
   this->AddOperationBuiltInType("MatrixTensorRational");
   this->AddOperationBuiltInType("MatrixRF");
+  this->AddOperationBuiltInType("MatrixPolynomialRational");
   this->AddOperationBuiltInType("CalculusPlot");
   this->AddOperationBuiltInType("SemisimpleSubalgebras");
   this->AddOperationBuiltInType("CandidateSSsubalgebra");

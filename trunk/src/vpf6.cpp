@@ -1123,7 +1123,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
   out << "<table>";
   for (int i=0; i< fundamentalWeights.size; i++)
-  { out << "<tr><td>" << fundamentalWeights[i].ToString() << "</td><td> =</td><td> " << CGI::GetMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
+  { out << "<tr><td style=\"white-space: nowrap\">" << fundamentalWeights[i].ToString() << "</td><td> =</td><td style=\"white-space: nowrap\"> " << CGI::GetMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -1136,7 +1136,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   simpleBasis.MakeEiBasis(theWeyl.GetDim());
   theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
   for (int i=0; i< simplebasisEpsCoords.size; i++)
-  { out << "<tr><td>" << simpleBasis[i].ToString() << " </td><td>=</td> <td>" << CGI::GetMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
+  { out << "<tr><td style=\"white-space: nowrap\">" << simpleBasis[i].ToString() << " </td><td>=</td> <td style=\"white-space: nowrap\">" << CGI::GetMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";

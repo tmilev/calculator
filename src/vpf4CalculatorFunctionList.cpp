@@ -1526,12 +1526,23 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    not too large. \
    ", "X=FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}})=1/(a+b);\n X; \\det {} X");
   this->AddOperationInnerHandler
-  ("DeterminantPolynomial", this->innerDeterminantPolynomial, "",
-   "Attempts to converts the entries of the matrix to polynomials and computes the determinant polynomial.\
-   The matrix must not be larger than 8x8. Note that this function does not perform Gaussian elimination: it is meant \
-   to be used with multivariate polynomials with large number of variables. ",
-   "DeterminantPolynomial{}\\left(\\begin{array}{ccc}x_{11}& x_{12} \
-   & x_{13}\\\\ x_{21} & x_{22} & x_{23} \\\\ x_{31} & x_{32} & x_{33} \\end{array} \\right) ");
+  ("DeterminantPolynomial", Calculator::innerDeterminantPolynomial, "",
+   "Attempts to convert the entries of the matrix \
+    to polynomials and computes the determinant polynomial.\
+    The matrix must not be larger than 8x8. \
+    Note that this function does not perform Gaussian elimination, but \
+    rather sums the n! summands of the matrix polynomial. \
+    This function is meant \
+    to be used with multivariate polynomials with large \
+    number of variables (in such cases summing n! summands may very well be\
+    faster). ",
+   "DeterminantPolynomial{}\\left( \\begin{array}{ccc}\
+    x_{11} & x_{12} & x_{13} \\\\ \
+    x_{21} & x_{22} & x_{23} \\\\ \
+    x_{31} & x_{32} & x_{33} \\end{array} \\right) ",
+    true, false, "Calculator::innerDeterminantPolynomial",
+    "DeterminantPolynomial"
+    );
   this->AddOperationInnerHandler
   ("Length", CalculatorFunctionsGeneral::innerLength, "",
    "Returns the length of a sequence. ",

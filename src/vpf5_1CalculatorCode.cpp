@@ -740,14 +740,22 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
 { MacroRegisterFunctionWithName("Calculator::innerDeterminantPolynomial");
   Matrix<Polynomial<Rational> > matPol;
   Expression theContext;
-  if (!theCommands.GetMatrix(input, matPol, &theContext, -1, CalculatorConversions::innerPolynomial<Rational>))
-    return theCommands << "<hr>Failed to convert the input to matrix of polynomials. ";
+  if (!theCommands.GetMatriXFromArguments
+      (input, matPol, &theContext, -1,
+       CalculatorConversions::innerPolynomial<Rational>))
+    return theCommands << "<hr>Failed to convert the input to "
+    << "matrix of polynomials. ";
   if (matPol.NumRows!=matPol.NumCols)
     return output.MakeError("<hr>Failed to compute determinant: matrix is non-square. ", theCommands);
   if (matPol.NumRows>8)
-    return theCommands << "<hr>Failed to compute determinant: matrix is larger than 8 x 8, and your matrix had "
-    << matPol.NumRows << " rows. Note that you can compute determinant using the \\det function which does Gaussian elimination "
-    << " and will work for large rational matrices. This function is meant to be used with honest polynomial entries. ";
+    return theCommands << "<hr>Failed to compute determinant: "
+    << "matrix is larger than 8 x 8, and your matrix had "
+    << matPol.NumRows << " rows. Note that you can compute "
+    << "determinant using the \\det function which "
+    << "does Gaussian elimination "
+    << " and will work for large rational matrices. "
+    << "This function is meant to be used with honest "
+    << "polynomial entries. ";
   Polynomial<Rational> outputPoly;
   outputPoly.MakeDeterminantFromSquareMatrix(matPol);
   return output.AssignValueWithContext(outputPoly, theContext, theCommands);

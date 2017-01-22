@@ -2220,20 +2220,22 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
   /////////////////////////
-  out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
-  out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
-  out << "<b>Please do not use the following button</b>.";
-  out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div>";
-  out << "<script language=\"javascript\">"
-  << " function onSignIn(googleUser) {\n"
-  << "var profile = googleUser.getBasicProfile();\n"
-  << "console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.\n"
-  << "console.log('Name: ' + profile.getName());\n"
-  << "console.log('Image URL: ' + profile.getImageUrl());\n"
-  << "console.log('Email: ' + profile.getEmail());\n"
-  << "console.log('id_token: '+googleUser.getAuthResponse().id_token);\n"
-  << "}\n"
-  << "</script>";
+//  out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
+//  out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
+//  out << "<b>This is an experimental feature which is "
+//  << "currently being worked on.<br>"
+//  << " Please do not use the following button</b>.";
+//  out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div>";
+//  out << "<script language=\"javascript\">"
+//  << " function onSignIn(googleUser) {\n"
+//  << "var profile = googleUser.getBasicProfile();\n"
+//  << "console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.\n"
+//  << "console.log('Name: ' + profile.getName());\n"
+//  << "console.log('Image URL: ' + profile.getImageUrl());\n"
+//  << "console.log('Email: ' + profile.getEmail());\n"
+//  << "console.log('id_token: '+googleUser.getAuthResponse().id_token);\n"
+//  << "}\n"
+//  << "</script>";
 
 ///////////////////////////////////////
 //  out << "<br><br><small>No account yet? We are sorry but automatic registration has not been implemented yet.<br>"
@@ -2440,10 +2442,10 @@ int WebWorker::ProcessCalculator()
   stOutput << this->openIndentTag("<tr>");
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
   std::string civilizedInputSafish;
-  if (CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish, false))
-    stOutput << "Your input has been treated normally, however the return string "
-    << "of your input has been modified. More precisely, &lt; and &gt;  are "
-    << " modified due to a javascript hijack issue. <br>";
+  bool hashtmlChars=
+  CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish, false);
+
+
   stOutput << this->GetHtmlHiddenInputs(true, true);
   stOutput << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"compute\">\n";
   stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"mainInput\" id=\"mainInputID\" "
@@ -2461,6 +2463,11 @@ int WebWorker::ProcessCalculator()
   stOutput << civilizedInputSafish;
   stOutput << "</textarea>\n";
   stOutput << "<br>";
+  if (hashtmlChars)
+    stOutput << "Your input had some html characters (such as &lt;). <br>"
+    << "I've encoded your input in html format.<br>"
+    ;
+
   stOutput << "<button title=\"Shift+Enter=shortcut from input text box. \" "
   << "name=\"Go\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus'); event.preventDefault();"

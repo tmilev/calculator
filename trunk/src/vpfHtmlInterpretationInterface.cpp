@@ -1091,7 +1091,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   }
   tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
   << "<th>Activation manual email</th>"
-  << "<th>Section/Group</th>  <th>Pre-filled login link</th><th>Score</th><th>Course</th></tr>";
+  << "<th>Section/Group</th>  <th>Pre-filled login link</th><th>Course</th></tr>";
   UserCalculator currentUser;
   currentUser.currentTable=DatabaseStrings::usersTableName;
   int indexUser=-1;

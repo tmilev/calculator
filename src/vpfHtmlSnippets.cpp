@@ -91,16 +91,6 @@ std::string HtmlSnippets::GetJavascriptCookieFunctions()
   return out.str();
 }
 
-std::string HtmlSnippets::GetDatePickerStart(const std::string& theId)
-{ std::stringstream out;
-  out << "\n<script type=\"text/javascript\">\n"
-  << "$(function() {\n"
-  << "$('#" << theId << "').datepicker();\n"
-  << "});\n"
-  << "</script>\n";
-  return out.str();
-}
-
 std::string HtmlSnippets::GetJavascriptCanvasGraphics()
 { MacroRegisterFunctionWithName("HtmlSnippets::GetJavascriptCanvasGraphics");
   std::stringstream out, commentsOnFailure;

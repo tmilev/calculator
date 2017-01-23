@@ -1579,10 +1579,9 @@ std::string CalculatorHTML::ToStringDeadlineModifyButton
 //    this->GetDeadline(inputFileName, sectionNumber, deadlineInherited);
     deadlineStream << "<tr>";
     deadlineStream << "<td>" << this->databaseStudentSections[i] << "</td>";
-    deadlineStream << "<td> <input type=\"text\" id=\"" << currentDeadlineId << "\" value=\""
+    deadlineStream << "<td> <input class=\"modifyDeadlineInput\" type=\"text\" id=\"" << currentDeadlineId << "\" value=\""
     << this->GetDeadline(inputFileName, this->databaseStudentSections[i], deadlineInherited)
     << "\"> " ;
-    deadlineStream << HtmlSnippets::GetDatePickerStart(currentDeadlineId);
     deadlineStream << "</td>";
     deadlineStream << "</tr>";
   }

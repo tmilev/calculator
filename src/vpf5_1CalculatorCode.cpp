@@ -363,9 +363,9 @@ bool DynkinSimpleType::HasEasySubalgebras()const
 }
 
 const std::string GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable=
-"http://calculator-algebra.org/calculator";
+"http://calculator-algebra.org/cgi-bin/calculator";
 const std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressOfServerExecutable=
-"https://calculator-algebra.org/calculator";
+"https://calculator-algebra.org/cgi-bin/calculator";
 const std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder=
 "http://calculator-algebra.org/";
 const std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder=

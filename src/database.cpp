@@ -219,10 +219,10 @@ std::string DatabaseStrings::userId="id";
 std::string DatabaseStrings::userColumnLabel="username";
 std::string DatabaseStrings::usersTableName="users";
 std::string DatabaseStrings::userGroupLabel="userInfo";
+std::string DatabaseStrings::userCurrentCoursesColumnLabel="currentCourses";
 std::string DatabaseStrings::databaseUser="ace";
 std::string DatabaseStrings::theDatabaseName="aceDB";
 std::string DatabaseStrings::deadlinesTableName="deadlines";
-std::string DatabaseStrings::deadlinesIdColumnName="idInDeadlines";
 std::string DatabaseStrings::infoColumnInDeadlinesTable="deadlines";
 
 std::string DatabaseStrings::problemWeightsTableName="problemWeights";
@@ -632,7 +632,9 @@ std::string UserCalculator::ToString()
     else
       out << " weight: " << weightRat.ToString();
   }
-  out << "<br>Deadline info: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(this->deadlineInfoString.value);
+  out << "<br>Deadline info: "
+  << CGI::URLKeyValuePairsToNormalRecursiveHtml
+  (this->currentCoursesDeadlineInfoString.value);
   return out.str();
 }
 
@@ -743,22 +745,23 @@ bool UserCalculator::FetchOneUserRow
   this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
   this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");
   this->problemDataString=this->GetSelectedRowEntry("problemData");
-  this->deadlineInfoRowId=this->GetSelectedRowEntry(DatabaseStrings::deadlinesIdColumnName);
+  this->currentCourses=this->GetSelectedRowEntry
+  (DatabaseStrings::userCurrentCoursesColumnLabel);
   this->problemInfoRowId=this->GetSelectedRowEntry(DatabaseStrings::problemWeightsIdColumnName);
   this->sectionsTaughtByUserString=this->GetSelectedRowEntry(DatabaseStrings::sectionsTaughtByUser);
   std::string reader;
   //stOutput << "DEBUG:  GOT to hereE!!!";
-  if (this->deadlineInfoRowId!="")
+  if (this->currentCourses!="")
     if (theRoutines.FetchEntry
-        (DatabaseStrings::deadlinesIdColumnName,
-         this->deadlineInfoRowId,
+        (DatabaseStrings::userCurrentCoursesColumnLabel,
+         this->currentCourses,
          DatabaseStrings::deadlinesTableName,
          DatabaseStrings::infoColumnInDeadlinesTable,
          reader,
          failureStream))
-      this->deadlineInfoString=reader;
+      this->currentCoursesDeadlineInfoString=reader;
 //  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
-//  << " this->deadlineInfoString:  " << this->deadlineInfoString.value;
+//  << " this->currentCoursesInfoString:  " << this->currentCoursesInfoString.value;
   if (this->problemInfoRowId!="")
     if (theRoutines.FetchEntry
         (DatabaseStrings::problemWeightsIdColumnName,
@@ -1271,7 +1274,7 @@ bool UserCalculator::StoreProblemDataToDatabase
 
 bool DatabaseRoutines::AddUsersFromEmails
 (const std::string& emailList, const std::string& userPasswords, std::string& userRole, std::string& userGroup,
- std::stringstream& comments)
+ std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers)
 { MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
   theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=1000;
@@ -1291,21 +1294,33 @@ bool DatabaseRoutines::AddUsersFromEmails
   currentUser.currentTable=DatabaseStrings::usersTableName;
   bool result=true;
   bool doSendEmails=false;
+  outputNumNewUsers=0;
+  outputNumUpdatedUsers=0;
   for (int i=0; i<theEmails.size; i++)
   { currentUser.username=theEmails[i];
     currentUser.email=theEmails[i];
+    currentUser.currentCourses =
+    CGI::StringToURLString(theGlobalVariables.GetWebInput("courseHome"), false);
     if (!currentUser.Iexist(*this))
     { if (!currentUser.CreateMeIfUsernameUnique(*this, &comments))
       { comments << "Failed to create user: " << currentUser.username.value;
         result=false;
         continue;
-      }
+      } else
+        outputNumNewUsers++;
       if (theEmails[i].find('@')!=std::string::npos)
         currentUser.SetColumnEntry("email", theEmails[i], *this, &comments);
     } else
-      if (!currentUser.FetchOneUserRow(*this, &comments))
+    { if (!currentUser.FetchOneUserRow(*this, &comments))
         result=false;
+      outputNumUpdatedUsers++;
+    }
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
+    currentUser.SetColumnEntry
+    (DatabaseStrings::userCurrentCoursesColumnLabel,
+     CGI::StringToURLString(theGlobalVariables.GetWebInput("courseHome"), false),
+     *this, &comments)
+    ;
     if (thePasswords.size==0 || thePasswords.size!=theEmails.size)
     { currentUser.ComputeActivationToken();
       if (!currentUser.SetColumnEntry("activationToken", currentUser.actualActivationToken.value, *this, &comments))
@@ -1941,16 +1956,24 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std
   }
   if (MathRoutines::StringBeginsWith(this->username.value, "deleted"))
   { if (commentsOnFailure!=0)
-      *commentsOnFailure << "You requested creation of user: " << this->username.value
+      *commentsOnFailure << "You requested creation of user: "
+      << this->username.value
       << " however user names starting with 'deleted' are not allowed. ";
     return false;
   }
   std::stringstream queryStream;
   queryStream << "INSERT INTO " << theRoutines.theDatabaseName
-  << ".users(username, " << DatabaseStrings::deadlinesIdColumnName << ", "
+  << ".users(username, " << DatabaseStrings::userCurrentCoursesColumnLabel << ", "
   << DatabaseStrings::problemWeightsIdColumnName << ")"
   << " VALUES("
-  << this->username.GetDatA() << ", 'defaultDeadlines', 'defaultProblemInfo' "
+  << this->username.GetDatA() << ", "
+  << "'"
+  << this->currentCourses.value
+  << "'"
+  << ", "
+  << "'"
+  << this->currentCourses.value
+  << "'"
   << ")";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
   if (this->enteredPassword=="")
@@ -2040,15 +2063,16 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   << "userRole LONGTEXT, "
   << "userInfo LONGTEXT, "
   << DatabaseStrings::problemWeightsIdColumnName << " LONGTEXT, "
-  << DatabaseStrings::deadlinesIdColumnName << " LONGTEXT, "
+  << DatabaseStrings::userCurrentCoursesColumnLabel << " LONGTEXT, "
   << DatabaseStrings::sectionsTaughtByUser << " LONGTEXT, "
   << "problemData LONGTEXT "
   ;
   if (! this->CreateTable
       (DatabaseStrings::usersTableName, tableCols.str(), commentsOnFailure, outputfirstLogin))
     return false;
-  deadlineTableCols << DatabaseStrings::deadlinesIdColumnName
-  << " VARCHAR(50) not null, " << DatabaseStrings::infoColumnInDeadlinesTable << " LONGTEXT";
+  deadlineTableCols << DatabaseStrings::userCurrentCoursesColumnLabel
+  << " VARCHAR(50) not null, "
+  << DatabaseStrings::infoColumnInDeadlinesTable << " LONGTEXT";
   if (!this->CreateTable
       (DatabaseStrings::deadlinesTableName,
       deadlineTableCols.str(), commentsOnFailure, 0))

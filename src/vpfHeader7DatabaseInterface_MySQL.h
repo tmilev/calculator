@@ -382,7 +382,7 @@ bool FetchAllUsers
   ;
   bool AddUsersFromEmails
   (const std::string& emailList, const std::string& userPasswords, std::string& userRole, std::string& userGroup,
- std::stringstream& comments)
+ std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers)
 
   ;
   bool SendActivationEmail(const std::string& emailList, std::stringstream& comments);

@@ -595,14 +595,32 @@ bool WebWorker::ReceiveAllHttpSSL()
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
   int numBytesInBuffer= SSL_read(theSSLdata.ssl, &buffer, bufferSize-1);
   double numSecondsAtStart=theGlobalVariables.GetElapsedSeconds();
-  if (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
-  { std::stringstream out;
-    out << "WebWorker::ReceiveAllHttpSSL on socket "
-    << this->connectedSocketID << " failed. "
-    << this->ToStringSSLError(numBytesInBuffer);
-    this->error=out.str();
-    theLog << out.str() << logger::endL;
-    return false;
+  int numFailedReceives=0;
+  while ((numBytesInBuffer<0) || (numBytesInBuffer>((signed)bufferSize)))
+  { numFailedReceives++;
+    std::stringstream out;
+    out << this->parent->ToStringConnection()
+    << ". WebWorker::ReceiveAllHttpSSL on socket "
+    << this->connectedSocketID
+    << " failed (so far "
+    << numFailedReceives << " fails). "
+    << "Return value: " << numBytesInBuffer
+    << ". Error description: "
+    <<  this->ToStringSSLError(numBytesInBuffer)
+    ;
+    if (numFailedReceives>5)
+    { out << this->parent->ToStringConnection()
+      << ". 5+ failed receives so far, aborting. ";
+      this->error=out.str();
+      logIO << out.str() << logger::endL;
+      numBytesInBuffer=0;
+      return false;
+    }
+    logIO << logger::orange << out.str() << logger::endL;
+    std::string bufferCopy(buffer, bufferSize);
+    logIO << this->parent->ToStringConnection()
+    << " Bytes in buffer so far: " << bufferCopy;
+    numBytesInBuffer= SSL_read(theSSLdata.ssl, &buffer, bufferSize-1);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);
   this->ParseMessageHead();
@@ -1336,7 +1354,7 @@ bool WebWorker::ReceiveAllHttp()
     out << this->parent->ToStringConnection()
     << "WebWorker::ReceiveAllHttp on socket " << this->connectedSocketID
     << " failed (so far "
-    << numFailedReceives << " fails on this connection). "
+    << numFailedReceives << " fails). "
     << "Return value: " << numBytesInBuffer
     << ". Error description: "
     << this->parent->ToStringLastErrorDescription();

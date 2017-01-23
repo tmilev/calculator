@@ -1584,8 +1584,8 @@ std::string HtmlInterpretation::ToStringNavigation()
   { if (theGlobalVariables.userCalculatorRequestType!="accounts")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=accounts&"
-      << "filterAccounts=true&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+      << "&filterAccounts=true"
       << "\">Accounts</a>" << linkSeparator;
     else
       out << "<b>Accounts</b>" << linkSeparator;

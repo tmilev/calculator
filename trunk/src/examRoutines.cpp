@@ -201,11 +201,11 @@ bool DatabaseRoutines::StoreProblemDatabaseInfo
   if (!this->startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
     return false;
   if (!this->SetEntry
-      (DatabaseStrings::deadlinesIdColumnName,
-       theUser.deadlineInfoRowId,
+      (DatabaseStrings::userCurrentCoursesColumnLabel,
+       theUser.currentCourses,
        DatabaseStrings::deadlinesTableName,
        DatabaseStrings::infoColumnInDeadlinesTable,
-       theUser.deadlineInfoString, &commentsOnFailure))
+       theUser.currentCoursesDeadlineInfoString, &commentsOnFailure))
     return false;
   if (!this->SetEntry
       (DatabaseStrings::problemWeightsIdColumnName,
@@ -291,7 +291,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
   //stOutput << "<hr><hr>Debug: after merge, resulting MERGED probs: "
   //<< this->currentUseR.theProblemData.ToStringHtml() << "<hr>";
   this->StoreDeadlineInfo
-  (theGlobalVariables.userDefault.deadlineInfoString.value,
+  (theGlobalVariables.userDefault.currentCoursesDeadlineInfoString.value,
    this->currentUseR.theProblemData);
   //stOutput << "<hr>Debug: about to store WEIGHT with row id: "
   //<< this->currentUseR.problemInfoRowId.value << "<hr>";
@@ -346,7 +346,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
     //stOutput << "<hr>Did not find problem data for filename: " << this->fileName << ". USer details: " << this->currentUseR.ToString() << "<hr>";
   //this->theProblemData.CheckConsistency();
   //stOutput << "<hr><hr>DEBug: got to before read prob append.";
-  if (!this->ReadProblemInfoAppend(this->currentUseR.deadlineInfoString.value, this->currentUseR.theProblemData, comments))
+  if (!this->ReadProblemInfoAppend(this->currentUseR.currentCoursesDeadlineInfoString.value, this->currentUseR.theProblemData, comments))
   { comments << "Failed to interpret the deadline string. ";
     return false;
   }

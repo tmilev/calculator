@@ -117,7 +117,8 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
 
   }
   if (!theProblem.ReadProblemInfoAppend
-      (theProblem.currentUseR.deadlineInfoString.value, theProblem.currentUseR.theProblemData, out))
+      (theProblem.currentUseR.currentCoursesDeadlineInfoString.value,
+       theProblem.currentUseR.theProblemData, out))
   { out << "Failed to interpret the deadline string. ";
     return out.str();
   }
@@ -300,7 +301,6 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
   out << theFile.LoadAndInterpretCurrentProblemItem(false);
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   return out.str();
-
 }
 
 std::string HtmlInterpretation::GetSelectCourse()
@@ -817,10 +817,16 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   bool sentEmails=true;
   //stOutput << "DEBUG: here be i!";
   bool doSendEmails= theGlobalVariables.userCalculatorRequestType=="sendEmails" ?  true : false;
-  bool createdUsers=theRoutines.AddUsersFromEmails(inputEmails, userPasswords, userRole, userGroup, comments);
+  int numNewUsers=0;
+  int numUpdatedUsers=0;
+  bool createdUsers=theRoutines.AddUsersFromEmails
+  (inputEmails, userPasswords, userRole, userGroup, comments,
+   numNewUsers, numUpdatedUsers);
   if (createdUsers)
-    out << "<span style=\"color:green\">Users successfully added. </span>";
-  else
+  { out << "<span style=\"color:green\">Success: "
+    << numNewUsers << " new users and " << numUpdatedUsers
+    << " updated users. </span>";
+  } else
     out << "<span style=\"color:red\">Failed to add all users. </span>";
   if (doSendEmails)
   { if (sentEmails)
@@ -992,11 +998,11 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   for (int i=0; i<userTable.size; i++)
     theSections.AddOnTopNoRepetition(userTable[i][indexExtraInfo]);
   theSections.QuickSortAscending();
-  out << "<hr><hr>";
+  out << "<hr>";
   out << HtmlInterpretation::ToStringAssignSection();
-  out << "<hr><hr>";
+  out << "<hr>";
   out << HtmlInterpretation::ToStringUserDetails(true, userTable, columnLabels, hostWebAddressWithPort);
-  out << "<hr><hr>";
+  out << "<hr>";
   out << HtmlInterpretation::ToStringUserDetails(false, userTable, columnLabels, hostWebAddressWithPort);
   return out.str();
 #else
@@ -1069,12 +1075,23 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
 { MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetailsTable");
 #ifdef MACRO_use_MySQL
   std::stringstream out;
-  std::string userRole = adminsOnly ? "admin" : "student";
+  //std::string userRole = adminsOnly ? "admin" : "student";
   int numUsers=0;
   std::stringstream tableStream;
+  bool flagFilterCourse=(!adminsOnly) && (theGlobalVariables.GetWebInput("filterAccounts")=="true");
+  if (flagFilterCourse)
+  { tableStream << "<br>Displaying only students in course: <span style=\"color:blue\"><b>"
+    << theGlobalVariables.GetWebInput("courseHome") << "</b></span>. "
+    << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?request=accounts&"
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+    << "filterAccounts=false&Z"
+    << "\">Show all. </a>"
+    << "<br>";
+  }
   tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
   << "<th>Activation manual email</th>"
-  << "<th>Section/Group</th> <th>Pre-filled login link</th><th>Score</th></tr>";
+  << "<th>Section/Group</th>  <th>Pre-filled login link</th><th>Score</th><th>Course</th></tr>";
   UserCalculator currentUser;
   currentUser.currentTable=DatabaseStrings::usersTableName;
   int indexUser=-1;
@@ -1082,6 +1099,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   int indexActivationToken=-1;
   int indexUserRole=-1;
   int indexExtraInfo=-1;
+  int indexCurrentCourse=-1;
   //int indexProblemData=-1;
   for (int i=0; i<columnLabels.size; i++)
   { if (columnLabels[i]==DatabaseStrings::userColumnLabel)
@@ -1094,23 +1112,27 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       indexUserRole=i;
     if (columnLabels[i]==DatabaseStrings::userGroupLabel)
       indexExtraInfo=i;
+    if (columnLabels[i]==DatabaseStrings::userCurrentCoursesColumnLabel)
+      indexCurrentCourse=i;
   }
   if (
       indexUser           ==-1 ||
       indexEmail          ==-1 ||
       indexActivationToken==-1 ||
       indexUserRole       ==-1 ||
-      indexExtraInfo      ==-1
+      indexExtraInfo      ==-1 ||
+      indexCurrentCourse  ==-1
       )
   { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
     << "column entries in the database. "
     << "This is likely a software bug. Function: HtmlInterpretation::ToStringUserDetailsTable. </b></span>"
-    << "indexUser, indexExtraInfo, indexEmail, indexActivationToken, indexUserRole:  "
+    << "indexUser, indexExtraInfo, indexEmail, indexActivationToken, indexUserRole, indexCurrentCourse:  "
     << indexUser << ", "
     << indexEmail          << ", "
     << indexActivationToken << ", "
     << indexUserRole << ", "
-    << indexExtraInfo << ". "
+    << indexExtraInfo << ", "
+    << indexCurrentCourse << ". "
     ;
     return out.str();
   }
@@ -1124,13 +1146,17 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   nonActivatedAccountBucketsBySection.SetSize(sectionNames.size);
   int numActivatedUsers=0;
   std::stringstream preFilledLoginLinks;
+  std::string currentCourse=
+  CGI::StringToURLString(theGlobalVariables.GetWebInput("courseHome"),false);
   for (int i=0; i<userTable.size; i++)
-  { std::stringstream failureStream;
-    currentUser.username=userTable[i][indexUser];
+  { currentUser.username=userTable[i][indexUser];
     currentUser.userGroup=CGI::URLStringToNormal(userTable[i][indexExtraInfo], false);
     currentUser.email=userTable[i][indexEmail];
     currentUser.actualActivationToken=userTable[i][indexActivationToken];
     currentUser.userRole=userTable[i][indexUserRole];
+    currentUser.currentCourses=userTable[i][indexCurrentCourse];
+    if (!adminsOnly && flagFilterCourse && currentUser.currentCourses!=currentCourse)
+      continue;
     if (adminsOnly xor (currentUser.userRole=="admin"))
       continue;
     numUsers++;
@@ -1140,9 +1166,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     << "<td>" << currentUser.email.value << "</td>"
     ;
     bool isActivated=true;
-    std::string webAddress="https://"+ hostWebAddressWithPort;
-    if (!theGlobalVariables.flagRunningAce)
-      webAddress+="/calculator";
+    std::string webAddress="https://"+ hostWebAddressWithPort+"/cgi-bin/calculator";
     if (currentUser.actualActivationToken.value!="activated" && currentUser.actualActivationToken.value!="error")
     { isActivated=false;
       numActivatedUsers++;
@@ -1189,7 +1213,8 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     std::stringstream oneLink;
     oneLink << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=login&username="
     << currentUser.username.value << "\">" << currentUser.username.value << "</a>";
-    oneTableLineStream << "<td>"  << oneLink.str()<< "</td>";
+    oneTableLineStream << "<td>" << oneLink.str() << "</td>";
+    oneTableLineStream << "<td>" << currentUser.currentCourses.value << "</td>";
     preFilledLoginLinks << oneLink.str() << "<br>";
     oneTableLineStream << "</tr>";
     if (isActivated)
@@ -1450,7 +1475,14 @@ std::string HtmlInterpretation::ToStringUserDetails
   std::string idExtraTextarea= "inputAddExtraInfo"+userRole;
   std::string idOutput="idOutput"+userRole;
   std::string idPasswordTextarea="inputAddDefaultPasswords"+userRole;
-  out << "Add <b>" << userRole << "(s)</b>.<br> ";
+  out << "Add/update <b>" << userRole << "(s)</b>.\n<br> ";
+  out << "Both newly added and updated users will "
+  << "have their current course set to: "
+  << "<span style=\"color:purple\"><b>"
+  << theGlobalVariables.GetWebInput("courseHome")
+  << "</b></span>.\n"
+  << "<br>\nUpdated users get an update on: "
+  << "section, password and current course.<br>\n";
 //  out << "<b>Warning: there's no remove button yet.</b><br>";
   out << "<textarea width=\"500px\" ";
   out << "id=\"" << idAddressTextarea << "\"";
@@ -1550,7 +1582,9 @@ std::string HtmlInterpretation::ToStringNavigation()
       //&& !theGlobalVariables.UserStudentViewOn()
   )
   { if (theGlobalVariables.userCalculatorRequestType!="accounts")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts&"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+      << "?request=accounts&"
+      << "filterAccounts=true&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
       << "\">Accounts</a>" << linkSeparator;
     else

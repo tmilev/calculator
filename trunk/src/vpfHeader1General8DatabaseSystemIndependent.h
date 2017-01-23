@@ -59,8 +59,8 @@ class UserCalculatorData{
   MySQLdata problemInfoRowId;
   MySQLdata problemInfoString;
   MySQLdata sectionsTaughtByUserString;
-  MySQLdata deadlineInfoRowId;
-  MySQLdata deadlineInfoString;
+  MySQLdata currentCourses;
+  MySQLdata currentCoursesDeadlineInfoString;
   MySQLdata userGroup;
 
   std::string enteredPassword;
@@ -90,9 +90,9 @@ public:
   static std::string userColumnLabel;
   static std::string usersTableName;
   static std::string userGroupLabel;
+  static std::string userCurrentCoursesColumnLabel;
 
   static std::string deadlinesTableName;
-  static std::string deadlinesIdColumnName;
   static std::string infoColumnInDeadlinesTable;
 
   static std::string problemWeightsTableName;

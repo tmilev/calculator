@@ -16,6 +16,5 @@ public:
   static std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
   static std::string GetJavascriptCanvasGraphics();
   static std::string GetDatePickerJavascriptInit();
-  static std::string GetDatePickerStart(const std::string& theId);
 };
 #endif

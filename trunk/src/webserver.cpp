@@ -528,6 +528,53 @@ void WebServer::SSLServerSideHandShake()
 #endif // MACRO_use_open_ssl
 }
 
+std::string WebWorker::ToStringSSLError(int errorCode)
+{ int theCode=SSL_get_error(theSSLdata.ssl, errorCode);
+  ERR_print_errors_fp(stderr);
+  std::stringstream out;
+  int extraErrorCode=0;
+  switch (theCode)
+  {
+  case SSL_ERROR_NONE:
+    out << "No error. ";
+    break;
+  case SSL_ERROR_ZERO_RETURN:
+    out << "SSL_ERROR_ZERO_RETURN: the TLS/SSL connection has been closed. ";
+    break;
+  case SSL_ERROR_WANT_READ:
+    out << "SSL_ERROR_WANT_READ: the read operation did not complete";
+    break;
+  case SSL_ERROR_WANT_WRITE:
+    out << "SSL_ERROR_WANT_WRITE: the write operation did not complete";
+    break;
+  case SSL_ERROR_WANT_CONNECT:
+    out << "SSL_ERROR_WANT_CONNECT: the connect operation did not complete";
+    break;
+  case SSL_ERROR_WANT_ACCEPT:
+    out << "SSL_ERROR_WANT_ACCEPT: the accept operation did not complete";
+    break;
+  case SSL_ERROR_WANT_X509_LOOKUP:
+    out << "SSL_ERROR_WANT_X509_LOOKUP: issue with X509 lookup. ";
+    break;
+  case SSL_ERROR_SYSCALL:
+    out << "SSL_ERROR_SYSCALL: Some I/O error occurred. ";
+    extraErrorCode=ERR_get_error();
+    if (extraErrorCode==0)
+      out << "Bad eof.";
+    else if (extraErrorCode==-1)
+      out << "I/O error outside of ssl. "
+      << theWebServer.ToStringLastErrorDescription();
+    break;
+  case SSL_ERROR_SSL:
+    out << "SSL_ERROR_SSL: ssl error, most likely protocol one. ";
+    break;
+  default:
+    out << "Unknown error code: " << theCode;
+    break;
+  }
+  return out.str();
+}
+
 bool WebWorker::ReceiveAllHttpSSL()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttpSSL");
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
@@ -550,9 +597,10 @@ bool WebWorker::ReceiveAllHttpSSL()
   double numSecondsAtStart=theGlobalVariables.GetElapsedSeconds();
   if (numBytesInBuffer<0 || numBytesInBuffer>(signed)bufferSize)
   { std::stringstream out;
-    out << "Socket::ReceiveAllHttpSSL on socket " << this->connectedSocketID << " failed. ";
-    ERR_print_errors_fp(stderr);
-    this->displayUserInput=out.str();
+    out << "WebWorker::ReceiveAllHttpSSL on socket "
+    << this->connectedSocketID << " failed. "
+    << this->ToStringSSLError(numBytesInBuffer);
+    this->error=out.str();
     theLog << out.str() << logger::endL;
     return false;
   }

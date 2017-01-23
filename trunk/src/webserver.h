@@ -183,6 +183,7 @@ int recursionDepth=0)
   void AttemptUnknownRequestErrorCorrection();
   bool ReceiveAllHttp();
   bool ReceiveAllHttpSSL();
+  std::string ToStringSSLError(int errorCode);
   void SendDisplayUserInputToServer();
   enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
   std::string ToStringStatus()const;

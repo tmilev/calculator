@@ -542,16 +542,16 @@ std::string WebWorker::ToStringSSLError(int errorCode)
     out << "SSL_ERROR_ZERO_RETURN: the TLS/SSL connection has been closed. ";
     break;
   case SSL_ERROR_WANT_READ:
-    out << "SSL_ERROR_WANT_READ: the read operation did not complete";
+    out << "SSL_ERROR_WANT_READ: the read operation did not complete. ";
     break;
   case SSL_ERROR_WANT_WRITE:
-    out << "SSL_ERROR_WANT_WRITE: the write operation did not complete";
+    out << "SSL_ERROR_WANT_WRITE: the write operation did not complete. ";
     break;
   case SSL_ERROR_WANT_CONNECT:
-    out << "SSL_ERROR_WANT_CONNECT: the connect operation did not complete";
+    out << "SSL_ERROR_WANT_CONNECT: the connect operation did not complete. ";
     break;
   case SSL_ERROR_WANT_ACCEPT:
-    out << "SSL_ERROR_WANT_ACCEPT: the accept operation did not complete";
+    out << "SSL_ERROR_WANT_ACCEPT: the accept operation did not complete. ";
     break;
   case SSL_ERROR_WANT_X509_LOOKUP:
     out << "SSL_ERROR_WANT_X509_LOOKUP: issue with X509 lookup. ";
@@ -600,7 +600,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   { numFailedReceives++;
     std::stringstream out;
     out << this->parent->ToStringConnection()
-    << ". WebWorker::ReceiveAllHttpSSL on socket "
+    << " WebWorker::ReceiveAllHttpSSL on socket "
     << this->connectedSocketID
     << " failed (so far "
     << numFailedReceives << " fails). "
@@ -4157,12 +4157,14 @@ int WebWorker::Run()
       << "<problemNavigation>"
       << theGlobalVariables.ToStringNavigation()
       << "</problemNavigation>"
-      << "<b>HTTP error 400 (bad request). </b> There was an error with the request. "
-      << "One possibility is that the input was too large. "
-      << "<br>The error message returned was:<br>"
+      << "<b>HTTP error 400 (bad request). </b> "
+      << "<br>Possible causes. "
+      << "<br>1. Connection time out, possibly due to high server load or sluggish internet (on either side). "
+      << "<br>2. Programming bug (less likely). "
+      << "<br>Detailed error message follows. <br>"
       << this->error
-      << " <hr><hr>The message (part) that was received is: "
-      << this->ToStringMessageFullUnsafe()
+//      << " <hr><hr>The message (part) that was received is: "
+//      << this->ToStringMessageFullUnsafe()
       << "</body></html>";
       this->SendAllAndWrapUp();
       return -1;

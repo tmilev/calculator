@@ -825,7 +825,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   if (createdUsers)
   { out << "<span style=\"color:green\">Success: "
     << numNewUsers << " new users and " << numUpdatedUsers
-    << " updated users. </span>";
+    << " user updates. </span>";
   } else
     out << "<span style=\"color:red\">Failed to add all users. </span>";
   if (doSendEmails)
@@ -1146,8 +1146,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   nonActivatedAccountBucketsBySection.SetSize(sectionNames.size);
   int numActivatedUsers=0;
   std::stringstream preFilledLoginLinks;
-  std::string currentCourse=
-  CGI::StringToURLString(theGlobalVariables.GetWebInput("courseHome"),false);
+  std::string currentCourse=theGlobalVariables.GetWebInput("courseHome");
   for (int i=0; i<userTable.size; i++)
   { currentUser.username=userTable[i][indexUser];
     currentUser.userGroup=CGI::URLStringToNormal(userTable[i][indexExtraInfo], false);
@@ -1481,8 +1480,8 @@ std::string HtmlInterpretation::ToStringUserDetails
   << "<span style=\"color:purple\"><b>"
   << theGlobalVariables.GetWebInput("courseHome")
   << "</b></span>.\n"
-  << "<br>\nUpdated users get an update on: "
-  << "section, password and current course.<br>\n";
+  << "<br>\nUpdated fields: "
+  << "section, password, current course and problem weight schema.<br>\n";
 //  out << "<b>Warning: there's no remove button yet.</b><br>";
   out << "<textarea width=\"500px\" ";
   out << "id=\"" << idAddressTextarea << "\"";

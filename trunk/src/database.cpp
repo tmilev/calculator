@@ -1299,8 +1299,7 @@ bool DatabaseRoutines::AddUsersFromEmails
   for (int i=0; i<theEmails.size; i++)
   { currentUser.username=theEmails[i];
     currentUser.email=theEmails[i];
-    currentUser.currentCourses =
-    CGI::StringToURLString(theGlobalVariables.GetWebInput("courseHome"), false);
+    currentUser.currentCourses = theGlobalVariables.GetWebInput("courseHome");
     if (!currentUser.Iexist(*this))
     { if (!currentUser.CreateMeIfUsernameUnique(*this, &comments))
       { comments << "Failed to create user: " << currentUser.username.value;
@@ -1318,8 +1317,13 @@ bool DatabaseRoutines::AddUsersFromEmails
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
     currentUser.SetColumnEntry
     (DatabaseStrings::userCurrentCoursesColumnLabel,
-     CGI::StringToURLString(theGlobalVariables.GetWebInput("courseHome"), false),
-     *this, &comments)
+     currentUser.currentCourses.value,
+      *this, &comments)
+    ;
+    currentUser.SetColumnEntry
+    (DatabaseStrings::problemWeightsIdColumnName,
+     currentUser.currentCourses.value,
+      *this, &comments)
     ;
     if (thePasswords.size==0 || thePasswords.size!=theEmails.size)
     { currentUser.ComputeActivationToken();
@@ -1967,13 +1971,9 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std
   << DatabaseStrings::problemWeightsIdColumnName << ")"
   << " VALUES("
   << this->username.GetDatA() << ", "
-  << "'"
-  << this->currentCourses.value
-  << "'"
+  << this->currentCourses.GetDatA()
   << ", "
-  << "'"
-  << this->currentCourses.value
-  << "'"
+  << this->currentCourses.GetDatA()
   << ")";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
   if (this->enteredPassword=="")

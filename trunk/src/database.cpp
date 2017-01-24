@@ -2049,7 +2049,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
       *commentsOnFailure << "Failed to select database: " << this->theDatabaseName << ". ";
     return false;
   }
-  //CANT use DatabaseQuery object as its constructor calls this method!!!!!
+  //CAN'T use DatabaseQuery object as its constructor calls this method!!!!!
   mysql_free_result( mysql_use_result(this->connection));
   std::stringstream tableCols, deadlineTableCols, probWeightTableCols;
   tableCols

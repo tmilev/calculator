@@ -322,10 +322,6 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 #ifdef MACRO_use_MySQL
   this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   //this->theProblemData.CheckConsistency();
-  //stOutput << "<hr>DEBug: got to loadDB info.<hr>";
-  if (this->currentUseR.problemDataString=="")
-    return true;
-  //stOutput << "<hr>DEBug: continuing to load ....<hr>";
   if (! this->PrepareSectionList(comments))
     return false;
   //this->theProblemData.CheckConsistency();

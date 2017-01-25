@@ -860,7 +860,9 @@ bool UserCalculator::SetColumnEntry
  std::stringstream* failureComments)
 { MacroRegisterFunctionWithName("UserCalculator::SetColumnEntry");
   if (this->currentTable=="")
-    crash << "Programming error: attempting to change column " << columnNameUnsafe << " without specifying a table. " << crash;
+    crash << "Programming error: attempting to change column " << columnNameUnsafe
+    << " without specifying a table. " << crash;
+  //stOutput << "<hr>DEBUG: value to set: " << theValueUnsafe;
   return theRoutines.SetEntry(DatabaseStrings::userColumnLabel, this->username, this->currentTable, columnNameUnsafe, theValueUnsafe, failureComments);
 }
 
@@ -1296,10 +1298,11 @@ bool DatabaseRoutines::AddUsersFromEmails
   bool doSendEmails=false;
   outputNumNewUsers=0;
   outputNumUpdatedUsers=0;
+  //stOutput << "DEBUG: courseHome: " << currentUser.currentCourses.value
+  //<< "\n<br>\ncurrentUser.currentTable: " << currentUser.currentTable.value << "\n<br>\n";
   for (int i=0; i<theEmails.size; i++)
   { currentUser.username=theEmails[i];
     currentUser.email=theEmails[i];
-    currentUser.currentCourses = theGlobalVariables.GetWebInput("courseHome");
     if (!currentUser.Iexist(*this))
     { if (!currentUser.CreateMeIfUsernameUnique(*this, &comments))
       { comments << "Failed to create user: " << currentUser.username.value;
@@ -1314,17 +1317,16 @@ bool DatabaseRoutines::AddUsersFromEmails
         result=false;
       outputNumUpdatedUsers++;
     }
+    //currentUser may have its updated entries modified by the functions above.
+    currentUser.currentTable=DatabaseStrings::usersTableName;
+    currentUser.currentCourses = theGlobalVariables.GetWebInput("courseHome");
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
     currentUser.SetColumnEntry
     (DatabaseStrings::userCurrentCoursesColumnLabel,
-     currentUser.currentCourses.value,
-      *this, &comments)
-    ;
+     currentUser.currentCourses.value, *this, &comments);
     currentUser.SetColumnEntry
     (DatabaseStrings::problemWeightsIdColumnName,
-     currentUser.currentCourses.value,
-      *this, &comments)
-    ;
+     currentUser.currentCourses.value, *this, &comments);
     if (thePasswords.size==0 || thePasswords.size!=theEmails.size)
     { currentUser.ComputeActivationToken();
       if (!currentUser.SetColumnEntry("activationToken", currentUser.actualActivationToken.value, *this, &comments))
@@ -1991,9 +1993,9 @@ bool DatabaseRoutines::SetEntry
     queryStream << "UPDATE " << this->theDatabaseName << "." << table.GetIdentifieR()
     << " SET " << columnToSet.GetIdentifieR() << "="
     << valueToSet.GetDatA() << " WHERE " << key.GetIdentifieR() << "=" << keyValue.GetDatA();
-    //  stOutput << "Got to here: " << columnName << ". ";
+//      stOutput << "DEBUG: Got to here: " << columnToSet.value << ". ";
     DatabaseQuery theDBQuery(*this, queryStream.str(), failureComments);
-    //stOutput << "<hr>Fired up query:<br>" << queryStream.str();
+    //stOutput << "<hr>DEBUG: Fired up query:<br>" << queryStream.str();
     if (!theDBQuery.flagQuerySucceeded)
     { if (failureComments!=0)
         *failureComments << "Failed update an already existing entry in column: " << columnToSet.value << ". ";

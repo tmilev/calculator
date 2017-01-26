@@ -2748,7 +2748,10 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   << "<button class=\"normalButton\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('"
   << clonePageAreaID << "').value, '" << spanCloningAttemptResultID << "', 'clonePage'"
-  << spanCloningAttemptResultID << ");"
+  << ", '"
+  << spanCloningAttemptResultID
+  << "'"
+  << ");"
   << "\" >Clone</button> <span id=\"" << spanCloningAttemptResultID <<"\"></span>";
   return out.str();
 }

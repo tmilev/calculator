@@ -928,8 +928,20 @@ D-B;\
   this->AddOperationInnerHandler
   ("CoefficientsPowersOf", CalculatorFunctionsGeneral::innerCoefficientsPowersOf, "",
    "Extracts the coefficients of the powers of the first argument in the second argument.",
-   "CoefficientsPowersOf(x, a x^2+ b *3 x +c +\\pi +3)", true, false)
+   "CoefficientsPowersOf(x, a x^2+ b *3 x +c +\\pi +3)", true, false,
+   "CalculatorFunctionsGeneral::innerCoefficientsPowersOf",
+   "CoefficientsPowersOf")
    ;
+
+      this->AddOperationInnerHandler
+  ("ConstantTerm", CalculatorFunctionsGeneral::innerConstTermRelative, "",
+   "Extracts term constant relative to the variable in the first argument. ",
+   "ConstantTerm(y,  x y x +3 +2z)", true, false,
+   "CalculatorFunctionsGeneral::innerCoefficientOf",
+   "ConstantTerm"
+   )
+   ;
+
   this->AddOperationInnerHandler
   ("EnsureExpressionDependsOnlyOn", CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard, "",
    "Ensures the expression in the first argument depends only on the free variables given in the remaining arguments. \
@@ -982,7 +994,9 @@ D-B;\
   this->AddOperationInnerHandler
   ("\\arcsin", CalculatorFunctionsGeneral::innerArcsin, "",
    "Arcsin function. Tries to evaluate the arcsin function. ",
-   "\\arcsin(3/4)", true, false)
+   "\\arcsin(3/4)", true, false,
+   "CalculatorFunctionsGeneral::innerArcsin",
+   "\\arcsin")
    ;
   this->AddOperationInnerHandler
   ("|", CalculatorFunctionsGeneral::innerAbs, "",
@@ -2165,9 +2179,11 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    this->AddOperationInnerHandler
   ("CoefficientOf", CalculatorFunctionsGeneral::innerCoefficientOf, "",
    "Gets the coefficient of the first argument in the second. ",
-   "CoefficientOf(y, x*x*y+x*z*y*z+x*y*x)", true)
+   "CoefficientOf(y, x*x*y+x*z*y*z+x*y*x)", true, false,
+   "CalculatorFunctionsGeneral::innerCoefficientOf",
+   "CoefficientOf"
+   )
    ;
-
 
 //  this->AddOperationInnerHandler
 //  ("minPoly", & this->fMinPoly, "",
@@ -3178,6 +3194,23 @@ void Calculator::initPredefinedStandardOperations()
    A==B;\n\
    x==y;\nx==1;\nIsEqualToX{} {{a}}=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\
    \nIsEqualToX{}1;\nx=1;\nIsEqualToX{}1; z= \\sqrt{}1; z==1", true);
+  this->AddOperationOuterHandler
+  ("Contains", CalculatorFunctionsGeneral::innerContains, "",
+   "Returns 1 if the first argument contains the second as a sub-expression, else returns 0. \
+    Function has not been optimized for speed, use with caution. ",
+   "Contains ((\\arcsin x+\\cos x,5), \\arcsin )", true, false,
+   "CalculatorFunctionsGeneral::innerContains",
+   "Contains");
+  this->AddOperationOuterHandler
+  ("ExpressionLeafs", CalculatorFunctionsGeneral::innerExpressionLeafs, "",
+   "Returns a sequence without repetition of all leafs making up an expression. \
+    Here, a ``leaf'' means either an atomic expression or a built-in type. Built-in types\
+    are not broken into atoms. ",
+   "ExpressionLeafs ((\\arcsin x+\\cos x,5), \\arcsin )", true, false,
+   "CalculatorFunctionsGeneral::innerExpressionLeafs",
+   "ExpressionLeafs");
+
+
   this->AddOperationOuterHandler
   ("last", CalculatorFunctionsGeneral::innerLastElement, "",
    "Returns the last element of the expression, provided the argument has no bound variables. If the expression has bound variables does nothing.",

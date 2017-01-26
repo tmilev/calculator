@@ -1751,6 +1751,8 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceEOEXByEX();
   if (fourthToLastS=="Expression" && thirdToLastS=="\\sqcup" && secondToLastS== "Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceEOEXByEX();
+  if (thirdToLastS=="if" && secondToLastS=="Expression" && this->AllowsIfInPreceding(lastS) )
+    return this->ReplaceOEXByEX();
   if (fourthToLastS=="Sequence" && thirdToLastS=="," && secondToLastS=="Expression" && (lastS=="," || lastS==")" || lastS=="}"))
     return this->ReplaceSequenceUXEYBySequenceZY(this->conSequence());
   if (thirdToLastS!="[" && secondToLastS=="Expression" && lastS==",")
@@ -1763,8 +1765,6 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="{" && secondToLastS=="Sequence" && lastS=="}")
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
-  if (thirdToLastS=="if" && secondToLastS=="Expression" && this->AllowsIfInPreceding(lastS) )
-    return this->ReplaceOEXByEX();
   if (secondToLastS=="Sequence" &&
       ((thirdToLastS=="(" && lastS==")")||
        (thirdToLastS=="{" && lastS=="}")

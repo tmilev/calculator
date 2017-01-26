@@ -1093,6 +1093,17 @@ bool Expression::StartsWithFunctionWithComplexRange()const
   return (*this)[0].IsKnownFunctionWithComplexRange();
 }
 
+bool Expression::StartsWithGivenAtom(const std::string& theAtom)const
+{ if (this->owner==0)
+    return false;
+  if (this->size()==0)
+    return false;
+  int theOpIndex=this->owner->theAtoms.GetIndex(theAtom);
+  if (theOpIndex==-1)
+    return false;
+  return (*this)[0].IsAtomGivenData(theOpIndex);
+}
+
 bool Expression::StartsWith(int theOp, int N)const
 { if (N!=-1)
   { if (this->children.size!=N)
@@ -1442,12 +1453,29 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output)const
     output.weylAlgebraLetters[i-1]=theEWAE[i].ToString();
 }
 
+bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs)const
+{ MacroRegisterFunctionWithName("Expression::GetExpressionLeafs");
+  if (this->owner==0)
+    return true;
+  RecursionDepthCounter(&this->owner->RecursionDeptH);
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetExpressionLeafs:"))
+    return false;
+  if (this->IsBuiltInType() || this->IsAtom())
+  { outputAccumulateLeafs.AddOnTopNoRepetition(*this);
+    return true;
+  }
+  for (int i=0; i<this->size(); i++)
+    if (!((*this)[i].GetExpressionLeafs(outputAccumulateLeafs)))
+      return false;
+  return true;
+}
+
 bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants)const
 { MacroRegisterFunctionWithName("Expression::GetFreeVariables");
   if (this->owner==0)
     return true;
   RecursionDepthCounter(&this->owner->RecursionDeptH);
-  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::IsDifferentialOneFormOneVariable:"))
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetFreeVariables:"))
     return false;
   if (this->IsBuiltInType()) //<- this may need to be rewritten as some built in types will store free variables in their context.
     return true;
@@ -1467,7 +1495,7 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
       outputAccumulateFreeVariables.AddOnTopNoRepetition(*this);
     return true;
   }
-  for (int i=0; i<this->children.size; i++)
+  for (int i=0; i<this->size(); i++)
     if (!((*this)[i].GetFreeVariables(outputAccumulateFreeVariables, excludeNamedConstants)))
       return false;
   return true;
@@ -1475,7 +1503,7 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
 
 bool Expression::IsIntegraLfdx
 (Expression* differentialVariable, Expression* functionToIntegrate, Expression* integrationSet)const
-{ MacroRegisterFunctionWithName("Expression::IsIndefiniteIntegralfdx");
+{ MacroRegisterFunctionWithName("Expression::IsIntegraLfdx");
   if (this->owner==0)
     return false;
   if (!this->StartsWith(this->owner->opIntegral(), 3))
@@ -1501,7 +1529,7 @@ bool Expression::IsIndefiniteIntegralfdx
 
 bool Expression::IsDefiniteIntegralOverIntervalfdx
 (Expression* differentialVariable, Expression* functionToIntegrate, Expression* integrationSet)const
-{ MacroRegisterFunctionWithName("Expression::IsIndefiniteIntegralfdx");
+{ MacroRegisterFunctionWithName("Expression::IsDefiniteIntegralOverIntervalfdx");
   this->CheckConsistency();
   Expression tempE;
   if (integrationSet==0)

@@ -198,6 +198,7 @@ class Expression
   bool StartsWithFunctionWithComplexRange()const;
   bool StartsWithArithmeticOperation()const;
   bool StartsWith(int theOp=-1, int N=-1)const;
+  bool StartsWithGivenAtom(const std::string& theAtom)const;
   bool IsListStartingWithAtom(int theOp=-1)const
   { if (!this->IsLisT())
       return false;
@@ -457,6 +458,7 @@ class Expression
    double* outputYmin=0, double* outputYmax=0, Vectors<double>* outputPoints=0)const
    ;
   bool EvaluatesToDouble(double* whichDouble=0)const;
+  bool GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs)const;
   bool GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants)const;
 bool EvaluatesToDoubleUnderSubstitutions
 (const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble=0)const

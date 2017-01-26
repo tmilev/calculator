@@ -2789,6 +2789,24 @@ bool CalculatorFunctionsGeneral::innerCoefficientsPowersOf
   return output.MakeSequence(theCommands, &theCFsIncludingZeros);
 }
 
+bool CalculatorFunctionsGeneral::innerConstTermRelative(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConstTermRelative");
+  if (!input.StartsWithGivenAtom("ConstantTerm"))
+    return false;
+  Expression coeffExtractor, theCoeffs;
+  coeffExtractor=input;
+  coeffExtractor.SetChildAtomValue(0, "ConstantTerm");
+  if (!CalculatorFunctionsGeneral::innerCoefficientsPowersOf(theCommands, coeffExtractor, theCoeffs))
+    return false;
+  if (theCoeffs.IsSequenceNElementS())
+    if (theCoeffs.size()>1)
+    { output=theCoeffs[1];
+      return true;
+
+    }
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa");
@@ -3606,6 +3624,30 @@ bool CalculatorFunctionsGeneral::innerTrace(Calculator& theCommands, const Expre
   }
   output=theMat.GetTrace();
   return true;
+}
+
+bool CalculatorFunctionsGeneral::innerContains
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerContains");
+  if (input.size()!=3)
+    return false;
+  if (input[1].ContainsAsSubExpression(input[2]))
+    return output.AssignValue(1,theCommands);
+  else
+    return output.AssignValue(0, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerExpressionLeafs
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionLeafs");
+  HashedList<Expression> theLeafs;
+  if (input.StartsWithGivenAtom("ExpressionLeafs"))
+  { for (int i=1; i<input.size(); i++)
+      if (!input[i].GetExpressionLeafs(theLeafs))
+        return theCommands << "Failed to extract expression leafs from " << input.ToString() << ".";
+  } else if (!input.GetExpressionLeafs(theLeafs))
+    return theCommands << "Failed to extract expression leafs from " << input.ToString() << ".";
+  return output.MakeSequence(theCommands, &theLeafs);
 }
 
 bool CalculatorFunctionsGeneral::innerLastElement(Calculator& theCommands, const Expression& input, Expression& output)

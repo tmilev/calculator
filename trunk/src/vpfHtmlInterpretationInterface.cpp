@@ -351,7 +351,11 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn();
   thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   if (!thePage.LoadMe(true, comments))
-  { out << "<html><body><b>Failed to load file: "
+  { out << "<html>"
+    << CGI::GetCalculatorStyleSheetWithTags()
+    << "<body>"
+    << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << " </problemNavigation>"
+    << "<b>Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();
@@ -440,17 +444,23 @@ std::string HtmlInterpretation::GetEditPageHTML()
   //  << CGI::GetLaTeXProcessingJavascript()
   //  << CGI::GetCalculatorStyleSheetWithTags()
   << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
+  << CGI::GetCalculatorStyleSheetWithTags()
   << "<style type=\"text/css\" media=\"screen\">\n"
   << "    #editor { \n"
   << "      height: 400px;\n"
   << "      font-size: 100%;\n"
   << "   }\n"
   << "</style>\n"
-  << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n"
+  << "<script src=\"/html-common-calculator/ace.min.js\" type=\"text/javascript\"charset=\"utf-8\"></script>"
+//  << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n"
+
+
   //  << "<link rel=\"stylesheet\" href=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css\">"
   //  << "<script src=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js\"></script>"
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
+  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
+  << "</problemNavigation>";
   std::stringstream failureStream;
   if (!theFile.LoadMe(false, failureStream))
   { out << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";

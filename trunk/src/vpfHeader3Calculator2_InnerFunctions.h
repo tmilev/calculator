@@ -71,6 +71,7 @@ public:
   static bool innerTan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCot(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCoefficientOf(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerConstTermRelative(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFloor(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerArcsin(Calculator& theCommands, const Expression& input, Expression& output);
@@ -242,6 +243,8 @@ public:
   static bool innerPlotPoint(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlot2DWithBars(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerContains(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerExpressionLeafs(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLastElement(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRemoveLastElement(Calculator& theCommands, const Expression& input, Expression& output);
 

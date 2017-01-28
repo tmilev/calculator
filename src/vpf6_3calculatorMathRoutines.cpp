@@ -2712,6 +2712,8 @@ bool CalculatorFunctionsGeneral::innerPolynomialRelations
 bool CalculatorFunctionsGeneral::outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPolynomialize");
   Expression thePolyE;
+  if (input.StartsWithGivenAtom("Polynomialize"))
+    return false;
   if (!CalculatorConversions::innerPolynomial<Rational>(theCommands, input, thePolyE))
     return false;
   if (!CalculatorConversions::innerExpressionFromBuiltInType(theCommands, thePolyE, output))

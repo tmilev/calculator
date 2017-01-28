@@ -941,6 +941,7 @@ public:
   bool flagLogFullTreeCrunching;
   bool flagProduceLatexLink;
   bool flagHideLHS;
+  bool flagHidePolynomialBuiltInTypeIndicator;
   bool flagDisplayFullExpressionTree;
   bool flagUseFracInRationalLaTeX;
   bool flagUseHtml;

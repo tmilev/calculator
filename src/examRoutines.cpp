@@ -418,7 +418,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
 }
 
 std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDatabaseMayIgnore)
-{ MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItem ");
+{ MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItem");
   double startTime=theGlobalVariables.GetElapsedSeconds();
 //  this->theProblemData.CheckConsistency();
   this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore);
@@ -469,12 +469,18 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore)
 
 //  this->theProblemData.CheckConsistency();
 //  stOutput << "<hr>DEBUG: got to before loading<hr>";
-  if (!this->LoadMe(needToLoadDatabaseMayIgnore, this->comments))
+  std::stringstream commentsStream;
+  if (!this->LoadMe(needToLoadDatabaseMayIgnore, commentsStream))
     this->flagLoadedSuccessfully =false;
 //  stOutput << "<hr>DEBUG: loaded<hr>";
 //  stOutput << "<hr>DEBUG: OK<hr>";
   if (!this->flagLoadedSuccessfully)
+  { this->comments <<"<problemNavigation>"
+    << theGlobalVariables.ToStringNavigation()
+    << "</problemNavigation>"
+    << commentsStream.str();
     this->comments << "<a href=\"/selectCourse.html\">Go to course list page.</a>";
+  }
   this->theProblemData.CheckConsistency();
 }
 

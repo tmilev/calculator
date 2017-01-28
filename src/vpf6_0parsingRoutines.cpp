@@ -62,6 +62,7 @@ void Calculator::reset()
   this->flagNewContextNeeded=true;
   this->flagProduceLatexLink=false;
   this->flagDisplayFullExpressionTree=false;
+  this->flagHidePolynomialBuiltInTypeIndicator=false;
   this->flagUseFracInRationalLaTeX=true;
   this->flagForkingProcessAllowed=true;
   this->flagNoApproximations=false;
@@ -273,6 +274,7 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("ShowContext");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogParsing");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluation");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("HidePolynomialDataStructure");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NumberColors");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogRules");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogCache");
@@ -1317,6 +1319,8 @@ bool Calculator::AllowsIfInPreceding(const std::string& lookAhead)
 { return
   lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead=="," || lookAhead==";" ||
+  lookAhead=="+" || lookAhead=="-" ||
+  lookAhead=="/" || lookAhead=="*" ||
   lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" ||
   lookAhead=="EndProgram"
   ;
@@ -1457,6 +1461,11 @@ bool Calculator::ApplyOneRule()
   if (secondToLastS=="%" && lastS=="PlotNoCoordinateDetails")
   { this->flagPlotNoControls=true;
     this->Comments << "Plot details suppressed. ";
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="%" && lastS=="HidePolynomialDataStructure")
+  { this->flagHidePolynomialBuiltInTypeIndicator=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
@@ -1814,8 +1823,10 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXYByY();
   if (fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="," && secondToLastS=="Expression" && lastS=="]")
     return this->ReplaceXEXEXByEusingO(this->conLieBracket());
-  if (this->isSeparatorFromTheLeftForDefinition(eighthToLastS) && seventhToLastS=="Expression" && sixthToLastS==":" &&
-      fifthToLastS=="if" && fourthToLastS=="Expression" && thirdToLastS=="=" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
+  if (this->isSeparatorFromTheLeftForDefinition(eighthToLastS) && seventhToLastS=="Expression" &&
+      sixthToLastS==":" && fifthToLastS=="if" && fourthToLastS=="Expression" &&
+      thirdToLastS=="=" && secondToLastS=="Expression" &&
+      this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEXXEXEXByEXusingO(this->conDefineConditional());
   if (lastS==";")
   { this->NonBoundVariablesStack.LastObject()->Clear();

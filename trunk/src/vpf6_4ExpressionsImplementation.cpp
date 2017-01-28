@@ -2015,8 +2015,11 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<Polynomial<Rational> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseFrac=true;
-    out << "Polynomial{}(";
-    out << this->GetValue<Polynomial<Rational> >().ToString(&contextFormat.GetElement()) << ")";
+    if (!this->owner->flagHidePolynomialBuiltInTypeIndicator)
+      out << "Polynomial{}(";
+    out << this->GetValue<Polynomial<Rational> >().ToString(&contextFormat.GetElement());
+    if (!this->owner->flagHidePolynomialBuiltInTypeIndicator)
+      out << ")";
     if (showContext)
       out << "[" << this->GetContext().ToString() << "]";
     result=true;
@@ -2521,7 +2524,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     else
       out << "(Corrupt string)";
   } else if (this->IsListStartingWithAtom(this->owner->opDefineConditional()))
-    out << (*this)[1].ToString(theFormat) << " :if " << (*this)[2].ToString(theFormat) << "=" << (*this)[3].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << " :if \\left(" << (*this)[2].ToString(theFormat) << "\\right)=" << (*this)[3].ToString(theFormat);
   else if (this->StartsWith(this->owner->opDivide(), 3))
   { bool doUseFrac= this->formatUseFrac || this->owner->flagUseFracInRationalLaTeX;
     if (doUseFrac && ((*this)[1].StartsWith(this->owner->opTimes()) ||

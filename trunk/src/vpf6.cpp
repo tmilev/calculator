@@ -2336,6 +2336,7 @@ void Calculator::ComputeAutoCompleteKeyWords()
   autoCompleteKeyWords.AddOnTopNoRepetition("ShowContext");
   autoCompleteKeyWords.AddOnTopNoRepetition("LogParsing");
   autoCompleteKeyWords.AddOnTopNoRepetition("LogEvaluation");
+  autoCompleteKeyWords.AddOnTopNoRepetition("HidePolynomialDataStructure");
   autoCompleteKeyWords.AddOnTopNoRepetition("NumberColors");
   autoCompleteKeyWords.AddOnTopNoRepetition("LogRules");
   autoCompleteKeyWords.AddOnTopNoRepetition("LogCache");

@@ -791,7 +791,7 @@ std::string& CGI::GetJavascriptAceEditorScript()
     found=false;
   }
   if (found)
-    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
+    out << "<script type=\"text/javascript\" src=\"/html-common-calculator/ace/src-min/ace.js\" charset=\"utf-8\"></script>";
   else
     out << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\""
     << " type=\"text/javascript\" charset=\"utf-8\"></script>\n";

@@ -451,7 +451,9 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "      font-size: 100%;\n"
   << "   }\n"
   << "</style>\n"
-  << "<script src=\"/html-common-calculator/ace.min.js\" type=\"text/javascript\"charset=\"utf-8\"></script>"
+  << CGI::GetJavascriptAceEditorScript()
+
+//  << "<script src=\"/html-common-calculator/ace.min.js\" type=\"text/javascript\" charset=\"utf-8\"></script>"
 //  << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n"
 
 

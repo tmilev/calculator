@@ -3336,6 +3336,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   this->AddOperationNoRepetitionAllowed("RulesOn");
   this->AddOperationNoRepetitionAllowed("Freeze");
   this->AddOperationNoRepetitionAllowed("\\infty");
+  this->AddOperationNoRepetitionAllowed("\\phantom");
   this->AddOperationNoRepetitionAllowed("CommandEnclosure");
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
   this->AddOperationNoRepetitionAllowed("MonomialPoly");

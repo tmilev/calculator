@@ -70,7 +70,7 @@ std::string HtmlInterpretation::GetProblemSolution()
   { out << "<span style=\"color:red\"><b>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
-    << theInterpreteR.ToStringSyntacticStackHumanReadable(false);
+    << theInterpreteR.ToStringSyntacticStackHumanReadable(false,false);
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
   }
@@ -189,7 +189,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   theInterpreteR.Evaluate(studentInterpretationWithComments.str());
   if (theInterpreteR.syntaxErrors!="")
   { out << "<span style=\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
-    << theInterpreteR.ToStringSyntacticStackHumanReadable(false);
+    << theInterpreteR.ToStringSyntacticStackHumanReadable(false, true);
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
   } else if (theInterpreteR.flagAbortComputationASAP)
@@ -604,7 +604,7 @@ std::string HtmlInterpretation::SubmitProblem()
     theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
     isolatedInterpreter.Evaluate("("+currentA.currentAnswerClean+")");
     if (isolatedInterpreter.syntaxErrors!="")
-      out << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false);
+      out << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false, true);
     else
       out << isolatedInterpreter.outputString;
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
@@ -928,7 +928,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
   { out << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
-    << theInterpreteR.ToStringSyntacticStackHumanReadable(false);
+    << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
   }

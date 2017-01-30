@@ -1972,7 +1972,9 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   MemorySaving<FormatExpressions> contextFormat;
   bool showContext= this->owner==0 ? false : owner->flagDisplayContext;
   if (this->IsAtom())
-  { if (this->owner->flagUseLnInsteadOfLog && this->IsAtomGivenData(this->owner->opLog()))
+  { if (this->IsAtomGivenData(this->owner->opPhantom()))
+      out << "\\phantom{}";
+    else if (this->owner->flagUseLnInsteadOfLog && this->IsAtomGivenData(this->owner->opLog()))
       out << "\\ln";
     else if (this->theData< this->owner->GetOperations().size && this->theData>=0)
       out << this->owner->GetOperations()[this->theData];
@@ -2492,6 +2494,10 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   int lineBreak=50;
   int charCounter=0;
   std::string tempS;
+//  stOutput << "DEBUG:" << this->theData << " [";
+//  for (int i=0; i<this->size(); i++)
+//    stOutput << (*this)[i].theData << ", ";
+//  stOutput << "]";
   if (this->ToStringData(tempS, theFormat))
     out << tempS;
   else if (this->StartsWith(this->owner->opDefine(), 3))
@@ -2914,9 +2920,12 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "(Error~ " << this->owner->NumErrors << ":~ see~ comments)";
     this->owner->Comments << "<br>Error " << this->owner->NumErrors << ". " << (*this)[1].ToString(theFormat);
   } else if (this->children.size==1)
+  { //stOutput << "I'm at this place";
     out << (*this)[0].ToString(theFormat);
+  }
   else if (this->children.size>=2)
-  { if (this->format==this->formatFunctionUseUnderscore)
+  { //stOutput << "I'm at the second place";
+    if (this->format==this->formatFunctionUseUnderscore)
       out << "{";
     out << (*this)[0].ToString(theFormat);
     bool needParenthesis=true;

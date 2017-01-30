@@ -2428,6 +2428,9 @@ std::string Calculator::ToString()
         out2 << "<br>";
     }
   }
+//  stOutput << "DEBUG: flags on;";
+  this->flagShowCalculatorInternalStatus=true;
+
   if (this->flagShowCalculatorExamples)
     out2 << this->ToStringFunctionHandlers();
   else

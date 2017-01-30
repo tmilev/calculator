@@ -1507,6 +1507,9 @@ public:
   int opLog()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\log");
   }
+  int opPhantom()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\phantom");
+  }
   int opSin()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\sin");
   }

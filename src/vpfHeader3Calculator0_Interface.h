@@ -1061,8 +1061,8 @@ public:
   }
   bool DecreaseStackExceptLast(int decrease);
   bool DecreaseStackExceptLastTwo(int decrease);
-  std::string ToStringSyntacticStackHTMLTable();
-  std::string ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions);
+  std::string ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclosures);
+  std::string ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions, bool ignoreCommandEnclosures);
   std::string WriteDefaultLatexFileReturnHtmlLink
   (const std::string& fileContent, std::string* outputFileNameNoExtension, bool useLatexDviPSpsToPNG=false);
   std::string GetCalculatorLink(const std::string& input);

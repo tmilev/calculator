@@ -2581,7 +2581,8 @@ bool Calculator::ReplaceEXEXByEX(int formatOptions)
   return true;
 }
 
-std::string Calculator::ToStringSyntacticStackHumanReadable(bool includeLispifiedExpressions)
+std::string Calculator::ToStringSyntacticStackHumanReadable
+(bool includeLispifiedExpressions, bool ignoreCommandEnclosures)
 { MacroRegisterFunctionWithName("Calculator::ToStringSyntacticStackHumanReadable");
   std::stringstream out;
   if ((*this->CurrentSyntacticStacK).size<this->numEmptyTokensStart)
@@ -2596,17 +2597,24 @@ std::string Calculator::ToStringSyntacticStackHumanReadable(bool includeLispifie
     return out.str();
   }
   out << "<table style=\"vertical-align:top;border-spacing:0px 0px;\"><tr>";
+  int counter=0;
   for (int i=this->numEmptyTokensStart; i<(*this->CurrentSyntacticStacK).size; i++)
+  { if (ignoreCommandEnclosures)
+      if ((*this->CurrentSyntacticStacK)[i].controlIndex==this->conExpression())
+        if ((*this->CurrentSyntacticStacK)[i].theData.StartsWith(this->opCommandEnclosure()))
+          continue;
     out
-    << "<td style=\"vertical-align:top;background-color:" << ((i%2==0) ?"#FAFAFA" : "#F0F0F0" ) << "\">"
+    << "<td style=\"vertical-align:top;background-color:" << ((counter%2==0) ?"#FAFAFA" : "#F0F0F0" ) << "\">"
     << (*this->CurrentSyntacticStacK)[i].ToStringHumanReadable(*this, includeLispifiedExpressions)
     << "</td>";
+    counter++;
+  }
   out << "</tr></table>";
   return out.str();
 }
 
-std::string Calculator::ToStringSyntacticStackHTMLTable()
-{ return this->ToStringSyntacticStackHumanReadable(true);
+std::string Calculator::ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclosures)
+{ return this->ToStringSyntacticStackHumanReadable(true, ignoreCommandEnclosures);
 }
 
 bool Calculator::ReplaceXXXByCon(int theCon)

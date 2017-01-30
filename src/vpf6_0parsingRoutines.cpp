@@ -1384,11 +1384,11 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
       errorLog << "Syntax error with message: " << result.errorString;
     else
     { errorLog << "Syntax error: your command simplifies to a single syntactic element but it is not an expression. <br>";
-      errorLog << "It simplifies to:<br> " << this->ToStringSyntacticStackHTMLTable();
+      errorLog << "It simplifies to:<br> " << this->ToStringSyntacticStackHTMLTable(false);
     }
   } else
   { errorLog << "Syntax error: your command does not simplify to a single syntactic element. <br>";
-    errorLog << "Instead it simplifies to:<br> " << this->ToStringSyntacticStackHTMLTable();
+    errorLog << "Instead it simplifies to:<br> " << this->ToStringSyntacticStackHTMLTable(false);
   }
   if (outputErrors!=0)
     *outputErrors=errorLog.str();
@@ -1425,9 +1425,9 @@ bool Calculator::ApplyOneRule()
 //  const SyntacticElement& ninthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-9];
 //  const std::string& ninthToLastS=this->theBoss->controlSequences[ninthToLastE.controlIndex];
   if (this->flagLogSyntaxRules)
-    this->parsingLog+= "<hr>" + this->ToStringSyntacticStackHTMLTable();
+    this->parsingLog+= "<hr>" + this->ToStringSyntacticStackHTMLTable(false);
   if (secondToLastS=="%" && lastS=="LogParsing")
-  { this->parsingLog+= "<hr>" + this->ToStringSyntacticStackHTMLTable();
+  { this->parsingLog+= "<hr>" + this->ToStringSyntacticStackHTMLTable(false);
     this->flagLogSyntaxRules=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();

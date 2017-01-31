@@ -376,6 +376,17 @@ void Calculator::initPredefinedInnerFunctions()
     ",
    "Product(a,b); Product{}(Sequence{}a); Product(Sequence{}a); Product(a)",
    true, false, "CalculatorFunctionsGeneral::innerMultiplySequence", "Product");
+  this->AddOperationInnerHandler
+  ("Sum", CalculatorFunctionsGeneral::innerSumSequence, "",
+   "Returns the sum of the elements in a sequence. \
+    When used on non-sequences, the function \
+    will ignore the first element and \
+    return the product of the remaining elements. \
+    This may not produce the result you expected for non-sequences,\
+    so use on sequences only. \
+    ",
+   "Sum(a,b); Sum{}(Sequence{}a); Sum(Sequence{}a); Sum(a)",
+   true, false, "CalculatorFunctionsGeneral::innerSumSequence", "Sum");
 
   this->AddOperationInnerHandler
   ("MakeExpression", CalculatorConversions::innerExpressionFromBuiltInType, "",
@@ -1215,12 +1226,26 @@ D-B;\
     a matrix.",
    "GaussianElimination(\\begin{array}{cccccc} sqrt 1 & sqrt 2 & sqrt 3 & 1 & 0& 0\\\\ sqrt 4 & sqrt 5 & sqrt 6 & 0 &1&0\\\\ sqrt 7 & sqrt 8 & sqrt 9 & 0 & 0 & 1     \\end{array})")
    ;
-  this->AddOperationInnerHandler ("UnivariatePartialFractions", CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals, "",
+  this->AddOperationInnerHandler ("UnivariatePartialFractionAlgrithm", CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm, "",
    "Attempts to splits a univariate rational function into partial fractions over the real algebraic numbers.\
-   <b>Currently the function is not implemented properly.</b> \
    At the moment, the function factors the denominator over the rationals. If this factorization\
    yields quadratic and linear terms at the function succeeds, else fails.",
-   "UnivariatePartialFractions(\\frac{x^11}{x^{8}-2x^{6}-2x^{5}+4x^{3}+x^{2}-2});")
+   "UnivariatePartialFractionAlgrithm(\\frac{x^11}{x^{8}-2x^{6}-2x^{5}+4x^{3}+x^{2}-2});"
+   , true, false,
+   "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm",
+   "UnivariatePartialFractionAlgrithm")
+   ;
+
+  this->AddOperationInnerHandler ("UnivariatePartialFractions", CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals, "",
+   "Attempts to splits a univariate rational function into partial fractions over the real algebraic numbers.\
+   If successful, produces a sequence containing the partial fractions.\
+   Else does nothing.",
+   "A=\\frac{x^3}{x^{3}-x^2+2x^2-2};\
+    B=UnivariatePartialFractions(A);\
+    A-Sum(B)"
+   , true, false,
+   "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals",
+   "UnivariatePartialFractions")
    ;
 
   this->AddOperationInnerHandler ("EqualityToArithmeticExpression", CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression, "",

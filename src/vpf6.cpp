@@ -1710,13 +1710,14 @@ bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expressio
 }
 
 bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& input)
-{ MacroRegisterFunctionWithName("Expression::MakeOXdotsX");
+{ MacroRegisterFunctionWithName("Expression::MakeXOXOdotsOX");
   if (input.size==0)
     crash << "This is a programming error: cannot create operation sequence from an empty list. " << crash;
   if (input.size==1)
   { *this=input[0];
     return true;
   }
+  //stOutput << "DEBUG: Calling MakeXOXOdotsOX with theOp: " << theOp;
   this->MakeXOX(owner, theOp, input[input.size-2], *input.LastObject());
   Expression result;
   result.format=this->formatDefault;
@@ -2429,7 +2430,7 @@ std::string Calculator::ToString()
     }
   }
 //  stOutput << "DEBUG: flags on;";
-  this->flagShowCalculatorInternalStatus=true;
+//  this->flagShowCalculatorInternalStatus=true;
 
   if (this->flagShowCalculatorExamples)
     out2 << this->ToStringFunctionHandlers();

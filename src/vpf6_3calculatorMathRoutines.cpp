@@ -814,6 +814,7 @@ public:
   std::string stringDenominatorFactors;
   MonomialCollection<Polynomial<AlgebraicNumber>, Rational> theDenominatorFactorsWithMults;
   List<List<Polynomial<AlgebraicNumber> > > theNumerators;
+  List<Expression> thePFSummands;
   List<Expression> theIntegralSummands;
   Expression theIntegralSum;
   bool ComputePartialFractionDecomposition();
@@ -821,6 +822,7 @@ public:
   void PrepareDenominatorFactors();
   void PrepareNumerators();
   void PrepareFinalAnswer();
+  bool PreparePFExpressionSummands();
   std::string ToStringRationalFunctionLatex();
   bool IntegrateRF();
   IntegralRFComputation(Calculator* inputOwner):owner(inputOwner){}
@@ -830,6 +832,67 @@ public:
 bool IntegralRFComputation::CheckConsistency()const
 { if (this->owner==0)
     crash << "Non-initialized rf computation" << crash;
+  return true;
+}
+
+bool IntegralRFComputation::PreparePFExpressionSummands()
+{ MacroRegisterFunctionWithName("IntegralRFComputation::PreparePFExpressionSummands");
+  this->CheckConsistency();
+  Expression polyE, currentNum, denExpE, currentDenNoPowerMonic,
+  currentDen, currentPFnoCoeff, currentPFWithCoeff,
+  coeffE;
+  this->thePFSummands.SetSize(0);
+  Polynomial<AlgebraicNumber> denRescaled, numRescaled;
+  AlgebraicNumber currentCoefficient, numScale;
+  for (int i=0; i<this->theNumerators.size; i++)
+    for (int j=0; j<this->theNumerators[i].size; j++)
+    { if (this->theNumerators[i][j].IsEqualToZero())
+        continue;
+      denRescaled=this->theDenominatorFactorsWithMults[i];
+      numRescaled=this->theNumerators[i][j];
+      currentCoefficient=denRescaled.theCoeffs[denRescaled.GetIndexMaxMonomial()];
+      currentCoefficient.Invert();
+      denRescaled*=currentCoefficient;
+      MathRoutines::RaiseToPower(currentCoefficient, j+1, (AlgebraicNumber) 1);
+      numScale=numRescaled.theCoeffs[numRescaled.GetIndexMaxMonomial()];
+      numRescaled/=numScale;
+      currentCoefficient*=numScale;
+      polyE.AssignValueWithContext(numRescaled, this->contextE, *this->owner);
+
+//      stOutput << "<br>polyE is: " << polyE.ToString();
+      if (!CalculatorConversions::innerExpressionFromBuiltInType(*this->owner, polyE, currentNum))
+        return false;
+//      stOutput << "<br>currentNum is: " << currentNum.ToString();
+      polyE.AssignValueWithContext(denRescaled, this->contextE, *this->owner);
+      if(!CalculatorConversions::innerExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPowerMonic))
+        return false;
+//      stOutput << "<br>currentDenNoPower is: " << currentDenNoPower.ToString();
+      if (j!=0)
+      { denExpE.AssignValue(j+1, *this->owner);
+        currentDen.MakeXOX(*this->owner, this->owner->opThePower(), currentDenNoPowerMonic, denExpE);
+      } else
+        currentDen=currentDenNoPowerMonic;
+      currentPFnoCoeff=currentNum;
+      currentPFnoCoeff/=currentDen;
+//      stOutput << "<br>CurrentIntegrand is: " << currentIntegrand.ToString();
+      coeffE.AssignValue(currentCoefficient, *this->owner);
+      currentPFWithCoeff=coeffE*currentPFnoCoeff;
+      currentPFWithCoeff.CheckConsistencyRecursively();
+//      stOutput << "<br>Current integral is: " << currentIntegral.ToString();
+      this->thePFSummands.AddOnTop(currentPFWithCoeff);
+    }
+  if (!this->quotientRat.IsEqualToZero())
+  { Expression currentPFpolyForm;
+    currentPFpolyForm.AssignValueWithContext(this->quotientRat, this->contextE, *this->owner);
+    if (!CalculatorConversions::innerExpressionFromPoly<Rational>(*this->owner, currentPFpolyForm, currentPFWithCoeff))
+    { *this->owner << "<br>Something is wrong: failed to convert polynomial " << currentPFpolyForm.ToString()
+      << " to expression. This shouldn't happen. ";
+      return false;
+    }
+    currentPFWithCoeff.CheckConsistencyRecursively();
+
+    this->thePFSummands.AddOnTop(currentPFWithCoeff);
+  }
   return true;
 }
 
@@ -845,7 +908,6 @@ bool IntegralRFComputation::IntegrateRF()
   Expression polyE, currentNum, denExpE, currentDenNoPowerMonic, currentDen, currentIntegrand,
   currentIntegralNoCoeff, currentIntegralWithCoeff, coeffE;
   this->theIntegralSummands.SetSize(0);
-  AlgebraicNumber theCoefficient;
   Polynomial<AlgebraicNumber> denRescaled, numRescaled;
   AlgebraicNumber currentCoefficient, numScale;
   for (int i=0; i<this->theNumerators.size; i++)
@@ -1387,7 +1449,32 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   return true;
 }
 
-bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals");
+  IntegralRFComputation theComputation(&theCommands);
+  bool isGood=CalculatorConversions::innerRationalFunction(theCommands, input, theComputation.inpuTE);
+  if (isGood)
+    isGood=theComputation.inpuTE.IsOfType<RationalFunctionOld>();
+  if (!isGood)
+    return theCommands << "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals: Failed to convert "
+    << input.ToString() << " to rational function. ";
+  theComputation.theRF=theComputation.inpuTE.GetValue<RationalFunctionOld>();
+  if (theComputation.theRF.GetMinNumVars()>1)
+    return theCommands << "The input rational function is of " << theComputation.theRF.GetMinNumVars() << " variables and "
+    << " I can handle only 1.";
+  if(!theComputation.ComputePartialFractionDecomposition())
+    return theCommands << "Did not manage do decompose "
+    << input.ToString() << " into partial fractions. ";
+  if (!theComputation.PreparePFExpressionSummands())
+    return theCommands << "Something went wrong while collecting summands "
+    << "while splitting "
+    << input.ToString() << " into partial fractions. ";
+
+  return output.MakeSequence(theCommands, &theComputation.thePFSummands);
+}
+
+bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRFComputation theComputation(&theCommands);
   bool isGood=CalculatorConversions::innerRationalFunction(theCommands, input, theComputation.inpuTE);

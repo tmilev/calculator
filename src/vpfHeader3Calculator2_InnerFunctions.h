@@ -94,6 +94,7 @@ public:
   static bool innerEnsureExpressionDependsOnlyOnStandard(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerMultiplySequence(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSumSequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNumerator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDenominator(Calculator& theCommands, const Expression& input, Expression& output);
@@ -281,6 +282,7 @@ public:
   static bool innerIsEven(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestTopCommand(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output);

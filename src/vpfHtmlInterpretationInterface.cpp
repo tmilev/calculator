@@ -98,7 +98,7 @@ std::string HtmlInterpretation::GetProblemSolution()
 }
 
 std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
-{ MacroRegisterFunctionWithName("WebWorker::GetSetProblemDatabaseInfoHtml");
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetSetProblemDatabaseInfoHtml");
 #ifdef MACRO_use_MySQL
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "<b>Only admins may set problem weights.</b>";
@@ -142,7 +142,7 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
 }
 
 std::string HtmlInterpretation::SubmitProblemPreview()
-{ MacroRegisterFunctionWithName("WebWorker::SubmitProblemPreview");
+{ MacroRegisterFunctionWithName("HtmlInterpretation::SubmitProblemPreview");
   double startTime=theGlobalVariables.GetElapsedSeconds();
   std::stringstream studentInterpretation;
   std::string lastStudentAnswerID;

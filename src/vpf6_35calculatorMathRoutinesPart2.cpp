@@ -435,15 +435,29 @@ bool CalculatorFunctionsGeneral::innerDenominator(Calculator& theCommands, const
   return output.AssignValue(1, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerSumSequence
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSumSequence");
+  if (input.size()<1)
+    return false;
+  if (input.size()==1)
+    return output.AssignValue(1, theCommands);
+  //stOutput << "DEBUG: making sum from: " << input.ToStringSemiFull();
+  List<Expression> theTerms;
+  for (int i=1; i<input.size(); i++)
+    theTerms.AddOnTop(input[i]);
+  return output.MakeSum(theCommands, theTerms);
+}
+
 bool CalculatorFunctionsGeneral::innerMultiplySequence
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMultiplySequence");
-  if (input.children.size<1)
+  if (input.size()<1)
     return false;
-  if (input.children.size==1)
+  if (input.size()==1)
     return output.AssignValue(1, theCommands);
   List<Expression> theTerms;
-  for (int i=1; i<input.children.size; i++)
+  for (int i=1; i<input.size(); i++)
     theTerms.AddOnTop(input[i]);
   return output.MakeProducT(theCommands, theTerms);
 }

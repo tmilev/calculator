@@ -1180,3 +1180,31 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
   input.HasInputBoxVariables(&result.boxesThatUpdateMe);
   return output.AssignValue(result, theCommands);
 }
+
+class QRFactorizationComputation{
+
+
+};
+
+bool CalculatorFunctionsGeneral::innerGramSchmidtVerbose(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGramSchmidtVerbose");
+    Matrix<AlgebraicNumber> theMatAlg;
+  bool matAlgWorks=false;
+  if (input.IsOfType<Matrix<AlgebraicNumber> >(&theMatAlg))
+    matAlgWorks=true;
+  if (!matAlgWorks)
+    if (theCommands.GetMatriXFromArguments(input, theMatAlg, 0, -1, 0))
+      matAlgWorks=true;
+  if (matAlgWorks)
+  { if (theMatAlg.NumRows!=theMatAlg.NumCols || theMatAlg.NumCols<1)
+      return output.MakeError("The matrix is not square", theCommands);
+    if (theMatAlg.GetDeterminant()==0)
+      return output.MakeError("Matrix determinant is zero.", theCommands);
+    QRFactorizationComputation theComputation;
+
+    theMatAlg.Invert();
+    return output.AssignValue(theMatAlg, theCommands);
+  }
+  return theCommands << "<hr>Failed to extract algebraic number matrix from: "
+  << input.ToString();
+}

@@ -1588,38 +1588,54 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "Length(a,b) ", true, false, "CalculatorFunctionsGeneral::innerLength",
    "Length");
   this->AddOperationInnerHandler
+  ("GetSummandList", CalculatorFunctionsGeneral::outerCollectSummands, "",
+   "Converts a sum to a sequence containing the summands. ",
+   "GetSummandList(1+a+b) ", true, false,
+   "CalculatorFunctionsGeneral::outerGetSummands", "GetSummandList");
+  this->AddOperationInnerHandler
   ("Sort", CalculatorFunctionsGeneral::innerSort, "",
    "Sorts a sequence. ",
-   "Sort(x^2, x^3, x^1, x^{-1}) ", true, false, "CalculatorFunctionsGeneral::innerSort", "Sort");
+   "Sort(x^2, x^3, x^1, x^{-1}) ", true, false,
+   "CalculatorFunctionsGeneral::innerSort", "Sort");
   this->AddOperationInnerHandler
   ("SortDescending", CalculatorFunctionsGeneral::innerSortDescending, "",
    "Sorts a sequence in descending order.  ",
-   "SortDescending(x^2, x^3, x^1, x^{-1}) ", true, false, "CalculatorFunctionsGeneral::innerSortDescending", "SortDescending");
+   "SortDescending(x^2, x^3, x^1, x^{-1}) ", true, false,
+   "CalculatorFunctionsGeneral::innerSortDescending",
+   "SortDescending");
   this->AddOperationInnerHandler
-  ("BlocksOfCommutativity", CalculatorFunctionsGeneral::innerGetUserDefinedSubExpressions, "",
+  ("BlocksOfCommutativity",
+    CalculatorFunctionsGeneral::innerGetUserDefinedSubExpressions, "",
    "Returns subexpression blocks of commutativity. ",
-   "BlocksOfCommutativity(\\sin x + x^2+ 3x y +18x ^{3/4 y}+\\sqrt{2}^{\\sqrt{2}c})");
+   "BlocksOfCommutativity(\\sin x + x^2+ 3x y +18x^{3/4 y}+\\sqrt{2}^{\\sqrt{2}c})",
+   true, false,
+   "CalculatorFunctionsGeneral::innerGetUserDefinedSubExpressions",
+   "BlocksOfCommutativity");
   this->AddOperationInnerHandler
   ("hwv", CalculatorFunctionsGeneral::innerHWV, "",
    "Highest weight vector in a generalized Verma module. \
    The first argument gives the semisimple Lie algebra. The second argument \
    gives the highest weight in fundamental coordinates. \
-   The third argument parametrizes the parabolic subalgebra, e.g. (1,0,0) stands for a \
-   parabolic subalgebra with first simple root crossed-out. The second argument is allowed to have \
-   entries that are not non-negative integers in the positions in which the third argument has 1's. ",
+   The third argument parametrizes the parabolic subalgebra, e.g. \
+   (1,0,0) stands for a \
+   parabolic subalgebra with first simple root crossed-out. \
+   The second argument is allowed to have \
+   entries that are not non-negative integers in the positions in \
+   which the third argument has 1's. ",
    "g_{{i}}=getChevalleyGenerator{}(B_3, i);h_{{i}}=getCartanGenerator{}(B_3, i);\
    \nv_\\mu=hwv{} (A_3, (1,0,1),(0,0,0));\nv_\\lambda=hwv{}(B_3, (x_1,0,1),(1,0,0));\nh_1g_{-1}v_\\lambda");
   this->AddOperationInnerHandler
   ("printModule", CalculatorFunctionsGeneral::innerPrintGenVermaModule, "",
-   "Makes a report on a finite dimensional Lie algebra module, or more generally, on \
-   a generalized Verma module (irreducible finite dimensional semisimple Lie algebra \
-   modules are a partial case of generalized Verma modules). \
-   The first argument gives the semisimple Lie algebra. The second argument \
-   gives the highest weight in fundamental coordinates. \
-   The third argument parametrizes the parabolic subalgebra, e.g. (1,0) stands for a \
-   parabolic subalgebra (lying in algebra of rank 2) with first simple root crossed-out. \
-   The second argument is allowed to have \
-   entries that are not non-negative integers in the positions in which the third argument has 1's. ",
+   "Makes a report on a finite dimensional Lie algebra module, \
+    or more generally, on \
+    a generalized Verma module (irreducible finite dimensional semisimple Lie algebra \
+    modules are a partial case of generalized Verma modules). \
+    The first argument gives the semisimple Lie algebra. The second argument \
+    gives the highest weight in fundamental coordinates. \
+    The third argument parametrizes the parabolic subalgebra, e.g. (1,0) stands for a \
+    parabolic subalgebra (lying in algebra of rank 2) with first simple root crossed-out. \
+    The second argument is allowed to have \
+    entries that are not non-negative integers in the positions in which the third argument has 1's. ",
    "printModule{} (G_2, (2,0),(0,0))");
   this->AddOperationInnerHandler
   ("hwTAAbf", CalculatorFunctionsGeneral::innerHWTAABF, "",
@@ -1635,14 +1651,16 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "Weyl dimension formula. First argument gives the type of the Weyl group of the simple\
     Lie algebra in the form Type_Rank (e.g. E_6).\
    The second argument gives the highest weight in fundamental coordinates. ",
-   "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));");
+   "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));", true, false,
+   "CalculatorFunctionsGeneral::innerWeylDimFormula", "WeylDimFormula");
   this->AddOperationInnerHandler
-  ("animateLittelmannPaths", this->innerAnimateLittelmannPaths, "",
+  ("animateLittelmannPaths", Calculator::innerAnimateLittelmannPaths, "",
    "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. \
    Presented first on the seminar in Charles University Prague. \
    The first argument gives the type of the semisimple  Lie algebra, the second gives the highest weight. \
    ",
-   "animateLittelmannPaths{}(G_2, (2,0));");
+   "animateLittelmannPaths{}(G_2, (2,0));", true, false,
+   "Calculator::innerAnimateLittelmannPaths","animateLittelmannPaths");
   this->AddOperationInnerHandler
   ("DecomposeInducingRepGenVermaModule",
    CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart, "",
@@ -1652,9 +1670,9 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    The last argument gives the parabolic subalgebra with respect to whose Levi part we decompose.",
    "DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))");
   this->AddOperationInnerHandler
-  ("Casimir", this->innerCasimir, "",
+  ("Casimir", Calculator::innerCasimir, "",
    "Gives the Casimir element. ",
-   "Casimir{}(G_2)");
+   "Casimir{}(G_2)", true, false, "Calculator::innerCasimir", "Casimir");
    this->AddOperationInnerHandler
   ("CasimirWRTLevi", CalculatorFunctionsGeneral::innerCasimirWRTlevi, "",
    "Gives the Casimir element of a Levi part of a parabolic subalgebra. First argument = ambient Lie algebra. \
@@ -1887,42 +1905,58 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    for which the term \"nilpotent\" makes sense. ",
    "IsNilpotent{}((0,1),(0,0))");
   this->AddOperationInnerHandler
-  ("InvertMatrixVerbose", this->innerInvertMatrixVerbose, "",
+  ("InvertMatrixVerbose", Calculator::innerInvertMatrixVerbose, "",
    "<b>Calculus teaching function.</b> Inverts a matrix of rationals if invertible, in any other case generates an error. Makes a detailed \
    printout of all Gaussian elimantion steps. ",
-   "InvertMatrixVerbose{}((1,2),(2,3))");
+   "InvertMatrixVerbose{}((1,2),(2,3))", true, false,
+   "Calculator::innerInvertMatrixVerbose", "InvertMatrixVerbose");
   this->AddOperationInnerHandler
   ("InvertMatrix", CalculatorFunctionsGeneral::innerInvertMatrix, "",
-   "Inverts a matrix of rationals if invertible, in any other case generates an error. ",
-   "X=MakeMatrix((1,2,1), (1,0,1), (-1,1,0)); InvertMatrix X- X^{-1}");
+   "Inverts a matrix of rationals or algebraic numbers if invertible. ",
+   "X=MakeMatrix((1,2,1), (1,0,1), (-1,1,0)); InvertMatrix X- X^{-1}",
+   true, false, "CalculatorFunctionsGeneral::innerInvertMatrix",
+   "InvertMatrix");
+  this->AddOperationInnerHandler
+  ("GramSchmidtAlgebraicVerbose", CalculatorFunctionsGeneral::innerGramSchmidtVerbose, "",
+   "(Attempts to) run Gram-Schmidt (over the algebraic numbers!) on a small matrix . \
+    The inputs are vector-rows.",
+   "X=GramSchmidtAlgebraicVerbose((1,2,1), (1,0,1), (-1,1,0)); InvertMatrix X- X^{-1}",
+   false, false, "CalculatorFunctionsGeneral::innerInvertMatrix",
+   "InvertMatrix");
   this->AddOperationInnerHandler
   ("Trace", CalculatorFunctionsGeneral::innerTrace, "",
    "Gets trace of a square matrix. ",
-   "X=MakeMatrix((1,2,1), (1,0,1), (-1,1,0)); Trace X");
+   "X=MakeMatrix((1,2,1), (1,0,1), (-1,1,0)); Trace X",
+   true, false,
+   "CalculatorFunctionsGeneral::innerTrace","Trace");
   this->AddOperationInnerHandler
   ("Reverse", this->innerReverseOrdeR, "",
    "Reverses order of elements. This operation will reverse products, orderes of lists, etc. \
     More precisely, the command leaves the fist child in the internal representation of the object in place\
     and flips the order of all other children.",
-   "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)", true, false, "Calculator::innerReverseOrdeR");
+   "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)",
+   true, false, "Calculator::innerReverseOrdeR", "Reverse");
   this->AddOperationInnerHandler
   ("ReverseRecursively", this->innerReverseOrderRecursively, "",
    "Same as Reverse but will apply recursively to the children expressions as well.",
-   "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)", true, false, "Calculator::innerReverseOrderRecursively");
+   "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)", true, false,
+   "Calculator::innerReverseOrderRecursively", "ReverseRecursively");
 
   this->AddOperationInnerHandler
   ("solveFor", CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT, "",
-   "Tries to solve a polynomial equation with respect to a variable. The first argument gives the variable expression\
-   (arbitrary expressions allowed) and\
-   the second argument gives the polynomial. \
-   At the moment the calculator \
-   only knows the quadratic formula but Cardano's formula and \
-   the fourth degree formula will be implemented when\
-   need arises.\
-   The solutions of the equation are returned in a list (empty list for no solution). \
-   Solutions with multiplicity higher than one are repeated. \
+   "Tries to solve a polynomial equation with respect to a variable. \
+    The first argument gives the variable expression\
+    (arbitrary expressions allowed) and\
+    the second argument gives the polynomial. \
+    At the moment the calculator \
+    only knows the quadratic formula but Cardano's formula and \
+    the fourth degree formula will be implemented when\
+    need arises.\
+    The solutions of the equation are returned in a list (empty list for no solution). \
+    Solutions with multiplicity higher than one are repeated. \
     ",
-   "solveFor(x, a x^2+b x +c); solveFor(x, a x +b)", true, false, "CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT",
+   "solveFor(x, a x^2+b x +c); solveFor(x, a x +b)", true, false,
+   "CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT",
    "solveFor");
 
   this->AddOperationInnerHandler

@@ -131,6 +131,7 @@ public:
   static bool innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetOutputFile(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool outerCollectSummands(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMergeConstantRadicals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCommuteConstants(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDivideReplaceAdivBpowerItimesBpowerJ(Calculator& theCommands, const Expression& input, Expression& output);
@@ -143,6 +144,8 @@ public:
   static bool innerGCD(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIsNilpotent(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGramSchmidtVerbose(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerInvertMatrixRFsVerbose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDFQsEulersMethod(Calculator& theCommands, const Expression& input, Expression& output);

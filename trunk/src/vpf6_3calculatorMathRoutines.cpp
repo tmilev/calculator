@@ -3388,8 +3388,17 @@ bool CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx(Calculator& theComman
   return output.MakeXOX(theCommands, theCommands.opDivide(), numeratorE, denominatorE);
 }
 
+bool CalculatorFunctionsGeneral::outerCollectSummands
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCollectSummands");
+  List<Expression> theList;
+  theCommands.AppendSummandsReturnTrueIfOrderNonCanonical
+  (input, theList);
+  return output.MakeSequence(theCommands, &theList);
+}
+
 bool CalculatorFunctionsGeneral::outerMergeConstantRadicals(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCommuteConstants");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerMergeConstantRadicals");
   if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
   if (!input[1].StartsWith(theCommands.opThePower(), 3) ||
@@ -3904,15 +3913,37 @@ bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, cons
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInvertMatrix");
   Matrix<Rational> theMat;
 //  stOutput << "Lispified: " << input.ToString();
-  if (!input.IsOfType<Matrix<Rational> >(&theMat))
-    if (!theCommands.GetMatriXFromArguments<Rational>(input, theMat, 0, -1, 0))
-      return output.MakeError("Failed to extract matrix with rational coefficients", theCommands);
-  if (theMat.NumRows!=theMat.NumCols || theMat.NumCols<1)
-    return output.MakeError("The matrix is not square", theCommands);
-  if (theMat.GetDeterminant()==0)
-    return output.MakeError("Matrix determinant is zero.", theCommands);
-  theMat.Invert();
-  return output.AssignValue(theMat, theCommands);
+  bool matRatWorks=false;
+  if (input.IsOfType(&theMat))
+    matRatWorks=true;
+  if (!matRatWorks)
+    if (theCommands.GetMatriXFromArguments(input, theMat, 0, -1, 0))
+      matRatWorks=true;
+  if (matRatWorks)
+  { if (theMat.NumRows!=theMat.NumCols || theMat.NumCols<1)
+      return output.MakeError("The matrix is not square", theCommands);
+    if (theMat.GetDeterminant()==0)
+      return output.MakeError("Matrix determinant is zero.", theCommands);
+    theMat.Invert();
+    return output.AssignValue(theMat, theCommands);
+  }
+  Matrix<AlgebraicNumber> theMatAlg;
+  bool matAlgWorks=false;
+  if (input.IsOfType<Matrix<AlgebraicNumber> >(&theMatAlg))
+    matAlgWorks=true;
+  if (!matAlgWorks)
+    if (theCommands.GetMatriXFromArguments(input, theMatAlg, 0, -1, 0))
+      matAlgWorks=true;
+  if (matAlgWorks)
+  { if (theMatAlg.NumRows!=theMatAlg.NumCols || theMatAlg.NumCols<1)
+      return output.MakeError("The matrix is not square", theCommands);
+    if (theMatAlg.GetDeterminant()==0)
+      return output.MakeError("Matrix determinant is zero.", theCommands);
+    theMatAlg.Invert();
+    return output.AssignValue(theMatAlg, theCommands);
+  }
+  return theCommands << "<hr>Failed to extract algebraic number matrix from: "
+  << input.ToString();
 }
 
 bool CalculatorFunctionsGeneral::innerPlotWedge(Calculator& theCommands, const Expression& input, Expression& output)

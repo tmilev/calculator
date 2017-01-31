@@ -1034,7 +1034,9 @@ bool Expression::AddChildRationalOnTop(const Rational& inputRat)
 
 bool Expression::AddChildOnTop(const Expression& inputChild)
 { this->CheckInitialization();
-  this->children.AddOnTop(this->owner->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(inputChild));
+  this->children.AddOnTop
+  (this->owner->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst
+  (inputChild));
   return true;
 }
 
@@ -1060,6 +1062,12 @@ bool Expression::SetChilD(int childIndexInMe, const Expression& inputChild)
 { this->CheckInitialization();
   int theIndexOfTheExpression=this->owner->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(inputChild);
   this->children.SetObjectAtIndex(childIndexInMe, theIndexOfTheExpression);
+  return true;
+}
+
+bool Expression::SetChilD(int childIndexInMe, int childIndexInBoss)
+{ this->CheckInitialization();
+  this->children.SetObjectAtIndex(childIndexInMe, childIndexInBoss);
   return true;
 }
 
@@ -1133,10 +1141,13 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
 { MacroRegisterFunctionWithName("Expression::SetContextAtLeastEqualTo");
   this->CheckInitialization();
   if (!this->IsBuiltInType())
-    crash << "This is a programming error: calling Expression::SetContextAtLeastEqualTo on an expression that is not of built-in type. "
+    crash << "This is a programming error: calling "
+    << "Expression::SetContextAtLeastEqualTo on an expression "
+    << "that is not of built-in type. "
     << "Contexts are Reserved for built-in data types. " << crash;
   if (!inputOutputMinContext.IsContext())
-  { this->owner->Comments << "<br>Warning: non-initialized input context in Expression::SetContextAtLeastEqualTo. Stack trace: "
+  { this->owner->Comments << "<br>Warning: non-initialized input context in "
+    << "Expression::SetContextAtLeastEqualTo. Stack trace: "
     << Crasher::GetStackTraceEtcErrorMessage();
     inputOutputMinContext.MakeEmptyContext(*this->owner);
   }

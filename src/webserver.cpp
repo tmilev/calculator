@@ -2976,9 +2976,10 @@ int WebWorker::ServeClient()
     }
     return this->ProcessLoginPage(argumentProcessingFailureComments.str());
   }
-  if (argumentProcessingFailureComments.str()!="")
+  if (argumentProcessingFailureComments.str()!="" && this->flagMustLogin)
     theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
-  this->errorCalculatorArguments=argumentProcessingFailureComments.str();
+  if (this->flagMustLogin)
+    this->errorLogin=argumentProcessingFailureComments.str();
   this->CheckRequestsAddressesReturnFalseIfModified();
 
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
@@ -2996,8 +2997,8 @@ int WebWorker::ServeClient()
     return this->ProcessCalculatorExamples();
   else if (theGlobalVariables.GetWebInput("error")!="")
     stOutput << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"), false);
-  else if (this->errorCalculatorArguments!="")
-    stOutput << this->errorCalculatorArguments;
+  else if (this->errorLogin!="")
+    stOutput << this->errorLogin;
   else if (theGlobalVariables.userCalculatorRequestType=="toggleMonitoring")
     return this->ProcessToggleMonitoring();
   else if (theGlobalVariables.userCalculatorRequestType=="status")
@@ -3064,8 +3065,9 @@ int WebWorker::ServeClient()
     else
       return this->ProcessLoginPage();
   } else if (theGlobalVariables.userCalculatorRequestType=="exerciseNoLogin")
-  { return this->ProcessExamPage();
-  } else if (theGlobalVariables.userCalculatorRequestType=="template")
+    return this->ProcessExamPage();
+  else if (theGlobalVariables.userCalculatorRequestType=="template" ||
+           theGlobalVariables.userCalculatorRequestType=="templateNoLogin")
     return this->ProcessTemplate();
   else if (theGlobalVariables.userCalculatorRequestType=="topicTable")
     return this->ProcessTopicTable();
@@ -3319,6 +3321,7 @@ WebServer::WebServer()
   this->requestStartsNotNeedingLogin.AddOnTop("calculator");
   this->requestStartsNotNeedingLogin.AddOnTop("calculatorExamples");
   this->requestStartsNotNeedingLogin.AddOnTop("exerciseNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("templateNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("submitExerciseNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
@@ -3339,7 +3342,9 @@ WebServer::WebServer()
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/mathquill.min-matrix.js");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/mathquill.min-matrix.js");
   this->addressStartsNotNeedingLogin.AddOnTop("cache.appcache");
-  this->addressStartsNotNeedingLogin.AddOnTop("/cache.appcache");
+  this->addressStartsNotNeedingLogin.AddOnTop("cache.appcache");
+  this->addressStartsNotNeedingLogin.AddOnTop("/selectCourse.html");
+  this->addressStartsNotNeedingLogin.AddOnTop("selectCourse.html");
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("html-common/");

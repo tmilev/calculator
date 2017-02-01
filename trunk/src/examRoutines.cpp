@@ -2503,7 +2503,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 #endif
     //outBody << "<br>";
   } else if (!this->flagIsExamHome && !this->flagIsForReal &&
-             theGlobalVariables.userCalculatorRequestType!="template")
+             theGlobalVariables.userCalculatorRequestType!="template" &&
+             theGlobalVariables.userCalculatorRequestType!="templateNoLogin"
+             )
     outBody << "<span style=\"color:green\"><b>Practice mode.</b></span><hr>";
 
   //////////////////////////////
@@ -2834,7 +2836,7 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemScoreFull");
   std::stringstream out;
   if (theGlobalVariables.UserGuestMode())
-  { out << "need to login";
+  { out << "scores require login";
     return out.str();
   }
   //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
@@ -2877,7 +2879,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemScoreShort");
   std::stringstream out;
   if (theGlobalVariables.UserGuestMode())
-  { out << "need to login";
+  { out << "scores require login";
     return out.str();
   }
   #ifdef MACRO_use_MySQL
@@ -3359,7 +3361,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   } else
   { std::string theRawSQLink=theGlobalVariables.DisplayNameExecutable +
     "?request=scoredQuiz&fileName=" + this->problem;
-    std::string theRawExerciseLink=theGlobalVariables.DisplayNameExecutable +
+    std::string theRawExerciseLink;
+    theRawExerciseLink=theGlobalVariables.DisplayNameExecutable +
     "?request=exercise&fileName=" + this->problem;
     this->displayAceProblemLink=
     " | <a href=\"#\" onclick=\"window.open('" + theRawSQLink +

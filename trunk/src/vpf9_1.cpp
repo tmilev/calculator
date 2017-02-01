@@ -282,7 +282,8 @@ bool GlobalVariables::UserGuestMode()
   return this->userCalculatorRequestType=="exerciseNoLogin" ||
   this->userCalculatorRequestType=="problemGiveUpNoLogin" ||
   this->userCalculatorRequestType=="submitExerciseNoLogin" ||
-  this->userCalculatorRequestType=="submitExercisePreviewNoLogin" ;
+  this->userCalculatorRequestType=="submitExercisePreviewNoLogin" ||
+  this->userCalculatorRequestType=="templateNoLogin";
 }
 
 bool GlobalVariables::UserRequestRequiresLoadingRealExamData()

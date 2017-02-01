@@ -70,7 +70,7 @@ public:
   Pipe pipeWorkerToServerUserInput;
 
   std::string error;
-  std::string errorCalculatorArguments;
+  std::string errorLogin;
   void PrepareFullMessageHeaderAndFooter();
   std::string openIndentTag(const std::string& theTag);
   std::string closeIndentTag(const std::string& theTag);

@@ -2572,10 +2572,6 @@ int WebWorker::ProcessCalculator()
   stOutput << this->closeIndentTag("</tr>");
   if (startingIndent!=this->indentationLevelHTML)
     crash << "Non-balanced html tags. " << crash;
-  if (theGlobalVariables.UserDebugFlagOn())
-    stOutput << "<tr><td>"
-    << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
-    << "</td></tr>";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
   theGlobalVariables.flagComputationCompletE=true;
   stOutput << this->openIndentTag("<tr>");
@@ -2595,7 +2591,12 @@ int WebWorker::ProcessCalculator()
   stOutput << theParser.ToString();
 
   stOutput << this->closeIndentTag("</td>");
+  if (theGlobalVariables.UserDebugFlagOn())
+    stOutput << "<td>"
+    << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
+    << "</td>";
   stOutput << this->closeIndentTag("</tr>");
+
   stOutput << this->closeIndentTag("</table><!-- outermost table-->");
 
   stOutput << "</body></html>";

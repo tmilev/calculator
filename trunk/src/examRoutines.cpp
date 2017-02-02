@@ -1541,7 +1541,9 @@ std::string CalculatorHTML::ToStringDeadline
 (const std::string& inputFileName, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringDeadlineWithModifyButton");
 #ifdef MACRO_use_MySQL
-  if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserStudentViewOn())
+  if (theGlobalVariables.UserGuestMode())
+  { return "deadlines require login";
+  } else if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserStudentViewOn())
   { std::string sectionNum=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
     return this->ToStringOnEDeadlineFormatted
     (inputFileName, sectionNum, problemAlreadySolved, returnEmptyStringIfNoDeadline);

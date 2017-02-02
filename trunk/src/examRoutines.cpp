@@ -2482,7 +2482,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
     { outBody << this->GetEditPageButton(this->fileName);
       if (this->flagIsExamHome)
-        outBody <<this->GetEditPageButton(this->topicListFileName);
+        outBody << this->GetEditPageButton(this->topicListFileName);
       outBody << "<br>";
     }
   if (this->flagIsExamProblem && this->flagIsForReal &&
@@ -2511,25 +2511,6 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   //////////////////////////////
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time after execution");
-  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-  { outBody << "Debug information follows. ";
-    if (this->flagIsExamProblem)
-      outBody << "Exam problem here. ";
-    outBody << "<br>Random seed: " << this->theProblemData.randomSeed
-    << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
-    << this->theProblemData.flagRandomSeedGiven
-    << "<br>flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven
-    << "\n<br>\n"
-    << CGI::StringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"), true);
-
-    #ifdef MACRO_use_MySQL
-    outBody << "<br>Problem names: " << this->currentUseR.theProblemData.theKeys.ToStringCommaDelimited();
-    outBody << "<br>Problem data string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(this->currentUseR.problemDataString.value);
-    #endif
-    outBody << "<hr>";
-    outBody << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-    outBody << "<hr>";
-  }
   //first command and first syntactic element are the random seed and are ignored.
   if (!this->ProcessInterprettedCommands(theInterpreter, this->theContent, comments))
   { outBody << comments.str();
@@ -2592,6 +2573,25 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
     if (!this->currentUseR.StoreProblemDataToDatabase(theRoutines, comments))
       outBody << "<b>Error: failed to store problem in database. </b>" << comments.str();
+  }
+  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+  { outBody << "<hr>Debug information follows. ";
+    if (this->flagIsExamProblem)
+      outBody << "Exam problem here. ";
+    outBody << "<br>Random seed: " << this->theProblemData.randomSeed
+    << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
+    << this->theProblemData.flagRandomSeedGiven
+    << "<br>flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven
+    << "\n<br>\n"
+    << CGI::StringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"), true);
+
+    #ifdef MACRO_use_MySQL
+    outBody << "<br>Problem names: " << this->currentUseR.theProblemData.theKeys.ToStringCommaDelimited();
+    outBody << "<br>Problem data string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(this->currentUseR.problemDataString.value);
+    #endif
+    outBody << "<hr>";
+    outBody << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+    outBody << "<hr>";
   }
   //out << "Current collection problems: " << this->databaseProblemList.ToStringCommaDelimited()
   //<< " with weights: " << this->databaseProblemWeights.ToStringCommaDelimited();

@@ -1072,14 +1072,18 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   //Returning true does not necessarily mean the login information was accepted.
   //Returning false guarantees the login information was not accepted.
   theGlobalVariables.flagLoggedIn=false;
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs= theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=
+  theGlobalVariables.webArguments;
   UserCalculatorData& theUser= theGlobalVariables.userDefault;
-  theUser.username= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("username"), false);
-  theUser.enteredAuthenticationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("authenticationToken"), false);
+  theUser.username= CGI::URLStringToNormal
+  (theGlobalVariables.GetWebInput("username"), false);
+  theUser.enteredAuthenticationToken=CGI::URLStringToNormal
+  (theGlobalVariables.GetWebInput("authenticationToken"), false);
   if (theUser.enteredAuthenticationToken!="")
     this->flagAuthenticationTokenWasSubmitted=true;
   /////////////////////////////////////////////
-  theUser.enteredPassword=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("password"), false);
+  theUser.enteredPassword=CGI::URLStringToNormal
+  (theGlobalVariables.GetWebInput("password"), false);
   //this may need a security audit: the URLStringToNormal and GetWebInput
   //functions may leave traces of (freed) memory
   //of the old password. Could only be used
@@ -1099,7 +1103,8 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     return false;
   if ((theGlobalVariables.userCalculatorRequestType=="activateAccount" || theGlobalVariables.userCalculatorRequestType=="changePassword")
       && theGlobalVariables.userDefault.enteredPassword=="")
-  { theGlobalVariables.userDefault.enteredActivationToken=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false);
+  { theGlobalVariables.userDefault.enteredActivationToken=
+    CGI::URLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false);
     //argumentProcessingFailureComments << "DEBUG: entered activatino token: " << theGlobalVariables.userDefault.enteredActivationToken.value;
   }
   bool changingPass=theGlobalVariables.userCalculatorRequestType=="changePassword" ||

@@ -1372,7 +1372,8 @@ std::string HtmlInterpretation::ToStringUserScores()
   int userGroupColIndex=userLabels.GetIndex(DatabaseStrings::userGroupLabel);
   if (userGroupColIndex==-1)
     return "Could not find user group column. ";
-  int problemWeightScheme=userLabels.GetIndex(DatabaseStrings::problemWeightsIdColumnName);
+  int problemWeightScheme=userLabels.GetIndex
+  (DatabaseStrings::problemWeightsIdColumnName);
   if (problemWeightScheme==-1)
     return "Could not find problem weight scheme. ";
   List<Rational> userScores;
@@ -1587,6 +1588,10 @@ std::string HtmlInterpretation::ToStringNavigation()
       out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
     if (theGlobalVariables.userDefault.userGroup.value!="")
       out << "Section: " << theGlobalVariables.userDefault.userGroup.value << linkSeparator;
+    //if (theGlobalVariables.UserDefaultHasAdminRights())
+    //  out << "Course home: "
+    //  << theGlobalVariables.userDefault.currentCourses.value
+    //  << linkSeparator;
   }
 
   if (theGlobalVariables.UserDefaultHasAdminRights()

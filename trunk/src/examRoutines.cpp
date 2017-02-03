@@ -191,6 +191,8 @@ bool DatabaseRoutines::ReadProblemDatabaseInfo
 bool DatabaseRoutines::StoreProblemDatabaseInfo
 (const UserCalculatorData& theUser, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
+  //stOutput << "<hr>DEBUG: About to store back: table row name: "
+  //<< theUser.problemInfoRowId.value;
   //stOutput << "<hr>DEBUG: About to store back: "
   //<< "<br>deadline:<br> "
   //<< theUser.deadlineInfoString.value
@@ -278,7 +280,8 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
 //  << crash.GetStackTraceEtcErrorMessage()
   //<< incomingProblemInfo
 //  ;
-  if (!this->ReadProblemInfoAppend(incomingProblemInfo, incomingProblems, commentsOnFailure))
+  if (!this->ReadProblemInfoAppend
+      (incomingProblemInfo, incomingProblems, commentsOnFailure))
   { commentsOnFailure << "Failed to parse your request";
     return false;
   }

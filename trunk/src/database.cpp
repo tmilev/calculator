@@ -745,9 +745,21 @@ bool UserCalculator::FetchOneUserRow
   this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
   this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");
   this->problemDataString=this->GetSelectedRowEntry("problemData");
-  this->currentCourses=this->GetSelectedRowEntry
-  (DatabaseStrings::userCurrentCoursesColumnLabel);
-  this->problemInfoRowId=this->GetSelectedRowEntry(DatabaseStrings::problemWeightsIdColumnName);
+  bool courseHomeFromDB=true;
+  if (this->userRole=="admin")
+    if (theGlobalVariables.GetWebInput("courseHome")!="")
+    { this->currentCourses=
+      CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"),false);
+      this->problemInfoRowId=
+      this->currentCourses.value;
+      courseHomeFromDB=false;
+    }
+  if (courseHomeFromDB)
+  { this->currentCourses=this->GetSelectedRowEntry
+    (DatabaseStrings::userCurrentCoursesColumnLabel);
+    this->problemInfoRowId=this->GetSelectedRowEntry
+    (DatabaseStrings::problemWeightsIdColumnName);
+  }
   this->sectionsTaughtByUserString=this->GetSelectedRowEntry(DatabaseStrings::sectionsTaughtByUser);
   std::string reader;
   //stOutput << "DEBUG:  GOT to hereE!!!";
@@ -762,6 +774,7 @@ bool UserCalculator::FetchOneUserRow
       this->currentCoursesDeadlineInfoString=reader;
 //  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
 //  << " this->currentCoursesInfoString:  " << this->currentCoursesInfoString.value;
+  //stOutput << "DEBUG: problem info row id: " << this->problemInfoRowId.value;
   if (this->problemInfoRowId!="")
     if (theRoutines.FetchEntry
         (DatabaseStrings::problemWeightsIdColumnName,
@@ -1765,7 +1778,6 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     //<< "<br>database user: " << theRoutines.databaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>"
     //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
   }
-  std::string activationTokenUnsafe;
   if (theGlobalVariables.userCalculatorRequestType=="changePassword" ||
       theGlobalVariables.userCalculatorRequestType=="activateAccount")
     if (userWrapper.enteredActivationToken!="")

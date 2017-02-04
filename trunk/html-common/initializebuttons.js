@@ -77,8 +77,8 @@ function initializeButtons()
   initializeButtonsCommon();
 }
 
-function initializeButtonsMatrixSupport(){
-  for (i=0; i<answerIdsPureLatex.length; i++)
+function initializeButtonsMatrixSupport()
+{ for (i=0; i<answerIdsPureLatex.length; i++)
   { var currentButtonPanel=document.getElementById(preferredButtonContainers[i]);
     currentButtonPanel.innerHTML=
 "<table><tr>"+
@@ -124,6 +124,9 @@ function initializeButtonsCalculator(){
   initializeButtonsCommon();
 }
 
+function updateUserStats()
+{
+}
 
 function getSqrt_N_Button(indexMathField){
   return "<button style='width:25' onmousedown='sqrt_N_Click(answerMathQuillObjects[" + indexMathField + "]);'>&#8731;</button>";

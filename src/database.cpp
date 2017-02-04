@@ -772,8 +772,8 @@ bool UserCalculator::FetchOneUserRow
          reader,
          failureStream))
       this->currentCoursesDeadlineInfoString=reader;
-//  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
-//  << " this->currentCoursesInfoString:  " << this->currentCoursesInfoString.value;
+  //  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
+  //  << " this->currentCoursesInfoString:  " << this->currentCoursesInfoString.value;
   //stOutput << "DEBUG: problem info row id: " << this->problemInfoRowId.value;
   if (this->problemInfoRowId!="")
     if (theRoutines.FetchEntry

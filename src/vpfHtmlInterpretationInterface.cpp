@@ -1049,8 +1049,6 @@ std::string HtmlInterpretation::GetScoresPage()
   out << theDebugHtml;
   out << "</body></html>";
   return out.str();
-
-
 }
 
 std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddressWithPort)
@@ -1339,27 +1337,33 @@ void UserCalculator::ComputePointsEarned
   }
 }
 
-std::string HtmlInterpretation::ToStringUserScores()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserScores");
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
-    return "only admins are allowed to view scores";
-  std::stringstream out;
-  out.precision(4);
+struct UserScores
+{
+public:
   CalculatorHTML theProblem;
-  theProblem.currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  theProblem.LoadFileNames();
-  if (!theProblem.LoadAndParseTopicList(out))
-    return out.str();
-  if (!theProblem.PrepareSectionList(out))
-    return out.str();
-  if (!theProblem.LoadDatabaseInfo(out))
-    out << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
-  theProblem.currentUseR.ComputePointsEarned(theProblem.currentUseR.theProblemData.theKeys, &theProblem.theTopicS);
+  List<MapLisT<std::string, Rational, MathRoutines::hashString> > scoresBreakdown;
   List<List<std::string> > userTable;
+  List<Rational> userScores;
+  List<std::string> userInfos;
+  List<std::string> userNames;
+  bool ComputeScoresAndStats(std::stringstream& comments);
+};
+
+bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("UserScores::ComputeScoresAndStats");
+  theProblem.currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
+  this->theProblem.LoadFileNames();
+  if (!this->theProblem.LoadAndParseTopicList(comments))
+    return false;
+  if (!this->theProblem.PrepareSectionList(comments))
+    return false;
+  if (!this->theProblem.LoadDatabaseInfo(comments))
+    comments << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
+  theProblem.currentUseR.ComputePointsEarned(theProblem.currentUseR.theProblemData.theKeys, &theProblem.theTopicS);
   List<std::string> userLabels;
   DatabaseRoutines theRoutines;
-  if (!theRoutines.FetchAllUsers(userTable, userLabels, out))
-    return out.str();
+  if (!theRoutines.FetchAllUsers(userTable, userLabels, comments))
+    return false;
   int usernameIndex=userLabels.GetIndex(DatabaseStrings::userColumnLabel);
   if (usernameIndex==-1)
     return "Could not find username column. ";
@@ -1376,62 +1380,82 @@ std::string HtmlInterpretation::ToStringUserScores()
   (DatabaseStrings::problemWeightsIdColumnName);
   if (problemWeightScheme==-1)
     return "Could not find problem weight scheme. ";
-  List<Rational> userScores;
-  List<MapLisT<std::string, Rational, MathRoutines::hashString> > scoresBreakdown;
   CalculatorHTML currentUserRecord;
-  userScores.SetSize(userTable.size);
-  scoresBreakdown.SetSize(userTable.size);
+  this->userScores.SetSize(userTable.size);
+  this->userNames.SetSize(userTable.size);
+  this->userInfos.SetSize(userTable.size);
+  this->scoresBreakdown.SetSize(userTable.size);
   for (int i=0; i<userTable.size; i++)
-  { userScores[i]=-1;
+  { this->userScores[i]=-1;
+    this->userNames[i]=userTable[i][usernameIndex];
+    this->userInfos[i]=userTable[i][userInfoIndex];
     currentUserRecord.currentUseR.username=userTable[i][usernameIndex];
     currentUserRecord.currentUseR.userGroup=userTable[i][userGroupColIndex];
 //    out << "<hr>Debug: reading db problem data from: "
 //    << CGI::URLKeyValuePairsToNormalRecursiveHtml(userTable[i][problemDataIndex]) << "<br>";
-    if (!currentUserRecord.currentUseR.InterpretDatabaseProblemData(userTable[i][problemDataIndex], out))
+    if (!currentUserRecord.currentUseR.InterpretDatabaseProblemData
+        (userTable[i][problemDataIndex], comments))
       continue;
 //    out << "<br>DEBUG: after db data read: " << currentUserRecord.currentUseR.ToString();
     currentUserRecord.ReadProblemInfoAppend
-    (theProblem.currentUseR.problemInfoString.value, currentUserRecord.currentUseR.theProblemData, out);
+    (theProblem.currentUseR.problemInfoString.value,
+    currentUserRecord.currentUseR.theProblemData, comments);
 //    out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
     currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.theTopicS);
-    scoresBreakdown[i].Clear();
+    this->scoresBreakdown[i].Clear();
     for (int j=0; j< theProblem.theTopicS.size(); j++)
-      scoresBreakdown[i].SetKeyValue
+      this->scoresBreakdown[i].SetKeyValue
       (theProblem.theTopicS.theKeys[j],
        theProblem.theTopicS[j].pointsEarnedInProblemsThatAreImmediateChildren);
-    userScores[i]=currentUserRecord.currentUseR.pointsEarned;
+    this->userScores[i]=currentUserRecord.currentUseR.pointsEarned;
     //out << "<br>DEBUG: Computed scores from: " << currentUserRecord.currentUseR.ToString();
   }
+  return true;
+}
+
+std::string HtmlInterpretation::ToStringUserScores()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserScores");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return "only admins are allowed to view scores";
+  std::stringstream out;
+  out.precision(4);
+  UserScores theScores;
+  if (!theScores.ComputeScoresAndStats(out))
+    return out.str();
 //  out << "DBUG: prob names: " << theProblem.problemNamesNoTopics.ToStringCommaDelimited();
-  out << "<table class=\"scoreTable\"><tr><th rowspan=\"3\">User</th><th rowspan=\"3\">Section</th><th rowspan=\"3\"> Total score</th>";
-  for (int i=0; i<theProblem.theTopicS.size(); i++)
-  { TopicElement& currentElt=theProblem.theTopicS.theValues[i];
+  out << "<table class=\"scoreTable\"><tr><th rowspan=\"3\">User</th>"
+  << "<th rowspan=\"3\">Section</th><th rowspan=\"3\"> Total score</th>";
+  for (int i=0; i<theScores.theProblem.theTopicS.size(); i++)
+  { TopicElement& currentElt=theScores.theProblem.theTopicS.theValues[i];
     if (currentElt.problem!="" || !currentElt.flagIsChapter)
       continue;
     int numCols=currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan=\"" << numCols << "\"";
-    if (currentElt.totalSubSectionsUnderME==0 && currentElt.flagContainsProblemsNotInSubsection)
+    if (currentElt.totalSubSectionsUnderME==0 &&
+        currentElt.flagContainsProblemsNotInSubsection)
       out << " rowspan=\"3\"";
     out << ">" << currentElt.title << "</td>";
   }
   out << "</tr>\n";
   out << "<tr>";
-  for (int i=0; i<theProblem.theTopicS.size(); i++)
-  { TopicElement& currentElt=theProblem.theTopicS.theValues[i];
+  for (int i=0; i<theScores.theProblem.theTopicS.size(); i++)
+  { TopicElement& currentElt=theScores.theProblem.theTopicS.theValues[i];
     if (currentElt.problem!="" || !currentElt.flagIsSection)
       continue;
     int numCols=currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan=\"" << numCols << "\"";
-    if (currentElt.totalSubSectionsUnderME==0 && currentElt.flagContainsProblemsNotInSubsection)
+    if (currentElt.totalSubSectionsUnderME==0 &&
+        currentElt.flagContainsProblemsNotInSubsection)
       out << " rowspan=\"2\"";
     out << ">" << currentElt.title << "</td>";
   }
   out << "</tr>\n";
   out << "<tr>";
-  for (int i=0; i<theProblem.theTopicS.size(); i++)
-  { TopicElement& currentElt=theProblem.theTopicS.theValues[i];
+  for (int i=0; i<theScores.theProblem.theTopicS.size(); i++)
+  { TopicElement& currentElt=theScores.theProblem.theTopicS.theValues[i];
     if (currentElt.problem=="" && !currentElt.flagIsSubSection)
-    { if ((currentElt.flagContainsProblemsNotInSubsection && currentElt.totalSubSectionsUnderMeIncludingEmptySubsections>1)
+    { if ((currentElt.flagContainsProblemsNotInSubsection &&
+           currentElt.totalSubSectionsUnderMeIncludingEmptySubsections>1)
           || currentElt.immediateChildren.size==0)
         out << "<td></td>";
       continue;
@@ -1444,10 +1468,10 @@ std::string HtmlInterpretation::ToStringUserScores()
 
   out << "<tr><td><b>Maximum score</b></td>"
   << "<td>-</td>"
-  << "<td>" << theProblem.currentUseR.pointsMax.GetDoubleValue()
+  << "<td>" << theScores.theProblem.currentUseR.pointsMax.GetDoubleValue()
   << "</td>";
-  for (int j=0; j< theProblem.theTopicS.size(); j++)
-  { TopicElement& currentElt=theProblem.theTopicS.theValues[j];
+  for (int j=0; j< theScores.theProblem.theTopicS.size(); j++)
+  { TopicElement& currentElt=theScores.theProblem.theTopicS.theValues[j];
     if (currentElt.problem!="")
       continue;
     if (!currentElt.flagIsSubSection && !currentElt.flagContainsProblemsNotInSubsection)
@@ -1455,18 +1479,18 @@ std::string HtmlInterpretation::ToStringUserScores()
     out << "<td>" << currentElt.maxPointsInAllChildren << "</td>";
   }
   out << "</tr>";
-  for (int i=0; i<userTable.size; i++)
-  { out << "<tr><td>" << userTable[i][usernameIndex] << "</td>"
-    << "<td>" << userTable[i][userInfoIndex] << "</td>"
-    << "<td>" << userScores[i].GetDoubleValue() << "</td>";
-    for (int j=0; j< theProblem.theTopicS.size(); j++)
-    { TopicElement& currentElt=theProblem.theTopicS.theValues[j];
+  for (int i=0; i< theScores.userTable.size; i++)
+  { out << "<tr><td>" << theScores.userNames[i] << "</td>"
+    << "<td>" << theScores.userInfos[i] << "</td>"
+    << "<td>" << theScores.userScores[i].GetDoubleValue() << "</td>";
+    for (int j=0; j< theScores.theProblem.theTopicS.size(); j++)
+    { TopicElement& currentElt=theScores.theProblem.theTopicS.theValues[j];
       if (currentElt.problem!="")
         continue;
       if (!currentElt.flagIsSubSection && !currentElt.flagContainsProblemsNotInSubsection)
         continue;
-      if (scoresBreakdown[i].Contains(theProblem.theTopicS.theKeys[j]))
-        out << "<td>" << scoresBreakdown[i].theValues[j].GetDoubleValue() << "</td>";
+      if (theScores.scoresBreakdown[i].Contains(theScores.theProblem.theTopicS.theKeys[j]))
+        out << "<td>" << theScores.scoresBreakdown[i].theValues[j].GetDoubleValue() << "</td>";
       else
         out << "<td></td>";
     }

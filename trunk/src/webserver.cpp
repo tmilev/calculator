@@ -2715,6 +2715,13 @@ int WebWorker::ProcessScores()
   return 0;
 }
 
+int WebWorker::ProcessScoresInCoursePage()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessScoresInCoursePage");
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::GetScoresInCoursePage();
+  return 0;
+}
+
 int WebWorker::ProcessAccounts()
 { MacroRegisterFunctionWithName("WebWorker::ProcessAccounts");
   this->SetHeaderOKNoContentLength();
@@ -3047,6 +3054,8 @@ int WebWorker::ServeClient()
     return this->ProcessSubmitProblem();
   else if (theGlobalVariables.userCalculatorRequestType=="scores" && theGlobalVariables.flagLoggedIn)
     return this->ProcessScores();
+  else if (theGlobalVariables.userCalculatorRequestType=="scoresInCoursePage" && theGlobalVariables.flagLoggedIn)
+    return this->ProcessScoresInCoursePage();
   else if (theGlobalVariables.UserGuestMode() && theGlobalVariables.userCalculatorRequestType=="submitExerciseNoLogin")
     return this->ProcessSubmitProblem();
   else if ((theGlobalVariables.userCalculatorRequestType=="problemGiveUp" &&

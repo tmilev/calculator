@@ -348,7 +348,10 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   CalculatorHTML thePage;
   std::stringstream comments;
   bool includeDeadlineJavascript=
-  theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn();
+  theGlobalVariables.UserDefaultHasAdminRights() &&
+  !theGlobalVariables.UserStudentViewOn();
+  bool includeInitializeButtonsJS=
+  theGlobalVariables.UserDefaultHasAdminRights();
   thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   if (!thePage.LoadMe(true, comments))
   { out << "<html>"
@@ -373,8 +376,10 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;
   out << HtmlSnippets::GetJavascriptStandardCookies();
-  if (includeDeadlineJavascript)
-    out << CGI::GetJavascriptInitializeButtons();
+  if (includeDeadlineJavascript || includeInitializeButtonsJS)
+  { out << CGI::GetJavascriptInitializeButtons();
+    out << CGI::GetJavascriptCalculatorPage();
+  }
   out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << "<body" //<< ">"
   << " onload=\"loadSettings();";
@@ -1294,7 +1299,10 @@ void UserCalculator::ComputePointsEarned
     for (int i=0; i<theTopics->size(); i++)
     { (*theTopics).theValues[i].totalPointsEarned=0;
       (*theTopics).theValues[i].pointsEarnedInProblemsThatAreImmediateChildren=0;
-      (*theTopics).theValues[i].maxPointsInAllChildren=0;  
+      (*theTopics).theValues[i].maxPointsInAllChildren=0;
+      (*theTopics).theValues[i].flagSubproblemHasNoWeight=false;
+      //(*theTopics).theValues[i].maxCorrectAnswersInAllChildren=0;
+      //(*theTopics).theValues[i].numAnsweredInAllChildren=0;
     }
   for (int i=0; i<this->theProblemData.size(); i++)
   { const std::string problemName=this->theProblemData.theKeys[i];
@@ -1309,7 +1317,11 @@ void UserCalculator::ComputePointsEarned
     currentP.adminData.GetWeightFromSection
     (this->userGroup.value, currentWeight);
     if (!currentP.flagProblemWeightIsOK)
-      currentWeight=0;
+    { currentWeight=0;
+      //stOutput << "Debug: weight not ok: " << problemName << "<br>";
+    }// else
+     // stOutput << "Debug: weight IS ok: " << problemName << "<br>";
+
 //    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
     for (int j=0; j<currentP.theAnswers.size; j++)
     { if (currentP.theAnswers[j].numCorrectSubmissions>0)
@@ -1329,6 +1341,8 @@ void UserCalculator::ComputePointsEarned
         for (int j=0; j<currentElt.parentTopics.size; j++)
         { (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned+=currentP.Points;
           (*theTopics).theValues[currentElt.parentTopics[j]].maxPointsInAllChildren+=currentWeight;
+          if (currentWeight==0)
+            (*theTopics).theValues[currentElt.parentTopics[j]].flagSubproblemHasNoWeight=true;
         }
         if (currentElt.parentTopics.size>1)
           (*theTopics).theValues[currentElt.parentTopics[currentElt.parentTopics.size-2]]
@@ -1342,10 +1356,13 @@ struct UserScores
 public:
   CalculatorHTML theProblem;
   List<MapLisT<std::string, Rational, MathRoutines::hashString> > scoresBreakdown;
-  List<List<std::string> > userTable;
+  List<List<std::string> > userTablE;
   List<Rational> userScores;
   List<std::string> userInfos;
   List<std::string> userNames;
+  List<LargeInt> numStudentsSolvedEntireTopic;
+  List<LargeInt> numStudentsSolvedPartOfTopic;
+  List<LargeInt> numStudentsSolvedNothingInTopic;
   bool ComputeScoresAndStats(std::stringstream& comments);
 };
 
@@ -1359,58 +1376,134 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
     return false;
   if (!this->theProblem.LoadDatabaseInfo(comments))
     comments << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
-  theProblem.currentUseR.ComputePointsEarned(theProblem.currentUseR.theProblemData.theKeys, &theProblem.theTopicS);
+  theProblem.currentUseR.ComputePointsEarned
+  (theProblem.currentUseR.theProblemData.theKeys, &theProblem.theTopicS);
   List<std::string> userLabels;
   DatabaseRoutines theRoutines;
-  if (!theRoutines.FetchAllUsers(userTable, userLabels, comments))
+  if (!theRoutines.FetchAllUsers(userTablE, userLabels, comments))
     return false;
   int usernameIndex=userLabels.GetIndex(DatabaseStrings::userColumnLabel);
   if (usernameIndex==-1)
     return "Could not find username column. ";
-  int userInfoIndex=userLabels.GetIndex(DatabaseStrings::userGroupLabel);
-  if (userInfoIndex==-1)
+  int userGroupIndex=userLabels.GetIndex(DatabaseStrings::userGroupLabel);
+  if (userGroupIndex==-1)
     return "Could not find user group column. ";
   int problemDataIndex=userLabels.GetIndex("problemData");
   if (problemDataIndex==-1)
     return "Could not find problem data column. ";
-  int userGroupColIndex=userLabels.GetIndex(DatabaseStrings::userGroupLabel);
-  if (userGroupColIndex==-1)
-    return "Could not find user group column. ";
-  int problemWeightScheme=userLabels.GetIndex
-  (DatabaseStrings::problemWeightsIdColumnName);
-  if (problemWeightScheme==-1)
-    return "Could not find problem weight scheme. ";
+  int indexCourseName=userLabels.GetIndex(DatabaseStrings::userCurrentCoursesColumnLabel);
   CalculatorHTML currentUserRecord;
-  this->userScores.SetSize(userTable.size);
-  this->userNames.SetSize(userTable.size);
-  this->userInfos.SetSize(userTable.size);
-  this->scoresBreakdown.SetSize(userTable.size);
-  for (int i=0; i<userTable.size; i++)
-  { this->userScores[i]=-1;
-    this->userNames[i]=userTable[i][usernameIndex];
-    this->userInfos[i]=userTable[i][userInfoIndex];
-    currentUserRecord.currentUseR.username=userTable[i][usernameIndex];
-    currentUserRecord.currentUseR.userGroup=userTable[i][userGroupColIndex];
+  this->userScores.Reserve(userTablE.size);
+  this->userNames.Reserve(userTablE.size);
+  this->userInfos.Reserve(userTablE.size);
+  this->scoresBreakdown.Reserve(userTablE.size);
+  this->userScores.SetSize(0);
+  this->userNames.SetSize(0);
+  this->userInfos.SetSize(0);
+  this->scoresBreakdown.SetSize(0);
+  this->numStudentsSolvedEntireTopic.initFillInObject
+  (this->theProblem.theTopicS.size(),0);
+  this->numStudentsSolvedPartOfTopic.initFillInObject
+  (this->theProblem.theTopicS.size(),0);
+  this->numStudentsSolvedNothingInTopic.initFillInObject
+  (this->theProblem.theTopicS.size(),0);
+  bool ignoreSectionsIdontTeach=true;
+  for (int i=0; i<this->userTablE.size; i++)
+  { if (ignoreSectionsIdontTeach)
+    { if (this->userTablE[i][indexCourseName]!=theGlobalVariables.userDefault.currentCourses.value)
+        continue;
+      if (theGlobalVariables.UserStudentViewOn())
+      { if (this->userTablE[i][userGroupIndex]!=theGlobalVariables.userDefault.userGroup.value)
+          continue;
+      }
+    }
+    this->userScores.AddOnTop(-1);
+    this->userNames.AddOnTop(this->userTablE[i][usernameIndex]);
+    this->userInfos.AddOnTop(this->userTablE[i][userGroupIndex]);
+    this->scoresBreakdown.SetSize(this->scoresBreakdown.size+1);
+    currentUserRecord.currentUseR.username=this->userTablE[i][usernameIndex];
+    currentUserRecord.currentUseR.userGroup=*this->userInfos.LastObject();
+
 //    out << "<hr>Debug: reading db problem data from: "
 //    << CGI::URLKeyValuePairsToNormalRecursiveHtml(userTable[i][problemDataIndex]) << "<br>";
     if (!currentUserRecord.currentUseR.InterpretDatabaseProblemData
-        (userTable[i][problemDataIndex], comments))
+        (this->userTablE[i][problemDataIndex], comments))
       continue;
 //    out << "<br>DEBUG: after db data read: " << currentUserRecord.currentUseR.ToString();
     currentUserRecord.ReadProblemInfoAppend
     (theProblem.currentUseR.problemInfoString.value,
     currentUserRecord.currentUseR.theProblemData, comments);
 //    out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
-    currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.theTopicS);
-    this->scoresBreakdown[i].Clear();
+    currentUserRecord.currentUseR.ComputePointsEarned
+    (theProblem.problemNamesNoTopics, &theProblem.theTopicS);
+    this->scoresBreakdown.LastObject()->Clear();
     for (int j=0; j< theProblem.theTopicS.size(); j++)
-      this->scoresBreakdown[i].SetKeyValue
-      (theProblem.theTopicS.theKeys[j],
-       theProblem.theTopicS[j].pointsEarnedInProblemsThatAreImmediateChildren);
-    this->userScores[i]=currentUserRecord.currentUseR.pointsEarned;
+    { TopicElement& currentTopic=theProblem.theTopicS[j];
+      Rational currentPts=currentTopic.totalPointsEarned;
+      Rational maxPts=currentTopic.maxPointsInAllChildren;
+      this->scoresBreakdown.LastObject()->SetKeyValue
+      (theProblem.theTopicS.theKeys[j],currentPts);
+      if ( maxPts ==currentPts)
+        this->numStudentsSolvedEntireTopic[j]++;
+      else if (currentPts>0)
+        this->numStudentsSolvedPartOfTopic[j]++;
+      else
+        this->numStudentsSolvedNothingInTopic[j]++;
+    }
+    *this->userScores.LastObject()=currentUserRecord.currentUseR.pointsEarned;
     //out << "<br>DEBUG: Computed scores from: " << currentUserRecord.currentUseR.ToString();
   }
   return true;
+}
+
+std::string HtmlInterpretation::GetScoresInCoursePage()
+{ MacroRegisterFunctionWithName("WebWorker::GetScoresInCoursePage");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return "Only admins are allowed to view student scores.";
+  std::stringstream out;
+  out.precision(4);
+  UserScores theScores;
+  if (!theScores.ComputeScoresAndStats(out))
+    return out.str();
+//  for (int i=0; i<theScores.theProblem.theTopicS.size(); i++)
+//  { TopicElement& currentElt=theScores.theProblem.theTopicS[i];
+//    currentElt.ComputeID();
+//    out << currentElt.id << ": "
+//    << currentElt.studentScoresSpanId
+//    << ": solved all: "
+//    << theScores.numStudentsSolvedEntireTopic[i]
+//    << ", solved part: "
+//    << theScores.numStudentsSolvedPartOfTopic[i]
+//    << ", solved none: "
+//    << theScores.numStudentsSolvedNothingInTopic[i]
+//    << "<br>";
+//  }
+  out << "<script type=\"text/javascript\">\n";
+  out << "studentScoresInHomePage= new Array("
+  << theScores.theProblem.theTopicS.size() << ");\n";
+  for (int i=0; i<theScores.theProblem.theTopicS.size(); i++)
+  { TopicElement& currentElt=theScores.theProblem.theTopicS[i];
+    out << "studentScoresInHomePage[" << i << "]= new Object;\n";
+    if (currentElt.flagSubproblemHasNoWeight)
+      out << "studentScoresInHomePage[" << i << "].weightsOK=false;\n";
+    else
+      out << "studentScoresInHomePage[" << i << "].weightsOK=true;\n";
+    out << "studentScoresInHomePage[" << i << "].theId="
+    << "'"
+    << currentElt.studentScoresSpanId
+    << "';\n";
+    out << "studentScoresInHomePage[" << i << "].numSolvedAll="
+    << theScores.numStudentsSolvedEntireTopic[i]
+    << ";\n";
+    out << "studentScoresInHomePage[" << i << "].numSolvedPart="
+    << theScores.numStudentsSolvedPartOfTopic[i]
+    << ";\n";
+    out << "studentScoresInHomePage[" << i << "].numSolvedNone="
+    << theScores.numStudentsSolvedNothingInTopic[i]
+    << ";\n";
+  }
+  out << "</script>";
+  return out.str();
 }
 
 std::string HtmlInterpretation::ToStringUserScores()
@@ -1479,7 +1572,7 @@ std::string HtmlInterpretation::ToStringUserScores()
     out << "<td>" << currentElt.maxPointsInAllChildren << "</td>";
   }
   out << "</tr>";
-  for (int i=0; i< theScores.userTable.size; i++)
+  for (int i=0; i< theScores.userInfos.size; i++)
   { out << "<tr><td>" << theScores.userNames[i] << "</td>"
     << "<td>" << theScores.userInfos[i] << "</td>"
     << "<td>" << theScores.userScores[i].GetDoubleValue() << "</td>";

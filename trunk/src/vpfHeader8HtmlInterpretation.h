@@ -17,6 +17,7 @@ public:
   bool flagIsSubSection;
   bool flagIsError;
   bool flagContainsProblemsNotInSubsection;
+  bool flagSubproblemHasNoWeight;
   List<int> parentTopics;
   List<int> immediateChildren;
   int totalSubSectionsUnderME;
@@ -40,15 +41,19 @@ public:
   std::string displayScore;
   std::string displayModifyWeight;
   std::string displayModifyDeadline;
+  std::string studentScoresSpanId;
   Rational totalPointsEarned;
   Rational pointsEarnedInProblemsThatAreImmediateChildren;
   Rational maxPointsInAllChildren;
+//  Rational numAnsweredInAllChildren;
+//  Rational maxCorrectAnswersInAllChildren;
   void ComputeID();
   void reset(int parentSize)
   { this->flagIsSection=false;
     this->flagIsSubSection=false;
     this->flagIsChapter=false;
     this->flagIsError=false;
+    this->flagSubproblemHasNoWeight=false;
     this->title="empty";
     this->id="";
     this->video="";
@@ -109,6 +114,7 @@ public:
   bool flagUseNavigationBar;
   bool flagMathQuillWithMatrices;
   bool flagSectionsPrepared;
+  bool flagIncludeStudentScores;
   double timeToParseHtml;
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;
@@ -219,6 +225,7 @@ public:
   std::string ToStringLinkFromFileName(const std::string& theFileName);
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
+  std::string ToStringStudentScoreButton();
   std::string ToStringProblemWeighT(const std::string& theFileName);
   std::string ToStringProblemScoreFull(const std::string& theFileName);
   std::string ToStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved);

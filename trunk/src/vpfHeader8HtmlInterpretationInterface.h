@@ -25,6 +25,7 @@ public:
   static std::string GetAnswerOnGiveUp();
   static std::string GetSelectCourse();
   static std::string GetScoresPage();
+  static std::string GetScoresInCoursePage();
   static std::string GetNavigationPanelWithGenerationTime();
   static std::string SubmitProblemPreview();
   static std::string GetSetProblemDatabaseInfoHtml();

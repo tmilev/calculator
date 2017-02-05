@@ -2939,7 +2939,7 @@ std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName
   //stOutput << "<br>this->databaseProblemWeights is: " << this->databaseProblemWeights.ToStringCommaDelimited();
   //stOutput << "<br> cleanedupLink: " << cleaneduplink;
   std::string idPoints = "points" + urledProblem;
-  std::string idNumTries= "numTries"+urledProblem;
+//  std::string idNumTries= "numTries"+urledProblem;
   std::string idButtonModifyPoints = "modifyPoints" + urledProblem;
   std::string idPointsModOutput = "modifyPointsOutputSpan" + urledProblem;
   out << "Pts: <textarea rows=\"1\" cols=\"2\" id=\"" << idPoints << "\">";
@@ -2982,6 +2982,7 @@ void TopicElement::ComputeID()
   if (this->flagIsSubSection)
     out << "[SubSection]";
   this->id=out.str();
+  this->studentScoresSpanId="topic"+ Crypto::computeSha1outputBase64(this->id);
 }
 
 void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
@@ -3199,6 +3200,26 @@ void CalculatorHTML::InterpretJavascripts(SyntacticElementHTML& inputOutput)
     inputOutput.interpretedCommand=CGI::GetJavascriptMathjax();
 }
 
+std::string CalculatorHTML::ToStringStudentScoreButton()
+{ std::stringstream out;
+  static int scoreButtonCounter=0;
+  scoreButtonCounter++;
+  out << "<button "
+  << "onclick=\"submitStringAsMainInput"
+  << "('','studentScoresLoadReport" << scoreButtonCounter << "', "
+  << "'scoresInCoursePage',"
+  << " updateStudentScores, 'studentScoresLoadReport"
+  << scoreButtonCounter << "');\">"
+  << "Update</button> student scores. ";
+  ;
+  out << "<span id='studentScoresLoadReport"
+  << scoreButtonCounter << "'></span>"
+  << "<span id='studentScoresOutput"
+  << scoreButtonCounter << "'></span>";
+
+  return out.str();
+}
+
 void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTopicList");
   std::stringstream out;
@@ -3213,6 +3234,12 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   //out << "DEBUG: sections: " << this->databaseStudentSections.ToStringCommaDelimited();
   //out << "DEBUG: prob data: " << this->currentUseR.theProblemData.ToStringHtml();
   #ifdef MACRO_use_MySQL
+  this->flagIncludeStudentScores=
+  theGlobalVariables.UserDefaultHasAdminRights() &&
+  theGlobalVariables.UserStudentViewOn();
+  if (this->flagIncludeStudentScores)
+  { this->ToStringStudentScoreButton();
+  }
   this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys, &this->theTopicS);
   if (this->currentUseR.pointsMax!=0)
   { double percent=100*this->currentUseR.pointsEarned.GetDoubleValue()/
@@ -3232,7 +3259,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   bool chapterStarted=false;
   std::string desiredChapter= CGI::URLStringToNormal(theGlobalVariables.GetWebInput("chapter"), false);
   std::string currentChapter="";
-  out << "<!--Topic list automatically generated from topic list: " << this->topicListFileName
+  out << "<!--Topic list automatically generated from topic list: "
+  << this->topicListFileName
   << ".-->";
   //out << "<br>DEBUG: Desired chapter: " << desiredChapter << "<hr>Total chapters: " << this->theTopics.size;
   bool firstListStarted=false;
@@ -3251,11 +3279,13 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       }
     if (!firstListStarted)
     { firstListStarted=true;
-      out << "\n<style>ol{counter-reset: item " << chapterCounter-1 << "}" << "</style>\n";
+      out << "\n<style>ol{counter-reset: item " << chapterCounter-1 << "}"
+      << "</style>\n";
       out << "<ol start=\"" << chapterCounter << "\">";
     }
     currentElt.ComputeLinks(*this, plainStyle);
-    if (!currentElt.flagIsSection && !currentElt.flagIsSubSection && !currentElt.flagIsChapter && !tableStarted)
+    if (!currentElt.flagIsSection && !currentElt.flagIsSubSection &&
+        !currentElt.flagIsChapter && !tableStarted)
     { out << TopicElement::GetTableStart(plainStyle);
       tableStarted=true;
     }
@@ -3279,16 +3309,36 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       sectionStarted=false;\
       subSectionStarted=false;
       tableStarted=false;
+//      out << " DEBUG: max possible pts: "
+//      << currentElt.maxPointsInAllChildren
+//      << ", pts: "
+//      << currentElt.totalPointsEarned;
       out << "<ol>\n";
     } else if (currentElt.flagIsSection)
-    { out << "<li class=\"listSection\">\n" << currentElt.displayTitleWithDeadline << "\n<br>\n";
+    { out << "<li class=\"listSection\">\n"
+      << currentElt.displayTitleWithDeadline;
+//      out << " DEBUG: total possible answers: "
+//      << currentElt.maxPointsInAllChildren
+//      << ", answered: "
+//      << currentElt.totalPointsEarned;
+      if (this->flagIncludeStudentScores)
+        out << "<br>"
+        << this->ToStringStudentScoreButton()
+        << "<span id='" << currentElt.studentScoresSpanId
+        << "'></span>";
+      out << "\n<br>\n";
       sectionStarted=true;
       subSectionStarted=false;
       tableStarted=false;
       out << "<ol>\n";
     } else if (currentElt.flagIsSubSection)
     { out << "<li class=\"listSubsection\">\n";
-      out << currentElt.displayTitleWithDeadline << "\n<br>\n";
+      out << currentElt.displayTitleWithDeadline;
+//      out << " DEBUG: total possible answers: "
+//      << currentElt.maxPointsInAllChildren
+//      << ", answered: "
+//      << currentElt.totalPointsEarned;
+      out << "\n<br>\n";
       subSectionStarted=true;
       tableStarted=false;
     } else if (currentElt.flagIsError)
@@ -3306,6 +3356,10 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     { out << "<tr class=\"topicList\">\n";
       out << "  <td>\n";
       out << currentElt.displayTitle;
+//      out << " DEBUG: total possible answers: "
+//      << currentElt.maxPointsInAllChildren
+//      << ", answered: "
+//      << currentElt.totalPointsEarned;
       out << "  </td>\n";
       out << "  <td>\n" << currentElt.displayVideoLink;
       if (currentElt.displaySlidesPrintableLink!="")

@@ -3,6 +3,7 @@ var answerIdsPureLatex=[];
 var answerMathQuillObjects=[];
 var answerMQspanIds=[];
 var preferredButtonContainers=[];
+var studentScoresInHomePage=[];
 //var lastFocus;
 var charsToSplit=['x','y'];
 
@@ -52,6 +53,7 @@ function initializeButtonsCommon()
 //    });
 //  }
 }
+
 function initializeButtons()
 { for (var i=0; i<answerIdsPureLatex.length; i++)
   { var currentButtonPanel=document.getElementById(preferredButtonContainers[i]);
@@ -102,8 +104,8 @@ function initializeButtonsMatrixSupport()
   initializeButtonsCommon();
 }
 
-function initializeButtonsCalculator(){
-  for (var i=0; i<answerIdsPureLatex.length; i++)
+function initializeButtonsCalculator()
+{ for (var i=0; i<answerIdsPureLatex.length; i++)
   { var currentButtonPanel=document.getElementById(preferredButtonContainers[i]);
     currentButtonPanel.innerHTML=
 "<table><tr>"+
@@ -124,8 +126,23 @@ function initializeButtonsCalculator(){
   initializeButtonsCommon();
 }
 
-function updateUserStats()
-{
+function updateStudentScores(idElement)
+{ onLoadDefaultFunction(idElement);
+  for (var i=0; i<studentScoresInHomePage.length; i++)
+  { var currentElt=document.getElementById(studentScoresInHomePage[i].theId);
+    if (currentElt===null || currentElt===undefined)
+      continue;
+    currentElt.innerHTML=
+    "<span style=\"color:green\">" +
+    studentScoresInHomePage[i].numSolvedAll+
+    " solved all; </span> <span style=\"color:orange\">" +
+    studentScoresInHomePage[i].numSolvedPart+
+    " solved some; </span>"+
+    "<span style=\"color:Red\"> " +studentScoresInHomePage[i].numSolvedNone+
+    " solved none.</span>";
+    if (!studentScoresInHomePage[i].weightsOK)
+      currentElt.innerHTML+= " Not all problems have weights. ";
+  }
 }
 
 function getSqrt_N_Button(indexMathField){

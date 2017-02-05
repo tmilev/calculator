@@ -92,6 +92,7 @@ public:
   int ProcessDatabaseOneEntry();
   int ProcessAccounts();
   int ProcessScores();
+  int ProcessScoresInCoursePage();
   int ProcessAssignTeacherToSection();
   int ProcessExamPage();
   int ProcessTemplate();

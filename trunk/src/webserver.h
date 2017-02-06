@@ -218,6 +218,7 @@ public:
   bool flagSSLHandshakeSuccessful;
   bool flagReapingChildren;
   bool flagThisIsWorkerProcess;
+  double timeAtLastBackup;
   MonomialCollection<MonomialWrapper<std::string, MathRoutines::hashString>, LargeInt> currentlyConnectedAddresses;
   List<std::string> PortsITryHttp;
   List<std::string> PortsITryHttpSSL;
@@ -241,7 +242,7 @@ public:
   static void AnalyzeMainArguments(int argC, char **argv);
   static void InitializeGlobalVariables();
   bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);
-
+  void BackupDatabaseIfNeeded();
   void ReleaseWorkerSideResources();
   void ReleaseActiveWorker();
   void ReleaseSocketsNonActiveWorkers();

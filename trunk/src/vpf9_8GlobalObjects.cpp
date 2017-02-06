@@ -10,25 +10,28 @@
 ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global objects");
 
 GlobalVariables theGlobalVariables;
-std::string GetDateForLogFiles()
+std::string GlobalVariables::GetDateForLogFiles()
 { static std::string tempDate;
   if (tempDate!="")
     return tempDate;
   TimeWrapper now;
   now.AssignLocalTime();
   tempDate=now.ToStringHumanReadable();
+  for (unsigned i=0; i<tempDate.size(); i++)
+    if (tempDate[i]==' ')
+      tempDate[i]='_';
   return tempDate;
 }
 
-logger logHttpErrors("LogFiles/LogHttpErrors"+GetDateForLogFiles()+".html");
-logger theLog("LogFiles/LogStandard"+GetDateForLogFiles()+".html");
-logger logBlock( "LogFiles/LogBlockingEvents"+GetDateForLogFiles()+".html");
-logger logIO( "LogFiles/LogIOErrorsEvents"+GetDateForLogFiles()+".html");
-logger logProcessKills( "LogFiles/LogMultiprocessing"+GetDateForLogFiles()+".html");
-logger logPlumbing( "LogFiles/LogServerPlumbing"+GetDateForLogFiles()+".html");
-logger logSocketAccept( "LogFiles/LogSocketAccept"+GetDateForLogFiles()+".html");
-logger logProcessStats( "LogFiles/LogWorkerProcessStats"+GetDateForLogFiles()+".html");
-logger logOpenSSL( "LogFiles/LogOpenSSL"+GetDateForLogFiles()+".html");
+logger logHttpErrors("LogFiles/LogHttpErrors"+GlobalVariables::GetDateForLogFiles()+".html");
+logger theLog("LogFiles/LogStandard"+GlobalVariables::GetDateForLogFiles()+".html");
+logger logBlock( "LogFiles/LogBlockingEvents"+GlobalVariables::GetDateForLogFiles()+".html");
+logger logIO( "LogFiles/LogIOErrorsEvents"+GlobalVariables::GetDateForLogFiles()+".html");
+logger logProcessKills( "LogFiles/LogMultiprocessing"+GlobalVariables::GetDateForLogFiles()+".html");
+logger logPlumbing( "LogFiles/LogServerPlumbing"+GlobalVariables::GetDateForLogFiles()+".html");
+logger logSocketAccept( "LogFiles/LogSocketAccept"+GlobalVariables::GetDateForLogFiles()+".html");
+logger logProcessStats( "LogFiles/LogWorkerProcessStats"+GlobalVariables::GetDateForLogFiles()+".html");
+logger logOpenSSL( "LogFiles/LogOpenSSL"+GlobalVariables::GetDateForLogFiles()+".html");
 Calculator theParser;
 FormatExpressions consoleFormat;
 Crasher crash;

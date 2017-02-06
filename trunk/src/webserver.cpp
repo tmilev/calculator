@@ -3316,6 +3316,7 @@ WebServer::WebServer()
   this->flagDeallocated=false;
   this->flagTryToKillOlderProcesses=true;
   this->activeWorker=-1;
+  this->timeAtLastBackup=-1;
   this->timeLastExecutableModification=-1;
   this->listeningSocketHTTP=-1;
   this->listeningSocketHttpSSL=-1;
@@ -4005,6 +4006,24 @@ extern void MonitorWebServer();
 
 #include <sys/time.h>
 timeval timeBeforeProcessFork;
+
+void WebServer::BackupDatabaseIfNeeded()
+{ MacroRegisterFunctionWithName("WebServer::BackupDatabaseIfNeeded");
+  if (this->timeAtLastBackup>0 &&
+      theGlobalVariables.GetElapsedSeconds()-this->timeAtLastBackup <
+      (24*3600))
+    return;
+  std::stringstream commandStream;
+  commandStream << "mysqldump -u ace --databases aceDB > "
+  << theGlobalVariables.PhysicalPathProjectBase
+  << "database-backups/dbBackup"
+  << theGlobalVariables.GetDateForLogFiles() << ".sql";
+  theLog << logger::orange << "Backing up database with command: " << logger::endL;
+  theLog << commandStream.str() << logger::endL;
+  theGlobalVariables.CallSystemWithOutput(commandStream.str());
+  theLog << logger::green << "Backing up completed. " << logger::endL;
+  this->timeAtLastBackup=theGlobalVariables.GetElapsedSeconds();
+}
 
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");

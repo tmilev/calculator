@@ -193,6 +193,7 @@ public:
   std::string ToStringNavigation();
   std::string ToStringCalcArgsNoNavigation(bool excludeAuthenticationToken, List<std::string>* tagsToExclude=0);
 
+  static std::string GetDateForLogFiles();
   void SetWebInpuT(const std::string& inputName, const std::string& inputValue);
   std::string GetWebInput(const std::string& inputName);
   void initDefaultFolderAndFileNames

@@ -2971,6 +2971,7 @@ std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName
 void TopicElement::ComputeID()
 { if (this->problem!="")
   { this->id=this->problem;
+    this->studentScoresSpanId="topic"+ Crypto::computeSha1outputBase64(this->id);
     return;
   }
   std::stringstream out;
@@ -3200,23 +3201,26 @@ void CalculatorHTML::InterpretJavascripts(SyntacticElementHTML& inputOutput)
     inputOutput.interpretedCommand=CGI::GetJavascriptMathjax();
 }
 
-std::string CalculatorHTML::ToStringStudentScoreButton()
+std::string TopicElement::ToStringStudentScoreButton(bool doIncludeButton)
 { std::stringstream out;
   static int scoreButtonCounter=0;
   scoreButtonCounter++;
-  out << "<button "
-  << "onclick=\"submitStringAsMainInput"
-  << "('','studentScoresLoadReport" << scoreButtonCounter << "', "
-  << "'scoresInCoursePage',"
-  << " updateStudentScores, 'studentScoresLoadReport"
-  << scoreButtonCounter << "');\">"
-  << "Update</button> student scores. ";
-  ;
+  out << "<span class=\"studentScoresWrapper\">";
+  if (doIncludeButton)
+    out << "<button class=\"studentScoresButton\""
+    << "onclick=\"toggleStudentScores"
+    << "('studentScoresLoadReport" << scoreButtonCounter << "', "
+    << "'scoresInCoursePage',"
+    << "'studentScoresLoadReport"
+    << scoreButtonCounter << "');\">"
+    << "Update scores.</button> ";
+   ;
   out << "<span id='studentScoresLoadReport"
   << scoreButtonCounter << "'></span>"
-  << "<span id='studentScoresOutput"
-  << scoreButtonCounter << "'></span>";
-
+  << "<span class='studentScoreOutputJavascriptSpan' id='studentScoresOutput"
+  << scoreButtonCounter << "'></span>"
+  << "<span class='studentScoresContent' id='" << this->studentScoresSpanId << "'></span>"
+  << "</span>";
   return out.str();
 }
 
@@ -3237,9 +3241,6 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   this->flagIncludeStudentScores=
   theGlobalVariables.UserDefaultHasAdminRights() &&
   theGlobalVariables.UserStudentViewOn();
-  if (this->flagIncludeStudentScores)
-  { this->ToStringStudentScoreButton();
-  }
   this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys, &this->theTopicS);
   if (this->currentUseR.pointsMax!=0)
   { double percent=100*this->currentUseR.pointsEarned.GetDoubleValue()/
@@ -3304,9 +3305,12 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       if (currentElt.flagIsChapter)
         out << "</ol></li>\n";
     if (currentElt.flagIsChapter)
-    { out << "<li class=\"listChapter\">\n" << currentElt.displayTitleWithDeadline << "\n<br>\n";
+    { out << "<li class=\"listChapter\">\n" << currentElt.displayTitleWithDeadline;
+      if (this->flagIncludeStudentScores)
+        out << currentElt.ToStringStudentScoreButton(true);
+      out << "\n<br>\n";
       chapterStarted=true;
-      sectionStarted=false;\
+      sectionStarted=false;
       subSectionStarted=false;
       tableStarted=false;
 //      out << " DEBUG: max possible pts: "
@@ -3322,10 +3326,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 //      << ", answered: "
 //      << currentElt.totalPointsEarned;
       if (this->flagIncludeStudentScores)
-        out << "<br>"
-        << this->ToStringStudentScoreButton()
-        << "<span id='" << currentElt.studentScoresSpanId
-        << "'></span>";
+        out << currentElt.ToStringStudentScoreButton(true);
       out << "\n<br>\n";
       sectionStarted=true;
       subSectionStarted=false;
@@ -3334,6 +3335,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     } else if (currentElt.flagIsSubSection)
     { out << "<li class=\"listSubsection\">\n";
       out << currentElt.displayTitleWithDeadline;
+      if (this->flagIncludeStudentScores)
+        out << currentElt.ToStringStudentScoreButton(false);
 //      out << " DEBUG: total possible answers: "
 //      << currentElt.maxPointsInAllChildren
 //      << ", answered: "
@@ -3356,6 +3359,9 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     { out << "<tr class=\"topicList\">\n";
       out << "  <td>\n";
       out << currentElt.displayTitle;
+      if (this->flagIncludeStudentScores)
+        out << currentElt.ToStringStudentScoreButton(false);
+
 //      out << " DEBUG: total possible answers: "
 //      << currentElt.maxPointsInAllChildren
 //      << ", answered: "

@@ -103,6 +103,32 @@ span.panel {
   opacity: 0;
 }
 
+button.studentScoresButton{
+  font-size: medium;
+  font-weight: normal;
+  background-color: Transparent;
+  background-repeat:no-repeat;
+  border: none;
+  cursor:pointer;
+  overflow: hidden;
+  outline:none;
+}
+
+button.studentScoresButton.active, button.studentScoresButton:hover {
+  background-color: #ddd;
+}
+
+span.studentScoresContent{
+  transition: opacity 1s linear;
+  opacity: 1;
+}
+
+span.studentScoresWrapper{
+  font-size: medium;
+  font-weight: normal;
+  margin-left: 50px;
+}
+
 span.panel.show {
   opacity: 1;
   max-height: 500px;
@@ -116,7 +142,7 @@ span.titleContainer{
 
 span.deadlineContainer{
   display: inline-block;
-  margin-left: 100px;
+  margin-left: 50px;
   font-weight: normal;
   font-size: medium;
   vertical-align: middle;

@@ -126,6 +126,37 @@ function initializeButtonsCalculator()
   initializeButtonsCommon();
 }
 
+var StudentScoresAreBeingDisplayed=false;
+function toggleStudentScores
+(studentScoreLoadRep, scoresInCoursePage, studentScoresLoadReport)
+{ if (!StudentScoresAreBeingDisplayed)
+  { submitStringAsMainInput
+    ('',studentScoreLoadRep,scoresInCoursePage, updateStudentScores,
+    studentScoresLoadReport);
+    StudentScoresAreBeingDisplayed=true;
+    var theScores=document.getElementsByClassName('studentScoresContent');
+    for (var i=0; i<theScores.length; i++)
+    { //theScores[i].style.transition='opacity 1s linear';
+      theScores[i].style.opacity='1';
+    }
+    var theButtons=document.getElementsByClassName('studentScoresButton');
+    for (var i=0; i<theButtons.length; i++)
+    { theButtons[i].innerHTML='Hide scores.';
+    }
+  } else
+  { StudentScoresAreBeingDisplayed=false;
+    var theScores=document.getElementsByClassName('studentScoresContent');
+    for (var i=0; i<theScores.length; i++)
+    { //theScores[i].style.transition='opacity 1s linear';
+      theScores[i].style.opacity='0';
+    }
+    var theButtons=document.getElementsByClassName('studentScoresButton');
+    for (var i=0; i<theButtons.length; i++)
+    { theButtons[i].innerHTML='Update scores.';
+    }
+  }
+}
+
 function updateStudentScores(idElement)
 { onLoadDefaultFunction(idElement);
   for (var i=0; i<studentScoresInHomePage.length; i++)
@@ -133,13 +164,13 @@ function updateStudentScores(idElement)
     if (currentElt===null || currentElt===undefined)
       continue;
     currentElt.innerHTML=
-    "<span style=\"color:green\">" +
+    "<b><span style=\"color:green\">" +
     studentScoresInHomePage[i].numSolvedAll+
     " solved all; </span> <span style=\"color:orange\">" +
     studentScoresInHomePage[i].numSolvedPart+
     " solved some; </span>"+
     "<span style=\"color:Red\"> " +studentScoresInHomePage[i].numSolvedNone+
-    " solved none.</span>";
+    " solved none.</span></b>";
     if (!studentScoresInHomePage[i].weightsOK)
       currentElt.innerHTML+= " Not all problems have weights. ";
   }

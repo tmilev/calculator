@@ -74,6 +74,7 @@ public:
   { output << theElt.ToString();
     return output;
   }
+  std::string ToStringStudentScoreButton(bool doIncludeButton);
   std::string ToString()const;
   static std::string GetTableStart(bool plainStyle);
   static std::string GetTableFinish(bool plainStyle);
@@ -225,7 +226,6 @@ public:
   std::string ToStringLinkFromFileName(const std::string& theFileName);
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
-  std::string ToStringStudentScoreButton();
   std::string ToStringProblemWeighT(const std::string& theFileName);
   std::string ToStringProblemScoreFull(const std::string& theFileName);
   std::string ToStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved);

@@ -56,6 +56,7 @@ void MonitorWebServer()
   TimeWrapper now;
   for (;;)
   { theGlobalVariables.FallAsleep(microsecondsToSleep);
+    theWebServer.BackupDatabaseIfNeeded();
     std::cout << "Pinging " << theCrawler.addressToConnectTo
     << " at port/service " << theCrawler.portOrService << ".\n";
     theCrawler.PingCalculatorStatus();

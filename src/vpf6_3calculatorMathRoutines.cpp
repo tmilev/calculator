@@ -3448,7 +3448,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateSinPowerNCosPowerM
 bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM");
-  /*Expression theFunctionE, theVariableE, integrationSet;
+  Expression theFunctionE, theVariableE, integrationSet;
   if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &integrationSet))
     return false;
 //  stOutput << "<br>innerIntegrateXnDiffX: Integrating function " << theFunctionE.ToString();
@@ -3487,8 +3487,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
     return false;
   const Polynomial<Rational>& theTrigPoly=polynomializedFunctionE.GetValue<Polynomial<Rational> >();
   Expression theTanE, theSecE;
-  theTanE.MakeOX(theCommands, theCommands.opCos(), theTrigArgument);
-  theSecE.MakeOX(theCommands, theCommands.opSin(), theTrigArgument);
+  theTanE.MakeOX(theCommands, theCommands.opTan(), theTrigArgument);
+  theSecE.MakeOX(theCommands, theCommands.opSec(), theTrigArgument);
   Expression outputCandidate, currentSummandE, currentCommandListE,
   currentSubE, currentIntegrandE, currentIntegrandNonPolynomializedE,
   currentIntegral, currentIntegralComputation,
@@ -3510,25 +3510,26 @@ bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
     if (powerTan<0 || powerSec<0)
       return false;
     if (powerTan%2==1 && powerSec>0)
-    { currentE=oneE - newVarE*newVarE;
+    { currentE=newVarE*newVarE-oneE;
       powerE.AssignValue((powerTan-1)/2, theCommands);
-      currentIntegrandSinePart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
+      currentIntegrandTanPart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
       powerE.AssignValue(powerSec-1, theCommands);
-      currentIntegrandCosinePart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
-      currentCF.AssignValue(-theTrigPoly.theCoeffs[i], theCommands);
-      currentCF/=theTrigArgCoeff;
-      currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theCosE);
-    } else if (powerCosine%2==1)
-    { currentE=oneE - newVarE*newVarE;
-      powerE.AssignValue((powerCosine-1)/2, theCommands);
-      currentIntegrandCosinePart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
-      powerE.AssignValue(powerSine, theCommands);
-      currentIntegrandSinePart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
+      currentIntegrandSecPart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
       currentCF.AssignValue(theTrigPoly.theCoeffs[i], theCommands);
       currentCF/=theTrigArgCoeff;
-      currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theSinE);
+      currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theSecE);
+    } else if (powerSec%2==0)
+    { currentE=oneE + newVarE*newVarE;
+      powerE.AssignValue((powerSec-2)/2, theCommands);
+      currentIntegrandSecPart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
+      powerE.AssignValue(powerTan, theCommands);
+      currentIntegrandTanPart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
+      currentCF.AssignValue(theTrigPoly.theCoeffs[i], theCommands);
+      currentCF/=theTrigArgCoeff;
+      currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theTanE);
     } else
-    { currentE=(oneE-theCosDoubleE)/twoE;
+    { return false;
+      /*currentE=(oneE-theCosDoubleE)/twoE;
       powerE.AssignValue(powerSine/2, theCommands);
       currentIntegrandSinePart.MakeXOX
       (theCommands, theCommands.opThePower(),currentE, powerE);
@@ -3544,10 +3545,10 @@ bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
       currentIntegrandE.AddChildOnTop(currentIntegrandNonPolynomializedE);
       currentIntegral.MakeIntegral(theCommands, integrationSet, currentIntegrandE, theVariableE);
       outputCandidate+=currentIntegral;
-      continue;
+      continue;*/
     }
     currentIntegrandNonPolynomializedE=
-    currentCF*currentIntegrandSinePart*currentIntegrandCosinePart;
+    currentCF*currentIntegrandTanPart*currentIntegrandSecPart;
     currentIntegrandE.reset(theCommands);
     currentIntegrandE.AddChildAtomOnTop("Polynomialize");
     currentIntegrandE.AddChildOnTop(currentIntegrandNonPolynomializedE);
@@ -3566,7 +3567,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
     outputCandidate+=currentSummandE;
   }
   output=outputCandidate;
-  return true;*/
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX(Calculator& theCommands, const Expression& input, Expression& output)

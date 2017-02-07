@@ -3445,6 +3445,131 @@ bool CalculatorFunctionsGeneral::innerIntegrateSinPowerNCosPowerM
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM");
+  /*Expression theFunctionE, theVariableE, integrationSet;
+  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &integrationSet))
+    return false;
+//  stOutput << "<br>innerIntegrateXnDiffX: Integrating function " << theFunctionE.ToString();
+  Expression polynomializedFunctionE;
+  if(!CalculatorConversions::innerPolynomial<Rational>(theCommands, theFunctionE, polynomializedFunctionE))
+    return false;
+  if (!polynomializedFunctionE.IsOfType<Polynomial<Rational> >())
+    return false;
+  Expression contextE= polynomializedFunctionE.GetContext();
+  int numVars=contextE.ContextGetNumContextVariables();
+  if(numVars>2)
+    return false;
+  if (numVars==0)
+    return false;
+  Expression sinPowerE, theTrigArgument, cosPowerE;
+  sinPowerE.AssignValue(1, theCommands);
+  cosPowerE.AssignValue(1, theCommands);
+  bool firstIsTan=false;
+  for (int i=0; i<numVars; i++)
+  { Expression currentE=contextE.ContextGetContextVariable(i);
+    if (!currentE.StartsWith(theCommands.opTan(),2) &&
+        !currentE.StartsWith(theCommands.opSec(),2))
+      return false;
+    if (i==0 && currentE.StartsWith(theCommands.opTan()))
+      firstIsTan=true;
+    if (i==0)
+      theTrigArgument=currentE[1];
+    else
+      if (theTrigArgument!=currentE[1])
+        return false;
+  }
+  Expression theTrigArgumentNoCoeff, theTrigArgCoeff;
+  theTrigArgument.GetCoefficientMultiplicandForm
+  (theTrigArgCoeff, theTrigArgumentNoCoeff);
+  if (theTrigArgumentNoCoeff!=theVariableE)
+    return false;
+  const Polynomial<Rational>& theTrigPoly=polynomializedFunctionE.GetValue<Polynomial<Rational> >();
+  Expression theTanE, theSecE;
+  theTanE.MakeOX(theCommands, theCommands.opCos(), theTrigArgument);
+  theSecE.MakeOX(theCommands, theCommands.opSin(), theTrigArgument);
+  Expression outputCandidate, currentSummandE, currentCommandListE,
+  currentSubE, currentIntegrandE, currentIntegrandNonPolynomializedE,
+  currentIntegral, currentIntegralComputation,
+  currentIntegrandSinePart, currentIntegrandCosinePart, newVarE, newResultE, currentE, currentCF;
+  Expression oneE, twoE, threeE, powerE;
+  oneE.AssignValue(1, theCommands);
+  twoE.AssignValue(2, theCommands);
+  threeE.AssignValue(3, theCommands);
+  outputCandidate.AssignValue(0,theCommands);
+  newVarE=theCommands.GetNewAtom();
+  newResultE=theCommands.GetNewAtom();
+  for (int i=0; i<theTrigPoly.size(); i++)
+  { const MonomialP& currentMon=theTrigPoly[i];
+    int powerTan=-1, powerSec=-1;
+    if (!currentMon(0).IsSmallInteger(&powerTan) || !currentMon(1).IsSmallInteger(&powerSec))
+      return false;
+    if (!firstIsTan)
+      MathRoutines::swap(powerTan, powerSec);
+    if (powerTan<0 || powerSec<0)
+      return false;
+    if (powerTan%2==1 && powerSec%2==1)
+    { currentE=oneE - newVarE*newVarE;
+      powerE.AssignValue((powerSine-1)/2, theCommands);
+      currentIntegrandSinePart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
+      powerE.AssignValue(powerCosine, theCommands);
+      currentIntegrandCosinePart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
+      currentCF.AssignValue(-theTrigPoly.theCoeffs[i], theCommands);
+      currentCF/=theTrigArgCoeff;
+      currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theCosE);
+    } else if (powerCosine%2==1)
+    { currentE=oneE - newVarE*newVarE;
+      powerE.AssignValue((powerCosine-1)/2, theCommands);
+      currentIntegrandCosinePart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
+      powerE.AssignValue(powerSine, theCommands);
+      currentIntegrandSinePart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
+      currentCF.AssignValue(theTrigPoly.theCoeffs[i], theCommands);
+      currentCF/=theTrigArgCoeff;
+      currentSubE.MakeXOX(theCommands, theCommands.opDefine(), newVarE, theSinE);
+    } else
+    { currentE=(oneE-theCosDoubleE)/twoE;
+      powerE.AssignValue(powerSine/2, theCommands);
+      currentIntegrandSinePart.MakeXOX
+      (theCommands, theCommands.opThePower(),currentE, powerE);
+      currentE=(oneE+theCosDoubleE)/twoE;
+      powerE.AssignValue(powerCosine/2, theCommands);
+      currentIntegrandCosinePart.MakeXOX
+      (theCommands, theCommands.opThePower(),currentE, powerE);
+      currentCF.AssignValue(theTrigPoly.theCoeffs[i], theCommands);
+      currentIntegrandNonPolynomializedE=
+      currentCF*currentIntegrandSinePart*currentIntegrandCosinePart;
+      currentIntegrandE.reset(theCommands);
+      currentIntegrandE.AddChildAtomOnTop("Polynomialize");
+      currentIntegrandE.AddChildOnTop(currentIntegrandNonPolynomializedE);
+      currentIntegral.MakeIntegral(theCommands, integrationSet, currentIntegrandE, theVariableE);
+      outputCandidate+=currentIntegral;
+      continue;
+    }
+    currentIntegrandNonPolynomializedE=
+    currentCF*currentIntegrandSinePart*currentIntegrandCosinePart;
+    currentIntegrandE.reset(theCommands);
+    currentIntegrandE.AddChildAtomOnTop("Polynomialize");
+    currentIntegrandE.AddChildOnTop(currentIntegrandNonPolynomializedE);
+    currentIntegral.MakeIntegral(theCommands, integrationSet, currentIntegrandE, newVarE);
+
+    currentIntegralComputation.MakeXOX(theCommands, theCommands.opDefine(), newResultE, currentIntegral);
+    currentCommandListE.reset(theCommands);
+    currentCommandListE.AddChildAtomOnTop(theCommands.opEndStatement());
+    currentCommandListE.AddChildOnTop(currentIntegralComputation);
+    currentCommandListE.AddChildOnTop(currentSubE);
+    currentCommandListE.AddChildOnTop(newResultE);
+    currentSummandE.reset(theCommands);
+    currentSummandE.AddChildOnTop(currentCommandListE);
+    currentSummandE.AddChildOnTop(threeE);
+
+    outputCandidate+=currentSummandE;
+  }
+  output=outputCandidate;
+  return true;*/
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX");
   Expression theFunctionE, theVariableE;

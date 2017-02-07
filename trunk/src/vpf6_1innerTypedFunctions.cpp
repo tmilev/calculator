@@ -641,37 +641,64 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger(Calculator& theC
 }
 
 bool CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
   int thePower=0;
-  if(!input[2].IsSmallInteger(&thePower))
+  bool powerIsSmall=input[2].IsSmallInteger(&thePower);
+  if(!powerIsSmall)
   { LargeInt largePower;
     if(input[2].IsInteger(&largePower))
-    { Matrix<Rational> base=input[1].GetValue<Matrix<Rational> >();
-      if (!base.IsSquare() || base.NumCols==0)
-      { std::stringstream errorStream;
-        errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
-        << "Your matrix, " << base.ToString() << " is not square. ";
-        return output.MakeError(errorStream.str(), theCommands);
+    { if (input[1].IsOfType<Matrix<Rational> >())
+      { Matrix<Rational> base=input[1].GetValue<Matrix<Rational> >();
+        if (!base.IsSquare() || base.NumCols==0)
+        { std::stringstream errorStream;
+          errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
+          << "Your matrix, " << base.ToString() << " is not square. ";
+          return output.MakeError(errorStream.str(), theCommands);
+        }
+        Rational theDet= base.GetDeterminant();
+        if (largePower<=0)
+          if (theDet==0 )
+            return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+        if (theDet!=0 && theDet!=-1 && theDet!=1)
+          return theCommands << "Matrix power too large.";
+        if (largePower<0)
+        { base.Invert();
+          largePower*=-1;
+        }
+        Matrix<Rational> idMat;
+        idMat.MakeIdMatrix(base.NumRows);
+        MathRoutines::RaiseToPower(base, largePower, idMat);
+        return output.AssignValue(base, theCommands);
       }
-      Rational theDet= base.GetDeterminant();
-      if (largePower<=0)
-        if (theDet==0 )
-          return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
-      if (theDet!=0 && theDet!=-1 && theDet!=1)
-        return theCommands << "Matrix power too large.";
-      if (largePower<0)
-      { base.Invert();
-        largePower*=-1;
+      if (input[1].IsOfType<Matrix<AlgebraicNumber> >())
+      { Matrix<AlgebraicNumber> base=input[1].GetValue<Matrix<AlgebraicNumber> >();
+        if (!base.IsSquare() || base.NumCols==0)
+        { std::stringstream errorStream;
+          errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
+          << "Your matrix, " << base.ToString() << " is not square. ";
+          return output.MakeError(errorStream.str(), theCommands);
+        }
+        AlgebraicNumber theDet= base.GetDeterminant();
+        if (largePower<=0)
+          if (theDet==0 )
+            return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+        if (theDet!=0 && theDet!=-1 && theDet!=1)
+          return theCommands << "Matrix power too large.";
+        if (largePower<0)
+        { base.Invert();
+          largePower*=-1;
+        }
+        Matrix<AlgebraicNumber> idMat;
+        idMat.MakeIdMatrix(base.NumRows);
+        MathRoutines::RaiseToPower(base, largePower, idMat);
+        return output.AssignValue(base, theCommands);
       }
-      Matrix<Rational> idMat;
-      idMat.MakeIdMatrix(base.NumRows);
-      MathRoutines::RaiseToPower(base, largePower, idMat);
-      return output.AssignValue(base, theCommands);
     }
-  }
+    return false;
+  }  
   if (input[1].IsOfType<Matrix<Rational> >())
   { Matrix<Rational> base=input[1].GetValue<Matrix<Rational> >();
     if (!base.IsSquare() || base.NumCols==0)

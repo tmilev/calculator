@@ -240,6 +240,24 @@ StackMaintainerRules::~StackMaintainerRules()
   this->owner=0;
 }
 
+Expression Calculator::GetNewAtom()
+{ std::string atomPrefix;
+  std::string candidate;
+  while (true)
+  { for (unsigned char a='a'; a<='z'; a++)
+    { candidate=atomPrefix;
+      candidate.push_back(a);
+      if (!this->theAtoms.Contains(candidate))
+      { Expression result;
+        result.MakeAtom(candidate, *this);
+        return result;
+      }
+    }
+    atomPrefix=candidate;
+  }
+
+}
+
 bool Calculator::AccountRule(const Expression &ruleE, StackMaintainerRules &theRuleStackMaintainer)
 { MacroRegisterFunctionWithName("Calculator::AccountRule");
   RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);

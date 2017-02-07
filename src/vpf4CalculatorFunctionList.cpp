@@ -462,6 +462,17 @@ D-B;\
    "\\int x dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateXnDiffX",
    "IntegratePowerRule");
   this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX, "",
+   "If a is a number, integrates e^{a x} dx.  ",
+   "\\int x dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX",
+   "IntegrateEpowerX");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateSinPowerNCosPowerM, "",
+   "Solves/transforms an integral of the form \\int \\sin^n x \\cos^m x.  ",
+   "\\int \\sin^{4}x \\cos^{6}x dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateSinPowerNCosPowerM",
+   "IntegrateSinPowerNCosPowerM");
+  this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateSum, "",
    "If the integral is of the form \\int (A+B )dx, tries recursively to integrate A and B. \
    If successful, integrates the sum in the obvious way.",

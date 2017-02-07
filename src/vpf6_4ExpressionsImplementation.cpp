@@ -3095,6 +3095,14 @@ bool Expression::IsAtom(std::string* outputWhichOperation)const
   return true;
 }
 
+bool Expression::IsAtomGivenData(const std::string& desiredAtom)const
+{ if (this->IsLisT())
+    return false;
+  if (this->owner==0)
+    return false;
+  return this->theData==this->owner->theAtoms.GetIndex(desiredAtom);
+}
+
 bool Expression::IsAtomGivenData(int desiredDataUseMinusOneForAny)const
 { if (this->IsLisT())
     return false;

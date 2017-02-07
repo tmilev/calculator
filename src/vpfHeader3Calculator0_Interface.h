@@ -223,6 +223,7 @@ class Expression
   bool IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom=0)const;
 
   bool IsAtom(std::string* outputWhichOperation=0)const;
+  bool IsAtomGivenData(const std::string& desiredAtom)const;
   bool IsAtomGivenData(int desiredDataUseMinusOneForAny=-1)const;
   bool IsBuiltInAtom(std::string* outputWhichOperation=0)const;
   bool IsGoodForChainRuleFunction(std::string* outputWhichOperation=0)const;
@@ -1015,6 +1016,7 @@ public:
   FormatExpressions formatVisibleStrings;
   std::string ToString();
   std::string ToStringPerformance();
+  Expression GetNewAtom();
   void ComputeAutoCompleteKeyWords();
   std::string ElementToStringNonBoundVars();
   std::string ToStringOutputAndSpecials();

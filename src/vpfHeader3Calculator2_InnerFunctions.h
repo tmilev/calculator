@@ -196,6 +196,7 @@ public:
   static bool innerIntegrateXnDiffX(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateEpowerAxDiffX(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateSinPowerNCosPowerM(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateTanPowerNSecPowerM(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerInterpretAsDifferential(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegralOperator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateSqrt(Calculator& theCommands, const Expression& input, Expression& output);

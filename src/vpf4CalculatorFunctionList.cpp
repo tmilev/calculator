@@ -473,6 +473,12 @@ D-B;\
    "CalculatorFunctionsGeneral::innerIntegrateSinPowerNCosPowerM",
    "IntegrateSinPowerNCosPowerM");
   this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM, "",
+   "Transforms an integral of the form \\int \\tan^n x \\sec^m x.  ",
+   "TurnOffRules(\"ExpressTanViaSineCosine\", \"ExpressSecViaSineCosine\"); \\int \\tan^2 x \\sec^{2}x dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM",
+   "IntegrateTanPowerNSecPowerM");
+  this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateSum, "",
    "If the integral is of the form \\int (A+B )dx, tries recursively to integrate A and B. \
    If successful, integrates the sum in the obvious way.",

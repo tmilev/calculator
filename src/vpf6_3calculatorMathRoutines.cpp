@@ -3492,7 +3492,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
   Expression outputCandidate, currentSummandE, currentCommandListE,
   currentSubE, currentIntegrandE, currentIntegrandNonPolynomializedE,
   currentIntegral, currentIntegralComputation,
-  currentIntegrandSinePart, currentIntegrandCosinePart, newVarE, newResultE, currentE, currentCF;
+  currentIntegrandTanPart, currentIntegrandSecPart, newVarE, newResultE, currentE, currentCF;
   Expression oneE, twoE, threeE, powerE;
   oneE.AssignValue(1, theCommands);
   twoE.AssignValue(2, theCommands);
@@ -3509,11 +3509,11 @@ bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
       MathRoutines::swap(powerTan, powerSec);
     if (powerTan<0 || powerSec<0)
       return false;
-    if (powerTan%2==1 && powerSec%2==1)
+    if (powerTan%2==1 && powerSec>0)
     { currentE=oneE - newVarE*newVarE;
-      powerE.AssignValue((powerSine-1)/2, theCommands);
+      powerE.AssignValue((powerTan-1)/2, theCommands);
       currentIntegrandSinePart.MakeXOX(theCommands, theCommands.opThePower(), currentE, powerE);
-      powerE.AssignValue(powerCosine, theCommands);
+      powerE.AssignValue(powerSec-1, theCommands);
       currentIntegrandCosinePart.MakeXOX(theCommands, theCommands.opThePower(), newVarE, powerE);
       currentCF.AssignValue(-theTrigPoly.theCoeffs[i], theCommands);
       currentCF/=theTrigArgCoeff;
@@ -3567,7 +3567,6 @@ bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
   }
   output=outputCandidate;
   return true;*/
-  return false;
 }
 
 bool CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX(Calculator& theCommands, const Expression& input, Expression& output)

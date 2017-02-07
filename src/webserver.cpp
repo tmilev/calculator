@@ -2474,6 +2474,7 @@ int WebWorker::ProcessCalculator()
   stOutput << CGI::GetJavascriptAutocompleteWithTags();
   stOutput << CGI::GetJavascriptInitializeButtons();
   stOutput << CGI::GetJavascriptMathQuillMatrixSupport();
+//  stOutput << CGI::GetJavascriptMathQuillDefault();
   stOutput << CGI::GetMathQuillStyleSheetWithTags();
 
   stOutput << this->GetJavaScriptIndicatorBuiltInServer();

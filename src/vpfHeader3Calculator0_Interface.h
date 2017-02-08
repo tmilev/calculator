@@ -525,7 +525,8 @@ class Function
   std::string ToStringFull()const;
   bool operator==(const Function& other)const
   { return this->theArgumentTypes==other.theArgumentTypes &&
-    this->theFunction==other.theFunction && this->flagIsInner==other.flagIsInner;
+    this->theFunction==other.theFunction &&
+    this->flagIsInner==other.flagIsInner;
   }
   void reset(Calculator& owner)
   { this->theArgumentTypes.reset(owner);
@@ -1496,6 +1497,9 @@ public:
   }
   int opE()
   { return this->theAtoms.GetIndexIMustContainTheObject("e");
+  }
+  int opImaginaryUnit()
+  { return this->theAtoms.GetIndexIMustContainTheObject("i");
   }
   int opLogBase()
   { return this->theAtoms.GetIndexIMustContainTheObject("logBase");

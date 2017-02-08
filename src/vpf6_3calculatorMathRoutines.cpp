@@ -3248,6 +3248,35 @@ bool Expression::MakeIntegral
   return this->AddChildOnTop(theDiffForm);
 }
 
+bool CalculatorFunctionsGeneral::innerIntegratePullImaginaryUnit(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegratePullImaginaryUnit");
+  Expression theFunctionE, theVariableE, integrationSetE;
+  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE))
+    return false;
+  Expression iE;
+  iE.MakeAtom(theCommands.opImaginaryUnit(), theCommands);
+  if (theVariableE==iE)
+    return false;
+  Expression theCF, theNoCFintegrand, theNoImIntegrand, outputIntegralNoCF;
+  theFunctionE.GetCoefficientMultiplicandForm(theCF, theNoCFintegrand);
+  //stOutput << "DEBUG: input: " << input.ToString() << " theCF: "
+  //<< theCF.ToString() << " NocfIntegrand: " << theNoCFintegrand;
+
+  if (theNoCFintegrand==iE)
+  { theNoImIntegrand.AssignValue(1,theCommands);
+  } else if (theNoCFintegrand.StartsWith(theCommands.opTimes(), 3))
+  { if (theNoCFintegrand[1]!=iE)
+      return false;
+    theNoImIntegrand=theNoCFintegrand[2];
+    //stOutput << "DEBUG: theNoImIntegrand: " << theNoImIntegrand.ToString();
+  } else
+    return false;
+  theCF*=iE;
+  outputIntegralNoCF.MakeIntegral(theCommands, integrationSetE,theNoImIntegrand,theVariableE);
+  output=theCF*outputIntegralNoCF;
+  return true;
+}
+
 bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateSum");
   Expression theFunctionE, theVariableE, integrationSetE;
@@ -3261,7 +3290,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, cons
   Expression newIntegralE, result, newSummand;
   for (int i=1; i<theFunctionE.children.size; i++)
   { newIntegralE.MakeIntegral(theCommands, integrationSetE, theFunctionE[i], theVariableE);
-//    stOutput << "New integral: " << newIntegralE.ToString();
+    //stOutput << "New integral: " << newIntegralE.ToString();
     if (!theCommands.EvaluateExpression(theCommands, newIntegralE, newSummand))
       return false;
     if (newSummand.ContainsAsSubExpression(theCommands.opIntegral()))
@@ -3570,15 +3599,99 @@ bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
   return true;
 }
 
-bool CalculatorFunctionsGeneral::innerTrigonometrize(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTrigonometrize");
+bool CalculatorFunctionsGeneral::innerExploitCosEvenness
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExploitCosEvenness");
+  Expression cfE, nonCFpart;
+  input.GetCoefficientMultiplicandForm(cfE, nonCFpart);
+  Rational theRat;
+  if (!cfE.IsRational(&theRat))
+    return false;
+  if (theRat>=0)
+    return false;
+  Expression moneE;
+  moneE.AssignValue(-1, theCommands);
+  return output.MakeOX(theCommands, theCommands.opCos(), moneE*cfE* nonCFpart);
+}
+
+bool CalculatorFunctionsGeneral::innerExploitSinOddness
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExploitSinOddness");
+  Expression cfE, nonCFpart;
+  input.GetCoefficientMultiplicandForm(cfE, nonCFpart);
+  Rational theRat;
+  if (!cfE.IsRational(&theRat))
+    return false;
+  if (theRat>=0)
+    return false;
+  Expression moneE, sinE;
+  moneE.AssignValue(-1, theCommands);
+  sinE.MakeOX(theCommands, theCommands.opSin(), moneE*cfE* nonCFpart);
+  output=moneE*sinE;
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerConvertSinToExponent(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertSinToExponent");
+  Expression eE, iE, exponentArgument, minusExponentArgument, leftE, rightE;
+  eE.MakeAtom(theCommands.opE(), theCommands);
+  iE.MakeAtom(theCommands.opImaginaryUnit(), theCommands);
+  exponentArgument=iE*input;
+  minusExponentArgument=exponentArgument*(-1);
+  leftE.MakeXOX(theCommands, theCommands.opThePower(), eE, exponentArgument);
+  rightE.MakeXOX(theCommands, theCommands.opThePower(), eE, minusExponentArgument);
+  output=(iE*(-1))*(leftE-rightE)/2;
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerConvertCosToExponent(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertCosToExponent");
+  Expression eE, iE, exponentArgument, minusExponentArgument, leftE, rightE;
+  eE.MakeAtom(theCommands.opE(), theCommands);
+  iE.MakeAtom(theCommands.opImaginaryUnit(), theCommands);
+  exponentArgument=iE*input;
+  minusExponentArgument=exponentArgument*(-1);
+  leftE.MakeXOX(theCommands, theCommands.opThePower(), eE, exponentArgument);
+  rightE.MakeXOX(theCommands, theCommands.opThePower(), eE, minusExponentArgument);
+  output=(leftE+rightE)/2;
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerPowerImaginaryUnit(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPowerImaginaryUnit");
+  if (!input.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  if (!input[1].IsAtomGivenData(theCommands.opImaginaryUnit()))
+    return false;
+  LargeInt thePower;
+  if (!input[2].IsInteger(&thePower))
+    return false;
+  Expression iE;
+  iE.MakeAtom(theCommands.opImaginaryUnit(), theCommands);
+  if (thePower%4==0)
+    return output.AssignValue(1, theCommands);
+  if (thePower%4==1)
+  { output=iE;
+    return true;
+  }
+  if (thePower%4==2)
+    return output.AssignValue(-1, theCommands);
+  if (thePower%4==3)
+  { output=iE*(-1);
+    return true;
+  }
+  return false; //<-this shouldn't happen
+}
+
+bool CalculatorFunctionsGeneral::innerEulerFlaAsALaw(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEulerFlaAsALaw");
   if (!input.StartsWith(theCommands.opThePower(),3))
     return false;
   if (!input[1].IsAtomGivenData(theCommands.opE()))
     return false;
   Expression coefficientOfI, currentE;
   Expression iE;
-  iE.MakeAtom("i", theCommands);
+  iE.MakeAtom(theCommands.opImaginaryUnit(), theCommands);
   currentE.reset(theCommands, 3);
   currentE.AddChildAtomOnTop(theCommands.opCoefficientOf());
   currentE.AddChildOnTop(iE);
@@ -3609,15 +3722,18 @@ bool CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX(Calculator& theComm
   Expression thePowerCoeff, thePowerNoCoeff;
   theFunNoCoeff[2].GetCoefficientMultiplicandForm(thePowerCoeff, thePowerNoCoeff);
   if (thePowerNoCoeff!=theVariableE)
-  { if (thePowerNoCoeff.StartsWith(theCommands.opTimes(),3))
-      if (thePowerNoCoeff[1].IsAtomGivenData("i")&& thePowerNoCoeff[2]==theVariableE)
-      { output=theFunctionE;
-        output/=thePowerCoeff;
-        output/=thePowerNoCoeff[1];
+  { //stOutput << "DEBUG: Got to here before the times, thepowernocoeff="
+    //<< thePowerNoCoeff.ToString();
+    if (thePowerNoCoeff.StartsWith(theCommands.opTimes(),3))
+    { //stOutput << "DEBUG: Got to here";
+      if (thePowerNoCoeff[1].IsAtomGivenData(theCommands.opImaginaryUnit())&&
+          thePowerNoCoeff[2]==theVariableE)
+      { output=thePowerNoCoeff[1]*(-1)* theFunctionE / thePowerCoeff;
         output.CheckConsistency();
         output.CheckInitializationRecursively();
         return true;
       }
+    }
     return false;
   }
   output=theFunctionE;

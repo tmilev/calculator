@@ -193,10 +193,18 @@ public:
 
   static bool innerIntegratePowerByUncoveringParenthesisFirst(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegratePullImaginaryUnit(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateXnDiffX(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateEpowerAxDiffX(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateSinPowerNCosPowerM(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerTrigonometrize(Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerExploitCosEvenness(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerExploitSinOddness(Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerConvertSinToExponent(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerConvertCosToExponent(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerImaginaryUnit(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEulerFlaAsALaw(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateTanPowerNSecPowerM(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerInterpretAsDifferential(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegralOperator(Calculator& theCommands, const Expression& input, Expression& output);

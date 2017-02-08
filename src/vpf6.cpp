@@ -1468,7 +1468,7 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
 { MacroRegisterFunctionWithName("Calculator::outerTimesToFunctionApplication");
   if (!input.StartsWith(theCommands.opTimes()))
     return false;
-  if (input.children.size<2)
+  if (input.size()<2)
     return false;
   const Expression& firstElt=input[1];
 //  stOutput << " <hr>outer times to function ";
@@ -1906,13 +1906,37 @@ Expression Expression::operator*(int other)
     //if (resultRat.IsSmallInteger(&result.theData))
     //  return result;
     crash << "Multiplying non-initialized expression with data: "
-    << this->theData << " by integer " << other << " results in a large integer. This is not allowed. "
+    << this->theData << " by integer " << other << " is not allowed. "
     << crash;
   }
   Expression otherE;
   otherE.AssignValue(other, *this->owner);
   result=*this;
   result*=otherE;
+  return result;
+}
+
+Expression Expression::operator/(int other)
+{ MacroRegisterFunctionWithName("Expression::operator/");
+  //stOutput << "going nearby Expression::operator*";
+  Expression result;
+  if (this->owner==0)
+  { //perhaps we should allow the code below for convenience: really
+    //hard to judge if the convenience is worth it, or whether it will cause
+    //hard-to-detect bugs.
+    //Rational resultRat=this->theData;
+    //resultRat*=other;
+    //if (resultRat.IsSmallInteger(&result.theData))
+    //  return result;
+    crash << "Multiplying non-initialized expression with data: "
+    << this->theData << " by integer " << other
+    << " is not allowed. "
+    << crash;
+  }
+  Expression otherE;
+  otherE.AssignValue(other, *this->owner);
+  result=*this;
+  result/=otherE;
   return result;
 }
 

@@ -467,6 +467,13 @@ D-B;\
    "\\int x dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX",
    "IntegrateEpowerX");
   this->AddOperationInnerHandler
+  ("^", CalculatorFunctionsGeneral::innerTrigonometrize, "",
+   "Trigonometrizes an exponential expression using Euler's formula.  ",
+   "Trigonometrize(e^{i x})", true, false,
+   "CalculatorFunctionsGeneral::innerTrigonometrize",
+   "EulerFormula", true);
+
+  this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateSinPowerNCosPowerM, "",
    "Solves/transforms an integral of the form \\int \\sin^n x \\cos^m x.  ",
    "\\int \\sin^{4}x \\cos^{6}x dx ", true, false,
@@ -951,7 +958,8 @@ D-B;\
    "Sets an output/progress report file different from the default one. No dots, forward slashes, back slashes or file extensions allowed.\
    A .html will be appended to the output file name.",
    "SetOutputFile(\"E7_subalgebras\"); SetOutputFile(\"/root/output.html\")", true, false
-   , "CalculatorFunctionsGeneral::innerSetOutputFile")
+   , "CalculatorFunctionsGeneral::innerSetOutputFile",
+   "SetOutputFile")
    ;
   this->AddOperationInnerHandler
   ("CoefficientsPowersOf", CalculatorFunctionsGeneral::innerCoefficientsPowersOf, "",
@@ -965,7 +973,7 @@ D-B;\
   ("ConstantTerm", CalculatorFunctionsGeneral::innerConstTermRelative, "",
    "Extracts term constant relative to the variable in the first argument. ",
    "ConstantTerm(y,  x y x +3 +2z)", true, false,
-   "CalculatorFunctionsGeneral::innerCoefficientOf",
+   "CalculatorFunctionsGeneral::innerConstTermRelative",
    "ConstantTerm"
    )
    ;
@@ -2766,14 +2774,15 @@ void Calculator::initPredefinedStandardOperations()
   ("*", CalculatorFunctionsGeneral::outerCommuteConstants, "",
    "Rule that commutes constants to the left-most positions.  \
     Provided that a is a constant number (built in) and b is not, replaces b*a by a*b. ",
-   "x 6^{1/3}; (x 10^{1/2})^{1/3}", true, true, false,  "CalculatorFunctionsGeneral::outerCommuteConstants",
-   "CommuteConstants");
+   "x 6^{1/3}; (x 10^{1/2})^{1/3}", true, true, false,
+   "CalculatorFunctionsGeneral::outerCommuteConstants",
+   "CommuteConstants", false);
   this->AddOperationHandler
   ("*", CalculatorFunctionsGeneral::outerMergeConstantRadicals, "",
    "If a and b are constants, replaces a^{c}b^c by (a b)^c.",
    "\\sqrt{}2 \\sqrt{}3", true, true, false,
    "CalculatorFunctionsGeneral::outerMergeConstantRadicals",
-   "MergeConstantRadicals");
+   "MergeConstantRadicals", false);
 
 
   this->AddOperationOuterHandler
@@ -3068,14 +3077,15 @@ void Calculator::initPredefinedStandardOperations()
   ("^", CalculatorFunctionsGeneral::innerIntegralUpperBound, "",
    "Replaces \\int_a^b by (\\int, a, b) .",
    "A=\\int_a^b; Lispify(A); DrawExpressionTree(A); ",
-   true, true, false, "CalculatorFunctionsGeneral::innerIntegralUpperBound",
-   "IntegralUpperBound");
+   true, true, false,
+   "CalculatorFunctionsGeneral::innerIntegralUpperBound",
+   "IntegralUpperBound", false);
   this->AddOperationHandler
   ("^", CalculatorFunctionsGeneral::innerPowerAnyToZero, "",
    "Replaces p^0 by 1 if p is non-zero, and by an error message if p is zero.",
    "A=x^0; x=0; A; B=x^0; 0^0; ",
    true, true, false, "CalculatorFunctionsGeneral::innerPowerAnyToZero",
-   "PowerAnytoZero");
+   "PowerAnytoZero", false);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger, this->opPoly(), this->opRational(),
    "Raises poly to small integer power. ",

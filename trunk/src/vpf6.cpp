@@ -2119,9 +2119,14 @@ void Calculator::RegisterCalculatorFunctionIdentifier
 }
 
 void Calculator::AddOperationHandler
-(const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
- const std::string& opExample, bool isInner, bool visible, bool experimental,
- const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
+(const std::string& theOpName, Expression::FunctionAddress handler,
+ const std::string& opArgumentListIgnoredForTheTimeBeing,
+ const std::string& opDescription,
+ const std::string& opExample, bool isInner, bool visible,
+ bool experimental,
+ const std::string& inputAdditionalIdentifier,
+ const std::string& inputCalculatorIdentifier,
+ bool inputDisabledByDefault)
 { int indexOp=this->theAtoms.GetIndex(theOpName);
   if (indexOp==-1)
   { this->theAtoms.AddOnTop(theOpName);
@@ -2132,8 +2137,10 @@ void Calculator::AddOperationHandler
   if (opArgumentListIgnoredForTheTimeBeing!="")
     crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
   Function theFun
-  (*this, indexOp, this->FunctionHandlers[indexOp].size, handler, 0, opDescription, opExample,
-   isInner, visible, experimental);
+  (*this, indexOp, this->FunctionHandlers[indexOp].size, handler,
+   0, opDescription, opExample,
+   isInner, visible, experimental, false,
+   inputDisabledByDefault);
   theFun.additionalIdentifier=inputAdditionalIdentifier;
   theFun.calculatorIdentifier=inputCalculatorIdentifier;
   if (theOpName=="*" || theOpName=="+" || theOpName=="/" || theOpName=="\\otimes" || theOpName=="^")

@@ -1083,7 +1083,6 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits()
   return true;
 }
 
-
 bool Calculator::ReplaceEEXByEXusingO(int theControlIndex)
 { SyntacticElement& left =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];

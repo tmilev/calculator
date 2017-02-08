@@ -178,7 +178,8 @@ void Calculator::initPredefinedInnerFunctions()
   ("makeInputBox", CalculatorHtmlFunctions::innerUserInputBox, "",
    "Creates an user input text box. ",
    "makeInputBox(name=a, value=randomInteger((-5,-1), (1,5)));", true, false,
-   "CalculatorHtmlFunctions::innerUserInputBox", "makeInputBox");
+   "CalculatorHtmlFunctions::innerUserInputBox",
+   "makeInputBox");
   this->AddOperationInnerHandler
   ("setInputBox", CalculatorHtmlFunctions::innerSetInputBox, "",
    "Sets value for input box that overrides the input box (no box is displayed). ",
@@ -194,17 +195,22 @@ void Calculator::initPredefinedInnerFunctions()
    \"calculator\", \"calculatorHidden\", \"calculatorAnswer\".",
    "ExtractCalculatorExpressionFromHtml(LoadFileIntoString(\
    \"DefaultProblemLocation/example.html\"))", true, false,
-   "CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml");
+   "CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml",
+   "ExtractCalculatorExpressionFromHtml");
    ;
   this->AddOperationInnerHandler
   ("TestCalculatorIndicator", CalculatorFunctionsGeneral::innerTestIndicator, "",
    "(This is not a mathematical function). Tests the calculator indicator mechanism.",
-   "TestCalculatorIndicator(1000)", true, false)
+   "TestCalculatorIndicator(1000)", true, false,
+   "CalculatorFunctionsGeneral::innerTestIndicator",
+   "TestCalculatorIndicator")
    ;
   this->AddOperationInnerHandler
   ("TestTopCommand", CalculatorFunctionsGeneral::innerTestTopCommand, "",
    "(This is not a mathematical function). Tests the top linux command. ",
-   "TestTopOperation(1000)", false, true, "CalculatorFunctionsGeneral::innerTestTopCommand")
+   "TestTopOperation(1000)", false, true,
+   "CalculatorFunctionsGeneral::innerTestTopCommand",
+   "TestTopCommand")
    ;
   this->AddOperationInnerHandler
   ("TestStandardOutput", CalculatorFunctionsGeneral::innerTestStandardOutput, "",
@@ -467,11 +473,45 @@ D-B;\
    "\\int x dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX",
    "IntegrateEpowerX");
   this->AddOperationInnerHandler
-  ("^", CalculatorFunctionsGeneral::innerTrigonometrize, "",
+  ("^", CalculatorFunctionsGeneral::innerEulerFlaAsALaw, "",
    "Trigonometrizes an exponential expression using Euler's formula.  ",
-   "Trigonometrize(e^{i x})", true, false,
-   "CalculatorFunctionsGeneral::innerTrigonometrize",
+   "TurnOnRules(\"EulerFormula\"); e^{i x}", true, false,
+   "CalculatorFunctionsGeneral::innerEulerFlaAsALaw",
    "EulerFormula", true);
+  this->AddOperationInnerHandler
+  ("^", CalculatorFunctionsGeneral::innerPowerImaginaryUnit, "",
+   "Raises imaginary unit to an integer power. ",
+   "TurnOnRules(\"RaiseItoPower\");i^{-50!+1}; ", true, false,
+   "CalculatorFunctionsGeneral::innerPowerImaginaryUnit",
+   "RaiseImaginaryUnitToPower", true);
+  this->AddOperationInnerHandler
+  ("\\sin", CalculatorFunctionsGeneral::innerConvertSinToExponent, "",
+   "Converts sine to exponent by sin(x)=(e^{i x}-e^{-ix})/(2i) ",
+   "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\"); \\sin x; cos x",
+   true, false,
+   "CalculatorFunctionsGeneral::innerConvertTrigToExponent",
+   "ExpressSinViaExponent", true);
+  this->AddOperationInnerHandler
+  ("\\cos", CalculatorFunctionsGeneral::innerConvertCosToExponent, "",
+   "Converts cosine to exponent by cos(x)=(e^{i x}+e^{-ix})/(2) ",
+   "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\"); \\sin x; cos x",
+   true, false,
+   "CalculatorFunctionsGeneral::innerConvertTrigToExponent",
+   "ExpressCosViaExponent", true);
+  this->AddOperationInnerHandler
+  ("\\cos", CalculatorFunctionsGeneral::innerExploitCosEvenness, "",
+   "If a is negative, converts cos (a) to cos(-a).",
+   "TurnOnRules(\"ExploitCosEvenness\"); cos(-5x)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerExploitCosEvenness",
+   "ExploitCosEvenness", true);
+  this->AddOperationInnerHandler
+  ("\\sin", CalculatorFunctionsGeneral::innerExploitSinOddness, "",
+   "If a is negative, converts sin (a) to -sin(-a).",
+   "TurnOnRules(\"ExploitSinEvenness\"); sin(-5x)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerExploitSinOddness",
+   "ExploitSinEvenness", true);
 
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateSinPowerNCosPowerM, "",
@@ -491,6 +531,12 @@ D-B;\
    If successful, integrates the sum in the obvious way.",
    "\\int (x+1+\\sqrt{}2) dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateSum",
    "IntegrateSum");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegratePullImaginaryUnit, "",
+   "Pulls out the imaginary unit in front of the integral. ",
+   "\\int i 3 e^{i x} dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegratePullImaginaryUnit",
+   "IntegratePullOutImaginaryUnit");
 
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",
@@ -3025,9 +3071,12 @@ void Calculator::initPredefinedStandardOperations()
 
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber, this->opRational(), this->opRational(),
+  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber,
+    this->opRational(), this->opRational(),
    "Convert rational exponent to the sqrt function. ",
-   "10^{1/2}- 10* \\sqrt{1/10}", true, false, "CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber");
+   "10^{1/2}- 10* \\sqrt{1/10}", true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber",
+   "RaiseRationalToRational");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRat, this->opRational(), this->opRational(),
    "Raises rational to power, provided the power is a small integer. ",
@@ -3108,7 +3157,8 @@ void Calculator::initPredefinedStandardOperations()
   ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger, this->opMatAlgebraic(), this->opRational(),
    "Raises algebraic number matrix to small integer power. ",
    "X=MakeMatrix((\\sqrt{}2,1),(\\sqrt{}3,3)); X^100",
-   true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger", "PowerMatrixByInteger");
+   true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger",
+   "PowerMatrixByInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger, this->opPolyOverANs(), this->opRational(),
    "Raises poly over algebraic numbers to small integer power. ",
@@ -3119,7 +3169,8 @@ void Calculator::initPredefinedStandardOperations()
    "Raises algebraic number to small integer or half-integer power. ",
    "a=3/2; b=-15/2; c=33/4;\
     \nx=(-b+\\sqrt{}(b^2-4a c))/(2a);\
-    \nB=c+a x^{2}+b x;", true, false, "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger");
+    \nB=c+a x^{2}+b x;", true, false,
+    "CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger, this->opElementWeylAlgebra(), this->opRational(),
    "Raises element of Weyl algebra to integer power. ",
@@ -3135,21 +3186,27 @@ void Calculator::initPredefinedStandardOperations()
     \n (g_1+g_2)^2+ g_1^{1/2}",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF, this->opElementUEoverRF(), this->opPoly(),
+  ("^", CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
+   this->opElementUEoverRF(), this->opPoly(),
    "Provided that an element of Universal Enveloping algebra is \
    a single generator (raised to arbitrary formal polynomial power) with coefficient 1,\
    raises (formally) the element of the UE to arbitrary polynomial power. ",
    "g_{{i}}= getChevalleyGenerator{}(G_2, i); h_{{i}}=getCartanGenerator{}(G_2, i) ;\
     \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
-   true, false, "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF");
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF",
+   "RaiseUEelementToPolyPower");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF, this->opElementUEoverRF(), this->opRationalFunction(),
+  ("^", CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
+    this->opElementUEoverRF(), this->opRationalFunction(),
    "Provided that an element of Universal Enveloping algebra is \
    a single generator (raised to arbitrary formal RF power) with coefficient 1,\
    raises (formally) the element of the UE to arbitrary RF power. ",
    "g_{{i}}= getChevalleyGenerator{}(G_2, i); h_{{i}}=getCartanGenerator{}(G_2, i) ;\
     \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
-   true, false, "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF");
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF",
+   "RaiseUEelementToRFPower");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat, this->opDouble(), this->opRational(),
    "Calls the built-in cpp functions to approximately raise a double to a power,\
@@ -3159,19 +3216,25 @@ void Calculator::initPredefinedStandardOperations()
    "f{}{{x}}=x^3+p x+q; \
    \nXcardano=( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
    \nq=DoubleValue{}1; \np=DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
-   true, false, "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat");
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat",
+   "RaiseFloatingToPower");
   this->AddOperationOuterHandler
   ("^", Calculator::innerAssociateExponentExponent, "",
    "Substitutes (a^b)^c with a^{b*c}.",
-   "(a^m)^n", true, false, "Calculator::innerAssociateExponentExponent");
+   "(a^m)^n", true, false,
+   "Calculator::innerAssociateExponentExponent",
+   "RaisePowerToPower");
   this->AddOperationOuterHandler
   ("^", Calculator::innerDistributeExponent, "",
    "If a is a constant, substitutes (a*b)^c with a^c b^c.",
-   "(a*b)^n; (\\sqrt(2)*b)^2", true, false, "Calculator::innerDistributeExponent", "DistributeExponent");
+   "(a*b)^n; (\\sqrt(2)*b)^2", true, false, "Calculator::innerDistributeExponent",
+   "DistributeExponent");
   this->AddOperationOuterHandler
   ("^", Calculator::outerPowerRaiseToFirst, "",
    "Realizes the tranformation {{anything}}^1=a. ",
-  "x^1+x^2; A^1", true, false, "Calculator::outerPowerRaiseToFirst");
+  "x^1+x^2; A^1", true, false, "Calculator::outerPowerRaiseToFirst",
+  "RaiseToPowerOne");
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
@@ -3433,6 +3496,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   //additional operations with the same status as user-input expressions.
   this->AddOperationNoRepetitionAllowed("\\pi");
   this->AddOperationNoRepetitionAllowed("e");
+  this->AddOperationNoRepetitionAllowed("i");
   this->AddOperationNoRepetitionAllowed("\\arctan");
   this->AddOperationNoRepetitionAllowed("\\diff");
   this->AddOperationNoRepetitionAllowed("CommandEnclosureStart");
@@ -3556,6 +3620,7 @@ void Calculator::initBuiltInAtomsNotInterpretedAsFunctions()
   this->AddKnownDoubleConstant("\\pi", MathRoutines::Pi());
   this->AddKnownDoubleConstant("e", MathRoutines::E());
   this->atomsNotInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\int");
+  this->atomsNotInterpretedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("i");
 }
 
 void Calculator::AddTrigSplit(const std::string& trigFun, const List<std::string>& theVars)

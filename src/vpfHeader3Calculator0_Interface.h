@@ -523,22 +523,6 @@ class Function
   std::string ToStringShort()const;
   std::string ToStringSummary()const;
   std::string ToStringFull()const;
-  void operator =(const Function& other)
-  { this->theArgumentTypes=other.theArgumentTypes;
-    this->theDescription=other.theDescription;
-    this->theExample=other.theExample;
-    this->theFunction=other.theFunction;
-    this->flagIsInner=other.flagIsInner;
-    this->flagMayActOnBoundVars=other.flagMayActOnBoundVars;
-    this->flagIamVisible=other.flagIamVisible;
-    this->flagIsExperimental=other.flagIsExperimental;
-    this->calculatorIdentifier=other.calculatorIdentifier;
-    this->additionalIdentifier=other.additionalIdentifier;
-    this->indexOperation=other.indexOperation;
-    this->indexAmongOperationHandlers=other.indexAmongOperationHandlers;
-    this->owner=other.owner;
-    this->flagIsCompositeHandler=other.flagIsCompositeHandler;
-  }
   bool operator==(const Function& other)const
   { return this->theArgumentTypes==other.theArgumentTypes &&
     this->theFunction==other.theFunction && this->flagIsInner==other.flagIsInner;
@@ -558,9 +542,15 @@ class Function
     this->flagDisabledByUser=false;
   }
   Function
-  (Calculator& inputOwner, int inputIndexOperation, int inputIndexAmongOperationHandlers, const Expression::FunctionAddress& functionPointer, Expression* inputArgTypes, const std::string& description, const std::string& inputExample,
-   bool inputflagIsInner, bool inputIsVisible=true, bool inputIsExperimental=false,
-   bool inputflagMayActOnBoundVars=false)
+  (Calculator& inputOwner, int inputIndexOperation,
+   int inputIndexAmongOperationHandlers,
+   const Expression::FunctionAddress& functionPointer,
+   Expression* inputArgTypes, const std::string& description,
+   const std::string& inputExample,
+   bool inputflagIsInner, bool inputIsVisible=true,
+   bool inputIsExperimental=false,
+   bool inputflagMayActOnBoundVars=false,
+   bool inputDisabledByUser=false)
   { this->owner=&inputOwner;
     this->indexOperation=inputIndexOperation;
     this->indexAmongOperationHandlers=inputIndexAmongOperationHandlers;
@@ -574,6 +564,7 @@ class Function
     this->flagMayActOnBoundVars=inputflagMayActOnBoundVars;
     this->flagIsExperimental=inputIsExperimental;
     this->flagIsCompositeHandler=false;
+    this->flagDisabledByUser=inputDisabledByUser;
   }
   inline static unsigned int HashFunction(const Function& input)
   { return input.HashFunction();
@@ -1329,6 +1320,9 @@ public:
   int opDefine()
   { return this->theAtoms.GetIndexIMustContainTheObject("=");
   }
+  int opCoefficientOf()
+  { return this->theAtoms.GetIndexIMustContainTheObject("CoefficientOf");
+  }
   int opCommandEnclosure()
   { return this->theAtoms.GetIndexIMustContainTheObject("CommandEnclosure");
   }
@@ -1923,27 +1917,31 @@ public:
   void AddOperationHandler
   (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
    const std::string& opExample, bool isInner, bool visible, bool experimental,
-   const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
+   const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier,
+   bool inputDisabledByDefault)
    ;
   void AddOperationInnerHandler
   (const std::string& theOpName, Expression::FunctionAddress innerHandler, const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false,
    const std::string& inputAdditionalIdentifier="",
-   const std::string& inputCalculatorIdentifier=""
+   const std::string& inputCalculatorIdentifier="",
+   bool inputDisabledByDefault=false
   )
   { this->AddOperationHandler
     (theOpName, innerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, true,
-     visible, experimental, inputAdditionalIdentifier, inputCalculatorIdentifier);
+     visible, experimental, inputAdditionalIdentifier, inputCalculatorIdentifier, inputDisabledByDefault);
   }
   void AddOperationOuterHandler
   (const std::string& theOpName, Expression::FunctionAddress outerHandler, const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false,
    const std::string& inputAdditionalIdentifier="",
-   const std::string& inputCalculatorIdentifier=""
+   const std::string& inputCalculatorIdentifier="",
+   bool inputDisabledByDefault=false
    )
   { this->AddOperationHandler
     (theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, false,
-     visible, experimental, inputAdditionalIdentifier, inputCalculatorIdentifier);
+     visible, experimental, inputAdditionalIdentifier, inputCalculatorIdentifier,
+     inputDisabledByDefault);
   }
   void init();
   void reset();

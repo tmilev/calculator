@@ -517,7 +517,7 @@ bool Calculator::GetSumProductsExpressions(const Expression& inputSum, List<List
 
 bool CalculatorFunctionsGeneral::innerCoefficientOf(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCoefficientOf");
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   List<List<Expression> > theSummands;
   List<Expression> currentListMultiplicands, survivingSummands;
@@ -3567,6 +3567,30 @@ bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
     outputCandidate+=currentSummandE;
   }
   output=outputCandidate;
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerTrigonometrize(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTrigonometrize");
+  if (!input.StartsWith(theCommands.opThePower(),3))
+    return false;
+  if (!input[1].IsAtomGivenData(theCommands.opE()))
+    return false;
+  Expression coefficientOfI, currentE;
+  Expression iE;
+  iE.MakeAtom("i", theCommands);
+  currentE.reset(theCommands, 3);
+  currentE.AddChildAtomOnTop(theCommands.opCoefficientOf());
+  currentE.AddChildOnTop(iE);
+  currentE.AddChildOnTop(input[2]);
+  if (!CalculatorFunctionsGeneral::innerCoefficientOf(theCommands, currentE, coefficientOfI))
+    return false;
+  if (coefficientOfI.IsEqualToZero())
+    return false;
+  Expression cosE, sinE;
+  cosE.MakeOX(theCommands, theCommands.opCos(), coefficientOfI);
+  sinE.MakeOX(theCommands, theCommands.opSin(), coefficientOfI);
+  output= cosE+iE*sinE;
   return true;
 }
 

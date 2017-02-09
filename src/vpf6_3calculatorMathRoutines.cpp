@@ -578,7 +578,7 @@ bool CalculatorFunctionsGeneral::innerDereferenceOperator(Calculator& theCommand
   int theIndex;
   if (!input[1].IsSmallInteger(&theIndex))
     return false;
-  if (theIndex>0 && theIndex<input[0].children.size)
+  if (theIndex>0 && theIndex<input[0].size())
   { output=input[0][theIndex];
     return true;
   }

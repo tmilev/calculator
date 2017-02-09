@@ -49,6 +49,7 @@ void Calculator::reset()
   this->NumLargeAdditionsStart      =-1;
   this->NumLargeMultiplicationsStart=-1;
   this->NumLargeGCDcallsStart       =-1;
+  this->LastLogEvaluationTime=theGlobalVariables.GetElapsedSeconds();
   this->DepthRecursionReached=0;
   this->flagWriteLatexPlots=false;
   this->flagLogSyntaxRules=false;

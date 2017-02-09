@@ -50,6 +50,17 @@ std::string Calculator::ToStringFunctionHandlers()
   return out.str();
 }
 
+void Calculator::DoLogEvaluationIfNeedBe(Function& inputF)
+{ if (!this->flagLogEvaluatioN)
+    return;
+  *this << "<hr>Built-in substitution: " << inputF.ToStringSummary()
+  << "<br>" << theGlobalVariables.GetElapsedSeconds()-this->LastLogEvaluationTime
+  << " second(s) since last log entry. "
+  << "Rule stack id: "
+  << this->RuleStackCacheIndex << ", stack size: " << this->RuleStack.size();
+  this->LastLogEvaluationTime=theGlobalVariables.GetElapsedSeconds();
+}
+
 bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
@@ -63,10 +74,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
       for (int i=0; i<theHandlers->size; i++)
         if (!((*theHandlers)[i].flagDisabledByUser))
           if ((*theHandlers)[i].theFunction(theCommands, input, output))
-          { if (theCommands.flagLogEvaluatioN)
-              theCommands << "<hr>Built-in substitution: " << (*theHandlers)[i].ToStringSummary()
-              << "<br>Rule stack id: "
-              << theCommands.RuleStackCacheIndex;
+          { theCommands.DoLogEvaluationIfNeedBe((*theHandlers)[i]);
             return true;
           }
   }
@@ -81,9 +89,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
       if (outerFun.theFunction(theCommands, input, output))
         if(output!=input)
         { output.CheckConsistency();
-          if (theCommands.flagLogEvaluatioN)
-            theCommands << "<hr>Built-in substitution: " << outerFun.ToStringSummary() << "<br>Rule stack id: "
-            << theCommands.RuleStackCacheIndex;
+          theCommands.DoLogEvaluationIfNeedBe(outerFun);
 //          if (input.Lispify()==output.Lispify())
 //            crash << "Temporary check failed. " << crash;
 //          stOutput << "<hr>DEBUG: Subbing: input: " << input.ToString()
@@ -99,18 +105,14 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
         if (innerFun.inputFitsMyInnerType(input))
           if (innerFun.theFunction(theCommands, input, output))
           { output.CheckConsistency();
-            if (theCommands.flagLogEvaluatioN)
-              theCommands << "<hr>Built-in substitution: " << innerFun.ToStringSummary() << "<br>Rule stack id: "
-              << theCommands.RuleStackCacheIndex;
+            theCommands.DoLogEvaluationIfNeedBe(innerFun);
             return true;
           }
       } else if (input.children.size==2)
         if (innerFun.inputFitsMyInnerType(input[1]))
           if (innerFun.theFunction(theCommands, input[1], output))
           { output.CheckConsistency();
-            if (theCommands.flagLogEvaluatioN)
-              theCommands << "<hr>Built-in substitution: " << innerFun.ToStringSummary()
-              << "<br>Rule stack id: " << theCommands.RuleStackCacheIndex;
+            theCommands.DoLogEvaluationIfNeedBe(innerFun);
             return true;
           }
     }
@@ -219,22 +221,32 @@ StackMaintainerRules::~StackMaintainerRules()
           continue;
         if (!this->owner->namedRules.Contains(currentRuleName))
           continue;
-        this->owner->GetFunctionHandlerFromNamedRule(currentRuleName).flagDisabledByUser=false;
+        Function& currentRule=this->owner->GetFunctionHandlerFromNamedRule(currentRuleName);
+        currentRule.flagDisabledByUser=currentRule.flagDisabledByUserDefaultValue;
+        //stOutput << "<br>DEBUG: resetting rule: " << currentRule.calculatorIdentifier
+        //<< " to value: "
+        //<< currentRule.flagDisabledByUserDefaultValue
+        //<< " with startingrulestacksize: "
+        //<< this->startingRuleStackSize;
+        shouldUpdateRules=true;
       }
   if (shouldUpdateRules)
-    for (int i=0; i<=this->startingRuleStackSize; i++)
-      if (theRuleStack[i].StartsWith(this->owner->opRulesOn()))
+    for (int i=0; i<this->startingRuleStackSize; i++)
+    { if (theRuleStack[i].StartsWith(this->owner->opRulesOn()))
         for (int j=1; j<theRuleStack[i].size(); j++)
         { Function& currentFun=
-          this->owner->GetFunctionHandlerFromNamedRule(theRuleStack[i][j].GetValue<std::string>());
+          this->owner->GetFunctionHandlerFromNamedRule
+          (theRuleStack[i][j].GetValue<std::string>());
           currentFun.flagDisabledByUser=false;
         }
       else if (theRuleStack[i].StartsWith(this->owner->opRulesOff()))
         for (int j=1; j<theRuleStack[i].size(); j++)
         { Function& currentFun=
-          this->owner->GetFunctionHandlerFromNamedRule(theRuleStack[i][j].GetValue<std::string>());
+          this->owner->GetFunctionHandlerFromNamedRule
+          (theRuleStack[i][j].GetValue<std::string>());
           currentFun.flagDisabledByUser=true;
         }
+    }
   this->owner->RuleStackCacheIndex=this->startingRuleStackIndex;
   this->owner->RuleStack.children.SetSize(this->startingRuleStackSize);
   this->owner=0;
@@ -258,14 +270,15 @@ Expression Calculator::GetNewAtom()
 
 }
 
-bool Calculator::AccountRule(const Expression &ruleE, StackMaintainerRules &theRuleStackMaintainer)
+bool Calculator::AccountRule(const Expression& ruleE, StackMaintainerRules& theRuleStackMaintainer)
 { MacroRegisterFunctionWithName("Calculator::AccountRule");
   RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
     return false;
   if (ruleE.IsCalculatorStatusChanger())
   { theRuleStackMaintainer.AddRule(ruleE);
-//    stOutput << "<br>DEBUG: accounted rule: " << ruleE.ToString();
+    //stOutput << "<br>DEBUG: rule stack: "
+    //<< this->RuleStackCacheIndex << ": accounted rule: " << ruleE.ToString();
   }
   if (!ruleE.IsListStartingWithAtom(this->opCommandEnclosure()))
     return true;
@@ -288,7 +301,9 @@ bool Calculator::EvaluateExpression
     for (int i=0; i<theCommands.RecursionDeptH; i++)
       theCommands << "&nbsp&nbsp&nbsp&nbsp";
       //stOutput << "&nbsp&nbsp&nbsp&nbsp";
-    theCommands << "Evaluating " << input.Lispify() << " with rule stack cache index " << theCommands.RuleStackCacheIndex; // << this->RuleStack.ToString();
+    theCommands << "Evaluating " << input.Lispify()
+    << " with rule stack cache index "
+    << theCommands.RuleStackCacheIndex; // << this->RuleStack.ToString();
 //    stOutput << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
   }
   if (theCommands.RecursionDepthExceededHandleRoughly())
@@ -306,7 +321,8 @@ bool Calculator::EvaluateExpression
   //////////////////////////////
   if (theCommands.EvaluatedExpressionsStack.Contains(input))
   { std::stringstream errorStream;
-    errorStream << "I think I have detected an infinite cycle: I am asked to reduce " << input.ToString()
+    errorStream << "I think I have detected an infinite cycle: I am asked to reduce "
+    << input.ToString()
     << " but I have already seen that expression in the expression stack. ";
     theCommands.flagAbortComputationASAP=true;
     return output.MakeError(errorStream.str(), theCommands);
@@ -320,8 +336,12 @@ bool Calculator::EvaluateExpression
   int indexInCache=theCommands.cachedExpressions.GetIndex(theExpressionWithContext);
   if (indexInCache!=-1)
   { if (theCommands.flagLogCache)
-    { theCommands << "<hr>Cache hit with state identifier " << theCommands.RuleStackCacheIndex << ": "
-      << output.ToString() << " -> " << theCommands.imagesCachedExpressions[indexInCache].ToString();
+    { theCommands << "<hr>Cache hit with state identifier "
+      << theCommands.RuleStackCacheIndex << ": "
+      << output.ToString() << " -> "
+      << theCommands.imagesCachedExpressions[indexInCache].ToString();
+      //theCommands << "DEBUG: "
+      //<< theCommands.RuleStack.ToString();
     }
     output= theCommands.imagesCachedExpressions[indexInCache];
   } else
@@ -376,10 +396,14 @@ bool Calculator::EvaluateExpression
     //////------Handling naughty expressions------
     if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
       if (theGlobalVariables.GetElapsedSeconds()!=0)
-        if (theGlobalVariables.GetElapsedSeconds()>theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
+        if (theGlobalVariables.GetElapsedSeconds()>
+            theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
         { if (!theCommands.flagTimeLimitErrorDetected)
-            stOutput << "<br><b>Max allowed computational time is " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
-            << theGlobalVariables.GetElapsedSeconds()-theCommands.StartTimeEvaluationInSecondS << " have elapsed -> aborting computation ungracefully.</b>";
+            stOutput << "<br><b>Max allowed computational time is "
+            << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2
+            << ";  so far, "
+            << theGlobalVariables.GetElapsedSeconds()-theCommands.StartTimeEvaluationInSecondS
+            << " have elapsed -> aborting computation ungracefully.</b>";
           theCommands.flagTimeLimitErrorDetected=true;
           theCommands.flagAbortComputationASAP=true;
           break;
@@ -387,7 +411,8 @@ bool Calculator::EvaluateExpression
     if (counterNumTransformations>theCommands.MaxAlgTransformationsPerExpression)
     { if (!theCommands.flagMaxTransformationsErrorEncountered)
       { std::stringstream out;
-        out << " While simplifying " << output.ToString(&theCommands.formatVisibleStrings) << "<br>Maximum number of algebraic transformations of "
+        out << " While simplifying " << output.ToString(&theCommands.formatVisibleStrings)
+        << "<br>Maximum number of algebraic transformations of "
         << theCommands.MaxAlgTransformationsPerExpression << " exceeded.";
         output.MakeError(out.str(), theCommands);
         theCommands.flagAbortComputationASAP=true;
@@ -402,13 +427,18 @@ bool Calculator::EvaluateExpression
     if (!output.IsFrozen())
       for (int i=0; i<output.size() && !theCommands.flagAbortComputationASAP; i++)
       { if (i>0 && output.StartsWith(theCommands.opEndStatement()))
-        { std::stringstream reportStream;
-          reportStream << "Substitution rules so far:";
-          for (int j=1; j<i; j++)
-            if (output[j].StartsWith(theCommands.opDefine()) || output[j].StartsWith(theCommands.opDefineConditional()))
-              reportStream << "<br>" << MathRoutines::StringShortenInsertDots(output[j].ToString(), 100);
-          reportStream << "<br>Evaluating:<br><b>" << MathRoutines::StringShortenInsertDots(output[i].ToString(), 100) << "</b>";
-          theReport.Report(reportStream.str());
+        { if (theGlobalVariables.flagReportEverything)
+          { std::stringstream reportStream;
+            reportStream << "Substitution rules so far:";
+            for (int j=1; j<i; j++)
+              if (output[j].StartsWith(theCommands.opDefine()) ||
+                  output[j].StartsWith(theCommands.opDefineConditional()))
+                reportStream << "<br>" << MathRoutines::StringShortenInsertDots
+                (output[j].ToString(), 100);
+            reportStream << "<br>Evaluating:<br><b>"
+            << MathRoutines::StringShortenInsertDots(output[i].ToString(), 100) << "</b>";
+            theReport.Report(reportStream.str());
+          }
         }
         if (theCommands.EvaluateExpression(theCommands, output[i], transformationE))
           output.SetChilD(i, transformationE);
@@ -457,16 +487,11 @@ bool Calculator::EvaluateExpression
         beforePatternMatch=output;
       BoundVariablesSubstitution bufferPairs;
       if (theCommands.ProcessOneExpressionOnePatternOneSub
-          (currentPattern, output, bufferPairs, &theCommands.Comments, theCommands.flagLogPatternMatching))
+          (currentPattern, output, bufferPairs, &theCommands.Comments,
+           theCommands.flagLogPatternMatching))
       { ReductionOcurred=true;
         if (theCommands.flagLogEvaluatioN)
-        { /*
-          if (theCommands.flagLogRules)
-          { *this << "<br>Rule stack size: " << theCommands.RuleStack.size << ", context identifier: "
-            << theCommands.RuleContextIdentifier << "<br>Rules: " << theCommands.RuleStack.ToString() << "<br>";
-          }
-          */
-          theCommands << "<hr>Rule cache index: " << theCommands.RuleStackCacheIndex
+        { theCommands << "<hr>Rule cache index: " << theCommands.RuleStackCacheIndex
           << "<br>Rule: " << currentPattern.ToString()
           << "<br>" << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << " -> "
           << CGI::GetMathSpanPure(output.ToString());

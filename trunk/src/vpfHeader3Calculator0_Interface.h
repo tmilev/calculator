@@ -518,6 +518,7 @@ class Function
   bool flagIamVisible;
   bool flagIsExperimental;
   bool flagDisabledByUser;
+  bool flagDisabledByUserDefaultValue;
   Expression::FunctionAddress theFunction;
 
   std::string ToStringShort()const;
@@ -540,6 +541,7 @@ class Function
     this->indexOperation=-1;
     this->owner=0;
     this->flagIsCompositeHandler=false;
+    this->flagDisabledByUserDefaultValue=false;
     this->flagDisabledByUser=false;
   }
   Function
@@ -565,6 +567,7 @@ class Function
     this->flagMayActOnBoundVars=inputflagMayActOnBoundVars;
     this->flagIsExperimental=inputIsExperimental;
     this->flagIsCompositeHandler=false;
+    this->flagDisabledByUserDefaultValue=inputDisabledByUser;
     this->flagDisabledByUser=inputDisabledByUser;
   }
   inline static unsigned int HashFunction(const Function& input)
@@ -950,6 +953,8 @@ public:
 //  bool flagReplaceInputBoxesByValues;
 
   bool flagForkingProcessAllowed;
+
+  double LastLogEvaluationTime;
   ///////////////////////////////////////////////////////////////////////////
   int NumListsStart;
   int NumListResizesStart;
@@ -1053,6 +1058,7 @@ public:
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
     return true;
   }
+  void DoLogEvaluationIfNeedBe(Function& inputF);
   bool DecreaseStackExceptLast(int decrease);
   bool DecreaseStackExceptLastTwo(int decrease);
   std::string ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclosures);

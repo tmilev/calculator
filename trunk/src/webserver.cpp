@@ -3588,7 +3588,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
 
   out << "<br>" << this->theWorkers.size  << " = peak number of concurrent connections. "
   << " The number tends to be high as many browsers open more than one connection per page visit. <br>"
-  << "<b>The following policies are only temporary and will be relaxed as we roll the ACE webserver into"
+  << "<b>The following policies are only temporary and will be relaxed as we roll the webserver into"
   << " production. </b><br>"
   << this->MaxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
   << "When the limit is exceeded, a random connection will be terminated. "
@@ -3615,7 +3615,7 @@ std::string WebServer::ToStringStatusPublic()
   }
   out << "The math libraries of the calculator can be found here: "
   << "<a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD/tree/\">calculator source code</a>. "
-  << "The rest of the code is property of ACE learning. ";
+  << "The problem templates are, for the time being, proprietary. ";
 
   out << "</body></html>";
   return out.str();

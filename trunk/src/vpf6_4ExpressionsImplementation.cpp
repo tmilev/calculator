@@ -932,7 +932,7 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
 { MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   //stOutput << "<hr>convert to ue called on: " << this->ToString();
   this->CheckInitialization();
-  if (!this->IsBuiltInType())
+  if (!this->IsBuiltInTypE())
     return false;
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
   { output=*this;
@@ -990,7 +990,7 @@ bool Expression::CheckConsistency()const
   this->CheckInitialization();
   if (this->children.size==0)
     return false;
-  if (this->IsBuiltInType())
+  if (this->IsBuiltInTypE())
   { if (this->children.size!=3)
       crash << "This is a programming error. At the moment of writing, an expression of built-in type must have 3 "
       << "children: type, context, and index in Calculator. The expression is " << this->ToStringFull()
@@ -1140,7 +1140,7 @@ int Expression::ContextGetNumContextVariables()const
 bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
 { MacroRegisterFunctionWithName("Expression::SetContextAtLeastEqualTo");
   this->CheckInitialization();
-  if (!this->IsBuiltInType())
+  if (!this->IsBuiltInTypE())
     crash << "This is a programming error: calling "
     << "Expression::SetContextAtLeastEqualTo on an expression "
     << "that is not of built-in type. "
@@ -1471,7 +1471,7 @@ bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeaf
   RecursionDepthCounter(&this->owner->RecursionDeptH);
   if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetExpressionLeafs:"))
     return false;
-  if (this->IsBuiltInType() || this->IsAtom())
+  if (this->IsBuiltInTypE() || this->IsAtom())
   { outputAccumulateLeafs.AddOnTopNoRepetition(*this);
     return true;
   }
@@ -1488,7 +1488,7 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
   RecursionDepthCounter(&this->owner->RecursionDeptH);
   if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetFreeVariables:"))
     return false;
-  if (this->IsBuiltInType()) //<- this may need to be rewritten as some built in types will store free variables in their context.
+  if (this->IsBuiltInTypE()) //<- this may need to be rewritten as some built in types will store free variables in their context.
     return true;
   if (this->IsOfType<InputBox>())
     return true;
@@ -1571,7 +1571,7 @@ bool Expression::ContainsAsSubExpressionNoBuiltInTypes(const Expression& input)c
     return false;
   if (*this==input)
     return true;
-  if (this->IsBuiltInType())
+  if (!this->IsSuitableForRecursion())
     return false;
   for (int i=0; i<this->size(); i++)
     if ((*this)[i].ContainsAsSubExpressionNoBuiltInTypes(input))
@@ -1817,7 +1817,7 @@ void Expression::GetBaseExponentForm(Expression& outputBase, Expression& outputE
 
 Expression Expression::GetContext()const
 { this->CheckInitialization();
-  if (this->IsBuiltInType())
+  if (this->IsBuiltInTypE())
     return (*this)[1];
   crash << "This is a programming error: GetContext called on an Expression"
   << " that is not a built-in data type. "
@@ -1939,9 +1939,9 @@ bool Expression::GreaterThanNoCoeff(const Expression& other)const
 { MacroRegisterFunctionWithName("Expression::GreaterThanNoCoeff");
   if (this->IsOfType<Rational>() && other.IsOfType<Rational>())
     return this->GetValue<Rational>()>other.GetValue<Rational>();
-  if (this->IsBuiltInType() && !other.IsBuiltInType())
+  if (this->IsBuiltInTypE() && !other.IsBuiltInTypE())
     return false;
-  if (!this->IsBuiltInType() && other.IsBuiltInType())
+  if (!this->IsBuiltInTypE() && other.IsBuiltInTypE())
     return true;
 //  stOutput << "<br>Comparing: " << this->ToString() << " with " << other.ToString();
   int thisExpressionTreeSize=this->GetExpressionTreeSize();
@@ -3186,7 +3186,7 @@ bool Expression::RemoveContext()
 
 bool Expression::HasContext()const
 { this->CheckInitialization();
-  if (!this->IsBuiltInType() || !(this->children.size==3))
+  if (!this->IsBuiltInTypE() || !(this->size()==3))
     return false;
   //std::string debugString=(*this)[1].ToString();
   //stOutput << "<br>Trying to fetch context from: " << debugString ;
@@ -3203,7 +3203,7 @@ bool Expression::IsCacheableExpression()const
 { MacroRegisterFunctionWithName("Expression::IsCacheableExpression");
   if (this->owner==0)
     return true;
-  if (this->IsBuiltInType())
+  if (this->IsBuiltInTypE())
     return true;
   for (int i=0; i<this->children.size; i++)
     if (!(*this)[i].IsCacheableExpression())
@@ -3221,7 +3221,19 @@ bool Expression::IsBuiltInScalar()const
   || this->IsOfType<RationalFunctionOld>() || this->IsOfType<double>() || this->IsOfType<AlgebraicNumber>();
 }
 
-bool Expression::IsBuiltInType(std::string* outputWhichOperation)const
+bool Expression::IsElementaryObject()const
+{ if(this->IsAtom())
+    return true;
+  if (this->IsBuiltInTypE())
+    return true;
+  if (this->owner==0)
+    return true;
+  if(this->StartsWith(this->owner->opBind()))
+    return true;
+  return false;
+}
+
+bool Expression::IsBuiltInTypE(std::string* outputWhichOperation)const
 { std::string tempS;
   if (!this->StartsWith())
     return false;
@@ -3237,9 +3249,9 @@ bool Expression::IsBuiltInType(std::string* outputWhichOperation)const
   return false;
 }
 
-bool Expression::IsBuiltInType(int* outputWhichType)const
+bool Expression::IsBuiltInTypE(int* outputWhichType)const
 { std::string theType;
-  if (!this->IsBuiltInType(&theType))
+  if (!this->IsBuiltInTypE(&theType))
     return false;
   if (outputWhichType!=0)
     *outputWhichType=this->owner->GetOperations().GetIndex(theType);

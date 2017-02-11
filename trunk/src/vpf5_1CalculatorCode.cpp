@@ -1452,16 +1452,41 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
   return resultStream.str();
 }
 
-void Expression::Substitute(const Expression& toBeSubbed, Expression& toBeSubbedWith)
-{ if(this->IsBuiltInType())
+bool Expression::IsSuitableForSubstitution()const
+{ if (this->owner==0)
+    return false;
+  if(this->IsBuiltInTypE() || this->StartsWith(this->owner->opBind()))
+    return false;
+  return true;
+}
+
+bool Expression::IsSuitableForRecursion()const
+{ if (this->owner==0)
+    return false;
+  if(this->IsAtom() || this->IsBuiltInTypE() ||
+     this->StartsWith(this->owner->opBind()))
+    return false;
+  return true;
+}
+
+void Expression::SubstituteRecursively(const Expression& toBeSubbed, Expression& toBeSubbedWith)
+{ if ((*this)==toBeSubbed)
+  { (*this)=toBeSubbedWith;
+    return;
+  }
+  this->SubstituteRecursivelyInChildren(toBeSubbed, toBeSubbedWith);
+}
+
+void Expression::SubstituteRecursivelyInChildren(const Expression& toBeSubbed, Expression& toBeSubbedWith)
+{ if (!this->IsSuitableForSubstitution())
     return;
   Expression tempE;
-  for (int i=0; i<this->children.size; i++)
+  for (int i=0; i<this->size(); i++)
     if (toBeSubbed==(*this)[i])
       this->SetChilD(i, toBeSubbedWith);
     else
     { tempE=(*this)[i];
-      tempE.Substitute(toBeSubbed, toBeSubbedWith);
+      tempE.SubstituteRecursivelyInChildren(toBeSubbed, toBeSubbedWith);
       if (!(tempE==(*this)[i]))
         this->SetChilD(i, tempE);
     }
@@ -1625,10 +1650,9 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   return output.AssignValue(out.str(), theCommands);
 }
 
-
 bool Calculator::innerReverseOrderRecursively(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerReverseOrderRecursively");
-  if (input.IsBuiltInType()||input.IsAtom())
+  if (!input.IsSuitableForRecursion())
   { output=input;
     return true;
   }
@@ -1651,7 +1675,7 @@ bool Calculator::innerReverseOrderRecursively(Calculator& theCommands, const Exp
 
 bool Calculator::innerReverseOrdeR(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerReverse");
-  if (input.IsBuiltInType()||input.IsAtom())
+  if (!input.IsSuitableForRecursion())
   { output=input;
     return true;
   }
@@ -1717,7 +1741,7 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
     return false;
   Expression leftE=input[1];
   Expression rightE=input[2];
-  if (!leftE.IsBuiltInType() || !rightE.IsBuiltInType())
+  if (!leftE.IsBuiltInTypE() || !rightE.IsBuiltInTypE())
     return false;
   if (!Expression::MergeContexts(leftE, rightE))
     return false;

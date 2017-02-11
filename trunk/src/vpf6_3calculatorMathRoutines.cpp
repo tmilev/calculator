@@ -1533,7 +1533,7 @@ bool CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly(Calculator& theComma
   Expression theArgument=input[1];
   if (!theEWAE.IsListStartingWithAtom(theCommands.opElementWeylAlgebra()))
     return false;
-  if (!theArgument.IsBuiltInType())
+  if (!theArgument.IsBuiltInTypE())
     return false;
   if (!theEWAE.MergeContexts(theEWAE, theArgument))
     return false;
@@ -4838,7 +4838,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
         continue;
       xValueE.AssignValue(i, theCommands);
       theFunValueEnonEvaluated=(j==0) ? lowerFunctionE : upperFunctionE;
-      theFunValueEnonEvaluated.Substitute(xExpression, xValueE);
+      theFunValueEnonEvaluated.SubstituteRecursively(xExpression, xValueE);
   //    stOutput << "<br>substitution result:" << tempE2.ToString();
       if (!theCommands.EvaluateExpression(theCommands, theFunValueEnonEvaluated, theFunValueFinal))
         return false;
@@ -7408,7 +7408,7 @@ public:
   { MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeCurrentEchildrenTruncated");
     this->currentEchildrenTruncated.SetSize(0);
     if (!this->flagUseFullTree)
-      if (this->GetCurrentE().IsBuiltInType())
+      if (this->GetCurrentE().IsBuiltInTypE())
         return;
     for (int i=0; i< this->GetCurrentE().children.size; i++)
     { this->currentEchildrenTruncated.AddOnTop(this->GetCurrentE()[i]);
@@ -7423,7 +7423,7 @@ public:
   bool isLeaf(const Expression& input)
   { if (this->flagUseFullTree)
       return input.IsAtom();
-    if (input.IsAtom() || input.IsBuiltInType())
+    if (input.IsAtom() || input.IsBuiltInTypE())
       return true;
     return false;
   }

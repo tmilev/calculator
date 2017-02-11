@@ -235,8 +235,9 @@ class Expression
   bool IsArithmeticOperation(std::string* outputWhichOperation=0)const;
   bool IsCacheableExpression()const;
   bool IsBuiltInScalar()const;
-  bool IsBuiltInType(std::string* outputWhichOperation=0)const;
-  bool IsBuiltInType(int* outputWhichType)const;
+  bool IsElementaryObject()const;
+  bool IsBuiltInTypE(std::string* outputWhichOperation=0)const;
+  bool IsBuiltInTypE(int* outputWhichType)const;
   const Expression& operator[](int n)const;
   bool IsSequenceNElementS(int N=-2)const;
   bool IsError(std::string* outputErrorMessage=0)const;
@@ -385,7 +386,11 @@ class Expression
   bool MakeOXdotsX(Calculator& owner, int theOp, const List<Expression>& input);
   bool MakeOX(Calculator& owner, int theOp, const Expression& opArgument);
   bool Sequencefy();
-  void Substitute(const Expression& input, Expression& output);
+  bool IsSuitableForSubstitution()const;
+  bool IsSuitableForRecursion()const;
+
+  void SubstituteRecursively(const Expression& toBeSubbed, Expression& toBeSubbedWith);
+  void SubstituteRecursivelyInChildren(const Expression& toBeSubbed, Expression& toBeSubbedWith);
   void AssignXOXToChild(int childIndex, Calculator& owner, int theOp, const Expression& left, const Expression& right)
   { Expression tempE;
     tempE.MakeXOX(owner, theOp, left, right);

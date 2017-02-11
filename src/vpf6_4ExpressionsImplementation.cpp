@@ -1563,7 +1563,7 @@ bool Expression::IsDifferentialOneFormOneVariablE(Expression* outputDifferential
   return true;
 }
 
-bool Expression::ContainsAsSubExpression(const Expression& input)const
+bool Expression::ContainsAsSubExpressionNoBuiltInTypes(const Expression& input)const
 { if (this->owner==0)
     return false;
   RecursionDepthCounter theCounter(&this->owner->RecursionDeptH);
@@ -1571,18 +1571,20 @@ bool Expression::ContainsAsSubExpression(const Expression& input)const
     return false;
   if (*this==input)
     return true;
-  for (int i=0; i<this->children.size; i++)
-    if ((*this)[i].ContainsAsSubExpression(input))
+  if (this->IsBuiltInType())
+    return false;
+  for (int i=0; i<this->size(); i++)
+    if ((*this)[i].ContainsAsSubExpressionNoBuiltInTypes(input))
       return true;
   return false;
 }
 
-bool Expression::ContainsAsSubExpression(int inputAtom)const
+bool Expression::ContainsAsSubExpressionNoBuiltInTypes(int inputAtom)const
 { if (this->owner==0)
     return false;
   Expression theE;
   theE.MakeAtom(inputAtom, *this->owner);
-  return this->ContainsAsSubExpression(theE);
+  return this->ContainsAsSubExpressionNoBuiltInTypes(theE);
 }
 
 bool Expression::IsContext()const

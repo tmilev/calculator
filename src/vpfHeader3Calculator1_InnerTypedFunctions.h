@@ -171,7 +171,17 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
       if (thePower<0)
       { coefficient theConst;
         if (!resultP.IsConstant(&theConst))
-          return theCommands << "<hr>Failed to extract polynomial from  " << input.ToString() << " because the exponent was negative. ";
+        { theCommands << "<hr>Failed to extract polynomial from  "
+          << input.ToString() << " because the exponent was negative. "
+          << "Please make sure that this is not a typo."
+          << " I am treating " << input.ToString() << " as a single variable. "
+          ;
+          Polynomial<coefficient> JustAmonomial;
+          JustAmonomial.MakeMonomiaL(0,1,1);
+          Expression theContext;
+          theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
+          return output.AssignValueWithContext(JustAmonomial, theContext, theCommands);
+        }
         theConst.Invert();
         thePower*=-1;
         resultP=theConst;

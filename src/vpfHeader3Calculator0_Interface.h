@@ -318,9 +318,9 @@ class Expression
   template <class theType>
   bool MergeContextsMyArumentsAndConvertThem(Expression& output)const;
 
-  bool ContainsAsSubExpression
+  bool ContainsAsSubExpressionNoBuiltInTypes
   (const Expression& input)const;
-  bool ContainsAsSubExpression
+  bool ContainsAsSubExpressionNoBuiltInTypes
   (int inputAtom)const;
 
   Expression ContextGetContextVariable(int variableIndex) const;

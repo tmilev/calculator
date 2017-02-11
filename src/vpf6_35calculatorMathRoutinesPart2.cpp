@@ -409,6 +409,41 @@ bool CalculatorConversions::innerMatrixDouble(Calculator& theCommands, const Exp
   return output.AssignValue(theMat, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("innerApplyToSubexpressionsRecurseThroughCalculusFunctions");
+  if (input.size()!=3)
+    return false;
+  if (!input.StartsWithGivenAtom("ApplyToSubexpressionsRecurseThroughCalculusFunctions"))
+    return false;
+  const Expression& theArg=input[2];
+  if (theArg.StartsWith(theCommands.opPlus()) ||
+      theArg.StartsWith(theCommands.opMinus()) ||
+      theArg.StartsWith(theCommands.opTimes()) ||
+      theArg.StartsWith(theCommands.opThePower()) ||
+      theArg.StartsWith(theCommands.opDivide()) ||
+      theArg.StartsWith(theCommands.opSequence()) ||
+      theArg.StartsWith(theCommands.opSqrt())
+        )
+  { output.reset(theCommands);
+    output.AddChildOnTop(input[1]);
+    Expression theRecursivelyModifiedE(theCommands), nextE(theCommands);
+    theRecursivelyModifiedE.AddChildOnTop(theArg[0]);
+    nextE.AddChildAtomOnTop("ApplyToSubexpressionsRecurseThroughCalculusFunctions");
+    nextE.AddChildOnTop(input[1]);
+    for (int i=1; i<theArg.size(); i++)
+    { nextE.children.SetSize(2);
+      nextE.AddChildOnTop(theArg[i]);
+      theRecursivelyModifiedE.AddChildOnTop(nextE);
+    }
+    return output.AddChildOnTop(theRecursivelyModifiedE);
+  }
+  output.reset(theCommands);
+  output.AddChildOnTop(input[1]);
+  output.AddChildOnTop(theArg);
+  return true;
+}
+
 bool CalculatorFunctionsGeneral::innerNumerator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerNumerator");
   if (input.StartsWith(theCommands.opDivide()))

@@ -368,7 +368,18 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("Numerator", CalculatorFunctionsGeneral::innerNumerator, "",
    "If the expression is a fraction, returns the numerator, else returns the entire expression. ",
-   "Numerator(a/b); Numerator(1+1/x)", true, false, "CalculatorFunctionsGeneral::innerNumerator", "Numerator");
+   "Numerator(a/b); Numerator(1+1/x)", true, false,
+   "CalculatorFunctionsGeneral::innerNumerator", "Numerator");
+  this->AddOperationInnerHandler
+  ("ApplyToSubexpressionsRecurseThroughCalculusFunctions",
+    CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions, "",
+   "Applies a transformation, recursively to all subexpressions of \
+    a list of known functions. ",
+   "ApplyToSubexpressionsRecurseThroughCalculusFunctions\
+    (Polynomialize, sin ((x+1)^3))", true, false,
+   "CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions",
+   "ApplyToSubexpressionsRecurseThroughCalculusFunctions");
+
   this->AddOperationInnerHandler
   ("Denominator", CalculatorFunctionsGeneral::innerDenominator, "",
    "If the expression is a fraction, returns the denominator, else returns 1. ",
@@ -508,10 +519,10 @@ D-B;\
   this->AddOperationInnerHandler
   ("\\sin", CalculatorFunctionsGeneral::innerExploitSinOddness, "",
    "If a is negative, converts sin (a) to -sin(-a).",
-   "TurnOnRules(\"ExploitSinEvenness\"); sin(-5x)",
+   "TurnOnRules(\"ExploitSinOddness\"); sin(-5x)",
    true, false,
    "CalculatorFunctionsGeneral::innerExploitSinOddness",
-   "ExploitSinEvenness", true);
+   "ExploitSinOddness", true);
 
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateSinPowerNCosPowerM, "",

@@ -96,6 +96,7 @@ public:
   static bool innerMultiplySequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSumSequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerApplyToSubexpressionsRecurseThroughCalculusFunctions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNumerator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDenominator(Calculator& theCommands, const Expression& input, Expression& output);
 

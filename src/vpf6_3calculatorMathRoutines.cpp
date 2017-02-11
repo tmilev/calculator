@@ -3223,7 +3223,7 @@ bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst
   newIntegralE.MakeIntegral(theCommands, integrationSetE, integrandE, theVariableE);
   if (!theCommands.EvaluateExpression(theCommands, newIntegralE, output))
     return false;
-  if (output.ContainsAsSubExpression(theCommands.opIntegral()))
+  if (output.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opIntegral()))
     return false;
   output.CheckConsistencyRecursively();
   output.CheckInitializationRecursively();
@@ -3282,7 +3282,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, cons
   Expression theFunctionE, theVariableE, integrationSetE;
   if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE))
     return false;
-//  stOutput << "<br>innerIntegrateSum: Integrating function " << theFunctionE.ToString();
+  //stOutput << "<br>DEBUG: innerIntegrateSum: Integrating function " << theFunctionE.ToString();
   if (!theFunctionE.StartsWith(theCommands.opPlus()))
     return false;
   List<Expression> integralsOfSummands;
@@ -3290,11 +3290,16 @@ bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, cons
   Expression newIntegralE, result, newSummand;
   for (int i=1; i<theFunctionE.children.size; i++)
   { newIntegralE.MakeIntegral(theCommands, integrationSetE, theFunctionE[i], theVariableE);
-    //stOutput << "New integral: " << newIntegralE.ToString();
+    //stOutput << "<br>DEBUG: New integral: " << newIntegralE.ToString();
     if (!theCommands.EvaluateExpression(theCommands, newIntegralE, newSummand))
+    { //stOutput << "<br>DEBUG: Eval fail!";
       return false;
-    if (newSummand.ContainsAsSubExpression(theCommands.opIntegral()))
+    }
+    if (newSummand.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opIntegral()))
+    { //stOutput << "<br>DEBUG: INTEGRAL epic fail!: " << newIntegralE.ToString()
+      //<< " result: " << newSummand;
       return false;
+    }
     if (i==1)
       result=newSummand;
     else
@@ -3712,7 +3717,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX(Calculator& theComm
   Expression theFunctionE, theVariableE;
   if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE))
     return false;
-//  stOutput << "<br>innerIntegrateXnDiffX: Integrating function " << theFunctionE.ToString();
+  //stOutput << "<br>DEBUG: innerIntegrateXnDiffX: Integrating function " << theFunctionE.ToString();
   Expression theFunCoeff, theFunNoCoeff;
   theFunctionE.GetCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
   if (!theFunNoCoeff.StartsWith(theCommands.opThePower(), 3))
@@ -4155,7 +4160,7 @@ bool CalculatorFunctionsGeneral::innerContains
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerContains");
   if (input.size()!=3)
     return false;
-  if (input[1].ContainsAsSubExpression(input[2]))
+  if (input[1].ContainsAsSubExpressionNoBuiltInTypes(input[2]))
     return output.AssignValue(1,theCommands);
   else
     return output.AssignValue(0, theCommands);

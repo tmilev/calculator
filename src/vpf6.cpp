@@ -2940,7 +2940,7 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
     return false;
 //  stOutput << " ... continuing to merge..." ;
   for (int i=1; i< this->children.size; i++)
-    if (!(*this)[i].IsBuiltInType())
+    if (!(*this)[i].IsBuiltInTypE())
     { *this->owner << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
       << (*this)[i].ToString() << "is not of built-in type";
       return false;
@@ -2961,7 +2961,7 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
     return true;
   }
   for (int i=2; i<this->children.size; i++)
-  { if (!(*this)[i].IsBuiltInType())
+  { if (!(*this)[i].IsBuiltInTypE())
     { *this->owner << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
       return false;
     }
@@ -2996,7 +2996,7 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
     if (inputOutputStartingContext->IsContext())
       commonContext=*inputOutputStartingContext;
   for (int i=0; i<inputOutputEs.size; i++)
-  { if (!inputOutputEs[i].IsBuiltInType())
+  { if (!inputOutputEs[i].IsBuiltInTypE())
       return *this << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext on expressions without context. "
       << Crasher::GetStackTraceEtcErrorMessage();
     if (!commonContext.ContextMergeContexts(commonContext, inputOutputEs[i].GetContext(), commonContext))

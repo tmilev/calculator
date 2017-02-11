@@ -347,7 +347,7 @@ bool Calculator::EvaluateExpression
   } else
   { bool shouldCache=
     theCommands.cachedExpressions.size<theCommands.MaxCachedExpressionPerRuleStack &&
-    !output.IsBuiltInType() && !output.IsBuiltInAtom();
+    !output.IsBuiltInTypE() && !output.IsBuiltInAtom();
     if (shouldCache)
     { theCommands.cachedExpressions.AddOnTop(theExpressionWithContext);
       indexInCache=theCommands.cachedExpressions.size-1;

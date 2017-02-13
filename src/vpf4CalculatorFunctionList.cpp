@@ -490,11 +490,17 @@ D-B;\
    "CalculatorFunctionsGeneral::innerIntegratePullConstant",
    "IntegratePullConstant");
   this->AddOperationInnerHandler
-  ("\\int", CalculatorFunctionsGeneral::innerIntegrateSqrtOneminusXsquared, "",
-   "Integrates \\int \\sqrt{a-x^2}dx  ",
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateSqrtOneMinusXsquared, "",
+   "Integrates \\int \\sqrt{a-x^2}dx, a>0.",
    "\\int 2\\sqrt{2-x^2} dx ", true, false,
    "CalculatorFunctionsGeneral::innerIntegrateSqrtOneminusXsquared",
    "IntegrateSqrtOneminusXsquared");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne, "",
+   "Integrates \\int \\sqrt{x^2-a}dx, a>0.  ",
+   "\\int 2\\sqrt{3x^2-5} dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne",
+   "IntegrateSqrtXsquaredMinusOne");
   this->AddOperationInnerHandler
   ("^", CalculatorFunctionsGeneral::innerEulerFlaAsALaw, "",
    "Trigonometrizes an exponential expression using Euler's formula.  ",

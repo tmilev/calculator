@@ -426,8 +426,8 @@ bool CalculatorFunctionsGeneral::innerIntegratePullConstant(Calculator& theComma
   return true;
 }
 
-bool CalculatorFunctionsGeneral::innerIntegrateSqrtOneminusXsquared(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegratePullConstant");
+bool CalculatorFunctionsGeneral::innerIntegrateSqrtOneMinusXsquared(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateSqrtOneMinusXsquared");
   Expression theFunctionE, theVariableE, theSetE;
   if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &theSetE))
     return false;
@@ -462,6 +462,46 @@ bool CalculatorFunctionsGeneral::innerIntegrateSqrtOneminusXsquared(Calculator& 
   algPart.MakeSqrt(theCommands, algSQRTPart);
   algPart*=theVariableE/2;
   output=theFunCoeff*(arcSinPart+algPart);
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne");
+  Expression theFunctionE, theVariableE, theSetE;
+  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &theSetE))
+    return false;
+  Expression theFunCoeff, theFunNoCoeff;
+  theFunctionE.GetCoefficientMultiplicandForm
+  (theFunCoeff, theFunNoCoeff);
+  if (!theFunNoCoeff.StartsWith(theCommands.opThePower(),3))
+    return false;
+  if (!theFunNoCoeff[2].IsEqualToHalf())
+    return false;
+  Expression a, b, c;
+  if (!CalculatorFunctionsGeneral::
+       extractQuadraticCoeffsWRTvariable
+       (theFunNoCoeff[1], theVariableE, a, b, c))
+    return false;
+  if (!b.IsEqualToZero())
+    return false;
+  if (!a.IsPositiveNumber())
+    return false;
+  if (!c.IsNegativeConstant())
+    return false;
+
+  Expression extraCF, theVarChangeCF, theNewVarE, oneE;
+  oneE.AssignValue(1,theCommands);
+  extraCF.MakeSqrt(theCommands,c*(-1));
+  theFunCoeff*=extraCF;
+  theVarChangeCF.MakeSqrt(theCommands, (a/c)*(-1));
+  theNewVarE=theVariableE* theVarChangeCF;
+  theFunCoeff/=theVarChangeCF;
+  Expression algSQRTPart, algPart, lnPart;
+  algSQRTPart=theNewVarE*theNewVarE-oneE;
+  algPart.MakeSqrt(theCommands, algSQRTPart);
+  lnPart.MakeOX
+  (theCommands,theCommands.opLog(), algPart-theNewVarE);
+  output=theFunCoeff*(algPart*theNewVarE+lnPart)/2;
   return true;
 }
 

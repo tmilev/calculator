@@ -196,6 +196,8 @@ public:
   static bool innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegratePullImaginaryUnit(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateXnDiffX(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegratePullConstant(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateSqrtOneminusXsquared(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateEpowerAxDiffX(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateSinPowerNCosPowerM(Calculator& theCommands, const Expression& input, Expression& output);
 

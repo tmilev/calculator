@@ -1614,6 +1614,29 @@ bool Expression::IsEqualToOne()const
   return false;
 }
 
+bool Expression::IsEqualToHalf()const
+{ Rational theRat;
+  if (this->IsRational(&theRat))
+  { Rational half(1,2);
+    return theRat==half;
+  }
+  return false;
+}
+
+bool Expression::IsNegativeConstant()const
+{ if (this->owner==0)
+    return false;
+  Rational theRat;
+  if (this->IsOfType<Rational>(&theRat))
+    return theRat.IsNegative();
+  if (!this->IsConstantNumber())
+    return false;
+  double tempD=-1;
+  if (!this->EvaluatesToDouble(&tempD))
+    return false;
+  return tempD<0;
+}
+
 bool Expression::IsEqualToMOne()const
 { MacroRegisterFunctionWithName("Expression::IsEqualToMOne");
   if (!this->IsConstantNumber())

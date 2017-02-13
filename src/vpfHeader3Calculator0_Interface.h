@@ -353,7 +353,9 @@ class Expression
   bool IsEqualToZero()const;
   bool IsMonEqualToZero()const;
   bool IsEqualToOne()const;
+  bool IsEqualToHalf()const;
   bool IsEqualToMOne()const;
+  bool IsNegativeConstant()const;
   bool MakeIdMatrixExpressions(int theDim, Calculator& inputBoss);
   void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, Calculator& newBoss);
   void MakeElementTensorsGeneralizedVermas(const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, Calculator& newBoss);

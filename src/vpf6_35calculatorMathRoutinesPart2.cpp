@@ -409,6 +409,62 @@ bool CalculatorConversions::innerMatrixDouble(Calculator& theCommands, const Exp
   return output.AssignValue(theMat, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerIntegratePullConstant(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegratePullConstant");
+  Expression theFunctionE, theVariableE, theSetE;
+  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &theSetE))
+    return false;
+  Expression theFunCoeff, theFunNoCoeff;
+  theFunctionE.GetCoefficientMultiplicandForm
+  (theFunCoeff, theFunNoCoeff);
+  if (theFunCoeff.IsEqualToOne())
+    return false;
+  Expression theNewIntegralE;
+  theNewIntegralE.MakeIntegral(theCommands, theSetE, theFunNoCoeff, theVariableE);
+  //stOutput << "theNewIntegralE:" << theNewIntegralE.ToString();
+  output=theFunCoeff*theNewIntegralE;
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerIntegrateSqrtOneminusXsquared(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegratePullConstant");
+  Expression theFunctionE, theVariableE, theSetE;
+  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &theSetE))
+    return false;
+  Expression theFunCoeff, theFunNoCoeff;
+  theFunctionE.GetCoefficientMultiplicandForm
+  (theFunCoeff, theFunNoCoeff);
+  if (!theFunNoCoeff.StartsWith(theCommands.opThePower(),3))
+    return false;
+  if (!theFunNoCoeff[2].IsEqualToHalf())
+    return false;
+  Expression a, b, c;
+  if (!CalculatorFunctionsGeneral::
+       extractQuadraticCoeffsWRTvariable
+       (theFunNoCoeff[1], theVariableE, a, b, c))
+    return false;
+  if (!b.IsEqualToZero())
+    return false;
+  if (!a.IsNegativeConstant())
+    return false;
+  if (!c.IsPositiveNumber())
+    return false;
+  Expression theSQRTedCoeff, theRadSquared, theRad;
+  theSQRTedCoeff.MakeSqrt(theCommands, a*(-1));
+  theFunCoeff*=theSQRTedCoeff;
+  theRadSquared=c/a*(-1);
+  theRad.MakeSqrt(theCommands, theRadSquared);
+  Expression rescaledArgument, arcSinPart, algSQRTPart, algPart;
+  rescaledArgument=theVariableE/theRad;
+  arcSinPart.MakeOX(theCommands, theCommands.opArcSin(), rescaledArgument);
+  arcSinPart*=theRadSquared/2;
+  algSQRTPart=theRadSquared-theVariableE*theVariableE;
+  algPart.MakeSqrt(theCommands, algSQRTPart);
+  algPart*=theVariableE/2;
+  output=theFunCoeff*(arcSinPart+algPart);
+  return true;
+}
+
 bool CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("innerApplyToSubexpressionsRecurseThroughCalculusFunctions");

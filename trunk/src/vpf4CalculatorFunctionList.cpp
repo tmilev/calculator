@@ -484,6 +484,18 @@ D-B;\
    "\\int x dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX",
    "IntegrateEpowerX");
   this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegratePullConstant, "",
+   "Pulls out constants from integrals  ",
+   "\\int 2\\sqrt{2-x^2} dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegratePullConstant",
+   "IntegratePullConstant");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateSqrtOneminusXsquared, "",
+   "Integrates \\int \\sqrt{a-x^2}dx  ",
+   "\\int 2\\sqrt{2-x^2} dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateSqrtOneminusXsquared",
+   "IntegrateSqrtOneminusXsquared");
+  this->AddOperationInnerHandler
   ("^", CalculatorFunctionsGeneral::innerEulerFlaAsALaw, "",
    "Trigonometrizes an exponential expression using Euler's formula.  ",
    "TurnOnRules(\"EulerFormula\"); e^{i x}", true, false,

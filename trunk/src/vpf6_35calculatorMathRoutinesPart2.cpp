@@ -500,7 +500,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne(Calculator& 
   algSQRTPart=theNewVarE*theNewVarE-oneE;
   algPart.MakeSqrt(theCommands, algSQRTPart);
   lnPart.MakeOX
-  (theCommands,theCommands.opLog(), algPart-theNewVarE);
+  (theCommands,theCommands.opLog(), theNewVarE-algPart);
   output=theFunCoeff*(algPart*theNewVarE+lnPart)/2;
   return true;
 }

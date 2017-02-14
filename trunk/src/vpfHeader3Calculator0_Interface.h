@@ -1100,6 +1100,7 @@ public:
   bool AllowsAndInPreceding(const std::string& lookAhead);
   bool AllowsInInPreceding(const std::string& lookAhead);
   bool AllowsPlusInPreceding(const std::string& lookAhead);
+  bool AllowsTimesInNext(const std::string& thePreceding);
   bool AllowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead);
 
   bool AllowsTimesInPreceding(const std::string& lookAhead);

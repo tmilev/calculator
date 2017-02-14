@@ -1247,6 +1247,13 @@ bool Calculator::AllowsTensorInPreceding(const std::string& lookAhead)
 { return this->AllowsTimesInPreceding(lookAhead) || lookAhead=="\\otimes";
 }
 
+bool Calculator::AllowsTimesInNext(const std::string& thePreceding)
+{ if (thePreceding=="{}" || thePreceding=="^" || thePreceding=="\\sqrt" ||
+      thePreceding=="_")
+    return false;
+  return true;
+}
+
 bool Calculator::AllowsTimesInPreceding(const SyntacticElement& thePreceding, const std::string& lookAhead)
 { //stOutput << "<hr><br><br>DEBUG: here i am0. Thepreceding: " << thePreceding.ToStringHumanReadable(*this, false)
   //<< "<br>lookahead: " << lookAhead;
@@ -1664,7 +1671,7 @@ bool Calculator::ApplyOneRule()
   if (seventhToLastS=="\\sqrt" && sixthToLastS=="[" && fifthToLastS=="Expression" &&
       fourthToLastS=="]" && thirdToLastS=="Expression")
     return this->ReplaceOXEXEXXByEXX();
-  if (fourthToLastS!="{}" && fourthToLastS!="^" && fourthToLastS!="\\sqrt" &&
+  if (this->AllowsTimesInNext(fourthToLastS) &&
       thirdToLastS=="Expression" && secondToLastS=="Expression" &&
       this->AllowsTimesInPreceding(secondToLastE, lastS))
   { this->ReplaceEEXByEXusingO(this->conTimes());

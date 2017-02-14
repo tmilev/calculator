@@ -430,9 +430,12 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
     return this->comments.str();
   std::stringstream out;
   if (!this->InterpretHtml(this->comments))
-  { if (theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
+    << "</problemNavigation>";
+    if (theGlobalVariables.UserDefaultHasAdminRights())
       out << this->GetEditPageButton(this->fileName) << "<br>";
-    out << "<b>Failed to interpret file: " << this->fileName << "</b>. Comments: " << this->comments.str();
+    out << "<b>Failed to interpret file: " << this->fileName
+    << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
   //out << "DEBUG: flagMathQuillWithMatrices=" << this->flagMathQuillWithMatrices << "<br>";

@@ -364,7 +364,11 @@ std::string HtmlInterpretation::GetPageFromTemplate()
     return out.str();
   }
   if (!thePage.InterpretHtml(comments))
-  { out << "<html><body><b>Failed to interpret file: "
+  { out << "<html>"
+    << CGI::GetCalculatorStyleSheetWithTags()
+    << "<body>"
+    << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << " </problemNavigation>"
+    << "<b>Failed to interpret file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();

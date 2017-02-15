@@ -1020,7 +1020,7 @@ std::string CalculatorHTML::PrepareUserInputBoxes()
 std::string CalculatorHTML::GetProblemHeaderEnclosure()
 { std::stringstream out;
   out << "CommandEnclosure{}(";
-  out <<  " setRandomSeed{}(" << this->theProblemData.randomSeed << "); ";
+  out <<  " SetRandomSeed{}(" << this->theProblemData.randomSeed << "); ";
   out << this->PrepareUserInputBoxes();
   out << "); ";
   return out.str();

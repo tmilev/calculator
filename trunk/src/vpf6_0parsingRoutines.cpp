@@ -175,7 +175,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("\\to");
   this->AddOperationNoRepetitionAllowed("if");
   this->AddOperationNoRepetitionAllowed("\\lim");
-  this->AddOperationNoRepetitionAllowed("logBase");
+  this->AddOperationNoRepetitionAllowed("LogBase");
   this->AddOperationNoRepetitionAllowed("userInputTextBox");
   this->AddOperationNoRepetitionAllowed("\\int");
 
@@ -1666,7 +1666,7 @@ bool Calculator::ApplyOneRule()
     this->ReplaCeOXbyEX();
     return this->PopTopSyntacticStack();
   }
-  if (fifthToLastS=="logBase" && fourthToLastS=="_" && thirdToLastS=="Expression" &&
+  if (fifthToLastS=="LogBase" && fourthToLastS=="_" && thirdToLastS=="Expression" &&
       secondToLastS=="Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceOXEEXByEX();
   if (seventhToLastS=="\\sqrt" && sixthToLastS=="[" && fifthToLastS=="Expression" &&
@@ -1738,7 +1738,7 @@ bool Calculator::ApplyOneRule()
     return this->ReplaCeOXbyEX();
 
   if (fourthToLastS=="\\log" && thirdToLastS=="_" && secondToLastS=="Expression")
-    return this->ReplaceXYYYByConYYY(this->controlSequences.GetIndexIMustContainTheObject("logBase"));
+    return this->ReplaceXYYYByConYYY(this->controlSequences.GetIndexIMustContainTheObject("LogBase"));
   //Some synonyms:
   if (lastS=="ln" || lastS=="log" || lastS=="\\ln")
     return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\log"));

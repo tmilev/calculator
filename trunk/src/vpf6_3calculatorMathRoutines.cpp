@@ -5072,85 +5072,6 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   return output.AssignValue(outputPlot, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerPlotConeUsualProjection(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotConeUsualProjection");
-  if (input.children.size!=5)
-    return theCommands << "<hr>PlotConeUsualProjection takes 4 arguments. ";
-  double radius, height, distance, viewPointHeight;
-  if (!input[1].EvaluatesToDouble(&radius) || !input[2].EvaluatesToDouble(&height) || !input[3].EvaluatesToDouble(&distance) || !input[4].EvaluatesToDouble(&viewPointHeight) )
-    return theCommands << "<hr> failed to extract radius, height, distance, viewpoint height from " << input.ToString();
-  affineHyperplane<double> projectionPane;
-  projectionPane.normal.MakeZero(3);
-  projectionPane.normal[1]=-distance;
-  projectionPane.normal[2]=-viewPointHeight;
-  projectionPane.affinePoint.MakeZero(3);
-  projectionPane.affinePoint[1]=distance;
-  projectionPane.affinePoint[2]=viewPointHeight;
-  Vector<double> pointCircle1, pointCircle2;
-  Vector<double> axis1, axis2, axis3;
-
-  pointCircle1.MakeZero(3);
-  pointCircle2.MakeZero(3);
-  pointCircle1[1]=radius;
-  pointCircle2[1]=-radius;
-  Vector<double> projection1= projectionPane.ProjectOnMe(pointCircle1);
-  Vector<double> projection2= projectionPane.ProjectOnMe(pointCircle2);
-  //stOutput << "<br>projection1: " << projection1.ToString();
-  //stOutput << "<br>projection2: " << projection2.ToString();
-  Vector<double> XdiameterVectorProjection=projection1-projection2;
-  double theProjYradius= FloatingPoint::sqrt(XdiameterVectorProjection.ScalarEuclidean(XdiameterVectorProjection))/2;
-  double theProjXradius=radius;
-  //stOutput << "<br>theProjYradius: " << theProjYradius;
-  //stOutput << "<br>theProjXradius: " << theProjXradius;
-  std::stringstream out;
-  Vector<double> tipOfTheCone, centerOfTheCone;
-  centerOfTheCone.MakeZero(3);
-  tipOfTheCone.MakeZero(3);
-  tipOfTheCone[2]=height;
-//  stOutput << "<br>radius, height, distance, view height: " << radius << ", " << height << ", " << distance << ", " << viewPointHeight;
-//  stOutput << "<br>projectionPane.ProjectOnMe(tipOfTheCone): " << projectionPane.ProjectOnMe(tipOfTheCone);
-  Vector<double> coneHeightVectorProjectedShifted= projectionPane.ProjectOnMe(tipOfTheCone)-projectionPane.ProjectOnMe(centerOfTheCone);
-//  stOutput << "<br>coneHeightVectorProjectedShifted: " << coneHeightVectorProjectedShifted.ToString();
-  double theConeProjectionHeight=FloatingPoint::sqrt(coneHeightVectorProjectedShifted.ScalarEuclidean(coneHeightVectorProjectedShifted));
-//  stOutput << "<br>theConeProjectionHeight: " << theConeProjectionHeight;
-  out << "\\psline[linecolor=black](0,0)(0," << MathRoutines::ReducePrecision(theConeProjectionHeight) << ")";
-  if (theConeProjectionHeight>theProjYradius)
-  { double yCoordPointTangency= theProjYradius*theProjYradius/theConeProjectionHeight;
-    double xCoordPointTangency=theProjXradius*FloatingPoint::sqrt(1- yCoordPointTangency/theConeProjectionHeight);
-    out << "\\psline[linecolor=\\fcColorGraph](" << MathRoutines::ReducePrecision(xCoordPointTangency) << ", "
-    << MathRoutines::ReducePrecision(yCoordPointTangency) << ")(0, " << MathRoutines::ReducePrecision(theConeProjectionHeight) << ")";
-    out << "\\psline[linecolor=\\fcColorGraph](" << MathRoutines::ReducePrecision(-xCoordPointTangency) << ", "
-    << MathRoutines::ReducePrecision(yCoordPointTangency) << ")(0, " << MathRoutines::ReducePrecision(theConeProjectionHeight) << ")";
-    double theAngleVisibleEnd=MathRoutines::Pi()/2;
-    double theAngleVisibleStart=-theAngleVisibleEnd;
-    double theAngleHiddenEnd=MathRoutines::Pi()/2;
-    if (theProjXradius!=0)
-    { theAngleVisibleEnd=FloatingPoint::arctan(yCoordPointTangency*theProjXradius/(xCoordPointTangency*theProjYradius));
-      theAngleVisibleStart = -MathRoutines::Pi()-theAngleVisibleEnd;
-      theAngleHiddenEnd=MathRoutines::Pi()-theAngleVisibleEnd;
-    }
-    out << "\\psparametricplot[algebraic,linecolor=\\fcColorGraph]{" << MathRoutines::ReducePrecision(theAngleVisibleStart)
-    << "}{" << MathRoutines::ReducePrecision(theAngleVisibleEnd) << "}{" << MathRoutines::ReducePrecision(theProjXradius)
-    << "*cos(t) |" << MathRoutines::ReducePrecision(theProjYradius) << "*sin(t)}";
-    out << "\\psparametricplot[algebraic, linestyle=dashed, linecolor=\\fcColorGraph]{" << MathRoutines::ReducePrecision(theAngleVisibleEnd)
-    << "}{" << MathRoutines::ReducePrecision(theAngleHiddenEnd) << "}{" << MathRoutines::ReducePrecision(theProjXradius)
-    << "*cos(t) |" << MathRoutines::ReducePrecision(theProjYradius) << "*sin(t)}";
-  } else
-  { theCommands << "<hr>Cone is not high enough and therefore has no tip. ";
-    out << "\\psparametricplot[algebraic,linecolor=\\fcColorGraph]{0}{6.283185307}{cos(t)*" << MathRoutines::ReducePrecision(theProjXradius)
-    << " |sin(t)*" << MathRoutines::ReducePrecision(theProjYradius) << "}";
-  }
-  PlotObject thePlot;
-  thePlot.xLow=-5;
-  thePlot.xHigh=5;
-  thePlot.yLow=-5;
-  thePlot.yHigh=5;
-  thePlot.thePlotElement=input;
-  thePlot.thePlotString=out.str();
-  thePlot.thePlotStringWithHtml=out.str();
-  return output.AssignValue(thePlot, theCommands);
-}
-
 bool CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras");
   if (!input.IsOfType<SemisimpleSubalgebras>())
@@ -7804,7 +7725,7 @@ bool CalculatorFunctionsGeneral::innerRandomInteger
 bool CalculatorFunctionsGeneral::innerSelectAtRandom
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSelectAtRandom");
-  if (!input.StartsWith(theCommands.theAtoms.GetIndex("selectAtRandom")))
+  if (!input.StartsWith(theCommands.theAtoms.GetIndex("SelectAtRandom")))
   { output=input; //only one item to select from: returning the item
     return true;
   }

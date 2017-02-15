@@ -76,27 +76,37 @@ void Calculator::initCalculusTestingFunctions()
 #endif // MACRO_use_MySQL
 }
 
+///////////////
+/// \brief Calculator::initPredefinedInnerFunctions
+/// Naming conventions: please start all built-in calculator functions with capital letter.
+/// Exceptions are made for
+/// 1) functions that have mathematical names
+/// starting with small letters (example: \\sin, logical operations, etc.)
+/// Those typically start with a backslash.
+/// 2) functions that have already been assigned keywords starting with non-capital letter
+/// and have been used too often.
+///
 void Calculator::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
-  ("setRandomSeed", CalculatorFunctionsGeneral::innerSetRandomSeed, "",
+  ("SetRandomSeed", CalculatorFunctionsGeneral::innerSetRandomSeed, "",
    "Sets the random seed of the calculator to the given integer value",
-   "setRandomSeed(123); randomInteger(-100,100); randomInteger(-100,100)",
-   true, false, "CalculatorConversions::innerSetRandomSeed");
+   "SetRandomSeed(123); RandomInteger(-100,100); RandomInteger(-100,100)",
+   true, false, "CalculatorConversions::innerSetRandomSeed", "SetRandomSeed");
   this->AddOperationInnerHandler
-  ("selectAtRandom", CalculatorFunctionsGeneral::innerSelectAtRandom, "",
+  ("SelectAtRandom", CalculatorFunctionsGeneral::innerSelectAtRandom, "",
    "Selects at random an object from a sequence.",
-   "f=selectAtRandom(\\sin, \\cos); \
-    g=selectAtRandom(\\tan, \\cot, \\sec, \\csc);\
+   "f=SelectAtRandom(\\sin, \\cos); \
+    g=SelectAtRandom(\\tan, \\cot, \\sec, \\csc);\
     f{}g{}x",
-   true, false, "CalculatorConversions::selectAtRandom", "selectAtRandom");
+   true, false, "CalculatorConversions::SelectAtRandom", "SelectAtRandom");
   this->AddOperationInnerHandler
-  ("randomInteger", CalculatorFunctionsGeneral::innerRandomInteger, "",
+  ("RandomInteger", CalculatorFunctionsGeneral::innerRandomInteger, "",
    "Generates a random integer. The random integer lives in intervals given by pairs of integers. The example code\
     generates a random number in the union of the intervals [-2, -1], [2,5]. If the input intervals overlap\
     the overlapped integers will be generated with higher probability. \
     For non-overlapping intervals, the random number distribution should be approximately uniform.",
-   "randomInteger((-2,-1), (2,5));",
-   true, false, "CalculatorConversions::innerRandomInteger", "randomInteger");
+   "RandomInteger((-2,-1), (2,5));",
+   true, false, "CalculatorConversions::innerRandomInteger", "RandomInteger");
   this->AddOperationInnerHandler
   ("TurnOffRules", CalculatorFunctionsGeneral::innerTurnOffRules, "",
    "Turns off computational rules.",
@@ -115,7 +125,6 @@ void Calculator::initPredefinedInnerFunctions()
    "Evaluates and replaces individual symbols/variables in LaTeX string. Leaves the rest of the string intact.",
    "x=5; left=a; EvaluateSymbols(\"x^x+ax+a x+\\left(left \\right)\")",
    true, false, "CalculatorConversions::innerTurnOnRules", "TurnOnRules");
-
   this->AddOperationInnerHandler
   ("or", CalculatorFunctionsGeneral::innerOr, "",
    "Logical or.",
@@ -175,17 +184,17 @@ void Calculator::initPredefinedInnerFunctions()
    \"DefaultProblemLocation/example.html\"), AlgebraAnswer)", true, false,
    "CalculatorHtmlFunctions::innerInterpretProblemGiveUp", "ProblemGiveUp");
   this->AddOperationInnerHandler
-  ("makeInputBox", CalculatorHtmlFunctions::innerUserInputBox, "",
+  ("MakeInputBox", CalculatorHtmlFunctions::innerUserInputBox, "",
    "Creates an user input text box. ",
-   "makeInputBox(name=a, value=randomInteger((-5,-1), (1,5)));", true, false,
+   "MakeInputBox(name=a, value=RandomInteger((-5,-1), (1,5)));", true, false,
    "CalculatorHtmlFunctions::innerUserInputBox",
-   "makeInputBox");
+   "MakeInputBox");
   this->AddOperationInnerHandler
-  ("setInputBox", CalculatorHtmlFunctions::innerSetInputBox, "",
+  ("SetInputBox", CalculatorHtmlFunctions::innerSetInputBox, "",
    "Sets value for input box that overrides the input box (no box is displayed). ",
-   "setInputBox(name=a, value=randomInteger((-5,-1), (1,5)));\
-     makeInputBox(name=a)", true, false,
-   "CalculatorHtmlFunctions::innerSetInputBox", "setInputBox");
+   "SetInputBox(name=a, value=RandomInteger((-5,-1), (1,5)));\
+     MakeInputBox(name=a)", true, false,
+   "CalculatorHtmlFunctions::innerSetInputBox", "SetInputBox");
   this->AddOperationInnerHandler
   ("ExtractCalculatorExpressionFromHtml", CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml, "",
    "Reads html and extracts embedded calculator commands. \
@@ -218,22 +227,22 @@ void Calculator::initPredefinedInnerFunctions()
    "TestStandardOutput(\"The quick brown fox jumps over the lazy dog\")", true, false)
    ;
   this->AddOperationInnerHandler
-  ("crash", CalculatorFunctionsGeneral::innerCrash, "",
+  ("Crash", CalculatorFunctionsGeneral::innerCrash, "",
    "Crashes the calculator: tests the \
     crashing mechanism (are crash logs properly created, etc.).",
-   "crash(0)",true, false, "CalculatorFunctionsGeneral::innerCrash", "crash");
+   "Crash(0)", true, false, "CalculatorFunctionsGeneral::innerCrash", "Crash");
   this->AddOperationInnerHandler
-  ("crashListOutOfBounds", CalculatorFunctionsGeneral::innerCrashByListOutOfBounds, "",
+  ("CrashListOutOfBounds", CalculatorFunctionsGeneral::innerCrashByListOutOfBounds, "",
    "Crashes the calculator by attempting to use data out-of-bounds in a List data structure.",
-   "crashListOutOfBounds(0)", true, false,
+   "CrashListOutOfBounds(0)", true, false,
    "CalculatorFunctionsGeneral::innerCrashByListOutOfBounds",
-   "crashListOutOfBounds");
+   "CrashListOutOfBounds");
   this->AddOperationInnerHandler
-  ("crashVectorOutOfBounds", CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds, "",
+  ("CrashVectorOutOfBounds", CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds, "",
    "Crashes the calculator by attempting to use data \
     out-of-bounds in a std::vector.",
-   "crashVectorOutOfBounds(0)", "CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds",
-   "crashVectorOutOfBounds");
+   "CrashVectorOutOfBounds(0)", "CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds",
+   "CrashVectorOutOfBounds");
   this->AddOperationInnerHandler
   ("DrawExpressionTree", CalculatorFunctionsGeneral::innerDrawExpressionGraph, "",
    "Draws the internal tree structure of an expression. Does not unfold built-in types.",
@@ -301,10 +310,10 @@ void Calculator::initPredefinedInnerFunctions()
     CharToBase64(\"sure.\");\
    ");
   this->AddOperationInnerHandler
-  ("x509CertificateCrunch", CalculatorFunctionsGeneral::innerX509certificateCrunch, "",
+  ("X509CertificateCrunch", CalculatorFunctionsGeneral::innerX509certificateCrunch, "",
    "Processes a x509 certificate database. This function is part of a security research project and \
    will be documented at a later time (if at all). Please do not use this function. ",
-   "x509CertificateCrunch(\"certificates\");\
+   "X509CertificateCrunch(\"certificates\");\
    ", false, true, "CalculatorFunctionsGeneral::innerX509certificateCrunch");
   this->AddOperationInnerHandler
   ("JWTverify", CalculatorFunctionsGeneral::innerJWTverity, "",
@@ -362,9 +371,9 @@ void Calculator::initPredefinedInnerFunctions()
    "Prints the generator commutation relations of a hyperoctahedral group.  ",
    "HyperOctahedralGeneratorPrint(3)", true, false, "CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations");
   this->AddOperationInnerHandler
-  ("printMacdonaldPolys", CalculatorFunctionsWeylGroup::innerMacdonaldPolys, "",
+  ("PrintMacdonaldPolys", CalculatorFunctionsWeylGroup::innerMacdonaldPolys, "",
    "Prints macdonald polynomials from a semisimple type. ",
-   "printMacdonaldPolys{}(B_3)", true);
+   "PrintMacdonaldPolys{}(B_3)", true);
   this->AddOperationInnerHandler
   ("Numerator", CalculatorFunctionsGeneral::innerNumerator, "",
    "If the expression is a fraction, returns the numerator, else returns the entire expression. ",
@@ -415,7 +424,8 @@ C=MakeExpression B;\
 D=MakeRationalFunction {}(\\frac{-2x^{3}y^{2}-\\frac{x y }{2}+\\frac{y }{32}}{x^{4}y +\\frac{x^{2}}{4}-\\frac{x }{32}}) ;\
 MakeExpression {}D-C;\
 D-B;\
-", true, false, "CalculatorConversions::innerExpressionFromBuiltInType", "MakeExpression");
+", true, false, "CalculatorConversions::innerExpressionFromBuiltInType",
+    "MakeExpression");
   this->AddOperationInnerHandler
   ("Polynomial", CalculatorConversions::innerPolynomial<Rational>, "",
    "Creates a polynomial expression with rational coefficients. ",
@@ -771,7 +781,8 @@ D-B;\
     \nWeylGroupClassicalSignMultiplicities{}(a_2);\
     \nWeylGroupClassicalSignMultiplicities{}(a_3);\
     \nWeylGroupClassicalSignMultiplicities{}(a_4);", true, false,
-   "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers", "WeylGroupClassicalSignMultiplicities")
+   "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers",
+   "WeylGroupClassicalSignMultiplicities")
    ;
   this->AddOperationInnerHandler
   ("WeylGroupTauSignatures",
@@ -921,8 +932,8 @@ D-B;\
   this->AddOperationInnerHandler
   ("CartanSA", CalculatorFunctionsGeneral::innerConstructCartanSA, "",
    "Generates a Cartan subalgebra, code is still experimental.",
-    "g_{{i}}=getChevalleyGenerator{}(b_3, i);\
-   \nh_{{i}}=getCartanGenerator{}(b_3, i);\
+    "g_{{i}}=GetChevalleyGenerator{}(b_3, i);\
+   \nh_{{i}}=GetCartanGenerator{}(b_3, i);\
    CartanSA(g_1+g_3, g_-1+g_-3, g_2, g_-2);\
    "
     , true, true, "CalculatorFunctionsGeneral::innerConstructCartanSA")
@@ -944,7 +955,7 @@ D-B;\
     \nGenerateVectorSpaceClosedWRTLieBracket{}(50, g_1, g_-1, g_2, g_-2, g_3, g_-3);\
     \nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1,g_2, g_-2, g_3, g_-3);\
     \nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1, g_-1, g_2, g_-2, g_3); \
-    q_{{i}}= getChevalleyGenerator{}(F_4, i);  \
+    q_{{i}}= GetChevalleyGenerator{}(F_4, i);  \
     s_2=-q_{-5}-q_{-6};\ns_1=q_{20}+q_{19};\n s_-1=-q_{-19}-q_{-20}\n; s_-2=2q_{6}+2q_{5};\
     \nGenerateVectorSpaceClosedWRTLieBracket(52, s_1, s_2, s_-1, s_-2);\
     ", true, false)
@@ -1081,16 +1092,16 @@ D-B;\
    "\\log{}(e); \\log 10", true, false, "CalculatorFunctionsGeneral::innerLog", "\\log")
    ;
   this->AddOperationInnerHandler
-  ("logBase", CalculatorFunctionsGeneral::innerLogBaseSimpleCases, "",
+  ("LogBase", CalculatorFunctionsGeneral::innerLogBaseSimpleCases, "",
    "If the argument is a power of the base does the computation. ",
    "\\log_5 25; log_5 1; log_5 (1/5)", true, false, "CalculatorFunctionsGeneral::innerLogBaseSimpleCases",
    "logBaseSimpleCases")
    ;
   this->AddOperationInnerHandler
-  ("logBase", CalculatorFunctionsGeneral::innerLogBase, "",
+  ("LogBase", CalculatorFunctionsGeneral::innerLogBase, "",
    "Logarithm function (arbitrary base). Equivalent to \\log_{{a}} {{b}}= (\\log b)/(\\log a). ",
    "\\log_10 5; \\log _e 10; \\ln 10; \\log_a b", true, false, "CalculatorFunctionsGeneral::innerLogBase",
-   "logBase")
+   "LogBase")
    ;
   this->AddOperationInnerHandler
   ("\\arctan", CalculatorFunctionsGeneral::innerArctan, "",
@@ -1157,10 +1168,10 @@ D-B;\
    )
    ;
   this->AddOperationInnerHandler
-  ("floor", CalculatorFunctionsGeneral::innerFloor, "",
+  ("Floor", CalculatorFunctionsGeneral::innerFloor, "",
    "Floor function.",
-   "floor(3/7)", true, false, "CalculatorFunctionsGeneral::innerFloor",
-   "floor")
+   "Floor(3/7)", true, false, "CalculatorFunctionsGeneral::innerFloor",
+   "Floor")
    ;
 
   this->AddOperationInnerHandler
@@ -1192,33 +1203,35 @@ D-B;\
    "A=100!+1; IsPrimeMillerRabin(A); IsPrimeMillerRabin( 4256233);IsPrimeMillerRabin(49979687);IsPrimeMillerRabin( 4256233*49979687)")
    ;
     this->AddOperationInnerHandler
-  ("gcd", CalculatorFunctionsGeneral::innerGCD, "",
+  ("GCD", CalculatorFunctionsGeneral::innerGCD, "",
    "Greatest common divisor of two integers.",
-   "gcd(100!+1, 101*103)", true, false, "CalculatorFunctionsGeneral::innerGCD", "gcd")
+   "GCD(100!+1, 101*103)", true, false, "CalculatorFunctionsGeneral::innerGCD", "GCD")
    ;
     this->AddOperationInnerHandler
-  ("lcm", CalculatorFunctionsGeneral::innerLCM, "",
+  ("LCM", CalculatorFunctionsGeneral::innerLCM, "",
    "Least common multiple of two integers.",
-   "lcm(91, 1001)", true, false, "CalculatorFunctionsGeneral::innerLCM", "lcm")
+   "LCM(91, 1001)", true, false, "CalculatorFunctionsGeneral::innerLCM", "LCM")
    ;
 
   this->AddOperationInnerHandler
-  ("gcdPoly", Calculator::innerGCDPoly, "",
+  ("GCDPoly", Calculator::innerGCDPoly, "",
    "Greatest common divisor polynomial of two polynomials. \
    The divisor is scaled so that all coefficients are relatively prime integers, \
    and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\
    has positive coefficient.",
-   "gcdPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+\
+   "GCDPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+\
    2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+\
    x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+\
    x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2},\
    x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}-\
    4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}-\
    2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-\
-   x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )", true, false, "Calculator::innerGCDPoly", "gcdPoly" )
+   x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )", true, false,
+   "Calculator::innerGCDPoly",
+   "GCDPoly" )
    ;
   this->AddOperationInnerHandler
-  ("lcmPoly", Calculator::innerLCMPoly, "",
+  ("LCMPoly", Calculator::innerLCMPoly, "",
    "Least common multiple of two polynomials.\
    The output is scaled so that all coefficients are relatively prime integers, \
    and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\
@@ -1230,13 +1243,16 @@ D-B;\
    x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}-\
    4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}-\
    2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-\
-   x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )", true, false, "Calculator::innerLCMPoly", "lcmPoly" )
+   x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )", true, false,
+   "Calculator::innerLCMPoly", "LCMPoly" )
    ;
   this->AddOperationInnerHandler
   ("Interpolate", &this->innerInterpolatePoly, "",
-   "Constructs the one-variable polynomial of minimal degree that passes through the points. Points are given in the form \
+   "Constructs the one-variable polynomial of minimal degree that passes through \
+    the points. Points are given in the form \
    ((x_1, y_1),(x_2, y_2), ...,(x_n, y_n))",
-   "Interpolate{}(1,0) ; Interpolate{}((1,0),(2,3)); Interpolate{}((1,1), (2,2), (3, 4), (4, 8), (5, 16))", true, false)
+   "Interpolate{}(1,0) ; Interpolate{}((1,0),(2,3)); \
+    Interpolate{}((1,1), (2,2), (3, 4), (4, 8), (5, 16))", true, false)
    ;
   this->AddOperationInnerHandler
   ("PolyDivRemainder", &this->innerPolynomialDivisionRemainder, "",
@@ -1272,11 +1288,11 @@ D-B;\
    "PolyDivStringLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
    ;
   this->AddOperationInnerHandler
-  ("suffixNotationForPostScript", this->innerSuffixNotationForPostScript, "",
+  ("SuffixNotationForPostScript", this->innerSuffixNotationForPostScript, "",
    "Suffix notation. for postscript, used to quickly generate pstricks drawings in LaTeX.  \
    ",
    "suffixNotationForPostScript{}((1/3 +a+b)*c)", true, false,
-   "Calculator::innerSuffixNotationForPostScript", "suffixNotationForPostScript")
+   "Calculator::innerSuffixNotationForPostScript", "SuffixNotationForPostScript")
    ;
   this->AddOperationInnerHandler
   ("MakeJavascriptExpression", CalculatorFunctionsGeneral::innerMakeJavascriptExpression, "",
@@ -1294,33 +1310,29 @@ D-B;\
    ",
    "DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, -2.5, 2.5)")
    ;
-  this->AddOperationInnerHandler ("FetchWebPage", CalculatorFunctionsGeneral::innerFetchWebPage, "",
+  this->AddOperationInnerHandler ("FetchWebPage",
+  CalculatorFunctionsGeneral::innerFetchWebPage, "",
    "Attempts to fetch a web page. For logged-in admins only.",
    "FetchWebPage(\"calculator-algebra.org/calculator?request=statusPublic\")", false,
    true, "CalculatorFunctionsGeneral::innerFetchWebPage", "FetchWebPage")
    ;
-  this->AddOperationInnerHandler ("drawPolar", CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta, "",
-   "<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates in the form \
+  this->AddOperationInnerHandler ("DrawPolar",
+  CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta, "",
+   "<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates \
+   in the form \
    r=f(t), where t is the angle variable. The angle variable is measured in degrees. \
    The first argument gives the function, the second and third argument give the upper and \
    lower bounds of the angle. \
    ",
-   "drawPolar(1+sin  t, 0, \\pi); \
-   \ndrawPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) (9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)")
+   "DrawPolar(1+sin  t, 0, \\pi); \
+   \nDrawPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) (9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)")
    ;
-  this->AddOperationInnerHandler ("drawPolarExtended", CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended, "",
+  this->AddOperationInnerHandler ("DrawPolarExtended", CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended, "",
    "<b>Calculus teaching function.</b> Same as drawPolar but also produces a graph in the (rho,theta)-plane. \
    ",
-   "drawPolarExtended(1+sin  t, 0, \\pi); \
-   \ndrawPolarExtended((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) (9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)")
+   "DrawPolarExtended(1+sin  t, 0, \\pi); \
+   \nDrawPolarExtended((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) (9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)")
    ;
-  this->AddOperationInnerHandler ("plotConeUsualProjection", CalculatorFunctionsGeneral::innerPlotConeUsualProjection, "",
-   "<b>Calculus teaching function.</b>Plots a cone with center of base at (0,0,0) with base lying in the xy plane\
-    of radius r and height h(first and second argument) viewed from a distance d (third argument) and viewing height vh (fourth argument).\
-   ",
-   "plotConeUsualProjection(2, 4, 3, 2)", false, true)
-   ;
-
   this->AddOperationInnerHandler ("GaussianElimination", CalculatorFunctionsGeneral::innerGaussianEliminationMatrix, "",
    "Gaussian elimination of a matrix. Prints a detailed string that shows the Gaussian elimination of \
     a matrix.",
@@ -1348,18 +1360,24 @@ D-B;\
    "UnivariatePartialFractions")
    ;
 
-  this->AddOperationInnerHandler ("EqualityToArithmeticExpression", CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression, "",
+  this->AddOperationInnerHandler ("EqualityToArithmeticExpression",
+  CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression, "",
    "",
    "EqualityToArithmeticExpression(a=b)", true, false,
-   "CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression", "EqualityToArithmeticExpression")
+   "CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression",
+   "EqualityToArithmeticExpression")
    ;
 
-  this->AddOperationInnerHandler ("pointsImplicitly", CalculatorFunctionsGeneral::innerGetPointsImplicitly, "",
-   "Returns points on or close to the curve in two dimensions. Same as plotImplicit but rather than plotting\
-   the curve returns the (x,y) pairs of points found. The output given as a nx2 matrix of floating point numbers. \
+  this->AddOperationInnerHandler ("PointsImplicitly",
+  CalculatorFunctionsGeneral::innerGetPointsImplicitly, "",
+   "Returns points on or close to the curve in two dimensions. \
+    Same as plotImplicit but rather than plotting\
+    the curve returns the (x,y) pairs of points found. \
+    The output given as a nx2 matrix of floating point numbers. \
    ",
-   "pointsImplicitly((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))", true, false,
-   "CalculatorFunctionsGeneral::innerGetPointsImplicitly", "pointsImplicitly")
+   "PointsImplicitly((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))",
+   true, false,
+   "CalculatorFunctionsGeneral::innerGetPointsImplicitly", "PointsImplicitly")
    ;
 
   this->AddOperationInnerHandler ("plotImplicit", CalculatorFunctionsGeneral::innerPlotImplicitFunction, "",
@@ -1392,10 +1410,10 @@ D-B;\
    "%HideLHS x=(R+v*cos(u/2))*cos(u);\
 y=(R+v*cos(u/2))*sin(u);\
 z=v*sin(u/2); \
-R=makeInputBox (name =radiusBig, value=2, min =2, max=5) ;\
-r=makeInputBox (name =radiusSmall, value=0.6, min =0.2, max=1, step=0.2) ;\
-uSegments = makeInputBox(name = uSegments, value = 22, min = 8, max =40) ;\
-vSegments = makeInputBox(name = vSegments, value = 4, min = 2, max =10) ;\
+R=MakeInputBox (name =radiusBig, value=2, min =2, max=5) ;\
+r=MakeInputBox (name =radiusSmall, value=0.6, min =0.2, max=1, step=0.2) ;\
+uSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max =40) ;\
+vSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max =10) ;\
 plotSurface((x,y,z  ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=blue, color2=cyan, numSegments1=uSegments, numSegments2=vSegments)+\
 plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=pink, numSegments1=uSegments, numSegments2=vSegments); ",
     true, false, "CalculatorFunctionsGeneral::innerPlotSurface",
@@ -1438,13 +1456,13 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    false, "CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants",
    "GetVariablesIncludeNamedConstants")
    ;
-  this->AddOperationInnerHandler ("plotPoint", CalculatorFunctionsGeneral::innerPlotPoint, "",
+  this->AddOperationInnerHandler ("PlotPoint", CalculatorFunctionsGeneral::innerPlotPoint, "",
    "<b>Calculus teaching function.</b> Plots a point from x and y coordinate.\
    ",
-   "plotPoint{}(1,2)", true, false, "CalculatorFunctionsGeneral::innerPlotPoint",
-   "plotPoint")
+   "PlotPoint{}(1,2)", true, false, "CalculatorFunctionsGeneral::innerPlotPoint",
+   "PlotPoint")
    ;
-  this->AddOperationInnerHandler ("plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",
+  this->AddOperationInnerHandler ("Plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \
    y=f(x). The the second and third argument give the upper and \
    lower bounds of x. The fourth and fifth argument are optional, specify the width \
@@ -1452,56 +1470,65 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    The seventh argument is optional and specifies line width. \
    Plots may be added together- adding plots superimposes the plots. \
    ",
-   "plot2D{}(\\sin{}x+cos{}x, 0, 5, 200, 200, \"blue\",2)", true, false,
-   "CalculatorFunctionsGeneral::innerPlot2D", "plot2D")
+   "Plot2D{}(\\sin{}x+cos{}x, 0, 5, 200, 200, \"blue\",2)", true, false,
+   "CalculatorFunctionsGeneral::innerPlot2D", "Plot2D")
    ;
-  this->AddOperationInnerHandler ("plotFill", CalculatorFunctionsGeneral::innerPlotFill, "",
+  this->AddOperationInnerHandler ("PlotFill", CalculatorFunctionsGeneral::innerPlotFill, "",
    "Fills a plot with color. ",
-   "plotFill(plot2D{}(sqrt(1-x^2), -1, 1, 200, 200, \"blue\",2)+plot2D(-sqrt(1-x^2),-1,1, 200,200), \"blue\")", true, false,
-   "CalculatorFunctionsGeneral::innerPlotFill", "plotFill")
+   "PlotFill(Plot2D{}(sqrt(1-x^2), -1, 1, 200, 200, \"blue\",2)+Plot2D(-sqrt(1-x^2),-1,1, 200,200), \"blue\")", true, false,
+   "CalculatorFunctionsGeneral::innerPlotFill", "PlotFill")
    ;
-  this->AddOperationInnerHandler ("plotRectangle", CalculatorFunctionsGeneral::innerPlotRectangle, "",
-   "Plots a rectangle. Arguments format: plotRectangle{}((lowerCornerLeftXcoord,  lowerCornerLeftXcoord), \
+  this->AddOperationInnerHandler ("PlotRectangle", CalculatorFunctionsGeneral::innerPlotRectangle, "",
+   "Plots a rectangle. Arguments format: PlotRectangle{}((lowerCornerLeftXcoord,  lowerCornerLeftXcoord), \
    (width, height)). \
    ",
-   "plotRectangle{}((1,2), (2,1))", true, false,
-   "CalculatorFunctionsGeneral::innerPlotRectangle", "plotRectangle")
+   "PlotRectangle{}((1,2), (2,1))", true, false,
+   "CalculatorFunctionsGeneral::innerPlotRectangle", "PlotRectangle")
    ;
-  this->AddOperationInnerHandler ("plotLabel", CalculatorFunctionsGeneral::innerPlotLabel, "",
-   "Plots a label at a given position. Arguments format: plotLabel(Xcoord, Ycoord, \"Label\"). \
+  this->AddOperationInnerHandler ("PlotLabel", CalculatorFunctionsGeneral::innerPlotLabel, "",
+   "Plots a label at a given position. Arguments format: PlotLabel(Xcoord, Ycoord, \"Label\"). \
    ",
-   "plotLabel{}(1,1, \"(1,1)\")", true, false,
-   "CalculatorFunctionsGeneral::innerPlotLabel", "plotLabel")
+   "PlotLabel{}(1,1, \"(1,1)\")", true, false,
+   "CalculatorFunctionsGeneral::innerPlotLabel", "PlotLabel")
    ;
-  this->AddOperationInnerHandler ("plotViewRectangle", CalculatorFunctionsGeneral::innerPlotViewRectangle, "",
+  this->AddOperationInnerHandler ("PlotViewRectangle", CalculatorFunctionsGeneral::innerPlotViewRectangle, "",
    "Creates an empty plot whose sole purpose is to fix the view rectangle of another plot. \
-   To restrict/expand the view rectangle of another plot, simply add plotViewRectangle to the other plot. \
+   To restrict/expand the view rectangle of another plot, simply add PlotViewRectangle to the other plot. \
    Takes as input two pairs of numbers: first pair gives the lower left corner of the viewing rectangle, \
    the second argument gives the upper right corner.\
    ",
-   "plot2D{}(1/x, -30, 30, 300, 300, \"red\") + plotViewRectangle((-5,-5), (5,5))", true, false,
-   "CalculatorFunctionsGeneral::plotViewRectangle", "plotViewRectangle")
+   "Plot2D{}(1/x, -30, 30, 300, 300, \"red\") + PlotViewRectangle((-5,-5), (5,5))", true, false,
+   "CalculatorFunctionsGeneral::PlotViewRectangle", "PlotViewRectangle")
    ;
-  this->AddOperationInnerHandler ("plotWindow", CalculatorFunctionsGeneral::innerPlotViewWindow, "",
+  this->AddOperationInnerHandler ("PlotWindow", CalculatorFunctionsGeneral::innerPlotViewWindow, "",
    "Creates an empty plot whose sole purpose is to fix the dimensions (in pixels) of the image in the format\
 (pixelwidth, pixelHeight). \
-   To modify the dimensions (in pixels) of another plot, add to it the plotWindow ``plot''.\
+   To modify the dimensions (in pixels) of another plot, add to it the PlotWindow ``plot''.\
    ",
-   "plot2D{}(1/x, -30, 30, 300, 300, \"red\") + plotWindow(400,400)+ plotViewRectangle((-5,-5), (5,5))", true, false,
-   "CalculatorFunctionsGeneral::innerPlotWindow", "plotWindow")
+   "Plot2D{}(1/x, -30, 30, 300, 300, \"red\") + PlotWindow(400,400)+ PlotViewRectangle((-5,-5), (5,5))", true, false,
+   "CalculatorFunctionsGeneral::innerPlotWindow", "PlotWindow")
    ;
-  this->AddOperationInnerHandler ("plot2DWithBars", CalculatorFunctionsGeneral::innerPlot2DWithBars, "",
-   "<b>Calculus teaching function.</b> Same as plot2D but plots two functions with bars locked between the two functions; \
+  this->AddOperationInnerHandler ("Plot2DWithBars",
+  CalculatorFunctionsGeneral::innerPlot2DWithBars, "",
+   "<b>Calculus teaching function.</b> Same as plot2D but plots two \
+   functions with bars locked between the two functions; \
    , used to illustrate approximations to definite integrals.",
-   "\nA=3/2- ((-3/4+1/4 (x))^{2});\nB= (1/4 (x))^{2}+2;\nplot2DWithBars{}(A, B, 0, 5, 1)", false, true)
+   "\nA=3/2- ((-3/4+1/4 (x))^{2});\nB= (1/4 (x))^{2}+2;\nPlot2DWithBars{}(A, B, 0, 5, 1)",
+   false, true, "CalculatorFunctionsGeneral::innerPlot2DWithBars",
+   "Plot2DWithBars")
    ;
-  this->AddOperationInnerHandler ("plotIntegralOf", CalculatorFunctionsGeneral::innerPlotIntegralOf, "",
+  this->AddOperationInnerHandler ("PlotIntegralOf",
+  CalculatorFunctionsGeneral::innerPlotIntegralOf, "",
    "<b>Calculus teaching function.</b> Plots area locked under curve.",
-   "\nA=3/2- ((-3/4+1/4 (x))^{2});\nplotIntegralOf{}(A, 0, 5)", false, true)
+   "\nA=3/2- ((-3/4+1/4 (x))^{2});\nPlotIntegralOf{}(A, 0, 5)", false, true,
+   "CalculatorFunctionsGeneral::innerPlotIntegralOf",
+   "PlotIntegralOf")
    ;
-  this->AddOperationInnerHandler ("CompareFunctionsNumerically", CalculatorFunctionsGeneral::innerCompareFunctionsNumerically, "",
+  this->AddOperationInnerHandler ("CompareFunctionsNumerically",
+   CalculatorFunctionsGeneral::innerCompareFunctionsNumerically, "",
    "<b>Calculus teaching function.</b> Compares two one-variable functions numerically.\
-   First two arguments give the two functions. Third and fourth arguments give the interval [a,b] over which to compare.\
+   First two arguments give the two functions. \
+   Third and fourth arguments give the interval [a,b] over which to compare.\
    Fifth argument is optional (default: 50) \
    and gives the number of sampling points. Sixth argument is optional (default: 0.0001) \
    and gives the numerical tolerance eps- if two numbers are \
@@ -1509,7 +1536,9 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    ",
    "CompareFunctionsNumerically{}(arctan (x), arcsin(x/\\sqrt{x^2+1}),0, 5,50,0.0001);\n\
     CompareFunctionsNumerically{}(e^x, 1+x+x^2/2+x^3/3!+x^4/4!+x^5/5!+x^6/6!,0, 5,50,0.0001)\
-   ", true, false, "CalculatorFunctionsGeneral::innerCompareFunctionsNumerically", "CompareFunctionsNumerically")
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerCompareFunctionsNumerically",
+   "CompareFunctionsNumerically")
    ;
 
   this->AddOperationInnerHandler ("CompareExpressionsNumerically",
@@ -1518,11 +1547,15 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    First two arguments give the two functions. The third argument gives the precision.\
    All remaining arguments come in pairs, in the form x\\in (2,3), 50. \
    ",
-   "CompareExpressionsNumerically{}(\\arctan x + \\arctan y, \\arctan((x+y)/(1- x y)), 0.0001,\
+   "CompareExpressionsNumerically{}(\\arctan x + \\arctan y, \
+   \\arctan((x+y)/(1- x y)), 0.0001,\
    x\\in(0,0.5), 20, y\\in(0,0.5), 20 );\
-   \nCompareExpressionsNumerically{}(\\arctan x + \\arctan y, \\arctan((x+y)/(1- x y)), 0.0001,\
+   \nCompareExpressionsNumerically{}(\\arctan x + \\arctan y, \
+   \\arctan((x+y)/(1- x y)), 0.0001,\
    x\\in(0,2), 20, y\\in(0,2), 20 );\
-   ", true, false, "CalculatorFunctionsGeneral::innerCompareExpressionsNumerically", "CompareExpressionsNumerically")
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerCompareExpressionsNumerically",
+   "CompareExpressionsNumerically")
    ;
   this->AddOperationInnerHandler ("CompareExpressionsNumericallyAtPoints",
    CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints, "",
@@ -1539,33 +1572,41 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
 \nden=CoefficientOf (d/dx y, theDiff);\
 \nb=-num/den;\
 \nCompareExpressionsNumerically(a,b, 0.001, x\\in(0,5),10, y\\in (0,5),10);\
-\nA=pointsImplicitly(theFun, (0,0),(4,4), (10,10), (400,400));\
+\nA=PointsImplicitly(theFun, (0,0),(4,4), (10,10), (400,400));\
 \nCompareExpressionsNumericallyAtPoints(a,b, 0.01, (x,y)\\in A);\
    ", true, false, "CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints",
    "CompareExpressionsNumericallyAtPoints")
    ;
 
   this->AddOperationInnerHandler
-  ("IsInteger", this->innerIsInteger, "",
-   " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
-   "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}=IsInteger{}a;\nf{}1;\nf{}b");
+  ("IsInteger", Calculator::innerIsInteger, "",
+   "If the argument has no bound variables, returns 1 if \
+    the argument is an integer, 0 otherwise. ",
+   "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}=IsInteger{}a;\nf{}1;\nf{}b", true, false,
+   "Calculator::innerIsInteger",
+   "IsInteger");
   this->AddOperationInnerHandler
   ("IsEven", CalculatorFunctionsGeneral::innerIsEven, "",
-   " If the argument has no bound variables, returns 1 if the argument is an even integer, 0 otherwise. ",
+   "If the argument has no bound variables, returns 1 if \
+    the argument is an even integer, 0 otherwise. ",
    "i^{{n}}:if IsEven n=(-1)^n; i^100 ");
   this->AddOperationInnerHandler
   ("IsNonEmptySequence", CalculatorFunctionsGeneral::innerIsNonEmptySequence, "",
-   " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
+   "If the argument has no bound variables, returns 1 if the argument is \
+    an integer, 0 otherwise. ",
    "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}=IsInteger{}a;\nf{}1;\nf{}b", true, false,
-   "CalculatorFunctionsGeneral::innerIsNonEmptySequence");
+   "CalculatorFunctionsGeneral::innerIsNonEmptySequence",
+   "IsNonEmptySequence");
   this->AddOperationInnerHandler
   ("IsRational", this->innerIsRational, "",
-   " If the argument has no bound variables, returns 1 if the argument is an rational, 0 otherwise. ",
+   "If the argument has no bound variables, returns 1 if \
+    the argument is an rational, 0 otherwise. ",
    "IsRational{}a;IsRational{}-1;\nf{}{{a}}=IsRational{}a;\nIsRational{}1;\nIsRational{}b");
     this->AddOperationInnerHandler
   ("not", this->innerNot, "",
-   " If the argument is a small integer, returns 1 if the argument is 0 and 1 the argument is non-zero. \
-   If the argument is not a small integer, does nothing. ",
+   "If the argument is a small integer, returns 1 if the argument is \
+    0 and 1 the argument is non-zero. \
+    If the argument is not a small integer, does nothing. ",
    "not{}1;not{}a; not{}0; not{}(3==4)");
   this->AddOperationInnerHandler
   ("AllPartitions", CalculatorFunctionsGeneral::innerAllPartitions, "",
@@ -1574,10 +1615,13 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerAllPartitions", "AllPartitions");
   this->AddOperationInnerHandler
   ("AllVectorPartitions", CalculatorFunctionsGeneral::innerAllVectorPartitions, "",
-   "Prints all partitions of the vector (first argument) using a given list of vectors (second argument). \
-   All partitioning vectors should have positive coordinates. ",
-   "AllVectorPartitions((10,11), ((1,2), (2,3), (4,5), (2,1), (3,2), (5,4))) ", true, false,
-   "CalculatorFunctionsGeneral::innerAllVectorPartitions", "AllVectorPartitions");
+   "Prints all partitions of the vector (first argument) using a given \
+    list of vectors (second argument). \
+    All partitioning vectors should have positive coordinates. ",
+   "AllVectorPartitions((10,11), ((1,2), (2,3), (4,5), (2,1), (3,2), (5,4))) ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerAllVectorPartitions",
+   "AllVectorPartitions");
   this->AddOperationInnerHandler
   ("AllSelectionsFixedRank", CalculatorFunctionsWeylGroup::innerAllSelectionsFixedRank, "",
    "Prints all selections of fixed size (given by first argument) from a \
@@ -1602,68 +1646,112 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerKostkaNumbers", "KostkaNumber");
 
   this->AddOperationInnerHandler
-  ("PrintNonNegativeVectorsLevel", this->innerPrintZnEnumeration, "",
-   " Prints all vectors of grade level d with n coordinates lying in Z_{>=0}. Function meant for \
+  ("PrintNonNegativeVectorsLevel", Calculator::innerPrintZnEnumeration, "",
+   "Prints all vectors of grade level d with n coordinates lying in Z_{>=0}. Function meant for \
    debugging purposes. First argument =dimension, second argument=grading level. ",
-   "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ");
+   "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ",
+   true, false,
+   "Calculator::innerPrintZnEnumeration",
+   "PrintNonNegativeVectorsLevel");
   this->AddOperationInnerHandler
   ("SemisimpleLieAlgebra", CalculatorConversions::innerSSLieAlgebra, "",
-   "Creates a semisimple Lie algebra. The semisimple Lie algebra is given via its Dynkin type. A simple Dynkin type is given by\
-    type letter with upper index equal to the inverse of the scale of the symmetric Cartan matrix and lower index equal to \
-    the rank of the subalgebra. For example A^2_3 stands for type A_3 (sl (4)) with symmetric Cartan matrix scale equal to 1/2.\
+   "Creates a semisimple Lie algebra. The semisimple Lie algebra \
+    is given via its Dynkin type. A simple Dynkin type is given by\
+    type letter with upper index equal to the inverse of the scale of\
+    the symmetric Cartan matrix and lower index equal to \
+    the rank of the subalgebra. For example A^2_3 stands for type A_3\
+    (sl (4)) with symmetric Cartan matrix scale equal to 1/2.\
     If the upper index is omitted, it is implied to be 1.<hr>\
-    We define the symmetric Cartan matrix as the matrix whose (i,j)^{th} entry is the scalar product of the i^{th} and j^{th} roots. \
-    We assume the roots to be ordered in the order implied by the (non-symmetric) Cartan matrices on page 59 in Humphreys, \
-    Introduction to Lie algebras and representation theory. If the upper index of the Dynkin type is 1, the corresponding symmetric Cartan matrix is\
-    assigned the default value. The default values are chosen so that the long root has squared length 2 in types \
-    A_n, B_n, D_n, E_6, E_7, E_8, and F_4, squared length 4 in C_n, and squared length 6 in type G_2. \
-    <br>If upper index is not equal to 1, the symmetric Cartan matrix is given by dividing the default symmetric Cartan matrix by the upper index. \
+    We define the symmetric Cartan matrix as the matrix whose (i,j)^{th}\
+    entry is the scalar product of the i^{th} and j^{th} roots. \
+    We assume the roots to be ordered in the order implied by the\
+    (non-symmetric) Cartan matrices on page 59 in Humphreys, \
+    Introduction to Lie algebras and representation theory. \
+    If the upper index of the Dynkin type is 1, the corresponding\
+    symmetric Cartan matrix is\
+    assigned the default value. The default values are chosen \
+    so that the long root has squared length 2 in types \
+    A_n, B_n, D_n, E_6, E_7, E_8, and F_4, squared length 4\
+    in C_n, and squared length 6 in type G_2. \
+    <br>If upper index is not equal to 1, the symmetric \
+    Cartan matrix is given by dividing the default symmetric \
+    Cartan matrix by the upper index. \
     ",
-   "g_{{i}}=getChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
-   \nh_{{i}}=getCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
-    \n[g_1,g_{-1}]; \n[g_2, g_{-2}]; \n[h_{1}, g_6]; \n[h_2, g_{-6}]");
+   "g_{{i}}=GetChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
+   \nh_{{i}}=GetCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
+    \n[g_1,g_{-1}]; \n[g_2, g_{-2}]; \n[h_{1}, g_6]; \n[h_2, g_{-6}]",
+    true, false,
+    "CalculatorConversions::innerSSLieAlgebra",
+    "SemisimpleLieAlgebra"
+    );
   this->AddOperationInnerHandler
-  ("printSemisimpleLieAlgebra", &this->innerPrintSSLieAlgebraVerbose, "",
-   "Creates a printout with information about the semisimple Lie algebra, including the Lie bracket pairing table. \
-   In addition, this function creates a graphics of the root system. \
+  ("PrintSemisimpleLieAlgebra", Calculator::innerPrintSSLieAlgebraVerbose, "",
+   "Creates a printout with information about the semisimple \
+    Lie algebra, including the Lie bracket pairing table. \
+    In addition, this function creates a graphics of the root system. \
    ",
-   "printSemisimpleLieAlgebra{}(F_4);\nprintSemisimpleLieAlgebra{}(2G^5_2+B_3);");
+   "PrintSemisimpleLieAlgebra{}(F_4);\nPrintSemisimpleLieAlgebra{}(2G^5_2+B_3);",
+   true, false,
+   "Calculator::innerPrintSSLieAlgebraVerbose",
+   "PrintSemisimpleLieAlgebra");
   this->AddOperationInnerHandler
-  ("getChevalleyGenerator", this->innerGetChevGen, "",
+  ("GetChevalleyGenerator", Calculator::innerGetChevGen, "",
    "First argument must be a semisimple Lie algebra, second argument must \
    be an integer from -N to N,\
    where N is the number of positive roots of the Lie algebra.\
    The function returns the Chevalley-Weyl generator labeled by the root\
-   corresponding to the integer index. The roots are indexed in the ordered displayed by the \
-   printSemisimpleLieAlgebra function. ",
-   "[getChevalleyGenerator{}(G_2, 6), getChevalleyGenerator{}(G_2, -6)]");
+   corresponding to the integer index. \
+   The roots are indexed in the ordered displayed by the \
+   PrintSemisimpleLieAlgebra function. ",
+   "[GetChevalleyGenerator{}(G_2, 6), GetChevalleyGenerator{}(G_2, -6)]",
+   true, false,
+   "Calculator::innerGetChevGen",
+   "GetChevalleyGenerator");
   this->AddOperationInnerHandler
-  ("getCartanGenerator", this->innerGetCartanGen, "",
-   "First argument must be a semisimple Lie algebra, second argument must \
-   be a number between 1 and K, where K is the rank of the Lie algebra.\
-   In this case the function returns the element of the Cartan subalgebra that is dual \
-   to the simple root with the same index. Note that this element of the Cartan subalgebra\
-   is proportional to a Chevalley-Weyl generator with a coefficient of proportionality \
-   equal to 2/(simple root length squared) ).",
-   "getCartanGenerator{}(G_2, 1)");
+  ("GetCartanGenerator", Calculator::innerGetCartanGen, "",
+   "First argument must be a semisimple Lie algebra, \
+    second argument must \
+    be a number between 1 and K, where K is the rank\
+    of the Lie algebra.\
+    In this case the function returns the element of \
+    the Cartan subalgebra that is dual \
+    to the simple root with the same index. \
+    Note that this element of the Cartan subalgebra\
+    is proportional to a Chevalley-Weyl generator \
+    with a coefficient of proportionality \
+    equal to 2/(simple root length squared) ).",
+   "GetCartanGenerator{}(G_2, 1)", true, false,
+   "Calculator::innerGetCartanGen",
+   "GetCartanGenerator");
 
   this->AddOperationInnerHandler
-  ("FunctionToMatrix", this->innerFunctionToMatrix,"",
-   "Creates a matrix from a function. The first argument gives the function, \
-   the second argument the number of rows, \
-   the third- the number of columns.\
-   ", "X=FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}})=a/b;\n X; \\det {} X");
+  ("FunctionToMatrix", Calculator::innerFunctionToMatrix,"",
+   "Creates a matrix from a function. \
+    The first argument gives the function, \
+    the second argument the number of rows, \
+    the third- the number of columns.\
+   ", "X=FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}})=a/b;\n X; \\det {} X",
+   true, false,
+   "Calculator::innerFunctionToMatrix",
+   "FunctionToMatrix"
+   );
   this->AddOperationInnerHandler
-  ("Transpose", this->innerTranspose, "",
+  ("Transpose", Calculator::innerTranspose, "",
    "Transposes a matrix of expressions. \
-   ", "Transpose{}(1,2); (1,2)^t");
+   ", "Transpose{}(1,2); (1,2)^t",
+   true, false,
+   "Calculator::innerTranspose",
+   "Transpose");
 
   this->AddOperationInnerHandler
   ("\\det", CalculatorFunctionsGeneral::innerDeterminant, "",
    "Tries to convert to a matrix of rationals or matrix of rational \
    functions and computes the determinant if\
    not too large. \
-   ", "X=FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}})=1/(a+b);\n X; \\det {} X");
+   ", "X=FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}})=1/(a+b);\n X; \\det {} X",
+   true, false,
+   "CalculatorFunctionsGeneral::innerDeterminant",
+   "Determinant");
   this->AddOperationInnerHandler
   ("DeterminantPolynomial", Calculator::innerDeterminantPolynomial, "",
    "Attempts to convert the entries of the matrix \
@@ -1685,7 +1773,8 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
   this->AddOperationInnerHandler
   ("Length", CalculatorFunctionsGeneral::innerLength, "",
    "Returns the length of a sequence. ",
-   "Length(a,b) ", true, false, "CalculatorFunctionsGeneral::innerLength",
+   "Length(a,b) ", true, false,
+   "CalculatorFunctionsGeneral::innerLength",
    "Length");
   this->AddOperationInnerHandler
   ("GetSummandList", CalculatorFunctionsGeneral::outerCollectSummands, "",
@@ -1712,7 +1801,7 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerGetUserDefinedSubExpressions",
    "BlocksOfCommutativity");
   this->AddOperationInnerHandler
-  ("hwv", CalculatorFunctionsGeneral::innerHWV, "",
+  ("HeighestWeightVector", CalculatorFunctionsGeneral::innerHWV, "",
    "Highest weight vector in a generalized Verma module. \
    The first argument gives the semisimple Lie algebra. The second argument \
    gives the highest weight in fundamental coordinates. \
@@ -1722,10 +1811,13 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    The second argument is allowed to have \
    entries that are not non-negative integers in the positions in \
    which the third argument has 1's. ",
-   "g_{{i}}=getChevalleyGenerator{}(B_3, i);h_{{i}}=getCartanGenerator{}(B_3, i);\
-   \nv_\\mu=hwv{} (A_3, (1,0,1),(0,0,0));\nv_\\lambda=hwv{}(B_3, (x_1,0,1),(1,0,0));\nh_1g_{-1}v_\\lambda");
+   "g_{{i}}=GetChevalleyGenerator{}(B_3, i);\n\
+    h_{{i}}=GetCartanGenerator{}(B_3, i);\n\
+    v_\\mu=HeighestWeightVector{} (A_3, (1,0,1),(0,0,0));\n\
+    v_\\lambda=HeighestWeightVector{}(B_3, (x_1,0,1),(1,0,0));\n\
+    h_1g_{-1}v_\\lambda");
   this->AddOperationInnerHandler
-  ("printModule", CalculatorFunctionsGeneral::innerPrintGenVermaModule, "",
+  ("PrintModule", CalculatorFunctionsGeneral::innerPrintGenVermaModule, "",
    "Makes a report on a finite dimensional Lie algebra module, \
     or more generally, on \
     a generalized Verma module (irreducible finite dimensional semisimple Lie algebra \
@@ -1736,16 +1828,16 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
     parabolic subalgebra (lying in algebra of rank 2) with first simple root crossed-out. \
     The second argument is allowed to have \
     entries that are not non-negative integers in the positions in which the third argument has 1's. ",
-   "printModule{} (G_2, (2,0),(0,0))");
+   "PrintModule{} (G_2, (2,0),(0,0))");
   this->AddOperationInnerHandler
-  ("hwTAAbf", CalculatorFunctionsGeneral::innerHWTAABF, "",
+  ("HighestWeightTAAbf", CalculatorFunctionsGeneral::innerHWTAABF, "",
    "Highest weight transpose anti-automorphism bilinear form, a.k.a. Shapovalov form. \
    Let M be a Verma module with highest weight vector v given in \
    fundamental coordinates. Let P:M->M\
    be a projection map onto Cv that maps every weight vector of M of weight different from the \
-   highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwTAAbf(u_1,u_2)=\
+   highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define HighestWeightTAAbf(u_1,u_2)=\
    Tr_M (P ( taa(u_1) u_2 ), where taa() is the transpose anti-automorphism of g. ",
-   "g_{{a}}=getChevalleyGenerator{} (G_2, a);\nhwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))");
+   "g_{{a}}=GetChevalleyGenerator{} (G_2, a);\nHighestWeightTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))");
   this->AddOperationInnerHandler
   ("WeylDimFormula", CalculatorFunctionsGeneral::innerWeylDimFormula, "",
    "Weyl dimension formula. First argument gives the type of the Weyl group of the simple\
@@ -1754,71 +1846,122 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));", true, false,
    "CalculatorFunctionsGeneral::innerWeylDimFormula", "WeylDimFormula");
   this->AddOperationInnerHandler
-  ("animateLittelmannPaths", Calculator::innerAnimateLittelmannPaths, "",
+  ("AnimateLittelmannPaths", Calculator::innerAnimateLittelmannPaths, "",
    "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. \
    Presented first on the seminar in Charles University Prague. \
-   The first argument gives the type of the semisimple  Lie algebra, the second gives the highest weight. \
+   The first argument gives the type of the semisimple Lie algebra, \
+   the second gives the highest weight. \
    ",
-   "animateLittelmannPaths{}(G_2, (2,0));", true, false,
-   "Calculator::innerAnimateLittelmannPaths","animateLittelmannPaths");
+   "AnimateLittelmannPaths{}(G_2, (2,0));", true, false,
+   "Calculator::innerAnimateLittelmannPaths",
+   "AnimateLittelmannPaths");
   this->AddOperationInnerHandler
   ("DecomposeInducingRepGenVermaModule",
    CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart, "",
-   "Decomposes the inducing module of a generalized Verma module over the Levi part of a parabolic smaller than the inducing one.\
-   The first argument gives the type of the algebra. The second argument gives the highest weight of the module in \
-   fundamental coordinates. The third argument gives the parabolic subalgebra with respect to which we induce. \
-   The last argument gives the parabolic subalgebra with respect to whose Levi part we decompose.",
-   "DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))");
+   "Decomposes the inducing module of a generalized \
+    Verma module over the Levi part of a parabolic \
+    smaller than the inducing one.\
+    The first argument gives the type of the algebra. \
+    The second argument gives the highest weight of the module in \
+    fundamental coordinates. The third argument gives \
+    the parabolic subalgebra with respect to which we induce. \
+    The last argument gives the parabolic subalgebra with \
+    respect to whose Levi part we decompose.",
+   "DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))",
+   true, false,
+   "CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart",
+   "DecomposeInducingRepGenVermaModule");
   this->AddOperationInnerHandler
   ("Casimir", Calculator::innerCasimir, "",
    "Gives the Casimir element. ",
-   "Casimir{}(G_2)", true, false, "Calculator::innerCasimir", "Casimir");
+   "Casimir{}(G_2)", true, false,
+   "Calculator::innerCasimir", "Casimir");
    this->AddOperationInnerHandler
   ("CasimirWRTLevi", CalculatorFunctionsGeneral::innerCasimirWRTlevi, "",
-   "Gives the Casimir element of a Levi part of a parabolic subalgebra. First argument = ambient Lie algebra. \
-   Second argument \
-   = parabolic selection =1 stands for simple root outside of the Levi component, 0 stands for simple root of the Levi component.",
-   "CasimirWRTLevi{}(B_3, (1,0,0))");
+   "Gives the Casimir element of a Levi part of \
+    a parabolic subalgebra. First argument = ambient Lie algebra. \
+    Second argument \
+    = parabolic selection =1 stands for simple root \
+    outside of the Levi component, 0 stands for \
+    simple root of the Levi component.",
+   "CasimirWRTLevi{}(B_3, (1,0,0))",
+   true, false,
+   "CalculatorFunctionsGeneral::innerCasimirWRTlevi",
+   "CasimirWRTLevi");
   this->AddOperationInnerHandler
-  ("hmmG2inB3", this->innerEmbedG2inB3, "",
-   "Embeds elements of the Universal enveloping of G_2 in B_3, following an embedding found in a paper by McGovern.",
-   "g_{{a}}=getChevalleyGenerator{} (G_2, a); hmmG2inB3{}(g_1);\nhmmG2inB3{}(g_2) ");
+  ("HmmG2inB3", Calculator::innerEmbedG2inB3, "",
+   "Embeds elements of the Universal enveloping \
+    of G_2 in B_3, following an embedding found \
+    in a paper by McGovern.",
+   "g_{{a}}=GetChevalleyGenerator{} (G_2, a); HmmG2inB3{}(g_1);\nHmmG2inB3{}(g_2) ",
+   true, false,
+   "Calculator::innerEmbedG2inB3",
+   "HmmG2inB3");
   this->AddOperationInnerHandler
-  ("drawRootSystem", CalculatorFunctionsGeneral::innerDrawRootSystem, "",
-   "Draws the root system of a semisimple Lie algebra. Takes one or three arguments: \
-    if one argument is provided, that must be a semisimple Lie algebra or a semisimple Lie algebra \
-    type; if three arguments are provided, the first must be a semisimple Lie algebra or a semisimple \
-    Lie algebra type, and the second and third argument must be two rational vectors of dimension\
+  ("DrawRootSystem", CalculatorFunctionsGeneral::innerDrawRootSystem, "",
+   "Draws the root system of a semisimple Lie algebra. \
+    Takes one or three arguments: \
+    if one argument is provided, that must be a semisimple Lie algebra or \
+    a semisimple Lie algebra \
+    type; if three arguments are provided, the first must be a semisimple \
+    Lie algebra or a semisimple \
+    Lie algebra type, and the second and third argument must be two \
+    rational vectors of dimension\
     equal to the rank of the semisimple Lie algebra. \
     The root system is drawn in a Coxeter plane.\
-    If the extra two vectors are given, they are used to initialize a preferred projection plane\
-    in the change-to-basis entries below the graphics. Clicking the obvious button creates a basis \
+    If the extra two vectors are given, they are used to initialize\
+    a preferred projection plane\
+    in the change-to-basis entries below the graphics. \
+    Clicking the obvious button creates a basis \
     change animations ideal for presentations.",
-   "drawRootSystem{}(A_7, (1, 0 , 2, 2, 2, 0, 1), (1, 3, 2, 2, 2, 3, 1));");
+   "DrawRootSystem{}(A_7, (1, 0 , 2, 2, 2, 0, 1), (1, 3, 2, 2, 2, 3, 1));",
+   true, false,
+   "CalculatorFunctionsGeneral::innerDrawRootSystem",
+   "DrawRootSystem");
   this->AddOperationInnerHandler
-  ("drawWeightSupportWithMults", CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults, "",
-   "Draws the weight support of an irreducible finite-dimensional highest weight module. \
-   The first argument gives the type and the second gives the highest weight given in \
-   fundamental weight basis. \
-   The maximum number of drawn weights allowed is (hard-code) limited to 10 000. If \
-   the number of weights in the weight support exceeds this number, only the first 10 000 weights will be drawn. \
-   <b> Warning. Drawing text (i.e. multiplicities) \
-   is very javascript-processor-intensive. Use only for *small* examples, else you might hang your browser. </b>",
-   "drawWeightSupportWithMults{}(B_3,(0,1,1));\n drawWeightSupportWithMults{}(G_2,(1,0))");
+  ("DrawWeightSupportWithMults", CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults, "",
+   "Draws the weight support of an irreducible \
+    finite-dimensional highest weight module. \
+    The first argument gives the type and the second\
+    gives the highest weight given in \
+    fundamental weight basis. \
+    The maximum number of drawn weights allowed is \
+    (hard-code) limited to 10 000. If \
+    the number of weights in the weight support exceeds this number, \
+    only the first 10 000 weights will be drawn. \
+    <b> Warning. Drawing text (i.e. multiplicities) \
+    is very javascript-processor-intensive. \
+    Use only for *small* examples, \
+    else you might hang your browser. </b>",
+   "DrawWeightSupportWithMults{}(B_3,(0,1,1));\n DrawWeightSupportWithMults{}(G_2,(1,0))",
+   true, false,
+   "CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults",
+   "DrawWeightSupportWithMults");
   this->AddOperationInnerHandler
-  ("drawWeightSupport", CalculatorFunctionsGeneral::innerDrawWeightSupport, "",
-   "Same as drawWeightSupportWithMults but displays no multiplicities. Same warning for hanging up your browser \
+  ("DrawWeightSupport",
+   CalculatorFunctionsGeneral::innerDrawWeightSupport, "",
+   "Same as DrawWeightSupportWithMults but displays no multiplicities. \
+    Same warning for hanging up your browser \
     with javascript holds.",
-   "drawWeightSupport{}(B_3,(1,1,1)); drawWeightSupport{}(G_2,(1,2))");
+   "DrawWeightSupport{}(B_3,(1,1,1)); DrawWeightSupport{}(G_2,(1,2))",
+   true, false,
+   "CalculatorFunctionsGeneral::innerDrawWeightSupport",
+   "DrawWeightSupport"
+   );
   this->AddOperationInnerHandler
-  ("SplitFDpartB3overG2CharsOnly", this->innerSplitFDpartB3overG2CharsOnly, "",
-   "Splits the finite dimensional part of the inducing module of the generalized Verma module of\
+  ("SplitFDpartB3overG2CharsOnly", Calculator::innerSplitFDpartB3overG2CharsOnly, "",
+   "Splits the finite dimensional part of the inducing module of the \
+    generalized Verma module of\
     B_3(so(7)) into G_2-components. \
-   The argument is gives the highest weight of the generalized Verma module in fundamental \
-   coordinates with respect to so(7). \
-   The arguments which are not small integers indicate the non-selected roots of the inducing parabolic\
+    The argument is gives the highest weight of the generalized \
+    Verma module in fundamental \
+    coordinates with respect to so(7). \
+    The arguments which are not small integers indicate the non-selected \
+    roots of the inducing parabolic\
     subalgebra of B_3. ",
-   "SplitFDpartB3overG2CharsOnly{}(x_1,2,0)");
+   "SplitFDpartB3overG2CharsOnly{}(x_1,2,0)", true, false,
+   "Calculator::innerSplitFDpartB3overG2CharsOnly",
+   "SplitFDpartB3overG2CharsOnly");
   this->AddOperationInnerHandler
   ("SplitFDpartB3overG2", CalculatorFunctionsGeneral::innerSplitFDpartB3overG2, "",
    "Splits the finite dimensional part of the inducing module of the generalized Verma module of \
@@ -1860,53 +2003,78 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "WriteGenVermaAsDiffOperatorsUpToWeightLevel{}(B_3, 1, (0, 0, y)); ");
   this->AddOperationInnerHandler
   ("MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder",
-   this->innerWriteGenVermaModAsDiffOperatorsGeneratorOrder, "",
+   Calculator::innerWriteGenVermaModAsDiffOperatorsGeneratorOrder, "",
    "Constructs a parabolically induced map from a semisimple Lie algebra \
-   to a Weyl algebra with matrix coefficients. More precisely, this function constructs a \
-   generalized Verma module and writes it using differential operators with matrix coefficients. \
-   The first argument gives the type of the semisimple Lie algebra, the second argument \
-   gives the highest weight in fundamental coordinates. The third argument gives the\
-   parabolic subalgebra selection with 0 standing for non-crossed out roots and 1 for \
-   crossed-out roots. In all non crossed-out root positions, \
-   the coordinates of the highest weight \
-   vector must be small integers (because the highest\
-   weight must be dominant and integral with respect to the Levi part of the inducing parabolic\
-   subalgebra). In the crossed-out root positions, the coordinates of the highest weight vector\
-   can be arbitrary polynomial expressions. \
-   The algorithm depends on an order chosen on the Chevalley-Weyl generators of the nilradical.\
-   Here, we sort the nilradical elements in descending order relative to the order of their roots.\
-   In addition to the first 3 arguments, this function\
-   accepts further optional arguments, customizing the notation of the final printout.",
-   "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ", true, false);
+    to a Weyl algebra with matrix coefficients. \
+    More precisely, this function constructs a \
+    generalized Verma module and writes it using \
+    differential operators with matrix coefficients. \
+    The first argument gives the type of the \
+    semisimple Lie algebra, the second argument \
+    gives the highest weight in fundamental coordinates.\
+    The third argument gives the\
+    parabolic subalgebra selection with 0 standing for non-crossed out roots and 1 for \
+    crossed-out roots. In all non crossed-out root positions, \
+    the coordinates of the highest weight \
+    vector must be small integers (because the highest\
+    weight must be dominant and integral with respect \
+    to the Levi part of the inducing parabolic\
+    subalgebra). In the crossed-out root positions,\
+    the coordinates of the highest weight vector\
+    can be arbitrary polynomial expressions. \
+    The algorithm depends on an order chosen on \
+    the Chevalley-Weyl generators of the nilradical.\
+    Here, we sort the nilradical elements in descending \
+    order relative to the order of their roots.\
+    In addition to the first 3 arguments, this function\
+    accepts further optional arguments, customizing the notation of the final printout.",
+   "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
+   true, false,
+   "Calculator::innerWriteGenVermaModAsDiffOperatorsGeneratorOrder",
+   "MapSemisimpleLieAlgebraInWeylAlgebraGeneratorOrder");
   this->AddOperationInnerHandler
-  ("MapSemisimpleLieAlgebraInWeylAlgebra", this->innerWriteGenVermaModAsDiffOperatorsNilOrderDescending, "",
-   "Same as MapSemisimpleLieAlgebraInWeylAlgebra, but with a different order on the elements of the nilradical. \
-   We sort the elements of the nilradical as follows. Consider the partial order given \
-   by the graded lex order on the coordinates that correspond to crossed-out roots. Then extend this partial order \
-   by ``breaking the ties'' via the graded lexicographic order on the non-crossed out roots. This extension we call\
-   the nil-order. Now this function sorts the elements of the nilradical in descending nil-order, that is, \
-   elements with higher nil-order come first.",
-   "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ", true, false);
+  ("MapSemisimpleLieAlgebraInWeylAlgebra",
+    Calculator::innerWriteGenVermaModAsDiffOperatorsNilOrderDescending, "",
+   "Same as MapSemisimpleLieAlgebraInWeylAlgebra, but with a \
+    different order on the elements of the nilradical. \
+    We sort the elements of the nilradical as follows. \
+    Consider the partial order given \
+    by the graded lex order on the coordinates that \
+    correspond to crossed-out roots. Then extend this partial order \
+    by ``breaking the ties'' via the graded \
+    lexicographic order on the non-crossed out roots.\
+    This extension we call\
+    the nil-order. Now this function sorts the \
+    elements of the nilradical in descending nil-order, that is, \
+    elements with higher nil-order come first.",
+   "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
+   true, false,
+   "Calculator::innerWriteGenVermaModAsDiffOperatorsNilOrderDescending",
+   "MapSemisimpleLieAlgebraInWeylAlgebra");
   this->AddOperationInnerHandler
-  ("MapSemisimpleLieAlgebraInWeylAlgebraAllGens", this->innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending, "",
+  ("MapSemisimpleLieAlgebraInWeylAlgebraAllGens",
+    Calculator::innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending, "",
    "Constructs a parabolically induced map from a semisimple Lie algebra \
-   to a Weyl algebra with matrix coefficients. More precisely, this function constructs a \
-   generalized Verma module and writes it using differential operators with matrix coefficients. \
-   The first argument gives the type of the semisimple Lie algebra, the second argument \
-   gives the highest weight in fundamental coordinates. The third argument gives the\
-   parabolic subalgebra selection with 0 standing for non-crossed out roots and 1 for \
-   crossed-out roots. In all non crossed-out root positions, \
-   the coordinates of the highest weight \
-   vector must be small integers (because the highest\
-   weight must be dominant and integral with respect to the Levi part of the inducing parabolic\
-   subalgebra). In the crossed-out root positions, the coordinates of the highest weight vector\
-   can be arbitrary polynomial expressions. In addition to the first 3 arguments, this function\
-   accepts further optional arguments, customizing the notation of the final printout.\
-   The differential operator part of the algorithm uses the nil-order given by the function \
-   MapSemisimpleLieAlgebraInWeylAlgebra.",
-   "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ", true, false);
+    to a Weyl algebra with matrix coefficients. More precisely, this function constructs a \
+    generalized Verma module and writes it using differential operators with matrix coefficients. \
+    The first argument gives the type of the semisimple Lie algebra, the second argument \
+    gives the highest weight in fundamental coordinates. The third argument gives the\
+    parabolic subalgebra selection with 0 standing for non-crossed out roots and 1 for \
+    crossed-out roots. In all non crossed-out root positions, \
+    the coordinates of the highest weight \
+    vector must be small integers (because the highest\
+    weight must be dominant and integral with respect to the Levi part of the inducing parabolic\
+    subalgebra). In the crossed-out root positions, the coordinates of the highest weight vector\
+    can be arbitrary polynomial expressions. In addition to the first 3 arguments, this function\
+    accepts further optional arguments, customizing the notation of the final printout.\
+    The differential operator part of the algorithm uses the nil-order given by the function \
+    MapSemisimpleLieAlgebraInWeylAlgebra.",
+   "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ",
+   true, false,
+   "Calculator::innerWriteGenVermaModAsDiffOperatorsAllGensNilOrderDescending",
+   "MapSemisimpleLieAlgebraInWeylAlgebraAllGens");
   this->AddOperationInnerHandler
-  ("KLcoeffs", this->innerKLcoeffs, "",
+  ("KLcoeffs", Calculator::innerKLcoeffs, "",
    "Computes the n by n tables of 1) Kazhdan-Lusztig polynomials, 2) R polynomials and 3) Kazhdan-Lusztig \
    polynomials evaluated at one, where n<=192  is the size of the Weyl group (i.e. no larger than D_4(so(8)).\
    The notation follows the original paper by Kazhdan and Lusztig, \"\
@@ -1918,12 +2086,18 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    (our simple implementation stores the full table of R-polynomials and KL-polynomials in RAM memory at \
    all times, unlike\
    the other more efficient implementations).",
-   "KLcoeffs{}(B_3)");
+   "KLcoeffs{}(B_3)", true, false,
+   "Calculator::innerKLcoeffs",
+   "KLcoeffs");
   this->AddOperationInnerHandler
-  ("RootSubsystem", this->innerRootSubsystem, "",
-   "Generates a root subsystem of a simple type. First argument indicates simple type, second, third,... arguments \
-   give the generating roots. ",
-   "RootSubsystem(F_4, (0,1,0,0), (0,0,1,0), (1,1,2,2))");
+  ("RootSubsystem", Calculator::innerRootSubsystem, "",
+   "Generates a root subsystem of a simple type. \
+    First argument indicates simple type, second, third,... arguments \
+    give the generating roots. ",
+   "RootSubsystem(F_4, (0,1,0,0), (0,0,1,0), (1,1,2,2))",
+   true, false,
+   "Calculator::innerRootSubsystem",
+   "RootSubsystem");
 
   this->AddOperationInnerHandler
   ("printRootSubalgebras", CalculatorFunctionsGeneral::innerPrintRootSAs, "",
@@ -1961,10 +2135,10 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    function up to E_6 but LaTeX crashes trying to process the output. </b>",
    "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))");
   this->AddOperationInnerHandler
-  ("fTestMonomialBasisConjecture", this->innerTestMonomialBaseConjecture, "",
+  ("TestMonomialBasisConjecture", this->innerTestMonomialBaseConjecture, "",
    "Tests the monomial basis conjecture from the Jackson-Milev paper. First argument gives rank bound. \
     Second argument gives dimension bound. ",
-   "fTestMonomialBasisConjecture{}(2, 50)");
+   "TestMonomialBasisConjecture{}(2, 50)");
 /*  this->AddOperationInnerHandler
   ("DecomposeCharGenVermaToIrreps", & this->fDecomposeCharGenVerma, "",
    "<b>This is an experiment; I have no mathematical proof that this function works. \
@@ -2043,7 +2217,7 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "Calculator::innerReverseOrderRecursively", "ReverseRecursively");
 
   this->AddOperationInnerHandler
-  ("solveFor", CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT, "",
+  ("SolveFor", CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT, "",
    "Tries to solve a polynomial equation with respect to a variable. \
     The first argument gives the variable expression\
     (arbitrary expressions allowed) and\
@@ -2055,9 +2229,9 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
     The solutions of the equation are returned in a list (empty list for no solution). \
     Solutions with multiplicity higher than one are repeated. \
     ",
-   "solveFor(x, a x^2+b x +c); solveFor(x, a x +b)", true, false,
+   "SolveFor(x, a x^2+b x +c); SolveFor(x, a x +b)", true, false,
    "CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT",
-   "solveFor");
+   "SolveFor");
 
   this->AddOperationInnerHandler
   ("FindOneSolutionSerreLikePolynomialSystem", CalculatorFunctionsGeneral::innerSolveSerreLikeSystemNoUpperLimit, "",
@@ -2278,10 +2452,10 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    " <b>This function is being developed and is not implemented fully yet. </b> \
    Loads an sl(2) subalgebra from expression. ",
    "SltwoSubalgebra(B_{3},g_  +(B)_{3}, -1)\\\\\
-    +3 ((getChevalleyGenerator, (B)_{3}, -2)), \
-    3 ((getChevalleyGenerator, (B)_{3}, 3))\\\\\
-    +6 ((getChevalleyGenerator, (B)_{3}, 1))\\\\\
-    +10/3 ((getChevalleyGenerator, (B)_{3}, 2)))", true, true)
+    +3 ((GetChevalleyGenerator, (B)_{3}, -2)), \
+    3 ((GetChevalleyGenerator, (B)_{3}, 3))\\\\\
+    +6 ((GetChevalleyGenerator, (B)_{3}, 1))\\\\\
+    +10/3 ((GetChevalleyGenerator, (B)_{3}, 2)))", true, true)
    ;
 //     this->AddOperationInnerHandler
 //  ("printAllPartitions", & this->innerPrintAllPartitions, "",
@@ -2320,7 +2494,7 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
   this->AddOperationInnerHandler
   ("Killing", this->innerKillingForm, "",
    "Computes the Killing form product of two elements of semisimple Lie algebra. ",
-   "h_{{i}}=getCartanGenerator{}(F_1, i);\
+   "h_{{i}}=GetCartanGenerator{}(F_1, i);\
     KF{}({{i}},{{j}})=Killing{}(h_i, h_j);\
     FunctionToMatrix(KF, 4, 4)", true, false)
    ;
@@ -2424,7 +2598,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
    "Superimposes two plots. ",
-   "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.1, 3.041592654)",
+   "Plot2D{}(sin{}(x), -5, 5)+ Plot2D{}(1/sin{}(x ), 0.1, 3.041592654)",
    true, false, "CalculatorFunctionsBinaryOps::innerAddPlotToPlot", "AddPlots");//must come before outer plus.
   this->AddOperationOuterHandler
   ("+", Calculator::outerPlus, "",
@@ -2449,7 +2623,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
    "Adds two elements of tensor products of generalized Verma modules. ",
-   "v=hwv{}(G_2, (1,0),(0,0));\
+   "v=HeighestWeightVector{}(G_2, (1,0),(0,0));\
    \n(3/4 v)\\otimes v-3/4 (v\\otimes v)", true, false, "CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly, this->opRational(), this->opPoly(),
@@ -2558,7 +2732,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddUEToAny, this->opElementUEoverRF(), this->opElementUEoverRF(),
    "Adds an element of UE (Universal Enveloping algebra) to an element of UE.",
-   " g_{{{i}}}=getChevalleyGenerator{}(F_{1}, {{i}});\nh_{{{i}}}=getCartanGenerator{}(F_{1}, {{i}});\n\
+   " g_{{{i}}}=GetChevalleyGenerator{}(F_{1}, {{i}});\nh_{{{i}}}=GetCartanGenerator{}(F_{1}, {{i}});\n\
    [g_{22}+g_{20}+g_{14},g_{-14}+g_{-20}+g_{-22}]"
    , true, false, "CalculatorFunctionsBinaryOps::innerAddUEToAny");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -2612,7 +2786,7 @@ void Calculator::initPredefinedStandardOperations()
 //  this->AddOperationOuterHandler
 ////  ("*", Calculator::outerTimesToFunctionApplication, "",
 //   "On condition that F is a built-int function name or built-in operation, replaces F*x with F{}x.",
-//   "plot2D(\\sin{}x+cos{}x, 0, 5) ", true, false, "Calculator::outerTimesToFunctionApplication");
+//   "Plot2D(\\sin{}x+cos{}x, 0, 5) ", true, false, "Calculator::outerTimesToFunctionApplication");
   this->AddOperationInnerHandler
   ("*", CalculatorFunctionsGeneral::innerInterpretAsDifferential, "",
    "If circumstances imply it, interprets an atom of the form dx as the differential \\diff x. ",
@@ -2902,12 +3076,12 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE, this->opRational(), this->opElementUEoverRF(),
    "Multiplies rational number by an element universal enveloping algebra.",
-   "g_{{i}}= getChevalleyGenerator{}(F_1, i); h_{{i}}=getCartanGenerator{}(F_1, i) ; \
+   "g_{{i}}= GetChevalleyGenerator{}(F_1, i); h_{{i}}=GetCartanGenerator{}(F_1, i) ; \
    \n[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE, this->opElementUEoverRF(), this->opElementUEoverRF(),
    "Multiplies elment Universal enveloping by element universal enveloping algebra.",
-   "g_{{i}}= getChevalleyGenerator{}(F_1, i); h_{{i}}=getCartanGenerator{}(F_1, i) ; \
+   "g_{{i}}= GetChevalleyGenerator{}(F_1, i); h_{{i}}=GetCartanGenerator{}(F_1, i) ; \
    \n[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE");
 
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -2921,8 +3095,8 @@ void Calculator::initPredefinedStandardOperations()
    "Handles multiplying rational number by an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
-   "X=G_2;\ng_{{i}}=getChevalleyGenerator{}(X,i);\nh_{{i}}=getCartanGenerator{}(X, i);  \
-   \nv=hwv{}(G_2, (1,0),(0,0));\
+   "X=G_2;\ng_{{i}}=GetChevalleyGenerator{}(X,i);\nh_{{i}}=GetCartanGenerator{}(X, i);  \
+   \nv=HeighestWeightVector{}(G_2, (1,0),(0,0));\
    \n2/5 v;\n(3/4 v)\\otimes v;\n3/4 (v\\otimes v);\n(3/4 v)\\otimes v-3/4 (v\\otimes v)", true,
    false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
 
@@ -2931,25 +3105,25 @@ void Calculator::initPredefinedStandardOperations()
    "Handles multiplying polynomial by an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
-   "X=G_2;\ng_{{i}}=getChevalleyGenerator{}(X,i);\nh_{{i}}=getCartanGenerator{}(X, i);  \
+   "X=G_2;\ng_{{i}}=GetChevalleyGenerator{}(X,i);\nh_{{i}}=GetCartanGenerator{}(X, i);  \
    \nz=Polynomial{}y;\
-   \nv=hwv{}(G_2, (z,1),(1,0));\
+   \nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
    \n(2*z) v;\n", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor, this->opRationalFunction(), this->opElementTensorGVM(),
    "Handles multiplying rational function number by an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
-   "X=G_2;\ng_{{i}}=getChevalleyGenerator{}(X,i);\nh_{{i}}=getCartanGenerator{}(X, i);  \
-   \nz=Polynomial{}y;\nv=hwv{}(G_2, (z,1),(1,0));\
+   "X=G_2;\ng_{{i}}=GetChevalleyGenerator{}(X,i);\nh_{{i}}=GetCartanGenerator{}(X, i);  \
+   \nz=Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
    \n1/z v", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor, this->opElementUEoverRF(), this->opElementTensorGVM(),
    "Handles acting by element Universal enveloping on an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
-   "X=G_2;\ng_{{i}}=getChevalleyGenerator{}(X,i);\nh_{{i}}=getCartanGenerator{}(X, i);  \
-   \nz=Polynomial{}y;\nv=hwv{}(G_2, (z,1),(1,0));\
+   "X=G_2;\ng_{{i}}=GetChevalleyGenerator{}(X,i);\nh_{{i}}=GetCartanGenerator{}(X, i);  \
+   \nz=Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
    \n h_1 v; \nh_2 v;\n g_1 g_{-1} v ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence, this->opRational(), this->opSequence(),
@@ -3211,7 +3385,7 @@ void Calculator::initPredefinedStandardOperations()
    "Raises element of universal enveloping to integer power. \
    If the exponent is non-positive integer but the element of the UE is \
    a single generator with coefficient 1, the exponent will be carried out formally. ",
-   "g_{{i}}= getChevalleyGenerator{}(G_2, i); h_{{i}}=getCartanGenerator{}(G_2, i) ;\
+   "g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}=GetCartanGenerator{}(G_2, i) ;\
     \n (g_1+g_2)^2+ g_1^{1/2}",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -3220,7 +3394,7 @@ void Calculator::initPredefinedStandardOperations()
    "Provided that an element of Universal Enveloping algebra is \
    a single generator (raised to arbitrary formal polynomial power) with coefficient 1,\
    raises (formally) the element of the UE to arbitrary polynomial power. ",
-   "g_{{i}}= getChevalleyGenerator{}(G_2, i); h_{{i}}=getCartanGenerator{}(G_2, i) ;\
+   "g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}=GetCartanGenerator{}(G_2, i) ;\
     \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF",
@@ -3231,7 +3405,7 @@ void Calculator::initPredefinedStandardOperations()
    "Provided that an element of Universal Enveloping algebra is \
    a single generator (raised to arbitrary formal RF power) with coefficient 1,\
    raises (formally) the element of the UE to arbitrary RF power. ",
-   "g_{{i}}= getChevalleyGenerator{}(G_2, i); h_{{i}}=getCartanGenerator{}(G_2, i) ;\
+   "g_{{i}}= GetChevalleyGenerator{}(G_2, i); h_{{i}}=GetCartanGenerator{}(G_2, i) ;\
     \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF",
@@ -3270,8 +3444,8 @@ void Calculator::initPredefinedStandardOperations()
    "Tensor product of two generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
-   "X=G_2;\ng_{{i}}=getChevalleyGenerator{}(X,i);\nh_{{i}}=getCartanGenerator{}(X, i);  \
-   \nz=Polynomial{}y;\nv=hwv{}(G_2, (z,1),(1,0));\
+   "X=G_2;\ng_{{i}}=GetChevalleyGenerator{}(X,i);\nh_{{i}}=GetCartanGenerator{}(X, i);  \
+   \nz=Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
    \ng_{-1}(v\\otimes v);\
    \ng_{-1}g_{-1}(v\\otimes v)", true);
   this->AddOperationInnerHandler
@@ -3281,7 +3455,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationInnerHandler
   ("[]", CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE, "",
    "Lie bracket of elements of semisimple Lie algebra. ",
-   "X=A_1;\ng_{{i}}=getChevalleyGenerator{}(X,i);\nh_{{i}}=getCartanGenerator{}(X,i);\n[g_1,g_{-1}] ", true);
+   "X=A_1;\ng_{{i}}=GetChevalleyGenerator{}(X,i);\nh_{{i}}=GetCartanGenerator{}(X,i);\n[g_1,g_{-1}] ", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", CalculatorFunctionsWeylGroup::innerTensorWeylReps,
@@ -3310,8 +3484,8 @@ void Calculator::initPredefinedStandardOperations()
    "Please do note use (or use at your own risk): this is work-in-progress. \
    Will be documented when implemented and tested. Tensor product of \
    generalized Verma modules. ",
-   "X=G_2;\ng_{{i}}=getChevalleyGenerator{}(X,i);\nh_{{i}}=getCartanGenerator{}(X,i);  \
-   \nv=hwv{}(X, (1,0),(0,0));\
+   "X=G_2;\ng_{{i}}=GetChevalleyGenerator{}(X,i);\nh_{{i}}=GetCartanGenerator{}(X,i);  \
+   \nv=HeighestWeightVector{}(X, (1,0),(0,0));\
    \ng_{-1}(v\\otimes v);\
    \ng_{-1}g_{-1}(v\\otimes v); ", true);
   this->AddOperationOuterHandler
@@ -3539,8 +3713,8 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
 void Calculator::initAtomsNonCacheable()
 { MacroRegisterFunctionWithName("Calculator::initAtomsNonCacheable");
   this->atomsThatMustNotBeCached.SetExpectedSize(30);
-  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("randomInteger");
-  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("selectAtRandom");
+  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("RandomInteger");
+  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("SelectAtRandom");
 //  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("PrintRuleStack");
 }
 
@@ -3635,7 +3809,7 @@ void Calculator::initOperationsThatAreKnownFunctions()
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arcsin");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\arccos");
   this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
-  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("logBase");
+  this->knownFunctionsWithComplexRange.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogBase");
 }
 
 void Calculator::AddKnownDoubleConstant(const std::string& theConstantName, double theConstantValue)

@@ -158,6 +158,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("[]");
   this->AddOperationNoRepetitionAllowed("=:");
   this->AddOperationNoRepetitionAllowed("^");
+  this->AddOperationNoRepetitionAllowed("\\geq");
   this->AddOperationNoRepetitionAllowed(">");
   this->AddOperationNoRepetitionAllowed("<");
   this->AddOperationNoRepetitionAllowed("==");
@@ -1681,6 +1682,9 @@ bool Calculator::ApplyOneRule()
       (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData=impliedFunApplication;
     return true;
   }
+  if ((lastS==">" && secondToLastS=="=") ||
+      (lastS=="=" && secondToLastS==">"))
+    return this->ReplaceXXByCon(this->conGEQ());
   if (thirdToLastS=="|" && secondToLastS=="Expression" && lastS=="|")
     return this->ReplaceOEXByE();
   if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS==")")
@@ -1694,6 +1698,8 @@ bool Calculator::ApplyOneRule()
   if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
     return this->ReplaceEOEByE();
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="==" && fourthToLastS=="Expression")
+    return this->ReplaceEOEXByEX();
+  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="\\geq" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS==">" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();

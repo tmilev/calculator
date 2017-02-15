@@ -1278,6 +1278,9 @@ public:
   int conDefineConditional()
   { return this->controlSequences.GetIndexIMustContainTheObject("if=");
   }
+  int conGEQ()
+  { return this->controlSequences.GetIndexIMustContainTheObject("\\geq");
+  }
   int conComma()
   { return this->controlSequences.GetIndexIMustContainTheObject(",");
   }
@@ -1373,6 +1376,9 @@ public:
   }
   int opEqualEqual()
   { return this->theAtoms.GetIndexIMustContainTheObject("==");
+  }
+  int opGreaterThanOrEqualTo()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\geq");
   }
   int opGreaterThan()
   { return this->theAtoms.GetIndexIMustContainTheObject(">");
@@ -1730,6 +1736,7 @@ public:
   static bool outerTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMinus(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGreaterThanOrEqualTo(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerGreaterThan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerLessThan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCombineFractions(Calculator& theCommands, const Expression& input, Expression& output);

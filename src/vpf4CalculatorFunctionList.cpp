@@ -1430,11 +1430,13 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "plotCurve(sin(12t),cos(13t), 0, 2\\pi); plotCurve(sin(12t),cos(13t), 0, 2\\pi, 300,300, blue, 2, 2000)", true, false, "CalculatorFunctionsGeneral::innerPlotParametricCurve",
    "PlotCurve")
    ;
-  this->AddOperationInnerHandler ("plotSegment", CalculatorFunctionsGeneral::innerPlotSegment, "",
+  this->AddOperationInnerHandler ("PlotSegment",
+    CalculatorFunctionsGeneral::innerPlotSegment, "",
    " Plots a segment connecting two points. \
    ",
-   "plotSegment( (1,2), (3,4))", true, false, "CalculatorFunctionsGeneral::innerPlotSegment",
-   "plotSegment")
+   "PlotSegment( (1,2), (3,4))", true, false,
+   "CalculatorFunctionsGeneral::innerPlotSegment",
+   "PlotSegment")
    ;
   this->AddOperationInnerHandler ("GetVariablesExcludeNamedConstants", CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants, "",
    "Gets the variables on which the expression depends. Excludes the named constants. Here, the word ``variables'' is to be thought of as \
@@ -1491,13 +1493,18 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "PlotLabel{}(1,1, \"(1,1)\")", true, false,
    "CalculatorFunctionsGeneral::innerPlotLabel", "PlotLabel")
    ;
-  this->AddOperationInnerHandler ("PlotViewRectangle", CalculatorFunctionsGeneral::innerPlotViewRectangle, "",
-   "Creates an empty plot whose sole purpose is to fix the view rectangle of another plot. \
-   To restrict/expand the view rectangle of another plot, simply add PlotViewRectangle to the other plot. \
-   Takes as input two pairs of numbers: first pair gives the lower left corner of the viewing rectangle, \
-   the second argument gives the upper right corner.\
+  this->AddOperationInnerHandler ("PlotViewRectangle",
+    CalculatorFunctionsGeneral::innerPlotViewRectangle, "",
+   "Creates an empty plot whose sole purpose is to fix \
+    the view rectangle of another plot. \
+    To restrict/expand the view rectangle of another plot, \
+    simply add PlotViewRectangle to the other plot. \
+    Takes as input two pairs of numbers: first pair gives the lower\
+    left corner of the viewing rectangle, \
+    the second argument gives the upper right corner.\
    ",
-   "Plot2D{}(1/x, -30, 30, 300, 300, \"red\") + PlotViewRectangle((-5,-5), (5,5))", true, false,
+   "Plot2D{}(1/x, -30, 30, 300, 300, \"red\") + PlotViewRectangle((-5,-5), (5,5))",
+   true, false,
    "CalculatorFunctionsGeneral::PlotViewRectangle", "PlotViewRectangle")
    ;
   this->AddOperationInnerHandler ("PlotWindow", CalculatorFunctionsGeneral::innerPlotViewWindow, "",

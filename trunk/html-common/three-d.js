@@ -294,7 +294,7 @@ function PointTwoD(inputLocation, inputColor)
 function SegmentTwoD(inputLeftPt, inputRightPt, inputColor)
 { this.leftPt=inputLeftPt;
   this.rightPt=inputRightPt;
-  this.color=inputColor;
+  this.color=colorToRGB(inputColor);
   this.type="segment";
   this.draw=function(theCanvas)
   { var theSurface=theCanvas.surface;
@@ -1610,8 +1610,8 @@ function testPicture(inputCanvas)
 function testPictureTwoD(inputCanvas)
 { var theCanvas=calculatorGetCanvasTwoD(document.getElementById(inputCanvas));
   theCanvas.init(inputCanvas);
-  theCanvas.drawLine([-1,0],[1,0], 'black');
-  theCanvas.drawLine([0,-1],[0,1], 'black');
+  theCanvas.drawLine([-1,0],[1,0], 'blue');
+  theCanvas.drawLine([0,-1],[0,1], 'blue');
 
   //console.log(theCanvas.theIIIdObjects.thePatches);
   theCanvas.redraw();

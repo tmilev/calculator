@@ -1190,7 +1190,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   out << "var theCanvas=calculatorGetCanvas(document.getElementById('"
   << canvasName
   << "'));\n"
-  << "theCanvas.init('" << canvasName << "');\n";
+  << "theCanvas.init('" << canvasName << "', false);\n";
   for (int i=0; i<this->the3dObjects.size; i++)
   { if (this->the3dObjects[i].thePlotType=="surface")
     { out

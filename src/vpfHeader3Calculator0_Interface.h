@@ -1522,7 +1522,7 @@ public:
   { return this->theAtoms.GetIndexIMustContainTheObject("i");
   }
   int opLogBase()
-  { return this->theAtoms.GetIndexIMustContainTheObject("logBase");
+  { return this->theAtoms.GetIndexIMustContainTheObject("LogBase");
   }
   int opLog()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\log");

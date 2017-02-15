@@ -377,7 +377,7 @@ std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType
   std::string theTitlePageFileNameNoPathSlowLoad= "SemisimpleSubalgebras_" + theType.ToString() + ".html";
   std::string theTitlePageFileNameNoPathFastLoad= "SemisimpleSubalgebras_FastLoad_" + theType.ToString() + ".html";
   out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=calculator&mainInput=printSemisimpleLieAlgebra%7B%7D"
+  << "?request=calculator&mainInput=PrintSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">"
   << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras())
@@ -403,7 +403,7 @@ std::string Calculator::ToStringLinksToCalculator(const DynkinType& theType, For
 { (void) theFormat;//avoid unused parameter warning, portable
   std::stringstream out;
   out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=calculator&mainInput=printSemisimpleLieAlgebra%7B%7D"
+  << "?request=calculator&mainInput=PrintSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras())
     out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=calculator&mainInput=printSemisimpleSubalgebras%7B%7D%28"
@@ -1190,7 +1190,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   out << "var theCanvas=calculatorGetCanvas(document.getElementById('"
   << canvasName
   << "'));\n"
-  << "theCanvas.init('" << canvasName << "', false);\n";
+  << "theCanvas.init('" << canvasName << "');\n";
   for (int i=0; i<this->the3dObjects.size; i++)
   { if (this->the3dObjects[i].thePlotType=="surface")
     { out

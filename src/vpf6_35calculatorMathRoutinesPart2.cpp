@@ -784,7 +784,7 @@ bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT");
   if (input.children.size!=3)
-    return theCommands << "solveFor takes as input three arguments. ";
+    return theCommands << "SolveFor takes as input three arguments. ";
   Expression thePowers;
   Expression modifiedInput=input;
   if (!modifiedInput[2].StartsWith(theCommands.opDefine()))

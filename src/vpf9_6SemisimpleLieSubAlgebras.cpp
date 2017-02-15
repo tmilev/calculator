@@ -4475,7 +4475,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
   std::stringstream out, outNotation, outNotationCommand;
   std::string fileName;
   std::fstream theFile;
-  outNotationCommand << "printSemisimpleLieAlgebra{}("
+  outNotationCommand << "PrintSemisimpleLieAlgebra{}("
   << this->GetOwnerWeyl().theDynkinType.ToString() << ")" ;
   outNotation << "Notation, structure constants and Weyl group info: "
   << CGI::GetCalculatorLink(theGlobalVariables.DisplayNameExecutable, outNotationCommand.str())

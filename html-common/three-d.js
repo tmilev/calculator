@@ -29,7 +29,8 @@ var firstCriticalRunTimeError="";
 var firstCanvas=undefined;
 
 function calculatorError(x)
-{ if (firstCriticalRunTimeError!="")
+{ console.log(x);
+  if (firstCriticalRunTimeError!="")
     return;  
   firstCriticalRunTimeError=x;
   if (firstCriticalRunTimeError!="" && firstCanvas!=undefined)
@@ -276,6 +277,246 @@ function calculatorResetCanvas(inputCanvas)
   }
 }
 
+function PointTwoD(inputLocation, inputColor)
+{ this.location=inputLocation;
+  this.color=colorToRGB(inputColor);
+  this.type="point";
+  this.draw=function(theCanvas)
+  { var theSurface=theCanvas.surface;
+    theSurface.beginPath();
+    theSurface.strokeStyle=colorRGBToString(this.color);
+    theSurface.fillStyle=colorRGBToString(this.color );
+    var theCoords=theCanvas.coordsMathToScreen(this.location);
+    theSurface.arc(theCoords[0], theCoords[1],3, 0, Math.PI*2);
+    theSurface.fill();
+  }
+}
+function SegmentTwoD(inputLeftPt, inputRightPt, inputColor)
+{ this.leftPt=inputLeftPt;
+  this.rightPt=inputRightPt;
+  this.color=inputColor;
+  this.type="segment";
+  this.draw=function(theCanvas)
+  { var theSurface=theCanvas.surface;
+    theSurface.beginPath();
+    theSurface.strokeStyle=colorRGBToString(this.color);
+    theSurface.fillStyle=colorRGBToString(this.color);
+    var theCoords=theCanvas.coordsMathToScreen(this.leftPt);
+    theSurface.moveTo(theCoords[0], theCoords[1]);
+    theCoords=theCanvas.coordsMathToScreen(this.rightPt);
+    theSurface.lineTo(theCoords[0], theCoords[1]);
+    theSurface.stroke();
+  }
+}
+
+function CanvasTwoD(inputCanvas)
+{ this.canvasResetFunction=null;
+
+  this.theObjects=[];
+  this.thePatchOrder=[];
+  this.numAccountedPatches=0;
+  this.numCyclicallyOverlappingPatchTieBreaks=0;
+  this.numContourPoints= 0;
+  this.numContourPaths= 0;
+  this.patchIsAccounted= [];
+  this.surface= null;
+  this.canvasContainer= null;
+  this.canvasId= null;
+  this.screenBasisUser= [[2,1,0],[0,1,1]];
+  this.screenNormal= [];
+  this.screenBasisOrthonormal= [];
+  this.zBufferColCount= 20;
+  this.zBufferRowCount= 20;
+  this.zBuffer= [];
+  this.zBufferIndexStrip=[];
+  this.bufferDeltaX= 0;
+  this.bufferDeltaY= 0;
+  this.colorDepthFactor= 0.4;
+  this.boundingBoxMathScreen= [[-0.01, -0.01], [0.01, 0.01]];
+  this.boundingBoxMath= [[-0.01,-0.01,-0.01],[0.01,0.01,0.01]];
+  this.boundingSegmentZ= [-0.01,0.01];
+  this.width= inputCanvas.width;
+  this.height= inputCanvas.height;
+  this.centerX= inputCanvas.width/2;
+  this.centerY= inputCanvas.height/2;
+  this.scale= 50;
+  this.mousePosition= [];
+  this.clickedPosition= [];
+  this.unitRay= [];
+  this.rayComponent= [];
+  this.positionDelta= [];
+  this.spanMessages= undefined;
+  this.textMouseInfo= "";
+  this.textProjectionInfo= "";
+  this.textPatchInfo= "";
+  this.textErrors= "";
+  this.textPerformance= "";
+  this.angleNormal= 0;
+  this.oldAngleNormal= 0;
+  this.newAngleNormal= 0;
+  this.anglePolar= 0;
+  this.selectedElement= "";
+  this.selectedVector= [];
+  this.selectedScreenBasis= [];
+  this.selectedScreenProjectionNormalized= [];
+  this.selectedScreenNormal= [];
+  this.selectedPolarAngleChange= 0;
+  this.redrawStart= 0;
+  this.redrawFinish= 0;
+  this.redrawTime= 0;
+  this.defaultNumSegmentsPerContour= 10;
+  this.flagRoundContours= false;
+  this.flagRoundPatches= true;
+  this.drawPoint= function (inputPoint, inputColor)
+  { this.theObjects.push(new PointTwoD(inputPoint, inputColor));
+  };
+  this.drawLine= function (inputLeftPt, inputRightPt, inputColor)
+  { var newLine=new SegmentTwoD(inputLeftPt, inputRightPt, inputColor);
+    this.theObjects.push(newLine);
+  };
+  this.computeBoundingBoxAccountPoint= function(input)
+  { var theV=this.coordsMathToMathScreen(input);
+    for (var i=0; i<2; i++)
+      if (theV[i]<this.boundingBoxMathScreen[0][i])
+        this.boundingBoxMathScreen[0][i]=theV[i];
+    for (i=0; i<2; i++)
+      if (theV[i]>this.boundingBoxMathScreen[1][i])
+        this.boundingBoxMathScreen[1][i]=theV[i];
+    for (i=0; i<2; i++)
+      if (input[i]<this.boundingBoxMath[0][i])
+        this.boundingBoxMath[0][i]=input[i];
+    for (i=0; i<2; i++)
+      if (input[i]>this.boundingBoxMath[1][i])
+        this.boundingBoxMath[1][i]=input[i];
+  };
+  this.computeBoundingBox= function()
+  { for (i=0; i<this.theObjects.length; i++)
+    { var currentO=this.theObjects[i];
+      if (currentO.type==="point")
+        this.computeBoundingBoxAccountPoint(currentO.location);
+      else if (currentO.type==="segment")
+      { this.computeBoundingBoxAccountPoint(currentO.leftPt);
+        this.computeBoundingBoxAccountPoint(currentO.rightPt);
+      } else
+        calculatorError("Bad 2D object"+currentO);
+    }
+  };
+  this.redraw= function()
+  { this.textPerformance="";
+    this.redrawStart=new Date().getTime();
+    var theSurface=this.surface;
+    theSurface.clearRect(0, 0, this.width, this.height);
+    for (var i=0; i<this.theObjects.length; i++)
+      this.theObjects[i].draw(this);
+    var redrawTime=new Date().getTime();
+    this.textPerformance=
+    "Redraw time (ms): " + (redrawTime-this.redrawStart);
+    this.showMessages();
+  };
+  this.computeBasis= function ()
+  { //if (this.screenBasisOrthonormal.length<2)
+    //  this.screenBasisOrthonormal.length=2;
+    this.screenBasisOrthonormal[0]=[1,0];
+    this.screenBasisOrthonormal[1]=[0,1];
+    this.textProjectionInfo="";
+    this.textProjectionInfo+=
+    "<br>e1: " + this.screenBasisOrthonormal[0]+
+    "<br>e2: " + this.screenBasisOrthonormal[1];
+  };
+  this.init= function(inputCanvasId)
+  { this.canvasId=inputCanvasId;
+    this.canvasContainer= document.getElementById(inputCanvasId);
+    this.surface=this.canvasContainer.getContext("2d");
+    this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
+    this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
+    this.spanMessages=document.getElementById(this.canvasId+"Messages");
+    this.spanCriticalErrors=document.getElementById(this.canvasId+"CriticalErrors");
+    this.computeBasis();
+  };
+  this.coordsMathScreenToMath= function(theCoords)
+  { var output=this.screenBasisOrthonormal[0].slice();
+    vectorTimesScalar(output, theCoords[0]);
+    vectorAddVectorTimesScalar(output, this.screenBasisOrthonormal[1], theCoords[1]);
+    return output;
+  };
+  this.coordsMathToMathScreen=function(vector)
+  { return [vectorScalarVector(vector, this.screenBasisOrthonormal[0]),
+            vectorScalarVector(vector, this.screenBasisOrthonormal[1])];
+  };
+  this.coordsMathToScreen= function(vector)
+  { return [this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[0])+this.centerX,
+       (-1)*this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[1])+this.centerY];
+  };
+  this.getPosXPosY= function (cx, cy)
+  { return getPosXPosYObject(this, cx, cy);
+  };
+  this.coordsScreenToMathScreen= function(screenX, screenY)
+  { var xyScreen= getPosXPosYObject(this.canvasContainer, screenX, screenY);
+    return [ (xyScreen[0]-this.centerX)/this.scale, (this.centerY-xyScreen[1])/this.scale];
+  };
+  this.coordsMathScreenToScreen= function(theCoords)
+  { return [this.scale*theCoords[0]+this.centerX, this.centerY-this.scale*theCoords[1]];
+  };
+  this.mouseMove=function(screenX, screenY)
+  { if (this.selectedElement==="")
+      return;
+    this.mousePosition=this.coordsScreenToMathScreen(screenX, screenY);
+    if (this.selectedElement==="origin")
+      this.panAfterCursor();
+    this.redrawFinish=new Date().getTime();
+    this.redrawTime=this.redrawFinish-this.redrawStart;
+  };
+  this.panAfterCursor= function()
+  { var difference=vectorMinusVector(this.mousePosition, this.clickedPosition);
+    this.centerX+=difference[0]*this.scale;
+    this.centerY-=difference[1]*this.scale;
+    this.redraw();
+  };
+  this.pointsWithinClickTolerance= function (leftXY, rightXY)
+  { var squaredDistance= ((leftXY[0]-rightXY[0])*(leftXY[0]-rightXY[0]) +
+          (leftXY[1]-rightXY[1])*(leftXY[1]-rightXY[1]))*this.scale;
+    return squaredDistance<7;
+  };
+  this.canvasClick=function (screenX, screenY)
+  { this.clickedPosition=this.coordsScreenToMathScreen(screenX, screenY);
+    this.mousePosition=[];
+    if (this.pointsWithinClickTolerance(this.clickedPosition,[0,0]))
+      this.selectedElement="origin";
+    else
+      this.selectedElement="";
+    this.logStatus();
+  };
+  this.selectEmpty= function()
+  { this.selectedElement="";
+  };
+  this.showMessages= function()
+  { if (this.spanMessages==null || this.spanMessages==undefined)
+      return;
+    var theHTML="";
+    if (this.textPerformance!="")
+      theHTML+=this.textPerformance + "<hr>";
+    if (this.textErrors!=="")
+      theHTML+="<span style=\"red\"><b>" +this.textErrors+ "</b></span><hr>";
+    theHTML+=
+    "<span>" +this.textMouseInfo+ "</span><hr>"+
+    "<span>" +this.textProjectionInfo+ "</span>";
+    if (this.textPatchInfo!=="")
+      theHTML+="<hr><span>" +this.textPatchInfo+ "</span>";
+    this.spanMessages.innerHTML=theHTML;
+    ;
+  };
+  this.logStatus= function()
+  { this.textMouseInfo="";
+    this.textMouseInfo+=
+    "time last redraw: " + this.redrawTime +" ms " +
+    "(~" + (1000/this.redrawTime).toFixed(1) + " f.p.s.)"+
+    "<br>mouse coordinates: " + this.mousePosition +
+    "<br>clicked coordinates: " + this.clickedPosition +
+    "<br>delta of position: " + this.positionDelta ;
+    this.showMessages();
+  };
+}
+
 function Canvas(inputCanvas)
 { this.canvasResetFunction=null;
   this.theIIIdObjects=
@@ -302,7 +543,6 @@ function Canvas(inputCanvas)
   this.bufferDeltaX= 0;
   this.bufferDeltaY= 0;
   this.colorDepthFactor= 0.4;
-  this.isTwoD= false;
   this.boundingBoxMathScreen= [[-0.01, -0.01], [0.01, 0.01]];
   this.boundingBoxMath= [[-0.01,-0.01,-0.01],[0.01,0.01,0.01]];
   this.boundingSegmentZ= [-0.01,0.01];
@@ -1031,11 +1271,6 @@ function Canvas(inputCanvas)
   this.computeBasis= function ()
   { //if (this.screenBasisOrthonormal.length<2)
     //  this.screenBasisOrthonormal.length=2;
-    if (this.isTwoD)
-    { this.screenBasisOrthonormal[0]=[1,0];
-      this.screenBasisOrthonormal[1]=[0,1];
-      return;
-    }
     this.screenBasisOrthonormal[0]=this.screenBasisUser[0].slice();
     this.screenBasisOrthonormal[1]=this.screenBasisUser[1].slice();
     var e1=this.screenBasisOrthonormal[0];
@@ -1054,9 +1289,8 @@ function Canvas(inputCanvas)
     "<br>selected e2: "+ this.selectedScreenBasis[1]
     ;
   };
-  this.init= function(inputCanvasId, inputIsTwoD)
+  this.init= function(inputCanvasId)
   { this.canvasId=inputCanvasId;
-    this.isTwoD=inputIsTwoD;
     this.canvasContainer= document.getElementById(inputCanvasId);
     this.surface=this.canvasContainer.getContext("2d");
     this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
@@ -1343,6 +1577,15 @@ function calculatorGetCanvas(inputCanvas)
   return calculatorCanvases[inputCanvas.id];
 }
 
+function calculatorGetCanvasTwoD(inputCanvas)
+{ if (calculatorCanvases[inputCanvas.id]===undefined)
+  { calculatorCanvases[inputCanvas.id]= new CanvasTwoD(inputCanvas);
+    if (firstCanvas==null)
+      firstCanvas=calculatorCanvases[inputCanvas.id];
+  }
+  return calculatorCanvases[inputCanvas.id];
+}
+
 function testPicture(inputCanvas)
 { var theCanvas=calculatorGetCanvas(document.getElementById(inputCanvas));
   theCanvas.init(inputCanvas, false);
@@ -1365,8 +1608,8 @@ function testPicture(inputCanvas)
 }
 
 function testPictureTwoD(inputCanvas)
-{ var theCanvas=calculatorGetCanvas(document.getElementById(inputCanvas));
-  theCanvas.init(inputCanvas, true);
+{ var theCanvas=calculatorGetCanvasTwoD(document.getElementById(inputCanvas));
+  theCanvas.init(inputCanvas);
   theCanvas.drawLine([-1,0],[1,0], 'black');
   theCanvas.drawLine([0,-1],[0,1], 'black');
 

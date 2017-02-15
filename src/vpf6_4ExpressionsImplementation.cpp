@@ -2356,8 +2356,10 @@ bool Expression::NeedsParenthesisForMultiplication()const
     return false;
   if (this->StartsWith(this->owner->opAbsoluteValue()))
     return false;
-  if (this->StartsWith(this->owner->opPlus()) || this->StartsWith(this->owner->opMinus()) ||
-      this->StartsWith(this->owner->opDefine()))
+  if (this->StartsWith(this->owner->opPlus()) ||
+      this->StartsWith(this->owner->opMinus()) ||
+      this->StartsWith(this->owner->opDefine()) ||
+      this->StartsWith(this->owner->opLimit()))
     return true;
   if (this->StartsWith(this->owner->opDivide(), 3))
   { //stOutput << "DEBUG: needparen here";
@@ -2827,6 +2829,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "}";
   } else if (this->IsListStartingWithAtom(this->owner->opGreaterThan()))
     out << (*this)[1].ToString(theFormat) << "&gt;" << (*this)[2].ToString(theFormat);
+  else if (this->IsListStartingWithAtom(this->owner->opGreaterThanOrEqualTo()))
+    out << (*this)[1].ToString(theFormat) << "\\geq " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLimit()))
     out << "\\lim_{" << (*this)[1].ToString(theFormat) << "}" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLimitProcess()))

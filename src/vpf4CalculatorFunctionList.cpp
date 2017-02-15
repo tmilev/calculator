@@ -3361,6 +3361,10 @@ void Calculator::initPredefinedStandardOperations()
    "Greater than: has similar action to the less than sign. The following example shows an implementation of commutativity. ",
    "x_{{i}}*x_{{j}}*{{a}}:if i>j=x_j*x_i*a;\n x_{{i}}*x_{{j}}:if i>j=x_j*x_i; (x_2*x_1- x_1*x_3)(x_1x_5+x_5x_4x_2); x_5x_4x_3x_2x_1", true, false,
    "Calculator::outerGreaterThan", "GreaterThan");
+  this->AddOperationInnerHandler
+  ("\\geq", Calculator::innerGreaterThanOrEqualTo, "",
+   "Greater than or equal to operation. ", "A=(2>=x); x=1; A", true, false,
+   "Calculator::innerGreaterThanOrEqualTo", "greaterThanOrEqualTo");
 
   this->AddOperationOuterHandler
   ("==", CalculatorFunctionsGeneral::outerEqualEqual, "",

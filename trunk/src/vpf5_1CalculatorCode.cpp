@@ -1301,7 +1301,7 @@ std::string PlotObject::GetJavascript2dPlot(std::string& outputPlotInstantiation
   << fnName
   << ", " << this->leftPtJS << ", " << this->rightPtJS << ", "
   << this->numSegmentsJS << ", " << "'" << this->colorRGBJS << "'"
-  << "); "
+  << ");\n"
   ;
   outputPlotInstantiationJS=fnInstStream.str();
   return out.str();
@@ -1317,19 +1317,21 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   std::stringstream canvasNameStream;
   canvasNameStream << "theCanvas" << this->canvasCounter;
   std::string canvasName=canvasNameStream.str();
-  out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
-  << "\" height=\"" << this->DesiredHtmlHeightInPixels << "\" "
-  << "style=\"border:solid 1px\" id=\"theCanvas"
-  << this->canvasCounter
-  << "\" "
-  << "onmousedown=\"calculatorCanvasClick(this, event);\" "
-  << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
-  << "onmousemove=\"calculatorCanvasMouseMoveRedraw"
-  << "(this, event.clientX, event.clientY);\""
-  << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
-  << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-  << "<span id=\"" << canvasName << "Messages\"></span>"
-  << "<script>\n";
+  if (!this->flagPlotShowJavascriptOnly)
+  { out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
+    << "\" height=\"" << this->DesiredHtmlHeightInPixels << "\" "
+    << "style=\"border:solid 1px\" id=\""
+    << canvasName
+    << "\" "
+    << "onmousedown=\"calculatorCanvasClick(this, event);\" "
+    << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
+    << "onmousemove=\"calculatorCanvasMouseMoveRedraw"
+    << "(this, event.clientX, event.clientY);\""
+    << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
+    << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
+    << "<span id=\"" << canvasName << "Messages\"></span>";
+  }
+  out << "<script>\n";
   std::string canvasFunctionName="functionMake"+ canvasName;
   out << "function " << canvasFunctionName << "()\n"
   << "{ ";

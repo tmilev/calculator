@@ -938,7 +938,7 @@ bool CalculatorFunctionsGeneral::innerFloor(Calculator& theCommands, const Expre
 
 bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSegment");
-  if (input.children.size<3)
+  if (input.size()<3)
     return false;
 //  stOutput << "DEBUG: Here i am";
   const Expression& leftE=input[1];
@@ -970,7 +970,7 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
 //    stOutput << "Final color index: " << colorIndex;
   }
   PlotObject theSegment;
-  theSegment.thePlotType="plotFunction";
+  theSegment.thePlotType="plotSegment";
   theSegment.colorRGB=colorIndex;
   if (leftV.size==3)
     theSegment.flagIs3d=true;

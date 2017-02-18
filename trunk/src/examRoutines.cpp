@@ -1192,6 +1192,8 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   this->PrepareCommands(comments);
 
   theInterpreter.init();
+  theInterpreter.flagWriteLatexPlots=false;
+  theInterpreter.flagPlotNoControls=true;
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("calculator init time");
 
@@ -1781,6 +1783,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
     this->timeIntermediateComments.LastObject()->SetSize(0);
     Calculator theInterpreter;
     this->NumAttemptsToInterpret++;
+//    stOutput << "DEBUG: flagPlotNoControls: " << theInterpreter.flagPlotNoControls;
     if (this->InterpretHtmlOneAttempt(theInterpreter, comments))
     { this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
       this->theProblemData.CheckConsistency();
@@ -2323,7 +2326,8 @@ bool CalculatorHTML::CheckContent(std::stringstream& comments)
     if (currentElt.syntacticRole=="command" && currentElt.IsAnswer() &&
         currentElt.GetKeyValue("id").find('=')!=std::string::npos)
     { result=false;
-      comments << "Error: the id of tag " << currentElt.ToStringDebug() << " contains the equality sign which is not allowed. ";
+      comments << "Error: the id of tag " << currentElt.ToStringDebug()
+      << " contains the equality sign which is not allowed. ";
     }
   }
   return result;
@@ -2473,7 +2477,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   outHeadPt2 << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile();
 //  else
 //    out << " no date picker";
-  theInterpreter.flagWriteLatexPlots=false;
+  //stOutput << "DEBUG: theInterpreter.flagPlotNoControls: " << theInterpreter.flagPlotNoControls;
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before execution");
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
@@ -2561,7 +2565,11 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       else
         outHeadPt2 << this->theContent[i].ToStringInterpretedBody();
     }
-  outHeadPt2 << this->GetJavascriptMathQuillBoxes();
+  if (this->flagIsExamProblem)
+  { outHeadPt2 << this->GetJavascriptMathQuillBoxes();
+    if (theInterpreter.flagHasGraphics)
+      outHeadPt2 << HtmlSnippets::GetJavascriptCanvasGraphics();
+  }
   ////////////////////////////////////////////////////////////////////
   //out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";
   //out << "<hr>" << this->ToStringExtractedCommands() << "<hr>";

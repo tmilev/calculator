@@ -1524,13 +1524,6 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    false, true, "CalculatorFunctionsGeneral::innerPlot2DWithBars",
    "Plot2DWithBars")
    ;
-  this->AddOperationInnerHandler ("PlotIntegralOf",
-  CalculatorFunctionsGeneral::innerPlotIntegralOf, "",
-   "<b>Calculus teaching function.</b> Plots area locked under curve.",
-   "\nA=3/2- ((-3/4+1/4 (x))^{2});\nPlotIntegralOf{}(A, 0, 5)", false, true,
-   "CalculatorFunctionsGeneral::innerPlotIntegralOf",
-   "PlotIntegralOf")
-   ;
   this->AddOperationInnerHandler ("CompareFunctionsNumerically",
    CalculatorFunctionsGeneral::innerCompareFunctionsNumerically, "",
    "<b>Calculus teaching function.</b> Compares two one-variable functions numerically.\

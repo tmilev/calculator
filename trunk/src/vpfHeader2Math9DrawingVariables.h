@@ -395,7 +395,7 @@ public:
   int GetColorFromChamberIndex(int index);
   static void GetCoordsForDrawing(DrawingVariables& TDV, Vector<Rational>& r, double& x, double& y);
   static void ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Vector<Rational>& output);
-  std::string GetColorHtmlFromColorIndex(int colorIndex);
+  static std::string GetColorHtmlFromColorIndex(int colorIndex);
   std::string GetColorPsTricksFromColorIndex(int colorIndex);
   static bool GetColorIntFromColorString(const std::string& input, int& output);
   DrawOperations theBuffer;

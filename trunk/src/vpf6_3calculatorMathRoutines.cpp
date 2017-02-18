@@ -4377,83 +4377,6 @@ bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, cons
   << input.ToString();
 }
 
-bool CalculatorFunctionsGeneral::innerPlotWedge(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotWedge");
-  if (input.children.size!=6)
-    return theCommands << "<hr>innerPlotWedge takes as input 4 arguments: x,y coordinates of center, starting angle, final angle. ";
-  Rational xCoord, yCoord, radius, startAngle, endAngle;
-  if (!input[1].IsOfType<Rational>(&xCoord) || !input[2].IsOfType<Rational>(&yCoord) || !input[3].IsOfType<Rational>(&radius) ||
-      !input[4].IsOfType<Rational>(&startAngle) || !input[5].IsOfType<Rational>(&endAngle))
-    return theCommands << "<hr>Failed to extract x, y coordinate, radius, start angle, end angle from " << input.ToString() << ". ";
-  std::stringstream out;
-  double x1wedge= MathRoutines::ReducePrecision(xCoord.GetDoubleValue()+ radius.GetDoubleValue() *FloatingPoint::cos(startAngle.GetDoubleValue()));
-  double y1wedge= MathRoutines::ReducePrecision(yCoord.GetDoubleValue()+ radius.GetDoubleValue() *FloatingPoint::sin(startAngle.GetDoubleValue()));
-  double x2wedge= MathRoutines::ReducePrecision(xCoord.GetDoubleValue()+ radius.GetDoubleValue() *FloatingPoint::cos(endAngle.GetDoubleValue()));
-  double y2wedge= MathRoutines::ReducePrecision(yCoord.GetDoubleValue()+ radius.GetDoubleValue() *FloatingPoint::sin(endAngle.GetDoubleValue()));
-  double xCoordDouble=MathRoutines::ReducePrecision(xCoord.GetDoubleValue());
-  double yCoordDouble=MathRoutines::ReducePrecision(yCoord.GetDoubleValue());
-  double startAngleDouble=MathRoutines::ReducePrecision(startAngle.GetDoubleValue());
-  double radiusDouble=MathRoutines::ReducePrecision(radius.GetDoubleValue());
-  double endAngleDouble=MathRoutines::ReducePrecision(endAngle.GetDoubleValue());
-  out << "\\pscustom*[linecolor=cyan]{ \\psparametricplot[algebraic,linecolor=\\fcColorGraph]{" << startAngleDouble << "}{" << endAngleDouble
-  << "}{" << xCoordDouble << "+" << radiusDouble << "*cos(t)| " << yCoordDouble << "+" << radiusDouble << "*sin(t)} \\psline("
-  << x2wedge << ", " << y2wedge << ")(" << xCoordDouble << ", " << yCoordDouble << ")" << "(" << x1wedge << ", " << y1wedge << ")}";
-  out << "\\pscustom[linecolor=blue]{ \\psparametricplot[algebraic,linecolor=\\fcColorGraph]{" << startAngleDouble << "}{" << endAngleDouble
-  << "}{" << xCoordDouble << "+" << radiusDouble << "*cos(t)| " << yCoordDouble << "+" << radiusDouble << "*sin(t)} \\psline("
-  << x2wedge << ", " << y2wedge << ")(" << xCoordDouble << ", " << yCoordDouble << ")" << "(" << x1wedge << ", " << y1wedge << ")}";
-  PlotObject thePlot;
-  thePlot.xLow=(-5);
-  thePlot.xHigh=(5);
-  thePlot.yLow=-2;
-  thePlot.yHigh=5;
-  thePlot.thePlotElement=(input);
-  thePlot.thePlotString=(out.str());
-  thePlot.thePlotStringWithHtml=(out.str());
-  thePlot.thePlotType="plotFunction";
-  theCommands.flagWriteLatexPlots=true;
-  return output.AssignValue(thePlot, theCommands);
-}
-
-bool CalculatorFunctionsGeneral::innerPlotIntegralOf(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotIntegralOf");
-  if (input.children.size<4)
-    return output.MakeError("Plotting integral of takes at least three arguments: function, lower and upper bound. ", theCommands);
-  const Expression& lowerE=input[2];
-  const Expression& upperE=input[3];
-  Expression functionE;
-  double upperBound, lowerBound;
-  if (!lowerE.EvaluatesToDouble(&upperBound) || !upperE.EvaluatesToDouble(&lowerBound))
-    return output.MakeError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
-  if (upperBound<lowerBound)
-    MathRoutines::swap(upperBound, lowerBound);
-  if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
-  { std::stringstream out;
-    out << "Failed to convert expression " << input[1].ToString() << " to postfix notation. ";
-    return output.MakeError(out.str(), theCommands);
-  }
-  std::stringstream theShadedRegion, theShadedRegionHTML;
-  PlotObject thePlot;
-  theShadedRegion << "\\pscustom*[linecolor=cyan]{"
-  << thePlot.GetPlotStringFromFunctionStringAndRanges(false, functionE.GetValue<std::string>(), input[1].ToString(), lowerBound, upperBound)
-  << "\\psline(" << std::fixed << upperBound << ", 0)(" << std::fixed << lowerBound << ", 0)}";
-  theShadedRegionHTML << "\\pscustom*[linecolor=cyan]{"
-  << thePlot.GetPlotStringFromFunctionStringAndRanges(true, functionE.GetValue<std::string>(), input[1].ToString(), lowerBound, upperBound)
-  << "\\psline(" << std::fixed << upperBound << ", 0)(" << std::fixed << lowerBound << ", 0)}";
-  thePlot.thePlotString=theShadedRegion.str();
-  thePlot.thePlotStringWithHtml=theShadedRegionHTML.str();
-  thePlot.xLow=lowerBound;
-  thePlot.xHigh=upperBound;
-  thePlot.yLow=-4;
-  thePlot.yHigh=4;
-  thePlot.thePlotElement=(input[1]);
-  Plot plotFinal;
-  plotFinal+=thePlot;
-  theCommands.flagWriteLatexPlots=true;
-  plotFinal.AddFunctionPlotOnTop
-  (input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, -4,  4, 0);
-  return output.AssignValue(plotFinal, theCommands);
-}
-
 bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDFQsEulersMethod");
   if (input.children.size!=7)
@@ -4580,7 +4503,7 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
   thePlot.xHigh=*XValues.LastObject();
   thePlot.yLow=-0.5;
   thePlot.yHigh=0.5;
-  thePlot.thePlotElement=input;
+  thePlot.functionToBePlottedE=input;
   std::stringstream outLatex, outHtml;
   outLatex << "\n\n%calculator input:" << input.ToString() << "\n\n"
   << "\\psline[linecolor=\\fcColorGraph]";
@@ -4681,53 +4604,104 @@ bool CalculatorFunctionsGeneral::innerPlotFill(Calculator& theCommands, const Ex
 bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlot2D");
   //stOutput << input.ToString();
-  if (input.children.size<4)
+  if (input.size()<4)
     return output.MakeError
-    ("Plotting coordinates takes at least three arguments: function, lower and upper bound. ", theCommands);
+    ("Plotting coordinates takes at least three arguments: function, lower and upper bound. ",
+     theCommands);
   if (input.HasBoundVariables())
     return false;
-  const Expression& lowerE=input[2];
-  const Expression& upperE=input[3];
-  int desiredHtmlHeightPixels=400;
-  int desiredHtmlWidthPixels=600;
-  if (input.children.size>=6)
-  { if (!input[4].IsSmallInteger(&desiredHtmlWidthPixels))
-      desiredHtmlWidthPixels=600;
-    if (!input[5].IsSmallInteger(&desiredHtmlHeightPixels))
-      desiredHtmlHeightPixels=400;
+  Plot thePlot;
+  PlotObject thePlotObj;
+  thePlotObj.leftPtE=input[2];
+  thePlotObj.rightPtE=input[3];
+  thePlot.DesiredHtmlHeightInPixels=400;
+  thePlot.DesiredHtmlWidthInPixels=600;
+  if (input.size()>=6)
+  { input[4].IsSmallInteger(&thePlot.DesiredHtmlWidthInPixels);
+    input[5].IsSmallInteger(&thePlot.DesiredHtmlHeightInPixels);
   }
-  std::string colorString;
-  int colorTripleRGB=CGI::RedGreenBlue(255, 0, 0);
-  if (input.children.size>=7)
-    if (input[6].IsOfType<std::string>(&colorString))
-      DrawingVariables::GetColorIntFromColorString(colorString, colorTripleRGB);
-  double linewidth=1;
-  if (input.children.size>=8)
-  { if (input[7].EvaluatesToDouble(&linewidth))
-      DrawingVariables::GetColorIntFromColorString(colorString, colorTripleRGB);
-    else
-      linewidth=1;
-  }
-  int numIntervals=500;
-  if (input.children.size>=9)
-    if (!input[8].IsSmallInteger(&numIntervals))
-      numIntervals=500;
+  if (input.size()>=7)
+  { if (!input[6].IsOfType<std::string>(&thePlotObj.colorRGBJS))
+      thePlotObj.colorRGBJS=input[6].ToString();
+  } else
+    thePlotObj.colorRGBJS="red";
+  thePlotObj.colorRGB=CGI::RedGreenBlue(255,0,0);
+  DrawingVariables::GetColorIntFromColorString(thePlotObj.colorRGBJS, thePlotObj.colorRGB);
+  thePlotObj.lineWidth=1;
+  if (input.size()>=8)
+    input[7].EvaluatesToDouble(&thePlotObj.lineWidth);
+  if (input.size()>=9)
+    thePlotObj.numSegmentsE=input[8];
+  else
+    thePlotObj.numSegmentsE.AssignValue(500, theCommands);
+  int numIntervals=-1;
+  if (!thePlotObj.numSegmentsE.IsSmallInteger(&numIntervals))
+    numIntervals=500;
   if (numIntervals<2)
     numIntervals=2;
-  Expression functionE;
-  double upperBound, lowerBound;
-  if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound))
-    return output.MakeError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
-//  if (upperBound<lowerBound)//no bounds swapping! this messes up filling commands.
-//    MathRoutines::swap(upperBound, lowerBound);
-  if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
+  Expression functionSuffixNotationE;
+  if (!thePlotObj.leftPtE.EvaluatesToDouble(&thePlotObj.xLow) ||
+      !thePlotObj.rightPtE.EvaluatesToDouble(&thePlotObj.xHigh))
+    return output.MakeError
+    ("Failed to convert upper and lower bounds of drawing function to rational numbers.",
+     theCommands);
+  if (!theCommands.CallCalculatorFunction
+       (theCommands.innerSuffixNotationForPostScript, input[1], functionSuffixNotationE))
   { std::stringstream out;
     out << "Failed to convert expression " << input[1].ToString() << " to postfix notation. ";
     return output.MakeError(out.str(), theCommands);
   }
-  double yLow, yHigh;
-  Vectors<double> thePoints;
-  if (!input[1].EvaluatesToDoubleInRange("x", lowerBound, upperBound, numIntervals, &yLow, &yHigh, &thePoints))
+  thePlotObj.functionToBePlottedE=input[1];
+  thePlotObj.functionToBePlottedE.GetFreeVariables
+  (thePlotObj.variablesInPlay, true);
+  if (thePlotObj.variablesInPlay.size>1)
+    return theCommands << "Got a function with "
+    << thePlotObj.variablesInPlay.size
+    << " variables, namely: "
+    << thePlotObj.variablesInPlay.ToStringCommaDelimited()
+    << ". I was expecting a single variable. ";
+  if (thePlotObj.variablesInPlay.size==0)
+  { Expression xE;
+    xE.MakeAtom("x", theCommands);
+    thePlotObj.variablesInPlay.AddOnTop(xE);
+  }
+  thePlotObj.variablesInPlayJS.SetSize(thePlotObj.variablesInPlay.size);
+  thePlotObj.variablesInPlayJS[0]= thePlotObj.variablesInPlay[0].ToString();
+  std::string theVarString=thePlotObj.variablesInPlayJS[0];
+  Expression jsConverterE;
+  thePlotObj.thePlotType="plotFunction";
+  if (CalculatorFunctionsGeneral::
+      innerMakeJavascriptExpression
+      (theCommands, thePlotObj.functionToBePlottedE, jsConverterE)
+      )
+    thePlotObj.functionToBePlottedJS=jsConverterE.ToString();
+  else
+    thePlotObj.thePlotType="plotFunctionPrecomputed";
+  if (CalculatorFunctionsGeneral::
+      innerMakeJavascriptExpression
+      (theCommands, thePlotObj.leftPtE, jsConverterE)
+      )
+    thePlotObj.leftPtJS=jsConverterE.ToString();
+  else
+    thePlotObj.thePlotType="plotFunctionPrecomputed";
+  if (CalculatorFunctionsGeneral::
+      innerMakeJavascriptExpression
+      (theCommands, thePlotObj.rightPtE, jsConverterE)
+      )
+    thePlotObj.rightPtJS=jsConverterE.ToString();
+  else
+    thePlotObj.thePlotType="plotFunctionPrecomputed";
+  if (CalculatorFunctionsGeneral::
+      innerMakeJavascriptExpression
+      (theCommands, thePlotObj.numSegmentsE, jsConverterE)
+      )
+    thePlotObj.numSegmentsJS=jsConverterE.ToString();
+  else
+    thePlotObj.thePlotType="plotFunctionPrecomputed";
+  Vectors<double>& thePoints=thePlotObj.thePoints;
+  if (!input[1].EvaluatesToDoubleInRange
+       (theVarString, thePlotObj.xLow, thePlotObj.xHigh, numIntervals,
+        &thePlotObj.yLow, &thePlotObj.yHigh, &thePoints))
   { bool hasOneGoodPoint=false;
     for (int i=0; i<thePoints.size; i++)
       if (!std::isnan(thePoints[i][1]))
@@ -4739,12 +4713,15 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
       << "perhaps your expression is not a function of x.";
     theCommands << "<hr>I failed to evaluate your function in a number of points. ";
   }
-  Plot thePlot;
-  thePlot.DesiredHtmlHeightInPixels=desiredHtmlHeightPixels;
-  thePlot.DesiredHtmlWidthInPixels=desiredHtmlWidthPixels;
-  thePlot.AddFunctionPlotOnTop
-  (input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh, &thePoints,
-   &colorTripleRGB, linewidth);
+
+  thePlotObj.thePlotString=thePlotObj.
+  GetPlotStringFromFunctionStringAndRanges
+  (false, functionSuffixNotationE.ToString(),
+   thePlotObj.functionToBePlottedE.ToString(),
+   thePlotObj.xLow, thePlotObj.xHigh);
+  thePlotObj.thePlotStringWithHtml=thePlotObj.thePlotString;
+
+  thePlot.thePlots.AddOnTop(thePlotObj);
 //  stOutput << "DEBUG: height, width: " << desiredHtmlHeightPixels << ", " << desiredHtmlWidthPixels;
   return output.AssignValue(thePlot, theCommands);
 }
@@ -4905,7 +4882,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   thePlot.yLow=yMin;
   thePlot.yHigh=yMax;
 
-  thePlot.thePlotElement=input[1];
+  thePlot.functionToBePlottedE=input[1];
   Plot plotFinal;
   plotFinal+=thePlot;
   plotFinal+=outputPlot;
@@ -5062,7 +5039,7 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
     thePlot.thePoints[i][0]=theXs[i][1];
     thePlot.thePoints[i][1]=theYs[i][1];
   }
-  thePlot.thePlotElement=input;
+  thePlot.functionToBePlottedE=input;
   thePlot.thePlotString=outLatex.str();
   thePlot.thePlotStringWithHtml=outHtml.str();
   Plot outputPlot;

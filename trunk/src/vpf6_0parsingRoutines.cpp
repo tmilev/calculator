@@ -72,6 +72,7 @@ void Calculator::reset()
   this->flagUsePredefinedWordSplits=true;
   this->flagPlotNoControls=false;
   this->flagPlotShowJavascriptOnly=false;
+  this->flagHasGraphics=false;
 
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;

@@ -411,14 +411,14 @@ function CanvasTwoD(inputCanvas)
     var desiredWidth=Math.abs(rightUpScreen[0]-leftLowScreen[0]);
     var candidateScaleHeight=this.scale* this.height/desiredHeight;
     var candidateScaleWidth=this.scale* this.width/desiredWidth;
-    console.log("leftLowScreen: "+ leftLowScreen+" rightUpScreen: "+rightUpScreen);
-    console.log(centerScreen);
-    console.log("desiredHeight: "+desiredHeight);
-    console.log("candidateScaleHeight: "+candidateScaleHeight);
-    console.log("candidateScaleWidth: "+candidateScaleWidth);
-    console.log("old scale: "+ this.scale);
+    //console.log("leftLowScreen: "+ leftLowScreen+" rightUpScreen: "+rightUpScreen);
+    //console.log(centerScreen);
+    //console.log("desiredHeight: "+desiredHeight);
+    //console.log("candidateScaleHeight: "+candidateScaleHeight);
+    //console.log("candidateScaleWidth: "+candidateScaleWidth);
+    //console.log("old scale: "+ this.scale);
     this.scale=Math.min(candidateScaleHeight, candidateScaleWidth);
-    console.log("new scale: "+ this.scale);
+    //console.log("new scale: "+ this.scale);
     var leftLowScreenRescaled= this.coordsMathToScreen(leftLowPt);
     var rightUpScreenRescaled= this.coordsMathToScreen(rightUpPt);
     var centerScreenRescaled=vectorPlusVector(leftLowScreenRescaled, rightUpScreenRescaled);
@@ -531,7 +531,7 @@ function CanvasTwoD(inputCanvas)
   { var squaredDistance=
     ((leftXY[0]-rightXY[0])*(leftXY[0]-rightXY[0]) +
      (leftXY[1]-rightXY[1])*(leftXY[1]-rightXY[1]))*this.scale;
-    return squaredDistance<7;
+    return squaredDistance<1000;
   };
   this.canvasClick=function (screenX, screenY)
   { this.clickedPosition=this.coordsScreenToMathScreen(screenX, screenY);

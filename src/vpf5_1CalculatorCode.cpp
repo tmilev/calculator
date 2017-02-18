@@ -835,61 +835,35 @@ bool PlotObject3d::operator==(const PlotObject3d& other)const
   this->theVarRangesJS==other.theVarRangesJS;
 }
 
-void PlotObject::CreatePlotFunction
-(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound,
- double inputUpperBound,
- double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* inputColorRGB,
- double inputlineWidth, std::string* inputFillStyle)
-{ MacroRegisterFunctionWithName("PlotObject::Create");
-  this->xLow=inputLowerBound;
-  this->xHigh=inputUpperBound;
-  this->yLow=inputYmin;
-  this->yHigh=inputYmax;
-  this->thePlotElement=(inputE);
-  this->lineWidth=lineWidth;
-  if (inputFillStyle!=0)
-    this->fillStyle=*inputFillStyle;
-  if (inputColorRGB!=0)
-    this->colorRGB=*inputColorRGB;
-  else
-    this->colorRGB=CGI::RedGreenBlue(0,0,0);
-  this->thePlotString=
-  GetPlotStringFromFunctionStringAndRanges
-  (false, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound);
-  this->thePlotStringWithHtml=
-  this->GetPlotStringFromFunctionStringAndRanges
-  (true, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound);
-  if (inputPoints!=0)
-    this->thePoints=*inputPoints;
-  this->thePlotType="plotFunction";
-  this->lineWidth=inputlineWidth;
-}
-
-void Plot::AddFunctionPlotOnTop
-(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
- double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* colorRGB, double penWidth,
- std::string* inputFillString)
-{ PlotObject thePlot;
-  thePlot.CreatePlotFunction
-  (inputE, inputPostfixNotation, inputLowerBound, inputUpperBound,
-   inputYmin, inputYmax, inputPoints, colorRGB, penWidth, inputFillString);
-  this->thePlots.AddOnTop(thePlot);
-}
-
 bool PlotObject::operator==(const PlotObject& other)const
-{ return this->thePlotStringWithHtml==other.thePlotStringWithHtml &&
+{ return
+  this->thePlotStringWithHtml==other.thePlotStringWithHtml &&
   this->xLow==other.xLow&&
   this->xHigh==other.xHigh &&
   this->yLow==other.yLow &&
   this->yHigh==other.yHigh &&
-  this->thePlotElement==other.thePlotElement &&
+  this->functionToBePlottedE==other.functionToBePlottedE &&
   this->thePlotType==other.thePlotType &&
   this->thePoints==other.thePoints &&
-//  this->theLines==other.theLines &&
   this->lineWidth==other.lineWidth &&
   this->theRectangles==other.theRectangles &&
-  this->flagIs3d==other.flagIs3d
-  ;
+  this->flagIs3d==other.flagIs3d &&
+  this->thePlotString==other.thePlotString &&
+  this->fillStyle== other.fillStyle &&
+  this->thePlotStringWithHtml ==other.thePlotStringWithHtml &&
+  this->colorRGB==other.colorRGB &&
+  this->fillColorRGB==other.fillColorRGB &&
+  this->variablesInPlay==other.variablesInPlay &&
+  this->leftPtE==other.leftPtE &&
+  this->rightPtE             == other.rightPtE &&
+  this->numSegmentsE         == other.numSegmentsE &&
+  this->functionToBePlottedJS== other.functionToBePlottedJS &&
+  this->variablesInPlayJS    == other.variablesInPlayJS &&
+  this->leftPtJS             == other.leftPtJS &&
+  this->rightPtJS            == other.rightPtJS &&
+  this->numSegmentsJS        == other.numSegmentsJS &&
+  this->colorRGBJS           == other.colorRGBJS;
+
 }
 
 PlotObject::PlotObject()
@@ -1147,17 +1121,17 @@ std::string Plot::GetPlotHtml3d()
 
 std::string Plot::GetPlotHtml3d_New(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml3d_New");
+  owner.flagHasGraphics=true;
   std::stringstream out;
-  static int canvasCounter=0;
-  canvasCounter++;
+  this->canvasCounter++;
   //out << this->ToStringDebug();
   std::stringstream canvasNameStream;
-  canvasNameStream << "theCanvas" << canvasCounter;
+  canvasNameStream << "theCanvas" << this->canvasCounter;
   std::string canvasName=canvasNameStream.str();
   out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
   << "\" height=\"" << this->DesiredHtmlHeightInPixels << "\" "
   << "style=\"border:solid 1px\" id=\"theCanvas"
-  << canvasCounter
+  << this->canvasCounter
   << "\" "
   << "onmousedown=\"calculatorCanvasClick(this, event);\" "
   << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
@@ -1283,7 +1257,7 @@ std::string PlotObject3d::GetJavascriptSurfaceImmersion(std::string& outputSurfa
     else
       surfaceInstStream << "colorVU: \"pink\"";
     surfaceInstStream << "}"
-    << ")"
+    << ");"
     ;
     outputSurfaceInstantiationJS=surfaceInstStream.str();
   }
@@ -1297,10 +1271,139 @@ std::string Plot::GetPlotHtml(Calculator& owner)
   else if (this->flagIs3d)
     return this->GetPlotHtml3d();
   else
-    return this->GetPlotHtml2d();
+  { if (false)
+      return this->GetPlotHtml2d_OLD();
+    return this->GetPlotHtml2d_New(owner);
+  }
 }
 
-std::string Plot::GetPlotHtml2d()
+int Plot::canvasCounter=0;
+
+std::string PlotObject::GetJavascript2dPlot(std::string& outputPlotInstantiationJS)
+{ MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascript2dPlot");
+  std::stringstream out;
+  static int canvasFunctionCounteR=0;
+  canvasFunctionCounteR++;
+  std::stringstream fnNameStream;
+  fnNameStream << "theCanvasPlotFn"
+  << canvasFunctionCounteR;
+  std::string fnName=fnNameStream.str();
+  if (this->variablesInPlay.size>0)
+  { out << "function " << fnName
+    << " (" << this->variablesInPlay[0] << "){\n";
+    out << "return " << this->functionToBePlottedJS << ";\n";
+    out << "}\n";
+  } else
+  { out << "console.log(\"Error: function with zero variables.\");";
+  }
+  std::stringstream fnInstStream;
+  fnInstStream << "drawFunction("
+  << fnName
+  << ", " << this->leftPtJS << ", " << this->rightPtJS << ", "
+  << this->numSegmentsJS << ", " << "'" << this->colorRGBJS << "'"
+  << "); "
+  ;
+  outputPlotInstantiationJS=fnInstStream.str();
+  return out.str();
+}
+
+std::string Plot::GetPlotHtml2d_New(Calculator& owner)
+{ MacroRegisterFunctionWithName("Plot::GetPlotHtml2d_New");
+  owner.flagHasGraphics=true;
+  std::stringstream out;
+  this->canvasCounter++;
+  this->ComputeAxesAndBoundingBox();
+    //out << this->ToStringDebug();
+  std::stringstream canvasNameStream;
+  canvasNameStream << "theCanvas" << this->canvasCounter;
+  std::string canvasName=canvasNameStream.str();
+  out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
+  << "\" height=\"" << this->DesiredHtmlHeightInPixels << "\" "
+  << "style=\"border:solid 1px\" id=\"theCanvas"
+  << this->canvasCounter
+  << "\" "
+  << "onmousedown=\"calculatorCanvasClick(this, event);\" "
+  << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
+  << "onmousemove=\"calculatorCanvasMouseMoveRedraw"
+  << "(this, event.clientX, event.clientY);\""
+  << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
+  << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
+  << "<span id=\"" << canvasName << "Messages\"></span>"
+  << "<script>\n";
+  std::string canvasFunctionName="functionMake"+ canvasName;
+  out << "function " << canvasFunctionName << "()\n"
+  << "{ ";
+  for (int i=0; i<this->boxesThatUpdateMe.size; i++)
+  { InputBox& currentBox=owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreateIfNotPresent
+    (this->boxesThatUpdateMe[i]);
+    out << " calculatorPlotUpdaters['"
+    << currentBox.GetSliderName() << "']="
+    << "'" << canvasName << "'"
+    << ";\n";
+  }
+  List<std::string> theFnPlots;
+  theFnPlots.SetSize(this->thePlots.size);
+  for (int i=0; i<this->thePlots.size; i++)
+  { PlotObject& currentPlot= this->thePlots[i];
+    if (currentPlot.thePlotType=="plotFunction")
+    { out << currentPlot.GetJavascript2dPlot(theFnPlots[i]) << "\n "
+      ;
+    }
+  }
+  out << "calculatorResetCanvas(document.getElementById('"
+  << canvasName << "'));\n";
+  out << "var theCanvas=calculatorGetCanvasTwoD(document.getElementById('"
+  << canvasName
+  << "'));\n"
+  << "theCanvas.init('" << canvasName << "');\n";
+  if (owner.flagPlotNoControls)
+    out << "theCanvas.flagShowPerformance=false;\n";
+  else
+    out << "theCanvas.flagShowPerformance=true;\n";
+  out.precision(7);
+  out << "theCanvas.drawLine([" << this->theLowerBoundAxes*1.05
+  << ",0],[" << this->theUpperBoundAxes*1.05 << ",0], 'black');\n";
+  out << "theCanvas.drawLine([0," << this->lowBoundY *1.05
+  << "],[0," << this->highBoundY*1.05 << "], 'black');\n";
+  out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'blabck');\n";
+  out << "theCanvas.drawText([1,-0.2],'1','black');\n";
+
+  for (int i=0; i<this->thePlots.size; i++)
+  { PlotObject& currentPlot=this->thePlots[i];
+    if (currentPlot.thePlotType=="plotFunction")
+    { out
+      << "theCanvas." << theFnPlots[i]
+      ;
+      continue;
+    }
+    for (int j=0; j<currentPlot.thePoints.size-1; j++)
+    { out
+      << "theCanvas.drawLine("
+      <<  currentPlot.thePoints[j].ToStringSquareBracketsBasicType()
+      << ", "
+      << currentPlot.thePoints[j+1].ToStringSquareBracketsBasicType()
+      << ", "
+      << "\""
+      << DrawingVariables::GetColorHtmlFromColorIndex
+      (this->thePlots[i].colorRGB)
+      << "\""
+      << ");\n"
+      ;
+    }
+  }
+  out
+  << "theCanvas.redraw();\n"
+  << "}\n"
+  << "calculatorGetCanvasTwoD(document.getElementById('"
+  << canvasName
+  << "')).canvasResetFunction=" << canvasFunctionName << ";\n"
+  << canvasFunctionName << "();\n"
+  << "</script>"
+  ;
+  return out.str();
+}
+
+std::string Plot::GetPlotHtml2d_OLD()
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml2d");
 /*  if (this->flagIncludeExtraHtmlDescriptions)
     stOutput << "including xtra html";
@@ -1559,7 +1662,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
 //  if (input[0].IsAtoM(theCommands.opDivide()))
 //    stOutput << input.Lispify();
   if (useUsualOrder)
-    for (int i=input.children.size-1; i>=1; i--)
+    for (int i=input.size()-1; i>=1; i--)
     { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
         return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
       if (!currentE.IsOfType(&currentString))
@@ -1567,7 +1670,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
       out << currentString << " ";
     }
   else
-    for (int i=1; i<input.children.size; i++)
+    for (int i=1; i<input.size(); i++)
     { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
         return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
       if (!currentE.IsOfType(&currentString))
@@ -1661,9 +1764,9 @@ bool Calculator::innerReverseOrderRecursively(Calculator& theCommands, const Exp
     tempE.SetChildAtomValue(0, theCommands.opSequence());
     return theCommands.innerReverseOrderRecursively(theCommands, tempE, output);
   }
-  output.reset(theCommands, input.children.size);
+  output.reset(theCommands, input.size());
   output.AddChildOnTop(input[0]);
-  for (int i=input.children.size-1; i>=1; i--)
+  for (int i=input.size()-1; i>=1; i--)
   { Expression currentE=input[i];
     Expression reversedCurrentE;
     if (!theCommands.innerReverseOrderRecursively(theCommands,  currentE, reversedCurrentE))
@@ -1684,9 +1787,9 @@ bool Calculator::innerReverseOrdeR(Calculator& theCommands, const Expression& in
     tempE.SetChildAtomValue(0, theCommands.opSequence());
     return theCommands.innerReverseOrdeR(theCommands, tempE, output);
   }
-  output.reset(theCommands, input.children.size);
+  output.reset(theCommands, input.size());
   output.AddChildOnTop(input[0]);
-  for (int i=input.children.size-1; i>=1; i--)
+  for (int i=input.size()-1; i>=1; i--)
     output.AddChildOnTop(input[i]);
   return true;
 }
@@ -1772,7 +1875,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   WeylGroupData& theWeyl=theSSlieAlg->theWeyl;
   if (!theWeyl.theDynkinType.IsSimple())
     return theCommands << "<hr>Function root subsystem works for simple ambient types only.";
-  for (int i=2; i<input.children.size; i++)
+  for (int i=2; i<input.size(); i++)
   { if (!theCommands.GetVectoR(input[i], currentRoot, 0, theRank, 0))
       return false;
     if (!theWeyl.RootSystem.Contains(currentRoot))
@@ -1793,9 +1896,9 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
 bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerPerturbSplittingNormal");
   std::stringstream out;
-  if (input.children.size!=4)
+  if (input.size()!=4)
   { out << "Perturbing splitting normal takes 3 arguments: normal, positive vectors, and vectors relative to which to perturb. "
-    << "Instead I got " << input.children.size-1 << ". ";
+    << "Instead I got " << input.size()-1 << ". ";
     return output.MakeError(out.str(), theCommands);
   }
   Vector<Rational> splittingNormal;

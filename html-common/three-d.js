@@ -120,6 +120,10 @@ function getAngleChangeMathScreen(newX, newY, oldX, oldY)
   return result;
 }
 
+function testFunctionPlot(v)
+{ return Math.sin(v);
+}
+
 function testMoebiusStripEmbedding(u,v)
 { var z=(v)*Math.sin(u/2);
   var x=(2+(v)*Math.cos(u/2))*Math.cos(u);
@@ -225,7 +229,7 @@ function colorScale(inputRGB, theScale)
 }
 
 function colorToRGB(input)
-{ if (input.length===3)
+{ if (input.length===3 && !(typeof input ==='string'))
     return input;
   var hex=colorToHex(input);
   return [parseInt(hex.slice(1,3), 16), parseInt(hex.slice(3,5), 16), parseInt(hex.slice(5,7), 16)];
@@ -291,6 +295,7 @@ function PointTwoD(inputLocation, inputColor)
     theSurface.fill();
   }
 }
+
 function SegmentTwoD(inputLeftPt, inputRightPt, inputColor)
 { this.leftPt=inputLeftPt;
   this.rightPt=inputRightPt;
@@ -309,32 +314,59 @@ function SegmentTwoD(inputLeftPt, inputRightPt, inputColor)
   }
 }
 
+function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, inputColor)
+{ this.theFunction=inputTheFn;
+  this.leftPt=inputLeftPt;
+  this.rightPt=inputRightPt;
+  this.color=colorToRGB(inputColor);
+  //console.log(this.color);
+  this.type="plotFunction";
+  this.numSegments=inputNumSegments;
+  this.Delta=(inputRightPt-inputLeftPt)/inputNumSegments;
+  this.draw=function(theCanvas)
+  { var theSurface=theCanvas.surface;
+    theSurface.beginPath();
+    theSurface.strokeStyle=colorRGBToString(this.color);
+    theSurface.fillStyle=colorRGBToString(this.color);
+    var theX=this.leftPt;
+    var theY=this.theFunction(theX);
+    var theCoords=theCanvas.coordsMathToScreen([theX, theY]);
+    theSurface.moveTo(theCoords[0], theCoords[1]);
+    for (var i=0; i<this.numSegments; i++)
+    { theX+=this.Delta;
+      theY=this.theFunction(theX);
+      theCoords=theCanvas.coordsMathToScreen([theX, theY]);
+      theSurface.lineTo(theCoords[0], theCoords[1]);
+    }
+    theSurface.stroke();
+  }
+}
+
+function TextPlotTwoD(inputLocation, inputText, inputColor)
+{ this.location=inputLocation;
+  this.text=inputText;
+  this.color=colorToRGB(inputColor);
+  this.type="plotText";
+  this.draw=function(theCanvas)
+  { var theSurface=theCanvas.surface;
+    theSurface.beginPath();
+    theSurface.strokeStyle=colorRGBToString(this.color);
+    theSurface.fillStyle=colorRGBToString(this.color);
+    var theCoords=theCanvas.coordsMathToScreen(this.location);
+    theSurface.fillText(this.text, theCoords[0], theCoords[1]);
+    theSurface.stroke();
+  }
+}
+
 function CanvasTwoD(inputCanvas)
 { this.canvasResetFunction=null;
-
   this.theObjects=[];
-  this.thePatchOrder=[];
-  this.numAccountedPatches=0;
-  this.numCyclicallyOverlappingPatchTieBreaks=0;
-  this.numContourPoints= 0;
-  this.numContourPaths= 0;
-  this.patchIsAccounted= [];
   this.surface= null;
   this.canvasContainer= null;
   this.canvasId= null;
-  this.screenBasisUser= [[2,1,0],[0,1,1]];
-  this.screenNormal= [];
   this.screenBasisOrthonormal= [];
-  this.zBufferColCount= 20;
-  this.zBufferRowCount= 20;
-  this.zBuffer= [];
-  this.zBufferIndexStrip=[];
-  this.bufferDeltaX= 0;
-  this.bufferDeltaY= 0;
-  this.colorDepthFactor= 0.4;
   this.boundingBoxMathScreen= [[-0.01, -0.01], [0.01, 0.01]];
-  this.boundingBoxMath= [[-0.01,-0.01,-0.01],[0.01,0.01,0.01]];
-  this.boundingSegmentZ= [-0.01,0.01];
+  this.boundingBoxMath= [[-0.01,-0.01],[0.01,0.01]];
   this.width= inputCanvas.width;
   this.height= inputCanvas.height;
   this.centerX= inputCanvas.width/2;
@@ -342,8 +374,6 @@ function CanvasTwoD(inputCanvas)
   this.scale= 50;
   this.mousePosition= [];
   this.clickedPosition= [];
-  this.unitRay= [];
-  this.rayComponent= [];
   this.positionDelta= [];
   this.spanMessages= undefined;
   this.textMouseInfo= "";
@@ -351,28 +381,26 @@ function CanvasTwoD(inputCanvas)
   this.textPatchInfo= "";
   this.textErrors= "";
   this.textPerformance= "";
-  this.angleNormal= 0;
-  this.oldAngleNormal= 0;
-  this.newAngleNormal= 0;
-  this.anglePolar= 0;
   this.selectedElement= "";
-  this.selectedVector= [];
-  this.selectedScreenBasis= [];
-  this.selectedScreenProjectionNormalized= [];
-  this.selectedScreenNormal= [];
-  this.selectedPolarAngleChange= 0;
   this.redrawStart= 0;
   this.redrawFinish= 0;
   this.redrawTime= 0;
   this.defaultNumSegmentsPerContour= 10;
-  this.flagRoundContours= false;
-  this.flagRoundPatches= true;
+  this.flagShowPerformance=true;
   this.drawPoint= function (inputPoint, inputColor)
   { this.theObjects.push(new PointTwoD(inputPoint, inputColor));
   };
   this.drawLine= function (inputLeftPt, inputRightPt, inputColor)
   { var newLine=new SegmentTwoD(inputLeftPt, inputRightPt, inputColor);
     this.theObjects.push(newLine);
+  };
+  this.drawFunction= function (inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor)
+  { var newPlot=new PlotTwoD(inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor);
+    this.theObjects.push(newPlot);
+  };
+  this.drawText= function (inputLocation, inputText, inputColor)
+  { var newPlot=new TextPlotTwoD(inputLocation, inputText, inputColor);
+    this.theObjects.push(newPlot);
   };
   this.computeBoundingBoxAccountPoint= function(input)
   { var theV=this.coordsMathToMathScreen(input);
@@ -409,9 +437,11 @@ function CanvasTwoD(inputCanvas)
     for (var i=0; i<this.theObjects.length; i++)
       this.theObjects[i].draw(this);
     var redrawTime=new Date().getTime();
-    this.textPerformance=
-    "Redraw time (ms): " + (redrawTime-this.redrawStart);
-    this.showMessages();
+    if (this.flagShowPerformance)
+    { this.textPerformance=
+      "Redraw time (ms): " + (redrawTime-this.redrawStart);
+      this.showMessages();
+    }
   };
   this.computeBasis= function ()
   { //if (this.screenBasisOrthonormal.length<2)
@@ -430,6 +460,7 @@ function CanvasTwoD(inputCanvas)
     this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
     this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
     this.spanMessages=document.getElementById(this.canvasId+"Messages");
+    this.theObjects=[];
     this.spanCriticalErrors=document.getElementById(this.canvasId+"CriticalErrors");
     this.computeBasis();
   };
@@ -473,8 +504,9 @@ function CanvasTwoD(inputCanvas)
     this.redraw();
   };
   this.pointsWithinClickTolerance= function (leftXY, rightXY)
-  { var squaredDistance= ((leftXY[0]-rightXY[0])*(leftXY[0]-rightXY[0]) +
-          (leftXY[1]-rightXY[1])*(leftXY[1]-rightXY[1]))*this.scale;
+  { var squaredDistance=
+    ((leftXY[0]-rightXY[0])*(leftXY[0]-rightXY[0]) +
+     (leftXY[1]-rightXY[1])*(leftXY[1]-rightXY[1]))*this.scale;
     return squaredDistance<7;
   };
   this.canvasClick=function (screenX, screenY)
@@ -1610,9 +1642,10 @@ function testPicture(inputCanvas)
 function testPictureTwoD(inputCanvas)
 { var theCanvas=calculatorGetCanvasTwoD(document.getElementById(inputCanvas));
   theCanvas.init(inputCanvas);
-  theCanvas.drawLine([-1,0],[1,0], 'blue');
-  theCanvas.drawLine([0,-1],[0,1], 'blue');
-
+  theCanvas.drawLine([-1,0],[1,0], 'green');
+  theCanvas.drawLine([0,-1],[0,1], 'purple');
+  theCanvas.drawText([-1,-1],'(-1,-1)', 'orange');
+  theCanvas.drawFunction(testFunctionPlot, -10,10, 100, 'red');
   //console.log(theCanvas.theIIIdObjects.thePatches);
   theCanvas.redraw();
 }

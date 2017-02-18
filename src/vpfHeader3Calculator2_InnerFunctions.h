@@ -249,7 +249,6 @@ public:
   static bool innerPlotImplicitShowGridFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotSegment(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPlotIntegralOf(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotPolarRfunctionThetaExtended(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output);
@@ -266,7 +265,6 @@ public:
   static bool innerLastElement(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRemoveLastElement(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerPlotWedge(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLispify(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLispifyFull(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerChildExpression(Calculator& theCommands, const Expression& input, Expression& output);

@@ -639,21 +639,29 @@ public:
   double lineWidth;
   bool flagIs3d;
   Vectors<double> thePoints;
-//  List<List<Vector<double> > > theLines;
   List<Vectors<double> > theRectangles;
   // each rectangle is a list of two 2-dim vectors. First vector gives the (x,y)-coords
   //of the lower left corner of the rectangle. Second vector gives the (width,height) of the rectangle.
-  Expression thePlotElement;
   std::string thePlotType;
+
+  Expression functionToBePlottedE;
+  HashedList<Expression> variablesInPlay;
+  Expression leftPtE;
+  Expression rightPtE;
+  Expression numSegmentsE;
+  std::string functionToBePlottedJS;
+  List<std::string> variablesInPlayJS;
+  std::string leftPtJS;
+  std::string rightPtJS;
+  std::string numSegmentsJS;
+  std::string colorRGBJS;
+
   void ComputeYbounds();
   std::string GetPlotStringFromFunctionStringAndRanges
   (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound);
-  void CreatePlotFunction
-  (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound,
-   double inputUpperBound,
-   double inputYmin, double inputYmax, Vectors<double>* inputPoints, int* inputColorRGB=0,
-   double inputlineWidth=1, std::string* inputFillStyle=0
-   );
+  std::string GetJavascript2dPlot
+  (std::string& outputPlotInstantiationJS);
+
   PlotObject();
   bool operator==(const PlotObject& other)const;
 };
@@ -694,6 +702,7 @@ class Plot
   bool flagPlotShowJavascriptOnly;
   bool flagIs3d;
   bool flagIs3dNewLibrary;
+  static int canvasCounter;
   int viewWindowPriority; //0 or less: compute the view Window. If this quantity is greater than zero,
   //the user-given bounding box will overwrite any computations.
   //When adding two plots with positive viewing window priorities, the window with the larger priority is used.
@@ -702,16 +711,13 @@ class Plot
   std::string GetPlotHtml(Calculator& owner);
   std::string GetPlotHtml3d();
   std::string GetPlotHtml3d_New(Calculator& owner);
-  std::string GetPlotHtml2d();
+  std::string GetPlotHtml2d_OLD();
+  std::string GetPlotHtml2d_New(Calculator& owner);
   std::string GetPlotStringAddLatexCommands(bool useHtml);
   bool IsOKVector(const Vector<double>& input);
   Plot();
   void ComputeAxesAndBoundingBox3d();
   void ComputeAxesAndBoundingBox();
-  void AddFunctionPlotOnTop
-  (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound,
-   double inputUpperBound, double inputYmin, double inputYmax, Vectors<double>* inputPoints,
-   int* colorRGB=0, double penWidth=1, std::string* inputFillStyle=0);
   void operator+=(const Plot& other);
   void operator+=(const PlotObject& other);
   void operator+=(const PlotObject3d& other);
@@ -952,7 +958,7 @@ public:
   bool flagShowCalculatorInternalStatus;
   bool flagShowCalculatorExamples;
   bool flagDefaultRulesWereTamperedWith;
-
+  bool flagHasGraphics;
   bool flagWriteLatexPlots;
 
   bool flagNoApproximations;

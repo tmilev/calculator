@@ -402,6 +402,30 @@ function CanvasTwoD(inputCanvas)
   { var newPlot=new TextPlotTwoD(inputLocation, inputText, inputColor);
     this.theObjects.push(newPlot);
   };
+  this.setViewWindow= function(leftLowPt, rightUpPt)
+  { var leftLowScreen= this.coordsMathToScreen(leftLowPt);
+    var rightUpScreen= this.coordsMathToScreen(rightUpPt);
+    var centerScreen=vectorPlusVector(leftLowScreen, rightUpScreen);
+    vectorTimesScalar(centerScreen, 0.5);
+    var desiredHeight=Math.abs(rightUpScreen[1]-leftLowScreen[1]);
+    var desiredWidth=Math.abs(rightUpScreen[0]-leftLowScreen[0]);
+    var candidateScaleHeight=this.scale* this.height/desiredHeight;
+    var candidateScaleWidth=this.scale* this.width/desiredWidth;
+    console.log("leftLowScreen: "+ leftLowScreen+" rightUpScreen: "+rightUpScreen);
+    console.log(centerScreen);
+    console.log("desiredHeight: "+desiredHeight);
+    console.log("candidateScaleHeight: "+candidateScaleHeight);
+    console.log("candidateScaleWidth: "+candidateScaleWidth);
+    console.log("old scale: "+ this.scale);
+    this.scale=Math.min(candidateScaleHeight, candidateScaleWidth);
+    console.log("new scale: "+ this.scale);
+    var leftLowScreenRescaled= this.coordsMathToScreen(leftLowPt);
+    var rightUpScreenRescaled= this.coordsMathToScreen(rightUpPt);
+    var centerScreenRescaled=vectorPlusVector(leftLowScreenRescaled, rightUpScreenRescaled);
+    vectorTimesScalar(centerScreenRescaled, 0.5);
+    this.centerX+=this.centerX-centerScreenRescaled[0];
+    this.centerY+=this.centerY-centerScreenRescaled[1];
+  };
   this.computeBoundingBoxAccountPoint= function(input)
   { var theV=this.coordsMathToMathScreen(input);
     for (var i=0; i<2; i++)
@@ -522,7 +546,7 @@ function CanvasTwoD(inputCanvas)
   { this.selectedElement="";
   };
   this.showMessages= function()
-  { if (this.spanMessages==null || this.spanMessages==undefined)
+  { if (this.spanMessages===null || this.spanMessages===undefined)
       return;
     var theHTML="";
     if (this.textPerformance!="")
@@ -1639,15 +1663,23 @@ function testPicture(inputCanvas)
   theCanvas.redraw();
 }
 
-function testPictureTwoD(inputCanvas)
-{ var theCanvas=calculatorGetCanvasTwoD(document.getElementById(inputCanvas));
-  theCanvas.init(inputCanvas);
-  theCanvas.drawLine([-1,0],[1,0], 'green');
+function testPictureTwoD(inputCanvas1, inputCanvas2)
+{ var theCanvas=calculatorGetCanvasTwoD(document.getElementById(inputCanvas1));
+  theCanvas.init(inputCanvas1);
+  theCanvas.drawLine([-10,0],[19,0], 'green');
   theCanvas.drawLine([0,-1],[0,1], 'purple');
   theCanvas.drawText([-1,-1],'(-1,-1)', 'orange');
   theCanvas.drawFunction(testFunctionPlot, -10,10, 100, 'red');
-  //console.log(theCanvas.theIIIdObjects.thePatches);
+  theCanvas.setViewWindow([-10,-1],[19,1]);
   theCanvas.redraw();
+  var theCanvas2=calculatorGetCanvasTwoD(document.getElementById(inputCanvas2));
+  theCanvas2.init(inputCanvas2);
+  theCanvas2.drawLine([-1,0],[1,0], 'green');
+  theCanvas2.drawLine([0,-19],[0,1], 'purple');
+  theCanvas2.drawText([-1,-1],'(-1,-1)', 'orange');
+  theCanvas2.drawFunction(testFunctionPlot, -10,10, 100, 'red');
+  theCanvas2.setViewWindow([-1,-19],[1,1]);
+  theCanvas2.redraw();
 }
 
 function calculatorCanvasMouseMoveRedraw(inputCanvas, x, y)

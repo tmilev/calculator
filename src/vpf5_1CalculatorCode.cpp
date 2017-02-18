@@ -1367,6 +1367,11 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   << "],[0," << this->highBoundY*1.05 << "], 'black');\n";
   out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'blabck');\n";
   out << "theCanvas.drawText([1,-0.2],'1','black');\n";
+  out << "theCanvas.setViewWindow("
+  << "[" << this->theLowerBoundAxes << ", " << this->lowBoundY << "]"
+  << ", "
+  << "[" << this->theUpperBoundAxes << ", " << this->highBoundY << "]"
+  << ");\n";
 
   for (int i=0; i<this->thePlots.size; i++)
   { PlotObject& currentPlot=this->thePlots[i];

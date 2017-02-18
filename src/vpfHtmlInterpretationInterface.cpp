@@ -482,8 +482,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
     out << "<b>Failed to parse file: " << theFile.fileName << ".</b> Details:<br>" << failureStream.str();
   std::stringstream buttonStream, submitModPageJS;
   submitModPageJS
-  //  << "submitStringAsMainInput(document.getElementById('mainInput').value, 'spanSubmitReport', 'modifyPage');"
-  << "submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage', 'spanSubmitReport');"
+  << "submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage', null, 'spanSubmitReport');"
   ;
   buttonStream
   << "<button "

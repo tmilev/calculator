@@ -4528,7 +4528,7 @@ bool CalculatorFunctionsGeneral::innerPlotViewWindow
     return false;
   Vector<double> widthHeight;
   Plot emptyPlot;
-  emptyPlot.viewWindowPriority=1;
+  emptyPlot.priorityViewWindow=1;
   bool isGood=false;
   if (theCommands.GetVectorDoublesFromFunctionArguments(input, widthHeight, 2) )
   { isGood=true;
@@ -4555,10 +4555,23 @@ bool CalculatorFunctionsGeneral::innerPlotViewWindow
   return output.AssignValue(emptyPlot, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerPlotSetId
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSetId");
+  Plot emptyPlot;
+  emptyPlot.priorityViewWindow=0;
+  emptyPlot.priorityCanvasName=1;
+  emptyPlot.DesiredHtmlHeightInPixels=100;
+  emptyPlot.DesiredHtmlWidthInPixels=100;
+  if (!input.IsOfType(&emptyPlot.canvasName))
+    emptyPlot.canvasName=input.ToString();
+  return output.AssignValue(emptyPlot, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerPlotViewRectangle
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotViewRectangle");
-  if (input.children.size<3)
+  if (input.size()<3)
     return false;
   Vector<double> lowerLeft, upperRight;
   if (!theCommands.GetVectorDoubles(input[1], lowerLeft, 2) || !theCommands.GetVectorDoubles(input[2], upperRight, 2))
@@ -4569,7 +4582,7 @@ bool CalculatorFunctionsGeneral::innerPlotViewRectangle
   emptyPlot.lowBoundY=lowerLeft[1];
   emptyPlot.theUpperBoundAxes=upperRight[0];
   emptyPlot.highBoundY=upperRight[1];
-  emptyPlot.viewWindowPriority=1;
+  emptyPlot.priorityViewWindow=1;
   emptyPlot.DesiredHtmlHeightInPixels=100;
   emptyPlot.DesiredHtmlWidthInPixels=100;
   return output.AssignValue(emptyPlot, theCommands);

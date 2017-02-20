@@ -2143,6 +2143,10 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
       thePlot.flagIncludeExtraHtmlDescriptions=
       (theFormat==0) ? true : theFormat->flagIncludeExtraHtmlDescriptionsInPlots;
       thePlot.flagPlotShowJavascriptOnly=this->owner->flagPlotShowJavascriptOnly;
+      //stOutput << "<br>DEBUG: Owner flagPlotnoctrls: "
+      //<< this->owner->flagPlotNoControls
+      //<< "<br>";
+
       out << thePlot.GetPlotHtml(*this->owner);
       if (this->owner->flagWriteLatexPlots)
       { out << this->owner->WriteDefaultLatexFileReturnHtmlLink

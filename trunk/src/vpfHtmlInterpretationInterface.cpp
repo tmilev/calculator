@@ -54,6 +54,8 @@ std::string HtmlInterpretation::GetProblemSolution()
   Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
   Calculator theInterpreteR;
   theInterpreteR.init();
+  theInterpreteR.flagPlotNoControls=false;
+  theInterpreteR.flagWriteLatexPlots=false;
   if(!theProblem.PrepareCommands(comments))
   { out << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
     return out.str();
@@ -141,18 +143,77 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
 #endif // MACRO_use_MySQL
 }
 
+std::string HtmlInterpretation::GetSanitizedComment
+(const Expression& input, FormatExpressions& theFormat)
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetSanitizedComment");
+  if (input.IsOfType<std::string>())
+    return input.ToString(&theFormat);
+  if (input.IsOfType<Plot>())
+    return input.ToString(&theFormat);
+  if (input.HasType<Plot>())
+    return "";
+  if (input.owner==0)
+    return "";
+  if (input.StartsWith(input.owner->opRulesOff()) ||
+      input.StartsWith(input.owner->opRulesOn()))
+    return "";
+  //<- expression has a partially drawn plot-> not displaying.
+  return input.ToString(&theFormat);
+}
+
+std::string HtmlInterpretation::GetCommentsInterpretation
+(Calculator& theInterpreterWithAdvice,
+ int indexShift, FormatExpressions& theFormat)
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetCommentsInterpretation");
+  std::stringstream out;
+  theFormat.flagExpressionIsFinal=true;
+  theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+  theFormat.flagUseQuotes=false;
+
+  //stOutput << "DEBUG: theInterpreterWithAdvice.flagPlotNoCtrls: "
+  //<< theInterpreterWithAdvice.flagPlotNoControls;
+  if (indexShift>=theInterpreterWithAdvice.theProgramExpression.size())
+  { stOutput << "DEBUG: something is very wrong with indexshift in comments!";
+    return "";
+  }
+  const Expression& currentE=theInterpreterWithAdvice.theProgramExpression[indexShift][1];
+  //out << "DEBUG: currentE: " << CGI::StringToHtmlString( currentE.ToString(), true);
+  if (!currentE.StartsWith(theInterpreterWithAdvice.opEndStatement()))
+  { //out << "<hr>DEBUG: currentE is not starting with commands!<hr>";
+    out << HtmlInterpretation::GetSanitizedComment
+    (currentE, theFormat);
+    return out.str();
+  }
+  //out << "<hr>DEBUG: case currentE is commandList!<hr>CurrentE: "
+  //<< CGI::StringToHtmlString(currentE.ToString(), true)
+  //;
+  std::string currentS;
+  for (int i=1; i<currentE.size(); i++ )
+  { currentS=
+    HtmlInterpretation::GetSanitizedComment
+    (currentE[i], theFormat);
+    if (currentS=="")
+      continue;
+    out << currentS;
+    //out << " DEBUG: Lispified: "
+    //<< CGI::StringToHtmlString( currentE[i].ToStringSemiFull() , true);
+    if (i!=currentE.size()-1)
+      out << "<br>";
+  }
+  return out.str();
+}
+
 std::string HtmlInterpretation::SubmitProblemPreview()
 { MacroRegisterFunctionWithName("HtmlInterpretation::SubmitProblemPreview");
   double startTime=theGlobalVariables.GetElapsedSeconds();
-  std::stringstream studentInterpretation;
   std::string lastStudentAnswerID;
   std::string lastAnswer;
-  std::stringstream out;
+  std::stringstream out, studentAnswerSream;
   MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   for (int i=0; i<theArgs.size(); i++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID))
       lastAnswer= "("+ CGI::URLStringToNormal(theArgs[i], false) + "); ";
-  studentInterpretation << lastAnswer;
+  studentAnswerSream << lastAnswer;
   out << "Your answer(s): \\(" << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem(theGlobalVariables.UserRequestRequiresLoadingRealExamData());
@@ -178,15 +239,19 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
   }
-  std::stringstream studentInterpretationWithComments;
-  if (MathRoutines::StringTrimWhiteSpace( currentA.commandsBeforeInterpretation)!="")
-    studentInterpretationWithComments << "CommandEnclosure{}{" << currentA.commandsBeforeInterpretation << "}; ";
-  studentInterpretationWithComments << studentInterpretation.str();
-
   Calculator theInterpreteR;
   theInterpreteR.flagUseLnInsteadOfLog=true;
   theInterpreteR.init();
-  theInterpreteR.Evaluate(studentInterpretationWithComments.str());
+  theInterpreteR.flagWriteLatexPlots=false;
+  theInterpreteR.flagPlotNoControls=true;
+  std::stringstream studentAnswerWithComments;
+  studentAnswerWithComments
+  << "CommandEnclosure{}("
+  << currentA.commandsCommentsBeforeInterpretatioN
+  << ");"
+  << studentAnswerSream.str();
+
+  theInterpreteR.Evaluate(studentAnswerWithComments.str());
   if (theInterpreteR.syntaxErrors!="")
   { out << "<span style=\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, true);
@@ -198,26 +263,29 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
   }
-  const Expression& studentAnswerNoContextE=theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1];
-  out << "<span style=\"color:magenta\"><b>Interpreting as:</b></span><br>";
   FormatExpressions theFormat;
   theFormat.flagUseLatex=true;
   theFormat.flagUsePmatrix=true;
+  const Expression& studentAnswerNoContextE=theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1];
+  out << "<span style=\"color:magenta\"><b>Interpreting as:</b></span><br>";
   out << "\\(" << studentAnswerNoContextE.ToString(&theFormat) << "\\)";
-  if (currentA.commandIndicesVisibleCommentsBeforeSubmission.size==0)
-  { out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
-    return out.str();
-  }
   Calculator theInterpreterWithAdvice;
   theInterpreterWithAdvice.flagUseLnInsteadOfLog=true;
   theInterpreterWithAdvice.init();
   theInterpreterWithAdvice.flagWriteLatexPlots=false;
+  theInterpreterWithAdvice.flagPlotNoControls=true;
   std::stringstream calculatorInputStream;
   calculatorInputStream << "CommandEnclosure{}("
   << currentA.commandsBeforeAnswer << ");";
   calculatorInputStream << "CommandEnclosure{}("
-  << currentA.answerId << " = " << lastAnswer << "); ";
-  calculatorInputStream << currentA.commandsCommentsBeforeSubmissionOnly;
+  << currentA.answerId << " = " << lastAnswer
+  << "); ";
+  bool hasCommentsBeforeSubmission=
+  (MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission)!="");
+  if (hasCommentsBeforeSubmission)
+    calculatorInputStream << "CommandEnclosure{}("
+    <<  currentA.commandsCommentsBeforeSubmission
+    << ");";
   theInterpreterWithAdvice.Evaluate(calculatorInputStream.str());
   if (theInterpreterWithAdvice.syntaxErrors!="")
   { out << "<br><span style=\"color:red\"><b>"
@@ -241,20 +309,9 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
   }
-  theFormat.flagExpressionIsFinal=true;
-  theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
-  theFormat.flagUseQuotes=false;
-  for (int j=0; j<currentA.commandIndicesVisibleCommentsBeforeSubmission.size; j++)
-  { int actualIndex=3+currentA.commandIndicesVisibleCommentsBeforeSubmission[j];//<-adding 3 to actual index; the first
-    //3 indices are reserved.
-    if (actualIndex>=theInterpreterWithAdvice.theProgramExpression.size() )
-      continue;
-    const Expression& currentE=theInterpreterWithAdvice.theProgramExpression[actualIndex][1];
-    theFormat.flagUseLatex=true;
-    theFormat.flagUseQuotes=false;
-    theFormat.flagExpressionIsFinal=true;
-    out << currentE.ToString(&theFormat);
-  }
+  if (hasCommentsBeforeSubmission)
+    out << HtmlInterpretation::GetCommentsInterpretation
+    (theInterpreterWithAdvice, 3, theFormat);
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).<hr>";
   if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn() )
     out << "<hr>Logged-in as admin with debug flag on = including (lots of) details. "
@@ -549,7 +606,6 @@ std::string HtmlInterpretation::SubmitProblem()
   { out << "<b>Failed to parse problem. </b>Comments: " << comments.str();
     return out.str();
   }
-  Calculator theInterpreter;
   if (!theProblem.theProblemData.flagRandomSeedGiven && !theProblem.flagIsForReal)
     out << "<b>Random seed not given.</b>";
 //  stOutput << "<b>DEBUG remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
@@ -596,19 +652,38 @@ std::string HtmlInterpretation::SubmitProblem()
   currentA.currentAnswerURLed=CGI::StringToURLString(currentA.currentAnswerClean, false);//<-encoding back to overwrite malformed input
   //stOutput << "<hr>DEBUG: Processing answer: " << currentA.currentAnswerClean << " to answer object: " << currentA.ToString();
   theProblem.studentTagsAnswered.AddSelectionAppendNewIndex(answerIdIndex);
-  std::stringstream studentAnswerStream, completedProblemStream;
-  completedProblemStream << currentA.commandsBeforeAnswer;
-  studentAnswerStream << currentA.answerId << "= (" << currentA.currentAnswerClean << ");";
-  completedProblemStream << studentAnswerStream.str();
+  std::stringstream completedProblemStream;
+  completedProblemStream << "CommandEnclosure{}("
+  << currentA.commandsBeforeAnswer
+  << ");";
+  completedProblemStream << "CommandEnclosure{}("
+  << currentA.answerId << "= (" << currentA.currentAnswerClean << ");"
+  << ");"
+  ;
+  //stOutput << "DEBUG: " << "adding: commands: " << currentA.commandsCommentsBeforeSubmissionOnly;
+  bool hasCommentsBeforeSubmission=
+  (MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission)!="");
+  if (hasCommentsBeforeSubmission)
+    completedProblemStream
+    << "CommandEnclosure{}("
+    << currentA.commandsCommentsBeforeSubmission
+    << ");";
   completedProblemStream << theProblem.CleanUpCommandString(currentA.commandVerificationOnly);
   //stOutput << "<br>DEBUG: input to the calculator: " << completedProblemStream.str() << "<hr>";
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
+  Calculator theInterpreter;
   theInterpreter.init();
+  theInterpreter.flagWriteLatexPlots=false;
+  theInterpreter.flagPlotNoControls=true;
+
   theInterpreter.Evaluate(completedProblemStream.str());
   if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors!="")
   { out << "<b>Error while processing your answer(s).</b> Here's what I understood. ";
     Calculator isolatedInterpreter;
     isolatedInterpreter.init();
+    isolatedInterpreter.flagWriteLatexPlots=false;
+    isolatedInterpreter.flagPlotNoControls=true;
+
     theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
     isolatedInterpreter.Evaluate("("+currentA.currentAnswerClean+")");
     if (isolatedInterpreter.syntaxErrors!="")
@@ -631,6 +706,7 @@ std::string HtmlInterpretation::SubmitProblem()
     isCorrect=false;
   else
     isCorrect=(mustBeOne==1);
+  FormatExpressions theFormat;
   out << "<table width=\"300\">";
   if (!isCorrect)
   { out << "<tr><td><span style=\"color:red\"><b>Your answer appears to be incorrect. </b></span></td></tr>";
@@ -639,7 +715,12 @@ std::string HtmlInterpretation::SubmitProblem()
       << "Comments: " << theInterpreter.Comments.str() << "<hr>Calculator input was:<hr>"
       << theInterpreter.inputString << "<hr></td></tr>";
   } else
-    out << "<tr><td><span style=\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
+  { out << "<tr><td><span style=\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
+  }
+  if (hasCommentsBeforeSubmission)
+    out << "<tr><td>" << HtmlInterpretation::GetCommentsInterpretation
+    (theInterpreter, 3, theFormat) << "</td></tr>\n";
+
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   UserCalculator& theUser=theProblem.currentUseR;
@@ -701,12 +782,12 @@ std::string HtmlInterpretation::SubmitProblem()
 #ifdef MACRO_use_MySQL
   if (theProblem.flagIsForReal)
   { std::stringstream comments;
-    /*if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      stOutput << "<hr>DEBUG: adding prob data for file name: " << theProblem.fileName
-      << "<br>"
-      << currentProblemData.ToString() << "<br> into:<br> "
-      << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString()
-      << "<hr>";*/
+    //if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
+    //  stOutput << "<hr>DEBUG: adding prob data for file name: " << theProblem.fileName
+    //  << "<br>"
+    //  << currentProblemData.ToString() << "<br> into:<br> "
+    //  << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString()
+    //  << "<hr>";
     theUser.SetProblemData(theProblem.fileName, currentProblemData);
     //if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
     //  stOutput << "<hr>result: " << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString() << "<hr>";
@@ -928,6 +1009,8 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
   }
   Calculator theInterpreteR;
   theInterpreteR.init();
+  theInterpreteR.flagPlotNoControls=true;
+  theInterpreteR.flagWriteLatexPlots=false;
   std::stringstream answerCommands;
   answerCommands << currentA.commandsBeforeAnswer;
   answerCommands << "CommandEnclosure{}(" << currentA.commandsNoEnclosureAnswerOnGiveUpOnly << ");";

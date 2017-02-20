@@ -40,6 +40,14 @@ public:
   (bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& columnLabels,
    const std::string& hostWebAddressWithPort);
   static std::string ToStringCalculatorArgumentsHumanReadable();
+  static std::string GetSanitizedComment
+  (const Expression& input,
+  FormatExpressions& theFormat);
+  static std::string GetCommentsInterpretation
+  (Calculator& theInterpreterWithAdvice,
+   int indexShift, FormatExpressions& theFormat)
+
+  ;
   static std::string ToStringNavigation();
 };
 

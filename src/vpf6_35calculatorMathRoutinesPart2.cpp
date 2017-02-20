@@ -1167,7 +1167,13 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
     theDoubleValue=input.GetValue<double>();
   }
   if (hasDoubleValue)
-  { out << " " << FloatingPoint::DoubleToString(theDoubleValue);
+  { std::string theDoubleString=FloatingPoint::DoubleToString(theDoubleValue);
+    if (theDoubleString.size()>0)
+    { if (theDoubleString[0]=='-')
+        out << "(" << theDoubleString << ")";
+      else
+        out << " " << theDoubleString;
+    }
     return output.AssignValue(out.str(), theCommands);
   }
   Expression opE, leftE, rightE;

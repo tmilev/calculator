@@ -4752,9 +4752,11 @@ bool CalculatorFunctionsGeneral::innerPlotPoint(Calculator& theCommands, const E
   Plot theFinalPlot;
   PlotObject thePlot;
   thePlot.colorRGB=CGI::RedGreenBlue(0,0,0);
-  if (input.children.size>3)
-    if (input[3].IsOfType<std::string>())
+  if (input.size()>3)
+  { if (input[3].IsOfType<std::string>())
       DrawingVariables::GetColorIntFromColorString(input[3].GetValue<std::string>(), thePlot.colorRGB);
+    thePlot.colorRGBJS=input[3].ToString();
+  }
   thePlot.thePoints.AddOnTop(theV);
   thePlot.thePlotType="point";
   theFinalPlot.thePlots.AddOnTop(thePlot);

@@ -1385,16 +1385,16 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   else
     out << "theCanvas.flagShowPerformance=true;\n";
   out.precision(7);
-  out << "theCanvas.drawLine([" << this->theLowerBoundAxes*1.05
-  << ",0],[" << this->theUpperBoundAxes*1.05 << ",0], 'black');\n";
-  out << "theCanvas.drawLine([0," << this->lowBoundY *1.05
-  << "],[0," << this->highBoundY*1.05 << "], 'black');\n";
+  out << "theCanvas.drawLine([" << this->theLowerBoundAxes*1.10
+  << ",0],[" << this->theUpperBoundAxes*1.10 << ",0], 'black');\n";
+  out << "theCanvas.drawLine([0," << this->lowBoundY *1.10
+  << "],[0," << this->highBoundY*1.10 << "], 'black');\n";
   out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black');\n";
   out << "theCanvas.drawText([1,-0.2],'1','black');\n";
   out << "theCanvas.setViewWindow("
-  << "[" << this->theLowerBoundAxes << ", " << this->lowBoundY << "]"
+  << "[" << this->theLowerBoundAxes*1.10 << ", " << this->lowBoundY*1.10 << "]"
   << ", "
-  << "[" << this->theUpperBoundAxes << ", " << this->highBoundY << "]"
+  << "[" << this->theUpperBoundAxes*1.10 << ", " << this->highBoundY*1.10 << "]"
   << ");\n";
 
   for (int i=0; i<this->thePlots.size; i++)
@@ -1403,6 +1403,17 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     { out
       << "theCanvas." << theFnPlots[i]
       ;
+      continue;
+    }
+    if (currentPlot.thePlotType=="point")
+    { for (int j=0; j<currentPlot.thePoints.size; j++)
+        out
+        << "theCanvas.drawPoint("
+        << currentPlot.thePoints[j].ToStringSquareBracketsBasicType()
+        << ", "
+        << "\"" << currentPlot.colorRGBJS << "\""
+        << ");\n";
+        ;
       continue;
     }
     out << "theCanvas.drawPath( ";
@@ -1415,7 +1426,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     out << "]";
     out << ", "
     << "\"" << DrawingVariables::GetColorHtmlFromColorIndex
-    (this->thePlots[i].colorRGB) << "\""
+    (currentPlot.colorRGB) << "\""
     << ");\n";
   }
   out

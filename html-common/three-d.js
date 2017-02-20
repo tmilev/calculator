@@ -353,9 +353,18 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
     var theY=this.theFunction(theX);
     var theCoords=theCanvas.coordsMathToScreen([theX, theY]);
     theSurface.moveTo(theCoords[0], theCoords[1]);
+    var skippedValues=false;
     for (var i=0; i<this.numSegments; i++)
     { theX+=this.Delta;
       theY=this.theFunction(theX);
+      if (!isFinite(theY) )
+        console.log('Failed to evaluate: ' + this.theFunction);
+      if (Math.abs(theY)>100000)
+      { if (!skippedValues)
+          console.log('Function result: ' + theY + " is too large, skipping. Further errors suppressed.");
+        skippedValues=true;
+        continue;
+      }
       theCoords=theCanvas.coordsMathToScreen([theX, theY]);
       theSurface.lineTo(theCoords[0], theCoords[1]);
     }
@@ -1744,9 +1753,10 @@ function calculatorCanvasMouseWheel(theCanvasContainer, theEvent)
   var theCanvas=calculatorCanvases[theCanvasContainer.id];
   if (theCanvas===undefined || theCanvas===null)
     return;
-  theCanvas.scale+= theWheelDelta *3;
+  var theIncrement=0.3;
+  theCanvas.scale+= theWheelDelta *theIncrement;
   if (theCanvas.scale<=0)
-    theCanvas.scale=3;
+    theCanvas.scale=theIncrement;
   theCanvas.redraw();
 }
 

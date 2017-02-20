@@ -1070,7 +1070,7 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
   if (!theBase.IsInteger(&baseInt))
     return false;
   argNum=theArg.GetNumerator();
-  LargeIntUnsigned argDen=theArg.GetDenominator();
+  LargeInt argDen=theArg.GetDenominator();
   double doubleBase= baseInt.GetDoubleValue();
   double doubleArgNum=argNum.GetDoubleValue();
   if (FloatingPoint::log(doubleArgNum)/FloatingPoint::log(doubleBase)>1000)
@@ -1078,6 +1078,11 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
   int intPart=0;
   while (argNum% baseInt ==0)
   { intPart++;
+    argNum/=baseInt;
+    changed=true;
+  }
+  while (argDen% baseInt ==0)
+  { intPart--;
     argNum/=baseInt;
     changed=true;
   }

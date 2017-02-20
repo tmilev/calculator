@@ -557,7 +557,7 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypeSubmit, "true", "", submitRandomSeed) << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params, \""
-  << requestTypeSubmit <<  "\");\n"
+  << requestTypeSubmit << "\");\n"
   << "}\n"
   << "function giveUp(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
@@ -925,17 +925,11 @@ bool SyntacticElementHTML::IsCalculatorHidden()
   return this->GetKeyValue("class")=="calculatorHidden";
 }
 
-bool SyntacticElementHTML::IsCalculatorHiddenCommentsBeforeSubmission()
-{ if (this->syntacticRole!="command")
-    return false;
-  return this->GetKeyValue("class") =="calculatorHiddenIncludeInCommentsBeforeSubmission";
-}
-
 bool SyntacticElementHTML::IsHidden()
 { if (this->syntacticRole!="command")
     return false;
   std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculatorHidden" || tagClass== "calculatorHiddenIncludeInCommentsBeforeSubmission"
+  return tagClass=="calculatorHidden" || tagClass== "calculatorCommentsBeforeInterpretation"
 ;
 }
 
@@ -959,25 +953,16 @@ bool SyntacticElementHTML::IsCommentBeforeSubmission()
 { if (this->syntacticRole!="command")
     return false;
   std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculatorCommentBeforeSubmission"
-  ||
-  tagClass=="calculatorHiddenIncludeInCommentsBeforeSubmission"
+  return
+  tagClass=="calculatorCommentsBeforeSubmission"
 ;
 }
 
-bool SyntacticElementHTML::IsVisibleCommentBeforeSubmission()
+bool SyntacticElementHTML::IsCommentBeforeInterpretation()
 { if (this->syntacticRole!="command")
     return false;
   std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculatorCommentBeforeSubmission"
-;
-}
-
-bool SyntacticElementHTML::IsCommentAfterSubmission()
-{ if (this->syntacticRole!="command")
-    return false;
-  std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculatorCommentAfterSubmission"
+  return tagClass=="calculatorCommentsBeforeInterpretation"
 ;
 }
 
@@ -1067,6 +1052,8 @@ bool CalculatorHTML::PrepareCommands(std::stringstream &comments)
       return false;
     if (!this->PrepareCommentsBeforeSubmission(this->theProblemData.theAnswers[i], comments))
       return false;
+    if (!this->PrepareCommentsBeforeInterpretation(this->theProblemData.theAnswers[i], comments))
+      return false;
   }
   return true;
 }
@@ -1096,36 +1083,38 @@ bool CalculatorHTML::PrepareCommentsBeforeSubmission
 (Answer& theAnswer, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommentsBeforeSubmission");
   (void) comments;
-  std::stringstream streamCommands, streamCommandsBeforeInterpretation;
-  //stOutput << "<hr>DEBUG: Preparing give-up commands for: "
+  std::stringstream streamCommands;
+  //stOutput << "<hr>DEBUG: Preparing comment commands for: "
   //<< theAnswer.answerId << "<hr>";
-  int counter=0;
 //  stOutput << "<hr>DEBUG: Call stack: " << crash.GetStackTraceEtcErrorMessage();
-  theAnswer.commandIndicesCommentsBeforeSubmissioN.SetSize(0);
-  theAnswer.commandIndicesVisibleCommentsBeforeSubmission.SetSize(0);
   for (int i=0; i<this->theContent.size; i++)
   { SyntacticElementHTML& currentElt=this->theContent[i];
     if (!currentElt.IsCommentBeforeSubmission())
       continue;
-    //stOutput << "<br>Current element: " << currentElt.ToStringDebug();
-    //stOutput << "<br>Comparing: " << theAnswer.answerId << " to: "
-    //<< currentElt.GetKeyValue("name");
-    if (currentElt.GetKeyValue("name")==theAnswer.answerId)
-    { streamCommands << "CommandEnclosure{}{"
-      << this->CleanUpCommandString(currentElt.content)
-      << "};";
-      theAnswer.commandIndicesCommentsBeforeSubmissioN.AddOnTop(counter);
-      if (currentElt.IsVisibleCommentBeforeSubmission())
-        theAnswer.commandIndicesVisibleCommentsBeforeSubmission.AddOnTop(counter);
-      else
-        streamCommandsBeforeInterpretation << this->CleanUpCommandString(currentElt.content);
-      counter++;
-    }
+    if (currentElt.GetKeyValue("name")!=theAnswer.answerId)
+      continue;
+    streamCommands << this->CleanUpCommandString(currentElt.content);
   }
-  theAnswer.commandsCommentsBeforeSubmissionOnly=streamCommands.str();
-  theAnswer.commandsBeforeInterpretation=streamCommandsBeforeInterpretation.str();
-//  stOutput << "<br>Final comments command: "
-//  << theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly;
+  theAnswer.commandsCommentsBeforeSubmission=streamCommands.str();
+  //stOutput << "<br>DEBUG: Final comments command: "
+  //<< theAnswer.commandsBeforeInterpretation;
+  return true;
+}
+
+bool CalculatorHTML::PrepareCommentsBeforeInterpretation
+(Answer& theAnswer, std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommentsBeforeInterpretation");
+  (void) comments;
+  std::stringstream streamCommands;
+  for (int i=0; i<this->theContent.size; i++)
+  { SyntacticElementHTML& currentElt=this->theContent[i];
+    if (!currentElt.IsCommentBeforeInterpretation())
+      continue;
+    if (currentElt.GetKeyValue("name")!=theAnswer.answerId)
+      continue;
+    streamCommands << this->CleanUpCommandString(currentElt.content);
+  }
+  theAnswer.commandsCommentsBeforeInterpretatioN =streamCommands.str();
   return true;
 }
 
@@ -1164,8 +1153,9 @@ bool CalculatorHTML::PrepareCommandsSolution
 bool CalculatorHTML::PrepareCommandsAnswer
 (Answer& theAnswer, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsAnswer");
-  std::stringstream streamCommands;
-  streamCommands << this->GetProblemHeaderEnclosure();//first calculator enclosure contains the header
+  std::stringstream streamCommandS;
+  streamCommandS << this->GetProblemHeaderEnclosure();//first calculator enclosure contains the header
+  std::stringstream streamCommandsBody;
   for (int i=0; i<this->theContent.size; i++)
   { SyntacticElementHTML& currentElt=this->theContent[i];
     if (!currentElt.IsCalculatorHidden() && !currentElt.IsCalculatorCommand()
@@ -1174,14 +1164,17 @@ bool CalculatorHTML::PrepareCommandsAnswer
     std::string commandCleaned=this->CleanUpCommandString(this->theContent[i].content);
     std::string commandEnclosed="CommandEnclosure{}( " + commandCleaned + " );";
     if (currentElt.IsAnswer() && currentElt.GetKeyValue("id")==theAnswer.answerId)
-    { theAnswer.commandsBeforeAnswer = streamCommands.str();
+    { std::string stringCommandsBody=streamCommandsBody.str();
+      if (stringCommandsBody!="")
+        streamCommandS << "CommandEnclosure{}(" << stringCommandsBody << ");\n";
+      theAnswer.commandsBeforeAnswer = streamCommandS.str();
       theAnswer.commandVerificationOnly=commandCleaned;
       return true;
     }
     if (this->theContent[i].IsCalculatorHidden() || this->theContent[i].IsCalculatorCommand())
-      streamCommands << commandEnclosed;
+      streamCommandsBody << commandEnclosed;
   }
-  comments << "<b>Somethins is wrong: did not find answer for answer tag: "
+  comments << "<b>Something is wrong: did not find answer for answer tag: "
   << theAnswer.answerId << ". </b>";
   return false;
 }
@@ -1925,10 +1918,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     this->calculatorClasses.AddOnTop("calculatorSolution");
     this->calculatorClasses.AddOnTop("calculatorShowToUserOnly");
     this->calculatorClasses.AddOnTop("calculatorHidden");
-    this->calculatorClasses.AddOnTop("calculatorHiddenIncludeInCommentsBeforeSubmission");
+    this->calculatorClasses.AddOnTop("calculatorCommentsBeforeInterpretation");
+    this->calculatorClasses.AddOnTop("calculatorCommentsBeforeSubmission");
     this->calculatorClasses.AddOnTop("calculatorAnswer");
     this->calculatorClasses.AddOnTop("calculatorAnswerOnGiveUp");
-    this->calculatorClasses.AddOnTop("calculatorCommentBeforeSubmission");
     this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
     this->calculatorClasses.AddOnTop("calculatorExamProblem");
     this->calculatorClasses.AddOnTop("calculatorManageClass");
@@ -2294,7 +2287,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
       continue;
     }
     if (!currentE.IsCommentBeforeSubmission() &&
-        !currentE.IsCommentAfterSubmission() &&
+        !currentE.IsCommentBeforeInterpretation() &&
         !currentE.IsAnswerOnGiveUp() &&
         !currentE.IsSolution())
       continue;

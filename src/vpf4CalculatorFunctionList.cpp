@@ -1094,13 +1094,16 @@ D-B;\
   this->AddOperationInnerHandler
   ("LogBase", CalculatorFunctionsGeneral::innerLogBaseSimpleCases, "",
    "If the argument is a power of the base does the computation. ",
-   "\\log_5 25; log_5 1; log_5 (1/5)", true, false, "CalculatorFunctionsGeneral::innerLogBaseSimpleCases",
+   "\\log_5 25; log_5 1; log_5 (1/5)", true, false,
+   "CalculatorFunctionsGeneral::innerLogBaseSimpleCases",
    "logBaseSimpleCases")
    ;
   this->AddOperationInnerHandler
   ("LogBase", CalculatorFunctionsGeneral::innerLogBase, "",
-   "Logarithm function (arbitrary base). Equivalent to \\log_{{a}} {{b}}= (\\log b)/(\\log a). ",
-   "\\log_10 5; \\log _e 10; \\ln 10; \\log_a b", true, false, "CalculatorFunctionsGeneral::innerLogBase",
+   "Logarithm function (arbitrary base). Equivalent to \
+    \\log_{{a}} {{b}}= (\\log b)/(\\log a). ",
+   "\\log_10 5; \\log _e 10; \\ln 10; \\log_a b", true, false,
+   "CalculatorFunctionsGeneral::innerLogBase",
    "LogBase")
    ;
   this->AddOperationInnerHandler
@@ -1438,6 +1441,17 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerPlotSegment",
    "PlotSegment")
    ;
+  this->AddOperationInnerHandler ("PlotSetId",
+    CalculatorFunctionsGeneral::innerPlotSetId, "",
+   " Creates an empty plot with a given canvas id. \
+     If you add a nameless plot to a named one the \
+     the resulting plot acquires the canvas id. \
+   ",
+   "PlotSetId( myId)", true, false,
+   "CalculatorFunctionsGeneral::innerPlotSetId",
+   "PlotSetId")
+   ;
+
   this->AddOperationInnerHandler ("GetVariablesExcludeNamedConstants", CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants, "",
    "Gets the variables on which the expression depends. Excludes the named constants. Here, the word ``variables'' is to be thought of as \
    ``free variables'' but the possibility for small distinctions is \

@@ -179,6 +179,7 @@ public:
   std::string PrepareUserInputBoxes();
   bool PrepareCommandsAnswerOnGiveUp(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommentsBeforeSubmission(Answer& theAnswer, std::stringstream& comments);
+  bool PrepareCommentsBeforeInterpretation(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsSolution(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsAnswer(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsGenerateProblem(std::stringstream& comments);

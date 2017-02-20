@@ -255,6 +255,7 @@ public:
   static bool innerPlotFill(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotRectangle(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotLabel(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotSetId(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotViewRectangle(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotViewWindow(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotPoint(Calculator& theCommands, const Expression& input, Expression& output);

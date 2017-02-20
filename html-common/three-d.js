@@ -314,6 +314,27 @@ function SegmentTwoD(inputLeftPt, inputRightPt, inputColor)
   }
 }
 
+function PathTwoD(inputPath, inputColor)
+{ this.path=inputPath;
+  this.color=colorToRGB(inputColor);
+  this.type="path";
+  this.draw=function(theCanvas)
+  { if (inputPath.length<1)
+      return;
+    var theSurface=theCanvas.surface;
+    theSurface.beginPath();
+    theSurface.strokeStyle=colorRGBToString(this.color);
+    theSurface.fillStyle=colorRGBToString(this.color);
+    var theCoords=theCanvas.coordsMathToScreen(this.path[0]);
+    theSurface.moveTo(theCoords[0], theCoords[1]);
+    for (var i=1; i<this.path.length; i++)
+    { theCoords=theCanvas.coordsMathToScreen(this.path[i]);
+      theSurface.lineTo(theCoords[0], theCoords[1]);
+    }
+    theSurface.stroke();
+  }
+}
+
 function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, inputColor)
 { this.theFunction=inputTheFn;
   this.leftPt=inputLeftPt;
@@ -365,12 +386,17 @@ function CanvasTwoD(inputCanvas)
   this.canvasContainer= null;
   this.canvasId= null;
   this.screenBasisOrthonormal= [];
+  this.spanMessages=null;
+  this.spanCriticalErrors=null;
+  this.spanControls=null;
   this.boundingBoxMathScreen= [[-0.01, -0.01], [0.01, 0.01]];
   this.boundingBoxMath= [[-0.01,-0.01],[0.01,0.01]];
   this.width= inputCanvas.width;
   this.height= inputCanvas.height;
   this.centerX= inputCanvas.width/2;
   this.centerY= inputCanvas.height/2;
+  this.oldViewWindowCenterMath=[0,0];
+  this.lastViewWindow=[[-5,-5],[5,5]];
   this.scale= 50;
   this.mousePosition= [];
   this.clickedPosition= [];
@@ -394,6 +420,10 @@ function CanvasTwoD(inputCanvas)
   { var newLine=new SegmentTwoD(inputLeftPt, inputRightPt, inputColor);
     this.theObjects.push(newLine);
   };
+  this.drawPath= function (inputPath, inputColor)
+  { var newPath=new PathTwoD(inputPath, inputColor);
+    this.theObjects.push(newPath);
+  };
   this.drawFunction= function (inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor)
   { var newPlot=new PlotTwoD(inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor);
     this.theObjects.push(newPlot);
@@ -403,10 +433,10 @@ function CanvasTwoD(inputCanvas)
     this.theObjects.push(newPlot);
   };
   this.setViewWindow= function(leftLowPt, rightUpPt)
-  { var leftLowScreen= this.coordsMathToScreen(leftLowPt);
+  { this.lastViewWindow=[leftLowPt,rightUpPt];
+    var leftLowScreen= this.coordsMathToScreen(leftLowPt);
     var rightUpScreen= this.coordsMathToScreen(rightUpPt);
-    var centerScreen=vectorPlusVector(leftLowScreen, rightUpScreen);
-    vectorTimesScalar(centerScreen, 0.5);
+    //console.log("leftLow: "+ leftLowPt+ " rightUp: " + rightUpPt);
     var desiredHeight=Math.abs(rightUpScreen[1]-leftLowScreen[1]);
     var desiredWidth=Math.abs(rightUpScreen[0]-leftLowScreen[0]);
     var candidateScaleHeight=this.scale* this.height/desiredHeight;
@@ -419,12 +449,15 @@ function CanvasTwoD(inputCanvas)
     //console.log("old scale: "+ this.scale);
     this.scale=Math.min(candidateScaleHeight, candidateScaleWidth);
     //console.log("new scale: "+ this.scale);
-    var leftLowScreenRescaled= this.coordsMathToScreen(leftLowPt);
-    var rightUpScreenRescaled= this.coordsMathToScreen(rightUpPt);
-    var centerScreenRescaled=vectorPlusVector(leftLowScreenRescaled, rightUpScreenRescaled);
-    vectorTimesScalar(centerScreenRescaled, 0.5);
-    this.centerX+=this.centerX-centerScreenRescaled[0];
-    this.centerY+=this.centerY-centerScreenRescaled[1];
+    var newViewWindowCenterMath= vectorPlusVector(leftLowPt,rightUpPt);
+    vectorTimesScalar(newViewWindowCenterMath,0.5);
+    var newCenterViewWindowScreenRescaled =
+    this.coordsMathToScreen(newViewWindowCenterMath);
+    var oldCenterViewWindowScreenRescaled =
+    this.coordsMathToScreen(this.oldViewWindowCenterMath);
+    this.centerX=this.centerX+oldCenterViewWindowScreenRescaled[0]-newCenterViewWindowScreenRescaled[0];
+    this.centerY=this.centerY+oldCenterViewWindowScreenRescaled[1]-newCenterViewWindowScreenRescaled[1];
+    this.oldViewWindowCenterMath=newViewWindowCenterMath;
   };
   this.computeBoundingBoxAccountPoint= function(input)
   { var theV=this.coordsMathToMathScreen(input);
@@ -483,10 +516,23 @@ function CanvasTwoD(inputCanvas)
     this.surface=this.canvasContainer.getContext("2d");
     this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
     this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
-    this.spanMessages=document.getElementById(this.canvasId+"Messages");
     this.theObjects=[];
+    this.spanMessages=document.getElementById(this.canvasId+"Messages");
     this.spanCriticalErrors=document.getElementById(this.canvasId+"CriticalErrors");
+    this.spanControls=document.getElementById(this.canvasId+"Controls");
+    this.constructControls();
     this.computeBasis();
+  };
+  this.resetView= function()
+  { this.centerX= inputCanvas.width/2;
+    this.centerY= inputCanvas.height/2;
+    this.oldViewWindowCenterMath=[0,0];
+    this.setViewWindow(this.lastViewWindow[0],this.lastViewWindow[1]);
+    this.redraw();
+  };
+  this.constructControls= function()
+  { var thisString="document.getElementById('"+this.canvasId+"')";
+    this.spanControls.innerHTML="<button style=\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvasTwoD("+thisString+ ").resetView();\">reset view</button>";
   };
   this.coordsMathScreenToMath= function(theCoords)
   { var output=this.screenBasisOrthonormal[0].slice();
@@ -540,7 +586,8 @@ function CanvasTwoD(inputCanvas)
       this.selectedElement="origin";
     else
       this.selectedElement="";
-    this.logStatus();
+    if (this.flagShowPerformance)
+      this.logStatus();
   };
   this.selectEmpty= function()
   { this.selectedElement="";
@@ -1677,6 +1724,7 @@ function testPictureTwoD(inputCanvas1, inputCanvas2)
   theCanvas2.drawLine([-1,0],[1,0], 'green');
   theCanvas2.drawLine([0,-19],[0,1], 'purple');
   theCanvas2.drawText([-1,-1],'(-1,-1)', 'orange');
+  theCanvas2.drawPath([[-2,-2], [3,3],[-1,4]],'cyan')
   theCanvas2.drawFunction(testFunctionPlot, -10,10, 100, 'red');
   theCanvas2.setViewWindow([-1,-19],[1,1]);
   theCanvas2.redraw();

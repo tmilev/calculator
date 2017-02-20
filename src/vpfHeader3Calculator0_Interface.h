@@ -264,6 +264,17 @@ class Expression
     return true;
   }
   template <class theType>
+  bool HasType()const
+  { if (this->IsOfType<theType>())
+      return true;
+    if (this->IsElementaryObject())
+      return false;
+    for (int i=0; i<this->size(); i++)
+      if ((*this)[i].HasType<theType>())
+        return true;
+    return false;
+  }
+  template <class theType>
   bool IsOfType(theType* whichElement)const
   { MacroRegisterFunctionWithName("Expression::IsOfType");
     if (this->owner==0)
@@ -702,11 +713,13 @@ class Plot
   bool flagPlotShowJavascriptOnly;
   bool flagIs3d;
   bool flagIs3dNewLibrary;
-  static int canvasCounter;
-  int viewWindowPriority; //0 or less: compute the view Window. If this quantity is greater than zero,
+  static int canvasCounteR;
+  std::string canvasName;
+  int priorityViewWindow; //0 or less: compute the view Window. If this quantity is greater than zero,
   //the user-given bounding box will overwrite any computations.
   //When adding two plots with positive viewing window priorities, the window with the larger priority is used.
   //If the priorities are equal, the windows are combined to the smallest window that fits both.
+  int priorityCanvasName; //same as priorityViewWindow but with respect to canvas names.
   std::string ToStringDebug();
   std::string GetPlotHtml(Calculator& owner);
   std::string GetPlotHtml3d();

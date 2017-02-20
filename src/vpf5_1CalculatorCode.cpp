@@ -773,25 +773,35 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
 
 void Plot::operator+=(const Plot& other)
 { MacroRegisterFunctionWithName("Plot::operator+=");
-  if (other.viewWindowPriority>this->viewWindowPriority)
+  //stOutput << "<hr>DEBUG: Adding plot with name: "
+  //<< this->canvasName << " to plot with name: "
+  //<< other.canvasName << "<hr>";
+  if (other.priorityCanvasName>this->priorityCanvasName)
+    this->canvasName=other.canvasName;
+  else if (this->canvasName=="" &&
+           this->priorityCanvasName==other.priorityCanvasName)
+    this->canvasName=other.canvasName;
+  if (other.priorityCanvasName>this->priorityCanvasName)
+    this->priorityCanvasName=other.priorityCanvasName;
+  if (other.priorityViewWindow>this->priorityViewWindow)
   { this->highBoundY=other.highBoundY;
     this->lowBoundY=other.lowBoundY;
     this->theLowerBoundAxes=other.theLowerBoundAxes;
     this->theUpperBoundAxes=other.theUpperBoundAxes;
   }
-  if (this->viewWindowPriority>0 && other.viewWindowPriority==this->viewWindowPriority)
+  if (this->priorityViewWindow>0 && other.priorityViewWindow==this->priorityViewWindow)
   { this->highBoundY=MathRoutines::Maximum(this->highBoundY, other.highBoundY);
     this->lowBoundY=MathRoutines::Minimum(this->lowBoundY, other.lowBoundY);
     this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, other.theUpperBoundAxes);
     this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
   }
-  this->viewWindowPriority=MathRoutines::Maximum(this->viewWindowPriority, other.viewWindowPriority);
+  this->priorityViewWindow=MathRoutines::Maximum(this->priorityViewWindow, other.priorityViewWindow);
   this->thePlots.AddListOnTop(other.thePlots);
   this->the3dObjects.AddListOnTop(other.the3dObjects);
-  if (other.viewWindowPriority>this->viewWindowPriority)
+  if (other.priorityViewWindow>this->priorityViewWindow)
   { this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
     this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
-  } else if (this->viewWindowPriority==other.viewWindowPriority)
+  } else if (this->priorityViewWindow==other.priorityViewWindow)
   { if (this->DesiredHtmlHeightInPixels<other.DesiredHtmlHeightInPixels)
       this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
     if (this->DesiredHtmlWidthInPixels<other.DesiredHtmlWidthInPixels)
@@ -801,7 +811,7 @@ void Plot::operator+=(const Plot& other)
 }
 
 bool Plot::operator==(const Plot& other)const
-{ if (this->viewWindowPriority!=other.viewWindowPriority)
+{ if (this->priorityViewWindow!=other.priorityViewWindow)
     return false;
   if (this->DesiredHtmlHeightInPixels!=other.DesiredHtmlHeightInPixels ||
       this->DesiredHtmlWidthInPixels!=other.DesiredHtmlWidthInPixels)
@@ -813,7 +823,11 @@ bool Plot::operator==(const Plot& other)const
     return false;
   return this->thePlots==other.thePlots &&
   this->the3dObjects==other.the3dObjects &&
-  this->boxesThatUpdateMe==other.boxesThatUpdateMe;
+  this->boxesThatUpdateMe==other.boxesThatUpdateMe &&
+  this->canvasName==other.canvasName &&
+  this->priorityCanvasName==other.priorityCanvasName &&
+  this->priorityViewWindow==other.priorityViewWindow
+  ;
 }
 
 void Plot::operator+=(const PlotObject3d& other)
@@ -913,14 +927,15 @@ Plot::Plot()
   this->DesiredHtmlWidthInPixels=600;
   this->defaultLineColor=0;
   this->flagPlotShowJavascriptOnly=false;
-  this->viewWindowPriority=0;
+  this->priorityViewWindow=0;
+  this->priorityCanvasName=0;
   this->flagIs3d=false;
   this->flagIs3dNewLibrary=false;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
 { MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox");
-  if (this->viewWindowPriority>0)
+  if (this->priorityViewWindow>0)
   { if (this->theLowerBoundAxes>this->theUpperBoundAxes)
       this->theUpperBoundAxes=this->theLowerBoundAxes+0.1;
     if (this->lowBoundY>this->highBoundY)
@@ -963,7 +978,7 @@ void Plot::ComputeAxesAndBoundingBox()
 
 void Plot::ComputeAxesAndBoundingBox3d()
 { MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox3d");
-  if (this->viewWindowPriority>0)
+  if (this->priorityViewWindow>0)
   { if (this->theLowerBoundAxes>this->theUpperBoundAxes)
       this->theUpperBoundAxes=this->theLowerBoundAxes+0.1;
     if (this->lowBoundY>this->highBoundY)
@@ -1123,15 +1138,17 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml3d_New");
   owner.flagHasGraphics=true;
   std::stringstream out;
-  this->canvasCounter++;
-  //out << this->ToStringDebug();
-  std::stringstream canvasNameStream;
-  canvasNameStream << "theCanvas" << this->canvasCounter;
-  std::string canvasName=canvasNameStream.str();
+  if (this->canvasName=="")
+  { this->canvasCounteR++;
+    //out << this->ToStringDebug();
+    std::stringstream canvasNameStream;
+    canvasNameStream << "theCanvas" << this->canvasCounteR;
+    this->canvasName=canvasNameStream.str();
+  }
   out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
   << "\" height=\"" << this->DesiredHtmlHeightInPixels << "\" "
-  << "style=\"border:solid 1px\" id=\"theCanvas"
-  << this->canvasCounter
+  << "style=\"border:solid 1px\" id=\""
+  << this->canvasName
   << "\" "
   << "onmousedown=\"calculatorCanvasClick(this, event);\" "
   << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
@@ -1139,16 +1156,16 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   << "(this, event.clientX, event.clientY);\""
   << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
   << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-  << "<span id=\"" << canvasName << "Messages\"></span>"
+  << "<span id=\"" << this->canvasName << "Messages\"></span>"
   << "<script>\n";
-  std::string canvasFunctionName="functionMake"+ canvasName;
+  std::string canvasFunctionName="functionMake"+ this->canvasName;
   out << "function " << canvasFunctionName << "()\n"
   << "{ ";
   for (int i=0; i<this->boxesThatUpdateMe.size; i++)
   { InputBox& currentBox=owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreateIfNotPresent
     (this->boxesThatUpdateMe[i]);
     out << " calculatorPlotUpdaters['"
-    << currentBox.GetSliderName() << "']=" << "'" << canvasName << "'"
+    << currentBox.GetSliderName() << "']=" << "'" << this->canvasName << "'"
     << ";\n";
   }
   List<std::string> theSurfaces;
@@ -1160,11 +1177,11 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
       ;
     }
   }
-  out << "calculatorResetCanvas(document.getElementById('"  << canvasName << "'));\n";
+  out << "calculatorResetCanvas(document.getElementById('"  << this->canvasName << "'));\n";
   out << "var theCanvas=calculatorGetCanvas(document.getElementById('"
-  << canvasName
+  << this->canvasName
   << "'));\n"
-  << "theCanvas.init('" << canvasName << "');\n";
+  << "theCanvas.init('" << this->canvasName << "');\n";
   for (int i=0; i<this->the3dObjects.size; i++)
   { if (this->the3dObjects[i].thePlotType=="surface")
     { out
@@ -1178,7 +1195,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   << "theCanvas.redraw();\n"
   << "}\n"
   << "calculatorGetCanvas(document.getElementById('"
-  << canvasName
+  << this->canvasName
   << "')).canvasResetFunction=" << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n"
   << "</script>"
@@ -1277,7 +1294,7 @@ std::string Plot::GetPlotHtml(Calculator& owner)
   }
 }
 
-int Plot::canvasCounter=0;
+int Plot::canvasCounteR=0;
 
 std::string PlotObject::GetJavascript2dPlot(std::string& outputPlotInstantiationJS)
 { MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascript2dPlot");
@@ -1310,18 +1327,21 @@ std::string PlotObject::GetJavascript2dPlot(std::string& outputPlotInstantiation
 std::string Plot::GetPlotHtml2d_New(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml2d_New");
   owner.flagHasGraphics=true;
+  if (this->canvasName=="")
+  { this->canvasCounteR++;
+    //out << this->ToStringDebug();
+    std::stringstream canvasNameStream;
+    canvasNameStream << "theCanvas" << this->canvasCounteR;
+    this->canvasName=canvasNameStream.str();
+  }
   std::stringstream out;
-  this->canvasCounter++;
   this->ComputeAxesAndBoundingBox();
     //out << this->ToStringDebug();
-  std::stringstream canvasNameStream;
-  canvasNameStream << "theCanvas" << this->canvasCounter;
-  std::string canvasName=canvasNameStream.str();
   if (!this->flagPlotShowJavascriptOnly)
   { out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
     << "\" height=\"" << this->DesiredHtmlHeightInPixels << "\" "
     << "style=\"border:solid 1px\" id=\""
-    << canvasName
+    << this->canvasName
     << "\" "
     << "onmousedown=\"calculatorCanvasClick(this, event);\" "
     << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
@@ -1329,10 +1349,12 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     << "(this, event.clientX, event.clientY);\""
     << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-    << "<span id=\"" << canvasName << "Messages\"></span>";
+    << "<span id=\"" << this->canvasName << "Controls\"></span>"
+    << "<span id=\"" << this->canvasName << "Messages\"></span>"
+    ;
   }
   out << "<script>\n";
-  std::string canvasFunctionName="functionMake"+ canvasName;
+  std::string canvasFunctionName="functionMake"+ this->canvasName;
   out << "function " << canvasFunctionName << "()\n"
   << "{ ";
   for (int i=0; i<this->boxesThatUpdateMe.size; i++)
@@ -1340,7 +1362,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     (this->boxesThatUpdateMe[i]);
     out << " calculatorPlotUpdaters['"
     << currentBox.GetSliderName() << "']="
-    << "'" << canvasName << "'"
+    << "'" << this->canvasName << "'"
     << ";\n";
   }
   List<std::string> theFnPlots;
@@ -1353,11 +1375,11 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     }
   }
   out << "calculatorResetCanvas(document.getElementById('"
-  << canvasName << "'));\n";
+  << this->canvasName << "'));\n";
   out << "var theCanvas=calculatorGetCanvasTwoD(document.getElementById('"
-  << canvasName
+  << this->canvasName
   << "'));\n"
-  << "theCanvas.init('" << canvasName << "');\n";
+  << "theCanvas.init('" << this->canvasName << "');\n";
   if (owner.flagPlotNoControls)
     out << "theCanvas.flagShowPerformance=false;\n";
   else
@@ -1367,7 +1389,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   << ",0],[" << this->theUpperBoundAxes*1.05 << ",0], 'black');\n";
   out << "theCanvas.drawLine([0," << this->lowBoundY *1.05
   << "],[0," << this->highBoundY*1.05 << "], 'black');\n";
-  out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'blabck');\n";
+  out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black');\n";
   out << "theCanvas.drawText([1,-0.2],'1','black');\n";
   out << "theCanvas.setViewWindow("
   << "[" << this->theLowerBoundAxes << ", " << this->lowBoundY << "]"
@@ -1383,26 +1405,24 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
       ;
       continue;
     }
-    for (int j=0; j<currentPlot.thePoints.size-1; j++)
-    { out
-      << "theCanvas.drawLine("
-      <<  currentPlot.thePoints[j].ToStringSquareBracketsBasicType()
-      << ", "
-      << currentPlot.thePoints[j+1].ToStringSquareBracketsBasicType()
-      << ", "
-      << "\""
-      << DrawingVariables::GetColorHtmlFromColorIndex
-      (this->thePlots[i].colorRGB)
-      << "\""
-      << ");\n"
-      ;
+    out << "theCanvas.drawPath( ";
+    out << "[";
+    for (int j=0; j<currentPlot.thePoints.size; j++)
+    { out << currentPlot.thePoints[j].ToStringSquareBracketsBasicType();
+      if (j!=currentPlot.thePoints.size-1)
+        out << ",";
     }
+    out << "]";
+    out << ", "
+    << "\"" << DrawingVariables::GetColorHtmlFromColorIndex
+    (this->thePlots[i].colorRGB) << "\""
+    << ");\n";
   }
   out
   << "theCanvas.redraw();\n"
   << "}\n"
   << "calculatorGetCanvasTwoD(document.getElementById('"
-  << canvasName
+  << this->canvasName
   << "')).canvasResetFunction=" << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n"
   << "</script>"

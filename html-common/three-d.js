@@ -314,23 +314,27 @@ function SegmentTwoD(inputLeftPt, inputRightPt, inputColor)
   }
 }
 
-function PathTwoD(inputPath, inputColor)
+function PathTwoD(inputPath, inputColor, inputFillColor)
 { this.path=inputPath;
   this.color=colorToRGB(inputColor);
+  this.colorFill=colorToRGB(inputFillColor);
+  this.isFilled=false;
   this.type="path";
   this.draw=function(theCanvas)
   { if (inputPath.length<1)
       return;
     var theSurface=theCanvas.surface;
     theSurface.beginPath();
-    theSurface.strokeStyle=colorRGBToString(this.color);
-    theSurface.fillStyle=colorRGBToString(this.color);
     var theCoords=theCanvas.coordsMathToScreen(this.path[0]);
     theSurface.moveTo(theCoords[0], theCoords[1]);
     for (var i=1; i<this.path.length; i++)
     { theCoords=theCanvas.coordsMathToScreen(this.path[i]);
       theSurface.lineTo(theCoords[0], theCoords[1]);
     }
+    theSurface.strokeStyle=colorRGBToString(this.color);
+    theSurface.fillStyle=colorRGBToString(this.colorFill);
+    if (this.isFilled)
+      theSurface.fill();
     theSurface.stroke();
   }
 }
@@ -430,7 +434,12 @@ function CanvasTwoD(inputCanvas)
     this.theObjects.push(newLine);
   };
   this.drawPath= function (inputPath, inputColor)
-  { var newPath=new PathTwoD(inputPath, inputColor);
+  { var newPath=new PathTwoD(inputPath, inputColor, inputColor);
+    this.theObjects.push(newPath);
+  };
+  this.drawPathFilled= function (inputPath, inputContourColor, inputFillColor)
+  { var newPath=new PathTwoD(inputPath, inputContourColor, inputFillColor);
+    newPath.isFilled=true;
     this.theObjects.push(newPath);
   };
   this.drawFunction= function (inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor)
@@ -1733,9 +1742,10 @@ function testPictureTwoD(inputCanvas1, inputCanvas2)
   theCanvas2.drawLine([-1,0],[1,0], 'green');
   theCanvas2.drawLine([0,-19],[0,1], 'purple');
   theCanvas2.drawText([-1,-1],'(-1,-1)', 'orange');
-  theCanvas2.drawPath([[-2,-2], [3,3],[-1,4]],'cyan')
+  theCanvas2.drawPath([[2,2], [3,3],[1,4]],'cyan');
+  theCanvas2.drawPathFilled([[-2,-2], [-7,-3],[-1,-4], [-2,-2]],'red', 'green');
   theCanvas2.drawFunction(testFunctionPlot, -10,10, 100, 'red');
-  theCanvas2.setViewWindow([-1,-19],[1,1]);
+  theCanvas2.setViewWindow([-1,-19],[1,5]);
   theCanvas2.redraw();
 }
 

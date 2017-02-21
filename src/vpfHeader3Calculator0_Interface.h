@@ -666,8 +666,10 @@ public:
   std::string rightPtJS;
   std::string numSegmentsJS;
   std::string colorRGBJS;
+  std::string colorFillJS;
 
   void ComputeYbounds();
+  std::string ToStringPointsList();
   std::string GetPlotStringFromFunctionStringAndRanges
   (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound);
   std::string GetJavascript2dPlot
@@ -722,9 +724,7 @@ class Plot
   int priorityCanvasName; //same as priorityViewWindow but with respect to canvas names.
   std::string ToStringDebug();
   std::string GetPlotHtml(Calculator& owner);
-  std::string GetPlotHtml3d();
   std::string GetPlotHtml3d_New(Calculator& owner);
-  std::string GetPlotHtml2d_OLD();
   std::string GetPlotHtml2d_New(Calculator& owner);
   std::string GetPlotStringAddLatexCommands(bool useHtml);
   bool IsOKVector(const Vector<double>& input);

@@ -761,7 +761,6 @@ bool CalculatorFunctionsGeneral::innerPlotLabel
   thePlot.thePoints.AddOnTop(labelPosition);
   thePlot.thePlotType="label";
   return output.AssignValue(thePlot, theCommands);
-
 }
 
 bool CalculatorFunctionsGeneral::innerPlotRectangle
@@ -774,6 +773,22 @@ bool CalculatorFunctionsGeneral::innerPlotRectangle
   if (!theCommands.GetVectorDoubles(input[1], theRectangle[0],2) || !theCommands.GetVectorDoubles(input[2], theRectangle[1], 2))
     return false;
   PlotObject thePlot;
+  thePlot.thePlotType="plotFilled";
+  Vector<double> currentCorner=theRectangle[0];
+  Vector<double>& dimensions=theRectangle[1];
+
+  thePlot.thePoints.AddOnTop(currentCorner);
+  currentCorner[0]+=dimensions[0];
+  thePlot.thePoints.AddOnTop(currentCorner);
+  currentCorner[1]+=dimensions[1];
+  thePlot.thePoints.AddOnTop(currentCorner);
+  currentCorner[0]-=dimensions[0];
+  thePlot.thePoints.AddOnTop(currentCorner);
+  currentCorner[1]-=dimensions[1];
+  thePlot.thePoints.AddOnTop(currentCorner);
+  thePlot.colorFillJS="cyan";
+  thePlot.colorRGBJS="blue";
+  thePlot.thePoints.AddOnTop(currentCorner);
   thePlot.theRectangles.AddOnTop(theRectangle);
   thePlot.colorRGB=CGI::RedGreenBlue(0,0,255);
   thePlot.fillColorRGB=CGI::RedGreenBlue(0,255,255);

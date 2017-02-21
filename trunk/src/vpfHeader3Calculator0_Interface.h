@@ -646,7 +646,7 @@ public:
   double yLow;
   double yHigh;
   int colorRGB;
-  int fillColorRGB;
+  int colorFillRGB;
   double lineWidth;
   bool flagIs3d;
   Vectors<double> thePoints;

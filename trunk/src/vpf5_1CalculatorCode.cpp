@@ -866,7 +866,7 @@ bool PlotObject::operator==(const PlotObject& other)const
   this->fillStyle== other.fillStyle &&
   this->thePlotStringWithHtml ==other.thePlotStringWithHtml &&
   this->colorRGB==other.colorRGB &&
-  this->fillColorRGB==other.fillColorRGB &&
+  this->colorFillRGB==other.colorFillRGB &&
   this->variablesInPlay==other.variablesInPlay &&
   this->leftPtE==other.leftPtE &&
   this->rightPtE             == other.rightPtE &&
@@ -887,7 +887,7 @@ PlotObject::PlotObject()
   this->yHigh=(0);
   this->colorRGB=0;
   this->lineWidth=1;
-  this->fillColorRGB=0;
+  this->colorFillRGB=0;
   this->flagIs3d=false;
 }
 
@@ -1286,27 +1286,21 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   else
     out << "theCanvas.flagShowPerformance=true;\n";
   out.precision(7);
-  out << "theCanvas.drawLine([" << this->theLowerBoundAxes*1.10
-  << ",0],[" << this->theUpperBoundAxes*1.10 << ",0], 'black');\n";
-  out << "theCanvas.drawLine([0," << this->lowBoundY *1.10
-  << "],[0," << this->highBoundY*1.10 << "], 'black');\n";
-  out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black');\n";
-  out << "theCanvas.drawText([1,-0.2],'1','black');\n";
-  out << "theCanvas.setViewWindow("
-  << "[" << this->theLowerBoundAxes*1.10 << ", " << this->lowBoundY*1.10 << "]"
-  << ", "
-  << "[" << this->theUpperBoundAxes*1.10 << ", " << this->highBoundY*1.10 << "]"
-  << ");\n";
-
   for (int i=0; i<this->thePlots.size; i++)
   { PlotObject& currentPlot=this->thePlots[i];
     if (currentPlot.thePlotType=="plotFunction")
-    { out
-      << "theCanvas." << theFnPlots[i]
-      ;
+    { out << "theCanvas." << theFnPlots[i];
       continue;
     }
-    if (currentPlot.thePlotType=="plotFilled")
+    if (currentPlot.thePlotType=="plotFillStart")
+    { out << "theCanvas.plotFillStart('" << currentPlot.colorFillJS << "');\n";
+      continue;
+    }
+    if (currentPlot.thePlotType=="plotFillFinish")
+    { out << "theCanvas.plotFillFinish();\n";
+      continue;
+    }
+    if (currentPlot.thePlotType=="pathFilled")
     { out << "theCanvas.drawPathFilled( ";
       out << currentPlot.ToStringPointsList();
       out << ", "
@@ -1334,6 +1328,17 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     (currentPlot.colorRGB) << "\""
     << ");\n";
   }
+  out << "theCanvas.drawLine([" << this->theLowerBoundAxes*1.10
+  << ",0],[" << this->theUpperBoundAxes*1.10 << ",0], 'black');\n";
+  out << "theCanvas.drawLine([0," << this->lowBoundY *1.10
+  << "],[0," << this->highBoundY*1.10 << "], 'black');\n";
+  out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black');\n";
+  out << "theCanvas.drawText([1,-0.2],'1','black');\n";
+  out << "theCanvas.setViewWindow("
+  << "[" << this->theLowerBoundAxes*1.10 << ", " << this->lowBoundY*1.10 << "]"
+  << ", "
+  << "[" << this->theUpperBoundAxes*1.10 << ", " << this->highBoundY*1.10 << "]"
+  << ");\n";
   out
   << "theCanvas.redraw();\n"
   << "}\n"

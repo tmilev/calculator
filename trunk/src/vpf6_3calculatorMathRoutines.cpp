@@ -4602,17 +4602,18 @@ bool CalculatorFunctionsGeneral::innerPlotFill(Calculator& theCommands, const Ex
   std::string colorString;
   if (!colorE.IsOfType<std::string>(&colorString))
     colorString=colorE.ToString();
-  if (!DrawingVariables::GetColorIntFromColorString(colorString, theFilledPlot.fillColorRGB))
+  if (!DrawingVariables::GetColorIntFromColorString(colorString, theFilledPlot.colorFillRGB))
     theCommands << "Failed to extract color from: " << colorE.ToString() << "; using default color value. ";
+  theFilledPlot.colorFillJS=colorString;
   for (int i=0; i<startPlot.thePlots.size; i++)
     theFilledPlot.thePoints.AddListOnTop(startPlot.thePlots[i].thePoints);
   theFilledPlot.fillStyle="filled";
-  theFilledPlot.thePlotType="fillStart";
+  theFilledPlot.thePlotType="plotFillStart";
   outputPlot.DesiredHtmlHeightInPixels=startPlot.DesiredHtmlHeightInPixels;
   outputPlot.DesiredHtmlWidthInPixels=startPlot.DesiredHtmlWidthInPixels;
   outputPlot.thePlots.AddOnTop(theFilledPlot);
   outputPlot.thePlots.AddListOnTop(startPlot.thePlots);
-  theFilledPlot.thePlotType="fillFinish";
+  theFilledPlot.thePlotType="plotFillFinish";
   outputPlot.thePlots.AddOnTop(theFilledPlot);
   return output.AssignValue(outputPlot, theCommands);
 }

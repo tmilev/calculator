@@ -3,9 +3,11 @@
 </script>
 <body onload="testPictureTwoD('cOne', 'cTwo');">
 <canvas width="600" height="400" style="border:solid 1px" id="cOne" onmousedown="calculatorCanvasClick(this, event);" onmouseup="calculatorCanvasMouseUp(this);" onmousemove="calculatorCanvasMouseMoveRedraw(this, event.clientX, event.clientY);" onmousewheel="calculatorCanvasMouseWheel(this, event);">Your browser does not support the HTML5 canvas tag.</canvas><br>
+<span id="cOneControls"></span>
 <span id="cOneMessages"></span>
 <br>
 <canvas width="600" height="400" style="border:solid 1px" id="cTwo" onmousedown="calculatorCanvasClick(this, event);" onmouseup="calculatorCanvasMouseUp(this);" onmousemove="calculatorCanvasMouseMoveRedraw(this, event.clientX, event.clientY);" onmousewheel="calculatorCanvasMouseWheel(this, event);">Your browser does not support the HTML5 canvas tag.</canvas><br>
+<span id="cTwoControls"></span>
 <span id="cTwoMessages"></span>
 </body>
 </html>

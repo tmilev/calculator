@@ -4607,10 +4607,13 @@ bool CalculatorFunctionsGeneral::innerPlotFill(Calculator& theCommands, const Ex
   for (int i=0; i<startPlot.thePlots.size; i++)
     theFilledPlot.thePoints.AddListOnTop(startPlot.thePlots[i].thePoints);
   theFilledPlot.fillStyle="filled";
+  theFilledPlot.thePlotType="fillStart";
   outputPlot.DesiredHtmlHeightInPixels=startPlot.DesiredHtmlHeightInPixels;
   outputPlot.DesiredHtmlWidthInPixels=startPlot.DesiredHtmlWidthInPixels;
   outputPlot.thePlots.AddOnTop(theFilledPlot);
   outputPlot.thePlots.AddListOnTop(startPlot.thePlots);
+  theFilledPlot.thePlotType="fillFinish";
+  outputPlot.thePlots.AddOnTop(theFilledPlot);
   return output.AssignValue(outputPlot, theCommands);
 }
 

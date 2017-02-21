@@ -301,15 +301,19 @@ function SegmentTwoD(inputLeftPt, inputRightPt, inputColor)
   this.rightPt=inputRightPt;
   this.color=colorToRGB(inputColor);
   this.type="segment";
-  this.draw=function(theCanvas)
+  this.drawNoFinish=function (theCanvas)
   { var theSurface=theCanvas.surface;
-    theSurface.beginPath();
     theSurface.strokeStyle=colorRGBToString(this.color);
     theSurface.fillStyle=colorRGBToString(this.color);
     var theCoords=theCanvas.coordsMathToScreen(this.leftPt);
     theSurface.moveTo(theCoords[0], theCoords[1]);
     theCoords=theCanvas.coordsMathToScreen(this.rightPt);
     theSurface.lineTo(theCoords[0], theCoords[1]);
+  }
+  this.draw=function(theCanvas)
+  { var theSurface=theCanvas.surface;
+    theSurface.beginPath();
+    this.drawNoFinish(theCanvas);
     theSurface.stroke();
   }
 }
@@ -320,11 +324,10 @@ function PathTwoD(inputPath, inputColor, inputFillColor)
   this.colorFill=colorToRGB(inputFillColor);
   this.isFilled=false;
   this.type="path";
-  this.draw=function(theCanvas)
+  this.drawNoFinish=function(theCanvas)
   { if (inputPath.length<1)
       return;
     var theSurface=theCanvas.surface;
-    theSurface.beginPath();
     var theCoords=theCanvas.coordsMathToScreen(this.path[0]);
     theSurface.moveTo(theCoords[0], theCoords[1]);
     for (var i=1; i<this.path.length; i++)
@@ -335,6 +338,13 @@ function PathTwoD(inputPath, inputColor, inputFillColor)
     theSurface.fillStyle=colorRGBToString(this.colorFill);
     if (this.isFilled)
       theSurface.fill();
+  }
+  this.draw=function(theCanvas)
+  { if (inputPath.length<1)
+      return;
+    var theSurface=theCanvas.surface;
+    theSurface.beginPath();
+    this.drawNoFinish(theCanvas);
     theSurface.stroke();
   }
 }
@@ -348,9 +358,8 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
   this.type="plotFunction";
   this.numSegments=inputNumSegments;
   this.Delta=(inputRightPt-inputLeftPt)/inputNumSegments;
-  this.draw=function(theCanvas)
+  this.drawNoFinish=function(theCanvas)
   { var theSurface=theCanvas.surface;
-    theSurface.beginPath();
     theSurface.strokeStyle=colorRGBToString(this.color);
     theSurface.fillStyle=colorRGBToString(this.color);
     var theX=this.leftPt;
@@ -359,10 +368,17 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
     theSurface.moveTo(theCoords[0], theCoords[1]);
     var skippedValues=false;
     for (var i=0; i<this.numSegments; i++)
-    { theX+=this.Delta;
+    { var theRatio=i/(this.numSegments-1);
+      theX= this.leftPt *(1-theRatio) +  this.rightPt*theRatio; //<- this way of
+      //computing x this way introduces smaller numerical errors.
+      //For example, suppose you plot sqrt(1-x^2) from -1 to 1.
+      //If not careful with rounding errors,
+      //you may end up evaluating sqrt(1-x^2) for x=1.00000000000004
+      //resulting in serious visual glitches.
+      //Note: the remarks above were discovered the painful way (trial and error).
       theY=this.theFunction(theX);
       if (!isFinite(theY) )
-        console.log('Failed to evaluate: ' + this.theFunction);
+        console.log('Failed to evaluate: ' + this.theFunction+ ' at x= ' + theX);
       if (Math.abs(theY)>100000)
       { if (!skippedValues)
           console.log('Function result: ' + theY + " is too large, skipping. Further errors suppressed.");
@@ -372,6 +388,11 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
       theCoords=theCanvas.coordsMathToScreen([theX, theY]);
       theSurface.lineTo(theCoords[0], theCoords[1]);
     }
+  }
+  this.draw=function(theCanvas)
+  { var theSurface=theCanvas.surface;
+    theSurface.beginPath();
+    this.drawNoFinish(theCanvas);
     theSurface.stroke();
   }
 }
@@ -381,14 +402,44 @@ function TextPlotTwoD(inputLocation, inputText, inputColor)
   this.text=inputText;
   this.color=colorToRGB(inputColor);
   this.type="plotText";
-  this.draw=function(theCanvas)
+  this.drawNoFinish=function(theCanvas)
   { var theSurface=theCanvas.surface;
-    theSurface.beginPath();
     theSurface.strokeStyle=colorRGBToString(this.color);
     theSurface.fillStyle=colorRGBToString(this.color);
     var theCoords=theCanvas.coordsMathToScreen(this.location);
     theSurface.fillText(this.text, theCoords[0], theCoords[1]);
+  };
+  this.draw=function(theCanvas)
+  { var theSurface=theCanvas.surface;
+    theSurface.beginPath();
+    this.drawNoFinish(theCanvas);
     theSurface.stroke();
+  };
+}
+
+function PlotFillTwoD(inputCanvas, inputColor)
+{ this.indexFillStart=inputCanvas.theObjects.length;
+  this.color=colorToRGB(inputColor);
+  this.draw=function(inputCanvas)
+  { var theSurface=inputCanvas.surface;
+    var theObs=inputCanvas.theObjects;
+    var tempCounter=inputCanvas.numDrawnObjects;
+    for (tempCounter++; tempCounter<theObs.length; tempCounter++)
+    { var currentO=theObs[tempCounter];
+      if (currentO.type==="plotFillFinish")
+        break;
+      currentO.draw(inputCanvas);
+    }
+    theSurface.beginPath();
+    for (inputCanvas.numDrawnObjects++; inputCanvas.numDrawnObjects<theObs.length; inputCanvas.numDrawnObjects++)
+    { currentO=theObs[inputCanvas.numDrawnObjects];
+      if (currentO.type==="plotFillFinish")
+        break;
+      currentO.drawNoFinish(inputCanvas);
+    }
+    theSurface.strokeStyle=colorRGBToString(this.color);
+    theSurface.fillStyle=colorRGBToString(this.color);
+    theSurface.fill();
   }
 }
 
@@ -402,6 +453,7 @@ function CanvasTwoD(inputCanvas)
   this.spanMessages=null;
   this.spanCriticalErrors=null;
   this.spanControls=null;
+  this.numDrawnObjects=0;
   this.boundingBoxMathScreen= [[-0.01, -0.01], [0.01, 0.01]];
   this.boundingBoxMath= [[-0.01,-0.01],[0.01,0.01]];
   this.width= inputCanvas.width;
@@ -449,6 +501,12 @@ function CanvasTwoD(inputCanvas)
   this.drawText= function (inputLocation, inputText, inputColor)
   { var newPlot=new TextPlotTwoD(inputLocation, inputText, inputColor);
     this.theObjects.push(newPlot);
+  };
+  this.plotFillStart=function (inputColor)
+  { this.theObjects.push(new PlotFillTwoD(this, inputColor));
+  };
+  this.plotFillFinish=function ()
+  { this.theObjects.push({type:"plotFillFinish"});
   };
   this.setViewWindow= function(leftLowPt, rightUpPt)
   { this.lastViewWindow=[leftLowPt,rightUpPt];
@@ -509,8 +567,8 @@ function CanvasTwoD(inputCanvas)
     this.redrawStart=new Date().getTime();
     var theSurface=this.surface;
     theSurface.clearRect(0, 0, this.width, this.height);
-    for (var i=0; i<this.theObjects.length; i++)
-      this.theObjects[i].draw(this);
+    for (this.numDrawnObjects=0; this.numDrawnObjects<this.theObjects.length; this.numDrawnObjects++)
+      this.theObjects[this.numDrawnObjects].draw(this);
     var redrawTime=new Date().getTime();
     if (this.flagShowPerformance)
     { this.textPerformance=
@@ -1739,11 +1797,15 @@ function testPictureTwoD(inputCanvas1, inputCanvas2)
   theCanvas.redraw();
   var theCanvas2=calculatorGetCanvasTwoD(document.getElementById(inputCanvas2));
   theCanvas2.init(inputCanvas2);
-  theCanvas2.drawLine([-1,0],[1,0], 'green');
+  theCanvas2.drawLine([-10,-1],[10,1], 'green');
   theCanvas2.drawLine([0,-19],[0,1], 'purple');
   theCanvas2.drawText([-1,-1],'(-1,-1)', 'orange');
   theCanvas2.drawPath([[2,2], [3,3],[1,4]],'cyan');
   theCanvas2.drawPathFilled([[-2,-2], [-7,-3],[-1,-4], [-2,-2]],'red', 'green');
+  theCanvas2.plotFillStart('pink');
+  theCanvas2.drawFunction(testFunctionPlot, -10,10, 100, 'red');
+  theCanvas2.drawLine([10,0],[-10,0],'black');
+  theCanvas2.plotFillFinish();
   theCanvas2.drawFunction(testFunctionPlot, -10,10, 100, 'red');
   theCanvas2.setViewWindow([-1,-19],[1,5]);
   theCanvas2.redraw();

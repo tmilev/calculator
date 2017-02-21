@@ -773,7 +773,7 @@ bool CalculatorFunctionsGeneral::innerPlotRectangle
   if (!theCommands.GetVectorDoubles(input[1], theRectangle[0],2) || !theCommands.GetVectorDoubles(input[2], theRectangle[1], 2))
     return false;
   PlotObject thePlot;
-  thePlot.thePlotType="plotFilled";
+  thePlot.thePlotType="pathFilled";
   Vector<double> currentCorner=theRectangle[0];
   Vector<double>& dimensions=theRectangle[1];
 
@@ -791,7 +791,7 @@ bool CalculatorFunctionsGeneral::innerPlotRectangle
   thePlot.thePoints.AddOnTop(currentCorner);
   thePlot.theRectangles.AddOnTop(theRectangle);
   thePlot.colorRGB=CGI::RedGreenBlue(0,0,255);
-  thePlot.fillColorRGB=CGI::RedGreenBlue(0,255,255);
+  thePlot.colorFillRGB=CGI::RedGreenBlue(0,255,255);
   return output.AssignValue(thePlot, theCommands);
 }
 

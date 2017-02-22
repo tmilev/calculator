@@ -1825,7 +1825,7 @@ function calculatorCanvasMouseWheel(theCanvasContainer, theEvent)
   var theCanvas=calculatorCanvases[theCanvasContainer.id];
   if (theCanvas===undefined || theCanvas===null)
     return;
-  var theIncrement=0.3;
+  var theIncrement=0.6;
   theCanvas.scale+= theWheelDelta *theIncrement;
   if (theCanvas.scale<=0)
     theCanvas.scale=theIncrement;

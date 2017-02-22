@@ -4612,7 +4612,7 @@ bool CalculatorFunctionsGeneral::innerPlotFill(Calculator& theCommands, const Ex
   outputPlot.DesiredHtmlHeightInPixels=startPlot.DesiredHtmlHeightInPixels;
   outputPlot.DesiredHtmlWidthInPixels=startPlot.DesiredHtmlWidthInPixels;
   outputPlot.thePlots.AddOnTop(theFilledPlot);
-  outputPlot.thePlots.AddListOnTop(startPlot.thePlots);
+  outputPlot+=startPlot;
   theFilledPlot.thePlotType="plotFillFinish";
   outputPlot.thePlots.AddOnTop(theFilledPlot);
   return output.AssignValue(outputPlot, theCommands);
@@ -4656,18 +4656,11 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
     numIntervals=500;
   if (numIntervals<2)
     numIntervals=2;
-  Expression functionSuffixNotationE;
   if (!thePlotObj.leftPtE.EvaluatesToDouble(&thePlotObj.xLow) ||
       !thePlotObj.rightPtE.EvaluatesToDouble(&thePlotObj.xHigh))
     return output.MakeError
     ("Failed to convert upper and lower bounds of drawing function to rational numbers.",
      theCommands);
-  if (!theCommands.CallCalculatorFunction
-       (theCommands.innerSuffixNotationForPostScript, input[1], functionSuffixNotationE))
-  { std::stringstream out;
-    out << "Failed to convert expression " << input[1].ToString() << " to postfix notation. ";
-    return output.MakeError(out.str(), theCommands);
-  }
   thePlotObj.functionToBePlottedE=input[1];
   thePlotObj.functionToBePlottedE.GetFreeVariables
   (thePlotObj.variablesInPlay, true);
@@ -4691,52 +4684,63 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
       innerMakeJavascriptExpression
       (theCommands, thePlotObj.functionToBePlottedE, jsConverterE)
       )
-    thePlotObj.functionToBePlottedJS=jsConverterE.ToString();
-  else
+  { thePlotObj.functionToBePlottedJS=jsConverterE.ToString();
+    thePlotObj.functionToBePlottedE.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+  } else
     thePlotObj.thePlotType="plotFunctionPrecomputed";
   if (CalculatorFunctionsGeneral::
       innerMakeJavascriptExpression
       (theCommands, thePlotObj.leftPtE, jsConverterE)
       )
-    thePlotObj.leftPtJS=jsConverterE.ToString();
-  else
+  { thePlotObj.leftPtJS=jsConverterE.ToString();
+    thePlotObj.leftPtE.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+  } else
     thePlotObj.thePlotType="plotFunctionPrecomputed";
   if (CalculatorFunctionsGeneral::
       innerMakeJavascriptExpression
       (theCommands, thePlotObj.rightPtE, jsConverterE)
       )
-    thePlotObj.rightPtJS=jsConverterE.ToString();
-  else
+  { thePlotObj.rightPtJS=jsConverterE.ToString();
+    thePlotObj.rightPtE.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+  } else
     thePlotObj.thePlotType="plotFunctionPrecomputed";
   if (CalculatorFunctionsGeneral::
       innerMakeJavascriptExpression
       (theCommands, thePlotObj.numSegmentsE, jsConverterE)
       )
-    thePlotObj.numSegmentsJS=jsConverterE.ToString();
-  else
+  { thePlotObj.numSegmentsJS=jsConverterE.ToString();
+    thePlotObj.numSegmentsE.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
+  } else
     thePlotObj.thePlotType="plotFunctionPrecomputed";
   Vectors<double>& thePoints=thePlotObj.thePoints;
-  if (!input[1].EvaluatesToDoubleInRange
-       (theVarString, thePlotObj.xLow, thePlotObj.xHigh, numIntervals,
-        &thePlotObj.yLow, &thePlotObj.yHigh, &thePoints))
-  { bool hasOneGoodPoint=false;
-    for (int i=0; i<thePoints.size; i++)
-      if (!std::isnan(thePoints[i][1]))
-      { hasOneGoodPoint=true;
-        break;
-      }
-    if (!hasOneGoodPoint)
-      return theCommands << "<hr>I failed to evaluate the input function at all points, "
-      << "perhaps your expression is not a function of x.";
-    theCommands << "<hr>I failed to evaluate your function in a number of points. ";
+  if (thePlot.boxesThatUpdateMe.size==0)
+    if (!input[1].EvaluatesToDoubleInRange
+         (theVarString, thePlotObj.xLow, thePlotObj.xHigh, numIntervals,
+          &thePlotObj.yLow, &thePlotObj.yHigh, &thePoints))
+    { bool hasOneGoodPoint=false;
+      for (int i=0; i<thePoints.size; i++)
+        if (!std::isnan(thePoints[i][1]))
+        { hasOneGoodPoint=true;
+          break;
+        }
+      if (!hasOneGoodPoint)
+        return theCommands << "<hr>I failed to evaluate the input function at all points, "
+        << "perhaps your expression is not a function of x.";
+      theCommands << "<hr>I failed to evaluate your function in a number of points. ";
+    }
+  Expression functionSuffixNotationE;
+  if (!theCommands.CallCalculatorFunction
+       (theCommands.innerSuffixNotationForPostScript, input[1], functionSuffixNotationE))
+  { theCommands << "No LaTeX version: failed to convert: "
+    << input[1].ToString() << " to postfix notation. ";
+  } else
+  { thePlotObj.thePlotString=thePlotObj.
+    GetPlotStringFromFunctionStringAndRanges
+    (false, functionSuffixNotationE.ToString(),
+     thePlotObj.functionToBePlottedE.ToString(),
+     thePlotObj.xLow, thePlotObj.xHigh);
+    thePlotObj.thePlotStringWithHtml=thePlotObj.thePlotString;
   }
-
-  thePlotObj.thePlotString=thePlotObj.
-  GetPlotStringFromFunctionStringAndRanges
-  (false, functionSuffixNotationE.ToString(),
-   thePlotObj.functionToBePlottedE.ToString(),
-   thePlotObj.xLow, thePlotObj.xHigh);
-  thePlotObj.thePlotStringWithHtml=thePlotObj.thePlotString;
 
   thePlot.thePlots.AddOnTop(thePlotObj);
 //  stOutput << "DEBUG: height, width: " << desiredHtmlHeightPixels << ", " << desiredHtmlWidthPixels;
@@ -4992,9 +4996,10 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended(Calculator
 
 bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotParametricCurve");
-  if (input.children.size<5)
+  if (input.size()<5)
     return theCommands
-    << "Parametric curve plots take 4+ arguments, first arguments stand for the functions in the various coordinates, "
+    << "Parametric curve plots take 4+ arguments. The first arguments stand for "
+    << "the coordinate functions (=2 or the dimension of the ambient space), "
     << " the last two arguments stands for the variable range.";
   if (input.HasBoundVariables())
     return false;

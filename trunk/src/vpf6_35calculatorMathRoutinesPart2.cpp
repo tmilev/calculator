@@ -967,7 +967,7 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
   if (leftV.size!=2 && leftV.size!=3)
     return false;
   int colorIndex=0;
-  if (input.children.size>=4)
+  if (input.size()>=4)
   { std::string theColor="black";
     int colorCandidate=0;
     const Expression& colorE=input[3];

@@ -1098,7 +1098,7 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
   }
   while (argDen% baseInt ==0)
   { intPart--;
-    argNum/=baseInt;
+    argDen/=baseInt;
     changed=true;
   }
   if (!changed)

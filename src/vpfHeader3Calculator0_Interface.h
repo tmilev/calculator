@@ -645,6 +645,8 @@ public:
   double xHigh;
   double yLow;
   double yHigh;
+  double paramLow;
+  double paramHigh;
   int colorRGB;
   int colorFillRGB;
   double lineWidth;
@@ -655,25 +657,34 @@ public:
   //of the lower left corner of the rectangle. Second vector gives the (width,height) of the rectangle.
   std::string thePlotType;
 
-  Expression functionToBePlottedE;
+  List<Expression> coordinateFunctionsE;
+  List<std::string> coordinateFunctionsJS;
   HashedList<Expression> variablesInPlay;
   Expression leftPtE;
   Expression rightPtE;
+  Expression paramLowE;
+  Expression paramHighE;
+
   Expression numSegmentsE;
-  std::string functionToBePlottedJS;
   List<std::string> variablesInPlayJS;
   std::string leftPtJS;
   std::string rightPtJS;
   std::string numSegmentsJS;
   std::string colorRGBJS;
   std::string colorFillJS;
+  std::string paramLowJS;
+  std::string paramHighJS;
 
   void ComputeYbounds();
   std::string ToStringPointsList();
   std::string GetPlotStringFromFunctionStringAndRanges
   (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound);
   std::string GetJavascript2dPlot
-  (std::string& outputPlotInstantiationJS);
+  (std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter)
+  ;
+  std::string GetJavascriptParametricCurve2D
+  (std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter)
+  ;
 
   PlotObject();
   bool operator==(const PlotObject& other)const;

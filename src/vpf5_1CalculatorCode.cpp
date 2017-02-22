@@ -852,26 +852,28 @@ bool PlotObject3d::operator==(const PlotObject3d& other)const
 bool PlotObject::operator==(const PlotObject& other)const
 { return
   this->thePlotStringWithHtml==other.thePlotStringWithHtml &&
-  this->xLow==other.xLow&&
-  this->xHigh==other.xHigh &&
-  this->yLow==other.yLow &&
-  this->yHigh==other.yHigh &&
-  this->functionToBePlottedE==other.functionToBePlottedE &&
-  this->thePlotType==other.thePlotType &&
-  this->thePoints==other.thePoints &&
-  this->lineWidth==other.lineWidth &&
-  this->theRectangles==other.theRectangles &&
-  this->flagIs3d==other.flagIs3d &&
-  this->thePlotString==other.thePlotString &&
-  this->fillStyle== other.fillStyle &&
-  this->thePlotStringWithHtml ==other.thePlotStringWithHtml &&
-  this->colorRGB==other.colorRGB &&
-  this->colorFillRGB==other.colorFillRGB &&
-  this->variablesInPlay==other.variablesInPlay &&
-  this->leftPtE==other.leftPtE &&
+  this->xLow                 ==other.xLow&&
+  this->xHigh                ==other.xHigh &&
+  this->yLow                 ==other.yLow &&
+  this->yHigh                ==other.yHigh &&
+  this->paramLow             ==other.paramLow  &&
+  this->paramHigh            ==other.paramHigh &&
+  this->coordinateFunctionsE ==other.coordinateFunctionsE &&
+  this->thePlotType          ==other.thePlotType &&
+  this->thePoints            ==other.thePoints &&
+  this->lineWidth            ==other.lineWidth &&
+  this->theRectangles        ==other.theRectangles &&
+  this->flagIs3d             ==other.flagIs3d &&
+  this->thePlotString        ==other.thePlotString &&
+  this->fillStyle            == other.fillStyle &&
+  this->thePlotStringWithHtml==other.thePlotStringWithHtml &&
+  this->colorRGB             ==other.colorRGB &&
+  this->colorFillRGB         == other.colorFillRGB &&
+  this->variablesInPlay      == other.variablesInPlay &&
+  this->leftPtE              == other.leftPtE &&
   this->rightPtE             == other.rightPtE &&
   this->numSegmentsE         == other.numSegmentsE &&
-  this->functionToBePlottedJS== other.functionToBePlottedJS &&
+  this->coordinateFunctionsJS== other.coordinateFunctionsJS &&
   this->variablesInPlayJS    == other.variablesInPlayJS &&
   this->leftPtJS             == other.leftPtJS &&
   this->rightPtJS            == other.rightPtJS &&
@@ -881,14 +883,16 @@ bool PlotObject::operator==(const PlotObject& other)const
 }
 
 PlotObject::PlotObject()
-{ this->xLow=(0);
-  this->xHigh=(0);
-  this->yLow=(0);
-  this->yHigh=(0);
-  this->colorRGB=0;
-  this->lineWidth=1;
+{ this->xLow        =0;
+  this->xHigh       =0;
+  this->paramLow    =0;
+  this->paramHigh   =0;
+  this->yLow        =0;
+  this->yHigh       =0;
+  this->colorRGB    =0;
+  this->lineWidth   =1;
   this->colorFillRGB=0;
-  this->flagIs3d=false;
+  this->flagIs3d    =false;
 }
 
 void PlotObject::ComputeYbounds()
@@ -968,7 +972,7 @@ void Plot::ComputeAxesAndBoundingBox()
         continue;
       this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
       this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentPoint[0]);
-      this->lowBoundY=MathRoutines::Minimum  (currentPoint[1], this->lowBoundY);
+      this->lowBoundY =MathRoutines::Minimum (currentPoint[1], this->lowBoundY);
       this->highBoundY=MathRoutines::Maximum (currentPoint[1], this->highBoundY);
     }
   }
@@ -1183,19 +1187,56 @@ std::string Plot::GetPlotHtml(Calculator& owner)
 
 int Plot::canvasCounteR=0;
 
-std::string PlotObject::GetJavascript2dPlot(std::string& outputPlotInstantiationJS)
+std::string PlotObject::GetJavascriptParametricCurve2D
+(std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter)
 { MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascript2dPlot");
   std::stringstream out;
-  static int canvasFunctionCounteR=0;
-  canvasFunctionCounteR++;
+  List<std::string> fnNames;
+  fnNames.SetSize(this->coordinateFunctionsJS.size);
+  for (int i=0; i<this->coordinateFunctionsJS.size; i++)
+  { funCounter++;
+    std::stringstream fnNameStream;
+    fnNameStream << "theCanvasCoordinateFn_" << canvasName << "_"
+    << funCounter;
+    fnNames[i]=fnNameStream.str();
+    if (this->variablesInPlay.size>0)
+    { out << "function " << fnNames[i]
+      << " (" << this->variablesInPlay[0] << "){\n";
+      out << "return " << this->coordinateFunctionsJS[i] << ";\n";
+      out << "}\n";
+    } else
+    { out << "console.log(\"Error: function with zero variables.\");";
+    }
+  }
+  if (this->coordinateFunctionsJS.size!=2)
+  { outputPlotInstantiationJS="";
+    return out.str();
+  }
+  std::stringstream fnInstStream;
+  fnInstStream.precision(7);
+  fnInstStream << "drawCurve("
+  << "[" << fnNames[0] << ", " << fnNames[1] << "]"
+  << ", " << this->paramLowJS << ", " << this->paramHighJS << ", "
+  << this->numSegmentsJS << ", " << "'" << this->colorRGBJS << "'"
+  << ");\n"
+  ;
+  outputPlotInstantiationJS=fnInstStream.str();
+  return out.str();
+}
+
+std::string PlotObject::GetJavascript2dPlot
+(std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter)
+{ MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascript2dPlot");
+  std::stringstream out;
   std::stringstream fnNameStream;
+  funCounter++;
   fnNameStream << "theCanvasPlotFn"
-  << canvasFunctionCounteR;
+  << funCounter;
   std::string fnName=fnNameStream.str();
   if (this->variablesInPlay.size>0)
   { out << "function " << fnName
     << " (" << this->variablesInPlay[0] << "){\n";
-    out << "return " << this->functionToBePlottedJS << ";\n";
+    out << "return " << this->coordinateFunctionsJS[0] << ";\n";
     out << "}\n";
   } else
   { out << "console.log(\"Error: function with zero variables.\");";
@@ -1268,12 +1309,21 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     << "'" << this->canvasName << "'"
     << ";\n";
   }
+  int funCounter=0;
   List<std::string> theFnPlots;
   theFnPlots.SetSize(this->thePlots.size);
   for (int i=0; i<this->thePlots.size; i++)
   { PlotObject& currentPlot= this->thePlots[i];
     if (currentPlot.thePlotType=="plotFunction")
-    { out << currentPlot.GetJavascript2dPlot(theFnPlots[i]) << "\n "
+    { out << currentPlot.GetJavascript2dPlot
+      (theFnPlots[i], this->canvasName, funCounter)
+      << "\n "
+      ;
+    }
+    if (currentPlot.thePlotType=="parametricCurve")
+    { out << currentPlot.GetJavascriptParametricCurve2D
+      (theFnPlots[i], this->canvasName, funCounter)
+      << "\n "
       ;
     }
   }
@@ -1291,6 +1341,10 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   for (int i=0; i<this->thePlots.size; i++)
   { PlotObject& currentPlot=this->thePlots[i];
     if (currentPlot.thePlotType=="plotFunction")
+    { out << "theCanvas." << theFnPlots[i];
+      continue;
+    }
+    if (currentPlot.thePlotType=="parametricCurve")
     { out << "theCanvas." << theFnPlots[i];
       continue;
     }

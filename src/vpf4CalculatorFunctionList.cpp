@@ -1423,14 +1423,19 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "PlotSurface")
    ;
 
-  this->AddOperationInnerHandler ("plotCurve", CalculatorFunctionsGeneral::innerPlotParametricCurve, "",
+  this->AddOperationInnerHandler ("PlotCurve",
+    CalculatorFunctionsGeneral::innerPlotParametricCurve, "",
    " Plots a curve sitting in 2-dimensional space. \
     The first and second argument give the x and y coordinate functions; the curve parameter must be t.\
-    The third and fourth argument give the start/finish range for t. The fifth and sixth argument give the image\
-    height/width. The seventh argument gives the curve color. The eighth argument gives the curve width. \
-    The ninth argument gives the number of points used to draw the curve. \
+    The third and fourth argument give the start/finish range for t. \
+    The next argument gives the curve color. \
+    The next argument gives the curve width. \
+    The next argument gives the number of points used to draw the curve. \
    ",
-   "plotCurve(sin(12t),cos(13t), 0, 2\\pi); plotCurve(sin(12t),cos(13t), 0, 2\\pi, 300,300, blue, 2, 2000)", true, false, "CalculatorFunctionsGeneral::innerPlotParametricCurve",
+   "a=MakeInputBox(name=\"a\", value=12, min=1, max=25); \
+\nb=MakeInputBox(name=\"b\", value=13, min=1, max=25);  \
+\nPlotFill(PlotCurve(sin(a t),cos(b t), 0, 2\\pi, blue, 2, 2000), pink) +PlotViewRectangle((-1.5, -1.5),(1.5, 1.5))",
+   true, false, "CalculatorFunctionsGeneral::innerPlotParametricCurve",
    "PlotCurve")
    ;
   this->AddOperationInnerHandler ("PlotSegment",

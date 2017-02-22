@@ -4216,7 +4216,8 @@ int WebWorker::Run()
     if (this->connectedSocketID==-1)
       break;
     this->SendAllBytesWithHeaders();
-    if (!this->flagKeepAlive)
+    double fixthis;
+    if (!this->flagKeepAlive || true)
       break;
   }
   this->WrapUpConnection();

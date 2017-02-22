@@ -831,7 +831,7 @@ bool Plot::operator==(const Plot& other)const
 }
 
 void Plot::operator+=(const PlotObject3d& other)
-{ this->flagIs3dNewLibrary=true;
+{ this->flagIs3d=true;
   this->the3dObjects.AddOnTop(other);
 }
 
@@ -930,7 +930,6 @@ Plot::Plot()
   this->priorityViewWindow=0;
   this->priorityCanvasName=0;
   this->flagIs3d=false;
-  this->flagIs3dNewLibrary=false;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
@@ -1056,7 +1055,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   for (int i=0; i<this->boxesThatUpdateMe.size; i++)
   { InputBox& currentBox=owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreateIfNotPresent
     (this->boxesThatUpdateMe[i]);
-    out << " calculatorPlotUpdaters['"
+    out << "  calculatorPlotUpdaters['"
     << currentBox.GetSliderName() << "']=" << "'" << this->canvasName << "'"
     << ";\n";
   }
@@ -1069,7 +1068,8 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
       ;
     }
   }
-  out << "calculatorResetCanvas(document.getElementById('"  << this->canvasName << "'));\n";
+  out << "calculatorResetCanvas(document.getElementById('"
+  << this->canvasName << "'));\n";
   out << "var theCanvas=calculatorGetCanvas(document.getElementById('"
   << this->canvasName
   << "'));\n"
@@ -1166,7 +1166,7 @@ std::string PlotObject3d::GetJavascriptSurfaceImmersion(std::string& outputSurfa
     else
       surfaceInstStream << "colorVU: \"pink\"";
     surfaceInstStream << "}"
-    << ");"
+    << ")"
     ;
     outputSurfaceInstantiationJS=surfaceInstStream.str();
   }
@@ -1250,8 +1250,10 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     << "(this, event.clientX, event.clientY);\""
     << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-    << "<span id=\"" << this->canvasName << "Controls\"></span>"
-    << "<span id=\"" << this->canvasName << "Messages\"></span>"
+    << "<span id=\"" << this->canvasName << "Controls\"></span>";
+    if (!owner.flagPlotNoControls)
+      out << "<br>";
+    out << "<span id=\"" << this->canvasName << "Messages\"></span>"
     ;
   }
   out << "<script>\n";

@@ -82,6 +82,9 @@ function onLoadDefaultFunction(idElement)
 //    document.getElementsByTagName('head')[0].appendChild(scriptChild);
   }
   numInsertedJavascriptChildren=0;
+  calculatorInputBoxNames=[];
+  calculatorInputBoxToSliderUpdaters= new Object;
+  calculatorCanvases=new Object;
   for (i=0; i<scripts.length; i++)
   { var scriptChild= document.createElement('script');
     scriptChild.innerHTML=scripts[i].innerHTML;
@@ -90,12 +93,12 @@ function onLoadDefaultFunction(idElement)
     numInsertedJavascriptChildren++;
   }
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById(idElement)]);
-  MathJax.Hub.Queue([calculatorAddListendersToInputBoxes]);
+  MathJax.Hub.Queue([calculatorAddListenersToInputBoxes]);
 
 //  alert(theString);
 }
 
-function calculatorAddListendersToInputBoxes()
+function calculatorAddListenersToInputBoxes()
 { //var theString=" updating: box names, slider names: ";
   for (var i=0; i<calculatorInputBoxNames.length; i++)
   { var theBoxes=document.getElementsByName(calculatorInputBoxNames[i]);

@@ -714,7 +714,6 @@ class Plot
   bool flagIncludeExtraHtmlDescriptions;
   bool flagPlotShowJavascriptOnly;
   bool flagIs3d;
-  bool flagIs3dNewLibrary;
   static int canvasCounteR;
   std::string canvasName;
   int priorityViewWindow; //0 or less: compute the view Window. If this quantity is greater than zero,

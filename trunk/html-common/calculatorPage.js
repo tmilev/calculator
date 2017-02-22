@@ -14,6 +14,7 @@ var calculatorPlotUpdaters= new Object;
 var calculatorInputBoxToSliderUpdaters=new Object;
 var calculatorInputBoxNames=[];
 var numInsertedJavascriptChildren=0;
+var calculatorCanvases;
 function initializeCalculatorVariables()
 { answerIdsPureLatex=['mainInputID'];
   answerMQspanIds=['mainInputMQfield'];

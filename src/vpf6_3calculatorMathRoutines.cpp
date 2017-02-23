@@ -1891,6 +1891,42 @@ bool CalculatorFunctionsGeneral::outerDivideByNumber
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerMax(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMax");
+  if (input.size()!=3)
+    return false;
+  double leftD, rightD;
+  if (!input[1].EvaluatesToDouble(&leftD) || !input[2].EvaluatesToDouble(&rightD))
+    return false;
+  if (leftD>rightD)
+  { output=input[1];
+    return true;
+  }
+  if (rightD>leftD)
+  { output=input[2];
+    return true;
+  }
+  return false;
+}
+
+bool CalculatorFunctionsGeneral::innerMin(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMin");
+  if (input.size()!=3)
+    return false;
+  double leftD, rightD;
+  if (!input[1].EvaluatesToDouble(&leftD) || !input[2].EvaluatesToDouble(&rightD))
+    return false;
+  if (rightD>leftD)
+  { output=input[1];
+    return true;
+  }
+  if (leftD>rightD)
+  { output=input[2];
+    return true;
+  }
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::outerEqualEqual(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return false;

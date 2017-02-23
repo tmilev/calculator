@@ -1235,6 +1235,40 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
   return theCommands << "Failed to make expression from " << input.ToString();
 }
 
+bool CalculatorFunctionsGeneral::innerPlotCoordinateSystem(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotCoordinateSystem");
+  if (input.size()!=3)
+    return false;
+  Vector<double> corner1, corner2;
+  if (!theCommands.GetVectorDoubles(input[1], corner1, 3) ||
+      !theCommands.GetVectorDoubles(input[2], corner2, 3) )
+    return theCommands << "Failed to extract 3d-vectors from "
+    << input[1].ToString() << ", "
+    << input[2].ToString() << ".";
+  Plot resultPlot;
+  resultPlot.flagIs3d=true;
+  PlotObject3d thePlot;
+  thePlot.colorJS="black";
+  thePlot.thePlotType="segment";
+  thePlot.thePoints.SetSize(2);
+  thePlot.thePoints[0].MakeZero(3);
+  thePlot.thePoints[1].MakeZero(3);
+  thePlot.thePoints[0][0]=corner1[0];
+  thePlot.thePoints[1][0]=corner2[0];
+  resultPlot+=(thePlot);
+  thePlot.thePoints[0].MakeZero(3);
+  thePlot.thePoints[1].MakeZero(3);
+  thePlot.thePoints[0][1]=corner1[1];
+  thePlot.thePoints[1][1]=corner2[1];
+  resultPlot+=(thePlot);
+  thePlot.thePoints[0].MakeZero(3);
+  thePlot.thePoints[1].MakeZero(3);
+  thePlot.thePoints[0][2]=corner1[2];
+  thePlot.thePoints[1][2]=corner2[2];
+  resultPlot+=(thePlot);
+  return output.AssignValue(resultPlot, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSurface");
   PlotObject3d thePlot;

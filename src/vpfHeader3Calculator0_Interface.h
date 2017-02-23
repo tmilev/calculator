@@ -698,10 +698,12 @@ public:
 ////////////////
   HashedList<Expression> theVars;
   Expression theSurface;
+  Vectors<double> thePoints;
   List<std::string> theCoordinateFunctionsJS;
   List<List<std::string> > theVarRangesJS;
   std::string colorUV;
   std::string colorVU;
+  std::string colorJS;
   std::string numSegmentsU;
   std::string numSegmentsV;
   PlotObject3d();

@@ -1311,7 +1311,9 @@ D-B;\
    second and third argument = x and y initial values, fourth argument = number of approximating points,\
     fifth and sixth argument = left and right endpoints.\
    ",
-   "DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, -2.5, 2.5)")
+   "DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, -2.5, 2.5)",
+   "CalculatorFunctionsGeneral::innerDFQsEulersMethod",
+   "DFQEuler")
    ;
   this->AddOperationInnerHandler ("FetchWebPage",
   CalculatorFunctionsGeneral::innerFetchWebPage, "",
@@ -1320,7 +1322,7 @@ D-B;\
    true, "CalculatorFunctionsGeneral::innerFetchWebPage", "FetchWebPage")
    ;
   this->AddOperationInnerHandler ("DrawPolar",
-  CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta, "",
+   CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta, "",
    "<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates \
    in the form \
    r=f(t), where t is the angle variable. The angle variable is measured in degrees. \
@@ -1330,11 +1332,16 @@ D-B;\
    "DrawPolar(1+sin  t, 0, \\pi); \
    \nDrawPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) (9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)")
    ;
-  this->AddOperationInnerHandler ("DrawPolarExtended", CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended, "",
-   "<b>Calculus teaching function.</b> Same as drawPolar but also produces a graph in the (rho,theta)-plane. \
+  this->AddOperationInnerHandler ("DrawPolarExtended",
+   CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended, "",
+   "<b>Calculus teaching function.</b> Same as drawPolar but also\
+    produces a graph in the (rho,theta)-plane. \
    ",
    "DrawPolarExtended(1+sin  t, 0, \\pi); \
-   \nDrawPolarExtended((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) (9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)")
+   \nDrawPolarExtended((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) \
+   \n(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)", true, false,
+   "CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended",
+   "DrawPolarExtended")
    ;
   this->AddOperationInnerHandler ("GaussianElimination", CalculatorFunctionsGeneral::innerGaussianEliminationMatrix, "",
    "Gaussian elimination of a matrix. Prints a detailed string that shows the Gaussian elimination of \
@@ -1380,7 +1387,8 @@ D-B;\
    ",
    "PointsImplicitly((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))",
    true, false,
-   "CalculatorFunctionsGeneral::innerGetPointsImplicitly", "PointsImplicitly")
+   "CalculatorFunctionsGeneral::innerGetPointsImplicitly",
+   "PointsImplicitly")
    ;
 
   this->AddOperationInnerHandler ("plotImplicit", CalculatorFunctionsGeneral::innerPlotImplicitFunction, "",
@@ -1405,9 +1413,21 @@ D-B;\
    and the gray grid is obtained by a subdivision which depends on the concrete function. \
    ",
    "plotImplicitShowGrid((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))", true, false,
-   "CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction", "plotImplicitShowGrid")
+   "CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction",
+   "plotImplicitShowGrid")
    ;
-  this->AddOperationInnerHandler ("plotSurface", CalculatorFunctionsGeneral::innerPlotSurface, "",
+  this->AddOperationInnerHandler ("PlotCoordinateSystem",
+   CalculatorFunctionsGeneral::innerPlotCoordinateSystem, "",
+   "Plots a 3d coordinate system, fitting in a box \
+    given by two opposite corners.  ",
+   "PlotCoordinateSystem((-3,-2,-3), (1,5, 4))s",
+    true, false,
+   "CalculatorFunctionsGeneral::innerPlotCoordinateSystem",
+   "PlotCoordinateSystem")
+   ;
+
+  this->AddOperationInnerHandler ("plotSurface",
+   CalculatorFunctionsGeneral::innerPlotSurface, "",
    " Plots a surface. \
    ",
    "%HideLHS x=(R+v*cos(u/2))*cos(u);\
@@ -3286,10 +3306,12 @@ void Calculator::initPredefinedStandardOperations()
    "Divides rational by polynomial (to get a rational function).",
    "z=Polynomial{}(x^2+y^2);\n1/z", true, false, "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly, this->opPoly(), this->opPoly(),
+  ("/", CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly,
+   this->opPoly(), this->opPoly(),
    "Divides polynomial by polynomial (to get a rational function). ",
    "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+1)/\
-   \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true, false, "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
+   \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ",
+   true, false, "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
 
 
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -3300,14 +3322,17 @@ void Calculator::initPredefinedStandardOperations()
    "CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber",
    "RaiseRationalToRational");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRat, this->opRational(), this->opRational(),
+  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRat,
+   this->opRational(), this->opRational(),
    "Raises rational to power, provided the power is a small integer. ",
    "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ", true, false,
    "CalculatorFunctionsBinaryOps::innerPowerRatByRat",
    "PowerIntegerByInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors, this->opRational(), this->opRational(),
-   "If a rational number is small enough to factor, reduces the rational exponents of the rational number. ",
+  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors,
+   this->opRational(), this->opRational(),
+   "If a rational number is small enough to factor, reduces the \
+    rational exponents of the rational number. ",
    "\n(4/9)^{17/3}; (12/7)^{7/2} ", true, false,
    "CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors", "PowerRationalByRational");
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -3358,14 +3383,17 @@ void Calculator::initPredefinedStandardOperations()
    true, true, false, "CalculatorFunctionsGeneral::innerPowerAnyToZero",
    "PowerAnytoZero", false);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger, this->opPoly(), this->opRational(),
+  ("^", CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger,
+    this->opPoly(), this->opRational(),
    "Raises poly to small integer power. ",
    "x=Polynomial{}x; y=Polynomial{}y;(x+2y+x y+x^2+3y^2)^3",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger, this->opMatRat(), this->opRational(),
+  ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger,
+   this->opMatRat(), this->opRational(),
    "Raises matrix of rationals to small integer power. \
-    Will also attempt to exponentiate if the matrix has determinant +/-1 or 0, independend of\
+    Will also attempt to exponentiate if the matrix has \
+    determinant +/-1 or 0, independend of\
     how large is the exponent. ",
    "X=MakeMatrix((0,1),(1,1)); q=100; \nX^q; \nFibonacci{}0=1; \nFibonacci{}1=1; \nFibonacci{}{{n}}:if((n>0)* (IsInteger{}n))=Fibonacci{}(n-1)+Fibonacci{}(n-2); \
    \nMakeMatrix((Fibonacci{}(q-2), Fibonacci{}(q-1)), (Fibonacci{}q-1, Fibonacci{}q))",
@@ -3376,7 +3404,8 @@ void Calculator::initPredefinedStandardOperations()
    "X=MakeMatrixRFs((x,y),(1,2)); X^5",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger, this->opMatAlgebraic(), this->opRational(),
+  ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger,
+   this->opMatAlgebraic(), this->opRational(),
    "Raises algebraic number matrix to small integer power. ",
    "X=MakeMatrix((\\sqrt{}2,1),(\\sqrt{}3,3)); X^100",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger",
@@ -3387,7 +3416,8 @@ void Calculator::initPredefinedStandardOperations()
    " x=Polynomial{}x; y=Polynomial{}y;(x+\\sqrt{2}y+x y+x^2+\\sqrt{3}y^2)^3",
    true, false, "CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger, this->opAlgNumber(), this->opRational(),
+  ("^", CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger,
+   this->opAlgNumber(), this->opRational(),
    "Raises algebraic number to small integer or half-integer power. ",
    "a=3/2; b=-15/2; c=33/4;\
     \nx=(-b+\\sqrt{}(b^2-4a c))/(2a);\
@@ -3499,7 +3529,7 @@ void Calculator::initPredefinedStandardOperations()
     \nZ=MakeMatrixTensorForm{}P; W=MakeMatrixTensorForm{}Q; \
     \nX\\otimes Y; Z\\otimes W", true);
   this->AddOperationOuterHandler
-  ("\\otimes", this->outerTensor, "",
+  ("\\otimes", Calculator::outerTensor, "",
    "Please do note use (or use at your own risk): this is work-in-progress. \
    Will be documented when implemented and tested. Tensor product of \
    generalized Verma modules. ",
@@ -3508,7 +3538,7 @@ void Calculator::initPredefinedStandardOperations()
    \ng_{-1}(v\\otimes v);\
    \ng_{-1}g_{-1}(v\\otimes v); ", true);
   this->AddOperationOuterHandler
-  ("=:", this->StandardIsDenotedBy, "", "The operation =: is the \"is denoted by\" operation. \
+  ("=:", Calculator::StandardIsDenotedBy, "", "The operation =: is the \"is denoted by\" operation. \
    The expression a=:b always reduces to \
    a=b. In addition to the transformation, the pair of expressions a,b is registered in a \
    special global \"registry\". This has the following effect. Every time \
@@ -3546,18 +3576,35 @@ void Calculator::initPredefinedStandardOperations()
 
   this->AddOperationOuterHandler
   ("<", Calculator::outerLessThan, "",
-   "If both the left hand side and the right hand side are rational, replaces the expression by \
-   1 if the left number is less than the right, else replaces the expression by 0.",
+   "If both the left hand side and the right hand side are rational, \
+    replaces the expression by \
+    1 if the left number is less than the right, else replaces the expression by 0.",
    "3<4; 5<4", true, false, "Calculator::outerLessThan", "LessThan");
   this->AddOperationOuterHandler
   (">", Calculator::outerGreaterThan, "",
-   "Greater than: has similar action to the less than sign. The following example shows an implementation of commutativity. ",
-   "x_{{i}}*x_{{j}}*{{a}}:if i>j=x_j*x_i*a;\n x_{{i}}*x_{{j}}:if i>j=x_j*x_i; (x_2*x_1- x_1*x_3)(x_1x_5+x_5x_4x_2); x_5x_4x_3x_2x_1", true, false,
+   "Greater than: has similar action to the less than sign. \
+    The following example shows an implementation of commutativity. ",
+   "x_{{i}}*x_{{j}}*{{a}}:if i>j=x_j*x_i*a;\n x_{{i}}*x_{{j}}:if i>j=x_j*x_i;\
+    (x_2*x_1- x_1*x_3)(x_1x_5+x_5x_4x_2); x_5x_4x_3x_2x_1", true, false,
    "Calculator::outerGreaterThan", "GreaterThan");
+  this->AddOperationOuterHandler
+  ("Max", CalculatorFunctionsGeneral::innerMax, "",
+   "Maximum function.",
+   "Max(-4,2)", true, false,
+   "CalculatorFunctionsGeneral::innerMax", "Max");
+  this->AddOperationOuterHandler
+  ("Min", CalculatorFunctionsGeneral::innerMin, "",
+   "Maximum function.",
+   "Min(-4,2)", true, false,
+   "CalculatorFunctionsGeneral::innerMin", "Min");
+
+
   this->AddOperationInnerHandler
   ("\\geq", Calculator::innerGreaterThanOrEqualTo, "",
-   "Greater than or equal to operation. ", "A=(2>=x); x=1; A", true, false,
-   "Calculator::innerGreaterThanOrEqualTo", "greaterThanOrEqualTo");
+   "Greater than or equal to operation. ",
+   "A=(2>=x); x=1; A", true, false,
+   "Calculator::innerGreaterThanOrEqualTo",
+   "greaterThanOrEqualTo");
 
   this->AddOperationOuterHandler
   ("==", CalculatorFunctionsGeneral::outerEqualEqual, "",

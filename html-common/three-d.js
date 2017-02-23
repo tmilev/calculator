@@ -772,6 +772,7 @@ function Canvas(inputCanvas)
     theContours: [],
     thePoints: [],
   };
+  this.flagShowPerformance=true;
   this.thePatchOrder=[];
   this.numAccountedPatches=0;
   this.numCyclicallyOverlappingPatchTieBreaks=0;
@@ -1726,7 +1727,9 @@ function Canvas(inputCanvas)
     this.selectedScreenBasis=[this.screenBasisOrthonormal[0].slice(), this.screenBasisOrthonormal[1].slice()];
   };
   this.showMessages= function()
-  { if (this.spanMessages==null || this.spanMessages==undefined)
+  { if (!this.flagShowPerformance)
+      return;
+    if (this.spanMessages===null || this.spanMessages===undefined)
       return;
     var theHTML="";
     if (this.textPerformance!="")

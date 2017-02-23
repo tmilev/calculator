@@ -171,6 +171,8 @@ public:
   static bool outerAssociateDivisionDivision(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateAdivBdivCpowerD(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerEqualEqual(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMax(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMin(Calculator& theCommands, const Expression& input, Expression& output);
 
 
   static bool outerCommuteAtimesBifUnivariate(Calculator& theCommands, const Expression& input, Expression& output);
@@ -243,6 +245,8 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerMakeJavascriptExpression(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotCoordinateSystem(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerPlotSurface(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotImplicitFunctionFull(Calculator& theCommands, const Expression& input, Expression& output, bool showGrid);
   static bool innerPlotImplicitFunction(Calculator& theCommands, const Expression& input, Expression& output);

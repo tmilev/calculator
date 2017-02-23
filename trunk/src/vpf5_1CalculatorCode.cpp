@@ -1079,14 +1079,34 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   << "'));\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
   for (int i=0; i<this->the3dObjects.size; i++)
-  { if (this->the3dObjects[i].thePlotType=="surface")
+  { PlotObject3d& currentPlot=this->the3dObjects[i];
+    if (currentPlot.thePlotType=="surface")
     { out
       << "theCanvas.drawSurface("
       <<  theSurfaces[i]
       << ");\n"
       ;
     }
+    if (currentPlot.thePlotType=="segment" && currentPlot.thePoints.size>=2)
+    { out
+      << "theCanvas.drawLine("
+      << currentPlot.thePoints[0].ToStringSquareBracketsBasicType()
+      << ", "
+      << currentPlot.thePoints[1].ToStringSquareBracketsBasicType()
+      << ", "
+      << "'"
+      << currentPlot.colorJS
+      << "'"
+      << ");\n"
+      ;
+
+    }
   }
+  if (owner.flagPlotNoControls)
+    out << "theCanvas.flagShowPerformance=false;\n";
+  else
+    out << "theCanvas.flagShowPerformance=true;\n";
+
   out
   << "theCanvas.redraw();\n"
   << "}\n"
@@ -1230,7 +1250,7 @@ std::string PlotObject::GetJavascript2dPlot
   std::stringstream out;
   std::stringstream fnNameStream;
   funCounter++;
-  fnNameStream << "theCanvasPlotFn"
+  fnNameStream << "theCanvasPlotFn_" << canvasName << "_"
   << funCounter;
   std::string fnName=fnNameStream.str();
   if (this->variablesInPlay.size>0)

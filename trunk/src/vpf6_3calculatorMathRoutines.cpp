@@ -1893,12 +1893,13 @@ bool CalculatorFunctionsGeneral::outerDivideByNumber
 
 bool CalculatorFunctionsGeneral::innerMax(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMax");
+  (void) theCommands;
   if (input.size()!=3)
     return false;
   double leftD, rightD;
   if (!input[1].EvaluatesToDouble(&leftD) || !input[2].EvaluatesToDouble(&rightD))
     return false;
-  if (leftD>rightD)
+  if (leftD>=rightD)
   { output=input[1];
     return true;
   }
@@ -1911,12 +1912,13 @@ bool CalculatorFunctionsGeneral::innerMax(Calculator& theCommands, const Express
 
 bool CalculatorFunctionsGeneral::innerMin(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMin");
+  (void) theCommands;
   if (input.size()!=3)
     return false;
   double leftD, rightD;
   if (!input[1].EvaluatesToDouble(&leftD) || !input[2].EvaluatesToDouble(&rightD))
     return false;
-  if (rightD>leftD)
+  if (rightD>=leftD)
   { output=input[1];
     return true;
   }
@@ -4560,33 +4562,35 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
 bool CalculatorFunctionsGeneral::innerPlotViewWindow
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotViewWindow");
-  if (input.children.size<3)
+  if (input.size()<3)
     return false;
   Vector<double> widthHeight;
   Plot emptyPlot;
   emptyPlot.priorityViewWindow=1;
   bool isGood=false;
-  if (theCommands.GetVectorDoublesFromFunctionArguments(input, widthHeight, 2) )
-  { isGood=true;
-  } else
+  if (theCommands.GetVectorDoublesFromFunctionArguments(input, widthHeight, 2))
+    isGood=true;
+  else
   { widthHeight.SetSize(2);
     widthHeight[0]=100;
     widthHeight[1]=100;
     MapLisT<std::string, Expression, MathRoutines::hashString> theMap;
-    if (! CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theMap, 0, false) )
+    if (!CalculatorConversions::innerLoadKeysFromStatementList
+        (theCommands, input, theMap, 0, false))
       isGood=false;
     else
     { if (theMap.Contains("width"))
         if (!theMap.GetValueCreateIfNotPresent("width").EvaluatesToDouble(&widthHeight[0]))
-         isGood=false;
+          isGood=false;
       if (theMap.Contains("height"))
         if (!theMap.GetValueCreateIfNotPresent("height").EvaluatesToDouble(&widthHeight[1]))
-         isGood=false;
+          isGood=false;
     }
   }
   if (!isGood)
-    return theCommands << "Failed to extract a pair of positive numbers from: " << input.ToString();
-  emptyPlot.DesiredHtmlWidthInPixels=(int) widthHeight[0];
+    return theCommands << "Failed to extract a pair of positive numbers from: "
+    << input.ToString();
+  emptyPlot.DesiredHtmlWidthInPixels =(int) widthHeight[0];
   emptyPlot.DesiredHtmlHeightInPixels=(int) widthHeight[1];
   return output.AssignValue(emptyPlot, theCommands);
 }
@@ -4610,10 +4614,12 @@ bool CalculatorFunctionsGeneral::innerPlotViewRectangle
   if (input.size()<3)
     return false;
   Vector<double> lowerLeft, upperRight;
-  if (!theCommands.GetVectorDoubles(input[1], lowerLeft, 2) || !theCommands.GetVectorDoubles(input[2], upperRight, 2))
+  if (!theCommands.GetVectorDoubles(input[1], lowerLeft, 2) ||
+      !theCommands.GetVectorDoubles(input[2], upperRight, 2))
     return theCommands << "Failed to extract two pairs of floating point numbers from: "
     << input[1].ToString() << " and " << input[2].ToString();
   Plot emptyPlot;
+  emptyPlot.dimension=2;
   emptyPlot.theLowerBoundAxes=lowerLeft[0];
   emptyPlot.lowBoundY=lowerLeft[1];
   emptyPlot.theUpperBoundAxes=upperRight[0];
@@ -4632,6 +4638,7 @@ bool CalculatorFunctionsGeneral::innerPlotFill(Calculator& theCommands, const Ex
   const Expression& thePlotE=input[1];
   const Expression& colorE=input[2];
   Plot outputPlot, startPlot;
+  outputPlot.dimension=2;
   PlotObject theFilledPlot;
   if (!thePlotE.IsOfType<Plot>(&startPlot))
     return false;
@@ -4664,6 +4671,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   if (input.HasBoundVariables())
     return false;
   Plot thePlot;
+  thePlot.dimension=2;
   PlotObject thePlotObj;
   thePlotObj.leftPtE=input[2];
   thePlotObj.rightPtE=input[3];
@@ -4787,21 +4795,21 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
 bool CalculatorFunctionsGeneral::innerPlotPoint(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotPoint");
   //stOutput << input.ToString();
-  if (input.children.size<3)
+  if (input.size()!=3)
     return output.MakeError
-    ("Plotting a point takes at least two arguments, namely the x and y coordinate of the point. ", theCommands);
+    ("Plotting a point takes at least two arguments, location and color. ", theCommands);
   Vector<double> theV;
-  theV.initFillInObject(2,0);
-  if (!input[1].EvaluatesToDouble(&theV[0]) || !input[2].EvaluatesToDouble(&theV[1]))
-    return theCommands << "<hr>Failed to extract x, y coordinates from: " << input.ToString();
+  if (!theCommands.GetVectorDoubles(input[1], theV))
+    return theCommands << "<hr>Failed to extract coordinates from: " << input[1].ToString();
   Plot theFinalPlot;
+  theFinalPlot.dimension=theV.size;
   PlotObject thePlot;
+  thePlot.dimension=theV.size;
   thePlot.colorRGB=CGI::RedGreenBlue(0,0,0);
-  if (input.size()>3)
-  { if (input[3].IsOfType<std::string>())
-      DrawingVariables::GetColorIntFromColorString(input[3].GetValue<std::string>(), thePlot.colorRGB);
-    thePlot.colorRGBJS=input[3].ToString();
-  }
+  if (input[2].IsOfType<std::string>())
+    DrawingVariables::GetColorIntFromColorString
+    (input[2].GetValue<std::string>(), thePlot.colorRGB);
+  thePlot.colorRGBJS=input[2].ToString();
   thePlot.thePoints.AddOnTop(theV);
   thePlot.thePlotType="point";
   theFinalPlot.thePlots.AddOnTop(thePlot);
@@ -4814,12 +4822,13 @@ bool CalculatorFunctionsGeneral::innerPlotPoint(Calculator& theCommands, const E
 bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlot2DWithBars");
   //stOutput << input.ToString();
-  if (input.children.size<6)
+  if (input.size()<6)
     return output.MakeError("Plotting coordinates takes the following arguments: lower function, upper function, lower and upper bound, delta x. ", theCommands);
   Expression lowerEplot=input, upperEplot=input;
   lowerEplot.children.RemoveIndexShiftDown(2);
   upperEplot.children.RemoveIndexShiftDown(1);
   Plot outputPlot;
+  outputPlot.dimension=2;
   bool tempB=CalculatorFunctionsGeneral::innerPlot2D(theCommands, lowerEplot, output);
   if (!tempB || !output.IsOfType<Plot>(&outputPlot))
     return theCommands << "<hr>Failed to get a plot from " << lowerEplot.ToString() << ", not proceding with bar plot.";
@@ -4958,6 +4967,7 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCom
   Expression functionE;
   double lowerBound=0, upperBound=0;
   PlotObject thePlotCartesian;
+  thePlotCartesian.dimension=2;
   if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound))
     return output.MakeError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
@@ -5006,6 +5016,7 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended(Calculator
   const Expression& upperE=input[3];
   Expression functionE;
   PlotObject thePlotPolar;
+  thePlotPolar.dimension=2;
   if (!lowerE.EvaluatesToDouble(&thePlotPolar.xLow) || !upperE.EvaluatesToDouble(&thePlotPolar.xHigh))
     return output.MakeError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (thePlotPolar.xHigh<thePlotPolar.xLow)
@@ -5041,6 +5052,7 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   if (input.HasBoundVariables())
     return false;
   PlotObject thePlot;
+  thePlot.dimension=2;
   thePlot.colorRGB=CGI::RedGreenBlue(255, 0, 0);
   if (input.size()>=6)
     if (!input[5].IsOfType<std::string>(&thePlot.colorRGBJS))
@@ -5165,6 +5177,7 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
     thePlot.thePoints[i][1]=theYs[i][1];
   }
   Plot outputPlot;
+  outputPlot.dimension=2;
   outputPlot.thePlots.AddOnTop(thePlot);
   input.HasInputBoxVariables(&outputPlot.boxesThatUpdateMe);
   return output.AssignValue(outputPlot, theCommands);

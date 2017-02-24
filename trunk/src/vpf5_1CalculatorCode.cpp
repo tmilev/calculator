@@ -783,6 +783,8 @@ void Plot::operator+=(const Plot& other)
     this->canvasName=other.canvasName;
   if (other.priorityCanvasName>this->priorityCanvasName)
     this->priorityCanvasName=other.priorityCanvasName;
+  if (this->dimension==-1)
+    this->dimension=other.dimension;
   if (other.priorityViewWindow>this->priorityViewWindow)
   { this->highBoundY=other.highBoundY;
     this->lowBoundY=other.lowBoundY;
@@ -795,7 +797,6 @@ void Plot::operator+=(const Plot& other)
     this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, other.theUpperBoundAxes);
     this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
   }
-  this->priorityViewWindow=MathRoutines::Maximum(this->priorityViewWindow, other.priorityViewWindow);
   this->thePlots.AddListOnTop(other.thePlots);
   this->the3dObjects.AddListOnTop(other.the3dObjects);
   if (other.priorityViewWindow>this->priorityViewWindow)
@@ -808,36 +809,43 @@ void Plot::operator+=(const Plot& other)
       this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
   }
   this->boxesThatUpdateMe.AddOnTopNoRepetition(other.boxesThatUpdateMe);
+  this->priorityViewWindow=MathRoutines::Maximum(this->priorityViewWindow, other.priorityViewWindow);
 }
 
 bool Plot::operator==(const Plot& other)const
-{ if (this->priorityViewWindow!=other.priorityViewWindow)
-    return false;
-  if (this->DesiredHtmlHeightInPixels!=other.DesiredHtmlHeightInPixels ||
-      this->DesiredHtmlWidthInPixels!=other.DesiredHtmlWidthInPixels)
-    return false;
-  if (this->highBoundY!=other.highBoundY ||
-      this->lowBoundY!=other.lowBoundY ||
-      this->theLowerBoundAxes!=other.theLowerBoundAxes ||
-      this->theUpperBoundAxes!=other.theUpperBoundAxes)
-    return false;
-  return this->thePlots==other.thePlots &&
+{ return
+  this->priorityViewWindow==other.priorityViewWindow &&
+  this->DesiredHtmlHeightInPixels==other.DesiredHtmlHeightInPixels &&
+  this->DesiredHtmlWidthInPixels==other.DesiredHtmlWidthInPixels &&
+  this->highBoundY==other.highBoundY &&
+  this->lowBoundY==other.lowBoundY &&
+  this->theLowerBoundAxes==other.theLowerBoundAxes &&
+  this->theUpperBoundAxes==other.theUpperBoundAxes &&
+  this->thePlots==other.thePlots &&
   this->the3dObjects==other.the3dObjects &&
   this->boxesThatUpdateMe==other.boxesThatUpdateMe &&
   this->canvasName==other.canvasName &&
   this->priorityCanvasName==other.priorityCanvasName &&
-  this->priorityViewWindow==other.priorityViewWindow
+  this->priorityViewWindow==other.priorityViewWindow &&
+  this->dimension==other.dimension
   ;
 }
 
 void Plot::operator+=(const PlotObject3d& other)
-{ this->flagIs3d=true;
+{ if (this->dimension!=3 && this->dimension!=-1)
+    crash << "Attempting to add plot of dimension: "
+    << this->dimension << " to a 3d object. " << crash;
+  this->dimension=3;
   this->the3dObjects.AddOnTop(other);
 }
 
 void Plot::operator+=(const PlotObject& other)
-{ if (this->thePlots.size==0)
-    this->flagIs3d=other.flagIs3d;
+{ if (other.dimension!=-1 && this->dimension!=-1 && this->dimension!=other.dimension)
+    crash << "Attempting to add plot of dimension: "
+    << this->dimension << " to a plot of dimension: "
+    << other.dimension << ". " << crash;
+  if (this->dimension==-1)
+    this->dimension=other.dimension;
   this->thePlots.AddOnTop(other);
 }
 
@@ -851,23 +859,23 @@ bool PlotObject3d::operator==(const PlotObject3d& other)const
 
 bool PlotObject::operator==(const PlotObject& other)const
 { return
-  this->thePlotStringWithHtml==other.thePlotStringWithHtml &&
-  this->xLow                 ==other.xLow&&
-  this->xHigh                ==other.xHigh &&
-  this->yLow                 ==other.yLow &&
-  this->yHigh                ==other.yHigh &&
-  this->paramLow             ==other.paramLow  &&
-  this->paramHigh            ==other.paramHigh &&
-  this->coordinateFunctionsE ==other.coordinateFunctionsE &&
-  this->thePlotType          ==other.thePlotType &&
-  this->thePoints            ==other.thePoints &&
-  this->lineWidth            ==other.lineWidth &&
-  this->theRectangles        ==other.theRectangles &&
-  this->flagIs3d             ==other.flagIs3d &&
-  this->thePlotString        ==other.thePlotString &&
+  this->thePlotStringWithHtml== other.thePlotStringWithHtml &&
+  this->xLow                 == other.xLow&&
+  this->xHigh                == other.xHigh &&
+  this->yLow                 == other.yLow &&
+  this->yHigh                == other.yHigh &&
+  this->paramLow             == other.paramLow  &&
+  this->paramHigh            == other.paramHigh &&
+  this->coordinateFunctionsE == other.coordinateFunctionsE &&
+  this->thePlotType          == other.thePlotType &&
+  this->thePoints            == other.thePoints &&
+  this->lineWidth            == other.lineWidth &&
+  this->theRectangles        == other.theRectangles &&
+  this->dimension            == other.dimension &&
+  this->thePlotString        == other.thePlotString &&
   this->fillStyle            == other.fillStyle &&
-  this->thePlotStringWithHtml==other.thePlotStringWithHtml &&
-  this->colorRGB             ==other.colorRGB &&
+  this->thePlotStringWithHtml== other.thePlotStringWithHtml &&
+  this->colorRGB             == other.colorRGB &&
   this->colorFillRGB         == other.colorFillRGB &&
   this->variablesInPlay      == other.variablesInPlay &&
   this->leftPtE              == other.leftPtE &&
@@ -883,16 +891,16 @@ bool PlotObject::operator==(const PlotObject& other)const
 }
 
 PlotObject::PlotObject()
-{ this->xLow        =0;
-  this->xHigh       =0;
-  this->paramLow    =0;
-  this->paramHigh   =0;
-  this->yLow        =0;
-  this->yHigh       =0;
-  this->colorRGB    =0;
-  this->lineWidth   =1;
-  this->colorFillRGB=0;
-  this->flagIs3d    =false;
+{ this->xLow         =0;
+  this->xHigh        =0;
+  this->paramLow     =0;
+  this->paramHigh    =0;
+  this->yLow         =0;
+  this->yHigh        =0;
+  this->colorRGB     =0;
+  this->lineWidth    =1;
+  this->colorFillRGB =0;
+  this->dimension    =-1;
 }
 
 void PlotObject::ComputeYbounds()
@@ -933,7 +941,7 @@ Plot::Plot()
   this->flagPlotShowJavascriptOnly=false;
   this->priorityViewWindow=0;
   this->priorityCanvasName=0;
-  this->flagIs3d=false;
+  this->dimension=-1;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
@@ -1015,8 +1023,8 @@ void Plot::ComputeAxesAndBoundingBox3d()
         continue;
       this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
       this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentPoint[0]);
-      this->lowBoundY=MathRoutines::Minimum  (currentPoint[1], this->lowBoundY);
-      this->highBoundY=MathRoutines::Maximum (currentPoint[1], this->highBoundY);
+      this->lowBoundY =MathRoutines::Minimum(currentPoint[1], this->lowBoundY);
+      this->highBoundY=MathRoutines::Maximum(currentPoint[1], this->highBoundY);
     }
   }
 
@@ -1040,6 +1048,8 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     canvasNameStream << "theCanvas" << this->canvasCounteR;
     this->canvasName=canvasNameStream.str();
   }
+  //stOutput << "DEBUG: width: " << this->DesiredHtmlWidthInPixels
+  //<< " height: " << this->DesiredHtmlHeightInPixels;
   out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
   << "\" height=\"" << this->DesiredHtmlHeightInPixels << "\" "
   << "style=\"border:solid 1px\" id=\""
@@ -1177,7 +1187,7 @@ std::string PlotObject3d::GetJavascriptSurfaceImmersion(std::string& outputSurfa
     surfaceInstStream << "new Surface("
     << fnName
     << ", [[" << this->theVarRangesJS[0][0] << "," << this->theVarRangesJS[1][0] << "],"
-    << " [" << this->theVarRangesJS[0][1] << ", " << this->theVarRangesJS[1][1] << "]], ";
+    << " ["   << this->theVarRangesJS[0][1] << ", " << this->theVarRangesJS[1][1] << "]], ";
     surfaceInstStream << "[" << this->numSegmentsU << ","
     << this->numSegmentsV << "], ";
     surfaceInstStream << "{colorContour: \"black\", ";
@@ -1199,10 +1209,15 @@ std::string PlotObject3d::GetJavascriptSurfaceImmersion(std::string& outputSurfa
 
 std::string Plot::GetPlotHtml(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml");
-  if (this->flagIs3d)
+  if (this->dimension==3)
     return this->GetPlotHtml3d_New(owner);
-  else
+  else if (this->dimension==2)
     return this->GetPlotHtml2d_New(owner);
+  else
+  { std::stringstream out;
+    out << "Error:dimension=" << this->dimension;
+    return out.str();
+  }
 }
 
 int Plot::canvasCounteR=0;
@@ -1366,6 +1381,16 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     }
     if (currentPlot.thePlotType=="parametricCurve")
     { out << "theCanvas." << theFnPlots[i];
+      continue;
+    }
+    if (currentPlot.thePlotType=="label")
+    { if (currentPlot.thePoints.size>0)
+        out << "theCanvas.drawText("
+        << currentPlot.thePoints[0].ToStringSquareBracketsBasicType()
+        << ", "
+        << "'" << currentPlot.thePlotString << "'"
+        << ", "
+        << "'" << currentPlot.colorRGBJS << "');\n" ;
       continue;
     }
     if (currentPlot.thePlotType=="plotFillStart")

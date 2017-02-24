@@ -596,7 +596,9 @@ bool CalculatorFunctionsBinaryOps::innerAddPlotToPlot(Calculator& theCommands, c
     return false;
   if(!input[2].IsOfType<Plot>(&rightPlot))
     return false;
-  if (leftPlot.flagIs3d!=rightPlot.flagIs3d)
+  if(leftPlot. dimension!=-1 &&
+     rightPlot.dimension!=-1 &&
+     leftPlot. dimension!=rightPlot.dimension)
     return false;
 //  stOutput << "DEBUG Adding plots, input plot dims: left: " << leftPlot.DesiredHtmlWidthInPixels << ", " << leftPlot.DesiredHtmlHeightInPixels
 //  << ", right: "

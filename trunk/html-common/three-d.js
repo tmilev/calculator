@@ -1732,9 +1732,9 @@ function Canvas(inputCanvas)
     if (this.spanMessages===null || this.spanMessages===undefined)
       return;
     var theHTML="";
-    if (this.textPerformance!="")
+    if (this.textPerformance!=="")
       theHTML+=this.textPerformance + "<hr>";
-    if (this.textErrors!="")
+    if (this.textErrors!=="")
       theHTML+="<span style=\"red\"><b>" +this.textErrors+ "</b></span><hr>";
     theHTML+=
     "<span>" +this.textMouseInfo+ "</span><hr>"+

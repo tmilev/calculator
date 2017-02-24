@@ -330,6 +330,7 @@ bool MeshTriangles::ComputePoints
 (Calculator& theCommands, const Expression& input, bool showGrid)
 { if (input.children.size<6)
     return false;
+  this->thePlot.dimension=2;
   this->flagShowGrid=showGrid;
   this->owner=&theCommands;
   this->theFun=input[1];
@@ -743,23 +744,23 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
   return output.AssignValue(out.str(), theCommands);
 }
 
-
 bool CalculatorFunctionsGeneral::innerPlotLabel
 (Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotRectangle");
-  if (input.size()<4)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotLabel");
+  if (input.size()!=3)
     return false;
   Vector<double> labelPosition;
-  labelPosition.SetSize(2);
-  if (!input[1].EvaluatesToDouble(& labelPosition[0]) || !input[2].EvaluatesToDouble(& labelPosition[1]))
+  if (!theCommands.GetVectorDoubles(input[1], labelPosition, -1))
     return false;
   std::string theLabel;
-  if (!input[3].IsOfType<std::string>(&theLabel))
-    theLabel=input[3].ToString();
+  if (!input[2].IsOfType<std::string>(&theLabel))
+    theLabel=input[2].ToString();
   PlotObject thePlot;
+  thePlot.dimension=labelPosition.size;
   thePlot.thePlotString=theLabel;
   thePlot.thePoints.AddOnTop(labelPosition);
   thePlot.thePlotType="label";
+  thePlot.colorRGBJS="black";
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -773,6 +774,7 @@ bool CalculatorFunctionsGeneral::innerPlotRectangle
   if (!theCommands.GetVectorDoubles(input[1], theRectangle[0],2) || !theCommands.GetVectorDoubles(input[2], theRectangle[1], 2))
     return false;
   PlotObject thePlot;
+  thePlot.dimension=2;
   thePlot.thePlotType="pathFilled";
   Vector<double> currentCorner=theRectangle[0];
   Vector<double>& dimensions=theRectangle[1];
@@ -988,7 +990,9 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
   theSegment.thePlotType="plotSegment";
   theSegment.colorRGB=colorIndex;
   if (leftV.size==3)
-    theSegment.flagIs3d=true;
+    theSegment.dimension=3;
+  else
+    theSegment.dimension=2;
   theSegment.thePoints.AddOnTop(leftV.GetVectorDouble());
   theSegment.thePoints.AddOnTop(rightV.GetVectorDouble());
   Plot thePlot;
@@ -1246,7 +1250,7 @@ bool CalculatorFunctionsGeneral::innerPlotCoordinateSystem(Calculator& theComman
     << input[1].ToString() << ", "
     << input[2].ToString() << ".";
   Plot resultPlot;
-  resultPlot.flagIs3d=true;
+  resultPlot.dimension=3;
   PlotObject3d thePlot;
   thePlot.colorJS="black";
   thePlot.thePlotType="segment";

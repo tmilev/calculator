@@ -1391,7 +1391,7 @@ D-B;\
    "PointsImplicitly")
    ;
 
-  this->AddOperationInnerHandler ("plotImplicit", CalculatorFunctionsGeneral::innerPlotImplicitFunction, "",
+  this->AddOperationInnerHandler ("PlotImplicit", CalculatorFunctionsGeneral::innerPlotImplicitFunction, "",
    "Plots implicitly a curve given by the zeros of an expression in the letters\
    x and y. The relation between x and y is assumed continuous at the points where it is defined.\
    The function has not been optimized for speed, please use with care.\
@@ -1404,29 +1404,29 @@ D-B;\
     of triangles to use (max=20000, default=2000). The triangle used to generate \
     the implicit plot is algorithmically chosen. \
    ",
-   "plotImplicit((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))", true, false,
-   "CalculatorFunctionsGeneral::innerPlotImplicitFunction", "plotImplicit")
+   "PlotImplicit((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))", true, false,
+   "CalculatorFunctionsGeneral::innerPlotImplicitFunction", "PlotImplicit")
    ;
-  this->AddOperationInnerHandler ("plotImplicitShowGrid", CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction, "",
+  this->AddOperationInnerHandler ("PlotImplicitShowGrid", CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction, "",
    "Same as plotImplicit but shows the underlying grid. \
    The yellow grid is the initial one (specified by the user), \
    and the gray grid is obtained by a subdivision which depends on the concrete function. \
    ",
-   "plotImplicitShowGrid((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))", true, false,
+   "PlotImplicitShowGrid((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))", true, false,
    "CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction",
-   "plotImplicitShowGrid")
+   "PlotImplicitShowGrid")
    ;
   this->AddOperationInnerHandler ("PlotCoordinateSystem",
    CalculatorFunctionsGeneral::innerPlotCoordinateSystem, "",
    "Plots a 3d coordinate system, fitting in a box \
     given by two opposite corners.  ",
-   "PlotCoordinateSystem((-3,-2,-3), (1,5, 4))s",
+   "PlotCoordinateSystem((-3,-2,-3), (1,5, 4))",
     true, false,
    "CalculatorFunctionsGeneral::innerPlotCoordinateSystem",
    "PlotCoordinateSystem")
    ;
 
-  this->AddOperationInnerHandler ("plotSurface",
+  this->AddOperationInnerHandler ("PlotSurface",
    CalculatorFunctionsGeneral::innerPlotSurface, "",
    " Plots a surface. \
    ",
@@ -1437,8 +1437,8 @@ R=MakeInputBox (name =radiusBig, value=2, min =2, max=5) ;\
 r=MakeInputBox (name =radiusSmall, value=0.6, min =0.2, max=1, step=0.2) ;\
 uSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max =40) ;\
 vSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max =10) ;\
-plotSurface((x,y,z  ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=blue, color2=cyan, numSegments1=uSegments, numSegments2=vSegments)+\
-plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=pink, numSegments1=uSegments, numSegments2=vSegments); ",
+PlotSurface((x,y,z  ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=blue, color2=cyan, numSegments1=uSegments, numSegments2=vSegments)+\
+PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=pink, numSegments1=uSegments, numSegments2=vSegments); ",
     true, false, "CalculatorFunctionsGeneral::innerPlotSurface",
    "PlotSurface")
    ;
@@ -1462,7 +1462,8 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
     CalculatorFunctionsGeneral::innerPlotSegment, "",
    " Plots a segment connecting two points. \
    ",
-   "PlotSegment( (1,2), (3,4))", true, false,
+   "PlotSegment( (1,2), (3,4))",
+   true, false,
    "CalculatorFunctionsGeneral::innerPlotSegment",
    "PlotSegment")
    ;
@@ -1472,7 +1473,8 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
      If you add a nameless plot to a named one the \
      the resulting plot acquires the canvas id. \
    ",
-   "PlotSetId( myId)", true, false,
+   "PlotSetId( myId)+PlotCoordinateSystem((-3,-2,-3), (1,5, 4))",
+   true, false,
    "CalculatorFunctionsGeneral::innerPlotSetId",
    "PlotSetId")
    ;
@@ -1497,10 +1499,12 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    false, "CalculatorFunctionsGeneral::innerGetFreeVariablesIncludeNamedConstants",
    "GetVariablesIncludeNamedConstants")
    ;
-  this->AddOperationInnerHandler ("PlotPoint", CalculatorFunctionsGeneral::innerPlotPoint, "",
+  this->AddOperationInnerHandler ("PlotPoint",
+   CalculatorFunctionsGeneral::innerPlotPoint, "",
    "<b>Calculus teaching function.</b> Plots a point from x and y coordinate.\
    ",
-   "PlotPoint{}(1,2)", true, false, "CalculatorFunctionsGeneral::innerPlotPoint",
+   "PlotPoint{}((1,2),blue)", true, false,
+   "CalculatorFunctionsGeneral::innerPlotPoint",
    "PlotPoint")
    ;
   this->AddOperationInnerHandler ("Plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",
@@ -1526,10 +1530,11 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "PlotRectangle{}((1,2), (2,1))", true, false,
    "CalculatorFunctionsGeneral::innerPlotRectangle", "PlotRectangle")
    ;
-  this->AddOperationInnerHandler ("PlotLabel", CalculatorFunctionsGeneral::innerPlotLabel, "",
-   "Plots a label at a given position. Arguments format: PlotLabel(Xcoord, Ycoord, \"Label\"). \
+  this->AddOperationInnerHandler ("PlotLabel",
+   CalculatorFunctionsGeneral::innerPlotLabel, "",
+   "Plots a label at a given position. Arguments format: PlotLabel((Xcoord, Ycoord), \"Label\"). \
    ",
-   "PlotLabel{}(1,1, \"(1,1)\")", true, false,
+   "PlotLabel{}((1,1), \"(1,1)\")", true, false,
    "CalculatorFunctionsGeneral::innerPlotLabel", "PlotLabel")
    ;
   this->AddOperationInnerHandler ("PlotViewRectangle",
@@ -1546,12 +1551,16 @@ plotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    true, false,
    "CalculatorFunctionsGeneral::PlotViewRectangle", "PlotViewRectangle")
    ;
-  this->AddOperationInnerHandler ("PlotWindow", CalculatorFunctionsGeneral::innerPlotViewWindow, "",
-   "Creates an empty plot whose sole purpose is to fix the dimensions (in pixels) of the image in the format\
-(pixelwidth, pixelHeight). \
-   To modify the dimensions (in pixels) of another plot, add to it the PlotWindow ``plot''.\
+  this->AddOperationInnerHandler ("PlotWindow",
+   CalculatorFunctionsGeneral::innerPlotViewWindow, "",
+   "Creates an empty plot whose sole purpose is to fix the dimensions \
+    (in pixels) of the image in the format\
+    (pixelwidth, pixelHeight). \
+    To modify the dimensions (in pixels) of another plot, \
+    add to it the PlotWindow ``plot''.\
    ",
-   "Plot2D{}(1/x, -30, 30, 300, 300, \"red\") + PlotWindow(400,400)+ PlotViewRectangle((-5,-5), (5,5))", true, false,
+   "Plot2D{}(1/x, -30, 30, 300, 300, \"red\") + \
+    PlotWindow(400,400)+ PlotViewRectangle((-5,-5), (5,5))", true, false,
    "CalculatorFunctionsGeneral::innerPlotWindow", "PlotWindow")
    ;
   this->AddOperationInnerHandler ("Plot2DWithBars",
@@ -2629,20 +2638,26 @@ void Calculator::initPredefinedStandardOperations()
    "Adds rational to algebraic number. ",
    "1/(1+\\sqrt {2}+\\sqrt{}6)", true, false, "CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat, this->opDouble(), this->opRational(),
+  ("+", CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat,
+   this->opDouble(), this->opRational(),
    "Adds double or rational to a double or rational approximately using the built-in cpp \
    addition, returning double. ",
-   "DoubleValue{}(3.14159265358979323846)+1"
-   , true, false, "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat");
+   "DoubleValue{}(3.14159265358979323846)+1",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps::innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
+  ("+", CalculatorFunctionsBinaryOps::innerAddPlotToPlot,
+   this->opCalculusPlot(), this->opCalculusPlot(),
    "Superimposes two plots. ",
    "Plot2D{}(sin{}(x), -5, 5)+ Plot2D{}(1/sin{}(x ), 0.1, 3.041592654)",
-   true, false, "CalculatorFunctionsBinaryOps::innerAddPlotToPlot", "AddPlots");//must come before outer plus.
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerAddPlotToPlot", "AddPlots");//must come before outer plus.
   this->AddOperationOuterHandler
   ("+", Calculator::outerPlus, "",
-   "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
-    Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true, false,
+   "Collects all terms (over the rationals), adding up terms \
+    proportional up to a rational number. \
+    Zero summands are removed, unless zero is the only term left. ",
+    "1+a-2a_1+1/2+a_1", true, false,
     "Calculator::outerPlus", "AddTerms");
   this->AddOperationOuterHandler
   ("+", CalculatorFunctionsGeneral::outerCombineFractionsCommutative, "",

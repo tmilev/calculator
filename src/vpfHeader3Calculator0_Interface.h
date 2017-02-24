@@ -650,7 +650,7 @@ public:
   int colorRGB;
   int colorFillRGB;
   double lineWidth;
-  bool flagIs3d;
+  int dimension;
   Vectors<double> thePoints;
   List<Vectors<double> > theRectangles;
   // each rectangle is a list of two 2-dim vectors. First vector gives the (x,y)-coords
@@ -726,7 +726,7 @@ class Plot
   int defaultLineColor;
   bool flagIncludeExtraHtmlDescriptions;
   bool flagPlotShowJavascriptOnly;
-  bool flagIs3d;
+  int dimension;
   static int canvasCounteR;
   std::string canvasName;
   int priorityViewWindow; //0 or less: compute the view Window. If this quantity is greater than zero,

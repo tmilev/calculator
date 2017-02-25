@@ -289,6 +289,9 @@ function PointTwoD(inputLocation, inputColor)
 { this.location=inputLocation;
   this.color=colorToRGB(inputColor);
   this.type="point";
+  this.accountBoundingBox= function(inputOutputBox)
+  { accountBoundingBox(this.location, inputOutputBox);
+  };
   this.draw=function(theCanvas)
   { var theSurface=theCanvas.surface;
     theSurface.beginPath();
@@ -300,6 +303,17 @@ function PointTwoD(inputLocation, inputColor)
   };
 }
 
+function accountBoundingBox(inputPoint, outputBox)
+{ for (var i=0; i<inputPoint.length; i++)
+  { if (inputPoint[i]<outputBox[0][i])
+      outputBox[0][i]=inputPoint[i];
+  }
+  for (i=0; i<inputPoint.length; i++)
+  { if (inputPoint[i]>outputBox[1][i])
+      outputBox[1][i]=inputPoint[i];
+  }
+}
+
 function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
                    inputNumSegments, inputColor)
 { this.coordinateFunctions=inputCoordinateFunctions;
@@ -307,6 +321,19 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
   this.rightPt=inputRightPt;
   this.color=colorToRGB(inputColor);
   this.numSegments=inputNumSegments;
+  this.accountBoundingBox= function(inputOutputBox)
+  { var theT=this.leftPt;
+    var theX=this.coordinateFunctions[0](theT);
+    var theY=this.coordinateFunctions[1](theT);
+    accountBoundingBox([theX, theY],inputOutputBox );
+    for (var i=0; i<this.numSegments; i++)
+    { var theRatio=i/(this.numSegments-1);
+      theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
+      theX=this.coordinateFunctions[0](theT);
+      theY=this.coordinateFunctions[1](theT);
+      accountBoundingBox([theX, theY],inputOutputBox );
+    }
+  };
   this.drawNoFinish=function(theCanvas, startByMoving)
   { var theSurface=theCanvas.surface;
     theSurface.strokeStyle=colorRGBToString(this.color);
@@ -323,7 +350,7 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
     for (var i=0; i<this.numSegments; i++)
     { var theRatio=i/(this.numSegments-1);
       theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio; //<- this way of
-      //computing x this way introduces smaller numerical errors.
+      //computing x introduces smaller numerical errors.
       //For example, suppose you plot sqrt(1-x^2) from -1 to 1.
       //If not careful with rounding errors,
       //you may end up evaluating sqrt(1-x^2) for x=1.00000000000004
@@ -357,6 +384,10 @@ function PathTwoD(inputPath, inputColor, inputFillColor)
   this.colorFill=colorToRGB(inputFillColor);
   this.isFilled=false;
   this.type="path";
+  this.accountBoundingBox= function(inputOutputBox)
+  { for (var i=1; i<this.path.length; i++)
+      accountBoundingBox(this.path[i], inputOutputBox);
+  };
   this.drawNoFinish=function(theCanvas, startByMoving)
   { if (inputPath.length<1)
       return;
@@ -394,6 +425,18 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
   this.type="plotFunction";
   this.numSegments=inputNumSegments;
   this.Delta=(inputRightPt-inputLeftPt)/inputNumSegments;
+  this.accountBoundingBox= function(inputOutputBox)
+  { for (var i=0; i<this.numSegments; i++)
+    { var theRatio=i/(this.numSegments-1);
+      theX= this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
+      theY=this.theFunction(theX);
+      if (!isFinite(theY) )
+        continue;
+      if (Math.abs(theY)>100000)
+        continue;
+      accountBoundingBox([theX, theY], inputOutputBox);
+    }
+  };
   this.drawNoFinish=function(theCanvas, startByMoving)
   { var theSurface=theCanvas.surface;
     theSurface.strokeStyle=colorRGBToString(this.color);
@@ -406,7 +449,7 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
     else
       theSurface.lineTo(theCoords[0], theCoords[1]);
     var skippedValues=false;
-    for (var i=0; i<this.numSegments; i++)
+    for (var i=1; i<this.numSegments; i++)
     { var theRatio=i/(this.numSegments-1);
       theX= this.leftPt *(1-theRatio) +  this.rightPt*theRatio; //<- this way of
       //computing x this way introduces smaller numerical errors.
@@ -441,6 +484,9 @@ function TextPlotTwoD(inputLocation, inputText, inputColor)
   this.text=inputText;
   this.color=colorToRGB(inputColor);
   this.type="plotText";
+  this.accountBoundingBox= function(inputOutputBox)
+  { accountBoundingBox(this.location, inputOutputBox);
+  };
   this.drawNoFinish=function(theCanvas)
   { var theSurface=theCanvas.surface;
     theSurface.strokeStyle=colorRGBToString(this.color);
@@ -461,6 +507,10 @@ function SegmentTwoD(inputLeftPt, inputRightPt, inputColor)
   this.rightPt=inputRightPt;
   this.color=colorToRGB(inputColor);
   this.type="segment";
+  this.accountBoundingBox= function(inputOutputBox)
+  { accountBoundingBox(this.leftPt , inputOutputBox);
+    accountBoundingBox(this.rightPt, inputOutputBox);
+  };
   this.drawNoFinish=function (theCanvas, startByMoving)
   { var theSurface=theCanvas.surface;
     var theCoords=theCanvas.coordsMathToScreen(this.leftPt);
@@ -484,6 +534,9 @@ function SegmentTwoD(inputLeftPt, inputRightPt, inputColor)
 function PlotFillTwoD(inputCanvas, inputColor)
 { this.indexFillStart=inputCanvas.theObjects.length;
   this.color=colorToRGB(inputColor);
+  this.accountBoundingBox= function(inputOutputBox)
+  {
+  };
   this.draw=function(inputCanvas)
   { var theSurface=inputCanvas.surface;
     var theObs=inputCanvas.theObjects;
@@ -519,14 +572,12 @@ function CanvasTwoD(inputCanvas)
   this.spanCriticalErrors=null;
   this.spanControls=null;
   this.numDrawnObjects=0;
-  this.boundingBoxMathScreen= [[-0.01, -0.01], [0.01, 0.01]];
   this.boundingBoxMath= [[-0.01,-0.01],[0.01,0.01]];
   this.width= inputCanvas.width;
   this.height= inputCanvas.height;
   this.centerX= inputCanvas.width/2;
   this.centerY= inputCanvas.height/2;
   this.oldViewWindowCenterMath=[0,0];
-  this.lastViewWindow=[[-5,-5],[5,5]];
   this.scale= 50;
   this.mousePosition= [];
   this.clickedPosition= [];
@@ -577,11 +628,21 @@ function CanvasTwoD(inputCanvas)
   this.plotFillFinish=function ()
   { this.theObjects.push({type:"plotFillFinish"});
   };
+  this.computeViewWindow= function()
+  { this.boundingBoxMath=[[-0.1,-0.1],[0.1,0.1]];
+    for (var i=0; i<this.theObjects.length; i++)
+    { if (this.theObjects[i].accountBoundingBox===undefined)
+        continue;
+      this.theObjects[i].accountBoundingBox(this.boundingBoxMath);
+    }
+    vectorTimesScalar(this.boundingBoxMath[0], 1.05);
+    vectorTimesScalar(this.boundingBoxMath[1], 1.05);
+    this.setViewWindow(this.boundingBoxMath[0], this.boundingBoxMath[1]);
+  };
   this.setViewWindow= function(leftLowPt, rightUpPt)
-  { this.lastViewWindow=[leftLowPt,rightUpPt];
+  { this.boundingBoxMath=[leftLowPt,rightUpPt];
     var leftLowScreen= this.coordsMathToScreen(leftLowPt);
     var rightUpScreen= this.coordsMathToScreen(rightUpPt);
-    //console.log("leftLow: "+ leftLowPt+ " rightUp: " + rightUpPt);
     var desiredHeight=Math.abs(rightUpScreen[1]-leftLowScreen[1]);
     var desiredWidth=Math.abs(rightUpScreen[0]-leftLowScreen[0]);
     var candidateScaleHeight=this.scale* this.height/desiredHeight;
@@ -603,33 +664,6 @@ function CanvasTwoD(inputCanvas)
     this.centerX=this.centerX+oldCenterViewWindowScreenRescaled[0]-newCenterViewWindowScreenRescaled[0];
     this.centerY=this.centerY+oldCenterViewWindowScreenRescaled[1]-newCenterViewWindowScreenRescaled[1];
     this.oldViewWindowCenterMath=newViewWindowCenterMath;
-  };
-  this.computeBoundingBoxAccountPoint= function(input)
-  { var theV=this.coordsMathToMathScreen(input);
-    for (var i=0; i<2; i++)
-      if (theV[i]<this.boundingBoxMathScreen[0][i])
-        this.boundingBoxMathScreen[0][i]=theV[i];
-    for (i=0; i<2; i++)
-      if (theV[i]>this.boundingBoxMathScreen[1][i])
-        this.boundingBoxMathScreen[1][i]=theV[i];
-    for (i=0; i<2; i++)
-      if (input[i]<this.boundingBoxMath[0][i])
-        this.boundingBoxMath[0][i]=input[i];
-    for (i=0; i<2; i++)
-      if (input[i]>this.boundingBoxMath[1][i])
-        this.boundingBoxMath[1][i]=input[i];
-  };
-  this.computeBoundingBox= function()
-  { for (i=0; i<this.theObjects.length; i++)
-    { var currentO=this.theObjects[i];
-      if (currentO.type==="point")
-        this.computeBoundingBoxAccountPoint(currentO.location);
-      else if (currentO.type==="segment")
-      { this.computeBoundingBoxAccountPoint(currentO.leftPt);
-        this.computeBoundingBoxAccountPoint(currentO.rightPt);
-      } else
-        calculatorError("Bad 2D object"+currentO);
-    }
   };
   this.redraw= function()
   { this.textPerformance="";

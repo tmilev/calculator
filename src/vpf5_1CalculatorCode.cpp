@@ -785,13 +785,13 @@ void Plot::operator+=(const Plot& other)
     this->priorityCanvasName=other.priorityCanvasName;
   if (this->dimension==-1)
     this->dimension=other.dimension;
-  if (other.priorityViewWindow>this->priorityViewWindow)
+  if (other.priorityViewRectangle>this->priorityViewRectangle)
   { this->highBoundY=other.highBoundY;
     this->lowBoundY=other.lowBoundY;
     this->theLowerBoundAxes=other.theLowerBoundAxes;
     this->theUpperBoundAxes=other.theUpperBoundAxes;
   }
-  if (this->priorityViewWindow>0 && other.priorityViewWindow==this->priorityViewWindow)
+  if (other.priorityViewRectangle==this->priorityViewRectangle)
   { this->highBoundY=MathRoutines::Maximum(this->highBoundY, other.highBoundY);
     this->lowBoundY=MathRoutines::Minimum(this->lowBoundY, other.lowBoundY);
     this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, other.theUpperBoundAxes);
@@ -799,22 +799,25 @@ void Plot::operator+=(const Plot& other)
   }
   this->thePlots.AddListOnTop(other.thePlots);
   this->the3dObjects.AddListOnTop(other.the3dObjects);
-  if (other.priorityViewWindow>this->priorityViewWindow)
+  if (other.priorityWindow>this->priorityWindow)
   { this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
     this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
-  } else if (this->priorityViewWindow==other.priorityViewWindow)
+  } else if (this->priorityWindow==other.priorityWindow)
   { if (this->DesiredHtmlHeightInPixels<other.DesiredHtmlHeightInPixels)
       this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
     if (this->DesiredHtmlWidthInPixels<other.DesiredHtmlWidthInPixels)
       this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
   }
   this->boxesThatUpdateMe.AddOnTopNoRepetition(other.boxesThatUpdateMe);
-  this->priorityViewWindow=MathRoutines::Maximum(this->priorityViewWindow, other.priorityViewWindow);
+  this->priorityWindow=MathRoutines::Maximum(this->priorityWindow, other.priorityWindow);
+  this->priorityViewRectangle=MathRoutines::Maximum(this->priorityViewRectangle, other.priorityViewRectangle);
 }
 
 bool Plot::operator==(const Plot& other)const
 { return
-  this->priorityViewWindow==other.priorityViewWindow &&
+  this->priorityWindow==other.priorityWindow &&
+  this->priorityCanvasName==other.priorityCanvasName &&
+  this->priorityViewRectangle==other.priorityViewRectangle &&
   this->DesiredHtmlHeightInPixels==other.DesiredHtmlHeightInPixels &&
   this->DesiredHtmlWidthInPixels==other.DesiredHtmlWidthInPixels &&
   this->highBoundY==other.highBoundY &&
@@ -825,8 +828,6 @@ bool Plot::operator==(const Plot& other)const
   this->the3dObjects==other.the3dObjects &&
   this->boxesThatUpdateMe==other.boxesThatUpdateMe &&
   this->canvasName==other.canvasName &&
-  this->priorityCanvasName==other.priorityCanvasName &&
-  this->priorityViewWindow==other.priorityViewWindow &&
   this->dimension==other.dimension
   ;
 }
@@ -936,23 +937,17 @@ Plot::Plot()
   this->highBoundY=0.5;
   this->flagIncludeExtraHtmlDescriptions=true;
   this->DesiredHtmlHeightInPixels=400;
-  this->DesiredHtmlWidthInPixels=600;
+  this->DesiredHtmlWidthInPixels=400;
   this->defaultLineColor=0;
   this->flagPlotShowJavascriptOnly=false;
-  this->priorityViewWindow=0;
+  this->priorityWindow=0;
+  this->priorityViewRectangle=0;
   this->priorityCanvasName=0;
   this->dimension=-1;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
 { MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox");
-  if (this->priorityViewWindow>0)
-  { if (this->theLowerBoundAxes>this->theUpperBoundAxes)
-      this->theUpperBoundAxes=this->theLowerBoundAxes+0.1;
-    if (this->lowBoundY>this->highBoundY)
-      this->highBoundY=this->lowBoundY+0.1;
-    return;
-  }
   this->theLowerBoundAxes=-0.5;
   this->theUpperBoundAxes=1.1;
   this->lowBoundY=-0.5;
@@ -989,13 +984,6 @@ void Plot::ComputeAxesAndBoundingBox()
 
 void Plot::ComputeAxesAndBoundingBox3d()
 { MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox3d");
-  if (this->priorityViewWindow>0)
-  { if (this->theLowerBoundAxes>this->theUpperBoundAxes)
-      this->theUpperBoundAxes=this->theLowerBoundAxes+0.1;
-    if (this->lowBoundY>this->highBoundY)
-      this->highBoundY=this->lowBoundY+0.1;
-    return;
-  }
   this->theLowerBoundAxes=-0.5;
   this->theUpperBoundAxes=1.1;
   this->lowBoundY=-0.5;
@@ -1435,11 +1423,14 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   << "],[0," << this->highBoundY*1.10 << "], 'black');\n";
   out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black');\n";
   out << "theCanvas.drawText([1,-0.2],'1','black');\n";
-  out << "theCanvas.setViewWindow("
-  << "[" << this->theLowerBoundAxes*1.10 << ", " << this->lowBoundY*1.10 << "]"
-  << ", "
-  << "[" << this->theUpperBoundAxes*1.10 << ", " << this->highBoundY*1.10 << "]"
-  << ");\n";
+  if (this->priorityViewRectangle>0)
+  { out << "theCanvas.setViewWindow("
+    << "[" << this->theLowerBoundAxes*1.10 << ", " << this->lowBoundY*1.10 << "]"
+    << ", "
+    << "[" << this->theUpperBoundAxes*1.10 << ", " << this->highBoundY*1.10 << "]"
+    << ");\n";
+  } else
+    out << "theCanvas.computeViewWindow();\n";
   out
   << "theCanvas.redraw();\n"
   << "}\n"

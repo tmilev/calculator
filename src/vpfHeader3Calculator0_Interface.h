@@ -729,7 +729,8 @@ class Plot
   int dimension;
   static int canvasCounteR;
   std::string canvasName;
-  int priorityViewWindow; //0 or less: compute the view Window. If this quantity is greater than zero,
+  int priorityViewRectangle; //0 or less: compute the view Window. If this quantity is greater than zero,
+  int priorityWindow; //0 or less: compute the view Window. If this quantity is greater than zero,
   //the user-given bounding box will overwrite any computations.
   //When adding two plots with positive viewing window priorities, the window with the larger priority is used.
   //If the priorities are equal, the windows are combined to the smallest window that fits both.

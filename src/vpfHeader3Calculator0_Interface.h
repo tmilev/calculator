@@ -683,7 +683,12 @@ public:
   std::string paramHighJS;
 
 ////////////////
-  std::string GetJavascriptSurfaceImmersion(std::string& outputSurfaceInstantiationJS);
+  std::string GetJavascriptSurfaceImmersion
+  (std::string& outputSurfaceInstantiationJS, const std::string& canvasName,
+   int& funCounter);
+  std::string GetJavascriptCurveImmersionIn3d
+  (std::string& outputCurveInstantiationJS, const std::string& canvasName,
+   int& funCounter);
   std::string ToStringDebug();
 
 

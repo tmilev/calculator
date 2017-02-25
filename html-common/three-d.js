@@ -164,6 +164,71 @@ function testGetTestPlane()
   return result;
 }
 
+
+function CurveThreeD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
+                     inputNumSegments, inputColor)
+{ this.coordinateFunctions=inputCoordinateFunctions;
+  this.leftPt=inputLeftPt;
+  this.rightPt=inputRightPt;
+  this.color=colorToRGB(inputColor);
+  this.numSegments=inputNumSegments;
+  this.accountBoundingBox= function(inputOutputBox)
+  { var theT=this.leftPt;
+    var theX=this.coordinateFunctions[0](theT);
+    var theY=this.coordinateFunctions[1](theT);
+    accountBoundingBox([theX, theY],inputOutputBox );
+    for (var i=0; i<this.numSegments; i++)
+    { var theRatio=i/(this.numSegments-1);
+      theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
+      theX=this.coordinateFunctions[0](theT);
+      theY=this.coordinateFunctions[1](theT);
+      accountBoundingBox([theX, theY],inputOutputBox );
+    }
+  };
+  this.drawNoFinish=function(theCanvas, startByMoving)
+  { var theSurface=theCanvas.surface;
+    theSurface.strokeStyle=colorRGBToString(this.color);
+    theSurface.fillStyle=colorRGBToString(this.color);
+    var theT=this.leftPt;
+    var theX=this.coordinateFunctions[0](theT);
+    var theY=this.coordinateFunctions[1](theT);
+    var theCoords=theCanvas.coordsMathToScreen([theX, theY]);
+    if (startByMoving)
+      theSurface.moveTo(theCoords[0], theCoords[1]);
+    else
+      theSurface.lineTo(theCoords[0], theCoords[1]);
+    var skippedValues=false;
+    for (var i=0; i<this.numSegments; i++)
+    { var theRatio=i/(this.numSegments-1);
+      theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio; //<- this way of
+      //computing x introduces smaller numerical errors.
+      //For example, suppose you plot sqrt(1-x^2) from -1 to 1.
+      //If not careful with rounding errors,
+      //you may end up evaluating sqrt(1-x^2) for x=1.00000000000004
+      //resulting in serious visual glitches.
+      //Note: the remarks above were discovered the painful way (trial and error).
+      theX=this.coordinateFunctions[0](theT);
+      theY=this.coordinateFunctions[1](theT);
+      if (!isFinite(theY) || !isFinite(theX))
+        console.log('Failed to evaluate: ' + this.theFunction+ ' at x= ' + theX);
+      if (Math.abs(theY)>100000 || Math.abs(theX)>100000)
+      { if (!skippedValues)
+          console.log('Curve point: ' + [theX, theY] + " is too large, skipping. Further errors suppressed.");
+        skippedValues=true;
+        continue;
+      }
+      theCoords=theCanvas.coordsMathToScreen([theX, theY]);
+      theSurface.lineTo(theCoords[0], theCoords[1]);
+    }
+  };
+  this.draw=function(theCanvas)
+  { var theSurface=theCanvas.surface;
+    theSurface.beginPath();
+    this.drawNoFinish(theCanvas, true);
+    theSurface.stroke();
+  };
+}
+
 function Surface(inputxyzFun, inputUVBox, inputPatchDimensions, inputColors)
 { this.xyzFun=inputxyzFun;
   this.uvBox=inputUVBox;

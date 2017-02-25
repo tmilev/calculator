@@ -1380,6 +1380,7 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
     << thePlot.theVarRangesJS;
   }
   thePlot.thePlotType="surface";
+  thePlot.dimension=thePlot.coordinateFunctionsE.size;
   Plot result;
   result+=thePlot;
   input.HasInputBoxVariables(&result.boxesThatUpdateMe);
@@ -1393,7 +1394,7 @@ class QRFactorizationComputation{
 
 bool CalculatorFunctionsGeneral::innerGramSchmidtVerbose(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGramSchmidtVerbose");
-    Matrix<AlgebraicNumber> theMatAlg;
+  Matrix<AlgebraicNumber> theMatAlg;
   bool matAlgWorks=false;
   if (input.IsOfType<Matrix<AlgebraicNumber> >(&theMatAlg))
     matAlgWorks=true;

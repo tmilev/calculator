@@ -842,45 +842,45 @@ void Plot::operator+=(const PlotObject& other)
 
 bool PlotObject::operator==(const PlotObject& other)const
 { return
-  thePlotString          == thePlotString          &&
-  fillStyle              == fillStyle              &&
-  thePlotStringWithHtml  == thePlotStringWithHtml  &&
-  xLow                   == xLow                   &&
-  xHigh                  == xHigh                  &&
-  yLow                   == yLow                   &&
-  yHigh                  == yHigh                  &&
-  paramLow               == paramLow               &&
-  paramHigh              == paramHigh              &&
-  colorRGB               == colorRGB               &&
-  colorFillRGB           == colorFillRGB           &&
-  lineWidth              == lineWidth              &&
-  dimension              == dimension              &&
-  colorUV                == colorUV                &&
-  colorVU                == colorVU                &&
-  colorJS                == colorJS                &&
-  numSegmentsU           == numSegmentsU           &&
-  numSegmentsV           == numSegmentsV           &&
-  thePoints              == thePoints              &&
-  theRectangles          == theRectangles          &&
-  thePlotType            == thePlotType            &&
-  theSurface             == theSurface             &&
-  coordinateFunctionsE   == coordinateFunctionsE   &&
-  coordinateFunctionsJS  == coordinateFunctionsJS  &&
-  variablesInPlay        == variablesInPlay        &&
-  theVarRangesJS         == theVarRangesJS         &&
-  leftPtE                == leftPtE                &&
-  rightPtE               == rightPtE               &&
-  paramLowE              == paramLowE              &&
-  paramHighE             == paramHighE             &&
-  numSegmentsE           == numSegmentsE           &&
-  variablesInPlayJS      == variablesInPlayJS      &&
-  leftPtJS               == leftPtJS               &&
-  rightPtJS              == rightPtJS              &&
-  numSegmentsJS          == numSegmentsJS          &&
-  colorRGBJS             == colorRGBJS             &&
-  colorFillJS            == colorFillJS            &&
-  paramLowJS             == paramLowJS             &&
-  paramHighJS            == paramHighJS            ;
+  thePlotString          == other.thePlotString          &&
+  fillStyle              == other.fillStyle              &&
+  thePlotStringWithHtml  == other.thePlotStringWithHtml  &&
+  xLow                   == other.xLow                   &&
+  xHigh                  == other.xHigh                  &&
+  yLow                   == other.yLow                   &&
+  yHigh                  == other.yHigh                  &&
+  paramLow               == other.paramLow               &&
+  paramHigh              == other.paramHigh              &&
+  colorRGB               == other.colorRGB               &&
+  colorFillRGB           == other.colorFillRGB           &&
+  lineWidth              == other.lineWidth              &&
+  dimension              == other.dimension              &&
+  colorUV                == other.colorUV                &&
+  colorVU                == other.colorVU                &&
+  colorJS                == other.colorJS                &&
+  numSegmentsU           == other.numSegmentsU           &&
+  numSegmentsV           == other.numSegmentsV           &&
+  thePoints              == other.thePoints              &&
+  theRectangles          == other.theRectangles          &&
+  thePlotType            == other.thePlotType            &&
+  theSurface             == other.theSurface             &&
+  coordinateFunctionsE   == other.coordinateFunctionsE   &&
+  coordinateFunctionsJS  == other.coordinateFunctionsJS  &&
+  variablesInPlay        == other.variablesInPlay        &&
+  theVarRangesJS         == other.theVarRangesJS         &&
+  leftPtE                == other.leftPtE                &&
+  rightPtE               == other.rightPtE               &&
+  paramLowE              == other.paramLowE              &&
+  paramHighE             == other.paramHighE             &&
+  numSegmentsE           == other.numSegmentsE           &&
+  variablesInPlayJS      == other.variablesInPlayJS      &&
+  leftPtJS               == other.leftPtJS               &&
+  rightPtJS              == other.rightPtJS              &&
+  numSegmentsJS          == other.numSegmentsJS          &&
+  colorRGBJS             == other.colorRGBJS             &&
+  colorFillJS            == other.colorFillJS            &&
+  paramLowJS             == other.paramLowJS             &&
+  paramHighJS            == other.paramHighJS            ;
 }
 
 PlotObject::PlotObject()
@@ -1057,10 +1057,15 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   }
   List<std::string> the3dObjects;
   the3dObjects.SetSize(this->thePlots.size);
+  int funCounter=0;
   for (int i=0; i<this->thePlots.size; i++)
-  { if (this->thePlots[i].thePlotType=="surface")
-    { PlotObject& theSurface= this->thePlots[i];
-      out << theSurface.GetJavascriptSurfaceImmersion(the3dObjects[i]) << "\n "
+  { PlotObject& currentO= this->thePlots[i];
+    if (currentO.thePlotType=="surface")
+    { out << currentO.GetJavascriptSurfaceImmersion(the3dObjects[i], this->canvasName, funCounter) << "\n "
+      ;
+    }
+    if (currentO.thePlotType=="parametricCurve")
+    { out << currentO.GetJavascriptCurveImmersionIn3d(the3dObjects[i], this->canvasName, funCounter) << "\n "
       ;
     }
   }
@@ -1075,6 +1080,14 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     if (currentPlot.thePlotType=="surface")
     { out
       << "theCanvas.drawSurface("
+      <<  the3dObjects[i]
+      << ");\n"
+      ;
+    }
+    if (currentPlot.thePlotType=="parametricCurve")
+    { stOutput << "DEBUG: here be i";
+      out
+      << "theCanvas.drawCurve("
       <<  the3dObjects[i]
       << ");\n"
       ;
@@ -1137,13 +1150,57 @@ std::string PlotObject::ToStringDebug()
   return out.str();
 }
 
-std::string PlotObject::GetJavascriptSurfaceImmersion(std::string& outputSurfaceInstantiationJS)
+std::string PlotObject::GetJavascriptCurveImmersionIn3d
+(std::string& outputCurveInstantiationJS, const std::string& canvasName,
+ int& funCounter)
+{ MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptCurveImmersionIn3d");
+  std::stringstream out;
+  funCounter++;
+  std::stringstream fnNameStream;
+  fnNameStream << "theCanvasSurfaceFn_" << canvasName << "_"
+  << funCounter;
+  std::string fnName=fnNameStream.str();
+
+  if (this->coordinateFunctionsJS.size==3)
+  { out << "function " << fnName
+    << " (" << this->variablesInPlayJS[0] << ","
+    << this->variablesInPlayJS[1] << "){\n";
+    out << "return [ " << this->coordinateFunctionsJS[0] << ", "
+    << this->coordinateFunctionsJS[1]
+    << ", " << this->coordinateFunctionsJS[2] << "];\n";
+    out << "}\n";
+  } else
+    out << "//this->theCoordinateFunctionsJS has "
+    << this->coordinateFunctionsJS.size
+    << " elements instead of 3 (expected).\n";
+  if (this->theVarRangesJS.size!=1)
+    out << "//this->theVarRangesJS has " << this->theVarRangesJS.size << " elements instead of 1 (expected).";
+  else if (this->theVarRangesJS[0].size!=2 || this->theVarRangesJS[1].size!=2)
+    out << "//this->theVarRangesJS had unexpected value: "
+    << this->theVarRangesJS.size;
+  else
+  { std::stringstream curveInstStream;
+    curveInstStream << "new CurveThreeD("
+    << fnName
+    << ", " << this->paramLowJS << ", " << this->paramHighJS
+;
+    curveInstStream << ", " << this->numSegmentsJS;
+    curveInstStream << ", " << this->colorJS;
+    curveInstStream << ")"
+    ;
+    outputCurveInstantiationJS=curveInstStream.str();
+  }
+  return out.str();
+}
+
+std::string PlotObject::GetJavascriptSurfaceImmersion
+(std::string& outputSurfaceInstantiationJS, const std::string& canvasName,
+ int& funCounter)
 { MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptSurfaceImmersion");
   std::stringstream out;
-  static int canvasFunctionCounteR=0;
-  canvasFunctionCounteR++;
+  funCounter++;
   std::stringstream fnNameStream;
-  fnNameStream << "theCanvasSurfaceFn" << canvasFunctionCounteR;
+  fnNameStream << "theCanvasSurfaceFn_" << canvasName << "_" << funCounter;
   std::string fnName=fnNameStream.str();
 
   if (this->coordinateFunctionsJS.size==3)
@@ -1204,7 +1261,9 @@ std::string Plot::GetPlotHtml(Calculator& owner)
 int Plot::canvasCounteR=0;
 
 std::string PlotObject::GetJavascriptParametricCurve2D
-(std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter)
+(std::string& outputPlotInstantiationJS,
+ const std::string& canvasName,
+ int& funCounter)
 { MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascript2dPlot");
   std::stringstream out;
   List<std::string> fnNames;

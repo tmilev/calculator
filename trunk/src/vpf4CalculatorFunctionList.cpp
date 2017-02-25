@@ -1454,7 +1454,7 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    ",
    "a=MakeInputBox(name=\"a\", value=12, min=1, max=25); \
 \nb=MakeInputBox(name=\"b\", value=13, min=1, max=25);  \
-\nPlotFill(PlotCurve(sin(a t),cos(b t), 0, 2\\pi, blue, 2, 2000), pink) +PlotViewRectangle((-1.5, -1.5),(1.5, 1.5))",
+\nPlotFill(PlotCurve((sin(a t),cos(b t)), 0, 2\\pi, blue, 2, 2000), pink) ",
    true, false, "CalculatorFunctionsGeneral::innerPlotParametricCurve",
    "PlotCurve")
    ;

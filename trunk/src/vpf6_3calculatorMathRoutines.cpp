@@ -4566,7 +4566,7 @@ bool CalculatorFunctionsGeneral::innerPlotViewWindow
     return false;
   Vector<double> widthHeight;
   Plot emptyPlot;
-  emptyPlot.priorityViewWindow=1;
+  emptyPlot.priorityWindow=1;
   bool isGood=false;
   if (theCommands.GetVectorDoublesFromFunctionArguments(input, widthHeight, 2))
     isGood=true;
@@ -4599,7 +4599,6 @@ bool CalculatorFunctionsGeneral::innerPlotSetId
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSetId");
   Plot emptyPlot;
-  emptyPlot.priorityViewWindow=0;
   emptyPlot.priorityCanvasName=1;
   emptyPlot.DesiredHtmlHeightInPixels=100;
   emptyPlot.DesiredHtmlWidthInPixels=100;
@@ -4624,7 +4623,7 @@ bool CalculatorFunctionsGeneral::innerPlotViewRectangle
   emptyPlot.lowBoundY=lowerLeft[1];
   emptyPlot.theUpperBoundAxes=upperRight[0];
   emptyPlot.highBoundY=upperRight[1];
-  emptyPlot.priorityViewWindow=1;
+  emptyPlot.priorityViewRectangle=1;
   emptyPlot.DesiredHtmlHeightInPixels=100;
   emptyPlot.DesiredHtmlWidthInPixels=100;
   return output.AssignValue(emptyPlot, theCommands);
@@ -5044,56 +5043,82 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended(Calculator
 
 bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotParametricCurve");
-  if (input.size()<5)
+  if (input.size()<4)
     return theCommands
-    << "Parametric curve plots take 4+ arguments. The first arguments stand for "
-    << "the coordinate functions (=2 or the dimension of the ambient space), "
-    << " the last two arguments stands for the variable range.";
+    << "Parametric curve plots take 3+ arguments. The first argument gives "
+    << "the coordinate functions in the format (f_1, f_2) or (f_1, f_2,f_3), "
+    << " the next two arguments stands for the variable range.";
   if (input.HasBoundVariables())
     return false;
   PlotObject thePlot;
-  thePlot.dimension=2;
+  if (!input[1].IsSequenceNElementS())
+    return theCommands
+    << "The first argument of parametric curve must be a sequence, instead I got: "
+    << input[1].ToString();
+  thePlot.dimension=input[1].size()-1;
+  for (int i=0; i<thePlot.dimension; i++)
+  { thePlot.coordinateFunctionsE.AddOnTop(input[1][i+1]);
+    thePlot.coordinateFunctionsE[i].GetFreeVariables(thePlot.variablesInPlay, true);
+  }
+  if (thePlot.variablesInPlay.size>1)
+    return theCommands << "Curve is allowed to depend on at most 1 parameter. "
+    << "Instead, your curve: " << input.ToString()
+    << " depends on "
+    << thePlot.variablesInPlay.size << ", namely: "
+    << thePlot.variablesInPlay.ToStringCommaDelimited() << ". ";
+  if (thePlot.variablesInPlay.size==0)
+  { Expression tempE;
+    tempE.MakeAtom("t",theCommands);
+    thePlot.variablesInPlay.AddOnTop(tempE);
+  }
+  thePlot.variablesInPlayJS.AddOnTop(thePlot.variablesInPlay[0].ToString());
   thePlot.colorRGB=CGI::RedGreenBlue(255, 0, 0);
-  if (input.size()>=6)
-    if (!input[5].IsOfType<std::string>(&thePlot.colorRGBJS))
-      thePlot.colorRGBJS=input[5].ToString();
-  DrawingVariables::GetColorIntFromColorString(thePlot.colorRGBJS, thePlot.colorRGB);
+  if (input.size()>=5)
+    if (!input[4].IsOfType<std::string>(&thePlot.colorRGBJS))
+      thePlot.colorRGBJS=input[4].ToString();
+  DrawingVariables::GetColorIntFromColorString
+  (thePlot.colorRGBJS, thePlot.colorRGB);
   thePlot.lineWidth=1;
-  if (input.size()>=7)
-    if (!input[6].EvaluatesToDouble(&thePlot.lineWidth))
+  if (input.size()>=6)
+    if (!input[5].EvaluatesToDouble(&thePlot.lineWidth))
       thePlot.lineWidth=1;
   int numPoints=1000;
-  if (input.size()>=8)
-  { if (!input[7].IsSmallInteger(&numPoints))
+  if (input.size()>=7)
+  { if (!input[6].IsSmallInteger(&numPoints))
     { numPoints=1000;
-      theCommands << "<hr>Could not extract number of points from " << input[7].ToString();
+      theCommands << "<hr>Could not extract number of points from "
+      << input[6].ToString();
     }
-    thePlot.numSegmentsE=input[7];
+    thePlot.numSegmentsE=input[6];
   }
   if (numPoints<2 || numPoints>30000)
   { numPoints=1000;
     theCommands << "<hr>Extracted " << numPoints
     << " point but that is not valid. Changing to 1000. ";
   }
-  if (input.size()<8)
+  if (input.size()<7)
     thePlot.numSegmentsE.AssignValue(numPoints, theCommands);
   List<Expression> theConvertedExpressions;
-  theConvertedExpressions.SetSize(input.size()-3);
+  theConvertedExpressions.SetSize(thePlot.dimension);
+  thePlot.paramLowE=input[2];
+  thePlot.paramHighE=input[3];
+  if (!thePlot.paramLowE.EvaluatesToDouble(&thePlot.paramLow) ||
+      !thePlot.paramHighE.EvaluatesToDouble(&thePlot.paramHigh))
+    theCommands << "Failed to convert "
+    << thePlot.paramLowE.ToString() << " and "
+    << thePlot.paramHighE.ToString()
+    << " to left and right endpoint of parameter interval. ";
+  Vectors<double> theXs, theYs;
+
   bool isGoodLatexWise=true;
-  for (int i=1; i<3; i++)
+  for (int i=0; i<thePlot.dimension; i++)
     if (!theCommands.CallCalculatorFunction
-         (Calculator::innerSuffixNotationForPostScript, input[i], theConvertedExpressions[i-1]))
-    { theCommands << "Failed to extract suffix notation from argument " << input[i].ToString();
+         (Calculator::innerSuffixNotationForPostScript, thePlot.coordinateFunctionsE[i], theConvertedExpressions[i]))
+    { theCommands << "Failed to extract suffix notation from argument " << thePlot.coordinateFunctionsE[i].ToString();
       isGoodLatexWise=false;
       break;
     }
-  thePlot.paramLowE=input[3];
-  thePlot.paramHighE=input[4];
-  if (!thePlot.paramLowE.EvaluatesToDouble(&thePlot.paramLow) ||
-      !thePlot.paramHighE.EvaluatesToDouble(&thePlot.paramHigh))
-    theCommands << "Failed to convert " << thePlot.paramLowE.ToString() << " and "
-    << thePlot.paramHighE.ToString() << " to left and right endpoint of parameter interval. ";
-  if (isGoodLatexWise)
+  if (isGoodLatexWise && thePlot.dimension==2)
   { std::stringstream outLatex, outHtml;
     outLatex << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=" << numPoints << "]{"
     << thePlot.paramLow << "}{" << thePlot.paramHigh << "}{"
@@ -5107,39 +5132,18 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
     thePlot.thePlotString=outLatex.str();
     thePlot.thePlotStringWithHtml=outHtml.str();
   }
-  Vectors<double> theXs, theYs;
-  thePlot.coordinateFunctionsE.AddOnTop(input[1]);
-  thePlot.coordinateFunctionsE.AddOnTop(input[2]);
-  thePlot.coordinateFunctionsE[0].GetFreeVariables(thePlot.variablesInPlay, true);
-  thePlot.coordinateFunctionsE[1].GetFreeVariables(thePlot.variablesInPlay, true);
-  if (thePlot.variablesInPlay.size>1)
-    return theCommands << "Curve is allowed to depend on at most 1 parameter. "
-    << "Instead, your curve: " << input.ToString()
-    << " depends on "
-    << thePlot.variablesInPlay.size << ", namely: "
-    << thePlot.variablesInPlay.ToStringCommaDelimited() << ". ";
-  if (thePlot.variablesInPlay.size==0)
-  { Expression tempE;
-    tempE.MakeAtom("t",theCommands);
-    thePlot.variablesInPlay.AddOnTop(tempE);
-  }
-  thePlot.variablesInPlayJS.AddOnTop(thePlot.variablesInPlay[0].ToString());
-  thePlot.coordinateFunctionsJS.SetSize(2);
   Expression converterE;
   thePlot.thePlotType="parametricCurve";
-  if (CalculatorFunctionsGeneral::innerMakeJavascriptExpression
-      (theCommands, thePlot.coordinateFunctionsE[0], converterE))
-    thePlot.coordinateFunctionsJS[0]=converterE.ToString();
-  else
-  { thePlot.thePlotType="parametricCurvePrecomputed";
-    theCommands << "Failed to convert: " << thePlot.coordinateFunctionsE[0] << " to js. ";
-  }
-  if (CalculatorFunctionsGeneral::innerMakeJavascriptExpression
-      (theCommands, thePlot.coordinateFunctionsE[1], converterE))
-    thePlot.coordinateFunctionsJS[1]=converterE.ToString();
-  else
-  { thePlot.thePlotType="parametricCurvePrecomputed";
-    theCommands << "Failed to convert: " << thePlot.coordinateFunctionsE[1] << " to js. ";
+  thePlot.coordinateFunctionsJS.SetSize(thePlot.dimension);
+  for (int i=0; i<thePlot.dimension; i++)
+  { if (CalculatorFunctionsGeneral::innerMakeJavascriptExpression
+        (theCommands, thePlot.coordinateFunctionsE[i], converterE))
+      thePlot.coordinateFunctionsJS[i]=converterE.ToString();
+    else
+    { thePlot.thePlotType="parametricCurvePrecomputed";
+      theCommands << "Failed to convert: "
+      << thePlot.coordinateFunctionsE[i] << " to js. ";
+    }
   }
   if (CalculatorFunctionsGeneral::innerMakeJavascriptExpression
       (theCommands, thePlot.numSegmentsE, converterE))
@@ -5162,23 +5166,26 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   { thePlot.thePlotType="parametricCurvePrecomputed";
     theCommands << "Failed to convert: " << thePlot.paramHighE << " to js. ";
   }
-  if (!input[1].EvaluatesToDoubleInRange
-      (thePlot.variablesInPlay[0].ToString(), thePlot.paramLow, thePlot.paramHigh, numPoints,
-       &thePlot.xLow, &thePlot.xHigh, &theXs))
-    theCommands << "<hr>Failed to evaluate curve function. ";
-  if (!input[2].EvaluatesToDoubleInRange
-      (thePlot.variablesInPlay[0].ToString(), thePlot.paramLow, thePlot.paramHigh, numPoints,
-       &thePlot.yLow, &thePlot.yHigh, &theYs))
-    theCommands << "<hr>Failed to evaluate curve function. ";
-  thePlot.thePoints.SetSize(theXs.size);
-  for (int i=0; i<theXs.size; i++)
-  { thePlot.thePoints[i].SetSize(2);
-    thePlot.thePoints[i][0]=theXs[i][1];
-    thePlot.thePoints[i][1]=theYs[i][1];
+  if (thePlot.dimension==2)
+  { if (!thePlot.coordinateFunctionsE[0].EvaluatesToDoubleInRange
+        (thePlot.variablesInPlay[0].ToString(), thePlot.paramLow, thePlot.paramHigh, numPoints,
+         &thePlot.xLow, &thePlot.xHigh, &theXs))
+      theCommands << "<hr>Failed to evaluate curve function. ";
+    if (!thePlot.coordinateFunctionsE[1].EvaluatesToDoubleInRange
+        (thePlot.variablesInPlay[0].ToString(), thePlot.paramLow, thePlot.paramHigh, numPoints,
+         &thePlot.yLow, &thePlot.yHigh, &theYs))
+      theCommands << "<hr>Failed to evaluate curve function. ";
+    thePlot.thePoints.SetSize(theXs.size);
+    for (int i=0; i<theXs.size; i++)
+    { thePlot.thePoints[i].SetSize(2);
+      thePlot.thePoints[i][0]=theXs[i][1];
+      thePlot.thePoints[i][1]=theYs[i][1];
+    }
   }
   Plot outputPlot;
-  outputPlot.dimension=2;
-  outputPlot.thePlots.AddOnTop(thePlot);
+  //stOutput << "DEBUG: outputPlot height: " << outputPlot.DesiredHtmlHeightInPixels;
+  outputPlot+=(thePlot);
+  //stOutput << "DEBUG: outputPlot height AFTER: " << outputPlot.DesiredHtmlHeightInPixels;
   input.HasInputBoxVariables(&outputPlot.boxesThatUpdateMe);
   return output.AssignValue(outputPlot, theCommands);
 }

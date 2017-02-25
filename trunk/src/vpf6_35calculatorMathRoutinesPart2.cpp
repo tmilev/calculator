@@ -1251,7 +1251,7 @@ bool CalculatorFunctionsGeneral::innerPlotCoordinateSystem(Calculator& theComman
     << input[2].ToString() << ".";
   Plot resultPlot;
   resultPlot.dimension=3;
-  PlotObject3d thePlot;
+  PlotObject thePlot;
   thePlot.colorJS="black";
   thePlot.thePlotType="segment";
   thePlot.thePoints.SetSize(2);
@@ -1275,7 +1275,7 @@ bool CalculatorFunctionsGeneral::innerPlotCoordinateSystem(Calculator& theComman
 
 bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSurface");
-  PlotObject3d thePlot;
+  PlotObject thePlot;
   bool found=false;
   for (int i=0; i<input.size(); i++)
     if (input[i].IsSequenceNElementS(3))
@@ -1286,42 +1286,52 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
   if (!found)
     return theCommands << "Could not find a triple of functions expressions to use for "
     << " the surface. ";
-  thePlot.theSurface.GetFreeVariables(thePlot.theVars, true);
-  if (thePlot.theVars.size>2)
+  thePlot.theSurface.GetFreeVariables(thePlot.variablesInPlay, true);
+  if (thePlot.variablesInPlay.size>2)
     return theCommands << "Got a surface with "
-    << thePlot.theVars.size
+    << thePlot.variablesInPlay.size
     << " variables, namely: "
-    << thePlot.theVars.ToStringCommaDelimited()
+    << thePlot.variablesInPlay.ToStringCommaDelimited()
     << ". I've been taught to plot 2d surfaces only. "
     << " Please reduce the number of variables to 2. ";
-  if (thePlot.theVars.size==1)
-  { if (thePlot.theVars.Contains((std::string)"v"))
-      thePlot.theVars.AddOnTop((std::string)"u");
+  Expression uE,vE;
+  uE.MakeAtom("u", theCommands);
+  vE.MakeAtom("v", theCommands);
+  if (thePlot.variablesInPlay.size==1)
+  { if (thePlot.variablesInPlay.Contains(vE))
+      thePlot.variablesInPlay.AddOnTop(uE);
     else
-      thePlot.theVars.AddOnTop((std::string) "v");
+      thePlot.variablesInPlay.AddOnTop(vE);
   }
-  if (thePlot.theVars.size==0)
-  { thePlot.theVars.AddOnTop((std::string) "u");
-    thePlot.theVars.AddOnTop((std::string) "v");
+  if (thePlot.variablesInPlay.size==0)
+  { thePlot.variablesInPlay.AddOnTop(uE);
+    thePlot.variablesInPlay.AddOnTop(vE);
   }
-  thePlot.theVars.QuickSortAscending();
-  thePlot.theCoordinateFunctionsJS.SetSize(thePlot.theSurface.size()-1);
+  thePlot.variablesInPlay.QuickSortAscending();
+  thePlot.coordinateFunctionsE.SetSize(thePlot.theSurface.size()-1);
+  thePlot.coordinateFunctionsJS.SetSize(thePlot.coordinateFunctionsE.size);
   thePlot.theVarRangesJS.SetSize(2);
+  thePlot.variablesInPlayJS.SetSize(2);
   for (int i=0; i<2; i++)
-    thePlot.theVarRangesJS[i].SetSize(2);
+  { thePlot.theVarRangesJS[i].SetSize(2);
+    thePlot.variablesInPlayJS[i]=thePlot.variablesInPlay[i].ToString();
+  }
   Expression jsConverter;
   for (int i=1; i<thePlot.theSurface.size(); i++)
-  { bool isGood=CalculatorFunctionsGeneral::innerMakeJavascriptExpression
-    (theCommands, thePlot.theSurface[i], jsConverter);
+  { thePlot.coordinateFunctionsE[i-1]=thePlot.theSurface[i];
+    bool isGood=CalculatorFunctionsGeneral::innerMakeJavascriptExpression
+    (theCommands, thePlot.coordinateFunctionsE[i-1], jsConverter);
     if (isGood)
-      isGood= jsConverter.IsOfType<std::string>(&thePlot.theCoordinateFunctionsJS[i-1]);
+      isGood= jsConverter.IsOfType<std::string>
+      (&thePlot.coordinateFunctionsJS[i-1]);
     if (!isGood)
-      return theCommands << "Failed to convert " << thePlot.theSurface[i].ToString()
+      return theCommands << "Failed to convert "
+      << thePlot.coordinateFunctionsE[i-1].ToString()
       << " to a javascript expression. ";
   }
   for (int i =1; i<input.size(); i++)
     if (input[i].StartsWith(theCommands.opIn(), 3))
-    { int theIndex=thePlot.theVars.GetIndex(input[i][1]);
+    { int theIndex=thePlot.variablesInPlay.GetIndex(input[i][1]);
       if (theIndex<0 || theIndex>2) //theIndex>2 should never happen
         continue;
       if (input[i][2].size()!=3)

@@ -651,15 +651,22 @@ public:
   int colorFillRGB;
   double lineWidth;
   int dimension;
+  std::string colorUV;
+  std::string colorVU;
+  std::string colorJS;
+  std::string numSegmentsU;
+  std::string numSegmentsV;
   Vectors<double> thePoints;
   List<Vectors<double> > theRectangles;
   // each rectangle is a list of two 2-dim vectors. First vector gives the (x,y)-coords
   //of the lower left corner of the rectangle. Second vector gives the (width,height) of the rectangle.
   std::string thePlotType;
 
+  Expression theSurface;
   List<Expression> coordinateFunctionsE;
   List<std::string> coordinateFunctionsJS;
   HashedList<Expression> variablesInPlay;
+  List<List<std::string> > theVarRangesJS;
   Expression leftPtE;
   Expression rightPtE;
   Expression paramLowE;
@@ -674,6 +681,11 @@ public:
   std::string colorFillJS;
   std::string paramLowJS;
   std::string paramHighJS;
+
+////////////////
+  std::string GetJavascriptSurfaceImmersion(std::string& outputSurfaceInstantiationJS);
+  std::string ToStringDebug();
+
 
   void ComputeYbounds();
   std::string ToStringPointsList();
@@ -690,32 +702,10 @@ public:
   bool operator==(const PlotObject& other)const;
 };
 
-class PlotObject3d
-{
-public:
-  std::string thePlotType;
-  bool operator==(const PlotObject3d& other)const;
-////////////////
-  HashedList<Expression> theVars;
-  Expression theSurface;
-  Vectors<double> thePoints;
-  List<std::string> theCoordinateFunctionsJS;
-  List<List<std::string> > theVarRangesJS;
-  std::string colorUV;
-  std::string colorVU;
-  std::string colorJS;
-  std::string numSegmentsU;
-  std::string numSegmentsV;
-  PlotObject3d();
-  std::string GetJavascriptSurfaceImmersion(std::string& outputSurfaceInstantiationJS);
-  std::string ToStringDebug();
-};
-
 //the following class is meant to use to draw plots for calculus students.
 class Plot
 { public:
   List<PlotObject> thePlots;
-  List<PlotObject3d> the3dObjects;
   HashedList<std::string, MathRoutines::hashString> boxesThatUpdateMe;
   double theLowerBoundAxes;
   double theUpperBoundAxes;
@@ -746,7 +736,6 @@ class Plot
   void ComputeAxesAndBoundingBox();
   void operator+=(const Plot& other);
   void operator+=(const PlotObject& other);
-  void operator+=(const PlotObject3d& other);
   bool operator==(const Plot& other)const;
 };
 

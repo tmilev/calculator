@@ -798,7 +798,6 @@ void Plot::operator+=(const Plot& other)
     this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
   }
   this->thePlots.AddListOnTop(other.thePlots);
-  this->the3dObjects.AddListOnTop(other.the3dObjects);
   if (other.priorityWindow>this->priorityWindow)
   { this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
     this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
@@ -825,19 +824,10 @@ bool Plot::operator==(const Plot& other)const
   this->theLowerBoundAxes==other.theLowerBoundAxes &&
   this->theUpperBoundAxes==other.theUpperBoundAxes &&
   this->thePlots==other.thePlots &&
-  this->the3dObjects==other.the3dObjects &&
   this->boxesThatUpdateMe==other.boxesThatUpdateMe &&
   this->canvasName==other.canvasName &&
   this->dimension==other.dimension
   ;
-}
-
-void Plot::operator+=(const PlotObject3d& other)
-{ if (this->dimension!=3 && this->dimension!=-1)
-    crash << "Attempting to add plot of dimension: "
-    << this->dimension << " to a 3d object. " << crash;
-  this->dimension=3;
-  this->the3dObjects.AddOnTop(other);
 }
 
 void Plot::operator+=(const PlotObject& other)
@@ -850,58 +840,62 @@ void Plot::operator+=(const PlotObject& other)
   this->thePlots.AddOnTop(other);
 }
 
-bool PlotObject3d::operator==(const PlotObject3d& other)const
-{ MacroRegisterFunctionWithName("PlotObject3d::operator ==");
-  if (this->thePlotType!=other.thePlotType)
-    return false;
-  return this->theCoordinateFunctionsJS==other.theCoordinateFunctionsJS &&
-  this->theVarRangesJS==other.theVarRangesJS;
-}
-
 bool PlotObject::operator==(const PlotObject& other)const
 { return
-  this->thePlotStringWithHtml== other.thePlotStringWithHtml &&
-  this->xLow                 == other.xLow&&
-  this->xHigh                == other.xHigh &&
-  this->yLow                 == other.yLow &&
-  this->yHigh                == other.yHigh &&
-  this->paramLow             == other.paramLow  &&
-  this->paramHigh            == other.paramHigh &&
-  this->coordinateFunctionsE == other.coordinateFunctionsE &&
-  this->thePlotType          == other.thePlotType &&
-  this->thePoints            == other.thePoints &&
-  this->lineWidth            == other.lineWidth &&
-  this->theRectangles        == other.theRectangles &&
-  this->dimension            == other.dimension &&
-  this->thePlotString        == other.thePlotString &&
-  this->fillStyle            == other.fillStyle &&
-  this->thePlotStringWithHtml== other.thePlotStringWithHtml &&
-  this->colorRGB             == other.colorRGB &&
-  this->colorFillRGB         == other.colorFillRGB &&
-  this->variablesInPlay      == other.variablesInPlay &&
-  this->leftPtE              == other.leftPtE &&
-  this->rightPtE             == other.rightPtE &&
-  this->numSegmentsE         == other.numSegmentsE &&
-  this->coordinateFunctionsJS== other.coordinateFunctionsJS &&
-  this->variablesInPlayJS    == other.variablesInPlayJS &&
-  this->leftPtJS             == other.leftPtJS &&
-  this->rightPtJS            == other.rightPtJS &&
-  this->numSegmentsJS        == other.numSegmentsJS &&
-  this->colorRGBJS           == other.colorRGBJS;
-
+  thePlotString          == thePlotString          &&
+  fillStyle              == fillStyle              &&
+  thePlotStringWithHtml  == thePlotStringWithHtml  &&
+  xLow                   == xLow                   &&
+  xHigh                  == xHigh                  &&
+  yLow                   == yLow                   &&
+  yHigh                  == yHigh                  &&
+  paramLow               == paramLow               &&
+  paramHigh              == paramHigh              &&
+  colorRGB               == colorRGB               &&
+  colorFillRGB           == colorFillRGB           &&
+  lineWidth              == lineWidth              &&
+  dimension              == dimension              &&
+  colorUV                == colorUV                &&
+  colorVU                == colorVU                &&
+  colorJS                == colorJS                &&
+  numSegmentsU           == numSegmentsU           &&
+  numSegmentsV           == numSegmentsV           &&
+  thePoints              == thePoints              &&
+  theRectangles          == theRectangles          &&
+  thePlotType            == thePlotType            &&
+  theSurface             == theSurface             &&
+  coordinateFunctionsE   == coordinateFunctionsE   &&
+  coordinateFunctionsJS  == coordinateFunctionsJS  &&
+  variablesInPlay        == variablesInPlay        &&
+  theVarRangesJS         == theVarRangesJS         &&
+  leftPtE                == leftPtE                &&
+  rightPtE               == rightPtE               &&
+  paramLowE              == paramLowE              &&
+  paramHighE             == paramHighE             &&
+  numSegmentsE           == numSegmentsE           &&
+  variablesInPlayJS      == variablesInPlayJS      &&
+  leftPtJS               == leftPtJS               &&
+  rightPtJS              == rightPtJS              &&
+  numSegmentsJS          == numSegmentsJS          &&
+  colorRGBJS             == colorRGBJS             &&
+  colorFillJS            == colorFillJS            &&
+  paramLowJS             == paramLowJS             &&
+  paramHighJS            == paramHighJS            ;
 }
 
 PlotObject::PlotObject()
-{ this->xLow         =0;
-  this->xHigh        =0;
-  this->paramLow     =0;
-  this->paramHigh    =0;
-  this->yLow         =0;
-  this->yHigh        =0;
-  this->colorRGB     =0;
-  this->lineWidth    =1;
-  this->colorFillRGB =0;
-  this->dimension    =-1;
+{ this->xLow         = 0;
+  this->xHigh        = 0;
+  this->paramLow     = 0;
+  this->paramHigh    = 0;
+  this->yLow         = 0;
+  this->yHigh        = 0;
+  this->colorRGB     = 0;
+  this->lineWidth    = 1;
+  this->colorFillRGB = 0;
+  this->dimension    = -1;
+  this->numSegmentsU = "22";
+  this->numSegmentsV = "4";
 }
 
 void PlotObject::ComputeYbounds()
@@ -1061,12 +1055,12 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     << currentBox.GetSliderName() << "']=" << "'" << this->canvasName << "'"
     << ";\n";
   }
-  List<std::string> theSurfaces;
-  theSurfaces.SetSize(this->the3dObjects.size);
-  for (int i=0; i<this->the3dObjects.size; i++)
-  { if (this->the3dObjects[i].thePlotType=="surface")
-    { PlotObject3d& theSurface= this->the3dObjects[i];
-      out << theSurface.GetJavascriptSurfaceImmersion(theSurfaces[i]) << "\n "
+  List<std::string> the3dObjects;
+  the3dObjects.SetSize(this->thePlots.size);
+  for (int i=0; i<this->thePlots.size; i++)
+  { if (this->thePlots[i].thePlotType=="surface")
+    { PlotObject& theSurface= this->thePlots[i];
+      out << theSurface.GetJavascriptSurfaceImmersion(the3dObjects[i]) << "\n "
       ;
     }
   }
@@ -1076,12 +1070,12 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   << this->canvasName
   << "'));\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
-  for (int i=0; i<this->the3dObjects.size; i++)
-  { PlotObject3d& currentPlot=this->the3dObjects[i];
+  for (int i=0; i<this->thePlots.size; i++)
+  { PlotObject& currentPlot=this->thePlots[i];
     if (currentPlot.thePlotType=="surface")
     { out
       << "theCanvas.drawSurface("
-      <<  theSurfaces[i]
+      <<  the3dObjects[i]
       << ");\n"
       ;
     }
@@ -1119,10 +1113,10 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
 
 std::string Plot::ToStringDebug()
 { std::stringstream out;
-  out <<  "Objects: " << this->the3dObjects.size << "<br>";
-  for (int i=0; i<this->the3dObjects.size; i++)
-  { if (this->the3dObjects[i].thePlotType=="surface")
-    { PlotObject3d& theSurface= this->the3dObjects[i];
+  out <<  "Objects: " << this->thePlots.size << "<br>";
+  for (int i=0; i<this->thePlots.size; i++)
+  { if (this->thePlots[i].thePlotType=="surface")
+    { PlotObject& theSurface= this->thePlots[i];
       out << theSurface.ToStringDebug();
       ;
     }
@@ -1130,24 +1124,20 @@ std::string Plot::ToStringDebug()
   return out.str();
 }
 
-PlotObject3d::PlotObject3d()
-{ this->numSegmentsU="22";
-  this->numSegmentsV="4";
-}
-
-std::string PlotObject3d::ToStringDebug()
+std::string PlotObject::ToStringDebug()
 { MacroRegisterFunctionWithName("PlotSurfaceIn3d::ToStringDebug");
   std::stringstream out;
 //  out << "Surface: " << this->theSurface.ToString() << "<br>";
   out << "colorUV: " << this->colorUV << "<br>";
   out << "colorVU: " << this->colorVU << "<br>";
-  out << "Coord f-ns: " << this->theCoordinateFunctionsJS << "<br>";
-  out << "Vars: " << this->theVars << "<br>";
+  out << "Coord f-ns: " << this->coordinateFunctionsE.ToStringCommaDelimited()
+  << "<br>";
+  out << "Vars: " << this->variablesInPlay << "<br>";
   out << "Var ranges: " << this->theVarRangesJS << "<br>";
   return out.str();
 }
 
-std::string PlotObject3d::GetJavascriptSurfaceImmersion(std::string& outputSurfaceInstantiationJS)
+std::string PlotObject::GetJavascriptSurfaceImmersion(std::string& outputSurfaceInstantiationJS)
 { MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptSurfaceImmersion");
   std::stringstream out;
   static int canvasFunctionCounteR=0;
@@ -1156,14 +1146,17 @@ std::string PlotObject3d::GetJavascriptSurfaceImmersion(std::string& outputSurfa
   fnNameStream << "theCanvasSurfaceFn" << canvasFunctionCounteR;
   std::string fnName=fnNameStream.str();
 
-  if (this->theCoordinateFunctionsJS.size==3)
+  if (this->coordinateFunctionsJS.size==3)
   { out << "function " << fnName
-    << " (" << theVars[0] << "," << theVars[1] << "){\n";
-    out << "return [ " << this->theCoordinateFunctionsJS[0] << ", " << this->theCoordinateFunctionsJS[1]
-    << ", " << this->theCoordinateFunctionsJS[2] << "];\n";
+    << " (" << this->variablesInPlayJS[0] << ","
+    << this->variablesInPlayJS[1] << "){\n";
+    out << "return [ " << this->coordinateFunctionsJS[0] << ", "
+    << this->coordinateFunctionsJS[1]
+    << ", " << this->coordinateFunctionsJS[2] << "];\n";
     out << "}\n";
   } else
-  out << "//this->theCoordinateFunctionsJS has " << this->theCoordinateFunctionsJS.size
+  out << "//this->theCoordinateFunctionsJS has "
+  << this->coordinateFunctionsJS.size
   << " elements instead of 3 (expected).\n";
   if (this->theVarRangesJS.size!=2)
     out << "//this->theVarRangesJS has " << this->theVarRangesJS.size << " elements instead of 2 (expected).";

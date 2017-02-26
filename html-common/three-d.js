@@ -801,8 +801,8 @@ function CanvasTwoD(inputCanvas)
     if (this.scale<=0)
       this.scale=1;
     var intermediateScreenPos= this.coordsMathScreenToScreen(mathScreenPos);
-    console.log("start screen: "+[screenX, screenY]);
-    console.log("intermed. screen: "+intermediateScreenPos);
+    //console.log("start screen: "+[screenX, screenY]);
+    //console.log("intermed. screen: "+intermediateScreenPos);
     this.centerX=this.centerX+screenPos[0]-intermediateScreenPos[0];
     this.centerY=this.centerY+screenPos[1]-intermediateScreenPos[1];
 
@@ -1780,12 +1780,14 @@ function Canvas(inputCanvas)
   { return [this.scale*vectorScalarVector(vector, this.selectedScreenBasis[0])+this.centerX,
        (-1)*this.scale*vectorScalarVector(vector, this.selectedScreenBasis[1])+this.centerY];
   };
+  this.coordsScreenToMathScreen= function(screenPos)
+  { return [ (screenPos[0]-this.centerX)/this.scale, (this.centerY-screenPos[1])/this.scale];
+  };
   this.coordsScreenAbsoluteToScreen= function (cx, cy)
   { return getPosXPosYObject(this.canvasContainer, cx, cy);
   };
   this.coordsScreenAbsoluteToMathScreen= function(screenX, screenY)
-  { var xyScreen= this.coordsScreenAbsoluteToScreen(screenX, screenY);
-    return [ (xyScreen[0]-this.centerX)/this.scale, (this.centerY-xyScreen[1])/this.scale];
+  { return this.coordsScreenToMathScreen(this.coordsScreenAbsoluteToScreen(screenX, screenY));
   };
   this.coordsMathScreenToScreen= function(theCoords)
   { return [this.scale*theCoords[0]+this.centerX, this.centerY-this.scale*theCoords[1]];
@@ -1871,10 +1873,19 @@ function Canvas(inputCanvas)
     this.rotateAfterCursorDefaultGreatNormalCircle(false);
   };
   this.mouseWheel=function(wheelDelta, screenX, screenY)
-  { this.scale+=wheelDelta;
+  { var screenPos=this.coordsScreenAbsoluteToScreen(screenX, screenY);
+    var mathScreenPos= this.coordsScreenToMathScreen(screenPos);
+    this.scale+=wheelDelta;
     if (this.scale<=0)
       this.scale=1;
+    var intermediateScreenPos= this.coordsMathScreenToScreen(mathScreenPos);
+    //console.log("start screen: "+[screenX, screenY]);
+    //console.log("intermed. screen: "+intermediateScreenPos);
+    this.centerX=this.centerX+screenPos[0]-intermediateScreenPos[0];
+    this.centerY=this.centerY+screenPos[1]-intermediateScreenPos[1];
+
     this.redraw();
+
   };
   this.mouseMove=function(screenX, screenY)
   { if (this.selectedElement=="")

@@ -163,8 +163,6 @@ function testGetTestPlane()
   var result=new Surface(function(u,v){return [u,0.9*v,1+u+v]; }, [[-1.2,-0.7], [1,1]], [5,5], colors);
   return result;
 }
-
-
 function CurveThreeD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
                      inputNumSegments, inputColor, inputLineWidth)
 { this.coordinateFunctions=inputCoordinateFunctions;
@@ -640,12 +638,14 @@ function CanvasTwoD(inputCanvas)
   this.spanCriticalErrors=null;
   this.spanControls=null;
   this.numDrawnObjects=0;
-  this.boundingBoxMath= [[-0.01,-0.01],[0.01,0.01]];
+  this.boundingBoxMath= [[-0.1,-0.1],[0.1,0.1]];
   this.width= inputCanvas.width;
   this.height= inputCanvas.height;
-  this.centerX= inputCanvas.width/2;
-  this.centerY= inputCanvas.height/2;
-  this.oldViewWindowCenterMath=[0,0];
+  this.centerCanvasX= inputCanvas.width/2;
+  this.centerCanvasY= inputCanvas.height/2;
+  this.centerX= this.centerCanvasX;
+  this.centerY= this.centerCanvasY;
+  this.viewWindowDefault=[[-5,-5],[5,5]];
   this.scale= 50;
   this.mousePosition= [];
   this.clickedPosition= [];
@@ -708,30 +708,20 @@ function CanvasTwoD(inputCanvas)
     this.setViewWindow(this.boundingBoxMath[0], this.boundingBoxMath[1]);
   };
   this.setViewWindow= function(leftLowPt, rightUpPt)
-  { this.boundingBoxMath=[leftLowPt,rightUpPt];
+  { this.viewWindowDefault=[leftLowPt,rightUpPt];
     var leftLowScreen= this.coordsMathToScreen(leftLowPt);
     var rightUpScreen= this.coordsMathToScreen(rightUpPt);
     var desiredHeight=Math.abs(rightUpScreen[1]-leftLowScreen[1]);
     var desiredWidth=Math.abs(rightUpScreen[0]-leftLowScreen[0]);
     var candidateScaleHeight=this.scale* this.height/desiredHeight;
     var candidateScaleWidth=this.scale* this.width/desiredWidth;
-    //console.log("leftLowScreen: "+ leftLowScreen+" rightUpScreen: "+rightUpScreen);
-    //console.log(centerScreen);
-    //console.log("desiredHeight: "+desiredHeight);
-    //console.log("candidateScaleHeight: "+candidateScaleHeight);
-    //console.log("candidateScaleWidth: "+candidateScaleWidth);
-    //console.log("old scale: "+ this.scale);
     this.scale=Math.min(candidateScaleHeight, candidateScaleWidth);
     //console.log("new scale: "+ this.scale);
-    var newViewWindowCenterMath= vectorPlusVector(leftLowPt,rightUpPt);
-    vectorTimesScalar(newViewWindowCenterMath,0.5);
-    var newCenterViewWindowScreenRescaled =
-    this.coordsMathToScreen(newViewWindowCenterMath);
-    var oldCenterViewWindowScreenRescaled =
-    this.coordsMathToScreen(this.oldViewWindowCenterMath);
-    this.centerX=this.centerX+oldCenterViewWindowScreenRescaled[0]-newCenterViewWindowScreenRescaled[0];
-    this.centerY=this.centerY+oldCenterViewWindowScreenRescaled[1]-newCenterViewWindowScreenRescaled[1];
-    this.oldViewWindowCenterMath=newViewWindowCenterMath;
+    var centerViewWindowMath= vectorPlusVector(leftLowPt,rightUpPt);
+    vectorTimesScalar(centerViewWindowMath,0.5);
+    var centerViewWindowScreen =this.coordsMathToScreen(centerViewWindowMath);
+    this.centerX+=this.centerCanvasX-centerViewWindowScreen[0];
+    this.centerY+=this.centerCanvasY-centerViewWindowScreen[1];
   };
   this.redraw= function()
   { this.textPerformance="";
@@ -771,15 +761,12 @@ function CanvasTwoD(inputCanvas)
     this.computeBasis();
   };
   this.resetView= function()
-  { this.centerX= inputCanvas.width/2;
-    this.centerY= inputCanvas.height/2;
-    this.oldViewWindowCenterMath=[0,0];
-    this.setViewWindow(this.lastViewWindow[0],this.lastViewWindow[1]);
+  { this.setViewWindow(this.viewWindowDefault[0],this.viewWindowDefault[1]);
     this.redraw();
   };
   this.constructControls= function()
   { var thisString="document.getElementById('"+this.canvasId+"')";
-    this.spanControls.innerHTML="<button style=\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvasTwoD("+thisString+ ").resetView();\">reset view</button>";
+    this.spanControls.innerHTML="<button style=\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvasTwoD("+thisString+ ").resetView();\">reset view</button> ";
   };
   this.coordsMathScreenToMath= function(theCoords)
   { var output=this.screenBasisOrthonormal[0].slice();
@@ -795,20 +782,37 @@ function CanvasTwoD(inputCanvas)
   { return [this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[0])+this.centerX,
        (-1)*this.scale*vectorScalarVector(vector, this.screenBasisOrthonormal[1])+this.centerY];
   };
-  this.getPosXPosY= function (cx, cy)
-  { return getPosXPosYObject(this, cx, cy);
+  this.coordsScreenAbsoluteToScreen=function(screenX, screenY)
+  { return getPosXPosYObject(this.canvasContainer, screenX, screenY);
   };
-  this.coordsScreenToMathScreen= function(screenX, screenY)
-  { var xyScreen= getPosXPosYObject(this.canvasContainer, screenX, screenY);
-    return [ (xyScreen[0]-this.centerX)/this.scale, (this.centerY-xyScreen[1])/this.scale];
+  this.coordsScreenToMathScreen= function(screenPos)
+  { return [ (screenPos[0]-this.centerX)/this.scale, (this.centerY-screenPos[1])/this.scale];
+  };
+  this.coordsScreenAbsoluteToMathScreen= function(screenX, screenY)
+  { return this.coordsScreenToMathScreen(this.coordsScreenAbsoluteToScreen(screenX, screenY));
   };
   this.coordsMathScreenToScreen= function(theCoords)
   { return [this.scale*theCoords[0]+this.centerX, this.centerY-this.scale*theCoords[1]];
   };
+  this.mouseWheel=function(wheelDelta, screenX, screenY)
+  { var screenPos=this.coordsScreenAbsoluteToScreen(screenX, screenY);
+    var mathScreenPos= this.coordsScreenToMathScreen(screenPos);
+    this.scale+=wheelDelta;
+    if (this.scale<=0)
+      this.scale=1;
+    var intermediateScreenPos= this.coordsMathScreenToScreen(mathScreenPos);
+    console.log("start screen: "+[screenX, screenY]);
+    console.log("intermed. screen: "+intermediateScreenPos);
+    this.centerX=this.centerX+screenPos[0]-intermediateScreenPos[0];
+    this.centerY=this.centerY+screenPos[1]-intermediateScreenPos[1];
+
+    this.redraw();
+
+  };
   this.mouseMove=function(screenX, screenY)
   { if (this.selectedElement==="")
       return;
-    this.mousePosition=this.coordsScreenToMathScreen(screenX, screenY);
+    this.mousePosition=this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
     if (this.selectedElement==="origin")
       this.panAfterCursor();
     this.redrawFinish=new Date().getTime();
@@ -827,12 +831,12 @@ function CanvasTwoD(inputCanvas)
     return squaredDistance<1000;
   };
   this.canvasClick=function (screenX, screenY)
-  { this.clickedPosition=this.coordsScreenToMathScreen(screenX, screenY);
+  { this.clickedPosition=this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
     this.mousePosition=[];
-    if (this.pointsWithinClickTolerance(this.clickedPosition,[0,0]))
-      this.selectedElement="origin";
-    else
-      this.selectedElement="";
+    //if (this.pointsWithinClickTolerance(this.clickedPosition,[0,0]))
+    this.selectedElement="origin";
+    //else
+    //  this.selectedElement="";
     if (this.flagShowPerformance)
       this.logStatus();
   };
@@ -885,7 +889,8 @@ function Canvas(inputCanvas)
   this.surface= null;
   this.canvasContainer= null;
   this.canvasId= null;
-  this.screenBasisUser= [[2,1,0],[0,1,1]];
+  this.screenBasisUserDefault= [[2,1,0],[0,1,1]];
+  this.screenBasisUser= this.screenBasisUserDefault.slice();
   this.screenNormal= [];
   this.screenBasisOrthonormal= [];
   this.zBufferColCount= 20;
@@ -898,11 +903,15 @@ function Canvas(inputCanvas)
   this.boundingBoxMathScreen= [[-0.01, -0.01], [0.01, 0.01]];
   this.boundingBoxMath= [[-0.01,-0.01,-0.01],[0.01,0.01,0.01]];
   this.boundingSegmentZ= [-0.01,0.01];
+  this.lastCenterScreen=[0,0];
   this.width= inputCanvas.width;
   this.height= inputCanvas.height;
-  this.centerX= inputCanvas.width/2;
-  this.centerY= inputCanvas.height/2;
-  this.scale= 50;
+  this.defaultCenterX=this.width/2;
+  this.defaultCenterY=this.height/2;
+  this.centerX=this.defaultCenterX;
+  this.centerY=this.defaultCenterY;
+  this.scaleDefault= 50;
+  this.scale=this.scaleDefault;
   this.mousePosition= [];
   this.clickedPosition= [];
   this.unitRay= [];
@@ -1258,6 +1267,7 @@ function Canvas(inputCanvas)
     theSurface.strokeStyle=theText.color;
     var theCoords=this.coordsMathToScreen(theText.location);
     theSurface.font="15pt sans-serif";
+    theSurface.lineWidth=1;
     if (isInForeGround)
     { theSurface.fillStyle=theText.color;
       theSurface.fillText(theText.text, theCoords[0], theCoords[1]);
@@ -1674,6 +1684,54 @@ function Canvas(inputCanvas)
     "<br>selected e2: "+ this.selectedScreenBasis[1]
     ;
   };
+  this.setBoundingBoxAsDefaultViewWindow=function()
+  { this.resetViewNoRedraw();
+    this.computeBoundingBox();
+    var leftLowScreen= this.coordsMathScreenToScreen(this.boundingBoxMathScreen[0]);
+    var rightUpScreen= this.coordsMathScreenToScreen(this.boundingBoxMathScreen[1]);
+    var desiredHeight=Math.abs(rightUpScreen[1]-leftLowScreen[1]) *1.05;
+    var desiredWidth=Math.abs(rightUpScreen[0]-leftLowScreen[0]) *1.05;
+    var candidateScaleHeight=this.scale* this.height/desiredHeight;
+    var candidateScaleWidth=this.scale* this.width/desiredWidth;
+    //console.log("leftLowScreen: "+ leftLowScreen+" rightUpScreen: "+rightUpScreen);
+    //console.log(centerScreen);
+    //console.log("desiredHeight: "+desiredHeight);
+    //console.log("candidateScaleHeight: "+candidateScaleHeight);
+    //console.log("candidateScaleWidth: "+candidateScaleWidth);
+    //console.log("old scale: "+ this.scale);
+    this.scale=Math.min(candidateScaleHeight, candidateScaleWidth);
+    //console.log("new scale: "+ this.scale);
+    var newViewWindowCenterMath= vectorPlusVector(
+      this.boundingBoxMathScreen[0],this.boundingBoxMathScreen[1]);
+    vectorTimesScalar(newViewWindowCenterMath,0.5);
+    var newCenterViewWindowScreenRescaled =
+    this.coordsMathScreenToScreen(newViewWindowCenterMath);
+    var oldCenterViewWindowMathScreenRescaled =
+    this.coordsMathScreenToScreen(this.lastCenterScreen);
+    this.centerX=this.centerX+oldCenterViewWindowMathScreenRescaled[0]-
+    newCenterViewWindowScreenRescaled[0];
+    this.centerY=this.centerY+oldCenterViewWindowMathScreenRescaled[1]-
+    newCenterViewWindowScreenRescaled[1];
+    this.defaultCenterX=this.centerX;
+    this.defaultCenterY=this.centerY;
+    this.scaleDefault=this.scale;
+    this.lastCenterScreen=newCenterViewWindowScreenRescaled;
+  };
+  this.resetView= function()
+  { this.resetViewNoRedraw();
+    this.redraw();
+  };
+  this.resetViewNoRedraw= function()
+  { this.screenBasisUser=this.screenBasisUserDefault.slice();
+    this.centerX= this.defaultCenterX;
+    this.centerY= this.defaultCenterY;
+    this.scale=this.scaleDefault;
+    this.computeBasis();
+  };
+  this.constructControls= function()
+  { var thisString="document.getElementById('"+this.canvasId+"')";
+    this.spanControls.innerHTML="<button style=\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvas("+thisString+ ").resetView();\">reset view</button><small> hold shift to rotate</small>";
+  };
   this.init= function(inputCanvasId)
   { this.canvasId=inputCanvasId;
     this.canvasContainer= document.getElementById(inputCanvasId);
@@ -1682,10 +1740,12 @@ function Canvas(inputCanvas)
     this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
     this.spanMessages=document.getElementById(this.canvasId+"Messages");
     this.spanCriticalErrors=document.getElementById(this.canvasId+"CriticalErrors");
+    this.spanControls=document.getElementById(this.canvasId+"Controls");
     this.theIIIdObjects.thePatches= [];
     this.theIIIdObjects.theContours= [];
     this.theIIIdObjects.thePoints= [];
     this.theIIIdObjects.theLabels= [];
+    this.constructControls();
     this.computeBasis();
     if (this.zBuffer.length===0)
       this.allocateZbuffer();
@@ -1720,11 +1780,11 @@ function Canvas(inputCanvas)
   { return [this.scale*vectorScalarVector(vector, this.selectedScreenBasis[0])+this.centerX,
        (-1)*this.scale*vectorScalarVector(vector, this.selectedScreenBasis[1])+this.centerY];
   };
-  this.getPosXPosY= function (cx, cy)
-  { return getPosXPosYObject(this, cx, cy);
+  this.coordsScreenAbsoluteToScreen= function (cx, cy)
+  { return getPosXPosYObject(this.canvasContainer, cx, cy);
   };
-  this.coordsScreenToMathScreen= function(screenX, screenY)
-  { var xyScreen= getPosXPosYObject(this.canvasContainer, screenX, screenY);
+  this.coordsScreenAbsoluteToMathScreen= function(screenX, screenY)
+  { var xyScreen= this.coordsScreenAbsoluteToScreen(screenX, screenY);
     return [ (xyScreen[0]-this.centerX)/this.scale, (this.centerY-xyScreen[1])/this.scale];
   };
   this.coordsMathScreenToScreen= function(theCoords)
@@ -1810,10 +1870,16 @@ function Canvas(inputCanvas)
       return;
     this.rotateAfterCursorDefaultGreatNormalCircle(false);
   };
+  this.mouseWheel=function(wheelDelta, screenX, screenY)
+  { this.scale+=wheelDelta;
+    if (this.scale<=0)
+      this.scale=1;
+    this.redraw();
+  };
   this.mouseMove=function(screenX, screenY)
   { if (this.selectedElement=="")
       return;
-    this.mousePosition=this.coordsScreenToMathScreen(screenX, screenY);
+    this.mousePosition=this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
     if (this.selectedElement==="default")
     { this.rotateAfterCursorDefault();
     }
@@ -1835,9 +1901,13 @@ function Canvas(inputCanvas)
     return squaredDistance<7;
   };
   this.canvasClick=function (screenX, screenY)
-  { this.clickedPosition=this.coordsScreenToMathScreen(screenX, screenY);
+  { this.clickedPosition=this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
     this.mousePosition=[];
-    if (this.pointsWithinClickTolerance(this.clickedPosition,[0,0]))
+    var mustSelectOrigin=true;
+    if (window.event.shiftKey)
+      mustSelectOrigin=false;
+    if (this.pointsWithinClickTolerance(this.clickedPosition,[0,0])
+        || mustSelectOrigin)
       this.selectedElement="origin";
     else
     { this.selectedElement="default";
@@ -1863,6 +1933,7 @@ function Canvas(inputCanvas)
       vectorTimesScalar(this.selectedVector, 1/Math.sqrt(lengthSelectedVector));
     this.selectedScreenBasis=[this.screenBasisOrthonormal[0].slice(), this.screenBasisOrthonormal[1].slice()];
   };
+
   this.showMessages= function()
   { if (!this.flagShowPerformance)
       return;
@@ -1985,6 +2056,7 @@ function testPicture(inputCanvas)
 //    theCanvas.drawSurface(testGetTestPlane());
 //    theCanvas.drawPatchStraight([1,0,0], [0,1,0], [0,0,1], 'cyan');
 //    theCanvas.drawPatchStraight([-3,0,0], [0,2,0.4], [0,0,2], 'green');
+  theCanvas.scale=100;
   theCanvas.drawSurface(testGetMoebiusSurface());
   theCanvas.drawSurface(testGetMoebiusSurface2());
   theCanvas.drawPoint([1,0,0], 'red');
@@ -1993,7 +2065,7 @@ function testPicture(inputCanvas)
   theCanvas.drawText({location:[1,0,0], text: "x", color:"green"});
   theCanvas.drawText({location:[0,1,0], text: "y", color:"green"});
   theCanvas.drawText({location:[0,0,1], text: "z", color:"green"});
-
+  theCanvas.setBoundingBoxAsDefaultViewWindow();
   //console.log(theCanvas.theIIIdObjects.thePatches);
   theCanvas.redraw();
 }
@@ -2046,10 +2118,7 @@ function calculatorCanvasMouseWheel(theCanvasContainer, theEvent)
   if (theCanvas===undefined || theCanvas===null)
     return;
   var theIncrement=0.6;
-  theCanvas.scale+= theWheelDelta *theIncrement;
-  if (theCanvas.scale<=0)
-    theCanvas.scale=theIncrement;
-  theCanvas.redraw();
+  theCanvas.mouseWheel(theWheelDelta *theIncrement, theEvent.clientX, theEvent.clientY);
 }
 
 function calculatorCanvasMouseUp(inputCanvas)

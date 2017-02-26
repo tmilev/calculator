@@ -1042,6 +1042,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   << "(this, event.clientX, event.clientY);\""
   << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
   << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
+  << "<span id=\"" << this->canvasName << "Controls\"></span>"
   << "<span id=\"" << this->canvasName << "Messages\"></span>"
   << "<script>\n";
   std::string canvasFunctionName="functionMake"+ this->canvasName;
@@ -1127,7 +1128,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     out << "theCanvas.flagShowPerformance=false;\n";
   else
     out << "theCanvas.flagShowPerformance=true;\n";
-
+  out << "theCanvas.setBoundingBoxAsDefaultViewWindow();\n";
   out
   << "theCanvas.redraw();\n"
   << "}\n"

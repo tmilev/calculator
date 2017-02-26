@@ -4681,12 +4681,12 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
     input[5].IsSmallInteger(&thePlot.DesiredHtmlHeightInPixels);
   }
   if (input.size()>=7)
-  { if (!input[6].IsOfType<std::string>(&thePlotObj.colorRGBJS))
-      thePlotObj.colorRGBJS=input[6].ToString();
+  { if (!input[6].IsOfType<std::string>(&thePlotObj.colorJS))
+      thePlotObj.colorJS=input[6].ToString();
   } else
-    thePlotObj.colorRGBJS="red";
+    thePlotObj.colorJS="red";
   thePlotObj.colorRGB=CGI::RedGreenBlue(255,0,0);
-  DrawingVariables::GetColorIntFromColorString(thePlotObj.colorRGBJS, thePlotObj.colorRGB);
+  DrawingVariables::GetColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
   thePlotObj.lineWidth=1;
   if (input.size()>=8)
     input[7].EvaluatesToDouble(&thePlotObj.lineWidth);
@@ -4808,7 +4808,7 @@ bool CalculatorFunctionsGeneral::innerPlotPoint(Calculator& theCommands, const E
   if (input[2].IsOfType<std::string>())
     DrawingVariables::GetColorIntFromColorString
     (input[2].GetValue<std::string>(), thePlot.colorRGB);
-  thePlot.colorRGBJS=input[2].ToString();
+  thePlot.colorJS=input[2].ToString();
   thePlot.thePoints.AddOnTop(theV);
   thePlot.thePlotType="point";
   theFinalPlot.thePlots.AddOnTop(thePlot);
@@ -5072,12 +5072,13 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
     thePlot.variablesInPlay.AddOnTop(tempE);
   }
   thePlot.variablesInPlayJS.AddOnTop(thePlot.variablesInPlay[0].ToString());
+  thePlot.colorJS="red";
   thePlot.colorRGB=CGI::RedGreenBlue(255, 0, 0);
   if (input.size()>=5)
-    if (!input[4].IsOfType<std::string>(&thePlot.colorRGBJS))
-      thePlot.colorRGBJS=input[4].ToString();
+    if (!input[4].IsOfType<std::string>(&thePlot.colorJS))
+      thePlot.colorJS=input[4].ToString();
   DrawingVariables::GetColorIntFromColorString
-  (thePlot.colorRGBJS, thePlot.colorRGB);
+  (thePlot.colorJS, thePlot.colorRGB);
   thePlot.lineWidth=1;
   if (input.size()>=6)
     if (!input[5].EvaluatesToDouble(&thePlot.lineWidth))

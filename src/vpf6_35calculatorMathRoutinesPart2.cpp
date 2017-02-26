@@ -760,7 +760,7 @@ bool CalculatorFunctionsGeneral::innerPlotLabel
   thePlot.thePlotString=theLabel;
   thePlot.thePoints.AddOnTop(labelPosition);
   thePlot.thePlotType="label";
-  thePlot.colorRGBJS="black";
+  thePlot.colorJS="black";
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -789,7 +789,7 @@ bool CalculatorFunctionsGeneral::innerPlotRectangle
   currentCorner[1]-=dimensions[1];
   thePlot.thePoints.AddOnTop(currentCorner);
   thePlot.colorFillJS="cyan";
-  thePlot.colorRGBJS="blue";
+  thePlot.colorJS="blue";
   thePlot.thePoints.AddOnTop(currentCorner);
   thePlot.theRectangles.AddOnTop(theRectangle);
   thePlot.colorRGB=CGI::RedGreenBlue(0,0,255);
@@ -1255,21 +1255,25 @@ bool CalculatorFunctionsGeneral::innerPlotCoordinateSystem(Calculator& theComman
   thePlot.colorJS="black";
   thePlot.thePlotType="segment";
   thePlot.thePoints.SetSize(2);
-  thePlot.thePoints[0].MakeZero(3);
-  thePlot.thePoints[1].MakeZero(3);
-  thePlot.thePoints[0][0]=corner1[0];
-  thePlot.thePoints[1][0]=corner2[0];
-  resultPlot+=(thePlot);
-  thePlot.thePoints[0].MakeZero(3);
-  thePlot.thePoints[1].MakeZero(3);
-  thePlot.thePoints[0][1]=corner1[1];
-  thePlot.thePoints[1][1]=corner2[1];
-  resultPlot+=(thePlot);
-  thePlot.thePoints[0].MakeZero(3);
-  thePlot.thePoints[1].MakeZero(3);
-  thePlot.thePoints[0][2]=corner1[2];
-  thePlot.thePoints[1][2]=corner2[2];
-  resultPlot+=(thePlot);
+  for (int i=0; i<3; i++)
+  { thePlot.thePoints[0].MakeZero(3);
+    thePlot.thePoints[1].MakeZero(3);
+    thePlot.thePoints[0][i]=corner1[i];
+    thePlot.thePoints[1][i]=corner2[i];
+    resultPlot+=(thePlot);
+  }
+  PlotObject plotLabels;
+  plotLabels.thePlotType="label";
+  plotLabels.thePoints.SetSize(1);
+  plotLabels.colorJS="blue";
+  for (unsigned char i=0; i<3; i++)
+  { plotLabels.thePoints[0].MakeZero(3);
+    plotLabels.thePoints[0][i]=corner2[i];
+    std::stringstream out;
+    out << (unsigned char) ('x'+i);
+    plotLabels.thePlotString=out.str();
+    resultPlot+=plotLabels;
+  }
   return output.AssignValue(resultPlot, theCommands);
 }
 

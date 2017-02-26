@@ -647,13 +647,14 @@ public:
   double yHigh;
   double paramLow;
   double paramHigh;
-  int colorRGB;
-  int colorFillRGB;
   double lineWidth;
   int dimension;
+  int colorRGB;
+  int colorFillRGB;
+  std::string colorJS;
+  std::string colorFillJS;
   std::string colorUV;
   std::string colorVU;
-  std::string colorJS;
   std::string numSegmentsU;
   std::string numSegmentsV;
   Vectors<double> thePoints;
@@ -677,8 +678,6 @@ public:
   std::string leftPtJS;
   std::string rightPtJS;
   std::string numSegmentsJS;
-  std::string colorRGBJS;
-  std::string colorFillJS;
   std::string paramLowJS;
   std::string paramHighJS;
 

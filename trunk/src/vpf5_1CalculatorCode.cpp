@@ -877,7 +877,6 @@ bool PlotObject::operator==(const PlotObject& other)const
   leftPtJS               == other.leftPtJS               &&
   rightPtJS              == other.rightPtJS              &&
   numSegmentsJS          == other.numSegmentsJS          &&
-  colorRGBJS             == other.colorRGBJS             &&
   colorFillJS            == other.colorFillJS            &&
   paramLowJS             == other.paramLowJS             &&
   paramHighJS            == other.paramHighJS            ;
@@ -1085,12 +1084,29 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
       ;
     }
     if (currentPlot.thePlotType=="parametricCurve")
-    { stOutput << "DEBUG: here be i";
+    { //stOutput << "DEBUG: here be i";
       out
       << "theCanvas.drawCurve("
       <<  the3dObjects[i]
       << ");\n"
       ;
+    }
+    if (currentPlot.thePlotType=="label")
+    { out
+      << "theCanvas.drawText({"
+      << "location: "
+      << currentPlot.thePoints[0].ToStringSquareBracketsBasicType()
+      << ", "
+      << "text:"
+      << "'" << currentPlot.thePlotString << "'"
+      << ", "
+      << "color: "
+      << "'"
+      << currentPlot.colorJS
+      << "'"
+      << "});\n"
+      ;
+
     }
     if (currentPlot.thePlotType=="segment" && currentPlot.thePoints.size>=2)
     { out
@@ -1163,8 +1179,8 @@ std::string PlotObject::GetJavascriptCurveImmersionIn3d
 
   if (this->coordinateFunctionsJS.size==3)
   { out << "function " << fnName
-    << " (" << this->variablesInPlayJS[0] << ","
-    << this->variablesInPlayJS[1] << "){\n";
+    << " (" << this->variablesInPlayJS[0]
+    << "){\n";
     out << "return [ " << this->coordinateFunctionsJS[0] << ", "
     << this->coordinateFunctionsJS[1]
     << ", " << this->coordinateFunctionsJS[2] << "];\n";
@@ -1173,23 +1189,19 @@ std::string PlotObject::GetJavascriptCurveImmersionIn3d
     out << "//this->theCoordinateFunctionsJS has "
     << this->coordinateFunctionsJS.size
     << " elements instead of 3 (expected).\n";
-  if (this->theVarRangesJS.size!=1)
-    out << "//this->theVarRangesJS has " << this->theVarRangesJS.size << " elements instead of 1 (expected).";
-  else if (this->theVarRangesJS[0].size!=2 || this->theVarRangesJS[1].size!=2)
-    out << "//this->theVarRangesJS had unexpected value: "
-    << this->theVarRangesJS.size;
-  else
-  { std::stringstream curveInstStream;
-    curveInstStream << "new CurveThreeD("
-    << fnName
-    << ", " << this->paramLowJS << ", " << this->paramHighJS
+  std::stringstream curveInstStream;
+  curveInstStream << "new CurveThreeD("
+  << fnName
+  << ", " << this->paramLowJS << ", " << this->paramHighJS
 ;
-    curveInstStream << ", " << this->numSegmentsJS;
-    curveInstStream << ", " << this->colorJS;
-    curveInstStream << ")"
-    ;
-    outputCurveInstantiationJS=curveInstStream.str();
-  }
+  curveInstStream << ", " << this->numSegmentsJS;
+  curveInstStream << ", "
+  << "\"" << this->colorJS << "\"";
+  curveInstStream << ", " << this->lineWidth;
+  curveInstStream << ")"
+  ;
+  outputCurveInstantiationJS=curveInstStream.str();
+
   return out.str();
 }
 
@@ -1292,7 +1304,7 @@ std::string PlotObject::GetJavascriptParametricCurve2D
   fnInstStream << "drawCurve("
   << "[" << fnNames[0] << ", " << fnNames[1] << "]"
   << ", " << this->paramLowJS << ", " << this->paramHighJS << ", "
-  << this->numSegmentsJS << ", " << "'" << this->colorRGBJS << "'"
+  << this->numSegmentsJS << ", " << "'" << this->colorJS << "'"
   << ");\n"
   ;
   outputPlotInstantiationJS=fnInstStream.str();
@@ -1320,7 +1332,7 @@ std::string PlotObject::GetJavascript2dPlot
   fnInstStream << "drawFunction("
   << fnName
   << ", " << this->leftPtJS << ", " << this->rightPtJS << ", "
-  << this->numSegmentsJS << ", " << "'" << this->colorRGBJS << "'"
+  << this->numSegmentsJS << ", " << "'" << this->colorJS << "'"
   << ");\n"
   ;
   outputPlotInstantiationJS=fnInstStream.str();
@@ -1430,7 +1442,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
         << ", "
         << "'" << currentPlot.thePlotString << "'"
         << ", "
-        << "'" << currentPlot.colorRGBJS << "');\n" ;
+        << "'" << currentPlot.colorJS << "');\n" ;
       continue;
     }
     if (currentPlot.thePlotType=="plotFillStart")
@@ -1445,7 +1457,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     { out << "theCanvas.drawPathFilled( ";
       out << currentPlot.ToStringPointsList();
       out << ", "
-      << "\"" << currentPlot.colorRGBJS << "\""
+      << "\"" << currentPlot.colorJS << "\""
       << ","
       << "\"" << currentPlot.colorFillJS << "\""
       << ");\n";
@@ -1457,7 +1469,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
         << "theCanvas.drawPoint("
         << currentPlot.thePoints[j].ToStringSquareBracketsBasicType()
         << ", "
-        << "\"" << currentPlot.colorRGBJS << "\""
+        << "\"" << currentPlot.colorJS << "\""
         << ");\n";
         ;
       continue;

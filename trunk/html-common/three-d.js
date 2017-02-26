@@ -148,13 +148,13 @@ function testMoebiusStripEmbedding2(u,v)
 
 function testGetMoebiusSurface()
 { var colors={colorContour: "black", colorUV: "blue", colorVU: "cyan"};
-  var result=new Surface(testMoebiusStripEmbedding, [[0,-0.6], [Math.PI*2, 0.6]], [22,4], colors);
+  var result=new Surface(testMoebiusStripEmbedding, [[0,-0.6], [Math.PI*2, 0.6]], [22,4], colors,2);
   return result;
 }
 
 function testGetMoebiusSurface2()
 { var colors={colorContour: "black", colorUV: "red", colorVU: "pink"};
-  var result=new Surface(testMoebiusStripEmbedding2, [[0,-0.6], [Math.PI*2, 0.6]], [22,4], colors);
+  var result=new Surface(testMoebiusStripEmbedding2, [[0,-0.6], [Math.PI*2, 0.6]], [22,4], colors,0.5);
   return result;
 }
 
@@ -166,12 +166,13 @@ function testGetTestPlane()
 
 
 function CurveThreeD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
-                     inputNumSegments, inputColor)
+                     inputNumSegments, inputColor, inputLineWidth)
 { this.coordinateFunctions=inputCoordinateFunctions;
   this.leftPt=inputLeftPt;
   this.rightPt=inputRightPt;
   this.color=colorToRGB(inputColor);
   this.numSegments=inputNumSegments;
+  this.lineWidth=inputLineWidth;
   this.accountBoundingBox= function(inputOutputBox)
   { var theT=this.leftPt;
     var theX=this.coordinateFunctions[0](theT);
@@ -229,11 +230,12 @@ function CurveThreeD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
   };
 }
 
-function Surface(inputxyzFun, inputUVBox, inputPatchDimensions, inputColors)
+function Surface(inputxyzFun, inputUVBox, inputPatchDimensions, inputColors, inputContourWidth)
 { this.xyzFun=inputxyzFun;
   this.uvBox=inputUVBox;
   this.patchDimensions=inputPatchDimensions;
   this.colors=inputColors;
+  this.contourWidth=inputContourWidth;
   this.colors.colorUV=colorToHex(this.colors.colorUV);
   this.colors.colorVU=colorToHex(this.colors.colorVU);
   this.deltaU=(inputUVBox[1][0]-inputUVBox[0][0])/this.patchDimensions[0];
@@ -267,12 +269,13 @@ function Patch(inputBase, inputEdge1, inputEdge2, inputColorUV, inputColorVU)
   this.index=-1;
 }
 
-function Contour(inputPoints, inputColor)
+function Contour(inputPoints, inputColor, inputLineWidth)
 { this.thePoints=inputPoints.slice();
   this.thePointsMathScreen=[];
   this.color=colorToRGB(inputColor);
   this.adjacentPatches=[];
   this.index=-1;
+  this.lineWidth=inputLineWidth;
 }
 
 function colorRGBToHex(r, g, b)
@@ -870,6 +873,7 @@ function Canvas(inputCanvas)
   { thePatches: [],
     theContours: [],
     thePoints: [],
+    theLabels: []
   };
   this.flagShowPerformance=true;
   this.thePatchOrder=[];
@@ -926,6 +930,18 @@ function Canvas(inputCanvas)
   this.defaultNumSegmentsPerContour= 10;
   this.flagRoundContours= false;
   this.flagRoundPatches= true;
+  this.drawText=function(theText)
+  { this.theIIIdObjects.theLabels.push(theText);
+  };
+  this.drawCurve=function(theCurve)
+  { var contourPoints=new Array(theCurve.numSegments+1);
+    for (var i=0; i<theCurve.numSegments+1; i++)
+    { var theRatio= i/(theCurve.numSegments);
+      var currentParam=theCurve.leftPt*(1-theRatio)+ theCurve.rightPt*theRatio;
+      contourPoints[i]=theCurve.coordinateFunctions(currentParam);
+    }
+    this.theIIIdObjects.theContours.push(new Contour(contourPoints, theCurve.color, theCurve.lineWidth));
+  };
   this.drawSurface=function(theSurface)
   { var numUsegments=theSurface.patchDimensions[0];
     var numVsegments=theSurface.patchDimensions[1];
@@ -963,7 +979,7 @@ function Canvas(inputCanvas)
         { currentV=theSurface.uvBox[0][1]+(j+k/numSegmentsPerContour)*deltaV;
           contourPoints[k]=theSurface.xyzFun(currentU,currentV);
         }
-        var incomingContour=new Contour(contourPoints, theSurface.colors.colorContour);
+        var incomingContour=new Contour(contourPoints, theSurface.colors.colorContour, theSurface.contourWidth);
         incomingContour.index=theContours.length;
         if (i>0)
         { incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments*(i-1)+j);
@@ -983,7 +999,7 @@ function Canvas(inputCanvas)
         { currentU=theSurface.uvBox[0][0]+(i+k/numSegmentsPerContour)*deltaU;
           contourPoints[k]=theSurface.xyzFun(currentU,currentV);
         }
-        incomingContour=new Contour(contourPoints, theSurface.colors.colorContour);
+        incomingContour=new Contour(contourPoints, theSurface.colors.colorContour, theSurface.contourWidth);
         incomingContour.index=theContours.length;
         if (j>0)
         { incomingContour.adjacentPatches.push(firstPatchIndex + numVsegments*i+j-1);
@@ -1023,8 +1039,8 @@ function Canvas(inputCanvas)
   this.drawPoint= function (inputPoint, inputColor)
   { this.theIIIdObjects.thePoints.push(new Point(inputPoint, inputColor));
   };
-  this.drawLine= function (leftPt, rightPt, inputColor)
-  { var newContour= new Contour([], inputColor);
+  this.drawLine= function (leftPt, rightPt, inputColor, inputLineWidth)
+  { var newContour= new Contour([], inputColor, inputLineWidth);
     var numSegments=this.defaultNumSegmentsPerContour;
     newContour.thePoints=new Array(numSegments);
     newContour.index=this.theIIIdObjects.theContours.length;
@@ -1048,7 +1064,7 @@ function Canvas(inputCanvas)
     vectorAddVectorTimesScalar(thePatch.internalPoint, thePatch.edge2, 0.5);
   };
   this.computeContour= function(theContour)
-  { if (theContour.thePointsMathScreen.length!=theContour.thePoints.length)
+  { if (theContour.thePointsMathScreen.length!==theContour.thePoints.length)
       theContour.thePointsMathScreen = new Array(theContour.thePoints.length);
     for (var i=0; i<theContour.thePoints.length; i++)
       theContour.thePointsMathScreen[i]=this.coordsMathToMathScreen(theContour.thePoints[i]);
@@ -1135,7 +1151,10 @@ function Canvas(inputCanvas)
     this.numContourPaths++;
 //    theSurface.setLineDash([]);
     theSurface.strokeStyle=colorRGBToString(theContour.color);
-    theSurface.lineWidth=1;
+    if (theContour.lineWidth!==undefined)
+      theSurface.lineWidth=theContour.lineWidth;
+    else
+      theSurface.lineWidth=1;
     theSurface.moveTo(currentPt[0], currentPt[1]);
     this.numContourPoints+=thePts.length;
     for (var i=1; i<thePts.length; i++)
@@ -1231,6 +1250,21 @@ function Canvas(inputCanvas)
       theSurface.fillText(thePatch.index, theCoords[0], theCoords[1]);
     }
 //    theSurface.stroke();
+  };
+  this.paintText=function(theText)
+  { var theSurface=this.surface;
+    var isInForeGround=this.pointIsInForeGround(theText.location, []);
+    theSurface.beginPath();
+    theSurface.strokeStyle=theText.color;
+    var theCoords=this.coordsMathToScreen(theText.location);
+    theSurface.font="15pt sans-serif";
+    if (isInForeGround)
+    { theSurface.fillStyle=theText.color;
+      theSurface.fillText(theText.text, theCoords[0], theCoords[1]);
+    } else
+    { theSurface.strokeStyle=theText.color;
+      theSurface.strokeText(theText.text, theCoords[0], theCoords[1]);
+    }
   };
   this.paintOnePoint= function(thePoint)
   { var theSurface=this.surface;
@@ -1516,6 +1550,7 @@ function Canvas(inputCanvas)
     var theContours=this.theIIIdObjects.theContours;
     var thePatches=this.theIIIdObjects.thePatches;
     var thePoints=this.theIIIdObjects.thePoints;
+    var theLabels=this.theIIIdObjects.theLabels;
     var theSurface=this.surface;
     theSurface.clearRect(0, 0, this.width, this.height);
     for (var i=0; i<thePatches.length; i++)
@@ -1547,6 +1582,8 @@ function Canvas(inputCanvas)
     var paintContourTime=new Date().getTime();
     for (i=0; i<thePoints.length; i++)
       this.paintOnePoint(thePoints[i]);
+    for (i=0; i<theLabels.length; i++)
+      this.paintText(theLabels[i]);
     this.paintMouseInfo();
     var redrawTime=new Date().getTime();
     this.textPerformance=
@@ -1648,6 +1685,7 @@ function Canvas(inputCanvas)
     this.theIIIdObjects.thePatches= [];
     this.theIIIdObjects.theContours= [];
     this.theIIIdObjects.thePoints= [];
+    this.theIIIdObjects.theLabels= [];
     this.computeBasis();
     if (this.zBuffer.length===0)
       this.allocateZbuffer();
@@ -1939,11 +1977,11 @@ function calculatorGetCanvasTwoD(inputCanvas)
 function testPicture(inputCanvas)
 { var theCanvas=calculatorGetCanvas(document.getElementById(inputCanvas));
   theCanvas.init(inputCanvas, false);
-  theCanvas.drawLine([-1,0,0],[1,0,0], 'black');
-  theCanvas.drawLine([0,-1,0],[0,1,0], 'black');
-  theCanvas.drawLine([0,0,-1],[0,0,1], 'black');
-  theCanvas.drawLine([0,0,0] ,[1,0.5,0.5], 'red');
-  theCanvas.drawLine([0,0,0] ,[-2,0,1], 'blue');
+  theCanvas.drawLine([-1,0,0],[1,0,0], 'black', 2);
+  theCanvas.drawLine([0,-1,0],[0,1,0], 'black',2);
+  theCanvas.drawLine([0,0,-1],[0,0,1], 'black',2);
+  theCanvas.drawLine([0,0,0] ,[1,0.5,0.5], 'red',2);
+  theCanvas.drawLine([0,0,0] ,[-2,0,1], 'blue',2);
 //    theCanvas.drawSurface(testGetTestPlane());
 //    theCanvas.drawPatchStraight([1,0,0], [0,1,0], [0,0,1], 'cyan');
 //    theCanvas.drawPatchStraight([-3,0,0], [0,2,0.4], [0,0,2], 'green');
@@ -1952,6 +1990,9 @@ function testPicture(inputCanvas)
   theCanvas.drawPoint([1,0,0], 'red');
   theCanvas.drawPoint([0,1,0], 'green');
   theCanvas.drawPoint([0,0,1], 'blue');
+  theCanvas.drawText({location:[1,0,0], text: "x", color:"green"});
+  theCanvas.drawText({location:[0,1,0], text: "y", color:"green"});
+  theCanvas.drawText({location:[0,0,1], text: "z", color:"green"});
 
   //console.log(theCanvas.theIIIdObjects.thePatches);
   theCanvas.redraw();

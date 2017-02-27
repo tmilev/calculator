@@ -968,37 +968,29 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
     return false;
   if (leftV.size!=2 && leftV.size!=3)
     return false;
-  int colorIndex=0;
-  if (input.size()>=4)
-  { std::string theColor="black";
-    int colorCandidate=0;
-    const Expression& colorE=input[3];
-    bool usingColorString= colorE.IsOfType<std::string>(&theColor);
-    if (!usingColorString)
-      usingColorString= colorE.IsAtom(&theColor);
-    if (usingColorString)
-    { usingColorString=DrawingVariables::GetColorIntFromColorString(theColor, colorIndex);
-      if (!usingColorString)
-        theCommands << "Unrecognized color: " << theColor;
-    }
-    if (!usingColorString)
-      if(colorE.IsIntegerFittingInInt(&colorCandidate))
-        colorIndex=colorCandidate;
-//    stOutput << "Final color index: " << colorIndex;
-  }
   PlotObject theSegment;
-  theSegment.thePlotType="plotSegment";
-  theSegment.colorRGB=colorIndex;
+  if (input.size()>=4)
+  { theSegment.colorJS="black";
+    theSegment.colorRGB=CGI::RedGreenBlue(0,0,0);
+    const Expression& colorE=input[3];
+    if (!colorE.IsOfType<std::string>(&theSegment.colorJS))
+      theSegment.colorJS= colorE.ToString();
+    if(!DrawingVariables::GetColorIntFromColorString
+        (theSegment.colorJS, theSegment.colorRGB))
+      theCommands << "Unrecognized color: " << theSegment.colorJS;
+  }
+  theSegment.thePlotType="segment";
   if (leftV.size==3)
     theSegment.dimension=3;
   else
     theSegment.dimension=2;
   theSegment.thePoints.AddOnTop(leftV.GetVectorDouble());
   theSegment.thePoints.AddOnTop(rightV.GetVectorDouble());
+  if (input.size()>=5)
+    if (!input[4].EvaluatesToDouble(&theSegment.lineWidth))
+      theSegment.lineWidth=1;
   Plot thePlot;
   thePlot+=theSegment;
-  thePlot.DesiredHtmlWidthInPixels=200;
-  thePlot.DesiredHtmlHeightInPixels=200;
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -1239,6 +1231,26 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
   return theCommands << "Failed to make expression from " << input.ToString();
 }
 
+bool CalculatorFunctionsGeneral::innerPlotSetProjectionScreenBasis(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSetProjectionScreenBasis");
+  if (input.size()!=3)
+    return false;
+  Vector<double> v1, v2;
+  if (!theCommands.GetVectorDoubles(input[1], v1, 3) ||
+      !theCommands.GetVectorDoubles(input[2], v2, 3) )
+    return theCommands << "Failed to extract 3d-vectors from "
+    << input[1].ToString() << ", "
+    << input[2].ToString() << ".";
+  Plot resultPlot;
+  resultPlot.dimension=3;
+  PlotObject thePlot;
+  thePlot.thePlotType="setProjectionScreen";
+  thePlot.thePoints.AddOnTop(v1);
+  thePlot.thePoints.AddOnTop(v2);
+  resultPlot+=thePlot;
+  return output.AssignValue(resultPlot, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerPlotCoordinateSystem(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotCoordinateSystem");
   if (input.size()!=3)
@@ -1360,6 +1372,7 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
     keysToConvert;
     keysToConvert.GetValueCreateIfNotPresent("numSegments1");
     keysToConvert.GetValueCreateIfNotPresent("numSegments2");
+    keysToConvert.GetValueCreateIfNotPresent("lineWidth");
     for (int i=0; i<keysToConvert.size(); i++)
     { if (!theKeys.Contains(keysToConvert.theKeys[i]))
         continue;
@@ -1377,6 +1390,10 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
       thePlot.numSegmentsU=keysToConvert.GetValueCreateIfNotPresent("numSegments1");
     if(keysToConvert.GetValueCreateIfNotPresent("numSegments2")!="")
       thePlot.numSegmentsV=keysToConvert.GetValueCreateIfNotPresent("numSegments2");
+    if(keysToConvert.GetValueCreateIfNotPresent("lineWidth")!="")
+    { thePlot.lineWidthJS=keysToConvert.GetValueCreateIfNotPresent("lineWidth");
+      //stOutput << "DEBUG: line width set to: " << thePlot.lineWidthJS;
+    }
   }
   if (thePlot.theVarRangesJS[0][0]=="" || thePlot.theVarRangesJS[0][1]=="" ||
       thePlot.theVarRangesJS[1][0]=="" || thePlot.theVarRangesJS[1][1]=="")

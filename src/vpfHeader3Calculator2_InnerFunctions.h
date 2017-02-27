@@ -246,6 +246,7 @@ public:
 
   static bool innerMakeJavascriptExpression(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotCoordinateSystem(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotSetProjectionScreenBasis(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPlotSurface(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotImplicitFunctionFull(Calculator& theCommands, const Expression& input, Expression& output, bool showGrid);

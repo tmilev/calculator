@@ -1425,6 +1425,16 @@ D-B;\
    "CalculatorFunctionsGeneral::innerPlotCoordinateSystem",
    "PlotCoordinateSystem")
    ;
+  this->AddOperationInnerHandler ("PlotSetProjectionScreen",
+   CalculatorFunctionsGeneral::innerPlotSetProjectionScreenBasis, "",
+   "Set the projection screen. Input: two 3d vectors \
+    that give the 2d-basis of the viewing screen. ",
+   "PlotCoordinateSystem((-2,-2,-2), (2,2,2))+\
+    PlotSetProjectionScreen((1,0,-0.1),(0,1,-0.2))",
+    true, false,
+   "CalculatorFunctionsGeneral::innerPlotSetProjectionScreenBasis",
+   "PlotSetProjectionScreen")
+   ;
 
   this->AddOperationInnerHandler ("PlotSurface",
    CalculatorFunctionsGeneral::innerPlotSurface, "",

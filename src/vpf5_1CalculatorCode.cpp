@@ -842,44 +842,45 @@ void Plot::operator+=(const PlotObject& other)
 
 bool PlotObject::operator==(const PlotObject& other)const
 { return
-  thePlotString          == other.thePlotString          &&
-  fillStyle              == other.fillStyle              &&
-  thePlotStringWithHtml  == other.thePlotStringWithHtml  &&
-  xLow                   == other.xLow                   &&
-  xHigh                  == other.xHigh                  &&
-  yLow                   == other.yLow                   &&
-  yHigh                  == other.yHigh                  &&
-  paramLow               == other.paramLow               &&
-  paramHigh              == other.paramHigh              &&
-  colorRGB               == other.colorRGB               &&
-  colorFillRGB           == other.colorFillRGB           &&
-  lineWidth              == other.lineWidth              &&
-  dimension              == other.dimension              &&
-  colorUV                == other.colorUV                &&
-  colorVU                == other.colorVU                &&
-  colorJS                == other.colorJS                &&
-  numSegmentsU           == other.numSegmentsU           &&
-  numSegmentsV           == other.numSegmentsV           &&
-  thePoints              == other.thePoints              &&
-  theRectangles          == other.theRectangles          &&
-  thePlotType            == other.thePlotType            &&
-  theSurface             == other.theSurface             &&
-  coordinateFunctionsE   == other.coordinateFunctionsE   &&
-  coordinateFunctionsJS  == other.coordinateFunctionsJS  &&
-  variablesInPlay        == other.variablesInPlay        &&
-  theVarRangesJS         == other.theVarRangesJS         &&
-  leftPtE                == other.leftPtE                &&
-  rightPtE               == other.rightPtE               &&
-  paramLowE              == other.paramLowE              &&
-  paramHighE             == other.paramHighE             &&
-  numSegmentsE           == other.numSegmentsE           &&
-  variablesInPlayJS      == other.variablesInPlayJS      &&
-  leftPtJS               == other.leftPtJS               &&
-  rightPtJS              == other.rightPtJS              &&
-  numSegmentsJS          == other.numSegmentsJS          &&
-  colorFillJS            == other.colorFillJS            &&
-  paramLowJS             == other.paramLowJS             &&
-  paramHighJS            == other.paramHighJS            ;
+  this->thePlotString          == other.thePlotString          &&
+  this->fillStyle              == other.fillStyle              &&
+  this->thePlotStringWithHtml  == other.thePlotStringWithHtml  &&
+  this->xLow                   == other.xLow                   &&
+  this->xHigh                  == other.xHigh                  &&
+  this->yLow                   == other.yLow                   &&
+  this->yHigh                  == other.yHigh                  &&
+  this->paramLow               == other.paramLow               &&
+  this->paramHigh              == other.paramHigh              &&
+  this->colorRGB               == other.colorRGB               &&
+  this->colorFillRGB           == other.colorFillRGB           &&
+  this->lineWidth              == other.lineWidth              &&
+  this->dimension              == other.dimension              &&
+  this->colorUV                == other.colorUV                &&
+  this->colorVU                == other.colorVU                &&
+  this->colorJS                == other.colorJS                &&
+  this->lineWidthJS            == other.lineWidthJS            &&
+  this->numSegmentsU           == other.numSegmentsU           &&
+  this->numSegmentsV           == other.numSegmentsV           &&
+  this->thePoints              == other.thePoints              &&
+  this->theRectangles          == other.theRectangles          &&
+  this->thePlotType            == other.thePlotType            &&
+  this->theSurface             == other.theSurface             &&
+  this->coordinateFunctionsE   == other.coordinateFunctionsE   &&
+  this->coordinateFunctionsJS  == other.coordinateFunctionsJS  &&
+  this->variablesInPlay        == other.variablesInPlay        &&
+  this->theVarRangesJS         == other.theVarRangesJS         &&
+  this->leftPtE                == other.leftPtE                &&
+  this->rightPtE               == other.rightPtE               &&
+  this->paramLowE              == other.paramLowE              &&
+  this->paramHighE             == other.paramHighE             &&
+  this->numSegmentsE           == other.numSegmentsE           &&
+  this->variablesInPlayJS      == other.variablesInPlayJS      &&
+  this->leftPtJS               == other.leftPtJS               &&
+  this->rightPtJS              == other.rightPtJS              &&
+  this->numSegmentsJS          == other.numSegmentsJS          &&
+  this->colorFillJS            == other.colorFillJS            &&
+  this->paramLowJS             == other.paramLowJS             &&
+  this->paramHighJS            == other.paramHighJS            ;
 }
 
 PlotObject::PlotObject()
@@ -1092,6 +1093,16 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
       << ");\n"
       ;
     }
+    if (currentPlot.thePlotType=="setProjectionScreen" && currentPlot.thePoints.size>=2)
+    { out
+      << "theCanvas.screenBasisUserDefault="
+      << "["
+      << currentPlot.thePoints[0].ToStringSquareBracketsBasicType()
+      << ","
+      << currentPlot.thePoints[1].ToStringSquareBracketsBasicType()
+      << "];\n";
+      out << "theCanvas.screenBasisUser=theCanvas.screenBasisUserDefault.slice();\n";
+    }
     if (currentPlot.thePlotType=="label")
     { out
       << "theCanvas.drawText({"
@@ -1119,6 +1130,8 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
       << "'"
       << currentPlot.colorJS
       << "'"
+      << ", "
+      << currentPlot.lineWidth
       << ");\n"
       ;
 
@@ -1251,7 +1264,12 @@ std::string PlotObject::GetJavascriptSurfaceImmersion
     else
       surfaceInstStream << "colorVU: \"pink\"";
     surfaceInstStream << "}"
-    << ")"
+    << ",";
+    if (this->lineWidthJS!="")
+      surfaceInstStream << this->lineWidthJS;
+    else
+      surfaceInstStream << "1";
+    surfaceInstStream << ")"
     ;
     outputSurfaceInstantiationJS=surfaceInstStream.str();
   }

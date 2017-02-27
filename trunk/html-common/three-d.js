@@ -381,12 +381,13 @@ function accountBoundingBox(inputPoint, outputBox)
 }
 
 function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
-                   inputNumSegments, inputColor)
+                   inputNumSegments, inputColor, inputLineWidth)
 { this.coordinateFunctions=inputCoordinateFunctions;
   this.leftPt=inputLeftPt;
   this.rightPt=inputRightPt;
   this.color=colorToRGB(inputColor);
   this.numSegments=inputNumSegments;
+  this.lineWidth=inputLineWidth;
   this.accountBoundingBox= function(inputOutputBox)
   { var theT=this.leftPt;
     var theX=this.coordinateFunctions[0](theT);
@@ -403,7 +404,7 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
   this.drawNoFinish=function(theCanvas, startByMoving)
   { var theSurface=theCanvas.surface;
     theSurface.strokeStyle=colorRGBToString(this.color);
-    theSurface.fillStyle=colorRGBToString(this.color);
+    theSurface.fillStyle  =colorRGBToString(this.color);
     var theT=this.leftPt;
     var theX=this.coordinateFunctions[0](theT);
     var theY=this.coordinateFunctions[1](theT);
@@ -412,6 +413,7 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
       theSurface.moveTo(theCoords[0], theCoords[1]);
     else
       theSurface.lineTo(theCoords[0], theCoords[1]);
+    theSurface.lineWidth=this.lineWidth;
     var skippedValues=false;
     for (var i=0; i<this.numSegments; i++)
     { var theRatio=i/(this.numSegments-1);
@@ -450,6 +452,7 @@ function PathTwoD(inputPath, inputColor, inputFillColor)
   this.colorFill=colorToRGB(inputFillColor);
   this.isFilled=false;
   this.type="path";
+  this.lineWidth=1;
   this.accountBoundingBox= function(inputOutputBox)
   { for (var i=1; i<this.path.length; i++)
       accountBoundingBox(this.path[i], inputOutputBox);
@@ -463,6 +466,7 @@ function PathTwoD(inputPath, inputColor, inputFillColor)
       theSurface.moveTo(theCoords[0], theCoords[1]);
     else
       theSurface.lineTo(theCoords[0], theCoords[1]);
+    theSurface.lineWidth=this.lineWidth;
     for (var i=1; i<this.path.length; i++)
     { theCoords=theCanvas.coordsMathToScreen(this.path[i]);
       theSurface.lineTo(theCoords[0], theCoords[1]);
@@ -482,11 +486,15 @@ function PathTwoD(inputPath, inputColor, inputFillColor)
   };
 }
 
-function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, inputColor)
+function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth)
 { this.theFunction=inputTheFn;
   this.leftPt=inputLeftPt;
   this.rightPt=inputRightPt;
   this.color=colorToRGB(inputColor);
+  if (inputLineWidth===undefined)
+    this.lineWidth=1;
+  else
+    this.lineWidth=inputLineWidth;
   //console.log(this.color);
   this.type="plotFunction";
   this.numSegments=inputNumSegments;
@@ -514,6 +522,7 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
       theSurface.moveTo(theCoords[0], theCoords[1]);
     else
       theSurface.lineTo(theCoords[0], theCoords[1]);
+    theSurface.lineWidth=this.lineWidth;
     var skippedValues=false;
     for (var i=1; i<this.numSegments; i++)
     { var theRatio=i/(this.numSegments-1);
@@ -573,6 +582,7 @@ function SegmentTwoD(inputLeftPt, inputRightPt, inputColor)
   this.rightPt=inputRightPt;
   this.color=colorToRGB(inputColor);
   this.type="segment";
+  this.lineWidth=1;
   this.accountBoundingBox= function(inputOutputBox)
   { accountBoundingBox(this.leftPt , inputOutputBox);
     accountBoundingBox(this.rightPt, inputOutputBox);
@@ -580,6 +590,7 @@ function SegmentTwoD(inputLeftPt, inputRightPt, inputColor)
   this.drawNoFinish=function (theCanvas, startByMoving)
   { var theSurface=theCanvas.surface;
     var theCoords=theCanvas.coordsMathToScreen(this.leftPt);
+    theSurface.lineWidth=this.lineWidth;
     if (startByMoving)
       theSurface.moveTo(theCoords[0], theCoords[1]);
     else
@@ -678,12 +689,12 @@ function CanvasTwoD(inputCanvas)
     newPath.isFilled=true;
     this.theObjects.push(newPath);
   };
-  this.drawFunction= function (inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor)
-  { var newPlot=new PlotTwoD(inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor);
+  this.drawFunction= function (inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth)
+  { var newPlot=new PlotTwoD(inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth);
     this.theObjects.push(newPlot);
   };
-  this.drawCurve= function (inputCoordinateFuns, inputLeftPt, inputRightPt, inputNumSegments, inputColor)
-  { var newPlot=new CurveTwoD(inputCoordinateFuns, inputLeftPt, inputRightPt, inputNumSegments, inputColor);
+  this.drawCurve= function (inputCoordinateFuns, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth)
+  { var newPlot=new CurveTwoD(inputCoordinateFuns, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth);
     this.theObjects.push(newPlot);
   };
   this.drawText= function (inputLocation, inputText, inputColor)
@@ -2101,7 +2112,7 @@ function testPictureTwoD(inputCanvas1, inputCanvas2)
   theCanvas.drawLine([-10,0],[19,0], 'green');
   theCanvas.drawLine([0,-1],[0,1], 'purple');
   theCanvas.drawText([-1,-1],'(-1,-1)', 'orange');
-  theCanvas.drawFunction(testFunctionPlot, -10,10, 100, 'red');
+  theCanvas.drawFunction(testFunctionPlot, -10,10, 100, 'red',4);
   theCanvas.setViewWindow([-10,-1],[19,1]);
   theCanvas.plotFillStart('orange');
   theCanvas.drawLine([0,-5],[1,-4], 'green');
@@ -2109,7 +2120,7 @@ function testPictureTwoD(inputCanvas1, inputCanvas2)
   theCanvas.drawLine([2,-5],[0,-5],'black');
   theCanvas.plotFillFinish();
   theCanvas.plotFillStart('pink');
-  theCanvas.drawCurve([testFunctionPlot, testFunctionPlot2], -4,4, 300, 'blue');
+  theCanvas.drawCurve([testFunctionPlot, testFunctionPlot2], -4,4, 300, 'blue', 1);
   theCanvas.plotFillFinish();
   theCanvas.redraw();
   var theCanvas2=calculatorGetCanvasTwoD(document.getElementById(inputCanvas2));
@@ -2120,10 +2131,10 @@ function testPictureTwoD(inputCanvas1, inputCanvas2)
   theCanvas2.drawPath([[2,2], [3,3],[1,4]],'cyan');
   theCanvas2.drawPathFilled([[-2,-2], [-7,-3],[-1,-4], [-2,-2]],'red', 'green');
   theCanvas2.plotFillStart('pink');
-  theCanvas2.drawFunction(testFunctionPlot, -10,10, 100, 'red');
+  theCanvas2.drawFunction(testFunctionPlot, -10,10, 100, 'red', 2);
   theCanvas2.drawLine([10,0],[-10,0],'black');
   theCanvas2.plotFillFinish();
-  theCanvas2.drawFunction(testFunctionPlot, -10,10, 100, 'red');
+  theCanvas2.drawFunction(testFunctionPlot, -10,10, 100, 'red',0.5);
   theCanvas2.setViewWindow([-1,-19],[1,5]);
   theCanvas2.redraw();
 }

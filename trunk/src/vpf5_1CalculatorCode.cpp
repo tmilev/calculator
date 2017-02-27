@@ -793,7 +793,7 @@ void Plot::operator+=(const Plot& other)
   }
   if (other.priorityViewRectangle==this->priorityViewRectangle)
   { this->highBoundY=MathRoutines::Maximum(this->highBoundY, other.highBoundY);
-    this->lowBoundY=MathRoutines::Minimum(this->lowBoundY, other.lowBoundY);
+    this->lowBoundY =MathRoutines::Minimum(this->lowBoundY,  other.lowBoundY);
     this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, other.theUpperBoundAxes);
     this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
   }
@@ -1352,8 +1352,12 @@ std::string PlotObject::GetJavascript2dPlot
   << fnName
   << ", " << this->leftPtJS << ", " << this->rightPtJS << ", "
   << this->numSegmentsJS << ", " << "'" << this->colorJS << "'"
-  << ");\n"
-  ;
+  << ", ";
+  if (this->lineWidthJS!="")
+    fnInstStream << this->lineWidthJS;
+  else
+    fnInstStream << this->lineWidth;
+  fnInstStream << ");\n";
   outputPlotInstantiationJS=fnInstStream.str();
   return out.str();
 }
@@ -1383,7 +1387,8 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     this->canvasName=canvasNameStream.str();
   }
   std::stringstream out;
-  this->ComputeAxesAndBoundingBox();
+  if (this->priorityViewRectangle<=0)
+    this->ComputeAxesAndBoundingBox();
     //out << this->ToStringDebug();
   if (!this->flagPlotShowJavascriptOnly)
   { out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
@@ -1506,6 +1511,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   << "],[0," << this->highBoundY*1.10 << "], 'black');\n";
   out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black');\n";
   out << "theCanvas.drawText([1,-0.2],'1','black');\n";
+  //stOutput << "DEBUG: this->priorityViewRectangle=" << this->priorityViewRectangle;
   if (this->priorityViewRectangle>0)
   { out << "theCanvas.setViewWindow("
     << "[" << this->theLowerBoundAxes*1.10 << ", " << this->lowBoundY*1.10 << "]"

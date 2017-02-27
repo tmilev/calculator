@@ -494,8 +494,8 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
   this.accountBoundingBox= function(inputOutputBox)
   { for (var i=0; i<this.numSegments; i++)
     { var theRatio=i/(this.numSegments-1);
-      theX= this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
-      theY=this.theFunction(theX);
+      var theX= this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
+      var theY=this.theFunction(theX);
       if (!isFinite(theY) )
         continue;
       if (Math.abs(theY)>100000)
@@ -1051,10 +1051,12 @@ function Canvas(inputCanvas)
   this.drawLine= function (leftPt, rightPt, inputColor, inputLineWidth)
   { var newContour= new Contour([], inputColor, inputLineWidth);
     var numSegments=this.defaultNumSegmentsPerContour;
-    newContour.thePoints=new Array(numSegments);
     newContour.index=this.theIIIdObjects.theContours.length;
-    var incrementScalar=1/numSegments;
     var incrementVector=vectorMinusVector(rightPt, leftPt);
+    if (vectorLength(incrementVector)*10>numSegments)
+      numSegments=Math.ceil(vectorLength(incrementVector)*10);
+    newContour.thePoints=new Array(numSegments);
+    var incrementScalar=1/numSegments;
     vectorTimesScalar(incrementVector, incrementScalar);
     var currentPoint=leftPt.slice();
     for (var i=0; i<numSegments+1; i++)
@@ -1079,18 +1081,23 @@ function Canvas(inputCanvas)
       theContour.thePointsMathScreen[i]=this.coordsMathToMathScreen(theContour.thePoints[i]);
   };
   this.pointRelativeToPatch= function(thePoint, thePatch)
-  { if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen1) *
+  { if (vectorLength(thePatch.normalScreen1)<0.00001 ||
+        vectorLength(thePatch.normalScreen2)<0.00001 ||
+        vectorLength(thePatch.normal)<0.00001)
+      return 0;
+
+    if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen1) *
         vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen1)
-        >=0)
+        >0)
       if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen1) *
           vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen1)
-          >=0)
+          >0)
         if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normalScreen2) *
             vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.base), thePatch.normalScreen2)
-            >=0)
+            >0)
           if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.vEnd), thePatch.normalScreen2) *
               vectorScalarVector(vectorMinusVector(thePatch.internalPoint, thePatch.vEnd), thePatch.normalScreen2)
-              >=0)
+              >0)
           { if (vectorScalarVector(vectorMinusVector(thePoint, thePatch.base), thePatch.normal) *
                 vectorScalarVector(this.screenNormal, thePatch.normal)<=0)
               return -1;
@@ -1153,10 +1160,10 @@ function Canvas(inputCanvas)
     if (this.flagRoundContours)
       vectorRound(currentPt);
     var oldIsInForeGround=this.pointIsInForeGround(theContour.thePoints[0], theContour.adjacentPatches);
-    var newIsInForeground;
+    var newIsInForeground=true;
     var dashIsOn=false;
-    theSurface.setLineDash([]);
     theSurface.beginPath();
+    theSurface.setLineDash([]);
     this.numContourPaths++;
 //    theSurface.setLineDash([]);
     theSurface.strokeStyle=colorRGBToString(theContour.color);
@@ -1203,6 +1210,8 @@ function Canvas(inputCanvas)
     { currentPt=this.coordsMathToScreen(thePts[4]);
       if (this.flagRoundContours)
         vectorRound(currentPt);
+      theSurface.font="9pt sans-serif";
+      theSurface.fillStyle="black";
       theSurface.fillText(theContour.index, currentPt[0], currentPt[1]);
     }
     //console.log("line end\n");
@@ -1256,6 +1265,9 @@ function Canvas(inputCanvas)
     if (0)
     { theCoords=this.coordsMathToScreen(thePatch.internalPoint);
       theSurface.fillStyle="black";
+      theSurface.font="20pt sans-serif";
+      theSurface.fillStyle="cyan";
+      //if (thePatch.index===90)
       theSurface.fillText(thePatch.index, theCoords[0], theCoords[1]);
     }
 //    theSurface.stroke();
@@ -1441,7 +1453,7 @@ function Canvas(inputCanvas)
     this.computeBoundingBox();
     this.bufferDeltaX=(this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0])/this.zBufferColCount;
     this.bufferDeltaY=(this.boundingBoxMathScreen[1][1]-this.boundingBoxMathScreen[0][1])/this.zBufferRowCount;
-    for (var i=0; i<thePatches.length; i++)
+    for (i=0; i<thePatches.length; i++)
       this.accountOnePatch(i);
     this.computePatchOrder();
   };
@@ -2058,12 +2070,14 @@ function calculatorGetCanvasTwoD(inputCanvas)
 
 function testPicture(inputCanvas)
 { var theCanvas=calculatorGetCanvas(document.getElementById(inputCanvas));
+  theCanvas.screenBasisUserDefault= [[1,0,-0.1],[0,1,-0.2]];
+  theCanvas.screenBasisUser=theCanvas.screenBasisUserDefault.slice();
   theCanvas.init(inputCanvas, false);
   theCanvas.drawLine([-1,0,0],[1,0,0], 'black', 2);
   theCanvas.drawLine([0,-1,0],[0,1,0], 'black',2);
   theCanvas.drawLine([0,0,-1],[0,0,1], 'black',2);
   theCanvas.drawLine([0,0,0] ,[1,0.5,0.5], 'red',2);
-  theCanvas.drawLine([0,0,0] ,[-2,0,1], 'blue',2);
+//  theCanvas.drawLine([0,0,0] ,[-2,0,1], 'blue',2);
 //    theCanvas.drawSurface(testGetTestPlane());
 //    theCanvas.drawPatchStraight([1,0,0], [0,1,0], [0,0,1], 'cyan');
 //    theCanvas.drawPatchStraight([-3,0,0], [0,2,0.4], [0,0,2], 'green');

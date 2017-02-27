@@ -655,6 +655,7 @@ public:
   std::string colorFillJS;
   std::string colorUV;
   std::string colorVU;
+  std::string lineWidthJS;
   std::string numSegmentsU;
   std::string numSegmentsV;
   Vectors<double> thePoints;

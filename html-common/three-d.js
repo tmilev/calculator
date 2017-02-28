@@ -409,10 +409,9 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
     var theX=this.coordinateFunctions[0](theT);
     var theY=this.coordinateFunctions[1](theT);
     var theCoords=theCanvas.coordsMathToScreen([theX, theY]);
+    var alreadyMoved=false;
     if (startByMoving)
-      theSurface.moveTo(theCoords[0], theCoords[1]);
-    else
-      theSurface.lineTo(theCoords[0], theCoords[1]);
+      alreadyMoved=true;
     theSurface.lineWidth=this.lineWidth;
     var skippedValues=false;
     for (var i=0; i<this.numSegments; i++)
@@ -435,7 +434,11 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
         continue;
       }
       theCoords=theCanvas.coordsMathToScreen([theX, theY]);
-      theSurface.lineTo(theCoords[0], theCoords[1]);
+      if (!alreadyMoved)
+      { alreadyMoved=true;
+        theSurface.moveTo(theCoords[0], theCoords[1]);
+      } else
+        theSurface.lineTo(theCoords[0], theCoords[1]);
     }
   };
   this.draw=function(theCanvas)
@@ -523,7 +526,7 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
       alreadyMoved=true;
     theSurface.lineWidth=this.lineWidth;
     var skippedValues=false;
-    for (var i=1; i<this.numSegments; i++)
+    for (var i=0; i<this.numSegments; i++)
     { var theRatio=i/(this.numSegments-1);
       theX= this.leftPt *(1-theRatio) +  this.rightPt*theRatio; //<- this way of
       //computing x this way introduces smaller numerical errors.
@@ -542,11 +545,11 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
         continue;
       }
       theCoords=theCanvas.coordsMathToScreen([theX, theY]);
-    if (!alreadyMoved)
-    { alreadyMoved=true;
-      theSurface.moveTo(theCoords[0], theCoords[1]);
-    } else
-      theSurface.lineTo(theCoords[0], theCoords[1]);
+      if (!alreadyMoved)
+      { alreadyMoved=true;
+        theSurface.moveTo(theCoords[0], theCoords[1]);
+      } else
+        theSurface.lineTo(theCoords[0], theCoords[1]);
     }
   };
   this.draw=function(theCanvas)

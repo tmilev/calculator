@@ -518,10 +518,9 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
     var theX=this.leftPt;
     var theY=this.theFunction(theX);
     var theCoords=theCanvas.coordsMathToScreen([theX, theY]);
+    var alreadyMoved=false;
     if (startByMoving)
-      theSurface.moveTo(theCoords[0], theCoords[1]);
-    else
-      theSurface.lineTo(theCoords[0], theCoords[1]);
+      alreadyMoved=true;
     theSurface.lineWidth=this.lineWidth;
     var skippedValues=false;
     for (var i=1; i<this.numSegments; i++)
@@ -536,13 +535,17 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
       theY=this.theFunction(theX);
       if (!isFinite(theY) )
         console.log('Failed to evaluate: ' + this.theFunction+ ' at x= ' + theX);
-      if (Math.abs(theY)>100000)
+      if (Math.abs(theY)>10000)
       { if (!skippedValues)
           console.log('Function result: ' + theY + " is too large, skipping. Further errors suppressed.");
         skippedValues=true;
         continue;
       }
       theCoords=theCanvas.coordsMathToScreen([theX, theY]);
+    if (!alreadyMoved)
+    { alreadyMoved=true;
+      theSurface.moveTo(theCoords[0], theCoords[1]);
+    } else
       theSurface.lineTo(theCoords[0], theCoords[1]);
     }
   };

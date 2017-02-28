@@ -960,9 +960,8 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
 //  stOutput << "DEBUG: Here i am";
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];
-  Vector<Rational> leftV, rightV;
-//  Vector<double> leftVd, rightVd;
-  if (!theCommands.GetVectoR(leftE,leftV ) || !theCommands.GetVectoR(rightE, rightV))
+  Vector<double> leftV, rightV;
+  if (!theCommands.GetVectorDoubles(leftE,leftV ) || !theCommands.GetVectorDoubles(rightE, rightV))
     return false;
   if (leftV.size!=rightV.size)
     return false;
@@ -984,8 +983,8 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
     theSegment.dimension=3;
   else
     theSegment.dimension=2;
-  theSegment.thePoints.AddOnTop(leftV.GetVectorDouble());
-  theSegment.thePoints.AddOnTop(rightV.GetVectorDouble());
+  theSegment.thePoints.AddOnTop(leftV);
+  theSegment.thePoints.AddOnTop(rightV);
   if (input.size()>=5)
     if (!input[4].EvaluatesToDouble(&theSegment.lineWidth))
       theSegment.lineWidth=1;

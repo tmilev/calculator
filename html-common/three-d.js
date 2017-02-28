@@ -1753,7 +1753,7 @@ function Canvas(inputCanvas)
   };
   this.constructControls= function()
   { var thisString="document.getElementById('"+this.canvasId+"')";
-    this.spanControls.innerHTML="<button style=\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvas("+thisString+ ").resetView();\">reset view</button><small> hold shift to rotate</small>";
+    this.spanControls.innerHTML="<button style=\"border:none; background:none; color:blue; padding:0; text-decoration: underline; cursor:pointer\" onclick=\"calculatorGetCanvas("+thisString+ ").resetView();\">reset view</button><small> shift+drag to rotate</small>";
   };
   this.init= function(inputCanvasId)
   { this.canvasId=inputCanvasId;

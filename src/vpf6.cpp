@@ -14,7 +14,6 @@ Calculator::Calculator()
 { this->numOutputFileS=0;
   this->flagHideLHS=false;
   this->flagUseHtml=true;
-  this->flagShowCalculatorInternalStatus=false;
   this->flagShowCalculatorExamples=true;
   this->flagWriteLatexPlots=true;
   this->flagUseLnInsteadOfLog=false;
@@ -2498,7 +2497,7 @@ std::string Calculator::ToString()
     out2 << CGI::GetHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Examples.");
     out2 << "<span id=\"calculatorExamples\"></span>";
   }
-  if (!this->flagShowCalculatorInternalStatus)
+  if (!theGlobalVariables.UserDebugFlagOn())
     return out2.str();
   std::stringstream out;
   out2 << "<hr><b>Further calculator details.</b>";
@@ -2653,13 +2652,21 @@ std::string Calculator::ToStringSyntacticStackHumanReadable
   out << "<table style=\"vertical-align:top;border-spacing:0px 0px;\"><tr>";
   int counter=0;
   for (int i=this->numEmptyTokensStart; i<(*this->CurrentSyntacticStacK).size; i++)
-  { if (ignoreCommandEnclosures)
-      if ((*this->CurrentSyntacticStacK)[i].controlIndex==this->conExpression())
-        if ((*this->CurrentSyntacticStacK)[i].theData.StartsWith(this->opCommandEnclosure()))
+  { SyntacticElement& currentElt=(*this->CurrentSyntacticStacK)[i];
+    if (ignoreCommandEnclosures)
+      if (currentElt.controlIndex==this->conExpression() ||
+          currentElt.controlIndex==this->conSequenceStatements())
+      { if (currentElt.theData.StartsWith(this->opCommandEnclosure()))
           continue;
+        if (currentElt.theData.StartsWith(this->opEndStatement() ))
+          if (currentElt.theData.size()>=2)
+            if (currentElt.theData[1].StartsWith(this->opCommandEnclosure()))
+              continue;
+      }
     out
-    << "<td style=\"vertical-align:top;background-color:" << ((counter%2==0) ?"#FAFAFA" : "#F0F0F0" ) << "\">"
-    << (*this->CurrentSyntacticStacK)[i].ToStringHumanReadable(*this, includeLispifiedExpressions)
+    << "<td style=\"vertical-align:top;background-color:"
+    << ((counter%2==0) ?"#FAFAFA" : "#F0F0F0" ) << "\">"
+    << currentElt.ToStringHumanReadable(*this, includeLispifiedExpressions)
     << "</td>";
     counter++;
   }

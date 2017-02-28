@@ -1544,11 +1544,6 @@ bool Calculator::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
-  if (secondToLastS=="%" && lastS=="CalculatorStatus")
-  { this->flagShowCalculatorInternalStatus=true;
-    this->PopTopSyntacticStack();
-    return this->PopTopSyntacticStack();
-  }
   if (this->flagUsePredefinedWordSplits)
     if (lastS=="Variable")
       if (this->predefinedWordSplits.Contains(this->theAtoms[lastE.theData.theData]))

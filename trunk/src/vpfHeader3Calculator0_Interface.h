@@ -975,7 +975,6 @@ public:
   bool flagUseFracInRationalLaTeX;
   bool flagUseHtml;
   bool flagDisplayContext;
-  bool flagShowCalculatorInternalStatus;
   bool flagShowCalculatorExamples;
   bool flagDefaultRulesWereTamperedWith;
   bool flagHasGraphics;

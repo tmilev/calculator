@@ -3250,7 +3250,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   { double percent=100*this->currentUseR.pointsEarned.GetDoubleValue()/
     this->currentUseR.pointsMax.GetDoubleValue();
     out.precision(2);
-    out << "Your score so far: "
+    out << "Total score: (includes problems without deadline): "
     << std::fixed << percent << "% = ";
     out << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
     << " out of " << this->currentUseR.pointsMax.GetDoubleValue()

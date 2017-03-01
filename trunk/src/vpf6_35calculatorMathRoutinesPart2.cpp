@@ -466,6 +466,57 @@ bool CalculatorFunctionsGeneral::innerIntegrateSqrtOneMinusXsquared(Calculator& 
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerIntegrateXpowerNePowerAx(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateXpowerNePowerAx");
+  Expression theFunctionE, theVariableE, theSetE;
+  if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &theSetE))
+    return false;
+  if (!theFunctionE.StartsWith(theCommands.opTimes(), 3))
+    return false;
+  Expression exponentPartE=theFunctionE[1];//<- note: the seemingly odd order is intentional!
+  Expression polyPartE=theFunctionE[2]; //<- note: the seemingly odd order is intentional!
+  Expression powerOfXE, powerOfEE;
+  Expression aE, bE;//exponent is of form aX+b
+  powerOfXE.AssignValue(1, theCommands);
+  bool isGood=false;
+  for (int i=0; i<2; i++)
+  { MathRoutines::swap(exponentPartE, polyPartE);
+    if (!exponentPartE.StartsWith(theCommands.opThePower(),3))
+      continue;
+    if (!exponentPartE[1].IsAtomGivenData(theCommands.opE()))
+      continue;
+    powerOfEE=exponentPartE[2];
+    if (!CalculatorFunctionsGeneral::extractLinearCoeffsWRTvariable(powerOfEE, theVariableE, aE, bE))
+      continue;
+    if (!aE.IsConstantNumber() || !bE.IsConstantNumber())
+      continue;
+    if (polyPartE!=theVariableE)
+    { if (!polyPartE.StartsWith(theCommands.opThePower(),3))
+        continue;
+      if (polyPartE[1]!=theVariableE)
+        continue;
+      int theInt=-1;
+      if (!polyPartE[2].IsSmallInteger(& theInt))
+        continue;
+      if (theInt<=0)
+        continue;
+      powerOfXE=polyPartE[2];
+    }
+    isGood=true;
+    break;
+  }
+  if (!isGood)
+    return false;
+  Expression remainingIntegrand, integralPart;
+  Expression oneE;
+  oneE.AssignValue(1, theCommands);
+  remainingIntegrand.MakeXOX(theCommands, theCommands.opThePower(), theVariableE, powerOfXE-oneE);
+  remainingIntegrand*=exponentPartE;
+  integralPart.MakeIntegral(theCommands, theSetE,remainingIntegrand, theVariableE);
+  output= (polyPartE*exponentPartE-powerOfXE*integralPart)/aE;
+  return true;
+}
+
 bool CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne");
   Expression theFunctionE, theVariableE, theSetE;

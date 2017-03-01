@@ -1490,19 +1490,23 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
 }
 
 bool Calculator::outerDistribute(Calculator& theCommands, const Expression& input, Expression& output,
-int theAdditiveOp, int theMultiplicativeOp)
-{ if (theCommands.outerLeftDistributeBracketIsOnTheLeft(theCommands, input, output, theAdditiveOp, theMultiplicativeOp))
+int theAdditiveOp, int theMultiplicativeOp, bool constantsOnly)
+{ if (theCommands.outerLeftDistributeBracketIsOnTheLeft(theCommands, input, output, theAdditiveOp, theMultiplicativeOp, constantsOnly))
     return true;
-  return theCommands.outerRightDistributeBracketIsOnTheRight(theCommands, input, output, theAdditiveOp, theMultiplicativeOp);
+  return theCommands.outerRightDistributeBracketIsOnTheRight(theCommands, input, output, theAdditiveOp, theMultiplicativeOp, constantsOnly);
 }
 
 bool Calculator::outerDistributeTimes(Calculator& theCommands, const Expression& input, Expression& output)
-{ return Calculator::outerDistribute(theCommands, input, output,theCommands.opPlus(), theCommands.opTimes());
+{ return Calculator::outerDistribute(theCommands, input, output,theCommands.opPlus(), theCommands.opTimes(), false);
+}
+
+bool Calculator::outerDistributeTimesConstant(Calculator& theCommands, const Expression& input, Expression& output)
+{ return Calculator::outerDistribute(theCommands, input, output,theCommands.opPlus(), theCommands.opTimes(), true);
 }
 
 bool Calculator::outerLeftDistributeBracketIsOnTheLeft
 (Calculator& theCommands, const Expression& input, Expression& output,
- int theAdditiveOp, int theMultiplicativeOp)
+ int theAdditiveOp, int theMultiplicativeOp, bool constantsOnly)
 { MacroRegisterFunctionWithName("Calculator::outerLeftDistributeBracketIsOnTheLeft");
   if (theAdditiveOp==-1)
     theAdditiveOp= theCommands.opPlus();
@@ -1512,6 +1516,9 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft
     return false;
   if (!input[1].StartsWith(theAdditiveOp,3))
     return false;
+  if (constantsOnly)
+    if (!input[2].IsConstantNumber())
+      return false;
 //  int theFormat=input.format;
   Expression leftE, rightE;
   leftE.MakeXOX(theCommands, theMultiplicativeOp, input[1][1], input[2]);
@@ -1521,7 +1528,7 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft
 
 bool Calculator::outerRightDistributeBracketIsOnTheRight
 (Calculator& theCommands, const Expression& input, Expression& output,
- int theAdditiveOp, int theMultiplicativeOp)
+ int theAdditiveOp, int theMultiplicativeOp, bool constantsOnly)
 { MacroRegisterFunctionWithName("Calculator::outerRightDistributeBracketIsOnTheRight");
   if (theAdditiveOp==-1)
     theAdditiveOp= theCommands.opPlus();
@@ -1531,6 +1538,9 @@ bool Calculator::outerRightDistributeBracketIsOnTheRight
     return false;
   if (!input[2].StartsWith(theAdditiveOp, 3))
     return false;
+  if (constantsOnly)
+    if (!input[1].IsConstantNumber())
+      return false;
 //  int theFormat=input.format;
   Expression leftE, rightE;
   leftE.MakeXOX(theCommands, theMultiplicativeOp, input[1], input[2][1]);

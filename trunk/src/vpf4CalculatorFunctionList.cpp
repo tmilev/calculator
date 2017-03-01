@@ -512,6 +512,12 @@ D-B;\
    "CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne",
    "IntegrateSqrtXsquaredMinusOne");
   this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateXpowerNePowerAx, "",
+   "Integrates by parts \\int x^n e^{a x} dx, where n is a positive integer.  ",
+   "\\int 2 x^{3} e^{5x} dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateXpowerNePowerAx",
+   "IntegrateXpowerNePowerAx");
+  this->AddOperationInnerHandler
   ("^", CalculatorFunctionsGeneral::innerEulerFlaAsALaw, "",
    "Trigonometrizes an exponential expression using Euler's formula.  ",
    "TurnOnRules(\"EulerFormula\"); e^{i x}", true, false,
@@ -3133,6 +3139,14 @@ void Calculator::initPredefinedStandardOperations()
    "(a+b)*c; \n a*(b+c)", true, false,
    "Calculator::outerDistributeTimes",
    "DistributeMultiplication");
+  this->AddOperationOuterHandler
+  ("*", Calculator::outerDistributeTimesConstant, "",
+   "Distributive law (left and right), acts only if the multiplicand is a constant. This rule is \
+    overridden by DistributeMultiplication, unless \
+    the DistributeMultiplication rule is turned off (which is the intended use case of this rule).",
+   "a(b+c); TurnOffRules(DistributeMultiplication); a(b+c); -5(b+c) ", true, false,
+   "Calculator::outerDistributeTimes",
+   "DistributeMultiplicationConstants");
   this->AddOperationOuterHandler
   ("*", CalculatorFunctionsGeneral::outerDivideReplaceAdivBpowerItimesBpowerJ, "",
    "Rule: (a/x^t)x^s=a x^{s-t}.",

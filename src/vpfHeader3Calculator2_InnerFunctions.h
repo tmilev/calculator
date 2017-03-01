@@ -201,6 +201,8 @@ public:
   static bool innerIntegratePullConstant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateSqrtOneMinusXsquared(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateSqrtXsquaredMinusOne(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateXpowerNePowerAx(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerIntegrateEpowerAxDiffX(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateSinPowerNCosPowerM(Calculator& theCommands, const Expression& input, Expression& output);
 

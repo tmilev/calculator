@@ -1779,15 +1779,16 @@ public:
   static bool innerMultiplyByOne(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerTimesToFunctionApplication(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDistributeTimes(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool outerDistributeTimesConstant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDistribute
   (Calculator& theCommands, const Expression& input, Expression& output,
-   int theAdditiveOp=-1, int theMultiplicativeOp=-1);
+   int theAdditiveOp=-1, int theMultiplicativeOp=-1, bool constantsOnly=false);
   static bool outerLeftDistributeBracketIsOnTheLeft
   (Calculator& theCommands, const Expression& input, Expression& output,
-   int theAdditiveOp=-1, int theMultiplicativeOp=-1);
+   int theAdditiveOp=-1, int theMultiplicativeOp=-1, bool constantsOnly=false);
   static bool outerRightDistributeBracketIsOnTheRight
   (Calculator& theCommands, const Expression& input, Expression& output,
-   int theAdditiveOp=-1, int theMultiplicativeOp=-1);
+   int theAdditiveOp=-1, int theMultiplicativeOp=-1, bool constantsOnly=false);
   static bool EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output);
   template<class theType>
   bool GetMatriXFromArguments

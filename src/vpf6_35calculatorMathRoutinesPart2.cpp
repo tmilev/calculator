@@ -1029,6 +1029,16 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
         (theSegment.colorJS, theSegment.colorRGB))
       theCommands << "Unrecognized color: " << theSegment.colorJS;
   }
+  if (input.size()>=5)
+  { const Expression& lineWidthE=input[4];
+    if (!lineWidthE.EvaluatesToDouble(&theSegment.lineWidth))
+      theCommands << "Failed to extract line width from: "
+      << lineWidthE.ToString();
+    std::stringstream lineWidthStream;
+    lineWidthStream.precision(4);
+    lineWidthStream << theSegment.lineWidth;
+    theSegment.lineWidthJS=lineWidthStream.str();
+  }
   theSegment.thePlotType="segment";
   if (leftV.size==3)
     theSegment.dimension=3;

@@ -1323,8 +1323,12 @@ std::string PlotObject::GetJavascriptParametricCurve2D
   fnInstStream << "drawCurve("
   << "[" << fnNames[0] << ", " << fnNames[1] << "]"
   << ", " << this->paramLowJS << ", " << this->paramHighJS << ", "
-  << this->numSegmentsJS << ", " << "'" << this->colorJS << "'"
-  << ");\n"
+  << this->numSegmentsJS << ", " << "'" << this->colorJS << "'";
+  if (this->lineWidthJS!="")
+    fnInstStream << ", " << this->lineWidthJS;
+  else
+    fnInstStream << ", " << this->lineWidth;
+  fnInstStream << ");\n"
   ;
   outputPlotInstantiationJS=fnInstStream.str();
   return out.str();
@@ -1502,14 +1506,18 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     out << currentPlot.ToStringPointsList();
     out << ", "
     << "\"" << DrawingVariables::GetColorHtmlFromColorIndex
-    (currentPlot.colorRGB) << "\""
-    << ");\n";
+    (currentPlot.colorRGB) << "\"";
+    if (currentPlot.lineWidthJS!="")
+      out << ", " << "\"" << currentPlot.lineWidthJS << "\"";
+    else
+      out << ", " << "\"" << currentPlot.lineWidth << "\"";
+    out << ");\n";
   }
   out << "theCanvas.drawLine([" << this->theLowerBoundAxes*1.10
-  << ",0],[" << this->theUpperBoundAxes*1.10 << ",0], 'black');\n";
+  << ",0],[" << this->theUpperBoundAxes*1.10 << ",0], 'black',1);\n";
   out << "theCanvas.drawLine([0," << this->lowBoundY *1.10
-  << "],[0," << this->highBoundY*1.10 << "], 'black');\n";
-  out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black');\n";
+  << "],[0," << this->highBoundY*1.10 << "], 'black',1);\n";
+  out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black',1);\n";
   out << "theCanvas.drawText([1,-0.2],'1','black');\n";
   //stOutput << "DEBUG: this->priorityViewRectangle=" << this->priorityViewRectangle;
   if (this->priorityViewRectangle>0)

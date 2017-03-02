@@ -1757,6 +1757,9 @@ public:
   bool CollectOpands
   (const Expression& input, int theOp, List<Expression>& outputOpands)
   ;
+  bool CollectOpandsAccumulate
+  (const Expression& input, int theOp, List<Expression>& outputOpands)
+  ;
   static bool CollectSummands(Calculator& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum);
   static bool outerTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);

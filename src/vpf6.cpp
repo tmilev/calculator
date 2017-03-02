@@ -1591,13 +1591,19 @@ bool Calculator::CollectCoefficientsPowersVar
 
 bool Calculator::CollectOpands(const Expression& input, int theOp, List<Expression>& outputOpands)
 { MacroRegisterFunctionWithName("Calculator::CollectOpands");
-  const Expression* currentE=&input;
   outputOpands.SetSize(0);
-  while (currentE->StartsWith(theOp, 3))
-  { outputOpands.AddOnTop((*currentE)[1]);
-    currentE=&(*currentE)[2];
+  return this->CollectOpandsAccumulate(input, theOp, outputOpands);
+}
+
+bool Calculator::CollectOpandsAccumulate
+(const Expression& input, int theOp, List<Expression>& outputOpands)
+{ MacroRegisterFunctionWithName("Calculator::CollectOpandsAccumulate");
+  if (!input.StartsWith(theOp))
+  { outputOpands.AddOnTop(input);
+    return true;
   }
-  outputOpands.AddOnTop(*currentE);
+  for (int i=1; i<input.size(); i++)
+    this->CollectOpandsAccumulate(input[i], theOp, outputOpands);
   return true;
 }
 

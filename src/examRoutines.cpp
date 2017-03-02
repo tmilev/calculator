@@ -777,8 +777,8 @@ void SyntacticElementHTML::resetAllExceptContent()
 }
 
 std::string SyntacticElementHTML::ToStringOpenTag(bool immediatelyClose)
-{ if (this->tag=="")
-    return "";
+{ if (this->tag=="" || this->flagUseMathSpan==false)
+    return "";  
   std::stringstream out;
   out << "<" << this->tag;
   for (int i=0; i<this->tagKeys.size; i++)
@@ -795,7 +795,7 @@ std::string SyntacticElementHTML::ToStringOpenTag(bool immediatelyClose)
 }
 
 std::string SyntacticElementHTML::ToStringCloseTag()
-{ if (this->tag=="")
+{ if (this->tag=="" || this->flagUseMathSpan==false)
     return "";
   return "</" + this->tag + ">";
 }
@@ -1703,8 +1703,10 @@ bool CalculatorHTML::ProcessInterprettedCommands
     currentElt.interpretedCommand=  currentExpr.ToString(&theFormat);
     currentElt.flagUseDisplaystyleInMathMode= ( currentElt.content.find("\\displaystyle")!=std::string::npos);
     currentElt.flagUseMathMode=true;
+    currentElt.flagUseMathSpan=false;
     if (currentExpr.IsOfType<std::string> () ||
-        currentExpr.IsOfType<Plot>())
+        currentExpr.IsOfType<Plot>() ||
+        currentElt.GetKeyValue("noTags")=="true")
     { currentElt.flagUseMathMode=false;
 //      stOutput << "<hr>currentExpr: " << currentExpr.ToString() << "is plot or string<hr>";
     }// else

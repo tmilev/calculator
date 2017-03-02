@@ -209,14 +209,16 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   std::string lastStudentAnswerID;
   std::string lastAnswer;
   std::stringstream out, studentAnswerSream;
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=
+  theGlobalVariables.webArguments;
   for (int i=0; i<theArgs.size(); i++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID))
       lastAnswer= "("+ CGI::URLStringToNormal(theArgs[i], false) + "); ";
   studentAnswerSream << lastAnswer;
   out << "Your answer(s): \\(" << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
-  theProblem.LoadCurrentProblemItem(theGlobalVariables.UserRequestRequiresLoadingRealExamData());
+  theProblem.LoadCurrentProblemItem
+  (theGlobalVariables.UserRequestRequiresLoadingRealExamData());
   if (!theProblem.flagLoadedSuccessfully)
     out << "<br><b>Failed to load problem.</b> Comments: " << theProblem.comments.str();
   std::stringstream comments;
@@ -226,7 +228,8 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   if (indexLastAnswerId==-1)
   { out << "<br>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
-    << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime
+    << " second(s).";
     return out.str();
   }
   Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
@@ -304,8 +307,12 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     << "in the context of the current problem. "
     << "</b></span>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn() )
-      out << "<br>Logged-in as admin with debug flag on=> printing error details. "
-      << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
+    { out << "<br>Logged-in as admin with debug flag on=> printing error details. "
+      << theInterpreterWithAdvice.outputString << "<br>"
+      << theInterpreterWithAdvice.outputCommentsString;
+      out << "<hr>Calculator input: <br>"
+      << calculatorInputStream.str();
+    }
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
   }

@@ -66,6 +66,7 @@ public:
   List<SyntacticElementHTML> children;
   bool flagUseDisplaystyleInMathMode;
   bool flagUseMathMode;
+  bool flagUseMathSpan;
   std::string interpretedCommand;
   static int ParsingNumDummyElements;
   bool IsInterpretedByCalculatorDuringProblemGeneration();
@@ -94,10 +95,13 @@ public:
   { this->flagUseDisplaystyleInMathMode=false;
     this->indexInOwner=-1;
     this->commandIndex=-1;
+    this->flagUseMathMode=true;
+    this->flagUseMathSpan=true;
   }
   SyntacticElementHTML(const std::string& inputContent)
   { this->flagUseDisplaystyleInMathMode=false;
     this->flagUseMathMode=true;
+    this->flagUseMathSpan=true;
     this->content=inputContent;
     this->indexInOwner=-1;
     this->commandIndex=-1;

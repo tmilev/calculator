@@ -424,6 +424,8 @@ bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Express
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSin");
   if (input.IsAtomGivenData(theCommands.opPi()))
     return output.AssignValue(0, theCommands);
+  if (input.IsEqualToZero())
+    return output.AssignValue(0, theCommands);
   Rational piProportion;
   if (input.StartsWith(theCommands.opTimes(), 3))
     if (input[2].IsAtomGivenData(theCommands.opPi()))
@@ -508,6 +510,8 @@ bool Calculator::GetSumProductsExpressions(const Expression& inputSum, List<List
   outputSumMultiplicands.SetSize(0);
   if (!this->CollectOpands(inputSum, this->opPlus(), theSummands))
     return false;
+  //stOutput << "DEBUG: Collected sum opands: "
+  //<< theSummands.ToStringCommaDelimited();
   for (int i=0; i<theSummands.size; i++)
   { this->CollectOpands(theSummands[i], this->opTimes(), currentMultiplicands);
     outputSumMultiplicands.AddOnTop(currentMultiplicands);
@@ -525,12 +529,18 @@ bool CalculatorFunctionsGeneral::innerCoefficientOf(Calculator& theCommands, con
   if (input[2].StartsWith(theCommands.opDivide()))
   { Expression coefficientNumerator=input;
     coefficientNumerator.SetChilD(2, input[2][1]);
-    if (!CalculatorFunctionsGeneral::innerCoefficientOf(theCommands, coefficientNumerator, output))
+    if (!CalculatorFunctionsGeneral::innerCoefficientOf
+        (theCommands, coefficientNumerator, output))
       return false;
     return output.MakeXOX(theCommands, theCommands.opDivide(), output, input[2][2]);
   }
+  //stOutput << "<hr>DEBUG: collecting sumproducts: " << input[2].ToString()
+  //<< "<hr>";
   if (!theCommands.GetSumProductsExpressions(input[2], theSummands))
-    return theCommands << "Failed to extract product of expressions from " << input[2].ToString();
+    return theCommands << "Failed to extract product of expressions from "
+    << input[2].ToString();
+  //stOutput << "<hr>DEBUG: summands: " << theSummands.ToStringCommaDelimited()
+  //<< "<hr>";
   for(int i=0; i<theSummands.size; i++)
   { bool isGood=false;
     for (int j=0; j<theSummands[i].size; j++)

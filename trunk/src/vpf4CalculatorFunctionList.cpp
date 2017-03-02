@@ -1120,7 +1120,9 @@ D-B;\
   this->AddOperationInnerHandler
   ("\\arccos", CalculatorFunctionsGeneral::innerArccos, "",
    "Arccos function. Tries to evaluate the arccos function. ",
-   "\\arccos(3/4)", true, false)
+   "\\arccos(3/4)", true, false,
+   "CalculatorFunctionsGeneral::innerArccos",
+   "\\arccos")
    ;
   this->AddOperationInnerHandler
   ("\\arcsin", CalculatorFunctionsGeneral::innerArcsin, "",

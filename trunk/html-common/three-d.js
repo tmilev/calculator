@@ -449,13 +449,13 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
   };
 }
 
-function PathTwoD(inputPath, inputColor, inputFillColor)
+function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
 { this.path=inputPath;
   this.color=colorToRGB(inputColor);
   this.colorFill=colorToRGB(inputFillColor);
   this.isFilled=false;
   this.type="path";
-  this.lineWidth=1;
+  this.lineWidth=inputLineWidth;
   this.accountBoundingBox= function(inputOutputBox)
   { for (var i=1; i<this.path.length; i++)
       accountBoundingBox(this.path[i], inputOutputBox);
@@ -583,12 +583,12 @@ function TextPlotTwoD(inputLocation, inputText, inputColor)
   };
 }
 
-function SegmentTwoD(inputLeftPt, inputRightPt, inputColor)
+function SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth)
 { this.leftPt=inputLeftPt;
   this.rightPt=inputRightPt;
   this.color=colorToRGB(inputColor);
   this.type="segment";
-  this.lineWidth=1;
+  this.lineWidth=inputLineWidth;
   this.accountBoundingBox= function(inputOutputBox)
   { accountBoundingBox(this.leftPt , inputOutputBox);
     accountBoundingBox(this.rightPt, inputOutputBox);
@@ -682,12 +682,12 @@ function CanvasTwoD(inputCanvas)
   this.drawPoint= function (inputPoint, inputColor)
   { this.theObjects.push(new PointTwoD(inputPoint, inputColor));
   };
-  this.drawLine= function (inputLeftPt, inputRightPt, inputColor)
-  { var newLine=new SegmentTwoD(inputLeftPt, inputRightPt, inputColor);
+  this.drawLine= function (inputLeftPt, inputRightPt, inputColor, inputLineWidth)
+  { var newLine=new SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth);
     this.theObjects.push(newLine);
   };
-  this.drawPath= function (inputPath, inputColor)
-  { var newPath=new PathTwoD(inputPath, inputColor, inputColor);
+  this.drawPath= function (inputPath, inputColor, inputLineWidth)
+  { var newPath=new PathTwoD(inputPath, inputColor, inputColor, inputLineWidth);
     this.theObjects.push(newPath);
   };
   this.drawPathFilled= function (inputPath, inputContourColor, inputFillColor)

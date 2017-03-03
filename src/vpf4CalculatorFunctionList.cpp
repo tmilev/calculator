@@ -2863,7 +2863,8 @@ void Calculator::initPredefinedStandardOperations()
   ("*", CalculatorFunctionsGeneral::innerInterpretAsDifferential, "",
    "If circumstances imply it, interprets an atom of the form dx as the differential \\diff x. ",
    "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx", true, false,
-   "CalculatorFunctionsGeneral::innerInterpretAsDifferential", "InterpretAsDifferential");
+   "CalculatorFunctionsGeneral::innerInterpretAsDifferential",
+   "InterpretAsDifferential");
   this->AddOperationInnerHandler
   ("*", CalculatorFunctionsGeneral::innerIntegralOperator, "",
    "Transforms integral notation into an integral expression. ",
@@ -2912,7 +2913,8 @@ void Calculator::initPredefinedStandardOperations()
    \n(z+1)-z;\
    \n y=101^200;\
    \nDoubleValue(y)"
-   , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat");
+   , true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat, this->opDouble(), this->opRational(),
    "Multiplies rational by a double approximately using the built-in cpp multiplication \
@@ -2971,7 +2973,8 @@ void Calculator::initPredefinedStandardOperations()
    "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true,
    false, "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly, this->opPoly(), this->opPoly(),
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
+   this->opPoly(), this->opPoly(),
    "Multiplies two polynomials. ",
    "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true,
    false, "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly");
@@ -2986,13 +2989,16 @@ void Calculator::initPredefinedStandardOperations()
    "Multiplies two polynomials over the algebraic numbers. ",
    "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*\\sqrt{6};", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly, this->opAlgNumber(), this->opPolyOverANs(),
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
+   this->opAlgNumber(), this->opPolyOverANs(),
    "Multiplies two polynomials over the algebraic numbers. ",
    "\\sqrt{6}*PolynomialAlgebraicNumbers{}(\\sqrt{3}x);", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly, this->opRational(), this->opPolyOverANs(),
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly,
+   this->opRational(), this->opPolyOverANs(),
    "Multiplies two polynomials over the algebraic numbers. ",
-   "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*2;", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly");
+   "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*2;", true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly, this->opPoly(), this->opAlgNumber(),
    "Multiplies two polynomials over the algebraic numbers. ",
@@ -3000,7 +3006,8 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly, this->opAlgNumber(), this->opPoly(),
    "Multiplies two polynomials over the algebraic numbers. ",
-   "\\sqrt{3}*PolynomialAlgebraicNumbers{}(x);", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly");
+   "\\sqrt{3}*PolynomialAlgebraicNumbers{}(x);", true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly");
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational,
@@ -3240,7 +3247,8 @@ void Calculator::initPredefinedStandardOperations()
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly, this->opPoly(), this->opWeightLieAlgPoly(),
    "Carries out multiplication between a rational or polynomial on left and a weight on the right.",
    "\\varepsilon_{{a}}=MakeWeight{}(B_3, a, epsilon);   x=Polynomial{}x; x\\varepsilon_1"
-   , true, false, "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
+   , true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly, this->opRational(), this->opWeightLieAlgPoly(),
    "Carries out multiplication between a rational or polynomial on left and a weight on the right.",
@@ -3250,7 +3258,9 @@ void Calculator::initPredefinedStandardOperations()
   ("*", CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix,
    this->opSequence(), this->opSequence(),
    "Multiplies two sequences of sequences in a similar way as if those were matrices.",
-   "((1,-1),(0,-1))((1, 0), (-1,-1))", true, false, "CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix");
+   "((1,-1),(0,-1))((1, 0), (-1,-1))", true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix",
+   "MultiplySequenceMatrixBySequenceMatrix");
 
   this->AddOperationInnerHandler
   ("\\choose", CalculatorFunctionsBinaryOps::innerNChooseK, "",
@@ -3342,17 +3352,23 @@ void Calculator::initPredefinedStandardOperations()
    "4/6; 2/0;", true, false, "CalculatorFunctionsBinaryOps::innerDivideRatByRat",
    "DivideRationalByRational");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble, this->opRational(), this->opDouble(),
+  ("/", CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble,
+    this->opRational(), this->opDouble(),
    "Divides doubles. ",
    "a=0.5; b=0.5; c=DoubleValue{}3.3; a/c; c/a; c/c", true, false, "CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble, this->opDouble(), this->opDouble(),
+  ("/", CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble,
+   this->opDouble(), this->opDouble(),
    "Divides doubles. ",
-   "a=0.5; b=0.5; c=DoubleValue{}3.3; a/c; c/a; c/c", true, false, "CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble");
+   "a=0.5; b=0.5; c=DoubleValue{}3.3; a/c; c/a; c/c", true, false,
+   "CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble",
+   "DivideDoubleByDouble");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly, this->opRational(), this->opPoly(),
+  ("/", CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly,
+   this->opRational(), this->opPoly(),
    "Divides rational by polynomial (to get a rational function).",
-   "z=Polynomial{}(x^2+y^2);\n1/z", true, false, "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
+   "z=Polynomial{}(x^2+y^2);\n1/z", true, false,
+   "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly,
    this->opPoly(), this->opPoly(),
@@ -3533,7 +3549,8 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("^", Calculator::outerPowerRaiseToFirst, "",
    "Realizes the tranformation {{anything}}^1=a. ",
-  "x^1+x^2; A^1", true, false, "Calculator::outerPowerRaiseToFirst",
+  "x^1+x^2; A^1", true, false,
+  "Calculator::outerPowerRaiseToFirst",
   "RaiseToPowerOne");
 
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -3544,11 +3561,14 @@ void Calculator::initPredefinedStandardOperations()
    "X=G_2;\ng_{{i}}=GetChevalleyGenerator{}(X,i);\nh_{{i}}=GetCartanGenerator{}(X, i);  \
    \nz=Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\
    \ng_{-1}(v\\otimes v);\
-   \ng_{-1}g_{-1}(v\\otimes v)", true);
+   \ng_{-1}g_{-1}(v\\otimes v)", true, false,
+   "CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor",
+   "TensorElementGeneralizedVermaModuleByElementGeneralizedVermaModule");
   this->AddOperationInnerHandler
   ("[]", CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA, "",
    "Lie bracket of elements of Weyl algebras=differential operators with polynomial coefficients. ",
-   "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; \n[\\partial_1, x_1]; ", true);
+   "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; \n[\\partial_1, x_1]; ",
+   true);
   this->AddOperationInnerHandler
   ("[]", CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE, "",
    "Lie bracket of elements of semisimple Lie algebra. ",
@@ -3708,7 +3728,9 @@ void Calculator::initPredefinedStandardOperations()
    "If all arguments of \\sqcup are of type list, substitutes the expression with a list \
    containing \
    the union of all members; all repeating members are discarded.",
-   "(x,y,x)\\sqcup(1,x,y,2)", true);
+   "(x,y,x)\\sqcup(1,x,y,2)", true, false,
+   "CalculatorFunctionsGeneral::innerUnionNoRepetition",
+   "\\sqcup");
 }
 
 void Calculator::initPredefinedOperationsComposite()

@@ -6,6 +6,7 @@
 #include "vpfHeader2Math9DrawingVariables.h"
 #include "vpfHeader3Calculator4HtmlFunctions.h"
 #include "vpfHeader5Crypto.h"
+#include "vpfHeader8HtmlSnippets.h"
 ProjectInformationInstance ProjectInfoVpf6_35cpp(__FILE__, "More calculator built-in functions. ");
 
 struct MeshTriangles{
@@ -1207,12 +1208,12 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
     return false;
   std::string atomString;
   if (input.IsAtom(&atomString))
-  { if (input.ToString()=="e")
+  { if (input.IsAtomGivenData(theCommands.opE()))
       return output.AssignValue<std::string>(" 2.718281828 ", theCommands);
-    if (input.ToString()=="\\pi")
-      return output.AssignValue<std::string>("3.141592654", theCommands);
+    if (input.IsAtomGivenData(theCommands.opPi()))
+      return output.AssignValue<std::string>(" 3.141592654 ", theCommands);
     if (input.theData>=theCommands.NumPredefinedAtoms)
-      return output.AssignValue(atomString, theCommands);
+      return output.AssignValue(HtmlSnippets::GetJavascriptVariable(atomString), theCommands);
     if (atomString=="+" || atomString=="*" || atomString=="/" || atomString=="-")
       return output.AssignValue(atomString, theCommands);
     return output.AssignValue(atomString, theCommands);
@@ -1249,14 +1250,17 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
   }
   Expression opE, leftE, rightE;
   std::string opString, leftString, rightString;
+  std::stringstream logStream;
   if (input.size()==3 || input.size()==2)
   { Expression* currentE=&opE;
     std::string* currentString=&opString;
     for (int i=0; i<input.size(); i++)
     { if (!CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[i], *currentE))
-        return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
+        return output.AssignValue("(Failed to convert "+input[i].ToString()+")", theCommands);
       if (!currentE->IsOfType(currentString))
-        return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
+        return output.AssignValue("(Failed to convert "+input[i].ToString()+")", theCommands);
+      logStream << "Converted: " << input[i].ToString() << " to: "
+      << *currentString << ". ";
       if (i==0)
       { currentE=&leftE;
         currentString=&leftString;
@@ -1281,14 +1285,15 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
       }
     }
     if (input.size()==2)
-    { if (opString=="\\sin" || opString == "\\cos" || opString=="\\log")
+      if (opString=="\\sin" || opString == "\\cos" || opString=="\\log")
       { std::string chopped=opString.substr(1);
         out << "(Math." << chopped << "( " << leftString << "))";
         return output.AssignValue(out.str(), theCommands);
       }
-    }
   }
-  return theCommands << "Failed to make expression from " << input.ToString();
+  out << "(Failed to make expression from " << input.ToString() << ". "
+  << logStream.str() << ")";
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlotSetProjectionScreenBasis(Calculator& theCommands, const Expression& input, Expression& output)

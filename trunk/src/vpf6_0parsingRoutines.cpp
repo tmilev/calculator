@@ -310,8 +310,6 @@ void Calculator::init()
   this->initArithmeticOperations();
   this->initPredefinedWordSplits();
   this->initStringsThatSplitIfFollowedByDigit();
-
-  Expression theSSLieAlgrule;
   this->RuleStack.reset(*this, 100);
   this->RuleStack.AddChildAtomOnTop(this->opEndStatement());
   this->cachedRuleStacks.Clear();

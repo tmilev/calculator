@@ -1305,9 +1305,9 @@ std::string PlotObject::GetJavascriptParametricCurve2D
     fnNameStream << "theCanvasCoordinateFn_" << canvasName << "_"
     << funCounter;
     fnNames[i]=fnNameStream.str();
-    if (this->variablesInPlay.size>0)
+    if (this->variablesInPlayJS.size>0)
     { out << "function " << fnNames[i]
-      << " (" << this->variablesInPlay[0] << "){\n";
+      << " (" << this->variablesInPlayJS[0] << "){\n";
       out << "return " << this->coordinateFunctionsJS[i] << ";\n";
       out << "}\n";
     } else
@@ -1343,9 +1343,9 @@ std::string PlotObject::GetJavascript2dPlot
   fnNameStream << "theCanvasPlotFn_" << canvasName << "_"
   << funCounter;
   std::string fnName=fnNameStream.str();
-  if (this->variablesInPlay.size>0)
+  if (this->variablesInPlayJS.size>0)
   { out << "function " << fnName
-    << " (" << this->variablesInPlay[0] << "){\n";
+    << " (" << this->variablesInPlayJS[0] << "){\n";
     out << "return " << this->coordinateFunctionsJS[0] << ";\n";
     out << "}\n";
   } else
@@ -1417,8 +1417,8 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   out << "function " << canvasFunctionName << "()\n"
   << "{ ";
   for (int i=0; i<this->boxesThatUpdateMe.size; i++)
-  { InputBox& currentBox=owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreateIfNotPresent
-    (this->boxesThatUpdateMe[i]);
+  { InputBox& currentBox=owner.theObjectContainer.theUserInputTextBoxesWithValues.
+    GetValueCreateIfNotPresent(this->boxesThatUpdateMe[i]);
     out << " calculatorPlotUpdaters['"
     << currentBox.GetSliderName() << "']="
     << "'" << this->canvasName << "'"

@@ -9,7 +9,7 @@
 #include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
 #include "vpfHeader5Crypto.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h" // undefined reference to `charSSAlgMod<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, charSSAlgMod<RationalFunctionOld>&, branchingData&, GlobalVariables&)'
-
+#include "vpfHeader8HtmlSnippets.h"
 ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
 
 template <class theType>
@@ -2511,6 +2511,16 @@ bool CalculatorFunctionsGeneral::innerIsNonEmptySequence(Calculator& theCommands
   if (!input.IsSequenceNElementS() || input.children.size<2)
     return output.AssignValue(0, theCommands);
   return output.AssignValue(1, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerDifferentialStandardHandler(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentialStandardHandler");
+  if (input.StartsWith(theCommands.opDifferential()))
+    return false;
+  output.reset(theCommands);
+  output.AddChildAtomOnTop(theCommands.opDifferential());
+  output.AddChildOnTop(input);
+  return output.AddChildRationalOnTop(1);
 }
 
 bool CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output)
@@ -5081,7 +5091,8 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
     tempE.MakeAtom("t",theCommands);
     thePlot.variablesInPlay.AddOnTop(tempE);
   }
-  thePlot.variablesInPlayJS.AddOnTop(thePlot.variablesInPlay[0].ToString());
+  thePlot.variablesInPlayJS.AddOnTop
+  (HtmlSnippets::GetJavascriptVariable(thePlot.variablesInPlay[0].ToString()));
   thePlot.colorJS="red";
   thePlot.colorRGB=CGI::RedGreenBlue(255, 0, 0);
   if (input.size()>=5)
@@ -5124,8 +5135,10 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   bool isGoodLatexWise=true;
   for (int i=0; i<thePlot.dimension; i++)
     if (!theCommands.CallCalculatorFunction
-         (Calculator::innerSuffixNotationForPostScript, thePlot.coordinateFunctionsE[i], theConvertedExpressions[i]))
-    { theCommands << "Failed to extract suffix notation from argument " << thePlot.coordinateFunctionsE[i].ToString();
+         (Calculator::innerSuffixNotationForPostScript,
+          thePlot.coordinateFunctionsE[i], theConvertedExpressions[i]))
+    { theCommands << "Failed to extract suffix notation from argument "
+      << thePlot.coordinateFunctionsE[i].ToString();
       isGoodLatexWise=false;
       break;
     }

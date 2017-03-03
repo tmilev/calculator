@@ -104,6 +104,20 @@ std::string HtmlSnippets::GetJavascriptCanvasGraphics()
   return out.str();
 }
 
+std::string HtmlSnippets::GetJavascriptVariable(const std::string& theVar)
+{ std::stringstream sanitizer;
+  for (unsigned i=0; i<theVar.size(); i++)
+  { if (MathRoutines::isALatinLetter(theVar[i]))
+    { sanitizer << theVar[i];
+      continue;
+    }
+    if (i==0)
+      sanitizer << "_";
+    sanitizer << ((int) theVar[i]);
+  }
+  return sanitizer.str();
+}
+
 std::string HtmlSnippets::GetDatePickerJavascriptInit()
 { std::stringstream out;
   if (!theGlobalVariables.flagAceIsAvailable)

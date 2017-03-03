@@ -3266,8 +3266,15 @@ void Calculator::initPredefinedStandardOperations()
   ("\\setminus", CalculatorFunctionsBinaryOps::innerSetMinus, "",
     "Removes the elements of the second set from the elements of the first set. \
     The outputs will be sorted in ascending order.",
-    " (x,y,t)\\setminus Sequence{}x; (x,y)\\setminus (z,y)", true, false, "CalculatorFunctionsBinaryOps::innerSetMinus",
+    " (x,y,t)\\setminus Sequence{}x; (x,y)\\setminus (z,y)", true, false,
+    "CalculatorFunctionsBinaryOps::innerSetMinus",
     "\\setminus");
+  this->AddOperationInnerHandler
+  ("\\diff", CalculatorFunctionsGeneral::innerDifferentialStandardHandler, "",
+    "Transforms \\diff{}a to the standard internal form \\diff {}(a,1).",
+    " \\int \\theta \\diff \\theta", true, false,
+    "CalculatorFunctionsBinaryOps::innerDifferentialStandardHandler",
+    "DifferentialStandardHandler");
 
   this->AddOperationInnerHandler
   ("/", CalculatorFunctionsGeneral::innerIntegralOperator, "",
@@ -3812,7 +3819,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   this->AddOperationNoRepetitionAllowed("e");
   this->AddOperationNoRepetitionAllowed("i");
   this->AddOperationNoRepetitionAllowed("\\arctan");
-  this->AddOperationNoRepetitionAllowed("\\diff");
+//  this->AddOperationNoRepetitionAllowed("\\diff");
   this->AddOperationNoRepetitionAllowed("CommandEnclosureStart");
   this->AddOperationNoRepetitionAllowed("CommandEnclosureFinish");
 }

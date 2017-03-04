@@ -3284,7 +3284,7 @@ void Calculator::initPredefinedStandardOperations()
     "Transforms \\diff{}a to the standard internal form \\diff {}(a,1).",
     " \\int \\theta \\diff \\theta", true, false,
     "CalculatorFunctionsBinaryOps::innerDifferentialStandardHandler",
-    "DifferentialStandardHandler",true);
+    "DifferentialStandardHandler");
 
   this->AddOperationInnerHandler
   ("/", CalculatorFunctionsGeneral::innerIntegralOperator, "",

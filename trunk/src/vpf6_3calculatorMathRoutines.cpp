@@ -3840,9 +3840,9 @@ bool CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation(Calculator& 
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation");
   if (!input.StartsWith(theCommands.opDivide(), 3))
     return false;
-  if (input[1]!="\\diff")
+  if (input[1]!="\\diff" && input[1]!="d")
     return false;
-  if (input[2].size()!=2)
+  if (input[2].size()<2)
     return false;
   if (input[2][0]!="\\diff")
     return false;

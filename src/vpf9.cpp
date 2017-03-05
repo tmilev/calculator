@@ -1544,8 +1544,8 @@ FormatExpressions::FormatExpressions()
   this->NumAmpersandsPerNewLineForLaTeX=0;
   this->MaxRecursionDepthPerExpression=500;
   this->thePolyMonOrder=0;
-  this->flagExpressionIsFinal=false;
-  this->flagExpressionNewLineAllowed=true;
+  this->flagExpressionIsFinal=true;
+  this->flagExpressionNewLineAllowed=false;
   this->flagIncludeLieAlgebraNonTechnicalNames=false;
   this->flagIncludeLieAlgebraTypes=true;
   this->flagUseReflectionNotation=false;

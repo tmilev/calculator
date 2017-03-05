@@ -91,7 +91,7 @@ public:
 template <class theType>
 bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyTypeByType");
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   Expression inputContextsMerged;
   if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged))
@@ -105,7 +105,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theComman
 template <class theType>
 bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   Expression inputContextsMerged;
   if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged))
@@ -118,13 +118,13 @@ bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, c
 template <class theType>
 bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   Expression inputContextsMerged;
   if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged))
     return false;
   if (inputContextsMerged[2].GetValue<theType>().IsEqualToZero())
-    return output.MakeError("Division by zero. ", theCommands);
+    return output.MakeError("Division by zero. ", theCommands, true);
   theType result=inputContextsMerged[1].GetValue<theType>();
   result/=inputContextsMerged[2].GetValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);

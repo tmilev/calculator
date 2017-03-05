@@ -685,7 +685,17 @@ std::string HtmlInterpretation::SubmitProblem()
 
   theInterpreter.Evaluate(completedProblemStream.str());
   if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors!="")
-  { out << "<b>Error while processing your answer(s).</b> Here's what I understood. ";
+  { if (theInterpreter.errorsPublic.str()!="")
+      out << "While checking your answer, got the error: "
+      << "<br><b><span style=\"color:red\">"
+      << theInterpreter.errorsPublic.str()
+      << "</span></b> "
+      << "<br><b>Most likely your answer is wrong. </b>";
+    else
+      out << "<b>Error while processing your answer(s).</b> "
+      << "<br>Perhaps your answer was wrong and "
+      << "generated division by zero during checking. ";
+    out << "<br>Here's what I understood. ";
     Calculator isolatedInterpreter;
     isolatedInterpreter.init();
     isolatedInterpreter.flagWriteLatexPlots=false;
@@ -1070,8 +1080,10 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
     }
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-    out << "<hr>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
-    << "<hr>Raw input: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+    out << "<hr>" << theInterpreteR.outputString << "<hr>"
+    << theInterpreteR.outputCommentsString
+    << "<hr>Calculator input:<br> "
+    << theInterpreteR.inputString;
   return out.str();
 }
 

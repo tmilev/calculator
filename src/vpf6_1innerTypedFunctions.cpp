@@ -157,7 +157,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(Calcu
       { std::stringstream out;
         out << "Got division by zero while attempting to divide "
         << theElt1.ToString() << " by " << theElt2.ToString();
-        return output.MakeError(out.str(), theCommands);
+        return output.MakeError(out.str(), theCommands, true);
       }
       return output.AssignValue(theElt1, theCommands);
     }
@@ -192,7 +192,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNum
     rightAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
   }
   if (rightAN.IsEqualToZero())
-    return output.MakeError("Division by zero. ", theCommands);
+    return output.MakeError("Division by zero. ", theCommands, true);
   leftAN/=rightAN;
   output.AssignValue(leftAN, theCommands);
   output.CheckInitializationRecursively();
@@ -288,7 +288,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideRatByRat(Calculator& theCommands, 
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
   if (rightR.IsEqualToZero())
-    return output.MakeError("Division by zero.", theCommands);
+    return output.MakeError("Division by zero.", theCommands, true);
   return output.AssignValue(leftR/rightR, theCommands);
 }
 
@@ -311,7 +311,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble(Calculator& theComm
       rightD=rightR.GetDoubleValue();
   }
   if (rightD==0)
-    return output.MakeError("Division by zero.", theCommands);
+    return output.MakeError("Division by zero.", theCommands, true);
   return output.AssignValue(leftD/rightD, theCommands);
 }
 
@@ -618,7 +618,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger(Calculator& theC
   if(!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
     return false;
   if (base.IsEqualToZero() && thePower<=0)
-    return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+    return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
   if (thePower<0)
   { if (base.size()==1)
     { Polynomial<Rational> outputPoly;
@@ -656,12 +656,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(Calculator& theCo
         { std::stringstream errorStream;
           errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
           << "Your matrix, " << base.ToString() << " is not square. ";
-          return output.MakeError(errorStream.str(), theCommands);
+          return output.MakeError(errorStream.str(), theCommands, true);
         }
         Rational theDet= base.GetDeterminant();
         if (largePower<=0)
           if (theDet==0 )
-            return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+            return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
         if (theDet!=0 && theDet!=-1 && theDet!=1)
           return theCommands << "Matrix power too large.";
         if (largePower<0)
@@ -684,7 +684,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(Calculator& theCo
         AlgebraicNumber theDet= base.GetDeterminant();
         if (largePower<=0)
           if (theDet==0 )
-            return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+            return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
         if (theDet!=0 && theDet!=-1 && theDet!=1)
           return theCommands << "Matrix power too large.";
         if (largePower<0)
@@ -709,7 +709,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(Calculator& theCo
     }
     if (thePower<=0)
       if (base.GetDeterminant()==0 )
-        return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+        return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
     if (thePower<0)
     { base.Invert();
       thePower*=-1;
@@ -727,7 +727,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(Calculator& theCo
       return output.MakeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", theCommands);
     if (thePower<=0)
       if (base.GetDeterminant()==0 )
-        return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+        return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
     if (thePower<0)
     { base.Invert();
       thePower*=-1;
@@ -741,10 +741,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(Calculator& theCo
   { Matrix<RationalFunctionOld> base=
     input[1].GetValue<Matrix<RationalFunctionOld> >();
     if (!base.IsSquare() || base.NumCols==0)
-      return output.MakeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", theCommands);
+      return output.MakeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", theCommands, true);
     if (thePower<=0)
       if (base.GetDeterminant()==0 )
-        return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+        return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
     if (thePower<0)
       return theCommands << "Raising matrices of rational functions to negative powers not implemented yet.";
     Matrix<RationalFunctionOld> idMat;
@@ -770,7 +770,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger
   if (thePower<0)
     return false;
   if (base.IsEqualToZero() && thePower<=0)
-    return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+    return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
   base.RaiseToPower(thePower);
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
 }
@@ -799,7 +799,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(Calcu
   if (!input[2].IsSmallInteger(&thePower))
     return false;
   if (base.IsEqualToZero() && thePower<0)
-    return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+    return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
   if (base.IsEqualToZero() && thePower==0)
     return output.AssignValue(1, theCommands);
   if (thePower<0)
@@ -849,7 +849,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(Calculator& theCo
 
   if (base.IsEqualToZero() )
   { if (thePower<0)
-      return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+      return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
     if (thePower==0)
       return output.AssignValue(1, theCommands);
   }
@@ -876,7 +876,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRat(Calculator& theCommands, c
   if (base==0 && thePower==0)
     return output.AssignValue(1, theCommands);
   if (base==0 && thePower<0)
-    return output.MakeError("Division by zero: trying to raise 0 to negative or zero power. ", theCommands);
+    return output.MakeError("Division by zero: trying to raise 0 to negative or zero power. ", theCommands, true);
   base.RaiseToPower(thePower);
   return output.AssignValue(base, theCommands);
 }
@@ -1023,7 +1023,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors
     return false;
   if (base==0)
   { if (exponent<0)
-      return output.MakeError("Division by zero while evaluating " + input.ToString(), theCommands);
+      return output.MakeError("Division by zero while evaluating " + input.ToString(), theCommands, true);
     return output.AssignValue(0, theCommands);
   }
   if (exponent<0)
@@ -1194,7 +1194,6 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& 
   { tempProduct.MakeProducT(theCommands, input[1], input[2][i]);
     output.AddChildOnTop(tempProduct);
   }
-  output.format=input[2].format;
   return true;
 }
 
@@ -1307,9 +1306,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg
       return false;
   if (matAlgLeft.NumCols!=matAlgRight.NumRows)
   { std::stringstream errorStream;
-    errorStream << "Error: attempting to multiply matrix with " << matAlgLeft.NumCols << " columns by a "
+    errorStream << "Error: attempting to multiply matrix with "
+    << matAlgLeft.NumCols << " columns by a "
     << " matrix with " << matAlgRight.NumRows << " rows. ";
-    return output.MakeError(errorStream.str(), theCommands);
+    return output.MakeError(errorStream.str(), theCommands, true);
   }
   matAlgLeft*=matAlgRight;
   return output.AssignValue(matAlgLeft, theCommands);
@@ -1478,7 +1478,7 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
   { std::stringstream errorStream;
     errorStream << "Error: attempting to add a " << rightMat.NumRows << " x " << rightMat.NumCols << " matrix to a "
     << leftMat.NumRows << " x " << leftMat.NumCols << " matrix. ";
-    return output.MakeError(errorStream.str(), theCommands);
+    return output.MakeError(errorStream.str(), theCommands, true);
   }
   Matrix<Rational> result=leftMat;
   result+=rightMat;
@@ -1561,18 +1561,14 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(Calculator& theCom
 //  stOutput << "<br>trouble be triple!";
   if (!input[2].IsSequenceNElementS())
     return false;
-  if (input[2].children.size!=input[1].children.size)
+  if (input[2].size()!=input[1].size())
     return theCommands << "<hr>Attempting to add a sequence of length " << input[1].children.size-1 << "  to a sequence of length "
-    << input[2].children.size-1 << ", possible user typo?";
+    << input[2].size()-1 << ", possible user typo?";
   output.reset(theCommands);
-  output.children.Reserve(input[1].children.size);
+  output.children.Reserve(input[1].size());
   output.AddChildAtomOnTop(theCommands.opSequence());
-  if (input[1].format==Expression::formatMatrixRow || input[2].format==Expression::formatMatrixRow)
-    output.format=Expression::formatMatrixRow;
-  if (input[1].format==Expression::formatMatrix || input[2].format==Expression::formatMatrix)
-    output.format=Expression::formatMatrix;
   Expression tempSum;
-  for (int i=1; i<input[2].children.size; i++)
+  for (int i=1; i<input[2].size(); i++)
   { tempSum.MakeXOX(theCommands, theCommands.opPlus(), input[1][i], input[2][i]);
     output.AddChildOnTop(tempSum);
   }

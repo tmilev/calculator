@@ -1475,7 +1475,6 @@ bool Calculator::innerFactorPoly(Calculator& theCommands, const Expression& inpu
     expressionE.AddChildOnTop(polyE);
     output.AddChildOnTop(expressionE);
   }
-  output.format=output.formatMatrix;
   //stOutput << "<hr>At this point of time, theExpression is: " << output.ToString();
   return true;
 }
@@ -1550,10 +1549,8 @@ bool Expression::AssignMatrixExpressions(const Matrix<Expression>& input, Calcul
     currentRow.AddChildAtomOnTop(owner.opSequence());
     for (int j=0; j<input.NumCols; j++)
       currentRow.AddChildOnTop(input(i,j));
-    currentRow.format=this->formatMatrixRow;
     this->AddChildOnTop(currentRow);
   }
-  this->format=this->formatMatrix;
   return true;
 }
 

@@ -1519,6 +1519,8 @@ public:
   int MaxMatrixDisplayedRows;
   int MaxLinesPerPage;
   int MatrixColumnVerticalLineIndex;
+//  bool flagMatrixStarted;
+//  bool flagMatrixRowStarted;
   bool flagPassCustomCoeffMonSeparatorToCoeffs;
   bool flagMakingExpressionTableWithLatex;
   bool flagUseLatex;

@@ -339,7 +339,7 @@ bool CalculatorFunctionsGeneral::innerLogBase(Calculator& theCommands, const Exp
 bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLog");
   if (input.IsEqualToZero())
-    return output.MakeError("Logarithm of zero is undefined.", theCommands);
+    return output.MakeError("Attempting to compute logarithm of zero.", theCommands, true);
   if (input.IsEqualToOne())
     return output.AssignValue(0, theCommands);
   if (theCommands.flagNoApproximations)
@@ -578,18 +578,35 @@ bool CalculatorFunctionsGeneral::innerChildExpression(Calculator& theCommands, c
   return true;
 }
 
-bool CalculatorFunctionsGeneral::innerDereferenceOperator(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsGeneral::innerDereferenceSequence(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceSequence");
+  (void) theCommands;
+  if (input.size()!=3)
+    return false;
+  if (!input[1].IsSequenceNElementS())
+    return false;
+  int theIndex;
+  if (!input[2].IsSmallInteger(&theIndex))
+    return false;
+  if (theIndex>0 && theIndex<input[1].size())
+  { output=input[1][theIndex];
+    return true;
+  }
+  return false;
+}
+
+bool CalculatorFunctionsGeneral::innerDereferenceSequenceStatements(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceOperator");
   (void) theCommands;
-  if (input.children.size!=2)
+  if (input.size()!=3)
     return false;
-//  if (!input[0].IsListStartingWithAtom(theCommands.opSequence()))
-//    return false;
+  if (!input[1].StartsWith(theCommands.opEndStatement()))
+    return false;
   int theIndex;
-  if (!input[1].IsSmallInteger(&theIndex))
+  if (!input[2].IsSmallInteger(&theIndex))
     return false;
-  if (theIndex>0 && theIndex<input[0].size())
-  { output=input[0][theIndex];
+  if (theIndex>0 && theIndex<input[1].size())
+  { output=input[1][theIndex];
     return true;
   }
   return false;
@@ -1648,7 +1665,6 @@ bool CalculatorFunctionsGeneral::innerUnion(Calculator& theCommands, const Expre
   for (int i=1; i<input.children.size; i++)
     for (int j=1; j<input[i].children.size; j++)
       output.AddChildOnTop(input[i][j]);
-  output.format=input.formatDefault;
   return true;
 }
 
@@ -1675,7 +1691,6 @@ bool CalculatorFunctionsGeneral::innerUnionNoRepetition(Calculator& theCommands,
   output.reset(theCommands, theIndices.size+1);
   output.AddChildAtomOnTop(theCommands.opSequence());
   output.children.AddOnTop(theIndices);
-  output.format=output.formatDefault;
   return true;
 }
 
@@ -1689,7 +1704,7 @@ bool CalculatorFunctionsGeneral::innerCrossProduct(Calculator& theCommands, cons
   { std::stringstream out;
     out << "Can't compute cross product of the non-3d vectors " << input[1].ToString() << " and "
     << input[2].ToString() << ". ";
-    return output.MakeError(out.str(), theCommands);
+    return output.MakeError(out.str(), theCommands, true);
   }
   List<Expression> outputSequence;
   outputSequence.SetSize(3);
@@ -1872,7 +1887,7 @@ bool CalculatorFunctionsGeneral::outerDivideByNumber
   if (!input.StartsWith(theCommands.opDivide(), 3))
     return false;
   if (input[2].IsEqualToZero())
-    return output.MakeError("Division by zero. ", theCommands);
+    return output.MakeError("Division by zero. ", theCommands, true);
 
 //  stOutput << "<br>Now I'm here! 2";
   Rational theRatValue;
@@ -2082,7 +2097,7 @@ bool CalculatorFunctionsGeneral::innerPowerAnyToZero(Calculator& theCommands, co
     return false;
 //  stOutput << "input[1]: "<< input[1].ToString() << ", input[2]: " << input[2].ToString();
   if (input[1].IsEqualToZero())
-    return output.MakeError("Error: expression of the form 0^0 is illegal.", theCommands);
+    return output.MakeError("Error: expression of the form 0^0 is illegal.", theCommands, true);
   return output.AssignValue<Rational>(1, theCommands);
 }
 
@@ -2729,7 +2744,7 @@ bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Express
   if (!theCommands.GetMatriXFromArguments<Rational>(input, mat, 0, -1, 0))
     return CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(theCommands, input, output);
   if (mat.NumRows!=mat.NumCols || mat.NumCols<1)
-    return output.MakeError("The matrix is not square", theCommands);
+    return output.MakeError("The matrix is not square", theCommands, true);
   outputMat.MakeIdMatrix(mat.NumRows);
   int tempI;
   int NumFoundPivots = 0;
@@ -2812,7 +2827,7 @@ bool CalculatorFunctionsGeneral::innerPolynomialRelations
   }*/
   Vector<Polynomial<Rational> > inputVector;
   Expression theContext;
-  if (input.children.size<3)
+  if (input.size()<3)
     return output.MakeError("Function takes at least two arguments. ", theCommands);
   const Expression& numComputationsE=input[1];
   Rational upperBound=0;
@@ -4160,7 +4175,7 @@ bool CalculatorFunctionsGeneral::innerMinPolyMatrix(Calculator& theCommands, con
   if (!output.IsOfType<Matrix<Rational> >(&theMat))
     return theCommands << "<hr>Minimal poly computation: could not convert " << input.ToString() << " to rational matrix.";
   if (theMat.NumRows!=theMat.NumCols || theMat.NumRows<=0)
-    return output.MakeError("Error: matrix is not square!", theCommands);
+    return output.MakeError("Error: matrix is not square.", theCommands, true);
   FormatExpressions tempF;
   tempF.polyAlphabeT.SetSize(1);
   tempF.polyAlphabeT[0]="q";
@@ -4178,7 +4193,7 @@ bool CalculatorFunctionsGeneral::innerCharPolyMatrix(Calculator& theCommands, co
   if (!output.IsOfType<Matrix<Rational> >(&theMat))
     return theCommands << "<hr>Characteristic poly computation: could not convert " << input.ToString() << " to rational matrix.";
   if (theMat.NumRows!=theMat.NumCols || theMat.NumRows<=0)
-    return output.MakeError("Error: matrix is not square!", theCommands);
+    return output.MakeError("Error: matrix is not square.", theCommands, true);
   FormatExpressions tempF;
   tempF.polyAlphabeT.SetSize(1);
   tempF.polyAlphabeT[0]="q";
@@ -4192,19 +4207,19 @@ bool CalculatorFunctionsGeneral::innerTrace(Calculator& theCommands, const Expre
 //  stOutput << "<hr>getting matrix from: " << input.ToString();
   if (input.IsOfType<Matrix<Rational> >())
   { if (!input.GetValue<Matrix<Rational> >().IsSquare())
-      return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands);
+      return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands, true);
     return output.AssignValue(input.GetValue<Matrix<Rational> >().GetTrace(), theCommands);
   }
   if (input.IsOfType<Matrix<RationalFunctionOld> >())
   { if (!input.GetValue<Matrix<RationalFunctionOld> >().IsSquare())
-      return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands);
+      return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands, true);
     return output.AssignValue(input.GetValue<Matrix<RationalFunctionOld> >().GetTrace(), theCommands);
   }
   Matrix<Expression> theMat;
   if (!theCommands.GetMatrixExpressionsFromArguments(input, theMat))
     return false;
   if (!theMat.IsSquare())
-    return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands);
+    return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands, true);
   if (theMat.NumRows==1)
   { theCommands << "Requesting trace of 1x1 matrix: possible interpretation of a scalar as a 1x1 matrix. Trace not taken";
     return false;
@@ -4245,7 +4260,7 @@ bool CalculatorFunctionsGeneral::innerLastElement(Calculator& theCommands, const
   if (input.IsAtom())
   { std::stringstream out;
     out << "Error: requesting the last element of the atom " << input.ToString();
-    return output.MakeError(out.str(), theCommands);
+    return output.MakeError(out.str(), theCommands, true);
   }
   std::string firstAtom;
   if (input.children.size==2)
@@ -4267,7 +4282,7 @@ bool CalculatorFunctionsGeneral::innerRemoveLastElement(Calculator& theCommands,
       out << "Error: requesting to remove the last element of the atom " << input.ToString();
     else
       out << "Error: requesting to remove the last element of the zero-element list " << input.ToString();
-    return output.MakeError(out.str(), theCommands);
+    return output.MakeError(out.str(), theCommands, true);
   }
   std::string firstAtom;
   if (input.children.size==2)
@@ -4410,9 +4425,9 @@ bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, cons
       matRatWorks=true;
   if (matRatWorks)
   { if (theMat.NumRows!=theMat.NumCols || theMat.NumCols<1)
-      return output.MakeError("The matrix is not square", theCommands);
+      return output.MakeError("The matrix is not square", theCommands, true);
     if (theMat.GetDeterminant()==0)
-      return output.MakeError("Matrix determinant is zero.", theCommands);
+      return output.MakeError("Matrix determinant is zero.", theCommands, true);
     theMat.Invert();
     return output.AssignValue(theMat, theCommands);
   }
@@ -4425,9 +4440,9 @@ bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, cons
       matAlgWorks=true;
   if (matAlgWorks)
   { if (theMatAlg.NumRows!=theMatAlg.NumCols || theMatAlg.NumCols<1)
-      return output.MakeError("The matrix is not square", theCommands);
+      return output.MakeError("The matrix is not square", theCommands, true);
     if (theMatAlg.GetDeterminant()==0)
-      return output.MakeError("Matrix determinant is zero.", theCommands);
+      return output.MakeError("Matrix determinant is zero.", theCommands, true);
     theMatAlg.Invert();
     return output.AssignValue(theMatAlg, theCommands);
   }
@@ -4686,7 +4701,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   if (input.size()<4)
     return output.MakeError
     ("Plotting coordinates takes at least three arguments: function, lower and upper bound. ",
-     theCommands);
+     theCommands, true);
   if (input.HasBoundVariables())
     return false;
   Plot thePlot;
@@ -4723,7 +4738,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
       !thePlotObj.rightPtE.EvaluatesToDouble(&thePlotObj.xHigh))
     return output.MakeError
     ("Failed to convert upper and lower bounds of drawing function to rational numbers.",
-     theCommands);
+     theCommands, true);
   thePlotObj.coordinateFunctionsE.AddOnTop(input[1]);
   thePlotObj.coordinateFunctionsJS.SetSize(1);
   thePlotObj.coordinateFunctionsE[0].GetFreeVariables
@@ -4816,7 +4831,8 @@ bool CalculatorFunctionsGeneral::innerPlotPoint(Calculator& theCommands, const E
   //stOutput << input.ToString();
   if (input.size()!=3)
     return output.MakeError
-    ("Plotting a point takes at least two arguments, location and color. ", theCommands);
+    ("Plotting a point takes at least two arguments, location and color. ",
+    theCommands, true);
   Vector<double> theV;
   if (!theCommands.GetVectorDoubles(input[1], theV))
     return theCommands << "<hr>Failed to extract coordinates from: " << input[1].ToString();
@@ -4842,7 +4858,8 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlot2DWithBars");
   //stOutput << input.ToString();
   if (input.size()<6)
-    return output.MakeError("Plotting coordinates takes the following arguments: lower function, upper function, lower and upper bound, delta x. ", theCommands);
+    return output.MakeError
+    ("Plotting coordinates takes the following arguments: lower function, upper function, lower and upper bound, delta x. ", theCommands, true);
   Expression lowerEplot=input, upperEplot=input;
   lowerEplot.children.RemoveIndexShiftDown(2);
   upperEplot.children.RemoveIndexShiftDown(1);
@@ -4870,7 +4887,8 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
     theDeltaNoSign=1;
   double upperBound, lowerBound;
   if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound))
-    return output.MakeError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
+    return output.MakeError
+    ("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands, true);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
   Expression xValueE, xExpression, theFunValueEnonEvaluated, theFunValueFinal;
@@ -4879,9 +4897,9 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   List<double> fValuesLower;
   List<double> fValuesUpper;
   if (theDeltaNoSign==0)
-    return output.MakeError("Delta equal to zero is not allowed", theCommands);
+    return output.MakeError("Delta equal to zero is not allowed", theCommands, true);
   if ((upperBound-lowerBound)/theDeltaNoSign>10000)
-    return output.MakeError("More than 10000 intervals needed for the plot, this is not allowed.", theCommands);
+    return output.MakeError("More than 10000 intervals needed for the plot, this is not allowed.", theCommands, true);
   List<Rational> rValues;
   Rational lowerBoundRat, upperBoundRat, deltaRat;
   if (lowerE.IsOfType<Rational>(&lowerBoundRat) && upperE.IsOfType<Rational>(&upperBoundRat) && deltaE.IsOfType<Rational>(&deltaRat))
@@ -5619,7 +5637,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant
       << matRat.NumRows << " by "
       << matRat.NumCols << " matrix: " << input.ToString();
       return output.MakeError
-      ("Requesting to compute determinant of non-square matrix. ", theCommands);
+      ("Requesting to compute determinant of non-square matrix. ", theCommands, true);
     }
   }
   Matrix<AlgebraicNumber> matAlg;
@@ -5638,7 +5656,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant
     { theCommands << "Requesting to compute determinant of the non-square "
       << matRat.NumRows << " by "
       << matRat.NumCols << " matrix: " << input.ToString();
-      return output.MakeError("Requesting to compute determinant of non-square matrix. ", theCommands);
+      return output.MakeError("Requesting to compute determinant of non-square matrix. ", theCommands, true);
     }
   }
 //  stOutput << "<hr>got to here";
@@ -5666,7 +5684,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant
   { theCommands << "Requesting to compute determinant of the non-square "
     << matRat.NumRows << " by "
     << matRat.NumCols << " matrix: " << input.ToString();
-    return output.MakeError("Requesting to compute determinant of non-square matrix given by:  "+input.ToString(), theCommands);
+    return output.MakeError("Requesting to compute determinant of non-square matrix given by:  "+input.ToString(), theCommands, true);
   }
 }
 
@@ -6348,7 +6366,8 @@ bool Expression::EvaluatesToDouble(double* whichDouble)const
 }
 
 bool Expression::EvaluatesToDoubleUnderSubstitutions
-(const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble)const
+(const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs,
+ double* whichDouble)const
 { MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleUnderSubstitutions");
   if (this->owner==0)
     return false;

@@ -403,7 +403,7 @@ void Calculator::initPredefinedInnerFunctions()
    "Product(a,b); Product{}(Sequence{}a); Product(Sequence{}a); Product(a)",
    true, false, "CalculatorFunctionsGeneral::innerMultiplySequence", "Product");
   this->AddOperationInnerHandler
-  ("Sum", CalculatorFunctionsGeneral::innerSumSequence, "",
+  ("\\sum", CalculatorFunctionsGeneral::innerSumSequence, "",
    "Returns the sum of the elements in a sequence. \
     When used on non-sequences, the function \
     will ignore the first element and \
@@ -411,8 +411,8 @@ void Calculator::initPredefinedInnerFunctions()
     This may not produce the result you expected for non-sequences,\
     so use on sequences only. \
     ",
-   "Sum(a,b); Sum{}(Sequence{}a); Sum(Sequence{}a); Sum(a)",
-   true, false, "CalculatorFunctionsGeneral::innerSumSequence", "Sum");
+   "\\sum(a,b); \\sum{}(Sequence{}a); \\sum(Sequence{}a); \\sum(a)",
+   true, false, "CalculatorFunctionsGeneral::innerSumSequence", "\\sum");
 
   this->AddOperationInnerHandler
   ("MakeExpression", CalculatorConversions::innerExpressionFromBuiltInType, "",
@@ -1095,7 +1095,8 @@ D-B;\
   this->AddOperationInnerHandler
   ("\\log", CalculatorFunctionsGeneral::innerLog, "",
    "Logarithm function. Gives a decimal approximation of the natural logarithm provided the input is a double number. ",
-   "\\log{}(e); \\log 10", true, false, "CalculatorFunctionsGeneral::innerLog", "\\log")
+   "\\log{}(e); \\log 10", true, false,
+   "CalculatorFunctionsGeneral::innerLog", "\\log")
    ;
   this->AddOperationInnerHandler
   ("LogBase", CalculatorFunctionsGeneral::innerLogBaseSimpleCases, "",
@@ -1372,7 +1373,7 @@ D-B;\
    Else does nothing.",
    "A=\\frac{x^3}{x^{3}-x^2+2x^2-2};\
     B=UnivariatePartialFractions(A);\
-    A-Sum(B)"
+    A-\\sum(B)"
    , true, false,
    "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals",
    "UnivariatePartialFractions")
@@ -3347,7 +3348,8 @@ void Calculator::initPredefinedStandardOperations()
    "CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI",
    "ConvertShortDenominatorToNegativePower");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", CalculatorFunctionsBinaryOps::innerDivideRatByRat, this->opRational(), this->opRational(),
+  ("/", CalculatorFunctionsBinaryOps::innerDivideRatByRat,
+   this->opRational(), this->opRational(),
    "Divides two rational numbers. ",
    "4/6; 2/0;", true, false, "CalculatorFunctionsBinaryOps::innerDivideRatByRat",
    "DivideRationalByRational");
@@ -3552,6 +3554,27 @@ void Calculator::initPredefinedStandardOperations()
   "x^1+x^2; A^1", true, false,
   "Calculator::outerPowerRaiseToFirst",
   "RaiseToPowerOne");
+
+  this->AddOperationInnerHandler
+  ("_", CalculatorFunctionsGeneral::innerDereferenceSequence, "",
+   "Dereferences a sequence. The syntax is as illustrated by the example. ",
+   "X=(a,b,c); X_1; X_2; X_3; X_4; X_j; j=3; X_j; \
+    \nDenominations=(1, 5, 10, 25,50, 100,200, 500, 1000, 2000, 5000);\
+    \np(0, 0 )=1;\
+    \np({{a}},{{x}}):if x<0=0;\
+    \np(0,{{x}})=0;\
+    \np({{a}},{{x}} )=p(a-1,x)+ p(a, x-Denominations_a);\
+    \np(11,100)\
+  ", true, false,
+  "CalculatorFunctionsGeneral::innerDereferenceSequence",
+  "DereferenceSequence");
+  this->AddOperationInnerHandler
+  ("_", CalculatorFunctionsGeneral::innerDereferenceSequenceStatements, "",
+   "Dereferences a sequence of rules. \
+    The syntax is as illustrated by the example. ",
+   "A=d/dx( \\sqrt(x+y)-4x^2y^2); (d/dx(y)=0; A)_2;  ", true, false,
+   "CalculatorFunctionsGeneral::innerDereferenceSequenceStatements",
+   "DereferenceSequenceStatements");
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
@@ -3771,24 +3794,6 @@ void Calculator::initPredefinedOperationsComposite()
    "CalculatorFunctionsGeneral::innerConstantFunction",
    "ConstantFunction");
   this->AddOperationComposite
-  ("Sequence", CalculatorFunctionsGeneral::innerDereferenceOperator, "",
-   "Dereferences a sequence. The syntax is as illustrated by the example. ",
-   "X=(a,b,c); X_1; X_2; X_3; X_4; X_j; j=3; X_j; \
-    \nDenominations=(1, 5, 10, 25,50, 100,200, 500, 1000, 2000, 5000);\
-    \np(0, 0 )=1;\
-    \np({{a}},{{x}}):if x<0=0;\
-    \np(0,{{x}})=0;\
-    \np({{a}},{{x}} )=p(a-1,x)+ p(a, x-Denominations_a);\
-    \np(11,100)\
-  ", true, true, false, "CalculatorFunctionsGeneral::innerDereferenceOperator",
-  "Dereference");
-  this->AddOperationComposite
-  (";", CalculatorFunctionsGeneral::innerDereferenceOperator, "",
-   "Dereferences a sequence of rules. The syntax is as illustrated by the example. ",
-   "A=d/dx( \\sqrt(x+y)-4x^2y^2); (d/dx(y)=0; A)_2;  ", true, true, false,
-   "CalculatorFunctionsGeneral::innerDereferenceOperator",
-   "Dereference");
-  this->AddOperationComposite
   ("ElementWeylAlgebra", CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly, "",
    "Differential operation acting on a polynomial. ",
    "x=ElementWeylAlgebraPoly{}(\\partial, x);\\partial=ElementWeylAlgebraDO{}(\\partial, x);\
@@ -3834,6 +3839,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
   this->AddOperationNoRepetitionAllowed("Melt");
   this->AddOperationNoRepetitionAllowed("Bind");
+  this->AddOperationNoRepetitionAllowed("\\limits");
   this->AddOperationNoRepetitionAllowed("IndefiniteIntegralIndicator");
   this->AddOperationNoRepetitionAllowed("\\log");
   //additional operations with the same status as user-input expressions.

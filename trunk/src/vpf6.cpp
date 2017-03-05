@@ -936,12 +936,10 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
   }
   output.reset(theCommands, numRows+1);
   output.AddChildAtomOnTop(theCommands.opSequence());
-  output.format=output.formatMatrix;
-  Expression theIndices, currentRow, currentE, leftIE, rightIE;
+  Expression currentRow, currentE, leftIE, rightIE;
   for (int i=0; i<numRows; i++)
   { currentRow.reset(theCommands, numCols+1);
     currentRow.AddChildAtomOnTop(theCommands.opSequence());
-    currentRow.format=currentRow.formatMatrixRow;
     for (int j=0; j<numCols; j++)
     { leftIE.AssignValue(i+1, theCommands);
       rightIE.AssignValue(j+1, theCommands);
@@ -1108,7 +1106,6 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
 //  stOutput << "<br>DEBUG: time before getting fund coords in simple coords: "
 //  << theGlobalVariables.GetElapsedSeconds()-startTimeDebug;
   Vectors<Rational> fundamentalWeights, fundamentalWeightsEpsForm;
-  //integralRoots.AssignMatrixRows(tempLattice.basisRationalForm);
   //theWeyl.GetEpsilonCoords(integralRoots, integralRootsEpsForm);
   //out << "<br>The integral lattice generators in epsilon format: " << integralRootsEpsForm.ElementToStringEpsilonForm();
   theWeyl.GetFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
@@ -1735,7 +1732,6 @@ bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
   //stOutput << "DEBUG: Calling MakeXOXOdotsOX with theOp: " << theOp;
   this->MakeXOX(owner, theOp, input[input.size-2], *input.LastObject());
   Expression result;
-  result.format=this->formatDefault;
   for (int i=input.size-3; i>=0; i--)
   { result.reset(owner, 3);
     result.AddChildAtomOnTop(theOp);
@@ -1743,7 +1739,6 @@ bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
     result.AddChildOnTop(*this);
     *this=result;
   }
-  this->format=this->formatDefault;
   return true;
 }
 
@@ -2558,98 +2553,6 @@ std::string Calculator::ToString()
   return out2.str();
 }
 
-bool Calculator::ReplaceIntIntBy10IntPlusInt()
-{ SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  SyntacticElement& right=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  Rational tempRat=left.theData.GetValue<Rational>();
-  if (this->registerPositionAfterDecimalPoint==0)
-  { tempRat*=10;
-    tempRat+=right.theData.GetValue<Rational>();
-  } else
-  { Rational afterDecimal=right.theData.GetValue<Rational>();
-    for (int i=0; i<this->registerPositionAfterDecimalPoint; i++)
-      afterDecimal/=10;
-    tempRat+=afterDecimal;
-    this->registerPositionAfterDecimalPoint++;
-  }
-  left.theData.AssignValue(tempRat, *this);
-  this->DecreaseStackSetCharacterRangeS(1);
-  return true;
-}
-
-bool Calculator::ReplaceXEXEXByEusingO(int theControlIndex, int formatOptions)
-{ SyntacticElement& lefT = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  SyntacticElement& result = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
-  Expression newExpr;
-  newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
-  newExpr.AddChildOnTop(lefT.theData);
-  newExpr.AddChildOnTop(right.theData);
-  newExpr.format=formatOptions;
-  result.theData=newExpr;
-  result.controlIndex=this->conExpression();
-  this->DecreaseStackSetCharacterRangeS(4);
-  return true;
-}
-
-bool Calculator::ReplaceEXdotsXbySsXdotsX(int numDots)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-1];
-  Expression newExpr;
-  newExpr.reset(*this);
-  newExpr.children.Reserve(2);
-  newExpr.AddChildAtomOnTop(this->opEndStatement());
-  newExpr.AddChildOnTop(left.theData);
-  left.theData=newExpr;
-  left.controlIndex=this->conSequenceStatements();
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool Calculator::ReplaceSsSsXdotsXbySsXdotsX(int numDots)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-2];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-1];
-  if (!left.theData.StartsWith(this->opEndStatement()))
-    crash << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX called but left expression is not EndStatement." << crash;
-  left.theData.children.Reserve(left.theData.children.size+ right.theData.children.size-1);
-  for (int i=1; i<right.theData.children.size; i++)
-    left.theData.AddChildOnTop(right.theData[i]);
-  left.theData.format=Expression::formatDefault;
-  left.controlIndex=this->conSequenceStatements();
-  (*this->CurrentSyntacticStacK).PopIndexShiftDown((*this->CurrentSyntacticStacK).size-numDots-1);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool Calculator::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  Expression newExpr;
-  newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
-  newExpr.AddChildOnTop(left.theData);
-  newExpr.AddChildOnTop(right.theData);
-  newExpr.format=formatOptions;
-  left.theData=newExpr;
-  this->DecreaseStackSetCharacterRangeS(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool Calculator::ReplaceEXEXByEX(int formatOptions)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  Expression newExpr;
-  newExpr.reset(*this, 2);
-  newExpr.AddChildOnTop(left.theData);
-  newExpr.AddChildOnTop(right.theData);
-  newExpr.format=formatOptions;
-  left.theData=newExpr;
-  this->DecreaseStackExceptLast(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
 std::string Calculator::ToStringSyntacticStackHumanReadable
 (bool includeLispifiedExpressions, bool ignoreCommandEnclosures)
 { MacroRegisterFunctionWithName("Calculator::ToStringSyntacticStackHumanReadable");
@@ -2694,76 +2597,6 @@ std::string Calculator::ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclos
 { return this->ToStringSyntacticStackHumanReadable(true, ignoreCommandEnclosures);
 }
 
-bool Calculator::ReplaceXXXByCon(int theCon)
-{ (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].controlIndex=theCon;
-  this->DecreaseStackSetCharacterRangeS(2);
-  return true;
-}
-
-bool Calculator::ReplaceXXXByConCon(int con1, int con2, int inputFormat1, int inputFormat2)
-{ (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex=con1;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].controlIndex=con2;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData.format=inputFormat2;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].theData.format=inputFormat1;
-  this->DecreaseStackSetCharacterRangeS(1);
-  return true;
-}
-
-bool Calculator::ReplaceXXXXXByCon(int theCon)
-{ (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5].controlIndex=theCon;
-  this->DecreaseStackSetCharacterRangeS(4);
-  return true;
-}
-
-bool Calculator::ReplaceXXXXXByConCon(int con1, int con2, int inputFormat1, int inputFormat2)
-{ (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].controlIndex=con2;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5].controlIndex=con1;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].theData.format=inputFormat2;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5].theData.format=inputFormat1;
-  this->DecreaseStackSetCharacterRangeS(3);
-  return true;
-}
-
-bool Calculator::ReplaceXXXXByConCon(int con1, int con2, int inputFormat1, int inputFormat2)
-{ (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].controlIndex=con2;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].controlIndex=con1;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].theData.format=inputFormat2;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].theData.format=inputFormat1;
-  this->DecreaseStackSetCharacterRangeS(2);
-  return true;
-}
-
-bool Calculator::ReplaceXXXXByCon(int con1, int inputFormat1)
-{ (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].controlIndex=con1;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].theData.format=inputFormat1;
-  this->DecreaseStackSetCharacterRangeS(3);
-  return true;
-}
-
-bool Calculator::ReplaceXByCon(int theCon, int theFormat)
-{ (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].controlIndex=theCon;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].theData.format=theFormat;
-  //    this->DecreaseStackSetCharacterRanges(2);
-  return true;
-}
-
-bool Calculator::ReplaceXByEusingO(int theOperation)
-{ (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].controlIndex=this->conExpression();
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].theData.MakeAtom(theOperation, *this);
-  //    this->DecreaseStackSetCharacterRanges(2);
-  return true;
-}
-
-bool Calculator::ReplaceXByConCon(int con1, int con2, int format1, int format2)
-{ (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size+1);
-  (*this->CurrentSyntacticStacK).LastObject()->theData.reset(*this);
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex=con1;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].controlIndex=con2;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData.format=format1;
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].theData.format=format2;
-  //    this->DecreaseStackSetCharacterRanges(2);
-  return true;
-}
 
 SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input)
 { MacroRegisterFunctionWithName("ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent");

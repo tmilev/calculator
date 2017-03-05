@@ -285,7 +285,7 @@ bool Calculator::innerPolynomialDivisionRemainder(Calculator& theCommands, const
   theGB.theBasiS.SetSize(thePolys.size-1);
   for (int i=1; i<thePolys.size; i++)
   { if (thePolys[i].IsEqualToZero())
-      return output.MakeError("Division by zero.", theCommands);
+      return output.MakeError("Division by zero.", theCommands, true);
     theGB.theBasiS[i-1]=thePolys[i];
   }
 //  stOutput << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
@@ -323,7 +323,7 @@ bool Calculator::innerPolynomialDivisionVerbose(Calculator& theCommands, const E
   theGB.theBasiS.SetSize(thePolys.size-1);
   for (int i=1; i<thePolys.size; i++)
   { if (thePolys[i].IsEqualToZero())
-      return output.MakeError("Division by zero.", theCommands);
+      return output.MakeError("Division by zero.", theCommands, true);
     theGB.theBasiS[i-1]=thePolys[i];
   }
 //  Polynomial<Rational> outputRemainder;

@@ -624,9 +624,13 @@ bool CalculatorFunctionsGeneral::innerSumSequence
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSumSequence");
   if (input.size()<1)
     return false;
+  if (input.StartsWith(theCommands.opLimitBoundary()))
+    return false;
   if (input.size()==1)
     return output.AssignValue(1, theCommands);
   //stOutput << "DEBUG: making sum from: " << input.ToStringSemiFull();
+  if (input[1].StartsWith(theCommands.opLimitBoundary()))
+    return false;
   List<Expression> theTerms;
   for (int i=1; i<input.size(); i++)
     theTerms.AddOnTop(input[i]);
@@ -979,7 +983,7 @@ bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expres
     return false;
   if (thePower<0)
   { if (rationalValue.IsEqualToZero())
-      return output.MakeError("Division by zero in expression: " + input.ToString(), theCommands);
+      return output.MakeError("Division by zero in expression: " + input.ToString(), theCommands, true);
     thePower*=-1;
     rationalValue.Invert();
   }
@@ -1489,9 +1493,9 @@ bool CalculatorFunctionsGeneral::innerGramSchmidtVerbose(Calculator& theCommands
       matAlgWorks=true;
   if (matAlgWorks)
   { if (theMatAlg.NumRows!=theMatAlg.NumCols || theMatAlg.NumCols<1)
-      return output.MakeError("The matrix is not square", theCommands);
+      return output.MakeError("The matrix is not square", theCommands, true);
     if (theMatAlg.GetDeterminant()==0)
-      return output.MakeError("Matrix determinant is zero.", theCommands);
+      return output.MakeError("Matrix determinant is zero.", theCommands, true);
     QRFactorizationComputation theComputation;
 
     theMatAlg.Invert();

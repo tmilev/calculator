@@ -364,10 +364,6 @@ bool Calculator::EvaluateExpression
   std::string inputIfAtom;
   bool currentExpressionIsNonCacheable=false;
   theCommands.flagCurrentExpressionIsNonCacheable=false;
-  //formatting issues. Expression formatting requires serious redesign, but no time now.
-  //So here we go with the dirty solution.
-  output.format=input.format;
-  transformationE.format=input.format;
   //////////////////////////////////
   while (ReductionOcurred && !theCommands.flagAbortComputationASAP)
   { StackMaintainerRules theRuleStackMaintainer(&theCommands);

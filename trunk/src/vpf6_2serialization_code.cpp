@@ -16,7 +16,6 @@ bool CalculatorConversions::innerExpressionFromChevalleyGenerator(Calculator& th
   else
     generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
   output.AddChildOnTop(generatorLetterE);
-  output.format=output.formatFunctionUseUnderscore;
   generatorIndexE.AssignValue(input.owner->GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
   return output.AddChildOnTop(generatorIndexE);
 }
@@ -175,7 +174,6 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType
   rankE.AssignValue(input.theRank, theCommands);
   letterAndIndexE.MakeXOX(theCommands, theCommands.opThePower(), letterE, indexE);
   output.reset(theCommands);
-  output.format=output.formatFunctionUseUnderscore;
   output.AddChildOnTop(letterAndIndexE);
   return output.AddChildOnTop(rankE);
 }

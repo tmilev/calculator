@@ -21,8 +21,6 @@ class Expression
   { this->owner=0;
     this->children.size=0;
     this->theData=-1;
-    this->format=this->formatDefault;
-//    this->IndexBoundVars=inputIndexBoundVars;
   }
   //Definitions.
   //1. Fundamentals.
@@ -110,18 +108,14 @@ class Expression
   int theData;
   HashedList<int, MathRoutines::IntUnsignIdentity> children;
   Calculator* owner;
-  ///////////////////////////////////////
-  //The status of the following data has not been decided:
-  int format;
-//////
   bool flagDeallocated;
+//////
   typedef bool (*FunctionAddress) (Calculator& theCommands, const Expression& input, Expression& output);
 //////
   void operator=(const Expression& other)
   { this->theData=other.theData;
     this->children=other.children;
     this->owner=other.owner;
-    this->format=other.format;
   }
   void operator=(const Rational& other)
   { MacroRegisterFunctionWithName("Expression::operator=(Rational)");
@@ -133,11 +127,6 @@ class Expression
     this->CheckInitialization();
     this->AssignValue(other, *this->owner);
   }
-  enum format
-  { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
-    formatFunctionUseCdot, formatNoBracketsForFunctionArgument, formatMatrix, formatMatrixRow, formatUseFrac,
-    formatSequenceWithBraces
-  };
   friend std::ostream& operator << (std::ostream& output, const Expression& theMon)
   { output << theMon.ToString();
     return output;
@@ -150,7 +139,6 @@ class Expression
   void reset(Calculator& newBoss, int numExpectedChildren=0)
   { this->owner=&newBoss;
     this->theData=0;
-    this->format=this->formatDefault;
     this->children.Clear();
     this->children.SetExpectedSize(numExpectedChildren);
   }
@@ -239,6 +227,7 @@ class Expression
   bool IsBuiltInTypE(std::string* outputWhichOperation=0)const;
   bool IsBuiltInTypE(int* outputWhichType)const;
   const Expression& operator[](int n)const;
+  bool IsSequenceDoubleButNotTripleNested()const;
   bool IsSequenceNElementS(int N=-2)const;
   bool IsError(std::string* outputErrorMessage=0)const;
   bool IsContext()const;
@@ -386,7 +375,6 @@ class Expression
   bool MakeSum(Calculator& theCommands, const List<Expression>& theSum);
   bool MakeProducT(Calculator& owner, const List<Expression>& theMultiplicands);
   bool MakeProducT(Calculator& owner, const Expression& left, const Expression& right);
-  void MakeFunction(Calculator& owner, const Expression& theFunction, const Expression& theArgument);
   int GetNumCols()const;
   bool MakeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues);
   bool MakeSequenceStatements(Calculator& owner, List<Expression>* inputStatements=0);
@@ -452,7 +440,7 @@ class Expression
   const Expression& GetLastChild()const
   { return (*this)[this->children.size-1];
   }
-  bool MakeError (const std::string& theError, Calculator& owner);
+  bool MakeError (const std::string& theError, Calculator& owner, bool isPublicError=false);
   Expression(const Expression& other):flagDeallocated(false)
   { this->operator=(other);
   }
@@ -616,22 +604,13 @@ class SyntacticElement
 //  int IndexLastCharPlusOne;
   std::string errorString;
   Expression theData;
-  void operator=(const SyntacticElement& other)
-  { this->controlIndex=other.controlIndex;
-    this->theData=other.theData;
-    this->errorString=other.errorString;
-//    this->IndexFirstChar=other.IndexFirstChar;
-//    this->IndexLastCharPlusOne=other.IndexLastCharPlusOne;
-  }
+  List<Expression> dataList;
   std::string ToStringHumanReadable(Calculator& theBoss, bool includeLispifiedExpressions)const;
   SyntacticElement()
   { this->controlIndex=0;//controlIndex=0 *MUST* point to the empty control sequence.
     this->errorString="";
 //    this->IndexFirstChar=-1;
 //    this->IndexLastCharPlusOne=-1;
-  }
-  SyntacticElement(const SyntacticElement& other)
-  { this->operator=(other);
   }
 };
 
@@ -1003,7 +982,6 @@ public:
   int numEmptyTokensStart;
   Expression theProgramExpression;
 //  std::vector<std::stringstream> theLogs;
-  int registerNumNonClosedBeginArray;
   int registerPositionAfterDecimalPoint;
   int counterInSyntacticSoup;
   List<SyntacticElement> syntacticSouP;
@@ -1042,6 +1020,7 @@ public:
   int numOutputFileS;
   std::string userLabel;
   std::stringstream Comments;
+  std::stringstream errorsPublic;
   FormatExpressions formatVisibleStrings;
   std::string ToString();
   std::string ToStringPerformance();
@@ -1091,6 +1070,7 @@ public:
     return true;
   }
   void DoLogEvaluationIfNeedBe(Function& inputF);
+  void LogPublicError(const std::string& theError);
   bool DecreaseStackExceptLast(int decrease);
   bool DecreaseStackExceptLastTwo(int decrease);
   std::string ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclosures);
@@ -1104,18 +1084,13 @@ public:
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
   bool isSeparatorFromTheLeftForDefinition(const std::string& input);
   bool isSeparatorFromTheLeftForList(const std::string& input);
-  bool isSeparatorFromTheLeftForListMatrixRow(const std::string& input);
-  bool isSeparatorFromTheLeftForMatrixRow(const std::string& input);
   bool isStandardCalculatorCharacter(char input);
   bool isSeparatorFromTheRightGeneral(const std::string& input);
   bool isSeparatorFromTheRightForDefinition(const std::string& input);
   bool isSeparatorFromTheRightForList(const std::string& input);
-  bool isSeparatorFromTheRightForListMatrixRow(const std::string& input);
-  bool isSeparatorFromTheRightForMatrixRow(const std::string& input);
 //  Expression::FunctionAddress GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right);
-  bool AllowsPowerInPreceding(const std::string& lookAhead)
-  { return lookAhead!="{}";
-  }
+  bool AllowsPowerInPreceding(const std::string& lookAhead);
+  bool AllowsPowerInNext(const std::string& lookBehind);
   bool RecursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo="");
 
   bool AllowsLimitProcessInPreceding(const std::string& lookAhead);
@@ -1142,7 +1117,7 @@ public:
   bool ReplaceEEXByEXusingO(int theControlIndex);
   bool ReplaceOOEEXbyEXpowerLike();
   bool ReplaceEEByE();
-  bool ReplaceEXEXByEX(int formatOptions);
+  bool ReplaceEXEXByEX();
   bool ReplaceSsSsXdotsXbySsXdotsX(int numDots);
   bool ReplaceEXdotsXbySsXdotsX(int numDots);
   bool ReplaceEXdotsXBySs(int numDots)
@@ -1150,53 +1125,49 @@ public:
     return this->DecreaseStackSetCharacterRangeS(numDots);
   }
   bool ReplaceOEXByE();
-  bool ReplaceOEXByEX(int formatOptions=Expression::formatDefault);
+  bool ReplaceOEXByEX();
   bool ReplaceO_2O_1E_3XbyEX();
-  bool ReplaceEOByE(int formatOptions=Expression::formatDefault);
-  bool ReplaceOEByE(int formatOptions=Expression::formatDefault);
-  bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
-  bool ReplaceOXEXByEX(int formatOptions=Expression::formatDefault);
-  bool ReplaceOXEEXByEX(int formatOptions=Expression::formatDefault);
-  bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
-  bool ReplaceSqrtEXXByEXX(int formatOptions=Expression::formatDefault);
-  bool ReplaceSqrtEXByEX(int formatOptions=Expression::formatDefault);
-  bool ReplaceSqrtXEXByEX(int formatOptions=Expression::formatDefault);
-  bool ReplaceOXEXEByE(int formatOptions=Expression::formatDefault);
-  bool ReplaceOXEXEXByEX(int formatOptions=Expression::formatDefault);
-  bool ReplaceOXEXEXXByEXX(int formatOptions=Expression::formatDefault);
-  bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
-  bool ReplaceEOEXByEX(int formatOptions=Expression::formatDefault);
-  bool ReplaceXEEXByEXusingO(int inputOperation, int formatOptions=Expression::formatDefault);
+  bool ReplaceEOByE();
+  bool ReplaceOEByE();
+  bool ReplaceOXEByE      ();
+  bool ReplaceOXEXByEX    ();
+  bool ReplaceOXEEXByEX   ();
+  bool ReplaceOXXEXEXEXByE();
+  bool ReplaceSqrtEXXByEXX();
+  bool ReplaceSqrtEXByEX  ();
+  bool ReplaceSqrtXEXByEX ();
+  bool ReplaceOXEXEByE    ();
+  bool ReplaceOXEXEXByEX  ();
+  bool ReplaceOXEXEXXByEXX();
+  bool ReplaceOXEXEXEXByE ();
+  bool ReplaceEOEXByEX    ();
+  bool ReplaceUnderscoreEPowerEbyLimits();
+  bool ReplacePowerEUnderScoreEbyLimits();
+  bool ReplaceXEEXByEXusingO(int inputOperation);
   bool ReplaceECByC();
-  bool ReplaceEXEBySequence(int theControlIndex, int inputFormat=Expression::formatDefault);
-  bool ReplaceYXBySequenceX(int theControlIndex, int inputFormat=Expression::formatDefault)
-  { return this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, inputFormat, 1);
-  }
-  bool ReplaceXXXbyE(int inputFormat=Expression::formatDefault);
-  bool ReplaceYBySequenceY(int theControlIndex, int inputFormat=Expression::formatDefault)
-  { return this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, inputFormat, 0);
-  }
-  bool ReplaceXXYBySequenceY(int theControlIndex, int inputFormat=Expression::formatDefault)
-  { this->ReplaceYBySequenceY(theControlIndex, inputFormat);
-    return this->ReplaceXXYByY();
-  }
-  bool ReplaceXXYXBySequenceYX(int theControlIndex, int inputFormat=Expression::formatDefault)
-  { this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, inputFormat, 1);
-    return this->ReplaceXXYXByYX();
-  }
-  bool ReplaceYXdotsXBySequenceYXdotsX(int theControlIndex, int inputFormat=Expression::formatDefault, int numXs=0);
-  bool ReplaceSequenceXEBySequence(int theControlIndex, int inputFormat=Expression::formatDefault);
-  bool ReplaceSequenceUXEYBySequenceZY(int theControlIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaceEXEBySequence(int theControlIndex);
+  bool ReplaceYXBySequenceX(int theControlIndex);
+  bool ReplaceXXXbyE();
+  bool ReplaceYBySequenceY(int theControlIndex);
+  bool ReplaceXXYBySequenceY(int theControlIndex);
+  bool ReplaceXXYXBySequenceYX(int theControlIndex);
+  bool ReplaceYXdotsXBySequenceYXdotsX(int theControlIndex, int numXs=0);
+  bool ReplaceSequenceXEBySequence    (int theControlIndex);
+  bool ReplaceSequenceUXEYBySequenceZY(int theControlIndex);
   bool ReplaceCEByC();
   bool ReplaceCCByC();
-  bool ReplaceEOEByE(int formatOptions=Expression::formatDefault)
-  { return this->ReplaceEXEByEusingO((*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex, formatOptions);
+  bool ReplaceEOEByE()
+  { return this->ReplaceEXEByEusingO((*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex);
   }
-  bool ReplaceXEXEXByEusingO(int theOperation, int formatOptions=Expression::formatDefault);
-  bool ReplaceEXEByEusingO(int theOperation, int formatOptions=Expression::formatDefault);
-  bool ReplaceXYByConY(int theCon, int theFormat=Expression::formatDefault)
+  bool ReplaceMatrixEXByMatrix();
+  bool ReplaceMatrixEXByMatrixX();
+  bool ReplaceMatrixEXByMatrixNewRow();
+  bool ReplaceMatrixXByE();
+  bool ReplaceCXByE();
+  bool ReplaceXEXEXByEusingO(int theOperation);
+  bool ReplaceEXEByEusingO  (int theOperation);
+  bool ReplaceXYByConY(int theCon)
   { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex=theCon;
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData.format=theFormat;
     return true;
   }
   bool ReplaceXYYByConYY(int theCon)
@@ -1207,19 +1178,20 @@ public:
   { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].controlIndex=theCon;
     return true;
   }
-  bool ReplaceXXByCon(int theCon, int theFormat=Expression::formatDefault)
-  { this->ReplaceXYByConY(theCon, theFormat);
+  bool ReplaceXXByCon(int theCon)
+  { this->ReplaceXYByConY(theCon);
     return this->DecreaseStackSetCharacterRangeS(1);
   }
-  bool ReplaceXByCon(int theCon, int theFormat=Expression::formatDefault);
+  bool ReplaceXByCon(int theCon);
   bool ReplaceXByEusingO(int theOperation);
-  bool ReplaceXByConCon(int con1, int con2, int format1=Expression::formatDefault, int format2=Expression::formatDefault);
+  bool ReplaceXByConCon(int con1, int con2);
   bool ReplaceXXXByCon(int theCon);
-  bool ReplaceXXXByConCon(int con1, int con2, int inputFormat1=Expression::formatDefault, int inputFormat2=Expression::formatDefault);
+  bool ReplaceXXXByConCon(int con1, int con2);
   bool ReplaceXXXXXByCon(int theCon);
-  bool ReplaceXXXXXByConCon(int con1, int con2, int inputFormat1=Expression::formatDefault, int inputFormat2=Expression::formatDefault);
-  bool ReplaceXXXXByConCon(int con1, int con2, int inputFormat1=Expression::formatDefault, int inputFormat2=Expression::formatDefault);
-  bool ReplaceXXXXByCon(int con1, int inputFormat1=Expression::formatDefault);
+  bool ReplaceXXXXXByConCon(int con1, int con2);
+  bool ReplaceXXXXByConCon (int con1, int con2);
+  bool ReplaceXdotsXByMatrixStart(int numXes);
+  bool ReplaceXXXXByCon(int con1);
   bool ReplaceXXYByY()
   { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-2);
@@ -1247,17 +1219,17 @@ public:
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-1);
     return true;
   }
-  bool ReplaceXEXByE(int inputFormat=Expression::formatDefault);
+  bool ReplaceXEXByE();
   bool ReplaceVbyVdotsVAccordingToPredefinedWordSplits();
   bool ReplaceAXbyEX();
   bool ReplaceXXByEEmptySequence();
   bool ReplaCeOXdotsXbyEXdotsX(int numXs);
-  bool ReplaCeOXbyEX(int inputFormat=Expression::formatDefault);
-  bool ReplaceXXbyEX(int inputFormat=Expression::formatDefault);
-  bool ReplaceXEXByEcontainingOE(int inputOpIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaCeOXbyEX();
+  bool ReplaceXXbyEX();
+  bool ReplaceXEXByEcontainingOE(int inputOpIndex);
   bool ReplaceXXByEmptyString();
   bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
-  bool ReplaceXXbyE(int inputFormat=Expression::formatDefault);
+  bool ReplaceXXbyE();
   bool ReplaceIntIntBy10IntPlusInt();
   bool GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows=-1, int desiredNumCols=-1);
   bool GetMatrixExpressionsFromArguments(const Expression& input, Matrix<Expression>& output, int desiredNumRows=-1, int desiredNumCols=-1);
@@ -1327,17 +1299,11 @@ public:
   int conSequenceNoRepetition()
   { return this->controlSequences.GetIndexIMustContainTheObject("SequenceNoRepetition");
   }
-  int conSequenceMatrixRow()
-  { return this->controlSequences.GetIndexIMustContainTheObject("SequenceMatrixRows");
+  int conMatrixStart()
+  { return this->controlSequences.GetIndexIMustContainTheObject("MatrixStart");
   }
-  int conMatrixRow()
-  { return this->controlSequences.GetIndexIMustContainTheObject("MatrixRow");
-  }
-  int conMatrixSeparator()
-  { return this->controlSequences.GetIndexIMustContainTheObject("MatrixSeparator");
-  }
-  int conMatrixRowSeparator()
-  { return this->controlSequences.GetIndexIMustContainTheObject("MatrixRowSeparator");
+  int conMatrixEnd()
+  { return this->controlSequences.GetIndexIMustContainTheObject("MatrixEnd");
   }
   int conLieBracket()
   { return this->controlSequences.GetIndexIMustContainTheObject("[]");
@@ -1354,9 +1320,9 @@ public:
   int opEltZmodP()
   { return this->theAtoms.GetIndexIMustContainTheObject("EltZmodP");
   }
-  int opApplyFunction()
-  { return this->theAtoms.GetIndexIMustContainTheObject("{}");
-  }
+  //int opApplyFunction()
+  //{ return this->theAtoms.GetIndexIMustContainTheObject("{}");
+  //}
   int opIsDenotedBy()
   { return this->theAtoms.GetIndexIMustContainTheObject("=:");
   }
@@ -1398,6 +1364,9 @@ public:
   }
   int opThePower()
   { return this->theAtoms.GetIndexIMustContainTheObject("^");
+  }
+  int opUnderscore()
+  { return this->theAtoms.GetIndexIMustContainTheObject("_");
   }
   int opEqualEqual()
   { return this->theAtoms.GetIndexIMustContainTheObject("==");
@@ -1560,6 +1529,9 @@ public:
   }
   int opFactorial()
   { return this->theAtoms.GetIndexIMustContainTheObject("!");
+  }
+  int opLimitBoundary()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\limits");
   }
   int opLimitProcess()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\to");
@@ -2347,10 +2319,8 @@ bool Expression::AssignMatrix(const Matrix<coefficient>& input, Calculator& owne
     { currentElt.AssignValue(input(i,j), owner);
       currentRow.AddChildOnTop(currentElt);
     }
-    currentRow.format=this->formatMatrixRow;
     this->AddChildOnTop(currentRow);
   }
-  this->format=this->formatMatrix;
   return true;
 }
 #endif

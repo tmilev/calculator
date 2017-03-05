@@ -1601,6 +1601,21 @@ bool Expression::IsError(std::string* outputErrorMessage)const
   return (*this)[1].IsOfType<std::string>(outputErrorMessage);
 }
 
+bool Expression::IsSequenceDoubleButNotTripleNested()const
+{ if (this->owner==0)
+    return false;
+  if (!this->IsSequenceNElementS())
+    return false;
+  for (int i=1; i<this->size(); i++)
+    if (!((*this)[i].IsSequenceNElementS()))
+      return false;
+  for (int i=0; i<this->size(); i++)
+    for (int j=0; j<(*this)[i].size(); j++)
+      if (!(*this)[i][j].IsSequenceNElementS())
+        return true;
+  return false;
+}
+
 bool Expression::IsSequenceNElementS(int N)const
 { if (this->owner==0)
     return false;
@@ -1664,9 +1679,12 @@ bool Expression::IsEqualToZero()const
   return false;
 }
 
-bool Expression::MakeError(const std::string& theError, Calculator& owner)
+bool Expression::MakeError(const std::string& theError, Calculator& owner, bool isPublicError)
 { this->reset(owner, 2);
   this->AddChildAtomOnTop(owner.opError());
+  if (isPublicError)
+    if (owner.errorsPublic.str()=="")
+      owner.errorsPublic << theError;
   return this->AddChildValueOnTop(theError);
 }
 
@@ -1857,13 +1875,12 @@ int Expression::GetNumContextVariables()const
 }
 
 int Expression::GetNumCols()const
-{ if (!this->IsSequenceNElementS() || this->format!=this->formatMatrix)
+{ if (!this->IsSequenceNElementS())
     return -1;
   int theMax=1;
-  for (int i=1; i<this->children.size; i++)
-    if ((*this)[i].format==this->formatMatrixRow &&
-        (*this)[i].IsSequenceNElementS())
-      theMax=MathRoutines::Maximum((*this)[i].children.size-1, theMax);
+  for (int i=1; i<this->size(); i++)
+    if ( (*this)[i].IsSequenceNElementS())
+      theMax=MathRoutines::Maximum((*this)[i].size()-1, theMax);
   return theMax;
 }
 
@@ -2326,10 +2343,9 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(cons
     return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
   if (this->IsAtom() || this->children.size==0)
     return false;
-  if (this->IsLisT())
-    if (this->format==this->formatFunctionUseUnderscore)
-      return false;
-  if (this->children.size>1)
+  if (this->StartsWith(this->owner->opUnderscore()))
+    return false;
+  if (this->size()>1)
   { const Expression& firstE=(*this)[0];
     //const Expression& secondE=(*this)[1];
     if (firstE.IsAtomGivenData(this->owner->opTimes()))
@@ -2379,10 +2395,9 @@ bool Expression::NeedsParenthesisForMultiplication()const
     return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplication();
   if (this->IsAtom() || this->children.size==0)
     return false;
-  if (this->IsLisT())
-    if (this->format==this->formatFunctionUseUnderscore)
-      return false;
-  if (this->children.size>1)
+  if (this->StartsWith(this->owner->opUnderscore()))
+    return false;
+  if (this->size()>1)
   { const Expression& firstE=(*this)[0];
     //const Expression& secondE=(*this)[1];
     if (firstE.IsAtomGivenData(this->owner->opTimes()))
@@ -2501,6 +2516,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
 { MacroRegisterFunctionWithName("Expression::ToString");
   if (this==0)
     crash << "Not supposed to happen: zero this pointer. " << crash;
+  MemorySaving<FormatExpressions> tempFormat;
+  if (theFormat==0)
+    theFormat=&tempFormat.GetElement();
   if (this->owner!=0)
   { if (this->owner->RecursionDeptH+1>this->owner->MaxRecursionDeptH)
       return "(...)";
@@ -2522,12 +2540,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
 //  if (this->owner->flagLogSyntaxRules && recursionDepth<=1)
 //  { out << "(ContextIndex=" << this->IndexBoundVars << ")";
 //  }
-  bool isFinal=theFormat==0 ? true : theFormat->flagExpressionIsFinal;
-  bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
-  bool oldAllowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
-  bool useFrac =this->owner->flagUseFracInRationalLaTeX; //(theFormat==0) ? true : theFormat->flagUseFrac;
-  bool usingPmatrix=false;
-  if (theFormat!=0 && !this->IsOfType<std::string>() && !this->StartsWith(this->owner->opEndStatement()))
+  bool isFinal=theFormat->flagExpressionIsFinal;
+  bool allowNewLine= theFormat->flagExpressionNewLineAllowed;
+  bool oldAllowNewLine= allowNewLine;
+  bool useFrac =this->owner->flagUseFracInRationalLaTeX;
+  if (!this->IsOfType<std::string>() && !this->StartsWith(this->owner->opEndStatement()))
   { if (startingExpression==0)
       theFormat->flagUseQuotes=true;
     else
@@ -2572,13 +2589,14 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     else
       out << "(Corrupt string)";
   } else if (this->IsListStartingWithAtom(this->owner->opDefineConditional()))
-    out << (*this)[1].ToString(theFormat) << " :if \\left(" << (*this)[2].ToString(theFormat) << "\\right)=" << (*this)[3].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << " :if \\left("
+    << (*this)[2].ToString(theFormat) << "\\right)="
+    << (*this)[3].ToString(theFormat);
   else if (this->StartsWith(this->owner->opDivide(), 3))
-  { bool doUseFrac= this->formatUseFrac || this->owner->flagUseFracInRationalLaTeX;
+  { bool doUseFrac= this->owner->flagUseFracInRationalLaTeX;
     if (doUseFrac && ((*this)[1].StartsWith(this->owner->opTimes()) ||
                       (*this)[1].StartsWith(this->owner->opDivide())))
-    { //stOutput << "DEBUG: should i use frac on " << (*this)[1].ToString() << "<br>";
-      List<Expression> multiplicandsLeft;
+    { List<Expression> multiplicandsLeft;
       this->GetMultiplicandsDivisorsRecursive(multiplicandsLeft, 0);
       for (int i=0; i<multiplicandsLeft.size; i++)
         if (multiplicandsLeft[i].StartsWith(this->owner->opIntegral()) ||
@@ -2614,13 +2632,20 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         theFormat->flagExpressionNewLineAllowed=oldAllowNewLine;
     }
   } else if (this->StartsWith(this->owner->opTensor(), 3) )
-    out << (*this)[1].ToString(theFormat) << "\\otimes " << (*this)[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << "\\otimes "
+    << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opIn(),3) )
-    out << (*this)[1].ToString(theFormat) << "\\in " << (*this)[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << "\\in "
+    << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opChoose(),3) )
-    out << (*this)[1].ToString(theFormat) << "\\choose " << (*this)[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << "\\choose "
+    << (*this)[2].ToString(theFormat);
+  else if (this->StartsWith(this->owner->opUnderscore()))
+    out << "{" << (*this)[1].ToString(theFormat) << "}_{"
+    << (*this)[2].ToString(theFormat) << "}";
   else if (this->StartsWith(this->owner->opSetMinus(),3) )
-    out << (*this)[1].ToString(theFormat) << "\\setminus " << (*this)[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << "\\setminus "
+    << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opTimes(), 3))
   { std::string secondE=(*this)[2].ToString(theFormat);
     if ((*this)[1].IsAtomGivenData(this->owner->opSqrt()))
@@ -2640,7 +2665,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       else
         out << firstE;
 //      if (this->for)
-      bool mustHaveTimes=(this->format==this->formatTimesDenotedByStar) && firstE!="-" && firstE!="";
+      bool mustHaveTimes= (firstE!="-" && firstE!="");
       if (!firstNeedsBrackets && !secondNeedsBrackets && firstE!="")
         if (MathRoutines::isADigit(firstE[firstE.size()-1]) )
         { if (MathRoutines::isADigit(secondE[0]))
@@ -2683,9 +2708,10 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if (hasPowerTwo)
       hasPowerTwo=(thePower==2);
     if (hasPowerTwo)
-      out << "\\sqrt{" << (*this)[2].ToString() << "}";
+      out << "\\sqrt{" << (*this)[2].ToString(theFormat) << "}";
     else
-      out << "\\sqrt[" << (*this)[1].ToString() << "]{" << (*this)[2].ToString() << "}";
+      out << "\\sqrt[" << (*this)[1].ToString(theFormat)
+      << "]{" << (*this)[2].ToString(theFormat) << "}";
   } else if (this->IsListStartingWithAtom(this->owner->opFactorial()))
     out << (*this)[1].ToString(theFormat) << "!";
   else if (this->StartsWith(this->owner->opAbsoluteValue(), 2))
@@ -2704,7 +2730,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         Expression newFunE;
         newFunE.MakeXOX(*this->owner, this->owner->opThePower(), firstE[0], (*this)[2]);
         newFunE.CheckConsistency();
-        //stOutput << "<br> tostringing a very special case: " << newE.ToString() << " lispified: " << this->ToStringFull();
+        //stOutput << "<br> tostringing a very special case: " << newE.ToString(theFormat) << " lispified: " << this->ToStringFull();
         out << "{" << newFunE.ToString(theFormat) << "}{}";
         if (firstE[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() ||
             firstE[1].StartsWith(this->owner->opTimes()))
@@ -2778,25 +2804,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << (*this)[2].ToString(theFormat);
   } else if (this->StartsWith(this->owner->opBind(), 2))
     out << "{{" << (*this)[1].ToString(theFormat) << "}}";
-  else if (this->IsListStartingWithAtom(this->owner->opApplyFunction()))
-  { if (this->children.size<2)
-      crash << "This shouldn't happen: too few children. " << crash;
-    switch(this->format)
-    { case Expression::formatFunctionUseUnderscore:
-        if (allowNewLine)
-          theFormat->flagExpressionNewLineAllowed=false;
-        out <<  (*this)[1].ToString(theFormat) << "_{" << (*this)[2].ToString(theFormat) << "}";
-        if (allowNewLine)
-          theFormat->flagExpressionNewLineAllowed=true;
-        break;
-      case Expression::formatFunctionUseCdot:
-        out << (*this)[1].ToString(theFormat) << "\\cdot\\left(" << (*this)[1].ToString(theFormat) << "\\right)";
-        break;
-      default:
-        out << (*this)[1].ToString(theFormat) << "{}\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
-        break;
-    }
-  } else if (this->IsListStartingWithAtom(this->owner->opEqualEqual()))
+  else if (this->IsListStartingWithAtom(this->owner->opEqualEqual()))
     out << (*this)[1].ToString(theFormat) << "==" << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opDifferential(), 3))
   { bool needsParen=(*this)[2].NeedsParenthesisForMultiplication() ||
@@ -2842,72 +2850,57 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   else if (this->IsListStartingWithAtom(this->owner->opLessThan()))
     out << (*this)[1].ToString(theFormat) << "&lt;" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opSequence()))
-    switch (this->format)
-    { case Expression::formatMatrixRow:
-        for (int i=1; i<this->children.size; i++)
-        { out << (*this)[i].ToString(theFormat);
-          if (i!=this->children.size-1)
-            out << "& ";
+  { if (this->IsSequenceDoubleButNotTripleNested())
+    { if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix)
+        out << "\\left(";
+      if (!theFormat->flagUsePmatrix)
+      { int numCols=this->GetNumCols();
+        out << "\\begin{array}{";
+        for (int i=0; i<numCols; i++)
+          out << "c";
+        out << "} ";
+      } else
+        out << "\\begin{pmatrix}";
+      for (int i=1; i<this->size(); i++)
+      { for (int j=1; j<(*this)[i].size(); j++)
+        { out << (*this)[i][j].ToString(theFormat);
+          if (j!=(*this)[i].size()-1)
+            out << " & ";
         }
-        break;
-      case Expression::formatMatrix:
-        if (theFormat!=0)
-          usingPmatrix=theFormat->flagUsePmatrix;
-        if (theFormat!=0)
-          if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix)
-            out << "\\left(";
-        if (!usingPmatrix)
-        { out << "\\begin{array}{";
-          for (int i=0; i<this->GetNumCols(); i++)
-            out << "c";
-          out << "} ";
-        } else
-          out << "\\begin{pmatrix}";
-        for (int i=1; i<this->children.size; i++)
-        { out << (*this)[i].ToString(theFormat);
-          if (i!=this->children.size-1)
-            out << "\\\\ \n";
-        }
-        if (usingPmatrix)
-          out << " \\end{pmatrix}";
-        else
-          out << " \\end{array}";
-        if (theFormat!=0)
-          if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix)
-            out << "\\right)";
-        break;
-      default:
-        if (this->children.size==2)
+        if (i!=this->size()-1)
+          out << "\\\\ \n";
+      }
+      if (theFormat->flagUsePmatrix)
+        out << " \\end{pmatrix}";
+      else
+        out << " \\end{array}";
+      if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix)
+        out << "\\right)";
+    } else
+    { if (this->size()==2)
           out << "{Sequence{}";
-        if (this->format!=formatSequenceWithBraces)
-          out << "\\left(";
-        else
-          out << "{";
-        for (int i=1; i<this->children.size; i++)
-        { std::string currentChildString=(*this)[i].ToString(theFormat);
-          out << currentChildString;
-          charCounter+=currentChildString.size();
-          if (i!=this->children.size-1)
-          { out << ", ";
-            if (theFormat!=0)
-              if (allowNewLine && charCounter >50)
-              { if (theFormat->flagUseLatex)
-                  out << "\\\\\n";
-                if (theFormat->flagUseHTML)
-                  out << "\n<br>\n";
-              }
-          }
-          charCounter%=50;
+      out << "\\left(";
+      for (int i=1; i<this->size(); i++)
+      { std::string currentChildString=(*this)[i].ToString(theFormat);
+        out << currentChildString;
+        charCounter+=currentChildString.size();
+        if (i!=this->children.size-1)
+        { out << ", ";
+          if (theFormat!=0)
+            if (allowNewLine && charCounter >50)
+            { if (theFormat->flagUseLatex)
+                out << "\\\\\n";
+              if (theFormat->flagUseHTML)
+                out << "\n<br>\n";
+            }
         }
-        if (this->format!=formatSequenceWithBraces)
-          out << "\\right)";
-        else
+        charCounter%=50;
+      }
+      out << "\\right)";
+      if (this->size()==2)
           out << "}";
-        if (this->children.size==2)
-          out << "}";
-        break;
     }
-  else if (this->IsListStartingWithAtom(this->owner->opLieBracket()))
+  } else if (this->IsListStartingWithAtom(this->owner->opLieBracket()))
     out << "[" << (*this)[1].ToString(theFormat) << "," << (*this)[2].ToString(theFormat) << "]";
   else if (this->IsListStartingWithAtom(this->owner->opMod()))
     out << (*this)[1].ToString(theFormat) << " mod " << (*this)[2].ToString(theFormat);
@@ -2963,40 +2956,29 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   { this->owner->NumErrors++;
     out << "(Error~ " << this->owner->NumErrors << ":~ see~ comments)";
     this->owner->Comments << "<br>Error " << this->owner->NumErrors << ". " << (*this)[1].ToString(theFormat);
-  } else if (this->children.size==1)
+  } else if (this->size()==1)
   { //stOutput << "I'm at this place";
     out << (*this)[0].ToString(theFormat);
   }
-  else if (this->children.size>=2)
+  else if (this->size()>=2)
   { //stOutput << "I'm at the second place";
-    if (this->format==this->formatFunctionUseUnderscore)
-      out << "{";
     out << (*this)[0].ToString(theFormat);
     bool needParenthesis=true;
-    if (this->children.size==2)
+    if (this->size()==2)
     { if ((*this)[0].IsAtomWhoseExponentsAreInterpretedAsFunction())
         needParenthesis=!(*this)[1].IsAtom();
       if ((*this)[0].IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction())
         needParenthesis=!(*this)[1].IsAtom();
     }
-    if (this->format==this->formatFunctionUseUnderscore)
-      out << "}" << "_";
-    else if (this->format==this->formatFunctionUseCdot)
-      out << "\\cdot";
-    else
-      out << "{}";
-    if (this->format== this->formatFunctionUseUnderscore)
-      out << "{";
-    else if (needParenthesis)
+    out << "{}";
+    if (needParenthesis)
       out << "\\left(";
     for (int i=1; i<this->children.size; i++)
     { out << (*this)[i].ToString(theFormat);
       if (i!=this->children.size-1)
         out << ", ";
     }
-    if (this->format== this->formatFunctionUseUnderscore)
-      out << "}";
-    else if (needParenthesis)
+    if (needParenthesis)
       out << "\\right)";
 //    stOutput << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
 
@@ -3319,13 +3301,6 @@ bool Expression::MakeOXdotsX(Calculator& owner, int theOp, const List<Expression
     this->MakeXOX(owner, theOp, theOpands[i], *this);
   this->CheckConsistencyRecursively();
   return true;
-}
-
-void Expression::MakeFunction(Calculator& owner, const Expression& theFunction, const Expression& theArgument)
-{ this->reset(owner, 2);
-  this->AddChildOnTop(theFunction);
-  this->AddChildOnTop(theArgument);
-  this->format=this->formatFunctionUseUnderscore;
 }
 
 bool Expression::MakeEmptyContext(Calculator& owner)

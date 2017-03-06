@@ -3065,7 +3065,7 @@ int WebWorker::ServeClient()
     return this->ProcessProblemGiveUp();
   else if ((theGlobalVariables.userCalculatorRequestType=="problemSolution" &&
             theGlobalVariables.flagLoggedIn) ||
-            theGlobalVariables.userCalculatorRequestType== "problemSolution")
+            theGlobalVariables.userCalculatorRequestType== "problemSolutionNoLogin")
     return this->ProcessProblemSolution();
   else if ((theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" ||
             theGlobalVariables.userCalculatorRequestType=="submitExercisePreview" ) &&

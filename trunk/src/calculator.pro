@@ -57,7 +57,8 @@ SOURCES += \
     vpfJson.cpp \
     vpfWebServerInterProcessLogistics.cpp \
     vpfHtmlInterpretationInterface.cpp \
-    vpfHtmlSnippets.cpp
+    vpfHtmlSnippets.cpp \
+    vpf6_37calculatorroutines.cpp
 
 HEADERS += \
     webserver.h \

@@ -916,15 +916,73 @@ bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT
 }
 
 bool CalculatorFunctionsGeneral::innerIntegralUpperBound(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerIntegralUpperBound");
-  if (input.size()!=3)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPowerIntToAny");
+  if (!input.StartsWith(theCommands.opThePower(),3))
     return false;
-  const Expression& base=input[1];
-  if (!base.StartsWith(theCommands.opIntegral(),2))
+  const Expression& baseE=input[1];
+  Expression integrationSet;
+  if (baseE.IsAtomGivenData(theCommands.opIntegral()))
+  { output.reset(theCommands);
+    output.AddChildAtomOnTop(theCommands.opIntegral());
+    integrationSet.MakeSequence(theCommands);
+    integrationSet.AddChildAtomOnTop(theCommands.opIndefiniteIntegralIndicator());
+    integrationSet.AddChildOnTop(input[2]);
+    output.AddChildOnTop(integrationSet);
+    return true;
+  }
+  if (!baseE.StartsWith(theCommands.opIntegral(),2))
     return false;
-  Expression newSetE;
-  newSetE.MakeXOX(theCommands, theCommands.opSequence(), base[1], input[2]);
-  return output.MakeOX(theCommands, theCommands.opIntegral(), newSetE);
+  if (baseE.size()<2)
+    return false;
+  if (baseE[1].IsAtomGivenData(theCommands.opIndefiniteIntegralIndicator()))
+  { integrationSet.MakeSequence(theCommands);
+    integrationSet.AddChildAtomOnTop(theCommands.opIndefiniteIntegralIndicator());
+    integrationSet.AddChildOnTop(input[2]);
+    output=baseE[1];
+    return output.SetChilD(1,integrationSet);
+  }
+  if (baseE[1].IsSequenceNElementS(2))
+  { Expression newSet=baseE[1];
+    newSet.SetChilD(2,input[2]);
+    output=baseE;
+    return output.SetChilD(1,newSet);
+  }
+  return false;
+}
+
+bool CalculatorFunctionsGeneral::innerUnderscoreIntWithAny(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPowerIntToAny");
+  if (!input.StartsWith(theCommands.opUnderscore(),3))
+    return false;
+  const Expression& baseE=input[1];
+  Expression integrationSet;
+  if (baseE.IsAtomGivenData(theCommands.opIntegral()))
+  { output.reset(theCommands);
+    output.AddChildAtomOnTop(theCommands.opIntegral());
+    integrationSet.MakeSequence(theCommands);
+    integrationSet.AddChildOnTop(input[2]);
+    integrationSet.AddChildAtomOnTop(theCommands.opIndefiniteIntegralIndicator());
+    output.AddChildOnTop(integrationSet);
+    return true;
+  }
+  if (!baseE.StartsWith(theCommands.opIntegral(),2))
+    return false;
+  if (baseE.size()<2)
+    return false;
+  if (baseE[1].IsAtomGivenData(theCommands.opIndefiniteIntegralIndicator()))
+  { integrationSet.MakeSequence(theCommands);
+    integrationSet.AddChildOnTop(input[2]);
+    integrationSet.AddChildAtomOnTop(theCommands.opIndefiniteIntegralIndicator());
+    output=baseE[1];
+    return output.SetChilD(1,integrationSet);
+  }
+  if (baseE[1].IsSequenceNElementS(2))
+  { Expression newSet=baseE[1];
+    newSet.SetChilD(1,input[2]);
+    output=baseE;
+    return output.SetChilD(1,newSet);
+  }
+  return false;
 }
 
 bool CalculatorFunctionsGeneral::innerPowerExponentToLog(Calculator& theCommands, const Expression& input, Expression& output)

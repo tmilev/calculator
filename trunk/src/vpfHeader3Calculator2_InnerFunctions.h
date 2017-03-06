@@ -15,6 +15,9 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrashByVectorOutOfBounds
   (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAutomatedTestProblemInterpretation
+  (Calculator& theCommands, const Expression& input, Expression& output);
+
 
   static bool innerTurnRulesOnOff
   (Calculator& theCommands, const Expression& input, Expression& output, bool turnOff);
@@ -101,6 +104,8 @@ public:
   static bool innerDenominator(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerLength(Calculator& theCommands, const Expression& input, Expression& output);
+
+
   static bool innerDereferenceSequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDereferenceSequenceStatements(Calculator& theCommands, const Expression& input, Expression& output);
 
@@ -124,6 +129,7 @@ public:
   static bool innerDifferentiateAPowerB(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeDifferentiateLog(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerUnderscoreIntWithAny(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegralUpperBound(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerAnyToZero(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerExponentToLog(Calculator& theCommands, const Expression& input, Expression& output);

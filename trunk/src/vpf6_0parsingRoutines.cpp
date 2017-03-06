@@ -167,6 +167,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("\\cap");
   this->AddOperationNoRepetitionAllowed("Error");
   this->AddOperationNoRepetitionAllowed("Sequence");
+  this->AddOperationNoRepetitionAllowed("Matrix");
   this->AddOperationNoRepetitionAllowed("Context");
   this->AddOperationNoRepetitionAllowed("|");
   this->AddOperationNoRepetitionAllowed("\"");
@@ -258,7 +259,6 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\circ");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\setminus");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("$");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MatrixStart");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MatrixEnd");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\begin");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\left");
@@ -999,6 +999,8 @@ bool Calculator::ReplaceXdotsXByMatrixStart(int numXes)
   currentElt.dataList.SetSize(1);
   currentElt.dataList.LastObject()->MakeSequence(*this);
   currentElt.controlIndex=this->conMatrixStart();
+  //stOutput << "DEBUG: calling: ReplaceXdotsXByMatrixStart. datalist last:"
+  //<< currentElt.dataList.LastObject()->ToString() << "<hr>";
   if (this->flagLogSyntaxRules)
     this->parsingLog+= "[Rule: Calculator::ReplaceXdotsXByMatrixStart]";
   return this->DecreaseStackSetCharacterRangeS(numXes-1);
@@ -1006,7 +1008,17 @@ bool Calculator::ReplaceXdotsXByMatrixStart(int numXes)
 
 bool Calculator::ReplaceMatrixXByE()
 { SyntacticElement& theMatElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  //stOutput << "<hr>DEBUG: START: Calculator::ReplaceMatrixXByE: "
+  //<< theMatElt.theData.ToString();
   theMatElt.theData.MakeSequence(*this, &theMatElt.dataList);
+  //stOutput << "<br>DEBUG: making sequence done, result: "
+  //<< theMatElt.theData.ToString();
+  //stOutput << "<br>DEBUG: opMatrix: " << this->opMatrix();
+  theMatElt.theData.SetChildAtomValue(0, this->opMatrix());
+  //stOutput << "<br>DEBUG: start is done ";
+  //
+  //stOutput << "<br>DEBUG: RESULT: "
+  //<< theMatElt.theData.ToString() << "<hr>";
   theMatElt.dataList.SetSize(0);
   theMatElt.controlIndex=this->conExpression();
   if (this->flagLogSyntaxRules)
@@ -1026,9 +1038,13 @@ bool Calculator::ReplaceMatrixEXByMatrixNewRow()
 }
 
 bool Calculator::ReplaceMatrixEXByMatrix()
-{ SyntacticElement& theMatElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+{ SyntacticElement& theMatElt=
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& theElt=
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   theMatElt.dataList.LastObject()->AddChildOnTop(theElt.theData);
+  //stOutput << "<hr>DEBUG: Calculator::ReplaceMatrixEXByMatrix: "
+  //<< theElt.theData.ToString();
   if (this->flagLogSyntaxRules)
     this->parsingLog+= "[Rule: Calculator::ReplaceMatrixEXByMatrix]";
   return this->DecreaseStackSetCharacterRangeS(2);
@@ -1038,6 +1054,8 @@ bool Calculator::ReplaceMatrixEXByMatrixX()
 { SyntacticElement& theMatElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   theMatElt.dataList.LastObject()->AddChildOnTop(theElt.theData);
+  //stOutput << "<hr>DEBUG: Calculator::ReplaceMatrixEXByMatrixXXX: "
+  //<< theElt.theData.ToString();
   if (this->flagLogSyntaxRules)
     this->parsingLog+= "[Rule: Calculator::ReplaceMatrixEXByMatrixX]";
   return this->DecreaseStackExceptLast(1);
@@ -1461,26 +1479,25 @@ bool Calculator::ReplaceXEEXByEXusingO(int inputOperation)
 bool Calculator::isSeparatorFromTheLeftGeneral(const std::string& input)
 { return input=="{" || input=="(" || input=="[" ||
   input=="," || input==":" || input==";" ||
-  input==" " || input=="MatrixStart" ||
+  input==" " || input=="Matrix" ||
   input=="&";
 }
 
 bool Calculator::isSeparatorFromTheRightGeneral(const std::string& input)
 { return input=="}" || input==")" || input=="]" || input=="," || input==":" || input==";" ||
-  input=="MatrixStart" ||
+  input=="Matrix" ||
   input=="=" || input=="\\\\" ||
   input=="\\end" || input=="&" || input=="EndProgram";
 }
 
 bool Calculator::isSeparatorFromTheLeftForList(const std::string& input)
 { return input=="{" || input=="(" || input=="[" || input==":" || input==";" || input==" " ||
-  input=="MatrixStart";
+  input=="Matrix";
 }
-
 
 bool Calculator::isSeparatorFromTheRightForList(const std::string& input)
 { return input=="}" || input==")" || input=="]" || input==":" || input==";" ||
-  input=="MatrixStart" || input=="\\\\" || input=="\\end";
+  input=="Matrix" || input=="\\\\" || input=="\\end";
 }
 
 bool Calculator::isSeparatorFromTheLeftForDefinition(const std::string& input)
@@ -1513,7 +1530,7 @@ bool Calculator::AllowsTimesInPreceding(const SyntacticElement& thePreceding, co
       lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
       lookAhead=="=" || lookAhead==">" || lookAhead=="<" ||
       lookAhead=="," || lookAhead==";" ||
-      lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixStart" || lookAhead=="\\" ||
+      lookAhead==":" || lookAhead=="&" || lookAhead=="Matrix" || lookAhead=="\\" ||
       lookAhead=="EndProgram"
       ;
     }
@@ -1549,7 +1566,7 @@ bool Calculator::AllowsLimitProcessInPreceding(const std::string& lookAhead)
   lookAhead=="(" || lookAhead=="[" ||
   lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead=="," || lookAhead==";" ||
-  lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixStart" ||
+  lookAhead==":" || lookAhead=="&" || lookAhead=="Matrix" ||
   lookAhead=="\\" ||
   lookAhead=="EndProgram"
   ;
@@ -1560,7 +1577,7 @@ bool Calculator::AllowsAndInPreceding(const std::string& lookAhead)
   lookAhead=="(" || lookAhead=="[" ||
   lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead=="," || lookAhead==";" ||
-  lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixStart" ||
+  lookAhead==":" || lookAhead=="&" || lookAhead=="Matrix" ||
   lookAhead=="\\" ||
   lookAhead=="EndProgram"
   ;
@@ -1571,7 +1588,7 @@ bool Calculator::AllowsOrInPreceding(const std::string& lookAhead)
   lookAhead=="(" || lookAhead=="[" ||
   lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead=="," || lookAhead==";" ||
-  lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixStart" ||
+  lookAhead==":" || lookAhead=="&" || lookAhead=="Matrix" ||
   lookAhead=="\\" ||
   lookAhead=="EndProgram"
   ;
@@ -1588,7 +1605,7 @@ bool Calculator::AllowsIfInPreceding(const std::string& lookAhead)
   lookAhead=="," || lookAhead==";" ||
   lookAhead=="+" || lookAhead=="-" ||
   lookAhead=="/" || lookAhead=="*" ||
-  lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixStart" ||
+  lookAhead==":" || lookAhead=="&" || lookAhead=="Matrix" ||
   lookAhead=="\\" ||
   lookAhead=="EndProgram"
   ;
@@ -2077,16 +2094,16 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\\\"));
   if (lastS=="\\displaystyle")
     return this->PopTopSyntacticStack();
-  if (thirdToLastS=="MatrixStart" && secondToLastS=="Expression" &&
+  if (thirdToLastS=="Matrix" && secondToLastS=="Expression" &&
       lastS=="&")
     return this->ReplaceMatrixEXByMatrix();
-  if (thirdToLastS=="MatrixStart" && secondToLastS=="Expression" &&
+  if (thirdToLastS=="Matrix" && secondToLastS=="Expression" &&
       lastS=="MatrixEnd")
     return this->ReplaceMatrixEXByMatrixX();
-  if (thirdToLastS=="MatrixStart" && secondToLastS=="Expression" &&
+  if (thirdToLastS=="Matrix" && secondToLastS=="Expression" &&
       lastS=="\\\\")
     return this->ReplaceMatrixEXByMatrixNewRow();
-  if (secondToLastS=="MatrixStart" && lastS=="MatrixEnd")
+  if (secondToLastS=="Matrix" && lastS=="MatrixEnd")
     return this->ReplaceMatrixXByE();
   if (fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="," && secondToLastS=="Expression" && lastS=="]")
     return this->ReplaceXEXEXByEusingO(this->conLieBracket());

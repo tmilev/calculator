@@ -1954,7 +1954,7 @@ bool CalculatorFunctionsWeylGroup::innerTestSpechtModules(Calculator& theCommand
 
 bool CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral");
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return theCommands << "Representating takes 2 arguments: element and rep.";
   ElementHyperoctahedralGroupR2 theElt;
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> theRep;
@@ -1965,7 +1965,7 @@ bool CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral(Calculat
   Matrix<Rational> result;
   if (!theRep.GetMatrixOfElement(theElt, result))
     return theCommands << "Failed to get matrix of element " << theElt.ToString() << " from representation: " << theRep.ToString();
-  return output.AssignMatrix(result, theCommands);
+  return output.AssignMatrix(result, theCommands, false);
 }
 
 bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(Calculator& theCommands, const Expression& input, Expression& output)

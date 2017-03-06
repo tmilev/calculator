@@ -637,8 +637,11 @@ bool CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs
 (Calculator& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output, SemisimpleLieAlgebra& owner)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs");
   ElementSemisimpleLieAlgebra<AlgebraicNumber> outputAlgebraic;
-  if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, input, outputAlgebraic, owner))
-    return theCommands << "<hr> Failed to semisimple Lie algebra element from " << input.ToString() << ". ";
+  if (!CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
+      (theCommands, input, outputAlgebraic, owner))
+    return theCommands << "<hr> Failed to obtain semisimple Lie algebra element from "
+    << input.ToString() << ". ";
+
   for (int i=0; i<outputAlgebraic.theCoeffs.size; i++)
     if (!outputAlgebraic.theCoeffs[i].IsRational())
       return theCommands << "<hr>From input: " << input.ToString() << ", I managed to extract element: "
@@ -670,11 +673,16 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
     if (!currentMon.IsOneLetterFirstDegree(&theGenIndex))
       return theCommands << "<hr>Failed to convert semisimple Lie algebra input to linear poly: " << input.ToString() << ".<hr>";
     Expression singleChevGenE=theContext.ContextGetContextVariable(theGenIndex);
-    if (!singleChevGenE.IsListNElements(2))
-      return theCommands << "<hr>Failed to convert a summand of " << input.ToString() << " to Chevalley generator.<hr>";
+    if (!singleChevGenE.StartsWith(theCommands.opUnderscore(), 3))
+      return theCommands << "<hr>Failed to convert: "
+      << singleChevGenE.ToString()
+      << "(summand of: "
+      << input.ToString() << ") to Chevalley generator.<hr>";
     std::string theLetter;
-    if (!singleChevGenE[0].IsAtom(&theLetter) || !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
-      return theCommands << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
+    if (!singleChevGenE[1].IsAtom(&theLetter) ||
+        !singleChevGenE[2].IsSmallInteger(&theChevGen.theGeneratorIndex))
+      return theCommands << "<hr>Failed to convert summand "
+      << singleChevGenE.ToString() << " to Chevalley generator of "
       << owner.GetLieAlgebraName();
     bool isGood=true;
     if (theLetter=="g")

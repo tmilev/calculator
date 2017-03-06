@@ -2857,8 +2857,8 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationInnerHandler
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix, "",
    "Adds two matrices.",
-   "\\begin{pmatrix} 1& 2\\ 2& 3\\end{pmatrix}+\
-  \n\\begin{pmatrix} 1& 3\\ 2& 3\\end{pmatrix}",
+   "\\begin{pmatrix} 1& 2\\\\ 2& 3\\end{pmatrix}+\
+  \n\\begin{pmatrix} 1& 3\\\\ 2& 3\\end{pmatrix}",
   true, false,
   "CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix",
   "AddMatrices");
@@ -2868,7 +2868,8 @@ void Calculator::initPredefinedStandardOperations()
    "Adds two sequences (termwise), provided the sequences have the same number of entries. \
    In case the entries of the sequences are elements of a base field, corresponds to vector addition.",
    "v_{1}=(1, 2, 3);\
-  \nv_{2}=(1, 3, 2);\nv_{3}=(3, 1, 1);\
+  \nv_{2}=(1, 3, 2);\
+  \nv_{3}=(3, 1, 1);\
   \nv_{4}=(-2, 2, 2);\
   \n1/2v_{1}+1/2v_{2}+7/8v_{3}+13/16v_{4}"
    , true, false,
@@ -3315,7 +3316,7 @@ void Calculator::initPredefinedStandardOperations()
   this->AddOperationInnerHandler
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix, "",
    "Multiplies a rational number by a matrix",
-   "2\\begin{pmatrix}  1& 2& 3\\2& 1& 0 \\end{pmatrix}"
+   "2\\begin{pmatrix}  1& 2& 3\\\\2& 1& 0 \\end{pmatrix}"
    , true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix",
    "ScalarTimesMatrix");

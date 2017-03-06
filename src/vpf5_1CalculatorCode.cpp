@@ -562,6 +562,8 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
   SemisimpleLieAlgebra* ownerSS=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
+  //stOutput << "DEBUG: got semisimple Lie algebra of type: "
+  //<< ownerSS->theWeyl.theDynkinType.ToString();
   ElementSemisimpleLieAlgebra<Rational> theErational;
   if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[2], theErational, *ownerSS))
     return output.MakeError("Failed to extract element of semisimple Lie algebra. ", theCommands);
@@ -586,10 +588,12 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
   SemisimpleLieAlgebra* ownerSS;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
+  //stOutput << "DEBUG: got semisimple Lie algebra of type: "
+  //<< ownerSS->theWeyl.theDynkinType.ToString();
   List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
-  theOperators.Reserve(input.children.size-2);
+  theOperators.Reserve(input.size()-2);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
-  for (int i=2; i<input.children.size; i++)
+  for (int i=2; i<input.size(); i++)
   { if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[i], tempElt, *ownerSS))
       return output.MakeError("Failed to extract element of semisimple Lie algebra. ", theCommands);
     theOperators.AddOnTop(tempElt);

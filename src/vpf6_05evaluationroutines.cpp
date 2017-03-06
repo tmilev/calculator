@@ -296,6 +296,14 @@ bool Calculator::EvaluateExpression
 (Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
+  //////////////////////////////
+  //  stOutput << "DEBUG: temporary check comment me out. Evaluating:"
+  //  << input.ToString()
+  //  << " <hr>"
+  //  ;
+  //  input.CheckConsistency();
+  //  input.HashFunction();
+  //////////////////////////////
   if (theCommands.flagLogFullTreeCrunching && theCommands.RecursionDeptH<3)
   { theCommands << "<br>";
     for (int i=0; i<theCommands.RecursionDeptH; i++)
@@ -314,8 +322,10 @@ bool Calculator::EvaluateExpression
     return true;
   }
   //////////////////////////////
-  //  stOutput << "temporary check comment me out";
-  //  theCommands.ExpressionStack.GrandMasterConsistencyCheck();
+  //  stOutput << "DEBUG: temporary check comment me out. Evaluating:"
+  //  << input.ToString()
+  //  << " <hr>"
+  //  ;
   //  input.CheckConsistency();
   //  input.HashFunction();
   //////////////////////////////

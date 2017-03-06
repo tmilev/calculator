@@ -1747,7 +1747,7 @@ bool Expression::MakeIdMatrixExpressions(int theDim, Calculator& inputBoss)
   oneE.AssignValue(1, inputBoss);
   zeroE.AssignValue(0, inputBoss);
   theMat.MakeIdMatrix(theDim, oneE, zeroE);
-  return this->AssignMatrixExpressions(theMat, inputBoss);
+  return this->AssignMatrixExpressions(theMat, inputBoss, false);
 }
 
 bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output)

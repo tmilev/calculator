@@ -4092,6 +4092,23 @@ void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inp
   inputOutputList.AddOnTopNoRepetition(*this);
 }
 
+bool Expression::MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat)
+{ MacroRegisterFunctionWithName("Expression::MakeMatrix");
+  this->reset(owner, inputMat==0 ? 1 : inputMat->NumRows+1);
+  this->AddChildAtomOnTop(owner.opMatrix());
+//  stOutput << "Making sequence from: " << inputSequence.ToString();
+  if (inputMat!=0)
+  { Expression nextRow;
+    for (int i=0; i<inputMat->NumRows; i++)
+    { nextRow.MakeSequence(owner);
+      for (int j=0; j<inputMat->NumCols; j++)
+        nextRow.AddChildOnTop((*inputMat)(i,j));
+      this->AddChildOnTop(nextRow);
+    }
+  }
+  return true;
+}
+
 bool Expression::MakeSequence(Calculator& owner, List<Expression>* inputSequence)
 { MacroRegisterFunctionWithName("Expression::MakeSequence");
   this->reset(owner, inputSequence==0 ? 1 : inputSequence->size+1);

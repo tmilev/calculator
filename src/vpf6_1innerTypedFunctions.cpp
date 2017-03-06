@@ -943,19 +943,19 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceByT(Calculator& theCommands
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-  if (!input[1].IsSequenceNElementS())
+  if (!input[1].IsSequenceNElementS() && !input[1].StartsWith(theCommands.opMatrix()))
     return false;
   if (!(input[2]=="t") && !(input[2]=="T"))
     return false;
   return theCommands.innerTranspose(theCommands, input[1], output);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsBinaryOps::innerPowerMatrixByRat(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3))
+  if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
-  if (!input[1].IsSequenceNElementS())
+  if (!input[1].StartsWith(theCommands.opMatrix()))
     return false;
   Matrix<Rational> theMatRat;
 //  stOutput << "raising " << input[1].ToString() << " to " << input[2].ToString();
@@ -972,7 +972,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
     { output=outputMatRat;
       return true;
     }
-    return output.AssignMatrix(theMatRat, theCommands);
+    return output.AssignMatrix(theMatRat, theCommands, true);
   }
   Matrix<AlgebraicNumber> theMatAlg;
   if (theCommands.GetMatrix(input[1], theMatAlg, 0,-1, CalculatorConversions::innerAlgebraicNumber))
@@ -988,7 +988,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
     { output=outputMatRat;
       return true;
     }
-    return output.AssignMatrix(theMatAlg, theCommands);
+    return output.AssignMatrix(theMatAlg, theCommands, true);
   }
   int thePower=0;
   if (!input[2].IsSmallInteger(&thePower))
@@ -1001,14 +1001,14 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
   if (!theMat.IsSquare())
     return output.MakeError("Attempting to raise non-square matrix to power", theCommands);
   if (theMat.NumRows>10)
-    return theCommands << "I've been instructed not to exponentiate non-ratinoal matrices of dimension >10. ";
+    return theCommands << "I've been instructed not to exponentiate non-rational matrices of dimension >10. ";
   Matrix<Expression> idMatE;
   Expression oneE, zeroE;
   oneE.AssignValue(1, theCommands);
   zeroE.AssignValue(0, theCommands);
   idMatE.MakeIdMatrix(theMat.NumRows, oneE, zeroE);
   MathRoutines::RaiseToPower(theMat, thePower, idMatE);
-  return output.AssignMatrixExpressions(theMat, theCommands);
+  return output.AssignMatrixExpressions(theMat, theCommands, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors
@@ -1174,13 +1174,35 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(Calcu
   return output.AssignValue(leftC, theCommands);
 }
 
+bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence");
+//  stOutput << "<br>here be trouble! input " << input.ToString()
+//  << " is a sequence of " << input.children.size << " elements.";
+  if (!input.StartsWith(theCommands.opTimes(), 3))
+    return false;
+//  stOutput << "<br>trouble be double!";
+  const Expression& theScalarE=input[1];
+  if (!theScalarE.IsBuiltInScalar())
+    return false;
+//  stOutput << "<br>trouble be triple!";
+  const Expression& theMatE=input[2];
+  if (!theMatE.StartsWith(theCommands.opMatrix()))
+    return false;
+  Matrix<Expression> theMat;
+  if (!theCommands.GetMatrixExpressions(theMatE, theMat))
+    return false;
+  for (int i=0; i<theMat.NumRows; i++)
+    for (int j=0; j<theMat.NumRows; j++)
+      theMat(i,j)=theScalarE*theMat(i,j);
+  return output.AssignMatrixExpressions(theMat, theCommands, false);
+}
+
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence");
 //  stOutput << "<br>here be trouble! input " << input.ToString()
 //  << " is a sequence of " << input.children.size << " elements.";
-  if (!input.IsListNElements(3))
+  if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
-//  stOutput << "<br>trouble be double!";
   if (!input[1].IsBuiltInScalar())
     return false;
 //  stOutput << "<br>trouble be triple!";
@@ -1197,9 +1219,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& 
   return true;
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence");
-  //stOutput << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
+bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix");
   if (!input.IsListNElements(3))
     return false;
   Matrix<Expression> leftMat, rightMat;
@@ -1222,7 +1244,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix(C
           leftSummand.MakeProducT(theCommands, leftMat(i,k), rightMat(k,j));
           outputMat(i,j).MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
         }
-  return output.AssignMatrixExpressions(outputMat, theCommands);
+  return output.AssignMatrixExpressions(outputMat, theCommands, true);
 }
 
 bool CalculatorFunctionsBinaryOps::innerTensorMatRatByMatRat(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1438,6 +1460,33 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(C
   ElementWeylAlgebra<Rational> resultE=rightConverted.GetValue<ElementWeylAlgebra<Rational> >();
   resultE.LieBracketOnTheLeft(leftConverted.GetValue<ElementWeylAlgebra<Rational> >());
   return output.AssignValueWithContext(resultE, leftConverted.GetContext(), theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix");
+  if (!input.StartsWith(theCommands.opPlus(), 3))
+    return false;
+  const Expression& leftE =input[1];
+  const Expression& rightE=input[2];
+  if (!leftE.StartsWith(theCommands.opMatrix()) && !leftE.StartsWith(theCommands.opSequence()))
+    return false;
+  if (!rightE.StartsWith(theCommands.opMatrix()) && !rightE.StartsWith(theCommands.opSequence()))
+    return false;
+  if (!leftE.StartsWith(theCommands.opMatrix())&& !rightE.StartsWith(theCommands.opMatrix()))
+    return false;
+  if (leftE.size()!=rightE.size())
+    return false;
+  Matrix<Expression> leftMat, rightMat;
+  if (!theCommands.GetMatrixExpressions(leftE, leftMat) ||
+      !theCommands.GetMatrixExpressions(rightE, rightMat))
+    return false;
+  if (leftMat.NumCols!=rightMat.NumCols || leftMat.NumRows!=rightMat.NumRows)
+    return false;
+  for (int i=0; i<leftMat.NumRows; i++)
+    for (int j=0; j<leftMat.NumCols; j++)
+      leftMat(i,j)+=rightMat(i,j);
+  return output.AssignMatrixExpressions(leftMat, theCommands,false);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(Calculator& theCommands, const Expression& input, Expression& output)

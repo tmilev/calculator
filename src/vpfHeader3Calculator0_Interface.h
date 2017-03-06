@@ -22,6 +22,7 @@ class Expression
     this->children.size=0;
     this->theData=-1;
   }
+  bool SetChilD(int childIndexInMe, int childIndexInBoss);
   //Definitions.
   //1. Fundamentals.
   //1.1. An atom is an expression with zero children.
@@ -163,10 +164,13 @@ class Expression
   { return this->children.size;
   }
   bool SetChilD(int childIndexInMe, const Expression& inputChild);
-  bool SetChilD(int childIndexInMe, int childIndexInBoss);
-  bool AssignMatrixExpressions(const Matrix<Expression>& input, Calculator& owner);
+  bool AssignMatrixExpressions
+  (const Matrix<Expression>& input, Calculator& owner,
+   bool reduceOneRowToSequenceAndOneByOneToNonMatrix);
   template<class coefficient>
-  bool AssignMatrix(const Matrix<coefficient>& input, Calculator& owner);
+  bool AssignMatrix
+  (const Matrix<coefficient>& input, Calculator& owner,
+   bool reduceOneRowToSequenceAndOneByOneToNonMatrix);
   bool DivisionByMeShouldBeWrittenInExponentForm()const;
   bool IsCalculatorStatusChanger()const;
   bool AssignMeMyChild(int childIndex)
@@ -378,6 +382,7 @@ class Expression
   int GetNumCols()const;
   bool MakeSequenceCommands(Calculator& owner, List<std::string>& inputKeys, List<Expression>& inputValues);
   bool MakeSequenceStatements(Calculator& owner, List<Expression>* inputStatements=0);
+  bool MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat=0);
   bool MakeSequence(Calculator& owner, List<Expression>* inputSequence=0);
   bool MakeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right);
   bool MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex=2);
@@ -1300,7 +1305,7 @@ public:
   { return this->controlSequences.GetIndexIMustContainTheObject("SequenceNoRepetition");
   }
   int conMatrixStart()
-  { return this->controlSequences.GetIndexIMustContainTheObject("MatrixStart");
+  { return this->controlSequences.GetIndexIMustContainTheObject("Matrix");
   }
   int conMatrixEnd()
   { return this->controlSequences.GetIndexIMustContainTheObject("MatrixEnd");
@@ -1400,6 +1405,9 @@ public:
   }
   int opCalculusPlot()
   { return this->theAtoms.GetIndexIMustContainTheObject("CalculusPlot");
+  }
+  int opMatrix()
+  { return this->theAtoms.GetIndexIMustContainTheObject("Matrix");
   }
   int opSequence()
   { return this->theAtoms.GetIndexIMustContainTheObject("Sequence");
@@ -2306,21 +2314,17 @@ bool Calculator::GetTypeHighestWeightParabolic
 }
 
 template <class coefficient>
-bool Expression::AssignMatrix(const Matrix<coefficient>& input, Calculator& owner)
+bool Expression::AssignMatrix
+(const Matrix<coefficient>& input, Calculator& owner, bool reduceOneRowToSequenceAndOneByOneToNonMatrix)
 { MacroRegisterFunctionWithName("Expression::AssignMatrix");
-  this->reset(owner, input.NumRows+1);
-  this->AddChildAtomOnTop(owner.opSequence());
-  Expression currentRow, currentElt;
+  Matrix<Expression> theMatEs;
+  theMatEs.init(input.NumRows, input.NumCols);
+  Expression currentElt;
   for (int i=0; i<input.NumRows; i++)
-  { currentRow.reset(owner);
-    currentRow.children.Reserve(input.NumCols+1);
-    currentRow.AddChildAtomOnTop(owner.opSequence());
     for (int j=0; j<input.NumCols; j++)
     { currentElt.AssignValue(input(i,j), owner);
-      currentRow.AddChildOnTop(currentElt);
+      theMatEs(i,j)=currentElt;
     }
-    this->AddChildOnTop(currentRow);
-  }
-  return true;
+  return this->AssignMatrixExpressions(theMatEs, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix);
 }
 #endif

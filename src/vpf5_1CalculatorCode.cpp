@@ -763,12 +763,15 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
 
 bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerTranspose");
-  if (!input.IsSequenceNElementS())
+  if (!input.IsSequenceNElementS() && !input.StartsWith(theCommands.opMatrix()))
     return false;
   Matrix<Expression> theMat;
   theCommands.GetMatrixExpressions(input, theMat);
+  if (input.IsSequenceNElementS())
+    if (theMat.NumRows!=1)
+      return false;
   theMat.Transpose();
-  return output.AssignMatrixExpressions(theMat, theCommands);
+  return output.AssignMatrixExpressions(theMat, theCommands, true);
 }
 
 void Plot::operator+=(const Plot& other)

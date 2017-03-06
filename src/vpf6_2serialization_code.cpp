@@ -43,28 +43,29 @@ bool CalculatorConversions::innerLoadWeylGroup(Calculator& theCommands, const Ex
 bool CalculatorConversions::innerDynkinSimpleType(Calculator& theCommands, const Expression& input, DynkinSimpleType& outputMon)
 { MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DeSerializeMon_DynkinSimpleType");
   Expression rankE, typeLetterE, scaleE;
-  if (input.children.size==2)
-  { rankE=input[1];
-    typeLetterE=input[0];
+  if (input.StartsWith(theCommands.opUnderscore(),3))
+  { rankE=input[2];
+    typeLetterE=input[1];
     if (typeLetterE.StartsWith(theCommands.opThePower(),3))
     { scaleE=typeLetterE[2];
       typeLetterE=typeLetterE[1];
     } else
       scaleE.AssignValue(1, theCommands);
-  } else if (input.children.size==3)
-  { if (!input.StartsWith(theCommands.opThePower(),3))
-      return theCommands << "<hr>Failed to extract rank, type, first co-root length - input has 3 children but was not exponent."
-      << " Input is " << input.ToString() << ".";
-    scaleE=input[2];
-    if (!input[1].IsListNElements(2))
-      return theCommands << "<hr>Failed to extract rank, type from " << input[1].ToString() << ". The expression does not have two children.";
-    rankE=input[1][1];
-    typeLetterE=input[1][0];
+  } else if (input.StartsWith(theCommands.opThePower(),3))
+  { scaleE=input[2];
+    if (!input[1].StartsWith(theCommands.opUnderscore(), 3))
+      return theCommands << "<hr>Failed to extract rank, type from "
+      << input[1].ToString()
+      << ". The expression does not have two children.";
+    rankE=input[1][2];
+    typeLetterE=input[1][1];
   } else
-    return theCommands << "<hr>Failed to extract rank, type, first co-root length from expression " << input.ToString();
+    return theCommands << "<hr>Failed to extract rank, type, "
+    << "first co-root length from: " << input.ToString() << ". ";
   Rational theScale;
   if (!scaleE.IsOfType<Rational>(&theScale))
-    return theCommands << "<hr>Failed to extract first co-root length: expression " << scaleE.ToString()
+    return theCommands << "<hr>Failed to extract first co-root length: "
+    << "expression " << scaleE.ToString()
     << " is not a rational number.";
   if (theScale<=0)
     return theCommands << "<hr>Couldn't extract first co-root length: " << theScale.ToString() << " is non-positive.";
@@ -342,7 +343,7 @@ bool CalculatorConversions::innerStoreCandidateSA(Calculator& theCommands, const
   values.AddOnTop(currentE);
   Matrix<Rational> conversionMat;
   conversionMat.AssignVectorsToRows(input.theHsScaledToActByTwo);
-  currentE.AssignMatrix(conversionMat, theCommands);
+  currentE.AssignMatrix(conversionMat, theCommands, false);
   keys.AddOnTop("ElementsCartan");
   values.AddOnTop(currentE);
   //  ElementSemisimpleLieAlgebra<Rational> convertedToRational;

@@ -1707,15 +1707,14 @@ bool Calculator::innerDistributeExponent(Calculator& theCommands, const Expressi
 }
 
 bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.StartsWith(theCommands.opThePower(), 3))
+{ MacroRegisterFunctionWithName("Calculator::outerPowerRaiseToFirst");
+  if (!input.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  if (input[1].StartsWith(theCommands.opIntegral(),2) ||
+      input[1].IsAtomGivenData(theCommands.opIntegral()))
     return false;
   if (input[2].IsEqualToOne())
-  { std::string tempS;
-//    if (input[1].IsOperation(&tempS))
-//      if (tempS=="A" || tempS=="B" || tempS=="C" || tempS=="D" || tempS=="E" ||
-//          tempS=="F" || tempS=="G")
-//        return false;
-    output=input[1];
+  { output=input[1];
     return true;
   }
   return false;

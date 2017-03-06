@@ -1927,7 +1927,7 @@ bool Calculator::ApplyOneRule()
   if (thirdToLastS=="\\int" && secondToLastS=="_" && lastS=="Expression")
     return this->ReplaCeOXdotsXbyEXdotsX(2);
   if (fourthToLastS=="\\int" && thirdToLastS=="_" &&
-      secondToLastS=="Expression" && lastS=="^")
+      secondToLastS=="Expression" && (lastS=="^" || lastS=="EndProgram"))
     return this->ReplaCeOXdotsXbyEXdotsX(3);
   if (fifthToLastS=="\\int" && fourthToLastS=="_" && thirdToLastS=="{}" &&
       secondToLastS=="^" && lastS=="{}")

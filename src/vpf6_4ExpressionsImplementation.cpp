@@ -2518,7 +2518,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     crash << "Not supposed to happen: zero this pointer. " << crash;
   MemorySaving<FormatExpressions> tempFormat;
   if (theFormat==0)
-    theFormat=&tempFormat.GetElement();
+  { theFormat=&tempFormat.GetElement();
+    theFormat->flagUseQuotes=false;
+  }
   if (this->owner!=0)
   { if (this->owner->RecursionDeptH+1>this->owner->MaxRecursionDeptH)
       return "(...)";
@@ -2544,7 +2546,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   bool allowNewLine= theFormat->flagExpressionNewLineAllowed;
   bool oldAllowNewLine= allowNewLine;
   bool useFrac =this->owner->flagUseFracInRationalLaTeX;
-  if (!this->IsOfType<std::string>() && !this->StartsWith(this->owner->opEndStatement()))
+  if (!this->IsOfType<std::string>() &&
+      !this->StartsWith(this->owner->opEndStatement()))
   { if (startingExpression==0)
       theFormat->flagUseQuotes=true;
     else
@@ -2654,6 +2657,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     { std::string firstE= (*this)[1].ToString(theFormat);
       bool firstNeedsBrackets=(*this)[1].NeedsParenthesisForMultiplication();
       bool secondNeedsBrackets=(*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(&((*this)[1]));
+      bool mustHaveTimes= false;
       if (firstE=="-1" )
       { firstE="-";
         firstNeedsBrackets=false;
@@ -2664,9 +2668,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << "\\left(" << firstE << "\\right)";
       else
         out << firstE;
-//      if (this->for)
-      bool mustHaveTimes= (firstE!="-" && firstE!="");
-      if (!firstNeedsBrackets && !secondNeedsBrackets && firstE!="")
+      if (!firstNeedsBrackets && !secondNeedsBrackets && firstE!=""
+          && firstE!="-")
         if (MathRoutines::isADigit(firstE[firstE.size()-1]) )
         { if (MathRoutines::isADigit(secondE[0]))
             mustHaveTimes=true;
@@ -2811,12 +2814,26 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     (*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
     if ((*this)[2].StartsWith(this->owner->opDivide()))
       needsParen=false;
+    bool rightNeedsParen=(*this)[1].NeedsParenthesisForMultiplication();
+    std::string theCoeff=(*this)[2].ToString(theFormat);
+    if (theCoeff=="1")
+    { needsParen=false;
+      theCoeff="";
+    }
+    if (theCoeff=="-1")
+    { theCoeff="-";
+    }
     if (needsParen)
       out << "\\left(";
-    out << (*this)[2].ToString(theFormat);
+    out << theCoeff;
     if (needsParen)
       out << "\\right)";
-    out << "\\diff " << (*this)[1].ToString(theFormat);
+    out << "\\diff ";
+    if (rightNeedsParen)
+      out << "\\left(";
+    out << (*this)[1].ToString(theFormat);
+    if (rightNeedsParen)
+      out << "\\right)";
   } else if (this->StartsWith(this->owner->opDifferential(), 2))
   { bool needsParen=(*this)[1].NeedsParenthesisForMultiplication() ||
     (*this)[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();

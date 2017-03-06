@@ -174,14 +174,14 @@ void Calculator::initPredefinedInnerFunctions()
   ("InterpretProblem", CalculatorHtmlFunctions::innerInterpretProblem, "",
    "Does as ExtractCalculatorExpressionFromHtml but in addition interprets the calculator commands. ",
    "InterpretProblem(LoadFileIntoString(\
-   \"DefaultProblemLocation/example.html\"))", true, false,
+   \"DefaultProblemLocation/Functions-composing-fractional-linear-1.html\"))", true, false,
    "CalculatorHtmlFunctions::innerInterpretProblem", "InterpretProblem");
   this->AddOperationInnerHandler
   ("ProblemGiveUp", CalculatorHtmlFunctions::innerInterpretProblemGiveUp, "",
    "Gives the predefined answer to a problem. First argument must be a string with the problem. \
     the second argument must be the id of the answer. ",
    "ProblemGiveUp(LoadFileIntoString(\
-   \"DefaultProblemLocation/example.html\"), AlgebraAnswer)", true, false,
+   \"DefaultProblemLocation/Functions-composing-fractional-linear-1.html\"), AlgebraAnswer)", true, false,
    "CalculatorHtmlFunctions::innerInterpretProblemGiveUp", "ProblemGiveUp");
   this->AddOperationInnerHandler
   ("MakeInputBox", CalculatorHtmlFunctions::innerUserInputBox, "",
@@ -203,7 +203,7 @@ void Calculator::initPredefinedInnerFunctions()
     At the moment of writing, the planned span class names are:\
    \"calculator\", \"calculatorHidden\", \"calculatorAnswer\".",
    "ExtractCalculatorExpressionFromHtml(LoadFileIntoString(\
-   \"DefaultProblemLocation/example.html\"))", true, false,
+   \"DefaultProblemLocation/Functions-composing-fractional-linear-1.html\"))", true, false,
    "CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml",
    "ExtractCalculatorExpressionFromHtml");
    ;
@@ -335,13 +335,29 @@ void Calculator::initPredefinedInnerFunctions()
    "MakeMakefile(0)", false);
 
   this->AddOperationInnerHandler
-  ("AutomatedTest", this->innerAutomatedTest, "",
+  ("AutomatedTest", Calculator::innerAutomatedTest, "",
    "Runs a big bad automated test of all built in functions against a set of known good results. ",
-   "AutomatedTest{}(0)", false);
+   "AutomatedTest{}(0)", false, false,
+   "Calculator::innerAutomatedTest", "AutomatedTest", true);
   this->AddOperationInnerHandler
-  ("AutomatedTestSetKnownGoodCopy", this->innerAutomatedTestSetKnownGoodCopy, "",
-   "Runs a big bad automated test of all built in functions to create a file containing a set of known good results.",
-   "AutomatedTestSetKnownGoodCopy 0", false);
+  ("AutomatedTestSetKnownGoodCopy",
+    Calculator::innerAutomatedTestSetKnownGoodCopy, "",
+   "Runs a big bad automated test of all built-in \
+    functions to create a file containing a set of known good results.",
+   "AutomatedTestSetKnownGoodCopy 0", false, false,
+   "Calculator::innerAutomatedTestSetKnownGoodCopy",
+   "AutomatedTestSetKnownGoodCopy",
+   true);
+  this->AddOperationInnerHandler
+  ("AutomatedTestProblemInterpretation",
+    CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation, "",
+   "Runs a big bad automated test of all built in \
+    problems located in the DefaultProblemLocation/ folder. ",
+   "AutomatedTestProblemInterpretation{}(0)", false, false,
+   "CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation",
+   "AutomatedTestProblemInterpretation",
+   true);
+
   this->AddOperationInnerHandler
   ("!", CalculatorFunctionsGeneral::innerFactorial, "",
    "Factorial function. ",
@@ -3436,13 +3452,6 @@ void Calculator::initPredefinedStandardOperations()
     true, false, "CalculatorFunctionsGeneral::innerPowerExponentToLog",
    "PowerToLog");
   this->AddOperationHandler
-  ("^", CalculatorFunctionsGeneral::innerIntegralUpperBound, "",
-   "Replaces \\int_a^b by (\\int, a, b) .",
-   "A=\\int_a^b; Lispify(A); DrawExpressionTree(A); ",
-   true, true, false,
-   "CalculatorFunctionsGeneral::innerIntegralUpperBound",
-   "IntegralUpperBound", false);
-  this->AddOperationHandler
   ("^", CalculatorFunctionsGeneral::innerPowerAnyToZero, "",
    "Replaces p^0 by 1 if p is non-zero, and by an error message if p is zero.",
    "A=x^0; x=0; A; B=x^0; 0^0; ",
@@ -3554,6 +3563,19 @@ void Calculator::initPredefinedStandardOperations()
   "x^1+x^2; A^1", true, false,
   "Calculator::outerPowerRaiseToFirst",
   "RaiseToPowerOne");
+  this->AddOperationHandler
+  ("^", CalculatorFunctionsGeneral::innerIntegralUpperBound, "",
+   "Replaces \\int_a^b by (\\int, a, b) .",
+   "A=\\int_a^b; Lispify(A); DrawExpressionTree(A); ",
+   true, true, false,
+   "CalculatorFunctionsGeneral::innerIntegralUpperBound",
+   "IntegralUpperBound", false);
+  this->AddOperationInnerHandler
+  ("_", CalculatorFunctionsGeneral::innerUnderscoreIntWithAny, "",
+   "Takes care of the integral superscript notation \\int^a ",
+  "\\int^a_b f dx; \\int_a^b f dx", true, false,
+  "Calculator::innerUnderscoreIntWithAny",
+  "IntegralUnderscore");
 
   this->AddOperationInnerHandler
   ("_", CalculatorFunctionsGeneral::innerDereferenceSequence, "",

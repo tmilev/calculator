@@ -2567,7 +2567,8 @@ bool CalculatorFunctionsGeneral::innerInterpretAsDifferential
   return false;
 }
 
-bool CalculatorFunctionsGeneral::innerIntegralOperator(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsGeneral::innerIntegralOperator
+(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx");
   //stOutput << "called innerCompositeMultiplyIntegralFbyDx with input: " << input.ToString();
   int theOp=theCommands.opTimes();

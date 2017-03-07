@@ -6748,7 +6748,8 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName()
   }
   this->theFileToCrawlPhysical=theGlobalVariables.PhysicalPathProjectBase+ "../freecalc/" +
   this->theFileToCrawlRelative;
-  this->baseFolderStartFilePhysical=FileOperations::GetPathFromFileNameWithPath(this->theFileToCrawlPhysical);
+  this->baseFolderStartFilePhysical=
+  FileOperations::GetPathFromFileNameWithPath(this->theFileToCrawlPhysical);
   MathRoutines::StringBeginsWith
   (this->theFileToCrawlPhysical, this->baseFolderStartFilePhysical, &this->theFileToCrawlNoPathPhysical);
   return true;
@@ -7021,7 +7022,8 @@ void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
     return;
   std::fstream theFile;
   if (!FileOperations::OpenFileUnsecure(theFile, currentFileName, false, false, false))
-  { this->errorStream << "Failed to open file " << currentFileName << ", aborting.";
+  { this->errorStream << "Failed to open file "
+    << currentFileName << ", aborting.";
     return;
   }
   std::string buffer;

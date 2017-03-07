@@ -2524,8 +2524,16 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    false, "CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras");
   this->AddOperationInnerHandler
   ("CentralizerChains", CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras, "",
-   "Creates a printout with centralizer chains of semisimple Lie subalgebras. ",
-   "CentralizerChains (ComputeSemisimpleSubalgebras{}(B_3))");
+   "This function is disabled by default (takes too long): you have to first call \
+    TurnRulesOn(CentralizerChains). \
+    Please use this function only if running the calculator on\
+    your own machine; don't use it on a public server.\
+    Creates a printout with centralizer chains of semisimple Lie subalgebras. ",
+   "CentralizerChains (ComputeSemisimpleSubalgebras{}(B_3))",
+   true, false,
+   "CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras",
+   "CentralizerChains",
+   true);
 
   this->AddOperationInnerHandler
   ("printSemisimpleSubalgebras", Calculator::innerPrintSSsubalgebrasRegular, "",

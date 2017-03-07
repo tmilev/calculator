@@ -572,7 +572,9 @@ bool CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculu
       theArg.StartsWith(theCommands.opThePower()) ||
       theArg.StartsWith(theCommands.opDivide()) ||
       theArg.StartsWith(theCommands.opSequence()) ||
-      theArg.StartsWith(theCommands.opSqrt())
+      theArg.StartsWith(theCommands.opSqrt()) ||
+      theArg.StartsWith(theCommands.opCos()) ||
+      theArg.StartsWith(theCommands.opSin())
         )
   { output.reset(theCommands);
     output.AddChildOnTop(input[1]);

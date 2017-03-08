@@ -17,6 +17,13 @@ public:
   bool Contains(const key& inputKey)const
   { return this->GetIndex(inputKey)!=-1;
   }
+  void RemoveKey(const key& theKey)
+  { int theIndex=this->theKeys.GetIndex(theKey);
+    if (theIndex==-1)
+      return;
+    this->theKeys.RemoveIndexSwapWithLast(theIndex);
+    this->theValues.RemoveIndexSwapWithLast(theIndex);
+  }
   value& GetValueCreateIfNotPresent(const key& input)
   { int theIndex=this->theKeys.GetIndex(input);
     if (theIndex==-1)

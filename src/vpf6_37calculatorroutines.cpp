@@ -7,29 +7,44 @@
 #include "vpfHeader3Calculator4HtmlFunctions.h"
 #include "vpfHeader8HtmlSnippets.h"
 #include "vpfHeader8HtmlInterpretation.h"
+#include "vpfHeader8HtmlInterpretationInterface.h"
 ProjectInformationInstance ProjectInfoVpf6_37cpp(__FILE__, "More calculator built-in functions. ");
 
 bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation");
-  (void) input;
+  if (input.size()!=3)
+   return theCommands << "I expected two arguments: number of tests to run and number of tests to report";
   std::stringstream out;
   ProgressReport theReport;
   List<std::string> theFileNames, theFileTypes;
   int numDesiredTests=0;
-  input.IsSmallInteger(&numDesiredTests);
+  int numSamples=1;
+  input[1].IsSmallInteger(&numDesiredTests);
+  input[2].IsSmallInteger(&numSamples);
   FileOperations::GetFolderFileNamesVirtual
   ("DefaultProblemLocation/", theFileNames, &theFileTypes, false);
-  out << "<table><tr><th>File name </th><th>Loading</th><th>Interpretation</th> <th>AnswerGeneration</th></tr>";
+  std::stringstream randSeedStream;
+  randSeedStream << theCommands.theObjectContainer.CurrentRandomSeed;
+  out << "Problems generated from random seed: " << randSeedStream.str();
+  out << "<table>";
+  out << "<tr>"
+  << "<th>File name </th>"
+  << "<th>Loading</th>"
+  << "<th>Interpretation</th>"
+  << "<th>AnswerGeneration</th>"
+  << "<th>Accepting built in answer?</th>"
+  << "</tr>";
   if (numDesiredTests<=0)
     numDesiredTests=theFileNames.size;
   int numInterpretations=0;
-  int numSamples=1;
   int totalToInterpret=0;
   for (int i=0; i< theFileNames.size; i++)
     if (theFileTypes[i]==".html")
       totalToInterpret++;
   totalToInterpret= MathRoutines::Minimum(numDesiredTests, totalToInterpret);
+  MapLisT<std::string, std::string, MathRoutines::hashString>&
+  globalKeys= theGlobalVariables.webArguments;
   for (int i=0; i< theFileNames.size; i++)
   { if (numInterpretations>=numDesiredTests)
       break;
@@ -38,10 +53,12 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     numInterpretations++;
     std::stringstream reportStream;
     reportStream << "Interpreting file "
+    << theFileNames[i] << " ("
     << numInterpretations
     << " out of "
     << totalToInterpret
-    << theFileNames[i];
+    << "). "
+    ;
     theReport.Report(reportStream.str());
     CalculatorHTML theProblem;
     std::stringstream problemComments;
@@ -55,7 +72,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     << theFileNames[i]
     << "</a>"
     << "</td>";
-    if (!theProblem.LoadMe(false, problemComments))
+    if (!theProblem.LoadMe(false, problemComments, randSeedStream.str()))
     { out << "<td><b>Couldn't load. </b>"
       << problemComments.str() << "</td>";
       out << "</tr>";
@@ -63,17 +80,59 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     } else
       out << "<td><span style=\"color:green\">Success</span></td>";
     if (!theProblem.InterpretHtml(problemComments))
-    {
-      out << "<td><b>Failed to interpret file: " << theProblem.fileName
-      << "</b>. Comments: " << problemComments.str();
-
+    { out << "<td><span style=\"color:red\"><b>Failure.</b></span> "
+      << "Comments: " << problemComments.str();
+      out << "</td></tr>";
+      break;
+    } else
+      out << "<td><span style=\"color:green\">Success</span></td>";
+    bool answerGenerated=false;
+    bool answersWork=false;
+    std::string answerGeneration;
+    std::string solutionReport;
+    for (int j=0; j<theProblem.theProblemData.theAnswers.size; j++)
+    { std::string currentAnswer;
+      std::string currentKey="calculatorAnswer"+
+      theProblem.theProblemData.theAnswers[j].answerId;
+      theGlobalVariables.SetWebInpuT(currentKey, "1");
+      theGlobalVariables.SetWebInpuT("fileName", theProblem.fileName);
+      answerGeneration+=HtmlInterpretation::GetAnswerOnGiveUp
+      (randSeedStream.str(), &currentAnswer, &answerGenerated)+"<hr>";
+      if (!answerGenerated)
+        break;
+      theGlobalVariables.SetWebInpuT(currentKey, CGI::StringToURLString(currentAnswer, false));
+      solutionReport+=
+      HtmlInterpretation::SubmitProblem(randSeedStream.str(), &answersWork)+"<hr>";
+      if (!answersWork)
+        break;
+      globalKeys.RemoveKey(currentKey);
+    }
+    if (!answerGenerated)
+    { out << "<td><span style=\"color:red\"><b>Failure.</b></span>";
+      out << "</td>"
+      << "<td>"
+      << answerGeneration
+      << "</td>"
+      << "</tr>";
+      break;
+    } else
+      out << "<td><span style=\"color:green\">Success</span></td>";
+    if (!answersWork)
+    { out << "<td><span style=\"color:red\"><b>Failure.</b></span>";
       out << "</td></tr>";
       break;
     } else
       out << "<td><span style=\"color:green\">Success</span></td>";
     if (numInterpretations<=numSamples)
-    { out << "<td>" << theProblem.outputHtmlBodyNoTag
-      << "</td>";
+    { out << "<td><b>Problem</b><hr>" << theProblem.outputHtmlBodyNoTag
+      << "</td>"
+      ;
+      out << "<td><b>Answer(s)</b><hr>" << answerGeneration
+      << "</td>"
+      ;
+      out << "<td><b>Answer(s) confirmation(s)</b><hr>" << solutionReport
+      << "</td>"
+      ;
     }
     out << "</tr>";
   }

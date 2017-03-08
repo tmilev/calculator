@@ -594,7 +594,7 @@ D-B;\
   this->AddOperationInnerHandler
   ("^", CalculatorFunctionsGeneral::innerPowerImaginaryUnit, "",
    "Raises imaginary unit to an integer power. ",
-   "TurnOnRules(\"RaiseItoPower\");i^{-50!+1}; ", true, false,
+   "TurnOnRules(\"RaiseImaginaryUnitToPower\");i^{-50!+1}; ", true, false,
    "CalculatorFunctionsGeneral::innerPowerImaginaryUnit",
    "RaiseImaginaryUnitToPower", true);
   this->AddOperationInnerHandler
@@ -635,7 +635,7 @@ D-B;\
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM, "",
    "Transforms an integral of the form \\int \\tan^n x \\sec^m x.  ",
-   "TurnOffRules(\"ExpressTanViaSineCosine\", \"ExpressSecViaSineCosine\"); \\int \\tan^2 x \\sec^{2}x dx ", true, false,
+   "TurnOffRules(\"ExpressTanViaSineCosine\", \"ExpressSecViaCosine\"); \\int \\tan^2 x \\sec^{2}x dx ", true, false,
    "CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM",
    "IntegrateTanPowerNSecPowerM");
   this->AddOperationInnerHandler

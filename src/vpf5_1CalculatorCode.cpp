@@ -771,7 +771,10 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
       && !input.StartsWithGivenAtom("Transpose") )
     return false;
   Matrix<Expression> theMat;
-  theCommands.GetMatrixExpressions(input, theMat);
+  if (input.StartsWithGivenAtom("Transpose"))
+    theCommands.GetMatrixExpressionsFromArguments(input, theMat);
+  else
+    theCommands.GetMatrixExpressions(input, theMat);
   if (input.IsSequenceNElementS())
     if (theMat.NumRows!=1)
       return false;

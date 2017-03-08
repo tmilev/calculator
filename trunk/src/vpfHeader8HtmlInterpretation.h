@@ -158,7 +158,7 @@ public:
   int GetAnswerIndex(const std::string& desiredAnswerId);
   bool CheckContent(std::stringstream& comments);
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
-  bool LoadMe(bool doLoadDatabase, std::stringstream& comments);
+  bool LoadMe(bool doLoadDatabase, std::stringstream& comments, const std::string& inputRandomSeed);
   bool LoadAndParseTopicList(std::stringstream& comments);
   bool LoadDatabaseInfo(std::stringstream& comments);
   std::string CleanUpFileName(const std::string& inputLink);
@@ -241,9 +241,9 @@ public:
   std::string GetEditPageButton(const std::string& desiredFileName);
   std::string GetJavascriptSubmitAnswers();
   std::string GetJavascriptMathQuillBoxes();
-  void LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore);
+  void LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed);
   void FigureOutCurrentProblemList(std::stringstream& comments);
-  std::string LoadAndInterpretCurrentProblemItem(bool needToLoadDatabaseMayIgnore);
+  std::string LoadAndInterpretCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed);
   static unsigned int HashFunction(const CalculatorHTML& input)
   { return input.HashFunction();
   }

@@ -371,7 +371,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 #endif
 }
 
-bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
+bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, const std::string& inputRandomSeed)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
   this->RelativePhysicalFileNameWithFolder=
   this->fileName
@@ -407,7 +407,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
 
   //stOutput << "DEBUG: flagIsForReal: " << this->flagIsForReal;
   if (!this->flagIsForReal)
-  { std::string randString= theGlobalVariables.GetWebInput("randomSeed");
+  { std::string randString=inputRandomSeed;
     if (randString!="")
     { std::stringstream randSeedStream(randString);
       //stOutput << "radSeedStream: " << randString;
@@ -420,11 +420,11 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments)
   return true;
 }
 
-std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDatabaseMayIgnore)
+std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItem");
   double startTime=theGlobalVariables.GetElapsedSeconds();
 //  this->theProblemData.CheckConsistency();
-  this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore);
+  this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore, desiredRandomSeed);
 //  this->theProblemData.CheckConsistency();
   if (!this->flagLoadedSuccessfully)
     return this->comments.str();
@@ -457,7 +457,7 @@ void CalculatorHTML::LoadFileNames()
   this->topicListFileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
 }
 
-void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore)
+void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadCurrentProblemItem");
   this->LoadFileNames();
   this->flagLoadedSuccessfully=false;
@@ -476,7 +476,7 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore)
 //  this->theProblemData.CheckConsistency();
 //  stOutput << "<hr>DEBUG: got to before loading<hr>";
   std::stringstream commentsStream;
-  if (!this->LoadMe(needToLoadDatabaseMayIgnore, commentsStream))
+  if (!this->LoadMe(needToLoadDatabaseMayIgnore, commentsStream, inputRandomSeed))
     this->flagLoadedSuccessfully =false;
 //  stOutput << "<hr>DEBUG: loaded<hr>";
 //  stOutput << "<hr>DEBUG: OK<hr>";
@@ -714,8 +714,8 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretProblemGiveUp");
   (void)input;
-  double FIXMEMEMEMEMEMEM;
-  return output.AssignValue(HtmlInterpretation::GetAnswerOnGiveUp(), theCommands);
+  return output.AssignValue
+  (HtmlInterpretation::GetAnswerOnGiveUp(theGlobalVariables.GetWebInput("randomSeed")), theCommands);
 }
 
 bool CalculatorHtmlFunctions::innerInterpretProblem

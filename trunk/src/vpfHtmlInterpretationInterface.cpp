@@ -13,7 +13,7 @@ std::string HtmlInterpretation::GetProblemSolution()
   double startTime=theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
   std::stringstream out;
-  theProblem.LoadCurrentProblemItem(false);
+  theProblem.LoadCurrentProblemItem(false, theGlobalVariables.GetWebInput("randomSeed"));
   if (!theProblem.flagLoadedSuccessfully)
   { out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
@@ -218,7 +218,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   out << "Your answer(s): \\(" << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem
-  (theGlobalVariables.UserRequestRequiresLoadingRealExamData());
+  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"));
   if (!theProblem.flagLoadedSuccessfully)
     out << "<br><b>Failed to load problem.</b> Comments: " << theProblem.comments.str();
   std::stringstream comments;
@@ -362,7 +362,7 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPageInterpreter");
   CalculatorHTML theFile;
   std::stringstream out;
-  out << theFile.LoadAndInterpretCurrentProblemItem(false);
+  out << theFile.LoadAndInterpretCurrentProblemItem(false, theGlobalVariables.GetWebInput("randomSeed"));
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 }
@@ -417,7 +417,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   bool includeInitializeButtonsJS=
   theGlobalVariables.UserDefaultHasAdminRights();
   thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-  if (!thePage.LoadMe(true, comments))
+  if (!thePage.LoadMe(true, comments, theGlobalVariables.GetWebInput("randomSeed")))
   { out << "<html>"
     << CGI::GetCalculatorStyleSheetWithTags()
     << "<body>"
@@ -472,7 +472,9 @@ std::string HtmlInterpretation::GetPageFromTemplate()
 std::string HtmlInterpretation::GetExamPage()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPage");
   CalculatorHTML theFile;
-  std::string problemBody= theFile.LoadAndInterpretCurrentProblemItem(theGlobalVariables.UserRequestRequiresLoadingRealExamData());
+  std::string problemBody= theFile.LoadAndInterpretCurrentProblemItem
+  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(),
+   theGlobalVariables.GetWebInput("randomSeed"));
   std::stringstream out;
   out << "<html>"
   << "<head>"
@@ -537,7 +539,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</problemNavigation>";
   std::stringstream failureStream;
-  if (!theFile.LoadMe(false, failureStream))
+  if (!theFile.LoadMe(false, failureStream, theGlobalVariables.GetWebInput("randomSeed")))
   { out << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";
     out << "</body></html>";
     return out.str();
@@ -599,11 +601,16 @@ std::string HtmlInterpretation::GetEditPageHTML()
 }
 
 std::string HtmlInterpretation::SubmitProblem()
+{ return HtmlInterpretation::SubmitProblem(theGlobalVariables.GetWebInput("randomSeed"),0);
+}
+
+std::string HtmlInterpretation::SubmitProblem(const std::string& inputRandomSeed, bool* outputIsCorrect)
 { MacroRegisterFunctionWithName("HtmlInterpretation::SubmitProblem");
   std::stringstream out;
   double startTime=theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
-  theProblem.LoadCurrentProblemItem(theGlobalVariables.UserRequestRequiresLoadingRealExamData());
+  theProblem.LoadCurrentProblemItem
+  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), inputRandomSeed);
   if (!theProblem.flagLoadedSuccessfully)
   { out << "Failed to load problem. " << theProblem.comments.str();
     return out.str();
@@ -717,15 +724,18 @@ std::string HtmlInterpretation::SubmitProblem()
 //    stOutput << theInterpreter.outputString;
     return out.str();
   }
-  bool isCorrect=false;
+  bool tempIsCorrect=false;
+  if (outputIsCorrect==0)
+    outputIsCorrect=&tempIsCorrect;
+  *outputIsCorrect=false;
   int mustBeOne=-1;
   if (!theInterpreter.theProgramExpression[theInterpreter.theProgramExpression.size()-1].IsSmallInteger(&mustBeOne))
-    isCorrect=false;
+    *outputIsCorrect=false;
   else
-    isCorrect=(mustBeOne==1);
+    *outputIsCorrect=(mustBeOne==1);
   FormatExpressions theFormat;
   out << "<table width=\"300\">";
-  if (!isCorrect)
+  if (!(*outputIsCorrect))
   { out << "<tr><td><span style=\"color:red\"><b>Your answer appears to be incorrect. </b></span></td></tr>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
       out << "<tr><td>For debug purposes: the calculator output is: " << theInterpreter.outputString
@@ -786,7 +796,7 @@ std::string HtmlInterpretation::SubmitProblem()
       out << "<tr><td><span style=\"color:red\"><b>Deadline passed, attempt not recorded.</b></span></td></tr>";
     else
     { currentA.numSubmissions++;
-      if (isCorrect)
+      if ((*outputIsCorrect))
       { currentA.numCorrectSubmissions++;
         if (currentA.firstCorrectAnswerClean=="")
           currentA.firstCorrectAnswerClean=currentA.currentAnswerClean;
@@ -972,10 +982,19 @@ const std::string CalculatorHTML::BugsGenericMessage=
 with a short explanation to the administrator of the web site. ";
 
 std::string HtmlInterpretation::GetAnswerOnGiveUp()
+{ return HtmlInterpretation::GetAnswerOnGiveUp(theGlobalVariables.GetWebInput("randomSeed"));
+}
+
+std::string HtmlInterpretation::GetAnswerOnGiveUp
+(const std::string& inputRandomSeed, std::string* outputNakedAnswer, bool* outputDidSucceed)
 { MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
+  if (outputNakedAnswer!=0)
+    *outputNakedAnswer="";
+  if (outputDidSucceed!=0)
+    *outputDidSucceed=false;
   double startTime=theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
-  theProblem.LoadCurrentProblemItem(false);
+  theProblem.LoadCurrentProblemItem(false, inputRandomSeed);
   std::stringstream out;
   if (!theProblem.flagLoadedSuccessfully)
   { out << "Problem name is: " << theProblem.fileName
@@ -989,7 +1008,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
   { out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
     return out.str();
   }
-  if(theGlobalVariables.GetWebInput("randomSeed")=="")
+  if (inputRandomSeed=="")
   { out << " <b>I could not figure out the exercise problem (missing random seed). </b>";
     return out.str();
   }
@@ -1005,7 +1024,9 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
     MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   int indexLastAnswerId=theProblem.GetAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId==-1)
-  { out << "<b>Student submitted answerID: " << lastStudentAnswerID
+  { out << "File: "
+    << theProblem.fileName
+    << "<br><b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
     << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
@@ -1060,8 +1081,12 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
   const Expression& currentE=
   theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1][1];
   if (!currentE.StartsWith(theInterpreteR.opEndStatement()))
-    out << "\\(" << currentE.ToString(&theFormat) << "\\)";
-  else
+  { out << "\\(" << currentE.ToString(&theFormat) << "\\)";
+    if (outputNakedAnswer!=0)
+      *outputNakedAnswer=currentE.ToString(&theFormat);
+    if (outputDidSucceed!=0)
+      *outputDidSucceed=true;
+  } else
     for (int j=1; j<currentE.size(); j++)
     { if (currentE[j].StartsWith(theInterpreteR.opRulesOff()) ||
           currentE[j].StartsWith(theInterpreteR.opRulesOn()))
@@ -1077,6 +1102,12 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
         out << currentE[j].GetValue<std::string>();
       else
         out << "\\(" << currentE[j].ToString(&theFormat) << "\\)";
+      if (j==currentE.size()-1)
+      { if (outputNakedAnswer!=0)
+          *outputNakedAnswer=currentE[j].ToString(&theFormat);
+        if (outputDidSucceed!=0)
+          *outputDidSucceed=true;
+      }
     }
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())

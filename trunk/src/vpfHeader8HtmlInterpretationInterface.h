@@ -15,6 +15,7 @@ public:
   static std::string ClonePageResult();
   static std::string AddTeachersSections();
   static std::string AddUserEmails(const std::string& hostWebAddressWithPort);
+  static std::string SubmitProblem(const std::string& inputRandomSeed, bool* outputIsCorrect);
   static std::string SubmitProblem();
   static std::string GetProblemSolution();
   static std::string GetEditPageHTML();
@@ -23,6 +24,8 @@ public:
   static std::string GetTopicTable();
   static std::string GetExamPageInterpreter();
   static std::string GetAnswerOnGiveUp();
+  static std::string GetAnswerOnGiveUp
+  (const std::string& inputRandomSeed, std::string* outputNakedAnswer=0, bool* outputDidSucceed=0);
   static std::string GetSelectCourse();
   static std::string GetScoresPage();
   static std::string GetScoresInCoursePage();

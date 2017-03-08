@@ -3672,6 +3672,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
     currentCommandListE.AddChildOnTop(currentSubE);
     currentCommandListE.AddChildOnTop(newResultE);
     currentSummandE.reset(theCommands);
+    currentSummandE.AddChildAtomOnTop(theCommands.opUnderscore());
     currentSummandE.AddChildOnTop(currentCommandListE);
     currentSummandE.AddChildOnTop(threeE);
 

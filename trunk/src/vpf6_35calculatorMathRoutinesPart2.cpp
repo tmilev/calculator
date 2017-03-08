@@ -624,8 +624,12 @@ bool CalculatorFunctionsGeneral::innerDenominator(Calculator& theCommands, const
 bool CalculatorFunctionsGeneral::innerSumSequence
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSumSequence");
+  //stOutput << "<br>DEBUG: making sum from: " << input.ToString()
+  //<< "size of input: " << input.size();
   if (input.size()<1)
-    return false;
+  { output=input;
+    return true;
+  }
   if (input.StartsWith(theCommands.opLimitBoundary()))
     return false;
   if (input.size()==1)

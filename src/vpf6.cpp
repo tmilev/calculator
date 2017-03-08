@@ -935,7 +935,7 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
     return false;
   }
   output.reset(theCommands, numRows+1);
-  output.AddChildAtomOnTop(theCommands.opSequence());
+  output.AddChildAtomOnTop(theCommands.opMatrix());
   Expression currentRow, currentE, leftIE, rightIE;
   for (int i=0; i<numRows; i++)
   { currentRow.reset(theCommands, numCols+1);
@@ -2682,7 +2682,7 @@ void ObjectContainer::reset()
   this->theMatRFs.Clear();
   this->theEltsModP.Clear();
   this->thePlots.SetSize(0);
-  theAlgebraicClosure.reset();
+  this->theAlgebraicClosure.reset();
   this->theAlgebraicNumbers.Clear();
   this->theLittelmannOperators.Clear();
   this->theSltwoSAs.SetSize(0);

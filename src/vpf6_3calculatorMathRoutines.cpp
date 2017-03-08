@@ -3535,15 +3535,18 @@ bool CalculatorFunctionsGeneral::innerIntegrateSinPowerNCosPowerM
     currentIntegrandE.reset(theCommands);
     currentIntegrandE.AddChildAtomOnTop("Polynomialize");
     currentIntegrandE.AddChildOnTop(currentIntegrandNonPolynomializedE);
-    currentIntegral.MakeIntegral(theCommands, integrationSet, currentIntegrandE, newVarE);
+    currentIntegral.MakeIntegral
+    (theCommands, integrationSet, currentIntegrandE, newVarE);
 
-    currentIntegralComputation.MakeXOX(theCommands, theCommands.opDefine(), newResultE, currentIntegral);
+    currentIntegralComputation.MakeXOX
+    (theCommands, theCommands.opDefine(), newResultE, currentIntegral);
     currentCommandListE.reset(theCommands);
     currentCommandListE.AddChildAtomOnTop(theCommands.opEndStatement());
     currentCommandListE.AddChildOnTop(currentIntegralComputation);
     currentCommandListE.AddChildOnTop(currentSubE);
     currentCommandListE.AddChildOnTop(newResultE);
     currentSummandE.reset(theCommands);
+    currentSummandE.AddChildAtomOnTop(theCommands.opUnderscore());
     currentSummandE.AddChildOnTop(currentCommandListE);
     currentSummandE.AddChildOnTop(threeE);
 
@@ -6751,7 +6754,8 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName()
   this->baseFolderStartFilePhysical=
   FileOperations::GetPathFromFileNameWithPath(this->theFileToCrawlPhysical);
   MathRoutines::StringBeginsWith
-  (this->theFileToCrawlPhysical, this->baseFolderStartFilePhysical, &this->theFileToCrawlNoPathPhysical);
+  (this->theFileToCrawlPhysical, this->baseFolderStartFilePhysical,
+   &this->theFileToCrawlNoPathPhysical);
   return true;
 }
 
@@ -7082,7 +7086,7 @@ bool CalculatorFunctionsGeneral::innerSetOutputFile(Calculator& theCommands, con
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   for (unsigned i=0; i<theFileName.size(); i++)
     if (theFileName[i]=='.' || theFileName[i]=='\\' || theFileName[i]=='/')
-    { out << theFileName << " rejected as a file name as it contains the characters one of the three characters .\\/  ";
+    { out << theFileName << " rejected as a file name as it contains one of the three characters .\\/  ";
       return output.AssignValue(out.str(), theCommands);
     }
   theGlobalVariables.initOutputReportAndCrashFileNames(theFileName, theCommands.inputString);

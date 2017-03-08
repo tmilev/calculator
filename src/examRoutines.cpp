@@ -714,6 +714,7 @@ bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretProblemGiveUp");
   (void)input;
+  double FIXMEMEMEMEMEMEM;
   return output.AssignValue(HtmlInterpretation::GetAnswerOnGiveUp(), theCommands);
 }
 

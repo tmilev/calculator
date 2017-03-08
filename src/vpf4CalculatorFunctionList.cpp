@@ -265,19 +265,28 @@ void Calculator::initPredefinedInnerFunctions()
    "Lispify( e^x)");
 
   this->AddOperationInnerHandler
-  ("FlattenCommandEnclosuresOneLayer", Calculator::innerFlattenCommandEnclosuresOneLayer, "",
+  ("FlattenCommandEnclosuresOneLayer",
+    Calculator::innerFlattenCommandEnclosuresOneLayer, "",
    "Flattens command enclosures. ",
-   "FlattenCommandEnclosuresOneLayer(CommandClosure{}(x=5; x); CommandClosure{}(y; x)  ) ", true, false, "Calculator::FlattenCommandEnclosuresOneLayer",
+   "FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x=5; x); CommandEnclosure{}(y; x)  ) ",
+   true, false,
+   "Calculator::FlattenCommandEnclosuresOneLayer",
    "FlattenCommandEnclosuresOneLayer");
   this->AddOperationInnerHandler
   ("LispifyFull", CalculatorFunctionsGeneral::innerLispifyFull, "",
    "Shows the complete internal tree structure of an expression (replacing the expression with a string).",
-   "LispifyFull( e^x)");
+   "LispifyFull( e^x)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerLispifyFull",
+   "LispifyFull");
 
   this->AddOperationInnerHandler
   ("ChildExpression", CalculatorFunctionsGeneral::innerChildExpression, "",
    "If defined, returns the nth child of an expression.",
-   "ChildExpression( e^x,1); ChildExpression( e^x,2); ChildExpression( e^x,3)", "ChildExpression");
+   "ChildExpression( e^x,1); ChildExpression( e^x,2); ChildExpression( e^x,3)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerChildExpression",
+   "ChildExpression");
 
   this->AddOperationInnerHandler
   ("ToString", CalculatorFunctionsGeneral::innerExpressionToString, "",
@@ -290,8 +299,10 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("\"", CalculatorFunctionsGeneral::innerQuoteToString, "",
    "Creates a string.",
-   "\"The quick brown fox jumps over the lazy dog.\"", true, false,
-   "CalculatorFunctionsGeneral::innerQuoteToString", "QuoteToString");
+   "\"The quick brown fox jumps over the lazy dog.\"",
+   true, false,
+   "CalculatorFunctionsGeneral::innerQuoteToString",
+   "QuoteToString");
   this->AddOperationInnerHandler
   ("TestBase64", CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test, "",
    "Test function: converts a base64 string to bitstream and back to base64. Output must be identical to input. ",
@@ -330,7 +341,8 @@ void Calculator::initPredefinedInnerFunctions()
    ");
 
   this->AddOperationInnerHandler
-  ("MakeMakefile", CalculatorFunctionsGeneral::innerMakeMakeFile, "",
+  ("MakeMakefile",
+    CalculatorFunctionsGeneral::innerMakeMakeFile, "",
    "Makes a makefile. ",
    "MakeMakefile(0)", false);
 
@@ -361,31 +373,46 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("!", CalculatorFunctionsGeneral::innerFactorial, "",
    "Factorial function. ",
-   "5!");
+   "5!", true, false,
+   "CalculatorFunctionsGeneral::innerFactorial",
+   "Factorial");
 
   this->AddOperationInnerHandler
-  ("RepresentElementHyperoctahedral", CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral, "",
+  ("RepresentElementHyperoctahedral",
+    CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral, "",
    "Represents element of hyperoctahedral into a representation. ",
    "V= HyperOctahedralRepresentation((1,1),1);\
    s= MakeElementHyperOctahedral{}((1,2),1,0,0); \
    RepresentElementHyperoctahedral(s, V)\
-   ", true, false, "CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral");
+   ", true, false,
+   "CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral");
   this->AddOperationInnerHandler
-  ("HyperOctahedralIrreps", CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules, "",
+  ("HyperOctahedralIrreps",
+    CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules, "",
    "Prints all modules induced from Specht modules. ",
-   "HyperOctahedralIrreps(3)", true, false, "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules");
+   "HyperOctahedralIrreps(3)", true, false,
+   "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules",
+   "HyperOctahedralIrreps");
   this->AddOperationInnerHandler
   ("SpechtModule", CalculatorFunctionsWeylGroup::innerSpechtModule, "",
    "Gets the Specht module of the partition. ",
-   "SpechtModule((3,2,1))", true, false, "CalculatorFunctionsWeylGroup::innerSpechtModule", "SpechtModule");
+   "SpechtModule((3,2,1))", true, false,
+   "CalculatorFunctionsWeylGroup::innerSpechtModule",
+   "SpechtModule");
   this->AddOperationInnerHandler
-  ("HyperOctahedralRepresentation", CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation, "",
+  ("HyperOctahedralRepresentation",
+    CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation, "",
    "Gets one hyperoctahedral representation from two partitions. ",
-   "HyperOctahedralRepresentation((1,1), (1))", true, false, "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules");
+   "HyperOctahedralRepresentation((1,1), (1))",
+   true, false,
+   "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules");
   this->AddOperationInnerHandler
-  ("HyperOctahedralGeneratorPrint", CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations, "",
+  ("HyperOctahedralGeneratorPrint",
+    CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations, "",
    "Prints the generator commutation relations of a hyperoctahedral group.  ",
-   "HyperOctahedralGeneratorPrint(3)", true, false, "CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations");
+   "HyperOctahedralGeneratorPrint(3)",
+   true, false,
+   "CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations");
   this->AddOperationInnerHandler
   ("PrintMacdonaldPolys", CalculatorFunctionsWeylGroup::innerMacdonaldPolys, "",
    "Prints macdonald polynomials from a semisimple type. ",
@@ -393,22 +420,28 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("Numerator", CalculatorFunctionsGeneral::innerNumerator, "",
    "If the expression is a fraction, returns the numerator, else returns the entire expression. ",
-   "Numerator(a/b); Numerator(1+1/x)", true, false,
-   "CalculatorFunctionsGeneral::innerNumerator", "Numerator");
+   "Numerator(a/b); Numerator(1+1/x)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerNumerator",
+   "Numerator");
   this->AddOperationInnerHandler
   ("ApplyToSubexpressionsRecurseThroughCalculusFunctions",
     CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions, "",
    "Applies a transformation, recursively to all subexpressions of \
     a list of known functions. ",
    "ApplyToSubexpressionsRecurseThroughCalculusFunctions\
-    (Polynomialize, sin ((x+1)^3))", true, false,
+    (Polynomialize, sin ((x+1)^3))",
+    true, false,
    "CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions",
    "ApplyToSubexpressionsRecurseThroughCalculusFunctions");
 
   this->AddOperationInnerHandler
   ("Denominator", CalculatorFunctionsGeneral::innerDenominator, "",
    "If the expression is a fraction, returns the denominator, else returns 1. ",
-   "Denominator(a/b); Denominator(1+1/x)", true, false, "CalculatorFunctionsGeneral::innerDenominator", "Denominator");
+   "Denominator(a/b); Denominator(1+1/x)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerDenominator",
+   "Denominator");
   this->AddOperationInnerHandler
   ("Product", CalculatorFunctionsGeneral::innerMultiplySequence, "",
    "Returns the product of the elements in a sequence. When used on non-sequences, the function \
@@ -428,7 +461,9 @@ void Calculator::initPredefinedInnerFunctions()
     so use on sequences only. \
     ",
    "\\sum(a,b); \\sum{}(Sequence{}a); \\sum(Sequence{}a); \\sum(a)",
-   true, false, "CalculatorFunctionsGeneral::innerSumSequence", "\\sum");
+   true, false,
+   "CalculatorFunctionsGeneral::innerSumSequence",
+   "\\sum");
 
   this->AddOperationInnerHandler
   ("MakeExpression", CalculatorConversions::innerExpressionFromBuiltInType, "",
@@ -474,7 +509,8 @@ D-B;\
    "  DynkinIndicesSlTwoSubalgebras(2A_2);\
     \n DynkinIndicesSlTwoSubalgebras(2A_2+A_2^2);\
     \n DynkinIndicesSlTwoSubalgebras(2A_2+A_2^7);\
-    \n DynkinIndicesSlTwoSubalgebras(2G_2+G_2^7+F_4+F_4^19);", true, false,
+    \n DynkinIndicesSlTwoSubalgebras(2G_2+G_2^7+F_4+F_4^19);",
+    true, false,
     "CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras");//, false);
   this->AddOperationInnerHandler
   ("CartanSymmetric", CalculatorFunctionsGeneral::innerGetSymmetricCartan, "",
@@ -492,29 +528,37 @@ D-B;\
    IsDifferentialOneFormOneVariable(1/(\\diff y) );");
 
   this->AddOperationInnerHandler
-  ("Polynomialize", CalculatorFunctionsGeneral::outerPolynomialize, "",
+  ("Polynomialize",
+    CalculatorFunctionsGeneral::outerPolynomialize, "",
    "Polynomialize(a) is equivalent to MakeExpression(Polynomial(a)).",
-   "C= (c a+ a b +b c +1 )^3; A=Polynomialize(C);B=MakeExpression(Polynomial(C)); A-B");
+   "C= (c a+ a b +b c +1 )^3; A=Polynomialize(C);B=MakeExpression(Polynomial(C)); A-B",
+   true, false,
+   "CalculatorFunctionsGeneral::outerPolynomialize",
+   "Polynomialize");
 
   this->AddOperationInnerHandler
   ("IsConstant", CalculatorFunctionsGeneral::innerIsConstant, "",
    "Tests whether the expression is a constant.  ",
    "IsConstant(\\pi^2); IsConstant(1);IsConstant(x);IsConstant(e^{\\sin(\\pi^2+e+\\sqrt{2}+3)}  ); ");
   this->AddOperationInnerHandler
-  ("\\int", CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst, "",
+  ("\\int",
+   CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst, "",
    "Attempts to rearrange into standard polynomial form and then integrate.  ",
-   "\\int  \\left( \\frac{x(x+1) }{ 2} \\right)^2 dx ", true, false,
+   "\\int  \\left( \\frac{x(x+1) }{ 2} \\right)^2 dx ",
+   true, false,
    "CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst",
    "IntegrateAfterPolynomialization");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateXnDiffX, "",
    "Integrates x^n dx.  ",
-   "\\int x dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateXnDiffX",
+   "\\int x dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateXnDiffX",
    "IntegratePowerRule");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX, "",
    "If a is a number, integrates e^{a x} dx.  ",
-   "\\int x dx ", true, false, "CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX",
+   "\\int x dx ", true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX",
    "IntegrateEpowerX");
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegratePullConstant, "",
@@ -525,7 +569,8 @@ D-B;\
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateSqrtOneMinusXsquared, "",
    "Integrates \\int \\sqrt{a-x^2}dx, a>0.",
-   "\\int 2\\sqrt{2-x^2} dx ", true, false,
+   "\\int 2\\sqrt{2-x^2} dx ",
+   true, false,
    "CalculatorFunctionsGeneral::innerIntegrateSqrtOneminusXsquared",
    "IntegrateSqrtOneminusXsquared");
   this->AddOperationInnerHandler
@@ -1300,7 +1345,7 @@ D-B;\
    The output is scaled so that all coefficients are relatively prime integers, \
    and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\
    has positive coefficient.",
-   "lcmPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+\
+   "LCMPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+\
    2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+\
    x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+\
    x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2},\
@@ -1311,68 +1356,96 @@ D-B;\
    "Calculator::innerLCMPoly", "LCMPoly" )
    ;
   this->AddOperationInnerHandler
-  ("Interpolate", &this->innerInterpolatePoly, "",
+  ("Interpolate", Calculator::innerInterpolatePoly, "",
    "Constructs the one-variable polynomial of minimal degree that passes through \
     the points. Points are given in the form \
    ((x_1, y_1),(x_2, y_2), ...,(x_n, y_n))",
    "Interpolate{}(1,0) ; Interpolate{}((1,0),(2,3)); \
-    Interpolate{}((1,1), (2,2), (3, 4), (4, 8), (5, 16))", true, false)
+    Interpolate{}((1,1), (2,2), (3, 4), (4, 8), (5, 16))",
+    true, false,
+    "Calculator::innerInterpolatePoly",
+    "Interpolate")
    ;
   this->AddOperationInnerHandler
-  ("PolyDivRemainder", &this->innerPolynomialDivisionRemainder, "",
+  ("PolyDivRemainder", Calculator::innerPolynomialDivisionRemainder, "",
    "Returns the remainder after taking quotient of a \
     polynomial divided by a set of polynomials using the default monomial order (lexicographic).",
-   "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x+y^2-1, y^3-x y) ;", true, false)
+   "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x+y^2-1, y^3-x y) ;",
+   true, false,
+   "Calculator::innerPolynomialDivisionRemainder",
+   "PolyDivRemainder")
    ;
   this->AddOperationInnerHandler
-  ("PolyDivStringGrLex", &this->innerPolynomialDivisionVerboseGrLex, "",
+  ("PolyDivStringGrLex", Calculator::innerPolynomialDivisionVerboseGrLex, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using gr lex order, for example, x^2 y^3 >x y^4, y^11>x^10. ",
-   "PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
+   "PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;",
+   true, false,
+   "Calculator::innerPolynomialDivisionVerboseGrLex",
+   "PolyDivStringGrLex")
    ;
   this->AddOperationInnerHandler
-  ("PolyDivStringGrLexRev", &this->innerPolynomialDivisionVerboseGrLexRev, "",
+  ("PolyDivStringGrLexRev",
+    Calculator::innerPolynomialDivisionVerboseGrLexRev, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using total degree (graded) order with \
    equal total degrees compared by lex order with reversed order of the letters, \
    for example, x y^4> x^2 y^3 , x^11>y^10. ",
-   "PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
+   "PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;",
+   true, false,
+   "Calculator::innerPolynomialDivisionVerboseGrLexRev",
+   "PolyDivStringGrLexRev")
    ;
   this->AddOperationInnerHandler
-  ("PolyDivStringLex", &this->innerPolynomialDivisionVerboseLex, "",
+  ("PolyDivStringLex", Calculator::innerPolynomialDivisionVerboseLex, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using the lex order, for example, x^2 y^4 > x y^1000 > x y^2. ",
-   "PolyDivStringLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
+   "PolyDivStringLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;",
+   true, false,
+   "Calculator::innerPolynomialDivisionVerboseLex",
+   "PolyDivStringLex")
    ;
   this->AddOperationInnerHandler
-  ("PolyDivStringLexRev", &this->innerPolynomialDivisionVerboseLexRev, "",
+  ("PolyDivStringLexRev", Calculator::innerPolynomialDivisionVerboseLexRev, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using the lex order with reversed order of variables, \
    for example, y^2 > x^1000 y > x y. ",
-   "PolyDivStringLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
+   "PolyDivStringLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;",
+   true, false,
+   "Calculator::innerPolynomialDivisionVerboseLexRev",
+   "PolyDivStringLexRev")
    ;
   this->AddOperationInnerHandler
-  ("SuffixNotationForPostScript", this->innerSuffixNotationForPostScript, "",
+  ("SuffixNotationForPostScript",
+    Calculator::innerSuffixNotationForPostScript, "",
    "Suffix notation. for postscript, used to quickly generate pstricks drawings in LaTeX.  \
    ",
    "suffixNotationForPostScript{}((1/3 +a+b)*c)", true, false,
-   "Calculator::innerSuffixNotationForPostScript", "SuffixNotationForPostScript")
+   "Calculator::innerSuffixNotationForPostScript",
+   "SuffixNotationForPostScript")
    ;
   this->AddOperationInnerHandler
-  ("MakeJavascriptExpression", CalculatorFunctionsGeneral::innerMakeJavascriptExpression, "",
+  ("MakeJavascriptExpression",
+    CalculatorFunctionsGeneral::innerMakeJavascriptExpression, "",
    "Attempts to construct a javascript translation of the input. \
     If not successful leaves the expression unchanged. \
    ",
    "MakeJavascriptExpression(a(b+c))", true, false,
-   "Calculator::innerMakeJavascriptExpression", "MakeJavascriptExpression")
+   "Calculator::innerMakeJavascriptExpression",
+   "MakeJavascriptExpression")
    ;
-  this->AddOperationInnerHandler ("DFQEuler", CalculatorFunctionsGeneral::innerDFQsEulersMethod, "",
-   "<b>Calculus teaching function.</b> Iterates Euler's method to approximate solutions of first order ordinary DFQ's. \
+  this->AddOperationInnerHandler
+  ("DFQEuler",
+   CalculatorFunctionsGeneral::innerDFQsEulersMethod, "",
+   "<b>Calculus teaching function.</b> Iterates Euler's method\
+   to approximate solutions of first order ordinary DFQ's. \
    First argument = expression for y',\
-   second and third argument = x and y initial values, fourth argument = number of approximating points,\
-    fifth and sixth argument = left and right endpoints.\
+   second and third argument = x and y initial values, \
+   fourth argument = number of approximating points,\
+   fifth and sixth argument = left and right endpoints.\
    ",
    "DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, -2.5, 2.5)",
+   true, false,
    "CalculatorFunctionsGeneral::innerDFQsEulersMethod",
    "DFQEuler")
    ;
@@ -1708,7 +1781,10 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
   ("IsEven", CalculatorFunctionsGeneral::innerIsEven, "",
    "If the argument has no bound variables, returns 1 if \
     the argument is an even integer, 0 otherwise. ",
-   "i^{{n}}:if IsEven n=(-1)^n; i^100 ");
+   "i^{{n}}:if IsEven n=(-1)^(n/2); i^100 ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIsEven",
+   "IsEven");
   this->AddOperationInnerHandler
   ("IsNonEmptySequence", CalculatorFunctionsGeneral::innerIsNonEmptySequence, "",
    "If the argument has no bound variables, returns 1 if the argument is \
@@ -2323,16 +2399,17 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    true, false,
    "CalculatorFunctionsGeneral::innerTrace","Trace");
   this->AddOperationInnerHandler
-  ("Reverse", this->innerReverseOrdeR, "",
-   "Reverses order of elements. This operation will reverse products, orderes of lists, etc. \
-    More precisely, the command leaves the fist child in the internal representation of the object in place\
+  ("Reverse", Calculator::innerReverseOrdeR, "",
+   "Reverses order of elements. This operation will reverse products, lists, etc. \
+    More precisely, the command leaves the fist child in \
+    the internal representation of the object in place\
     and flips the order of all other children.",
    "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)",
    true, false, "Calculator::innerReverseOrdeR", "Reverse");
   this->AddOperationInnerHandler
   ("ReverseRecursively", this->innerReverseOrderRecursively, "",
    "Same as Reverse but will apply recursively to the children expressions as well.",
-   "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)", true, false,
+   "ReverseRecursively{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)", true, false,
    "Calculator::innerReverseOrderRecursively", "ReverseRecursively");
 
   this->AddOperationInnerHandler

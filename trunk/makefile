@@ -83,6 +83,7 @@ SOURCES=\
 ./src/vpf6_3calculatorMathRoutines.cpp \
 ./src/vpf6_35calculatorMathRoutinesPart2.cpp \
 ./src/vpf6_36calculatorHtmlRoutines.cpp \
+./src/vpf6_37calculatorroutines.cpp \
 ./src/vpf6_4ExpressionsImplementation.cpp \
 ./src/vpf6.cpp \
 ./src/vpf7.cpp \

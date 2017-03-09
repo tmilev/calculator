@@ -16,7 +16,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   if (input.size()!=4)
    return theCommands
    << "I expected three arguments: "
-   << "1) first problem number to test (0 or less= start at the beginning) "
+   << "1) first problem number to test (1 or less= start at the beginning) "
    << "2) number of tests to run (0 or less= run all) and "
    << "3) number of tests to interpret. ";
   std::stringstream out;
@@ -54,12 +54,14 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   totalToInterpret= MathRoutines::Minimum(numDesiredTests, totalToInterpret);
   MapLisT<std::string, std::string, MathRoutines::hashString>&
   globalKeys= theGlobalVariables.webArguments;
-  for (int i=firstTestToRun-1; i< theFileNames.size; i++)
+  for (int i=0; i< theFileNames.size; i++)
   { if (numInterpretations>=numDesiredTests)
       break;
     if (theFileTypes[i]!=".html")
       continue;
     numInterpretations++;
+    if (numInterpretations<firstTestToRun)
+      continue;
     std::stringstream reportStream;
     reportStream << "Interpreting file "
     << theFileNames[i] << " ("
@@ -81,7 +83,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     randSeedCurrentStream << theProblem.theProblemData.randomSeed;
     randomSeedCurrent=randSeedCurrentStream.str();
     out << "<tr>";
-    out << "<td>" << i+1 << ". <td>";
+    out << "<td>" << numInterpretations << ". <td>";
     out << "<td>"
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=exerciseNoLogin"

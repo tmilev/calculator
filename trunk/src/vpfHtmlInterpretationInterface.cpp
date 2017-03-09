@@ -601,10 +601,11 @@ std::string HtmlInterpretation::GetEditPageHTML()
 }
 
 std::string HtmlInterpretation::SubmitProblem()
-{ return HtmlInterpretation::SubmitProblem(theGlobalVariables.GetWebInput("randomSeed"),0);
+{ return HtmlInterpretation::SubmitProblem(theGlobalVariables.GetWebInput("randomSeed"),0, true);
 }
 
-std::string HtmlInterpretation::SubmitProblem(const std::string& inputRandomSeed, bool* outputIsCorrect)
+std::string HtmlInterpretation::SubmitProblem
+(const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake)
 { MacroRegisterFunctionWithName("HtmlInterpretation::SubmitProblem");
   std::stringstream out;
   double startTime=theGlobalVariables.GetElapsedSeconds();
@@ -684,7 +685,8 @@ std::string HtmlInterpretation::SubmitProblem(const std::string& inputRandomSeed
     << ");";
   completedProblemStream << theProblem.CleanUpCommandString(currentA.commandVerificationOnly);
   //stOutput << "<br>DEBUG: input to the calculator: " << completedProblemStream.str() << "<hr>";
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
+  if (timeSafetyBrake)
+    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
   Calculator theInterpreter;
   theInterpreter.init();
   theInterpreter.flagWriteLatexPlots=false;
@@ -707,8 +709,8 @@ std::string HtmlInterpretation::SubmitProblem(const std::string& inputRandomSeed
     isolatedInterpreter.init();
     isolatedInterpreter.flagWriteLatexPlots=false;
     isolatedInterpreter.flagPlotNoControls=true;
-
-    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
+    if (timeSafetyBrake)
+      theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
     isolatedInterpreter.Evaluate("("+currentA.currentAnswerClean+")");
     if (isolatedInterpreter.syntaxErrors!="")
       out << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false, true);

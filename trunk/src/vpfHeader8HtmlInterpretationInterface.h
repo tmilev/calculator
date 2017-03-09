@@ -15,7 +15,8 @@ public:
   static std::string ClonePageResult();
   static std::string AddTeachersSections();
   static std::string AddUserEmails(const std::string& hostWebAddressWithPort);
-  static std::string SubmitProblem(const std::string& inputRandomSeed, bool* outputIsCorrect);
+  static std::string SubmitProblem
+  (const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake);
   static std::string SubmitProblem();
   static std::string GetProblemSolution();
   static std::string GetEditPageHTML();

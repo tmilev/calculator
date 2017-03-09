@@ -57,7 +57,8 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     << numInterpretations
     << " out of "
     << totalToInterpret
-    << "). "
+    << "). Random seed: "
+    << randSeedStream.str() << "."
     ;
     theReport.Report(reportStream.str());
     CalculatorHTML theProblem;
@@ -102,7 +103,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
         break;
       theGlobalVariables.SetWebInpuT(currentKey, CGI::StringToURLString(currentAnswer, false));
       solutionReport+=
-      HtmlInterpretation::SubmitProblem(randSeedStream.str(), &answersWork)+"<hr>";
+      HtmlInterpretation::SubmitProblem(randSeedStream.str(), &answersWork, false)+"<hr>";
       if (!answersWork)
         break;
       globalKeys.RemoveKey(currentKey);

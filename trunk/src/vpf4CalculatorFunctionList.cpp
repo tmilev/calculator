@@ -3808,8 +3808,8 @@ void Calculator::initPredefinedStandardOperations()
   "IntegralUnderscore");
 
   this->AddOperationInnerHandler
-  ("_", CalculatorFunctionsGeneral::innerDereferenceSequence, "",
-   "Dereferences a sequence. The syntax is as illustrated by the example. ",
+  ("_", CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix, "",
+   "Dereferences a sequence or a mtrix. The syntax is as illustrated by the example. ",
    "X=(a,b,c); X_1; X_2; X_3; X_4; X_j; j=3; X_j; \
     \nDenominations=(1, 5, 10, 25,50, 100,200, 500, 1000, 2000, 5000);\
     \np(0, 0 )=1;\
@@ -3818,8 +3818,8 @@ void Calculator::initPredefinedStandardOperations()
     \np({{a}},{{x}} )=p(a-1,x)+ p(a, x-Denominations_a);\
     \np(11,100)\
   ", true, false,
-  "CalculatorFunctionsGeneral::innerDereferenceSequence",
-  "DereferenceSequence");
+  "CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix",
+  "DereferenceSequenceOrMatrix");
   this->AddOperationInnerHandler
   ("_", CalculatorFunctionsGeneral::innerDereferenceSequenceStatements, "",
    "Dereferences a sequence of rules. \

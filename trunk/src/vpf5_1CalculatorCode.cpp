@@ -1034,29 +1034,25 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml3d_New");
   owner.flagHasGraphics=true;
   std::stringstream out;
-  if (this->canvasName=="")
-  { this->canvasCounteR++;
-    //out << this->ToStringDebug();
-    std::stringstream canvasNameStream;
-    canvasNameStream << "theCanvas" << this->canvasCounteR;
-    this->canvasName=canvasNameStream.str();
-  }
+  this->ComputeCanvasNameIfNecessary();
   //stOutput << "DEBUG: width: " << this->DesiredHtmlWidthInPixels
   //<< " height: " << this->DesiredHtmlHeightInPixels;
-  out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
-  << "\" height=\"" << this->DesiredHtmlHeightInPixels << "\" "
-  << "style=\"border:solid 1px\" id=\""
-  << this->canvasName
-  << "\" "
-  << "onmousedown=\"calculatorCanvasClick(this, event);\" "
-  << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
-  << "onmousemove=\"calculatorCanvasMouseMoveRedraw"
-  << "(this, event.clientX, event.clientY);\""
-  << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
-  << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
-  << "<span id=\"" << this->canvasName << "Controls\"></span>"
-  << "<span id=\"" << this->canvasName << "Messages\"></span>"
-  << "<script>\n";
+  if (!owner.flagPlotShowJavascriptOnly)
+  { out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
+    << "\" height=\"" << this->DesiredHtmlHeightInPixels << "\" "
+    << "style=\"border:solid 1px\" id=\""
+    << this->canvasName
+    << "\" "
+    << "onmousedown=\"calculatorCanvasClick(this, event);\" "
+    << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
+    << "onmousemove=\"calculatorCanvasMouseMoveRedraw"
+    << "(this, event.clientX, event.clientY);\""
+    << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
+    << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
+    << "<span id=\"" << this->canvasName << "Controls\"></span>"
+    << "<span id=\"" << this->canvasName << "Messages\"></span>";
+  }
+  out << "<script>\n";
   std::string canvasFunctionName="functionMake"+ this->canvasName;
   out << "function " << canvasFunctionName << "()\n"
   << "{ ";
@@ -1391,16 +1387,20 @@ std::string PlotObject::ToStringPointsList()
   return out.str();
 }
 
+void Plot::ComputeCanvasNameIfNecessary()
+{ if (this->canvasName!="")
+    return;
+  this->canvasCounteR++;
+  //out << this->ToStringDebug();
+  std::stringstream canvasNameStream;
+  canvasNameStream << "theCanvas" << this->canvasCounteR;
+  this->canvasName=canvasNameStream.str();
+}
+
 std::string Plot::GetPlotHtml2d_New(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml2d_New");
   owner.flagHasGraphics=true;
-  if (this->canvasName=="")
-  { this->canvasCounteR++;
-    //out << this->ToStringDebug();
-    std::stringstream canvasNameStream;
-    canvasNameStream << "theCanvas" << this->canvasCounteR;
-    this->canvasName=canvasNameStream.str();
-  }
+  this->ComputeCanvasNameIfNecessary();
   std::stringstream out;
   if (this->priorityViewRectangle<=0)
     this->ComputeAxesAndBoundingBox();

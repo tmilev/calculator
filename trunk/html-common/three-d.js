@@ -1744,14 +1744,17 @@ function Canvas(inputCanvas)
     this.defaultCenterX=this.centerX;
     this.defaultCenterY=this.centerY;
     this.scaleDefault=this.scale;
-    this.lastCenterScreen=newCenterViewWindowScreenRescaled;
+    this.lastCenterScreen= newViewWindowCenterMath.slice();
   };
   this.resetView= function()
   { this.resetViewNoRedraw();
     this.redraw();
   };
   this.resetViewNoRedraw= function()
-  { this.screenBasisUser=this.screenBasisUserDefault.slice();
+  { this.boundingBoxMathScreen= [[-0.01, -0.01], [0.01, 0.01]];
+    this.boundingBoxMath= [[-0.01,-0.01,-0.01],[0.01,0.01,0.01]];
+    this.boundingSegmentZ= [-0.01,0.01];
+    this.screenBasisUser=this.screenBasisUserDefault.slice();
     this.centerX= this.defaultCenterX;
     this.centerY= this.defaultCenterY;
     this.scale=this.scaleDefault;

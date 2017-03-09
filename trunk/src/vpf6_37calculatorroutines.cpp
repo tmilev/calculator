@@ -13,15 +13,21 @@ ProjectInformationInstance ProjectInfoVpf6_37cpp(__FILE__, "More calculator buil
 bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation");
-  if (input.size()!=3)
-   return theCommands << "I expected two arguments: number of tests to run and number of tests to report";
+  if (input.size()!=4)
+   return theCommands
+   << "I expected three arguments: "
+   << "1) first problem number to test (0 or less= start at the beginning) "
+   << "2) number of tests to run (0 or less= run all) and "
+   << "3) number of tests to interpret. ";
   std::stringstream out;
   ProgressReport theReport;
   List<std::string> theFileNames, theFileTypes;
   int numDesiredTests=0;
   int numSamples=1;
-  input[1].IsSmallInteger(&numDesiredTests);
-  input[2].IsSmallInteger(&numSamples);
+  int firstTestToRun=1;
+  input[1].IsSmallInteger(&firstTestToRun);
+  input[2].IsSmallInteger(&numDesiredTests);
+  input[3].IsSmallInteger(&numSamples);
   FileOperations::GetFolderFileNamesVirtual
   ("DefaultProblemLocation/", theFileNames, &theFileTypes, false);
   std::stringstream randSeedStreaM;
@@ -29,7 +35,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   std::string randomSeedCurrent=randSeedStreaM.str();
   out << "Random seed at start: " << randomSeedCurrent << "<br>";
   out << "<table>";
-  out << "<tr>"
+  out << "<tr><th></th>"
   << "<th>File name </th>"
   << "<th>Loading</th>"
   << "<th>Interpretation</th>"
@@ -38,6 +44,8 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   << "</tr>";
   if (numDesiredTests<=0)
     numDesiredTests=theFileNames.size;
+  if (firstTestToRun<1)
+    firstTestToRun=1;
   int numInterpretations=0;
   int totalToInterpret=0;
   for (int i=0; i< theFileNames.size; i++)
@@ -46,7 +54,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   totalToInterpret= MathRoutines::Minimum(numDesiredTests, totalToInterpret);
   MapLisT<std::string, std::string, MathRoutines::hashString>&
   globalKeys= theGlobalVariables.webArguments;
-  for (int i=0; i< theFileNames.size; i++)
+  for (int i=firstTestToRun-1; i< theFileNames.size; i++)
   { if (numInterpretations>=numDesiredTests)
       break;
     if (theFileTypes[i]!=".html")
@@ -73,6 +81,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     randSeedCurrentStream << theProblem.theProblemData.randomSeed;
     randomSeedCurrent=randSeedCurrentStream.str();
     out << "<tr>";
+    out << "<td>" << i+1 << ". <td>";
     out << "<td>"
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=exerciseNoLogin"

@@ -1358,6 +1358,11 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
         out << "(Math." << chopped << "( " << leftString << "))";
         return output.AssignValue(out.str(), theCommands);
       }
+    if (input.size()==2)
+      if (opString=="|")
+      { out << "(Math.abs( " << leftString << "))";
+        return output.AssignValue(out.str(), theCommands);
+      }
   }
   out << "(Failed to make expression from " << input.ToString() << ". "
   << logStream.str() << ")";

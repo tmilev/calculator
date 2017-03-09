@@ -144,20 +144,24 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
 }
 
 std::string HtmlInterpretation::GetSanitizedComment
-(const Expression& input, FormatExpressions& theFormat)
+(const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot)
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetSanitizedComment");
+  theFormat.flagUseQuotes=false;
+  resultIsPlot=false;
   if (input.IsOfType<std::string>())
     return input.ToString(&theFormat);
   if (input.IsOfType<Plot>())
+  { resultIsPlot=true;
     return input.ToString(&theFormat);
+  }
   if (input.HasType<Plot>())
     return "";
+  //<- expression has a partially drawn plot-> not displaying.
   if (input.owner==0)
     return "";
   if (input.StartsWith(input.owner->opRulesOff()) ||
       input.StartsWith(input.owner->opRulesOn()))
     return "";
-  //<- expression has a partially drawn plot-> not displaying.
   return input.ToString(&theFormat);
 }
 
@@ -168,7 +172,6 @@ std::string HtmlInterpretation::GetCommentsInterpretation
   std::stringstream out;
   theFormat.flagExpressionIsFinal=true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
-  theFormat.flagUseQuotes=false;
 
   //stOutput << "DEBUG: theInterpreterWithAdvice.flagPlotNoCtrls: "
   //<< theInterpreterWithAdvice.flagPlotNoControls;
@@ -178,10 +181,11 @@ std::string HtmlInterpretation::GetCommentsInterpretation
   }
   const Expression& currentE=theInterpreterWithAdvice.theProgramExpression[indexShift][1];
   //out << "DEBUG: currentE: " << CGI::StringToHtmlString( currentE.ToString(), true);
+  bool resultIsPlot=false;
   if (!currentE.StartsWith(theInterpreterWithAdvice.opEndStatement()))
   { //out << "<hr>DEBUG: currentE is not starting with commands!<hr>";
     out << HtmlInterpretation::GetSanitizedComment
-    (currentE, theFormat);
+    (currentE, theFormat, resultIsPlot);
     return out.str();
   }
   //out << "<hr>DEBUG: case currentE is commandList!<hr>CurrentE: "
@@ -191,13 +195,13 @@ std::string HtmlInterpretation::GetCommentsInterpretation
   for (int i=1; i<currentE.size(); i++ )
   { currentS=
     HtmlInterpretation::GetSanitizedComment
-    (currentE[i], theFormat);
-    if (currentS=="")
+    (currentE[i], theFormat,resultIsPlot);
+    if (MathRoutines::StringTrimWhiteSpace(currentS)=="")
       continue;
     out << currentS;
     //out << " DEBUG: Lispified: "
     //<< CGI::StringToHtmlString( currentE[i].ToStringSemiFull() , true);
-    if (i!=currentE.size()-1)
+    if (i!=currentE.size()-1 && !resultIsPlot)
       out << "<br>";
   }
   return out.str();
@@ -269,7 +273,8 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   FormatExpressions theFormat;
   theFormat.flagUseLatex=true;
   theFormat.flagUsePmatrix=true;
-  const Expression& studentAnswerNoContextE=theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1];
+  const Expression& studentAnswerNoContextE=
+  theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1];
   out << "<span style=\"color:magenta\"><b>Interpreting as:</b></span><br>";
   out << "\\(" << studentAnswerNoContextE.ToString(&theFormat) << "\\)";
   Calculator theInterpreterWithAdvice;

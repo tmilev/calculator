@@ -46,7 +46,7 @@ public:
   static std::string ToStringCalculatorArgumentsHumanReadable();
   static std::string GetSanitizedComment
   (const Expression& input,
-  FormatExpressions& theFormat);
+  FormatExpressions& theFormat, bool& resultIsPlot);
   static std::string GetCommentsInterpretation
   (Calculator& theInterpreterWithAdvice,
    int indexShift, FormatExpressions& theFormat)

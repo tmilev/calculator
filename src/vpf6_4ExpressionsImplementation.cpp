@@ -1507,7 +1507,7 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
   { bool doAddExpression=!this->IsKnownFunctionWithComplexRange();
     if (doAddExpression)
       if (atomName=="=" || atomName==">" || atomName=="\"" || atomName=="==" ||
-          atomName=="<" || atomName=="Sequence")
+          atomName=="<" || atomName=="Sequence" || atomName=="Matrix")
         doAddExpression=false;
     if (doAddExpression && excludeNamedConstants)
       if (this->owner->knownDoubleConstants.Contains(*this))

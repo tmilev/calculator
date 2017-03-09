@@ -716,6 +716,7 @@ class Plot
   int priorityCanvasName; //same as priorityViewWindow but with respect to canvas names.
   std::string ToStringDebug();
   std::string GetPlotHtml(Calculator& owner);
+  void ComputeCanvasNameIfNecessary();
   std::string GetPlotHtml3d_New(Calculator& owner);
   std::string GetPlotHtml2d_New(Calculator& owner);
   std::string GetPlotStringAddLatexCommands(bool useHtml);

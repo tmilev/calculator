@@ -578,12 +578,13 @@ bool CalculatorFunctionsGeneral::innerChildExpression(Calculator& theCommands, c
   return true;
 }
 
-bool CalculatorFunctionsGeneral::innerDereferenceSequence(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceSequence");
+bool CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix");
   (void) theCommands;
-  if (input.size()!=3)
+  if (!input.StartsWith(theCommands.opUnderscore(),3))
     return false;
-  if (!input[1].IsSequenceNElementS())
+  if (!input[1].StartsWith(theCommands.opSequence()) &&
+      !input[1].StartsWith(theCommands.opMatrix()))
     return false;
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))

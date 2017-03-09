@@ -65,7 +65,10 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     CalculatorHTML theProblem;
     std::stringstream problemComments;
     theProblem.fileName="DefaultProblemLocation/"+theFileNames[i];
-    bool isGood=theProblem.LoadMe(false, problemComments, randomSeedCurrent);
+    bool isGoodLoad=theProblem.LoadMe(false, problemComments, randomSeedCurrent);
+    bool isGoodInterpretation=false;
+    if (isGoodLoad)
+      isGoodInterpretation=theProblem.InterpretHtml(problemComments);
     std::stringstream randSeedCurrentStream;
     randSeedCurrentStream << theProblem.theProblemData.randomSeed;
     randomSeedCurrent=randSeedCurrentStream.str();
@@ -79,14 +82,14 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     << theFileNames[i]
     << "</a>"
     << "</td>";  
-    if (!isGood)
+    if (!isGoodLoad)
     { out << "<td><b>Couldn't load. </b>"
       << problemComments.str() << "</td>";
       out << "</tr>";
       break;
     } else
       out << "<td><span style=\"color:green\">Success</span></td>";
-    if (!theProblem.InterpretHtml(problemComments))
+    if (!isGoodInterpretation)
     { out << "<td><span style=\"color:red\"><b>Failure.</b></span> "
       << "Comments: " << problemComments.str();
       out << "</td></tr>";

@@ -24,9 +24,6 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   input[2].IsSmallInteger(&numSamples);
   FileOperations::GetFolderFileNamesVirtual
   ("DefaultProblemLocation/", theFileNames, &theFileTypes, false);
-  std::stringstream randSeedStream;
-  randSeedStream << theCommands.theObjectContainer.CurrentRandomSeed;
-  out << "Problems generated from random seed: " << randSeedStream.str();
   out << "<table>";
   out << "<tr>"
   << "<th>File name </th>"
@@ -45,6 +42,9 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   totalToInterpret= MathRoutines::Minimum(numDesiredTests, totalToInterpret);
   MapLisT<std::string, std::string, MathRoutines::hashString>&
   globalKeys= theGlobalVariables.webArguments;
+  std::stringstream randSeedStreaM;
+  randSeedStreaM << theCommands.theObjectContainer.CurrentRandomSeed;
+  std::string randomSeedCurrent=randSeedStreaM.str();
   for (int i=0; i< theFileNames.size; i++)
   { if (numInterpretations>=numDesiredTests)
       break;
@@ -58,7 +58,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     << " out of "
     << totalToInterpret
     << "). Random seed: "
-    << randSeedStream.str() << "."
+    << randomSeedCurrent << "."
     ;
     theReport.Report(reportStream.str());
     CalculatorHTML theProblem;
@@ -69,17 +69,21 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=exerciseNoLogin"
     << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
-    << "fileName=" << theProblem.fileName << "&\">"
+    << "fileName=" << theProblem.fileName << "&randomSeed="
+    << randomSeedCurrent << "\">"
     << theFileNames[i]
     << "</a>"
-    << "</td>";
-    if (!theProblem.LoadMe(false, problemComments, randSeedStream.str()))
+    << "</td>";  
+    if (!theProblem.LoadMe(false, problemComments, randomSeedCurrent))
     { out << "<td><b>Couldn't load. </b>"
       << problemComments.str() << "</td>";
       out << "</tr>";
       break;
     } else
       out << "<td><span style=\"color:green\">Success</span></td>";
+    std::stringstream randSeedCurrentStream;
+    randSeedCurrentStream << theProblem.theProblemData.randomSeed;
+    randomSeedCurrent=randSeedCurrentStream.str();
     if (!theProblem.InterpretHtml(problemComments))
     { out << "<td><span style=\"color:red\"><b>Failure.</b></span> "
       << "Comments: " << problemComments.str();
@@ -98,12 +102,12 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
       theGlobalVariables.SetWebInpuT(currentKey, "1");
       theGlobalVariables.SetWebInpuT("fileName", theProblem.fileName);
       answerGeneration+=HtmlInterpretation::GetAnswerOnGiveUp
-      (randSeedStream.str(), &currentAnswer, &answerGenerated)+"<hr>";
+      (randomSeedCurrent, &currentAnswer, &answerGenerated)+"<hr>";
       if (!answerGenerated)
         break;
       theGlobalVariables.SetWebInpuT(currentKey, CGI::StringToURLString(currentAnswer, false));
       solutionReport+=
-      HtmlInterpretation::SubmitProblem(randSeedStream.str(), &answersWork, false)+"<hr>";
+      HtmlInterpretation::SubmitProblem(randomSeedCurrent, &answersWork, false)+"<hr>";
       if (!answersWork)
         break;
       globalKeys.RemoveKey(currentKey);

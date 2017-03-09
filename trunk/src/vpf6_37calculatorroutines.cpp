@@ -24,6 +24,10 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   input[2].IsSmallInteger(&numSamples);
   FileOperations::GetFolderFileNamesVirtual
   ("DefaultProblemLocation/", theFileNames, &theFileTypes, false);
+  std::stringstream randSeedStreaM;
+  randSeedStreaM << theCommands.theObjectContainer.CurrentRandomSeed;
+  std::string randomSeedCurrent=randSeedStreaM.str();
+  out << "Random seed at start: " << randomSeedCurrent << "<br>";
   out << "<table>";
   out << "<tr>"
   << "<th>File name </th>"
@@ -42,9 +46,6 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   totalToInterpret= MathRoutines::Minimum(numDesiredTests, totalToInterpret);
   MapLisT<std::string, std::string, MathRoutines::hashString>&
   globalKeys= theGlobalVariables.webArguments;
-  std::stringstream randSeedStreaM;
-  randSeedStreaM << theCommands.theObjectContainer.CurrentRandomSeed;
-  std::string randomSeedCurrent=randSeedStreaM.str();
   for (int i=0; i< theFileNames.size; i++)
   { if (numInterpretations>=numDesiredTests)
       break;
@@ -64,6 +65,10 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     CalculatorHTML theProblem;
     std::stringstream problemComments;
     theProblem.fileName="DefaultProblemLocation/"+theFileNames[i];
+    bool isGood=theProblem.LoadMe(false, problemComments, randomSeedCurrent);
+    std::stringstream randSeedCurrentStream;
+    randSeedCurrentStream << theProblem.theProblemData.randomSeed;
+    randomSeedCurrent=randSeedCurrentStream.str();
     out << "<tr>";
     out << "<td>"
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
@@ -74,16 +79,13 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     << theFileNames[i]
     << "</a>"
     << "</td>";  
-    if (!theProblem.LoadMe(false, problemComments, randomSeedCurrent))
+    if (!isGood)
     { out << "<td><b>Couldn't load. </b>"
       << problemComments.str() << "</td>";
       out << "</tr>";
       break;
     } else
       out << "<td><span style=\"color:green\">Success</span></td>";
-    std::stringstream randSeedCurrentStream;
-    randSeedCurrentStream << theProblem.theProblemData.randomSeed;
-    randomSeedCurrent=randSeedCurrentStream.str();
     if (!theProblem.InterpretHtml(problemComments))
     { out << "<td><span style=\"color:red\"><b>Failure.</b></span> "
       << "Comments: " << problemComments.str();

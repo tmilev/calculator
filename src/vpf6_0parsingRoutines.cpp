@@ -179,7 +179,6 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("LogBase");
   this->AddOperationNoRepetitionAllowed("userInputTextBox");
   this->AddOperationNoRepetitionAllowed("\\int");
-  this->AddOperationNoRepetitionAllowed("\\sum");
 
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("EltZmodP");
@@ -1870,16 +1869,6 @@ bool Calculator::ApplyOneRule()
       this->AllowsApplyFunctionInPreceding(lastS))
     return this->ReplaceEXEXByEX();
   //end of ambiguity.
-  if (fifthToLastS=="\\sum" && fourthToLastS=="_" &&
-      thirdToLastS=="Expression" &&
-      secondToLastS=="^" && lastS=="Expression")
-    return this->ReplaceUnderscoreEPowerEbyLimits();
-  if (fifthToLastS=="\\sum" && fourthToLastS=="^" &&
-      thirdToLastS=="Expression" &&
-      secondToLastS=="_" && lastS=="Expression")
-    return this->ReplacePowerEUnderScoreEbyLimits();
-  if (secondToLastS=="\\sum" && lastS!="_" && lastS!="^")
-    return this->ReplaCeOXbyEX();
   if (fifthToLastS=="\\lim" && fourthToLastS=="_" && thirdToLastS=="Expression" &&
       secondToLastS=="Expression" && this->AllowsLimitProcessInPreceding(lastS))
     return this->ReplaceOXEEXByEX();

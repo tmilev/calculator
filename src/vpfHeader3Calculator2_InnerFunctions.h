@@ -98,6 +98,9 @@ public:
 
   static bool innerMultiplySequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSumSequence(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSumTimesExpressionToSumOf(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSumAsOperatorToSumInternalNotation(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerHandleUnderscorePowerLimits(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerApplyToSubexpressionsRecurseThroughCalculusFunctions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNumerator(Calculator& theCommands, const Expression& input, Expression& output);
@@ -128,8 +131,7 @@ public:
   static bool innerDifferentiateAPowerB(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeDifferentiateLog(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerUnderscoreIntWithAny(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerIntegralUpperBound(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerOperatorBounds(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerAnyToZero(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerExponentToLog(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDiffdivDiffxToDifferentiation(Calculator& theCommands, const Expression& input, Expression& output);

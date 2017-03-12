@@ -675,19 +675,28 @@ void Calculator::EvaluateCommands()
   if(theGlobalVariables.flagRunningCommandLine)
   { theGlobalVariables.theDefaultFormat.GetElement().flagUseQuotes=false;
     theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
-    out << "Input: " << "\e[1;32m" << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
+    out << "Input: " << "\e[1;32m"
+    << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement())
+    << "\033[0m" << std::endl;
     theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
     this->theObjectContainer.resetSliders();
-    out << "Output: " << "\e[1;33m" << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "\033[0m" << std::endl;
+    out << "Output: " << "\e[1;33m"
+    << this->theProgramExpression.ToString
+    (&theGlobalVariables.theDefaultFormat.GetElement())
+    << "\033[0m" << std::endl;
   } else if (!this->flagDisplayFullExpressionTree)
-  { std::string badCharsString=this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
+  { std::string badCharsString=
+    this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharsString!="")
       out << badCharsString << "<hr>";
     this->theObjectContainer.resetSliders();
+    this->theObjectContainer.resetPlots();
     out << this->theObjectContainer.ToStringJavascriptForUserInputBoxes();
-    out << this->theProgramExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression);
+    out << this->theProgramExpression.ToString
+    (&theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression);
   } else
-  { std::string badCharsString=this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
+  { std::string badCharsString=this->ToStringIsCorrectAsciiCalculatorString
+    (this->inputString);
     if (badCharsString!="")
       out << badCharsString << "<hr>";
     this->theObjectContainer.resetSliders();
@@ -697,7 +706,8 @@ void Calculator::EvaluateCommands()
   this->outputString=out.str();
   std::stringstream commentsStream;
   if (this->theObjectContainer.theAlgebraicClosure.theBasisMultiplicative.size>1)
-    commentsStream << "<b>Algebraic number closure status. </b><br>" << this->theObjectContainer.theAlgebraicClosure.ToString() << "<hr>";
+    commentsStream << "<b>Algebraic number closure status. </b><br>"
+    << this->theObjectContainer.theAlgebraicClosure.ToString() << "<hr>";
   if (this->Comments.str()!="")
     commentsStream << "<br><span>" << this->Comments.str() << "</span>";
   this->outputCommentsString=commentsStream.str();

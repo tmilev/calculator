@@ -621,6 +621,56 @@ bool CalculatorFunctionsGeneral::innerDenominator(Calculator& theCommands, const
   return output.AssignValue(1, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits");
+  if (!input.StartsWith(theCommands.opThePower(),  3) &&
+      !input.StartsWith(theCommands.opUnderscore(),3))
+    return false;
+  if (!input[1].StartsWith(theCommands.opLimitBoundary()))
+    return false;
+  output=input[1];
+  for (int i=output.size(); i<3; i++)
+    output.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
+  if (input.StartsWith(theCommands.opThePower()))
+    return output.SetChilD(2,input[2]);
+  else
+    return output.SetChilD(1,input[2]);
+}
+
+bool CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation");
+  if (input.size()<=1)
+    return false;
+  if (!input[0].StartsWith(theCommands.opSum()))
+    return false;
+  output=input[0];
+  if (input.size()==2)
+    return output.AddChildOnTop(input[1]);
+  List<Expression> theRemaining;
+  for (int i=1; i<input.size(); i++)
+    theRemaining.AddOnTop(input[i]);
+  Expression argumentE;
+  argumentE.MakeSequence(theCommands, &theRemaining);
+  return output.AddChildOnTop(argumentE);
+}
+
+bool CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSumSequence");
+  //stOutput << "<br>DEBUG: making sum from: " << input.ToString()
+  //<< "size of input: " << input.size();
+  if (!input.StartsWith(theCommands.opTimes(),3))
+    return false;
+  if (!input[1].StartsWith(theCommands.opSum(),2))
+    return false;
+  if (!input[1][1].StartsWith(theCommands.opLimitBoundary()))
+    return false;
+  output=input[1];
+  return output.AddChildOnTop(input[2]);
+}
+
 bool CalculatorFunctionsGeneral::innerSumSequence
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSumSequence");
@@ -921,74 +971,41 @@ bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT
   return false;
 }
 
-bool CalculatorFunctionsGeneral::innerIntegralUpperBound(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsGeneral::innerOperatorBounds(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPowerIntToAny");
-  if (!input.StartsWith(theCommands.opThePower(),3))
+  if (!input.StartsWith(theCommands.opUnderscore(),3) &&
+      !input.StartsWith(theCommands.opThePower(), 3 ))
     return false;
   const Expression& baseE=input[1];
-  Expression integrationSet;
-  if (baseE.IsAtomGivenData(theCommands.opIntegral()))
+  Expression theLimitsE;
+  int theIntegralOp=baseE.theData;
+  if (theIntegralOp==theCommands.opIntegral() ||
+      theIntegralOp==theCommands.opSum())
   { output.reset(theCommands);
-    output.AddChildAtomOnTop(theCommands.opIntegral());
-    integrationSet.MakeSequence(theCommands);
-    integrationSet.AddChildAtomOnTop(theCommands.opIndefiniteIntegralIndicator());
-    integrationSet.AddChildOnTop(input[2]);
-    output.AddChildOnTop(integrationSet);
+    output.AddChildAtomOnTop(theIntegralOp);
+    theLimitsE.reset(theCommands);
+    theLimitsE.AddChildAtomOnTop(theCommands.opLimitBoundary());
+    theLimitsE.AddChildOnTop(input[2]);
+    theLimitsE.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
+    output.AddChildOnTop(theLimitsE);
     return true;
   }
-  if (!baseE.StartsWith(theCommands.opIntegral(),2))
+  if (!baseE.StartsWith(theCommands.opIntegral(),2) &&
+      !baseE.StartsWith(theCommands.opSum(),2))
     return false;
-  if (baseE.size()<2)
-    return false;
-  if (baseE[1].IsAtomGivenData(theCommands.opIndefiniteIntegralIndicator()))
-  { integrationSet.MakeSequence(theCommands);
-    integrationSet.AddChildAtomOnTop(theCommands.opIndefiniteIntegralIndicator());
-    integrationSet.AddChildOnTop(input[2]);
-    output=baseE[1];
-    return output.SetChilD(1,integrationSet);
-  }
-  if (baseE[1].IsSequenceNElementS(2))
-  { Expression newSet=baseE[1];
-    newSet.SetChilD(2,input[2]);
-    output=baseE;
-    return output.SetChilD(1,newSet);
-  }
-  return false;
-}
-
-bool CalculatorFunctionsGeneral::innerUnderscoreIntWithAny(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPowerIntToAny");
-  if (!input.StartsWith(theCommands.opUnderscore(),3))
-    return false;
-  const Expression& baseE=input[1];
-  Expression integrationSet;
-  if (baseE.IsAtomGivenData(theCommands.opIntegral()))
-  { output.reset(theCommands);
-    output.AddChildAtomOnTop(theCommands.opIntegral());
-    integrationSet.MakeSequence(theCommands);
-    integrationSet.AddChildOnTop(input[2]);
-    integrationSet.AddChildAtomOnTop(theCommands.opIndefiniteIntegralIndicator());
-    output.AddChildOnTop(integrationSet);
-    return true;
-  }
-  if (!baseE.StartsWith(theCommands.opIntegral(),2))
-    return false;
-  if (baseE.size()<2)
-    return false;
-  if (baseE[1].IsAtomGivenData(theCommands.opIndefiniteIntegralIndicator()))
-  { integrationSet.MakeSequence(theCommands);
-    integrationSet.AddChildOnTop(input[2]);
-    integrationSet.AddChildAtomOnTop(theCommands.opIndefiniteIntegralIndicator());
-    output=baseE[1];
-    return output.SetChilD(1,integrationSet);
-  }
-  if (baseE[1].IsSequenceNElementS(2))
-  { Expression newSet=baseE[1];
-    newSet.SetChilD(1,input[2]);
-    output=baseE;
-    return output.SetChilD(1,newSet);
-  }
-  return false;
+  theLimitsE.reset(theCommands);
+  theLimitsE.AddChildAtomOnTop(theCommands.opLimitBoundary());
+  for (int i=1; i<3; i++)
+    if (i<baseE[1].size())
+      theLimitsE.AddChildOnTop(baseE[1][i]);
+    else
+      theLimitsE.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
+  if (input[1].IsAtomGivenData(theCommands.opUnderscore()))
+    theLimitsE.SetChilD(1,input[2]);
+  else
+    theLimitsE.SetChilD(2,input[2]);
+  output=input[1];
+  return output.SetChilD(1,theLimitsE);
 }
 
 bool CalculatorFunctionsGeneral::innerPowerExponentToLog(Calculator& theCommands, const Expression& input, Expression& output)

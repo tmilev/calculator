@@ -794,6 +794,8 @@ void Plot::operator+=(const Plot& other)
     this->canvasName=other.canvasName;
   if (other.priorityCanvasName>this->priorityCanvasName)
     this->priorityCanvasName=other.priorityCanvasName;
+  if (this->priorityCanvasName==0)
+    this->canvasName="";
   if (this->dimension==-1)
     this->dimension=other.dimension;
   if (other.priorityViewRectangle>this->priorityViewRectangle)
@@ -849,6 +851,7 @@ void Plot::operator+=(const PlotObject& other)
   if (this->dimension==-1)
     this->dimension=other.dimension;
   this->thePlots.AddOnTop(other);
+  this->canvasName="";
 }
 
 bool PlotObject::operator==(const PlotObject& other)const
@@ -949,6 +952,7 @@ Plot::Plot()
   this->priorityViewRectangle=0;
   this->priorityCanvasName=0;
   this->dimension=-1;
+  this->flagDivAlreadyDisplayed=false;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
@@ -1400,6 +1404,9 @@ void Plot::ComputeCanvasNameIfNecessary()
 std::string Plot::GetPlotHtml2d_New(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml2d_New");
   owner.flagHasGraphics=true;
+  if (this->flagDivAlreadyDisplayed)
+    return "[plot alredy displayed]";
+  this->flagDivAlreadyDisplayed=true;
   this->ComputeCanvasNameIfNecessary();
   std::stringstream out;
   if (this->priorityViewRectangle<=0)

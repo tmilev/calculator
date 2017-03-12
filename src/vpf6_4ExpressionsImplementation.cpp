@@ -1545,7 +1545,7 @@ bool Expression::IsIndefiniteIntegralfdx
     integrationSet=&tempE;
   if (!this->IsIntegraLfdx(differentialVariable, functionToIntegrate, integrationSet))
     return false;
-  return integrationSet->IsAtomGivenData(this->owner->opIndefiniteIntegralIndicator());
+  return integrationSet->IsAtomGivenData(this->owner->opIndefiniteIndicator());
 }
 
 bool Expression::IsDefiniteIntegralOverIntervalfdx
@@ -2662,7 +2662,12 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   else if (this->StartsWith(this->owner->opSetMinus(),3) )
     out << (*this)[1].ToString(theFormat) << "\\setminus "
     << (*this)[2].ToString(theFormat);
-  else if (this->StartsWith(this->owner->opTimes(), 3))
+  else if (this->StartsWith(this->owner->opLimitBoundary(), 3))
+  { out << "\\limits_{" << (*this)[1].ToString(theFormat)
+    << "}^{"
+    << (*this)[2].ToString(theFormat)
+    << "}";
+  } else if (this->StartsWith(this->owner->opTimes(), 3))
   { std::string secondE=(*this)[2].ToString(theFormat);
     if ((*this)[1].IsAtomGivenData(this->owner->opSqrt()))
       out << "\\sqrt{" << secondE << "}";
@@ -2812,9 +2817,13 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
   else if (this->StartsWith(this->owner->opMinus(), 3))
   { if (!(this->children.size==3))
-      crash << "This is a programming error: the minus function expects 1 or 2 arguments, instead there are " << this->children.size-1 << ". " << crash;
+      crash << "This is a programming error: "
+      << "the minus function expects 1 or 2 arguments, "
+      << "instead there are " << this->children.size-1
+      << ". " << crash;
     out << (*this)[1].ToString(theFormat) << "-";
-    if ((*this)[2].StartsWith(this->owner->opPlus()) || (*this)[2].StartsWith(this->owner->opMinus()))
+    if ((*this)[2].StartsWith(this->owner->opPlus()) ||
+        (*this)[2].StartsWith(this->owner->opMinus()))
       out << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
     else
       out << (*this)[2].ToString(theFormat);
@@ -2856,19 +2865,31 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat);
     if (needsParen)
       out << "\\right)";
-  } else if (this->StartsWith(this->owner->opIntegral()))
-  { std::string indexString=" ";
+  } else if (this->StartsWith(this->owner->opSum()) ||
+             this->StartsWith(this->owner->opIntegral()) )
+  { std::string opString=(*this)[0].ToString(theFormat);
+    out << opString;
+    int firstIndex=2;
     if (this->size()>=2)
-    { if ((*this)[1].IsSequenceNElementS(2))
-        indexString= "_{"+(*this)[1][1].ToString(theFormat) + "}^{"
-        + (*this)[1][2].ToString(theFormat) + "}";
-      else if (!(*this)[1].IsAtomGivenData(this->owner->opIndefiniteIntegralIndicator()))
-        indexString="_{" + (*this)[1].ToString(theFormat) + "}";
+    { if ((*this)[1].StartsWith(this->owner->opLimitBoundary(),3))
+        out
+        << "_{" << (*this)[1][1].ToString(theFormat) << "}"
+        << "^{" << (*this)[1][2].ToString(theFormat) << "}";
+      else
+        firstIndex=1;
     }
-    out << "{\\int" << indexString;
-    if (this->size()==3)
-      out << (*this)[2].ToString(theFormat);
-    out << "}";
+    if (this->size()<=firstIndex+1)
+    { if (this->size()==firstIndex+1)
+        out << (*this)[firstIndex].ToString(theFormat);
+    } else
+    { out << "(";
+      for (int i=firstIndex; i<this->size(); i++)
+      { out << (*this)[i].ToString(theFormat);
+        if (i!=this->size()-1)
+          out << ", ";
+      }
+      out << ")";
+    }
   } else if (this->IsListStartingWithAtom(this->owner->opGreaterThan()))
     out << (*this)[1].ToString(theFormat) << "&gt;" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opGreaterThanOrEqualTo()))
@@ -2950,7 +2971,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << "<hr> ";
         if (!this->owner->flagHideLHS)
         { if (i<(*startingExpression).children.size)
-            out << CGI::GetMathMouseHoverBeginArrayL((*startingExpression)[i].ToString(theFormat));
+            out << CGI::GetMathSpanPure((*startingExpression)[i].ToString(theFormat));
           else
             out << "No matching starting expression- possible use of the Melt keyword.";
         } else
@@ -2960,13 +2981,14 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << "</td><td valign=\"top\"><hr>";
         if ((*this)[i].IsOfType<std::string>() && isFinal)
           out << currentE.GetValue<std::string>();
-        else if ((currentE.IsOfType<Plot> () ||
+        else if ((currentE.HasType<Plot> () ||
                   currentE.IsOfType<SemisimpleSubalgebras>() ||
-                  currentE.IsOfType<WeylGroupData>()
-                  || currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) && isFinal)
+                  currentE.IsOfType<WeylGroupData>() ||
+                  currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) && isFinal)
           out << currentE.ToString(theFormat);
         else
-          out << CGI::GetMathSpanBeginArrayL(currentE.ToString(theFormat), 1700);
+          out << CGI::GetMathSpanPure
+          (currentE.ToString(theFormat), 1700);
         if (i!=this->children.size-1)
           out << ";";
         out << currentE.ToStringAllSlidersInExpression();
@@ -2984,7 +3006,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->StartsWith(this->owner->opError(), 2))
   { this->owner->NumErrors++;
     out << "(Error~ " << this->owner->NumErrors << ":~ see~ comments)";
-    this->owner->Comments << "<br>Error " << this->owner->NumErrors << ". " << (*this)[1].ToString(theFormat);
+    this->owner->Comments << "<br>Error "
+    << this->owner->NumErrors << ". " << (*this)[1].ToString(theFormat);
   } else if (this->size()==1)
   { //stOutput << "I'm at this place";
     out << (*this)[0].ToString(theFormat);
@@ -3025,12 +3048,15 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if (this->IsListStartingWithAtom(this->owner->opEndStatement()))
       outTrue << out.str();
     else
-    { outTrue << "<tr><td>" << CGI::GetMathSpanBeginArrayL(startingExpression->ToString(theFormat), 1700);
+    { outTrue << "<tr><td>"
+      << CGI::GetMathSpanPure
+      (startingExpression->ToString(theFormat), 1700);
       if ((this->IsOfType<std::string>() || this->IsOfType<Plot>() ||
            this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroupData>()) && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else
-        outTrue << "</td><td>" << CGI::GetMathSpanBeginArrayL(out.str(), 1700) << "</td></tr>";
+        outTrue << "</td><td>"
+        << CGI::GetMathSpanPure(out.str(), 1700) << "</td></tr>";
     }
     outTrue << "</table>";
     return outTrue.str();

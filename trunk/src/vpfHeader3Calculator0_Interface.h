@@ -705,6 +705,7 @@ class Plot
   int defaultLineColor;
   bool flagIncludeExtraHtmlDescriptions;
   bool flagPlotShowJavascriptOnly;
+  bool flagDivAlreadyDisplayed;
   int dimension;
   static int canvasCounteR;
   std::string canvasName;
@@ -793,6 +794,7 @@ public:
   int CurrentRandomSeed;
   void reset();
   void resetSliders();
+  void resetPlots();
   std::string ToString();
   std::string ToStringJavascriptForUserInputBoxes();
 };
@@ -1452,8 +1454,8 @@ public:
   int opDifferential()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\diff");
   }
-  int opIndefiniteIntegralIndicator()
-  { return this->theAtoms.GetIndexIMustContainTheObject("IndefiniteIntegralIndicator");
+  int opIndefiniteIndicator()
+  { return this->theAtoms.GetIndexIMustContainTheObject("IndefiniteIndicator");
   }
   int opIntegral()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\int");
@@ -1622,6 +1624,9 @@ public:
   }
   int opTimes()
   { return this->theAtoms.GetIndexIMustContainTheObject("*");
+  }
+  int opSum()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\sum");
   }
   int opCrossProduct()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\times");

@@ -2583,7 +2583,7 @@ bool CalculatorFunctionsGeneral::innerIntegralOperator
   { Expression integralOperatorE;
     integralOperatorE.reset(theCommands, 2);
     integralOperatorE.AddChildAtomOnTop(theCommands.opIntegral());
-    integralOperatorE.AddChildAtomOnTop(theCommands.opIndefiniteIntegralIndicator());
+    integralOperatorE.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
     output=input;
     return output.SetChilD(1, integralOperatorE);
   }

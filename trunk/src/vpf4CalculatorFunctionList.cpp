@@ -1808,6 +1808,7 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "Prints all partitions of a positive number into a sum of positive integers. ",
    "AllPartitions(10) ", true, false,
    "CalculatorFunctionsGeneral::innerAllPartitions", "AllPartitions");
+
   this->AddOperationInnerHandler
   ("AllVectorPartitions", CalculatorFunctionsGeneral::innerAllVectorPartitions, "",
    "Prints all partitions of the vector (first argument) using a given \
@@ -3016,6 +3017,29 @@ void Calculator::initPredefinedStandardOperations()
    "Transforms integral notation into an integral expression. ",
    "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx", true, false,
    "CalculatorFunctionsGeneral::innerIntegralOperator", "IntegralOperator");
+  this->AddOperationInnerHandler
+  ("*", CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf, "",
+   "Transforms \\sum\\limits_{b}^c* a to (\\sum\\limits_b^c){} a. \
+    ",
+   "DrawExpressionTree(  \\sum\\limits_{b}^c);\
+    \nDrawExpressionTree( \\sum\\limits_{b}^c*a) ",
+   true,  false,
+   "CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf",
+   "SumProductNotationToABuiltInDataStructure");
+this->AddOperationInnerHandler
+  ("^", CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits, "",
+   "Handles expressions of the form \\limits_a^b",
+   "\\limits_a^b; \\limits^b_a",
+   true, false,
+   "CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits",
+   "LimitBoundaryNotation");
+this->AddOperationInnerHandler
+  ("_", CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits, "",
+   "Handles expressions of the form \\limits_a^b",
+   "\\limits_a^b; \\limits^b_a",
+   true, false,
+   "CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits",
+   "LimitBoundaryNotation");
 
   this->AddOperationOuterHandler
   ("*", CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny, "",
@@ -3794,18 +3818,18 @@ void Calculator::initPredefinedStandardOperations()
   "Calculator::outerPowerRaiseToFirst",
   "RaiseToPowerOne");
   this->AddOperationHandler
-  ("^", CalculatorFunctionsGeneral::innerIntegralUpperBound, "",
+  ("^", CalculatorFunctionsGeneral::innerOperatorBounds, "",
    "Replaces \\int_a^b by (\\int, a, b) .",
    "A=\\int_a^b; Lispify(A); DrawExpressionTree(A); ",
    true, true, false,
    "CalculatorFunctionsGeneral::innerIntegralUpperBound",
-   "IntegralUpperBound", false);
+   "OperatorBoundsSuperscript", false);
   this->AddOperationInnerHandler
-  ("_", CalculatorFunctionsGeneral::innerUnderscoreIntWithAny, "",
+  ("_", CalculatorFunctionsGeneral::innerOperatorBounds, "",
    "Takes care of the integral superscript notation \\int^a ",
   "\\int^a_b f dx; \\int_a^b f dx", true, false,
   "Calculator::innerUnderscoreIntWithAny",
-  "IntegralUnderscore");
+  "OperatorBoundsUnderscore");
 
   this->AddOperationInnerHandler
   ("_", CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix, "",
@@ -4012,6 +4036,17 @@ void Calculator::initPredefinedStandardOperations()
 
 void Calculator::initPredefinedOperationsComposite()
 { MacroRegisterFunctionWithName("Calculator::initPredefinedOperationsComposite");
+
+  this->AddOperationComposite
+  ("\\sum", CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation, "",
+   "Transforms (\\sum_a^b ){} n to \\sum_a^b n (internal notation). \
+    ",
+   "DrawExpressionTree(  Freeze(\\sum_a^b ){} n);\
+    \nDrawExpressionTree( (\\sum_a^b ){} n) ",
+   true, true, false,
+   "CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation",
+   "SumProductNotationToABuiltInDataStructure");
+
   this->AddOperationComposite
   ("Rational", CalculatorFunctionsGeneral::innerConstantFunction, "",
    "If x is a constant, replaces x{}({{anything}})=x; ",
@@ -4094,7 +4129,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   this->AddOperationNoRepetitionAllowed("Melt");
   this->AddOperationNoRepetitionAllowed("Bind");
   this->AddOperationNoRepetitionAllowed("\\limits");
-  this->AddOperationNoRepetitionAllowed("IndefiniteIntegralIndicator");
+  this->AddOperationNoRepetitionAllowed("IndefiniteIndicator");
   this->AddOperationNoRepetitionAllowed("\\log");
   //additional operations with the same status as user-input expressions.
   this->AddOperationNoRepetitionAllowed("\\pi");

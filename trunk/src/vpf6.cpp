@@ -2652,6 +2652,11 @@ std::string ObjectContainer::ToStringJavascriptForUserInputBoxes()
   return out.str();
 }
 
+void ObjectContainer::resetPlots()
+{ for (int i=0; i<this->thePlots.size; i++)
+    this->thePlots[i].flagDivAlreadyDisplayed=false;
+}
+
 void ObjectContainer::resetSliders()
 { this->userInputBoxSliderDisplayed.initFillInObject(this->theUserInputTextBoxesWithValues.size(), false);
 }

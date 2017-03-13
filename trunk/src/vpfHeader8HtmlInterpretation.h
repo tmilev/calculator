@@ -133,7 +133,7 @@ public:
   std::string outputHtmlBodyNoTag;
   std::string outputHtmlHeadNoTag;
   std::string outputHtmlNavigatioN;
-  std::string logCommandsProblemGeneration;
+  std::stringstream logCommandsProblemGeneration;
   std::string courseHome;
 
   static const std::string BugsGenericMessage;

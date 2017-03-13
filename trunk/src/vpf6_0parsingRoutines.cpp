@@ -67,7 +67,6 @@ void Calculator::reset()
   this->flagUseFracInRationalLaTeX=true;
   this->flagForkingProcessAllowed=true;
   this->flagNoApproximations=false;
-  this->flagCurrentExpressionIsNonCacheable=false;
   this->flagDefaultRulesWereTamperedWith=false;
   this->flagUsePredefinedWordSplits=true;
   this->flagPlotNoControls=false;

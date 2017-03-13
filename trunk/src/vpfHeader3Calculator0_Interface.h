@@ -939,7 +939,6 @@ public:
   bool flagMaxRecursionErrorEncountered;
   bool flagMaxTransformationsErrorEncountered;
   bool flagNewContextNeeded;
-  bool flagCurrentExpressionIsNonCacheable;
 
   bool flagUsePredefinedWordSplits;
 
@@ -2007,6 +2006,10 @@ public:
   void EvaluateCommands();
   static bool EvaluateExpression
   (Calculator& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool EvaluateExpression
+  (Calculator& theCommands, const Expression& input, Expression& output,
+   bool& outputIsCacheable)
   ;
   void Evaluate(const std::string& theInput);
   bool ParseAndExtractExpressions

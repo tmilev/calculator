@@ -503,8 +503,6 @@ std::string HtmlInterpretation::GetExamPage()
     out << "initializeButtonsMatrixSupport();";
   out << "\">\n";
   out << problemBody;
-  if (theFile.logCommandsProblemGeneration!="")
-    out << "<hr>" << theFile.logCommandsProblemGeneration << "<hr>";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();

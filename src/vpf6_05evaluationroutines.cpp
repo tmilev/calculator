@@ -294,6 +294,14 @@ bool Calculator::AccountRule(const Expression& ruleE, StackMaintainerRules& theR
 
 bool Calculator::EvaluateExpression
 (Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
+  bool notUsed=false;
+  return theCommands.EvaluateExpression(theCommands, input, output, notUsed);
+}
+
+bool Calculator::EvaluateExpression
+(Calculator& theCommands, const Expression& input, Expression& output,
+ bool& outputIsNonCacheable)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
   //////////////////////////////
@@ -372,8 +380,7 @@ bool Calculator::EvaluateExpression
   Expression transformationE(theCommands);
   Expression beforePatternMatch;
   std::string inputIfAtom;
-  bool currentExpressionIsNonCacheable=false;
-  theCommands.flagCurrentExpressionIsNonCacheable=false;
+  outputIsNonCacheable=false;
   //////////////////////////////////
   while (ReductionOcurred && !theCommands.flagAbortComputationASAP)
   { StackMaintainerRules theRuleStackMaintainer(&theCommands);
@@ -381,12 +388,12 @@ bool Calculator::EvaluateExpression
     counterNumTransformations++;
     if (output.IsAtom(&inputIfAtom))
       if (theCommands.atomsThatMustNotBeCached.Contains(inputIfAtom))
-        currentExpressionIsNonCacheable=true;
-    theCommands.flagCurrentExpressionIsNonCacheable=currentExpressionIsNonCacheable;
-    //The following code enclosed in the if clause is too complicated/obfuscated for my taste
+        outputIsNonCacheable=true;
+    //The following code enclosed in the if clause is too
+    //complicated/obfuscated for my taste
     //and perhaps needs a rewrite. However, at the moment of writing, I see
     //no better way of doing this, so here we go.
-    if (currentExpressionIsNonCacheable)
+    if (outputIsNonCacheable)
     { if (indexInCache!=-1)
       { //We "undo" the caching process by
         //replacing the cached value with the minusOneExpression,
@@ -446,11 +453,12 @@ bool Calculator::EvaluateExpression
             theReport.Report(reportStream.str());
           }
         }
-        if (theCommands.EvaluateExpression(theCommands, output[i], transformationE))
+        bool childIsNonCacheable=false;
+        if (theCommands.EvaluateExpression(theCommands, output[i], transformationE, childIsNonCacheable))
           output.SetChilD(i, transformationE);
         //important: here we check if the child is non-cache-able.
-        if (theCommands.flagCurrentExpressionIsNonCacheable)
-          currentExpressionIsNonCacheable=theCommands.flagCurrentExpressionIsNonCacheable;
+        if (childIsNonCacheable)
+          outputIsNonCacheable=true;
         if (output[i].IsError())
         { theCommands.flagAbortComputationASAP=true;
           break;

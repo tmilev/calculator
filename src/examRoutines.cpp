@@ -1192,7 +1192,13 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   this->timeIntermediateComments.LastObject()->AddOnTop("calculator init time");
 
   //stOutput << "nput cmds: " << calculatorCommands.str();
+  if(theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights())
+  { this->logCommandsProblemGeneration << "<b>Input commands:</b><br>\n"
+    << this->theProblemData.commandsGenerateProblem;
+  }
   theInterpreter.Evaluate(this->theProblemData.commandsGenerateProblem);
+
+
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("calculator evaluation time");
   //stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
@@ -1729,7 +1735,7 @@ bool CalculatorHTML::ProcessInterprettedCommands
       << "</td></tr>";
     }
     streamLog << "</table>";
-    this->logCommandsProblemGeneration=streamLog.str();
+    this->logCommandsProblemGeneration << streamLog.str();
   }
   return result;
 }
@@ -2586,24 +2592,24 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (!this->currentUseR.StoreProblemDataToDatabase(theRoutines, comments))
       outBody << "<b>Error: failed to store problem in database. </b>" << comments.str();
   }
-  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+  if (theGlobalVariables.UserDebugFlagOn() &&
+      theGlobalVariables.UserDefaultHasAdminRights())
   { outBody << "<hr>Debug information follows. ";
+    if (this->logCommandsProblemGeneration.str()!="")
+      outBody << "<br>" << this->logCommandsProblemGeneration.str() << "<hr>";
     if (this->flagIsExamProblem)
       outBody << "Exam problem here. ";
     outBody << "<br>Random seed: " << this->theProblemData.randomSeed
     << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
     << this->theProblemData.flagRandomSeedGiven
-    << "<br>flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven
+    << "<br>flagRandomSeedGiven: "
+    << this->theProblemData.flagRandomSeedGiven
     << "\n<br>\n"
-    << CGI::StringToHtmlString(this->ToStringCalculatorArgumentsForProblem("exercise", "false"), true);
+    << "<hr>"
 
-    #ifdef MACRO_use_MySQL
-    outBody << "<br>Problem names: " << this->currentUseR.theProblemData.theKeys.ToStringCommaDelimited();
-    outBody << "<br>Problem data string: " << CGI::URLKeyValuePairsToNormalRecursiveHtml(this->currentUseR.problemDataString.value);
-    #endif
-    outBody << "<hr>";
-    outBody << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-    outBody << "<hr>";
+    << "<hr>"
+    << CGI::StringToHtmlString
+    (this->ToStringCalculatorArgumentsForProblem("exercise", "false"), true);
   }
   //out << "Current collection problems: " << this->databaseProblemList.ToStringCommaDelimited()
   //<< " with weights: " << this->databaseProblemWeights.ToStringCommaDelimited();
@@ -2738,11 +2744,9 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
     out << "fileName=" << CGI::StringToURLString(theGlobalVariables.GetWebInput("fileName"), false)
     << "&";
   out << "topicList=" << theGlobalVariables.GetWebInput("topicList") << "&";
-  //if (!theGlobalVariables.UserGuestMode())
-  { out << "studentView=" << studentView << "&";
+  out << "studentView=" << studentView << "&";
     if (studentSection!="")
       out << "studentSection=" << CGI::StringToURLString(studentSection, false) << "&";
-  }
   if (includeRandomSeedIfAppropriate)
     out << "randomSeed=" << this->theProblemData.randomSeed << "&";
 //  out << "fileName=" << CGI::StringToURLString(this->fileName) << "&";

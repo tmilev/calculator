@@ -1786,6 +1786,33 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerIsEven",
    "IsEven");
   this->AddOperationInnerHandler
+  ("[)", CalculatorFunctionsGeneral::innerIntervalLeftClosedFromSequence,
+   "",
+   "Internal data structure transformation: \
+    sequence ->left-closed interval.",
+   "%UseBracketForIntervals DrawExpressionTree[1,2); DrawExpressionTree(1,2]; DrawExpressionTree[1,2];",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIntervalToSequence",
+   "[)");
+  this->AddOperationInnerHandler
+  ("(]", CalculatorFunctionsGeneral::innerIntervalRightClosedFromSequence,
+   "",
+   "Internal data structure transformation: \
+    sequence ->right-closed interval.",
+   "%UseBracketForIntervals DrawExpressionTree[1,2); DrawExpressionTree(1,2]; DrawExpressionTree[1,2];",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIntervalToSequence",
+   "(]");
+  this->AddOperationInnerHandler
+  ("IntervalClosed", CalculatorFunctionsGeneral::innerIntervalClosedFromSequence,
+   "",
+   "Internal data structure transformation: \
+    sequence ->closed interval.",
+   "%UseBracketForIntervals DrawExpressionTree[1,2); DrawExpressionTree(1,2]; DrawExpressionTree[1,2];",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIntervalToSequence",
+   "IntervalClosed");
+  this->AddOperationInnerHandler
   ("IsNonEmptySequence", CalculatorFunctionsGeneral::innerIsNonEmptySequence, "",
    "If the argument has no bound variables, returns 1 if the argument is \
     an integer, 0 otherwise. ",
@@ -4129,6 +4156,9 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   this->AddOperationNoRepetitionAllowed("Melt");
   this->AddOperationNoRepetitionAllowed("Bind");
   this->AddOperationNoRepetitionAllowed("\\limits");
+  this->AddOperationNoRepetitionAllowed("[)");
+  this->AddOperationNoRepetitionAllowed("(]");
+  this->AddOperationNoRepetitionAllowed("IntervalClosed");
   this->AddOperationNoRepetitionAllowed("IndefiniteIndicator");
   this->AddOperationNoRepetitionAllowed("\\log");
   //additional operations with the same status as user-input expressions.
@@ -4314,4 +4344,5 @@ void Calculator::initAtomsThatFreezeArguments()
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Freeze");
+  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Bind");
 }

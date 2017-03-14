@@ -72,6 +72,7 @@ void Calculator::reset()
   this->flagPlotNoControls=false;
   this->flagPlotShowJavascriptOnly=false;
   this->flagHasGraphics=false;
+  this->flagUseBracketsForIntervals=false;
 
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
@@ -280,6 +281,7 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogRules");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogCache");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogFull");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseBracketForIntervals");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("DontUsePredefinedWordSplits");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotShowJavascriptOnly");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotNoCoordinateDetails");
@@ -1725,6 +1727,12 @@ bool Calculator::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
+  if (secondToLastS=="%" && lastS=="UseBracketForIntervals")
+  { this->flagUseBracketsForIntervals=true;
+    this->Comments << "Using brackets for intervals. ";
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
   if (secondToLastS=="%" && lastS=="DontUsePredefinedWordSplits")
   { this->flagUsePredefinedWordSplits=false;
     this->Comments << "Using predefined word splits -for example xy is replaced by x y. ";
@@ -1890,21 +1898,29 @@ bool Calculator::ApplyOneRule()
       this->AllowsPowerInNext(fifthToLastS)
       )
     return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="\\setminus" && fourthToLastS=="Expression" && this->AllowsPowerInPreceding(lastS) )
+  if (secondToLastS=="Expression" && thirdToLastS=="\\setminus" &&
+      fourthToLastS=="Expression" && this->AllowsPowerInPreceding(lastS))
     return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="or" && fourthToLastS=="Expression" && this->AllowsOrInPreceding(lastS) )
+  if (secondToLastS=="Expression" && thirdToLastS=="or" &&
+      fourthToLastS=="Expression" && this->AllowsOrInPreceding(lastS))
     return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="and" && fourthToLastS=="Expression" && this->AllowsAndInPreceding(lastS) )
+  if (secondToLastS=="Expression" && thirdToLastS=="and" &&
+      fourthToLastS=="Expression" && this->AllowsAndInPreceding(lastS))
     return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="+" && fourthToLastS=="Expression" && this->AllowsPlusInPreceding(lastS) )
+  if (secondToLastS=="Expression" && thirdToLastS=="+" &&
+      fourthToLastS=="Expression" && this->AllowsPlusInPreceding(lastS))
     return this->ReplaceEOEXByEX();
-  if (fifthToLastS=="|" && secondToLastS=="Expression" && thirdToLastS=="+" && fourthToLastS=="Expression" && lastS=="|" )
+  if (fifthToLastS=="|" && secondToLastS=="Expression" &&
+      thirdToLastS=="+" && fourthToLastS=="Expression" && lastS=="|")
     return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="-" && fourthToLastS=="Expression" && this->AllowsPlusInPreceding(lastS) )
+  if (secondToLastS=="Expression" && thirdToLastS=="-" &&
+      fourthToLastS=="Expression" && this->AllowsPlusInPreceding(lastS))
     return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="-" && fourthToLastS=="Expression" && lastS=="|" && fifthToLastS=="|" )
+  if (secondToLastS=="Expression" && thirdToLastS=="-" &&
+      fourthToLastS=="Expression" && lastS=="|" && fifthToLastS=="|")
     return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="-" && this->AllowsPlusInPreceding(lastS) )
+  if (secondToLastS=="Expression" && thirdToLastS=="-" &&
+      this->AllowsPlusInPreceding(lastS))
     return this->ReplaceOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="-" && lastS=="|" && fourthToLastS=="|" )
     return this->ReplaceOEXByEX();
@@ -1974,6 +1990,14 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXEXByE();
   if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}")
     return this->ReplaceXEXByE();
+  if (this->flagUseBracketsForIntervals)
+  { if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS=="]")
+      return this->ReplaceXEXByEcontainingOE(this->opIntervalRightClosed());
+    if (thirdToLastS=="[" && secondToLastS=="Expression" && lastS==")")
+      return this->ReplaceXEXByEcontainingOE(this->opIntervalLeftClosed());
+    if (thirdToLastS=="[" && secondToLastS=="Expression" && lastS=="]")
+      return this->ReplaceXEXByEcontainingOE(this->opIntervalClosed());
+  }
   if (thirdToLastS=="\"" && secondToLastS=="Expression" && lastS=="\"")
     return this->ReplaceXEXByEcontainingOE(this->opQuote());
   if (secondToLastS=="\"" && lastS=="\"")
@@ -1994,7 +2018,8 @@ bool Calculator::ApplyOneRule()
   if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" && thirdToLastS=="=:" &&
       secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEOEXByEX();
-  if (lastS=="Sequence" && lastE.theData.children.size==0 && lastE.theData.theData==this->opLisT())
+  if (lastS=="Sequence" && lastE.theData.children.size==0 &&
+      lastE.theData.theData==this->opLisT())
     return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("MakeSequence"));
   //else
   //  stOutput << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
@@ -2058,21 +2083,33 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceEOEXByEX();
   if (thirdToLastS=="if" && secondToLastS=="Expression" && this->AllowsIfInPreceding(lastS) )
     return this->ReplaceOEXByEX();
-  if (fourthToLastS=="Sequence" && thirdToLastS=="," && secondToLastS=="Expression" && (lastS=="," || lastS==")" || lastS=="}"))
+  if (fourthToLastS=="Sequence" && thirdToLastS=="," &&
+      secondToLastS=="Expression" &&
+      (lastS=="," || lastS==")" || lastS=="}" ||
+       (this->flagUseBracketsForIntervals && lastS=="]")
+      ))
     return this->ReplaceSequenceUXEYBySequenceZY(this->conSequence());
-  if (thirdToLastS!="[" && secondToLastS=="Expression" && lastS==",")
+  if ((thirdToLastS!="[" || this->flagUseBracketsForIntervals)&&
+      secondToLastS=="Expression" && lastS==",")
     return this->ReplaceYXBySequenceX(this->conSequence());
   if (thirdToLastS=="MakeSequence" && secondToLastS=="{}" && lastS=="Expression")
     return this->ReplaceXXYBySequenceY(this->conExpression());
   if (fourthToLastS=="MakeSequence" && thirdToLastS=="{}" && secondToLastS=="Expression")
     return this->ReplaceXXYXBySequenceYX(this->conExpression());
-  if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="(" && secondToLastS=="Sequence" && lastS==")")
+  if (fifthToLastS=="Expression" && fourthToLastS== "{}" &&
+      thirdToLastS=="(" && secondToLastS=="Sequence" && lastS==")")
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
-  if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="{" && secondToLastS=="Sequence" && lastS=="}")
+  if (fifthToLastS=="Expression" && fourthToLastS== "{}" &&
+      thirdToLastS=="{" && secondToLastS=="Sequence" && lastS=="}")
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   if (secondToLastS=="Sequence" &&
       ((thirdToLastS=="(" && lastS==")")||
-       (thirdToLastS=="{" && lastS=="}")
+       (thirdToLastS=="{" && lastS=="}") ||
+       (this->flagUseBracketsForIntervals &&
+        ((thirdToLastS=="[" && lastS==")")||
+         (thirdToLastS=="(" && lastS=="]")||
+         (thirdToLastS=="[" && lastS=="]")
+         ))
       ))
     return this->ReplaceXXbyEX();
   if (fourthToLastS=="\\begin" && thirdToLastS=="{" &&
@@ -2100,9 +2137,13 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceMatrixEXByMatrixNewRow();
   if (secondToLastS=="Matrix" && lastS=="MatrixEnd")
     return this->ReplaceMatrixXByE();
-  if (fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="," && secondToLastS=="Expression" && lastS=="]")
-    return this->ReplaceXEXEXByEusingO(this->conLieBracket());
-  if (this->isSeparatorFromTheLeftForDefinition(eighthToLastS) && seventhToLastS=="Expression" &&
+  if (!this->flagUseBracketsForIntervals)
+    if (fifthToLastS=="[" && fourthToLastS=="Expression" &&
+        thirdToLastS=="," &&
+        secondToLastS=="Expression" && lastS=="]")
+      return this->ReplaceXEXEXByEusingO(this->conLieBracket());
+  if (this->isSeparatorFromTheLeftForDefinition(eighthToLastS) &&
+      seventhToLastS=="Expression" &&
       sixthToLastS==":" && fifthToLastS=="if" && fourthToLastS=="Expression" &&
       thirdToLastS=="=" && secondToLastS=="Expression" &&
       this->isSeparatorFromTheRightForDefinition(lastS))
@@ -2117,7 +2158,9 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceEXdotsXBySs(1);
   if (secondToLastS=="Expression" && lastS=="EndProgram")
     return this->ReplaceEXdotsXbySsXdotsX(1);
-  if ((thirdToLastS=="(" || thirdToLastS=="{" ) && secondToLastS=="SequenceStatements" && (lastS==")" || lastS== "}"))
+  if ((thirdToLastS=="(" || thirdToLastS=="{" ) &&
+      secondToLastS=="SequenceStatements" &&
+      (lastS==")" || lastS== "}"))
     return this->ReplaceXEXByE();
   if (secondToLastS=="SequenceStatements" && lastS=="SequenceStatements")
     return this->ReplaceSsSsXdotsXbySsXdotsX(0);

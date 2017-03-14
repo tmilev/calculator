@@ -160,3 +160,27 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   out << "</table>";
   return output.AssignValue(out.str(), theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerIntervalClosedFromSequence(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntervalToSequence");
+  if (!input.IsSequenceNElementS())
+    return false;
+  output=input;
+  return output.SetChildAtomValue(0, theCommands.opIntervalClosed());
+}
+
+bool CalculatorFunctionsGeneral::innerIntervalRightClosedFromSequence(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntervalRightClosedFromSequence");
+  if (!input.IsSequenceNElementS())
+    return false;
+  output=input;
+  return output.SetChildAtomValue(0, theCommands.opIntervalRightClosed());
+}
+
+bool CalculatorFunctionsGeneral::innerIntervalLeftClosedFromSequence(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntervalLeftClosedFromSequence");
+  if (!input.IsSequenceNElementS())
+    return false;
+  output=input;
+  return output.SetChildAtomValue(0, theCommands.opIntervalLeftClosed());
+}

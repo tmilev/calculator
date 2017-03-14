@@ -272,6 +272,7 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NoFrac");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NoApproximations");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("ShowContext");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NoLogarithmExponentShortcut");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogParsing");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluation");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("HidePolynomialDataStructure");
@@ -1796,6 +1797,12 @@ bool Calculator::ApplyOneRule()
   }
   if (secondToLastS=="%" && lastS=="LatexLink")
   { this->flagProduceLatexLink=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="%" && lastS=="NoLogarithmExponentShortcut")
+  { this->atomsWhoseExponentsAreInterpretedAsFunctions.
+    RemoveFirstOccurenceSwapWithLast((std::string) "\\log");
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

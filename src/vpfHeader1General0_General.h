@@ -1183,7 +1183,6 @@ class HashTemplate: public TemplateList
 private:
   void AddObjectOnBottom(const Object& o);
   void AddListOnTop(List<Object>& theList);
-  void RemoveFirstOccurenceSwapWithLast(Object& o);
   Object PopIndexShiftDown(int index);
   void AssignLight(const ListLight<Object>& from);
   void ReverseOrderElements();
@@ -1250,6 +1249,12 @@ public:
   { this->SetExpectedSize(this->size+theList.size);
     for (int i=0; i<theList.size; i++)
       this->AddOnTop(theList[i]);
+  }
+  void RemoveFirstOccurenceSwapWithLast(const Object& o)
+  { int theIndex=this->GetIndex(o);
+    if (theIndex==-1)
+      return;
+    this->RemoveIndexSwapWithLast(theIndex);
   }
   const List<int>& GetHashArray(int hashIndex)const
   { return this->TheHashedArrays[hashIndex];

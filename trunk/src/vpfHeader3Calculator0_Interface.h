@@ -951,6 +951,7 @@ public:
   bool flagLogEvaluatioN;
   bool flagUseNumberColors;
   bool flagLogRules;
+  bool flagUseBracketsForIntervals;
   bool flagLogCache;
   bool flagLogPatternMatching;
   bool flagLogFullTreeCrunching;
@@ -1413,6 +1414,15 @@ public:
   }
   int opSequence()
   { return this->theAtoms.GetIndexIMustContainTheObject("Sequence");
+  }
+  int opIntervalLeftClosed()
+  { return this->theAtoms.GetIndexIMustContainTheObject("[)");
+  }
+  int opIntervalRightClosed()
+  { return this->theAtoms.GetIndexIMustContainTheObject("(]");
+  }
+  int opIntervalClosed()
+  { return this->theAtoms.GetIndexIMustContainTheObject("IntervalClosed");
   }
   int opQuote()
   { return this->theAtoms.GetIndexIMustContainTheObject("\"");

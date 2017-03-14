@@ -2599,6 +2599,15 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->StartsWith(this->owner->opLogBase(), 3))
     out << "\\log_{" << (*this)[1].ToString(theFormat) << "}"
     << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
+  else if (this->StartsWith(this->owner->opIntervalClosed(), 3))
+    out << "\\left[" << (*this)[1].ToString(theFormat) << ", "
+    << (*this)[2].ToString(theFormat) << "\\right]";
+  else if (this->StartsWith(this->owner->opIntervalLeftClosed(), 3))
+    out << "\\left[" << (*this)[1].ToString(theFormat) << ", "
+    << (*this)[2].ToString(theFormat) << "\\right)";
+  else if (this->StartsWith(this->owner->opIntervalRightClosed(), 3))
+    out << "\\left(" << (*this)[1].ToString(theFormat) << ", "
+    << (*this)[2].ToString(theFormat) << "\\right]";
   else if (this->StartsWith(this->owner->opQuote(),2))
   { if ((*this)[1].IsAtom(&tempS))
       out << "\"" <<  tempS << "\"";

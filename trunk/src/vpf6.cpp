@@ -2394,26 +2394,10 @@ void Calculator::ComputeAutoCompleteKeyWords()
     this->autoCompleteKeyWords.AddOnTopNoRepetition(this->theAtoms[i]);
   for (int i=0; i<this->namedRules.size; i++)
     this->autoCompleteKeyWords.AddOnTopNoRepetition(this->namedRules[i]);
-  autoCompleteKeyWords.AddOnTopNoRepetition("NoFrac");
-  autoCompleteKeyWords.AddOnTopNoRepetition("NoApproximations");
-  autoCompleteKeyWords.AddOnTopNoRepetition("ShowContext");
-  autoCompleteKeyWords.AddOnTopNoRepetition("LogParsing");
-  autoCompleteKeyWords.AddOnTopNoRepetition("LogEvaluation");
-  autoCompleteKeyWords.AddOnTopNoRepetition("HidePolynomialDataStructure");
-  autoCompleteKeyWords.AddOnTopNoRepetition("NumberColors");
-  autoCompleteKeyWords.AddOnTopNoRepetition("LogRules");
-  autoCompleteKeyWords.AddOnTopNoRepetition("LogCache");
-  autoCompleteKeyWords.AddOnTopNoRepetition("LogFull");
-  autoCompleteKeyWords.AddOnTopNoRepetition("LatexLink");
-  autoCompleteKeyWords.AddOnTopNoRepetition("UseLnInsteadOfLog");
-  autoCompleteKeyWords.AddOnTopNoRepetition("UseLnAbsInsteadOfLog");
-  autoCompleteKeyWords.AddOnTopNoRepetition("CalculatorStatus");
-  autoCompleteKeyWords.AddOnTopNoRepetition("FullTree");
-  autoCompleteKeyWords.AddOnTopNoRepetition("HideLHS");
-  autoCompleteKeyWords.AddOnTopNoRepetition("DontUsePredefinedWordSplits");
-  autoCompleteKeyWords.AddOnTopNoRepetition("PlotShowJavascriptOnly");
-  autoCompleteKeyWords.AddOnTopNoRepetition("PlotNoCoordinateDetails");
-
+  for (int i=0; i<this->controlSequences.size; i++)
+    if (this->controlSequences[i].size()>0)
+      if (MathRoutines::isALatinLetter(this->controlSequences[i][0]))
+        autoCompleteKeyWords.AddOnTopNoRepetition(this->controlSequences[i]);
 }
 
 std::string Calculator::ToStringPerformance()

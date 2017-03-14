@@ -311,6 +311,9 @@ public:
   static bool innerSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerCoefficientsPowersOf(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntervalClosedFromSequence(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntervalLeftClosedFromSequence(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntervalRightClosedFromSequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsNonEmptySequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsEven(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output);

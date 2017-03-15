@@ -276,7 +276,8 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   const Expression& studentAnswerNoContextE=
   theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1];
   out << "<span style=\"color:magenta\"><b>Interpreting as:</b></span><br>";
-  out << "\\(" << studentAnswerNoContextE.ToString(&theFormat) << "\\)";
+  out << "\\(\\displaystyle "
+  << studentAnswerNoContextE.ToString(&theFormat) << "\\)";
   Calculator theInterpreterWithAdvice;
   theInterpreterWithAdvice.flagUseLnInsteadOfLog=true;
   theInterpreterWithAdvice.init();
@@ -289,7 +290,8 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   << currentA.answerId << " = " << lastAnswer
   << "); ";
   bool hasCommentsBeforeSubmission=
-  (MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission)!="");
+  (MathRoutines::StringTrimWhiteSpace
+  (currentA.commandsCommentsBeforeSubmission)!="");
   if (hasCommentsBeforeSubmission)
     calculatorInputStream << "CommandEnclosure{}("
     <<  currentA.commandsCommentsBeforeSubmission
@@ -324,13 +326,20 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   if (hasCommentsBeforeSubmission)
     out << HtmlInterpretation::GetCommentsInterpretation
     (theInterpreterWithAdvice, 3, theFormat);
-  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).<hr>";
-  if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn() )
-    out << "<hr>Logged-in as admin with debug flag on = including (lots of) details. "
-    << "Executed command, no advice:<br>" << studentAnswerWithComments.str()
-    << "<hr>Executed command, with advice:<br>" << calculatorInputStream.str()
+  out << "<br>Response time: "
+  << theGlobalVariables.GetElapsedSeconds()-startTime
+  << " second(s).<hr>";
+  if (theGlobalVariables.UserDefaultHasAdminRights() &&
+      theGlobalVariables.UserDebugFlagOn())
+    out << "<hr>Logged-in as admin with debug flag"
+    << " on = including (lots of) details. "
+    << "Executed command, no advice:<br>"
+    << studentAnswerWithComments.str()
+    << "<hr>Executed command, with advice:<br>"
+    << calculatorInputStream.str()
     << "<hr>"
-    << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
+    << theInterpreterWithAdvice.outputString
+    << "<br>" << theInterpreterWithAdvice.outputCommentsString;
   return out.str();
 }
 
@@ -1028,7 +1037,8 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   std::string lastStudentAnswerID;
   MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   for (int i=0; i<theArgs.size(); i++)
-    MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
+    MathRoutines::StringBeginsWith
+    (theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
   int indexLastAnswerId=theProblem.GetAnswerIndex(lastStudentAnswerID);
   if (indexLastAnswerId==-1)
   { out << "File: "
@@ -1088,7 +1098,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   const Expression& currentE=
   theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1][1];
   if (!currentE.StartsWith(theInterpreteR.opEndStatement()))
-  { out << "\\(" << currentE.ToString(&theFormat) << "\\)";
+  { out << "\\(\\displaystyle " << currentE.ToString(&theFormat) << "\\)";
     if (outputNakedAnswer!=0)
       *outputNakedAnswer=currentE.ToString(&theFormat);
     if (outputDidSucceed!=0)
@@ -1108,7 +1118,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
       if (currentE[j].IsOfType<std::string>())
         out << currentE[j].GetValue<std::string>();
       else
-        out << "\\(" << currentE[j].ToString(&theFormat) << "\\)";
+        out << "\\(\\displaystyle " << currentE[j].ToString(&theFormat) << "\\)";
       if (j==currentE.size()-1)
       { if (outputNakedAnswer!=0)
           *outputNakedAnswer=currentE[j].ToString(&theFormat);

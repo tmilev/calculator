@@ -59,19 +59,22 @@ function initializeButtons()
   { var currentButtonPanel=document.getElementById(preferredButtonContainers[i]);
     currentButtonPanel.innerHTML=
 "<table><tr>"+
-"<td>" + getSqrtButton(i)+ "</td><td>"+getSqrt_N_Button(i) + "</td>"+ 
+"<td>" + getSqrtButton(i)+ "</td>"+
+"<td>"+getSqrt_N_Button(i) + "</td>"+
+"<td>"+getPowerButton(i) + "</td>"+
 "</tr>"+
 "<tr>"+
-"<td>" + getDivideButton(i)+ "</td><td>"+getPowerButton(i) + "</td>"+ 
+"<td>" + getDivideButton(i)+ "</td>"+
+"<td>"+getTimesButton(i) + "</td>"+
+"<td>" + getPlusButton(i)+ "</td>"+
 "</tr>"+
 "<tr>"+
-"<td>" + getPlusButton(i)+ "</td><td>"+getTimesButton(i) + "</td>"+ 
+"<td>" + getMinusButton(i)+ "</td>"+
+"<td>" + getUnderscoreButton(i)+ "</td>"+
+"<td>" + getLogBaseButton(i) + "</td>"+
 "</tr>"+
 "<tr>"+
-"<td>" + getInftyButton(i)+ "</td><td>" + getPiButton(i) + "</td>"+ 
-"</tr>"+
-"<tr>"+
-"<td>" + getUnderscoreButton(i)+ "</td><td>" + getLogBaseButton(i) + "</td>"+ 
+"<td>" + getSumButton(i)+ "</td>"+"<td>" + getInftyButton(i)+ "</td>"+"<td>" + getPiButton(i) + "</td>"+
 "</tr>"+
 "</table>"
 ;
@@ -208,8 +211,9 @@ function getPowerButton(indexMathField){
 }
 
 function powerClick(currentMathField){ 
-  currentMathField.typedText("^");
+  currentMathField.cmd("^");
   currentMathField.focus();
+  event.preventDefault();
 }
 
 function getPlusButton(indexMathField){
@@ -218,6 +222,7 @@ function getPlusButton(indexMathField){
 
 function plusClick(currentMathField){ 
   currentMathField.cmd("+");
+  currentMathField.focus();
   event.preventDefault();
 }
 
@@ -230,12 +235,30 @@ function timesClick(currentMathField){
   event.preventDefault();
 }
 
+function getSumButton(indexMathField){
+  return "<button style='width:25' onmousedown='sumClick(answerMathQuillObjects[" + indexMathField + "]);'>&#8721</button>";
+}
+
+function sumClick(currentMathField){
+  currentMathField.cmd("\\sum");
+  event.preventDefault();
+}
+
 function getInftyButton(indexMathField){
   return "<button style='width:25' onmousedown='inftyClick(answerMathQuillObjects[" + indexMathField + "]);'>&#8734</button>";
 }
 
 function inftyClick(currentMathField){ 
   currentMathField.cmd("\\infty");
+  event.preventDefault();
+}
+
+function getMinusButton(indexMathField){
+  return "<button style='width:25' onmousedown='minusClick(answerMathQuillObjects[" + indexMathField + "]);'>-</button>";
+}
+
+function minusClick(currentMathField){
+  currentMathField.cmd("-");
   event.preventDefault();
 }
 

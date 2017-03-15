@@ -1551,7 +1551,7 @@ bool Calculator::CollectCoefficientsPowersVar
   List<Expression> theSummands, currentMultiplicands, remainingMultiplicands;
   Calculator& theCommands=*input.owner;
   theCommands.CollectOpands(input, theCommands.opPlus(), theSummands);
-  Expression currentCoeff, constTerm;
+  Expression currentCoeff;
   outputPositionIiscoeffXtoIth.MakeZero();
   for (int i=0; i<theSummands.size; i++)
   { theCommands.CollectOpands(theSummands[i], theCommands.opTimes(), currentMultiplicands);
@@ -2048,7 +2048,6 @@ bool Expression::operator==(const Expression& other)const
 
 bool Expression::IsEqualToMathematically(const Expression& other)const
 { MacroRegisterFunctionWithName("Expression::IsEqualToMathematically");
-  //stOutput << "<br>DEBUG: Calling Expression::IsEqualToMathematically with input: " << this->ToString() << " and " << other.ToString();
   if (this->owner==0 && other.owner==0)
     return this->theData==other.theData;
   if (this->owner==0)
@@ -2062,11 +2061,8 @@ bool Expression::IsEqualToMathematically(const Expression& other)const
   if (other.IsOfType<Rational>(&theRat) && this->IsOfType<AlgebraicNumber>(&theAlgebraic))
     return theAlgebraic==theRat;
   double leftD=-1, rightD=-1;
-//  stOutput << "<br>DEBUG: step 1: Calling Expression::IsEqualToMathematically with input: " << this->ToString() << " and " << other.ToString();
-  if (this->EvaluatesToDouble(&leftD) && other.EvaluatesToDouble(&rightD) )
-  { //stOutput << "<br>DEBUG: step 1.1: comparing leftD: " << leftD << " to rightD: " << rightD << ";<br>";
+  if (this->EvaluatesToDouble(&leftD) && other.EvaluatesToDouble(&rightD))
     return leftD==rightD;
-  }
   Expression differenceE = *this;
   differenceE-=other;
   Expression differenceEsimplified;
@@ -2075,6 +2071,14 @@ bool Expression::IsEqualToMathematically(const Expression& other)const
  // stOutput << "<br>DEBUG: step 2: Calling Expression::IsEqualToMathematically with input: " << this->ToString() << " and " << other.ToString();
   if (differenceEsimplified.IsEqualToZero())
     return true;
+  //stOutput << "DEBUG: differenceEsimplified: "
+  //<< differenceEsimplified.ToString();
+  if (differenceEsimplified.IsSequenceNElementS())
+  { for (int i=1; i<differenceEsimplified.size(); i++)
+      if (!differenceEsimplified[i].IsEqualToZero())
+        return false;
+    return true;
+  }
  // stOutput << "<br>DEBUG: step 3: Calling Expression::IsEqualToMathematically with input: " << this->ToString() << " and " << other.ToString();
   if (this->size()!=other.size())
     return false;

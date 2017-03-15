@@ -2000,10 +2000,28 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerLength",
    "Length");
   this->AddOperationInnerHandler
-  ("GetSummandList", CalculatorFunctionsGeneral::outerCollectSummands, "",
+  ("GetMultiplicandList",
+    CalculatorFunctionsGeneral::innerCollectMultiplicands, "",
    "Converts a sum to a sequence containing the summands. ",
-   "GetSummandList(1+a+b) ", true, false,
-   "CalculatorFunctionsGeneral::outerGetSummands", "GetSummandList");
+   "GetMultiplicandList(a*b*c) ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerCollectMultiplicands",
+   "GetMultiplicandList");
+  this->AddOperationInnerHandler
+  ("GetSummandList",
+    CalculatorFunctionsGeneral::innerCollectSummands, "",
+   "Converts a sum to a sequence containing the summands. ",
+   "GetSummandList(1+a+b) ",
+   true, false,
+   "CalculatorFunctionsGeneral::outerGetSummands",
+   "GetSummandList");
+  this->AddOperationInnerHandler
+  ("GetSummand", CalculatorFunctionsGeneral::innerGetSummand, "",
+   "Extracts the nth summand from a sum, \
+    <b>starts with the ZEROETH summand</b>. ",
+   "GetSummand(\\sum_{n=1}^\\infty (-1)^{2n+1} x^{2n+1}/(2n+1)!, 5 ) ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerGetSummand", "GetSummand");
   this->AddOperationInnerHandler
   ("Sort", CalculatorFunctionsGeneral::innerSort, "",
    "Sorts a sequence. ",
@@ -3052,7 +3070,7 @@ void Calculator::initPredefinedStandardOperations()
     \nDrawExpressionTree( \\sum\\limits_{b}^c*a) ",
    true,  false,
    "CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf",
-   "SumProductNotationToABuiltInDataStructure");
+   "SumProductNotationToOperator");
 this->AddOperationInnerHandler
   ("^", CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits, "",
    "Handles expressions of the form \\limits_a^b",
@@ -3994,7 +4012,6 @@ this->AddOperationInnerHandler
    "Min(-4,2)", true, false,
    "CalculatorFunctionsGeneral::innerMin", "Min");
 
-
   this->AddOperationInnerHandler
   ("\\geq", Calculator::innerGreaterThanOrEqualTo, "",
    "Greater than or equal to operation. ",
@@ -4009,48 +4026,76 @@ this->AddOperationInnerHandler
    "%NumberColors\n  \
    A=(a=3, b=4);\n\
    B=(a=(sqrt(3))^2, b=4 );\n\
-   A==B;\n\
-   x==y;\nx==1;\nIsEqualToX{} {{a}}=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\
+   A==B;\
+   \nx==y;\n\
+   x==1;\nIsEqualToX{} {{a}}=a==x;\
+   \nIsEqualToX{}y;\nIsEqualToX{}x;\
    \nIsEqualToX{}1;\nx=1;\nIsEqualToX{}1; z= \\sqrt{}1; z==1", true);
   this->AddOperationOuterHandler
   ("Contains", CalculatorFunctionsGeneral::innerContains, "",
-   "Returns 1 if the first argument contains the second as a sub-expression, else returns 0. \
+   "Returns 1 if the first argument contains the \
+    second as a sub-expression, else returns 0. \
     Function has not been optimized for speed, use with caution. ",
-   "Contains ((\\arcsin x+\\cos x,5), \\arcsin )", true, false,
+   "Contains ((\\arcsin x+\\cos x,5), \\arcsin )",
+    true, false,
    "CalculatorFunctionsGeneral::innerContains",
    "Contains");
   this->AddOperationOuterHandler
   ("ExpressionLeafs", CalculatorFunctionsGeneral::innerExpressionLeafs, "",
-   "Returns a sequence without repetition of all leafs making up an expression. \
-    Here, a ``leaf'' means either an atomic expression or a built-in type. Built-in types\
+   "Returns a sequence without repetition of all leafs \
+    making up an expression. \
+    Here, a ``leaf'' means either an atomic expression\
+    or a built-in type. Built-in types\
     are not broken into atoms. ",
-   "ExpressionLeafs ((\\arcsin x+\\cos x,5), \\arcsin )", true, false,
+   "ExpressionLeafs ((\\arcsin x+\\cos x,5), \\arcsin )",
+    true, false,
    "CalculatorFunctionsGeneral::innerExpressionLeafs",
    "ExpressionLeafs");
 
 
   this->AddOperationOuterHandler
-  ("last", CalculatorFunctionsGeneral::innerLastElement, "",
+  ("Last", CalculatorFunctionsGeneral::innerLastElement, "",
    "Returns the last element of the expression, provided the argument has no bound variables. If the expression has bound variables does nothing.",
    "p{}((), 0 )=1;\
     \np{}({{x}}, {{n}}):if n<0=0;\
     \np{}((), {{n}})=0;\
-    \np{}({{x}},{{n}})=p{}(x, n-last x)+p{}(removeLast x, n);\
-    \np{}((1,2, 5, 10, 25,100), 100);", true);
+    \np{}({{x}},{{n}})=p{}(x, n-Last x)+p{}(RemoveLast x, n);\
+    \np{}((1,2, 5, 10, 25,100), 100);",
+    true, false,
+    "CalculatorFunctionsGeneral::innerLastElement",
+    "Last");
   this->AddOperationOuterHandler
-  ("removeLast", CalculatorFunctionsGeneral::innerRemoveLastElement, "",
-   "Returns a list with the last element removed, provided the argument has no bound variables. If the expression has bound variables does nothing.",
-   "X=(a,b,c); Y= (removeLast X)\\cup Sequence{}(last X)-X; ", true);
+  ("RemoveLast",
+    CalculatorFunctionsGeneral::innerRemoveLastElement, "",
+   "Returns a list with the last element removed, provided \
+    the argument has no bound variables. If the expression \
+    has bound variables does nothing.",
+   "X=(a,b,c); Y= (RemoveLast X)\\cup Sequence{}(last X)-X; ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerRemoveLastElement",
+   "RemoveLast");
   this->AddOperationOuterHandler
-  ("\\cap", CalculatorFunctionsGeneral::innerIntersection, "",
-   "Intersects lists. For the time being, the output order is not specified (will be fixed in the future).",
-   "(a,b,c)\\cap (c, d, e);x=(a,b,c)\\cap (c, d, e);\na= 1;\nd=1;(a,b,c)\\cap (c, d, e); x", true);
+  ("\\cap",
+   CalculatorFunctionsGeneral::innerIntersection, "",
+   "Intersects lists. For the time being, the \
+    output order is not specified (will be fixed in the future).",
+   "(a,b,c)\\cap (c, d, e);\
+    \nx=(a,b,c)\\cap (c, d, e);\
+    \na= 1;\
+    \nd=1;\
+    \n(a,b,c)\\cap (c, d, e); x",
+    true, false,
+    "CalculatorFunctionsGeneral::innerIntersection",
+    "\\cap");
   this->AddOperationOuterHandler
   ("\\cup", CalculatorFunctionsGeneral::innerUnion, "",
    "If all arguments of \\cup are of type list, substitutes the expression with \
    a list containing \
    the union of all members (with repetition).",
-   "x\\cup (MakeSequence{} x \\cup MakeSequence{}x \\cup (a,b,x))", true);
+   "x\\cup (MakeSequence{} x \\cup MakeSequence{}x \\cup (a,b,x))",
+   true, false,
+   "CalculatorFunctionsGeneral::innerUnion",
+   "\\cup");
   this->AddOperationOuterHandler
   ("\\sqcup", CalculatorFunctionsGeneral::innerUnionNoRepetition, "",
    "If all arguments of \\sqcup are of type list, substitutes the expression with a list \
@@ -4072,7 +4117,7 @@ void Calculator::initPredefinedOperationsComposite()
     \nDrawExpressionTree( (\\sum_a^b ){} n) ",
    true, true, false,
    "CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation",
-   "SumProductNotationToABuiltInDataStructure");
+   "SumAsOperator");
 
   this->AddOperationComposite
   ("Rational", CalculatorFunctionsGeneral::innerConstantFunction, "",

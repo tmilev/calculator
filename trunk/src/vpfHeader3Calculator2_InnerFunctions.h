@@ -141,7 +141,9 @@ public:
   static bool innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetOutputFile(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool outerCollectSummands(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGetSummand(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCollectMultiplicands(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCollectSummands(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMergeConstantRadicals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCommuteConstants(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDivideReplaceAdivBpowerItimesBpowerJ(Calculator& theCommands, const Expression& input, Expression& output);

@@ -1787,7 +1787,8 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
     Calculator theInterpreter;
     this->NumAttemptsToInterpret++;
 //    stOutput << "DEBUG: flagPlotNoControls: " << theInterpreter.flagPlotNoControls;
-    if (this->InterpretHtmlOneAttempt(theInterpreter, comments))
+    std::stringstream commentsOnLastFailure;
+    if (this->InterpretHtmlOneAttempt(theInterpreter, commentsOnLastFailure))
     { this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
       this->theProblemData.CheckConsistency();
       return true;
@@ -1795,6 +1796,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
     this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
     if (this->NumAttemptsToInterpret>=this->MaxInterpretationAttempts)
     { std::stringstream out;
+      comments << commentsOnLastFailure.str();
       out << "Failed to evaluate the commands: " << this->NumAttemptsToInterpret
       << " attempts made. Calculator evaluation details follow.<hr> "
       << theInterpreter.outputString << "<hr><b>Comments</b><br>"

@@ -1858,9 +1858,9 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(2);
   if ((secondToLastS=="\\left" || secondToLastS=="\\right") && lastS == "|")
     return this->ReplaceXYByY();
-  if (secondToLastS=="\\left" && lastS == "(")
+  if (secondToLastS=="\\left" && (lastS == "(" || lastS=="[" || lastS=="{"))
     return this->ReplaceXYByY();
-  if (secondToLastS=="\\right" && lastS == ")")
+  if (secondToLastS=="\\right" && (lastS == ")" || lastS=="]" || lastS=="}"))
     return this->ReplaceXYByY();
   if (lastS=="=" && secondToLastS=="=")
     return this->ReplaceXXByCon(this->conEqualEqual());

@@ -447,6 +447,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
     << " second(s).</small>" << "</problemNavigation>\n";
    }
+  out << this->comments.str();
   out << this->outputHtmlBodyNoTag;
   return out.str();
 }
@@ -1975,15 +1976,19 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     SyntacticElementHTML& fifthToLast  = eltsStack[eltsStack.size-5];
     SyntacticElementHTML& sixthToLast  = eltsStack[eltsStack.size-6];
 //    SyntacticElementHTML& seventhToLast = eltsStack[eltsStack.size-7];
-    if ((secondToLast.syntacticRole=="<openTagCalc>" || secondToLast.syntacticRole=="<calculatorSolution>") &&
-        last.syntacticRole=="</closeTag>" && secondToLast.tag==last.tag)
+    if ((secondToLast.syntacticRole=="<openTagCalc>" ||
+         secondToLast.syntacticRole=="<calculatorSolution>") &&
+        last.syntacticRole=="</closeTag>" &&
+        secondToLast.tag==last.tag)
     { secondToLast.syntacticRole="command";
       eltsStack.RemoveLastObject();
       if (this->IsStateModifierApplyIfYes(secondToLast))
         eltsStack.RemoveLastObject();
       continue;
     }
-    if (thirdToLast.syntacticRole=="<openTag" && secondToLast=="/" && last.syntacticRole==">")
+    if (thirdToLast.syntacticRole=="<openTag" &&
+        secondToLast=="/" &&
+        last.syntacticRole==">")
     { tagClass=thirdToLast.GetKeyValue("class");
       if (tagClass=="calculatorSolution")
         thirdToLast.syntacticRole="<calculatorSolution>";
@@ -2060,8 +2065,9 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       continue;
     }
     if (last==" " &&
-        (secondToLast.syntacticRole=="<openTag" || thirdToLast.syntacticRole=="<openTag"
-         || fourthToLast.syntacticRole=="<openTag"))
+        (secondToLast.syntacticRole=="<openTag" ||
+         thirdToLast.syntacticRole=="<openTag" ||
+         fourthToLast.syntacticRole=="<openTag"))
     { eltsStack.RemoveLastObject();
       continue;
     }
@@ -2086,8 +2092,9 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       //stOutput << "<hr>Rule 2: processed " << thirdToLast.ToStringOpenTag(true) << "<hr>";
       continue;
     }
-    if (sixthToLast.syntacticRole=="<openTag" && fourthToLast=="=" && thirdToLast=="\""
-        && last!="\"" )
+    if (sixthToLast.syntacticRole=="<openTag" &&
+        fourthToLast=="=" && thirdToLast=="\"" &&
+        last!="\"" )
     { if (last.syntacticRole!="" && last.content=="")
         secondToLast.content+=last.syntacticRole;
       else
@@ -2107,8 +2114,9 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (sixthToLast.syntacticRole=="<openTag" && fourthToLast=="=" && thirdToLast=="\""
-        && last=="\"" )
+    if (sixthToLast.syntacticRole=="<openTag" &&
+        fourthToLast=="=" && thirdToLast=="\"" &&
+        last=="\"" )
     { sixthToLast.SetKeyValue(fifthToLast.content, secondToLast.content);
       eltsStack.SetSize(eltsStack.size-5);
       //stOutput << "<hr>Rule ZZ executed<hr> ";
@@ -2120,7 +2128,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       eltsStack.SetSize(eltsStack.size-2);
       continue;
     }
-    if (thirdToLast.syntacticRole=="<openTag" && secondToLast.syntacticRole=="" && last.syntacticRole==">")
+    if (thirdToLast.syntacticRole=="<openTag" &&
+        secondToLast.syntacticRole=="" && last.syntacticRole==">")
     { thirdToLast.tagKeysWithoutValue.AddOnTop(secondToLast.content);
       eltsStack[eltsStack.size-2]=*eltsStack.LastObject();
       eltsStack.RemoveLastObject();
@@ -2137,6 +2146,15 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
         secondToLast.syntacticRole="command";
       else
       { secondToLast.content=secondToLast.ToStringOpenTag();
+        if (theGlobalVariables.UserDefaultHasProblemComposingRights())
+          if (MathRoutines::StringBeginsWith(tagClass, "calculator"))
+            if (!this->calculatorClasses.Contains(tagClass))
+              comments
+              << "<hr><b><span style=\"color:red\">Warning: found class tag: "
+              << tagClass
+              << ". The name of this class starts with calculator yet this is not"
+              << " a calculator class. This may be a typo. "
+              << "</span></b>";
         secondToLast.resetAllExceptContent();
       }
       //stOutput << "<hr>Rule 3: processed: " << secondToLast.ToStringDebug() << "<hr>";
@@ -2148,7 +2166,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       eltsStack.RemoveLastObject();
       continue;
     }
-
     reduced=false;
   } while (reduced || indexInElts<theElements.size);
   this->theContent.SetSize(0);
@@ -2173,7 +2190,8 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       this->theContent.LastObject()->content+=eltsStack[i].content;
     else
     { if (this->theContent.size>0)
-        if (this->theContent.LastObject()->IsInterpretedByCalculatorDuringProblemGeneration() &&
+        if (this->theContent.LastObject()->
+            IsInterpretedByCalculatorDuringProblemGeneration() &&
             eltsStack[i].IsInterpretedByCalculatorDuringProblemGeneration())
         { SyntacticElementHTML emptyElt;
           this->theContent.AddOnTop(emptyElt);
@@ -2183,6 +2201,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   }
 //  stOutput << "<hr>DEBUG: About to check consistency while parsing<hr>";
   //this->theProblemData.CheckConsistency();
+
   if (!result)
     comments << "<hr>Parsing stack.<hr>" << this->ToStringParsingStack(this->eltsStack);
   //this->theProblemData.CheckConsistency();

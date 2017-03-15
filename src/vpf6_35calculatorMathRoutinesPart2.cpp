@@ -509,9 +509,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateXpowerNePowerAx(Calculator& theCo
   if (!isGood)
     return false;
   Expression remainingIntegrand, integralPart;
-  Expression oneE;
-  oneE.AssignValue(1, theCommands);
-  remainingIntegrand.MakeXOX(theCommands, theCommands.opThePower(), theVariableE, powerOfXE-oneE);
+  remainingIntegrand.MakeXOX
+  (theCommands, theCommands.opThePower(), theVariableE, powerOfXE-theCommands.EOne());
   remainingIntegrand*=exponentPartE;
   integralPart.MakeIntegral(theCommands, theSetE,remainingIntegrand, theVariableE);
   output= (polyPartE*exponentPartE-powerOfXE*integralPart)/aE;
@@ -542,15 +541,14 @@ bool CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne(Calculator& 
   if (!c.IsNegativeConstant())
     return false;
 
-  Expression extraCF, theVarChangeCF, theNewVarE, oneE;
-  oneE.AssignValue(1,theCommands);
+  Expression extraCF, theVarChangeCF, theNewVarE;
   extraCF.MakeSqrt(theCommands,c*(-1));
   theFunCoeff*=extraCF;
   theVarChangeCF.MakeSqrt(theCommands, (a/c)*(-1));
   theNewVarE=theVariableE* theVarChangeCF;
   theFunCoeff/=theVarChangeCF;
   Expression algSQRTPart, algPart, lnPart;
-  algSQRTPart=theNewVarE*theNewVarE-oneE;
+  algSQRTPart=theNewVarE*theNewVarE-theCommands.EOne();
   algPart.MakeSqrt(theCommands, algSQRTPart);
   lnPart.MakeOX
   (theCommands,theCommands.opLog(), theNewVarE-algPart);
@@ -1263,9 +1261,7 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
   newArgE.AssignValue(theArg, theCommands);
   logPartE.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
   if (theSign<0)
-  { Expression mOneE;
-    mOneE.AssignValue(-1, theCommands);
-    logPartE*=mOneE;
+  { logPartE*=theCommands.EMOne();
   }
   if (intPart==0)
   { output=logPartE;

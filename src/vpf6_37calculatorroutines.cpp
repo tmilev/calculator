@@ -190,11 +190,39 @@ bool CalculatorFunctionsGeneral::innerGetSummand(Calculator& theCommands, const 
   if (input.size()!=3)
     return false;
   const Expression& theExpression=input[1];
+  if (theExpression.StartsWith(theCommands.opPlus(),3))
+  { int summandIndex=-1;
+    if (!input[2].IsSmallInteger(&summandIndex))
+      return false;
+    if (summandIndex<0)
+      return false;
+    List<Expression> theSummands;
+    List<Expression> theSums;
+    theCommands.CollectOpands(theExpression, theCommands.opPlus(),theSummands);
+    for (int i=0; i<theSummands.size; i++)
+      if (theSummands[i].ContainsAsSubExpressionNoBuiltInTypes(theCommands.opSum()))
+      { theSums.AddOnTop(theSummands[i]);
+        theSummands.RemoveIndexShiftDown(i);
+        i--;
+      }
+    if (theSums.size>1)
+      return false;
+    if (summandIndex< theSummands.size)
+    { output=theSummands[summandIndex];
+      return true;
+    }
+    if (theSums.size==0)
+      return false;
+    output.reset(theCommands);
+    output.AddChildAtomOnTop("GetSummands");
+    output.AddChildOnTop(theSums[0]);
+    Expression shiftE;
+    shiftE.AssignValue(theSummands.size, theCommands);
+    return output.AddChildOnTop(input[2]-shiftE);
+  }
   List<Expression> theMultiplicands;
   theExpression.GetMultiplicandsRecursive(theMultiplicands);
   Expression theSum=*theMultiplicands.LastObject();
-  if (!theSum.StartsWith(theCommands.opSum(),3))
-    return false;
   theMultiplicands.RemoveLastObject();
   Expression theCoeff;
   if (theMultiplicands.size>0)
@@ -217,7 +245,7 @@ bool CalculatorFunctionsGeneral::innerGetSummand(Calculator& theCommands, const 
   theCommandSequence.AddChildAtomOnTop(theCommands.opEndStatement());
   theCommandSequence.AddChildOnTop(theSub);
   theCommandSequence.AddChildOnTop(theCoeff*theSum[2]);
-  Expression twoE;
-  twoE.AssignValue(2, theCommands);
-  return output.MakeXOX(theCommands, theCommands.opUnderscore(), theCommandSequence, twoE);
+  return output.MakeXOX
+  (theCommands, theCommands.opUnderscore(), theCommandSequence,
+   theCommands.ETwo());
 }

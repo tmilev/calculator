@@ -529,7 +529,9 @@ void WebServer::SSLServerSideHandShake()
 }
 
 std::string WebWorker::ToStringSSLError(int errorCode)
-{ int theCode=SSL_get_error(theSSLdata.ssl, errorCode);
+{
+#ifdef MACRO_use_open_ssl
+  int theCode=SSL_get_error(theSSLdata.ssl, errorCode);
   ERR_print_errors_fp(stderr);
   std::stringstream out;
   int extraErrorCode=0;
@@ -573,6 +575,9 @@ std::string WebWorker::ToStringSSLError(int errorCode)
     break;
   }
   return out.str();
+#else
+  return "";
+#endif
 }
 
 bool WebWorker::ReceiveAllHttpSSL()

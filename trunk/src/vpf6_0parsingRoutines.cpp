@@ -349,11 +349,10 @@ bool Calculator::ReplaceOXEXEXEXByE()
 bool Calculator::ReplaceSqrtEXByEX()
 { SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& argument=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  Expression newExpr, twoE;
-  twoE.AssignValue(2, *this);
+  Expression newExpr;
   newExpr.reset(*this, 3);
   newExpr.AddChildAtomOnTop(this->opSqrt());
-  newExpr.AddChildOnTop(twoE);
+  newExpr.AddChildOnTop(this->ETwo());
   newExpr.AddChildOnTop(argument.theData);
   left.theData=newExpr;
   left.controlIndex=this->conExpression();
@@ -364,11 +363,10 @@ bool Calculator::ReplaceSqrtEXXByEXX()
 { int lastSize=(*this->CurrentSyntacticStacK).size;
   SyntacticElement& left=(*this->CurrentSyntacticStacK)[lastSize-4];
   SyntacticElement& argument=(*this->CurrentSyntacticStacK)[lastSize-3];
-  Expression newExpr, twoE;
-  twoE.AssignValue(2, *this);
+  Expression newExpr;
   newExpr.reset(*this, 3);
   newExpr.AddChildAtomOnTop(this->opSqrt());
-  newExpr.AddChildOnTop(twoE);
+  newExpr.AddChildOnTop(this->ETwo());
   newExpr.AddChildOnTop(argument.theData);
   left.theData=newExpr;
   left.controlIndex=this->conExpression();
@@ -381,11 +379,10 @@ bool Calculator::ReplaceSqrtEXXByEXX()
 bool Calculator::ReplaceSqrtXEXByEX()
 { SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& argument=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  Expression newExpr, twoE;
-  twoE.AssignValue(2, *this);
+  Expression newExpr;
   newExpr.reset(*this, 3);
   newExpr.AddChildAtomOnTop(this->opSqrt());
-  newExpr.AddChildOnTop(twoE);
+  newExpr.AddChildOnTop(this->ETwo());
   newExpr.AddChildOnTop(argument.theData);
   left.theData=newExpr;
   left.controlIndex=this->conExpression();

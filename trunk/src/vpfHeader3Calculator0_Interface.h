@@ -839,6 +839,14 @@ class Calculator
   { output.Comments << any;
     return output;
   }
+private:
+  Expression frequentConstantOne, frequentConstantTwo,
+  frequentConstantThree, frequentConstantFour,
+  frequentConstantFive, frequentConstantHalf,
+  frequentConstantMinusHalf,
+  frequentConstantZero,
+  frequentConstantMinusOne;
+
 public:
   //Operations parametrize the expression elements.
   //Operations are the labels of the atom nodes of the expression tree.
@@ -1078,6 +1086,15 @@ public:
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
     return true;
   }
+  const Expression& EZero();
+  const Expression& EOne();
+  const Expression& ETwo();
+  const Expression& EThree();
+  const Expression& EFour();
+  const Expression& EFive();
+  const Expression& EMOne();
+  const Expression& EHalf();
+  const Expression& EMHalf();
   void DoLogEvaluationIfNeedBe(Function& inputF);
   void LogPublicError(const std::string& theError);
   bool DecreaseStackExceptLast(int decrease);

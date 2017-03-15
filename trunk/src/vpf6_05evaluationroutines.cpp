@@ -50,6 +50,36 @@ std::string Calculator::ToStringFunctionHandlers()
   return out.str();
 }
 
+const Expression& Calculator::EZero()
+{ if (this->frequentConstantZero.owner==0)
+    this->frequentConstantZero.AssignValue(0,*this);
+  return this->frequentConstantZero;
+}
+
+const Expression& Calculator::EOne()
+{ if (this->frequentConstantOne.owner==0)
+    this->frequentConstantOne.AssignValue(1,*this);
+  return this->frequentConstantOne;
+}
+
+const Expression& Calculator::EMOne()
+{ if (this->frequentConstantMinusOne.owner==0)
+    this->frequentConstantMinusOne.AssignValue(-1,*this);
+  return this->frequentConstantMinusOne;
+}
+
+const Expression& Calculator::ETwo()
+{ if (this->frequentConstantTwo.owner==0)
+    this->frequentConstantTwo.AssignValue(2,*this);
+  return this->frequentConstantTwo;
+}
+
+const Expression& Calculator::EMHalf()
+{ if (this->frequentConstantMinusHalf.owner==0)
+    this->frequentConstantMinusHalf.AssignValue(Rational(-1,2),*this);
+  return this->frequentConstantMinusHalf;
+}
+
 void Calculator::DoLogEvaluationIfNeedBe(Function& inputF)
 { if (!this->flagLogEvaluatioN)
     return;
@@ -398,9 +428,7 @@ bool Calculator::EvaluateExpression
       { //We "undo" the caching process by
         //replacing the cached value with the minusOneExpression,
         //which, having no context, will never match another expression.
-        Expression minusOneE(theCommands);
-        minusOneE=-1;
-        theCommands.cachedExpressions.SetObjectAtIndex(indexInCache, minusOneE);
+        theCommands.cachedExpressions.SetObjectAtIndex(indexInCache, theCommands.EMOne());
       }
       indexInCache=-1;
     }

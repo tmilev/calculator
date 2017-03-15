@@ -1609,8 +1609,6 @@ bool Calculator::CollectSummands
 { MacroRegisterFunctionWithName("Calculator::CollectSummands");
   List<Expression> summands;
   theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, summands);
-  Expression oneE; //used to record the constant term
-  oneE.AssignValue<Rational>(1, theCommands);
   outputSum.MakeZero();
   MonomialCollection<Expression, AlgebraicNumber> sumOverAlgNums;
   MonomialCollection<Expression, double> sumOverDoubles;
@@ -1638,7 +1636,7 @@ bool Calculator::CollectSummands
       }
     }
     if (summands[i].IsRational(&coeffRat))
-      outputSum.AddMonomial(oneE, coeffRat);
+      outputSum.AddMonomial(theCommands.EOne(), coeffRat);
     else
       outputSum.AddMonomial(summands[i],1);
   }
@@ -1743,10 +1741,7 @@ bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Express
 
 bool Expression::MakeIdMatrixExpressions(int theDim, Calculator& inputBoss)
 { Matrix<Expression> theMat;
-  Expression oneE, zeroE;
-  oneE.AssignValue(1, inputBoss);
-  zeroE.AssignValue(0, inputBoss);
-  theMat.MakeIdMatrix(theDim, oneE, zeroE);
+  theMat.MakeIdMatrix(theDim, inputBoss.EOne(), inputBoss.EZero());
   return this->AssignMatrixExpressions(theMat, inputBoss, false);
 }
 

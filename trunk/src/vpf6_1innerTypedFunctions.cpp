@@ -1003,10 +1003,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixByRat(Calculator& theCommands
   if (theMat.NumRows>10)
     return theCommands << "I've been instructed not to exponentiate non-rational matrices of dimension >10. ";
   Matrix<Expression> idMatE;
-  Expression oneE, zeroE;
-  oneE.AssignValue(1, theCommands);
-  zeroE.AssignValue(0, theCommands);
-  idMatE.MakeIdMatrix(theMat.NumRows, oneE, zeroE);
+  idMatE.MakeIdMatrix(theMat.NumRows, theCommands.EOne(), theCommands.EZero());
   MathRoutines::RaiseToPower(theMat, thePower, idMatE);
   return output.AssignMatrixExpressions(theMat, theCommands, true);
 }

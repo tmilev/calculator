@@ -327,7 +327,9 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).<hr>";
   if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn() )
     out << "<hr>Logged-in as admin with debug flag on = including (lots of) details. "
-    << "Executed command:<br>" << calculatorInputStream.str() << "<hr>"
+    << "Executed command, no advice:<br>" << studentAnswerWithComments.str()
+    << "<hr>Executed command, with advice:<br>" << calculatorInputStream.str()
+    << "<hr>"
     << theInterpreterWithAdvice.outputString << "<br>" << theInterpreterWithAdvice.outputCommentsString;
   return out.str();
 }

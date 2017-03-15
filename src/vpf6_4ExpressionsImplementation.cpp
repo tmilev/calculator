@@ -1895,6 +1895,19 @@ int Expression::GetNumCols()const
   return theMax;
 }
 
+void Expression::GetMultiplicandsRecursive(List<Expression>& outputAppendList, int depth)const
+{ MacroRegisterFunctionWithName("Expression::GetMultiplicandsRecursive");
+  this->CheckInitialization();
+  if (depth==0)
+    outputAppendList.SetSize(0);
+  if (!this->StartsWith(this->owner->opTimes()))
+  { outputAppendList.AddOnTop(*this);
+    return;
+  }
+  for (int i=1; i<this->size(); i++)
+    (*this)[i].GetMultiplicandsDivisorsRecursive(outputAppendList, depth+1);
+}
+
 void Expression::GetMultiplicandsDivisorsRecursive(List<Expression>& outputAppendList, int depth)const
 { MacroRegisterFunctionWithName("Expression::GetMultiplicandsDivisorsRecursive");
   this->CheckInitialization();

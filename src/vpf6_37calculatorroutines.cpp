@@ -184,3 +184,40 @@ bool CalculatorFunctionsGeneral::innerIntervalLeftClosedFromSequence(Calculator&
   output=input;
   return output.SetChildAtomValue(0, theCommands.opIntervalLeftClosed());
 }
+
+bool CalculatorFunctionsGeneral::innerGetSummand(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetSummand");
+  if (input.size()!=3)
+    return false;
+  const Expression& theExpression=input[1];
+  List<Expression> theMultiplicands;
+  theExpression.GetMultiplicandsRecursive(theMultiplicands);
+  Expression theSum=*theMultiplicands.LastObject();
+  if (!theSum.StartsWith(theCommands.opSum(),3))
+    return false;
+  theMultiplicands.RemoveLastObject();
+  Expression theCoeff;
+  if (theMultiplicands.size>0)
+    theCoeff.MakeProducT(theCommands, theMultiplicands);
+  else
+    theCoeff.AssignValue(1, theCommands);
+  const Expression& theLimits=theSum[1];
+  if (!theLimits.StartsWith(theCommands.opLimitBoundary(),3))
+    return false;
+  const Expression& theBottomBoundary=theLimits[1];
+  if (!theBottomBoundary.StartsWith(theCommands.opDefine(),3))
+    return false;
+  Expression theSub=theBottomBoundary;
+  Expression //oneE,
+  valueToSubWith;
+  //oneE.AssignValue(1, theCommands);
+  valueToSubWith=theBottomBoundary[2]+input[2];
+  theSub.SetChilD(2, valueToSubWith);
+  Expression theCommandSequence(theCommands);
+  theCommandSequence.AddChildAtomOnTop(theCommands.opEndStatement());
+  theCommandSequence.AddChildOnTop(theSub);
+  theCommandSequence.AddChildOnTop(theCoeff*theSum[2]);
+  Expression twoE;
+  twoE.AssignValue(2, theCommands);
+  return output.MakeXOX(theCommands, theCommands.opUnderscore(), theCommandSequence, twoE);
+}

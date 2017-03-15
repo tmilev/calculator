@@ -155,6 +155,7 @@ class Expression
   void GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList)const;
   bool SplitProduct(int numDesiredMultiplicandsLeft, Expression& outputLeftMultiplicand, Expression& outputRightMultiplicand)const;
   void GetBaseExponentForm(Expression& outputBase, Expression& outputExponent)const;
+  void GetMultiplicandsRecursive(List<Expression>& outputAppendList, int depth=0)const;
   void GetMultiplicandsDivisorsRecursive(List<Expression>& outputAppendList, int depth=0)const;
   void GetCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff)const;
   void GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff)const;

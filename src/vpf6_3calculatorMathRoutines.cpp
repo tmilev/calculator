@@ -1956,7 +1956,8 @@ bool CalculatorFunctionsGeneral::innerMin(Calculator& theCommands, const Express
 }
 
 bool CalculatorFunctionsGeneral::outerEqualEqual(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElements(3))
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerEqualEqual");
+  if (!input.IsListNElements(3))
     return false;
   const Expression& left=input[1];
   const Expression& right=input[2];
@@ -3898,7 +3899,16 @@ bool CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx(Calculator& theComman
   return output.MakeXOX(theCommands, theCommands.opDivide(), numeratorE, denominatorE);
 }
 
-bool CalculatorFunctionsGeneral::outerCollectSummands
+bool CalculatorFunctionsGeneral::innerCollectMultiplicands
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCollectSummands");
+  List<Expression> theList;
+  theCommands.AppendOpandsReturnTrueIfOrderNonCanonical
+  (input, theList, theCommands.opTimes());
+  return output.MakeSequence(theCommands, &theList);
+}
+
+bool CalculatorFunctionsGeneral::innerCollectSummands
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCollectSummands");
   List<Expression> theList;
@@ -4286,9 +4296,9 @@ bool CalculatorFunctionsGeneral::innerLastElement(Calculator& theCommands, const
     return output.MakeError(out.str(), theCommands, true);
   }
   std::string firstAtom;
-  if (input.children.size==2)
+  if (input.size()==2)
     if (input[0].IsAtom(&firstAtom) )
-      if (firstAtom=="last")
+      if (firstAtom=="Last")
         return CalculatorFunctionsGeneral::innerLastElement(theCommands, input[1], output);
   output=input[input.children.size-1];
   return true;

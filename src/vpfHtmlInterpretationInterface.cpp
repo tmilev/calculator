@@ -219,7 +219,8 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID))
       lastAnswer= "("+ CGI::URLStringToNormal(theArgs[i], false) + "); ";
   studentAnswerSream << lastAnswer;
-  out << "Your answer(s): \\(" << lastAnswer << "\\)" << "\n<br>\n";
+  out << "Your answer(s): \\(\\displaystyle "
+  << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem
   (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"));
@@ -859,7 +860,7 @@ std::string HtmlInterpretation::SubmitProblem
     //stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
 #endif
   out << "<tr><td>Your answer was: ";
-  out << "\\(";
+  out << "\\(\\displaystyle ";
   out << currentA.currentAnswerClean;
   out << "\\)";
   std::string errorMessage;

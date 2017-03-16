@@ -141,6 +141,7 @@ public:
   static bool innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetOutputFile(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerGetFirstSummandContaining(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetSummand(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCollectMultiplicands(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCollectSummands(Calculator& theCommands, const Expression& input, Expression& output);

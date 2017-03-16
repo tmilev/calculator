@@ -191,7 +191,7 @@ class Expression
   bool StartsWithFunctionWithComplexRange()const;
   bool StartsWithArithmeticOperation()const;
   bool StartsWith(int theOp=-1, int N=-1)const;
-  bool StartsWithGivenAtom(const std::string& theAtom)const;
+  bool StartsWithGivenAtom(const std::string& theAtom, int desiredChildren=-1)const;
   bool IsListStartingWithAtom(int theOp=-1)const
   { if (!this->IsLisT())
       return false;

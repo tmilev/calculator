@@ -185,9 +185,23 @@ bool CalculatorFunctionsGeneral::innerIntervalLeftClosedFromSequence(Calculator&
   return output.SetChildAtomValue(0, theCommands.opIntervalLeftClosed());
 }
 
+bool CalculatorFunctionsGeneral::innerGetFirstSummandContaining(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetFirstSummandContaining");
+  if (!input.StartsWithGivenAtom("GetFirstSummandContaining", 3))
+    return false;
+  List<Expression> theSummands;
+  theCommands.CollectOpands(input[1], theCommands.opPlus(), theSummands);
+  for (int i=0; i<theSummands.size; i++)
+    if (theSummands[i].ContainsAsSubExpressionNoBuiltInTypes(input[2]))
+    { output=theSummands[i];
+      return true;
+    }
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerGetSummand(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetSummand");
-  if (input.size()!=3)
+  if (! input.StartsWithGivenAtom("GetSummand",3))
     return false;
   const Expression& theExpression=input[1];
   if (theExpression.StartsWith(theCommands.opPlus(),3))
@@ -214,7 +228,7 @@ bool CalculatorFunctionsGeneral::innerGetSummand(Calculator& theCommands, const 
     if (theSums.size==0)
       return false;
     output.reset(theCommands);
-    output.AddChildAtomOnTop("GetSummands");
+    output.AddChildAtomOnTop("GetSummand");
     output.AddChildOnTop(theSums[0]);
     Expression shiftE;
     shiftE.AssignValue(theSummands.size, theCommands);

@@ -656,21 +656,26 @@ bool CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation
 
 bool CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf
 (Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSumSequence");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf");
   //stOutput << "<br>DEBUG: making sum from: " << input.ToString()
   //<< "size of input: " << input.size();
-  if (!input.StartsWith(theCommands.opTimes(),3))
+  if (!input.StartsWith(theCommands.opTimes(), 3) &&
+      !input.StartsWith(theCommands.opDivide(), 3))
     return false;
-  if (input[1].StartsWith(theCommands.opSum(),2))
+  if (input[1].StartsWith(theCommands.opSum(), 2) &&
+      !input.StartsWith(theCommands.opDivide()))
   { if (!input[1][1].StartsWith(theCommands.opLimitBoundary()))
       return false;
     output=input[1];
     return output.AddChildOnTop(input[2]);
   }
-  if (input[1].StartsWith(theCommands.opSum(),3))
+  if (input[1].StartsWith(theCommands.opSum(), 3))
   { if (!input[1][1].StartsWith(theCommands.opLimitBoundary()))
       return false;
-    Expression theSummed=input[1][2]*input[2];
+    Expression theSummed(theCommands);
+    theSummed.AddChildOnTop(input[0]);
+    theSummed.AddChildOnTop(input[1][2]);
+    theSummed.AddChildOnTop(input[2]);
     output=input[1];
     return output.SetChilD(2,theSummed);
   }

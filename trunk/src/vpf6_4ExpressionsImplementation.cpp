@@ -1111,7 +1111,7 @@ bool Expression::StartsWithFunctionWithComplexRange()const
   return (*this)[0].IsKnownFunctionWithComplexRange();
 }
 
-bool Expression::StartsWithGivenAtom(const std::string& theAtom)const
+bool Expression::StartsWithGivenAtom(const std::string& theAtom, int desiredChildren)const
 { if (this->owner==0)
     return false;
   if (this->size()==0)
@@ -1119,6 +1119,9 @@ bool Expression::StartsWithGivenAtom(const std::string& theAtom)const
   int theOpIndex=this->owner->theAtoms.GetIndex(theAtom);
   if (theOpIndex==-1)
     return false;
+  if (desiredChildren>=0)
+    if (desiredChildren!=this->size())
+      return false;
   return (*this)[0].IsAtomGivenData(theOpIndex);
 }
 

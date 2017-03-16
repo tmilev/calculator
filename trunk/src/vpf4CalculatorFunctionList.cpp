@@ -2021,7 +2021,17 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
     <b>starts with the ZEROETH summand</b>. ",
    "GetSummand(\\sum_{n=1}^\\infty (-1)^{2n+1} x^{2n+1}/(2n+1)!, 5 ) ",
    true, false,
-   "CalculatorFunctionsGeneral::innerGetSummand", "GetSummand");
+   "CalculatorFunctionsGeneral::innerGetSummand",
+   "GetSummand");
+  this->AddOperationInnerHandler
+  ("GetFirstSummandContaining",
+    CalculatorFunctionsGeneral::innerGetFirstSummandContaining, "",
+   "Extracts the first summand containing a subexpression. ",
+   "GetFirstSummandContaining(a+b+\\sum_{n=1}^\\infty  \
+    ((-1)^{2n+1} x^{2n+1}/(2n+1)!), \\sum ) ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerGetFirstSummandContaining",
+   "GetFirstSummandContaining");
   this->AddOperationInnerHandler
   ("Sort", CalculatorFunctionsGeneral::innerSort, "",
    "Sorts a sequence. ",
@@ -3063,15 +3073,27 @@ void Calculator::initPredefinedStandardOperations()
    "(\\int x)dx; \\int x (1+x) dx; \\int_2^3 x dx; \\int_2^3 x(1+x)dx", true, false,
    "CalculatorFunctionsGeneral::innerIntegralOperator", "IntegralOperator");
   this->AddOperationInnerHandler
-  ("*", CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf, "",
+  ("*",
+    CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf, "",
    "Transforms \\sum\\limits_{b}^c* a to (\\sum\\limits_b^c){} a. \
     ",
    "DrawExpressionTree(  \\sum\\limits_{b}^c);\
     \nDrawExpressionTree( \\sum\\limits_{b}^c*a) ",
-   true,  false,
+   true, false,
    "CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf",
    "SumProductNotationToOperator");
-this->AddOperationInnerHandler
+  this->AddOperationInnerHandler
+  ("/",
+    CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf, "",
+   "Transforms \\sum\\limits_{b}^c* a to (\\sum\\limits_b^c){} a. \
+    ",
+   "DrawExpressionTree(  \\sum\\limits_{b}^c);\
+    \nDrawExpressionTree( \\sum\\limits_{b}^c*a) ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf",
+   "SumProductNotationToOperatorRelativeToDivision");
+
+  this->AddOperationInnerHandler
   ("^", CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits, "",
    "Handles expressions of the form \\limits_a^b",
    "\\limits_a^b; \\limits^b_a",

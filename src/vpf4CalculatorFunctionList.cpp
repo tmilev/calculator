@@ -3569,11 +3569,11 @@ this->AddOperationInnerHandler
    "MultiplySequenceByMatrix");
 
   this->AddOperationInnerHandler
-  ("\\choose", CalculatorFunctionsBinaryOps::innerNChooseK, "",
+  ("\\binom", CalculatorFunctionsBinaryOps::innerNChooseK, "",
    "Evaluates the binomial coefficient if possible.",
-   "8 \\choose 3 ", true, false,
+   "\\binom{8}{3} ", true, false,
    "CalculatorFunctionsBinaryOps::innerNChooseK",
-   "Choose");
+   "Binom");
 
   this->AddOperationOuterHandler
   ("mod", Calculator::innerZmodP, "",

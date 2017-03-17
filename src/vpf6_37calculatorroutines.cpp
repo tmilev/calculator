@@ -243,6 +243,8 @@ bool CalculatorFunctionsGeneral::innerGetSummand(Calculator& theCommands, const 
     theCoeff.MakeProducT(theCommands, theMultiplicands);
   else
     theCoeff.AssignValue(1, theCommands);
+  if (!theSum.StartsWith(theCommands.opSum(),3))
+    return false;
   const Expression& theLimits=theSum[1];
   if (!theLimits.StartsWith(theCommands.opLimitBoundary(),3))
     return false;

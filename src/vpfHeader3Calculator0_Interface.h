@@ -1144,6 +1144,7 @@ public:
   bool ReplaceOOEEXbyEXpowerLike();
   bool ReplaceEEByE();
   bool ReplaceEXEXByEX();
+  bool ReplaceEXEXByEXUsingO(int theOp);
   bool ReplaceSsSsXdotsXbySsXdotsX(int numDots);
   bool ReplaceEXdotsXbySsXdotsX(int numDots);
   bool ReplaceEXdotsXBySs(int numDots)
@@ -1170,6 +1171,7 @@ public:
   bool ReplaceUnderscoreEPowerEbyLimits();
   bool ReplacePowerEUnderScoreEbyLimits();
   bool ReplaceXEEXByEXusingO(int inputOperation);
+  bool ReplaceXEEByEusingO(int inputOperation);
   bool ReplaceECByC();
   bool ReplaceEXEBySequence(int theControlIndex);
   bool ReplaceYXBySequenceX(int theControlIndex);
@@ -1661,8 +1663,8 @@ public:
   int opTensor()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\otimes");
   }
-  int opChoose()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\choose");
+  int opBinom()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\binom");
   }
   int opSetMinus()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\setminus");

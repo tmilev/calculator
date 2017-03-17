@@ -3861,15 +3861,31 @@ bool CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation(Calculator& 
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation");
   if (!input.StartsWith(theCommands.opDivide(), 3))
     return false;
+  bool hasArgument=false;
+  bool hasExtraCF=false;
+  Expression theArgument, extraCoeff;
   if (input[1]!="\\diff" && input[1]!="d")
-    return false;
+  { if (!input[1].StartsWith(theCommands.opDifferential()))
+      return false;
+    if (input[1].size()>3)
+      return false;
+    theArgument=input[1][1];
+    if (input[1].size()==3)
+    { extraCoeff=input[1][2];
+      hasExtraCF=true;
+    }
+    hasArgument=true;
+  }
   if (input[2].size()<2)
     return false;
   if (input[2][0]!="\\diff")
     return false;
   output.reset(theCommands, 2);
   output.AddChildAtomOnTop(theCommands.opDifferentiate());
-  return output.AddChildOnTop(input[2][1]);
+  output.AddChildOnTop(input[2][1]);
+  if (hasArgument)
+    output.AddChildOnTop(theArgument);
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx(Calculator& theCommands, const Expression& input, Expression& output)

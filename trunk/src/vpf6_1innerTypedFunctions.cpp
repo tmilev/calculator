@@ -1623,15 +1623,23 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(Calculator& theCom
 
 bool CalculatorFunctionsBinaryOps::innerNChooseK(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerNChooseK");
-  if (!input.IsListNElements(3))
+  if (input.size()!=3)
     return false;
   Rational N;
-  int K;
-  if (!input[1].IsOfType<Rational>(&N) || !input[2].IsSmallInteger(&K))
+  int K=-1;
+  if (!input[2].IsSmallInteger(&K))
     return false;
-//  stOutput << N.ToString();
   if (K<0)
-    return output.AssignValue(0, theCommands);
-  Rational result= result.NChooseK(N, K);
-  return output.AssignValue(result, theCommands);
+    return false;
+  if (input[1].IsOfType<Rational>(&N))
+  { Rational result= result.NChooseK(N, K);
+    return output.AssignValue(result, theCommands);
+  }
+  if (K<11)
+  { output.AssignValue(1, theCommands);
+    for (int i=0; i<K; i++)
+      output*=input[1]-i;
+    return true;
+  }
+  return false;
 }

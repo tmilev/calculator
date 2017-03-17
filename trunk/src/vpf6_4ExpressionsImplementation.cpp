@@ -2678,9 +2678,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   else if (this->StartsWith(this->owner->opIn(),3) )
     out << (*this)[1].ToString(theFormat) << "\\in "
     << (*this)[2].ToString(theFormat);
-  else if (this->StartsWith(this->owner->opChoose(),3) )
-    out << (*this)[1].ToString(theFormat) << "\\choose "
-    << (*this)[2].ToString(theFormat);
+  else if (this->StartsWith(this->owner->opBinom(),3) )
+    out << "\\binom{" << (*this)[1].ToString(theFormat) << "}{ "
+    << (*this)[2].ToString(theFormat) << "}";
   else if (this->StartsWith(this->owner->opUnderscore()))
     out << "{" << (*this)[1].ToString(theFormat) << "}_{"
     << (*this)[2].ToString(theFormat) << "}";
@@ -2758,9 +2758,12 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     else
       out << "\\sqrt[" << (*this)[1].ToString(theFormat)
       << "]{" << (*this)[2].ToString(theFormat) << "}";
-  } else if (this->IsListStartingWithAtom(this->owner->opFactorial()))
-    out << (*this)[1].ToString(theFormat) << "!";
-  else if (this->StartsWith(this->owner->opAbsoluteValue(), 2))
+  } else if (this->StartsWith(this->owner->opFactorial(),2))
+  { if ((*this)[1].NeedsParenthesisForBaseOfExponent())
+      out << "\\left(" << (*this)[1].ToString(theFormat) << "\\right) !";
+    else
+      out << (*this)[1].ToString(theFormat) << "!";
+  } else if (this->StartsWith(this->owner->opAbsoluteValue(), 2))
     out << "\\left|" << (*this)[1].ToString(theFormat) << "\\right|";
   else if (this->StartsWith(this->owner->opThePower(), 3))
   { bool involvesExponentsInterpretedAsFunctions=false;

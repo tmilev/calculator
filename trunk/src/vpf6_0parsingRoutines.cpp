@@ -152,7 +152,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("or");
   this->AddOperationNoRepetitionAllowed("\\times");
   this->AddOperationNoRepetitionAllowed("\\otimes");
-  this->AddOperationNoRepetitionAllowed("\\choose");
+  this->AddOperationNoRepetitionAllowed("\\binom");
   this->AddOperationNoRepetitionAllowed("\\sqrt");
   this->AddOperationNoRepetitionAllowed("\\in");
   this->AddOperationNoRepetitionAllowed("[]");
@@ -225,6 +225,7 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(",");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(".");
 //  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\"");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\choose");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\frac");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cdot");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("_");
@@ -1435,6 +1436,24 @@ bool Calculator::ReplaceEOEXByEX()
   return true;
 }
 
+bool Calculator::ReplaceEXEXByEXUsingO(int theOp)
+{ SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
+  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceEOEXByEX]";
+  Expression newExpr;
+  newExpr.reset(*this, 3);
+  newExpr.AddChildAtomOnTop(theOp);
+  newExpr.AddChildOnTop(left.theData);
+  newExpr.AddChildOnTop(right.theData);
+  left.theData=newExpr;
+  middle=*(*this->CurrentSyntacticStacK).LastObject();
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceEXEXByEXUsingO]";
+  return this->DecreaseStackExceptLast(2);
+}
+
 bool Calculator::ReplaceO_2O_1E_3XbyEX()
 { SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
@@ -1467,12 +1486,29 @@ bool Calculator::ReplaceXEEXByEXusingO(int inputOperation)
   left.theData=newExpr;
   left.controlIndex=this->conExpression();
   middle=*(*this->CurrentSyntacticStacK).LastObject();
-//  left.IndexLastCharPlusOne=right.IndexLastCharPlusOne;
-  this->DecreaseStackExceptLast(2);
-//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceXEEXByEXusingO]";
+  return this->DecreaseStackExceptLast(2);
 }
 
+bool Calculator::ReplaceXEEByEusingO(int inputOperation)
+{ //stOutput << "<b>Here iam!</b>";
+  SyntacticElement& right =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
+  SyntacticElement& middle = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  SyntacticElement& left  =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  Expression newExpr;
+  newExpr.reset(*this, 3);
+  newExpr.AddChildAtomOnTop(inputOperation);
+  newExpr.AddChildOnTop(middle.theData);
+  newExpr.AddChildOnTop(right.theData);
+  left.theData=newExpr;
+  left.controlIndex=this->conExpression();
+//  left.IndexLastCharPlusOne=right.IndexLastCharPlusOne;
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceXEEByEusingO]";
+  return this->DecreaseStackSetCharacterRangeS(2);
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+}
 
 bool Calculator::isSeparatorFromTheLeftGeneral(const std::string& input)
 { return input=="{" || input=="(" || input=="[" ||
@@ -1890,6 +1926,10 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXYYXByYY();
   if (secondToLastS=="Expression" && lastS=="!")
     return this->ReplaceEOByE();
+  if (thirdToLastS=="\\binom" && secondToLastS=="Expression" &&
+      lastS=="Expression" )
+    return this->ReplaceXEEByEusingO(this->opBinom());
+
   if (secondToLastS=="Expression" && thirdToLastS=="^" &&
       fourthToLastS=="Expression" && this->AllowsPowerInPreceding(lastS) &&
       this->AllowsPowerInNext(fifthToLastS)
@@ -1928,7 +1968,7 @@ bool Calculator::ApplyOneRule()
   if (secondToLastS=="Expression" && thirdToLastS=="\\in" && fourthToLastS=="Expression" && this->AllowsInInPreceding(lastS))
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="\\choose" && fourthToLastS=="Expression")
-    return this->ReplaceEOEXByEX();
+    return this->ReplaceEXEXByEXUsingO(this->opBinom());
   if (secondToLastS=="Expression" && thirdToLastS=="\\otimes" && fourthToLastS=="Expression" && this->AllowsTensorInPreceding(lastS))
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="Expression" && fourthToLastS=="\\frac")

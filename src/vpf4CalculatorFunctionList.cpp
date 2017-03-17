@@ -3607,8 +3607,12 @@ this->AddOperationInnerHandler
    "CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat");
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation, "",
-   "Replaces \\diff /\\diff {}x by Differentiate{}(x). Note that the variable of differentiation is expected to be the string following the d letter. ",
-   "\\diff /\\diff {}x x", true, false, "CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation", "LeibnizDifferentialOperatorToDifferentialOperator");
+   "Replaces \\diff /\\diff {}x by Differentiate{}(x). \
+    Should also work on the notation (\\diff y)/(\\diff x). ",
+   "\\diff /\\diff {}x x",
+   true, false,
+   "CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation",
+   "LeibnizDifferentialOperatorToDifferentialOperator");
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx, "",
    "Replaces d/dx by \\diff /\\diff{}x. Note that the variable of differentiation is expected to be the string following the d letter. ",

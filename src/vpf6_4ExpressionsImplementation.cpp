@@ -2859,12 +2859,22 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "{{" << (*this)[1].ToString(theFormat) << "}}";
   else if (this->IsListStartingWithAtom(this->owner->opEqualEqual()))
     out << (*this)[1].ToString(theFormat) << "==" << (*this)[2].ToString(theFormat);
-  else if (this->StartsWith(this->owner->opDifferential(), 3))
+  else if (this->StartsWith(this->owner->opDifferentiate(), 3))
+  { out << "\\frac{\\diff ";
+    if ((*this)[2].NeedsParenthesisForMultiplication())
+      out << "\\left(" << (*this)[2].ToString(theFormat)
+      << "\\right)";
+    else
+      out << (*this)[2].ToString(theFormat);
+    out <<"}{\\diff "
+    << (*this)[1].ToString(theFormat)  << "}";
+  } else if (this->StartsWith(this->owner->opDifferential(), 3))
   { bool needsParen=(*this)[2].NeedsParenthesisForMultiplication() ||
     (*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
     if ((*this)[2].StartsWith(this->owner->opDivide()))
       needsParen=false;
-    bool rightNeedsParen=(*this)[1].NeedsParenthesisForMultiplication();
+    bool rightNeedsParen=
+    (!(*this)[1].IsAtom()) && (!(*this)[1].IsBuiltInTypE());
     std::string theCoeff=(*this)[2].ToString(theFormat);
     if (theCoeff=="1")
     { needsParen=false;
@@ -2885,8 +2895,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if (rightNeedsParen)
       out << "\\right)";
   } else if (this->StartsWith(this->owner->opDifferential(), 2))
-  { bool needsParen=(*this)[1].NeedsParenthesisForMultiplication() ||
-    (*this)[1].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
+  { bool needsParen=
+    (!(*this)[1].IsAtom()) && (!(*this)[1].IsBuiltInTypE());
     out << "\\diff{}";
     if (needsParen)
       out << "\\left(";

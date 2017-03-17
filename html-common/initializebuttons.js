@@ -64,17 +64,21 @@ function initializeButtons()
 "<td>"+getPowerButton(i) + "</td>"+
 "</tr>"+
 "<tr>"+
+"<td>" + getPlusButton(i)  + "</td>"+
+"<td>" + getMinusButton(i) + "</td>"+
+"<td>" + getTimesButton(i) + "</td>"+
 "<td>" + getDivideButton(i)+ "</td>"+
-"<td>"+getTimesButton(i) + "</td>"+
-"<td>" + getPlusButton(i)+ "</td>"+
 "</tr>"+
 "<tr>"+
-"<td>" + getMinusButton(i)+ "</td>"+
 "<td>" + getUnderscoreButton(i)+ "</td>"+
 "<td>" + getLogBaseButton(i) + "</td>"+
+"<td>" + getBinomButton(i) + "</td>"+
+"<td>" + getFactorialButton(i) + "</td>"+
 "</tr>"+
 "<tr>"+
-"<td>" + getSumButton(i)+ "</td>"+"<td>" + getInftyButton(i)+ "</td>"+"<td>" + getPiButton(i) + "</td>"+
+"<td>" + getSumButton(i)+ "</td>"+
+"<td>" + getInftyButton(i)+ "</td>"+
+"<td>" + getPiButton(i) + "</td>"+
 "</tr>"+
 "</table>"
 ;
@@ -268,6 +272,24 @@ function getUnderscoreButton(indexMathField){
 
 function underscoreClick(currentMathField){ 
   currentMathField.cmd("_");
+  event.preventDefault();
+}
+
+function getFactorialButton(indexMathField){
+  return "<button style='padding:0; width:25;' onmousedown='factorialButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>!</button>";
+}
+
+function factorialButtonClick(currentMathField){
+  currentMathField.cmd("!");
+  event.preventDefault();
+}
+
+function getBinomButton(indexMathField){
+  return "<button style='padding:0; width:25; font-size : 7px; height:21.2;' onmousedown='binomButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>binom</button>";
+}
+
+function binomButtonClick(currentMathField){
+  currentMathField.cmd("\\binom");
   event.preventDefault();
 }
 

@@ -99,8 +99,23 @@ bool TimerThreadData::HandleMaxComputationTime()
   out << ". The allowed run time is "
   << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
   << " seconds (twice the amount of time allowed for calculator interpretation). "
-  << "<br>The present timeout limit may be extended by modifying theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;"
-  << " the restriction can be altogether lifted by modifying source file "
+  << "<br>This restriction may be lifted "
+  << "by restarting the server "
+  << "with a larger timeout limit (requires admin access via ssh). "
+  << "For example, the command:<br> "
+  << "calculator/bin/calculator server 1000<br>"
+  << "will restart the server with a timeout of 1000 seconds, "
+  << "and the command:<br>"
+  << "calculator/bin/calculator server 0"
+  << "<br>will restart the server without any timeout limits whatsoever. "
+  << "<br>Please note that running the server without time limits "
+  << "is intended for private use only "
+  << "(on computers not facing the internet). "
+  << "<br>Finally, you may modify the timeout restrictions "
+  << "by modifying the source code directly, increasing the variable: "
+  << "theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit. "
+  << "<br>This may be a lot of work but will allow you to alter"
+  << " time limits dynamically. "
   << __FILE__ << "<br>";
   crash << out.str() << crash;
   return true;

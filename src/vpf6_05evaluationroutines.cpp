@@ -443,7 +443,7 @@ bool Calculator::EvaluateExpression
             stOutput << "<br><b>Max allowed computational time is "
             << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2
             << ";  so far, "
-            << theGlobalVariables.GetElapsedSeconds()-theCommands.StartTimeEvaluationInSecondS
+            << theGlobalVariables.GetElapsedSeconds()
             << " have elapsed -> aborting computation ungracefully.</b>";
           theCommands.flagTimeLimitErrorDetected=true;
           theCommands.flagAbortComputationASAP=true;

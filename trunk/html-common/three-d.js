@@ -600,8 +600,12 @@ function VectorFieldTwoD(
   this.highRight=inputHighRight;
   this.numSegmentsXY=inputNumSegmentsXY;
   this.desiredLengthDirectionVectors=inputDesiredLengthDirectionVectors;
-  this.color=inputColor;
+  this.color=colorToRGB(inputColor);
   this.lineWidth=inputLineWidth;
+  this.accountBoundingBox= function(inputOutputBox)
+  { accountBoundingBox(this.lowLeft, inputOutputBox);
+    accountBoundingBox(this.highRight, inputOutputBox);
+  };
   this.draw=function(theCanvas)
   { var theSurface=theCanvas.surface;
     theSurface.beginPath();
@@ -624,11 +628,16 @@ function VectorFieldTwoD(
         var tailMath = [theX-theV[0]/2, theY-theV[1]/2 ];
         var headScreen=theCanvas.coordsMathToScreen(headMath);
         var tailScreen=theCanvas.coordsMathToScreen(tailMath);
+        var baseScreen=theCanvas.coordsMathToScreen([theX, theY]);
         theSurface.moveTo(tailScreen[0], tailScreen[1]);
         theSurface.lineTo(headScreen[0], headScreen[1]);
         theSurface.stroke();
+        theSurface.moveTo(baseScreen[0], baseScreen[1]);
+        theSurface.arc(baseScreen[0], baseScreen[1],2, 0, Math.PI*2);
+        theSurface.fill();
       }
     }
+
   };
 }
 

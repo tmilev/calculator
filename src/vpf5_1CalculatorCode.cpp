@@ -892,7 +892,9 @@ bool PlotObject::operator==(const PlotObject& other)const
   this->rightPtJS              == other.rightPtJS              &&
   this->colorFillJS            == other.colorFillJS            &&
   this->paramLowJS             == other.paramLowJS             &&
-  this->paramHighJS            == other.paramHighJS            ;
+  this->paramHighJS            == other.paramHighJS            &&
+  this->defaultLengthJS        == other.defaultLengthJS
+  ;
 }
 
 PlotObject::PlotObject()
@@ -1402,7 +1404,7 @@ std::string PlotObject::GetJavascriptDirectionField
       fnInstStream << ", ";
   }
   fnInstStream << "], ";
-  fnInstStream << "0.5, ";
+  fnInstStream << this->defaultLengthJS << ", ";
   fnInstStream << "'" << this->colorJS << "'";
   if (this->lineWidthJS!="")
     fnInstStream << ", " << this->lineWidthJS;

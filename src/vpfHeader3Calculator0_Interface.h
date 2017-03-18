@@ -636,6 +636,7 @@ public:
   int dimension;
   int colorRGB;
   int colorFillRGB;
+  std::string defaultLengthJS;
   std::string colorJS;
   std::string colorFillJS;
   std::string colorUV;

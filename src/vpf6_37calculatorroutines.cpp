@@ -312,6 +312,10 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   if (!theCommands.GetVectorDoubles(input[3], upRight, 2))
     return theCommands << "Failed to up right corner from: "
     << input[3].ToString();
+  thePlotObj.yHigh=upRight[1];
+  thePlotObj.yLow=lowLeft[1];
+  thePlotObj.xHigh=upRight[0];
+  thePlotObj.xLow=lowLeft[0];
   List<std::string> lowLeftStrings, upRightStrings;
   lowLeft.ToListStringsBasicType(lowLeftStrings);
   upRight.ToListStringsBasicType(upRightStrings);
@@ -324,6 +328,20 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   thePlotObj.theVarRangesJS[1][1]=upRightStrings[1];
   thePlotObj.manifoldImmersion=input[1];
   Expression jsConverterE;
+  //thePlotObj.defaultLengthJS="0.5";
+  if (input.size()>=6)
+  { //stOutput << "DEBUG: got to here";
+    if (CalculatorFunctionsGeneral::
+        innerMakeJavascriptExpression
+        (theCommands, input[5], jsConverterE)
+        )
+    { thePlotObj.defaultLengthJS=jsConverterE.ToString();
+    } else
+      return theCommands << "Failed to extract javascript from "
+      << input[5].ToString();
+  }
+//stOutput << "DEBUG: defaultLengthJS: " << thePlotObj.defaultLengthJS;
+
   if (CalculatorFunctionsGeneral::
       innerMakeJavascriptExpression
       (theCommands, thePlotObj.manifoldImmersion, jsConverterE)

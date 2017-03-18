@@ -1384,11 +1384,14 @@ std::string PlotObject::GetJavascriptDirectionField
   << ", ";
   for (int i=0; i<2; i++)
   { fnInstStream << "[";
-    for (int j=0; j<this->variablesInPlayJS.size; j++)
-    { fnInstStream
-      << this->theVarRangesJS[j][i];
-      if (j!=this->variablesInPlayJS.size-1)
-        fnInstStream << ", ";
+    for (int j=0; j<this->theVarRangesJS.size; j++)
+    { if (i<this->theVarRangesJS[j].size)
+      { fnInstStream
+        << this->theVarRangesJS[j][i];
+        if (j!=this->theVarRangesJS.size-1)
+          fnInstStream << ", ";
+      } else
+        fnInstStream << "(bad variable range)";
     }
     fnInstStream << "], ";
   }

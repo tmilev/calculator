@@ -1345,6 +1345,18 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
     return output.AssignValue(out.str(), theCommands);
   }
   Expression opE, leftE, rightE;
+  if (input.StartsWith(theCommands.opSequence()))
+  { out << "[";
+    for (int i=1; i<input.size(); i++)
+    { if (!CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[i], opE))
+        return output.AssignValue("(Failed to convert "+input[i].ToString()+")", theCommands);
+      out << opE.ToString();
+      if (i!=input.size()-1)
+        out << ", ";
+    }
+    out << "]";
+    return output.AssignValue(out.str(), theCommands);
+  }
   std::string opString, leftString, rightString;
   std::stringstream logStream;
   if (input.size()==3 || input.size()==2)

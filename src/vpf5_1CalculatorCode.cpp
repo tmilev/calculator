@@ -873,12 +873,11 @@ bool PlotObject::operator==(const PlotObject& other)const
   this->colorVU                == other.colorVU                &&
   this->colorJS                == other.colorJS                &&
   this->lineWidthJS            == other.lineWidthJS            &&
-  this->numSegmentsU           == other.numSegmentsU           &&
-  this->numSegmentsV           == other.numSegmentsV           &&
+  this->numSegmenTsJS          == other.numSegmenTsJS          &&
   this->thePoints              == other.thePoints              &&
   this->theRectangles          == other.theRectangles          &&
   this->thePlotType            == other.thePlotType            &&
-  this->theSurface             == other.theSurface             &&
+  this->manifoldImmersion      == other.manifoldImmersion      &&
   this->coordinateFunctionsE   == other.coordinateFunctionsE   &&
   this->coordinateFunctionsJS  == other.coordinateFunctionsJS  &&
   this->variablesInPlay        == other.variablesInPlay        &&
@@ -891,7 +890,6 @@ bool PlotObject::operator==(const PlotObject& other)const
   this->variablesInPlayJS      == other.variablesInPlayJS      &&
   this->leftPtJS               == other.leftPtJS               &&
   this->rightPtJS              == other.rightPtJS              &&
-  this->numSegmentsJS          == other.numSegmentsJS          &&
   this->colorFillJS            == other.colorFillJS            &&
   this->paramLowJS             == other.paramLowJS             &&
   this->paramHighJS            == other.paramHighJS            ;
@@ -908,8 +906,6 @@ PlotObject::PlotObject()
   this->lineWidth    = 1;
   this->colorFillRGB = 0;
   this->dimension    = -1;
-  this->numSegmentsU = "22";
-  this->numSegmentsV = "4";
 }
 
 void PlotObject::ComputeYbounds()
@@ -1219,7 +1215,10 @@ std::string PlotObject::GetJavascriptCurveImmersionIn3d
   << fnName
   << ", " << this->paramLowJS << ", " << this->paramHighJS
 ;
-  curveInstStream << ", " << this->numSegmentsJS;
+  if (this->numSegmenTsJS.size>0)
+    curveInstStream << ", " << this->numSegmenTsJS[0];
+  else
+    curveInstStream << ", 100";
   curveInstStream << ", "
   << "\"" << this->colorJS << "\"";
   curveInstStream << ", " << this->lineWidth;
@@ -1263,8 +1262,11 @@ std::string PlotObject::GetJavascriptSurfaceImmersion
     << fnName
     << ", [[" << this->theVarRangesJS[0][0] << "," << this->theVarRangesJS[1][0] << "],"
     << " ["   << this->theVarRangesJS[0][1] << ", " << this->theVarRangesJS[1][1] << "]], ";
-    surfaceInstStream << "[" << this->numSegmentsU << ","
-    << this->numSegmentsV << "], ";
+    if (this->numSegmenTsJS.size>1)
+      surfaceInstStream << "[" << this->numSegmenTsJS[0] << ","
+      << this->numSegmenTsJS[1] << "], ";
+    else
+      surfaceInstStream << "[22, 4], ";
     surfaceInstStream << "{colorContour: \"black\", ";
     if (this->colorUV!="")
       surfaceInstStream << "colorUV: \"" << this->colorUV << "\",";
@@ -1333,8 +1335,72 @@ std::string PlotObject::GetJavascriptParametricCurve2D
   fnInstStream.precision(7);
   fnInstStream << "drawCurve("
   << "[" << fnNames[0] << ", " << fnNames[1] << "]"
-  << ", " << this->paramLowJS << ", " << this->paramHighJS << ", "
-  << this->numSegmentsJS << ", " << "'" << this->colorJS << "'";
+  << ", " << this->paramLowJS << ", " << this->paramHighJS << ", ";
+  if (this->numSegmenTsJS.size>0)
+    fnInstStream << this->numSegmenTsJS[0] << ", ";
+  else
+    fnInstStream << "200, ";
+  fnInstStream << "'" << this->colorJS << "'";
+  if (this->lineWidthJS!="")
+    fnInstStream << ", " << this->lineWidthJS;
+  else
+    fnInstStream << ", " << this->lineWidth;
+  fnInstStream << ");\n"
+  ;
+  outputPlotInstantiationJS=fnInstStream.str();
+  return out.str();
+}
+
+std::string PlotObject::GetJavascriptDirectionField
+(std::string& outputPlotInstantiationJS,
+ const std::string& canvasName,
+ int& funCounter)
+{ MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptDirectionField");
+  std::stringstream out;
+  std::string fnName;
+  funCounter++;
+  std::stringstream fnNameStream;
+  fnNameStream << "theCanvasCoordinateFn_" << canvasName << "_"
+  << funCounter;
+  fnName=fnNameStream.str();
+  if (this->variablesInPlayJS.size>0)
+  { out << "function " << fnName
+    << " (";
+    for (int i=0; i<this->variablesInPlayJS.size; i++)
+    { out << this->variablesInPlayJS[i];
+      if (i!=this->variablesInPlayJS.size-1)
+        out << ", ";
+    }
+    out << "){\n";
+    out << "return " << this->manifoldImmersionJS << ";\n";
+    out << "}\n";
+  } else
+    out << "console.log(\"Error: function with zero variables.\");";
+  std::stringstream fnInstStream;
+  fnInstStream.precision(7);
+  fnInstStream << "drawVectorField("
+  << fnName
+  << ", true"
+  << ", ";
+  for (int i=0; i<2; i++)
+  { fnInstStream << "[";
+    for (int j=0; j<this->variablesInPlayJS.size; j++)
+    { fnInstStream
+      << this->theVarRangesJS[j][i];
+      if (j!=this->variablesInPlayJS.size-1)
+        fnInstStream << ", ";
+    }
+    fnInstStream << "], ";
+  }
+  fnInstStream << "[";
+  for (int i=0; i<this->numSegmenTsJS.size; i++)
+  { fnInstStream << this->numSegmenTsJS[i];
+    if (i!=this->numSegmenTsJS.size-1)
+      fnInstStream << ", ";
+  }
+  fnInstStream << "], ";
+  fnInstStream << "0.5, ";
+  fnInstStream << "'" << this->colorJS << "'";
   if (this->lineWidthJS!="")
     fnInstStream << ", " << this->lineWidthJS;
   else
@@ -1365,8 +1431,12 @@ std::string PlotObject::GetJavascript2dPlot
   std::stringstream fnInstStream;
   fnInstStream << "drawFunction("
   << fnName
-  << ", " << this->leftPtJS << ", " << this->rightPtJS << ", "
-  << this->numSegmentsJS << ", " << "'" << this->colorJS << "'"
+  << ", " << this->leftPtJS << ", " << this->rightPtJS << ", ";
+  if (this->numSegmenTsJS.size>0)
+    fnInstStream << this->numSegmenTsJS[0] << ", ";
+  else
+    fnInstStream << "200, ";
+  fnInstStream << "'" << this->colorJS << "'"
   << ", ";
   if (this->lineWidthJS!="")
     fnInstStream << this->lineWidthJS;
@@ -1459,6 +1529,12 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
       << "\n "
       ;
     }
+    if (currentPlot.thePlotType=="plotDirectionField")
+    { out << currentPlot.GetJavascriptDirectionField
+      (theFnPlots[i], this->canvasName, funCounter)
+      << "\n "
+      ;
+    }
   }
   out << "calculatorResetCanvas(document.getElementById('"
   << this->canvasName << "'));\n";
@@ -1478,6 +1554,10 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
       continue;
     }
     if (currentPlot.thePlotType=="parametricCurve")
+    { out << "theCanvas." << theFnPlots[i];
+      continue;
+    }
+    if (currentPlot.thePlotType=="plotDirectionField")
     { out << "theCanvas." << theFnPlots[i];
       continue;
     }

@@ -270,6 +270,9 @@ public:
   static bool innerPlotSegment(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotPolarRfunctionThetaExtended(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotDirectionField(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotVectorField(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotDirectionOrVectorField(Calculator& theCommands, const Expression& input, Expression& output, bool vectorsAreNormalized);
   static bool innerPlotPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotFill(Calculator& theCommands, const Expression& input, Expression& output);

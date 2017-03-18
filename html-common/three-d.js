@@ -158,6 +158,11 @@ function testGetMoebiusSurface2()
   return result;
 }
 
+function testVectorField2d(x,y)
+{ return [ -y,x];
+}
+
+
 function testGetTestPlane()
 { var colors={colorContour: "black", colorUV: "blue", colorVU: "cyan"};
   var result=new Surface(function(u,v){return [u,0.9*v,1+u+v]; }, [[-1.2,-0.7], [1,1]], [5,5], colors);
@@ -583,6 +588,50 @@ function TextPlotTwoD(inputLocation, inputText, inputColor)
   };
 }
 
+function VectorFieldTwoD(
+  inputField, inputIsDirectionField,
+  inputLowLeft, inputHighRight,
+  inputNumSegmentsXY,
+  inputDesiredLengthDirectionVectors,
+  inputColor, inputLineWidth)
+{ this.theField=inputField;
+  this.isDirectionField=inputIsDirectionField;
+  this.lowLeft=inputLowLeft;
+  this.highRight=inputHighRight;
+  this.numSegmentsXY=inputNumSegmentsXY;
+  this.desiredLengthDirectionVectors=inputDesiredLengthDirectionVectors;
+  this.color=inputColor;
+  this.lineWidth=inputLineWidth;
+  this.draw=function(theCanvas)
+  { var theSurface=theCanvas.surface;
+    theSurface.beginPath();
+    theSurface.strokeStyle=colorRGBToString(this.color);
+    theSurface.fillStyle=colorRGBToString(this.color);
+    theSurface.lineWidth=this.lineWidth;
+    for (var i=0; i<this.numSegmentsXY[0]; i++)
+    { var theRatioX=i/(this.numSegmentsX-1);
+      var theX= this.lowLeft[0] *(1-theRatioX) +
+        this.highRight[0]*theRatioX;
+      for (var j=0; j<this.numSegmentsXY[1]; j++)
+      { var theRatioY=j/(this.numSegmentsY-1);
+        var theY= this.lowLeft[1] *(1-theRatioY)+
+          this.highRight[1]*theRatioY;
+        var theV=this.theField(theX, theY);
+        if (this.isDirectionField)
+          if (vectorLength(theV)!==0)
+            vectorTimesScalar(theV,this.desiredLengthDirectionVectors* 1/vectorLength(theV));
+        var headMath = [theX+theV[0]/2, theY+theV[1]/2 ];
+        var tailMath = [theX-theV[0]/2, theY-theV[1]/2 ];
+        var headScreen=theCanvas.coordsMathToScreen(headMath);
+        var tailScreen=theCanvas.coordsMathToScreen(tailMath);
+        theSurface.moveTo(tailScreen[0], tailScreen[1]);
+        theSurface.lineTo(headScreen[0], headScreen[1]);
+        theSurface.stroke();
+      }
+    }
+  };
+}
+
 function SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth)
 { this.leftPt=inputLeftPt;
   this.rightPt=inputRightPt;
@@ -684,6 +733,18 @@ function CanvasTwoD(inputCanvas)
   };
   this.drawLine= function (inputLeftPt, inputRightPt, inputColor, inputLineWidth)
   { var newLine=new SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth);
+    this.theObjects.push(newLine);
+  };
+  this.drawVectorField= function (
+    inputField, inputIsDirectionField, inputLowLeft,
+    inputHighRight, inputNumSegmentsXY,
+    inputDesiredLengthDirectionVectors,
+    inputColor, inputLineWidth)
+  { var newLine=new VectorFieldTwoD(
+      inputField, inputIsDirectionField, inputLowLeft, inputHighRight,
+      inputNumSegmentsXY,
+      inputDesiredLengthDirectionVectors,
+      inputColor, inputLineWidth);
     this.theObjects.push(newLine);
   };
   this.drawPath= function (inputPath, inputColor, inputLineWidth)
@@ -2131,6 +2192,7 @@ function testPictureTwoD(inputCanvas1, inputCanvas2)
   theCanvas.plotFillStart('pink');
   theCanvas.drawCurve([testFunctionPlot, testFunctionPlot2], -4,4, 300, 'blue', 1);
   theCanvas.plotFillFinish();
+  theCanvas.drawVectorField(testVectorField2d, true, [-6,-6], [6,6], [20, 20], 0.5, "red",2);
   theCanvas.redraw();
   var theCanvas2=calculatorGetCanvasTwoD(document.getElementById(inputCanvas2));
   theCanvas2.init(inputCanvas2);
@@ -2145,6 +2207,7 @@ function testPictureTwoD(inputCanvas1, inputCanvas2)
   theCanvas2.plotFillFinish();
   theCanvas2.drawFunction(testFunctionPlot, -10,10, 100, 'red',0.5);
   theCanvas2.setViewWindow([-1,-19],[1,5]);
+  theCanvas2.drawVectorField(testVectorField2d, false, [-6,-6], [6,6], 20, 20, 0.5, "red",2);
   theCanvas2.redraw();
 }
 

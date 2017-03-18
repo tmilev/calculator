@@ -8,6 +8,7 @@
 #include "vpfHeader8HtmlSnippets.h"
 #include "vpfHeader8HtmlInterpretation.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
+#include "vpfHeader2Math9DrawingVariables.h"
 ProjectInformationInstance ProjectInfoVpf6_37cpp(__FILE__, "More calculator built-in functions. ");
 
 bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
@@ -264,4 +265,107 @@ bool CalculatorFunctionsGeneral::innerGetSummand(Calculator& theCommands, const 
   return output.MakeXOX
   (theCommands, theCommands.opUnderscore(), theCommandSequence,
    theCommands.ETwo());
+}
+
+bool CalculatorFunctionsGeneral::innerPlotVectorField(Calculator& theCommands, const Expression& input, Expression& output)
+{ return CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(theCommands, input, output, false);
+}
+
+bool CalculatorFunctionsGeneral::innerPlotDirectionField(Calculator& theCommands, const Expression& input, Expression& output)
+{ return CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(theCommands, input, output, true);
+}
+
+bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& theCommands, const Expression& input, Expression& output, bool vectorsAreNormalized)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField");
+  //stOutput << input.ToString();
+  if (input.size()<5)
+    return output.MakeError
+    ("Vector fields take at least four arguments: \
+      the vector field, the low left corner, \
+      the upper right, and the number of \
+      segments in each direction. ",
+     theCommands, true);
+  if (input.HasBoundVariables())
+    return false;
+  Plot thePlot;
+  thePlot.dimension=2;
+  PlotObject thePlotObj;
+  thePlotObj.leftPtE=input[2];
+  thePlotObj.rightPtE=input[3];
+  thePlot.DesiredHtmlHeightInPixels=300;
+  thePlot.DesiredHtmlWidthInPixels=300;
+  if (input.size()>=7)
+  { if (!input[6].IsOfType<std::string>(&thePlotObj.colorJS))
+      thePlotObj.colorJS=input[6].ToString();
+  } else
+    thePlotObj.colorJS="blue";
+  thePlotObj.colorRGB=CGI::RedGreenBlue(0, 0, 255);
+  DrawingVariables::GetColorIntFromColorString
+  (thePlotObj.colorJS, thePlotObj.colorRGB);
+  thePlotObj.lineWidth=1;
+  if (input.size()>=8)
+    input[7].EvaluatesToDouble(&thePlotObj.lineWidth);
+  Vector<double> lowLeft, upRight;
+  if (!theCommands.GetVectorDoubles(input[2], lowLeft, 2))
+    return theCommands << "Failed to low left corner from: "
+    << input[2].ToString();
+  if (!theCommands.GetVectorDoubles(input[3], upRight, 2))
+    return theCommands << "Failed to up right corner from: "
+    << input[3].ToString();
+  Vector<double> varRangeX, varRangeY;
+  varRangeX.SetSize(2);
+  varRangeY.SetSize(2);
+  varRangeX[0]=lowLeft[0];
+  varRangeX[1]=upRight[0];
+  varRangeY[0]=lowLeft[1];
+  varRangeY[1]=upRight[1];
+  thePlotObj.theVarRangesJS.SetSize(2);
+  thePlotObj.theVarRangesJS[0]=varRangeX.ToStringSquareBracketsBasicType();
+  thePlotObj.theVarRangesJS[1]=varRangeY.ToStringSquareBracketsBasicType();
+  thePlotObj.manifoldImmersion=input[1];
+  Expression jsConverterE;
+  if (CalculatorFunctionsGeneral::
+      innerMakeJavascriptExpression
+      (theCommands, thePlotObj.manifoldImmersion, jsConverterE)
+      )
+  { thePlotObj.manifoldImmersionJS=jsConverterE.ToString();
+    thePlotObj.manifoldImmersion.HasInputBoxVariables
+    (&thePlot.boxesThatUpdateMe);
+  } else
+    return theCommands << "Failed to extract javascript from "
+    << input[1].ToString();
+  thePlotObj.manifoldImmersion.GetFreeVariables
+  (thePlotObj.variablesInPlay, true);
+  Expression xE, yE;
+  xE.MakeAtom("x", theCommands);
+  yE.MakeAtom("y", theCommands);
+  if (thePlotObj.variablesInPlay.size==0)
+    thePlotObj.variablesInPlay.AddOnTop(xE);
+  if (thePlotObj.variablesInPlay.size==1)
+  { if (thePlotObj.variablesInPlay.Contains(xE))
+      thePlotObj.variablesInPlay.AddOnTop(xE);
+    else
+      thePlotObj.variablesInPlay.AddOnTop(yE);
+  }
+  thePlotObj.variablesInPlayJS.SetSize(thePlotObj.variablesInPlay.size);
+  for (int i=0; i<thePlotObj.variablesInPlay.size; i++)
+    thePlotObj.variablesInPlayJS[i]=thePlotObj.variablesInPlay[i].ToString();
+  thePlotObj.thePlotType="plotDirectionField";
+  if (!input[4].IsSequenceNElementS(2))
+    return theCommands
+    << "<hr>Could not extract a list of elements for the "
+    << "number of segments from: " << input[4].ToString();
+  thePlotObj.numSegmenTsJS.SetSize(2);
+  for (int i=0; i<2; i++)
+  { if (!CalculatorFunctionsGeneral::
+        innerMakeJavascriptExpression
+        (theCommands, input[4][i+1], jsConverterE))
+      return theCommands << "Failed to convert "
+      << input[4][i+1].ToString()
+      << " to javascript. ";
+    thePlotObj.numSegmenTsJS[i]=jsConverterE.ToString();
+  }
+  thePlot.thePlots.AddOnTop(thePlotObj);
+//  stOutput << "DEBUG: height, width: " << desiredHtmlHeightPixels << ", " << desiredHtmlWidthPixels;
+  return output.AssignValue(thePlot, theCommands);
 }

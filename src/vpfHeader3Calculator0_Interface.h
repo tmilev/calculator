@@ -641,15 +641,15 @@ public:
   std::string colorUV;
   std::string colorVU;
   std::string lineWidthJS;
-  std::string numSegmentsU;
-  std::string numSegmentsV;
+  List<std::string> numSegmenTsJS;
   Vectors<double> thePoints;
   List<Vectors<double> > theRectangles;
   // each rectangle is a list of two 2-dim vectors. First vector gives the (x,y)-coords
   //of the lower left corner of the rectangle. Second vector gives the (width,height) of the rectangle.
   std::string thePlotType;
 
-  Expression theSurface;
+  Expression manifoldImmersion;
+  std::string manifoldImmersionJS;
   List<Expression> coordinateFunctionsE;
   List<std::string> coordinateFunctionsJS;
   HashedList<Expression> variablesInPlay;
@@ -663,7 +663,6 @@ public:
   List<std::string> variablesInPlayJS;
   std::string leftPtJS;
   std::string rightPtJS;
-  std::string numSegmentsJS;
   std::string paramLowJS;
   std::string paramHighJS;
 
@@ -675,17 +674,23 @@ public:
   (std::string& outputCurveInstantiationJS, const std::string& canvasName,
    int& funCounter);
   std::string ToStringDebug();
-
-
   void ComputeYbounds();
   std::string ToStringPointsList();
   std::string GetPlotStringFromFunctionStringAndRanges
-  (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound);
+  (bool useHtml, const std::string& functionStringPostfixNotation,
+   const std::string& functionStringCalculatorFormat,
+   double lowerBound, double upperBound);
   std::string GetJavascript2dPlot
-  (std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter)
+  (std::string& outputPlotInstantiationJS, const std::string& canvasName,
+   int& funCounter)
   ;
   std::string GetJavascriptParametricCurve2D
-  (std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter)
+  (std::string& outputPlotInstantiationJS, const std::string& canvasName,
+   int& funCounter)
+  ;
+  std::string GetJavascriptDirectionField
+  (std::string& outputPlotInstantiationJS, const std::string& canvasName,
+   int& funCounter)
   ;
 
   PlotObject();

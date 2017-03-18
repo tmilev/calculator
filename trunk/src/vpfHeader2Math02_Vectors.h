@@ -46,6 +46,15 @@ public:
     out << ")";
     return out.str();
   }
+  void ToListStringsBasicType(List<std::string>& output)const
+  { output.SetSize(this->size);
+    for(int i=0; i<this->size; i++)
+    { std::stringstream out;
+      out.precision(5);
+      out << (*this)[i];
+      output[i]=out.str();
+    }
+  }
   std::string ToStringSquareBrackets(FormatExpressions* theFormat=0)const
   { std::stringstream out;
     out.precision(5);

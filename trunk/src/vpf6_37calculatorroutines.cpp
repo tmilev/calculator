@@ -312,16 +312,16 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   if (!theCommands.GetVectorDoubles(input[3], upRight, 2))
     return theCommands << "Failed to up right corner from: "
     << input[3].ToString();
-  Vector<double> varRangeX, varRangeY;
-  varRangeX.SetSize(2);
-  varRangeY.SetSize(2);
-  varRangeX[0]=lowLeft[0];
-  varRangeX[1]=upRight[0];
-  varRangeY[0]=lowLeft[1];
-  varRangeY[1]=upRight[1];
+  List<std::string> lowLeftStrings, upRightStrings;
+  lowLeft.ToListStringsBasicType(lowLeftStrings);
+  upRight.ToListStringsBasicType(upRightStrings);
   thePlotObj.theVarRangesJS.SetSize(2);
-  thePlotObj.theVarRangesJS[0]=varRangeX.ToStringSquareBracketsBasicType();
-  thePlotObj.theVarRangesJS[1]=varRangeY.ToStringSquareBracketsBasicType();
+  thePlotObj.theVarRangesJS[0].SetSize(2);
+  thePlotObj.theVarRangesJS[1].SetSize(2);
+  thePlotObj.theVarRangesJS[0][0]=lowLeftStrings[0];
+  thePlotObj.theVarRangesJS[0][1]=upRightStrings[0];
+  thePlotObj.theVarRangesJS[1][0]=lowLeftStrings[1];
+  thePlotObj.theVarRangesJS[1][1]=upRightStrings[1];
   thePlotObj.manifoldImmersion=input[1];
   Expression jsConverterE;
   if (CalculatorFunctionsGeneral::
@@ -347,6 +347,7 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
     else
       thePlotObj.variablesInPlay.AddOnTop(yE);
   }
+  thePlotObj.variablesInPlay.QuickSortAscending();
   thePlotObj.variablesInPlayJS.SetSize(thePlotObj.variablesInPlay.size);
   for (int i=0; i<thePlotObj.variablesInPlay.size; i++)
     thePlotObj.variablesInPlayJS[i]=thePlotObj.variablesInPlay[i].ToString();

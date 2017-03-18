@@ -609,11 +609,11 @@ function VectorFieldTwoD(
     theSurface.fillStyle=colorRGBToString(this.color);
     theSurface.lineWidth=this.lineWidth;
     for (var i=0; i<this.numSegmentsXY[0]; i++)
-    { var theRatioX=i/(this.numSegmentsX-1);
+    { var theRatioX=i/(this.numSegmentsXY[0]-1);
       var theX= this.lowLeft[0] *(1-theRatioX) +
         this.highRight[0]*theRatioX;
       for (var j=0; j<this.numSegmentsXY[1]; j++)
-      { var theRatioY=j/(this.numSegmentsY-1);
+      { var theRatioY=j/(this.numSegmentsXY[1]-1);
         var theY= this.lowLeft[1] *(1-theRatioY)+
           this.highRight[1]*theRatioY;
         var theV=this.theField(theX, theY);
@@ -2207,7 +2207,7 @@ function testPictureTwoD(inputCanvas1, inputCanvas2)
   theCanvas2.plotFillFinish();
   theCanvas2.drawFunction(testFunctionPlot, -10,10, 100, 'red',0.5);
   theCanvas2.setViewWindow([-1,-19],[1,5]);
-  theCanvas2.drawVectorField(testVectorField2d, false, [-6,-6], [6,6], 20, 20, 0.5, "red",2);
+  theCanvas2.drawVectorField(testVectorField2d, false, [-6,-6], [6,6], [20, 20], 0.5, "red",2);
   theCanvas2.redraw();
 }
 

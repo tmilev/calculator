@@ -1455,7 +1455,24 @@ D-B;\
    "FetchWebPage(\"calculator-algebra.org/calculator?request=statusPublic\")", false,
    true, "CalculatorFunctionsGeneral::innerFetchWebPage", "FetchWebPage")
    ;
-  this->AddOperationInnerHandler ("DrawPolar",
+  this->AddOperationInnerHandler ("PlotDirectionField",
+   CalculatorFunctionsGeneral::innerPlotDirectionField, "",
+   "Plots a direction field (in 2d for the time being, 3d coming soon). \
+    Direction field is like a vector field except that all vectors are\
+    normalized to have the same length. First argument = the vector field.\
+    Second, third arguments: bottom left and top right corner of the \
+    viewing rectangle. Next argument: (numX,numY,...), where numX is the number \
+    of segments along the x axis and so on. Next argument: length of \
+    each direction line. \
+     Next arguments: color, line width.\
+    ",
+   "PlotDirectionField( (-y,x), (-2,-2),(2,2), (20,20),0.2, blue,1);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerPlotDirectionField",
+   "PlotDirectionField"
+   )
+   ;
+  this->AddOperationInnerHandler ("PlotPolar",
    CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta, "",
    "<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates \
    in the form \
@@ -1463,19 +1480,19 @@ D-B;\
    The first argument gives the function, the second and third argument give the upper and \
    lower bounds of the angle. \
    ",
-   "DrawPolar(1+sin  t, 0, \\pi); \
-   \nDrawPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) (9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)")
+   "PlotPolar(1+sin  t, 0, \\pi); \
+   \nPlotPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) (9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)")
    ;
-  this->AddOperationInnerHandler ("DrawPolarExtended",
+  this->AddOperationInnerHandler ("PlotPolarExtended",
    CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended, "",
-   "<b>Calculus teaching function.</b> Same as drawPolar but also\
+   "<b>Calculus teaching function.</b> Same as PlotPolar but also\
     produces a graph in the (rho,theta)-plane. \
    ",
-   "DrawPolarExtended(1+sin  t, 0, \\pi); \
-   \nDrawPolarExtended((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) \
+   "PlotPolarExtended(1+sin  t, 0, \\pi); \
+   \nPlotPolarExtended((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) \
    \n(9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)", true, false,
    "CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended",
-   "DrawPolarExtended")
+   "PlotPolarExtended")
    ;
   this->AddOperationInnerHandler ("GaussianElimination", CalculatorFunctionsGeneral::innerGaussianEliminationMatrix, "",
    "Gaussian elimination of a matrix. Prints a detailed string that shows the Gaussian elimination of \

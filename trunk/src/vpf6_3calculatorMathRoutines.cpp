@@ -3885,6 +3885,10 @@ bool CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation(Calculator& 
   output.AddChildOnTop(input[2][1]);
   if (hasArgument)
     output.AddChildOnTop(theArgument);
+  if (hasExtraCF)
+  { Expression outputCopy=output;
+    output=extraCoeff*outputCopy;
+  }
   return true;
 }
 
@@ -4831,11 +4835,13 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
     thePlotObj.rightPtE.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else
     thePlotObj.thePlotType="plotFunctionPrecomputed";
+  thePlotObj.numSegmenTsJS.SetSize(1);
+  thePlotObj.numSegmenTsJS[0]="200";
   if (CalculatorFunctionsGeneral::
       innerMakeJavascriptExpression
       (theCommands, thePlotObj.numSegmentsE, jsConverterE)
       )
-  { thePlotObj.numSegmentsJS=jsConverterE.ToString();
+  { thePlotObj.numSegmenTsJS[0]=jsConverterE.ToString();
     thePlotObj.numSegmentsE.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else
     thePlotObj.thePlotType="plotFunctionPrecomputed";
@@ -5045,7 +5051,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
 
 bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta");
-  if (!input.IsListNElements(4))
+  if (input.size()<4)
     return output.MakeError("Drawing polar coordinates takes three arguments: function, lower angle bound and upper angle bound. ", theCommands);
   const Expression& lowerE=input[2];
   const Expression& upperE=input[3];
@@ -5235,12 +5241,15 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
       << thePlot.coordinateFunctionsE[i] << " to js. ";
     }
   }
+  thePlot.numSegmenTsJS.SetSize(1);
+  thePlot.numSegmenTsJS[0]="200";
   if (CalculatorFunctionsGeneral::innerMakeJavascriptExpression
       (theCommands, thePlot.numSegmentsE, converterE))
-    thePlot.numSegmentsJS=converterE.ToString();
+    thePlot.numSegmenTsJS[0]=converterE.ToString();
   else
   { thePlot.thePlotType="parametricCurvePrecomputMakeBoxed";
-    theCommands << "Failed to convert: " << thePlot.numSegmentsE << " to js. ";
+    theCommands << "Failed to convert: "
+    << thePlot.numSegmentsE << " to js. ";
   }
   if (CalculatorFunctionsGeneral::innerMakeJavascriptExpression
       (theCommands, thePlot.paramLowE, converterE))

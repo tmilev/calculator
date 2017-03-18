@@ -1461,14 +1461,15 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
   bool found=false;
   for (int i=0; i<input.size(); i++)
     if (input[i].IsSequenceNElementS(3))
-    { thePlot.theSurface=input[i];
+    { thePlot.manifoldImmersion=input[i];
       found=true;
       break;
     }
   if (!found)
-    return theCommands << "Could not find a triple of functions expressions to use for "
+    return theCommands << "Could not find a triple of "
+    << "functions expressions to use for "
     << " the surface. ";
-  thePlot.theSurface.GetFreeVariables(thePlot.variablesInPlay, true);
+  thePlot.manifoldImmersion.GetFreeVariables(thePlot.variablesInPlay, true);
   if (thePlot.variablesInPlay.size>2)
     return theCommands << "Got a surface with "
     << thePlot.variablesInPlay.size
@@ -1490,7 +1491,7 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
     thePlot.variablesInPlay.AddOnTop(vE);
   }
   thePlot.variablesInPlay.QuickSortAscending();
-  thePlot.coordinateFunctionsE.SetSize(thePlot.theSurface.size()-1);
+  thePlot.coordinateFunctionsE.SetSize(thePlot.manifoldImmersion.size()-1);
   thePlot.coordinateFunctionsJS.SetSize(thePlot.coordinateFunctionsE.size);
   thePlot.theVarRangesJS.SetSize(2);
   thePlot.variablesInPlayJS.SetSize(2);
@@ -1499,8 +1500,8 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
     thePlot.variablesInPlayJS[i]=thePlot.variablesInPlay[i].ToString();
   }
   Expression jsConverter;
-  for (int i=1; i<thePlot.theSurface.size(); i++)
-  { thePlot.coordinateFunctionsE[i-1]=thePlot.theSurface[i];
+  for (int i=1; i<thePlot.manifoldImmersion.size(); i++)
+  { thePlot.coordinateFunctionsE[i-1]=thePlot.manifoldImmersion[i];
     bool isGood=CalculatorFunctionsGeneral::innerMakeJavascriptExpression
     (theCommands, thePlot.coordinateFunctionsE[i-1], jsConverter);
     if (isGood)
@@ -1552,10 +1553,11 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
         << expressionToConvert.ToString()
         << " to a javascript expression. ";
     }
+    thePlot.numSegmenTsJS.SetSize(2);
     if(keysToConvert.GetValueCreateIfNotPresent("numSegments1")!="")
-      thePlot.numSegmentsU=keysToConvert.GetValueCreateIfNotPresent("numSegments1");
+      thePlot.numSegmenTsJS[0]=keysToConvert.GetValueCreateIfNotPresent("numSegments1");
     if(keysToConvert.GetValueCreateIfNotPresent("numSegments2")!="")
-      thePlot.numSegmentsV=keysToConvert.GetValueCreateIfNotPresent("numSegments2");
+      thePlot.numSegmenTsJS[1]=keysToConvert.GetValueCreateIfNotPresent("numSegments2");
     if(keysToConvert.GetValueCreateIfNotPresent("lineWidth")!="")
     { thePlot.lineWidthJS=keysToConvert.GetValueCreateIfNotPresent("lineWidth");
       //stOutput << "DEBUG: line width set to: " << thePlot.lineWidthJS;

@@ -1673,7 +1673,7 @@ std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpre
   return out.str();
 }
 
-bool CalculatorHTML::ProcessInterprettedCommands
+bool CalculatorHTML::InterpretProcessExecutedCommands
 (Calculator &theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream &comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::ProcessInterprettedCommands");
   (void) comments;
@@ -1683,6 +1683,7 @@ bool CalculatorHTML::ProcessInterprettedCommands
   theFormat.flagUseQuotes=false;
   theFormat.flagUseLatex=true;
   bool result=true;
+  theInterpreter.theObjectContainer.resetPlots();
   for (int i=0; i<theElements.size; i++)
   { SyntacticElementHTML& currentElt=theElements[i];
     if (!currentElt.IsInterpretedByCalculatorDuringProblemGeneration())
@@ -2547,7 +2548,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time after execution");
   //first command and first syntactic element are the random seed and are ignored.
-  if (!this->ProcessInterprettedCommands(theInterpreter, this->theContent, comments))
+  if (!this->InterpretProcessExecutedCommands(theInterpreter, this->theContent, comments))
   { outBody << comments.str();
     this->outputHtmlBodyNoTag=outBody.str();
     return false;

@@ -361,9 +361,9 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
     thePlotObj.variablesInPlay.AddOnTop(xE);
   if (thePlotObj.variablesInPlay.size==1)
   { if (thePlotObj.variablesInPlay.Contains(xE))
-      thePlotObj.variablesInPlay.AddOnTop(xE);
-    else
       thePlotObj.variablesInPlay.AddOnTop(yE);
+    else
+      thePlotObj.variablesInPlay.AddOnTop(xE);
   }
   thePlotObj.variablesInPlay.QuickSortAscending();
   thePlotObj.variablesInPlayJS.SetSize(thePlotObj.variablesInPlay.size);

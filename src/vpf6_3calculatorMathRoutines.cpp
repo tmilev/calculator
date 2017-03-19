@@ -1917,41 +1917,45 @@ bool CalculatorFunctionsGeneral::outerDivideByNumber
 }
 
 bool CalculatorFunctionsGeneral::innerMax(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMax");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMin");
   (void) theCommands;
-  if (input.size()!=3)
+  if (input.size()<3)
     return false;
-  double leftD, rightD;
-  if (!input[1].EvaluatesToDouble(&leftD) || !input[2].EvaluatesToDouble(&rightD))
-    return false;
-  if (leftD>=rightD)
-  { output=input[1];
-    return true;
+  double theMax, current;
+  int bestIndex=1;
+  for (int i=1; i<input.size(); i++)
+  { if (!input[i].EvaluatesToDouble(& current))
+      return false;
+    if (i==1)
+      theMax=current;
+    else if (theMax<current)
+    { theMax=current;
+      bestIndex=i;
+    }
   }
-  if (rightD>leftD)
-  { output=input[2];
-    return true;
-  }
-  return false;
+  output=input[bestIndex];
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::innerMin(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMin");
   (void) theCommands;
-  if (input.size()!=3)
+  if (input.size()<3)
     return false;
-  double leftD, rightD;
-  if (!input[1].EvaluatesToDouble(&leftD) || !input[2].EvaluatesToDouble(&rightD))
-    return false;
-  if (rightD>=leftD)
-  { output=input[1];
-    return true;
+  double theMin, current;
+  int bestIndex=1;
+  for (int i=1; i<input.size(); i++)
+  { if (!input[i].EvaluatesToDouble(& current))
+      return false;
+    if (i==1)
+      theMin=current;
+    else if (theMin>current)
+    { theMin=current;
+      bestIndex=i;
+    }
   }
-  if (leftD>rightD)
-  { output=input[2];
-    return true;
-  }
-  return false;
+  output=input[bestIndex];
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::outerEqualEqual(Calculator& theCommands, const Expression& input, Expression& output)

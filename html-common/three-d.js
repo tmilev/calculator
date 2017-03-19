@@ -632,9 +632,9 @@ function VectorFieldTwoD(
         theSurface.moveTo(tailScreen[0], tailScreen[1]);
         theSurface.lineTo(headScreen[0], headScreen[1]);
         theSurface.stroke();
-        theSurface.moveTo(baseScreen[0], baseScreen[1]);
-        theSurface.arc(baseScreen[0], baseScreen[1],2, 0, Math.PI*2);
-        theSurface.fill();
+        //theSurface.moveTo(baseScreen[0], baseScreen[1]);
+        //theSurface.arc(baseScreen[0], baseScreen[1],0.5, 0, Math.PI*2);
+        //theSurface.fill();
       }
     }
 

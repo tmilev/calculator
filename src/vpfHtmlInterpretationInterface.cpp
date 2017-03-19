@@ -86,7 +86,7 @@ std::string HtmlInterpretation::GetProblemSolution()
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
   }
-  if (!theProblem.ProcessInterprettedCommands
+  if (!theProblem.InterpretProcessExecutedCommands
        (theInterpreteR, currentA.solutionElements, out))
     return out.str();
   for (int i=1; i<currentA.solutionElements.size; i++)
@@ -172,7 +172,7 @@ std::string HtmlInterpretation::GetCommentsInterpretation
   std::stringstream out;
   theFormat.flagExpressionIsFinal=true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
-
+  theInterpreterWithAdvice.theObjectContainer.resetPlots();
   //stOutput << "DEBUG: theInterpreterWithAdvice.flagPlotNoCtrls: "
   //<< theInterpreterWithAdvice.flagPlotNoControls;
   if (indexShift>=theInterpreterWithAdvice.theProgramExpression.size())

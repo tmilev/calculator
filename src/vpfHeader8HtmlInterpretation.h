@@ -171,7 +171,7 @@ public:
   bool InterpretHtml(std::stringstream& comments);
   bool InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
   std::string ToStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements);
-  bool ProcessInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream& comments);
+  bool InterpretProcessExecutedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream& comments);
   bool PrepareAnswerElements(std::stringstream &comments);
   bool InterpretAnswerElements(std::stringstream& comments);
   bool InterpretOneAnswerElement(SyntacticElementHTML& inputOutput);

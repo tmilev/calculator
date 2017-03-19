@@ -1393,7 +1393,9 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
       }
     }
     if (input.size()==2)
-      if (opString=="\\sin" || opString == "\\cos" || opString=="\\log")
+      if (opString=="\\sin" || opString == "\\cos" ||
+          opString=="\\log" || opString == "\\tan" ||
+          opString=="\\cot")
       { std::string chopped=opString.substr(1);
         out << "(Math." << chopped << "( " << leftString << "))";
         return output.AssignValue(out.str(), theCommands);

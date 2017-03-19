@@ -1223,6 +1223,14 @@ void MathRoutines::KToTheNth(int k, int n, LargeInt& output)
     output*=k;
 }
 
+Vector<double> MathRoutines::GetVectorDouble(Vector<Rational>& input)
+{ Vector<double> result;
+  result.SetSize(input.size);
+  for (int i=0; i<input.size; i++)
+    result[i]=input[i].GetDoubleValue();
+  return result;
+}
+
 int MathRoutines::BinomialCoefficientMultivariate(int N, List<int>& theChoices)
 { int ChoiceIndex=0;
   int denominator=1;

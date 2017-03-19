@@ -713,6 +713,7 @@ class Plot
   bool flagIncludeExtraHtmlDescriptions;
   bool flagPlotShowJavascriptOnly;
   bool flagDivAlreadyDisplayed;
+  bool flagIncludeCoordinateSystem;
   int dimension;
   static int canvasCounteR;
   std::string canvasName;

@@ -820,6 +820,8 @@ void Plot::operator+=(const Plot& other)
     if (this->DesiredHtmlWidthInPixels<other.DesiredHtmlWidthInPixels)
       this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
   }
+  if (other.flagIncludeCoordinateSystem)
+    this->flagIncludeCoordinateSystem=true;
   this->boxesThatUpdateMe.AddOnTopNoRepetition(other.boxesThatUpdateMe);
   this->priorityWindow=MathRoutines::Maximum(this->priorityWindow, other.priorityWindow);
   this->priorityViewRectangle=MathRoutines::Maximum(this->priorityViewRectangle, other.priorityViewRectangle);
@@ -839,7 +841,8 @@ bool Plot::operator==(const Plot& other)const
   this->thePlots==other.thePlots &&
   this->boxesThatUpdateMe==other.boxesThatUpdateMe &&
   this->canvasName==other.canvasName &&
-  this->dimension==other.dimension
+  this->dimension==other.dimension &&
+  this->flagIncludeCoordinateSystem==other.flagIncludeCoordinateSystem
   ;
 }
 
@@ -951,6 +954,7 @@ Plot::Plot()
   this->priorityCanvasName=0;
   this->dimension=-1;
   this->flagDivAlreadyDisplayed=false;
+  this->flagIncludeCoordinateSystem=true;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
@@ -1616,12 +1620,14 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
       out << ", " << "\"" << currentPlot.lineWidth << "\"";
     out << ");\n";
   }
-  out << "theCanvas.drawLine([" << this->theLowerBoundAxes*1.10
-  << ",0],[" << this->theUpperBoundAxes*1.10 << ",0], 'black',1);\n";
-  out << "theCanvas.drawLine([0," << this->lowBoundY *1.10
-  << "],[0," << this->highBoundY*1.10 << "], 'black',1);\n";
-  out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black',1);\n";
-  out << "theCanvas.drawText([1,-0.2],'1','black');\n";
+  if (this->flagIncludeCoordinateSystem)
+  { out << "theCanvas.drawLine([" << this->theLowerBoundAxes*1.10
+    << ",0],[" << this->theUpperBoundAxes*1.10 << ",0], 'black',1);\n";
+    out << "theCanvas.drawLine([0," << this->lowBoundY *1.10
+    << "],[0," << this->highBoundY*1.10 << "], 'black',1);\n";
+    out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black',1);\n";
+    out << "theCanvas.drawText([1,-0.2],'1','black');\n";
+  }
   //stOutput << "DEBUG: this->priorityViewRectangle=" << this->priorityViewRectangle;
   if (this->priorityViewRectangle>0)
   { out << "theCanvas.setViewWindow("

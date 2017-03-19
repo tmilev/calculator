@@ -2906,13 +2906,15 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->StartsWith(this->owner->opSum()) ||
              this->StartsWith(this->owner->opIntegral()) )
   { std::string opString=(*this)[0].ToString(theFormat);
-    out << opString;
+    out << opString << " ";
     int firstIndex=2;
     if (this->size()>=2)
     { if ((*this)[1].StartsWith(this->owner->opLimitBoundary(),3))
         out
         << "_{" << (*this)[1][1].ToString(theFormat) << "}"
         << "^{" << (*this)[1][2].ToString(theFormat) << "}";
+      else if ((*this)[1].IsAtomGivenData(this->owner->opIndefiniteIndicator()))
+        firstIndex=2;
       else
         firstIndex=1;
     }

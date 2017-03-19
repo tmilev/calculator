@@ -230,6 +230,7 @@ public:
   static bool GenerateVectorSpaceClosedWRTLieBracket(List<theType>& inputOutputElts, int upperDimensionBound)
   { return MathRoutines::GenerateVectorSpaceClosedWRTOperation(inputOutputElts, upperDimensionBound, theType::LieBracket);
   }
+  static Vector<double> GetVectorDouble(Vector<Rational>& input);
   template <class theType>
   static bool GenerateVectorSpaceClosedWRTOperation
   (List<theType>& inputOutputElts, int upperDimensionBound, void (*theBinaryOperation)(const theType& left, const theType& right, theType& output));

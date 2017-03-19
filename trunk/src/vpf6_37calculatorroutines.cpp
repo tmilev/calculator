@@ -277,6 +277,7 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionField(Calculator& theCommands
 
 bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& theCommands, const Expression& input, Expression& output, bool vectorsAreNormalized)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField");
+  (void) vectorsAreNormalized;
   //stOutput << input.ToString();
   if (input.size()<5)
     return output.MakeError

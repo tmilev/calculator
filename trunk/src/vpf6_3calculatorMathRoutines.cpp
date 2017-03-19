@@ -7521,10 +7521,11 @@ public:
   HashedList<std::string, MathRoutines::hashString> DisplayedEstrings;
   List<bool> DisplayedStringIsLeaf;
   List<Vector<Rational> > NodePositions;
+  List<Vector<double> > NodePositionsDouble;
   List<int> LayerSizes;
   List<int> LayerFirstIndices;
   List<List<int> > arrows;
-  DrawingVariables theDV;
+  Plot thePlot;
   List<Expression> currentLayer;
   List<Expression> nextLayer;
   List<Expression> currentEchildrenTruncated;
@@ -7629,8 +7630,8 @@ public:
     out << "<br>Node positions: " << this->NodePositions.ToStringCommaDelimited() ;
     out << "<br>Arrows: " << this->arrows.ToStringCommaDelimited() ;
     out << "<br>Width max layer: " << this->widthMaxLayer;
-    out << "<br>DrawOps centerX, centerY: " << this->theDV.theBuffer.centerX[0] << ", "
-    << this->theDV.theBuffer.centerY[0];
+    //out << "<br>DrawOps centerX, centerY: " << this->theDV.theBuffer.centerX[0] << ", "
+    //<< this->theDV.theBuffer.centerY[0];
     return out.str();
   }
   void AddStringTruncate(const std::string& input, bool isLeaf)
@@ -7692,39 +7693,56 @@ public:
     this->init();
     while (this->IncrementReturnFalseIfPastLast())
     {}
+    this->thePlot.dimension=2;
+    this->thePlot.flagIncludeCoordinateSystem=false;
     this->NodePositions.SetSize(this->DisplayedEstrings.size);
     for (int i=0; i<this->LayerFirstIndices.size; i++)
       this->ComputeLayerPositions(i);
     //stOutput << this->ToString();
-    Vector<Rational> arrowBase, arrowHead;
+    this->NodePositionsDouble.SetSize(this->NodePositions.size);
+    for (int i=0; i<this->NodePositionsDouble.size; i++)
+    { this->NodePositionsDouble[i]
+      = MathRoutines::GetVectorDouble(this->NodePositions[i]);
+    }
+    Vector<double> arrowBase, arrowHead;
     for (int i=0; i<this->DisplayedEstrings.size; i++)
-    { if (this->DisplayedEstrings[i]!="")
-      { int theColor= this->DisplayedStringIsLeaf[i] ? CGI::RedGreenBlue(255, 0,0) : CGI::RedGreenBlue(100,100,100);
-        theDV.drawTextAtVectorBufferRational
-        (this->NodePositions[i],
-         CGI::clearNewLines(CGI::backslashQuotes(
-         CGI::DoubleBackslashes( this->DisplayedEstrings[i]) )),
-         theColor, theDV.TextStyleNormal);
+    {       for (int j=0; j<this->arrows[i].size; j++)
+      { arrowBase= this->NodePositionsDouble[i];
+        arrowHead=this->NodePositionsDouble[this->arrows[i][j]];
+        arrowHead[1]+=this->charHeight.GetDoubleValue() /2;
+        PlotObject theSegment;
+        theSegment.thePlotString="segment";
+        theSegment.thePoints.AddOnTop(arrowBase);
+        theSegment.thePoints.AddOnTop(arrowHead);
+        theSegment.colorJS="black";
+        this->thePlot+=theSegment;
+      }
+      if (this->DisplayedEstrings[i]!="")
+      { PlotObject theText;
+        theText.thePlotType="label";
+        theText.thePoints.AddOnTop(this->NodePositionsDouble[i]);
+        theText.colorJS=
+        this->DisplayedStringIsLeaf[i] ? "red" : "gray";
+        theText.thePlotString=
+        CGI::clearNewLines
+        (CGI::backslashQuotes(CGI::DoubleBackslashes(this->DisplayedEstrings[i]) ));
+        thePlot+=theText;
       } else
-        theDV.drawCircleAtVectorBufferRational
-        (this->NodePositions[i], 0.04, theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
-      for (int j=0; j<this->arrows[i].size; j++)
-      { arrowBase= this->NodePositions[i];
-        arrowHead=this->NodePositions[this->arrows[i][j]];
-        arrowHead[1]+=this->charHeight/2;
-        //arrowHead=arrowHead*nineTenths+arrowBase*oneTenth;
-        theDV.drawLineBetweenTwoVectorsBufferRational
-        (arrowBase, arrowHead, theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0),1);
+      { PlotObject thePoint;
+        thePoint.thePlotType="point";
+        thePoint.colorJS="blue";
+        thePoint.thePoints.AddOnTop(this->NodePositionsDouble[i]);
+        this->thePlot+=thePoint;
       }
     }
-    double& theGraphicsUnit =theDV.theBuffer.GraphicsUnit[0];
-    theGraphicsUnit=100;
-    theDV.DefaultHtmlHeight=(int)( (this->layerHeight* (this->LayerSizes.size-1)*theGraphicsUnit+100).GetDoubleValue());
-    theDV.DefaultHtmlWidth=(int)( (this->widthMaxLayer*theGraphicsUnit+40).GetDoubleValue());
-    theDV.theBuffer.centerX.SetSize(1);
-    theDV.theBuffer.centerY.SetSize(1);
-    theDV.theBuffer.centerX[0]= (this->widthMaxLayer/2).GetDoubleValue()*theGraphicsUnit;
-    theDV.theBuffer.centerY[0]= 40;
+//    double& theGraphicsUnit =theDV.theBuffer.GraphicsUnit[0];
+//    theGraphicsUnit=100;
+//    theDV.DefaultHtmlHeight=(int)( (this->layerHeight* (this->LayerSizes.size-1)*theGraphicsUnit+100).GetDoubleValue());
+//    theDV.DefaultHtmlWidth=(int)( (this->widthMaxLayer*theGraphicsUnit+40).GetDoubleValue());
+//    theDV.theBuffer.centerX.SetSize(1);
+//    theDV.theBuffer.centerY.SetSize(1);
+//    theDV.theBuffer.centerX[0]= (this->widthMaxLayer/2).GetDoubleValue()*theGraphicsUnit;
+//    theDV.theBuffer.centerY[0]= 40;
 //    stOutput << this->ToString();
   }
 };
@@ -7737,9 +7755,7 @@ bool CalculatorFunctionsGeneral::innerDrawExpressionGraphWithOptions
   theEdrawer.owner=&theCommands;
   theEdrawer.baseExpression=input;
   theEdrawer.DrawToDV();
-  std::stringstream out;
-  out << theEdrawer.theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
-  return output.AssignValue(out.str(), theCommands);
+  return output.AssignValue(theEdrawer.thePlot, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerDrawWeightSupport(Calculator& theCommands, const Expression& input, Expression& output)

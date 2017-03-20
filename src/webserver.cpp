@@ -1158,12 +1158,16 @@ void WebWorker::OutputResultAfterTimeout()
 { MacroRegisterFunctionWithName("WebWorker::OutputResultAfterTimeout");
   std::stringstream out;
 //  out << theParser.ToStringOutputSpecials();
+  std::string theFileName=
+  "output/" + theGlobalVariables.RelativePhysicalNameOutpuT;
+  out << "Output written in: <a href=\"/"
+  << theFileName << "\"> " << theFileName << "</a>";
   if (standardOutputStreamAfterTimeout.str().size()!=0)
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
   out << theParser.ToStringOutputAndSpecials();
   std::fstream outputTimeOutFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual
-  (outputTimeOutFile, "output/" + theGlobalVariables.RelativePhysicalNameOutpuT, false, true, false);
+  (outputTimeOutFile, theFileName, false, true, false);
   outputTimeOutFile << "<html><body>" << out.str() << "</body></html>";
   outputTimeOutFile.close();
   WebWorker::OutputSendAfterTimeout(out.str());

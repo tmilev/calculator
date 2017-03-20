@@ -239,9 +239,11 @@ function getSemiColumnEnclosure()
   if (calculatorInput.selectionEnd===undefined)
     calculatorInput.selectionEnd=0;
   var startPos =calculatorInput.selectionEnd;
-  for (; startPos>0; startPos--)
+  for (; startPos>0 && startPos<calculatorInput.value.length; startPos--)
     if (isSeparatorCharacter(calculatorInput.value[startPos]))
       break;
+  if (startPos>=calculatorInput.value.length)
+    startPos=calculatorInput.value.length-1;
   var rightPos=startPos;
   var lastSeparator=startPos;
   var lastWord='';

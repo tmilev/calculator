@@ -20,17 +20,6 @@ struct MeshTriangles{
   double Height;
   double Width;
   double minTriangleSideAsPercentOfWidthPlusHeight;
-  MeshTriangles()
-  { this->XstartingGridCount=0;
-    this->YstartingGridCount=0;
-    this->numBadEvaluations=0;
-    this->numGoodEvaluations=0;
-    this->flagFunctionEvaluationFailed=false;
-    this->minTriangleSideAsPercentOfWidthPlusHeight=0.001;
-    this->maxNumTriangles=2000;
-    this->flagTriangleLimitReached=false;
-    this->flagShowGrid=false;
-  }
   List<bool> trianglesUsed;
   List<List<Vector<double> > > theTriangles;
   MapLisT<Vector<double>, double, MathRoutines::HashVectorDoubles> theEvaluatedPoints;
@@ -59,7 +48,20 @@ struct MeshTriangles{
   bool ComputePoints
   (Calculator& theCommands, const Expression& input, bool showGrid)
 ;
+  MeshTriangles();
 };
+
+MeshTriangles::MeshTriangles()
+{ this->XstartingGridCount=0;
+  this->YstartingGridCount=0;
+  this->numBadEvaluations=0;
+  this->numGoodEvaluations=0;
+  this->minTriangleSideAsPercentOfWidthPlusHeight=0.001;
+  this->maxNumTriangles=2000;
+  this->flagTriangleLimitReached=false;
+  this->flagShowGrid=false;
+  this->flagFunctionEvaluationFailed=false;
+}
 
 void MeshTriangles::PlotGrid(int theColor)
 { MacroRegisterFunctionWithName("MeshTriangles::PlotGrid");

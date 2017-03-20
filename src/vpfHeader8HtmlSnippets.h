@@ -14,7 +14,8 @@ public:
   static std::string GetJavascriptSubmitEmails();
   static std::string GetJavascriptCookieFunctions();
   static std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
-  static std::string GetJavascriptCanvasGraphics();
+  static std::string GetJavascriptCanvasGraphicsWithTags();
+  static std::string GetJavascriptTopicListWithTags();
   static std::string GetDatePickerJavascriptInit();
   static std::string GetJavascriptVariable(const std::string& theVar);
 };

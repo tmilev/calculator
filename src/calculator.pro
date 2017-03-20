@@ -118,5 +118,6 @@ DISTFILES += \
     ../html-common/three-d.js \
     ../html-common/initializebuttons.js \
     ../html-common/calculatorPage.js \
-    ../html-common/autocomplete.js
+    ../html-common/autocomplete.js \
+    ../html-common/topiclist.js
 

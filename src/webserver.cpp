@@ -2481,7 +2481,7 @@ int WebWorker::ProcessCalculator()
   stOutput << HtmlSnippets::GetJavascriptHideHtml();
   stOutput << HtmlSnippets::GetJavascriptStandardCookies();
   stOutput << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile();
-  stOutput << HtmlSnippets::GetJavascriptCanvasGraphics();
+  stOutput << HtmlSnippets::GetJavascriptCanvasGraphicsWithTags();
   stOutput << CGI::GetJavascriptAutocompleteWithTags();
   stOutput << CGI::GetJavascriptInitializeButtons();
   stOutput << CGI::GetJavascriptMathQuillMatrixSupport();
@@ -2537,7 +2537,7 @@ int WebWorker::ProcessCalculator()
   //stOutput << "style=\"white-space:normal; resize:both; border: 1px solid; overflow:auto\" ";
   stOutput << "name=\"mainInput\" id=\"mainInputID\" ";
   stOutput << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {"
-  << "submitStringAsMainInput(document.getElementById('mainInputID').textContent,"
+  << "submitStringAsMainInput(document.getElementById('mainInputID').value,"
   << " 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus');"
   << " event.preventDefault();"
   << "}\" "

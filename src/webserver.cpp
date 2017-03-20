@@ -1160,8 +1160,10 @@ void WebWorker::OutputResultAfterTimeout()
 //  out << theParser.ToStringOutputSpecials();
   std::string theFileName=
   "output/" + theGlobalVariables.RelativePhysicalNameOutpuT;
+  std::string theLink=
+  "output/" + CGI::StringToURLString(theGlobalVariables.RelativePhysicalNameOutpuT,false);
   out << "Output written in: <a href=\"/"
-  << theFileName << "\"> " << theFileName << "</a>";
+  << theLink << "\"> " << theLink << "</a><br>";
   if (standardOutputStreamAfterTimeout.str().size()!=0)
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
   out << theParser.ToStringOutputAndSpecials();

@@ -69,7 +69,7 @@ void Calculator::reset()
   this->flagNoApproximations=false;
   this->flagDefaultRulesWereTamperedWith=false;
   this->flagUsePredefinedWordSplits=true;
-  this->flagPlotNoControls=false;
+  this->flagPlotNoControls=true;
   this->flagPlotShowJavascriptOnly=false;
   this->flagHasGraphics=false;
   this->flagUseBracketsForIntervals=false;
@@ -285,7 +285,7 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseBracketForIntervals");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("DontUsePredefinedWordSplits");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotShowJavascriptOnly");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotNoCoordinateDetails");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("PlotDetails");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LatexLink");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnInsteadOfLog");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("UseLnAbsInsteadOfLog");
@@ -1784,9 +1784,9 @@ bool Calculator::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
-  if (secondToLastS=="%" && lastS=="PlotNoCoordinateDetails")
-  { this->flagPlotNoControls=true;
-    this->Comments << "Plot details suppressed. ";
+  if (secondToLastS=="%" && lastS=="PlotDetails")
+  { this->flagPlotNoControls=false;
+    this->Comments << "Plot details on. ";
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

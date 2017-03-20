@@ -244,25 +244,28 @@ void Calculator::initPredefinedInnerFunctions()
    "CrashVectorOutOfBounds(0)", "CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds",
    "CrashVectorOutOfBounds");
   this->AddOperationInnerHandler
-  ("DrawExpressionTree", CalculatorFunctionsGeneral::innerDrawExpressionGraph, "",
+  ("PlotExpressionTree", CalculatorFunctionsGeneral::innerDrawExpressionGraph, "",
    "Draws the internal tree structure of an expression. Does not unfold built-in types.",
-   "DrawExpressionTree( e^x)");
+   "PlotExpressionTree( e^x)");
   this->AddOperationInnerHandler
   ("Thaw", CalculatorFunctionsGeneral::innerThaw, "",
    "If the argument is frozen, removes the top freeze command and returns the argument, \
     else returns the argument unchanged.",
-   "a=Freeze{}(1+1); Thaw a; c=Thaw(Freeze(a,b)); DrawExpressionTree c", "Thaw");
+   "a=Freeze{}(1+1); Thaw a; c=Thaw(Freeze(a,b)); PlotExpressionTree c", "Thaw");
 
   this->AddOperationInnerHandler
-  ("DrawExpressionTreeFull", CalculatorFunctionsGeneral::innerDrawExpressionGraphFull, "",
+  ("PlotExpressionTreeFull", CalculatorFunctionsGeneral::innerDrawExpressionGraphFull, "",
    "Draws the internal tree structure of an expression. Unfolds built-in types. ",
-   "DrawExpressionTreeFull( 1); DrawExpressionTree(1+ 1);DrawExpressionTree( Freeze{}(1+1));",
-   "DrawExpressionTreeFull");
+   "PlotExpressionTreeFull( 1); PlotExpressionTree(1+ 1);PlotExpressionTree( Freeze{}(1+1));",
+   "PlotExpressionTreeFull");
   this->AddOperationInnerHandler
   ("Lispify", CalculatorFunctionsGeneral::innerLispify, "",
    "Shows the internal tree structure of an expression, without completely unfolding the tree structure of expressions that represent a single mathematical\
    entity.",
-   "Lispify( e^x)");
+   "Lispify( e^x)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerLispify",
+   "Lispify");
 
   this->AddOperationInnerHandler
   ("FlattenCommandEnclosuresOneLayer",
@@ -1807,7 +1810,7 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "",
    "Internal data structure transformation: \
     sequence ->left-closed interval.",
-   "%UseBracketForIntervals DrawExpressionTree[1,2); DrawExpressionTree(1,2]; DrawExpressionTree[1,2];",
+   "%UseBracketForIntervals PlotExpressionTree[1,2); PlotExpressionTree(1,2]; PlotExpressionTree[1,2];",
    true, false,
    "CalculatorFunctionsGeneral::innerIntervalToSequence",
    "[)");
@@ -1816,7 +1819,7 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "",
    "Internal data structure transformation: \
     sequence ->right-closed interval.",
-   "%UseBracketForIntervals DrawExpressionTree[1,2); DrawExpressionTree(1,2]; DrawExpressionTree[1,2];",
+   "%UseBracketForIntervals PlotExpressionTree[1,2); PlotExpressionTree(1,2]; PlotExpressionTree[1,2];",
    true, false,
    "CalculatorFunctionsGeneral::innerIntervalToSequence",
    "(]");
@@ -1825,7 +1828,7 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "",
    "Internal data structure transformation: \
     sequence ->closed interval.",
-   "%UseBracketForIntervals DrawExpressionTree[1,2); DrawExpressionTree(1,2]; DrawExpressionTree[1,2];",
+   "%UseBracketForIntervals PlotExpressionTree[1,2); PlotExpressionTree(1,2]; PlotExpressionTree[1,2];",
    true, false,
    "CalculatorFunctionsGeneral::innerIntervalToSequence",
    "IntervalClosed");
@@ -3094,8 +3097,8 @@ void Calculator::initPredefinedStandardOperations()
     CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf, "",
    "Transforms \\sum\\limits_{b}^c* a to (\\sum\\limits_b^c){} a. \
     ",
-   "DrawExpressionTree(  \\sum\\limits_{b}^c);\
-    \nDrawExpressionTree( \\sum\\limits_{b}^c*a) ",
+   "PlotExpressionTree(  \\sum\\limits_{b}^c);\
+    \nPlotExpressionTree( \\sum\\limits_{b}^c*a) ",
    true, false,
    "CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf",
    "SumProductNotationToOperator");
@@ -3104,8 +3107,8 @@ void Calculator::initPredefinedStandardOperations()
     CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf, "",
    "Transforms \\sum\\limits_{b}^c* a to (\\sum\\limits_b^c){} a. \
     ",
-   "DrawExpressionTree(  \\sum\\limits_{b}^c);\
-    \nDrawExpressionTree( \\sum\\limits_{b}^c*a) ",
+   "PlotExpressionTree(  \\sum\\limits_{b}^c);\
+    \nPlotExpressionTree( \\sum\\limits_{b}^c*a) ",
    true, false,
    "CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf",
    "SumProductNotationToOperatorRelativeToDivision");
@@ -3908,7 +3911,7 @@ this->AddOperationInnerHandler
   this->AddOperationHandler
   ("^", CalculatorFunctionsGeneral::innerOperatorBounds, "",
    "Replaces \\int_a^b by (\\int, a, b) .",
-   "A=\\int_a^b; Lispify(A); DrawExpressionTree(A); ",
+   "A=\\int_a^b; Lispify(A); PlotExpressionTree(A); ",
    true, true, false,
    "CalculatorFunctionsGeneral::innerIntegralUpperBound",
    "OperatorBoundsSuperscript", false);
@@ -4156,8 +4159,8 @@ void Calculator::initPredefinedOperationsComposite()
   ("\\sum", CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation, "",
    "Transforms (\\sum_a^b ){} n to \\sum_a^b n (internal notation). \
     ",
-   "DrawExpressionTree(  Freeze(\\sum_a^b ){} n);\
-    \nDrawExpressionTree( (\\sum_a^b ){} n) ",
+   "PlotExpressionTree(  Freeze(\\sum_a^b ){} n);\
+    \nPlotExpressionTree( (\\sum_a^b ){} n) ",
    true, true, false,
    "CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation",
    "SumAsOperator");

@@ -1692,7 +1692,7 @@ bool Calculator::innerDistributeExponent(Calculator& theCommands, const Expressi
     else
     { Rational exponentRat;
       if (exponentE.IsRational(&exponentRat))
-        if (exponentRat.GetDenominator().IsEven())
+        if (!exponentRat.GetDenominator().IsEven())
           isGood=true;
     }
   }

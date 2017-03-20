@@ -465,6 +465,8 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   { out << CGI::GetJavascriptInitializeButtons();
     out << CGI::GetJavascriptCalculatorPage();
   }
+  if (theGlobalVariables.UserDefaultHasProblemComposingRights())
+    out << HtmlSnippets::GetJavascriptTopicListWithTags();
   out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << "<body" //<< ">"
   << " onload=\"loadSettings();";

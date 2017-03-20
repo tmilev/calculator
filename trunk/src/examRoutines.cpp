@@ -2592,7 +2592,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsExamProblem)
   { outHeadPt2 << this->GetJavascriptMathQuillBoxes();
     if (theInterpreter.flagHasGraphics)
-      outHeadPt2 << HtmlSnippets::GetJavascriptCanvasGraphics();
+      outHeadPt2 << HtmlSnippets::GetJavascriptCanvasGraphicsWithTags();
   }
   ////////////////////////////////////////////////////////////////////
   //out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";

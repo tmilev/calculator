@@ -91,8 +91,23 @@ std::string HtmlSnippets::GetJavascriptCookieFunctions()
   return out.str();
 }
 
-std::string HtmlSnippets::GetJavascriptCanvasGraphics()
-{ MacroRegisterFunctionWithName("HtmlSnippets::GetJavascriptCanvasGraphics");
+std::string HtmlSnippets::GetJavascriptTopicListWithTags()
+{ MacroRegisterFunctionWithName("HtmlSnippets::GetJavascriptTopicListWithTags");
+  std::stringstream out, commentsOnFailure;
+  std::string fileReader;
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/topiclist.js", fileReader, commentsOnFailure))
+    out << "Javascript file topiclist.js not found. ";
+  else
+    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
+//  CGI::JavascriptAceEditorScript=out.str();
+//  return CGI::JavascriptAceEditorScript;
+  return out.str();
+
+
+}
+
+std::string HtmlSnippets::GetJavascriptCanvasGraphicsWithTags()
+{ MacroRegisterFunctionWithName("HtmlSnippets::GetJavascriptCanvasGraphicsWithTags");
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
   if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/three-d.js", fileReader, commentsOnFailure))

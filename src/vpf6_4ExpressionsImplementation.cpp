@@ -2888,7 +2888,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << theCoeff;
     if (needsParen)
       out << "\\right)";
-    out << "\\diff ";
+    out << " \\diff ";
     if (rightNeedsParen)
       out << "\\left(";
     out << (*this)[1].ToString(theFormat);

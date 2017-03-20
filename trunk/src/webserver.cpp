@@ -2525,10 +2525,13 @@ int WebWorker::ProcessCalculator()
 
   stOutput << this->GetHtmlHiddenInputs(true, true);
   stOutput << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"compute\">\n";
-  stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"mainInput\" id=\"mainInputID\" "
-  << "style=\"white-space:normal\" "
-  << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {"
-  << "submitStringAsMainInput(document.getElementById('mainInputID').value,"
+  stOutput << "<textarea rows=\"3\" cols=\"30\" ";
+  stOutput << "style=\"white-space:normal\" ";
+  //stOutput << "<div contenteditable=\"true\" ";
+  //stOutput << "style=\"white-space:normal; resize:both; border: 1px solid; overflow:auto\" ";
+  stOutput << "name=\"mainInput\" id=\"mainInputID\" ";
+  stOutput << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {"
+  << "submitStringAsMainInput(document.getElementById('mainInputID').textContent,"
   << " 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus');"
   << " event.preventDefault();"
   << "}\" "
@@ -2539,6 +2542,7 @@ int WebWorker::ProcessCalculator()
   << ">";
   stOutput << civilizedInputSafish;
   stOutput << "</textarea>\n";
+  //stOutput << "</div>\n";
   stOutput << "<br>";
   if (hashtmlChars)
     stOutput << "Your input had some html characters (such as &lt;). <br>"

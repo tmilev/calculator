@@ -15,6 +15,7 @@ var calculatorInputBoxToSliderUpdaters=new Object;
 var calculatorInputBoxNames=[];
 var numInsertedJavascriptChildren=0;
 var calculatorCanvases;
+var keyWordsKnownToMathQuill=['sqrt', 'frac', 'cdot'];
 function initializeCalculatorVariables()
 { answerIdsPureLatex=['mainInputID'];
   answerMQspanIds=['mainInputMQfield'];
@@ -24,6 +25,28 @@ function initializeCalculatorVariables()
 }
 
 var calculatorMQobjectsInitialized=false;
+
+function createSelectionNoFocus(field, start, end)
+{ if( field.createTextRange )
+  { var selRange = field.createTextRange();
+    selRange.collapse(true);
+    selRange.moveStart('character', start);
+    selRange.moveEnd('character', end);
+    selRange.select();
+    field.focus();
+    calculatorMQfield.focus();
+  } else if( field.setSelectionRange )
+  { field.focus();
+    field.setSelectionRange(start, end);
+    calculatorMQfield.focus();
+  } else if( typeof field.selectionStart != 'undefined' )
+  { field.selectionStart = start;
+    field.selectionEnd = end;
+    field.focus();
+    calculatorMQfield.focus();
+  }
+}
+
 function initializeCalculatorPage()
 { if (calculatorMQobjectsInitialized===true)
     return;
@@ -48,18 +71,15 @@ function initializeCalculatorPage()
           if (calculatorLeftString===undefined ||
               calculatorRightString===undefined)
             mQHelpCalculator();
-          var addNewLine=false;
-          if (calculatorLeftString instanceof String)
-            if (calculatorLeftString[calculatorLeftString.length-1]!=="\n")
-              addNewLine=true;
-          if (addNewLine)
-            calculatorInput.value =calculatorLeftString+"\n"+
-            processMathQuillLatex(theBoxContent)+
-            calculatorRightString;
-          else
-            calculatorInput.value =calculatorLeftString+
-            processMathQuillLatex(theBoxContent)+
-            calculatorRightString;
+          var theInserted=processMathQuillLatex(theBoxContent);
+          calculatorInput.value =calculatorLeftString+
+          theInserted+
+          calculatorRightString;
+//          calculatorInput.innerHTML =calculatorLeftString+
+//          +"<span style='color:red'>" +theInserted+ "</span>"+
+//          calculatorRightString;
+
+//          createSelectionNoFocus(calculatorInput, calculatorLeftString.length, calculatorLeftString.length+theInserted.length);
         }
       }
     }
@@ -191,23 +211,67 @@ function chopCalculatorStrings()
   substring(calculatorRightPosition+1);
 }
 
+function isSeparatorCharacter(theChar)
+{ if(theChar[0]>='a' && theChar[0]<='z')
+    return false;
+  if (theChar[0]>='A' && theChar[0]<='Z')
+    return false;
+  return true;
+}
+
+function isKeyWordStartKnownToMathQuill(input)
+{ for (var i=0; i<keyWordsKnownToMathQuill.length; i++)
+    if (keyWordsKnownToMathQuill[i].startsWith(input))
+      return true;
+  return false;
+}
+
+function isKeyWordEndKnownToMathQuill(input)
+{ for (var i=0; i<keyWordsKnownToMathQuill.length; i++)
+    if (keyWordsKnownToMathQuill[i].endsWith(input))
+      return true;
+  return false;
+}
+
 function getSemiColumnEnclosure()
 { if (calculatorInput===undefined)
     initializeCalculatorPage();
   if (calculatorInput.selectionEnd===undefined)
     calculatorInput.selectionEnd=0;
-  var rightPos=calculatorInput.selectionEnd;
-  for (; rightPos<calculatorInput.value.length; rightPos++)
-    if (calculatorInput.value[rightPos]===';')
+  var startPos =calculatorInput.selectionEnd;
+  for (; startPos>0; startPos--)
+    if (isSeparatorCharacter(calculatorInput.value[startPos]))
+      break;
+  var rightPos=startPos;
+  var lastSeparator=startPos;
+  var lastWord='';
+  var currentChar='a';
+  for (; rightPos<calculatorInput.value.length-1; rightPos++)
+  { currentChar=calculatorInput.value[rightPos];
+    if (currentChar===';')
     { if (rightPos>0)
         rightPos--;
       break;
     }
+    if (isSeparatorCharacter(currentChar))
+    { lastWord='';
+      lastSeparator=rightPos;
+    } else
+      lastWord+=currentChar;
+    if (lastWord.length>3)
+      if (!isKeyWordStartKnownToMathQuill(lastWord))
+      { rightPos=lastSeparator;
+        break;
+      }
+  }
   var calculatorSeparatorCounts=
   new Array(calculatorSeparatorLeftDelimiters.length).fill(0);
   var leftPos=rightPos;
+  lastWord='';
+  lastSeparator=rightPos;
   for (; leftPos>0; leftPos--)
-  { if (calculatorInput.value[leftPos]===';')
+  { currentChar=calculatorInput.value[leftPos];
+    if (currentChar===';')
     { leftPos++;
       break;
     }
@@ -217,6 +281,17 @@ function getSemiColumnEnclosure()
     { leftPos++;
       break;
     }
+    if (isSeparatorCharacter(currentChar))
+    { lastWord='';
+      lastSeparator=leftPos;
+    } else
+    { lastWord=currentChar+lastWord;
+    }
+    if (lastWord.length>3)
+      if (!isKeyWordEndKnownToMathQuill(lastWord))
+      { leftPos=lastSeparator;
+        break;
+      }
   }
   if (leftPos>rightPos)
     leftPos=rightPos;

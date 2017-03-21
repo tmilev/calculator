@@ -1465,12 +1465,12 @@ std::string CalculatorHTML::GetDeadline
 }
 
 std::string CalculatorHTML::ToStringOnEDeadlineFormatted
-(const std::string& cleanedUpLink,  const std::string& sectionNumber,
+(const std::string& cleanedUpLink, const std::string& sectionNumber,
  bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
 { std::stringstream out;
-  bool deadlineInherited=false;
+  bool deadlineIsInherited=false;
   std::string currentDeadline =
-  this->GetDeadline(cleanedUpLink, sectionNumber, deadlineInherited);
+  this->GetDeadline(cleanedUpLink, sectionNumber, deadlineIsInherited);
   if (currentDeadline=="")
   { if (returnEmptyStringIfNoDeadline)
       return "";
@@ -1496,9 +1496,11 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   if (!deadlineHasPassed)
   { if (deadlineIsNear)
       hoursTillDeadlineStream << "<span style=\"color:red\">"
-      << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false) << "</span>";
+      << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
+      (secondsTillDeadline, false, true) << "</span>";
     else
-      hoursTillDeadlineStream << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false)
+      hoursTillDeadlineStream << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
+      (secondsTillDeadline, false, true)
       << " left. ";
   } else
     hoursTillDeadlineStream << "[passed]. ";
@@ -1511,7 +1513,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
       out << "<span style=\"color:green\">" << currentDeadline << "</span>. ";
     else if (deadlineIsNear)
       out << "<span style=\"color:red\">" << currentDeadline << "</span>. ";
-    else if (deadlineInherited)
+    else if (deadlineIsInherited)
       out << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
     else
       out << "<span style=\"color:brown\">" << currentDeadline << "</span>. ";
@@ -1551,13 +1553,17 @@ std::string CalculatorHTML::ToStringDeadline
 #ifdef MACRO_use_MySQL
   if (theGlobalVariables.UserGuestMode())
   { return "deadlines require login";
-  } else if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserStudentVieWOn())
-  { std::string sectionNum=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
+  } else if (theGlobalVariables.UserDefaultHasAdminRights() &&
+             theGlobalVariables.UserStudentVieWOn())
+  { std::string sectionNum=CGI::URLStringToNormal
+    (theGlobalVariables.GetWebInput("studentSection"), false);
     return this->ToStringOnEDeadlineFormatted
-    (inputFileName, sectionNum, problemAlreadySolved, returnEmptyStringIfNoDeadline);
+    (inputFileName, sectionNum, problemAlreadySolved,
+     returnEmptyStringIfNoDeadline);
   } else
     return this->ToStringOnEDeadlineFormatted
-    (inputFileName, this->currentUseR.userGroup.value, problemAlreadySolved, returnEmptyStringIfNoDeadline);
+    (inputFileName, this->currentUseR.userGroup.value, problemAlreadySolved,
+     returnEmptyStringIfNoDeadline);
 #endif // MACRO_use_MySQL
   return "";
 }
@@ -1571,10 +1577,15 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   (void) problemAlreadySolved;
   std::stringstream out;
   std::stringstream deadlineStream;
-  deadlineStream << "<table class=\"deadlineTable\"><tr>";
-  deadlineStream << "<td><table><tr><th>Grp.</th><th>Deadline</th></tr>";
+  deadlineStream << "<table class=\"deadlineTable\">";
+  deadlineStream << "<tr><th>Grp.</th><th>Deadline</th></tr>";
   inputOutput.idsDeadlines.SetSize(this->databaseStudentSections.size);
-  inputOutput.deadlinesPerSection.initFillInObject(this->databaseStudentSections.size, "");
+  inputOutput.deadlinesPerSectionFormatted.initFillInObject
+  (this->databaseStudentSections.size, "");
+  inputOutput.deadlinesPerSectioN.initFillInObject
+  (this->databaseStudentSections.size, "");
+  inputOutput.deadlinesAreInherited.initFillInObject
+  (this->databaseStudentSections.size, false);
   for (int i=0; i<this->databaseStudentSections.size; i++)
   { std::string& currentDeadlineId=inputOutput.idsDeadlines[i];
     if (this->databaseStudentSections[i]=="")
@@ -1585,33 +1596,42 @@ void CalculatorHTML::ComputeDeadlineModifyButton
       currentDeadlineId.resize(currentDeadlineId.size()-1);
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);
-    inputOutput.flagDeadlineIsInherited=false;
+    inputOutput.deadlinesAreInherited[i]=false;
 //    std::string sectionNumber;
 //    std::string currentDeadline =
 //    this->GetDeadline(inputFileName, sectionNumber, deadlineInherited);
     deadlineStream << "<tr>";
     deadlineStream << "<td>" << this->databaseStudentSections[i] << "</td>";
-    inputOutput.deadlinesPerSection[i]=
-    this->GetDeadline
+    inputOutput.deadlinesPerSectioN[i] = this->GetDeadline
     (inputOutput.id, this->databaseStudentSections[i],
-     inputOutput.flagDeadlineIsInherited)
+     inputOutput.deadlinesAreInherited[i])
+     ;
+    if (inputOutput.deadlinesAreInherited[i])
+      inputOutput.deadlinesPerSectioN[i]="";
+    inputOutput.deadlinesPerSectionFormatted[i]=
+    this->ToStringOnEDeadlineFormatted
+    (inputOutput.id, this->databaseStudentSections[i],
+     problemAlreadySolved, false)
     ;
-    deadlineStream << "<td> <input class=\"modifyDeadlineInput\" type=\"text\" id=\""
-    << currentDeadlineId << "\" value=\""
-    << inputOutput.deadlinesPerSection[i]
-    << "\"> " ;
+    deadlineStream
+    << "<td> <input class=\"modifyDeadlineInput\" type=\"text\" id=\""
+    << currentDeadlineId << "\" value=\"";
+    if (!inputOutput.deadlinesAreInherited[i])
+      deadlineStream << inputOutput.deadlinesPerSectioN[i];
+    deadlineStream << "\"> " ;
     deadlineStream << "</td>";
     deadlineStream << "</tr>";
   }
-  deadlineStream << "</table></td>";
-  deadlineStream << "<td>\n";
-  inputOutput.idDeadlineReport="deadlineReport"+Crypto::CharsToBase64String(inputOutput.id);
+  deadlineStream << "<tr><td>\n";
+  inputOutput.idDeadlineReport="deadlineReport" +
+  Crypto::CharsToBase64String(inputOutput.id);
   if (inputOutput.idDeadlineReport[inputOutput.idDeadlineReport.size()-1]=='=')
     inputOutput.idDeadlineReport.resize(inputOutput.idDeadlineReport.size()-1);
   if (inputOutput.idDeadlineReport[inputOutput.idDeadlineReport.size()-1]=='=')
     inputOutput.idDeadlineReport.resize(inputOutput.idDeadlineReport.size()-1);
   deadlineStream << "<button onclick=\"";
-  deadlineStream << "submitStringAsMainInput('" << CGI::StringToURLString(inputOutput.id, false)
+  deadlineStream << "submitStringAsMainInput('"
+  << CGI::StringToURLString(inputOutput.id, false)
   << "='+encodeURIComponent('deadlines='+encodeURIComponent(";
   bool isFirst=true;
   for (int i=0; i<this->databaseStudentSections.size; i++)
@@ -1620,7 +1640,9 @@ void CalculatorHTML::ComputeDeadlineModifyButton
     if (!isFirst)
       deadlineStream << "+";
     isFirst=false;
-    deadlineStream << "'" << CGI::StringToURLString(this->databaseStudentSections[i], false) << "='";
+    deadlineStream << "'"
+    << CGI::StringToURLString(this->databaseStudentSections[i], false)
+    << "='";
     deadlineStream << "+ encodeURIComponent(document.getElementById('"
     << inputOutput.idsDeadlines[i] << "').value)+'&'";
   }
@@ -1631,14 +1653,15 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   << "\""
   << ">\n";
   deadlineStream << "Set</button>";
+  deadlineStream << "</td>";
+  deadlineStream << "<td>";
   deadlineStream << "<span id=\"" << inputOutput.idDeadlineReport << "\"></span>";
   deadlineStream << "</td>";
   deadlineStream << "</tr>";
   if (!isProblemGroup)
-    deadlineStream << "<tr><td>(overrides section deadline).</td></tr> ";
+    deadlineStream << "<tr><td colspan=\"2\">(overrides section deadline).</td></tr> ";
   else
-    deadlineStream << "<tr><td>(overriden by per-problem-deadline).</td></tr> ";
-
+    deadlineStream << "<tr><td colspan=\"2\">(overriden by per-problem-deadline).</td></tr>";
   deadlineStream << "</table>";
 //  out << deadlineStream.str();
   out << "<button class=\"accordion\">"
@@ -1647,7 +1670,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   out << "</span>";
 
 //  out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "deadline+ ");
-  inputOutput.displayDeadlineWithSource=out.str();
+  inputOutput.displayDeadlinE=out.str();
 }
 
 std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpreter, List<SyntacticElementHTML> &theElements)
@@ -3269,7 +3292,8 @@ std::string TopicElement::ToStringStudentScoreButton(bool doIncludeButton)
 }
 
 std::string CalculatorHTML::GetSectionSelector()
-{ if (!theGlobalVariables.UserDefaultHasProblemComposingRights())
+{ if (!theGlobalVariables.UserDefaultHasProblemComposingRights() ||
+      theGlobalVariables.UserStudentVieWOn())
     return "";
   std::stringstream out;
   for (int i=0; i<this->databaseStudentSections.size; i++)
@@ -3455,7 +3479,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       else
         out << currentElt.displayScore;
       out << "  </td>\n";
-      out << "  <td>\n" << currentElt.displayDeadlineWithSource << "  </td>\n";
+      out << "  <td>\n" << currentElt.displayDeadlinE << "  </td>\n";
       out << "</tr>\n";
     }
   }
@@ -3493,18 +3517,33 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     else
       topicListJS << "problem";
     topicListJS << "', ";
+    //////////////////////////////////////////////////
     topicListJS << "deadlines: {";
     bool found=false;
-    for (int j=0; j<currentE.deadlinesPerSection.size; j++)
-    { if (currentE.deadlinesPerSection[j]=="")
+    for (int j=0; j<currentE.deadlinesPerSectioN.size; j++)
+    { if (currentE.deadlinesPerSectioN[j]=="")
         continue;
       if (found)
         topicListJS << ", ";
       found=true;
       topicListJS << "'" << this->databaseStudentSections[j] << "': "
-      << "'" << currentE.deadlinesPerSection[j] << "'";
+      << "'" << currentE.deadlinesPerSectioN[j] << "'";
+    }
+    topicListJS << "}, ";
+    //////////////////////////////////////////////////
+    topicListJS << "deadlinesFormatted: {";
+    found=false;
+    for (int j=0; j<currentE.deadlinesPerSectionFormatted.size; j++)
+    { if (currentE.deadlinesPerSectionFormatted[j]=="")
+        continue;
+      if (found)
+        topicListJS << ", ";
+      found=true;
+      topicListJS << "'" << this->databaseStudentSections[j] << "': "
+      << "'" << currentE.deadlinesPerSectionFormatted[j] << "'";
     }
     topicListJS << "}";
+    //////////////////////////////////////////////////
     topicListJS << "}";
     if (i!=this->theTopicS.size()-1)
       topicListJS << ", ";
@@ -3558,7 +3597,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     this->displayScore=owner.ToStringProblemScoreShort(this->problem, problemSolved);
     this->displayModifyWeight=owner.ToStringProblemWeighT(this->problem);
   }
-  this->displayDeadlinE=owner.ToStringDeadline(this->id, problemSolved, returnEmptyStringIfNoDeadline);
+  this->displayDeadlinE=owner.ToStringDeadline
+  (this->id, problemSolved, returnEmptyStringIfNoDeadline);
   if (theGlobalVariables.UserDefaultHasAdminRights() &&
       !theGlobalVariables.UserStudentVieWOn())
   { if (this->displayDeadlinE=="")
@@ -3572,7 +3612,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     titleAndDeadlineStream
     << "<span class=\"deadlineAndTitleContainer\">"
     << "<span class=\"titleContainer\">" << this->displayTitle << "</span>"
-    << "<span class=\"deadlineContainer\">" << this->displayDeadlineWithSource << "</span>"
+    << "<span class=\"deadlineContainer\">" << this->displayDeadlinE << "</span>"
     << "</span>"
     ;
     this->displayTitleWithDeadline=titleAndDeadlineStream.str();

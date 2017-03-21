@@ -18,7 +18,6 @@ public:
   bool flagIsError;
   bool flagContainsProblemsNotInSubsection;
   bool flagSubproblemHasNoWeight;
-  bool flagDeadlineIsInherited;
   List<int> parentTopics;
   List<int> immediateChildren;
   int totalSubSectionsUnderME;
@@ -26,7 +25,9 @@ public:
   std::string id; //<- for problems the id is the problem file name. For all other topic
   // elements the id is the title of the element.
   List<std::string> idsDeadlines;
-  List<std::string> deadlinesPerSection;
+  List<std::string> deadlinesPerSectioN;
+  List<std::string> deadlinesPerSectionFormatted;
+  List<bool> deadlinesAreInherited;
   std::string idBase64;
   std::string idDeadlineReport;
   std::string title;
@@ -43,7 +44,6 @@ public:
   std::string displayProblemLink;
   std::string displayAceProblemLink;
   std::string displayDeadlinE;
-  std::string displayDeadlineWithSource;
   std::string displayScore;
   std::string displayModifyWeight;
   std::string displayModifyDeadline;
@@ -75,7 +75,6 @@ public:
     this->pointsEarnedInProblemsThatAreImmediateChildren=0;
     this->totalPointsEarned=0;
     this->maxPointsInAllChildren=0;
-    this->flagDeadlineIsInherited=false;
   }
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt)
   { output << theElt.ToString();

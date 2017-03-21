@@ -64,22 +64,27 @@ void TimeWrapper::AssignLocalTime()
   this->ComputeTimeStringNonReadable();
 }
 
-std::string TimeWrapper::ToStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds)
+std::string TimeWrapper::ToStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds, bool beShort)
 { std::stringstream out;
+  out.precision(2);
   bool isPositive=(input>0);
   if (!isPositive)
     input*=-1;
   int days= (int ) FloatingPoint::floor( input/(24*3600));
+  if (beShort && days>0)
+  { double daysfloat=input/(24*3600);
+    out << daysfloat << " day(s)";
+    return out.str();
+  }
   input-=days*24*3600;
   if (!isPositive)
     out << "-(";
   out << "~";
   if (days>0)
     out << days << " day(s) ";
-  out.precision(1);
   if (input>0)
     out << std::fixed << input/3600 << " hour(s)";
-  if (includeSeconds)
+  if (includeSeconds && !beShort)
     out << std::fixed << (((int)input) /60) << " minute(s) " << (((int)input) %60) << " second(s).";
   if (!isPositive)
     out << ")";

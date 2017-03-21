@@ -3586,7 +3586,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
   << "<br>" << this->GetActiveWorker().timeOfLastPingServerSideOnly
   << " seconds = "
   << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
-  (this->GetActiveWorker().timeOfLastPingServerSideOnly, false)
+  (this->GetActiveWorker().timeOfLastPingServerSideOnly, false, false)
   << " web server uptime. ";
   int approxNumPings=
   this->GetActiveWorker().timeOfLastPingServerSideOnly/this->WebServerPingIntervalInSeconds;

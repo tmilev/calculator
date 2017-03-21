@@ -21,7 +21,8 @@ public:
   double SubtractAnotherTimeFromMeInSeconds(TimeWrapper& other);
   double SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other);
   bool AssignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure);
-  static std::string ToStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds);
+  static std::string ToStringSecondsToDaysHoursSecondsString
+  (double input, bool includeSeconds, bool beShort);
   TimeWrapper();
 };
 

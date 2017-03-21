@@ -149,6 +149,16 @@ span.deadlineContainer{
   clear: left;
 }
 
+table.deadlineTable tr td{
+margin: 0;
+padding: 0;
+}
+
+table.deadlineTable tr th{
+margin: 0;
+padding: 0;
+}
+
 textarea.calculatorAnswer {
   padding: 0 0px;
   background-color: white;

@@ -850,11 +850,13 @@ std::string HtmlInterpretation::SubmitProblem
         secondsTillDeadline*=-1;
       if (deadLinePassed)
         out << "<tr><td><span style=\"color:red\"><b>Submission "
-        << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false)
+        << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
+        (secondsTillDeadline, false, false)
         << " after deadline. </b></span></td></tr>";
       else
         out << "<tr><td><span style=\"color:green\"><b>Submission "
-        << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false)
+        << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
+        (secondsTillDeadline, false, false)
         << " before deadline. </b></span></td></tr>";
     } else
       out << "<tr><td><span style=\"color:green\"><b>No deadline yet.</b></span></td></tr>";

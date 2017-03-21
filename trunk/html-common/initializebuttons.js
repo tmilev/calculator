@@ -152,14 +152,14 @@ function toggleStudentScores
     }
   } else
   { StudentScoresAreBeingDisplayed=false;
-    var theScores=document.getElementsByClassName('studentScoresContent');
+    theScores=document.getElementsByClassName('studentScoresContent');
     for (var i=0; i<theScores.length; i++)
     { //theScores[i].style.transition='opacity 1s linear';
       theScores[i].style.opacity='0';
     }
-    var theButtons=document.getElementsByClassName('studentScoresButton');
+    theButtons=document.getElementsByClassName('studentScoresButton');
     for (var i=0; i<theButtons.length; i++)
-    { theButtons[i].innerHTML='Update scores.';
+    { theButtons[i].innerHTML='Scores';
     }
   }
 }

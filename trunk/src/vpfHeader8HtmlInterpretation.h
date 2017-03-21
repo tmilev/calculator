@@ -18,12 +18,17 @@ public:
   bool flagIsError;
   bool flagContainsProblemsNotInSubsection;
   bool flagSubproblemHasNoWeight;
+  bool flagDeadlineIsInherited;
   List<int> parentTopics;
   List<int> immediateChildren;
   int totalSubSectionsUnderME;
   int totalSubSectionsUnderMeIncludingEmptySubsections;
   std::string id; //<- for problems the id is the problem file name. For all other topic
   // elements the id is the title of the element.
+  List<std::string> idsDeadlines;
+  List<std::string> deadlinesPerSection;
+  std::string idBase64;
+  std::string idDeadlineReport;
   std::string title;
   std::string video;
   std::string slides;
@@ -37,7 +42,8 @@ public:
   std::string displaySlidesPrintableLink;
   std::string displayProblemLink;
   std::string displayAceProblemLink;
-  std::string displayDeadline;
+  std::string displayDeadlinE;
+  std::string displayDeadlineWithSource;
   std::string displayScore;
   std::string displayModifyWeight;
   std::string displayModifyDeadline;
@@ -69,6 +75,7 @@ public:
     this->pointsEarnedInProblemsThatAreImmediateChildren=0;
     this->totalPointsEarned=0;
     this->maxPointsInAllChildren=0;
+    this->flagDeadlineIsInherited=false;
   }
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt)
   { output << theElt.ToString();
@@ -135,6 +142,7 @@ public:
   std::string outputHtmlNavigatioN;
   std::stringstream logCommandsProblemGeneration;
   std::string courseHome;
+  std::string topicListJavascriptWithTag;
 
   static const std::string BugsGenericMessage;
   HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
@@ -161,6 +169,7 @@ public:
   bool LoadMe(bool doLoadDatabase, std::stringstream& comments, const std::string& inputRandomSeed);
   bool LoadAndParseTopicList(std::stringstream& comments);
   bool LoadDatabaseInfo(std::stringstream& comments);
+  std::string GetSectionSelector();
   std::string CleanUpFileName(const std::string& inputLink);
   bool ParseHTML(std::stringstream& comments);
   bool ParseHTMLPrepareCommands(std::stringstream& comments);
@@ -220,9 +229,8 @@ public:
   std::string ToStringDeadline
 (const std::string& inputFileName, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
   ;
-  std::string ToStringDeadlineModifyButton
-  (const std::string& inputFileName, std::string& buttonHtmlContent,
-   bool problemAlreadySolved, bool isProblemGroup);
+  void ComputeDeadlineModifyButton
+  (TopicElement& inputOutput, bool problemAlreadySolved, bool isProblemGroup);
   std::string ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay="");
   std::string ToStringLinkFromFileName(const std::string& theFileName);
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);

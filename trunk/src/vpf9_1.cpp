@@ -263,7 +263,7 @@ bool GlobalVariables::UserDebugFlagOn()
 { return theGlobalVariables.GetWebInput("debugFlag")=="true";
 }
 
-bool GlobalVariables::UserStudentViewOn()
+bool GlobalVariables::UserStudentVieWOn()
 { return theGlobalVariables.GetWebInput("studentView")=="true";
 }
 

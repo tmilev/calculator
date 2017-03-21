@@ -732,7 +732,7 @@ bool UserCalculator::FetchOneUserRow
   //<-Important! Database lookup may be
   //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
   //The preceding line of code guarantees we have read the username as it is stored in the DB.
-  if (theGlobalVariables.UserStudentViewOn() && this->userRole=="admin" &&
+  if (theGlobalVariables.UserStudentVieWOn() && this->userRole=="admin" &&
       theGlobalVariables.GetWebInput("studentSection")!="")
   //<- warning, the user may not be
   //fully logged-in yet so theGlobalVariables.UserDefaultHasAdminRights()

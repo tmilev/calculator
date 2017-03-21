@@ -204,7 +204,7 @@ public:
   bool UserSecureNonAdminOperationsAllowed();
   bool UserGuestMode();
   bool UserDebugFlagOn();
-  bool UserStudentViewOn();
+  bool UserStudentVieWOn();
 //  void operator=(const GlobalVariables& other)
 //  { this->IndicatorStringOutputFunction=other.IndicatorStringOutputFunction;
 //    this->theDrawingVariables=other.theDrawingVariables;

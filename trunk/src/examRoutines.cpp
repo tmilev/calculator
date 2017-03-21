@@ -442,7 +442,6 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
   if (this->flagUseNavigationBar)
   { out << "<problemNavigation>"
     << this->outputHtmlNavigatioN
-    << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
     << " second(s).</small>" << "</problemNavigation>\n";
@@ -661,7 +660,7 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   std::string urledProblem=CGI::StringToURLString(theFileName, false);
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
   << "fileName=" << urledProblem << "&";
-  if (theGlobalVariables.UserStudentViewOn())
+  if (theGlobalVariables.UserStudentVieWOn())
   { refStreamNoRequest << "studentView=true&";
     if (theGlobalVariables.GetWebInput("studentSection")!="")
       refStreamNoRequest << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
@@ -1245,7 +1244,7 @@ bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure)
 
 void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretManageClass");
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentVieWOn())
     return;
 #ifdef MACRO_use_MySQL
   std::stringstream out;
@@ -1552,7 +1551,7 @@ std::string CalculatorHTML::ToStringDeadline
 #ifdef MACRO_use_MySQL
   if (theGlobalVariables.UserGuestMode())
   { return "deadlines require login";
-  } else if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserStudentViewOn())
+  } else if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserStudentVieWOn())
   { std::string sectionNum=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
     return this->ToStringOnEDeadlineFormatted
     (inputFileName, sectionNum, problemAlreadySolved, returnEmptyStringIfNoDeadline);
@@ -2517,12 +2516,12 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsExamProblem)
     outHeadPt2 << this->GetJavascriptSubmitAnswers();
   if (this->flagIsExamHome && theGlobalVariables.UserDefaultHasAdminRights() &&
-      !theGlobalVariables.UserStudentViewOn())
+      !theGlobalVariables.UserStudentVieWOn())
   { outHeadPt2 << HtmlSnippets::GetJavascriptHideHtml();
     outHeadPt2 << HtmlSnippets::GetDatePickerJavascriptInit();
   }
   if (this->flagUseNavigationBar)
-    if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
+    if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn())
     { outBody << this->GetEditPageButton(this->fileName);
       if (this->flagIsExamHome)
         outBody << this->GetEditPageButton(this->topicListFileName);
@@ -2655,7 +2654,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemNavigation");
   std::stringstream out;
   std::string exerciseRequest="exercise";
-  std::string studentView= theGlobalVariables.UserStudentViewOn() ? "true" : "false";
+  std::string studentView= theGlobalVariables.UserStudentVieWOn() ? "true" : "false";
   std::string linkSeparator=" | ";
   std::string linkBigSeparator=" || ";
   if (theGlobalVariables.UserGuestMode())
@@ -2669,54 +2668,22 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   randomSeedContainer.AddOnTop("randomSeed");
   std::string calcArgsNoPassExamDetails=
   theGlobalVariables.ToStringCalcArgsNoNavigation(true, &randomSeedContainer);
-  if (theGlobalVariables.UserDefaultHasAdminRights())
-  { if (theGlobalVariables.UserStudentViewOn())
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
-      << this->ToStringCalculatorArgumentsForProblem
-      (theGlobalVariables.userCalculatorRequestType, "false", theGlobalVariables.GetWebInput("studentSection"))
-      << "\">Admin view</a>" << linkSeparator;
-    else
-      out << "<b>Admin view</b>" << linkSeparator;
-    if (this->databaseStudentSections.size==0)
-    { if (theGlobalVariables.UserStudentViewOn())
-        out << "<b>Student View</b>";
-      else
-        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
-        << this->ToStringCalculatorArgumentsForProblem
-        (theGlobalVariables.userCalculatorRequestType, "true", "")
-        << "\">Student view</a>";
-    } else
-      out << "Student view: ";
-    for (int i=0; i<this->databaseStudentSections.size; i++)
-      if (this->databaseStudentSections[i]!="")
-      { if (theGlobalVariables.UserStudentViewOn() &&
-            this->databaseStudentSections[i] == theGlobalVariables.GetWebInput("studentSection"))
-          out << "<b>section " << this->databaseStudentSections[i] << "</b>";
-        else
-          out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
-          << this->ToStringCalculatorArgumentsForProblem
-          (theGlobalVariables.userCalculatorRequestType, "true", this->databaseStudentSections[i])
-          << "\">section " << this->databaseStudentSections[i] << " </a>";
-        if (i!=this->databaseStudentSections.size-1)
-          out << linkSeparator;
-      }
-    out << linkBigSeparator;
-  }
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType=="exercise")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&"
       << this->ToStringCalculatorArgumentsForProblem("scoredQuiz", studentView)
       << "\">" << this->stringScoredQuizzes << "</a>" << linkSeparator;
     else if (theGlobalVariables.userCalculatorRequestType=="scoredQuiz")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=exercise&"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+      << "?request=exercise&"
       << this->ToStringCalculatorArgumentsForProblem("exercise", studentView)
       << "\">" << this->stringPracticE << "</a>" << linkSeparator;
   }
   if (this->flagIsExamProblem && this->flagParentInvestigated)
   { int indexInParent=this->problemNamesNoTopics.GetIndex(this->fileName);
     if (indexInParent==-1)
-    { out << "<b>Problem not in course</b>" << linkSeparator;
-    } else
+      out << "<b>Problem not in course</b>" << linkSeparator;
+    else
     { if (indexInParent>0)
       { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
         << theGlobalVariables.userCalculatorRequestType;
@@ -2752,7 +2719,40 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
     << "\">" << this->stringProblemLink << "</a>" << linkBigSeparator;
-//  out << linkBigSeparator << theGlobalVariables.ToStringNavigation();
+  out << theGlobalVariables.ToStringNavigation();
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+  { if (theGlobalVariables.UserStudentVieWOn())
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
+      << this->ToStringCalculatorArgumentsForProblem
+      (theGlobalVariables.userCalculatorRequestType, "false", theGlobalVariables.GetWebInput("studentSection"))
+      << "\">Admin view</a>" << linkSeparator;
+    else
+      out << "<b>Admin view</b>" << linkSeparator;
+    if (this->databaseStudentSections.size==0)
+    { if (theGlobalVariables.UserStudentVieWOn())
+        out << "<b>Student View</b>";
+      else
+        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
+        << this->ToStringCalculatorArgumentsForProblem
+        (theGlobalVariables.userCalculatorRequestType, "true", "")
+        << "\">Student view</a>";
+    } else
+      out << "Student view: ";
+    for (int i=0; i<this->databaseStudentSections.size; i++)
+      if (this->databaseStudentSections[i]!="")
+      { if (theGlobalVariables.UserStudentVieWOn() &&
+            this->databaseStudentSections[i] == theGlobalVariables.GetWebInput("studentSection"))
+          out << "<b>section " << this->databaseStudentSections[i] << "</b>";
+        else
+          out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
+          << this->ToStringCalculatorArgumentsForProblem
+          (theGlobalVariables.userCalculatorRequestType, "true", this->databaseStudentSections[i])
+          << "\">section " << this->databaseStudentSections[i] << " </a>";
+        if (i!=this->databaseStudentSections.size-1)
+          out << linkSeparator;
+      }
+    out << linkBigSeparator;
+  }
   return out.str();
 }
 
@@ -2931,7 +2931,9 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   #ifdef MACRO_use_MySQL
   std::stringstream problemWeight;
   ProblemData theProbData;
-  bool showModifyButton=theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn();
+  bool showModifyButton=
+  theGlobalVariables.UserDefaultHasAdminRights() &&
+  !theGlobalVariables.UserStudentVieWOn();
   outputAlreadySolved=false;
   Rational currentWeight;
   std::string currentWeightAsGivenByInstructor;
@@ -2972,7 +2974,8 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
 
 std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemWeighT");
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentViewOn())
+  if (!theGlobalVariables.UserDefaultHasAdminRights() ||
+      theGlobalVariables.UserStudentVieWOn())
     return "";
   std::string urledProblem=CGI::StringToURLString(theFileName, false);
   std::stringstream out;
@@ -3267,7 +3270,7 @@ std::string TopicElement::ToStringStudentScoreButton(bool doIncludeButton)
 
 std::string CalculatorHTML::GetSectionSelector()
 { if (!theGlobalVariables.UserDefaultHasProblemComposingRights())
-    return false;
+    return "";
   std::stringstream out;
   for (int i=0; i<this->databaseStudentSections.size; i++)
   { out << "<input type=\"radio\" name=\"sectionSelector\" "
@@ -3302,7 +3305,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   #ifdef MACRO_use_MySQL
   this->flagIncludeStudentScores=
   theGlobalVariables.UserDefaultHasAdminRights() &&
-  theGlobalVariables.UserStudentViewOn();
+  !theGlobalVariables.UserStudentVieWOn();
   this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys, &this->theTopicS);
   out << this->GetSectionSelector();
   if (this->currentUseR.pointsMax!=0)
@@ -3556,7 +3559,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     this->displayModifyWeight=owner.ToStringProblemWeighT(this->problem);
   }
   this->displayDeadlinE=owner.ToStringDeadline(this->id, problemSolved, returnEmptyStringIfNoDeadline);
-  if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentViewOn())
+  if (theGlobalVariables.UserDefaultHasAdminRights() &&
+      !theGlobalVariables.UserStudentVieWOn())
   { if (this->displayDeadlinE=="")
       this->displayDeadlinE+="Deadline";
     owner.ComputeDeadlineModifyButton

@@ -430,7 +430,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   std::stringstream comments;
   bool includeDeadlineJavascript=
   theGlobalVariables.UserDefaultHasAdminRights() &&
-  !theGlobalVariables.UserStudentViewOn();
+  !theGlobalVariables.UserStudentVieWOn();
   bool includeInitializeButtonsJS=
   theGlobalVariables.UserDefaultHasAdminRights();
   thePage.fileName=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
@@ -480,7 +480,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
     thePage.flagUseNavigationBar=true;
   if (thePage.flagUseNavigationBar)
     out << "<problemNavigation>" << thePage.outputHtmlNavigatioN
-    << theGlobalVariables.ToStringNavigation() << "<small>Generated in " << theGlobalVariables.GetElapsedSeconds()
+    << "<small>Generated in " << theGlobalVariables.GetElapsedSeconds()
     << " second(s).</small>" << "</problemNavigation>\n";
   out << thePage.outputHtmlBodyNoTag;
   out << "</body><!-- tag added automatically; user-specified body tag ignored-->\n";
@@ -1568,7 +1568,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   { if (ignoreSectionsIdontTeach)
     { if (this->userTablE[i][indexCourseName]!=theGlobalVariables.userDefault.currentCourses.value)
         continue;
-      if (theGlobalVariables.UserStudentViewOn())
+      if (theGlobalVariables.UserStudentVieWOn())
       { if (this->userTablE[i][userGroupIndex]!=theGlobalVariables.userDefault.userGroup.value)
           continue;
       }
@@ -1811,22 +1811,6 @@ std::string HtmlInterpretation::ToStringNavigation()
   //out << "<table>";
   std::string linkSeparator=" | ";
   std::string linkBigSeparator=" || ";
-  if (!theGlobalVariables.flagRunningApache)
-  { if (theGlobalVariables.flagAllowProcessMonitoring)
-    { if (!theGlobalVariables.UserDefaultHasAdminRights())
-        out << "<span style=\"color:red\" ><b>Monitoring on</b></span>" << linkSeparator;
-      else
-        out << "<a style=\"color:red\" href=\""
-        << theGlobalVariables.DisplayNameExecutable
-        << "?request=toggleMonitoring\""
-        << "><b>Monitoring on</b></a>" << linkSeparator;
-    } else
-      if (theGlobalVariables.UserDefaultHasAdminRights())
-        out << "<a style=\"color:green\" href=\""
-        << theGlobalVariables.DisplayNameExecutable
-        << "?request=toggleMonitoring\""
-        << "><b>Monitoring off</b></a>" << linkSeparator;
-  }
   if (theGlobalVariables.userCalculatorRequestType=="template")
     out << "<b>Home</b>" << linkSeparator;
   else
@@ -1867,9 +1851,7 @@ std::string HtmlInterpretation::ToStringNavigation()
     //  << linkSeparator;
   }
 
-  if (theGlobalVariables.UserDefaultHasAdminRights()
-      //&& !theGlobalVariables.UserStudentViewOn()
-  )
+  if (theGlobalVariables.UserDefaultHasAdminRights())
   { if (theGlobalVariables.userCalculatorRequestType!="accounts")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=accounts&"
@@ -1902,5 +1884,22 @@ std::string HtmlInterpretation::ToStringNavigation()
     << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << " \">Calculator</a>" << linkBigSeparator;
   else
     out << "<b>Calculator</b> " << linkBigSeparator;
+  if (!theGlobalVariables.flagRunningApache)
+  { if (theGlobalVariables.flagAllowProcessMonitoring)
+    { if (!theGlobalVariables.UserDefaultHasAdminRights())
+        out << "<span style=\"color:red\" ><b>Monitoring on</b></span>" << linkSeparator;
+      else
+        out << "<a style=\"color:red\" href=\""
+        << theGlobalVariables.DisplayNameExecutable
+        << "?request=toggleMonitoring\""
+        << "><b>Monitoring on</b></a>" << linkSeparator;
+    } else
+      if (theGlobalVariables.UserDefaultHasAdminRights())
+        out << "<a style=\"color:green\" href=\""
+        << theGlobalVariables.DisplayNameExecutable
+        << "?request=toggleMonitoring\""
+        << "><b>Monitoring off</b></a>" << linkSeparator;
+  }
+
   return out.str();
 }

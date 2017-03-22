@@ -1513,6 +1513,7 @@ struct UserScores
 {
 public:
   CalculatorHTML theProblem;
+  std::string currentSection;
   List<MapLisT<std::string, Rational, MathRoutines::hashString> > scoresBreakdown;
   List<List<std::string> > userTablE;
   List<Rational> userScores;
@@ -1566,12 +1567,21 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   this->numStudentsSolvedNothingInTopic.initFillInObject
   (this->theProblem.theTopicS.size(),0);
   bool ignoreSectionsIdontTeach=true;
+  this->currentSection = theGlobalVariables.userDefault.currentCourses.value;
+  if (theGlobalVariables.GetWebInput("request")== "scoresInCoursePage")
+    this->currentSection =
+    MathRoutines::StringTrimWhiteSpace(
+    CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false)
+    );
   for (int i=0; i<this->userTablE.size; i++)
   { if (ignoreSectionsIdontTeach)
     { if (this->userTablE[i][indexCourseName]!=theGlobalVariables.userDefault.currentCourses.value)
         continue;
       if (theGlobalVariables.UserStudentVieWOn())
       { if (this->userTablE[i][userGroupIndex]!=theGlobalVariables.userDefault.userGroup.value)
+          continue;
+      } else
+      { if (this->userTablE[i][userGroupIndex]!=this->currentSection)
           continue;
       }
     }
@@ -1636,6 +1646,15 @@ std::string HtmlInterpretation::GetScoresInCoursePage()
 //    << theScores.numStudentsSolvedNothingInTopic[i]
 //    << "<br>";
 //  }
+  out << "Section: " << theScores.currentSection << ". ";
+  //out << "DEBUG: solvedl topic 0: "
+  //<< theScores.numStudentsSolvedEntireTopic[0]
+  //<< ", "
+  //<< theScores.numStudentsSolvedPartOfTopic[0]
+  //<< ", "
+  //<< theScores.numStudentsSolvedNothingInTopic[0]
+  //<< ". ";
+
   out << "<script type=\"text/javascript\">\n";
   out << "studentScoresInHomePage= new Array("
   << theScores.theProblem.theTopicS.size() << ");\n";

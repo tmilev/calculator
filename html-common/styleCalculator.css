@@ -65,11 +65,13 @@ textarea{
 }
 
 button.accordionLike {
+  display: inline;
   background-color: #eee;
   color: #444;
   cursor: pointer;
   padding: 0px;
-  /*width: 100;*/
+  margin-top: 0px;
+  margin-bottom: 0px;
   border: none;
   text-align: left;
   outline: none;
@@ -82,11 +84,13 @@ button.accordionLike.active, button.accordionLike:hover {
 }
 
 button.accordion {
+  display: inline;
   background-color: #eee;
   color: #444;
   cursor: pointer;
   padding: 0px;
-  /*width: 100;*/
+  margin-top: 0px;
+  margin-bottom: 0px;
   border: none;
   text-align: left;
   outline: none;
@@ -99,28 +103,35 @@ button.accordion.active, button.accordion:hover {
 }
 
 button.accordion:after {
-/*  content: '\02795';*/
   vertical-align: middle;
   color: #777;
   margin-left: 0px;
 }
 
 button.accordion.active:after {
-/*  content: "\2796";*/
 }
 
 span.panel {
-  display: inline-block;
+  display:none;
   padding: 0 0px;
   background-color: white;
   max-height: 0;
-  max-width: 100;
+  margin-top: 0px;
+  margin-bottom: 0px;
   overflow: hidden;
-  transition: 0.6s ease-in-out;
+  transition: 0.6s linear;
   opacity: 0;
 }
 
+span.panel.show {
+  transition: 0.6s linear;
+  opacity: 1;
+  max-height: 500px;
+}
+
 button.studentScoresButton{
+  margin-top: 0;
+  margin-bottom: 0px;
   font-size: medium;
   font-weight: normal;
   background-color: Transparent;
@@ -143,22 +154,21 @@ span.studentScoresContent{
 span.panelProblemWeights{
   display: block;
   max-height: 0;
+  margin-top: 0px;
+  margin-bottom: 0px;
   overflow: hidden;
   transition: 1s linear;
   opacity: 0;
 }
 
 span.studentScoresWrapper{
-  display: inline-block;
+  /*display: inline-block;*/
   width: 420px;
   font-size: medium;
   font-weight: normal;
   margin-left: 10px;
-}
-
-span.panel.show {
-  opacity: 1;
-  max-height: 500px;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 span.deadlineAndTitleContainer{
@@ -170,12 +180,14 @@ span.titleContainer{
 span.deadlineContainer{
   display: inline-block;
   margin-left: 10px;
-  margin-top: 15px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
   font-weight: normal;
-  width: 280px;
+  width: 300px;
   font-size: medium;
   vertical-align: middle;
-  clear: left;
 }
 
 table.deadlineTable tr td{

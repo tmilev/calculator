@@ -73,7 +73,7 @@ std::string TimeWrapper::ToStringSecondsToDaysHoursSecondsString(double input, b
   int days= (int ) FloatingPoint::floor( input/(24*3600));
   if (beShort && days>0)
   { double daysfloat=input/(24*3600);
-    out << daysfloat << " day(s)";
+    out << "~" << daysfloat << " day(s)";
     return out.str();
   }
   input-=days*24*3600;

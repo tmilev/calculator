@@ -30,18 +30,25 @@ function processMathQuillLatex(theText)
   return theText;
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function initializeButtonsCommon()
 { ///initializing accordions
   var acc = document.getElementsByClassName("accordion");
   for (var i = 0; i < acc.length; i++)
-  { acc[i].onclick = function()
+  { acc[i].onclick = async function()
     { if (this.firstLoad===undefined)
       { this.firstLoad=true;
         var theDeadlines=this.nextElementSibling.getElementsByClassName("modifyDeadlineInput");
         for (var j=0; j<theDeadlines.length; j++)
           $('#'+ theDeadlines[j].id).datepicker();
 //        console.log("first run: "+theDeadlines);
+        this.nextElementSibling.style.display="inline-block";
+        await sleep(400);
       }
+      //this.nextElementSibling.style.transition="0.6s linear";
       this.classList.toggle("active");
       this.nextElementSibling.classList.toggle("show");
     }

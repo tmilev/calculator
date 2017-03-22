@@ -10,28 +10,21 @@ function getProblemDeadlineFromIndex(theIndex, inputSection)
   return result;
 }
 
-var currentStudentSection=null;
-
 function populateTopicList(inputSection)
 { //var theRows= document.getElementsByClassName("calculatorProblem");
   currentStudentSection=inputSection;
   for (var i=0; i<listTopics.length; i++)
-  { var currentElement= document.getElementById(listTopics[i].id);
-    if (currentElement.cells!==undefined)
-    { var currentDeadlineButton=currentElement.cells[3].childNodes[0];
-      if (currentDeadlineButton.className!=="accordion")
-        currentDeadlineButton=currentElement.cells[3].childNodes[1];
-      currentDeadlineButton.innerHTML=getProblemDeadlineFromIndex(i, inputSection);
-    }
+  { var currentButton=document.getElementById(listTopics[i].idButton);
+    currentButton.innerHTML=getProblemDeadlineFromIndex(i, inputSection);
   }
 }
 
 function updateDeadlines(idRowUpdated, idDeadlineTableUpdated)
 { var currentRow=document.getElementById(idRowUpdated);
-  var currentTopicElement=null;
+  var startingElement=null;
   for (var i=0; i<listTopics.length; i++)
-  { currentTopicElement=listTopics[i];
-    if (currentTopicElement.id===idRowUpdated)
+  { startingElement=listTopics[i];
+    if (startingElement.id===idRowUpdated)
       break;
   }
   var currentDeadlineTable=document.getElementById(idDeadlineTableUpdated);
@@ -40,8 +33,21 @@ function updateDeadlines(idRowUpdated, idDeadlineTableUpdated)
     var deadlineCell=currentDeadlineTable.rows[i].cells[1];
     var currentGroup= groupCell.childNodes[0].textContent;
     var currentDeadline=deadlineCell.firstElementChild.value;
-    currentTopicElement.deadlinesFormatted[currentGroup]="Deadline: " +currentDeadline;
-    currentTopicElement.deadlines[currentGroup]=currentDeadline;
+    startingElement.deadlinesFormatted[currentGroup]="Deadline: " +currentDeadline;
+    startingElement.deadlines[currentGroup]=currentDeadline;
+    startingElement.isInherited[currentGroup]=false;
+    var processedTopics=[startingElement];
+    for (var j=0; j< processedTopics.length; j++)
+    { var currentTopicElement=processedTopics[j];
+      for (var k=0; k<currentTopicElement.immediateChildren.length; k++)
+        processedTopics.push(listTopics[currentTopicElement.immediateChildren[k]]);
+      if (currentTopicElement.isInherited[currentGroup])
+      { currentTopicElement.deadlinesFormatted[currentGroup]="Deadline: " +currentDeadline;
+        if (currentGroup===currentStudentSection)
+          document.getElementById(currentTopicElement.idButton).
+            innerHTML="Inherited d.: " +currentDeadline;
+      }
+    }
   }
 }
 

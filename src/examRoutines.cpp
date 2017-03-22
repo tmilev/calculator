@@ -1439,7 +1439,7 @@ std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
 std::string CalculatorHTML::GetDeadline
 (const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited)
 { MacroRegisterFunctionWithName("CalculatorHTML::GetDeadline");
-  outputIsInherited=false;
+  outputIsInherited=true;
   std::string result;
   #ifdef MACRO_use_MySQL
   int topicIndex=this->theTopicS.GetIndex(problemName);
@@ -1452,9 +1452,7 @@ std::string CalculatorHTML::GetDeadline
     { ProblemDataAdministrative& currentProb=
       this->currentUseR.theProblemData.GetValueCreateIfNotPresent(containerName).adminData;
       result=currentProb.deadlinesPerSection.GetValueCreateIfNotPresent(sectionNumber);
-//      stOutput << "DEBUG: deadline for containerName: " << containerName << " : " << result
-//      << "<br>from problem data: " << currentProb.ToString();
-      if (result!="")
+      if (MathRoutines::StringTrimWhiteSpace(result)!="")
       { outputIsInherited=(containerName!=problemName);
         return result;
       }
@@ -1579,7 +1577,9 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   std::stringstream out;
   std::stringstream deadlineStream;
   inputOutput.idDeadlineTable="deadlineTable" +
-  Crypto::CharsToBase64String(inputOutput.id);
+  Crypto::computeSha1outputBase64(inputOutput.id);
+  inputOutput.idDeadlineButton="deadlineButton" +
+  Crypto::computeSha1outputBase64(inputOutput.id);
   deadlineStream << "<table class=\"deadlineTable\" id=\""
   << inputOutput.idDeadlineTable
   << "\">";
@@ -1629,7 +1629,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   }
   deadlineStream << "<tr><td>\n";
   inputOutput.idDeadlineReport="deadlineReport" +
-  Crypto::CharsToBase64String(inputOutput.id);
+  Crypto::computeSha1outputBase64(inputOutput.id);
 
   if (inputOutput.idDeadlineReport[inputOutput.idDeadlineReport.size()-1]=='=')
     inputOutput.idDeadlineReport.resize(inputOutput.idDeadlineReport.size()-1);
@@ -1674,7 +1674,9 @@ void CalculatorHTML::ComputeDeadlineModifyButton
 //  out << deadlineStream.str();
 //  out << "<table>";
 //  out << "<tr><td>";
-  out << "<button class=\"accordion\">"
+  out << "<button class=\"accordion\" id=\""
+  << inputOutput.idDeadlineButton
+  << "\">"
   << inputOutput.displayDeadlinE << "</button>"
 //  << "</td></tr>"
   ;
@@ -3073,7 +3075,7 @@ void TopicElement::ComputeID()
       out << "[SubSection]";
     this->id=out.str();
   }
-  this->idBase64=Crypto::CharsToBase64String(this->id);
+  this->idBase64=Crypto::computeSha1outputBase64(this->id);
   this->studentScoresSpanId="topic"+ Crypto::computeSha1outputBase64(this->id);
 }
 
@@ -3515,6 +3517,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   inputOutput.interpretedCommand=out.str();
   std::stringstream topicListJS;
   topicListJS << "<script type=\"text/javascript\">";
+  topicListJS << "var currentStudentSection="
+  << "'" << this->currentUseR.userGroup.value << "'" << ";\n";
   topicListJS << "var studentSections=[";
   for (int i=0; i<this->databaseStudentSections.size; i++)
   { topicListJS
@@ -3543,6 +3547,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       topicListJS << "problem";
     topicListJS << "', ";
     //////////////////////////////////////////////////
+    topicListJS << "idButton: '" << currentE.idDeadlineButton << "', ";
+    //////////////////////////////////////////////////
     topicListJS << "deadlines: {";
     bool found=false;
     for (int j=0; j<currentE.deadlinesPerSectioN.size; j++)
@@ -3567,7 +3573,27 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       topicListJS << "'" << this->databaseStudentSections[j] << "': "
       << "'" << currentE.deadlinesPerSectionFormatted[j] << "'";
     }
-    topicListJS << "}";
+    topicListJS << "}, ";
+    ////////////////////////////
+    topicListJS << "isInherited: {";
+    for (int j=0; j<currentE.deadlinesAreInherited.size; j++)
+    { topicListJS << "'" << this->databaseStudentSections[j] << "': ";
+      if (currentE.deadlinesAreInherited[j])
+        topicListJS << "true";
+      else
+        topicListJS << "false";
+      if (j!=currentE.deadlinesAreInherited.size-1)
+        topicListJS << ", ";
+    }
+    topicListJS << "}, ";
+    //////////////////////////////////////////////////
+    topicListJS << "immediateChildren: [";
+    for (int j=0; j< currentE.immediateChildren.size; j++)
+    { topicListJS << currentE.immediateChildren[j];
+      if (j!=currentE.immediateChildren.size-1)
+        topicListJS << ", ";
+    }
+    topicListJS << "]";
     //////////////////////////////////////////////////
     topicListJS << "}";
     if (i!=this->theTopicS.size()-1)

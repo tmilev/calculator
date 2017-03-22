@@ -31,6 +31,7 @@ public:
   std::string idBase64;
   std::string idDeadlineReport;
   std::string idDeadlineTable;
+  std::string idDeadlineButton;
 
   std::string title;
   std::string video;

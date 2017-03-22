@@ -55,7 +55,7 @@ var StudentScoresAreBeingDisplayed=false;
 function toggleStudentScores
 (studentScoreLoadRep, scoresInCoursePage, studentScoresLoadReport)
 { if (!StudentScoresAreBeingDisplayed)
-  { submitStringAsMainInput('', studentScoreLoadRep,
+  { submitStringAsMainInput(currentStudentSection, studentScoreLoadRep,
     scoresInCoursePage, updateStudentScores, studentScoresLoadReport);
     StudentScoresAreBeingDisplayed=true;
     var theScores=document.getElementsByClassName('studentScoresContent');

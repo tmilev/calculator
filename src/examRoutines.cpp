@@ -693,7 +693,7 @@ std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, 
   std::stringstream out;
   out << this->ToStringLinkFromFileName(theFileName);
   out << this->ToStringProblemScoreFull(theFileName);
-  out << this->ToStringProblemWeighT(theFileName);
+  out << this->ToStringProblemWeightButton(theFileName);
 #ifdef MACRO_use_MySQL
   bool problemAlreadySolved=false;
   if (this->currentUseR.theProblemData.Contains(theFileName))
@@ -1493,6 +1493,10 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   std::stringstream hoursTillDeadlineStream;
   bool deadlineIsNear=secondsTillDeadline<24*3600 && !problemAlreadySolved;
   bool deadlineHasPassed=(secondsTillDeadline<0);
+  if (deadlineIsInherited && !theGlobalVariables.UserStudentVieWOn())
+      out << "Inherited d.: ";
+    else
+      out << "Deadline: ";
   if (!deadlineHasPassed)
   { if (deadlineIsNear)
       hoursTillDeadlineStream << "<span style=\"color:red\">"
@@ -1503,20 +1507,17 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
       (secondsTillDeadline, false, true)
       << " left. ";
   } else
-    hoursTillDeadlineStream << "[passed]. ";
+    hoursTillDeadlineStream << "[passed].";
   if (deadlineHasPassed && !problemAlreadySolved)
-    out << "<span style=\"red\"><b>[Deadline passed]. </b></span>"
-    << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
-  else
-  { out << "Deadline: ";
-    if (problemAlreadySolved)
-      out << "<span style=\"color:green\">" << currentDeadline << "</span>. ";
+  { out << "<span style=\"color:blue\">" << currentDeadline << "</span> ";
+    out << "<span style=\"red\"><b>[passed].</b></span>";
+  } else
+  { if (problemAlreadySolved)
+      out << "<span style=\"color:green\">" << currentDeadline << "</span> ";
     else if (deadlineIsNear)
-      out << "<span style=\"color:red\">" << currentDeadline << "</span>. ";
-    else if (deadlineIsInherited)
-      out << "<span style=\"color:blue\">" << currentDeadline << "</span>. ";
+      out << "<span style=\"color:red\">" << currentDeadline << "</span> ";
     else
-      out << "<span style=\"color:brown\">" << currentDeadline << "</span>. ";
+      out << "<span style=\"color:brown\">" << currentDeadline << "</span> ";
     out << hoursTillDeadlineStream.str();
   }
   return
@@ -1577,7 +1578,11 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   (void) problemAlreadySolved;
   std::stringstream out;
   std::stringstream deadlineStream;
-  deadlineStream << "<table class=\"deadlineTable\">";
+  inputOutput.idDeadlineTable="deadlineTable" +
+  Crypto::CharsToBase64String(inputOutput.id);
+  deadlineStream << "<table class=\"deadlineTable\" id=\""
+  << inputOutput.idDeadlineTable
+  << "\">";
   deadlineStream << "<tr><th>Grp.</th><th>Deadline</th></tr>";
   inputOutput.idsDeadlines.SetSize(this->databaseStudentSections.size);
   inputOutput.deadlinesPerSectionFormatted.initFillInObject
@@ -1625,6 +1630,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   deadlineStream << "<tr><td>\n";
   inputOutput.idDeadlineReport="deadlineReport" +
   Crypto::CharsToBase64String(inputOutput.id);
+
   if (inputOutput.idDeadlineReport[inputOutput.idDeadlineReport.size()-1]=='=')
     inputOutput.idDeadlineReport.resize(inputOutput.idDeadlineReport.size()-1);
   if (inputOutput.idDeadlineReport[inputOutput.idDeadlineReport.size()-1]=='=')
@@ -1649,10 +1655,12 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   deadlineStream << ")), '" << inputOutput.idDeadlineReport << "',"
   << " 'setProblemData', "
   << "null, "
-  << "'" << inputOutput.idDeadlineReport << "' );"
+  << "'" << inputOutput.idDeadlineReport << "' ); "
+  << "updateDeadlines('" << inputOutput.idBase64 << "', '"
+  << inputOutput.idDeadlineTable << "');"
   << "\""
   << ">\n";
-  deadlineStream << "Set</button>";
+  deadlineStream << "<b>Set</b></button>";
   deadlineStream << "</td>";
   deadlineStream << "<td>";
   deadlineStream << "<span id=\"" << inputOutput.idDeadlineReport << "\"></span>";
@@ -1664,10 +1672,18 @@ void CalculatorHTML::ComputeDeadlineModifyButton
     deadlineStream << "<tr><td colspan=\"2\">(overriden by per-problem-deadline).</td></tr>";
   deadlineStream << "</table>";
 //  out << deadlineStream.str();
+//  out << "<table>";
+//  out << "<tr><td>";
   out << "<button class=\"accordion\">"
-  << inputOutput.displayDeadlinE << "</button><span class=\"panel\">";
+  << inputOutput.displayDeadlinE << "</button>"
+//  << "</td></tr>"
+  ;
+//  out << "<tr class=\"panel\"><td>";
+  out << "<span class=\"panel\">";
   out << deadlineStream.str();
   out << "</span>";
+//  out << "</td></tr>";
+//  out << "</table>";
 
 //  out << CGI::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "deadline+ ");
   inputOutput.displayDeadlinE=out.str();
@@ -2989,13 +3005,21 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
     }
   } else
     out << "<span style=\"color:brown\"><b>need to solve</b></span>";
-  if (showModifyButton)
-    out << " | " << this->ToStringProblemWeighT(theFileName);
+  if (!showModifyButton)
+    return out.str();
+  std::stringstream finalOut;
+  finalOut << "<button class=\"accordionLike\" onclick=\"toggleProblemWeights();\">"
+  << out.str()
+  << "</button>"
+  ;
+  finalOut << "<span class=\"panelProblemWeights\"><br>"
+  << this->ToStringProblemWeightButton(theFileName)
+  << "</span>";
   #endif // MACRO_use_MySQL
-  return out.str();
+  return finalOut.str();
 }
 
-std::string CalculatorHTML::ToStringProblemWeighT(const std::string& theFileName)
+std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemWeighT");
   if (!theGlobalVariables.UserDefaultHasAdminRights() ||
       theGlobalVariables.UserStudentVieWOn())
@@ -3280,7 +3304,7 @@ std::string TopicElement::ToStringStudentScoreButton(bool doIncludeButton)
     << "'scoresInCoursePage',"
     << "'studentScoresLoadReport"
     << scoreButtonCounter << "');\">"
-    << "Scores</button> ";
+    << "Scores</button>";
    ;
   out << "<span id='studentScoresLoadReport"
   << scoreButtonCounter << "'></span>"
@@ -3296,6 +3320,7 @@ std::string CalculatorHTML::GetSectionSelector()
       theGlobalVariables.UserStudentVieWOn())
     return "";
   std::stringstream out;
+  out << "Sections: ";
   for (int i=0; i<this->databaseStudentSections.size; i++)
   { out << "<input type=\"radio\" name=\"sectionSelector\" "
     << "onclick=\"populateTopicList("
@@ -3595,7 +3620,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     "',  'width=300', 'height=250', 'top=400'); return false;\">" +CalculatorHTML::stringPracticE+ "</a>";
     this->displayProblemLink= owner.ToStringLinkFromFileName(this->problem);
     this->displayScore=owner.ToStringProblemScoreShort(this->problem, problemSolved);
-    this->displayModifyWeight=owner.ToStringProblemWeighT(this->problem);
+    this->displayModifyWeight=owner.ToStringProblemWeightButton(this->problem);
   }
   this->displayDeadlinE=owner.ToStringDeadline
   (this->id, problemSolved, returnEmptyStringIfNoDeadline);

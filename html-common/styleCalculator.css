@@ -64,6 +64,23 @@ textarea{
   background-color:#878787;
 }
 
+button.accordionLike {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 0px;
+  /*width: 100;*/
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.4s;
+}
+
+button.accordionLike.active, button.accordionLike:hover {
+  background-color: #ddd;
+}
+
 button.accordion {
   background-color: #eee;
   color: #444;
@@ -123,10 +140,20 @@ span.studentScoresContent{
   opacity: 1;
 }
 
+span.panelProblemWeights{
+  display: block;
+  max-height: 0;
+  overflow: hidden;
+  transition: 1s linear;
+  opacity: 0;
+}
+
 span.studentScoresWrapper{
+  display: inline-block;
+  width: 420px;
   font-size: medium;
   font-weight: normal;
-  margin-left: 50px;
+  margin-left: 10px;
 }
 
 span.panel.show {
@@ -142,8 +169,10 @@ span.titleContainer{
 
 span.deadlineContainer{
   display: inline-block;
-  margin-left: 50px;
+  margin-left: 10px;
+  margin-top: 15px;
   font-weight: normal;
+  width: 250px;
   font-size: medium;
   vertical-align: middle;
   clear: left;

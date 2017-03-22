@@ -30,6 +30,8 @@ public:
   List<bool> deadlinesAreInherited;
   std::string idBase64;
   std::string idDeadlineReport;
+  std::string idDeadlineTable;
+
   std::string title;
   std::string video;
   std::string slides;
@@ -234,7 +236,7 @@ public:
   std::string ToStringLinkFromFileName(const std::string& theFileName);
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
-  std::string ToStringProblemWeighT(const std::string& theFileName);
+  std::string ToStringProblemWeightButton(const std::string& theFileName);
   std::string ToStringProblemScoreFull(const std::string& theFileName);
   std::string ToStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved);
   bool ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput);

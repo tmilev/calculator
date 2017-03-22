@@ -133,56 +133,6 @@ function initializeButtonsCalculator()
   initializeButtonsCommon();
 }
 
-var StudentScoresAreBeingDisplayed=false;
-function toggleStudentScores
-(studentScoreLoadRep, scoresInCoursePage, studentScoresLoadReport)
-{ if (!StudentScoresAreBeingDisplayed)
-  { submitStringAsMainInput
-    ('',studentScoreLoadRep,scoresInCoursePage, updateStudentScores,
-    studentScoresLoadReport);
-    StudentScoresAreBeingDisplayed=true;
-    var theScores=document.getElementsByClassName('studentScoresContent');
-    for (var i=0; i<theScores.length; i++)
-    { //theScores[i].style.transition='opacity 1s linear';
-      theScores[i].style.opacity='1';
-    }
-    var theButtons=document.getElementsByClassName('studentScoresButton');
-    for (var i=0; i<theButtons.length; i++)
-    { theButtons[i].innerHTML='Hide scores.';
-    }
-  } else
-  { StudentScoresAreBeingDisplayed=false;
-    theScores=document.getElementsByClassName('studentScoresContent');
-    for (var i=0; i<theScores.length; i++)
-    { //theScores[i].style.transition='opacity 1s linear';
-      theScores[i].style.opacity='0';
-    }
-    theButtons=document.getElementsByClassName('studentScoresButton');
-    for (var i=0; i<theButtons.length; i++)
-    { theButtons[i].innerHTML='Scores';
-    }
-  }
-}
-
-function updateStudentScores(idElement)
-{ onLoadDefaultFunction(idElement);
-  for (var i=0; i<studentScoresInHomePage.length; i++)
-  { var currentElt=document.getElementById(studentScoresInHomePage[i].theId);
-    if (currentElt===null || currentElt===undefined)
-      continue;
-    currentElt.innerHTML=
-    "<b><span style=\"color:green\">" +
-    studentScoresInHomePage[i].numSolvedAll+
-    " solved all; </span> <span style=\"color:orange\">" +
-    studentScoresInHomePage[i].numSolvedPart+
-    " solved some; </span>"+
-    "<span style=\"color:Red\"> " +studentScoresInHomePage[i].numSolvedNone+
-    " solved none.</span></b>";
-    if (!studentScoresInHomePage[i].weightsOK)
-      currentElt.innerHTML+= " Not all problems have weights. ";
-  }
-}
-
 function getSqrt_N_Button(indexMathField){
   return "<button style='width:25' onmousedown='sqrt_N_Click(answerMathQuillObjects[" + indexMathField + "]);'>&#8731;</button>";
 }

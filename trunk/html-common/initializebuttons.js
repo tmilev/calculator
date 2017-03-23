@@ -38,7 +38,8 @@ function initializeButtonsCommon()
 { ///initializing accordions
   var acc = document.getElementsByClassName("accordion");
   for (var i = 0; i < acc.length; i++)
-  { acc[i].onclick = async function()
+  { acc[i].onclick = //async
+    function()
     { if (this.firstLoad===undefined)
       { this.firstLoad=true;
         var theDeadlines=this.nextElementSibling.getElementsByClassName("modifyDeadlineInput");
@@ -46,7 +47,7 @@ function initializeButtonsCommon()
           $('#'+ theDeadlines[j].id).datepicker();
 //        console.log("first run: "+theDeadlines);
         this.nextElementSibling.style.display="inline-block";
-        await sleep(400);
+        //await sleep(400);
       }
       //this.nextElementSibling.style.transition="0.6s linear";
       this.classList.toggle("active");

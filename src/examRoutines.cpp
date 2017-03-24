@@ -3338,7 +3338,7 @@ std::string CalculatorHTML::GetSectionSelector()
       theGlobalVariables.UserStudentVieWOn())
     return "";
   std::stringstream out;
-  out << "Sections: ";
+  out << "<sectionSelection>Sections: ";
   for (int i=0; i<this->databaseStudentSections.size; i++)
   { out << "<input type=\"radio\" name=\"sectionSelector\" "
     << "onclick=\"populateTopicList("
@@ -3352,7 +3352,7 @@ std::string CalculatorHTML::GetSectionSelector()
     << this->databaseStudentSections[i]
     << "</input>";
   }
-  out << "\n<br>\n";
+  out << "</sectionSelection>\n";
   return out.str();
 }
 

@@ -2318,7 +2318,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 //  << "console.log('id_token: '+googleUser.getAuthResponse().id_token);\n"
 //  << "}\n"
 //  << "</script>";
-
+//
 ///////////////////////////////////////
 //  out << "<br><br><small>No account yet? We are sorry but automatic registration has not been implemented yet.<br>"
 //  << " If you are our students please contact us by email and we'll register you.<br>Everyone else, please che.</small>";

@@ -76,6 +76,12 @@ void MonitorWebServer()
     if (numConsecutiveFailedPings>=maxNumPingFailures)
     { logProcessKills << logger::red << "Server stopped responding (probably locked pipe?)"
       << ", restarting. " << logger::endL;
+      std::fstream theFile;
+      FileOperations::OpenFileCreateIfNotPresentVirtual
+      (theFile,"/LogFiles/_unexpected_Restart_Log.txt",true, false, false, true);
+      theFile << "Unexpected server restart: server stopped responding (locked pipe?). Time: "
+      << now.ToStringHumanReadable() << "\n";
+      theFile.flush();
       theWebServer.Restart();
     }
   }

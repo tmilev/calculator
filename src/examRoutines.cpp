@@ -2652,7 +2652,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   bool shouldResetTheRandomSeed=false;
   if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven)
     shouldResetTheRandomSeed=true;
-  if (this->NumAttemptsToInterpret>1)
+  if (this->flagIsForReal && this->NumAttemptsToInterpret>1 )
   { shouldResetTheRandomSeed=true;
     outBody
     << "<hr><span style=\"color:red\"><b>"

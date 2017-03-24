@@ -2485,8 +2485,10 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
   this->AddOperationInnerHandler
   ("ReverseRecursively", this->innerReverseOrderRecursively, "",
    "Same as Reverse but will apply recursively to the children expressions as well.",
-   "ReverseRecursively{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)", true, false,
-   "Calculator::innerReverseOrderRecursively", "ReverseRecursively");
+   "ReverseRecursively{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)",
+   true, false,
+   "Calculator::innerReverseOrderRecursively",
+   "ReverseRecursively");
 
   this->AddOperationInnerHandler
   ("SolveFor", CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT, "",
@@ -2501,7 +2503,8 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
     The solutions of the equation are returned in a list (empty list for no solution). \
     Solutions with multiplicity higher than one are repeated. \
     ",
-   "SolveFor(x, a x^2+b x +c); SolveFor(x, a x +b)", true, false,
+   "SolveFor(x, a x^2+b x +c); SolveFor(x, a x +b)",
+   true, false,
    "CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT",
    "SolveFor");
 
@@ -2542,7 +2545,10 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
     x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},\
     x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},\
     x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
-    x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemNoUpperLimit");
+    x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)",
+    true, false,
+    "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemNoUpperLimit",
+    "FindOneSolutionSerreLikePolynomialSystem");
   this->AddOperationInnerHandler
   ("FindOneSolutionSerreLikePolynomialSystemUpperLimit", CalculatorFunctionsGeneral::innerSolveSerreLikeSystemUpperLimit, "",
    "Same as FindOneSolutionSerreLikePolynomialSystem but the first argument gives upper limits \
@@ -2568,13 +2574,19 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
     x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},\
     x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},\
     x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
-    x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemUpperLimit");
+    x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)",
+    true, false,
+    "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemUpperLimit",
+    "FindOneSolutionSerreLikePolynomialSystemUpperLimit");
   this->AddOperationInnerHandler
   ("FindOneSolutionSerreLikePolynomialSystemAlgebraic", CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraic, "",
    "Same as FindOneSolutionSerreLikePolynomialSystem but starts directly over algebraic closure.\
     ",
    "FindOneSolutionSerreLikePolynomialSystemAlgebraic{}( \
-    x^2+1, y x z -1, z^2 x+y-1, w u)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraic");
+    x^2+1, y x z -1, z^2 x+y-1, w u)",
+    true, false,
+    "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraic",
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraic");
   this->AddOperationInnerHandler
   ("FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit",
    CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraicUpperLimit, "",
@@ -2582,10 +2594,13 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    to the number of polynomial computations that can be carried out.\
     ",
    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit{}( 10000, \
-    x^2+1, y x z -1, z^2 x+y-1, w u)", true, false, "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraicUpperLimit");
+    x^2+1, y x z -1, z^2 x+y-1, w u)",
+    true, false,
+    "CalculatorFunctionsGeneral::innerSolveSerreLikeSystemAlgebraicUpperLimit",
+    "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit");
 
   this->AddOperationInnerHandler
-  ("GroebnerLexUpperLimit", this->innerGroebnerLex, "",
+  ("GroebnerLexUpperLimit", Calculator::innerGroebnerLex, "",
    "Transforms to a reduced Groebner basis using the  \
     lexicographic order. \
     The lexicographic order is inherited from the comparison of the underlying expressions.\
@@ -2639,11 +2654,19 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
     <br>\n3. Return changedMainBucket.  <br><b>End of algorithm description.</b>\
    ",
    "GroebnerLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );\
-   \nGroebnerLexUpperLimit{}(5, s^2+c^2+1, a-s^4, b-c^4 );");
+   \nGroebnerLexUpperLimit{}(5, s^2+c^2+1, a-s^4, b-c^4 );",
+   true, false,
+   "Calculator::innerGroebnerLex",
+   "GroebnerLexUpperLimit");
     this->AddOperationInnerHandler
-  ("PolynomialRelationsUpperLimit", CalculatorFunctionsGeneral::innerPolynomialRelations, "",
+  ("PolynomialRelationsUpperLimit",
+    CalculatorFunctionsGeneral::innerPolynomialRelations, "",
    "Finds the relations between the polynomials.",
-   "PolynomialRelationsUpperLimit{}(10000, s^2+c^2+1, s^4, c^4 );");
+   "PolynomialRelationsUpperLimit{}(10000, s^2+c^2+1, s^4, c^4 );",
+   true, false,
+   "CalculatorFunctionsGeneral::innerPolynomialRelations",
+   "PolynomialRelationsUpperLimit"
+   );
     this->AddOperationInnerHandler
   ("GroebnerRevLexUpperLimit", this->innerGroebnerRevLex, "",
    "Same as GroebnerLexUpperLimit but uses reverse order on the variables (z<x).",
@@ -2651,7 +2674,8 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    \nGroebnerRevLexUpperLimit{}(5, s^2+c^2+1, a-s^4, b-c^4 );");
 
   this->AddOperationInnerHandler
-  ("GroebnerGrLexUpperLimit", this->innerGroebnerGrLex, "",
+  ("GroebnerGrLexUpperLimit",
+    Calculator::innerGroebnerGrLex, "",
    "Transforms to a reduced Groebner basis relative to the graded \
    lexicographic order. In the graded lexicographic order, monomials are first compared by\
    total degree, then by lexicographic order. \
@@ -2662,7 +2686,10 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    The resulting printout will let your know whether the upper limit was hit or not. \
    For a description of the algorithm used see the description of function GroebnerLexUpperLimit.",
    "GroebnerGrLexUpperLimit{}(10000, a^2+b^2+1, x-a^4, y-b^4 );\n \
-   GroebnerGrLexUpperLimit{}(5, a^2+b^2+1, x-a^4, y-b^4 )");
+   GroebnerGrLexUpperLimit{}(5, a^2+b^2+1, x-a^4, y-b^4 )",
+   true, false,
+   "Calculator::innerGroebnerGrLex",
+   "GroebnerGrLexUpperLimit");
 
   this->AddOperationInnerHandler
   ("ComputeFKFT", CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras, "",
@@ -2674,9 +2701,12 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
   ("ComputeSemisimpleSubalgebras", CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras, "",
    "Computes the semisimple subalgebras of a semisimple Lie algebra and creates a data structure containing them. ",
    "ComputeSemisimpleSubalgebras(A_2)", false,
-   false, "CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras");
+   false,
+   "CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras",
+   "ComputeSemisimpleSubalgebras");
   this->AddOperationInnerHandler
-  ("CentralizerChains", CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras, "",
+  ("CentralizerChains",
+    CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras, "",
    "This function is disabled by default (takes too long): you have to first call \
     TurnRulesOn(CentralizerChains). \
     Please use this function only if running the calculator on\
@@ -2689,53 +2719,78 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    true);
 
   this->AddOperationInnerHandler
-  ("printSemisimpleSubalgebras", Calculator::innerPrintSSsubalgebrasRegular, "",
+  ("PrintSemisimpleSubalgebras", Calculator::innerPrintSSsubalgebrasRegular, "",
    " <b>This function is being developed and is not implemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "printSemisimpleSubalgebras(B_3)", true, false,
+   "PrintSemisimpleSubalgebras(B_3)", true, false,
    "Calculator::innerPrintSSsubalgebrasRegular",
-   "printSemisimpleSubalgebras");
+   "PrintSemisimpleSubalgebras");
   this->AddOperationInnerHandler
-  ("printSemisimpleSubalgebrasRecompute", Calculator::innerPrintSSsubalgebrasRecompute, "",
+  ("PrintSemisimpleSubalgebrasRecompute", Calculator::innerPrintSSsubalgebrasRecompute, "",
    " <b>This function is being developed and is not implemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "printSemisimpleSubalgebrasRecompute(C_3)", false, false, "Calculator::innerPrintSSsubalgebrasRecompute");
+   "PrintSemisimpleSubalgebrasRecompute(C_3)",
+   false, false,
+   "Calculator::innerPrintSSsubalgebrasRecompute",
+   "PrintSemisimpleSubalgebrasRecompute");
   this->AddOperationInnerHandler
-  ("printSemisimpleSubalgebrasNoCentralizers", this->innerPrintSSsubalgebrasNoCentralizers, "",
+  ("PrintSemisimpleSubalgebrasNoCentralizers",
+   Calculator::innerPrintSSsubalgebrasNoCentralizers, "",
    " <b>This function is being developed and is not implemented fully yet. </b> \
    Prints the semisimple subalgebra candidates of a Lie algebra. ",
-   "printSemisimpleSubalgebrasNoCentralizers(A_3)", false, false);
+   "PrintSemisimpleSubalgebrasNoCentralizers(A_3)",
+   false, false,
+   "Calculator::innerPrintSSsubalgebrasNoCentralizers",
+   "PrintSemisimpleSubalgebrasNoCentralizers");
   this->AddOperationInnerHandler
-  ("printSemisimpleSubalgebrasFull", this->innerPrintSSsubalgebrasNilradicals, "",
+  ("PrintSemisimpleSubalgebrasFull",
+   Calculator::innerPrintSSsubalgebrasNilradicals, "",
    " <b>This function is being developed and is not implemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "printSemisimpleSubalgebrasFull{}(A_2)", false, false);
+   "PrintSemisimpleSubalgebrasFull{}(A_2)",
+   false, false,
+   "Calculator::innerPrintSSsubalgebrasNilradicals",
+   "PrintSemisimpleSubalgebrasFull");
   this->AddOperationInnerHandler
   ("CanBeExtendedParabolicallyTo", CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo, "",
    "Finds whether a Dynkin type extends via the standard parabolic extension to another. ",
    "CanBeExtendedParabolicallyTo(A^3_1, A_5); CanBeExtendedParabolicallyTo(a_2, b_3); CanBeExtendedParabolicallyTo(g_2, b_3);\
    CanBeExtendedParabolicallyTo(d_5, e_6); CanBeExtendedParabolicallyTo(b_3, a_10); CanBeExtendedParabolicallyTo(c_2, c_10);\
    CanBeExtendedParabolicallyTo(b_3+e_6+a_3, d_4+e_8+f_4)\
-   ", true, false);
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo",
+   "CanBeExtendedParabolicallyTo");
   this->AddOperationInnerHandler
-  ("EmbedSemisimpleInSemisimple", CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg, "",
+  ("EmbedSemisimpleInSemisimple",
+    CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg, "",
    " Tries to find all embeddings of the first semisimple type into the second. Records all intermediate subalgebras. ",
-   "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);EmbedSemisimpleInSemisimple{}(G_2, B_3)", true, false);
+   "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);EmbedSemisimpleInSemisimple{}(G_2, B_3)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg",
+   "EmbedSemisimpleInSemisimple");
   this->AddOperationInnerHandler
-  ("LoadSemisimpleSubalgebras", CalculatorConversions::innerLoadSemisimpleSubalgebras, "",
+  ("LoadSemisimpleSubalgebras",
+   CalculatorConversions::innerLoadSemisimpleSubalgebras, "",
    " <b>This function is being developed and is not implemented fully yet. </b> \
    Loads a semisimpleSubalgebra from expression. ",
-   "LoadSemisimpleSubalgebras {}(EmbedSemisimpleInSemisimple{}(G_2, B_3))", true, false)
+   "LoadSemisimpleSubalgebras {}(EmbedSemisimpleInSemisimple{}(G_2, B_3))",
+   true, false,
+   "CalculatorConversions::innerLoadSemisimpleSubalgebras",
+   "LoadSemisimpleSubalgebras")
    ;
   this->AddOperationInnerHandler
-  ("SltwoSubalgebra", CalculatorConversions::innerSlTwoSubalgebraPrecomputed, "",
+  ("SltwoSubalgebra",
+    CalculatorConversions::innerSlTwoSubalgebraPrecomputed, "",
    " <b>This function is being developed and is not implemented fully yet. </b> \
    Loads an sl(2) subalgebra from expression. ",
    "SltwoSubalgebra(B_{3},g_  +(B)_{3}, -1)\\\\\
     +3 ((GetChevalleyGenerator, (B)_{3}, -2)), \
     3 ((GetChevalleyGenerator, (B)_{3}, 3))\\\\\
     +6 ((GetChevalleyGenerator, (B)_{3}, 1))\\\\\
-    +10/3 ((GetChevalleyGenerator, (B)_{3}, 2)))", true, true)
+    +10/3 ((GetChevalleyGenerator, (B)_{3}, 2)))",
+    true, true,
+    "CalculatorConversions::innerSlTwoSubalgebraPrecomputed",
+    "SltwoSubalgebra")
    ;
 //     this->AddOperationInnerHandler
 //  ("printAllPartitions", & this->innerPrintAllPartitions, "",

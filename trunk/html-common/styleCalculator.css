@@ -32,6 +32,13 @@ textarea{
 .normalButton{
 }
 
+sectionSelection{
+  position:fixed;
+  background: silver;
+  bottom:0;
+  right:0;
+}
+
 .submitButton{
   color:red;
   width:60px;

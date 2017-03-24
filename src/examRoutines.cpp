@@ -2649,7 +2649,23 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before database storage");
 #ifdef MACRO_use_MySQL
+  bool shouldResetTheRandomSeed=false;
   if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven)
+    shouldResetTheRandomSeed=true;
+  if (this->NumAttemptsToInterpret>1)
+  { shouldResetTheRandomSeed=true;
+    outBody
+    << "<hr><span style=\"color:red\"><b>"
+    << "Your problem's random seed was just reset. </b></span> "
+    << "You should be seeing this message very rarely, "
+    << "<b>ONLY IF </b> your problem was changed by your instructor "
+    << "<b>AFTER</b> you started solving it. "
+    << "You should not be seeing this message a second time. "
+    << "<span style=\"color:red\"><b>If you see this message every "
+    << "time you reload the problem "
+    << "this is a bug. Please take a screenshot and send it to your instructor. </b></span>";
+  }
+  if (shouldResetTheRandomSeed)
   { //stOutput << "This is for real!<br>";
     this->theProblemData.flagRandomSeedGiven=true;
     DatabaseRoutines theRoutines;

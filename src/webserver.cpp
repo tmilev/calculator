@@ -3374,7 +3374,8 @@ WebServer::WebServer()
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/mathquill.min-matrix.js");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/mathquill.min-matrix.js");
   this->addressStartsNotNeedingLogin.AddOnTop("cache.appcache");
-  this->addressStartsNotNeedingLogin.AddOnTop("cache.appcache");
+  this->addressStartsNotNeedingLogin.AddOnTop("/.well-known/");
+  this->addressStartsNotNeedingLogin.AddOnTop(".well-known/");
   this->addressStartsNotNeedingLogin.AddOnTop("/selectCourse.html");
   this->addressStartsNotNeedingLogin.AddOnTop("selectCourse.html");
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");

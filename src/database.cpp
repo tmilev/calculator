@@ -801,7 +801,7 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
   }
   if (this->AuthenticateWithToken(&secondCommentsStream))
     return true;
-  //stOutput << "<br>DEBUG: User could not authenticate with token.";
+  stOutput << "<br>DEBUG: User could not authenticate with token.";
   bool result= this->AuthenticateWithUserNameAndPass(theRoutines, commentsOnFailure);
   if (this->enteredPassword!="")
     this->ResetAuthenticationToken(theRoutines, commentsOnFailure);
@@ -814,9 +814,19 @@ bool UserCalculator::AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutin
   (void) theRoutines;
   (void) commentsOnFailure;
   this->ComputeShaonedSaltedPassword();
-  //stOutput << "DEBUG: computed salted shaoned pass: " << this->enteredShaonedSaltedPassword
-  //<< "; actual: " << this->actualShaonedSaltedPassword;
-  return this->enteredShaonedSaltedPassword==this->actualShaonedSaltedPassword;
+  std::string actualPasswordRFC4648=this->actualShaonedSaltedPassword;
+  //<-old versions of the database were using a deprecated base64 encoding
+  //<- below is a small compatibility layer.
+  for (unsigned i=0; i<actualPasswordRFC4648.size(); i++)
+  { if (actualPasswordRFC4648[i]=='/')
+      actualPasswordRFC4648[i]='_';
+    if (actualPasswordRFC4648[i]=='+')
+      actualPasswordRFC4648[i]='-';
+  }
+  //if (commentsOnFailure!=0)
+  //  *commentsOnFailure << "DEBUG: Comparing " << this->enteredShaonedSaltedPassword
+  //  << " with: " << actualPasswordRFC4648;
+  return this->enteredShaonedSaltedPassword==actualPasswordRFC4648;
 }
 
 std::string UserCalculator::GetPassword(DatabaseRoutines& theRoutines)
@@ -1748,7 +1758,6 @@ std::string DatabaseRoutines::ToStringSuggestionsReasonsForFailure
   return out.str();
 }
 #endif //MACRO_use_MySQL
-
 
 bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 (UserCalculatorData& theUseR, std::stringstream* comments)

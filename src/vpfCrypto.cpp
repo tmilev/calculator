@@ -281,6 +281,8 @@ std::string Crypto::CharsToBase64String(const List<unsigned char>& input)
 
 uint32_t Crypto::leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate)
 { uint32_t result=input;
+  //Can be improved for speed but since not using bit operators,
+  //this should be ultra portable
   for (int i=0; i<numBitsToRotate; i++)
   { uint32_t last_bit = result/2147483648;
     result*=2;
@@ -293,6 +295,8 @@ uint32_t Crypto::leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate)
 
 uint32_t Crypto::rightShiftAsIfBigEndian(uint32_t input, int numBitsToShift)
 { uint32_t result=input;
+  //Can be improved for speed but since not using bit operators,
+  //this should be ultra portable
   for (int i=0; i<numBitsToShift; i++)
     result/=2;
   //stOutput << "<hr>DEBUG: right shift: " << numBitsToShift << " bits maps: "
@@ -303,6 +307,8 @@ uint32_t Crypto::rightShiftAsIfBigEndian(uint32_t input, int numBitsToShift)
 
 uint32_t Crypto::leftShiftAsIfBigEndian(uint32_t input, int numBitsToShift)
 { uint32_t result=input;
+  //Can be improved for speed but since not using bit operators,
+  //this should be ultra portable
   for (int i=0; i<numBitsToShift; i++)
     result*=2;
   return result;
@@ -310,6 +316,8 @@ uint32_t Crypto::leftShiftAsIfBigEndian(uint32_t input, int numBitsToShift)
 
 uint32_t Crypto::rightRotateAsIfBigEndian(uint32_t input, int numBitsToRotate)
 { uint32_t result=input;
+  //Can be improved for speed but since not using bit operators,
+  //this should be ultra portable
   for (int i=0; i<numBitsToRotate; i++)
   { uint32_t rightBit = result%2;
     result/=2;

@@ -6,29 +6,32 @@
 static ProjectInformationInstance ProjectInfoVpfJSON(__FILE__, "Implementation JSON.");
 
 void JSData::operator=(const bool other)
-{ this->type = JSBOOL;
+{ this->reset();
+  this->type = this->JSbool;
   this->boolean = other;
 }
 
 void JSData::operator=(const double other)
-{ this->type = JSNUM;
+{ this->reset();
+  this->type = this->JSnumber;
   this->number = other;
 }
 
 void JSData::operator=(const std::string& other)
-{ this->type = JSSTR;
+{ this->reset();
+  this->type = this->JSstring;
   this->string = other;
 }
 
 JSData& JSData::operator[](int i)
-{ this->type = JSLIST;
+{ this->type = this->JSarray;
   if(this->list.size < i+1)
     this->list.SetSize(i+1);
   return this->list[i];
 }
 
 JSData& JSData::operator[](const std::string& key)
-{ this->type = JSOBJ;
+{ this->type = this->JSObject;
   for(int i=0; i<this->obj.size; i++)
     if(this->obj[i].key == key)
       return this->obj[i].value;
@@ -36,192 +39,6 @@ JSData& JSData::operator[](const std::string& key)
   this->obj.SetSize(i+1);
   this->obj[i].key = key;
   return this->obj[i].value;
-}
-
-std::string JSData::GetString(const std::string& json, int begin, int end, int* actualend) const
-{ // i don't expect this to be bigger then 2147482647 but smaller then 4294967296
-  // the compiler whines about comparison between int i and json.size()
-  unsigned int i;
-  unsigned int minend;
-  bool endlt;
-  if(end>0 and ((unsigned int) end)<json.size())
-  { endlt = true;
-    minend = end;
-  }
-  else
-  { endlt = false;
-    minend = json.size();
-  }
-  for(i=begin; i<minend; i++)
-    if(json[i] == '"')
-    { i += 1;
-      break;
-    }
-  if(i>=minend)
-  { stOutput << "GetString: there does not appear to be a string between " << begin << " and " << minend << "\n";
-    if(actualend)
-      *actualend = minend;
-    return json.substr(i,0);
-  }
-  for(; i<minend; i++)
-  { if(json[i] == '"')
-    { if(actualend)
-        *actualend = i;
-      return json.substr(begin+1,i-begin-1);
-    }
-  }
-  if(endlt)
-  { stOutput << "string being extracted failed to terminate in a timely manner, ending it at position" << i << "\n";
-    if(actualend)
-      *actualend = i;
-    return json.substr(begin+1,i-begin);
-  }
-  stOutput << "json ended before string being extracted" << "\n";
-  if(actualend)
-    *actualend = i;
-  return json.substr(begin+1,i-begin);
-}
-
-int JSData::AcceptString(const std::string& json, int begin)
-{ this->type = JSSTR;
-  // i don't expect this to be bigger then 2147482647 but smaller than 4294967296
-  // the compiler whines about comparison between int i and json.size()
-  unsigned int i = begin+1;
-  for(; i<json.size(); i++)
-  { if(json[i] == '"')
-    { this->string = json.substr(begin+1,i-begin-1);
-      return i;
-    }
-  }
-  stOutput << "parse error: input string ended but current data string is incomplete" << "\n";
-  this->string = json.substr(begin+1,json.size()-begin-1);
-  return json.size();
-}
-
-void JSData::ExtractScalar(const std::string& json, int begin, int end)
-{ if(begin==end)
-    return;
-  std::string sbs = json.substr(begin,end-begin);
-  this->type = JSNUM;
-  this->number = atof(sbs.c_str());
-}
-
-int JSData::AcceptList(const std::string& json, int begin)
-{ this->type = JSLIST;
-  unsigned int curobjbgn = begin+1;
-  unsigned int i=curobjbgn;
-  bool havecurobj = false;
-  this->list.SetSize(0);
-  //this code needs to be fixed. Appears to be too complicated.
-  //check for empty list first: a dirty hack but no time atm. This functino needs a rewrite.
-  for (i=curobjbgn; i<json.size(); i++)
-    if (json[i]==']')
-      return i;
-    else if (json[i]!=' ')
-      break;
-  for(i=curobjbgn; i<json.size(); i++)
-  { if(json[i] == ']')
-    { if(!havecurobj)
-      { // hack: should instead test in extractScalar for any type of reasonable
-        // scalar.  don't.  no need to figure that out yet.
-        if(i>curobjbgn)
-        { this->list.SetSize(this->list.size+1);
-          this->list[this->list.size-1].ExtractScalar(json, curobjbgn, i);
-        }
-      }
-      return i;
-    }
-    if(json[i] == '[')
-    { this->list.SetSize(this->list.size+1);
-      i = this->list[this->list.size-1].AcceptList(json,i);
-      havecurobj = true;
-      continue;
-    }
-    if(json[i] == '"')
-    { this->list.SetSize(this->list.size+1);
-      i = this->list[this->list.size-1].AcceptString(json,i);
-      havecurobj = true;
-      continue;
-    }
-    if(json[i] == '{')
-    { this->list.SetSize(this->list.size+1);
-      i = this->list[this->list.size-1].AcceptObject(json,i);
-      havecurobj = true;
-      continue;
-    }
-    if(json[i] == ',')
-    { if(!havecurobj)
-      { this->list.SetSize(this->list.size+1);
-        this->list[this->list.size-1].ExtractScalar(json, curobjbgn, i);
-      }
-      havecurobj = false;
-      curobjbgn = i+1;
-      continue;
-    }
-  }
-  stOutput << "parse error: string ended but list is incomplete" << "\n";
-  return i;
-}
-
-int JSData::AcceptObject(const std::string& json, int begin)
-{ this->type = JSOBJ;
-  unsigned int i=begin+1;
-  unsigned int curobjbgn = i;
-  bool isvaluetime = false;
-  bool havecurobj = false;
-  for(; i<json.size(); i++)
-  { if(json[i] == '}')
-    { if(!isvaluetime)
-      { stOutput << "parse error: } in key, character " << i << " key will be ignored" << "\n";
-        return i;
-      }
-      if(!havecurobj)
-        this->obj[this->obj.size-1].value.ExtractScalar(json,curobjbgn,i-1);
-      return i;
-    }
-    if(json[i] == ':')
-    { if(isvaluetime)
-      { stOutput << "parse error: : in value, second key ignored" << "\n";
-        curobjbgn = i+1;
-        continue;
-      }
-      isvaluetime = true;
-      this->obj.SetSize(this->obj.size+1);
-      this->obj[this->obj.size-1].key = this->GetString(json,curobjbgn,i);
-      curobjbgn = i+1;
-      havecurobj = false;
-    }
-    if(json[i] == ',')
-    { if(!isvaluetime)
-      { stOutput << "parse error: , in key, key ignored";
-        curobjbgn = i+1;
-        continue;
-      }
-      if(!havecurobj)
-        this->obj[this->obj.size-1].value.ExtractScalar(json, curobjbgn, i-1);
-      isvaluetime = false;
-      curobjbgn = i+1;
-    }
-    if(isvaluetime)
-    { if(json[i] == '[')
-      { i = this->obj[this->obj.size-1].value.AcceptList(json,i);
-        havecurobj = true;
-        continue;
-      }
-      if(json[i] == '"')
-      { i = this->obj[this->obj.size-1].value.AcceptString(json,i);
-        havecurobj = true;
-        continue;
-      }
-      if(json[i] == '{')
-      { i = this->obj[this->obj.size-1].value.AcceptObject(json,i);
-        havecurobj = true;
-        continue;
-      }
-    }
-  }
-  stOutput << "parse error: string ended but object is incomplete" << "\n";
-  return i;
 }
 
 void JSData::readfile(const char* filename)
@@ -236,62 +53,282 @@ void JSData::readfile(const char* filename)
   this->readstring(json);
 }
 
-void JSData::readstring(const std::string& json)
-{ for(unsigned int i=0; i<json.size(); i++)
-  { if(json[i] == '"')
-    { this->AcceptString(json,0);
-      return;
-    }
-    if(json[i] == '[')
-    { this->AcceptList(json,0);
-      return;
-    }
-    if(json[i] == '{')
-    { this->AcceptObject(json,0);
-      return;
-    }
+bool JSData::IsValidElement()
+{ return
+  this->type==this->JSnull   ||
+  this->type==this->JSbool   ||
+  this->type==this->JSnumber ||
+  this->type==this->JSstring ||
+  this->type==this->JSarray  ||
+  this->type==this->JSObject;
+}
+
+void JSData::TryToComputeType()
+{ if (this->type!=this->JSUndefined)
+    return;
+  if (this->string=="")
+    return;
+  if (this->string=="null")
+  { this->reset();
+    this->type=this->JSnull;
+    return;
   }
-  this->ExtractScalar(json,0,json.size());
+  if (this->string=="true")
+  { this->reset();
+    this->type=this->JSbool;
+    this->boolean=true;
+    return;
+  }
+  if (this->string=="false")
+  { this->reset();
+    this->type=this->JSbool;
+    this->boolean=false;
+    return;
+  }
+  if (this->string.size()>0)
+    if (this->string[0]=='-' || MathRoutines::isADigit(this->string[0]))
+    { this->number=  std::stod(this->string);
+      this->string="";
+      this->type=JSData::JSnumber;
+      return;
+    }
+  this->type=JSData::JSstring;
+}
+
+bool JSData::Tokenize
+(const std::string& input, List<JSData>& output)
+{ output.SetSize(0);
+  output.SetExpectedSize(input.size());
+  JSData currentElt;
+  for (unsigned i=0; i<input.size(); i++)
+  { if (input[i]=='"')
+    { if (currentElt.type==currentElt.JSstring)
+      { output.AddOnTop(currentElt);
+        currentElt.reset();
+      } else
+      { currentElt.TryToComputeType();
+        if (currentElt.type!=currentElt.JSUndefined)
+          output.AddOnTop(currentElt);
+        currentElt.reset();
+        currentElt.type=currentElt.JSstring;
+      }
+      continue;
+    }
+    if (input[i]==' ' || input[i]=='\r' || input[i]=='\n')
+    { currentElt.TryToComputeType();
+      if (currentElt.type!=currentElt.JSUndefined)
+      { output.AddOnTop(currentElt);
+        currentElt.reset();
+      }
+      continue;
+    }
+    if (input[i]=='{' || input[i]=='}' ||
+        input[i]=='[' || input[i]==']' ||
+        input[i]==':' || input[i]== ',')
+    { currentElt.TryToComputeType();
+      if (currentElt.type!=JSData::JSUndefined)
+        output.AddOnTop(currentElt);
+      currentElt.reset();
+      if (input[i]=='{')
+        currentElt.type=currentElt.JSopenBrace;
+      if (input[i]=='[')
+        currentElt.type=currentElt.JSopenBracket;
+      if (input[i]=='}')
+        currentElt.type=currentElt.JScloseBrace;
+      if (input[i]==']')
+        currentElt.type=currentElt.JScloseBracket;
+      if (input[i]==':')
+        currentElt.type=currentElt.JScolon;
+      if (input[i]==',')
+        currentElt.type=currentElt.JScomma;
+      output.AddOnTop(currentElt);
+      currentElt.reset();
+      continue;
+    }
+    currentElt.string+=input[i];
+  }
+  return true;
+}
+
+bool JSData::readstring
+(const std::string& json,
+ std::stringstream* comments)
+{ List<JSData> theTokenS;
+  JSData::Tokenize(json, theTokenS);
+  JSHashData pair;
+  List<JSData> readingStack;
+  JSData emptyElt;
+  for (int i=0; i<JSData::numEmptyTokensAtStart; i++)
+    readingStack.AddOnTop(emptyElt);
+  readingStack.AddOnTop(theTokenS[0]);
+  for (int i=0; ; )
+  { JSData& last= readingStack[readingStack.size-1];
+    JSData& secondToLast=readingStack[readingStack.size-2];
+    JSData& thirdToLast=readingStack[readingStack.size-3];
+    JSData& fourthToLast=readingStack[readingStack.size-4];
+    //JSData& fifthToLast=theTokenS[i-4];
+    if (fourthToLast.type==JSData::JSopenBrace &&
+        thirdToLast.type==JSData::JSstring &&
+        secondToLast.type==JSData::JScolon &&
+        last.IsValidElement())
+    { pair.key=thirdToLast.string;
+      pair.value=last;
+      fourthToLast.obj.AddOnTop(pair);
+      readingStack.SetSize(readingStack.size-3);
+      continue;
+    }
+    if (secondToLast.type==JSData::JSopenBracket && last.IsValidElement())
+    { secondToLast.list.AddOnTop(last);
+      readingStack.RemoveLastObject();
+      continue;
+    }
+    if (secondToLast.type==JSData::JSopenBracket && last.type==JSData::JScomma)
+    { readingStack.RemoveLastObject();
+      continue;
+    }
+    if ((secondToLast.type==JSData::JSopenBrace ||
+         secondToLast.type==JSData::JSopenBracket)
+        &&
+        last.type==JSData::JScomma)
+    { readingStack.RemoveLastObject();
+      continue;
+    }
+    if (secondToLast.type==JSData::JSopenBrace &&
+        last.type==JSData::JScloseBrace)
+    { secondToLast.type=JSData::JSObject;
+      readingStack.RemoveLastObject();
+      continue;
+    }
+    if (secondToLast.type==JSData::JSopenBracket &&
+        last.type==JSData::JScloseBracket)
+    { secondToLast.type=JSData::JSarray;
+      readingStack.RemoveLastObject();
+      continue;
+    }
+    i++;
+    if (i>=theTokenS.size)
+      break;
+    readingStack.AddOnTop(theTokenS[i]);
+  }
+
+  if (readingStack.size!=JSData::numEmptyTokensAtStart+1)
+  { if (comments!=0)
+    { *comments << "<hr>Failed to parse your JSON. Got:<br>\n ";
+      for (int i=JSData::numEmptyTokensAtStart; i<readingStack.size; i++)
+        *comments << readingStack[i].ToString() << "\n<br>\n";
+    }
+    return false;
+  }
+  *this=readingStack[JSData::numEmptyTokensAtStart];
+  return true;
 }
 
 template <typename somestream>
-somestream& JSData::IntoStream(somestream& out) const
-{ switch(this->type)
-  { case JSNULL:
+somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) const
+{ std::string theIndentation="";
+  for (int i=0; i<indentation; i++)
+  { if (!useHTML)
+      theIndentation+=" ";
+    else
+      theIndentation+="&nbsp;";
+  }
+  out << theIndentation;
+  std::string newLine= useHTML ? "\n<br>\n" : "\n";
+  indentation++;
+  switch(this->type)
+  { case JSnull:
       out << "null";
       return out;
-    case JSNUM:
+    case JSnumber:
       out << this->number;
       return out;
-    case JSBOOL:
+    case JSbool:
       if(this->boolean == true)
         out << "true";
       else
         out << "false";
       return out;
-    case JSSTR:
+    case JSstring:
       out << '"' << this->string << '"';
       return out;
-    case JSLIST:
-      out << '[';
+    case JSarray:
+      out << "[" << newLine;
       for(int i=0; i<this->list.size; i++)
-      { this->list[i].IntoStream(out);
+      { this->list[i].IntoStream(out, indentation, useHTML);
         if(i!=this->list.size-1)
           out << ',';
       }
-      out << ']';
+      out << newLine << ']';
       return out;
-    case JSOBJ:
-      out << '{';
+    case JSObject:
+      out << "{" << newLine;
       for(int i=0; i<this->obj.size; i++)
       { out << '"' << this->obj[i].key << '"';
         out << ':';
-        this->obj[i].value.IntoStream(out);
+        this->obj[i].value.IntoStream(out, indentation, useHTML);
         if(i!=this->obj.size-1)
           out << ',';
       }
-      out << '}';
+      out << newLine << '}';
       return out;
+    case JSopenBrace:
+      if (useHTML)
+        out << "<b>";
+      out << "{";
+      if (useHTML)
+        out << "</b>";
+      return out;
+    case JScloseBrace:
+      if (useHTML)
+        out << "<b>";
+      out << "}";
+      if (useHTML)
+        out << "</b>";
+      return out;
+    case JSopenBracket:
+      if (useHTML)
+        out << "<b>";
+      out << "[";
+      if (useHTML)
+        out << "</b>";
+      return out;
+    case JScloseBracket:
+      if (useHTML)
+        out << "<b>";
+      out << "]";
+      if (useHTML)
+        out << "</b>";
+      return out;
+    case JScolon:
+      if (useHTML)
+        out << "<b>";
+      out << ":";
+      if (useHTML)
+        out << "</b>";
+      return out;
+    case JScomma:
+      if (useHTML)
+        out << "<b>";
+      out << ",";
+      if (useHTML)
+        out << "</b>";
+      return out;
+    case JSUndefined:
+      if (useHTML)
+        out << "<b>";
+      out << "undefined";
+      if (useHTML)
+        out << "</b>";
+      return out;
+    case JSerror:
+      if (useHTML)
+        out << "<b>";
+      out << "error";
+      if (useHTML)
+        out << "</b>";
+      return out;
+    default:
+      break;
   }
   //unreachable
   assert(false);
@@ -302,6 +339,15 @@ void JSData::writefile(const char* filename) const
 { std::ofstream out;
   out.open(filename);
   this->IntoStream(out);
+}
+
+void JSData::reset()
+{ this->type=this->JSUndefined;
+  this->boolean=false;
+  this->number=0;
+  this->string="";
+  this->list.SetSize(0);
+  this->obj.SetSize(0);
 }
 
 std::string JSData::ToString() const

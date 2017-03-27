@@ -5,7 +5,7 @@
 
 #include "vpfHeader2Math0_General.h" // Matrix
 #include "vpfHeader2Math01_LargeIntArithmetic.h" // Rational
-static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, work in progress, Thomas.");
+static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, work in progress.");
 
 
 /*The best kind of misleading documentation is aspirational
@@ -26,17 +26,27 @@ static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, wor
 // error: 'JSData::number' cannot appear in a constant-expression
 // or
 // error: 'JSType' is not a cass or namespace
-#define JSNULL 0
-#define JSBOOL 1
-#define JSNUM 2
-#define JSSTR 3
-#define JSLIST 4
-#define JSOBJ 5
 
 //struct JSHashData;
 class JSData
 {
 public:
+  static const char numEmptyTokensAtStart= 6;
+  static const char JSUndefined   = 0;
+  static const char JSnull        = 1;
+  static const char JSbool        = 2;
+  static const char JSnumber      = 3;
+  static const char JSstring      = 4;
+  static const char JSarray       = 5;
+  static const char JSObject      = 6;
+  static const char JSopenBrace   = 7;
+  static const char JScloseBrace  = 8;
+  static const char JSopenBracket = 9;
+  static const char JScloseBracket= 10;
+  static const char JScolon       = 11;
+  static const char JScomma       = 12;
+  static const char JSerror       = 13;
+
   char type;
   bool boolean;
   double number;
@@ -52,7 +62,7 @@ public:
 
   // there has to be a better way to do this
   void operator=(const Rational& other)
-  { this->type = JSNUM;
+  { this->type = this->JSnumber;
     this->number = other.GetDoubleValue();
   }
 
@@ -63,25 +73,24 @@ public:
 
   // parsing
   void ExtractScalar(const std::string& json, int begin, int end);
-  std::string GetString(const std::string& json, int begin, int end, int* actualend = NULL) const;
-  int AcceptString(const std::string& json, int begin);
-  int AcceptList(const std::string& json, int begin);
-  int AcceptObject(const std::string& json, int begin);
-
+  bool IsValidElement();
   JSData()
-  { type=JSNULL;
+  { this->reset();
   }
+  void reset();
   std::string ToString() const;
   template <typename somestream>
-  somestream& IntoStream(somestream& out) const;
+  somestream& IntoStream(somestream& out, int indentation=0, bool useHTML=false) const;
   void readfile(const char* filename);
-  void readstring(const std::string& json);
+  bool readstring(const std::string& json, std::stringstream* comments=0);
+  void TryToComputeType();
+  static bool Tokenize(const std::string& input, List<JSData>& output);
   void writefile(const char* filename) const;
 };
 
 struct JSHashData
 { std::string key;
-  struct JSData value;
+  JSData value;
 };
 
 std::ostream& operator<<(std::ostream& out, const JSData& data);

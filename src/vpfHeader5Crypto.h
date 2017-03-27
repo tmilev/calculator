@@ -3,10 +3,21 @@
 #include "vpfHeader1General0_General.h"
 static ProjectInformationInstance projectInfoCryptoHeader(__FILE__, "Crypto class declaration.");
 
+class Certificate
+{
+public:
+
+
+};
+
 class Crypto
 {
   //To do: make sure all crypto functions zero their buffers.
 public:
+  static List<Certificate> knownCertificates;
+  static void LoadKnownCertificates(std::stringstream* comments);
+  static void LoadOneKnownCertificate(const std::string& input, std::stringstream* comments);
+
   static std::string CharsToBase64String(const List<unsigned char>& input);
   static std::string CharsToBase64String(const std::string& input);
   static uint32_t GetUInt32FromCharBigendian(const List<unsigned char>& input);

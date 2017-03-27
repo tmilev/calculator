@@ -179,6 +179,14 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLoadKnownCertificates");
+  (void) input;
+  std::stringstream out;
+  Crypto::LoadKnownCertificates(&out);
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerJWTverity(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverity");
   if (!input.IsOfType<std::string>())
@@ -191,10 +199,18 @@ bool CalculatorFunctionsGeneral::innerJWTverity(Calculator& theCommands, const E
   { out << "JWT does not appear to have 3 parts";
     return output.AssignValue(out.str(), theCommands);
   }
-  out << "<br>Input: " << inputString;
-  std::string stringNormal;
-  if (Crypto::StringBase64ToString(theStrings[0], stringNormal, &theCommands.Comments))
-    out << "<br>un-base64:" << stringNormal;
+//  out << "<br>Input: " << inputString;
+  std::string stringOne, stringTwo, stringThree;
+  if (!Crypto::StringBase64ToString(theStrings[0], stringOne, &theCommands.Comments))
+    return false;
+  else
+    out << "<br>un-base64 stringOne: " << stringOne;
+  if (!Crypto::StringBase64ToString(theStrings[1], stringTwo, &theCommands.Comments))
+    return false;
+  else
+    out << "<br>un-base64 stringTwo:" << stringTwo;
+  if (!Crypto::StringBase64ToString(theStrings[2], stringThree, &theCommands.Comments))
+    return false;
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -221,6 +237,16 @@ bool CalculatorFunctionsGeneral::innerSha1OfString(Calculator& theCommands, cons
   for (int i=0; i<theSha1Uint.size; i++)
     out << std::hex << theSha1Uint[i];
   return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerBase64ToString(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBase64ToString");
+  std::string theString, result;
+  if (!input.IsOfType<std::string>(&theString))
+    theString=input.ToString();
+  if (!Crypto::StringBase64ToString(theString, result, &theCommands.Comments))
+    return false;
+  return output.AssignValue(result, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output)

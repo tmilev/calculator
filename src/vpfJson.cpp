@@ -30,10 +30,30 @@ JSData& JSData::operator[](int i)
   return this->list[i];
 }
 
+JSData JSData::GetValue(const std::string& key)
+{ int theIndex=this->GetKeyIndex(key);
+  if (theIndex!=-1)
+    return this->obj[theIndex].value;
+  JSData result;
+  result.type=JSData::JSUndefined;
+  return result;
+}
+
+bool JSData::HasKey(const std::string& key)
+{ return this->GetKeyIndex(key)!=-1;
+}
+
+int JSData::GetKeyIndex(const std::string& key)
+{ for(int i=0; i<this->obj.size; i++)
+    if(this->obj[i].key == key)
+      return i;
+  return -1;
+}
+
 JSData& JSData::operator[](const std::string& key)
 { this->type = this->JSObject;
-  for(int i=0; i<this->obj.size; i++)
-    if(this->obj[i].key == key)
+  for (int i=0; i<this->obj.size; i++)
+    if (this->obj[i].key == key)
       return this->obj[i].value;
   int i = this->obj.size;
   this->obj.SetSize(i+1);

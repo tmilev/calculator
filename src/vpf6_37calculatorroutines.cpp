@@ -9,6 +9,11 @@
 #include "vpfHeader8HtmlInterpretation.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
 #include "vpfHeader2Math9DrawingVariables.h"
+#include "vpfHeader5Crypto.h"
+//////////////////////////////////////
+#include "webserver.h"
+#include "vpfHeader4SystemFunctionsGlobalObjects.h"
+///////////////////////////////////
 ProjectInformationInstance ProjectInfoVpf6_37cpp(__FILE__, "More calculator built-in functions. ");
 
 bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
@@ -388,4 +393,62 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   thePlot.thePlots.AddOnTop(thePlotObj);
 //  stOutput << "DEBUG: height, width: " << desiredHtmlHeightPixels << ", " << desiredHtmlWidthPixels;
   return output.AssignValue(thePlot, theCommands);
+}
+
+extern WebServer theWebServer;
+bool CalculatorFunctionsGeneral::innerJWTverity(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverity");
+  if (!input.IsOfType<std::string>())
+    return false;
+  const std::string& inputString=input.GetValue<std::string>();
+  List<std::string> theStrings;
+  MathRoutines::StringSplitExcludeDelimiter(inputString,'.', theStrings);
+  std::stringstream out;
+  if (theStrings.size!=3)
+  { out << "JWT does not appear to have 3 parts";
+    return output.AssignValue(out.str(), theCommands);
+  }
+//  out << "<br>Input: " << inputString;
+  std::string stringOne, stringTwo, stringThree;
+  if (!Crypto::StringBase64ToString(theStrings[0], stringOne, &theCommands.Comments))
+    return false;
+  else
+    out << "<br>un-base64 stringOne: " << stringOne;
+  if (!Crypto::StringBase64ToString(theStrings[1], stringTwo, &theCommands.Comments))
+    return false;
+  else
+    out << "<br>un-base64 stringTwo:" << stringTwo;
+  if (!Crypto::StringBase64ToString(theStrings[2], stringThree, &theCommands.Comments))
+    return false;
+  if (!Crypto::LoadKnownCertificates(&out))
+    return output.AssignValue(out.str(), theCommands);
+  JSData keyID;
+  if (!keyID.readstring(stringOne), out)
+  { out << "Couldn't load string one.";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  bool isGood=false;
+  std::string keyIDstring;
+  if (keyID.type==keyID.JSObject)
+    if (keyID.HasKey("kid"))
+    { isGood=true;
+      keyIDstring=keyID.GetValue("kid").string;
+    }
+  if (!isGood)
+  { out << "Couldn't find key ID from string one. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  int theIndex=-1;
+  for (int i=0; i<Crypto::knownCertificates.size; i++)
+    if (keyIDstring==Crypto::knownCertificates[i].keyid)
+    { theIndex=i;
+      break;
+    }
+  if (theIndex==-1)
+  { out << "Could not find key id: " << keyIDstring << ". ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  Certificate& currentCert=Crypto::knownCertificates[theIndex];
+//  theWebServer.theSSLdata.ctx-
+  return output.AssignValue(out.str(), theCommands);
 }

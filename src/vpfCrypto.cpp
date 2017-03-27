@@ -286,6 +286,36 @@ uint32_t Crypto::leftRotateAsIfBigEndian(uint32_t input, int numBitsToRotate)
     result*=2;
     result+=last_bit;
   }
+  //stOutput << "<hr>DEBUG: right rotate: " << numBitsToRotate << " bits maps: "
+  //<< input << " to " << result;
+  return result;
+}
+
+uint32_t Crypto::rightShiftAsIfBigEndian(uint32_t input, int numBitsToShift)
+{ uint32_t result=input;
+  for (int i=0; i<numBitsToShift; i++)
+    result/=2;
+  //stOutput << "<hr>DEBUG: right shift: " << numBitsToShift << " bits maps: "
+  //<< input << " to " << result;
+
+  return result;
+}
+
+uint32_t Crypto::leftShiftAsIfBigEndian(uint32_t input, int numBitsToShift)
+{ uint32_t result=input;
+  for (int i=0; i<numBitsToShift; i++)
+    result*=2;
+  return result;
+}
+
+uint32_t Crypto::rightRotateAsIfBigEndian(uint32_t input, int numBitsToRotate)
+{ uint32_t result=input;
+  for (int i=0; i<numBitsToRotate; i++)
+  { uint32_t rightBit = result%2;
+    result/=2;
+    if (rightBit>0)
+      result+=2147483648;
+  }
   return result;
 }
 
@@ -348,7 +378,11 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
   uint32_t h4 = 0xC3D2E1F0;
   uint64_t messageLength=inputString.size()*8;//*sizeof(unsigned char);
   std::string inputStringPreprocessed=inputString;
-//  if (messageLength%256==0)
+  //Wikipedia appears to claim that if the message
+  //is a multiple of 8 bits, padding with the bit 1
+  //is not necessary. This appears to be false:
+  //adding: if (messageLength%256==0)
+  //appears to produce wrong results.
   inputStringPreprocessed.push_back(0x80);
   unsigned numbytesMod64= inputStringPreprocessed.size() %64;
   if (numbytesMod64>56)
@@ -423,35 +457,309 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
   output[4]=h4;
 }
 
-void Crypto::LoadOneKnownCertificate(const std::string& input, std::stringstream* comments)
+void Crypto::initSha256()
+{ MacroRegisterFunctionWithName("Crypto::initSha256");
+  if (Crypto::kArraySha2xx.size!=0)
+    return;
+  Crypto::kArraySha2xx.SetSize(64);
+  Crypto::kArraySha2xx[0] =0x428a2f98;
+  Crypto::kArraySha2xx[1] =0x71374491;
+  Crypto::kArraySha2xx[2] =0xb5c0fbcf;
+  Crypto::kArraySha2xx[3] =0xe9b5dba5;
+  Crypto::kArraySha2xx[4] =0x3956c25b;
+  Crypto::kArraySha2xx[5] =0x59f111f1;
+  Crypto::kArraySha2xx[6] =0x923f82a4;
+  Crypto::kArraySha2xx[7] =0xab1c5ed5;
+  Crypto::kArraySha2xx[8] =0xd807aa98;
+  Crypto::kArraySha2xx[9] =0x12835b01;
+  Crypto::kArraySha2xx[10]=0x243185be;
+  Crypto::kArraySha2xx[11]=0x550c7dc3;
+  Crypto::kArraySha2xx[12]=0x72be5d74;
+  Crypto::kArraySha2xx[13]=0x80deb1fe;
+  Crypto::kArraySha2xx[14]=0x9bdc06a7;
+  Crypto::kArraySha2xx[15]=0xc19bf174;
+  Crypto::kArraySha2xx[16]=0xe49b69c1;
+  Crypto::kArraySha2xx[17]=0xefbe4786;
+  Crypto::kArraySha2xx[18]=0x0fc19dc6;
+  Crypto::kArraySha2xx[19]=0x240ca1cc;
+  Crypto::kArraySha2xx[20]=0x2de92c6f;
+  Crypto::kArraySha2xx[21]=0x4a7484aa;
+  Crypto::kArraySha2xx[22]=0x5cb0a9dc;
+  Crypto::kArraySha2xx[23]=0x76f988da;
+  Crypto::kArraySha2xx[24]=0x983e5152;
+  Crypto::kArraySha2xx[25]=0xa831c66d;
+  Crypto::kArraySha2xx[26]=0xb00327c8;
+  Crypto::kArraySha2xx[27]=0xbf597fc7;
+  Crypto::kArraySha2xx[28]=0xc6e00bf3;
+  Crypto::kArraySha2xx[29]=0xd5a79147;
+  Crypto::kArraySha2xx[30]=0x06ca6351;
+  Crypto::kArraySha2xx[31]=0x14292967;
+  Crypto::kArraySha2xx[32]=0x27b70a85;
+  Crypto::kArraySha2xx[33]=0x2e1b2138;
+  Crypto::kArraySha2xx[34]=0x4d2c6dfc;
+  Crypto::kArraySha2xx[35]=0x53380d13;
+  Crypto::kArraySha2xx[36]=0x650a7354;
+  Crypto::kArraySha2xx[37]=0x766a0abb;
+  Crypto::kArraySha2xx[38]=0x81c2c92e;
+  Crypto::kArraySha2xx[39]=0x92722c85;
+  Crypto::kArraySha2xx[40]=0xa2bfe8a1;
+  Crypto::kArraySha2xx[41]=0xa81a664b;
+  Crypto::kArraySha2xx[42]=0xc24b8b70;
+  Crypto::kArraySha2xx[43]=0xc76c51a3;
+  Crypto::kArraySha2xx[44]=0xd192e819;
+  Crypto::kArraySha2xx[45]=0xd6990624;
+  Crypto::kArraySha2xx[46]=0xf40e3585;
+  Crypto::kArraySha2xx[47]=0x106aa070;
+  Crypto::kArraySha2xx[48]=0x19a4c116;
+  Crypto::kArraySha2xx[49]=0x1e376c08;
+  Crypto::kArraySha2xx[50]=0x2748774c;
+  Crypto::kArraySha2xx[51]=0x34b0bcb5;
+  Crypto::kArraySha2xx[52]=0x391c0cb3;
+  Crypto::kArraySha2xx[53]=0x4ed8aa4a;
+  Crypto::kArraySha2xx[54]=0x5b9cca4f;
+  Crypto::kArraySha2xx[55]=0x682e6ff3;
+  Crypto::kArraySha2xx[56]=0x748f82ee;
+  Crypto::kArraySha2xx[57]=0x78a5636f;
+  Crypto::kArraySha2xx[58]=0x84c87814;
+  Crypto::kArraySha2xx[59]=0x8cc70208;
+  Crypto::kArraySha2xx[60]=0x90befffa;
+  Crypto::kArraySha2xx[61]=0xa4506ceb;
+  Crypto::kArraySha2xx[62]=0xbef9a3f7;
+  Crypto::kArraySha2xx[63]=0xc67178f2;
+}
+
+void Crypto::computeSha224(const std::string& inputString, List<uint32_t>& output)
+{ MacroRegisterFunctionWithName("Crypto::computeSha224");
+  return Crypto::computeSha2xx(inputString, output, true);
+}
+
+void Crypto::computeSha256(const std::string& inputString, List<uint32_t>& output)
+{ MacroRegisterFunctionWithName("Crypto::computeSha256");
+  return Crypto::computeSha2xx(inputString, output, false);
+}
+
+List<uint32_t> Crypto::kArraySha2xx;
+
+void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& output, bool is224)
+{ MacroRegisterFunctionWithName("Crypto::computeSha2xx");
+  //Reference: wikipedia page on sha256.
+  //the Algorithm here is a direct implementation of the Wikipedia pseudocode.
+  uint32_t h0 = 0x6a09e667;
+  uint32_t h1 = 0xbb67ae85;
+  uint32_t h2 = 0x3c6ef372;
+  uint32_t h3 = 0xa54ff53a;
+  uint32_t h4 = 0x510e527f;
+  uint32_t h5 = 0x9b05688c;
+  uint32_t h6 = 0x1f83d9ab;
+  uint32_t h7 = 0x5be0cd19;
+  if (is224)
+  { h0 =0xc1059ed8;
+    h1 =0x367cd507;
+    h2 =0x3070dd17;
+    h3 =0xf70e5939;
+    h4 =0xffc00b31;
+    h5 =0x68581511;
+    h6 =0x64f98fa7;
+    h7 =0xbefa4fa4;
+  }
+  Crypto::initSha256();
+  //stOutput << "DEBUG: start string length: " << inputString.size();
+  uint64_t messageLength=inputString.size()*8;//*sizeof(unsigned char);
+  std::string inputStringPreprocessed=inputString;
+  inputStringPreprocessed.push_back(0x80);
+  unsigned numbytesMod64= inputStringPreprocessed.size() %64;
+  if (numbytesMod64>56)
+  { for (unsigned i=numbytesMod64; i<64; i++)
+      inputStringPreprocessed.push_back(0);
+    numbytesMod64=0;
+  }
+  for (int i=numbytesMod64; i<56; i++)
+    inputStringPreprocessed.push_back(0);
+  Crypto::convertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
+////////////////////////
+//  std::stringstream tempSTream;
+//  for (unsigned i=0; i<inputStringPreprocessed.size(); i++)
+//  {
+//    tempSTream << std::hex << inputStringPreprocessed[i];
+//  }
+//  stOutput << "<hr>DEBUG: first stream: " << tempSTream.str();
+///////////////////////
+  List<unsigned char> convertorToUint32;
+  List<uint32_t> inputStringUint32;
+  inputStringUint32.Reserve(1+inputStringPreprocessed.size()/4);
+  convertorToUint32.SetSize(4);
+  for (unsigned i=0; i<inputStringPreprocessed.size()/4; i++)
+  { convertorToUint32[0]=inputStringPreprocessed[i*4];
+    convertorToUint32[1]=inputStringPreprocessed[i*4+1];
+    convertorToUint32[2]=inputStringPreprocessed[i*4+2];
+    convertorToUint32[3]=inputStringPreprocessed[i*4+3];
+    inputStringUint32.AddOnTop(Crypto::GetUInt32FromCharBigendian(convertorToUint32));
+  }
+//  stOutput << "<hr>DEBUG inputStringUint32: " << inputStringUint32.ToStringCommaDelimited();
+  List<uint32_t> currentChunk;
+  currentChunk.SetSize(64);
+  uint32_t a=0, b=0, c=0, d=0, e=0, f=0, g=0, h=0, maj=0, temp1=0, temp2=0;
+  uint32_t s0=0, s1=0, ch=0;
+  List<uint32_t>& kArray= Crypto::kArraySha2xx;
+  for (int chunkCounter=0; chunkCounter<inputStringUint32.size; chunkCounter+=16)
+  { for (int j=0; j<16; j++)
+      currentChunk[j]=inputStringUint32[chunkCounter+j];
+    for (int j=16; j<64; j++)
+    { s0=
+      Crypto::rightRotateAsIfBigEndian(currentChunk[j-15],7) xor
+      Crypto::rightRotateAsIfBigEndian(currentChunk[j-15],18) xor
+      Crypto::rightShiftAsIfBigEndian(currentChunk[j-15],3);
+      s1=
+      Crypto::rightRotateAsIfBigEndian(currentChunk[j-2],17) xor
+      Crypto::rightRotateAsIfBigEndian(currentChunk[j-2],19) xor
+      Crypto::rightShiftAsIfBigEndian(currentChunk[j-2],10);
+      currentChunk[j]=currentChunk[j-16]+ s0 + currentChunk[j-7] + s1;
+    }
+    a=h0;
+    b=h1;
+    c=h2;
+    d=h3;
+    e=h4;
+    f=h5;
+    g=h6;
+    h=h7;
+    for (int j=0; j<64; j++)
+    { s1 =
+      Crypto::rightRotateAsIfBigEndian(e, 6) xor
+      Crypto::rightRotateAsIfBigEndian(e, 11) xor
+      Crypto::rightRotateAsIfBigEndian(e, 25);
+      ch = (e bitand f) xor ((compl e) bitand g);
+      temp1 = h + s1 + ch + kArray[j] + currentChunk[j];
+      s0 =
+      Crypto::rightRotateAsIfBigEndian(a, 2) xor
+      Crypto::rightRotateAsIfBigEndian(a, 13) xor
+      Crypto::rightRotateAsIfBigEndian(a, 22);
+      maj = (a bitand b) xor (a bitand c) xor (b bitand c);
+      temp2 = s0 + maj;
+      h = g            ;
+      g = f            ;
+      f = e            ;
+      e = d + temp1    ;
+      d = c            ;
+      c = b            ;
+      b = a            ;
+      a = temp1 + temp2;
+    }
+    h0+=a;
+    h1+=b;
+    h2+=c;
+    h3+=d;
+    h4+=e;
+    h5+=f;
+    h6+=g;
+    h7+=h;
+  }
+  if (is224)
+    output.SetSize(7);
+  else
+    output.SetSize(8);
+  output[0]=h0;
+  output[1]=h1;
+  output[2]=h2;
+  output[3]=h3;
+  output[4]=h4;
+  output[5]=h5;
+  output[6]=h6;
+  if (!is224)
+    output[7]=h7;
+}
+
+bool Certificate::LoadFromJSON(JSData& input, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("Certificate::LoadFromJSON");
+  if (comments!=0)
+    *comments << "<hr>Loading certificate from: "
+    << input.ToString();
+  if (input.type!=JSData::JSObject)
+  { if (comments!=0)
+      *comments << "Can't load certificate: JSON not of type object. ";
+    return false;
+  }
+  this->algorithm="";
+  this->keyid="";
+  this->theModulus="";
+  this->theExponent="";
+  if (input.HasKey("alg"))
+    this->algorithm=input.GetValue("alg").string;
+  if (input.HasKey("kid"))
+    this->keyid=input.GetValue("kid").string;
+  if (input.HasKey("n"))
+    this->theModulus=input.GetValue("n").string;
+  if (input.HasKey("e"))
+    this->theExponent=input.GetValue("e").string;
+  return true;
+}
+
+List<Certificate> Crypto::knownCertificates;
+
+bool Crypto::LoadOneKnownCertificate(const std::string& input, std::stringstream* comments)
 { MacroRegisterFunctionWithName("Crypto::LoadOneKnownCertificate");
   if (comments!=0)
     *comments << "Loading from: " << input;
-  JSData theCert;
-  theCert.readstring(input, comments);
-  if (comments!=0)
-  { *comments << "<br>Loaded: ";
-    theCert.IntoStream(*comments,0,true);
+  JSData certificateJSON;
+  if (!certificateJSON.readstring(input, comments))
+    return false;
+  Certificate currentCert;
+  bool isGood=false;
+  if (certificateJSON.type==JSData::JSObject)
+    if (certificateJSON.HasKey("keys"))
+    { JSData theKeys=certificateJSON.GetValue("keys");
+      if (theKeys.type==JSData::JSarray)
+      { isGood=true;
+        for (int i=0; i<theKeys.list.size; i++)
+        { if (!currentCert.LoadFromJSON(theKeys.list[i],comments))
+            return false;
+          Crypto::knownCertificates.AddOnTop(currentCert);
+        }
+      }
+    }
+  if (!isGood)
+  { if (comments!=0)
+      *comments << "I expected an object with key 'keys'"
+      << " consisting of an array of public keys. Instead, I got: "
+      << certificateJSON.ToString();
+    return false;
   }
+  return true;
 }
 
-void Crypto::LoadKnownCertificates(std::stringstream* comments)
+std::string Certificate::ToString()
+{ std::stringstream out;
+  out << "Algorithm: " << this->algorithm;
+  out << "Keyid: "     << this->keyid;
+  out << "Modulus: "   << this->theModulus;
+  out << "Exponent: "  << this->theExponent;
+  return out.str();
+}
+
+bool Crypto::LoadKnownCertificates(std::stringstream* comments)
 { MacroRegisterFunctionWithName("Crypto::LoadKnownCertificates");
+  Crypto::knownCertificates.SetSize(0);
   List<std::string> theFileNames;
   if (! FileOperations::GetFolderFileNamesVirtual("public-certificates/", theFileNames,0))
   { if (comments!=0)
       *comments << "Could not open folder public-certificates/, no certificates loaded.";
-    return;
+    return false;
   }
   std::stringstream temp;
   if (comments==0)
     comments=&temp;
+  *comments << "Certificates: ";
   for (int i=0; i<theFileNames.size; i++)
   { if (theFileNames[i]=="." || theFileNames[i]=="..")
       continue;
     std::string currentCert;
     if (!FileOperations::LoadFileToStringVirtual("public-certificates/"+theFileNames[i], currentCert, *comments, false))
       continue;
-    Crypto::LoadOneKnownCertificate(currentCert, comments);
+    if (!Crypto::LoadOneKnownCertificate(currentCert, comments))
+      return false;
   }
+  for (int i=0; i<Crypto::knownCertificates.size; i++)
+    *comments << "\n<hr>\nLoaded: "
+    << Crypto::knownCertificates[i].ToString();
+  return true;
 }

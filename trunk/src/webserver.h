@@ -5,6 +5,40 @@
 
 static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "Web server classes declarations.");
 
+/////////////////////////////////////////////////////////
+#ifdef MACRO_use_open_ssl
+//installation of these headers in ubuntu:
+//sudo apt-get install libssl-dev
+//on opensuse:
+//sudo yast -i libopenssl-devel
+//Instructions: look at the examples folder in the openssl.
+//openssl tutorial (couldn't make it work myself):
+//http://www.ibm.com/developerworks/library/l-openssl/
+#include <openssl/rsa.h>
+#include <openssl/crypto.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+struct SSLdata{
+public:
+  int errorCode;
+  SSL* ssl;
+  X509* client_cert;
+  SSL_CTX* ctx;
+  std::string otherCertificateIssuerName, otherCertificateSubjectName;
+  SSLdata()
+  { this->errorCode=-1;
+    this->ssl=0;
+    this->client_cert=0;
+    this->ctx=0;
+  }
+};
+#endif
+////////////////////////////////////////////
+
+
 class WebServer;
 
 class WebWorker
@@ -219,6 +253,9 @@ public:
   bool flagReapingChildren;
   bool flagThisIsWorkerProcess;
   double timeAtLastBackup;
+#ifdef MACRO_use_open_ssl
+  SSLdata theSSLdata;
+#endif
   MonomialCollection<MonomialWrapper<std::string, MathRoutines::hashString>, LargeInt> currentlyConnectedAddresses;
   List<std::string> PortsITryHttp;
   List<std::string> PortsITryHttpSSL;

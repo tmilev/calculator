@@ -16,39 +16,6 @@ WebServer theWebServer;
 #include <sys/stat.h>//<-for file statistics
 #include <fcntl.h>//<-setting flags of file descriptors
 
-#ifdef MACRO_use_open_ssl
-//installation of these headers in ubuntu:
-//sudo apt-get install libssl-dev
-//on opensuse:
-//sudo yast -i libopenssl-devel
-//Instructions: look at the examples folder in the openssl.
-//openssl tutorial (couldn't make it work myself):
-//http://www.ibm.com/developerworks/library/l-openssl/
-#include <openssl/rsa.h>
-#include <openssl/crypto.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-
-struct SSLdata{
-public:
-  int errorCode;
-  SSL* ssl;
-  X509* client_cert;
-  SSL_CTX* ctx;
-  std::string otherCertificateIssuerName, otherCertificateSubjectName;
-  SSLdata()
-  { this->errorCode=-1;
-    this->ssl=0;
-    this->client_cert=0;
-    this->ctx=0;
-  }
-};
-
-SSLdata theSSLdata;
-#endif
-////////////////////////////////////////////
 bool WebWorker::CheckConsistency()
 { auto oldOutputFn = stOutput.theOutputFunction;
   stOutput.theOutputFunction=0;
@@ -320,7 +287,7 @@ void WebServer::initSSL()
 
   FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate1, singedFileCertificate1Physical, true, true);
   FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate3, signedFileCertificate3Physical, true, true);
-  FileOperations::GetPhysicalFileNameFromVirtual (fileCertificate, fileCertificatePhysical, true, true);
+  FileOperations::GetPhysicalFileNameFromVirtual(fileCertificate, fileCertificatePhysical, true, true);
   FileOperations::GetPhysicalFileNameFromVirtual(fileKey, fileKeyPhysical, true, true);
   FileOperations::GetPhysicalFileNameFromVirtual(signedFileKey, signedFileKeyPhysical, true, true);
   //std::cout << "\n\nproject base: " << theGlobalVariables.PhysicalPathProjectBase;
@@ -531,7 +498,7 @@ void WebServer::SSLServerSideHandShake()
 std::string WebWorker::ToStringSSLError(int errorCode)
 {
 #ifdef MACRO_use_open_ssl
-  int theCode=SSL_get_error(theSSLdata.ssl, errorCode);
+  int theCode=SSL_get_error(this->parent->theSSLdata.ssl, errorCode);
   ERR_print_errors_fp(stderr);
   std::stringstream out;
   int extraErrorCode=0;
@@ -598,7 +565,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   tv.tv_sec = 5;  // 30 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
-  int numBytesInBuffer= SSL_read(theSSLdata.ssl, &buffer, bufferSize-1);
+  int numBytesInBuffer= SSL_read(this->parent->theSSLdata.ssl, &buffer, bufferSize-1);
   double numSecondsAtStart=theGlobalVariables.GetElapsedSeconds();
   int numFailedReceives=0;
   while ((numBytesInBuffer<0) || (numBytesInBuffer>((signed)bufferSize)))
@@ -625,7 +592,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     std::string bufferCopy(buffer, bufferSize);
     logIO << this->parent->ToStringConnection()
     << " Bytes in buffer so far: " << bufferCopy;
-    numBytesInBuffer= SSL_read(theSSLdata.ssl, &buffer, bufferSize-1);
+    numBytesInBuffer= SSL_read(this->parent->theSSLdata.ssl, &buffer, bufferSize-1);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);
   this->ParseMessageHead();
@@ -661,7 +628,7 @@ bool WebWorker::ReceiveAllHttpSSL()
       return false;
     }
 //    logIO << logger::blue << "about to read ..." << logger::endL;
-    numBytesInBuffer= SSL_read(theSSLdata.ssl, &buffer, bufferSize-1);
+    numBytesInBuffer= SSL_read(this->parent->theSSLdata.ssl, &buffer, bufferSize-1);
     if (numBytesInBuffer==0)
     { this->error= "While trying to fetch message-body, received 0 bytes. " +
       this->parent->ToStringLastErrorDescription();
@@ -725,7 +692,7 @@ void WebWorker::SendAllBytesHttpSSL()
       << logger::endL;
       return;
     }
-    int numBytesSent =  SSL_write (theSSLdata.ssl, this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
+    int numBytesSent =  SSL_write (this->parent->theSSLdata.ssl, this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
     if (numBytesSent<0)
     { ERR_print_errors_fp(stderr);
       theLog << "WebWorker::SendAllBytes failed: SSL_write error. " << logger::endL;

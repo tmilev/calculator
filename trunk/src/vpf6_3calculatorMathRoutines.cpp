@@ -187,35 +187,27 @@ bool CalculatorFunctionsGeneral::innerLoadKnownCertificates(Calculator& theComma
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerJWTverity(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverity");
-  if (!input.IsOfType<std::string>())
-    return false;
-  const std::string& inputString=input.GetValue<std::string>();
-  List<std::string> theStrings;
-  MathRoutines::StringSplitExcludeDelimiter(inputString,'.', theStrings);
-  std::stringstream out;
-  if (theStrings.size!=3)
-  { out << "JWT does not appear to have 3 parts";
-    return output.AssignValue(out.str(), theCommands);
-  }
-//  out << "<br>Input: " << inputString;
-  std::string stringOne, stringTwo, stringThree;
-  if (!Crypto::StringBase64ToString(theStrings[0], stringOne, &theCommands.Comments))
-    return false;
-  else
-    out << "<br>un-base64 stringOne: " << stringOne;
-  if (!Crypto::StringBase64ToString(theStrings[1], stringTwo, &theCommands.Comments))
-    return false;
-  else
-    out << "<br>un-base64 stringTwo:" << stringTwo;
-  if (!Crypto::StringBase64ToString(theStrings[2], stringThree, &theCommands.Comments))
-    return false;
-  return output.AssignValue(out.str(), theCommands);
+bool CalculatorFunctionsGeneral::innerSha1OfString
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha1OfString");
+  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA1");
 }
 
-bool CalculatorFunctionsGeneral::innerSha1OfString(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha1OfString");
+bool CalculatorFunctionsGeneral::innerSha256OfString
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha256OfString");
+  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA256");
+}
+
+bool CalculatorFunctionsGeneral::innerSha224OfString
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha224OfString");
+  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA224");
+}
+
+bool CalculatorFunctionsGeneral::innerShaX
+(Calculator& theCommands, const Expression& input, Expression& output, const std::string& shaId)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerShaX");
   if (!input.IsOfType<std::string>())
     return false;
   List<unsigned char> theBitStream;
@@ -229,11 +221,16 @@ bool CalculatorFunctionsGeneral::innerSha1OfString(Calculator& theCommands, cons
   List<uint32_t> theSha1Uint;
   List<unsigned char> theSha1Uchar;
   std::string theSha1base64string;
-  Crypto::computeSha1(inputString, theSha1Uint);
+  if (shaId=="SHA1")
+    Crypto::computeSha1(inputString, theSha1Uint);
+  else if (shaId=="SHA256")
+    Crypto::computeSha256(inputString, theSha1Uint);
+  else if (shaId=="SHA224")
+    Crypto::computeSha224(inputString, theSha1Uint);
   Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, theSha1Uchar);
   theSha1base64string=Crypto::CharsToBase64String(theSha1Uchar);
-  out << "<br>Sha1 in base64: " << theSha1base64string;
-  out << "<br>Sha1 hex: ";
+  out << "<br>" << shaId << " in base64: " << theSha1base64string;
+  out << "<br>" << shaId << " hex: ";
   for (int i=0; i<theSha1Uint.size; i++)
     out << std::hex << theSha1Uint[i];
   return output.AssignValue(out.str(), theCommands);

@@ -411,6 +411,22 @@ void Calculator::initPredefinedInnerFunctions()
    ", true, false,
    "CalculatorFunctionsGeneral::innerSha1OfString",
    "Sha1");
+  this->AddOperationInnerHandler
+  ("Sha224", CalculatorFunctionsGeneral::innerSha224OfString, "",
+   "Converts characters to a sequence of bits and computes the sha224 hash value of those bits. \
+   Reference: Wikipedia. ",
+   "Sha224(\"\");\
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerSha224OfString",
+   "Sha1");
+  this->AddOperationInnerHandler
+  ("Sha256", CalculatorFunctionsGeneral::innerSha256OfString, "",
+   "Converts characters to a sequence of bits and computes the sha256 hash value of those bits. \
+   Reference: Wikipedia. ",
+   "Sha256(\"\");\
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerSha256OfString",
+   "Sha256");
 
   this->AddOperationInnerHandler
   ("MakeMakefile",

@@ -59,7 +59,12 @@ public:
   void operator=(const std::string& other);
   JSData& operator[](int i);
   JSData& operator[](const std::string& s);
-
+  JSData GetValue(const std::string& key);
+  bool HasKey(const std::string& key);
+  int GetKeyIndex(const std::string& key);
+  JSData()
+  { this->reset();
+  }
   // there has to be a better way to do this
   void operator=(const Rational& other)
   { this->type = this->JSnumber;
@@ -74,9 +79,6 @@ public:
   // parsing
   void ExtractScalar(const std::string& json, int begin, int end);
   bool IsValidElement();
-  JSData()
-  { this->reset();
-  }
   void reset();
   std::string ToString() const;
   template <typename somestream>

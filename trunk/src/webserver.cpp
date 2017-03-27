@@ -1083,7 +1083,8 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   theGlobalVariables.userCalculatorRequestType=="activateAccount";
   if (changingPass)
     theUser.enteredAuthenticationToken = "";
-  if (theUser.enteredAuthenticationToken!="" || theUser.enteredPassword!="" || theUser.enteredActivationToken!="")
+  if (theUser.enteredAuthenticationToken!="" || theUser.enteredPassword!="" ||
+      theUser.enteredActivationToken!="")
     theGlobalVariables.flagLoggedIn= DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (theUser, &argumentProcessingFailureComments);
   theUser.resetPassword();
@@ -2240,6 +2241,8 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 { MacroRegisterFunctionWithName("WebWorker::GetLoginHTMLinternal");
   std::stringstream out;
   out << reasonForLogin;
+  if (theGlobalVariables.GetWebInput("error")!="")
+    out << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"), true);
   out << "<form name=\"login\">";
   out <<  "User name:\n"
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
@@ -2269,22 +2272,22 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
   /////////////////////////
-  out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
-  out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
-  out << "<b>This is an experimental feature which is "
-  << "currently being worked on.<br>"
-  << " Please do not use the following button</b>.";
-  out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div>";
-  out << "<script language=\"javascript\">"
-  << " function onSignIn(googleUser) {\n"
-  << "var profile = googleUser.getBasicProfile();\n"
-  << "console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.\n"
-  << "console.log('Name: ' + profile.getName());\n"
-  << "console.log('Image URL: ' + profile.getImageUrl());\n"
-  << "console.log('Email: ' + profile.getEmail());\n"
-  << "console.log('id_token: '+googleUser.getAuthResponse().id_token);\n"
-  << "}\n"
-  << "</script>";
+  //out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
+  //out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
+  //out << "<b>This is an experimental feature which is "
+  //<< "currently being worked on.<br>"
+  //<< " Please do not use the following button</b>.";
+  //out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div>";
+  //out << "<script language=\"javascript\">"
+  //<< " function onSignIn(googleUser) {\n"
+  //<< "var profile = googleUser.getBasicProfile();\n"
+  //<< "console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.\n"
+  //<< "console.log('Name: ' + profile.getName());\n"
+  //<< "console.log('Image URL: ' + profile.getImageUrl());\n"
+  //<< "console.log('Email: ' + profile.getEmail());\n"
+  //<< "console.log('id_token: '+googleUser.getAuthResponse().id_token);\n"
+  //<< "}\n"
+  //<< "</script>";
 //
 ///////////////////////////////////////
 //  out << "<br><br><small>No account yet? We are sorry but automatic registration has not been implemented yet.<br>"
@@ -2934,6 +2937,10 @@ int WebWorker::ServeClient()
           theGlobalVariables.webArguments.theKeys[i]!="request")
         redirectedAddress << theGlobalVariables.webArguments.theKeys[i] << "="
         << theGlobalVariables.webArguments.theValues[i] << "&";
+    if (argumentProcessingFailureComments.str()!="")
+      redirectedAddress << "error="
+      << CGI::StringToURLString(argumentProcessingFailureComments.str(),false)
+      << "&";
     std::stringstream headerStream;
     headerStream << "Location: " << redirectedAddress.str();
     //double fixme;

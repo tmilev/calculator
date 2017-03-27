@@ -313,7 +313,7 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(bool excludeAuthentica
     if (currentName=="request" ||  currentName=="password" ||
         currentName=="fileName" || currentName=="courseHome" || currentName=="topicList" ||
         currentName=="currentDatabaseTable" || currentName=="mainInput" || currentName=="studentView" ||
-        currentName=="studentSection")
+        currentName=="studentSection" || currentName=="error")
       continue;
     if (excludeAuthenticationToken && currentName=="authenticationToken")
       continue;

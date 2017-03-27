@@ -4,6 +4,7 @@
 #define vpfHeader1General7FileOperations_Encodings_already_included
 
 #include "vpfHeader1General0_General.h"
+#include "vpfHeader1General6Maps.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1General7FileOperations_EncodingsHeader1instance(__FILE__, "Header, file routines, encodings and more. ");
 
 struct FileOperations
@@ -34,7 +35,8 @@ public:
    ;
   static bool GetFolderFileNamesVirtual
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
-   List<std::string>* outputFileTypes=0, bool accessSensitiveFolders=false)
+   List<std::string>* outputFileTypes=0, bool accessSensitiveFolders=false,
+   bool accessULTRASensitiveFolders=false)
    ;
   static bool GetPhysicalFileNameFromVirtual
   (const std::string& inputFileName, std::string& output, bool accessSensitiveFolders=false, bool accessULTRASensitiveFolders=false);

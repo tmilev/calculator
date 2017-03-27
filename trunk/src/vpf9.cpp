@@ -479,12 +479,13 @@ std::string FileOperations::GetPathFromFileNameWithPath(const std::string& fileN
 }
 
 bool FileOperations::GetFolderFileNamesVirtual
-(const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes, bool accessSensitiveFolders)
+(const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes, bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
 { MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesOnTopOfProjectBase");
   std::string computedFolderName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFolderName, computedFolderName, accessSensitiveFolders))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFolderName, computedFolderName, accessSensitiveFolders, accessULTRASensitiveFolders))
     return false;
-//  stOutput << "Getting folder names from physical folder: " << computedFolderName;
+  //stOutput << "DEBUG: Getting folder names from physical folder: "
+  //<< computedFolderName;
   return FileOperations::GetFolderFileNamesUnsecure
   (computedFolderName, outputFileNamesNoPath, outputFileTypes);
 }
@@ -562,6 +563,7 @@ FileOperations::FolderVirtualLinksNonSensitive()
     result.SetKeyValue("freecalc/", "../freecalc/");
     result.SetKeyValue("html/", "../public_html/");
     result.SetKeyValue("html-common/", "html-common/");
+    result.SetKeyValue("public-certificates/", "public-certificates/");
   }
   return result;
 }

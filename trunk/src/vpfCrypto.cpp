@@ -1,4 +1,7 @@
 #include "vpfHeader5Crypto.h"
+#include "vpfHeader1General1_ListReferences.h"
+#include "vpfHeader1General7FileOperations_Encodings.h"
+#include "vpfJson.h"
 ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA-1 and base64 implementation.");
 
 unsigned char Crypto::GetCharFrom6bit(uint32_t input)
@@ -65,8 +68,10 @@ unsigned char Crypto::GetCharFrom6bit(uint32_t input)
     case 59: return '7';
     case 60: return '8';
     case 61: return '9';
-    case 62: return '+';
-    case 63: return '/';
+    case 62: return '-';//RFC 7515 mandates these values.
+    case 63: return '_';//RFC 7515 mandates these values.
+//    case 62: return '+';//original base64, deprecated.
+//    case 63: return '/';//original base64, deprecated.
     default: crash << "Requesting character from a purported 6 bit integer, which in fact has more significant bits. " << crash;
       break;
   }
@@ -137,8 +142,12 @@ bool Crypto::Get6bitFromChar(char input, uint32_t& output)
     case '7': output= 59; return true;
     case '8': output= 60; return true;
     case '9': output= 61; return true;
-    case '+': output= 62; return true;
-    case '/': output= 63; return true;
+    case '-': output= 62; return true;//RFC 7515 mandates these values.
+    case '_': output= 63; return true;//RFC 7515 mandates these values.
+    case '+': output= 62; return true;//Orinal base64, RFC 1421, deprecated (wikipedia).
+    case '/': output= 63; return true;//Orinal base64, RFC 1421, deprecated (wikipedia).
+    //Note: there is no collision between the original base64 and RFC 7515,
+    //both can be supported for input.
     case '=': return false;
     default: return false;
   }
@@ -412,4 +421,37 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
   output[2]=h2;
   output[3]=h3;
   output[4]=h4;
+}
+
+void Crypto::LoadOneKnownCertificate(const std::string& input, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("Crypto::LoadOneKnownCertificate");
+  if (comments!=0)
+    *comments << "Loading from: " << input;
+  JSData theCert;
+  theCert.readstring(input, comments);
+  if (comments!=0)
+  { *comments << "<br>Loaded: ";
+    theCert.IntoStream(*comments,0,true);
+  }
+}
+
+void Crypto::LoadKnownCertificates(std::stringstream* comments)
+{ MacroRegisterFunctionWithName("Crypto::LoadKnownCertificates");
+  List<std::string> theFileNames;
+  if (! FileOperations::GetFolderFileNamesVirtual("public-certificates/", theFileNames,0))
+  { if (comments!=0)
+      *comments << "Could not open folder public-certificates/, no certificates loaded.";
+    return;
+  }
+  std::stringstream temp;
+  if (comments==0)
+    comments=&temp;
+  for (int i=0; i<theFileNames.size; i++)
+  { if (theFileNames[i]=="." || theFileNames[i]=="..")
+      continue;
+    std::string currentCert;
+    if (!FileOperations::LoadFileToStringVirtual("public-certificates/"+theFileNames[i], currentCert, *comments, false))
+      continue;
+    Crypto::LoadOneKnownCertificate(currentCert, comments);
+  }
 }

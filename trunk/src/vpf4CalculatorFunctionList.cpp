@@ -129,30 +129,42 @@ void Calculator::initPredefinedInnerFunctions()
   ("or", CalculatorFunctionsGeneral::innerOr, "",
    "Logical or.",
    "0 or 0; 0 or 1; 1 or 0; 1 or 1; a or 1; a or 0;",
-   true, false, "CalculatorConversions::innerOr");
+   true, false,
+   "CalculatorConversions::innerOr",
+   "or");
   this->AddOperationInnerHandler
   ("if", CalculatorFunctionsGeneral::innerIf, "",
    "if function. Takes 3 arguments. If first argument is true (equal to 1)\
    then returns the second argument. If the first argument is false (equal to 0)\
    returns the third argument. In any other situation the expression is not reduced.",
    "if (1, x,y); if (0, x, y); if (2, x,y)",
-   true, false, "CalculatorConversions::innerIf");
+   true, false,
+   "CalculatorConversions::innerIf",
+   "if");
   this->AddOperationInnerHandler
   ("and", CalculatorFunctionsGeneral::innerAnd, "",
    "Logical and.",
    "0 and 0; 0 and 1; 1 and 0; 1 and 1; a and 1; a and 0;",
-   true, false, "CalculatorConversions::innerAnd");
+   true, false,
+   "CalculatorConversions::innerAnd",
+   "and");
   this->AddOperationInnerHandler
-  ("URLStringToNormalString", CalculatorFunctionsGeneral::innerUrlStringToNormalString, "",
+  ("URLStringToNormalString",
+    CalculatorFunctionsGeneral::innerUrlStringToNormalString, "",
    "Converts an url-encoded string to a normal string.",
    "URLStringToNormalString(\"randomSeed%3d92742048%26submissionsAlgebraAnswer%3\")",
-   true, false, "CalculatorConversions::innerUrlStringToNormalString");
+   true, false,
+   "CalculatorConversions::innerUrlStringToNormalString",
+   "URLStringToNormalString");
   this->AddOperationInnerHandler
-  ("URLKeyValuePairsDecode", CalculatorFunctionsGeneral::innerURLKeyValuePairsToNormalRecursive, "",
+  ("URLKeyValuePairsDecode",
+    CalculatorFunctionsGeneral::innerURLKeyValuePairsToNormalRecursive, "",
    "Converts an url-encoded string to a normal string. All % signs are interpreted recursively as\
    double, triple, ... url encoded strings and decoded accordingly.",
    "URLKeyValuePairsDecode(\"Problems%2fFunctions%2dcomposing%2dfractional%2dlinear%2d1.html=weight%3d3%26deadlines%3d%26&Problems%2fLimits%2dbasic%2dsubstitution%2d1.html=weight%3d3%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dinfinity%2dRF%2dequal%2ddeg%2d1.html=weight%3d2%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2dequal%2ddeg%2d1.html=weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dpm%2dinfinity%2dRF%2dnum%2ddeg%2dsmaller%2d1.html=weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html=weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d1.html=weight%3d5%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dRF%2ddeg%2dden%2dsmaller%2d2.html=weight%3d6%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dpm%2dinfinity%2dquotient%2dradical%2deven%2dpower%2dbasic%2d1.html=weight%3d1%26deadlines%3d%26&Problems%2fLimits%2dx%2dtends%2dto%2dminus%2dinfinity%2dquotient%2dradical%2dodd%2dpower%2dbasic%2d1.html=weight%3d1%26deadlines%3d%26&Homework%2fPrecalculus%2dPrerequisites%2dUMB%2d1.html=deadlines%3d%26&\")",
-   true, false, "CalculatorConversions::innerUrlStringToNormalString");
+   true, false,
+   "CalculatorConversions::innerUrlStringToNormalString",
+   "URLKeyValuePairsDecode");
   this->AddOperationInnerHandler
   ("LoadFileIntoString", CalculatorConversions::innerLoadFileIntoString, "",
    "Loads a file into a string. The file must be given its relative file name displayed when browsing \
@@ -169,20 +181,27 @@ void Calculator::initPredefinedInnerFunctions()
    "LoadFileIntoString(\"robots.txt\");\
     \nLoadFileIntoString(\"freecalc/contributors.tex\");\
     \nLoadFileIntoString(\"DefaultProblemLocation/Functions-composing-fractional-linear-1.html\")",
-   true, false, "CalculatorConversions::innerLoadFileIntoString");
+   true, false,
+   "CalculatorConversions::innerLoadFileIntoString",
+   "LoadFileIntoString");
   this->AddOperationInnerHandler
-  ("InterpretProblem", CalculatorHtmlFunctions::innerInterpretProblem, "",
+  ("InterpretProblem",
+    CalculatorHtmlFunctions::innerInterpretProblem, "",
    "Does as ExtractCalculatorExpressionFromHtml but in addition interprets the calculator commands. ",
    "InterpretProblem(LoadFileIntoString(\
-   \"DefaultProblemLocation/Functions-composing-fractional-linear-1.html\"))", true, false,
-   "CalculatorHtmlFunctions::innerInterpretProblem", "InterpretProblem");
+   \"DefaultProblemLocation/Functions-composing-fractional-linear-1.html\"))",
+   true, false,
+   "CalculatorHtmlFunctions::innerInterpretProblem",
+   "InterpretProblem");
   this->AddOperationInnerHandler
   ("ProblemGiveUp", CalculatorHtmlFunctions::innerInterpretProblemGiveUp, "",
    "Gives the predefined answer to a problem. First argument must be a string with the problem. \
     the second argument must be the id of the answer. ",
    "ProblemGiveUp(LoadFileIntoString(\
-   \"DefaultProblemLocation/Functions-composing-fractional-linear-1.html\"), AlgebraAnswer)", true, false,
-   "CalculatorHtmlFunctions::innerInterpretProblemGiveUp", "ProblemGiveUp");
+   \"DefaultProblemLocation/Functions-composing-fractional-linear-1.html\"), AlgebraAnswer)",
+   true, false,
+   "CalculatorHtmlFunctions::innerInterpretProblemGiveUp",
+   "ProblemGiveUp");
   this->AddOperationInnerHandler
   ("MakeInputBox", CalculatorHtmlFunctions::innerUserInputBox, "",
    "Creates an user input text box. ",
@@ -193,8 +212,10 @@ void Calculator::initPredefinedInnerFunctions()
   ("SetInputBox", CalculatorHtmlFunctions::innerSetInputBox, "",
    "Sets value for input box that overrides the input box (no box is displayed). ",
    "SetInputBox(name=a, value=RandomInteger((-5,-1), (1,5)));\
-     MakeInputBox(name=a)", true, false,
-   "CalculatorHtmlFunctions::innerSetInputBox", "SetInputBox");
+     MakeInputBox(name=a)",
+   true, false,
+   "CalculatorHtmlFunctions::innerSetInputBox",
+   "SetInputBox");
   this->AddOperationInnerHandler
   ("ExtractCalculatorExpressionFromHtml", CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml, "",
    "Reads html and extracts embedded calculator commands. \
@@ -210,35 +231,45 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("TestCalculatorIndicator", CalculatorFunctionsGeneral::innerTestIndicator, "",
    "(This is not a mathematical function). Tests the calculator indicator mechanism.",
-   "TestCalculatorIndicator(1000)", true, false,
+   "TestCalculatorIndicator(1000)",
+   true, false,
    "CalculatorFunctionsGeneral::innerTestIndicator",
    "TestCalculatorIndicator")
    ;
   this->AddOperationInnerHandler
   ("TestTopCommand", CalculatorFunctionsGeneral::innerTestTopCommand, "",
    "(This is not a mathematical function). Tests the top linux command. ",
-   "TestTopOperation(1000)", false, true,
+   "TestTopOperation(1000)",
+   false, true,
    "CalculatorFunctionsGeneral::innerTestTopCommand",
    "TestTopCommand")
    ;
   this->AddOperationInnerHandler
   ("TestStandardOutput", CalculatorFunctionsGeneral::innerTestStandardOutput, "",
    "(This is not a mathematical function). Tests the calculator standard output.",
-   "TestStandardOutput(\"The quick brown fox jumps over the lazy dog\")", true, false)
+   "TestStandardOutput(\"The quick brown fox jumps over the lazy dog\")",
+   true, false,
+   "CalculatorFunctionsGeneral::innerTestStandardOutput",
+   "TestStandardOutput")
    ;
   this->AddOperationInnerHandler
   ("Crash", CalculatorFunctionsGeneral::innerCrash, "",
    "Crashes the calculator: tests the \
     crashing mechanism (are crash logs properly created, etc.).",
-   "Crash(0)", true, false, "CalculatorFunctionsGeneral::innerCrash", "Crash");
+   "Crash(0)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerCrash",
+   "Crash");
   this->AddOperationInnerHandler
-  ("CrashListOutOfBounds", CalculatorFunctionsGeneral::innerCrashByListOutOfBounds, "",
+  ("CrashListOutOfBounds",
+    CalculatorFunctionsGeneral::innerCrashByListOutOfBounds, "",
    "Crashes the calculator by attempting to use data out-of-bounds in a List data structure.",
    "CrashListOutOfBounds(0)", true, false,
    "CalculatorFunctionsGeneral::innerCrashByListOutOfBounds",
    "CrashListOutOfBounds");
   this->AddOperationInnerHandler
-  ("CrashVectorOutOfBounds", CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds, "",
+  ("CrashVectorOutOfBounds",
+    CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds, "",
    "Crashes the calculator by attempting to use data \
     out-of-bounds in a std::vector.",
    "CrashVectorOutOfBounds(0)", "CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds",
@@ -251,17 +282,25 @@ void Calculator::initPredefinedInnerFunctions()
   ("Thaw", CalculatorFunctionsGeneral::innerThaw, "",
    "If the argument is frozen, removes the top freeze command and returns the argument, \
     else returns the argument unchanged.",
-   "a=Freeze{}(1+1); Thaw a; c=Thaw(Freeze(a,b)); PlotExpressionTree c", "Thaw");
+   "a=Freeze{}(1+1); Thaw a; c=Thaw(Freeze(a,b)); PlotExpressionTree c",
+   true, false,
+   "CalculatorFunctionsGeneral::innerThaw"
+   "Thaw");
 
   this->AddOperationInnerHandler
-  ("PlotExpressionTreeFull", CalculatorFunctionsGeneral::innerDrawExpressionGraphFull, "",
+  ("PlotExpressionTreeFull",
+    CalculatorFunctionsGeneral::innerDrawExpressionGraphFull, "",
    "Draws the internal tree structure of an expression. Unfolds built-in types. ",
    "PlotExpressionTreeFull( 1); PlotExpressionTree(1+ 1);PlotExpressionTree( Freeze{}(1+1));",
+   true, false,
+   "CalculatorFunctionsGeneral::innerDrawExpressionGraphFull",
    "PlotExpressionTreeFull");
   this->AddOperationInnerHandler
   ("Lispify", CalculatorFunctionsGeneral::innerLispify, "",
-   "Shows the internal tree structure of an expression, without completely unfolding the tree structure of expressions that represent a single mathematical\
-   entity.",
+   "Shows the internal tree structure of an expression, \
+    without completely unfolding the tree structure of \
+    expressions that represent a single mathematical\
+    entity.",
    "Lispify( e^x)",
    true, false,
    "CalculatorFunctionsGeneral::innerLispify",
@@ -271,13 +310,15 @@ void Calculator::initPredefinedInnerFunctions()
   ("FlattenCommandEnclosuresOneLayer",
     Calculator::innerFlattenCommandEnclosuresOneLayer, "",
    "Flattens command enclosures. ",
-   "FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x=5; x); CommandEnclosure{}(y; x)  ) ",
+   "FlattenCommandEnclosuresOneLayer(CommandEnclosure{}(x=5; x); \
+    CommandEnclosure{}(y; x)  ) ",
    true, false,
    "Calculator::FlattenCommandEnclosuresOneLayer",
    "FlattenCommandEnclosuresOneLayer");
   this->AddOperationInnerHandler
   ("LispifyFull", CalculatorFunctionsGeneral::innerLispifyFull, "",
-   "Shows the complete internal tree structure of an expression (replacing the expression with a string).",
+   "Shows the complete internal tree structure of an expression \
+    (replacing the expression with a string).",
    "LispifyFull( e^x)",
    true, false,
    "CalculatorFunctionsGeneral::innerLispifyFull",
@@ -298,7 +339,10 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("StringToAtom", CalculatorFunctionsGeneral::innerStringToAtom, "",
    "Transforms a string to an atom. ",
-   "StringToAtom(\"The quick brown fox jumps over the lazy dog.\")");
+   "StringToAtom(\"The quick brown fox jumps over the lazy dog.\")",
+   true, false,
+   "CalculatorFunctionsGeneral::innerStringToAtom",
+   "StringToAtom");
   this->AddOperationInnerHandler
   ("\"", CalculatorFunctionsGeneral::innerQuoteToString, "",
    "Creates a string.",
@@ -310,7 +354,10 @@ void Calculator::initPredefinedInnerFunctions()
   ("TestBase64", CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test, "",
    "Test function: converts a base64 string to bitstream and back to base64. Output must be identical to input. ",
    "TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog=\");\
-   \nTestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")");
+   \nTestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")",
+   true, false,
+   "CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test",
+   "TestBase64");
   this->AddOperationInnerHandler
   ("CharToBase64", CalculatorFunctionsGeneral::innerCharToBase64, "",
    "Converts characters to bit stream and the bitstream to base64. The character to bit stream conversion is not fixed at the moment and may be \
@@ -322,18 +369,38 @@ void Calculator::initPredefinedInnerFunctions()
     CharToBase64(\"easure.\");\
     CharToBase64(\"asure.\");\
     CharToBase64(\"sure.\");\
-   ");
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerCharToBase64",
+   "CharToBase64");
+  this->AddOperationInnerHandler
+  ("Base64ToString", CalculatorFunctionsGeneral::innerBase64ToString, "",
+   "Converts base64 to string",
+   "Base64ToString(\"k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9\");\
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerBase64ToString",
+   "Base64ToString");
+  this->AddOperationInnerHandler
+  ("LoadKnownCertificates",
+    CalculatorFunctionsGeneral::innerLoadKnownCertificates, "",
+   "Loads known security certificates from the knowncertificates folder. ",
+   "LoadKnownCertificates(0);", true, false,
+   "CalculatorFunctionsGeneral::innerLoadKnownCertificates",
+   "LoadKnownCertificates");
   this->AddOperationInnerHandler
   ("X509CertificateCrunch", CalculatorFunctionsGeneral::innerX509certificateCrunch, "",
    "Processes a x509 certificate database. This function is part of a security research project and \
    will be documented at a later time (if at all). Please do not use this function. ",
    "X509CertificateCrunch(\"certificates\");\
-   ", false, true, "CalculatorFunctionsGeneral::innerX509certificateCrunch");
+   ", false, true,
+   "CalculatorFunctionsGeneral::innerX509certificateCrunch",
+   "X509CertificateCrunch");
   this->AddOperationInnerHandler
   ("JWTverify", CalculatorFunctionsGeneral::innerJWTverity, "",
    "Tries to verify a Json Web Token.",
-   "JWTverify(\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImEwZjMxYjMzMmYyODE2YTllMTlmYzZkMDM1OWMzNmE1N2RjODJjMTIifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiaWF0IjoxNDg0MjAxMzk1LCJleHAiOjE0ODQyMDQ5OTUsImF0X2hhc2giOiJ6SmdyckhYM0xJWnlzVGUwcFZ0Rm1BIiwiYXVkIjoiNTM4NjA1MzA2NTk0LW40Mzc1NHZiMG00OGlyODRnOHZwNXVqMnU3a2xlcm4zLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTAzODQ1NzIyNTcxOTcxMzE0NTUyIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF6cCI6IjUzODYwNTMwNjU5NC1uNDM3NTR2YjBtNDhpcjg0Zzh2cDV1ajJ1N2tsZXJuMy5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImVtYWlsIjoidG9kb3IubWlsZXZAZ21haWwuY29tIiwibmFtZSI6IlRvZG9yIE1pbGV2IiwicGljdHVyZSI6Imh0dHBzOi8vbGg1Lmdvb2dsZXVzZXJjb250ZW50LmNvbS8tdmN2YWVzbE9RSm8vQUFBQUFBQUFBQUkvQUFBQUFBQUFBRk0veDJCU0pVVjUwa28vczk2LWMvcGhvdG8uanBnIiwiZ2l2ZW5fbmFtZSI6IlRvZG9yIiwiZmFtaWx5X25hbWUiOiJNaWxldiIsImxvY2FsZSI6ImVuIn0.k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9-FL9p-z_u_6rC_RoUta-S0nLZ_boGqCsonyQbussPHTLRKqRQanJ6MWZinKWjRPZvkx6ZnplqSAY9_uHwqZTwzeeXnOThxA1x-UvwLzGZcJDy8mF9yWj5YIQ7hvcWFwmQrEUUa9s7pSQzZ_hfFNELFFLxjT9TPRP4g3WBp6758ninMGHP_iBfWbPw7ZgNc6Wl9n8WGCzGlSpmM--wZFigPHPFA99cwmlhPK9sWgXMznzNuigQZRsiw\");\
-   ", true, false, "CalculatorFunctionsGeneral::innerJWTverity", "JWTverify");
+   "%HideLHS JWTverify(\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImEwZjMxYjMzMmYyODE2YTllMTlmYzZkMDM1OWMzNmE1N2RjODJjMTIifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiaWF0IjoxNDg0MjAxMzk1LCJleHAiOjE0ODQyMDQ5OTUsImF0X2hhc2giOiJ6SmdyckhYM0xJWnlzVGUwcFZ0Rm1BIiwiYXVkIjoiNTM4NjA1MzA2NTk0LW40Mzc1NHZiMG00OGlyODRnOHZwNXVqMnU3a2xlcm4zLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTAzODQ1NzIyNTcxOTcxMzE0NTUyIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF6cCI6IjUzODYwNTMwNjU5NC1uNDM3NTR2YjBtNDhpcjg0Zzh2cDV1ajJ1N2tsZXJuMy5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImVtYWlsIjoidG9kb3IubWlsZXZAZ21haWwuY29tIiwibmFtZSI6IlRvZG9yIE1pbGV2IiwicGljdHVyZSI6Imh0dHBzOi8vbGg1Lmdvb2dsZXVzZXJjb250ZW50LmNvbS8tdmN2YWVzbE9RSm8vQUFBQUFBQUFBQUkvQUFBQUFBQUFBRk0veDJCU0pVVjUwa28vczk2LWMvcGhvdG8uanBnIiwiZ2l2ZW5fbmFtZSI6IlRvZG9yIiwiZmFtaWx5X25hbWUiOiJNaWxldiIsImxvY2FsZSI6ImVuIn0.k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9-FL9p-z_u_6rC_RoUta-S0nLZ_boGqCsonyQbussPHTLRKqRQanJ6MWZinKWjRPZvkx6ZnplqSAY9_uHwqZTwzeeXnOThxA1x-UvwLzGZcJDy8mF9yWj5YIQ7hvcWFwmQrEUUa9s7pSQzZ_hfFNELFFLxjT9TPRP4g3WBp6758ninMGHP_iBfWbPw7ZgNc6Wl9n8WGCzGlSpmM--wZFigPHPFA99cwmlhPK9sWgXMznzNuigQZRsiw\");\
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerJWTverity",
+   "JWTverify");
 
   this->AddOperationInnerHandler
   ("Sha1", CalculatorFunctionsGeneral::innerSha1OfString, "",
@@ -341,19 +408,25 @@ void Calculator::initPredefinedInnerFunctions()
    The examples below are taken from Wikipedia. ",
    "Sha1(\"The quick brown fox jumps over the lazy dog\");\
     Sha1(\"The quick brown fox jumps over the lazy cog\");\
-   ");
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerSha1OfString",
+   "Sha1");
 
   this->AddOperationInnerHandler
   ("MakeMakefile",
     CalculatorFunctionsGeneral::innerMakeMakeFile, "",
    "Makes a makefile. ",
-   "MakeMakefile(0)", false);
+   "MakeMakefile(0)", false, false,
+   "CalculatorFunctionsGeneral::innerMakeMakeFile",
+   "MakeMakefile");
 
   this->AddOperationInnerHandler
   ("AutomatedTest", Calculator::innerAutomatedTest, "",
-   "Runs a big bad automated test of all built in functions against a set of known good results. ",
+   "Runs a big bad automated test of all built in functions \
+    against a set of known good results. ",
    "AutomatedTest{}(0)", false, false,
-   "Calculator::innerAutomatedTest", "AutomatedTest", true);
+   "Calculator::innerAutomatedTest",
+   "AutomatedTest", true);
   this->AddOperationInnerHandler
   ("AutomatedTestSetKnownGoodCopy",
     Calculator::innerAutomatedTestSetKnownGoodCopy, "",
@@ -368,7 +441,8 @@ void Calculator::initPredefinedInnerFunctions()
     CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation, "",
    "Runs a big bad automated test of all built in \
     problems located in the DefaultProblemLocation/ folder. ",
-   "AutomatedTestProblemInterpretation{}(0)", false, false,
+   "AutomatedTestProblemInterpretation{}(0)",
+   false, false,
    "CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation",
    "AutomatedTestProblemInterpretation",
    true);
@@ -408,21 +482,27 @@ void Calculator::initPredefinedInnerFunctions()
    "Gets one hyperoctahedral representation from two partitions. ",
    "HyperOctahedralRepresentation((1,1), (1))",
    true, false,
-   "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules");
+   "CalculatorFunctionsWeylGroup::innerHyperOctahedralAllModulesInducedFromSpechtModules",
+   "HyperOctahedralRepresentation");
   this->AddOperationInnerHandler
   ("HyperOctahedralGeneratorPrint",
     CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations, "",
    "Prints the generator commutation relations of a hyperoctahedral group.  ",
    "HyperOctahedralGeneratorPrint(3)",
    true, false,
-   "CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations");
+   "CalculatorFunctionsWeylGroup::innerHyperOctahedralPrintGeneratorCommutationRelations",
+   "HyperOctahedralGeneratorPrint");
   this->AddOperationInnerHandler
   ("PrintMacdonaldPolys", CalculatorFunctionsWeylGroup::innerMacdonaldPolys, "",
    "Prints macdonald polynomials from a semisimple type. ",
-   "PrintMacdonaldPolys{}(B_3)", true);
+   "PrintMacdonaldPolys{}(B_3)",
+   true, false,
+   "CalculatorFunctionsWeylGroup::innerMacdonaldPolys",
+   "PrintMacdonaldPolys");
   this->AddOperationInnerHandler
   ("Numerator", CalculatorFunctionsGeneral::innerNumerator, "",
-   "If the expression is a fraction, returns the numerator, else returns the entire expression. ",
+   "If the expression is a fraction, returns the numerator, \
+    else returns the entire expression. ",
    "Numerator(a/b); Numerator(1+1/x)",
    true, false,
    "CalculatorFunctionsGeneral::innerNumerator",
@@ -440,20 +520,25 @@ void Calculator::initPredefinedInnerFunctions()
 
   this->AddOperationInnerHandler
   ("Denominator", CalculatorFunctionsGeneral::innerDenominator, "",
-   "If the expression is a fraction, returns the denominator, else returns 1. ",
+   "If the expression is a fraction, returns the denominator, \
+    else returns 1. ",
    "Denominator(a/b); Denominator(1+1/x)",
    true, false,
    "CalculatorFunctionsGeneral::innerDenominator",
    "Denominator");
   this->AddOperationInnerHandler
   ("Product", CalculatorFunctionsGeneral::innerMultiplySequence, "",
-   "Returns the product of the elements in a sequence. When used on non-sequences, the function \
-   will ignore the first element and \
-   return the product of the remaining elements. This may not produce the result you expected for non-sequences,\
-   so use on sequences only. \
+   "Returns the product of the elements in a sequence. \
+    When used on non-sequences, the function \
+    will ignore the first element and \
+    return the product of the remaining elements. \
+    This may not produce the result you expected for non-sequences,\
+    so use on sequences only. \
     ",
    "Product(a,b); Product{}(Sequence{}a); Product(Sequence{}a); Product(a)",
-   true, false, "CalculatorFunctionsGeneral::innerMultiplySequence", "Product");
+   true, false,
+   "CalculatorFunctionsGeneral::innerMultiplySequence",
+   "Product");
   this->AddOperationInnerHandler
   ("\\sum", CalculatorFunctionsGeneral::innerSumSequence, "",
    "Returns the sum of the elements in a sequence. \
@@ -491,9 +576,13 @@ D-B;\
   this->AddOperationInnerHandler
   ("PolynomialAlgebraicNumbers", CalculatorConversions::innerPolynomial<AlgebraicNumber>, "",
    "Creates a polynomial expression with algebraic number coefficients. ",
-   "PolynomialAlgebraicNumbers{}((x+\\sqrt{2})^2 (\\sqrt{3}x-\\sqrt{5}));");
+   "PolynomialAlgebraicNumbers{}((x+\\sqrt{2})^2 (\\sqrt{3}x-\\sqrt{5}));",
+   true, false,
+   "CalculatorConversions::innerPolynomial",
+   "PolynomialAlgebraicNumbers");
   this->AddOperationInnerHandler
-  ("AlgebraicNumberFromPoly", CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly, "",
+  ("AlgebraicNumberFromPoly",
+    CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly, "",
    "Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. ",
    "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x+1);",
    true, false,
@@ -501,11 +590,16 @@ D-B;\
    "AlgebraicNumberFromPoly");
 
   this->AddOperationInnerHandler
-  ("PrincipalSlTwoIndex", CalculatorFunctionsGeneral::innerGetPrincipalSl2Index, "",
+  ("PrincipalSlTwoIndex",
+    CalculatorFunctionsGeneral::innerGetPrincipalSl2Index, "",
    "Gives the symmetric Cartan corresponding to a given dynkin type.",
-   "PrincipalSlTwoIndex(G_2^3+D_4^2);", true, false, "CalculatorFunctionsGeneral::innerGetPrincipalSl2Index");//, false);
+   "PrincipalSlTwoIndex(G_2^3+D_4^2);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerGetPrincipalSl2Index",
+   "PrincipalSlTwoIndex");
   this->AddOperationInnerHandler
-  ("DynkinIndicesSlTwoSubalgebras", CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras, "",
+  ("DynkinIndicesSlTwoSubalgebras",
+    CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras, "",
    "Fetches the absolute Dynkin indices of the sl(2) subalgebras of the input Dynkin type. The indices of each simple \
     component are computed by actually constructing the sl(2)-subalgebras; clearly this can be greatly optimized\
     but we postpone that for a future version. ",
@@ -514,21 +608,34 @@ D-B;\
     \n DynkinIndicesSlTwoSubalgebras(2A_2+A_2^7);\
     \n DynkinIndicesSlTwoSubalgebras(2G_2+G_2^7+F_4+F_4^19);",
     true, false,
-    "CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras");//, false);
+    "CalculatorFunctionsGeneral::innerGetDynkinIndicesSlTwoSubalgebras",
+    "DynkinIndicesSlTwoSubalgebras");
   this->AddOperationInnerHandler
-  ("CartanSymmetric", CalculatorFunctionsGeneral::innerGetSymmetricCartan, "",
+  ("CartanSymmetric",
+    CalculatorFunctionsGeneral::innerGetSymmetricCartan, "",
    "Gives the symmetric Cartan corresponding to a given dynkin type.",
-   "CartanSymmetric(e^7_6);");//, false);
+   "CartanSymmetric(e^7_6);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerGetSymmetricCartan",
+   "CartanSymmetric");
   this->AddOperationInnerHandler
   ("GrowDynkinType", CalculatorFunctionsGeneral::innerGrowDynkinType, "",
-   "This is a calculator testing function. Grows a Dynkin type inside an ambient Dynkin type. ",
-   "GrowDynkinType(A^30_1+d^30_4, e_6); GrowDynkinType(g^35_2+B^30_2, e_6);");//, false);
+   "This is a calculator testing function. Grows a Dynkin \
+    type inside an ambient Dynkin type. ",
+   "GrowDynkinType(A^30_1+d^30_4, e_6); GrowDynkinType(g^35_2+B^30_2, e_6);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerGrowDynkinType",
+   "GrowDynkinType");
   this->AddOperationInnerHandler
-  ("IsDifferentialOneFormOneVariable", CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable, "",
+  ("IsDifferentialOneFormOneVariable",
+    CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable, "",
    "Tests whether the expression is a differential form in one variable.  ",
    "IsDifferentialOneFormOneVariable(\\diff x ); IsDifferentialOneFormOneVariable(x\\diff y ); \
    IsDifferentialOneFormOneVariable(\\frac{\\diff y}{y} );\
-   IsDifferentialOneFormOneVariable(1/(\\diff y) );");
+   IsDifferentialOneFormOneVariable(1/(\\diff y) );",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable",
+   "IsDifferentialOneFormOneVariable");
 
   this->AddOperationInnerHandler
   ("Polynomialize",
@@ -542,7 +649,11 @@ D-B;\
   this->AddOperationInnerHandler
   ("IsConstant", CalculatorFunctionsGeneral::innerIsConstant, "",
    "Tests whether the expression is a constant.  ",
-   "IsConstant(\\pi^2); IsConstant(1);IsConstant(x);IsConstant(e^{\\sin(\\pi^2+e+\\sqrt{2}+3)}  ); ");
+   "IsConstant(\\pi^2); IsConstant(1);IsConstant(x);\
+    IsConstant(e^{\\sin(\\pi^2+e+\\sqrt{2}+3)}  ); ",
+    true, false,
+    "CalculatorFunctionsGeneral::innerIsConstant",
+    "IsConstant");
   this->AddOperationInnerHandler
   ("\\int",
    CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst, "",
@@ -657,9 +768,9 @@ D-B;\
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",
    "Differentiation - square root function.  ",
-   "d/dx(sqrt(x));", true, false, "CalculatorFunctionsGeneral::innerDifferentiateSqrt",
+   "d/dx(sqrt(x));", true, false,
+   "CalculatorFunctionsGeneral::innerDifferentiateSqrt",
    "DifferentiateSqrt");
-
 
   //the function integrating the building blocks must come in the exact order below:
   //else we risk infinite substitution cycle. The reasons are implementation-specific.
@@ -711,12 +822,14 @@ D-B;\
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig, "",
    "Differentiation - product rule.  ",
    "Differentiate(x,  (\\sin x) \\cos x )", true, false,
-   "CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig", "DifferentiateTrigAndInverseTrig");
+   "CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig",
+   "DifferentiateTrigAndInverseTrig");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateChainRule, "",
    "Differentiation - chain rule.  ",
    "Differentiate(x,  \\sin x^2 \\cos (\\sin x))", true, false,
-   "CalculatorFunctionsGeneral::innerDifferentiateChainRule", "DifferentiateChainRule");
+   "CalculatorFunctionsGeneral::innerDifferentiateChainRule",
+   "DifferentiateChainRule");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateAtimesB, "",
    "Differentiation - product rule.  ",
@@ -732,7 +845,9 @@ D-B;\
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateAplusB, "",
    "Differentiation - sum rule.  ",
-   "Differentiate(x, f+g )", true, false, "CalculatorFunctionsGeneral::innerDifferentiateAplusB");
+   "Differentiate(x, f+g )", true, false,
+   "CalculatorFunctionsGeneral::innerDifferentiateAplusB",
+   "DifferentiateSum");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateConstant, "",
    "Differentiation - constant rule. ",
@@ -742,7 +857,8 @@ D-B;\
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateX, "",
    "Differentiation - d/dx x= 1.",
-   "Differentiate(x, x ); d/dx x", true, false, "CalculatorFunctionsGeneral::innerDifferentiateX",
+   "Differentiate(x, x ); d/dx x", true, false,
+   "CalculatorFunctionsGeneral::innerDifferentiateX",
    "DifferentiateIdentity");
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateConstPower, "",
@@ -760,14 +876,18 @@ D-B;\
   this->AddOperationInnerHandler
   ("\\times", CalculatorFunctionsGeneral::innerCrossProduct, "",
    "Cross product in IIId. Returns error if given two non-3d vectors.",
-   "(1,-2,3 ) \\times( 1,-1,-1)", true, false, "CalculatorFunctionsGeneral::innerCrossProduct", "crossProduct");
+   "(1,-2,3 ) \\times( 1,-1,-1)", true, false,
+   "CalculatorFunctionsGeneral::innerCrossProduct",
+   "crossProduct");
 
   this->AddOperationInnerHandler
   ("ElementWeylAlgebraDO", Calculator::innerElementWeylAlgebra, "",
    "Creates element of a Weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
    second argument - the dual polynomial expression. ",
    "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1",
-   true, false, "Calculator::innerElementWeylAlgebra");
+   true, false,
+   "Calculator::innerElementWeylAlgebra",
+   "ElementWeylAlgebraDO");
   this->AddOperationInnerHandler
   ("ElementWeylAlgebraPoly", Calculator::innerPolynomialWithEWA, "",
    "Creates a monomial from the second argument whose differential \
@@ -775,7 +895,8 @@ D-B;\
    "x_{{i}}=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \
     \n\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i);\
     \n\\partial_1 x_1", true, false,
-   "Calculator::innerPolynomialWithEWA", "ElementWeylAlgebraPoly");
+   "Calculator::innerPolynomialWithEWA",
+   "ElementWeylAlgebraPoly");
   this->AddOperationInnerHandler
   ("MakeRationalFunction", CalculatorConversions::innerRationalFunction, "",
    "Creates a built-in rational function.",
@@ -793,8 +914,11 @@ D-B;\
   this->AddOperationInnerHandler
   ("MakeMatrixTensorForm", CalculatorConversions::innerMatrixRationalTensorForm,"",
    "Same as MakeMatrix but uses different c++ implementation (class MatrixTensor instead of class Matrix). \
-   ", "s_1=MakeMatrixTensorForm{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ", true, false,
-   "CalculatorConversions::innerMatrixRationalTensorForm");
+   ",
+   "s_1=MakeMatrixTensorForm{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ",
+   true, false,
+   "CalculatorConversions::innerMatrixRationalTensorForm",
+   "MakeMatrixTensorForm");
   this->AddOperationInnerHandler
   ("MakeMatrixRFs", CalculatorConversions::innerMatrixRationalFunction,"",
    "Creates an internal c++ matrix structure from double list of polynomial functions. \
@@ -834,12 +958,16 @@ D-B;\
    (0, 1, 2, 0), (0, 1, 1, 1), (1, 1, 2, 0), (1, 1, 1, 1), (0, 1, 2, 1), (1, 2, 2, 0), (1, 1, 2, 1), (0, 1, 2, 2), (1, 2, 2, 1), \
    (1, 1, 2, 2), (1, 2, 3, 1), (1, 2, 2, 2), (1, 2, 3, 2), (1, 2, 4, 2), (1, 3, 4, 2), (2, 3, 4, 2)\
    )\
-    )", true, false)
+    )", true, false,
+    "Calculator::innerPerturbSplittingNormal",
+    "PerturbSplittingNormal")
    ;
   this->AddOperationInnerHandler
   ("TestSpechtModules", CalculatorFunctionsWeylGroup::innerTestSpechtModules, "",
    "Tests all Specht modules of S_n, where n is the only argument taken by the function.",
-   "TestSpechtModules(4); ", true, false)
+   "TestSpechtModules(4); ", true, false,
+   "CalculatorFunctionsWeylGroup::innerTestSpechtModules",
+   "TestSpechtModules")
    ;
   this->AddOperationInnerHandler
   ("MakeElementWeylGroup",

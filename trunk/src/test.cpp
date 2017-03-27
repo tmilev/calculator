@@ -570,33 +570,33 @@ void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroupData>& g, Per
 template <typename somegroup>
 void PrintCharTable(const somegroup& G, const char* filename)
 { JSData data;
-  data.type = JSOBJ;
+  data.type = JSData::JSObject;
   data.obj.SetSize(3);
   data.obj[0].key = "representatives";
   data.obj[1].key = "sizes";
   data.obj[2].key = "characters";
 
-  data.obj[0].value.type = JSLIST;
+  data.obj[0].value.type = JSData::JSarray;
   data.obj[0].value.list.SetSize(G.conjugacyClasses.size);
   for(int i=0; i<G.conjugacyClasses.size; i++)
   { List<int> reprefs;
     G.GetWord(G.conjugacyClasses[i][0],reprefs);
-    data.obj[0].value.list[i].type = JSLIST;
+    data.obj[0].value.list[i].type = JSData::JSarray;
     data.obj[0].value.list[i].list.SetSize(reprefs.size);
     for(int j=0; j<reprefs.size; j++)
-    { data.obj[0].value.list[i].list[j].type = JSNUM;
+    { data.obj[0].value.list[i].list[j].type = JSData::JSnumber;
       data.obj[0].value.list[i].list[j].number = reprefs[j];
     }
   }
 
-  data.obj[1].value.type = JSLIST;
+  data.obj[1].value.type = JSData::JSarray;
   data.obj[1].value.list.SetSize(G.conjugacyClasses.size);
   for(int i=0; i<G.conjugacyClasses.size; i++)
-  { data.obj[1].value.list[i].type = JSNUM;
+  { data.obj[1].value.list[i].type = JSData::JSnumber;
     data.obj[1].value.list[i].number = G.conjugacyClasses[i].size;
   }
 
-  data.obj[2].value.type = JSLIST;
+  data.obj[2].value.type = JSData::JSarray;
   data.obj[2].value.list.SetSize(G.characterTable.size);
   for(int i=0; i<G.characterTable.size; i++)
   { for(int j=0; j<G.characterTable[i].size; j++)

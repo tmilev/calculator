@@ -763,25 +763,9 @@ bool CalculatorFunctionsGeneral::innerSort(Calculator& theCommands, const Expres
       !input.IsSequenceNElementS())
     return false;
   List<Expression> sortedExpressions;
-  sortedExpressions.Reserve(input.children.size-1);
-  for (int i=1; i<input.children.size; i++)
+  sortedExpressions.Reserve(input.size()-1);
+  for (int i=1; i<input.size(); i++)
     sortedExpressions.AddOnTop(input[i]);
-/*  stOutput << "<hr>DEBUG";
-  if (sortedExpressions.size==3)
-  { if (sortedExpressions[0]>sortedExpressions[1])
-      stOutput << "<br>" << sortedExpressions[0].ToString() << "&gt;" << sortedExpressions[1].ToString();
-    else
-      stOutput << "<br>" << sortedExpressions[1].ToString() << "&gt;" << sortedExpressions[0].ToString();
-    if (sortedExpressions[0]>sortedExpressions[2])
-      stOutput << "<br>" << sortedExpressions[0].ToString() << "&gt;" << sortedExpressions[2].ToString();
-    else
-      stOutput << "<br>" << sortedExpressions[2].ToString() << "&gt;" << sortedExpressions[0].ToString();
-    if (sortedExpressions[1]>sortedExpressions[2])
-      stOutput << "<br>" << sortedExpressions[1].ToString() << "&gt;" << sortedExpressions[2].ToString();
-    else
-      stOutput << "<br>" << sortedExpressions[2].ToString() << "&gt;" << sortedExpressions[1].ToString();
-  }
-    stOutput << "<hr>";*/
   sortedExpressions.QuickSortAscending();
   return output.MakeSequence(theCommands, &sortedExpressions);
 }

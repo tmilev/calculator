@@ -171,7 +171,7 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
     out << "Raw cert+sha:<br>" << certsAndShas[i] << "<br>Certificate " << i+1
     << " (base64):<br>" << theCerts[i] << "<br>Sha1:<br>" << theShas[i]
     << "<br>Comments while extracting the raw certificate: ";
-    Crypto::StringBase64ToBitStream(theCerts[i], theCertsRAWuchars[i], &out);
+    Crypto::ConvertStringBase64ToBitStream(theCerts[i], theCertsRAWuchars[i], &out);
     Crypto::ConvertBitStreamToString(theCertsRAWuchars[i], theCertsRAWstrings[i]);
     out << "<br>Raw certificate: " << theCertsRAWstrings[i];
 //    Crypto::GetUInt32FromCharBigendian(theCertsRAW[i], )
@@ -241,7 +241,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToString(Calculator& theCommands, co
   std::string theString, result;
   if (!input.IsOfType<std::string>(&theString))
     theString=input.ToString();
-  if (!Crypto::StringBase64ToString(theString, result, &theCommands.Comments))
+  if (!Crypto::ConvertStringBase64ToString(theString, result, &theCommands.Comments))
     return false;
   return output.AssignValue(result, theCommands);
 }
@@ -263,7 +263,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCo
   if (!input.IsOfType<std::string>())
     return false;
   List<unsigned char> theBitStream;
-  if (!Crypto::StringBase64ToBitStream(input.GetValue<std::string>(), theBitStream, &theCommands.Comments))
+  if (!Crypto::ConvertStringBase64ToBitStream(input.GetValue<std::string>(), theBitStream, &theCommands.Comments))
     return false;
   std::stringstream out;
   std::string theConvertedBack=Crypto::CharsToBase64String(theBitStream);
@@ -4433,26 +4433,34 @@ bool LargeIntUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun)
   if (this->IsEven())
     return *this==2;
   List<unsigned int> aFewPrimes;
-  std::cout << "got to here 1 \n";
-  std::cout.flush();
+  //std::cout << "got to here 1 \n";
+  //std::cout.flush();
   LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(100000, aFewPrimes);
   if (numTimesToRun>aFewPrimes.size)
     numTimesToRun=aFewPrimes.size;
   LargeIntUnsigned theOddFactorOfNminusOne=*this;
   int theExponentOfThePowerTwoFactorOfNminusOne=0;
   theOddFactorOfNminusOne--;
-  std::cout << "got to here 2 \n";
-  std::cout.flush();
+  //std::cout << "got to here 2 \n";
+  //std::cout.flush();
   while (theOddFactorOfNminusOne.IsEven())
   { theOddFactorOfNminusOne/=2;
     theExponentOfThePowerTwoFactorOfNminusOne++;
   }
-  std::cout << "got to here 3\n";
-  std::cout.flush();
+  //std::cout << "got to here 3\n";
+  //std::cout.flush();
+  ProgressReport theReport;
   for (int i=0; i<numTimesToRun; i++)
+  { if (theGlobalVariables.flagReportEverything)
+    { std::stringstream reportStream;
+      reportStream << "Miller-Rabin test " << i+1 << " out of "
+      << numTimesToRun;
+      theReport.Report(reportStream.str());
+    }
     if (!this->IsPossiblyPrimeMillerRabinOnce
         (aFewPrimes[i], theExponentOfThePowerTwoFactorOfNminusOne, theOddFactorOfNminusOne))
       return false;
+  }
   return true;
 }
 

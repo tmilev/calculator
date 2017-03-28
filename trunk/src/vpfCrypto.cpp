@@ -154,15 +154,15 @@ bool Crypto::Get6bitFromChar(char input, uint32_t& output)
   return false;
 }
 
-bool Crypto::StringBase64ToString(const std::string& input, std::string& output, std::stringstream* comments)
+bool Crypto::ConvertStringBase64ToString(const std::string& input, std::string& output, std::stringstream* comments)
 { List<unsigned char> byteList;
-  if (!Crypto::StringBase64ToBitStream(input, byteList, comments))
+  if (!Crypto::ConvertStringBase64ToBitStream(input, byteList, comments))
     return false;
   Crypto::ConvertBitStreamToString(byteList, output);
   return true;
 }
 
-bool Crypto::StringBase64ToBitStream(const std::string& input, List<unsigned char>& output, std::stringstream* comments)
+bool Crypto::ConvertStringBase64ToBitStream(const std::string& input, List<unsigned char>& output, std::stringstream* comments)
 { MacroRegisterFunctionWithName("Crypto::StringBase64ToBitStream");
   output.Reserve((3*input.size())/4+1);
   output.SetSize(0);
@@ -215,7 +215,7 @@ void Crypto::ConvertBitStreamToString(const List<unsigned char>& input, std::str
     output.push_back(input[i]);
 }
 
-void Crypto::ConvertStringToBitStream(const std::string& input, List<unsigned char>& output)
+void Crypto::ConvertStringToListBytes(const std::string& input, List<unsigned char>& output)
 { MacroRegisterFunctionWithName("Crypto::ConvertStringToBitStream");
   output.SetSize(input.size());
   for (unsigned i=0; i<input.size(); i++)
@@ -339,7 +339,46 @@ void Crypto::ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<uns
 
 }
 
-void Crypto::convertUint64toBigendianStringAppendResult(uint64_t& input, std::string& outputAppend)
+bool Crypto::ConvertHexToInteger(const std::string& input, LargeInt& output)
+{ output.MakeZero();
+  for (unsigned i=0; i<input.size(); i++)
+  { int theDigit=-1;
+    //stOutput << "DEBUG: Digit from: " << input[i];
+    if (input[i]>='A' && input[i]<='F')
+      theDigit=10+input[i]-'A';
+    if (input[i]>='a' && input[i]<='f')
+      theDigit=10+input[i]-'a';
+    if (input[i]>='0' && input[i]<='9')
+      theDigit=input[i]-'0';
+    //stOutput << "DEBUG: got digit: " << theDigit;
+    if (theDigit!=-1)
+    { output*=16;
+      output+=theDigit;
+    }
+  }
+  //stOutput << "result: " << output.ToString();
+  return true;
+}
+
+bool Crypto::ConvertBitStreamToHexString(const std::string& input, std::string& output)
+{ std::stringstream out;
+  for (unsigned i=0; i<input.size(); i++)
+  { unsigned char high= ((unsigned char) input[i])/16;
+    unsigned char low = ((unsigned char) input[i])%16;
+    if (high<10)
+      out << (int)high;
+    else
+      out << ((unsigned char) ('a'+high-10));
+    if (low<10)
+      out << (int)low;
+    else
+      out << ((unsigned char) ('a'+low-10));
+  }
+  output=out.str();
+  return true;
+}
+
+void Crypto::ConvertUint64toBigendianStringAppendResult(uint64_t& input, std::string& outputAppend)
 { //the following code should work on both big- and little-endian systems:
   outputAppend.push_back((unsigned char)  (input/72057594037927936) );
   outputAppend.push_back((unsigned char) ((input/281474976710656)%256 ));
@@ -400,7 +439,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
   }
   for (int i=numbytesMod64; i<56; i++)
     inputStringPreprocessed.push_back(0);
-  Crypto::convertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
+  Crypto::ConvertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
   List<unsigned char> convertorToUint32;
   List<uint32_t> inputStringUint32;
   inputStringUint32.Reserve(inputStringPreprocessed.size()/4);
@@ -583,7 +622,7 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
   }
   for (int i=numbytesMod64; i<56; i++)
     inputStringPreprocessed.push_back(0);
-  Crypto::convertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
+  Crypto::ConvertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
 ////////////////////////
 //  std::stringstream tempSTream;
 //  for (unsigned i=0; i<inputStringPreprocessed.size(); i++)

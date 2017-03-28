@@ -427,6 +427,20 @@ void Calculator::initPredefinedInnerFunctions()
    ", true, false,
    "CalculatorFunctionsGeneral::innerSha256OfString",
    "Sha256");
+  this->AddOperationInnerHandler
+  ("Base64ToHex", CalculatorFunctionsGeneral::innerBase64ToHex, "",
+   "Converts base64 string to hexadecimal string. ",
+   "Base64ToHex(\"AQAB\");\
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerBase64ToHex",
+   "Base64ToHex");
+  this->AddOperationInnerHandler
+  ("HexStringToInteger", CalculatorFunctionsGeneral::innerHexToInteger, "",
+   "Converts a hex string to an integer. ",
+   "HexStringToInteger(Base64ToHex(\"AQAB\"));\
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerHexToInteger",
+   "HexStringToInteger");
 
   this->AddOperationInnerHandler
   ("MakeMakefile",

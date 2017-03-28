@@ -395,7 +395,6 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   return output.AssignValue(thePlot, theCommands);
 }
 
-extern WebServer theWebServer;
 bool CalculatorFunctionsGeneral::innerJWTverity(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverity");
   if (!input.IsOfType<std::string>())
@@ -410,15 +409,15 @@ bool CalculatorFunctionsGeneral::innerJWTverity(Calculator& theCommands, const E
   }
 //  out << "<br>Input: " << inputString;
   std::string stringOne, stringTwo, stringThree;
-  if (!Crypto::StringBase64ToString(theStrings[0], stringOne, &theCommands.Comments))
+  if (!Crypto::ConvertStringBase64ToString(theStrings[0], stringOne, &theCommands.Comments))
     return false;
   else
     out << "<br>un-base64 stringOne: " << stringOne;
-  if (!Crypto::StringBase64ToString(theStrings[1], stringTwo, &theCommands.Comments))
+  if (!Crypto::ConvertStringBase64ToString(theStrings[1], stringTwo, &theCommands.Comments))
     return false;
   else
     out << "<br>un-base64 stringTwo:" << stringTwo;
-  if (!Crypto::StringBase64ToString(theStrings[2], stringThree, &theCommands.Comments))
+  if (!Crypto::ConvertStringBase64ToString(theStrings[2], stringThree, &theCommands.Comments))
     return false;
   if (!Crypto::LoadKnownCertificates(&out))
     return output.AssignValue(out.str(), theCommands);
@@ -451,4 +450,29 @@ bool CalculatorFunctionsGeneral::innerJWTverity(Calculator& theCommands, const E
   Certificate& currentCert=Crypto::knownCertificates[theIndex];
 //  theWebServer.theSSLdata.ctx-
   return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerHexToInteger(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerHexToInteger");
+  std::string inputString;
+  if (!input.IsOfType(&inputString))
+    inputString=input.ToString();
+  LargeInt result;
+  if (!Crypto::ConvertHexToInteger(inputString, result))
+    return theCommands << "Failed to interpret " << inputString
+    << " as a hex string ";
+  Rational resultRat=result;
+  return output.AssignValue(resultRat, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerBase64ToHex(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBase64ToHex");
+  std::string inputString;
+  if (!input.IsOfType(&inputString))
+    inputString=input.ToString();
+  std::string result, bitStream;
+  if (! Crypto::ConvertStringBase64ToString(inputString, bitStream,&theCommands.Comments))
+    return false;
+  Crypto::ConvertBitStreamToHexString(bitStream, result);
+  return output.AssignValue(result, theCommands);
 }

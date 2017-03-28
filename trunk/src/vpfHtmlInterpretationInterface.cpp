@@ -284,19 +284,33 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   theInterpreterWithAdvice.init();
   theInterpreterWithAdvice.flagWriteLatexPlots=false;
   theInterpreterWithAdvice.flagPlotNoControls=true;
-  std::stringstream calculatorInputStream;
+  std::stringstream calculatorInputStream,
+  calculatorInputStreamNoEnclosures;
   calculatorInputStream << "CommandEnclosure{}("
   << currentA.commandsBeforeAnswer << ");";
+  calculatorInputStreamNoEnclosures
+  << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   calculatorInputStream << "CommandEnclosure{}("
   << currentA.answerId << " = " << lastAnswer
   << "); ";
+  calculatorInputStreamNoEnclosures
+  << currentA.answerId << " = " << lastAnswer << "; ";
   bool hasCommentsBeforeSubmission=
   (MathRoutines::StringTrimWhiteSpace
   (currentA.commandsCommentsBeforeSubmission)!="");
   if (hasCommentsBeforeSubmission)
-    calculatorInputStream << "CommandEnclosure{}("
+  { calculatorInputStream << "CommandEnclosure{}("
     <<  currentA.commandsCommentsBeforeSubmission
     << ");";
+    calculatorInputStreamNoEnclosures
+    << currentA.commandsCommentsBeforeSubmission;
+  }
+  std::stringstream problemLinkStream;
+  problemLinkStream
+  << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+  << "?request=calculator&mainInput="
+  << CGI::StringToURLString(calculatorInputStreamNoEnclosures.str(),false)
+  << "\">Input link</a>";
   theInterpreterWithAdvice.Evaluate(calculatorInputStream.str());
   if (theInterpreterWithAdvice.syntaxErrors!="")
   { out << "<br><span style=\"color:red\"><b>"
@@ -318,7 +332,8 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     { out << "<br>Logged-in as admin with debug flag on=> printing error details. "
       << theInterpreterWithAdvice.outputString << "<br>"
       << theInterpreterWithAdvice.outputCommentsString;
-      out << "<hr>Calculator input: <br>"
+      out << "<hr><b>Calculator input:</b> "
+      << problemLinkStream.str() << "<br>"
       << calculatorInputStream.str();
     }
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
@@ -684,23 +699,44 @@ std::string HtmlInterpretation::SubmitProblem
   currentA.currentAnswerURLed=CGI::StringToURLString(currentA.currentAnswerClean, false);//<-encoding back to overwrite malformed input
   //stOutput << "<hr>DEBUG: Processing answer: " << currentA.currentAnswerClean << " to answer object: " << currentA.ToString();
   theProblem.studentTagsAnswered.AddSelectionAppendNewIndex(answerIdIndex);
+  std::stringstream completedProblemStreamNoEnclosures;
+
   std::stringstream completedProblemStream;
   completedProblemStream << "CommandEnclosure{}("
   << currentA.commandsBeforeAnswer
   << ");";
+  completedProblemStreamNoEnclosures << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+
   completedProblemStream << "CommandEnclosure{}("
   << currentA.answerId << "= (" << currentA.currentAnswerClean << ");"
   << ");"
   ;
+  completedProblemStreamNoEnclosures << currentA.answerId << "= (" << currentA.currentAnswerClean << ");";
+
   //stOutput << "DEBUG: " << "adding: commands: " << currentA.commandsCommentsBeforeSubmissionOnly;
   bool hasCommentsBeforeSubmission=
   (MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission)!="");
   if (hasCommentsBeforeSubmission)
-    completedProblemStream
+  { completedProblemStream
     << "CommandEnclosure{}("
     << currentA.commandsCommentsBeforeSubmission
     << ");";
+    completedProblemStreamNoEnclosures << currentA.commandsCommentsBeforeSubmission;
+  }
   completedProblemStream << theProblem.CleanUpCommandString(currentA.commandVerificationOnly);
+  completedProblemStreamNoEnclosures << theProblem.CleanUpCommandString(currentA.commandVerificationOnly);
+
+  std::stringstream debugInputStream;
+  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+  { debugInputStream
+    << "Input, no enclosures, direct link: "
+    << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?request=calculator&mainInput="
+    << CGI::StringToURLString(completedProblemStreamNoEnclosures.str(), false)
+    << "\">Input link</a>";
+  }
+
+
   //stOutput << "<br>DEBUG: input to the calculator: " << completedProblemStream.str() << "<hr>";
   if (timeSafetyBrake)
     theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
@@ -734,9 +770,14 @@ std::string HtmlInterpretation::SubmitProblem
     else
       out << isolatedInterpreter.outputString;
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-    { out << "<hr><b>Admin view internals:</b><br>" << theInterpreter.outputString
+    { out << "<hr><b>Admin view internals.</b><hr>"
+      << debugInputStream.str() << "<hr>"
+      << theInterpreter.outputString
       << "<br>" << theInterpreter.outputCommentsString
-      << "<hr><b>Submited completed problem stream.</b><br>" << completedProblemStream.str();
+      << "<hr>Input, no enclosures: <hr>"
+      << completedProblemStreamNoEnclosures.str()
+      << "<br>"
+      ;
 
     }
 //    stOutput << "yer input: " << completedProblemStream.str();
@@ -757,9 +798,16 @@ std::string HtmlInterpretation::SubmitProblem
   if (!(*outputIsCorrect))
   { out << "<tr><td><span style=\"color:red\"><b>Your answer appears to be incorrect. </b></span></td></tr>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      out << "<tr><td>For debug purposes: the calculator output is: " << theInterpreter.outputString
-      << "Comments: " << theInterpreter.Comments.str() << "<hr>Calculator input was:<hr>"
+    { out << "<tr><td>Admin view internals. "
+      << "<hr>" << debugInputStream.str()
+      << "<br>The calculator output is: " << theInterpreter.outputString
+      << "Comments: " << theInterpreter.Comments.str()
+      << "<hr>Input, no enclosures: <hr>"
+      << completedProblemStreamNoEnclosures.str()
+      ;
+      out << "<hr>Input, full:<hr>"
       << theInterpreter.inputString << "<hr></td></tr>";
+    }
   } else
   { out << "<tr><td><span style=\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
   }

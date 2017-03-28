@@ -53,6 +53,8 @@ public:
   static bool innerSha256OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha1OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerShaX(Calculator& theCommands, const Expression& input, Expression& output, const std::string& shaId);
+  static bool innerBase64ToHex(Calculator& theCommands, const Expression& input, Expression& output );
+  static bool innerHexToInteger(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerX509certificateCrunch(Calculator& theCommands, const Expression& input, Expression& output);
 

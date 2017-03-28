@@ -1971,12 +1971,11 @@ bool Expression::operator>(const Expression& other)const
   bool leftEvalsToDouble=this->EvaluatesToDouble(&left);
   bool rightEvalsToDouble=other.EvaluatesToDouble(&right);
   if (leftEvalsToDouble && rightEvalsToDouble)
-  { bool result =(left>right);
-    //if (result)
-    //  stOutput << "true";
-    //else
-    //  stOutput << "false";
-    return result;
+  { if(left!=right)
+      return left>right;
+    if (left==right)
+      if ((*this)==other)
+        return false;
   }
   if (leftEvalsToDouble && !rightEvalsToDouble)
     return false;

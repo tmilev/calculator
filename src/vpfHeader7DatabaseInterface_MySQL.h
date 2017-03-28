@@ -127,6 +127,7 @@ struct Answer
   std::string commandsCommentsBeforeSubmission;
   std::string commandsCommentsBeforeInterpretatioN;
   std::string commandsBeforeAnswer;
+  std::string commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   std::string commandVerificationOnly;
   std::string commandsSolutionOnly;
   std::string commandsNoEnclosureAnswerOnGiveUpOnly;
@@ -194,6 +195,8 @@ public:
   int totalNumSubmissions;
 //  int numAnswersSought;
   std::string commandsGenerateProblem;
+  std::string commandsGenerateProblemNoEnclosures;
+  std::string commandsGenerateProblemLink;
   List<Answer> theAnswers;
   List<std::string> inputNonAnswerIds;
   void AddEmptyAnswerIdOnTop(const std::string& inputAnswerId);

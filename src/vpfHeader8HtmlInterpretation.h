@@ -142,7 +142,7 @@ public:
   std::string outputHtmlBodyNoTag;
   std::string outputHtmlHeadNoTag;
   std::string outputHtmlNavigatioN;
-  std::stringstream logCommandsProblemGeneration;
+  std::stringstream logCommandsProblemGeneratioN;
   std::string courseHome;
   std::string topicListJavascriptWithTag;
 
@@ -182,8 +182,9 @@ public:
   bool InterpretHtml(std::stringstream& comments);
   bool InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments);
   std::string ToStringInterprettedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements);
+  void LogProblemGenerationObsolete(Calculator& theInterpreter);
   bool InterpretProcessExecutedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream& comments);
-  bool PrepareAnswerElements(std::stringstream &comments);
+  bool PrepareAnswerElements(std::stringstream& comments);
   bool InterpretAnswerElements(std::stringstream& comments);
   bool InterpretOneAnswerElement(SyntacticElementHTML& inputOutput);
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
@@ -195,6 +196,7 @@ public:
   bool PrepareCommandsAnswer(Answer& theAnswer, std::stringstream& comments);
   bool PrepareCommandsGenerateProblem(std::stringstream& comments);
   std::string GetProblemHeaderEnclosure();
+  std::string GetProblemHeaderWithoutEnclosure();
   bool SetTagClassFromOpenTag(SyntacticElementHTML& output);
   bool SetTagClassFromCloseTag(SyntacticElementHTML& output);
 

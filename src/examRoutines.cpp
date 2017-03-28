@@ -1012,10 +1012,18 @@ std::string CalculatorHTML::GetProblemHeaderEnclosure()
   return out.str();
 }
 
+std::string CalculatorHTML::GetProblemHeaderWithoutEnclosure()
+{ std::stringstream out;
+  out <<  " SetRandomSeed{}(" << this->theProblemData.randomSeed << "); ";
+  out << this->PrepareUserInputBoxes();
+  return out.str();
+}
+
 bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsGenerateProblem");
   (void) comments;
-  std::stringstream streamCommands;
+  std::stringstream streamCommands, streamCommandsNoEnclosures;
+  streamCommandsNoEnclosures << this->GetProblemHeaderWithoutEnclosure();
   streamCommands << this->GetProblemHeaderEnclosure();//first calculator enclosure contains the header
   int numCommandsSoFar=2;//two commands at the start: the opEndStatement command and
   // the first enclosure.
@@ -1026,10 +1034,19 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
     std::string commandCleaned=this->CleanUpCommandString(currentElt.content);
     std::string commandEnclosed="CommandEnclosure{}( " + commandCleaned + " );";
     streamCommands << commandEnclosed;
+    streamCommandsNoEnclosures << commandCleaned;
     currentElt.commandIndex=numCommandsSoFar;
     numCommandsSoFar++;
   }
   this->theProblemData.commandsGenerateProblem=streamCommands.str();
+  this->theProblemData.commandsGenerateProblemNoEnclosures = streamCommandsNoEnclosures.str();
+  std::stringstream debugStream;
+  debugStream << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+  << "?request=calculator&mainInput="
+  << CGI::StringToURLString(this->theProblemData.commandsGenerateProblemNoEnclosures,false)
+  << "\"> "
+  << "Input link </a>";
+  this->theProblemData.commandsGenerateProblemLink=debugStream.str();
   return true;
 }
 
@@ -1155,8 +1172,11 @@ bool CalculatorHTML::PrepareCommandsAnswer
 (Answer& theAnswer, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommandsAnswer");
   std::stringstream streamCommandS;
+  std::stringstream streamCommandsNoEnclosures;
   streamCommandS << this->GetProblemHeaderEnclosure();//first calculator enclosure contains the header
+  streamCommandsNoEnclosures << this->GetProblemHeaderWithoutEnclosure();
   std::stringstream streamCommandsBody;
+  std::stringstream streamCommandsBodyNoEnclosures;
   for (int i=0; i<this->theContent.size; i++)
   { SyntacticElementHTML& currentElt=this->theContent[i];
     if (!currentElt.IsCalculatorHidden() && !currentElt.IsCalculatorCommand()
@@ -1167,13 +1187,18 @@ bool CalculatorHTML::PrepareCommandsAnswer
     if (currentElt.IsAnswer() && currentElt.GetKeyValue("id")==theAnswer.answerId)
     { std::string stringCommandsBody=streamCommandsBody.str();
       if (stringCommandsBody!="")
-        streamCommandS << "CommandEnclosure{}(" << stringCommandsBody << ");\n";
+      { streamCommandS << "CommandEnclosure{}(" << stringCommandsBody << ");\n";
+        streamCommandsNoEnclosures << streamCommandsBodyNoEnclosures.str();
+      }
       theAnswer.commandsBeforeAnswer = streamCommandS.str();
+      theAnswer.commandsBeforeAnswerNoEnclosuresForDEBUGGING=streamCommandsNoEnclosures.str();
       theAnswer.commandVerificationOnly=commandCleaned;
       return true;
     }
     if (this->theContent[i].IsCalculatorHidden() || this->theContent[i].IsCalculatorCommand())
-      streamCommandsBody << commandEnclosed;
+    { streamCommandsBody << commandEnclosed;
+      streamCommandsBodyNoEnclosures << commandCleaned;
+    }
   }
   comments << "<b>Something is wrong: did not find answer for answer tag: "
   << theAnswer.answerId << ". </b>";
@@ -1193,7 +1218,9 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
 
   //stOutput << "nput cmds: " << calculatorCommands.str();
   if(theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights())
-  { this->logCommandsProblemGeneration << "<b>Input commands:</b><br>\n"
+  { this->logCommandsProblemGeneratioN << "<b>Input commands:</b> "
+    << this->theProblemData.commandsGenerateProblemLink
+    << "<br>\n"
     << this->theProblemData.commandsGenerateProblem;
   }
   theInterpreter.Evaluate(this->theProblemData.commandsGenerateProblem);
@@ -1772,21 +1799,24 @@ bool CalculatorHTML::InterpretProcessExecutedCommands
     //  stOutput << "<hr>";
     //}
   }
-  if(theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights())
-  { std::stringstream streamLog;
-    streamLog << "<table border='1'>";
-    for (int i=0; i<theInterpreter.theProgramExpression.size(); i++)
-    { streamLog << "<tr>";
-      for (int j=0; j<this->theContent.size; j++)
-        if (this->theContent[j].commandIndex==i)
-          streamLog << "<td>" << this->theContent[j].ToStringDebug() << "</td>";
-      streamLog << "<td>" << theInterpreter.theProgramExpression[i].ToString()
-      << "</td></tr>";
-    }
-    streamLog << "</table>";
-    this->logCommandsProblemGeneration << streamLog.str();
-  }
   return result;
+}
+
+void CalculatorHTML::LogProblemGenerationObsolete(Calculator &theInterpreter)
+{ if(! theGlobalVariables.UserDebugFlagOn() || !theGlobalVariables.UserDefaultHasProblemComposingRights())
+    return;
+  std::stringstream streamLog;
+  streamLog << "<table border='1'>";
+  for (int i=0; i<theInterpreter.theProgramExpression.size(); i++)
+  { streamLog << "<tr>";
+    for (int j=0; j<this->theContent.size; j++)
+      if (this->theContent[j].commandIndex==i)
+        streamLog << "<td>" << this->theContent[j].ToStringDebug() << "</td>";
+    streamLog << "<td>" << theInterpreter.theProgramExpression[i].ToString()
+    << "</td></tr>";
+  }
+  streamLog << "</table>";
+  this->logCommandsProblemGeneratioN << streamLog.str();
 }
 
 void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
@@ -2681,8 +2711,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (theGlobalVariables.UserDebugFlagOn() &&
       theGlobalVariables.UserDefaultHasAdminRights())
   { outBody << "<hr>Debug information follows. ";
-    if (this->logCommandsProblemGeneration.str()!="")
-      outBody << "<br>" << this->logCommandsProblemGeneration.str() << "<hr>";
+    if (this->logCommandsProblemGeneratioN.str()!="")
+      outBody << "<br>" << this->logCommandsProblemGeneratioN.str() << "<hr>";
     if (this->flagIsExamProblem)
       outBody << "Exam problem here. ";
     outBody << "<br>Random seed: " << this->theProblemData.randomSeed

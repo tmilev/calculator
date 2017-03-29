@@ -1327,7 +1327,7 @@ bool WebWorker::ReceiveAllHttp()
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 5 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
-  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
+  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO, (void*)(&tv), sizeof(timeval));
   double numSecondsAtStart=theGlobalVariables.GetElapsedSeconds();
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   int numFailedReceives=0;

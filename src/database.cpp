@@ -801,7 +801,7 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
   }
   if (this->AuthenticateWithToken(&secondCommentsStream))
     return true;
-  stOutput << "<br>DEBUG: User could not authenticate with token.";
+  //stOutput << "<br>DEBUG: User could not authenticate with token.";
   bool result= this->AuthenticateWithUserNameAndPass(theRoutines, commentsOnFailure);
   if (this->enteredPassword!="")
     this->ResetAuthenticationToken(theRoutines, commentsOnFailure);

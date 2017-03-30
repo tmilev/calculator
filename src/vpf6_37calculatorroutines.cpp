@@ -19,12 +19,14 @@ ProjectInformationInstance ProjectInfoVpf6_37cpp(__FILE__, "More calculator buil
 bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return theCommands << "Automated tests available to logged-in admins only. ";
   if (input.size()!=4)
-   return theCommands
-   << "I expected three arguments: "
-   << "1) first problem number to test (1 or less= start at the beginning) "
-   << "2) number of tests to run (0 or less= run all) and "
-   << "3) number of tests to interpret. ";
+    return theCommands
+    << "I expected three arguments: "
+    << "1) first problem number to test (1 or less= start at the beginning) "
+    << "2) number of tests to run (0 or less= run all) and "
+    << "3) number of tests to interpret. ";
   std::stringstream out;
   ProgressReport theReport;
   List<std::string> theFileNames, theFileTypes;
@@ -305,8 +307,6 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   PlotObject thePlotObj;
   thePlotObj.leftPtE=input[2];
   thePlotObj.rightPtE=input[3];
-  thePlot.DesiredHtmlHeightInPixels=300;
-  thePlot.DesiredHtmlWidthInPixels=300;
   if (input.size()>=7)
   { if (!input[6].IsOfType<std::string>(&thePlotObj.colorJS))
       thePlotObj.colorJS=input[6].ToString();
@@ -402,8 +402,20 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   return output.AssignValue(thePlot, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerJWTverity(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverity");
+bool CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverifyAgainstKeyRSA256");
+  if (input.size()!=4)
+    return theCommands << "The JWT verify command expects 3 arguments:"
+    << " string with the token in the usual format (\"a.b.c\"),"
+    << " the modulus of the key and the exponent of the key. ";
+  std::string theToken;
+  if (!input.IsOfType(&theToken))
+    return theCommands << "The first argument of " << input.ToString() << " is not a string. ";
+
+}
+
+bool CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownRSAkeys");
   if (!input.IsOfType<std::string>())
     return false;
   const std::string& inputString=input.GetValue<std::string>();

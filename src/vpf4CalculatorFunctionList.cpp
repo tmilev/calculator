@@ -395,12 +395,24 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorFunctionsGeneral::innerX509certificateCrunch",
    "X509CertificateCrunch");
   this->AddOperationInnerHandler
-  ("JWTverify", CalculatorFunctionsGeneral::innerJWTverity, "",
+  ("JWTverifyAgainstKnownKeys", CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys, "",
    "Tries to verify a Json Web Token.",
-   "%HideLHS JWTverify(\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImEwZjMxYjMzMmYyODE2YTllMTlmYzZkMDM1OWMzNmE1N2RjODJjMTIifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiaWF0IjoxNDg0MjAxMzk1LCJleHAiOjE0ODQyMDQ5OTUsImF0X2hhc2giOiJ6SmdyckhYM0xJWnlzVGUwcFZ0Rm1BIiwiYXVkIjoiNTM4NjA1MzA2NTk0LW40Mzc1NHZiMG00OGlyODRnOHZwNXVqMnU3a2xlcm4zLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTAzODQ1NzIyNTcxOTcxMzE0NTUyIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF6cCI6IjUzODYwNTMwNjU5NC1uNDM3NTR2YjBtNDhpcjg0Zzh2cDV1ajJ1N2tsZXJuMy5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImVtYWlsIjoidG9kb3IubWlsZXZAZ21haWwuY29tIiwibmFtZSI6IlRvZG9yIE1pbGV2IiwicGljdHVyZSI6Imh0dHBzOi8vbGg1Lmdvb2dsZXVzZXJjb250ZW50LmNvbS8tdmN2YWVzbE9RSm8vQUFBQUFBQUFBQUkvQUFBQUFBQUFBRk0veDJCU0pVVjUwa28vczk2LWMvcGhvdG8uanBnIiwiZ2l2ZW5fbmFtZSI6IlRvZG9yIiwiZmFtaWx5X25hbWUiOiJNaWxldiIsImxvY2FsZSI6ImVuIn0.k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9-FL9p-z_u_6rC_RoUta-S0nLZ_boGqCsonyQbussPHTLRKqRQanJ6MWZinKWjRPZvkx6ZnplqSAY9_uHwqZTwzeeXnOThxA1x-UvwLzGZcJDy8mF9yWj5YIQ7hvcWFwmQrEUUa9s7pSQzZ_hfFNELFFLxjT9TPRP4g3WBp6758ninMGHP_iBfWbPw7ZgNc6Wl9n8WGCzGlSpmM--wZFigPHPFA99cwmlhPK9sWgXMznzNuigQZRsiw\");\
+   "%HideLHS JWTverifyAgainstKnownKeys(\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImEwZjMxYjMzMmYyODE2YTllMTlmYzZkMDM1OWMzNmE1N2RjODJjMTIifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiaWF0IjoxNDg0MjAxMzk1LCJleHAiOjE0ODQyMDQ5OTUsImF0X2hhc2giOiJ6SmdyckhYM0xJWnlzVGUwcFZ0Rm1BIiwiYXVkIjoiNTM4NjA1MzA2NTk0LW40Mzc1NHZiMG00OGlyODRnOHZwNXVqMnU3a2xlcm4zLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTAzODQ1NzIyNTcxOTcxMzE0NTUyIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF6cCI6IjUzODYwNTMwNjU5NC1uNDM3NTR2YjBtNDhpcjg0Zzh2cDV1ajJ1N2tsZXJuMy5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImVtYWlsIjoidG9kb3IubWlsZXZAZ21haWwuY29tIiwibmFtZSI6IlRvZG9yIE1pbGV2IiwicGljdHVyZSI6Imh0dHBzOi8vbGg1Lmdvb2dsZXVzZXJjb250ZW50LmNvbS8tdmN2YWVzbE9RSm8vQUFBQUFBQUFBQUkvQUFBQUFBQUFBRk0veDJCU0pVVjUwa28vczk2LWMvcGhvdG8uanBnIiwiZ2l2ZW5fbmFtZSI6IlRvZG9yIiwiZmFtaWx5X25hbWUiOiJNaWxldiIsImxvY2FsZSI6ImVuIn0.k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9-FL9p-z_u_6rC_RoUta-S0nLZ_boGqCsonyQbussPHTLRKqRQanJ6MWZinKWjRPZvkx6ZnplqSAY9_uHwqZTwzeeXnOThxA1x-UvwLzGZcJDy8mF9yWj5YIQ7hvcWFwmQrEUUa9s7pSQzZ_hfFNELFFLxjT9TPRP4g3WBp6758ninMGHP_iBfWbPw7ZgNc6Wl9n8WGCzGlSpmM--wZFigPHPFA99cwmlhPK9sWgXMznzNuigQZRsiw\");\
    ", true, false,
-   "CalculatorFunctionsGeneral::innerJWTverity",
-   "JWTverify");
+   "CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys",
+   "JWTverifyAgainstKnownKeys");
+  this->AddOperationInnerHandler
+  ("JWTverifyRSA256", CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256, "",
+   "Tries to verify a Json Web Token with respect to a given rsa modulus and exponent.",
+   "%HideLHS \
+token=\"eyJhbGciOiJSUzI1NiIsImtpZCI6IjdjODNmNWNjMTUzNjAwMzczN2MzNzU5YjJiOTBiMWE1ZDFkNGFjNjUifQ.eyJhenAiOiI1Mzg2MDUzMDY1OTQtbjQzNzU0dmIwbTQ4aXI4NGc4dnA1dWoydTdrbGVybjMuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI1Mzg2MDUzMDY1OTQtbjQzNzU0dmIwbTQ4aXI4NGc4dnA1dWoydTdrbGVybjMuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDM4NDU3MjI1NzE5NzEzMTQ1NTIiLCJlbWFpbCI6InRvZG9yLm1pbGV2QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhdF9oYXNoIjoiZE5XTUtlTGl1UDJzd3dJNUtPSHdZQSIsImlzcyI6ImFjY291bnRzLmdvb2dsZS5jb20iLCJpYXQiOjE0OTA4ODQzMjIsImV4cCI6MTQ5MDg4NzkyMiwibmFtZSI6IlRvZG9yIE1pbGV2IiwicGljdHVyZSI6Imh0dHBzOi8vbGg1Lmdvb2dsZXVzZXJjb250ZW50LmNvbS8tdmN2YWVzbE9RSm8vQUFBQUFBQUFBQUkvQUFBQUFBQUFBRk0veDJCU0pVVjUwa28vczk2LWMvcGhvdG8uanBnIiwiZ2l2ZW5fbmFtZSI6IlRvZG9yIiwiZmFtaWx5X25hbWUiOiJNaWxldiIsImxvY2FsZSI6ImVuIn0.LlaSM5lvXlwxIV-jn8MpQWtzaTCX433ltU2M4Dojqybgs9JOSNEnP2tVt-TJ2fo-hxvaYxHaDgB-M84MzG07F_bs4ggIAsImJWO3saLqRPNjRGk6eKWh5vqE-HZkMS5mpn1KYsEy5Jbdd-i-fO1Ias_Q7NbH2dex71mErcagsyedcCjmvLiOKEzGTZ7o6gSXv_BZM29h5YoNDoOqerFuWuQCryDDTohh_xZ1TM2DH-2jAUVyqLIWUqnQhLo_CB_gre7Xs2qoBnGxTKtPB4SCqOS_0O38dI7cw2QzYczEY1q5ksFg_5pZoPyYuFQLKpAWbJLEn69S5_V-0rFEodKXeA\";\
+modulus= \"xvqIfxXslXjIJN33exth0D7r4N7jTF45TtIlQa_XVfOsCuw82cpS5C7Qut5oyW6yo5UwIDLfFclqaJR9MZGmpotFq148HM-C_oHTliHBC3aSPj7TRTr4lRDqgjLhZqbmEM3HPl4KWXZ7TVComhFiXgtImkvmMGkE3oURw1fFFnuIoG05bKVEn9UO5XYmqei1qWswtwNBr1PAmvS8HSIvgIZpBWSoFemQzsw31MDnw5_Quk7uilvOMpajyBLABUTu0XsQLY5gE6ZdGiLLAUuQS5ueueweKaCCBq5lNB22BM5PfyIdQSLLRrV5IkfL2JWxVCryZnoEL2lEDeCoEV-WBQ\";\
+exponent=\"AQAB\";\
+JWTverifyRSA256(token,HexStringToInteger( Base64ToHex(modulus))\
+,HexStringToInteger( Base64ToHex(exponent)));\
+   ", true, false,
+   "CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256",
+   "JWTverifyRSA256");
 
   this->AddOperationInnerHandler
   ("Sha1", CalculatorFunctionsGeneral::innerSha1OfString, "",
@@ -2058,20 +2070,21 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
   this->AddOperationInnerHandler ("Plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \
    y=f(x). The the second and third argument give the upper and \
-   lower bounds of x. The fourth and fifth argument are optional, specify the width \
-   and height of the image. The sixth argument is optional and specifies color.\
-   The seventh argument is optional and specifies line width. \
+   lower bounds of x. The remaining arguments are optional. \
+   The next argument specifies color.\
+   Next argument gives line width. \
+   Next argument gives number of sample points\
    Plots may be added together- adding plots superimposes the plots. \
    ",
-   "Plot2D{}(\\sin{}x+cos{}x, 0, 5, 200, 200, \"blue\",2)",
+   "Plot2D{}(\\sin{}x+cos{}x, 0, 5, \"blue\",2,8)",
    true, false,
    "CalculatorFunctionsGeneral::innerPlot2D",
    "Plot2D")
    ;
   this->AddOperationInnerHandler ("PlotFill", CalculatorFunctionsGeneral::innerPlotFill, "",
    "Fills a plot with color. ",
-   "PlotFill(Plot2D{}(sqrt(1-x^2), -1, 1, 200, 200, \"blue\",2)+\
-    Plot2D(-sqrt(1-x^2),-1,1, 200,200), \"blue\")",
+   "PlotFill(Plot2D{}(sqrt(1-x^2), -1, 1, \"blue\",2)+\
+    Plot2D(-sqrt(1-x^2),-1,1), \"blue\")",
     true, false,
    "CalculatorFunctionsGeneral::innerPlotFill",
    "PlotFill")
@@ -2104,7 +2117,7 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
     left corner of the viewing rectangle, \
     the second argument gives the upper right corner.\
    ",
-   "Plot2D{}(1/x, -30, 30, 300, 300, \"red\") + PlotViewRectangle((-5,-5), (5,5))",
+   "Plot2D{}(1/x, -30, 30, \"red\") + PlotViewRectangle((-5,-5), (5,5))",
    true, false,
    "CalculatorFunctionsGeneral::PlotViewRectangle", "PlotViewRectangle")
    ;
@@ -2116,7 +2129,7 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
     To modify the dimensions (in pixels) of another plot, \
     add to it the PlotWindow ``plot''.\
    ",
-   "Plot2D{}(1/x, -30, 30, 300, 300, \"red\") + \
+   "Plot2D{}(1/x, -30, 30, \"red\") + \
     PlotWindow(400,400)+ PlotViewRectangle((-5,-5), (5,5))",
     true, false,
    "CalculatorFunctionsGeneral::innerPlotWindow", "PlotWindow")
@@ -3408,6 +3421,13 @@ void Calculator::initPredefinedStandardOperations()
    a*(b*c)=a*(b*c), which clearly is infinite substitution.",
    "%LogEvaluation\n({{a}}*{{b}})*{{c}}=a*(b*c);  ", true);
 
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CalculatorFunctionsBinaryOps::innerAddStringToString, this->opString(), this->opString(),
+   "Concatenates strings. ",
+   "\"hello \"+ \"world\"",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerAddStringToString",
+   "AddStrings");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatToRat, this->opRational(), this->opRational(),
    "Adds two rational numbers. ",

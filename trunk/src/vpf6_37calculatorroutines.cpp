@@ -83,17 +83,24 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     theProblem.fileName="DefaultProblemLocation/"+theFileNames[i];
     bool isGoodLoad=theProblem.LoadMe(false, problemComments, randomSeedCurrent);
     bool isGoodInterpretation=false;
+    out << "<tr>";
+//    out << "<td>DEBUG: Random seed at start: "
+//    << theProblem.theProblemData.randomSeed;
+
     if (isGoodLoad)
       isGoodInterpretation=theProblem.InterpretHtml(problemComments);
+//    out << ".<br>DEBUG: random seed end: "
+//    << theProblem.theProblemData.randomSeed
+//    << "</td>";
     std::stringstream randSeedCurrentStream;
     randSeedCurrentStream << theProblem.theProblemData.randomSeed;
     randomSeedCurrent=randSeedCurrentStream.str();
-    out << "<tr>";
     out << "<td>" << numInterpretations << ". <td>";
     out << "<td>"
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=exerciseNoLogin"
-    << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+    << "&"
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
     << "fileName=" << theProblem.fileName << "&randomSeed="
     << randomSeedCurrent << "\">"
     << theFileNames[i]
@@ -475,4 +482,23 @@ bool CalculatorFunctionsGeneral::innerBase64ToHex(Calculator& theCommands, const
     return false;
   Crypto::ConvertBitStreamToHexString(bitStream, result);
   return output.AssignValue(result, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerRSAencrypt(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRSAencrypt");
+  //stOutput << "DEBUG: here be i";
+  if (input.size()!=4)
+    return false;
+  LargeInt theExponent, theModulus, theMessage, result;
+  if (!input[1].IsInteger(& theModulus) ||
+      !input[2].IsInteger(&theExponent) ||
+      !input[3].IsInteger(&theMessage))
+    return theCommands << "Failed to extract three (large) integers from the arguments of "
+    << input.ToString();
+  if (theModulus<0)
+    theModulus*=-1;
+  if (theModulus==1)
+    return theCommands << "Modulus 1 not allowed";
+  result=Crypto::RSAencrypt(theModulus.value, theExponent, theMessage);
+  return output.AssignValue((Rational)result, theCommands);
 }

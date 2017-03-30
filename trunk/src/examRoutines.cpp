@@ -1221,7 +1221,7 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   { this->logCommandsProblemGeneratioN << "<b>Input commands:</b> "
     << this->theProblemData.commandsGenerateProblemLink
     << "<br>\n"
-    << this->theProblemData.commandsGenerateProblem;
+    << this->theProblemData.commandsGenerateProblem << "<br>";
   }
   theInterpreter.Evaluate(this->theProblemData.commandsGenerateProblem);
 
@@ -2617,8 +2617,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     //outBody << "<br>";
   } else if (!this->flagIsExamHome && !this->flagIsForReal &&
              theGlobalVariables.userCalculatorRequestType!="template" &&
-             theGlobalVariables.userCalculatorRequestType!="templateNoLogin"
-             )
+             theGlobalVariables.userCalculatorRequestType!="templateNoLogin")
     outBody << "<span style=\"color:green\"><b>Practice mode.</b></span><hr>";
 
   //////////////////////////////
@@ -2682,7 +2681,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   bool shouldResetTheRandomSeed=false;
   if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven)
     shouldResetTheRandomSeed=true;
-  if (this->flagIsForReal && this->NumAttemptsToInterpret>1 )
+  if (this->flagIsForReal && this->NumAttemptsToInterpret>1)
   { shouldResetTheRandomSeed=true;
     outBody
     << "<hr><span style=\"color:red\"><b>"
@@ -2715,7 +2714,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       outBody << "<br>" << this->logCommandsProblemGeneratioN.str() << "<hr>";
     if (this->flagIsExamProblem)
       outBody << "Exam problem here. ";
-    outBody << "<br>Random seed: " << this->theProblemData.randomSeed
+    outBody << "<br>Random seed: "
+    << this->theProblemData.randomSeed
     << "<br>ForReal: " << this->flagIsForReal << "<br>seed given: "
     << this->theProblemData.flagRandomSeedGiven
     << "<br>flagRandomSeedGiven: "

@@ -2,6 +2,7 @@
 #include "vpfHeader1General1_ListReferences.h"
 #include "vpfHeader1General7FileOperations_Encodings.h"
 #include "vpfJson.h"
+#include "vpfHeader2Math2_AlgebraicNumbers.h"
 ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA-1 and base64 implementation.");
 
 unsigned char Crypto::GetCharFrom6bit(uint32_t input)
@@ -809,4 +810,16 @@ bool Crypto::LoadKnownCertificates(std::stringstream* comments)
     *comments << "\n<hr>\nLoaded: "
     << Crypto::knownCertificates[i].ToString();
   return true;
+}
+
+LargeInt Crypto::RSAencrypt(LargeIntUnsigned& theModulus, LargeInt& theExponent, LargeInt& theMessage)
+{ MacroRegisterFunctionWithName("Crypto::RSAencrypt");
+  ElementZmodP theElt, theOne;
+  theElt.theModulo=theModulus;
+  theOne.theValue=1;
+  theElt.AssignRational(theMessage);
+  MathRoutines::RaiseToPower(theElt, theExponent, theOne);
+  LargeInt result;
+  result=theElt.theValue;
+  return result;
 }

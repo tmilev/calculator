@@ -331,7 +331,8 @@ bool CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction(Calculator& t
 
 bool MeshTriangles::ComputePoints
 (Calculator& theCommands, const Expression& input, bool showGrid)
-{ if (input.children.size<6)
+{ MacroRegisterFunctionWithName("MeshTriangles::ComputePoints");
+  if (input.size()<5)
     return false;
   this->thePlot.dimension=2;
   this->flagShowGrid=showGrid;
@@ -366,25 +367,19 @@ bool MeshTriangles::ComputePoints
     return theCommands << "Failed to extract lower left corner from: " << input[2].ToString();
   if (!theCommands.GetVectorDoubles(input[3], this->upperRightCorner))
     return theCommands << "Failed to extract upper right corner from: " << input[3].ToString();
-  List<int> theGridCount, widthHeightInPixels;
+  List<int> theGridCount;
   if (!theCommands.GetVectoRInt(input[4], theGridCount))
     return theCommands << "Failed to extract pair of small integers from: " << input[4].ToString();
   if (theGridCount.size!=2)
     return theCommands << "Failed to extract pair of small integers from: " << input[4].ToString();
-  if (!theCommands.GetVectoRInt(input[5], widthHeightInPixels))
-    return theCommands << "Failed to extract pair of small integers from: " << input[5].ToString();
-  if (widthHeightInPixels.size!=2)
-    return theCommands << "Failed to extract pair of small integers from: " << input[5].ToString();
-  this->thePlot.DesiredHtmlWidthInPixels=widthHeightInPixels[0];
-  this->thePlot.DesiredHtmlWidthInPixels=widthHeightInPixels[1];
   this->XstartingGridCount=theGridCount[0];
   this->YstartingGridCount=theGridCount[1];
-  if (input.children.size>=7)
-  { if (!input[6].IsSmallInteger(&this->maxNumTriangles))
-      return theCommands << "Failed to extract small integer from: " << input[6].ToString();
+  if (input.size()>=6)
+  { if (!input[5].IsSmallInteger(&this->maxNumTriangles))
+      return theCommands << "Failed to extract small integer from: " << input[5].ToString();
     if (this->maxNumTriangles>20000)
     { this->maxNumTriangles=20000;
-      theCommands << "Max number of triangles decreased from your input: " << input[6].ToString()
+      theCommands << "Max number of triangles decreased from your input: " << input[5].ToString()
       << " to 20000. If you'd like to lift the restriction, modify code around: file: " << __FILE__
       << " line: " << __LINE__ << ". ";
     }

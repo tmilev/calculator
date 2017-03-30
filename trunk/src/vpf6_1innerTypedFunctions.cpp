@@ -166,12 +166,22 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(Calcu
 
 bool CalculatorFunctionsBinaryOps::innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddRatToRat");
-  if (!input.IsListNElements(3))
+  if (input.size()!=3)
     return false;
   Rational leftR, rightR;
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
   return output.AssignValue(leftR+rightR, theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerAddStringToString(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddStringToString");
+  if (input.size()!=3)
+    return false;
+  std::string left, right;
+  if (!input[1].IsOfType(&left) || !input[2].IsOfType(&right))
+    return false;
+  return output.AssignValue(left+right, theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat(Calculator& theCommands, const Expression& input, Expression& output)

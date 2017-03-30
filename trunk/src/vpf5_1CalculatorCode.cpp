@@ -945,8 +945,8 @@ Plot::Plot()
   this->lowBoundY=-0.5;
   this->highBoundY=0.5;
   this->flagIncludeExtraHtmlDescriptions=true;
-  this->DesiredHtmlHeightInPixels=400;
-  this->DesiredHtmlWidthInPixels=400;
+  this->DesiredHtmlHeightInPixels=350;
+  this->DesiredHtmlWidthInPixels=350;
   this->defaultLineColor=0;
   this->flagPlotShowJavascriptOnly=false;
   this->priorityWindow=0;

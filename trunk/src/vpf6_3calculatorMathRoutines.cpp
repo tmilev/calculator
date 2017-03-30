@@ -4796,24 +4796,18 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   PlotObject thePlotObj;
   thePlotObj.leftPtE=input[2];
   thePlotObj.rightPtE=input[3];
-  thePlot.DesiredHtmlHeightInPixels=400;
-  thePlot.DesiredHtmlWidthInPixels=600;
-  if (input.size()>=6)
-  { input[4].IsSmallInteger(&thePlot.DesiredHtmlWidthInPixels);
-    input[5].IsSmallInteger(&thePlot.DesiredHtmlHeightInPixels);
-  }
-  if (input.size()>=7)
-  { if (!input[6].IsOfType<std::string>(&thePlotObj.colorJS))
-      thePlotObj.colorJS=input[6].ToString();
+  if (input.size()>=5)
+  { if (!input[4].IsOfType<std::string>(&thePlotObj.colorJS))
+      thePlotObj.colorJS=input[4].ToString();
   } else
     thePlotObj.colorJS="red";
   thePlotObj.colorRGB=CGI::RedGreenBlue(255,0,0);
   DrawingVariables::GetColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
   thePlotObj.lineWidth=1;
-  if (input.size()>=8)
-    input[7].EvaluatesToDouble(&thePlotObj.lineWidth);
-  if (input.size()>=9)
-    thePlotObj.numSegmentsE=input[8];
+  if (input.size()>=6)
+    input[5].EvaluatesToDouble(&thePlotObj.lineWidth);
+  if (input.size()>=7)
+    thePlotObj.numSegmentsE=input[6];
   else
     thePlotObj.numSegmentsE.AssignValue(500, theCommands);
   int numIntervals=-1;
@@ -5087,85 +5081,52 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
 bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta");
   if (input.size()<4)
-    return output.MakeError("Drawing polar coordinates takes three arguments: function, lower angle bound and upper angle bound. ", theCommands);
-  const Expression& lowerE=input[2];
-  const Expression& upperE=input[3];
-  Expression functionE;
-  double lowerBound=0, upperBound=0;
-  PlotObject thePlotCartesian;
-  thePlotCartesian.dimension=2;
-  if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound))
-    return output.MakeError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
-  if (upperBound<lowerBound)
-    MathRoutines::swap(upperBound, lowerBound);
-  if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
+    return output.MakeError("Drawing polar coordinates takes at least three arguments: function, lower angle bound and upper angle bound. ", theCommands);
+if (input.size()<4)
+    return theCommands
+    << "Parametric curve plots take 3+ arguments. The first argument gives "
+    << "the coordinate functions in the format (f_1, f_2) or (f_1, f_2,f_3), "
+    << " the next two arguments stands for the variable range.";
+  if (input.HasBoundVariables())
     return false;
-  Expression xCoordE, yCoordE, costE(theCommands), sintE(theCommands);
-  costE.AddChildAtomOnTop(theCommands.opCos());
-  costE.AddChildAtomOnTop("t");
-  sintE.AddChildAtomOnTop(theCommands.opSin());
-  sintE.AddChildAtomOnTop("t");
-  xCoordE.MakeProducT(theCommands, input[1], costE);
-  yCoordE.MakeProducT(theCommands, input[1], sintE);
-  Vectors<double> theXCoords, theYCoords;
-  if (!xCoordE.EvaluatesToDoubleInRange("t", lowerBound, upperBound, 500, &thePlotCartesian.xLow, &thePlotCartesian.xHigh, &theXCoords))
+  const Expression& polarE=input[1];
+  HashedList<Expression> theVars;
+  if (!polarE.GetFreeVariables(theVars,true))
     return false;
-  if (!yCoordE.EvaluatesToDoubleInRange("t", lowerBound, upperBound, 500, &thePlotCartesian.yLow, &thePlotCartesian.yHigh, &theYCoords))
-    return false;
-  thePlotCartesian.thePoints.SetSize(theXCoords.size);
-  for (int i=0; i<thePlotCartesian.thePoints.size; i++)
-  { thePlotCartesian.thePoints[i].SetSize(2);
-    thePlotCartesian.thePoints[i][0]=theXCoords[i][1];
-    thePlotCartesian.thePoints[i][1]=theYCoords[i][1];
-  }
-  std::stringstream outCartesianLatex, outCartesianHtml;
-  outCartesianLatex << "%Calculator command: " << input.ToString() << "\n";
-  outCartesianHtml << "%Calculator command: " << input.ToString() << "\n<br>\n";
-
-  outCartesianLatex << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000, algebraic=false]{" << lowerBound << "}{"
-  << upperBound << "}{";
-  outCartesianHtml << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000, algebraic=false]{" << lowerBound << "}{"
-  << upperBound << "}{";
-  std::string funString=functionE.GetValue<std::string>();
-  outCartesianLatex << funString << " t 57.29578 mul cos mul " << funString << " t 57.29578 mul sin mul " << "}";
-  outCartesianHtml << funString << " t 57.29578 mul cos mul " << funString << " t 57.29578 mul sin mul " << "}";
-  thePlotCartesian.thePlotString=outCartesianLatex.str();
-  thePlotCartesian.thePlotStringWithHtml=outCartesianHtml.str();
-  return output.AssignValue(thePlotCartesian, theCommands);
+  if (theVars.size>1)
+    return theCommands << "Polar radius must depend on a single variable. ";
+  if (theVars.size==0)
+    theVars.AddOnTop( theCommands.GetNewAtom());
+  Expression theSine(theCommands), theCosine(theCommands);
+  theSine.AddChildAtomOnTop(theCommands.opSin());
+  theCosine.AddChildAtomOnTop(theCommands.opCos());
+  theSine.AddChildOnTop(theVars[0]);
+  theCosine.AddChildOnTop(theVars[0]);
+  Expression theX=theCosine*polarE;
+  Expression theY=theSine*polarE;
+  Expression newArg;
+  newArg.MakeSequence(theCommands);
+  newArg.AddChildOnTop(theX);
+  newArg.AddChildOnTop(theY);
+  output.reset(theCommands);
+  output.AddChildAtomOnTop("PlotCurve");
+  output.AddChildOnTop(newArg);
+  for (int i=2; i<input.size(); i++)
+    output.AddChildOnTop(input[i]);
+  return true;
 }
 
-bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended
+(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended");
-  if (!input.IsListNElements(4))
+  if (input.size()<4)
     return output.MakeError("Drawing polar coordinates takes three arguments: function, lower angle bound and upper angle bound. ", theCommands);
-  const Expression& lowerE=input[2];
-  const Expression& upperE=input[3];
-  Expression functionE;
-  PlotObject thePlotPolar;
-  thePlotPolar.dimension=2;
-  if (!lowerE.EvaluatesToDouble(&thePlotPolar.xLow) || !upperE.EvaluatesToDouble(&thePlotPolar.xHigh))
-    return output.MakeError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
-  if (thePlotPolar.xHigh<thePlotPolar.xLow)
-    MathRoutines::swap(thePlotPolar.xHigh, thePlotPolar.xLow);
-  if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
+  Expression plotXYE, plotRthetaE;
+  if (!theCommands.CallCalculatorFunction(CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta, input, plotXYE))
     return false;
-  Expression cartesianPlotE, polarPlotE;
-  if (!theCommands.CallCalculatorFunction(CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta, input, cartesianPlotE))
+  if (!theCommands.CallCalculatorFunction(CalculatorFunctionsGeneral::innerPlot2D, input, plotRthetaE))
     return false;
-  std::stringstream  outPolarLatex, outPolarHtml;
-  outPolarLatex << "%Calculator command: " << input.ToString() << "\n";
-  outPolarHtml << "%Calculator command: " << input.ToString() << "\n<br>\n";
-  outPolarLatex << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
-  << thePlotPolar.xHigh << "}{";
-  outPolarHtml << "\\parametricplot[linecolor=\\fcColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
-  << thePlotPolar.xHigh << "}{";
-  std::string funString=functionE.GetValue<std::string>();
-  outPolarLatex << "t " << funString << "}";
-  outPolarHtml << "t " << funString << "}";
-  thePlotPolar.thePlotString=outPolarLatex.str();
-  thePlotPolar.thePlotStringWithHtml=outPolarHtml.str();
-  polarPlotE.AssignValue(thePlotPolar, theCommands);
-  return output.MakeXOX(theCommands, theCommands.opSequence(), cartesianPlotE, polarPlotE);
+  return output.MakeXOX(theCommands, theCommands.opSequence(), plotXYE, plotRthetaE);
 }
 
 bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output)

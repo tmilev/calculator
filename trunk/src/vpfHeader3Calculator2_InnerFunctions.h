@@ -47,7 +47,8 @@ public:
   static bool innerBase64ToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerJWTverity(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerJWTverifyAgainstKnownKeys(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerJWTverifyAgainstRSA256(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerRSAencrypt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha224OfString(Calculator& theCommands, const Expression& input, Expression& output);
@@ -278,10 +279,10 @@ public:
   static bool innerPlotImplicitShowGridFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotSegment(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPlotPolarRfunctionThetaExtended(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotDirectionField(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotVectorField(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotDirectionOrVectorField(Calculator& theCommands, const Expression& input, Expression& output, bool vectorsAreNormalized);
+  static bool innerPlotPolarRfunctionThetaExtended(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotFill(Calculator& theCommands, const Expression& input, Expression& output);

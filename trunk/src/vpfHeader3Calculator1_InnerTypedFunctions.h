@@ -29,6 +29,7 @@ public:
   static bool innerAddMatrixRFsToMatrixRFs(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddMatrixTensorToMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddStringToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddEltZmodPorRatToEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddAlgebraicNumberToAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddWeightToWeight(Calculator& theCommands, const Expression& input, Expression& output);

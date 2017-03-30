@@ -1945,7 +1945,7 @@ D-B;\
     The triangle used to generate \
     the implicit plot is algorithmically chosen. \
    ",
-   "PlotImplicit((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))",
+   "PlotImplicit((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10))",
    true, false,
    "CalculatorFunctionsGeneral::innerPlotImplicitFunction",
    "PlotImplicit")
@@ -1955,7 +1955,7 @@ D-B;\
    The yellow grid is the initial one (specified by the user), \
    and the gray grid is obtained by a subdivision which depends on the concrete function. \
    ",
-   "PlotImplicitShowGrid((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10), (400,400))",
+   "PlotImplicitShowGrid((x-1) (y-1)-((x-1)^2(y-1)+1)^2, (-2, -2), (2, 2), (10,10))",
    true, false,
    "CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction",
    "PlotImplicitShowGrid")

@@ -49,6 +49,7 @@ public:
   static bool innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerJWTverity(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerRSAencrypt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha224OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha256OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha1OfString(Calculator& theCommands, const Expression& input, Expression& output);

@@ -51,6 +51,7 @@ public:
   static void computeSha224(const std::string& inputString, List<uint32_t>& output);
   static void computeSha2xx(const std::string& inputString, List<uint32_t>& output, bool is224);
   static void computeSha256(const std::string& inputString, List<uint32_t>& output);
+  static LargeInt RSAencrypt(LargeIntUnsigned& theModulus, LargeInt& theExponent, LargeInt& theMessage);
   static std::string computeSha1outputBase64(const std::string& inputString);
 };
 #endif // header_crypto_was_already_defined

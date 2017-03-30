@@ -7901,7 +7901,7 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
   HashedList<std::string, MathRoutines::hashString> rulesToSwitch;
   rulesToSwitch.Reserve(rulesToConsider.size);
   for (int i=0; i<rulesToConsider.size; i++)
-    if (! theCommands.namedRules.Contains(rulesToConsider[i]))
+    if (!theCommands.namedRules.Contains(rulesToConsider[i]))
       return theCommands << "Can't find named rule: " << rulesToConsider[i]
       << ". Turn-off rules command failed. "
 //      << theCommands.namedRules.ToStringCommaDelimited()

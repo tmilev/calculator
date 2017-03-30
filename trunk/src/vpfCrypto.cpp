@@ -817,6 +817,7 @@ LargeInt Crypto::RSAencrypt(LargeIntUnsigned& theModulus, LargeInt& theExponent,
   ElementZmodP theElt, theOne;
   theElt.theModulo=theModulus;
   theOne.theValue=1;
+  theOne.theModulo=theModulus;
   theElt.AssignRational(theMessage);
   MathRoutines::RaiseToPower(theElt, theExponent, theOne);
   LargeInt result;

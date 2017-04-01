@@ -422,7 +422,9 @@ bool CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256(Calculator& theComm
   LargeIntUnsigned theMod, theExp;
   if (!theToken.AssignString(theTokenString, &out))
     return output.AssignValue(out.str(), theCommands);
-  out << "Sucesfully extracted JWT token";
+  out << "Sucesfully extracted JWT token. <br>"
+  << theToken.ToString()
+  << "<br>";
   if (!Crypto::ConvertStringBase64ToLargeUnsignedInt(theModBase64, theMod, &out) ||
       !Crypto::ConvertStringBase64ToLargeUnsignedInt(theExpBase64, theExp, &out))
     return output.AssignValue(out.str(), theCommands);
@@ -440,38 +442,24 @@ bool CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys(Calculator& theC
   if (!input.IsOfType<std::string>())
     return false;
   const std::string& inputString=input.GetValue<std::string>();
-  List<std::string> theStrings;
-  MathRoutines::StringSplitExcludeDelimiter(inputString,'.', theStrings);
+  JSONWebToken theToken;
+  if (!theToken.AssignString(inputString, &theCommands.Comments))
+    return false;
   std::stringstream out;
-  if (theStrings.size!=3)
-  { out << "JWT does not appear to have 3 parts";
-    return output.AssignValue(out.str(), theCommands);
-  }
-//  out << "<br>Input: " << inputString;
-  std::string stringOne, stringTwo, stringThree;
-  if (!Crypto::ConvertStringBase64ToString(theStrings[0], stringOne, &theCommands.Comments))
-    return false;
-  else
-    out << "<br>un-base64 stringOne: " << stringOne;
-  if (!Crypto::ConvertStringBase64ToString(theStrings[1], stringTwo, &theCommands.Comments))
-    return false;
-  else
-    out << "<br>un-base64 stringTwo:" << stringTwo;
-  if (!Crypto::ConvertStringBase64ToString(theStrings[2], stringThree, &theCommands.Comments))
-    return false;
   if (!Crypto::LoadKnownCertificates(&out))
     return output.AssignValue(out.str(), theCommands);
-  JSData keyID;
-  if (!keyID.readstring(stringOne), out)
+
+  JSData header;
+  if (!header.readstring(theToken.headerJSON), out)
   { out << "Couldn't load string one.";
     return output.AssignValue(out.str(), theCommands);
   }
   bool isGood=false;
   std::string keyIDstring;
-  if (keyID.type==keyID.JSObject)
-    if (keyID.HasKey("kid"))
+  if (header.type==header.JSObject)
+    if (header.HasKey("kid"))
     { isGood=true;
-      keyIDstring=keyID.GetValue("kid").string;
+      keyIDstring=header.GetValue("kid").string;
     }
   if (!isGood)
   { out << "Couldn't find key ID from string one. ";

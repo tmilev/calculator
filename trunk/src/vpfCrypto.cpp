@@ -870,10 +870,19 @@ LargeIntUnsigned Crypto::RSAencrypt(const LargeIntUnsigned& theModulus, const La
   return theElt.theValue;
 }
 
+std::string JSONWebToken::ToString()
+{ std::stringstream out;
+  out << "JWT token.";
+  out << "<br>Header: " << this->headerJSON;
+  out << "<br>Claims: " << this->claimsJSON;
+  out << "<br>Signature base64: " << this->signatureBase64;
+  return out.str();
+}
+
 bool JSONWebToken::VerifyRSA256
 (const LargeIntUnsigned& theModulus, const LargeIntUnsigned& theExponent,
  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
-{ std::string payload=this->header+'.'+this->claims;
+{ std::string payload=this->headerBase64+'.'+this->claimsBase64;
   if (commentsGeneral!=0)
   { *commentsGeneral << "<br>Payload: " << payload;
   }
@@ -884,7 +893,7 @@ bool JSONWebToken::VerifyRSA256
   if (commentsGeneral!=0)
   { *commentsGeneral << "<br>Sha256 of payload: " << theSha.ToString();
   }
-  if (! Crypto::ConvertStringBase64ToLargeUnsignedInt(this->signature,theSignatureInt,commentsOnFailure))
+  if (! Crypto::ConvertStringBase64ToLargeUnsignedInt(this->signatureBase64,theSignatureInt,commentsOnFailure))
     return false;
   if (commentsGeneral!=0)
   { *commentsGeneral << "<br>Signature: " << theSignatureInt.ToString();
@@ -899,7 +908,7 @@ bool JSONWebToken::VerifyRSA256
   if (!result && commentsOnFailure!=0)
   { *commentsOnFailure << "<br>The sha: "
     << theSha.ToString()
-    << " does not match the encrypted signature " << RSAresult.ToString()
+    << "<br>does not match the encrypted signature <br>" << RSAresult.ToString()
     << "<br>sha base64: " << theShaString
     << "<br>RSAresult base64: " << RSAresultString
     ;
@@ -918,8 +927,12 @@ bool JSONWebToken::AssignString(const std::string& other, std::stringstream* com
       << theStrings.size << " strings.";
     return false;
   }
-  this->header   =theStrings[0];
-  this->claims   =theStrings[1];
-  this->signature=theStrings[2];
+  this->headerBase64   =theStrings[0];
+  this->claimsBase64   =theStrings[1];
+  this->signatureBase64=theStrings[2];
+  if (!Crypto::ConvertStringBase64ToString(this->headerBase64, this->headerJSON, commentsOnFailure))
+    return false;
+  if (!Crypto::ConvertStringBase64ToString(this->claimsBase64, this->claimsJSON, commentsOnFailure))
+    return false;
   return true;
 }

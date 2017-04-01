@@ -67,12 +67,15 @@ class JSONWebToken
 {
 public:
   std::string signatureScheme;
-  std::string header;
-  std::string claims;
-  std::string signature;
+  std::string headerBase64;
+  std::string claimsBase64;
+  std::string signatureBase64;
+  std::string headerJSON;
+  std::string claimsJSON;
   MapLisT<std::string, std::string, MathRoutines::hashString> payloadKeys;
 
   bool AssignString(const std::string& other, std::stringstream* commentsOnFailure);
+  std::string ToString();
   bool VerifyRSA256
   (const LargeIntUnsigned& theModulus, const LargeIntUnsigned& theExponent,
    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral

@@ -369,21 +369,24 @@ void Calculator::initPredefinedInnerFunctions()
     CharToBase64(\"easure.\");\
     CharToBase64(\"asure.\");\
     CharToBase64(\"sure.\");\
-   ", true, false,
+   ",
+   true, false,
    "CalculatorFunctionsGeneral::innerCharToBase64",
    "CharToBase64");
   this->AddOperationInnerHandler
   ("Base64ToString", CalculatorFunctionsGeneral::innerBase64ToString, "",
    "Converts base64 to string",
    "Base64ToString(\"k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9\");\
-   ", true, false,
+   ",
+   true, false,
    "CalculatorFunctionsGeneral::innerBase64ToString",
    "Base64ToString");
   this->AddOperationInnerHandler
   ("LoadKnownCertificates",
     CalculatorFunctionsGeneral::innerLoadKnownCertificates, "",
    "Loads known security certificates from the knowncertificates folder. ",
-   "LoadKnownCertificates(0);", true, false,
+   "LoadKnownCertificates(0);",
+   true, false,
    "CalculatorFunctionsGeneral::innerLoadKnownCertificates",
    "LoadKnownCertificates");
   this->AddOperationInnerHandler
@@ -391,14 +394,16 @@ void Calculator::initPredefinedInnerFunctions()
    "Processes a x509 certificate database. This function is part of a security research project and \
    will be documented at a later time (if at all). Please do not use this function. ",
    "X509CertificateCrunch(\"certificates\");\
-   ", false, true,
+   ",
+   false, true,
    "CalculatorFunctionsGeneral::innerX509certificateCrunch",
    "X509CertificateCrunch");
   this->AddOperationInnerHandler
   ("JWTverifyAgainstKnownKeys", CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys, "",
    "Tries to verify a Json Web Token.",
    "%HideLHS JWTverifyAgainstKnownKeys(\"eyJhbGciOiJSUzI1NiIsImtpZCI6ImEwZjMxYjMzMmYyODE2YTllMTlmYzZkMDM1OWMzNmE1N2RjODJjMTIifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiaWF0IjoxNDg0MjAxMzk1LCJleHAiOjE0ODQyMDQ5OTUsImF0X2hhc2giOiJ6SmdyckhYM0xJWnlzVGUwcFZ0Rm1BIiwiYXVkIjoiNTM4NjA1MzA2NTk0LW40Mzc1NHZiMG00OGlyODRnOHZwNXVqMnU3a2xlcm4zLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTAzODQ1NzIyNTcxOTcxMzE0NTUyIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF6cCI6IjUzODYwNTMwNjU5NC1uNDM3NTR2YjBtNDhpcjg0Zzh2cDV1ajJ1N2tsZXJuMy5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImVtYWlsIjoidG9kb3IubWlsZXZAZ21haWwuY29tIiwibmFtZSI6IlRvZG9yIE1pbGV2IiwicGljdHVyZSI6Imh0dHBzOi8vbGg1Lmdvb2dsZXVzZXJjb250ZW50LmNvbS8tdmN2YWVzbE9RSm8vQUFBQUFBQUFBQUkvQUFBQUFBQUFBRk0veDJCU0pVVjUwa28vczk2LWMvcGhvdG8uanBnIiwiZ2l2ZW5fbmFtZSI6IlRvZG9yIiwiZmFtaWx5X25hbWUiOiJNaWxldiIsImxvY2FsZSI6ImVuIn0.k7qTF1hLeOdihfKG5IRnlb7us2FVo1pSC2r0DVLkYwRAQHMs4XatvGcdG81S64uoaqG4fZ9IHJNpZjqokojuX5VIwl6utBO9-FL9p-z_u_6rC_RoUta-S0nLZ_boGqCsonyQbussPHTLRKqRQanJ6MWZinKWjRPZvkx6ZnplqSAY9_uHwqZTwzeeXnOThxA1x-UvwLzGZcJDy8mF9yWj5YIQ7hvcWFwmQrEUUa9s7pSQzZ_hfFNELFFLxjT9TPRP4g3WBp6758ninMGHP_iBfWbPw7ZgNc6Wl9n8WGCzGlSpmM--wZFigPHPFA99cwmlhPK9sWgXMznzNuigQZRsiw\");\
-   ", true, false,
+   ",
+   true, false,
    "CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys",
    "JWTverifyAgainstKnownKeys");
   this->AddOperationInnerHandler
@@ -408,9 +413,10 @@ void Calculator::initPredefinedInnerFunctions()
 token=\"eyJhbGciOiJSUzI1NiIsImtpZCI6IjdjODNmNWNjMTUzNjAwMzczN2MzNzU5YjJiOTBiMWE1ZDFkNGFjNjUifQ.eyJhenAiOiI1Mzg2MDUzMDY1OTQtbjQzNzU0dmIwbTQ4aXI4NGc4dnA1dWoydTdrbGVybjMuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI1Mzg2MDUzMDY1OTQtbjQzNzU0dmIwbTQ4aXI4NGc4dnA1dWoydTdrbGVybjMuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDM4NDU3MjI1NzE5NzEzMTQ1NTIiLCJlbWFpbCI6InRvZG9yLm1pbGV2QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhdF9oYXNoIjoiZE5XTUtlTGl1UDJzd3dJNUtPSHdZQSIsImlzcyI6ImFjY291bnRzLmdvb2dsZS5jb20iLCJpYXQiOjE0OTA4ODQzMjIsImV4cCI6MTQ5MDg4NzkyMiwibmFtZSI6IlRvZG9yIE1pbGV2IiwicGljdHVyZSI6Imh0dHBzOi8vbGg1Lmdvb2dsZXVzZXJjb250ZW50LmNvbS8tdmN2YWVzbE9RSm8vQUFBQUFBQUFBQUkvQUFBQUFBQUFBRk0veDJCU0pVVjUwa28vczk2LWMvcGhvdG8uanBnIiwiZ2l2ZW5fbmFtZSI6IlRvZG9yIiwiZmFtaWx5X25hbWUiOiJNaWxldiIsImxvY2FsZSI6ImVuIn0.LlaSM5lvXlwxIV-jn8MpQWtzaTCX433ltU2M4Dojqybgs9JOSNEnP2tVt-TJ2fo-hxvaYxHaDgB-M84MzG07F_bs4ggIAsImJWO3saLqRPNjRGk6eKWh5vqE-HZkMS5mpn1KYsEy5Jbdd-i-fO1Ias_Q7NbH2dex71mErcagsyedcCjmvLiOKEzGTZ7o6gSXv_BZM29h5YoNDoOqerFuWuQCryDDTohh_xZ1TM2DH-2jAUVyqLIWUqnQhLo_CB_gre7Xs2qoBnGxTKtPB4SCqOS_0O38dI7cw2QzYczEY1q5ksFg_5pZoPyYuFQLKpAWbJLEn69S5_V-0rFEodKXeA\";\
 modulus= \"xvqIfxXslXjIJN33exth0D7r4N7jTF45TtIlQa_XVfOsCuw82cpS5C7Qut5oyW6yo5UwIDLfFclqaJR9MZGmpotFq148HM-C_oHTliHBC3aSPj7TRTr4lRDqgjLhZqbmEM3HPl4KWXZ7TVComhFiXgtImkvmMGkE3oURw1fFFnuIoG05bKVEn9UO5XYmqei1qWswtwNBr1PAmvS8HSIvgIZpBWSoFemQzsw31MDnw5_Quk7uilvOMpajyBLABUTu0XsQLY5gE6ZdGiLLAUuQS5ueueweKaCCBq5lNB22BM5PfyIdQSLLRrV5IkfL2JWxVCryZnoEL2lEDeCoEV-WBQ\";\
 exponent=\"AQAB\";\
-JWTverifyRSA256(token,HexStringToInteger( Base64ToHex(modulus))\
-,HexStringToInteger( Base64ToHex(exponent)));\
-   ", true, false,
+JWTverifyRSA256(token,modulus\
+,exponent);\
+   ",
+   true, false,
    "CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256",
    "JWTverifyRSA256");
 
@@ -420,7 +426,8 @@ JWTverifyRSA256(token,HexStringToInteger( Base64ToHex(modulus))\
    The examples below are taken from Wikipedia. ",
    "Sha1(\"The quick brown fox jumps over the lazy dog\");\
     Sha1(\"The quick brown fox jumps over the lazy cog\");\
-   ", true, false,
+   ",
+   true, false,
    "CalculatorFunctionsGeneral::innerSha1OfString",
    "Sha1");
   this->AddOperationInnerHandler
@@ -428,7 +435,8 @@ JWTverifyRSA256(token,HexStringToInteger( Base64ToHex(modulus))\
    "Converts characters to a sequence of bits and computes the sha224 hash value of those bits. \
    Reference: Wikipedia. ",
    "Sha224(\"\");\
-   ", true, false,
+   ",
+   true, false,
    "CalculatorFunctionsGeneral::innerSha224OfString",
    "Sha1");
   this->AddOperationInnerHandler
@@ -462,7 +470,8 @@ JWTverifyRSA256(token,HexStringToInteger( Base64ToHex(modulus))\
   ("HexStringToInteger", CalculatorFunctionsGeneral::innerHexToInteger, "",
    "Converts a hex string to an integer. ",
    "HexStringToInteger(Base64ToHex(\"AQAB\"));\
-   ", true, false,
+   ",
+   true, false,
    "CalculatorFunctionsGeneral::innerHexToInteger",
    "HexStringToInteger");
 
@@ -517,7 +526,8 @@ JWTverifyRSA256(token,HexStringToInteger( Base64ToHex(modulus))\
    "V= HyperOctahedralRepresentation((1,1),1);\
    s= MakeElementHyperOctahedral{}((1,2),1,0,0); \
    RepresentElementHyperoctahedral(s, V)\
-   ", true, false,
+   ",
+   true, false,
    "CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral");
   this->AddOperationInnerHandler
   ("HyperOctahedralIrreps",
@@ -620,8 +630,9 @@ C=MakeExpression B;\
 D=MakeRationalFunction {}(\\frac{-2x^{3}y^{2}-\\frac{x y }{2}+\\frac{y }{32}}{x^{4}y +\\frac{x^{2}}{4}-\\frac{x }{32}}) ;\
 MakeExpression {}D-C;\
 D-B;\
-", true, false, "CalculatorConversions::innerExpressionFromBuiltInType",
-    "MakeExpression");
+",
+   true, false, "CalculatorConversions::innerExpressionFromBuiltInType",
+   "MakeExpression");
   this->AddOperationInnerHandler
   ("Polynomial", CalculatorConversions::innerPolynomial<Rational>, "",
    "Creates a polynomial expression with rational coefficients. ",

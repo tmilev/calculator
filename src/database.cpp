@@ -1729,7 +1729,7 @@ EmailRoutines::EmailRoutines()
 { this->fromEmail="calculator.todor.milev@gmail.com";
   //this->ccEmail="todor.milev@gmail.com";
   this->smtpWithPort= "smtp.gmail.com:587";
-  this->fromEmailAuth=Crypto::CharsToBase64String("A good day to use a computer algebra system");
+  this->fromEmailAuth=Crypto::ConvertStringToBase64("A good day to use a computer algebra system");
 }
 
 std::string DatabaseRoutines::ToStringSuggestionsReasonsForFailure

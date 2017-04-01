@@ -217,7 +217,7 @@ bool CalculatorFunctionsGeneral::innerShaX
     theBitStream[i]=inputString[i];
   std::stringstream out;
   out << "<br>Input: " << inputString;
-  out << "<br>Base64 conversion: " << Crypto::CharsToBase64String(theBitStream);
+  out << "<br>Base64 conversion: " << Crypto::ConvertStringToBase64(theBitStream);
   List<uint32_t> theSha1Uint;
   List<unsigned char> theSha1Uchar;
   std::string theSha1base64string;
@@ -228,7 +228,7 @@ bool CalculatorFunctionsGeneral::innerShaX
   else if (shaId=="SHA224")
     Crypto::computeSha224(inputString, theSha1Uint);
   Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, theSha1Uchar);
-  theSha1base64string=Crypto::CharsToBase64String(theSha1Uchar);
+  theSha1base64string=Crypto::ConvertStringToBase64(theSha1Uchar);
   out << "<br>" << shaId << " in base64: " << theSha1base64string;
   out << "<br>" << shaId << " hex: ";
   for (int i=0; i<theSha1Uint.size; i++)
@@ -255,7 +255,7 @@ bool CalculatorFunctionsGeneral::innerCharToBase64(Calculator& theCommands, cons
   theBitStream.SetSize(inputString.size());
   for (unsigned i =0; i<inputString.size(); i++)
     theBitStream[i]=inputString[i];
-  return output.AssignValue(Crypto::CharsToBase64String(theBitStream), theCommands);
+  return output.AssignValue(Crypto::ConvertStringToBase64(theBitStream), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCommands, const Expression& input, Expression& output)
@@ -266,7 +266,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCo
   if (!Crypto::ConvertStringBase64ToBitStream(input.GetValue<std::string>(), theBitStream, &theCommands.Comments))
     return false;
   std::stringstream out;
-  std::string theConvertedBack=Crypto::CharsToBase64String(theBitStream);
+  std::string theConvertedBack=Crypto::ConvertStringToBase64(theBitStream);
   out << "Original string: " << input.GetValue<std::string>()
   << "<br>Converted to bitstream and back: " << theConvertedBack;
   if (theConvertedBack!=input.GetValue<std::string>())

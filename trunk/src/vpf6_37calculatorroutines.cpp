@@ -403,19 +403,40 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
 }
 
 bool CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverifyAgainstKeyRSA256");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256");
   if (input.size()!=4)
     return theCommands << "The JWT verify command expects 3 arguments:"
     << " string with the token in the usual format (\"a.b.c\"),"
     << " the modulus of the key and the exponent of the key. ";
-  std::string theToken;
-  if (!input.IsOfType(&theToken))
+  std::string theTokenString;
+  if (!input[1].IsOfType(&theTokenString))
     return theCommands << "The first argument of " << input.ToString() << " is not a string. ";
-
+  std::stringstream out;
+  std::string theModBase64, theExpBase64;
+  if (!input[2].IsOfType(&theModBase64) || !input[3].IsOfType(&theExpBase64))
+    return theCommands << "Failed to convert the arguments "
+    << input[2].ToString()
+    << " and " << input[3].ToString()
+    << " to base64 strings";
+  JSONWebToken theToken;
+  LargeIntUnsigned theMod, theExp;
+  if (!theToken.AssignString(theTokenString, &out))
+    return output.AssignValue(out.str(), theCommands);
+  out << "Sucesfully extracted JWT token";
+  if (!Crypto::ConvertStringBase64ToLargeUnsignedInt(theModBase64, theMod, &out) ||
+      !Crypto::ConvertStringBase64ToLargeUnsignedInt(theExpBase64, theExp, &out))
+    return output.AssignValue(out.str(), theCommands);
+  out << "<br>Successfully extracted modulus and exponent";
+  if (!theToken.VerifyRSA256(theMod, theExp, &out, &out))
+    return output.AssignValue(out.str(), theCommands);
+  out << "Token verified successfully. ";
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownRSAkeys");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return theCommands << "This function is only available to logged-in admins. ";
   if (!input.IsOfType<std::string>())
     return false;
   const std::string& inputString=input.GetValue<std::string>();

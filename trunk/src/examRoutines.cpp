@@ -1622,7 +1622,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   { std::string& currentDeadlineId=inputOutput.idsDeadlines[i];
     if (this->databaseStudentSections[i]=="")
       continue;
-    currentDeadlineId = "deadline" + Crypto::CharsToBase64String
+    currentDeadlineId = "deadline" + Crypto::ConvertStringToBase64
     (this->databaseStudentSections[i]+inputOutput.id);
     if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
       currentDeadlineId.resize(currentDeadlineId.size()-1);

@@ -200,7 +200,7 @@ bool Crypto::ConvertStringBase64ToBitStream(const std::string& input, List<unsig
       theStack=theStack%4;
     }
   }
-//  stOutput << "<br>output is: " << output << ", Converted back: " << Crypto::CharsToBase64String(output);
+//  stOutput << "<br>output is: " << output << ", Converted back: " << Crypto::ConvertStringToBase64(output);
   if (comments!=0 && numBitsInStack!=0)
   { *comments << "<br>Input " << input << " corresponds modulo 8 to " << numBitsInStack
     << " bits. Perhaps the input was not padded correctly with = signs.";
@@ -229,20 +229,20 @@ std::string Crypto::computeSha1outputBase64(const std::string& inputString)
   List<unsigned char> theSha1Uchar;
   Crypto::computeSha1(inputString, theSha1Uint);
   Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, theSha1Uchar);
-  return Crypto::CharsToBase64String(theSha1Uchar);
+  return Crypto::ConvertStringToBase64(theSha1Uchar);
 }
 
 
-std::string Crypto::CharsToBase64String(const std::string& input)
+std::string Crypto::ConvertStringToBase64(const std::string& input)
 { List<unsigned char> inputChar;
   inputChar.SetSize(input.size());
   for (unsigned i=0; i<input.size(); i++)
     inputChar[i]=input[i];
-  return Crypto::CharsToBase64String(inputChar);
+  return Crypto::ConvertStringToBase64(inputChar);
 }
 
-std::string Crypto::CharsToBase64String(const List<unsigned char>& input)
-{ MacroRegisterFunctionWithName("Crypto::CharsToBase64String");
+std::string Crypto::ConvertStringToBase64(const List<unsigned char>& input)
+{ MacroRegisterFunctionWithName("Crypto::ConvertStringToBase64");
   uint32_t theStack=0;
   int numBitsInTheStack=0;
   std::string result;
@@ -576,6 +576,53 @@ void Crypto::initSha256()
   Crypto::kArraySha2xx[63]=0xc67178f2;
 }
 
+bool Crypto::ConvertLargeUnsignedIntToStringBase64
+(const LargeIntUnsigned& input, std::string& outputBase64)
+{ List<char> result;
+  LargeIntUnsigned digit, inputCopy=input;
+  while (inputCopy>0)
+  { digit=inputCopy%256;
+    inputCopy/=256;
+    unsigned char digitChar=(unsigned char) digit.theDigits[0];
+    result.AddOnTop(digitChar);
+  }
+  result.ReverseOrderElements();
+  std::string outputBitStream;
+  outputBitStream.assign(result.TheObjects,result.size);
+  outputBase64= Crypto::ConvertStringToBase64(outputBitStream);
+  return true;
+}
+
+
+bool Crypto::ConvertStringBase64ToLargeUnsignedInt
+(const std::string& inputBase64, LargeIntUnsigned& output, std::stringstream* comments)
+{ List<unsigned char> theBitStream;
+  if(!Crypto::ConvertStringBase64ToBitStream(inputBase64,theBitStream,comments))
+    return false;
+  Crypto::ConvertBitStreamToLargeUnsignedInt(theBitStream, output);
+  return true;
+}
+
+void Crypto::ConvertListUintToLargeUInt(List<uint32_t>& input, LargeIntUnsigned& output)
+{ output=0;
+  LargeIntUnsigned twoPower32;
+  twoPower32=65536;
+  twoPower32*=65536;
+  for (int i=input.size-1; i>=0; i--)
+  { output*=twoPower32;
+    output+=input[i];
+  }
+}
+
+void Crypto::ConvertBitStreamToLargeUnsignedInt
+(const List<unsigned char>& input, LargeIntUnsigned& output)
+{ output=0;
+  for (int i=0; i<input.size; i++)
+  { output*=256;
+    output+=((unsigned int) input[i]);
+  }
+}
+
 void Crypto::computeSha224(const std::string& inputString, List<uint32_t>& output)
 { MacroRegisterFunctionWithName("Crypto::computeSha224");
   return Crypto::computeSha2xx(inputString, output, true);
@@ -812,7 +859,7 @@ bool Crypto::LoadKnownCertificates(std::stringstream* comments)
   return true;
 }
 
-LargeInt Crypto::RSAencrypt(LargeIntUnsigned& theModulus, LargeInt& theExponent, LargeInt& theMessage)
+LargeIntUnsigned Crypto::RSAencrypt(const LargeIntUnsigned& theModulus, const LargeInt& theExponent, const LargeInt& theMessage)
 { MacroRegisterFunctionWithName("Crypto::RSAencrypt");
   ElementZmodP theElt, theOne;
   theElt.theModulo=theModulus;
@@ -820,7 +867,59 @@ LargeInt Crypto::RSAencrypt(LargeIntUnsigned& theModulus, LargeInt& theExponent,
   theOne.theModulo=theModulus;
   theElt.AssignRational(theMessage);
   MathRoutines::RaiseToPower(theElt, theExponent, theOne);
-  LargeInt result;
-  result=theElt.theValue;
+  return theElt.theValue;
+}
+
+bool JSONWebToken::VerifyRSA256
+(const LargeIntUnsigned& theModulus, const LargeIntUnsigned& theExponent,
+ std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
+{ std::string payload=this->header+'.'+this->claims;
+  if (commentsGeneral!=0)
+  { *commentsGeneral << "<br>Payload: " << payload;
+  }
+  List<uint32_t> outputSha;
+  Crypto::computeSha256(payload, outputSha);
+  LargeIntUnsigned theSha, theSignatureInt;
+  Crypto::ConvertListUintToLargeUInt(outputSha, theSha);
+  if (commentsGeneral!=0)
+  { *commentsGeneral << "<br>Sha256 of payload: " << theSha.ToString();
+  }
+  if (! Crypto::ConvertStringBase64ToLargeUnsignedInt(this->signature,theSignatureInt,commentsOnFailure))
+    return false;
+  if (commentsGeneral!=0)
+  { *commentsGeneral << "<br>Signature: " << theSignatureInt.ToString();
+  }
+  LargeIntUnsigned RSAresult= Crypto::RSAencrypt(theModulus, theExponent, theSignatureInt);
+  std::string RSAresultString, theShaString;
+  if (commentsGeneral!=0)
+  { Crypto::ConvertLargeUnsignedIntToStringBase64(RSAresult,RSAresultString);
+    Crypto::ConvertLargeUnsignedIntToStringBase64(theSha,theShaString);
+  }
+  bool result = (RSAresult==theSignatureInt);
+  if (!result && commentsOnFailure!=0)
+  { *commentsOnFailure << "<br>The sha: "
+    << theSha.ToString()
+    << " does not match the encrypted signature " << RSAresult.ToString()
+    << "<br>sha base64: " << theShaString
+    << "<br>RSAresult base64: " << RSAresultString
+    ;
+
+  }
   return result;
+}
+
+bool JSONWebToken::AssignString(const std::string& other, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("JSONWebToken::AssignString");
+  List<std::string> theStrings;
+  MathRoutines::StringSplitExcludeDelimiter(other, '.',theStrings);
+  if (theStrings.size!=3)
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Expected 3 strings separeted by two dots, got: "
+      << theStrings.size << " strings.";
+    return false;
+  }
+  this->header   =theStrings[0];
+  this->claims   =theStrings[1];
+  this->signature=theStrings[2];
+  return true;
 }

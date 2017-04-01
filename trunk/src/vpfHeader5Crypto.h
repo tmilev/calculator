@@ -1,6 +1,7 @@
 #ifndef header_crypto_was_already_defined
 #define header_crypto_was_already_defined
 #include "vpfHeader1General0_General.h"
+#include "vpfHeader2Math01_LargeIntArithmetic.h"
 #include "vpfJson.h"
 static ProjectInformationInstance projectInfoCryptoHeader(__FILE__, "Crypto class declaration.");
 
@@ -24,8 +25,8 @@ public:
   static bool LoadKnownCertificates(std::stringstream* comments);
   static bool LoadOneKnownCertificate(const std::string& input, std::stringstream* comments);
 
-  static std::string CharsToBase64String(const List<unsigned char>& input);
-  static std::string CharsToBase64String(const std::string& input);
+  static std::string ConvertStringToBase64(const List<unsigned char>& input);
+  static std::string ConvertStringToBase64(const std::string& input);
   static uint32_t GetUInt32FromCharBigendian(const List<unsigned char>& input);
   static void GetUInt32FromCharBigendianPadLastIntWithZeroes
   (const List<unsigned char>& input, List<uint32_t>& output);
@@ -51,7 +52,30 @@ public:
   static void computeSha224(const std::string& inputString, List<uint32_t>& output);
   static void computeSha2xx(const std::string& inputString, List<uint32_t>& output, bool is224);
   static void computeSha256(const std::string& inputString, List<uint32_t>& output);
-  static LargeInt RSAencrypt(LargeIntUnsigned& theModulus, LargeInt& theExponent, LargeInt& theMessage);
+  static void ConvertListUintToLargeUInt(List<uint32_t>& input, LargeIntUnsigned& output);
+  static LargeIntUnsigned RSAencrypt(const LargeIntUnsigned& theModulus, const LargeInt& theExponent, const LargeInt& theMessage);
+  static void ConvertBitStreamToLargeUnsignedInt
+  (const List<unsigned char>& input, LargeIntUnsigned& output);
+  static bool ConvertStringBase64ToLargeUnsignedInt
+  (const std::string& inputBase64, LargeIntUnsigned& output, std::stringstream* comments);
+  static bool ConvertLargeUnsignedIntToStringBase64
+  (const LargeIntUnsigned& input, std::string& outputBase64);
   static std::string computeSha1outputBase64(const std::string& inputString);
+};
+
+class JSONWebToken
+{
+public:
+  std::string signatureScheme;
+  std::string header;
+  std::string claims;
+  std::string signature;
+  MapLisT<std::string, std::string, MathRoutines::hashString> payloadKeys;
+
+  bool AssignString(const std::string& other, std::stringstream* commentsOnFailure);
+  bool VerifyRSA256
+  (const LargeIntUnsigned& theModulus, const LargeIntUnsigned& theExponent,
+   std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
+  );
 };
 #endif // header_crypto_was_already_defined

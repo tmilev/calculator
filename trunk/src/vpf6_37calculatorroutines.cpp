@@ -425,13 +425,11 @@ bool CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256(Calculator& theComm
   out << "Sucesfully extracted JWT token. <br>"
   << theToken.ToString()
   << "<br>";
-  if (!Crypto::ConvertStringBase64ToLargeUnsignedInt(theModBase64, theMod, &out) ||
-      !Crypto::ConvertStringBase64ToLargeUnsignedInt(theExpBase64, theExp, &out))
+  if (!Crypto::ConvertBase64ToLargeUnsignedInt(theModBase64, theMod, &out) ||
+      !Crypto::ConvertBase64ToLargeUnsignedInt(theExpBase64, theExp, &out))
     return output.AssignValue(out.str(), theCommands);
   out << "<br>Successfully extracted modulus and exponent";
-  if (!theToken.VerifyRSA256(theMod, theExp, &out, &out))
-    return output.AssignValue(out.str(), theCommands);
-  out << "Token verified successfully. ";
+  theToken.VerifyRSA256(theMod, theExp, &out, &out);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -480,6 +478,19 @@ bool CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys(Calculator& theC
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerHexToString(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerHexToString");
+  std::string inputString;
+  if (!input.IsOfType(&inputString))
+    inputString=input.ToString();
+  std::string result;
+  if (!Crypto::ConvertHexToString(inputString, result))
+    return theCommands << "Failed to interpret " << inputString
+    << " as a hex string ";
+  return output.AssignValue(result, theCommands);
+}
+
+
 bool CalculatorFunctionsGeneral::innerHexToInteger(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerHexToInteger");
   std::string inputString;
@@ -499,9 +510,9 @@ bool CalculatorFunctionsGeneral::innerBase64ToHex(Calculator& theCommands, const
   if (!input.IsOfType(&inputString))
     inputString=input.ToString();
   std::string result, bitStream;
-  if (! Crypto::ConvertStringBase64ToString(inputString, bitStream,&theCommands.Comments))
+  if (! Crypto::ConvertBase64ToString(inputString, bitStream,&theCommands.Comments))
     return false;
-  Crypto::ConvertBitStreamToHexString(bitStream, result);
+  Crypto::ConvertStringToHex(bitStream, result);
   return output.AssignValue(result, theCommands);
 }
 

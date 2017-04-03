@@ -171,7 +171,7 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
     out << "Raw cert+sha:<br>" << certsAndShas[i] << "<br>Certificate " << i+1
     << " (base64):<br>" << theCerts[i] << "<br>Sha1:<br>" << theShas[i]
     << "<br>Comments while extracting the raw certificate: ";
-    Crypto::ConvertStringBase64ToBitStream(theCerts[i], theCertsRAWuchars[i], &out);
+    Crypto::ConvertBase64ToBitStream(theCerts[i], theCertsRAWuchars[i], &out);
     Crypto::ConvertBitStreamToString(theCertsRAWuchars[i], theCertsRAWstrings[i]);
     out << "<br>Raw certificate: " << theCertsRAWstrings[i];
 //    Crypto::GetUInt32FromCharBigendian(theCertsRAW[i], )
@@ -241,7 +241,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToString(Calculator& theCommands, co
   std::string theString, result;
   if (!input.IsOfType<std::string>(&theString))
     theString=input.ToString();
-  if (!Crypto::ConvertStringBase64ToString(theString, result, &theCommands.Comments))
+  if (!Crypto::ConvertBase64ToString(theString, result, &theCommands.Comments))
     return false;
   return output.AssignValue(result, theCommands);
 }
@@ -263,7 +263,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCo
   if (!input.IsOfType<std::string>())
     return false;
   List<unsigned char> theBitStream;
-  if (!Crypto::ConvertStringBase64ToBitStream(input.GetValue<std::string>(), theBitStream, &theCommands.Comments))
+  if (!Crypto::ConvertBase64ToBitStream(input.GetValue<std::string>(), theBitStream, &theCommands.Comments))
     return false;
   std::stringstream out;
   std::string theConvertedBack=Crypto::ConvertStringToBase64(theBitStream);

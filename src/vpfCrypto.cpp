@@ -155,16 +155,16 @@ bool Crypto::Get6bitFromChar(char input, uint32_t& output)
   return false;
 }
 
-bool Crypto::ConvertStringBase64ToString(const std::string& input, std::string& output, std::stringstream* comments)
+bool Crypto::ConvertBase64ToString(const std::string& input, std::string& output, std::stringstream* comments)
 { List<unsigned char> byteList;
-  if (!Crypto::ConvertStringBase64ToBitStream(input, byteList, comments))
+  if (!Crypto::ConvertBase64ToBitStream(input, byteList, comments))
     return false;
   Crypto::ConvertBitStreamToString(byteList, output);
   return true;
 }
 
-bool Crypto::ConvertStringBase64ToBitStream(const std::string& input, List<unsigned char>& output, std::stringstream* comments)
-{ MacroRegisterFunctionWithName("Crypto::StringBase64ToBitStream");
+bool Crypto::ConvertBase64ToBitStream(const std::string& input, List<unsigned char>& output, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("Crypto::Base64ToBitStream");
   output.Reserve((3*input.size())/4+1);
   output.SetSize(0);
   uint32_t theStack=0, sixBitDigit=0;
@@ -232,6 +232,13 @@ std::string Crypto::computeSha1outputBase64(const std::string& inputString)
   return Crypto::ConvertStringToBase64(theSha1Uchar);
 }
 
+List<int> Crypto::ConvertStringToListInt(const std::string& input)
+{ List<int> result;
+  result.SetSize(input.size());
+  for (unsigned i=0; i<input.size(); i++)
+    result[i]=input[i];
+  return result;
+}
 
 std::string Crypto::ConvertStringToBase64(const std::string& input)
 { List<unsigned char> inputChar;
@@ -239,6 +246,14 @@ std::string Crypto::ConvertStringToBase64(const std::string& input)
   for (unsigned i=0; i<input.size(); i++)
     inputChar[i]=input[i];
   return Crypto::ConvertStringToBase64(inputChar);
+}
+
+std::string Crypto::ConvertStringToEMSAPKCS1V15UsingSha256
+(const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* generalComments)
+{ MacroRegisterFunctionWithName("Crypto::ConvertStringToEMSAPKCS1V15UsingSha256");
+  std::string result;
+
+  return result;
 }
 
 std::string Crypto::ConvertStringToBase64(const List<unsigned char>& input)
@@ -340,6 +355,38 @@ void Crypto::ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<uns
 
 }
 
+bool Crypto::ConvertHexToString(const std::string& input, std::string& output)
+{ output.reserve(input.size()/2);
+  output.clear();
+  bool result=true;
+  for (unsigned i=0; i<input.size(); i+=2)
+  { char nextByte=0;
+    for (unsigned j=0; j<2; j++)
+    { if (i+j>=input.size())
+      { result=false;
+        break;
+      }
+      char theDigit=-1;
+      //stOutput << "DEBUG: Digit from: " << input[i];
+      if (input[i+j]>='A' && input[i+j]<='F')
+        theDigit=10+input[i+j]-'A';
+      if (input[i+j]>='a' && input[i+j]<='f')
+        theDigit=10+input[i]-'a';
+      if (input[i+j]>='0' && input[i+j]<='9')
+        theDigit=input[i+j]-'0';
+      //stOutput << "DEBUG: got digit: " << theDigit;
+      if (theDigit!=-1)
+      { nextByte*=16;
+        nextByte+=theDigit;
+      } else
+        result=false;
+    }
+    output.push_back(nextByte);
+  }
+  //stOutput << "result: " << output.ToString();
+  return result;
+}
+
 bool Crypto::ConvertHexToInteger(const std::string& input, LargeInt& output)
 { output.MakeZero();
   for (unsigned i=0; i<input.size(); i++)
@@ -361,7 +408,13 @@ bool Crypto::ConvertHexToInteger(const std::string& input, LargeInt& output)
   return true;
 }
 
-bool Crypto::ConvertBitStreamToHexString(const std::string& input, std::string& output)
+std::string Crypto::ConvertStringToHex(const std::string& input)
+{ std::string result;
+  Crypto::ConvertStringToHex(input, result);
+  return result;
+}
+
+bool Crypto::ConvertStringToHex(const std::string& input, std::string& output)
 { std::stringstream out;
   for (unsigned i=0; i<input.size(); i++)
   { unsigned char high= ((unsigned char) input[i])/16;
@@ -391,8 +444,14 @@ void Crypto::ConvertUint64toBigendianStringAppendResult(uint64_t& input, std::st
   outputAppend.push_back((unsigned char)  (input%256 ));
 }
 
-void Crypto::GetUInt32FromCharBigendianPadLastIntWithZeroes(const List<unsigned char>& input, List<uint32_t>& output)
-{ MacroRegisterFunctionWithName("Crypto::GetUInt32FromCharBigendianPadLastIntWithZeroes");
+void Crypto::ConvertStringToListUInt32BigendianZeroPad(const std::string& input, List<uint32_t>& output)
+{ List<unsigned char> resultChar;
+  Crypto::ConvertStringToListBytes(input, resultChar);
+  Crypto::ConvertStringToListUInt32BigendianZeroPad(resultChar, output);
+}
+
+void Crypto::ConvertStringToListUInt32BigendianZeroPad(const List<unsigned char>& input, List<uint32_t>& output)
+{ MacroRegisterFunctionWithName("Crypto::ConvertStringToListUInt32BigendianZeroPad");
   List<unsigned char> theConvertor;
   theConvertor.SetSize(4);
   int finalSize=input.size/4;
@@ -576,8 +635,16 @@ void Crypto::initSha256()
   Crypto::kArraySha2xx[63]=0xc67178f2;
 }
 
-bool Crypto::ConvertLargeUnsignedIntToStringBase64
-(const LargeIntUnsigned& input, std::string& outputBase64)
+bool Crypto::ConvertLargeUnsignedIntToHex
+(const LargeIntUnsigned& input, std::string& output)
+{ std::string outputString;
+  Crypto::ConvertLargeUnsignedIntToString(input, outputString);
+  Crypto::ConvertStringToHex(outputString, output);
+  return true;
+}
+
+bool Crypto::ConvertLargeUnsignedIntToString
+(const LargeIntUnsigned& input, std::string& output)
 { List<char> result;
   LargeIntUnsigned digit, inputCopy=input;
   while (inputCopy>0)
@@ -587,17 +654,22 @@ bool Crypto::ConvertLargeUnsignedIntToStringBase64
     result.AddOnTop(digitChar);
   }
   result.ReverseOrderElements();
-  std::string outputBitStream;
-  outputBitStream.assign(result.TheObjects,result.size);
-  outputBase64= Crypto::ConvertStringToBase64(outputBitStream);
+  output.assign(result.TheObjects,result.size);
   return true;
 }
 
+bool Crypto::ConvertLargeUnsignedIntToBase64
+(const LargeIntUnsigned& input, std::string& outputBase64)
+{ std::string theString;
+  Crypto::ConvertLargeUnsignedIntToString(input, theString);
+  outputBase64= Crypto::ConvertStringToBase64(theString);
+  return true;
+}
 
-bool Crypto::ConvertStringBase64ToLargeUnsignedInt
+bool Crypto::ConvertBase64ToLargeUnsignedInt
 (const std::string& inputBase64, LargeIntUnsigned& output, std::stringstream* comments)
 { List<unsigned char> theBitStream;
-  if(!Crypto::ConvertStringBase64ToBitStream(inputBase64,theBitStream,comments))
+  if(!Crypto::ConvertBase64ToBitStream(inputBase64,theBitStream,comments))
     return false;
   Crypto::ConvertBitStreamToLargeUnsignedInt(theBitStream, output);
   return true;
@@ -618,6 +690,15 @@ void Crypto::ConvertBitStreamToLargeUnsignedInt
 (const List<unsigned char>& input, LargeIntUnsigned& output)
 { output=0;
   for (int i=0; i<input.size; i++)
+  { output*=256;
+    output+=((unsigned int) input[i]);
+  }
+}
+
+void Crypto::ConvertStringToLargeIntUnsigned
+(const std::string& input, LargeIntUnsigned& output)
+{ output=0;
+  for (unsigned i=0; i<input.size(); i++)
   { output*=256;
     output+=((unsigned int) input[i]);
   }
@@ -885,32 +966,52 @@ bool JSONWebToken::VerifyRSA256
 { std::string payload=this->headerBase64+'.'+this->claimsBase64;
   if (commentsGeneral!=0)
   { *commentsGeneral << "<br>Payload: " << payload;
+    List<int> intValues;
+    intValues.SetSize(payload.size());
+    for (unsigned i=0; i< payload.size(); i++)
+      intValues[i]=payload[i];
+    *commentsGeneral << "<br>Payload, json: " << intValues.ToStringCommaDelimited();
   }
-  List<uint32_t> outputSha;
-  Crypto::computeSha256(payload, outputSha);
-  LargeIntUnsigned theSha, theSignatureInt;
-  Crypto::ConvertListUintToLargeUInt(outputSha, theSha);
+  List<uint32_t> outputSha, RSAresultInts;
+  Crypto::computeSha256(payload, outputSha);\
+
   if (commentsGeneral!=0)
-  { *commentsGeneral << "<br>Sha256 of payload: " << theSha.ToString();
+  { LargeIntUnsigned theSha;
+    Crypto::ConvertListUintToLargeUInt(outputSha, theSha);
+    *commentsGeneral << "<br>Sha256 of payload: " << theSha.ToString();
   }
-  if (! Crypto::ConvertStringBase64ToLargeUnsignedInt(this->signatureBase64,theSignatureInt,commentsOnFailure))
+  LargeIntUnsigned theSignatureInt;
+  if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->signatureBase64,theSignatureInt,commentsOnFailure))
     return false;
-  if (commentsGeneral!=0)
-  { *commentsGeneral << "<br>Signature: " << theSignatureInt.ToString();
-  }
   LargeIntUnsigned RSAresult= Crypto::RSAencrypt(theModulus, theExponent, theSignatureInt);
-  std::string RSAresultString, theShaString;
-  if (commentsGeneral!=0)
-  { Crypto::ConvertLargeUnsignedIntToStringBase64(RSAresult,RSAresultString);
-    Crypto::ConvertLargeUnsignedIntToStringBase64(theSha,theShaString);
+  std::string RSAresultBitstream, RSAresultLast32bytes;
+  Crypto::ConvertLargeUnsignedIntToString(RSAresult, RSAresultBitstream);
+  RSAresultLast32bytes=RSAresultBitstream.substr(RSAresultBitstream.size()-32,32);
+  Crypto::ConvertStringToListUInt32BigendianZeroPad(RSAresultLast32bytes, RSAresultInts);
+  bool result = (RSAresultInts==outputSha);
+  if (!result)
+  { RSAresultInts.ReverseOrderElements();
+    result = (RSAresultInts==outputSha);
   }
-  bool result = (RSAresult==theSignatureInt);
-  if (!result && commentsOnFailure!=0)
-  { *commentsOnFailure << "<br>The sha: "
-    << theSha.ToString()
-    << "<br>does not match the encrypted signature <br>" << RSAresult.ToString()
-    << "<br>sha base64: " << theShaString
-    << "<br>RSAresult base64: " << RSAresultString
+  if ((!result && commentsOnFailure!=0) || commentsGeneral!=0)
+  { std::string RSAresultTrimmedHex, theShaHex, RSAresultHex, RSAresultBase64;
+    LargeIntUnsigned theShaUI;
+    Crypto::ConvertListUintToLargeUInt(outputSha, theShaUI);
+    RSAresultBase64=Crypto::ConvertStringToBase64(RSAresultBitstream);
+    Crypto::ConvertStringToHex(RSAresultBitstream, RSAresultHex);
+    Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex);
+    Crypto::ConvertLargeUnsignedIntToHex(theShaUI, theShaHex);
+    if (!result && commentsOnFailure!=0)
+      *commentsOnFailure << "<br><b><span style=\"color:red\">The sha does not match the RSA result</span></b><br>";
+    else if (commentsGeneral!=0)
+      *commentsOnFailure << "<br><b><span style=\"color:green\">Validated.</span></b><br>";
+    if (commentsOnFailure!=0)
+      *commentsOnFailure << theShaUI.ToString()
+      << "<br>does not match the encrypted signature <br>" << RSAresult.ToString()
+      << "<br>sha hex: " << theShaHex
+      << "<br>RSAresult hex: " << RSAresultHex
+      << "<br>trimmed: " << RSAresultTrimmedHex
+      << "<br>RSAresult base64: " << RSAresultBase64
     ;
 
   }
@@ -930,9 +1031,9 @@ bool JSONWebToken::AssignString(const std::string& other, std::stringstream* com
   this->headerBase64   =theStrings[0];
   this->claimsBase64   =theStrings[1];
   this->signatureBase64=theStrings[2];
-  if (!Crypto::ConvertStringBase64ToString(this->headerBase64, this->headerJSON, commentsOnFailure))
+  if (!Crypto::ConvertBase64ToString(this->headerBase64, this->headerJSON, commentsOnFailure))
     return false;
-  if (!Crypto::ConvertStringBase64ToString(this->claimsBase64, this->claimsJSON, commentsOnFailure))
+  if (!Crypto::ConvertBase64ToString(this->claimsBase64, this->claimsJSON, commentsOnFailure))
     return false;
   return true;
 }

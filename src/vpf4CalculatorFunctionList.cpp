@@ -421,6 +421,7 @@ JWTverifyRSA256(token,modulus\
    true, false,
    "CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256",
    "JWTverifyRSA256");
+
   this->AddOperationInnerHandler
   ("Sha1", CalculatorFunctionsGeneral::innerSha1OfString, "",
    "Converts characters to a sequence of bits and computes the sha1 hash value of those bits. \
@@ -468,13 +469,21 @@ JWTverifyRSA256(token,modulus\
    "CalculatorFunctionsGeneral::innerBase64ToHex",
    "Base64ToHex");
   this->AddOperationInnerHandler
-  ("HexStringToInteger", CalculatorFunctionsGeneral::innerHexToInteger, "",
+  ("HexToInteger", CalculatorFunctionsGeneral::innerHexToInteger, "",
    "Converts a hex string to an integer. ",
-   "HexStringToInteger(Base64ToHex(\"AQAB\"));\
+   "HexToInteger(Base64ToHex(\"AQAB\"));\
    ",
    true, false,
    "CalculatorFunctionsGeneral::innerHexToInteger",
-   "HexStringToInteger");
+   "HexToInteger");
+  this->AddOperationInnerHandler
+  ("HexToString", CalculatorFunctionsGeneral::innerHexToString, "",
+   "Converts a hex string to a string. ",
+   "HexToString(\"3031300d060960864801650304020105000420\");\
+   ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerHexToString",
+   "HexToString");
 
   this->AddOperationInnerHandler
   ("MakeMakefile",

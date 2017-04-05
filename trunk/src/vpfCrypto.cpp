@@ -936,6 +936,9 @@ bool Crypto::LoadKnownCertificates(std::stringstream* comments)
 
 LargeIntUnsigned Crypto::RSAencrypt(const LargeIntUnsigned& theModulus, const LargeInt& theExponent, const LargeInt& theMessage)
 { MacroRegisterFunctionWithName("Crypto::RSAencrypt");
+  if (theModulus==0 || theExponent==0)
+    crash << "The modulus and the exponent are not allowed to be zero while running RSA. "
+    << "The modulus: " << theModulus.ToString() << "; the exponent: " << theExponent.ToString() << crash;
   ElementZmodP theElt, theOne;
   theElt.theModulo=theModulus;
   theOne.theValue=1;
@@ -980,13 +983,22 @@ bool JSONWebToken::VerifyRSA256
   double timeStart=-1;
   if (commentsGeneral!=0)
     timeStart=theGlobalVariables.GetElapsedSeconds();
+  if (theModulus==0 || theExponent==0)
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "The modulus and the exponent must be non-zero. "
+      << "The mod is: " << theModulus << "; the exponent is: " << theExponent;
+    return false;
+  }
+  stOutput << "DEBUG: Got to here";
   LargeIntUnsigned RSAresult= Crypto::RSAencrypt(theModulus, theExponent, theSignatureInt);
+  stOutput << "<br>DEBUG: Got to here pt 2";
   if (commentsGeneral!=0)
     *commentsGeneral << "<br>RSA encryption took: "
     << theGlobalVariables.GetElapsedSeconds()-timeStart << "second(s).<br>";
   std::string RSAresultBitstream, RSAresultLast32bytes;
   Crypto::ConvertLargeUnsignedIntToString(RSAresult, RSAresultBitstream);
-  RSAresultLast32bytes=RSAresultBitstream.substr(RSAresultBitstream.size()-32,32);
+  if (RSAresultBitstream.size()>32)
+    RSAresultLast32bytes=RSAresultBitstream.substr(RSAresultBitstream.size()-32,32);
   Crypto::ConvertStringToListUInt32BigendianZeroPad(RSAresultLast32bytes, RSAresultInts);
   bool result = (RSAresultInts==outputSha);
   if (!result)

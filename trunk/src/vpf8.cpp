@@ -48,13 +48,13 @@ bool LargeIntUnsigned::AssignStringFailureAllowed(const std::string& input, bool
   return true;
 }
 
-LargeIntUnsigned&& LargeIntUnsigned::operator*(const LargeIntUnsigned& x)const
+LargeIntUnsigned LargeIntUnsigned::operator*(const LargeIntUnsigned& x)const
 { LargeIntUnsigned result;
   this->MultiplyBy(x, result);
   return std::move(result);
 }
 
-LargeIntUnsigned&& LargeIntUnsigned::operator/(unsigned int x)const
+LargeIntUnsigned LargeIntUnsigned::operator/(unsigned int x)const
 { LargeIntUnsigned result;
   LargeIntUnsigned remainder;
   LargeIntUnsigned tempX;
@@ -64,7 +64,7 @@ LargeIntUnsigned&& LargeIntUnsigned::operator/(unsigned int x)const
   return std::move(result);
 }
 
-LargeIntUnsigned&& LargeIntUnsigned::operator/(const LargeIntUnsigned& x)const
+LargeIntUnsigned LargeIntUnsigned::operator/(const LargeIntUnsigned& x)const
 { LargeIntUnsigned result;
   LargeIntUnsigned remainder;
   this->DivPositive(x, result, remainder);
@@ -125,7 +125,7 @@ void LargeIntUnsigned::operator+=(unsigned int x)
 { this->AddUInt(x);
 }
 
-LargeIntUnsigned&& LargeIntUnsigned::operator+(const LargeIntUnsigned& other)
+LargeIntUnsigned LargeIntUnsigned::operator+(const LargeIntUnsigned& other)
 { LargeIntUnsigned result=*this;
   result+=other;
   return std::move(result);
@@ -439,11 +439,6 @@ LargeIntUnsigned::LargeIntUnsigned(const LargeIntUnsigned& x)
 //  stOutput << "<br>Copy constructor";
 }
 
-LargeIntUnsigned::LargeIntUnsigned(LargeIntUnsigned&& x)
-{ this->theDigits=std::move(x.theDigits);
-  stOutput << "<br>Move constructor";
-}
-
 void LargeIntUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift)
 { if(!(x<LargeIntUnsigned::CarryOverBound))
     crash << "Digit too large. " << crash;
@@ -513,7 +508,7 @@ void LargeIntUnsigned::operator+=(const LargeIntUnsigned& x)
   this->FitSize();
 }
 
-LargeIntUnsigned&& LargeIntUnsigned::operator-(const LargeIntUnsigned& other) const
+LargeIntUnsigned LargeIntUnsigned::operator-(const LargeIntUnsigned& other) const
 { LargeIntUnsigned result;
   result=*this;
   result.SubtractSmallerPositive(other);
@@ -655,7 +650,7 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
 //  if(!this->CheckForConsistensy())crash << crash;
 }
 
-LargeIntUnsigned&& LargeIntUnsigned::operator%(const LargeIntUnsigned& other)const
+LargeIntUnsigned LargeIntUnsigned::operator%(const LargeIntUnsigned& other)const
 { LargeIntUnsigned result, temp;
   this->DivPositive(other, temp, result);
   return std::move(result);
@@ -785,11 +780,6 @@ void LargeIntUnsigned::lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b,
 void LargeIntUnsigned::operator=(const LargeIntUnsigned& x)
 { this->theDigits=x.theDigits;
   //stOutput << "<br>Copy assignment" << crash.GetStackTraceShort();
-}
-
-void LargeIntUnsigned::operator=(LargeIntUnsigned&& other)
-{ this->theDigits=other.theDigits;
-  stOutput << "<br>Move assignment";
 }
 
 void LargeIntUnsigned::operator=(unsigned int x)

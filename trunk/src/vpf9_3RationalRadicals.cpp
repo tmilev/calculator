@@ -151,7 +151,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
           if (this->theQuadraticRadicals[j]%radicalsNew[k]==0 && radicalsNew[k]!=-1)
             largerFieldSel.AddSelectionAppendNewIndex(k);
       }
-//        stOutput << "<hr>smaller field sel: " << smallerFieldSel.ToString() << " larger field sel: " << largerFieldSel.ToString();
+      //stOutput << "<hr>smaller field sel: " << smallerFieldSel.ToString() << " larger field sel: " << largerFieldSel.ToString();
     currentInjection.AddMonomial(MonomialMatrix(this->GetIndexFromRadicalSelection(largerFieldSel), this->GetIndexFromRadicalSelection(smallerFieldSel)), 1);
   }while (smallerFieldSel.IncrementReturnFalseIfPastLast());
   this->theQuadraticRadicals=radicalsNew;
@@ -159,10 +159,10 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
   do
     this->GetMultiplicativeOperatorFromRadicalSelection(largerFieldSel, this->theBasisMultiplicative[this->GetIndexFromRadicalSelection(largerFieldSel)]);
   while(largerFieldSel.IncrementReturnFalseIfPastLast());
-//  stOutput << "<hr>Computing display strings";
+  //stOutput << "<hr>Computing display strings";
   this->RegisterNewBasis(currentInjection);
   this->ComputeDisplayStringsFromRadicals();
-//  stOutput << this->ToString();
+  //stOutput << this->ToString();
   return true;
 }
 

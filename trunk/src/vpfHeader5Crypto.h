@@ -25,8 +25,6 @@ public:
   static bool LoadKnownCertificates(std::stringstream* comments);
   static bool LoadOneKnownCertificate(const std::string& input, std::stringstream* comments);
 
-  static std::string ConvertStringToEMSAPKCS1V15UsingSha256
-  (const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* generalComments);
   static std::string ConvertStringToBase64(const List<unsigned char>& input);
   static std::string ConvertStringToBase64(const std::string& input);
   static uint32_t GetUInt32FromCharBigendian(const List<unsigned char>& input);

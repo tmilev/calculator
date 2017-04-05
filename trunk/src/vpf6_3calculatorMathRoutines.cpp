@@ -389,9 +389,14 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
 
 bool CalculatorFunctionsGeneral::innerFactorial(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFactorial");
-  int inputInt;
-  if (!input.IsSmallInteger(&inputInt))
+  int inputInt=-1;
+  if (!input.IsIntegerFittingInInt(&inputInt))
     return false;
+  if (inputInt<0)
+    return false;
+  if (inputInt>30000)
+    return theCommands << "Computing large factorials is disabled "
+    << "(can be changed in the source code by modifying CalculatorFunctionsGeneral::innerFactorial).";
   Rational result;
   return output.AssignValue(result.Factorial(inputInt), theCommands);
 }

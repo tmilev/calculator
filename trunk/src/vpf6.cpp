@@ -925,13 +925,17 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
   const Expression& rightE =input[3];
 //  stOutput << leftE.ToString() << ", " << rightE.ToString() << ", " << middleE.ToString();
   int numRows, numCols;
-  if (!middleE.IsSmallInteger(&numRows) || !rightE.IsSmallInteger(&numCols))
+  if (!middleE.IsIntegerFittingInInt(&numRows) || !rightE.IsIntegerFittingInInt(&numCols))
     return false;
 //  stOutput << "<br>Rows, cols: " << numRows << ", " << numCols;
   if (numRows<=0 || numCols<=0)
     return false;
-  if (numRows>1000 || numCols>1000)
-  { theCommands << "Max number of rows/columns is 1000. You requested " << numRows << " rows and " << numCols << " columns.<br>";
+  LargeInt numRowsTimesCols=numRows;
+  numRowsTimesCols*=numCols ;
+  if (numRowsTimesCols>10000)
+  { theCommands << "Max number of matrix entries is 10000. You requested " << numRows
+    << " rows and " << numCols
+    << " columns, total: " << numRowsTimesCols.ToString() << " entries<br>";
     return false;
   }
   output.reset(theCommands, numRows+1);

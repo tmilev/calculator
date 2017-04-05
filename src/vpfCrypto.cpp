@@ -248,14 +248,6 @@ std::string Crypto::ConvertStringToBase64(const std::string& input)
   return Crypto::ConvertStringToBase64(inputChar);
 }
 
-std::string Crypto::ConvertStringToEMSAPKCS1V15UsingSha256
-(const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* generalComments)
-{ MacroRegisterFunctionWithName("Crypto::ConvertStringToEMSAPKCS1V15UsingSha256");
-  std::string result;
-
-  return result;
-}
-
 std::string Crypto::ConvertStringToBase64(const List<unsigned char>& input)
 { MacroRegisterFunctionWithName("Crypto::ConvertStringToBase64");
   uint32_t theStack=0;
@@ -650,7 +642,9 @@ bool Crypto::ConvertLargeUnsignedIntToString
   while (inputCopy>0)
   { digit=inputCopy%256;
     inputCopy/=256;
-    unsigned char digitChar=(unsigned char) digit.theDigits[0];
+    int digitInt=0;
+    digit.IsIntegerFittingInInt(&digitInt);
+    char digitChar=(char) digitInt;
     result.AddOnTop(digitChar);
   }
   result.ReverseOrderElements();
@@ -983,7 +977,13 @@ bool JSONWebToken::VerifyRSA256
   LargeIntUnsigned theSignatureInt;
   if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->signatureBase64,theSignatureInt,commentsOnFailure))
     return false;
+  double timeStart=-1;
+  if (commentsGeneral!=0)
+    timeStart=theGlobalVariables.GetElapsedSeconds();
   LargeIntUnsigned RSAresult= Crypto::RSAencrypt(theModulus, theExponent, theSignatureInt);
+  if (commentsGeneral!=0)
+    *commentsGeneral << "<br>RSA encryption took: "
+    << theGlobalVariables.GetElapsedSeconds()-timeStart << "second(s).<br>";
   std::string RSAresultBitstream, RSAresultLast32bytes;
   Crypto::ConvertLargeUnsignedIntToString(RSAresult, RSAresultBitstream);
   RSAresultLast32bytes=RSAresultBitstream.substr(RSAresultBitstream.size()-32,32);

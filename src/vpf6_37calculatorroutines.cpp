@@ -490,6 +490,19 @@ bool CalculatorFunctionsGeneral::innerHexToString(Calculator& theCommands, const
   return output.AssignValue(result, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerIntegerToHex(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegerToHex");
+  LargeInt theLI;
+  if (!input.IsInteger(&theLI))
+    return false;
+  if (theLI<0)
+    return theCommands << "I only convert positive integers to hex strings. ";
+  std::string result;
+  if (!Crypto::ConvertLargeUnsignedIntToHex(theLI.value, result))
+    return theCommands << "Failed to convert " << theLI
+    << " as a hex string ";
+  return output.AssignValue(result, theCommands);
+}
 
 bool CalculatorFunctionsGeneral::innerHexToInteger(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerHexToInteger");

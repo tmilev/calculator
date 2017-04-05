@@ -477,6 +477,14 @@ JWTverifyRSA256(token,modulus\
    "CalculatorFunctionsGeneral::innerHexToInteger",
    "HexToInteger");
   this->AddOperationInnerHandler
+  ("IntegerToHex", CalculatorFunctionsGeneral::innerIntegerToHex, "",
+   "Converts an integer to hex string. ",
+   "IntegerToHex(65537);\
+   ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIntegerToHex",
+   "IntegerToHex");
+  this->AddOperationInnerHandler
   ("HexToString", CalculatorFunctionsGeneral::innerHexToString, "",
    "Converts a hex string to a string. ",
    "HexToString(\"3031300d060960864801650304020105000420\");\

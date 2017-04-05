@@ -12,20 +12,22 @@ public:
   //
   //CarryOverBound is the "base" over which we work.
   //Requirements on the CarryOverBound:
-  //1.  CarryOverBound*2-1 must fit inside an unsigned (int)
+  //1.  +/-(CarryOverBound*2)-1 must fit inside an (int)
   //    on the system
   //2. (CarryOverBound*2)^2-1 must fit inside (long long)
   //    on the system.
   ////////////////////////////////////////////////////////
-  //On a 32 bit machine any number smaller than or equal to 2^31 will work.
+  //On a 32 bit machine any number smaller than or equal to 2^30 will work.
   //If you got no clue what to put just leave CarryOverBound as it is below.
-  List<unsigned int> theDigits;
-  static const unsigned int CarryOverBound=1000000000UL;
+  List<int32_t> theDigits;
+  //static const int CarryOverBound=10; //<-for extreme "corner case" testing
+  static const int CarryOverBound=1000000000;
   //the above choice of CarryOverBound facilitates very quick conversions of Large integers into decimal, with
   //relatively small loss of speed and RAM memory.
 //  static const unsigned int CarryOverBound=2147483648UL; //=2^31
   //The following must be less than or equal to the square root of CarryOverBound.
   //It is used for quick multiplication of Rational-s.
+  //static const int SquareRootOfCarryOverBound=3;//<-for extreme "corner case" testing
   static const int SquareRootOfCarryOverBound=31000; //31000*31000=961000000<1000000000
 //  static const int SquareRootOfCarryOverBound=32768; //=2^15
   friend bool operator <(int left, const LargeIntUnsigned& right)
@@ -35,22 +37,16 @@ public:
   { output << theLIU.ToString();
     return output;
   }
+  void PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
+  void AddLargeIntUnsignedShiftedTimesDigit(const LargeIntUnsigned& other, int digitShift, int theConst);
   void SubtractSmallerPositive(const LargeIntUnsigned& x);
   void ToString(std::string& output)const;
   void ElementToStringLargeElementDecimal(std::string& output)const;
-  std::string ToString(FormatExpressions* theFormat=0)const
-  { (void) theFormat;//to avoid unused paramater warning
-    std::string tempS;
-    this->ToString(tempS);
-    return tempS;
-  }
-  void DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToStringAbbreviate(FormatExpressions* theFormat=0)const;
+  void DivPositive(const LargeIntUnsigned& divisor, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
   void MakeOne();
-  void AddUInt(unsigned int x)
-  { LargeIntUnsigned tempI;
-    tempI.AssignShiftedUInt(x, 0);
-    (*this)+=tempI;
-  }
+  void AddUInt(unsigned int x);
   void MakeZero();
   bool IsEqualToZero()const;
   bool IsEven()const;
@@ -58,54 +54,20 @@ public:
   bool IsPossiblyPrimeMillerRabin(int numTimesToRun=1);
   bool IsPossiblyPrimeMillerRabinOnce
   (unsigned int theBase, int theExponentOfThePowerTwoFactorOfNminusOne,
- const LargeIntUnsigned& theOddFactorOfNminusOne)
-  ;
+   const LargeIntUnsigned& theOddFactorOfNminusOne);
   bool IsEqualToOne()const;
   bool IsGEQ(const LargeIntUnsigned& x)const;
-  static void GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output)
-  { List<int> theSieve;
-    theSieve.initFillInObject(n+1,1);
-    output.Reserve(n/2);
-    output.size=0;
-    for (unsigned int i=2; i<=n; i++)
-      if (theSieve.TheObjects[i]!=0)
-      { output.AddOnTop(i);
-//        stOutput << i << ",";
-        for (unsigned int j=i; j<=n; j+=i)
-          theSieve[j]=0;
-      }
-  }
+  static void GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output);
   static void gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output);
-  static LargeIntUnsigned gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b)
-  { LargeIntUnsigned output;
-    LargeIntUnsigned::gcd(a, b, output);
-    return output;
-  }
-  static LargeIntUnsigned lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b)
-  { LargeIntUnsigned output;
-    LargeIntUnsigned::lcm(a, b, output);
-    return output;
-  }
+  static LargeIntUnsigned gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b);
+  static LargeIntUnsigned lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b);
   static void lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output);
   unsigned int HashFunction()const;
   void MultiplyBy(const LargeIntUnsigned& right);
-  inline void operator*=(const LargeIntUnsigned& right)
-  { this->MultiplyBy(right);
-  }
-  inline void operator*=(unsigned int x)
-  { this->MultiplyByUInt(x);
-  }
-  inline void operator+=(unsigned int x)
-  { this->AddUInt(x);
-  }
-  LargeIntUnsigned operator+(const LargeIntUnsigned& other)
-  { LargeIntUnsigned result=*this;
-    result+=other;
-    return result;
-  }
-  inline void operator++(int)
-  { this->AddUInt(1);
-  }
+  void operator*=(const LargeIntUnsigned& right);
+  void operator*=(unsigned int x);
+  void operator+=(unsigned int x);
+  void operator++(int);
   bool IsIntegerFittingInInt(int* whichInt);
   void AssignFactorial(unsigned int x);
   void MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const;
@@ -118,81 +80,34 @@ public:
   void AssignString(const std::string& input);
   bool AssignStringFailureAllowed(const std::string& input, bool ignoreNonDigits);
   int GetUnsignedIntValueTruncated();
-  LargeIntUnsigned operator%(const LargeIntUnsigned& other)const
-  { LargeIntUnsigned result, temp;
-    this->DivPositive(other, temp, result);
-    return result;
-  }
-  LargeIntUnsigned operator-(const LargeIntUnsigned& other)const;
   int operator%(unsigned int x);
   void operator=(const LargeIntUnsigned& x);
+  void operator=(LargeIntUnsigned&& other);
   void operator=(unsigned int x);
   void operator+=(const LargeIntUnsigned& other);
   bool operator==(const LargeIntUnsigned& other)const;
   bool operator!=(const LargeIntUnsigned& other)const;
-  inline void operator--(int)
-  { if (this->IsEqualToZero())
-      crash << "This is a programming error: attempting to subtract 1 from a large unsigned integer with value 0. " << crash;
-    this->SubtractSmallerPositive(1);
-  }
-  inline void operator%=(const LargeIntUnsigned& other)
-  { if (&other==this)
-    { this->MakeZero();
-      return;
-    }
-    LargeIntUnsigned copyMe=*this;
-    LargeIntUnsigned temp1;
-    copyMe.DivPositive(other, temp1, *this);
-  }
-  inline void operator/=(const LargeIntUnsigned& other)
-  { if (&other==this)
-    { this->MakeOne();
-      return;
-    }
-    LargeIntUnsigned copyMe=*this;
-    LargeIntUnsigned temp1;
-    copyMe.DivPositive(other, *this, temp1);
-  }
-  LargeIntUnsigned operator/(unsigned int x)const;
-  LargeIntUnsigned operator/(const LargeIntUnsigned& x)const;
-  LargeIntUnsigned operator*(const LargeIntUnsigned& x)const
-  { LargeIntUnsigned result;
-    this->MultiplyBy(x, result);
-    return result;
-  }
+  void operator--(int);
+  void operator%=(const LargeIntUnsigned& other);
+  void operator/=(const LargeIntUnsigned& other);
+  LargeIntUnsigned&& operator+(const LargeIntUnsigned& other);
+  LargeIntUnsigned&& operator%(const LargeIntUnsigned& other)const;
+  LargeIntUnsigned&& operator-(const LargeIntUnsigned& other)const;
+  LargeIntUnsigned&& operator/(unsigned int x)const;
+  LargeIntUnsigned&& operator/(const LargeIntUnsigned& x)const;
+  LargeIntUnsigned&& operator*(const LargeIntUnsigned& x)const;
   LargeIntUnsigned(unsigned int x);
   LargeIntUnsigned(const LargeIntUnsigned& x);
+  LargeIntUnsigned(LargeIntUnsigned&& x);
   LargeIntUnsigned();
 //  LargeIntUnsigned(unsigned int value){this->operator=(value); }
 //  LargeIntUnsigned(unsigned int x) {this->AssignShiftedUInt(x,0);}
-  static inline LargeIntUnsigned GetOne()
-  { LargeIntUnsigned tempI;
-    tempI.MakeOne();
-    return tempI;
-  }
-  inline bool operator<(int other)const
-  { if (other<0)
-      return false;
-    LargeIntUnsigned tempUI;
-    tempUI= (unsigned) other;
-    return *this<tempUI;
-  }
-  inline bool operator>(int other)const
-  { if (other<0)
-      return true;
-    LargeIntUnsigned tempUI;
-    tempUI= (unsigned) other;
-    return *this>tempUI;
-  }
-  inline bool operator<(const LargeIntUnsigned& other)const
-  { return !this->IsGEQ(other);
-  }
-  bool operator>=(const LargeIntUnsigned& other)const
-  { return this->IsGEQ(other);
-  }
-  bool operator>(const LargeIntUnsigned& other)const
-  { return other<*this;
-  }
+  static LargeIntUnsigned GetOne();
+  bool operator<(int other)const;
+  bool operator>(int other)const;
+  bool operator<(const LargeIntUnsigned& other)const;
+  bool operator>=(const LargeIntUnsigned& other)const;
+  bool operator>(const LargeIntUnsigned& other)const;
   //must be rewritten:
   double GetDoubleValue()const;
   void FitSize();

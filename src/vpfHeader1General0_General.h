@@ -762,6 +762,13 @@ public:
   { this->initConstructorCallOnly();
     *this=(other);
   }
+  List(List<Object>&& other)
+  { this->initConstructorCallOnly();
+    this->size=other.size;
+    this->TheObjects=other.TheObjects;
+    other.size=0;
+    other.TheObjects=0;
+  }
   List(const ListLight<Object>& other)
   { this->initConstructorCallOnly();
     this->AssignLight(other);
@@ -1065,6 +1072,17 @@ public:
   { return input.HashFunction();
   }
   void IntersectWith(const List<Object>& other, List<Object>& output)const;
+  void operator=(List<Object>&& right)
+  { if (this==&right)
+      return;
+    this->ReleaseMemory();
+    this->TheObjects=right.TheObjects;
+    this->size=right.size;
+    this->ActualSize=right.ActualSize;
+    right.TheObjects=0;
+    right.size=0;
+    right.ActualSize=0;
+  }
   void operator=(const List<Object>& right)
   { if (this==&right)
       return;

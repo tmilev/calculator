@@ -542,6 +542,8 @@ bool CalculatorFunctionsGeneral::innerRSAencrypt(Calculator& theCommands, const 
     << input.ToString();
   if (theModulus<0)
     theModulus*=-1;
+  if (theModulus==0 || theExponent==0)
+    return theCommands << "The modulus and exponent must be non-zero.";
   if (theModulus==1)
     return theCommands << "Modulus 1 not allowed";
   result=Crypto::RSAencrypt(theModulus.value, theExponent, theMessage);

@@ -82,7 +82,7 @@ public:
   int GetUnsignedIntValueTruncated();
   int operator%(unsigned int x);
   void operator=(const LargeIntUnsigned& x);
-  void operator=(LargeIntUnsigned&& other);
+  //void operator=(LargeIntUnsigned&& other);
   void operator=(unsigned int x);
   void operator+=(const LargeIntUnsigned& other);
   bool operator==(const LargeIntUnsigned& other)const;
@@ -90,15 +90,15 @@ public:
   void operator--(int);
   void operator%=(const LargeIntUnsigned& other);
   void operator/=(const LargeIntUnsigned& other);
-  LargeIntUnsigned&& operator+(const LargeIntUnsigned& other);
-  LargeIntUnsigned&& operator%(const LargeIntUnsigned& other)const;
-  LargeIntUnsigned&& operator-(const LargeIntUnsigned& other)const;
-  LargeIntUnsigned&& operator/(unsigned int x)const;
-  LargeIntUnsigned&& operator/(const LargeIntUnsigned& x)const;
-  LargeIntUnsigned&& operator*(const LargeIntUnsigned& x)const;
+  LargeIntUnsigned operator+(const LargeIntUnsigned& other);
+  LargeIntUnsigned operator%(const LargeIntUnsigned& other)const;
+  LargeIntUnsigned operator-(const LargeIntUnsigned& other)const;
+  LargeIntUnsigned operator/(unsigned int x)const;
+  LargeIntUnsigned operator/(const LargeIntUnsigned& x)const;
+  LargeIntUnsigned operator*(const LargeIntUnsigned& x)const;
   LargeIntUnsigned(unsigned int x);
   LargeIntUnsigned(const LargeIntUnsigned& x);
-  LargeIntUnsigned(LargeIntUnsigned&& x);
+//  LargeIntUnsigned(LargeIntUnsigned x);
   LargeIntUnsigned();
 //  LargeIntUnsigned(unsigned int value){this->operator=(value); }
 //  LargeIntUnsigned(unsigned int x) {this->AssignShiftedUInt(x,0);}

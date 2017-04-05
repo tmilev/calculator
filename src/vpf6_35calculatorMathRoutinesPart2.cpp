@@ -1374,13 +1374,22 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
       }
     }
     if (input.size()==2)
+    { std::string theFunName="";
       if (opString=="\\sin" || opString == "\\cos" ||
           opString=="\\log" || opString == "\\tan" ||
           opString=="\\cot")
-      { std::string chopped=opString.substr(1);
-        out << "(Math." << chopped << "( " << leftString << "))";
+        theFunName=opString.substr(1);
+      if (opString=="\\arccos")
+        theFunName="acos";
+      if (opString=="\\arcsin")
+        theFunName="asin";
+      if (opString=="\\arctan")
+        theFunName="atan";
+      if (theFunName!="")
+      { out << "(Math." << theFunName << "( " << leftString << "))";
         return output.AssignValue(out.str(), theCommands);
       }
+    }
     if (input.size()==2)
       if (opString=="|")
       { out << "(Math.abs( " << leftString << "))";

@@ -1117,7 +1117,7 @@ public:
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
   bool isSeparatorFromTheLeftForDefinition(const std::string& input);
   bool isSeparatorFromTheLeftForList(const std::string& input);
-  bool isStandardCalculatorCharacter(char input);
+  bool isStandardCalculatorCharacter(unsigned char input);
   bool isSeparatorFromTheRightGeneral(const std::string& input);
   bool isSeparatorFromTheRightForDefinition(const std::string& input);
   bool isSeparatorFromTheRightForList(const std::string& input);

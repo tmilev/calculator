@@ -286,7 +286,7 @@ Expression Calculator::GetNewAtom()
 { std::string atomPrefix;
   std::string candidate;
   while (true)
-  { for (unsigned char a='a'; a<='z'; a++)
+  { for (char a='a'; a<='z'; a++)
     { candidate=atomPrefix;
       candidate.push_back(a);
       if (!this->theAtoms.Contains(candidate))
@@ -749,4 +749,5 @@ void Calculator::EvaluateCommands()
   this->outputCommentsString=commentsStream.str();
   if(theGlobalVariables.flagRunningCommandLine && this->Comments.str()!="")
     this->outputString+=this->outputCommentsString;
+  //std::cout << "DEBUG: got to end of story. " ;
 }

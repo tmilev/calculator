@@ -956,7 +956,7 @@ std::string HtmlInterpretation::AddTeachersSections()
   List<std::string> theDelimiters;
 #ifdef MACRO_use_MySQL
   List<std::string> theTeachers, theSections;
-  List<unsigned char> delimiters;
+  List<char> delimiters;
   delimiters.AddOnTop(' ');
   delimiters.AddOnTop('\r');
   delimiters.AddOnTop('\n');

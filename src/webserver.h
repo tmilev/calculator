@@ -21,19 +21,43 @@ static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-struct SSLdata{
+struct SSLdata
+{
 public:
+  static bool flagSSLlibraryInitialized;
   int errorCode;
-  SSL* ssl;
+  SSL* sslClient;
+  SSL* sslServer;
   X509* client_cert;
-  SSL_CTX* ctx;
+  SSL_CTX* contextServer;
+  SSL_CTX* contextClient;
+  const SSL_METHOD* theSSLClientMethod;
+  const SSL_METHOD* theSSLServerMethod;
   std::string otherCertificateIssuerName, otherCertificateSubjectName;
+  bool flagSSLHandshakeSuccessful;
+  void ClearErrorQueue(int errorCode, SSL* theSSL, std::stringstream* output);
+  void initSSLlibrary();
+  void initSSLserver();
+  void initSSLclient();
+  int SSLread(SSL* theSSL, void *buffer, int bufferSize, std::stringstream* comments);
+  int SSLwrite(SSL* theSSL, void *buffer, int bufferSize, std::stringstream* comments);
   SSLdata()
   { this->errorCode=-1;
-    this->ssl=0;
+    this->sslClient=0;
+    this->sslServer=0;
     this->client_cert=0;
-    this->ctx=0;
+    this->theSSLClientMethod=0;
+    this->theSSLServerMethod=0;
+    this->contextServer=0;
+    this->contextClient=0;
+    this->flagSSLHandshakeSuccessful=false;
   }
+  ~SSLdata();
+  void FreeSSL();
+  void FreeContext();
+  void HandShakeIamServer(int inputSocketID);
+  bool HandShakeIamClient(int inputSocketID, std::stringstream* comments);
+  void FreeEverythingShutdownSSL();
 };
 #endif
 ////////////////////////////////////////////
@@ -218,7 +242,6 @@ int recursionDepth=0)
   void AttemptUnknownRequestErrorCorrection();
   bool ReceiveAllHttp();
   bool ReceiveAllHttpSSL();
-  std::string ToStringSSLError(int errorCode);
   void SendDisplayUserInputToServer();
   enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
   std::string ToStringStatus()const;
@@ -249,7 +272,6 @@ public:
   long long NumFailedSelectsSoFar;
   long long NumSuccessfulSelectsSoFar;
   bool flagTryToKillOlderProcesses;
-  bool flagSSLHandshakeSuccessful;
   bool flagReapingChildren;
   bool flagThisIsWorkerProcess;
   double timeAtLastBackup;
@@ -307,9 +329,7 @@ public:
   void initPortsITry();
   void initListeningSockets();
   void initSSL();
-  void SSLfreeResources();
   void SSLServerSideHandShake();
-  void SSLfreeEverythingShutdownSSL();
   void TerminateChildSystemCall(int i);
   void RecycleChildrenIfPossible();
   void HandleTooManyConnections(const std::string& incomingUserAddress);

@@ -1089,7 +1089,7 @@ std::string Calculator::ToStringIsCorrectAsciiCalculatorString(const std::string
   return out.str();
 }
 
-bool Calculator::isStandardCalculatorCharacter(char input)
+bool Calculator::isStandardCalculatorCharacter(unsigned char input)
 { if (10<=input && input<=126)
     return true;
   if (this->isInterpretedAsEmptySpace(input))

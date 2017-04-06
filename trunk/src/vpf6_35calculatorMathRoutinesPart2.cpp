@@ -1448,11 +1448,11 @@ bool CalculatorFunctionsGeneral::innerPlotCoordinateSystem(Calculator& theComman
   plotLabels.thePlotType="label";
   plotLabels.thePoints.SetSize(1);
   plotLabels.colorJS="blue";
-  for (unsigned char i=0; i<3; i++)
+  for (char i=0; i<3; i++)
   { plotLabels.thePoints[0].MakeZero(3);
     plotLabels.thePoints[0][i]=corner2[i];
     std::stringstream out;
-    out << (unsigned char) ('x'+i);
+    out << (char) ('x'+i);
     plotLabels.thePlotString=out.str();
     resultPlot+=plotLabels;
   }

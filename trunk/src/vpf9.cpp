@@ -1028,8 +1028,8 @@ std::string MathRoutines::StringShortenInsertDots(const std::string& inputString
 }
 
 void MathRoutines::StringSplitExcludeDelimiter
-(const std::string& inputString, unsigned char delimiter, List<std::string>& output)
-{ List<unsigned char> tempList;
+(const std::string& inputString, char delimiter, List<std::string>& output)
+{ List<char> tempList;
   tempList.AddOnTop(delimiter);
   MathRoutines::StringSplitExcludeDelimiters(inputString, tempList, output);
 }
@@ -1066,7 +1066,7 @@ void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::str
 void MathRoutines::StringSplitDefaultDelimiters
 (const std::string& inputString, List<std::string>& output)
 { MacroRegisterFunctionWithName("MathRoutines::StringSplitDefaultDelimiters");
-  List<unsigned char> delimiters;
+  List<char> delimiters;
   delimiters.AddOnTop(' ');
   delimiters.AddOnTop('\r');
   delimiters.AddOnTop('\n');
@@ -1078,7 +1078,7 @@ void MathRoutines::StringSplitDefaultDelimiters
 }
 
 void MathRoutines::StringSplitExcludeDelimiters
-(const std::string& inputString, const List<unsigned char>& delimiters, List<std::string>& output)
+(const std::string& inputString, const List<char>& delimiters, List<std::string>& output)
 { MacroRegisterFunctionWithName("MathRoutines::StringSplit");
   output.SetSize(0);
   std::string reader;
@@ -8000,7 +8000,7 @@ std::string CGI::StringToURLString(const std::string& input, bool usePlusesForSp
       out << '+';
     else
     { out << "%";
-      int x = (unsigned char) input[i];
+      int x = (char) input[i];
       out << std::hex << ((x/16)%16) << (x%16) << std::dec;
     }
   return out.str();

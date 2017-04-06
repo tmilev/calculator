@@ -22,7 +22,7 @@ TimeWrapper::TimeWrapper()
 
 bool TimeWrapper::AssignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure)
 { this->AssignLocalTime(); //<-hopefully this initialized things properly ...
-  List<unsigned char> theDelimiters;
+  List<char> theDelimiters;
   theDelimiters.AddOnTop('/');
   theDelimiters.AddOnTop('-');
   theDelimiters.AddOnTop('.');

@@ -54,7 +54,7 @@ std::ostream& operator<<(std::ostream& out, const f65521& data);
 
 class f211
 { public:
-  unsigned char n;
+  char n;
 
   f211(){};
 

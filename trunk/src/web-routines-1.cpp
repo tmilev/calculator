@@ -1,8 +1,9 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "../../calculator/src/vpfHeader3Calculator2_InnerFunctions.h"
-#include "../../calculator/src/vpfHeader1General5TimeDate.h"
+#include "vpfHeader3Calculator2_InnerFunctions.h"
+#include "vpfHeader1General5TimeDate.h"
 #include "webserver.h"
+#include "vpfHeader5Crypto.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -21,8 +22,15 @@ ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Cal
 class WebCrawler
 {
 public:
+  SSLdata theSSlData;
   int theSocket;
   std::string portOrService;
+  std::string addressToConnectTo;
+  std::string serverToConnectTo;
+  std::string lastTransactionErrors;
+  std::string lastTransaction;
+  std::string messageReceived;
+
   bool flagInitialized;
   List<char> buffer;
   struct sockaddr_in serverAddress;
@@ -31,14 +39,17 @@ public:
   struct addrinfo *serverInfo;
   WebCrawler();
   ~WebCrawler();
+  void FetchWebPagePart2(std::stringstream* comments);
   void init();
   void PingCalculatorStatus();
   void FreeAddressInfo();
-  std::string addressToConnectTo;
-  std::stringstream fatalErrors;
-  std::string lastTransactionErrors;
-  std::string lastTransaction;
+  void FetchWebPage(std::stringstream* comments);
+  void initSSL();
 };
+
+void WebCrawler::initSSL()
+{ this->theSSlData.initSSLclient();
+}
 
 void MonitorWebServer()
 { MacroRegisterFunctionWithName("MonitorWebServer");
@@ -229,17 +240,144 @@ void WebCrawler::PingCalculatorStatus()
   this->FreeAddressInfo();
 }
 
+void WebCrawler::FetchWebPage(std::stringstream* comments)
+{ MacroRegisterFunctionWithName("WebCrawler::FetchWebPage");
+  logOpenSSL << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
+  std::stringstream reportStream;
+  this->theSSlData.initSSLclient();
+  this->theSSlData.sslClient= SSL_new(this->theSSlData.contextClient);
+  if (this->theSSlData.sslClient==0)
+  { logOpenSSL << logger::red << "Failed to allocate ssl. " << logger::endL;
+    crash << "Failed to allocate ssl: not supposed to happen. " << crash;
+  }
+  this->lastTransaction="";
+  this->lastTransactionErrors="";
+  memset(&this->hints, 0, sizeof this->hints); // make sure the struct is empty
+  this->hints.ai_family   = AF_UNSPEC  ;       // don't care IPv4 or IPv6
+  this->hints.ai_socktype = SOCK_STREAM;       // TCP stream sockets
+  this->hints.ai_flags    = AI_PASSIVE ;       // fill in my IP for me
+  this->serverInfo=0;
+  int status=getaddrinfo(this->addressToConnectTo.c_str(), this->portOrService.c_str(), &hints, &this->serverInfo);
+  if (status!= 0)
+  { this->lastTransactionErrors =  "Error calling getaddrinfo: ";
+    this->lastTransactionErrors+= gai_strerror(status);
+    this->FreeAddressInfo();
+    return;
+  }
+  if (this->serverInfo==0)
+  { this->lastTransactionErrors= "Server info is zero";
+    return;
+  }
+  struct addrinfo *p=0;  // will point to the results
+  this->theSocket=-1;
+  char ipString[INET6_ADDRSTRLEN];
+  for(p = this->serverInfo; p != 0; p = p->ai_next, close(this->theSocket))
+  { void *theAddress=0;
+    this->theSocket=-1;
+    // get the pointer to the address itself,
+    // different fields in IPv4 and IPv6:
+    if (p->ai_family == AF_INET)
+    { // IPv4
+      struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
+      theAddress = &(ipv4->sin_addr);
+      reportStream << "IPv4: ";
+    } else
+    { // IPv6
+      struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
+      theAddress = &(ipv6->sin6_addr);
+      reportStream << "IPv6: ";
+    }
+    // convert the IP to a string and print it:
+    inet_ntop(p->ai_family, theAddress, ipString, sizeof ipString);
+//    std::string ipString()
+    reportStream << this->addressToConnectTo << ": " << ipString << "<br>";
+    this->theSocket= socket(this->serverInfo->ai_family, this->serverInfo->ai_socktype, this->serverInfo->ai_protocol);
+    int connectionResult=-1;
+    if (this->theSocket<0)
+    { this->lastTransactionErrors= "failed to create socket ";
+      continue;
+    } else
+    { fd_set fdConnectSockets;
+      FD_ZERO(&fdConnectSockets);
+      FD_SET(this->theSocket, &fdConnectSockets);
+      timeval timeOut;
+      timeOut.tv_sec=1;
+      timeOut.tv_usec=0;
+      int numPingFails=0;
+      int numSelected=0;
+      std::stringstream failStream;
+      do
+      { if (numPingFails>10)
+          break;
+        numSelected=select(this->theSocket+1, &fdConnectSockets, 0, 0, &timeOut);
+        failStream << "While pinging, select failed. Error message: "
+        << strerror(errno) << ". \n";
+        numPingFails++;
+      } while (numSelected<0);
+      if (numSelected<=0)
+      { logIO << logger::red << failStream.str() << logger::endL;
+        reportStream << failStream.str() << "Could not connect through port. Select returned: " << numSelected;
+        connectionResult=-1;
+      } else
+        connectionResult =connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
+    }
+    if (connectionResult==-1)
+    { reportStream << "<br>Failed to connect: address: " << this->addressToConnectTo << " port: "
+      << this->portOrService << ". ";
+//      << explain_errno_connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
+      this->lastTransactionErrors= reportStream.str();
+      close(this->theSocket);
+      continue;
+    } else
+      reportStream << "<br>connected: " << this->addressToConnectTo << " port: " << this->portOrService << ". ";
+    this->FetchWebPagePart2(comments);
+    close(this->theSocket);
+  }
+  this->FreeAddressInfo();
+}
+
+void WebCrawler::FetchWebPagePart2(std::stringstream* comments)
+{ MacroRegisterFunctionWithName("WebCrawler::FetchWebPagePart2");
+  std::string getMessage=  "GET " + this->addressToConnectTo;
+  logOpenSSL << logger::green  << "DEBUG: got to before handshake i am client" << logger::endL;
+  this->theSSlData.HandShakeIamClient(this->theSocket, comments);
+
+  Crypto::ConvertStringToListBytesSigned(getMessage, this->buffer);
+  stOutput << "DEBUG: Got before ssl write";
+  std::stringstream errorStream;
+  int numBytes = this->theSSlData.SSLwrite(this->theSSlData.sslClient,this->buffer.TheObjects,this->buffer.size, &errorStream);
+  if ((unsigned) numBytes !=getMessage.size())
+  { this->lastTransactionErrors+= "\nERROR writing to socket";
+    close(this->theSocket);
+    return;
+  }
+  stOutput << "DEBUG: Got before ssl read";
+  numBytes = this->theSSlData.SSLread(this->theSSlData.sslClient,this->buffer.TheObjects,this->buffer.size, &errorStream);
+  if (numBytes < 0)
+  { this->lastTransactionErrors+= "\nERROR reading from socket";
+    close(this->theSocket);
+    return;
+  }
+  this->messageReceived.assign(buffer.TheObjects, numBytes);
+  if (comments!=0)
+    *comments << "<br>Read: " << this->messageReceived;
+}
+
 bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchWebPage");
-  (void) input;//portable way of avoiding unused parameter warning
-//  if (!theGlobalVariables.UserDefaultHasAdminRights())
-//    return output.AssignValue((std::string) "Fetching web pages available only for logged-in admins. ", theCommands);
-
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return output.AssignValue((std::string) "Fetching web pages available only for logged-in admins. ", theCommands);
   WebCrawler theCrawler;
-  theCrawler.init();
-//  theCrawler.addressToConnectTo="localhost";
-//  theCrawler.portOrService="8080";
-
-  theCrawler.PingCalculatorStatus();
-  return output.AssignValue(theCrawler.lastTransactionErrors+"<hr>"+theCrawler.lastTransaction, theCommands);
+  if (input.size()!=4)
+    return theCommands << "Fetching web page expects 3 arguments: server, service/port, and webpage. ";
+  if (!input[1].IsOfType(&theCrawler.serverToConnectTo))
+    theCrawler.serverToConnectTo=input[1].ToString();
+  if (!input[2].IsOfType(&theCrawler.portOrService))
+    theCrawler.portOrService=input[2].ToString();
+  if (!input[3].IsOfType(&theCrawler.addressToConnectTo))
+    theCrawler.addressToConnectTo=input[3].ToString();
+  std::stringstream out;
+  theCrawler.FetchWebPage(&out);
+  out << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
+  return output.AssignValue(out.str(), theCommands);
 }

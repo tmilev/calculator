@@ -79,7 +79,7 @@ unsigned char Crypto::GetCharFrom6bit(uint32_t input)
   return -1;
 }
 
-bool Crypto::Get6bitFromChar(char input, uint32_t& output)
+bool Crypto::Get6bitFromChar(unsigned char input, uint32_t& output)
 { switch (input)
   { case 'A': output= 0;  return true;
     case 'B': output= 1;  return true;
@@ -217,7 +217,14 @@ void Crypto::ConvertBitStreamToString(const List<unsigned char>& input, std::str
 }
 
 void Crypto::ConvertStringToListBytes(const std::string& input, List<unsigned char>& output)
-{ MacroRegisterFunctionWithName("Crypto::ConvertStringToBitStream");
+{ MacroRegisterFunctionWithName("Crypto::ConvertStringToListBytes");
+  output.SetSize(input.size());
+  for (unsigned i=0; i<input.size(); i++)
+    output[i]=input[i];
+}
+
+void Crypto::ConvertStringToListBytesSigned(const std::string& input, List<char>& output)
+{ MacroRegisterFunctionWithName("Crypto::ConvertStringToListBytesSigned");
   output.SetSize(input.size());
   for (unsigned i=0; i<input.size(); i++)
     output[i]=input[i];
@@ -352,7 +359,7 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output)
   output.clear();
   bool result=true;
   for (unsigned i=0; i<input.size(); i+=2)
-  { char nextByte=0;
+  { unsigned char nextByte=0;
     for (unsigned j=0; j<2; j++)
     { if (i+j>=input.size())
       { result=false;
@@ -409,8 +416,8 @@ std::string Crypto::ConvertStringToHex(const std::string& input)
 bool Crypto::ConvertStringToHex(const std::string& input, std::string& output)
 { std::stringstream out;
   for (unsigned i=0; i<input.size(); i++)
-  { unsigned char high= ((unsigned char) input[i])/16;
-    unsigned char low = ((unsigned char) input[i])%16;
+  { char high= ((unsigned char) input[i])/16;
+    char low = ((unsigned char) input[i])%16;
     if (high<10)
       out << (int)high;
     else
@@ -426,14 +433,14 @@ bool Crypto::ConvertStringToHex(const std::string& input, std::string& output)
 
 void Crypto::ConvertUint64toBigendianStringAppendResult(uint64_t& input, std::string& outputAppend)
 { //the following code should work on both big- and little-endian systems:
-  outputAppend.push_back((unsigned char)  (input/72057594037927936) );
-  outputAppend.push_back((unsigned char) ((input/281474976710656)%256 ));
-  outputAppend.push_back((unsigned char) ((input/1099511627776)%256 ));
-  outputAppend.push_back((unsigned char) ((input/4294967296)%256 ));
-  outputAppend.push_back((unsigned char) ((input/16777216)%256 ));
-  outputAppend.push_back((unsigned char) ((input/65536)%256 ));
-  outputAppend.push_back((unsigned char) ((input/256)%256 ));
-  outputAppend.push_back((unsigned char)  (input%256 ));
+  outputAppend.push_back((char)  (input/72057594037927936) );
+  outputAppend.push_back((char) ((input/281474976710656)%256 ));
+  outputAppend.push_back((char) ((input/1099511627776)%256 ));
+  outputAppend.push_back((char) ((input/4294967296)%256 ));
+  outputAppend.push_back((char) ((input/16777216)%256 ));
+  outputAppend.push_back((char) ((input/65536)%256 ));
+  outputAppend.push_back((char) ((input/256)%256 ));
+  outputAppend.push_back((char)  (input%256 ));
 }
 
 void Crypto::ConvertStringToListUInt32BigendianZeroPad(const std::string& input, List<uint32_t>& output)
@@ -475,7 +482,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
   uint32_t h2 = 0x98BADCFE;
   uint32_t h3 = 0x10325476;
   uint32_t h4 = 0xC3D2E1F0;
-  uint64_t messageLength=inputString.size()*8;//*sizeof(unsigned char);
+  uint64_t messageLength=inputString.size()*8;//*sizeof(char);
   std::string inputStringPreprocessed=inputString;
   //Wikipedia appears to claim that if the message
   //is a multiple of 8 bits, padding with the bit 1
@@ -734,7 +741,7 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
   }
   Crypto::initSha256();
   //stOutput << "DEBUG: start string length: " << inputString.size();
-  uint64_t messageLength=inputString.size()*8;//*sizeof(unsigned char);
+  uint64_t messageLength=inputString.size()*8;//*sizeof(char);
   std::string inputStringPreprocessed=inputString;
   inputStringPreprocessed.push_back(0x80);
   unsigned numbytesMod64= inputStringPreprocessed.size() %64;
@@ -989,12 +996,12 @@ bool JSONWebToken::VerifyRSA256
       << "The mod is: " << theModulus << "; the exponent is: " << theExponent;
     return false;
   }
-  stOutput << "DEBUG: Got to here";
+  //stOutput << "DEBUG: Got to here";
   LargeIntUnsigned RSAresult= Crypto::RSAencrypt(theModulus, theExponent, theSignatureInt);
-  stOutput << "<br>DEBUG: Got to here pt 2";
+  //stOutput << "<br>DEBUG: Got to here pt 2";
   if (commentsGeneral!=0)
     *commentsGeneral << "<br>RSA encryption took: "
-    << theGlobalVariables.GetElapsedSeconds()-timeStart << "second(s).<br>";
+    << theGlobalVariables.GetElapsedSeconds()-timeStart << " second(s).<br>";
   std::string RSAresultBitstream, RSAresultLast32bytes;
   Crypto::ConvertLargeUnsignedIntToString(RSAresult, RSAresultBitstream);
   if (RSAresultBitstream.size()>32)
@@ -1014,12 +1021,13 @@ bool JSONWebToken::VerifyRSA256
     Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex);
     Crypto::ConvertLargeUnsignedIntToHex(theShaUI, theShaHex);
     if (!result && commentsOnFailure!=0)
-      *commentsOnFailure << "<br><b><span style=\"color:red\">The sha does not match the RSA result</span></b><br>";
+      *commentsOnFailure << "<br><b><span style=\"color:red\">The sha does not match the RSA result</span></b>";
     else if (commentsGeneral!=0)
-      *commentsOnFailure << "<br><b><span style=\"color:green\">Validated.</span></b><br>";
-    if (commentsOnFailure!=0)
-      *commentsOnFailure << theShaUI.ToString()
-      << "<br>does not match the encrypted signature <br>" << RSAresult.ToString()
+      *commentsOnFailure << "<br><b><span style=\"color:green\">Validated.</span></b>";
+    if (commentsGeneral!=0)
+      *commentsGeneral
+      << "<br>Sha integer: " << theShaUI.ToString()
+      << "<br>Encrypted signature: " << RSAresult.ToString()
       << "<br>sha hex: " << theShaHex
       << "<br>RSAresult hex: " << RSAresultHex
       << "<br>trimmed: " << RSAresultTrimmedHex

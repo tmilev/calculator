@@ -268,10 +268,9 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
 //from where you get the signedFileCertificate1 and signedFileCertificate3
 const std::string fileCertificate= "certificates/cert.pem";
 const std::string fileKey= "certificates/key.pem";
-const std::string signedFileCertificate1= "certificates/2_calculator-algebra.org.crt";
-//const std::string signedFileCertificate2= "certificates/1_Intermediate.crt";
-const std::string signedFileCertificate3= "certificates/1_root_bundle.crt";
-const std::string signedFileKey= "certificates/privateKey.key";
+const std::string signedFileCertificate1= "certificates/calculator-algebra.crt";
+const std::string signedFileCertificate3= "certificates/godaddy-signature.crt";
+const std::string signedFileKey= "certificates/calculator-algebra.key";
 
 void WebServer::initSSL()
 { MacroRegisterFunctionWithName("WebServer::initSSL");
@@ -292,9 +291,9 @@ SSLdata::~SSLdata()
 }
 
 void SSLdata::FreeSSL()
-{ SSL_free(this->sslClient);
+{ //SSL_free(this->sslClient);
   SSL_free(this->sslServer);
-  this->sslClient=0;
+  //this->sslClient=0;
   this->sslServer=0;
 }
 
@@ -309,9 +308,9 @@ void SSLdata::FreeEverythingShutdownSSL()
 void SSLdata::FreeContext()
 {
 #ifdef MACRO_use_open_ssl
-  SSL_CTX_free (this->contextClient);
+  //SSL_CTX_free (this->contextClient);
   SSL_CTX_free (this->contextServer);
-  this->contextClient=0;
+  //this->contextClient=0;
   this->contextServer=0;
 #endif // MACRO_use_open_ssl
 }
@@ -400,17 +399,17 @@ void SSLdata::initSSLserver()
 ////////
 }
 
-void SSLdata::initSSLclient()
-{ this->initSSLlibrary();
-  if (this->theSSLClientMethod!=0)
-    return;
-  this->theSSLClientMethod= SSLv23_client_method();
-  this->contextClient = SSL_CTX_new(this->theSSLClientMethod);   /* Create new context */
-  if (this->contextClient == 0)
-  { ERR_print_errors_fp(stderr);
-    crash << "openssl error: failed to create CTX object." << crash;
-  }
-}
+//void SSLdata::initSSLclient()
+//{ this->initSSLlibrary();
+//  if (this->theSSLClientMethod!=0)
+//    return;
+//  this->theSSLClientMethod= SSLv23_client_method();
+//  this->contextClient = SSL_CTX_new(this->theSSLClientMethod);   /* Create new context */
+//  if (this->contextClient == 0)
+//  { ERR_print_errors_fp(stderr);
+//    crash << "openssl error: failed to create CTX object." << crash;
+//  }
+//}
 
 void SSLdata::HandShakeIamServer(int inputSocketID)
 {
@@ -424,7 +423,7 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
 //  theLog << "Got to here 1.1" << logger::endL;
-  SSL_set_fd(this->sslServer, inputSocketID);
+  this->SetSocket(inputSocketID);
 //  theLog << "Got to here 1.2" << logger::endL;
   int maxNumHandshakeTries=1;
 //  int theError=-1;
@@ -493,19 +492,33 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
 #endif // MACRO_use_open_ssl
 }
 
+void SSLdata::RemoveLastSocket()
+{ this->socketStack.RemoveLastObject();
+  if (this->socketStack.size>0)
+  { int lastSocket=this->socketStack.PopLastObject();
+    SSL_set_fd(this->sslServer, lastSocket);
+    close(lastSocket);
+  }
+}
+
+void SSLdata::SetSocket(int theSocket)
+{ this->socketStack.AddOnTop(theSocket);
+  SSL_set_fd(this->sslServer, *this->socketStack.LastObject());
+}
+
 bool SSLdata::HandShakeIamClient(int inputSocketID, std::stringstream* comments)
 {
 #ifdef MACRO_use_open_ssl
   MacroRegisterFunctionWithName("WebServer::HandShakeIamClient");
-  this->sslClient = SSL_new(this->contextServer);
-  if (this->sslClient==0)
-  { logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
-    crash << "Failed to allocate ssl: not supposed to happen" << crash;
-  }
-  SSL_set_fd(this->sslClient, inputSocketID);
+  //this->sslClient = SSL_new(this->contextServer);
+  //if (this->sslClient==0)
+  //{ logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
+  //  crash << "Failed to allocate ssl: not supposed to happen" << crash;
+  //}
+  this->SetSocket(inputSocketID);
   int maxNumHandshakeTries=1;
   for (int i=0; i<maxNumHandshakeTries; i++)
-  { this->errorCode= SSL_accept (this->sslClient);
+  { this->errorCode= SSL_connect (this->sslServer);
     this->flagSSLHandshakeSuccessful=false;
     if (this->errorCode!=1)
     { if (this->errorCode==0)
@@ -513,7 +526,7 @@ bool SSLdata::HandShakeIamClient(int inputSocketID, std::stringstream* comments)
       else
         logOpenSSL << "OpenSSL handshake not successful with a fatal error. ";
       logOpenSSL << "Attempt " << i+1 << " out of " << maxNumHandshakeTries << " failed. ";
-      switch(SSL_get_error(this->sslClient, this->errorCode))
+      switch(SSL_get_error(this->sslServer, this->errorCode))
       {
       case SSL_ERROR_NONE:
         logOpenSSL << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
@@ -566,20 +579,22 @@ bool SSLdata::HandShakeIamClient(int inputSocketID, std::stringstream* comments)
       break;
     }
   }
-  //  theLog << "Got to here 1.3" << logger::endL;
+  theLog << logger::green << "DEBUG: Got to here 1.3" << logger::endL;
   //CHK_SSL(err);
 //  theLog << "Got to here 2" << logger::endL;
   /* Get the cipher - opt */
   /* Get client's certificate (note: beware of dynamic allocation) - opt */
-  this->client_cert= SSL_get_peer_certificate(this->sslClient);
+  this->client_cert= SSL_get_peer_certificate(this->sslServer);
   if (this->client_cert!= 0)
   { char* tempCharPtr=0;
     if (comments!=0)
-      *comments << "SSL connection using: " << SSL_get_cipher(this->sslClient);
+      *comments << "SSL connection using: " << SSL_get_cipher(this->sslServer);
+    theLog << logger::blue << "DEBUG: SSL connection using: " << SSL_get_cipher(this->sslServer);
     tempCharPtr = X509_NAME_oneline(X509_get_subject_name (this->client_cert), 0, 0);
     if (tempCharPtr==0)
     { if (comments!=0)
         *comments << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
+      this->RemoveLastSocket();
       return false;
     }
     this->otherCertificateSubjectName=tempCharPtr;
@@ -591,18 +606,23 @@ bool SSLdata::HandShakeIamClient(int inputSocketID, std::stringstream* comments)
     if (tempCharPtr==0)
     { if (comments!=0)
         *comments << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
+      this->RemoveLastSocket();
       return false;
     }
     this->otherCertificateIssuerName=tempCharPtr;
     OPENSSL_free(tempCharPtr);
     if (comments!=0)
       *comments << "Issuer name: " << this->otherCertificateIssuerName << "<br>\n";
+    theLog << logger::blue << "DEBUG: Issuer name: " << this->otherCertificateIssuerName << "<br>\n";
     X509_free(this->client_cert);
     this->client_cert=0;
+    this->RemoveLastSocket();
     return true;
   } else
   { if (comments!=0)
-      *comments << "SSL connection using: " << SSL_get_cipher(this->sslClient) << ". "
+      *comments << "SSL connection using: " << SSL_get_cipher(this->sslServer) << ". "
+      << "No client certificate.<br>\n";
+    theLog << "SSL connection using: " << SSL_get_cipher(this->sslServer) << ". "
       << "No client certificate.<br>\n";
     return false;
   }
@@ -3467,7 +3487,7 @@ WebServer::WebServer()
   this->NumProcessAssassinated=0;
   this->NumConnectionsSoFar=0;
   this->NumWorkersNormallyExited=0;
-  this->WebServerPingIntervalInSeconds=20;
+  this->WebServerPingIntervalInSeconds=10;
   this->flagThisIsWorkerProcess=false;
   this->requestStartsNotNeedingLogin.AddOnTop("compute");
   this->requestStartsNotNeedingLogin.AddOnTop("calculator");

@@ -22,7 +22,7 @@ ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Cal
 class WebCrawler
 {
 public:
-  SSLdata theSSlData;
+//  SSLdata theSSlData;
   int theSocket;
   std::string portOrService;
   std::string addressToConnectTo;
@@ -44,12 +44,7 @@ public:
   void PingCalculatorStatus();
   void FreeAddressInfo();
   void FetchWebPage(std::stringstream* comments);
-  void initSSL();
 };
-
-void WebCrawler::initSSL()
-{ this->theSSlData.initSSLclient();
-}
 
 void MonitorWebServer()
 { MacroRegisterFunctionWithName("MonitorWebServer");
@@ -244,12 +239,12 @@ void WebCrawler::FetchWebPage(std::stringstream* comments)
 { MacroRegisterFunctionWithName("WebCrawler::FetchWebPage");
   logOpenSSL << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
   std::stringstream reportStream;
-  this->theSSlData.initSSLclient();
-  this->theSSlData.sslClient= SSL_new(this->theSSlData.contextClient);
-  if (this->theSSlData.sslClient==0)
-  { logOpenSSL << logger::red << "Failed to allocate ssl. " << logger::endL;
-    crash << "Failed to allocate ssl: not supposed to happen. " << crash;
-  }
+  //theWebServer.theSSlData.initSSLclient();
+  //this->theSSlData.sslClient= SSL_new(this->theSSlData.contextClient);
+  //if (this->theSSlData.sslClient==0)
+  //{ logOpenSSL << logger::red << "Failed to allocate ssl. " << logger::endL;
+  //  crash << "Failed to allocate ssl: not supposed to happen. " << crash;
+  //}
   this->lastTransaction="";
   this->lastTransactionErrors="";
   memset(&this->hints, 0, sizeof this->hints); // make sure the struct is empty
@@ -257,7 +252,7 @@ void WebCrawler::FetchWebPage(std::stringstream* comments)
   this->hints.ai_socktype = SOCK_STREAM;       // TCP stream sockets
   this->hints.ai_flags    = AI_PASSIVE ;       // fill in my IP for me
   this->serverInfo=0;
-  int status=getaddrinfo(this->addressToConnectTo.c_str(), this->portOrService.c_str(), &hints, &this->serverInfo);
+  int status=getaddrinfo(this->serverToConnectTo.c_str(), this->portOrService.c_str(), &hints, &this->serverInfo);
   if (status!= 0)
   { this->lastTransactionErrors =  "Error calling getaddrinfo: ";
     this->lastTransactionErrors+= gai_strerror(status);
@@ -340,22 +335,25 @@ void WebCrawler::FetchWebPagePart2(std::stringstream* comments)
 { MacroRegisterFunctionWithName("WebCrawler::FetchWebPagePart2");
   std::string getMessage=  "GET " + this->addressToConnectTo;
   logOpenSSL << logger::green  << "DEBUG: got to before handshake i am client" << logger::endL;
-  this->theSSlData.HandShakeIamClient(this->theSocket, comments);
+  theWebServer.theSSLdata.HandShakeIamClient(this->theSocket, comments);
+  logOpenSSL << logger::orange  << "DEBUG: Shook hands ok" << logger::endL;
 
   Crypto::ConvertStringToListBytesSigned(getMessage, this->buffer);
   stOutput << "DEBUG: Got before ssl write";
   std::stringstream errorStream;
-  int numBytes = this->theSSlData.SSLwrite(this->theSSlData.sslClient,this->buffer.TheObjects,this->buffer.size, &errorStream);
+  int numBytes = theWebServer.theSSLdata.SSLwrite
+  (theWebServer.theSSLdata.sslServer, this->buffer.TheObjects, this->buffer.size, &errorStream);
   if ((unsigned) numBytes !=getMessage.size())
   { this->lastTransactionErrors+= "\nERROR writing to socket";
-    close(this->theSocket);
+    theWebServer.theSSLdata.RemoveLastSocket();
     return;
   }
   stOutput << "DEBUG: Got before ssl read";
-  numBytes = this->theSSlData.SSLread(this->theSSlData.sslClient,this->buffer.TheObjects,this->buffer.size, &errorStream);
+  numBytes = theWebServer.theSSLdata.SSLread
+  (theWebServer.theSSLdata.sslServer,this->buffer.TheObjects,this->buffer.size, &errorStream);
   if (numBytes < 0)
   { this->lastTransactionErrors+= "\nERROR reading from socket";
-    close(this->theSocket);
+    theWebServer.theSSLdata.RemoveLastSocket();
     return;
   }
   this->messageReceived.assign(buffer.TheObjects, numBytes);
@@ -377,6 +375,9 @@ bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, cons
   if (!input[3].IsOfType(&theCrawler.addressToConnectTo))
     theCrawler.addressToConnectTo=input[3].ToString();
   std::stringstream out;
+  out << "Server:  " << theCrawler.serverToConnectTo
+  << " port: " << theCrawler.portOrService
+  << " resource: " << theCrawler.addressToConnectTo;
   theCrawler.FetchWebPage(&out);
   out << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
   return output.AssignValue(out.str(), theCommands);

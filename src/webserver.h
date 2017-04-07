@@ -26,15 +26,18 @@ struct SSLdata
 public:
   static bool flagSSLlibraryInitialized;
   int errorCode;
-  SSL* sslClient;
+  //SSL* sslClient;
   SSL* sslServer;
   X509* client_cert;
   SSL_CTX* contextServer;
-  SSL_CTX* contextClient;
+  //SSL_CTX* contextClient;
   const SSL_METHOD* theSSLClientMethod;
   const SSL_METHOD* theSSLServerMethod;
+  List<int> socketStack;
   std::string otherCertificateIssuerName, otherCertificateSubjectName;
   bool flagSSLHandshakeSuccessful;
+  void SetSocket(int theSocket);
+  void RemoveLastSocket();
   void ClearErrorQueue(int errorCode, SSL* theSSL, std::stringstream* output);
   void initSSLlibrary();
   void initSSLserver();
@@ -43,13 +46,13 @@ public:
   int SSLwrite(SSL* theSSL, void *buffer, int bufferSize, std::stringstream* comments);
   SSLdata()
   { this->errorCode=-1;
-    this->sslClient=0;
+//    this->sslClient=0;
     this->sslServer=0;
     this->client_cert=0;
     this->theSSLClientMethod=0;
     this->theSSLServerMethod=0;
     this->contextServer=0;
-    this->contextClient=0;
+//    this->contextClient=0;
     this->flagSSLHandshakeSuccessful=false;
   }
   ~SSLdata();

@@ -423,7 +423,7 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
 //  theLog << "Got to here 1.1" << logger::endL;
-  this->SetSocket(inputSocketID);
+  this->SetSocketAddToStack(inputSocketID);
 //  theLog << "Got to here 1.2" << logger::endL;
   int maxNumHandshakeTries=1;
 //  int theError=-1;
@@ -492,31 +492,46 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
 #endif // MACRO_use_open_ssl
 }
 
+void SSLdata::DoSetSocket(int theSocket, SSL *theSSL)
+{ MacroRegisterFunctionWithName("SSLdata::DoSetSocket");
+  int result=0;
+  for (int i=0; i<10; i++)
+  { result= SSL_set_fd(theSSL, theSocket);
+    if (result!=0)
+      break;
+  }
+  if (result==0)
+    crash << "Failed to set socket of server. " << crash;
+}
+
+void SSLdata::SetSocketAddToStack(int theSocket)
+{ MacroRegisterFunctionWithName("SSLdata::SetSocketAddToStack");
+  this->socketStack.AddOnTop(theSocket);
+  this->DoSetSocket(theSocket, this->sslServer);
+}
+
 void SSLdata::RemoveLastSocket()
-{ this->socketStack.RemoveLastObject();
+{ MacroRegisterFunctionWithName("SSLdata::RemoveLastSocket");
   if (this->socketStack.size>0)
   { int lastSocket=this->socketStack.PopLastObject();
-    SSL_set_fd(this->sslServer, lastSocket);
     close(lastSocket);
   }
+  if (this->socketStack.size<=0)
+    return;
+  this->DoSetSocket(*this->socketStack.LastObject(), this->sslServer);
 }
 
-void SSLdata::SetSocket(int theSocket)
-{ this->socketStack.AddOnTop(theSocket);
-  SSL_set_fd(this->sslServer, *this->socketStack.LastObject());
-}
-
-bool SSLdata::HandShakeIamClient(int inputSocketID, std::stringstream* comments)
+bool SSLdata::HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringstream* comments)
 {
 #ifdef MACRO_use_open_ssl
-  MacroRegisterFunctionWithName("WebServer::HandShakeIamClient");
+  MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
   //this->sslClient = SSL_new(this->contextServer);
   //if (this->sslClient==0)
   //{ logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
   //  crash << "Failed to allocate ssl: not supposed to happen" << crash;
   //}
-  this->SetSocket(inputSocketID);
-  int maxNumHandshakeTries=1;
+  this->SetSocketAddToStack(inputSocketID);
+  int maxNumHandshakeTries=4;
   for (int i=0; i<maxNumHandshakeTries; i++)
   { this->errorCode= SSL_connect (this->sslServer);
     this->flagSSLHandshakeSuccessful=false;
@@ -579,7 +594,12 @@ bool SSLdata::HandShakeIamClient(int inputSocketID, std::stringstream* comments)
       break;
     }
   }
-  theLog << logger::green << "DEBUG: Got to here 1.3" << logger::endL;
+  if (this->flagSSLHandshakeSuccessful)
+    theLog << logger::green << "DEBUG: handshake ok" << logger::endL;
+  else
+  { theLog << logger::red << "DEBUG: handshake bad" << logger::endL;
+    return false;
+  }
   //CHK_SSL(err);
 //  theLog << "Got to here 2" << logger::endL;
   /* Get the cipher - opt */
@@ -594,19 +614,18 @@ bool SSLdata::HandShakeIamClient(int inputSocketID, std::stringstream* comments)
     if (tempCharPtr==0)
     { if (comments!=0)
         *comments << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
-      this->RemoveLastSocket();
       return false;
     }
     this->otherCertificateSubjectName=tempCharPtr;
     OPENSSL_free(tempCharPtr);
     if (comments!=0)
-      *comments << "Client certificate:"
+      *comments << "Peer certificate:"
       << "Subject: " << this->otherCertificateSubjectName << "<br>\n";
+
     tempCharPtr = X509_NAME_oneline (X509_get_issuer_name(this->client_cert), 0, 0);
     if (tempCharPtr==0)
     { if (comments!=0)
         *comments << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
-      this->RemoveLastSocket();
       return false;
     }
     this->otherCertificateIssuerName=tempCharPtr;
@@ -616,7 +635,6 @@ bool SSLdata::HandShakeIamClient(int inputSocketID, std::stringstream* comments)
     theLog << logger::blue << "DEBUG: Issuer name: " << this->otherCertificateIssuerName << "<br>\n";
     X509_free(this->client_cert);
     this->client_cert=0;
-    this->RemoveLastSocket();
     return true;
   } else
   { if (comments!=0)

@@ -36,7 +36,8 @@ public:
   List<int> socketStack;
   std::string otherCertificateIssuerName, otherCertificateSubjectName;
   bool flagSSLHandshakeSuccessful;
-  void SetSocket(int theSocket);
+  void DoSetSocket(int theSocket, SSL *theSSL);
+  void SetSocketAddToStack(int theSocket);
   void RemoveLastSocket();
   void ClearErrorQueue(int errorCode, SSL* theSSL, std::stringstream* output);
   void initSSLlibrary();
@@ -59,7 +60,7 @@ public:
   void FreeSSL();
   void FreeContext();
   void HandShakeIamServer(int inputSocketID);
-  bool HandShakeIamClient(int inputSocketID, std::stringstream* comments);
+  bool HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringstream* comments);
   void FreeEverythingShutdownSSL();
 };
 #endif

@@ -51,6 +51,10 @@ void MonitorWebServer()
   WebCrawler theCrawler;
   theCrawler.init();
   int maxNumPingFailures=3;
+  theLog << logger::red << "**********WARNING**************"
+  << logger::endL
+  << logger::red << " Setting ping interval to a large value. " << logger::endL;
+  theWebServer.WebServerPingIntervalInSeconds=10000;
   int microsecondsToSleep=1000000*theWebServer.WebServerPingIntervalInSeconds;//
   theLog << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
   << theCrawler.portOrService << " every " << (microsecondsToSleep/1000000) << " second(s). "
@@ -239,12 +243,6 @@ void WebCrawler::FetchWebPage(std::stringstream* comments)
 { MacroRegisterFunctionWithName("WebCrawler::FetchWebPage");
   logOpenSSL << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
   std::stringstream reportStream;
-  //theWebServer.theSSlData.initSSLclient();
-  //this->theSSlData.sslClient= SSL_new(this->theSSlData.contextClient);
-  //if (this->theSSlData.sslClient==0)
-  //{ logOpenSSL << logger::red << "Failed to allocate ssl. " << logger::endL;
-  //  crash << "Failed to allocate ssl: not supposed to happen. " << crash;
-  //}
   this->lastTransaction="";
   this->lastTransactionErrors="";
   memset(&this->hints, 0, sizeof this->hints); // make sure the struct is empty
@@ -324,9 +322,15 @@ void WebCrawler::FetchWebPage(std::stringstream* comments)
       close(this->theSocket);
       continue;
     } else
-      reportStream << "<br>connected: " << this->addressToConnectTo << " port: " << this->portOrService << ". ";
+    { reportStream << "<br>connected: " << this->addressToConnectTo << " port: " << this->portOrService << ". ";
+      logOpenSSL << logger::green
+      << "connected: "
+      << this->addressToConnectTo << " port: " << this->portOrService << ". " << logger::endL;
+    }
     this->FetchWebPagePart2(comments);
+    theWebServer.theSSLdata.RemoveLastSocket();
     close(this->theSocket);
+    break;
   }
   this->FreeAddressInfo();
 }
@@ -335,30 +339,49 @@ void WebCrawler::FetchWebPagePart2(std::stringstream* comments)
 { MacroRegisterFunctionWithName("WebCrawler::FetchWebPagePart2");
   std::string getMessage=  "GET " + this->addressToConnectTo;
   logOpenSSL << logger::green  << "DEBUG: got to before handshake i am client" << logger::endL;
-  theWebServer.theSSLdata.HandShakeIamClient(this->theSocket, comments);
-  logOpenSSL << logger::orange  << "DEBUG: Shook hands ok" << logger::endL;
-
+  if (theWebServer.theSSLdata.HandShakeIamClientNoSocketCleanup(this->theSocket, comments))
+    logOpenSSL << logger::green  << "DEBUG: Shook hands ok" << logger::endL;
+  else
+  { logOpenSSL << logger::red  << "DEBUG: Shook hands bad. " << logger::endL;
+    if (comments!=0)
+      *comments << "Could not shake hands. ";
+    return;
+  }
   Crypto::ConvertStringToListBytesSigned(getMessage, this->buffer);
   stOutput << "DEBUG: Got before ssl write";
   std::stringstream errorStream;
-  int numBytes = theWebServer.theSSLdata.SSLwrite
-  (theWebServer.theSSLdata.sslServer, this->buffer.TheObjects, this->buffer.size, &errorStream);
-  if ((unsigned) numBytes !=getMessage.size())
-  { this->lastTransactionErrors+= "\nERROR writing to socket";
-    theWebServer.theSSLdata.RemoveLastSocket();
-    return;
+  List<char> result;
+  result.Reserve(20000);
+  int numBytes =-1;
+  int i=0;
+  for (i=0; i<10; i++)
+  { theWebServer.theSSLdata.SSLwrite
+    (theWebServer.theSSLdata.sslServer, this->buffer.TheObjects, this->buffer.size, &errorStream);
+    if ((unsigned) numBytes ==getMessage.size())
+      break;
   }
+  if ((unsigned) numBytes !=getMessage.size())
+    { errorStream << i << " errors to socket.\n";
+      logOpenSSL << logger::red  << i << " errors " << " writing to socket.\n";
+      return;
+    }
   stOutput << "DEBUG: Got before ssl read";
-  numBytes = theWebServer.theSSLdata.SSLread
-  (theWebServer.theSSLdata.sslServer,this->buffer.TheObjects,this->buffer.size, &errorStream);
+  for (i=0; i<10; i++)
+  { numBytes = theWebServer.theSSLdata.SSLread
+    (theWebServer.theSSLdata.sslServer,this->buffer.TheObjects,this->buffer.size, &errorStream);
+    if (numBytes >0)
+      break;
+  }
   if (numBytes < 0)
   { this->lastTransactionErrors+= "\nERROR reading from socket";
-    theWebServer.theSSLdata.RemoveLastSocket();
+    logOpenSSL << logger::red  << i << " errors writing to socket.\n";
     return;
   }
   this->messageReceived.assign(buffer.TheObjects, numBytes);
   if (comments!=0)
     *comments << "<br>Read: " << this->messageReceived;
+  logOpenSSL << logger::green << "Read message: "
+  << this->messageReceived << logger::endL;
 }
 
 bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, const Expression& input, Expression& output)

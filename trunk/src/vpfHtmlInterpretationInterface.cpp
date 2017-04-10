@@ -1119,9 +1119,11 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   theInterpreteR.init();
   theInterpreteR.flagPlotNoControls=true;
   theInterpreteR.flagWriteLatexPlots=false;
-  std::stringstream answerCommands;
+  std::stringstream answerCommands, answerCommandsNoEnclosure;
   answerCommands << currentA.commandsBeforeAnswer;
+  answerCommandsNoEnclosure << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   answerCommands << "CommandEnclosure{}(" << currentA.commandsNoEnclosureAnswerOnGiveUpOnly << ");";
+  answerCommandsNoEnclosure << currentA.commandsNoEnclosureAnswerOnGiveUpOnly;
   theInterpreteR.Evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors!="")
   { out << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
@@ -1181,10 +1183,15 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     }
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-    out << "<hr>" << theInterpreteR.outputString << "<hr>"
+    out
+    << "<hr><a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?request=calculator&"
+    << "mainInput="
+    << CGI::StringToURLString(answerCommandsNoEnclosure.str() ,false)
+    << "\">Calculator input no enclosures</a>"
+    << theInterpreteR.outputString << "<hr>"
     << theInterpreteR.outputCommentsString
-    << "<hr>Calculator input:<br> "
-    << theInterpreteR.inputString;
+    << "<hr>Raw input: <br>" << theInterpreteR.inputString;
   return out.str();
 }
 

@@ -51,10 +51,11 @@ void MonitorWebServer()
   WebCrawler theCrawler;
   theCrawler.init();
   int maxNumPingFailures=3;
-  theLog << logger::red << "**********WARNING**************"
-  << logger::endL
-  << logger::red << " Setting ping interval to a large value. " << logger::endL;
-  theWebServer.WebServerPingIntervalInSeconds=10000;
+//  theWebServer.WebServerPingIntervalInSeconds=10000;
+  if (theWebServer.WebServerPingIntervalInSeconds>30)
+    theLog << logger::red << "**********WARNING**************"
+    << logger::endL
+    << logger::red << " Setting ping interval to a large value. " << logger::endL;
   int microsecondsToSleep=1000000*theWebServer.WebServerPingIntervalInSeconds;//
   theLog << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
   << theCrawler.portOrService << " every " << (microsecondsToSleep/1000000) << " second(s). "

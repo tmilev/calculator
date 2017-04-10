@@ -291,10 +291,15 @@ SSLdata::~SSLdata()
 }
 
 void SSLdata::FreeSSL()
-{ //SSL_free(this->sslClient);
-  SSL_free(this->sslServer);
-  //this->sslClient=0;
-  this->sslServer=0;
+{ SSL_free(this->sslClient);
+  SSL_free(this->sslServeR);
+  this->sslClient=0;
+  this->sslServeR=0;
+}
+
+void SSLdata::FreeClientSSL()
+{ SSL_free(this->sslClient);
+  this->sslClient=0;
 }
 
 void SSLdata::FreeEverythingShutdownSSL()
@@ -336,7 +341,7 @@ void SSLdata::initSSLlibrary()
 
 void SSLdata::initSSLserver()
 { this->initSSLlibrary();
-  if (this->theSSLServerMethod!=0)
+  if (this->theSSLMethod!=0)
     return;
   std::string fileCertificatePhysical, fileKeyPhysical,
   singedFileCertificate1Physical, signedFileCertificate3Physical,
@@ -356,8 +361,8 @@ void SSLdata::initSSLserver()
     return;
   }
   theLog << logger::green << "SSL is available." << logger::endL;
-  this->theSSLServerMethod = SSLv23_method();
-  this->contextServer= SSL_CTX_new(this->theSSLServerMethod);
+  this->theSSLMethod = SSLv23_method();
+  this->contextServer= SSL_CTX_new(this->theSSLMethod);
   if (!this->contextServer)
   { ERR_print_errors_fp(stderr);
     crash << "openssl error: failed to create CTX object." << crash;
@@ -416,19 +421,19 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
 #ifdef MACRO_use_open_ssl
   MacroRegisterFunctionWithName("WebServer::SSLServerSideHandShake");
 //  theLog << "Got to here 1" << logger::endL;
-  this->sslServer = SSL_new(this->contextServer);
+  this->sslServeR = SSL_new(this->contextServer);
 //  theLog << "Got to here 1.05" << logger::endL;
-  if (this->sslServer==0)
+  if (this->sslServeR==0)
   { logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
 //  theLog << "Got to here 1.1" << logger::endL;
-  this->SetSocketAddToStack(inputSocketID);
+  this->SetSocketAddToStackServer(inputSocketID);
 //  theLog << "Got to here 1.2" << logger::endL;
-  int maxNumHandshakeTries=1;
+  int maxNumHandshakeTries=3;
 //  int theError=-1;
   for (int i=0; i<maxNumHandshakeTries; i++)
-  { this->errorCode= SSL_accept (this->sslServer);
+  { this->errorCode= SSL_accept (this->sslServeR);
     this->flagSSLHandshakeSuccessful=false;
     if (this->errorCode!=1)
     { if (this->errorCode==0)
@@ -436,7 +441,7 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
       else
         logOpenSSL << "OpenSSL handshake not successful with a fatal error. ";
       logOpenSSL << "Attempt " << i+1 << " out of " << maxNumHandshakeTries << " failed. ";
-      switch(SSL_get_error(this->sslServer, this->errorCode))
+      switch(SSL_get_error(this->sslServeR, this->errorCode))
       {
       case SSL_ERROR_NONE:
         logOpenSSL << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
@@ -504,90 +509,120 @@ void SSLdata::DoSetSocket(int theSocket, SSL *theSSL)
     crash << "Failed to set socket of server. " << crash;
 }
 
-void SSLdata::SetSocketAddToStack(int theSocket)
-{ MacroRegisterFunctionWithName("SSLdata::SetSocketAddToStack");
-  this->socketStack.AddOnTop(theSocket);
-  this->DoSetSocket(theSocket, this->sslServer);
+void SSLdata::SetSocketAddToStackServer(int theSocket)
+{ MacroRegisterFunctionWithName("SSLdata::SetSocketAddToStackServer");
+  this->socketStackServer.AddOnTop(theSocket);
+  this->DoSetSocket(theSocket, this->sslServeR);
 }
 
-void SSLdata::RemoveLastSocket()
-{ MacroRegisterFunctionWithName("SSLdata::RemoveLastSocket");
-  if (this->socketStack.size>0)
-  { int lastSocket=this->socketStack.PopLastObject();
+void SSLdata::SetSocketAddToStackClient(int theSocket)
+{ MacroRegisterFunctionWithName("SSLdata::SetSocketAddToStackClient");
+  this->socketStackClient.AddOnTop(theSocket);
+  this->DoSetSocket(theSocket, this->sslClient);
+}
+
+void SSLdata::RemoveLastSocketServer()
+{ MacroRegisterFunctionWithName("SSLdata::RemoveLastSocketServer");
+  if (this->socketStackServer.size>0)
+  { int lastSocket=this->socketStackServer.PopLastObject();
     close(lastSocket);
   }
-  if (this->socketStack.size<=0)
+  if (this->socketStackServer.size<=0)
     return;
-  this->DoSetSocket(*this->socketStack.LastObject(), this->sslServer);
+  this->DoSetSocket(*this->socketStackServer.LastObject(), this->sslServeR);
+}
+
+void SSLdata::RemoveLastSocketClient()
+{ MacroRegisterFunctionWithName("SSLdata::RemoveLastSocketClient");
+  if (this->socketStackClient.size>0)
+  { int lastSocket=this->socketStackClient.PopLastObject();
+    close(lastSocket);
+  }
+  if (this->socketStackClient.size<=0)
+    return;
+  this->DoSetSocket(*this->socketStackClient.LastObject(), this->sslClient);
 }
 
 bool SSLdata::HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringstream* comments)
 {
 #ifdef MACRO_use_open_ssl
   MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
-  //this->sslClient = SSL_new(this->contextServer);
-  //if (this->sslClient==0)
-  //{ logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
-  //  crash << "Failed to allocate ssl: not supposed to happen" << crash;
-  //}
-  this->SetSocketAddToStack(inputSocketID);
+  this->FreeClientSSL();
+  this->sslClient = SSL_new(this->contextServer);
+  if (this->sslClient==0)
+  { logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
+    crash << "Failed to allocate ssl: not supposed to happen" << crash;
+  }
+  this->SetSocketAddToStackClient(inputSocketID);
   int maxNumHandshakeTries=4;
   for (int i=0; i<maxNumHandshakeTries; i++)
-  { this->errorCode= SSL_connect (this->sslServer);
+  { this->errorCode= SSL_connect (this->sslClient);
     this->flagSSLHandshakeSuccessful=false;
     if (this->errorCode!=1)
     { if (this->errorCode==0)
-        logOpenSSL << "OpenSSL handshake not successful in a controlled manner. ";
-      else
-        logOpenSSL << "OpenSSL handshake not successful with a fatal error. ";
-      logOpenSSL << "Attempt " << i+1 << " out of " << maxNumHandshakeTries << " failed. ";
-      switch(SSL_get_error(this->sslServer, this->errorCode))
+      { if (comments!=0)
+          *comments << "Attempt " << i+1
+          << ": SSL handshake not successfull in a "
+          << "controlled fashion (errorCode=0). <br>";
+      } else
+      { if (comments!=0)
+          *comments << "Attempt " << i+1
+          << ": SSL handshake not successfull with a fatal error with "
+          << "errorCode: " << this->errorCode << ". <br>";
+      }
+      switch(SSL_get_error(this->sslClient, this->errorCode))
       {
       case SSL_ERROR_NONE:
-        logOpenSSL << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
+        if (comments!=0)
+          *comments << "No error reported, this shouldn't happen. <br>";
         maxNumHandshakeTries=1;
         break;
       case SSL_ERROR_ZERO_RETURN:
-        logOpenSSL << logger::red << "The TLS/SSL connection has been closed (possibly cleanly). " << logger::endL;
+        if (comments!=0)
+          *comments <<"The TLS/SSL connection has been closed (possibly cleanly).  <br>";
         maxNumHandshakeTries=1;
         break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
-        logOpenSSL << logger::red << " During regular I/O: repeat needed (not implemented). " << logger::endL;
+        if (comments!=0)
+          *comments << " During regular I/O: repeat needed (not implemented).  <br>";
         break;
       case SSL_ERROR_WANT_CONNECT:
       case SSL_ERROR_WANT_ACCEPT:
-        logOpenSSL << logger::red << " During handshake negotiations: repeat needed (not implemented). "
-        << logger::endL;
+        if (comments!=0)
+          *comments << " During handshake negotiations: repeat needed (not implemented). <br> ";
         break;
       case SSL_ERROR_WANT_X509_LOOKUP:
-        logOpenSSL << logger::red << " Application callback set by SSL_CTX_set_client_cert_cb(): "
-        << "repeat needed (not implemented). "
-        << logger::endL;
+        if (comments!=0)
+          *comments << " Application callback set by SSL_CTX_set_client_cert_cb(): "
+          << "repeat needed (not implemented).  <br>";
         maxNumHandshakeTries=1;
         break;
   //    case SSL_ERROR_WANT_ASYNC:
-  //      logOpenSSL << logger::red << "Asynchronous engine is still processing data. "
+  //      logOpenSSL << logger::red << "Asynchronous engine is still processing data. <br>"
   //      << logger::endL;
   //      break;
       case SSL_ERROR_SYSCALL:
-        logOpenSSL << logger::red << "Error: some I/O error occurred. "
-        << logger::endL;
+        if (comments!=0)
+          *comments << logger::red << "Error: some I/O error occurred. <br>"
+          << logger::endL;
         maxNumHandshakeTries=1;
         break;
       case SSL_ERROR_SSL:
-        logOpenSSL << logger::red << "A failure in the SSL library occurred. "
-        << logger::endL;
+        if (comments!=0)
+          *comments << "A failure in the SSL library occurred. <br>";
 //        theError=ERR_get_error(3ssl);
 //        if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
 //          maxNumHandshakeTries=1;
         break;
       default:
-        logOpenSSL << logger::red << "Unknown error. " << logger::endL;
+        if (comments!=0)
+          *comments << "Unknown error. <br>";
         maxNumHandshakeTries=1;
         break;
       }
-      logOpenSSL << "Retrying connection in 0.5 seconds...";
+      if (comments!=0)
+        *comments << "Retrying connection in 0.5 seconds...<br>";
       theGlobalVariables.FallAsleep(500000);
     } else
     { this->flagSSLHandshakeSuccessful=true;
@@ -595,22 +630,23 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringst
     }
   }
   if (this->flagSSLHandshakeSuccessful)
-    theLog << logger::green << "DEBUG: handshake ok" << logger::endL;
-  else
-  { theLog << logger::red << "DEBUG: handshake bad" << logger::endL;
+  { if (comments!=0)
+      *comments << "<span style=\"color:green\">SSL handshake successfull.</span>\n<br>\n";
+  } else
+  { if (comments!=0)
+      *comments << "<span style=\"color:red\">SSL handshake failed.</span>\n<br>\n";
     return false;
   }
   //CHK_SSL(err);
 //  theLog << "Got to here 2" << logger::endL;
   /* Get the cipher - opt */
   /* Get client's certificate (note: beware of dynamic allocation) - opt */
-  this->client_cert= SSL_get_peer_certificate(this->sslServer);
-  if (this->client_cert!= 0)
+  this->peer_certificate= SSL_get_peer_certificate(this->sslClient);
+  if (this->peer_certificate!= 0)
   { char* tempCharPtr=0;
     if (comments!=0)
-      *comments << "SSL connection using: " << SSL_get_cipher(this->sslServer);
-    theLog << logger::blue << "DEBUG: SSL connection using: " << SSL_get_cipher(this->sslServer);
-    tempCharPtr = X509_NAME_oneline(X509_get_subject_name (this->client_cert), 0, 0);
+      *comments << "SSL connection using: " << SSL_get_cipher(this->sslClient) << ".<br>\n";
+    tempCharPtr = X509_NAME_oneline(X509_get_subject_name (this->peer_certificate), 0, 0);
     if (tempCharPtr==0)
     { if (comments!=0)
         *comments << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
@@ -622,7 +658,7 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringst
       *comments << "Peer certificate:"
       << "Subject: " << this->otherCertificateSubjectName << "<br>\n";
 
-    tempCharPtr = X509_NAME_oneline (X509_get_issuer_name(this->client_cert), 0, 0);
+    tempCharPtr = X509_NAME_oneline (X509_get_issuer_name(this->peer_certificate), 0, 0);
     if (tempCharPtr==0)
     { if (comments!=0)
         *comments << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
@@ -632,15 +668,12 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringst
     OPENSSL_free(tempCharPtr);
     if (comments!=0)
       *comments << "Issuer name: " << this->otherCertificateIssuerName << "<br>\n";
-    theLog << logger::blue << "DEBUG: Issuer name: " << this->otherCertificateIssuerName << "<br>\n";
-    X509_free(this->client_cert);
-    this->client_cert=0;
+    X509_free(this->peer_certificate);
+    this->peer_certificate=0;
     return true;
   } else
   { if (comments!=0)
-      *comments << "SSL connection using: " << SSL_get_cipher(this->sslServer) << ". "
-      << "No client certificate.<br>\n";
-    theLog << "SSL connection using: " << SSL_get_cipher(this->sslServer) << ". "
+      *comments << "SSL connection using: " << SSL_get_cipher(this->sslClient) << ". "
       << "No client certificate.<br>\n";
     return false;
   }
@@ -648,27 +681,35 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringst
   return true;
 }
 
-int SSLdata::SSLread(SSL *theSSL, void *buffer, int bufferSize, std::stringstream *comments)
+int SSLdata::SSLread
+(SSL *theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
+ std::stringstream *commentsGeneral)
 { int result=SSL_read(theSSL, buffer, bufferSize);
-  this->ClearErrorQueue(result, theSSL, comments);
+  this->ClearErrorQueue(result, theSSL, commentsOnFailure, commentsGeneral);
   return result;
 }
 
-int SSLdata::SSLwrite(SSL *theSSL, void *buffer, int bufferSize, std::stringstream *comments)
+int SSLdata::SSLwrite
+(SSL *theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
+ std::stringstream *commentsGeneral)
 { int result=SSL_write(theSSL, buffer, bufferSize);
-  this->ClearErrorQueue(result, theSSL, comments);
+  this->ClearErrorQueue(result, theSSL, commentsOnFailure, commentsGeneral);
   return result;
 }
 
 void SSLdata::ClearErrorQueue
-(int errorCode, SSL* theSSL, std::stringstream* commentsOnError)
+(int errorCode, SSL* theSSL, std::stringstream* commentsOnError,
+ std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("SSLdata::ToStringError");
 #ifdef MACRO_use_open_ssl
   //for(int i=0; i<20; i++)
   //{
     int theCode=SSL_get_error(theSSL, errorCode);
     if (theCode==SSL_ERROR_NONE)
+    { if (commentsGeneral!=0)
+        *commentsGeneral << "No error. ";
       return;
+    }
     //if (i>0)
     //{ if (commentsOnError!=0)
     //  { *commentsOnError << i+1 << " ssl errors so far. ";
@@ -748,7 +789,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
   std::stringstream errorStream;
   int numBytesInBuffer= this->parent->theSSLdata.SSLread
-  (this->parent->theSSLdata.sslServer, &buffer, bufferSize-1, &errorStream);
+  (this->parent->theSSLdata.sslServeR, &buffer, bufferSize-1, &errorStream, 0);
   double numSecondsAtStart=theGlobalVariables.GetElapsedSeconds();
   int numFailedReceives=0;
   while ((numBytesInBuffer<0) || (numBytesInBuffer>((signed)bufferSize)))
@@ -774,7 +815,8 @@ bool WebWorker::ReceiveAllHttpSSL()
     std::string bufferCopy(buffer, bufferSize);
     logIO << this->parent->ToStringConnection()
     << " Bytes in buffer so far: " << bufferCopy;
-    numBytesInBuffer=this->parent->theSSLdata.SSLread(this->parent->theSSLdata.sslServer, &buffer, bufferSize-1, &errorStream);
+    numBytesInBuffer=this->parent->theSSLdata.SSLread
+    (this->parent->theSSLdata.sslServeR, &buffer, bufferSize-1, &errorStream, 0);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);
   this->ParseMessageHead();
@@ -811,7 +853,8 @@ bool WebWorker::ReceiveAllHttpSSL()
       return false;
     }
 //    logIO << logger::blue << "about to read ..." << logger::endL;
-    numBytesInBuffer= this->parent->theSSLdata.SSLread(this->parent->theSSLdata.sslServer, &buffer, bufferSize-1, &comments);
+    numBytesInBuffer= this->parent->theSSLdata.SSLread
+    (this->parent->theSSLdata.sslServeR, &buffer, bufferSize-1, &comments, 0);
     if (numBytesInBuffer==0)
     { this->error= "While trying to fetch message-body, received 0 bytes. " +
       this->parent->ToStringLastErrorDescription();
@@ -877,8 +920,8 @@ void WebWorker::SendAllBytesHttpSSL()
       return;
     }
     int numBytesSent = this->parent->theSSLdata.SSLwrite
-    (this->parent->theSSLdata.sslServer, this->remainingBytesToSenD.TheObjects,
-     this->remainingBytesToSenD.size, &errorStream);
+    (this->parent->theSSLdata.sslServeR, this->remainingBytesToSenD.TheObjects,
+     this->remainingBytesToSenD.size, &errorStream, 0);
     if (numBytesSent<0)
     { theLog << "WebWorker::SendAllBytes failed: SSL_write error. " << logger::endL;
       return;

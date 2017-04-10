@@ -26,32 +26,44 @@ struct SSLdata
 public:
   static bool flagSSLlibraryInitialized;
   int errorCode;
-  //SSL* sslClient;
-  SSL* sslServer;
-  X509* client_cert;
+  SSL* sslClient;
+  SSL* sslServeR;
+  X509* my_certificate;
+  X509* peer_certificate;
   SSL_CTX* contextServer;
   //SSL_CTX* contextClient;
-  const SSL_METHOD* theSSLClientMethod;
-  const SSL_METHOD* theSSLServerMethod;
-  List<int> socketStack;
+  const SSL_METHOD* theSSLMethod;
+  List<int> socketStackServer;
+  List<int> socketStackClient;
   std::string otherCertificateIssuerName, otherCertificateSubjectName;
   bool flagSSLHandshakeSuccessful;
   void DoSetSocket(int theSocket, SSL *theSSL);
-  void SetSocketAddToStack(int theSocket);
-  void RemoveLastSocket();
-  void ClearErrorQueue(int errorCode, SSL* theSSL, std::stringstream* output);
+  void SetSocketAddToStackServer(int theSocket);
+  void RemoveLastSocketServer();
+  void SetSocketAddToStackClient(int theSocket);
+  void RemoveLastSocketClient();
+  void FreeClientSSL();
+  void ClearErrorQueue
+  (int errorCode, SSL* theSSL, std::stringstream* commentsOnError,
+   std::stringstream* commentsGeneral);
   void initSSLlibrary();
   void initSSLserver();
   void initSSLclient();
-  int SSLread(SSL* theSSL, void *buffer, int bufferSize, std::stringstream* comments);
-  int SSLwrite(SSL* theSSL, void *buffer, int bufferSize, std::stringstream* comments);
+  int SSLread
+  (SSL* theSSL, void *buffer, int bufferSize,
+   std::stringstream *commentsOnFailure,
+   std::stringstream *commentsGeneral);
+  int SSLwrite
+  (SSL* theSSL, void *buffer, int bufferSize,
+   std::stringstream *commentsOnFailure,
+   std::stringstream *commentsGeneral);
   SSLdata()
   { this->errorCode=-1;
-//    this->sslClient=0;
-    this->sslServer=0;
-    this->client_cert=0;
-    this->theSSLClientMethod=0;
-    this->theSSLServerMethod=0;
+    this->sslClient=0;
+    this->sslServeR=0;
+    this->my_certificate=0;
+    this->peer_certificate=0;
+    this->theSSLMethod=0;
     this->contextServer=0;
 //    this->contextClient=0;
     this->flagSSLHandshakeSuccessful=false;

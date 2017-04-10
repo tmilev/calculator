@@ -1855,7 +1855,7 @@ D-B;\
   this->AddOperationInnerHandler ("FetchWebPage",
   CalculatorFunctionsGeneral::innerFetchWebPage, "",
    "Attempts to fetch a web page. For logged-in admins only.",
-   "FetchWebPage(\"www.googleapis.com\", \"https\", \"/oauth2/v3/certs\")",
+   "FetchWebPage(\"www.googleapis.com\", \"https\", \"https://www.googleapis.com/oauth2/v3/certs\")",
    true, false,
    "CalculatorFunctionsGeneral::innerFetchWebPage",
    "FetchWebPage")

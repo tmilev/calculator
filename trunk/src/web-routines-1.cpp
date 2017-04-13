@@ -29,7 +29,8 @@ public:
   std::string serverToConnectTo;
   std::string lastTransactionErrors;
   std::string lastTransaction;
-  std::string messageReceived;
+  std::string headerReceived;
+  std::string bodyReceived;
 
   bool flagInitialized;
   List<char> buffer;
@@ -51,11 +52,14 @@ void MonitorWebServer()
   WebCrawler theCrawler;
   theCrawler.init();
   int maxNumPingFailures=3;
-//  theWebServer.WebServerPingIntervalInSeconds=10000;
+  theWebServer.WebServerPingIntervalInSeconds=10000;
   if (theWebServer.WebServerPingIntervalInSeconds>30)
     theLog << logger::red << "**********WARNING**************"
     << logger::endL
-    << logger::red << " Setting ping interval to a large value. " << logger::endL;
+    << logger::red << " The ping interval: "
+    << theWebServer.WebServerPingIntervalInSeconds
+    << " is set to a large value. "
+    << "Set the ping interval to less than 30 seconds to remove this message. " << logger::endL;
   int microsecondsToSleep=1000000*theWebServer.WebServerPingIntervalInSeconds;//
   theLog << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
   << theCrawler.portOrService << " every " << (microsecondsToSleep/1000000) << " second(s). "
@@ -264,6 +268,7 @@ void WebCrawler::FetchWebPage(std::stringstream* comments)
   struct addrinfo *p=0;  // will point to the results
   this->theSocket=-1;
   char ipString[INET6_ADDRSTRLEN];
+  timeval timeOut;
   for(p = this->serverInfo; p != 0; p = p->ai_next, close(this->theSocket))
   { void *theAddress=0;
     this->theSocket=-1;
@@ -296,7 +301,6 @@ void WebCrawler::FetchWebPage(std::stringstream* comments)
     { fd_set fdConnectSockets;
       FD_ZERO(&fdConnectSockets);
       FD_SET(this->theSocket, &fdConnectSockets);
-      timeval timeOut;
       timeOut.tv_sec=1;
       timeOut.tv_usec=0;
       int numPingFails=0;
@@ -317,6 +321,9 @@ void WebCrawler::FetchWebPage(std::stringstream* comments)
         connectionResult=-1;
       } else
         connectionResult =connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
+      timeOut.tv_sec = 3;  // 5 Secs Timeout
+      timeOut.tv_usec = 0;  // Not init'ing this can cause strange errors
+      setsockopt(connectionResult, SOL_SOCKET, SO_RCVTIMEO, (void*)(&timeOut), sizeof(timeval));
     }
     if (connectionResult==-1)
     { std::stringstream errorStream;
@@ -344,49 +351,42 @@ void WebCrawler::FetchWebPage(std::stringstream* comments)
 
 void WebCrawler::FetchWebPagePart2(std::stringstream* comments)
 { MacroRegisterFunctionWithName("WebCrawler::FetchWebPagePart2");
-  std::stringstream theMessage;
-  theMessage << "GET " << this->addressToConnectTo << " HTTP/1.1"
+  std::stringstream theMessageHeader, theContinueHeader;
+  theMessageHeader << "GET " << this->addressToConnectTo << " HTTP/1.1"
   << "\r\n" << "Host: " << this->serverToConnectTo << "\r\n\r\n";
   if (!theWebServer.theSSLdata.HandShakeIamClientNoSocketCleanup(this->theSocket, comments))
   { if (comments!=0)
       *comments << "Could not shake hands. ";
     return;
   }
+
   if (comments!=0)
     *comments << "<hr>";
-  Crypto::ConvertStringToListBytesSigned(theMessage.str(), this->buffer);
-  List<char> result;
-  result.Reserve(20000);
-  int numBytes =-1;
-  int i=0;
-  for (i=0; i<10; i++)
-  { numBytes=theWebServer.theSSLdata.SSLwrite
-    (theWebServer.theSSLdata.sslClient, this->buffer.TheObjects, this->buffer.size, comments, comments);
-    if ((unsigned) numBytes ==theMessage.str().size())
-      break;
-  }
-  if ((unsigned) numBytes !=theMessage.str().size())
-    { if (comments!=0)
-        *comments  << i << " errors writing to socket.\n NumBytes: " << numBytes << ". ";
-      return;
-    }
-  //stOutput << "DEBUG: Got before ssl read";
-  for (i=0; i<10; i++)
-  { numBytes = theWebServer.theSSLdata.SSLread
-    (theWebServer.theSSLdata.sslClient,this->buffer.TheObjects,this->buffer.size, comments, comments);
-    if (numBytes >0)
-      break;
-  }
-  if (numBytes < 0)
-  { this->lastTransactionErrors+= "\nERROR reading from socket";
-    logOpenSSL << logger::red  << i << " errors writing to socket.\n";
+  if (!theWebServer.theSSLdata.SSLwriteLoop
+      (10, theWebServer.theSSLdata.sslClient, theMessageHeader.str(),
+       comments, comments, true))
+    return;
+  if (!theWebServer.theSSLdata.SSLreadLoop
+      (10,theWebServer.theSSLdata.sslClient, this->headerReceived,comments, comments, true))
+    return;
+  if (comments!=0)
+    *comments << "<br>Header:<br>" << this->headerReceived;
+  if (this->headerReceived.find("HTTP/1.1 200 OK")==std::string::npos)
+  { if (comments!=0)
+        *comments  << "No http ok message found. " ;
     return;
   }
-  this->messageReceived.assign(buffer.TheObjects, numBytes);
+  theContinueHeader << "HTTP/1.1 100 Continue\r\n\r\n";
+  if (!theWebServer.theSSLdata.SSLwriteLoop
+      (10, theWebServer.theSSLdata.sslClient, theContinueHeader.str(),
+       comments, comments, true))
+    return;
+  this->bodyReceived="";
+  if (!theWebServer.theSSLdata.SSLreadLoop
+      (10,theWebServer.theSSLdata.sslClient, this->bodyReceived,comments, comments, true))
+    return;
   if (comments!=0)
-    *comments << "<br>Read: " << this->messageReceived;
-  logOpenSSL << logger::green << "Read message: "
-  << this->messageReceived << logger::endL;
+    *comments << "<br>Body:<br>" << this->bodyReceived;
 }
 
 bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, const Expression& input, Expression& output)

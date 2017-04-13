@@ -35,6 +35,7 @@ public:
   const SSL_METHOD* theSSLMethod;
   List<int> socketStackServer;
   List<int> socketStackClient;
+  List<char> buffer;
   std::string otherCertificateIssuerName, otherCertificateSubjectName;
   bool flagSSLHandshakeSuccessful;
   void DoSetSocket(int theSocket, SSL *theSSL);
@@ -45,18 +46,26 @@ public:
   void FreeClientSSL();
   void ClearErrorQueue
   (int errorCode, SSL* theSSL, std::stringstream* commentsOnError,
-   std::stringstream* commentsGeneral);
+   std::stringstream* commentsGeneral, bool includeNoErrorInComments);
   void initSSLlibrary();
   void initSSLserver();
   void initSSLclient();
   int SSLread
   (SSL* theSSL, void *buffer, int bufferSize,
    std::stringstream *commentsOnFailure,
-   std::stringstream *commentsGeneral);
+   std::stringstream *commentsGeneral, bool includeNoErrorInComments);
+  bool SSLreadLoop
+  (int numTries, SSL* theSSL, std::string& output,
+   std::stringstream *commentsOnFailure,
+   std::stringstream *commentsGeneral, bool includeNoErrorInComments);
+  bool SSLwriteLoop
+  (int numTries, SSL* theSSL, const std::string& input,
+   std::stringstream *commentsOnFailure,
+   std::stringstream *commentsGeneral, bool includeNoErrorInComments);
   int SSLwrite
   (SSL* theSSL, void *buffer, int bufferSize,
    std::stringstream *commentsOnFailure,
-   std::stringstream *commentsGeneral);
+   std::stringstream *commentsGeneral, bool includeNoErrorInComments);
   SSLdata()
   { this->errorCode=-1;
     this->sslClient=0;

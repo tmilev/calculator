@@ -655,8 +655,8 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringst
     this->otherCertificateSubjectName=tempCharPtr;
     OPENSSL_free(tempCharPtr);
     if (comments!=0)
-      *comments << "Peer certificate:"
-      << "Subject: " << this->otherCertificateSubjectName << "<br>\n";
+      *comments << "Peer certificate: "
+      << "subject: " << this->otherCertificateSubjectName << "<br>\n";
 
     tempCharPtr = X509_NAME_oneline (X509_get_issuer_name(this->peer_certificate), 0, 0);
     if (tempCharPtr==0)
@@ -683,31 +683,83 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringst
 
 int SSLdata::SSLread
 (SSL *theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
- std::stringstream *commentsGeneral)
+ std::stringstream *commentsGeneral, bool includeNoErrorInComments)
 { int result=SSL_read(theSSL, buffer, bufferSize);
-  this->ClearErrorQueue(result, theSSL, commentsOnFailure, commentsGeneral);
+  this->ClearErrorQueue
+  (result, theSSL, commentsOnFailure, commentsGeneral, includeNoErrorInComments);
   return result;
 }
 
 int SSLdata::SSLwrite
 (SSL *theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
- std::stringstream *commentsGeneral)
+ std::stringstream *commentsGeneral, bool includeNoErrorInComments)
 { int result=SSL_write(theSSL, buffer, bufferSize);
-  this->ClearErrorQueue(result, theSSL, commentsOnFailure, commentsGeneral);
+  this->ClearErrorQueue
+  (result, theSSL, commentsOnFailure, commentsGeneral, includeNoErrorInComments);
   return result;
+}
+
+bool SSLdata::SSLreadLoop
+(int numTries, SSL *theSSL, std::string& output, std::stringstream *commentsOnFailure,
+ std::stringstream *commentsGeneral, bool includeNoErrorInComments)
+{ MacroRegisterFunctionWithName("SSLdata::SSLreadLoop");
+  this->buffer.SetSize(100000);
+  output="";
+  int i=0;
+  std::string next;
+  int numBytes=-1;
+  for (i=0; i<numTries; i++)
+  { numBytes = theWebServer.theSSLdata.SSLread
+    (theSSL, this->buffer.TheObjects,this->buffer.size,
+     commentsOnFailure, commentsGeneral, includeNoErrorInComments);
+    if (numBytes>0)
+    { next.assign(this->buffer.TheObjects, numBytes);
+      output+=next;
+      break;
+    }
+  }
+  if (numBytes < 0)
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "\nERROR reading from socket. ";
+    return false;
+  }
+  return true;
+}
+
+#include "vpfHeader5Crypto.h"
+bool SSLdata::SSLwriteLoop
+(int numTries, SSL *theSSL, const std::string& input, std::stringstream *commentsOnFailure,
+ std::stringstream *commentsGeneral, bool includeNoErrorInComments)
+{ MacroRegisterFunctionWithName("SSLdata::SSLwriteLoop");
+  Crypto::ConvertStringToListBytesSigned(input, this->buffer);
+  int i=0;
+  int numBytes=-1;
+  for (i=0; i<numTries; i++)
+  { numBytes=this->SSLwrite
+    (theSSL, this->buffer.TheObjects, this->buffer.size,
+     commentsOnFailure, commentsGeneral, includeNoErrorInComments);
+    if (numBytes ==this->buffer.size)
+      break;
+  }
+  if (numBytes !=this->buffer.size)
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure  << i << " errors writing to socket.\n NumBytes: " << numBytes << ". ";
+    return false;
+  }
+  return true;
 }
 
 void SSLdata::ClearErrorQueue
 (int errorCode, SSL* theSSL, std::stringstream* commentsOnError,
- std::stringstream* commentsGeneral)
+ std::stringstream* commentsGeneral, bool includeNoErrorInComments)
 { MacroRegisterFunctionWithName("SSLdata::ToStringError");
 #ifdef MACRO_use_open_ssl
   //for(int i=0; i<20; i++)
   //{
     int theCode=SSL_get_error(theSSL, errorCode);
     if (theCode==SSL_ERROR_NONE)
-    { if (commentsGeneral!=0)
-        *commentsGeneral << "No error. ";
+    { if (commentsGeneral!=0 && includeNoErrorInComments)
+        *commentsGeneral << "\n<br>\nNo error.\n";
       return;
     }
     //if (i>0)
@@ -789,7 +841,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
   std::stringstream errorStream;
   int numBytesInBuffer= this->parent->theSSLdata.SSLread
-  (this->parent->theSSLdata.sslServeR, &buffer, bufferSize-1, &errorStream, 0);
+  (this->parent->theSSLdata.sslServeR, &buffer, bufferSize-1, &errorStream, 0, true);
   double numSecondsAtStart=theGlobalVariables.GetElapsedSeconds();
   int numFailedReceives=0;
   while ((numBytesInBuffer<0) || (numBytesInBuffer>((signed)bufferSize)))
@@ -816,7 +868,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     logIO << this->parent->ToStringConnection()
     << " Bytes in buffer so far: " << bufferCopy;
     numBytesInBuffer=this->parent->theSSLdata.SSLread
-    (this->parent->theSSLdata.sslServeR, &buffer, bufferSize-1, &errorStream, 0);
+    (this->parent->theSSLdata.sslServeR, &buffer, bufferSize-1, &errorStream, 0, true);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);
   this->ParseMessageHead();
@@ -854,7 +906,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     }
 //    logIO << logger::blue << "about to read ..." << logger::endL;
     numBytesInBuffer= this->parent->theSSLdata.SSLread
-    (this->parent->theSSLdata.sslServeR, &buffer, bufferSize-1, &comments, 0);
+    (this->parent->theSSLdata.sslServeR, &buffer, bufferSize-1, &comments, 0, true);
     if (numBytesInBuffer==0)
     { this->error= "While trying to fetch message-body, received 0 bytes. " +
       this->parent->ToStringLastErrorDescription();
@@ -921,7 +973,7 @@ void WebWorker::SendAllBytesHttpSSL()
     }
     int numBytesSent = this->parent->theSSLdata.SSLwrite
     (this->parent->theSSLdata.sslServeR, this->remainingBytesToSenD.TheObjects,
-     this->remainingBytesToSenD.size, &errorStream, 0);
+     this->remainingBytesToSenD.size, &errorStream, 0, true);
     if (numBytesSent<0)
     { theLog << "WebWorker::SendAllBytes failed: SSL_write error. " << logger::endL;
       return;

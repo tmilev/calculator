@@ -2323,7 +2323,7 @@ bool CalculatorFunctionsGeneral::innerCompareFunctionsNumerically
 bool CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints");
-  if (input.children.size<5)
+  if (input.size()<5)
     return theCommands << "Comparing functions at points takes as input at least 5 arguments "
     << "- two functions to compare, precision, variable belonging to an interval and number of sampling points).";
   Expression theFunE=input[1];
@@ -2390,7 +2390,15 @@ bool CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints
       }
     }
     if (floatingResult> tolerance || floatingResult <-tolerance)
+    { //theCommands << "<hr>DEBUG: "
+      //<< "floating result: " << floatingResult << " violates the tolerance: "
+      //<< tolerance << " for: "
+      //<< varsGiven[0].ToString() << "= " << thePoints(i,0)
+      //<< ", "
+      //<< varsGiven[1].ToString() << "= " << thePoints(i,1)
+      //;
       return output.AssignValue(0, theCommands);
+    }
   }
   return output.AssignValue(1, theCommands);
 }

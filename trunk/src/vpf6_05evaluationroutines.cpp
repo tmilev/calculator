@@ -68,6 +68,12 @@ const Expression& Calculator::EMOne()
   return this->frequentConstantMinusOne;
 }
 
+const Expression& Calculator::EFour()
+{ if (this->frequentConstantFour.owner==0)
+    this->frequentConstantFour.AssignValue(4,*this);
+  return this->frequentConstantFour;
+}
+
 const Expression& Calculator::ETwo()
 { if (this->frequentConstantTwo.owner==0)
     this->frequentConstantTwo.AssignValue(2,*this);

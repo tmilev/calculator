@@ -403,6 +403,17 @@ bool CalculatorFunctionsGeneral::innerFactorial(Calculator& theCommands, const E
 
 bool CalculatorFunctionsGeneral::innerArctan(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArctan");
+  if (input.IsEqualToOne())
+  { output.MakeAtom(theCommands.opPi(), theCommands);
+    output/=theCommands.EFour();
+    return true;
+  }
+  if (input.IsEqualToMOne())
+  { output.MakeAtom(theCommands.opPi(), theCommands);
+    output/=theCommands.EFour();
+    output*=theCommands.EMOne();
+    return true;
+  }
   if (theCommands.flagNoApproximations)
     return false;
   double theArgument;

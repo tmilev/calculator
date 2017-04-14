@@ -40,6 +40,7 @@ public:
   struct addrinfo *serverInfo;
   WebCrawler();
   ~WebCrawler();
+  void UpdatePublicKeys(std::stringstream* comments);
   void FetchWebPagePart2(std::stringstream* comments);
   void init();
   void PingCalculatorStatus();
@@ -410,4 +411,24 @@ bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, cons
   theCrawler.FetchWebPage(&out);
   out << "<br>" << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
   return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerFetchKnownPublicKeys(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchKnownPublicKeys");
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "You need to be a logged-in admin to call this function. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  WebCrawler theCrawler;
+  theCrawler.UpdatePublicKeys(& out);
+  return output.AssignValue(out.str(), theCommands);
+}
+
+void WebCrawler::UpdatePublicKeys(std::stringstream* comments)
+{ MacroRegisterFunctionWithName("WebCrawler::UpdatePublicKeys");
+  this->serverToConnectTo  = "www.googleapis.com";
+  this->portOrService      = "https";
+  this->addressToConnectTo = "https://www.googleapis.com/oauth2/v3/certs";
+
 }

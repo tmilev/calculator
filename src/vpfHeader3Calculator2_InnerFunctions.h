@@ -218,6 +218,7 @@ public:
   (const Expression& theLinearExpression, const Expression& theVariable,
    Expression& outputCoeffLinTerm, Expression& outputConstTerm);
 
+  static bool innerIntegrateDefiniteIntegral(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegratePowerByUncoveringParenthesisFirst(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegratePullImaginaryUnit(Calculator& theCommands, const Expression& input, Expression& output);
@@ -374,6 +375,8 @@ public:
   { return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, true);
   }
   static bool innerFetchWebPage
+  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerFetchKnownPublicKeys
   (Calculator& theCommands, const Expression& input, Expression& output);
 
 

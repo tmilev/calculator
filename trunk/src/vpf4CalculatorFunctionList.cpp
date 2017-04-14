@@ -742,6 +742,14 @@ D-B;\
     "IsConstant");
   this->AddOperationInnerHandler
   ("\\int",
+   CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral, "",
+   "Integrates a definite integral.  ",
+   "\\int_{1}^2 (x^2+x) dx ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral",
+   "DefiniteIntegral");
+  this->AddOperationInnerHandler
+  ("\\int",
    CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst, "",
    "Attempts to rearrange into standard polynomial form and then integrate.  ",
    "\\int  \\left( \\frac{x(x+1) }{ 2} \\right)^2 dx ",
@@ -1859,6 +1867,15 @@ D-B;\
    true, false,
    "CalculatorFunctionsGeneral::innerFetchWebPage",
    "FetchWebPage")
+   ;
+  this->AddOperationInnerHandler ("FetchKnownPublicKeys",
+  CalculatorFunctionsGeneral::innerFetchKnownPublicKeys, "",
+   "Updates known public keys. Requires admin privileges. \
+    At the moment, works for google public keys only. ",
+   "FetchKnownPublicKeys(0)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerFetchKnownPublicKeys",
+   "FetchKnownPublicKeys")
    ;
   this->AddOperationInnerHandler ("PlotDirectionField",
    CalculatorFunctionsGeneral::innerPlotDirectionField, "",

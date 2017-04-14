@@ -553,6 +553,50 @@ bool CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne(Calculator& 
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral");
+  Expression theFunctionE, theVariableE, theSetE;
+  //stOutput << "DEBUG: I'm here. " ;
+  if (!input.IsDefiniteIntegralOverIntervalfdx(&theVariableE, &theFunctionE, &theSetE))
+    return false;
+  //stOutput << "DEBUG:HERE. " ;
+  if (!theSetE.StartsWith(theCommands.opLimitBoundary(), 3))
+    return false;
+  Expression theIndefiniteIntegral, indefiniteExpression;
+  indefiniteExpression.MakeAtom(theCommands.opIndefiniteIndicator(), theCommands);
+  theIndefiniteIntegral.MakeIntegral(theCommands, indefiniteExpression, theFunctionE, theVariableE);
+  Expression solvedIntegral;
+  //stOutput << "DEBUG: trying to solve: " << theIndefiniteIntegral.ToString();
+  if (!theCommands.EvaluateExpression(theCommands, theIndefiniteIntegral, solvedIntegral))
+    return false;
+  if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opIntegral()))
+    return false;
+//  if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opDivide()))
+//    return false;
+  if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opLog()))
+    return false;
+  Expression theSubTop(theCommands), theSubBottom(theCommands);
+  theSubTop.AddChildAtomOnTop(theCommands.opDefine());
+  theSubTop.AddChildOnTop(theVariableE);
+  theSubBottom=theSubTop;
+  theSubBottom.AddChildOnTop(theSetE[1]);
+  theSubTop.AddChildOnTop(theSetE[2]);
+  Expression theTopCommands(theCommands), theBottomCommands(theCommands);
+  theTopCommands.AddChildAtomOnTop(theCommands.opEndStatement());
+  theBottomCommands.AddChildAtomOnTop(theCommands.opEndStatement());
+
+  theTopCommands.AddChildOnTop(theSubTop);
+  theBottomCommands.AddChildOnTop(theSubBottom);
+
+  theTopCommands.AddChildOnTop(solvedIntegral);
+  theBottomCommands.AddChildOnTop(solvedIntegral);
+  Expression theTop, theBottom;
+  theTop.MakeXOX(theCommands, theCommands.opUnderscore(), theTopCommands, theCommands.ETwo());
+  theBottom.MakeXOX(theCommands, theCommands.opUnderscore(), theBottomCommands, theCommands.ETwo());
+  output=theTop-theBottom;
+  return true;
+}
+
 bool CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("innerApplyToSubexpressionsRecurseThroughCalculusFunctions");

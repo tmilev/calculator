@@ -403,6 +403,8 @@ bool CalculatorFunctionsGeneral::innerFactorial(Calculator& theCommands, const E
 
 bool CalculatorFunctionsGeneral::innerArctan(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArctan");
+  if (theCommands.flagNoApproximations)
+    return false;
   double theArgument;
   if (!input.EvaluatesToDouble(&theArgument))
     return false;
@@ -411,6 +413,8 @@ bool CalculatorFunctionsGeneral::innerArctan(Calculator& theCommands, const Expr
 
 bool CalculatorFunctionsGeneral::innerArccos(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArccos");
+  if (theCommands.flagNoApproximations)
+    return false;
   double theArgument;
   if (!input.EvaluatesToDouble(&theArgument))
     return false;
@@ -419,6 +423,8 @@ bool CalculatorFunctionsGeneral::innerArccos(Calculator& theCommands, const Expr
 
 bool CalculatorFunctionsGeneral::innerArcsin(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArcsin");
+  if (theCommands.flagNoApproximations)
+    return false;
   double theArgument;
   if (!input.EvaluatesToDouble(&theArgument))
     return false;

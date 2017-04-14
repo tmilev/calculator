@@ -1560,7 +1560,7 @@ bool Expression::IsDefiniteIntegralOverIntervalfdx
     integrationSet=&tempE;
   if (!this->IsIntegraLfdx(differentialVariable, functionToIntegrate, integrationSet))
     return false;
-  return integrationSet->IsSequenceNElementS(2);
+  return integrationSet->StartsWith(this->owner->opLimitBoundary(), 3);
 }
 
 bool Expression::IsDifferentialOneFormOneVariablE(Expression* outputDifferentialOfWhat, Expression* outputCoeffInFrontOfDifferential)const

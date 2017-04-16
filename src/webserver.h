@@ -55,7 +55,7 @@ public:
    std::stringstream *commentsOnFailure,
    std::stringstream *commentsGeneral, bool includeNoErrorInComments);
   bool SSLreadLoop
-  (int numTries, SSL* theSSL, std::string& output,
+  (int numTries, SSL* theSSL, std::string& output, const LargeInt& expectedLength,
    std::stringstream *commentsOnFailure,
    std::stringstream *commentsGeneral, bool includeNoErrorInComments);
   bool SSLwriteLoop

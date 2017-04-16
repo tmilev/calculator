@@ -360,7 +360,8 @@ void WebCrawler::FetchWebPagePart2(std::stringstream* comments)
       *comments << "Could not shake hands. ";
     return;
   }
-
+  this->headerReceived="";
+  this->bodyReceived="";
   if (comments!=0)
     *comments << "<hr>";
   if (!theWebServer.theSSLdata.SSLwriteLoop
@@ -368,13 +369,52 @@ void WebCrawler::FetchWebPagePart2(std::stringstream* comments)
        comments, comments, true))
     return;
   if (!theWebServer.theSSLdata.SSLreadLoop
-      (10,theWebServer.theSSLdata.sslClient, this->headerReceived,comments, comments, true))
+      (10,theWebServer.theSSLdata.sslClient, this->headerReceived, 0, comments, comments, true))
     return;
+  unsigned bodyStart=0;
+  int numcrlfs=0;
+  //std::stringstream tempStream;
+  for (; bodyStart<this->headerReceived.size(); bodyStart++)
+  { if (numcrlfs>=4)
+      break;
+    if (this->headerReceived[bodyStart]=='\n' ||
+        this->headerReceived[bodyStart]=='\r')
+    { numcrlfs++;
+      //if (fullMessage[bodyStart]=='\n')
+      //  tempStream << "\\N";
+      //else
+      //  tempStream << "\\R";
+    } else
+    { numcrlfs=0;
+      //tempStream << fullMessage[bodyStart];
+    }
+  }
+  if (bodyStart<this->headerReceived.size())
+  { this->bodyReceived=this->headerReceived.substr(bodyStart);
+    this->headerReceived=this->headerReceived.substr(0, bodyStart);
+  }
+  List<std::string> theHeaderPieces;
+  MathRoutines::StringSplitDefaultDelimiters(this->headerReceived, theHeaderPieces);
+  std::string expectedLengthString;
+  for (int i=0; i<theHeaderPieces.size; i++)
+    if (theHeaderPieces[i]=="Content-length:" ||
+        theHeaderPieces[i]=="Content-Length:" ||
+        theHeaderPieces[i]=="content-length:"
+        )
+      if (i+1<theHeaderPieces.size)
+      { expectedLengthString=theHeaderPieces[i+1];
+        break;
+      }
+  LargeInt expectedLength=-1;
+  if (expectedLengthString!="")
+    expectedLength.AssignString(expectedLengthString);
+  if (comments!=0)
+    *comments << "<br>Expected length: " << expectedLength;
   if (comments!=0)
     *comments << "<br>Header:<br>" << this->headerReceived;
   if (this->headerReceived.find("HTTP/1.1 200 OK")==std::string::npos)
   { if (comments!=0)
-        *comments  << "No http ok message found. " ;
+      *comments << "No http ok message found. " ;
     return;
   }
   theContinueHeader << "HTTP/1.1 100 Continue\r\n\r\n";
@@ -382,12 +422,23 @@ void WebCrawler::FetchWebPagePart2(std::stringstream* comments)
       (10, theWebServer.theSSLdata.sslClient, theContinueHeader.str(),
        comments, comments, true))
     return;
-  this->bodyReceived="";
+  std::string secondPart;
   if (!theWebServer.theSSLdata.SSLreadLoop
-      (10,theWebServer.theSSLdata.sslClient, this->bodyReceived,comments, comments, true))
+      (10,theWebServer.theSSLdata.sslClient, secondPart, expectedLength, comments, comments, true))
     return;
   if (comments!=0)
-    *comments << "<br>Body:<br>" << this->bodyReceived;
+    *comments << "<br>Second part length: "
+    << secondPart.size();
+  this->bodyReceived+=secondPart;
+  //if (!theWebServer.theSSLdata.SSLreadLoop
+  //    (10,theWebServer.theSSLdata.sslClient, secondPart, comments, comments, true))
+  //  return;
+  //this->bodyReceived+=secondPart;
+  //stOutput << tempStream.str();
+  if (comments!=0)
+    *comments << "<br>Body (length: "
+    << this->bodyReceived.size()
+    << ")<br>" << this->bodyReceived;
 }
 
 bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, const Expression& input, Expression& output)
@@ -404,7 +455,8 @@ bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, cons
   if (!input[3].IsOfType(&theCrawler.addressToConnectTo))
     theCrawler.addressToConnectTo=input[3].ToString();
   std::stringstream out;
-  out << "Server:  " << theCrawler.serverToConnectTo
+  out
+  << "Server:  " << theCrawler.serverToConnectTo
   << " port: " << theCrawler.portOrService
   << " resource: " << theCrawler.addressToConnectTo
   << "<br>";
@@ -415,6 +467,7 @@ bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, cons
 
 bool CalculatorFunctionsGeneral::innerFetchKnownPublicKeys(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchKnownPublicKeys");
+  (void) input;
   std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights())
   { out << "You need to be a logged-in admin to call this function. ";
@@ -430,5 +483,88 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* comments)
   this->serverToConnectTo  = "www.googleapis.com";
   this->portOrService      = "https";
   this->addressToConnectTo = "https://www.googleapis.com/oauth2/v3/certs";
+  this->FetchWebPage(comments);
+  if (this->bodyReceived=="")
+  { if (comments!=0)
+      *comments << "Could not fetch google certificate list";
+    return;
+  }
+  std::string googleKeysFileName="certificates-public/google.txt";
+  std::fstream googleKeysFile;
+  if (! FileOperations::OpenFileCreateIfNotPresentVirtual
+       (googleKeysFile, googleKeysFileName, false, true, false))
+  { if (comments!=0)
+      *comments << "<br>Failed to open: " << googleKeysFileName;
+    return;
+  }
+  if (comments!=0)
+    *comments << "<br>Updated file: " << googleKeysFileName;
+  googleKeysFile << this->bodyReceived;
+  googleKeysFile.flush();
+}
 
+bool Crypto::VerifyJWTagainstKnownKeys
+(const std::string& inputToken, std::stringstream* commentsOnFailure,
+ std::stringstream* commentsGeneral)
+{ MacroRegisterFunctionWithName("Crypto::VerifyJWTagainstKnownKeys");
+  //This function is slightly insecure.
+  //If an attacker hijacks a machine connecting the server to the outside
+  //and impersonates google
+  //the attacker would be able to impersonate another user.
+  //Since we are reloading the google keys for
+  //every JWT key we fail to find in our cache,
+  //this could happen more easily
+  //than if we were storing the google keys until their expiry date.
+  //To solve this problem, we need to
+  //ensure that the google public keys are authentic.
+  //For that we need to leverage the built-in web of trust of
+  //the host system (pgp keys, etc.).
+  //This is system dependent and a lot of work-> not doing now, but will do
+  //in the future as the need arises.
+  JSONWebToken theToken;
+  //if (commentsGeneral!=0)
+  //  *commentsGeneral << "DEBUG: inputToken: " << inputToken;
+  if (!theToken.AssignString(inputToken, commentsOnFailure))
+    return false;
+  std::string keyIDstring="";
+  JSData header;
+  if (!header.readstring(theToken.headerJSON))
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Couldn't load JSON from the user token.";
+    return false;
+  }
+  if (header.type==header.JSObject)
+    if (header.HasKey("kid"))
+      keyIDstring=header.GetValue("kid").string;
+  if (keyIDstring=="")
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Couldn't find key id in the token.";
+    return false;
+  }
+  int theIndex=-1;
+  for (int i=0; i<2; i++)
+  { Crypto::LoadKnownCertificates(commentsOnFailure);
+    for (int j=0; j<Crypto::knownCertificates.size; j++)
+      if (keyIDstring==Crypto::knownCertificates[j].keyid)
+      { theIndex=j;
+        break;
+      }
+    if (commentsGeneral!=0)
+      *commentsGeneral << "<br>Couldn't find key ID from string one. ";
+    if (i==1)
+      break;
+    if (commentsGeneral!=0 )
+      *commentsGeneral << "<br>Reloading google public keys. ";
+    WebCrawler theCrawler;
+    theCrawler.UpdatePublicKeys(commentsGeneral);
+  }
+  if (theIndex==-1)
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Could not find key id: " << keyIDstring << ". ";
+    return false;
+  }
+  Certificate& currentCert=Crypto::knownCertificates[theIndex];
+  return theToken.VerifyRSA256
+  (currentCert.theModuluS, currentCert.theExponenT,
+   commentsOnFailure, commentsGeneral);
 }

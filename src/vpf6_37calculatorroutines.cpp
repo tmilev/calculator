@@ -440,41 +440,9 @@ bool CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys(Calculator& theC
   if (!input.IsOfType<std::string>())
     return false;
   const std::string& inputString=input.GetValue<std::string>();
-  JSONWebToken theToken;
-  if (!theToken.AssignString(inputString, &theCommands.Comments))
-    return false;
   std::stringstream out;
-  if (!Crypto::LoadKnownCertificates(&out))
-    return output.AssignValue(out.str(), theCommands);
-
-  JSData header;
-  if (!header.readstring(theToken.headerJSON), out)
-  { out << "Couldn't load string one.";
-    return output.AssignValue(out.str(), theCommands);
-  }
-  bool isGood=false;
-  std::string keyIDstring;
-  if (header.type==header.JSObject)
-    if (header.HasKey("kid"))
-    { isGood=true;
-      keyIDstring=header.GetValue("kid").string;
-    }
-  if (!isGood)
-  { out << "Couldn't find key ID from string one. ";
-    return output.AssignValue(out.str(), theCommands);
-  }
-  int theIndex=-1;
-  for (int i=0; i<Crypto::knownCertificates.size; i++)
-    if (keyIDstring==Crypto::knownCertificates[i].keyid)
-    { theIndex=i;
-      break;
-    }
-  if (theIndex==-1)
-  { out << "Could not find key id: " << keyIDstring << ". ";
-    return output.AssignValue(out.str(), theCommands);
-  }
-  Certificate& currentCert=Crypto::knownCertificates[theIndex];
-//  theWebServer.theSSLdata.ctx-
+  //out << "DEBUG: Input string: " << inputString << "<br>";
+  Crypto::VerifyJWTagainstKnownKeys(inputString, &out, &out);
   return output.AssignValue(out.str(), theCommands);
 }
 

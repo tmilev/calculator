@@ -563,7 +563,7 @@ FileOperations::FolderVirtualLinksNonSensitive()
     result.SetKeyValue("freecalc/", "../freecalc/");
     result.SetKeyValue("html/", "../public_html/");
     result.SetKeyValue("html-common/", "html-common/");
-    result.SetKeyValue("public-certificates/", "public-certificates/");
+    result.SetKeyValue("certificates-public/", "certificates-public/");
   }
   return result;
 }

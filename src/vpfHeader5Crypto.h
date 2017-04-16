@@ -10,8 +10,10 @@ class Certificate
 public:
   std::string algorithm;
   std::string keyid;
-  std::string theModulus;
-  std::string theExponent;
+  std::string theModulusString;
+  std::string theExponentString;
+  LargeIntUnsigned theModuluS;
+  LargeIntUnsigned theExponenT;
   bool LoadFromJSON(JSData& input, std::stringstream* comments);
   std::string ToString();
 };
@@ -72,6 +74,8 @@ public:
   static bool ConvertLargeUnsignedIntToString
   (const LargeIntUnsigned& input, std::string& output);
   static std::string computeSha1outputBase64(const std::string& inputString);
+  static bool VerifyJWTagainstKnownKeys
+  (const std::string& inputToken, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
 };
 
 class JSONWebToken

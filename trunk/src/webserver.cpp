@@ -700,7 +700,8 @@ int SSLdata::SSLwrite
 }
 
 bool SSLdata::SSLreadLoop
-(int numTries, SSL *theSSL, std::string& output, std::stringstream *commentsOnFailure,
+(int numTries, SSL *theSSL, std::string& output, const LargeInt& expectedLength,
+ std::stringstream *commentsOnFailure,
  std::stringstream *commentsGeneral, bool includeNoErrorInComments)
 { MacroRegisterFunctionWithName("SSLdata::SSLreadLoop");
   this->buffer.SetSize(100000);
@@ -715,8 +716,14 @@ bool SSLdata::SSLreadLoop
     if (numBytes>0)
     { next.assign(this->buffer.TheObjects, numBytes);
       output+=next;
-      break;
+      if (expectedLength<=0)
+        break;
+      else
+        if (expectedLength<=output.size())
+          break;
     }
+    if (numBytes==0)
+      break;
   }
   if (numBytes < 0)
   { if (commentsOnFailure!=0)
@@ -4583,8 +4590,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.Clear();
   folderSubstitutionsNonSensitive.SetKeyValue("output/", "output/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("public-certificates/", "public-certificates/");//<-internal use
-  folderSubstitutionsNonSensitive.SetKeyValue("/public-certificates/", "public-certificates/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("certificates-public/", "certificates-public/");//<-internal use
+  folderSubstitutionsNonSensitive.SetKeyValue("/certificates-public/", "certificates-public/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("ProblemCollections/", "ProblemCollections/");
   folderSubstitutionsNonSensitive.SetKeyValue("problemtemplates/", "../problemtemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");

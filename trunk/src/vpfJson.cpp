@@ -235,7 +235,7 @@ bool JSData::readstring
   { if (comments!=0)
     { *comments << "<hr>Failed to parse your JSON. Got:<br>\n ";
       for (int i=JSData::numEmptyTokensAtStart; i<readingStack.size; i++)
-        *comments << readingStack[i].ToString() << "\n<br>\n";
+        *comments << i << ": " << readingStack[i].ToString() << "\n<br>\n";
     }
     return false;
   }

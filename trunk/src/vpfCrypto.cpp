@@ -202,8 +202,9 @@ bool Crypto::ConvertBase64ToBitStream(const std::string& input, List<unsigned ch
   }
 //  stOutput << "<br>output is: " << output << ", Converted back: " << Crypto::ConvertStringToBase64(output);
   if (comments!=0 && numBitsInStack!=0)
-  { *comments << "<br>Input " << input << " corresponds modulo 8 to " << numBitsInStack
-    << " bits. Perhaps the input was not padded correctly with = signs.";
+  { *comments << "<br>Base64: input corresponds modulo 8 to " << numBitsInStack
+    << " bits. Perhaps the input was not padded correctly with = signs. The input: "
+    << input;
   }
   return true;
 }
@@ -858,16 +859,22 @@ bool Certificate::LoadFromJSON(JSData& input, std::stringstream* comments)
   }
   this->algorithm="";
   this->keyid="";
-  this->theModulus="";
-  this->theExponent="";
+  this->theModulusString="";
+  this->theExponentString="";
   if (input.HasKey("alg"))
     this->algorithm=input.GetValue("alg").string;
   if (input.HasKey("kid"))
     this->keyid=input.GetValue("kid").string;
   if (input.HasKey("n"))
-    this->theModulus=input.GetValue("n").string;
+  { this->theModulusString=input.GetValue("n").string;
+    if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theModulusString,this->theModuluS,comments))
+      return false;
+  }
   if (input.HasKey("e"))
-    this->theExponent=input.GetValue("e").string;
+  { this->theExponentString=input.GetValue("e").string;
+    if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theExponentString,this->theExponenT,comments))
+      return false;
+  }
   return true;
 }
 
@@ -906,10 +913,14 @@ bool Crypto::LoadOneKnownCertificate(const std::string& input, std::stringstream
 
 std::string Certificate::ToString()
 { std::stringstream out;
-  out << "Algorithm: " << this->algorithm;
-  out << "Keyid: "     << this->keyid;
-  out << "Modulus: "   << this->theModulus;
-  out << "Exponent: "  << this->theExponent;
+  out << "Algorithm: " << this->algorithm << "\n<br>\n";
+  out << "Keyid: "     << this->keyid << "\n<br>\n";
+  out << "Modulus [base64, math]: [" << this->theModulusString
+  << ", " << this->theModuluS.ToString() << "]" << "\n<br>\n";
+  out << "Exponent [base64, math]: " << "["
+  << this->theExponentString << ", "
+  << this->theExponenT.ToString()
+  << "\n<br>\n";
   return out.str();
 }
 
@@ -917,20 +928,20 @@ bool Crypto::LoadKnownCertificates(std::stringstream* comments)
 { MacroRegisterFunctionWithName("Crypto::LoadKnownCertificates");
   Crypto::knownCertificates.SetSize(0);
   List<std::string> theFileNames;
-  if (! FileOperations::GetFolderFileNamesVirtual("public-certificates/", theFileNames,0))
+  if (! FileOperations::GetFolderFileNamesVirtual("certificates-public/", theFileNames,0))
   { if (comments!=0)
-      *comments << "Could not open folder public-certificates/, no certificates loaded.";
+      *comments << "Could not open folder certificates-public/, no certificates loaded.";
     return false;
   }
   std::stringstream temp;
   if (comments==0)
     comments=&temp;
-  *comments << "Certificates: ";
+  *comments << "<br>Certificates: ";
   for (int i=0; i<theFileNames.size; i++)
   { if (theFileNames[i]=="." || theFileNames[i]=="..")
       continue;
     std::string currentCert;
-    if (!FileOperations::LoadFileToStringVirtual("public-certificates/"+theFileNames[i], currentCert, *comments, false))
+    if (!FileOperations::LoadFileToStringVirtual("certificates-public/"+theFileNames[i], currentCert, *comments, false))
       continue;
     if (!Crypto::LoadOneKnownCertificate(currentCert, comments))
       return false;
@@ -1044,8 +1055,8 @@ bool JSONWebToken::AssignString(const std::string& other, std::stringstream* com
   MathRoutines::StringSplitExcludeDelimiter(other, '.',theStrings);
   if (theStrings.size!=3)
   { if (commentsOnFailure!=0)
-      *commentsOnFailure << "Expected 3 strings separeted by two dots, got: "
-      << theStrings.size << " strings.";
+      *commentsOnFailure << "Expected 3 strings separated by two dots, got: "
+      << theStrings.size << " strings, obtained from: " << other;
     return false;
   }
   this->headerBase64   =theStrings[0];

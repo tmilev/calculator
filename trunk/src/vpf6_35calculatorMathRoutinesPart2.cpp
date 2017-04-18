@@ -562,6 +562,9 @@ bool CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral(Calculator& theC
   //stOutput << "DEBUG:HERE. " ;
   if (!theSetE.StartsWith(theCommands.opLimitBoundary(), 3))
     return false;
+  if (theSetE[1].ContainsAsSubExpressionNoBuiltInTypes(theCommands.opInfinity()) ||
+      theSetE[2].ContainsAsSubExpressionNoBuiltInTypes(theCommands.opInfinity()))
+    return false;
   Expression theIndefiniteIntegral, indefiniteExpression;
   indefiniteExpression.MakeAtom(theCommands.opIndefiniteIndicator(), theCommands);
   theIndefiniteIntegral.MakeIntegral(theCommands, indefiniteExpression, theFunctionE, theVariableE);
@@ -571,8 +574,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral(Calculator& theC
     return false;
   if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opIntegral()))
     return false;
-//  if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opDivide()))
-//    return false;
+  if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opDivide()))
+    return false;
   if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opLog()))
     return false;
   Expression theSubTop(theCommands), theSubBottom(theCommands);

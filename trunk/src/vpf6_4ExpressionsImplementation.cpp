@@ -2933,9 +2933,19 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << "&gt;" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opGreaterThanOrEqualTo()))
     out << (*this)[1].ToString(theFormat) << "\\geq " << (*this)[2].ToString(theFormat);
-  else if (this->IsListStartingWithAtom(this->owner->opLimit()))
-    out << "\\lim_{" << (*this)[1].ToString(theFormat) << "}" << (*this)[2].ToString(theFormat);
-  else if (this->IsListStartingWithAtom(this->owner->opLimitProcess()))
+  else if (this->StartsWith(this->owner->opLimit(),3))
+  { out << "\\lim_{";
+    if (!(*this)[1].IsSequenceNElementS())
+      out << (*this)[1].ToString(theFormat);
+    else
+      for (int i=1; i<(*this)[1].size(); i++)
+      { out << (*this)[1][i].ToString(theFormat);
+        if (i!=(*this)[1].size()-1)
+          out << ", ";
+      }
+    out << "}"
+    << (*this)[2].ToString(theFormat);
+  } else if (this->IsListStartingWithAtom(this->owner->opLimitProcess()))
     out << (*this)[1].ToString(theFormat) << " \\to " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLessThan()))
     out << (*this)[1].ToString(theFormat) << "&lt;" << (*this)[2].ToString(theFormat);

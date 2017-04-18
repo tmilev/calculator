@@ -18,6 +18,8 @@ public:
   bool flagIsError;
   bool flagContainsProblemsNotInSubsection;
   bool flagSubproblemHasNoWeight;
+  std::string problemNumberString;
+  List<int> problemNumber;
   List<int> parentTopics;
   List<int> immediateChildren;
   int totalSubSectionsUnderME;
@@ -57,28 +59,7 @@ public:
 //  Rational numAnsweredInAllChildren;
 //  Rational maxCorrectAnswersInAllChildren;
   void ComputeID();
-  void reset(int parentSize)
-  { this->flagIsSection=false;
-    this->flagIsSubSection=false;
-    this->flagIsChapter=false;
-    this->flagIsError=false;
-    this->flagSubproblemHasNoWeight=false;
-    this->title="empty";
-    this->id="";
-    this->video="";
-    this->slides="";
-    this->slidesPrintable="";
-    this->problem="";
-    this->error="";
-    this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
-    this->immediateChildren.SetSize(0);
-    this->totalSubSectionsUnderME=0;
-    this->totalSubSectionsUnderMeIncludingEmptySubsections=0;
-    this->flagContainsProblemsNotInSubsection=false;
-    this->pointsEarnedInProblemsThatAreImmediateChildren=0;
-    this->totalPointsEarned=0;
-    this->maxPointsInAllChildren=0;
-  }
+  void reset(int parentSize);
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt)
   { output << theElt.ToString();
     return output;

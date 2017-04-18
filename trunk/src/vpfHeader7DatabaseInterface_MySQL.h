@@ -235,7 +235,10 @@ public:
   std::string smtpWithPort;
 
   EmailRoutines();
+  bool IsValidForMailgunCommand(std::stringstream* commentsOnFailure);
+
   std::string GetCommandToSendEmailWithMailX();
+  bool SendEmailWithMailGun();
 };
 
 class TopicElement;

@@ -1868,6 +1868,20 @@ D-B;\
    "CalculatorFunctionsGeneral::innerFetchWebPage",
    "FetchWebPage")
    ;
+  this->AddOperationInnerHandler ("SendEmailWithMailGun",
+  CalculatorFunctionsGeneral::innerSendEmailWithMailGun, "",
+   "Sends an email from the calculator via mailgun. Requires external setup with \
+    www.mailgun.com.\
+    The function is available to logged-in admins only.\
+    The email sender is noreply@mail2.YOURDOMAINNAME.\
+    First argument = recepient email, \
+    second argument= content, \
+    third argument = subject. ",
+   "SendEmailWithMailGun(\"todor.milev@gmail.com\",\"A testing email. \", \"[Do not reply] Test email. \")",
+   true, false,
+   "CalculatorFunctionsGeneral::innerSendEmailWithMailGun",
+   "SendEmailWithMailGun")
+   ;
   this->AddOperationInnerHandler ("FetchKnownPublicKeys",
   CalculatorFunctionsGeneral::innerFetchKnownPublicKeys, "",
    "Updates known public keys. Requires admin privileges. \

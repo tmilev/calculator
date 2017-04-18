@@ -521,10 +521,10 @@ bool FileOperations::GetFolderFileNamesUnsecure
 
 bool FileOperations::LoadFileToStringVirtual
 (const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure,
- bool accessSensitiveFolders)
+ bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
 { std::string computedFileName;
 //  stOutput << "DEBUG: loading string virtual from: " << theFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders))
     return false;
   return FileOperations::LoadFileToStringUnsecure
   (computedFileName, output, commentsOnFailure);

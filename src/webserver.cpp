@@ -4307,6 +4307,16 @@ int WebServer::Run()
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
   theParser.init();
   theParser.ComputeAutoCompleteKeyWords();
+  if (!this->flagTryToKillOlderProcesses)
+  { theLog.reset();
+    logBlock.reset();
+    logIO.reset();
+    logProcessKills.reset();
+    logPlumbing.reset();
+    logSocketAccept.reset();
+    logProcessStats.reset();
+    logOpenSSL.reset();
+  }
   if (true)
   { int pidServer=fork();
     if (pidServer<0)
@@ -4658,6 +4668,7 @@ int WebServer::main(int argc, char **argv)
   MacroRegisterFunctionWithName("main");
   try {
   InitializeGlobalObjects();
+
   theWebServer.AnalyzeMainArguments(argc, argv);
   if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
     theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=

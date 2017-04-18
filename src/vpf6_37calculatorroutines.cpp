@@ -517,3 +517,51 @@ bool CalculatorFunctionsGeneral::innerRSAencrypt(Calculator& theCommands, const 
   result=Crypto::RSAencrypt(theModulus.value, theExponent, theMessage);
   return output.AssignValue((Rational)result, theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSendEmailWithMailGun");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return theCommands << "Sending mail available to logged-in admins only. ";
+  std::stringstream out, commandToExecute;
+  if (input.size()!=4)
+    return theCommands << "Send email requires three arguments. ";
+  EmailRoutines theEmail;
+  if (! input[1].IsOfType(&theEmail.toEmail) ||
+      ! input[2].IsOfType(&theEmail.emailContent) ||
+      ! input[3].IsOfType(&theEmail.subject)
+      )
+    return theCommands << "Arguments of "
+    << input.ToString()
+    << "expected to be strings (enclose in \"\" please). ";
+
+  std::string mailGunKey;
+  if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-api.txt",mailGunKey,out, true, true))
+    return theCommands << "Could not find mailgun key. The key must be located in file: "
+    << "<br>\ncertificates/mailgun-api.txt\n<br>\n "
+    << "The file must be uploaded manually to the server. ";
+  commandToExecute << "curl -s --user 'api:" << mailGunKey
+  << "' ";
+  commandToExecute
+  << "https://api.mailgun.net/v3/mail2."
+
+  <<  theGlobalVariables.hostNoPort
+  << "/messages "
+  ;
+  commandToExecute << "-F from='Automated Email "
+  << "<noreply@mail2."
+  << theGlobalVariables.hostNoPort
+  << ">' ";
+  commandToExecute << "-F to='"
+  << theEmail.toEmail << "' "
+  << "-F subject='"
+  << theEmail.subject << "' "
+  << "-F text='"
+  << theEmail.emailContent
+  << "'"
+  ;
+  out << "Command: " << CGI::StringToHtmlString( commandToExecute.str(), true);
+  //theGlobalVariables.CallSystemWithOutput(commandToExecute.str());
+
+  return output.AssignValue(out.str(),theCommands);
+}

@@ -53,7 +53,9 @@ void MonitorWebServer()
   WebCrawler theCrawler;
   theCrawler.init();
   int maxNumPingFailures=3;
-  theWebServer.WebServerPingIntervalInSeconds=10000;
+  //warning: setting theWebServer.WebServerPingIntervalInSeconds to more than 1000
+  //may overflow the variable int microsecondsToSleep.
+  theWebServer.WebServerPingIntervalInSeconds=1000;
   if (theWebServer.WebServerPingIntervalInSeconds>30)
     theLog << logger::red << "**********WARNING**************"
     << logger::endL
@@ -73,8 +75,8 @@ void MonitorWebServer()
   for (;;)
   { theGlobalVariables.FallAsleep(microsecondsToSleep);
     theWebServer.BackupDatabaseIfNeeded();
-    std::cout << "Pinging " << theCrawler.addressToConnectTo
-    << " at port/service " << theCrawler.portOrService << ".\n";
+    //std::cout << "Pinging " << theCrawler.addressToConnectTo
+    //<< " at port/service " << theCrawler.portOrService << ".\n";
     theCrawler.PingCalculatorStatus();
     numPings++;
     if (theCrawler.lastTransactionErrors!="")

@@ -20,7 +20,8 @@ public:
   static bool LoadFileToStringUnsecure
   (const std::string& fileNameUnsecure, std::string& output, std::stringstream& commentsOnFailure);
   static bool LoadFileToStringVirtual
-  (const std::string& fileName, std::string& output, std::stringstream& commentsOnFailure, bool accessSensitiveFolders=false);
+  (const std::string& fileName, std::string& output, std::stringstream& commentsOnFailure,
+   bool accessSensitiveFolders=false, bool accessULTRASensitiveFolders=false);
   static bool IsOKfileNameVirtual(const std::string& fileName, bool accessSensitiveFolders=false);
   static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
   static std::string GetFileNameFromFileNameWithPath(const std::string& fileName);

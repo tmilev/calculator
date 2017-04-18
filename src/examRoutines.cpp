@@ -2598,6 +2598,15 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
         outBody << this->GetEditPageButton(this->topicListFileName);
       outBody << "<br>";
     }
+  std::string problemLabel="";
+  if (!this->flagIsExamHome && !this->flagIsForReal &&
+      theGlobalVariables.userCalculatorRequestType!="template" &&
+      theGlobalVariables.userCalculatorRequestType!="templateNoLogin")
+    if (this->theTopicS.Contains(this->fileName))
+    { TopicElement& current=this->theTopicS.GetValueCreateIfNotPresent(this->fileName);
+      current.ComputeLinks(*this,true);
+      problemLabel= current.displayTitle;
+    }
   if (this->flagIsExamProblem && this->flagIsForReal &&
       !this->flagIsExamHome && theGlobalVariables.userCalculatorRequestType!="template")
   { bool problemAlreadySolved=false;
@@ -2612,13 +2621,14 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       outBody << "<span style=\"color:orange\"><b>No deadline yet but scores are recorded. </b></span>";
     else
       outBody << "<span style=\"color:brown\"><b>Scores are recorded. </b></span>";
+    outBody << problemLabel;
     outBody << theDeadlineString << "\n<hr>\n";
 #endif
     //outBody << "<br>";
   } else if (!this->flagIsExamHome && !this->flagIsForReal &&
              theGlobalVariables.userCalculatorRequestType!="template" &&
              theGlobalVariables.userCalculatorRequestType!="templateNoLogin")
-    outBody << "<span style=\"color:green\"><b>Practice mode.</b></span><hr>";
+    outBody << "<span style=\"color:green\"><b>Practice mode. </b></span>" << problemLabel << "<hr>";
 
   //////////////////////////////
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
@@ -3150,12 +3160,47 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicEl
     .immediateChildren.AddOnTop(output.GetIndex(inputElt.id));
 }
 
+void TopicElement::reset(int parentSize)
+{ this->flagIsSection=false;
+  this->flagIsSubSection=false;
+  this->flagIsChapter=false;
+  this->flagIsError=false;
+  this->flagSubproblemHasNoWeight=false;
+  this->title="empty";
+  this->id="";
+  this->video="";
+  this->slides="";
+  this->slidesPrintable="";
+  this->problem="";
+  this->error="";
+  this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
+  if (this->problemNumber.size<4)
+    this->problemNumber.initFillInObject(4,0);
+  for (int i=parentSize+1; i<this->problemNumber.size; i++)
+    this->problemNumber[i]=0;
+  this->problemNumber[parentSize]++;
+  this->immediateChildren.SetSize(0);
+  this->totalSubSectionsUnderME=0;
+  this->totalSubSectionsUnderMeIncludingEmptySubsections=0;
+  this->flagContainsProblemsNotInSubsection=false;
+  this->pointsEarnedInProblemsThatAreImmediateChildren=0;
+  this->totalPointsEarned=0;
+  this->maxPointsInAllChildren=0;
+  if (parentSize==0)
+    this->flagIsChapter=true;
+  if (parentSize==1)
+    this->flagIsSection=true;
+  if (parentSize==2)
+    this->flagIsSubSection=true;
+}
+
 void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
 { MacroRegisterFunctionWithName("TopicElement::GetTopicList");
   std::stringstream tableReader(inputString);
   std::string currentLine, currentArgument;
   TopicElement currentElt;
   bool found=false;
+  currentElt.problemNumber.initFillInObject(4,0);
   while(std::getline(tableReader, currentLine, '\n'))
   { if (MathRoutines::StringTrimWhiteSpace(currentLine)=="")
       continue;
@@ -3169,7 +3214,6 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       currentElt.reset(0);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
-      currentElt.flagIsChapter=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Section:", &currentArgument))
     { if(found)
         TopicElement::AddTopic(currentElt, output);
@@ -3178,7 +3222,6 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id=currentElt.title;
-      currentElt.flagIsSection=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Topic:", &currentArgument))
     { if(found)
         TopicElement::AddTopic(currentElt, output);
@@ -3187,7 +3230,6 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id=currentElt.title;
-      currentElt.flagIsSubSection=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument))
     { if(found)
         TopicElement::AddTopic(currentElt, output);
@@ -3655,10 +3697,24 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   (void) plainStyle;
   if (this->displayProblemLink!="")
     return;
+  int depth=3;
+  if (this->flagIsChapter)
+    depth=0;
+  if (this->flagIsSection)
+    depth=1;
+  if (this->flagIsSubSection)
+    depth=2;
+  std::stringstream problemLabel;
+  for (int i=0; i<depth+1; i++)
+  { problemLabel << this->problemNumber[i];
+    problemLabel << ".";
+  }
+  problemLabel << " ";
+  this->problemNumberString=problemLabel.str();
   if (this->title=="")
-    this->displayTitle= (std::string)"-" ;//+ "<br>DEBUG: "+this->ToString();
+    this->displayTitle= this->problemNumberString + "-" ;//+ "<br>DEBUG: "+this->ToString();
   else
-    this->displayTitle=this->title ;//+ "<br>DEBUG: "+this->ToString();
+    this->displayTitle= this->problemNumberString + this->title ;//+ "<br>DEBUG: "+this->ToString();
   if (this->video=="")
     this->displayVideoLink = "Lesson coming soon";
   else if (this->video=="-")

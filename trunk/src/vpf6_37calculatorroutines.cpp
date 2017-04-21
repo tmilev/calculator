@@ -561,7 +561,8 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
   << "'"
   ;
   out << "Command: " << CGI::StringToHtmlString( commandToExecute.str(), true);
-  //theGlobalVariables.CallSystemWithOutput(commandToExecute.str());
+  out << "<br>Result:<br>"
+  << CGI::StringToHtmlString(theGlobalVariables.CallSystemWithOutput(commandToExecute.str()), true);
 
   return output.AssignValue(out.str(),theCommands);
 }

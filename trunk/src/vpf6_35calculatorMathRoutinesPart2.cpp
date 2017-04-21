@@ -556,10 +556,9 @@ bool CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne(Calculator& 
 bool CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral");
   Expression theFunctionE, theVariableE, theSetE;
-  //stOutput << "DEBUG: I'm here. " ;
   if (!input.IsDefiniteIntegralOverIntervalfdx(&theVariableE, &theFunctionE, &theSetE))
     return false;
-  //stOutput << "DEBUG:HERE. " ;
+  //stOutput << "<br>DEBUG: I'm here, evaluating:  " << input.ToString() ;
   if (!theSetE.StartsWith(theCommands.opLimitBoundary(), 3))
     return false;
   if (theSetE[1].ContainsAsSubExpressionNoBuiltInTypes(theCommands.opInfinity()) ||
@@ -569,15 +568,33 @@ bool CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral(Calculator& theC
   indefiniteExpression.MakeAtom(theCommands.opIndefiniteIndicator(), theCommands);
   theIndefiniteIntegral.MakeIntegral(theCommands, indefiniteExpression, theFunctionE, theVariableE);
   Expression solvedIntegral;
+  //stOutput << "<br>DEBUG: Got to here at " << theGlobalVariables.GetElapsedSeconds();
   //stOutput << "DEBUG: trying to solve: " << theIndefiniteIntegral.ToString();
   if (!theCommands.EvaluateExpression(theCommands, theIndefiniteIntegral, solvedIntegral))
     return false;
+  //stOutput << "<br>DEBUG: Got to here at after evaluating. Time: " << theGlobalVariables.GetElapsedSeconds();
   if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opIntegral()))
     return false;
   if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opDivide()))
     return false;
   if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opLog()))
     return false;
+  HashedList<Expression> theVar;
+  List<double> theValue;
+  theVar.AddOnTop(theVariableE);
+  theValue.AddOnTop(0);
+  //stOutput << "<br>DEBUG: Got to before evaluates to double at " << theGlobalVariables.GetElapsedSeconds();
+  for (int i=1; i<=2; i++)
+    if (theSetE[i].EvaluatesToDouble(&theValue[0]))
+    { double theResult=0;
+      if (!solvedIntegral.EvaluatesToDoubleUnderSubstitutions(theVar, theValue, &theResult))
+        return false;
+      //theCommands << "DEBUG: " << solvedIntegral << " at " << theVar[0].ToString()
+      //<< "=" << theValue[0]
+      //<< " evaluates to: "
+      //<< theResult;
+    }
+  //stOutput << "<br>DEBUG: Got to here part 2. " << theGlobalVariables.GetElapsedSeconds();
   Expression theSubTop(theCommands), theSubBottom(theCommands);
   theSubTop.AddChildAtomOnTop(theCommands.opDefine());
   theSubTop.AddChildOnTop(theVariableE);

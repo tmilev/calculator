@@ -6,6 +6,8 @@
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader2Math9DrawingVariables.h"
 #include <assert.h>
+#include "vpfHeader3Calculator0_Interface.h"
+#include "vpfHeader4SystemFunctionsGlobalObjects.h"
 
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
@@ -21,6 +23,8 @@ void Crasher::FirstRun()
     << theGlobalVariables.GetElapsedSeconds() << " second(s) from the start.<hr>";
   this->flagCrashInitiateD=true;
 }
+
+extern Calculator theParser;
 
 Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
 { (void) dummyCrasherSignalsActualCrash;
@@ -53,16 +57,24 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     bool succeededToOpen=FileOperations::OpenFileCreateIfNotPresentVirtual
     (theFile, "crashes/"+theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false, true);
     if (succeededToOpen)
-      stOutput << "<hr>Crash dumped in file " << theGlobalVariables.RelativePhysicalNameCrashLog
+      stOutput << "<hr>Crash dumped in file "
+      << "<a href=\"/LogFiles/crashes/"
+      << CGI::StringToURLString( theGlobalVariables.RelativePhysicalNameCrashLog, false)
+      << "\" >"
+      << theGlobalVariables.RelativePhysicalNameCrashLog
+      << "</a>"
       << " located inside the output folder.";
     else
       stOutput << "<hr>Failed to create a crash report: check if folder exists and the "
       << "executable has file permissions for file " << theGlobalVariables.RelativePhysicalNameCrashLog
       << " located inside the output folder.";
     theFile << this->theCrashReport.str();
+    theFile.flush();
+    theFile << "<hr>Additional comments follow. " << theParser.Comments.str();
     theFile.close();
   } else
     stOutput << "GlobalVariables.flagNotAllocated is true. ";
+  stOutput << "<hr>Additional comments follow. " << theParser.Comments.str();
   if (this->CleanUpFunction!=0)
     this->CleanUpFunction();
   std::cout.flush();

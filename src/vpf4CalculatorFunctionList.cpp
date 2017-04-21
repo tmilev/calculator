@@ -1472,7 +1472,7 @@ D-B;\
    "Crawls a latex file collecting all local style files and all \\input commands to produce a single latex file. \
    The function was originally designed for the purposes of the freecalc project as not been tested on any other projects,\
    please use only for freecalc.",
-   "Crawl(\"/homework/UMB-All-Problems-By-Course/Calc-I-MasterProblemSheet.tex\")",
+   "Crawl(\"freecalc/homework/UMB-All-Problems-By-Course/Calc-I-MasterProblemSheet.tex\")",
    true, false,
    "CalculatorFunctionsGeneral::innerCrawlTexFile",
    "Crawl")
@@ -1486,10 +1486,10 @@ D-B;\
    The function assumes the freecalc project is installed in a folder called freecalc, \
    parallel to the calculator project folder (i.e, we have folders /vectorpartition and /freecalc next to one another).\
    The folders are given relative to the /freecalc base.",
-   "BuildFreecalc (\"lectures/UMB-Reference-Lectures/Calculus_I.tex\");\
-   \nBuildFreecalc(\"lectures/UMB-Reference-Lectures/Calculus_II.tex\");\
-   \nBuildFreecalc(\"homework/UMB-All-Problems-By-Course/Homework_Calculus_I.tex\");\
-   \nBuildFreecalc(\"homework/UMB-All-Problems-By-Course/Homework_Calculus_II.tex\");\
+   "BuildFreecalc (\"freecalc/lectures/UMB-Reference-Lectures/Calculus_I.tex\");\
+   \nBuildFreecalc(\"freecalc/lectures/UMB-Reference-Lectures/Calculus_II.tex\");\
+   \nBuildFreecalc(\"freecalc/homework/UMB-All-Problems-By-Course/Homework_Calculus_I.tex\");\
+   \nBuildFreecalc(\"freecalc/homework/UMB-All-Problems-By-Course/Homework_Calculus_II.tex\");\
    ",
    true, false,
    "CalculatorFunctionsGeneral::innerBuildFreecalc",

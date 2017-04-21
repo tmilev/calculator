@@ -2879,9 +2879,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     { needsParen=false;
       theCoeff="";
     }
-    if (theCoeff=="-1")
-    { theCoeff="-";
-    }
+//    if (theCoeff=="-1")
+//    { theCoeff="-";
+//    }
     if (needsParen)
       out << "\\left(";
     out << theCoeff;

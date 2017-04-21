@@ -4604,7 +4604,6 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("/certificates-public/", "certificates-public/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("ProblemCollections/", "ProblemCollections/");
   folderSubstitutionsNonSensitive.SetKeyValue("problemtemplates/", "../problemtemplates/");
-  folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");
   folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("html/", "../public_html/"); //<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "../public_html/html-common/");//<-coming from webserver
@@ -4620,6 +4619,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
 
   folderSubstitutionsSensitive.Clear();
+  folderSubstitutionsSensitive.SetKeyValue("freecalc/", "../freecalc/");//<-internal use
+  folderSubstitutionsSensitive.SetKeyValue("/freecalc/", "../freecalc/");
   folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");//<-internal use
   folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");//<-coming from webserver
   folderSubstitutionsSensitive.SetKeyValue("crashes/", "LogFiles/crashes/");

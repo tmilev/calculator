@@ -560,7 +560,6 @@ FileOperations::FolderVirtualLinksNonSensitive()
     MutexLockGuard theGuard(theMutex);
     result.SetKeyValue("output/", "output/");
     result.SetKeyValue("problemtemplates/", "../problemtemplates/");
-    result.SetKeyValue("freecalc/", "../freecalc/");
     result.SetKeyValue("html/", "../public_html/");
     result.SetKeyValue("html-common/", "html-common/");
     result.SetKeyValue("certificates-public/", "certificates-public/");
@@ -576,6 +575,7 @@ FileOperations::FolderVirtualLinksSensitive()
   { firstRun=true;
     static MutexRecursiveWrapper theMutex;
     MutexLockGuard theGuard(theMutex);
+    result.SetKeyValue("freecalc/", "../freecalc/");
     result.SetKeyValue("LogFiles/", "LogFiles/");
     result.SetKeyValue("crashes/", "LogFiles/crashes/");
   }

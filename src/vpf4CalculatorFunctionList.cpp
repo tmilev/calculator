@@ -4077,7 +4077,8 @@ this->AddOperationInnerHandler
    "Rule 1*{{anything}}=anything.",
    "x*1;x*1-x ",
    true, false,
-   "Calculator::innerMultiplyByOne");
+   "Calculator::innerMultiplyByOne",
+   "MultiplyByOne");
   this->AddOperationHandler
   ("*", CalculatorFunctionsGeneral::outerCommuteConstants, "",
    "Rule that commutes constants to the left-most positions.  \

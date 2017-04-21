@@ -1231,7 +1231,13 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   //stOutput << "<hr>Fter eval: " << theInterpreter.outputString;
   bool result=!theInterpreter.flagAbortComputationASAP && theInterpreter.syntaxErrors=="";
   if (!result)
-  { comments << "Failed to interpret your file. The interpretation input was:<br> "
+  { comments << "<br>Failed to interpret your file. "
+    << "<a href=\""
+    << theGlobalVariables.DisplayNameExecutable
+    << "?request=calculator&mainInput="
+    << CGI::StringToURLString( this->theProblemData.commandsGenerateProblemNoEnclosures,false)
+    << "\">Input link</a><br>"
+    << "The interpretation input was:<br> "
     << this->theProblemData.commandsGenerateProblem << "<br>";
     if (theGlobalVariables.UserDefaultHasAdminRights())
       comments << "The result of the interpretation attempt is:<br>"

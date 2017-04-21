@@ -2947,7 +2947,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
   Expression theFunctionE, theVariableE, integrationSetE;
   if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &integrationSetE))
     return false;
-  //stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, input: " << input.ToString();
+  //stOutput << "<br>DEBUG: Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks, input: " << input.ToString();
   IntegralRFComputation theComputation(&theCommands);
   if(!CalculatorConversions::innerRationalFunction(theCommands, theFunctionE, theComputation.inpuTE))
     return theCommands << "<hr>Call of function CalculatorConversions::innerRationalFunction failed, input was: "
@@ -2967,13 +2967,13 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
   theComputation.theRF=theComputation.inpuTE.GetValue<RationalFunctionOld>();
   theComputation.theRF.GetDenominator(theComputation.theDen);
   theComputation.theRF.GetNumerator(theComputation.theNum);
-//  stOutput << "<br>partial fraction decompo called, the den is: " << theComputation.theDen.ToString();
+  //stOutput << "<br>DEBUG: partial fraction decompo called, the den is: " << theComputation.theDen.ToString();
   if (theComputation.theDen.TotalDegree()<1)
     return false;
-//  stOutput << "<br>calling integration... ";
+  //stOutput << "<br>DEBUG: calling integration... ";
   if (!theComputation.IntegrateRF())
     return theCommands << theComputation.printoutIntegration.str();
-  //stOutput << "got before check consistency 2";
+  //stOutput << "DEBUG: got before check consistency 2";
   theComputation.theIntegralSum.CheckConsistencyRecursively();
   //stOutput << "got before check consistency 3";
   //stOutput << "result of "
@@ -2983,7 +2983,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
       return false;
   output.CheckConsistencyRecursively();
   output.CheckInitializationRecursively();
-//  stOutput << "<hr>Transforming " << input.ToString() << " to " << output[1].ToString() << "<hr>";
+  //stOutput << "<hr>DEBUG: Transforming " << input.ToString() << " to " << output[1].ToString() << "<hr>";
   return true;
 }
 
@@ -6525,8 +6525,10 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
           }
       }
       double tempDouble=0;
-      if (whichDouble==0)
+       if (whichDouble==0)
         whichDouble=&tempDouble;
+      if (leftD==0 && rightD<0)
+        return false;
       if (leftD==0 && rightD>0)
         *whichDouble=0;
       else
@@ -6534,7 +6536,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
       if (signChange)
         *whichDouble*=-1;
 //      stOutput << "debug: here i am power " << leftD << " ^ " << rightD << " = " << *whichDouble << "<br>";
-      return !std::isnan(*whichDouble);
+      return !std::isnan(*whichDouble) && !std::isinf(*whichDouble);
     }
     if ((*this).StartsWith(theCommands.opSqrt(),3))
     { bool signChange=false;
@@ -6547,6 +6549,8 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
             rightD*=-1;
           }
       }
+      if (leftD==0 && rightD<0)
+        return false;
 //      stOutput << "debug: here i am";
       double tempDouble=0;
       if (whichDouble==0)
@@ -6557,7 +6561,7 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
         *whichDouble=FloatingPoint::power(rightD,1/leftD);
       if (signChange)
         *whichDouble*=-1;
-      return !std::isnan(*whichDouble);
+      return !std::isnan(*whichDouble) && !std::isinf(*whichDouble);
     }
     if ((*this).StartsWith(theCommands.opDivide(),3))
     { if (rightD==0)

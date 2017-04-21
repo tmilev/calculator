@@ -55,7 +55,7 @@ void MonitorWebServer()
   int maxNumPingFailures=3;
   //warning: setting theWebServer.WebServerPingIntervalInSeconds to more than 1000
   //may overflow the variable int microsecondsToSleep.
-  theWebServer.WebServerPingIntervalInSeconds=1000;
+  //theWebServer.WebServerPingIntervalInSeconds=1000;
   if (theWebServer.WebServerPingIntervalInSeconds>30)
     theLog << logger::red << "**********WARNING**************"
     << logger::endL
@@ -82,13 +82,13 @@ void MonitorWebServer()
     if (theCrawler.lastTransactionErrors!="")
     { now.AssignLocalTime();
       numConsecutiveFailedPings++;
-      logIO << logger::red << "Ping of " << theCrawler.addressToConnectTo
+      logIO << logger::red << "Connection monitor: Ping of " << theCrawler.addressToConnectTo
       << " at port/service " << theCrawler.portOrService
       << " failed on " << now.ToStringHumanReadable() << ". " << "Got the following errors/messages: "
       << theCrawler.lastTransactionErrors << theCrawler.lastTransaction << ". "
       <<  numConsecutiveFailedPings << " consecutive fails so far, restarting on " << maxNumPingFailures << "." << logger::endL;
     } else
-    { std::cout << "Ping success #" << numPings << std::endl;
+    { std::cout << "Connection monitor: Ping success #" << numPings << std::endl;
       numConsecutiveFailedPings=0;
     }
     if (numConsecutiveFailedPings>=maxNumPingFailures)

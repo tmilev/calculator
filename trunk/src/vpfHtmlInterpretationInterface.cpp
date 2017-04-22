@@ -453,7 +453,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   { out << "<html>"
     << CGI::GetCalculatorStyleSheetWithTags()
     << "<body>"
-    << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << " </problemNavigation>"
+    << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
     << "<b>Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
@@ -463,7 +463,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   { out << "<html>"
     << CGI::GetCalculatorStyleSheetWithTags()
     << "<body>"
-    << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << " </problemNavigation>"
+    << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
     << "<b>Failed to interpret file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
@@ -494,9 +494,11 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   else
     thePage.flagUseNavigationBar=true;
   if (thePage.flagUseNavigationBar)
-    out << "<problemNavigation>" << thePage.outputHtmlNavigatioN
+  { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in " << theGlobalVariables.GetElapsedSeconds()
-    << " second(s).</small>" << "</problemNavigation>\n";
+    << " second(s).</small>" << "</calculatorNavigation>\n";
+    out << thePage.outputHtmlNavigatioN;
+  }
   out << thePage.outputHtmlBodyNoTag;
   out << "</body><!-- tag added automatically; user-specified body tag ignored-->\n";
   out << "</html><!-- tag added automatically; user-specified html tag ignored-->\n";
@@ -523,7 +525,7 @@ std::string HtmlInterpretation::GetExamPage()
   out << CGI::GetJavascriptInitializeButtons() << "\n";
   if (theFile.flagLoadedSuccessfully)
     out << theFile.outputHtmlHeadNoTag;
-  //<- ?????must come after theFile.outputHtmlHeadNoTag
+  //<-must come after theFile.outputHtmlHeadNoTag
   out << "</head>"
   << "<body onload=\"loadSettings(); initializeMathQuill(); ";
   if (!theFile.flagMathQuillWithMatrices)
@@ -568,8 +570,8 @@ std::string HtmlInterpretation::GetEditPageHTML()
   //  << "<script src=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js\"></script>"
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
-  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "</problemNavigation>";
+  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
+  << "</calculatorNavigation>";
   std::stringstream failureStream;
   if (!theFile.LoadMe(false, failureStream, theGlobalVariables.GetWebInput("randomSeed")))
   { out << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";
@@ -1244,9 +1246,9 @@ std::string HtmlInterpretation::GetNavigationPanelWithGenerationTime()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetNavigationPanelWithGenerationTime");
   std::stringstream out;
   out.precision(3);
-  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
+  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
   << "Generated in " << theGlobalVariables.GetElapsedSeconds() << " second(s)"
-  << "</problemNavigation>\n";
+  << "</calculatorNavigation>\n";
   return out.str();
 }
 
@@ -1291,7 +1293,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
     return out.str();
   }
   out << accountsPageBody;
-//  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
+//  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << "</calculatorNavigation>\n";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
@@ -1914,11 +1916,16 @@ std::string HtmlInterpretation::ToStringNavigation()
     out << ": " << theGlobalVariables.userDefault.username.value << linkSeparator;
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout&";
     out << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << " \">Log out</a>" << linkSeparator;
-    if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << "\">Change password</a>" << linkSeparator;
-    else
-      out << "<b>Password change: <br>secure connection<br>only</b>" << linkSeparator;
+    if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage")
+    { out << "<b>Account";
+      out << "</b>" << linkSeparator;
+    } else
+    { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
+        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage&"
+        << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << "\">Account</a>" << linkSeparator;
+      else
+        out << "<b>Account settings: requires secure connection</b>" << linkSeparator;
+    }
     if (theGlobalVariables.userDefault.userGroup.value!="")
       out << "Section: " << theGlobalVariables.userDefault.userGroup.value << linkSeparator;
     //if (theGlobalVariables.UserDefaultHasAdminRights())

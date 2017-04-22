@@ -672,7 +672,8 @@ bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
     return false;
   TimeWrapper now;
   now.AssignLocalTime();
-  this->approximateHoursSinceLastTokenWasIssued=now.SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours
+  this->approximateHoursSinceLastTokenWasIssued=
+  now.SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours
   (this->authenticationCreationTime);
   //<-to do: revoke authentication token if expired.
   return this->enteredAuthenticationToken.value==this->actualAuthenticationToken.value;
@@ -1758,6 +1759,21 @@ std::string DatabaseRoutines::ToStringSuggestionsReasonsForFailure
   return out.str();
 }
 #endif //MACRO_use_MySQL
+
+bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
+(UserCalculatorData& theUseR, std::stringstream* comments)
+{ (void) comments;
+  (void) theUseR;
+#ifdef MACRO_use_MySQL
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
+  if (theUseR.enteredGoogleToken=="")
+    return false;
+  bool result=Crypto::VerifyJWTagainstKnownKeys(theUseR.enteredGoogleToken, comments, comments);
+  return result;
+#else
+  return true;
+#endif
+}
 
 bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 (UserCalculatorData& theUseR, std::stringstream* comments)

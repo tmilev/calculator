@@ -1,12 +1,24 @@
 /*styleCalculator.css*/
+
 problemNavigation {
-  background-color: #eeeeee;
+  background-color: #e8e8e8;
   overflow: none;
   display: block;
   padding: 7px;
   white-space: nowrap;
 }	      
 problemNavigation:after{
+clear:both;
+}
+
+calculatorNavigation {
+  background-color: #f0f0f0;
+  overflow: none;
+  display: block;
+  padding: 7px;
+  white-space: nowrap;
+}	      
+calculatorNavigation:after{
 clear:both;
 }
 

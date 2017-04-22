@@ -6,7 +6,8 @@
 #include "vpfHeader1General0_General.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemIndependentinstance(__FILE__, "Header, system independent database data structures. ");
 
-class MySQLdata{
+class MySQLdata
+{
 //This class is needed to attempt to deal with mySQL's
 //numerous design errors, to the extent possible.
 //Documenting those errors for the interested reader.
@@ -43,7 +44,8 @@ public:
   std::string GetIdentifieR()const;
 };
 
-class UserCalculatorData{
+class UserCalculatorData
+{
   public:
   double approximateHoursSinceLastTokenWasIssued;
   std::string usernamePlusPassWord;
@@ -66,6 +68,7 @@ class UserCalculatorData{
   std::string enteredPassword;
   std::string actualShaonedSaltedPassword;
   std::string enteredShaonedSaltedPassword;
+  std::string enteredGoogleToken;
   std::string userRole;
   std::string authenticationTokenCreationTime;
   //List<std::string> sectionsViewableByUser;
@@ -75,9 +78,11 @@ class UserCalculatorData{
 
   List<std::string> selectedRowFieldsUnsafe;
   List<std::string> selectedRowFieldNamesUnsafe;
+  bool flagUserHasNoPassword;
+  UserCalculatorData();
   void reset();
-  void resetPassword();
-  void resetAuthenticationTokenAndPassword();
+  void clearPasswordFromMemory();
+  void clearAuthenticationTokenAndPassword();
   std::string ToStringUnsecure();
 };
 

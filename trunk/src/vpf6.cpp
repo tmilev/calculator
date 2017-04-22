@@ -2053,11 +2053,13 @@ bool Expression::IsEqualToMathematically(const Expression& other)const
     return false;
   if (*this==other)
     return true;
-  Rational theRat;
+  Rational theRat, theRatTwo;
   AlgebraicNumber theAlgebraic;
-  if (this->IsOfType<Rational>(&theRat) && other.IsOfType<AlgebraicNumber>(&theAlgebraic))
+  if (this->IsOfType(&theRat) && other.IsOfType(&theRatTwo))
+    return theRat==theRatTwo;
+  if (this->IsOfType(&theRat) && other.IsOfType(&theAlgebraic))
     return theAlgebraic==theRat;
-  if (other.IsOfType<Rational>(&theRat) && this->IsOfType<AlgebraicNumber>(&theAlgebraic))
+  if (other.IsOfType(&theRat) && this->IsOfType(&theAlgebraic))
     return theAlgebraic==theRat;
   double leftD=-1, rightD=-1;
   if (this->EvaluatesToDouble(&leftD) && other.EvaluatesToDouble(&rightD))

@@ -1242,7 +1242,7 @@ std::string WebWorker::GetDatabasePage()
   << HtmlSnippets::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
-//  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation() << "</problemNavigation>\n";
+//  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << "</calculatorNavigation>\n";
 std::stringstream dbOutput;
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
@@ -1338,6 +1338,8 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   (theGlobalVariables.GetWebInput("username"), false);
   theUser.enteredAuthenticationToken=CGI::URLStringToNormal
   (theGlobalVariables.GetWebInput("authenticationToken"), false);
+  theUser.enteredGoogleToken=CGI::URLStringToNormal
+  (theGlobalVariables.GetWebInput("googleToken"), false);
   if (theUser.enteredAuthenticationToken!="")
     this->flagAuthenticationTokenWasSubmitted=true;
   /////////////////////////////////////////////
@@ -1352,15 +1354,30 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   this->flagPasswordWasSubmitted=(theUser.enteredPassword!="");
   if (this->flagPasswordWasSubmitted)
     this->flagMustLogin=true;
-  if (!this->flagPasswordWasSubmitted && !this->flagAuthenticationTokenWasSubmitted)
+  if (!this->flagPasswordWasSubmitted &&
+      !this->flagAuthenticationTokenWasSubmitted &&
+      theUser.enteredGoogleToken=="")
     return !this->flagMustLogin;
   if (this->flagPasswordWasSubmitted)
   { this->flagAuthenticationTokenWasSubmitted=false;
     theUser.enteredAuthenticationToken="";
   }
-  if (theUser.username.value=="" || !theGlobalVariables.flagUsingSSLinCurrentConnection)
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     return false;
-  if ((theGlobalVariables.userCalculatorRequestType=="activateAccount" || theGlobalVariables.userCalculatorRequestType=="changePassword")
+  bool doAttemptGoogleTokenLogin=false;
+  if (theUser.enteredGoogleToken!="")
+  { if (theUser.enteredActivationToken=="" &&
+        theUser.enteredPassword=="" &&
+        theUser.enteredAuthenticationToken=="")
+    { theUser.username.value="";
+      doAttemptGoogleTokenLogin=true;
+    }
+    if (theUser.username.value=="")
+      doAttemptGoogleTokenLogin=true;
+  } else if (theUser.username.value=="")
+    return !this->flagMustLogin;
+  if ((theGlobalVariables.userCalculatorRequestType=="activateAccount" ||
+       theGlobalVariables.userCalculatorRequestType=="changePassword")
       && theGlobalVariables.userDefault.enteredPassword=="")
   { theGlobalVariables.userDefault.enteredActivationToken=
     CGI::URLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false);
@@ -1370,13 +1387,19 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   theGlobalVariables.userCalculatorRequestType=="activateAccount";
   if (changingPass)
     theUser.enteredAuthenticationToken = "";
-  if (theUser.enteredAuthenticationToken!="" || theUser.enteredPassword!="" ||
-      theUser.enteredActivationToken!="")
-    theGlobalVariables.flagLoggedIn= DatabaseRoutinesGlobalFunctions::LoginViaDatabase
+  if (doAttemptGoogleTokenLogin )
+  { stOutput << "Attempting google token login ...";
+    theGlobalVariables.flagLoggedIn=
+    DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
     (theUser, &argumentProcessingFailureComments);
-  theUser.resetPassword();
+  } else if (theUser.enteredAuthenticationToken!="" || theUser.enteredPassword!="" ||
+             theUser.enteredActivationToken!="")
+    theGlobalVariables.flagLoggedIn=
+    DatabaseRoutinesGlobalFunctions::LoginViaDatabase
+    (theUser, &argumentProcessingFailureComments);
+  theUser.clearPasswordFromMemory();
   if (!theGlobalVariables.flagLoggedIn)
-  { theGlobalVariables.userDefault.resetAuthenticationTokenAndPassword();
+  { theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
     argumentProcessingFailureComments << "<b>Invalid user or password. </b>";
   } else
   { //in case the user logged in with password, we need
@@ -1876,9 +1899,9 @@ int WebWorker::ProcessToggleMonitoring()
   stOutput << CGI::GetCalculatorStyleSheetWithTags();
   stOutput << "</head>";
   stOutput << "<body>";
-  stOutput << "<problemNavigation>"
+  stOutput << "<calculatorNavigation>"
   << theGlobalVariables.ToStringNavigation()
-  << "</problemNavigation>\n";
+  << "</calculatorNavigation>\n";
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { this->flagToggleMonitoring=true;
     if (theGlobalVariables.flagAllowProcessMonitoring)
@@ -2401,8 +2424,8 @@ int WebWorker::ProcessUnknown()
   << CGI::GetCalculatorStyleSheetWithTags()
   << "</head>";
   stOutput << "<body>";
-  stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "</problemNavigation>\n";
+  stOutput << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
+  << "</calculatorNavigation>\n";
   stOutput << "<b>Requested method is not implemented. </b> "
   << "<hr>The original message received from the server follows."
   << "<hr>\n" << this->ToStringMessageUnsafe();
@@ -2530,7 +2553,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << reasonForLogin;
   if (theGlobalVariables.GetWebInput("error")!="")
     out << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"), true);
-  out << "<form name=\"login\">";
+  out << "<form name=\"login\" id=\"login\">";
   out <<  "User name:\n"
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
   if (theGlobalVariables.GetWebInput("username")!="")
@@ -2546,6 +2569,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   { out << " value=\"" << theGlobalVariables.userCalculatorRequestType << "\"";
   }
   out << ">";
+  out << "<input type=\"hidden\" name=\"googleToken\" id=\"googleToken\" value=\"\">";
   out << "<button type=\"submit\" value=\"Submit\" ";
   out << "action=\"" << theWebServer.GetActiveWorker().addressComputed;
 //  if (theWebServer.GetActiveWorker().argumentComputed!="")
@@ -2565,16 +2589,16 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "currently being worked on.<br>"
   << " Please do not use the following button</b>.";
   out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div>";
-  out << "<script language=\"javascript\">"
-  << " function onSignIn(googleUser) {\n"
-  << "var profile = googleUser.getBasicProfile();\n"
-  << "console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.\n"
-  << "console.log('Name: ' + profile.getName());\n"
-  << "console.log('Image URL: ' + profile.getImageUrl());\n"
-  << "console.log('Email: ' + profile.getEmail());\n"
-  << "console.log('id_token: '+googleUser.getAuthResponse().id_token);\n"
+  out << "<script language=\"javascript\">\n"
+  << "function onSignIn(googleUser)\n"
+  << "{ document.getElementById(\"googleToken\").value=googleUser.getAuthResponse().id_token;\n"
+  << "  document.getElementById(\"username\").required=false;\n"
+  //<< "  document.getElementById(\"login\").submit();\n"
   << "}\n"
-  << "</script>";
+  << "</script>\n";
+  out << "DEBUG: "
+  << "google token submitted: "
+  << theGlobalVariables.GetWebInput("googleToken");
 //
 ///////////////////////////////////////
 //  out << "<br><br><small>No account yet? We are sorry but automatic registration has not been implemented yet.<br>"
@@ -2622,8 +2646,16 @@ std::string WebWorker::GetChangePasswordPage()
   << "  https.send(params);\n"
   << "}\n"
   << "</script>";
+  out << CGI::GetCalculatorStyleSheetWithTags();
   out << "</head>";
   out << "<body> ";
+  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
+  << "</problemNavigation>";
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { out << "Changing password requires secure connection. ";
+    out << "</body></html>";
+    return out.str();
+  }
 //    << "  window.location='calculator?username='+GlobalUser+'&authenticationToken='+GlobalAuthenticationToken;";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
 //  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">";
@@ -2766,8 +2798,8 @@ int WebWorker::ProcessCalculator()
     << " 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus');";
   }
   stOutput << "\">\n";
-  stOutput << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "</problemNavigation>\n";
+  stOutput << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
+  << "</calculatorNavigation>\n";
 
 
   stOutput << this->openIndentTag("<table><!-- Outermost table, 3 cells (3 columns 1 row)-->");
@@ -2892,7 +2924,7 @@ int WebWorker::ProcessLogout()
 { MacroRegisterFunctionWithName("WebWorker::ProcessLogout");
   this->SetHeaderOKNoContentLength();
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
-  theGlobalVariables.userDefault.resetAuthenticationTokenAndPassword();
+  theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
   stOutput << this->GetLoginPage();
   return 0;
 }
@@ -3118,8 +3150,8 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
 //  out << "DEBUG: " << this->ToStringMessageFullUnsafe();
 //  out << WebWorker::ToStringCalculatorArgumentsHumanReadable();
-  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "</problemNavigation>\n";
+  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
+  << "</calculatorNavigation>\n";
   out << WebWorker::GetLoginHTMLinternal(reasonForLogin) << "</body></html>";
   return out.str();
 }
@@ -4480,9 +4512,9 @@ int WebWorker::Run()
       << CGI::GetCalculatorStyleSheetWithTags()
       << "</head>"
       << "<body>"
-      << "<problemNavigation>"
+      << "<calculatorNavigation>"
       << theGlobalVariables.ToStringNavigation()
-      << "</problemNavigation>"
+      << "</calculatorNavigation>"
       << "<b>HTTP error 400 (bad request). </b> "
       << "<br>Possible causes. "
       << "<br>1. Connection time out, possibly due to high server load or sluggish internet (on either side). "

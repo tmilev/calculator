@@ -432,15 +432,21 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
   return out.str();
 }
 
+UserCalculatorData::UserCalculatorData()
+{ this->flagUserHasNoPassword=false;
+  this->approximateHoursSinceLastTokenWasIssued=-1;
+
+}
+
 void UserCalculatorData::reset()
 { MacroRegisterFunctionWithName("UserCalculatorData::reset");
   for (unsigned i=0; i<this->username.value.size(); i++)
     this->username.value[i]=' ';
   this->username="";
-  this->resetAuthenticationTokenAndPassword();
+  this->clearAuthenticationTokenAndPassword();
 }
 
-void UserCalculatorData::resetPassword()
+void UserCalculatorData::clearPasswordFromMemory()
 { MacroRegisterFunctionWithName("UserCalculatorData::resetPassword");
   for (unsigned i=0; i<this->actualShaonedSaltedPassword.size(); i++)
     this->actualShaonedSaltedPassword[i]=' ';
@@ -459,9 +465,9 @@ void UserCalculatorData::resetPassword()
   this->enteredActivationToken="";
 }
 
-void UserCalculatorData::resetAuthenticationTokenAndPassword()
+void UserCalculatorData::clearAuthenticationTokenAndPassword()
 { MacroRegisterFunctionWithName("UserCalculatorData::reset");
-  this->resetPassword();
+  this->clearPasswordFromMemory();
   for (unsigned i=0; i<this->actualAuthenticationToken.value.size(); i++)
     this->actualAuthenticationToken.value[i]=' ';
   this->actualAuthenticationToken="";

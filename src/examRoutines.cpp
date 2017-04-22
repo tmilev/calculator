@@ -430,8 +430,11 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
     return this->comments.str();
   std::stringstream out;
   if (!this->InterpretHtml(this->comments))
-  { out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
-    << "</problemNavigation>";
+  { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
+    << "<small>Generated in "
+    << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
+    << " second(s).</small>"
+    << "</calculatorNavigation>";
     if (theGlobalVariables.UserDefaultHasAdminRights())
       out << this->GetEditPageButton(this->fileName) << "<br>";
     out << "<b>Failed to interpret file: " << this->fileName
@@ -440,11 +443,12 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
   }
   //out << "DEBUG: flagMathQuillWithMatrices=" << this->flagMathQuillWithMatrices << "<br>";
   if (this->flagUseNavigationBar)
-  { out << "<problemNavigation>"
-    << this->outputHtmlNavigatioN
+  { out << "<calculatorNavigation>"
+    << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
-    << " second(s).</small>" << "</problemNavigation>\n";
+    << " second(s).</small>" << "</calculatorNavigation>\n"
+    << this->outputHtmlNavigatioN;
    }
   out << this->comments.str();
   out << this->outputHtmlBodyNoTag;
@@ -481,9 +485,9 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
 //  stOutput << "<hr>DEBUG: loaded<hr>";
 //  stOutput << "<hr>DEBUG: OK<hr>";
   if (!this->flagLoadedSuccessfully)
-  { this->comments <<"<problemNavigation>"
+  { this->comments <<"<calculatorNavigation>"
     << theGlobalVariables.ToStringNavigation()
-    << "</problemNavigation>"
+    << "</calculatorNavigation>"
     << commentsStream.str();
     this->comments << "<a href=\"/selectCourse.html\">Go to course list page.</a>";
   }
@@ -2634,7 +2638,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   } else if (!this->flagIsExamHome && !this->flagIsForReal &&
              theGlobalVariables.userCalculatorRequestType!="template" &&
              theGlobalVariables.userCalculatorRequestType!="templateNoLogin")
-    outBody << "<span style=\"color:green\"><b>Practice mode. </b></span>" << problemLabel << "<hr>";
+    outBody << "<span style=\"color:green\"><b>Scores not recorded. </b></span>" << problemLabel << "<hr>";
 
   //////////////////////////////
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
@@ -2773,14 +2777,19 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   theGlobalVariables.ToStringCalcArgsNoNavigation(true, &randomSeedContainer);
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType=="exercise")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&"
+    { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&"
       << this->ToStringCalculatorArgumentsForProblem("scoredQuiz", studentView)
       << "\">" << this->stringScoredQuizzes << "</a>" << linkSeparator;
-    else if (theGlobalVariables.userCalculatorRequestType=="scoredQuiz")
+      out << "<span style=\"color:green\"><b>" << this->stringPracticE << "</b>"
+      << "</span>" << linkSeparator;
+    } else if (theGlobalVariables.userCalculatorRequestType=="scoredQuiz")
+    { out << "<span style=\"color:brown\"><b>"
+      << this->stringScoredQuizzes << "</b></span>" << linkSeparator;
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=exercise&"
       << this->ToStringCalculatorArgumentsForProblem("exercise", studentView)
       << "\">" << this->stringPracticE << "</a>" << linkSeparator;
+    }
   }
   if (this->flagIsExamProblem && this->flagParentInvestigated)
   { int indexInParent=this->problemNamesNoTopics.GetIndex(this->fileName);
@@ -2822,7 +2831,6 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
     << "\">" << this->stringProblemLink << "</a>" << linkBigSeparator;
-  out << theGlobalVariables.ToStringNavigation();
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { if (theGlobalVariables.UserStudentVieWOn())
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
@@ -2854,9 +2862,13 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         if (i!=this->databaseStudentSections.size-1)
           out << linkSeparator;
       }
-    out << linkBigSeparator;
   }
-  return out.str();
+  if (out.str()=="")
+    return "";
+  std::stringstream outFinal;
+  outFinal << "<problemNavigation>" << out.str()
+  << "</problemNavigation>";
+  return outFinal.str();
 }
 
 std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem

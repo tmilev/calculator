@@ -111,7 +111,7 @@ public:
   static std::string GetStyleButtonLikeHtml();
   static std::string GetHtmlButton(const std::string& buttonID, const std::string& theScript, const std::string& buttonText);
   static std::string GetHtmlSpanHidableStartsHiddeN
-  (const std::string& input, const std::string& labelExpandButton= "info expand/collapse");
+  (const std::string& input, const std::string& labelExpandButton= "info expand/collapse", const std::string& desiredId="");
   static std::string clearNewLines(const std::string& theString);
   static std::string backslashQuotes(const std::string& theString);
   static std::string clearSlashes(const std::string& theString);

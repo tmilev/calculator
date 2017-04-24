@@ -2537,7 +2537,7 @@ std::string Calculator::ToString()
     if (i!=this->cachedExpressions.size-1)
       out << "<br>";
   }
-  out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());//, "Expand/collapse.");
+  out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str(), "info expand/collapse", "calculatorInternalDetails");
   return out2.str();
 }
 

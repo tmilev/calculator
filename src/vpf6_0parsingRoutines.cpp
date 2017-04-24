@@ -781,8 +781,16 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
   SyntacticElement currentElement;
   int currentDigit;
   bool inQuotes=false;
+  bool escapedInQuotes=false;
+  bool escapingAllowed=true;
   for (unsigned i=0; i<input.size(); i++)
-  { current.push_back(input[i]);
+  { if (escapedInQuotes)
+    { if (current.size()>0)
+        current.resize(current.size()-1);
+      escapedInQuotes=false;
+      escapingAllowed=false;
+    }
+    current.push_back(input[i]);
     if (i+1<input.size())
       LookAheadChar=input[i+1];
     else
@@ -793,28 +801,41 @@ void Calculator::ParseFillDictionary(const std::string& input, List<SyntacticEle
     if (!inQuotes )
       if (this->isInterpretedAsEmptySpace(current))
         current=" ";
-    bool shouldSplit=
-    (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current==" ");
-    if (MathRoutines::isADigit(LookAheadChar))
-    { //stOutput << "DEBUG: lookahead digit, current: " << current;
-      if (current[current.size()-1]=='\\' || this->stringsThatSplitIfFollowedByDigit.Contains(current))
-      { shouldSplit=true;
-        //stOutput << "DEBUG: shouldsplit true";
-
+    bool shouldSplit=false;
+    if (!inQuotes)
+    { shouldSplit=
+      (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current==" ");
+      if (MathRoutines::isADigit(LookAheadChar))
+      { //stOutput << "DEBUG: lookahead digit, current: " << current;
+        if (current[current.size()-1]=='\\' || this->stringsThatSplitIfFollowedByDigit.Contains(current))
+        { shouldSplit=true;
+          //stOutput << "DEBUG: shouldsplit true";
+        }
       }
     }
     if (inQuotes)
+    { if (escapingAllowed)
+        if (current.size()>=1)
+          if (current[current.size()-1]=='\\')
+            if (LookAheadChar=='\\' || LookAheadChar=='"')
+            { escapedInQuotes=true;
+              continue;
+            }
       shouldSplit=(LookAheadChar=='"');
-    if (current=="\"")
+    }
+    if (current=="\"" && escapingAllowed)
     { inQuotes=!inQuotes;
       shouldSplit=true;
     }
-//    stOutput << "<br>in quotes: "<< inQuotes << " current: " << current << " shouldsplit: " << shouldSplit;
+    //stOutput << "<br>in quotes: "<< inQuotes << " current: " << current << " shouldsplit: " << shouldSplit;
     if (!shouldSplit)
+    { escapingAllowed=true;
       continue;
+    }
     bool mustInterpretAsVariable=false;
-    if (inQuotes && current!="\"")
+    if (inQuotes && (current!="\"" || !escapingAllowed))
       mustInterpretAsVariable=true;
+    escapingAllowed=true;
 //    stOutput << "must interpret as var: " << mustInterpretAsVariable;
     if (this->controlSequences.Contains(current) && !mustInterpretAsVariable)
     { currentElement.controlIndex=this->controlSequences.GetIndex(current);

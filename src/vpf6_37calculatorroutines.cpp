@@ -491,7 +491,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToHex(Calculator& theCommands, const
   if (!input.IsOfType(&inputString))
     inputString=input.ToString();
   std::string result, bitStream;
-  if (! Crypto::ConvertBase64ToString(inputString, bitStream,&theCommands.Comments))
+  if (!Crypto::ConvertBase64ToString(inputString, bitStream, &theCommands.Comments, &theCommands.Comments))
     return false;
   Crypto::ConvertStringToHex(bitStream, result);
   return output.AssignValue(result, theCommands);

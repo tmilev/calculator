@@ -155,15 +155,20 @@ bool Crypto::Get6bitFromChar(unsigned char input, uint32_t& output)
   return false;
 }
 
-bool Crypto::ConvertBase64ToString(const std::string& input, std::string& output, std::stringstream* comments)
+bool Crypto::ConvertBase64ToString
+(const std::string& input, std::string& output, std::stringstream* commentsOnFailure,
+ std::stringstream* commentsGeneral)
 { List<unsigned char> byteList;
-  if (!Crypto::ConvertBase64ToBitStream(input, byteList, comments))
+  if (!Crypto::ConvertBase64ToBitStream(input, byteList, commentsOnFailure, commentsGeneral))
     return false;
   Crypto::ConvertBitStreamToString(byteList, output);
   return true;
 }
 
-bool Crypto::ConvertBase64ToBitStream(const std::string& input, List<unsigned char>& output, std::stringstream* comments)
+bool Crypto::ConvertBase64ToBitStream
+(const std::string& input, List<unsigned char>& output,
+ std::stringstream* commentsOnFailure,
+ std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("Crypto::Base64ToBitStream");
   output.Reserve((3*input.size())/4+1);
   output.SetSize(0);
@@ -172,8 +177,9 @@ bool Crypto::ConvertBase64ToBitStream(const std::string& input, List<unsigned ch
   for (unsigned i=0; i<input.size(); i++)
   { if (!Crypto::Get6bitFromChar(input[i], sixBitDigit))
     { if (input[i]!='=')
-      { if (comments!=0)
-          *comments << "<hr>Error: the input string: <br>\n" << input << "\n<br>had characters outside of base64";
+      { if (commentsOnFailure!=0)
+          *commentsOnFailure << "<hr>Error: the input string: <br>\n"
+          << input << "\n<br>had characters outside of base64";
         return false;
       }
       theStack=0;
@@ -201,8 +207,8 @@ bool Crypto::ConvertBase64ToBitStream(const std::string& input, List<unsigned ch
     }
   }
 //  stOutput << "<br>output is: " << output << ", Converted back: " << Crypto::ConvertStringToBase64(output);
-  if (comments!=0 && numBitsInStack!=0)
-  { *comments << "<br>Base64: input corresponds modulo 8 to " << numBitsInStack
+  if (commentsGeneral!=0 && numBitsInStack!=0)
+  { *commentsGeneral << "<br>Base64: input corresponds modulo 8 to " << numBitsInStack
     << " bits. Perhaps the input was not padded correctly with = signs. The input: "
     << input;
   }
@@ -669,9 +675,9 @@ bool Crypto::ConvertLargeUnsignedIntToBase64
 }
 
 bool Crypto::ConvertBase64ToLargeUnsignedInt
-(const std::string& inputBase64, LargeIntUnsigned& output, std::stringstream* comments)
+(const std::string& inputBase64, LargeIntUnsigned& output, std::stringstream* commentsOnFailure)
 { List<unsigned char> theBitStream;
-  if(!Crypto::ConvertBase64ToBitStream(inputBase64,theBitStream,comments))
+  if(!Crypto::ConvertBase64ToBitStream(inputBase64, theBitStream, commentsOnFailure))
     return false;
   Crypto::ConvertBitStreamToLargeUnsignedInt(theBitStream, output);
   return true;
@@ -847,14 +853,14 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
     output[7]=h7;
 }
 
-bool Certificate::LoadFromJSON(JSData& input, std::stringstream* comments)
+bool Certificate::LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("Certificate::LoadFromJSON");
-  if (comments!=0)
-    *comments << "<hr>Loading certificate from: "
+  if (commentsGeneral!=0)
+    *commentsGeneral << "<hr>Loading certificate from: "
     << input.ToString();
   if (input.type!=JSData::JSObject)
-  { if (comments!=0)
-      *comments << "Can't load certificate: JSON not of type object. ";
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Can't load certificate: JSON not of type object. ";
     return false;
   }
   this->algorithm="";
@@ -867,12 +873,12 @@ bool Certificate::LoadFromJSON(JSData& input, std::stringstream* comments)
     this->keyid=input.GetValue("kid").string;
   if (input.HasKey("n"))
   { this->theModulusString=input.GetValue("n").string;
-    if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theModulusString,this->theModuluS,comments))
+    if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theModulusString, this->theModuluS, commentsOnFailure))
       return false;
   }
   if (input.HasKey("e"))
   { this->theExponentString=input.GetValue("e").string;
-    if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theExponentString,this->theExponenT,comments))
+    if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theExponentString, this->theExponenT, commentsOnFailure))
       return false;
   }
   return true;
@@ -880,12 +886,13 @@ bool Certificate::LoadFromJSON(JSData& input, std::stringstream* comments)
 
 List<Certificate> Crypto::knownCertificates;
 
-bool Crypto::LoadOneKnownCertificate(const std::string& input, std::stringstream* comments)
+bool Crypto::LoadOneKnownCertificate
+(const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("Crypto::LoadOneKnownCertificate");
-  if (comments!=0)
-    *comments << "Loading from: " << input;
+  if (commentsGeneral!=0)
+    *commentsGeneral << "Loading from: " << input;
   JSData certificateJSON;
-  if (!certificateJSON.readstring(input, comments))
+  if (!certificateJSON.readstring(input, commentsOnFailure))
     return false;
   Certificate currentCert;
   bool isGood=false;
@@ -895,15 +902,15 @@ bool Crypto::LoadOneKnownCertificate(const std::string& input, std::stringstream
       if (theKeys.type==JSData::JSarray)
       { isGood=true;
         for (int i=0; i<theKeys.list.size; i++)
-        { if (!currentCert.LoadFromJSON(theKeys.list[i],comments))
+        { if (!currentCert.LoadFromJSON(theKeys.list[i], commentsOnFailure, commentsGeneral))
             return false;
           Crypto::knownCertificates.AddOnTop(currentCert);
         }
       }
     }
   if (!isGood)
-  { if (comments!=0)
-      *comments << "I expected an object with key 'keys'"
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "I expected an object with key 'keys'"
       << " consisting of an array of public keys. Instead, I got: "
       << certificateJSON.ToString();
     return false;
@@ -924,31 +931,32 @@ std::string Certificate::ToString()
   return out.str();
 }
 
-bool Crypto::LoadKnownCertificates(std::stringstream* comments)
+bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("Crypto::LoadKnownCertificates");
   Crypto::knownCertificates.SetSize(0);
   List<std::string> theFileNames;
-  if (! FileOperations::GetFolderFileNamesVirtual("certificates-public/", theFileNames,0))
-  { if (comments!=0)
-      *comments << "Could not open folder certificates-public/, no certificates loaded.";
+  if (! FileOperations::GetFolderFileNamesVirtual("certificates-public/", theFileNames, 0))
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Could not open folder certificates-public/, no certificates loaded.";
     return false;
   }
-  std::stringstream temp;
-  if (comments==0)
-    comments=&temp;
-  *comments << "<br>Certificates: ";
+  if (commentsGeneral==0)
+    *commentsGeneral << "<br>Certificates: ";
   for (int i=0; i<theFileNames.size; i++)
   { if (theFileNames[i]=="." || theFileNames[i]=="..")
       continue;
-    std::string currentCert;
-    if (!FileOperations::LoadFileToStringVirtual("certificates-public/"+theFileNames[i], currentCert, *comments, false))
+    if (MathRoutines::StringBeginsWith(theFileNames[i],"debug"))
       continue;
-    if (!Crypto::LoadOneKnownCertificate(currentCert, comments))
+    std::string currentCert;
+    if (!FileOperations::LoadFileToStringVirtual("certificates-public/"+theFileNames[i], currentCert, *commentsOnFailure, false))
+      continue;
+    if (!Crypto::LoadOneKnownCertificate(currentCert, commentsOnFailure, commentsGeneral))
       return false;
   }
   for (int i=0; i<Crypto::knownCertificates.size; i++)
-    *comments << "\n<hr>\nLoaded: "
-    << Crypto::knownCertificates[i].ToString();
+    if (commentsGeneral!=0)
+      *commentsGeneral << "\n<hr>\nLoaded: "
+      << Crypto::knownCertificates[i].ToString();
   return true;
 }
 
@@ -1032,7 +1040,7 @@ bool JSONWebToken::VerifyRSA256
     Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex);
     Crypto::ConvertLargeUnsignedIntToHex(theShaUI, theShaHex);
     if (!result && commentsOnFailure!=0)
-      *commentsOnFailure << "<br><b><span style=\"color:red\">The sha does not match the RSA result</span></b>";
+      *commentsOnFailure << "<br><b><span style=\"color:red\">The SHA does not match the RSA result. </span></b>";
     else if (commentsGeneral!=0)
       *commentsOnFailure << "<br><b><span style=\"color:green\">Validated.</span></b>";
     if (commentsGeneral!=0)

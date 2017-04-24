@@ -14,7 +14,7 @@ public:
   std::string theExponentString;
   LargeIntUnsigned theModuluS;
   LargeIntUnsigned theExponenT;
-  bool LoadFromJSON(JSData& input, std::stringstream* comments);
+  bool LoadFromJSON(JSData& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   std::string ToString();
 };
 
@@ -24,8 +24,9 @@ class Crypto
 public:
   static List<Certificate> knownCertificates;
   static List<uint32_t> kArraySha2xx;
-  static bool LoadKnownCertificates(std::stringstream* comments);
-  static bool LoadOneKnownCertificate(const std::string& input, std::stringstream* comments);
+  static bool LoadKnownCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  static bool LoadOneKnownCertificate
+  (const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
 
   static std::string ConvertStringToBase64(const List<unsigned char>& input);
   static std::string ConvertStringToBase64(const std::string& input);
@@ -35,8 +36,13 @@ public:
   static void ConvertStringToListUInt32BigendianZeroPad
   (const std::string& input, List<uint32_t>& output);
   static void ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output);
-  static bool ConvertBase64ToBitStream(const std::string& input, List<unsigned char>& output, std::stringstream* comments=0);
-  static bool ConvertBase64ToString(const std::string& input, std::string& output, std::stringstream* comments=0);
+  static bool ConvertBase64ToBitStream
+  (const std::string& input, List<unsigned char>& output,
+   std::stringstream* commentsOnFailure=0,
+   std::stringstream* commentsGeneral=0);
+  static bool ConvertBase64ToString
+  (const std::string& input, std::string& output, std::stringstream* commentsOnFailure=0,
+   std::stringstream* commentsGeneral=0);
 
   static void ConvertStringToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output);
   static bool ConvertHexToString(const std::string& input, std::string& output);
@@ -66,7 +72,7 @@ public:
   static void ConvertBitStreamToLargeUnsignedInt
   (const List<unsigned char>& input, LargeIntUnsigned& output);
   static bool ConvertBase64ToLargeUnsignedInt
-  (const std::string& inputBase64, LargeIntUnsigned& output, std::stringstream* comments);
+  (const std::string& inputBase64, LargeIntUnsigned& output, std::stringstream* commentsOnFailure);
   static bool ConvertLargeUnsignedIntToBase64
   (const LargeIntUnsigned& input, std::string& outputBase64);
   static bool ConvertLargeUnsignedIntToHex

@@ -183,7 +183,7 @@ bool CalculatorFunctionsGeneral::innerLoadKnownCertificates(Calculator& theComma
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLoadKnownCertificates");
   (void) input;
   std::stringstream out;
-  Crypto::LoadKnownCertificates(&out);
+  Crypto::LoadKnownCertificates(&out, &out);
   return output.AssignValue(out.str(), theCommands);
 }
 

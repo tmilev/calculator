@@ -543,7 +543,9 @@ void SSLdata::RemoveLastSocketClient()
   this->DoSetSocket(*this->socketStackClient.LastObject(), this->sslClient);
 }
 
-bool SSLdata::HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringstream* comments)
+bool SSLdata::HandShakeIamClientNoSocketCleanup
+(int inputSocketID, std::stringstream* commentsOnFailure,
+ std::stringstream* commentsGeneral)
 {
 #ifdef MACRO_use_open_ssl
   MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
@@ -560,41 +562,41 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringst
     this->flagSSLHandshakeSuccessful=false;
     if (this->errorCode!=1)
     { if (this->errorCode==0)
-      { if (comments!=0)
-          *comments << "Attempt " << i+1
+      { if (commentsOnFailure!=0)
+          *commentsOnFailure << "Attempt " << i+1
           << ": SSL handshake not successfull in a "
           << "controlled fashion (errorCode=0). <br>";
       } else
-      { if (comments!=0)
-          *comments << "Attempt " << i+1
+      { if (commentsOnFailure!=0)
+          *commentsOnFailure << "Attempt " << i+1
           << ": SSL handshake not successfull with a fatal error with "
           << "errorCode: " << this->errorCode << ". <br>";
       }
       switch(SSL_get_error(this->sslClient, this->errorCode))
       {
       case SSL_ERROR_NONE:
-        if (comments!=0)
-          *comments << "No error reported, this shouldn't happen. <br>";
+        if (commentsOnFailure!=0)
+          *commentsOnFailure << "No error reported, this shouldn't happen. <br>";
         maxNumHandshakeTries=1;
         break;
       case SSL_ERROR_ZERO_RETURN:
-        if (comments!=0)
-          *comments <<"The TLS/SSL connection has been closed (possibly cleanly).  <br>";
+        if (commentsOnFailure!=0)
+          *commentsOnFailure <<"The TLS/SSL connection has been closed (possibly cleanly).  <br>";
         maxNumHandshakeTries=1;
         break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
-        if (comments!=0)
-          *comments << " During regular I/O: repeat needed (not implemented).  <br>";
+        if (commentsOnFailure!=0)
+          *commentsOnFailure << " During regular I/O: repeat needed (not implemented).  <br>";
         break;
       case SSL_ERROR_WANT_CONNECT:
       case SSL_ERROR_WANT_ACCEPT:
-        if (comments!=0)
-          *comments << " During handshake negotiations: repeat needed (not implemented). <br> ";
+        if (commentsOnFailure!=0)
+          *commentsOnFailure << " During handshake negotiations: repeat needed (not implemented). <br> ";
         break;
       case SSL_ERROR_WANT_X509_LOOKUP:
-        if (comments!=0)
-          *comments << " Application callback set by SSL_CTX_set_client_cert_cb(): "
+        if (commentsOnFailure!=0)
+          *commentsOnFailure << " Application callback set by SSL_CTX_set_client_cert_cb(): "
           << "repeat needed (not implemented).  <br>";
         maxNumHandshakeTries=1;
         break;
@@ -603,26 +605,26 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringst
   //      << logger::endL;
   //      break;
       case SSL_ERROR_SYSCALL:
-        if (comments!=0)
-          *comments << logger::red << "Error: some I/O error occurred. <br>"
+        if (commentsOnFailure!=0)
+          *commentsOnFailure << logger::red << "Error: some I/O error occurred. <br>"
           << logger::endL;
         maxNumHandshakeTries=1;
         break;
       case SSL_ERROR_SSL:
-        if (comments!=0)
-          *comments << "A failure in the SSL library occurred. <br>";
+        if (commentsOnFailure!=0)
+          *commentsOnFailure << "A failure in the SSL library occurred. <br>";
 //        theError=ERR_get_error(3ssl);
 //        if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
 //          maxNumHandshakeTries=1;
         break;
       default:
-        if (comments!=0)
-          *comments << "Unknown error. <br>";
+        if (commentsOnFailure!=0)
+          *commentsOnFailure << "Unknown error. <br>";
         maxNumHandshakeTries=1;
         break;
       }
-      if (comments!=0)
-        *comments << "Retrying connection in 0.5 seconds...<br>";
+      if (commentsOnFailure!=0)
+        *commentsOnFailure << "Retrying connection in 0.5 seconds...<br>";
       theGlobalVariables.FallAsleep(500000);
     } else
     { this->flagSSLHandshakeSuccessful=true;
@@ -630,55 +632,66 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringst
     }
   }
   if (this->flagSSLHandshakeSuccessful)
-  { if (comments!=0)
-      *comments << "<span style=\"color:green\">SSL handshake successfull.</span>\n<br>\n";
+  { if (commentsGeneral!=0)
+      *commentsGeneral << "<span style=\"color:green\">SSL handshake successfull.</span>\n<br>\n";
   } else
-  { if (comments!=0)
-      *comments << "<span style=\"color:red\">SSL handshake failed.</span>\n<br>\n";
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "<span style=\"color:red\">SSL handshake failed.</span>\n<br>\n";
     return false;
   }
   //CHK_SSL(err);
 //  theLog << "Got to here 2" << logger::endL;
   /* Get the cipher - opt */
   /* Get client's certificate (note: beware of dynamic allocation) - opt */
+  if (false)
+    this->InspectCertificates(commentsOnFailure, commentsGeneral);
+
+#endif // MACRO_use_open_ssl
+  return true;
+}
+
+bool SSLdata::InspectCertificates
+(std::stringstream *commentsOnFailure, std::stringstream *commentsGeneral)
+{ MacroRegisterFunctionWithName("SSLdata::InspectCertificates");
   this->peer_certificate= SSL_get_peer_certificate(this->sslClient);
   if (this->peer_certificate!= 0)
   { char* tempCharPtr=0;
-    if (comments!=0)
-      *comments << "SSL connection using: " << SSL_get_cipher(this->sslClient) << ".<br>\n";
+    if (commentsGeneral!=0)
+      *commentsGeneral << "SSL connection using: "
+      << SSL_get_cipher(this->sslClient) << ".<br>\n";
     tempCharPtr = X509_NAME_oneline(X509_get_subject_name (this->peer_certificate), 0, 0);
     if (tempCharPtr==0)
-    { if (comments!=0)
-        *comments << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
+    { if (commentsOnFailure!=0)
+        *commentsOnFailure << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
       return false;
     }
     this->otherCertificateSubjectName=tempCharPtr;
     OPENSSL_free(tempCharPtr);
-    if (comments!=0)
-      *comments << "Peer certificate: "
+    if (commentsGeneral!=0)
+      *commentsGeneral << "Peer certificate: "
       << "subject: " << this->otherCertificateSubjectName << "<br>\n";
 
     tempCharPtr = X509_NAME_oneline (X509_get_issuer_name(this->peer_certificate), 0, 0);
     if (tempCharPtr==0)
-    { if (comments!=0)
-        *comments << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
+    { if (commentsOnFailure!=0)
+        *commentsOnFailure << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
       return false;
     }
     this->otherCertificateIssuerName=tempCharPtr;
     OPENSSL_free(tempCharPtr);
-    if (comments!=0)
-      *comments << "Issuer name: " << this->otherCertificateIssuerName << "<br>\n";
+    if (commentsGeneral!=0)
+      *commentsGeneral << "Issuer name: "
+      << this->otherCertificateIssuerName << "<br>\n";
     X509_free(this->peer_certificate);
     this->peer_certificate=0;
     return true;
   } else
-  { if (comments!=0)
-      *comments << "SSL connection using: " << SSL_get_cipher(this->sslClient) << ". "
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "SSL connection using: "
+      << SSL_get_cipher(this->sslClient) << ". "
       << "No client certificate.<br>\n";
     return false;
   }
-#endif // MACRO_use_open_ssl
-  return true;
 }
 
 int SSLdata::SSLread
@@ -1376,6 +1389,9 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
       doAttemptGoogleTokenLogin=true;
   } else if (theUser.username.value=="")
     return !this->flagMustLogin;
+  /////////////////
+  //doAttemptGoogleTokenLogin=false;
+  ////////////////////////////
   if ((theGlobalVariables.userCalculatorRequestType=="activateAccount" ||
        theGlobalVariables.userCalculatorRequestType=="changePassword")
       && theGlobalVariables.userDefault.enteredPassword=="")
@@ -1388,7 +1404,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   if (changingPass)
     theUser.enteredAuthenticationToken = "";
   if (doAttemptGoogleTokenLogin )
-  { stOutput << "Attempting google token login ...";
+  { argumentProcessingFailureComments << "DEBUG: Attempting google token login ...";
     theGlobalVariables.flagLoggedIn=
     DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
     (theUser, &argumentProcessingFailureComments);

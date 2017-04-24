@@ -8518,12 +8518,13 @@ std::string CGI::GetHtmlButton(const std::string& buttonID, const std::string& t
   return out.str();
 }
 
-std::string CGI::GetHtmlSpanHidableStartsHiddeN(const std::string& input, const std::string& labelExpandButton)
+std::string CGI::GetHtmlSpanHidableStartsHiddeN
+(const std::string& input, const std::string& labelExpandButton, const std::string& desiredIdStart)
 { std::stringstream out;
   CGI::GlobalGeneralPurposeID ++;
   std::stringstream buttonLabel;
   std::stringstream spanLabel;
-  spanLabel << "hidableSpan" << CGI::GlobalGeneralPurposeID;
+  spanLabel << "hidableSpan" << desiredIdStart << CGI::GlobalGeneralPurposeID;
   buttonLabel << "buttonHS" << CGI::GlobalGeneralPurposeID;
   out << CGI::GetHtmlButton(buttonLabel.str(), "switchMenu('"+spanLabel.str() +"');", labelExpandButton);
   out << "<span";

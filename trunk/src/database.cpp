@@ -1768,8 +1768,17 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   if (theUseR.enteredGoogleToken=="")
     return false;
-  bool result=Crypto::VerifyJWTagainstKnownKeys(theUseR.enteredGoogleToken, comments, comments);
-  return result;
+  std::stringstream commentsGeneral;
+  if (!Crypto::VerifyJWTagainstKnownKeys(theUseR.enteredGoogleToken, comments, &commentsGeneral))
+    return false;
+  JSONWebToken theToken;
+  if (!theToken.AssignString(theUseR.enteredGoogleToken, comments))
+    return false;
+  JSData theData;
+  if (!theData.readstring(theToken.claimsJSON, comments))
+    return false;
+  //*comments << "DEBUG: json data: " << theData.ToString();
+  return false;
 #else
   return true;
 #endif

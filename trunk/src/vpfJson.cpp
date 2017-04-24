@@ -171,10 +171,12 @@ bool JSData::Tokenize
 }
 
 bool JSData::readstring
-(const std::string& json,
- std::stringstream* comments)
-{ List<JSData> theTokenS;
+(const std::string& json, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("JSData::readstring");
+  List<JSData> theTokenS;
   JSData::Tokenize(json, theTokenS);
+  if (theTokenS.size==0)
+    return false;
   JSHashData pair;
   List<JSData> readingStack;
   JSData emptyElt;
@@ -230,16 +232,19 @@ bool JSData::readstring
       break;
     readingStack.AddOnTop(theTokenS[i]);
   }
-
+//  stOutput << "DEBUG: " << "go to here finally. ";
   if (readingStack.size!=JSData::numEmptyTokensAtStart+1)
-  { if (comments!=0)
-    { *comments << "<hr>Failed to parse your JSON. Got:<br>\n ";
+  { if (commentsOnFailure!=0)
+    { *commentsOnFailure << "<hr>Failed to parse your JSON. Input: "
+      << CGI::StringToHtmlString(json, true)
+      << "<br>Result:<br>\n ";
       for (int i=JSData::numEmptyTokensAtStart; i<readingStack.size; i++)
-        *comments << i << ": " << readingStack[i].ToString() << "\n<br>\n";
+        *commentsOnFailure << i << ": " << readingStack[i].ToString() << "\n<br>\n";
     }
     return false;
   }
-  *this=readingStack[JSData::numEmptyTokensAtStart];
+  if (JSData::numEmptyTokensAtStart<readingStack.size)
+    *this=readingStack[JSData::numEmptyTokensAtStart];
   return true;
 }
 

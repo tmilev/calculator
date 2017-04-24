@@ -81,7 +81,12 @@ public:
   void FreeSSL();
   void FreeContext();
   void HandShakeIamServer(int inputSocketID);
-  bool HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringstream* comments);
+  bool InspectCertificates
+  (std::stringstream* commentsOnFailure,
+   std::stringstream* commentsGeneral);
+  bool HandShakeIamClientNoSocketCleanup
+  (int inputSocketID, std::stringstream* commentsOnFailure,
+   std::stringstream* commentsGeneral);
   void FreeEverythingShutdownSSL();
 };
 #endif

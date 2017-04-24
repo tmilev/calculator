@@ -348,7 +348,6 @@ bool CalculatorFunctionsBinaryOps::innerAddWeightToWeight(Calculator& theCommand
 bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
   //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  //std:: cout << "grrrrrrrrrrr!!!!!!!!!!!!1";
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
   { //stOutput << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
@@ -374,7 +373,6 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(Calculator
 bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly");
   //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  //std:: cout << "grrrrrrrrrrr!!!!!!!!!!!!1";
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
   { //stOutput << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
@@ -400,7 +398,6 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calcula
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
   //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  //std:: cout << "grrrrrrrrrrr!!!!!!!!!!!!1";
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
   { //stOutput << "<br>input.children.size equals " << input.children.size << " instead of 2. ";

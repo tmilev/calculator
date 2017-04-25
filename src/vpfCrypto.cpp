@@ -857,7 +857,7 @@ bool Certificate::LoadFromJSON(JSData& input, std::stringstream* commentsOnFailu
 { MacroRegisterFunctionWithName("Certificate::LoadFromJSON");
   if (commentsGeneral!=0)
     *commentsGeneral << "<hr>Loading certificate from: "
-    << input.ToString();
+    << input.ToString(true);
   if (input.type!=JSData::JSObject)
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "Can't load certificate: JSON not of type object. ";
@@ -912,7 +912,7 @@ bool Crypto::LoadOneKnownCertificate
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "I expected an object with key 'keys'"
       << " consisting of an array of public keys. Instead, I got: "
-      << certificateJSON.ToString();
+      << certificateJSON.ToString(true);
     return false;
   }
   return true;

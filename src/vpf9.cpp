@@ -357,9 +357,21 @@ std::string CGI::GetStyleButtonLikeHtml()
 { return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";
 }
 
-std::string CGI::StringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr)
+std::string CGI::ConvertStringToBackslashEscapedString(const std::string& input)
+{ MacroRegisterFunctionWithName("CGI::ConvertStringToBackslashEscapedString");
+  std::stringstream out;
+  for (unsigned i=0; i<input.size(); i++)
+    if (input[i]=='"')
+      out << "\\\"";
+    else if (input[i]=='\\')
+      out << "\\\\";
+    else out << input[i];
+  return out.str();
+}
+
+std::string CGI::ConvertStringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr)
 { std::string result;
-  CGI::StringToHtmlStringReturnTrueIfModified(theString, result, doReplaceNewLineByBr);
+  CGI::ConvertStringToHtmlStringReturnTrueIfModified(theString, result, doReplaceNewLineByBr);
   return result;
 }
 
@@ -7955,7 +7967,7 @@ bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective
   return result;
 }
 
-bool CGI::StringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr)
+bool CGI::ConvertStringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr)
 { std::stringstream out;
   bool modified=false;
   for (unsigned int i=0; i<input.size(); i++)
@@ -7991,7 +8003,7 @@ bool CGI::IsRepresentedByItselfInURLs(char input)
   return input=='.';
 }
 
-std::string CGI::StringToURLString(const std::string& input, bool usePlusesForSpacebars)
+std::string CGI::ConvertStringToURLString(const std::string& input, bool usePlusesForSpacebars)
 { std::stringstream out;
   for (unsigned int i=0; i<input.size(); i++)
     if (CGI::IsRepresentedByItselfInURLs(input[i]))

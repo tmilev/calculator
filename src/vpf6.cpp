@@ -2333,7 +2333,7 @@ std::string Function::ToStringFull()const
     if (this->theExample!="")
       out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=calculator&showExamples=true&mainInput="
-      << CGI::StringToURLString(this->theExample, false)
+      << CGI::ConvertStringToURLString(this->theExample, false)
       << "\"> " << " Example" << "</a>" ;
   } else
     out2 << "<b>Experimental, please don't use.</b>";
@@ -2368,7 +2368,7 @@ std::string Calculator::ToStringOutputAndSpecials()
   if (this->inputString=="")
     return "";
   std::stringstream out;
-  std::string urledInput=CGI::StringToURLString(this->inputString, false);
+  std::string urledInput=CGI::ConvertStringToURLString(this->inputString, false);
   if (this->inputString!="")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=calculator&mainInput="

@@ -287,7 +287,7 @@ bool CalculatorFunctionsGeneral::innerUrlStringToNormalString(Calculator& theCom
   std::string theString;
   if (!input.IsOfType<std::string>(&theString))
     return false;
-  return output.AssignValue(CGI::URLStringToNormal(theString, false), theCommands);
+  return output.AssignValue(CGI::ConvertURLStringToNormal(theString, false), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerStringToAtom(Calculator& theCommands, const Expression& input, Expression& output)

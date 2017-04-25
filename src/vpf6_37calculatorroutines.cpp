@@ -136,7 +136,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
       (randomSeedCurrent, &currentAnswer, &answerGenerated)+"<hr>";
       if (!answerGenerated)
         break;
-      theGlobalVariables.SetWebInpuT(currentKey, CGI::StringToURLString(currentAnswer, false));
+      theGlobalVariables.SetWebInpuT(currentKey, CGI::ConvertStringToURLString(currentAnswer, false));
       solutionReport+=
       HtmlInterpretation::SubmitProblem(randomSeedCurrent, &answersWork, false)+"<hr>";
       if (!answersWork)
@@ -485,6 +485,20 @@ bool CalculatorFunctionsGeneral::innerHexToInteger(Calculator& theCommands, cons
   return output.AssignValue(resultRat, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerTestJSON(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestJSON");
+  std::string inputString;
+  if (!input.IsOfType(&inputString))
+    inputString=input.ToString();
+  JSData theData;
+  std::stringstream out;
+  if (!theData.readstring(inputString, &out))
+    return output.AssignValue(out.str(), theCommands);
+  out << "<hr>Output: <br>"
+  << theData.ToString(true);
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerBase64ToHex(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBase64ToHex");
   std::string inputString;
@@ -560,9 +574,9 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
   << theEmail.emailContent
   << "'"
   ;
-  out << "Command: " << CGI::StringToHtmlString( commandToExecute.str(), true);
+  out << "Command: " << CGI::ConvertStringToHtmlString( commandToExecute.str(), true);
   out << "<br>Result:<br>"
-  << CGI::StringToHtmlString(theGlobalVariables.CallSystemWithOutput(commandToExecute.str()), true);
+  << CGI::ConvertStringToHtmlString(theGlobalVariables.CallSystemWithOutput(commandToExecute.str()), true);
 
   return output.AssignValue(out.str(),theCommands);
 }

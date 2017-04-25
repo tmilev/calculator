@@ -80,7 +80,7 @@ public:
   void ExtractScalar(const std::string& json, int begin, int end);
   bool IsValidElement();
   void reset();
-  std::string ToString() const;
+  std::string ToString(bool useHTML) const;
   template <typename somestream>
   somestream& IntoStream(somestream& out, int indentation=0, bool useHTML=false) const;
   void readfile(const char* filename);

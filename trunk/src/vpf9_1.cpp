@@ -59,7 +59,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     if (succeededToOpen)
       stOutput << "<hr>Crash dumped in file "
       << "<a href=\"/LogFiles/crashes/"
-      << CGI::StringToURLString( theGlobalVariables.RelativePhysicalNameCrashLog, false)
+      << CGI::ConvertStringToURLString( theGlobalVariables.RelativePhysicalNameCrashLog, false)
       << "\" >"
       << theGlobalVariables.RelativePhysicalNameCrashLog
       << "</a>"
@@ -358,7 +358,7 @@ void GlobalVariables::initOutputReportAndCrashFileNames
 { std::string inputAbbreviated;
   this->userInputStringIfAvailable=
   CGI::CleanUpForFileNameUse
-  (CGI::StringToURLString(inputUserStringCivilized,false));
+  (CGI::ConvertStringToURLString(inputUserStringCivilized,false));
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
   { this->userInputStringRAWIfAvailable=inputUserStringRAW;
     inputAbbreviated=this->userInputStringRAWIfAvailable;

@@ -2346,11 +2346,11 @@ std::string CGI::URLKeyValuePairsToNormalRecursiveHtml(const std::string& input,
   for (int i=0; i<currentMap.size(); i++)
   { out << "<tr>";
     out << "<td>"
-    << CGI::URLStringToNormal(currentMap.theKeys[i], false) << " </td>";
+    << CGI::ConvertURLStringToNormal(currentMap.theKeys[i], false) << " </td>";
     if (currentMap[i]!="")
     { out << "<td>=</td><td>";
       if (currentMap[i]!="")
-        out << CGI::URLKeyValuePairsToNormalRecursiveHtml(CGI::URLStringToNormal(currentMap.theValues[i], true), recursionDepth+1);
+        out << CGI::URLKeyValuePairsToNormalRecursiveHtml(CGI::ConvertURLStringToNormal(currentMap.theValues[i], true), recursionDepth+1);
       out << "</td>";
     }
     out << "</tr>";
@@ -2359,13 +2359,13 @@ std::string CGI::URLKeyValuePairsToNormalRecursiveHtml(const std::string& input,
   return out.str();
 }
 
-std::string CGI::URLStringToNormal(const std::string& input, bool replacePlusBySpace)
+std::string CGI::ConvertURLStringToNormal(const std::string& input, bool replacePlusBySpace)
 { std::string output;
-  CGI::URLStringToNormal(input, output, replacePlusBySpace);
+  CGI::ConvertURLStringToNormal(input, output, replacePlusBySpace);
   return output;
 }
 
-void CGI::URLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace)
+void CGI::ConvertURLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace)
 { std::string readAhead;
   std::stringstream out;
   int inputSize=(signed) input.size();

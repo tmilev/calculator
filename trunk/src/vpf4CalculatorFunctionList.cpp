@@ -461,6 +461,15 @@ JWTverifyRSA256(token,modulus\
    "CalculatorFunctionsGeneral::innerSha256OfString",
    "Sha256");
   this->AddOperationInnerHandler
+  ("TestJSON", CalculatorFunctionsGeneral::innerTestJSON, "",
+   "Tests the JSON parsing mechanism. Input: json string, use backslash escapes for \
+    backslashes and quotes.",
+   "TestJSON(\"{a:1}\");"
+   ,
+   true, false,
+   "CalculatorFunctionsGeneral::innerTestJSON",
+   "TestJSON");
+  this->AddOperationInnerHandler
   ("Base64ToHex", CalculatorFunctionsGeneral::innerBase64ToHex, "",
    "Converts base64 string to hexadecimal string. ",
    "Base64ToHex(\"AQAB\");\

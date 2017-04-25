@@ -79,10 +79,15 @@ public:
   static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
   static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
   static std::string URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth=0);
-  static void URLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace);
-  static std::string URLStringToNormal(const std::string& input, bool replacePlusBySpace);
+
+  static void ConvertURLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace);
+  static std::string ConvertURLStringToNormal(const std::string& input, bool replacePlusBySpace);
+  static bool ConvertStringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr);
+  static std::string ConvertStringToURLString(const std::string& input, bool usePlusesForSpacebars);
+  static std::string ConvertStringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr);
+  static std::string ConvertStringToBackslashEscapedString(const std::string& input);
+
   static bool URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out, bool replacePlusBySpace);
-  static std::string StringToURLString(const std::string& input, bool usePlusesForSpacebars);
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
   static std::string GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input);
@@ -90,8 +95,6 @@ public:
   static std::string GetHtmlLinkFromProjectFileName
   (const std::string& fileName, const std::string& fileDesc="", int line=-1);
   static std::string GetLatexEmbeddableLinkFromCalculatorInput(const std::string& address, const std::string& display);
-  static bool StringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr);
-  static std::string StringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr);
   static std::string DoubleBackslashes(const std::string& input);
   static std::string& GetMathQuillStyleSheetWithTags();
   static std::string& GetJavascriptInitializeButtons();

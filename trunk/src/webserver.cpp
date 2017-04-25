@@ -94,15 +94,15 @@ std::string HtmlSnippets::GetJavascriptStandardCookies()
        theGlobalVariables.userCalculatorRequestType!="calculator")
   { if (theGlobalVariables.GetWebInput("fileName")!="")
       out << "  addCookie(\"fileName\", \""
-      << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false)
+      << CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false)
       << "\", 100, false);\n";
     if (theGlobalVariables.GetWebInput("courseHome")!="")
       out << "  addCookie(\"courseHome\", \""
-      << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false)
+      << CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false)
       << "\", 100, false);\n";
     if (theGlobalVariables.GetWebInput("topicList")!="")
       out << "  addCookie(\"topicList\", \""
-      << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false)
+      << CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false)
       << "\", 100, false);\n";
   }
   out
@@ -1131,11 +1131,11 @@ std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat)c
     out << "GET or POST **chunked** " ;
   else
     out << "Request type undefined.";
-  out << "<hr>Address get or post:\n" << CGI::StringToHtmlString(this->addressGetOrPost, true);
-  out << lineBreak << "\nAddress computed:\n" << CGI::StringToHtmlString(this->addressComputed, true);
-  out << lineBreak << "\nArgument computed:\n" << CGI::StringToHtmlString(this->argumentComputed, true);
-  out << lineBreak << "\nVirtual file/directory name:\n" << CGI::StringToHtmlString(this->VirtualFileName, true);
-  out << lineBreak << "\nRelative physical file/directory name:\n" << CGI::StringToHtmlString(this->RelativePhysicalFileNamE, true);
+  out << "<hr>Address get or post:\n" << CGI::ConvertStringToHtmlString(this->addressGetOrPost, true);
+  out << lineBreak << "\nAddress computed:\n" << CGI::ConvertStringToHtmlString(this->addressComputed, true);
+  out << lineBreak << "\nArgument computed:\n" << CGI::ConvertStringToHtmlString(this->argumentComputed, true);
+  out << lineBreak << "\nVirtual file/directory name:\n" << CGI::ConvertStringToHtmlString(this->VirtualFileName, true);
+  out << lineBreak << "\nRelative physical file/directory name:\n" << CGI::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
   out << lineBreak << "\nExecutable url:\n" << theGlobalVariables.DisplayNameExecutable;
   out << lineBreak << "\nPhysical address project base:\n" << theGlobalVariables.PhysicalPathProjectBase;
   out << lineBreak << "\nPhysical address server base:\n" << theGlobalVariables.PhysicalPathServerBasE;
@@ -1164,13 +1164,13 @@ std::string WebWorker::ToStringMessageUnsafe(bool useHTML)const
   tempFormat.flagUseHTML=true;
   out << this->ToStringMessageShortUnsafe(&tempFormat);
   out << "<hr>";
-  out << "Main address: " << CGI::StringToHtmlString(this->addressGetOrPost, true) << "<br>";
+  out << "Main address: " << CGI::ConvertStringToHtmlString(this->addressGetOrPost, true) << "<br>";
   if (this->requestTypE==this->requestGet)
-    out << "GET " << CGI::StringToHtmlString(this->addressGetOrPost, true);
+    out << "GET " << CGI::ConvertStringToHtmlString(this->addressGetOrPost, true);
   if (this->requestTypE==this->requestPost)
-    out << "POST " << CGI::StringToHtmlString(this->addressGetOrPost, true);
+    out << "POST " << CGI::ConvertStringToHtmlString(this->addressGetOrPost, true);
   if (this->requestTypE==this->requestChunked)
-    out << "POST or GET **chunked** " << CGI::StringToHtmlString(this->addressGetOrPost, true);
+    out << "POST or GET **chunked** " << CGI::ConvertStringToHtmlString(this->addressGetOrPost, true);
   if (this->flagKeepAlive)
     out << "<br><b>Keeping alive.</b><br>";
   else
@@ -1179,8 +1179,8 @@ std::string WebWorker::ToStringMessageUnsafe(bool useHTML)const
   for (int i=0; i<this->cookies.size; i++)
     out << "<br>" << this->cookies[i];
   if (useHTML)
-  { out << "\n<hr>\nFull message head:<br>\n" << CGI::StringToHtmlString(this->messageHead, true);
-    out << "\n<hr>\nFull message body:<br>\n" << CGI::StringToHtmlString(this->messageBody, true);
+  { out << "\n<hr>\nFull message head:<br>\n" << CGI::ConvertStringToHtmlString(this->messageHead, true);
+    out << "\n<hr>\nFull message body:<br>\n" << CGI::ConvertStringToHtmlString(this->messageBody, true);
   } else
   { out << "\nFull message head (length " << this->messageHead.size()
     << "):\n" << this->messageHead;
@@ -1347,16 +1347,16 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=
   theGlobalVariables.webArguments;
   UserCalculatorData& theUser= theGlobalVariables.userDefault;
-  theUser.username= CGI::URLStringToNormal
+  theUser.username= CGI::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("username"), false);
-  theUser.enteredAuthenticationToken=CGI::URLStringToNormal
+  theUser.enteredAuthenticationToken=CGI::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("authenticationToken"), false);
-  theUser.enteredGoogleToken=CGI::URLStringToNormal
+  theUser.enteredGoogleToken=CGI::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("googleToken"), false);
   if (theUser.enteredAuthenticationToken!="")
     this->flagAuthenticationTokenWasSubmitted=true;
   /////////////////////////////////////////////
-  theUser.enteredPassword=CGI::URLStringToNormal
+  theUser.enteredPassword=CGI::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("password"), false);
   //this may need a security audit: the URLStringToNormal and GetWebInput
   //functions may leave traces of (freed) memory
@@ -1396,7 +1396,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
        theGlobalVariables.userCalculatorRequestType=="changePassword")
       && theGlobalVariables.userDefault.enteredPassword=="")
   { theGlobalVariables.userDefault.enteredActivationToken=
-    CGI::URLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false);
+    CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false);
     //argumentProcessingFailureComments << "DEBUG: entered activatino token: " << theGlobalVariables.userDefault.enteredActivationToken.value;
   }
   bool changingPass=theGlobalVariables.userCalculatorRequestType=="changePassword" ||
@@ -1455,7 +1455,7 @@ void WebWorker::OutputResultAfterTimeout()
   std::string theFileName=
   "output/" + theGlobalVariables.RelativePhysicalNameOutpuT;
   std::string theLink=
-  "output/" + CGI::StringToURLString(theGlobalVariables.RelativePhysicalNameOutpuT,false);
+  "output/" + CGI::ConvertStringToURLString(theGlobalVariables.RelativePhysicalNameOutpuT,false);
   out << "Output written in: <a href=\"/"
   << theLink << "\"> " << theLink << "</a><br>";
   if (standardOutputStreamAfterTimeout.str().size()!=0)
@@ -2174,8 +2174,8 @@ int WebWorker::ProcessFolder()
   for (int i=0; i<theFileNames.size; i++)
   { std::stringstream currentStream;
     bool isDir= (theFileTypes[i]==".d");
-//    theLog << logger::red << "Current file name: " << CGI::StringToURLString(theFileNames[i]) << logger::endL;
-    currentStream << "<a href=\"" << this->addressGetOrPost << CGI::StringToURLString(theFileNames[i], false);
+//    theLog << logger::red << "Current file name: " << CGI::ConvertStringToURLString(theFileNames[i]) << logger::endL;
+    currentStream << "<a href=\"" << this->addressGetOrPost << CGI::ConvertStringToURLString(theFileNames[i], false);
     if (isDir)
       currentStream << "/";
 //    else
@@ -2219,10 +2219,10 @@ int WebWorker::ProcessFile()
       << " Therefore I have sanitized the address to a relative physical address: " << this->RelativePhysicalFileNamE;
     }
     stOutput << "<br><b> Address:</b> "
-    << CGI::StringToHtmlString(this->addressGetOrPost, true) << "<br><b>Virtual file name:</b> "
-    << CGI::StringToHtmlString(this->VirtualFileName, true)
+    << CGI::ConvertStringToHtmlString(this->addressGetOrPost, true) << "<br><b>Virtual file name:</b> "
+    << CGI::ConvertStringToHtmlString(this->VirtualFileName, true)
     << "<br><b>Computed relative physical file name:</b> "
-    << CGI::StringToHtmlString(this->RelativePhysicalFileNamE, true)
+    << CGI::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true)
     ;
     stOutput << "<hr><hr><hr>Message details:<br>"
     << this->ToStringMessageUnsafe()
@@ -2568,12 +2568,12 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   std::stringstream out;
   out << reasonForLogin;
   if (theGlobalVariables.GetWebInput("error")!="")
-    out << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"), true);
+    out << CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), true);
   out << "<form name=\"login\" id=\"login\">";
   out <<  "User name:\n"
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
   if (theGlobalVariables.GetWebInput("username")!="")
-    out << "value=\"" << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("username"), false) << "\"";
+    out << "value=\"" << CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("username"), false) << "\"";
   out << "required>";
   out << "</input>\n";
   out << "<br>Password: ";
@@ -2683,7 +2683,7 @@ std::string WebWorker::GetChangePasswordPage()
 
   if (theGlobalVariables.userCalculatorRequestType=="activateAccount")
     out << "<input type=\"hidden\" id=\"activationToken\" value=\""
-    << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false) << "\">";
+    << CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false) << "\">";
   else
     out << "<br>Password: "
     << "<input type=\"password\" id=\"password\" placeholder=\"password\">\n";
@@ -2747,10 +2747,10 @@ int WebWorker::ProcessCompute()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCompute");
   this->SetHeaderOKNoContentLength();
 //  theParser.initComputationStats();
-  theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  theParser.inputString=CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone;
   theGlobalVariables.initOutputReportAndCrashFileNames
-  (CGI::StringToURLString(theParser.inputString, false), theParser.inputString);
+  (CGI::ConvertStringToURLString(theParser.inputString, false), theParser.inputString);
 
   //std::cout << "DEBUG: input string: " << theParser.inputString;
   //std::cout.flush();
@@ -2777,7 +2777,7 @@ int WebWorker::ProcessCompute()
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   this->SetHeaderOKNoContentLength();
-  theParser.inputString=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
+  theParser.inputString=CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
   theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
   stOutput << "<html><head> <title>calculator version  "
   << __DATE__ << ", " << __TIME__ << "</title>";
@@ -2831,7 +2831,7 @@ int WebWorker::ProcessCalculator()
   stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
   std::string civilizedInputSafish;
   bool hashtmlChars=
-  CGI::StringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish, false);
+  CGI::ConvertStringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish, false);
 
 
   stOutput << this->GetHtmlHiddenInputs(true, true);
@@ -3117,9 +3117,9 @@ std::string HtmlInterpretation::ModifyProblemReport()
     shouldProceed= theGlobalVariables.flagUsingSSLinCurrentConnection;
   if (!shouldProceed)
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
-  std::string mainInput=CGI::URLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  std::string mainInput=CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   std::string fileName=
-  CGI::URLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
+  CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
   std::fstream theFile;
   std::stringstream out;
   if (!FileOperations::OpenFileVirtual(theFile, fileName, false, true, false))
@@ -3274,7 +3274,7 @@ int WebWorker::ServeClient()
         << theGlobalVariables.webArguments.theValues[i] << "&";
     if (argumentProcessingFailureComments.str()!="")
       redirectedAddress << "error="
-      << CGI::StringToURLString(argumentProcessingFailureComments.str(),false)
+      << CGI::ConvertStringToURLString(argumentProcessingFailureComments.str(),false)
       << "&";
     std::stringstream headerStream;
     headerStream << "Location: " << redirectedAddress.str();
@@ -3334,7 +3334,7 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType=="calculatorExamples")
     return this->ProcessCalculatorExamples();
   else if (theGlobalVariables.GetWebInput("error")!="")
-    stOutput << CGI::URLStringToNormal(theGlobalVariables.GetWebInput("error"), false);
+    stOutput << CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), false);
   else if (this->errorLogin!="")
     stOutput << this->errorLogin;
   else if (theGlobalVariables.userCalculatorRequestType=="toggleMonitoring")
@@ -3423,7 +3423,7 @@ int WebWorker::ServeClient()
   { return this->ProcessCompute();
   }
 //  stOutput << "<html><body> got to here pt 2";
-  this->VirtualFileName=CGI::URLStringToNormal(this->addressComputed,true);
+  this->VirtualFileName=CGI::ConvertURLStringToNormal(this->addressComputed,true);
   this->SanitizeVirtualFileName();
 //    std::cout << "GOT TO file names!" << std::endl;
   if (!FileOperations::GetPhysicalFileNameFromVirtual
@@ -4870,7 +4870,7 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
   out << "Default user: " << theGlobalVariables.userDefault.username.value;
   if (theGlobalVariables.flagLoggedIn)
     out << "\n<br>\nLogged in.";
-  out << "\n<br>\nAddress:\n" << CGI::StringToHtmlString(theWebServer.GetActiveWorker().addressComputed, true);
+  out << "\n<br>\nAddress:\n" << CGI::ConvertStringToHtmlString(theWebServer.GetActiveWorker().addressComputed, true);
   out << "\n<br>\nRequest:\n" << theGlobalVariables.userCalculatorRequestType;
   if (theGlobalVariables.UserDefaultHasAdminRights())
     out << "\n<br>\n<b>User has admin rights</b>";
@@ -4881,7 +4881,7 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
   out << "\n<hr>\n";
   for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
   { out << theGlobalVariables.webArguments.theKeys[i] << ": "
-    << CGI::StringToHtmlString(theGlobalVariables.webArguments[i], true);
+    << CGI::ConvertStringToHtmlString(theGlobalVariables.webArguments[i], true);
     if (i!=theGlobalVariables.webArguments.size()-1)
       out << "\n<br>\n";
   }

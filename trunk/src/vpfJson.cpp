@@ -120,18 +120,25 @@ bool JSData::Tokenize
 { output.SetSize(0);
   output.SetExpectedSize(input.size());
   JSData currentElt;
+  bool inQuotes=false;
   for (unsigned i=0; i<input.size(); i++)
   { if (input[i]=='"')
     { if (currentElt.type==currentElt.JSstring)
       { output.AddOnTop(currentElt);
         currentElt.reset();
+        inQuotes=false;
       } else
       { currentElt.TryToComputeType();
         if (currentElt.type!=currentElt.JSUndefined)
           output.AddOnTop(currentElt);
         currentElt.reset();
         currentElt.type=currentElt.JSstring;
+        inQuotes=true;
       }
+      continue;
+    }
+    if (inQuotes && currentElt.type==currentElt.JSstring)
+    { currentElt.string+=input[i];
       continue;
     }
     if (input[i]==' ' || input[i]=='\r' || input[i]=='\n')
@@ -235,11 +242,22 @@ bool JSData::readstring
 //  stOutput << "DEBUG: " << "go to here finally. ";
   if (readingStack.size!=JSData::numEmptyTokensAtStart+1)
   { if (commentsOnFailure!=0)
-    { *commentsOnFailure << "<hr>Failed to parse your JSON. Input: "
-      << CGI::StringToHtmlString(json, true)
+    { std::stringstream calculatorInput;
+      calculatorInput
+      << "TestJSON(\""
+      << CGI::ConvertStringToBackslashEscapedString(json)
+      << "\")";
+      *commentsOnFailure << "<hr>Failed to parse your JSON. Input:\n<br>\n "
+      << "<a href=\""
+      << theGlobalVariables.DisplayNameExecutable
+      << "?request=calculator&mainInput="
+      << CGI::ConvertStringToURLString(calculatorInput.str(),false)
+      << "\">"
+      << CGI::ConvertStringToHtmlString(json, true)
+      << "</a>"
       << "<br>Result:<br>\n ";
       for (int i=JSData::numEmptyTokensAtStart; i<readingStack.size; i++)
-        *commentsOnFailure << i << ": " << readingStack[i].ToString() << "\n<br>\n";
+        *commentsOnFailure << i << ": " << readingStack[i].ToString(true) << "\n<br>\n";
     }
     return false;
   }
@@ -375,9 +393,9 @@ void JSData::reset()
   this->obj.SetSize(0);
 }
 
-std::string JSData::ToString() const
+std::string JSData::ToString(bool useHTML) const
 { std::stringstream out;
-  this->IntoStream(out);
+  this->IntoStream(out, 2, useHTML);
   return out.str();
 }
 

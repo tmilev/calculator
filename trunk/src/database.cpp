@@ -1761,8 +1761,8 @@ std::string DatabaseRoutines::ToStringSuggestionsReasonsForFailure
 #endif //MACRO_use_MySQL
 
 bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
-(UserCalculatorData& theUseR, std::stringstream* comments)
-{ (void) comments;
+(UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
+{ (void) commentsOnFailure;
   (void) theUseR;
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
@@ -1771,35 +1771,39 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded");
   if (userWrapper.enteredGoogleToken=="")
     return false;
-  std::stringstream commentsGeneral;
-  if (!Crypto::VerifyJWTagainstKnownKeys(userWrapper.enteredGoogleToken, comments, &commentsGeneral))
+  if (!Crypto::VerifyJWTagainstKnownKeys(userWrapper.enteredGoogleToken, commentsOnFailure, commentsGeneral))
     return false;
   JSONWebToken theToken;
-  if (!theToken.AssignString(userWrapper.enteredGoogleToken, comments))
+  if (!theToken.AssignString(userWrapper.enteredGoogleToken, commentsOnFailure))
     return false;
   JSData theData;
-  if (!theData.readstring(theToken.claimsJSON, comments))
+  if (!theData.readstring(theToken.claimsJSON, commentsOnFailure))
     return false;
   if (theData.GetValue("email").type!=JSData::JSstring)
-  { if (comments!=0)
-      *comments << "Could not find email entry in the json data " << theData.ToString(true);
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Could not find email entry in the json data " << theData.ToString(true);
     return false;
   }
   userWrapper.email.value=theData.GetValue("email").string;
   userWrapper.username.value="";
   DatabaseRoutines theRoutines;
   if (!userWrapper.Iexist(theRoutines))
-  { if (comments!=0)
-      *comments << "User with email " << userWrapper.email.value << " does not exist. ";
-    return false;
+  { if (commentsGeneral!=0)
+      *commentsGeneral << "User with email " << userWrapper.email.value << " does not exist. ";
+    userWrapper.username=userWrapper.email;
+    if (!userWrapper.CreateMeIfUsernameUnique(theRoutines, commentsOnFailure))
+      return false;
+    if (commentsGeneral!=0)
+      *commentsGeneral << "Created new user with username: " << userWrapper.username.value;
+    return true;
   }
-  if (!userWrapper.FetchOneUserRow(theRoutines, comments))
-  { if (comments!=0)
-      *comments << "Failed to fetch user with email " << userWrapper.email.value << ". ";
+  if (!userWrapper.FetchOneUserRow(theRoutines, commentsOnFailure))
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Failed to fetch user with email " << userWrapper.email.value << ". ";
     return false;
   }
   if (userWrapper.actualAuthenticationToken.value=="")
-    userWrapper.ResetAuthenticationToken(theRoutines, comments);
+    userWrapper.ResetAuthenticationToken(theRoutines, commentsOnFailure);
   theUseR = userWrapper;
   return true;
 #else

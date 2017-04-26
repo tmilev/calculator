@@ -940,7 +940,7 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
       *commentsOnFailure << "Could not open folder certificates-public/, no certificates loaded.";
     return false;
   }
-  if (commentsGeneral==0)
+  if (commentsGeneral!=0)
     *commentsGeneral << "<br>Certificates: ";
   for (int i=0; i<theFileNames.size; i++)
   { if (theFileNames[i]=="." || theFileNames[i]=="..")
@@ -989,11 +989,11 @@ bool JSONWebToken::VerifyRSA256
 { std::string payload=this->headerBase64+'.'+this->claimsBase64;
   if (commentsGeneral!=0)
   { *commentsGeneral << "<br>Payload: " << payload;
-    List<int> intValues;
-    intValues.SetSize(payload.size());
-    for (unsigned i=0; i< payload.size(); i++)
-      intValues[i]=payload[i];
-    *commentsGeneral << "<br>Payload, json: " << intValues.ToStringCommaDelimited();
+    //List<int> intValues;
+    //intValues.SetSize(payload.size());
+    //for (unsigned i=0; i< payload.size(); i++)
+    //  intValues[i]=payload[i];
+    //*commentsGeneral << "<br>Payload, json: " << intValues.ToStringCommaDelimited();
   }
   List<uint32_t> outputSha, RSAresultInts;
   Crypto::computeSha256(payload, outputSha);\

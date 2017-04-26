@@ -1408,7 +1408,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     //std::stringstream comments
     theGlobalVariables.flagLoggedIn=
     DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
-    (theUser, &argumentProcessingFailureComments, &argumentProcessingFailureComments);
+    (theUser, &argumentProcessingFailureComments, 0);
   } else if (theUser.enteredAuthenticationToken!="" || theUser.enteredPassword!="" ||
              theUser.enteredActivationToken!="")
     theGlobalVariables.flagLoggedIn=

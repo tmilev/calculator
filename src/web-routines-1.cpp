@@ -601,7 +601,8 @@ bool Crypto::VerifyJWTagainstKnownKeys
   //stOutput << "DEBUG:Got to here";
   int theIndex=-1;
   if (commentsGeneral!=0)
-    *commentsGeneral << "Seeking key: " << keyIDstring << ". ";
+    *commentsGeneral << "Seeking key: <span style=\"color:brown\"><b>"
+    << keyIDstring << "</b></span>. ";
   for (int i=0; i<2; i++)
   { Crypto::LoadKnownCertificates(commentsOnFailure, commentsGeneral);
     //if (commentsOnFailure!=0)
@@ -609,9 +610,12 @@ bool Crypto::VerifyJWTagainstKnownKeys
     for (int j=0; j<Crypto::knownCertificates.size; j++)
       if (keyIDstring==Crypto::knownCertificates[j].keyid)
       { theIndex=j;
+        //if (commentsGeneral!=0)
+        //  *commentsGeneral << "<br>DEBUG: current keyid: "
+        //  << Crypto::knownCertificates[j].keyid;
         break;
       }
-    if (i==1)
+    if (theIndex!=-1 || i==1)
       break;
     if (commentsGeneral!=0 && i==0)
       *commentsGeneral << "<br><span style=\"color:red\"><b>Couldn't find key ID: "

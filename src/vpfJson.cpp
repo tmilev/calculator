@@ -299,7 +299,7 @@ somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) c
       for(int i=0; i<this->list.size; i++)
       { this->list[i].IntoStream(out, indentation, useHTML);
         if(i!=this->list.size-1)
-          out << ',';
+          out << ", ";
       }
       out << newLine << ']';
       return out;
@@ -310,7 +310,7 @@ somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) c
         out << ':';
         this->obj[i].value.IntoStream(out, indentation, useHTML);
         if(i!=this->obj.size-1)
-          out << ',';
+          out << ", ";
       }
       out << newLine << '}';
       return out;

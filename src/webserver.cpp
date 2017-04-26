@@ -1405,9 +1405,10 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theUser.enteredAuthenticationToken = "";
   if (doAttemptGoogleTokenLogin )
   { //argumentProcessingFailureComments << "DEBUG: Attempting google token login ...";
+    //std::stringstream comments
     theGlobalVariables.flagLoggedIn=
     DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
-    (theUser, &argumentProcessingFailureComments);
+    (theUser, &argumentProcessingFailureComments, &argumentProcessingFailureComments);
   } else if (theUser.enteredAuthenticationToken!="" || theUser.enteredPassword!="" ||
              theUser.enteredActivationToken!="")
     theGlobalVariables.flagLoggedIn=

@@ -589,7 +589,7 @@ bool Crypto::VerifyJWTagainstKnownKeys
       *commentsOnFailure << "Couldn't load JSON from the user token.";
     return false;
   }
-  //stOutput << "DEBUG:Got to here, part 0";
+  //stOutput << "DEBUG: Got to here, part 0";
   if (header.type==header.JSObject)
     if (header.HasKey("kid"))
       keyIDstring=header.GetValue("kid").string;
@@ -600,8 +600,8 @@ bool Crypto::VerifyJWTagainstKnownKeys
   }
   //stOutput << "DEBUG:Got to here";
   int theIndex=-1;
-  //if (commentsOnFailure!=0)
-  //  *commentsOnFailure << "DEBUG: got to here. Seeking key: " << keyIDstring;
+  if (commentsGeneral!=0)
+    *commentsGeneral << "Seeking key: " << keyIDstring << ". ";
   for (int i=0; i<2; i++)
   { Crypto::LoadKnownCertificates(commentsOnFailure, commentsGeneral);
     //if (commentsOnFailure!=0)
@@ -611,10 +611,11 @@ bool Crypto::VerifyJWTagainstKnownKeys
       { theIndex=j;
         break;
       }
-    if (commentsGeneral!=0)
-      *commentsGeneral << "<br>Couldn't find key ID from string one. ";
     if (i==1)
       break;
+    if (commentsGeneral!=0 && i==0)
+      *commentsGeneral << "<br><span style=\"color:red\"><b>Couldn't find key ID: "
+      << keyIDstring << " from cached certificate.</b></span>";
     if (commentsGeneral!=0 )
       *commentsGeneral << "<br>Reloading google public keys. ";
     WebCrawler theCrawler;
@@ -629,9 +630,9 @@ bool Crypto::VerifyJWTagainstKnownKeys
       << keyIDstring << "</b></span>. ";
     return false;
   }
-  //if (commentsOnFailure!=0)
-  //  *commentsOnFailure << "DEBUG: <span style=\"color:green\"><b>Found key id: "
-  //  << keyIDstring << ".</b></span>";
+  if (commentsGeneral!=0)
+    *commentsGeneral << "<span style=\"color:green\"><b>Found key id: "
+    << keyIDstring << ".</b></span>";
   Certificate& currentCert=Crypto::knownCertificates[theIndex];
   return theToken.VerifyRSA256
   (currentCert.theModuluS, currentCert.theExponenT,

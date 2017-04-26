@@ -13,9 +13,7 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 void Calculator::initAdminFunctions()
 {
 #ifdef MACRO_use_MySQL
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
-    return;
- // this->AddOperationInnerHandler
+// this->AddOperationInnerHandler
 //  ("SendActivationEmailUsers", DatabaseRoutines::innerSendActivationEmailUsers, "",
 //   "Sends activation emails to a comma-separated list of users. ",
 //   "SendActivationEmailUsers(\"todor.milev@gmail.com, Todor.Milev@umb.edu \"); ",
@@ -24,47 +22,75 @@ void Calculator::initAdminFunctions()
   this->AddOperationInnerHandler
   ("GetUserPassword", DatabaseRoutines::innerGetUserPassword, "",
    "Gets a user's password.",
-   "GetUserPassword(\"testUser\"); ", false, true, "DatabaseRoutines::innerGetUserPassword");
+   "GetUserPassword(\"testUser\"); ", false, true,
+   "DatabaseRoutines::innerGetUserPassword",
+   "GetUserPassword",
+   true);
    ;
   this->AddOperationInnerHandler
   ("DisplayTables", DatabaseRoutines::innerDisplayTables, "",
    "Displays all database tables. Only available for admins.",
-   "DisplayTables(0)", false, true, "DatabaseRoutines::innerDisplayTables");
+   "DisplayTables(0)", false, true,
+   "DatabaseRoutines::innerDisplayTables",
+   "DisplayTables",
+   true);
   this->AddOperationInnerHandler
   ("DisplayDatabaseTable", DatabaseRoutines::innerDisplayDatabaseTable, "",
    "Displays a database table. Only available for admins.",
-   "DisplayDatabaseTable(\"gradesCourse_Homework_UMB_Spring_2016_Milev.html\"); ", false, true, "DatabaseRoutines::innerDisplayDatabaseTable");
+   "DisplayDatabaseTable(\"gradesCourse_Homework_UMB_Spring_2016_Milev.html\"); ",
+   false, true,
+   "DatabaseRoutines::innerDisplayDatabaseTable",
+   "DisplayDatabaseTable",
+   true);
   this->AddOperationInnerHandler
   ("GetAuthenticationToken", DatabaseRoutines::innerGetAuthentication, "",
    "Gets the authentication token of a given user.",
-   "GetAuthentication(\"testUser\"); ", false, true, "DatabaseRoutines::innerGetAuthentication");
+   "GetAuthentication(\"testUser\"); ",
+   false, true,
+   "DatabaseRoutines::innerGetAuthentication",
+   "GetAuthenticationToken",
+   true);
   this->AddOperationInnerHandler
   ("GetUserDetails", DatabaseRoutines::innerGetUserDetails, "",
    "Generates a list of database users visible to the given user. First argument: username (in quotes), \
    second argument: password (in quotes). This function will list all non-archived \
    users if invoked with the admin account.",
-   "GetUserDetails(\"admin\", \"password\")", false, true, "DatabaseRoutines::innerGetUserDetails");
+   "GetUserDetails(\"admin\", \"password\")",
+   false, true,
+   "DatabaseRoutines::innerGetUserDetails",
+   "GetUserDetails",
+   true);
   this->AddOperationInnerHandler
   ("GetUserDBEntry", DatabaseRoutines::innerGetUserDBEntry, "",
    "Gets a user database entry. Argument: desired database entry (in quotes).",
    "GetUserDBEntry(\"authenticationCreationTime\"); \
     GetUserDBEntry(\"authenticationToken\");\
-    GetUserDBEntry(\"email\")", false, true, "DatabaseRoutines::innerGetUserDBEntry");
+    GetUserDBEntry(\"email\")", false, true,
+    "DatabaseRoutines::innerGetUserDBEntry",
+    "GetUserDBEntry",
+    true);
    ;
   this->AddOperationInnerHandler
   ("SetUserPassword", DatabaseRoutines::innerSetUserPassword, "",
    "Sets user's password (first argument: user, second: desired password).",
-   "SetUserPassword(\"testUser\", \"password\"); GetUserPassword(\"testUser\");", false, true, "DatabaseRoutines::innerSetUserPassword");
+   "SetUserPassword(\"testUser\", \"password\"); GetUserPassword(\"testUser\");",
+   false, true,
+   "DatabaseRoutines::innerSetUserPassword",
+   "SetUserPassword", true);
    ;
-  this->AddOperationInnerHandler
-  ("DeleteUser", DatabaseRoutines::innerDeleteUser, "",
-   "Deletes a user (first argument: user, second argument: admin password).",
-   "DeleteUser(testUser);", false, true, "DatabaseRoutines::innerDeleteUser");
-   ;
+//  this->AddOperationInnerHandler
+//  ("DeleteUser", DatabaseRoutines::innerDeleteUser, "",
+//   "Deletes a user (first argument: user, second argument: admin password).",
+//   "DeleteUser(testUser);", false, true,
+//   "DatabaseRoutines::innerDeleteUser");
+//   ;
   this->AddOperationInnerHandler
   ("TestDatabase", DatabaseRoutines::innerTestDatabase, "",
    "Tests the connection to/existence of the database. ",
-   "TestDatabase(0)", false, true, "DatabaseRoutines::innerTestDatabase");
+   "TestDatabase(0)", false, true,
+   "DatabaseRoutines::innerTestDatabase",
+   "TestDatabase",
+   true);
    ;
 #endif // MACRO_use_MySQL
 }

@@ -525,7 +525,7 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->flagOutputWasTruncated=false;
   this->MaxNumRowsToRead=inputMaxNumRowsToRead;
   this->numRowsRead=0;
-//  stOutput << "<hr> querying: " << inputQuery;
+  stOutput << "<hr>DEBUG: querying: " << inputQuery;
   if (this->parent->connection==0)
     if (!this->parent->startMySQLDatabase(outputFailureComments, 0))
     { if (outputFailureComments!=0)
@@ -543,10 +543,10 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   }
   this->flagQuerySucceeded=true;
   this->theQueryResult= mysql_store_result(this->parent->connection);
-  //stOutput << "and even to here";
+  stOutput << "DEBUG: and even to here";
   if (this->theQueryResult==0)
-  { //if (this->failurecomments!=0)
-    //  *this->failurecomments << "Query succeeded. ";
+  { if (outputFailureComments!=0)
+      *outputFailureComments << "DEBUG: Query succeeded. ";
     return;
   }
   this->numRowsRead=mysql_num_rows(this->theQueryResult);
@@ -579,7 +579,7 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
       }
     }
   }
-//  stOutput << "<br>the flag: " << this->flagQueryReturnedResult;
+  stOutput << "DEBUG: query results: " << this->allQueryResultStrings.ToStringCommaDelimited();
 }
 
 void DatabaseQuery::close()
@@ -686,7 +686,7 @@ bool UserCalculator::FetchOneUserRow
     crash << "Calling UserCalculator::FetchOneUserRow with an empty table is forbidden. " << crash;
   std::stringstream queryStream;
   queryStream << "SELECT * FROM " << theRoutines.theDatabaseName << "." << this->currentTable.GetIdentifieR()
-  << " WHERE " << "username=" << this->username.GetDatA();
+  << " WHERE " << this->GetMySQLclauseIdentifyingUserByEmailOrID();
   DatabaseQuery theQuery(theRoutines, queryStream.str(), failureStream, 5);
   if (!theQuery.flagQuerySucceeded)
   { if (failureStream!=0)
@@ -1029,10 +1029,14 @@ bool DatabaseRoutines::TableExists(const std::string& tableNameUnsafe, std::stri
 
 bool DatabaseRoutines::innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerGetUserPassword");
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "Function available to logged-in admins only. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
   UserCalculator theUser;
   if (!theUser.getUser(theCommands, input))
     return false;
-  std::stringstream out;
   DatabaseRoutines theRoutines;
   out << theUser.GetPassword(theRoutines);
   return output.AssignValue(out.str(), theCommands);
@@ -1506,9 +1510,11 @@ bool DatabaseRoutines::innerDeleteUser(Calculator& theCommands, const Expression
 
 bool DatabaseRoutines::innerSetUserPassword(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerSetUserPassword");
-  if (!theGlobalVariables.flagLoggedIn)
-    return output.MakeError
-    ("Function innerSetUserPassword can be invoked only for logged in users. ", theCommands);
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "Function available to logged-in admins only. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
   UserCalculator theUser;
   if (!theUser.getUserAndPass(theCommands, input))
     return false;
@@ -1620,13 +1626,15 @@ void UserCalculator::FetchColumns(DatabaseRoutines& theRoutines)
 
 bool DatabaseRoutines::innerGetUserDetails(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerGetUserDetails");
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "Function available to logged-in admins only. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
   UserCalculator theUser;
   if (!theUser.getUserAndPass(theCommands, input))
     return false;
   DatabaseRoutines theRoutines;
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
-    return output.AssignValue
-    ((std::string)"At the moment, the GetUserDetails function is implemented only for admin user(s). ", theCommands);
   std::stringstream comments;
   if (!theUser.Authenticate(theRoutines, &comments))
     return theCommands << "Authentication failed. " << comments.str();
@@ -1637,6 +1645,10 @@ bool DatabaseRoutines::innerDisplayTables(Calculator& theCommands, const Express
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerDisplayTables");
   (void) input;//prevent unused parameter, portable
   std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "Function available to logged-in admins only. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
   DatabaseRoutines theRoutines;
   List<std::string> theTables;
   if (!theRoutines.FetchTableNames(theTables, theCommands.Comments))
@@ -1651,7 +1663,7 @@ bool DatabaseRoutines::innerDisplayTables(Calculator& theCommands, const Express
 bool DatabaseRoutines::innerDisplayDatabaseTable
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerDisplayDatabaseTable");
-  if (theGlobalVariables.UserDefaultHasAdminRights())
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
     return theCommands << "Displaying database tables allowed only for logged-in admins. ";
   std::string desiredTableName;
   if (!input.IsOfType<std::string>(&desiredTableName))
@@ -1664,6 +1676,11 @@ bool DatabaseRoutines::innerDisplayDatabaseTable
 
 bool DatabaseRoutines::innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerGetauthenticationCreationTime");
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "Function available to logged-in admins only. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
   UserCalculator theUser;
   if (!theUser.getUserPassAndSelectedColumns(theCommands, input))
     return false;
@@ -1677,6 +1694,11 @@ bool DatabaseRoutines::innerGetUserDBEntry(Calculator& theCommands, const Expres
 
 bool DatabaseRoutines::innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerGetAuthentication");
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "Function available to logged-in admins only. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
   UserCalculator theUser;
   if (!theUser.getUserAndPass(theCommands, input))
     return false;
@@ -1689,9 +1711,13 @@ bool DatabaseRoutines::innerGetAuthentication(Calculator& theCommands, const Exp
 
 bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerTestDatabase");
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "Function available to logged-in admins only. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
   (void) input;//prevent unused parameter, portable
   DatabaseRoutines theRoutines;
-  std::stringstream out;
   out << "Testing database ... Comments:<br>";
   std::stringstream comments;
   theRoutines.startMySQLDatabase(&comments, 0);
@@ -2015,6 +2041,21 @@ bool DatabaseRoutines::FetchEntry
   return true;
 }
 
+std::string UserCalculator::GetMySQLclauseIdentifyingUserByEmailOrID()
+{ MacroRegisterFunctionWithName("UserCalculator::GetMySQLclauseIdentifyingUserByEmailOrID");
+  if (this->username.value=="" && this->email.value=="")
+    crash << "Calculator user cannot be identified as both email and username are missing. " << crash;
+  std::stringstream out;
+  if (this->username.value!="")
+  { out << " username=" << this->username.GetDatA();
+    if (this->email.value!="")
+      out << " OR ";
+  }
+  if (this->email.value!="")
+    out << "email=" << this->email.GetDatA();
+  return out.str();
+}
+
 bool UserCalculator::IamPresentInTable(DatabaseRoutines& theRoutines, const std::string& tableNameUnsafe)
 { MacroRegisterFunctionWithName("UserCalculator::IamPresentInTable");
   if (this->username.value=="" && this->email.value=="")
@@ -2023,14 +2064,8 @@ bool UserCalculator::IamPresentInTable(DatabaseRoutines& theRoutines, const std:
   std::stringstream theQueryStream;
   theQueryStream << "SELECT username FROM " << theRoutines.theDatabaseName
   << "." << theTable.GetIdentifieR()
-  << " where ";
-  if (this->username.value!="")
-  { theQueryStream << " username=" << this->username.GetDatA();
-    if (this->email.value!="")
-      theQueryStream << " OR ";
-  }
-  if (this->email.value!="")
-    theQueryStream << "email=" << this->email.GetDatA();
+  << " where " << this->GetMySQLclauseIdentifyingUserByEmailOrID();
+
   DatabaseQuery theQuery(theRoutines, theQueryStream.str());
   //stOutput << "DEBUG: firing: query: " << theQuery.theQueryString;
   return theQuery.flagQueryReturnedResult;
@@ -2053,13 +2088,18 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std
   std::stringstream queryStream;
   queryStream << "INSERT INTO " << theRoutines.theDatabaseName
   << ".users(username, " << DatabaseStrings::userCurrentCoursesColumnLabel << ", "
-  << DatabaseStrings::problemWeightsIdColumnName << ")"
+  << DatabaseStrings::problemWeightsIdColumnName;
+  if (this->email.value!="")
+    queryStream << ", email";
+  queryStream << ")"
   << " VALUES("
   << this->username.GetDatA() << ", "
   << this->currentCourses.GetDatA()
   << ", "
-  << this->currentCourses.GetDatA()
-  << ")";
+  << this->currentCourses.GetDatA();
+  if (this->email.value!="")
+    queryStream << ", " << this->email.GetDatA();
+  queryStream << ")";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
   if (this->enteredPassword=="")
     return true;

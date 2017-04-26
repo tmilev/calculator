@@ -272,6 +272,7 @@ public:
   bool InterpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure);
   bool StoreProblemDataToDatabase(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
   std::string GetSelectedRowEntry(const std::string& theKey);
+  std::string GetMySQLclauseIdentifyingUserByEmailOrID();
   bool FetchOneUserRow
   (DatabaseRoutines& theRoutines, std::stringstream* failureStream);
   bool FetchOneColumn

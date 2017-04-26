@@ -1764,21 +1764,44 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
 (UserCalculatorData& theUseR, std::stringstream* comments)
 { (void) comments;
   (void) theUseR;
+  UserCalculator userWrapper;
+  userWrapper.::UserCalculatorData::operator=(theUseR);
+  userWrapper.currentTable=DatabaseStrings::usersTableName;
 #ifdef MACRO_use_MySQL
-  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
-  if (theUseR.enteredGoogleToken=="")
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded");
+  if (userWrapper.enteredGoogleToken=="")
     return false;
   std::stringstream commentsGeneral;
-  if (!Crypto::VerifyJWTagainstKnownKeys(theUseR.enteredGoogleToken, comments, &commentsGeneral))
+  if (!Crypto::VerifyJWTagainstKnownKeys(userWrapper.enteredGoogleToken, comments, &commentsGeneral))
     return false;
   JSONWebToken theToken;
-  if (!theToken.AssignString(theUseR.enteredGoogleToken, comments))
+  if (!theToken.AssignString(userWrapper.enteredGoogleToken, comments))
     return false;
   JSData theData;
   if (!theData.readstring(theToken.claimsJSON, comments))
     return false;
-  //*comments << "DEBUG: json data: " << theData.ToString();
-  return false;
+  if (theData.GetValue("email").type!=JSData::JSstring)
+  { if (comments!=0)
+      *comments << "Could not find email entry in the json data " << theData.ToString(true);
+    return false;
+  }
+  userWrapper.email.value=theData.GetValue("email").string;
+  userWrapper.username.value="";
+  DatabaseRoutines theRoutines;
+  if (!userWrapper.Iexist(theRoutines))
+  { if (comments!=0)
+      *comments << "User with email " << userWrapper.email.value << " does not exist. ";
+    return false;
+  }
+  if (!userWrapper.FetchOneUserRow(theRoutines, comments))
+  { if (comments!=0)
+      *comments << "Failed to fetch user with email " << userWrapper.email.value << ". ";
+    return false;
+  }
+  if (userWrapper.actualAuthenticationToken.value=="")
+    userWrapper.ResetAuthenticationToken(theRoutines, comments);
+  theUseR = userWrapper;
+  return true;
 #else
   return true;
 #endif
@@ -1989,12 +2012,22 @@ bool DatabaseRoutines::FetchEntry
 }
 
 bool UserCalculator::IamPresentInTable(DatabaseRoutines& theRoutines, const std::string& tableNameUnsafe)
-{ MacroRegisterFunctionWithName("UserCalculator::Iexist");
+{ MacroRegisterFunctionWithName("UserCalculator::IamPresentInTable");
+  if (this->username.value=="" && this->email.value=="")
+    return false;
   MySQLdata theTable=tableNameUnsafe;
-  DatabaseQuery theQuery(theRoutines,
-  "SELECT username FROM " + theRoutines.theDatabaseName + "." + theTable.GetIdentifieR() +
-  " where username=" + this->username.GetDatA()
-  );
+  std::stringstream theQueryStream;
+  theQueryStream << "SELECT username FROM " << theRoutines.theDatabaseName
+  << "." << theTable.GetIdentifieR()
+  << " where ";
+  if (this->username.value!="")
+  { theQueryStream << " username=" << this->username.GetDatA();
+    if (this->email.value!="")
+      theQueryStream << " OR ";
+  }
+  if (this->email.value!="")
+    theQueryStream << "email=" << this->email.GetDatA();
+  DatabaseQuery theQuery(theRoutines, theQueryStream.str());
   //stOutput << "DEBUG: firing: query: " << theQuery.theQueryString;
   return theQuery.flagQueryReturnedResult;
 }

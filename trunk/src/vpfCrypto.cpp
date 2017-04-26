@@ -1040,9 +1040,9 @@ bool JSONWebToken::VerifyRSA256
     Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex);
     Crypto::ConvertLargeUnsignedIntToHex(theShaUI, theShaHex);
     if (!result && commentsOnFailure!=0)
-      *commentsOnFailure << "<br><b><span style=\"color:red\">The SHA does not match the RSA result. </span></b>";
+      *commentsOnFailure << "<br><b><span style=\"color:red\">Token invalid: the SHA does not match the RSA result. </span></b>";
     else if (commentsGeneral!=0)
-      *commentsOnFailure << "<br><b><span style=\"color:green\">Validated.</span></b>";
+      *commentsGeneral << "<b><span style=\"color:green\">Validated. </span></b>";
     if (commentsGeneral!=0)
       *commentsGeneral
       << "<br>Sha integer: " << theShaUI.ToString()

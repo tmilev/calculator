@@ -1404,7 +1404,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   if (changingPass)
     theUser.enteredAuthenticationToken = "";
   if (doAttemptGoogleTokenLogin )
-  { argumentProcessingFailureComments << "DEBUG: Attempting google token login ...";
+  { //argumentProcessingFailureComments << "DEBUG: Attempting google token login ...";
     theGlobalVariables.flagLoggedIn=
     DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
     (theUser, &argumentProcessingFailureComments);
@@ -2609,12 +2609,14 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "function onSignIn(googleUser)\n"
   << "{ document.getElementById(\"googleToken\").value=googleUser.getAuthResponse().id_token;\n"
   << "  document.getElementById(\"username\").required=false;\n"
+  << "  document.getElementById(\"username\").value=\"\";\n"
+  << "  document.getElementById(\"password\").value=\"\";\n"
   //<< "  document.getElementById(\"login\").submit();\n"
   << "}\n"
   << "</script>\n";
-  out << "DEBUG: "
-  << "google token submitted: "
-  << theGlobalVariables.GetWebInput("googleToken");
+  //out << "DEBUG: "
+  //<< "google token submitted: "
+  //<< theGlobalVariables.GetWebInput("googleToken");
 //
 ///////////////////////////////////////
 //  out << "<br><br><small>No account yet? We are sorry but automatic registration has not been implemented yet.<br>"

@@ -525,7 +525,7 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->flagOutputWasTruncated=false;
   this->MaxNumRowsToRead=inputMaxNumRowsToRead;
   this->numRowsRead=0;
-  stOutput << "\n<hr>DEBUG: querying: " << inputQuery;
+  //stOutput << "\n<hr>DEBUG: querying: " << inputQuery;
   if (this->parent->connection==0)
     if (!this->parent->startMySQLDatabase(outputFailureComments, 0))
     { if (outputFailureComments!=0)
@@ -543,7 +543,7 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   }
   this->flagQuerySucceeded=true;
   this->theQueryResult= mysql_store_result(this->parent->connection);
-  stOutput << "\n<br>\nDEBUG: and even to here";
+  //stOutput << "\n<br>\nDEBUG: and even to here";
   if (this->theQueryResult==0)
   { if (outputFailureComments!=0)
       *outputFailureComments << "\n<br>\nDEBUG: Query succeeded. ";
@@ -579,7 +579,7 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
       }
     }
   }
-  stOutput << "\n<br>\nDEBUG: query results: " << this->allQueryResultStrings.ToStringCommaDelimited();
+  //stOutput << "\n<br>\nDEBUG: query results: " << this->allQueryResultStrings.ToStringCommaDelimited();
 }
 
 void DatabaseQuery::close()

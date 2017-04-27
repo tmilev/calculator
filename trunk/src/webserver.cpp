@@ -1282,14 +1282,24 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
   for (int i=0; i<this->cookies.size; i++)
     if (!CGI::ChopCGIStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments))
       result=false;
+  bool loginInfoAlreadyPresent=false;
+  if (theGlobalVariables.webArguments.Contains("email") ||
+      theGlobalVariables.webArguments.Contains("username") ||
+      theGlobalVariables.webArguments.Contains("googleToken"))
+    loginInfoAlreadyPresent=true;
+
   for (int i=0; i<newlyFoundArgs.size(); i++)
   { if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i]))
       continue; //<-if a key is already given cookie entries are ignored.
+    if (loginInfoAlreadyPresent)
+      if (newlyFoundArgs.theKeys[i]=="username" ||
+          newlyFoundArgs.theKeys[i]=="email")
+        continue; //<-username is ignored if email has beed submitted through the web address.
     //argumentProcessingFailureComments << "Found new cookie key: " << newlyFoundArgs.theKeys[i] << "<br>";
     std::string trimmed=newlyFoundArgs.theValues[i];
     if (trimmed.size()>0)
       if (trimmed[trimmed.size()-1]==';')
-        trimmed= trimmed.substr(0,trimmed.size()-1);
+        trimmed=trimmed.substr(0, trimmed.size()-1);
     //<-except the last cookie, cookies have extra semicolumn at the end, trimming.
     bool isGood=true;
     if (newlyFoundArgs.theKeys[i]=="request") //<- we are careful about
@@ -1353,6 +1363,8 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   (theGlobalVariables.GetWebInput("authenticationToken"), false);
   theUser.enteredGoogleToken=CGI::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("googleToken"), false);
+  if (theUser.username.value!="")
+    theUser.enteredGoogleToken="";
   if (theUser.enteredAuthenticationToken!="")
     this->flagAuthenticationTokenWasSubmitted=true;
   /////////////////////////////////////////////

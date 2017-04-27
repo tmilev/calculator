@@ -525,7 +525,7 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->flagOutputWasTruncated=false;
   this->MaxNumRowsToRead=inputMaxNumRowsToRead;
   this->numRowsRead=0;
-  stOutput << "<hr>DEBUG: querying: " << inputQuery;
+  stOutput << "\n<hr>DEBUG: querying: " << inputQuery;
   if (this->parent->connection==0)
     if (!this->parent->startMySQLDatabase(outputFailureComments, 0))
     { if (outputFailureComments!=0)
@@ -543,10 +543,10 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   }
   this->flagQuerySucceeded=true;
   this->theQueryResult= mysql_store_result(this->parent->connection);
-  stOutput << "DEBUG: and even to here";
+  stOutput << "\n<br>\nDEBUG: and even to here";
   if (this->theQueryResult==0)
   { if (outputFailureComments!=0)
-      *outputFailureComments << "DEBUG: Query succeeded. ";
+      *outputFailureComments << "\n<br>\nDEBUG: Query succeeded. ";
     return;
   }
   this->numRowsRead=mysql_num_rows(this->theQueryResult);
@@ -579,7 +579,7 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
       }
     }
   }
-  stOutput << "DEBUG: query results: " << this->allQueryResultStrings.ToStringCommaDelimited();
+  stOutput << "\n<br>\nDEBUG: query results: " << this->allQueryResultStrings.ToStringCommaDelimited();
 }
 
 void DatabaseQuery::close()
@@ -1816,6 +1816,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   if (!userWrapper.Iexist(theRoutines))
   { if (commentsGeneral!=0)
       *commentsGeneral << "User with email " << userWrapper.email.value << " does not exist. ";
+    stOutput << "\n<br>\nDEBUG: User with email " << userWrapper.email.value << " does not exist. ";
     userWrapper.username=userWrapper.email;
     if (!userWrapper.CreateMeIfUsernameUnique(theRoutines, commentsOnFailure))
       return false;

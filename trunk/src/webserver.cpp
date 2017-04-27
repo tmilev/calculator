@@ -2712,6 +2712,10 @@ std::string WebWorker::GetChangePasswordPage()
 //  << "</form>"
   ;
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  out << "<br><a href=\""
+  << theGlobalVariables.DisplayNameExecutable
+  << "?request=emailChange"
+  << "\">Change/set email</a>";
   out << "</body></html>";
   return out.str();
 }
@@ -2829,34 +2833,33 @@ int WebWorker::ProcessCalculator()
     << " 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus');";
   }
   stOutput << "\">\n";
-  stOutput << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "</calculatorNavigation>\n";
+  std::stringstream out;
 
 
-  stOutput << this->openIndentTag("<table><!-- Outermost table, 3 cells (3 columns 1 row)-->");
-  stOutput << this->openIndentTag("<tr style=\"vertical-align:top\">");
-  stOutput << this->openIndentTag("<td><!-- Cell containing the output table-->");
-  stOutput << this->openIndentTag("<table><!-- Output table, 2 cells (1 column 2-3 rows) -->");
+  out << this->openIndentTag("<table><!-- Outermost table, 3 cells (3 columns 1 row)-->");
+  out << this->openIndentTag("<tr style=\"vertical-align:top\">");
+  out << this->openIndentTag("<td><!-- Cell containing the output table-->");
+  out << this->openIndentTag("<table><!-- Output table, 2 cells (1 column 2-3 rows) -->");
 
   int startingIndent=this->indentationLevelHTML;
-  stOutput << this->openIndentTag("<tr style=\"vertical-align:top\">");
-  stOutput << this->openIndentTag("<td><!-- cell with input, autocomplete space and output-->");
-  stOutput << this->openIndentTag("<table><!--table with input, autocomplete space and output-->");
-  stOutput << this->openIndentTag("<tr>");
-  stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
+  out << this->openIndentTag("<tr style=\"vertical-align:top\">");
+  out << this->openIndentTag("<td><!-- cell with input, autocomplete space and output-->");
+  out << this->openIndentTag("<table><!--table with input, autocomplete space and output-->");
+  out << this->openIndentTag("<tr>");
+  out << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
   std::string civilizedInputSafish;
   bool hashtmlChars=
   CGI::ConvertStringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish, false);
 
 
-  stOutput << this->GetHtmlHiddenInputs(true, true);
-  stOutput << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"compute\">\n";
-  stOutput << "<textarea rows=\"3\" cols=\"30\" ";
-  stOutput << "style=\"white-space:normal\" ";
-  //stOutput << "<div contenteditable=\"true\" ";
-  //stOutput << "style=\"white-space:normal; resize:both; border: 1px solid; overflow:auto\" ";
-  stOutput << "name=\"mainInput\" id=\"mainInputID\" ";
-  stOutput << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {"
+  out << this->GetHtmlHiddenInputs(true, true);
+  out << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"compute\">\n";
+  out << "<textarea rows=\"3\" cols=\"30\" ";
+  out << "style=\"white-space:normal\" ";
+  //out << "<div contenteditable=\"true\" ";
+  //out << "style=\"white-space:normal; resize:both; border: 1px solid; overflow:auto\" ";
+  out << "name=\"mainInput\" id=\"mainInputID\" ";
+  out << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {"
   << "submitStringAsMainInput(document.getElementById('mainInputID').value,"
   << " 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus');"
   << " event.preventDefault();"
@@ -2866,81 +2869,84 @@ int WebWorker::ProcessCalculator()
   << "onmouseup=\"suggestWord(); mQHelpCalculator();\", "
   << "oninput=  \"suggestWord(); mQHelpCalculator();\""
   << ">";
-  stOutput << civilizedInputSafish;
-  stOutput << "</textarea>\n";
-  //stOutput << "</div>\n";
-  stOutput << "<br>";
+  out << civilizedInputSafish;
+  out << "</textarea>\n";
+  //out << "</div>\n";
+  out << "<br>";
   if (hashtmlChars)
-    stOutput << "Your input had some html characters (such as &lt;). <br>"
+    out << "Your input had some html characters (such as &lt;). <br>"
     << "I've encoded your input in html format.<br>"
     ;
 
-  stOutput << "<button title=\"Shift+Enter=shortcut from input text box. \" "
+  out << "<button title=\"Shift+Enter=shortcut from input text box. \" "
   << "name=\"Go\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus'); event.preventDefault();"
   << "\"> ";
-  stOutput << "Go" << "</button>"
+  out << "Go" << "</button>"
   << "<span id=\"mainComputationStatus\"></span>";
-  stOutput << this->closeIndentTag("</td>");
+  out << this->closeIndentTag("</td>");
 
-  stOutput << this->openIndentTag("<td style=\"vertical-align:top\">");
-  stOutput << "<table style=\"vertical-align:top\"><tr><td style=\"vertical-align:top\">";
-  stOutput << "<span id=\"mqProblemSpan\" style=\"white-space:nowrap\">Equation assistant</span>";
-  stOutput << "</td></tr><tr>";
-  stOutput << "<td style=\"vertical-align:top\">";
-  stOutput << "<span style=\"vertical-align:top\" id=\"mainInputMQfield\"></span>";
-  stOutput << "</td>";
-  stOutput << "<td style=\"vertical-align:top\">";
-  stOutput << "<span style=\"vertical-align:top\" id=\"mainInputMQfieldButtons\"></span>";
-  stOutput << "</td>";
-  stOutput << "</tr></table>";
-  stOutput << this->closeIndentTag("</td>");
+  out << this->openIndentTag("<td style=\"vertical-align:top\">");
+  out << "<table style=\"vertical-align:top\"><tr><td style=\"vertical-align:top\">";
+  out << "<span id=\"mqProblemSpan\" style=\"white-space:nowrap\">Equation assistant</span>";
+  out << "</td></tr><tr>";
+  out << "<td style=\"vertical-align:top\">";
+  out << "<span style=\"vertical-align:top\" id=\"mainInputMQfield\"></span>";
+  out << "</td>";
+  out << "<td style=\"vertical-align:top\">";
+  out << "<span style=\"vertical-align:top\" id=\"mainInputMQfieldButtons\"></span>";
+  out << "</td>";
+  out << "</tr></table>";
+  out << this->closeIndentTag("</td>");
 
 
-  stOutput << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
-  stOutput << "<span style=\"white-space:nowrap\" id=\"idAutocompleteHints\">"
+  out << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
+  out << "<span style=\"white-space:nowrap\" id=\"idAutocompleteHints\">"
   << "Ctrl+space = autocomplete<br>ctrl+arrow = select</span>";
-  stOutput << "<br>";
-  stOutput << "<div id=\"idAutocompleteSpan\" "
+  out << "<br>";
+  out << "<div id=\"idAutocompleteSpan\" "
   << "style=\"vertical-align:top; display:block; overflow:auto;\" "
   << " height=\"100px\" "
   << "></div>";
-  stOutput << "<span id=\"idAutocompleteDebug\"></span>";
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << this->closeIndentTag("</tr>");
-  stOutput << this->closeIndentTag("</table>");
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << this->closeIndentTag("</tr>");
+  out << "<span id=\"idAutocompleteDebug\"></span>";
+  out << this->closeIndentTag("</td>");
+  out << this->closeIndentTag("</tr>");
+  out << this->closeIndentTag("</table>");
+  out << this->closeIndentTag("</td>");
+  out << this->closeIndentTag("</tr>");
   if (startingIndent!=this->indentationLevelHTML)
     crash << "Non-balanced html tags. " << crash;
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
   theGlobalVariables.flagComputationCompletE=true;
-  stOutput << this->openIndentTag("<tr>");
-  stOutput << this->openIndentTag("<td>");
-  stOutput << "<span id=\"calculatorOutput\"></span>";
-  stOutput << this->closeIndentTag("</td>");
-  stOutput << this->closeIndentTag("</tr>");
-  stOutput << this->closeIndentTag("</table><!--table with input, autocomplete space and output-->");
-  stOutput << this->closeIndentTag("</td>");
+  out << this->openIndentTag("<tr>");
+  out << this->openIndentTag("<td>");
+  out << "<span id=\"calculatorOutput\"></span>";
+  out << this->closeIndentTag("</td>");
+  out << this->closeIndentTag("</tr>");
+  out << this->closeIndentTag("</table><!--table with input, autocomplete space and output-->");
+  out << this->closeIndentTag("</td>");
 
 //  bool displayClientMessage=theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!=-1;
   //displayClientMessage=false;
-  stOutput << "<td valign=\"top\">";
+  out << "<td valign=\"top\">";
   theGlobalVariables.theSourceCodeFiles().QuickSortAscending();
-  stOutput << theGlobalVariables.ToStringSourceCodeInfo();
-  stOutput << "<hr>";
-  stOutput << theParser.ToString();
+  out << theGlobalVariables.ToStringSourceCodeInfo();
+  out << "<hr>";
+  out << theParser.ToString();
 
-  stOutput << this->closeIndentTag("</td>");
+  out << this->closeIndentTag("</td>");
   if (theGlobalVariables.UserDebugFlagOn())
-    stOutput << "<td>"
+    out << "<td>"
     << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
     << "</td>";
-  stOutput << this->closeIndentTag("</tr>");
+  out << this->closeIndentTag("</tr>");
 
-  stOutput << this->closeIndentTag("</table><!-- outermost table-->");
+  out << this->closeIndentTag("</table><!-- outermost table-->");
 
-  stOutput << "</body></html>";
+  out << "</body></html>";
+  stOutput << HtmlInterpretation::GetNavigationPanelWithGenerationTime()
+  << out.str();
+
   return 0;
 }
 

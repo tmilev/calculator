@@ -254,6 +254,7 @@ int recursionDepth=0)
   std::string GetEditPageHTML();
   std::string GetExamPageInterpreter();
   std::string GetDatabasePage();
+  //std::string GetEmailChangePage();
   std::string GetDatabaseOneEntry();
   std::string GetNavigationPage();
   std::string GetAddUserEmails();

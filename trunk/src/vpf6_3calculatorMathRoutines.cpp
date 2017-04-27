@@ -2145,6 +2145,9 @@ bool CalculatorFunctionsGeneral::innerPowerAnyToZero(Calculator& theCommands, co
     return false;
   if (!input[2].IsEqualToZero())
     return false;
+  if (input[1].StartsWith(theCommands.opIntegral()))
+    if (input[1].size()!=3) //<- an expression of the form \int_a^b (without f*dx).
+      return false;
 //  stOutput << "input[1]: "<< input[1].ToString() << ", input[2]: " << input[2].ToString();
   if (input[1].IsEqualToZero())
     return output.MakeError("Error: expression of the form 0^0 is illegal.", theCommands, true);

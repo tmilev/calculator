@@ -478,10 +478,10 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitOuterSimple(Calculator& th
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
     (theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
-    << (useMathTag ? CGI::GetMathSpanPure(orbitGeneratingSet.theGroup.theElements[i].ToString()) : orbitGeneratingSet.theGroup.theElements[i].ToString())
-    << "</td><td>" << (useMathTag ? CGI::GetMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
-    << (useMathTag ? CGI::GetMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
-    << "</td><td>" << (useMathTag ? CGI::GetMathSpanPure(weightEltString) : weightEltString) << "</td>";
+    << (useMathTag ? HtmlRoutines::GetMathSpanPure(orbitGeneratingSet.theGroup.theElements[i].ToString()) : orbitGeneratingSet.theGroup.theElements[i].ToString())
+    << "</td><td>" << (useMathTag ? HtmlRoutines::GetMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
+    << (useMathTag ? HtmlRoutines::GetMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
+    << "</td><td>" << (useMathTag ? HtmlRoutines::GetMathSpanPure(weightEltString) : weightEltString) << "</td>";
     latexReport << "$" << orbitGeneratingSet.theGroup.theElements[i].ToString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords << "$ & $"
     << weightEltString << "$ & $" << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat) << "$\\\\\n<br>";
     out << "</tr>";
@@ -607,12 +607,12 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
     std::string weightEltString=
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
-    << (useMathTag ? CGI::GetMathMouseHover(orbitGeneratingSet[i].ToString()) : orbitGeneratingSet[i].ToString())
+    << (useMathTag ? HtmlRoutines::GetMathMouseHover(orbitGeneratingSet[i].ToString()) : orbitGeneratingSet[i].ToString())
     << "</td><td>"
-    << (useMathTag ? CGI::GetMathMouseHover(orbitEltString) : orbitEltString) << "</td><td>"
-    << (useMathTag ? CGI::GetMathMouseHover(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
+    << (useMathTag ? HtmlRoutines::GetMathMouseHover(orbitEltString) : orbitEltString) << "</td><td>"
+    << (useMathTag ? HtmlRoutines::GetMathMouseHover(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
     << "</td><td>"
-    << (useMathTag ? CGI::GetMathMouseHover(weightEltString) : weightEltString)
+    << (useMathTag ? HtmlRoutines::GetMathMouseHover(weightEltString) : weightEltString)
     << "</td>";
     latexReport << "$" << orbitGeneratingSet[i].ToString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords
     << "$ & $" <<  weightEltString << "$ & $" << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
@@ -637,7 +637,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
       }
       out << "<td>";
       if (isGood)
-        out << CGI::GetMathMouseHover(standardElt.ToString(&theFormat));
+        out << HtmlRoutines::GetMathMouseHover(standardElt.ToString(&theFormat));
       else
         out << "-";
       out << "</td>";
@@ -823,7 +823,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromSc
   //{ //out << "<br>" << theGroup.irreps[i].theCharacteR.ToString();
   //  charMat.AssignVectorToRowKeepOtherRowsIntactNoInit(i, theGroupData.irreps[i].GetCharacter().data);
   //}
-  //out << CGI::GetMathSpanPure(charMat.ToString(&tempFormat));
+  //out << HtmlRoutines::GetMathSpanPure(charMat.ToString(&tempFormat));
   out << "<br>Explicit realizations of each representation follow.";
   for (int i=0; i<theGroupData.theGroup.irreps.size; i++)
     out << "<hr>" << theGroupData.theGroup.irreps[i].ToString(&tempFormat);
@@ -844,7 +844,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(Calcul
   tempFormat.flagUseHTML=false;
   for (int i=0; i<groupGeneratedByMatrices.theGenerators.size; i++)
   { outCommand << "<br>s_{" << i+1 << "}=MatrixRationals" << groupGeneratedByMatrices.theGenerators[i].ToStringMatForm(&tempFormat) << ";";
-    out << "<br>s_" << i+1 << " = " << CGI::GetMathSpanPure(groupGeneratedByMatrices.theGenerators[i].ToStringMatForm(&tempFormat) );
+    out << "<br>s_" << i+1 << " = " << HtmlRoutines::GetMathSpanPure(groupGeneratedByMatrices.theGenerators[i].ToStringMatForm(&tempFormat) );
   }
   outCommand << "<br>GenerateFiniteMultiplicativelyClosedSet(1000, ";
   for (int i=0; i<groupGeneratedByMatrices.theGenerators.size; i++)
@@ -866,8 +866,8 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(Calcul
       for (int i=0; i<groupGeneratedByMatrices.theElements.size; i++)
       { std::stringstream elementNameStream;
         elementNameStream << "t_" << i+1;
-        out << "<tr><td>" << CGI::GetMathMouseHover(elementNameStream.str())<< "</td><td>"
-        << CGI::GetMathMouseHover(groupGeneratedByMatrices.theElements[i].ToStringMatForm(&tempFormat)) << "</td></tr>";
+        out << "<tr><td>" << HtmlRoutines::GetMathMouseHover(elementNameStream.str())<< "</td><td>"
+        << HtmlRoutines::GetMathMouseHover(groupGeneratedByMatrices.theElements[i].ToStringMatForm(&tempFormat)) << "</td></tr>";
       }
       out << "</table>";
     }
@@ -1062,7 +1062,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
       mainTableStream << "p{0.275cm}";
     }
     mainTableStream << "}\n<br>\n" << "\\caption{\\label{table:SignSignature"
-    << CGI::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString())
+    << HtmlRoutines::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString())
     << "}Multiplicity of the sign representation over the classes of root subgroups. "
     << "There are " << numParabolicClasses << " parabolic subgroup classes, " << numNonParabolicPseudoParabolic
     << " pseudo-parabolic subgroup classes that are not parabolic, and "
@@ -1150,7 +1150,7 @@ std::string WeylGroupData::ToStringSignSignatureRootSubsystem(const List<Subgrou
     out << "$" << this->ToStringIrrepLabel(i) << "$&$" << this->theGroup.characterTable[i].ToString() << "$\\\\\n<br>\n";
   out << "\\end{longtable}\n<br>\n";
   out << "\\begin{longtable}{rcl}"<< "\\caption{\\label{tableConjugacyClassTable"
-  << CGI::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString()) << "}}\\\\ ";
+  << HtmlRoutines::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString()) << "}}\\\\ ";
   out << "Representative & Class size & Root subsystem label\\\\\n<br>\n";
   for (int i=0; i<this->theGroup.ConjugacyClassCount(); i++)
   { out << "$" << this->theGroup.conjugacyClasseS[i].representative.ToString() << "$&$ " << this->theGroup.conjugacyClasseS[i].size.ToString() << "$";

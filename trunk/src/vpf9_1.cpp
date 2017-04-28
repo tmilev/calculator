@@ -59,7 +59,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     if (succeededToOpen)
       stOutput << "<hr>Crash dumped in file "
       << "<a href=\"/LogFiles/crashes/"
-      << CGI::ConvertStringToURLString( theGlobalVariables.RelativePhysicalNameCrashLog, false)
+      << HtmlRoutines::ConvertStringToURLString( theGlobalVariables.RelativePhysicalNameCrashLog, false)
       << "\" >"
       << theGlobalVariables.RelativePhysicalNameCrashLog
       << "</a>"
@@ -110,7 +110,7 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
     theGlobalVariables.CustomStackTrace[threadCounter];
     out << "<td><table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
     for (int i=currentInfo.size-1; i>=0; i--)
-    { out << "<tr><td>" << CGI::GetHtmlLinkFromProjectFileName(currentInfo[i].fileName, "", currentInfo[i].line)
+    { out << "<tr><td>" << HtmlRoutines::GetHtmlLinkFromProjectFileName(currentInfo[i].fileName, "", currentInfo[i].line)
       << "</td><td>" << currentInfo[i].line << "</td>";
       if (currentInfo[i].functionName!="")
         out << "<td>" << currentInfo[i].functionName << "</td>";
@@ -357,8 +357,8 @@ void GlobalVariables::initOutputReportAndCrashFileNames
 (const std::string& inputUserStringRAW, const std::string& inputUserStringCivilized)
 { std::string inputAbbreviated;
   this->userInputStringIfAvailable=
-  CGI::CleanUpForFileNameUse
-  (CGI::ConvertStringToURLString(inputUserStringCivilized,false));
+  HtmlRoutines::CleanUpForFileNameUse
+  (HtmlRoutines::ConvertStringToURLString(inputUserStringCivilized,false));
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
   { this->userInputStringRAWIfAvailable=inputUserStringRAW;
     inputAbbreviated=this->userInputStringRAWIfAvailable;
@@ -390,7 +390,7 @@ void FileInformation::AddProjectInfo(const std::string& fileName, const std::str
 
 std::string GlobalVariables::ToStringSourceCodeInfo()
 { std::stringstream out;
-  out << "<button " << CGI::GetStyleButtonLikeHtml()
+  out << "<button " << HtmlRoutines::GetStyleButtonLikeHtml()
   << " onclick=\"switchMenu('sourceDetails');\" >Source code</button>";
   out << "<div id=\"sourceDetails\" style=\"display: none\">";
   out << "<br>The calculator is a standalone application that can either be used "
@@ -426,7 +426,7 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
   out << "<br>svn checkout command:<br>svn checkout svn://svn.code.sf.net/p/vectorpartition/code/trunk calculator";
   for (int i=0; i<this->theSourceCodeFiles().size; i++)
   { out << " <br>\n";
-    out << CGI::GetHtmlLinkFromProjectFileName(this->theSourceCodeFiles()[i].FileName, this->theSourceCodeFiles()[i].FileDescription);
+    out << HtmlRoutines::GetHtmlLinkFromProjectFileName(this->theSourceCodeFiles()[i].FileName, this->theSourceCodeFiles()[i].FileDescription);
   }
   out << "</div>";
   return out.str();
@@ -1255,7 +1255,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   for (int i=0; i<this->theLinearOperators.size; i++)
   { this->theLinearOperators[i].ActOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]);
     translationsProjectedFinal[i]+=this->theTranslationsProjectedBasisChanged[i];
-    drawOps.drawCircleAtVectorBufferRational(-translationsProjectedFinal[i], 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(250,0,0));
+    drawOps.drawCircleAtVectorBufferRational(-translationsProjectedFinal[i], 3, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(250,0,0));
   }
   out << "<br>the translations projected final: " << translationsProjectedFinal.ToString();
   Accum.MakeZero(theStartingPoly.NumVariables);
@@ -1301,8 +1301,8 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     tempRoot.Minus();
     tempRoot-=this->theTranslationsProjecteD[i];
     drawOps.
-    drawCircleAtVectorBuffer(tempRoot, 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,100));
-    drawOps.drawLineBetweenTwoVectorsBuffer(tempRoot, ZeroRoot, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(240, 240, 240));
+    drawCircleAtVectorBuffer(tempRoot, 2, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,100));
+    drawOps.drawLineBetweenTwoVectorsBuffer(tempRoot, ZeroRoot, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(240, 240, 240));
     tempComplex.DrawMeProjective(&tempRoot, false, drawOps, tempFormat);
     out << tempRoot.ToString();
   }

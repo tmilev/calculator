@@ -215,14 +215,14 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
   return output.AssignValueWithContext(outputUE, contextE, theCommands);
 }
 
-std::string CGI::GetSliderSpanStartsHidden(const std::string& content, const std::string& label, const std::string& desiredID)
+std::string HtmlRoutines::GetSliderSpanStartsHidden(const std::string& content, const std::string& label, const std::string& desiredID)
 { (void) label;//avoid unused parameter warning, portable
   std::stringstream out;
-  CGI::GlobalGeneralPurposeID++;
+  HtmlRoutines::GlobalGeneralPurposeID++;
   std::stringstream idStringStream;
   idStringStream << desiredID;
   if (desiredID=="")
-    idStringStream << "UnnamedSpan" << CGI::GlobalGeneralPurposeID;
+    idStringStream << "UnnamedSpan" << HtmlRoutines::GlobalGeneralPurposeID;
   out << "<a href=\"javascript:;\" onmusedown=\"document.getElementById('"  << idStringStream.str() << "').slideToggle('slow');\">Expand/collapse</a>";
   out << "<span id=\"" << idStringStream.str() << "\" style=\"display:none\">" << content << "</span>";
   return out.str();
@@ -503,18 +503,18 @@ bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, co
     << "\\hline so(7)& dim. &$G_2$&dim.& $\\mathfrak b \\cap G_2$-singular vectors\\\\ \\hline"
     << "\\endhead \n<br>";
   } else
-  { out << "Let " << CGI::GetMathSpanPure("p\\subset so(7)") << " be the "
+  { out << "Let " << HtmlRoutines::GetMathSpanPure("p\\subset so(7)") << " be the "
     << theG2B3Data.selInducing.ToString() << "-parabolic subalgebra"
-    << " and let " << CGI::GetMathSpanPure("{p}'= p\\cap G_2")
-    << ". Then  " << CGI::GetMathSpanPure("{p}'") << " is the "
+    << " and let " << HtmlRoutines::GetMathSpanPure("{p}'= p\\cap G_2")
+    << ". Then  " << HtmlRoutines::GetMathSpanPure("{p}'") << " is the "
     << theG2B3Data.selSmallParSel.ToString() << "- parabolic subalgebra of G_2"
     << "<br> <table border=\"1\"><tr><td>$so(7)$-highest weight</td>"
     << "<td>character difference from top</td>"
     << "<td>Decomposition of inducing module over "
-    << CGI::GetMathSpanPure("p'")
-    << "</td><td>" << CGI::GetMathSpanPure("p'\\cap b")
+    << HtmlRoutines::GetMathSpanPure("p'")
+    << "</td><td>" << HtmlRoutines::GetMathSpanPure("p'\\cap b")
     << "-eigenvectors</td><td>Casimir projector</td><td>Extra multiplier</td><td>corresponding "
-    << CGI::GetMathSpanPure("G_2\\cap b")
+    << HtmlRoutines::GetMathSpanPure("G_2\\cap b")
     << "-eigenvectors</td><td>Shapovalov square</td></tr>";
     latexTable << "\\begin{longtable}{|cccclll|} \\caption{\\label{tableB3fdsOverG2charsAndHWV"
     << theG2B3Data.selInducing.ToString() << "} "
@@ -600,15 +600,15 @@ bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, co
           latexTable << "&";
         latexTable << "&";
         theG2B3Data.theFormat.CustomPlusSign="";
-        out << "<td>" << CGI::GetMathSpanPure(theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].ToString(&theG2B3Data.theFormat)) << "</td>";
+        out << "<td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].ToString(&theG2B3Data.theFormat)) << "</td>";
         theG2B3Data.theFormat.MaxLineLength=20;
         latexTable << "$\\begin{array}{l}" << theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].ToString(&theG2B3Data.theFormat) << "\\end{array}$ \n";
         if (!isFD)
         { std::string tempS1=theG2B3Data.GetStringCasimirProjector(eigenIndexcounter, 12);
           std::string tempS2= "("+ theG2B3Data.theUEelts[eigenIndexcounter].ToString(&theG2B3Data.theFormat)+ ")\\cdot v_\\lambda";
-          out << "<td>" << CGI::GetMathSpanPure(tempS1) << "</td>";
+          out << "<td>" << HtmlRoutines::GetMathSpanPure(tempS1) << "</td>";
           out << "<td>" << theG2B3Data.additionalMultipliers[eigenIndexcounter].ToString() << "</td>";
-          out << "<td>" << CGI::GetMathSpanPure(tempS2) << "</td>";
+          out << "<td>" << HtmlRoutines::GetMathSpanPure(tempS2) << "</td>";
           out << "<td>" << theG2B3Data.theShapovalovProducts[eigenIndexcounter].ToString(&theG2B3Data.theFormat);
           out << "</td>";
           int theIndex=-1;
@@ -698,16 +698,16 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     << "Decompositions of finite dimensional $so(7)$-modules over $G_2$}\\\\"
     << "\\hline$so(7)$-module & ~~~~~~ decomposition over $G_2$\\endhead \\hline\n<br>";
   } else
-  { out << "Let " << CGI::GetMathSpanPure("p\\subset so(7)") << " be the "
+  { out << "Let " << HtmlRoutines::GetMathSpanPure("p\\subset so(7)") << " be the "
     << theg2b3data.selInducing.ToString() << "-parabolic subalgebra"
-    << " and let " << CGI::GetMathSpanPure("{p}'= p\\cap G_2")
-    << ". Then  " << CGI::GetMathSpanPure("{p}'") << " is the "
+    << " and let " << HtmlRoutines::GetMathSpanPure("{p}'= p\\cap G_2")
+    << ". Then  " << HtmlRoutines::GetMathSpanPure("{p}'") << " is the "
     << theg2b3data.selSmallParSel.ToString() << "- parabolic subalgebra of G_2"
     << "<br> <table><tr><td>$so(7)$-highest weight</td>"
     << "<td>Dimension of inducing fin. dim. "
-    << CGI::GetMathSpanPure(" p")
+    << HtmlRoutines::GetMathSpanPure(" p")
     << "-module</td><td>Decomposition of inducing module over "
-    << CGI::GetMathSpanPure("p'")
+    << HtmlRoutines::GetMathSpanPure("p'")
     << "</td><td>Dimensions</td>"
     << " <td>Highest weight <br> is sufficiently generic <br> if none of <br>the following vanish</td>"
     << "</tr>";

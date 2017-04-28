@@ -233,14 +233,14 @@ int SemisimpleSubalgebras::GetDisplayIndexFromActual(int ActualIndexSubalgebra)c
 std::string SemisimpleSubalgebras::GetRelativePhysicalFileNameSubalgebra(int ActualIndexSubalgebra)const
 { std::stringstream out;
   out << this->owner->VirtualNameSSAlgOutputFolder;
-  out << CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
+  out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
 
 std::string SemisimpleSubalgebras::GetRelativePhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra)const
 { std::stringstream out;
   out << this->owner->VirtualNameSSAlgOutputFolder;
-  out << CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
+  out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
 
@@ -248,7 +248,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraAbsolute(int Actu
 { std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
   out << this->owner->DisplayNameSSalgOutputFolder;
-  out << CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
+  out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
 
@@ -256,7 +256,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraRelative(int Actu
 { std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
   out << "./";
-  out << CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
+  out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
 
@@ -264,7 +264,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameFKFTNilradicals(int ActualI
 { std::stringstream out;
   (void) theFormat;//avoid unused parameter warning in a portable way
   out << this->owner->DisplayNameSSalgOutputFolder;
-  out << CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_"
+  out << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "_subalgebra_"
   << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
@@ -311,13 +311,13 @@ void SemisimpleSubalgebras::WriteReportToFiles()
   fileSlowLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owner->theWeyl.theDynkinType.ToString()
   << "</title>"
-  << CGI::GetJavascriptMathjax()
+  << HtmlRoutines::GetJavascriptMathjax()
   << "<body>" << this->ToString(&this->currentFormat);
   this->currentFormat.flagUseMathSpanPureVsMouseHover=false;
   fileFastLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
   << this->owner->theWeyl.theDynkinType.ToString()
   << "</title>"
-  << CGI::GetJavascriptMathjax()
+  << HtmlRoutines::GetJavascriptMathjax()
   << "<body>" << this->ToString(&this->currentFormat);
   fileFastLoad << "</body></html>";
   fileSlowLoad << "</body></html>";
@@ -332,8 +332,8 @@ void SemisimpleSubalgebras::ComputeFolderNames(FormatExpressions& inputFormat)
   this->currentFormat.flagUseLatex=false;
   this->currentFormat.flagUsePNG=true;
 
-  this->DisplayNameMainFile1NoPath= "SemisimpleSubalgebras_" + CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
-  this->DisplayNameMainFile2FastLoadNoPath= "SemisimpleSubalgebras_FastLoad_" + CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
+  this->DisplayNameMainFile1NoPath= "SemisimpleSubalgebras_" + HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
+  this->DisplayNameMainFile2FastLoadNoPath= "SemisimpleSubalgebras_FastLoad_" + HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
   this->DisplayNameMainFile1WithPath=this->owner->DisplayNameSSalgOutputFolder+this->DisplayNameMainFile1NoPath;
   this->DisplayNameMainFile2FastLoadWithPath= this->owner->DisplayNameSSalgOutputFolder+ this->DisplayNameMainFile2FastLoadNoPath;
 
@@ -453,7 +453,7 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
 
 std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToString");
-  CGI::GlobalMathSpanID=0;
+  HtmlRoutines::GlobalMathSpanID=0;
   bool writingToHD=theFormat==0? false: theFormat->flagUseHtmlAndStoreToHD;
   std::stringstream out;
   int candidatesRealized=0;
@@ -494,7 +494,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   out << "<hr>";
   out << "The base field over which the subalgebras were realized is: ";
   if (this->ownerField==0)
-    out << CGI::GetMathSpanPure("\\mathbb Q");
+    out << HtmlRoutines::GetMathSpanPure("\\mathbb Q");
   else
     out << this->ownerField->ToString();
   out << "<hr> ";
@@ -548,7 +548,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
           << "2. The calculator has no write permission to the folder in which the file is located. "
           << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
         }
-        outputFileSubalgebra << "<html>" << CGI::GetJavascriptMathjax()
+        outputFileSubalgebra << "<html>" << HtmlRoutines::GetJavascriptMathjax()
         << "\n<body>Subalgebra number "
         << this->GetDisplayIndexFromActual(i) << ".<br>" << this->theSubalgebras[i].ToString(&theFormatCopy);
         if (this->flagComputeNilradicals)
@@ -562,7 +562,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
             << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
           }
           outputFileFKFTnilradicals << "<html>"
-          << CGI::GetJavascriptMathjax()
+          << HtmlRoutines::GetJavascriptMathjax()
           << "<body>"
           << this->ToStringAlgebraLink(i, &theFormatCopy) << this->theSubalgebras[i].ToStringNilradicals(&theFormatCopy) << "\n</body></html>";
         }
@@ -759,7 +759,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasInit()
   if (this->owner==0)
     crash << "<hr>Owner of semisimple subalgebras is zero" << crash;
   if (theGlobalVariables.flagReportEverything)
-  { this->fileNameToLogComments="LogFileComments_"+ CGI::CleanUpForFileNameUse( this->owner->theWeyl.theDynkinType.ToString()) + ".html";
+  { this->fileNameToLogComments="LogFileComments_"+ HtmlRoutines::CleanUpForFileNameUse( this->owner->theWeyl.theDynkinType.ToString()) + ".html";
     std::fstream LogFile;
     if (!FileOperations::OpenFileCreateIfNotPresentVirtual
         (LogFile, "output/"+this->fileNameToLogComments, true, false, false))
@@ -1671,7 +1671,7 @@ std::string SemisimpleSubalgebras::ToStringProgressReport(FormatExpressions* the
   std::stringstream out;
   out << this->ToStringState(theFormat);
   if (this->ToStringExpressionString!=0)
-    out << "\n<hr>\n" << "SetOutputFile(\"subalgebras_" << CGI::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "\");\n<br>\n"
+    out << "\n<hr>\n" << "SetOutputFile(\"subalgebras_" << HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) << "\");\n<br>\n"
     << "LoadSemisimpleSubalgebras {}" << this->ToStringExpressionString(*this);
   out << "\n\n<hr>";
   return out.str();
@@ -1837,7 +1837,7 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational
     theFormat.flagUseHTML=false;
     theFormat.flagUseLatex=true;
     crash << "This is a programming error: the determinant of the automorphism matrix of the Dynkin graph must be +/-1, it is instead "
-    << tempRat.ToString() << ". The auto matrix is: " << CGI::GetMathMouseHover(output.ToStringMatForm(&theFormat)) << " and the dynkin type is: "
+    << tempRat.ToString() << ". The auto matrix is: " << HtmlRoutines::GetMathMouseHover(output.ToStringMatForm(&theFormat)) << " and the dynkin type is: "
     << this->ToString() << "." << crash;
   }
 }
@@ -3859,27 +3859,27 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
   FormatExpressions formatCharacter;
   formatCharacter.vectorSpaceEiBasisNames.AddOnTop("\\psi");
-  out << CGI::GetMathMouseHover((this->moduleDecompositionAmbientSA.ToString(&formatCharacter))) << "\n<br>\n";
+  out << HtmlRoutines::GetMathMouseHover((this->moduleDecompositionAmbientSA.ToString(&formatCharacter))) << "\n<br>\n";
   out << "\nBelow is one possible realization of the sl(2) subalgebra.";
   if (useHtml)
     out << "\n<br>\n";
   std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
   tempS=this->theH.ToString(theFormat);
   tempStreamH << "\nh= " << tempS << "";
-  out << CGI::GetMathMouseHover(tempStreamH.str()) << "\n<br>\n";
+  out << HtmlRoutines::GetMathMouseHover(tempStreamH.str()) << "\n<br>\n";
   tempStreamE << "\ne= " << this->theE.ToString(theFormat) << "\n<br>\n";
-  out << CGI::GetMathMouseHover(tempStreamE.str()) << "\n<br>\n";
+  out << HtmlRoutines::GetMathMouseHover(tempStreamE.str()) << "\n<br>\n";
   tempStreamF << "\nf= " << this->theF.ToString(theFormat) << "\n<br>\n";
-/*  out << CGI::GetMathMouseHover(tempStreamF.str()) << "\n<br>\n";
+/*  out << HtmlRoutines::GetMathMouseHover(tempStreamF.str()) << "\n<br>\n";
   out << "\nLie brackets of the above elements. Printed for debugging.";
   if (useHtml)
     out << "\n<br>\n";
   tempStreamEF << "\n[e, f]=" <<  this->bufferEbracketF.ToString(theFormat) << "";
-  out << CGI::GetMathMouseHover(tempStreamEF.str()) << "\n<br>\n";
+  out << HtmlRoutines::GetMathMouseHover(tempStreamEF.str()) << "\n<br>\n";
   tempStreamHE << "\n[h, e]=" << this->bufferHbracketE.ToString(theFormat) << "";
-  out << CGI::GetMathMouseHover(tempStreamHE.str()) << "\n<br>\n";
+  out << HtmlRoutines::GetMathMouseHover(tempStreamHE.str()) << "\n<br>\n";
   tempStreamHF << "\n[h, f]= " << this->bufferHbracketF.ToString(theFormat) << "";
-  out << CGI::GetMathMouseHover(tempStreamHF.str()) << "\n<br>\n";*/
+  out << HtmlRoutines::GetMathMouseHover(tempStreamHF.str()) << "\n<br>\n";*/
   //this->theSystemMatrixForm.ToString(tempS);
   //out <<"\nSystem matrix form we try to solve:\n"<< tempS;
   //this->theSystemColumnVector.ToString(tempS);
@@ -3892,7 +3892,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   out << "\nThe polynomial system that corresponds to finding the h,e,f triple:\n";
   if (useHtml)
     out << "\n<br>\n";
-  out << CGI::GetMathMouseHover(latexStreamActual.str()) << "\n<br>\n";
+  out << HtmlRoutines::GetMathMouseHover(latexStreamActual.str()) << "\n<br>\n";
   return out.str();
 }
 
@@ -4377,7 +4377,7 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat)
     << " always exists. Note that Theorem 10.3 is stated in one direction only.";
   }
   if(useHtml)
-    out << "<br><br><table><tr><td style=\"padding-right:20px\">" << CGI::ElementToStringTooltip("Characteristic", tooltipHchar)
+    out << "<br><br><table><tr><td style=\"padding-right:20px\">" << HtmlRoutines::ElementToStringTooltip("Characteristic", tooltipHchar)
     << "</td><td align=\"center\" style=\"white-space: nowrap\" title=\"" << tooltipHvalue << "\"> h</td><td style=\"padding-left:20px\" title=\""
     << tooltipVDecomposition << "\"> Decomposition of ambient Lie algebra: \\psi stands for the fundamental sl(2)-weight. </td>"
     << "<td>Centralizer dimension</td>"
@@ -4400,13 +4400,13 @@ std::string SltwoSubalgebras::ToStringSummary(FormatExpressions* theFormat)
       out << "</td><td style=\"padding-left:20px\" title=\"" << tooltipVDecomposition << "\">";
     FormatExpressions formatCharacter;
     formatCharacter.vectorSpaceEiBasisNames.AddOnTop("\\psi");
-    out << CGI::GetMathMouseHover((theSl2.moduleDecompositionAmbientSA.ToString(&formatCharacter)))
+    out << HtmlRoutines::GetMathMouseHover((theSl2.moduleDecompositionAmbientSA.ToString(&formatCharacter)))
     << "\n<br>\n";
     if (useHtml)
       out << "</td>";
     out << "<td>" << theSl2.dimensionCentralizer << "</td>";
     if (theSl2.flagCentralizerTypeComputed)
-    { out << "<td> " << CGI::GetMathSpanPure(theSl2.CentralizerTypeIfKnown.ToString()) << "</td>";
+    { out << "<td> " << HtmlRoutines::GetMathSpanPure(theSl2.CentralizerTypeIfKnown.ToString()) << "</td>";
     }
     else
       out << "<td> not computed</td>";
@@ -4478,7 +4478,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
   outNotationCommand << "PrintSemisimpleLieAlgebra{}("
   << this->GetOwnerWeyl().theDynkinType.ToString() << ")" ;
   outNotation << "Notation, structure constants and Weyl group info: "
-  << CGI::GetCalculatorLink(theGlobalVariables.DisplayNameExecutable, outNotationCommand.str())
+  << HtmlRoutines::GetCalculatorLink(theGlobalVariables.DisplayNameExecutable, outNotationCommand.str())
   << "<br> <a href=\"" << theGlobalVariables.DisplayNameExecutable
   << "?request=calculator"
   << "\"> Calculator main page</a><br><a href=\"../rootSubalgebras.html\">Root subsystem table</a><br>";
@@ -4492,7 +4492,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
     tempS= out.str();
     theFile << "<html><title>sl(2)-subalgebras of "
     << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString() << "</title>";
-    theFile << CGI::GetJavascriptMathjax();
+    theFile << HtmlRoutines::GetJavascriptMathjax();
     theFile << "<meta name=\"keywords\" content=\""
     <<  this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToString()
     << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras, nilpotent orbits of "
@@ -4571,7 +4571,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeightsHelper(int indexModule, co
       out << "<tr>";
 
       out << "<td style=\\\"text-align: center;\\\">" << openTag;
-      out << "<span class=\\\"math\\\">" << CGI::DoubleBackslashes(currentMod[i][j].ToString()) << "</span>";
+      out << "<span class=\\\"math\\\">" << HtmlRoutines::DoubleBackslashes(currentMod[i][j].ToString()) << "</span>";
       out << closeTag << "</td>";
 
       Vector<Rational> tempV;
@@ -4643,9 +4643,9 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     for (int j=0; j<this->Modules[i].size; j++)
       for (int k=0; k<this->Modules[i][j].size; k++)
       { if (j==0)
-        { int color= CGI::RedGreenBlue(150,150,0);
+        { int color= HtmlRoutines::RedGreenBlue(150,150,0);
           if (this->primalSubalgebraModules.Contains(i))
-          { color=CGI::RedGreenBlue(0,250,0);
+          { color=HtmlRoutines::RedGreenBlue(0,250,0);
             theDV.drawLineBetweenTwoVectorsBufferRational
             (zeroVector, this->WeightsModulesPrimal[i][k], theDV.PenStyleNormal, color);
           }
@@ -4659,9 +4659,9 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
             BasisToDrawCirclesAt.RemoveLastObject();
         }
       }
-    int color=CGI::RedGreenBlue(250, 250,0);
+    int color=HtmlRoutines::RedGreenBlue(250, 250,0);
     if (this->primalSubalgebraModules.Contains(i))
-      color=CGI::RedGreenBlue(0, 0, 250);
+      color=HtmlRoutines::RedGreenBlue(0, 0, 250);
     for (int j=0; j<cornerWeights.size; j++)
     { Rational minDist=0;
       for (int k=0; k<cornerWeights.size; k++)
@@ -4700,9 +4700,9 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   { theDV.theBuffer.BasisToDrawCirclesAt[i].SetSize(thePrimalRank);
     for (int j=0; j<thePrimalRank; j++)
       theDV.theBuffer.BasisToDrawCirclesAt[i][j]=BasisToDrawCirclesAt[i][j].GetDoubleValue();
-    theDV.drawCircleAtVectorBufferRational(BasisToDrawCirclesAt[i], 4, theDV.PenStyleNormal, CGI::RedGreenBlue(250, 0,0));
+    theDV.drawCircleAtVectorBufferRational(BasisToDrawCirclesAt[i], 4, theDV.PenStyleNormal, HtmlRoutines::RedGreenBlue(250, 0,0));
     //theDV.drawTextAtVectorBuffer
-    //(BasisToDrawCirclesAt[i], BasisToDrawCirclesAt[i].ToString(), CGI::RedGreenBlue(0, 0,0), theDV.TextStyleNormal, 0);
+    //(BasisToDrawCirclesAt[i], BasisToDrawCirclesAt[i].ToString(), HtmlRoutines::RedGreenBlue(0, 0,0), theDV.TextStyleNormal, 0);
   }
 //  theDV.theBuffer.GraphicsUnit[0]/=sqrt(this->theWeylNonEmbedded->CartanSymmetric(0,0).GetDoubleValue());
   out << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(thePrimalRank);
@@ -4804,9 +4804,9 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
       std::stringstream tempStream;
       tempStream << "V_{" << this->HighestWeightsPrimal[i].ToStringLetterFormat("\\omega", &tempCharFormat) << "} ";
       if (useMouseHover)
-        out << CGI::GetMathMouseHover(tempStream.str()) << "-> " << this->HighestWeightsPrimal[i].ToString();
+        out << HtmlRoutines::GetMathMouseHover(tempStream.str()) << "-> " << this->HighestWeightsPrimal[i].ToString();
       else
-        out << CGI::GetMathSpanPure(tempStream.str()) << "-> " << this->HighestWeightsPrimal[i].ToString();
+        out << HtmlRoutines::GetMathSpanPure(tempStream.str()) << "-> " << this->HighestWeightsPrimal[i].ToString();
       out << "</td>";
     }
   }
@@ -4893,9 +4893,9 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
     for (int i=0; i<this->CharsPrimalModules.size; i++)
     { out << "<td>";
       if (useMouseHover)
-        out << CGI::GetMathMouseHover(this->CharsPrimalModules[i].ToString(&tempCharFormat));
+        out << HtmlRoutines::GetMathMouseHover(this->CharsPrimalModules[i].ToString(&tempCharFormat));
       else
-        out << CGI::GetMathSpanPure(this->CharsPrimalModules[i].ToString(&tempCharFormat));
+        out << HtmlRoutines::GetMathSpanPure(this->CharsPrimalModules[i].ToString(&tempCharFormat));
       out << "</td>";
     }
   else
@@ -4908,9 +4908,9 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
     for (int i=0; i<this->CharsPrimalModulesMerged.size; i++)
     { out << "<td>";
       if (useMouseHover)
-        out << CGI::GetMathMouseHover(this->CharsPrimalModulesMerged[i].ToString(&tempCharFormat));
+        out << HtmlRoutines::GetMathMouseHover(this->CharsPrimalModulesMerged[i].ToString(&tempCharFormat));
       else
-        out << CGI::GetMathSpanPure(this->CharsPrimalModulesMerged[i].ToString(&tempCharFormat));
+        out << HtmlRoutines::GetMathSpanPure(this->CharsPrimalModulesMerged[i].ToString(&tempCharFormat));
       out << "</td>";
     }
   else
@@ -5361,9 +5361,9 @@ std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra
   if (makeLink)
   { out << "<a href=\"" << this->GetDisplayFileNameSubalgebraRelative(ActualIndexSubalgebra, theFormat) << "\" style=\"text-decoration: none\">";
     if (useMouseHover)
-      out << CGI::GetMathMouseHover(theTypeString);
+      out << HtmlRoutines::GetMathMouseHover(theTypeString);
     else
-      out << CGI::GetMathSpanPure(theTypeString);
+      out << HtmlRoutines::GetMathSpanPure(theTypeString);
     out << "</a> ";
   } else
     out << theTypeString << "";
@@ -5385,9 +5385,9 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
   for (int i=0; i<this->CartanSAsByComponentScaledToActByTwo.size; i++)
   { if (useLaTeX && useHtml)
     { if (useMouseHover)
-        out << CGI::GetMathMouseHover(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
+        out << HtmlRoutines::GetMathMouseHover(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
       else
-        out << CGI::GetMathSpanPure(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
+        out << HtmlRoutines::GetMathSpanPure(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
     } else
       out << theSimpleTypes[i].ToString(&tempFormat) << ":";
     for (int j=0; j<this->CartanSAsByComponentScaledToActByTwo[i].size; j++)
@@ -5427,9 +5427,9 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
         out << " + ";
     } else if (!this->theCentralizerType.IsEqualToZero())
     { if (useMouseHover)
-        out << CGI::GetMathMouseHover(this->theCentralizerType.ToString());
+        out << HtmlRoutines::GetMathMouseHover(this->theCentralizerType.ToString());
       else
-        out << CGI::GetMathSpanPure(this->theCentralizerType.ToString());
+        out << HtmlRoutines::GetMathSpanPure(this->theCentralizerType.ToString());
       out << " (can't determine subalgebra number - subalgebras computed partially?)";
       dimToralPartCentralizer-=this->theCentralizerType.GetRank();
     }
@@ -5437,9 +5437,9 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
     { std::stringstream toralPartStream;
       toralPartStream << "T_{" << dimToralPartCentralizer.ToString() << "}";
       if (useMouseHover)
-        out << CGI::GetMathMouseHover(toralPartStream.str());
+        out << HtmlRoutines::GetMathMouseHover(toralPartStream.str());
       else
-        out << CGI::GetMathSpanPure(toralPartStream.str());
+        out << HtmlRoutines::GetMathSpanPure(toralPartStream.str());
       out << " (toral part, subscript=dimension)";
     }
     out << ". ";
@@ -5669,9 +5669,9 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
   for (int i=0; i<this->theNegGens.size; i++)
   { if (useHtml && useLaTeX)
     { if (useMouseHover)
-        out << CGI::GetMathMouseHover(this->theNegGens[i].ToString(theFormat), 2000);
+        out << HtmlRoutines::GetMathMouseHover(this->theNegGens[i].ToString(theFormat), 2000);
       else
-        out << CGI::GetMathSpanPure(this->theNegGens[i].ToString(theFormat), 2000);
+        out << HtmlRoutines::GetMathSpanPure(this->theNegGens[i].ToString(theFormat), 2000);
     } else
       out << this->theNegGens[i].ToString(theFormat);
     if (i!=this->theNegGens.size-1)
@@ -5681,9 +5681,9 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
   for (int i=0; i<this->thePosGens.size; i++)
   { if (useHtml && useLaTeX)
     { if (useMouseHover)
-        out << CGI::GetMathMouseHover(this->thePosGens[i].ToString(theFormat), 2000);
+        out << HtmlRoutines::GetMathMouseHover(this->thePosGens[i].ToString(theFormat), 2000);
       else
-        out << CGI::GetMathSpanPure(this->thePosGens[i].ToString(theFormat), 2000);
+        out << HtmlRoutines::GetMathSpanPure(this->thePosGens[i].ToString(theFormat), 2000);
     } else
       out << this->thePosGens[i].ToString(theFormat);
     if (i!=this->thePosGens.size-1)
@@ -5757,17 +5757,17 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   out << "<br>Cartan symmetric matrix: ";
   if (useLaTeX && useHtml)
   { if (useMouseHover)
-      out << CGI::GetMathMouseHover(this->theWeylNonEmbedded->CartanSymmetric.ToString(&tempFormat));
+      out << HtmlRoutines::GetMathMouseHover(this->theWeylNonEmbedded->CartanSymmetric.ToString(&tempFormat));
     else
-      out << CGI::GetMathSpanPure(this->theWeylNonEmbedded->CartanSymmetric.ToString(&tempFormat));
+      out << HtmlRoutines::GetMathSpanPure(this->theWeylNonEmbedded->CartanSymmetric.ToString(&tempFormat));
   } else
     out << this->theWeylNonEmbedded->CartanSymmetric.ToString(theFormat);
   out << "<br>Scalar products of elements of Cartan subalgebra scaled to act by 2 (co-symmetric Cartan matrix): ";
   if (useLaTeX && useHtml)
   { if (useMouseHover)
-      out << CGI::GetMathMouseHover(this->theWeylNonEmbedded->CoCartanSymmetric.ToString(&tempFormat));
+      out << HtmlRoutines::GetMathMouseHover(this->theWeylNonEmbedded->CoCartanSymmetric.ToString(&tempFormat));
     else
-      out << CGI::GetMathSpanPure(this->theWeylNonEmbedded->CoCartanSymmetric.ToString(&tempFormat));
+      out << HtmlRoutines::GetMathSpanPure(this->theWeylNonEmbedded->CoCartanSymmetric.ToString(&tempFormat));
   } else
     out << this->theWeylNonEmbedded->CoCartanSymmetric.ToString(theFormat);
   FormatExpressions charFormatNonConst;
@@ -5776,18 +5776,18 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   out << "<br>Decomposition of ambient Lie algebra: ";
   if (useLaTeX)
   { if (useMouseHover)
-      out << CGI::GetMathMouseHover(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst), 20000);
+      out << HtmlRoutines::GetMathMouseHover(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst), 20000);
     else
-      out << CGI::GetMathSpanPure(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst), 20000);
+      out << HtmlRoutines::GetMathSpanPure(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst), 20000);
   } else
     out << this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst);
   if (this->CartanOfCentralizer.size>0)
   { out << "<br>Primal decomposition of the ambient Lie algebra (refining the above decomposition; the order from the above decomposition is not preserved): ";
     if (useLaTeX)
     { if (useMouseHover)
-        out << CGI::GetMathMouseHover(this->thePrimalChaR.ToString(&charFormatNonConst), 20000);
+        out << HtmlRoutines::GetMathMouseHover(this->thePrimalChaR.ToString(&charFormatNonConst), 20000);
       else
-        out << CGI::GetMathSpanPure(this->thePrimalChaR.ToString(&charFormatNonConst), 20000);
+        out << HtmlRoutines::GetMathSpanPure(this->thePrimalChaR.ToString(&charFormatNonConst), 20000);
     } else
       out << this->thePrimalChaR.ToString(&charFormatNonConst);
   }
@@ -6020,7 +6020,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
       if (i>=100)
         reportStream << "... and so on, only the first 100 elements printed out of total " << theOuterAutos.theElements.size << ". ";
       else
-        reportStream << "<br>" << CGI::GetMathMouseHover(theOuterAutos.theElements[i].ToStringMatForm(&theFormat));
+        reportStream << "<br>" << HtmlRoutines::GetMathMouseHover(theOuterAutos.theElements[i].ToStringMatForm(&theFormat));
 //    if (doDebug)
 //      stOutput << "<br>report current: " << reportStream.str();
     theReport.Report(reportStream.str());

@@ -21,7 +21,7 @@ Calculator::Calculator()
 }
 
 std::string Calculator::GetCalculatorLink(const std::string& input)
-{ return CGI::GetCalculatorLink(theGlobalVariables.DisplayNameExecutable, input);
+{ return HtmlRoutines::GetCalculatorLink(theGlobalVariables.DisplayNameExecutable, input);
 }
 
 std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
@@ -414,13 +414,13 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
 //  Polynomial<Rational> Pone, Pzero;
   result.AssignElementLieAlgebra(inputElt, *this->owner, 1);
   std::stringstream out;
-//  stOutput << "<br>the generic elt:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
+//  stOutput << "<br>the generic elt:" << HtmlRoutines::GetHtmlMathSpanPure(theGenElt.ToString());
   theGenElt.Simplify();
-//  stOutput << "<br>the generic elt simplified:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
-//  stOutput << "<br>" << CGI::GetHtmlMathSpanPure(result.ToString() ) << " times " << CGI::GetHtmlMathSpanPure(theGenElt.ToString()) << " = ";
+//  stOutput << "<br>the generic elt simplified:" << HtmlRoutines::GetHtmlMathSpanPure(theGenElt.ToString());
+//  stOutput << "<br>" << HtmlRoutines::GetHtmlMathSpanPure(result.ToString() ) << " times " << HtmlRoutines::GetHtmlMathSpanPure(theGenElt.ToString()) << " = ";
   result*=(theGenElt);
   result.Simplify();
-//  stOutput << " <br>" << CGI::GetHtmlMathSpanPure(result.ToString());
+//  stOutput << " <br>" << HtmlRoutines::GetHtmlMathSpanPure(result.ToString());
   MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
   idMT.MakeIdSpecial();
   MatrixTensor<RationalFunctionOld> tempMat1;
@@ -624,7 +624,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
 //      stOutput << "<br>theUEformat: ";
 //      for (int k=0; k<theUEformat.polyAlphabeT.size; k++)
 //        stOutput << theUEformat.polyAlphabeT[k] << ", ";
-      out << "<tr><td>General monomial in U(n_-):</td><td>" << CGI::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td> </tr>";
+      out << "<tr><td>General monomial in U(n_-):</td><td>" << HtmlRoutines::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td> </tr>";
       latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
       latexReport << "Action on ";
       out << "<tr><td></td><td colspan=\"" << theGeneratorsItry.size << "\"> Element acting</td></td></tr>";
@@ -635,7 +635,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       }
       latexReport << "\\endhead \\hline<br>";
       out << "</tr>";
-      out << "<tr><td>" << CGI::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td>";
+      out << "<tr><td>" << HtmlRoutines::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td>";
       latexReport << "$" << genericElt.ToString(&theUEformat) << "$";
       for (int j=0; j<theGeneratorsItry.size; j++)
       { actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone);
@@ -643,14 +643,14 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
         theSSalgebra.OrderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
         actionOnGenericElt.Simplify();
         theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
-        out << "<td>" << CGI::GetMathMouseHover("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}") << "</td>";
+        out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}") << "</td>";
         theUEformat.NumAmpersandsPerNewLineForLaTeX=0;
         latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.ToString(&theUEformat) << "\\end{array}$ ";
       }
       latexReport << "\\\\ \\hline\\hline<br>";
       out << "</tr>";
     }
-    out << "<tr><td>" << CGI::GetMathMouseHover(theMod.theChaR.ToString()) << "</td>";
+    out << "<tr><td>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.ToString()) << "</td>";
     latexReport2 << "\\begin{longtable}{rll}";
     latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline" << "\\multirow{" << theGeneratorsItry.size
     << "}{*}{$" << theSSalgebra.GetLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
@@ -670,7 +670,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       totalTime+=theGlobalVariables.GetElapsedSeconds()-currentTime;
       theWeylFormat.CustomCoeffMonSeparator="\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
-      out << "<td>" << CGI::GetMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}")
+      out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}")
       << "</td>";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX=0;
       theWeylFormat.MaxLineLength=300;
@@ -686,11 +686,11 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
     out << "</tr>";
     if (theMod.GetDim()==1)
     { ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
-      reportFourierTransformedCalculatorCommands << "<hr>" << CGI::GetMathMouseHover(theMod.theChaR.ToString())
+      reportFourierTransformedCalculatorCommands << "<hr>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.ToString())
       << ", differential operators Fourier transformed - formatted for calculator input. <br><br>";
       reportFourierTransformedCalculatorCommands << "x_{{i}}=ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
-      reportCalculatorCommands << "<hr>" << CGI::GetMathMouseHover(theMod.theChaR.ToString())
+      reportCalculatorCommands << "<hr>" << HtmlRoutines::GetMathMouseHover(theMod.theChaR.ToString())
       << ", differential operators - formatted for calculator input. <br><br>";
       reportCalculatorCommands << "x_{{i}}=ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
@@ -758,7 +758,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   latexFormat.flagUseLatex=true;
   latexFormat.flagUseHTML=false;
   if (this->theCharOverH.size()<100)
-    out << CGI::GetMathMouseHover(this->theCharOverH.ToString(&latexFormat));
+    out << HtmlRoutines::GetMathMouseHover(this->theCharOverH.ToString(&latexFormat));
   else
     out << this->theCharOverH.ToString();
   out << "<br>Dimensionn of the finite dimensional part of the module: " << this->GetDim();
@@ -793,13 +793,13 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
     if (this->ComputedGeneratorActions.selected[i])
     { tempSSElt.MakeGenerator(i, theAlgebrA);
       out << "<tr>";
-      out << "<td>" << CGI::GetMathMouseHover(tempSSElt.ToString(theFormat)) << "</td>";
+      out << "<td>" << HtmlRoutines::GetMathMouseHover(tempSSElt.ToString(theFormat)) << "</td>";
       out << "<td>";
       if (this->GetDim()<28)
       { Matrix<coefficient> outputMat;
         this->actionsGeneratorsMaT[i].GetMatrix(outputMat, this->GetDim());
         //stOutput << outputMat.ToString(&latexFormat);
-        out << CGI::GetMathMouseHover(outputMat.ToString(&latexFormat), 5000) << " = ";
+        out << HtmlRoutines::GetMathMouseHover(outputMat.ToString(&latexFormat), 5000) << " = ";
         out << this->actionsGeneratorsMaT[i].ToString();
       }
       else
@@ -1084,11 +1084,11 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   }
   out << "We define the symmetric Cartan matrix <br>by requesting that the entry in the i-th row and j-th column<br> "
   << " be the scalar product of the i^th and j^th roots. The symmetric Cartan matrix is:<br>"
-  << CGI::GetMathSpanPure(theWeyl.CartanSymmetric.ToString(&latexFormat));
+  << HtmlRoutines::GetMathSpanPure(theWeyl.CartanSymmetric.ToString(&latexFormat));
   out << "<br>Let the (i,j)^{th} entry of the symmetric Cartan matrix be a_{ij}. <br> Then we define the co-symmetric Cartan matrix as "
   << " the matrix whose (i,j)^{th} entry equals 4*a_{ij}/(a_{ii}*a_{jj}). In other words, the co-symmetric Cartan matrix is the "
   << "symmetric Cartan matrix of the dual root system. The co-symmetric Cartan matrix equals:<br>"
-  << CGI::GetMathSpanPure(theWeyl.CoCartanSymmetric.ToStringLatex());
+  << HtmlRoutines::GetMathSpanPure(theWeyl.CoCartanSymmetric.ToStringLatex());
   out << "<br>The determinant of the symmetric Cartan matrix is: " << theWeyl.CartanSymmetric.GetDeterminant().ToString();
   /*  Rational theRatio;
     for (int j=0; j<theWeyl.GetDim(); j++)
@@ -1117,13 +1117,13 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   out << "<hr> Half sum of positive roots: " << theWeyl.rho.ToString();
   Vector<Rational> tempRoot;
   theWeyl.GetEpsilonCoords(theWeyl.rho, tempRoot);
-  out << "= " << CGI::GetMathSpanPure(tempRoot.ToStringLetterFormat("\\varepsilon"));
+  out << "= " << HtmlRoutines::GetMathSpanPure(tempRoot.ToStringLetterFormat("\\varepsilon"));
   out << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br>with the j^th simple root times 2 divided by the root length squared,<br> "
   << " and 0 with the remaining simple roots): ";
   theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
   out << "<table>";
   for (int i=0; i< fundamentalWeights.size; i++)
-  { out << "<tr><td style=\"white-space: nowrap\">" << fundamentalWeights[i].ToString() << "</td><td> =</td><td style=\"white-space: nowrap\"> " << CGI::GetMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
+  { out << "<tr><td style=\"white-space: nowrap\">" << fundamentalWeights[i].ToString() << "</td><td> =</td><td style=\"white-space: nowrap\"> " << HtmlRoutines::GetMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -1136,7 +1136,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   simpleBasis.MakeEiBasis(theWeyl.GetDim());
   theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
   for (int i=0; i< simplebasisEpsCoords.size; i++)
-  { out << "<tr><td style=\"white-space: nowrap\">" << simpleBasis[i].ToString() << " </td><td>=</td> <td style=\"white-space: nowrap\">" << CGI::GetMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
+  { out << "<tr><td style=\"white-space: nowrap\">" << simpleBasis[i].ToString() << " </td><td>=</td> <td style=\"white-space: nowrap\">" << HtmlRoutines::GetMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -2329,11 +2329,11 @@ std::string Function::ToStringFull()const
       out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";
     if (this->theExample!="")
       out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
-    out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
+    out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample!="")
       out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=calculator&showExamples=true&mainInput="
-      << CGI::ConvertStringToURLString(this->theExample, false)
+      << HtmlRoutines::ConvertStringToURLString(this->theExample, false)
       << "\"> " << " Example" << "</a>" ;
   } else
     out2 << "<b>Experimental, please don't use.</b>";
@@ -2368,7 +2368,7 @@ std::string Calculator::ToStringOutputAndSpecials()
   if (this->inputString=="")
     return "";
   std::stringstream out;
-  std::string urledInput=CGI::ConvertStringToURLString(this->inputString, false);
+  std::string urledInput=HtmlRoutines::ConvertStringToURLString(this->inputString, false);
   if (this->inputString!="")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=calculator&mainInput="
@@ -2384,7 +2384,7 @@ std::string Calculator::ToStringOutputAndSpecials()
   out << "</td></tr></table>";
   if (this->flagProduceLatexLink)
     out << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
-    << CGI::GetLatexEmbeddableLinkFromCalculatorInput(urledInput, this->inputString)
+    << HtmlRoutines::GetLatexEmbeddableLinkFromCalculatorInput(urledInput, this->inputString)
     ;
   if (this->parsingLog!="")
     out << "<b> As requested, here is a calculator parsing log</b><br>"
@@ -2456,7 +2456,7 @@ std::string Calculator::ToStringPerformance()
     moreDetails << "<br>Large gcd calls: "
     << Rational::TotalLargeGCDcalls - this->NumLargeGCDcallsStart
     << ", total: " << Rational::TotalLargeGCDcalls;
-  out << CGI::GetHtmlSpanHidableStartsHiddeN(moreDetails.str(), "More details");
+  out << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreDetails.str(), "More details");
   #endif
   return out.str();
 }
@@ -2493,7 +2493,7 @@ std::string Calculator::ToString()
     << "else"
     << "  switchMenu('calculatorExamples');"
     ;
-    out2 << CGI::GetHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Examples.");
+    out2 << HtmlRoutines::GetHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Examples.");
     out2 << "<span id=\"calculatorExamples\"></span>";
   }
   if (!theGlobalVariables.UserDebugFlagOn())
@@ -2537,7 +2537,7 @@ std::string Calculator::ToString()
     if (i!=this->cachedExpressions.size-1)
       out << "<br>";
   }
-  out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str(), "info expand/collapse", "calculatorInternalDetails");
+  out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str(), "info expand/collapse", "calculatorInternalDetails");
   return out2.str();
 }
 

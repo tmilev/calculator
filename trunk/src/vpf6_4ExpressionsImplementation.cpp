@@ -2065,7 +2065,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     { if (isFinal)
         out << this->GetValue<std::string>();
       else
-        out << CGI::ConvertStringToHtmlString(this->GetValue<std::string>(), false);
+        out << HtmlRoutines::ConvertStringToHtmlString(this->GetValue<std::string>(), false);
     } else
       out << "\"" << this->GetValue<std::string>() << "\"";
     result=true;
@@ -3020,7 +3020,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << "<hr> ";
         if (!this->owner->flagHideLHS)
         { if (i<(*startingExpression).children.size)
-            out << CGI::GetMathSpanPure((*startingExpression)[i].ToString(theFormat));
+            out << HtmlRoutines::GetMathSpanPure((*startingExpression)[i].ToString(theFormat));
           else
             out << "No matching starting expression- possible use of the Melt keyword.";
         } else
@@ -3036,7 +3036,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
                   currentE.IsOfType<GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >()) && isFinal)
           out << currentE.ToString(theFormat);
         else
-          out << CGI::GetMathSpanPure
+          out << HtmlRoutines::GetMathSpanPure
           (currentE.ToString(theFormat), 1700);
         if (i!=this->children.size-1)
           out << ";";
@@ -3098,20 +3098,20 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       outTrue << out.str();
     else
     { outTrue << "<tr><td>"
-      << CGI::GetMathSpanPure
+      << HtmlRoutines::GetMathSpanPure
       (startingExpression->ToString(theFormat), 1700);
       if ((this->IsOfType<std::string>() || this->IsOfType<Plot>() ||
            this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroupData>()) && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else
         outTrue << "</td><td>"
-        << CGI::GetMathSpanPure(out.str(), 1700) << "</td></tr>";
+        << HtmlRoutines::GetMathSpanPure(out.str(), 1700) << "</td></tr>";
     }
     outTrue << "</table>";
     return outTrue.str();
   }
 //  if (useLatex && recursionDepth==0 && this->theOperation!=owner->opEndStatement())
-//    return CGI::GetHtmlMathSpanFromLatexFormula(out.str());
+//    return HtmlRoutines::GetHtmlMathSpanFromLatexFormula(out.str());
 //  if (this->format==this->formatTimesDenotedByStar)
 //    stOutput << "DEBUG: Formatted by star: " << out.str() << "<br>";
   return out.str();

@@ -520,8 +520,8 @@ bool Calculator::EvaluateExpression
           << theCommands.RuleContextIdentifier << "<br>Rules: " << theCommands.RuleStack.ToString() << "<br>";
         }*/
         theCommands << "<br>Rule context identifier: " << theCommands.RuleStackCacheIndex
-        << "<br>" << CGI::GetMathMouseHover(output.ToString()) << " -> "
-        << CGI::GetMathMouseHover(transformationE.ToString());
+        << "<br>" << HtmlRoutines::GetMathMouseHover(output.ToString()) << " -> "
+        << HtmlRoutines::GetMathMouseHover(transformationE.ToString());
       }
       output=transformationE;
       continue;
@@ -541,8 +541,8 @@ bool Calculator::EvaluateExpression
         if (theCommands.flagLogEvaluatioN)
         { theCommands << "<hr>Rule cache index: " << theCommands.RuleStackCacheIndex
           << "<br>Rule: " << currentPattern.ToString()
-          << "<br>" << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << " -> "
-          << CGI::GetMathSpanPure(output.ToString());
+          << "<br>" << HtmlRoutines::GetMathSpanPure(beforePatternMatch.ToString()) << " -> "
+          << HtmlRoutines::GetMathSpanPure(output.ToString());
         }
         break;
       }

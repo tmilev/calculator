@@ -260,7 +260,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     }
     out << "<br>";
   }
-  out << CGI::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "redraw");
+  out << HtmlRoutines::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "redraw");
   out << "<br>The picture is drawn using javascript."
   << "<br> Left click + hold+ move the mouse on a special vector = rotates the special vector. "
   << "Special vectors, if any, should be labeled according to the author's ``artistic'' inspiration (usually dark red dots).  "
@@ -992,7 +992,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     }
     out << "<br>";
   }
-  out << CGI::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "redraw");
+  out << HtmlRoutines::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "redraw");
   out << "<br>The picture is drawn using javascript."
   << "<br> Left click + hold+ move the mouse on a special vector = rotates the special vector. "
   << "Special vectors, if any, should be labeled according to the author's ``artistic'' inspiration (usually dark red dots).  "

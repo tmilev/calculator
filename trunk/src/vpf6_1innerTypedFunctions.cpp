@@ -347,7 +347,7 @@ bool CalculatorFunctionsBinaryOps::innerAddWeightToWeight(Calculator& theCommand
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
-  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << HtmlRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
   { //stOutput << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
@@ -372,7 +372,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(Calculator
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly");
-  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << HtmlRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
   { //stOutput << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
@@ -397,7 +397,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calcula
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
-  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << HtmlRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
   { //stOutput << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
@@ -490,7 +490,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(Calculator
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly");
-  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << HtmlRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   if (input.children.size<3)
     return false;
   const Expression leftE=input[1];
@@ -524,7 +524,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands,
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO");
-  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << HtmlRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -549,7 +549,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO(Calculator& theCommands
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath");
-  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << HtmlRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -594,7 +594,7 @@ bool CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(Calculator
 
 bool CalculatorFunctionsBinaryOps::innerAddPlotToPlot(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPlotToPlot");
-  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << HtmlRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;

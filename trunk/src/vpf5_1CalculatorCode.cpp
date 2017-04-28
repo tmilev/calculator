@@ -574,8 +574,8 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
 //  stOutput << "<br>The elts: " <<  theOperators.ToString();
 //  stOutput << "<br> The common ad: " << commonAd.ToString();
   if (success)
-    out << CGI::GetMathSpanPure("F="+theF.ToString() + ";") << "<br>" << CGI::GetMathSpanPure("H="+theH.ToString() + ";") << "<br>"
-    << CGI::GetMathSpanPure("E="+theE.ToString() + ";") << "<br><br>The log stream of the computation follows. " << logStream.str();
+    out << HtmlRoutines::GetMathSpanPure("F="+theF.ToString() + ";") << "<br>" << HtmlRoutines::GetMathSpanPure("H="+theH.ToString() + ";") << "<br>"
+    << HtmlRoutines::GetMathSpanPure("E="+theE.ToString() + ";") << "<br><br>The log stream of the computation follows. " << logStream.str();
   else
     out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();
   return output.AssignValue(out.str(), theCommands);
@@ -703,12 +703,12 @@ bool Calculator::innerGroebner
   }
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
   for(int i=0; i<inputVector.size; i++)
-    out << "<br>" << CGI::GetMathSpanPure(inputVector[i].ToString(&theGroebnerComputation.theFormat));
+    out << "<br>" << HtmlRoutines::GetMathSpanPure(inputVector[i].ToString(&theGroebnerComputation.theFormat));
   if (success)
   { out << "<br>Minimal Groebner basis with " << outputGroebner.size << " elements, computed using algorithm 1, using "
     << theGroebnerComputation.NumberGBComputations << " polynomial operations. ";
     for(int i=0; i<outputGroebner.size; i++)
-      out << "<br> " << CGI::GetMathSpanPure(outputGroebner[i].ToString(&theGroebnerComputation.theFormat));
+      out << "<br> " << HtmlRoutines::GetMathSpanPure(outputGroebner[i].ToString(&theGroebnerComputation.theFormat));
     out << "<br>Output in calculator-ready format: ";
     out << "<br>(";
     for(int i=0; i<outputGroebner.size; i++)
@@ -735,7 +735,7 @@ bool Calculator::innerGroebner
   out << "<br>Minimal Groebner basis algorithm 2 (" << outputGroebner2.size << " elements):";
   for(int i=0; i<outputGroebner2.size; i++)
     out << "<br> "
-    << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(outputGroebner2[i].ToString(&theFormat))
+    << HtmlRoutines::GetHtmlMathSpanNoButtonAddBeginArrayL(outputGroebner2[i].ToString(&theFormat))
   ;*/
   return output.AssignValue(out.str(), theCommands);
 }

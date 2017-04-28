@@ -808,10 +808,10 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
   }
   this->CheckCommonOwner(other);
 //  AlgebraicNumber otherCopy=other;
-//  stOutput << "Converting <hr>" << CGI::GetMathSpanPure(this->ToString()) << " and <br><br>\n\n\n\n<br><br>"
-//  << CGI::GetMathSpanPure(otherCopy.ToString());
-//  stOutput << " <br><br>To get: " << CGI::GetMathSpanPure(this->ToString()) << "<br>\n\n and  <br><br>\n\n\n\n<br><br> \n"
-//  << CGI::GetMathSpanPure(otherCopy.ToString()) ;
+//  stOutput << "Converting <hr>" << HtmlRoutines::GetMathSpanPure(this->ToString()) << " and <br><br>\n\n\n\n<br><br>"
+//  << HtmlRoutines::GetMathSpanPure(otherCopy.ToString());
+//  stOutput << " <br><br>To get: " << HtmlRoutines::GetMathSpanPure(this->ToString()) << "<br>\n\n and  <br><br>\n\n\n\n<br><br> \n"
+//  << HtmlRoutines::GetMathSpanPure(otherCopy.ToString()) ;
   //stOutput << " <hr>multiplying " << this->theElt.ToString() << " by " << other.theElt.ToString() << " ";
   MatrixTensor<Rational> leftMat, rightMat;
 //  FormatExpressions tempformat;
@@ -821,8 +821,8 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
   this->owner->GetMultiplicationBy(other, rightMat);
   leftMat.CheckConsistencyGrandMaster();
   rightMat.CheckConsistencyGrandMaster();
-//  stOutput << "<br><br>\n\n\n\n<br><br> in matrix form: " << CGI::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat)) << " by "
-//  << CGI::GetMathSpanPure(rightMat.ToStringMatForm(&tempformat));
+//  stOutput << "<br><br>\n\n\n\n<br><br> in matrix form: " << HtmlRoutines::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat)) << " by "
+//  << HtmlRoutines::GetMathSpanPure(rightMat.ToStringMatForm(&tempformat));
   leftMat*=rightMat;
   if (doReport)
   { reportStream << "<b>DONE</b>.";
@@ -831,7 +831,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
 
   this->basisIndex=this->owner->theBasesAdditive.size-1;
   this->theElT.MaKeEi(0);
-  //stOutput << "matrix " << CGI::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat));
+  //stOutput << "matrix " << HtmlRoutines::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat));
   leftMat.ActOnVectorColumn(this->theElT);
   //stOutput << this->theElt.ToString();
 }
@@ -1006,7 +1006,7 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
   tempFormat.flagUseHTML=false;
   tempFormat.flagUseLatex=true;
   if (this->theBasisMultiplicative.size==1)
-  { out << CGI::GetMathSpanPure("\\mathbb Q");
+  { out << HtmlRoutines::GetMathSpanPure("\\mathbb Q");
     return out.str();
   }
   if (this->flagIsQuadraticRadicalExtensionRationals)
@@ -1017,7 +1017,7 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
         out << ", ";
     }
     out << "]";
-    return CGI::GetMathSpanPure(out.str());
+    return HtmlRoutines::GetMathSpanPure(out.str());
   }
   out << "Dimension over the rationals: " << this->theBasisMultiplicative.size << ". Multiplicative basis follows. ";
   for (int i=0; i<this->theBasisMultiplicative.size; i++)
@@ -1031,19 +1031,19 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
     } else
       theFlaStream << " e_{" << i+1 << "}";
     theFlaStream << "=" << this->theBasisMultiplicative[i].ToStringMatForm(&tempFormat);
-    out << CGI::GetMathSpanPure(theFlaStream.str());
+    out << HtmlRoutines::GetMathSpanPure(theFlaStream.str());
     if (i!=this->theBasisMultiplicative.size-1)
       out << ",  ";
   }
   if (this->flagIsQuadraticRadicalExtensionRationals)
     out << "<br>Generating element not selected. ";
   else
-    out << "<br>Generating element: " << CGI::GetMathSpanPure(this->GeneratingElementMatForm.ToString(&tempFormat));
+    out << "<br>Generating element: " << HtmlRoutines::GetMathSpanPure(this->GeneratingElementMatForm.ToString(&tempFormat));
   out << "<br>There are " << this->theBasesAdditive.size << " registered old bases. ";
   for (int i=0; i<this->theBasesAdditive.size; i++)
   { out << "<hr>Basis " << i+1 << " has " << this->theBasesAdditive[i].size << " elements: ";
     for (int j=0; j<this->theBasesAdditive[i].size; j++)
-    { out << CGI::GetMathSpanPure(this->theBasesAdditive[i][j].ToString(&tempFormat));
+    { out << HtmlRoutines::GetMathSpanPure(this->theBasesAdditive[i][j].ToString(&tempFormat));
       if (j!=this->theBasesAdditive[i].size-1)
         out << ", ";
     }

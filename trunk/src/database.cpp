@@ -236,11 +236,11 @@ std::string MySQLdata::GetDatA()const
 }
 
 std::string MySQLdata::GetDataNoQuotes()const
-{ return CGI::ConvertStringToURLString(this->value, false);
+{ return HtmlRoutines::ConvertStringToURLString(this->value, false);
 }
 
 std::string MySQLdata::GetIdentifierNoQuotes()const
-{ std::string result=CGI::ConvertStringToURLString(this->value, false);
+{ std::string result=HtmlRoutines::ConvertStringToURLString(this->value, false);
   if (result.size()<=30)
     return result;
   return result.substr(0,30)+ Crypto::computeSha1outputBase64(this->value);
@@ -379,7 +379,7 @@ std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string
   { out << "<tr>";
     for (int j=0; j<theTable[i].size; j++)
       if (j!=indexToBeReplacedWithLinks)
-        out << "<td>" << CGI::URLKeyValuePairsToNormalRecursiveHtml(theTable[i][j]) << "</td>";
+        out << "<td>" << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theTable[i][j]) << "</td>";
       else if (theTable[i][j]=="")
         out << "<td></td>";
       else
@@ -387,10 +387,10 @@ std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string
         std::stringstream spanId;
         std::stringstream theRequest;
         theRequest
-        << "currentDatabaseTable=" << CGI::ConvertStringToURLString(tableIdentifier, false) << "&"
-        << "currentDatabaseRow=" << CGI::ConvertStringToURLString(theTable[i][0], false) << "&"
-        << "currentDatabaseKeyColumn=" << CGI::ConvertStringToURLString(columnLabels[0], false) << "&"
-        << "currentDatabaseDesiredColumn=" << CGI::ConvertStringToURLString(columnLabels[indexToBeReplacedWithLinks], false)
+        << "currentDatabaseTable=" << HtmlRoutines::ConvertStringToURLString(tableIdentifier, false) << "&"
+        << "currentDatabaseRow=" << HtmlRoutines::ConvertStringToURLString(theTable[i][0], false) << "&"
+        << "currentDatabaseKeyColumn=" << HtmlRoutines::ConvertStringToURLString(columnLabels[0], false) << "&"
+        << "currentDatabaseDesiredColumn=" << HtmlRoutines::ConvertStringToURLString(columnLabels[indexToBeReplacedWithLinks], false)
         ;
         spanId << "spanRow" << i << "Col" << j;
         out << "<span class=\"linkLike\"  "
@@ -427,7 +427,7 @@ bool DatabaseRoutines::FetchTableNames(List<std::string>& output, std::stringstr
 std::string DatabaseRoutines::ToStringCurrentTableHTML ()
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringCurrentTableHTML");
   std::string currentTable=
-  CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"), false);
+  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"), false);
   if (currentTable.find("`")!=std::string::npos)
   { std::stringstream out;
     out << "<b>The table identifier: " << currentTable << " contains the ` character and is invalid. </b>";
@@ -447,20 +447,20 @@ std::string DatabaseRoutines::ToStringOneEntry()
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringOneEntry");
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   std::stringstream out;
-  if (!CGI::ChopCGIString(CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false), theMap, out))
+  if (!HtmlRoutines::ChopCGIString(HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false), theMap, out))
   { out << "Failed to extract input arguments. ";
     return out.str();
   }
   out << "<hr>";
 //  out << "DEBUG: getting info from: " << theGlobalVariables.GetWebInput("mainInput")
 //  << "<br> got: <hr>" << theMap.ToStringHtml();
-  std::string currentTable=CGI::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  std::string currentTable=HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
   ("currentDatabaseTable"), false);
-  std::string currentRow = CGI::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  std::string currentRow = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
   ("currentDatabaseRow"), false);
-  std::string currentKeyColumn = CGI::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  std::string currentKeyColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
   ("currentDatabaseKeyColumn"), false);
-  std::string currentDesiredColumn = CGI::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  std::string currentDesiredColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
   ("currentDatabaseDesiredColumn"), false);
 
   if (currentTable.find("`")!=std::string::npos ||
@@ -489,7 +489,7 @@ std::string DatabaseRoutines::ToStringOneEntry()
   else
     out
     //<< "<hr>DEBUG<hr>"
-    << CGI::URLKeyValuePairsToNormalRecursiveHtml( outputString)
+    << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml( outputString)
 //    << "<hr>DEBUG<hr>"
     ;
 //  out << "<hr>DEBUG: requesting: "
@@ -545,8 +545,8 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->theQueryResult= mysql_store_result(this->parent->connection);
   //stOutput << "\n<br>\nDEBUG: and even to here";
   if (this->theQueryResult==0)
-  { if (outputFailureComments!=0)
-      *outputFailureComments << "\n<br>\nDEBUG: Query succeeded. ";
+  { //if (outputFailureComments!=0)
+    //  *outputFailureComments << "\n<br>\nDEBUG: Query succeeded. ";
     return;
   }
   this->numRowsRead=mysql_num_rows(this->theQueryResult);
@@ -633,7 +633,7 @@ std::string UserCalculator::ToString()
       out << " weight: " << weightRat.ToString();
   }
   out << "<br>Deadline info: "
-  << CGI::URLKeyValuePairsToNormalRecursiveHtml
+  << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml
   (this->currentCoursesDeadlineInfoString.value);
   return out.str();
 }
@@ -706,7 +706,7 @@ bool UserCalculator::FetchOneUserRow
   }
   this->selectedRowFieldsUnsafe.SetSize(theQuery.allQueryResultStrings[0].size);
   for (int i=0; i<this->selectedRowFieldsUnsafe.size; i++)
-    this->selectedRowFieldsUnsafe[i]=CGI::ConvertURLStringToNormal(theQuery.allQueryResultStrings[0][i], false);
+    this->selectedRowFieldsUnsafe[i]=HtmlRoutines::ConvertURLStringToNormal(theQuery.allQueryResultStrings[0][i], false);
   theQuery.close();
   std::stringstream queryStreamFields;
   queryStreamFields
@@ -722,7 +722,7 @@ bool UserCalculator::FetchOneUserRow
   this->selectedRowFieldNamesUnsafe.SetSize(theFieldQuery.allQueryResultStrings.size);
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
-      this->selectedRowFieldNamesUnsafe[i]=CGI::ConvertURLStringToNormal(theFieldQuery.allQueryResultStrings[i][0], false);
+      this->selectedRowFieldNamesUnsafe[i]=HtmlRoutines::ConvertURLStringToNormal(theFieldQuery.allQueryResultStrings[i][0], false);
   if (this->currentTable!=DatabaseStrings::usersTableName)
     return true;
   this->actualActivationToken= this->GetSelectedRowEntry("activationToken");
@@ -750,7 +750,7 @@ bool UserCalculator::FetchOneUserRow
   if (this->userRole=="admin")
     if (theGlobalVariables.GetWebInput("courseHome")!="")
     { this->currentCourses=
-      CGI::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"),false);
+      HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"),false);
       this->problemInfoRowId=
       this->currentCourses.value;
       courseHomeFromDB=false;
@@ -1160,9 +1160,9 @@ void UserCalculator::SetProblemData(const std::string& problemName, const Proble
 bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("ProblemData::LoadFrom");
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
-  if (!CGI::ChopCGIString(inputData, theMap, commentsOnFailure))
+  if (!HtmlRoutines::ChopCGIString(inputData, theMap, commentsOnFailure))
     return false;
-  //stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml( inputData )<< "<hr>";
+  //stOutput << "<hr>DEBUG: Interpreting: <br>" << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml( inputData )<< "<hr>";
   this->Points=0;
   this->numCorrectlyAnswered=0;
   this->totalNumSubmissions=0;
@@ -1181,10 +1181,10 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
   for (int i=0; i<theMap.size(); i++)
   { if (theMap.theKeys[i]=="randomSeed")
       continue;
-    this->AddEmptyAnswerIdOnTop(CGI::ConvertURLStringToNormal(theMap.theKeys[i], false));
+    this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
     Answer& currentA=*this->theAnswers.LastObject();
-    std::string currentQuestion=CGI::ConvertURLStringToNormal(theMap.theValues[i], false);
-    result=CGI::ChopCGIString(currentQuestion, currentQuestionMap, commentsOnFailure);
+    std::string currentQuestion=HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false);
+    result=HtmlRoutines::ChopCGIString(currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result)
     { commentsOnFailure << "Failed to interpret as key-value pair: "
       << currentQuestion << ". ";
@@ -1198,8 +1198,8 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
       atoi(currentQuestionMap.GetValueCreateIfNotPresent("numSubmissions").c_str());
     if (currentQuestionMap.Contains("firstCorrectAnswer"))
     { currentA.firstCorrectAnswerURLed=currentQuestionMap.GetValueCreateIfNotPresent("firstCorrectAnswer");
-      currentA.firstCorrectAnswerClean= CGI::ConvertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
-      currentA.firstCorrectAnswerURLed=CGI::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
+      currentA.firstCorrectAnswerClean= HtmlRoutines::ConvertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
+      currentA.firstCorrectAnswerURLed=HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly.
     }
   }
@@ -1240,13 +1240,13 @@ std::string ProblemData::Store()
   { Answer& currentA=this->theAnswers[i];
     if (this->flagRandomSeedGiven || i!=0)
       out << "&";
-    out << CGI::ConvertStringToURLString(currentA.answerId, false) << "=";
+    out << HtmlRoutines::ConvertStringToURLString(currentA.answerId, false) << "=";
     std::stringstream questionsStream;
     questionsStream
     << "numCorrectSubmissions=" << currentA.numCorrectSubmissions
     << "&numSubmissions=" << currentA.numSubmissions
-    << "&firstCorrectAnswer=" << CGI::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false);
-    out << CGI::ConvertStringToURLString(questionsStream.str(), false);
+    << "&firstCorrectAnswer=" << HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false);
+    out << HtmlRoutines::ConvertStringToURLString(questionsStream.str(), false);
   }
   return out.str();
 }
@@ -1255,24 +1255,24 @@ bool UserCalculator::InterpretDatabaseProblemData
 (const std::string& theInfo, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
-  if (!CGI::ChopCGIString(theInfo, theMap, commentsOnFailure))
+  if (!HtmlRoutines::ChopCGIString(theInfo, theMap, commentsOnFailure))
     return false;
   this->theProblemData.Clear();
   this->theProblemData.SetExpectedSize(theMap.size());
   bool result=true;
-  //stOutput << "<hr>DEBUG: Interpreting: <br>" << CGI::URLKeyValuePairsToNormalRecursiveHtml(theInfo)
+  //stOutput << "<hr>DEBUG: Interpreting: <br>" << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theInfo)
   //<< "<br>Map has: "
   //<< theMap.size() << " entries. ";
   ProblemData reader;
   std::string probNameNoWhiteSpace;
   for (int i=0; i<theMap.size(); i++)
   { //stOutput << "<hr>Reading data: " << theMap.theKeys[i] << ", value: "
-    //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(theMap[i]);
-    if (!reader.LoadFrom(CGI::ConvertURLStringToNormal(theMap[i], false), commentsOnFailure))
+    //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theMap[i]);
+    if (!reader.LoadFrom(HtmlRoutines::ConvertURLStringToNormal(theMap[i], false), commentsOnFailure))
     { result=false;
       continue;
     }
-    probNameNoWhiteSpace=MathRoutines::StringTrimWhiteSpace(CGI::ConvertURLStringToNormal(theMap.theKeys[i], false));
+    probNameNoWhiteSpace=MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
     if (probNameNoWhiteSpace=="")
       continue;
     this->theProblemData.SetKeyValue(probNameNoWhiteSpace, reader);
@@ -1292,11 +1292,11 @@ bool UserCalculator::StoreProblemDataToDatabase
 { MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabase");
   std::stringstream problemDataStream;
   for (int i=0; i<this->theProblemData.size(); i++)
-    problemDataStream << CGI::ConvertStringToURLString(this->theProblemData.theKeys[i], false) << "="
-    << CGI::ConvertStringToURLString(this->theProblemData.theValues[i].Store(), false) << "&";
+    problemDataStream << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false) << "="
+    << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theValues[i].Store(), false) << "&";
 //  stOutput << "DEBUG: storing in database ... stack trace: "
 //  << crash.GetStackTraceEtcErrorMessage();
-  //<< CGI::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
+  //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
   this->currentTable=DatabaseStrings::usersTableName;
   bool result= this->SetColumnEntry("problemData", problemDataStream.str(), theRoutines, &commentsOnFailure);
   return result;
@@ -1330,7 +1330,12 @@ bool DatabaseRoutines::AddUsersFromEmails
   //<< "\n<br>\ncurrentUser.currentTable: " << currentUser.currentTable.value << "\n<br>\n";
   for (int i=0; i<theEmails.size; i++)
   { currentUser.username=theEmails[i];
-    currentUser.email=theEmails[i];
+    bool isEmail=true;
+    if (theEmails[i].find('@')==std::string::npos)
+    { isEmail=false;
+      currentUser.email.value="";
+    } else
+      currentUser.email=theEmails[i];
     if (!currentUser.Iexist(*this))
     { if (!currentUser.CreateMeIfUsernameUnique(*this, &comments))
       { comments << "Failed to create user: " << currentUser.username.value;
@@ -1338,7 +1343,7 @@ bool DatabaseRoutines::AddUsersFromEmails
         continue;
       } else
         outputNumNewUsers++;
-      if (theEmails[i].find('@')!=std::string::npos)
+      if (isEmail)
         currentUser.SetColumnEntry("email", theEmails[i], *this, &comments);
     } else
     { if (!currentUser.FetchOneUserRow(*this, &comments))
@@ -1365,7 +1370,7 @@ bool DatabaseRoutines::AddUsersFromEmails
     } else
     { currentUser.enteredPassword=thePasswords[i];
       //stOutput << "Debug: user:<br>" << currentUser.username.value << "<br>password:<br>"
-      //<< CGI::ConvertStringToURLString(thePasswords[i]) << "<br>";
+      //<< HtmlRoutines::ConvertStringToURLString(thePasswords[i]) << "<br>";
       if (!currentUser.SetPassword(*this, &comments))
         result=false;
       currentUser.SetColumnEntry("activationToken", "activated", *this, &comments);
@@ -1959,8 +1964,8 @@ std::string DatabaseRoutines::ToStringAllTables()
   { std::stringstream linkStream;
     linkStream << theGlobalVariables.DisplayNameExecutable
     << "?request=database&currentDatabaseTable="
-    << CGI::ConvertStringToURLString(tableNames[i], false) << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true);
-    out << "<tr><td><a href=\"" << linkStream.str() << "\">" << CGI::ConvertURLStringToNormal(tableNames[i], false)
+    << HtmlRoutines::ConvertStringToURLString(tableNames[i], false) << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true);
+    out << "<tr><td><a href=\"" << linkStream.str() << "\">" << HtmlRoutines::ConvertURLStringToNormal(tableNames[i], false)
     << "</a></td></tr>";
   }
   out << "</table>";
@@ -1984,7 +1989,7 @@ bool DatabaseRoutines::FetchTableFromDatabaseIdentifier
   for (int i=0; i<theQuery.allQueryResultStrings.size; i++)
   { output[i].SetSize(theQuery.allQueryResultStrings[i].size);
     for (int j=0; j<theQuery.allQueryResultStrings[i].size; j++)
-      output[i][j]=CGI::ConvertURLStringToNormal(theQuery.allQueryResultStrings[i][j], false);
+      output[i][j]=HtmlRoutines::ConvertURLStringToNormal(theQuery.allQueryResultStrings[i][j], false);
   }
   outputWasTruncated=theQuery.flagOutputWasTruncated;
   if (outputWasTruncated)
@@ -2008,7 +2013,7 @@ bool DatabaseRoutines::FetchTableFromDatabaseIdentifier
   outputColumnLabels.SetSize(theFieldQuery.allQueryResultStrings.size);
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
-      outputColumnLabels[i]= CGI::ConvertURLStringToNormal(theFieldQuery.allQueryResultStrings[i][0], false);
+      outputColumnLabels[i]= HtmlRoutines::ConvertURLStringToNormal(theFieldQuery.allQueryResultStrings[i][0], false);
   return true;
 }
 
@@ -2036,7 +2041,7 @@ bool DatabaseRoutines::FetchEntry
   //stOutput << "<hr>DEBUG: Query did not return a result - column may not exist. <hr>";
     return false;
   }
-  outputUnsafe= CGI::ConvertURLStringToNormal(theQuery.firstResultString, false);
+  outputUnsafe= HtmlRoutines::ConvertURLStringToNormal(theQuery.firstResultString, false);
 //  stOutput << "Input entry as fetched from the system: " <<  theQuery.firstResultString
 //  << "<br>When made unsafe: " << outputUnsafe << "<br>";
   return true;
@@ -2232,8 +2237,8 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   (void) calculatorBase;
   std::stringstream out;
   out << theGlobalVariables.DisplayPathExecutable
-  << "?request=activateAccount&username=" << CGI::ConvertStringToURLString(inputUserNameUnsafe, false)
-  << "&activationToken=" << CGI::ConvertStringToURLString(theActivationToken, false)
+  << "?request=activateAccount&username=" << HtmlRoutines::ConvertStringToURLString(inputUserNameUnsafe, false)
+  << "&activationToken=" << HtmlRoutines::ConvertStringToURLString(theActivationToken, false)
   ;
   return out.str();
 }

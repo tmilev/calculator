@@ -35,9 +35,9 @@ Rational PartFraction::CheckSum;
 Rational PartFraction::CheckSum2;
 
 int DrawingVariables::NumHtmlGraphics=0;
-int CGI::GlobalMathSpanID=0;
-int CGI::GlobalCanvasID=0;
-int CGI::GlobalGeneralPurposeID=0;
+int HtmlRoutines::GlobalMathSpanID=0;
+int HtmlRoutines::GlobalCanvasID=0;
+int HtmlRoutines::GlobalGeneralPurposeID=0;
 
 template < > bool Matrix<Rational>::flagComputingDebugInfo=true;
 template < > bool Polynomial<Rational>::flagAnErrorHasOccuredTimeToPanic=true;
@@ -128,6 +128,7 @@ GlobalVariables::GlobalVariables()
   this->MaxTimeNoPingBeforeChildIsPresumedDead= 10;
   this->flagAceIsAvailable=false;
   this->MutexProgressReportinG.mutexName="ProgressReport";
+  this->flagCachingInternalFilesOn=true;
 //  this->flagIgnoreSecurityToWorkaroundSafarisBugs=false;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
@@ -208,7 +209,7 @@ int DrawingVariables::GetColorFromChamberIndex(int index)
   int r=(255* (tempI%NumColorsBase))/NumColorsBase;
   int g=(255* (tempI%(NumColorsBase*NumColorsBase)))/(NumColorsBase*NumColorsBase);
   int b=(255* (tempI%(NumColorsBase*NumColorsBase*NumColorsBase)))/(NumColorsBase*NumColorsBase*NumColorsBase);
-  return CGI::RedGreenBlue(r, g, b);
+  return HtmlRoutines::RedGreenBlue(r, g, b);
 }
 
 void DrawingVariables::initDrawingVariables()
@@ -226,15 +227,15 @@ void DrawingVariables::initDrawingVariables()
   this->flagDrawingInvisibles=false;
   this->flagDrawingLinkToOrigin=true;
   this->flagFillUserDefinedProjection=false;
-  this->ColorDashes=CGI::RedGreenBlue(200, 200, 200);
+  this->ColorDashes=HtmlRoutines::RedGreenBlue(200, 200, 200);
   this->flag2DprojectionDraw=true;
   this->flagIncludeExtraHtmlDescriptions=true;
   this->flagAllowMovingCoordinateSystemFromArbitraryClick=true;
-  this->ColorChamberIndicator=CGI::RedGreenBlue(220, 220, 0);
-  this->ColorWeylChamberWalls=CGI::RedGreenBlue(220, 220, 0);
-  this->ColorTextPermanentlyZeroChamber = CGI::RedGreenBlue(250, 220, 220);
-  this->ColorTextZeroChamber = CGI::RedGreenBlue(200, 100, 100);
-  this->ColorTextDefault= CGI::RedGreenBlue(0, 0, 0);
+  this->ColorChamberIndicator=HtmlRoutines::RedGreenBlue(220, 220, 0);
+  this->ColorWeylChamberWalls=HtmlRoutines::RedGreenBlue(220, 220, 0);
+  this->ColorTextPermanentlyZeroChamber = HtmlRoutines::RedGreenBlue(250, 220, 220);
+  this->ColorTextZeroChamber = HtmlRoutines::RedGreenBlue(200, 100, 100);
+  this->ColorTextDefault= HtmlRoutines::RedGreenBlue(0, 0, 0);
   this->Selected=-2;
   this->textX=0;
   this->textY=15;
@@ -242,16 +243,16 @@ void DrawingVariables::initDrawingVariables()
   this->theBuffer.init();
 }
 
-std::stringstream  CGI::outputStream;
-int CGI::numLinesAll;
-int CGI::shiftX=0;
-int CGI::numDashedLines=0;
-int CGI::numRegularLines=0;
-int CGI::numDottedLines=0;
-int CGI::shiftY=-200;
-int CGI::scale=100;
+std::stringstream  HtmlRoutines::outputStream;
+int HtmlRoutines::numLinesAll;
+int HtmlRoutines::shiftX=0;
+int HtmlRoutines::numDashedLines=0;
+int HtmlRoutines::numRegularLines=0;
+int HtmlRoutines::numDottedLines=0;
+int HtmlRoutines::shiftY=-200;
+int HtmlRoutines::scale=100;
 
-std::string CGI::CleanUpForFileNameUse(const std::string& inputString)
+std::string HtmlRoutines::CleanUpForFileNameUse(const std::string& inputString)
 { std::stringstream out;
   for (int i=0; i<(signed) inputString.size(); i++)
     if (inputString[i]=='/')
@@ -261,7 +262,7 @@ std::string CGI::CleanUpForFileNameUse(const std::string& inputString)
   return out.str();
 }
 
-std::string CGI::CleanUpForLaTeXLabelUse(const std::string& inputString)
+std::string HtmlRoutines::CleanUpForLaTeXLabelUse(const std::string& inputString)
 { std::stringstream out;
   for (int i=0; i<(signed) inputString.size(); i++)
     if (inputString[i]!='/' && inputString[i]!='^' && inputString[i]!='_' && inputString[i]!='{'
@@ -270,7 +271,7 @@ std::string CGI::CleanUpForLaTeXLabelUse(const std::string& inputString)
   return out.str();
 }
 
-void CGI::clearDollarSigns(std::string& theString, std::string& output)
+void HtmlRoutines::clearDollarSigns(std::string& theString, std::string& output)
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)
     if(theString[i]!='$')
@@ -278,7 +279,7 @@ void CGI::clearDollarSigns(std::string& theString, std::string& output)
   output=out.str();
 }
 
-std::string CGI::DoubleBackslashes(const std::string& input)
+std::string HtmlRoutines::DoubleBackslashes(const std::string& input)
 { std::stringstream out;
   for (int i=0; i<(signed) input.size(); i++)
   { out << input[i];
@@ -288,7 +289,7 @@ std::string CGI::DoubleBackslashes(const std::string& input)
   return out.str();
 }
 
-std::string CGI::clearNewLines(const std::string& input)
+std::string HtmlRoutines::clearNewLines(const std::string& input)
 { std::stringstream out;
   for (int i=0; i<(signed) input.size(); i++)
     if (input[i]=='\n' || input[i]=='\r')
@@ -298,7 +299,7 @@ std::string CGI::clearNewLines(const std::string& input)
   return out.str();
 }
 
-std::string CGI::backslashQuotes(const std::string& input)
+std::string HtmlRoutines::backslashQuotes(const std::string& input)
 { std::stringstream out;
   for (int i=0; i<(signed) input.size(); i++)
   { if (input[i]=='"')
@@ -308,7 +309,7 @@ std::string CGI::backslashQuotes(const std::string& input)
   return out.str();
 }
 
-std::string CGI::clearSlashes(const std::string& theString)
+std::string HtmlRoutines::clearSlashes(const std::string& theString)
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)
     if(theString[i]!='\\')
@@ -316,7 +317,7 @@ std::string CGI::clearSlashes(const std::string& theString)
   return out.str();
 }
 
-void CGI::subEqualitiesWithSimeq(std::string& theString, std::string& output)
+void HtmlRoutines::subEqualitiesWithSimeq(std::string& theString, std::string& output)
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)
     if(theString[i]!='=')
@@ -326,39 +327,39 @@ void CGI::subEqualitiesWithSimeq(std::string& theString, std::string& output)
   output=out.str();
 }
 
-void CGI::PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines)
+void HtmlRoutines::PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines)
 { stOutput << "\n\tvar num" << lineTypeName << "Lines=" << numberLines << "; ";
   stOutput << "\n\tvar " << lineTypeName << "1= new Array(" << numberLines << "); " << "  \tvar " << lineTypeName << "2= new Array("
   << numberLines << "); " << "  \tvar clr" << lineTypeName << "= new Array("  << numberLines << "); ";
 }
 
-void CGI::outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter)
+void HtmlRoutines::outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter)
 { std::string tempS;
   stOutput  << "\n\t" << lineTypeName << "1["  << lineCounter << "]= new Array(" << theDimension << "); " << "\t" << lineTypeName << "2["
   << lineCounter << "]= new Array(" << theDimension << "); " << "\tclr" << lineTypeName << "[" << lineCounter << "]= new Array(" << 3 << "); \n";
   for (int j=0; j< theDimension; j++)
-  { CGI::outputStream >> tempS;
+  { HtmlRoutines::outputStream >> tempS;
     stOutput << "\t" << lineTypeName << "1[" << lineCounter << "][" << j << "]=" << tempS << "; ";
-    CGI::outputStream >> tempS;
+    HtmlRoutines::outputStream >> tempS;
     stOutput << "\t" << lineTypeName << "2[" << lineCounter << "][" << j << "]=" << tempS << "; ";
   }
   stOutput << "\tclr" << lineTypeName << "[" << lineCounter << "]=" << stringColor << "; ";
   lineCounter++;
 }
 
-void CGI::ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml)
+void HtmlRoutines::ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml)
 { std::stringstream out;
   if (useHtml)
     out << "<span title=\"" << inputTooltip << "\">" << input << "</span>";
   output=out.str();
 }
 
-std::string CGI::GetStyleButtonLikeHtml()
+std::string HtmlRoutines::GetStyleButtonLikeHtml()
 { return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";
 }
 
-std::string CGI::ConvertStringToBackslashEscapedString(const std::string& input)
-{ MacroRegisterFunctionWithName("CGI::ConvertStringToBackslashEscapedString");
+std::string HtmlRoutines::ConvertStringToBackslashEscapedString(const std::string& input)
+{ MacroRegisterFunctionWithName("HtmlRoutines::ConvertStringToBackslashEscapedString");
   std::stringstream out;
   for (unsigned i=0; i<input.size(); i++)
     if (input[i]=='"')
@@ -369,20 +370,20 @@ std::string CGI::ConvertStringToBackslashEscapedString(const std::string& input)
   return out.str();
 }
 
-std::string CGI::ConvertStringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr)
+std::string HtmlRoutines::ConvertStringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr)
 { std::string result;
-  CGI::ConvertStringToHtmlStringReturnTrueIfModified(theString, result, doReplaceNewLineByBr);
+  HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(theString, result, doReplaceNewLineByBr);
   return result;
 }
 
-uint32_t CGI::RedGreenBlue(unsigned int r, unsigned int g, unsigned int b)
+uint32_t HtmlRoutines::RedGreenBlue(unsigned int r, unsigned int g, unsigned int b)
 { r=r%256;
   g=g%256;
   b=b%256;
   return r*65536+g*256+b;
 }
 
-void CGI::FormatCPPSourceCode(const std::string& FileName)
+void HtmlRoutines::FormatCPPSourceCode(const std::string& FileName)
 { std::fstream fileIn, fileOut;
   FileOperations::OpenFileCreateIfNotPresentVirtual(fileIn, "output/"+ FileName, false, false, false);
   if(!fileIn.is_open())
@@ -848,10 +849,10 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
     std::string tempS;
     tempS=tempRoot.ToString();
     TDV.drawLineBetweenTwoVectorsBufferRational
-    (zeroRoot, tempRoot, TDV.PenStyleNormal, CGI::RedGreenBlue(210, 210, 210), 1);
+    (zeroRoot, tempRoot, TDV.PenStyleNormal, HtmlRoutines::RedGreenBlue(210, 210, 210), 1);
     TDV.drawTextAtVectorBufferRational
-    (tempRoot, tempS, CGI::RedGreenBlue(100, 200, 100), TDV.TextStyleNormal);
-    TDV.drawCircleAtVectorBufferRational(tempRoot, 2, TDV.PenStyleNormal, CGI::RedGreenBlue(100, 200, 100) );
+    (tempRoot, tempS, HtmlRoutines::RedGreenBlue(100, 200, 100), TDV.TextStyleNormal);
+    TDV.drawCircleAtVectorBufferRational(tempRoot, 2, TDV.PenStyleNormal, HtmlRoutines::RedGreenBlue(100, 200, 100) );
   }
   TDV.theBuffer.BasisToDrawCirclesAt.MakeEiBasis(theDimension);
 }
@@ -5046,7 +5047,7 @@ std::string WeylGroupData::ToStringRootsAndRootReflections(FormatExpressions* th
   { const Vector<Rational>& current=this->RootSystem[i];
     currentRootReflection.MakeRootReflection(current, *this);
     out << "<tr><td>" << current.ToString() << "</td><td>" << rootSystemEpsCoords[i].ToStringLetterFormat("e") << "</td>"
-    << "<td>" << CGI::GetMathMouseHover(currentRootReflection.ToString()) << "</td>" << "</tr>";
+    << "<td>" << HtmlRoutines::GetMathMouseHover(currentRootReflection.ToString()) << "</td>" << "</tr>";
   }
   out << "</table>";
   out << "Comma delimited list of roots: ";
@@ -5467,13 +5468,13 @@ void WeylGroupData::DrawRootSystem
     output.init();
   int theDimension=this->GetDim();
   if(theDimension==1)
-  { int color=CGI::RedGreenBlue(0, 255, 0);
+  { int color=HtmlRoutines::RedGreenBlue(0, 255, 0);
     Vector<Rational> tempRoot, tempZero;
     tempZero.MakeZero(2);
     tempRoot.MakeEi(2, 0);
     for (int i=0; i<2; i++)
     { output.drawLineBetweenTwoVectorsBufferRational(tempZero, tempRoot, DrawingVariables::PenStyleNormal, color, 1);
-      output.drawCircleAtVectorBufferRational(tempRoot, 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,255));
+      output.drawCircleAtVectorBufferRational(tempRoot, 2, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(255,0,255));
       tempRoot.Minus();
     }
     return;
@@ -5530,9 +5531,9 @@ void WeylGroupData::DrawRootSystem
 //  stOutput << "<hr>the min length is: " << minLength.ToString();
   Rational tempRat;
   if (bluePoint!=0)
-  { output.drawCircleAtVectorBufferRational(*bluePoint, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,255));
-    output.drawCircleAtVectorBufferRational(*bluePoint, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,255));
-    output.drawCircleAtVectorBufferRational(*bluePoint, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,255));
+  { output.drawCircleAtVectorBufferRational(*bluePoint, 5, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,255));
+    output.drawCircleAtVectorBufferRational(*bluePoint, 4, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,255));
+    output.drawCircleAtVectorBufferRational(*bluePoint, 3, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,255));
   }
   if (drawWeylChamber)
   { Cone theWeylChamber;
@@ -5545,15 +5546,15 @@ void WeylGroupData::DrawRootSystem
   output.centerX[0]=300;
   output.centerY[0]=300;
   for (int i=0; i<RootSystemSorted.size; i++)
-  { int color=CGI::RedGreenBlue(0, 255, 0);
+  { int color=HtmlRoutines::RedGreenBlue(0, 255, 0);
     output.drawLineBetweenTwoVectorsBufferRational(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color, 1);
-    output.drawCircleAtVectorBufferRational(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,255));
+    output.drawCircleAtVectorBufferRational(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(255,0,255));
     for (int j=i+1; j<RootSystemSorted.size; j++)
     { differenceRoot=RootSystemSorted[i]-RootSystemSorted[j];
       tempRat=this->RootScalarCartanRoot(differenceRoot, differenceRoot);
       if (minLength== tempRat)
         output.drawLineBetweenTwoVectorsBufferRational
-        (RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0, 0, 255), 1);
+        (RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0, 0, 255), 1);
     }
   }
   Vector<Rational> tempRootRat;
@@ -5562,9 +5563,9 @@ void WeylGroupData::DrawRootSystem
   this->GetEpsilonCoords(epsNotationSimpleBasis, epsNotationSimpleBasis);
   for (int i=0; i<theDimension; i++)
   { tempRootRat.MakeEi(theDimension, i);
-    output.drawCircleAtVectorBufferRational(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
-    output.drawCircleAtVectorBufferRational(tempRootRat, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
-    output.drawCircleAtVectorBufferRational(tempRootRat, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
+    output.drawCircleAtVectorBufferRational(tempRootRat, 1, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(255,0,0));
+    output.drawCircleAtVectorBufferRational(tempRootRat, 3, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(255,0,0));
+    output.drawCircleAtVectorBufferRational(tempRootRat, 4, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(255,0,0));
     if (LabelDynkinDiagramVertices)
     { Vector<Rational>& current=epsNotationSimpleBasis[i];
       output.drawTextAtVectorBufferRational(tempRootRat, current.ToStringLetterFormat("e"),0, 10, DrawingVariables::TextStyleNormal);
@@ -5587,7 +5588,7 @@ void WeylGroupData::DrawRootSystem
     theTwoPlane[0][1]=1;
     outputDV.theBuffer.ModifyToOrthonormalNoShiftSecond(theTwoPlane[0], theTwoPlane[1]);
   }
-  output.drawTextBuffer(0, 0, tempStream.str(), 10, CGI::RedGreenBlue(0,0,0), DrawingVariables::TextStyleNormal);
+  output.drawTextBuffer(0, 0, tempStream.str(), 10, HtmlRoutines::RedGreenBlue(0,0,0), DrawingVariables::TextStyleNormal);
 }
 
 std::string WeylGroupData::GenerateWeightSupportMethoD1
@@ -5837,7 +5838,7 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
   for (int i=0; i<this->simpleGenerators.size; i++)
     head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i] << "}&=&" << this->simpleGenerators[i].ToString() << "\\\\";
   head << "\\end{array}";
-  out << CGI::GetMathMouseHover(head.str());
+  out << HtmlRoutines::GetMathMouseHover(head.str());
   if (this->ExternalAutomorphisms.size>0)
   { out << "<br>Outer automorphisms: \n";
     Matrix<Rational> tempMat;
@@ -5848,7 +5849,7 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
       head2 << "a_{" << i+1 << "}&=&" << tempMat.ToString(&latexFormat) << "\\\\";
     }
     head2 << "\\end{array}";
-    out << CGI::GetMathMouseHover(head2.str());
+    out << HtmlRoutines::GetMathMouseHover(head2.str());
   }
   out << "<br>Half sum of the positive roots: " << this->GetRho().ToString();
   out << "<br>Roots of Borel (" << this->RootsOfBorel.size << " total): ";
@@ -5863,7 +5864,7 @@ void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
       body << currentElt.ToString(0) << "\\\\";
     }
     body << "\\end{array}";
-    out << CGI::GetMathMouseHover(body.str());
+    out << HtmlRoutines::GetMathMouseHover(body.str());
   }
   output=out.str();
 }
@@ -6121,8 +6122,8 @@ std::string KLpolys::ToString(FormatExpressions* theFormat)
   out << "R Polynomials:<br>" << this->RPolysToString(theFormat);
   if (this->theKLcoeffs.size==this->TheWeylGroup->theGroup.theElements.size)
   { out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(theFormat);
-    out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of " << CGI::GetMathSpanPure("L_{w_2 \\cdot \\lambda}")
-    << " in " <<  CGI::GetMathSpanPure(" M_{w_1\\cdot \\lambda }  ") << " where \\cdot stands for the \\rho-modified action"
+    out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of " << HtmlRoutines::GetMathSpanPure("L_{w_2 \\cdot \\lambda}")
+    << " in " <<  HtmlRoutines::GetMathSpanPure(" M_{w_1\\cdot \\lambda }  ") << " where \\cdot stands for the \\rho-modified action"
     << " of the Weyl group, \\lambda is a dominant integral weight, M_{\\lambda} stands for Verma module "
     << "of highest weight \\lambda, L_\\lambda stands for irreducible highest weight of highest weight \\lambda: <br><table border=\"1\"><tr><td>Weyl elt.</td>";
     for (int i=0; i<this->TheWeylGroup->theGroup.theElements.size; i++)
@@ -7341,7 +7342,7 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString
         if (tempQP.valueOnEachLatticeShift[0].size<30)
           useHtml=true;
       outHtml << "<br>Quasi-polynomial: " <<
-      CGI::GetHtmlMathDivFromLatexFormulA(tempQP.ToString(useHtml, true, theFormat));
+      HtmlRoutines::GetHtmlMathDivFromLatexFormulA(tempQP.ToString(useHtml, true, theFormat));
     }
     */
   out << "\\end{document}";
@@ -7967,7 +7968,7 @@ bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective
   return result;
 }
 
-bool CGI::ConvertStringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr)
+bool HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr)
 { std::stringstream out;
   bool modified=false;
   for (unsigned int i=0; i<input.size(); i++)
@@ -7995,7 +7996,7 @@ bool CGI::ConvertStringToHtmlStringReturnTrueIfModified(const std::string& input
   return modified;
 }
 
-bool CGI::IsRepresentedByItselfInURLs(char input)
+bool HtmlRoutines::IsRepresentedByItselfInURLs(char input)
 { if (MathRoutines::isADigit(input))
     return true;
   if (MathRoutines::isALatinLetter(input))
@@ -8003,10 +8004,10 @@ bool CGI::IsRepresentedByItselfInURLs(char input)
   return input=='.';
 }
 
-std::string CGI::ConvertStringToURLString(const std::string& input, bool usePlusesForSpacebars)
+std::string HtmlRoutines::ConvertStringToURLString(const std::string& input, bool usePlusesForSpacebars)
 { std::stringstream out;
   for (unsigned int i=0; i<input.size(); i++)
-    if (CGI::IsRepresentedByItselfInURLs(input[i]))
+    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]))
       out << input[i];
     else if (input[i]==' ' && usePlusesForSpacebars)
       out << '+';
@@ -8214,23 +8215,23 @@ std::string DrawingVariables::GetColorPsTricksFromColorIndex(int colorIndex)
 
 bool DrawingVariables::GetColorIntFromColorString(const std::string& input, int& output)
 { if (input=="blue")
-  { output= CGI::RedGreenBlue(0,0,255);
+  { output= HtmlRoutines::RedGreenBlue(0,0,255);
     return true;
   }
   if (input=="green")
-  { output= CGI::RedGreenBlue(0,255,0);
+  { output= HtmlRoutines::RedGreenBlue(0,255,0);
     return true;
   }
   if (input=="red")
-  { output= CGI::RedGreenBlue(255,0,0);
+  { output= HtmlRoutines::RedGreenBlue(255,0,0);
     return true;
   }
   if (input=="cyan")
-  { output= CGI::RedGreenBlue(0,255,255);
+  { output= HtmlRoutines::RedGreenBlue(0,255,255);
     return true;
   }
   if (input=="orange")
-  { output= CGI::RedGreenBlue(255,127,0);
+  { output= HtmlRoutines::RedGreenBlue(255,127,0);
     return true;
   }
   return false;
@@ -8353,7 +8354,7 @@ bool ConeComplex::DrawMeLastCoordAffine
     Vector<Rational> tempRoot=this->TheObjects[i].GetInternalPoint();
     tempRoot.MakeAffineUsingLastCoordinate();
     theDrawingVariables.drawTextAtVectorBufferRational
-    (tempRoot, tempStream.str(), CGI::RedGreenBlue(0,0,0), theDrawingVariables.PenStyleNormal);
+    (tempRoot, tempStream.str(), HtmlRoutines::RedGreenBlue(0,0,0), theDrawingVariables.PenStyleNormal);
     //stOutput <<"<hr> drawing number " << i+1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
   }
   return result;
@@ -8435,7 +8436,7 @@ bool Cone::DrawMeLastCoordAffine
                 if (jVertexLiesAtInfinity)
                   jScaledVertex*=10000;
                 theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-                (iScaledVertex, jScaledVertex, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(200,200,200));
+                (iScaledVertex, jScaledVertex, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(200,200,200));
               }*/
               theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
               (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, ChamberWallColor, 1);
@@ -8488,12 +8489,12 @@ bool Cone::DrawMeProjective
     for (int i=0; i<this->GetDim(); i++)
     { tempRoot.MakeEi(this->GetDim(), i);
       theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-      (ZeroRoot+coordCenter, tempRoot+coordCenter, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(205,205,205), 1);
+      (ZeroRoot+coordCenter, tempRoot+coordCenter, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(205,205,205), 1);
     }
   }
   for (int i=0; i<this->Vertices.size; i++)
     theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-    (ZeroRoot+coordCenter, VerticesScaled[i]*10000+coordCenter, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(180,180,180), 1);
+    (ZeroRoot+coordCenter, VerticesScaled[i]*10000+coordCenter, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(180,180,180), 1);
   for (int k=0; k<this->Normals.size; k++)
     for (int i=0; i<this->Vertices.size; i++)
       if (this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
@@ -8501,7 +8502,7 @@ bool Cone::DrawMeProjective
           if(this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
             if (this->IsAnHonest1DEdgeAffine(i,j))
               theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-              (VerticesScaled[i]+coordCenter, VerticesScaled[j]+coordCenter, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(0,0,0),1);
+              (VerticesScaled[i]+coordCenter, VerticesScaled[j]+coordCenter, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,0),1);
   return true;
 }
 
@@ -8524,21 +8525,21 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
   return out.str();
 }
 
-std::string CGI::GetHtmlButton(const std::string& buttonID, const std::string& theScript, const std::string& buttonText)
+std::string HtmlRoutines::GetHtmlButton(const std::string& buttonID, const std::string& theScript, const std::string& buttonText)
 { std::stringstream out;
-  out << "\n<button id=\"" << buttonID << "\" " << CGI::GetStyleButtonLikeHtml() << " onclick=\"" << theScript << "\">" << buttonText << "</button>";
+  out << "\n<button id=\"" << buttonID << "\" " << HtmlRoutines::GetStyleButtonLikeHtml() << " onclick=\"" << theScript << "\">" << buttonText << "</button>";
   return out.str();
 }
 
-std::string CGI::GetHtmlSpanHidableStartsHiddeN
+std::string HtmlRoutines::GetHtmlSpanHidableStartsHiddeN
 (const std::string& input, const std::string& labelExpandButton, const std::string& desiredIdStart)
 { std::stringstream out;
-  CGI::GlobalGeneralPurposeID ++;
+  HtmlRoutines::GlobalGeneralPurposeID ++;
   std::stringstream buttonLabel;
   std::stringstream spanLabel;
-  spanLabel << "hidableSpan" << desiredIdStart << CGI::GlobalGeneralPurposeID;
-  buttonLabel << "buttonHS" << CGI::GlobalGeneralPurposeID;
-  out << CGI::GetHtmlButton(buttonLabel.str(), "switchMenu('"+spanLabel.str() +"');", labelExpandButton);
+  spanLabel << "hidableSpan" << desiredIdStart << HtmlRoutines::GlobalGeneralPurposeID;
+  buttonLabel << "buttonHS" << HtmlRoutines::GlobalGeneralPurposeID;
+  out << HtmlRoutines::GetHtmlButton(buttonLabel.str(), "switchMenu('"+spanLabel.str() +"');", labelExpandButton);
   out << "<span";
   out << " id=\"" << spanLabel.str() << "\" style=\"display: none\">";
   out << input << "</span>";
@@ -9358,9 +9359,9 @@ bool PiecewiseQuasipolynomial::MakeVPF(Vectors<Rational>& theRoots, std::string&
   std::string whatWentWrong;
 
   theFracs.initFromRoots(theRoots);
-  out << CGI::GetMathMouseHover(theFracs.ToString(theFormat));
+  out << HtmlRoutines::GetMathMouseHover(theFracs.ToString(theFormat));
   theFracs.split(0);
-  out << CGI::GetMathMouseHover(theFracs.ToString(theFormat));
+  out << HtmlRoutines::GetMathMouseHover(theFracs.ToString(theFormat));
   //theFracs.theChambers.InitFromDirectionsAndRefine(theRoots);
   crash << crash ;
 //  theFracs.theChambersOld.AmbientDimension=theRoots[0].size;
@@ -9502,7 +9503,7 @@ std::string PiecewiseQuasipolynomial::ToString(bool useLatex, bool useHtml)
       out << "<br>";
     out << "quasipolynomial: ";
     if (useLatex& useHtml)
-      out << CGI::GetMathSpanBeginArrayL(currentQP.ToString(useHtml, useLatex));
+      out << HtmlRoutines::GetMathSpanBeginArrayL(currentQP.ToString(useHtml, useLatex));
     else
       out << currentQP.ToString(useHtml, useLatex);
     if (useHtml)
@@ -9519,7 +9520,7 @@ void PiecewiseQuasipolynomial::DrawMe(DrawingVariables& theDrawingVars, int numL
   List<int> tempList;
   if (numLatticePointsPerDim<0)
     numLatticePointsPerDim=0;
-  int ZeroColor=CGI::RedGreenBlue(200, 200, 200);
+  int ZeroColor=HtmlRoutines::RedGreenBlue(200, 200, 200);
   for (int i=0; i<this->theProjectivizedComplex.size; i++)
   { int chamberWallColor=0;
     bool isZeroChamber=this->theQPs[i].IsEqualToZero();
@@ -9613,9 +9614,9 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
           //this->DrawMe(tempDV);
           this->theProjectivizedComplex.DrawMeLastCoordAffine(true, tempDV, tempFormat);
           tempDV.NumHtmlGraphics=5;
-          tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
-          tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, 10, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
-          tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
+          tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, 5, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,0));
+          tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, 10, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,0));
+          tempDV.theBuffer.drawCircleAtVectorBufferRational(AffineInput, 4, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(255,0,0));
           stOutput << "<br> <script src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\" type=\"text/javascript\"></script>\n";
           stOutput << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->theProjectivizedComplex.GetDim()-1);
 

@@ -245,15 +245,15 @@ bool JSData::readstring
     { std::stringstream calculatorInput;
       calculatorInput
       << "TestJSON(\""
-      << CGI::ConvertStringToBackslashEscapedString(json)
+      << HtmlRoutines::ConvertStringToBackslashEscapedString(json)
       << "\")";
       *commentsOnFailure << "<hr>Failed to parse your JSON. Input:\n<br>\n "
       << "<a href=\""
       << theGlobalVariables.DisplayNameExecutable
       << "?request=calculator&mainInput="
-      << CGI::ConvertStringToURLString(calculatorInput.str(),false)
+      << HtmlRoutines::ConvertStringToURLString(calculatorInput.str(),false)
       << "\">"
-      << CGI::ConvertStringToHtmlString(json, true)
+      << HtmlRoutines::ConvertStringToHtmlString(json, true)
       << "</a>"
       << "<br>Result:<br>\n ";
       for (int i=JSData::numEmptyTokensAtStart; i<readingStack.size; i++)

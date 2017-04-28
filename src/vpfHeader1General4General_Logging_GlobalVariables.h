@@ -82,6 +82,8 @@ public:
   bool flagRunningAce;
   bool flagAceIsAvailable;
 //webserver flags and variables
+  bool flagCachingInternalFilesOn;
+
   bool flagLoggedIn;
   bool flagUsingSSLinCurrentConnection;
   bool flagSSLisAvailable;

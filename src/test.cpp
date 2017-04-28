@@ -1648,7 +1648,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
 
 
   rootSubalgebras theRootSAs;
-  theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
+  theGlobalVariables.SetStandardStringOutput(HtmlRoutines::MakeStdCoutReport);
   theRootSAs.theGlobalVariables=&theGlobalVariables;
   theRootSAs.owner=&theSSlieAlg;
   DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
@@ -2424,7 +2424,7 @@ int pointis(int d, int n)
 //
 //void get_macdonald_representations_of_weyl_group_v2(SemisimpleLieAlgebra& theSSlieAlg)
 //{ WeylGroup& W = theSSlieAlg.theWeyl;
-//  theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
+//  theGlobalVariables.SetStandardStringOutput(HtmlRoutines::MakeStdCoutReport);
 //
 //  rootSubalgebras theRootSAs;
 //  theRootSAs.owner=&theSSlieAlg;
@@ -3445,7 +3445,7 @@ void TestInduction(int n=4, int m=3)
 
   //LoadAndPrintTauSignatures(letter, number);
 
-  //theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
+  //theGlobalVariables.SetStandardStringOutput(HtmlRoutines::MakeStdCoutReport);
   //SemisimpleLieAlgebra theSSlieAlg;
   //theSSlieAlg.theWeyl.MakeArbitrarySimple(letter, number);
   //theSSlieAlg.ComputeChevalleyConstants(&theGlobalVariables);

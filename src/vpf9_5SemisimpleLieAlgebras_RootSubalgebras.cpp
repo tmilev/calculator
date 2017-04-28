@@ -1101,7 +1101,7 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat)
   if (this->GetAmbientWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
   output << " \">";
-  output << CGI::GetJavascriptMathjax();
+  output << HtmlRoutines::GetJavascriptMathjax();
   output << "<body>" << this->ToString(theFormat) << "</body></html>";
   output.close();
 }
@@ -1119,8 +1119,8 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat)
       this->kModulesgEpsCoords.size!= this->Modules.size ||
       this->kModulesKepsCoords.size!= this->Modules.size)
     includeKEpsCoords=false;
-  out << "Type: " << CGI::GetMathSpanPure(this->theDynkinDiagram.ToString());
-  out << " (Dynkin type computed to be: " << CGI::GetMathSpanPure(this->theDynkinType.ToString()) << ")";
+  out << "Type: " << HtmlRoutines::GetMathSpanPure(this->theDynkinDiagram.ToString());
+  out << " (Dynkin type computed to be: " << HtmlRoutines::GetMathSpanPure(this->theDynkinType.ToString()) << ")";
   out << "\n<br>\nSimple basis: " << this->SimpleBasisK.ToString();
   out << "\n<br>\nSimple basis epsilon form: " << this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
   out << "\n<br>\nSimple basis epsilon form with respect to k: " << this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
@@ -1132,7 +1132,7 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat)
   out << "<br>\n simple basis centralizer: "<< this->SimpleBasisCentralizerRoots.ToString();
   out << "<hr>\n Number of k-submodules of g: " << this->Modules.size;
   out << "<br>Module decomposition, fundamental coords over k: ";
-  out << CGI::GetMathSpanPure(this->ModuleDecompoHighestWeights.ToString());
+  out << HtmlRoutines::GetMathSpanPure(this->ModuleDecompoHighestWeights.ToString());
   out << "<br>\n";
   out << "\ng/k k-submodules<table border=\"1\">\n<tr><th>id</th><th>size</th>"
   << "<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>Module basis</th><th>Weights epsilon coords</th>";
@@ -2686,7 +2686,7 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat)
   if (this->GetOwnerWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
   output << " \">";
-  output << CGI::GetJavascriptMathjax();
+  output << HtmlRoutines::GetJavascriptMathjax();
   output << "<body>" << this->ToString(theFormat)
   << "<hr>LaTeX table with root subalgebra details.<br>"
   << this->ToStringDynkinTableFormat2LaTeX(theFormat)

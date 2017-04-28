@@ -20,12 +20,12 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
     gLetter=theFormat->chevalleyGgeneratorLetter;
   }
   out << "Type " << this->theWeyl.theDynkinType.ToString() << ".";
-  out << "The letter " << CGI::GetMathSpanPure(hLetter) << " stands for elements of the Cartan subalgebra, <br>"
-  << " the letter " << CGI::GetMathSpanPure(gLetter) << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
-  << " The generator " << CGI::GetMathSpanPure(hLetter+"_i") << " is the element of the Cartan subalgebra dual to the <br>"
-  << "i^th simple root, that is, " << CGI::GetMathSpanPure("[" + hLetter + "_i, g]=\\langle \\alpha_i , \\gamma\\rangle g")
-  << ", <br> where g is a Chevalley generator, " << CGI::GetMathSpanPure("\\gamma") << " is its weight, and <br>"
-  << CGI::GetMathSpanPure("\\alpha_i") << " is the i^th simple root. ";
+  out << "The letter " << HtmlRoutines::GetMathSpanPure(hLetter) << " stands for elements of the Cartan subalgebra, <br>"
+  << " the letter " << HtmlRoutines::GetMathSpanPure(gLetter) << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
+  << " The generator " << HtmlRoutines::GetMathSpanPure(hLetter+"_i") << " is the element of the Cartan subalgebra dual to the <br>"
+  << "i^th simple root, that is, " << HtmlRoutines::GetMathSpanPure("[" + hLetter + "_i, g]=\\langle \\alpha_i , \\gamma\\rangle g")
+  << ", <br> where g is a Chevalley generator, " << HtmlRoutines::GetMathSpanPure("\\gamma") << " is its weight, and <br>"
+  << HtmlRoutines::GetMathSpanPure("\\alpha_i") << " is the i^th simple root. ";
   std::stringstream theTableLateXStream, theHtmlStream;
   theHtmlStream << "<table><tr><td> roots simple coords </td><td>epsilon coordinates</td>"
   << "<td>[,]</td>";
@@ -90,9 +90,9 @@ void SemisimpleLieAlgebra::ComputeFolderNames()
   std::stringstream outMainDisplayPath;
   this->CheckConsistency();
   DynkinType& theType=this->theWeyl.theDynkinType;
-  this->VirtualNameSSAlgOutputFolder="output/"+ CGI::CleanUpForFileNameUse(theType.ToString()) + "/";
+  this->VirtualNameSSAlgOutputFolder="output/"+ HtmlRoutines::CleanUpForFileNameUse(theType.ToString()) + "/";
   outMainDisplayPath << theGlobalVariables.DisplayPathOutputFolder
-  << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
+  << HtmlRoutines::CleanUpForFileNameUse(theType.ToString()) << "/";
   this->DisplayNameSSalgOutputFolder=outMainDisplayPath.str();
 }
 

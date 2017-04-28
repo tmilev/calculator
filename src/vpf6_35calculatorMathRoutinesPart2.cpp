@@ -212,7 +212,7 @@ void MeshTriangles::ComputeImplicitPlotPart2()
   }
   double minSide=MathRoutines::Minimum(this->Height, this->Width)*this->minTriangleSideAsPercentOfWidthPlusHeight;
   PlotObject currentPlot;
-  currentPlot.colorRGB=CGI::RedGreenBlue(255, 0, 0);
+  currentPlot.colorRGB=HtmlRoutines::RedGreenBlue(255, 0, 0);
   Vectors<double>& theSegment=currentPlot.thePoints;
   List<Vector<double> > currentTriangle;
   for (int i=0; i<this->theTriangles.size; i++)
@@ -283,15 +283,15 @@ void MeshTriangles::ComputeImplicitPlot()
       this->theTriangles.AddOnTop(currentTriangle);
     }
   if (this->flagShowGrid)
-  { this->PlotGrid(CGI::RedGreenBlue(240, 240, 0));
+  { this->PlotGrid(HtmlRoutines::RedGreenBlue(240, 240, 0));
     this->thePlot.thePlots.AddListOnTop(this->theGrid.thePlots);
   }
   this->ComputeImplicitPlotPart2();
   if (this->flagShowGrid)
-  { this->PlotGrid(CGI::RedGreenBlue(100, 100, 100));
+  { this->PlotGrid(HtmlRoutines::RedGreenBlue(100, 100, 100));
     this->thePlot.thePlots.AddListOnTop(this->theGrid.thePlots);
   }
-//  this->theCurve.colorRGB=CGI::RedGreenBlue(255,0,0);
+//  this->theCurve.colorRGB=HtmlRoutines::RedGreenBlue(255,0,0);
   this->thePlot.thePlots.AddListOnTop(this->theCurve.thePlots);
 //  stOutput << "ze lines: " << this->theCurve.theLines;
 }
@@ -962,8 +962,8 @@ bool CalculatorFunctionsGeneral::innerPlotRectangle
   thePlot.colorJS="blue";
   thePlot.thePoints.AddOnTop(currentCorner);
   thePlot.theRectangles.AddOnTop(theRectangle);
-  thePlot.colorRGB=CGI::RedGreenBlue(0,0,255);
-  thePlot.colorFillRGB=CGI::RedGreenBlue(0,255,255);
+  thePlot.colorRGB=HtmlRoutines::RedGreenBlue(0,0,255);
+  thePlot.colorFillRGB=HtmlRoutines::RedGreenBlue(0,255,255);
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -1165,7 +1165,7 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
   PlotObject theSegment;
   if (input.size()>=4)
   { theSegment.colorJS="black";
-    theSegment.colorRGB=CGI::RedGreenBlue(0,0,0);
+    theSegment.colorRGB=HtmlRoutines::RedGreenBlue(0,0,0);
     const Expression& colorE=input[3];
     if (!colorE.IsOfType<std::string>(&theSegment.colorJS))
       theSegment.colorJS= colorE.ToString();
@@ -1354,7 +1354,7 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
     if (input.IsAtomGivenData(theCommands.opPi()))
       return output.AssignValue<std::string>(" 3.141592654 ", theCommands);
     if (input.theData>=theCommands.NumPredefinedAtoms)
-      return output.AssignValue(HtmlSnippets::GetJavascriptVariable(atomString), theCommands);
+      return output.AssignValue(HtmlRoutines::GetJavascriptVariable(atomString), theCommands);
     if (atomString=="+" || atomString=="*" || atomString=="/" || atomString=="-")
       return output.AssignValue(atomString, theCommands);
     return output.AssignValue(atomString, theCommands);

@@ -40,7 +40,7 @@ StdoutClass stOutput;
 void InitializeGlobalObjects()
 { //stOutput << "Content-Type: text/html\n\n";
   InitializeTimer();
-  theGlobalVariables.IndicatorStringOutputFunction=&CGI::MakeReportIndicatorFile;
+  theGlobalVariables.IndicatorStringOutputFunction=&HtmlRoutines::MakeReportIndicatorFile;
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
   theGlobalVariables.sleepFunction=SleepFunction;
   theGlobalVariables.pointerCallSystemNoOutput=&CallSystemWrapperNoOutput;
@@ -53,8 +53,8 @@ void InitializeGlobalObjects()
   consoleFormat.flagUseLatex = false;
 }
 
-void CGI::MakeReportIndicatorFile(const std::string& input)
-{ //calling stOutput forbidden! stOutput itself calls CGI::MakeReportIndicatorFile.
+void HtmlRoutines::MakeReportIndicatorFile(const std::string& input)
+{ //calling stOutput forbidden! stOutput itself calls HtmlRoutines::MakeReportIndicatorFile.
   static int counter =-1;
   counter++;
   //  if (counter%10!=0)
@@ -70,9 +70,9 @@ void CGI::MakeReportIndicatorFile(const std::string& input)
   theFile.close();
 }
 
-void CGI::MakeStdCoutReport(const std::string& input)
+void HtmlRoutines::MakeStdCoutReport(const std::string& input)
 { stOutput << input;
-  CGI::MakeReportIndicatorFile(input);
+  HtmlRoutines::MakeReportIndicatorFile(input);
 }
 
 

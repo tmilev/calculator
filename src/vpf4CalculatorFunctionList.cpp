@@ -4819,7 +4819,7 @@ this->AddOperationInnerHandler
   << " tries to carry out the raise-to-power operation. If successful, substitutes the expression with the obtained atom. "
   << " A small integer is defined at compile time in the variable LargeIntUnsigned::SquareRootOfCarryOverBound (currently equal to "
   << LargeIntUnsigned::SquareRootOfCarryOverBound << "). "
-  << CGI::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
+  << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
 
   this->AddOperationOuterHandler
   ("<", Calculator::outerLessThan, "",

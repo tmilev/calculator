@@ -448,7 +448,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
     out << "<tr>";
     out << "<td style=\"border-right:1px solid black; border-bottom: 1px solid gray;\">";
     if (this->theFormat.flagUseLatex)
-      out << CGI::GetMathSpanPure(this->theBasiS[i].ToString(&this->theFormat),-1 );
+      out << HtmlRoutines::GetMathSpanPure(this->theBasiS[i].ToString(&this->theFormat),-1 );
     else
       out << this->theBasiS[i].ToString(&this->theFormat);
     out << "</td>";
@@ -463,7 +463,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
       }
       out << "<td>";
       if (this->theFormat.flagUseLatex)
-        out << CGI::GetMathSpanPure( Polynomial<Rational>::GetBlendCoeffAndMon
+        out << HtmlRoutines::GetMathSpanPure( Polynomial<Rational>::GetBlendCoeffAndMon
         (this->intermediateHighestMonDivHighestMon.GetElement()[j], this->intermediateCoeffs.GetElement()[j], found, &this->theFormat),-1);
       else
         out << Polynomial<Rational>::GetBlendCoeffAndMon
@@ -755,7 +755,7 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
     if (useHighlightStyle)
       out << "<span style=\"color:red\">";
     if (this->theFormat.flagUseLatex)
-      out << CGI::GetMathSpanPure(Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat));
+      out << HtmlRoutines::GetMathSpanPure(Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat));
     else
       out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat);
     found=true;
@@ -963,7 +963,7 @@ void GroebnerBasisComputation<coefficient>::PolySystemSolutionSimplificationPhas
 
 //  stOutput << "<hr><hr>Recursion depth: " << this->RecursionCounterSerreLikeSystem << "<br>Solving the system\n<br>\n";
 //  for (int i=0; i<inputSystem.size; i++)
-//    stOutput << "<br>" << CGI::GetMathSpanPure(inputSystem[i].ToString());
+//    stOutput << "<br>" << HtmlRoutines::GetMathSpanPure(inputSystem[i].ToString());
   bool changed=true;
   PolynomialSubstitution<coefficient> theSub;
   this->theImpliedSubS.SetSize(0);
@@ -1008,7 +1008,7 @@ void GroebnerBasisComputation<coefficient>::PolySystemSolutionSimplificationPhas
     if (success)
     { //stOutput << "<hr>System groebner reduced successfully, output:";
       //for (int i=0; i <inputSystem.size; i++)
-        //stOutput << "<br>" << CGI::GetMathSpanPure(inputSystem[i].ToString());
+        //stOutput << "<br>" << HtmlRoutines::GetMathSpanPure(inputSystem[i].ToString());
       if (this->IsContradictoryReducedSystem(inputSystem))
       { this->flagSystemProvenToHaveNoSolution=true;
         this->flagSystemSolvedOverBaseField=false;
@@ -1092,7 +1092,7 @@ void GroebnerBasisComputation<coefficient>::ProcessSolvedSubcaseIfSolvedOrProven
 (GroebnerBasisComputation& potentiallySolvedCase)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::ProcessSolvedSubcaseIfSolvedOrProvenToHaveSolution");
   if (potentiallySolvedCase.flagSystemSolvedOverBaseField)
-  { //stOutput << "<hr>System solved after first recursive call. The input system before back sub: " << CGI::GetMathSpanPure(inputSystem.ToString());
+  { //stOutput << "<hr>System solved after first recursive call. The input system before back sub: " << HtmlRoutines::GetMathSpanPure(inputSystem.ToString());
     potentiallySolvedCase.NumberSerreSystemComputations=this->NumberSerreSystemComputations;
 //    List<PolynomialSubstitution<coefficient> > impliedSubsCopy=this->theImpliedSubS;
 //    stOutput << "<br>potentially solved case: system solution:  "

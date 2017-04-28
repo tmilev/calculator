@@ -409,10 +409,10 @@ bool charSSAlgMod<coefficient>::DrawMe
     }
     for (int j=0; j<finalWeights.size; j++)
     { convertor=finalWeights[j].GetVectorRational();
-      theDrawingVars.drawCircleAtVectorBufferRational(convertor, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+      theDrawingVars.drawCircleAtVectorBufferRational(convertor, 3, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,0));
       if (useMults)
         theDrawingVars.drawTextAtVectorBufferRational
-        (convertor, CharCartan.theCoeffs[i].ToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal);
+        (convertor, CharCartan.theCoeffs[i].ToString(), HtmlRoutines::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal);
     }
   }
   out << "<br>Number of computed weights: " << totalNumWeights << ". ";
@@ -435,8 +435,8 @@ void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(WeylGroupData& actu
   for (int j=0; j<this->size(); j++)
   { actualWeight=actualAmbientWeyl.GetSimpleCoordinatesFromFundamental((*this)[j].weightFundamentalCoordS);
     actualWeightRationalPart=actualWeight.GetVectorRational(); // <-type conversion here!
-    theDrawingVars.drawCircleAtVectorBufferRational(actualWeightRationalPart, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
-    theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->theCoeffs[j].ToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal);
+    theDrawingVars.drawCircleAtVectorBufferRational(actualWeightRationalPart, 5, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,0));
+    theDrawingVars.drawTextAtVectorBufferRational(actualWeightRationalPart, this->theCoeffs[j].ToString(), HtmlRoutines::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal);
   }
 }
 
@@ -554,8 +554,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   theFormat.flagUseLatex=true;
   theFormat.CustomPlusSign="\\oplus ";
   theFormat.fundamentalWeightLetter="\\omega";
-  out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: " << CGI::GetMathSpanPure(remainingCharDominantLevI.ToString(&theFormat));
-  //stOutput << "<br>Character w.r.t Levi part: " << CGI::GetMathSpanPure
+  out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: " << HtmlRoutines::GetMathSpanPure(remainingCharDominantLevI.ToString(&theFormat));
+  //stOutput << "<br>Character w.r.t Levi part: " << HtmlRoutines::GetMathSpanPure
   //(remainingCharDominantLevI.ToString());
   remainingCharProjected.MakeZero();
   Vector<coefficient> fundCoordsSmaller, theProjection, inSimpleCoords;
@@ -571,7 +571,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     tempMon.weightFundamentalCoordS=fundCoordsSmaller;
     remainingCharProjected.AddMonomial(tempMon, remainingCharDominantLevI.theCoeffs[i]);
   }
-//  stOutput << "<br>Character w.r.t subalgebra: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
+//  stOutput << "<br>Character w.r.t subalgebra: " << HtmlRoutines::GetHtmlMathDivFromLatexAddBeginArrayL
 // (remainingCharProjected.ToString());
   Vector<coefficient> simpleGeneratorBaseField;
   output.MakeZero();
@@ -619,8 +619,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
 //    stOutput << "<br>remaining character after accounting:<br>" << remainingCharProjected.ToString();
   }
   theFormat.fundamentalWeightLetter="\\psi";
-  out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: " << CGI::GetMathSpanPure(output.ToString(&theFormat));
-//  stOutput << "<br>Character w.r.t Levi part: " << CGI::GetMathSpanPure
+  out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: " << HtmlRoutines::GetMathSpanPure(output.ToString(&theFormat));
+//  stOutput << "<br>Character w.r.t Levi part: " << HtmlRoutines::GetMathSpanPure
 //  (output.ToString())
 //  ;
 
@@ -636,14 +636,14 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     for (int i=0; i<output.size(); i++)
     { tempRoot=WeylFDSmall.AmbientWeyl->GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
 //      smallWeyl.DrawContour
- //     (tempRoot, theDV1, CGI::RedGreenBlue(200, 200, 0), 1000);
+ //     (tempRoot, theDV1, HtmlRoutines::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
       theDV1.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal);
       for (int j=1; j<WeylFDSmall.AmbientWeyl->theGroup.theElements.size; j++)
       { tempRoot2=tempRoot;
         WeylFDSmall.AmbientWeyl->ActOnRhoModified(j, tempRoot2);
-        theDV1.drawCircleAtVectorBufferRational(tempRoot2, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(200,0,0));
+        theDV1.drawCircleAtVectorBufferRational(tempRoot2, 5, DrawingVariables::PenStyleNormal, HtmlRoutines::RedGreenBlue(200,0,0));
       }
     }
     out << "<hr>" << theDV1.GetHtmlFromDrawOperationsCreateDivWithUniqueName(WeylFDSmall.AmbientWeyl->GetDim());
@@ -656,7 +656,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     for (int i=0; i<output.size; i++)
     { tempRoot=theWeyl.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoords).GetVectorRational();
       outputSubGroup.DrawContour
-      (tempRoot, theDV2, CGI::RedGreenBlue(200, 200, 0), 1000);
+      (tempRoot, theDV2, HtmlRoutines::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
       theDV2.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);

@@ -8,6 +8,7 @@
 #include "vpfHeader2Math02_Vectors.h"
 #include "vpfHeader2Math5_SubsetsSelections.h"
 #include "vpfHeader1General7FileOperations_Encodings.h"
+#include "vpfHeader8HtmlSnippets.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
@@ -3344,7 +3345,7 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
     *IvemadeARowSwitch=false;
 //  stOutput << "<br><b>starting list:</b> ";
 //  for (int i=0; i<theList.size; i++)
-//    stOutput << //"<br>" << CGI::GetMathSpanPure
+//    stOutput << //"<br>" << HtmlRoutines::GetMathSpanPure
 //    (theList[i].ToString(&tempFormat)) << ", ";
   int currentRowIndex=0;
   coefficient tempCF, tempCF2;
@@ -3383,9 +3384,9 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
         int otherColIndex=currentOther.theMonomials.GetIndex(currentMon);
         if (otherColIndex!=-1)
         { tempCF=currentOther.theCoeffs[otherColIndex];
-          //stOutput << "<br>subtracting " << CGI::GetMathSpanPure(currentPivot.ToString())
+          //stOutput << "<br>subtracting " << HtmlRoutines::GetMathSpanPure(currentPivot.ToString())
             //<< " times " << tempCF.ToString() << " from "
-            //<< CGI::GetMathSpanPure(currentOther.ToString());
+            //<< HtmlRoutines::GetMathSpanPure(currentOther.ToString());
           currentOther.SubtractOtherTimesCoeff(currentPivot, &tempCF);
           if (carbonCopyList!=0)
             (*carbonCopyList)[j].SubtractOtherTimesCoeff((*carbonCopyList)[currentRowIndex], &tempCF);
@@ -3394,14 +3395,14 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
             tempCF2*=-1;
             carbonCopyMatrix->AddTwoRows(currentRowIndex, j, 0, tempCF2);
           }
-          //stOutput << "<br>to get " << CGI::GetMathSpanPure(currentOther.ToString());
+          //stOutput << "<br>to get " << HtmlRoutines::GetMathSpanPure(currentOther.ToString());
         }
       }
     currentRowIndex++;
   }
 //    stOutput << "<br><b>final list:</b> ";
 //  for (int i=0; i<theList.size; i++)
-//    stOutput << //"<br>" << CGI::GetMathSpanPure
+//    stOutput << //"<br>" << HtmlRoutines::GetMathSpanPure
 //    (theList[i].ToString(&tempFormat)) << ", ";
 }
 
@@ -4927,9 +4928,9 @@ void Matrix<coefficient>::GaussianEliminationByRows
     { if (useHtmlInReport)
       { *humanReadableReport << "<tr><td style=\"border-bottom:1pt solid black;\">";
         if (formatAsLinearSystem)
-          *humanReadableReport << CGI::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),-1);
+          *humanReadableReport << HtmlRoutines::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),-1);
         else
-          *humanReadableReport << CGI::GetMathSpanPure(this->ToStringLatex(theFormat),-1);
+          *humanReadableReport << HtmlRoutines::GetMathSpanPure(this->ToStringLatex(theFormat),-1);
         *humanReadableReport << "</td><td style=\"border-bottom:1pt solid black;\">Selected pivot column "
         << i+1 << ". ";
         if (NumFoundPivots!=tempI)
@@ -4984,10 +4985,10 @@ void Matrix<coefficient>::GaussianEliminationByRows
   if (humanReadableReport!=0)
   { if (useHtmlInReport)
     { if (formatAsLinearSystem)
-        *humanReadableReport << "<tr><td>" << CGI::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),-1)
+        *humanReadableReport << "<tr><td>" << HtmlRoutines::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),-1)
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       else
-        *humanReadableReport << "<tr><td>" << CGI::GetMathSpanPure(this->ToStringLatex(theFormat))
+        *humanReadableReport << "<tr><td>" << HtmlRoutines::GetMathSpanPure(this->ToStringLatex(theFormat))
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
     } else
     { if (formatAsLinearSystem)

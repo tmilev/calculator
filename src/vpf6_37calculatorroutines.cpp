@@ -136,7 +136,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
       (randomSeedCurrent, &currentAnswer, &answerGenerated)+"<hr>";
       if (!answerGenerated)
         break;
-      theGlobalVariables.SetWebInpuT(currentKey, CGI::ConvertStringToURLString(currentAnswer, false));
+      theGlobalVariables.SetWebInpuT(currentKey, HtmlRoutines::ConvertStringToURLString(currentAnswer, false));
       solutionReport+=
       HtmlInterpretation::SubmitProblem(randomSeedCurrent, &answersWork, false)+"<hr>";
       if (!answersWork)
@@ -312,7 +312,7 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
       thePlotObj.colorJS=input[6].ToString();
   } else
     thePlotObj.colorJS="blue";
-  thePlotObj.colorRGB=CGI::RedGreenBlue(0, 0, 255);
+  thePlotObj.colorRGB=HtmlRoutines::RedGreenBlue(0, 0, 255);
   DrawingVariables::GetColorIntFromColorString
   (thePlotObj.colorJS, thePlotObj.colorRGB);
   thePlotObj.lineWidth=1;
@@ -574,9 +574,9 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
   << theEmail.emailContent
   << "'"
   ;
-  out << "Command: " << CGI::ConvertStringToHtmlString( commandToExecute.str(), true);
+  out << "Command: " << HtmlRoutines::ConvertStringToHtmlString( commandToExecute.str(), true);
   out << "<br>Result:<br>"
-  << CGI::ConvertStringToHtmlString(theGlobalVariables.CallSystemWithOutput(commandToExecute.str()), true);
+  << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.CallSystemWithOutput(commandToExecute.str()), true);
 
   return output.AssignValue(out.str(),theCommands);
 }

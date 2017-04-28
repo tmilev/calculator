@@ -97,7 +97,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
     std::stringstream out;
     out << "Starting elements: <br>";
     for (int i=0; i<theLieAlgElts.size; i++)
-      out << CGI::GetMathSpanPure(theLieAlgElts[i].ToString(&theFormat)) << "<br>";
+      out << HtmlRoutines::GetMathSpanPure(theLieAlgElts[i].ToString(&theFormat)) << "<br>";
     bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theLieAlgElts, upperBound);
     if (!success)
       out << "<br>Did not succeed with generating vector space, instead got a vector space with basis " << theLieAlgElts.size << " exceeding the limit. "
@@ -109,7 +109,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
         if (theLieAlgElts.size>50)
           out << theLieAlgElts[i].ToString(&theFormat);
         else
-          out << CGI::GetMathSpanPure(theLieAlgElts[i].ToString(&theFormat));
+          out << HtmlRoutines::GetMathSpanPure(theLieAlgElts[i].ToString(&theFormat));
       }
     }
     return output.AssignValue(out.str(), theCommands);
@@ -119,7 +119,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
   std::stringstream out;
   out << "Starting elements: <br>";
   for (int i=0; i<theOps.size; i++)
-    out << CGI::GetMathSpanPure(theOps[i].ToString(&theFormat)) << "<br>";
+    out << HtmlRoutines::GetMathSpanPure(theOps[i].ToString(&theFormat)) << "<br>";
   bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, upperBound);
   if (!success)
     out << "<br>Did not succeed with generating vector space, instead got a vector space with basis " << theOps.size << " exceeding the limit. "
@@ -131,7 +131,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
       if (theOps.size>50)
         out << theOps[i].ToString(&theFormat);
       else
-        out << CGI::GetMathSpanPure(theOps[i].ToString(&theFormat));
+        out << HtmlRoutines::GetMathSpanPure(theOps[i].ToString(&theFormat));
     }
   }
   return output.AssignValue(out.str(), theCommands);
@@ -279,7 +279,7 @@ bool CalculatorFunctionsGeneral::innerURLKeyValuePairsToNormalRecursive(Calculat
   std::string theString;
   if (!input.IsOfType<std::string>(&theString))
     return false;
-  return output.AssignValue(CGI::URLKeyValuePairsToNormalRecursiveHtml(theString), theCommands);
+  return output.AssignValue(HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theString), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerUrlStringToNormalString(Calculator& theCommands, const Expression& input, Expression& output)
@@ -287,7 +287,7 @@ bool CalculatorFunctionsGeneral::innerUrlStringToNormalString(Calculator& theCom
   std::string theString;
   if (!input.IsOfType<std::string>(&theString))
     return false;
-  return output.AssignValue(CGI::ConvertURLStringToNormal(theString, false), theCommands);
+  return output.AssignValue(HtmlRoutines::ConvertURLStringToNormal(theString, false), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerStringToAtom(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1218,7 +1218,7 @@ void IntegralRFComputation::PrepareFinalAnswer()
 
 void IntegralRFComputation::PrepareDenominatorFactors()
 { MacroRegisterFunctionWithName("IntegralRFComputation::PrepareDenominatorFactors");
-  this->printoutPFsHtml << "The rational function is: " << CGI::GetMathSpanPure
+  this->printoutPFsHtml << "The rational function is: " << HtmlRoutines::GetMathSpanPure
   ("\\frac{" + this->theNum.ToString(&this->currentFormaT) + "}{" +this->theDen.ToString(&this->currentFormaT) +"}")
   << ".";
   this->printoutPFsHtml << "<br>The denominator factors are: ";
@@ -1228,7 +1228,7 @@ void IntegralRFComputation::PrepareDenominatorFactors()
   << "\\frac{" << this->theNum.ToString(&this->currentFormaT)  << "}{ ";
   this->allFactorsAreOfDegree2orless =true;
   for (int i=0; i<this->theFactors.size; i++)
-  { this->printoutPFsHtml << CGI::GetMathSpanPure(this->theFactors[i].ToString(&this->currentFormaT));
+  { this->printoutPFsHtml << HtmlRoutines::GetMathSpanPure(this->theFactors[i].ToString(&this->currentFormaT));
     bool needsParenthesis= this->theFactors[i].NeedsParenthesisForMultiplication();
     if (needsParenthesis)
       this->printoutPFsLatex << "\\left(";
@@ -1402,10 +1402,10 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
 //  << "<br>this->remainderRat= " << this->remainderRat.ToString(&this->currentFormaT);
   needPolyDivision=!this->quotientRat.IsEqualToZero();
   if (needPolyDivision)
-  { this->printoutPFsHtml << "<br>The numerator " << CGI::GetMathSpanPure(this->theNum.ToString(&this->currentFormaT))
-    << " divided by the denominator " << CGI::GetMathSpanPure(theDen.ToString(&this->currentFormaT)) << " yields "
-    << CGI::GetMathSpanPure(this->quotientRat.ToString(&this->currentFormaT)) << " with remainder "
-    << CGI::GetMathSpanPure(this->remainderRat.ToString(&this->currentFormaT)) << ". ";
+  { this->printoutPFsHtml << "<br>The numerator " << HtmlRoutines::GetMathSpanPure(this->theNum.ToString(&this->currentFormaT))
+    << " divided by the denominator " << HtmlRoutines::GetMathSpanPure(theDen.ToString(&this->currentFormaT)) << " yields "
+    << HtmlRoutines::GetMathSpanPure(this->quotientRat.ToString(&this->currentFormaT)) << " with remainder "
+    << HtmlRoutines::GetMathSpanPure(this->remainderRat.ToString(&this->currentFormaT)) << ". ";
     GroebnerBasisComputation<Rational> theGB;
     theGB.flagDoLogDivision=true;
     theGB.theBasiS.SetSize(1);
@@ -1468,19 +1468,19 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   }
   this->theDenominatorFactorsWithMults.QuickSortAscending();
 //  this->printoutPFsHtml << "<hr>this->theDenominatorFactorsWithMults: " << this->theDenominatorFactorsWithMults.ToString();
-  this->printoutPFsHtml << "<br><br>I need to find " << CGI::GetMathSpanPure("A_i") << "'s so that I have the equality of rational functions: ";
+  this->printoutPFsHtml << "<br><br>I need to find " << HtmlRoutines::GetMathSpanPure("A_i") << "'s so that I have the equality of rational functions: ";
   this->printoutPFsLatex << "We need to find $A_i$'s so that we have the following equality of rational functions. ";
   this->PrepareNumerators();
   this->PrepareFormatExpressions();
-  this->printoutPFsHtml << CGI::GetMathSpanPure(this->stringRationalFunctionLatex, -1);
+  this->printoutPFsHtml << HtmlRoutines::GetMathSpanPure(this->stringRationalFunctionLatex, -1);
   this->printoutPFsHtml << "<br><br>After clearing denominators, we get the equality: ";
   this->printoutPFsLatex << "After clearing denominators, we get the following equality. ";
-  this->printoutPFsHtml << "<br><br>" << CGI::GetMathSpanPure(this->stringPolyIndentityNonSimplifiedLatex, -1);
+  this->printoutPFsHtml << "<br><br>" << HtmlRoutines::GetMathSpanPure(this->stringPolyIndentityNonSimplifiedLatex, -1);
   this->printoutPFsLatex << "\\[" << this->stringPolyIndentityNonSimplifiedLatex << "\\]";
   Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustDie;
   thePolyThatMustVanish.GetPolyUnivariateWithPolyCoeffs(0, univariateThatMustDie);
   this->printoutPFsHtml << "<br><br>After rearranging we get that the following polynomial must vanish: "
-  << CGI::GetMathSpanPure(univariateThatMustDie.ToString(&this->currentFormaT));
+  << HtmlRoutines::GetMathSpanPure(univariateThatMustDie.ToString(&this->currentFormaT));
   this->printoutPFsLatex << "After rearranging we get that the following polynomial must vanish. Here, by ``vanish'' "
   << "we mean that the coefficients of the powers of $x$ must be equal to zero."
   << "\\[" << univariateThatMustDie.ToString(&this->currentFormaT) << "\\]";
@@ -1491,7 +1491,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   theConstTermsForLaTeX=theConstTerms;
   this->currentFormaT.flagFormatMatrixAsLinearSystem=true;
   this->printoutPFsHtml << "<br>In other words, we need to solve the system: "
-  << CGI::GetMathSpanPure(theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT),-1);
+  << HtmlRoutines::GetMathSpanPure(theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT),-1);
   this->printoutPFsLatex << "In other words, we need to solve the following system. "
   << "\\[" << theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT) << "\\]";
   this->currentFormaT.flagUseHTML=true;
@@ -1508,7 +1508,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
       this->theNumerators[i][k].Substitution(theSub);
   this->PrepareFinalAnswer();
   this->printoutPFsHtml << "<br>Therefore, the final partial fraction decomposition is: "
-  << CGI::GetMathSpanPure(this->stringFinalAnswer);
+  << HtmlRoutines::GetMathSpanPure(this->stringFinalAnswer);
   this->printoutPFsLatex << "Therefore, the final partial fraction decomposition is the following. "
   << "\\[" << this->stringFinalAnswer << "\\]";
 //  static bool tempBool=false;
@@ -2714,10 +2714,10 @@ bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theComm
   theFormat.flagUseHTML=false;
   theFormat.flagUseFrac=true;
   theFormat.MatrixColumnVerticalLineIndex=mat.NumCols-1;
-  out << "Computing " << CGI::GetMathSpanPure(mat.ToString(&theFormat) + "^{-1}");
+  out << "Computing " << HtmlRoutines::GetMathSpanPure(mat.ToString(&theFormat) + "^{-1}");
   tempMat=mat;
   tempMat.AppendMatrixOnTheRight(outputMat);
-  out << "<br>" << CGI::GetMathSpanPure(tempMat.ToString(&theFormat)) ;
+  out << "<br>" << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat)) ;
   outLaTeX << "\\begin{tabular}{ll}";
   outLaTeX << "$" << tempMat.ToString(& theFormat) << "$";
 
@@ -2731,7 +2731,7 @@ bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theComm
         outLaTeX << "& Swap row " << NumFoundPivots+1 << " and row " << tempI+1 << ". ";
         tempMat=mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
-        out << "<br>" << CGI::GetMathSpanPure(outputMat.ToString(&theFormat));
+        out << "<br>" << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
         outLaTeX << "\\\\" << "$" << outputMat.ToString(&theFormat) << "$";
       }
       tempElement=mat.elements[NumFoundPivots][i];
@@ -2747,7 +2747,7 @@ bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theComm
       if (tempElement!=1)
       { tempMat=mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
-        out << CGI::GetMathSpanPure(tempMat.ToString(&theFormat));
+        out << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
         outLaTeX << "$" << tempMat.ToString(&theFormat) << "$";
       }
       bool found = false;
@@ -2778,7 +2778,7 @@ bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theComm
         outLaTeX << "\\\\";
         tempMat=mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
-        out << CGI::GetMathSpanPure(tempMat.ToString(&theFormat));
+        out << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
         outLaTeX << "$" << tempMat.ToString(&theFormat) << "$";
       }
       NumFoundPivots++;
@@ -2792,7 +2792,7 @@ bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theComm
     outLaTeX << "Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
   } else
   { out << "<br>The inverse of the starting matrix can be read off on the matrix to the left of the id matrix: "
-    << CGI::GetMathSpanPure(outputMat.ToString(&theFormat));
+    << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
     outLaTeX << " The inverse matrix can now be read off as the matrix to the left of the identity matrix: $"
     << outputMat.ToString(&theFormat) << "$";
   }
@@ -2816,10 +2816,10 @@ bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Express
   theFormat.flagUseLatex=true;
   theFormat.flagUseHTML=false;
   theFormat.MatrixColumnVerticalLineIndex=mat.NumCols-1;
-  out << "Computing " << CGI::GetMathSpanPure(mat.ToString(&theFormat) + "^{-1}");
+  out << "Computing " << HtmlRoutines::GetMathSpanPure(mat.ToString(&theFormat) + "^{-1}");
   tempMat=mat;
   tempMat.AppendMatrixOnTheRight(outputMat);
-  out << "<br>" << CGI::GetMathSpanPure(tempMat.ToString(&theFormat)) ;
+  out << "<br>" << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat)) ;
   for (int i=0; i<mat.NumCols; i++)
   { tempI = mat.FindPivot(i, NumFoundPivots);
     if (tempI!=-1)
@@ -2829,7 +2829,7 @@ bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Express
         out << "<br>switch row " << NumFoundPivots+1 << " and row " << tempI+1 << ": ";
         tempMat=mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
-        out << "<br>" << CGI::GetMathSpanPure(outputMat.ToString(&theFormat));
+        out << "<br>" << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
       }
       tempElement=mat.elements[NumFoundPivots][i];
       tempElement.Invert();
@@ -2840,7 +2840,7 @@ bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Express
       if (tempElement!=1)
       { tempMat=mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
-        out << CGI::GetMathSpanPure(tempMat.ToString(&theFormat));
+        out << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
       }
       bool found = false;
       for (int j = 0; j<mat.NumRows; j++)
@@ -2862,7 +2862,7 @@ bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Express
       { out << ": <br> ";
         tempMat=mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
-        out << CGI::GetMathSpanPure(tempMat.ToString(&theFormat));
+        out << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
       }
       NumFoundPivots++;
     }
@@ -2871,7 +2871,7 @@ bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Express
     out << "<br>Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
   else
     out << "<br>The inverse of the starting matrix can be read off on the matrix to the left of the id matrix: "
-    << CGI::GetMathSpanPure(output.ToString(&theFormat));
+    << HtmlRoutines::GetMathSpanPure(output.ToString(&theFormat));
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -3261,8 +3261,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(
   (twoE*numPowerE-threeE)/(twoE*numPowerE-twoE)*remainingIntegral);
   output.CheckConsistencyRecursively();
   output.CheckInitializationRecursively();
-  //stOutput << " <hr>innerIntegrateRationalFunctionBuidingBlockIIIb: replacing " << CGI::GetMathSpanPure(input.ToString() ) << " by "
-  //<< CGI::GetMathSpanPure(output.ToString());
+  //stOutput << " <hr>innerIntegrateRationalFunctionBuidingBlockIIIb: replacing " << HtmlRoutines::GetMathSpanPure(input.ToString() ) << " by "
+  //<< HtmlRoutines::GetMathSpanPure(output.ToString());
   return true;
 }
 
@@ -4156,7 +4156,7 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
           out << ", ";
       }
       out << "</td><td>";
-      out << CGI::GetMathSpanPure
+      out << HtmlRoutines::GetMathSpanPure
       (tempSas.GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot
        (largerTypes[i], imagesSimpleRoots[i], tempCandidate).ToStringLetterFormat("\\omega"));
       out << "</td></tr>";
@@ -4834,7 +4834,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
       thePlotObj.colorJS=input[4].ToString();
   } else
     thePlotObj.colorJS="red";
-  thePlotObj.colorRGB=CGI::RedGreenBlue(255,0,0);
+  thePlotObj.colorRGB=HtmlRoutines::RedGreenBlue(255,0,0);
   DrawingVariables::GetColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
   thePlotObj.lineWidth=1;
   if (input.size()>=6)
@@ -4955,7 +4955,7 @@ bool CalculatorFunctionsGeneral::innerPlotPoint(Calculator& theCommands, const E
   theFinalPlot.dimension=theV.size;
   PlotObject thePlot;
   thePlot.dimension=theV.size;
-  thePlot.colorRGB=CGI::RedGreenBlue(0,0,0);
+  thePlot.colorRGB=HtmlRoutines::RedGreenBlue(0,0,0);
   if (input[2].IsOfType<std::string>())
     DrawingVariables::GetColorIntFromColorString
     (input[2].GetValue<std::string>(), thePlot.colorRGB);
@@ -5192,9 +5192,9 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
     thePlot.variablesInPlay.AddOnTop(tempE);
   }
   thePlot.variablesInPlayJS.AddOnTop
-  (HtmlSnippets::GetJavascriptVariable(thePlot.variablesInPlay[0].ToString()));
+  (HtmlRoutines::GetJavascriptVariable(thePlot.variablesInPlay[0].ToString()));
   thePlot.colorJS="red";
-  thePlot.colorRGB=CGI::RedGreenBlue(255, 0, 0);
+  thePlot.colorRGB=HtmlRoutines::RedGreenBlue(255, 0, 0);
   if (input.size()>=5)
     if (!input[4].IsOfType<std::string>(&thePlot.colorJS))
       thePlot.colorJS=input[4].ToString();
@@ -5376,8 +5376,8 @@ bool CalculatorFunctionsGeneral::innerEvaluateToDouble(Calculator& theCommands, 
 bool CalculatorFunctionsGeneral::innerTestMathMouseHover(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestMathMouseHover");
   std::stringstream out;
-  out << "Hover mouse to render: " << CGI::GetMathMouseHover(input.ToString());
-//  out << "<br>Directly rendered: " << CGI::GetMathSpanPure(input.ToString());
+  out << "Hover mouse to render: " << HtmlRoutines::GetMathMouseHover(input.ToString());
+//  out << "<br>Directly rendered: " << HtmlRoutines::GetMathSpanPure(input.ToString());
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -5401,8 +5401,8 @@ bool CalculatorFunctionsGeneral::innerGetSymmetricCartan(Calculator& theCommands
   Matrix<Rational> outputMat, outputCoMat;
   theType.GetCartanSymmetric(outputMat);
   theType.GetCoCartanSymmetric(outputCoMat);
-  out << "Symmetric Cartan matrix: " << CGI::GetMathMouseHover(outputMat.ToStringLatex(),10000)
-  << "<br>Co-symmetric Cartan matrix: " << CGI::GetMathMouseHover(outputCoMat.ToStringLatex(), 10000);
+  out << "Symmetric Cartan matrix: " << HtmlRoutines::GetMathMouseHover(outputMat.ToStringLatex(),10000)
+  << "<br>Co-symmetric Cartan matrix: " << HtmlRoutines::GetMathMouseHover(outputCoMat.ToStringLatex(), 10000);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -5548,7 +5548,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroups(Calculator& theCommand
   std::stringstream out;
   for (int i=0; i<numCycles; i++, selectionParSel.incrementSelection())
   { theSubgroup.MakeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, 2000);
-    out << "<hr>" << CGI::GetMathSpanPure(theSubgroup.ToString());
+    out << "<hr>" << HtmlRoutines::GetMathSpanPure(theSubgroup.ToString());
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -5623,20 +5623,20 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
     for (int i=0; i<theSubgroup.RepresentativesQuotientAmbientOrder.size; i++)
     { ElementWeylGroup<WeylGroupData>& current=theSubgroup.RepresentativesQuotientAmbientOrder[i];
       out << "<tr><td>"
-      << (useJavascript ? CGI::GetMathSpanPure(current.ToString()) : current.ToString())
+      << (useJavascript ? HtmlRoutines::GetMathSpanPure(current.ToString()) : current.ToString())
       << "</td>";
       theHWsimplecoords=
       theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
       theSSalgebra.theWeyl.ActOnRhoModified
       (theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
       out << "<td>"
-      << (useJavascript ? CGI::GetMathSpanPure(theHWsimplecoords.ToString(&theFormat))
+      << (useJavascript ? HtmlRoutines::GetMathSpanPure(theHWsimplecoords.ToString(&theFormat))
       : theHWsimplecoords.ToString(&theFormat))
       << "</td>";
       tempRoot = theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimplecoords);
       std::string theFundString=
       tempRoot.ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
-      out << "<td>" << (useJavascript ? CGI::GetMathSpanPure(theFundString): theFundString)
+      out << "<td>" << (useJavascript ? HtmlRoutines::GetMathSpanPure(theFundString): theFundString)
       << "</td>";
       out << "</tr>";
     }
@@ -5859,14 +5859,14 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
     theWeyl.ActOn(indexInWeyl, currentHW);
     currentHW-=theSub.GetRho();
     out << "<td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega") << "</td>";
-    out << "<td>" << CGI::GetMathMouseHover(currentChar.ToString(&formatChars)) << "</td>";
+    out << "<td>" << HtmlRoutines::GetMathMouseHover(currentChar.ToString(&formatChars)) << "</td>";
     if (currentElt.generatorsLastAppliedFirst.size%2==1)
       currentChar*=-1;
     theChar+=currentChar;
     out << "</tr>";
   }
   out << "</table>";
-  out << "Final char: " << CGI::GetMathMouseHover(theChar.ToString(&formatChars));
+  out << "Final char: " << HtmlRoutines::GetMathMouseHover(theChar.ToString(&formatChars));
   return output.AssignValue<std::string>(out.str(), theCommands);
 }
 
@@ -6074,9 +6074,9 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
   tempFormat.fundamentalWeightLetter="\\psi";
   tempFormat.CustomPlusSign="\\oplus ";
   hwContext.ContextGetFormatExpressions(tempFormat);
-  out << "<br>Character of finite dimensional module:" << CGI::GetMathMouseHover(theFDChaR.ToString());
+  out << "<br>Character of finite dimensional module:" << HtmlRoutines::GetMathMouseHover(theFDChaR.ToString());
   if (theGenMod.parabolicSelectionSelectedAreElementsLevi.CardinalitySelection>0)
-    out << "<br>theFDChar split over levi:" << CGI::GetMathMouseHover(theFDLeviSplit.ToString(&tempFormat));
+    out << "<br>theFDChar split over levi:" << HtmlRoutines::GetMathMouseHover(theFDLeviSplit.ToString(&tempFormat));
   //out << "<br> Splitting report: " << report;
   std::stringstream latexReport1;
   out << "<br><table><tr><td>weight in fundamental coords</td><td>Character</td></tr>";
@@ -6166,7 +6166,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
 //      stOutput << ") * " << tempRat.ToString()  << "<hr>=" << theElt.ToString() << "<hr><hr>";
     out << "<tr><td>"
     << theSSalgebra->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
-    << "</td><td>" << CGI::GetMathMouseHover(tempStream.str()) << "</td><td>" << tempRat.ToString() << "</td>";
+    << "</td><td>" << HtmlRoutines::GetMathMouseHover(tempStream.str()) << "</td><td>" << tempRat.ToString() << "</td>";
     latexReport2
     << "$" << theSSalgebra->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
     << "$ &  " << tempStream2.str() << " &" << tempRat.ToString();
@@ -6175,14 +6175,14 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
     if (theNumVars==1)
     { tmpGCD= theElt.FindGCDCoefficientNumeratorsOverRationals();
       tmpGCD.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-      out << "<td>" << CGI::GetMathMouseHover(tmpGCD.ToString(&tempFormat)) << "</td>";
+      out << "<td>" << HtmlRoutines::GetMathMouseHover(tmpGCD.ToString(&tempFormat)) << "</td>";
     }
-    out << "<td>" << CGI::GetMathMouseHover(theElt.ToString(&tempFormat)) << "</td>";
+    out << "<td>" << HtmlRoutines::GetMathMouseHover(theElt.ToString(&tempFormat)) << "</td>";
     latexReport2 << "&$\\begin{array}{l}" << theElt.ToString(&tempFormat) << "\\end{array}$\\\\<br>";
     if (theNumVars==1)
     { tmpRF=tmpGCD;
       theElt/=tmpRF;
-      out << "<td>" << CGI::GetMathMouseHover("\\begin{array}{l}" + theElt.ToString(&tempFormat)+"\\end{array}") << "</td>";
+      out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{l}" + theElt.ToString(&tempFormat)+"\\end{array}") << "</td>";
     }
     out << "</tr>";
   }
@@ -6354,7 +6354,7 @@ bool Calculator::innerSplitFDpartB3overG2old(Calculator& theCommands, const Expr
     << "</td><td>" << currentG2Weight.ToStringLetterFormat("\\alpha") << "</td><td> "
     << theG2B3Data.theHmm.theDomain().theWeyl.GetFundamentalCoordinatesFromSimple(currentG2Weight).ToString()
     << "</td><td> " << currentG2DualWeight.ToString() << "</td>";
-    out << "<td>" << CGI::GetMathSpanPure(theG2B3Data.theChars[i].ToString()) << "</td>";
+    out << "<td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theChars[i].ToString()) << "</td>";
     out << "</tr>";
   }
   readyForLatexConsumptionTable1 <<"\\hline \n";
@@ -6372,7 +6372,7 @@ bool Calculator::innerSplitFDpartB3overG2old(Calculator& theCommands, const Expr
         formulaStream1 << "(12(i(\\bar c) - " << theG2B3Data.theChars[j].ToString() <<  "))";
     }
     formulaStream1 << "v_\\lambda";
-    out << CGI::GetMathSpanPure(formulaStream1.str()) << "</td><td>" << CGI::GetMathSpanPure(theG2B3Data.theEigenVectorS[k].ToString()) << "</td></tr>";
+    out << HtmlRoutines::GetMathSpanPure(formulaStream1.str()) << "</td><td>" << HtmlRoutines::GetMathSpanPure(theG2B3Data.theEigenVectorS[k].ToString()) << "</td></tr>";
   }
   out << "</table>";
   out << "<br>Time final: " << theGlobalVariables.GetElapsedSeconds();
@@ -7771,8 +7771,8 @@ public:
         theText.colorJS=
         this->DisplayedStringIsLeaf[i] ? "red" : "gray";
         theText.thePlotString=
-        CGI::clearNewLines
-        (CGI::backslashQuotes(CGI::DoubleBackslashes(this->DisplayedEstrings[i]) ));
+        HtmlRoutines::clearNewLines
+        (HtmlRoutines::backslashQuotes(HtmlRoutines::DoubleBackslashes(this->DisplayedEstrings[i]) ));
         thePlot+=theText;
       } else
       { PlotObject thePoint;

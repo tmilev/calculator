@@ -133,6 +133,8 @@ public:
   bool flagArgumentsAreOK;
   bool flagDoAddContentLength;
   bool flagMustLogin;
+  bool flagStopIfNoLogin;
+
   bool flagUsingSSLInWorkerProcess;
   bool flagDidSendAll;
   bool flagToggleMonitoring;

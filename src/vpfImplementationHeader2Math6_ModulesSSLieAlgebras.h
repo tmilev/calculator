@@ -340,8 +340,8 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
       }
   }
   output.MakeZero();
-  out << "<br>Character w.r.t Levi part: " << CGI::GetMathMouseHover(remainingCharDominantLevi.ToString());
-//  stOutput << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
+  out << "<br>Character w.r.t Levi part: " << HtmlRoutines::GetMathMouseHover(remainingCharDominantLevi.ToString());
+//  stOutput << "<br>Character w.r.t Levi part: " << HtmlRoutines::GetHtmlMathDivFromLatexAddBeginArrayL
 // (remainingCharDominantLevi.ToString());
 
   Vector<coefficient> simpleGeneratorBaseField;
@@ -380,7 +380,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
     }
 //    stOutput << "<br>remaining character after accounting:<br>" << remainingCharDominantLevi.ToString();
   }
-  out << "<br>Character w.r.t Levi part: " << CGI::GetMathMouseHover(output.ToString());
+  out << "<br>Character w.r.t Levi part: " << HtmlRoutines::GetMathMouseHover(output.ToString());
   if (Report!=0)
   { //out << "<hr>"  << "The split character is: " << output.ToString("V", "\\omega", false);
     DrawingVariables theDV;
@@ -391,7 +391,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
     << " simple reflections of one another, with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i=0; i<output.size(); i++)
     { tempRoot=theWeyL.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
-      outputWeylSub.DrawContour(tempRoot, theDV, CGI::RedGreenBlue(200, 200, 0), 1000);
+      outputWeylSub.DrawContour(tempRoot, theDV, HtmlRoutines::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
       theDV.drawTextAtVectorBufferRational(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal);
@@ -736,7 +736,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
           theReport.Report(tempStream.str());
           if (outputReport!=0)
           { if (this->GetDim() <50)
-              out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << CGI::GetMathMouseHover(theMatrix.ToString(), 5000);
+              out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << HtmlRoutines::GetMathMouseHover(theMatrix.ToString(), 5000);
             else
               out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << theMatrix.ToString();
           }

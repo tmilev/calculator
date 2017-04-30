@@ -1102,7 +1102,11 @@ bool UserCalculator::ComputeAndStoreActivationEmailAndTokens
   std::stringstream tableCols;
   tableCols
   << "emailId int NOT NULL AUTO_INCREMENT PRIMARY KEY, "
-  << "email varchar(255) not null, lastActivationEmailTime LONGTEXT, numActivationEmails LONGTEXT, activationToken LONGTEXT";
+  << "email varchar(255) not null, "
+  << "lastActivationEmailTime LONGTEXT, "
+  << "numActivationEmails LONGTEXT, "
+  << "activationToken LONGTEXT, "
+  << "usernameAssociatedWithToken LONGTEXT";
   if (!theRoutines.CreateTable("emailActivationStats", tableCols.str() , commentsOnFailure, 0))
     return false;
   if (!theRoutines.RowExists
@@ -1154,9 +1158,14 @@ bool UserCalculator::ComputeAndStoreActivationEmailAndTokens
   if (!theRoutines.SetEntry
       ((std::string) "email", this->email, (std::string) "emailActivationStats",
        (std::string) "activationToken",
-       this->actualActivationToken.value, commentsOnFailure))
+       this->actualActivationToken, commentsOnFailure))
     return false;
-  this->activationEmailSubject="NO REPLY: Activation of a Math homework account. ";
+  if (!theRoutines.SetEntry
+      ((std::string) "email", this->email, (std::string) "emailActivationStats",
+       (std::string) "usernameAssociatedWithToken",
+       this->username, commentsOnFailure))
+    return false;
+  this->activationEmailSubject="NO REPLY: Activation of your Math homework account. ";
   std::stringstream emailBody;
   emailBody << "Dear user,"
   << "\n\nto confirm your email change at our website calculator-algebra.org"
@@ -2002,7 +2011,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   if (!userWrapper.Iexist(theRoutines))
   { if (commentsGeneral!=0)
       *commentsGeneral << "User with email " << userWrapper.email.value << " does not exist. ";
-    stOutput << "\n<br>\nDEBUG: User with email " << userWrapper.email.value << " does not exist. ";
+    //stOutput << "\n<br>\nDEBUG: User with email " << userWrapper.email.value << " does not exist. ";
     userWrapper.username=userWrapper.email;
     if (!userWrapper.CreateMeIfUsernameUnique(theRoutines, commentsOnFailure))
       return false;
@@ -2212,13 +2221,15 @@ bool DatabaseRoutines::FetchEntry
   outputUnsafe="";
   if (!theQuery.flagQuerySucceeded)
   { if (failureComments!=0)
-      *failureComments << "<b>Query failed - column may not exist (or some other error occurred). </b>";
+      *failureComments << "<br><b>Query failed - column may not exist (or some other error occurred). </b>";
   //stOutput << "<hr><b>Query failed - column may not exist (or some other error occurred). </b><hr>";
     return false;
   }
   if (!theQuery.flagQueryReturnedResult)
   { if (failureComments!=0)
-      *failureComments << "<b>Query did not return a result - column may not exist. </b>";
+      *failureComments << "<b>Query: </b> "
+      << queryStream.str()
+      << " <b>did not return a result - column may not exist. </b>";
   //stOutput << "<hr>DEBUG: Query did not return a result - column may not exist. <hr>";
     return false;
   }

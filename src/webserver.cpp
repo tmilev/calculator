@@ -2677,13 +2677,23 @@ std::string WebWorker::GetChangePasswordPage()
     << "\">";
     if (theGlobalVariables.GetWebInput("activationToken")!="")
     { DatabaseRoutines theRoutines;
-      std::string actualEmailActivationToken;
+      std::string actualEmailActivationToken, usernameAssociatedWithToken;
       if (!theRoutines.FetchEntry
           ((std::string) "email", claimedEmail, (std::string)"emailActivationStats",
            (std::string) "activationToken", actualEmailActivationToken, &out))
         out << "\n<br>\n<span style=\"color:red\"><b>Failed to fetch email activation token. </b></span>";
+      else if (!theRoutines.FetchEntry
+          ((std::string) "email", claimedEmail, (std::string)"emailActivationStats",
+           (std::string) "usernameAssociatedWithToken", usernameAssociatedWithToken, &out))
+        out << "\n<br>\n<span style=\"color:red\"><b>Failed to fetch username for this token. </b></span>";
       else if (actualEmailActivationToken!=claimedActivationToken)
         out << "\n<br>\n<span style=\"color:red\"><b>Bad activation token: could not activate your email. </b></span>";
+      else if (usernameAssociatedWithToken!=theGlobalVariables.userDefault.username.value)
+        out << "\n<br>\n<span style=\"color:red\"><b>Activation token was issued for another user. </b></span>";
+      else if (!theRoutines.SetEntry
+          ((std::string) "email", claimedEmail, (std::string)"emailActivationStats",
+           (std::string) "activationToken",(std::string)"", &out))
+        out << "\n<br>\n<span style=\"color:red\"><b>Could not reset the activation token (database is down?). </b></span>";
       else if (!theRoutines.SetEntry
        (DatabaseStrings::userColumnLabel, theGlobalVariables.userDefault.username,
         DatabaseStrings::usersTableName, (std::string) "email", claimedEmail,&out))

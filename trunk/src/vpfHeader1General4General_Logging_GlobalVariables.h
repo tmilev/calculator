@@ -128,10 +128,11 @@ public:
 
   PauseThread theLocalPauseController;
 
-  static const std::string hopefullyPermanentWebAdressOfServerExecutable;
-  static const std::string hopefullyPermanent_HTTPS_WebAdressOfServerExecutable;
-  static const std::string hopefullyPermanent_HTTPS_WebAdressJavascriptFolder;
-  static const std::string hopefullyPermanentWebAdressOfServerOutputFolder;
+  static std::string hopefullyPermanentWebAdress;
+  static std::string hopefullyPermanentWebAdressOfServerExecutable;
+  static std::string hopefullyPermanent_HTTPS_WebAdressOfServerExecutable;
+  static std::string hopefullyPermanent_HTTPS_WebAdressJavascriptFolder;
+  static std::string hopefullyPermanentWebAdressOfServerOutputFolder;
 
   std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;

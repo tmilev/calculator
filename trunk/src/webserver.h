@@ -176,6 +176,7 @@ public:
   int ProcessFolder();
   int ProcessFile();
   int ProcessChangePassword();
+  int SetEmail(const std::string& input);
   int ProcessChangePasswordPage();
   int ProcessCalculator();
   int ProcessDatabase();

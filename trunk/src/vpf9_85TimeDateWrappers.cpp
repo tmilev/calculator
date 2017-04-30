@@ -104,6 +104,18 @@ std::string TimeWrapper::ToStringHumanReadable()
   return result;
 }
 
+std::string TimeWrapper::ToString()
+{ std::stringstream out;
+  out
+  <<        this->theTime.tm_year
+  << " " << this->theTime.tm_mon
+  << " " << this->theTime.tm_mday
+  << " " << this->theTime.tm_hour
+  << " " << this->theTime.tm_min
+  << " " << this->theTime.tm_sec;
+  return out.str();
+}
+
 void TimeWrapper::operator=(const std::string& input)
 { std::string inputNoDashes;
   inputNoDashes.reserve(input.size());

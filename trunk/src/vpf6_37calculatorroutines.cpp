@@ -549,34 +549,6 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
     << input.ToString()
     << "expected to be strings (enclose in \"\" please). ";
 
-  std::string mailGunKey;
-  if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-api.txt",mailGunKey,out, true, true))
-    return theCommands << "Could not find mailgun key. The key must be located in file: "
-    << "<br>\ncertificates/mailgun-api.txt\n<br>\n "
-    << "The file must be uploaded manually to the server. ";
-  commandToExecute << "curl -s --user 'api:" << mailGunKey
-  << "' ";
-  commandToExecute
-  << "https://api.mailgun.net/v3/mail2."
-
-  <<  theGlobalVariables.hostNoPort
-  << "/messages "
-  ;
-  commandToExecute << "-F from='Automated Email "
-  << "<noreply@mail2."
-  << theGlobalVariables.hostNoPort
-  << ">' ";
-  commandToExecute << "-F to='"
-  << theEmail.toEmail << "' "
-  << "-F subject='"
-  << theEmail.subject << "' "
-  << "-F text='"
-  << theEmail.emailContent
-  << "'"
-  ;
-  out << "Command: " << HtmlRoutines::ConvertStringToHtmlString( commandToExecute.str(), true);
-  out << "<br>Result:<br>"
-  << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.CallSystemWithOutput(commandToExecute.str()), true);
-
+  theEmail.SendEmailWithMailGun(&out, &out);
   return output.AssignValue(out.str(),theCommands);
 }

@@ -746,6 +746,7 @@ bool UserCalculator::FetchOneUserRow
   this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
   this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");
   this->problemDataString=this->GetSelectedRowEntry("problemData");
+  this->activationTokenCreationTime=this->GetSelectedRowEntry("activationTokenCreationTime");
   bool courseHomeFromDB=true;
   if (this->userRole=="admin")
     if (theGlobalVariables.GetWebInput("courseHome")!="")
@@ -1089,14 +1090,100 @@ bool DatabaseRoutines::SendActivationEmail(const std::string& emailList, std::st
   return this->SendActivationEmail(theEmails, comments);
 }
 
-void UserCalculator::ComputeActivationToken()
-{ MacroRegisterFunctionWithName("UserCalculator::ComputeActivationToken");
+bool UserCalculator::ComputeAndStoreActivationEmailAndTokens
+(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral, DatabaseRoutines& theRoutines)
+{ MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationEmailAndTokens");
+  if (!this->ComputeAndStoreActivationToken(commentsOnFailure, theRoutines))
+    return false;
+  std::string activationAddress=
+  this->GetActivationAddressFromActivationToken
+  (this->actualActivationToken.value, theGlobalVariables.hostNoPort,
+   this->username.value, this->email.value);
+  std::stringstream tableCols;
+  tableCols
+  << "emailId int NOT NULL AUTO_INCREMENT PRIMARY KEY, "
+  << "email varchar(255) not null, lastActivationEmailTime LONGTEXT, numActivationEmails LONGTEXT, activationToken LONGTEXT";
+  if (!theRoutines.CreateTable("emailActivationStats", tableCols.str() , commentsOnFailure, 0))
+    return false;
+  if (!theRoutines.RowExists
+      ((std::string) "email", this->email,
+       (std::string) "emailActivationStats", commentsOnFailure))
+    theRoutines.InsertRow
+    ((std::string) "email", this->email.value, (std::string) "emailActivationStats", commentsOnFailure);
+  std::string lastEmailTime, emailCountForThisEmail;
+  if (! theRoutines.FetchEntry
+      ((std::string) "email", this->email, (std::string) "emailActivationStats",
+       (std::string) "lastActivationEmailTime", lastEmailTime, commentsOnFailure))
+    return false;
+  if (! theRoutines.FetchEntry
+      ((std::string) "email", this->email, (std::string) "emailActivationStats",
+       (std::string) "numActivationEmails", emailCountForThisEmail, commentsOnFailure))
+    return false;
+  LargeInt numActivationsThisEmail=0;
+  if (emailCountForThisEmail!="")
+    numActivationsThisEmail.AssignString(emailCountForThisEmail);
+  numActivationsThisEmail++;
+  TimeWrapper now, lastActivationOnThisEmail, lastActivationOnThisAccount;
+  now.AssignLocalTime();
+  if (lastEmailTime!="")
+  { lastActivationOnThisEmail.operator =(lastEmailTime);
+    lastActivationOnThisAccount.operator =(this->activationTokenCreationTime);
+  }
+  if (commentsGeneral!=0)
+    *commentsGeneral
+    << "<br>Last activation on this email: "
+    << lastActivationOnThisEmail.ToStringHumanReadable()
+    << "<br>Last activation on this account: "
+    << lastActivationOnThisEmail.ToStringHumanReadable()
+    << "<br>Total activations (attempted on) this email: "
+    << numActivationsThisEmail.ToString();
+  if (!theRoutines.SetEntry
+      (DatabaseStrings::userId, this->userId, DatabaseStrings::usersTableName,
+       (std::string) "activationTokenCreationTime", now.ToString(), commentsOnFailure))
+    return false;
+  if (!theRoutines.SetEntry
+      ((std::string) "email", this->email, (std::string) "emailActivationStats",
+       (std::string) "lastActivationEmailTime",
+       now.ToString(), commentsOnFailure))
+    return false;
+  if (!theRoutines.SetEntry
+      ((std::string) "email", this->email, (std::string) "emailActivationStats",
+       (std::string) "numActivationEmails",
+       numActivationsThisEmail.ToString(), commentsOnFailure))
+    return false;
+  if (!theRoutines.SetEntry
+      ((std::string) "email", this->email, (std::string) "emailActivationStats",
+       (std::string) "activationToken",
+       this->actualActivationToken.value, commentsOnFailure))
+    return false;
+  this->activationEmailSubject="NO REPLY: Activation of a Math homework account. ";
+  std::stringstream emailBody;
+  emailBody << "Dear user,"
+  << "\n\nto confirm your email change at our website calculator-algebra.org"
+  << ", please follow the activation link below.\n\n "
+  << activationAddress
+  << "\n\nSincerely, \nthe calculator-algebra.org team";
+  this->activationEmail=emailBody.str();
+  return true;
+}
+
+bool UserCalculator::ComputeAndStoreActivationToken
+(std::stringstream* commentsOnFailure, DatabaseRoutines& theRoutines)
+{ MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationToken");
+
   TimeWrapper now;
   //stOutput << "Resetting authentication token. ";
   now.AssignLocalTime();
   std::stringstream activationTokenStream;
   activationTokenStream << now.theTimeStringNonReadable << rand();
   this->actualActivationToken=Crypto::computeSha1outputBase64(activationTokenStream.str());
+  if (!this->SetColumnEntry("activationToken", this->actualActivationToken.value, theRoutines, commentsOnFailure))
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Setting activation token failed.";
+    this->actualActivationToken="";
+    return false;
+  }
+  return true;
 }
 
 bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, std::stringstream& comments)
@@ -1303,7 +1390,8 @@ bool UserCalculator::StoreProblemDataToDatabase
 }
 
 bool DatabaseRoutines::AddUsersFromEmails
-(const std::string& emailList, const std::string& userPasswords, std::string& userRole, std::string& userGroup,
+(const std::string& emailList, const std::string& userPasswords,
+ std::string& userRole, std::string& userGroup,
  std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers)
 { MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
@@ -1361,12 +1449,8 @@ bool DatabaseRoutines::AddUsersFromEmails
     (DatabaseStrings::problemWeightsIdColumnName,
      currentUser.currentCourses.value, *this, &comments);
     if (thePasswords.size==0 || thePasswords.size!=theEmails.size)
-    { currentUser.ComputeActivationToken();
-      if (!currentUser.SetColumnEntry("activationToken", currentUser.actualActivationToken.value, *this, &comments))
-      { comments << "Setting activation token failed.";
+    { if (!currentUser.ComputeAndStoreActivationToken(&comments, *this))
         result=false;
-        currentUser.actualActivationToken="";
-      }
     } else
     { currentUser.enteredPassword=thePasswords[i];
       //stOutput << "Debug: user:<br>" << currentUser.username.value << "<br>password:<br>"
@@ -1420,7 +1504,7 @@ bool UserCalculator::GetActivationAddress
     return false;
   }
   output= this->GetActivationAddressFromActivationToken
-  (this->actualActivationToken.value, calculatorBase, this->username.value);
+  (this->actualActivationToken.value, calculatorBase, this->username.value, this->email.value);
   return true;
 }
 
@@ -1680,7 +1764,7 @@ bool DatabaseRoutines::innerDisplayDatabaseTable
 }
 
 bool DatabaseRoutines::innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::innerGetauthenticationCreationTime");
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerGetUserDBEntry");
   std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights())
   { out << "Function available to logged-in admins only. ";
@@ -1728,6 +1812,103 @@ bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expressi
   theRoutines.startMySQLDatabase(&comments, 0);
   out << comments.str();
   return output.AssignValue(out.str(), theCommands);
+}
+
+bool EmailRoutines::SendEmailWithMailGun
+(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral,
+ bool includeEmailCommandInComments)
+{ MacroRegisterFunctionWithName("EmailRoutines::SendEmailWithMailGun");
+  std::string mailGunKey;
+  std::stringstream temp;
+  if (commentsOnFailure==0)
+    commentsOnFailure=&temp;
+  if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-api.txt", mailGunKey, *commentsOnFailure, true, true))
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Could not find mailgun key. The key must be located in file: "
+      << "<br>\ncertificates/mailgun-api.txt\n<br>\n "
+      << "The file must be uploaded manually to the server. ";
+    return false;
+  }
+  std::stringstream commandToExecute;
+  commandToExecute << "curl -s --user 'api:" << mailGunKey
+  << "' ";
+  commandToExecute
+  << "https://api.mailgun.net/v3/mail2."
+
+  <<  theGlobalVariables.hostNoPort
+  << "/messages "
+  ;
+  commandToExecute << "-F from='Automated Email "
+  << "<noreply@mail2."
+  << theGlobalVariables.hostNoPort
+  << ">' ";
+  if (this->toEmail=="")
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Receiver address is missing. ";
+    return false;
+  }
+  if (this->subject=="" && this->emailContent=="")
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Empty emails not allowed. ";
+    return false;
+  }
+  //WARNING: calling command line
+  //that includes user inputs.
+  //Those MUST be sanitized (else an attacker would use username with " characters
+  //to execute arbitrary code.
+  commandToExecute << "-F to=\""
+  << HtmlRoutines::ConvertStringToBackslashEscapedString(this->toEmail) << "\" "
+  << "-F subject=\""
+  << HtmlRoutines::ConvertStringToBackslashEscapedString(this->subject) << "\" "
+  << "-F text=\""
+  << HtmlRoutines::ConvertStringToBackslashEscapedString(this->emailContent)
+  << "\""
+  ;
+  std::string commandResult=theGlobalVariables.CallSystemWithOutput(commandToExecute.str());
+  if (commentsGeneral!=0)
+  { if (includeEmailCommandInComments)
+      *commentsGeneral << "Command: " << HtmlRoutines::ConvertStringToHtmlString(commandToExecute.str(), true);
+    bool isBad=false;
+    if (commandResult.find("Forbidden")!=std::string::npos)
+    { isBad=true;
+    }
+    *commentsGeneral << "<br>Result:<br>";
+    if(isBad)
+      *commentsGeneral << "<span style=\"color:red\"><b>";
+    *commentsGeneral << HtmlRoutines::ConvertStringToHtmlString(commandResult, true);
+    if(isBad)
+      *commentsGeneral << "</b></span>";
+  }
+  return true;
+}
+
+List<bool> EmailRoutines::recognizedEmailCharacters;
+List<bool>& EmailRoutines::GetRecognizedEmailChars()
+{ if (recognizedEmailCharacters.size==0)
+  { recognizedEmailCharacters.initFillInObject(256, false);
+    std::string theChars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    theChars+="0123456789";
+    theChars+="@";
+    theChars+="!#$%&'*+-/=?.";
+    for (unsigned i=0; i<theChars.size(); i++)
+      recognizedEmailCharacters[ ((unsigned char)theChars[i])]=true;
+  }
+  return EmailRoutines::recognizedEmailCharacters;
+}
+
+bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* commentsOnError)
+{ MacroRegisterFunctionWithName("EmailRoutines::IsOKEmail");
+  //stOutput << "DEBUG: got to isokemail";
+  if (input.size()==0)
+    return false;
+  for (unsigned i=0; i<input.size(); i++)
+    if(!EmailRoutines::GetRecognizedEmailChars()[((unsigned char) input[i])])
+    { if (commentsOnError!=0)
+        *commentsOnError << "Email: " << input << " contains the unrecognized character "
+        << input[i];
+      return false;
+    }
+  return true;
 }
 
 std::string EmailRoutines::GetCommandToSendEmailWithMailX()
@@ -2191,6 +2372,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   << "authenticationCreationTime LONGTEXT, "
   << "authenticationToken LONGTEXT, "
   << "activationToken LONGTEXT, "
+  << "activationCreationTime LONGTEXT, "
   << "userRole LONGTEXT, "
   << "userInfo LONGTEXT, "
   << DatabaseStrings::problemWeightsIdColumnName << " LONGTEXT, "
@@ -2198,7 +2380,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   << DatabaseStrings::sectionsTaughtByUser << " LONGTEXT, "
   << "problemData LONGTEXT "
   ;
-  if (! this->CreateTable
+  if (!this->CreateTable
       (DatabaseStrings::usersTableName, tableCols.str(), commentsOnFailure, outputfirstLogin))
     return false;
   deadlineTableCols << DatabaseStrings::userCurrentCoursesColumnLabel
@@ -2218,27 +2400,33 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
 
 bool DatabaseRoutines::InsertRow
 (const std::string& primaryKeyUnsafe, const std::string& primaryValueUnsafe,
- const std::string& tableNameUnsafe, std::stringstream& commentsOnFailure)
+ const std::string& tableNameUnsafe, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::InsertRow");
   MySQLdata primaryKey   = primaryKeyUnsafe;
   MySQLdata primaryValue = primaryValueUnsafe;
   MySQLdata tableName    = tableNameUnsafe;
   std::stringstream queryStream;
   queryStream << "INSERT INTO " << this->theDatabaseName << "."
-  << tableName.GetIdentifieR() << "(" << primaryKey.GetIdentifieR() << ") VALUES(" << primaryValue.GetDatA() << ")";
-  DatabaseQuery theQuery(*this, queryStream.str(), &commentsOnFailure);
+  << tableName.GetIdentifieR() << "(" << primaryKey.GetIdentifieR() << ") VALUES("
+  << primaryValue.GetDatA() << ")";
+  DatabaseQuery theQuery(*this, queryStream.str(), commentsOnFailure);
   return theQuery.flagQuerySucceeded;
 }
 
 std::string UserCalculator::GetActivationAddressFromActivationToken
   (const std::string& theActivationToken, const std::string& calculatorBase,
-   const std::string& inputUserNameUnsafe)
+   const std::string& inputUserNameUnsafe, const std::string& inputEmailUnsafe)
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
   (void) calculatorBase;
   std::stringstream out;
-  out << theGlobalVariables.DisplayPathExecutable
-  << "?request=activateAccount&username=" << HtmlRoutines::ConvertStringToURLString(inputUserNameUnsafe, false)
-  << "&activationToken=" << HtmlRoutines::ConvertStringToURLString(theActivationToken, false)
+
+  out << theGlobalVariables.hopefullyPermanentWebAdress
+  << theGlobalVariables.DisplayNameExecutable
+  << "?request=activateAccount&username="
+  << HtmlRoutines::ConvertStringToURLString(inputUserNameUnsafe, false);
+  if (inputEmailUnsafe!="")
+    out << "&email=" << HtmlRoutines::ConvertStringToURLString(inputEmailUnsafe, false);
+  out << "&activationToken=" << HtmlRoutines::ConvertStringToURLString(theActivationToken, false)
   ;
   return out.str();
 }

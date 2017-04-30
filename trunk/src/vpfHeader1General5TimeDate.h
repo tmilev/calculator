@@ -17,6 +17,7 @@ public:
   void AssignLocalTime();
   void ComputeTimeStringNonReadable();
   std::string ToStringHumanReadable();
+  std::string ToString();
   void operator=(const std::string& inputTime);
   double SubtractAnotherTimeFromMeInSeconds(TimeWrapper& other);
   double SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other);

@@ -1404,7 +1404,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
         oneTableLineStream << "<td>"
         << "<a href=\""
         << UserCalculator::GetActivationAddressFromActivationToken
-        (currentUser.actualActivationToken.value, webAddress, userTable[i][indexUser])
+        (currentUser.actualActivationToken.value, webAddress, userTable[i][indexUser], currentUser.email.value)
         << "\"> (Re)activate account and change password</a>"
         << "</td>";
       oneTableLineStream << "<td>";
@@ -1419,10 +1419,8 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
       << HtmlRoutines::ConvertStringToURLString( UserCalculator::GetActivationAddressFromActivationToken
         (currentUser.actualActivationToken.value, webAddress,
-         userTable[i][indexUser]), false )
+         userTable[i][indexUser], currentUser.email.value), false )
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
-      << "The link does not work with apple safari; if you use safari, please contact us by email"
-      << " and we will activate your account manually. "
       << " Once you activate your account, you can log in safely here: \n"
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
       << webAddress

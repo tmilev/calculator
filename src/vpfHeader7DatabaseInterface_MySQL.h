@@ -235,12 +235,15 @@ public:
   std::string toEmail;
   std::string emailContent;
   std::string smtpWithPort;
-
+  static List<bool> recognizedEmailCharacters;
+  List<bool>& GetRecognizedEmailChars();
   EmailRoutines();
-  bool IsValidForMailgunCommand(std::stringstream* commentsOnFailure);
-
+  //bool IsValidForMailgunCommand(std::stringstream* commentsOnFailure);
+  bool IsOKEmail(const std::string& input, std::stringstream* commentsOnError);
   std::string GetCommandToSendEmailWithMailX();
-  bool SendEmailWithMailGun();
+  bool SendEmailWithMailGun
+  (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral,
+   bool includeEmailCommandInComments=false);
 };
 
 class TopicElement;
@@ -299,7 +302,7 @@ public:
   bool getUser(Calculator& theCommands, const Expression& input);
   bool getUserPassAndSelectedColumns(Calculator& theCommands, const Expression& input);
   bool getUserPassAndExtraData(Calculator& theCommands, const Expression& input, List<std::string>& outputData);
-  void ComputeActivationToken();
+  bool ComputeAndStoreActivationToken(std::stringstream* commentsOnFailure, DatabaseRoutines& theRoutines);
   void ComputeShaonedSaltedPassword();
   bool GetActivationAbsoluteAddress
   (std::string& output, DatabaseRoutines& theRoutines, std::stringstream& comments)
@@ -310,8 +313,10 @@ public:
   ;
   static std::string GetActivationAddressFromActivationToken
   (const std::string& theActivationToken, const std::string& calculatorBase,
-   const std::string& inputUserNameUnsafe)
+   const std::string& inputUserNameUnsafe, const std::string& inputEmailUnsafe)
   ;
+  bool ComputeAndStoreActivationEmailAndTokens
+  (std::stringstream* commentsInFailure, std::stringstream* commentsGeneral, DatabaseRoutines& theRoutines);
   bool SendActivationEmail(DatabaseRoutines& theRoutines, std::stringstream& comments);
   std::string ToString();
   std::string ToStringSelectedColumns();
@@ -340,7 +345,7 @@ public:
 ;
   bool InsertRow
   (const std::string& primaryKeyUnsafe, const std::string& primaryValueUnsafe,
-   const std::string& tableNameUnsafe, std::stringstream& commentsOnFailure)
+   const std::string& tableNameUnsafe, std::stringstream* commentsOnFailure)
   ;
   bool ColumnExists(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream);
   bool CreateColumn(const std::string& columnNameNameUnsafe, const std::string& tableNameUnsafe,

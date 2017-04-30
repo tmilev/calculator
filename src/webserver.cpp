@@ -2615,9 +2615,11 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   /////////////////////////
   out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
   out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
-  out << "<b>This is an experimental feature which is "
-  << "currently being worked on.<br>"
-  << " Please do not use the following button</b>.";
+  out << "<hr>Logging in with google is an experimental feature.<br> "
+  << "While we are not aware of any bugs/security gaps in our code, <br>"
+  << "<b>please use the google login button only at your own risk.</b><br>"
+  << "We will remove this message when we complete our testing. "
+  ;
   out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div>";
   out << "<script language=\"javascript\">\n"
   << "function onSignIn(googleUser)\n"
@@ -2650,8 +2652,7 @@ std::string WebWorker::GetChangePasswordPage()
   out << HtmlRoutines::GetCalculatorStyleSheetWithTags();
   out << "</head>";
   out << "<body> ";
-  out << "<problemNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "</problemNavigation>";
+  out << "<calculatorNavigation>" << HtmlInterpretation::ToStringNavigation() << "</calculatorNavigation>";
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
   { out << "Changing password requires secure connection. ";
     out << "</body></html>";
@@ -2667,9 +2668,32 @@ std::string WebWorker::GetChangePasswordPage()
   << "required>";
 
   if (theGlobalVariables.userCalculatorRequestType=="activateAccount")
+  { std::string claimedActivationToken=
+    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false);
+    std::string claimedEmail=
+    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"),false);
     out << "<input type=\"hidden\" id=\"activationToken\" value=\""
-    << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false) << "\">";
-  else
+    << claimedActivationToken
+    << "\">";
+    if (theGlobalVariables.GetWebInput("activationToken")!="")
+    { DatabaseRoutines theRoutines;
+      std::string actualEmailActivationToken;
+      if (!theRoutines.FetchEntry
+          ((std::string) "email", claimedEmail, (std::string)"emailActivationStats",
+           (std::string) "activationToken", actualEmailActivationToken, &out))
+        out << "\n<br>\n<span style=\"color:red\"><b>Failed to fetch email activation token. </b></span>";
+      else if (actualEmailActivationToken!=claimedActivationToken)
+        out << "\n<br>\n<span style=\"color:red\"><b>Bad activation token: could not activate your email. </b></span>";
+      else if (!theRoutines.SetEntry
+       (DatabaseStrings::userColumnLabel, theGlobalVariables.userDefault.username,
+        DatabaseStrings::usersTableName, (std::string) "email", claimedEmail,&out))
+        out << "\n<br>\n<span style=\"color:red\"><b>Could not store your email (database is down?). </b></span>";
+      else
+      { theGlobalVariables.userDefault.email=claimedEmail;
+        out << "\n<br>\n<span style=\"color:green\"><b>Email successfully updated. </b></span>";
+      }
+    }
+  } else
     out << "<br>Password: "
     << "<input type=\"password\" id=\"password\" placeholder=\"password\">\n";
   out << "<br>New password: \n"
@@ -2681,15 +2705,47 @@ std::string WebWorker::GetChangePasswordPage()
   << "<span id=\"passwordChangeResult\"> </span>\n"
 //  << "</form>"
   ;
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "<hr>"
   << "Email: " << theGlobalVariables.userDefault.email.value
   << "<br>\n"
   << "Change/set email: <input type=\"email\" id=\"emailInputID\">\n "
   << "<button onclick=\"submitChangePassRequest('emailChangeResult') \"> Submit</button>\n";
   out << "<span id=\"emailChangeResult\"></span>\n";
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
+}
+
+int WebWorker::SetEmail(const std::string& input)
+{ MacroRegisterFunctionWithName("WebWorker::ProcessChangeEmail");
+  std::stringstream out;
+  EmailRoutines theEmail;
+  theEmail.toEmail=input;
+  //out << "DEBUG: got to here part 1. ";
+  if (!theEmail.IsOKEmail(theEmail.toEmail, & out))
+  { stOutput << out.str();
+    return 0;
+  }
+  //out << "DEBUG: got to here part 2. ";
+  DatabaseRoutines theRoutines;
+  UserCalculator userCopy;
+  userCopy.UserCalculatorData::operator=(theGlobalVariables.userDefault);
+  userCopy.email=input;
+  if (!userCopy.ComputeAndStoreActivationEmailAndTokens(&out, &out, theRoutines))
+  { stOutput << out.str();
+    return 0;
+  }
+  theGlobalVariables.userDefault=userCopy;
+  theEmail.emailContent=userCopy.activationEmail;
+  theEmail.subject=userCopy.activationEmailSubject;
+  out << "<br><b>Sending email... </b>";
+  theEmail.SendEmailWithMailGun(&out, &out);
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    out << "<hr>Content of sent email (admin view only):<br>"
+    << HtmlRoutines::ConvertStringToHtmlString(theEmail.emailContent, true);
+  stOutput << out.str();
+  theGlobalVariables.userDefault=userCopy;
+  return 0;
 }
 
 int WebWorker::ProcessChangePassword()
@@ -2701,12 +2757,19 @@ int WebWorker::ProcessChangePassword()
   this->SetHeaderOKNoContentLength();
   UserCalculatorData& theUser=theGlobalVariables.userDefault;
   theUser.enteredAuthenticationToken="";
-  if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { stOutput << "<span style=\"color:red\"><b> Password change available only to logged in users via SSL.</b></span>";
+  if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { stOutput << "<span style=\"color:red\"><b>Please use secure connection.</b></span>";
+    return 0;
+  }
+  if (!theGlobalVariables.flagLoggedIn)
+  { stOutput << "<span style=\"color:red\"><b>Please enter (old) password.</b></span>";
     return 0;
   }
   std::string newPassword=theGlobalVariables.GetWebInput("newPassword");
   std::string reenteredPassword=theGlobalVariables.GetWebInput("reenteredPassword");
+  std::string newEmail=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"),false);
+  if (newPassword=="" && reenteredPassword=="" && newEmail!="")
+    return this->SetEmail(newEmail);
   if (newPassword!=reenteredPassword)
   { stOutput << "<span style=\"color:red\"><b> Passwords don't match.</b></span>";
     return 0;

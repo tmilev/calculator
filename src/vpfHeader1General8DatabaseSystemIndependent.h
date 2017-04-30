@@ -53,6 +53,7 @@ class UserCalculatorData
   MySQLdata username;
   MySQLdata email;
   MySQLdata currentTable;
+  MySQLdata timeOfActivationTokenCreation;
   MySQLdata actualActivationToken;
   MySQLdata enteredActivationToken;
   MySQLdata enteredAuthenticationToken;
@@ -71,6 +72,9 @@ class UserCalculatorData
   std::string enteredGoogleToken;
   std::string userRole;
   std::string authenticationTokenCreationTime;
+  std::string activationTokenCreationTime;
+  std::string activationEmail;
+  std::string activationEmailSubject;
   //List<std::string> sectionsViewableByUser;
   List<std::string> selectedColumnsUnsafe;
   List<std::string> selectedColumnValuesUnsafe;

@@ -2749,7 +2749,7 @@ int WebWorker::SetEmail(const std::string& input)
   theEmail.emailContent=userCopy.activationEmail;
   theEmail.subject=userCopy.activationEmailSubject;
   out << "<br><b>Sending email... </b>";
-  theEmail.SendEmailWithMailGun(&out, &out);
+  theEmail.SendEmailWithMailGun(&out, &out, theGlobalVariables.UserDefaultHasAdminRights());
   if (theGlobalVariables.UserDefaultHasAdminRights())
     out << "<hr>Content of sent email (admin view only):<br>"
     << HtmlRoutines::ConvertStringToHtmlString(theEmail.emailContent, true);

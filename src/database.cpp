@@ -1838,6 +1838,8 @@ bool EmailRoutines::SendEmailWithMailGun
       << "The file must be uploaded manually to the server. ";
     return false;
   }
+  if (mailGunKey.size()>0)
+    mailGunKey.resize(mailGunKey.size()-1);
   std::stringstream commandToExecute;
   commandToExecute << "curl -s --user 'api:" << mailGunKey
   << "' ";

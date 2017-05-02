@@ -66,7 +66,7 @@ void Calculator::reset()
   this->flagHidePolynomialBuiltInTypeIndicator=false;
   this->flagUseFracInRationalLaTeX=true;
   this->flagForkingProcessAllowed=true;
-  this->flagNoApproximations=false;
+  this->flagNoApproximationS=false;
   this->flagDefaultRulesWereTamperedWith=false;
   this->flagUsePredefinedWordSplits=true;
   this->flagPlotNoControls=true;
@@ -272,7 +272,6 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("&");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("%");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NoFrac");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NoApproximations");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("ShowContext");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("NoLogarithmExponentShortcut");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogParsing");
@@ -1880,11 +1879,6 @@ bool Calculator::ApplyOneRule()
   }
   if (secondToLastS=="%" && lastS=="NoFrac")
   { this->flagUseFracInRationalLaTeX=false;
-    this->PopTopSyntacticStack();
-    return this->PopTopSyntacticStack();
-  }
-  if (secondToLastS=="%" && lastS=="NoApproximations")
-  { this->flagNoApproximations=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

@@ -141,10 +141,29 @@ void Calculator::initPredefinedInnerFunctions()
    \nb=1/t^3; TurnOnRules(\"ConvertShortDenominatorToNegativePower\"); b",
    true, false, "CalculatorConversions::innerTurnOffRules", "TurnOffRules");
   this->AddOperationInnerHandler
-  ("TurnOnRules", CalculatorFunctionsGeneral::innerTurnOnRules, "",
+  ("TurnOnRules",
+   CalculatorFunctionsGeneral::innerTurnOnRules, "",
    "Turns on computational rules.",
    "TurnOffRules(\"sqrt\"); a= \\sqrt[4]{t}; TurnOnRules(\"sqrt\"); a",
-   true, false, "CalculatorConversions::innerTurnOnRules", "TurnOnRules");
+   true, false,
+   "CalculatorConversions::innerTurnOnRules",
+   "TurnOnRules");
+  this->AddOperationInnerHandler
+  ("TurnOnApproximations",
+   CalculatorFunctionsGeneral::innerTurnOnApproximations, "",
+   "Turns on numerical approximations. Takes as input dummy argument. ",
+   "TurnOffApproximations(0); ln(2); TurnOnApproximations(0); ln(2)",
+   true, false,
+   "CalculatorConversions::innerTurnOnRules",
+   "TurnOnApproximations");
+  this->AddOperationInnerHandler
+  ("TurnOffApproximations",
+   CalculatorFunctionsGeneral::innerTurnOffApproximations, "",
+   "Turns on numerical approximations. Takes as input dummy argument. ",
+   "TurnOffApproximations(0); ln(2); TurnOnApproximations(0); ln(2)",
+   true, false,
+   "CalculatorConversions::innerTurnOnRules",
+   "TurnOffApproximations");
 
   this->AddOperationInnerHandler
   ("EvaluateSymbols", CalculatorHtmlFunctions::innerEvaluateSymbols, "",
@@ -5061,6 +5080,8 @@ void Calculator::initAtomsNonCacheable()
   this->atomsThatMustNotBeCached.SetExpectedSize(30);
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("RandomInteger");
   this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("SelectAtRandom");
+  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("TurnOffApproximations");
+  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("TurnOnApproximations");
 //  this->atomsThatMustNotBeCached.AddOnTopNoRepetitionMustBeNewCrashIfNot("PrintRuleStack");
 }
 

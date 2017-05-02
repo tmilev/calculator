@@ -27,6 +27,11 @@ public:
   static bool innerTurnOnRules
   (Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerTurnOnApproximations
+  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTurnOffApproximations
+  (Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerEqualityToArithmeticExpression
   (Calculator& theCommands, const Expression& input, Expression& output);
 

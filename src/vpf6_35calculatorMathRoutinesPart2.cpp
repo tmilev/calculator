@@ -453,14 +453,14 @@ bool CalculatorFunctionsGeneral::innerIntegrateSqrtOneMinusXsquared(Calculator& 
   theFunCoeff*=theSQRTedCoeff;
   theRadSquared=c/a*(-1);
   theRad.MakeSqrt(theCommands, theRadSquared);
-  Expression rescaledArgument, arcSinPart, algSQRTPart, algPart;
+  Expression rescaledArgument, arcCosPart, algSQRTPart, algPart;
   rescaledArgument=theVariableE/theRad;
-  arcSinPart.MakeOX(theCommands, theCommands.opArcSin(), rescaledArgument);
-  arcSinPart*=theRadSquared/2;
+  arcCosPart.MakeOX(theCommands, theCommands.opArcCos(), rescaledArgument);
+  arcCosPart*=theRadSquared/-2;
   algSQRTPart=theRadSquared-theVariableE*theVariableE;
   algPart.MakeSqrt(theCommands, algSQRTPart);
   algPart*=theVariableE/2;
-  output=theFunCoeff*(arcSinPart+algPart);
+  output=theFunCoeff*(arcCosPart+algPart);
   return true;
 }
 

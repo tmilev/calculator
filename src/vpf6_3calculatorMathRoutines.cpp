@@ -1904,6 +1904,18 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(Calculator
     denE.AssignValueWithContext(oneMinusXsquared, theContext, theCommands);
     return output.MakeXOX(theCommands, theCommands.opThePower(), denE, theCommands.EMHalf());
   }
+  if (theArgument.IsAtomGivenData(theCommands.opArcCos()))
+  { Expression denE, theContext;
+    theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
+    RationalFunctionOld oneMinusXsquared;
+    oneMinusXsquared.MakeMonomiaL(0,2);
+    oneMinusXsquared*=-1;
+    oneMinusXsquared+=1;
+    denE.AssignValueWithContext(oneMinusXsquared, theContext, theCommands);
+    output.MakeXOX(theCommands, theCommands.opThePower(), denE, theCommands.EMHalf());
+    output*=-1;
+    return true;
+  }
   return false;
 }
 

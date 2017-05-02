@@ -983,7 +983,7 @@ public:
   bool flagHasGraphics;
   bool flagWriteLatexPlots;
 
-  bool flagNoApproximations;
+  bool flagNoApproximationS;
 
 //  bool flagReplaceInputBoxesByValues;
 

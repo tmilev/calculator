@@ -365,7 +365,7 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
     return output.MakeError("Attempting to compute logarithm of zero.", theCommands, true);
   if (input.IsEqualToOne())
     return output.AssignValue(0, theCommands);
-  if (theCommands.flagNoApproximations)
+  if (theCommands.flagNoApproximationS)
     return false;
   double theArgument;
   if (!input.EvaluatesToDouble(&theArgument))
@@ -414,7 +414,7 @@ bool CalculatorFunctionsGeneral::innerArctan(Calculator& theCommands, const Expr
     output*=theCommands.EMOne();
     return true;
   }
-  if (theCommands.flagNoApproximations)
+  if (theCommands.flagNoApproximationS)
     return false;
   double theArgument;
   if (!input.EvaluatesToDouble(&theArgument))
@@ -424,7 +424,7 @@ bool CalculatorFunctionsGeneral::innerArctan(Calculator& theCommands, const Expr
 
 bool CalculatorFunctionsGeneral::innerArccos(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArccos");
-  if (theCommands.flagNoApproximations)
+  if (theCommands.flagNoApproximationS)
     return false;
   double theArgument;
   if (!input.EvaluatesToDouble(&theArgument))
@@ -434,7 +434,7 @@ bool CalculatorFunctionsGeneral::innerArccos(Calculator& theCommands, const Expr
 
 bool CalculatorFunctionsGeneral::innerArcsin(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArcsin");
-  if (theCommands.flagNoApproximations)
+  if (theCommands.flagNoApproximationS)
     return false;
   double theArgument;
   if (!input.EvaluatesToDouble(&theArgument))
@@ -483,7 +483,7 @@ bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Express
           return output.AssignValue(algOutput, theCommands);
         }
       }
-  if (theCommands.flagNoApproximations)
+  if (theCommands.flagNoApproximationS)
     return false;
   double theArgument=0;
   if (!input.EvaluatesToDouble(&theArgument))
@@ -509,7 +509,7 @@ bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Express
           return output.AssignValue(algOutput, theCommands);
         }
       }
-  if (theCommands.flagNoApproximations)
+  if (theCommands.flagNoApproximationS)
     return false;
   double theArgument=0;
   if (!input.EvaluatesToDouble(&theArgument))
@@ -7935,6 +7935,23 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
     output.AddChildOnTop(currentRuleE);
   }
   return true;
+}
+
+
+bool CalculatorFunctionsGeneral::innerTurnOnApproximations
+  (Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTurnOnApproximations");
+  (void) input;
+  theCommands.flagNoApproximationS=false;
+  return output.AssignValue((std::string) "Approximations have been turned on. ", theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerTurnOffApproximations
+  (Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTurnOffApproximations");
+  (void) input;
+  theCommands.flagNoApproximationS=true;
+  return output.AssignValue((std::string) "Approximations have been turned off. ", theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerTurnOffRules

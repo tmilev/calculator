@@ -2612,22 +2612,28 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "</form>";
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
+  out << "<hr><a href=\""
+  << theGlobalVariables.DisplayNameExecutable << "?request=signUp"
+  << "\">Sign up</a>";
   /////////////////////////
   out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
   out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
   out << "<hr>Logging in with google is an experimental feature.<br> "
   << "While we are not aware of any bugs/security gaps in our code, <br>"
   << "<b>please use the google login button only at your own risk.</b><br>"
-  << "We will remove this message when we complete our testing. "
+  << "We will remove this message when we complete our testing. <br> <br>"
   ;
-  out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div>";
+  out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div> "
+  << "<br><button style=\"opacity:0; transition: 0.6s\" id=\"doSignInWithGoogleToken\" "
+  << "onclick=\"document.getElementById(\"login\").submit();\">Proceed with Google</button>";
   out << "<script language=\"javascript\">\n"
   << "function onSignIn(googleUser)\n"
   << "{ document.getElementById(\"googleToken\").value=googleUser.getAuthResponse().id_token;\n"
   << "  document.getElementById(\"username\").required=false;\n"
   << "  document.getElementById(\"username\").value=\"\";\n"
   << "  document.getElementById(\"password\").value=\"\";\n"
-  //<< "  document.getElementById(\"login\").submit();\n"
+  << "  document.getElementById(\"doSignInWithGoogleToken\").style.opacity=\"1\";\n"
+//  << "  document.getElementById(\"doSignInWithGoogleToken\").style.visibility=\"visible\";\n"
   << "}\n"
   << "</script>\n";
   //out << "DEBUG: "
@@ -3002,6 +3008,15 @@ int WebWorker::ProcessChangePasswordPage()
   return 0;
 }
 
+int WebWorker::ProcessSignUp()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSignUp");
+  this->SetHeaderOKNoContentLength();
+  DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
+  theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
+  stOutput << this->GetSignUpPage();
+  return 0;
+}
+
 int WebWorker::ProcessLogout()
 { MacroRegisterFunctionWithName("WebWorker::ProcessLogout");
   this->SetHeaderOKNoContentLength();
@@ -3216,6 +3231,24 @@ int WebWorker::ProcessSubmitProblem()
   this->SetHeaderOKNoContentLength();
   stOutput << HtmlInterpretation::SubmitProblem();
   return 0;
+}
+
+std::string WebWorker::GetSignUpPage()
+{ MacroRegisterFunctionWithName("WebWorker::GetSignUpPage");
+  std::stringstream out;
+  out << "<html>"
+  << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
+  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << "<body>\n";
+  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
+  << "</calculatorNavigation>\n";
+  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
+  out << "<form name=\"desiredAccount\" id=\"login\">";
+  out <<  "Desired user name:\n"
+  << "<input type=\"text\" id=\"desiredUsername\" name=\"desiredUsername\" placeholder=\"username\" ";
+  out << "</form>";
+  out << "</body></html>";
+  return out.str();
 }
 
 std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
@@ -3433,6 +3466,8 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage" ||
            theGlobalVariables.userCalculatorRequestType=="activateAccount")
     return this->ProcessChangePasswordPage();
+  else if (theGlobalVariables.userCalculatorRequestType=="signUp")
+    return this->ProcessSignUp();
   else if (theGlobalVariables.userCalculatorRequestType=="login")
     return this->ProcessLoginPage();
   else if (theGlobalVariables.userCalculatorRequestType=="logout")
@@ -3728,6 +3763,7 @@ WebServer::WebServer()
   this->NumWorkersNormallyExited=0;
   this->WebServerPingIntervalInSeconds=10;
   this->flagThisIsWorkerProcess=false;
+  this->requestStartsNotNeedingLogin.AddOnTop("signUp");
   this->requestStartsNotNeedingLogin.AddOnTop("compute");
   this->requestStartsNotNeedingLogin.AddOnTop("calculator");
   this->requestStartsNotNeedingLogin.AddOnTop("calculatorExamples");

@@ -2580,7 +2580,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   double startTime=theGlobalVariables.GetElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeaD, outHeadPt1, outHeadPt2;
-  this->flagIsExamHome=(theGlobalVariables.userCalculatorRequestType=="template");
+  this->flagIsExamHome=(theGlobalVariables.userCalculatorRequestType=="template" || theGlobalVariables.userCalculatorRequestType=="templateNoLogin");
   this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
@@ -2609,16 +2609,18 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       outBody << "<br>";
     }
   std::string problemLabel="";
-  if (!this->flagIsExamHome && !this->flagIsForReal &&
+  if (!this->flagIsExamHome &&
       theGlobalVariables.userCalculatorRequestType!="template" &&
       theGlobalVariables.userCalculatorRequestType!="templateNoLogin")
     if (this->theTopicS.Contains(this->fileName))
     { TopicElement& current=this->theTopicS.GetValueCreateIfNotPresent(this->fileName);
-      current.ComputeLinks(*this,true);
+      current.ComputeLinks(*this, true);
       problemLabel= current.displayTitle;
     }
   if (this->flagIsExamProblem && this->flagIsForReal &&
-      !this->flagIsExamHome && theGlobalVariables.userCalculatorRequestType!="template")
+      !this->flagIsExamHome &&
+      theGlobalVariables.userCalculatorRequestType!="template" &&
+      theGlobalVariables.userCalculatorRequestType!="templateNoLogin")
   { bool problemAlreadySolved=false;
 #ifdef MACRO_use_MySQL
     if (this->currentUseR.theProblemData.Contains(this->fileName))
@@ -3462,7 +3464,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   #ifdef MACRO_use_MySQL
   this->flagIncludeStudentScores=
   theGlobalVariables.UserDefaultHasAdminRights() &&
-  !theGlobalVariables.UserStudentVieWOn();
+  !theGlobalVariables.UserStudentVieWOn() &&
+  theGlobalVariables.userCalculatorRequestType!="templateNoLogin";
   this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys, &this->theTopicS);
   out << this->GetSectionSelector();
   if (this->currentUseR.pointsMax!=0)
@@ -3771,7 +3774,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   this->displayDeadlinE=owner.ToStringDeadline
   (this->id, problemSolved, returnEmptyStringIfNoDeadline);
   if (theGlobalVariables.UserDefaultHasAdminRights() &&
-      !theGlobalVariables.UserStudentVieWOn())
+      !theGlobalVariables.UserStudentVieWOn() &&
+      theGlobalVariables.userCalculatorRequestType!="templateNoLogin")
   { if (this->displayDeadlinE=="")
       this->displayDeadlinE+="Deadline";
     owner.ComputeDeadlineModifyButton

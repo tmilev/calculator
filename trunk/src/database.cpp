@@ -766,26 +766,43 @@ bool UserCalculator::FetchOneUserRow
   std::string reader;
   //stOutput << "DEBUG:  GOT to hereE!!!";
   if (this->currentCourses!="")
+  { std::stringstream localFailureStream;
     if (theRoutines.FetchEntry
         (DatabaseStrings::userCurrentCoursesColumnLabel,
          this->currentCourses,
          DatabaseStrings::deadlinesTableName,
          DatabaseStrings::infoColumnInDeadlinesTable,
          reader,
-         failureStream))
+         &localFailureStream))
       this->currentCoursesDeadlineInfoString=reader;
+    else if(! theRoutines.InsertRow
+        (DatabaseStrings::userCurrentCoursesColumnLabel,
+         this->currentCourses.value,
+         DatabaseStrings::deadlinesTableName,
+         &localFailureStream))
+      if (failureStream!=0)
+        *failureStream << localFailureStream.str();
+  }
   //  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
   //  << " this->currentCoursesInfoString:  " << this->currentCoursesInfoString.value;
   //stOutput << "DEBUG: problem info row id: " << this->problemInfoRowId.value;
   if (this->problemInfoRowId!="")
+  { std::stringstream localFailureStream;
     if (theRoutines.FetchEntry
         (DatabaseStrings::problemWeightsIdColumnName,
          this->problemInfoRowId,
          DatabaseStrings::problemWeightsTableName,
          DatabaseStrings::infoColumnInProblemWeightsTable,
          reader,
-         failureStream))
+         &localFailureStream))
       this->problemInfoString=reader;
+    else if(! theRoutines.InsertRow
+        (DatabaseStrings::problemWeightsIdColumnName,
+         this->problemInfoRowId.value, DatabaseStrings::problemWeightsTableName,
+         &localFailureStream))
+      if (failureStream!=0)
+        *failureStream << localFailureStream.str();
+  }
   return true;
 }
 
@@ -2231,7 +2248,7 @@ bool DatabaseRoutines::FetchEntry
   { if (failureComments!=0)
       *failureComments << "<b>Query: </b> "
       << queryStream.str()
-      << " <b>did not return a result - column may not exist. </b>";
+      << " <b>did not return a result - column/row may not exist. </b>";
   //stOutput << "<hr>DEBUG: Query did not return a result - column may not exist. <hr>";
     return false;
   }
@@ -2397,14 +2414,14 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
       (DatabaseStrings::usersTableName, tableCols.str(), commentsOnFailure, outputfirstLogin))
     return false;
   deadlineTableCols << DatabaseStrings::userCurrentCoursesColumnLabel
-  << " VARCHAR(50) not null, "
+  << " VARCHAR(1000) not null, "
   << DatabaseStrings::infoColumnInDeadlinesTable << " LONGTEXT";
   if (!this->CreateTable
       (DatabaseStrings::deadlinesTableName,
       deadlineTableCols.str(), commentsOnFailure, 0))
     return false;
   probWeightTableCols << DatabaseStrings::problemWeightsIdColumnName
-  << " VARCHAR(50) not null, " << DatabaseStrings::infoColumnInProblemWeightsTable << " LONGTEXT";
+  << " VARCHAR(1000) not null, " << DatabaseStrings::infoColumnInProblemWeightsTable << " LONGTEXT";
   if(!this->CreateTable
     (DatabaseStrings::problemWeightsTableName, probWeightTableCols.str(), commentsOnFailure, 0))
     return false;

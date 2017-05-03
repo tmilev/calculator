@@ -5,6 +5,7 @@ problemNavigation {
   overflow: none;
   display: block;
   padding: 7px;
+  margin: 0;
   white-space: nowrap;
 }	      
 problemNavigation:after{
@@ -16,6 +17,7 @@ calculatorNavigation {
   overflow: none;
   display: block;
   padding: 7px;
+  margin: 0;
   white-space: nowrap;
 }	      
 calculatorNavigation:after{

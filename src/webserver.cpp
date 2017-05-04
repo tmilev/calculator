@@ -2639,7 +2639,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "We will remove this message when we complete our testing. <br> <br>"
   ;
   out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div> "
-  << "<br><button style=\"opaciy:0; transition: 0.6s\" id=\"doSignInWithGoogleToken\" "
+  << "<br><button style=\"opacity:0; transition: 0.6s\" id=\"doSignInWithGoogleToken\" "
   << "onclick=\"document.getElementById('login').submit();\">Proceed with Google</button>";
   out << "<script language=\"javascript\">\n"
   << "function onSignIn(googleUser)\n"

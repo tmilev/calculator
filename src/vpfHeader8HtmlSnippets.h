@@ -73,6 +73,7 @@ public:
   static std::string GetJavascriptSubmitEmails();
   static std::string GetJavascriptCookieFunctions();
   static std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
+  static std::string GetJavascriptSubmitURLString();
   static std::string GetJavascriptCanvasGraphicsWithTags();
   static std::string GetJavascriptTopicListWithTags();
   static std::string GetDatePickerJavascriptInit();

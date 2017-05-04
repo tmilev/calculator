@@ -2584,14 +2584,28 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   if (theGlobalVariables.GetWebInput("error")!="")
     out << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), true);
   out << "<form name=\"login\" id=\"login\">";
-  out <<  "User name:\n"
+  out << "<table>";
+  out
+  << "<tr><td>"
+  << "User name:\n"
+  << "</td>"
+  << "<td>"
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
   if (theGlobalVariables.GetWebInput("username")!="")
-    out << "value=\"" << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("username"), false) << "\"";
+    out << "value=\"" << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("username"), false) << "\" ";
   out << "required>";
   out << "</input>\n";
-  out << "<br>Password: ";
-  out << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">";
+  out << "</td></tr>";
+
+  out
+  << "<tr><td>"
+  << "Password:\n"
+  << "</td>";
+  out
+  << "<td>"
+  << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">"
+  << "</td></tr>";
+  out << "</table>";
   out << this->GetHtmlHiddenInputs(false, false);
   out << "<input type=\"hidden\" name=\"request\" id=\"request\"";
   if (theGlobalVariables.userCalculatorRequestType!="logout" &&
@@ -2613,7 +2627,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
   out << "<hr><a href=\""
-  << theGlobalVariables.DisplayNameExecutable << "?request=signUp"
+  << theGlobalVariables.DisplayNameExecutable << "?request=signUpPage"
   << "\">Sign up</a>";
   /////////////////////////
   out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
@@ -2624,8 +2638,8 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "We will remove this message when we complete our testing. <br> <br>"
   ;
   out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div> "
-  << "<br><button style=\"opacity:0; transition: 0.6s\" id=\"doSignInWithGoogleToken\" "
-  << "onclick=\"document.getElementById(\"login\").submit();\">Proceed with Google</button>";
+  << "<br><button style=\"opaciy:0; transition: 0.6s\" id=\"doSignInWithGoogleToken\" "
+  << "onclick=\"document.getElementById('login').submit();\">Proceed with Google</button>";
   out << "<script language=\"javascript\">\n"
   << "function onSignIn(googleUser)\n"
   << "{ document.getElementById(\"googleToken\").value=googleUser.getAuthResponse().id_token;\n"
@@ -2710,13 +2724,28 @@ std::string WebWorker::GetChangePasswordPage()
       }
     }
   } else
-    out << "<br>Password: "
-    << "<input type=\"password\" id=\"password\" placeholder=\"password\">\n";
-  out << "<br>New password: \n"
-  << "<input type=\"password\" id=\"newPassword\" placeholder=\"password\">\n"
-  << "<br>Re-enter new password: \n"
-  << "<input type=\"password\"  id=\"reenteredPassword\" placeholder=\"password\" "
+    out << "<table>"
+    << "<tr><td>"
+    << "Old password:\n "
+    << "</td>"
+    << "<td>"
+    << "<input type=\"password\" id=\"password\" placeholder=\"password\">\n"
+    << "</td></tr>";
+  out
+  << "<tr>"
+  << "<td>"
+  << "New password:\n"
+  << "</td>"
+  << "<td>"
+  << "<input type=\"password\" id=\"newPassword\" placeholder=\"new password\">\n"
+  << "</td></tr>"
+  << "<tr><td>"
+  << "Re-enter new password: \n"
+  << "</td><td>"
+  << "<input type=\"password\"  id=\"reenteredPassword\" placeholder=\"re-enter\" "
   << "onkeyup=\"if (event.keyCode == 13) submitChangePassRequest('passwordChangeResult');\">\n"
+  << "</td></tr>"
+  << "</table>"
   << "<button  onclick=\"submitChangePassRequest('passwordChangeResult') \"> Submit</button>\n"
   << "<span id=\"passwordChangeResult\"> </span>\n"
 //  << "</form>"
@@ -3008,8 +3037,8 @@ int WebWorker::ProcessChangePasswordPage()
   return 0;
 }
 
-int WebWorker::ProcessSignUp()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessSignUp");
+int WebWorker::ProcessSignUpPage()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSignUpPage");
   this->SetHeaderOKNoContentLength();
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
@@ -3238,15 +3267,49 @@ std::string WebWorker::GetSignUpPage()
   std::stringstream out;
   out << "<html>"
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
-  << "<body>\n";
+  << HtmlRoutines::GetCalculatorStyleSheetWithTags();
+  out << "<script language=\"javascript\">\n";
+  out << "function submitSignUpInfo()\n"
+  << "{ var theInput=\"request=signUp&\";\n"
+  << "  theInput+=\"desiredUsername=\" +encodeURIComponent(document.getElementById('desiredUsername').value) + \"&\";\n"
+  << "  theInput+=\"desiredPassword=\" +encodeURIComponent(document.getElementById('desiredPassword').value) + \"&\";\n"
+  << "  theInput+=\"reenteredPassword=\" +encodeURIComponent(document.getElementById('reenteredPassword').value) + \"&\";\n"
+  << "  submitStringCalculatorArgument(theInput, 'signUpResult', null, 'signUpResultReport');\n"
+  << "}\n";
+  out << "</script>";
+  out << "<body>\n";
   out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</calculatorNavigation>\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
   out << "<form name=\"desiredAccount\" id=\"login\">";
-  out <<  "Desired user name:\n"
-  << "<input type=\"text\" id=\"desiredUsername\" name=\"desiredUsername\" placeholder=\"username\" ";
+  out <<  "<table>"
+  << "<tr>"
+  << "<td> Desired user name:</td>"
+  << "<td> <input type=\"text\" id=\"desiredUsername\" name=\"desiredUsername\" placeholder=\"username\">\n</td>\n"
+  << "</tr>"
+  << "<tr>"
+  << "<td>"
+  << "Password:"
+  << "</td>\n"
+  << "<td>"
+  << "<input type=\"password\" id=\"desiredPassword\" name=\"desiredPassword\" placeholder=\"password\">\n"
+  << "</td>\n"
+  << "</tr>"
+  << "<tr>"
+  << "<td>"
+  <<  "Repeat password:\n"
+  << "\n</td>"
+  << "<td>\n"
+  << "<input type=\"password\" id=\"reenteredPassword\" name=\"reenteredPassword\" placeholder=\"re-enter password\">\n<br>\n"
+  << "</td>\n"
+  << "</tr>"
+  << "</table>"
+  ;
   out << "</form>";
+  out << "<button onclick=\"submitSignUpInfo();\">Sign up</button>"
+  << "<span id=\"signUpResultReport\">"
+  << "<span id=\"signUpResult\">"
+  ;
   out << "</body></html>";
   return out.str();
 }
@@ -3466,8 +3529,8 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage" ||
            theGlobalVariables.userCalculatorRequestType=="activateAccount")
     return this->ProcessChangePasswordPage();
-  else if (theGlobalVariables.userCalculatorRequestType=="signUp")
-    return this->ProcessSignUp();
+  else if (theGlobalVariables.userCalculatorRequestType=="signUpPage")
+    return this->ProcessSignUpPage();
   else if (theGlobalVariables.userCalculatorRequestType=="login")
     return this->ProcessLoginPage();
   else if (theGlobalVariables.userCalculatorRequestType=="logout")
@@ -3764,6 +3827,7 @@ WebServer::WebServer()
   this->WebServerPingIntervalInSeconds=10;
   this->flagThisIsWorkerProcess=false;
   this->requestStartsNotNeedingLogin.AddOnTop("signUp");
+  this->requestStartsNotNeedingLogin.AddOnTop("signUpPage");
   this->requestStartsNotNeedingLogin.AddOnTop("compute");
   this->requestStartsNotNeedingLogin.AddOnTop("calculator");
   this->requestStartsNotNeedingLogin.AddOnTop("calculatorExamples");

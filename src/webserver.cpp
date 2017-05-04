@@ -2627,9 +2627,9 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
   /////////////////////////
-  //out << "<hr><a href=\""
-  //<< theGlobalVariables.DisplayNameExecutable << "?request=signUpPage"
-  //<< "\">Sign up</a>";
+  out << "<hr><a href=\""
+  << theGlobalVariables.DisplayNameExecutable << "?request=signUpPage"
+  << "\">Sign up</a>";
   /////////////////////////
   out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
   out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
@@ -2762,35 +2762,39 @@ std::string WebWorker::GetChangePasswordPage()
   return out.str();
 }
 
-int WebWorker::SetEmail(const std::string& input)
-{ MacroRegisterFunctionWithName("WebWorker::ProcessChangeEmail");
-  std::stringstream out;
+bool WebWorker::DoSetEmail(UserCalculatorData& inputOutputUser, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
+{ MacroRegisterFunctionWithName("WebWorker::DoSetEmail");
   EmailRoutines theEmail;
-  theEmail.toEmail=input;
-  //out << "DEBUG: got to here part 1. ";
-  if (!theEmail.IsOKEmail(theEmail.toEmail, & out))
-  { stOutput << out.str();
-    return 0;
-  }
+  theEmail.toEmail=inputOutputUser.email.value;
+  if (!theEmail.IsOKEmail(theEmail.toEmail, commentsOnFailure))
+    return false;
   //out << "DEBUG: got to here part 2. ";
   DatabaseRoutines theRoutines;
   UserCalculator userCopy;
-  userCopy.UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  userCopy.email=input;
-  if (!userCopy.ComputeAndStoreActivationEmailAndTokens(&out, &out, theRoutines))
-  { stOutput << out.str();
-    return 0;
-  }
-  theGlobalVariables.userDefault=userCopy;
+  userCopy.UserCalculatorData::operator=(inputOutputUser);
+  userCopy.email=inputOutputUser.email;
+  if (!userCopy.ComputeAndStoreActivationEmailAndTokens(commentsOnFailure, commentsGeneral, theRoutines))
+    return false;
   theEmail.emailContent=userCopy.activationEmail;
   theEmail.subject=userCopy.activationEmailSubject;
-  out << "<br><b>Sending email... </b>";
-  theEmail.SendEmailWithMailGun(&out, &out, theGlobalVariables.UserDefaultHasAdminRights());
-  if (theGlobalVariables.UserDefaultHasAdminRights())
-    out << "<hr>Content of sent email (admin view only):<br>"
+  if (commentsGeneral!=0)
+    *commentsGeneral << "<br><b>Sending email... </b>";
+  theEmail.SendEmailWithMailGun(commentsOnFailure, commentsGeneral, theGlobalVariables.UserDefaultHasAdminRights());
+  if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral!=0)
+    *commentsGeneral << "<hr>Content of sent email (admin view only):<br>"
     << HtmlRoutines::ConvertStringToHtmlString(theEmail.emailContent, true);
+  userCopy.clearAuthenticationTokenAndPassword();
+  userCopy.actualActivationToken="";
+  inputOutputUser=userCopy;
+  return true;
+}
+
+int WebWorker::SetEmail(const std::string& input)
+{ MacroRegisterFunctionWithName("WebWorker::SetEmail");
+  std::stringstream out;
+  theGlobalVariables.userDefault.email=input;
+  this->DoSetEmail(theGlobalVariables.userDefault, &out, &out);
   stOutput << out.str();
-  theGlobalVariables.userDefault=userCopy;
   return 0;
 }
 
@@ -3035,6 +3039,28 @@ int WebWorker::ProcessChangePasswordPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessChangePasswordPage");
   this->SetHeaderOKNoContentLength();
   stOutput << this->GetChangePasswordPage();
+  return 0;
+}
+
+int WebWorker::ProcessSignUP()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
+  this->SetHeaderOKNoContentLength();
+  DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
+  UserCalculator theUser;
+  theUser.username=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
+  theUser.email=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
+  DatabaseRoutines theRoutines;
+  if (theUser.Iexist(theRoutines))
+  { stOutput << "<span style=\"color:red\"><b>Either the username or email you sent is already taken.</b></span>";
+    return 0;
+  }
+  std::stringstream out;
+  if (!theUser.CreateMeIfUsernameUnique(theRoutines, &out))
+  { stOutput << out.str();
+    return 0;
+  }
+  this->DoSetEmail(theUser, &out, &out);
+  stOutput << out.str();
   return 0;
 }
 
@@ -3289,21 +3315,25 @@ std::string WebWorker::GetSignUpPage()
   << "<td> <input type=\"text\" id=\"desiredUsername\" name=\"desiredUsername\" placeholder=\"username\">\n</td>\n"
   << "</tr>"
   << "<tr>"
-  << "<td>"
-  << "Password:"
-  << "</td>\n"
-  << "<td>"
-  << "<input type=\"password\" id=\"desiredPassword\" name=\"desiredPassword\" placeholder=\"password\">\n"
-  << "</td>\n"
+  << "<td> Email:</td>"
+  << "<td> <input type=\"text\" id=\"email\" name=\"email\" placeholder=\"email\">\n</td>\n"
   << "</tr>"
-  << "<tr>"
-  << "<td>"
-  <<  "Repeat password:\n"
-  << "\n</td>"
-  << "<td>\n"
-  << "<input type=\"password\" id=\"reenteredPassword\" name=\"reenteredPassword\" placeholder=\"re-enter password\">\n<br>\n"
-  << "</td>\n"
-  << "</tr>"
+//  << "<tr>"
+//  << "<td>"
+//  << "Password:"
+//  << "</td>\n"
+//  << "<td>"
+//  << "<input type=\"password\" id=\"desiredPassword\" name=\"desiredPassword\" placeholder=\"password\">\n"
+//  << "</td>\n"
+//  << "</tr>"
+//  << "<tr>"
+//  << "<td>"
+//  <<  "Repeat password:\n"
+//  << "\n</td>"
+//  << "<td>\n"
+//  << "<input type=\"password\" id=\"reenteredPassword\" name=\"reenteredPassword\" placeholder=\"re-enter password\">\n<br>\n"
+//  << "</td>\n"
+//  << "</tr>"
   << "</table>"
   ;
   out << "</form>";
@@ -3530,6 +3560,8 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage" ||
            theGlobalVariables.userCalculatorRequestType=="activateAccount")
     return this->ProcessChangePasswordPage();
+  else if (theGlobalVariables.userCalculatorRequestType=="signUp")
+    return this->ProcessSignUP();
   else if (theGlobalVariables.userCalculatorRequestType=="signUpPage")
     return this->ProcessSignUpPage();
   else if (theGlobalVariables.userCalculatorRequestType=="login")

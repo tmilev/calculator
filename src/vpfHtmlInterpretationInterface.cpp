@@ -148,8 +148,16 @@ std::string HtmlInterpretation::GetSanitizedComment
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetSanitizedComment");
   theFormat.flagUseQuotes=false;
   resultIsPlot=false;
-  if (input.IsOfType<std::string>())
+  //if (input.IsOfType<std::string>(&theString))
+  //{ stOutput << "<br>DEBUG: string input: "
+  //  << theString;
+  //}
+  std::string theString;
+  if (input.IsOfType<std::string>(&theString))
+  { if (MathRoutines::StringBeginsWith(theString, "Approximations have been"))
+      return "";
     return input.ToString(&theFormat);
+  }
   if (input.IsOfType<Plot>())
   { resultIsPlot=true;
     return input.ToString(&theFormat);
@@ -176,11 +184,11 @@ std::string HtmlInterpretation::GetCommentsInterpretation
   //stOutput << "DEBUG: theInterpreterWithAdvice.flagPlotNoCtrls: "
   //<< theInterpreterWithAdvice.flagPlotNoControls;
   if (indexShift>=theInterpreterWithAdvice.theProgramExpression.size())
-  { stOutput << "DEBUG: something is very wrong with indexshift in comments!";
+  { stOutput << "<br>DEBUG: something is very wrong with indexshift in comments!";
     return "";
   }
   const Expression& currentE=theInterpreterWithAdvice.theProgramExpression[indexShift][1];
-  //out << "DEBUG: currentE: " << HtmlRoutines::StringToHtmlString( currentE.ToString(), true);
+  //out << "<br>DEBUG: currentE: " << HtmlRoutines::ConvertStringToHtmlString(currentE.ToString(), true);
   bool resultIsPlot=false;
   if (!currentE.StartsWith(theInterpreterWithAdvice.opEndStatement()))
   { //out << "<hr>DEBUG: currentE is not starting with commands!<hr>";
@@ -199,8 +207,8 @@ std::string HtmlInterpretation::GetCommentsInterpretation
     if (MathRoutines::StringTrimWhiteSpace(currentS)=="")
       continue;
     out << currentS;
-    //out << " DEBUG: Lispified: "
-    //<< HtmlRoutines::StringToHtmlString( currentE[i].ToStringSemiFull() , true);
+    //out << "<br>DEBUG: Lispified: "
+    //<< HtmlRoutines::ConvertStringToHtmlString(currentE[i].ToString(), true);
     if (i!=currentE.size()-1 && !resultIsPlot)
       out << "<br>";
   }

@@ -4020,7 +4020,7 @@ bool CalculatorFunctionsGeneral::outerMergeConstantRadicals(Calculator& theComma
   if (!input[1][1].IsConstantNumber() || !input[2][1].IsConstantNumber())
     return false;
   Expression theProduct;
-  theProduct.MakeProducT(theCommands, input[1][2], input[2][1]);
+  theProduct.MakeProducT(theCommands, input[1][1], input[2][1]);
   return output.MakeXOX(theCommands, theCommands.opThePower(), theProduct, input[1][2]);
 }
 

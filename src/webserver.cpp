@@ -2626,9 +2626,10 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "</form>";
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
-  out << "<hr><a href=\""
-  << theGlobalVariables.DisplayNameExecutable << "?request=signUpPage"
-  << "\">Sign up</a>";
+  /////////////////////////
+  //out << "<hr><a href=\""
+  //<< theGlobalVariables.DisplayNameExecutable << "?request=signUpPage"
+  //<< "\">Sign up</a>";
   /////////////////////////
   out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
   out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";

@@ -193,7 +193,8 @@ public:
   int ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication);
   int ProcessLoginPage(const std::string& reasonForLogin="");
   int ProcessLogout();
-  int ProcessSignUp();
+  int ProcessSignUP();
+  int ProcessSignUpPage();
   int ProcessNavigation();
   int ProcessCompute();
   int ProcessCalculatorExamples();

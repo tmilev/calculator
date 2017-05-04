@@ -2927,29 +2927,22 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   return out.str();
 }
 
-std::string HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
-{ std::stringstream out;
+std::string HtmlRoutines::GetJavascriptSubmitURLString()
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptSubmitURLString");
+  std::stringstream out;
   out
-  << "<script type=\"text/javascript\"> \n"
-  << "\"use srict\";\n"
   << "var GlobalSubmitStringAsMainInputCounter=0;\n"
-  << "function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus){\n"
-  << "  var spanOutput = document.getElementById(idOutput);\n"
+  << "function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus)\n"
+  << "{ var spanOutput = document.getElementById(idOutput);\n"
   << "  if (spanOutput==null){\n"
   << "    spanOutput = document.createElement('span');\n"
   << "    document.body.appendChild(spanOutput);\n"
   << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idOutput + \"MISSING! </span>\";\n"
-  << "  }\n"
-  << "  var inputParams='';\n"
-  << "  inputParams+='request='+requestType+'&';\n"
-  << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << "';\n"
-//  << "  inputParams+='&debugFlag=true';\n"
-  << "  inputParams+='&fileName=" << theGlobalVariables.GetWebInput("fileName") << "';\n"
-  << "  inputParams+='&topicList=" << theGlobalVariables.GetWebInput("topicList") << "';\n"
-  << "  inputParams+='&courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "';\n"
-  << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
-  << "  var https = new XMLHttpRequest();\n"
+  << "  }\n";
+
   ////////////////////////////////////////////
+  out
+  << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutable << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   << "  if (idStatus===undefined)\n"
@@ -2990,6 +2983,27 @@ std::string HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   /////////////////or/////////////////////////
   //  << "  https.send();\n"
   ////////////////////////////////////////////
+  << "}\n";
+  return out.str();
+}
+
+std::string HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile");
+  std::stringstream out;
+  out
+  << "<script type=\"text/javascript\"> \n";
+  out << "\"use srict\";\n";
+  out << HtmlRoutines::GetJavascriptSubmitURLString()
+  << "function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus){\n"
+  << "  var inputParams='';\n"
+  << "  inputParams+='request='+requestType+'&';\n"
+  << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << "';\n"
+//  << "  inputParams+='&debugFlag=true';\n"
+  << "  inputParams+='&fileName=" << theGlobalVariables.GetWebInput("fileName") << "';\n"
+  << "  inputParams+='&topicList=" << theGlobalVariables.GetWebInput("topicList") << "';\n"
+  << "  inputParams+='&courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "';\n"
+  << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
+  << "  submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);\n"
   << "}\n"
   << "</script>";
   return out.str();

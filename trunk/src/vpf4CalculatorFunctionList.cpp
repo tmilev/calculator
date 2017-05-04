@@ -4142,14 +4142,13 @@ this->AddOperationInnerHandler
    "CalculatorFunctionsGeneral::outerCommuteConstants",
    "CommuteConstants", false);
   this->AddOperationHandler
-  ("*", CalculatorFunctionsGeneral::outerMergeConstantRadicals, "",
+  ("*",
+   CalculatorFunctionsGeneral::outerMergeConstantRadicals, "",
    "If a and b are constants, replaces a^{c}b^c by (a b)^c.",
    "\\sqrt{}2 \\sqrt{}3",
    true, true, false,
    "CalculatorFunctionsGeneral::outerMergeConstantRadicals",
    "MergeConstantRadicals", false);
-
-
   this->AddOperationOuterHandler
   ("*", Calculator::outerAssociate, "",
    "Associative law: reorders the multiplicative tree in standard form. ",

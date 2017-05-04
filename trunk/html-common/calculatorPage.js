@@ -15,7 +15,7 @@ var calculatorInputBoxToSliderUpdaters=new Object;
 var calculatorInputBoxNames=[];
 var numInsertedJavascriptChildren=0;
 var calculatorCanvases;
-var keyWordsKnownToMathQuill=['sqrt', 'frac', 'cdot', 'left', 'right'];
+var keyWordsKnownToMathQuill=['sqrt', 'frac', 'cdot', 'left', 'right', 'infty'];
 function initializeCalculatorVariables()
 { answerIdsPureLatex=['mainInputID'];
   answerMQspanIds=['mainInputMQfield'];

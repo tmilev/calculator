@@ -2640,13 +2640,15 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   ;
   out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div> "
   << "<br><button style=\"opacity:0; transition: 0.6s\" id=\"doSignInWithGoogleToken\" "
-  << "onclick=\"document.getElementById('login').submit();\">Proceed with Google</button>";
+  << "onclick=\""
+  << "document.getElementById('username').required=false;"
+  << "document.getElementById('username').value='';"
+  << "document.getElementById('password').value='';"
+  << "document.getElementById('login').submit();"
+  << "\">Proceed with Google</button>";
   out << "<script language=\"javascript\">\n"
   << "function onSignIn(googleUser)\n"
   << "{ document.getElementById(\"googleToken\").value=googleUser.getAuthResponse().id_token;\n"
-  << "  document.getElementById(\"username\").required=false;\n"
-  << "  document.getElementById(\"username\").value=\"\";\n"
-  << "  document.getElementById(\"password\").value=\"\";\n"
   << "  document.getElementById(\"doSignInWithGoogleToken\").style.opacity=\"1\";\n"
 //  << "  document.getElementById(\"doSignInWithGoogleToken\").style.visibility=\"visible\";\n"
   << "}\n"
@@ -3051,7 +3053,8 @@ int WebWorker::ProcessSignUP()
   theUser.email=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
   DatabaseRoutines theRoutines;
   if (theUser.Iexist(theRoutines))
-  { stOutput << "<span style=\"color:red\"><b>Either the username or email you sent is already taken.</b></span>";
+  { stOutput << "<span style=\"color:red\"><b>"
+    << "Either the username or the email you requested is already taken.</b></span>";
     return 0;
   }
   std::stringstream out;
@@ -3294,13 +3297,14 @@ std::string WebWorker::GetSignUpPage()
   std::stringstream out;
   out << "<html>"
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
+  << HtmlRoutines::GetJavascriptHideHtml()
   << HtmlRoutines::GetCalculatorStyleSheetWithTags();
   out << "<script language=\"javascript\">\n";
   out << "function submitSignUpInfo()\n"
   << "{ var theInput=\"request=signUp&\";\n"
   << "  theInput+=\"desiredUsername=\" +encodeURIComponent(document.getElementById('desiredUsername').value) + \"&\";\n"
-  << "  theInput+=\"desiredPassword=\" +encodeURIComponent(document.getElementById('desiredPassword').value) + \"&\";\n"
-  << "  theInput+=\"reenteredPassword=\" +encodeURIComponent(document.getElementById('reenteredPassword').value) + \"&\";\n"
+  << "  theInput+=\"email=\" +encodeURIComponent(document.getElementById('email').value) + \"&\";\n"
+  //<< "  theInput+=\"reenteredPassword=\" +encodeURIComponent(document.getElementById('reenteredPassword').value) + \"&\";\n"
   << "  submitStringCalculatorArgument(theInput, 'signUpResult', null, 'signUpResultReport');\n"
   << "}\n";
   out << "</script>";
@@ -3338,8 +3342,9 @@ std::string WebWorker::GetSignUpPage()
   ;
   out << "</form>";
   out << "<button onclick=\"submitSignUpInfo();\">Sign up</button>"
-  << "<span id=\"signUpResultReport\">"
-  << "<span id=\"signUpResult\">"
+  << "<span id=\"signUpResultReport\"></span>"
+  << "\n<br>\n"
+  << "<span id=\"signUpResult\"></span>"
   ;
   out << "</body></html>";
   return out.str();

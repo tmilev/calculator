@@ -2934,8 +2934,8 @@ std::string HtmlRoutines::GetJavascriptSubmitURLString()
   << "var GlobalSubmitStringAsMainInputCounter=0;\n"
   << "function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus)\n"
   << "{ var spanOutput = document.getElementById(idOutput);\n"
-  << "  if (spanOutput==null){\n"
-  << "    spanOutput = document.createElement('span');\n"
+  << "  if (spanOutput==null)\n"
+  << "  { spanOutput = document.createElement('span');\n"
   << "    document.body.appendChild(spanOutput);\n"
   << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idOutput + \"MISSING! </span>\";\n"
   << "  }\n";

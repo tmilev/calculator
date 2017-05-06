@@ -236,10 +236,10 @@ public:
   std::string emailContent;
   std::string smtpWithPort;
   static List<bool> recognizedEmailCharacters;
-  List<bool>& GetRecognizedEmailChars();
+  static List<bool>& GetRecognizedEmailChars();
   EmailRoutines();
   //bool IsValidForMailgunCommand(std::stringstream* commentsOnFailure);
-  bool IsOKEmail(const std::string& input, std::stringstream* commentsOnError);
+  static bool IsOKEmail(const std::string& input, std::stringstream* commentsOnError);
   std::string GetCommandToSendEmailWithMailX();
   bool SendEmailWithMailGun
   (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral,
@@ -292,8 +292,8 @@ public:
    DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);
   bool SetPassword(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   bool DeleteMe(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
-  bool Iexist(DatabaseRoutines& theRoutines);
-  bool IamPresentInTable(DatabaseRoutines& theRoutines, const std::string& tableNameUnsafe);
+  bool Iexist(DatabaseRoutines& theRoutines, std::stringstream* comments);
+  bool IamPresentInTable(DatabaseRoutines& theRoutines, const std::string& tableNameUnsafe, std::stringstream* comments=0);
   bool CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   static bool IsAcceptableDatabaseInpuT(const std::string& input, std::stringstream* comments);
   static bool IsAcceptableCharDatabaseInpuT(char theChar);
@@ -424,6 +424,7 @@ bool FetchAllUsers
   static bool innerGetAuthentication(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDisplayTables(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDisplayDatabaseTable(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerUserExists(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDetails(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddStudentToClass(Calculator& theCommands, const Expression& input, Expression& output);

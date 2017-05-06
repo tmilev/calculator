@@ -94,6 +94,7 @@ public:
 
 
 class WebServer;
+class DatabaseRoutines;
 
 class WebWorker
 {
@@ -177,7 +178,10 @@ public:
   int ProcessFile();
   int ProcessChangePassword();
   int SetEmail(const std::string& input);
-  bool DoSetEmail(UserCalculatorData& inputOutputUser, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool DoSetEmail
+  (DatabaseRoutines& theRoutines, UserCalculatorData& inputOutputUser,
+   std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive,
+   std::stringstream* commentsGeneralSensitive);
   int ProcessChangePasswordPage();
   int ProcessCalculator();
   int ProcessDatabase();

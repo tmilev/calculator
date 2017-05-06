@@ -2634,9 +2634,9 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
   out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
   out << "<hr>Logging in with google is an experimental feature.<br> "
-  << "While we are not aware of any bugs/security gaps in our code, <br>"
-  << "<b>please use the google login button only at your own risk.</b><br>"
-  << "We will remove this message when we complete our testing. <br> <br>"
+  << "<b><style=\"color:green\">At the moment, the only information we "
+  << "store from google is your gmail address. </span></b><br>"
+  << "<br>"
   ;
   out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div> "
   << "<br><button style=\"opacity:0; transition: 0.6s\" id=\"doSignInWithGoogleToken\" "
@@ -2689,101 +2689,150 @@ std::string WebWorker::GetChangePasswordPage()
   << "<input type=\"hidden\" id=\"username\" placeholder=\"username\" "
   << "value=\"" << theGlobalVariables.userDefault.username.value << "\" "
   << "required>";
-
+  bool doShowPasswordChangeField=true;
+  out << "<table>";
   if (theGlobalVariables.userCalculatorRequestType=="activateAccount")
-  { std::string claimedActivationToken=
+  { out << "<tr><td colspan=\"2\">";
+    std::string claimedActivationToken=
     HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false);
     std::string claimedEmail=
     HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"),false);
     out << "<input type=\"hidden\" id=\"activationToken\" value=\""
     << claimedActivationToken
     << "\">";
-    if (theGlobalVariables.GetWebInput("activationToken")!="")
+    if (theGlobalVariables.GetWebInput("activationToken")!="" && claimedEmail!="")
     { DatabaseRoutines theRoutines;
       std::string actualEmailActivationToken, usernameAssociatedWithToken;
-      if (!theRoutines.FetchEntry
+      if (theGlobalVariables.userDefault.email.value==claimedEmail)
+        out << "\n<b><span style=\"color:green\">Email "
+        << claimedEmail << " already updated.</span>"
+        << "<br>"
+        << "<span style=\"color:orange\">To fully activate your account, please choose a password.</span></b>";
+      else if (!theRoutines.FetchEntry
           ((std::string) "email", claimedEmail, (std::string)"emailActivationStats",
            (std::string) "activationToken", actualEmailActivationToken, &out))
-        out << "\n<br>\n<span style=\"color:red\"><b>Failed to fetch email activation token. </b></span>";
+        out << "\n<span style=\"color:red\"><b>Failed to fetch email activation token. </b></span>";
       else if (!theRoutines.FetchEntry
           ((std::string) "email", claimedEmail, (std::string)"emailActivationStats",
            (std::string) "usernameAssociatedWithToken", usernameAssociatedWithToken, &out))
         out << "\n<br>\n<span style=\"color:red\"><b>Failed to fetch username for this token. </b></span>";
       else if (actualEmailActivationToken!=claimedActivationToken)
-        out << "\n<br>\n<span style=\"color:red\"><b>Bad activation token: could not activate your email. </b></span>";
+        out << "\n<span style=\"color:red\"><b>Bad activation token: could not activate your email. </b></span>";
       else if (usernameAssociatedWithToken!=theGlobalVariables.userDefault.username.value)
-        out << "\n<br>\n<span style=\"color:red\"><b>Activation token was issued for another user. </b></span>";
+        out << "\n<span style=\"color:red\"><b>Activation token was issued for another user. </b></span>";
       else if (!theRoutines.SetEntry
           ((std::string) "email", claimedEmail, (std::string)"emailActivationStats",
            (std::string) "activationToken",(std::string)"", &out))
-        out << "\n<br>\n<span style=\"color:red\"><b>Could not reset the activation token (database is down?). </b></span>";
+        out << "\n<span style=\"color:red\"><b>Could not reset the activation token (database is down?). </b></span>";
       else if (!theRoutines.SetEntry
        (DatabaseStrings::userColumnLabel, theGlobalVariables.userDefault.username,
         DatabaseStrings::usersTableName, (std::string) "email", claimedEmail,&out))
-        out << "\n<br>\n<span style=\"color:red\"><b>Could not store your email (database is down?). </b></span>";
+        out << "\n<span style=\"color:red\"><b>Could not store your email (database is down?). </b></span>";
       else
       { theGlobalVariables.userDefault.email=claimedEmail;
-        out << "\n<br>\n<span style=\"color:green\"><b>Email successfully updated. </b></span>";
+        out << "\n<span style=\"color:green\"><b>Email successfully updated. </b></span>";
+        if (theGlobalVariables.userDefault.actualActivationToken.value!="" &&
+            theGlobalVariables.userDefault.actualActivationToken.value!="activated" &&
+            theGlobalVariables.userDefault.actualShaonedSaltedPassword!="")
+        { out << "<br>It appears your password is already set. "
+          << "<br>If you'd like to change it using your old password, "
+          << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+          << "?request=changePasswordPage\">click here</a>. ";
+          doShowPasswordChangeField=false;
+          theRoutines.SetEntry
+          (DatabaseStrings::userId, theGlobalVariables.userDefault.userId,
+           DatabaseStrings::usersTableName, (std::string) "activationToken",
+           (std::string) "activated", &out)
+          ;
+        } else
+          out << "<br>"
+          << "<span style=\"color:orange\">To fully activate your account, please choose a password.</span></b>";
       }
     }
+    out << "</td></tr>";
   } else
-    out << "<table>"
+  { if (theGlobalVariables.userDefault.actualActivationToken.value!="" &&
+        theGlobalVariables.userDefault.actualActivationToken.value!="activated" &&
+        theGlobalVariables.userDefault.actualShaonedSaltedPassword!="" &&
+        theGlobalVariables.userCalculatorRequestType=="changePasswordPage")
+    { out << "<tr><td colspan=\"2\">";
+      out << "You already have a password but your account was marked as not activated "
+      << "- probably by an admin/instructor. ";
+      DatabaseRoutines theRoutines;
+      if (!theRoutines.SetEntry
+          (DatabaseStrings::userId, theGlobalVariables.userDefault.userId,
+           DatabaseStrings::usersTableName, (std::string) "activationToken",
+           (std::string) "activated", &out))
+        out << " <span style=\"color:red\"><b>Failed to activate your account. </b></span>";
+      else
+        out << " <span style=\"color:green\"><b>Your account is now marked as activated.</b></span>";
+      out << "</td></tr>";
+    }
+    out
     << "<tr><td>"
     << "Old password:\n "
     << "</td>"
     << "<td>"
     << "<input type=\"password\" id=\"password\" placeholder=\"password\">\n"
     << "</td></tr>";
+  }
+  if (doShowPasswordChangeField)
+  { out
+    << "<tr>"
+    << "<td>"
+    << "New password:\n"
+    << "</td>"
+    << "<td>"
+    << "<input type=\"password\" id=\"newPassword\" placeholder=\"new password\">\n"
+    << "</td></tr>"
+    << "<tr><td>"
+    << "Re-enter new password: \n"
+    << "</td><td>"
+    << "<input type=\"password\"  id=\"reenteredPassword\" placeholder=\"re-enter\" "
+    << "onkeyup=\"if (event.keyCode == 13) submitChangePassRequest('passwordChangeResult');\">\n"
+    << "</td></tr>";
+  }
   out
-  << "<tr>"
-  << "<td>"
-  << "New password:\n"
-  << "</td>"
-  << "<td>"
-  << "<input type=\"password\" id=\"newPassword\" placeholder=\"new password\">\n"
-  << "</td></tr>"
-  << "<tr><td>"
-  << "Re-enter new password: \n"
-  << "</td><td>"
-  << "<input type=\"password\"  id=\"reenteredPassword\" placeholder=\"re-enter\" "
-  << "onkeyup=\"if (event.keyCode == 13) submitChangePassRequest('passwordChangeResult');\">\n"
-  << "</td></tr>"
-  << "</table>"
-  << "<button  onclick=\"submitChangePassRequest('passwordChangeResult') \"> Submit</button>\n"
-  << "<span id=\"passwordChangeResult\"> </span>\n"
+  << "</table>";
+  if (doShowPasswordChangeField)
+  { out << "<button  onclick=\"submitChangePassRequest('passwordChangeResult') \"> Submit</button>\n"
+    << "<span id=\"passwordChangeResult\"> </span>\n"
 //  << "</form>"
-  ;
-  out << "<hr>"
-  << "Email: " << theGlobalVariables.userDefault.email.value
-  << "<br>\n"
-  << "Change/set email: <input type=\"email\" id=\"emailInputID\">\n "
-  << "<button onclick=\"submitChangePassRequest('emailChangeResult') \"> Submit</button>\n";
-  out << "<span id=\"emailChangeResult\"></span>\n";
+    ;
+    out << "<hr>"
+    << "Email: " << theGlobalVariables.userDefault.email.value
+    << "<br>\n"
+    << "Change/set email: <input type=\"email\" id=\"emailInputID\">\n "
+    << "<button onclick=\"submitChangePassRequest('emailChangeResult') \"> Submit</button>\n";
+    out << "<span id=\"emailChangeResult\"></span>\n";
+  }
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
 }
 
-bool WebWorker::DoSetEmail(UserCalculatorData& inputOutputUser, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
+bool WebWorker::DoSetEmail
+(DatabaseRoutines& theRoutines, UserCalculatorData& inputOutputUser,
+ std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive,
+ std::stringstream* commentsGeneralSensitive)
 { MacroRegisterFunctionWithName("WebWorker::DoSetEmail");
   EmailRoutines theEmail;
   theEmail.toEmail=inputOutputUser.email.value;
   if (!theEmail.IsOKEmail(theEmail.toEmail, commentsOnFailure))
     return false;
   //out << "DEBUG: got to here part 2. ";
-  DatabaseRoutines theRoutines;
   UserCalculator userCopy;
   userCopy.UserCalculatorData::operator=(inputOutputUser);
   userCopy.email=inputOutputUser.email;
-  if (!userCopy.ComputeAndStoreActivationEmailAndTokens(commentsOnFailure, commentsGeneral, theRoutines))
+  if (!userCopy.ComputeAndStoreActivationEmailAndTokens(commentsOnFailure, commentsGeneralNonSensitive, theRoutines))
     return false;
   theEmail.emailContent=userCopy.activationEmail;
   theEmail.subject=userCopy.activationEmailSubject;
-  if (commentsGeneral!=0)
-    *commentsGeneral << "<br><b>Sending email... </b>";
-  theEmail.SendEmailWithMailGun(commentsOnFailure, commentsGeneral, theGlobalVariables.UserDefaultHasAdminRights());
-  if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral!=0)
-    *commentsGeneral << "<hr>Content of sent email (admin view only):<br>"
+  if (commentsGeneralNonSensitive!=0)
+    *commentsGeneralNonSensitive << "<br><b>Sending email... </b>";
+  theEmail.SendEmailWithMailGun(commentsOnFailure, commentsGeneralSensitive, theGlobalVariables.UserDefaultHasAdminRights());
+  if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneralSensitive!=0)
+    *commentsGeneralSensitive << "<hr>Content of sent email (admin view only):<br>"
     << HtmlRoutines::ConvertStringToHtmlString(theEmail.emailContent, true);
   userCopy.clearAuthenticationTokenAndPassword();
   userCopy.actualActivationToken="";
@@ -2793,10 +2842,18 @@ bool WebWorker::DoSetEmail(UserCalculatorData& inputOutputUser, std::stringstrea
 
 int WebWorker::SetEmail(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::SetEmail");
-  std::stringstream out;
+  std::stringstream out, debugStream;
+  DatabaseRoutines theRoutines;
+  //double startTime=theGlobalVariables.GetElapsedSeconds();
   theGlobalVariables.userDefault.email=input;
-  this->DoSetEmail(theGlobalVariables.userDefault, &out, &out);
+  std::stringstream* adminOutputStream=0;
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    adminOutputStream=&out;
+  this->DoSetEmail(theRoutines, theGlobalVariables.userDefault, &out, &out, adminOutputStream);
   stOutput << out.str();
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    stOutput << "<hr><b>Admin view only. </b>" << debugStream.str();
+  stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s).";
   return 0;
 }
 
@@ -3046,24 +3103,53 @@ int WebWorker::ProcessChangePasswordPage()
 
 int WebWorker::ProcessSignUP()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
+  //double startTime=theGlobalVariables.GetElapsedSeconds();
   this->SetHeaderOKNoContentLength();
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   UserCalculator theUser;
   theUser.username=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
-  theUser.email=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
+  theUser.email=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
   DatabaseRoutines theRoutines;
-  if (theUser.Iexist(theRoutines))
+  std::stringstream out;
+  if (theUser.username=="")
   { stOutput << "<span style=\"color:red\"><b>"
-    << "Either the username or the email you requested is already taken.</b></span>";
+    << "Empty username not allowed. "
+    << "</b></span>";
     return 0;
   }
-  std::stringstream out;
+  if (!EmailRoutines::IsOKEmail(theUser.email.value, &out))
+  { stOutput << "<span style=\"color:red\"><b>Your email address does not appear to be valid. "
+    << out.str() << "</b></span>";
+    return 0;
+  }
+  if (theUser.Iexist(theRoutines, &out))
+  { stOutput << "<span style=\"color:red\"><b>"
+    << "Either the username ("
+    << theUser.username.value
+    << ") or the email ("
+    << theUser.email.value
+    << ") you requested is already taken.</b></span>";
+    return 0;
+  } else
+    stOutput << "<span style=\"color:green\"><b>"
+    << "Username ("
+    << theUser.username.value
+    << ") with email ("
+    << theUser.email.value
+    << ") is available.</b></span>";
+
+
   if (!theUser.CreateMeIfUsernameUnique(theRoutines, &out))
   { stOutput << out.str();
     return 0;
   }
-  this->DoSetEmail(theUser, &out, &out);
+  std::stringstream* adminOutputStream=0;
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    adminOutputStream=&out;
+  this->DoSetEmail(theRoutines, theUser, &out, &out, adminOutputStream);
   stOutput << out.str();
+  stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
+  << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
   return 0;
 }
 

@@ -525,14 +525,16 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   this->flagOutputWasTruncated=false;
   this->MaxNumRowsToRead=inputMaxNumRowsToRead;
   this->numRowsRead=0;
-  //stOutput << "\n<hr>DEBUG: querying: " << inputQuery;
+//  if (outputFailureComments!=0)
+//    *outputFailureComments << "\n<hr>DEBUG: querying: " << inputQuery;
   if (this->parent->connection==0)
     if (!this->parent->startMySQLDatabase(outputFailureComments, 0))
     { if (outputFailureComments!=0)
         *outputFailureComments << "Failed to start database. ";
       return;
     }
-//  stOutput << "got to here in the queery query part -1";
+//  if (outputFailureComments!=0)
+//    *outputFailureComments << "<br>DEBUG: got to here in the queery query part -1";
   int queryError=mysql_query(this->parent->connection, this->theQueryString.c_str());
   if (queryError!=0)
   { if (outputFailureComments!=0)
@@ -543,7 +545,8 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   }
   this->flagQuerySucceeded=true;
   this->theQueryResult= mysql_store_result(this->parent->connection);
-  //stOutput << "\n<br>\nDEBUG: and even to here";
+//  if (outputFailureComments!=0)
+//    *outputFailureComments << "\n<br>\nDEBUG: and even to here";
   if (this->theQueryResult==0)
   { //if (outputFailureComments!=0)
     //  *outputFailureComments << "\n<br>\nDEBUG: Query succeeded. ";
@@ -559,7 +562,8 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
   int numFields=mysql_num_fields(this->theQueryResult);
   if (numFields<1)
     return;
-//  stOutput << "here i'm now...";
+//  if (outputFailureComments!=0)
+//    *outputFailureComments << "DEBUG: got to this point in the query ...";
   for (int i=0; i<this->allQueryResultStrings.size; i++)
   { this->currentRow=mysql_fetch_row(this->theQueryResult);
     if (this->currentRow==0)
@@ -579,7 +583,8 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
       }
     }
   }
-  //stOutput << "\n<br>\nDEBUG: query results: " << this->allQueryResultStrings.ToStringCommaDelimited();
+//  if (outputFailureComments!=0)
+//    *outputFailureComments << "\n<br>\nDEBUG: query results: " << this->allQueryResultStrings.ToStringCommaDelimited();
 }
 
 void DatabaseQuery::close()
@@ -812,7 +817,7 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
   this->currentTable=DatabaseStrings::usersTableName;
   std::stringstream secondCommentsStream;
   if (!this->FetchOneUserRow(theRoutines, &secondCommentsStream))
-  { if (!this->Iexist(theRoutines))
+  { if (!this->Iexist(theRoutines,0))
       if (commentsOnFailure!=0)
         *commentsOnFailure << "User " << this->username.value << " does not exist. ";
   //stOutput << "<hr>DEBUG: user " << this->username.value << " does not exist. More details: " << secondCommentsStream.str() << "<hr>";
@@ -859,9 +864,9 @@ std::string UserCalculator::GetPassword(DatabaseRoutines& theRoutines)
   return out.str();
 }
 
-bool UserCalculator::Iexist(DatabaseRoutines& theRoutines)
+bool UserCalculator::Iexist(DatabaseRoutines& theRoutines, std::stringstream* comments)
 { MacroRegisterFunctionWithName("UserCalculator::Iexist");
-  return this->IamPresentInTable(theRoutines, DatabaseStrings::usersTableName);
+  return this->IamPresentInTable(theRoutines, DatabaseStrings::usersTableName, comments);
 }
 
 bool UserCalculator::DeleteMe(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure)
@@ -870,7 +875,7 @@ bool UserCalculator::DeleteMe(DatabaseRoutines& theRoutines, std::stringstream& 
   { commentsOnFailure << "User names starting with 'deleted' cannot be deleted from the calculator interface. ";
     return false;
   }
-  if (!this->Iexist(theRoutines))
+  if (!this->Iexist(theRoutines, &commentsOnFailure))
   { commentsOnFailure << "I was not able to find user: " << this->username.value
     << ". The user does not exist or there is something wrong with the database";
     return false;
@@ -1117,6 +1122,7 @@ bool UserCalculator::ComputeAndStoreActivationEmailAndTokens
   (this->actualActivationToken.value, theGlobalVariables.hostNoPort,
    this->username.value, this->email.value);
   std::stringstream tableCols;
+  this->currentTable="emailActivationStats";
   tableCols
   << "emailId int NOT NULL AUTO_INCREMENT PRIMARY KEY, "
   << "email varchar(255) not null, "
@@ -1149,13 +1155,15 @@ bool UserCalculator::ComputeAndStoreActivationEmailAndTokens
   if (lastEmailTime!="")
   { lastActivationOnThisEmail.operator =(lastEmailTime);
     lastActivationOnThisAccount.operator =(this->activationTokenCreationTime);
+    if (commentsGeneral!=0)
+      *commentsGeneral
+      << "<br>Last activation on this email: "
+      << lastActivationOnThisEmail.ToStringHumanReadable()
+      << "<br>Last activation on this account: "
+      << lastActivationOnThisEmail.ToStringHumanReadable();
   }
   if (commentsGeneral!=0)
     *commentsGeneral
-    << "<br>Last activation on this email: "
-    << lastActivationOnThisEmail.ToStringHumanReadable()
-    << "<br>Last activation on this account: "
-    << lastActivationOnThisEmail.ToStringHumanReadable()
     << "<br>Total activations (attempted on) this email: "
     << numActivationsThisEmail.ToString();
   if (!theRoutines.SetEntry
@@ -1203,6 +1211,7 @@ bool UserCalculator::ComputeAndStoreActivationToken
   std::stringstream activationTokenStream;
   activationTokenStream << now.theTimeStringNonReadable << rand();
   this->actualActivationToken=Crypto::computeSha1outputBase64(activationTokenStream.str());
+  this->currentTable="users";
   if (!this->SetColumnEntry("activationToken", this->actualActivationToken.value, theRoutines, commentsOnFailure))
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "Setting activation token failed.";
@@ -1450,7 +1459,7 @@ bool DatabaseRoutines::AddUsersFromEmails
       currentUser.email.value="";
     } else
       currentUser.email=theEmails[i];
-    if (!currentUser.Iexist(*this))
+    if (!currentUser.Iexist(*this,0))
     { if (!currentUser.CreateMeIfUsernameUnique(*this, &comments))
       { comments << "Failed to create user: " << currentUser.username.value;
         result=false;
@@ -1775,6 +1784,27 @@ bool DatabaseRoutines::innerDisplayTables(Calculator& theCommands, const Express
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool DatabaseRoutines::innerUserExists
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerDisplayDatabaseTable");
+  if (input.size()!=3)
+    return theCommands << "Required inputs are missing: username, email. ";
+  std::string userName, email;
+  if (!input[1].IsOfType<std::string>(&userName) || !input[2].IsOfType<std::string>(&email))
+    return theCommands << "Inputs: " << input[1].ToString() << ", "
+    << input[2].ToString() << " are required to be strings. ";
+  DatabaseRoutines theRoutines;
+  UserCalculator theUser;
+  theUser.email=email;
+  theUser.username=userName;
+  std::stringstream out;
+  if (theUser.Iexist(theRoutines, &out))
+    out << "User identified by: " << userName << ", " << email << " is present in the database. ";
+  else
+    out << "User identified by: " << userName << ", " << email << " is NOT present in the database. ";
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool DatabaseRoutines::innerDisplayDatabaseTable
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerDisplayDatabaseTable");
@@ -1928,15 +1958,25 @@ bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* comme
 { MacroRegisterFunctionWithName("EmailRoutines::IsOKEmail");
   //stOutput << "DEBUG: got to isokemail";
   if (input.size()==0)
+  { if (commentsOnError!=0)
+      *commentsOnError << "Empty email not allowed. ";
     return false;
+  }
+  int numAts=0;
   for (unsigned i=0; i<input.size(); i++)
-    if(!EmailRoutines::GetRecognizedEmailChars()[((unsigned char) input[i])])
+  { if(!EmailRoutines::GetRecognizedEmailChars()[((unsigned char) input[i])])
     { if (commentsOnError!=0)
         *commentsOnError << "Email: " << input << " contains the unrecognized character "
-        << input[i];
+        << input[i] << ". ";
       return false;
     }
-  return true;
+    if (input[i]=='@')
+      numAts++;
+  }
+  if (numAts!=1 && commentsOnError!=0)
+    *commentsOnError << "Email: "
+    << input << " is required to have exactly one @ character. ";
+  return numAts==1;
 }
 
 std::string EmailRoutines::GetCommandToSendEmailWithMailX()
@@ -1978,13 +2018,13 @@ std::string DatabaseRoutines::ToStringSuggestionsReasonsForFailure
 { MacroRegisterFunctionWithName("ToStringSuggestionsReasonsForFailure");
   std::stringstream out;
   bool userFound=false;
-  if (theUser.Iexist(theRoutines))
+  if (theUser.Iexist(theRoutines,0))
     userFound=true;
   else if (theUser.username.value.find('@')==std::string::npos)
-    { theUser.username.value+="@umb.edu";
-      if (theUser.Iexist(theRoutines))
-        userFound=true;
-    }
+  { theUser.username.value+="@umb.edu";
+    if (theUser.Iexist(theRoutines, 0))
+      userFound=true;
+  }
   if (userFound)
   { std::string recommendedNewName;
     if (!theUser.FetchOneColumn(DatabaseStrings::userColumnLabel, recommendedNewName, theRoutines, &out))
@@ -2027,7 +2067,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   userWrapper.email.value=theData.GetValue("email").string;
   userWrapper.username.value="";
   DatabaseRoutines theRoutines;
-  if (!userWrapper.Iexist(theRoutines))
+  if (!userWrapper.Iexist(theRoutines, commentsOnFailure))
   { if (commentsGeneral!=0)
       *commentsGeneral << "User with email " << userWrapper.email.value << " does not exist. ";
     //stOutput << "\n<br>\nDEBUG: User with email " << userWrapper.email.value << " does not exist. ";
@@ -2036,6 +2076,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
       return false;
     if (commentsGeneral!=0)
       *commentsGeneral << "Created new user with username: " << userWrapper.username.value;
+    theUseR = userWrapper;
     return true;
   }
   if (!userWrapper.FetchOneUserRow(theRoutines, commentsOnFailure))
@@ -2098,7 +2139,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
       }
     }
   if (userWrapper.username.value=="admin" && userWrapper.enteredPassword!="")
-    if (!userWrapper.Iexist(theRoutines))
+    if (!userWrapper.Iexist(theRoutines, 0))
     { if (comments!=0)
         *comments << "<b>First login of user admin: setting admin pass. </b>";
       userWrapper.CreateMeIfUsernameUnique(theRoutines, comments);
@@ -2273,24 +2314,28 @@ std::string UserCalculator::GetMySQLclauseIdentifyingUserByEmailOrID()
   return out.str();
 }
 
-bool UserCalculator::IamPresentInTable(DatabaseRoutines& theRoutines, const std::string& tableNameUnsafe)
+bool UserCalculator::IamPresentInTable
+(DatabaseRoutines& theRoutines, const std::string& tableNameUnsafe, std::stringstream* comments)
 { MacroRegisterFunctionWithName("UserCalculator::IamPresentInTable");
   if (this->username.value=="" && this->email.value=="")
+  { if (comments!=0)
+      *comments << "Empty username and empty email not allowed simultaneously. ";
     return false;
+  }
   MySQLdata theTable=tableNameUnsafe;
   std::stringstream theQueryStream;
   theQueryStream << "SELECT username FROM " << theRoutines.theDatabaseName
   << "." << theTable.GetIdentifieR()
   << " where " << this->GetMySQLclauseIdentifyingUserByEmailOrID();
 
-  DatabaseQuery theQuery(theRoutines, theQueryStream.str());
+  DatabaseQuery theQuery(theRoutines, theQueryStream.str(), comments);
   //stOutput << "DEBUG: firing: query: " << theQuery.theQueryString;
   return theQuery.flagQueryReturnedResult;
 }
 
 bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::CreateMeIfUsernameUnique");
-  if (this->Iexist(theRoutines))
+  if (this->Iexist(theRoutines, commentsOnFailure))
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "User " << this->username.value << " already exists. ";
     return false;
@@ -2318,6 +2363,9 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std
     queryStream << ", " << this->email.GetDatA();
   queryStream << ")";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
+  this->currentTable=DatabaseStrings::usersTableName;
+  if (!this->FetchOneUserRow(theRoutines,commentsOnFailure))
+    return false;
   if (this->enteredPassword=="")
     return true;
   return this->SetPassword(theRoutines, commentsOnFailure);
@@ -2402,7 +2450,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   << "authenticationCreationTime LONGTEXT, "
   << "authenticationToken LONGTEXT, "
   << "activationToken LONGTEXT, "
-  << "activationCreationTime LONGTEXT, "
+  << "activationTokenCreationTime LONGTEXT, "
   << "userRole LONGTEXT, "
   << "userInfo LONGTEXT, "
   << DatabaseStrings::problemWeightsIdColumnName << " LONGTEXT, "

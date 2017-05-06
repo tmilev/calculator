@@ -43,6 +43,15 @@ void Calculator::initAdminFunctions()
    "DisplayDatabaseTable",
    true);
   this->AddOperationInnerHandler
+  ("UserExists", DatabaseRoutines::innerUserExists, "",
+   "Probes the database whether the user exists. First argument: user\
+    , second argument: email. ",
+   "UserExists(\"\",\"\") ",
+   false, false,
+   "DatabaseRoutines::innerUserExists",
+   "UserExists",
+   false);
+  this->AddOperationInnerHandler
   ("GetAuthenticationToken", DatabaseRoutines::innerGetAuthentication, "",
    "Gets the authentication token of a given user.",
    "GetAuthentication(\"testUser\"); ",

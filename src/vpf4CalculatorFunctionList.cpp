@@ -1923,13 +1923,21 @@ D-B;\
    "CalculatorFunctionsGeneral::innerDFQsEulersMethod",
    "DFQEuler")
    ;
-  this->AddOperationInnerHandler ("FetchWebPage",
-  CalculatorFunctionsGeneral::innerFetchWebPage, "",
-   "Attempts to fetch a web page. For logged-in admins only.",
-   "FetchWebPage(\"www.googleapis.com\", \"https\", \"https://www.googleapis.com/oauth2/v3/certs\")",
+  this->AddOperationInnerHandler ("FetchWebPageGET",
+  CalculatorFunctionsGeneral::innerFetchWebPageGET, "",
+   "Attempts to GET a web page. For logged-in admins only.",
+   "FetchWebPageGET(\"www.googleapis.com\", \"https\", \"https://www.googleapis.com/oauth2/v3/certs\")",
    true, false,
-   "CalculatorFunctionsGeneral::innerFetchWebPage",
-   "FetchWebPage")
+   "CalculatorFunctionsGeneral::innerFetchWebPageGET",
+   "FetchWebPageGET")
+   ;
+  this->AddOperationInnerHandler ("FetchWebPagePOST",
+  CalculatorFunctionsGeneral::innerFetchWebPagePOST, "",
+   "Attempts to fetch a web page via POST. For logged-in admins only.",
+   "FetchWebPagePOST(\"www.googleapis.com\", \"https\", \"https://www.googleapis.com/oauth2/v3/certs\", \"\")",
+   true, false,
+   "CalculatorFunctionsGeneral::innerFetchWebPagePOST",
+   "FetchWebPagePOST")
    ;
   this->AddOperationInnerHandler ("SendEmailWithMailGun",
   CalculatorFunctionsGeneral::innerSendEmailWithMailGun, "",

@@ -2057,7 +2057,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       if (indexInElts<theElements.size)
         eltsStack.AddOnTop(theElements[indexInElts]);
     }
-//    stOutput << "<br>" << this->ToStringParsingStack(eltsStack);
+    //stOutput << "<br>DEBUG: " << this->ToStringParsingStack(eltsStack);
     reduced=true;
     SyntacticElementHTML& last         = eltsStack[eltsStack.size-1];
     SyntacticElementHTML& secondToLast = eltsStack[eltsStack.size-2];
@@ -2175,11 +2175,12 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       continue;
     }
     if (thirdToLast.syntacticRole=="<calculatorSolution>" &&
-        (secondToLast.syntacticRole=="" || secondToLast.syntacticRole=="command"))
+        (secondToLast.syntacticRole=="" || secondToLast.syntacticRole=="command" ||
+         secondToLast.syntacticRole=="<"))
     { thirdToLast.children.AddOnTop(secondToLast);
       eltsStack[eltsStack.size-2]=last;
       eltsStack.RemoveLastObject();
-      //stOutput << "<hr>Rule 2: processed " << thirdToLast.ToStringOpenTag(true) << "<hr>";
+      //stOutput << "<hr>DEBUG: Rule 2: processed " << thirdToLast.ToStringOpenTag(true) << "<hr>";
       continue;
     }
     if (sixthToLast.syntacticRole=="<openTag" &&

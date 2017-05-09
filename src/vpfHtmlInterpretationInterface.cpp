@@ -89,7 +89,7 @@ std::string HtmlInterpretation::GetProblemSolution()
   if (!theProblem.InterpretProcessExecutedCommands
        (theInterpreteR, currentA.solutionElements, out))
     return out.str();
-  for (int i=1; i<currentA.solutionElements.size; i++)
+  for (int i=0; i<currentA.solutionElements.size; i++)
     if (!currentA.solutionElements[i].IsHidden())
       out << currentA.solutionElements[i].ToStringInterpretedBody();
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
@@ -1895,7 +1895,8 @@ std::string HtmlInterpretation::ToStringNavigation()
   //out << "<table>";
   std::string linkSeparator=" | ";
   std::string linkBigSeparator=" || ";
-  if (theGlobalVariables.userCalculatorRequestType=="template")
+  if (theGlobalVariables.userCalculatorRequestType=="template" ||
+      theGlobalVariables.userCalculatorRequestType=="templateNoLogin")
     out << "<b>Home</b>" << linkSeparator;
   else
   { std::string topicList=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
@@ -1903,8 +1904,12 @@ std::string HtmlInterpretation::ToStringNavigation()
     if (topicList!="" && courseHome!="")
     { std::string studentView=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentView"), false);
       std::string section=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=template"
-      << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable;
+      if (theGlobalVariables.userCalculatorRequestType=="exerciseNoLogin")
+        out << "?request=templateNoLogin";
+      else
+        out << "?request=template";
+      out << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
       << "studentView=" << studentView << "&";
       if (section!="")
         out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";

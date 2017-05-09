@@ -3403,7 +3403,7 @@ std::string WebWorker::GetSignUpPage()
   << "  submitStringCalculatorArgument(theInput, 'signUpResult', null, 'signUpResultReport');\n"
   << "}\n";
   out << "</script>";
-  out << "<script src='https://www.google.com/recaptcha/api.js'></script>";
+//  out << "<script src='https://www.google.com/recaptcha/api.js'></script>";
   out << "<body>\n";
   out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</calculatorNavigation>\n";
@@ -3436,7 +3436,7 @@ std::string WebWorker::GetSignUpPage()
 //  << "</tr>"
   << "</table>"
   ;
-  out << "<div class=\"g-recaptcha\" data-sitekey=\"6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql\"></div>";
+  //out << "<div class=\"g-recaptcha\" data-sitekey=\"6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql\"></div>";
   out << "</form>";
   out << "<button onclick=\"submitSignUpInfo();\">Sign up</button>"
   << "<span id=\"signUpResultReport\"></span>"

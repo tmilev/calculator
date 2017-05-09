@@ -550,13 +550,14 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   this->serverToConnectTo  = "www.googleapis.com";
   this->portOrService      = "https";
   this->addressToConnectTo = "https://www.googleapis.com/oauth2/v3/certs";
+  this->flagDoUseGET=true;
   if (commentsGeneral!=0)
     *commentsGeneral << "<hr>"
     << "Updating public keys <hr>";
   this->FetchWebPage(commentsOnFailure, commentsGeneral);
   if (this->bodyReceiveD=="")
   { if (commentsOnFailure!=0)
-      *commentsOnFailure << "Could not fetch google certificate list";
+      *commentsOnFailure << "Could not fetch google certificate list. ";
     return;
   }
   std::string googleKeysFileName="certificates-public/google.txt";

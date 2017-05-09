@@ -54,7 +54,7 @@ std::string HtmlInterpretation::GetProblemSolution()
   Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
   Calculator theInterpreteR;
   theInterpreteR.init();
-  theInterpreteR.flagPlotNoControls=false;
+  theInterpreteR.flagPlotNoControls=true;
   theInterpreteR.flagWriteLatexPlots=false;
   if(!theProblem.PrepareCommands(comments))
   { out << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();

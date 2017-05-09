@@ -3101,58 +3101,6 @@ int WebWorker::ProcessChangePasswordPage()
   return 0;
 }
 
-int WebWorker::ProcessSignUP()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
-  //double startTime=theGlobalVariables.GetElapsedSeconds();
-  this->SetHeaderOKNoContentLength();
-  DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
-  UserCalculator theUser;
-  theUser.username=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
-  theUser.email=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
-  DatabaseRoutines theRoutines;
-  std::stringstream out;
-  if (theUser.username=="")
-  { stOutput << "<span style=\"color:red\"><b>"
-    << "Empty username not allowed. "
-    << "</b></span>";
-    return 0;
-  }
-  if (!EmailRoutines::IsOKEmail(theUser.email.value, &out))
-  { stOutput << "<span style=\"color:red\"><b>Your email address does not appear to be valid. "
-    << out.str() << "</b></span>";
-    return 0;
-  }
-  if (theUser.Iexist(theRoutines, &out))
-  { stOutput << "<span style=\"color:red\"><b>"
-    << "Either the username ("
-    << theUser.username.value
-    << ") or the email ("
-    << theUser.email.value
-    << ") you requested is already taken.</b></span>";
-    return 0;
-  } else
-    stOutput << "<span style=\"color:green\"><b>"
-    << "Username ("
-    << theUser.username.value
-    << ") with email ("
-    << theUser.email.value
-    << ") is available.</b></span>";
-
-
-  if (!theUser.CreateMeIfUsernameUnique(theRoutines, &out))
-  { stOutput << out.str();
-    return 0;
-  }
-  std::stringstream* adminOutputStream=0;
-  if (theGlobalVariables.UserDefaultHasAdminRights())
-    adminOutputStream=&out;
-  this->DoSetEmail(theRoutines, theUser, &out, &out, adminOutputStream);
-  stOutput << out.str();
-  stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
-  << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
-  return 0;
-}
-
 int WebWorker::ProcessSignUpPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSignUpPage");
   this->SetHeaderOKNoContentLength();
@@ -3389,21 +3337,21 @@ std::string WebWorker::GetSignUpPage()
   out << "function submitSignUpInfo()\n";
   out << "{";
 //  << " document.getElementById('desiredAccount')"
-  out << "  var grecaptcha;\n";
+  //out << "  var grecaptcha;\n";
   out
   << "  var theInput=\"request=signUp&\";\n"
   << "  theInput+=\"desiredUsername=\" +encodeURIComponent(document.getElementById('desiredUsername').value) + \"&\";\n"
   << "  theInput+=\"email=\" +encodeURIComponent(document.getElementById('email').value) + \"&\";\n"
-//  << "  if (grecaptcha===undefined || grecaptcha===null)\n"
-//  << "  { document.getElementById('signUpResult').innerHTML="
-//  << "\"<span style='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
-//  << "   return false;\n"
-//  << "  }\n"
-//  << "  theInput+=\"recapchaToken=\" +encodeURIComponent(grecaptcha.getResponse()) + \"&\";\n"
+  << "  if (grecaptcha===undefined || grecaptcha===null)\n"
+  << "  { document.getElementById('signUpResult').innerHTML="
+  << "\"<span style='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
+  << "   return false;\n"
+  << "  }\n"
+  << "  theInput+=\"recapchaToken=\" +encodeURIComponent(grecaptcha.getResponse()) + \"&\";\n"
   << "  submitStringCalculatorArgument(theInput, 'signUpResult', null, 'signUpResultReport');\n"
   << "}\n";
   out << "</script>";
-//  out << "<script src='https://www.google.com/recaptcha/api.js'></script>";
+  out << "<script src='https://www.google.com/recaptcha/api.js'></script>";
   out << "<body>\n";
   out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</calculatorNavigation>\n";
@@ -3436,7 +3384,7 @@ std::string WebWorker::GetSignUpPage()
 //  << "</tr>"
   << "</table>"
   ;
-  //out << "<div class=\"g-recaptcha\" data-sitekey=\"6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql\"></div>";
+  out << "<div class=\"g-recaptcha\" data-sitekey=\"6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql\"></div>";
   out << "</form>";
   out << "<button onclick=\"submitSignUpInfo();\">Sign up</button>"
   << "<span id=\"signUpResultReport\"></span>"
@@ -3972,6 +3920,7 @@ WebServer::WebServer()
   this->requestStartsNotNeedingLogin.AddOnTop("submitExerciseNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.6-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("MathJax-2.6-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery.min.js");

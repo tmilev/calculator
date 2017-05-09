@@ -15,6 +15,8 @@
 #include <arpa/inet.h>
 //#include <libexplain/connect.h>
 
+#include "vpfHeader7DatabaseInterface_MySQL.h"
+
 
 extern WebServer theWebServer;
 ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
@@ -495,6 +497,7 @@ bool CalculatorFunctionsGeneral::innerFetchWebPageGET(Calculator& theCommands, c
   if (!input[3].IsOfType(&theCrawler.addressToConnectTo))
     theCrawler.addressToConnectTo=input[3].ToString();
   std::stringstream out;
+  theCrawler.flagDoUseGET=true;
   out
   << "Server:  " << theCrawler.serverToConnectTo
   << " port: " << theCrawler.portOrService
@@ -682,3 +685,78 @@ bool Crypto::VerifyJWTagainstKnownKeys
   (currentCert.theModuluS, currentCert.theExponenT,
    commentsOnFailure, commentsGeneral);
 }
+
+int WebWorker::ProcessSignUP()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
+  //double startTime=theGlobalVariables.GetElapsedSeconds();
+  this->SetHeaderOKNoContentLength();
+  DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
+  UserCalculator theUser;
+  theUser.username=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
+  theUser.email=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
+  DatabaseRoutines theRoutines;
+  std::stringstream out;
+  if (theUser.username=="")
+  { stOutput << "<span style=\"color:red\"><b>"
+    << "Empty username not allowed. "
+    << "</b></span>";
+    return 0;
+  }
+  if (!EmailRoutines::IsOKEmail(theUser.email.value, &out))
+  { stOutput << "<span style=\"color:red\"><b>Your email address does not appear to be valid. "
+    << out.str() << "</b></span>";
+    return 0;
+  }
+  if (theUser.Iexist(theRoutines, &out))
+  { stOutput << "<span style=\"color:red\"><b>"
+    << "Either the username ("
+    << theUser.username.value
+    << ") or the email ("
+    << theUser.email.value
+    << ") you requested is already taken.</b></span>";
+    return 0;
+  } else
+    stOutput << "<span style=\"color:green\"><b>"
+    << "Username ("
+    << theUser.username.value
+    << ") with email ("
+    << theUser.email.value
+    << ") is available.</b></span>";
+  WebCrawler theCrawler;
+  theCrawler.flagDoUseGET=false;
+  theCrawler.addressToConnectTo="";
+  theCrawler.postMessageToSend=
+  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("recapchaToken"), false);
+  std::stringstream fetchPageStream, errorStream;
+  theCrawler.FetchWebPage(&fetchPageStream, &errorStream);
+  std::string response=theCrawler.bodyReceiveD;
+  JSData theJSparser;
+  if (!theJSparser.readstring(response, &errorStream))
+  { stOutput << "<span style=\"color:red\">"
+    << "<b>" << "Failed to extract response token from captcha verification. "
+    << "</b>"
+    << errorStream.str()
+    << "</span>";
+    return 0;
+  }
+  if (!theJSparser.HasKey("verified"))
+  { stOutput << "<span style=\"color:red\">"
+    << "<b>" << "Captcha failure: could not find key: "
+    << "</b>"
+    << "</span>";
+    return 0;
+  }
+  if (!theUser.CreateMeIfUsernameUnique(theRoutines, &out))
+  { stOutput << out.str();
+    return 0;
+  }
+  std::stringstream* adminOutputStream=0;
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    adminOutputStream=&out;
+  this->DoSetEmail(theRoutines, theUser, &out, &out, adminOutputStream);
+  stOutput << out.str();
+  stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
+  << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
+  return 0;
+}
+

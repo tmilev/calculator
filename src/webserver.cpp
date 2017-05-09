@@ -3394,12 +3394,12 @@ std::string WebWorker::GetSignUpPage()
   << "  var theInput=\"request=signUp&\";\n"
   << "  theInput+=\"desiredUsername=\" +encodeURIComponent(document.getElementById('desiredUsername').value) + \"&\";\n"
   << "  theInput+=\"email=\" +encodeURIComponent(document.getElementById('email').value) + \"&\";\n"
-  << "  if (grecaptcha===undefined || grecaptcha===null)\n"
-  << "  { document.getElementById('signUpResult').innerHTML="
-  << "\"<span style='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
-  << "   return false;\n"
-  << "  }\n"
-  << "  theInput+=\"recapchaToken=\" +encodeURIComponent(grecaptcha.getResponse()) + \"&\";\n"
+//  << "  if (grecaptcha===undefined || grecaptcha===null)\n"
+//  << "  { document.getElementById('signUpResult').innerHTML="
+//  << "\"<span style='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
+//  << "   return false;\n"
+//  << "  }\n"
+//  << "  theInput+=\"recapchaToken=\" +encodeURIComponent(grecaptcha.getResponse()) + \"&\";\n"
   << "  submitStringCalculatorArgument(theInput, 'signUpResult', null, 'signUpResultReport');\n"
   << "}\n";
   out << "</script>";

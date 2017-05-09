@@ -27,6 +27,7 @@ public:
   std::string portOrService;
   std::string addressToConnectTo;
   std::string serverToConnectTo;
+  std::string postMessageToSend;
   std::string lastTransactionErrors;
   std::string lastTransaction;
   std::string headerReceived;
@@ -36,6 +37,7 @@ public:
 
   bool flagInitialized;
   bool flagContinueWasNeeded;
+  bool flagDoUseGET;
   LargeInt expectedLength;
   List<char> buffer;
   struct sockaddr_in serverAddress;
@@ -127,6 +129,7 @@ void WebCrawler::init()
     return;
   this->flagContinueWasNeeded=false;
   MacroRegisterFunctionWithName("WebCrawler::init");
+  this->flagDoUseGET=true;
   buffer.initFillInObject(50000, 0);
   if (!theWebServer.flagPort8155)
   { this->portOrService="8080";
@@ -363,8 +366,17 @@ void WebCrawler::FetchWebPagePart2
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("WebCrawler::FetchWebPagePart2");
   std::stringstream theMessageHeader, theContinueHeader;
-  theMessageHeader << "GET " << this->addressToConnectTo << " HTTP/1.1"
-  << "\r\n" << "Host: " << this->serverToConnectTo << "\r\n\r\n";
+  if (this->flagDoUseGET)
+  { theMessageHeader << "GET " << this->addressToConnectTo << " HTTP/1.1"
+    << "\r\n" << "Host: " << this->serverToConnectTo << "\r\n\r\n";
+  } else
+  { theMessageHeader << "POST " << this->addressToConnectTo << " HTTP/1.1"
+    << "\r\n" << "Host: " << this->serverToConnectTo;
+    theMessageHeader << "\r\nContent-length: " << this->postMessageToSend.size();
+    theMessageHeader << "\r\n\r\n";
+    theMessageHeader << this->postMessageToSend;
+  }
+
   if (!theWebServer.theSSLdata.HandShakeIamClientNoSocketCleanup
        (this->theSocket, commentsOnFailure, commentsGeneral))
   { if (commentsOnFailure!=0)
@@ -469,8 +481,8 @@ void WebCrawler::FetchWebPagePart2
     << ")<br>" << this->bodyReceiveD;
 }
 
-bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchWebPage");
+bool CalculatorFunctionsGeneral::innerFetchWebPageGET(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchWebPageGET");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return output.AssignValue((std::string) "Fetching web pages available only for logged-in admins. ", theCommands);
   WebCrawler theCrawler;
@@ -488,6 +500,33 @@ bool CalculatorFunctionsGeneral::innerFetchWebPage(Calculator& theCommands, cons
   << " port: " << theCrawler.portOrService
   << " resource: " << theCrawler.addressToConnectTo
   << "<br>";
+  theCrawler.FetchWebPage(&out, &out);
+  out << "<br>" << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerFetchWebPagePOST(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFetchWebPagePOST");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return output.AssignValue((std::string) "Fetching web pages available only for logged-in admins. ", theCommands);
+  WebCrawler theCrawler;
+  if (input.size()!=5)
+    return theCommands << "Fetching web page expects 4 arguments: server, service/port, webpage and message to post. ";
+  if (!input[1].IsOfType(&theCrawler.serverToConnectTo))
+    theCrawler.serverToConnectTo=input[1].ToString();
+  if (!input[2].IsOfType(&theCrawler.portOrService))
+    theCrawler.portOrService=input[2].ToString();
+  if (!input[3].IsOfType(&theCrawler.addressToConnectTo))
+    theCrawler.addressToConnectTo=input[3].ToString();
+  if (!input[4].IsOfType(&theCrawler.postMessageToSend))
+    theCrawler.postMessageToSend=input[4].ToString();
+  std::stringstream out;
+  out
+  << "Server:  " << theCrawler.serverToConnectTo
+  << " port: " << theCrawler.portOrService
+  << " resource: " << theCrawler.addressToConnectTo
+  << "<br>";
+  theCrawler.flagDoUseGET=false;
   theCrawler.FetchWebPage(&out, &out);
   out << "<br>" << theCrawler.lastTransactionErrors << "<hr>" << theCrawler.lastTransaction;
   return output.AssignValue(out.str(), theCommands);

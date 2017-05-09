@@ -380,7 +380,9 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output)
   { return CalculatorFunctionsGeneral::innerSolveSerreLikeSystem(theCommands, input, output, true, true);
   }
-  static bool innerFetchWebPage
+  static bool innerFetchWebPagePOST
+  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerFetchWebPageGET
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFetchKnownPublicKeys
   (Calculator& theCommands, const Expression& input, Expression& output);

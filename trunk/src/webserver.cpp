@@ -3386,14 +3386,24 @@ std::string WebWorker::GetSignUpPage()
   << HtmlRoutines::GetJavascriptHideHtml()
   << HtmlRoutines::GetCalculatorStyleSheetWithTags();
   out << "<script language=\"javascript\">\n";
-  out << "function submitSignUpInfo()\n"
-  << "{ var theInput=\"request=signUp&\";\n"
+  out << "function submitSignUpInfo()\n";
+  out << "{";
+//  << " document.getElementById('desiredAccount')"
+  out << "  var grecaptcha;\n";
+  out
+  << "  var theInput=\"request=signUp&\";\n"
   << "  theInput+=\"desiredUsername=\" +encodeURIComponent(document.getElementById('desiredUsername').value) + \"&\";\n"
   << "  theInput+=\"email=\" +encodeURIComponent(document.getElementById('email').value) + \"&\";\n"
-  //<< "  theInput+=\"reenteredPassword=\" +encodeURIComponent(document.getElementById('reenteredPassword').value) + \"&\";\n"
+  << "  if (grecaptcha===undefined || grecaptcha===null)\n"
+  << "  { document.getElementById('signUpResult').innerHTML="
+  << "\"<span style='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
+  << "   return false;\n"
+  << "  }\n"
+  << "  theInput+=\"recapchaToken=\" +encodeURIComponent(grecaptcha.getResponse()) + \"&\";\n"
   << "  submitStringCalculatorArgument(theInput, 'signUpResult', null, 'signUpResultReport');\n"
   << "}\n";
   out << "</script>";
+  out << "<script src='https://www.google.com/recaptcha/api.js'></script>";
   out << "<body>\n";
   out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</calculatorNavigation>\n";
@@ -3426,12 +3436,14 @@ std::string WebWorker::GetSignUpPage()
 //  << "</tr>"
   << "</table>"
   ;
+  out << "<div class=\"g-recaptcha\" data-sitekey=\"6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql\"></div>";
   out << "</form>";
   out << "<button onclick=\"submitSignUpInfo();\">Sign up</button>"
   << "<span id=\"signUpResultReport\"></span>"
   << "\n<br>\n"
   << "<span id=\"signUpResult\"></span>"
   ;
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
 }

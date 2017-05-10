@@ -193,9 +193,11 @@ public:
   int ProcessExamPage();
   int ProcessTemplate();
   int ProcessSelectCourse();
+  int ProcessSelectCourseFromHtml();
   int ProcessTopicTable();
   int ProcessExamPageInterpreter();
   int ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication);
+  int ProcessLoginNeededOverUnsecureConnection();
   int ProcessLoginPage(const std::string& reasonForLogin="");
   int ProcessLogout();
   int ProcessSignUP();
@@ -221,7 +223,8 @@ public:
 
   static bool IsAllowedAsRequestCookie(const std::string& input);
   bool Login(std::stringstream& argumentProcessingFailureComments);
-  bool CheckRequestsAddressesReturnFalseIfModified();
+  bool CorrectRequestsBEFORELoginReturnFalseIfModified();
+  bool CorrectRequestsAFTERLoginReturnFalseIfModified();
 
   bool ExtractArgumentsFromMessage
 (const std::string& input, std::stringstream& argumentProcessingFailureComments,

@@ -407,6 +407,30 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
   return out.str();
 }
 
+std::string HtmlInterpretation::GetSelectCourseFromHtml()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourseFromHtml");
+  std::stringstream out;
+  out << "<!DOCTYPE html>";
+  out << "<html>";
+  out << "<head>"
+  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << "</head>";
+  out << "<body>";
+  out << "<calculatorNavigation>"
+  << HtmlInterpretation::ToStringNavigation()
+  << "</calculatorNavigation>";
+  std::string theFile;
+  if (!FileOperations::LoadFileToStringVirtual("html/selectCourse.html", theFile, out, false, false))
+  { out << "<span style=\"color:red\"><b>" << "File: selectCourse.html is missing. " << "</b></span>"
+    << "<br>The file needs to be located at <br>calculator-base-folder/../public_html/selectCourse.html"
+    << "<br>i.e., the file must be in a folder named public_html, parallel to the installation folder." ;
+  } else
+  { out << theFile;
+  }
+  out << "</body></html>";
+  return out.str();
+}
+
 std::string HtmlInterpretation::GetSelectCourse()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourse");
   std::stringstream out;
@@ -1919,7 +1943,10 @@ std::string HtmlInterpretation::ToStringNavigation()
       << linkSeparator;
     }
   }
-  out << "<a href=\"/selectCourse.html\">Select course</a>" << linkBigSeparator;
+  if (theGlobalVariables.userCalculatorRequestType=="selectCourseFromHtml")
+    out << "<b>Select course</b>" << linkBigSeparator;
+  else
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=selectCourseFromHtml\">Select course</a>" << linkBigSeparator;
   if (theGlobalVariables.flagLoggedIn)
   { out << "User";
     if (theGlobalVariables.UserDefaultHasAdminRights())
@@ -1973,7 +2000,7 @@ std::string HtmlInterpretation::ToStringNavigation()
     else
       out << "<b>Database</b>" << linkBigSeparator;
   }
-  if (theGlobalVariables.userCalculatorRequestType!="compute")
+  if (theGlobalVariables.userCalculatorRequestType!="calculator")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=calculator&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << " \">Calculator</a>" << linkBigSeparator;
   else

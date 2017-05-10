@@ -272,6 +272,9 @@ void WebCrawler::FetchWebPage
   if (status!= 0)
   { this->lastTransactionErrors =  "Error calling getaddrinfo: ";
     this->lastTransactionErrors+= gai_strerror(status);
+    if (commentsOnFailure!=0)
+      *commentsOnFailure << this->lastTransactionErrors << ". "
+      << "Server: " << this->serverToConnectTo << ", port or service: " << this->portOrService << ". ";
     this->FreeAddressInfo();
     return;
   }
@@ -721,14 +724,26 @@ int WebWorker::ProcessSignUP()
     << theUser.username.value
     << ") with email ("
     << theUser.email.value
-    << ") is available.</b></span>";
+    << ") is available. </b></span>";
   WebCrawler theCrawler;
   theCrawler.flagDoUseGET=false;
-  theCrawler.addressToConnectTo="";
-  theCrawler.postMessageToSend=
-  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("recapchaToken"), false);
+  theCrawler.addressToConnectTo="www.google.com/recaptcha/api/siteverify";
+  theCrawler.serverToConnectTo="www.google.com/recaptcha/api/siteverify";
+  theCrawler.portOrService="https";
+  std::stringstream messageToSendStream;
+  std::string secret;
+  if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-secret.txt",secret,out,true, true))
+  { stOutput << "<span style=\"color:red\"><b>Failed to load recaptcha secret. </b></span>" << out.str();
+    return 0;
+  }
+  messageToSendStream << "response="
+  << theGlobalVariables.GetWebInput("recapchaToken")
+  << "&"
+  << "secret="
+  << secret;
+  theCrawler.postMessageToSend=messageToSendStream.str();
   std::stringstream fetchPageStream, errorStream;
-  theCrawler.FetchWebPage(&fetchPageStream, &errorStream);
+  theCrawler.FetchWebPage( &errorStream, &fetchPageStream);
   std::string response=theCrawler.bodyReceiveD;
   JSData theJSparser;
   if (!theJSparser.readstring(response, &errorStream))
@@ -736,16 +751,32 @@ int WebWorker::ProcessSignUP()
     << "<b>" << "Failed to extract response token from captcha verification. "
     << "</b>"
     << errorStream.str()
+    << " <br>The response string was: "
+    << response
+    << " obtained by: "
+    << fetchPageStream.str()
+    << " with error stream: "
+    << errorStream.str()
     << "</span>";
     return 0;
   }
-  if (!theJSparser.HasKey("verified"))
+  if (!theJSparser.HasKey("success"))
   { stOutput << "<span style=\"color:red\">"
     << "<b>" << "Captcha failure: could not find key: "
     << "</b>"
     << "</span>";
     return 0;
   }
+  JSData theSuccess;
+  theSuccess= theJSparser.GetValue("success");
+  if (theSuccess.type!=theJSparser.JSbool || theSuccess.boolean!=true)
+  { stOutput << "<span style=\"color:red\">"
+    << "<b>" << "Could not verify your captcha solution. "
+    << "</b>"
+    << "</span>";
+    return 0;
+  }
+
   if (!theUser.CreateMeIfUsernameUnique(theRoutines, &out))
   { stOutput << out.str();
     return 0;

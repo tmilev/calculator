@@ -2611,7 +2611,8 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   if (theGlobalVariables.userCalculatorRequestType!="logout" &&
       theGlobalVariables.userCalculatorRequestType!="login")
   { out << " value=\"" << theGlobalVariables.userCalculatorRequestType << "\"";
-  }
+  } else
+    out << "value=\"selectCourseFromHtml\"";
   out << ">";
   out << "<input type=\"hidden\" name=\"googleToken\" id=\"googleToken\" value=\"\">";
   out << "<button type=\"submit\" value=\"Submit\" ";
@@ -3120,9 +3121,16 @@ int WebWorker::ProcessLogout()
 }
 
 int WebWorker::ProcessSelectCourse()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessTemplate");
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourse");
   this->SetHeaderOKNoContentLength();
   stOutput << HtmlInterpretation::GetSelectCourse();
+  return 0;
+}
+
+int WebWorker::ProcessSelectCourseFromHtml()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourseFromHtml");
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::GetSelectCourseFromHtml();
   return 0;
 }
 
@@ -3347,6 +3355,11 @@ std::string WebWorker::GetSignUpPage()
   << "\"<span style='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
   << "   return false;\n"
   << "  }\n"
+  << "  if (grecaptcha.getResponse()==='' || grecaptcha.getResponse()===null)"
+  << "  { document.getElementById('signUpResult').innerHTML="
+  << "\"<span style='color:red'><b>Please don't forget to solve the captcha. </b></span>\";\n"
+  << "   return false;\n"
+  << "  }\n"
   << "  theInput+=\"recapchaToken=\" +encodeURIComponent(grecaptcha.getResponse()) + \"&\";\n"
   << "  submitStringCalculatorArgument(theInput, 'signUpResult', null, 'signUpResultReport');\n"
   << "}\n";
@@ -3384,7 +3397,13 @@ std::string WebWorker::GetSignUpPage()
 //  << "</tr>"
   << "</table>"
   ;
-  out << "<div class=\"g-recaptcha\" data-sitekey=\"6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql\"></div>";
+  std::string recaptchaPublic;
+  std::stringstream failStream;
+  if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-public.txt", recaptchaPublic, failStream, true, true))
+    out << "<span style=\"color:red\"><b>Couldn't recaptcha site key in file: certificates/recaptcha-public.txt. </b></span>"
+    << failStream.str();
+  else
+    out << "<div class=\"g-recaptcha\" data-sitekey=\"" << recaptchaPublic << "\"></div>";
   out << "</form>";
   out << "<button onclick=\"submitSignUpInfo();\">Sign up</button>"
   << "<span id=\"signUpResultReport\"></span>"
@@ -3416,34 +3435,77 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   return out.str();
 }
 
-bool WebWorker::CheckRequestsAddressesReturnFalseIfModified()
-{ MacroRegisterFunctionWithName("WebWorker::CheckRequestsAddressesReturnFalseIfModified");
+bool WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified()
+{ MacroRegisterFunctionWithName("WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified");
   bool stateNotModified=true;
-  if ((this->addressComputed=="/" || this->addressComputed=="" ||
-      (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
-       theGlobalVariables.userCalculatorRequestType==""))
-      && !theGlobalVariables.flagSSLisAvailable)
+  if (!theGlobalVariables.flagSSLisAvailable)
+    if (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
+        theGlobalVariables.userCalculatorRequestType=="")
+    { this->addressComputed=theGlobalVariables.DisplayNameExecutable;
+      theGlobalVariables.userCalculatorRequestType="calculator";
+      stateNotModified=false;
+    }
+  if (this->addressComputed=="/" || this->addressComputed=="")
   { this->addressComputed=theGlobalVariables.DisplayNameExecutable;
-    theGlobalVariables.userCalculatorRequestType="calculator";
+    theGlobalVariables.userCalculatorRequestType="selectCourseFromHtml";
     stateNotModified=false;
   }
+  return stateNotModified;
+}
+
+bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified()
+{ MacroRegisterFunctionWithName("WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified");
+  bool stateNotModified=true;
   bool shouldFallBackToDefaultPage=false;
+  if (this->addressComputed=="/" || this->addressComputed=="")
+    shouldFallBackToDefaultPage=true;
+  if (!theGlobalVariables.flagSSLisAvailable)
+    if (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
+        theGlobalVariables.userCalculatorRequestType=="")
+    { this->addressComputed=theGlobalVariables.DisplayNameExecutable;
+      theGlobalVariables.userCalculatorRequestType="calculator";
+      stateNotModified=false;
+    }
   if (theGlobalVariables.flagLoggedIn)
-  { if (this->addressComputed=="/" || this->addressComputed=="")
-      shouldFallBackToDefaultPage=true;
-    else if (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
-             theGlobalVariables.userCalculatorRequestType=="")
+  { if (this->addressComputed==theGlobalVariables.DisplayNameExecutable &&
+        theGlobalVariables.userCalculatorRequestType=="")
       shouldFallBackToDefaultPage=true;
     else if (theGlobalVariables.userCalculatorRequestType=="template" &&
              theGlobalVariables.GetWebInput("courseHome")=="")
       shouldFallBackToDefaultPage=true;
   }
   if (shouldFallBackToDefaultPage)
-  { this->addressComputed="/html/selectCourse.html";
-    theGlobalVariables.userCalculatorRequestType="selectCourse";
+  { this->addressComputed=theGlobalVariables.DisplayNameExecutable;
+    theGlobalVariables.userCalculatorRequestType="selectCourseFromHtml";
     stateNotModified=false;
   }
   return stateNotModified;
+}
+
+int WebWorker::ProcessLoginNeededOverUnsecureConnection()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessLoginNeededOverUnsecureConnection");
+  std::stringstream redirectStream, newAddressStream;
+  newAddressStream << "https://" << this->hostNoPort;
+  if (!this->parent->flagPort8155)
+    newAddressStream << ":" << this->parent->httpSSLPort;
+  if (this->addressGetOrPost.size()!=0)
+    if (this->addressGetOrPost[0]!='/')
+      this->addressGetOrPost='/'+this->addressGetOrPost;
+  newAddressStream << this->addressGetOrPost;
+  if (theGlobalVariables.flagRunningApache)
+    redirectStream << "Content-Type: text/html\r\n";
+  redirectStream << "Location: " << newAddressStream.str();
+  //double fixme;
+  this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectStream.str());
+  //this->SetHeaderOKNoContentLength();
+  stOutput << "<html><body>Address available through secure (SSL) connection only. "
+  << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
+  if (theGlobalVariables.flagRunningApache)
+    stOutput << "To avoid seeing this message, <b><span \"style=color:red\">please use the secure version:</span></b> "
+    << "<a href=\"https://" << this->hostNoPort << "\">https://" << this->hostNoPort
+    << "</a>. If using bookmarks, don't forget to re-bookmark to the secure site. ";
+  stOutput << "</body></html>";
+  return 0;
 }
 
 int WebWorker::ServeClient()
@@ -3475,32 +3537,13 @@ int WebWorker::ServeClient()
   theGlobalVariables.userCalculatorRequestType="";
   if (this->addressComputed==theGlobalVariables.DisplayNameExecutable)
     theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
+  this->CorrectRequestsBEFORELoginReturnFalseIfModified();
   this->flagMustLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
   if (this->flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
-  { std::stringstream redirectStream, newAddressStream;
-    newAddressStream << "https://" << this->hostNoPort;
-    if (!this->parent->flagPort8155)
-      newAddressStream << ":" << this->parent->httpSSLPort;
-    if (this->addressGetOrPost.size()!=0)
-      if (this->addressGetOrPost[0]!='/')
-        this->addressGetOrPost='/'+this->addressGetOrPost;
-    newAddressStream << this->addressGetOrPost;
-    if (theGlobalVariables.flagRunningApache)
-      redirectStream << "Content-Type: text/html\r\n";
-    redirectStream << "Location: " << newAddressStream.str();
-    //double fixme;
-    this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectStream.str());
-    //this->SetHeaderOKNoContentLength();
-    stOutput << "<html><body>Address available through secure (SSL) connection only. "
-    << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
-    if (theGlobalVariables.flagRunningApache)
-      stOutput << "To avoid seeing this message, <b><span \"style=color:red\">please use the secure version:</span></b> "
-      << "<a href=\"https://" << this->hostNoPort << "\">https://" << this->hostNoPort
-      << "</a>. If using bookmarks, don't forget to re-bookmark to the secure site. ";
-    stOutput << "</body></html>";
-    return 0;
-  }
+    return this->ProcessLoginNeededOverUnsecureConnection();
   this->flagArgumentsAreOK=this->Login(argumentProcessingFailureComments);
+  this->CorrectRequestsAFTERLoginReturnFalseIfModified();
+
   //stOutput << "DEBUG: this->flagPasswordWasSubmitted: " << this->flagPasswordWasSubmitted;
   if (this->flagPasswordWasSubmitted &&
       theGlobalVariables.userCalculatorRequestType!="changePassword" &&
@@ -3550,11 +3593,14 @@ int WebWorker::ServeClient()
   if (this->flagStopIfNoLogin)
   { if (theGlobalVariables.userCalculatorRequestType=="changePassword")
       this->flagStopIfNoLogin=false;
+    if (theGlobalVariables.userCalculatorRequestType=="changePassword")
+      this->flagStopIfNoLogin=false;
   }
   if (this->flagStopIfNoLogin)
   { if(theGlobalVariables.userCalculatorRequestType!="logout" &&
        theGlobalVariables.userCalculatorRequestType!="login")
     { argumentProcessingFailureComments << "<b>Accessing: ";
+      //argumentProcessingFailureComments << "DEBUG: " << this->addressComputed;
       if (theGlobalVariables.userCalculatorRequestType!="")
         argumentProcessingFailureComments << theGlobalVariables.userCalculatorRequestType;
       else
@@ -3567,8 +3613,6 @@ int WebWorker::ServeClient()
     theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
   if (this->flagMustLogin)
     this->errorLogin=argumentProcessingFailureComments.str();
-  this->CheckRequestsAddressesReturnFalseIfModified();
-
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType=="database")
     return this->ProcessDatabase();
@@ -3673,10 +3717,12 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType=="calculator")
     return this->ProcessCalculator();
   else if (theGlobalVariables.userCalculatorRequestType=="compute")
-  { return this->ProcessCompute();
-  }
+    return this->ProcessCompute();
+  else if (theGlobalVariables.userCalculatorRequestType=="selectCourseFromHtml")
+    return this->ProcessSelectCourseFromHtml();
 //  stOutput << "<html><body> got to here pt 2";
-  this->VirtualFileName=HtmlRoutines::ConvertURLStringToNormal(this->addressComputed,true);
+
+  this->VirtualFileName=HtmlRoutines::ConvertURLStringToNormal(this->addressComputed, true);
   this->SanitizeVirtualFileName();
 //    std::cout << "GOT TO file names!" << std::endl;
   if (!FileOperations::GetPhysicalFileNameFromVirtual
@@ -3921,6 +3967,7 @@ WebServer::WebServer()
   this->requestStartsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("selectCourseFromHtml");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.6-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("MathJax-2.6-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery.min.js");
@@ -3942,6 +3989,8 @@ WebServer::WebServer()
   this->addressStartsNotNeedingLogin.AddOnTop(".well-known/");
   this->addressStartsNotNeedingLogin.AddOnTop("/selectCourse.html");
   this->addressStartsNotNeedingLogin.AddOnTop("selectCourse.html");
+  this->addressStartsNotNeedingLogin.AddOnTop("html/selectCourse.html");
+  this->addressStartsNotNeedingLogin.AddOnTop("/html/selectCourse.html");
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("html-common/");

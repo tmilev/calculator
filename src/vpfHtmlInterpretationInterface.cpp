@@ -431,6 +431,29 @@ std::string HtmlInterpretation::GetSelectCourseFromHtml()
   return out.str();
 }
 
+std::string HtmlInterpretation::GetAboutPage()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourseFromHtml");
+  std::stringstream out;
+  out << "<!DOCTYPE html>";
+  out << "<html>";
+  out << "<head>"
+  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << "</head>";
+  out << "<body>";
+  out << "<calculatorNavigation>"
+  << HtmlInterpretation::ToStringNavigation()
+  << "</calculatorNavigation>";
+  std::string theFile;
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/about.html", theFile, out, false, false))
+  { out << "<span style=\"color:red\"><b>" << "File: selectCourse.html is missing. " << "</b></span>"
+    << "<br>The file needs to be located at <br>calculator-base-folder/../public_html/selectCourse.html"
+    << "<br>i.e., the file must be in a folder named public_html, parallel to the installation folder." ;
+  } else
+    out << theFile;
+  out << "</body></html>";
+  return out.str();
+}
+
 std::string HtmlInterpretation::GetSelectCourse()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourse");
   std::stringstream out;
@@ -2005,6 +2028,11 @@ std::string HtmlInterpretation::ToStringNavigation()
     << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << " \">Calculator</a>" << linkBigSeparator;
   else
     out << "<b>Calculator</b> " << linkBigSeparator;
+  if (theGlobalVariables.userCalculatorRequestType!="about")
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=about&"
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << " \">About</a>" << linkBigSeparator;
+  else
+    out << "<b>About</b> " << linkBigSeparator;
   if (!theGlobalVariables.flagRunningApache)
   { if (theGlobalVariables.flagAllowProcessMonitoring)
     { if (!theGlobalVariables.UserDefaultHasAdminRights())

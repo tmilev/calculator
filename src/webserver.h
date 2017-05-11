@@ -188,6 +188,7 @@ public:
   int ProcessDatabaseOneEntry();
   int ProcessAccounts();
   int ProcessScores();
+  int ProcessAbout();
   int ProcessScoresInCoursePage();
   int ProcessAssignTeacherToSection();
   int ProcessExamPage();

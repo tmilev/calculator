@@ -3127,6 +3127,13 @@ int WebWorker::ProcessSelectCourse()
   return 0;
 }
 
+int WebWorker::ProcessAbout()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessAbout");
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::GetAboutPage();
+  return 0;
+}
+
 int WebWorker::ProcessSelectCourseFromHtml()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourseFromHtml");
   this->SetHeaderOKNoContentLength();
@@ -3355,12 +3362,13 @@ std::string WebWorker::GetSignUpPage()
   << "\"<span style='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
   << "   return false;\n"
   << "  }\n"
-  << "  if (grecaptcha.getResponse()==='' || grecaptcha.getResponse()===null)"
+  << "  var theToken=grecaptcha.getResponse();\n"
+  << "  if (theToken==='' || theToken===null)"
   << "  { document.getElementById('signUpResult').innerHTML="
   << "\"<span style='color:red'><b>Please don't forget to solve the captcha. </b></span>\";\n"
   << "   return false;\n"
   << "  }\n"
-  << "  theInput+=\"recapchaToken=\" +encodeURIComponent(grecaptcha.getResponse()) + \"&\";\n"
+  << "  theInput+=\"recaptchaToken=\" +encodeURIComponent(theToken) + \"&\";\n"
   << "  submitStringCalculatorArgument(theInput, 'signUpResult', null, 'signUpResultReport');\n"
   << "}\n";
   out << "</script>";
@@ -3400,7 +3408,7 @@ std::string WebWorker::GetSignUpPage()
   std::string recaptchaPublic;
   std::stringstream failStream;
   if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-public.txt", recaptchaPublic, failStream, true, true))
-    out << "<span style=\"color:red\"><b>Couldn't recaptcha site key in file: certificates/recaptcha-public.txt. </b></span>"
+    out << "<span style=\"color:red\"><b>Couldn't find the recaptcha key in file: certificates/recaptcha-public.txt. </b></span>"
     << failStream.str();
   else
     out << "<div class=\"g-recaptcha\" data-sitekey=\"" << recaptchaPublic << "\"></div>";
@@ -3720,6 +3728,9 @@ int WebWorker::ServeClient()
     return this->ProcessCompute();
   else if (theGlobalVariables.userCalculatorRequestType=="selectCourseFromHtml")
     return this->ProcessSelectCourseFromHtml();
+  else if (theGlobalVariables.userCalculatorRequestType=="about")
+  { return this->ProcessAbout();
+  }
 //  stOutput << "<html><body> got to here pt 2";
 
   this->VirtualFileName=HtmlRoutines::ConvertURLStringToNormal(this->addressComputed, true);
@@ -3957,6 +3968,7 @@ WebServer::WebServer()
   this->WebServerPingIntervalInSeconds=10;
   this->flagThisIsWorkerProcess=false;
   this->requestStartsNotNeedingLogin.AddOnTop("signUp");
+  this->requestStartsNotNeedingLogin.AddOnTop("about");
   this->requestStartsNotNeedingLogin.AddOnTop("signUpPage");
   this->requestStartsNotNeedingLogin.AddOnTop("compute");
   this->requestStartsNotNeedingLogin.AddOnTop("calculator");

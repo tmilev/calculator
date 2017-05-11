@@ -30,6 +30,7 @@ public:
   static std::string GetSelectCourse();
   static std::string GetSelectCourseFromHtml();
   static std::string GetScoresPage();
+  static std::string GetAboutPage();
   static std::string GetScoresInCoursePage();
   static std::string GetNavigationPanelWithGenerationTime();
   static std::string SubmitProblemPreview();

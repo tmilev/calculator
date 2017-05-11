@@ -442,7 +442,7 @@ void WebCrawler::FetchWebPagePart2
     *commentsGeneral << "<br>Expected length: " << this->expectedLength;
   if (commentsGeneral!=0)
     *commentsGeneral << "<br>Header:<br>" << this->headerReceived;
-  if (this->headerReceived.find("HTTP/1.1 200 OK")==std::string::npos)
+  if (this->headerReceived.find("200 OK")==std::string::npos)
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "No http ok message found. " ;
     return;
@@ -725,22 +725,28 @@ int WebWorker::ProcessSignUP()
     << ") with email ("
     << theUser.email.value
     << ") is available. </b></span>";
-  WebCrawler theCrawler;
-  theCrawler.flagDoUseGET=false;
-  theCrawler.addressToConnectTo="www.google.com/recaptcha/api/siteverify";
-  theCrawler.serverToConnectTo="www.google.com/recaptcha/api/siteverify";
-  theCrawler.portOrService="https";
   std::stringstream messageToSendStream;
   std::string secret;
   if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-secret.txt",secret,out,true, true))
   { stOutput << "<span style=\"color:red\"><b>Failed to load recaptcha secret. </b></span>" << out.str();
     return 0;
   }
+  std::string recaptchaURLencoded= theGlobalVariables.GetWebInput("recaptchaToken");
+  stOutput << "Recaptcha: " << recaptchaURLencoded;
+  if (recaptchaURLencoded=="")
+  { stOutput << "<span style=\"color:red\"><b>Recaptcha is missing. </b></span>" << out.str();
+    return 0;
+  }
   messageToSendStream << "response="
-  << theGlobalVariables.GetWebInput("recapchaToken")
+  << recaptchaURLencoded
   << "&"
   << "secret="
   << secret;
+  WebCrawler theCrawler;
+  theCrawler.flagDoUseGET=false;
+  theCrawler.addressToConnectTo="https://www.google.com/recaptcha/api/siteverify";
+  theCrawler.serverToConnectTo="www.google.com";
+  theCrawler.portOrService="https";
   theCrawler.postMessageToSend=messageToSendStream.str();
   std::stringstream fetchPageStream, errorStream;
   theCrawler.FetchWebPage( &errorStream, &fetchPageStream);

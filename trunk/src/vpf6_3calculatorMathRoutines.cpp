@@ -4017,7 +4017,15 @@ bool CalculatorFunctionsGeneral::outerMergeConstantRadicals(Calculator& theComma
     return false;
   if (input[1][2]!=input[2][2])
     return false;
-  if (!input[1][1].IsConstantNumber() || !input[2][1].IsConstantNumber())
+  if(!input[1][1].IsOfType<Rational>() &&
+     !input[1][1].IsOfType<AlgebraicNumber>()&&
+     !input[1][1].IsOfType<double>()
+    )
+    return false;
+  if(!input[2][1].IsOfType<Rational>() &&
+     !input[2][1].IsOfType<AlgebraicNumber>()&&
+     !input[2][1].IsOfType<double>()
+    )
     return false;
   Expression theProduct;
   theProduct.MakeProducT(theCommands, input[1][1], input[2][1]);

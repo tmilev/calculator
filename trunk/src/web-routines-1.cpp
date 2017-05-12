@@ -372,10 +372,10 @@ void WebCrawler::FetchWebPagePart2
 { MacroRegisterFunctionWithName("WebCrawler::FetchWebPagePart2");
   std::stringstream theMessageHeader, theContinueHeader;
   if (this->flagDoUseGET)
-  { theMessageHeader << "GET " << this->addressToConnectTo << " HTTP/1.1"
+  { theMessageHeader << "GET " << this->addressToConnectTo << " HTTP/1.0"
     << "\r\n" << "Host: " << this->serverToConnectTo << "\r\n\r\n";
   } else
-  { theMessageHeader << "POST " << this->addressToConnectTo << " HTTP/1.1"
+  { theMessageHeader << "POST " << this->addressToConnectTo << " HTTP/1.0"
     << "\r\n" << "Host: " << this->serverToConnectTo;
     theMessageHeader << "\r\nContent-length: " << this->postMessageToSend.size();
     theMessageHeader << "\r\n\r\n";
@@ -455,6 +455,7 @@ void WebCrawler::FetchWebPagePart2
   //if (this->bodyReceivedWithHeader=="")
   //{
   theContinueHeader << "HTTP/1.1 100 Continue\r\n\r\n";
+  //theContinueHeader << "\r\n\r\n";
   if (!theWebServer.theSSLdata.SSLwriteLoop
       (10, theWebServer.theSSLdata.sslClient, theContinueHeader.str(),
       commentsOnFailure, commentsGeneral, true))
@@ -481,9 +482,16 @@ void WebCrawler::FetchWebPagePart2
   //this->bodyReceived+=secondPart;
   //stOutput << tempStream.str();
   if (commentsGeneral!=0)
-    *commentsGeneral << "<br>Body (length: "
+  { *commentsGeneral << "<br>Body (length: "
     << this->bodyReceiveD.size()
     << ")<br>" << this->bodyReceiveD;
+    if (this->bodyReceivedOutsideOfExpectedLength.size()==0)
+      *commentsGeneral << "<br><span style=\"color:green\"><b>No extraneous data received</b></span>";
+    else
+      *commentsGeneral<< "<br><span style=\"color:red\"><b>Received more data than expected "
+      << "(perhaps due to a protocol error?).</b></span>"
+      << "<br>" << this->bodyReceivedOutsideOfExpectedLength;
+  }
 }
 
 bool CalculatorFunctionsGeneral::innerFetchWebPageGET(Calculator& theCommands, const Expression& input, Expression& output)
@@ -776,9 +784,11 @@ int WebWorker::ProcessSignUP()
   JSData theSuccess;
   theSuccess= theJSparser.GetValue("success");
   if (theSuccess.type!=theJSparser.JSbool || theSuccess.boolean!=true)
-  { stOutput << "<span style=\"color:red\">"
+  { stOutput << "<br><span style=\"color:red\">"
     << "<b>" << "Could not verify your captcha solution. "
     << "</b>"
+    << "The response from google was: "
+    << response
     << "</span>";
     return 0;
   }

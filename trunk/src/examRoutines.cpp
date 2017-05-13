@@ -31,7 +31,10 @@ CalculatorHTML::CalculatorHTML()
   this->flagTagHeadPresent=false;
   this->flagTagHtmlPresent=false;
   this->flagTagBodyPresent=false;
-  this->flagUseNavigationBar=true;
+  this->flagDoPrependCalculatorNavigationBar=true;
+  this->flagDoPrependProblemNavigationBar=true;
+  this->flagDoPrependEditPagePanel=true;
+
   this->timeToParseHtml=0;
   this->flagMathQuillWithMatrices=false;
   this->flagSectionsPrepared=false;
@@ -436,20 +439,26 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
     << " second(s).</small>"
     << "</calculatorNavigation>";
     if (theGlobalVariables.UserDefaultHasAdminRights())
-      out << this->GetEditPageButton(this->fileName) << "<br>";
+      out
+      << "<editPagePanel>"
+      << this->GetEditPageButton(this->fileName)
+      << "</editPagePanel>"
+      << "<br>";
     out << "<b>Failed to interpret file: " << this->fileName
     << "</b>. Comments: " << this->comments.str();
     return out.str();
   }
   //out << "DEBUG: flagMathQuillWithMatrices=" << this->flagMathQuillWithMatrices << "<br>";
-  if (this->flagUseNavigationBar)
+  if (this->flagDoPrependCalculatorNavigationBar)
   { out << "<calculatorNavigation>"
     << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in "
     << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
     << " second(s).</small>" << "</calculatorNavigation>\n"
-    << this->outputHtmlNavigatioN;
-   }
+    ;
+  }
+  if (this->flagDoPrependProblemNavigationBar)
+    out << this->outputProblemNavigatioN;
   out << this->comments.str();
   out << this->outputHtmlBodyNoTag;
   return out.str();
@@ -468,9 +477,10 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
   if (theGlobalVariables.UserGuestMode())
     needToLoadDatabaseMayIgnore=false;
   if (theGlobalVariables.flagRunningApache)
-    this->flagUseNavigationBar=(theGlobalVariables.GetWebInput("navigationBar")=="true");
-  else
-    this->flagUseNavigationBar=true;
+  { this->flagDoPrependCalculatorNavigationBar
+    =(theGlobalVariables.GetWebInput("navigationBar")=="true");
+  } else
+    this->flagDoPrependCalculatorNavigationBar=true;
   this->flagLoadedSuccessfully=true;
   if (this->fileName=="")
   { this->flagLoadedSuccessfully=false;
@@ -889,6 +899,9 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   tagClass=="calculatorJavascript" ||
   tagClass=="accountInformationLinks" ||
   tagClass=="generateTableOfContents" ||
+  tagClass== "calculatorNavigationHere" ||
+  tagClass== "calculatorProblemNavigationHere"||
+  tagClass== "calculatorEditPageHere" ||
 //  tagClass=="htmlStart" || tagClass=="htmlFinish" ||
 //  tagClass=="bodyStart" || tagClass=="bodyFinish" ||
 //  tagClass=="headStart" || tagClass=="headFinish" ||
@@ -1446,6 +1459,12 @@ void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
     this->InterpretAccountInformationLinks(inputOutput);
   else if (tagClass=="calculatorJavascript")
     this->InterpretJavascripts(inputOutput);
+  else if (tagClass=="calculatorNavigationHere")
+    this->InterpretCalculatorNavigationBar(inputOutput);
+  else if (tagClass=="calculatorProblemNavigationHere")
+    this->InterpretProblemNavigationBar(inputOutput);
+  else if (tagClass=="calculatorEditPageHere")
+    this->InterpretEditPagePanel(inputOutput);
 }
 
 std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
@@ -2024,6 +2043,9 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     this->calculatorClasses.AddOnTop("calculatorAnswerOnGiveUp");
     this->calculatorClasses.AddOnTop("calculatorExamIntermediate");
     this->calculatorClasses.AddOnTop("calculatorExamProblem");
+    this->calculatorClasses.AddOnTop("calculatorNavigationHere");
+    this->calculatorClasses.AddOnTop("calculatorProblemNavigationHere");
+    this->calculatorClasses.AddOnTop("calculatorEditPageHere");
     this->calculatorClasses.AddOnTop("calculatorManageClass");
     this->calculatorClasses.AddOnTop("setCalculatorExamProblem");
     this->calculatorClasses.AddOnTop("setCalculatorExamHome");
@@ -2602,13 +2624,6 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   { outHeadPt2 << HtmlRoutines::GetJavascriptHideHtml();
     outHeadPt2 << HtmlRoutines::GetDatePickerJavascriptInit();
   }
-  if (this->flagUseNavigationBar)
-    if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn())
-    { outBody << this->GetEditPageButton(this->fileName);
-      if (this->flagIsExamHome)
-        outBody << this->GetEditPageButton(this->topicListFileName);
-      outBody << "<br>";
-    }
   std::string problemLabel="";
   if (!this->flagIsExamHome &&
       theGlobalVariables.userCalculatorRequestType!="template" &&
@@ -2753,7 +2768,19 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   //out << "Current collection problems: " << this->databaseProblemList.ToStringCommaDelimited()
   //<< " with weights: " << this->databaseProblemWeights.ToStringCommaDelimited();
 #endif // MACRO_use_MySQL
-  this->outputHtmlNavigatioN=this->ToStringProblemNavigation();
+  std::stringstream navigationAndEditTagStream;
+  if (this->flagDoPrependProblemNavigationBar)
+    navigationAndEditTagStream << this->ToStringProblemNavigation();
+  if (this->flagDoPrependEditPagePanel)
+    if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn())
+    { navigationAndEditTagStream
+      << "<editPagePanel>"
+      << this->GetEditPageButton(this->fileName);
+      if (this->flagIsExamHome)
+        navigationAndEditTagStream << this->GetEditPageButton(this->topicListFileName);
+      navigationAndEditTagStream << "</editPagePanel>";
+    }
+  this->outputProblemNavigatioN=navigationAndEditTagStream.str();
   this->outputHtmlBodyNoTag=outBody.str();
   outHeaD << outHeadPt1.str() << outHeadPt2.str();
   this->outputHtmlHeadNoTag=outHeaD.str();
@@ -3357,6 +3384,34 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
   return true;
 }
 
+void CalculatorHTML::InterpretCalculatorNavigationBar(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretCalculatorNavigationBar");
+  std::stringstream out;
+  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
+    << "</calculatorNavigation>";
+  inputOutput.interpretedCommand=out.str();
+  this->flagDoPrependCalculatorNavigationBar=false;
+}
+
+void CalculatorHTML::InterpretProblemNavigationBar(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretCalculatorNavigationBar");
+  inputOutput.interpretedCommand=this->ToStringProblemNavigation();
+  this->flagDoPrependProblemNavigationBar=false;
+}
+
+void CalculatorHTML::InterpretEditPagePanel(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretCalculatorNavigationBar");
+  std::stringstream out;
+  out
+  << "<editPagePanel>"
+  << this->GetEditPageButton(this->fileName);
+  if (this->flagIsExamHome)
+    out << this->GetEditPageButton(this->topicListFileName);
+  out << "</editPagePanel>";
+  inputOutput.interpretedCommand=out.str();
+  this->flagDoPrependEditPagePanel=false;
+}
+
 void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTableOfContents");
   std::stringstream out;
@@ -3369,6 +3424,9 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   bool chapterStarted=false;
   out << "<!--Topic list automatically generated from topic list: " << this->topicListFileName
   << ".-->";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+  << "?request=template&fileName=" << this->fileName << "&"
+  << "topicList=" << this->topicListFileName << "&" << "\">Course</a>";
   out << "<ol>";
   for (int i=0; i<this->theTopicS.size(); i++)
   { TopicElement& currentElt=this->theTopicS.theValues[i];
@@ -3382,7 +3440,8 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
       if (currentElt.flagIsChapter)
         out << "</ol></li>";
     if (currentElt.flagIsChapter)
-    { out << "<li>" << "<a href=\"" << "template?fileName=" << this->fileName << "&"
+    { out << "<li>" << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+      << "?request=template&fileName=" << this->fileName << "&"
       << "topicList=" << this->topicListFileName << "&" << "chapter=" << currentElt.title
       << "\">" << currentElt.title << "</a>" << "<br>\n";
       chapterStarted=true;
@@ -3406,6 +3465,12 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
       << "PrintableSlides: modules/substitution-rule/pdf/printable-integral-derivative-f-over-f-intro.pdf<br>\n"
       << "\n";
   }
+  if (subSectionStarted)
+      out << "</li>";
+  if (sectionStarted)
+      out << "</ol></li>";
+  if (chapterStarted)
+      out << "</ol></li>";
   out << "</ol>";
   inputOutput.interpretedCommand=out.str();
 }

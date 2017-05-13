@@ -102,7 +102,9 @@ public:
   bool flagTagHtmlPresent;
   bool flagTagHeadPresent;
   bool flagTagBodyPresent;
-  bool flagUseNavigationBar;
+  bool flagDoPrependCalculatorNavigationBar;
+  bool flagDoPrependProblemNavigationBar;
+  bool flagDoPrependEditPagePanel;
   bool flagMathQuillWithMatrices;
   bool flagSectionsPrepared;
   bool flagIncludeStudentScores;
@@ -122,7 +124,7 @@ public:
 
   std::string outputHtmlBodyNoTag;
   std::string outputHtmlHeadNoTag;
-  std::string outputHtmlNavigatioN;
+  std::string outputProblemNavigatioN;
   std::stringstream logCommandsProblemGeneratioN;
   std::string courseHome;
   std::string topicListJavascriptWithTag;
@@ -229,6 +231,10 @@ public:
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
   void InterpretTopicList(SyntacticElementHTML& inputOutput);
   void InterpretTableOfContents(SyntacticElementHTML& inputOutput);
+  void InterpretEditPagePanel(SyntacticElementHTML& inputOutput);
+  void InterpretProblemNavigationBar(SyntacticElementHTML& inputOutput);
+  void InterpretCalculatorNavigationBar(SyntacticElementHTML& inputOutput);
+
   void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
   void InterpretJavascripts(SyntacticElementHTML& inputOutput);
   std::string GetEditPageButton(const std::string& desiredFileName);

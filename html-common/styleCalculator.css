@@ -1,7 +1,17 @@
 /*styleCalculator.css*/
+calculatorNavigation {
+  background-color: #e8e8e8;
+  display: block;
+  padding: 7px;
+  margin: 0;
+  white-space: nowrap;
+}	      
+calculatorNavigation:after{
+clear:both;
+}
 
 problemNavigation {
-  background-color: #e8e8e8;
+  background-color: #f0f0f0;
   overflow: none;
   display: block;
   padding: 7px;
@@ -12,17 +22,13 @@ problemNavigation:after{
 clear:both;
 }
 
-calculatorNavigation {
-  background-color: #f0f0f0;
-  overflow: none;
-  display: block;
-  padding: 7px;
-  margin: 0;
-  white-space: nowrap;
-}	      
-calculatorNavigation:after{
-clear:both;
+editPagePanel{
+display: inline-block;
+width: 100%;
+background-color:#fafafa;
+white-space: nowrap;
 }
+
 
 textarea{
   resize: both;

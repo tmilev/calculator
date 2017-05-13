@@ -544,16 +544,13 @@ std::string HtmlInterpretation::GetPageFromTemplate()
     out << " initializeButtonsCommon(); ";
   out <<"\"><!-- tag added automatically; user-specified body tag ignored-->\n"
   ;
-  if (theGlobalVariables.flagRunningApache)
-    thePage.flagUseNavigationBar=(theGlobalVariables.GetWebInput("navigationBar")!="false");
-  else
-    thePage.flagUseNavigationBar=true;
-  if (thePage.flagUseNavigationBar)
+  if (thePage.flagDoPrependCalculatorNavigationBar)
   { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in " << theGlobalVariables.GetElapsedSeconds()
     << " second(s).</small>" << "</calculatorNavigation>\n";
-    out << thePage.outputHtmlNavigatioN;
   }
+  if (thePage.flagDoPrependProblemNavigationBar)
+    out << thePage.outputProblemNavigatioN;
   out << thePage.outputHtmlBodyNoTag;
   out << "</body><!-- tag added automatically; user-specified body tag ignored-->\n";
   out << "</html><!-- tag added automatically; user-specified html tag ignored-->\n";

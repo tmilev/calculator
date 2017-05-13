@@ -751,8 +751,9 @@ int WebWorker::ProcessSignUP()
   << "secret="
   << secret;
   WebCrawler theCrawler;
-  theCrawler.flagDoUseGET=false;
-  theCrawler.addressToConnectTo="https://www.google.com/recaptcha/api/siteverify";
+  theCrawler.flagDoUseGET=true;
+  theCrawler.addressToConnectTo="https://www.google.com/recaptcha/api/siteverify";;
+  theCrawler.addressToConnectTo+="?"+messageToSendStream.str();
   theCrawler.serverToConnectTo="www.google.com";
   theCrawler.portOrService="https";
   theCrawler.postMessageToSend=messageToSendStream.str();
@@ -791,6 +792,13 @@ int WebWorker::ProcessSignUP()
     << response
     << "</span>";
     return 0;
+  } else
+  { stOutput << "<br><span style=\"color:green\">"
+    << "<b>" << "Your recaptcha answer appears to be valid. "
+    << "</b>"
+    << "The response from google was: "
+    << response
+    << "</span>";
   }
 
   if (!theUser.CreateMeIfUsernameUnique(theRoutines, &out))

@@ -707,6 +707,9 @@ int WebWorker::ProcessSignUP()
   theUser.email=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
   DatabaseRoutines theRoutines;
   std::stringstream out;
+  out << "Our code works just fine but may be a bit rough around the edges at the moment. "
+  << "Please excuse our verbose messages, they are just used"
+  << " for debugging and will soon be turned off. ";
   if (theUser.username=="")
   { stOutput << "<span style=\"color:red\"><b>"
     << "Empty username not allowed. "

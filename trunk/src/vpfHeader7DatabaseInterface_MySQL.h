@@ -399,9 +399,18 @@ bool FetchAllUsers
  std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers)
 
   ;
-  bool SendActivationEmail(const std::string& emailList, std::stringstream& comments);
-  bool SendActivationEmail(const List<std::string>& theEmails, std::stringstream& comments);
-  bool ExtractEmailList(const std::string& emailList, List<std::string>& outputList, std::stringstream& comments);
+  bool SendActivationEmail
+  (const std::string& emailList,
+   std::stringstream* commentsOnFailure,
+   std::stringstream* commentsGeneral,
+   std::stringstream* commentsGeneralSensitive
+  );
+  bool SendActivationEmail
+  (const List<std::string>& theEmails,
+   std::stringstream* commentsOnFailure,
+   std::stringstream* commentsGeneral,
+   std::stringstream* commentsGeneralSensitive
+  );
 
   std::string ToString();
   std::string ToStringAllUsersHTMLFormat();

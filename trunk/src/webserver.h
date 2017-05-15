@@ -203,6 +203,8 @@ public:
   int ProcessLogout();
   int ProcessSignUP();
   int ProcessSignUpPage();
+  int ProcessForgotLogin();
+  int ProcessForgotLoginPage();
   int ProcessNavigation();
   int ProcessCompute();
   int ProcessCalculatorExamples();
@@ -263,6 +265,7 @@ int recursionDepth=0)
   std::string GetClonePageResult();
   std::string GetModifyProblemReport();
   std::string GetLoginPage(const std::string& reasonForLogin="");
+  std::string GetForgotLoginPage();
   std::string GetSignUpPage();
   std::string GetLoginHTMLinternal(const std::string& reasonForLogin="");
   std::string GetAuthenticationToken(const std::string& reasonForNoAuthentication="");

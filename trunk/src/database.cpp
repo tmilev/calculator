@@ -3,6 +3,8 @@
 #include "vpfHeader7DatabaseInterface_MySQL.h"
 #include "vpfHeader5Crypto.h"
 #include "vpfHeader7DatabaseInterface_MySQL.h"
+#include "webserver.h"
+#include "vpfHeader4SystemFunctionsGlobalObjects.h"
 
 ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
 
@@ -1098,18 +1100,17 @@ bool DatabaseRoutines::FetchAllUsers
   return true;
 }
 
-bool DatabaseRoutines::ExtractEmailList(const std::string& emailList, List<std::string>& outputList, std::stringstream& comments)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::ExtractEmailList");
-  (void) comments;//portable way to avoid unused parameter warning
-  MathRoutines::StringSplitDefaultDelimiters(emailList, outputList);
-  return true;
-}
-
-bool DatabaseRoutines::SendActivationEmail(const std::string& emailList, std::stringstream& comments)
+bool DatabaseRoutines::SendActivationEmail
+(const std::string& emailList,
+ std::stringstream* commentsOnFailure,
+ std::stringstream* commentsGeneral,
+ std::stringstream* commentsGeneralSensitive
+ )
 { MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   List<std::string> theEmails;
-  this->ExtractEmailList(emailList, theEmails, comments);
-  return this->SendActivationEmail(theEmails, comments);
+  MathRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
+  return this->SendActivationEmail
+  (theEmails, commentsOnFailure, commentsGeneral, commentsGeneralSensitive);
 }
 
 bool UserCalculator::ComputeAndStoreActivationEmailAndTokens
@@ -1221,21 +1222,17 @@ bool UserCalculator::ComputeAndStoreActivationToken
   return true;
 }
 
-bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, std::stringstream& comments)
+extern WebServer theWebServer;
+
+bool DatabaseRoutines::SendActivationEmail
+( const List<std::string>& theEmails,
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneral,
+  std::stringstream* commentsGeneralSensitive
+)
 { MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
-  if (!this->ColumnExists("activationToken", DatabaseStrings::usersTableName, comments))
-    if (!this->CreateColumn("activationToken", DatabaseStrings::usersTableName, comments))
-    { comments << "Failed to create activationToken column. ";
-      return false;
-    }
-/*  if (!this->ColumnExists("activationEmailSent", "users", comments))
-    if (!this->CreateColumn("activationEmailSent", "users", comments))
-    { comments << "Failed to create activationEmailSent column. ";
-      return false;
-    }*/
   UserCalculator currentUser;
   currentUser.currentTable=DatabaseStrings::usersTableName;
-  ProgressReport theReport;
   bool result=true;
   TimeWrapper now;
   now.AssignLocalTime();
@@ -1243,29 +1240,21 @@ bool DatabaseRoutines::SendActivationEmail(const List<std::string>& theEmails, s
   std::string emailActivationLogFileName = "LogFileEmailsDebug"+now.theTimeStringNonReadable + ".html";
   logger emailActivationLogFile(theGlobalVariables.PhysicalPathHtmlFolder+emailActivationLogFileName);
   emailActivationLogFile.MaxLogSize=10000000;
+  DatabaseRoutines theRoutines;
   for (int i=0; i<theEmails.size; i++)
-  { std::stringstream reportStream;
-    reportStream << "Sending activation email, user " << i+1 << " out of " << theEmails.size;
-    emailActivationLogFile << "Sending activation email, user " << i+1 << " out of " << theEmails.size << " ... ";
-    theReport.Report(reportStream.str());
+  { emailActivationLogFile << "Sending activation email, user "
+    << i+1 << " out of " << theEmails.size << " ... ";
     currentUser.username=theEmails[i];
     currentUser.email=theEmails[i];
-    if (currentUser.actualActivationToken=="" || currentUser.actualActivationToken=="error")
-    { comments << "<span style=\"color:red\">Failed to get an activation token for user: "
-      << currentUser.username.value << "</span>";
-      continue;
-    }
-    std::stringstream localComments;
-    if (!currentUser.SendActivationEmail(*this, localComments))
-    { comments << "<span style=\"color:red\"><b>Failed to send activation email to: </b></span> "
-      << currentUser.username.value;
-      comments << localComments.str();
-      result=false;
-      emailActivationLogFile << logger::red << localComments.str() << logger::endL;
-      continue;
-    }
-    emailActivationLogFile << logger::green << " sent." << logger::endL;
+    theWebServer.GetActiveWorker().DoSetEmail
+    (theRoutines, currentUser, commentsOnFailure, commentsGeneral, commentsGeneralSensitive);
   }
+  if (commentsOnFailure!=0)
+    emailActivationLogFile << commentsOnFailure->str();
+  if (commentsGeneral!=0 && commentsOnFailure!=commentsGeneral)
+    emailActivationLogFile << commentsGeneral->str();
+  if (commentsGeneralSensitive!=0 && commentsGeneralSensitive!=commentsOnFailure)
+    emailActivationLogFile << commentsGeneralSensitive->str();
   return result;
 }
 
@@ -1432,8 +1421,8 @@ bool DatabaseRoutines::AddUsersFromEmails
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
   theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=1000;
   List<std::string> theEmails, thePasswords;
-  this->ExtractEmailList(emailList, theEmails, comments);
-  this->ExtractEmailList(userPasswords, thePasswords, comments);
+  MathRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
+  MathRoutines::StringSplitDefaultDelimiters(userPasswords, thePasswords);
   if (thePasswords.size>0)
     if (thePasswords.size!=theEmails.size)
     { comments << "Different number of usernames/emails and passwords: " << theEmails.size << " emails and "
@@ -1506,12 +1495,12 @@ bool DatabaseRoutines::AddUsersFromEmails
   if (!result)
     comments << "<br>Failed to create all users. ";
   if (doSendEmails)
-  { doSendEmails=false;
-    comments << "Sending actual emails disabled for security reasons (system not stable enough yet). ";
-  }
-  if (doSendEmails)
-    if (!this->SendActivationEmail(theEmails, comments))
+  { std::stringstream* commentsGeneralSensitive=0;
+    if (theGlobalVariables.UserDefaultHasAdminRights())
+      commentsGeneralSensitive=&comments;
+    if (!this->SendActivationEmail(theEmails, &comments, &comments, commentsGeneralSensitive))
       result=false;
+  }
   return result;
 }
 
@@ -1612,7 +1601,7 @@ bool DatabaseRoutines::innerSendActivationEmailUsers(Calculator& theCommands, co
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return theCommands << "Adding users requires admin rights. ";
   DatabaseRoutines theRoutines;
-  if (!theRoutines.SendActivationEmail(inputEmailList, theCommands.Comments))
+  if (!theRoutines.SendActivationEmail(inputEmailList, &theCommands.Comments, &theCommands.Comments, &theCommands.Comments))
     return false;
   std::stringstream out;
   out << "Successfully added students. " ;

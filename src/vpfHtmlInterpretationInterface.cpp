@@ -457,7 +457,15 @@ std::string HtmlInterpretation::GetAboutPage()
 std::string HtmlInterpretation::GetSelectCourse()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourse");
   std::stringstream out;
-  out << "<html><body>";
+  out << "<!DOCTYPE html>";
+  out << "<html>";
+  out << "<head>"
+  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << "</head>";
+  out << "<body>";
+  out << "<calculatorNavigation>"
+  << HtmlInterpretation::ToStringNavigation()
+  << "</calculatorNavigation>";
   List<std::string> theFileNames, theExtensions;
   if (!FileOperations::GetFolderFileNamesVirtual("topiclists/", theFileNames, &theExtensions))
   { out << "<b>Failed to fetch file names from topiclists/</b>. </body></html>";
@@ -467,7 +475,7 @@ std::string HtmlInterpretation::GetSelectCourse()
     if (theExtensions[i]==".txt")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=template&topicList=topiclists/" << theFileNames[i]
-    << "&fileName=pagetemplates/ace-learning-Singapore-H2.html\">"
+    << "&courseHome=pagetemplates/ace-learning-Singapore-H-syllabus-common.html\">"
     << theFileNames[i] << "</a><br>";
   out << "</body></html>";
   return out.str();

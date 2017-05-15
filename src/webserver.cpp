@@ -327,9 +327,12 @@ void WebServer::SSLServerSideHandShake()
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     return;
 //  logOpenSSL << "Initiating SSL handshake. " << logger::endL;
-  theSSLdata.HandShakeIamServer(this->GetActiveWorker().connectedSocketID);
+#ifdef MACRO_use_open_ssl
+  this->theSSLdata.HandShakeIamServer(this->GetActiveWorker().connectedSocketID);
+#endif
 }
 
+#ifdef MACRO_use_open_ssl
 bool SSLdata::flagSSLlibraryInitialized=false;
 
 void SSLdata::initSSLlibrary()
@@ -404,6 +407,7 @@ void SSLdata::initSSLserver()
 //  SSL_CTX_set_options(theSSLdata.ctx, SSL_OP_SAFARI_ECDHE_ECDSA_BUG);
 ////////
 }
+#endif
 
 //void SSLdata::initSSLclient()
 //{ this->initSSLlibrary();
@@ -417,9 +421,9 @@ void SSLdata::initSSLserver()
 //  }
 //}
 
+#ifdef MACRO_use_open_ssl
 void SSLdata::HandShakeIamServer(int inputSocketID)
 {
-#ifdef MACRO_use_open_ssl
   MacroRegisterFunctionWithName("WebServer::SSLServerSideHandShake");
 //  theLog << "Got to here 1" << logger::endL;
   this->sslServeR = SSL_new(this->contextServer);
@@ -495,8 +499,8 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
       break;
     }
   }
-#endif // MACRO_use_open_ssl
 }
+#endif // MACRO_use_open_ssl
 
 void SSLdata::DoSetSocket(int theSocket, SSL *theSSL)
 { MacroRegisterFunctionWithName("SSLdata::DoSetSocket");
@@ -4003,7 +4007,10 @@ bool WebServer::CheckConsistency()
 }
 
 void WebServer::ReleaseEverything()
-{ this->theSSLdata.FreeSSL();
+{
+#ifdef MACRO_use_open_ssl
+  this->theSSLdata.FreeSSL();
+#endif
   ProgressReportWebServer::flagServerExists=false;
   for (int i=0; i<this->theWorkers.size; i++)
     this->theWorkers[i].Release();

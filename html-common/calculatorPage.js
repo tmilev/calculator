@@ -151,6 +151,8 @@ function updateCalculatorSliderToInputBox(boxName, sliderName)
 
 function mQHelpCalculator()
 { //event.preventDefault();
+  if (calculatorMQobject===undefined)
+    return;
   getSemiColumnEnclosure();
   if (!calculatorMQobjectsInitialized)
     return;

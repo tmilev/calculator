@@ -1687,7 +1687,7 @@ D-B;\
    "\\cos{}(3.1415)",
    true, false,
    "CalculatorFunctionsGeneral::innerCos",
-   "\\cos")
+   "Cosine")
    ;
   this->AddOperationInnerHandler
   ("\\tan", CalculatorFunctionsGeneral::innerTan, "",

@@ -53,7 +53,11 @@ public:
   void PingCalculatorStatus();
   void FreeAddressInfo();
   void FetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  bool VerifyRecaptcha(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool VerifyRecaptcha
+(std::stringstream* commentsOnFailure,
+ std::stringstream* commentsGeneralNONsensitive,
+ std::stringstream* commentsGeneralSensitive)
+ ;
 };
 
 void MonitorWebServer()
@@ -697,7 +701,10 @@ bool Crypto::VerifyJWTagainstKnownKeys
    commentsOnFailure, commentsGeneral);
 }
 
-bool WebCrawler::VerifyRecaptcha(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
+bool WebCrawler::VerifyRecaptcha
+(std::stringstream* commentsOnFailure,
+ std::stringstream* commentsGeneralNONsensitive,
+ std::stringstream* commentsGeneralSensitive)
 { MacroRegisterFunctionWithName("WebCrawler::VerifyRecaptcha");
   std::stringstream messageToSendStream;
   std::string secret;
@@ -713,11 +720,11 @@ bool WebCrawler::VerifyRecaptcha(std::stringstream* commentsOnFailure, std::stri
     return false;
   }
   std::string recaptchaURLencoded= theGlobalVariables.GetWebInput("recaptchaToken");
-  if (commentsGeneral!=0)
-    *commentsGeneral << "Recaptcha: " << recaptchaURLencoded;
+  if (commentsGeneralSensitive!=0)
+    *commentsGeneralSensitive << "Recaptcha: " << recaptchaURLencoded;
   if (recaptchaURLencoded=="")
   { if (commentsOnFailure!=0)
-      *commentsOnFailure << "<span style=\"color:red\"><b>Recaptcha is missing. </b></span>";
+      *commentsOnFailure << "<span style=\"color:red\"><b>Recaptcha appears to be missing. </b></span>";
     return false;
   }
   messageToSendStream << "response="
@@ -731,7 +738,7 @@ bool WebCrawler::VerifyRecaptcha(std::stringstream* commentsOnFailure, std::stri
   this->serverToConnectTo="www.google.com";
   this->portOrService="https";
   this->postMessageToSend=messageToSendStream.str();
-  this->FetchWebPage(commentsOnFailure, commentsGeneral);
+  this->FetchWebPage(commentsOnFailure, commentsGeneralSensitive);
   std::string response=this->bodyReceiveD;
   JSData theJSparser;
   if (!theJSparser.readstring(response, commentsOnFailure))
@@ -765,13 +772,15 @@ bool WebCrawler::VerifyRecaptcha(std::stringstream* commentsOnFailure, std::stri
       << "</span>";
     return false;
   } else
-  { if (commentsGeneral!=0)
-      *commentsGeneral << "<br><span style=\"color:green\">"
+  { if (commentsGeneralNONsensitive!=0)
+      *commentsGeneralNONsensitive
+      << "<br><span style=\"color:green\">"
       << "<b>" << "Your recaptcha answer appears to be valid. "
-      << "</b>"
+      << "</b></span>\n<br>\n";
+    if (commentsGeneralSensitive!=0)
+      *commentsGeneralSensitive
       << "The response from google was: "
-      << response
-      << "</span>";
+      << response;
   }
   return true;
 }
@@ -791,7 +800,7 @@ int WebWorker::ProcessSignUP()
   << " for debugging and will soon be turned off. </b>"
   << "<br>Our code works just fine but we are still checking for unexpected bugs ...";
   WebCrawler theCrawler;
-  if (!theCrawler.VerifyRecaptcha(&out, &out))
+  if (!theCrawler.VerifyRecaptcha(&out, &out, 0))
   { stOutput << out.str();
     return 0;
   }
@@ -845,19 +854,21 @@ int WebWorker::ProcessForgotLogin()
   DatabaseRoutines theRoutines;
   WebCrawler theCrawler;
   std::stringstream out;
-  if (!theCrawler.VerifyRecaptcha(&out, &out))
+  out << "<br><b> "
+  << "Please excuse our verbose technical messages. </b>"
+  << "<br><b>We are still testing our system; "
+  << "we will remove the technical garbage as soon as we are done. "
+  << "</b><br>\n"
+;
+  if (!theCrawler.VerifyRecaptcha(&out, &out, 0))
   { stOutput << out.str();
     return 0;
   }
-  out << "<br><b> "
-  << "Please excuse our verbose messages, they are used"
-  << " for debugging and will soon be turned off. </b>"
-  << "<br>Our code works just fine but we are still checking for unexpected bugs ...<br>";
   if (!theRoutines.FetchEntry
       ((std::string)"email", theUser.email,
        (std::string) "emailActivationStats", (std::string)"usernameAssociatedWithToken",
         theUser.username.value, &out))
-  { out << "<span style=\"color:red\"><b>"
+  { out << "<br><span style=\"color:red\"><b>"
     << "We failed to find your email in our records. "
     << "</b></span>";
     stOutput << out.str();
@@ -870,10 +881,10 @@ int WebWorker::ProcessForgotLogin()
     << " which is supposed to be associated with it. This should be an error. "
     << "</b></span>";
     return 0;
-  } else
-    stOutput << "<span style=\"color:green\"><b>"
-    << "Your email is on record. "
-    << "</b></span>";
+  }
+  stOutput << "<span style=\"color:green\"><b>"
+  << "Your email is on record. "
+  << "</b></span>";
   this->DoSetEmail(theRoutines, theUser, &out, &out, 0);
   stOutput << out.str();
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "

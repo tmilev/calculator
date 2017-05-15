@@ -1159,18 +1159,30 @@ bool UserCalculator::ComputeAndStoreActivationEmailAndTokens
     if (commentsGeneral!=0)
       *commentsGeneral
       << "<br>Last activation on this email: "
-      << lastActivationOnThisEmail.ToStringHumanReadable()
+      << lastActivationOnThisEmail.ToStringHumanReadable() << ".\n"
       << "<br>Last activation on this account: "
-      << lastActivationOnThisEmail.ToStringHumanReadable();
+      << lastActivationOnThisEmail.ToStringHumanReadable() << ".\n";
   }
   if (commentsGeneral!=0)
     *commentsGeneral
     << "<br>Total activations (attempted on) this email: "
-    << numActivationsThisEmail.ToString();
-  if (!theRoutines.SetEntry
-      (DatabaseStrings::userId, this->userId, DatabaseStrings::usersTableName,
-       (std::string) "activationTokenCreationTime", now.ToString(), commentsOnFailure))
+    << numActivationsThisEmail.ToString() << ".\n <br>\n";
+  if (this->userId.value!="")
+  { if (!theRoutines.SetEntry
+        (DatabaseStrings::userId, this->userId, DatabaseStrings::usersTableName,
+         (std::string) "activationTokenCreationTime", now.ToString(), commentsOnFailure))
+      return false;
+  } else if (this->username.value!="")
+  { if (!theRoutines.SetEntry
+        (DatabaseStrings::userColumnLabel, this->username, DatabaseStrings::usersTableName,
+         (std::string) "activationTokenCreationTime", now.ToString(), commentsOnFailure))
+      return false;
+  } else
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure
+      << "This shouldn't happen: both the username and the user id are empty. ";
     return false;
+  }
   if (!theRoutines.SetEntry
       ((std::string) "email", this->email, (std::string) "emailActivationStats",
        (std::string) "lastActivationEmailTime",

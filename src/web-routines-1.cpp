@@ -17,7 +17,6 @@
 
 #include "vpfHeader7DatabaseInterface_MySQL.h"
 
-
 extern WebServer theWebServer;
 ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
 
@@ -54,6 +53,7 @@ public:
   void PingCalculatorStatus();
   void FreeAddressInfo();
   void FetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool VerifyRecaptcha(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
 };
 
 void MonitorWebServer()
@@ -697,6 +697,85 @@ bool Crypto::VerifyJWTagainstKnownKeys
    commentsOnFailure, commentsGeneral);
 }
 
+bool WebCrawler::VerifyRecaptcha(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
+{ MacroRegisterFunctionWithName("WebCrawler::VerifyRecaptcha");
+  std::stringstream messageToSendStream;
+  std::string secret;
+  std::stringstream notUsed;
+  if (commentsOnFailure==0)
+    commentsOnFailure=&notUsed;
+  if (!FileOperations::LoadFileToStringVirtual
+      ("certificates/recaptcha-secret.txt", secret, *commentsOnFailure, true, true))
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "<span style=\"color:red\"><b>"
+      << "Failed to load recaptcha secret."
+      << " </b></span>";
+    return false;
+  }
+  std::string recaptchaURLencoded= theGlobalVariables.GetWebInput("recaptchaToken");
+  if (commentsGeneral!=0)
+    *commentsGeneral << "Recaptcha: " << recaptchaURLencoded;
+  if (recaptchaURLencoded=="")
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "<span style=\"color:red\"><b>Recaptcha is missing. </b></span>";
+    return false;
+  }
+  messageToSendStream << "response="
+  << recaptchaURLencoded
+  << "&"
+  << "secret="
+  << secret;
+  this->flagDoUseGET=true;
+  this->addressToConnectTo="https://www.google.com/recaptcha/api/siteverify";;
+  this->addressToConnectTo+="?"+messageToSendStream.str();
+  this->serverToConnectTo="www.google.com";
+  this->portOrService="https";
+  this->postMessageToSend=messageToSendStream.str();
+  this->FetchWebPage(commentsOnFailure, commentsGeneral);
+  std::string response=this->bodyReceiveD;
+  JSData theJSparser;
+  if (!theJSparser.readstring(response, commentsOnFailure))
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "<span style=\"color:red\">"
+      << "<b>" << "Failed to extract response token from captcha verification. "
+      << "</b>"
+      << " <br>The response string was: "
+      << response
+      << "</span>";
+    return 0;
+  }
+  if (!theJSparser.HasKey("success"))
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure
+      << "<span style=\"color:red\">"
+      << "<b>" << "Captcha failure: could not find key 'success'."
+      << "</b>"
+      << "</span>";
+    return false;
+  }
+  JSData theSuccess;
+  theSuccess= theJSparser.GetValue("success");
+  if (theSuccess.type!=theJSparser.JSbool || theSuccess.boolean!=true)
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "<br><span style=\"color:red\">"
+      << "<b>" << "Could not verify your captcha solution. "
+      << "</b>"
+      << "The response from google was: "
+      << response
+      << "</span>";
+    return false;
+  } else
+  { if (commentsGeneral!=0)
+      *commentsGeneral << "<br><span style=\"color:green\">"
+      << "<b>" << "Your recaptcha answer appears to be valid. "
+      << "</b>"
+      << "The response from google was: "
+      << response
+      << "</span>";
+  }
+  return true;
+}
+
 int WebWorker::ProcessSignUP()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
   //double startTime=theGlobalVariables.GetElapsedSeconds();
@@ -711,6 +790,11 @@ int WebWorker::ProcessSignUP()
   << "Please excuse our verbose messages, they are used"
   << " for debugging and will soon be turned off. </b>"
   << "<br>Our code works just fine but we are still checking for unexpected bugs ...";
+  WebCrawler theCrawler;
+  if (!theCrawler.VerifyRecaptcha(&out, &out))
+  { stOutput << out.str();
+    return 0;
+  }
   if (theUser.username=="")
   { stOutput << "<span style=\"color:red\"><b>"
     << "Empty username not allowed. "
@@ -737,74 +821,6 @@ int WebWorker::ProcessSignUP()
     << ") with email ("
     << theUser.email.value
     << ") is available. </b></span>";
-  std::stringstream messageToSendStream;
-  std::string secret;
-  if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-secret.txt",secret,out,true, true))
-  { stOutput << "<span style=\"color:red\"><b>Failed to load recaptcha secret. </b></span>" << out.str();
-    return 0;
-  }
-  std::string recaptchaURLencoded= theGlobalVariables.GetWebInput("recaptchaToken");
-  stOutput << "Recaptcha: " << recaptchaURLencoded;
-  if (recaptchaURLencoded=="")
-  { stOutput << "<span style=\"color:red\"><b>Recaptcha is missing. </b></span>" << out.str();
-    return 0;
-  }
-  messageToSendStream << "response="
-  << recaptchaURLencoded
-  << "&"
-  << "secret="
-  << secret;
-  WebCrawler theCrawler;
-  theCrawler.flagDoUseGET=true;
-  theCrawler.addressToConnectTo="https://www.google.com/recaptcha/api/siteverify";;
-  theCrawler.addressToConnectTo+="?"+messageToSendStream.str();
-  theCrawler.serverToConnectTo="www.google.com";
-  theCrawler.portOrService="https";
-  theCrawler.postMessageToSend=messageToSendStream.str();
-  std::stringstream fetchPageStream, errorStream;
-  theCrawler.FetchWebPage( &errorStream, &fetchPageStream);
-  std::string response=theCrawler.bodyReceiveD;
-  JSData theJSparser;
-  if (!theJSparser.readstring(response, &errorStream))
-  { stOutput << "<span style=\"color:red\">"
-    << "<b>" << "Failed to extract response token from captcha verification. "
-    << "</b>"
-    << errorStream.str()
-    << " <br>The response string was: "
-    << response
-    << " obtained by: "
-    << fetchPageStream.str()
-    << " with error stream: "
-    << errorStream.str()
-    << "</span>";
-    return 0;
-  }
-  if (!theJSparser.HasKey("success"))
-  { stOutput << "<span style=\"color:red\">"
-    << "<b>" << "Captcha failure: could not find key: "
-    << "</b>"
-    << "</span>";
-    return 0;
-  }
-  JSData theSuccess;
-  theSuccess= theJSparser.GetValue("success");
-  if (theSuccess.type!=theJSparser.JSbool || theSuccess.boolean!=true)
-  { stOutput << "<br><span style=\"color:red\">"
-    << "<b>" << "Could not verify your captcha solution. "
-    << "</b>"
-    << "The response from google was: "
-    << response
-    << "</span>";
-    return 0;
-  } else
-  { stOutput << "<br><span style=\"color:green\">"
-    << "<b>" << "Your recaptcha answer appears to be valid. "
-    << "</b>"
-    << "The response from google was: "
-    << response
-    << "</span>";
-  }
-
   if (!theUser.CreateMeIfUsernameUnique(theRoutines, &out))
   { stOutput << out.str();
     return 0;
@@ -813,6 +829,52 @@ int WebWorker::ProcessSignUP()
   if (theGlobalVariables.UserDefaultHasAdminRights())
     adminOutputStream=&out;
   this->DoSetEmail(theRoutines, theUser, &out, &out, adminOutputStream);
+  stOutput << out.str();
+  stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
+  << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
+  return 0;
+}
+
+int WebWorker::ProcessForgotLogin()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessForgotLogin");
+  //double startTime=theGlobalVariables.GetElapsedSeconds();
+  this->SetHeaderOKNoContentLength();
+  DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
+  UserCalculator theUser;
+  theUser.email=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
+  DatabaseRoutines theRoutines;
+  WebCrawler theCrawler;
+  std::stringstream out;
+  if (!theCrawler.VerifyRecaptcha(&out, &out))
+  { stOutput << out.str();
+    return 0;
+  }
+  out << "<br><b> "
+  << "Please excuse our verbose messages, they are used"
+  << " for debugging and will soon be turned off. </b>"
+  << "<br>Our code works just fine but we are still checking for unexpected bugs ...<br>";
+  if (!theRoutines.FetchEntry
+      ((std::string)"email", theUser.email,
+       (std::string) "emailActivationStats", (std::string)"usernameAssociatedWithToken",
+        theUser.username.value, &out))
+  { out << "<span style=\"color:red\"><b>"
+    << "We failed to find your email in our records. "
+    << "</b></span>";
+    stOutput << out.str();
+    return 0;
+  }
+  if (!theUser.Iexist(theRoutines, &out))
+  { stOutput << "<span style=\"color:red\"><b>"
+    << "We have your email on record but we can't find the username: "
+    << theUser.username.value
+    << " which is supposed to be associated with it. This should be an error. "
+    << "</b></span>";
+    return 0;
+  } else
+    stOutput << "<span style=\"color:green\"><b>"
+    << "Your email is on record. "
+    << "</b></span>";
+  this->DoSetEmail(theRoutines, theUser, &out, &out, 0);
   stOutput << out.str();
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
   << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";

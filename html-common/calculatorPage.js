@@ -15,7 +15,7 @@ var calculatorInputBoxToSliderUpdaters=new Object;
 var calculatorInputBoxNames=[];
 var numInsertedJavascriptChildren=0;
 var calculatorCanvases;
-var keyWordsKnownToMathQuill=['sqrt', 'frac', 'cdot', 'left', 'right', 'infty'];
+var keyWordsKnownToMathQuill=['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times'];
 function initializeCalculatorVariables()
 { answerIdsPureLatex=['mainInputID'];
   answerMQspanIds=['mainInputMQfield'];
@@ -152,6 +152,8 @@ function updateCalculatorSliderToInputBox(boxName, sliderName)
 function mQHelpCalculator()
 { //event.preventDefault();
   getSemiColumnEnclosure();
+  if (!calculatorMQobjectsInitialized)
+    return;
   ignoreNextMathQuillUpdateEvent=true;
   if (calculatorMQStringIsOK)
     calculatorMQobject.latex(calculatorMQString);

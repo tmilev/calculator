@@ -912,7 +912,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     this->displayUserInput=this->error;
     return false;
   }
-  this->remainingBytesToSenD=(std::string) "HTTP/1.1 100 Continue\r\n\r\n";
+  this->remainingBytesToSenD=(std::string) "HTTP/1.0 100 Continue\r\n\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
@@ -1729,7 +1729,7 @@ bool WebWorker::ReceiveAllHttp()
     this->displayUserInput=this->error;
     return false;
   }
-  this->remainingBytesToSenD=(std::string) "HTTP/1.1 100 Continue\r\n\r\n";
+  this->remainingBytesToSenD=(std::string) "HTTP/1.0 100 Continue\r\n\r\n";
   this->SendAllBytesNoHeaders();
   this->remainingBytesToSenD.SetSize(0);
   std::string bufferString;
@@ -2627,6 +2627,8 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "</form>";
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
+  out << "<br><a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=forgotLoginPage\">"
+  << "Forgot login/password?</a>";
   /////////////////////////
   out << "<hr><a href=\""
   << theGlobalVariables.DisplayNameExecutable << "?request=signUpPage"
@@ -3102,6 +3104,15 @@ int WebWorker::ProcessChangePasswordPage()
   return 0;
 }
 
+int WebWorker::ProcessForgotLoginPage()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessForgotLoginPage");
+  this->SetHeaderOKNoContentLength();
+  DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
+  theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
+  stOutput << this->GetForgotLoginPage();
+  return 0;
+}
+
 int WebWorker::ProcessSignUpPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSignUpPage");
   this->SetHeaderOKNoContentLength();
@@ -3341,6 +3352,80 @@ int WebWorker::ProcessSubmitProblem()
   return 0;
 }
 
+std::string HtmlInterpretation::GetJavascriptCaptcha()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetCaptchaJavascript");
+  std::stringstream out;
+  out << "<script src='https://www.google.com/recaptcha/api.js'></script>";
+  return out.str();
+}
+
+std::string HtmlInterpretation::GetCaptchaDiv()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetCaptchaDiv");
+  std::stringstream out;
+  std::string recaptchaPublic;
+  if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-public.txt", recaptchaPublic, out, true, true))
+    out << "<span style=\"color:red\"><b>Couldn't find the recaptcha key in file: certificates/recaptcha-public.txt. </b></span>";
+  else
+    out << "<div class=\"g-recaptcha\" data-sitekey=\"" << recaptchaPublic << "\"></div>";
+  return out.str();
+}
+
+std::string WebWorker::GetForgotLoginPage()
+{ MacroRegisterFunctionWithName("WebWorker::GetForgotLoginPage");
+  std::stringstream out;
+  out << "<html>"
+  << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
+  << HtmlRoutines::GetJavascriptHideHtml()
+  << HtmlRoutines::GetCalculatorStyleSheetWithTags();
+  out << HtmlInterpretation::GetJavascriptCaptcha();
+  out << "<script language=\"javascript\">\n";
+  out << "function submitForgotLogin()\n";
+  out << "{";
+  out
+  << "  var theInput=\"request=forgotLogin&\";\n"
+  << "  theInput+=\"email=\" +encodeURIComponent(document.getElementById('email').value) + \"&\";\n"
+  << "  if (grecaptcha===undefined || grecaptcha===null)\n"
+  << "  { document.getElementById('forgotLoginResult').innerHTML="
+  << "\"<span style='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
+  << "   return false;\n"
+  << "  }\n"
+  << "  var theToken=grecaptcha.getResponse();\n"
+  << "  if (theToken==='' || theToken===null)"
+  << "  { document.getElementById('forgotLoginResult').innerHTML="
+  << "\"<span style='color:red'><b>Please don't forget to solve the captcha. </b></span>\";\n"
+  << "   return false;\n"
+  << "  }\n"
+  << "  theInput+=\"recaptchaToken=\" +encodeURIComponent(theToken) + \"&\";\n"
+  << "  submitStringCalculatorArgument(theInput, 'forgotLoginResult', null, 'forgotLoginResultReport');\n"
+  << "}\n";
+  out << "</script>";
+
+  out << "<body>\n";
+  out << "<calculatorNavigation>"
+  << theGlobalVariables.ToStringNavigation()
+  << "</calculatorNavigation>\n";
+  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
+  out << "<form name=\"forgotTheLogin\" id=\"login\">";
+  out << "<table>"
+  << "<tr>"
+  << "<td> Email:</td>"
+  << "<td> <input type=\"text\" id=\"email\" name=\"email\" placeholder=\"email\">\n</td>\n"
+  << "</tr>"
+  << "</table>"
+  ;
+  out << HtmlInterpretation::GetCaptchaDiv();
+  out << "</form>";
+  out << "<button onclick=\"submitForgotLogin();\">Send recovery email</button>"
+  << "<span id=\"forgotLoginResultReport\"></span>"
+  << "\n<br>\n"
+  << "<span id=\"forgotLoginResult\"></span>"
+  ;
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  out << "</body></html>";
+
+  return out.str();
+}
+
 std::string WebWorker::GetSignUpPage()
 { MacroRegisterFunctionWithName("WebWorker::GetSignUpPage");
   std::stringstream out;
@@ -3372,7 +3457,7 @@ std::string WebWorker::GetSignUpPage()
   << "  submitStringCalculatorArgument(theInput, 'signUpResult', null, 'signUpResultReport');\n"
   << "}\n";
   out << "</script>";
-  out << "<script src='https://www.google.com/recaptcha/api.js'></script>";
+  out << HtmlInterpretation::GetJavascriptCaptcha();
   out << "<body>\n";
   out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</calculatorNavigation>\n";
@@ -3405,13 +3490,7 @@ std::string WebWorker::GetSignUpPage()
 //  << "</tr>"
   << "</table>"
   ;
-  std::string recaptchaPublic;
-  std::stringstream failStream;
-  if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-public.txt", recaptchaPublic, failStream, true, true))
-    out << "<span style=\"color:red\"><b>Couldn't find the recaptcha key in file: certificates/recaptcha-public.txt. </b></span>"
-    << failStream.str();
-  else
-    out << "<div class=\"g-recaptcha\" data-sitekey=\"" << recaptchaPublic << "\"></div>";
+  out << HtmlInterpretation::GetCaptchaDiv();
   out << "</form>";
   out << "<button onclick=\"submitSignUpInfo();\">Sign up</button>"
   << "<span id=\"signUpResultReport\"></span>"
@@ -3667,6 +3746,10 @@ int WebWorker::ServeClient()
     return this->ProcessSignUP();
   else if (theGlobalVariables.userCalculatorRequestType=="signUpPage")
     return this->ProcessSignUpPage();
+  else if (theGlobalVariables.userCalculatorRequestType=="forgotLogin")
+    return this->ProcessForgotLogin();
+  else if (theGlobalVariables.userCalculatorRequestType=="forgotLoginPage")
+    return this->ProcessForgotLoginPage();
   else if (theGlobalVariables.userCalculatorRequestType=="login")
     return this->ProcessLoginPage();
   else if (theGlobalVariables.userCalculatorRequestType=="logout")
@@ -3967,9 +4050,11 @@ WebServer::WebServer()
   this->NumWorkersNormallyExited=0;
   this->WebServerPingIntervalInSeconds=10;
   this->flagThisIsWorkerProcess=false;
-  this->requestStartsNotNeedingLogin.AddOnTop("signUp");
   this->requestStartsNotNeedingLogin.AddOnTop("about");
+  this->requestStartsNotNeedingLogin.AddOnTop("signUp");
   this->requestStartsNotNeedingLogin.AddOnTop("signUpPage");
+  this->requestStartsNotNeedingLogin.AddOnTop("forgotLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("forgotLoginPage");
   this->requestStartsNotNeedingLogin.AddOnTop("compute");
   this->requestStartsNotNeedingLogin.AddOnTop("calculator");
   this->requestStartsNotNeedingLogin.AddOnTop("calculatorExamples");

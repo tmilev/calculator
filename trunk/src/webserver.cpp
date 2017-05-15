@@ -3379,6 +3379,10 @@ std::string WebWorker::GetForgotLoginPage()
   << HtmlRoutines::GetCalculatorStyleSheetWithTags();
   out << HtmlInterpretation::GetJavascriptCaptcha();
   out << "<script language=\"javascript\">\n";
+  out
+  << "function resetRecaptchaOnLoad()\n"
+  << "{ grecaptcha.reset();\n"
+  << "}\n";
   out << "function submitForgotLogin()\n";
   out << "{";
   out
@@ -3401,7 +3405,7 @@ std::string WebWorker::GetForgotLoginPage()
   << "   return false;\n"
   << "  }\n"
   << "  theInput+=\"recaptchaToken=\" +encodeURIComponent(theToken) + \"&\";\n"
-  << "  submitStringCalculatorArgument(theInput, 'forgotLoginResult', null, 'forgotLoginResultReport');\n"
+  << "  submitStringCalculatorArgument(theInput, 'forgotLoginResult', resetRecaptchaOnLoad, 'forgotLoginResultReport');\n"
   << "}\n";
   out << "</script>";
 
@@ -3439,6 +3443,10 @@ std::string WebWorker::GetSignUpPage()
   << HtmlRoutines::GetJavascriptHideHtml()
   << HtmlRoutines::GetCalculatorStyleSheetWithTags();
   out << "<script language=\"javascript\">\n";
+  out
+  << "function resetRecaptchaOnLoad()\n"
+  << "{ grecaptcha.reset();\n"
+  << "}\n";
   out << "function submitSignUpInfo()\n";
   out << "{";
 //  << " document.getElementById('desiredAccount')"
@@ -3456,10 +3464,10 @@ std::string WebWorker::GetSignUpPage()
   << "  if (theToken==='' || theToken===null)"
   << "  { document.getElementById('signUpResult').innerHTML="
   << "\"<span style='color:red'><b>Please don't forget to solve the captcha. </b></span>\";\n"
-  << "   return false;\n"
+  << "    return false;\n"
   << "  }\n"
   << "  theInput+=\"recaptchaToken=\" +encodeURIComponent(theToken) + \"&\";\n"
-  << "  submitStringCalculatorArgument(theInput, 'signUpResult', null, 'signUpResultReport');\n"
+  << "  submitStringCalculatorArgument(theInput, 'signUpResult', resetRecaptchaOnLoad, 'signUpResultReport');\n"
   << "}\n";
   out << "</script>";
   out << HtmlInterpretation::GetJavascriptCaptcha();
@@ -3816,6 +3824,8 @@ int WebWorker::ServeClient()
     return this->ProcessCompute();
   else if (theGlobalVariables.userCalculatorRequestType=="selectCourseFromHtml")
     return this->ProcessSelectCourseFromHtml();
+  else if (theGlobalVariables.userCalculatorRequestType=="selectCourse")
+    return this->ProcessSelectCourse();
   else if (theGlobalVariables.userCalculatorRequestType=="about")
   { return this->ProcessAbout();
   }
@@ -4957,7 +4967,7 @@ int WebWorker::Run()
     if (this->connectedSocketID==-1)
       break;
     this->SendAllBytesWithHeaders();
-    double fixthis;
+//    double fixthis;
     if (!this->flagKeepAlive || true)
       break;
   }

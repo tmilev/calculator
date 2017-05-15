@@ -3449,7 +3449,7 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
   << "?request=template&fileName=" << this->fileName << "&"
   << "topicList=" << this->topicListFileName << "&" << "\">Course</a>";
-  out << "<ol>";
+  out << "<ul>";
   for (int i=0; i<this->theTopicS.size(); i++)
   { TopicElement& currentElt=this->theTopicS.theValues[i];
     if (subSectionStarted)
@@ -3457,10 +3457,10 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
         out << "</li>";
     if (sectionStarted)
       if (currentElt.flagIsSection || currentElt.flagIsChapter)
-        out << "</ol></li>";
+        out << "</ul></li>";
     if (chapterStarted)
       if (currentElt.flagIsChapter)
-        out << "</ol></li>";
+        out << "</ul></li>";
     if (currentElt.flagIsChapter)
     { out << "<li>" << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=template&fileName=" << this->fileName << "&"
@@ -3469,12 +3469,12 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
       chapterStarted=true;
       sectionStarted=false;
       subSectionStarted=false;
-      out << "<ol>";
+      out << "<ul>";
     } else if (currentElt.flagIsSection)
     { out << "<li>" << currentElt.title << "<br>\n";
       sectionStarted=true;
       subSectionStarted=false;
-      out << "<ol>";
+      out << "<ul>";
     } else if (currentElt.flagIsError)
       out << "Error parsing topic list. Could not make sense of: " << currentElt.error << ". "
       << "The allowed data labels are CASE SENSITIVE: "
@@ -3490,10 +3490,10 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   if (subSectionStarted)
       out << "</li>";
   if (sectionStarted)
-      out << "</ol></li>";
+      out << "</ul></li>";
   if (chapterStarted)
-      out << "</ol></li>";
-  out << "</ol>";
+      out << "</ul></li>";
+  out << "</ul>";
   inputOutput.interpretedCommand=out.str();
 }
 

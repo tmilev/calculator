@@ -865,8 +865,8 @@ int WebWorker::ProcessForgotLogin()
     return 0;
   }
   if (!theRoutines.FetchEntry
-      ((std::string)"email", theUser.email,
-       (std::string) "emailActivationStats", (std::string)"usernameAssociatedWithToken",
+      ((std::string) "email", theUser.email,
+       (std::string) "emailActivationStats", (std::string) "usernameAssociatedWithToken",
         theUser.username.value, &out))
   { out << "<br><span style=\"color:red\"><b>"
     << "We failed to find your email in our records. "

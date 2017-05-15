@@ -519,7 +519,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
     << HtmlRoutines::GetCalculatorStyleSheetWithTags()
     << "<body>"
     << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
-    << "<b>Failed to interpret file: "
+    << "<b>Failed to interpret as template the following file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
     << "<br>Comments:<br> " << comments.str() << "</body></html>";
     return out.str();

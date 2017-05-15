@@ -182,6 +182,7 @@ public:
   std::string GetProblemHeaderWithoutEnclosure();
   bool SetTagClassFromOpenTag(SyntacticElementHTML& output);
   bool SetTagClassFromCloseTag(SyntacticElementHTML& output);
+  bool StoreRandomSeedCurrent(std::stringstream& commentsOnFailure);
 
   bool PrepareCommands(std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);

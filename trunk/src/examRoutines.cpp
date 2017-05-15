@@ -445,7 +445,21 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
       << "</editPagePanel>"
       << "<br>";
     out << "<b>Failed to interpret file: " << this->fileName
-    << "</b>. Comments: " << this->comments.str();
+    << "</b>. ";
+    out << "<br>We limit the number of generation attemps to 10 for performance reasons; "
+    << "with bad luck, some finicky problems require more. "
+    << "<br> <b>Please refresh the page.</b><br>";
+    if (!this->flagIsForReal)
+      out
+      << "If you specified the problem through the 'problem link' link,"
+      << " please go back to the course page. Alternatively, remove the randomSeed=... "
+      << "portion of the page address and reload the page (with the randomSeed portion removed). ";
+    else
+      out << "<b>Your random seed must have been reset. </b>";
+    out << "<br><span style=\"color:red\"><b>If the problem persists after a couple of page refreshes, "
+    << "it's a bug. Please take a screenshot and email the site admin/your instructor. </b></span>";
+    if (theGlobalVariables.UserDefaultHasProblemComposingRights())
+      out << "<hr> <b>Comments, admin view only.</b><br> " << this->comments.str();
     return out.str();
   }
   //out << "DEBUG: flagMathQuillWithMatrices=" << this->flagMathQuillWithMatrices << "<br>";
@@ -1893,6 +1907,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
     this->timeIntermediateComments.LastObject()->SetSize(0);
     Calculator theInterpreter;
     this->NumAttemptsToInterpret++;
+//    stOutput << "DEBUG: Interpretation attempt #: " << this->NumAttemptsToInterpret;
 //    stOutput << "DEBUG: flagPlotNoControls: " << theInterpreter.flagPlotNoControls;
     std::stringstream commentsOnLastFailure;
     if (this->InterpretHtmlOneAttempt(theInterpreter, commentsOnLastFailure))
@@ -1902,18 +1917,17 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
     }
     this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
     if (this->NumAttemptsToInterpret>=this->MaxInterpretationAttempts)
-    { std::stringstream out;
       comments << commentsOnLastFailure.str();
-      out << "Failed to evaluate the commands: " << this->NumAttemptsToInterpret
-      << " attempts made. Calculator evaluation details follow.<hr> "
-      << theInterpreter.outputString << "<hr><b>Comments</b><br>"
-      << theInterpreter.Comments.str();
-      this->outputHtmlBodyNoTag=out.str();
-      return false;
-    }
+  }
+  comments << "<hr>Failed to evaluate the commands: " << this->NumAttemptsToInterpret
+  << " attempts made. "
+  ;
+  if (this->flagIsForReal)
+  { this->StoreRandomSeedCurrent(comments);
+    comments << "<b>Your random seed has been reset due to a finicky problem generation. </b>";
   }
   this->theProblemData.CheckConsistency();
-  return true;
+  return false;
 }
 
 bool CalculatorHTML::IsSplittingChar(const std::string& input)
@@ -2598,12 +2612,29 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
   return out.str();
 }
 
+bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("CalculatorHTML::StoreRandomSeedCurrent");
+  this->theProblemData.flagRandomSeedGiven=true;
+  DatabaseRoutines theRoutines;
+  this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
+  if (!this->currentUseR.StoreProblemDataToDatabase(theRoutines, commentsOnFailure))
+  { commentsOnFailure << "<span style=\"color:red\"> <b>"
+    << "Error: failed to store problem in database. "
+    << "If you see this message, please take a screenshot and email your instructor. "
+    << "</b></span>";
+    return false;
+  }
+  return true;
+}
+
 bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtmlOneAttempt");
   double startTime=theGlobalVariables.GetElapsedSeconds();
   std::stringstream outBody;
   std::stringstream outHeaD, outHeadPt1, outHeadPt2;
-  this->flagIsExamHome=(theGlobalVariables.userCalculatorRequestType=="template" || theGlobalVariables.userCalculatorRequestType=="templateNoLogin");
+  this->flagIsExamHome=
+  theGlobalVariables.userCalculatorRequestType=="template" ||
+  theGlobalVariables.userCalculatorRequestType=="templateNoLogin";
   this->theProblemData.randomSeed=this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret-1];
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
@@ -2725,7 +2756,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     << "<hr><span style=\"color:red\"><b>"
     << "Your problem's random seed was just reset. </b></span> "
     << "You should be seeing this message very rarely, "
-    << "<b>ONLY IF </b> your problem was changed by your instructor "
+    << "<b>ONLY IF</b> your problem was changed by your instructor "
     << "<b>AFTER</b> you started solving it. "
     << "You should not be seeing this message a second time. "
     << "<span style=\"color:red\"><b>If you see this message every "
@@ -2733,17 +2764,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     << "this is a bug. Please take a screenshot and send it to your instructor. </b></span>";
   }
   if (shouldResetTheRandomSeed)
-  { //stOutput << "This is for real!<br>";
-    this->theProblemData.flagRandomSeedGiven=true;
-    DatabaseRoutines theRoutines;
-    //this->currentUser.username=theGlobalVariables.userDefault;
-    //stOutput << "About to store problem data: " << this->theProblemData.ToString();
-    //if (!this->currentUser.InterpretDatabaseProblemData(this->currentUserDatabaseString, comments))
-      //out << "<b>Error: corrupt database string. </b>";
-    //else
-    this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
-    if (!this->currentUseR.StoreProblemDataToDatabase(theRoutines, comments))
-      outBody << "<b>Error: failed to store problem in database. </b>" << comments.str();
+  { this->StoreRandomSeedCurrent(comments);
+    //stOutput << "This is for real!<br>";
   }
   if (theGlobalVariables.UserDebugFlagOn() &&
       theGlobalVariables.UserDefaultHasAdminRights())

@@ -285,6 +285,7 @@ void WebServer::initSSL()
 #endif // MACRO_use_open_ssl
 }
 
+#ifdef MACRO_use_open_ssl
 SSLdata::~SSLdata()
 { this->FreeSSL();
   this->FreeContext();
@@ -840,6 +841,7 @@ void SSLdata::ClearErrorQueue
   //}
 #endif
 }
+#endif //MACRO_use_open_ssl
 
 bool WebWorker::ReceiveAllHttpSSL()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAllHttpSSL");
@@ -2678,6 +2680,7 @@ std::string WebWorker::GetChangePasswordPage()
   out << HtmlRoutines::GetCalculatorStyleSheetWithTags();
   out << "</head>";
   out << "<body> ";
+#ifdef MACRO_use_MySQL
   out << "<calculatorNavigation>" << HtmlInterpretation::ToStringNavigation() << "</calculatorNavigation>";
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
   { out << "Changing password requires secure connection. ";
@@ -2810,6 +2813,9 @@ std::string WebWorker::GetChangePasswordPage()
     out << "<span id=\"emailChangeResult\"></span>\n";
   }
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+#else
+  out << "Database not available";
+#endif //Macro_use_mysql
   out << "</body></html>";
   return out.str();
 }

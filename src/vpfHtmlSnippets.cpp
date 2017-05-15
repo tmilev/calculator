@@ -157,10 +157,10 @@ std::string HtmlRoutines::GetDatePickerJavascriptInit()
 
 std::string HtmlRoutines::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc, int line)
 { std::stringstream out;
-  out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/src/"
+  out << " <a href=\"https://github.com/tmilev/calculator/blob/master/src/"
   << FileOperations::GetFileNameFromFileNameWithPath(fileName);
   if (line>0)
-    out << "#l" << line;
+    out << "#L" << line;
   out << "\">" << FileOperations::GetFileNameFromFileNameWithPath(fileName);
   if (fileDesc!="")
     out << " (" << fileDesc << ")";

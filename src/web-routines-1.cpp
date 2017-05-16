@@ -264,6 +264,7 @@ void WebCrawler::PingCalculatorStatus()
 void WebCrawler::FetchWebPage
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("WebCrawler::FetchWebPage");
+#ifdef MACRO_use_open_ssl
   //logOpenSSL << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
   this->lastTransaction="";
   this->lastTransactionErrors="";
@@ -369,11 +370,13 @@ void WebCrawler::FetchWebPage
     break;
   }
   this->FreeAddressInfo();
+#endif //Macro_use_openssl
 }
 
 void WebCrawler::FetchWebPagePart2
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("WebCrawler::FetchWebPagePart2");
+#ifdef MACRO_use_open_ssl
   std::stringstream theMessageHeader, theContinueHeader;
   if (this->flagDoUseGET)
   { theMessageHeader << "GET " << this->addressToConnectTo << " HTTP/1.0"
@@ -496,6 +499,7 @@ void WebCrawler::FetchWebPagePart2
       << "(perhaps due to a protocol error?).</b></span>"
       << "<br>" << this->bodyReceivedOutsideOfExpectedLength;
   }
+#endif
 }
 
 bool CalculatorFunctionsGeneral::innerFetchWebPageGET(Calculator& theCommands, const Expression& input, Expression& output)
@@ -789,6 +793,7 @@ int WebWorker::ProcessSignUP()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
   //double startTime=theGlobalVariables.GetElapsedSeconds();
   this->SetHeaderOKNoContentLength();
+#ifdef MACRO_use_MySQL
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   UserCalculator theUser;
   theUser.username=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
@@ -841,6 +846,9 @@ int WebWorker::ProcessSignUP()
   stOutput << out.str();
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
   << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
+#else
+  stOutput << "Error: database not available. ";
+#endif
   return 0;
 }
 
@@ -848,6 +856,7 @@ int WebWorker::ProcessForgotLogin()
 { MacroRegisterFunctionWithName("WebWorker::ProcessForgotLogin");
   //double startTime=theGlobalVariables.GetElapsedSeconds();
   this->SetHeaderOKNoContentLength();
+#ifdef MACRO_use_MySQL
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   UserCalculator theUser;
   theUser.email=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
@@ -889,6 +898,9 @@ int WebWorker::ProcessForgotLogin()
   stOutput << out.str();
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
   << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
+#else
+  stOutput << "Error: database not running. ";
+#endif
   return 0;
 }
 

@@ -1290,6 +1290,7 @@ std::string SyntacticElementHTML::GetTagClass()
 
 bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareSectionList");
+#ifdef MACRO_use_MySQL
   (void) commentsOnFailure;
   if (this->flagSectionsPrepared)
     return true;
@@ -1304,6 +1305,10 @@ bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure)
   MathRoutines::StringSplitDefaultDelimiters(this->currentUseR.sectionsTaughtByUserString.value, sectionList);
   this->databaseStudentSections.AddListOnTop(sectionList);
   return true;
+#else
+  commentsOnFailure << "Database not running. ";
+  return false;
+#endif
 }
 
 void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
@@ -2614,6 +2619,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
 
 bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::StoreRandomSeedCurrent");
+#ifdef MACRO_use_MySQL
   this->theProblemData.flagRandomSeedGiven=true;
   DatabaseRoutines theRoutines;
   this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
@@ -2625,6 +2631,10 @@ bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream& commentsOnFailure
     return false;
   }
   return true;
+#else
+  commentsOnFailure << "Error: database not running. ";
+  return false;
+#endif
 }
 
 bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::stringstream& comments)
@@ -3104,12 +3114,12 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
 
 std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemScoreShort");
+#ifdef MACRO_use_MySQL
   std::stringstream out;
   if (theGlobalVariables.UserGuestMode())
   { out << "scores require login";
     return out.str();
   }
-  #ifdef MACRO_use_MySQL
   std::stringstream problemWeight;
   ProblemData theProbData;
   bool showModifyButton=
@@ -3157,8 +3167,10 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   finalOut << "<span class=\"panelProblemWeights\"><br>"
   << this->ToStringProblemWeightButton(theFileName)
   << "</span>";
-  #endif // MACRO_use_MySQL
   return finalOut.str();
+#else
+  return "Error: database not running. ";
+#endif // MACRO_use_MySQL
 }
 
 std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFileName)
@@ -3531,6 +3543,7 @@ std::string CalculatorHTML::GetSectionSelector()
 { if (!theGlobalVariables.UserDefaultHasProblemComposingRights() ||
       theGlobalVariables.UserStudentVieWOn())
     return "";
+#ifdef MACRO_use_MySQL
   std::stringstream out;
   out << "<sectionSelection>Sections: ";
   for (int i=0; i<this->databaseStudentSections.size; i++)
@@ -3548,6 +3561,10 @@ std::string CalculatorHTML::GetSectionSelector()
   }
   out << "</sectionSelection>\n";
   return out.str();
+#else
+  return "";
+#endif
+
 }
 
 void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
@@ -3728,8 +3745,13 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   inputOutput.interpretedCommand=out.str();
   std::stringstream topicListJS;
   topicListJS << "<script type=\"text/javascript\">";
-  topicListJS << "var currentStudentSection="
-  << "'" << this->currentUseR.userGroup.value << "'" << ";\n";
+
+  topicListJS << "var currentStudentSection=";
+#ifdef MACRO_use_MySQL
+  topicListJS << "'" << this->currentUseR.userGroup.value << "'" << ";\n";
+#else
+  topicListJS << "''" << ";\n";
+#endif
   topicListJS << "var studentSections=[";
   for (int i=0; i<this->databaseStudentSections.size; i++)
   { topicListJS

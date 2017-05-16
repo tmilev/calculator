@@ -297,6 +297,30 @@ std::string ProblemDataAdministrative::ToString()const
   return out.str();
 }
 
+bool ProblemData::CheckConsistency()const
+{ MacroRegisterFunctionWithName("ProblemData::CheckConsistency");
+  for (int i=0; i<this->theAnswers.size; i++)
+  { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].answerId)=="")
+      crash << "This is not supposed to happen: empty answer id." << crash;
+//    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
+//      crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
+//      << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>All the answers are: "
+//      << this->ToString() << crash;
+  }
+  return true;
+}
+
+bool ProblemData::CheckConsistencyMQids()const
+{ MacroRegisterFunctionWithName("ProblemData::CheckConsistencyMQids");
+  for (int i=0; i<this->theAnswers.size; i++)
+  { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
+      crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
+      << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>All the answers are: "
+      << this->ToString() << crash;
+  }
+  return true;
+}
+
 std::string ProblemData::ToString()const
 { std::stringstream out;
   out << "Problem data. "
@@ -1330,30 +1354,6 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
   return result;
 }
 
-bool ProblemData::CheckConsistency()const
-{ MacroRegisterFunctionWithName("ProblemData::CheckConsistency");
-  for (int i=0; i<this->theAnswers.size; i++)
-  { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].answerId)=="")
-      crash << "This is not supposed to happen: empty answer id." << crash;
-//    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
-//      crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
-//      << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>All the answers are: "
-//      << this->ToString() << crash;
-  }
-  return true;
-}
-
-bool ProblemData::CheckConsistencyMQids()const
-{ MacroRegisterFunctionWithName("ProblemData::CheckConsistencyMQids");
-  for (int i=0; i<this->theAnswers.size; i++)
-  { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
-      crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
-      << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>All the answers are: "
-      << this->ToString() << crash;
-  }
-  return true;
-}
-
 std::string ProblemData::Store()
 { MacroRegisterFunctionWithName("ProblemData::Store");
   std::stringstream out;
@@ -2045,10 +2045,10 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
 (UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { (void) commentsOnFailure;
   (void) theUseR;
+#ifdef MACRO_use_MySQL
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
   userWrapper.currentTable=DatabaseStrings::usersTableName;
-#ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded");
   if (userWrapper.enteredGoogleToken=="")
     return false;

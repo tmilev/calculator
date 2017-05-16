@@ -537,7 +537,8 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSendEmailWithMailGun");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return theCommands << "Sending mail available to logged-in admins only. ";
-  std::stringstream out, commandToExecute;
+  std::stringstream out;
+#ifdef MACRO_use_MySQL
   if (input.size()!=4)
     return theCommands << "Send email requires three arguments. ";
   EmailRoutines theEmail;
@@ -550,5 +551,8 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
     << "expected to be strings (enclose in \"\" please). ";
 
   theEmail.SendEmailWithMailGun(&out, &out);
+#else
+  out << "Error: database not running. ";
+#endif
   return output.AssignValue(out.str(),theCommands);
 }

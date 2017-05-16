@@ -56,7 +56,7 @@ else
 	LIBRARYINCLUDESEND+= -lssl -lcrypto #WARNING believe it or not, the libraries must come AFTER the executable name
 endif
 
-ifeq ($(nomysql),1)
+ifeq ($(nosql),1)
 else
 	CFLAGS+= -DMACRO_use_MySQL
 	LIBRARYINCLUDESEND+= -L/usr/lib64/mysql -lmysqlclient  #WARNING believe it or not, the libraries must come AFTER the executable name

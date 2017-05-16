@@ -2829,6 +2829,7 @@ bool WebWorker::DoSetEmail
  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive,
  std::stringstream* commentsGeneralSensitive)
 { MacroRegisterFunctionWithName("WebWorker::DoSetEmail");
+#ifdef MACRO_use_MySQL
   EmailRoutines theEmail;
   theEmail.toEmail=inputOutputUser.email.value;
   if (!theEmail.IsOKEmail(theEmail.toEmail, commentsOnFailure))
@@ -2851,10 +2852,14 @@ bool WebWorker::DoSetEmail
   userCopy.actualActivationToken="";
   inputOutputUser=userCopy;
   return true;
+#else
+  return false; //MACRO_use_MySQL
+#endif
 }
 
 int WebWorker::SetEmail(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::SetEmail");
+#ifdef MACRO_use_MySQ
   std::stringstream out, debugStream;
   DatabaseRoutines theRoutines;
   //double startTime=theGlobalVariables.GetElapsedSeconds();
@@ -2867,6 +2872,9 @@ int WebWorker::SetEmail(const std::string& input)
   if (theGlobalVariables.UserDefaultHasAdminRights())
     stOutput << "<hr><b>Admin view only. </b>" << debugStream.str();
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s).";
+#else
+  stOutput << "<b>Error: database not available.</b>";
+#endif
   return 0;
 }
 
@@ -4916,7 +4924,9 @@ int WebServer::Run()
     this->ReleaseWorkerSideResources();
   }
   this->ReleaseEverything();
+#ifdef MACRO_use_open_ssl
   this->theSSLdata.FreeEverythingShutdownSSL();
+#endif //MACRO_use_open_ssl
   return 0;
 }
 
@@ -4935,6 +4945,7 @@ int WebWorker::Run()
   crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
   InitializeTimer(&timeBeforeProcessFork);
   CreateTimerThread();
+#ifdef MACRO_use_open_ssl
   theWebServer.SSLServerSideHandShake();
   if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection &&
       !this->parent->theSSLdata.flagSSLHandshakeSuccessful)
@@ -4944,6 +4955,7 @@ int WebWorker::Run()
     logOpenSSL << logger::red << "ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
     return -1;
   }
+#endif //Macro_use_open_ssl
   if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection)
     logOpenSSL << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
   /////////////////////////////////////////////////////////////////////////

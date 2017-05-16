@@ -1561,6 +1561,7 @@ std::string HtmlInterpretation::ToStringAssignSection()
   return out.str();
 }
 
+#ifdef MACRO_use_MySQL
 void UserCalculator::ComputePointsEarned
 (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
  MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics
@@ -1623,6 +1624,7 @@ void UserCalculator::ComputePointsEarned
       }
   }
 }
+#endif
 
 struct UserScores
 {
@@ -1642,7 +1644,9 @@ public:
 
 bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
 { MacroRegisterFunctionWithName("UserScores::ComputeScoresAndStats");
+#ifdef MACRO_use_MySQL
   theProblem.currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
+
   this->theProblem.LoadFileNames();
   if (!this->theProblem.LoadAndParseTopicList(comments))
     return false;
@@ -1737,6 +1741,9 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
     //out << "<br>DEBUG: Computed scores from: " << currentUserRecord.currentUseR.ToString();
   }
   return true;
+#else
+  return false;
+#endif
 }
 
 std::string HtmlInterpretation::GetScoresInCoursePage()
@@ -1802,6 +1809,7 @@ std::string HtmlInterpretation::ToStringUserScores()
 { MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserScores");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "only admins are allowed to view scores";
+#ifdef MACRO_use_open_ssl
   std::stringstream out;
   out.precision(4);
   UserScores theScores;
@@ -1883,6 +1891,9 @@ std::string HtmlInterpretation::ToStringUserScores()
   }
   out << "</table>";
   return out.str();
+#else
+  return "Error: database not running. ";
+#endif
 }
 
 std::string HtmlInterpretation::ToStringUserDetails

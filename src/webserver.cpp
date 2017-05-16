@@ -2859,7 +2859,8 @@ bool WebWorker::DoSetEmail
 
 int WebWorker::SetEmail(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::SetEmail");
-#ifdef MACRO_use_MySQ
+  (void) input;
+#ifdef MACRO_use_MySQL
   std::stringstream out, debugStream;
   DatabaseRoutines theRoutines;
   //double startTime=theGlobalVariables.GetElapsedSeconds();

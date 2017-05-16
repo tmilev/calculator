@@ -3088,9 +3088,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   if (startingExpression!=0)
   { std::stringstream outTrue;
     outTrue << "<table>";
-
-//    outTrue << "<tr><td colspan=\"2\"> Double click expressions to get the LaTeX code. "
-//    << "Many thanks to the <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a> project!</td></tr>";
+    //outTrue << "<tr><th colspan=\"2\"> Dbl click f-la to get LaTeX.</th></tr> ";
+    //out << "Many thanks to the <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a> project!</td></tr>";
     outTrue << "<tr><th>Input</th><th>Result</th></tr>";
     // stOutput << this->Lispify();
 

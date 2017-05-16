@@ -407,7 +407,7 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
   << "On Ubuntu the command is the following.  <br>sudo apt-get install g++"
   << "\n<br>\n3) [Optional] Install the development packages for mysql and openssl. To do so, google-search ``how to install ... on ...''"
   << "\n<br>\n4) Checkout the calculator project. The command is as follows.<br>"
-  << "svn checkout svn://svn.code.sf.net/p/vectorpartition/code/trunk calculator"
+  << "svn checkout https://github.com/tmilev/calculator.git/trunk calculator"
   << "<br> The command fetches the latest source code from sourceforge."
   << "\n<br>\n5) Navigate to the newly created calculator folder.  "
   << "\n<br>\n6) Type the following command. <br>make nossl=1 nosql=1"
@@ -423,7 +423,7 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
   << " (say, the port is already taken) it may bind to ports 8081 or 8082. In that case replace "
   << " the 8080 in the address above with the port number reported by the calculator. ";
   out << "<hr>" << this->theSourceCodeFiles().size << " files total. ";
-  out << "<br>svn checkout command:<br>svn checkout svn://svn.code.sf.net/p/vectorpartition/code/trunk calculator";
+  out << "<br>svn checkout command:<br>svn checkout https://github.com/tmilev/calculator.git/trunk calculator";
   for (int i=0; i<this->theSourceCodeFiles().size; i++)
   { out << " <br>\n";
     out << HtmlRoutines::GetHtmlLinkFromProjectFileName(this->theSourceCodeFiles()[i].FileName, this->theSourceCodeFiles()[i].FileDescription);

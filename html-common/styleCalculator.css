@@ -8,10 +8,20 @@ calculatorNavigation {
   text-align: center;
   white-space: nowrap;
   width: 100%;
-}	      
+}
+
 calculatorNavigation:after{
 clear:both;
 }
+
+tr.problemContainerRow{
+/*height: 500px;*/
+}
+
+td.problemContainerCell{
+/*height: 500px;*/
+}
+
 
 problemNavigation {
   text-align: center;
@@ -24,6 +34,7 @@ problemNavigation {
   margin: 0;
   white-space: nowrap;
 }	      
+
 problemNavigation:after{
 clear:both;
 }

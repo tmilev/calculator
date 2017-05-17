@@ -3602,10 +3602,11 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     << " points earned. " ;
   }
   #endif
-  out   << "Problem links open in: "
-  << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('sameWindow');\">same window, replacing topic list</input>"
-  << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('newWindow');\">new window</input>"
-  << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('accordion');\">same window, expanding under topic list</input>"
+  out << "Problem links open in: "
+  << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('sameWindow');\" checked>same tab, replace topics</input>"
+  << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('newWindow');\">new tab</input>"
+  << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('accordion');\">same tab, under topics</input>"
+  << ". "
  ;
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
   bool tableStarted=false;

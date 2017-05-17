@@ -490,11 +490,8 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
   this->flagLoadedSuccessfully=false;
   if (theGlobalVariables.UserGuestMode())
     needToLoadDatabaseMayIgnore=false;
-  if (theGlobalVariables.flagRunningApache)
-  { this->flagDoPrependCalculatorNavigationBar
+  this->flagDoPrependCalculatorNavigationBar
     =(theGlobalVariables.GetWebInput("navigationBar")=="true");
-  } else
-    this->flagDoPrependCalculatorNavigationBar=true;
   this->flagLoadedSuccessfully=true;
   if (this->fileName=="")
   { this->flagLoadedSuccessfully=false;

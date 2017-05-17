@@ -33,8 +33,12 @@ function accordionExpansionOfProblem(theAnchor)
   newCell.className="problemContainerCell";
   newCell.colSpan=4;
   newCell.theIframeId=theAnchor.href;
-  newCell.innerHTML="<div class=\"CurrentProblemIframeContainer\"> <iframe onload=\"resizeIFrameToFitContent(this);\" id=\"" + newCell.theIframeId + "\" src=\""+ theAnchor.href +"\" "+
-  "style=\"width:100%\"> It appears your web browser doesn't support iframes ...</iframe></div>";
+  newCell.innerHTML=
+    "<div class=\"CurrentProblemIframeContainer\"> <iframe onload=\"resizeIFrameToFitContent(this);\" id=\"" +
+    newCell.theIframeId + "\" src=\""+
+    theAnchor.href + "&navigationBar=false"+
+    "\" "+
+    "style=\"width:100%\"> It appears your web browser doesn't support iframes ...</iframe></div>";
 }
 
 function setProblemLinkStyle(desiredStyle)

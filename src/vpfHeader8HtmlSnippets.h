@@ -23,6 +23,9 @@ public:
   static std::string JavascriptAceEditorScript;
   static std::string JavascriptCalculatorPage;
   static std::string JavascriptAccountManagement;
+  static std::string JavascriptProblemLinksWithTags;
+  static std::string JavascriptTopicListWithTags;
+  static std::string JavascriptCanvasGraphicsWithTags;
   static std::stringstream outputStream;
   static int GlobalMathSpanID;
   static int GlobalCanvasID;
@@ -76,6 +79,7 @@ public:
   static std::string GetJavascriptSubmitURLString();
   static std::string GetJavascriptCanvasGraphicsWithTags();
   static std::string GetJavascriptTopicListWithTags();
+  static std::string GetJavascriptProblemLinksWithTags();
   static std::string GetDatePickerJavascriptInit();
   static std::string GetJavascriptVariable(const std::string& theVar);
 

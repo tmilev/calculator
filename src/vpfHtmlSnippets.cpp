@@ -92,8 +92,28 @@ std::string HtmlRoutines::GetJavascriptCookieFunctions()
   return out.str();
 }
 
+std::string HtmlRoutines::GetJavascriptProblemLinksWithTags()
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptProblemLinksWithTags");
+  if (theGlobalVariables.flagCachingInternalFilesOn)
+    if (HtmlRoutines::JavascriptProblemLinksWithTags!="")
+      return HtmlRoutines::JavascriptProblemLinksWithTags;
+
+  std::stringstream out, commentsOnFailure;
+  std::string fileReader;
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/problemlinkstyles.js", fileReader, commentsOnFailure))
+    out << "Javascript file problemlinkstyles.js not found. ";
+  else
+    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
+  if (theGlobalVariables.flagCachingInternalFilesOn)
+    HtmlRoutines::JavascriptProblemLinksWithTags=out.str();
+  return out.str();
+}
+
 std::string HtmlRoutines::GetJavascriptTopicListWithTags()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptTopicListWithTags");
+  if (theGlobalVariables.flagCachingInternalFilesOn)
+    if (HtmlRoutines::JavascriptTopicListWithTags!="")
+      return HtmlRoutines::JavascriptTopicListWithTags;
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
   if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/topiclist.js", fileReader, commentsOnFailure))
@@ -102,13 +122,16 @@ std::string HtmlRoutines::GetJavascriptTopicListWithTags()
     out << "<script type=\"text/javascript\">" << fileReader << "</script>";
 //  HtmlRoutines::JavascriptAceEditorScript=out.str();
 //  return HtmlRoutines::JavascriptAceEditorScript;
+  if (theGlobalVariables.flagCachingInternalFilesOn)
+    HtmlRoutines::JavascriptTopicListWithTags=out.str();
   return out.str();
-
-
 }
 
 std::string HtmlRoutines::GetJavascriptCanvasGraphicsWithTags()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptCanvasGraphicsWithTags");
+  if (theGlobalVariables.flagCachingInternalFilesOn)
+    if (HtmlRoutines::JavascriptCanvasGraphicsWithTags!="")
+      return HtmlRoutines::JavascriptCanvasGraphicsWithTags;
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
   if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/three-d.js", fileReader, commentsOnFailure))
@@ -117,6 +140,8 @@ std::string HtmlRoutines::GetJavascriptCanvasGraphicsWithTags()
     out << "<script type=\"text/javascript\">" << fileReader << "</script>";
 //  HtmlRoutines::JavascriptAceEditorScript=out.str();
 //  return HtmlRoutines::JavascriptAceEditorScript;
+  if (theGlobalVariables.flagCachingInternalFilesOn)
+    HtmlRoutines::JavascriptCanvasGraphicsWithTags=out.str();
   return out.str();
 }
 
@@ -231,6 +256,10 @@ std::string HtmlRoutines::JavascriptInitializeButtons;
 std::string HtmlRoutines::JavascriptAceEditorScript;
 std::string HtmlRoutines::JavascriptCalculatorPage;
 std::string HtmlRoutines::JavascriptAccountManagement;
+std::string HtmlRoutines::JavascriptProblemLinksWithTags;
+std::string HtmlRoutines::JavascriptTopicListWithTags;
+std::string HtmlRoutines::JavascriptCanvasGraphicsWithTags;
+
 
 void HtmlRoutines::LoadStrings()
 { HtmlRoutines::GetMathQuillStyleSheetWithTags();
@@ -244,6 +273,9 @@ void HtmlRoutines::LoadStrings()
   HtmlRoutines::GetJavascriptMathjax();
   HtmlRoutines::GetJavascriptMathQuillDefault();
   HtmlRoutines::GetJavascriptMathQuillMatrixSupport();
+  HtmlRoutines::GetJavascriptCanvasGraphicsWithTags();
+  HtmlRoutines::GetJavascriptTopicListWithTags();
+  HtmlRoutines::GetJavascriptProblemLinksWithTags();
 }
 
 extern logger theLog;

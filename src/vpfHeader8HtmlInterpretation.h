@@ -47,7 +47,6 @@ public:
   std::string displaySlidesLink;
   std::string displaySlidesPrintableLink;
   std::string displayProblemLink;
-  std::string displayAceProblemLink;
   std::string displayDeadlinE;
   std::string displayScore;
   std::string displayModifyWeight;

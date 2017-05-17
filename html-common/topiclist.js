@@ -10,6 +10,35 @@ function getProblemDeadlineFromIndex(theIndex, inputSection)
   return result;
 }
 
+function setProblemLinkStyle(desiredStyle)
+{ var theLinks=document.getElementsByClassName("problemLink");
+  for (var i=0; i<theLinks.length; i++)
+  { if (desiredStyle==="newWindow")
+    { theLinks[i].target="_blank";
+      if (theLinks[i].href==="")
+        theLinks[i].href =theLinks[i].hrefStored;
+      theLinks[i]='';
+    }
+    if (desiredStyle==="sameWindow")
+    { theLinks[i].target="";
+      if (theLinks[i].href==="")
+        theLinks[i].href =theLinks[i].hrefStored;
+      theLinks[i]='';
+    }
+    if (desiredStyle==="accordion")
+    { theLinks[i].onclick=
+      function (event)
+      { if (this.href!=="")
+        { this.hrefStored=this.href;
+          this.href="";
+        }
+        event.preventDefault();
+        alert(this.hrefStored);
+      };
+    }
+  }
+}
+
 function populateTopicList(inputSection)
 { //var theRows= document.getElementsByClassName("calculatorProblem");
   currentStudentSection=inputSection;
@@ -45,7 +74,7 @@ function updateDeadlines(idRowUpdated, idDeadlineTableUpdated)
       { currentTopicElement.deadlinesFormatted[currentGroup]="Deadline: " +currentDeadline;
         if (currentGroup===currentStudentSection)
           document.getElementById(currentTopicElement.idButton).
-            innerHTML="Inherited d.: " +currentDeadline;
+            innerHTML="Inherited: " + currentDeadline;
       }
     }
   }

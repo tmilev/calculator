@@ -418,10 +418,13 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
   << "\n<br>\n7) Through the command-line, navigate to the following directory. <br>calculator/bin/ "
   << "\n<br>\n8) Type the following command. Make sure to include the dot.  <br>./calculator server"
   << "\n<br>\n9) The calculator will display a message saying on which port it got bound. "
-  << "The default port is 8080. Type the address:  <br>localhost:8080/cgi-bin/calculator<br>"
-  << " in your web browser to get to the calculator. If the calculator doesn't succeed in binding to port 8080"
-  << " (say, the port is already taken) it may bind to ports 8081 or 8082. In that case replace "
-  << " the 8080 in the address above with the port number reported by the calculator. ";
+  << "The default ports should be 8155 and 8166 for http and https. "
+  << "Type the address:  <br>locsalhost:8155/cgi-bin/calculator<br>"
+  << " in your web browser to get to the calculator. "
+  << "If the calculator didn't succeed in binding to port 8155"
+  << " (say, the port is already taken) it will try to bind next to ports 8080, 8081 and 8082. "
+  << "In that case replace "
+  << " the 8155 in the address above with the port number reported by the calculator. ";
   out << "<hr>" << this->theSourceCodeFiles().size << " files total. ";
   out << "<br>svn checkout command:<br>svn checkout https://github.com/tmilev/calculator.git/trunk calculator";
   for (int i=0; i<this->theSourceCodeFiles().size; i++)

@@ -2,8 +2,10 @@
 calculatorNavigation {
   background-color: #e8e8e8;
   display: block;
-  padding: 7px;
+  padding-top: 8px;
+  padding-bottom: 8px;
   margin: 0;
+  text-align: center;
   white-space: nowrap;
   width: 100%;
 }	      
@@ -12,11 +14,13 @@ clear:both;
 }
 
 problemNavigation {
+  text-align: center;
   background-color: #f0f0f0;
   width: 100%;
   overflow: none;
   display: block;
-  padding: 7px;
+  padding-top: 4px;
+  padding-bottom: 4px;
   margin: 0;
   white-space: nowrap;
 }	      
@@ -25,10 +29,13 @@ clear:both;
 }
 
 editPagePanel{
-display: inline-block;
+display: block;
 width: 100%;
 background-color:#fafafa;
 white-space: nowrap;
+margin: 0;
+padding-top: 2px;
+padding-bottom: 2px;
 }
 
 

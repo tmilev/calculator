@@ -703,13 +703,17 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
     return out.str();
   }
   if (!theGlobalVariables.UserGuestMode())
-  { refStreamExercise << theGlobalVariables.DisplayNameExecutable << "?request=exercise&" << refStreamNoRequest.str();
-    refStreamForReal << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&" << refStreamNoRequest.str();
+  { refStreamExercise << theGlobalVariables.DisplayNameExecutable
+    << "?request=exercise&" << refStreamNoRequest.str();
+    refStreamForReal << theGlobalVariables.DisplayNameExecutable
+    << "?request=scoredQuiz&" << refStreamNoRequest.str();
   } else
     refStreamExercise << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
   if (!theGlobalVariables.UserGuestMode())
-    out << " <a href=\"" << refStreamForReal.str() << "\">" << CalculatorHTML::stringScoredQuizzes << "</a> ";
-  out << " | <a href=\"" << refStreamExercise.str() << "\">" << CalculatorHTML::stringPracticE << "</a> ";
+    out << " <a class=\"problemLink\" href=\"" << refStreamForReal.str() << "\">"
+    << CalculatorHTML::stringScoredQuizzes << "</a> ";
+  out << " | <a class=\"problemLink\" href=\"" << refStreamExercise.str() << "\">"
+  << CalculatorHTML::stringPracticE << "</a> ";
   //out << "DEBUG: topiclist: " << this->topicListFileName << " courseHome: " << this->courseHome
   //<< " filename: " << theFileName;
   return out.str();
@@ -1567,7 +1571,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   bool deadlineIsNear=secondsTillDeadline<24*3600 && !problemAlreadySolved;
   bool deadlineHasPassed=(secondsTillDeadline<0);
   if (deadlineIsInherited && !theGlobalVariables.UserStudentVieWOn())
-      out << "Inherited d.: ";
+      out << "Inherited: ";
     else
       out << "Deadline: ";
   if (!deadlineHasPassed)
@@ -3598,6 +3602,11 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     << " points earned. " ;
   }
   #endif
+  out   << "Problem links open in: "
+  << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('sameWindow');\">same window, replacing topic list</input>"
+  << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('newWindow');\">new window</input>"
+  << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('accordion');\">same window, expanding under topic list</input>"
+ ;
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
   bool tableStarted=false;
   bool sectionStarted=false;
@@ -3706,7 +3715,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       << "PrintableSlides: modules/substitution-rule/pdf/printable-integral-derivative-f-over-f-intro.pdf<br>\n"
       << "\n";
     else
-    { out << "<tr class=\"calculatorProblem\""
+    { out << "<tr class=\"calculatorProblem\" "
       << "id=\"" << currentElt.idBase64 << "\"" << ">\n";
       out << "  <td>\n";
       out << currentElt.displayTitle;
@@ -3723,10 +3732,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
         out << " | " << currentElt.displaySlidesLink;
       if (currentElt.displaySlidesPrintableLink!="")
         out << " | " << currentElt.displaySlidesPrintableLink;
-      if (theGlobalVariables.flagRunningAce)
-        out << currentElt.displayAceProblemLink;
-      else
-        out << currentElt.displayProblemLink;
+      out << currentElt.displayProblemLink;
       out << "  </td>\n";
       out << "  <td>";
       if (currentElt.problem=="")
@@ -3886,11 +3892,6 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     std::string theRawExerciseLink;
     theRawExerciseLink=theGlobalVariables.DisplayNameExecutable +
     "?request=exercise&fileName=" + this->problem;
-    this->displayAceProblemLink=
-    " | <a href=\"#\" onclick=\"window.open('" + theRawSQLink +
-    "', 'width=300', 'height=250', 'top=400'); return false;\">" + CalculatorHTML::stringScoredQuizzes + "</a>"+
-    " | <a href=\"#\" onclick=\"window.open('" + theRawExerciseLink+
-    "',  'width=300', 'height=250', 'top=400'); return false;\">" +CalculatorHTML::stringPracticE+ "</a>";
     this->displayProblemLink= owner.ToStringLinkFromFileName(this->problem);
     this->displayScore=owner.ToStringProblemScoreShort(this->problem, problemSolved);
     this->displayModifyWeight=owner.ToStringProblemWeightButton(this->problem);

@@ -2049,7 +2049,7 @@ std::string HtmlInterpretation::ToStringNavigation()
     << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << " \">About</a>" << linkBigSeparator;
   else
     out << "<b>About</b> " << linkBigSeparator;
-  out << "<a href=\"https://github.com/tmilev/calculator/issues\" target=\"_blank\">Bug reports</a>"
+  out << "<a href=\"https://github.com/tmilev/calculator/issues\" target=\"_blank\">Feedback, bugs</a>"
   << linkBigSeparator;
 
   if (!theGlobalVariables.flagRunningApache)

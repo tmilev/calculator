@@ -539,6 +539,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;
   out << HtmlRoutines::GetJavascriptStandardCookies();
+  out << HtmlRoutines::GetJavascriptProblemLinksWithTags();
   if (includeDeadlineJavascript || includeInitializeButtonsJS)
   { out << HtmlRoutines::GetJavascriptInitializeButtons();
     out << HtmlRoutines::GetJavascriptCalculatorPage();

@@ -1079,7 +1079,8 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
     << "onmousemove=\"calculatorCanvasMouseMoveRedraw"
     << "(this, event.clientX, event.clientY);\""
-    << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
+    << " onmousewheel=\"calculatorCanvasMouseWheel(event);\""
+    << " onDOMMouseScroll=\"calculatorCanvasMouseWheel(event);\""
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
     << "<span id=\"" << this->canvasName << "Controls\"></span>"
     << "<span id=\"" << this->canvasName << "Messages\"></span>";
@@ -1527,7 +1528,9 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
     << "onmousemove=\"calculatorCanvasMouseMoveRedraw"
     << "(this, event.clientX, event.clientY);\""
-    << " onmousewheel=\"calculatorCanvasMouseWheel(this, event);\">"
+    << " onmousewheel=\"calculatorCanvasMouseWheel(event);\""
+    << " onDOMMouseScroll=\"calculatorCanvasMouseWheel(event);\""
+    << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
     << "<span id=\"" << this->canvasName << "Controls\"></span>";
     if (!owner.flagPlotNoControls)

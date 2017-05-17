@@ -840,6 +840,7 @@ function CanvasTwoD(inputCanvas)
     this.surface=this.canvasContainer.getContext("2d");
     this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
     this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
+//    this.canvasContainer.addEventListener("wheel", calculatorCanvasMouseWheel, true);
     this.theObjects=[];
     this.spanMessages=document.getElementById(this.canvasId+"Messages");
     this.spanCriticalErrors=document.getElementById(this.canvasId+"CriticalErrors");
@@ -1840,6 +1841,7 @@ function Canvas(inputCanvas)
     this.surface=this.canvasContainer.getContext("2d");
     this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
     this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
+//    this.canvasContainer.addEventListener("wheel", calculatorCanvasMouseWheel, true);
     this.spanMessages=document.getElementById(this.canvasId+"Messages");
     this.spanCriticalErrors=document.getElementById(this.canvasId+"CriticalErrors");
     this.spanControls=document.getElementById(this.canvasId+"Controls");
@@ -2226,12 +2228,13 @@ function calculatorCanvasMouseMoveRedraw(inputCanvas, x, y)
     theCanvas.mouseMove(x,y);
 }
 
-function calculatorCanvasMouseWheel(theCanvasContainer, theEvent)
-{ theEvent = theEvent ? theEvent : window.event;
+function calculatorCanvasMouseWheel(theEvent)
+{ if (theEvent===undefined)
+    theEvent = window.event;
   theEvent.preventDefault();
   theEvent.stopPropagation();
   var theWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;
-  var theCanvas=calculatorCanvases[theCanvasContainer.id];
+  var theCanvas=calculatorCanvases[theEvent.target.id];
   if (theCanvas===undefined || theCanvas===null)
     return;
   var theIncrement=0.6;

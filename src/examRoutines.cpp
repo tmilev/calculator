@@ -3888,8 +3888,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     problemSolved=false;
     returnEmptyStringIfNoDeadline=true;
   } else
-  { std::string theRawSQLink=theGlobalVariables.DisplayNameExecutable +
-    "?request=scoredQuiz&fileName=" + this->problem;
+  { //std::string theRawSQLink=theGlobalVariables.DisplayNameExecutable +
+    //"?request=scoredQuiz&fileName=" + this->problem;
     std::string theRawExerciseLink;
     theRawExerciseLink=theGlobalVariables.DisplayNameExecutable +
     "?request=exercise&fileName=" + this->problem;

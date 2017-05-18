@@ -4710,7 +4710,11 @@ bool WebServer::initBindToPorts()
           << this->ToStringLastErrorDescription() << logger::endL;
           continue;
         }
-        fcntl(*theListeningSocket, F_SETFL, O_NONBLOCK);
+        int setFlagCounter=0;
+        while (fcntl(*theListeningSocket, F_SETFL, O_NONBLOCK)!=0)
+        { if (++setFlagCounter>10)
+            crash << "Error: failed to set non-blocking status to listening socket. " << crash;
+        }
         break;
       }
       if (p!=NULL)

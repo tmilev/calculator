@@ -491,7 +491,7 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
   if (theGlobalVariables.UserGuestMode())
     needToLoadDatabaseMayIgnore=false;
   this->flagDoPrependCalculatorNavigationBar
-    =(theGlobalVariables.GetWebInput("navigationBar")=="true");
+    =(theGlobalVariables.GetWebInput("navigationBar")!="false");
   this->flagLoadedSuccessfully=true;
   if (this->fileName=="")
   { this->flagLoadedSuccessfully=false;

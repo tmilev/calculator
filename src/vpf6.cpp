@@ -1619,7 +1619,8 @@ bool Calculator::CollectSummands
   Rational coeffRat=1;
   AlgebraicNumber coeffAlg=1;
   double coeffDouble=1;
-//  stOutput << "The summands are: " << summands.ToStringCommaDelimited();
+  //stOutput << "DEBUG: The summands are: " << summands.ToStringCommaDelimited();
+  bool hasNAN=false;
   for (int i=0; i<summands.size; i++)
   { if (summands[i].IsEqualToZero())
       continue;
@@ -1636,6 +1637,8 @@ bool Calculator::CollectSummands
         continue;
       } else if (summands[i][1].IsOfType<double>(&coeffDouble))
       { sumOverDoubles.AddMonomial(summands[i][2], coeffDouble);
+        if (std::isnan(coeffDouble))
+          hasNAN=true;
         continue;
       }
     }
@@ -1644,12 +1647,15 @@ bool Calculator::CollectSummands
     else
       outputSum.AddMonomial(summands[i],1);
   }
-  if (!sumOverDoubles.IsEqualToZero())
-  { sumOverDoubles.QuickSortDescending();
+  //stOutput << "DEBUG: GOT to here -1 ";
+  if (!sumOverDoubles.IsEqualToZero() && !hasNAN)
+  { //stOutput << "DEBUG: sorting sum over doubles... ";
+    sumOverDoubles.QuickSortDescending();
     Expression doubleSum;
     doubleSum.MakeSum(theCommands, sumOverDoubles);
     outputSum.AddMonomial(doubleSum, 1);
   }
+  //stOutput << "DEBUG: GOT to here 2 ";
   if (!sumOverAlgNums.IsEqualToZero())
   { sumOverAlgNums.QuickSortDescending();
     Expression algSum;
@@ -1661,9 +1667,11 @@ bool Calculator::CollectSummands
 //    stOutput << outputSum.theMonomials[0].ToString() << " > " << outputSum.theMonomials[1].ToString();
 //  else
 //    stOutput << outputSum.theMonomials[0].ToString() << " < " << outputSum.theMonomials[1].ToString();
+  //stOutput << "DEBUG: GOT to here ";
   outputSum.QuickSortDescending();
+ // stOutput << "DEBUG: GOT to here2 ";
 //  stOutput << " after mon sort: " << outputSum.theMonomials.ToString();
-  return true;
+  return !hasNAN;
 }
 
 bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1756,10 +1764,11 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
     return false;
 //  stOutput << "<hr><hr>DEBUG: processing outer plus with input: <br>" << input.Lispify();
   MonomialCollection<Expression, Rational> theSum;
-  theCommands.CollectSummands(theCommands, input, theSum);
-//  stOutput << "<br>Debug: collected summands: " << theSum.ToString();
+  if (!theCommands.CollectSummands(theCommands, input, theSum))
+    return false;
+  //stOutput << "<br>Debug: collected summands: " << theSum.ToString();
   theSum.QuickSortDescending();
-//  stOutput << "<br>Debug: sorted: " << theSum.ToString();
+  //stOutput << "<br>Debug: sorted: " << theSum.ToString();
   /*if (theSum.size()==3)
   { if (theSum[0]>theSum[1])
       stOutput << "<br>" << theSum[0].ToString() << "&gt;" << theSum[1].ToString();
@@ -1781,7 +1790,10 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
           crash << "Faulty comparison: " << theSum[i].ToString() << " and " << theSum[j].ToString()
           << " are mutually greater than one another. " << crash;
   output.MakeSum(theCommands, theSum);
-//  stOutput << "<br>to get output:<br>" << output.Lispify();
+  if (output==input)
+    return false;
+  //stOutput << "DEBUG: input was: " << input.ToString() << "=" << input.ToStringSemiFull();
+  //stOutput << "DEBUG: output is: " << output.ToString()<< "=" << output.ToStringSemiFull();
   return true;
 }
 
@@ -2668,6 +2680,7 @@ void ObjectContainer::reset()
   this->theRationals.Clear();
   this->theCharsSSLieAlgFD.Clear();
   this->theDoubles.Clear();
+  this->theDoubles.AddOnTop(std::nan(""));
   this->theStrings.Clear();
   this->ExpressionNotation.Clear();
   this->ExpressionWithNotation.Clear();

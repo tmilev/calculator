@@ -4077,8 +4077,8 @@ WebServer::WebServer()
   this->listeningSocketHttpSSL=-1;
   this->highestSocketNumber=-1;
   this->flagReapingChildren=false;
-  this->MaxNumWorkersPerIPAdress=8;
-  this->MaxTotalUsedWorkers=20;
+  this->MaxNumWorkersPerIPAdress=24;
+  this->MaxTotalUsedWorkers=40;
   this->NumFailedSelectsSoFar=0;
   this->NumSuccessfulSelectsSoFar=0;
   this->NumProcessesReaped=0;
@@ -4355,7 +4355,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
   << " production. </b><br>"
   << this->MaxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
   << "When the limit is exceeded, a random connection will be terminated. "
-  << "<br>  " << this->MaxNumWorkersPerIPAdress
+  << "<br> " << this->MaxNumWorkersPerIPAdress
   << " maximum simultaneous connection per IP address. "
   << "When the limit is exceeded, a random connection from that IP address will be terminated. "
   ;

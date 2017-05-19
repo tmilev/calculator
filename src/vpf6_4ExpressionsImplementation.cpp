@@ -349,6 +349,8 @@ int Expression::AddObjectReturnIndex(const
 double
 & inputValue)const
 { this->CheckInitialization();
+  if (std::isnan( inputValue))
+    return 0;
   return this->owner->theObjectContainer.theDoubles
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
@@ -1971,8 +1973,17 @@ bool Expression::operator>(const Expression& other)const
   bool leftEvalsToDouble=this->EvaluatesToDouble(&left);
   bool rightEvalsToDouble=other.EvaluatesToDouble(&right);
   if (leftEvalsToDouble && rightEvalsToDouble)
-  { if(left!=right)
+  { //double aaa;
+    //if (false )
+    if (std::isnan(left) && std::isnan(right))
+      return false; //WARNING nan==nan evaluates to false!
+    if(left!=right)
+    { if (std::isnan(left))
+        return true;
+      if (std::isnan(right))
+        return false;
       return left>right;
+    }
     if (left==right)
       if ((*this)==other)
         return false;
@@ -1981,6 +1992,7 @@ bool Expression::operator>(const Expression& other)const
     return false;
   if (!leftEvalsToDouble && rightEvalsToDouble)
     return true;
+  //stOutput << "<br>DEBUG: got to here.";
   Rational leftCoeff, rightCoeff;
   Expression leftMon, rightMon;
   this->GetCoefficientMultiplicandForm(leftCoeff, leftMon);
@@ -1988,16 +2000,16 @@ bool Expression::operator>(const Expression& other)const
   if (leftMon==rightMon)
   { bool result= leftCoeff>rightCoeff;
     //if (result)
-    //  stOutput << "true";
+    //  stOutput << "DEBIG: leftMon==rightMon";
     //else
-    //  stOutput << "false";
+    //  stOutput << "DEBIG: false";
     return result;
   }
   bool result= leftMon.GreaterThanNoCoeff(rightMon);
   //if (result)
-  //  stOutput << "true";
+  //  stOutput << "DEBUG: " << leftMon.ToString() << " bigger than " << rightMon.ToString();
   //else
-  //  stOutput << "false";
+  //  stOutput << "DEBUG: " << leftMon.ToString() << " leq " << rightMon.ToString();
   return result;
 }
 

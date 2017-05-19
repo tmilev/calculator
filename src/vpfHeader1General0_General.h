@@ -1730,7 +1730,7 @@ void List<Object>::AddListOnTop(const List<Object>& theList)
 template<class Object>
 void List<Object>::SwapTwoIndices(int index1, int index2)
 { if (index1<0 || index1>=this->size || index2<0 || index2>=this->size)
-    crash << "This is a programming error: requested to the elements with indices " << index1 << " and " << index2 << " in a list that has "
+    crash << "This is a programming error: requested elements with indices " << index1 << " and " << index2 << " in a list that has "
     << this->size << " elements. This is impossible. " << crash;
   if (index1==index2)
     return;

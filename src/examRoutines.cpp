@@ -490,8 +490,8 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
   this->flagLoadedSuccessfully=false;
   if (theGlobalVariables.UserGuestMode())
     needToLoadDatabaseMayIgnore=false;
-  this->flagDoPrependCalculatorNavigationBar
-    =(theGlobalVariables.GetWebInput("navigationBar")!="false");
+  this->flagDoPrependCalculatorNavigationBar=
+  (theGlobalVariables.GetWebInput("navigationBar")!="false");
   this->flagLoadedSuccessfully=true;
   if (this->fileName=="")
   { this->flagLoadedSuccessfully=false;
@@ -506,7 +506,7 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
 //  stOutput << "<hr>DEBUG: loaded<hr>";
 //  stOutput << "<hr>DEBUG: OK<hr>";
   if (!this->flagLoadedSuccessfully)
-  { this->comments <<"<calculatorNavigation>"
+  { this->comments << "<calculatorNavigation>"
     << theGlobalVariables.ToStringNavigation()
     << "</calculatorNavigation>"
     << commentsStream.str();

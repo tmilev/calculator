@@ -4354,10 +4354,10 @@ std::string WebServer::ToStringStatusPublicNoTop()
   << "<b>The following policies are only temporary and will be relaxed as we roll the webserver into"
   << " production. </b><br>"
   << this->MaxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
-  << "When the limit is exceeded, a random connection will be terminated. "
+  << "When the limit is exceeded, all connections except a randomly chosen one will be terminated. "
   << "<br> " << this->MaxNumWorkersPerIPAdress
   << " maximum simultaneous connection per IP address. "
-  << "When the limit is exceeded, a random connection from that IP address will be terminated. "
+  << "When the limit is exceeded, all connections from that IP address are terminated. "
   ;
   return out.str();
 }

@@ -246,7 +246,7 @@ void WebCrawler::PingCalculatorStatus()
       close(this->theSocket);
       continue;
     }
-    numBytes = Pipe::ReadWithTimeOutViaSelect(this->theSocket, this->buffer,1,10, &reportStream);
+    numBytes =Pipe::ReadWithTimeOutViaSelect(this->theSocket, this->buffer,1,10, &reportStream);
     if (numBytes < 0)
     { this->lastTransactionErrors+= "\nERROR reading from socket";
       close(this->theSocket);
@@ -461,7 +461,7 @@ void WebCrawler::FetchWebPagePart2
   this->flagContinueWasNeeded=true;
   //if (this->bodyReceivedWithHeader=="")
   //{
-  theContinueHeader << "HTTP/1.1 100 Continue\r\n\r\n";
+  theContinueHeader << "HTTP/1.0 100 Continue\r\n\r\n";
   //theContinueHeader << "\r\n\r\n";
   if (!theWebServer.theSSLdata.SSLwriteLoop
       (10, theWebServer.theSSLdata.sslClient, theContinueHeader.str(),

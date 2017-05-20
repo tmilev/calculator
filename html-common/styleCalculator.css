@@ -40,13 +40,14 @@ clear:both;
 }
 
 editPagePanel{
-display: block;
-width: 100%;
-background-color:#fafafa;
-white-space: nowrap;
-margin: 0;
-padding-top: 2px;
-padding-bottom: 2px;
+  text-align: center;
+  display: block;
+  width: 100%;
+  background-color:#fafafa;
+  white-space: nowrap;
+  margin: 0;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 
 

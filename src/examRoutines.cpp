@@ -3596,7 +3596,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     << std::fixed << percent << "% = ";
     out << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
     << " out of " << this->currentUseR.pointsMax.GetDoubleValue()
-    << " points earned. " ;
+    << " points earned.<br>\n" ;
   }
   #endif
   out << "Problem links open in: "

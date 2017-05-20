@@ -153,12 +153,12 @@ public:
   PauseProcess PauseComputationReportReceived;
   PauseProcess PauseWorker;
   PauseProcess PauseIndicatorPipeInUse;
-  Pipe pipeServerToWorkerRequestIndicator;
-  Pipe pipeWorkerToServerControls;
-  Pipe pipeWorkerToServerTimerPing;
-  Pipe pipeWorkerToServerIndicatorData;
-  Pipe pipeWorkerToServerWorkerStatus;
-  Pipe pipeWorkerToServerUserInput;
+  Pipe pipeWorkerToWorkerRequestIndicator;
+  Pipe pipeWorkerToWorkerIndicatorData;
+  PipePrimitive pipeWorkerToWorkerUserInput;
+  PipePrimitive pipeWorkerToWorkerStatus;
+  PipePrimitive pipeWorkerToServerControls;
+  PipePrimitive pipeWorkerToServerTimerPing;
 
   std::string error;
   std::string errorLogin;
@@ -291,7 +291,7 @@ int recursionDepth=0)
   void AttemptUnknownRequestErrorCorrection();
   bool ReceiveAllHttp();
   bool ReceiveAllHttpSSL();
-  void SendDisplayUserInputToServer();
+  void ReportDisplayUserInput();
   enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
   std::string ToStringStatus()const;
   std::string ToStringMessageUnsafe(bool useHTML=true)const;

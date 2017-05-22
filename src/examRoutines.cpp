@@ -1075,7 +1075,7 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
   std::stringstream debugStream;
   debugStream << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
   << "?request=calculator&mainInput="
-  << HtmlRoutines::ConvertStringToURLString(this->theProblemData.commandsGenerateProblemNoEnclosures,false)
+  << HtmlRoutines::ConvertStringToURLString(this->theProblemData.commandsGenerateProblemNoEnclosures, false)
   << "\"> "
   << "Input link </a>";
   this->theProblemData.commandsGenerateProblemLink=debugStream.str();

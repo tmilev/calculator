@@ -1081,11 +1081,12 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     << "(this, event.clientX, event.clientY);\""
     << " onmousewheel=\"calculatorCanvasMouseWheel(event);\""
     << " onDOMMouseScroll=\"calculatorCanvasMouseWheel(event);\""
+    << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
     << "<span id=\"" << this->canvasName << "Controls\"></span>"
     << "<span id=\"" << this->canvasName << "Messages\"></span>";
   }
-  out << "<script>\n";
+  out << "<script language=\"javascript\">\n";
   std::string canvasFunctionName="functionMake"+ this->canvasName;
   out << "function " << canvasFunctionName << "()\n"
   << "{ ";
@@ -1538,7 +1539,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     out << "<span id=\"" << this->canvasName << "Messages\"></span>"
     ;
   }
-  out << "<script>\n";
+  out << "<script language=\"javascript\">\n";
   std::string canvasFunctionName="functionMake"+ this->canvasName;
   out << "function " << canvasFunctionName << "()\n"
   << "{ ";

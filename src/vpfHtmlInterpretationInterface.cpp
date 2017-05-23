@@ -1343,9 +1343,12 @@ std::string HtmlInterpretation::GetScoresPage()
   << "<link rel=\"stylesheet\" href=\"/html-common-calculator/styleScorePage.css\">"
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
+  CalculatorHTML thePage;
+  thePage.LoadDatabaseInfo(out);
   std::string theScoresHtml=HtmlInterpretation::ToStringUserScores();
   std::string theDebugHtml=HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
+  out << "<problemNavigation>" << thePage.ToStringProblemNavigation() << "</problemNavigation>";
   out << theScoresHtml;
   out << theDebugHtml;
   out << "</body></html>";

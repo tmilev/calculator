@@ -3761,7 +3761,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   for (int i=0; i<this->databaseStudentSections.size; i++)
   { topicListJS
     << "'"
-    << HtmlRoutines::ConvertStringToURLString(this->databaseStudentSections[i],false)
+    << HtmlRoutines::ConvertStringToURLString(this->databaseStudentSections[i], false)
     << "'"
     ;
     if (i!=this->databaseStudentSections.size-1)

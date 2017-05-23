@@ -2973,6 +2973,7 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   //  out << "<br>urled link: " <<  urledProblem;
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
   << "fileName=" << urledProblem << "&"
+  << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName,false) << "&"
   << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
   out << refStreamNoRequest.str() << "\">" << "Edit" << "</a>";
   out << "<textarea class=\"currentFileNameArea\" id=\""<< clonePageAreaID << "\" cols=\""

@@ -1629,7 +1629,7 @@ D-B;\
    "If the argument is a power of the base does the computation. ",
    "\\log_5 25; log_5 1; log_5 (1/5)", true, false,
    "CalculatorFunctionsGeneral::innerLogBaseSimpleCases",
-   "logBaseSimpleCases")
+   "LogBaseSimpleCases")
    ;
   this->AddOperationInnerHandler
   ("LogBase",
@@ -2348,6 +2348,24 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    true, false,
    "CalculatorFunctionsGeneral::innerIsEven",
    "IsEven");
+  this->AddOperationInnerHandler
+  ("IsSquareFree", CalculatorFunctionsGeneral::innerIsSquareFree, "",
+   "If the argument is an integer, returns 1 if the integer is square-free \
+    (no primes in the decomposition of the integer \
+     appear with power greater than one) ",
+   "IsSquareFree(6); IsSquareFree(12)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIsSquareFree",
+   "IsSquareFree");
+  this->AddOperationInnerHandler
+  ("IsPower", CalculatorFunctionsGeneral::innerIsPower, "",
+   "If the argument is an integer, returns 1 if the integer is plus or minus the power of a prime \
+    (no primes in the decomposition of the integer \
+     appear with power greater than one) ",
+   "IsPower(6); IsPower(8)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIsPower",
+   "IsPower");
   this->AddOperationInnerHandler
   ("[)", CalculatorFunctionsGeneral::innerIntervalLeftClosedFromSequence,
    "",
@@ -4908,6 +4926,13 @@ this->AddOperationInnerHandler
    true, false,
    "CalculatorFunctionsGeneral::outerEqualEqual",
    "IsEqualTo");
+  this->AddOperationInnerHandler
+  ("===", CalculatorFunctionsGeneral::innerEqualEqualEqual, "",
+   "Returns 1 if both sides have identical expression trees, 0 otherwise.",
+   "2+3 == 5; Freeze{}(2+3)==Freeze{}5; Freeze{}(2+3)===Freeze{}5",
+   true, false,
+   "CalculatorFunctionsGeneral::innerEqualEqualEqual",
+   "IsEqualExpressionTree");
   this->AddOperationOuterHandler
   ("Contains", CalculatorFunctionsGeneral::innerContains, "",
    "Returns 1 if the first argument contains the \

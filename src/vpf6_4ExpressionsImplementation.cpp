@@ -2870,6 +2870,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "{{" << (*this)[1].ToString(theFormat) << "}}";
   else if (this->IsListStartingWithAtom(this->owner->opEqualEqual()))
     out << (*this)[1].ToString(theFormat) << "==" << (*this)[2].ToString(theFormat);
+  else if (this->IsListStartingWithAtom(this->owner->opEqualEqualEqual()))
+    out << (*this)[1].ToString(theFormat) << "===" << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opDifferentiate(), 3))
   { out << "\\frac{\\diff ";
     if ((*this)[2].NeedsParenthesisForMultiplication())

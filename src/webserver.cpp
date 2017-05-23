@@ -3349,7 +3349,7 @@ std::string HtmlInterpretation::ModifyProblemReport()
   }
   theFile << mainInput;
   theFile.close();
-  out << "<b><span style=\"color:green\">Written content to file: "
+  out << "<b><span style=\"color:green\"> Written content to file: "
   << fileName << ". </span></b>";
   return out.str();
 }

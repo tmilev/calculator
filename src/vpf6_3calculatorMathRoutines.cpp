@@ -2015,6 +2015,18 @@ bool CalculatorFunctionsGeneral::innerMin(Calculator& theCommands, const Express
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerEqualEqualEqual(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEqualEqualEqual");
+  if (!input.IsListNElements(3))
+    return false;
+  const Expression& left =input[1];
+  const Expression& right=input[2];
+  int result=0;
+  if (left==right)
+    result=1;
+  return output.AssignValue(result, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::outerEqualEqual(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerEqualEqual");
   if (!input.IsListNElements(3))
@@ -7956,7 +7968,6 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
   }
   return true;
 }
-
 
 bool CalculatorFunctionsGeneral::innerTurnOnApproximations
   (Calculator& theCommands, const Expression& input, Expression& output)

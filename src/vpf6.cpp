@@ -2066,6 +2066,7 @@ bool Expression::IsEqualToMathematically(const Expression& other)const
   if (*this==other)
     return true;
   Rational theRat, theRatTwo;
+  //stOutput << "<br>DEBUG: step 2: Calling Expression::IsEqualToMathematically with input: " << this->ToString() << " and " << other.ToString();
   AlgebraicNumber theAlgebraic;
   if (this->IsOfType(&theRat) && other.IsOfType(&theRatTwo))
     return theRat==theRatTwo;

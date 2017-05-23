@@ -556,3 +556,41 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
 #endif
   return output.AssignValue(out.str(),theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerIsSquareFree(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsSquareFree");
+  LargeInt theLI;
+  if (!input.IsInteger(&theLI))
+    return false;
+  List<int> theMults;
+  List<LargeInt> theFactors;
+  if (!theLI.value.Factor(theFactors, theMults))
+    return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
+  int result=1;
+  for (int i=0; i<theMults.size; i++)
+    if (theMults[i]>1)
+    { result=0;
+      break;
+    }
+  return output.AssignValue(result, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerIsPower(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsPower");
+  LargeInt theLI;
+  if (!input.IsInteger(&theLI))
+    return false;
+  List<int> theMults;
+  List<LargeInt> theFactors;
+  if (!theLI.value.Factor(theFactors, theMults))
+    return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
+  int result=1;
+  if (theMults.size>0)
+    result = (theMults[0]>1);
+  for (int i=1; i<theMults.size; i++)
+    if (theMults[i]!=theMults[0])
+    { result=0;
+      break;
+    }
+  return output.AssignValue(result, theCommands);
+}

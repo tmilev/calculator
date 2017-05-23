@@ -64,8 +64,11 @@ std::string HtmlInterpretation::GetProblemSolution()
   { out << "<b> Unfortunately there is no solution given for this question (answerID: " << lastStudentAnswerID << ").";
     return out.str();
   }
-  std::stringstream answerCommands;
+  std::stringstream answerCommands, answerCommandsNoEnclosures;
   answerCommands << "CommandEnclosure{}(" << currentA.commandsBeforeAnswer << "); "
+  << currentA.commandsSolutionOnly;
+  answerCommandsNoEnclosures
+  << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING
   << currentA.commandsSolutionOnly;
   theInterpreteR.Evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors!="")
@@ -94,7 +97,12 @@ std::string HtmlInterpretation::GetProblemSolution()
       out << currentA.solutionElements[i].ToStringInterpretedBody();
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
-    out <<  "<hr>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
+    out << "<hr>"
+    << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?request=calculator&mainInput="
+    << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosures.str(), false)
+    << "\">Input link</a>"
+    <<  "<br>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
     << "<hr>Raw input: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   return out.str();
 }
@@ -391,10 +399,10 @@ std::string HtmlInterpretation::ClonePageResult()
   }
   theFile << startingFileString;
   theFile.close();
-  out << "<b><span style=\"color:green\">Written content to file: "
-  << fileNameResulT << ". </span></b>";
   CalculatorHTML linkInterpreter;
   out << linkInterpreter.ToStringLinkFromFileName(fileNameResulT);
+  out << "<b><span style=\"color:green\">Written content to file: "
+  << fileNameResulT << ". </span></b>";
   return out.str();
 }
 
@@ -1190,16 +1198,28 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   theInterpreteR.Evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors!="")
   { out << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
-    << "Likely there is a bug with the problem. </b></span>"
-    << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
+    << "Likely there is a bug with the problem. </b></span>";
+    if (theGlobalVariables.UserDefaultHasProblemComposingRights())
+      out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable
+      << "?request=calculator&"
+      << "mainInput="
+      << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str(), false)
+      << "\">Calculator input no enclosures</a>";
+    out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
   }
   if (theInterpreteR.flagAbortComputationASAP)
   { out << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
-    << "Likely there is a bug with the problem. </b></span>"
-    << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
+    << "Likely there is a bug with the problem. </b></span>";
+    if (theGlobalVariables.UserDefaultHasProblemComposingRights())
+      out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable
+      << "?request=calculator&"
+      << "mainInput="
+      << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str(), false)
+      << "\">Calculator input no enclosures</a>";
+    out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.outputString
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;

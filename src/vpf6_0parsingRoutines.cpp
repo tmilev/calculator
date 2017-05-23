@@ -162,6 +162,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed(">");
   this->AddOperationNoRepetitionAllowed("<");
   this->AddOperationNoRepetitionAllowed("==");
+  this->AddOperationNoRepetitionAllowed("===");
   this->AddOperationNoRepetitionAllowed("\\cup");
   this->AddOperationNoRepetitionAllowed("\\sqcup");
   this->AddOperationNoRepetitionAllowed("\\cap");
@@ -2056,6 +2057,10 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXXByEmptyString();
   if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
     return this->ReplaceEOEByE();
+  if (secondToLastS=="==" && lastS=="=")
+    this->ReplaceXXByCon(this->conEqualEqualEqual());
+  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="===" && fourthToLastS=="Expression")
+    return this->ReplaceEOEXByEX();
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="==" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="\\geq" && fourthToLastS=="Expression")

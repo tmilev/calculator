@@ -1298,6 +1298,9 @@ public:
   int conEqualEqual()
   { return this->controlSequences.GetIndexIMustContainTheObject("==");
   }
+  int conEqualEqualEqual()
+  { return this->controlSequences.GetIndexIMustContainTheObject("===");
+  }
   int conApplyFunction()
   { return this->controlSequences.GetIndexIMustContainTheObject("{}");
   }
@@ -1405,6 +1408,9 @@ public:
   }
   int opEqualEqual()
   { return this->theAtoms.GetIndexIMustContainTheObject("==");
+  }
+  int opEqualEqualEqual()
+  { return this->theAtoms.GetIndexIMustContainTheObject("===");
   }
   int opGreaterThanOrEqualTo()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\geq");

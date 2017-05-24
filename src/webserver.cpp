@@ -2029,13 +2029,22 @@ int WebWorker::ProcessMonitor()
     return 0;
   }
   int inputWebWorkerNumber= atoi(theMainInput.c_str());
-  stOutput << "<html><body>"
+  stOutput << "<html>"
+  << "<head>"
+  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
   << this->GetJavaScriptIndicatorBuiltInServer()
-  << "<script language=\"javascript\">\n"
-  << "currentWorkerNumber=" << inputWebWorkerNumber << ";\n"
-  << "progressReport();\n"
-  <<" </script>"
-  << "</body></html>";
+  << "</head>"
+  << "<body>";
+  stOutput << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << "</calculatorNavigation>";
+  if (theGlobalVariables.flagAllowProcessMonitoring && theGlobalVariables.UserDefaultHasAdminRights())
+    stOutput << "<script language=\"javascript\">\n"
+    << "currentWorkerNumber=" << inputWebWorkerNumber << ";\n"
+    << "progressReport();\n"
+    << " </script>";
+  else
+    stOutput << "Process monitoring is allowed only for logged-in admins with process monitoring turned on. "
+    << "The link to turn on process monitoring in the calculator navigation panel. ";
+  stOutput << "</body></html>";
   return 0;
 }
 
@@ -3757,19 +3766,17 @@ int WebWorker::ServeClient()
     return this->ProcessServerStatus();
   else if (theGlobalVariables.userCalculatorRequestType=="statusPublic")
     return this->ProcessServerStatusPublic();
-  else if (theGlobalVariables.flagAllowProcessMonitoring)
-  { if (theGlobalVariables.userCalculatorRequestType=="monitor")
-      return this->ProcessMonitor();
-    else if (theGlobalVariables.userCalculatorRequestType=="pause")
-      return this->ProcessPauseWorker();
-    else if (theGlobalVariables.userCalculatorRequestType=="indicator")
-      return this->ProcessComputationIndicator();
-  }
+  if (theGlobalVariables.userCalculatorRequestType=="monitor")
+    return this->ProcessMonitor();
+  else if (theGlobalVariables.userCalculatorRequestType=="pause" && theGlobalVariables.flagAllowProcessMonitoring)
+    return this->ProcessPauseWorker();
+  else if (theGlobalVariables.userCalculatorRequestType=="indicator" && theGlobalVariables.flagAllowProcessMonitoring)
+    return this->ProcessComputationIndicator();
   //The following line is NOT ALLOWED:
   //this->parent->ReleaseNonActiveWorkers();
   //Reason: the architecture changed, now multiple requests
   //can be piped through one worker.
-  if (theGlobalVariables.userCalculatorRequestType=="setProblemData")
+  else if (theGlobalVariables.userCalculatorRequestType=="setProblemData")
     return this->ProcessSetProblemDatabaseInfo();
   else if (theGlobalVariables.userCalculatorRequestType=="changePassword")
     return this->ProcessChangePassword();

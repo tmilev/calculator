@@ -123,6 +123,7 @@ public:
   List<std::string> programArguments;
 
   MapLisT<std::string, std::string, MathRoutines::hashString> webArguments;
+  MapLisT<std::string, std::string, MathRoutines::hashString> CookiesToSetUsingHeaders;
   UserCalculatorData userDefault;
   std::string userCalculatorRequestType;
 

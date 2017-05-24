@@ -1107,7 +1107,8 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   List<std::string> userLabels;
   if (!theRoutines.FetchAllUsers(userTable, userLabels, comments))
     out << comments.str();
-  out << HtmlInterpretation::ToStringUserDetailsTable(usersAreAdmins, userTable, userLabels, hostWebAddressWithPort);
+  out << HtmlInterpretation::ToStringUserDetailsTable
+  (usersAreAdmins, userTable, userLabels, hostWebAddressWithPort);
 //    out << "<hr>Debug: got to here. ";
   if (!createdUsers || !sentEmails)
     out << "<br>Comments:<br>" << comments.str();
@@ -1488,7 +1489,8 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
         oneTableLineStream << "<td>"
         << "<a href=\""
         << UserCalculator::GetActivationAddressFromActivationToken
-        (currentUser.actualActivationToken.value, webAddress, userTable[i][indexUser], currentUser.email.value)
+        (currentUser.actualActivationToken.value, hostWebAddressWithPort,
+         userTable[i][indexUser], currentUser.email.value)
         << "\"> (Re)activate account and change password</a>"
         << "</td>";
       oneTableLineStream << "<td>";
@@ -1498,18 +1500,18 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
 
       oneTableLineStream << "body=";
       std::stringstream emailBody;
-      emailBody << "Dear student,\n you have not activated your homework server account yet. \n"
+      emailBody << "Dear user,\n you have not activated your homework server account yet. \n"
       << "To activate your account and set your password please use the link: "
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
       << HtmlRoutines::ConvertStringToURLString( UserCalculator::GetActivationAddressFromActivationToken
-        (currentUser.actualActivationToken.value, webAddress,
+        (currentUser.actualActivationToken.value, hostWebAddressWithPort,
          userTable[i][indexUser], currentUser.email.value), false )
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
       << " Once you activate your account, you can log in safely here: \n"
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
       << webAddress
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
-      << "Best regards, \n your Math 140 instructors."
+      << "Best regards, \ncalculator-algebra.org."
       ;
       oneTableLineStream << emailBody.str() << "\">Send email manually.</a> "
       ;
@@ -1980,6 +1982,7 @@ std::string HtmlInterpretation::ToStringNavigation()
 { MacroRegisterFunctionWithName("HtmlInterpretation::ToStringNavigation");
   std::stringstream out;
   //out << "<table>";
+  //out << "DEBUG: auth token: " << theGlobalVariables.GetWebInput("authenticationToken") << "<br>";
   std::string linkSeparator=" | ";
   std::string linkBigSeparator=" || ";
   if (theGlobalVariables.userCalculatorRequestType=="template" ||
@@ -2079,7 +2082,7 @@ std::string HtmlInterpretation::ToStringNavigation()
   if (!theGlobalVariables.flagRunningApache)
   { if (theGlobalVariables.flagAllowProcessMonitoring)
     { if (!theGlobalVariables.UserDefaultHasAdminRights())
-        out << "<span style=\"color:red\" ><b>Monitoring on</b></span>" << linkSeparator;
+        out << "<span style=\"color:red\"><b>Monitoring on</b></span>" << linkSeparator;
       else
         out << "<a style=\"color:red\" href=\""
         << theGlobalVariables.DisplayNameExecutable

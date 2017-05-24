@@ -198,7 +198,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 {
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LogoutViaDatabase");
-  //stOutput << "Got to logout";
+  stOutput << "<br>DEBUG: Got to logout";
   if (!theGlobalVariables.flagLoggedIn)
   { //stOutput << "but not resetting token. ";
     return true;
@@ -207,7 +207,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
   UserCalculator theUser;
   theUser.UserCalculatorData::operator=(theGlobalVariables.userDefault);
   theUser.currentTable=DatabaseStrings::usersTableName;
-//  stOutput << "<hr>DEBUG: logout: resetting token ... ";
+  stOutput << "<hr>DEBUG: logout: resetting token ... ";
   theUser.ResetAuthenticationToken(theRoutines, 0);
 //  stOutput << "token reset!... <hr>";
   theGlobalVariables.SetWebInpuT("authenticationToken", "");
@@ -843,7 +843,7 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
   this->currentTable=DatabaseStrings::usersTableName;
   std::stringstream secondCommentsStream;
   if (!this->FetchOneUserRow(theRoutines, &secondCommentsStream))
-  { if (!this->Iexist(theRoutines,0))
+  { if (!this->Iexist(theRoutines, 0))
       if (commentsOnFailure!=0)
         *commentsOnFailure << "User " << this->username.value << " does not exist. ";
   //stOutput << "<hr>DEBUG: user " << this->username.value << " does not exist. More details: " << secondCommentsStream.str() << "<hr>";
@@ -2103,13 +2103,16 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   DatabaseRoutines theRoutines;
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
-  //stOutput << "Logging in: " << userWrapper.ToStringUnsecure();
+  //stOutput << "DEBUG: Logging in: " << userWrapper.ToStringUnsecure();
   userWrapper.currentTable=DatabaseStrings::usersTableName;
   if (userWrapper.Authenticate(theRoutines, comments))
   { theUseR=userWrapper;
     return true;
   }
-  if (userWrapper.enteredAuthenticationToken!="" && userWrapper.enteredActivationToken=="" && comments!=0)
+  if (userWrapper.enteredAuthenticationToken!="" &&
+      userWrapper.enteredActivationToken=="" &&
+      userWrapper.enteredAuthenticationToken!="0" &&
+      comments!=0)
   { *comments << "<b> Authentication of user: " << userWrapper.username.value
     << " with token " << userWrapper.enteredAuthenticationToken.value << " failed. </b>";
     //*comments << "<br>DEBUG: actual token: " << userWrapper.actualAuthenticationToken.value
@@ -2122,10 +2125,13 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     //<< "<br>database user: " << theRoutines.databaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>"
     //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
   }
+  //stOutput << "<br>DEBUG: Got to this point";
   if (theGlobalVariables.userCalculatorRequestType=="changePassword" ||
-      theGlobalVariables.userCalculatorRequestType=="activateAccount")
+      theGlobalVariables.userCalculatorRequestType=="changePasswordPage" ||
+      theGlobalVariables.userCalculatorRequestType=="activateAccount" )
     if (userWrapper.enteredActivationToken!="")
-    { if (userWrapper.actualActivationToken!="activated" &&
+    { //stOutput << "<br>DEBUG: Proceding to login with activation token. ";
+      if (userWrapper.actualActivationToken!="activated" &&
           userWrapper.actualActivationToken!="" &&
           userWrapper.actualActivationToken!="error")
       { if (userWrapper.enteredActivationToken.value==userWrapper.actualActivationToken.value)
@@ -2496,11 +2502,14 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   (const std::string& theActivationToken, const std::string& calculatorBase,
    const std::string& inputUserNameUnsafe, const std::string& inputEmailUnsafe)
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
-  (void) calculatorBase;
   std::stringstream out;
-
-  out << theGlobalVariables.hopefullyPermanentWebAdress
-  << theGlobalVariables.DisplayNameExecutable
+  if (MathRoutines::StringBeginsWith(calculatorBase, "localhost"))
+    out << "https://" << calculatorBase;
+  else if(MathRoutines::StringBeginsWith(calculatorBase, "https://localhost"))
+    out << calculatorBase;
+  else
+    out << theGlobalVariables.hopefullyPermanentWebAdress;
+  out << theGlobalVariables.DisplayNameExecutable
   << "?request=activateAccount&username="
   << HtmlRoutines::ConvertStringToURLString(inputUserNameUnsafe, false);
   if (inputEmailUnsafe!="")

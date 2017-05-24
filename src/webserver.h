@@ -127,15 +127,10 @@ public:
   bool flagDeallocated;
   bool flagKeepAlive;
   bool flagFileNameSanitized;
-  bool flagAuthenticationTokenWasSubmitted;
-  bool flagPasswordWasSubmitted;
   bool flagFoundMalformedFormInput;
   bool flagProgressReportAllowed;
   bool flagArgumentsAreOK;
   bool flagDoAddContentLength;
-  bool flagMustLogin;
-  bool flagStopIfNoLogin;
-
   bool flagUsingSSLInWorkerProcess;
   bool flagDidSendAll;
   bool flagToggleMonitoring;

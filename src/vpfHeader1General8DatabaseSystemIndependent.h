@@ -82,6 +82,11 @@ class UserCalculatorData
 
   List<std::string> selectedRowFieldsUnsafe;
   List<std::string> selectedRowFieldNamesUnsafe;
+  bool flagEnteredAuthenticationToken;
+  bool flagEnteredPassword;
+  bool flagEnteredActivationToken;
+  bool flagMustLogin;
+  bool flagStopIfNoLogin;
   bool flagUserHasNoPassword;
   UserCalculatorData();
   void reset();

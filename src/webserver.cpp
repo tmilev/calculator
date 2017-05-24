@@ -1363,36 +1363,50 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=
   theGlobalVariables.webArguments;
   UserCalculatorData& theUser= theGlobalVariables.userDefault;
+
   theUser.username= HtmlRoutines::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("username"), false);
   theUser.enteredAuthenticationToken=HtmlRoutines::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("authenticationToken"), false);
   theUser.enteredGoogleToken=HtmlRoutines::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("googleToken"), false);
+  theUser.enteredActivationToken=HtmlRoutines::ConvertURLStringToNormal
+  (theGlobalVariables.GetWebInput("activationToken"), false);
+  theUser.enteredPassword=HtmlRoutines::ConvertURLStringToNormal
+  (theGlobalVariables.GetWebInput("password"), false);
+  theUser.flagEnteredPassword=(theUser.enteredPassword!="");
+  if (theUser.flagEnteredPassword)
+  { theUser.flagMustLogin=true;
+    theUser.enteredGoogleToken="";
+    theUser.enteredAuthenticationToken="";
+    theUser.enteredActivationToken="";
+    theUser.flagEnteredAuthenticationToken=false;
+    theUser.flagEnteredActivationToken=false;
+  }
+  if (theUser.enteredActivationToken.value!="")
+  { theUser.enteredGoogleToken="";
+    theUser.enteredAuthenticationToken="";
+    theUser.flagEnteredAuthenticationToken=false;
+    theUser.flagEnteredActivationToken=true;
+  }
+
+  //stOutput << "DEBUG: logging-in: " << theUser.ToStringUnsecure();
   if (theUser.username.value!="")
     theUser.enteredGoogleToken="";
   if (theUser.enteredAuthenticationToken!="")
-    this->flagAuthenticationTokenWasSubmitted=true;
+    theUser.flagEnteredAuthenticationToken=true;
   /////////////////////////////////////////////
-  theUser.enteredPassword=HtmlRoutines::ConvertURLStringToNormal
-  (theGlobalVariables.GetWebInput("password"), false);
   //this may need a security audit: the URLStringToNormal and GetWebInput
   //functions may leave traces of (freed) memory
   //of the old password. Could only be used
   //if the attacker has control of the server executable - which probably means we
   //already are in big trouble - so this really shouldn't be such a big deal.
   /////////////////////////////////////////////
-  this->flagPasswordWasSubmitted=(theUser.enteredPassword!="");
-  if (this->flagPasswordWasSubmitted)
-    this->flagMustLogin=true;
-  if (!this->flagPasswordWasSubmitted &&
-      !this->flagAuthenticationTokenWasSubmitted &&
+  if (theUser.flagEnteredPassword &&
+      theUser.flagEnteredAuthenticationToken &&
+      theUser.enteredActivationToken.value=="" &&
       theUser.enteredGoogleToken=="")
-    return !this->flagMustLogin;
-  if (this->flagPasswordWasSubmitted)
-  { this->flagAuthenticationTokenWasSubmitted=false;
-    theUser.enteredAuthenticationToken="";
-  }
+    return !theUser.flagMustLogin;
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     return false;
   bool doAttemptGoogleTokenLogin=false;
@@ -1406,17 +1420,10 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     if (theUser.username.value=="")
       doAttemptGoogleTokenLogin=true;
   } else if (theUser.username.value=="")
-    return !this->flagMustLogin;
+    return !theUser.flagMustLogin;
   /////////////////
   //doAttemptGoogleTokenLogin=false;
   ////////////////////////////
-  if ((theGlobalVariables.userCalculatorRequestType=="activateAccount" ||
-       theGlobalVariables.userCalculatorRequestType=="changePassword")
-      && theGlobalVariables.userDefault.enteredPassword=="")
-  { theGlobalVariables.userDefault.enteredActivationToken=
-    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false);
-    //argumentProcessingFailureComments << "DEBUG: entered activatino token: " << theGlobalVariables.userDefault.enteredActivationToken.value;
-  }
   bool changingPass=theGlobalVariables.userCalculatorRequestType=="changePassword" ||
   theGlobalVariables.userCalculatorRequestType=="activateAccount";
   if (changingPass)
@@ -1432,15 +1439,34 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theGlobalVariables.flagLoggedIn=
     DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (theUser, &argumentProcessingFailureComments);
-  theUser.clearPasswordFromMemory();
-  if (!theGlobalVariables.flagLoggedIn)
-  { theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
-    argumentProcessingFailureComments << "<b>Invalid user or password. </b>";
-  } else
+  theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("username",theUser.username.GetDataNoQuotes());
+  if (theGlobalVariables.flagLoggedIn && theUser.enteredActivationToken.value=="")
   { //in case the user logged in with password, we need
     //to give him/her the correct authentication token
+    //stOutput << "DEBUG: disclosing auth token. Entered activation token: "
+    //<< theUser.enteredActivationToken.value;
+    theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", theUser.actualAuthenticationToken.GetDataNoQuotes());
     theGlobalVariables.SetWebInpuT("authenticationToken", theUser.actualAuthenticationToken.GetDataNoQuotes());
+  } else
+    theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "0");
+  bool shouldDisplayMessage=false;
+  if (!theGlobalVariables.flagLoggedIn && theUser.username.value!="")
+  { if (theUser.flagEnteredPassword || theUser.flagEnteredActivationToken)
+      shouldDisplayMessage=true;
+    if (theUser.flagEnteredAuthenticationToken)
+      if (theUser.enteredActivationToken.value!="0" &&
+          theUser.enteredActivationToken.value!="")
+        shouldDisplayMessage=true;
   }
+  theUser.clearPasswordFromMemory();
+  if (shouldDisplayMessage)
+  { theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
+    //stOutput << "<br>DEBUG: Invalid user or pass";
+    argumentProcessingFailureComments << "<b>Invalid user and/or authentication. </b>";
+  }
+  //stOutput << "<br>DEBUG: Login success: " << theGlobalVariables.flagLoggedIn
+  //<< " entered auth token: " << theUser.enteredAuthenticationToken.value
+  //<< " actual auth token: " << theUser.actualAuthenticationToken.value;
   theArgs.SetKeyValue("password", "********************************************");
   return true;
 }
@@ -1845,20 +1871,15 @@ std::string WebWorker::GetHeaderConnectionClose()
 }
 
 std::string WebWorker::GetHeaderSetCookie()
-{ if (!theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
-    return "";
-  std::stringstream out;
-  if (theGlobalVariables.userDefault.username.value!="")
-  { out << "Set-Cookie: " << "username="
-    << theGlobalVariables.userDefault.username.GetDataNoQuotes()
+{ std::stringstream out;
+  for (int i=0; i<theGlobalVariables.CookiesToSetUsingHeaders.size(); i++)
+  { out << "Set-Cookie: " << theGlobalVariables.CookiesToSetUsingHeaders.theKeys[i]
+    << "="
+    << theGlobalVariables.CookiesToSetUsingHeaders.theValues[i]
     << "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT; Secure";
-    if (theGlobalVariables.userDefault.actualAuthenticationToken.value!="")
+    if (i!=theGlobalVariables.CookiesToSetUsingHeaders.size()-1)
       out << "\r\n";
   }
-  if (theGlobalVariables.userDefault.actualAuthenticationToken.value!="")
-    out << "Set-Cookie: " << "authenticationToken="
-    << theGlobalVariables.userDefault.actualAuthenticationToken.GetDataNoQuotes()
-    << "; Path=/; Expires=Sat, 01 Jan 2030 20:00:00 GMT; Secure";
   return out.str();
 }
 
@@ -2370,13 +2391,9 @@ void WebWorker::reset()
   this->flagFileNameSanitized=false;
   this->timeOfLastPingServerSideOnly=-1;
   this->timeServerAtWorkerStart=-1;
-  this->flagAuthenticationTokenWasSubmitted=false;
   this->flagFoundMalformedFormInput=false;
-  this->flagPasswordWasSubmitted=false;
   this->flagProgressReportAllowed=false;
   this->flagKeepAlive=false;
-  this->flagMustLogin=true;
-  this->flagStopIfNoLogin=true;
   this->flagDidSendAll=false;
   this->flagUsingSSLInWorkerProcess=false;
   theGlobalVariables.flagUsingSSLinCurrentConnection=false;
@@ -2712,6 +2729,13 @@ std::string WebWorker::GetChangePasswordPage()
   << "required>";
   bool doShowPasswordChangeField=true;
   out << "<table>";
+  if (theGlobalVariables.userDefault.actualActivationToken.value!="" &&
+      theGlobalVariables.userDefault.actualActivationToken.value!="activated" &&
+      theGlobalVariables.userDefault.actualActivationToken.value!="error")
+    out << "<tr><td colspan=\"2\">"
+    << "<b><span style=\"color:orange\">"
+    << "To fully activate your account, "
+    << "please choose a password.</span></b></td></tr>";
   if (theGlobalVariables.userCalculatorRequestType=="activateAccount")
   { out << "<tr><td colspan=\"2\">";
     std::string claimedActivationToken=
@@ -2726,9 +2750,8 @@ std::string WebWorker::GetChangePasswordPage()
       std::string actualEmailActivationToken, usernameAssociatedWithToken;
       if (theGlobalVariables.userDefault.email.value==claimedEmail)
         out << "\n<b><span style=\"color:green\">Email "
-        << claimedEmail << " already updated.</span>"
-        << "<br>"
-        << "<span style=\"color:orange\">To fully activate your account, please choose a password.</span></b>";
+        << claimedEmail << " already updated. </span></b>"
+        ;
       else if (!theRoutines.FetchEntry
           ((std::string) "email", claimedEmail, (std::string)"emailActivationStats",
            (std::string) "activationToken", actualEmailActivationToken, &out))
@@ -3641,7 +3664,9 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection()
 int WebWorker::ServeClient()
 { MacroRegisterFunctionWithName("WebWorker::ServeClient");
   theGlobalVariables.flagComputationStarted=true;
-  this->flagMustLogin=true;
+  theGlobalVariables.userDefault.flagMustLogin=true;
+  theGlobalVariables.userDefault.flagStopIfNoLogin=true;
+  UserCalculatorData& theUser=theGlobalVariables.userDefault;
   theGlobalVariables.IndicatorStringOutputFunction=WebServer::PipeProgressReportToParentProcess;
 //  std::cout << "GOT TO HERE 0" << std::endl;
   if (this->requestTypE!=this->requestGet && this->requestTypE!=this->requestPost
@@ -3668,14 +3693,14 @@ int WebWorker::ServeClient()
   if (this->addressComputed==theGlobalVariables.DisplayNameExecutable)
     theGlobalVariables.userCalculatorRequestType=theGlobalVariables.GetWebInput("request");
   this->CorrectRequestsBEFORELoginReturnFalseIfModified();
-  this->flagMustLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
-  if (this->flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
+  theUser.flagMustLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
+  if (theUser.flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
     return this->ProcessLoginNeededOverUnsecureConnection();
   this->flagArgumentsAreOK=this->Login(argumentProcessingFailureComments);
   this->CorrectRequestsAFTERLoginReturnFalseIfModified();
 
   //stOutput << "DEBUG: this->flagPasswordWasSubmitted: " << this->flagPasswordWasSubmitted;
-  if (this->flagPasswordWasSubmitted &&
+  if (theUser.flagEnteredPassword &&
       theGlobalVariables.userCalculatorRequestType!="changePassword" &&
       theGlobalVariables.userCalculatorRequestType!="activateAccount")
   { std::stringstream redirectedAddress;
@@ -3716,17 +3741,17 @@ int WebWorker::ServeClient()
     stOutput << "</body></html>";
     return 0;
   }
-  this->flagStopIfNoLogin=
+  theUser.flagStopIfNoLogin=
   (!theGlobalVariables.flagLoggedIn &&
    theGlobalVariables.flagUsingSSLinCurrentConnection &&
-   this->flagMustLogin);
-  if (this->flagStopIfNoLogin)
+   theUser.flagMustLogin);
+  if (theUser.flagStopIfNoLogin)
   { if (theGlobalVariables.userCalculatorRequestType=="changePassword")
-      this->flagStopIfNoLogin=false;
+      theUser.flagStopIfNoLogin=false;
     if (theGlobalVariables.userCalculatorRequestType=="changePassword")
-      this->flagStopIfNoLogin=false;
+      theUser.flagStopIfNoLogin=false;
   }
-  if (this->flagStopIfNoLogin)
+  if (theUser.flagStopIfNoLogin)
   { if(theGlobalVariables.userCalculatorRequestType!="logout" &&
        theGlobalVariables.userCalculatorRequestType!="login")
     { argumentProcessingFailureComments << "<b>Accessing: ";
@@ -3739,9 +3764,9 @@ int WebWorker::ServeClient()
     }
     return this->ProcessLoginPage(argumentProcessingFailureComments.str());
   }
-  if (argumentProcessingFailureComments.str()!="" && this->flagMustLogin)
+  if (argumentProcessingFailureComments.str()!="" && theUser.flagMustLogin)
     theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
-  if (this->flagMustLogin)
+  if (theUser.flagMustLogin)
     this->errorLogin=argumentProcessingFailureComments.str();
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType=="database")

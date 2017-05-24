@@ -440,9 +440,13 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
 }
 
 UserCalculatorData::UserCalculatorData()
-{ this->flagUserHasNoPassword=false;
-  this->approximateHoursSinceLastTokenWasIssued=-1;
-
+{ this->approximateHoursSinceLastTokenWasIssued=-1;
+  this->flagEnteredAuthenticationToken=false;
+  this->flagMustLogin=true;
+  this->flagEnteredPassword=false;
+  this->flagStopIfNoLogin=true;
+  this->flagUserHasNoPassword=false;
+  this->flagEnteredActivationToken=false;
 }
 
 void UserCalculatorData::reset()
@@ -494,7 +498,11 @@ std::string UserCalculatorData::ToStringUnsecure()
   << "\n<br>Entered authentication token: "
   << this->enteredAuthenticationToken.value
   << "\n<br>Entered password: "
-  << this->enteredPassword;
+  << this->enteredPassword
+  << "\n<br>Entered activation token: "
+  << this->enteredActivationToken.value
+  << "\n<br>Actual activation token: "
+  << this->actualActivationToken.value;
   return out.str();
 }
 

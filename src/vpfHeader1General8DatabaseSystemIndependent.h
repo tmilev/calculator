@@ -87,6 +87,7 @@ class UserCalculatorData
   bool flagEnteredActivationToken;
   bool flagMustLogin;
   bool flagStopIfNoLogin;
+  bool flagUserHasActivationToken;
   bool flagUserHasNoPassword;
   UserCalculatorData();
   void reset();

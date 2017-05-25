@@ -446,6 +446,7 @@ UserCalculatorData::UserCalculatorData()
   this->flagEnteredPassword=false;
   this->flagStopIfNoLogin=true;
   this->flagUserHasNoPassword=false;
+  this->flagUserHasActivationToken=false;
   this->flagEnteredActivationToken=false;
 }
 

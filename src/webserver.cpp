@@ -2729,9 +2729,7 @@ std::string WebWorker::GetChangePasswordPage()
   << "required>";
   bool doShowPasswordChangeField=true;
   out << "<table>";
-  if (theGlobalVariables.userDefault.actualActivationToken.value!="" &&
-      theGlobalVariables.userDefault.actualActivationToken.value!="activated" &&
-      theGlobalVariables.userDefault.actualActivationToken.value!="error")
+  if (theGlobalVariables.userDefault.flagUserHasActivationToken)
     out << "<tr><td colspan=\"2\">"
     << "<b><span style=\"color:orange\">"
     << "To fully activate your account, "

@@ -198,7 +198,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 {
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LogoutViaDatabase");
-  stOutput << "<br>DEBUG: Got to logout";
+  //stOutput << "<br>DEBUG: Got to logout";
   if (!theGlobalVariables.flagLoggedIn)
   { //stOutput << "but not resetting token. ";
     return true;
@@ -207,7 +207,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
   UserCalculator theUser;
   theUser.UserCalculatorData::operator=(theGlobalVariables.userDefault);
   theUser.currentTable=DatabaseStrings::usersTableName;
-  stOutput << "<hr>DEBUG: logout: resetting token ... ";
+  //stOutput << "<hr>DEBUG: logout: resetting token ... ";
   theUser.ResetAuthenticationToken(theRoutines, 0);
 //  stOutput << "token reset!... <hr>";
   theGlobalVariables.SetWebInpuT("authenticationToken", "");
@@ -778,6 +778,12 @@ bool UserCalculator::FetchOneUserRow
   this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");
   this->problemDataString=this->GetSelectedRowEntry("problemData");
   this->activationTokenCreationTime=this->GetSelectedRowEntry("activationTokenCreationTime");
+  if (this->actualActivationToken.value!="" &&
+      this->actualActivationToken.value!="activated" &&
+      this->actualActivationToken.value!="error")
+    this->flagUserHasActivationToken=true;
+  if (this->actualShaonedSaltedPassword=="")
+    this->flagUserHasNoPassword=true;
   bool courseHomeFromDB=true;
   if (this->userRole=="admin")
     if (theGlobalVariables.GetWebInput("courseHome")!="")

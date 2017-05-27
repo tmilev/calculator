@@ -5149,6 +5149,10 @@ void WebServer::InitializeGlobalVariables()
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/favicon.ico");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("html/selectCourse.html");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/html/selectCourse.html");
+  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("html-common-calculator/about.html");
+  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/html-common-calculator/about.html");
+  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("html/about.html");
+  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/html/about.html");
 
 }
 

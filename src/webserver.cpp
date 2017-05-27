@@ -5146,7 +5146,9 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsSensitive.SetKeyValue("crashes/", "LogFiles/crashes/");
 
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("favicon.ico");
+  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/favicon.ico");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("html/selectCourse.html");
+  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/html/selectCourse.html");
 
 }
 

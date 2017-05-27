@@ -3633,6 +3633,28 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified()
   return stateNotModified;
 }
 
+bool WebWorker::ProcessRedirectAwayFromWWW()
+{ std::string addressNoWWW;
+  if (!MathRoutines::StringBeginsWith(theGlobalVariables.hostWithPort,"www.",&addressNoWWW))
+    return false;
+  std::stringstream newAddressStream, redirectHeaderStream;
+  newAddressStream << "https://" << addressNoWWW;
+  if (this->addressGetOrPost.size()!=0)
+    if (this->addressGetOrPost[0]!='/')
+      this->addressGetOrPost='/'+this->addressGetOrPost;
+  newAddressStream << this->addressGetOrPost;
+  if (theGlobalVariables.flagRunningApache)
+    redirectHeaderStream << "Content-Type: text/html\r\n";
+  redirectHeaderStream << "Location: " << newAddressStream.str();
+  //double fixme;
+  this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectHeaderStream.str());
+  //this->SetHeaderOKNoContentLength();
+  stOutput << "<html><body>Please remove the www. from the address, it creates issues with authentication services. "
+  << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
+  stOutput << "</body></html>";
+  return true;
+}
+
 int WebWorker::ProcessLoginNeededOverUnsecureConnection()
 { MacroRegisterFunctionWithName("WebWorker::ProcessLoginNeededOverUnsecureConnection");
   std::stringstream redirectStream, newAddressStream;
@@ -3694,6 +3716,8 @@ int WebWorker::ServeClient()
   theUser.flagMustLogin=this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
   if (theUser.flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
     return this->ProcessLoginNeededOverUnsecureConnection();
+  if (this->ProcessRedirectAwayFromWWW())
+    return 0;
   this->flagArgumentsAreOK=this->Login(argumentProcessingFailureComments);
   this->CorrectRequestsAFTERLoginReturnFalseIfModified();
 

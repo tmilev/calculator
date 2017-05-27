@@ -194,6 +194,7 @@ public:
   int ProcessExamPageInterpreter();
   int ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication);
   int ProcessLoginNeededOverUnsecureConnection();
+  bool ProcessRedirectAwayFromWWW();
   int ProcessLoginPage(const std::string& reasonForLogin="");
   int ProcessLogout();
   int ProcessSignUP();

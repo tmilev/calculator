@@ -428,14 +428,17 @@ bool FileOperations::IsFolderUnsecure(const std::string& theFolderName)
   return false;
 }
 
-std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileName)
+std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileName, std::string* outputFileNameNoExtension)
 { MacroRegisterFunctionWithName("FileOperations::GetFileExtensionWithDot");
   if (theFileName=="" || theFileName.size()<=0)
     return "";
 //  std::cout << "file name size: " << theFileName.size() ;
   for (int i=(signed) theFileName.size()-1; i>=0; i--)
     if (theFileName[i]=='.')
+    { if (outputFileNameNoExtension!=0)
+        *outputFileNameNoExtension=theFileName.substr(0,i);
       return theFileName.substr(i, std::string::npos);
+    }
   return "";
 }
 
@@ -580,14 +583,18 @@ FileOperations::FolderVirtualLinksNonSensitive()
   return result;
 }
 
+HashedList<std::string, MathRoutines::hashString>&
+FileOperations::FilesStartsToWhichWeAppendHostName()
+{ static HashedList<std::string, MathRoutines::hashString> result;
+  return result;
+}
+
 MapLisT<std::string, std::string, MathRoutines::hashString>&
 FileOperations::FolderVirtualLinksSensitive()
 { static MapLisT<std::string, std::string, MathRoutines::hashString> result;
   static bool firstRun=false;
   if (!firstRun)
   { firstRun=true;
-    static MutexRecursiveWrapper theMutex;
-    MutexLockGuard theGuard(theMutex);
     result.SetKeyValue("freecalc/", "../freecalc/");
     result.SetKeyValue("LogFiles/", "LogFiles/");
     result.SetKeyValue("crashes/", "LogFiles/crashes/");
@@ -601,8 +608,6 @@ FileOperations::FolderVirtualLinksULTRASensitive()
   static bool firstRun=false;
   if (!firstRun)
   { firstRun=true;
-    static MutexRecursiveWrapper theMutex;
-    MutexLockGuard theGuard(theMutex);
     result.SetKeyValue("certificates/", "certificates/");
   }
   return result;
@@ -666,37 +671,48 @@ bool FileOperations::OpenFileUnsecureReadOnly(std::ifstream& theFile, const std:
   return theFile.is_open();
 }
 
-bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFileName, std::string& output, bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
+bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFileNamE, std::string& output, bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
 { MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtual");
-//  stOutput << "<br>DEBUG: processing " << inputFileName << " -> ... <br>";
-  if (!FileOperations::IsOKfileNameVirtual(inputFileName, accessSensitiveFolders))
+  //stOutput << "<br>DEBUG: processing " << inputFileNamE << " -> ... <br>";
+  if (!FileOperations::IsOKfileNameVirtual(inputFileNamE, accessSensitiveFolders))
     return false;
-  if (&inputFileName==&output)
-  { std::string inputCopy=inputFileName;
-    return FileOperations::GetPhysicalFileNameFromVirtual(inputCopy, output, accessSensitiveFolders);
-  }
+  std::string inputCopy=inputFileNamE;
+  for (int i=0; i<FileOperations::FilesStartsToWhichWeAppendHostName().size; i++)
+    if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FilesStartsToWhichWeAppendHostName()[i]))
+    { if (!FileOperations::IsOKfileNameVirtual(theGlobalVariables.hostNoPort))
+        return false;
+      std::string toAppend=theGlobalVariables.hostNoPort;
+      if (MathRoutines::StringBeginsWith(toAppend, "www."))
+        toAppend=toAppend.substr(4);
+      if (MathRoutines::StringBeginsWith(toAppend, "localhost"))
+        toAppend="calculator-algebra.org";
+      std::string fileStart, fileExtension;
+      fileExtension=FileOperations::GetFileExtensionWithDot(inputCopy, &fileStart);
+      inputCopy=fileStart+"-"+toAppend+fileExtension;
+      //stOutput << "DEBUG: inputCopy: " << inputCopy;
+    }
   std::string folderEnd;
   for (int i=0; i<FileOperations::FolderVirtualLinksNonSensitive().size(); i++)
-    if (MathRoutines::StringBeginsWith(inputFileName, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd))
+    if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd))
     { output=theGlobalVariables.PhysicalPathProjectBase+FileOperations::FolderVirtualLinksNonSensitive().theValues[i]+folderEnd;
       //stOutput << inputFileName << " transformed to: " << output;
       return true;
     }
   if (accessSensitiveFolders)
     for (int i=0; i<FileOperations::FolderVirtualLinksSensitive().size(); i++)
-      if (MathRoutines::StringBeginsWith(inputFileName, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd))
+      if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd))
       { output=theGlobalVariables.PhysicalPathProjectBase+FileOperations::FolderVirtualLinksSensitive().theValues[i]+folderEnd;
         //stOutput << inputFileName << " transformed to: " << output;
         return true;
       }
   if (accessULTRASensitiveFolders)
     for (int i=0; i<FileOperations::FolderVirtualLinksULTRASensitive().size(); i++)
-      if (MathRoutines::StringBeginsWith(inputFileName, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd))
+      if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd))
       { output=theGlobalVariables.PhysicalPathProjectBase+FileOperations::FolderVirtualLinksULTRASensitive().theValues[i]+folderEnd;
         //stOutput << inputFileName << " transformed to: " << output;
         return true;
       }
-  output=theGlobalVariables.PhysicalPathHtmlFolder+inputFileName;
+  output=theGlobalVariables.PhysicalPathHtmlFolder+inputCopy;
 //  stOutput << "<br>No key matching: " << inputFileName << ". Selecting default: " << output << "<br>";
   return true;
 }

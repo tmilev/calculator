@@ -10,6 +10,9 @@ static ProjectInformationInstance ProjectInfoVpfHeader1General7FileOperations_En
 struct FileOperations
 {
 public:
+  static HashedList<std::string, MathRoutines::hashString>&
+  FilesStartsToWhichWeAppendHostName();
+
   static MapLisT<std::string, std::string, MathRoutines::hashString>&
   FolderVirtualLinksNonSensitive();
   static MapLisT<std::string, std::string, MathRoutines::hashString>&
@@ -26,7 +29,7 @@ public:
   static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
   static std::string GetFileNameFromFileNameWithPath(const std::string& fileName);
   static std::string GetPathFromFileNameWithPath(const std::string& fileName);
-  static std::string GetFileExtensionWithDot(const std::string& theFileName);
+  static std::string GetFileExtensionWithDot(const std::string& theFileName, std::string* outputFileNameNoExtension=0);
   static bool FileExistsUnsecure(const std::string& theFileName);
   static bool FileExistsVirtual(const std::string& theFileName, bool accessSensitiveFolders=false, bool accessULTRASensitiveFolders=false);
   static bool IsFolderUnsecure(const std::string& theFolderName);

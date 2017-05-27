@@ -34,11 +34,11 @@ function accordionExpansionOfProblem(theAnchor)
   newCell.colSpan=4;
   newCell.theIframeId=theAnchor.href;
   newCell.innerHTML=
-    "<div class=\"CurrentProblemIframeContainer\"> <iframe onload=\"resizeIFrameToFitContent(this);\" id=\"" +
+    "<div class=\"CurrentProblemIframeContainer\"> <iframe style=\"background:white; width:100%\" onload=\"resizeIFrameToFitContent(this);\" id=\"" +
     newCell.theIframeId + "\" src=\""+
     theAnchor.href + "&navigationBar=false"+
     "\" "+
-    "style=\"width:100%\"> It appears your web browser doesn't support iframes ...</iframe></div>";
+    "> It appears your web browser doesn't support iframes ...</iframe></div>";
 }
 
 function setProblemLinkStyle(desiredStyle)

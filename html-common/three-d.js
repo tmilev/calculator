@@ -1,6 +1,5 @@
 "use strict";
 
-
 //Copyright (c) 2016, Todor Emilov Milev
 //This file is licensed to you under the permissive MIT license.
 //The license text is included below for your convenience (copied from Wikipedia).

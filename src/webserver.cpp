@@ -260,7 +260,7 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
 
 #endif // MACRO_use_open_ssl
 //http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
-//openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 1001
+//openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 3001
 //Alternatively:
 //certificate with certificate signing request:
 //openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout privateKey.key
@@ -5144,6 +5144,10 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");//<-internal use
   folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");//<-coming from webserver
   folderSubstitutionsSensitive.SetKeyValue("crashes/", "LogFiles/crashes/");
+
+  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("favicon.ico");
+  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("html/selectCourse.html");
+
 }
 
 int main(int argc, char **argv)

@@ -454,7 +454,7 @@ std::string HtmlInterpretation::GetAboutPage()
   std::string theFile;
   if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/about.html", theFile, out, false, false))
   { out << "<span style=\"color:red\"><b>" << "File: selectCourse.html is missing. " << "</b></span>"
-    << "<br>The file needs to be located at <br>calculator-base-folder/../public_html/selectCourse.html"
+    << "<br>The file needs to be located at <br>calculator-base-folder/html-common/about.html"
     << "<br>i.e., the file must be in a folder named public_html, parallel to the installation folder." ;
   } else
     out << theFile;

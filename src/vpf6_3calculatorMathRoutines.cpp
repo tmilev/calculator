@@ -6832,7 +6832,12 @@ class LaTeXcrawler
   std::string baseFolderStartFilePhysical;
   std::string theFileToCrawlNoPathPhysical;
   std::string theFileWorkingCopy;
+  List<std::string> theLectureNumbers;
+  List<std::string> theLectureDesiredNames;
+  List<std::string> theSlides;
+  List<std::string> theSlideNames;
   Calculator* owner;
+  bool flagBuildSingleSlides;
   bool ExtractFileNamesFromRelativeFileName();
   void Crawl();
   void BuildFreecalc();
@@ -6841,6 +6846,9 @@ class LaTeXcrawler
   std::stringstream displayResult;
   std::stringstream errorStream;
   std::string ToString();
+  LaTeXcrawler()
+  { this->flagBuildSingleSlides=false;
+  }
 };
 
 bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName()
@@ -6875,7 +6883,6 @@ void LaTeXcrawler::BuildFreecalc()
   { this->displayResult << "Failed to open input file: " << this->theFileToCrawlPhysical << ", aborting. ";
     return;
   }
-  List<std::string> theLectureNumbers, theLectureDesiredNames;
   inputFile.seekg(0);
   std::string buffer;
   ProgressReport theReport;
@@ -6885,16 +6892,24 @@ void LaTeXcrawler::BuildFreecalc()
 //  stOutput << "Processing input file: extracting lecture numbers.";
   bool isLecturE =false;
   bool isHW=false;
+  int currentLineIndex=-1;
   while (!inputFile.eof())
   { std::getline(inputFile, buffer);
+    currentLineIndex++;
     bool isInput=false;
-    if (MathRoutines::StringBeginsWith(buffer, "\\lect"))
+    if (MathRoutines::StringBeginsWith(buffer, "\\lect") &&
+        !MathRoutines::StringBeginsWith(buffer, "\\lecture"))
     { isInput=true;
       isLecturE=true;
     }
     if (MathRoutines::StringBeginsWith(buffer, "\\homeworkOnATopic"))
     { isInput=true;
       isHW=true;
+    }
+    if (this->flagBuildSingleSlides && isLecturE)
+    { //stOutput << "<br>DEBUG: Checking " << buffer << " trimmed to: " << MathRoutines::StringTrimWhiteSpace(buffer);
+      if (MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\input", 0) )
+        this->theSlides.AddOnTop(MathRoutines::StringTrimWhiteSpace(buffer));
     }
     if (!isInput)
       continue;
@@ -6920,8 +6935,8 @@ void LaTeXcrawler::BuildFreecalc()
         lectureNumber.push_back(buffer[i]);
     }
     if (lectureNumber.size()>0)
-      theLectureNumbers.AddOnTop(lectureNumber.substr(1, lectureNumber.size()-1));
-    else
+    { this->theLectureNumbers.AddOnTop(lectureNumber.substr(1, lectureNumber.size()-1));
+    } else
     { this->displayResult << "Failed to extract lecture/homework number from line: " << buffer;
       return;
     }
@@ -6952,17 +6967,29 @@ void LaTeXcrawler::BuildFreecalc()
     return;
   }
   std::stringstream LectureContentNoDocumentClassNoCurrentLecture;
+  std::stringstream LectureHeaderNoDocumentClass;
   inputFile.clear();
   inputFile.seekg(0);
+  bool foundFirstLecture=false;
   if (isLecturE)
     while (!inputFile.eof())
     { std::getline(inputFile, buffer);
-      if (!MathRoutines::StringBeginsWith(buffer, "\\documentclass") &&
-          !MathRoutines::StringBeginsWith(buffer, "[handout]") &&
-          !MathRoutines::StringBeginsWith(buffer, "{beamer}") &&
-          !MathRoutines::StringBeginsWith(buffer, "\\newcommand{\\currentLecture}")
+      if (!MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\documentclass") &&
+          !MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "[handout]") &&
+          !MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "{beamer}") &&
+          !MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\newcommand{\\currentLecture}")
          )
         LectureContentNoDocumentClassNoCurrentLecture << buffer << "\n";
+      if (this->flagBuildSingleSlides)
+      { if (MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\lect") &&
+            !MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\lecture"))
+          foundFirstLecture=true;
+        if (!foundFirstLecture)
+          if (!MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\documentclass") &&
+              !MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "[handout]") &&
+              !MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "{beamer}"))
+            LectureHeaderNoDocumentClass << buffer << "\n";
+      }
     }
   else
     while (!inputFile.eof())
@@ -6984,12 +7011,6 @@ void LaTeXcrawler::BuildFreecalc()
     if (!MathRoutines::StringBeginsWith(this->theFileToCrawlNoPathPhysical, "Homework_", &lectureFileNameEnd))
       lectureFileNameEnd="";
   std::string folderEnd=this->theFileToCrawlNoPathPhysical.substr(0, this->theFileToCrawlNoPathPhysical.size()-4);
-  std::string printableFolder;
-  std::string lectureProjectorFolder="lectures_projector_" + folderEnd + "/";
-  if (!isLecturE)
-    printableFolder="homework_" + folderEnd + "/";
-  else
-    printableFolder="lectures_printable_" + folderEnd + "/";
   if (lectureFileNameEnd.size()>4)
     lectureFileNameEnd=lectureFileNameEnd.substr(0, lectureFileNameEnd.size()-4);
   std::stringstream executedCommands, resultTable;
@@ -6999,24 +7020,36 @@ void LaTeXcrawler::BuildFreecalc()
   executedCommands << "Commands executed: "
   << "<br>Directory changed: " << this->baseFolderStartFilePhysical;
   reportStream << "<br>Directory changed: " << this->baseFolderStartFilePhysical;
+  std::string lectureProjectorFolder="lectures_projector_" + folderEnd + "/";
+  std::string printableFolder;
+  std::string slideProjectorFolder, slideHandoutFolder;
+  if (!isLecturE)
+    printableFolder="homework_" + folderEnd + "/";
+  else
+    printableFolder="lectures_printable_" + folderEnd + "/";
   theGlobalVariables.CallSystemNoOutput("mkdir "+printableFolder);
   if (isLecturE)
-    theGlobalVariables.CallSystemNoOutput("mkdir "+lectureProjectorFolder);
+  { theGlobalVariables.CallSystemNoOutput("mkdir "+lectureProjectorFolder);
+    if (this->flagBuildSingleSlides)
+    { slideProjectorFolder = "slides_projector_" + folderEnd + "/";
+      slideHandoutFolder = "slides_handout_" + folderEnd + "/";
+      theGlobalVariables.CallSystemNoOutput("mkdir "+slideProjectorFolder);
+      theGlobalVariables.CallSystemNoOutput("mkdir "+slideHandoutFolder);
+    }
+  }
   //this->theFileWorkingCopy=this->baseFolderStartFilePhysical+ "working_file_"+ this->theFileToCrawlNoPathPhysical;
   //std::string theFileWorkingCopyPDF=this->baseFolderStartFilePhysical+ "working_file_"
   //+this->theFileToCrawlNoPathPhysical.substr(0, this->theFileToCrawlNoPathPhysical.size()-3)+"pdf";
   this->theFileWorkingCopy= "working_file_"+ this->theFileToCrawlNoPathPhysical;
   std::string theFileWorkingCopyPDF= "working_file_"
   +this->theFileToCrawlNoPathPhysical.substr(0, this->theFileToCrawlNoPathPhysical.size()-3)+"pdf";
-  for (int i=0; i<
-//1
-  theLectureNumbers.size
-  ; i++)
+  int numLecturesToProcess=theLectureNumbers.size;
+  std::fstream workingFile;
+  for (int i=0; i<numLecturesToProcess; i++)
   { reportStream << "<br>Processing lecture " << i+1 << " out of " << theLectureNumbers.size << ". ";
     resultTable << "<tr>";
     resultTable << "<td>" << theLectureNumbers[i] << "</td>";
     resultTable << "<td>" << theLectureDesiredNames[i] << "</td>";
-    std::fstream workingFile;
     if (!FileOperations::OpenFileCreateIfNotPresentUnsecure(workingFile, this->theFileWorkingCopy, false, true, false))
     { resultTable << "<td>-</td><td>-</td><td>Failed to open working file: "
       << this->theFileWorkingCopy << ", aborting. </td> </tr>";
@@ -7029,6 +7062,7 @@ void LaTeXcrawler::BuildFreecalc()
     else
       workingFile << "\\newcommand{\\currentHW}{" << theLectureNumbers[i] << "}\n"
       << LectureContentNoDocumentClassNoCurrentLecture.str();
+    workingFile.close();
     currentSysCommand="pdflatex -shell-escape "+this->theFileWorkingCopy;
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
@@ -7057,7 +7091,6 @@ void LaTeXcrawler::BuildFreecalc()
     theGlobalVariables.CallSystemNoOutput(currentSysCommand);
     reportStream << " done.";
     theReport.Report(reportStream.str());
-    workingFile.close();
     if (!isLecturE)
     { theReport.Report(reportStream.str());
       resultTable << "<td>" << thePdfFileNameHandout.str() << "</td>";
@@ -7072,6 +7105,7 @@ void LaTeXcrawler::BuildFreecalc()
     workingFile << "\\documentclass{beamer}\n\\newcommand{\\currentLecture}{"
     << theLectureNumbers[i] << "}\n";
     workingFile << LectureContentNoDocumentClassNoCurrentLecture.str();
+    workingFile.close();
     currentSysCommand="pdflatex -shell-escape "+this->theFileWorkingCopy;
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
@@ -7091,6 +7125,61 @@ void LaTeXcrawler::BuildFreecalc()
     resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>" << "<td>" << thePdfFileNameHandout.str() << "</td>";
     resultTable << "</tr>";
   }
+  int numSlidesToBuild=this->theSlides.size;
+  this->theSlideNames.SetSize(this->theSlides.size);
+  for (int i=0; i<this->theSlides.size; i++)
+  { this->theSlideNames[i]="";
+    if (this->theSlides[i]=="")
+      continue;
+    std::string currentName=this->theSlides[i].substr(0, this->theSlides[i].size()-1);
+    this->theSlideNames[i]= FileOperations::GetFileNameFromFileNameWithPath(currentName);
+  }
+  //executedCommands << "<br>Slides extracted: " << this->theSlides.ToStringCommaDelimited();
+  //executedCommands << "<br>Slides names: " << this->theSlideNames.ToStringCommaDelimited();
+  for (int i=0; i<numSlidesToBuild; i++)
+  { for (int k=0; k<2; k++)
+    { if (!FileOperations::OpenFileUnsecure(workingFile, this->theFileWorkingCopy, false, true, false))
+      { resultTable << "<td>-</td><td>-</td><td>Failed to open working file: "
+        << this->theFileWorkingCopy << ", aborting. </td> </tr>";
+        break;
+      }
+      workingFile << "\\documentclass";
+      if (k==1)
+        workingFile << "[handout]";
+      workingFile << "{beamer}";
+      workingFile << LectureHeaderNoDocumentClass.str()
+      << "\n"
+      << this->theSlides[i]
+      << "\n"
+      << "\\end{document}";
+      workingFile.close();
+      currentSysCommand="pdflatex -shell-escape "+this->theFileWorkingCopy;
+      executedCommands << "<br>" << currentSysCommand;
+      reportStream << currentSysCommand;
+      theReport.Report(reportStream.str());
+      theGlobalVariables.CallSystemNoOutput(currentSysCommand);
+//      executedCommands << "<br>result: "
+//      << theGlobalVariables.CallSystemWithOutput(currentSysCommand);
+      std::stringstream thePdfFileNameNormal;
+      thePdfFileNameNormal << "./";
+      if (k==0)
+        thePdfFileNameNormal << slideProjectorFolder;
+      else
+        thePdfFileNameNormal << slideHandoutFolder;
+      thePdfFileNameNormal << "Slide_"
+      << this->theSlideNames[i] << ".pdf";
+      currentSysCommand= "mv " +theFileWorkingCopyPDF + " " + thePdfFileNameNormal.str();
+      executedCommands << "<br>" << currentSysCommand;
+      reportStream << "<br>Slide " << i+1 << ", run " << k << " compiled, renaming file ... ";
+      theReport.Report(reportStream.str());
+      theGlobalVariables.CallSystemWithOutput(currentSysCommand);
+      reportStream << " done.";
+      theReport.Report(reportStream.str());
+      resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>";
+      resultTable << "</tr>";
+    }
+  }
+
   resultTable << "</table>";
   this->displayResult << executedCommands.str() << "<br>" << resultTable.str();
   theGlobalVariables.ChDir("../");
@@ -7181,8 +7270,8 @@ bool CalculatorFunctionsGeneral::innerCrawlTexFile(Calculator& theCommands, cons
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerBuildFreecalc(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrawlTexFile");
+bool CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
   { std::stringstream out;
     out << "Command available to logged-in admins only. ";
@@ -7191,6 +7280,24 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalc(Calculator& theCommands, con
   if (!input.IsOfType<std::string>())
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   LaTeXcrawler theCrawler;
+  theCrawler.flagBuildSingleSlides=true;
+  theCrawler.owner=&theCommands;
+  theCrawler.theFileToCrawlRelative=input.GetValue<std::string>();
+  theCrawler.BuildFreecalc();
+  return output.AssignValue(theCrawler.displayResult.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerBuildFreecalc(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBuildFreecalc");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { std::stringstream out;
+    out << "Command available to logged-in admins only. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  if (!input.IsOfType<std::string>())
+    return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
+  LaTeXcrawler theCrawler;
+  theCrawler.flagBuildSingleSlides=false;
   theCrawler.owner=&theCommands;
   theCrawler.theFileToCrawlRelative=input.GetValue<std::string>();
   theCrawler.BuildFreecalc();

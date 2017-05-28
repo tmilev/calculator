@@ -5161,6 +5161,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");
+  folderSubstitutionsNonSensitive.SetKeyValue("LaTeX-materials/", "../LaTeX-materials/");
 
   folderSubstitutionsSensitive.Clear();
   folderSubstitutionsSensitive.SetKeyValue("freecalc/", "../freecalc/");//<-internal use

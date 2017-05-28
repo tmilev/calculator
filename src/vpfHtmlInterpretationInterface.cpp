@@ -488,7 +488,7 @@ std::string HtmlInterpretation::GetSelectCourse()
     if (theExtensions[i]==".txt")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=template&topicList=topiclists/" << theFileNames[i]
-    << "&courseHome=pagetemplates/ace-learning-Singapore-H-syllabus-common.html\">"
+    << "&courseHome=pagetemplates/ace-learning-Singapore-H1-syllabus.html\">"
     << theFileNames[i] << "</a><br>";
   out << "</body></html>";
   return out.str();

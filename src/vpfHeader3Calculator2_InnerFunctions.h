@@ -155,6 +155,7 @@ public:
   static bool innerDdivDxToDiffDivDiffx(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestMathMouseHover(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBuildFreecalc(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerBuildFreecalcSingleSlides(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetOutputFile(Calculator& theCommands, const Expression& input, Expression& output);
 

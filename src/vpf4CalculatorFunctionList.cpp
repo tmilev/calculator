@@ -1559,6 +1559,16 @@ D-B;\
    "BuildFreecalc")
    ;
   this->AddOperationInnerHandler
+  ("BuildFreecalcWithSlides",
+    CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides, "",
+   "Same as BuildFreeCalc but attempts to also build individual slides. ",
+   "BuildFreecalcWithSlides (\"LaTeX-materials/lectures/ace-h1-2017/Lecture-Ace.tex\");\
+   ",
+   true, false,
+   "CalculatorFunctionsGeneral::BuildFreecalcWithSlides",
+   "BuildFreecalcWithSlides")
+   ;
+  this->AddOperationInnerHandler
   ("SetOutputFile",
     CalculatorFunctionsGeneral::innerSetOutputFile, "",
    "Sets an output/progress report file different from the default one. No dots, forward slashes, back slashes or file extensions allowed.\

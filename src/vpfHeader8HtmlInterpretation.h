@@ -35,8 +35,8 @@ public:
 
   std::string title;
   std::string video;
-  std::string slides;
-  std::string slidesSource;
+  std::string slidesProjector;
+  List<std::string> slidesSources;
   std::string slidesPrintable;
   std::string problem;
   std::string error;
@@ -116,6 +116,7 @@ public:
   static std::string stringScoredQuizzes;
   static std::string stringPracticE;
   static std::string stringProblemLink;
+  std::string slidesSourcesHeader;
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
   std::string inputHtml;

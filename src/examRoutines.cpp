@@ -3247,7 +3247,7 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicEl
       }
     if (!startsWithChapter)
     { TopicElement chapterlessChapter;
-      chapterlessChapter.parentTopics.AddOnTop(0);
+      chapterlessChapter.parentTopics.AddOnTop(output.size()-1);
       chapterlessChapter.type=chapterlessChapter.tChapter;
       chapterlessChapter.title="Topics without chapter";
       TopicElement::AddTopic(chapterlessChapter, output);
@@ -3274,8 +3274,9 @@ void TopicElement::reset(int parentSize)
   this->title="empty";
   this->id="";
   this->video="";
-  this->slides="";
+  this->slidesProjector="";
   this->slidesPrintable="";
+  this->slidesSources.SetSize(0);
   this->problem="";
   this->error="";
   this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
@@ -3312,13 +3313,13 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
     if (currentLine.size()>0)
       if (currentLine[0]=='%')
         continue;
-    if (MathRoutines::StringBeginsWith(currentLine, "SlideSourceHeader:", &currentArgument))
+    if (MathRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument))
     { if (found)
         TopicElement::AddTopic(currentElt, output);
       found=true;
       currentElt.reset(0);
       currentElt.type=currentElt.tTexHeader;
-      currentElt.slidesSource=currentArgument;
+      currentElt.slidesSources.AddOnTop(currentArgument);
     } else if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
     { if(found)
         TopicElement::AddTopic(currentElt, output);
@@ -3352,11 +3353,11 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       currentElt.id=currentElt.title;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Video:", &currentArgument))
       currentElt.video=MathRoutines::StringTrimWhiteSpace(currentArgument);
-    else if (MathRoutines::StringBeginsWith(currentLine, "Slides:", &currentArgument))
-      currentElt.slides=MathRoutines::StringTrimWhiteSpace(currentArgument);
-    else if (MathRoutines::StringBeginsWith(currentLine, "SlideSource:", &currentArgument))
-      currentElt.slidesSource=MathRoutines::StringTrimWhiteSpace(currentArgument);
-    else if (MathRoutines::StringBeginsWith(currentLine, "PrintableSlides:", &currentArgument))
+    else if (MathRoutines::StringBeginsWith(currentLine, "SlidesProjector:", &currentArgument))
+      currentElt.slidesProjector=MathRoutines::StringTrimWhiteSpace(currentArgument);
+    else if (MathRoutines::StringBeginsWith(currentLine, "SlidesSource:", &currentArgument))
+      currentElt.slidesSources.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
+    else if (MathRoutines::StringBeginsWith(currentLine, "SlidesPrintable:", &currentArgument))
       currentElt.slidesPrintable=MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "Problem:", &currentArgument))
     { currentElt.problem=MathRoutines::StringTrimWhiteSpace(currentArgument);
@@ -3511,13 +3512,22 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
     } else if (currentElt.type==currentElt.tError)
       out << "Error parsing topic list. Could not make sense of: " << currentElt.error << ". "
       << "The allowed data labels are CASE SENSITIVE: "
-      << "<br>Chapter<br>Section<br>Topic<br>Title<br>Video<br>Problem<br>Slides<br>PrintableSlides<br>"
-      << "You need to include columns immediately after the data labels. The data entries are terminated by new line. "
+      << "<br>Chapter"
+      << "<br>Section"
+      << "<br>Topic"
+      << "<br>Title"
+      << "<br>Video"
+      << "<br>Problem"
+      << "<br>SlidesProjector"
+      << "<br>SlidesPrintable"
+      << "<br>SlidesSourceHeader"
+      << "<br>SlidesSource"
+      << "<br>You need to include columns immediately after the data labels. The data entries are terminated by new line. "
       << " Here is a correctly entered example:"
       << "Title: What is a logarithmic derivative?<br>\n"
       << "Video: modules/substitution-rule/videos/integral-derivative-f-over-f-intro.html<br>\n"
-      << "Slides: modules/substitution-rule/pdf/integral-derivative-f-over-f-intro.pdf<br>\n"
-      << "PrintableSlides: modules/substitution-rule/pdf/printable-integral-derivative-f-over-f-intro.pdf<br>\n"
+      << "SlidesProjector: modules/substitution-rule/pdf/integral-derivative-f-over-f-intro.pdf<br>\n"
+      << "SlidesPrintable: modules/substitution-rule/pdf/printable-integral-derivative-f-over-f-intro.pdf<br>\n"
       << "\n";
   }
   if (subSectionStarted)
@@ -3641,6 +3651,10 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   //CalculatorHTML currentProblem;
   for (int i=0; i<this->theTopicS.size(); i++)
   { TopicElement& currentElt=this->theTopicS[i];
+    if (currentElt.type==currentElt.tTexHeader)
+    { this->slidesSourcesHeader=currentElt.slidesProjector;
+      continue;
+    }
     if (currentElt.type==currentElt.tChapter)
     { currentChapter=currentElt.title;
       chapterCounter++;
@@ -3753,11 +3767,11 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 //      << ", answered: "
 //      << currentElt.totalPointsEarned;
       out << "  </td>\n";
-      out << "  <td>\n" << currentElt.displayVideoLink;
+      out << "  <td>\n" << currentElt.displayVideoLink << " | ";
+      if (currentElt.displaySlidesLink!="")
+        out << currentElt.displaySlidesLink << " | ";
       if (currentElt.displaySlidesPrintableLink!="")
-        out << " | " << currentElt.displaySlidesLink;
-      if (currentElt.displaySlidesPrintableLink!="")
-        out << " | " << currentElt.displaySlidesPrintableLink;
+        out << currentElt.displaySlidesPrintableLink << " | ";
       out << currentElt.displayProblemLink;
       out << "  </td>\n";
       out << "  <td>";
@@ -3798,6 +3812,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   topicListJS << "var listTopics=[";
   for (int i=0; i<this->theTopicS.size(); i++)
   { TopicElement& currentE=this->theTopicS[i];
+    if (currentE.type==currentE.tTexHeader)
+      continue;
     topicListJS << "{id: '" << currentE.idBase64 << "', ";
     topicListJS << "type: '";
     if (currentE.type==currentE.tChapter)
@@ -3899,10 +3915,23 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   else
     this->displayVideoLink= "<a href=\"#\" onclick=\"window.open('"
     + this->video + "',  'width=300', 'height=250', 'top=400'); return false;\">Go to lesson</a>";
-  if (this->slides!="")
-    this->displaySlidesLink = "<a href=\"" + this->slides + "\">Slides</a>";
+  if (this->slidesProjector!="")
+    this->displaySlidesLink = "<a href=\"" + this->slidesProjector + "\">Slides</a>";
   if (this->slidesPrintable!="")
     this->displaySlidesPrintableLink = "<a href=\"" + this->slidesPrintable + "\">Printable slides</a>";
+  if (this->slidesProjector=="" && this->slidesPrintable=="" && this->slidesSources.size>0)
+  { std::stringstream slideFromSourceStream;
+    slideFromSourceStream << "<a href=\""
+    << theGlobalVariables.DisplayNameExecutable
+    << "?request=slidesFromSource&";
+    slideFromSourceStream << "header="
+    << HtmlRoutines::ConvertStringToURLString(owner.slidesSourcesHeader, false) << "&";
+    for (int i=0; i<this->slidesSources.size; i++)
+      slideFromSourceStream << "file" << i+1
+      << "=" << HtmlRoutines::ConvertStringToURLString(this->slidesSources[i], false) << "&";
+    slideFromSourceStream << "\">Slides</a>";
+    this->displaySlidesLink=slideFromSourceStream.str();
+  }
   bool problemSolved=false;
   bool returnEmptyStringIfNoDeadline=false;
   if (this->problem=="")

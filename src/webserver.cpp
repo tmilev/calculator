@@ -3322,6 +3322,14 @@ int WebWorker::ProcessEditPage()
   return 0;
 }
 
+int WebWorker::ProcessSlidesFromSource()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSlidesFromSource");
+  this->SetHeaderOKNoContentLength();
+  crash << "not implemented" << crash;
+  stOutput << this->GetClonePageResult();
+  return 0;
+}
+
 int WebWorker::ProcessClonePage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessClonePage");
   this->SetHeaderOKNoContentLength();
@@ -3891,6 +3899,8 @@ int WebWorker::ServeClient()
     return this->ProcessEditPage();
   else if (theGlobalVariables.userCalculatorRequestType=="modifyPage")
     return this->ProcessModifyPage();
+  else if (theGlobalVariables.userCalculatorRequestType=="slidesFromSource")
+    return this->ProcessSlidesFromSource();
   else if (theGlobalVariables.userCalculatorRequestType=="clonePage")
     return this->ProcessClonePage();
   else if (theGlobalVariables.userCalculatorRequestType=="calculator")

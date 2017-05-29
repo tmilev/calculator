@@ -58,7 +58,8 @@ SOURCES += \
     vpfWebServerInterProcessLogistics.cpp \
     vpfHtmlInterpretationInterface.cpp \
     vpfHtmlSnippets.cpp \
-    vpf6_37calculatorroutines.cpp
+    vpf6_37calculatorroutines.cpp \
+    vpf6_38LaTeXRoutines.cpp
 
 HEADERS += \
     webserver.h \
@@ -112,7 +113,8 @@ HEADERS += \
     vpfHeader8HtmlInterpretation.h \
     vpfHeader8HtmlInterpretationInterface.h \
     vpfHeader8HtmlSnippets.h \
-    vpfHeader1General8DatabaseSystemIndependent.h
+    vpfHeader1General8DatabaseSystemIndependent.h \
+    vpfHeader2Math10_LaTeXRoutines.h
 
 DISTFILES += \
     ../html-common/three-d.js \

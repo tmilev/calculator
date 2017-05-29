@@ -76,6 +76,7 @@ SOURCES=\
 ./src/vpf5_1CalculatorCode.cpp \
 ./src/vpf5_2javascript_graphics.cpp \
 ./src/vpf5.cpp \
+./src/vpf6_38LaTeXRoutines \
 ./src/vpf6_05evaluationroutines.cpp \
 ./src/vpf6_0parsingRoutines.cpp \
 ./src/vpf6_1innerTypedFunctions.cpp \

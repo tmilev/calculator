@@ -12,10 +12,8 @@ class CalculatorHTML;
 
 struct TopicElement{
 public:
-  bool flagIsChapter;
-  bool flagIsSection;
-  bool flagIsSubSection;
-  bool flagIsError;
+  int type;
+  enum topicType{tChapter, tSection, tSubSection, tError, tProblem, tTexHeader, tUndefined};
   bool flagContainsProblemsNotInSubsection;
   bool flagSubproblemHasNoWeight;
   std::string problemNumberString;
@@ -38,6 +36,7 @@ public:
   std::string title;
   std::string video;
   std::string slides;
+  std::string slidesSource;
   std::string slidesPrintable;
   std::string problem;
   std::string error;

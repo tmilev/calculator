@@ -1562,7 +1562,7 @@ D-B;\
   ("BuildFreecalcWithSlides",
     CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides, "",
    "Same as BuildFreeCalc but attempts to also build individual slides. ",
-   "BuildFreecalcWithSlides (\"LaTeX-materials/lectures/ace-h1-2017/Lecture-Ace.tex\");\
+   "BuildFreecalcWithSlides (\"freecalc/lectures/UMB-Reference-Lectures/Calculus_I.tex\");\
    ",
    true, false,
    "CalculatorFunctionsGeneral::BuildFreecalcWithSlides",

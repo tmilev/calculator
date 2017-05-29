@@ -3218,14 +3218,17 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
 void TopicElement::ComputeID()
 { if (this->problem!="")
   { this->id=this->problem;
+    this->type=this->tProblem;
   } else
   { std::stringstream out;
     out << this->title;
-    if (this->flagIsChapter)
+    if (this->type==this->tTexHeader)
+      out << "[sourceHeader]";
+    if (this->type==this->tChapter)
       out << "[Chapter]";
-    if (this->flagIsSection)
+    if (this->type==this->tSection)
       out << "[Section]";
-    if (this->flagIsSubSection)
+    if (this->type==this->tSubSection)
       out << "[SubSection]";
     this->id=out.str();
   }
@@ -3235,17 +3238,24 @@ void TopicElement::ComputeID()
 
 void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
 { MacroRegisterFunctionWithName("TopicElement::AddTopic");
-  if (output.size()==0)
-    if (!inputElt.flagIsChapter)
+  if (output.size()<3 && inputElt.type!=inputElt.tTexHeader && inputElt.type!=inputElt.tChapter)
+  { bool startsWithChapter=false;
+    for (int i=0; i<2; i++)
+      if (output.theValues[i].type==inputElt.tChapter)
+      { startsWithChapter=true;
+        break;
+      }
+    if (!startsWithChapter)
     { TopicElement chapterlessChapter;
       chapterlessChapter.parentTopics.AddOnTop(0);
-      chapterlessChapter.flagIsChapter=true;
+      chapterlessChapter.type=chapterlessChapter.tChapter;
       chapterlessChapter.title="Topics without chapter";
       TopicElement::AddTopic(chapterlessChapter, output);
     }
+  }
   inputElt.ComputeID();
   if (inputElt.id=="")
-  { inputElt.flagIsError=true;
+  { inputElt.type=inputElt.tError;
     inputElt.id="error";
   }
   if (output.Contains(inputElt.id))
@@ -3259,10 +3269,7 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicEl
 }
 
 void TopicElement::reset(int parentSize)
-{ this->flagIsSection=false;
-  this->flagIsSubSection=false;
-  this->flagIsChapter=false;
-  this->flagIsError=false;
+{ this->type=this->tUndefined;
   this->flagSubproblemHasNoWeight=false;
   this->title="empty";
   this->id="";
@@ -3285,11 +3292,11 @@ void TopicElement::reset(int parentSize)
   this->totalPointsEarned=0;
   this->maxPointsInAllChildren=0;
   if (parentSize==0)
-    this->flagIsChapter=true;
+    this->type=this->tChapter;
   if (parentSize==1)
-    this->flagIsSection=true;
+    this->type=this->tSection;
   if (parentSize==2)
-    this->flagIsSubSection=true;
+    this->type=this->tSubSection;
 }
 
 void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
@@ -3305,7 +3312,14 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
     if (currentLine.size()>0)
       if (currentLine[0]=='%')
         continue;
-    if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
+    if (MathRoutines::StringBeginsWith(currentLine, "SlideSourceHeader:", &currentArgument))
+    { if (found)
+        TopicElement::AddTopic(currentElt, output);
+      found=true;
+      currentElt.reset(0);
+      currentElt.type=currentElt.tTexHeader;
+      currentElt.slidesSource=currentArgument;
+    } else if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
     { if(found)
         TopicElement::AddTopic(currentElt, output);
       found=true;
@@ -3340,6 +3354,8 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       currentElt.video=MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "Slides:", &currentArgument))
       currentElt.slides=MathRoutines::StringTrimWhiteSpace(currentArgument);
+    else if (MathRoutines::StringBeginsWith(currentLine, "SlideSource:", &currentArgument))
+      currentElt.slidesSource=MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "PrintableSlides:", &currentArgument))
       currentElt.slidesPrintable=MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "Problem:", &currentArgument))
@@ -3348,7 +3364,7 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       found=true;
     } else
     { currentElt.error+="Unrecognized entry: " + currentLine + ". ";
-      currentElt.flagIsError=true;
+      currentElt.type=currentElt.tError;
       found=true;
     }
   }
@@ -3394,7 +3410,7 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
   { TopicElement& currentElt=this->theTopicS.theValues[i];
     if (currentElt.problem!="")
       continue;
-    if (currentElt.flagIsSubSection)
+    if (currentElt.type==currentElt.tSubSection)
     { currentElt.totalSubSectionsUnderME=0;
       currentElt.totalSubSectionsUnderMeIncludingEmptySubsections=0;
       currentElt.flagContainsProblemsNotInSubsection=false;
@@ -3404,7 +3420,7 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
     currentElt.totalSubSectionsUnderME=0;
     for (int j=0; j<currentElt.immediateChildren.size; j++)
     { TopicElement& currentChild=this->theTopicS.theValues[currentElt.immediateChildren[j]];
-      if (currentChild.flagIsSubSection)
+      if (currentChild.type==currentChild.tSubSection)
       { currentElt.totalSubSectionsUnderME++;
         currentElt.totalSubSectionsUnderMeIncludingEmptySubsections++;
       } else if (currentChild.problem!="")
@@ -3467,15 +3483,18 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   for (int i=0; i<this->theTopicS.size(); i++)
   { TopicElement& currentElt=this->theTopicS.theValues[i];
     if (subSectionStarted)
-      if (currentElt.flagIsSubSection || currentElt.flagIsSection || currentElt.flagIsChapter)
+      if (currentElt.type==currentElt.tSubSection ||
+          currentElt.type==currentElt.tSection ||
+          currentElt.type==currentElt.tChapter)
         out << "</li>";
     if (sectionStarted)
-      if (currentElt.flagIsSection || currentElt.flagIsChapter)
+      if (currentElt.type==currentElt.tSection ||
+          currentElt.type==currentElt.tChapter)
         out << "</ul></li>";
     if (chapterStarted)
-      if (currentElt.flagIsChapter)
+      if (currentElt.type==currentElt.tChapter)
         out << "</ul></li>";
-    if (currentElt.flagIsChapter)
+    if (currentElt.type==currentElt.tChapter)
     { out << "<li>" << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=template&fileName=" << this->fileName << "&"
       << "topicList=" << this->topicListFileName << "&" << "chapter=" << currentElt.title
@@ -3484,12 +3503,12 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
       sectionStarted=false;
       subSectionStarted=false;
       out << "<ul>";
-    } else if (currentElt.flagIsSection)
+    } else if (currentElt.type==currentElt.tSection)
     { out << "<li>" << currentElt.title << "<br>\n";
       sectionStarted=true;
       subSectionStarted=false;
       out << "<ul>";
-    } else if (currentElt.flagIsError)
+    } else if (currentElt.type==currentElt.tError)
       out << "Error parsing topic list. Could not make sense of: " << currentElt.error << ". "
       << "The allowed data labels are CASE SENSITIVE: "
       << "<br>Chapter<br>Section<br>Topic<br>Title<br>Video<br>Problem<br>Slides<br>PrintableSlides<br>"
@@ -3622,7 +3641,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   //CalculatorHTML currentProblem;
   for (int i=0; i<this->theTopicS.size(); i++)
   { TopicElement& currentElt=this->theTopicS[i];
-    if (currentElt.flagIsChapter)
+    if (currentElt.type==currentElt.tChapter)
     { currentChapter=currentElt.title;
       chapterCounter++;
     }
@@ -3638,26 +3657,34 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       out << "<ol start=\"" << chapterCounter << "\">";
     }
     currentElt.ComputeLinks(*this, plainStyle);
-    if (!currentElt.flagIsSection && !currentElt.flagIsSubSection &&
-        !currentElt.flagIsChapter && !tableStarted)
+    if (!tableStarted &&
+        currentElt.type!=currentElt.tSection &&
+        currentElt.type!=currentElt.tSubSection &&
+        currentElt.type!=currentElt.tChapter )
     { out << TopicElement::GetTableStart(plainStyle);
       tableStarted=true;
     }
-    if ((currentElt.flagIsSection || currentElt.flagIsSubSection || currentElt.flagIsChapter || currentElt.flagIsError)
+    if ((currentElt.type==currentElt.tSection ||
+         currentElt.type==currentElt.tSubSection ||
+         currentElt.type==currentElt.tChapter ||
+         currentElt.type==currentElt.tError)
         && tableStarted)
     { out << TopicElement::GetTableFinish(plainStyle);
       tableStarted=false;
     }
     if (subSectionStarted)
-      if (currentElt.flagIsSubSection || currentElt.flagIsSection || currentElt.flagIsChapter)
+      if (currentElt.type==currentElt.tSubSection ||
+          currentElt.type==currentElt.tSection ||
+          currentElt.type==currentElt.tChapter)
         out << "</li>\n";
     if (sectionStarted)
-      if (currentElt.flagIsSection || currentElt.flagIsChapter)
+      if (currentElt.type==currentElt.tSection ||
+          currentElt.type==currentElt.tChapter)
         out << "</ol></li>\n";
     if (chapterStarted)
-      if (currentElt.flagIsChapter)
+      if (currentElt.type==currentElt.tChapter)
         out << "</ol></li>\n";
-    if (currentElt.flagIsChapter)
+    if (currentElt.type==currentElt.tChapter)
     { out << "<li class=\"listChapter\" "
       << "id=\"" << currentElt.idBase64 << "\"" << ">\n"
       << currentElt.displayTitleWithDeadline;
@@ -3673,7 +3700,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 //      << ", pts: "
 //      << currentElt.totalPointsEarned;
       out << "<ol>\n";
-    } else if (currentElt.flagIsSection)
+    } else if (currentElt.type==currentElt.tSection)
     { out << "<li class=\"listSection\""
       << "id=\"" << currentElt.idBase64 << "\"" << ">\n"
       << currentElt.displayTitleWithDeadline;
@@ -3688,7 +3715,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       subSectionStarted=false;
       tableStarted=false;
       out << "<ol>\n";
-    } else if (currentElt.flagIsSubSection)
+    } else if (currentElt.type==currentElt.tSubSection)
     { out << "<li class=\"listSubsection\""
       << "id=\"" << currentElt.idBase64 << "\"" << ">\n"
       ;
@@ -3702,7 +3729,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       out << "\n<br>\n";
       subSectionStarted=true;
       tableStarted=false;
-    } else if (currentElt.flagIsError)
+    } else if (currentElt.type==currentElt.tError)
       out << "Error parsing topic list. Could not make sense of: " << currentElt.error << ". "
       << "The allowed data labels are [CASE SENSITIVE!]: "
       << "<br>Section<br>Topic<br>Title<br>Video<br>Problem<br>Slides<br>PrintableSlides<br>"
@@ -3773,13 +3800,13 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   { TopicElement& currentE=this->theTopicS[i];
     topicListJS << "{id: '" << currentE.idBase64 << "', ";
     topicListJS << "type: '";
-    if (currentE.flagIsChapter)
+    if (currentE.type==currentE.tChapter)
       topicListJS << "chapter";
-    else if (currentE.flagIsSection)
+    else if (currentE.type==currentE.tSection)
       topicListJS << "section";
-    else if (currentE.flagIsSubSection)
+    else if (currentE.type==currentE.tSubSection)
       topicListJS << "subSection";
-    else if (currentE.flagIsError)
+    else if (currentE.type==currentE.tError)
       topicListJS << "error";
     else
       topicListJS << "problem";
@@ -3848,11 +3875,11 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   if (this->displayProblemLink!="")
     return;
   int depth=3;
-  if (this->flagIsChapter)
+  if (this->type==this->tChapter)
     depth=0;
-  if (this->flagIsSection)
+  if (this->type==this->tSection)
     depth=1;
-  if (this->flagIsSubSection)
+  if (this->type==this->tSubSection)
     depth=2;
   std::stringstream problemLabel;
   for (int i=0; i<depth+1; i++)
@@ -3904,9 +3931,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
       this->displayDeadlinE+="Deadline";
     owner.ComputeDeadlineModifyButton
     (*this, problemSolved,
-     this->flagIsSubSection ||
-     this->flagIsSection ||
-     this->flagIsChapter);
+     this->type==this->tSubSection ||
+     this->type==this->tSection ||
+     this->type==this->tChapter);
     std::stringstream titleAndDeadlineStream;
     titleAndDeadlineStream
     << "<span class=\"deadlineAndTitleContainer\">"
@@ -3924,11 +3951,11 @@ std::string TopicElement::ToString()const
   out << this->title;
   if (this->title=="")
     out << "-";
-  if (this->flagIsChapter)
+  if (this->type==this->tChapter)
     out << "(chapter)";
-  if (this->flagIsSection)
+  if (this->type==this->tSection)
     out << "(section)";
-  if (this->flagIsSubSection)
+  if (this->type==this->tSubSection)
     out << "(subsection)";
   out << "<br>Parents: " << this->parentTopics.ToStringCommaDelimited();
   return out.str();

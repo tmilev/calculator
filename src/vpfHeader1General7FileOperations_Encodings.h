@@ -20,6 +20,10 @@ public:
   static MapLisT<std::string, std::string, MathRoutines::hashString>&
   FolderVirtualLinksULTRASensitive(); //<- no access allowed through web server
 
+  static List<bool> safeFileCharacters;
+  static List<bool>& GetSafeFileChars();
+
+  static std::string ConvertStringToEscapedStringFileNameSafe(const std::string& input);
   static bool LoadFileToStringUnsecure
   (const std::string& fileNameUnsecure, std::string& output, std::stringstream& commentsOnFailure);
   static bool LoadFileToStringVirtual
@@ -27,6 +31,7 @@ public:
    bool accessSensitiveFolders=false, bool accessULTRASensitiveFolders=false);
   static bool IsOKfileNameVirtual(const std::string& fileName, bool accessSensitiveFolders=false);
   static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
+  static bool IsFileNameSafeForSystemCommands(const std::string& fileName, std::stringstream* commentsOnFailure);
   static std::string GetFileNameFromFileNameWithPath(const std::string& fileName);
   static std::string GetPathFromFileNameWithPath(const std::string& fileName);
   static std::string GetFileExtensionWithDot(const std::string& theFileName, std::string* outputFileNameNoExtension=0);

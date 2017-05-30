@@ -3319,7 +3319,7 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       found=true;
       currentElt.reset(0);
       currentElt.type=currentElt.tTexHeader;
-      currentElt.slidesSources.AddOnTop(currentArgument);
+      currentElt.slidesSources.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
     } else if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
     { if(found)
         TopicElement::AddTopic(currentElt, output);
@@ -3652,7 +3652,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   for (int i=0; i<this->theTopicS.size(); i++)
   { TopicElement& currentElt=this->theTopicS[i];
     if (currentElt.type==currentElt.tTexHeader)
-    { this->slidesSourcesHeader=currentElt.slidesProjector;
+    { if (currentElt.slidesSources.size>0)
+        this->slidesSourcesHeader=currentElt.slidesSources[0];
       continue;
     }
     if (currentElt.type==currentElt.tChapter)

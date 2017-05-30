@@ -6835,7 +6835,7 @@ bool CalculatorFunctionsGeneral::innerCrawlTexFile(Calculator& theCommands, cons
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   LaTeXcrawler theCrawler;
   theCrawler.ownerCalculator=&theCommands;
-  theCrawler.theFileToCrawlRelative=input.GetValue<std::string>();
+  theCrawler.theFileNameToCrawlRelative=input.GetValue<std::string>();
   theCrawler.Crawl();
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
@@ -6852,7 +6852,7 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides(Calculator& theC
   LaTeXcrawler theCrawler;
   theCrawler.flagBuildSingleSlides=true;
   theCrawler.ownerCalculator=&theCommands;
-  theCrawler.theFileToCrawlRelative=input.GetValue<std::string>();
+  theCrawler.theFileNameToCrawlRelative=input.GetValue<std::string>();
   theCrawler.BuildFreecalc();
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
@@ -6869,7 +6869,7 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalc(Calculator& theCommands, con
   LaTeXcrawler theCrawler;
   theCrawler.flagBuildSingleSlides=false;
   theCrawler.ownerCalculator=&theCommands;
-  theCrawler.theFileToCrawlRelative=input.GetValue<std::string>();
+  theCrawler.theFileNameToCrawlRelative=input.GetValue<std::string>();
   theCrawler.BuildFreecalc();
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }

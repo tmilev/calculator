@@ -3322,11 +3322,40 @@ int WebWorker::ProcessEditPage()
   return 0;
 }
 
+#include "vpfHeader2Math10_LaTeXRoutines.h"
 int WebWorker::ProcessSlidesFromSource()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSlidesFromSource");
   this->SetHeaderOKNoContentLength();
-  crash << "not implemented" << crash;
-  stOutput << this->GetClonePageResult();
+  LaTeXcrawler theCrawler;
+  theCrawler.slideHeader=
+  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("header"), false);
+  for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
+  { std::string theKey=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
+    if (theKey!="fileName" && MathRoutines::StringBeginsWith(theKey, "file"))
+    { theCrawler.theSlides.AddOnTop
+      (HtmlRoutines::ConvertURLStringToNormal
+      (theGlobalVariables.webArguments.theValues[i],false));
+    }
+  }
+  std::stringstream comments;
+  if (!theCrawler.BuildOrFetchFromCachePresentationFromSlides(&comments, &comments))
+  { this->flagDoAddContentLength=true;
+    stOutput << "<!DOCTYPE html>"
+    << "<html>"
+    << "<head>"
+    << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+    << "</head>"
+    << "<body>"
+    << "<calculatorNavigation>"
+    << HtmlInterpretation::ToStringNavigation()
+    << "</calculatorNavigation>";
+    stOutput << comments.str();
+    stOutput << "</body></html>";
+    return 0;
+  }
+  this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");
+  this->flagDoAddContentLength=true;
+  stOutput << theCrawler.slidePDFbinaryBlob;
   return 0;
 }
 

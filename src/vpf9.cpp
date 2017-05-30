@@ -88,7 +88,7 @@ std::string GlobalVariables::CallSystemWithOutput(const std::string& systemComma
 
 void GlobalVariables::ChDir(const std::string& systemCommand)
 { if (this->pointerCallChDir!=0)
-    this->pointerCallChDir(systemCommand);
+    this->pointerCallChDir(FileOperations::ConvertStringToEscapedStringFileNameSafe(systemCommand));
 }
 
 GlobalVariables::GlobalVariables()
@@ -442,6 +442,20 @@ std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileNa
   return "";
 }
 
+std::string FileOperations::ConvertStringToEscapedStringFileNameSafe(const std::string& input)
+{ MacroRegisterFunctionWithName("FileOperations::ConvertStringToEscapedStringFileNameSafe");
+  std::stringstream out;
+  for (unsigned i=0; i<input.size(); i++)
+    if (input[i]==' ')
+      out << " ";
+    else if (input[i]=='"')
+      out << "\\\"";
+    else if (input[i]=='\\')
+      out << "\\\\";
+    else out << input[i];
+  return out.str();
+}
+
 bool FileOperations::IsOKfileNameVirtual(const std::string& theFileName, bool accessSensitiveFolders)
 { MacroRegisterFunctionWithName("FileOperations::IsOKfileNameVirtual");
   (void) accessSensitiveFolders;
@@ -469,6 +483,38 @@ bool FileOperations::IsFileNameWithoutDotsAndSlashes(const std::string& theFileN
   for (unsigned i=0; i<theFileName.size(); i++)
     if (theFileName[i]=='/' || theFileName[i]=='\\' || theFileName[i]=='.')
       return false;
+  return true;
+}
+
+List<bool> FileOperations::safeFileCharacters;
+List<bool>& FileOperations::GetSafeFileChars()
+{ if (FileOperations::safeFileCharacters.size==0)
+  { FileOperations::safeFileCharacters.initFillInObject(256, false);
+    std::string theChars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    theChars+="0123456789";
+    theChars+="@";
+    theChars+="+-/=.";
+    for (unsigned i=0; i<theChars.size(); i++)
+      FileOperations::safeFileCharacters[ ((unsigned char)theChars[i])]=true;
+  }
+  return FileOperations::safeFileCharacters;
+}
+
+bool FileOperations::IsFileNameSafeForSystemCommands(const std::string& theFileName, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("FileOperations::IsFileNameSafeForSystemCommands");
+  const unsigned maxAllowedFileNameSize=1000;
+  if (theFileName.size()>maxAllowedFileNameSize)
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "File name has length: " << theFileName.size()
+      << "; max allowed file name size is: " << maxAllowedFileNameSize;
+    return false;
+  }
+  for (unsigned i=0; i<theFileName.size(); i++)
+    if(!FileOperations::GetSafeFileChars()[theFileName[i]])
+    { if (commentsOnFailure!=0)
+        *commentsOnFailure << "Character: " << theFileName[i] << " not allowed in file name. ";
+      return false;
+    }
   return true;
 }
 

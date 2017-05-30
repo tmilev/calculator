@@ -10,19 +10,25 @@ class LaTeXcrawler
 {
   public:
   int recursionDepth;
-  std::string theFileToCrawlPhysical;
-  std::string theFileToCrawlRelative;
+  std::string theFileToCrawlContent;
+  std::string theFileNameToCrawlPhysical;
+  std::string theFileNameToCrawlRelative;
   std::string baseFolderStartFilePhysical;
-  std::string theFileToCrawlNoPathPhysical;
-  std::string theFileWorkingCopy;
+  std::string theFileNameToCrawlNoPathPhysical;
+  std::string theFileNameWorkingCopy;
+  std::string theFileNameWorkinGCopyPDF;
+  std::string slideHeader;
+  std::string slidePDFbinaryBlob;
+  std::string targetPDFfileName;
   List<std::string> theLectureNumbers;
   List<std::string> theLectureDesiredNames;
   List<std::string> theSlides;
   List<std::string> theSlideNames;
   void* ownerCalculator;
   bool flagBuildSingleSlides;
-  bool ExtractFileNamesFromRelativeFileName();
+  bool ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
   void Crawl();
+  bool BuildOrFetchFromCachePresentationFromSlides(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void BuildFreecalc();
   void CrawlRecursive(const std::string& currentFileName);
   std::stringstream crawlingResult;
@@ -31,6 +37,7 @@ class LaTeXcrawler
   std::string ToString();
   LaTeXcrawler()
   { this->flagBuildSingleSlides=false;
+    this->ownerCalculator=0;
   }
 };
 

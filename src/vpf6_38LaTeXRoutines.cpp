@@ -501,6 +501,16 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   if (commentsGeneral!=0)
     *commentsGeneral << "<br>Loaded file: " << this->theFileNameToCrawlRelative << "<br>";
   bool addExtraTex=(this->slideFileNamesVirtualWithPatH.size>1);
+
+  if (this->desiredPresentationTitle.find("</actualExamProblem>")!=std::string::npos &&
+      this->desiredPresentationTitle.find("<actualExamProblem>")!=std::string::npos
+      )
+  { int start=this->desiredPresentationTitle.find("<actualExamProblem>");
+    int finish=this->desiredPresentationTitle.find("</actualExamProblem>")+20;
+    this->desiredPresentationTitle=this->desiredPresentationTitle.substr(0, start)+
+    this->desiredPresentationTitle.substr(finish);
+  }
+
   if (addExtraTex)
   { theFileContentStream << "\\begin{document}"
     << "\\providecommand{\\currentLecture}{1}"

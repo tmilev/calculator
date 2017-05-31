@@ -19,7 +19,7 @@ std::string CalculatorHTML::stringProblemLink="Problem link";
 CalculatorHTML::CalculatorHTML()
 { this->NumAttemptsToInterpret=0;
   this->NumAnswerIdsMathquilled=0;
-  this->MaxInterpretationAttempts=10;
+  this->MaxInterpretationAttempts=25;
   this->flagLoadedSuccessfully=false;
   this->flagIsExamHome=false;
   this->flagIsExamProblem=false;
@@ -1891,7 +1891,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
   //stOutput << "<hr>DEBUG: Checking consistency 2 passed<hr>";
   this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
   //stOutput << "DEBUG: this->theProblemData.flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven;
-  this->MaxInterpretationAttempts=10;
+  this->MaxInterpretationAttempts=25;
   this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);
   if (!this->theProblemData.flagRandomSeedGiven)
   { srand(time(NULL));

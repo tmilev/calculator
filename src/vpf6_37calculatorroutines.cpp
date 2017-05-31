@@ -595,6 +595,25 @@ bool CalculatorFunctionsGeneral::innerIsPower(Calculator& theCommands, const Exp
   return output.AssignValue(result, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerFactorInteger(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFactorInteger");
+  LargeInt theLI;
+  if (!input.IsInteger(&theLI))
+    return false;
+  List<LargeInt> primeFactors;
+  List<int> mults;
+  if (!theLI.value.Factor(primeFactors,mults))
+    return false;
+  List<Expression> result;
+  for (int i=0; i<primeFactors.size; i++)
+  { Expression currentE;
+    currentE.AssignValue((Rational) primeFactors[i],theCommands);
+    for (int j=0; j<mults[i]; j++)
+      result.AddOnTop(currentE);
+  }
+  return output.MakeSequence(theCommands, &result);
+}
+
 bool CalculatorFunctionsGeneral::innerFactorOutNumberContent(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFactorOutNumberContent");
   MonomialCollection<Expression, Rational> theV;

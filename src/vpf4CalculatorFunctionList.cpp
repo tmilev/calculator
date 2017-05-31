@@ -3510,6 +3510,14 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "FactorOneVarPolyOverRationals")
    ;
   this->AddOperationInnerHandler
+  ("FactorInteger", CalculatorFunctionsGeneral::innerFactorInteger, "",
+   "Factors an integer, assuming the integer is small enough. ",
+   "FactorInteger(100011); FactorInteger(1)",
+   true, false,
+   "Calculator::innerFactorInteger",
+   "FactorInteger")
+   ;
+  this->AddOperationInnerHandler
   ("Freudenthal", Calculator::innerFreudenthalEval, "",
    "Computes the dominant weights with multiplicities of a finite dimensional \
    module of a highest weight given in fundamental coordinates. The first argument gives \

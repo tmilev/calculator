@@ -80,6 +80,7 @@ public:
   static bool innerCasimirWRTlevi(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerFactorInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFactorOutNumberContent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFactorial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLogBaseSimpleCases(Calculator& theCommands, const Expression& input, Expression& output);

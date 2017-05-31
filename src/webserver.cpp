@@ -3340,6 +3340,8 @@ int WebWorker::ProcessSlidesFromSource()
        (theGlobalVariables.webArguments.theValues[i], false)));
     }
   }
+  theCrawler.desiredPresentationTitle=
+  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("title"), false);
   std::stringstream comments;
   if (!theCrawler.BuildOrFetchFromCachePresentationFromSlides(&comments, &comments))
   { this->flagDoAddContentLength=true;

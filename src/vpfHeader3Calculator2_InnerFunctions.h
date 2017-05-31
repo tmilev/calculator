@@ -79,6 +79,8 @@ public:
   static bool innerFourierTransformEWA(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCasimirWRTlevi(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerFactorOutNumberContent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFactorial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLogBaseSimpleCases(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLogBase(Calculator& theCommands, const Expression& input, Expression& output);

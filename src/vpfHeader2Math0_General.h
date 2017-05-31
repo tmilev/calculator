@@ -1715,6 +1715,8 @@ public:
     theSortedMons.QuickSortDescending(theOrder, &this->theCoeffs);
     this->theMonomials=theSortedMons;
   }
+  void GetVectorMonsAscending(Vector<coefficient>& result);
+  void GetVectorMonsDescending(Vector<coefficient>& result);
   void PopMonomial(int index)
   { this->theMonomials.RemoveIndexSwapWithLast(index);
     this->theCoeffs.RemoveIndexSwapWithLast(index);
@@ -1749,7 +1751,26 @@ public:
         outputCF=this->theCoeffs[i];
       }
   }
-  inline bool CleanupMonIndex(int theIndex)
+  void GetMaxMonomial(templateMonomial& outputMon, coefficient& outputCF)const
+  { if (this->IsEqualToZero())
+      crash << "This is a programming error: calling GetMinMon on a zero monomial collection is forbidden. " << crash;
+    outputMon=(*this)[0];
+    outputCF=this->theCoeffs[0];
+    for (int i=1; i<this->size(); i++)
+      if ((*this)[i]>outputMon)
+      { outputMon=(*this)[i];
+        outputCF=this->theCoeffs[i];
+      }
+  }
+  coefficient GetLeadingCoefficient()const
+  { if (this->IsEqualToZero())
+      return 0;
+    templateMonomial tempM;
+    coefficient result;
+    this->GetMaxMonomial(tempM, result);
+    return result;
+  }
+  bool CleanupMonIndex(int theIndex)
   { if (theIndex!=-1)
       if (this->theCoeffs[theIndex]==0)
       { if (this->flagDeallocated)
@@ -1928,6 +1949,14 @@ public:
     }
     return result;
   }
+  Rational ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedByLeadingCoefficientPositive()
+  { Rational result=this->ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+    if (this->GetLeadingCoefficient()<0)
+    { (*this)*=-1;
+      result*=-1;
+    }
+    return result;
+  }
   Rational ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy()
   { if (this->size()==0)
       return 1;
@@ -1993,7 +2022,7 @@ public:
   }
   bool operator==(const MonomialCollection<templateMonomial, coefficient>& other)const;
   bool operator==(int x)const;
-  inline void operator+=(const MonomialCollection<templateMonomial, coefficient>& other);
+  void operator+=(const MonomialCollection<templateMonomial, coefficient>& other);
   MonomialCollection<templateMonomial, coefficient> operator*(const coefficient& other)const
   { MonomialCollection<templateMonomial, coefficient> result=*this;
     result*=other;
@@ -3098,7 +3127,7 @@ public:
 };
 
 template <class templateMonomial, class coefficient>
-inline bool MonomialCollection<templateMonomial, coefficient>::operator==(int x)const
+bool MonomialCollection<templateMonomial, coefficient>::operator==(int x)const
 { if (x==0)
     return this->size()==0;
   crash << "This is either a programming error, or an unforeseen use of operator==. If the second is the case, an audit/careful "
@@ -3107,7 +3136,7 @@ inline bool MonomialCollection<templateMonomial, coefficient>::operator==(int x)
 }
 
 template <class templateMonomial, class coefficient>
-inline bool MonomialCollection<templateMonomial, coefficient>::operator==(const MonomialCollection<templateMonomial, coefficient>& other)const
+bool MonomialCollection<templateMonomial, coefficient>::operator==(const MonomialCollection<templateMonomial, coefficient>& other)const
 { if (this->theCoeffs.size!=other.theCoeffs.size)
     return false;
   for (int i=0; i<this->size(); i++)
@@ -3137,7 +3166,7 @@ void MonomialCollection<templateMonomial, coefficient>::WriteToFile(std::fstream
 }
 
 template <class templateMonomial, class coefficient>
-inline bool MonomialCollection<templateMonomial, coefficient>::ReadFromFile(std::fstream& input)
+bool MonomialCollection<templateMonomial, coefficient>::ReadFromFile(std::fstream& input)
 { int numReadWords, targetSize;
   XML::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
   std::string ReaderString;
@@ -3201,6 +3230,18 @@ bool MonomialCollection<templateMonomial, coefficient>::IsSmallInteger(int* whic
   if (result)
     result=this->theCoeffs[0].IsSmallInteger(whichInteger);
   return result;
+}
+
+template <class templateMonomial, class coefficient>
+void MonomialCollection<templateMonomial, coefficient>::GetVectorMonsAscending(Vector<coefficient>& result)
+{ this->QuickSortAscending();
+  result=this->theCoeffs;
+}
+
+template <class templateMonomial, class coefficient>
+void MonomialCollection<templateMonomial, coefficient>::GetVectorMonsDescending(Vector<coefficient>& result)
+{ this->QuickSortDescending();
+  result=this->theCoeffs;
 }
 
 template <class coefficient>

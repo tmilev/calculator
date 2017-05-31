@@ -594,3 +594,28 @@ bool CalculatorFunctionsGeneral::innerIsPower(Calculator& theCommands, const Exp
     }
   return output.AssignValue(result, theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerFactorOutNumberContent(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFactorOutNumberContent");
+  MonomialCollection<Expression, Rational> theV;
+  if (!theCommands.CollectSummands(theCommands, input, theV))
+    return theCommands << "Failed to extract summands from: " << input.ToString();
+  if (theV.IsEqualToZero())
+    return output.AssignValue(0, theCommands);
+  Rational theCF= theV.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedByLeadingCoefficientPositive();
+  if (theCF==0)
+    return false;
+  theCF.Invert();
+  if (theCF==1 )
+  { if (!input.StartsWithGivenAtom("FactorOutNumberContent"))
+    { output=input;
+      return true;
+    } else
+      return false;
+  }
+  Expression left, right;
+  left.AssignValue(theCF, theCommands);
+  right.MakeSum(theCommands, theV);
+  output=left*right;
+  return true;
+}

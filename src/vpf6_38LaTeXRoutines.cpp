@@ -504,7 +504,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   if (addExtraTex)
   { theFileContentStream << "\\begin{document}"
     << "\\providecommand{\\currentLecture}{1}"
-    << "\\lect{\\semester}{Automatically generated}{1}{\n";
+    << "\\lect{\\semester}{" << this->desiredPresentationTitle << "}{1}{\n";
     for (int i=1; i<this->slideFileNamesVirtualWithPatH.size; i++)
       theFileContentStream << "\\input{" << this->slideFileNamesWithLatexPathNoExtension[i] << "}\n";
     theFileContentStream << "}\n"

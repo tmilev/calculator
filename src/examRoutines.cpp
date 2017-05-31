@@ -3927,6 +3927,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     << "?request=slidesFromSource&";
     slideFromSourceStream << "header="
     << HtmlRoutines::ConvertStringToURLString(owner.slidesSourcesHeader, false) << "&";
+    slideFromSourceStream << "title="
+    << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
     for (int i=0; i<this->slidesSources.size; i++)
       slideFromSourceStream << "file" << i+1
       << "=" << HtmlRoutines::ConvertStringToURLString(this->slidesSources[i], false) << "&";

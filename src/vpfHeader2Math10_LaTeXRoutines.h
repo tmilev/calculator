@@ -34,6 +34,8 @@ class LaTeXcrawler
   std::string workingFileNameNoPathPDF;
   std::string workingFileContent;
 
+  std::string desiredPresentationTitle;
+
   List<std::string> theLectureNumbers;
   List<std::string> theLectureDesiredNames;
   List<std::string> slideTexInputCommands;

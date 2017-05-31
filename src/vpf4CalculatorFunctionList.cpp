@@ -3482,6 +3482,17 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    true, false,
    "Calculator::innerSqrt",
    "sqrt");
+  this->AddOperationInnerHandler
+  ("FactorOutNumberContent", CalculatorFunctionsGeneral::innerFactorOutNumberContent, "",
+   "Factors out the rational number content of an additive expression. \
+    The expression part of the result\
+    must have integer relatively prime coefficients, \
+    with leading coefficient positive. ",
+   "TurnOffRules(\"DistributeMultiplication\",\"DistributeMultiplicationConstants\"); FactorOutNumberContent{}(3x+9t+27);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerFactorOutNumberContent",
+   "FactorOutNumberContent")
+   ;
 
   this->AddOperationInnerHandler
   ("FactorOneVarPolyOverRationals", Calculator::innerFactorPoly, "",

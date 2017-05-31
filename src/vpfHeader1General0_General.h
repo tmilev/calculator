@@ -236,6 +236,7 @@ public:
   (List<theType>& inputOutputElts, int upperDimensionBound, void (*theBinaryOperation)(const theType& left, const theType& right, theType& output));
 //  static void NChooseK(int n, int k, LargeInt& output);//
   static bool StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd=0);
+  static bool StringEndsWith(const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning=0);
   static char ConvertHumanReadableHexToCharValue(char input);
   static void StringSplitDefaultDelimiters(const std::string& inputString, List<std::string>& output);
   static void StringSplitExcludeDelimiter(const std::string& inputString, char delimiter, List<std::string>& output);

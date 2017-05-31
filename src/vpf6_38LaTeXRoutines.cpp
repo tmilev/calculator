@@ -439,7 +439,7 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
       }
     FileOperations::GetFileExtensionWithDot
     (this->slideFileNamesVirtualWithPatH[i], &this->slideFileNamesWithLatexPathNoExtension[i]);
-    if (MathRoutines::StringBeginsWith(this->slideFileNamesWithLatexPathNoExtension[i], "freecalc",0))
+    if (MathRoutines::StringBeginsWith(this->slideFileNamesWithLatexPathNoExtension[i], "freecalc", 0))
       this->slideFileNamesWithLatexPathNoExtension[i]="../../"+this->slideFileNamesWithLatexPathNoExtension[i];
   }
   this->headerFileNameWithPathVirtual=this->slideFileNamesVirtualWithPatH[0];
@@ -467,6 +467,9 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
 bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides");
+  for (int i=0; i<this->slideFileNamesVirtualWithPatH.size; i++)
+    if (!MathRoutines::StringEndsWith(this->slideFileNamesVirtualWithPatH[i], ".tex"))
+      this->slideFileNamesVirtualWithPatH[i]+=".tex";
   if (!this->ExtractPresentationFileNames(commentsOnFailure, commentsGeneral))
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "Failed to extract file names. ";

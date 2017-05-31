@@ -3337,7 +3337,7 @@ int WebWorker::ProcessSlidesFromSource()
     { theCrawler.slideFileNamesVirtualWithPatH.AddOnTop
       (MathRoutines::StringTrimWhiteSpace
        (HtmlRoutines::ConvertURLStringToNormal
-       (theGlobalVariables.webArguments.theValues[i],false)));
+       (theGlobalVariables.webArguments.theValues[i], false)));
     }
   }
   std::stringstream comments;

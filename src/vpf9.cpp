@@ -1230,6 +1230,26 @@ int MathRoutines::NChooseK(int n, int k)
   return result;
 }
 
+bool MathRoutines::StringEndsWith(const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning)
+{ MacroRegisterFunctionWithName("MathRoutines::StringEndsWith");
+  if (desiredEnd.size()==0)
+  { if (outputStringBeginning==0)
+      *outputStringBeginning=theString;
+    return true;
+  }
+  int indexInTheString=theString.size()-1;
+  for (int i= ((signed)desiredEnd.size())-1; i>=0; i--)
+  { if (indexInTheString<0)
+      return false;
+    if (desiredEnd[i]!=theString[indexInTheString])
+      return false;
+    indexInTheString--;
+  }
+  if (outputStringBeginning!=0)
+    *outputStringBeginning=theString.substr(0, theString.size()-desiredEnd.size());
+  return true;
+}
+
 bool MathRoutines::StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd)
 { std::string actualBeginning, stringEnd;
   MathRoutines::SplitStringInTwo(theString, desiredBeginning.size(), actualBeginning, stringEnd);

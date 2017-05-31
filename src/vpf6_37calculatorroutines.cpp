@@ -580,6 +580,8 @@ bool CalculatorFunctionsGeneral::innerIsPower(Calculator& theCommands, const Exp
   LargeInt theLI;
   if (!input.IsInteger(&theLI))
     return false;
+  if (theLI.IsEqualToZero())
+    return false;
   List<int> theMults;
   List<LargeInt> theFactors;
   if (!theLI.value.Factor(theFactors, theMults))
@@ -600,6 +602,8 @@ bool CalculatorFunctionsGeneral::innerFactorInteger(Calculator& theCommands, con
   LargeInt theLI;
   if (!input.IsInteger(&theLI))
     return false;
+  if (theLI.IsEqualToZero())
+    return false;
   List<LargeInt> primeFactors;
   List<int> mults;
   if (!theLI.value.Factor(primeFactors,mults))
@@ -611,6 +615,8 @@ bool CalculatorFunctionsGeneral::innerFactorInteger(Calculator& theCommands, con
     for (int j=0; j<mults[i]; j++)
       result.AddOnTop(currentE);
   }
+  if (theLI<0 && result.size>0)
+    result[0]*=-1;
   return output.MakeSequence(theCommands, &result);
 }
 

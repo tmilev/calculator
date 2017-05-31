@@ -3512,7 +3512,7 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
   this->AddOperationInnerHandler
   ("FactorInteger", CalculatorFunctionsGeneral::innerFactorInteger, "",
    "Factors an integer, assuming the integer is small enough. ",
-   "FactorInteger(100011); FactorInteger(1)",
+   "FactorInteger(10001011); FactorInteger(1); FactorInteger(-10); FactorInteger(0);",
    true, false,
    "Calculator::innerFactorInteger",
    "FactorInteger")

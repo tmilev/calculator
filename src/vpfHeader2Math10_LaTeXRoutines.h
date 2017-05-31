@@ -10,23 +10,40 @@ class LaTeXcrawler
 {
   public:
   int recursionDepth;
-  std::string theFileToCrawlContent;
   std::string theFileNameToCrawlPhysical;
   std::string theFileNameToCrawlRelative;
   std::string baseFolderStartFilePhysical;
+
+  std::string theFileToCrawlContent;
   std::string theFileNameToCrawlNoPathPhysical;
   std::string theFileNameWorkingCopy;
   std::string theFileNameWorkinGCopyPDF;
-  std::string slideHeader;
-  std::string slidePDFbinaryBlob;
-  std::string targetPDFfileName;
+
+  std::string targetPDFbinaryContent;
+  std::string targetPDFFileNameWithPathVirtual;
+  std::string targetPDFFileNameWithLatexPath;
+  std::string targetPDFLatexPath;
+
+  std::string headerFileNameWithPathVirtual;
+  std::string headerFileNameNoPath;
+  std::string headerFileNameNoPathNoExtension;
+  std::string headerFilePathVirtual;
+
+  std::string workingFilePathPhysical;
+  std::string workingFileNameNoPathTex;
+  std::string workingFileNameNoPathPDF;
+  std::string workingFileContent;
+
   List<std::string> theLectureNumbers;
   List<std::string> theLectureDesiredNames;
-  List<std::string> theSlides;
-  List<std::string> theSlideNames;
+  List<std::string> slideTexInputCommands;
+  List<std::string> slideFileNamesVirtualWithPatH;
+  List<std::string> slideFileNamesWithLatexPathNoExtension;
+  List<std::string> slideFileNamesVirtualNoPathNoExtensioN;
   void* ownerCalculator;
   bool flagBuildSingleSlides;
   bool ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
+  bool ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void Crawl();
   bool BuildOrFetchFromCachePresentationFromSlides(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void BuildFreecalc();

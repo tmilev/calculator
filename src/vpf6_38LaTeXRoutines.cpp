@@ -66,7 +66,7 @@ void LaTeXcrawler::BuildFreecalc()
     if (this->flagBuildSingleSlides && isLecturE)
     { //stOutput << "<br>DEBUG: Checking " << buffer << " trimmed to: " << MathRoutines::StringTrimWhiteSpace(buffer);
       if (MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\input", 0) )
-        this->theSlides.AddOnTop(MathRoutines::StringTrimWhiteSpace(buffer));
+        this->slideTexInputCommands.AddOnTop(MathRoutines::StringTrimWhiteSpace(buffer));
     }
     if (!isInput)
       continue;
@@ -282,14 +282,14 @@ void LaTeXcrawler::BuildFreecalc()
     resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>" << "<td>" << thePdfFileNameHandout.str() << "</td>";
     resultTable << "</tr>";
   }
-  int numSlidesToBuild=this->theSlides.size;
-  this->theSlideNames.SetSize(this->theSlides.size);
-  for (int i=0; i<this->theSlides.size; i++)
-  { this->theSlideNames[i]="";
-    if (this->theSlides[i]=="")
+  int numSlidesToBuild=this->slideTexInputCommands.size;
+  this->slideFileNamesVirtualNoPathNoExtensioN.SetSize(this->slideTexInputCommands.size);
+  for (int i=0; i<this->slideTexInputCommands.size; i++)
+  { this->slideFileNamesVirtualNoPathNoExtensioN[i]="";
+    if (this->slideTexInputCommands[i]=="")
       continue;
-    std::string currentName=this->theSlides[i].substr(0, this->theSlides[i].size()-1);
-    this->theSlideNames[i]= FileOperations::GetFileNameFromFileNameWithPath(currentName);
+    std::string currentName=this->slideTexInputCommands[i].substr(0, this->slideTexInputCommands[i].size()-1);
+    this->slideFileNamesVirtualNoPathNoExtensioN[i]= FileOperations::GetFileNameFromFileNameWithPath(currentName);
   }
   //executedCommands << "<br>Slides extracted: " << this->theSlides.ToStringCommaDelimited();
   //executedCommands << "<br>Slides names: " << this->theSlideNames.ToStringCommaDelimited();
@@ -306,7 +306,7 @@ void LaTeXcrawler::BuildFreecalc()
       workingFile << "{beamer}";
       workingFile << LectureHeaderNoDocumentClass.str()
       << "\n"
-      << this->theSlides[i]
+      << this->slideTexInputCommands[i]
       << "\n"
       << "\\end{document}";
       workingFile.close();
@@ -324,7 +324,7 @@ void LaTeXcrawler::BuildFreecalc()
       else
         thePdfFileNameNormal << slideHandoutFolder;
       thePdfFileNameNormal << "Slide_"
-      << this->theSlideNames[i] << ".pdf";
+      << this->slideFileNamesVirtualNoPathNoExtensioN[i] << ".pdf";
       currentSysCommand= "mv " +theFileNameWorkingCopyPDF + " " + thePdfFileNameNormal.str();
       executedCommands << "<br>" << currentSysCommand;
       reportStream << "<br>Slide " << i+1 << ", run " << k << " compiled, renaming file ... ";
@@ -411,106 +411,122 @@ void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
   }
 }
 
-bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
-{ MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides");
+bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
+{ MacroRegisterFunctionWithName("LaTeXcrawler::ExtractPresentationFileNames");
   (void) commentsGeneral;
-  int startIndex=0;
-  if (this->slideHeader!="")
-    this->theFileNameToCrawlRelative=this->slideHeader;
-  else if (this->theSlides.size>0)
-  { startIndex=1;
-    this->theFileNameToCrawlRelative=this->theSlides[0];
+  if (this->slideFileNamesVirtualWithPatH.size<1)
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Could not find slide file names. ";
+    return false;
   }
-  std::string tempString;
-  for (int i=0; i<this->theSlides.size; i++)
-  { if (!FileOperations::IsFileNameSafeForSystemCommands(this->theSlides[i], commentsOnFailure))
+  this->slideFileNamesWithLatexPathNoExtension.SetSize(this->slideFileNamesVirtualWithPatH.size);
+  for (int i=0; i<this->slideFileNamesVirtualWithPatH.size; i++)
+  { if (!FileOperations::IsFileNameSafeForSystemCommands(this->slideFileNamesVirtualWithPatH[i], commentsOnFailure))
     { if (commentsOnFailure!=0)
-        *commentsOnFailure << "Found invalid slide name. ";
+        *commentsOnFailure << "Found unsafe slide name: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
       return false;
     }
-    tempString=this->theSlides[i];
-    FileOperations::GetFileExtensionWithDot(tempString, &this->theSlides[i]);
+    if (!FileOperations::IsOKfileNameVirtual(this->slideFileNamesVirtualWithPatH[i], false))
+    { if (commentsOnFailure!=0)
+        *commentsOnFailure << "Found invalid slide name: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
+      return false;
+    }
+    if (theGlobalVariables.UserDefaultHasAdminRights())
+      if (!FileOperations::FileExistsVirtual(this->slideFileNamesVirtualWithPatH[i], false, false))
+      { if (commentsOnFailure!=0)
+          *commentsOnFailure << "Failed to find file: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
+        return false;
+      }
+    FileOperations::GetFileExtensionWithDot
+    (this->slideFileNamesVirtualWithPatH[i], &this->slideFileNamesWithLatexPathNoExtension[i]);
+    if (MathRoutines::StringBeginsWith(this->slideFileNamesWithLatexPathNoExtension[i], "freecalc",0))
+      this->slideFileNamesWithLatexPathNoExtension[i]="../../"+this->slideFileNamesWithLatexPathNoExtension[i];
   }
-  if (!FileOperations::IsFileNameSafeForSystemCommands(this->slideHeader, commentsOnFailure))
+  this->headerFileNameWithPathVirtual=this->slideFileNamesVirtualWithPatH[0];
+  this->headerFilePathVirtual = FileOperations::GetPathFromFileNameWithPath(this->headerFileNameWithPathVirtual);
+  this->headerFileNameNoPath = FileOperations::GetFileNameFromFileNameWithPath(this->headerFileNameWithPathVirtual);
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(this->headerFilePathVirtual, this->workingFilePathPhysical, false, false))
   { if (commentsOnFailure!=0)
-      *commentsOnFailure << "Slide header has invalid name: " << this->slideHeader;
+      *commentsOnFailure << "Failed to extract physical path from: " << this->headerFilePathVirtual;
     return false;
   }
-  tempString=this->slideHeader;
-  FileOperations::GetFileExtensionWithDot(tempString, &this->slideHeader);
-  if (this->theFileNameToCrawlRelative=="")
+  FileOperations::GetFileExtensionWithDot(this->headerFileNameNoPath, &this->headerFileNameNoPathNoExtension);
+  this->workingFileNameNoPathTex="workingfile" + this->headerFileNameNoPathNoExtension + ".tex";
+  this->workingFileNameNoPathPDF="workingfile" + this->headerFileNameNoPathNoExtension + ".pdf";
+  std::string tempString=this->slideFileNamesVirtualWithPatH.size>1 ?
+  this->slideFileNamesVirtualWithPatH[1] : this->slideFileNamesVirtualWithPatH[0];
+  FileOperations::GetFileExtensionWithDot(tempString, &this->targetPDFFileNameWithPathVirtual);
+  if (MathRoutines::StringBeginsWith(this->targetPDFFileNameWithPathVirtual, "freecalc", &tempString))
+    this->targetPDFFileNameWithPathVirtual="slides-videos"+tempString;
+  this->targetPDFFileNameWithPathVirtual+=".pdf";
+  this->targetPDFFileNameWithLatexPath="../../" + this->targetPDFFileNameWithPathVirtual;
+  this->targetPDFLatexPath= FileOperations::GetPathFromFileNameWithPath(this->targetPDFFileNameWithLatexPath);
+  return true;
+}
+
+bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
+(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
+{ MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides");
+  if (!this->ExtractPresentationFileNames(commentsOnFailure, commentsGeneral))
   { if (commentsOnFailure!=0)
-      *commentsOnFailure << "Could not extract file name. ";
+      *commentsOnFailure << "Failed to extract file names. ";
     return false;
   }
-  if (!this->ExtractFileNamesFromRelativeFileName(commentsOnFailure))
-    return false;
-  std::stringstream thePdfFileName;
-  std::string desiredFilePDFNameFolder, desiredFilePDFNameNoPathNoExtension;
-  if (this->theSlides.size>0)
-    desiredFilePDFNameFolder= this->theSlides[0];
-  else
-    desiredFilePDFNameFolder=this->slideHeader;
-  std::stringstream tempStream;
-  if (commentsOnFailure==0)
-    commentsOnFailure=&tempStream;
-  if (FileOperations::FileExistsVirtual(desiredFilePDFNameFolder + ".pdf", false, false))
+  if (FileOperations::FileExistsVirtual(this->targetPDFFileNameWithPathVirtual, false, false))
     return FileOperations::LoadFileToStringVirtual
-    (desiredFilePDFNameFolder + ".pdf", this->slidePDFbinaryBlob, *commentsOnFailure, false, false);
-  desiredFilePDFNameNoPathNoExtension = FileOperations::GetFileNameFromFileNameWithPath(desiredFilePDFNameFolder);
-  desiredFilePDFNameFolder = FileOperations::GetPathFromFileNameWithPath(desiredFilePDFNameFolder);
-  std::string tempFolder;
-  if (MathRoutines::StringBeginsWith(desiredFilePDFNameFolder, "freecalc", &tempFolder) )
-    desiredFilePDFNameFolder="../../slides-video" + tempFolder;
-  thePdfFileName << "Slide_" << desiredFilePDFNameNoPathNoExtension << ".pdf";
-  this->targetPDFfileName =thePdfFileName.str();
+    (this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, *commentsOnFailure, false, false);
   if (!theGlobalVariables.UserDefaultHasAdminRights())
   { if (commentsOnFailure!=0)
-        *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. ";
-      return false;
+      *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. ";
+    return false;
   }
+  std::stringstream tempStream;
+  if(commentsOnFailure==0)
+    commentsOnFailure = &tempStream;
   std::fstream theFile;
   if (!FileOperations::OpenFileVirtual
-      (theFile, this->theFileNameToCrawlRelative, false, false, false))
+      (theFile, this->headerFileNameWithPathVirtual, false, false, false))
     return false;
   std::stringstream theFileContentStream;
   std::string buffer;
-  for (std::getline(theFile, buffer); !theFile.eof(); std::getline(theFile, buffer))
+  do
+  { std::getline(theFile, buffer);
     if (!MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "[handout]"))
       theFileContentStream << buffer << "\n";
+  } while (!theFile.eof());
   theFile.close();
-  this->theFileToCrawlContent=theFileContentStream.str();
   if (commentsGeneral!=0)
     *commentsGeneral << "<br>Loaded file: " << this->theFileNameToCrawlRelative << "<br>";
-  std::stringstream theFileContent;
-  theFileContent << this->theFileToCrawlContent;
-  bool addExtraTex=(startIndex<this->theSlides.size);
+  bool addExtraTex=(this->slideFileNamesVirtualWithPatH.size>1);
   if (addExtraTex)
-    theFileContent << "\\begin{document}"
+  { theFileContentStream << "\\begin{document}"
     << "\\providecommand{\\currentLecture}{1}"
     << "\\lect{\\semester}{Automatically generated}{1}{\n";
-  for (int i=startIndex; i<this->theSlides.size; i++)
-    theFileContent << "\\input{../../" << this->theSlides[i] << "}\n";
-  if (addExtraTex)
-    theFileContent << "}\\end{document}";
-  theGlobalVariables.ChDir(this->baseFolderStartFilePhysical);
-  this->theFileNameWorkingCopy    = "working_file_" + this->theFileNameToCrawlNoPathPhysical ;
-  this->theFileNameWorkinGCopyPDF = this->theFileNameWorkingCopy.substr(0, this->theFileNameWorkingCopy.size()-4)+".pdf";
-  if (FileOperations::OpenFileCreateIfNotPresentUnsecure(theFile, this->theFileNameWorkingCopy, false, true, false))
-    theFile << theFileContent.str();
-  if (commentsGeneral!=0)
-    *commentsGeneral << "Stored working file: " << this->theFileNameWorkingCopy << "<br>";
+    for (int i=1; i<this->slideFileNamesVirtualWithPatH.size; i++)
+      theFileContentStream << "\\input{" << this->slideFileNamesWithLatexPathNoExtension[i] << "}\n";
+    theFileContentStream << "}\n"
+    << "\\end{document}";
+  }
+  theGlobalVariables.ChDir(this->workingFilePathPhysical);
+  if (FileOperations::OpenFileCreateIfNotPresentUnsecure(theFile, this->workingFileNameNoPathTex, false, true, false))
+    theFile << theFileContentStream.str();
   theFile.close();
-  std::string currentSysCommand = "pdflatex -shell-escape " + this->theFileNameWorkingCopy;
-  std::stringstream executedCommands;
-  executedCommands << "<br>" << currentSysCommand;
+  if (commentsGeneral!=0)
+    *commentsGeneral << "Stored working file: " << this->workingFileNameNoPathTex << "<br>";
+  std::string currentSysCommand = "pdflatex -shell-escape " + this->workingFileNameNoPathTex;
+  if (commentsGeneral!=0)
+    *commentsGeneral << "Executing command: " << currentSysCommand << " ... ";
   theGlobalVariables.CallSystemNoOutput(currentSysCommand);
   if (commentsGeneral!=0)
-    *commentsGeneral << "Executed command: " << currentSysCommand << "<br>";
-  currentSysCommand = "mv " + this->theFileNameWorkinGCopyPDF + " " + this->targetPDFfileName;
-  std::string moveResult=  theGlobalVariables.CallSystemWithOutput(currentSysCommand);
+    *commentsGeneral << "done!<br>";
+  currentSysCommand = "mkdir -p "+ this->targetPDFLatexPath;
+  std::string commandResult=  theGlobalVariables.CallSystemWithOutput(currentSysCommand);
   if (commentsGeneral!=0)
-    *commentsGeneral << "Executed command: " << currentSysCommand << "<br>Result: " << moveResult << "<br>";
-  return FileOperations::LoadFileToStringVirtual
-  (desiredFilePDFNameFolder + ".pdf", this->slidePDFbinaryBlob, *commentsOnFailure, false, false);
+    *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
+  currentSysCommand = "mv " + this->workingFileNameNoPathPDF + " " + this->targetPDFFileNameWithLatexPath;
+  commandResult=  theGlobalVariables.CallSystemWithOutput(currentSysCommand);
+  if (commentsGeneral!=0)
+    *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
+  return FileOperations::LoadFileToStringUnsecure
+  (this->targetPDFFileNameWithLatexPath, this->targetPDFbinaryContent, *commentsOnFailure);
 }

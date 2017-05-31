@@ -3327,14 +3327,17 @@ int WebWorker::ProcessSlidesFromSource()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSlidesFromSource");
   this->SetHeaderOKNoContentLength();
   LaTeXcrawler theCrawler;
-  theCrawler.slideHeader=
-  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("header"), false);
+  std::string firstSlideName= MathRoutines::StringTrimWhiteSpace
+  (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("header"), false));
+  theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(firstSlideName);
   for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
   { std::string theKey=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
+    //stOutput << "DEBUG: considering key: " << theKey << "<br>";
     if (theKey!="fileName" && MathRoutines::StringBeginsWith(theKey, "file"))
-    { theCrawler.theSlides.AddOnTop
-      (HtmlRoutines::ConvertURLStringToNormal
-      (theGlobalVariables.webArguments.theValues[i],false));
+    { theCrawler.slideFileNamesVirtualWithPatH.AddOnTop
+      (MathRoutines::StringTrimWhiteSpace
+       (HtmlRoutines::ConvertURLStringToNormal
+       (theGlobalVariables.webArguments.theValues[i],false)));
     }
   }
   std::stringstream comments;
@@ -3355,7 +3358,7 @@ int WebWorker::ProcessSlidesFromSource()
   }
   this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");
   this->flagDoAddContentLength=true;
-  stOutput << theCrawler.slidePDFbinaryBlob;
+  stOutput << theCrawler.targetPDFbinaryContent;
   return 0;
 }
 
@@ -5202,10 +5205,12 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
   folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");
   folderSubstitutionsNonSensitive.SetKeyValue("LaTeX-materials/", "../LaTeX-materials/");
+  folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");//<-internal use
+  folderSubstitutionsNonSensitive.SetKeyValue("/freecalc/", "../freecalc/");
+  folderSubstitutionsNonSensitive.SetKeyValue("slides-videos/", "../slides-videos/");//<-internal use
+  folderSubstitutionsNonSensitive.SetKeyValue("/slides-videos/", "../slides-videos/");
 
   folderSubstitutionsSensitive.Clear();
-  folderSubstitutionsSensitive.SetKeyValue("freecalc/", "../freecalc/");//<-internal use
-  folderSubstitutionsSensitive.SetKeyValue("/freecalc/", "../freecalc/");
   folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");//<-internal use
   folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");//<-coming from webserver
   folderSubstitutionsSensitive.SetKeyValue("crashes/", "LogFiles/crashes/");

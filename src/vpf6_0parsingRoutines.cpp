@@ -1749,8 +1749,13 @@ bool Calculator::ApplyOneRule()
   { this->registerPositionAfterDecimalPoint=0;
     return this->ReplaceAXbyEX();
   }
+  if (lastS==" " && secondToLastS=="\\" &&
+      this->CurrentSyntacticStacK->size>=this->numEmptyTokensStart+2)
+  { this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
   if (lastS==" ")
-    return  this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
   const SyntacticElement& thirdToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   const std::string& thirdToLastS=this->controlSequences[thirdToLastE.controlIndex];
   const SyntacticElement& fourthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];

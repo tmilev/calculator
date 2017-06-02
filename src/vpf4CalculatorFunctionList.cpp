@@ -4803,6 +4803,13 @@ this->AddOperationInnerHandler
   "CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix",
   "DereferenceSequenceOrMatrix");
   this->AddOperationInnerHandler
+  ("_", CalculatorFunctionsGeneral::innerDereferenceInterval, "",
+   "Dereferences an interval, as illustrated by the example. ",
+   "%UseBracketForIntervals; [a,b)_1; (a,b]_2; [a,b]_1; ",
+  true, false,
+  "CalculatorFunctionsGeneral::innerDereferenceInterval",
+  "DereferenceInterval");
+  this->AddOperationInnerHandler
   ("_", CalculatorFunctionsGeneral::innerDereferenceSequenceStatements, "",
    "Dereferences a sequence of rules. \
     The syntax is as illustrated by the example. ",
@@ -5020,7 +5027,9 @@ this->AddOperationInnerHandler
   ("\\cup", CalculatorFunctionsGeneral::innerUnion, "",
    "If all arguments of \\cup are of type list, substitutes the expression with \
    a list containing \
-   the union of all members (with repetition).",
+   the union of all members (with repetition). \
+   If a flag is set requesting that (a,b) is interpreted as an interval, does nothing if\
+   either of the two sequences has two elements.",
    "x\\cup (MakeSequence{} x \\cup MakeSequence{}x \\cup (a,b,x))",
    true, false,
    "CalculatorFunctionsGeneral::innerUnion",

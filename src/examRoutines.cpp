@@ -3279,12 +3279,14 @@ void TopicElement::reset(int parentSize)
   this->slidesSources.SetSize(0);
   this->problem="";
   this->error="";
-  this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
-  if (this->problemNumber.size<4)
-    this->problemNumber.initFillInObject(4,0);
-  for (int i=parentSize+1; i<this->problemNumber.size; i++)
-    this->problemNumber[i]=0;
-  this->problemNumber[parentSize]++;
+  if(parentSize!=-1)
+  { this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
+    if (this->problemNumber.size<4)
+      this->problemNumber.initFillInObject(4,0);
+    for (int i=parentSize+1; i<this->problemNumber.size; i++)
+      this->problemNumber[i]=0;
+    this->problemNumber[parentSize]++;
+  }
   this->immediateChildren.SetSize(0);
   this->totalSubSectionsUnderME=0;
   this->totalSubSectionsUnderMeIncludingEmptySubsections=0;
@@ -3292,7 +3294,7 @@ void TopicElement::reset(int parentSize)
   this->pointsEarnedInProblemsThatAreImmediateChildren=0;
   this->totalPointsEarned=0;
   this->maxPointsInAllChildren=0;
-  if (parentSize==0)
+   if (parentSize==0)
     this->type=this->tChapter;
   if (parentSize==1)
     this->type=this->tSection;
@@ -3316,8 +3318,7 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
     if (MathRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument))
     { if (found)
         TopicElement::AddTopic(currentElt, output);
-      found=true;
-      currentElt.reset(0);
+      currentElt.reset(-1);
       currentElt.type=currentElt.tTexHeader;
       currentElt.slidesSources.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
     } else if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
@@ -3479,7 +3480,7 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   << ".-->";
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
   << "?request=template&fileName=" << this->fileName << "&"
-  << "topicList=" << this->topicListFileName << "&" << "\">Course</a>";
+  << "topicList=" << this->topicListFileName << "&" << "\">All topics</a>";
   out << "<ul>";
   for (int i=0; i<this->theTopicS.size(); i++)
   { TopicElement& currentElt=this->theTopicS.theValues[i];

@@ -128,6 +128,7 @@ public:
 
   static bool innerLength(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerDereferenceInterval(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDereferenceSequenceOrMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDereferenceSequenceStatements(Calculator& theCommands, const Expression& input, Expression& output);
 

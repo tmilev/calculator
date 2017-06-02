@@ -1267,23 +1267,38 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
     return false;
   if (theBase==1)
     return false;
-  bool changed=false;
-  int theSign=1;
-  if (theBase<1)
-  { theBase.Invert();
-    theSign*=-1;
-    changed=true;
-  }
   if (theArg==1)
     return output.AssignValue(0, theCommands);
+  Expression newBaseE, newArgE;
+  newBaseE.AssignValue(theBase, theCommands);
+  newArgE.AssignValue(theArg, theCommands);
+  if (theBase<1)
+  { theBase.Invert();
+    newBaseE.AssignValue(theBase, theCommands);
+    output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
+    output*=-1;
+    return true;
+  }
   if (theArg<1)
   { theArg.Invert();
-    theSign*=-1;
-    changed=true;
+    newArgE.AssignValue(theArg, theCommands);
+    output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
+    output*=-1;
+    return true;
   }
   LargeInt baseInt, argNum;
   if (!theBase.IsInteger(&baseInt))
     return false;
+  LargeInt simplerBase;
+  int simplerPower=-1;
+  bool isPower=false;
+  if (baseInt.TryToFindWhetherIsPower(isPower, simplerBase, simplerPower))
+    if (isPower)
+    { newBaseE.AssignValue((Rational) simplerBase, theCommands);
+      output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
+      output/=simplerPower;
+      return true;
+    }
   argNum=theArg.GetNumerator();
   LargeInt argDen=theArg.GetDenominator();
   double doubleBase= baseInt.GetDoubleValue();
@@ -1291,6 +1306,7 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
   if (FloatingPoint::log(doubleArgNum)/FloatingPoint::log(doubleBase)>1000)
     return false;
   int intPart=0;
+  bool changed =false;
   while (argNum% baseInt ==0)
   { intPart++;
     argNum/=baseInt;
@@ -1303,23 +1319,14 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
   }
   if (!changed)
     return false;
-  intPart*=theSign;
   theArg=argNum;
   theArg/=argDen;
-  Expression logPartE, newBaseE, newArgE;
   newBaseE.AssignValue(theBase, theCommands);
   newArgE.AssignValue(theArg, theCommands);
-  logPartE.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
-  if (theSign<0)
-  { logPartE*=theCommands.EMOne();
-  }
+  output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
   if (intPart==0)
-  { output=logPartE;
     return true;
-  }
-  Expression intPartE;
-  intPartE.AssignValue(intPart, theCommands);
-  output=intPartE+logPartE;
+  output+=intPart;
   return true;
 }
 

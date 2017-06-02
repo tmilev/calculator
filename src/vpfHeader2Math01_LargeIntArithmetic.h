@@ -51,6 +51,7 @@ public:
   bool IsEqualToZero()const;
   bool IsEven()const;
   bool IsPositive()const;
+  bool TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& outputBase, int& outputPower)const;
   bool IsPossiblyPrimeMillerRabin(int numTimesToRun=1);
   bool IsPossiblyPrimeMillerRabinOnce
   (unsigned int theBase, int theExponentOfThePowerTwoFactorOfNminusOne,
@@ -74,9 +75,9 @@ public:
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
-  void AccountPrimeFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMults);
-  bool Factor(List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicites);
-  bool Factor(List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMultiplicites);
+  void AccountPrimeFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMults)const;
+  bool Factor(List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicites)const;
+  bool Factor(List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMultiplicites)const;
   void AssignString(const std::string& input);
   bool AssignStringFailureAllowed(const std::string& input, bool ignoreNonDigits);
   int GetUnsignedIntValueTruncated();
@@ -159,15 +160,16 @@ public:
   bool IsNegative()const
   { return this->sign==-1&& (this->value.IsPositive());
   }
-  inline bool BeginsWithMinus()
+  bool BeginsWithMinus()
   { return this->IsNegative();
   }
-  inline bool IsPositiveOrZero()const
+  bool IsPositiveOrZero()const
   { return !this->IsNegative();
   }
-  inline bool IsNonPositive()const
+  bool IsNonPositive()const
   { return !this->IsPositive();
   }
+  bool TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& outputBase, int& outputPower)const;
   bool NeedsParenthesisForMultiplication()const
   { return false;
   }

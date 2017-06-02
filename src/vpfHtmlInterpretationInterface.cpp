@@ -302,15 +302,18 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   theInterpreterWithAdvice.flagPlotNoControls=true;
   std::stringstream calculatorInputStream,
   calculatorInputStreamNoEnclosures;
+
   calculatorInputStream << "CommandEnclosure{}("
   << currentA.commandsBeforeAnswer << ");";
   calculatorInputStreamNoEnclosures
   << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+
   calculatorInputStream << "CommandEnclosure{}("
   << currentA.answerId << " = " << lastAnswer
-  << "); ";
+  << ");";
   calculatorInputStreamNoEnclosures
-  << currentA.answerId << " = " << lastAnswer << "; ";
+  << currentA.answerId << " = " << lastAnswer << "";
+  //stOutput << "<br>DEBUG: calculatorInputStreamNoEnclosures: " << calculatorInputStreamNoEnclosures.str();
   bool hasCommentsBeforeSubmission=
   (MathRoutines::StringTrimWhiteSpace
   (currentA.commandsCommentsBeforeSubmission)!="");
@@ -320,6 +323,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     << ");";
     calculatorInputStreamNoEnclosures
     << currentA.commandsCommentsBeforeSubmission;
+    //stOutput << "<br>DEBUG: commandsCommentsBeforeSubmission: " << currentA.commandsCommentsBeforeSubmission;
   }
   std::stringstream problemLinkStream;
   problemLinkStream
@@ -333,8 +337,10 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     << "Something went wrong when parsing your answer "
     << "in the context of the current problem. "
     << "</b></span>";
-    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
-      out << theInterpreterWithAdvice.outputString << "<br>"
+    if (theGlobalVariables.UserDefaultHasAdminRights())
+      out
+      << problemLinkStream.str()
+      << theInterpreterWithAdvice.outputString << "<br>"
       << theInterpreterWithAdvice.outputCommentsString;
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
     return out.str();
@@ -363,15 +369,14 @@ std::string HtmlInterpretation::SubmitProblemPreview()
   << " second(s).<hr>";
   if (theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.UserDebugFlagOn())
-    out << "<hr>Logged-in as admin with debug flag"
-    << " on = including (lots of) details. "
-    << "Executed command, no advice:<br>"
-    << studentAnswerWithComments.str()
-    << "<hr>Executed command, with advice:<br>"
-    << calculatorInputStream.str()
-    << "<hr>"
+  { out << "<hr> " << problemLinkStream.str()
+    << "<br>"
+    << calculatorInputStreamNoEnclosures.str()
+    << "<br>"
+    << "Result:<br>"
     << theInterpreterWithAdvice.outputString
     << "<br>" << theInterpreterWithAdvice.outputCommentsString;
+  }
   return out.str();
 }
 

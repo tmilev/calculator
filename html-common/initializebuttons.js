@@ -70,6 +70,7 @@ function initializeButtons()
 "<td>" + getSqrtButton(i)+ "</td>"+
 "<td>"+getSqrt_N_Button(i) + "</td>"+
 "<td>"+getPowerButton(i) + "</td>"+
+"<td>" + getFactorialButton(i) + "</td>"+
 "</tr>"+
 "<tr>"+
 "<td>" + getPlusButton(i)  + "</td>"+
@@ -81,12 +82,13 @@ function initializeButtons()
 "<td>" + getUnderscoreButton(i)+ "</td>"+
 "<td>" + getLogBaseButton(i) + "</td>"+
 "<td>" + getBinomButton(i) + "</td>"+
-"<td>" + getFactorialButton(i) + "</td>"+
+"<td>" + getUnionButton(i) + "</td>"+
 "</tr>"+
 "<tr>"+
 "<td>" + getSumButton(i)+ "</td>"+
 "<td>" + getInftyButton(i)+ "</td>"+
 "<td>" + getPiButton(i) + "</td>"+
+"<td>" + getBelongsToButton(i) + "</td>"+
 "</tr>"+
 "</table>"
 ;
@@ -156,6 +158,24 @@ function getSqrtButton(indexMathField){
 
 function sqrtClick(currentMathField){
   currentMathField.cmd('\\sqrt');
+  event.preventDefault();
+}
+
+function getUnionButton(indexMathField)
+{ return "<button style='width:25' onmousedown='unionClick(answerMathQuillObjects[" + indexMathField + "]);'>cup</button>";
+}
+
+function unionClick(currentMathField)
+{ currentMathField.cmd('\\cup');
+  event.preventDefault();
+}
+
+function getBelongsToButton(indexMathField)
+{ return "<button style='width:25' onmousedown='belongsToClick(answerMathQuillObjects[" + indexMathField + "]);'>in</button>";
+}
+
+function belongsToClick(currentMathField)
+{ currentMathField.cmd('\\in');
   event.preventDefault();
 }
 

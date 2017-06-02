@@ -705,7 +705,7 @@ void LargeIntUnsigned::FitSize()
 //  if(!this->CheckForConsistensy())crash << crash;
 }
 
-void LargeIntUnsigned::AccountPrimeFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMults)
+void LargeIntUnsigned::AccountPrimeFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMults)const
 { if (outputPrimeFactors.size==0)
   { outputPrimeFactors.AddOnTop(theP);
     outputMults.AddOnTop(1);
@@ -719,7 +719,7 @@ void LargeIntUnsigned::AccountPrimeFactor(const LargeInt& theP, List<LargeInt>& 
   }
 }
 
-bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicites)
+bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<int>& outputMultiplicites)const
 { MacroRegisterFunctionWithName("LargeIntUnsigned::Factor");
   List<LargeIntUnsigned> buffer;
   if (!this->Factor(outputPrimeFactors, buffer))
@@ -731,7 +731,7 @@ bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<int>& out
   return true;
 }
 
-bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMultiplicites)
+bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMultiplicites)const
 { MacroRegisterFunctionWithName("LargeIntUnsigned::Factor");
   if (this->theDigits.size>1)
     return false;
@@ -883,6 +883,12 @@ void LargeInt::MultiplyByInt(int x)
   LargeInt tempI;
   tempI.AssignInt(x);
   *this*=(tempI);
+}
+
+bool LargeInt::TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& outputBase, int& outputPower) const
+{ if (this->sign==-1)
+    return false;
+  return this->value.TryToFindWhetherIsPower(outputIsPower, outputBase, outputPower);
 }
 
 bool LargeInt::operator==(const LargeInt& x)const

@@ -358,6 +358,7 @@ class Expression
   bool IsEqualToZero()const;
   bool IsMonEqualToZero()const;
   bool IsEqualToOne()const;
+  bool IsEqualToTwo()const;
   bool IsEqualToHalf()const;
   bool IsEqualToMOne()const;
   bool IsNegativeConstant()const;

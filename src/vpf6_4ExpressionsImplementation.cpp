@@ -1512,7 +1512,8 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
   { bool doAddExpression=!this->IsKnownFunctionWithComplexRange();
     if (doAddExpression)
       if (atomName=="=" || atomName==">" || atomName=="\"" || atomName=="==" ||
-          atomName=="<" || atomName=="Sequence" || atomName=="Matrix")
+          atomName=="<" || atomName=="Sequence" || atomName=="Matrix" ||
+          atomName=="\\cup" || atomName=="\\infty")
         doAddExpression=false;
     if (doAddExpression && excludeNamedConstants)
       if (this->owner->knownDoubleConstants.Contains(*this))
@@ -1641,6 +1642,13 @@ bool Expression::IsEqualToOne()const
 { int theInt;
   if (this->IsSmallInteger(&theInt))
     return theInt==1;
+  return false;
+}
+
+bool Expression::IsEqualToTwo()const
+{ int theInt;
+  if (this->IsSmallInteger(&theInt))
+    return theInt==2;
   return false;
 }
 

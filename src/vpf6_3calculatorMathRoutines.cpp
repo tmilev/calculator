@@ -624,6 +624,27 @@ bool CalculatorFunctionsGeneral::innerChildExpression(Calculator& theCommands, c
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerDereferenceInterval(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceInterval");
+  (void) theCommands;
+  if (!input.StartsWith(theCommands.opUnderscore(),3))
+    return false;
+  if (!input[1].StartsWith(theCommands.opIntervalClosed(),3 ) &&
+      !input[1].StartsWith(theCommands.opIntervalLeftClosed(),3 ) &&
+      !input[1].StartsWith(theCommands.opIntervalRightClosed() ,3 )
+      )
+    return false;
+  if (input[2].IsEqualToOne())
+  { output=input[1][1];
+    return true;
+  }
+  if (input[2].IsEqualToTwo())
+  { output=input[1][2];
+    return true;
+  }
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix");
   (void) theCommands;
@@ -643,7 +664,7 @@ bool CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix(Calculator& th
 }
 
 bool CalculatorFunctionsGeneral::innerDereferenceSequenceStatements(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceOperator");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceSequenceStatements");
   (void) theCommands;
   if (input.size()!=3)
     return false;
@@ -1702,11 +1723,17 @@ bool CalculatorFunctionsGeneral::innerUnion(Calculator& theCommands, const Expre
   if (!input.StartsWith(theCommands.opUnion()))
     return false;
   int numElts=1;
-  for (int i=1; i<input.children.size; i++)
+  bool has2ElementSequence=false;
+  for (int i=1; i<input.size(); i++)
     if (!input[i].IsSequenceNElementS())
       return false;
     else
-      numElts+=input[i].children.size-1;
+    { numElts+=input[i].size()-1;
+      if (input[i].size()==3)
+        has2ElementSequence=true;
+    }
+  if (has2ElementSequence && theCommands.flagUseBracketsForIntervals)
+    return false;
   output.reset(theCommands, numElts);
   output.AddChildAtomOnTop(theCommands.opSequence());
   for (int i=1; i<input.children.size; i++)
@@ -4492,6 +4519,35 @@ bool LargeIntUnsigned::IsPossiblyPrimeMillerRabinOnce
     thePower*=thePower;
   }
   return false;
+}
+
+bool LargeIntUnsigned::TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& outputBase, int& outputPower) const
+{ MacroRegisterFunctionWithName("LargeIntUnsigned::TryToFindWhetherIsPower");
+  List<LargeInt> theFactors;
+  List<int> theMults;
+  if (!this->Factor(theFactors,theMults))
+    return false;
+  if (theMults.size==0)
+  { outputIsPower=true;
+    outputBase=1;
+    outputPower=0;
+    return true;
+  }
+  if (theMults[0]<=1)
+  { outputIsPower=false;
+    return true;
+  }
+  for (int i=1; i<theFactors.size; i++)
+    if (theMults[i]!=theMults[0])
+    { outputIsPower=false;
+      return true;
+    }
+  outputIsPower=true;
+  outputBase=1;
+  for (int i=0; i<theFactors.size; i++)
+    outputBase*=theFactors[i];
+  outputPower=theMults[0];
+  return true;
 }
 
 bool LargeIntUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun)

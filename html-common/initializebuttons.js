@@ -162,7 +162,7 @@ function sqrtClick(currentMathField){
 }
 
 function getUnionButton(indexMathField)
-{ return "<button style='width:25' onmousedown='unionClick(answerMathQuillObjects[" + indexMathField + "]);'>cup</button>";
+{ return "<button style='width:25' onmousedown='unionClick(answerMathQuillObjects[" + indexMathField + "]);'>&#8746;</button>";
 }
 
 function unionClick(currentMathField)
@@ -171,7 +171,7 @@ function unionClick(currentMathField)
 }
 
 function getBelongsToButton(indexMathField)
-{ return "<button style='width:25' onmousedown='belongsToClick(answerMathQuillObjects[" + indexMathField + "]);'>in</button>";
+{ return "<button style='width:25' onmousedown='belongsToClick(answerMathQuillObjects[" + indexMathField + "]);'>&#8712;</button>";
 }
 
 function belongsToClick(currentMathField)

@@ -1513,7 +1513,8 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
     if (doAddExpression)
       if (atomName=="=" || atomName==">" || atomName=="\"" || atomName=="==" ||
           atomName=="<" || atomName=="Sequence" || atomName=="Matrix" ||
-          atomName=="\\cup" || atomName=="\\infty")
+          atomName=="\\cup" || atomName=="\\infty" || atomName=="IntervalClosed" ||
+          atomName=="[)" || atomName=="(]")
         doAddExpression=false;
     if (doAddExpression && excludeNamedConstants)
       if (this->owner->knownDoubleConstants.Contains(*this))

@@ -914,6 +914,16 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerPlotAxesGrid
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotLabel");
+  (void) input;
+  PlotObject thePlot;
+  thePlot.thePlotType="axesGrid";
+  thePlot.dimension=2;
+  return output.AssignValue(thePlot, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerPlotLabel
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotLabel");

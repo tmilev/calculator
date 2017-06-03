@@ -493,6 +493,28 @@ function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
   };
 }
 
+function AxesGrid()
+{ this.draw=function(theCanvas)
+  { var theSurface=theCanvas.surface;
+    theSurface.beginPath();
+    this.drawNoFinish(theCanvas, true);
+    theSurface.stroke();
+  };
+  this.drawNoFinish=function(theCanvas, startByMoving)
+  { var lowLeft= theCanvas.coordsScreenToMathScreen([0, this.height]);
+    var topRight= theCanvas.coordsScreenToMathScreen([this.width, 0]);
+    var theSurface=theCanvas.surface;
+    theSurface.strokeStyle=colorRGBToString([0, 0, 0]);
+    theSurface.fillStyle=colorRGBToString([0, 0, 0] );
+    var theCoords=theCanvas.coordsMathScreenToScreen(lowLeft);
+    theSurface.arc(theCoords[0], theCoords[1], 15, 0, Math.PI*2);
+    theSurface.fill();
+    theCoords=theCanvas.coordsMathScreenToScreen(topRight);
+    theSurface.arc(theCoords[0], theCoords[1], 15, 0, Math.PI*2);
+    theSurface.fill();
+  };
+}
+
 function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth)
 { this.theFunction=inputTheFn;
   this.leftPt=inputLeftPt;
@@ -736,12 +758,19 @@ function CanvasTwoD(inputCanvas)
   this.redrawTime= 0;
   this.defaultNumSegmentsPerContour= 10;
   this.flagShowPerformance=true;
+  this.flagShowAxesTicks=false;
+  this.flagShowGrid=false;
   this.drawPoint= function (inputPoint, inputColor)
   { this.theObjects.push(new PointTwoD(inputPoint, inputColor));
   };
   this.drawLine= function (inputLeftPt, inputRightPt, inputColor, inputLineWidth)
   { var newLine=new SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth);
     this.theObjects.push(newLine);
+  };
+  this.drawGrid= function ()
+  { this.flagShowAxesTicks=true;
+    this.flagShowGrid=true;
+    this.theObjects.push(new AxesGrid());
   };
   this.drawVectorField= function (
     inputField, inputIsDirectionField, inputLowLeft,
@@ -837,8 +866,8 @@ function CanvasTwoD(inputCanvas)
   { this.canvasId=inputCanvasId;
     this.canvasContainer= document.getElementById(inputCanvasId);
     this.surface=this.canvasContainer.getContext("2d");
-    this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, true);
-    this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, true);
+    this.canvasContainer.addEventListener("DOMMouseScroll", calculatorCanvasMouseWheel, false);
+    this.canvasContainer.addEventListener("mousewheel", calculatorCanvasMouseWheel, false);
 //    this.canvasContainer.addEventListener("wheel", calculatorCanvasMouseWheel, true);
     this.theObjects=[];
     this.spanMessages=document.getElementById(this.canvasId+"Messages");
@@ -892,9 +921,7 @@ function CanvasTwoD(inputCanvas)
     //console.log("intermed. screen: "+intermediateScreenPos);
     this.centerX=this.centerX+screenPos[0]-intermediateScreenPos[0];
     this.centerY=this.centerY+screenPos[1]-intermediateScreenPos[1];
-
     this.redraw();
-
   };
   this.mouseMove=function(screenX, screenY)
   { if (this.selectedElement==="")
@@ -1971,7 +1998,7 @@ function Canvas(inputCanvas)
     this.redraw();
   };
   this.rotateAfterCursorDefault= function()
-  { if (this.mousePosition.length==0)
+  { if (this.mousePosition.length===0)
       return;
     this.rotateAfterCursorDefaultGreatNormalCircle(false);
   };
@@ -2200,6 +2227,7 @@ function testPictureTwoD(inputCanvas1, inputCanvas2)
   theCanvas.drawLine([2,-5],[0,-5],'black');
   theCanvas.plotFillFinish();
   theCanvas.plotFillStart('pink');
+  theCanvas.drawGrid();
   theCanvas.drawCurve([testFunctionPlot, testFunctionPlot2], -4,4, 300, 'blue', 1);
   theCanvas.plotFillFinish();
   theCanvas.drawVectorField(testVectorField2d, true, [-6,-6], [6,6], [20, 20], 0.5, "red",2);
@@ -2230,8 +2258,12 @@ function calculatorCanvasMouseMoveRedraw(inputCanvas, x, y)
 function calculatorCanvasMouseWheel(theEvent)
 { if (theEvent===undefined)
     theEvent = window.event;
-  theEvent.preventDefault();
-  theEvent.stopPropagation();
+  if (theEvent.target===undefined)
+    return;
+  if (theEvent.preventDefault!==undefined)
+    theEvent.preventDefault();
+  if (theEvent.stopPropagation!==undefined)
+    theEvent.stopPropagation();
   var theWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;
   var theCanvas=calculatorCanvases[theEvent.target.id];
   if (theCanvas===undefined || theCanvas===null)

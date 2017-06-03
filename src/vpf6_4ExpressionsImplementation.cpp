@@ -2392,6 +2392,8 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(cons
     return false;
   if (this->StartsWith(this->owner->opUnderscore()))
     return false;
+  if (this->StartsWith(this->owner->opTimes(),3))
+    return false;
   if (this->size()>1)
   { const Expression& firstE=(*this)[0];
     //const Expression& secondE=(*this)[1];

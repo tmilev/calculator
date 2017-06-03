@@ -1618,6 +1618,10 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     { out << "theCanvas.plotFillFinish();\n";
       continue;
     }
+    if (currentPlot.thePlotType=="axesGrid")
+    { out << "theCanvas.drawGrid();\n";
+      continue;
+    }
     if (currentPlot.thePlotType=="pathFilled")
     { out << "theCanvas.drawPathFilled( ";
       out << currentPlot.ToStringPointsList();

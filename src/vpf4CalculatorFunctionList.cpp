@@ -2239,6 +2239,15 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerPlotRectangle",
    "PlotRectangle")
    ;
+  this->AddOperationInnerHandler ("PlotAxesGrid",
+   CalculatorFunctionsGeneral::innerPlotAxesGrid, "",
+   "Tells the plot to show axes ticks. Takes as input dummy (non-used) argument.\
+   ",
+   "PlotAxesGrid{}(0)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerPlotAxesGrid",
+   "PlotAxesGrid")
+   ;
   this->AddOperationInnerHandler ("PlotLabel",
    CalculatorFunctionsGeneral::innerPlotLabel, "",
    "Plots a label at a given position. Arguments format: PlotLabel((Xcoord, Ycoord), \"Label\"). \

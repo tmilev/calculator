@@ -161,12 +161,12 @@ function testVectorField2d(x,y)
 { return [ -y,x];
 }
 
-
 function testGetTestPlane()
 { var colors={colorContour: "black", colorUV: "blue", colorVU: "cyan"};
   var result=new Surface(function(u,v){return [u,0.9*v,1+u+v]; }, [[-1.2,-0.7], [1,1]], [5,5], colors);
   return result;
 }
+
 function CurveThreeD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
                      inputNumSegments, inputColor, inputLineWidth)
 { this.coordinateFunctions=inputCoordinateFunctions;
@@ -493,25 +493,85 @@ function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
   };
 }
 
-function AxesGrid()
+function drawCoordinateAxesTwoD()
 { this.draw=function(theCanvas)
   { var theSurface=theCanvas.surface;
-    theSurface.beginPath();
     this.drawNoFinish(theCanvas, true);
-    theSurface.stroke();
+  };
+  this.accountBoundingBox= function(inputOutputBox)
+  { accountBoundingBox([0,1], inputOutputBox);
+    accountBoundingBox([1,0], inputOutputBox);
   };
   this.drawNoFinish=function(theCanvas, startByMoving)
-  { var lowLeft= theCanvas.coordsScreenToMathScreen([0, this.height]);
-    var topRight= theCanvas.coordsScreenToMathScreen([this.width, 0]);
+  { var lowLeft= theCanvas.coordsScreenToMathScreen([0, theCanvas.height]);
+    var topRight= theCanvas.coordsScreenToMathScreen([theCanvas.width, 0]);
     var theSurface=theCanvas.surface;
     theSurface.strokeStyle=colorRGBToString([0, 0, 0]);
     theSurface.fillStyle=colorRGBToString([0, 0, 0] );
-    var theCoords=theCanvas.coordsMathScreenToScreen(lowLeft);
-    theSurface.arc(theCoords[0], theCoords[1], 15, 0, Math.PI*2);
-    theSurface.fill();
-    theCoords=theCanvas.coordsMathScreenToScreen(topRight);
-    theSurface.arc(theCoords[0], theCoords[1], 15, 0, Math.PI*2);
-    theSurface.fill();
+    theSurface.lineWidth=1;
+    var left=lowLeft[0];
+    var right=topRight[0];
+    var bottom=lowLeft[1];
+    var top=topRight[1];
+    theSurface.beginPath();
+    var theCoords=theCanvas.coordsMathScreenToScreen([0, bottom]);
+    theSurface.moveTo(theCoords[0], theCoords[1]);
+    theCoords=theCanvas.coordsMathScreenToScreen([0, top]);
+    theSurface.lineTo(theCoords[0], theCoords[1]);
+    theSurface.stroke();
+    theCoords=theCanvas.coordsMathScreenToScreen([left, 0]);
+    theSurface.moveTo(theCoords[0], theCoords[1]);
+    theCoords=theCanvas.coordsMathScreenToScreen([right, 0]);
+    theSurface.lineTo(theCoords[0], theCoords[1]);
+    theSurface.stroke();
+    theCoords=theCanvas.coordsMathScreenToScreen([1, -0.1]);
+    theSurface.moveTo(theCoords[0], theCoords[1]);
+    theCoords=theCanvas.coordsMathScreenToScreen([1, 0.1]);
+    theSurface.lineTo(theCoords[0], theCoords[1]);
+    theSurface.stroke();
+    theCoords=theCanvas.coordsMathScreenToScreen([1, 0]);
+    theSurface.fillText("1", theCoords[0]+5, theCoords[1]+15);
+  };
+}
+
+function AxesGrid()
+{ this.draw=function(theCanvas)
+  { var theSurface=theCanvas.surface;
+    this.drawNoFinish(theCanvas, true);
+  };
+  this.drawNoFinish=function(theCanvas, startByMoving)
+  { var lowLeft= theCanvas.coordsScreenToMathScreen([0, theCanvas.height]);
+    var topRight= theCanvas.coordsScreenToMathScreen([theCanvas.width, 0]);
+    var theSurface=theCanvas.surface;
+    theSurface.strokeStyle=colorRGBToString([160, 160, 160]);
+    theSurface.fillStyle=colorRGBToString([160, 160, 160] );
+    theSurface.lineWidth=0.1;
+    var left=lowLeft[0];
+    var right=topRight[0];
+    var bottom=lowLeft[1];
+    var top=topRight[1];
+    var floorLeft=Math.floor(left);
+    var ceilRight=Math.ceil(right);
+    var floorBottom=Math.floor(bottom);
+    var ceilTop=Math.ceil(top);
+    var DeltaHorizontal=Math.max(1, Math.floor ((ceilRight-floorLeft)/ (theCanvas.width/20)));
+    var DeltaVertical=Math.max(1, Math.floor ((ceilTop-floorBottom)/ (theCanvas.height/20)));
+    var Delta = Math.max(DeltaHorizontal, DeltaVertical);
+    theSurface.beginPath();
+    for (var i=floorLeft; i<=ceilRight; i+=Delta)
+    { var theCoords=theCanvas.coordsMathScreenToScreen([i, bottom]);
+      theSurface.moveTo(theCoords[0], theCoords[1]);
+      theCoords=theCanvas.coordsMathScreenToScreen([i, top]);
+      theSurface.lineTo(theCoords[0], theCoords[1]);
+      theSurface.stroke();
+    }
+    for (i=floorBottom; i<=ceilTop; i+=Delta)
+    { theCoords=theCanvas.coordsMathScreenToScreen([left, i]);
+      theSurface.moveTo(theCoords[0], theCoords[1]);
+      theCoords=theCanvas.coordsMathScreenToScreen([right, i]);
+      theSurface.lineTo(theCoords[0], theCoords[1]);
+      theSurface.stroke();
+    }
   };
 }
 
@@ -771,6 +831,9 @@ function CanvasTwoD(inputCanvas)
   { this.flagShowAxesTicks=true;
     this.flagShowGrid=true;
     this.theObjects.push(new AxesGrid());
+  };
+  this.drawCoordinateAxes= function ()
+  { this.theObjects.push(new drawCoordinateAxesTwoD());
   };
   this.drawVectorField= function (
     inputField, inputIsDirectionField, inputLowLeft,
@@ -2213,7 +2276,7 @@ function testPicture(inputCanvas)
   theCanvas.redraw();
 }
 
-function testPictureTwoD(inputCanvas1, inputCanvas2)
+function testPictureTwoD(inputCanvas1, inputCanvas2, inputCanvas3)
 { var theCanvas=calculatorGetCanvasTwoD(document.getElementById(inputCanvas1));
   theCanvas.init(inputCanvas1);
   theCanvas.drawLine([-10,0],[19,0], 'green');
@@ -2227,7 +2290,6 @@ function testPictureTwoD(inputCanvas1, inputCanvas2)
   theCanvas.drawLine([2,-5],[0,-5],'black');
   theCanvas.plotFillFinish();
   theCanvas.plotFillStart('pink');
-  theCanvas.drawGrid();
   theCanvas.drawCurve([testFunctionPlot, testFunctionPlot2], -4,4, 300, 'blue', 1);
   theCanvas.plotFillFinish();
   theCanvas.drawVectorField(testVectorField2d, true, [-6,-6], [6,6], [20, 20], 0.5, "red",2);
@@ -2247,6 +2309,13 @@ function testPictureTwoD(inputCanvas1, inputCanvas2)
   theCanvas2.setViewWindow([-1,-19],[1,5]);
   theCanvas2.drawVectorField(testVectorField2d, false, [-6,-6], [6,6], [20, 20], 0.5, "red",2);
   theCanvas2.redraw();
+  var theCanvas3=calculatorGetCanvasTwoD(document.getElementById(inputCanvas3));
+  theCanvas3.init(inputCanvas3);
+  theCanvas3.drawFunction(testFunctionPlot, -10,10, 100, 'red', 2);
+  theCanvas3.drawGrid();
+  theCanvas3.drawCoordinateAxes();
+  theCanvas3.setViewWindow([-1,-19],[1,5]);
+  theCanvas3.redraw();
 }
 
 function calculatorCanvasMouseMoveRedraw(inputCanvas, x, y)

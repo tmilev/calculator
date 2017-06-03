@@ -1655,12 +1655,13 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     out << ");\n";
   }
   if (this->flagIncludeCoordinateSystem)
-  { out << "theCanvas.drawLine([" << this->theLowerBoundAxes*1.10
-    << ",0],[" << this->theUpperBoundAxes*1.10 << ",0], 'black',1);\n";
-    out << "theCanvas.drawLine([0," << this->lowBoundY *1.10
-    << "],[0," << this->highBoundY*1.10 << "], 'black',1);\n";
-    out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black',1);\n";
-    out << "theCanvas.drawText([1,-0.2],'1','black');\n";
+  { //out << "theCanvas.drawLine([" << this->theLowerBoundAxes*1.10
+    //<< ",0],[" << this->theUpperBoundAxes*1.10 << ",0], 'black',1);\n";
+    //out << "theCanvas.drawLine([0," << this->lowBoundY *1.10
+    //<< "],[0," << this->highBoundY*1.10 << "], 'black',1);\n";
+    //out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black',1);\n";
+    //out << "theCanvas.drawText([1,-0.2],'1','black');\n";
+    out << "theCanvas.drawCoordinateAxes();\n";
   }
   //stOutput << "DEBUG: this->priorityViewRectangle=" << this->priorityViewRectangle;
   if (this->priorityViewRectangle>0)

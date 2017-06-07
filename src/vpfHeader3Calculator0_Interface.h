@@ -1873,13 +1873,6 @@ public:
   { return theCommands.innerGCDOrLCMPoly(theCommands, input, output, true);
   }
   bool GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext);
-  static bool innerPolynomialDivisionRemainder(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerbose
-  (Calculator& theCommands, const Expression& input, Expression& output, List<MonomialP>::OrderLeftGreaterThanRight theMonOrder);
-  static bool innerPolynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerboseGrLexRev(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerboseLexRev(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialDivisionVerboseLex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintAllVectorPartitions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, const Expression& input, Expression& output);
   bool innerPrintB3G2branchingIntermediate

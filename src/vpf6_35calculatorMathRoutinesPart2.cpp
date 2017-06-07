@@ -916,7 +916,7 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
 
 bool CalculatorFunctionsGeneral::innerPlotAxesGrid
 (Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotLabel");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotAxesGrid");
   (void) input;
   PlotObject thePlot;
   thePlot.thePlotType="axesGrid";
@@ -1687,4 +1687,311 @@ bool CalculatorFunctionsGeneral::innerGramSchmidtVerbose(Calculator& theCommands
   }
   return theCommands << "<hr>Failed to extract algebraic number matrix from: "
   << input.ToString();
+}
+
+bool CalculatorFunctionsGeneral::innerPolynomialDivisionRemainder(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionRemainder");
+  Expression theContext;
+  Vector<Polynomial<Rational> > thePolys;
+  if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
+    return output.MakeError("Failed to extract list of polynomials. ", theCommands);
+  GroebnerBasisComputation<Rational> theGB;
+  theGB.theBasiS.SetSize(thePolys.size-1);
+  for (int i=1; i<thePolys.size; i++)
+  { if (thePolys[i].IsEqualToZero())
+      return output.MakeError("Division by zero.", theCommands, true);
+    theGB.theBasiS[i-1]=thePolys[i];
+  }
+//  stOutput << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
+//  << theGB.theBasiS.ToString() << "<hr>";
+  Polynomial<Rational> outputRemainder;
+  theGB.initForDivisionAlone(theGB.theBasiS);
+  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, -1);
+  return output.AssignValueWithContext(outputRemainder, theContext, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output)
+{ return CalculatorFunctionsGeneral::innerPolynomialDivisionVerbose(theCommands, input, output, MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest);
+}
+
+bool CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseGrLexRev(Calculator& theCommands, const Expression& input, Expression& output)
+{ return CalculatorFunctionsGeneral::innerPolynomialDivisionVerbose(theCommands, input, output, MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest);
+}
+
+bool CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLex(Calculator& theCommands, const Expression& input, Expression& output)
+{ return CalculatorFunctionsGeneral::innerPolynomialDivisionVerbose(theCommands, input, output, MonomialP::LeftGreaterThanLexicographicLastVariableStrongest);
+}
+
+bool CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLexRev(Calculator& theCommands, const Expression& input, Expression& output)
+{ return CalculatorFunctionsGeneral::innerPolynomialDivisionVerbose(theCommands, input, output, MonomialP::LeftGreaterThanLexicographicLastVariableWeakest);
+}
+
+bool CalculatorFunctionsGeneral::innerPolynomialDivisionVerbose(Calculator& theCommands, const Expression& input, Expression& output, List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)
+{ MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionVerbose");
+  Expression theContext;
+  Vector<Polynomial<Rational> > thePolys;
+  if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
+    return output.MakeError("Failed to extract list of polynomials. ", theCommands);
+  GroebnerBasisComputation<Rational> theGB;
+  theGB.flagDoLogDivision=true;
+  theGB.theBasiS.SetSize(thePolys.size-1);
+  for (int i=1; i<thePolys.size; i++)
+  { if (thePolys[i].IsEqualToZero())
+      return output.MakeError("Division by zero.", theCommands, true);
+    theGB.theBasiS[i-1]=thePolys[i];
+  }
+//  Polynomial<Rational> outputRemainder;
+  theGB.initForDivisionAlone(theGB.theBasiS);
+  theGB.thePolynomialOrder.theMonOrder= theMonOrder;
+  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, -1);
+  theContext.ContextGetFormatExpressions(theGB.theFormat);
+//  stOutput << "context vars: " << theFormat.polyAlphabeT;
+  theGB.theFormat.flagUseLatex=true;
+  theGB.theFormat.flagUseFrac=true;
+  std::stringstream latexOutput;
+  latexOutput <<
+  "<br>In latex: <br>\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol}"
+  << "\\begin{document} "
+  << theGB.GetDivisionStringLaTeX()
+  << "\\end{document}";
+  return output.AssignValue
+  (theGB.GetDivisionStringHtml()+latexOutput.str(), theCommands);
+}
+
+template <class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX()
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionStringLaTeX");
+  std::stringstream out;
+  List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
+  List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
+  this->theFormat.thePolyMonOrder=this->thePolynomialOrder.theMonOrder;
+  HashedList<MonomialP> totalMonCollection;
+  std::string HighlightedColor="red";
+  totalMonCollection.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
+  for (int i=0; i<theRemainders.size; i++)
+  { totalMonCollection.AddOnTopNoRepetition(theRemainders[i].theMonomials);
+    totalMonCollection.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
+  }
+  //List<std::string> basisColorStyles;
+  //basisColorStyles.SetSize(this->theBasiS.size);
+  totalMonCollection.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
+//  stOutput << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
+//  int numVars=this->GetNumVars();
+  this->theFormat.flagUseLatex=true;
+  out << this->ToStringLetterOrder(true);
+  out << theRemainders.size << " division steps total.";
+  out << "\\renewcommand{\\arraystretch}{1.2}";
+  out << "\\begin{longtable}{|c";
+  for (int i =0; i<totalMonCollection.size; i++)
+    out << "c";
+  out << "|} \\hline";
+  out << "&" <<  "\\multicolumn{" << totalMonCollection.size << "}{|c|}{\\textbf{Remainder}}" << "\\\\";
+  out << "\\multicolumn{1}{|c|}{} & ";
+  out << this->GetPolynomialStringSpacedMonomialsLaTeX
+  (this->remainderDivision, &HighlightedColor, &this->remainderDivision.theMonomials)
+  << "\\\\\\hline";
+  out << "\\textbf{Divisor(s)} &" << "\\multicolumn{" << totalMonCollection.size << "}{|c|}{\\textbf{Quotient(s)}}"
+  << "\\\\";
+  Polynomial<coefficient> currentQuotient;
+  for (int i=0; i<this->theBasiS.size; i++)
+  { out << "$";
+    out << this->theBasiS[i].ToString(&this->theFormat);
+    out << "$";
+    out << "& \\multicolumn{" << totalMonCollection.size << "}{|l|}{";
+    currentQuotient.MakeZero();
+    for (int j=0; j<theRemainders.size; j++)
+    { if (this->intermediateSelectedDivisors.GetElement()[j]!=i)
+        continue;
+      currentQuotient.AddMonomial(this->intermediateHighestMonDivHighestMon.GetElement()[j],
+      this->intermediateCoeffs.GetElement()[j]);
+    }
+    out << "$" << currentQuotient.ToString(&this->theFormat) << "$" << "}\\\\\\hline";
+  }
+  out << "& \\multicolumn{" << totalMonCollection.size << "}{|c|}{\\textbf{Dividend}}\\\\";
+  out << "\\multicolumn{1}{|c|}{";
+  if (theRemainders.size>0)
+    out << "$\\underline{~}$";
+  out << "} &";
+  out << this->GetPolynomialStringSpacedMonomialsLaTeX
+  (this->startingPoly.GetElement(), &HighlightedColor,
+   &this->intermediateHighlightedMons.GetElement()[0]);
+  out << "\\\\";
+  for (int i=0; i<theRemainders.size; i++)
+  { out << "&";
+    out << this->GetPolynomialStringSpacedMonomialsLaTeX(theSubtracands[i], &HighlightedColor)
+    << "\\\\\\cline{2-" << totalMonCollection.size+1 << "}";
+    if (i<theRemainders.size-1)
+      out << "$\\underline{~}$";
+    out << "&"
+    << this->GetPolynomialStringSpacedMonomialsLaTeX
+    (theRemainders[i], &HighlightedColor, &this->intermediateHighlightedMons.GetElement()[i+1])
+    << "\\\\";
+  }
+  out << "\\hline";
+  out << "\\end{longtable}";
+  return out.str();
+}
+
+template <class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlightLaTeX
+  (const Polynomial<coefficient>& thePoly,
+   List<List<int> >* slidesToHighlightMon,
+   bool useColumnSeparator)
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::GetSpacedMonomialsWithHighlightLaTeX");
+  std::stringstream out;
+  bool found=false;
+  int countMons=0;
+  for (int i=0; i<this->allMonomials.size; i++)
+  { int theIndex= thePoly.theMonomials.GetIndex(this->allMonomials[i]);
+    if (theIndex==-1)
+    { if (useColumnSeparator)
+        if (i!=this->allMonomials.size-1)
+          out << "&";
+      continue;
+    }
+    countMons++;
+    bool useHighlightStyle=false;
+    out << "$";
+
+    out << Polynomial<Rational>::GetBlendCoeffAndMon
+    (thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat);
+    found=true;
+    out << "$ ";
+    if (useColumnSeparator)
+      if (i!=this->allMonomials.size-1)
+        out << "& ";
+  }
+  if (countMons!=thePoly.size())
+    out << " Programming ERROR!";
+  return out.str();
+}
+
+template <class coefficient>
+void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
+(int remainderIndex, int& currentSlideNumber)
+{
+
+}
+
+template <class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionLaTeXSlide");
+  std::stringstream out;
+  List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
+  List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
+  this->theFormat.thePolyMonOrder=this->thePolynomialOrder.theMonOrder;
+  bool oneDivisor= (this->theBasiS.size==1);
+  this->allMonomials.Clear();
+  this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
+  for (int i=0; i<theRemainders.size; i++)
+  { this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
+    this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
+  }
+  this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
+  List<List<int> > empty;
+  empty.SetSize(this->allMonomials.size);
+  this->highlightMonsRemainders.initFillInObject(theRemainders.size, empty);
+  this->highlightMonsSubtracands.initFillInObject(theSubtracands.size, empty);
+  this->highlightMonsQuotients.initFillInObject(theBasiS.size, empty);
+  this->highlightMonsDivisors.initFillInObject(theBasiS.size, empty);
+  this->uncoverMonsRemainders.initFillInObject(theRemainders.size, empty);
+  this->uncoverMonsSubtracands.initFillInObject(theSubtracands.size, empty);
+  this->uncoverMonsQuotients.initFillInObject(theBasiS.size, empty);
+  this->uncoverMonsDivisors.initFillInObject(theBasiS.size, empty);
+  int currentSlideNumer=this->firstIndexLatexSlide+1;
+  for (int i=0; i<theRemainders.size; i++)
+    this->ComputeHighLightsFromRemainder(i, currentSlideNumer);
+  this->theFormat.flagUseLatex=true;
+  out << "\\renewcommand{\\arraystretch}{1.2}";
+  out << "\\begin{longtable}{@{}c";
+  for (int i =0; i<this->allMonomials.size*2; i++)
+    out << "@{}c";
+  out << "} \\cline{2-" << this->allMonomials.size*2+1 << "}";
+  if (!oneDivisor)
+  { out << "\\textbf{Divisor(s)} &" << "\\multicolumn{"
+    << this->allMonomials.size*2 << "}{|c|}{\\textbf{Quotient(s)}}"
+    << "\\\\";
+  }
+  for (int i=0; i<this->theBasiS.size; i++)
+  { if (!oneDivisor)
+    { out << "$";
+      out << this->theBasiS[i].ToString(&this->theFormat);
+      out << "$";
+    }
+    out << "&";
+    out << this->GetSpacedMonomialsWithHighlightLaTeX
+    (this->theQuotients[i], &this->highlightMonsQuotients[i], -1);
+    out << "\\\\\\hline";
+  }
+  if (!oneDivisor)
+    out << "& \\multicolumn{" << this->allMonomials.size*2 << "}{|c|}{\\textbf{Dividend}}\\\\";
+  if (!oneDivisor)
+  { out << "\\multicolumn{1}{|c|}{";
+    if (theRemainders.size>0)
+      out << "$\\underline{~}$";
+    out << "} &";
+  }
+  out << "\\\\";
+  for (int i=0; i<theRemainders.size; i++)
+  { if (oneDivisor)
+      out << "\\multicolumn{1}{c|}{$"
+      << this->theBasiS[0].ToString(&this->theFormat) << "$}";
+    out << "&";
+    out << this->GetSpacedMonomialsWithHighlightLaTeX
+    (theRemainders[i], &this->highlightMonsRemainders[i], true)
+    << "\\\\";
+    if (i<this->highlightMonsSubtracands.size)
+    { out << this->GetSpacedMonomialsWithHighlightLaTeX
+      (theSubtracands[i], &this->highlightMonsSubtracands[i], true);
+      out << "\\\\\\cline{" << this->firstNonZeroIndicesPerIntermediateSubtracand[i]*2 +1
+      << "-" << this->allMonomials.size*2+1 << "}";
+      if (!oneDivisor)
+        if (i<theRemainders.size-1)
+          out << "$\\underline{~}$";
+      out << "\\\\";
+    }
+  }
+  //out << "\\hline";
+  out << "\\end{longtable}";
+  return out.str();
+}
+
+bool CalculatorFunctionsGeneral::innerPolynomialDivisionSlidesGrLex
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionSlidesGrLex");
+  Expression theContext;
+  Vector<Polynomial<Rational> > thePolys;
+  if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
+    return output.MakeError("Failed to extract list of polynomials. ", theCommands);
+  if (thePolys.size<3)
+    return theCommands << "Function takes at least 3 inputs: index of first slide, dividend, divisor(s).";
+  GroebnerBasisComputation<Rational> theGB;
+  theGB.flagDoLogDivision=true;
+  theGB.flagStoreQuotients=true;
+  theGB.theBasiS.SetSize(thePolys.size-2);
+  for (int i=2; i<thePolys.size; i++)
+  { if (thePolys[i].IsEqualToZero())
+      return output.MakeError("Division by zero.", theCommands, true);
+    theGB.theBasiS[i-2]=thePolys[i];
+  }
+  if (!thePolys[0].IsSmallInteger(&theGB.firstIndexLatexSlide))
+    return theCommands << "Failed to extract integer from first argument";
+//  Polynomial<Rational> outputRemainder;
+  theGB.initForDivisionAlone(theGB.theBasiS);
+  theGB.thePolynomialOrder.theMonOrder= MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
+  theGB.RemainderDivisionWithRespectToBasis(thePolys[1], &theGB.remainderDivision, -1);
+  theContext.ContextGetFormatExpressions(theGB.theFormat);
+//  stOutput << "context vars: " << theFormat.polyAlphabeT;
+  theGB.theFormat.flagUseLatex=true;
+  theGB.theFormat.flagUseFrac=true;
+  std::stringstream latexOutput;
+  latexOutput <<
+  "<br>In latex: <br>\\documentclass{beamer}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol}"
+  << "\\begin{document} "
+  << "\\begin{frame}"
+  << theGB.GetDivisionLaTeXSlide()
+  << "\\end{frame}"
+  << "\\end{document}";
+  return output.AssignValue
+  (latexOutput.str(), theCommands);
 }

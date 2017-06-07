@@ -74,6 +74,17 @@ public:
 
   static bool innerChooseCartanSA(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerPolynomialDivisionSlidesGrLex
+  (Calculator& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerPolynomialDivisionRemainder
+  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialDivisionVerbose
+  (Calculator& theCommands, const Expression& input, Expression& output, List<MonomialP>::OrderLeftGreaterThanRight theMonOrder);
+  static bool innerPolynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialDivisionVerboseGrLexRev(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialDivisionVerboseLexRev(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialDivisionVerboseLex(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerGenerateVectorSpaceClosedWRTLieBracket(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFourierTransformEWA(Calculator& theCommands, const Expression& input, Expression& output);

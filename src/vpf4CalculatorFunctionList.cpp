@@ -1849,52 +1849,61 @@ D-B;\
     "Interpolate")
    ;
   this->AddOperationInnerHandler
-  ("PolyDivRemainder", Calculator::innerPolynomialDivisionRemainder, "",
+  ("PolyDivRemainder", CalculatorFunctionsGeneral::innerPolynomialDivisionRemainder, "",
    "Returns the remainder after taking quotient of a \
     polynomial divided by a set of polynomials using the default monomial order (lexicographic).",
    "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x+y^2-1, y^3-x y) ;",
    true, false,
-   "Calculator::innerPolynomialDivisionRemainder",
+   "CalculatorFunctionsGeneral::innerPolynomialDivisionRemainder",
    "PolyDivRemainder")
    ;
   this->AddOperationInnerHandler
-  ("PolyDivStringGrLex", Calculator::innerPolynomialDivisionVerboseGrLex, "",
+  ("PolyDivSlidesGrLex", CalculatorFunctionsGeneral::innerPolynomialDivisionSlidesGrLex, "",
+   "Creates a slide with the polynomial disivion algorithm. First element= starting slide number.",
+   "PolyDivSlidesGrLex{}(1,x^3+x+10, x+2) ; PolyDivSlidesGrLex{}(1,x+y+10, x+1,y-1) ",
+   true, false,
+   "Calculator::innerPolynomialDivisionSlidesGrLex",
+   "PolyDivSlidesGrLex")
+   ;
+
+  this->AddOperationInnerHandler
+  ("PolyDivStringGrLex", CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseGrLex, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using gr lex order, for example, x^2 y^3 >x y^4, y^11>x^10. ",
    "PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;",
    true, false,
-   "Calculator::innerPolynomialDivisionVerboseGrLex",
+   "CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseGrLex",
    "PolyDivStringGrLex")
    ;
   this->AddOperationInnerHandler
   ("PolyDivStringGrLexRev",
-    Calculator::innerPolynomialDivisionVerboseGrLexRev, "",
+    CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseGrLexRev, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using total degree (graded) order with \
    equal total degrees compared by lex order with reversed order of the letters, \
    for example, x y^4> x^2 y^3 , x^11>y^10. ",
    "PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;",
    true, false,
-   "Calculator::innerPolynomialDivisionVerboseGrLexRev",
+   "CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseGrLexRev",
    "PolyDivStringGrLexRev")
    ;
   this->AddOperationInnerHandler
-  ("PolyDivStringLex", Calculator::innerPolynomialDivisionVerboseLex, "",
+  ("PolyDivStringLex", CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLex, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using the lex order, for example, x^2 y^4 > x y^1000 > x y^2. ",
    "PolyDivStringLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;",
    true, false,
-   "Calculator::innerPolynomialDivisionVerboseLex",
+   "CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLex",
    "PolyDivStringLex")
    ;
   this->AddOperationInnerHandler
-  ("PolyDivStringLexRev", Calculator::innerPolynomialDivisionVerboseLexRev, "",
+  ("PolyDivStringLexRev", CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLexRev, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using the lex order with reversed order of variables, \
    for example, y^2 > x^1000 y > x y. ",
    "PolyDivStringLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;",
    true, false,
-   "Calculator::innerPolynomialDivisionVerboseLexRev",
+   "CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseLexRev",
    "PolyDivStringLexRev")
    ;
   this->AddOperationInnerHandler

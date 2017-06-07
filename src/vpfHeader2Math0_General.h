@@ -2763,6 +2763,7 @@ class GroebnerBasisComputation
   MonomialP SoPolyLeftShift;
   MonomialP SoPolyRightShift;
   MonomialP bufferMoN1;
+  List<Polynomial<coefficient> > theQuotients;
   List<Polynomial<coefficient> > theBasiS;
   List<Polynomial<coefficient> > basisCandidates;
   List<MonomialP> leadingMons;
@@ -2777,17 +2778,29 @@ class GroebnerBasisComputation
   int MaxNumSerreSystemComputationsPreferred;
   int MaxNumGBComputations;
   int MaxNumBasisReductionComputations;
+  int firstIndexLatexSlide;
 //  bool flagBasisGuaranteedToGenerateIdeal;
   bool flagUseTheMonomialBranchingOptimization;
   bool flagDoProgressReport;
   bool flagDoSortBasis;
   bool flagDoLogDivision;
+  bool flagStoreQuotients;
   bool flagSystemProvenToHaveNoSolution;
   bool flagSystemProvenToHaveSolution;
   bool flagSystemSolvedOverBaseField;
   bool flagUsingAlgebraicClosuRe;
   bool flagTryDirectlySolutionOverAlgebraicClosure;
   AlgebraicClosureRationals* theAlgebraicClosurE;
+  HashedList<MonomialP> allMonomials;
+  List<List<List<int> > > highlightMonsQuotients;
+  List<List<List<int> > > highlightMonsRemainders;
+  List<List<List<int> > > highlightMonsSubtracands;
+  List<List<List<int> > > highlightMonsDivisors;
+  List<List<List<int> > > uncoverMonsQuotients;
+  List<List<List<int> > > uncoverMonsRemainders;
+  List<List<List<int> > > uncoverMonsSubtracands;
+  List<List<List<int> > > uncoverMonsDivisors;
+  List<int> firstNonZeroIndicesPerIntermediateSubtracand;
   MemorySaving<GroebnerBasisComputation<coefficient> > ComputationUsedInRecursiveCalls;
   MemorySaving<List<Polynomial<coefficient> > > intermediateRemainders;
   MemorySaving<List<List<MonomialP> > > intermediateHighlightedMons;
@@ -2804,13 +2817,24 @@ class GroebnerBasisComputation
   void GetSubFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<coefficient>& outputSub);
   std::string ToStringSerreLikeSolution();
   std::string GetPolynomialStringSpacedMonomialsHtml
-  (const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder, const std::string& extraStyle,
-    List<MonomialP>* theHighLightedMons=0);
+  (const Polynomial<coefficient>& thePoly,
+   const std::string& extraStyle,
+   List<MonomialP>* theHighLightedMons=0);
   std::string GetPolynomialStringSpacedMonomialsLaTeX
-  (const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
-   std::string* highlightColor=0, List<MonomialP>* theHighLightedMons=0);
+  (const Polynomial<coefficient>& thePoly,
+   std::string* highlightColor=0,
+   List<MonomialP>* theHighLightedMons=0,
+   int* firstNonZeroIndex=0);
+  std::string GetSpacedMonomialsWithHighlightLaTeX
+  (const Polynomial<coefficient>& thePoly,
+   List<List<int> >* slidesToHighlightMon,
+   bool useColumnSeparator)
+  ;
+  void ComputeHighLightsFromRemainder(int remainderIndex, int& currentSlideNumber);
   std::string GetDivisionStringHtml();
   std::string GetDivisionStringLaTeX();
+  std::string GetDivisionLaTeXSlide();
+
   int SelectPolyIndexToAddNext();
   bool AddPolysAndReduceBasis();
   bool TransformToReducedBasis
@@ -2834,7 +2858,9 @@ class GroebnerBasisComputation
   static void GetVarsToSolveFor(const List<Polynomial<coefficient> >& input, Selection& output);
   static bool IsContradictoryReducedSystem(const List<Polynomial<coefficient> >& input);
   void RemainderDivisionWithRespectToBasis
-  (Polynomial<coefficient>& inputOutput, Polynomial<coefficient>* outputRemainder=0, int basisIndexToIgnore=-1);
+  (Polynomial<coefficient>& inputOutput,
+   Polynomial<coefficient>* outputRemainder=0,
+   int basisIndexToIgnore=-1);
   std::string ToStringCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem);
   void SolveSerreLikeSystem(List<Polynomial<coefficient> >& inputSystem);
   bool HasImpliedSubstitutions

@@ -7,6 +7,7 @@
 #include "vpfHeader3Calculator4HtmlFunctions.h"
 #include "vpfHeader5Crypto.h"
 #include "vpfHeader8HtmlSnippets.h"
+#include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 ProjectInformationInstance ProjectInfoVpf6_35cpp(__FILE__, "More calculator built-in functions. ");
 
 struct MeshTriangles{
@@ -1689,6 +1690,114 @@ bool CalculatorFunctionsGeneral::innerGramSchmidtVerbose(Calculator& theCommands
   << input.ToString();
 }
 
+template<class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomialsHtml
+(const Polynomial<coefficient>& thePoly,
+ const std::string& extraStyle,
+ List<MonomialP>* theHighLightedMons)
+{ std::stringstream out;
+  bool found=false;
+  int countMons=0;
+  for (int i=0; i<this->allMonomials.size; i++)
+  { int theIndex= thePoly.theMonomials.GetIndex(this->allMonomials[i]);
+    if (theIndex==-1)
+    { out << "<td" << extraStyle << ">" << "</td>";
+      continue;
+    }
+    countMons++;
+    bool useHighlightStyle=false;
+    if (theHighLightedMons!=0)
+      if (theHighLightedMons->Contains(this->allMonomials[i]))
+        useHighlightStyle=true;
+    out << "<td" << extraStyle << ">";
+    if (useHighlightStyle)
+      out << "<span style=\"color:red\">";
+    if (this->theFormat.flagUseLatex)
+      out << HtmlRoutines::GetMathSpanPure(Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat));
+    else
+      out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat);
+    found=true;
+    if (useHighlightStyle)
+      out << "</span>";
+    out << "</td>";
+  }
+  if (countMons!=thePoly.size())
+    out << "<td><b>Programming ERROR!</b></td>";
+  return out.str();
+}
+
+template <class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionStringHtml");
+  stOutput << "<br>DEBUG: got to here, pt -2.";
+  std::stringstream out;
+  List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
+  List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
+  this->theFormat.thePolyMonOrder=this->thePolynomialOrder.theMonOrder;
+  std::string underlineStyle=" style=\"white-space: nowrap; border-bottom:1px solid black;\"";
+  this->allMonomials.Clear();
+  this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
+  for (int i=0; i<theRemainders.size; i++)
+  { this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
+    if (i<theSubtracands.size)
+      this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
+  }
+  //List<std::string> basisColorStyles;
+  //basisColorStyles.SetSize(this->theBasiS.size);
+  this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
+//  stOutput << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
+//  int numVars=this->GetNumVars();
+  out << this->ToStringLetterOrder(false);
+  out << "<br>";
+  out << theRemainders.size << " division steps total.<br>";
+  out << "<table style=\"white-space: nowrap; border:1px solid black;\">";
+  out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
+  out << this->GetPolynomialStringSpacedMonomialsHtml
+  (this->remainderDivision, underlineStyle, &this->remainderDivision.theMonomials)
+  << "</td></tr>";
+  out << "<tr><td style=\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan=\""
+  << this->allMonomials.size+1 << "\"><b>Quotient(s) </b></td>"
+  << "</tr>";
+  stOutput << "<br>DEBUG: got to here, pt -1.";
+  for (int i=0; i<this->theBasiS.size; i++)
+  { //if (i==this->theBasiS.size-1)
+//    else
+    out << "<tr>";
+    out << "<td style=\"border-right:1px solid black; border-bottom: 1px solid gray;\">";
+    if (this->theFormat.flagUseLatex)
+      out << HtmlRoutines::GetMathSpanPure(this->theBasiS[i].ToString(&this->theFormat),-1 );
+    else
+      out << this->theBasiS[i].ToString(&this->theFormat);
+    out << "</td>";
+    out << "<td style=\"border-bottom:1px solid gray;\" colspan=\""
+    << this->allMonomials.size+1 << "\">";
+    out << HtmlRoutines::GetMathSpanPure(this->theQuotients[i].ToString(&this->theFormat));
+    out << "</td></tr>";
+  }
+  out << "</tr>";
+  stOutput << "<br>DEBUG: got to here";
+  if (theRemainders.size!=this->intermediateHighlightedMons.GetElement().size)
+    crash << "Should have as many remainders: " << theRemainders.size
+    << " as intermediate highlighted mons: "
+    << this->intermediateHighlightedMons.GetElement().size << crash;
+  if (theRemainders.size!=theSubtracands.size+1)
+    crash << "Remainders should equal subtracands plus one. " << crash;
+  for (int i=0; i<theRemainders.size; i++)
+  { out << "<tr><td></td>"
+    << this->GetPolynomialStringSpacedMonomialsHtml
+    (theRemainders[i], "", &this->intermediateHighlightedMons.GetElement()[i])
+    << "</tr>";
+    if (i<theSubtracands.size)
+    { out << "<tr><td>-</td></tr>";
+      out << "<tr><td></td>" << this->GetPolynomialStringSpacedMonomialsHtml
+      (theSubtracands[i], underlineStyle)
+      << "</tr>";
+    }
+  }
+  out << "</table>";
+  return out.str();
+}
+
 bool CalculatorFunctionsGeneral::innerPolynomialDivisionRemainder(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionRemainder");
   Expression theContext;
@@ -1734,6 +1843,7 @@ bool CalculatorFunctionsGeneral::innerPolynomialDivisionVerbose(Calculator& theC
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   GroebnerBasisComputation<Rational> theGB;
   theGB.flagDoLogDivision=true;
+  theGB.flagStoreQuotients=true;
   theGB.theBasiS.SetSize(thePolys.size-1);
   for (int i=1; i<thePolys.size; i++)
   { if (thePolys[i].IsEqualToZero())
@@ -1744,18 +1854,68 @@ bool CalculatorFunctionsGeneral::innerPolynomialDivisionVerbose(Calculator& theC
   theGB.initForDivisionAlone(theGB.theBasiS);
   theGB.thePolynomialOrder.theMonOrder= theMonOrder;
   theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, -1);
+  stOutput << "DEBUG: got to after div wrt basis.";
   theContext.ContextGetFormatExpressions(theGB.theFormat);
 //  stOutput << "context vars: " << theFormat.polyAlphabeT;
   theGB.theFormat.flagUseLatex=true;
   theGB.theFormat.flagUseFrac=true;
   std::stringstream latexOutput;
   latexOutput <<
-  "<br>In latex: <br>\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol}"
+  "<br>In latex: <br>"
+  << "\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol}"
   << "\\begin{document} "
   << theGB.GetDivisionStringLaTeX()
-  << "\\end{document}";
-  return output.AssignValue
-  (theGB.GetDivisionStringHtml()+latexOutput.str(), theCommands);
+  << "\\end{document}"
+  ;
+  //stOutput << "DEBUG: got to before getdivstring.";
+  std::stringstream out;
+  out << theGB.GetDivisionStringHtml();
+  out << latexOutput.str();
+  return output.AssignValue(out.str(), theCommands);
+}
+
+template<class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomialsLaTeX
+  (const Polynomial<coefficient>& thePoly,
+   std::string* highlightColor,
+   List<MonomialP>* theHighLightedMons,
+   int* firstNonZeroIndex)
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::GetPolynomialStringSpacedMonomialsLaTeX");
+  std::stringstream out;
+  bool found=false;
+  int countMons=0;
+  if (firstNonZeroIndex!=0)
+    *firstNonZeroIndex=-1;
+  for (int i=0; i<this->allMonomials.size; i++)
+  { int theIndex= thePoly.theMonomials.GetIndex(this->allMonomials[i]);
+    if (theIndex==-1)
+    { if (i!=this->allMonomials.size-1)
+        out << "&";
+      continue;
+    }
+    if (firstNonZeroIndex!=0)
+      if (*firstNonZeroIndex==-1)
+        *firstNonZeroIndex=i;
+    countMons++;
+    bool useHighlightStyle=false;
+    if (highlightColor!=0)
+      if (theHighLightedMons!=0)
+        if (theHighLightedMons->Contains(this->allMonomials[i]))
+          useHighlightStyle=true;
+    out << "$";
+    if (useHighlightStyle)
+      out << "\\color{" << *highlightColor << "}{";
+    out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat);
+    found=true;
+    if (useHighlightStyle)
+      out << "}\\color{black}";
+    out << "$ ";
+    if (i!=this->allMonomials.size-1)
+      out << "& ";
+  }
+  if (countMons!=thePoly.size())
+    out << " Programming ERROR!";
+  return out.str();
 }
 
 template <class coefficient>
@@ -1765,67 +1925,54 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX()
   List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
   List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
   this->theFormat.thePolyMonOrder=this->thePolynomialOrder.theMonOrder;
-  HashedList<MonomialP> totalMonCollection;
   std::string HighlightedColor="red";
-  totalMonCollection.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
+  this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
   for (int i=0; i<theRemainders.size; i++)
-  { totalMonCollection.AddOnTopNoRepetition(theRemainders[i].theMonomials);
-    totalMonCollection.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
-  }
+    this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
+  for (int i=0; i<theSubtracands.size; i++)
+    this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
   //List<std::string> basisColorStyles;
   //basisColorStyles.SetSize(this->theBasiS.size);
-  totalMonCollection.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
-//  stOutput << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
+  this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
+//  stOutput << "<hr>The monomials in play ordered: " << this->allMonomials.ToString(theFormat);
 //  int numVars=this->GetNumVars();
   this->theFormat.flagUseLatex=true;
   out << this->ToStringLetterOrder(true);
   out << theRemainders.size << " division steps total.";
   out << "\\renewcommand{\\arraystretch}{1.2}";
   out << "\\begin{longtable}{|c";
-  for (int i =0; i<totalMonCollection.size; i++)
+  for (int i =0; i<this->allMonomials.size; i++)
     out << "c";
   out << "|} \\hline";
-  out << "&" <<  "\\multicolumn{" << totalMonCollection.size << "}{|c|}{\\textbf{Remainder}}" << "\\\\";
+  out << "&" <<  "\\multicolumn{" << this->allMonomials.size
+  << "}{|c|}{\\textbf{Remainder}}" << "\\\\";
   out << "\\multicolumn{1}{|c|}{} & ";
   out << this->GetPolynomialStringSpacedMonomialsLaTeX
   (this->remainderDivision, &HighlightedColor, &this->remainderDivision.theMonomials)
   << "\\\\\\hline";
-  out << "\\textbf{Divisor(s)} &" << "\\multicolumn{" << totalMonCollection.size << "}{|c|}{\\textbf{Quotient(s)}}"
+  out << "\\textbf{Divisor(s)} &" << "\\multicolumn{"
+  << this->allMonomials.size << "}{|c|}{\\textbf{Quotient(s)}}"
   << "\\\\";
-  Polynomial<coefficient> currentQuotient;
   for (int i=0; i<this->theBasiS.size; i++)
   { out << "$";
     out << this->theBasiS[i].ToString(&this->theFormat);
     out << "$";
-    out << "& \\multicolumn{" << totalMonCollection.size << "}{|l|}{";
-    currentQuotient.MakeZero();
-    for (int j=0; j<theRemainders.size; j++)
-    { if (this->intermediateSelectedDivisors.GetElement()[j]!=i)
-        continue;
-      currentQuotient.AddMonomial(this->intermediateHighestMonDivHighestMon.GetElement()[j],
-      this->intermediateCoeffs.GetElement()[j]);
-    }
-    out << "$" << currentQuotient.ToString(&this->theFormat) << "$" << "}\\\\\\hline";
+    out << "& \\multicolumn{" << this->allMonomials.size << "}{|l|}{";
+    out << "$" << this->theQuotients[i].ToString(&this->theFormat) << "$" << "}\\\\\\hline\\hline";
   }
-  out << "& \\multicolumn{" << totalMonCollection.size << "}{|c|}{\\textbf{Dividend}}\\\\";
-  out << "\\multicolumn{1}{|c|}{";
-  if (theRemainders.size>0)
-    out << "$\\underline{~}$";
-  out << "} &";
-  out << this->GetPolynomialStringSpacedMonomialsLaTeX
-  (this->startingPoly.GetElement(), &HighlightedColor,
-   &this->intermediateHighlightedMons.GetElement()[0]);
-  out << "\\\\";
   for (int i=0; i<theRemainders.size; i++)
-  { out << "&";
-    out << this->GetPolynomialStringSpacedMonomialsLaTeX(theSubtracands[i], &HighlightedColor)
-    << "\\\\\\cline{2-" << totalMonCollection.size+1 << "}";
-    if (i<theRemainders.size-1)
+  { if (i<theRemainders.size-1)
       out << "$\\underline{~}$";
     out << "&"
     << this->GetPolynomialStringSpacedMonomialsLaTeX
-    (theRemainders[i], &HighlightedColor, &this->intermediateHighlightedMons.GetElement()[i+1])
-    << "\\\\";
+    (theRemainders[i], &HighlightedColor, &this->intermediateHighlightedMons.GetElement()[i])
+    << "\\\\\n";
+    if (i<theSubtracands.size)
+    { out << "&";
+      out << this->GetPolynomialStringSpacedMonomialsLaTeX
+      (theSubtracands[i], &HighlightedColor)
+      << "\\\\\\cline{2-" << this->allMonomials.size+1 << "}";
+    }
   }
   out << "\\hline";
   out << "\\end{longtable}";
@@ -1836,6 +1983,7 @@ template <class coefficient>
 std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlightLaTeX
   (const Polynomial<coefficient>& thePoly,
    List<List<int> >* slidesToHighlightMon,
+   int slidesToUncoverMon,
    bool useColumnSeparator)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::GetSpacedMonomialsWithHighlightLaTeX");
   std::stringstream out;
@@ -1850,7 +1998,6 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
       continue;
     }
     countMons++;
-    bool useHighlightStyle=false;
     out << "$";
 
     out << Polynomial<Rational>::GetBlendCoeffAndMon
@@ -1890,14 +2037,15 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
   this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
   List<List<int> > empty;
   empty.SetSize(this->allMonomials.size);
+  this->firstNonZeroIndicesPerIntermediateSubtracand.initFillInObject(theSubtracands.size, 0);
   this->highlightMonsRemainders.initFillInObject(theRemainders.size, empty);
   this->highlightMonsSubtracands.initFillInObject(theSubtracands.size, empty);
-  this->highlightMonsQuotients.initFillInObject(theBasiS.size, empty);
-  this->highlightMonsDivisors.initFillInObject(theBasiS.size, empty);
-  this->uncoverMonsRemainders.initFillInObject(theRemainders.size, empty);
-  this->uncoverMonsSubtracands.initFillInObject(theSubtracands.size, empty);
-  this->uncoverMonsQuotients.initFillInObject(theBasiS.size, empty);
-  this->uncoverMonsDivisors.initFillInObject(theBasiS.size, empty);
+  this->highlightMonsQuotients.initFillInObject(this->theBasiS.size, empty);
+  this->highlightMonsDivisors.initFillInObject (this->theBasiS.size, empty);
+  this->uncoverMonsRemainders.initFillInObject (theRemainders.size, 1);
+  this->uncoverMonsSubtracands.initFillInObject(theSubtracands.size, 1);
+  this->uncoverMonsQuotients.initFillInObject  (this->theBasiS.size, 1);
+  this->uncoverMonsDivisors.initFillInObject   (this->theBasiS.size, 1);
   int currentSlideNumer=this->firstIndexLatexSlide+1;
   for (int i=0; i<theRemainders.size; i++)
     this->ComputeHighLightsFromRemainder(i, currentSlideNumer);
@@ -1920,7 +2068,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
     }
     out << "&";
     out << this->GetSpacedMonomialsWithHighlightLaTeX
-    (this->theQuotients[i], &this->highlightMonsQuotients[i], -1);
+    (this->theQuotients[i], &this->highlightMonsQuotients[i], this->uncoverMonsQuotients[i], true);
     out << "\\\\\\hline";
   }
   if (!oneDivisor)
@@ -1933,16 +2081,16 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
   }
   out << "\\\\";
   for (int i=0; i<theRemainders.size; i++)
-  { if (oneDivisor)
+  { if (oneDivisor && i==0)
       out << "\\multicolumn{1}{c|}{$"
       << this->theBasiS[0].ToString(&this->theFormat) << "$}";
     out << "&";
     out << this->GetSpacedMonomialsWithHighlightLaTeX
-    (theRemainders[i], &this->highlightMonsRemainders[i], true)
+    (theRemainders[i], &this->highlightMonsRemainders[i], this->uncoverMonsRemainders[i], true)
     << "\\\\";
     if (i<this->highlightMonsSubtracands.size)
     { out << this->GetSpacedMonomialsWithHighlightLaTeX
-      (theSubtracands[i], &this->highlightMonsSubtracands[i], true);
+      (theSubtracands[i], &this->highlightMonsSubtracands[i], this->uncoverMonsSubtracands[i], true);
       out << "\\\\\\cline{" << this->firstNonZeroIndicesPerIntermediateSubtracand[i]*2 +1
       << "-" << this->allMonomials.size*2+1 << "}";
       if (!oneDivisor)

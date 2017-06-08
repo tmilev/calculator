@@ -414,96 +414,13 @@ std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder
 }
 
 template <class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
-{ std::stringstream out;
-  List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
-  List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
-  this->theFormat.thePolyMonOrder=this->thePolynomialOrder.theMonOrder;
-  std::string underlineStyle=" style=\"white-space: nowrap; border-bottom:1px solid black;\"";
-  std::string underlineStyleHighlighted=" style=\"textcolor=red; white-space: nowrap; border-bottom:1px solid black;\"";
-  std::string HighlightedStyle=" style=\"textcolor=red; white-space: nowrap;\"";
-  this->allMonomials.Clear();
-  this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
-  for (int i=0; i<theRemainders.size; i++)
-  { this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
-    this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
-  }
-  //List<std::string> basisColorStyles;
-  //basisColorStyles.SetSize(this->theBasiS.size);
-  this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
-//  stOutput << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
-//  int numVars=this->GetNumVars();
-  out << this->ToStringLetterOrder(false);
-  out << "<br>";
-  out << theRemainders.size << " division steps total.<br>";
-  out << "<table style=\"white-space: nowrap; border:1px solid black;\">";
-  out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
-  out << this->GetPolynomialStringSpacedMonomialsHtml
-  (this->remainderDivision, underlineStyle, &this->remainderDivision.theMonomials)
-  << "</td></tr>";
-  out << "<tr><td style=\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan=\""
-  << this->allMonomials.size+1 << "\"><b>Quotient(s) </b></td>"
-  << "</tr>";
-  for (int i=0; i<this->theBasiS.size; i++)
-  { //if (i==this->theBasiS.size-1)
-//    else
-    out << "<tr>";
-    out << "<td style=\"border-right:1px solid black; border-bottom: 1px solid gray;\">";
-    if (this->theFormat.flagUseLatex)
-      out << HtmlRoutines::GetMathSpanPure(this->theBasiS[i].ToString(&this->theFormat),-1 );
-    else
-      out << this->theBasiS[i].ToString(&this->theFormat);
-    out << "</td>";
-    out << "<td style=\"border-bottom:1px solid gray;\" colspan=\""
-    << this->allMonomials.size+1 << "\">";
-    out << "<table><tr>";
-    bool found=false;
-    for (int j=0; j<theRemainders.size; j++)
-    { if (this->intermediateSelectedDivisors.GetElement()[j]!=i)
-      { out << "<td></td>";
-        continue;
-      }
-      out << "<td>";
-      if (this->theFormat.flagUseLatex)
-        out << HtmlRoutines::GetMathSpanPure( Polynomial<Rational>::GetBlendCoeffAndMon
-        (this->intermediateHighestMonDivHighestMon.GetElement()[j], this->intermediateCoeffs.GetElement()[j], found, &this->theFormat),-1);
-      else
-        out << Polynomial<Rational>::GetBlendCoeffAndMon
-        (this->intermediateHighestMonDivHighestMon.GetElement()[j], this->intermediateCoeffs.GetElement()[j], found, &this->theFormat);
-      found=true;
-      out << "</td>";
-    }
-    out << "</tr></table>";
-    out << "</td></tr>";
-  }
-  out << "<tr><td style=\"border-right:1px solid black;\"></td><td colspan=\""
-  << this->allMonomials.size+1
-  << "\"><b>Divident </b></td>" << "</tr>";
-  out << "<tr><td style=\"border-right:1px solid black;\"></td>";
-  out << this->GetPolynomialStringSpacedMonomialsHtml
-  (this->startingPoly.GetElement(), "", &this->intermediateHighlightedMons.GetElement()[0]);
-  out << "</tr>";
-  for (int i=0; i<theRemainders.size; i++)
-  { out << "<tr><td>-</td></tr>";
-    out << "<tr><td></td>" << this->GetPolynomialStringSpacedMonomialsHtml
-    (theSubtracands[i], underlineStyle)
-    << "</tr>";
-    out << "<tr><td></td>"
-    << this->GetPolynomialStringSpacedMonomialsHtml
-    (theRemainders[i], "", &this->intermediateHighlightedMons.GetElement()[i+1])
-    << "</tr>";
-  }
-  out << "</table>";
-  return out.str();
-}
-
-template <class coefficient>
 void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
 (Polynomial<coefficient>& inputOutput, Polynomial<coefficient>* outputRemainder,
  int basisIndexToIgnore)
 { //Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62
   MacroRegisterFunctionWithName("GroebnerBasisComputation::RemainderDivisionWithRespectToBasis");
-  if (&inputOutput==outputRemainder || &inputOutput==&this->bufPoly || outputRemainder==&this->bufPoly)
+  if (&inputOutput==outputRemainder || &inputOutput==&this->bufPoly ||
+      outputRemainder==&this->bufPoly)
     crash << "This is a programming error: the input, the output and "
     << "the buffer member object must be pairwise distinct when carrying out "
     << " multi-polynomial division. " << crash;
@@ -518,7 +435,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
   ProgressReport theReportStart;
   ProgressReport theReport;
   if (this->flagDoProgressReport)
-  { theReportStart.Report("Computing remainder  division");
+  { theReportStart.Report("Computing remainder division");
     //+     inputOutput.ToString(&theGlobalVariables->theDefaultFormat) + " mod " +theBasiS.ToString(&theGlobalVariables->theDefaultFormat));
   }
   outputRemainder->MakeZero();
@@ -530,11 +447,13 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
   int numIntermediateRemainders=0;
   if (this->flagDoLogDivision)
   { this->intermediateCoeffs.GetElement().size=0;
-    this->intermediateHighestMonDivHighestMon.GetElement().size=0;
     this->intermediateRemainders.GetElement().size=0;
     this->intermediateSubtractands.GetElement().size=0;
+
+    this->intermediateRemainders.GetElement().AddOnTop(currentRemainder);
     this->intermediateHighlightedMons.GetElement().SetSize(1);
     this->intermediateHighlightedMons.GetElement().LastObject()->SetSize(0);
+//    this->intermedi
   }
   while (!currentRemainder.IsEqualToZero())
   { bool divisionOcurred=false;
@@ -556,9 +475,6 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
         { this->intermediateHighestMonDivHighestMon.GetElement().AddOnTop
           (highestMonCurrentDivHighestMonOther);
           this->intermediateSelectedDivisors.GetElement().AddOnTop(i);
-          this->intermediateHighlightedMons.GetElement().SetSize
-          (this->intermediateHighlightedMons.GetElement().size+1);
-          this->intermediateHighlightedMons.GetElement().LastObject()->size=0;
         }
         this->bufPoly=this->theBasiS[i];
         leadingMonCoeff/=this->leadingCoeffs[i];
@@ -574,9 +490,12 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
           out << "Total number of polynomial operations so far: " << this->NumberGBComputations;
           if (this->MaxNumGBComputations>0)
             out << ", with a limit of " << this->MaxNumGBComputations << " operations.";
-          out << "\n<br>Number of intermediate remainders: " << numIntermediateRemainders << "\n<br> Highest mon of current remainder: "
-          << currentRemainder[indexLeadingMonRemainder].ToString() << ". \n<br>Current index we are dividing by: " << i+1
-          << " out of " << this->theBasiS.size << "\n<br>" << currentRemainder.size() << " monomials in current remainder."
+          out << "\n<br>Number of intermediate remainders: "
+          << numIntermediateRemainders << "\n<br> Highest mon of current remainder: "
+          << currentRemainder[indexLeadingMonRemainder].ToString()
+          << ". \n<br>Current index we are dividing by: " << i+1
+          << " out of " << this->theBasiS.size << "\n<br>"
+          << currentRemainder.size() << " monomials in current remainder."
           << "\n<br>" << outputRemainder->size() << " monomials in output remainder.";
           theReport.Report(out.str());
           //stOutput << out.str();
@@ -596,7 +515,10 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
         currentRemainder-=this->bufPoly;
         //stOutput << " to get " << currentRemainder.ToString();
         if (this->flagDoLogDivision)
-          this->intermediateRemainders.GetElement().AddOnTop(currentRemainder);
+        { this->intermediateRemainders.GetElement().AddOnTop(currentRemainder);
+          List<MonomialP> empty;
+          this->intermediateHighlightedMons.GetElement().AddOnTop(empty);
+        }
         divisionOcurred=true;
 /*        if (this->NumberOfComputations>this->MaxNumGBComputations+1000)
         { stOutput << "<br>Result:<br> " << currentRemainder.ToString()
@@ -628,8 +550,12 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
         */
       if (this->flagDoProgressReport)
       { std::stringstream out;
-        out << "Number of intermediate remainders: " << numIntermediateRemainders << "\n<br> Highest mon of current remainder is no longer reducible. "
-        << "\n<br>" << currentRemainder.size() << " monomials in current remainder.\n<br>" << outputRemainder->size() << " monomials in output remainder.";
+        out << "Number of intermediate remainders: "
+        << numIntermediateRemainders
+        << "\n<br> Highest mon of current remainder is no longer reducible. "
+        << "\n<br>" << currentRemainder.size()
+        << " monomials in current remainder.\n<br>"
+        << outputRemainder->size() << " monomials in output remainder.";
         theReport.Report(out.str());
           //stOutput << out.str();
       }
@@ -748,42 +674,6 @@ void GroebnerBasisComputation<coefficient>::CheckConsistency()
     //crash << "This may or may not be a programming error. While handling computation excess limit, I got that NumberOfComputations is much larger than MaxNumComputations. "
     //<< " I have no explanation for this issue right now, so I am crashing to let you know something is fishy. "
     //<< crash;
-}
-
-template<class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomialsHtml
-(const Polynomial<coefficient>& thePoly,
- const std::string& extraStyle,
- List<MonomialP>* theHighLightedMons)
-{ std::stringstream out;
-  bool found=false;
-  int countMons=0;
-  for (int i=0; i<this->allMonomials.size; i++)
-  { int theIndex= thePoly.theMonomials.GetIndex(this->allMonomials[i]);
-    if (theIndex==-1)
-    { out << "<td" << extraStyle << ">" << "</td>";
-      continue;
-    }
-    countMons++;
-    bool useHighlightStyle=false;
-    if (theHighLightedMons!=0)
-      if (theHighLightedMons->Contains(this->allMonomials[i]))
-        useHighlightStyle=true;
-    out << "<td" << extraStyle << ">";
-    if (useHighlightStyle)
-      out << "<span style=\"color:red\">";
-    if (this->theFormat.flagUseLatex)
-      out << HtmlRoutines::GetMathSpanPure(Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat));
-    else
-      out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat);
-    found=true;
-    if (useHighlightStyle)
-      out << "</span>";
-    out << "</td>";
-  }
-  if (countMons!=thePoly.size())
-    out << "<td><b>Programming ERROR!</b></td>";
-  return out.str();
 }
 
 template <class coefficient>

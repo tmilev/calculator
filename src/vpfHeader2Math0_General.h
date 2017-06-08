@@ -2796,10 +2796,18 @@ class GroebnerBasisComputation
   List<List<List<int> > > highlightMonsRemainders;
   List<List<List<int> > > highlightMonsSubtracands;
   List<List<List<int> > > highlightMonsDivisors;
-  List<int> uncoverMonsQuotients;
-  List<int> uncoverMonsRemainders;
-  List<int> uncoverMonsSubtracands;
-  List<int> uncoverMonsDivisors;
+  List<List<int> > fcAnswerMonsQuotients;
+  List<List<int> > fcAnswerMonsRemainders;
+  List<List<int> > fcAnswerMonsSubtracands;
+  List<List<int> > fcAnswerMonsDivisors;
+  List<int> uncoverAllMonsQuotients;
+  List<int> uncoverAllMonsRemainders;
+  List<int> uncoverAllMonsSubtracands;
+  List<int> uncoverAllMonsDivisors;
+  List<int> uncoverMonsFinalRemainder;
+  List<int> additionalHighlightFinalRemainder;
+  List<List<int> > additionalHighlightRemainders;
+
   List<int> firstNonZeroIndicesPerIntermediateSubtracand;
   MemorySaving<GroebnerBasisComputation<coefficient> > ComputationUsedInRecursiveCalls;
   MemorySaving<List<Polynomial<coefficient> > > intermediateRemainders;
@@ -2828,7 +2836,10 @@ class GroebnerBasisComputation
   std::string GetSpacedMonomialsWithHighlightLaTeX
   (const Polynomial<coefficient>& thePoly,
    List<List<int> >* slidesToHighlightMon,
-   int slidesToUncoverMon,
+   List<int>* slidesToFcAnswer,
+   List<int>* slidesToUncover,
+   List<int>* slidesAdditionalHighlight,
+   int slidesToUncoverAllMons,
    bool useColumnSeparator)
   ;
   void ComputeHighLightsFromRemainder(int remainderIndex, int& currentSlideNumber);

@@ -2095,6 +2095,16 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
 (int remainderIndex, int& currentSlideNumber)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::ComputeHighLightsFromRemainder");
+  if (remainderIndex==0)
+  { for (int i=0; i<this->allMonomials.size; i++)
+      this->highlightMonsRemainders[remainderIndex][i].AddOnTop(currentSlideNumber);
+    currentSlideNumber++;
+    for (int j=0; j<this->theBasiS.size; j++)
+    { for (int i=0; i<this->allMonomials.size; i++)
+        this->highlightMonsDivisors[j][i].AddOnTop(currentSlideNumber);
+      currentSlideNumber++;
+    }
+  }
   for (int i=0; i<this->intermediateHighlightedMons.GetElement()[remainderIndex].size; i++)
   { int theMonIndex=this->allMonomials.GetIndex
     (this->intermediateHighlightedMons.GetElement()[remainderIndex][i]);
@@ -2111,40 +2121,96 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
     this->additionalHighlightFinalRemainder[zeroMonIndex]=currentSlideNumber;
     currentSlideNumber++;
   }
+  if (remainderIndex==this->intermediateRemainders.GetElement().size-1)
+  { for (int i=0; i<this->theBasiS.size; i++)
+    { this->uncoverAllMonsQuotients[i]=currentSlideNumber;
+      for (int j=0; j<this->allMonomials.size; j++)
+        this->highlightMonsQuotients[i][j].AddOnTop(currentSlideNumber);
+    }
+    currentSlideNumber++;
+    this->highlightAllMonsFinalRemainder=currentSlideNumber;
+  }
   if (remainderIndex>=this->intermediateSelectedDivisors.GetElement().size)
     return;
+  Polynomial<coefficient>& currentRemainder=
+  this->intermediateRemainders.GetElement()[remainderIndex];
   int indexCurrentDivisor=this->intermediateSelectedDivisors.GetElement()[remainderIndex];
-  int indexCurrentDivisorLeadingMon=this->allMonomials.GetIndex
-  (this->theBasiS[indexCurrentDivisor].GetMaxMonomial(this->thePolynomialOrder.theMonOrder));
-  int indexCurrentRemainderLeadingMon=
-  this->allMonomials.GetIndex
-  (this->intermediateRemainders.GetElement()[remainderIndex].GetMaxMonomial(this->thePolynomialOrder.theMonOrder));
-  this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMon].
+  Polynomial<coefficient>& currentDivisor=this->theBasiS[indexCurrentDivisor];
+  int indexCurrentDivisorLeadingMoN=
+  currentDivisor.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
+  int indexCurrentDivisorLeadingMonInAllMons=this->allMonomials.GetIndex
+  (currentDivisor.theMonomials[indexCurrentDivisorLeadingMoN]);
+  int indexCurrentRemainderLeadingMoN=currentRemainder.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
+  const MonomialP& maxMonCurrentRemainder=currentRemainder.theMonomials [indexCurrentRemainderLeadingMoN];
+  coefficient leadingCFCurrentRemainder=currentRemainder.theCoeffs[indexCurrentRemainderLeadingMoN];
+  int indexCurrentRemainderLeadingMonInAllMons=this->allMonomials.GetIndex(maxMonCurrentRemainder);
+  this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].
   AddOnTop(currentSlideNumber);
-  this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMon].AddOnTop(currentSlideNumber);
+  this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].AddOnTop(currentSlideNumber);
+
+  if (remainderIndex==0)
+  { this->longDivisionLog << "$\\vphantom"
+    << "{\\frac{x^1}{x^1}}$";
+  }
+  this->longDivisionLog << "\\only<" << currentSlideNumber << ","
+  << currentSlideNumber+1 << ">{Divide "
+  << "\\alertNoH{"
+  << currentSlideNumber << ","
+  << currentSlideNumber+1 << "}{"
+  << "$" << currentRemainder.GetBlendCoeffAndMon
+  (maxMonCurrentRemainder, leadingCFCurrentRemainder, false, &this->theFormat)
+  << "$ "
+  << "}"
+  << " by "
+  << "\\alertNoH{"
+  << currentSlideNumber << ","
+  << currentSlideNumber+1 << "}{"
+  << "$" << currentRemainder.GetBlendCoeffAndMon
+  (currentDivisor.theMonomials[indexCurrentDivisorLeadingMoN],
+   currentDivisor.theCoeffs[indexCurrentDivisorLeadingMoN], false, &this->theFormat)
+  << "$"
+  << "}."
+  << "}";
   currentSlideNumber++;
-  this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMon].
+  this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].
   AddOnTop(currentSlideNumber);
-  this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMon].AddOnTop(currentSlideNumber);
-  int indexCurrentQuotientMon=
+  this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].AddOnTop(currentSlideNumber);
+  int indexCurrentQuotientMonInAllMons=
   this->allMonomials.GetIndex
   (this->intermediateHighestMonDivHighestMon.GetElement()[remainderIndex]);
+  Polynomial<coefficient>& currentQuotient=this->theQuotients[indexCurrentDivisor];
+  int indexCurrentQuotientMoN=
+  currentQuotient.theMonomials.GetIndex(this->intermediateHighestMonDivHighestMon.GetElement()[remainderIndex]);
   //stOutput << "DEBUG: Seeking "
   //<< this->intermediateHighestMonDivHighestMon.GetElement()[remainderIndex].ToString()
   //<< " in " << this->theQuotients[indexCurrentDivisor].ToString() << "<br>";
-  if (indexCurrentQuotientMon!=-1)
-    if (this->fcAnswerMonsQuotients[indexCurrentDivisor].size!=this->allMonomials.size)
-      this->fcAnswerMonsQuotients[indexCurrentDivisor].initFillInObject(this->allMonomials.size,-1);
-  this->fcAnswerMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMon]=currentSlideNumber;
+  this->fcAnswerMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons]=currentSlideNumber;
   currentSlideNumber++;
-  this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMon].AddOnTop(currentSlideNumber);
+  this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons]
+  .AddOnTop(currentSlideNumber);
   for (int i=0; i<this->theBasiS[indexCurrentDivisor].size(); i++)
     this->highlightMonsDivisors[indexCurrentDivisor]
     [this->allMonomials.GetIndex(this->theBasiS[indexCurrentDivisor][i])].
     AddOnTop(currentSlideNumber);
   this->uncoverAllMonsSubtracands[remainderIndex]=currentSlideNumber;
+  this->longDivisionLog << "\\only<"
+  << currentSlideNumber << ", "
+  << currentSlideNumber+1
+  << ">{Multiply "
+  << "\\alertNoH{"
+  << currentSlideNumber << ", "
+  << currentSlideNumber+1
+  << "}{$"
+  << currentQuotient.GetBlendCoeffAndMon
+  (currentQuotient.theMonomials[indexCurrentQuotientMoN],
+   currentQuotient.theCoeffs   [indexCurrentQuotientMoN], false, &this->theFormat)
+  << "$}"
+  << " by divisor. "
+  << "}";
+
   currentSlideNumber++;
-  this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMon].AddOnTop(currentSlideNumber);
+  this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons]
+  .AddOnTop(currentSlideNumber);
   for (int i=0; i<this->theBasiS[indexCurrentDivisor].size(); i++)
     this->highlightMonsDivisors[indexCurrentDivisor]
     [this->allMonomials.GetIndex(this->theBasiS[indexCurrentDivisor][i])].
@@ -2165,6 +2231,8 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
     [this->allMonomials.GetIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])]
     .AddOnTop(currentSlideNumber);
   this->uncoverAllMonsRemainders[remainderIndex+1]=currentSlideNumber;
+  this->longDivisionLog << "\\only<" << currentSlideNumber << ", "
+  << currentSlideNumber+1 << ">{Subtract last two polynomials.}";
   currentSlideNumber++;
   for (int i=0; i<this->intermediateRemainders.GetElement()[remainderIndex].size(); i++)
     this->highlightMonsRemainders[remainderIndex]
@@ -2229,6 +2297,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
   this->uncoverMonsFinalRemainder.initFillInObject(this->allMonomials.size,-1);
   this->additionalHighlightFinalRemainder.initFillInObject(this->allMonomials.size,-1);
   this->additionalHighlightRemainders.initFillInObject(this->allMonomials.size, dummyList);
+  this->highlightAllMonsFinalRemainder=-1;
   int currentSlideNumer=this->firstIndexLatexSlide+1;
   //stOutput
   //<< "<br>DEBUG: interm. remainders: "
@@ -2252,7 +2321,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
   out << "}";
   if (!oneDivisor)
   { //out << " \\cline{2-" << this->allMonomials.size*2+1 << "}";
-    out << "\\textbf{Remainder:} &"
+    out << "{\\color{orange}\\textbf{Remainder:} }&"
     << this->GetSpacedMonomialsWithHighlightLaTeX
     (this->remainderDivision, 0, 0, &this->uncoverMonsFinalRemainder,
     &this->additionalHighlightFinalRemainder, -1, true)
@@ -2261,7 +2330,11 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
   if (!oneDivisor)
   { //out << " \\cline{2-" << this->allMonomials.size*2+1 << "}";
     out << "\\textbf{Divisor(s)} &" << "\\multicolumn{"
-    << this->allMonomials.size*2 << "}{c}{\\textbf{Quotient(s)}}"
+    << this->allMonomials.size*2 << "}{c}{"
+    << "\\alertNoH{" << this->uncoverAllMonsQuotients[0] << "}{"
+    << "\\textbf{Quotient(s)}"
+    << "}"
+    << "}"
     << "\\\\";
   }
   for (int i=0; i<this->theBasiS.size; i++)
@@ -2269,6 +2342,12 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
     { out << this->GetSpacedMonomialsWithHighlightLaTeX
       (this->theBasiS[i], &this->highlightMonsDivisors[i], &this->fcAnswerMonsDivisors[i],
        0, 0, this->uncoverAllMonsDivisors[i], false);
+    } else
+    { out << "\\uncover<" << this->uncoverAllMonsQuotients[0] << "->{"
+      << "\\alertNoH{" << this->uncoverAllMonsQuotients[0] << "}{"
+      << "\\textbf{Quotient: }"
+      << "}"
+      << "}";
     }
     out << "&";
     out << "\\multicolumn{" << this->allMonomials.size*2 << "}{c}{";
@@ -2296,6 +2375,12 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
         << "}";
     } else
       out << "\\uncover<" << this->uncoverAllMonsRemainders[i] << "->{";
+    if (i==theRemainders.size-1 && i!=0 && oneDivisor)
+      out << "\\uncover<" << this->highlightAllMonsFinalRemainder << "->{"
+      //<< "\\alertNoH{" << this->highlightAllMonsFinalRemainder << "}{"
+      << "\\textbf{\\color{orange}Remainder: }"
+      //<< "}"
+      << "}";
     out << "&";
     out << this->GetSpacedMonomialsWithHighlightLaTeX
     (theRemainders[i], &this->highlightMonsRemainders[i],
@@ -2305,13 +2390,12 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
     if (i<theSubtracands.size)
     { out << "\\uncover<" << this->uncoverAllMonsSubtracands[i] << "->{";
 //      if (!oneDivisor)
-      if (i<theSubtracands.size-1)
-        out << "\\uncover<" << this->uncoverAllMonsSubtracands[i]+2
-        << "->{\\alertNoH{" << this->uncoverAllMonsSubtracands[i]+2
-        << ", " << this->uncoverAllMonsSubtracands[i]+3
-        << "}{"
-        << "$\\overline{\\phantom{A}}$"
-        << "}}";
+      out << "\\uncover<" << this->uncoverAllMonsSubtracands[i]+2
+      << "->{\\alertNoH{" << this->uncoverAllMonsSubtracands[i]+2
+      << ", " << this->uncoverAllMonsSubtracands[i]+3
+      << "}{"
+      << "$\\overline{\\phantom{A}}$"
+      << "}}";
       out << "&";
       out << this->GetSpacedMonomialsWithHighlightLaTeX
       (theSubtracands[i], &this->highlightMonsSubtracands[i],
@@ -2325,6 +2409,8 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
       out << "}";
   }
   out << "\\end{longtable}";
+  out << "\r\n";
+  out << this->longDivisionLog.str();
   return out.str();
 }
 

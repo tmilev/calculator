@@ -2805,10 +2805,11 @@ class GroebnerBasisComputation
   List<int> uncoverAllMonsSubtracands;
   List<int> uncoverAllMonsDivisors;
   List<int> uncoverMonsFinalRemainder;
+  int highlightAllMonsFinalRemainder;
   List<int> additionalHighlightFinalRemainder;
   List<List<int> > additionalHighlightRemainders;
-
   List<int> firstNonZeroIndicesPerIntermediateSubtracand;
+  std::stringstream longDivisionLog;
   MemorySaving<GroebnerBasisComputation<coefficient> > ComputationUsedInRecursiveCalls;
   MemorySaving<List<Polynomial<coefficient> > > intermediateRemainders;
   MemorySaving<List<List<MonomialP> > > intermediateHighlightedMons;

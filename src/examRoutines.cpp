@@ -3316,11 +3316,13 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       if (currentLine[0]=='%')
         continue;
     if (MathRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument))
-    { if (found)
+    { //stOutput << "DEBUG: Found slide sources header: " << currentLine;
+      if (found)
         TopicElement::AddTopic(currentElt, output);
       currentElt.reset(-1);
       currentElt.type=currentElt.tTexHeader;
       currentElt.slidesSources.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
+      found=true;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
     { if(found)
         TopicElement::AddTopic(currentElt, output);
@@ -3652,9 +3654,12 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   //CalculatorHTML currentProblem;
   for (int i=0; i<this->theTopicS.size(); i++)
   { TopicElement& currentElt=this->theTopicS[i];
+    //stOutput << "DEBUG: Slide type:: " << currentElt.type;
     if (currentElt.type==currentElt.tTexHeader)
     { if (currentElt.slidesSources.size>0)
-        this->slidesSourcesHeader=currentElt.slidesSources[0];
+      { this->slidesSourcesHeader=currentElt.slidesSources[0];
+        //stOutput << "DEBUG: Slides header: " << this->slidesSourcesHeader;
+      }
       continue;
     }
     if (currentElt.type==currentElt.tChapter)
@@ -3922,19 +3927,23 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   if (this->slidesPrintable!="")
     this->displaySlidesPrintableLink = "<a href=\"" + this->slidesPrintable + "\">Printable slides</a>";
   if (this->slidesProjector=="" && this->slidesPrintable=="" && this->slidesSources.size>0)
-  { std::stringstream slideFromSourceStream;
-    slideFromSourceStream << "<a href=\""
+  { std::stringstream slideFromSourceStreamHandout, slideFromSourceStreamProjector;
+    slideFromSourceStreamHandout << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
     << "?request=slidesFromSource&";
-    slideFromSourceStream << "header="
+    slideFromSourceStreamHandout << "header="
     << HtmlRoutines::ConvertStringToURLString(owner.slidesSourcesHeader, false) << "&";
-    slideFromSourceStream << "title="
+    slideFromSourceStreamHandout << "title="
     << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
     for (int i=0; i<this->slidesSources.size; i++)
-      slideFromSourceStream << "file" << i+1
+      slideFromSourceStreamHandout << "file" << i+1
       << "=" << HtmlRoutines::ConvertStringToURLString(this->slidesSources[i], false) << "&";
-    slideFromSourceStream << "\">Slides</a>";
-    this->displaySlidesLink=slideFromSourceStream.str();
+    slideFromSourceStreamProjector << slideFromSourceStreamHandout.str();
+    slideFromSourceStreamHandout << "layout=printable&";
+    slideFromSourceStreamHandout << "\">Printable slides</a>" << " | ";
+    slideFromSourceStreamProjector << "layout=projector&";
+    slideFromSourceStreamProjector << "\">Slides</a>";
+    this->displaySlidesLink=slideFromSourceStreamHandout.str() + slideFromSourceStreamProjector.str();
   }
   bool problemSolved=false;
   bool returnEmptyStringIfNoDeadline=false;
@@ -3970,9 +3979,14 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     std::stringstream titleAndDeadlineStream;
     titleAndDeadlineStream
     << "<span class=\"deadlineAndTitleContainer\">"
-    << "<span class=\"titleContainer\">" << this->displayTitle << "</span>"
+    << "<span class=\"titleContainer\">" << this->displayTitle
+    << "</span>"
+    << "&nbsp;&nbsp;<span style=\"font-weight:normal; font-size: medium\">"
+    << this->displaySlidesLink
+    << "</span>"
     << "<span class=\"deadlineContainer\">" << this->displayDeadlinE << "</span>"
     << "</span>"
+
     ;
     this->displayTitleWithDeadline=titleAndDeadlineStream.str();
   } else

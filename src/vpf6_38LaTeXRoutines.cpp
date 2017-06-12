@@ -37,7 +37,8 @@ void LaTeXcrawler::BuildFreecalc()
     return;
   std::fstream inputFile;
   if (!FileOperations::OpenFileUnsecure(inputFile, this->theFileNameToCrawlPhysical, false, false, false))
-  { this->displayResult << "Failed to open input file: " << this->theFileNameToCrawlPhysical << ", aborting. ";
+  { this->displayResult << "Failed to open input file: "
+    << this->theFileNameToCrawlPhysical << ", aborting. ";
     return;
   }
   inputFile.seekg(0);
@@ -259,7 +260,8 @@ void LaTeXcrawler::BuildFreecalc()
       << this->theFileNameWorkingCopy << ", aborting. </td> </tr>";
       break;
     }
-    workingFile << "\\documentclass{beamer}\n\\newcommand{\\currentLecture}{"
+    workingFile << "\\documentclass";
+    workingFile << "{beamer}\n\\newcommand{\\currentLecture}{"
     << theLectureNumbers[i] << "}\n";
     workingFile << LectureContentNoDocumentClassNoCurrentLecture.str();
     workingFile.close();
@@ -426,7 +428,7 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
         *commentsOnFailure << "Found unsafe slide name: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
       return false;
     }
-    if (!FileOperations::IsOKfileNameVirtual(this->slideFileNamesVirtualWithPatH[i], false))
+    if (!FileOperations::IsOKfileNameVirtual(this->slideFileNamesVirtualWithPatH[i], false, commentsOnFailure))
     { if (commentsOnFailure!=0)
         *commentsOnFailure << "Found invalid slide name: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
       return false;
@@ -458,6 +460,10 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   FileOperations::GetFileExtensionWithDot(tempString, &this->targetPDFFileNameWithPathVirtual);
   if (MathRoutines::StringBeginsWith(this->targetPDFFileNameWithPathVirtual, "freecalc", &tempString))
     this->targetPDFFileNameWithPathVirtual="slides-videos"+tempString;
+  if (this->flagProjectorMode)
+    this->targetPDFFileNameWithPathVirtual+="_projector";
+  else
+    this->targetPDFFileNameWithPathVirtual+="_printable";
   this->targetPDFFileNameWithPathVirtual+=".pdf";
   this->targetPDFFileNameWithLatexPath="../../" + this->targetPDFFileNameWithPathVirtual;
   this->targetPDFLatexPath= FileOperations::GetPathFromFileNameWithPath(this->targetPDFFileNameWithLatexPath);
@@ -496,6 +502,9 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   { std::getline(theFile, buffer);
     if (!MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "[handout]"))
       theFileContentStream << buffer << "\n";
+    if (!this->flagProjectorMode)
+      if (MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\documentclass"))
+        theFileContentStream << "[handout]" << "\n";
   } while (!theFile.eof());
   theFile.close();
   if (commentsGeneral!=0)

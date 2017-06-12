@@ -3332,7 +3332,8 @@ int WebWorker::ProcessSlidesFromSource()
   theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(firstSlideName);
   for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
   { std::string theKey=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
-    //stOutput << "DEBUG: considering key: " << theKey << "<br>";
+    //stOutput << "DEBUG: considering key: " << theKey
+    //<< " with value: " << theGlobalVariables.webArguments.theValues[i] << "<br>";
     if (theKey!="fileName" && MathRoutines::StringBeginsWith(theKey, "file"))
     { theCrawler.slideFileNamesVirtualWithPatH.AddOnTop
       (MathRoutines::StringTrimWhiteSpace
@@ -3343,6 +3344,8 @@ int WebWorker::ProcessSlidesFromSource()
   theCrawler.desiredPresentationTitle=
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("title"), false);
   std::stringstream comments;
+  if (theGlobalVariables.GetWebInput("layout")=="printable")
+    theCrawler.flagProjectorMode=false;
   if (!theCrawler.BuildOrFetchFromCachePresentationFromSlides(&comments, &comments))
   { this->flagDoAddContentLength=true;
     stOutput << "<!DOCTYPE html>"

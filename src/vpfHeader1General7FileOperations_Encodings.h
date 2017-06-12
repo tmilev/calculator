@@ -29,7 +29,7 @@ public:
   static bool LoadFileToStringVirtual
   (const std::string& fileName, std::string& output, std::stringstream& commentsOnFailure,
    bool accessSensitiveFolders=false, bool accessULTRASensitiveFolders=false);
-  static bool IsOKfileNameVirtual(const std::string& fileName, bool accessSensitiveFolders=false);
+  static bool IsOKfileNameVirtual(const std::string& fileName, bool accessSensitiveFolders=false, std::stringstream* commentsOnFailure=0);
   static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
   static bool IsFileNameSafeForSystemCommands(const std::string& fileName, std::stringstream* commentsOnFailure);
   static std::string GetFileNameFromFileNameWithPath(const std::string& fileName);

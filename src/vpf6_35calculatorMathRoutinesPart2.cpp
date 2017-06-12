@@ -2153,7 +2153,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
     << "{\\frac{x^1}{x^1}}$";
   }
   this->longDivisionLog << "\\only<" << currentSlideNumber << ","
-  << currentSlideNumber+1 << ">{Divide "
+  << currentSlideNumber+1 << "| handout:0>{Divide "
   << "\\alertNoH{"
   << currentSlideNumber << ","
   << currentSlideNumber+1 << "}{"
@@ -2196,7 +2196,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
   this->longDivisionLog << "\\only<"
   << currentSlideNumber << ", "
   << currentSlideNumber+1
-  << ">{Multiply "
+  << "| handout:0>{Multiply "
   << "\\alertNoH{"
   << currentSlideNumber << ", "
   << currentSlideNumber+1
@@ -2232,7 +2232,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
     .AddOnTop(currentSlideNumber);
   this->uncoverAllMonsRemainders[remainderIndex+1]=currentSlideNumber;
   this->longDivisionLog << "\\only<" << currentSlideNumber << ", "
-  << currentSlideNumber+1 << ">{Subtract last two polynomials.}";
+  << currentSlideNumber+1 << "| handout:0>{Subtract last two polynomials.}";
   currentSlideNumber++;
   for (int i=0; i<this->intermediateRemainders.GetElement()[remainderIndex].size(); i++)
     this->highlightMonsRemainders[remainderIndex]

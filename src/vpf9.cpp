@@ -456,7 +456,8 @@ std::string FileOperations::ConvertStringToEscapedStringFileNameSafe(const std::
   return out.str();
 }
 
-bool FileOperations::IsOKfileNameVirtual(const std::string& theFileName, bool accessSensitiveFolders)
+bool FileOperations::IsOKfileNameVirtual
+(const std::string& theFileName, bool accessSensitiveFolders, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("FileOperations::IsOKfileNameVirtual");
   (void) accessSensitiveFolders;
   std::string theFileNameNoPath=FileOperations::GetFileNameFromFileNameWithPath(theFileName);
@@ -464,17 +465,29 @@ bool FileOperations::IsOKfileNameVirtual(const std::string& theFileName, bool ac
 //  std::cout << "Calling IsOKfileNameVirtual, theFilePath: "
 //  << theFilePath << "\ntheFileNameNoPath: " << theFileNameNoPath << "\n";
   if (theFilePath.size()>10000000)
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Invalid file name: too long. ";
     return false;
+  }
   if (theFilePath[0]=='.')
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Invalid file name: " << theFileName << ": starts with dot.";
     return false;
+  }
   for (unsigned i=0; i<theFilePath.size(); i++)
     if (theFilePath[i]=='.')
       if (i+1<theFilePath.size())
         if (theFilePath[i+1]=='.')
+        { if (commentsOnFailure!=0)
+           *commentsOnFailure << "Invalid file name: " << theFileName << ": has two consecutive dots.";
           return false;
+        }
   if (theFileNameNoPath.size()>0)
     if (theFileNameNoPath[0]=='.')
+    { if (commentsOnFailure!=0)
+       *commentsOnFailure << "Invalid file name: " << theFileName << ": starts with dot. ";
       return false;
+    }
   return true;
 }
 

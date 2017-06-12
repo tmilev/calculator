@@ -44,6 +44,7 @@ class LaTeXcrawler
   List<std::string> slideFileNamesVirtualNoPathNoExtensioN;
   void* ownerCalculator;
   bool flagBuildSingleSlides;
+  bool flagProjectorMode;
   bool ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
   bool ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void Crawl();
@@ -56,6 +57,7 @@ class LaTeXcrawler
   std::string ToString();
   LaTeXcrawler()
   { this->flagBuildSingleSlides=false;
+    this->flagProjectorMode=true;
     this->ownerCalculator=0;
   }
 };

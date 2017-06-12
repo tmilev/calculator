@@ -76,7 +76,6 @@ SOURCES=\
 ./src/vpf5_1CalculatorCode.cpp \
 ./src/vpf5_2javascript_graphics.cpp \
 ./src/vpf5.cpp \
-./src/vpf6_38LaTeXRoutines \
 ./src/vpf6_05evaluationroutines.cpp \
 ./src/vpf6_0parsingRoutines.cpp \
 ./src/vpf6_1innerTypedFunctions.cpp \
@@ -85,6 +84,7 @@ SOURCES=\
 ./src/vpf6_35calculatorMathRoutinesPart2.cpp \
 ./src/vpf6_36calculatorHtmlRoutines.cpp \
 ./src/vpf6_37calculatorroutines.cpp \
+./src/vpf6_38LaTeXRoutines.cpp \
 ./src/vpf6_4ExpressionsImplementation.cpp \
 ./src/vpf6.cpp \
 ./src/vpf7.cpp \

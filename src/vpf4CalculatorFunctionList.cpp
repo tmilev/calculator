@@ -665,6 +665,14 @@ JWTverifyRSA256(token,modulus\
     true, false,
    "CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions",
    "ApplyToSubexpressionsRecurseThroughCalculusFunctions");
+  this->AddOperationInnerHandler
+  ("ApplyToList",
+    CalculatorFunctionsGeneral::innerApplyToList, "",
+   "Applies a transformation to each element of a list. ",
+   "SolveForX{}{{a}}=SolveFor(x,{{a}});\nSolveForX(x^2+2);\n ApplyToList(SolveForX,(x^2+1,x^2-x-2))",
+    true, false,
+   "CalculatorFunctionsGeneral::innerApplyToList",
+   "ApplyToList");
 
   this->AddOperationInnerHandler
   ("Denominator", CalculatorFunctionsGeneral::innerDenominator, "",

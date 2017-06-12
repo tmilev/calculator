@@ -1849,6 +1849,8 @@ public:
   bool ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext=0);
   bool GetVectoRInt(const Expression& input, List<int>& output);
   bool GetVectorLargeIntFromFunctionArguments(const Expression& input, List<LargeInt>& output);
+  bool GetMatrixDoubles(const Expression& input, Matrix<double>& output, int DesiredNumcols=-1);
+
   bool GetVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory=-1);
   bool GetVectorDoublesFromFunctionArguments(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory=-1);
   template <class theType>

@@ -297,6 +297,13 @@ void MeshTriangles::ComputeImplicitPlot()
 //  stOutput << "ze lines: " << this->theCurve.theLines;
 }
 
+bool Calculator::GetMatrixDoubles
+(const Expression& input, Matrix<double>& output, int DesiredNumcols)
+{ return this->GetMatrix<double>
+  (input, output, 0, DesiredNumcols, CalculatorFunctionsGeneral::innerEvaluateToDouble);
+}
+
+
 bool Calculator::GetVectorDoubles(const Expression& input, Vector<double>& output, int DesiredDimensionNonMandatory)
 { return this->GetVectoR(input, output, 0, DesiredDimensionNonMandatory, CalculatorFunctionsGeneral::innerEvaluateToDouble);
 }
@@ -981,8 +988,12 @@ bool CalculatorFunctionsGeneral::innerPlotRectangle
 bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT");
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return theCommands << "SolveFor takes as input three arguments. ";
+  if (input[1].HasBoundVariables() )
+    return false;
+  if (input[2].HasBoundVariables() )
+    return false;
   Expression thePowers;
   Expression modifiedInput=input;
   if (!modifiedInput[2].StartsWith(theCommands.opDefine()))

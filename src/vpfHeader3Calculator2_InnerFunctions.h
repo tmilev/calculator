@@ -134,6 +134,7 @@ public:
   static bool innerHandleUnderscorePowerLimits(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerApplyToSubexpressionsRecurseThroughCalculusFunctions(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerApplyToList(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNumerator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDenominator(Calculator& theCommands, const Expression& input, Expression& output);
 

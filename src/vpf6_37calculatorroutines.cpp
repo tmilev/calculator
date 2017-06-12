@@ -644,3 +644,20 @@ bool CalculatorFunctionsGeneral::innerFactorOutNumberContent(Calculator& theComm
   output=left*right;
   return true;
 }
+
+bool CalculatorFunctionsGeneral::innerApplyToList(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerApplyToList");
+  if (input.size()!=3)
+    return false;
+  const Expression& theFun=input[1];
+  if (!input[2].IsSequenceNElementS())
+    return false;
+  List<Expression> result;
+  result.SetSize(input[2].size()-1);
+  for (int i=1; i<input[2].size(); i++)
+  { result[i-1].reset(theCommands);
+    result[i-1].AddChildOnTop(theFun);
+    result[i-1].AddChildOnTop(input[2][i]);
+  }
+  return output.MakeSequence(theCommands, &result);
+}

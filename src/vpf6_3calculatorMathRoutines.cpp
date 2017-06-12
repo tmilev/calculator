@@ -4928,21 +4928,28 @@ bool CalculatorFunctionsGeneral::innerPlotPoint(Calculator& theCommands, const E
     return output.MakeError
     ("Plotting a point takes at least two arguments, location and color. ",
     theCommands, true);
-  Vector<double> theV;
-  if (!theCommands.GetVectorDoubles(input[1], theV))
+  Matrix<double> theMat;
+  if (!theCommands.GetMatrixDoubles(input[1], theMat))
+    return theCommands << "<hr>Failed to extract coordinates from: " << input[1].ToString();
+  if (theMat.NumCols<1 || theMat.NumRows<1)
     return theCommands << "<hr>Failed to extract coordinates from: " << input[1].ToString();
   Plot theFinalPlot;
-  theFinalPlot.dimension=theV.size;
+  theFinalPlot.dimension=theMat.NumCols;
   PlotObject thePlot;
-  thePlot.dimension=theV.size;
-  thePlot.colorRGB=HtmlRoutines::RedGreenBlue(0,0,0);
+  thePlot.dimension=theFinalPlot.dimension;
+  thePlot.colorRGB=HtmlRoutines::RedGreenBlue(0, 0, 0);
   if (input[2].IsOfType<std::string>())
     DrawingVariables::GetColorIntFromColorString
     (input[2].GetValue<std::string>(), thePlot.colorRGB);
   thePlot.colorJS=input[2].ToString();
-  thePlot.thePoints.AddOnTop(theV);
   thePlot.thePlotType="point";
-  theFinalPlot.thePlots.AddOnTop(thePlot);
+  for (int i=0; i<theMat.NumRows; i++)
+  { Vector<double> theV;
+    theMat.GetVectorFromRow(i, theV);
+    thePlot.thePoints.SetSize(0);
+    thePlot.thePoints.AddOnTop(theV);
+    theFinalPlot.thePlots.AddOnTop(thePlot);
+  }
   theFinalPlot.DesiredHtmlHeightInPixels=100;
   theFinalPlot.DesiredHtmlWidthInPixels=100;
 //  stOutput << "DEBUG: plotting point with coords: " << theV;

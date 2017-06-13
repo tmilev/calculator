@@ -61,6 +61,7 @@ function setProblemLinkStyle(desiredStyle)
       };
     }
   }
+  addCookie("problemLinkStyle", desiredStyle, 100);
 }
 
 function resizeIFrameToFitContent(iFrame)

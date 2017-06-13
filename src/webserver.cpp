@@ -84,6 +84,8 @@ std::string HtmlRoutines::GetJavascriptStandardCookies()
   << "function storeSettingsProgress(){\n";
   if (theGlobalVariables.GetWebInput("debugFlag")!="")
     out << "  addCookie(\"debugFlag\", \"" << theGlobalVariables.GetWebInput("debugFlag") << "\", 100, false);  \n";
+  if (theGlobalVariables.GetWebInput("problemLinkStyle")!="")
+    out << "  addCookie(\"problemLinkStyle\", \"" << theGlobalVariables.GetWebInput("problemLinkStyle") << "\", 100, false);  \n";
   if (theGlobalVariables.GetWebInput("studentSection")!="")
     out << "  addCookie(\"studentSection\", \"" << theGlobalVariables.GetWebInput("studentSection") << "\", 100, true);  \n";
   if (theGlobalVariables.GetWebInput("studentView")!="")
@@ -124,6 +126,7 @@ std::string HtmlRoutines::GetJavascriptStandardCookies()
 //  << "  result+=\"&fileName=\"+getCookie(\"fileName\");\n"
 //  << "  return result;\n"
 //  << "}\n"
+  << "var setProblemLinkStyle;\n"
   << "function loadSettings(){\n"
   << "  storeSettingsSecurity();\n"
   << "  storeSettingsProgress();\n"
@@ -137,6 +140,10 @@ std::string HtmlRoutines::GetJavascriptStandardCookies()
   << "  if (document.getElementById(\"debugFlag\")!=null)\n "
   << "    if(getCookie(\"debugFlag\")!='')\n"
   << "      document.getElementById(\"debugFlag\").value=getCookie(\"debugFlag\");\n"
+  << "  if(getCookie(\"problemLinkStyle\")!='')\n"
+  << "  { if (setProblemLinkStyle!==undefined)\n"
+     "      setProblemLinkStyle(getCookie(\"problemLinkStyle\"));\n"
+  << "  }\n"
   << "  if (document.getElementById(\"studentView\")!=null)\n "
   << "    if(getCookie(\"studentView\")!='')\n"
   << "      document.getElementById(\"studentView\").value=getCookie(\"studentView\");\n"

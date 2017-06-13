@@ -327,6 +327,7 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(bool excludeAuthentica
         currentName=="currentDatabaseTable" || currentName=="mainInput" || currentName=="studentView" ||
         currentName=="studentSection" || currentName=="error" ||
         currentName=="navigationBar" ||
+        currentName=="problemLinkStyle" ||
         currentName=="googleToken" ||
         currentName=="G_AUTHUSER_H" ||
         currentName=="mjx.menu")

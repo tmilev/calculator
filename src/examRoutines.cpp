@@ -3632,10 +3632,22 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     << " points earned.<br>\n" ;
   }
   #endif
-  out << "Problem links open in: "
-  << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('sameWindow');\" checked>same tab, replace topics</input>"
-  << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('newWindow');\">new tab</input>"
-  << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('accordion');\">same tab, under topics</input>"
+  out << "Problem links open in: ";
+//  out << "<br>DEBUG: problinkstyle: "
+//  << theGlobalVariables.GetWebInput("problemLinkStyle")
+//  << "<br>";
+  out << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('accordion');\" ";
+  if (theGlobalVariables.GetWebInput("problemLinkStyle")=="accordion")
+    out << "checked";
+  out << ">same tab, under topics</input>";
+  out << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('sameWindow');\" ";
+  if (theGlobalVariables.GetWebInput("problemLinkStyle")=="sameWindow")
+    out << "checked";
+  out << ">same tab, replace topics</input>";
+  out << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('newWindow');\" ";
+  if (theGlobalVariables.GetWebInput("problemLinkStyle")=="newWindow")
+    out << "checked";
+  out << ">new tab</input>"
   << ". "
  ;
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
@@ -3940,9 +3952,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
       << "=" << HtmlRoutines::ConvertStringToURLString(this->slidesSources[i], false) << "&";
     slideFromSourceStreamProjector << slideFromSourceStreamHandout.str();
     slideFromSourceStreamHandout << "layout=printable&";
-    slideFromSourceStreamHandout << "\">Printable slides</a>" << " | ";
+    slideFromSourceStreamHandout << "\" target=\"_blank\">Printable slides</a>" << " | ";
     slideFromSourceStreamProjector << "layout=projector&";
-    slideFromSourceStreamProjector << "\">Slides</a>";
+    slideFromSourceStreamProjector << "\" target=\"_blank\">Slides</a>";
     this->displaySlidesLink=slideFromSourceStreamHandout.str() + slideFromSourceStreamProjector.str();
   }
   bool problemSolved=false;

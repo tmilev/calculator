@@ -79,6 +79,8 @@ public:
 ;
   static bool innerPolynomialDivisionRemainder
   (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialDivisionQuotient
+  (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerbose
   (Calculator& theCommands, const Expression& input, Expression& output, List<MonomialP>::OrderLeftGreaterThanRight theMonOrder);
   static bool innerPolynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output);

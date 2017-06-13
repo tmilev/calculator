@@ -661,3 +661,38 @@ bool CalculatorFunctionsGeneral::innerApplyToList(Calculator& theCommands, const
   }
   return output.MakeSequence(theCommands, &result);
 }
+
+bool CalculatorFunctionsGeneral::innerPolynomialDivisionQuotient(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionQuotient");
+  Expression theContext;
+  Vector<Polynomial<Rational> > thePolys;
+  if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
+    return output.MakeError("Failed to extract list of polynomials. ", theCommands);
+  GroebnerBasisComputation<Rational> theGB;
+  theGB.flagStoreQuotients=true;
+  theGB.theBasiS.SetSize(thePolys.size-1);
+  for (int i=1; i<thePolys.size; i++)
+  { if (thePolys[i].IsEqualToZero())
+      return output.MakeError("Division by zero.", theCommands, true);
+    theGB.theBasiS[i-1]=thePolys[i];
+  }
+//  stOutput << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
+//  << theGB.theBasiS.ToString() << "<hr>";
+  Polynomial<Rational> outputRemainder;
+  theGB.initForDivisionAlone(theGB.theBasiS);
+  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, -1);
+  Expression currentE, thePolyE;
+  List<Expression> theList;
+  for (int i=0; i<theGB.theQuotients.size; i++)
+  { currentE.reset(theCommands);
+    currentE.AddChildAtomOnTop("MakeExpression");
+    thePolyE.AssignValueWithContext(theGB.theQuotients[i], theContext, theCommands);
+    currentE.AddChildOnTop(thePolyE);
+    theList.AddOnTop(currentE);
+  }
+  if (theList.size==1)
+  { output=theList[0];
+    return true;
+  }
+  return output.MakeSequence(theCommands, &theList);
+}

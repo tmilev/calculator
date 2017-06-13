@@ -1827,7 +1827,12 @@ bool CalculatorFunctionsGeneral::innerPolynomialDivisionRemainder(Calculator& th
   Polynomial<Rational> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS);
   theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, -1);
-  return output.AssignValueWithContext(outputRemainder, theContext, theCommands);
+  Expression thePolyE;
+  thePolyE.AssignValueWithContext(outputRemainder, theContext, theCommands);
+  output.reset(theCommands);
+  output.AddChildAtomOnTop("MakeExpression");
+  output.AddChildOnTop(thePolyE);
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::innerPolynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output)

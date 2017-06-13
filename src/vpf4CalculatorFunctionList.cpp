@@ -1866,6 +1866,15 @@ D-B;\
    "PolyDivRemainder")
    ;
   this->AddOperationInnerHandler
+  ("PolyDivQuotient", CalculatorFunctionsGeneral::innerPolynomialDivisionQuotient, "",
+   "Returns the quotients of a \
+    polynomial divided by a set of polynomials using the default monomial order (lexicographic).",
+   "PolyDivQuotient{}(x^7+6x y+5x y^8+y^5, x+y^2-1, y^3-x y) ;",
+   true, false,
+   "CalculatorFunctionsGeneral::innerPolynomialDivisionRemainder",
+   "PolyDivQuotient")
+   ;
+  this->AddOperationInnerHandler
   ("PolyDivSlidesGrLex", CalculatorFunctionsGeneral::innerPolynomialDivisionSlidesGrLex, "",
    "Creates a slide with the polynomial disivion algorithm. First element= starting slide number.",
    "PolyDivSlidesGrLex{}(1,x^3+x+10, x+2) ; PolyDivSlidesGrLex{}(1,x+y+10, x+1,y-1) ",

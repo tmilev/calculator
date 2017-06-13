@@ -530,7 +530,7 @@ function drawCoordinateAxesTwoD()
     theSurface.lineTo(theCoords[0], theCoords[1]);
     theSurface.stroke();
     theCoords=theCanvas.coordsMathScreenToScreen([1, 0]);
-    theSurface.fillText("1", theCoords[0]+5, theCoords[1]+15);
+    theSurface.fillText("1", theCoords[0], theCoords[1]+10);
   };
 }
 
@@ -571,6 +571,24 @@ function AxesGrid()
       theCoords=theCanvas.coordsMathScreenToScreen([right, i]);
       theSurface.lineTo(theCoords[0], theCoords[1]);
       theSurface.stroke();
+    }
+    theSurface.strokeStyle=colorRGBToString([0, 0, 0]);
+    theSurface.fillStyle=colorRGBToString([0, 0, 0] );
+    var counter=0;
+    for (var i=floorLeft; i<=ceilRight; i+=Delta)
+    { counter++;
+      //if (counter%2===0 && i!==1){
+        theCoords=theCanvas.coordsMathScreenToScreen([i, 0]);
+        theSurface.fillText(i, theCoords[0], theCoords[1]+10);
+      //}
+    }
+    counter=0;
+    for (i=floorBottom; i<=ceilTop; i+=Delta)
+    { counter++;
+      //if (counter%2===0 && i!==1){
+        theCoords=theCanvas.coordsMathScreenToScreen([ 0,i]);
+        theSurface.fillText(i, theCoords[0]-10, theCoords[1]);
+      //}
     }
   };
 }

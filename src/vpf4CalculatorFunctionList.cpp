@@ -1668,6 +1668,24 @@ D-B;\
    "\\arctan")
    ;
   this->AddOperationInnerHandler
+  ("\\arcsin",
+    CalculatorFunctionsGeneral::innerArcsinAlgebraic, "",
+   "Arcsin function for special angles. ",
+   "\\arcsin(1/2)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerArcsinAlgebraic",
+   "arcsinAlgebraic")
+   ;
+  this->AddOperationInnerHandler
+  ("\\arccos",
+    CalculatorFunctionsGeneral::innerArccosAlgebraic, "",
+   "Arccos function for special angles. ",
+   "\\arccos(\\sqrt{2}/2})",
+   true, false,
+   "CalculatorFunctionsGeneral::innerArccosAlgebraic",
+   "arccosAlgebraic")
+   ;
+  this->AddOperationInnerHandler
   ("\\arccos", CalculatorFunctionsGeneral::innerArccos, "",
    "Arccos function. Tries to evaluate the arccos function. ",
    "\\arccos(3/4)",

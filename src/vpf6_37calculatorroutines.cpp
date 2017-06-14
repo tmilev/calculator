@@ -696,3 +696,117 @@ bool CalculatorFunctionsGeneral::innerPolynomialDivisionQuotient(Calculator& the
   }
   return output.MakeSequence(theCommands, &theList);
 }
+
+bool CalculatorFunctionsGeneral::innerArccosAlgebraic(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArccosAlgebraic");
+  Rational theRat;
+  if (input.IsRational(&theRat))
+  { if (theRat==1)
+      output.AssignValue(0, theCommands);
+    if (theRat==0)
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=2;
+      return true;
+    }
+    if (theRat==-1)
+      return output.MakeAtom(theCommands.opPi(), theCommands);
+    if (theRat==Rational(1,2))
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=3;
+      return true;
+    }
+    if (theRat==Rational(-1,2))
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output*=2;
+      output/=3;
+      return true;
+    }
+  }
+  AlgebraicNumber argument, candidate;
+  if (input.IsOfType<AlgebraicNumber>(&argument))
+  { candidate.AssignRationalQuadraticRadical(Rational(1,2), theCommands.theObjectContainer.theAlgebraicClosure);
+    if (candidate==argument)
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=4;
+      return true;
+    }
+    candidate*=-1;
+    if (candidate==argument)
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=4;
+      output*=3;
+      return true;
+    }
+    candidate.AssignRationalQuadraticRadical(Rational(3,4), theCommands.theObjectContainer.theAlgebraicClosure);
+    if (candidate==argument)
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=6;
+      return true;
+    }
+    candidate*=-1;
+    if (candidate==argument)
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=6;
+      output*=5;
+      return true;
+    }
+  }
+  return false;
+}
+
+bool CalculatorFunctionsGeneral::innerArcsinAlgebraic(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArcsinAlgebraic");
+  Rational theRat;
+  if (input.IsRational(&theRat))
+  { if (theRat==1)
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=2;
+      return true;
+    }
+    if (theRat==0)
+      return output.AssignValue(0, theCommands);
+    if (theRat==-1)
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=-2;
+      return true;
+    }
+    if (theRat==Rational(1,2))
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=6;
+      return true;
+    }
+    if (theRat==Rational(-1,2))
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=-6;
+      return true;
+    }
+  }
+  AlgebraicNumber argument, candidate;
+  if (input.IsOfType<AlgebraicNumber>(&argument))
+  { candidate.AssignRationalQuadraticRadical(Rational(1,2), theCommands.theObjectContainer.theAlgebraicClosure);
+    if (candidate==argument)
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=4;
+      return true;
+    }
+    candidate*=-1;
+    if (candidate==argument)
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=-4;
+      return true;
+    }
+    candidate.AssignRationalQuadraticRadical(Rational(3,4), theCommands.theObjectContainer.theAlgebraicClosure);
+    if (candidate==argument)
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=3;
+      return true;
+    }
+    candidate*=-1;
+    if (candidate==argument)
+    { output.MakeAtom(theCommands.opPi(), theCommands);
+      output/=-3;
+      return true;
+    }
+  }
+  return false;
+}

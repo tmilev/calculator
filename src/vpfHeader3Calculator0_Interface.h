@@ -1653,6 +1653,12 @@ public:
   int opBind()
   { return this->theAtoms.GetIndexIMustContainTheObject("Bind");
   }
+  int opOr()
+  { return this->theAtoms.GetIndexIMustContainTheObject("or");
+  }
+  int opAnd()
+  { return this->theAtoms.GetIndexIMustContainTheObject("and");
+  }
   int opPlus()
   { return this->theAtoms.GetIndexIMustContainTheObject("+");
   }

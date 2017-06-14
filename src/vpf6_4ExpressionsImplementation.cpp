@@ -2697,9 +2697,15 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->StartsWith(this->owner->opTensor(), 3) )
     out << (*this)[1].ToString(theFormat) << "\\otimes "
     << (*this)[2].ToString(theFormat);
-  else if (this->StartsWith(this->owner->opIn(),3) )
+  else if (this->StartsWith(this->owner->opIn(), 3))
     out << (*this)[1].ToString(theFormat) << "\\in "
     << (*this)[2].ToString(theFormat);
+  else if (this->StartsWith(this->owner->opOr(), 3))
+    out << "\\left(" << (*this)[1] << "\\right)" << "\\ or\\ "
+    << "\\left(" << (*this)[2] << "\\right)";
+  else if (this->StartsWith(this->owner->opAnd(), 3))
+    out << "\\left(" << (*this)[1] << "\\right)" << " and "
+    << "\\left(" << (*this)[2] << "\\right)" ;
   else if (this->StartsWith(this->owner->opBinom(),3) )
     out << "\\binom{" << (*this)[1].ToString(theFormat) << "}{ "
     << (*this)[2].ToString(theFormat) << "}";

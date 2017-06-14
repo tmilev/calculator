@@ -4999,7 +4999,7 @@ this->AddOperationInnerHandler
    "IsEqualTo");
   this->AddOperationInnerHandler
   ("===", CalculatorFunctionsGeneral::innerEqualEqualEqual, "",
-   "Returns 1 if both sides have identical expression trees, 0 otherwise.",
+   "Returns 1 if both sides have identical expression trees, 0 otherwise. ",
    "2+3 == 5; Freeze{}(2+3)==Freeze{}5; Freeze{}(2+3)===Freeze{}5",
    true, false,
    "CalculatorFunctionsGeneral::innerEqualEqualEqual",

@@ -1556,11 +1556,17 @@ bool Calculator::isSeparatorFromTheRightForList(const std::string& input)
 }
 
 bool Calculator::isSeparatorFromTheLeftForDefinition(const std::string& input)
-{ return input=="{" || input=="(" || input==";" || input=="," || input=="SequenceStatements" || input==" ";
+{ return input=="{" || input=="(" || input==";" || input=="," ||
+  input=="SequenceStatements" || input==" " ||
+  input=="or" ||
+  input=="and";
 }
 
 bool Calculator::isSeparatorFromTheRightForDefinition(const std::string& input)
-{ return input=="}" || input==")" || input==";" || input=="," || input=="EndProgram";
+{ return input=="}" || input==")" || input==";" || input=="," ||
+  input=="EndProgram" || input=="or" ||
+  input=="and"
+  ;
 }
 
 bool Calculator::AllowsTensorInPreceding(const std::string& lookAhead)
@@ -1586,6 +1592,8 @@ bool Calculator::AllowsTimesInPreceding(const SyntacticElement& thePreceding, co
       lookAhead=="=" || lookAhead==">" || lookAhead=="<" ||
       lookAhead=="," || lookAhead==";" ||
       lookAhead==":" || lookAhead=="&" || lookAhead=="Matrix" || lookAhead=="\\" ||
+      lookAhead=="or" ||
+      lookAhead=="and" ||
       lookAhead=="EndProgram"
       ;
     }
@@ -1603,6 +1611,8 @@ bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
   lookAhead=="=" || lookAhead==">" || lookAhead=="<" ||
   lookAhead=="Variable" || lookAhead=="," || lookAhead==";" ||
   lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixEnd" ||
+  lookAhead=="or" ||
+  lookAhead=="and" ||
   lookAhead=="\\" ||
   lookAhead=="sqrt" || lookAhead=="\\sqrt" || lookAhead=="EndProgram"
   ;
@@ -1671,6 +1681,8 @@ bool Calculator::AllowsPlusInPreceding(const std::string& lookAhead)
   lookAhead=="=" || lookAhead=="<" || lookAhead==">" ||
   lookAhead==")" || lookAhead==";" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead==":" || lookAhead=="," || lookAhead=="\\choose" ||
+  lookAhead=="or" ||
+  lookAhead=="and" ||
   lookAhead=="EndProgram" ||
   lookAhead=="&" || lookAhead=="MatrixEnd" || lookAhead=="\\";
   ;
@@ -1747,15 +1759,22 @@ bool Calculator::ApplyOneRule()
   const std::string& secondToLastS=this->controlSequences[secondToLastE.controlIndex];
   if (secondToLastS=="Integer" && lastS!="Integer" && lastS!=".")
   { this->registerPositionAfterDecimalPoint=0;
+    if (this->flagLogSyntaxRules)
+      this->parsingLog+= "[Rule: digit to number]";
     return this->ReplaceAXbyEX();
   }
   if (lastS==" " && secondToLastS=="\\" &&
       this->CurrentSyntacticStacK->size>=this->numEmptyTokensStart+2)
   { this->PopTopSyntacticStack();
+    if (this->flagLogSyntaxRules)
+      this->parsingLog+= "[Rule: remove \\ ]";
     return this->PopTopSyntacticStack();
   }
   if (lastS==" ")
+  { if (this->flagLogSyntaxRules)
+      this->parsingLog+= "[Rule: remove white space]";
     return this->PopTopSyntacticStack();
+  }
   const SyntacticElement& thirdToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   const std::string& thirdToLastS=this->controlSequences[thirdToLastE.controlIndex];
   const SyntacticElement& fourthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
@@ -2036,7 +2055,10 @@ bool Calculator::ApplyOneRule()
     Expression impliedFunApplication;
     if (this->outerTimesToFunctionApplication
         (*this, (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData, impliedFunApplication))
-      (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData=impliedFunApplication;
+    { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData=impliedFunApplication;
+      if (this->flagLogSyntaxRules)
+        this->parsingLog+= "[Rule: implied function application]";
+    }
     return true;
   }
   if ((lastS==">" && secondToLastS=="=") ||

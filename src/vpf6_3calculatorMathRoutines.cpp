@@ -55,7 +55,7 @@ bool CalculatorFunctionsGeneral::innerConstructCartanSA(Calculator& theCommands,
   if (input.ConvertsToType(&theElt))
     theSA.theGenerators.AddOnTop(theElt);
   else
-    for (int i=1; i<input.children.size; i++)
+    for (int i=1; i<input.size(); i++)
       if (input[i].ConvertsToType(&theElt))
         theSA.theGenerators.AddOnTop(theElt);
       else
@@ -80,7 +80,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket");
   Vector<ElementWeylAlgebra<Rational> > theOps;
   Expression theContext;
-  if (!(input.children.size>1))
+  if (!(input.size()>1))
     return false;
   int upperBound=-1;
   if (!input[1].IsSmallInteger(&upperBound))
@@ -613,7 +613,7 @@ bool CalculatorFunctionsGeneral::innerCoefficientOf(Calculator& theCommands, con
 bool CalculatorFunctionsGeneral::innerChildExpression(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerChildExpression");
   (void) theCommands;
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   int theIndex=0;
   if (!input[2].IsSmallInteger(&theIndex))
@@ -628,7 +628,7 @@ bool CalculatorFunctionsGeneral::innerChildExpression(Calculator& theCommands, c
 bool CalculatorFunctionsGeneral::innerDereferenceInterval(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceInterval");
   (void) theCommands;
-  if (!input.StartsWith(theCommands.opUnderscore(),3))
+  if (!input.StartsWith(theCommands.opUnderscore(), 3))
     return false;
   if (!input[1].StartsWith(theCommands.opIntervalClosed(),3 ) &&
       !input[1].StartsWith(theCommands.opIntervalLeftClosed(),3 ) &&
@@ -649,7 +649,7 @@ bool CalculatorFunctionsGeneral::innerDereferenceInterval(Calculator& theCommand
 bool CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix");
   (void) theCommands;
-  if (!input.StartsWith(theCommands.opUnderscore(),3))
+  if (!input.StartsWith(theCommands.opUnderscore(), 3))
     return false;
   if (!input[1].StartsWith(theCommands.opSequence()) &&
       !input[1].StartsWith(theCommands.opMatrix()))
@@ -1513,7 +1513,7 @@ bool CalculatorFunctionsGeneral::innerCompositeConstTimesAnyActOn(Calculator& th
 
 bool CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly");
-  if (input.children.size!=2)
+  if (input.size()!=2)
     return false;
   Expression theEWAE=input[0];
   Expression theArgument=input[1];
@@ -1588,7 +1588,7 @@ bool CalculatorFunctionsGeneral::innerIntersection(Calculator& theCommands, cons
   if (!input.StartsWith(theCommands.opIntersection()))
     return false;
   int numElts=1;
-  for (int i=1; i<input.children.size; i++)
+  for (int i=1; i<input.size(); i++)
     if (!input[i].IsSequenceNElementS())
       return false;
     else
@@ -1682,7 +1682,7 @@ bool CalculatorFunctionsGeneral::innerCrossProduct(Calculator& theCommands, cons
 bool CalculatorFunctionsGeneral::innerDifferentiateConstPower(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateConstPower");
   //////////////////////
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
@@ -1706,7 +1706,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateConstPower(Calculator& theCom
 bool CalculatorFunctionsGeneral::innerDifferentiateAPowerB(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateAPowerB");
   //////////////////////
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
@@ -1729,7 +1729,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAPowerB(Calculator& theComman
 bool CalculatorFunctionsGeneral::innerDifferentiateConstant(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateConstant");
   //////////////////////
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
@@ -1744,7 +1744,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateConstant(Calculator& theComma
 bool CalculatorFunctionsGeneral::innerDifferentiateX(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateX");
   //////////////////////
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
@@ -1760,7 +1760,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateX(Calculator& theCommands, co
 bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig");
   /////////////////////
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString() << " - possible user typo?";
@@ -1842,7 +1842,7 @@ bool CalculatorFunctionsGeneral::innerCompositeDifferentiateLog(Calculator& theC
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeDifferentiateLog");
   /////////////////////
 //  stOutput << "<hr>input composite: " << input.ToString();
-  if (input.children.size!=2)
+  if (input.size()!=2)
     return false;
   if (!input[0].StartsWith(theCommands.opDifferentiate(), 3))
     return false;
@@ -2014,7 +2014,7 @@ bool CalculatorFunctionsGeneral::outerAssociateDivisionDivision(Calculator& theC
 bool CalculatorFunctionsGeneral::innerDifferentiateChainRule(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateChainRule");
   /////////////////////
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
@@ -7416,7 +7416,7 @@ public:
     }
     Vector<double> arrowBase, arrowHead;
     for (int i=0; i<this->DisplayedEstrings.size; i++)
-    {       for (int j=0; j<this->arrows[i].size; j++)
+    { for (int j=0; j<this->arrows[i].size; j++)
       { arrowBase= this->NodePositionsDouble[i];
         arrowHead=this->NodePositionsDouble[this->arrows[i][j]];
         arrowHead[1]+=this->charHeight.GetDoubleValue() /2;
@@ -7515,7 +7515,7 @@ bool CalculatorFunctionsGeneral::innerSetRandomSeed
 bool CalculatorFunctionsGeneral::innerAnd
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAnd");
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   if (input[1].IsEqualToZero())
     return output.AssignValue(0, theCommands);
@@ -7529,7 +7529,7 @@ bool CalculatorFunctionsGeneral::innerAnd
 bool CalculatorFunctionsGeneral::innerOr
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerOr");
-  if (input.children.size!=3)
+  if (input.size()!=3)
     return false;
   if (input[1].IsEqualToOne())
     return output.AssignValue(1, theCommands);
@@ -7544,7 +7544,7 @@ bool CalculatorFunctionsGeneral::innerIf
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerOr");
   (void) theCommands;//portable way of avoiding unused parameter warning
-  if (input.children.size!=4)
+  if (input.size()!=4)
     return false;
   if (input[1].IsEqualToOne())
   { output=input[2];
@@ -7696,9 +7696,9 @@ bool CalculatorFunctionsGeneral::innerSelectAtRandom
   { output=input; //only one item to select from: returning the item
     return true;
   }
-  if (input.children.size<2)
+  if (input.size()<2)
     return false;
-  if (input.children.size==2)
+  if (input.size()==2)
   { output=input[1]; //only one item to select from: return that item
     return true;
   }

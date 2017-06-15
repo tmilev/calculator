@@ -90,6 +90,9 @@ function initializeButtons()
 "<td>" + getPiButton(i) + "</td>"+
 "<td>" + getBelongsToButton(i) + "</td>"+
 "</tr>"+
+"<tr>"+
+"<td>" + getOrButton(i)+ "</td>"+
+"</tr>"+
 "</table>"
 ;
   }
@@ -278,6 +281,15 @@ function getLogBaseButton(indexMathField){
 function logBaseButtonClick(currentMathField){ 
   currentMathField.cmd("log");
   currentMathField.cmd("_");
+  event.preventDefault();
+}
+
+function getOrButton(indexMathField){
+  return "<button style='width:25' onmousedown='orClick(answerMathQuillObjects[" + indexMathField + "]);'>or</button>";
+}
+
+function orClick(currentMathField){
+  currentMathField.cmd(" or ");
   event.preventDefault();
 }
 

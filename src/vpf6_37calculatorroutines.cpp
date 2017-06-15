@@ -840,3 +840,17 @@ bool CalculatorFunctionsGeneral::innerMatchesPattern(Calculator& theCommands, co
   output.AddChildAtomOnTop(theCommands.opCommandEnclosure());
   return output.AddChildOnTop(commandList);
 }
+
+bool CalculatorFunctionsGeneral::innerDegreesToRadians(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDegreesToRadians");
+  if (!input.StartsWith(theCommands.opThePower(),3))
+    return false;
+  if (!input[2].IsAtomGivenData("\\circ"))
+    return false;
+  Expression piE;
+  piE.MakeAtom(theCommands.opPi(), theCommands);
+  output=input[1]*piE;
+  output/=180;
+  return true;
+}
+

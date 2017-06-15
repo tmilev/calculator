@@ -335,6 +335,7 @@ public:
   static bool innerChildExpression(Calculator& theCommands, const Expression& input, Expression& output);
 
 
+  static bool innerDegreesToRadians(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerEvaluateToDouble(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylDimFormula(Calculator& theCommands, const Expression& input, Expression& output);

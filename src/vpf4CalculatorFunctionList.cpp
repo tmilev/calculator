@@ -1779,6 +1779,14 @@ D-B;\
    "DoubleValue")
    ;
   this->AddOperationInnerHandler
+  ("^", CalculatorFunctionsGeneral::innerDegreesToRadians, "",
+   "Converts degrees to radians",
+   "30^\\circ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerDegreesToRadians",
+   "DegreesToRadians")
+   ;
+  this->AddOperationInnerHandler
   ("ModP", this->innerZmodP, "",
    "Number modulo P. First argument = number, second argument = modulo.",
    "ModP{}(7, 3)", true, false)

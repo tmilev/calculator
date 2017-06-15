@@ -2511,8 +2511,13 @@ bool Calculator::innerFlattenCommandEnclosuresOneLayer(Calculator& theCommands, 
         for (int j=1; j<input[i].size(); j++)
           result.AddChildOnTop(input[i][j]);
       result.AddChildAtomOnTop(theCommands.opCommandEnclosureFinish());
-    } else
+    } else if (input[i].StartsWithGivenAtom("MatchesPattern"))
+    { result.AddChildAtomOnTop(theCommands.opCommandEnclosureStart());
       result.AddChildOnTop(input[i]);
+      result.AddChildAtomOnTop(theCommands.opCommandEnclosureFinish());
+    } else
+    { result.AddChildOnTop(input[i]);
+    }
   output=result;
   return true;
 }

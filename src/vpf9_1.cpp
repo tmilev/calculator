@@ -1656,9 +1656,11 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   this->theLinearOperators[0].ActOnVectorColumn(tempRoot);
   this->preferredBasisChangE.ActOnVectorColumn(tempRoot);
   tempRoot.Minus();
-  this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}=" << theSubgroup.GetRho().ToStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
+  this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}="
+  << theSubgroup.GetRho().ToStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
   << tempRoot.ToStringLetterFormat("\\alpha") << "$.";
-  this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
+  this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}"
+  << "Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
   << tempVect.ToString(&theFormat) << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
   for (int i=0; i<this->theLinearOperatorsExtended.size; i++)
   { Matrix<Rational> & currentLoExt=this->theLinearOperatorsExtended[i];

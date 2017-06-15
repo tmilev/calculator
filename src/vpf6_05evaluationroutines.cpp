@@ -160,8 +160,10 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (!(thePattern.owner==this && input.owner==this))
-    crash << "This is a programming error. Either a pattern or an input has a wrongly  initialized owner: the pattern is "
-    << thePattern.ToString() << " and the input is " << input.ToString() << ". The error is certainly in the preceding code; here "
+    crash << "This is a programming error. "
+    << "Either a pattern or an input has a wrongly  initialized owner: the pattern is "
+    << thePattern.ToString() << " and the input is "
+    << input.ToString() << ". The error is certainly in the preceding code; here "
     << "is a stack trace, however beware that the error might be in code preceding the stack loading. "
     << crash;
 //  static int ExpressionMatchesPatternDebugCounter=-1;

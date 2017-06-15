@@ -2219,8 +2219,22 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerPlotSetId",
    "PlotSetId")
    ;
+  this->AddOperationInnerHandler ("MatchesPattern",
+    CalculatorFunctionsGeneral::innerMatchesPattern, "",
+   "Checks whether the first argument matches the pattern of the second argument. If no, returns 0.  \
+    Pattern parametric entries are indicated with the bound variable notation {{a}}. \
+    If the expression matches the pattern, the return is a command enclosure\
+    in which each of the variables is freed and assigned the matched value.\
+   ",
+   "MatchesPattern{}(a=b*10,a={{c}}*b);\
+    MatchesPattern{}(a=b*10, a=b*{{c}})",
+   true, false,
+   "CalculatorFunctionsGeneral::innerMatchesPattern",
+   "MatchesPattern")
+   ;
 
-  this->AddOperationInnerHandler ("GetVariablesExcludeNamedConstants", CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants, "",
+  this->AddOperationInnerHandler ("GetVariablesExcludeNamedConstants",
+   CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants, "",
    "Gets the variables on which the expression depends. Excludes the named constants. Here, the word ``variables'' is to be thought of as \
    ``free variables'' but the possibility for small distinctions is \
    reserved (to allow dealing with named constants, reserved keywords, etc.). \

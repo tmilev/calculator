@@ -1200,6 +1200,7 @@ public:
   bool ReplaceMatrixEXByMatrixNewRow();
   bool ReplaceMatrixXByE();
   bool ReplaceCXByE();
+  bool ReplaceCXByEX();
   bool ReplaceXEXEXByEusingO(int theOperation);
   bool ReplaceEXEByEusingO  (int theOperation);
   bool ReplaceXYByConY(int theCon)
@@ -1261,6 +1262,7 @@ public:
   bool ReplaceXXByEEmptySequence();
   bool ReplaCeOXdotsXbyEXdotsX(int numXs);
   bool ReplaCeOXbyEX();
+  bool ReplaCeObyE();
   bool ReplaceXXbyEX();
   bool ReplaceXEXByEcontainingOE(int inputOpIndex);
   bool ReplaceXXByEmptyString();
@@ -1577,6 +1579,9 @@ public:
   }
   int opPhantom()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\phantom");
+  }
+  int opCirc()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\circ");
   }
   int opSin()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\sin");

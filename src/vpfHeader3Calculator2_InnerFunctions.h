@@ -117,7 +117,7 @@ public:
   static bool innerArctan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeArithmeticOperationEvaluatedOnArgument(Calculator& theCommands, const Expression& input, Expression& output);
 
-
+  static bool innerMatchesPattern(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerThaw(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetFreeVariablesIncludeNamedConstants(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetFreeVariablesExcludeNamedConstants(Calculator& theCommands, const Expression& input, Expression& output);

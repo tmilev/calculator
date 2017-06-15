@@ -158,6 +158,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("[]");
   this->AddOperationNoRepetitionAllowed("=:");
   this->AddOperationNoRepetitionAllowed("^");
+  this->AddOperationNoRepetitionAllowed("\\circ");
   this->AddOperationNoRepetitionAllowed("\\geq");
   this->AddOperationNoRepetitionAllowed(">");
   this->AddOperationNoRepetitionAllowed("<");
@@ -257,7 +258,6 @@ void Calculator::init()
   (this->knownOperationsInterpretedAsFunctionsMultiplicatively);
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("SequenceStatements");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MakeSequence");
-  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\circ");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\setminus");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("$");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("MatrixEnd");
@@ -890,8 +890,17 @@ bool Calculator::ReplaCeOXbyEX()
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   theElt.theData.MakeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
   if (this->flagLogSyntaxRules)
-    this->parsingLog+= "[Rule: Calculator::ReplaCeOXbyEX]";
+    this->parsingLog+= "[Rule: Calculator::ReplaceOXbyEX]";
   return this->ReplaceXXbyEX();
+}
+
+bool Calculator::ReplaCeObyE()
+{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
+  theElt.theData.MakeAtom(this->GetOperationIndexFromControlIndex(theElt.controlIndex), *this);
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceObyE]";
+  theElt.controlIndex=this->conExpression();
+  return true;
 }
 
 bool Calculator::ReplaceXXbyEX()
@@ -1011,6 +1020,13 @@ bool Calculator::ReplaceCXByE()
 //  theElt.theData.IndexBoundVars=this->theExpressionContext.size-1;
   theElt.controlIndex=this->conExpression();
   return this->PopTopSyntacticStack();
+}
+
+bool Calculator::ReplaceCXByEX()
+{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+//  theElt.theData.IndexBoundVars=this->theExpressionContext.size-1;
+  theElt.controlIndex=this->conExpression();
+  return true;
 }
 
 bool Calculator::ReplaceXdotsXByMatrixStart(int numXes)
@@ -1917,7 +1933,7 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXXByCon(this->conApplyFunction());
   if (lastS=="\\cdot")
     return this->ReplaceXByCon(this->conTimes());
-  if (lastS=="\\circ")
+  if (lastS=="\\circ" && secondToLastS!="{" && secondToLastS!="(" && secondToLastS!="^")
     return this->ReplaceXByCon(this->conApplyFunction());
 //  if ( thirdToLastS=="{" && secondToLastS=="{}" && lastS=="}")
 //    return this->ReplaceXXXByCon(this->conBindVariable());
@@ -2070,6 +2086,12 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXEXByE();
   if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}")
     return this->ReplaceXEXByE();
+  if (thirdToLastS=="(" && secondToLastS=="\\circ" && lastS==")")
+    return this->ReplaCeOXbyEX();
+  if (thirdToLastS=="{" && secondToLastS=="\\circ" && lastS=="}")
+    return this->ReplaCeOXbyEX();
+  if (secondToLastS=="^" && lastS=="\\circ")
+    return this->ReplaCeObyE();
   if (this->flagUseBracketsForIntervals)
   { if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS=="]")
       return this->ReplaceXEXByEcontainingOE(this->opIntervalRightClosed());

@@ -854,3 +854,70 @@ bool CalculatorFunctionsGeneral::innerDegreesToRadians(Calculator& theCommands, 
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerLessThanOrEqualTo(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLessThanOrEqualTo");
+  if (input.size()!=3)
+    return false;
+  Expression result(theCommands);
+  result.AddChildAtomOnTop("\\geq");
+  result.AddChildOnTop(input[2]);
+  result.AddChildOnTop(input[1]);
+  output=result;
+  return true;
+}
+
+
+bool CalculatorFunctionsGeneral::innerGreaterThanOrEqualTo(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGreaterThanOrEqualTo");
+  if (input.size()!=3)
+    return false;
+  const Expression& left=input[1];
+  const Expression& right=input[2];
+  Rational leftRat, rightRat;
+  if (left.IsRational(&leftRat) && right.IsRational(&rightRat))
+  { if (leftRat>=rightRat)
+      return output.AssignValue(1, theCommands);
+    return output.AssignValue(0, theCommands);
+  }
+  double leftD, rightD;
+//  stOutput << "DEBUG: Got to here, comparing " << left.ToString() << " to " << right.ToString();
+  if (left.EvaluatesToDouble(&leftD) && right.EvaluatesToDouble(&rightD) )
+  { if (leftD>=rightD)
+      return output.AssignValue(1, theCommands);
+    return output.AssignValue(0, theCommands);
+  }
+  return false;
+}
+
+bool CalculatorFunctionsGeneral::innerGreaterThan(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGreaterThan");
+  if (!input.IsListNElements(3))
+    return false;
+  const Expression& left=input[1];
+  const Expression& right=input[2];
+  Rational leftRat, rightRat;
+  if (left.IsRational(&leftRat) && right.IsRational(&rightRat))
+  { if (leftRat>rightRat)
+      return output.AssignValue(1, theCommands);
+    return output.AssignValue(0, theCommands);
+  }
+  double leftD, rightD;
+//  stOutput << "DEBUG: Got to here, comparing " << left.ToString() << " to " << right.ToString();
+  if (left.EvaluatesToDouble(&leftD) && right.EvaluatesToDouble(&rightD) )
+  { if (leftD>rightD)
+      return output.AssignValue(1, theCommands);
+    return output.AssignValue(0, theCommands);
+  }
+  return false;
+}
+
+bool CalculatorFunctionsGeneral::innerLessThan(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLessThan");
+  if (!input.IsListNElements(3))
+    return false;
+  Expression swappedE(theCommands);
+  swappedE.AddChildOnTop(input[0]);
+  swappedE.AddChildOnTop(input[2]);
+  swappedE.AddChildOnTop(input[1]);
+  return CalculatorFunctionsGeneral::innerGreaterThan(theCommands, swappedE, output);
+}

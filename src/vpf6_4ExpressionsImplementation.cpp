@@ -2970,6 +2970,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << "&gt;" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opGreaterThanOrEqualTo()))
     out << (*this)[1].ToString(theFormat) << "\\geq " << (*this)[2].ToString(theFormat);
+  else if (this->IsListStartingWithAtom(this->owner->opLessThanOrEqualTo()))
+    out << (*this)[1].ToString(theFormat) << "\\leq " << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opLimit(),3))
   { out << "\\lim_{";
     if (!(*this)[1].IsSequenceNElementS())
@@ -3097,8 +3099,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->size()==1)
   { //stOutput << "I'm at this place";
     out << (*this)[0].ToString(theFormat);
-  }
-  else if (this->size()>=2)
+  } else if (this->size()>=2)
   { //stOutput << "I'm at the second place";
     out << (*this)[0].ToString(theFormat);
     bool needParenthesis=true;

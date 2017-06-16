@@ -4993,21 +4993,21 @@ this->AddOperationInnerHandler
   << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
 
   this->AddOperationOuterHandler
-  ("<", Calculator::outerLessThan, "",
+  ("<", CalculatorFunctionsGeneral::innerLessThan, "",
    "If both the left hand side and the right hand side are rational, \
     replaces the expression by \
     1 if the left number is less than the right, else replaces the expression by 0.",
    "3<4; 5<4",
    true, false,
-   "Calculator::outerLessThan", "LessThan");
+   "CalculatorFunctionsGeneral::innerLessThan", "LessThan");
   this->AddOperationOuterHandler
-  (">", Calculator::outerGreaterThan, "",
+  (">", CalculatorFunctionsGeneral::innerGreaterThan, "",
    "Greater than: has similar action to the less than sign. \
     The following example shows an implementation of commutativity. ",
    "x_{{i}}*x_{{j}}*{{a}}:if i>j=x_j*x_i*a;\n x_{{i}}*x_{{j}}:if i>j=x_j*x_i;\
     (x_2*x_1- x_1*x_3)(x_1x_5+x_5x_4x_2); x_5x_4x_3x_2x_1",
     true, false,
-   "Calculator::outerGreaterThan", "GreaterThan");
+   "CalculatorFunctionsGeneral::innerGreaterThan", "GreaterThan");
   this->AddOperationOuterHandler
   ("Max", CalculatorFunctionsGeneral::innerMax, "",
    "Maximum function.",
@@ -5022,9 +5022,16 @@ this->AddOperationInnerHandler
    "CalculatorFunctionsGeneral::innerMin", "Min");
 
   this->AddOperationInnerHandler
-  ("\\geq", Calculator::innerGreaterThanOrEqualTo, "",
+  ("\\geq", CalculatorFunctionsGeneral::innerGreaterThanOrEqualTo, "",
    "Greater than or equal to operation. ",
    "A=(2>=x); x=1; A",
+   true, false,
+   "Calculator::innerGreaterThanOrEqualTo",
+   "greaterThanOrEqualTo");
+  this->AddOperationInnerHandler
+  ("\\leq", CalculatorFunctionsGeneral::innerLessThanOrEqualTo, "",
+   "Transforms \\(a\\leq b\\) to \\(b\\geq a\\).",
+   "a \\leq b",
    true, false,
    "Calculator::innerGreaterThanOrEqualTo",
    "greaterThanOrEqualTo");

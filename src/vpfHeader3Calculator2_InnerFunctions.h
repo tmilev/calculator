@@ -225,6 +225,10 @@ public:
   static bool innerEqualEqualEqual(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMax(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMin(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLessThanOrEqualTo(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGreaterThanOrEqualTo(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGreaterThan(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLessThan(Calculator& theCommands, const Expression& input, Expression& output);
 
 
   static bool outerCommuteAtimesBifUnivariate(Calculator& theCommands, const Expression& input, Expression& output);

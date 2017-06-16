@@ -1418,6 +1418,9 @@ public:
   int opGreaterThanOrEqualTo()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\geq");
   }
+  int opLessThanOrEqualTo()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\leq");
+  }
   int opGreaterThan()
   { return this->theAtoms.GetIndexIMustContainTheObject(">");
   }
@@ -1804,9 +1807,6 @@ public:
   static bool outerTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMinus(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerGreaterThanOrEqualTo(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerGreaterThan(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerLessThan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCombineFractions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCheckRule(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociate(Calculator& theCommands, const Expression& input, Expression& output);

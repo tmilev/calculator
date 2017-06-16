@@ -160,6 +160,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("^");
   this->AddOperationNoRepetitionAllowed("\\circ");
   this->AddOperationNoRepetitionAllowed("\\geq");
+  this->AddOperationNoRepetitionAllowed("\\leq");
   this->AddOperationNoRepetitionAllowed(">");
   this->AddOperationNoRepetitionAllowed("<");
   this->AddOperationNoRepetitionAllowed("==");
@@ -2113,6 +2114,8 @@ bool Calculator::ApplyOneRule()
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="==" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="\\geq" && fourthToLastS=="Expression")
+    return this->ReplaceEOEXByEX();
+  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="\\leq" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS==">" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();

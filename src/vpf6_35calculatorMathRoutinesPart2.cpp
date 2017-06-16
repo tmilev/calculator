@@ -1170,6 +1170,22 @@ bool CalculatorFunctionsGeneral::innerFloor(Calculator& theCommands, const Expre
   return false;
 }
 
+bool CalculatorFunctionsGeneral::innerRound(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRound");
+  Rational theRat;
+  if(input.IsOfType<Rational>(&theRat))
+  { Rational result=theRat;
+    result.AssignFloor();
+    if (theRat-result>=Rational(1,2) )
+      result++;
+    return output.AssignValue(result, theCommands);
+  }
+  double theDouble=0;
+  if (input.EvaluatesToDouble(&theDouble))
+    return output.AssignValue((int) std::round(theDouble), theCommands);
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSegment");
   if (input.size()<3)

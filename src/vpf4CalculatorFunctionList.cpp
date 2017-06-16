@@ -1769,6 +1769,13 @@ D-B;\
    "CalculatorFunctionsGeneral::innerFloor",
    "Floor")
    ;
+  this->AddOperationInnerHandler
+  ("Round", CalculatorFunctionsGeneral::innerRound, "",
+   "Round function.",
+   "Round(3/7)", true, false,
+   "CalculatorFunctionsGeneral::innerRound",
+   "Round")
+   ;
 
   this->AddOperationInnerHandler
   ("DoubleValue", CalculatorFunctionsGeneral::innerEvaluateToDouble, "",

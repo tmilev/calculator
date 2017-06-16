@@ -109,6 +109,7 @@ public:
   static bool innerCoefficientOf(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConstTermRelative(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFloor(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerRound(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerArcsinAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerArccosAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);

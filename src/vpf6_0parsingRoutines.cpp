@@ -1606,7 +1606,9 @@ bool Calculator::AllowsTimesInPreceding(const SyntacticElement& thePreceding, co
       return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" ||
       lookAhead=="\\cup" ||
       lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
-      lookAhead=="=" || lookAhead==">" || lookAhead=="<" ||
+      lookAhead=="=" ||
+      lookAhead==">" || lookAhead=="<" ||
+      lookAhead=="\\leq" || lookAhead=="\\geq" ||
       lookAhead=="," || lookAhead==";" ||
       lookAhead==":" || lookAhead=="&" || lookAhead=="Matrix" || lookAhead=="\\" ||
       lookAhead=="or" ||
@@ -1625,7 +1627,9 @@ bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
   lookAhead=="(" || lookAhead=="[" ||
   lookAhead=="|" ||
   lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
-  lookAhead=="=" || lookAhead==">" || lookAhead=="<" ||
+  lookAhead=="=" ||
+  lookAhead==">" || lookAhead=="<" ||
+  lookAhead=="\\geq" || lookAhead=="\\leq" ||
   lookAhead=="Variable" || lookAhead=="," || lookAhead==";" ||
   lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixEnd" ||
   lookAhead=="or" ||
@@ -1696,6 +1700,7 @@ bool Calculator::AllowsIfInPreceding(const std::string& lookAhead)
 bool Calculator::AllowsPlusInPreceding(const std::string& lookAhead)
 { return lookAhead=="+" || lookAhead=="-" || lookAhead=="," ||
   lookAhead=="=" || lookAhead=="<" || lookAhead==">" ||
+  lookAhead=="\\geq" || lookAhead== "\\leq" ||
   lookAhead==")" || lookAhead==";" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead==":" || lookAhead=="," || lookAhead=="\\choose" ||
   lookAhead=="or" ||
@@ -2111,15 +2116,15 @@ bool Calculator::ApplyOneRule()
     this->ReplaceXXByCon(this->conEqualEqualEqual());
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="===" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="==" && fourthToLastS=="Expression")
+  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && this->isSeparatorFromTheRightForDefinition(lastS) && secondToLastS=="Expression" && thirdToLastS=="==" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="\\geq" && fourthToLastS=="Expression")
+  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && this->isSeparatorFromTheRightForDefinition(lastS) && secondToLastS=="Expression" && thirdToLastS=="\\geq" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="\\leq" && fourthToLastS=="Expression")
+  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && this->isSeparatorFromTheRightForDefinition(lastS) && secondToLastS=="Expression" && thirdToLastS=="\\leq" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS==">" && fourthToLastS=="Expression")
+  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && this->isSeparatorFromTheRightForDefinition(lastS) && secondToLastS=="Expression" && thirdToLastS==">" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="<" && fourthToLastS=="Expression")
+  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && this->isSeparatorFromTheRightForDefinition(lastS) && secondToLastS=="Expression" && thirdToLastS=="<" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
   if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" && thirdToLastS=="=" &&
       secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
@@ -2127,7 +2132,7 @@ bool Calculator::ApplyOneRule()
   if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" && thirdToLastS=="=:" &&
       secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEOEXByEX();
-  if (lastS=="Sequence" && lastE.theData.children.size==0 &&
+  if (lastS=="Sequence" && lastE.theData.size()==0 &&
       lastE.theData.theData==this->opLisT())
     return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("MakeSequence"));
   //else

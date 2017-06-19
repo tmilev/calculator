@@ -2694,6 +2694,16 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerCollectMultiplicands",
    "GetMultiplicandList");
   this->AddOperationInnerHandler
+  ("GetOpandList",
+    CalculatorFunctionsGeneral::innerCollectOpands, "",
+   "Converts a chain of operations to a list. First argument: operation name. \
+    You can expressions such as StringToAtom(\"+\") to make an arbitrary expresssion. ",
+   "%UseBracketForIntervals\nGetOpandList(StringToAtom(\"\\otimes\"), a\\otimes b \\otimes c ); \
+    GetOpandList(StringToAtom(\"\\cup\"), [a,b]\\cup [c,d] \\cup [e,f] );",
+   true, false,
+   "CalculatorFunctionsGeneral::innerCollectOpands",
+   "GetOpandList");
+  this->AddOperationInnerHandler
   ("GetSummandList",
     CalculatorFunctionsGeneral::innerCollectSummands, "",
    "Converts a sum to a sequence containing the summands. ",

@@ -1257,10 +1257,10 @@ bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& inp
   if (!input.IsListStartingWithAtom(theOp))
     output.AddOnTop(input);
   else
-    for (int i=1; i<input.children.size; i++)
+    for (int i=1; i<input.size(); i++)
     { if (this->AppendOpandsReturnTrueIfOrderNonCanonical(input[i], output, theOp))
         result=true;
-      if (i<input.children.size-1 && input[i].IsListStartingWithAtom(theOp) && input[i].children.size>2)
+      if (i<input.size()-1 && input[i].IsListStartingWithAtom(theOp) && input[i].size()>2)
         result=true;
     }
   return result;
@@ -2769,10 +2769,10 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
 { MacroRegisterFunctionWithName("Expression::MergeContextsMyAruments");
 //  stOutput << "<hr>Merging contexts of expression " << this->ToString();
   this->CheckInitialization();
-  if (this->children.size<2)
+  if (this->size()<2)
     return false;
 //  stOutput << " ... continuing to merge..." ;
-  for (int i=1; i< this->children.size; i++)
+  for (int i=1; i< this->size(); i++)
     if (!(*this)[i].IsBuiltInTypE())
     { *this->owner << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
       << (*this)[i].ToString() << "is not of built-in type";
@@ -2780,7 +2780,7 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
     }
   Expression commonContext=(*this)[1].GetContext();
   bool needsMerge=false;
-  for (int i=2; i<this->children.size; i++)
+  for (int i=2; i<this->size(); i++)
     if (!(commonContext==(*this)[i].GetContext()))
     { needsMerge=true;
       break;
@@ -2793,7 +2793,7 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
   { output=*this;
     return true;
   }
-  for (int i=2; i<this->children.size; i++)
+  for (int i=2; i<this->size(); i++)
   { if (!(*this)[i].IsBuiltInTypE())
     { *this->owner << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
       return false;
@@ -2805,10 +2805,10 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
     }
 //    stOutput << " ...  to get context: " << commonContext.ToString();
   }
-  output.reset(*this->owner, this->children.size);
+  output.reset(*this->owner, this->size());
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;
-  for (int i=1; i<this->children.size; i++)
+  for (int i=1; i<this->size(); i++)
   { convertedE=(*this)[i];
     //stOutput << "<hr>Setting context of " << convertedE.ToString() << " to be the context " << commonContext.ToString();
     if (!convertedE.SetContextAtLeastEqualTo(commonContext))

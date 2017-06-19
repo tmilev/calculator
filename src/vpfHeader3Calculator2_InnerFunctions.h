@@ -183,6 +183,7 @@ public:
   static bool innerGetFirstSummandContaining(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetSummand(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCollectMultiplicands(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCollectOpands(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCollectSummands(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMergeConstantRadicals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCommuteConstants(Calculator& theCommands, const Expression& input, Expression& output);

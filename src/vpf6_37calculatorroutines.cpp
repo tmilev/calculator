@@ -921,3 +921,34 @@ bool CalculatorFunctionsGeneral::innerLessThan(Calculator& theCommands, const Ex
   swappedE.AddChildOnTop(input[1]);
   return CalculatorFunctionsGeneral::innerGreaterThan(theCommands, swappedE, output);
 }
+
+bool CalculatorFunctionsGeneral::innerCollectOpands
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCollectOpands");
+  if (input.size()!=3)
+    return false;
+  if (!input[1].IsAtom())
+    return false;
+  List<Expression> theList;
+  theCommands.AppendOpandsReturnTrueIfOrderNonCanonical
+  (input[2], theList, input[1].theData);
+  return output.MakeSequence(theCommands, &theList);
+}
+
+bool CalculatorFunctionsGeneral::innerCollectMultiplicands
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCollectSummands");
+  List<Expression> theList;
+  theCommands.AppendOpandsReturnTrueIfOrderNonCanonical
+  (input, theList, theCommands.opTimes());
+  return output.MakeSequence(theCommands, &theList);
+}
+
+bool CalculatorFunctionsGeneral::innerCollectSummands
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCollectSummands");
+  List<Expression> theList;
+  theCommands.AppendSummandsReturnTrueIfOrderNonCanonical
+  (input, theList);
+  return output.MakeSequence(theCommands, &theList);
+}

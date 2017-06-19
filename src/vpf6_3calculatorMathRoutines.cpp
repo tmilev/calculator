@@ -3921,24 +3921,6 @@ bool CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx(Calculator& theComman
   return output.MakeXOX(theCommands, theCommands.opDivide(), numeratorE, denominatorE);
 }
 
-bool CalculatorFunctionsGeneral::innerCollectMultiplicands
-(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCollectSummands");
-  List<Expression> theList;
-  theCommands.AppendOpandsReturnTrueIfOrderNonCanonical
-  (input, theList, theCommands.opTimes());
-  return output.MakeSequence(theCommands, &theList);
-}
-
-bool CalculatorFunctionsGeneral::innerCollectSummands
-(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCollectSummands");
-  List<Expression> theList;
-  theCommands.AppendSummandsReturnTrueIfOrderNonCanonical
-  (input, theList);
-  return output.MakeSequence(theCommands, &theList);
-}
-
 bool CalculatorFunctionsGeneral::outerMergeConstantRadicals(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerMergeConstantRadicals");
   if (!input.StartsWith(theCommands.opTimes(), 3))

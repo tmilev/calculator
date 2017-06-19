@@ -82,16 +82,17 @@ function initializeButtons()
 "<td>" + getUnderscoreButton(i)+ "</td>"+
 "<td>" + getLogBaseButton(i) + "</td>"+
 "<td>" + getBinomButton(i) + "</td>"+
-"<td>" + getUnionButton(i) + "</td>"+
+"<td>" + getSumButton(i)+ "</td>"+
 "</tr>"+
 "<tr>"+
-"<td>" + getSumButton(i)+ "</td>"+
 "<td>" + getInftyButton(i)+ "</td>"+
 "<td>" + getPiButton(i) + "</td>"+
-"<td>" + getBelongsToButton(i) + "</td>"+
+"<td>" + getCircButton(i) + "</td>"+
 "</tr>"+
 "<tr>"+
 "<td>" + getOrButton(i)+ "</td>"+
+"<td>" + getUnionButton(i) + "</td>"+
+"<td>" + getBelongsToButton(i) + "</td>"+
 "</tr>"+
 "</table>"
 ;
@@ -297,8 +298,17 @@ function getPiButton(indexMathField){
   return "<button style='width:25' onmousedown='piClick(answerMathQuillObjects[" + indexMathField + "]);'>&#960</button>";
 }
 
-function piClick(currentMathField){ 
+function piClick(currentMathField){
   currentMathField.cmd("\\pi");
+  event.preventDefault();
+}
+
+function getCircButton(indexMathField){
+  return "<button style='width:25' onmousedown='circClick(answerMathQuillObjects[" + indexMathField + "]);'>&#176</button>";
+}
+
+function circClick(currentMathField){
+  currentMathField.cmd("\\circ");
   event.preventDefault();
 }
 

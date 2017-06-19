@@ -87,6 +87,7 @@ function initializeButtons()
 "<tr>"+
 "<td>" + getInftyButton(i)+ "</td>"+
 "<td>" + getPiButton(i) + "</td>"+
+"<td>" + getDegreesButton(i) + "</td>"+
 "<td>" + getCircButton(i) + "</td>"+
 "</tr>"+
 "<tr>"+
@@ -295,7 +296,7 @@ function orClick(currentMathField){
 }
 
 function getPiButton(indexMathField){
-  return "<button style='width:25' onmousedown='piClick(answerMathQuillObjects[" + indexMathField + "]);'>&#960</button>";
+  return "<button style='width:25' onmousedown='piClick(answerMathQuillObjects[" + indexMathField + "]);'>&#960;</button>";
 }
 
 function piClick(currentMathField){
@@ -303,8 +304,18 @@ function piClick(currentMathField){
   event.preventDefault();
 }
 
+function getDegreesButton(indexMathField){
+  return "<button style='width:25' onmousedown='degreesClick(answerMathQuillObjects[" + indexMathField + "]);'>&#176;</button>";
+}
+
+function degreesClick(currentMathField){
+  currentMathField.cmd("^");
+  currentMathField.cmd("\\circ");
+  event.preventDefault();
+}
+
 function getCircButton(indexMathField){
-  return "<button style='width:25' onmousedown='circClick(answerMathQuillObjects[" + indexMathField + "]);'>&#176</button>";
+  return "<button style='width:25' onmousedown='circClick(answerMathQuillObjects[" + indexMathField + "]);'>&#9675;</button>";
 }
 
 function circClick(currentMathField){

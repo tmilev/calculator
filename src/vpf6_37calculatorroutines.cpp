@@ -960,29 +960,28 @@ bool CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight
   if (left.size()!=3 || right.size()!=3)
     return left>right;
   if (!left.StartsWith(left.owner->opIntervalClosed(),3) &&
-     !left.StartsWith(left.owner->opIntervalLeftClosed(),3) &&
-     !left.StartsWith(left.owner->opIntervalRightClosed(),3) &&
-     !left.StartsWith(left.owner->opSequence(),3)
-     )
+      !left.StartsWith(left.owner->opIntervalLeftClosed(),3) &&
+      !left.StartsWith(left.owner->opIntervalRightClosed(),3) &&
+      !left.StartsWith(left.owner->opSequence(),3)
+      )
    return left>right;
   if (!right.StartsWith(right.owner->opIntervalClosed(),3) &&
-     !right.StartsWith(right.owner->opIntervalLeftClosed(),3) &&
-     !right.StartsWith(right.owner->opIntervalRightClosed(),3) &&
-     !right.StartsWith(right.owner->opSequence(),3)
-     )
+      !right.StartsWith(right.owner->opIntervalLeftClosed(),3) &&
+      !right.StartsWith(right.owner->opIntervalRightClosed(),3) &&
+      !right.StartsWith(right.owner->opSequence(),3)
+      )
    return left>right;
   double left1, right1, left2, right2;
-  if (left.EvaluatesToDouble(&left1) && right.EvaluatesToDouble(&right1))
+  if (left[1].EvaluatesToDouble(&left1) && right[1].EvaluatesToDouble(&right1))
   { if (left1>right1)
       return true;
     if (right1>left1)
       return false;
-    if (left.EvaluatesToDouble(&left2) && right.EvaluatesToDouble(&right2))
+    if (left[2].EvaluatesToDouble(&left2) && right[2].EvaluatesToDouble(&right2))
     { if (left2>right2)
         return true;
       if (right2>left2)
         return false;
-      return false;
     }
   }
   return left>right;
@@ -1012,17 +1011,69 @@ bool CalculatorFunctionsGeneral::innerUnionIntervals
     return false;
   if (!rightE[1].EvaluatesToDouble(&right1) || !rightE[2].EvaluatesToDouble(&right2))
     return false;
-  if (right1<left1 && left1<right2 && right2<left2 )
-  { if ( (leftE.StartsWith(theCommands.opIntervalLeftClosed()) ||
-          leftE.StartsWith(theCommands.opIntervalClosed())
-         ) &&
-         (rightE.StartsWith(theCommands.opIntervalRightClosed()) ||
-          rightE.StartsWith(theCommands.opIntervalClosed())
-         )
-       )
-     { return output.MakeXOX(theCommands, theCommands.opIntervalClosed(),rightE[1], leftE[2]);
-     }
+  if (left1>left2 || right2>right2)
+    return false;
+  bool makeUnion=false;
+  if (right1<left2 && left2<right2)
+    makeUnion=true;
+  if (!makeUnion)
+    return false;
+  bool leftIsClosed=false;
+  bool rightIsClosed=false;
+  Expression leftFinal, rightFinal;
+  if (left1<right1)
+  { leftFinal=leftE[1];
+    if (leftE.StartsWith(theCommands.opIntervalClosed()) ||
+        leftE.StartsWith(theCommands.opIntervalLeftClosed()))
+      leftIsClosed=true;
   }
+  if (left1==right1)
+  { leftFinal=leftE[1];
+    if (leftE .StartsWith(theCommands.opIntervalClosed()) ||
+        leftE .StartsWith(theCommands.opIntervalLeftClosed())||
+        rightE.StartsWith(theCommands.opIntervalClosed()) ||
+        rightE.StartsWith(theCommands.opIntervalLeftClosed())
+        )
+      leftIsClosed=true;
+  }
+  if (left1>right1)
+  { leftFinal=rightE[1];
+    if (rightE.StartsWith(theCommands.opIntervalClosed()) ||
+        rightE.StartsWith(theCommands.opIntervalLeftClosed())
+        )
+      leftIsClosed=true;
+  }
+///////////////////////
+  if (left2>right2)
+  { rightFinal=leftE[2];
+    if (leftE.StartsWith(theCommands.opIntervalClosed()) ||
+        leftE.StartsWith(theCommands.opIntervalRightClosed()))
+      rightIsClosed=true;
+  }
+  if (left2==right2)
+  { rightFinal=rightE[2];
+    if (leftE .StartsWith(theCommands.opIntervalClosed()) ||
+        leftE .StartsWith(theCommands.opIntervalRightClosed())||
+        rightE.StartsWith(theCommands.opIntervalClosed()) ||
+        rightE.StartsWith(theCommands.opIntervalRightClosed())
+        )
+      rightIsClosed=true;
+  }
+  if (left2<right2)
+  { rightFinal=rightE[2];
+    if (rightE.StartsWith(theCommands.opIntervalClosed()) ||
+        rightE.StartsWith(theCommands.opIntervalRightClosed())
+        )
+      rightIsClosed=true;
+  }
+  if (leftIsClosed && rightIsClosed)
+    return output.MakeXOX(theCommands, theCommands.opIntervalClosed(), leftFinal, rightFinal);
+  if (!leftIsClosed && rightIsClosed)
+    return output.MakeXOX(theCommands, theCommands.opIntervalRightClosed(), leftFinal, rightFinal);
+  if (leftIsClosed && !rightIsClosed)
+    return output.MakeXOX(theCommands, theCommands.opIntervalLeftClosed(), leftFinal, rightFinal);
+  if (!leftIsClosed && !rightIsClosed)
+    return output.MakeXOX(theCommands, theCommands.opSequence(), leftFinal, rightFinal);
   return false;
 }
 

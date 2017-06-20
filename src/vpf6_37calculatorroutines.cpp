@@ -991,7 +991,39 @@ bool CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight
 bool CalculatorFunctionsGeneral::innerUnionIntervals
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUnionIntervals");
-
+  if (input.size()!=3)
+    return false;
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  if(!leftE.StartsWith(theCommands.opIntervalClosed(),3) &&
+     !leftE.StartsWith(theCommands.opIntervalLeftClosed(),3) &&
+     !leftE.StartsWith(theCommands.opIntervalRightClosed(),3) &&
+     !leftE.StartsWith(theCommands.opSequence(),3)
+    )
+    return false;
+  if(!rightE.StartsWith(theCommands.opIntervalClosed(),3) &&
+     !rightE.StartsWith(theCommands.opIntervalLeftClosed(),3) &&
+     !rightE.StartsWith(theCommands.opIntervalRightClosed(),3) &&
+     !rightE.StartsWith(theCommands.opSequence(),3)
+    )
+    return false;
+  double left1=0, left2=0, right1=0, right2=0;
+  if (!leftE[1].EvaluatesToDouble(&left1) || !leftE[2].EvaluatesToDouble(&left2))
+    return false;
+  if (!rightE[1].EvaluatesToDouble(&right1) || !rightE[2].EvaluatesToDouble(&right2))
+    return false;
+  if (right1<left1 && left1<right2 && right2<left2 )
+  { if ( (leftE.StartsWith(theCommands.opIntervalLeftClosed()) ||
+          leftE.StartsWith(theCommands.opIntervalClosed())
+         ) &&
+         (rightE.StartsWith(theCommands.opIntervalRightClosed()) ||
+          rightE.StartsWith(theCommands.opIntervalClosed())
+         )
+       )
+     { return output.MakeXOX(theCommands, theCommands.opIntervalClosed(),rightE[1], leftE[2]);
+     }
+  }
+  return false;
 }
 
 bool CalculatorFunctionsGeneral::innerNormalizeIntervals

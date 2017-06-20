@@ -2701,6 +2701,14 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    true, false,
    "CalculatorFunctionsGeneral::innerNormalizeIntervals",
    "NormalizeIntervals");
+  this->AddOperationInnerHandler
+  ("\\cup",
+    CalculatorFunctionsGeneral::innerUnionIntervals, "",
+   "If the union of two intervals is one interval, replaces the interval. ",
+   "%UseBracketForIntervals\n  [3,7]\\cup [6,8]);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerUnionIntervals",
+   "UnionIntervals");
 
   this->AddOperationInnerHandler
   ("GetOpandList",

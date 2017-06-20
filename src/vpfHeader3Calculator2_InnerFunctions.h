@@ -9,6 +9,7 @@ static ProjectInformationInstance ProjectInfoVpf6_2Header(__FILE__, "Header, cal
 class CalculatorFunctionsGeneral
 {
 public:
+  static bool LeftIntervalGreaterThanRight(const Expression& left, const Expression& right);
   static bool innerPrintRuleStack(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrash(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrashByListOutOfBounds
@@ -180,6 +181,8 @@ public:
   static bool innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetOutputFile(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerUnionIntervals(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerNormalizeIntervals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetFirstSummandContaining(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetSummand(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCollectMultiplicands(Calculator& theCommands, const Expression& input, Expression& output);

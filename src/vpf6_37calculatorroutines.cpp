@@ -952,3 +952,55 @@ bool CalculatorFunctionsGeneral::innerCollectSummands
   (input, theList);
   return output.MakeSequence(theCommands, &theList);
 }
+
+bool CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight
+(const Expression& left, const Expression& right)
+{ if (left.owner==0 || right.owner==0)
+    return left>right;
+  if (left.size()!=3 || right.size()!=3)
+    return left>right;
+  if (!left.StartsWith(left.owner->opIntervalClosed(),3) &&
+     !left.StartsWith(left.owner->opIntervalLeftClosed(),3) &&
+     !left.StartsWith(left.owner->opIntervalRightClosed(),3) &&
+     !left.StartsWith(left.owner->opSequence(),3)
+     )
+   return left>right;
+  if (!right.StartsWith(right.owner->opIntervalClosed(),3) &&
+     !right.StartsWith(right.owner->opIntervalLeftClosed(),3) &&
+     !right.StartsWith(right.owner->opIntervalRightClosed(),3) &&
+     !right.StartsWith(right.owner->opSequence(),3)
+     )
+   return left>right;
+  double left1, right1, left2, right2;
+  if (left.EvaluatesToDouble(&left1) && right.EvaluatesToDouble(&right1))
+  { if (left1>right1)
+      return true;
+    if (right1>left1)
+      return false;
+    if (left.EvaluatesToDouble(&left2) && right.EvaluatesToDouble(&right2))
+    { if (left2>right2)
+        return true;
+      if (right2>left2)
+        return false;
+      return false;
+    }
+  }
+  return left>right;
+}
+
+bool CalculatorFunctionsGeneral::innerUnionIntervals
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUnionIntervals");
+
+}
+
+bool CalculatorFunctionsGeneral::innerNormalizeIntervals
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerNormalizeIntervals");
+  List<Expression> outputList;
+  theCommands.CollectOpands(input, theCommands.opUnion(), outputList);
+  if (outputList.size<=1)
+    return false;
+  outputList.QuickSortAscending(CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight);
+  return output.MakeXOXOdotsOX(theCommands, theCommands.opUnion(), outputList);
+}

@@ -2694,6 +2694,15 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerCollectMultiplicands",
    "GetMultiplicandList");
   this->AddOperationInnerHandler
+  ("NormalizeIntervals",
+    CalculatorFunctionsGeneral::innerNormalizeIntervals, "",
+   "Sorts interval union. ",
+   "%UseBracketForIntervals\n NormalizeIntervals([2,3]\\cup [5,7]\\cup [-1,-1/2]);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerNormalizeIntervals",
+   "NormalizeIntervals");
+
+  this->AddOperationInnerHandler
   ("GetOpandList",
     CalculatorFunctionsGeneral::innerCollectOpands, "",
    "Converts a chain of operations to a list. First argument: operation name. \

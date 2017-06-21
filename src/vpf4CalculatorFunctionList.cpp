@@ -2709,6 +2709,30 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    true, false,
    "CalculatorFunctionsGeneral::innerUnionIntervals",
    "UnionIntervals");
+  this->AddOperationInnerHandler
+  ("\\cup",
+    CalculatorFunctionsGeneral::innerUnionEmptySet, "",
+   "Takes union with the empty set. ",
+   "%UseBracketForIntervals\n  [3,7)\\cup \\emptyset;",
+   true, false,
+   "CalculatorFunctionsGeneral::innerUnionEmptySet",
+   "UnionEmptySet");
+  this->AddOperationInnerHandler
+  ("\\cap",
+    CalculatorFunctionsGeneral::innerIntersectEmptySet, "",
+   "Intersects with the empty set. ",
+   "%UseBracketForIntervals\n  [3,7)\\cap \\emptyset;",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIntersectEmptySet",
+   "InersectEmptySet");
+  this->AddOperationInnerHandler
+  ("\\cap",
+    CalculatorFunctionsGeneral::innerIntersectIntervals, "",
+   "Intersects two intervals. ",
+   "%UseBracketForIntervals\n  [3,7)\\cup [6,8);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIntersectIntervals",
+   "InersectIntervals");
 
   this->AddOperationInnerHandler
   ("GetOpandList",
@@ -5261,6 +5285,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   this->AddOperationNoRepetitionAllowed("IndefiniteIndicator");
   this->AddOperationNoRepetitionAllowed("\\log");
   //additional operations with the same status as user-input expressions.
+  this->AddOperationNoRepetitionAllowed("\\emptyset");
   this->AddOperationNoRepetitionAllowed("\\pi");
   this->AddOperationNoRepetitionAllowed("e");
   this->AddOperationNoRepetitionAllowed("i");

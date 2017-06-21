@@ -987,6 +987,100 @@ bool CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight
   return left>right;
 }
 
+bool CalculatorFunctionsGeneral::innerIntersectIntervals
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntersectIntervals");
+  if (!input.StartsWith(theCommands.opIntersection(), 3))
+    return false;
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  if(!leftE.StartsWith(theCommands.opIntervalClosed(), 3) &&
+     !leftE.StartsWith(theCommands.opIntervalLeftClosed(), 3) &&
+     !leftE.StartsWith(theCommands.opIntervalRightClosed(), 3) &&
+     !leftE.StartsWith(theCommands.opSequence(), 3)
+    )
+    return false;
+  if(!rightE.StartsWith(theCommands.opIntervalClosed(), 3) &&
+     !rightE.StartsWith(theCommands.opIntervalLeftClosed(), 3) &&
+     !rightE.StartsWith(theCommands.opIntervalRightClosed(), 3) &&
+     !rightE.StartsWith(theCommands.opSequence(), 3)
+    )
+    return false;
+  double left1=0, left2=0, right1=0, right2=0;
+  if (!leftE[1].EvaluatesToDouble(&left1) || !leftE[2].EvaluatesToDouble(&left2))
+    return false;
+  if (!rightE[1].EvaluatesToDouble(&right1) || !rightE[2].EvaluatesToDouble(&right2))
+    return false;
+  if (left1>left2 || right1>right2)
+    return false;
+  bool leftIsClosed =true;
+  bool rightIsClosed=true;
+  Expression leftFinal, rightFinal;
+  double leftResult=0, rightResult=0;
+  if (left1<right1)
+  { leftFinal=rightE[1];
+    leftResult=right1;
+    if (rightE.StartsWith(theCommands.opSequence()) ||
+        rightE.StartsWith(theCommands.opIntervalRightClosed()))
+      leftIsClosed=false;
+  }
+  if (left1==right1)
+  { leftFinal=leftE[1];
+    leftResult=left1;
+    if (leftE .StartsWith(theCommands.opSequence()) ||
+        leftE .StartsWith(theCommands.opIntervalRightClosed())||
+        rightE.StartsWith(theCommands.opSequence()) ||
+        rightE.StartsWith(theCommands.opIntervalRightClosed())
+        )
+      leftIsClosed=false;
+  }
+  if (left1>right1)
+  { leftFinal=leftE[1];
+    leftResult=left1;
+    if (leftE.StartsWith(theCommands.opSequence()) ||
+        leftE.StartsWith(theCommands.opIntervalRightClosed())
+        )
+      leftIsClosed=false;
+  }
+///////////////////////////
+  if (left2>right2)
+  { rightFinal=rightE[2];
+    rightResult=right2;
+    if (rightE.StartsWith(theCommands.opSequence()) ||
+        rightE.StartsWith(theCommands.opIntervalLeftClosed()))
+      rightIsClosed=false;
+  }
+  if (left2==right2)
+  { rightFinal=rightE[2];
+    rightResult=right2;
+    if (leftE .StartsWith(theCommands.opSequence()) ||
+        leftE .StartsWith(theCommands.opIntervalLeftClosed())||
+        rightE.StartsWith(theCommands.opSequence()) ||
+        rightE.StartsWith(theCommands.opIntervalLeftClosed())
+        )
+      rightIsClosed=false;
+  }
+  if (left2<right2)
+  { rightFinal=leftE[2];
+    rightResult=left2;
+    if (leftE.StartsWith(theCommands.opSequence()) ||
+        leftE.StartsWith(theCommands.opIntervalLeftClosed())
+        )
+      rightIsClosed=false;
+  }
+  if (leftResult>rightResult)
+    return output.MakeAtom("\\emptyset", theCommands);
+  if (leftIsClosed && rightIsClosed)
+    return output.MakeXOX(theCommands, theCommands.opIntervalClosed(), leftFinal, rightFinal);
+  if (!leftIsClosed && rightIsClosed)
+    return output.MakeXOX(theCommands, theCommands.opIntervalRightClosed(), leftFinal, rightFinal);
+  if (leftIsClosed && !rightIsClosed)
+    return output.MakeXOX(theCommands, theCommands.opIntervalLeftClosed(), leftFinal, rightFinal);
+  if (!leftIsClosed && !rightIsClosed)
+    return output.MakeXOX(theCommands, theCommands.opSequence(), leftFinal, rightFinal);
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerUnionIntervals
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUnionIntervals");
@@ -1011,7 +1105,7 @@ bool CalculatorFunctionsGeneral::innerUnionIntervals
     return false;
   if (!rightE[1].EvaluatesToDouble(&right1) || !rightE[2].EvaluatesToDouble(&right2))
     return false;
-  if (left1>left2 || right2>right2)
+  if (left1>left2 || right1>right2)
     return false;
   bool makeUnion=false;
   if (right1<left2 && left2<right2)
@@ -1086,4 +1180,37 @@ bool CalculatorFunctionsGeneral::innerNormalizeIntervals
     return false;
   outputList.QuickSortAscending(CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight);
   return output.MakeXOXOdotsOX(theCommands, theCommands.opUnion(), outputList);
+}
+
+bool CalculatorFunctionsGeneral::innerUnionEmptySet
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUnionEmptySet");
+  if (!input.StartsWith(theCommands.opUnion(), 3))
+    return false;
+  if (input[1].IsAtomGivenData("\\emptyset"))
+  { output=input[2];
+    return true;
+  }
+  if (input[2].IsAtomGivenData("\\emptyset"))
+  { output=input[1];
+    return true;
+  }
+  return false;
+}
+
+bool CalculatorFunctionsGeneral::innerIntersectEmptySet
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntersectEmptySet");
+  if (!input.StartsWith(theCommands.opIntersection(), 3))
+    return false;
+  if (input[1].IsAtomGivenData("\\emptyset"))
+  { output=input[1];
+    return true;
+  }
+  if (input[2].IsAtomGivenData("\\emptyset"))
+  { output=input[2];
+    return true;
+  }
+  return false;
+
 }

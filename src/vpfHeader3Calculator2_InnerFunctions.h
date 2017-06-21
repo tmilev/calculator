@@ -181,6 +181,7 @@ public:
   static bool innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetOutputFile(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerIntersectUnion(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntersectEmptySet(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerUnionEmptySet(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntersectIntervals(Calculator& theCommands, const Expression& input, Expression& output);

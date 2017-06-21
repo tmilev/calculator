@@ -3058,11 +3058,19 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "[" << (*this)[1].ToString(theFormat) << "," << (*this)[2].ToString(theFormat) << "]";
   else if (this->IsListStartingWithAtom(this->owner->opMod()))
     out << (*this)[1].ToString(theFormat) << " mod " << (*this)[2].ToString(theFormat);
-  else if (this->IsListStartingWithAtom(this->owner->opUnion()) && this->children.size==3)
-    out << (*this)[1].ToString(theFormat) << "\\cup " << (*this)[2].ToString(theFormat);
-  else if (this->IsListStartingWithAtom(this->owner->opIntersection()) && this->children.size==3)
-    out << (*this)[1].ToString(theFormat) << "\\cap " << (*this)[2].ToString(theFormat);
-  else if (this->IsListStartingWithAtom(this->owner->opUnionNoRepetition()))
+  else if (this->IsListStartingWithAtom(this->owner->opUnion()) && this->size()==3)
+  { if ((*this)[1].StartsWith(this->owner->opIntersection()))
+      out << "\\left(" << (*this)[1].ToString(theFormat) <<  "\\right)"
+      << "\\cup " << (*this)[2].ToString(theFormat);
+    else
+      out << (*this)[1].ToString(theFormat) << "\\cup " << (*this)[2].ToString(theFormat);
+  } else if (this->IsListStartingWithAtom(this->owner->opIntersection()) && this->size()==3)
+  { if ((*this)[1].StartsWith(this->owner->opUnion()))
+      out << "\\left(" << (*this)[1].ToString(theFormat) << "\\right)"
+      << "\\cap " << (*this)[2].ToString(theFormat);
+    else
+      out << (*this)[1].ToString(theFormat) << "\\cap " << (*this)[2].ToString(theFormat);
+  } else if (this->IsListStartingWithAtom(this->owner->opUnionNoRepetition()))
     out << (*this)[1].ToString(theFormat) << "\\sqcup " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opEndStatement()))
   { bool createTable=(startingExpression!=0);

@@ -2719,6 +2719,14 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "UnionEmptySet");
   this->AddOperationInnerHandler
   ("\\cap",
+    CalculatorFunctionsGeneral::innerIntersectUnion, "",
+   "Intersects with the empty set. ",
+   "%UseBracketForIntervals\n  ([3,7)\\cup (9,10))\\cap (4,8.5);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIntersectUnion",
+   "IntersectUnion");
+  this->AddOperationInnerHandler
+  ("\\cap",
     CalculatorFunctionsGeneral::innerIntersectEmptySet, "",
    "Intersects with the empty set. ",
    "%UseBracketForIntervals\n  [3,7)\\cap \\emptyset;",

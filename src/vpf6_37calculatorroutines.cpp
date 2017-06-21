@@ -1198,6 +1198,12 @@ bool CalculatorFunctionsGeneral::innerUnionEmptySet
   return false;
 }
 
+bool CalculatorFunctionsGeneral::innerIntersectUnion
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntersectUnion");
+  return theCommands.outerDistribute(theCommands, input, output, theCommands.opUnion(), theCommands.opIntersection(), false);
+}
+
 bool CalculatorFunctionsGeneral::innerIntersectEmptySet
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntersectEmptySet");

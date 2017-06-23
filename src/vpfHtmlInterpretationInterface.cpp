@@ -638,8 +638,10 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "      height: 400px;\n"
   << "      font-size: 100%;\n"
   << "   }\n"
-  << "</style>\n"
-  << HtmlRoutines::GetJavascriptAceEditorScript()
+  << "</style>\n";
+
+
+  out << HtmlRoutines::GetJavascriptAceEditorScript();
 
 //  << "<script src=\"/html-common-calculator/ace.min.js\" type=\"text/javascript\" charset=\"utf-8\"></script>"
 //  << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n"
@@ -647,7 +649,23 @@ std::string HtmlInterpretation::GetEditPageHTML()
 
   //  << "<link rel=\"stylesheet\" href=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css\">"
   //  << "<script src=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js\"></script>"
-  << "</head>"
+  out << "<script type=\"text/javascript\">\n";
+
+  Calculator tempCalculator;
+  tempCalculator.init();
+  out << "var AceEditorAutoCompletionWordList=[";
+  bool found=false;
+  for (int i=0; i<tempCalculator.theAtoms.size; i++)
+  { if (tempCalculator.theAtoms[i].size()>2)
+    { if (found)
+        out << ", ";
+      found=true;
+      out << "\"" << tempCalculator.theAtoms[i] << "\"";
+    }
+  }
+  out << "];\n";
+  out << "\n</script>";
+  out << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</calculatorNavigation>";
@@ -695,14 +713,24 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << submitModPageJS.str() << "\n"
   << "}\n"
   << "</script>\n";
+  out
+  << "<script src=\"/html-common-calculator/ace/src-min/ext-language_tools.js\"></script>";
+  out << "";
   out << "<script type=\"text/javascript\"> \n"
   //<< " document.getElementById('mainInput').value=decodeURIComponent(\""
   << " document.getElementById('editor').textContent=decodeURIComponent(\""
   << HtmlRoutines::ConvertStringToURLString(theFile.inputHtml, false)
   << "\");\n"
+  << "    ace.require(\"ace/ext/language_tools\");\n"
   << "    var editor = ace.edit(\"editor\");\n"
   << "    editor.setTheme(\"ace/theme/chrome\");\n"
   << "    editor.getSession().setMode(\"ace/mode/xml\");\n"
+  << "    editor.setOptions({\n"
+  << "      enableBasicAutocompletion: true,\n"
+  << "      enableLiveAutocompletion: true\n"
+  << "    });\n"
+  << "    editor.completers = [staticWordCompleter];"
+  << "    editor.$blockScrolling = Infinity;"
   << "</script>\n";
   out << buttonStream.str();
   out << "<span id=\"spanSubmitReport\"></span><br>";

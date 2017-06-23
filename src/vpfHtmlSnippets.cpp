@@ -331,6 +331,13 @@ std::string& HtmlRoutines::GetJavascriptAceEditorScript()
   else
     out << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\""
     << " type=\"text/javascript\" charset=\"utf-8\"></script>\n";
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/ace-editor-settings.js", fileReader, commentsOnFailure))
+  { theLog << logger::red  << "Javascript file ace-editor-settings.js not found. " << logger::endL;
+    found=false;
+  }
+  out << "<script type=\"text/javascript\">\n";
+  out << fileReader;
+  out << "\n</script>";
   HtmlRoutines::JavascriptAceEditorScript=out.str();
   return HtmlRoutines::JavascriptAceEditorScript;
 }

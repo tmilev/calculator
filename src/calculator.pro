@@ -122,6 +122,6 @@ DISTFILES += \
     ../html-common/calculatorPage.js \
     ../html-common/autocomplete.js \
     ../html-common/topiclist.js \
-    ../html-common/account-management.js \
-    ../html-common/problemlinkstyles.js
+    ../html-common/problemlinkstyles.js \
+    ../html-common/ace-editor-settings.js
 

@@ -155,6 +155,7 @@ public:
   bool LoadDatabaseInfo(std::stringstream& comments);
   std::string GetSectionSelector();
   std::string CleanUpFileName(const std::string& inputLink);
+  void initBuiltInSpanClasses();
   bool ParseHTML(std::stringstream& comments);
   bool ParseHTMLPrepareCommands(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);

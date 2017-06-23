@@ -653,16 +653,22 @@ std::string HtmlInterpretation::GetEditPageHTML()
 
   Calculator tempCalculator;
   tempCalculator.init();
+  tempCalculator.ComputeAutoCompleteKeyWords();
+  CalculatorHTML tempParser;
+  tempParser.initBuiltInSpanClasses();
+  HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
+  theAutocompleteKeyWords.AddOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
+  theAutocompleteKeyWords.AddOnTopNoRepetition(tempParser.calculatorClasses);
+  theAutocompleteKeyWords.AddOnTopNoRepetition(tempParser.calculatorClassesAnswerFields);
   out << "var AceEditorAutoCompletionWordList=[";
   bool found=false;
-  for (int i=0; i<tempCalculator.theAtoms.size; i++)
-  { if (tempCalculator.theAtoms[i].size()>2)
+  for (int i=0; i<theAutocompleteKeyWords.size; i++)
+    if (theAutocompleteKeyWords[i].size()>2)
     { if (found)
         out << ", ";
       found=true;
-      out << "\"" << tempCalculator.theAtoms[i] << "\"";
+      out << "\"" << theAutocompleteKeyWords[i] << "\"";
     }
-  }
   out << "];\n";
   out << "\n</script>";
   out << "</head>"

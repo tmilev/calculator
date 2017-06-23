@@ -2044,34 +2044,8 @@ bool CalculatorHTML::SetTagClassFromOpenTag(SyntacticElementHTML& output)
   return false;
 }
 
-bool CalculatorHTML::ParseHTML(std::stringstream& comments)
-{ MacroRegisterFunctionWithName("Problem::ParseHTML");
-  std::stringstream theReader(this->inputHtml);
-  theReader.seekg(0);
-  std::string word;
-  char currentChar;
-  List<SyntacticElementHTML> theElements;
-  theElements.SetSize(0);
-  theElements.SetExpectedSize(theReader.str().size()/4);
-  this->splittingChars.AddOnTop('<');
-  this->splittingChars.AddOnTop('\"');
-  this->splittingChars.AddOnTop('>');
-  this->splittingChars.AddOnTop('=');
-  this->splittingChars.AddOnTop('/');
-  this->splittingChars.AddOnTop(' ');
-  while (theReader.get(currentChar))
-  { if (splittingChars.Contains(currentChar))
-    { if (word!="")
-        theElements.AddOnTop(word);
-      std::string charToString;
-      charToString.push_back(currentChar);
-      theElements.AddOnTop(charToString);
-      word="";
-    } else
-      word.push_back(currentChar);
-  }
-  if (word!="")
-    theElements.AddOnTop(word);
+void CalculatorHTML::initBuiltInSpanClasses()
+{ MacroRegisterFunctionWithName("CalculatorHTML::initBuiltInSpanClasses");
   if (this->calculatorClassesAnswerFields.size==0)
   { this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonSubmit");
     this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonInterpret");
@@ -2104,6 +2078,37 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     this->calculatorClasses.AddOnTop("calculatorJavascript");
     this->calculatorClasses.AddListOnTop(this->calculatorClassesAnswerFields);
   }
+}
+
+bool CalculatorHTML::ParseHTML(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("Problem::ParseHTML");
+  std::stringstream theReader(this->inputHtml);
+  theReader.seekg(0);
+  std::string word;
+  char currentChar;
+  List<SyntacticElementHTML> theElements;
+  theElements.SetSize(0);
+  theElements.SetExpectedSize(theReader.str().size()/4);
+  this->splittingChars.AddOnTop('<');
+  this->splittingChars.AddOnTop('\"');
+  this->splittingChars.AddOnTop('>');
+  this->splittingChars.AddOnTop('=');
+  this->splittingChars.AddOnTop('/');
+  this->splittingChars.AddOnTop(' ');
+  while (theReader.get(currentChar))
+  { if (splittingChars.Contains(currentChar))
+    { if (word!="")
+        theElements.AddOnTop(word);
+      std::string charToString;
+      charToString.push_back(currentChar);
+      theElements.AddOnTop(charToString);
+      word="";
+    } else
+      word.push_back(currentChar);
+  }
+  if (word!="")
+    theElements.AddOnTop(word);
+  this->initBuiltInSpanClasses();
   this->eltsStack.SetSize(0);
   SyntacticElementHTML dummyElt, tempElt;
   dummyElt.content="<>";

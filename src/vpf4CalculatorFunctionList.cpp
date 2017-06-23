@@ -1643,6 +1643,15 @@ D-B;\
    ;
   this->AddOperationInnerHandler
   ("LogBase",
+    CalculatorFunctionsGeneral::innerLogBaseNaturalToLn, "",
+   "Converts \\log_e A to \\ln A. ",
+   "\\log_e A", true, false,
+   "CalculatorFunctionsGeneral::innerLogBaseNaturalToLn",
+   "LogBaseNaturalToLn")
+   ;
+
+  this->AddOperationInnerHandler
+  ("LogBase",
     CalculatorFunctionsGeneral::innerLogBaseSimpleCases, "",
    "If the argument is a power of the base does the computation. ",
    "\\log_5 25; log_5 1; log_5 (1/5)", true, false,
@@ -2741,6 +2750,16 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    true, false,
    "CalculatorFunctionsGeneral::innerIntersectIntervals",
    "InersectIntervals");
+  this->AddOperationInnerHandler
+  ("CompareIntervalsNumerically",
+    CalculatorFunctionsGeneral::innerCompareIntervalsNumerically, "",
+   "Compares unions of intervals numerically. First and second arguments: \
+    two unions of intervals to compare. Third argument: precisions to compare with. ",
+   "%UseBracketForIntervals\n  CompareIntervalsNumerically\
+    ( [3,7)\\cup [8,9], [3,7.00000001)\\cup [7.9999999, 9], 0.0001);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerCompareIntervalsNumerically",
+   "CompareIntervalsNumerically");
 
   this->AddOperationInnerHandler
   ("GetOpandList",

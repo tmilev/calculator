@@ -17,6 +17,7 @@ static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, mat
 class FloatingPoint
 {
 public:
+  static double abs(double argument);
   static double sin(double argument);
   static double cos(double argument);
   static double arccos(double argument);

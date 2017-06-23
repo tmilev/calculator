@@ -702,7 +702,7 @@ bool CalculatorFunctionsGeneral::innerArccosAlgebraic(Calculator& theCommands, c
   Rational theRat;
   if (input.IsRational(&theRat))
   { if (theRat==1)
-      output.AssignValue(0, theCommands);
+      return output.AssignValue(0, theCommands);
     if (theRat==0)
     { output.MakeAtom(theCommands.opPi(), theCommands);
       output/=2;
@@ -1011,6 +1011,8 @@ bool CalculatorFunctionsGeneral::innerIntersectIntervals
     return false;
   if (!rightE[1].EvaluatesToDouble(&right1) || !rightE[2].EvaluatesToDouble(&right2))
     return false;
+  //stOutput << "intervals double: " << left1 << ", " << left2 << " , "
+  //<< right1 << " " << right2;
   if (left1>left2 || right1>right2)
     return false;
   bool leftIsClosed =true;
@@ -1202,6 +1204,61 @@ bool CalculatorFunctionsGeneral::innerIntersectUnion
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntersectUnion");
   return theCommands.outerDistribute(theCommands, input, output, theCommands.opUnion(), theCommands.opIntersection(), false);
+}
+
+bool CalculatorFunctionsGeneral::innerCompareIntervalsNumerically(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareIntervalsNumerically");
+  if (input.size()!=4)
+    return theCommands << "Comparing intervals numerically takes 3 arguments: two unions and precision. ";
+  double precision=0;
+  if (!input[3].EvaluatesToDouble(&precision))
+    return theCommands << "Could not extract precision from the last argument.";
+  List<Expression> leftList, rightList;
+  if (!theCommands.CollectOpands(input[1], theCommands.opUnion(), leftList))
+    return false;
+  if (!theCommands.CollectOpands(input[2], theCommands.opUnion(), rightList))
+    return false;
+  if (leftList.size!=rightList.size)
+    return output.AssignValue(0, theCommands);
+  leftList.QuickSortAscending(CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight);
+  rightList.QuickSortAscending(CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight);
+  for (int i=0; i<leftList.size; i++)
+  { if (leftList[i]==rightList[i])
+      continue;
+    if ((!leftList[i].StartsWith(theCommands.opSequence(),3) &&
+         !leftList[i].StartsWith(theCommands.opIntervalClosed(),3) &&
+         !leftList[i].StartsWith(theCommands.opIntervalLeftClosed(),3) &&
+         !leftList[i].StartsWith(theCommands.opIntervalRightClosed(),3)
+        )||
+        (!rightList[i].StartsWith(theCommands.opSequence(),3) &&
+         !rightList[i].StartsWith(theCommands.opIntervalClosed(),3) &&
+         !rightList[i].StartsWith(theCommands.opIntervalLeftClosed(),3) &&
+         !rightList[i].StartsWith(theCommands.opIntervalRightClosed(),3)
+        )
+       )
+      return output.AssignValue(0, theCommands);
+    if (leftList[i][0]!=rightList[i][0])
+      return output.AssignValue(0, theCommands);
+    double left1, left2, right1, right2;
+    if (! leftList[i][1].EvaluatesToDouble(&left1) ||
+        ! leftList[i][2].EvaluatesToDouble(&left2) ||
+        ! rightList[i][1].EvaluatesToDouble(&right1) ||
+        ! rightList[i][2].EvaluatesToDouble(&right2)
+        )
+      return output.AssignValue(0, theCommands);
+    //std::stringstream temp;
+    //temp.precision(20);
+    //temp << "left1: " << FloatingPoint::DoubleToString(left1) << " left2: " << FloatingPoint::DoubleToString(left2)
+    //<< " right1: " << FloatingPoint::DoubleToString(right1) << " right2: " << FloatingPoint::DoubleToString(right2)
+    //<< " diff1: " << FloatingPoint::DoubleToString(FloatingPoint::abs(left1-right1))
+    //<< " diff2: " << FloatingPoint::DoubleToString(FloatingPoint::abs(left2-right2));
+    //stOutput << temp.str();
+    if (FloatingPoint::abs(left1-right1)>precision ||
+        FloatingPoint::abs(left2-right2)>precision)
+      return output.AssignValue(0, theCommands);
+  }
+  return output.AssignValue(1, theCommands);
+
 }
 
 bool CalculatorFunctionsGeneral::innerIntersectEmptySet

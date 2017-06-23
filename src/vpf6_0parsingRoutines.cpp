@@ -239,6 +239,7 @@ void Calculator::init()
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("{");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("}");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot(":");
+  this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\varnothing");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("pi");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("infty");
   this->controlSequences.AddOnTopNoRepetitionMustBeNewCrashIfNot("infinity");
@@ -1939,6 +1940,8 @@ bool Calculator::ApplyOneRule()
     return this->ReplaceXXByCon(this->conApplyFunction());
   if (lastS=="\\cdot")
     return this->ReplaceXByCon(this->conTimes());
+  if (lastS=="\\varnothing")
+    return this->ReplaceXByEusingO(this->opEmptySet());
   if (lastS=="\\circ" && secondToLastS!="{" && secondToLastS!="(" && secondToLastS!="^")
     return this->ReplaceXByCon(this->conApplyFunction());
 //  if ( thirdToLastS=="{" && secondToLastS=="{}" && lastS=="}")

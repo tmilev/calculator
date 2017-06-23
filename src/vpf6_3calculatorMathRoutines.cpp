@@ -6459,7 +6459,8 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
   this->StartsWith(theCommands.opMinus(),3) ||
   this->StartsWith(theCommands.opThePower(),3) ||
   this->StartsWith(theCommands.opDivide(),3) ||
-  this->StartsWith(theCommands.opSqrt(),3)
+  this->StartsWith(theCommands.opSqrt(),3) ||
+  this->StartsWith(theCommands.opLogBase(),3)
   ;
   //stOutput << " is arithmetic operation two arguments! ";
   //if (input.StartsWith(theCommands.opSqrt()))
@@ -6482,6 +6483,15 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     if ((*this).StartsWith(theCommands.opMinus(),3))
     { if (whichDouble!=0)
         *whichDouble=leftD-rightD;
+      return true;
+    }
+    if ((*this).StartsWith(theCommands.opLogBase(),3))
+    { if (leftD<=0 || rightD<=0)
+        return false;
+      if (leftD==1)
+        return false;
+      if (whichDouble!=0)
+        *whichDouble=(FloatingPoint::log(rightD)) /(FloatingPoint::log(leftD));
       return true;
     }
     if ((*this).StartsWith(theCommands.opThePower(),3))

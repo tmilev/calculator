@@ -1562,6 +1562,9 @@ public:
   int opInfinity()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\infty");
   }
+  int opEmptySet()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\emptyset");
+  }
   int opIn()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\in");
   }

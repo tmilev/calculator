@@ -97,6 +97,8 @@ public:
   static bool innerFactorInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFactorOutNumberContent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFactorial(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLogBaseNaturalToLn(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerLogBaseSimpleCases(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLogBase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLog(Calculator& theCommands, const Expression& input, Expression& output);
@@ -181,6 +183,7 @@ public:
   static bool innerCrawlTexFile(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetOutputFile(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerCompareIntervalsNumerically(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntersectUnion(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntersectEmptySet(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerUnionEmptySet(Calculator& theCommands, const Expression& input, Expression& output);

@@ -15,7 +15,9 @@ double FloatingPoint::sin(double argument)
 
 std::string FloatingPoint::DoubleToString(double input)
 { std::stringstream out;
+  out.precision(8);
   out << std::fixed << input;
+  //out << " (" << std::scientific << input << ")";
   std::string result=out.str();
 //  stOutput << "got as input " << input << ", before resizing got: " << result << "";
   bool hasDot=false;
@@ -44,29 +46,33 @@ std::string FloatingPoint::DoubleToString(double input)
 }
 
 double FloatingPoint::cos(double argument)
-{ return ::cos(argument);
+{ return std::cos(argument);
+}
+
+double FloatingPoint::abs(double argument)
+{ return argument>=0? argument : -argument;
 }
 
 double FloatingPoint::log(double argument)
-{ return ::log(argument);
+{ return std::log(argument);
 }
 
 double FloatingPoint::arctan(double argument)
-{ return ::atan(argument);
+{ return std::atan(argument);
 }
 
 double FloatingPoint::arccos(double argument)
-{ return ::acos(argument);
+{ return std::acos(argument);
 }
 
 double FloatingPoint::arcsin(double argument)
-{ return ::asin(argument);
+{ return std::asin(argument);
 }
 
 double FloatingPoint::floor(double argument)
-{ return ::floor(argument);
+{ return std::floor(argument);
 }
 
 double FloatingPoint::power(double base, double exponent)
-{ return ::pow(base, exponent);
+{ return std::pow(base, exponent);
 }

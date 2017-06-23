@@ -1293,6 +1293,14 @@ bool CalculatorFunctionsGeneral::innerGCD(Calculator& theCommands, const Express
   return output.AssignValue(theResult, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerLogBaseNaturalToLn(Calculator& theCommands, const Expression& input, Expression& output)
+{ if (!input.StartsWith(theCommands.opLogBase(),3))
+    return false;
+  if (!input[1].IsAtomGivenData(theCommands.opE()))
+    return false;
+  return output.MakeOX(theCommands, theCommands.opLog(), input[2]);
+}
+
 bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLogBaseSimpleCases");
   //stOutput << "reducing ...." << input.ToStringSemiFull();
@@ -1305,6 +1313,12 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
     return false;
   if (theBase==1)
     return false;
+  if (theBase==0 || theArg==0)
+  { std::stringstream errorStream;
+    errorStream << "Attempt to take logarithm base " << theBase
+    << " of " << theArg << " is not allowed. ";
+    return output.MakeError(errorStream.str(), theCommands);
+  }
   if (theArg==1)
     return output.AssignValue(0, theCommands);
   Expression newBaseE, newArgE;
@@ -1479,6 +1493,10 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
       }
       if (opString=="^")
       { out << "Math.pow(" << leftString << ", " << rightString << ")";
+        return output.AssignValue(out.str(), theCommands);
+      }
+      if (opString=="LogBase")
+      { out << "Math.log(" << rightString << ") / Math.log(" << leftString << ")";
         return output.AssignValue(out.str(), theCommands);
       }
     }

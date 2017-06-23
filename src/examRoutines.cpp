@@ -679,6 +679,35 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
   inputOutput.interpretedCommand= this->ToStringProblemInfo(this->CleanUpFileName(inputOutput.content));
 }
 
+std::string CalculatorHTML::ToStringLinkCurrentAdmin
+(const std::string& displayString, bool setDebugFlag)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkCurrentAdmin");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return "";
+  std::stringstream out;
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
+  << theGlobalVariables.userCalculatorRequestType << "&";
+  std::string urledProblem=HtmlRoutines::ConvertStringToURLString(this->fileName, false);
+  out << "fileName=" << urledProblem << "&"
+  << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+  << "randomSeed=" << this->theProblemData.randomSeed << "&";
+  if (setDebugFlag)
+    out << "debugFlag=true&";
+  else
+    out << "debugFlag=false&";
+  if (this->topicListFileName!="")
+    out << "topicList=" << this->topicListFileName << "&";
+  if (this->courseHome!="")
+    out << "courseHome=" << this->courseHome << "&";
+  if (theGlobalVariables.UserStudentVieWOn())
+  { out << "studentView=true&";
+    if (theGlobalVariables.GetWebInput("studentSection")!="")
+      out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+  }
+  out << "\">" << displayString << "</a>";
+  return out.str();
+}
+
 std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkFromFileName");
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
@@ -2964,6 +2993,10 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
 std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
+  if (theGlobalVariables.UserDebugFlagOn())
+    out << this->ToStringLinkCurrentAdmin("Turn off debug", true);
+  else
+    out << this->ToStringLinkCurrentAdmin("Debug page", true);
   out << "\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
   std::string urledProblem=HtmlRoutines::ConvertStringToURLString(desiredFileName, false);
   std::stringstream refStreamNoRequest;

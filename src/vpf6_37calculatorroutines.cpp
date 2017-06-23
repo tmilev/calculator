@@ -1239,13 +1239,17 @@ bool CalculatorFunctionsGeneral::innerCompareIntervalsNumerically(Calculator& th
       return output.AssignValue(0, theCommands);
     if (leftList[i][0]!=rightList[i][0])
       return output.AssignValue(0, theCommands);
-    double left1, left2, right1, right2;
+    double left1=0, left2=0, right1=0, right2=0;
     if (! leftList[i][1].EvaluatesToDouble(&left1) ||
-        ! leftList[i][2].EvaluatesToDouble(&left2) ||
-        ! rightList[i][1].EvaluatesToDouble(&right1) ||
-        ! rightList[i][2].EvaluatesToDouble(&right2)
+        ! rightList[i][1].EvaluatesToDouble(&right1)
         )
-      return output.AssignValue(0, theCommands);
+      if (leftList[i][1]!=rightList[i][1])
+        return output.AssignValue(0, theCommands);
+    if (! rightList[i][2].EvaluatesToDouble(&right2)||
+        ! leftList[i][2].EvaluatesToDouble(&left2)
+        )
+      if (leftList[i][2]!=rightList[i][2])
+        return output.AssignValue(0, theCommands);
     //std::stringstream temp;
     //temp.precision(20);
     //temp << "left1: " << FloatingPoint::DoubleToString(left1) << " left2: " << FloatingPoint::DoubleToString(left2)

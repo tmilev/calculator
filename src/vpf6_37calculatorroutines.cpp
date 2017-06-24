@@ -1203,8 +1203,7 @@ bool CalculatorFunctionsGeneral::innerNormalizeIntervals
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerNormalizeIntervals");
   List<Expression> outputList;
-  theCommands.CollectOpands(input, theCommands.opUnion(), outputList);
-  if (outputList.size<=1)
+  if (!theCommands.CollectOpands(input, theCommands.opUnion(), outputList))
     return false;
   outputList.QuickSortAscending(CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight);
   return output.MakeXOXOdotsOX(theCommands, theCommands.opUnion(), outputList);

@@ -1779,7 +1779,7 @@ bool Expression::IsConstantNumber()const
   if (this->IsAtomGivenData(this->owner->opE()))
     return true;
   if (this->StartsWithFunctionWithComplexRange())
-  { for (int i=1; i<this->children.size; i++)
+  { for (int i=1; i<this->size(); i++)
       if (!(*this)[i].IsConstantNumber())
         return false;
     return true;

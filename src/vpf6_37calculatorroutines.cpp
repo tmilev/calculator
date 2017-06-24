@@ -1281,3 +1281,51 @@ bool CalculatorFunctionsGeneral::innerIntersectEmptySet
   return false;
 
 }
+
+bool CalculatorFunctionsGeneral::innerIsLinearOrConstantIn(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsLinearOrConstantIn");
+  if (input.size()<3)
+    return false;
+  List<List<Expression> > theSummands;
+  if (!theCommands.GetSumProductsExpressions(input[2], theSummands))
+    return theCommands << "Failed to extract sum from "
+    << input[2].ToString();
+  for(int i=0; i<theSummands.size; i++)
+  { bool found=false;
+    for (int j=0; j<theSummands[i].size; j++)
+      if (theSummands[i][j]==input[1])
+      { if (found)
+          return output.AssignValue(0,theCommands);
+        found=true;
+      } else if (! theSummands[i][j].EvaluatesToDouble())
+        return output.AssignValue(0,theCommands);
+  }
+  return output.AssignValue(1, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerIsProductLinearOrConstTermsIn(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsProductLinearOrConstTermsIn");
+  if (input.size()<3)
+    return false;
+  List<Expression> theMultiplicands;
+  if (!theCommands.CollectOpands(input[2], theCommands.opTimes(),theMultiplicands))
+    return theCommands << "Could not extract multiplicands from: "
+    << input[2].ToString();
+  for (int k=0; k<theMultiplicands.size; k++)
+  { List<List<Expression> > theSummands;
+    if (!theCommands.GetSumProductsExpressions(theMultiplicands[k], theSummands))
+      return theCommands << "Failed to extract sum from "
+      << theMultiplicands[k].ToString();
+    for(int i=0; i<theSummands.size; i++)
+    { bool found=false;
+      for (int j=0; j<theSummands[i].size; j++)
+        if (theSummands[i][j]==input[1])
+        { if (found)
+            return output.AssignValue(0,theCommands);
+          found=true;
+        } else if (! theSummands[i][j].EvaluatesToDouble())
+          return output.AssignValue(0,theCommands);
+    }
+  }
+  return output.AssignValue(1, theCommands);
+}

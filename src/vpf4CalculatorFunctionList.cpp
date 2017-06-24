@@ -1586,25 +1586,6 @@ D-B;\
    "CalculatorFunctionsGeneral::innerSetOutputFile",
    "SetOutputFile")
    ;
-  this->AddOperationInnerHandler
-  ("CoefficientsPowersOf",
-    CalculatorFunctionsGeneral::innerCoefficientsPowersOf, "",
-   "Extracts the coefficients of the powers of the first argument in the second argument.",
-   "CoefficientsPowersOf(x, a x^2+ b *3 x +c +\\pi +3)",
-   true, false,
-   "CalculatorFunctionsGeneral::innerCoefficientsPowersOf",
-   "CoefficientsPowersOf")
-   ;
-
-  this->AddOperationInnerHandler
-  ("ConstantTerm", CalculatorFunctionsGeneral::innerConstTermRelative, "",
-   "Extracts term constant relative to the variable in the first argument. ",
-   "ConstantTerm(y,  x y x +3 +2z)",
-   true, false,
-   "CalculatorFunctionsGeneral::innerConstTermRelative",
-   "ConstantTerm"
-   )
-   ;
 
   this->AddOperationInnerHandler
   ("EnsureExpressionDependsOnlyOn",
@@ -3712,6 +3693,26 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
 //   "This is not a mathematical function; instead it is an html/javascript test function. Converts the input to a math mouse hover class.",
 //   "TestMouseHover(x^2)", true, false)
 //   ;
+  this->AddOperationInnerHandler
+  ("CoefficientsPowersOf",
+    CalculatorFunctionsGeneral::innerCoefficientsPowersOf, "",
+   "Extracts the coefficients of the powers of the first argument in the second argument.",
+   "CoefficientsPowersOf(x, a x^2+ b *3 x +c +\\pi +3)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerCoefficientsPowersOf",
+   "CoefficientsPowersOf")
+   ;
+
+  this->AddOperationInnerHandler
+  ("ConstantTerm", CalculatorFunctionsGeneral::innerConstTermRelative, "",
+   "Extracts term constant relative to the variable in the first argument. ",
+   "ConstantTerm(y,  x y x +3 +2z)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerConstTermRelative",
+   "ConstantTerm"
+   )
+   ;
+
    this->AddOperationInnerHandler
   ("CoefficientOf", CalculatorFunctionsGeneral::innerCoefficientOf, "",
    "Gets the coefficient of the first argument in the second. ",
@@ -3721,6 +3722,37 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CoefficientOf"
    )
    ;
+   this->AddOperationInnerHandler
+  ("IsLinearOrConstantIn", CalculatorFunctionsGeneral::innerIsLinearOrConstantIn, "",
+   "Returns one if the second argument is linear in the first. \
+    All variables are treated as non-constants. ",
+   "IsLinearOrConstantIn(x, x^2+1);\n\
+    IsLinearOrConstantIn(x, x y+1);\n\
+    IsLinearOrConstantIn(x, x+1);\n\
+    IsLinearOrConstantIn(x, x \\pi+1);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIsLinearOrConstantIn",
+   "IsLinearOrConstantIn"
+   )
+   ;
+   this->AddOperationInnerHandler
+  ("IsProductLinearOrConstantTermsIn", CalculatorFunctionsGeneral::innerIsProductLinearOrConstTermsIn, "",
+   "Returns true if the expression is a product of linear or constant terms.\
+    Although this is subject to change, at the moment \
+    powers of linear terms are not considered linear. ",
+   " TurnOffRules(\"DistributeMultiplication\");\
+    IsProductLinearOrConstantTermsIn(x, x^2+1);\n\
+    IsProductLinearOrConstantTermsIn(x, x^2-1);\n\
+    IsProductLinearOrConstantTermsIn(x, (x-1)(x+1));\n\
+    IsProductLinearOrConstantTermsIn(x, (2x+1)(x \\pi+1));\n\
+    IsProductLinearOrConstantTermsIn(x, (2x+y)(x \\pi+1));\n\
+    ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIsProductLinearOrConstTermsIn",
+   "IsProductLinearOrConstantTermsIn"
+   )
+   ;
+
 }
 
 void Calculator::initPredefinedStandardOperations()

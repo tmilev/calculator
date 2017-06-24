@@ -86,6 +86,18 @@ const Expression& Calculator::EMHalf()
   return this->frequentConstantMinusHalf;
 }
 
+const Expression& Calculator::EInfinity()
+{ if (this->frequentEInfinity.owner==0)
+    this->frequentEInfinity.MakeAtom(this->opInfinity(),*this);
+  return this->frequentEInfinity;
+}
+
+const Expression& Calculator::EMInfinity()
+{ if (this->frequentEMInfinity.owner==0)
+    this->frequentEMInfinity=this->EMOne()* this->EInfinity();
+  return this->frequentEMInfinity;
+}
+
 void Calculator::DoLogEvaluationIfNeedBe(Function& inputF)
 { if (!this->flagLogEvaluatioN)
     return;

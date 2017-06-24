@@ -177,7 +177,7 @@ function unionClick(currentMathField)
 }
 
 function getEmptySetButton(indexMathField)
-{ return "<button style='width:25' onmousedown='emptySetClick(answerMathQuillObjects[" + indexMathField + "]);'>&#8712;</button>";
+{ return "<button style='width:25' onmousedown='emptySetClick(answerMathQuillObjects[" + indexMathField + "]);'>&#8709;</button>";
 }
 
 function emptySetClick(currentMathField)

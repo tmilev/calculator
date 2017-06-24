@@ -853,7 +853,9 @@ private:
   frequentConstantFive, frequentConstantHalf,
   frequentConstantMinusHalf,
   frequentConstantZero,
-  frequentConstantMinusOne;
+  frequentConstantMinusOne,
+  frequentEInfinity,
+  frequentEMInfinity;
 
 public:
   //Operations parametrize the expression elements.
@@ -1103,6 +1105,8 @@ public:
   const Expression& EMOne();
   const Expression& EHalf();
   const Expression& EMHalf();
+  const Expression& EInfinity();
+  const Expression& EMInfinity();
   void DoLogEvaluationIfNeedBe(Function& inputF);
   void LogPublicError(const std::string& theError);
   bool DecreaseStackExceptLast(int decrease);

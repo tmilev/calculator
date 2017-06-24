@@ -964,25 +964,51 @@ bool CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight
       !left.StartsWith(left.owner->opIntervalRightClosed(),3) &&
       !left.StartsWith(left.owner->opSequence(),3)
       )
-   return left>right;
+    return left>right;
   if (!right.StartsWith(right.owner->opIntervalClosed(),3) &&
       !right.StartsWith(right.owner->opIntervalLeftClosed(),3) &&
       !right.StartsWith(right.owner->opIntervalRightClosed(),3) &&
       !right.StartsWith(right.owner->opSequence(),3)
       )
-   return left>right;
+    return left>right;
   double left1, right1, left2, right2;
-  if (left[1].EvaluatesToDouble(&left1) && right[1].EvaluatesToDouble(&right1))
+  bool left1IsDouble=left[1].EvaluatesToDouble(&left1);
+  bool right1IsDouble=right[1].EvaluatesToDouble(&right1);
+  bool left2IsDouble=left[2].EvaluatesToDouble(&left2);
+  bool righ2IsDouble=right[2].EvaluatesToDouble(&right2);
+  const Expression& inftyE=right.owner->EInfinity();
+  const Expression& mInftyE=right.owner->EMInfinity();
+  if (left1IsDouble && right1IsDouble)
   { if (left1>right1)
       return true;
     if (right1>left1)
       return false;
-    if (left[2].EvaluatesToDouble(&left2) && right[2].EvaluatesToDouble(&right2))
+    if (left2IsDouble && righ2IsDouble)
     { if (left2>right2)
         return true;
       if (right2>left2)
         return false;
     }
+    if (left[2]==inftyE && righ2IsDouble)
+      return true;
+    if (left2IsDouble && right[2]==inftyE)
+      return false;
+  }
+  if (left[1]==mInftyE && right1IsDouble)
+    return false;
+  if (left1IsDouble && right[1]==mInftyE)
+    return true;
+  if (left[1]==mInftyE || right[1]==mInftyE)
+  { if (left2IsDouble && righ2IsDouble)
+    { if (left2>right2)
+        return true;
+      if (right2>left2)
+        return false;
+    }
+    if (left[2]==inftyE && righ2IsDouble)
+      return true;
+    if (left2IsDouble && right[2]==inftyE)
+      return false;
   }
   return left>right;
 }

@@ -1407,6 +1407,10 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
   if (theCommands.RecursionDepthExceededHandleRoughly())
     return false;
   std::string atomString;
+  if (input==theCommands.EMInfinity())
+    return output.AssignValue<std::string>( "\"minusInfinity\"", theCommands);
+  if (input==theCommands.EInfinity())
+    return output.AssignValue<std::string>( "\"infinity\"", theCommands);
   if (input.IsAtom(&atomString))
   { if (input.IsAtomGivenData(theCommands.opE()))
       return output.AssignValue<std::string>(" 2.718281828 ", theCommands);

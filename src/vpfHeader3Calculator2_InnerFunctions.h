@@ -333,7 +333,9 @@ public:
   static bool innerPlotDirectionOrVectorField(Calculator& theCommands, const Expression& input, Expression& output, bool vectorsAreNormalized);
   static bool innerPlotPolarRfunctionThetaExtended(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIsPlot(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlot2DoverIntervals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotFill(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotRectangle(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotAxesGrid(Calculator& theCommands, const Expression& input, Expression& output);

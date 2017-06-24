@@ -816,44 +816,46 @@ void Plot::operator+=(const PlotObject& other)
 
 bool PlotObject::operator==(const PlotObject& other)const
 { return
-  this->thePlotString          == other.thePlotString          &&
-  this->fillStyle              == other.fillStyle              &&
-  this->thePlotStringWithHtml  == other.thePlotStringWithHtml  &&
-  this->xLow                   == other.xLow                   &&
-  this->xHigh                  == other.xHigh                  &&
-  this->yLow                   == other.yLow                   &&
-  this->yHigh                  == other.yHigh                  &&
-  this->paramLow               == other.paramLow               &&
-  this->paramHigh              == other.paramHigh              &&
-  this->colorRGB               == other.colorRGB               &&
-  this->colorFillRGB           == other.colorFillRGB           &&
-  this->lineWidth              == other.lineWidth              &&
-  this->dimension              == other.dimension              &&
-  this->colorUV                == other.colorUV                &&
-  this->colorVU                == other.colorVU                &&
-  this->colorJS                == other.colorJS                &&
-  this->lineWidthJS            == other.lineWidthJS            &&
-  this->numSegmenTsJS          == other.numSegmenTsJS          &&
-  this->thePoints              == other.thePoints              &&
-  this->theRectangles          == other.theRectangles          &&
-  this->thePlotType            == other.thePlotType            &&
-  this->manifoldImmersion      == other.manifoldImmersion      &&
-  this->coordinateFunctionsE   == other.coordinateFunctionsE   &&
-  this->coordinateFunctionsJS  == other.coordinateFunctionsJS  &&
-  this->variablesInPlay        == other.variablesInPlay        &&
-  this->theVarRangesJS         == other.theVarRangesJS         &&
-  this->leftPtE                == other.leftPtE                &&
-  this->rightPtE               == other.rightPtE               &&
-  this->paramLowE              == other.paramLowE              &&
-  this->paramHighE             == other.paramHighE             &&
-  this->numSegmentsE           == other.numSegmentsE           &&
-  this->variablesInPlayJS      == other.variablesInPlayJS      &&
-  this->leftPtJS               == other.leftPtJS               &&
-  this->rightPtJS              == other.rightPtJS              &&
-  this->colorFillJS            == other.colorFillJS            &&
-  this->paramLowJS             == other.paramLowJS             &&
-  this->paramHighJS            == other.paramHighJS            &&
-  this->defaultLengthJS        == other.defaultLengthJS
+  this->thePlotString                == other.thePlotString                &&
+  this->fillStyle                    == other.fillStyle                    &&
+  this->thePlotStringWithHtml        == other.thePlotStringWithHtml        &&
+  this->xLow                         == other.xLow                         &&
+  this->xHigh                        == other.xHigh                        &&
+  this->yLow                         == other.yLow                         &&
+  this->yHigh                        == other.yHigh                        &&
+  this->paramLow                     == other.paramLow                     &&
+  this->paramHigh                    == other.paramHigh                    &&
+  this->colorRGB                     == other.colorRGB                     &&
+  this->colorFillRGB                 == other.colorFillRGB                 &&
+  this->lineWidth                    == other.lineWidth                    &&
+  this->dimension                    == other.dimension                    &&
+  this->colorUV                      == other.colorUV                      &&
+  this->colorVU                      == other.colorVU                      &&
+  this->colorJS                      == other.colorJS                      &&
+  this->lineWidthJS                  == other.lineWidthJS                  &&
+  this->numSegmenTsJS                == other.numSegmenTsJS                &&
+  this->thePoints                    == other.thePoints                    &&
+  this->theRectangles                == other.theRectangles                &&
+  this->thePlotType                  == other.thePlotType                  &&
+  this->manifoldImmersion            == other.manifoldImmersion            &&
+  this->coordinateFunctionsE         == other.coordinateFunctionsE         &&
+  this->coordinateFunctionsJS        == other.coordinateFunctionsJS        &&
+  this->variablesInPlay              == other.variablesInPlay              &&
+  this->theVarRangesJS               == other.theVarRangesJS               &&
+  this->leftPtE                      == other.leftPtE                      &&
+  this->rightPtE                     == other.rightPtE                     &&
+  this->paramLowE                    == other.paramLowE                    &&
+  this->paramHighE                   == other.paramHighE                   &&
+  this->numSegmentsE                 == other.numSegmentsE                 &&
+  this->variablesInPlayJS            == other.variablesInPlayJS            &&
+  this->leftBoundaryIsMinusInfinity  == other.leftBoundaryIsMinusInfinity  &&
+  this->rightBoundaryIsMinusInfinity == other.rightBoundaryIsMinusInfinity &&
+  this->leftPtJS                     == other.leftPtJS                     &&
+  this->rightPtJS                    == other.rightPtJS                    &&
+  this->colorFillJS                  == other.colorFillJS                  &&
+  this->paramLowJS                   == other.paramLowJS                   &&
+  this->paramHighJS                  == other.paramHighJS                  &&
+  this->defaultLengthJS              == other.defaultLengthJS
   ;
 }
 
@@ -868,6 +870,8 @@ PlotObject::PlotObject()
   this->lineWidth    = 1;
   this->colorFillRGB = 0;
   this->dimension    = -1;
+  this->rightBoundaryIsMinusInfinity=false;
+  this->leftBoundaryIsMinusInfinity=false;
 }
 
 void PlotObject::ComputeYbounds()

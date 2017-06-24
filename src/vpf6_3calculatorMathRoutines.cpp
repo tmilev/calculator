@@ -4777,6 +4777,40 @@ bool CalculatorFunctionsGeneral::innerPlotFill(Calculator& theCommands, const Ex
   return output.AssignValue(outputPlot, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerIsPlot(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsPlot");
+  if (input.IsOfType<Plot>())
+    return output.AssignValue(1,theCommands);
+  return output.AssignValue(0,theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerPlot2DoverIntervals(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlot2DoverIntervals");
+  if (input.size()<3)
+    return false;
+  List<Expression> theIntervalCandidates;
+  if (! theCommands.CollectOpands(input[2], theCommands.opUnion(),theIntervalCandidates))
+    return false;
+  if (theIntervalCandidates.size<1)
+    return false;
+  for (int i=0; i<theIntervalCandidates.size; i++)
+    if (!theIntervalCandidates[i].IsIntervalRealLine())
+      return false;
+  Expression summandE;
+  List<Expression> finalSummands;
+  for (int i=0; i<theIntervalCandidates.size; i++)
+  { summandE.reset(theCommands);
+    summandE.AddChildOnTop(input[0]);
+    summandE.AddChildOnTop(input[1]);
+    summandE.AddChildOnTop(theIntervalCandidates[i][1]);
+    summandE.AddChildOnTop(theIntervalCandidates[i][2]);
+    for (int j=3; j<input.size(); j++)
+      summandE.AddChildOnTop(input[j]);
+    finalSummands.AddOnTop(summandE);
+  }
+  return output.MakeSum(theCommands, finalSummands);
+}
+
 bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlot2D");
   //stOutput << input.ToString();
@@ -4810,10 +4844,24 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
     numIntervals=500;
   if (numIntervals<2)
     numIntervals=2;
-  if (!thePlotObj.leftPtE.EvaluatesToDouble(&thePlotObj.xLow) ||
-      !thePlotObj.rightPtE.EvaluatesToDouble(&thePlotObj.xHigh))
-    return theCommands
-    << "Couldn't convert bounds of drawing function to floating point numbers. ";
+  bool leftIsDouble=thePlotObj.leftPtE.EvaluatesToDouble(&thePlotObj.xLow);
+  bool rightIsDouble=thePlotObj.rightPtE.EvaluatesToDouble(&thePlotObj.xHigh);
+  if (!leftIsDouble)
+  { if (thePlotObj.leftPtE!=theCommands.EMInfinity())
+      return theCommands
+      << "Couldn't convert left boundary "
+      << thePlotObj.leftPtE.ToString() << " to floating point number. ";
+    else
+      thePlotObj.leftBoundaryIsMinusInfinity=true;
+  }
+  if (!rightIsDouble)
+  { if (thePlotObj.rightPtE!=theCommands.EInfinity())
+      return theCommands
+      << "Couldn't convert right boundary "
+      << thePlotObj.rightPtE.ToString() << " to floating point number. ";
+    else
+      thePlotObj.rightBoundaryIsMinusInfinity=true;
+  }
   thePlotObj.coordinateFunctionsE.AddOnTop(input[1]);
   thePlotObj.coordinateFunctionsJS.SetSize(1);
   thePlotObj.coordinateFunctionsE[0].GetFreeVariables

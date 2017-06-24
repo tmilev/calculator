@@ -2271,6 +2271,17 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerPlotPoint",
    "PlotPoint")
    ;
+  this->AddOperationInnerHandler ("Plot2D", CalculatorFunctionsGeneral::innerPlot2DoverIntervals, "",
+   "If the second argument is a union of intervals, \
+    replaces the plot command with a sum of Plot2d's in which the second and third argument \
+    are extracted from each of the intervals.\
+   ",
+   "%UseBracketForIntervals\
+    Plot2D{}(\\sin{}x+cos{}x, [0, \\pi]\\cup [2\\pi, 3\\pi), \"blue\",2,8)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerPlot2DoverIntervals",
+   "Plot2DoverIntervals")
+   ;
   this->AddOperationInnerHandler ("Plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \
    y=f(x). The the second and third argument give the upper and \
@@ -2284,6 +2295,16 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    true, false,
    "CalculatorFunctionsGeneral::innerPlot2D",
    "Plot2D")
+   ;
+  this->AddOperationInnerHandler ("IsPlot",
+    CalculatorFunctionsGeneral::innerIsPlot, "",
+   "Returns 1 if the argument is a plot, 0 otherwise.\
+   ",
+   "%UseBracketForIntervals\
+    IsPlot( Plot2D{}(\\sin{}x+cos{}x, [0, \\pi]\\cup [2\\pi, 3\\pi), \"blue\",2,8))",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIsPlot",
+   "IsPlot")
    ;
   this->AddOperationInnerHandler ("PlotFill", CalculatorFunctionsGeneral::innerPlotFill, "",
    "Fills a plot with color. ",

@@ -232,6 +232,7 @@ class Expression
   bool IsBuiltInTypE(std::string* outputWhichOperation=0)const;
   bool IsBuiltInTypE(int* outputWhichType)const;
   const Expression& operator[](int n)const;
+  bool IsIntervalRealLine();
   bool IsSequenceDoubleButNotTripleNested()const;
   bool IsSequenceNElementS(int N=-2)const;
   bool IsError(std::string* outputErrorMessage=0)const;
@@ -637,6 +638,8 @@ public:
   int dimension;
   int colorRGB;
   int colorFillRGB;
+  bool leftBoundaryIsMinusInfinity;
+  bool rightBoundaryIsMinusInfinity;
   std::string defaultLengthJS;
   std::string colorJS;
   std::string colorFillJS;

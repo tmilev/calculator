@@ -605,7 +605,8 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
   //console.log(this.color);
   this.type="plotFunction";
   this.numSegments=inputNumSegments;
-  this.Delta=(inputRightPt-inputLeftPt)/inputNumSegments;
+  if (inputRightPt!=="infinity" && inputLeftPt!=="minusInfinity")
+    this.Delta=(inputRightPt-inputLeftPt)/inputNumSegments;
   this.accountBoundingBox= function(inputOutputBox)
   { for (var i=0; i<this.numSegments; i++)
     { var theRatio=i/(this.numSegments-1);
@@ -622,7 +623,16 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
   { var theSurface=theCanvas.surface;
     theSurface.strokeStyle=colorRGBToString(this.color);
     theSurface.fillStyle=colorRGBToString(this.color);
-    var theX=this.leftPt;
+    var realLeft=this.leftPt;
+    var realRight=this.rightPt;
+    if(realLeft==="minusInfinity")
+      realLeft=theCanvas.leftMostPlotPoint;
+    if (this.rightPt==="infinity" || this.leftPt==="minusInfinity")
+    { if (realRight==="infinity")
+        realRight=theCanvas.rightMostPlotPoint;
+      this.Delta=(realRight-realLeft)/this.numSegments;
+    }
+    var theX=realLeft;
     var theY=this.theFunction(theX);
     var theCoords=theCanvas.coordsMathToScreen([theX, theY]);
     var alreadyMoved=false;
@@ -632,7 +642,7 @@ function PlotTwoD(inputTheFn, inputLeftPt, inputRightPt, inputNumSegments, input
     var skippedValues=false;
     for (var i=0; i<this.numSegments; i++)
     { var theRatio=i/(this.numSegments-1);
-      theX= this.leftPt *(1-theRatio) +  this.rightPt*theRatio; //<- this way of
+      theX= realLeft *(1-theRatio) +  realRight*theRatio; //<- this way of
       //computing x this way introduces smaller numerical errors.
       //For example, suppose you plot sqrt(1-x^2) from -1 to 1.
       //If not careful with rounding errors,
@@ -813,6 +823,8 @@ function CanvasTwoD(inputCanvas)
   this.spanControls=null;
   this.numDrawnObjects=0;
   this.boundingBoxMath= [[-0.1,-0.1],[0.1,0.1]];
+  this.leftMostPlotPoint="none";
+  this.rightMostPlotPoint="none";
   this.width= inputCanvas.width;
   this.height= inputCanvas.height;
   this.centerCanvasX= inputCanvas.width/2;
@@ -876,6 +888,16 @@ function CanvasTwoD(inputCanvas)
   };
   this.drawFunction= function (inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth)
   { var newPlot=new PlotTwoD(inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth);
+    if (inputLeftPt!=="infinity" && inputLeftPt!=="minusInfinity")
+    { if (this.leftMostPlotPoint==="none")
+        this.leftMostPlotPoint=inputLeftPt;
+      else
+        this.leftMostPlotPoint=Math.min(inputLeftPt, this.leftMostPlotPoint);
+      if (this.rightMostPlotPoint==="none")
+        this.rightMostPlotPoint=inputRightPt;
+      else
+        this.rightMostPlotPoint=Math.max(inputRightPt, this.rightMostPlotPoint);
+    }
     this.theObjects.push(newPlot);
   };
   this.drawCurve= function (inputCoordinateFuns, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth)
@@ -2333,6 +2355,7 @@ function testPictureTwoD(inputCanvas1, inputCanvas2, inputCanvas3)
   theCanvas3.drawGrid();
   theCanvas3.drawCoordinateAxes();
   theCanvas3.setViewWindow([-1,-19],[1,5]);
+  theCanvas3.drawFunction(testFunctionPlot2, "minusInfinity", "infinity", 100, 'red',4);
   theCanvas3.redraw();
 }
 

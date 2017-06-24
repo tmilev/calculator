@@ -1641,6 +1641,20 @@ bool Expression::IsSequenceNElementS(int N)const
   return this->StartsWith(this->owner->opSequence(), N+1);
 }
 
+bool Expression::IsIntervalRealLine()
+{ if (this->owner==0)
+    return false;
+  if (this->IsSequenceNElementS(2))
+    return true;
+  if (this->StartsWith(this->owner->opIntervalClosed(),3))
+    return true;
+  if (this->StartsWith(this->owner->opIntervalLeftClosed(),3))
+    return true;
+  if (this->StartsWith(this->owner->opIntervalRightClosed(),3))
+    return true;
+  return false;
+}
+
 bool Expression::IsEqualToOne()const
 { int theInt;
   if (this->IsSmallInteger(&theInt))

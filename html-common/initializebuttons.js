@@ -94,6 +94,7 @@ function initializeButtons()
 "<td>" + getOrButton(i)+ "</td>"+
 "<td>" + getUnionButton(i) + "</td>"+
 "<td>" + getBelongsToButton(i) + "</td>"+
+"<td>" + getEmptySetButton(i) + "</td>"+
 "</tr>"+
 "</table>"
 ;
@@ -172,6 +173,15 @@ function getUnionButton(indexMathField)
 
 function unionClick(currentMathField)
 { currentMathField.cmd('\\cup');
+  event.preventDefault();
+}
+
+function getEmptySetButton(indexMathField)
+{ return "<button style='width:25' onmousedown='emptySetClick(answerMathQuillObjects[" + indexMathField + "]);'>&#8712;</button>";
+}
+
+function emptySetClick(currentMathField)
+{ currentMathField.cmd('\\emptyset');
   event.preventDefault();
 }
 

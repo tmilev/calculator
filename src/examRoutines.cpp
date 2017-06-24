@@ -2999,7 +2999,7 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
   if (theGlobalVariables.UserDebugFlagOn())
-    out << this->ToStringLinkCurrentAdmin("Turn off debug", true);
+    out << this->ToStringLinkCurrentAdmin("Turn off debug", false);
   else
     out << this->ToStringLinkCurrentAdmin("Debug page", true);
   out << "\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";

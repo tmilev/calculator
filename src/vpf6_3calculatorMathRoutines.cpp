@@ -1627,8 +1627,8 @@ bool CalculatorFunctionsGeneral::innerUnion(Calculator& theCommands, const Expre
     return false;
   output.reset(theCommands, numElts);
   output.AddChildAtomOnTop(theCommands.opSequence());
-  for (int i=1; i<input.children.size; i++)
-    for (int j=1; j<input[i].children.size; j++)
+  for (int i=1; i<input.size(); i++)
+    for (int j=1; j<input[i].size(); j++)
       output.AddChildOnTop(input[i][j]);
   return true;
 }
@@ -1638,16 +1638,16 @@ bool CalculatorFunctionsGeneral::innerUnionNoRepetition(Calculator& theCommands,
   if (!input.IsLisT())
     return false;
   int numElts=1;
-  for (int i=1; i<input.children.size; i++)
+  for (int i=1; i<input.size(); i++)
     if (!input[i].IsListStartingWithAtom(theCommands.opSequence()))
       return false;
     else
-      numElts+=input[i].children.size-1;
+      numElts+=input[i].size()-1;
   HashedList<Expression> theList;
   List<int> theIndices;
   theList.SetExpectedSize(numElts);
-  for (int i=1; i<input.children.size; i++)
-    for (int j=1; j<input[i].children.size; j++)
+  for (int i=1; i<input.size(); i++)
+    for (int j=1; j<input[i].size(); j++)
       theList.AddOnTopNoRepetition(input[i][j]);
   theIndices.SetSize(theList.size);
   for (int i=0; i<theList.size; i++)

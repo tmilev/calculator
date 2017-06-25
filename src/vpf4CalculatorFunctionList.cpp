@@ -2714,6 +2714,15 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "NormalizeIntervals");
   this->AddOperationInnerHandler
   ("\\cup",
+    CalculatorFunctionsGeneral::innerUnionUnionIntervals, "",
+   "In for the expression a \\cup (b\\cup c) the expression a\\cup b\
+    can be reduced to d, replaces a\\cup(b\\cup c) by a\\cup d. ",
+   "%UseBracketForIntervals\n  [3,3]\\cup([3,7]\\cup [6,8]);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerUnionUnionIntervals",
+   "UnionUnionIntervals");
+  this->AddOperationInnerHandler
+  ("\\cup",
     CalculatorFunctionsGeneral::innerUnionIntervals, "",
    "If the union of two intervals is one interval, replaces the interval. ",
    "%UseBracketForIntervals\n  [3,7]\\cup [6,8]);",

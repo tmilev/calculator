@@ -1109,6 +1109,23 @@ bool CalculatorFunctionsGeneral::innerIntersectIntervals
   return false;
 }
 
+bool CalculatorFunctionsGeneral::innerUnionUnionIntervals
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUnionUnionIntervals");
+  if (input.size()!=3)
+    return false;
+  const Expression& leftE=input[1];
+  const Expression& rightComposite=input[2];
+  if (!rightComposite.StartsWith(theCommands.opUnion(), 3))
+    return false;
+  const Expression& rightE=input[2][1];
+  Expression theMiddleUnion, middleUnionReduced;
+  theMiddleUnion.MakeXOX(theCommands, theCommands.opUnion(),leftE, rightE);
+  if (!CalculatorFunctionsGeneral::innerUnionIntervals(theCommands, theMiddleUnion, middleUnionReduced))
+    return false;
+  return output.MakeXOX(theCommands, theCommands.opUnion(), middleUnionReduced, rightComposite[2]);
+}
+
 bool CalculatorFunctionsGeneral::innerUnionIntervals
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUnionIntervals");
@@ -1116,17 +1133,9 @@ bool CalculatorFunctionsGeneral::innerUnionIntervals
     return false;
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];
-  if(!leftE.StartsWith(theCommands.opIntervalClosed(),3) &&
-     !leftE.StartsWith(theCommands.opIntervalLeftClosed(),3) &&
-     !leftE.StartsWith(theCommands.opIntervalRightClosed(),3) &&
-     !leftE.StartsWith(theCommands.opSequence(),3)
-    )
+  if(!leftE.IsIntervalRealLine())
     return false;
-  if(!rightE.StartsWith(theCommands.opIntervalClosed(),3) &&
-     !rightE.StartsWith(theCommands.opIntervalLeftClosed(),3) &&
-     !rightE.StartsWith(theCommands.opIntervalRightClosed(),3) &&
-     !rightE.StartsWith(theCommands.opSequence(),3)
-    )
+  if(!rightE.IsIntervalRealLine())
     return false;
   double left1=0, left2=0, right1=0, right2=0;
   if (!leftE[1].EvaluatesToDouble(&left1) || !leftE[2].EvaluatesToDouble(&left2))
@@ -1136,7 +1145,7 @@ bool CalculatorFunctionsGeneral::innerUnionIntervals
   if (left1>left2 || right1>right2)
     return false;
   bool makeUnion=false;
-  if (right1<left2 && left2<right2)
+  if (right1<=left2 && left2<=right2)
     makeUnion=true;
   if (!makeUnion)
     return false;

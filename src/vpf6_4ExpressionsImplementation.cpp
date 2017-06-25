@@ -1641,7 +1641,7 @@ bool Expression::IsSequenceNElementS(int N)const
   return this->StartsWith(this->owner->opSequence(), N+1);
 }
 
-bool Expression::IsIntervalRealLine()
+bool Expression::IsIntervalRealLine()const
 { if (this->owner==0)
     return false;
   if (this->IsSequenceNElementS(2))

@@ -191,6 +191,7 @@ public:
   static bool innerIntersectEmptySet(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerUnionEmptySet(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntersectIntervals(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerUnionUnionIntervals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerUnionIntervals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNormalizeIntervals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetFirstSummandContaining(Calculator& theCommands, const Expression& input, Expression& output);

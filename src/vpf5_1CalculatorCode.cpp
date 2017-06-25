@@ -1394,7 +1394,7 @@ std::string PlotObject::GetJavascript2dPlot
   std::string fnName=fnNameStream.str();
   if (this->variablesInPlayJS.size>0)
   { out << "function " << fnName
-    << " (" << this->variablesInPlayJS[0] << "){\n";
+    << " (" << HtmlRoutines::GetJavascriptVariable(this->variablesInPlayJS[0]) << "){\n";
     out << "return " << this->coordinateFunctionsJS[0] << ";\n";
     out << "}\n";
   } else

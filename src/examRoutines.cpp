@@ -2044,6 +2044,19 @@ bool CalculatorHTML::SetTagClassFromOpenTag(SyntacticElementHTML& output)
   return false;
 }
 
+void CalculatorHTML::initTopicElementNames()
+{ MacroRegisterFunctionWithName("CalculatorHTML::initTopicElementNames");
+  if (this->calculatorTopicElementNames.size==0)
+  { this->calculatorTopicElementNames.AddOnTop("Chapter");
+    this->calculatorTopicElementNames.AddOnTop("Section");
+    this->calculatorTopicElementNames.AddOnTop("Topic");
+    this->calculatorTopicElementNames.AddOnTop("Problem");
+    this->calculatorTopicElementNames.AddOnTop("Video");
+    this->calculatorTopicElementNames.AddOnTop("SlidesSource");
+    this->calculatorTopicElementNames.AddOnTop("SlidesSourceHeader");
+  }
+}
+
 void CalculatorHTML::initBuiltInSpanClasses()
 { MacroRegisterFunctionWithName("CalculatorHTML::initBuiltInSpanClasses");
   if (this->calculatorClassesAnswerFields.size==0)

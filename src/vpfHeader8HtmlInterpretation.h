@@ -130,6 +130,7 @@ public:
 
   static const std::string BugsGenericMessage;
   HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
+  List<std::string> calculatorTopicElementNames;
   List<std::string> calculatorClasses;
   List<std::string> calculatorClassesAnswerFields;
   List<char> splittingChars;
@@ -156,6 +157,7 @@ public:
   std::string GetSectionSelector();
   std::string CleanUpFileName(const std::string& inputLink);
   void initBuiltInSpanClasses();
+  void initTopicElementNames();
   bool ParseHTML(std::stringstream& comments);
   bool ParseHTMLPrepareCommands(std::stringstream& comments);
   bool IsSplittingChar(const std::string& input);

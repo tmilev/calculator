@@ -656,10 +656,12 @@ std::string HtmlInterpretation::GetEditPageHTML()
   tempCalculator.ComputeAutoCompleteKeyWords();
   CalculatorHTML tempParser;
   tempParser.initBuiltInSpanClasses();
+  tempParser.initTopicElementNames();
   HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
   theAutocompleteKeyWords.AddOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
   theAutocompleteKeyWords.AddOnTopNoRepetition(tempParser.calculatorClasses);
   theAutocompleteKeyWords.AddOnTopNoRepetition(tempParser.calculatorClassesAnswerFields);
+  theAutocompleteKeyWords.AddOnTopNoRepetition(tempParser.calculatorTopicElementNames);
   out << "var AceEditorAutoCompletionWordList=[";
   bool found=false;
   for (int i=0; i<theAutocompleteKeyWords.size; i++)

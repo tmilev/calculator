@@ -187,6 +187,16 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorConversions::innerOr",
    "or");
   this->AddOperationInnerHandler
+  ("or", CalculatorFunctionsGeneral::innerOrIdentical, "",
+   "If the two arguments of or are identical, replaces the expression with the argument.\
+   Works even if the individual expression cannot be evaluated to 1 or 0. \
+   Please note that mathematically equal objects may fail to be identical, for example\
+   a rational number 5 and an algebraic number 5.",
+   "a or b; a or a",
+   true, false,
+   "CalculatorConversions::innerOrIdentical",
+   "or");
+  this->AddOperationInnerHandler
   ("if", CalculatorFunctionsGeneral::innerIf, "",
    "if function. Takes 3 arguments. If first argument is true (equal to 1)\
    then returns the second argument. If the first argument is false (equal to 0)\

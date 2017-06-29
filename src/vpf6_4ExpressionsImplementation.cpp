@@ -2737,9 +2737,16 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << "\\in "
     << (*this)[2].ToString(theFormat);
   else if (this->StartsWith(this->owner->opOr(), 3))
-    out << "\\left(" << (*this)[1] << "\\right)" << "\\ or\\ "
-    << "\\left(" << (*this)[2] << "\\right)";
-  else if (this->StartsWith(this->owner->opAnd(), 3))
+  { if (!(*this)[1].IsSequenceNElementS())
+      out << "\\left(" << (*this)[1] << "\\right)";
+    else
+      out << (*this)[1];
+    out << "\\ or\\ ";
+    if (!(*this)[2].IsSequenceNElementS())
+      out << "\\left(" << (*this)[2] << "\\right)";
+    else
+      out << (*this)[2];
+  } else if (this->StartsWith(this->owner->opAnd(), 3))
     out << "\\left(" << (*this)[1] << "\\right)" << " and "
     << "\\left(" << (*this)[2] << "\\right)" ;
   else if (this->StartsWith(this->owner->opBinom(),3) )

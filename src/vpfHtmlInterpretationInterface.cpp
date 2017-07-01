@@ -1918,7 +1918,8 @@ std::string HtmlInterpretation::ToStringUserScores()
   out << "<tr>";
   for (int i=0; i<theScores.theProblem.theTopicS.size(); i++)
   { TopicElement& currentElt=theScores.theProblem.theTopicS.theValues[i];
-    if (currentElt.problem=="" && currentElt.type!=currentElt.tSubSection)
+    if (currentElt.problem=="" && currentElt.type!=currentElt.tProblem &&
+        currentElt.type!=currentElt.tSubSection && currentElt.type!=currentElt.tTexHeader)
     { if ((currentElt.flagContainsProblemsNotInSubsection &&
            currentElt.totalSubSectionsUnderMeIncludingEmptySubsections>1)
           || currentElt.immediateChildren.size==0)

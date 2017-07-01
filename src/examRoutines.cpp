@@ -2050,6 +2050,7 @@ void CalculatorHTML::initTopicElementNames()
   { this->calculatorTopicElementNames.AddOnTop("Chapter");
     this->calculatorTopicElementNames.AddOnTop("Section");
     this->calculatorTopicElementNames.AddOnTop("Topic");
+    this->calculatorTopicElementNames.AddOnTop("Title");
     this->calculatorTopicElementNames.AddOnTop("Problem");
     this->calculatorTopicElementNames.AddOnTop("Video");
     this->calculatorTopicElementNames.AddOnTop("SlidesSource");
@@ -3281,6 +3282,8 @@ void TopicElement::ComputeID()
       out << "[Section]";
     if (this->type==this->tSubSection)
       out << "[SubSection]";
+    if (this->type==this->tProblem)
+      out << "[TitledItem]";
     this->id=out.str();
   }
   this->idBase64=Crypto::computeSha1outputBase64(this->id);
@@ -3298,7 +3301,7 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicEl
       }
     if (!startsWithChapter)
     { TopicElement chapterlessChapter;
-      chapterlessChapter.parentTopics.AddOnTop(output.size()-1);
+      chapterlessChapter.parentTopics.AddOnTop(output.size());
       chapterlessChapter.type=chapterlessChapter.tChapter;
       chapterlessChapter.title="Topics without chapter";
       TopicElement::AddTopic(chapterlessChapter, output);
@@ -3345,12 +3348,14 @@ void TopicElement::reset(int parentSize)
   this->pointsEarnedInProblemsThatAreImmediateChildren=0;
   this->totalPointsEarned=0;
   this->maxPointsInAllChildren=0;
-   if (parentSize==0)
+  if (parentSize==0)
     this->type=this->tChapter;
   if (parentSize==1)
     this->type=this->tSection;
   if (parentSize==2)
     this->type=this->tSubSection;
+  if (parentSize==3)
+    this->type=this->tProblem;
 }
 
 void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
@@ -3564,7 +3569,7 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
       subSectionStarted=false;
       out << "<ul>";
     } else if (currentElt.type==currentElt.tError)
-      out << "Error parsing topic list. Could not make sense of: " << currentElt.error << ". "
+    { out << "Error parsing topic list. Could not make sense of: " << currentElt.error << ". "
       << "The allowed data labels are CASE SENSITIVE: "
       << "<br>Chapter"
       << "<br>Section"
@@ -3578,11 +3583,12 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
       << "<br>SlidesSource"
       << "<br>You need to include columns immediately after the data labels. The data entries are terminated by new line. "
       << " Here is a correctly entered example:"
-      << "Title: What is a logarithmic derivative?<br>\n"
-      << "Video: modules/substitution-rule/videos/integral-derivative-f-over-f-intro.html<br>\n"
-      << "SlidesProjector: modules/substitution-rule/pdf/integral-derivative-f-over-f-intro.pdf<br>\n"
-      << "SlidesPrintable: modules/substitution-rule/pdf/printable-integral-derivative-f-over-f-intro.pdf<br>\n"
-      << "\n";
+      << "<br>Title: Complex multiplication"
+      << "<br>Video: -"
+      << "<br>Problem: DefaultProblemLocation/Complex-multiplication-z-times-w.html"
+      << "<br>SlidesSource: freecalc/modules/complex-numbers/complex-numbers-addition-multiplication-example-1"
+      << "<br>\n";
+    }
   }
   if (subSectionStarted)
       out << "</li>";
@@ -3683,6 +3689,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     << " points earned.<br>\n" ;
   }
   #endif
+  this->initTopicElementNames();
   out << "Problem links open in: ";
 //  out << "<br>DEBUG: problinkstyle: "
 //  << theGlobalVariables.GetWebInput("problemLinkStyle")
@@ -3742,10 +3749,17 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     }
     currentElt.ComputeLinks(*this, plainStyle);
     if (!tableStarted &&
-        currentElt.type!=currentElt.tSection &&
-        currentElt.type!=currentElt.tSubSection &&
-        currentElt.type!=currentElt.tChapter )
-    { out << TopicElement::GetTableStart(plainStyle);
+         (currentElt.type==currentElt.tProblem
+         ))
+    { if (!subSectionStarted && !sectionStarted)
+      { sectionStarted=true;
+        out << "<li class='listSection'><ol>";
+      }
+      if (!subSectionStarted)
+      { subSectionStarted=true;
+        out << "<li class='listSubsection'>";
+      }
+      out << TopicElement::GetTableStart(plainStyle);
       tableStarted=true;
     }
     if ((currentElt.type==currentElt.tSection ||
@@ -3814,9 +3828,12 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       subSectionStarted=true;
       tableStarted=false;
     } else if (currentElt.type==currentElt.tError)
-      out << "Error parsing topic list. Could not make sense of: " << currentElt.error << ". "
-      << "The allowed data labels are [CASE SENSITIVE!]: "
-      << "<br>Section<br>Topic<br>Title<br>Video<br>Problem<br>Slides<br>PrintableSlides<br>"
+    { out << "Error parsing topic list. Could not make sense of: " << currentElt.error << ". "
+      << "The entry labels are [CASE SENSITIVE!]: <br>";
+      for (int k=0; k<this->calculatorTopicElementNames.size; k++)
+        out << "<span style='color:green'>" << this->calculatorTopicElementNames[k]
+        << ":</span><br>";
+      out
       << "You need to include columns immediately after the data labels. The data entries are terminated by new line. "
       << " Here is a correctly entered example:"
       << "Title: What is a logarithmic derivative?<br>\n"
@@ -3824,7 +3841,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       << "Slides: modules/substitution-rule/pdf/integral-derivative-f-over-f-intro.pdf<br>\n"
       << "PrintableSlides: modules/substitution-rule/pdf/printable-integral-derivative-f-over-f-intro.pdf<br>\n"
       << "\n";
-    else
+    } else
     { out << "<tr class=\"calculatorProblem\" "
       << "id=\"" << currentElt.idBase64 << "\"" << ">\n";
       out << "  <td>\n";

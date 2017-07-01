@@ -12,7 +12,7 @@
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCustomCode
 (__FILE__, "Routines for calculus teaching: calculator exam mode. Shared code. ");
 
-std::string CalculatorHTML::stringScoredQuizzes="Scored Quizzes";
+std::string CalculatorHTML::stringScoredQuizzes="Quiz";
 std::string CalculatorHTML::stringPracticE="Practice";
 std::string CalculatorHTML::stringProblemLink="Problem link";
 
@@ -736,8 +736,8 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   } else
     refStreamExercise << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
   if (!theGlobalVariables.UserGuestMode())
-    out << " <a class=\"problemLink\" href=\"" << refStreamForReal.str() << "\">"
-    << CalculatorHTML::stringScoredQuizzes << "</a> ";
+    out << "<b> <a class=\"problemLink\" href=\"" << refStreamForReal.str() << "\">"
+    << CalculatorHTML::stringScoredQuizzes << "</a></b> ";
   out << " | <a class=\"problemLink\" href=\"" << refStreamExercise.str() << "\">"
   << CalculatorHTML::stringPracticE << "</a> ";
   //out << "DEBUG: topiclist: " << this->topicListFileName << " courseHome: " << this->courseHome
@@ -3854,12 +3854,23 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 //      << ", answered: "
 //      << currentElt.totalPointsEarned;
       out << "  </td>\n";
-      out << "  <td>\n" << currentElt.displayVideoLink << " | ";
+      out << "  <td>\n";
+      List<std::string> theLinks;
+      if (currentElt.displayVideoLink!="")
+        theLinks.AddOnTop(currentElt.displayVideoLink);
       if (currentElt.displaySlidesLink!="")
-        out << currentElt.displaySlidesLink << " | ";
+        theLinks.AddOnTop(currentElt.displaySlidesLink);
       if (currentElt.displaySlidesPrintableLink!="")
-        out << currentElt.displaySlidesPrintableLink << " | ";
+        theLinks.AddOnTop(currentElt.displaySlidesPrintableLink);
+      for (int k=0; k<theLinks.size; k++)
+      { out << theLinks[k];
+        if (k!=theLinks.size-1)
+          out << " | ";
+      }
+      out << "</td>";
+      out << "<td>";
       out << currentElt.displayProblemLink;
+
       out << "  </td>\n";
       out << "  <td>";
       if (currentElt.problem=="")

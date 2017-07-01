@@ -31,7 +31,7 @@ function accordionExpansionOfProblem(theAnchor)
   CurrentProblemIframeRow.className="problemContainerRow";
   var newCell=CurrentProblemIframeRow.insertCell(0);
   newCell.className="problemContainerCell";
-  newCell.colSpan=4;
+  newCell.colSpan=5;
   newCell.theIframeId=theAnchor.href;
   newCell.innerHTML=
     "<div class=\"CurrentProblemIframeContainer\"> <iframe style=\"background:white; width:100%\" onload=\"resizeIFrameToFitContent(this);\" id=\"" +

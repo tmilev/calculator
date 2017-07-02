@@ -4006,13 +4006,12 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     this->displayTitle= this->problemNumberString + "-" ;//+ "<br>DEBUG: "+this->ToString();
   else
     this->displayTitle= this->problemNumberString + this->title ;//+ "<br>DEBUG: "+this->ToString();
-  if (this->video=="")
-    this->displayVideoLink = "Lesson coming soon";
-  else if (this->video=="-")
+  if (this->video=="" || this->video=="-" || this->video=="--")
     this->displayVideoLink = "";
   else
-    this->displayVideoLink= "<a href=\"#\" onclick=\"window.open('"
-    + this->video + "',  'width=300', 'height=250', 'top=400'); return false;\">Go to lesson</a>";
+  { // stOutput <<"DEBUG: Video: " << this->video;
+    this->displayVideoLink= "<a href=\"" + this->video + "\" class=\"videoLink\" target=\"_blank\">Go to lesson</a>";
+  }
   if (this->slidesProjector!="")
     this->displaySlidesLink = "<a href=\"" + this->slidesProjector + "\">Slides</a>";
   if (this->slidesPrintable!="")

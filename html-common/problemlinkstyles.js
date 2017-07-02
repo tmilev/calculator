@@ -70,6 +70,7 @@ function resizeIFrameToFitContent(iFrame)
   var desiredHeight= Math.max(
     iFrameBody.scrollHeight, iFrameBody.offsetHeight,
     iFrameHtml.clientHeight, iFrameHtml.scrollHeight, iFrameHtml.offsetHeight );
+  desiredHeight=Math.min(desiredHeight, 600);
   desiredHeight+=200;
   iFrame.height=desiredHeight;
 }

@@ -1,6 +1,5 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math10_LaTeXRoutines.h"
 #include "vpfHeader1General7FileOperations_Encodings.h"
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
@@ -444,6 +443,8 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
     (this->slideFileNamesVirtualWithPatH[i], &this->slideFileNamesWithLatexPathNoExtension[i]);
     if (MathRoutines::StringBeginsWith(this->slideFileNamesWithLatexPathNoExtension[i], "freecalc", 0))
       this->slideFileNamesWithLatexPathNoExtension[i]="../../"+this->slideFileNamesWithLatexPathNoExtension[i];
+    if (MathRoutines::StringBeginsWith(this->slideFileNamesWithLatexPathNoExtension[i], "LaTeX-materials", 0))
+      this->slideFileNamesWithLatexPathNoExtension[i]="../../"+this->slideFileNamesWithLatexPathNoExtension[i];
   }
   this->headerFileNameWithPathVirtual=this->slideFileNamesVirtualWithPatH[0];
   this->headerFilePathVirtual = FileOperations::GetPathFromFileNameWithPath(this->headerFileNameWithPathVirtual);
@@ -460,6 +461,8 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   this->slideFileNamesVirtualWithPatH[1] : this->slideFileNamesVirtualWithPatH[0];
   FileOperations::GetFileExtensionWithDot(tempString, &this->targetPDFFileNameWithPathVirtual);
   if (MathRoutines::StringBeginsWith(this->targetPDFFileNameWithPathVirtual, "freecalc", &tempString))
+    this->targetPDFFileNameWithPathVirtual="slides-videos"+tempString;
+  if (MathRoutines::StringBeginsWith(this->targetPDFFileNameWithPathVirtual, "LaTeX-materials", &tempString))
     this->targetPDFFileNameWithPathVirtual="slides-videos"+tempString;
   if (this->flagProjectorMode)
     this->targetPDFFileNameWithPathVirtual+="_projector";
@@ -534,8 +537,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   if (FileOperations::OpenFileCreateIfNotPresentUnsecure(theFile, this->workingFileNameNoPathTex, false, true, false))
     theFile << theFileContentStream.str();
   theFile.close();
-  if (commentsGeneral!=0)
-    *commentsGeneral << "Stored working file: " << this->workingFileNameNoPathTex << "<br>";
+  if (commentsGeneral!=0)    *commentsGeneral << "Stored working file: " << this->workingFileNameNoPathTex << "<br>";
   std::string currentSysCommand = "pdflatex -shell-escape " + this->workingFileNameNoPathTex;
   if (commentsGeneral!=0)
     *commentsGeneral << "Executing command: " << currentSysCommand << " ... ";

@@ -1366,6 +1366,7 @@ bool CalculatorFunctionsGeneral::innerIsProductLinearOrConstTermsIn(Calculator& 
 
 bool CalculatorFunctionsGeneral::innerOrIdentical(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerOrIdentical");
+  (void) theCommands;
   if (!input.StartsWithGivenAtom("or",3))
     return false;
   if (input[1]==input[2])

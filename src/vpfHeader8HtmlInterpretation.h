@@ -12,6 +12,7 @@ class CalculatorHTML;
 
 struct TopicElement{
 public:
+  static int scoreButtonCounter;
   int type;
   enum topicType{tChapter, tSection, tSubSection, tError, tProblem, tTexHeader, tUndefined};
   bool flagContainsProblemsNotInSubsection;
@@ -40,7 +41,6 @@ public:
   std::string slidesPrintable;
   std::string problem;
   std::string error;
-  std::string displayTitleWithDeadline;
   std::string displayTitle;
   std::string displayVideoLink;
   std::string displaySlidesLink;
@@ -62,7 +62,9 @@ public:
   { output << theElt.ToString();
     return output;
   }
-  std::string ToStringStudentScoreButton(bool doIncludeButton);
+  std::string ToStringItemInTable(bool doIncludeScoreButton);
+  std::string ToStringStudentScoreButton();
+  std::string ToStringStudentScoreReportPanel();
   std::string ToString()const;
   static std::string GetTableStart(bool plainStyle);
   static std::string GetTableFinish(bool plainStyle);

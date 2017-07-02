@@ -3607,26 +3607,51 @@ void CalculatorHTML::InterpretJavascripts(SyntacticElementHTML& inputOutput)
     inputOutput.interpretedCommand=HtmlRoutines::GetJavascriptMathjax();
 }
 
-std::string TopicElement::ToStringStudentScoreButton(bool doIncludeButton)
+std::string TopicElement::ToStringItemInTable(bool doIncludeScoreButton)
 { std::stringstream out;
-  static int scoreButtonCounter=0;
-  scoreButtonCounter++;
+  out << "<table class=\"tableItem\">";
+  out << "<colgroup><col><col><col><col><col></colgroup>\n";
+  out << "<tr>"
+  << "<td>" << this->displayTitle;
+  if (doIncludeScoreButton)
+    out << this->ToStringStudentScoreReportPanel();
+  out  << "</td>";
+  out << "<td>" << this->displayVideoLink << this->displayProblemLink << "</td>";
+  out << "<td></td>";
+  if (doIncludeScoreButton)
+    out << "<td>" << this->ToStringStudentScoreButton() << "</td>";
+  else
+    out << "<td></td>";
+  out << "<td class=\"deadlineCell\">" << this->displayDeadlinE << "</td>";
+  out << "</tr></table>";
+  return out.str();
+}
+
+int TopicElement::scoreButtonCounter=0;
+
+std::string TopicElement::ToStringStudentScoreReportPanel()
+{ std::stringstream out;
+  TopicElement::scoreButtonCounter++;
   out << "<span class=\"studentScoresWrapper\">";
-  if (doIncludeButton)
-    out << "<button class=\"studentScoresButton\""
-    << "onclick=\"toggleStudentScores"
-    << "('studentScoresLoadReport" << scoreButtonCounter << "', "
-    << "'scoresInCoursePage',"
-    << "'studentScoresLoadReport"
-    << scoreButtonCounter << "');\">"
-    << "Scores</button>";
-   ;
   out << "<span id='studentScoresLoadReport"
   << scoreButtonCounter << "'></span>"
   << "<span class='studentScoreOutputJavascriptSpan' id='studentScoresOutput"
   << scoreButtonCounter << "'></span>"
   << "<span class='studentScoresContent' id='" << this->studentScoresSpanId << "'></span>"
   << "</span>";
+  return out.str();
+}
+
+std::string TopicElement::ToStringStudentScoreButton()
+{ std::stringstream out;
+  out << "<button class=\"studentScoresButton\""
+  << "onclick=\"toggleStudentScores"
+  << "('studentScoresLoadReport" << TopicElement::scoreButtonCounter << "', "
+  << "'scoresInCoursePage',"
+  << "'studentScoresLoadReport"
+  << TopicElement::scoreButtonCounter << "');\">"
+  << "Scores</button>";
+  ;
   return out.str();
 }
 
@@ -3784,11 +3809,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
         out << "</ol></li>\n";
     if (currentElt.type==currentElt.tChapter)
     { out << "<li class=\"listChapter\" "
-      << "id=\"" << currentElt.idBase64 << "\"" << ">\n"
-      << currentElt.displayTitleWithDeadline;
-      if (this->flagIncludeStudentScores)
-        out << currentElt.ToStringStudentScoreButton(true);
-      out << "\n<br>\n";
+      << "id=\"" << currentElt.idBase64 << "\"" << ">\n";
+      out << currentElt.ToStringItemInTable(this->flagIncludeStudentScores);
       chapterStarted=true;
       sectionStarted=false;
       subSectionStarted=false;
@@ -3800,15 +3822,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       out << "<ol>\n";
     } else if (currentElt.type==currentElt.tSection)
     { out << "<li class=\"listSection\""
-      << "id=\"" << currentElt.idBase64 << "\"" << ">\n"
-      << currentElt.displayTitleWithDeadline;
-//      out << " DEBUG: total possible answers: "
-//      << currentElt.maxPointsInAllChildren
-//      << ", answered: "
-//      << currentElt.totalPointsEarned;
-      if (this->flagIncludeStudentScores)
-        out << currentElt.ToStringStudentScoreButton(true);
-      out << "\n<br>\n";
+      << "id=\"" << currentElt.idBase64 << "\"" << ">\n";
+      out << currentElt.ToStringItemInTable(this->flagIncludeStudentScores);
       sectionStarted=true;
       subSectionStarted=false;
       tableStarted=false;
@@ -3817,14 +3832,11 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     { out << "<li class=\"listSubsection\""
       << "id=\"" << currentElt.idBase64 << "\"" << ">\n"
       ;
-      out << currentElt.displayTitleWithDeadline;
-      if (this->flagIncludeStudentScores)
-        out << currentElt.ToStringStudentScoreButton(false);
+      out << currentElt.ToStringItemInTable(this->flagIncludeStudentScores);
 //      out << " DEBUG: total possible answers: "
 //      << currentElt.maxPointsInAllChildren
 //      << ", answered: "
 //      << currentElt.totalPointsEarned;
-      out << "\n<br>\n";
       subSectionStarted=true;
       tableStarted=false;
     } else if (currentElt.type==currentElt.tError)
@@ -3847,8 +3859,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       out << "  <td>\n";
       out << currentElt.displayTitle;
       if (this->flagIncludeStudentScores)
-        out << currentElt.ToStringStudentScoreButton(false);
-
+        out << currentElt.ToStringStudentScoreReportPanel();
 //      out << " DEBUG: total possible answers: "
 //      << currentElt.maxPointsInAllChildren
 //      << ", answered: "
@@ -3878,7 +3889,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       else
         out << currentElt.displayScore;
       out << "  </td>\n";
-      out << "  <td>\n" << currentElt.displayDeadlinE << "  </td>\n";
+      out << "  <td class=\"deadlineCell\">\n" << currentElt.displayDeadlinE << " </td>\n";
       out << "</tr>\n";
     }
   }
@@ -4010,7 +4021,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     this->displayVideoLink = "";
   else
   { // stOutput <<"DEBUG: Video: " << this->video;
-    this->displayVideoLink= "<a href=\"" + this->video + "\" class=\"videoLink\" target=\"_blank\">Go to lesson</a>";
+    this->displayVideoLink= "<a href=\"" + this->video + "\" class=\"videoLink\" target=\"_blank\">Video</a>";
   }
   if (this->slidesProjector!="")
     this->displaySlidesLink = "<a href=\"" + this->slidesProjector + "\">Slides</a>";
@@ -4066,21 +4077,20 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
      this->type==this->tSubSection ||
      this->type==this->tSection ||
      this->type==this->tChapter);
-    std::stringstream titleAndDeadlineStream;
-    titleAndDeadlineStream
-    << "<span class=\"deadlineAndTitleContainer\">"
-    << "<span class=\"titleContainer\">" << this->displayTitle
-    << "</span>"
-    << "&nbsp;&nbsp;<span style=\"font-weight:normal; font-size: medium\">"
-    << this->displaySlidesLink
-    << "</span>"
-    << "<span class=\"deadlineContainer\">" << this->displayDeadlinE << "</span>"
-    << "</span>"
-
-    ;
-    this->displayTitleWithDeadline=titleAndDeadlineStream.str();
-  } else
-    this->displayTitleWithDeadline=this->displayTitle;
+    //std::stringstream titleAndDeadlineStream;
+    //titleAndDeadlineStream
+    //<< "<span class=\"deadlineAndTitleContainer\">"
+    //<< "<span class=\"titleContainer\">" << this->displayTitle
+    //<< "</span>"
+    //<< "&nbsp;&nbsp;<span style=\"font-weight:normal; font-size: medium\">"
+    //<< this->displaySlidesLink
+    //<< "</span>"
+    //<< "" << this->displayDeadlinE << "</span>"
+    //<< "</span>"
+    //
+    //;
+    //this->displayTitleWithDeadline=titleAndDeadlineStream.str();
+  }
 }
 
 std::string TopicElement::ToString()const
@@ -4101,7 +4111,7 @@ std::string TopicElement::ToString()const
 std::string TopicElement::GetTableStart(bool plainStyle)
 { std::stringstream out;
   out << "\n\n<table class=\"topicList\">\n";
-  out << "<colgroup><col><col><col><col></colgroup>\n";
+  out << "<colgroup><col><col><col><col><col></colgroup>\n";
   out << "<tbody>\n";
   if (!plainStyle)
     out

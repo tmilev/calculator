@@ -224,8 +224,8 @@ span.deadlineAndTitleContainer{
 span.titleContainer{
 }
 
-span.deadlineContainer{
-  display: inline-block;
+td.deadlineCell{
+  padding: 8px;
   margin-left: 10px;
   margin-top: 0px;
   margin-bottom: 0px;
@@ -269,5 +269,117 @@ textarea.currentFileNameArea {
   height: 1.5em;
   padding: 0px;
 }
+
+section {
+  width:100%;
+  float:left;
+  overflow: auto;
+}
+li{
+  display: block;
+}
+ol { 
+  counter-reset: item 0;
+  padding: 5px;
+  margin-left: 0;
+  margin-right: 0;
+}
+ol li{
+  padding-bottom: 10px; 
+  margin-left: 0;
+  margin-right: 0;
+  padding-bottom: 5px;
+}
+ol ol { 
+  margin-top: 5pt;
+/*  margin-left: 5pt;*/
+  margin-right: 0;
+  padding: 0; 
+}
+li.listChapter{
+  font-weight: bold;
+  font-size: 1.3em;
+}
+li.listSection{
+  font-weight: bold;
+  font-size: 0.9em;
+}
+li.listSubsection{
+font-weight: normal;
+font-size: 0.9em;
+}
+
+table.tableItem{
+  width: 100%;
+  /*border: 1px solid #ddd;*/
+}
+
+table.tableItem col:nth-child(1){
+  width: 40%;
+}
+table.tableItem col:nth-child(2){
+  width: 20%;
+}
+table.tableItem col:nth-child(3){
+  width: 10%;
+}
+table.tableItem col:nth-child(4){
+  width: 10%;
+}
+table.tableItem col:nth-child(5){
+  width: 20%;
+}
+table.tableItem td, table.tableItem th {
+  text-align: left;
+}
+
+
+table.topicList {
+  border-collapse: collapse;
+  width: 100%;
+  font-weight: normal;
+  font-size: 1em;
+}
+table.topicList {
+  counter-reset: rowNumber;
+}
+tr.calculatorProblem {
+  counter-increment: rowNumber;
+}
+/*tr.calculatorProblem > td:nth-child(1)::before {
+  content: counters(item, ".") "." counter(rowNumber) ".";
+  min-width: 1em;
+  margin-right: 0.5em;
+}*/
+table.topicList td, table.topicList th {
+  border: 1px solid #ddd;
+  text-align: left;
+  padding: 8px;
+}
+table.topicList col:nth-child(1){
+  width: 40%;
+}
+table.topicList col:nth-child(2){
+  width: 20%;
+}
+table.topicList col:nth-child(3){
+  width: 10%;
+}
+table.topicList col:nth-child(4){
+  width: 10%;
+}
+table.topicList col:nth-child(5){
+  width: 20%;
+}
+table.topicList tr:nth-child(even){}
+table.topicList tr:nth-child(odd){background-color: #fafafa}
+td a:hover{ background-color:#dddddd}
+/*table.topicList tr:hover {background-color: #ddd;}*/
+
+table.topicList th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
 
 

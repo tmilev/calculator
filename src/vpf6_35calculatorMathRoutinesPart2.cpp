@@ -861,7 +861,7 @@ bool CalculatorFunctionsGeneral::innerLength(Calculator& theCommands, const Expr
 }
 
 bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables
-(Calculator& theCommands, const Expression& input, Expression& output)
+(Calculator& theCommands, const Expression& input, Expression& output, bool excludeNamedConstants)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables");
   if (input.size()<3)
     return false;
@@ -882,7 +882,7 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
       allowedFreeVars.AddOnTop(input[3]);
   }
   presentFreeVars.SetExpectedSize(input.size()-2);
-  theExpression.GetFreeVariables(presentFreeVars, true);
+  theExpression.GetFreeVariables(presentFreeVars, excludeNamedConstants);
   std::stringstream out;
   if (!presentFreeVars.Contains(mandatoryFreeVars))
   { out << "<hr>";
@@ -894,7 +894,7 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
       { if (found)
           out << ", ";
         found=true;
-        out << mandatoryFreeVars[i].ToString();
+        out << "\\(" << mandatoryFreeVars[i].ToString() << "\\)";
       }
     out << "</b>.";
     out << "<br>The mandatory variable(s) are: " << mandatoryFreeVars.ToStringCommaDelimited() << ". ";

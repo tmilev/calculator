@@ -1612,7 +1612,7 @@ D-B;\
    ;
   this->AddOperationInnerHandler
   ("EnsureExpressionDependsMandatoryVariables",
-    CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables, "",
+    CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariablesExcludeNamedConstants, "",
    "Similar to EnsureExpressionDependsOnlyOn, but requests that the expression \
    depend on two lists, first \
    with mandatory variables, second with non-mandatory. ",
@@ -1622,6 +1622,17 @@ D-B;\
    true, false,
    "CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables",
    "EnsureExpressionDependsMandatoryVariables")
+   ;
+  this->AddOperationInnerHandler
+  ("EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants",
+    CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariablesIncludeNamedConstants, "",
+   "Same as EnsureExpressionDependsMandatoryVariables including named constants such as \\pi, e.  ",
+   "EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants(2\\pi, \\pi, y); \
+   EnsureExpressionDependsMandatoryVariables(2, \\pi, none );\
+   ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables",
+   "EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants")
    ;
   this->AddOperationInnerHandler
   ("\\log", CalculatorFunctionsGeneral::innerLog, "",

@@ -135,7 +135,15 @@ public:
 //  static bool innerPowerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPolynomialRelations(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariables(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariables(Calculator& theCommands, const Expression& input, Expression& output, bool excludeNamedConstants);
+  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariablesExcludeNamedConstants
+  (Calculator& theCommands, const Expression& input, Expression& output)
+  { return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables(theCommands, input, output, true);
+  }
+  static bool innerEnsureExpressionDependsOnlyOnMandatoryVariablesIncludeNamedConstants
+  (Calculator& theCommands, const Expression& input, Expression& output)
+  { return CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables(theCommands, input, output, false);
+  }
   static bool innerEnsureExpressionDependsOnlyOnStandard(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerMultiplySequence(Calculator& theCommands, const Expression& input, Expression& output);

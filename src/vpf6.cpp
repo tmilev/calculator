@@ -1693,6 +1693,8 @@ bool Calculator::innerDistributeExponent(Calculator& theCommands, const Expressi
     return false;
   const Expression& base = input[1];
   const Expression& exponentE=input[2];
+  if (exponentE.IsAtomGivenData(theCommands.opCirc()))
+    return false;
   if (!input[1].StartsWith(theCommands.opTimes(), 3))
     return false;
   if (!base[1].IsConstantNumber())

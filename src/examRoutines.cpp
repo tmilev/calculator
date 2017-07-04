@@ -736,9 +736,9 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   } else
     refStreamExercise << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
   if (!theGlobalVariables.UserGuestMode())
-    out << "<b> <a class=\"problemLink\" href=\"" << refStreamForReal.str() << "\">"
+    out << "<b> <a class=\"problemLinkQuiz\" href=\"" << refStreamForReal.str() << "\">"
     << CalculatorHTML::stringScoredQuizzes << "</a></b> ";
-  out << " | <a class=\"problemLink\" href=\"" << refStreamExercise.str() << "\">"
+  out << " | <a class=\"problemLinkPractice\" href=\"" << refStreamExercise.str() << "\">"
   << CalculatorHTML::stringPracticE << "</a> ";
   //out << "DEBUG: topiclist: " << this->topicListFileName << " courseHome: " << this->courseHome
   //<< " filename: " << theFileName;
@@ -3609,7 +3609,7 @@ void CalculatorHTML::InterpretJavascripts(SyntacticElementHTML& inputOutput)
 
 std::string TopicElement::ToStringItemInTable(bool doIncludeScoreButton)
 { std::stringstream out;
-  out << "<table class=\"tableItem\">";
+  out << "\n\n<table class=\"tableItem\">";
   out << "<colgroup><col><col><col><col><col></colgroup>\n";
   out << "<tr>"
   << "<td>" << this->displayTitle;
@@ -3623,7 +3623,7 @@ std::string TopicElement::ToStringItemInTable(bool doIncludeScoreButton)
   else
     out << "<td></td>";
   out << "<td class=\"deadlineCell\">" << this->displayDeadlinE << "</td>";
-  out << "</tr></table>";
+  out << "</tr></table>\n\n";
   return out.str();
 }
 
@@ -3644,7 +3644,7 @@ std::string TopicElement::ToStringStudentScoreReportPanel()
 
 std::string TopicElement::ToStringStudentScoreButton()
 { std::stringstream out;
-  out << "<button class=\"studentScoresButton\""
+  out << "<button class=\"studentScoresButton\" "
   << "onclick=\"toggleStudentScores"
   << "('studentScoresLoadReport" << TopicElement::scoreButtonCounter << "', "
   << "'scoresInCoursePage',"
@@ -3774,14 +3774,22 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     }
     currentElt.ComputeLinks(*this, plainStyle);
     if (!tableStarted &&
-         (currentElt.type==currentElt.tProblem
+         ( currentElt.type!=currentElt.tSection    &&
+           currentElt.type!=currentElt.tSubSection &&
+           currentElt.type!=currentElt.tChapter    &&
+           currentElt.type!=currentElt.tError
          ))
-    { if (!subSectionStarted && !sectionStarted)
-      { sectionStarted=true;
+    { //stOutput << "DEBUG: here be I, item is: " << currentElt.id << " sectionStarted: "
+      //<< sectionStarted
+      //<< " subsectionStarted: " << subSectionStarted << "<br>";
+      if (!subSectionStarted && !sectionStarted)
+      { //stOutput << "DEBUG: here be I at sectionStart";
+        sectionStarted=true;
         out << "<li class='listSection'><ol>";
       }
       if (!subSectionStarted)
-      { subSectionStarted=true;
+      { //stOutput << "DEBUG: here be I at subsecstart";
+        subSectionStarted=true;
         out << "<li class='listSubsection'>";
       }
       out << TopicElement::GetTableStart(plainStyle);
@@ -3829,7 +3837,11 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       tableStarted=false;
       out << "<ol>\n";
     } else if (currentElt.type==currentElt.tSubSection)
-    { out << "<li class=\"listSubsection\""
+    { if (!sectionStarted)
+      { out << "<li class=\"listSection\">\n<ol>\n";
+        sectionStarted=true;
+      }
+      out << "<li class=\"listSubsection\""
       << "id=\"" << currentElt.idBase64 << "\"" << ">\n"
       ;
       out << currentElt.ToStringItemInTable(this->flagIncludeStudentScores);
@@ -4021,12 +4033,12 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     this->displayVideoLink = "";
   else
   { // stOutput <<"DEBUG: Video: " << this->video;
-    this->displayVideoLink= "<a href=\"" + this->video + "\" class=\"videoLink\" target=\"_blank\">Video</a>";
+    this->displayVideoLink= "<a href=\"" + this->video + "\" class=\"videoLink\" class=\"videoLink\" target=\"_blank\">Video</a>";
   }
   if (this->slidesProjector!="")
-    this->displaySlidesLink = "<a href=\"" + this->slidesProjector + "\">Slides</a>";
+    this->displaySlidesLink = "<a href=\"" + this->slidesProjector + "\" class=\"slidesLink\">Slides</a>";
   if (this->slidesPrintable!="")
-    this->displaySlidesPrintableLink = "<a href=\"" + this->slidesPrintable + "\">Printable slides</a>";
+    this->displaySlidesPrintableLink = "<a href=\"" + this->slidesPrintable + "\" class=\"slidesLink\">Printable slides</a>";
   if (this->slidesProjector=="" && this->slidesPrintable=="" && this->slidesSources.size>0)
   { std::stringstream slideFromSourceStreamHandout, slideFromSourceStreamProjector;
     slideFromSourceStreamHandout << "<a href=\""
@@ -4041,9 +4053,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
       << "=" << HtmlRoutines::ConvertStringToURLString(this->slidesSources[i], false) << "&";
     slideFromSourceStreamProjector << slideFromSourceStreamHandout.str();
     slideFromSourceStreamHandout << "layout=printable&";
-    slideFromSourceStreamHandout << "\" target=\"_blank\">Printable slides</a>" << " | ";
+    slideFromSourceStreamHandout << "\" class=\"slidesLink\" target=\"_blank\">Printable slides</a>" << " | ";
     slideFromSourceStreamProjector << "layout=projector&";
-    slideFromSourceStreamProjector << "\" target=\"_blank\">Slides</a>";
+    slideFromSourceStreamProjector << "\" class=\"slidesLink\" target=\"_blank\">Slides</a>";
     this->displaySlidesLink=slideFromSourceStreamHandout.str() + slideFromSourceStreamProjector.str();
   }
   bool problemSolved=false;

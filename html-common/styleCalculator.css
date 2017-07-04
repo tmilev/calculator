@@ -22,7 +22,6 @@ td.problemContainerCell{
 /*height: 500px;*/
 }
 
-
 problemNavigation {
   text-align: center;
   background-color: #f0f0f0;
@@ -113,17 +112,20 @@ sectionSelection{
 
 button.accordionLike {
   display: inline;
-  background-color: #eee;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #efefef;
+  padding: 2px;
   color: #444;
   cursor: pointer;
-  padding: 0px;
   margin-top: 0px;
   margin-bottom: 0px;
   border: none;
   text-align: left;
   outline: none;
   font-size: medium;
-  transition: 0.4s;
+  transition: 0.6s;
 }
 
 button.accordionLike.active, button.accordionLike:hover {
@@ -131,22 +133,25 @@ button.accordionLike.active, button.accordionLike:hover {
 }
 
 button.accordion {
+  padding: 2px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
   display: inline;
-  background-color: #eee;
+  background-color: #efefef;
   color: #444;
   cursor: pointer;
-  padding: 0px;
   margin-top: 0px;
   margin-bottom: 0px;
   border: none;
   text-align: left;
   outline: none;
   font-size: medium;
-  transition: 0.4s;
+  transition: 0.6s;
 }
 
 button.accordion.active, button.accordion:hover {
-  background-color: #ddd;
+  background-color: #dfdfdf;
 }
 
 button.accordion:after {
@@ -182,11 +187,17 @@ button.studentScoresButton{
   font-size: medium;
   font-weight: normal;
   background-color: Transparent;
+  padding: 2px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
   background-repeat:no-repeat;
   border: none;
   cursor:pointer;
   overflow: hidden;
   outline:none;
+  transition: 0.6s;
 }
 
 button.studentScoresButton.active, button.studentScoresButton:hover {
@@ -271,8 +282,8 @@ textarea.currentFileNameArea {
 }
 
 section {
-  width:100%;
-  float:left;
+  width: 100%;
+  float: left;
   overflow: auto;
 }
 li{
@@ -314,26 +325,10 @@ table.tableItem{
   /*border: 1px solid #ddd;*/
 }
 
-table.tableItem col:nth-child(1){
-  width: 40%;
-}
-table.tableItem col:nth-child(2){
-  width: 20%;
-}
-table.tableItem col:nth-child(3){
-  width: 10%;
-}
-table.tableItem col:nth-child(4){
-  width: 10%;
-}
-table.tableItem col:nth-child(5){
-  width: 20%;
-}
 table.tableItem td, table.tableItem th {
   text-align: left;
+  padding-left: 8px;
 }
-
-
 table.topicList {
   border-collapse: collapse;
   width: 100%;
@@ -354,32 +349,90 @@ tr.calculatorProblem {
 table.topicList td, table.topicList th {
   border: 1px solid #ddd;
   text-align: left;
-  padding: 8px;
+  padding-left: 8px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+table.tableItem col:nth-child(1){
+  width: 35%;
+}
+table.tableItem col:nth-child(2){
+  width: 20%;
+}
+table.tableItem col:nth-child(3){
+  width: 12%;
+}
+table.tableItem col:nth-child(4){
+  width: 13%;
+}
+table.tableItem col:nth-child(5){
+  width: 20%;
 }
 table.topicList col:nth-child(1){
-  width: 40%;
+  width: 35%;
 }
 table.topicList col:nth-child(2){
   width: 20%;
 }
 table.topicList col:nth-child(3){
-  width: 10%;
+  width: 12%;
 }
 table.topicList col:nth-child(4){
-  width: 10%;
+  width: 13%;
 }
 table.topicList col:nth-child(5){
   width: 20%;
 }
 table.topicList tr:nth-child(even){}
 table.topicList tr:nth-child(odd){background-color: #fafafa}
-td a:hover{ background-color:#dddddd}
 /*table.topicList tr:hover {background-color: #ddd;}*/
-
 table.topicList th {
   padding-top: 12px;
   padding-bottom: 12px;
 }
-
-
+a.problemLinkQuiz{
+/*  color:green;*/
+  background-color: #efefef;
+  padding:2px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+a.problemLinkPractice{
+  padding:2px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+a.slidesLink{
+  padding:2px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+a.videoLink{
+  padding:2px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+a.problemLinkQuiz:hover{ 
+  background-color: Orange;
+}
+a.problemLinkPractice:hover{
+  background-color: PaleGreen;
+}
+a.slidesLink:hover{
+  background-color: #dfdfdf;
+}
+a.videoLink:hover{
+  background-color: #dfdfdf;
+}
 

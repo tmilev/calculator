@@ -95,7 +95,8 @@ function accordionExpansionOfProblem(theAnchor)
 }
 
 function setProblemLinkStyle(desiredStyle)
-{ var theLinks=document.getElementsByClassName("problemLink");
+{ var theLinks= Array.prototype.slice.call(document.getElementsByClassName("problemLinkQuiz")).
+    concat(     Array.prototype.slice.call(document.getElementsByClassName("problemLinkPractice")));
   DesiredLinkStyle=desiredStyle;
   for (var i=0; i<theLinks.length; i++)
   { if (desiredStyle==="newWindow")

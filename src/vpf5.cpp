@@ -1591,7 +1591,7 @@ bool Calculator::GetMatrixExpressions(const Expression& input, Matrix<Expression
     }
     return false;
   }
-  if (!input[1].IsSequenceNElementS())
+  if (!input[1].IsSequenceNElementS() && !input[1].StartsWith(this->opIntervalOpen()))
   { if (desiredNumRows>0)
       if (desiredNumRows!=1)
         return false;
@@ -1611,7 +1611,7 @@ bool Calculator::GetMatrixExpressions(const Expression& input, Matrix<Expression
       return false;
   output.init(input.size()-1, input[1].size()-1);
   for (int i=1; i<input.size(); i++)
-    if (input[i].IsSequenceNElementS(output.NumCols))
+    if (input[i].IsSequenceNElementS(output.NumCols) || input[i].StartsWith(this->opIntervalOpen(), output.NumCols+1))
       for (int j=1; j<input[i].size(); j++)
         output(i-1, j-1)=input[i][j];
     else

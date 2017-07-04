@@ -3322,6 +3322,13 @@ int WebWorker::ProcessDatabaseOneEntry()
   return 0;
 }
 
+int WebWorker::ProcessBrowseProblems()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessBrowseProblems");
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::GetBrowseProblems();
+  return 0;
+}
+
 int WebWorker::ProcessEditPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessEditPage");
   this->SetHeaderOKNoContentLength();

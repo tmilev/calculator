@@ -938,6 +938,8 @@ bool Calculator::ReplaceXEXByE()
 bool Calculator::ReplaceXEXByEcontainingOE(int inputOpIndex)
 { SyntacticElement& outputElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& inputElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  if (this->flagLogSyntaxRules)
+    this->parsingLog+= "[Rule: Calculator::ReplaceXEXByEcontainingOE]";
   outputElt.theData.reset(*this, 2);
   outputElt.theData.AddChildAtomOnTop(inputOpIndex);
   outputElt.theData.AddChildOnTop(inputElt.theData);
@@ -1556,6 +1558,13 @@ bool Calculator::isSeparatorFromTheLeftGeneral(const std::string& input)
   input=="&";
 }
 
+
+bool Calculator::isSeparatorFromTheLeftForInterval(const std::string& input)
+{ return input=="," || input=="(" || input=="[" || input==":" || input==";" ||
+  input=="=" || input=="\\\\" || input=="\\cup" || input=="\\cap" ||
+  input=="\\end" || input=="&" || input=="EndProgram";
+}
+
 bool Calculator::isSeparatorFromTheRightGeneral(const std::string& input)
 { return input=="}" || input==")" || input=="]" || input=="," || input==":" || input==";" ||
   input=="Matrix" ||
@@ -2108,6 +2117,11 @@ bool Calculator::ApplyOneRule()
       return this->ReplaceXEXByEcontainingOE(this->opIntervalLeftClosed());
     if (thirdToLastS=="[" && secondToLastS=="Expression" && lastS=="]")
       return this->ReplaceXEXByEcontainingOE(this->opIntervalClosed());
+    if (this->flagUseBracketsForIntervals)
+      if (secondToLastE.theData.IsSequenceNElementS(2))
+        if (this->isSeparatorFromTheLeftForInterval(fourthToLastS) &&
+            thirdToLastS=="(" && secondToLastS=="Sequence" && lastS==")")
+          return this->ReplaceXEXByEcontainingOE(this->opIntervalOpen());
   }
   if (thirdToLastS=="\"" && secondToLastS=="Expression" && lastS=="\"")
     return this->ReplaceXEXByEcontainingOE(this->opQuote());
@@ -2214,10 +2228,12 @@ bool Calculator::ApplyOneRule()
   if (fourthToLastS=="MakeSequence" && thirdToLastS=="{}" && secondToLastS=="Expression")
     return this->ReplaceXXYXBySequenceYX(this->conExpression());
   if (fifthToLastS=="Expression" && fourthToLastS== "{}" &&
-      thirdToLastS=="(" && secondToLastS=="Sequence" && lastS==")")
+      thirdToLastS=="(" &&
+      secondToLastS=="Sequence" && lastS==")")
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   if (fifthToLastS=="Expression" && fourthToLastS== "{}" &&
-      thirdToLastS=="{" && secondToLastS=="Sequence" && lastS=="}")
+      thirdToLastS=="{" &&
+      secondToLastS=="Sequence" && lastS=="}")
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   if (secondToLastS=="Sequence" &&
       ((thirdToLastS=="(" && lastS==")")||

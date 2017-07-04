@@ -1481,7 +1481,7 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
   if (firstElt.IsAtomNotInterpretedAsFunction())
     return false;
   const Expression& secondElt=input[2];
-  if (secondElt.IsSequenceNElementS())
+  if (secondElt.IsSequenceNElementS() || secondElt.StartsWith(theCommands.opIntervalOpen()))
   { output=secondElt;
     return output.SetChilD(0, firstElt);
   }

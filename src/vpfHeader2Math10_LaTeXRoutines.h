@@ -28,6 +28,7 @@ class LaTeXcrawler
   std::string headerFileNameNoPath;
   std::string headerFileNameNoPathNoExtension;
   std::string headerFilePathVirtual;
+  std::string headerPathBelowFileNameVirtual;
 
   std::string workingFilePathPhysical;
   std::string workingFileNameNoPathTex;

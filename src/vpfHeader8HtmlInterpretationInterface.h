@@ -20,6 +20,7 @@ public:
   static std::string SubmitProblem();
   static std::string GetProblemSolution();
   static std::string GetEditPageHTML();
+  static std::string GetBrowseProblems();
   static std::string GetJavascriptCaptcha();
   static std::string GetCaptchaDiv();
   static std::string GetExamPage();

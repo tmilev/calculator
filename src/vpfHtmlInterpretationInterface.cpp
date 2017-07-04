@@ -618,6 +618,24 @@ std::string HtmlInterpretation::GetExamPage()
   return out.str();
 }
 
+std::string HtmlInterpretation::GetBrowseProblems()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetBrowseProblems");
+  std::stringstream out;
+  out << "<!DOCTYPE html>";
+  out << "<html>";
+  out << "<head>"
+  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << "</head>";
+  out << "<body>";
+  out << "<calculatorNavigation>"
+  << HtmlInterpretation::ToStringNavigation()
+  << "</calculatorNavigation>";
+  out << "Not implmented yet.";
+  out << "</body></html>";
+  return out.str();
+
+}
+
 std::string HtmlInterpretation::GetEditPageHTML()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetEditPageHTML");
   std::stringstream out;

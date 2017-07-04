@@ -630,10 +630,7 @@ bool CalculatorFunctionsGeneral::innerDereferenceInterval(Calculator& theCommand
   (void) theCommands;
   if (!input.StartsWith(theCommands.opUnderscore(), 3))
     return false;
-  if (!input[1].StartsWith(theCommands.opIntervalClosed(),3 ) &&
-      !input[1].StartsWith(theCommands.opIntervalLeftClosed(),3 ) &&
-      !input[1].StartsWith(theCommands.opIntervalRightClosed() ,3 )
-      )
+  if (!input[1].IsIntervalRealLine())
     return false;
   if (input[2].IsEqualToOne())
   { output=input[1][1];
@@ -748,13 +745,15 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
 bool CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly");
   Expression polyE;
-  if (!CalculatorConversions::innerPolynomial<AlgebraicNumber>(theCommands, input, polyE) )
+  if (!CalculatorConversions::innerPolynomial<AlgebraicNumber>(theCommands, input, polyE))
     return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial. ";
   Polynomial<AlgebraicNumber> thePoly;
   if (!polyE.IsOfType<Polynomial<AlgebraicNumber> >(&thePoly))
-   return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial, instead got " << polyE.ToString();
+    return theCommands << "<hr>Failed to convert " << input.ToString()
+    << " to polynomial, instead got " << polyE.ToString();
   if (polyE.GetNumContextVariables()!=1)
-    return theCommands << "<hr>After conversion, I got the polynomial " << polyE.ToString() << ", which is not in one variable.";
+    return theCommands << "<hr>After conversion, I got the polynomial " << polyE.ToString()
+    << ", which is not in one variable.";
   AlgebraicNumber theAN;
   if (!theAN.ConstructFromMinPoly(thePoly, theCommands.theObjectContainer.theAlgebraicClosure))
     return false;
@@ -4800,6 +4799,8 @@ bool CalculatorFunctionsGeneral::innerPlot2DoverIntervals(Calculator& theCommand
   List<Expression> finalSummands;
   for (int i=0; i<theIntervalCandidates.size; i++)
   { summandE.reset(theCommands);
+    stOutput << "<br>DEBUG: interval candidate: "
+    << theIntervalCandidates[i].ToString();
     summandE.AddChildOnTop(input[0]);
     summandE.AddChildOnTop(input[1]);
     summandE.AddChildOnTop(theIntervalCandidates[i][1]);

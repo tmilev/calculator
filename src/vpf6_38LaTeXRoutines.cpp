@@ -442,13 +442,20 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
     FileOperations::GetFileExtensionWithDot
     (this->slideFileNamesVirtualWithPatH[i], &this->slideFileNamesWithLatexPathNoExtension[i]);
     if (MathRoutines::StringBeginsWith(this->slideFileNamesWithLatexPathNoExtension[i], "freecalc", 0))
-      this->slideFileNamesWithLatexPathNoExtension[i]="../../"+this->slideFileNamesWithLatexPathNoExtension[i];
+      this->slideFileNamesWithLatexPathNoExtension[i] = "../../" + this->slideFileNamesWithLatexPathNoExtension[i];
     if (MathRoutines::StringBeginsWith(this->slideFileNamesWithLatexPathNoExtension[i], "LaTeX-materials", 0))
-      this->slideFileNamesWithLatexPathNoExtension[i]="../../"+this->slideFileNamesWithLatexPathNoExtension[i];
+      this->slideFileNamesWithLatexPathNoExtension[i] = "../../" + this->slideFileNamesWithLatexPathNoExtension[i];
   }
   this->headerFileNameWithPathVirtual=this->slideFileNamesVirtualWithPatH[0];
   this->headerFilePathVirtual = FileOperations::GetPathFromFileNameWithPath(this->headerFileNameWithPathVirtual);
   this->headerFileNameNoPath = FileOperations::GetFileNameFromFileNameWithPath(this->headerFileNameWithPathVirtual);
+  this->headerPathBelowFileNameVirtual = this->headerFilePathVirtual;
+  if (this->headerPathBelowFileNameVirtual.size()>0)
+  { this->headerPathBelowFileNameVirtual=
+    this->headerPathBelowFileNameVirtual.substr(0, this->headerPathBelowFileNameVirtual.size()-1);
+    this->headerPathBelowFileNameVirtual=
+    FileOperations::GetFileNameFromFileNameWithPath(this->headerPathBelowFileNameVirtual);
+  }
   if (!FileOperations::GetPhysicalFileNameFromVirtual(this->headerFilePathVirtual, this->workingFilePathPhysical, false, false))
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "Failed to extract physical path from: " << this->headerFilePathVirtual;
@@ -465,9 +472,9 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   if (MathRoutines::StringBeginsWith(this->targetPDFFileNameWithPathVirtual, "LaTeX-materials", &tempString))
     this->targetPDFFileNameWithPathVirtual="slides-videos"+tempString;
   if (this->flagProjectorMode)
-    this->targetPDFFileNameWithPathVirtual+="_projector";
+    this->targetPDFFileNameWithPathVirtual+="_projector_" + this->headerPathBelowFileNameVirtual;
   else
-    this->targetPDFFileNameWithPathVirtual+="_printable";
+    this->targetPDFFileNameWithPathVirtual+="_printable_" + this->headerPathBelowFileNameVirtual;
   this->targetPDFFileNameWithPathVirtual+=".pdf";
   this->targetPDFFileNameWithLatexPath="../../" + this->targetPDFFileNameWithPathVirtual;
   this->targetPDFLatexPath= FileOperations::GetPathFromFileNameWithPath(this->targetPDFFileNameWithLatexPath);

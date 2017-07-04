@@ -676,6 +676,15 @@ JWTverifyRSA256(token,modulus\
    "CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions",
    "ApplyToSubexpressionsRecurseThroughCalculusFunctions");
   this->AddOperationInnerHandler
+  ("SubList",
+    CalculatorFunctionsGeneral::innerSubList, "",
+   "Extracts a sub-list that contains all elements that satisfy a condition given by the second argument.\
+    Use the bound variable syntax {{a}} to address the current element of the list.",
+   "SubList{}((1,2,3,4), {{a}}>2)",
+    true, false,
+   "CalculatorFunctionsGeneral::innerSubList",
+   "SubList");
+  this->AddOperationInnerHandler
   ("ApplyToList",
     CalculatorFunctionsGeneral::innerApplyToList, "",
    "Applies a transformation to each element of a list. ",
@@ -2517,6 +2526,15 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    true, false,
    "CalculatorFunctionsGeneral::innerIntervalToSequence",
    "IntervalClosed");
+  this->AddOperationInnerHandler
+  ("IntervalOpen", CalculatorFunctionsGeneral::innerIntervalOpenFromSequence,
+   "",
+   "Internal data structure transformation: \
+    sequence ->open interval.",
+   "%UseBracketForIntervals PlotExpressionTree (1,2); ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIntervalOpenFromSequence",
+   "IntervalOpen");
   this->AddOperationInnerHandler
   ("IsNonEmptySequence", CalculatorFunctionsGeneral::innerIsNonEmptySequence, "",
    "If the argument has no bound variables, returns 1 if the argument is \
@@ -5392,6 +5410,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
   this->AddOperationNoRepetitionAllowed("[)");
   this->AddOperationNoRepetitionAllowed("(]");
   this->AddOperationNoRepetitionAllowed("IntervalClosed");
+  this->AddOperationNoRepetitionAllowed("IntervalOpen");
   this->AddOperationNoRepetitionAllowed("IndefiniteIndicator");
   this->AddOperationNoRepetitionAllowed("\\log");
   //additional operations with the same status as user-input expressions.

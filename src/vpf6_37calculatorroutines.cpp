@@ -177,11 +177,19 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
 }
 
 bool CalculatorFunctionsGeneral::innerIntervalClosedFromSequence(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntervalToSequence");
-  if (!input.IsSequenceNElementS())
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntervalClosedFromSequence");
+  if (!input.IsSequenceNElementS(2))
     return false;
   output=input;
   return output.SetChildAtomValue(0, theCommands.opIntervalClosed());
+}
+
+bool CalculatorFunctionsGeneral::innerIntervalOpenFromSequence(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntervalOpenFromSequence");
+  if (!input.IsSequenceNElementS(2))
+    return false;
+  output=input;
+  return output.SetChildAtomValue(0, theCommands.opIntervalOpen());
 }
 
 bool CalculatorFunctionsGeneral::innerIntervalRightClosedFromSequence(Calculator& theCommands, const Expression& input, Expression& output)
@@ -216,10 +224,10 @@ bool CalculatorFunctionsGeneral::innerGetFirstSummandContaining(Calculator& theC
 
 bool CalculatorFunctionsGeneral::innerGetSummand(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetSummand");
-  if (! input.StartsWithGivenAtom("GetSummand",3))
+  if (! input.StartsWithGivenAtom("GetSummand", 3))
     return false;
   const Expression& theExpression=input[1];
-  if (theExpression.StartsWith(theCommands.opPlus(),3))
+  if (theExpression.StartsWith(theCommands.opPlus(), 3))
   { int summandIndex=-1;
     if (!input[2].IsSmallInteger(&summandIndex))
       return false;
@@ -645,6 +653,37 @@ bool CalculatorFunctionsGeneral::innerFactorOutNumberContent(Calculator& theComm
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerSubList(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSubList");
+  if(input.size()!=3)
+    return false;
+  if (!input[1].IsSequenceNElementS())
+    return false;
+  HashedList<Expression> boundVars;
+  if(!input[2].GetBoundVariables(boundVars))
+    return theCommands << "Could not get bound variables from: " << input[2].ToString();
+  if (input[2].IsEqualToOne())
+  { output=input[1];
+    return true;
+  }
+  if (boundVars.size==0)
+    return output.MakeSequence(theCommands,0);
+  Expression theSubbed, toBeSubbed, subbedSimplified;
+  toBeSubbed.reset(theCommands);
+  toBeSubbed.AddChildAtomOnTop(theCommands.opBind());
+  toBeSubbed.AddChildOnTop(boundVars[0]);
+  List<Expression> theList;
+  for (int i=1; i<input[1].size(); i++)
+  { theSubbed=input[2];
+    theSubbed.SubstituteRecursively(toBeSubbed, input[1][i]);
+    if (!theCommands.EvaluateExpression(theCommands, theSubbed, subbedSimplified))
+      return theCommands << "Failed to evaluate " << theSubbed.ToString();
+    if (subbedSimplified.IsEqualToOne())
+      theList.AddOnTop(input[1][i]);
+  }
+  return output.MakeSequence(theCommands, &theList);
+}
+
 bool CalculatorFunctionsGeneral::innerApplyToList(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerApplyToList");
   if (input.size()!=3)
@@ -959,17 +998,9 @@ bool CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight
     return left>right;
   if (left.size()!=3 || right.size()!=3)
     return left>right;
-  if (!left.StartsWith(left.owner->opIntervalClosed(),3) &&
-      !left.StartsWith(left.owner->opIntervalLeftClosed(),3) &&
-      !left.StartsWith(left.owner->opIntervalRightClosed(),3) &&
-      !left.StartsWith(left.owner->opSequence(),3)
-      )
+  if (!left.IsIntervalRealLine())
     return left>right;
-  if (!right.StartsWith(right.owner->opIntervalClosed(),3) &&
-      !right.StartsWith(right.owner->opIntervalLeftClosed(),3) &&
-      !right.StartsWith(right.owner->opIntervalRightClosed(),3) &&
-      !right.StartsWith(right.owner->opSequence(),3)
-      )
+  if (!right.IsIntervalRealLine())
     return left>right;
   double left1, right1, left2, right2;
   bool left1IsDouble=left[1].EvaluatesToDouble(&left1);
@@ -1020,17 +1051,9 @@ bool CalculatorFunctionsGeneral::innerIntersectIntervals
     return false;
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];
-  if(!leftE.StartsWith(theCommands.opIntervalClosed(), 3) &&
-     !leftE.StartsWith(theCommands.opIntervalLeftClosed(), 3) &&
-     !leftE.StartsWith(theCommands.opIntervalRightClosed(), 3) &&
-     !leftE.StartsWith(theCommands.opSequence(), 3)
-    )
+  if(!leftE.IsIntervalRealLine())
     return false;
-  if(!rightE.StartsWith(theCommands.opIntervalClosed(), 3) &&
-     !rightE.StartsWith(theCommands.opIntervalLeftClosed(), 3) &&
-     !rightE.StartsWith(theCommands.opIntervalRightClosed(), 3) &&
-     !rightE.StartsWith(theCommands.opSequence(), 3)
-    )
+  if(!rightE.IsIntervalRealLine())
     return false;
   double left1=0, left2=0, right1=0, right2=0;
   if (!leftE[1].EvaluatesToDouble(&left1) || !leftE[2].EvaluatesToDouble(&left2))
@@ -1147,6 +1170,10 @@ bool CalculatorFunctionsGeneral::innerUnionIntervals
   bool makeUnion=false;
   if (right1<=left2 && left2<=right2)
     makeUnion=true;
+  if (right1==left2 &&
+      leftE.StartsWith(theCommands.opIntervalOpen(), 3) &&
+      rightE.StartsWith(theCommands.opIntervalOpen(), 3))
+    makeUnion=false;
   if (!makeUnion)
     return false;
   bool leftIsClosed=false;
@@ -1204,7 +1231,7 @@ bool CalculatorFunctionsGeneral::innerUnionIntervals
   if (leftIsClosed && !rightIsClosed)
     return output.MakeXOX(theCommands, theCommands.opIntervalLeftClosed(), leftFinal, rightFinal);
   if (!leftIsClosed && !rightIsClosed)
-    return output.MakeXOX(theCommands, theCommands.opSequence(), leftFinal, rightFinal);
+    return output.MakeXOX(theCommands, theCommands.opIntervalOpen(), leftFinal, rightFinal);
   return false;
 }
 
@@ -1259,17 +1286,7 @@ bool CalculatorFunctionsGeneral::innerCompareIntervalsNumerically(Calculator& th
   for (int i=0; i<leftList.size; i++)
   { if (leftList[i]==rightList[i])
       continue;
-    if ((!leftList[i].StartsWith(theCommands.opSequence(),3) &&
-         !leftList[i].StartsWith(theCommands.opIntervalClosed(),3) &&
-         !leftList[i].StartsWith(theCommands.opIntervalLeftClosed(),3) &&
-         !leftList[i].StartsWith(theCommands.opIntervalRightClosed(),3)
-        )||
-        (!rightList[i].StartsWith(theCommands.opSequence(),3) &&
-         !rightList[i].StartsWith(theCommands.opIntervalClosed(),3) &&
-         !rightList[i].StartsWith(theCommands.opIntervalLeftClosed(),3) &&
-         !rightList[i].StartsWith(theCommands.opIntervalRightClosed(),3)
-        )
-       )
+    if ((!leftList[i].IsIntervalRealLine() ) || (!rightList[i].IsIntervalRealLine()))
       return output.AssignValue(0, theCommands);
     if (leftList[i][0]!=rightList[i][0])
       return output.AssignValue(0, theCommands);

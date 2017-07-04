@@ -1496,6 +1496,25 @@ bool Expression::GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeaf
   return true;
 }
 
+bool Expression::GetBoundVariables(HashedList<Expression>& outputAccumulateBoundVariables)const
+{ MacroRegisterFunctionWithName("Expression::GetBoundVariables");
+  if (this->owner==0)
+    return true;
+  RecursionDepthCounter(&this->owner->RecursionDeptH);
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::GetFreeVariables:"))
+    return false;
+  if (this->IsBuiltInTypE()) //<- this may need to be rewritten as some built in types will store free variables in their context.
+    return true;
+  if (this->StartsWith(this->owner->opBind(), 2))
+  { outputAccumulateBoundVariables.AddOnTopNoRepetition((*this)[1]);
+    return true;
+  }
+  for (int i=0; i<this->size(); i++)
+    if (!((*this)[i].GetBoundVariables(outputAccumulateBoundVariables)))
+      return false;
+  return true;
+}
+
 bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants)const
 { MacroRegisterFunctionWithName("Expression::GetFreeVariables");
   if (this->owner==0)
@@ -1644,13 +1663,13 @@ bool Expression::IsSequenceNElementS(int N)const
 bool Expression::IsIntervalRealLine()const
 { if (this->owner==0)
     return false;
-  if (this->IsSequenceNElementS(2))
+  if (this->StartsWith(this->owner->opIntervalOpen()))
     return true;
-  if (this->StartsWith(this->owner->opIntervalClosed(),3))
+  if (this->StartsWith(this->owner->opIntervalClosed(), 3))
     return true;
-  if (this->StartsWith(this->owner->opIntervalLeftClosed(),3))
+  if (this->StartsWith(this->owner->opIntervalLeftClosed(), 3))
     return true;
-  if (this->StartsWith(this->owner->opIntervalRightClosed(),3))
+  if (this->StartsWith(this->owner->opIntervalRightClosed(), 3))
     return true;
   return false;
 }
@@ -2658,7 +2677,12 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->StartsWith(this->owner->opLogBase(), 3))
     out << "\\log_{" << (*this)[1].ToString(theFormat) << "}"
     << "\\left(" << (*this)[2].ToString(theFormat) << "\\right)";
-  else if (this->StartsWith(this->owner->opIntervalClosed(), 3))
+  else if (this->StartsWith(this->owner->opIntervalOpen(), 3))
+  { if (!this->owner->flagUseBracketsForIntervals)
+      out << "IntervalOpen{}";
+    out << "\\left(" << (*this)[1].ToString(theFormat) << ", "
+    << (*this)[2].ToString(theFormat) << "\\right)";
+  } else if (this->StartsWith(this->owner->opIntervalClosed(), 3))
     out << "\\left[" << (*this)[1].ToString(theFormat) << ", "
     << (*this)[2].ToString(theFormat) << "\\right]";
   else if (this->StartsWith(this->owner->opIntervalLeftClosed(), 3))

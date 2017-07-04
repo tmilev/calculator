@@ -1668,7 +1668,7 @@ bool Expression::IsSuitableForRecursion()const
   return true;
 }
 
-void Expression::SubstituteRecursively(const Expression& toBeSubbed, Expression& toBeSubbedWith)
+void Expression::SubstituteRecursively(const Expression& toBeSubbed, const Expression& toBeSubbedWith)
 { if ((*this)==toBeSubbed)
   { (*this)=toBeSubbedWith;
     return;
@@ -1676,7 +1676,7 @@ void Expression::SubstituteRecursively(const Expression& toBeSubbed, Expression&
   this->SubstituteRecursivelyInChildren(toBeSubbed, toBeSubbedWith);
 }
 
-void Expression::SubstituteRecursivelyInChildren(const Expression& toBeSubbed, Expression& toBeSubbedWith)
+void Expression::SubstituteRecursivelyInChildren(const Expression& toBeSubbed, const Expression& toBeSubbedWith)
 { if (!this->IsSuitableForSubstitution())
     return;
   Expression tempE;

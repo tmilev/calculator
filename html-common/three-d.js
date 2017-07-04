@@ -888,7 +888,7 @@ function CanvasTwoD(inputCanvas)
   };
   this.drawFunction= function (inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth)
   { var newPlot=new PlotTwoD(inputFun, inputLeftPt, inputRightPt, inputNumSegments, inputColor, inputLineWidth);
-    if (inputLeftPt!=="infinity" && inputLeftPt!=="minusInfinity")
+    if (inputLeftPt!=="minusInfinity" && inputRightPt!=="infinity")
     { if (this.leftMostPlotPoint==="none")
         this.leftMostPlotPoint=inputLeftPt;
       else

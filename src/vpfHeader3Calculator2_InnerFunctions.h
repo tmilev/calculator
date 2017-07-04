@@ -153,6 +153,7 @@ public:
   static bool innerHandleUnderscorePowerLimits(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerApplyToSubexpressionsRecurseThroughCalculusFunctions(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSubList(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerApplyToList(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNumerator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDenominator(Calculator& theCommands, const Expression& input, Expression& output);
@@ -390,6 +391,7 @@ public:
   static bool innerSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerCoefficientsPowersOf(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntervalOpenFromSequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntervalClosedFromSequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntervalLeftClosedFromSequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntervalRightClosedFromSequence(Calculator& theCommands, const Expression& input, Expression& output);

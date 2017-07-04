@@ -112,6 +112,8 @@ void Calculator::DoLogEvaluationIfNeedBe(Function& inputF)
 bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
+  //if (theCommands.RecursionDepthExceededHandleRoughly("Evaluating built-in user functions. "))
+  //  return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsLisT())
     return false;
@@ -128,7 +130,9 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
   }
   if (!functionNameNode.IsAtom())
     return false;
-//  stOutput << "<br>Evaluating: " << input.ToString() << "<br>Lispified: " << input.ToStringSemiFull();
+  //stOutput << "<br>DEBUG: Evaluating: " << input.ToString()
+  //<< "<br>Lispified: " << input.ToStringSemiFull()
+  //<< "<br>Stack: " << crash.GetStackTraceShort();
   for (int i=0; i<theCommands.FunctionHandlers[functionNameNode.theData].size; i++)
     if (!theCommands.FunctionHandlers[functionNameNode.theData][i].flagIsInner)
     { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];

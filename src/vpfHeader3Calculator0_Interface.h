@@ -398,8 +398,8 @@ class Expression
   bool IsSuitableForSubstitution()const;
   bool IsSuitableForRecursion()const;
 
-  void SubstituteRecursively(const Expression& toBeSubbed, Expression& toBeSubbedWith);
-  void SubstituteRecursivelyInChildren(const Expression& toBeSubbed, Expression& toBeSubbedWith);
+  void SubstituteRecursively(const Expression& toBeSubbed, const Expression& toBeSubbedWith);
+  void SubstituteRecursivelyInChildren(const Expression& toBeSubbed, const Expression& toBeSubbedWith);
   void AssignXOXToChild(int childIndex, Calculator& owner, int theOp, const Expression& left, const Expression& right)
   { Expression tempE;
     tempE.MakeXOX(owner, theOp, left, right);
@@ -475,6 +475,7 @@ class Expression
   bool EvaluatesToDouble(double* whichDouble=0)const;
   bool GetExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs)const;
   bool GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVariables, bool excludeNamedConstants)const;
+  bool GetBoundVariables(HashedList<Expression>& outputAccumulateBoundVariables)const;
 bool EvaluatesToDoubleUnderSubstitutions
 (const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble=0)const
   ;
@@ -1126,6 +1127,7 @@ public:
   bool isSeparatorFromTheLeftForDefinition(const std::string& input);
   bool isSeparatorFromTheLeftForList(const std::string& input);
   bool isStandardCalculatorCharacter(unsigned char input);
+  bool isSeparatorFromTheLeftForInterval(const std::string& input);
   bool isSeparatorFromTheRightGeneral(const std::string& input);
   bool isSeparatorFromTheRightForDefinition(const std::string& input);
   bool isSeparatorFromTheRightForList(const std::string& input);
@@ -1460,6 +1462,9 @@ public:
   }
   int opSequence()
   { return this->theAtoms.GetIndexIMustContainTheObject("Sequence");
+  }
+  int opIntervalOpen()
+  { return this->theAtoms.GetIndexIMustContainTheObject("IntervalOpen");
   }
   int opIntervalLeftClosed()
   { return this->theAtoms.GetIndexIMustContainTheObject("[)");

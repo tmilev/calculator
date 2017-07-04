@@ -554,8 +554,9 @@ function AxesGrid()
     var ceilRight=Math.ceil(right);
     var floorBottom=Math.floor(bottom);
     var ceilTop=Math.ceil(top);
-    var DeltaHorizontal=Math.max(1, Math.floor ((ceilRight-floorLeft)/ (theCanvas.width/20)));
-    var DeltaVertical=Math.max(1, Math.floor ((ceilTop-floorBottom)/ (theCanvas.height/20)));
+    var distanceBetweenMarks=30;
+    var DeltaHorizontal=Math.max(1, Math.floor ((ceilRight-floorLeft)/ (theCanvas.width/distanceBetweenMarks)));
+    var DeltaVertical=Math.max(1, Math.floor ((ceilTop-floorBottom)/ (theCanvas.height/distanceBetweenMarks)));
     var Delta = Math.max(DeltaHorizontal, DeltaVertical);
     theSurface.beginPath();
     for (var i=floorLeft; i<=ceilRight; i+=Delta)

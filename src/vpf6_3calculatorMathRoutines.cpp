@@ -4799,8 +4799,8 @@ bool CalculatorFunctionsGeneral::innerPlot2DoverIntervals(Calculator& theCommand
   List<Expression> finalSummands;
   for (int i=0; i<theIntervalCandidates.size; i++)
   { summandE.reset(theCommands);
-    stOutput << "<br>DEBUG: interval candidate: "
-    << theIntervalCandidates[i].ToString();
+    //stOutput << "<br>DEBUG: interval candidate: "
+    //<< theIntervalCandidates[i].ToString();
     summandE.AddChildOnTop(input[0]);
     summandE.AddChildOnTop(input[1]);
     summandE.AddChildOnTop(theIntervalCandidates[i][1]);

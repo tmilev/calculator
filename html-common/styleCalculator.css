@@ -9,19 +9,15 @@ calculatorNavigation {
   white-space: nowrap;
   width: 100%;
 }
-
 calculatorNavigation:after{
 clear:both;
 }
-
 tr.problemContainerRow{
 /*height: 500px;*/
 }
-
 td.problemContainerCell{
 /*height: 500px;*/
 }
-
 problemNavigation {
   text-align: center;
   background-color: #f0f0f0;
@@ -32,12 +28,10 @@ problemNavigation {
   padding-bottom: 4px;
   margin: 0;
   white-space: nowrap;
-}	      
-
+}
 problemNavigation:after{
 clear:both;
 }
-
 editPagePanel{
   text-align: center;
   display: block;
@@ -48,68 +42,52 @@ editPagePanel{
   padding-top: 2px;
   padding-bottom: 2px;
 }
-
-
 textarea{
   resize: both;
 }
-
 .calculatorHidden{
   display:none;
 }
-
 .calculatorCommentBeforeSubmission{
   display:none;
 }
-
 .calculatorMQfieldEnclosure{
 }
-
 .problemForm{
 }
-
 .normalButton{
 }
-
 sectionSelection{
   position:fixed;
   background: silver;
   bottom:0;
   right:0;
 }
-
 .submitButton{
   color:red;
   width:60px;
 }
-
 .showSolutionButton{
   color:green;
   width:60px;
 }
-
 .submitButton:hover {
   background-color:#878787;
 }
-
 .previewButton {
   color:green;
   width:60px;
 }
-
 .previewButton:hover {
   background-color:#878787;
 }
-
 .showAnswerButton {
   color:green;
   width:60px;
 }
-
 .showAnswerButton:hover {
   background-color:#878787;
 }
-
 button.accordionLike {
   display: inline;
   -moz-border-radius: 3px;
@@ -127,11 +105,9 @@ button.accordionLike {
   font-size: medium;
   transition: 0.6s;
 }
-
 button.accordionLike.active, button.accordionLike:hover {
   background-color: #ddd;
 }
-
 button.accordion {
   padding: 2px;
   -moz-border-radius: 3px;
@@ -149,24 +125,19 @@ button.accordion {
   font-size: medium;
   transition: 0.6s;
 }
-
 button.accordion.active, button.accordion:hover {
   background-color: #dfdfdf;
 }
-
 button.accordion:after {
   vertical-align: middle;
   color: #777;
   margin-left: 0px;
 }
-
 button.accordion.active:after {
 }
-
 button.buttonStandard{
   margin: 2px;
 }
-
 button.buttonSaveEdit{
   margin: 4px;
   padding: 3px;
@@ -205,7 +176,6 @@ button.buttonClone{
 button.buttonClone:hover{
   background-color: green;
 }
-
 span.panel {
   display:none;
   padding: 0 0px;
@@ -217,13 +187,11 @@ span.panel {
   transition: 0.6s linear;
   opacity: 0;
 }
-
 span.panel.show {
   transition: 0.6s linear;
   opacity: 1;
   max-height: 500px;
 }
-
 button.studentScoresButton{
   margin-top: 0;
   margin-bottom: 0px;
@@ -242,16 +210,13 @@ button.studentScoresButton{
   outline:none;
   transition: 0.6s;
 }
-
 button.studentScoresButton.active, button.studentScoresButton:hover {
   background-color: #ddd;
 }
-
 span.studentScoresContent{
   transition: opacity 1s linear;
   opacity: 1;
 }
-
 span.panelProblemWeights{
   display: block;
   max-height: 0;
@@ -261,9 +226,7 @@ span.panelProblemWeights{
   transition: 1s linear;
   opacity: 0;
 }
-
 span.studentScoresWrapper{
-  /*display: inline-block;*/
   width: 420px;
   font-size: medium;
   font-weight: normal;
@@ -271,13 +234,10 @@ span.studentScoresWrapper{
   margin-top: 0;
   margin-bottom: 0;
 }
-
 span.deadlineAndTitleContainer{
 }
-
 span.titleContainer{
 }
-
 td.deadlineCell{
   padding: 8px;
   margin-left: 10px;
@@ -290,17 +250,14 @@ td.deadlineCell{
   font-size: medium;
   vertical-align: middle;
 }
-
 table.deadlineTable tr td{
-margin: 0;
-padding: 0;
+  margin: 0;
+  padding: 0;
 }
-
 table.deadlineTable tr th{
-margin: 0;
-padding: 0;
+  margin: 0;
+  padding: 0;
 }
-
 textarea.calculatorAnswer {
   padding: 0 0px;
   background-color: white;
@@ -311,12 +268,10 @@ textarea.calculatorAnswer {
   word-wrap: break-word;
   width: 60px
 }
-
 textarea.calculatorAnswer.show {
   opacity: 1;
   max-height: 500px;
 }
-
 textarea.currentFileNameArea {
   height: 20px;
   margin-bottom: -8px;
@@ -326,14 +281,12 @@ section {
   float: left;
   overflow: auto;
 }
-
 ol.listItem{
   margin-left: 0;
   margin-right: 0;
   padding-left: 0;
   padding-bottom: 5px;
 }
-
 li.listChapter{
   padding-bottom: 10px; 
   padding-left: 0;
@@ -362,15 +315,12 @@ li.listSubsection{
   font-weight: normal;
   font-size: 0.9em;
 }
-
 table.tableItem{
   width: 100%;
-  /*border: 1px solid #ddd;*/
 }
-
 table.tableItem td, table.tableItem th {
   text-align: left;
-  padding-left: 2px;
+  padding-left: 8px;
 }
 table.topicList {
   border-collapse: collapse;
@@ -379,16 +329,12 @@ table.topicList {
   font-size: 1em;
 }
 table.topicList {
+  margin-top: 4px;
   counter-reset: rowNumber;
 }
 tr.calculatorProblem {
   counter-increment: rowNumber;
 }
-/*tr.calculatorProblem > td:nth-child(1)::before {
-  content: counters(item, ".") "." counter(rowNumber) ".";
-  min-width: 1em;
-  margin-right: 0.5em;
-}*/
 table.topicList td, table.topicList th {
   border: 1px solid #ddd;
   text-align: left;
@@ -433,7 +379,6 @@ table.topicList th {
   padding-top: 12px;
   padding-bottom: 12px;
 }
-
 a.linkStandardButtonLike{
   margin: 3px;
   padding:3px;
@@ -446,7 +391,6 @@ a.linkStandardButtonLike{
 a.linkStandardButtonLike:hover{
   background-color: #dfdfdf;
 }
-
 a.problemLinkQuiz{
   margin: 3px;
   padding:3px;
@@ -495,4 +439,3 @@ a.slidesLink:hover{
 a.videoLink:hover{
   background-color: #dfdfdf;
 }
-

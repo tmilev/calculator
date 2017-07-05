@@ -1435,7 +1435,10 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   std::string accountsPageBody;
   if (isOK)
     accountsPageBody= HtmlInterpretation::GetAccountsPageBody(hostWebAddressWithPort);
+  CalculatorHTML thePage;
+  thePage.LoadDatabaseInfo(out);
   out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
+  out << "<problemNavigation>" << thePage.ToStringProblemNavigation() << "</problemNavigation>";
   if (!isOK)
   { out << "<b>Viewing accounts is allowed for logged-in admins only</b>"
     << "</body></html>";
@@ -2069,7 +2072,7 @@ std::string HtmlInterpretation::ToStringNavigation()
       << "studentView=" << studentView << "&";
       if (section!="")
         out << "studentSection="
-        << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false) << "&";
+        << theGlobalVariables.GetWebInput("studentSection") << "&";
       out << "topicList=" << topicList << "&";
       out << "courseHome=" << courseHome << "&";
       out << "fileName=" << courseHome << "&\">Home</a>"

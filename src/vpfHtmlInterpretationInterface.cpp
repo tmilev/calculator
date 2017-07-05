@@ -2068,7 +2068,8 @@ std::string HtmlInterpretation::ToStringNavigation()
       out << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
       << "studentView=" << studentView << "&";
       if (section!="")
-        out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+        out << "studentSection="
+        << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false) << "&";
       out << "topicList=" << topicList << "&";
       out << "courseHome=" << courseHome << "&";
       out << "fileName=" << courseHome << "&\">Home</a>"

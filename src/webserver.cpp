@@ -87,7 +87,8 @@ std::string HtmlRoutines::GetJavascriptStandardCookies()
   if (theGlobalVariables.GetWebInput("problemLinkStyle")!="")
     out << "  addCookie(\"problemLinkStyle\", \"" << theGlobalVariables.GetWebInput("problemLinkStyle") << "\", 100, false);  \n";
   if (theGlobalVariables.GetWebInput("studentSection")!="")
-    out << "  addCookie(\"studentSection\", \"" << theGlobalVariables.GetWebInput("studentSection") << "\", 100, true);  \n";
+    out << "  addCookie(\"studentSection\", \""
+    << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false) << "\", 100, true);  \n";
   if (theGlobalVariables.GetWebInput("studentView")!="")
     out << "  addCookie(\"studentView\", \"" << theGlobalVariables.GetWebInput("studentView") << "\", 100, true);  \n";
   if (WebWorker::IsAllowedAsRequestCookie(theGlobalVariables.userCalculatorRequestType))

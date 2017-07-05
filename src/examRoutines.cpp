@@ -717,7 +717,8 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   if (theGlobalVariables.UserStudentVieWOn())
   { refStreamNoRequest << "studentView=true&";
     if (theGlobalVariables.GetWebInput("studentSection")!="")
-      refStreamNoRequest << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+      refStreamNoRequest << "studentSection="
+      << theGlobalVariables.GetWebInput("studentSection") << "&";
   }
   if (this->topicListFileName!="")
     refStreamNoRequest << "topicList=" << this->topicListFileName << "&";
@@ -2946,7 +2947,8 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   { if (theGlobalVariables.UserStudentVieWOn())
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
       << this->ToStringCalculatorArgumentsForProblem
-      (theGlobalVariables.userCalculatorRequestType, "false", theGlobalVariables.GetWebInput("studentSection"))
+      (theGlobalVariables.userCalculatorRequestType, "false",
+       HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false))
       << "\">Admin view</a>" << linkSeparator;
     else
       out << "<b>Admin view</b>" << linkSeparator;
@@ -2963,7 +2965,8 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     for (int i=0; i<this->databaseStudentSections.size; i++)
       if (this->databaseStudentSections[i]!="")
       { if (theGlobalVariables.UserStudentVieWOn() &&
-            this->databaseStudentSections[i] == theGlobalVariables.GetWebInput("studentSection"))
+            this->databaseStudentSections[i] == HtmlRoutines::ConvertURLStringToNormal
+            (theGlobalVariables.GetWebInput("studentSection"), false))
           out << "<b>section " << this->databaseStudentSections[i] << "</b>";
         else
           out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
@@ -2972,6 +2975,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
           << "\">section " << this->databaseStudentSections[i] << " </a>";
         if (i!=this->databaseStudentSections.size-1)
           out << linkSeparator;
+        //stOutput << "DEBUG: student section: " << this->databaseStudentSections[i];
       }
   }
   if (out.str()=="")

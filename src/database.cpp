@@ -769,7 +769,7 @@ bool UserCalculator::FetchOneUserRow
   //<- warning, the user may not be
   //fully logged-in yet so theGlobalVariables.UserDefaultHasAdminRights()
   //does not work right.
-    this->userGroup=theGlobalVariables.GetWebInput("studentSection");
+    this->userGroup=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
   else
     this->userGroup=this->GetSelectedRowEntry(DatabaseStrings::userGroupLabel);
 

@@ -1461,9 +1461,14 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   int numUsers=0;
   std::stringstream tableStream;
   bool flagFilterCourse=(!adminsOnly) && (theGlobalVariables.GetWebInput("filterAccounts")=="true");
+  std::string currentCourse=
+  HtmlRoutines::ConvertURLStringToNormal(
+  theGlobalVariables.GetWebInput("courseHome")
+  , false)
+  ;
   if (flagFilterCourse)
   { tableStream << "<br>Displaying only students in course: <span style=\"color:blue\"><b>"
-    << theGlobalVariables.GetWebInput("courseHome") << "</b></span>. "
+    << currentCourse << "</b></span>. "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=accounts&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
@@ -1528,7 +1533,6 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   nonActivatedAccountBucketsBySection.SetSize(sectionNames.size);
   int numActivatedUsers=0;
   std::stringstream preFilledLoginLinks;
-  std::string currentCourse=theGlobalVariables.GetWebInput("courseHome");
   for (int i=0; i<userTable.size; i++)
   { currentUser.username=userTable[i][indexUser];
     currentUser.userGroup=HtmlRoutines::ConvertURLStringToNormal(userTable[i][indexExtraInfo], false);
@@ -1536,6 +1540,12 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     currentUser.actualActivationToken=userTable[i][indexActivationToken];
     currentUser.userRole=userTable[i][indexUserRole];
     currentUser.currentCourses=userTable[i][indexCurrentCourse];
+    if (currentUser.currentCourses.value.find('%')!=std::string::npos)
+    { out << "<span style=\"color:red\"><b>Non-expected behavior: user: " << currentUser.username.value
+      << "current course: "
+      << currentUser.currentCourses.value
+      << " contains the % symbol. </b></span><br>";
+    }
     if (!adminsOnly && flagFilterCourse && currentUser.currentCourses!=currentCourse)
       continue;
     if (adminsOnly xor (currentUser.userRole=="admin"))

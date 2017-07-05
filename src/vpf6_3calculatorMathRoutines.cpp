@@ -1613,17 +1613,9 @@ bool CalculatorFunctionsGeneral::innerUnion(Calculator& theCommands, const Expre
   if (!input.StartsWith(theCommands.opUnion()))
     return false;
   int numElts=1;
-  bool has2ElementSequence=false;
   for (int i=1; i<input.size(); i++)
     if (!input[i].IsSequenceNElementS())
       return false;
-    else
-    { numElts+=input[i].size()-1;
-      if (input[i].size()==3)
-        has2ElementSequence=true;
-    }
-  if (has2ElementSequence && theCommands.flagUseBracketsForIntervals)
-    return false;
   output.reset(theCommands, numElts);
   output.AddChildAtomOnTop(theCommands.opSequence());
   for (int i=1; i<input.size(); i++)
@@ -4788,7 +4780,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DoverIntervals(Calculator& theCommand
   if (input.size()<3)
     return false;
   List<Expression> theIntervalCandidates;
-  if (! theCommands.CollectOpands(input[2], theCommands.opUnion(),theIntervalCandidates))
+  if (!theCommands.CollectOpands(input[2], theCommands.opUnion(),theIntervalCandidates))
     return false;
   if (theIntervalCandidates.size<1)
     return false;

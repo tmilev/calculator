@@ -163,6 +163,49 @@ button.accordion:after {
 button.accordion.active:after {
 }
 
+button.buttonStandard{
+  margin: 2px;
+}
+
+button.buttonSaveEdit{
+  margin: 4px;
+  padding: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 4px;
+  display: inline;
+  background-color: PaleGreen;
+  color: #444;
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s; 
+}
+button.buttonSaveEdit:hover{
+  background-color: green;
+}
+button.buttonClone{
+  margin: 3px;
+  padding: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  display: inline;
+  background-color: PaleGreen;
+  color: #444;
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s; 
+}
+button.buttonClone:hover{
+  background-color: green;
+}
+
 span.panel {
   display:none;
   padding: 0 0px;
@@ -275,49 +318,49 @@ textarea.calculatorAnswer.show {
 }
 
 textarea.currentFileNameArea {
-  margin-top: 5px;
-  margin-bottom: -2px;
-  height: 1.5em;
-  padding: 0px;
+  height: 20px;
+  margin-bottom: -8px;
 }
-
 section {
   width: 100%;
   float: left;
   overflow: auto;
 }
-li{
-  display: block;
-}
-ol { 
-  counter-reset: item 0;
-  padding: 5px;
+
+ol.listItem{
   margin-left: 0;
   margin-right: 0;
+  padding-left: 0;
+  padding-bottom: 5px;
 }
-ol li{
+
+li.listChapter{
   padding-bottom: 10px; 
+  padding-left: 0;
   margin-left: 0;
   margin-right: 0;
   padding-bottom: 5px;
-}
-ol ol { 
-  margin-top: 5pt;
-/*  margin-left: 5pt;*/
-  margin-right: 0;
-  padding: 0; 
-}
-li.listChapter{
+  display: block;
   font-weight: bold;
   font-size: 1.3em;
 }
 li.listSection{
+  padding-bottom: 10px; 
+  margin-left: 0;
+  margin-right: 0;
+  padding-bottom: 5px;
+  display: block;
   font-weight: bold;
   font-size: 0.9em;
 }
 li.listSubsection{
-font-weight: normal;
-font-size: 0.9em;
+  padding-bottom: 10px; 
+  margin-left: 0;
+  margin-right: 0;
+  padding-bottom: 5px;
+  display: block;
+  font-weight: normal;
+  font-size: 0.9em;
 }
 
 table.tableItem{
@@ -327,7 +370,7 @@ table.tableItem{
 
 table.tableItem td, table.tableItem th {
   text-align: left;
-  padding-left: 8px;
+  padding-left: 2px;
 }
 table.topicList {
   border-collapse: collapse;
@@ -390,17 +433,32 @@ table.topicList th {
   padding-top: 12px;
   padding-bottom: 12px;
 }
-a.problemLinkQuiz{
-/*  color:green;*/
+
+a.linkStandardButtonLike{
+  margin: 3px;
+  padding:3px;
   background-color: #efefef;
-  padding:2px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+a.linkStandardButtonLike:hover{
+  background-color: #dfdfdf;
+}
+
+a.problemLinkQuiz{
+  margin: 3px;
+  padding:3px;
+  background-color: #efefef;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
   transition: 0.6s;
 }
 a.problemLinkPractice{
-  padding:2px;
+  margin: 3px;
+  padding:3px;
   background-color: #efefef;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -408,7 +466,8 @@ a.problemLinkPractice{
   transition: 0.6s;
 }
 a.slidesLink{
-  padding:2px;
+  margin: 3px;
+  padding:3px;
   background-color: #efefef;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -416,7 +475,8 @@ a.slidesLink{
   transition: 0.6s;
 }
 a.videoLink{
-  padding:2px;
+  margin: 3px;
+  padding:3px;
   background-color: #efefef;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;

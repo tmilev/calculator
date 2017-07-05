@@ -708,7 +708,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage', null, 'spanSubmitReport');"
   ;
   buttonStream
-  << "<button "
+  << "<button class=\"buttonSaveEdit\" "
   << "onclick=\"" << submitModPageJS.str() << "\" >Save changes</button>";
   //  out << "<form>";
   //  out << "<input type=\"submit\" value=\"Save changes\"> ";

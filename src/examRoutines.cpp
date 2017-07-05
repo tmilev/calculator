@@ -685,7 +685,7 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "";
   std::stringstream out;
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
+  out << "<a class=\"linkStandardButtonLike\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
   << theGlobalVariables.userCalculatorRequestType << "&";
   std::string urledProblem=HtmlRoutines::ConvertStringToURLString(this->fileName, false);
   out << "fileName=" << urledProblem << "&"
@@ -3016,7 +3016,8 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
     out << this->ToStringLinkCurrentAdmin("Turn off debug", false);
   else
     out << this->ToStringLinkCurrentAdmin("Debug page", true);
-  out << "\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
+  out << "\n<a class=\"linkStandardButtonLike\" href=\""
+  << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
   std::string urledProblem=HtmlRoutines::ConvertStringToURLString(desiredFileName, false);
   std::stringstream refStreamNoRequest;
   std::string spanCloningAttemptResultID="spanCloningAttemptResultID"+desiredFileName;
@@ -3030,7 +3031,7 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   out << refStreamNoRequest.str() << "\">" << "Edit" << "</a>";
   out << "<textarea class=\"currentFileNameArea\" id=\""<< clonePageAreaID << "\" cols=\""
   << desiredFileName.size()+4 << "\">" << desiredFileName << "</textarea>\n"
-  << "<button class=\"normalButton\" onclick=\""
+  << "<button class=\"buttonClone\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('"
   << clonePageAreaID << "').value, '" << spanCloningAttemptResultID << "', 'clonePage'"
   << ", '"
@@ -3770,7 +3771,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     { firstListStarted=true;
       out << "\n<style>ol{counter-reset: item " << chapterCounter-1 << "}"
       << "</style>\n";
-      out << "<ol start=\"" << chapterCounter << "\">";
+      out << "<ol class=\"listItem\" start=\"" << chapterCounter << "\">";
     }
     currentElt.ComputeLinks(*this, plainStyle);
     if (!tableStarted &&
@@ -3827,7 +3828,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 //      << currentElt.maxPointsInAllChildren
 //      << ", pts: "
 //      << currentElt.totalPointsEarned;
-      out << "<ol>\n";
+      out << "<ol class=\"listItem\">\n";
     } else if (currentElt.type==currentElt.tSection)
     { out << "<li class=\"listSection\""
       << "id=\"" << currentElt.idBase64 << "\"" << ">\n";
@@ -3835,10 +3836,10 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       sectionStarted=true;
       subSectionStarted=false;
       tableStarted=false;
-      out << "<ol>\n";
+      out << "<ol class=\"listItem\">\n";
     } else if (currentElt.type==currentElt.tSubSection)
     { if (!sectionStarted)
-      { out << "<li class=\"listSection\">\n<ol>\n";
+      { out << "<li class=\"listSection\">\n<ol class=\"listItem\">\n";
         sectionStarted=true;
       }
       out << "<li class=\"listSubsection\""

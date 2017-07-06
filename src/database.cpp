@@ -416,7 +416,7 @@ std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string
 
         out
         << "'" << HtmlRoutines::ConvertStringToURLString(theTable[i][0], false) << "', "
-        << "'" << HtmlRoutines::ConvertStringToURLString(columnLabels[indexToBeReplacedWithLinks], false) << "', "
+        << "'" << HtmlRoutines::ConvertStringToURLString(columnLabels[j], false) << "', "
         << "'" << spanId.str() << "' ";
 
         out << ");\"> Modify</a><br>";
@@ -494,7 +494,6 @@ std::string DatabaseRoutines::ToStringModifyEntry()
   { out << "Failed to extract input arguments. ";
     return out.str();
   }
-  out << "<hr>";
 //  out << "DEBUG: getting info from: " << theGlobalVariables.GetWebInput("mainInput")
 //  << "<br> got: <hr>" << theMap.ToStringHtml();
   std::string currentTable=HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
@@ -505,16 +504,35 @@ std::string DatabaseRoutines::ToStringModifyEntry()
   ("currentDatabaseKeyColumn"), false);
   std::string currentDesiredColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
   ("currentDatabaseDesiredColumn"), false);
-
+  std::string desiredContent=HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  ("desiredContent"), false);
+  List<std::string> allowedColumns;
+  allowedColumns.AddOnTop("currentCourses");
+  if (!allowedColumns.Contains(currentDesiredColumn))
+  { std::stringstream out;
+    out << "<b style=\"color:red\">Modifying column: " << currentDesiredColumn << " is forbidden. "
+    << " Modifying database entries is allowed only for the following columns: "
+    << allowedColumns.ToStringCommaDelimited() << ".</b> ";
+    return out.str();
+  }
   if (currentTable.find("`")!=std::string::npos ||
       currentRow.find("`")!=std::string::npos ||
       currentKeyColumn.find("`")!=std::string::npos ||
-      currentDesiredColumn.find("`")!=std::string::npos
+      currentDesiredColumn.find("`")!=std::string::npos ||
+      desiredContent.find("`")!=std::string::npos
       )
   { std::stringstream out;
     out << "<b>At least one of the identifiers: "
     << currentTable << ", " << currentRow << ", " << currentKeyColumn << ", " << currentDesiredColumn
+    << ", " << desiredContent
     << " contains the ` character and is invalid. </b>";
+    return out.str();
+  }
+  if (desiredContent.size()>10000)
+  { std::stringstream out;
+    out << "Desired content is too large ("
+    << desiredContent.size() << " chars) - max is 10000. The received content was: <br>"
+    << desiredContent << "<br> ";
     return out.str();
   }
   if (currentTable.size()>=64 || currentRow.size()>=64 ||
@@ -525,14 +543,12 @@ std::string DatabaseRoutines::ToStringModifyEntry()
     << " is longer than 64 characters and is invalid. </b>";
     return out.str();
   }
-  std::string outputString;
-  if (!this->FetchEntry
-      (currentKeyColumn, currentRow, currentTable, currentDesiredColumn, outputString, &out))
-    out << "<hr>Failed to fetch entry. ";
+  if (!this->SetEntry(currentKeyColumn, currentRow, currentTable, currentDesiredColumn, desiredContent, &out))
+    out << "<hr>Failed to set entry. ";
   else
     out
     //<< "<hr>DEBUG<hr>"
-    << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml( outputString)
+    << desiredContent
 //    << "<hr>DEBUG<hr>"
     ;
 //  out << "<hr>DEBUG: requesting: "

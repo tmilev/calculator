@@ -1255,7 +1255,6 @@ std::string WebWorker::GetDatabaseModifyEntry()
 out << "<b>Database not available. </b>";
 #endif // MACRO_use_MySQL
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  out << "</body></html>";
   return out.str();
 }
 
@@ -1272,7 +1271,6 @@ std::string WebWorker::GetDatabaseOneEntry()
 out << "<b>Database not available. </b>";
 #endif // MACRO_use_MySQL
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  out << "</body></html>";
   return out.str();
 }
 
@@ -3891,6 +3889,9 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
            theGlobalVariables.userCalculatorRequestType=="databaseOneEntry")
     return this->ProcessDatabaseOneEntry();
+  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
+           theGlobalVariables.userCalculatorRequestType=="databaseModifyEntry")
+    return this->ProcessDatabaseModifyEntry();
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType=="accounts")
     return this->ProcessAccounts();
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&

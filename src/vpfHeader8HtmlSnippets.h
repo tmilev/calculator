@@ -26,6 +26,7 @@ public:
   static std::string JavascriptProblemLinksWithTags;
   static std::string JavascriptTopicListWithTags;
   static std::string JavascriptCanvasGraphicsWithTags;
+  static std::string JavascriptDBroutinesWithTags;
   static std::stringstream outputStream;
   static int GlobalMathSpanID;
   static int GlobalCanvasID;
@@ -78,6 +79,7 @@ public:
   static std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
   static std::string GetJavascriptSubmitURLString();
   static std::string GetJavascriptCanvasGraphicsWithTags();
+  static std::string GetJavascriptDatabaseRoutinesWithTags();
   static std::string GetJavascriptTopicListWithTags();
   static std::string GetJavascriptProblemLinksWithTags();
   static std::string GetDatePickerJavascriptInit();

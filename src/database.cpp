@@ -372,7 +372,7 @@ std::string DatabaseRoutines::ToStringTablE(const MySQLdata& inputTable)
   return this->ToStringTablE(inputTable.GetIdentifierNoQuotes());
 }
 
-std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string& tableIdentifier)
+std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string& tableIdentifier, std::string& outputDatabaseKeyId)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringTable");
   std::stringstream out, comments;
   List<List<std::string> > theTable;
@@ -397,35 +397,51 @@ std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string
   << "underline;\n "
   << "cursor: pointer;\n"
   << "}" << "</style>";
-  out << "<table><tr>";
+  out << "<table class=\"tableDatabase\"><tr>";
   for (int i=0; i<columnLabels.size; i++)
     out << "<td>" << columnLabels[i] << "</td>";
   out << "</tr>";
+  List<int> modifyableCols;
+  modifyableCols.AddOnTop(columnLabels.GetIndex("currentCourses"));
+  outputDatabaseKeyId= columnLabels[0];
   for (int i=0; i<theTable.size; i++)
   { out << "<tr>";
     for (int j=0; j<theTable[i].size; j++)
-      if (j!=indexToBeReplacedWithLinks)
+      if (modifyableCols.Contains(j))
+      { out << "<td>";
+        std::stringstream spanId;
+        spanId << "spanRow" << i << "Col" << j;
+
+        out << "<a href=\"#\" onclick=\"modifyGetUI(";
+
+        out
+        << "'" << HtmlRoutines::ConvertStringToURLString(theTable[i][0], false) << "', "
+        << "'" << HtmlRoutines::ConvertStringToURLString(columnLabels[indexToBeReplacedWithLinks], false) << "', "
+        << "'" << spanId.str() << "' ";
+
+        out << ");\"> Modify</a><br>";
+
+        out <<  "<span id=\"" << spanId.str() << "\">";
+        out << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theTable[i][j]);
+        out << "</span>";
+        out << "</td>";
+      } else if (j!=indexToBeReplacedWithLinks)
         out << "<td>" << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theTable[i][j]) << "</td>";
       else if (theTable[i][j]=="")
         out << "<td></td>";
       else
       { out << "<td>";
         std::stringstream spanId;
-        std::stringstream theRequest;
-        theRequest
-        << "currentDatabaseTable=" << HtmlRoutines::ConvertStringToURLString(tableIdentifier, false) << "&"
-        << "currentDatabaseRow=" << HtmlRoutines::ConvertStringToURLString(theTable[i][0], false) << "&"
-        << "currentDatabaseKeyColumn=" << HtmlRoutines::ConvertStringToURLString(columnLabels[0], false) << "&"
-        << "currentDatabaseDesiredColumn=" << HtmlRoutines::ConvertStringToURLString(columnLabels[indexToBeReplacedWithLinks], false)
-        ;
         spanId << "spanRow" << i << "Col" << j;
         out << "<span class=\"linkLike\"  "
-        << "onclick=\"submitStringAsMainInput("
-        << "'" << theRequest.str() << "', "
-        << "'" << spanId.str() << "', "
-        << "'databaseOneEntry',"
-        << "null"
-        << "); return true;\">More info</span> <span id=\""
+        << "onclick=\"fetchDBentry(";
+
+        out
+        << "'" << HtmlRoutines::ConvertStringToURLString(theTable[i][0], false) << "', "
+        << "'" << HtmlRoutines::ConvertStringToURLString(columnLabels[indexToBeReplacedWithLinks], false) << "', "
+        << "'" << spanId.str() << "' ";
+
+        out << ");\">More info</span> <span id=\""
         << spanId.str() << "\"></span>";
         out << "</td>";
       }
@@ -450,10 +466,11 @@ bool DatabaseRoutines::FetchTableNames(List<std::string>& output, std::stringstr
   return true;
 }
 
-std::string DatabaseRoutines::ToStringCurrentTableHTML ()
+std::string DatabaseRoutines::ToStringCurrentTableHTML(std::string& outputKeyColName)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringCurrentTableHTML");
   std::string currentTable=
-  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"), false);
+  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"), false)
+  ;
   if (currentTable.find("`")!=std::string::npos)
   { std::stringstream out;
     out << "<b>The table identifier: " << currentTable << " contains the ` character and is invalid. </b>";
@@ -466,7 +483,62 @@ std::string DatabaseRoutines::ToStringCurrentTableHTML ()
     out << "<b>The table identifier: " << currentTable << " is longer than 64 characters and is invalid. </b>";
     return out.str();
   }
-  return this->ToStringTableFromTableIdentifier(currentTable);
+  return this->ToStringTableFromTableIdentifier(currentTable, outputKeyColName);
+}
+
+std::string DatabaseRoutines::ToStringModifyEntry()
+{ MacroRegisterFunctionWithName("DatabaseRoutines::ToStringModifyEntry");
+  MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
+  std::stringstream out;
+  if (!HtmlRoutines::ChopCGIString(HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false), theMap, out))
+  { out << "Failed to extract input arguments. ";
+    return out.str();
+  }
+  out << "<hr>";
+//  out << "DEBUG: getting info from: " << theGlobalVariables.GetWebInput("mainInput")
+//  << "<br> got: <hr>" << theMap.ToStringHtml();
+  std::string currentTable=HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  ("currentDatabaseTable"), false);
+  std::string currentRow = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  ("currentDatabaseRow"), false);
+  std::string currentKeyColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  ("currentDatabaseKeyColumn"), false);
+  std::string currentDesiredColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  ("currentDatabaseDesiredColumn"), false);
+
+  if (currentTable.find("`")!=std::string::npos ||
+      currentRow.find("`")!=std::string::npos ||
+      currentKeyColumn.find("`")!=std::string::npos ||
+      currentDesiredColumn.find("`")!=std::string::npos
+      )
+  { std::stringstream out;
+    out << "<b>At least one of the identifiers: "
+    << currentTable << ", " << currentRow << ", " << currentKeyColumn << ", " << currentDesiredColumn
+    << " contains the ` character and is invalid. </b>";
+    return out.str();
+  }
+  if (currentTable.size()>=64 || currentRow.size()>=64 ||
+      currentKeyColumn.size()>=64 || currentDesiredColumn.size()>=64)
+  { std::stringstream out;
+    out << "<b>At least one of the identifiers: "
+    << currentTable << ", " << currentRow << ", " << currentKeyColumn << ", " << currentDesiredColumn
+    << " is longer than 64 characters and is invalid. </b>";
+    return out.str();
+  }
+  std::string outputString;
+  if (!this->FetchEntry
+      (currentKeyColumn, currentRow, currentTable, currentDesiredColumn, outputString, &out))
+    out << "<hr>Failed to fetch entry. ";
+  else
+    out
+    //<< "<hr>DEBUG<hr>"
+    << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml( outputString)
+//    << "<hr>DEBUG<hr>"
+    ;
+//  out << "<hr>DEBUG: requesting: "
+//  << currentTable << ", " << currentRow << ", " << currentKeyColumn << ", " << currentDesiredColumn
+//  ;
+  return out.str();
 }
 
 std::string DatabaseRoutines::ToStringOneEntry()

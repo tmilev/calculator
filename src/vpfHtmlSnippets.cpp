@@ -138,10 +138,24 @@ std::string HtmlRoutines::GetJavascriptCanvasGraphicsWithTags()
     out << "Javascript file three-d.js not found. ";
   else
     out << "<script type=\"text/javascript\">" << fileReader << "</script>";
-//  HtmlRoutines::JavascriptAceEditorScript=out.str();
-//  return HtmlRoutines::JavascriptAceEditorScript;
   if (theGlobalVariables.flagCachingInternalFilesOn)
     HtmlRoutines::JavascriptCanvasGraphicsWithTags=out.str();
+  return out.str();
+}
+
+std::string HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags()
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags");
+  if (theGlobalVariables.flagCachingInternalFilesOn)
+    if (HtmlRoutines::JavascriptDBroutinesWithTags!="")
+      return HtmlRoutines::JavascriptDBroutinesWithTags;
+  std::stringstream out, commentsOnFailure;
+  std::string fileReader;
+  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/database-routines.js", fileReader, commentsOnFailure))
+    out << "Javascript file database-routines.js not found. ";
+  else
+    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
+  if (theGlobalVariables.flagCachingInternalFilesOn)
+    HtmlRoutines::JavascriptDBroutinesWithTags=out.str();
   return out.str();
 }
 
@@ -259,7 +273,7 @@ std::string HtmlRoutines::JavascriptAccountManagement;
 std::string HtmlRoutines::JavascriptProblemLinksWithTags;
 std::string HtmlRoutines::JavascriptTopicListWithTags;
 std::string HtmlRoutines::JavascriptCanvasGraphicsWithTags;
-
+std::string HtmlRoutines::JavascriptDBroutinesWithTags;
 
 void HtmlRoutines::LoadStrings()
 { HtmlRoutines::GetMathQuillStyleSheetWithTags();
@@ -526,6 +540,11 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(const std::strin
   { //stOutput << "oh no: " << notUsed.str();
     return input;
   }
+  if (currentMap.size()==0)
+    return "";
+  if (currentMap.size()==1)
+    if (currentMap[0]=="")
+      return HtmlRoutines::ConvertURLStringToNormal(currentMap.theKeys[0], false);
   std::stringstream out;
   out << "<table border=\"1px solid black;\">";
   for (int i=0; i<currentMap.size(); i++)

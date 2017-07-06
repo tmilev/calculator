@@ -415,11 +415,12 @@ bool FetchAllUsers
 
   std::string ToString();
   std::string ToStringAllUsersHTMLFormat();
+  std::string ToStringModifyEntry();
   std::string ToStringOneEntry();
-  std::string ToStringCurrentTableHTML();
+  std::string ToStringCurrentTableHTML(std::string& outputKeyColName);
   std::string ToStringAllTables();
   std::string ToStringTablE(const MySQLdata& inputTable);
-  std::string ToStringTableFromTableIdentifier(const std::string& tableIdentifier);
+  std::string ToStringTableFromTableIdentifier(const std::string& tableIdentifier, std::string& outputDatabaseKeyId);
 
   bool CreateTable
   (const std::string& tableNameUnsafe, const std::string& desiredTableContent,

@@ -182,6 +182,7 @@ public:
   int ProcessChangePasswordPage();
   int ProcessCalculator();
   int ProcessDatabase();
+  int ProcessDatabaseModifyEntry();
   int ProcessDatabaseOneEntry();
   int ProcessAccounts();
   int ProcessScores();
@@ -272,6 +273,7 @@ int recursionDepth=0)
   std::string GetExamPageInterpreter();
   std::string GetDatabasePage();
   //std::string GetEmailChangePage();
+  std::string GetDatabaseModifyEntry();
   std::string GetDatabaseOneEntry();
   std::string GetNavigationPage();
   std::string GetAddUserEmails();

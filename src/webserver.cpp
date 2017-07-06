@@ -1242,6 +1242,23 @@ std::string WebWorker::GetNavigationPage()
   return out.str();
 }
 
+std::string WebWorker::GetDatabaseModifyEntry()
+{ MacroRegisterFunctionWithName("WebWorker::GetDatabaseModifyEntry");
+  std::stringstream out;
+#ifdef MACRO_use_MySQL
+  DatabaseRoutines theRoutines;
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
+    out << "<b>Modifying database allowed for logged-in admins only.</b>";
+  else
+    out << theRoutines.ToStringModifyEntry();
+#else
+out << "<b>Database not available. </b>";
+#endif // MACRO_use_MySQL
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  out << "</body></html>";
+  return out.str();
+}
+
 std::string WebWorker::GetDatabaseOneEntry()
 { MacroRegisterFunctionWithName("WebWorker::GetDatabaseOneEntry");
   std::stringstream out;
@@ -1266,11 +1283,14 @@ std::string WebWorker::GetDatabasePage()
   << "<head>"
   << HtmlRoutines::GetCalculatorStyleSheetWithTags()
   << HtmlRoutines::GetJavascriptStandardCookies()
-  << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
-  << "</head>"
-  << "<body onload=\"loadSettings();\">\n";
-//  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << "</calculatorNavigation>\n";
-std::stringstream dbOutput;
+  << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile();
+
+  std::string currentTable=
+  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"), false)
+  ;
+  //  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << "</calculatorNavigation>\n";
+  std::stringstream dbOutput;
+  std::string keyColName;
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
@@ -1278,10 +1298,20 @@ std::stringstream dbOutput;
   else
     dbOutput << "Database: " << DatabaseStrings::theDatabaseName
     << "<br>Database user: " << DatabaseStrings::databaseUser
-    <<  "<section>" << theRoutines.ToStringCurrentTableHTML() << "</section>";
+    << theRoutines.ToStringCurrentTableHTML(keyColName);
 #else
-dbOutput << "<b>Database not available. </b>";
+  dbOutput << "<b>Database not available. </b>";
 #endif // MACRO_use_MySQL
+  out << "<script type=\"text/javascript\">\n"
+  << " var extraDatabaseRequestParameters=\"currentDatabaseTable="
+  << HtmlRoutines::ConvertStringToURLString(currentTable, false) << "&"
+  << "currentDatabaseKeyColumn=" << keyColName << "&"
+  << "\";\n"
+  << "</script>"
+  << HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags()
+  ;
+  out << "</head>"
+  << "<body onload=\"loadSettings();\">\n";
   out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
   out << dbOutput.str();
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
@@ -1992,7 +2022,6 @@ int WebWorker::ProcessServerStatus()
   << "</head>"
   << "<body>";
   std::stringstream pageBody;
-  pageBody << "<section>";
   if (theGlobalVariables.UserDefaultHasAdminRights())
     pageBody << " <table><tr><td style=\"vertical-align:top\">"
     << this->parent->ToStringStatusAll() << "</td><td>"
@@ -2000,7 +2029,6 @@ int WebWorker::ProcessServerStatus()
     << "</td></tr></table>";
   else
     pageBody << "<b>Viewing server status available only to logged-in admins.</b>";
-  pageBody << "</section>";
   if (theGlobalVariables.flagLoggedIn)
     out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
   out << pageBody.str();
@@ -3313,6 +3341,13 @@ int WebWorker::ProcessDatabase()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabase");
   this->SetHeaderOKNoContentLength();
   stOutput << this->GetDatabasePage();
+  return 0;
+}
+
+int WebWorker::ProcessDatabaseModifyEntry()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseModifyEntry");
+  this->SetHeaderOKNoContentLength();
+  stOutput << this->GetDatabaseModifyEntry();
   return 0;
 }
 

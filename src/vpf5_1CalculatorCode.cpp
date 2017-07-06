@@ -727,15 +727,21 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
   if (!input.IsSequenceNElementS() && !input.StartsWith(theCommands.opMatrix())
       && !input.StartsWithGivenAtom("Transpose") )
     return false;
+  //  stOutput << "DEBUG: got to here";
   Matrix<Expression> theMat;
   if (input.StartsWithGivenAtom("Transpose"))
     theCommands.GetMatrixExpressionsFromArguments(input, theMat);
   else
     theCommands.GetMatrixExpressions(input, theMat);
-  if (input.IsSequenceNElementS())
-    if (theMat.NumRows!=1)
-      return false;
+  //  stOutput << "DEBUG: got to here, mat is: " << theMat.ToString();
+  //The commented code used to be here. I don't remember why I added it, perhaps there was a solid reason for it?
+  //If the code is uncommented, then ((1,2),(3,5))^t will not be transposed according to expectation.
+  //If the commented code needs to be restored, please document why.
+  //if (input.IsSequenceNElementS())
+  //  if (theMat.NumRows!=1)
+  //    return false;
   theMat.Transpose();
+//  stOutput << "DEBUG: got to here pt2, mat is: " << theMat.ToString();
   return output.AssignMatrixExpressions(theMat, theCommands, true);
 }
 

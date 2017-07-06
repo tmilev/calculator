@@ -338,6 +338,7 @@ public:
   static bool innerPlotImplicitFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotImplicitShowGridFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotSegment(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotPath(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotDirectionField(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotVectorField(Calculator& theCommands, const Expression& input, Expression& output);

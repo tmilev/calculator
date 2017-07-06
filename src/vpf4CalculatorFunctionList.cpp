@@ -2243,6 +2243,15 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerPlotSegment",
    "PlotSegment")
    ;
+  this->AddOperationInnerHandler ("PlotPath",
+    CalculatorFunctionsGeneral::innerPlotPath, "",
+   "Plots a straight segment path. The path should be enclosed in parentheses, and color must be indicated. \
+   ",
+   "PlotPath( ((0,0), (3,0), (3,4),(0,0)), blue)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerPlotPath",
+   "PlotPath")
+   ;
   this->AddOperationInnerHandler ("PlotSetId",
     CalculatorFunctionsGeneral::innerPlotSetId, "",
    " Creates an empty plot with a given canvas id. \

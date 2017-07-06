@@ -1186,6 +1186,49 @@ bool CalculatorFunctionsGeneral::innerRound(Calculator& theCommands, const Expre
   return false;
 }
 
+bool CalculatorFunctionsGeneral::innerPlotPath(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotPath");
+  if (input.size()<3)
+    return false;
+//  stOutput << "DEBUG: Here i am";
+  const Expression& theMatE=input[1];
+  Matrix<double> theMat;
+  if (!theCommands.GetMatrixDoubles(theMatE, theMat))
+    return theCommands << "Failed to extract matrix from: " << theMatE.ToString();
+  if (theMat.NumCols!=2 && theMat.NumCols!=3)
+    return theCommands << "Only dimensions 2 and 3 are supported at the moment. ";
+  PlotObject theSegment;
+  if (input.size()>=3)
+  { theSegment.colorJS="black";
+    theSegment.colorRGB=HtmlRoutines::RedGreenBlue(0,0,0);
+    const Expression& colorE=input[2];
+    if (!colorE.IsOfType<std::string>(&theSegment.colorJS))
+      theSegment.colorJS= colorE.ToString();
+    if(!DrawingVariables::GetColorIntFromColorString
+        (theSegment.colorJS, theSegment.colorRGB))
+      theCommands << "Unrecognized color: " << theSegment.colorJS;
+  }
+  if (input.size()>=4)
+  { const Expression& lineWidthE=input[3];
+    if (!lineWidthE.EvaluatesToDouble(&theSegment.lineWidth))
+      theCommands << "Failed to extract line width from: "
+      << lineWidthE.ToString();
+    std::stringstream lineWidthStream;
+    lineWidthStream.precision(4);
+    lineWidthStream << theSegment.lineWidth;
+    theSegment.lineWidthJS=lineWidthStream.str();
+  }
+  theSegment.thePlotType="segmentPath";
+  theSegment.dimension=theMat.NumCols;
+  theMat.GetVectorsFromRows(theSegment.thePoints);
+  if (input.size()>=4)
+    if (!input[3].EvaluatesToDouble(&theSegment.lineWidth))
+      theSegment.lineWidth=1;
+  Plot thePlot;
+  thePlot+=theSegment;
+  return output.AssignValue(thePlot, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSegment");
   if (input.size()<3)

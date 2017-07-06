@@ -290,6 +290,7 @@ void HtmlRoutines::LoadStrings()
   HtmlRoutines::GetJavascriptCanvasGraphicsWithTags();
   HtmlRoutines::GetJavascriptTopicListWithTags();
   HtmlRoutines::GetJavascriptProblemLinksWithTags();
+  HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags();
 }
 
 extern logger theLog;

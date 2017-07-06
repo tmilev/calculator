@@ -952,8 +952,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceByT(Calculator& theCommands
     return false;
   if (!input[1].IsSequenceNElementS() && !input[1].StartsWith(theCommands.opMatrix()))
     return false;
-  if (!(input[2]=="t") && !(input[2]=="T"))
+  if (! input[2].IsAtomGivenData("t") && ! input[2].IsAtomGivenData("T"))
     return false;
+  //stOutput << "DEBUG: got to here";
   return theCommands.innerTranspose(theCommands, input[1], output);
 }
 

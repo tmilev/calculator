@@ -4066,7 +4066,10 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   bool problemSolved=false;
   bool returnEmptyStringIfNoDeadline=false;
   if (this->problem=="")
-  { this->displayProblemLink="";
+  { if (this->type==this->tProblem)
+      this->displayProblemLink="(theory)";
+    else
+      this->displayProblemLink="";
     this->displayScore="";
     this->displayModifyWeight="";
     this->displayDeadlinE="";

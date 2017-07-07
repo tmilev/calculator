@@ -96,6 +96,12 @@ function initializeButtons()
 "<td>" + getBelongsToButton(i) + "</td>"+
 "<td>" + getEmptySetButton(i) + "</td>"+
 "</tr>"+
+"<tr>"+
+"<td>" + getAlphaButton(i)+ "</td>"+
+"<td>" + getBetaButton(i) + "</td>"+
+"<td>" + getGammaButton(i) + "</td>"+
+"<td>" + getThetaButton(i) + "</td>"+
+"</tr>"+
 "</table>"
 ;
   }
@@ -191,6 +197,42 @@ function getBelongsToButton(indexMathField)
 
 function belongsToClick(currentMathField)
 { currentMathField.cmd('\\in');
+  event.preventDefault();
+}
+
+function getAlphaButton(indexMathField)
+{ return "<button style='width:25' onmousedown='alphaClick(answerMathQuillObjects[" + indexMathField + "]);'>&alpha;</button>";
+}
+
+function alphaClick(currentMathField)
+{ currentMathField.cmd('\\alpha');
+  event.preventDefault();
+}
+
+function getBetaButton(indexMathField)
+{ return "<button style='width:25' onmousedown='betaClick(answerMathQuillObjects[" + indexMathField + "]);'>&beta;</button>";
+}
+
+function betaClick(currentMathField)
+{ currentMathField.cmd('\\beta');
+  event.preventDefault();
+}
+
+function getGammaButton(indexMathField)
+{ return "<button style='width:25' onmousedown='gammaClick(answerMathQuillObjects[" + indexMathField + "]);'>&gamma;</button>";
+}
+
+function gammaClick(currentMathField)
+{ currentMathField.cmd('\\gamma');
+  event.preventDefault();
+}
+
+function getThetaButton(indexMathField)
+{ return "<button style='width:25' onmousedown='thetaClick(answerMathQuillObjects[" + indexMathField + "]);'>&theta;</button>";
+}
+
+function thetaClick(currentMathField)
+{ currentMathField.cmd('\\theta');
   event.preventDefault();
 }
 

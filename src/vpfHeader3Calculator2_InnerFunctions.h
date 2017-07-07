@@ -291,6 +291,8 @@ public:
   static bool innerExploitCosEvenness(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExploitSinOddness(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerSineOfAngleSumToTrig(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCosineOfAngleSumToTrig(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertSinToExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertCosToExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerImaginaryUnit(Calculator& theCommands, const Expression& input, Expression& output);

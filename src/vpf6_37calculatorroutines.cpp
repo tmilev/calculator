@@ -1392,3 +1392,31 @@ bool CalculatorFunctionsGeneral::innerOrIdentical(Calculator& theCommands, const
   }
   return false;
 }
+
+bool CalculatorFunctionsGeneral::innerSineOfAngleSumToTrig
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSineOfAngleSumToTrig");
+  if (!input.StartsWith(theCommands.opPlus(),3))
+    return false;
+  Expression sinA, sinB, cosA, cosB;
+  sinA.MakeOX(theCommands, theCommands.opSin(),input[1]);
+  sinB.MakeOX(theCommands, theCommands.opSin(),input[2]);
+  cosA.MakeOX(theCommands, theCommands.opCos(),input[1]);
+  cosB.MakeOX(theCommands, theCommands.opCos(),input[2]);
+  output= sinA*cosB+cosA*sinB;
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig");
+  if (!input.StartsWith(theCommands.opPlus(),3))
+    return false;
+  Expression sinA, sinB, cosA, cosB;
+  sinA.MakeOX(theCommands, theCommands.opSin(),input[1]);
+  sinB.MakeOX(theCommands, theCommands.opSin(),input[2]);
+  cosA.MakeOX(theCommands, theCommands.opCos(),input[1]);
+  cosB.MakeOX(theCommands, theCommands.opCos(),input[2]);
+  output= cosA*cosB-sinA*sinB;
+  return true;
+}

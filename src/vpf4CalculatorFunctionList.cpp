@@ -903,6 +903,20 @@ D-B;\
    "CalculatorFunctionsGeneral::innerPowerImaginaryUnit",
    "RaiseImaginaryUnitToPower", true);
   this->AddOperationInnerHandler
+  ("\\sin", CalculatorFunctionsGeneral::innerSineOfAngleSumToTrig, "",
+   "Implementation of sin (a+b)=sin(a)cos(b)+cos(a)sin(b).",
+   "TurnOnRules(\"SineOfAngleSum\"); \\sin(a+b)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerSineOfAngleSumToTrig",
+   "SineOfAngleSum", true);
+  this->AddOperationInnerHandler
+  ("\\cos", CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig, "",
+   "Implementation of cos (a+b)=cos(a)cos(b)-sin(a)sin(b).",
+   "TurnOnRules(\"CosineOfAngleSum\"); \\cos(a+b)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig",
+   "CosineOfAngleSum", true);
+  this->AddOperationInnerHandler
   ("\\sin", CalculatorFunctionsGeneral::innerConvertSinToExponent, "",
    "Converts sine to exponent by sin(x)=(e^{i x}-e^{-ix})/(2i) ",
    "TurnOnRules(\"ExpressSinViaExponent\", \"ExpressCosViaExponent\"); \\sin x; cos x",

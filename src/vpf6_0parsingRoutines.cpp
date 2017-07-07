@@ -1561,7 +1561,7 @@ bool Calculator::isSeparatorFromTheLeftGeneral(const std::string& input)
 
 bool Calculator::isSeparatorFromTheLeftForInterval(const std::string& input)
 { return input=="," || input=="(" || input=="[" || input==":" || input==";" ||
-  input=="=" || input=="\\\\" || input=="\\cup" || input=="\\cap" ||
+  input=="=" || input== "==" || input=="\\\\" || input=="\\cup" || input=="\\cap" ||
   input=="\\end" || input=="&" || input=="EndProgram";
 }
 

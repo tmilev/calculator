@@ -1821,6 +1821,38 @@ bool Expression::IsConstantNumber()const
   return false;
 }
 
+bool Expression::IsAlgebraicRadical()const
+{ MacroRegisterFunctionWithName("Expression::IsAlgebraicRadical");
+  if (this->owner==0)
+    return false;
+  RecursionDepthCounter thecounter(&this->owner->RecursionDeptH);
+  if (this->owner->RecursionDepthExceededHandleRoughly("In Expression::IsAlgebraicRadical: "))
+    return false;
+  if (this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>())
+    return true;
+  if (this->StartsWith(this->owner->opPlus()) ||
+      this->StartsWith(this->owner->opMinus())||
+      this->StartsWith(this->owner->opTimes()) ||
+      this->StartsWith(this->owner->opDivide())
+      )
+  { for (int i=1; i<this->size(); i++)
+      if (!(*this)[i].IsAlgebraicRadical())
+        return false;
+    return true;
+  }
+  if (this->StartsWith(this->owner->opThePower(),3))
+  { if (!(*this)[2].IsRational())
+      return false;
+    return (*this)[1].IsAlgebraicRadical();
+  }
+  if (this->StartsWith(this->owner->opSqrt(), 3))
+  { if (!(*this)[1].IsRational())
+      return false;
+    return (*this)[2].IsAlgebraicRadical();
+  }
+  return false;
+}
+
 bool Expression::IsInteger(LargeInt* whichInteger)const
 { Rational theRat;
   if (!this->IsOfType<Rational>(&theRat))
@@ -3124,8 +3156,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     for (int i=1; i<this->children.size; i++)
     { const Expression currentE=(*this)[i];
       if (createTable)
-      { out << "<tr><td valign=\"top\">";
-        out << "<hr> ";
+      { out << "<tr><td class=\"cellCalculatorInput\">";
         if (!this->owner->flagHideLHS)
         { if (i<(*startingExpression).children.size)
             out << HtmlRoutines::GetMathSpanPure((*startingExpression)[i].ToString(theFormat));
@@ -3135,7 +3166,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           out << "...";
         if (i!=this->children.size-1)
           out << ";";
-        out << "</td><td valign=\"top\"><hr>";
+        out << "</td><td class=\"cellCalculatorResult\">";
         if ((*this)[i].IsOfType<std::string>() && isFinal)
           out << currentE.GetValue<std::string>();
         else if ((currentE.HasType<Plot> () ||
@@ -3146,8 +3177,6 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         else
           out << HtmlRoutines::GetMathSpanPure
           (currentE.ToString(theFormat), 1700);
-        if (i!=this->children.size-1)
-          out << ";";
         out << currentE.ToStringAllSlidersInExpression();
         out << "</td></tr>";
       } else
@@ -3194,7 +3223,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "(ProgrammingError:NotDocumented)" ;
   if (startingExpression!=0)
   { std::stringstream outTrue;
-    outTrue << "<table>";
+    outTrue << "<table class=\"tableCalculatorOutput\">";
     //outTrue << "<tr><th colspan=\"2\"> Dbl click f-la to get LaTeX.</th></tr> ";
     //out << "Many thanks to the <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a> project!</td></tr>";
     outTrue << "<tr><th>Input</th><th>Result</th></tr>";
@@ -3203,14 +3232,14 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if (this->IsListStartingWithAtom(this->owner->opEndStatement()))
       outTrue << out.str();
     else
-    { outTrue << "<tr><td>"
+    { outTrue << "<tr><td class=\"cellCalculatorInput\">"
       << HtmlRoutines::GetMathSpanPure
       (startingExpression->ToString(theFormat), 1700);
       if ((this->IsOfType<std::string>() || this->IsOfType<Plot>() ||
            this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroupData>()) && isFinal)
-        outTrue << "</td><td>" << out.str() << "</td></tr>";
+        outTrue << "</td><td class=\"cellCalculatorResult\">" << out.str() << "</td></tr>";
       else
-        outTrue << "</td><td>"
+        outTrue << "</td><td class=\"cellCalculatorResult\">"
         << HtmlRoutines::GetMathSpanPure(out.str(), 1700) << "</td></tr>";
     }
     outTrue << "</table>";

@@ -466,6 +466,7 @@ class Expression
   bool IsSmallInteger(int* whichInteger=0)const;
   bool IsInteger(LargeInt* whichInteger=0)const;
   bool IsRational(Rational* whichRational=0)const;
+  bool IsAlgebraicRadical()const;
   bool IsConstantNumber()const;
   bool IsPositiveNumber()const;
   bool EvaluatesToDoubleInRange

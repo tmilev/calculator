@@ -823,6 +823,16 @@ D-B;\
    "Polynomialize");
 
   this->AddOperationInnerHandler
+  ("IsAlgebraicRadical", CalculatorFunctionsGeneral::innerIsAlgebraicRadical, "",
+   "Tests whether the expression is an algebraic expression \
+    obtained using radicals and the four arithmetic operations.  ",
+   "IsAlgebraicRadical(\\sqrt{5+\\sqrt{2}}); IsAlgebraicRadical(\\sqrt{x}); \
+    IsAlgebraicRadical(\\sqrt{\\pi+e+1})",
+    true, false,
+    "CalculatorFunctionsGeneral::innerIsAlgebraicRadical",
+    "IsAlgebraicRadical");
+
+  this->AddOperationInnerHandler
   ("IsConstant", CalculatorFunctionsGeneral::innerIsConstant, "",
    "Tests whether the expression is a constant.  ",
    "IsConstant(\\pi^2); IsConstant(1);IsConstant(x);\

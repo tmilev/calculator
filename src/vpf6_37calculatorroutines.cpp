@@ -1,4 +1,3 @@
-
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
@@ -1420,3 +1419,11 @@ bool CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig
   output= cosA*cosB-sinA*sinB;
   return true;
 }
+
+bool CalculatorFunctionsGeneral::innerIsAlgebraicRadical(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsAlgebraicRadical");
+  //stOutput << "<br>Evaluating isconstant on: " << input.ToString();
+  int result=(int) input.IsAlgebraicRadical();
+  return output.AssignValue(result, theCommands);
+}
+

@@ -2431,6 +2431,8 @@ bool Expression::NeedsParenthesisForBaseOfExponent()const
     return true;
   if (this->IsOfType<Rational>())
     return this->GetValue<Rational>()<0 || !this->GetValue<Rational>().IsInteger();
+  if (this->IsOfType<double>())
+    return this->GetValue<double>()<0;
   if (this->IsOfType<AlgebraicNumber>())
   { LargeInt tempI;
     if (!this->GetValue<AlgebraicNumber>().IsInteger(&tempI))

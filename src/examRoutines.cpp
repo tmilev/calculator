@@ -737,10 +737,10 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   } else
     refStreamExercise << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
   if (!theGlobalVariables.UserGuestMode())
-    out << "<b> <a class=\"problemLinkQuiz\" href=\"" << refStreamForReal.str() << "\">"
-    << CalculatorHTML::stringScoredQuizzes << "</a></b> ";
-  out << " | <a class=\"problemLinkPractice\" href=\"" << refStreamExercise.str() << "\">"
-  << CalculatorHTML::stringPracticE << "</a> ";
+    out << "<b><a class=\"problemLinkQuiz\" href=\"" << refStreamForReal.str() << "\">"
+    << CalculatorHTML::stringScoredQuizzes << "</a></b>";
+  out << "<a class=\"problemLinkPractice\" href=\"" << refStreamExercise.str() << "\">"
+  << CalculatorHTML::stringPracticE << "</a>";
   //out << "DEBUG: topiclist: " << this->topicListFileName << " courseHome: " << this->courseHome
   //<< " filename: " << theFileName;
   return out.str();
@@ -3892,8 +3892,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
         theLinks.AddOnTop(currentElt.displaySlidesPrintableLink);
       for (int k=0; k<theLinks.size; k++)
       { out << theLinks[k];
-        if (k!=theLinks.size-1)
-          out << " | ";
+//        if (k!=theLinks.size-1)
+//          out << " | ";
       }
       out << "</td>";
       out << "<td>";
@@ -4058,7 +4058,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
       << "=" << HtmlRoutines::ConvertStringToURLString(this->slidesSources[i], false) << "&";
     slideFromSourceStreamProjector << slideFromSourceStreamHandout.str();
     slideFromSourceStreamHandout << "layout=printable&";
-    slideFromSourceStreamHandout << "\" class=\"slidesLink\" target=\"_blank\">Printable slides</a>" << " | ";
+    slideFromSourceStreamHandout << "\" class=\"slidesLink\" target=\"_blank\">Printable slides</a>";
     slideFromSourceStreamProjector << "layout=projector&";
     slideFromSourceStreamProjector << "\" class=\"slidesLink\" target=\"_blank\">Slides</a>";
     this->displaySlidesLink=slideFromSourceStreamHandout.str() + slideFromSourceStreamProjector.str();

@@ -139,7 +139,7 @@ button.buttonStandard{
   margin: 2px;
 }
 button.buttonSaveEdit{
-  margin:  1px;
+  margin:  3px;
   padding: 3px;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -158,7 +158,7 @@ button.buttonSaveEdit:hover{
   background-color: green;
 }
 button.buttonClone{
-  margin:  1px;
+  margin:  3px;
   padding: 3px;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -412,7 +412,7 @@ table.topicList th {
   padding-bottom: 12px;
 }
 a.linkStandardButtonLike{
-  margin:  1px;
+  margin:  3px;
   padding: 3px;
   background-color: #efefef;
   -moz-border-radius: 3px;
@@ -425,7 +425,7 @@ a.linkStandardButtonLike:hover{
 }
 a.problemLinkQuiz{
   display: inline-block;
-  margin:  1px;
+  margin:  3px;
   padding: 3px;
   background-color: #efefef;
   -moz-border-radius: 3px;
@@ -435,7 +435,7 @@ a.problemLinkQuiz{
 }
 a.problemLinkPractice{
   display: inline-block;
-  margin:  1px;
+  margin:  3px;
   padding: 3px;
   background-color: #efefef;
   -moz-border-radius: 3px;
@@ -445,7 +445,7 @@ a.problemLinkPractice{
 }
 a.slidesLink{
   display: inline-block;
-  margin:  1px;
+  margin:  3px;
   padding: 3px;
   background-color: #efefef;
   -moz-border-radius: 3px;
@@ -455,7 +455,7 @@ a.slidesLink{
 }
 a.videoLink{
   display: inline-block;
-  margin:  1px;
+  margin:  3px;
   padding: 3px;
   background-color: #efefef;
   -moz-border-radius: 3px;

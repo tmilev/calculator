@@ -2981,8 +2981,12 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   if (out.str()=="")
     return "";
   std::stringstream outFinal;
-  outFinal << "<problemNavigation>" << out.str()
-  << "</problemNavigation>";
+  outFinal << "<problemNavigation>" << out.str();
+  if (!this->flagDoPrependCalculatorNavigationBar)
+    outFinal << " | <small>Generated in: "
+    << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds())
+    << " second(s).</small>";
+  outFinal << "</problemNavigation>";
   return outFinal.str();
 }
 
@@ -3790,7 +3794,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       if (!subSectionStarted && !sectionStarted)
       { //stOutput << "DEBUG: here be I at sectionStart";
         sectionStarted=true;
-        out << "<li class='listSection'><ol>";
+        out << "<li class='listSection'><ol class=\"listItem\">";
       }
       if (!subSectionStarted)
       { //stOutput << "DEBUG: here be I at subsecstart";

@@ -848,6 +848,10 @@ bool CalculatorConversions::innerExpressionFromPoly
 
 bool CalculatorConversions::innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromBuiltInType");
+  if (input.IsOfType<Rational>() || input.IsOfType<double>() || input.IsOfType<AlgebraicNumber>())
+  { output=input;
+    return true;
+  }
   if (input.IsOfType<Polynomial<Rational> >())
     return CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, input, output);
   if (input.IsOfType<Polynomial<AlgebraicNumber> >())

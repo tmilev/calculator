@@ -398,8 +398,20 @@ void Calculator::initPredefinedInnerFunctions()
 
   this->AddOperationInnerHandler
   ("ToString", CalculatorFunctionsGeneral::innerExpressionToString, "",
-   "Transforms an arbitrary expression to its string representation.",
-   "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"");
+   "Transforms an arbitrary expression to its string representation. \
+    The string representation is (supposed to be) LaTeX-compatible. ",
+   "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"",
+   true, false,
+   "CalculatorFunctionsGeneral::innerExpressionToString",
+   "ToString");
+  this->AddOperationInnerHandler
+  ("ToUTF8String", CalculatorFunctionsGeneral::innerExpressionToUTF8String, "",
+   "Transforms an arbitrary expression to its utf8-string representation. The string\
+    is supposed to look reasonable when drawn on a javascript canvas. ",
+   "f= \\sin {}x / \\cos {}x; Plot(f, -\\pi/4, \\pi/4)+ PlotLabel{}((1,1), \"y=\" + ToUTF8String(f))",
+   true, false,
+   "CalculatorFunctionsGeneral::innerExpressionToUTF8String",
+   "ToUTF8String");
   this->AddOperationInnerHandler
   ("StringToAtom", CalculatorFunctionsGeneral::innerStringToAtom, "",
    "Transforms a string to an atom. ",

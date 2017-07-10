@@ -415,6 +415,7 @@ class Expression
   std::string ToStringSemiFull()const;
   std::string ToStringFull()const;
   std::string ToStringAllSlidersInExpression()const;
+  std::string ToUTF8String(FormatExpressions* theFormat=0)const;
   std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0, bool unfoldCommandEnclosures=true)const;
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();

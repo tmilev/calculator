@@ -1427,3 +1427,13 @@ bool CalculatorFunctionsGeneral::innerIsAlgebraicRadical(Calculator& theCommands
   return output.AssignValue(result, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerExpressionToUTF8String
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionToUTF8String");
+  if (input.StartsWithGivenAtom("ToUTF8String"))
+  { Expression inputCopy=input;
+    inputCopy.SetChildAtomValue(0, theCommands.opSequence());
+    return output.AssignValue(inputCopy.ToUTF8String(), theCommands);
+  }
+  return output.AssignValue(input.ToUTF8String(), theCommands);
+}

@@ -1406,6 +1406,66 @@ bool CalculatorFunctionsGeneral::innerSineOfAngleSumToTrig
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerTrigSumToTrigProduct
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTrigSumToTrigProduct");
+  if (!input.StartsWith(theCommands.opPlus(), 3))
+    return false;
+  Expression leftE=input[1], rightE=input[2];
+  bool isGood=false;
+  int leftSign=1;
+  int rightSign=1;
+  if (leftE.StartsWith(theCommands.opTimes(),3))
+    if (leftE[1].IsEqualToMOne())
+    { leftE=leftE[2];
+      leftSign=-1;
+    }
+  if (rightE.StartsWith(theCommands.opTimes(),3))
+    if (rightE[1].IsEqualToMOne())
+    { rightE=rightE[2];
+      rightSign=-1;
+    }
+
+  if (leftE.StartsWith(theCommands.opSin(), 2) &&
+      rightE.StartsWith(theCommands.opSin(), 2))
+    isGood=true;
+  else if ( leftE.StartsWith(theCommands.opCos(), 2) &&
+            rightE.StartsWith(theCommands.opCos(), 2))
+    isGood=true;
+  if (!isGood)
+    return false;
+  Expression argSum, argDiff, leftMultiplicand, rightMultiplicand;
+  if (leftE.StartsWith(theCommands.opSin(),2))
+  { //stOutput << "DEBUG: leftSign: " << leftSign << "Right sign: " << rightSign;
+    argSum=  (leftE[1]*leftSign+ rightE[1]*rightSign)/2;
+    argDiff= (leftE[1]*leftSign- rightE[1]*rightSign)/2;
+    leftMultiplicand.MakeOX(theCommands, theCommands.opCos(), argDiff);
+    rightMultiplicand.MakeOX(theCommands, theCommands.opSin(), argSum);
+    output=leftMultiplicand*rightMultiplicand*2;
+    return true;
+  } else
+  { if (leftSign== rightSign)
+    { argSum=(leftE[1]+  rightE[1])/2;
+      argDiff= (leftE[1]-rightE[1])/2;
+      leftMultiplicand.MakeOX(theCommands, theCommands.opCos(), argDiff);
+      rightMultiplicand.MakeOX(theCommands, theCommands.opCos(), argSum);
+      output=leftMultiplicand*rightMultiplicand*2;
+      if (leftSign==-1)
+        output*=-1;
+      return true;
+    } else
+    { argSum=(leftE[1]+  rightE[1])/2;
+      argDiff= (leftE[1]*leftSign+rightE[1]*rightSign)/2;
+      leftMultiplicand.MakeOX(theCommands, theCommands.opSin(), argDiff);
+      rightMultiplicand.MakeOX(theCommands, theCommands.opSin(), argSum);
+      output=leftMultiplicand*rightMultiplicand*2;
+      return true;
+    }
+    return true;
+  }
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig");

@@ -925,6 +925,16 @@ D-B;\
    "CalculatorFunctionsGeneral::innerPowerImaginaryUnit",
    "RaiseImaginaryUnitToPower", true);
   this->AddOperationInnerHandler
+  ("+", CalculatorFunctionsGeneral::innerTrigSumToTrigProduct, "",
+   "Implementation of sum-to-product trig rules. ",
+   "TurnOnRules(\"TrigSumToTrigProduct\"); \
+    sin(a)+sin(b); sin(b)-sin(a);\
+    -sin(b)+sin(a); -sin(b)-sin(a); \
+    cos(a)+cos(b); cos(a)-cos(b); -cos(a)-cos(b)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerTrigSumToTrigProduct",
+   "TrigSumToTrigProduct", true);
+  this->AddOperationInnerHandler
   ("\\sin", CalculatorFunctionsGeneral::innerSineOfAngleSumToTrig, "",
    "Implementation of sin (a+b)=sin(a)cos(b)+cos(a)sin(b).",
    "TurnOnRules(\"SineOfAngleSum\"); \\sin(a+b)",

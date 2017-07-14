@@ -530,7 +530,12 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
     this->desiredPresentationTitle=this->desiredPresentationTitle.substr(0, start)+
     this->desiredPresentationTitle.substr(finish);
   }
-
+  if (this->desiredPresentationTitle.find("\\(\\LaTeX\\)")!=std::string::npos )
+  { int pos=this->desiredPresentationTitle.find("\\(\\LaTeX\\)");
+    this->desiredPresentationTitle=
+    this->desiredPresentationTitle.substr(0, pos)+"\\LaTeX"+
+    this->desiredPresentationTitle.substr(pos+10);
+  }
   if (addExtraTex)
   { theFileContentStream << "\\begin{document}"
     << "\\providecommand{\\currentLecture}{1}"

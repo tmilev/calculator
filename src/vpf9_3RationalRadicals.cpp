@@ -387,6 +387,22 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
     sign=-1;
   if (halfIntegerPartTimesTwo==3)
     halfFracPart=half-halfFracPart;
+  if (halfFracPart==Rational(1,12))
+  { AlgebraicNumber sqrt6, sqrt2;
+    sqrt6.AssignRationalQuadraticRadical(6,inputOwner);
+    sqrt2.AssignRationalQuadraticRadical(2,inputOwner);
+    *this=sqrt6+sqrt2;
+    *this/=4*sign;
+    return true;
+  }
+  if (halfFracPart==Rational(5,12))
+  { AlgebraicNumber sqrt6, sqrt2;
+    sqrt6.AssignRationalQuadraticRadical(6,inputOwner);
+    sqrt2.AssignRationalQuadraticRadical(2,inputOwner);
+    *this=sqrt6-sqrt2;
+    *this/=4*sign;
+    return true;
+  }
   if (halfFracPart==Rational(1,6))
   { this->AssignRationalQuadraticRadical(3, inputOwner);
     *this/=2;

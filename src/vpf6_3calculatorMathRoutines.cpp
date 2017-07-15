@@ -6827,6 +6827,24 @@ bool CalculatorFunctionsGeneral::innerCrawlTexFile(Calculator& theCommands, cons
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { std::stringstream out;
+    out << "Command available to logged-in admins only. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  if (!input.IsOfType<std::string>())
+    return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
+  LaTeXcrawler theCrawler;
+  theCrawler.flagBuildSingleSlides=true;
+  theCrawler.ownerCalculator=&theCommands;
+  theCrawler.topicListToBuild=input.GetValue<std::string>();
+  std::stringstream out;
+  theCrawler.BuildTopicList(&out, &out);
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides");
   if (!theGlobalVariables.UserDefaultHasAdminRights())

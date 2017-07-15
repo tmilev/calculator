@@ -782,6 +782,8 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtual
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
     return false;
+  //stOutput << "DEBUG: computed file name: " << computedFileName;
+
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
   (theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
 }
@@ -804,7 +806,7 @@ bool FileOperations::OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, c
         theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out);
     }
   }
-  if(theFile.is_open())
+  if (theFile.is_open())
   { theFile.clear();
     theFile.seekp(0, std::ios_base::end);
     int tempI=theFile.tellp();

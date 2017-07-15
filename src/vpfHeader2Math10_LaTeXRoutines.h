@@ -10,6 +10,7 @@ class LaTeXcrawler
 {
   public:
   int recursionDepth;
+  std::string topicListToBuild;
   std::string theFileNameToCrawlPhysical;
   std::string theFileNameToCrawlRelative;
   std::string baseFolderStartFilePhysical;
@@ -46,10 +47,12 @@ class LaTeXcrawler
   void* ownerCalculator;
   bool flagBuildSingleSlides;
   bool flagProjectorMode;
+  bool flagForceSlideRebuild;
   bool ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
   bool ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void Crawl();
   bool BuildOrFetchFromCachePresentationFromSlides(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void BuildFreecalc();
   void CrawlRecursive(const std::string& currentFileName);
   std::stringstream crawlingResult;
@@ -59,6 +62,7 @@ class LaTeXcrawler
   LaTeXcrawler()
   { this->flagBuildSingleSlides=false;
     this->flagProjectorMode=true;
+    this->flagForceSlideRebuild=false;
     this->ownerCalculator=0;
   }
 };

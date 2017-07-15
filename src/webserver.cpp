@@ -1536,9 +1536,11 @@ void WebWorker::OutputResultAfterTimeout()
   std::string theFileName=
   "output/" + theGlobalVariables.RelativePhysicalNameOutpuT;
   std::string theLink=
-  "output/" + HtmlRoutines::ConvertStringToURLString(theGlobalVariables.RelativePhysicalNameOutpuT,false);
+  "output/" + HtmlRoutines::ConvertStringToURLString
+  (theGlobalVariables.RelativePhysicalNameOutpuT, false);
   out << "Output written in: <a href=\"/"
   << theLink << "\"> " << theLink << "</a><br>";
+//  out <<  "DEBUG: filename: " << theFileName << "<br>";
   if (standardOutputStreamAfterTimeout.str().size()!=0)
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
   out << theParser.ToStringOutputAndSpecials();

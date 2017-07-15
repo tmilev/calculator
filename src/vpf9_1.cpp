@@ -377,9 +377,9 @@ void GlobalVariables::initOutputReportAndCrashFileNames
     << "_abbreviated_input_" << inputAbbreviated.substr(0, 150);
     inputAbbreviated=inputAbbreviatedStream.str();
   }
-  this->RelativePhysicalNameCrashLog="crash_"+ inputAbbreviated+".html";
-  this->RelativePhysicalNameProgressReport="progressReport_"+ inputAbbreviated+".html";
-  this->RelativePhysicalNameOutpuT="output_"+ inputAbbreviated+".html";
+  this->RelativePhysicalNameCrashLog="crash_" + inputAbbreviated + ".html";
+  this->RelativePhysicalNameProgressReport="progressReport_" + inputAbbreviated + ".html";
+  this->RelativePhysicalNameOutpuT="output_" + inputAbbreviated + ".html";
 }
 
 void FileInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription)

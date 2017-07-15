@@ -492,9 +492,10 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
       *commentsOnFailure << "Failed to extract file names. ";
     return false;
   }
-  if (FileOperations::FileExistsVirtual(this->targetPDFFileNameWithPathVirtual, false, false))
-    return FileOperations::LoadFileToStringVirtual
-    (this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, *commentsOnFailure, false, false);
+  if (!this->flagForceSlideRebuild)
+    if (FileOperations::FileExistsVirtual(this->targetPDFFileNameWithPathVirtual, false, false))
+      return FileOperations::LoadFileToStringVirtual
+      (this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, *commentsOnFailure, false, false);
   if (!theGlobalVariables.UserDefaultHasAdminRights())
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. ";
@@ -566,4 +567,54 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
     *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
   return FileOperations::LoadFileToStringUnsecure
   (this->targetPDFFileNameWithLatexPath, this->targetPDFbinaryContent, *commentsOnFailure);
+}
+
+#include "vpfHeader8HtmlInterpretation.h"
+bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
+{ MacroRegisterFunctionWithName("LaTeXcrawler::BuildTopicList");
+  //stOutput << "DEBUG: Here we are. ";
+  ProgressReport theReport;
+  CalculatorHTML topicParser;
+  std::stringstream temp;
+  if (commentsGeneral==0)
+    commentsGeneral=&temp;
+  topicParser.LoadFileNames();
+  if (!topicParser.LoadAndParseTopicList(*commentsOnFailure))
+    return false;
+  //stOutput << "DEBUG: loaded topic list. ";
+  List<std::string> headerStack;
+  bool result=true;
+  for (int i=0; i<
+//  5
+  topicParser.theTopicS.size()
+  ; i++)
+  { std::stringstream reportStream;
+    reportStream << "Processing topic element " << i+1 << " out of " << topicParser.theTopicS.size();
+    theReport.Report(reportStream.str());
+    TopicElement& currentElt=topicParser.theTopicS[i];
+    if (currentElt.type==currentElt.tTexHeader)
+    { headerStack.AddListOnTop(currentElt.slidesSources);
+      continue;
+    }
+    if (currentElt.slidesSources.size==0)
+      continue;
+    this->slideFileNamesVirtualWithPatH.SetSize(0);
+    this->slideFileNamesVirtualWithPatH.AddListOnTop(headerStack);
+    this->slideFileNamesVirtualWithPatH.AddListOnTop(currentElt.slidesSources);
+    this->desiredPresentationTitle=currentElt.title;
+    this->flagForceSlideRebuild=true;
+    this->flagProjectorMode=false;
+    if(!this->BuildOrFetchFromCachePresentationFromSlides
+        (commentsOnFailure, commentsGeneral))
+      result=false;
+    this->flagProjectorMode=false;
+    if(!this->BuildOrFetchFromCachePresentationFromSlides
+        (commentsOnFailure, commentsGeneral))
+      result=false;
+    this->flagProjectorMode=true;
+    if(!this->BuildOrFetchFromCachePresentationFromSlides
+        (commentsOnFailure, commentsGeneral))
+      result=false;
+  }
+  return result;
 }

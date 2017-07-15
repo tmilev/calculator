@@ -1642,6 +1642,16 @@ D-B;\
    "BuildFreecalcWithSlides")
    ;
   this->AddOperationInnerHandler
+  ("BuildSlidesInTopicList",
+    CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic, "",
+   "Builds all slides in a given topic list. ",
+   "BuildSlidesInTopicList (\"topiclists/Singapore-H1-2017.txt\");\
+   ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic",
+   "BuildSlidesInTopicList")
+   ;
+  this->AddOperationInnerHandler
   ("SetOutputFile",
     CalculatorFunctionsGeneral::innerSetOutputFile, "",
    "Sets an output/progress report file different from the default one. No dots, forward slashes, back slashes or file extensions allowed.\

@@ -179,13 +179,13 @@ function CurveThreeD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
   { var theT=this.leftPt;
     var theX=this.coordinateFunctions[0](theT);
     var theY=this.coordinateFunctions[1](theT);
-    accountBoundingBox([theX, theY],inputOutputBox );
+    accountBoundingBox([theX, theY], inputOutputBox);
     for (var i=0; i<this.numSegments; i++)
     { var theRatio=i/(this.numSegments-1);
       theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
       theX=this.coordinateFunctions[0](theT);
       theY=this.coordinateFunctions[1](theT);
-      accountBoundingBox([theX, theY],inputOutputBox );
+      accountBoundingBox([theX, theY], inputOutputBox);
     }
   };
   this.drawNoFinish=function(theCanvas, startByMoving)
@@ -396,13 +396,13 @@ function CurveTwoD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
   { var theT=this.leftPt;
     var theX=this.coordinateFunctions[0](theT);
     var theY=this.coordinateFunctions[1](theT);
-    accountBoundingBox([theX, theY],inputOutputBox );
+    accountBoundingBox([theX, theY], inputOutputBox);
     for (var i=0; i<this.numSegments; i++)
     { var theRatio=i/(this.numSegments-1);
       theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
       theX=this.coordinateFunctions[0](theT);
       theY=this.coordinateFunctions[1](theT);
-      accountBoundingBox([theX, theY],inputOutputBox );
+      accountBoundingBox([theX, theY], inputOutputBox);
     }
   };
   this.drawNoFinish=function(theCanvas, startByMoving)
@@ -461,7 +461,7 @@ function PathTwoD(inputPath, inputColor, inputFillColor, inputLineWidth)
   this.type="path";
   this.lineWidth=inputLineWidth;
   this.accountBoundingBox= function(inputOutputBox)
-  { for (var i=1; i<this.path.length; i++)
+  { for (var i=0; i<this.path.length; i++)
       accountBoundingBox(this.path[i], inputOutputBox);
   };
   this.drawNoFinish=function(theCanvas, startByMoving)

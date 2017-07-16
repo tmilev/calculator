@@ -783,8 +783,8 @@ void Plot::operator+=(const Plot& other)
     if (this->DesiredHtmlWidthInPixels<other.DesiredHtmlWidthInPixels)
       this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
   }
-  if (other.flagIncludeCoordinateSystem)
-    this->flagIncludeCoordinateSystem=true;
+  if (!other.flagIncludeCoordinateSystem)
+    this->flagIncludeCoordinateSystem=false;
   this->boxesThatUpdateMe.AddOnTopNoRepetition(other.boxesThatUpdateMe);
   this->priorityWindow=MathRoutines::Maximum(this->priorityWindow, other.priorityWindow);
   this->priorityViewRectangle=MathRoutines::Maximum(this->priorityViewRectangle, other.priorityViewRectangle);

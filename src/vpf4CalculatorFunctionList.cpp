@@ -2418,14 +2418,23 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerPlotRectangle",
    "PlotRectangle")
    ;
-  this->AddOperationInnerHandler ("PlotAxesGrid",
-   CalculatorFunctionsGeneral::innerPlotAxesGrid, "",
+  this->AddOperationInnerHandler ("PlotGrid",
+   CalculatorFunctionsGeneral::innerPlotGrid, "",
    "Tells the plot to show axes ticks. Takes as input dummy (non-used) argument.\
    ",
-   "PlotAxesGrid{}(0)",
+   "PlotGrid{}(0)",
    true, false,
-   "CalculatorFunctionsGeneral::innerPlotAxesGrid",
-   "PlotAxesGrid")
+   "CalculatorFunctionsGeneral::innerPlotGrid",
+   "PlotGrid")
+   ;
+  this->AddOperationInnerHandler ("PlotRemoveCoordinateAxes",
+   CalculatorFunctionsGeneral::innerPlotRemoveCoordinateAxes, "",
+   "Removes the coordinate axes from a plot.\
+   ",
+   "PlotRemoveCoordinateAxes{}(0)",
+   true, false,
+   "CalculatorFunctionsGeneral::innerPlotRemoveCoordinateAxes",
+   "PlotRemoveCoordinateAxes")
    ;
   this->AddOperationInnerHandler ("PlotLabel",
    CalculatorFunctionsGeneral::innerPlotLabel, "",

@@ -664,8 +664,11 @@ bool CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculu
 
 bool CalculatorFunctionsGeneral::innerNumerator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerNumerator");
+  Rational theRat;
+  if (input.IsRational(&theRat))
+    return output.AssignValue((Rational) theRat.GetNumerator(), theCommands);
   if (input.StartsWith(theCommands.opDivide()))
-    if (input.children.size>1)
+    if (input.size()>1)
     { output=input[1];
       return true;
     }
@@ -922,14 +925,24 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerPlotAxesGrid
+bool CalculatorFunctionsGeneral::innerPlotGrid
 (Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotAxesGrid");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotGrid");
   (void) input;
   PlotObject thePlot;
   thePlot.thePlotType="axesGrid";
   thePlot.dimension=2;
   return output.AssignValue(thePlot, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerPlotRemoveCoordinateAxes
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotRemoveCoordinateAxes");
+  (void) input;
+  Plot thePlotFinal;
+  thePlotFinal.dimension=2;
+  thePlotFinal.flagIncludeCoordinateSystem=false;
+  return output.AssignValue(thePlotFinal, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlotLabel

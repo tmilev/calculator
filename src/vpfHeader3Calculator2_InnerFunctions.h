@@ -355,7 +355,8 @@ public:
   static bool innerPlot2DoverIntervals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotFill(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotRectangle(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPlotAxesGrid(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotRemoveCoordinateAxes(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotGrid(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotLabel(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotSetId(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotViewRectangle(Calculator& theCommands, const Expression& input, Expression& output);

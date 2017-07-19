@@ -23,7 +23,7 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword
   UserCalculator theUser;
   theUser.username = inputUsername;
   theUser.enteredPassword = inputNewPassword;
-  stOutput << "DEBUG: setting password: " << inputNewPassword;
+  //stOutput << "DEBUG: setting password: " << inputNewPassword;
   bool result= theUser.SetPassword(theRoutines, &comments);
   theUser.ResetAuthenticationToken(theRoutines, &comments);
   outputAuthenticationToken = theUser.actualAuthenticationToken.value;

@@ -292,6 +292,14 @@ bool CalculatorFunctionsGeneral::innerUrlStringToNormalString(Calculator& theCom
   return output.AssignValue(HtmlRoutines::ConvertURLStringToNormal(theString, false), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerStringToURL(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerStringToURL");
+  std::string theString;
+  if (!input.IsOfType<std::string>(&theString))
+    return false;
+  return output.AssignValue(HtmlRoutines::ConvertStringToURLString(theString, false), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerStringToAtom(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerStringToAtom");
   std::string theString;

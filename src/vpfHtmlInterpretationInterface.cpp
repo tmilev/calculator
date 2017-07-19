@@ -1132,11 +1132,13 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   { out << "<b>Only admins may add users, under ssl connection. </b>";
     return out.str();
   }
+  stOutput << "<br>DEBUG: userlist: " << theGlobalVariables.GetWebInput("userList") << "<br>";
+  stOutput << "DEBUG: userlist: " << theGlobalVariables.GetWebInput("passwordList") << "<br>";
   std::string inputEmails=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userList"), false);
   std::string userPasswords=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("passwordList"), false);
   std::string userGroup=
-  MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(
-  theGlobalVariables.GetWebInput(DatabaseStrings::userGroupLabel), false));
+  MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal
+  (theGlobalVariables.GetWebInput(DatabaseStrings::userGroupLabel), false));
   std::string userRole=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userRole"), false);
 
   if (inputEmails=="")
@@ -1159,7 +1161,8 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
     << numNewUsers << " new users and " << numUpdatedUsers
     << " user updates. </span>";
   } else
-    out << "<span style=\"color:red\">Failed to add all users. </span>";
+    out << "<span style=\"color:red\">Failed to add all users. </span> Errors follow. <hr>"
+    << comments.str() << "<hr>";
   if (doSendEmails)
   { if (sentEmails)
       out << "<span style=\"color:green\">Activation emails successfully sent. </span>";
@@ -1471,7 +1474,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     << currentCourse << "</b></span>. "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=accounts&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
     << "filterAccounts=false&Z"
     << "\">Show all. </a>"
     << "<br>";
@@ -2078,7 +2081,7 @@ std::string HtmlInterpretation::ToStringNavigation()
         out << "?request=templateNoLogin";
       else
         out << "?request=template";
-      out << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+      out << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "studentView=" << studentView << "&";
       if (section!="")
         out << "studentSection="
@@ -2099,14 +2102,14 @@ std::string HtmlInterpretation::ToStringNavigation()
       out << " <b>(admin)</b>";
     out << ": " << theGlobalVariables.userDefault.username.value << linkSeparator;
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout&";
-    out << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << " \">Log out</a>" << linkSeparator;
+    out << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">Log out</a>" << linkSeparator;
     if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage")
     { out << "<b>Account";
       out << "</b>" << linkSeparator;
     } else
     { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
         out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage&"
-        << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << "\">Account</a>" << linkSeparator;
+        << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << "\">Account</a>" << linkSeparator;
       else
         out << "<b>Account settings: requires secure connection</b>" << linkSeparator;
     }
@@ -2122,38 +2125,38 @@ std::string HtmlInterpretation::ToStringNavigation()
   { if (theGlobalVariables.userCalculatorRequestType!="accounts")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=accounts&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "&filterAccounts=true"
       << "\">Accounts</a>" << linkSeparator;
     else
       out << "<b>Accounts</b>" << linkSeparator;
     if (theGlobalVariables.userCalculatorRequestType!="scores")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scores&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "\">Scores</a>" << linkSeparator;
     else
       out << "<b>Scores</b>" << linkSeparator;
     if (theGlobalVariables.userCalculatorRequestType!="status")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=status&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "\">Server</a>" << linkSeparator;
     else
       out << "<b>Server</b>" << linkBigSeparator;
     if (theGlobalVariables.userCalculatorRequestType!="database")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database&"
-      << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+      << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "\">Database</a>" << linkBigSeparator;
     else
       out << "<b>Database</b>" << linkBigSeparator;
   }
   if (theGlobalVariables.userCalculatorRequestType!="calculator")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=calculator&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << " \">Calculator</a>" << linkBigSeparator;
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">Calculator</a>" << linkBigSeparator;
   else
     out << "<b>Calculator</b> " << linkBigSeparator;
   if (theGlobalVariables.userCalculatorRequestType!="about")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=about&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << " \">About</a>" << linkBigSeparator;
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">About</a>" << linkBigSeparator;
   else
     out << "<b>About</b> " << linkBigSeparator;
   out << "<a href=\"https://github.com/tmilev/calculator/issues\" target=\"_blank\">Feedback, bugs</a>"

@@ -317,7 +317,9 @@ public:
    )
   ;
   bool ComputeAndStoreActivationEmailAndTokens
-  (std::stringstream* commentsInFailure, std::stringstream* commentsGeneral, DatabaseRoutines& theRoutines);
+  (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral, DatabaseRoutines& theRoutines);
+  bool ComputeAndStoreActivationStats
+  (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral, DatabaseRoutines& theRoutines);
   bool SendActivationEmail(DatabaseRoutines& theRoutines, std::stringstream& comments);
   std::string ToString();
   std::string ToStringSelectedColumns();
@@ -426,6 +428,7 @@ bool FetchAllUsers
   (const std::string& tableNameUnsafe, const std::string& desiredTableContent,
    std::stringstream* commentsOnCreation, bool* outputTableNewlyCreated);
 
+  static bool innerRepairDatabaseEmailRecords(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSendActivationEmailUsers(Calculator& theCommands, const Expression& input, Expression& output);

@@ -8106,7 +8106,7 @@ std::string HtmlRoutines::ConvertStringToURLString(const std::string& input, boo
   for (unsigned int i=0; i<input.size(); i++)
     if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]))
       out << input[i];
-    else if (input[i]==' ' && usePlusesForSpacebars)
+    else if (input[i] == ' ' && usePlusesForSpacebars)
       out << '+';
     else
     { out << "%";

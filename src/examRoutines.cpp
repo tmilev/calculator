@@ -689,7 +689,7 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin
   << theGlobalVariables.userCalculatorRequestType << "&";
   std::string urledProblem=HtmlRoutines::ConvertStringToURLString(this->fileName, false);
   out << "fileName=" << urledProblem << "&"
-  << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+  << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
   << "randomSeed=" << this->theProblemData.randomSeed << "&";
   if (setDebugFlag)
     out << "debugFlag=true&";
@@ -712,7 +712,7 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkFromFileName");
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
   std::string urledProblem=HtmlRoutines::ConvertStringToURLString(theFileName, false);
-  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
   << "fileName=" << urledProblem << "&";
   if (theGlobalVariables.UserStudentVieWOn())
   { refStreamNoRequest << "studentView=true&";
@@ -2886,7 +2886,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
   std::string calcArgsNoPassExamDetails=
-  theGlobalVariables.ToStringCalcArgsNoNavigation(true, &randomSeedContainer);
+  theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType=="exercise")
     { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&"
@@ -3000,7 +3000,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
   out << "request=" << requestType << "&";
   List<std::string> excludedTags;
   excludedTags.AddOnTop("randomSeed");
-  out << theGlobalVariables.ToStringCalcArgsNoNavigation(true, &excludedTags)
+  out << theGlobalVariables.ToStringCalcArgsNoNavigation(&excludedTags)
   << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
   if  (!theGlobalVariables.flagRunningApache && this->fileName!="")
     out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->fileName, false) << "&";
@@ -3032,9 +3032,9 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   std::string clonePageAreaID="clonePageAreaID"+desiredFileName;
   //  out << "cleaned up link: " << cleaneduplink;
   //  out << "<br>urled link: " <<  urledProblem;
-  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+  refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
   << "fileName=" << urledProblem << "&"
-  << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName,false) << "&"
+  << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&"
   << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
   out << refStreamNoRequest.str() << "\">" << "Edit" << "</a>";
   out << "<textarea class=\"currentFileNameArea\" id=\""<< clonePageAreaID << "\" cols=\""
@@ -3120,7 +3120,7 @@ std::string HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus){\n"
   << "  var inputParams='';\n"
   << "  inputParams+='request='+requestType+'&';\n"
-  << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation(true) << "';\n"
+  << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << "';\n"
 //  << "  inputParams+='&debugFlag=true';\n"
   << "  inputParams+='&fileName=" << theGlobalVariables.GetWebInput("fileName") << "';\n"
   << "  inputParams+='&topicList=" << theGlobalVariables.GetWebInput("topicList") << "';\n"

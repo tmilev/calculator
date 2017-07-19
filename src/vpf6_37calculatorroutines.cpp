@@ -101,7 +101,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=exerciseNoLogin"
     << "&"
-    << theGlobalVariables.ToStringCalcArgsNoNavigation(true)
+    << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
     << "fileName=" << theProblem.fileName << "&randomSeed="
     << randomSeedCurrent << "\">"
     << theFileNames[i]

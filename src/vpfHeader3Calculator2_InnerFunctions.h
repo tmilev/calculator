@@ -44,6 +44,7 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerUrlStringToNormalString(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerStringToURL(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerURLKeyValuePairsToNormalRecursive(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerStringToAtom(Calculator& theCommands, const Expression& input, Expression& output);

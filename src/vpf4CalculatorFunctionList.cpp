@@ -19,6 +19,7 @@ void Calculator::initAdminFunctions()
 //   "SendActivationEmailUsers(\"todor.milev@gmail.com, Todor.Milev@umb.edu \"); ",
 //   true, false, "DatabaseRoutines::innerSendActivationEmailUsers");
 //   ;
+  //stOutput << "got to here";
   this->AddOperationInnerHandler
   ("GetUserPassword", DatabaseRoutines::innerGetUserPassword, "",
    "Gets a user's password.",
@@ -100,7 +101,14 @@ void Calculator::initAdminFunctions()
    "DatabaseRoutines::innerTestDatabase",
    "TestDatabase",
    true);
-   ;
+  this->AddOperationInnerHandler
+  ("RepairDatabaseEmailRecords", DatabaseRoutines::innerRepairDatabaseEmailRecords, "",
+   "Tests the connection to/existence of the database. ",
+   "TestDatabase(0)", false, true,
+   "DatabaseRoutines::innerTestDatabase",
+   "TestDatabase",
+   true);
+
 #endif // MACRO_use_MySQL
 }
 
@@ -220,6 +228,14 @@ void Calculator::initPredefinedInnerFunctions()
    true, false,
    "CalculatorConversions::innerUrlStringToNormalString",
    "URLStringToNormalString");
+  this->AddOperationInnerHandler
+  ("ConvertStringToURL",
+    CalculatorFunctionsGeneral::innerStringToURL, "",
+   "Converts a normal string to a url-encoded one.",
+   "ConvertStringToURL(\"+ %\")",
+   true, false,
+   "CalculatorConversions::innerStringToURL",
+   "ConvertStringToURL");
   this->AddOperationInnerHandler
   ("URLKeyValuePairsDecode",
     CalculatorFunctionsGeneral::innerURLKeyValuePairsToNormalRecursive, "",

@@ -111,15 +111,6 @@ std::string HtmlRoutines::GetJavascriptStandardCookies()
   out
   << "}\n";
   out
-  << "function storeSettingsSecurity(){\n";
-  if (theGlobalVariables.flagLoggedIn)
-  { out << "   addCookie(\"authenticationToken\", \""
-    << theGlobalVariables.userDefault.actualAuthenticationToken.value << "\", 150, true);"
-    << "//150 days is a little longer than a semester\n"
-    << "  addCookie(\"username\", \"" << theGlobalVariables.userDefault.username.value << "\", 150, true);\n";
-  }
-  out << "}\n";
-  out
 //  << "function getCalculatorCGIsettings(){\n"
 //  << "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"
 //  << "  result+=\"&username=\"+getCookie(\"username\");\n"
@@ -129,7 +120,6 @@ std::string HtmlRoutines::GetJavascriptStandardCookies()
 //  << "}\n"
   << "var setProblemLinkStyle;\n"
   << "function loadSettings(){\n"
-  << "  storeSettingsSecurity();\n"
   << "  storeSettingsProgress();\n"
   << "  theCalculatorForm=document.getElementById(\"mainInputID\");  \n"
   << "  if (theCalculatorForm!=null){\n"
@@ -1378,6 +1368,7 @@ int recursionDepth)
   theGlobalVariables.webArguments;
   if (!HtmlRoutines::ChopCGIStringAppend(input, theArgs, argumentProcessingFailureComments))
     return false;
+  //argumentProcessingFailureComments << "DEBUG: args from message pure: " << theArgs.ToStringHtml();
   if (theGlobalVariables.flagRunningApache)
     if (this->addressComputed=="")
       this->addressComputed=theGlobalVariables.GetWebInput("request");
@@ -1401,15 +1392,39 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   UserCalculatorData& theUser= theGlobalVariables.userDefault;
 
   theUser.username= HtmlRoutines::ConvertURLStringToNormal
-  (theGlobalVariables.GetWebInput("username"), false);
+  (theGlobalVariables.GetWebInput("username"), true);
+  if (theUser.username.value.find('%')!=std::string::npos)
+    argumentProcessingFailureComments << "<b>Unusual behavior: % sign in username.</b>";
   theUser.enteredAuthenticationToken=HtmlRoutines::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("authenticationToken"), false);
   theUser.enteredGoogleToken=HtmlRoutines::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("googleToken"), false);
   theUser.enteredActivationToken=HtmlRoutines::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("activationToken"), false);
-  theUser.enteredPassword=HtmlRoutines::ConvertURLStringToNormal
-  (theGlobalVariables.GetWebInput("password"), false);
+
+  //argumentProcessingFailureComments << "<br>DEBUG: username as read from web input: "
+  //<< theGlobalVariables.GetWebInput("username");
+  //argumentProcessingFailureComments << "<br>DEBUG: username decoded to: "
+  //<< theUser.username.value;
+  //argumentProcessingFailureComments << "<br>DEBUG: pure password as read from web input: "
+  //<< theGlobalVariables.GetWebInput("password");
+  //argumentProcessingFailureComments << "<br>DEBUG: password deurled: "
+  //<< HtmlRoutines::ConvertURLStringToNormal( theGlobalVariables.GetWebInput("password"), false);
+  //argumentProcessingFailureComments << "<br>DEBUG: password deurled and then urled: "
+  //<<
+  //HtmlRoutines::ConvertStringToURLString(
+  //HtmlRoutines::ConvertURLStringToNormal( theGlobalVariables.GetWebInput("password"), true), false
+  //)
+  //;
+
+  theUser.enteredPassword =
+  HtmlRoutines::ConvertStringToURLString(
+  HtmlRoutines::ConvertURLStringToNormal( theGlobalVariables.GetWebInput("password"), true), false
+  );
+  //<-Passwords are ONE-LAYER url-encoded
+  //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
+  //<-Incoming pluses must be re-coded as spaces (%20).
+
   theUser.flagEnteredPassword=(theUser.enteredPassword!="");
   if (theUser.flagEnteredPassword)
   { theUser.flagMustLogin=true;
@@ -1475,7 +1490,16 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theGlobalVariables.flagLoggedIn=
     DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (theUser, &argumentProcessingFailureComments);
-  theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("username",theUser.username.GetDataNoQuotes());
+  theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("username",
+  theUser.username.GetDataNoQuotes()
+  //<-User name must be stored in URL-encoded fashion, NO PLUSES.
+  );
+  //argumentProcessingFailureComments
+  //<< "<br>DEBUG: username is, non-encoded: " << theUser.username.value
+  //<< "<br>DEBUG: Setting username cookie header to: "
+  //<< theUser.username.GetDataNoQuotes()
+  //<< "<br>Stack: " << crash.GetStackTraceEtcErrorMessage();
+
   if (theGlobalVariables.flagLoggedIn && theUser.enteredActivationToken.value=="")
   { //in case the user logged in with password, we need
     //to give him/her the correct authentication token
@@ -2378,9 +2402,9 @@ int WebWorker::ProcessFile()
   unsigned int totalLength=fileSize+debugBytesStream.str().size();
   theHeader << "Content-length: " << totalLength << "\r\n";
   theHeader << this->GetHeaderConnectionClose() << "\r\n";
-  std::string theCookie=this->GetHeaderSetCookie();
-  if (theCookie!="")
-    theHeader << theCookie << "\r\n";
+  //std::string theCookie=this->GetHeaderSetCookie();
+  //if (theCookie!="")
+  //  theHeader << theCookie << "\r\n";
   theHeader << "\r\n";
   this->QueueStringForSendingNoHeadeR(theHeader.str());
   if (this->requestTypE==this->requestHead)
@@ -2964,10 +2988,26 @@ int WebWorker::ProcessChangePassword()
   { stOutput << "<span style=\"color:red\"><b>Please enter (old) password.</b></span>";
     return 0;
   }
-  std::string newPassword=theGlobalVariables.GetWebInput("newPassword");
-  std::string reenteredPassword=theGlobalVariables.GetWebInput("reenteredPassword");
-  std::string newEmail=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"),false);
-  if (newPassword=="" && reenteredPassword=="" && newEmail!="")
+  std::string newPassword=
+    HtmlRoutines::ConvertStringToURLString(
+    HtmlRoutines::ConvertURLStringToNormal( theGlobalVariables.GetWebInput("newPassword"), true), false
+    )
+  ;
+  //<-Passwords are ONE-LAYER url-encoded
+  //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
+  //<-Incoming pluses must be re-coded as spaces (%20).
+
+  std::string reenteredPassword=
+    HtmlRoutines::ConvertStringToURLString(
+    HtmlRoutines::ConvertURLStringToNormal( theGlobalVariables.GetWebInput("reenteredPassword"), true), false
+    )
+  ;
+  //<-Passwords are ONE-LAYER url-encoded
+  //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
+  //<-Incoming pluses must be re-coded as spaces (%20).
+
+  std::string newEmail=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
+  if (newPassword == "" && reenteredPassword == "" && newEmail != "")
     return this->SetEmail(newEmail);
   if (newPassword!=reenteredPassword)
   { stOutput << "<span style=\"color:red\"><b> Passwords don't match.</b></span>";
@@ -2986,13 +3026,14 @@ int WebWorker::ProcessChangePassword()
     << commentsOnFailure.str() << "</b></span>";
 
   stOutput << "<span style=\"color:green\"> <b>Password change successful. </b></span>";
-  stOutput
-  << "<meta http-equiv=\"refresh\" content=\"0; url='"
-  << theGlobalVariables.DisplayNameExecutable  << "?request=logout"
-  << "&username="
-  << theGlobalVariables.userDefault.username.GetDataNoQuotes() << "&activationToken=&authenticationToken=&"
-  << "'\" />"
-  ;
+  stOutput << "DEBUG: newpassword: " << newPassword;
+//  stOutput
+//  << "<meta http-equiv=\"refresh\" content=\"0; url='"
+//  << theGlobalVariables.DisplayNameExecutable  << "?request=logout"
+//  << "&username="
+//  << theGlobalVariables.userDefault.username.GetDataNoQuotes() << "&activationToken=&authenticationToken=&"
+//  << "'\" />"
+//  ;
   return 0;
 }
 
@@ -3799,6 +3840,8 @@ int WebWorker::ServeClient()
   this->ExtractAddressParts();
 //  std::cout << "GOT TO HERE 2" << std::endl;
   std::stringstream argumentProcessingFailureComments;
+  //argumentProcessingFailureComments << "<hr>DEBUG: Date: " << theGlobalVariables.GetDateForLogFiles()
+  //<< " seconds: " << theGlobalVariables.GetElapsedSeconds();
   this->flagArgumentsAreOK=true;
   if (!this->ExtractArgumentsFromMessage(this->argumentComputed, argumentProcessingFailureComments))
     this->flagArgumentsAreOK=false;
@@ -3813,7 +3856,11 @@ int WebWorker::ServeClient()
     return this->ProcessLoginNeededOverUnsecureConnection();
   if (this->ProcessRedirectAwayFromWWW())
     return 0;
+  //argumentProcessingFailureComments << "<hr>DEBUG: About to login.  Date: " << theGlobalVariables.GetDateForLogFiles()
+  //<< " seconds: " << theGlobalVariables.GetElapsedSeconds();
+
   this->flagArgumentsAreOK=this->Login(argumentProcessingFailureComments);
+  //argumentProcessingFailureComments << "<hr>DEBUG: LOGIN done. ";
   this->CorrectRequestsAFTERLoginReturnFalseIfModified();
 
   //stOutput << "DEBUG: this->flagPasswordWasSubmitted: " << this->flagPasswordWasSubmitted;
@@ -3828,7 +3875,10 @@ int WebWorker::ServeClient()
       redirectedAddress << this->addressComputed << "?";
     for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
       if (theGlobalVariables.webArguments.theKeys[i]!="password" &&
-          theGlobalVariables.webArguments.theKeys[i]!="request")
+          theGlobalVariables.webArguments.theKeys[i]!="request" &&
+          theGlobalVariables.webArguments.theKeys[i]!="googleToken" &&
+          theGlobalVariables.webArguments.theKeys[i]!="G_AUTHUSER_H"
+          )
         redirectedAddress << theGlobalVariables.webArguments.theKeys[i] << "="
         << theGlobalVariables.webArguments.theValues[i] << "&";
     if (argumentProcessingFailureComments.str()!="")
@@ -3837,22 +3887,21 @@ int WebWorker::ServeClient()
       << "&";
     std::stringstream headerStream;
     headerStream << "Location: " << redirectedAddress.str();
-    //double fixme;
     this->SetHeadeR("HTTP/1.0 303 See other", headerStream.str());
+    //double fixme;
     //this->SetHeaderOKNoContentLength();
     stOutput << "<html><head>"
     << "<meta http-equiv=\"refresh\" content=\"0; url='" << redirectedAddress.str()
     << "'\" />"
-    << "</head>"
-    << "<body>Click <a href=\"" << redirectedAddress.str() << "\">"
+    << "</head>";
+    stOutput << "<body>Click <a href=\"" << redirectedAddress.str() << "\">"
     << " here " << "</a> if your browser does not redirect the page automatically. ";
-
-    //stOutput << "<hr>DEBUG: addressComputed: <br>" << HtmlRoutines::StringToHtmlString(this->addressComputed)
-    //<< "<hr>addressToRedirectTo: <br>\n" << HtmlRoutines::StringToHtmlString(redirectedAddress.str())
-    //<< "<hr>argumentComputed: <br>\n" << HtmlRoutines::StringToHtmlString(this->argumentComputed)
-    //<< "<hr>addressGetOrPost: <br>" << HtmlRoutines::StringToHtmlString(this->addressGetOrPost)
-    //<< "<hr>MessageBody: <br>\n" << HtmlRoutines::StringToHtmlString(this->messageBody)
-    //<< " <br>MessageHead: <br>\n" << HtmlRoutines::StringToHtmlString(this->messageHead)
+    //stOutput << "<hr>DEBUG: addressComputed: <br>" << HtmlRoutines::ConvertStringToHtmlString(this->addressComputed, true)
+    //<< "<hr>addressToRedirectTo: <br>\n" << HtmlRoutines::ConvertStringToHtmlString(redirectedAddress.str(), true)
+    //<< "<hr>argumentComputed: <br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->argumentComputed, true)
+    //<< "<hr>addressGetOrPost: <br>" << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true)
+    //<< "<hr>MessageBody: <br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageBody, true)
+    //<< " <br>MessageHead: <br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageHead, true)
     //<< HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
     //<< this->ToStringMessageFullUnsafe();
     stOutput << "</body></html>";

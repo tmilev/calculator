@@ -1132,8 +1132,8 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   { out << "<b>Only admins may add users, under ssl connection. </b>";
     return out.str();
   }
-  stOutput << "<br>DEBUG: userlist: " << theGlobalVariables.GetWebInput("userList") << "<br>";
-  stOutput << "DEBUG: userlist: " << theGlobalVariables.GetWebInput("passwordList") << "<br>";
+  //stOutput << "<br>DEBUG: userlist: " << theGlobalVariables.GetWebInput("userList") << "<br>";
+  //stOutput << "DEBUG: userlist: " << theGlobalVariables.GetWebInput("passwordList") << "<br>";
   std::string inputEmails=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userList"), false);
   std::string userPasswords=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("passwordList"), false);
   std::string userGroup=

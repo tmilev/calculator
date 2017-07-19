@@ -3027,13 +3027,13 @@ int WebWorker::ProcessChangePassword()
 
   stOutput << "<span style=\"color:green\"> <b>Password change successful. </b></span>";
   //stOutput << "DEBUG: newpassword: " << newPassword;
-//  stOutput
-//  << "<meta http-equiv=\"refresh\" content=\"0; url='"
-//  << theGlobalVariables.DisplayNameExecutable  << "?request=logout"
-//  << "&username="
-//  << theGlobalVariables.userDefault.username.GetDataNoQuotes() << "&activationToken=&authenticationToken=&"
-//  << "'\" />"
-//  ;
+  stOutput
+  << "<meta http-equiv=\"refresh\" content=\"0; url='"
+  << theGlobalVariables.DisplayNameExecutable  << "?request=logout"
+  << "&username="
+  << theGlobalVariables.userDefault.username.GetDataNoQuotes() << "&activationToken=&authenticationToken=&"
+  << "'\" />"
+  ;
   return 0;
 }
 

@@ -2457,12 +2457,15 @@ bool Expression::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(cons
     return this->GetValue<Rational>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
   if (this->IsOfType<AlgebraicNumber>())
     return this->GetValue<AlgebraicNumber>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
-  if (this->IsAtom() || this->children.size==0)
+  if (this->IsAtom() || this->size()==0)
     return false;
   if (this->StartsWith(this->owner->opUnderscore()))
     return false;
-  if (this->StartsWith(this->owner->opTimes(),3))
+  if (this->StartsWith(this->owner->opTimes(), 3))
+  { if ((*this)[1].IsOfType<Rational>())
+      return (*this)[1].GetValue<Rational>().NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
     return false;
+  }
   if (this->size()>1)
   { const Expression& firstE=(*this)[0];
     //const Expression& secondE=(*this)[1];
@@ -2829,6 +2832,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     { std::string firstE= (*this)[1].ToString(theFormat);
       bool firstNeedsBrackets=(*this)[1].NeedsParenthesisForMultiplication();
       bool secondNeedsBrackets=(*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(&((*this)[1]));
+      if (secondE.size()>0)
+        if (secondE[0]=='-')
+          secondNeedsBrackets=true;
       bool mustHaveTimes= false;
       if (firstE=="-1" )
       { firstE="-";
@@ -2840,8 +2846,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << "\\left(" << firstE << "\\right)";
       else
         out << firstE;
-      if (!firstNeedsBrackets && !secondNeedsBrackets && firstE!=""
-          && firstE!="-")
+      if (!firstNeedsBrackets && !secondNeedsBrackets && firstE!="" && firstE!="-")
         if (MathRoutines::isADigit(firstE[firstE.size()-1]) )
         { if (MathRoutines::isADigit(secondE[0]))
             mustHaveTimes=true;

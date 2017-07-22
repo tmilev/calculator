@@ -404,10 +404,22 @@ std::string HtmlInterpretation::ClonePageResult()
   }
   theFile << startingFileString;
   theFile.close();
+  std::stringstream svnAddCommand;
+  std::string fileNameNonVirtual;
+  std::stringstream commandResult;
+  if (FileOperations::GetPhysicalFileNameFromVirtual(fileNameResulT, fileNameNonVirtual, false, false))
+  { if (FileOperations::IsFileNameSafeForSystemCommands( fileNameNonVirtual, &commandResult))
+    { svnAddCommand << "svn add " << fileNameNonVirtual;
+      commandResult << "<b>Command:</b> " << svnAddCommand.str() << "<br>";
+      commandResult << "<b>Result: </b>"
+      << theGlobalVariables.CallSystemWithOutput(svnAddCommand.str());
+    }
+  } else
+    commandResult << "SVN: Could not get physical file name from virtual. ";
   CalculatorHTML linkInterpreter;
-  out << linkInterpreter.ToStringLinkFromFileName(fileNameResulT);
-  out << "<b><span style=\"color:green\">Written content to file: "
-  << fileNameResulT << ". </span></b>";
+  out << "<br>" << linkInterpreter.ToStringLinkFromFileName(fileNameResulT);
+  out << "<br><b><span style=\"color:green\">Written content to file: "
+  << fileNameResulT << ". </span></b>" << "<br> " << commandResult.str();
   return out.str();
 }
 

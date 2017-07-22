@@ -565,8 +565,18 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   commandResult=  theGlobalVariables.CallSystemWithOutput(currentSysCommand);
   if (commentsGeneral!=0)
     *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
-  return FileOperations::LoadFileToStringUnsecure
-  (this->targetPDFFileNameWithLatexPath, this->targetPDFbinaryContent, *commentsOnFailure);
+  if(!FileOperations::LoadFileToStringUnsecure
+     (this->targetPDFFileNameWithLatexPath, this->targetPDFbinaryContent, *commentsOnFailure))
+    return false;
+  std::stringstream svnCommand, svnResult;
+  if (FileOperations::IsFileNameSafeForSystemCommands(this->targetPDFFileNameWithLatexPath, commentsOnFailure))
+    return true;
+  svnCommand << "svn add " << this->targetPDFFileNameWithLatexPath;
+  svnResult << "<br>Command: " << svnCommand.str() << "<br>Result: ";
+  svnResult << theGlobalVariables.CallSystemWithOutput(svnCommand.str());
+  if (commentsGeneral!=0)
+    *commentsGeneral << svnResult.str();
+  return true;
 }
 
 #include "vpfHeader8HtmlInterpretation.h"

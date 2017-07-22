@@ -45,6 +45,7 @@ class LaTeXcrawler
   List<std::string> slideFileNamesWithLatexPathNoExtension;
   List<std::string> slideFileNamesVirtualNoPathNoExtensioN;
   void* ownerCalculator;
+  bool flagAddSlideToSVN;
   bool flagBuildSingleSlides;
   bool flagProjectorMode;
   bool flagForceSlideRebuild;
@@ -63,6 +64,7 @@ class LaTeXcrawler
   { this->flagBuildSingleSlides=false;
     this->flagProjectorMode=true;
     this->flagForceSlideRebuild=false;
+    this->flagAddSlideToSVN=false;
     this->ownerCalculator=0;
   }
 };

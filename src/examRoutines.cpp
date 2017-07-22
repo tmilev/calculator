@@ -2722,7 +2722,15 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (this->theTopicS.Contains(this->fileName))
     { TopicElement& current=this->theTopicS.GetValueCreateIfNotPresent(this->fileName);
       current.ComputeLinks(*this, true);
-      problemLabel= current.displayTitle;
+      problemLabel= current.displayTitle+ "&nbsp;&nbsp;";
+      if (this->flagDoPrependProblemNavigationBar)
+      { if (current.displaySlidesPrintableLink!="")
+          problemLabel += current.displaySlidesPrintableLink;
+        if (current.displaySlidesLink!="")
+          problemLabel += current.displaySlidesLink;
+        if (current.displayVideoLink!="")
+          problemLabel += current.displayVideoLink;
+      }
     }
   if (this->flagIsExamProblem && this->flagIsForReal &&
       !this->flagIsExamHome &&
@@ -2747,7 +2755,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   } else if (!this->flagIsExamHome && !this->flagIsForReal &&
              theGlobalVariables.userCalculatorRequestType!="template" &&
              theGlobalVariables.userCalculatorRequestType!="templateNoLogin")
-    outBody << "<span style=\"color:green\"><b>Scores not recorded. </b></span>" << problemLabel << "<hr>";
+    outBody << "<span style=\"color:green\"><b>Scores not recorded. </b></span>"
+    << problemLabel << "<hr>";
 
   //////////////////////////////
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
@@ -3367,7 +3376,7 @@ void TopicElement::reset(int parentSize)
     this->type=this->tProblem;
 }
 
-void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
+void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output, CalculatorHTML& owner)
 { MacroRegisterFunctionWithName("TopicElement::GetTopicList");
   std::stringstream tableReader(inputString);
   std::string currentLine, currentArgument;
@@ -3381,13 +3390,8 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       if (currentLine[0]=='%')
         continue;
     if (MathRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument))
-    { //stOutput << "DEBUG: Found slide sources header: " << currentLine;
-      if (found)
-        TopicElement::AddTopic(currentElt, output);
-      currentElt.reset(-1);
-      currentElt.type=currentElt.tTexHeader;
-      currentElt.slidesSources.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
-      found=true;
+    { owner.slidesSourcesHeaders.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
+      continue;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
     { if(found)
         TopicElement::AddTopic(currentElt, output);
@@ -3470,7 +3474,7 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
       return false;
   if (this->topicListContent=="")
     return false;
-  TopicElement::GetTopicList(this->topicListContent, this->theTopicS);
+  TopicElement::GetTopicList(this->topicListContent, this->theTopicS, *this);
   this->problemNamesNoTopics.Clear();
   for (int i=0; i<this->theTopicS.size(); i++)
     if (this->theTopicS[i].problem!="")
@@ -3760,12 +3764,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   { TopicElement& currentElt=this->theTopicS[i];
     //stOutput << "DEBUG: Slide type:: " << currentElt.type;
     if (currentElt.type==currentElt.tTexHeader)
-    { if (currentElt.slidesSources.size>0)
-      { this->slidesSourcesHeader=currentElt.slidesSources[0];
-        //stOutput << "DEBUG: Slides header: " << this->slidesSourcesHeader;
-      }
       continue;
-    }
     if (currentElt.type==currentElt.tChapter)
     { currentChapter=currentElt.title;
       chapterCounter++;
@@ -4053,13 +4052,21 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     slideFromSourceStreamHandout << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
     << "?request=slidesFromSource&";
-    slideFromSourceStreamHandout << "header="
-    << HtmlRoutines::ConvertStringToURLString(owner.slidesSourcesHeader, false) << "&";
     slideFromSourceStreamHandout << "title="
     << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
+    //stOutput << "DEBUG, round 2: header: "  << owner.slidesSourcesHeaders.ToStringCommaDelimited()
+    //<< "; slide sources: " << this->slidesSources.ToStringCommaDelimited();
+    int sourceCounter=0;
+    for (int i=0; i<owner.slidesSourcesHeaders.size; i++)
+    { sourceCounter++;
+      slideFromSourceStreamHandout << "file" << sourceCounter
+      << "=" << HtmlRoutines::ConvertStringToURLString(owner.slidesSourcesHeaders[i], false) << "&";
+    }
     for (int i=0; i<this->slidesSources.size; i++)
-      slideFromSourceStreamHandout << "file" << i+1
+    { sourceCounter++;
+      slideFromSourceStreamHandout << "file" << sourceCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(this->slidesSources[i], false) << "&";
+    }
     slideFromSourceStreamProjector << slideFromSourceStreamHandout.str();
     slideFromSourceStreamHandout << "layout=printable&";
     slideFromSourceStreamHandout << "\" class=\"slidesLink\" target=\"_blank\">Printable slides</a>";

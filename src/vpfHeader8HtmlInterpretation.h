@@ -72,7 +72,7 @@ public:
   TopicElement()
   { this->reset(0);
   }
-  static void GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output);
+  static void GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output, CalculatorHTML& owner);
   static void AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output);
 };
 
@@ -118,7 +118,7 @@ public:
   static std::string stringScoredQuizzes;
   static std::string stringPracticE;
   static std::string stringProblemLink;
-  std::string slidesSourcesHeader;
+  List<std::string> slidesSourcesHeaders;
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
   std::string inputHtml;

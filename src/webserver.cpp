@@ -3418,9 +3418,6 @@ int WebWorker::ProcessSlidesFromSource()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSlidesFromSource");
   this->SetHeaderOKNoContentLength();
   LaTeXcrawler theCrawler;
-  std::string firstSlideName= MathRoutines::StringTrimWhiteSpace
-  (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("header"), false));
-  theCrawler.slideFileNamesVirtualWithPatH.AddOnTop(firstSlideName);
   for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
   { std::string theKey=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
     //stOutput << "DEBUG: considering key: " << theKey

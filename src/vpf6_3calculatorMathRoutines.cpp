@@ -6842,12 +6842,13 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic(Calculator& the
     out << "Command available to logged-in admins only. ";
     return output.AssignValue(out.str(), theCommands);
   }
-  if (!input.IsOfType<std::string>())
-    return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
+  (void) input;
+  //if (!input.IsOfType<std::string>())
+  //  return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   LaTeXcrawler theCrawler;
   theCrawler.flagBuildSingleSlides=true;
   theCrawler.ownerCalculator=&theCommands;
-  theCrawler.topicListToBuild=input.GetValue<std::string>();
+  //theCrawler.topicListToBuild=input.GetValue<std::string>();
   std::stringstream out;
   theCrawler.BuildTopicList(&out, &out);
   return output.AssignValue(out.str(), theCommands);

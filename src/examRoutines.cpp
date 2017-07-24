@@ -14,7 +14,7 @@ ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCu
 
 std::string CalculatorHTML::stringScoredQuizzes="Quiz";
 std::string CalculatorHTML::stringPracticE="Practice";
-std::string CalculatorHTML::stringProblemLink="Problem link";
+std::string CalculatorHTML::stringProblemLink="Problem";
 
 CalculatorHTML::CalculatorHTML()
 { this->NumAttemptsToInterpret=0;
@@ -680,7 +680,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 }
 
 std::string CalculatorHTML::ToStringLinkCurrentAdmin
-(const std::string& displayString, bool setDebugFlag)
+(const std::string& displayString, bool setDebugFlag, bool includeRandomSeed)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkCurrentAdmin");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "";
@@ -688,9 +688,12 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin
   out << "<a class=\"linkStandardButtonLike\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
   << theGlobalVariables.userCalculatorRequestType << "&";
   std::string urledProblem=HtmlRoutines::ConvertStringToURLString(this->fileName, false);
+  List<std::string> randomSeedContainer;
+  randomSeedContainer.AddOnTop("randomSeed");
   out << "fileName=" << urledProblem << "&"
-  << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
-  << "randomSeed=" << this->theProblemData.randomSeed << "&";
+  << theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
+  if (includeRandomSeed)
+    out << "randomSeed=" << this->theProblemData.randomSeed << "&";
   if (setDebugFlag)
     out << "debugFlag=true&";
   else
@@ -2951,7 +2954,8 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
-    << "\">" << this->stringProblemLink << "</a>" << linkBigSeparator;
+    << "\">" << this->stringProblemLink << " (#"
+    << this->theProblemData.randomSeed << ")</a>" << linkBigSeparator;
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { if (theGlobalVariables.UserStudentVieWOn())
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
@@ -3030,9 +3034,9 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
   if (theGlobalVariables.UserDebugFlagOn())
-    out << this->ToStringLinkCurrentAdmin("Turn off debug", false);
+    out << this->ToStringLinkCurrentAdmin("Turn off debug", false, false);
   else
-    out << this->ToStringLinkCurrentAdmin("Debug page", true);
+    out << this->ToStringLinkCurrentAdmin("Debug page", true, true);
   out << "\n<a class=\"linkStandardButtonLike\" href=\""
   << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
   std::string urledProblem=HtmlRoutines::ConvertStringToURLString(desiredFileName, false);

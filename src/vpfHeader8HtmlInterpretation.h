@@ -226,7 +226,7 @@ public:
   std::string ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay="");
   std::string ToStringLinkFromFileName(const std::string& theFileName);
   std::string ToStringLinkCurrentAdmin
-  (const std::string& displayString, bool setDebugFlag);
+  (const std::string& displayString, bool setDebugFlag, bool includeRandomSeed);
   std::string ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName);
   void InterpretGenerateLink(SyntacticElementHTML& inputOutput);
   std::string ToStringProblemWeightButton(const std::string& theFileName);

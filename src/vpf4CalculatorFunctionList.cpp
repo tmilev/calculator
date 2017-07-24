@@ -1660,8 +1660,8 @@ D-B;\
   this->AddOperationInnerHandler
   ("BuildSlidesInTopicList",
     CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic, "",
-   "Builds all slides in a given topic list. ",
-   "BuildSlidesInTopicList (\"topiclists/Singapore-H1-2017.txt\");\
+   "Builds all slides in the current topic list. Available to logged-in admins only. ",
+   "BuildSlidesInTopicList (0);\
    ",
    true, false,
    "CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic",

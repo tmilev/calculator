@@ -519,10 +519,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
         theFileContentStream << "[handout]" << "\n";
   } while (!theFile.eof());
   theFile.close();
-  if (commentsGeneral!=0)
-    *commentsGeneral << "<br>Loaded file: " << this->theFileNameToCrawlRelative << "<br>";
   bool addExtraTex=(this->slideFileNamesVirtualWithPatH.size>1);
-
   if (this->desiredPresentationTitle.find("</actualExamProblem>")!=std::string::npos &&
       this->desiredPresentationTitle.find("<actualExamProblem>")!=std::string::npos
       )
@@ -535,7 +532,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   { int pos=this->desiredPresentationTitle.find("\\(\\LaTeX\\)");
     this->desiredPresentationTitle=
     this->desiredPresentationTitle.substr(0, pos)+"\\LaTeX"+
-    this->desiredPresentationTitle.substr(pos+10);
+    this->desiredPresentationTitle.substr(pos + 10);
   }
   if (addExtraTex)
   { theFileContentStream << "\\begin{document}"
@@ -546,11 +543,15 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
     theFileContentStream << "}\n"
     << "\\end{document}";
   }
-  theGlobalVariables.ChDir(this->workingFilePathPhysical);
+  if (commentsGeneral!=0)
+    *commentsGeneral << "About to change dir to: " << this->workingFilePathPhysical << "<br>";
+  if (this->flagDoChangeDirs)
+    theGlobalVariables.ChDir(this->workingFilePathPhysical);
   if (FileOperations::OpenFileCreateIfNotPresentUnsecure(theFile, this->workingFileNameNoPathTex, false, true, false))
     theFile << theFileContentStream.str();
   theFile.close();
-  if (commentsGeneral!=0)    *commentsGeneral << "Stored working file: " << this->workingFileNameNoPathTex << "<br>";
+  if (commentsGeneral!=0)
+    *commentsGeneral << "Stored working file: " << this->workingFileNameNoPathTex << "<br>";
   std::string currentSysCommand = "pdflatex -shell-escape " + this->workingFileNameNoPathTex;
   if (commentsGeneral!=0)
     *commentsGeneral << "Executing command: " << currentSysCommand << " ... ";
@@ -591,32 +592,43 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   topicParser.LoadFileNames();
   if (!topicParser.LoadAndParseTopicList(*commentsOnFailure))
     return false;
-  //stOutput << "DEBUG: loaded topic list. ";
-  List<std::string> headerStack;
+  int numSlidePairsToBuild=0;
+  for (int i=0; i<topicParser.theTopicS.size(); i++)
+    if (topicParser.theTopicS[i].slidesSources.size>0)
+      numSlidePairsToBuild++;
+  if (commentsGeneral!=0)
+  { *commentsGeneral << "Loaded topic list: " << topicParser.topicListFileName;
+    *commentsGeneral << "<br> " << numSlidePairsToBuild << " slide pairs to build ";
+    *commentsGeneral << "(" << topicParser.theTopicS.size() << " total topic elements)<br>";
+  }
   bool result=true;
+  int numProcessed=0;
+  this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.slidesSourcesHeaders);
   for (int i=0; i<
 //  5
   topicParser.theTopicS.size()
   ; i++)
-  { std::stringstream reportStream;
-    reportStream << "Processing topic element " << i+1 << " out of " << topicParser.theTopicS.size();
-    theReport.Report(reportStream.str());
-    TopicElement& currentElt=topicParser.theTopicS[i];
-    if (currentElt.type==currentElt.tTexHeader)
-    { headerStack.AddListOnTop(currentElt.slidesSources);
-      continue;
-    }
+  { TopicElement& currentElt=topicParser.theTopicS[i];
     if (currentElt.slidesSources.size==0)
       continue;
-    this->slideFileNamesVirtualWithPatH.SetSize(0);
-    this->slideFileNamesVirtualWithPatH.AddListOnTop(headerStack);
+    std::stringstream reportStream;
+    numProcessed++;
+    reportStream << "Processing slide pair " << numProcessed << " out of " << numSlidePairsToBuild;
+    theReport.Report(reportStream.str());
+
+    this->slideFileNamesVirtualWithPatH.SetSize(topicParser.slidesSourcesHeaders.size);
     this->slideFileNamesVirtualWithPatH.AddListOnTop(currentElt.slidesSources);
     this->desiredPresentationTitle=currentElt.title;
     this->flagForceSlideRebuild=true;
     this->flagProjectorMode=false;
+    this->flagAddSlideToSVN=false;
+    if (commentsGeneral!=0)
+      *commentsGeneral << "Build slide pair from: " << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
     if(!this->BuildOrFetchFromCachePresentationFromSlides
         (commentsOnFailure, commentsGeneral))
       result=false;
+    this->flagDoChangeDirs=false;
+    this->flagAddSlideToSVN=true;
     this->flagProjectorMode=false;
     if(!this->BuildOrFetchFromCachePresentationFromSlides
         (commentsOnFailure, commentsGeneral))

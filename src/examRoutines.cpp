@@ -763,7 +763,7 @@ std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, 
     if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
       problemAlreadySolved=true;
   }
-  out << this->ToStringDeadline(theFileName, problemAlreadySolved, false);
+  out << this->ToStringDeadline(theFileName, problemAlreadySolved, false, false);
 #endif // MACRO_use_MySQL
   std::string finalStringToDisplay=stringToDisplay;
   if (finalStringToDisplay=="")
@@ -1572,12 +1572,12 @@ std::string CalculatorHTML::GetDeadline
 }
 
 std::string CalculatorHTML::ToStringOnEDeadlineFormatted
-(const std::string& cleanedUpLink, const std::string& sectionNumber,
- bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
+(const std::string& topicID, const std::string& sectionNumber,
+ bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection)
 { std::stringstream out;
   bool deadlineIsInherited=false;
   std::string currentDeadline =
-  this->GetDeadline(cleanedUpLink, sectionNumber, deadlineIsInherited);
+  this->GetDeadline(topicID, sectionNumber, deadlineIsInherited);
   if (currentDeadline=="")
   { if (returnEmptyStringIfNoDeadline)
       return "";
@@ -1598,12 +1598,14 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
 
   std::stringstream hoursTillDeadlineStream;
-  bool deadlineIsNear=secondsTillDeadline<24*3600 && !problemAlreadySolved;
+  bool deadlineIsNear=secondsTillDeadline<24*3600 && !problemAlreadySolved && !isSection;
   bool deadlineHasPassed=(secondsTillDeadline<0);
+  //if (isSection)
+  //  out << "DEBUG: isSection=true";
   if (deadlineIsInherited && !theGlobalVariables.UserStudentVieWOn())
-      out << "Inherited: ";
-    else
-      out << "Deadline: ";
+    out << "Inherited: ";
+  else
+    out << "Deadline: ";
   if (!deadlineHasPassed)
   { if (deadlineIsNear)
       hoursTillDeadlineStream << "<span style=\"color:red\">"
@@ -1619,9 +1621,9 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   { out << "<span style=\"color:blue\">" << currentDeadline << "</span> ";
     out << "<span style=\"red\"><b>[passed].</b></span>";
   } else
-  { if (problemAlreadySolved)
+  { if (problemAlreadySolved && !isSection)
       out << "<span style=\"color:green\">" << currentDeadline << "</span> ";
-    else if (deadlineIsNear)
+    else if (deadlineIsNear && !isSection)
       out << "<span style=\"color:red\">" << currentDeadline << "</span> ";
     else
       out << "<span style=\"color:brown\">" << currentDeadline << "</span> ";
@@ -1637,7 +1639,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
 }
 
 std::string CalculatorHTML::ToStringAllSectionDeadlines
-  (const std::string& cleanedUpLink)
+  (const std::string& topicID, bool isSection)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringAllSectionDeadlines");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "";
@@ -1648,7 +1650,7 @@ std::string CalculatorHTML::ToStringAllSectionDeadlines
       continue;
     out << "<tr><td>Section " << this->databaseStudentSections[i] << ":</td>";
     out << "<td>" << this->ToStringOnEDeadlineFormatted
-    (cleanedUpLink, this->databaseStudentSections[i], false, false) << "</td>";
+    (topicID, this->databaseStudentSections[i], false, false, isSection) << "</td>";
     out << "</tr>";
   }
   out << "</table>";
@@ -1656,7 +1658,7 @@ std::string CalculatorHTML::ToStringAllSectionDeadlines
 }
 
 std::string CalculatorHTML::ToStringDeadline
-(const std::string& inputFileName, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
+(const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringDeadlineWithModifyButton");
 #ifdef MACRO_use_MySQL
   if (theGlobalVariables.UserGuestMode())
@@ -1666,12 +1668,12 @@ std::string CalculatorHTML::ToStringDeadline
   { std::string sectionNum=HtmlRoutines::ConvertURLStringToNormal
     (theGlobalVariables.GetWebInput("studentSection"), false);
     return this->ToStringOnEDeadlineFormatted
-    (inputFileName, sectionNum, problemAlreadySolved,
-     returnEmptyStringIfNoDeadline);
+    (topicID, sectionNum, problemAlreadySolved,
+     returnEmptyStringIfNoDeadline, isSection);
   } else
     return this->ToStringOnEDeadlineFormatted
-    (inputFileName, this->currentUseR.userGroup.value, problemAlreadySolved,
-     returnEmptyStringIfNoDeadline);
+    (topicID, this->currentUseR.userGroup.value, problemAlreadySolved,
+     returnEmptyStringIfNoDeadline, isSection);
 #endif // MACRO_use_MySQL
   return "";
 }
@@ -1725,7 +1727,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
     inputOutput.deadlinesPerSectionFormatted[i]=
     this->ToStringOnEDeadlineFormatted
     (inputOutput.id, this->databaseStudentSections[i],
-     problemAlreadySolved, false)
+     problemAlreadySolved, false, isProblemGroup)
     ;
     deadlineStream
     << "<td> <input class=\"modifyDeadlineInput\" type=\"text\" id=\""
@@ -2746,7 +2748,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
         problemAlreadySolved=true;
     }
-    std::string theDeadlineString=this->ToStringDeadline(this->fileName, problemAlreadySolved, true);
+    std::string theDeadlineString=this->ToStringDeadline(this->fileName, problemAlreadySolved, true, true);
     if (theDeadlineString=="")
       outBody << "<span style=\"color:orange\"><b>No deadline yet but scores are recorded. </b></span>";
     else
@@ -4087,7 +4089,6 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
       this->displayProblemLink="";
     this->displayScore="";
     this->displayModifyWeight="";
-    this->displayDeadlinE="";
     problemSolved=false;
     returnEmptyStringIfNoDeadline=true;
   } else
@@ -4100,8 +4101,11 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     this->displayScore=owner.ToStringProblemScoreShort(this->problem, problemSolved);
     this->displayModifyWeight=owner.ToStringProblemWeightButton(this->problem);
   }
-  this->displayDeadlinE=owner.ToStringDeadline
-  (this->id, problemSolved, returnEmptyStringIfNoDeadline);
+  if (this->problem=="" && this->type==this->tProblem)
+    this->displayDeadlinE="";
+  else
+    this->displayDeadlinE=owner.ToStringDeadline
+    (this->id, problemSolved, returnEmptyStringIfNoDeadline, (this->type!=this->tProblem));
   if (theGlobalVariables.UserDefaultHasAdminRights() &&
       !theGlobalVariables.UserStudentVieWOn() &&
       theGlobalVariables.userCalculatorRequestType!="templateNoLogin")

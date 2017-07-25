@@ -219,7 +219,7 @@ public:
    inputProblemInfo)
    ;
   std::string ToStringDeadline
-(const std::string& inputFileName, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
+(const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection)
   ;
   void ComputeDeadlineModifyButton
   (TopicElement& inputOutput, bool problemAlreadySolved, bool isProblemGroup);
@@ -260,11 +260,11 @@ public:
   { return this->fileName==other.fileName;
   }
   std::string ToStringAllSectionDeadlines
-  (const std::string& cleanedUpLink)
+  (const std::string& topicID, bool isSection)
   ;
   std::string ToStringOnEDeadlineFormatted
-  (const std::string& cleanedUpLink, const std::string& sectionNumber,
-  bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline)
+  (const std::string& topicID, const std::string& sectionNumber,
+  bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection)
   ;
   std::string ToStringCalculatorArgumentsForProblem
   (const std::string& requestType, const std::string& studentView,

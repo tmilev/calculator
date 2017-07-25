@@ -1604,6 +1604,8 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   //  out << "DEBUG: isSection=true";
   if (deadlineIsInherited && !theGlobalVariables.UserStudentVieWOn())
     out << "Inherited: ";
+  else if (deadlineIsInherited && isSection && returnEmptyStringIfNoDeadline)
+    return "";
   else
     out << "Deadline: ";
   if (!deadlineHasPassed)

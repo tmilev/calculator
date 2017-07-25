@@ -16,6 +16,9 @@ WebServer theWebServer;
 #include <sys/stat.h>//<-for file statistics
 #include <fcntl.h>//<-setting flags of file descriptors
 
+struct sigaction SignalSEGV, SignalFPE, SignalChild, SignalINT;
+//sigset_t SignalSetToBlockWhileHandlingSIGCHLD;
+
 bool WebWorker::CheckConsistency()
 { auto oldOutputFn = stOutput.theOutputFunction;
   stOutput.theOutputFunction=0;
@@ -1110,7 +1113,8 @@ void WebServer::ReapChildren()
           theLog << logger::green << "Child with pid " << waitResult << " successfully reaped. " << logger::endL;
           this->NumProcessesReaped++;
         }
-  }while (waitResult>0);
+  } while (waitResult>0);
+
 }
 
 // get sockaddr, IPv4 or IPv6:
@@ -4931,34 +4935,45 @@ bool WebServer::initBindToPorts()
 
 void WebServer::initPrepareSignals()
 { MacroRegisterFunctionWithName("WebServer::initPrepareSignals");
-  struct sigaction sa;
-  sa.sa_sigaction = &segfault_sigaction;
-  sigemptyset(&sa.sa_mask);
-  sa.sa_flags = SA_SIGINFO;
-  if (sigaction(SIGSEGV, &sa, NULL) == -1)
-  { theLog << "sigaction returned -1" << logger::endL;
-    crash << "Was not able to register SIGSEGV handler. Crashing to let you know. " << crash;
-  }
+  if (sigemptyset(&SignalSEGV.sa_mask)==-1)
+    crash << "Failed to initialize SignalSEGV mask. Crashing to let you know. " << crash;
+  SignalSEGV.sa_sigaction = &segfault_sigaction;
+  SignalSEGV.sa_flags = SA_SIGINFO;
+  if (sigaction(SIGSEGV, &SignalSEGV, NULL) == -1)
+    crash << "Failed to register SIGSEGV handler (segmentation fault (attempt to write memory without permission))."
+    << " Crashing to let you know. " << crash;
+  ///////////////////////
   //catch floating point exceptions
-  sa.sa_sigaction=0;
-  sa.sa_handler= &fperror_sigaction;
-  sigemptyset(&sa.sa_mask);
-//  sa.sa_flags = SA_SIGINFO;
-  if (sigaction(SIGFPE, &sa, NULL) == -1)
-  { theLog << "sigaction returned -1" << logger::endL;
-    crash << "Was not able to register SIGFPE handler. Crashing to let you know. " << crash;
-  }
-  sa.sa_handler=&WebServer::Signal_SIGINT_handler;
-  if (sigaction(SIGINT, &sa, NULL) == -1)
-    theLog << "sigaction returned -1" << logger::endL;
-  sa.sa_handler =  &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
-//  sa.sa_handler =  0; // reap all dead processes
-  sigemptyset(&sa.sa_mask);
-  sa.sa_flags = SA_NOCLDWAIT;
-  if (sigaction(SIGCHLD, &sa, NULL) == -1)
-  { theLog << "sigaction returned -1" << logger::endL;
-    crash << "sigaction returned -1" << crash;
-  }
+  if (sigemptyset(&SignalFPE.sa_mask)==-1)
+    crash << "Failed to initialize SignalFPE mask. Crashing to let you know. " << crash;
+  SignalFPE.sa_sigaction=0;
+  SignalFPE.sa_handler= &fperror_sigaction;
+  if (sigaction(SIGFPE, &SignalFPE, NULL) == -1)
+    crash << "Failed to register SIGFPE handler (fatal arithmetic error). Crashing to let you know. " << crash;
+  ////////////////////
+  //ignore interrupts
+  if (sigemptyset(&SignalINT.sa_mask)==-1)
+    crash << "Failed to initialize SignalINT mask. Crashing to let you know. " << crash;
+  SignalINT.sa_sigaction=0;
+  SignalINT.sa_handler=&WebServer::Signal_SIGINT_handler;
+  if (sigaction(SIGINT, &SignalINT, NULL) == -1)
+    crash << "Failed to register null SIGINT handler. Crashing to let you know. " << crash;
+  ////////////////////
+  //reap children
+  if(sigemptyset(&SignalChild.sa_mask)==-1)
+    crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  if(sigaddset(&SignalChild.sa_mask, SIGINT)==-1)
+    crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  if(sigaddset(&SignalChild.sa_mask, SIGCHLD)==-1)
+    crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  if(sigaddset(&SignalChild.sa_mask, SIGFPE)==-1)
+    crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  if(sigaddset(&SignalChild.sa_mask, SIGSEGV)==-1)
+    crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  SignalChild.sa_flags = SA_NOCLDWAIT;
+  SignalChild.sa_handler =  &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
+  if (sigaction(SIGCHLD, &SignalChild, NULL) == -1)
+    crash << "Was not able to register SIGCHLD handler (reaping child processes). Crashing to let you know." << crash;
 //  sigemptyset(&sa.sa_mask);
 //  sa.sa_flags = SA_RESTART;
 //  if (sigaction(SIGCHLD, &sa, NULL) == -1)

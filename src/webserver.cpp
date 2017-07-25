@@ -4964,8 +4964,12 @@ void WebServer::initPrepareSignals()
     crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   if(sigaddset(&SignalChild.sa_mask, SIGINT)==-1)
     crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  ////////////////////////////////
+  //sigchld signal should automatically be blocked when calling the sigchld handler.
+  //Nevertheless, let's explicitly add it:
   if(sigaddset(&SignalChild.sa_mask, SIGCHLD)==-1)
     crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  ////////////////////////////////
   if(sigaddset(&SignalChild.sa_mask, SIGFPE)==-1)
     crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   if(sigaddset(&SignalChild.sa_mask, SIGSEGV)==-1)

@@ -2168,7 +2168,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     else
       out << this->GetValue<MatrixTensor<Rational> >().ToString();
     result=true;
-  } else if (this->IsMatrixGivenType<Rational>())
+  } /*else if (this->IsMatrixGivenType<Rational>())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=false;
@@ -2190,7 +2190,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     this->IsMatrixGivenType(0, 0, &theMat);
     out << theMat.ToString(&contextFormat.GetElement());
     result=true;
-  } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
+  } */else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     out << "ETGVM{}(";
     out << this->GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString(&contextFormat.GetElement());
@@ -3018,7 +3018,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << " \\to " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLessThan()))
     out << (*this)[1].ToString(theFormat) << "&lt;" << (*this)[2].ToString(theFormat);
-  else if (this->StartsWith(this->owner->opMatriX()))
+  else if (this->IsMatrix())
   { //stOutput << "DEBUG: Here I am <hr>";
     if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix)
       out << "\\left(";

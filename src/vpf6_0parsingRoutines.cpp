@@ -1050,15 +1050,24 @@ bool Calculator::ReplaceMatrixXByE()
 { SyntacticElement& theMatElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   //stOutput << "<hr>DEBUG: START: Calculator::ReplaceMatrixXByE: "
   //<< theMatElt.theData.ToString();
-  theMatElt.theData.MakeSequence(*this, &theMatElt.dataList);
-  //stOutput << "<br>DEBUG: making sequence done, result: "
-  //<< theMatElt.theData.ToString();
-  //stOutput << "<br>DEBUG: opMatrix: " << this->opMatrix();
-  theMatElt.theData.SetChildAtomValue(0, this->opMatriX());
-  //stOutput << "<br>DEBUG: start is done ";
-  //
-  //stOutput << "<br>DEBUG: RESULT: "
-  //<< theMatElt.theData.ToString() << "<hr>";
+  Matrix<Expression> theMat;
+  int numRows=theMatElt.dataList.size;
+  int numCols=0;
+  for (int i=0; i<theMatElt.dataList.size; i++)
+    numCols= MathRoutines::Maximum(theMatElt.dataList[i].size()-1, numCols);
+  if (numCols>0 && numRows>0)
+  { theMat.init(numRows, numCols);
+    for (int i=0; i<numRows; i++)
+      for (int j=0; j<numCols; j++)
+      { if (j+1>=theMatElt.dataList[i].size())
+        { theMat.elements[i][j].AssignValue(0,*this);
+          continue;
+        }
+        theMat.elements[i][j]=theMatElt.dataList[i][j+1];
+      }
+    theMatElt.theData.AssignMatrixExpressions(theMat, *this, false);
+  } else
+    theMatElt.theData.MakeMatrix(*this);
   theMatElt.dataList.SetSize(0);
   theMatElt.controlIndex=this->conExpression();
   if (this->flagLogSyntaxRules)

@@ -4122,7 +4122,9 @@ bool Expression::MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat)
 { MacroRegisterFunctionWithName("Expression::MakeMatrix");
   if (inputMat==0)
   { this->reset(owner);
-    this->AddChildAtomOnTop(owner.opMatriX());
+    Expression theMatID(owner);
+    theMatID.AddChildAtomOnTop(owner.opMatriX());
+    this->AddChildOnTop(theMatID);
     return true;
   }
   return this->AssignMatrixExpressions(*inputMat, owner, true);

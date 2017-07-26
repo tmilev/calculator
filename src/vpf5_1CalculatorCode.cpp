@@ -724,7 +724,7 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
 
 bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerTranspose");
-  if (!input.IsSequenceNElementS() && !input.StartsWith(theCommands.opMatrix())
+  if (!input.IsSequenceNElementS() && !input.StartsWith(theCommands.opMatriX())
       && !input.StartsWithGivenAtom("Transpose") )
     return false;
   //  stOutput << "DEBUG: got to here";

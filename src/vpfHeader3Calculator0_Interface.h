@@ -17,7 +17,9 @@
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file, calculator declaration. ");
 
 class Expression
-{ void reset()
+{
+private:
+  void reset()
   { this->owner=0;
     this->children.size=0;
     this->theData=-1;
@@ -171,7 +173,8 @@ class Expression
   template<class coefficient>
   bool AssignMatrix
   (const Matrix<coefficient>& input, Calculator& owner,
-   bool reduceOneRowToSequenceAndOneByOneToNonMatrix);
+   Expression const * inputContext=0,
+   bool reduceOneRowToSequenceAndOneByOneToNonMatrix=true);
   bool DivisionByMeShouldBeWrittenInExponentForm()const;
   bool IsCalculatorStatusChanger()const;
   bool AssignMeMyChild(int childIndex)
@@ -214,7 +217,9 @@ class Expression
   bool IsAtomWhoseExponentsAreInterpretedAsFunction(std::string* outputWhichAtom=0)const;
   bool IsPowerOfAtomWhoseExponentsAreInterpretedAsFunction()const;
   bool IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom=0)const;
-
+  bool IsMatrix(int* outputNumRows=0, int* outputNumCols=0)const;
+  template <typename theType>
+  bool IsMatrixGivenType(int* outputNumRows=0, int* outputNumCols=0, Matrix<theType>* whichMatrix=0)const;
   bool IsAtom(std::string* outputWhichOperation=0)const;
   bool IsAtomGivenData(const std::string& desiredAtom)const;
   bool IsAtomGivenData(int desiredDataUseMinusOneForAny=-1)const;
@@ -289,12 +294,10 @@ class Expression
   }
   template <class theType>
   theType& GetValueNonConst()const;
-
   template<class theType>
   int GetTypeOperation()const;
   template<class theType>
   int AddObjectReturnIndex(const theType& inputValue)const;
-
   //note: the following always returns true:
   template <class theType>
   bool AssignValue(const theType& inputValue, Calculator& owner);
@@ -783,12 +786,12 @@ public:
   HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedListReferences<Expression> ExpressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
-  ListReferences<Matrix<double> > theMatDoubles;
-  HashedListReferences<Matrix<Rational> > theMatRats;
-  HashedListReferences<Matrix<AlgebraicNumber> > theMatsAlgebraic;
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
-  HashedListReferences<Matrix<Polynomial<Rational> > > theMatPolyRational;
-  HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
+  //ListReferences<Matrix<double> > theMatDoubles;
+  //HashedListReferences<Matrix<Rational> > theMatRats;
+  //HashedListReferences<Matrix<AlgebraicNumber> > theMatsAlgebraic;
+  //HashedListReferences<Matrix<Polynomial<Rational> > > theMatPolyRational;
+  //HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
   HashedListReferences<ElementZmodP> theEltsModP;
   HashedListReferences<Weight<Rational> > theWeights;
   HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
@@ -1459,7 +1462,7 @@ public:
   int opCalculusPlot()
   { return this->theAtoms.GetIndexIMustContainTheObject("CalculusPlot");
   }
-  int opMatrix()
+  int opMatriX()
   { return this->theAtoms.GetIndexIMustContainTheObject("Matrix");
   }
   int opSequence()
@@ -1495,9 +1498,6 @@ public:
   int opAlgNumber()
   { return this->theAtoms.GetIndexIMustContainTheObject("AlgebraicNumber");
   }
-  int opMatPolyRat()
-  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixPolynomialRational");
-  }
   int opElementWeylAlgebra()
   { return this->theAtoms.GetIndexIMustContainTheObject("ElementWeylAlgebra");
   }
@@ -1525,23 +1525,11 @@ public:
   int opAbsoluteValue()
   { return this->theAtoms.GetIndexIMustContainTheObject("|");
   }
-  int opMatAlgebraic()
-  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixAlgebraic");
-  }
-  int opMatRat()
-  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixRational");
-  }
-  int opMatDouble()
-  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixDouble");
-  }
   int opMatTensorRat()
   { return this->theAtoms.GetIndexIMustContainTheObject("MatrixTensorRational");
   }
   int opWeylGroupRep()
   { return this->theAtoms.GetIndexIMustContainTheObject("WeylGroupRep");
-  }
-  int opMatRF()
-  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixRF");
   }
   int opFreeze()
   { return this->theAtoms.GetIndexIMustContainTheObject("Freeze");
@@ -2203,8 +2191,15 @@ template <class theType>
 bool Calculator::GetMatrix
 (const Expression& input, Matrix<theType>& outputMat, Expression* inputOutputStartingContext, int targetNumColsNonMandatory, Expression::FunctionAddress conversionFunction)
 { MacroRegisterFunctionWithName("Calculator::GetMatrix");
-  if (input.IsOfType<Matrix<theType> >())
-  { outputMat=input.GetValue<Matrix<theType> >();
+  int numCols=-1, numRows=-1;
+  if (input.IsMatrixGivenType<theType>(&numRows, &numCols, &outputMat))
+  { if (inputOutputStartingContext!=0)
+      for (int i=0; i<numRows; i++)
+        for (int j=0; j<numCols; j++)
+          inputOutputStartingContext->ContextMergeContexts
+          (*inputOutputStartingContext, input[i+1][j+1].GetContext(), *inputOutputStartingContext);
+    if (targetNumColsNonMandatory>0)
+      return numCols==targetNumColsNonMandatory;
     return true;
   }
   Matrix<Expression> nonConvertedEs;
@@ -2283,8 +2278,9 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner)
 { Expression tempE;
   tempE.owner=&owner;
   int curType=tempE.GetTypeOperation<theType>();
-  if (curType==owner.opPoly() || curType==owner.opRationalFunction() || curType==owner.opElementTensorGVM() || curType==owner.opElementUEoverRF() ||
-      curType==owner.opMatRF() || curType==owner.opElementWeylAlgebra() || curType==owner.opWeightLieAlgPoly())
+  if (curType==owner.opPoly() || curType==owner.opRationalFunction() || curType==owner.opElementTensorGVM() ||
+      curType==owner.opElementUEoverRF() ||
+      curType==owner.opElementWeylAlgebra() || curType==owner.opWeightLieAlgPoly())
   { crash << "This may or may not be a programming error. Assigning value WITHOUT CONTEXT to data type "
     << this->owner->GetOperations()[curType] << " is discouraged, and most likely is an error. Crashing to let you know. "
     << crash;
@@ -2391,16 +2387,45 @@ bool Calculator::GetTypeHighestWeightParabolic
 
 template <class coefficient>
 bool Expression::AssignMatrix
-(const Matrix<coefficient>& input, Calculator& owner, bool reduceOneRowToSequenceAndOneByOneToNonMatrix)
+(const Matrix<coefficient>& input, Calculator& owner,
+ Expression const* inputContext,
+ bool reduceOneRowToSequenceAndOneByOneToNonMatrix)
 { MacroRegisterFunctionWithName("Expression::AssignMatrix");
   Matrix<Expression> theMatEs;
   theMatEs.init(input.NumRows, input.NumCols);
   Expression currentElt;
   for (int i=0; i<input.NumRows; i++)
     for (int j=0; j<input.NumCols; j++)
-    { currentElt.AssignValue(input(i,j), owner);
-      theMatEs(i,j)=currentElt;
+    { if (inputContext==0)
+        currentElt.AssignValue(input(i, j), owner);
+      else
+        currentElt.AssignValueWithContext(input(i, j), *inputContext, owner);
+      theMatEs(i, j)=currentElt;
     }
   return this->AssignMatrixExpressions(theMatEs, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix);
+}
+
+template <typename theType>
+bool Expression::IsMatrixGivenType(int* outputNumRows, int* outputNumCols, Matrix<theType>* whichMatrix)const
+{ MacroRegisterFunctionWithName("Expression::IsMatrixGivenType");
+  int numRows=-1, numCols=-1;
+  if (outputNumRows==0)
+    outputNumRows=&numRows;
+  if (outputNumCols==0)
+    outputNumCols=&numCols;
+  if (!this->IsMatrix(outputNumRows, outputNumCols))
+    return false;
+  if (!(*this)[0].StartsWith(this->owner->opMatriX(), 2))
+    return false;
+  if (!(*this)[0][1].IsAtomGivenData(this->GetTypeOperation<theType>()))
+    return false;
+  if (whichMatrix==0)
+    return true;
+  whichMatrix->init(numRows, numCols);
+  for (int i=0; i<numRows; i++)
+    for (int j=0; j<numCols; j++)
+      if (!(*this)[i+1][j+1].IsOfType<theType>(&whichMatrix->elements[i][j]))
+        return false;
+  return true;
 }
 #endif

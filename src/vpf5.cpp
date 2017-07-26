@@ -1553,16 +1553,64 @@ bool Expression::AssignMatrixExpressions
     return true;
   }
   this->reset(owner, input.NumRows+1);
-  this->AddChildAtomOnTop(owner.opMatrix());
+  Expression theMatType(owner);
+  theMatType.AddChildAtomOnTop(owner.opMatriX());
+  this->AddChildOnTop(theMatType);
+  enum mType{typeUnknown, typeRat, typeDouble, typeAlgebraic, typePolyRat, typePolyAlg, typeRF, typeExpression};
+  mType outType=typeUnknown;
   Expression currentRow;
   for (int i=0; i<input.NumRows; i++)
   { currentRow.reset(owner);
     currentRow.children.Reserve(input.NumCols+1);
     currentRow.AddChildAtomOnTop(owner.opSequence());
     for (int j=0; j<input.NumCols; j++)
-      currentRow.AddChildOnTop(input(i,j));
+    { currentRow.AddChildOnTop(input(i,j));
+      mType inType;
+      if (input(i,j).IsOfType<Rational>())
+        inType=typeRat;
+      else if (input(i,j).IsOfType<double>())
+        inType=typeDouble;
+      else if (input(i,j).IsOfType<AlgebraicNumber>())
+        inType=typeAlgebraic;
+      else if (input(i,j).IsOfType<Polynomial<Rational> >())
+        inType=typePolyRat;
+      else if (input(i,j).IsOfType<Polynomial<AlgebraicNumber> >())
+        inType=typeAlgebraic;
+      else if (input(i,j).IsOfType<RationalFunctionOld>())
+        inType=typeRF;
+      else
+        inType=typeExpression;
+      if (outType==typeUnknown)
+        outType=inType;
+      else if (outType!=inType)
+        outType=typeExpression;
+    }
     this->AddChildOnTop(currentRow);
   }
+  switch(outType)
+  { case typeRat:
+      theMatType.AddChildAtomOnTop(owner.opRational());
+      break;
+    case typeDouble:
+      theMatType.AddChildAtomOnTop(owner.opDouble());
+      break;
+    case typeAlgebraic:
+      theMatType.AddChildAtomOnTop(owner.opAlgNumber());
+      break;
+    case typePolyRat:
+      theMatType.AddChildAtomOnTop(owner.opPoly());
+      break;
+    case typePolyAlg:
+      theMatType.AddChildAtomOnTop(owner.opPolyOverANs());
+      break;
+    case typeRF:
+      theMatType.AddChildAtomOnTop(owner.opRationalFunction());
+      break;
+    default:
+      break;
+  }
+  if (outType!=typeUnknown && outType!=typeExpression)
+    this->SetChilD(0, theMatType);
   return true;
 }
 
@@ -1577,16 +1625,14 @@ bool Calculator::GetMatrixExpressionsFromArguments(const Expression& input, Matr
 
 bool Calculator::GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols)
 { MacroRegisterFunctionWithName("Calculator::GetMatrixExpressions");
-  //stOutput << "DEBUG: get matrix expression.";
-  if (!input.IsSequenceNElementS() &&
-      !input.StartsWith(this->opMatrix()))
-  { output.init(1,1);
+  if (!input.IsSequenceNElementS() && !input.IsMatrix())
+  { output.init(1, 1);
     output(0,0)=input;
     return true;
   }
   if (input.size()<2)
-  { if (input.StartsWith(this->opMatrix()))
-    { output.init(0,0);
+  { if (input.IsMatrix())
+    { output.init(0, 0);
       return true;
     }
     return false;

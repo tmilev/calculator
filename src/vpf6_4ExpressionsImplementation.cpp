@@ -109,30 +109,6 @@ int Expression::GetTypeOperation<ElementUniversalEnveloping<RationalFunctionOld>
 }
 
 template < >
-int Expression::GetTypeOperation<Matrix<Rational> >()const
-{ this->CheckInitialization();
-  return this->owner->opMatRat();
-}
-
-template < >
-int Expression::GetTypeOperation<Matrix<double> >()const
-{ this->CheckInitialization();
-  return this->owner->opMatDouble();
-}
-
-template < >
-int Expression::GetTypeOperation<Matrix<Polynomial<Rational> > >()const
-{ this->CheckInitialization();
-  return this->owner->opMatPolyRat();
-}
-
-template < >
-int Expression::GetTypeOperation<Matrix<AlgebraicNumber> >()const
-{ this->CheckInitialization();
-  return this->owner->opMatAlgebraic();
-}
-
-template < >
 int Expression::GetTypeOperation<Weight<Rational> >()const
 { this->CheckInitialization();
   return this->owner->opWeightLieAlg();
@@ -148,12 +124,6 @@ template < >
 int Expression::GetTypeOperation<MatrixTensor<Rational> >()const
 { this->CheckInitialization();
   return this->owner->opMatTensorRat();
-}
-
-template < >
-int Expression::GetTypeOperation<Matrix<RationalFunctionOld> >()const
-{ this->CheckInitialization();
-  return this->owner->opMatRF();
 }
 
 template < >
@@ -366,6 +336,15 @@ RationalFunctionOld
 
 template < >
 int Expression::AddObjectReturnIndex(const
+MatrixTensor<Rational>
+& inputValue)const
+{ this->CheckInitialization();
+  return this->owner->theObjectContainer.theMatTensorRats
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
 ElementUniversalEnveloping<RationalFunctionOld>
 & inputValue)const
 { this->CheckInitialization();
@@ -497,51 +476,6 @@ LittelmannPath
 & inputValue)const
 { this->CheckInitialization();
   return this->owner->theObjectContainer.theLSpaths
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
-}
-
-template < >
-int Expression::AddObjectReturnIndex(const
-Matrix<Rational>
-& inputValue)const
-{ this->CheckInitialization();
-  return this->owner->theObjectContainer.theMatRats
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
-}
-
-template < >
-int Expression::AddObjectReturnIndex(const
-Matrix<double>
-& inputValue)const
-{ this->CheckInitialization();
-  return this->owner->theObjectContainer.theMatDoubles
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
-}
-
-template < >
-int Expression::AddObjectReturnIndex(const
-Matrix<AlgebraicNumber>
-& inputValue)const
-{ this->CheckInitialization();
-  return this->owner->theObjectContainer.theMatsAlgebraic
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
-}
-
-template < >
-int Expression::AddObjectReturnIndex(const
-MatrixTensor<Rational>
-& inputValue)const
-{ this->CheckInitialization();
-  return this->owner->theObjectContainer.theMatTensorRats
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
-}
-
-template < >
-int Expression::AddObjectReturnIndex(const
-Matrix<RationalFunctionOld>
-& inputValue)const
-{ this->CheckInitialization();
-  return this->owner->theObjectContainer.theMatRFs
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -739,40 +673,10 @@ SemisimpleLieAlgebra& Expression::GetValueNonConst()const
 }
 
 template < >
-Matrix<Rational>& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<Matrix<Rational> >())
-    crash << "This is a programming error: expression not of required type MatrixRational. The expression equals " << this->ToString() << "." << crash;
-  return this->owner->theObjectContainer.theMatRats.GetElement(this->GetLastChild().theData);
-}
-
-template < >
-Matrix<AlgebraicNumber>& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<Matrix<AlgebraicNumber> >())
-    crash << "This is a programming error: expression not of required type MatrixAlgebraic. The expression equals "
-    << this->ToString() << "." << crash;
-  return this->owner->theObjectContainer.theMatsAlgebraic.GetElement(this->GetLastChild().theData);
-}
-
-template < >
 MatrixTensor<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<MatrixTensor<Rational> >())
     crash << "This is a programming error: expression not of required type MatrixTensorRational. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theMatTensorRats.GetElement(this->GetLastChild().theData);
-}
-
-template < >
-Matrix<RationalFunctionOld>& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<Matrix<RationalFunctionOld> >())
-    crash << "This is a programming error: expression not of required type MatrixRF. The expression equals " << this->ToString() << "." << crash;
-  return this->owner->theObjectContainer.theMatRFs.GetElement(this->GetLastChild().theData);
-}
-
-template < >
-Matrix<Polynomial<Rational> >& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<Matrix<Polynomial<Rational> > >())
-    crash << "This is a programming error: expression not of required type MatrixPolynomialRatinoal."
-    << " The expression equals " << this->ToString() << "." << crash;
-  return this->owner->theObjectContainer.theMatPolyRational.GetElement(this->GetLastChild().theData);
 }
 
 template < >
@@ -812,17 +716,30 @@ ElementWeylGroup<WeylGroupData>& Expression::GetValueNonConst()const
 }
 
 template < >
-Matrix<double>& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<Matrix<double> >())
-    crash << "This is a programming error: expression not of required type MatrixRational. The expression equals " << this->ToString() << "." << crash;
-  return this->owner->theObjectContainer.theMatDoubles[this->GetLastChild().theData];
-}
-
-template < >
 VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<VirtualRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> >())
     crash << "This is a programming error: expression not of required type WeylGroupVirtualRepresentation. The expression equals " << this->ToString() << "." << crash;
   return this->owner->theObjectContainer.theWeylGroupVirtualReps.GetElement(this->GetLastChild().theData);
+}
+
+bool Expression::IsMatrix(int* outputNumRows, int* outputNumCols)const
+{ MacroRegisterFunctionWithName("Expression::IsMatrix");
+  if (this->owner==0)
+    return false;
+  if (this->size()<1)
+    return false;
+  bool isGood=(*this)[0].StartsWith(this->owner->opMatriX());
+  if (!isGood)
+    return false;
+  if (outputNumRows!=0)
+    *outputNumRows=this->size()-1;
+  if (outputNumCols!=0)
+  { if (this->size()<=1)
+      *outputNumCols= 0;
+    else
+      *outputNumRows=(*this)[1].size()-1;
+  }
+  return true;
 }
 
 //end Expression::GetValueNonConst specializations.
@@ -1248,9 +1165,10 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
       theWeight.weightFundamentalCoordS[i].Substitution(subPolyPart);
     return this->AssignValueWithContext(theWeight, inputOutputMinContext, *this->owner);
   }
-  if (this->IsOfType<Matrix<RationalFunctionOld> >())
-  { Matrix<RationalFunctionOld> newMat=this->GetValue<Matrix< RationalFunctionOld> >();
-    //stOutput << "<br>Subbing " << polySub.ToString() << " in "
+  if (this->IsMatrixGivenType<RationalFunctionOld>())
+  { //stOutput << "<br>Subbing " << polySub.ToString() << " in "
+    Matrix<RationalFunctionOld> newMat;
+    this->IsMatrixGivenType<RationalFunctionOld>(0, 0, &newMat);
     PolynomialSubstitution<Rational> subPolyPart;
     //<< newPoly.ToString();
     myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
@@ -1259,7 +1177,7 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
         if (!newMat(i,j).Substitution(subPolyPart))
           return *this->owner << "Failed to carry out the substitution "
           << subPolyPart.ToString() << " in the matrix " << this->ToString() << ". ";
-    return this->AssignValueWithContext(newMat, inputOutputMinContext, *this->owner);
+    return this->AssignMatrix(newMat, *this->owner, &inputOutputMinContext);
   }
   this->owner->Comments << "Expression " << this->ToString()
   << " is of built-in type but is not handled by Expression::SetContextAtLeastEqualTo. ";
@@ -1388,10 +1306,10 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
 //  stOutput << "<br>Merging: leftPolyV: " << leftPolyV.ToString() << " and rightPolyV: " << rightPolyV.ToString();
   HashedList<Expression> polyVarUnion;
   MemorySaving<HashedList<Expression> > EWAVarUnion;
-  polyVarUnion.SetExpectedSize(leftPolyV.children.size+rightPolyV.children.size-2);
-  for (int i=1; i<leftPolyV.children.size; i++)
+  polyVarUnion.SetExpectedSize(leftPolyV.size()+rightPolyV.size()-2);
+  for (int i=1; i<leftPolyV.size(); i++)
     polyVarUnion.AddOnTopNoRepetition(leftPolyV[i]);
-  for (int i =1; i<rightPolyV.children.size; i++)
+  for (int i=1; i<rightPolyV.size(); i++)
     polyVarUnion.AddOnTopNoRepetition(rightPolyV[i]);
   polyVarUnion.QuickSortAscending();
 //  stOutput << "<br>Polyvarunion is: " << polyVarUnion.ToString();
@@ -1409,7 +1327,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
   //Converting differential operators if needed.
   Expression leftEWAV=leftContext.ContextGetDifferentialOperatorVariables();
   Expression rightEWAV=rightContext.ContextGetDifferentialOperatorVariables();
-  if (leftEWAV.children.size>1 || rightEWAV.children.size>1)
+  if (leftEWAV.size()>1 || rightEWAV.size()>1)
   { Selection foundEWAVar;
     List<Expression> EWAVars;
     foundEWAVar.init(polyVarUnion.size);
@@ -1417,7 +1335,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
     Expression* currentPolyV=&leftPolyV;
     Expression* currentEWAV=&leftEWAV;
     for (int k=0; k<2; k++, currentPolyV=&rightPolyV, currentEWAV=&rightEWAV)
-      for (int i=1; i<currentEWAV->children.size; i++)
+      for (int i=1; i<currentEWAV->size(); i++)
       { int theIndex=polyVarUnion.GetIndex((*currentPolyV)[i]);
         if (foundEWAVar.selected[theIndex])
           if ((*currentEWAV)[i]!=EWAVars[theIndex])
@@ -1951,13 +1869,17 @@ Expression Expression::GetContext()const
 { this->CheckInitialization();
   if (this->IsBuiltInTypE())
     return (*this)[1];
+  if (this->IsMatrix())
+    if ((*this)[0].StartsWith(this->owner->opMatriX()))
+      if ((*this)[0].size()>2)
+        return (*this)[0][2];
+  Expression output;
+  output.MakeEmptyContext(*this->owner);
   crash << "This is a programming error: GetContext called on an Expression"
   << " that is not a built-in data type. "
   << " I can't display the expression as this may cause ``infinite'' "
   << "recursion if the error is caused by the ToString method. Here is however the lisp form "
   << this->ToStringFull() << " of the expression. " << "Here's  a stack trace. " << crash;
-  Expression output;
-  output.MakeEmptyContext(*this->owner);
   return output;
 }
 
@@ -2246,21 +2168,27 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     else
       out << this->GetValue<MatrixTensor<Rational> >().ToString();
     result=true;
-  } else if (this->IsOfType<Matrix<Rational> >())
+  } else if (this->IsMatrixGivenType<Rational>())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=false;
-    out << this->GetValue<Matrix<Rational> >().ToString(&contextFormat.GetElement());
+    Matrix<Rational> theMat;
+    this->IsMatrixGivenType(0, 0, &theMat);
+    out << theMat.ToString(&contextFormat.GetElement());
     result=true;
-  } else if (this->IsOfType<Matrix<double> >())
+  } else if (this->IsMatrixGivenType<double>())
   { out.precision(4);
-    out << std::fixed << this->GetValue<Matrix<double> >();
+    Matrix<double> theMat;
+    this->IsMatrixGivenType(0, 0, &theMat);
+    out << std::fixed << theMat;
     result=true;
-  } else if (this->IsOfType<Matrix<AlgebraicNumber> >())
+  } else if (this->IsMatrixGivenType<AlgebraicNumber>())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=false;
-    out << this->GetValue<Matrix<AlgebraicNumber> >().ToString(&contextFormat.GetElement());
+    Matrix<AlgebraicNumber> theMat;
+    this->IsMatrixGivenType(0, 0, &theMat);
+    out << theMat.ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
@@ -2364,11 +2292,13 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<LittelmannPath>())
   { out << this->GetValue<LittelmannPath>().ToString();
     result=true;
-  } else if (this->IsOfType<Matrix<RationalFunctionOld> >())
+  } else if (this->IsMatrixGivenType<RationalFunctionOld>())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseHTML=false;
     contextFormat.GetElement().flagUseLatex=true;
-    out << this->GetValue<Matrix<RationalFunctionOld> >().ToString(&contextFormat.GetElement());
+    Matrix<RationalFunctionOld> theMat;
+    this->IsMatrixGivenType(0, 0, &theMat);
+    out << theMat.ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<ElementWeylAlgebra<Rational> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
@@ -2497,7 +2427,7 @@ bool Expression::NeedsParenthesisForMultiplication()const
     return false;
   if (this->StartsWith(this->owner->opAbsoluteValue()))
     return false;
-  if (this->StartsWith(this->owner->opMatrix()))
+  if (this->IsMatrix())
     return false;
   if (this->StartsWith(this->owner->opPlus()) ||
       this->StartsWith(this->owner->opMinus()) ||
@@ -3088,7 +3018,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << " \\to " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opLessThan()))
     out << (*this)[1].ToString(theFormat) << "&lt;" << (*this)[2].ToString(theFormat);
-  else if (this->StartsWith(this->owner->opMatrix()))
+  else if (this->StartsWith(this->owner->opMatriX()))
   { //stOutput << "DEBUG: Here I am <hr>";
     if (theFormat->flagUseLatex && !theFormat->flagUsePmatrix)
       out << "\\left(";

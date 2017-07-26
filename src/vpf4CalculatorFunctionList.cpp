@@ -4168,39 +4168,6 @@ void Calculator::initPredefinedStandardOperations()
    , true, false,
    "CalculatorFunctionsBinaryOps::innerAddSequenceToSequence", "AddSequences");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic,
-   this->opMatRat(), this->opMatRat(),
-   "Adds two matrices.",
-   " A=MakeMatrix{}((5, 8), (3, 5)); A*A-A; B=MakeMatrix{}((5, 8), (3, 5)); A+B",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic,
-   this->opMatAlgebraic(), this->opMatAlgebraic(),
-   "Adds two matrices.",
-   " A=MakeMatrix{}((\\sqrt{}5, 8), (\\sqrt{}3, 5)); A*A-A; A+A*A;",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic,
-   this->opMatRat(), this->opMatAlgebraic(),
-   "Adds two matrices.",
-   " A=MakeMatrix{}((5, 8), (3, 5)); B=MakeMatrix{}((\\sqrt{}5, 8), (\\sqrt{}3, 5)); A+B; B+A",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic,
-   this->opMatAlgebraic(), this->opMatRat(),
-   "Adds two matrices.",
-   " A=MakeMatrix{}((5, 8), (3, 5)); B=MakeMatrix{}((\\sqrt{}5, 8), (\\sqrt{}3, 5)); A+B; B+A",
-   true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs,
-   this->opMatRF(), this->opMatRF(),
-   "Adds two matrices.",
-   " A=MakeMatrixRFs{}((5, 8z), (3, 5)); A*A-A;",
-   true, false, "CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational");
-  this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),
    "Adds two matrices.",
@@ -4427,56 +4394,6 @@ this->AddOperationInnerHandler
    "\\sqrt{3}*PolynomialAlgebraicNumbers{}(x);",
    true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly");
-
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational,
-   this->opMatRat(), this->opMatRat(),
-   "Multiplies matrix rational by matrix rational. ",
-   "M=MakeMatrix{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg,
-   this->opMatRat(), this->opMatAlgebraic(),
-   "Multiplies matrix rational by matrix rational. ",
-   "M=MakeMatrix{}((1,1), (0,1)); N=MakeMatrix{}((1,2),(3, sqrt 5)); L=MakeMatrix{}((1,2),(3, sqrt 5)); M*N; N*M; M*L ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg,
-   this->opMatAlgebraic(), this->opMatRat(),
-   "Multiplies matrix rational by matrix rational. ",
-   "M=MakeMatrix{}((1,1), (0,1)); N=MakeMatrix{}((1,2),(3, sqrt 5)); L=MakeMatrix{}((1,2),(3, sqrt 5)); M*N; N*M; M*L ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg,
-   this->opMatAlgebraic(), this->opMatAlgebraic(),
-   "Multiplies matrix rational by matrix rational. ",
-   "M=MakeMatrix{}((1,1), (0,1)); N=MakeMatrix{}((1,2),(3, sqrt 5)); L=MakeMatrix{}((1,2),(3, sqrt 5)); M*N; N*M; M*L ", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
-   this->opRational(), this->opMatRF(),
-   "Multiplies a rational number by matrix of polynomial functions. ",
-   "M=MakeMatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true, false,
-   "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
-   this->opPoly(), this->opMatRF(),
-   "Multiplies matrix of polynomial functions by polynomial. ",
-   "M=MakeMatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
-   this->opMatRF(), this->opMatRF(),
-   "Multiplies matrix of polynomial functions by matrix of polynomial functions. ",
-   "M=MakeMatrixRFs{}((x,1/x), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF,
-   this->opRationalFunction(), this->opMatRF(),
-   "Multiplies a polynomial by a matrix of polynomials. ",
-   "M=MakeMatrixRFs{}((x^2,1), (0,1)); (MakeRationalFunction{}(1/x)) M; ",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),
@@ -4484,39 +4401,6 @@ this->AddOperationInnerHandler
    "M=MakeMatrixTensorForm{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ",
    true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg,
-   this->opAlgNumber(), this->opMatRat(),
-   "Multiplies rational by algebraic matrix or algebraic \
-    number matrix of rational or algebraic numbers. ",
-   "A=MakeMatrix((1,2),(3,4)); \
-    B=MakeMatrix((1, sqrt(2)),(sqrt (3), sqrt(4))); sqrt{}2 A; 2B; sqrt{}2 B ",
-    true, false,
-    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg,
-   this->opRational(), this->opMatAlgebraic(),
-   "Multiplies rational by algebraic matrix or algebraic \
-    number matrix of rational or algebraic numbers. ",
-   "A=MakeMatrix((1,2),(3,4)); B=MakeMatrix((1, sqrt(2)),(sqrt (3), sqrt(4))); sqrt{}2 A; 2B; sqrt{}2 B ",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg,
-   this->opAlgNumber(), this->opMatAlgebraic(),
-   "Multiplies rational by algebraic matrix or algebraic \
-    number matrix of rational or algebraic numbers. ",
-   "A=MakeMatrix((1,2),(3,4)); B=MakeMatrix((1, sqrt(2)),(sqrt (3), sqrt(4))); sqrt{}2 A; 2B; sqrt{}2 B ",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg");
-
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational,
-   this->opRational(), this->opMatRat(),
-   "Multiplies rational by matrix rational. ",
-   "M=MakeMatrix{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor,
    this->opRational(), this->opMatTensorRat(),
@@ -4774,9 +4658,8 @@ this->AddOperationInnerHandler
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*",
   CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix,
-   this->opMatrix(), this->opMatrix(),
-   "Multiplies two sequences of sequences in a similar \
-    way as if those were matrices.",
+   this->opMatriX(), this->opMatriX(),
+   "Multiplies matrices.",
    "\\begin{pmatrix} 1& 2 \\\\ 3& 5\\end{pmatrix} \
     \\begin{pmatrix} 1& -2 \\\\ 3& 5\\end{pmatrix}",
    true, false,
@@ -4785,7 +4668,7 @@ this->AddOperationInnerHandler
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*",
   CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix,
-   this->opSequence(), this->opMatrix(),
+   this->opSequence(), this->opMatriX(),
    "Multiplies sequence by matrix as if the sequence is a vector",
    "(1,1)\\begin{pmatrix} 1& 2 \\\\ 3& 5\\end{pmatrix}",
    true, false,
@@ -4979,7 +4862,7 @@ this->AddOperationInnerHandler
    "TransposePowerNotation");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerMatrixByRat,
-    this->opMatrix(), this->opRational(), //-1= any type
+    this->opMatriX(), this->opRational(), //-1= any type
    "If the base is a matrix and the exponent is a rational number: \
    1. If the base is not square, returns error. \
    2. If the base is square and consists of \
@@ -5011,34 +4894,6 @@ this->AddOperationInnerHandler
    "x=Polynomial{}x; y=Polynomial{}y;(x+2y+x y+x^2+3y^2)^3",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger,
-   this->opMatRat(), this->opRational(),
-   "Raises matrix of rationals to small integer power. \
-    Will also attempt to exponentiate if the matrix has \
-    determinant +/-1 or 0, independend of\
-    how large is the exponent. ",
-   "X=MakeMatrix((0,1),(1,1)); q=100; \nX^q; \nFibonacci{}0=1; \
-    \nFibonacci{}1=1; \
-    \nFibonacci{}{{n}}:if((n>0)* (IsInteger{}n))=Fibonacci{}(n-1)+Fibonacci{}(n-2); \
-    \nMakeMatrix((Fibonacci{}(q-2), Fibonacci{}(q-1)), (Fibonacci{}q-1, Fibonacci{}q))",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger",
-   "PowerMatrixByInteger");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger, this->opMatRF(), this->opRational(),
-   "Raises a polynomial matrix to small integer power. ",
-   "X=MakeMatrixRFs((x,y),(1,2)); X^5",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger,
-   this->opMatAlgebraic(), this->opRational(),
-   "Raises algebraic number matrix to small integer power. ",
-   "X=MakeMatrix((\\sqrt{}2,1),(\\sqrt{}3,3)); X^100",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger",
-   "PowerMatrixByInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger, this->opPolyOverANs(), this->opRational(),
    "Raises poly over algebraic numbers to small integer power. ",
@@ -5200,8 +5055,8 @@ this->AddOperationInnerHandler
    If you want decomposition, use V*V instead. ",
    "V=WeylGroupNaturalRep{}(B_3); V\\otimes V; V*V", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorMatRatByMatRat,
-   this->opMatRat(), this->opMatRat(),
+  ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix,
+   this->opMatriX(), this->opMatriX(),
    "Tensor product of two matrices.",
     "P=((0 , 2 ),(1 , 0)); Q=((0 , 3 ),(1 , 0)); \
     \nX=MakeMatrix{}P; Y=MakeMatrix{}Q; \

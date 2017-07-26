@@ -1709,7 +1709,7 @@ bool CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup(Calculator& theComm
   if (!CalculatorConversions::innerDynkinType(theCommands, input[1], theType))
     return theCommands << "<hr>Failed to get Dynkin type from argument. " << input[1].ToString();
   Matrix<Rational> theMat;
-  if (!input[2].IsOfType<Matrix<Rational> >(&theMat))
+  if (!input[2].IsMatrixGivenType<Rational>(0, 0, &theMat))
     if (!theCommands.GetMatrix(input[2], theMat))
       return theCommands << "<hr>Failed to get matrix from argument. " << input[2].ToString();
   if (theMat.NumCols!=theMat.NumRows || theMat.NumCols!=theType.GetRank())
@@ -1965,7 +1965,7 @@ bool CalculatorFunctionsWeylGroup::innerRepresentElementHyperOctahedral(Calculat
   Matrix<Rational> result;
   if (!theRep.GetMatrixOfElement(theElt, result))
     return theCommands << "Failed to get matrix of element " << theElt.ToString() << " from representation: " << theRep.ToString();
-  return output.AssignMatrix(result, theCommands, false);
+  return output.AssignMatrix(result, theCommands, 0, false);
 }
 
 bool CalculatorFunctionsWeylGroup::innerHyperOctahedralGetOneRepresentation(Calculator& theCommands, const Expression& input, Expression& output)

@@ -325,7 +325,7 @@ bool CalculatorFunctionsGeneral::innerGetPointsImplicitly
   }
   Matrix<double> theMatrix;
   theMatrix.AssignVectorsToRows(thePoints);
-  return output.AssignValue(theMatrix, theCommands);
+  return output.AssignMatrix(theMatrix, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlotImplicitFunction
@@ -413,7 +413,7 @@ bool CalculatorConversions::innerMatrixDouble(Calculator& theCommands, const Exp
   Matrix<double> theMat;
   if (!theCommands.GetMatrix(input, theMat, 0, 0, CalculatorFunctionsGeneral::innerEvaluateToDouble))
     return theCommands << "<br>Failed to get matrix of algebraic numbers. ";
-  return output.AssignValue(theMat, theCommands);
+  return output.AssignMatrix(theMat, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerIntegratePullConstant(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1776,7 +1776,7 @@ bool CalculatorFunctionsGeneral::innerGramSchmidtVerbose(Calculator& theCommands
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGramSchmidtVerbose");
   Matrix<AlgebraicNumber> theMatAlg;
   bool matAlgWorks=false;
-  if (input.IsOfType<Matrix<AlgebraicNumber> >(&theMatAlg))
+  if (input.IsMatrixGivenType<AlgebraicNumber>(0, 0, &theMatAlg))
     matAlgWorks=true;
   if (!matAlgWorks)
     if (theCommands.GetMatriXFromArguments(input, theMatAlg, 0, -1, 0))
@@ -1787,9 +1787,8 @@ bool CalculatorFunctionsGeneral::innerGramSchmidtVerbose(Calculator& theCommands
     if (theMatAlg.GetDeterminant()==0)
       return output.MakeError("Matrix determinant is zero.", theCommands, true);
     QRFactorizationComputation theComputation;
-
     theMatAlg.Invert();
-    return output.AssignValue(theMatAlg, theCommands);
+    return output.AssignMatrix(theMatAlg, theCommands);
   }
   return theCommands << "<hr>Failed to extract algebraic number matrix from: "
   << input.ToString();

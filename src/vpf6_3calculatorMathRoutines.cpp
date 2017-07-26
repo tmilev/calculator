@@ -657,7 +657,7 @@ bool CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix(Calculator& th
   if (!input.StartsWith(theCommands.opUnderscore(), 3))
     return false;
   if (!input[1].StartsWith(theCommands.opSequence()) &&
-      !input[1].StartsWith(theCommands.opMatrix()))
+      !input[1].IsMatrix())
     return false;
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
@@ -1490,7 +1490,7 @@ bool CalculatorFunctionsGeneral::innerGaussianEliminationMatrix(Calculator& theC
   if (!CalculatorConversions::innerMatrixAlgebraic(theCommands, input, theConverted))
     return theCommands << "<hr>Failed to extract algebraic number matrix from " << input.ToString();
   Matrix<AlgebraicNumber> theMat;
-  if (!theConverted.IsOfType<Matrix<AlgebraicNumber> >(&theMat))
+  if (!theConverted.IsMatrixGivenType<AlgebraicNumber>(0, 0, &theMat))
     return theCommands << "<hr>Failed to extract algebraic number matrix, got intermediate conversion to: "
     << theConverted.ToString();
   if (theMat.NumRows<2)
@@ -2635,7 +2635,7 @@ bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theComm
 { MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
   Matrix<RationalFunctionOld> mat, outputMat, tempMat;
   Expression theContext;
-  if (!input.IsOfType<Matrix<RationalFunctionOld> >(& mat))
+  if (!input.IsMatrixGivenType<RationalFunctionOld>(0, 0, &mat))
     return output.MakeError("Failed to extract matrix. ", theCommands);
   theContext=input.GetContext();
   if (mat.NumRows!=mat.NumCols || mat.NumCols<1)
@@ -4120,19 +4120,12 @@ void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inp
 
 bool Expression::MakeMatrix(Calculator& owner, Matrix<Expression>* inputMat)
 { MacroRegisterFunctionWithName("Expression::MakeMatrix");
-  this->reset(owner, inputMat==0 ? 1 : inputMat->NumRows+1);
-  this->AddChildAtomOnTop(owner.opMatrix());
-//  stOutput << "Making sequence from: " << inputSequence.ToString();
-  if (inputMat!=0)
-  { Expression nextRow;
-    for (int i=0; i<inputMat->NumRows; i++)
-    { nextRow.MakeSequence(owner);
-      for (int j=0; j<inputMat->NumCols; j++)
-        nextRow.AddChildOnTop((*inputMat)(i,j));
-      this->AddChildOnTop(nextRow);
-    }
+  if (inputMat==0)
+  { this->reset(owner);
+    this->AddChildAtomOnTop(owner.opMatriX());
+    return true;
   }
-  return true;
+  return this->AssignMatrixExpressions(*inputMat, owner, true);
 }
 
 bool Expression::MakeSequence(Calculator& owner, List<Expression>* inputSequence)
@@ -4212,11 +4205,11 @@ bool CalculatorFunctionsGeneral::innerLispifyFull(Calculator& theCommands, const
 
 bool CalculatorFunctionsGeneral::innerMinPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMinPolyMatrix");
-  if (!output.IsOfType<Matrix<Rational> >())
+  if (!output.IsMatrixGivenType<Rational>())
     if (!CalculatorConversions::innerMatrixRational(theCommands, input, output))
       return false;
   Matrix<Rational> theMat;
-  if (!output.IsOfType<Matrix<Rational> >(&theMat))
+  if (!output.IsMatrixGivenType<Rational>(0, 0, &theMat))
     return theCommands << "<hr>Minimal poly computation: could not convert " << input.ToString() << " to rational matrix.";
   if (theMat.NumRows!=theMat.NumCols || theMat.NumRows<=0)
     return output.MakeError("Error: matrix is not square.", theCommands, true);
@@ -4230,11 +4223,11 @@ bool CalculatorFunctionsGeneral::innerMinPolyMatrix(Calculator& theCommands, con
 
 bool CalculatorFunctionsGeneral::innerCharPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMinPolyMatrix");
-  if (!output.IsOfType<Matrix<Rational> >())
+  if (!output.IsMatrixGivenType<Rational>())
     if (!CalculatorConversions::innerMatrixRational(theCommands, input, output))
       return false;
   Matrix<Rational> theMat;
-  if (!output.IsOfType<Matrix<Rational> >(&theMat))
+  if (!output.IsMatrixGivenType<Rational>(0, 0, &theMat))
     return theCommands << "<hr>Characteristic poly computation: could not convert " << input.ToString() << " to rational matrix.";
   if (theMat.NumRows!=theMat.NumCols || theMat.NumRows<=0)
     return output.MakeError("Error: matrix is not square.", theCommands, true);
@@ -4249,18 +4242,20 @@ bool CalculatorFunctionsGeneral::innerCharPolyMatrix(Calculator& theCommands, co
 bool CalculatorFunctionsGeneral::innerTrace(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTrace");
 //  stOutput << "<hr>getting matrix from: " << input.ToString();
-  if (input.IsOfType<Matrix<Rational> >())
-  { if (!input.GetValue<Matrix<Rational> >().IsSquare())
+  Matrix<Rational> theMat;
+  if (input.IsMatrixGivenType<Rational>(0,0,&theMat))
+  { if (!theMat.IsSquare())
       return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands, true);
-    return output.AssignValue(input.GetValue<Matrix<Rational> >().GetTrace(), theCommands);
+    return output.AssignValue(theMat.GetTrace(), theCommands);
   }
-  if (input.IsOfType<Matrix<RationalFunctionOld> >())
-  { if (!input.GetValue<Matrix<RationalFunctionOld> >().IsSquare())
+  Matrix<RationalFunctionOld> theMatRF;
+  if (input.IsMatrixGivenType<RationalFunctionOld>(0, 0, &theMatRF))
+  { if (!theMatRF.IsSquare())
       return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands, true);
-    return output.AssignValue(input.GetValue<Matrix<RationalFunctionOld> >().GetTrace(), theCommands);
+    return output.AssignValue(theMatRF.GetTrace(), theCommands);
   }
-  Matrix<Expression> theMat;
-  if (!theCommands.GetMatrixExpressionsFromArguments(input, theMat))
+  Matrix<Expression> theMatExp;
+  if (!theCommands.GetMatrixExpressionsFromArguments(input, theMatExp))
     return false;
   if (!theMat.IsSquare())
     return output.MakeError("Error: attempting to get trace of non-square matrix.", theCommands, true);
@@ -4278,7 +4273,7 @@ bool CalculatorFunctionsGeneral::innerContains
   if (input.size()!=3)
     return false;
   if (input[1].ContainsAsSubExpressionNoBuiltInTypes(input[2]))
-    return output.AssignValue(1,theCommands);
+    return output.AssignValue(1, theCommands);
   else
     return output.AssignValue(0, theCommands);
 }
@@ -4477,7 +4472,7 @@ bool CalculatorFunctionsGeneral::innerIsNilpotent(Calculator& theCommands, const
   Matrix<Rational> theMat;
   MatrixTensor<Rational> theMatTensor;
   bool found=false;
-  if (input.IsOfType<Matrix<Rational> >(&theMat))
+  if (input.IsMatrixGivenType<Rational>(0, 0, &theMat))
   { found=true;
     theMatTensor=theMat;
   } else if (input.IsOfType<MatrixTensor<Rational> >(&theMatTensor))
@@ -4499,7 +4494,7 @@ bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, cons
   Matrix<Rational> theMat;
 //  stOutput << "Lispified: " << input.ToString();
   bool matRatWorks=false;
-  if (input.IsOfType(&theMat))
+  if (input.IsMatrixGivenType(0, 0, &theMat))
     matRatWorks=true;
   if (!matRatWorks)
     if (theCommands.GetMatriXFromArguments(input, theMat, 0, -1, 0))
@@ -4510,11 +4505,11 @@ bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, cons
     if (theMat.GetDeterminant()==0)
       return output.MakeError("Matrix determinant is zero.", theCommands, true);
     theMat.Invert();
-    return output.AssignValue(theMat, theCommands);
+    return output.AssignMatrix(theMat, theCommands);
   }
   Matrix<AlgebraicNumber> theMatAlg;
   bool matAlgWorks=false;
-  if (input.IsOfType<Matrix<AlgebraicNumber> >(&theMatAlg))
+  if (input.IsMatrixGivenType<AlgebraicNumber>(0, 0, &theMatAlg))
     matAlgWorks=true;
   if (!matAlgWorks)
     if (theCommands.GetMatriXFromArguments(input, theMatAlg, 0, -1, 0))
@@ -4525,7 +4520,7 @@ bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, cons
     if (theMatAlg.GetDeterminant()==0)
       return output.MakeError("Matrix determinant is zero.", theCommands, true);
     theMatAlg.Invert();
-    return output.AssignValue(theMatAlg, theCommands);
+    return output.AssignMatrix(theMatAlg, theCommands);
   }
   return theCommands << "<hr>Failed to extract algebraic number matrix from: "
   << input.ToString();
@@ -5722,7 +5717,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDeterminant");
   Matrix<Rational> matRat;
-  bool isMatRat=input.IsOfType(&matRat);
+  bool isMatRat=input.IsMatrixGivenType(0, 0, &matRat);
   if (!isMatRat)
    isMatRat= theCommands.GetMatriXFromArguments(input, matRat, 0, 0, 0);
   if (isMatRat)
@@ -5744,7 +5739,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant
     }
   }
   Matrix<AlgebraicNumber> matAlg;
-  bool isMatAlg=input.IsOfType(&matAlg);
+  bool isMatAlg=input.IsMatrixGivenType(0, 0, &matAlg);
   if (!isMatAlg)
     isMatAlg=theCommands.GetMatriXFromArguments(input, matAlg, 0,0,0);
   if (isMatAlg)
@@ -5765,7 +5760,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant
 //  stOutput << "<hr>got to here";
   Matrix<RationalFunctionOld> matRF;
   Expression theContext;
-  if (!input.IsOfType(&matRF))
+  if (!input.IsMatrixGivenType(0, 0, &matRF))
   { if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, CalculatorConversions::innerRationalFunction))
       return theCommands << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
       << " rational functions or rationals, and I failed to convert your matrix to either type. "

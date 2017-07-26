@@ -88,7 +88,7 @@ public:
   static bool innerSetMinus(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerTensorEltTensorByEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerTensorMatRatByMatRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTensorMatrixByMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTensorMatByMatTensor(Calculator& theCommands, const Expression& input, Expression& output);
 };
 

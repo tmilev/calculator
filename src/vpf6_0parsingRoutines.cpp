@@ -1054,7 +1054,7 @@ bool Calculator::ReplaceMatrixXByE()
   //stOutput << "<br>DEBUG: making sequence done, result: "
   //<< theMatElt.theData.ToString();
   //stOutput << "<br>DEBUG: opMatrix: " << this->opMatrix();
-  theMatElt.theData.SetChildAtomValue(0, this->opMatrix());
+  theMatElt.theData.SetChildAtomValue(0, this->opMatriX());
   //stOutput << "<br>DEBUG: start is done ";
   //
   //stOutput << "<br>DEBUG: RESULT: "

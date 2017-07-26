@@ -939,7 +939,7 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
     return false;
   }
   output.reset(theCommands, numRows+1);
-  output.AddChildAtomOnTop(theCommands.opMatrix());
+  output.AddChildAtomOnTop(theCommands.opMatriX());
   Expression currentRow, currentE, leftIE, rightIE;
   for (int i=0; i<numRows; i++)
   { currentRow.reset(theCommands, numCols+1);
@@ -2635,18 +2635,18 @@ void ObjectContainer::reset()
   this->ExpressionNotation.Clear();
   this->ExpressionWithNotation.Clear();
   this->theLSpaths.Clear();
-  this->theMatRats.Clear();
+  //this->theMatRats.Clear();
   this->theMatTensorRats.Clear();
-  this->theMatRFs.Clear();
+  //this->theMatRFs.Clear();
   this->theEltsModP.Clear();
   this->thePlots.SetSize(0);
   this->theAlgebraicClosure.reset();
   this->theAlgebraicNumbers.Clear();
   this->theLittelmannOperators.Clear();
   this->theSltwoSAs.SetSize(0);
-  this->theMatDoubles.SetSize(0);
-  this->theMatsAlgebraic.Clear();
-  this->theMatPolyRational.Clear();
+  //this->theMatDoubles.SetSize(0);
+  //this->theMatsAlgebraic.Clear();
+  //this->theMatPolyRational.Clear();
   this->theWeights.Clear();
   this->theWeightsPoly.Clear();
   this->theHyperOctahedralGroups.SetSize(0);

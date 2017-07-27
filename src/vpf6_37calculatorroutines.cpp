@@ -1142,7 +1142,7 @@ bool CalculatorFunctionsGeneral::innerUnionUnionIntervals
     return false;
   const Expression& rightE=input[2][1];
   Expression theMiddleUnion, middleUnionReduced;
-  theMiddleUnion.MakeXOX(theCommands, theCommands.opUnion(),leftE, rightE);
+  theMiddleUnion.MakeXOX(theCommands, theCommands.opUnion(), leftE, rightE);
   if (!CalculatorFunctionsGeneral::innerUnionIntervals(theCommands, theMiddleUnion, middleUnionReduced))
     return false;
   return output.MakeXOX(theCommands, theCommands.opUnion(), middleUnionReduced, rightComposite[2]);
@@ -1345,10 +1345,10 @@ bool CalculatorFunctionsGeneral::innerIsLinearOrConstantIn(Calculator& theComman
     for (int j=0; j<theSummands[i].size; j++)
       if (theSummands[i][j]==input[1])
       { if (found)
-          return output.AssignValue(0,theCommands);
+          return output.AssignValue(0, theCommands);
         found=true;
       } else if (! theSummands[i][j].EvaluatesToDouble())
-        return output.AssignValue(0,theCommands);
+        return output.AssignValue(0, theCommands);
   }
   return output.AssignValue(1, theCommands);
 }
@@ -1371,10 +1371,10 @@ bool CalculatorFunctionsGeneral::innerIsProductLinearOrConstTermsIn(Calculator& 
       for (int j=0; j<theSummands[i].size; j++)
         if (theSummands[i][j]==input[1])
         { if (found)
-            return output.AssignValue(0,theCommands);
+            return output.AssignValue(0, theCommands);
           found=true;
         } else if (! theSummands[i][j].EvaluatesToDouble())
-          return output.AssignValue(0,theCommands);
+          return output.AssignValue(0, theCommands);
     }
   }
   return output.AssignValue(1, theCommands);
@@ -1496,4 +1496,29 @@ bool CalculatorFunctionsGeneral::innerExpressionToUTF8String
     return output.AssignValue(inputCopy.ToUTF8String(), theCommands);
   }
   return output.AssignValue(input.ToUTF8String(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite");
+  if (input.size()<1)
+    return false;
+  if (!input[0].StartsWith(theCommands.opMatriX(), 1))
+    return false;
+  //stOutput << "DEBUG: Here be i";
+  Matrix<Expression> theMat;
+  if (!theCommands.GetMatrixExpressions(input, theMat))
+    return false;
+  Expression conversionAttempt;
+  conversionAttempt.AssignMatrixExpressions(theMat, theCommands, true);
+  if (!conversionAttempt.IsMatrix())
+  { output=conversionAttempt;
+    return true;
+  }
+  if (conversionAttempt.size()>=1)
+    if (conversionAttempt[0].StartsWith(theCommands.opMatriX()))
+      if (conversionAttempt[0].size()>1)
+      { output=conversionAttempt;
+        return true;
+      }
+  return false;
 }

@@ -1568,10 +1568,10 @@ bool Expression::AssignMatrixExpressions
       mType inType;
       if (input(i,j).IsOfType<Rational>())
         inType=typeRat;
-      else if (input(i,j).IsOfType<double>())
-        inType=typeDouble;
       else if (input(i,j).IsOfType<AlgebraicNumber>())
         inType=typeAlgebraic;
+      else if (input(i,j).IsOfType<double>())
+        inType=typeDouble;
       else if (input(i,j).IsOfType<Polynomial<Rational> >())
         inType=typePolyRat;
       else if (input(i,j).IsOfType<Polynomial<AlgebraicNumber> >())
@@ -1582,11 +1582,54 @@ bool Expression::AssignMatrixExpressions
         inType=typeExpression;
       if (outType==typeUnknown)
         outType=inType;
-      else if (outType!=inType)
+      //stOutput << "DEBUG: intype: " << inType << "<br>";
+      if (inType==typeAlgebraic)
+      { if (outType==typeRat)
+        { outType=inType;
+          continue;
+        }
+        if (outType==typeDouble || outType==typeAlgebraic || outType== typePolyAlg)
+          continue;
         outType=typeExpression;
+        continue;
+      } else if (inType==typeDouble)
+      { if (outType==typeRat || outType==typeAlgebraic || outType==typeDouble)
+        { outType=inType;
+          continue;
+        }
+        outType=typeExpression;
+        continue;
+      } else if (inType==typePolyRat)
+      { if (outType==typeRat)
+        { outType=inType;
+          continue;
+        }
+        if (outType==typeAlgebraic || outType==typePolyAlg)
+        { outType=typePolyAlg;
+          continue;
+        }
+        outType=typeExpression;
+        continue;
+      } else if (inType==typePolyAlg)
+      { if (outType==typeRat || outType==typeAlgebraic || outType==typePolyRat || outType==typePolyAlg)
+        { outType=inType;
+          continue;
+        }
+        outType=typeExpression;
+        continue;
+      } else if (inType==typeRF)
+      { if (outType==typeRat || outType==typePolyRat)
+        { outType=inType;
+          continue;
+        }
+        outType=typeExpression;
+        continue;
+      } else if (inType==typeExpression)
+        outType=inType;
     }
     this->AddChildOnTop(currentRow);
   }
+  //stOutput << "DEBUG: outType determined to be: " << outType << ", typeRat: " << typeRat;
   switch(outType)
   { case typeRat:
       theMatType.AddChildAtomOnTop(owner.opRational());

@@ -647,67 +647,73 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger(Calculator& theC
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger");
+bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible");
+  if (!input.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  LargeInt largePower;
+  if (!input[2].IsInteger(&largePower))
+    return false;
+  Matrix<Rational> baseRat;
+  if (input[1].IsMatrixGivenType(0, 0, &baseRat))
+  { if (!baseRat.IsSquare() || baseRat.NumCols==0)
+    { std::stringstream errorStream;
+      errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
+      << "Your matrix, " << baseRat.ToString() << " is not square. ";
+      return output.MakeError(errorStream.str(), theCommands, true);
+    }
+    Rational theDet= baseRat.GetDeterminant();
+    if (largePower<=0)
+      if (theDet==0 )
+        return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
+    if (theDet!=0 && theDet!=-1 && theDet!=1)
+      return theCommands << "Matrix power too large.";
+    if (largePower<0)
+    { baseRat.Invert();
+      largePower*=-1;
+    }
+    Matrix<Rational> idMat;
+    idMat.MakeIdMatrix(baseRat.NumRows);
+    MathRoutines::RaiseToPower(baseRat, largePower, idMat);
+    return output.AssignMatrix(baseRat, theCommands);
+  }
+  Matrix<AlgebraicNumber> baseAlg;
+  if (input[1].IsMatrixGivenType(0, 0, &baseAlg))
+  { if (!baseAlg.IsSquare() || baseAlg.NumCols==0)
+    { std::stringstream errorStream;
+      errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
+      << "Your matrix, " << baseAlg.ToString() << " is not square. ";
+      return output.MakeError(errorStream.str(), theCommands);
+    }
+    AlgebraicNumber theDet= baseAlg.GetDeterminant();
+    if (largePower<=0)
+      if (theDet==0 )
+        return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
+    if (theDet!=0 && theDet!=-1 && theDet!=1)
+      return theCommands << "Matrix power too large.";
+    if (largePower<0)
+    { baseAlg.Invert();
+      largePower*=-1;
+    }
+    Matrix<AlgebraicNumber> idMat;
+    idMat.MakeIdMatrix(baseAlg.NumRows);
+    MathRoutines::RaiseToPower(baseAlg, largePower, idMat);
+    return output.AssignMatrix(baseAlg, theCommands);
+  }
+  return false;
+}
+
+bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3))
+  if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
   int thePower=0;
   bool powerIsSmall=input[2].IsSmallInteger(&thePower);
-
-  if(!powerIsSmall)
-  { LargeInt largePower;
-    if(input[2].IsInteger(&largePower))
-    { Matrix<Rational> baseRat;
-      if (input[1].IsMatrixGivenType(0, 0, &baseRat))
-      { if (!baseRat.IsSquare() || baseRat.NumCols==0)
-        { std::stringstream errorStream;
-          errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
-          << "Your matrix, " << baseRat.ToString() << " is not square. ";
-          return output.MakeError(errorStream.str(), theCommands, true);
-        }
-        Rational theDet= baseRat.GetDeterminant();
-        if (largePower<=0)
-          if (theDet==0 )
-            return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
-        if (theDet!=0 && theDet!=-1 && theDet!=1)
-          return theCommands << "Matrix power too large.";
-        if (largePower<0)
-        { baseRat.Invert();
-          largePower*=-1;
-        }
-        Matrix<Rational> idMat;
-        idMat.MakeIdMatrix(baseRat.NumRows);
-        MathRoutines::RaiseToPower(baseRat, largePower, idMat);
-        return output.AssignMatrix(baseRat, theCommands);
-      }
-      Matrix<AlgebraicNumber> baseAlg;
-      if (input[1].IsMatrixGivenType(0, 0, &baseAlg))
-      { if (!baseAlg.IsSquare() || baseAlg.NumCols==0)
-        { std::stringstream errorStream;
-          errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
-          << "Your matrix, " << baseAlg.ToString() << " is not square. ";
-          return output.MakeError(errorStream.str(), theCommands);
-        }
-        AlgebraicNumber theDet= baseAlg.GetDeterminant();
-        if (largePower<=0)
-          if (theDet==0 )
-            return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
-        if (theDet!=0 && theDet!=-1 && theDet!=1)
-          return theCommands << "Matrix power too large.";
-        if (largePower<0)
-        { baseAlg.Invert();
-          largePower*=-1;
-        }
-        Matrix<AlgebraicNumber> idMat;
-        idMat.MakeIdMatrix(baseAlg.NumRows);
-        MathRoutines::RaiseToPower(baseAlg, largePower, idMat);
-        return output.AssignMatrix(baseAlg, theCommands);
-      }
-    }
+  if (!powerIsSmall)
     return false;
-  }  
   Matrix<Rational> baseRat;
+  //stOutput << "DEBUG: here i am";
   if (input[1].IsMatrixGivenType<Rational>(0, 0, &baseRat))
   { if (!baseRat.IsSquare() || baseRat.NumCols==0)
     { std::stringstream errorStream;
@@ -959,46 +965,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceByT(Calculator& theCommands
   return theCommands.innerTranspose(theCommands, input[1], output);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerMatrixByRat(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat");
+bool CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
   if (!input[1].IsMatrix())
     return false;
-  Matrix<Rational> theMatRat;
-//  stOutput << "raising " << input[1].ToString() << " to " << input[2].ToString();
-  if (theCommands.GetMatrix(input[1], theMatRat))
-  { Expression inputCopy, baseRatMat, outputMatRat;
-    baseRatMat.AssignMatrix(theMatRat, theCommands);
-    inputCopy.reset(theCommands);
-    inputCopy.AddChildOnTop(input[0]);
-    inputCopy.AddChildOnTop(baseRatMat);
-    inputCopy.AddChildOnTop(input[2]);
-    if (!CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(theCommands, inputCopy, outputMatRat))
-      return false;
-    if (!outputMatRat.IsMatrixGivenType(0,0,&theMatRat))//<- probably outputMatRat is of type Error.
-    { output=outputMatRat;
-      return true;
-    }
-    return output.AssignMatrix(theMatRat, theCommands, 0, true);
-  }
-  Matrix<AlgebraicNumber> theMatAlg;
-  if (theCommands.GetMatrix(input[1], theMatAlg, 0,-1, CalculatorConversions::innerAlgebraicNumber))
-  { Expression inputCopy, baseRatMat, outputMatRat;
-    baseRatMat.AssignMatrix(theMatAlg, theCommands);
-    inputCopy.reset(theCommands);
-    inputCopy.AddChildOnTop(input[0]);
-    inputCopy.AddChildOnTop(baseRatMat);
-    inputCopy.AddChildOnTop(input[2]);
-    if (!CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger(theCommands, inputCopy, outputMatRat))
-      return false;
-    if (!outputMatRat.IsMatrixGivenType(0, 0, &theMatAlg))//<- probably outputMatRat is of type Error.
-    { output=outputMatRat;
-      return true;
-    }
-    return output.AssignMatrix(theMatAlg, theCommands, 0, true);
-  }
   int thePower=0;
   if (!input[2].IsSmallInteger(&thePower))
     return false;
@@ -1009,8 +982,14 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatrixByRat(Calculator& theCommands
     return false;
   if (!theMat.IsSquare())
     return output.MakeError("Attempting to raise non-square matrix to power", theCommands);
-  if (theMat.NumRows>10)
-    return theCommands << "I've been instructed not to exponentiate non-rational matrices of dimension >10. ";
+  LargeInt expectedNumTerms;
+  expectedNumTerms=theMat.NumCols;
+  expectedNumTerms.RaiseToPower(thePower);
+  if (expectedNumTerms>10000)
+    return theCommands << "The expected number terms in the result of the exponentiation "
+    << theMat.ToString() << " to the power of " << thePower << " is approximately ("
+    << theMat.NumCols << ")^" << thePower << "=" << expectedNumTerms
+    << ". I have been instructed to proceed only if the expected number of terms is fewer than 10000. ";
   Matrix<Expression> idMatE;
   idMatE.MakeIdMatrix(theMat.NumRows, theCommands.EOne(), theCommands.EZero());
   MathRoutines::RaiseToPower(theMat, thePower, idMatE);

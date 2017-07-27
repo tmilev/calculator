@@ -71,7 +71,10 @@ public:
   static bool innerDivideRFOrPolyOrRatByRFOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDivideEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerPowerMatBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerMatNumbersBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerMatExpressionsBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerMatNumbersByLargeIntegerIfPossible(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerPowerRatByRatReducePrimeFactors(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerRatByRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerRatByRatGetAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
@@ -82,7 +85,6 @@ public:
   static bool innerPowerElementUEbyRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerSequenceByT(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerMatrixByRat(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerNChooseK(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetMinus(Calculator& theCommands, const Expression& input, Expression& output);

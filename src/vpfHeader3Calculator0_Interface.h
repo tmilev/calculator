@@ -219,7 +219,7 @@ private:
   bool IsAtomNotInterpretedAsFunction(std::string* outputWhichAtom=0)const;
   bool IsMatrix(int* outputNumRows=0, int* outputNumCols=0)const;
   template <typename theType>
-  bool IsMatrixGivenType(int* outputNumRows=0, int* outputNumCols=0, Matrix<theType>* whichMatrix=0)const;
+  bool IsMatrixGivenType(int* outputNumRows=0, int* outputNumCols=0, Matrix<theType>* outputMat=0)const;
   bool IsAtom(std::string* outputWhichOperation=0)const;
   bool IsAtomGivenData(const std::string& desiredAtom)const;
   bool IsAtomGivenData(int desiredDataUseMinusOneForAny=-1)const;
@@ -1742,9 +1742,6 @@ public:
     }
     if (theFun==0)
       return false;
-    // Todor: "Cannot convert 'std::basic_ostream<char>' to 'bool' in return. this stanza was
-    // return this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
-    // I assume that the intention was to return false
     if (!theFun(*this, input, output))
     { this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
       return false;
@@ -2191,17 +2188,6 @@ template <class theType>
 bool Calculator::GetMatrix
 (const Expression& input, Matrix<theType>& outputMat, Expression* inputOutputStartingContext, int targetNumColsNonMandatory, Expression::FunctionAddress conversionFunction)
 { MacroRegisterFunctionWithName("Calculator::GetMatrix");
-  int numCols=-1, numRows=-1;
-  if (input.IsMatrixGivenType<theType>(&numRows, &numCols, &outputMat))
-  { if (inputOutputStartingContext!=0)
-      for (int i=0; i<numRows; i++)
-        for (int j=0; j<numCols; j++)
-          inputOutputStartingContext->ContextMergeContexts
-          (*inputOutputStartingContext, input[i+1][j+1].GetContext(), *inputOutputStartingContext);
-    if (targetNumColsNonMandatory>0)
-      return numCols==targetNumColsNonMandatory;
-    return true;
-  }
   Matrix<Expression> nonConvertedEs;
   //stOutput << " Getting matrix from: " << input.ToString();
   if (!this->GetMatrixExpressions(input, nonConvertedEs, -1, targetNumColsNonMandatory))
@@ -2217,7 +2203,8 @@ bool Calculator::GetMatrix
   for (int i=0; i<nonConvertedEs.NumRows; i++)
     for (int j=0; j<nonConvertedEs.NumCols; j++)
     { if (!this->ConvertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs(i,j), convertedEs(i,j)))
-        return false;
+        if (!nonConvertedEs(i,j).ConvertToType<theType>(convertedEs.elements[i][j]))
+          return false;
       theContext.ContextMergeContexts(theContext, convertedEs(i,j).GetContext(), theContext);
     }
   for (int i=0; i<convertedEs.NumRows; i++)
@@ -2227,7 +2214,7 @@ bool Calculator::GetMatrix
   outputMat.init(convertedEs.NumRows, convertedEs.NumCols);
   for (int i=0; i<convertedEs.NumRows; i++)
     for (int j=0; j<convertedEs.NumCols; j++)
-      outputMat(i,j)=convertedEs(i,j).GetValue<theType>();
+      outputMat(i,j)=convertedEs(i, j).GetValue<theType>();
   if (inputOutputStartingContext!=0)
     *inputOutputStartingContext=theContext;
   return true;
@@ -2406,7 +2393,7 @@ bool Expression::AssignMatrix
 }
 
 template <typename theType>
-bool Expression::IsMatrixGivenType(int* outputNumRows, int* outputNumCols, Matrix<theType>* whichMatrix)const
+bool Expression::IsMatrixGivenType(int* outputNumRows, int* outputNumCols, Matrix<theType>* outputMat)const
 { MacroRegisterFunctionWithName("Expression::IsMatrixGivenType");
   int numRows=-1, numCols=-1;
   if (outputNumRows==0)
@@ -2419,13 +2406,9 @@ bool Expression::IsMatrixGivenType(int* outputNumRows, int* outputNumCols, Matri
     return false;
   if (!(*this)[0][1].IsAtomGivenData(this->GetTypeOperation<theType>()))
     return false;
-  if (whichMatrix==0)
+  if (outputMat==0)
     return true;
-  whichMatrix->init(numRows, numCols);
-  for (int i=0; i<numRows; i++)
-    for (int j=0; j<numCols; j++)
-      if (!(*this)[i+1][j+1].IsOfType<theType>(&whichMatrix->elements[i][j]))
-        return false;
+  this->owner->GetMatrix(*this, *outputMat);
   return true;
 }
 #endif

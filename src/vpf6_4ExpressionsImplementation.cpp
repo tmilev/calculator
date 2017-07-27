@@ -890,6 +890,46 @@ bool Expression::ConvertToType<ElementTensorsGeneralizedVermas<RationalFunctionO
   }
   return false;
 }
+
+template< >
+bool Expression::ConvertToType<Rational>(Expression& output)const
+{ MacroRegisterFunctionWithName("ConvertToType_Rational");
+  this->CheckInitialization();
+  if (this->IsOfType<Rational>())
+  { output=*this;
+    return true;
+  }
+  return false;
+}
+
+template< >
+bool Expression::ConvertToType<AlgebraicNumber>(Expression& output)const
+{ MacroRegisterFunctionWithName("ConvertToType_AlgebraicNumber");
+  this->CheckInitialization();
+  if (this->IsOfType<AlgebraicNumber>())
+  { output=*this;
+    return true;
+  }
+  Rational theRat;
+  if (!this->IsOfType<Rational>(&theRat))
+    return false;
+  AlgebraicNumber outRat=theRat;
+  return output.AssignValue(outRat, *this->owner);
+}
+
+template< >
+bool Expression::ConvertToType<double>(Expression& output)const
+{ MacroRegisterFunctionWithName("ConvertToType_double");
+  this->CheckInitialization();
+  if (this->IsOfType<double>())
+  { output=*this;
+    return true;
+  }
+  double outputDouble=0;
+  if (this->EvaluatesToDouble(&outputDouble))
+    return output.AssignValue(outputDouble, *this->owner);
+  return false;
+}
 //end Expression::ConvertToType specializations.
 
 bool Expression::CheckConsistencyRecursively()const

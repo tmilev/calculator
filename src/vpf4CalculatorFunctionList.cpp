@@ -4849,9 +4849,8 @@ this->AddOperationInnerHandler
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerSequenceByT",
    "TransposePowerNotation");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerMatrixByRat,
-    this->opMatriX(), this->opRational(), //-1= any type
+  this->AddOperationInnerHandler
+  ("^", CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger, "",
    "If the base is a matrix and the exponent is a rational number: \
    1. If the base is not square, returns error. \
    2. If the base is square and consists of \
@@ -4861,8 +4860,22 @@ this->AddOperationInnerHandler
    the matrix is zero, returns error. ",
    "X=\\begin{pmatrix} 0 & 1 \\\\ 1 &1\\end{pmatrix}; X^5; X^{-5}  ",
    true, false,
-   "CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat",
-   "PowerSequenceMatrixByInteger");
+   "CalculatorFunctionsBinaryOps::innerPowerMatBySmallInteger",
+   "PowerMatrixNumbersByInteger");
+  this->AddOperationInnerHandler
+  ("^", CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible, "",
+   "Attempts to exponentiate matrix by a large power. ",
+   "X=\\begin{pmatrix} 0 & 1 \\\\ 1 &1\\end{pmatrix}; X^{-55!-1}  ",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible",
+   "PowerMatrixNumbersByLargeIntegerIfPossible");
+  this->AddOperationInnerHandler
+  ("^", CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger, "",
+   "Attempts to exponentiate a matrix of expressions, if the exponent is small. ",
+   "X=\\begin{pmatrix} a & b \\\\ t+q &r\\end{pmatrix}; X^{2}  ",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger",
+   "PowerMatrixNumbersByLargeIntegerIfPossible");
   this->AddOperationInnerHandler
   ("^", CalculatorFunctionsGeneral::innerPowerExponentToLog, "",
    "Replaces e^{\\ln x} by x.",
@@ -5258,6 +5271,13 @@ void Calculator::initPredefinedOperationsComposite()
    true, true, false,
    "CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation",
    "SumAsOperator");
+
+  this->AddOperationComposite
+  ("Matrix", CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite, "",
+   "If A is a non-typed matrix of expressions that can be converted to a typed matrix, carries out the type specialization. ",
+   " \\begin{pmatrix}-1&2\\\\5&3\\end{pmatrix}", true, true, false,
+   "CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite",
+   "MatrixComputeType");
 
   this->AddOperationComposite
   ("Rational", CalculatorFunctionsGeneral::innerConstantFunction, "",

@@ -1281,7 +1281,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix(Calculator& theComm
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix");
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];
-  if (!rightE.IsMatrix() || !leftE.IsMatrix())
+  if ( ( !rightE.IsMatrix() && !rightE.IsSequenceNElementS()) || (!leftE.IsMatrix() && !leftE.IsSequenceNElementS()))
     return false;
   Matrix<Rational> leftMatRat, rightMatRat;
   if (leftE.IsMatrixGivenType(0, 0, &leftMatRat) && rightE.IsMatrixGivenType(0, 0, &rightMatRat))

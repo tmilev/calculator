@@ -5033,6 +5033,16 @@ this->AddOperationInnerHandler
    true, false,
    "CalculatorFunctionsGeneral::innerDereferenceSequenceStatements",
    "DereferenceSequenceStatements");
+  this->AddOperationInnerHandler
+  ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix,
+   "",
+   "Tensor product of two matrices.",
+    "P=((0 , 2 ),(1 , 0)); Q=((0 , 3 ),(1 , 0)); \
+    \nX=MakeMatrix{}P; Y=MakeMatrix{}Q; \
+    \nZ=MakeMatrixTensorForm{}P; W=MakeMatrixTensorForm{}Q; \
+    X\\otimes Y; Z\\otimes W", true, false,
+    "CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix",
+    "MatrixTensorMatrix");
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
@@ -5064,14 +5074,6 @@ this->AddOperationInnerHandler
    "Tensor product of two Weyl group reps. Does not decompose the tensor product. \
    If you want decomposition, use V*V instead. ",
    "V=WeylGroupNaturalRep{}(B_3); V\\otimes V; V*V", true);
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix,
-   this->opMatriX(), this->opMatriX(),
-   "Tensor product of two matrices.",
-    "P=((0 , 2 ),(1 , 0)); Q=((0 , 3 ),(1 , 0)); \
-    \nX=MakeMatrix{}P; Y=MakeMatrix{}Q; \
-    \nZ=MakeMatrixTensorForm{}P; W=MakeMatrixTensorForm{}Q; \
-    X\\otimes Y; Z\\otimes W", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),

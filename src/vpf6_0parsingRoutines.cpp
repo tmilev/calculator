@@ -1065,7 +1065,7 @@ bool Calculator::ReplaceMatrixXByE()
         }
         theMat.elements[i][j]=theMatElt.dataList[i][j+1];
       }
-    theMatElt.theData.AssignMatrixExpressions(theMat, *this, false);
+    theMatElt.theData.AssignMatrixExpressions(theMat, *this, true);
   } else
     theMatElt.theData.MakeMatrix(*this);
   theMatElt.dataList.SetSize(0);

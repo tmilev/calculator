@@ -10,8 +10,11 @@ var charsToSplit=['x','y'];
 function processMathQuillLatex(theText)
 { for (var i=0; i<theText.length; i++)
     if (i+1<theText.length)
-      if ((theText[i]==='_' || theText[i]==='^') && theText[i+1]!=='{')
+    { if ((theText[i]==='_' || theText[i]==='^') && theText[i+1]!=='{')
         theText=theText.slice(0,i+1)+'{'+theText[i+1]+'}'+theText.slice(i+2);
+      if (theText[i]==='\\'  && theText[i+1]==='\\')
+        theText=theText.slice(0,i+2)+' '+theText.slice(i+2);
+    }
   if (charsToSplit!=undefined)
     for (i=0; i<theText.length-1; i++)
     { for (var j=0; j<charsToSplit.length; j++)

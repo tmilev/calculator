@@ -86,7 +86,7 @@ public:
   static bool innerPowerEWABySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerElementUEbyRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerSequenceByT(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerSequenceOrMatrixByT(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerNChooseK(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetMinus(Calculator& theCommands, const Expression& input, Expression& output);

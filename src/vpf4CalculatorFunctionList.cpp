@@ -4850,12 +4850,12 @@ this->AddOperationInnerHandler
    "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat");
   this->AddOperationInnerHandler
   ("^",
-    CalculatorFunctionsBinaryOps::innerPowerSequenceByT, "",
+    CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT, "",
    "Provided the exponent is t or T, calls the Transpose \
     function on the base.",
-   "X=(1,2)^t; X-Transpose{}(1,2)  ",
+   "X=(1,2)^t; X-Transpose{}(1,2); \\begin{pmatrix}1&2\\\\ 3& 5\\end{pmatrix}^t  ",
    true, false,
-   "CalculatorFunctionsBinaryOps::innerPowerSequenceByT",
+   "CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT",
    "TransposePowerNotation");
   this->AddOperationInnerHandler
   ("^", CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger, "",

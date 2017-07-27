@@ -14,6 +14,7 @@ var calculatorPlotUpdaters= new Object;
 var calculatorInputBoxToSliderUpdaters=new Object;
 var calculatorInputBoxNames=[];
 var numInsertedJavascriptChildren=0;
+var startingCharacterSectionUnderMathQuillEdit;
 var calculatorCanvases;
 var keyWordsKnownToMathQuill=['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times', 'pmatrix','int', 'begin', 'end'];
 function initializeCalculatorVariables()
@@ -72,7 +73,7 @@ function initializeCalculatorPage()
               calculatorRightString===undefined)
             mQHelpCalculator();
           var theInserted=processMathQuillLatex(theBoxContent);
-          if (theInserted.length>0)
+          if (theInserted.length>0 && startingCharacterSectionUnderMathQuillEdit.length>0)
             if (theInserted[0]!==' ')
               theInserted=' '+theInserted;
           calculatorInput.value =calculatorLeftString+
@@ -309,6 +310,10 @@ function getSemiColumnEnclosure()
   }
   calculatorLeftPosition=leftPos;
   calculatorRightPosition=rightPos;
+  startingCharacterSectionUnderMathQuillEdit='';
+  if (calculatorInput.value[leftPos]==='\n' || calculatorInput.value[leftPos]===' ' ||
+      calculatorInput.value[leftPos]==='\t')
+    startingCharacterSectionUnderMathQuillEdit=calculatorInput.value[leftPos];
   chopCalculatorStrings();
 }
 

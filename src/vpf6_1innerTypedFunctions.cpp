@@ -952,12 +952,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(Calculator
   return output.AssignValueWithContext(outputUE, copyBase.GetContext(), theCommands);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerSequenceByT(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceByT");
+bool CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3))
+  if (!input.StartsWith(theCommands.opThePower(),3))
     return false;
-  if (!input[1].IsSequenceNElementS() && !input[1].StartsWith(theCommands.opMatriX()))
+  if (!input[1].IsSequenceNElementS() && !input[1].IsMatrix())
     return false;
   if (!input[2].IsAtomGivenData("t")  && !input[2].IsAtomGivenData("T"))
     return false;

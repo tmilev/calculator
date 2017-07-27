@@ -1228,7 +1228,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& 
 bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix");
-  if (!input.IsListNElements(3))
+  if (!input.StartsWith(theCommands.opTimes()))
     return false;
   int numColsFirst=-1;
   int numRowsSecond=-1;
@@ -1237,6 +1237,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix
   if (numColsFirst!=numRowsSecond)
     return theCommands << "WARNING: I encountered a product of a matrix with " << numColsFirst
     << " columns by a matrix with " << numRowsSecond << " rows. ";
+  //stOutput << "DEBUG: here i am";
   if (input[1].IsMatrixGivenType<Rational>() && input[2].IsMatrixGivenType<Rational>())
     return CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational(theCommands, input, output);
   bool invokeAlgMatMultiplication=
@@ -1512,14 +1513,14 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix
   const Expression& leftE =input[1];
   const Expression& rightE=input[2];
   int leftNumRows=-1, leftNumCols=-1, rightNumRows=-1, rightNumCols=-1;
-  stOutput << "DEBUG: Got to here 0";
-  if (!leftE.IsMatrix(&leftNumRows, &leftNumCols) &&
+  //stOutput << "DEBUG: Got to here 0";
+  if (!leftE.IsMatrix(&leftNumRows, &leftNumCols) ||
       !rightE.IsMatrix(&rightNumRows, &rightNumCols))
     return false;
   if ((leftNumRows!=rightNumRows) || (leftNumCols!=rightNumCols))
     return false;
   Matrix<Expression> leftMat, rightMat;
-  stOutput << "DEBUG: Got to here";
+  //stOutput << "DEBUG: Got to here";
   if (!theCommands.GetMatrixExpressions(leftE, leftMat) ||
       !theCommands.GetMatrixExpressions(rightE, rightMat))
     return false;

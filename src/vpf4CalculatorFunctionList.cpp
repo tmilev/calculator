@@ -4155,6 +4155,15 @@ void Calculator::initPredefinedStandardOperations()
   true, false,
   "CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix",
   "AddMatrices");
+  this->AddOperationInnerHandler
+  ("*",
+  CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix, "",
+   "Multiplies matrices.",
+   "\\begin{pmatrix} 1& 2 \\\\ 3& 5\\end{pmatrix} \
+    \\begin{pmatrix} 1& -2 \\\\ 3& 5\\end{pmatrix}",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix",
+   "MultiplyMatrixByMatrix");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddSequenceToSequence,
     this->opSequence(), this->opSequence(),
@@ -4655,27 +4664,7 @@ this->AddOperationInnerHandler
     x=Polynomial{}x; x\\varepsilon_1",
     true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*",
-  CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix,
-   this->opMatriX(), this->opMatriX(),
-   "Multiplies matrices.",
-   "\\begin{pmatrix} 1& 2 \\\\ 3& 5\\end{pmatrix} \
-    \\begin{pmatrix} 1& -2 \\\\ 3& 5\\end{pmatrix}",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix",
-   "MultiplyMatrixByMatrix");
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*",
-  CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix,
-   this->opSequence(), this->opMatriX(),
-   "Multiplies sequence by matrix as if the sequence is a vector",
-   "(1,1)\\begin{pmatrix} 1& 2 \\\\ 3& 5\\end{pmatrix}",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix",
-   "MultiplySequenceByMatrix");
-
-  this->AddOperationInnerHandler
+    this->AddOperationInnerHandler
   ("\\binom", CalculatorFunctionsBinaryOps::innerNChooseK, "",
    "Evaluates the binomial coefficient if possible.",
    "\\binom{8}{3} ",

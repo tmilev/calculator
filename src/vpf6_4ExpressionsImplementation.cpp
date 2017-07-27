@@ -737,7 +737,7 @@ bool Expression::IsMatrix(int* outputNumRows, int* outputNumCols)const
   { if (this->size()<=1)
       *outputNumCols= 0;
     else
-      *outputNumRows=(*this)[1].size()-1;
+      *outputNumCols=(*this)[1].size()-1;
   }
   return true;
 }

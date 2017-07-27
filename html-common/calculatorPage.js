@@ -15,7 +15,7 @@ var calculatorInputBoxToSliderUpdaters=new Object;
 var calculatorInputBoxNames=[];
 var numInsertedJavascriptChildren=0;
 var calculatorCanvases;
-var keyWordsKnownToMathQuill=['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times'];
+var keyWordsKnownToMathQuill=['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times', 'pmatrix','int', 'begin', 'end'];
 function initializeCalculatorVariables()
 { answerIdsPureLatex=['mainInputID'];
   answerMQspanIds=['mainInputMQfield'];
@@ -272,7 +272,7 @@ function getSemiColumnEnclosure()
   }
   var calculatorSeparatorCounts=
   new Array(calculatorSeparatorLeftDelimiters.length).fill(0);
-  var leftPos=rightPos;
+  var leftPos=rightPos-1;
   lastWord='';
   lastSeparator=rightPos;
   for (; leftPos>0; leftPos--)

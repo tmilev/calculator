@@ -4164,6 +4164,14 @@ void Calculator::initPredefinedStandardOperations()
    true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix",
    "MultiplyMatrixByMatrix");
+  this->AddOperationInnerHandler
+  ("*",
+  CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix, "",
+   "Multiplies matrices.",
+   "(1,2)\\begin{pmatrix} 1& 2 \\\\ 3& 5\\end{pmatrix}",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix",
+   "MultiplySequenceByMatrix");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddSequenceToSequence,
     this->opSequence(), this->opSequence(),

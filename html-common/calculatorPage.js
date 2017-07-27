@@ -72,6 +72,9 @@ function initializeCalculatorPage()
               calculatorRightString===undefined)
             mQHelpCalculator();
           var theInserted=processMathQuillLatex(theBoxContent);
+          if (theInserted.length>0)
+            if (theInserted[0]!==' ')
+              theInserted=' '+theInserted;
           calculatorInput.value =calculatorLeftString+
           theInserted+
           calculatorRightString;

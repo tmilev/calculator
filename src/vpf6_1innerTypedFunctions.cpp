@@ -1254,6 +1254,27 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix
   return output.AssignMatrixExpressions(outputMat, theCommands, true);
 }
 
+bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix");
+  if (!input.StartsWith(theCommands.opTimes()))
+    return false;
+  int matRows=-1, matCols=-1;
+  if (!input[1].IsSequenceNElementS() || !input[2].IsMatrix(&matRows, &matCols))
+    return false;
+  if (input[1].size()-1!=matRows)
+    return false;
+  List<Expression> theResult;
+  theResult.SetSize(matCols);
+  for (int i=0; i<theResult.size; i++)
+    for (int j=0; j<matRows; j++)
+      if (j==0)
+        theResult[i]=input[1][j+1]*input[2][j+1][i+1];
+      else
+        theResult[i]+=input[1][j+1]*input[2][j+1][i+1];
+  return output.MakeSequence(theCommands, &theResult);
+}
+
 bool CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.StartsWith(theCommands.opTensor()))
     return false;

@@ -4156,6 +4156,14 @@ void Calculator::initPredefinedStandardOperations()
   "CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix",
   "AddMatrices");
   this->AddOperationInnerHandler
+  ("\\oplus", CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix, "",
+   "Direct sum of two matrices, non-commutative.",
+   "\\begin{pmatrix} 1& 2\\\\ 2& 3\\end{pmatrix}\\oplus\
+  \n\\begin{pmatrix} -1& 3\\\\ -2& -3\\end{pmatrix}",
+  true, false,
+  "CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix",
+  "DirectSumMatrices");
+  this->AddOperationInnerHandler
   ("*",
   CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix, "",
    "Multiplies matrices.",

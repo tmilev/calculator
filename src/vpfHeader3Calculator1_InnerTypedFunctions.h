@@ -24,6 +24,7 @@ public:
   static bool innerAddPlotToPlot(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddSequenceToSequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddMatrixToMatrix(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDirectSumMatrixWithMatrix(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddMatrixRFsToMatrixRFs(Calculator& theCommands, const Expression& input, Expression& output);

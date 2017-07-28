@@ -2940,6 +2940,25 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       if (rightString[0]!='-')
         out << "+";
     out << rightString;
+  } else if (this->IsListStartingWithAtom(this->owner->opDirectSum() ))
+  { if (this->children.size<3)
+      crash << "Plus operation takes at least 2 arguments. " << crash;
+    const Expression& left=(*this)[1];
+    const Expression& right=(*this)[2];
+    std::string leftString;
+    if (left.NeedsParenthesisForAddition())
+      leftString= "\\left(" + left.ToString(theFormat) + "\\right)";
+    else
+      leftString= left.ToString(theFormat);
+    out << leftString;
+    if (allowNewLine && !useFrac && leftString.size()>(unsigned)lineBreak)
+      out << "\\\\\n";
+    std::string rightString= right.NeedsParenthesisForAddition() ?
+    ("\\left("+right.ToString(theFormat)+"\\right)") : right.ToString(theFormat);
+    if (rightString.size()>0)
+      if (rightString[0]!='-')
+        out << "\\oplus ";
+    out << rightString;
   } else if (this->StartsWith(this->owner->opMinus(), 2))
   { if ((*this)[1].StartsWith(this->owner->opPlus()) ||(*this)[1].StartsWith(this->owner->opMinus()) )
       out << "-\\left(" << (*this)[1].ToString(theFormat) << "\\right)";

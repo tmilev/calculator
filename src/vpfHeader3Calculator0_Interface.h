@@ -1675,6 +1675,9 @@ public:
   int opPlus()
   { return this->theAtoms.GetIndexIMustContainTheObject("+");
   }
+  int opDirectSum()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\oplus");
+  }
   int opUserInputTextBox()
   { return this->theAtoms.GetIndexIMustContainTheObject("userInputTextBox");
   }

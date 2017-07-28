@@ -1532,6 +1532,24 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix
   return output.AssignMatrixExpressions(leftMat, theCommands, false);
 }
 
+bool CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix");
+  if (!input.StartsWith(theCommands.opDirectSum(), 3))
+    return false;
+  const Expression& leftE =input[1];
+  const Expression& rightE=input[2];
+  if (!leftE.IsMatrix() || !rightE.IsMatrix())
+    return false;
+  Matrix<Expression> leftMat, rightMat;
+  //stOutput << "DEBUG: Got to here";
+  if (!theCommands.GetMatrixExpressions(leftE, leftMat) ||
+      !theCommands.GetMatrixExpressions(rightE, rightMat))
+    return false;
+  leftMat.DirectSumWith(rightMat,theCommands.EZero());
+  return output.AssignMatrixExpressions(leftMat, theCommands, false);
+}
+
 bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational");
   if (!input.IsListNElements(3))

@@ -152,6 +152,7 @@ void Calculator::init()
   this->AddOperationNoRepetitionAllowed("or");
   this->AddOperationNoRepetitionAllowed("\\times");
   this->AddOperationNoRepetitionAllowed("\\otimes");
+  this->AddOperationNoRepetitionAllowed("\\oplus");
   this->AddOperationNoRepetitionAllowed("\\binom");
   this->AddOperationNoRepetitionAllowed("\\sqrt");
   this->AddOperationNoRepetitionAllowed("\\in");
@@ -2028,6 +2029,9 @@ bool Calculator::ApplyOneRule()
       fourthToLastS=="Expression" && this->AllowsAndInPreceding(lastS))
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="+" &&
+      fourthToLastS=="Expression" && this->AllowsPlusInPreceding(lastS))
+    return this->ReplaceEOEXByEX();
+  if (secondToLastS=="Expression" && thirdToLastS=="\\oplus" &&
       fourthToLastS=="Expression" && this->AllowsPlusInPreceding(lastS))
     return this->ReplaceEOEXByEX();
   if (fifthToLastS=="|" && secondToLastS=="Expression" &&

@@ -1011,6 +1011,9 @@ bool CalculatorConversions::innerMakeMatrix(Calculator& theCommands, const Expre
     return true;
   if (CalculatorConversions::innerMatrixDouble(theCommands, input, output))
     return true;
+  Matrix<Expression> outMat;
+  if (theCommands.GetMatrixExpressionsFromArguments(input, outMat))
+    return output.AssignMatrixExpressions(outMat, theCommands, true);
   return false;
 }
 

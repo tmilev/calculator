@@ -938,24 +938,19 @@ bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression
     << " columns, total: " << numRowsTimesCols.ToString() << " entries<br>";
     return false;
   }
-  output.reset(theCommands, numRows+1);
-  output.AddChildAtomOnTop(theCommands.opMatriX());
-  Expression currentRow, currentE, leftIE, rightIE;
+  Matrix<Expression> resultMat;
+  resultMat.init(numRows, numCols);
+  Expression leftIE, rightIE;
   for (int i=0; i<numRows; i++)
-  { currentRow.reset(theCommands, numCols+1);
-    currentRow.AddChildAtomOnTop(theCommands.opSequence());
     for (int j=0; j<numCols; j++)
     { leftIE.AssignValue(i+1, theCommands);
       rightIE.AssignValue(j+1, theCommands);
-      currentE.reset(theCommands, 3);
-      currentE.AddChildOnTop(leftE);
-      currentE.AddChildOnTop(leftIE);
-      currentE.AddChildOnTop(rightIE);
-      currentRow.AddChildOnTop(currentE);
+      resultMat.elements[i][j].reset(theCommands, 3);
+      resultMat.elements[i][j].AddChildOnTop(leftE);
+      resultMat.elements[i][j].AddChildOnTop(leftIE);
+      resultMat.elements[i][j].AddChildOnTop(rightIE);
     }
-    output.AddChildOnTop(currentRow);
-  }
-  return true;
+  return output.AssignMatrixExpressions(resultMat, theCommands, true);
 }
 
 bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& input, Expression& output)

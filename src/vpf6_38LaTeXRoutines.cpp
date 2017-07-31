@@ -654,7 +654,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.slidesSourcesHeaders);
   for (int i=0; i<topicParser.theTopicS.size()
 
-  && numProcessed < 2
+//  && numProcessed < 2
 
   ; i++)
   { TopicElement& currentElt=topicParser.theTopicS[i];

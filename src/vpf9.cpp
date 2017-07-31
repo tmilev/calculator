@@ -506,7 +506,7 @@ List<bool>& FileOperations::GetSafeFileChars()
     std::string theChars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     theChars+="0123456789";
     theChars+="@";
-    theChars+="+-/=.";
+    theChars+="+-/=._%";
     for (unsigned i=0; i<theChars.size(); i++)
       FileOperations::safeFileCharacters[ ((unsigned char)theChars[i])]=true;
   }
@@ -8111,6 +8111,20 @@ bool HtmlRoutines::IsRepresentedByItselfInURLs(char input)
   if (MathRoutines::isALatinLetter(input))
     return true;
   return input=='.';
+}
+
+std::string HtmlRoutines::ConvertStringToURLStringExceptDashesAndSlashes(const std::string& input)
+{ std::stringstream out;
+  for (unsigned int i=0; i<input.size(); i++)
+    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) || input[i]=='-' ||
+        input[i]=='/')
+      out << input[i];
+    else
+    { out << "%";
+      int x = (char) input[i];
+      out << std::hex << ((x/16)%16) << (x%16) << std::dec;
+    }
+  return out.str();
 }
 
 std::string HtmlRoutines::ConvertStringToURLString(const std::string& input, bool usePlusesForSpacebars)

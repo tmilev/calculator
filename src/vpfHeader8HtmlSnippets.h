@@ -46,6 +46,7 @@ public:
   static void ConvertURLStringToNormal(const std::string& input, std::string& output, bool replacePlusBySpace);
   static std::string ConvertURLStringToNormal(const std::string& input, bool replacePlusBySpace);
   static bool ConvertStringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr);
+  static std::string ConvertStringToURLStringExceptDashesAndSlashes(const std::string& input);
   static std::string ConvertStringToURLString(const std::string& input, bool usePlusesForSpacebars);
   static std::string ConvertStringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr);
   static std::string ConvertStringToBackslashEscapedString(const std::string& input);

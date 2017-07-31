@@ -492,13 +492,16 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   if (MathRoutines::StringBeginsWith(this->targetPDFFileNameWithPathVirtual, "LaTeX-materials", &tempString))
     this->targetPDFFileNameWithPathVirtual="slides-videos"+tempString;
   if (this->flagProjectorMode)
-    this->targetPDFFileNameWithPathVirtual+="_projector_" + this->headerPathBelowFileNameVirtual;
+    this->targetPDFFileNameWithPathVirtual+="-projector-" + this->headerPathBelowFileNameVirtual;
   else
-    this->targetPDFFileNameWithPathVirtual+="_printable_" + this->headerPathBelowFileNameVirtual;
-  std::string urledTitle=HtmlRoutines::ConvertStringToURLString(this->desiredPresentationTitle, false);
-  MathRoutines::StringTrimToLength(urledTitle, 200);
+    this->targetPDFFileNameWithPathVirtual+="-printable-" + this->headerPathBelowFileNameVirtual;
+  std::string trimmedTitle=this->desiredPresentationTitle;
+  MathRoutines::StringTrimToLength(trimmedTitle, 150);
   if (this->desiredPresentationTitle!="")
-    this->targetPDFFileNameWithPathVirtual+= "_" + urledTitle;
+    this->targetPDFFileNameWithPathVirtual+= "-" + trimmedTitle;
+  this->targetPDFFileNameWithPathVirtual=
+  HtmlRoutines::ConvertStringToURLStringExceptDashesAndSlashes
+  (this->targetPDFFileNameWithPathVirtual);
   this->targetPDFFileNameWithPathVirtual+=".pdf";
   this->targetPDFFileNameWithLatexPath="../../" + this->targetPDFFileNameWithPathVirtual;
   this->targetPDFLatexPath= FileOperations::GetPathFromFileNameWithPath(this->targetPDFFileNameWithLatexPath);
@@ -610,7 +613,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
      (this->targetPDFFileNameWithLatexPath, this->targetPDFbinaryContent, *commentsOnFailure))
     return false;
   std::stringstream svnAddFileCommand, svnAddDirCommand, svnResult;
-  if (FileOperations::IsFileNameSafeForSystemCommands(this->targetPDFFileNameWithLatexPath, commentsOnFailure))
+  if (!FileOperations::IsFileNameSafeForSystemCommands(this->targetPDFFileNameWithLatexPath, commentsOnFailure))
     return true;
   svnAddDirCommand << "svn add " << this->targetPDFLatexPath << " --depth=empty";
   svnResult << "<br>Command: " << svnAddDirCommand.str() << "<br>Result: ";
@@ -649,9 +652,10 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   bool result=true;
   int numProcessed=0;
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.slidesSourcesHeaders);
-  for (int i=0; i<
-//  5
-  topicParser.theTopicS.size()
+  for (int i=0; i<topicParser.theTopicS.size()
+
+  && numProcessed < 2
+
   ; i++)
   { TopicElement& currentElt=topicParser.theTopicS[i];
     if (currentElt.slidesSources.size==0)

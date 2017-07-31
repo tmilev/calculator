@@ -372,12 +372,7 @@ void GlobalVariables::initOutputReportAndCrashFileNames
   { this->userInputStringRAWIfAvailable="Raw user input string not available in SSL mode. ";
     inputAbbreviated=this->userInputStringIfAvailable;
   }
-  if (inputAbbreviated.size()>150)
-  { std::stringstream inputAbbreviatedStream;
-    inputAbbreviatedStream << "hash_" << MathRoutines::hashString(inputAbbreviated)
-    << "_abbreviated_input_" << inputAbbreviated.substr(0, 150);
-    inputAbbreviated=inputAbbreviatedStream.str();
-  }
+  MathRoutines::StringTrimToLength(inputAbbreviated, 150);
   this->RelativePhysicalNameCrashLog="crash_" + inputAbbreviated + ".html";
   this->RelativePhysicalNameProgressReport="progressReport_" + inputAbbreviated + ".html";
   this->RelativePhysicalNameOutpuT="output_" + inputAbbreviated + ".html";

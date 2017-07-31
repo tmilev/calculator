@@ -1130,6 +1130,18 @@ std::string MathRoutines::StringTrimWhiteSpace(const std::string& inputString)
   return result;
 }
 
+void MathRoutines::StringTrimToLength(std::string& inputOutput, int desiredLength50AtLeast)
+{ if (((signed) inputOutput.size())<=desiredLength50AtLeast)
+    return;
+  if (desiredLength50AtLeast<50)
+    return;
+  std::stringstream inputAbbreviatedStream;
+  inputAbbreviatedStream << inputOutput.substr(0, desiredLength50AtLeast-40)
+  << "_abbrev_hash_" << MathRoutines::hashString(inputOutput)
+  ;
+  inputOutput=inputAbbreviatedStream.str();
+}
+
 void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::string& output)
 { //this function needs to be rewritten to do one substr call (no time now).
   std::stringstream out;

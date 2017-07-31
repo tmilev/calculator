@@ -242,6 +242,8 @@ public:
   static void StringSplitExcludeDelimiter(const std::string& inputString, char delimiter, List<std::string>& output);
   static void StringSplitExcludeDelimiters(const std::string& inputString, const List<char>& delimiters, List<std::string>& output);
   static void StringTrimWhiteSpace(const std::string& inputString, std::string& output);
+  static void StringTrimToLength(std::string& inputOutput, int desiredLength50AtLeast=150);
+
   static std::string StringTrimWhiteSpace(const std::string& inputString);
   static void SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond);
   static void NChooseK(int n, int k, LargeInt& result);

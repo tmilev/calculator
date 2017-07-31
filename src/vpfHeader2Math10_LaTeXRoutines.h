@@ -43,12 +43,14 @@ class LaTeXcrawler
   List<std::string> slideFileNamesVirtualWithPatH;
   List<std::string> slideFileNamesWithLatexPathNoExtension;
   List<std::string> slideFileNamesVirtualNoPathNoExtensioN;
+  List<std::string> latexSnippets;
   void* ownerCalculator;
   bool flagAddSlideToSVN;
   bool flagBuildSingleSlides;
   bool flagProjectorMode;
   bool flagForceSlideRebuild;
   bool flagDoChangeDirs;
+  void AdjustDisplayTitle();
   bool ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
   bool ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void Crawl();

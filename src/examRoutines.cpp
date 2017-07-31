@@ -2061,6 +2061,7 @@ void CalculatorHTML::initTopicElementNames()
     this->calculatorTopicElementNames.AddOnTop("Title");
     this->calculatorTopicElementNames.AddOnTop("Problem");
     this->calculatorTopicElementNames.AddOnTop("Video");
+    this->calculatorTopicElementNames.AddOnTop("SlidesLatex");
     this->calculatorTopicElementNames.AddOnTop("SlidesSource");
     this->calculatorTopicElementNames.AddOnTop("SlidesSourceHeader");
   }
@@ -3437,6 +3438,8 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       currentElt.slidesProjector=MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "SlidesSource:", &currentArgument))
       currentElt.slidesSources.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
+    else if (MathRoutines::StringBeginsWith(currentLine, "SlidesLatex:", &currentArgument))
+      currentElt.slidesSources.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
     else if (MathRoutines::StringBeginsWith(currentLine, "SlidesPrintable:", &currentArgument))
       currentElt.slidesPrintable=MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "Problem:", &currentArgument))
@@ -3602,6 +3605,7 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
       << "<br>SlidesPrintable"
       << "<br>SlidesSourceHeader"
       << "<br>SlidesSource"
+      << "<br>SlidesLatex"
       << "<br>You need to include columns immediately after the data labels. The data entries are terminated by new line. "
       << " Here is a correctly entered example:"
       << "<br>Title: Complex multiplication"

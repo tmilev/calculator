@@ -475,3 +475,8 @@ a.slidesLink:hover{
 a.videoLink:hover{
   background-color: #dfdfdf;
 }
+lectureTag{
+color: green;
+font-weight: bold;
+font-size: 1.5em;
+}

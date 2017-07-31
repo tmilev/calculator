@@ -3,6 +3,7 @@
 #include "vpfHeader2Math10_LaTeXRoutines.h"
 #include "vpfHeader1General7FileOperations_Encodings.h"
 #include "vpfHeader1General4General_Logging_GlobalVariables.h"
+#include "vpfHeader8HtmlSnippets.h"
 
 ProjectInformationInstance ProjectInfoVpf6_38LaTeXRoutines(__FILE__, "LaTeX routines. ");
 
@@ -421,9 +422,21 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
       *commentsOnFailure << "Could not find slide file names. ";
     return false;
   }
-  this->slideFileNamesWithLatexPathNoExtension.SetSize(this->slideFileNamesVirtualWithPatH.size);
+  this->slideFileNamesWithLatexPathNoExtension.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
+  this->latexSnippets.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
   for (int i=0; i<this->slideFileNamesVirtualWithPatH.size; i++)
-  { if (!FileOperations::IsFileNameSafeForSystemCommands(this->slideFileNamesVirtualWithPatH[i], commentsOnFailure))
+  { if (MathRoutines::StringBeginsWith(this->slideFileNamesVirtualWithPatH[i], "LaTeX: ", &this->latexSnippets[i]))
+    { if (i==0)
+      { if (commentsOnFailure!=0)
+          *commentsOnFailure << "Found LaTeX snippet without a header file. "
+          << this->slideFileNamesVirtualWithPatH[i] << "<br>";
+        return false;
+      }
+      continue;
+    }
+    if (!MathRoutines::StringEndsWith(this->slideFileNamesVirtualWithPatH[i], ".tex"))
+      this->slideFileNamesVirtualWithPatH[i]+=".tex";
+    if (!FileOperations::IsFileNameSafeForSystemCommands(this->slideFileNamesVirtualWithPatH[i], commentsOnFailure))
     { if (commentsOnFailure!=0)
         *commentsOnFailure << "Found unsafe slide name: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
       return false;
@@ -464,9 +477,16 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   FileOperations::GetFileExtensionWithDot(this->headerFileNameNoPath, &this->headerFileNameNoPathNoExtension);
   this->workingFileNameNoPathTex="workingfile" + this->headerFileNameNoPathNoExtension + ".tex";
   this->workingFileNameNoPathPDF="workingfile" + this->headerFileNameNoPathNoExtension + ".pdf";
-  std::string tempString=this->slideFileNamesVirtualWithPatH.size>1 ?
-  this->slideFileNamesVirtualWithPatH[1] : this->slideFileNamesVirtualWithPatH[0];
-  FileOperations::GetFileExtensionWithDot(tempString, &this->targetPDFFileNameWithPathVirtual);
+  std::string firstSignificantSlideName="";
+  if (this->slideFileNamesVirtualWithPatH.size>=1)
+    firstSignificantSlideName=this->slideFileNamesVirtualWithPatH[0];
+  for (int i=1; i<this->slideFileNamesVirtualWithPatH.size; i++)
+    if (this->latexSnippets[i]=="")
+    { firstSignificantSlideName=this->slideFileNamesVirtualWithPatH[1];
+      break;
+    }
+  FileOperations::GetFileExtensionWithDot(firstSignificantSlideName, &this->targetPDFFileNameWithPathVirtual);
+  std::string tempString;
   if (MathRoutines::StringBeginsWith(this->targetPDFFileNameWithPathVirtual, "freecalc", &tempString))
     this->targetPDFFileNameWithPathVirtual="slides-videos"+tempString;
   if (MathRoutines::StringBeginsWith(this->targetPDFFileNameWithPathVirtual, "LaTeX-materials", &tempString))
@@ -475,18 +495,47 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
     this->targetPDFFileNameWithPathVirtual+="_projector_" + this->headerPathBelowFileNameVirtual;
   else
     this->targetPDFFileNameWithPathVirtual+="_printable_" + this->headerPathBelowFileNameVirtual;
+  std::string urledTitle=HtmlRoutines::ConvertStringToURLString(this->desiredPresentationTitle, false);
+  MathRoutines::StringTrimToLength(urledTitle, 200);
+  if (this->desiredPresentationTitle!="")
+    this->targetPDFFileNameWithPathVirtual+= "_" + urledTitle;
   this->targetPDFFileNameWithPathVirtual+=".pdf";
   this->targetPDFFileNameWithLatexPath="../../" + this->targetPDFFileNameWithPathVirtual;
   this->targetPDFLatexPath= FileOperations::GetPathFromFileNameWithPath(this->targetPDFFileNameWithLatexPath);
   return true;
 }
 
+void LaTeXcrawler::AdjustDisplayTitle()
+{ MacroRegisterFunctionWithName("LaTeXcrawler::AdjustDisplayTitle");
+  if (this->desiredPresentationTitle.find("</actualExamProblem>")!=std::string::npos &&
+      this->desiredPresentationTitle.find("<actualExamProblem>")!=std::string::npos
+      )
+  { int start=this->desiredPresentationTitle.find("<actualExamProblem>");
+    int finish=this->desiredPresentationTitle.find("</actualExamProblem>")+((std::string)"</actualExamProblem>").size();
+    this->desiredPresentationTitle=this->desiredPresentationTitle.substr(0, start)+
+    this->desiredPresentationTitle.substr(finish);
+  }
+  if (this->desiredPresentationTitle.find("</lectureTag>")!=std::string::npos &&
+      this->desiredPresentationTitle.find("<lectureTag>")!=std::string::npos
+      )
+  { int start=this->desiredPresentationTitle.find("<lectureTag>");
+    int finish=this->desiredPresentationTitle.find("</lectureTag>")+((std::string)"</lectureTag>").size();
+    this->desiredPresentationTitle=this->desiredPresentationTitle.substr(0, start)+
+    this->desiredPresentationTitle.substr(finish);
+  }
+  if (this->desiredPresentationTitle.find("\\(\\LaTeX\\)")!=std::string::npos )
+  { int pos=this->desiredPresentationTitle.find("\\(\\LaTeX\\)");
+    this->desiredPresentationTitle=
+    this->desiredPresentationTitle.substr(0, pos)+"\\LaTeX"+
+    this->desiredPresentationTitle.substr(pos + ((std::string) "\\(\\LaTeX\\)").size());
+  }
+  this->desiredPresentationTitle=MathRoutines::StringTrimWhiteSpace(this->desiredPresentationTitle);
+}
+
 bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides");
-  for (int i=0; i<this->slideFileNamesVirtualWithPatH.size; i++)
-    if (!MathRoutines::StringEndsWith(this->slideFileNamesVirtualWithPatH[i], ".tex"))
-      this->slideFileNamesVirtualWithPatH[i]+=".tex";
+  this->AdjustDisplayTitle();
   if (!this->ExtractPresentationFileNames(commentsOnFailure, commentsGeneral))
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "Failed to extract file names. ";
@@ -520,26 +569,17 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   } while (!theFile.eof());
   theFile.close();
   bool addExtraTex=(this->slideFileNamesVirtualWithPatH.size>1);
-  if (this->desiredPresentationTitle.find("</actualExamProblem>")!=std::string::npos &&
-      this->desiredPresentationTitle.find("<actualExamProblem>")!=std::string::npos
-      )
-  { int start=this->desiredPresentationTitle.find("<actualExamProblem>");
-    int finish=this->desiredPresentationTitle.find("</actualExamProblem>")+20;
-    this->desiredPresentationTitle=this->desiredPresentationTitle.substr(0, start)+
-    this->desiredPresentationTitle.substr(finish);
-  }
-  if (this->desiredPresentationTitle.find("\\(\\LaTeX\\)")!=std::string::npos )
-  { int pos=this->desiredPresentationTitle.find("\\(\\LaTeX\\)");
-    this->desiredPresentationTitle=
-    this->desiredPresentationTitle.substr(0, pos)+"\\LaTeX"+
-    this->desiredPresentationTitle.substr(pos + 10);
-  }
+
   if (addExtraTex)
-  { theFileContentStream << "\\begin{document}"
+  { theFileContentStream << "\\begin{document}\n"
     << "\\providecommand{\\currentLecture}{1}"
     << "\\lect{\\semester}{" << this->desiredPresentationTitle << "}{1}{\n";
     for (int i=1; i<this->slideFileNamesVirtualWithPatH.size; i++)
-      theFileContentStream << "\\input{" << this->slideFileNamesWithLatexPathNoExtension[i] << "}\n";
+    { if (this->latexSnippets[i]=="")
+        theFileContentStream << "\\input{" << this->slideFileNamesWithLatexPathNoExtension[i] << "}\n";
+      else
+        theFileContentStream << this->latexSnippets[i] << "\n";
+    }
     theFileContentStream << "}\n"
     << "\\end{document}";
   }
@@ -569,12 +609,17 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   if(!FileOperations::LoadFileToStringUnsecure
      (this->targetPDFFileNameWithLatexPath, this->targetPDFbinaryContent, *commentsOnFailure))
     return false;
-  std::stringstream svnCommand, svnResult;
+  std::stringstream svnAddFileCommand, svnAddDirCommand, svnResult;
   if (FileOperations::IsFileNameSafeForSystemCommands(this->targetPDFFileNameWithLatexPath, commentsOnFailure))
     return true;
-  svnCommand << "svn add " << this->targetPDFFileNameWithLatexPath;
-  svnResult << "<br>Command: " << svnCommand.str() << "<br>Result: ";
-  svnResult << theGlobalVariables.CallSystemWithOutput(svnCommand.str());
+  svnAddDirCommand << "svn add " << this->targetPDFLatexPath << " --depth=empty";
+  svnResult << "<br>Command: " << svnAddDirCommand.str() << "<br>Result: ";
+  svnResult << theGlobalVariables.CallSystemWithOutput(svnAddDirCommand.str());
+
+  svnAddFileCommand << "svn add " << this->targetPDFFileNameWithLatexPath;
+  svnResult << "<br>Command: " << svnAddFileCommand.str() << "<br>Result: ";
+  svnResult << theGlobalVariables.CallSystemWithOutput(svnAddFileCommand.str());
+
   if (commentsGeneral!=0)
     *commentsGeneral << svnResult.str();
   return true;

@@ -69,9 +69,9 @@ int IntIdentity(const int& x)
 
 bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory)
 { MacroRegisterFunctionWithName("Calculator::GetVectorExpressions");
-  output.Reserve(input.children.size);
+  output.Reserve(input.size());
   output.SetSize(0);
-  if (!input.IsSequenceNElementS())
+  if (!input.IsSequenceNElementS() && !input.StartsWith(this->opIntervalOpen()))
   { if (targetDimNonMandatory>0)
       if (targetDimNonMandatory!=1)
         return *this << "<hr>GetVector failure: target dim is " << targetDimNonMandatory << " but the input " << input.ToString()
@@ -80,10 +80,11 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
     return true;
   }
   if (targetDimNonMandatory>0)
-    if (targetDimNonMandatory!=input.children.size-1)
-      return *this << "<hr>Failed to GetVector: the input is required to have " << targetDimNonMandatory << " columns but it has "
-      << input.children.size-1 << " columns instead. <hr>";
-  targetDimNonMandatory=input.children.size-1;
+    if (targetDimNonMandatory!=input.size()-1)
+      return *this << "<hr>Failed to GetVector: the input is required to have "
+      << targetDimNonMandatory << " columns but it has "
+      << input.size()-1 << " columns instead. <hr>";
+  targetDimNonMandatory=input.size()-1;
   for (int i=0; i<targetDimNonMandatory; i++)
     output.AddOnTop(input[i+1]);
   return true;

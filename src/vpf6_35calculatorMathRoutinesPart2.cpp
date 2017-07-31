@@ -1250,7 +1250,7 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];
   Vector<double> leftV, rightV;
-  if (!theCommands.GetVectorDoubles(leftE,leftV ) || !theCommands.GetVectorDoubles(rightE, rightV))
+  if (!theCommands.GetVectorDoubles(leftE, leftV) || !theCommands.GetVectorDoubles(rightE, rightV))
     return false;
   if (leftV.size!=rightV.size)
     return false;

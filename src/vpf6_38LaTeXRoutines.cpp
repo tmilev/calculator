@@ -482,7 +482,7 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
     firstSignificantSlideName=this->slideFileNamesVirtualWithPatH[0];
   for (int i=1; i<this->slideFileNamesVirtualWithPatH.size; i++)
     if (this->latexSnippets[i]=="")
-    { firstSignificantSlideName=this->slideFileNamesVirtualWithPatH[1];
+    { firstSignificantSlideName=this->slideFileNamesVirtualWithPatH[i];
       break;
     }
   FileOperations::GetFileExtensionWithDot(firstSignificantSlideName, &this->targetPDFFileNameWithPathVirtual);

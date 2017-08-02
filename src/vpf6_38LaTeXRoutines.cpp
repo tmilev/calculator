@@ -499,7 +499,7 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
     this->targetPDFNoPath+="-printable-" + this->headerPathBelowFileNameVirtual;
   this->targetPDFNoPath+=this->desiredPresentationTitle;
   this->targetPDFNoPath= HtmlRoutines::ConvertStringToURLString(this->targetPDFNoPath, false);
-  MathRoutines::StringTrimToLength(this->targetPDFNoPath, 245);
+  MathRoutines::StringTrimToLength(this->targetPDFNoPath, 230);
   this->targetPDFNoPath+=".pdf";
   this->targetPDFFileNameWithPathVirtual=this->targetPDFVirtualPath+this->targetPDFNoPath;
   this->targetPDFLatexPath="../../" + this->targetPDFVirtualPath;

@@ -186,7 +186,7 @@ std::string GlobalVariables::ToStringProgressReportHtml()
     { reportStream << "<b>Progress report available only "
       << "for the current thread of index: "
       << currentThreadID
-      << ".</b>";
+      << ". </b>";
       //<-to avoid coordinating threads
       continue;
     }

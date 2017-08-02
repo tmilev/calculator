@@ -432,6 +432,10 @@ std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileNa
 { MacroRegisterFunctionWithName("FileOperations::GetFileExtensionWithDot");
   if (theFileName=="" || theFileName.size()<=0)
     return "";
+  if (&theFileName==outputFileNameNoExtension)
+  { std::string theCopy=theFileName;
+    return FileOperations::GetFileExtensionWithDot(theCopy, outputFileNameNoExtension);
+  }
 //  std::cout << "file name size: " << theFileName.size() ;
   for (int i=(signed) theFileName.size()-1; i>=0; i--)
     if (theFileName[i]=='.')
@@ -1133,10 +1137,10 @@ std::string MathRoutines::StringTrimWhiteSpace(const std::string& inputString)
 void MathRoutines::StringTrimToLength(std::string& inputOutput, int desiredLength50AtLeast)
 { if (((signed) inputOutput.size())<=desiredLength50AtLeast)
     return;
-  if (desiredLength50AtLeast<50)
+  if (desiredLength50AtLeast<40)
     return;
   std::stringstream inputAbbreviatedStream;
-  inputAbbreviatedStream << inputOutput.substr(0, desiredLength50AtLeast-40)
+  inputAbbreviatedStream << inputOutput.substr(0, desiredLength50AtLeast-30)
   << "_abbrev_hash_" << MathRoutines::hashString(inputOutput)
   ;
   inputOutput=inputAbbreviatedStream.str();

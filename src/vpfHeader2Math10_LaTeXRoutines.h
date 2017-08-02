@@ -23,6 +23,8 @@ class LaTeXcrawler
   std::string targetPDFFileNameWithPathVirtual;
   std::string targetPDFFileNameWithLatexPath;
   std::string targetPDFLatexPath;
+  std::string targetPDFVirtualPath;
+  std::string targetPDFNoPath;
 
   std::string headerFileNameWithPathVirtual;
   std::string headerFileNameNoPath;

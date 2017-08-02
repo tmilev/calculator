@@ -485,26 +485,25 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
     { firstSignificantSlideName=this->slideFileNamesVirtualWithPatH[i];
       break;
     }
-  FileOperations::GetFileExtensionWithDot(firstSignificantSlideName, &this->targetPDFFileNameWithPathVirtual);
+  this->targetPDFVirtualPath= FileOperations::GetPathFromFileNameWithPath(firstSignificantSlideName);
   std::string tempString;
-  if (MathRoutines::StringBeginsWith(this->targetPDFFileNameWithPathVirtual, "freecalc", &tempString))
-    this->targetPDFFileNameWithPathVirtual="slides-videos"+tempString;
-  if (MathRoutines::StringBeginsWith(this->targetPDFFileNameWithPathVirtual, "LaTeX-materials", &tempString))
-    this->targetPDFFileNameWithPathVirtual="slides-videos"+tempString;
+  if (MathRoutines::StringBeginsWith(this->targetPDFVirtualPath, "freecalc", &tempString))
+    this->targetPDFVirtualPath="slides-videos"+tempString;
+  if (MathRoutines::StringBeginsWith(this->targetPDFVirtualPath, "LaTeX-materials", &tempString))
+    this->targetPDFVirtualPath="slides-videos"+tempString;
+  this->targetPDFNoPath=FileOperations::GetFileNameFromFileNameWithPath(firstSignificantSlideName);
+  FileOperations::GetFileExtensionWithDot(this->targetPDFNoPath, &this->targetPDFNoPath);
   if (this->flagProjectorMode)
-    this->targetPDFFileNameWithPathVirtual+="-projector-" + this->headerPathBelowFileNameVirtual;
+    this->targetPDFNoPath+="-projector-" + this->headerPathBelowFileNameVirtual;
   else
-    this->targetPDFFileNameWithPathVirtual+="-printable-" + this->headerPathBelowFileNameVirtual;
-  std::string trimmedTitle=this->desiredPresentationTitle;
-  MathRoutines::StringTrimToLength(trimmedTitle, 150);
-  if (this->desiredPresentationTitle!="")
-    this->targetPDFFileNameWithPathVirtual+= "-" + trimmedTitle;
-  this->targetPDFFileNameWithPathVirtual=
-  HtmlRoutines::ConvertStringToURLStringExceptDashesAndSlashes
-  (this->targetPDFFileNameWithPathVirtual);
-  this->targetPDFFileNameWithPathVirtual+=".pdf";
-  this->targetPDFFileNameWithLatexPath="../../" + this->targetPDFFileNameWithPathVirtual;
-  this->targetPDFLatexPath= FileOperations::GetPathFromFileNameWithPath(this->targetPDFFileNameWithLatexPath);
+    this->targetPDFNoPath+="-printable-" + this->headerPathBelowFileNameVirtual;
+  this->targetPDFNoPath+=this->desiredPresentationTitle;
+  this->targetPDFNoPath= HtmlRoutines::ConvertStringToURLString(this->targetPDFNoPath, false);
+  MathRoutines::StringTrimToLength(this->targetPDFNoPath, 245);
+  this->targetPDFNoPath+=".pdf";
+  this->targetPDFFileNameWithPathVirtual=this->targetPDFVirtualPath+this->targetPDFNoPath;
+  this->targetPDFLatexPath="../../" + this->targetPDFVirtualPath;
+  this->targetPDFFileNameWithLatexPath=this->targetPDFLatexPath+this->targetPDFNoPath;
   return true;
 }
 

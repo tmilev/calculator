@@ -404,6 +404,7 @@ std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string
   out << "</tr>";
   List<int> modifyableCols;
   modifyableCols.AddOnTop(columnLabels.GetIndex("currentCourses"));
+  modifyableCols.AddOnTop(columnLabels.GetIndex(DatabaseStrings::problemWeightsIdColumnName));
   outputDatabaseKeyId= columnLabels[0];
   for (int i=0; i<theTable.size; i++)
   { out << "<tr>";
@@ -509,6 +510,7 @@ std::string DatabaseRoutines::ToStringModifyEntry()
   ("desiredContent"), false);
   List<std::string> allowedColumns;
   allowedColumns.AddOnTop("currentCourses");
+  allowedColumns.AddOnTop(DatabaseStrings::problemWeightsIdColumnName);
   if (!allowedColumns.Contains(currentDesiredColumn))
   { std::stringstream out;
     out << "<b style=\"color:red\">Modifying column: " << currentDesiredColumn << " is forbidden. "

@@ -1522,3 +1522,54 @@ bool CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite(Calculator& the
       }
   return false;
 }
+
+bool CalculatorFunctionsGeneral::innerIsProductTermsUpToPower(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsProductTermsUpToPower");
+  if (input.size()<3)
+    return false;
+  Expression theBase;
+  theBase=input[1];
+  LargeInt desiredMaxPower=1;
+  if (theBase.StartsWith(theCommands.opThePower(), 3))
+  { if (theBase[2].IsInteger(&desiredMaxPower))
+    { if (desiredMaxPower>0)
+        theBase=input[1][1];
+      else
+        desiredMaxPower=1;
+    } else
+      desiredMaxPower=1;
+  }
+  List<Expression> theMultiplicands;
+  if (!theCommands.CollectOpands(input[2], theCommands.opTimes(), theMultiplicands))
+    return theCommands << "Could not extract multiplicands from: "
+    << input[2].ToString();
+
+  for (int k=0; k<theMultiplicands.size; k++)
+  { List<List<Expression> > theSummands;
+    if (!theCommands.GetSumProductsExpressions(theMultiplicands[k], theSummands))
+      return theCommands << "Failed to extract sum from "
+      << theMultiplicands[k].ToString();
+    for(int i=0; i<theSummands.size; i++)
+    { LargeInt foundPower=0;
+      for (int j=0; j<theSummands[i].size; j++)
+      { if (theSummands[i][j]==theBase)
+        { foundPower++;
+          continue;
+        }
+        if (theSummands[i][j].StartsWith(theCommands.opThePower(),3))
+          if (theSummands[i][j][1]==theBase)
+          { LargeInt localPower;
+            if (theSummands[i][j][2].IsInteger(&localPower))
+            { foundPower+=localPower;
+              continue;
+            }
+          }
+        if (! theSummands[i][j].EvaluatesToDouble())
+          return output.AssignValue(0, theCommands);
+      }
+      if (foundPower>desiredMaxPower)
+        return output.AssignValue(0, theCommands);
+    }
+  }
+  return output.AssignValue(1, theCommands);
+}

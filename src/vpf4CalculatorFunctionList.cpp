@@ -3911,6 +3911,24 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "IsProductLinearOrConstantTermsIn"
    )
    ;
+   this->AddOperationInnerHandler
+  ("IsProductTermsUpToPower", CalculatorFunctionsGeneral::innerIsProductTermsUpToPower, "",
+   "Returns true if the expression is a product of terms of power up to the given power.\
+    Although this is subject to change, at the moment \
+    powers of linear terms are not considered linear. ",
+   " TurnOffRules(\"DistributeMultiplication\");\
+    IsProductTermsUpToPower(x^2, x^2+1);\n\
+    IsProductTermsUpToPower(x^3,x( x^2-1));\n\
+    IsProductTermsUpToPower(x^2,x( x^2-1));\n\
+    IsProductTermsUpToPower(x, (x-1)(x+1));\n\
+    IsProductTermsUpToPower(x, (2x+1)(x \\pi+1));\n\
+    IsProductTermsUpToPower(x, (2x+y)(x \\pi+1));\n\
+    ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIsProductTermsUpToPower",
+   "IsProductTermsUpToPower"
+   )
+   ;
 
 }
 

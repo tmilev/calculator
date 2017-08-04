@@ -113,6 +113,7 @@ public:
   static bool innerCot(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIsProductLinearOrConstTermsIn(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIsProductTermsUpToPower(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsLinearOrConstantIn(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCoefficientOf(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConstTermRelative(Calculator& theCommands, const Expression& input, Expression& output);

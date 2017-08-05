@@ -734,7 +734,8 @@ bool FileOperations::OpenFileUnsecureReadOnly(std::ifstream& theFile, const std:
   return theFile.is_open();
 }
 
-bool FileOperations::GetPhysicalFileNameFromVirtual(const std::string& inputFileNamE, std::string& output, bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
+bool FileOperations::GetPhysicalFileNameFromVirtual
+(const std::string& inputFileNamE, std::string& output, bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
 { MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtual");
   //stOutput << "<br>DEBUG: processing " << inputFileNamE << " -> ... <br>";
   if (!FileOperations::IsOKfileNameVirtual(inputFileNamE, accessSensitiveFolders))

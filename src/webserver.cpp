@@ -3935,6 +3935,12 @@ int WebWorker::ServeClient()
     theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
   if (theUser.flagMustLogin)
     this->errorLogin=argumentProcessingFailureComments.str();
+
+  if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.flagLoggedIn)
+    if (theGlobalVariables.GetWebInput("spoofHostName")!="")
+    { theGlobalVariables.hostNoPort=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("spoofHostName"), false);
+      theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", theGlobalVariables.hostNoPort);
+    }
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType=="database")
     return this->ProcessDatabase();

@@ -3742,7 +3742,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   }
   #endif
   this->initTopicElementNames();
-  out << "Problem links open in: ";
+  out << "<problemLinkStyleSelectionTab>Problem links open in: ";
 //  out << "<br>DEBUG: problinkstyle: "
 //  << theGlobalVariables.GetWebInput("problemLinkStyle")
 //  << "<br>";
@@ -3758,7 +3758,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   if (theGlobalVariables.GetWebInput("problemLinkStyle")=="newWindow")
     out << "checked";
   out << ">new tab</input>"
-  << ". "
+  << ". </problemLinkStyleSelectionTab>"
  ;
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
   bool tableStarted=false;

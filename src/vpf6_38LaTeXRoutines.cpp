@@ -509,21 +509,22 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
 
 void LaTeXcrawler::AdjustDisplayTitle()
 { MacroRegisterFunctionWithName("LaTeXcrawler::AdjustDisplayTitle");
-  if (this->desiredPresentationTitle.find("</actualExamProblem>")!=std::string::npos &&
-      this->desiredPresentationTitle.find("<actualExamProblem>")!=std::string::npos
-      )
-  { int start=this->desiredPresentationTitle.find("<actualExamProblem>");
-    int finish=this->desiredPresentationTitle.find("</actualExamProblem>")+((std::string)"</actualExamProblem>").size();
-    this->desiredPresentationTitle=this->desiredPresentationTitle.substr(0, start)+
-    this->desiredPresentationTitle.substr(finish);
-  }
-  if (this->desiredPresentationTitle.find("</lectureTag>")!=std::string::npos &&
-      this->desiredPresentationTitle.find("<lectureTag>")!=std::string::npos
-      )
-  { int start=this->desiredPresentationTitle.find("<lectureTag>");
-    int finish=this->desiredPresentationTitle.find("</lectureTag>")+((std::string)"</lectureTag>").size();
-    this->desiredPresentationTitle=this->desiredPresentationTitle.substr(0, start)+
-    this->desiredPresentationTitle.substr(finish);
+  List<std::string> ignoredTags;
+  ignoredTags.AddOnTop("actualExamProblem");
+  ignoredTags.AddOnTop("lectureTag");
+  ignoredTags.AddOnTop("advancedTopic");
+  ignoredTags.AddOnTop("reviewProblem");
+  for (int i=0; i<ignoredTags.size; i++)
+  { std::string closeTag = "</" + ignoredTags[i] + ">";
+    std::string openTag  = "<"  + ignoredTags[i] + ">";
+    if (this->desiredPresentationTitle.find(openTag)!=std::string::npos &&
+        this->desiredPresentationTitle.find(closeTag)!=std::string::npos
+        )
+    { int start=this->desiredPresentationTitle.find(openTag);
+      int finish=this->desiredPresentationTitle.find(closeTag)+closeTag.size();
+      this->desiredPresentationTitle=this->desiredPresentationTitle.substr(0, start)+
+      this->desiredPresentationTitle.substr(finish);
+    }
   }
   if (this->desiredPresentationTitle.find("\\(\\LaTeX\\)")!=std::string::npos )
   { int pos=this->desiredPresentationTitle.find("\\(\\LaTeX\\)");

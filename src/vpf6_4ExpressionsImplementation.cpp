@@ -1026,17 +1026,17 @@ bool Expression::SetChilD(int childIndexInMe, const Expression& inputChild)
 
 bool Expression::SetChilD(int childIndexInMe, int childIndexInBoss)
 { this->CheckInitialization();
-  stOutput << "<hr>DEBUG: Setting childIndexInBoss: "
-  << childIndexInBoss
-  << " to child: " << childIndexInMe << "<hr>";
+  //stOutput << "<hr>DEBUG: Setting childIndexInBoss: "
+  //<< childIndexInBoss
+  //<< " to child: " << childIndexInMe << "<hr>";
   this->children.SetObjectAtIndex(childIndexInMe, childIndexInBoss);
   if (this->children[childIndexInMe]!=childIndexInBoss)
     crash << "This shouldn't happen." << crash;
-  stOutput << "<hr>DEBUG: children comma delimited: "
-  << this->children.ToStringCommaDelimited();
-  for (int i=0; i<this->size(); i++)
-    stOutput << "Child: " << i << ": "
-    << (*this)[i].ToString();
+  //stOutput << "<hr>DEBUG: children comma delimited: "
+  //<< this->children.ToStringCommaDelimited();
+  //for (int i=0; i<this->size(); i++)
+  //  stOutput << "Child: " << i << ": "
+  //  << (*this)[i].ToString();
   return true;
 }
 

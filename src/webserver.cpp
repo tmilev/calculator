@@ -1437,19 +1437,22 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theUser.enteredActivationToken="";
     theUser.flagEnteredAuthenticationToken=false;
     theUser.flagEnteredActivationToken=false;
+    theGlobalVariables.flagLogInAttempted=true;
   }
   if (theUser.enteredActivationToken.value!="")
   { theUser.enteredGoogleToken="";
     theUser.enteredAuthenticationToken="";
     theUser.flagEnteredAuthenticationToken=false;
     theUser.flagEnteredActivationToken=true;
+    theGlobalVariables.flagLogInAttempted=true;
   }
-
   //stOutput << "DEBUG: logging-in: " << theUser.ToStringUnsecure();
   if (theUser.username.value!="")
     theUser.enteredGoogleToken="";
   if (theUser.enteredAuthenticationToken!="")
-    theUser.flagEnteredAuthenticationToken=true;
+  { theUser.flagEnteredAuthenticationToken=true;
+    theGlobalVariables.flagLogInAttempted=true;
+  }
   /////////////////////////////////////////////
   //this may need a security audit: the URLStringToNormal and GetWebInput
   //functions may leave traces of (freed) memory
@@ -1498,12 +1501,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   theUser.username.GetDataNoQuotes()
   //<-User name must be stored in URL-encoded fashion, NO PLUSES.
   );
-  //argumentProcessingFailureComments
-  //<< "<br>DEBUG: username is, non-encoded: " << theUser.username.value
-  //<< "<br>DEBUG: Setting username cookie header to: "
-  //<< theUser.username.GetDataNoQuotes()
-  //<< "<br>Stack: " << crash.GetStackTraceEtcErrorMessage();
-
+  //stOutput << "<br>DEBUG: did do the authentication.";
   if (theGlobalVariables.flagLoggedIn && theUser.enteredActivationToken.value=="")
   { //in case the user logged in with password, we need
     //to give him/her the correct authentication token
@@ -1938,6 +1936,7 @@ std::string WebWorker::GetHeaderConnectionClose()
 
 std::string WebWorker::GetHeaderSetCookie()
 { std::stringstream out;
+  //stOutput << "DEBUG: setting headers: " << theGlobalVariables.CookiesToSetUsingHeaders.ToStringHtml();
   for (int i=0; i<theGlobalVariables.CookiesToSetUsingHeaders.size(); i++)
   { out << "Set-Cookie: " << theGlobalVariables.CookiesToSetUsingHeaders.theKeys[i]
     << "="
@@ -1964,9 +1963,12 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
   out << this->GetHeaderConnectionClose() << "\r\n";
   if (remainingHeaderNoTermination!="")
     out << remainingHeaderNoTermination << "\r\n";
-  if (theGlobalVariables.flagLoggedIn && WebWorker::GetHeaderSetCookie()!="")
+  if ((theGlobalVariables.flagLoggedIn || theGlobalVariables.flagLogInAttempted) &&
+      WebWorker::GetHeaderSetCookie()!="")
     out << WebWorker::GetHeaderSetCookie() << "\r\n";
   std::string finalHeader=out.str();
+  //stOutput << "<br>DEBUG: flagloginattempted: " << theGlobalVariables.flagLogInAttempted;
+  //stOutput << "<br>DEBUG: final header: " << HtmlRoutines::ConvertStringToHtmlString(finalHeader, true);
   this->remainingHeaderToSend.SetSize(0);
   this->remainingHeaderToSend.SetExpectedSize(finalHeader.size());
   for (unsigned i =0; i<finalHeader.size(); i++)
@@ -2092,8 +2094,6 @@ int WebWorker::ProcessPauseWorker()
   }
   theLog << "Proceeding to toggle worker pause." << logger::endL;
   WebWorker& otherWorker=this->parent->theWorkers[inputWebWorkerIndex];
-//  if (theGlobalVariables.flagLogInterProcessCommunication)
-//  theLog << "About to read pipeServerToWorker..." << logger::endL;
   if (!otherWorker.PauseWorker.CheckPauseIsRequested(false, false, false))
   { otherWorker.PauseWorker.RequestPausePauseIfLocked(false, false);
     stOutput << "paused";
@@ -2678,14 +2678,23 @@ std::string WebWorker::GetJavascriptSubmitLoginInfo()
 std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 { MacroRegisterFunctionWithName("WebWorker::GetLoginHTMLinternal");
   std::stringstream out;
-  out << reasonForLogin;
+  if (reasonForLogin!="")
+    out
+//    << "DEBUG: reasonforlogin<br>" << theGlobalVariables.CookiesToSetUsingHeaders.ToStringHtml() << "<br>"
+
+    << "<br><div style=\"text-align:center\">"
+    << reasonForLogin
+    << "</div>";
   if (theGlobalVariables.GetWebInput("error")!="")
-    out << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), true);
-  out << "<form name=\"login\" id=\"login\">";
-  out << "<table>";
+    out << "<div style=\"text-align:center\">"
+    << HtmlRoutines::ConvertStringToHtmlString
+    (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), false), true)
+    << "</div>";
+  out << "<br><div class=\"divLogin\"><form class=\"formLogin\" name=\"login\" id=\"login\">";
+  out << "<table class=\"tableLogin\">";
   out
   << "<tr><td>"
-  << "User name:\n"
+  << "<b>User:</b>"
   << "</td>"
   << "<td>"
   << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
@@ -2697,12 +2706,14 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 
   out
   << "<tr><td>"
-  << "Password:\n"
+  << "<b>Password:</b>"
   << "</td>";
   out
   << "<td>"
   << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">"
   << "</td></tr>";
+//  out << "<tr><td></td><td>";
+//  out << "</td></tr>";
   out << "</table>";
   out << this->GetHtmlHiddenInputs(false, false);
   out << "<input type=\"hidden\" name=\"request\" id=\"request\"";
@@ -2713,34 +2724,30 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
     out << "value=\"selectCourseFromHtml\"";
   out << ">";
   out << "<input type=\"hidden\" name=\"googleToken\" id=\"googleToken\" value=\"\">";
-  out << "<button type=\"submit\" value=\"Submit\" ";
+  out << "</form>";
+  out << "<button class=\"buttonLogin\" type=\"submit\" value=\"Submit\" ";
   out << "action=\"" << theWebServer.GetActiveWorker().addressComputed;
-//  if (theWebServer.GetActiveWorker().argumentComputed!="")
-//    out << "?" << theWebServer.GetActiveWorker().argumentComputed;
   out << "\"";
   out << ">Login</button>";
-//  if (theGlobalVariables.flagRunningApache)
-//    out << "action=\"" << theGlobalVariables.DisplayNameCalculatorApacheQ
-//    << theGlobalVariables.userCalculatorRequestType << "\"";
-  out << "</form>";
 //  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
   out << "<span id=\"loginResult\"></span>";
-  out << "<br><a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=forgotLoginPage\">"
-  << "Forgot login/password?</a>";
+  out << "</div>";
+  out << "<br>"
+  << "<div class=\"divForgotLogin\">"
+  << "<a class=\"linkForgotLoginPass\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=forgotLoginPage\">"
+  << "Forgot login/password?</a></div>";
   /////////////////////////
-  out << "<hr><a href=\""
+  out << "<br><div class=\"divSignUp\">"
+  << "<a class=\"linkSignUp\" href=\""
   << theGlobalVariables.DisplayNameExecutable << "?request=signUpPage"
-  << "\">Sign up</a>";
+  << "\">Sign up</a></div>";
   /////////////////////////
+  out << "<br>";
+  out << "<div class=\"divExternalLogin\">";
   out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
   out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
-  out << "<hr>Logging in with google is an experimental feature.<br> "
-  << "<b><style=\"color:green\">At the moment, the only information we "
-  << "store from google is your gmail address. </span></b><br>"
-  << "<br>"
-  ;
-  out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\"></div> "
-  << "<br><button style=\"opacity:0; transition: 0.6s\" id=\"doSignInWithGoogleToken\" "
+  out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\">button</div> "
+  << "<br><br><button class=\"buttonLogin\" style=\"opacity:0; transition: 0.6s\" id=\"doSignInWithGoogleToken\" "
   << "onclick=\""
   << "document.getElementById('username').required=false;"
   << "document.getElementById('username').value='';"
@@ -2754,13 +2761,13 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
 //  << "  document.getElementById(\"doSignInWithGoogleToken\").style.visibility=\"visible\";\n"
   << "}\n"
   << "</script>\n";
-  //out << "DEBUG: "
-  //<< "google token submitted: "
-  //<< theGlobalVariables.GetWebInput("googleToken");
-//
-///////////////////////////////////////
-//  out << "<br><br><small>No account yet? We are sorry but automatic registration has not been implemented yet.<br>"
-//  << " If you are our students please contact us by email and we'll register you.<br>Everyone else, please che.</small>";
+
+  out << "<br><br><small>Log-in with google: creates account automatically if not already present.<br> "
+  << "<b style=\"color:green\">We do not store any personal information from google except your gmail email."
+  << "<br>We do not have access (and don't wish to have one) to your google password or other sensitive information.</span></b><br>"
+  << "<br></small>"
+  ;
+  out << "</div>";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
 
   //out << "<hr><hr>DEBUG: " << this->ToStringMessageFullUnsafe();
@@ -3834,12 +3841,10 @@ int WebWorker::ServeClient()
     this->ProcessUnknown();
     return 0;
   }
-//  std::cout << "GOT TO HERE" << std::endl;
   if (theGlobalVariables.theThreads.size<=1)
     crash << "Number of threads must be at least 2 in this point of code..." << crash;
   this->ExtractHostInfo();
   this->ExtractAddressParts();
-//  std::cout << "GOT TO HERE 2" << std::endl;
   std::stringstream argumentProcessingFailureComments;
   //argumentProcessingFailureComments << "<hr>DEBUG: Date: " << theGlobalVariables.GetDateForLogFiles()
   //<< " seconds: " << theGlobalVariables.GetElapsedSeconds();
@@ -3857,12 +3862,16 @@ int WebWorker::ServeClient()
     return this->ProcessLoginNeededOverUnsecureConnection();
   if (this->ProcessRedirectAwayFromWWW())
     return 0;
-  //argumentProcessingFailureComments << "<hr>DEBUG: About to login.  Date: " << theGlobalVariables.GetDateForLogFiles()
-  //<< " seconds: " << theGlobalVariables.GetElapsedSeconds();
+  //stOutput << "<br>DEBUG: argumentProcessingFailureComments: "
+  //<< argumentProcessingFailureComments.str()
+  //<< "<br>login attempted:" << theGlobalVariables.flagLogInAttempted;
 
   this->flagArgumentsAreOK=this->Login(argumentProcessingFailureComments);
-  //argumentProcessingFailureComments << "<hr>DEBUG: LOGIN done. ";
   this->CorrectRequestsAFTERLoginReturnFalseIfModified();
+  //stOutput << "<br>DEBUG: argumentProcessingFailureComments after login: "
+  //<< argumentProcessingFailureComments.str()
+  //<< "<br>login attempted:" << theGlobalVariables.flagLogInAttempted;
+
 
   //stOutput << "DEBUG: this->flagPasswordWasSubmitted: " << this->flagPasswordWasSubmitted;
   if (theUser.flagEnteredPassword &&
@@ -3884,7 +3893,7 @@ int WebWorker::ServeClient()
         << theGlobalVariables.webArguments.theValues[i] << "&";
     if (argumentProcessingFailureComments.str()!="")
       redirectedAddress << "error="
-      << HtmlRoutines::ConvertStringToURLString(argumentProcessingFailureComments.str(),false)
+      << HtmlRoutines::ConvertStringToURLString(argumentProcessingFailureComments.str(), false)
       << "&";
     std::stringstream headerStream;
     headerStream << "Location: " << redirectedAddress.str();
@@ -3915,8 +3924,6 @@ int WebWorker::ServeClient()
   if (theUser.flagStopIfNoLogin)
   { if (theGlobalVariables.userCalculatorRequestType=="changePassword")
       theUser.flagStopIfNoLogin=false;
-    if (theGlobalVariables.userCalculatorRequestType=="changePassword")
-      theUser.flagStopIfNoLogin=false;
   }
   if (theUser.flagStopIfNoLogin)
   { if(theGlobalVariables.userCalculatorRequestType!="logout" &&
@@ -3929,13 +3936,16 @@ int WebWorker::ServeClient()
         argumentProcessingFailureComments << "[html base folder]";
       argumentProcessingFailureComments << " requires login. </b>";
     }
+    //stOutput << "DEBUG: passed through here";
+    theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
+    if (argumentProcessingFailureComments.str()!="")
+      theGlobalVariables.SetWebInpuT("authenticationToken", "");
     return this->ProcessLoginPage(argumentProcessingFailureComments.str());
   }
   if (argumentProcessingFailureComments.str()!="" && theUser.flagMustLogin)
     theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
   if (theUser.flagMustLogin)
     this->errorLogin=argumentProcessingFailureComments.str();
-
   if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.flagLoggedIn)
     if (theGlobalVariables.GetWebInput("spoofHostName")!="")
     { theGlobalVariables.hostNoPort=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("spoofHostName"), false);
@@ -3958,7 +3968,9 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType=="calculatorExamples")
     return this->ProcessCalculatorExamples();
   else if (theGlobalVariables.GetWebInput("error")!="")
-    stOutput << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), false);
+    stOutput << "<div style=\"text-align:center\">"
+    << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), false)
+    << "</div>";
   else if (this->errorLogin!="")
     stOutput << this->errorLogin;
   else if (theGlobalVariables.userCalculatorRequestType=="toggleMonitoring")

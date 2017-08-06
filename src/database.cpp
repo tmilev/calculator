@@ -212,6 +212,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
   theUser.ResetAuthenticationToken(theRoutines, 0);
 //  stOutput << "token reset!... <hr>";
   theGlobalVariables.SetWebInpuT("authenticationToken", "");
+  theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "");
   return true;
 #else
   return true;

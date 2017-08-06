@@ -419,6 +419,7 @@ a.linkStandardButtonLike{
   -webkit-border-radius: 3px;
   border-radius: 3px;
   transition: 0.6s;
+  text-decoration: none;
 }
 a.linkStandardButtonLike:hover{
   background-color: #dfdfdf;
@@ -433,6 +434,9 @@ a.problemLinkQuiz{
   border-radius: 3px;
   transition: 0.6s;
 }
+a.problemLinkQuiz:hover{ 
+  background-color: Orange;
+}
 a.problemLinkPractice{
   display: inline-block;
   margin:  3px;
@@ -442,6 +446,9 @@ a.problemLinkPractice{
   -webkit-border-radius: 3px;
   border-radius: 3px;
   transition: 0.6s;
+}
+a.problemLinkPractice:hover{
+  background-color: PaleGreen;
 }
 a.slidesLink{
   display: inline-block;
@@ -453,6 +460,9 @@ a.slidesLink{
   border-radius: 3px;
   transition: 0.6s;
 }
+a.slidesLink:hover{
+  background-color: #dfdfdf;
+}
 a.videoLink{
   display: inline-block;
   margin:  3px;
@@ -463,43 +473,97 @@ a.videoLink{
   border-radius: 3px;
   transition: 0.6s;
 }
-a.problemLinkQuiz:hover{ 
-  background-color: Orange;
-}
-a.problemLinkPractice:hover{
-  background-color: PaleGreen;
-}
-a.slidesLink:hover{
-  background-color: #dfdfdf;
-}
 a.videoLink:hover{
   background-color: #dfdfdf;
 }
-
+a.linkForgotLoginPass{
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  font-size: 1.25em;
+  text-decoration: none;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+a.linkForgotLoginPass:hover{ 
+  background-color: Orange;
+}
+a.linkSignUp{
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  font-size: 1.25em;
+  text-decoration: none;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+a.linkSignUp:hover{ 
+  background-color: LawnGreen;
+}
+div.divLogin{
+text-align: center;
+}
+div.divForgotLogin{
+text-align: center;
+}
+div.divSignUp{
+text-align: center;
+}
+div.divExternalLogin{
+text-align: center;
+}
+form.formLogin > * {
+font-size: 1.1em;
+}
+table.tableLogin{
+margin: 0 auto;
+}
+button.buttonLogin{
+  display: inline;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #ccffcc;
+  padding: 3px;
+  color: #444;
+  cursor: pointer;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 1.25em;
+  transition: 0.6s;
+}
+button.buttonLogin:hover {
+  background-color: LawnGreen
+}
 lectureTag{
 color: green;
 font-weight: bold;
 font-size: 1.25em;
 }
-
 actualExamProblem{
 font-weight: bold;
 color: brown;
 font-size: 1.25em;
 }
-
 advancedTopic{
 font-weight: bold;
 color: orange;
 font-size: 1.25em;
 }
-
 reviewProblem{
 font-weight: bold;
 color: green;
 font-size: 1.25em;
 }
-
 problemLinkStyleSelectionTab{
   display: block;
   margin:  3px;
@@ -514,5 +578,13 @@ problemLinkStyleSelectionTab{
 }
 problemLinkStyleSelectionTab:hover{
   background-color: #dfdfdf;
+}
+
+.g-signin2{
+  width: 100%;
+}
+
+.g-signin2 > div{
+  margin: 0 auto;
 }
 

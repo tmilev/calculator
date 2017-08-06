@@ -85,6 +85,7 @@ public:
   bool flagCachingInternalFilesOn;
 
   bool flagLoggedIn;
+  bool flagLogInAttempted;
   bool flagUsingSSLinCurrentConnection;
   bool flagSSLisAvailable;
   bool flagCertificatesAreOfficiallySigned;

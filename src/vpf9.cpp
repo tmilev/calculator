@@ -123,6 +123,7 @@ GlobalVariables::GlobalVariables()
   this->flagRunningBuiltInWebServer=false;
   this->flagRunningAce=false;
   this->flagLoggedIn=false;
+  this->flagLogInAttempted=false;
   this->flagUsingSSLinCurrentConnection=false;
   this->flagSSLisAvailable=false;
   this->MaxTimeNoPingBeforeChildIsPresumedDead= 10;

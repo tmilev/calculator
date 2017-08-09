@@ -617,7 +617,9 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   }
   if (this->flagCrawlTexSourcesRecursively)
   { this->crawlingResult << "%file automatically generated from file: " << this->headerFileNameNoPath
-    << "\n%Please note that this file compiles with pdflatex -shell-escape\n";
+    << "\n%This file compiles with pdflatex -shell-escape\n"
+    << "\n%Comment out/in the [handout] line to get the slide in projector/handout mode.\n"
+    ;
     this->CrawlRecursive(this->headerFileNameNoPath);
   }
   if (addExtraTex)

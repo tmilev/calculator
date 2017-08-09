@@ -22,6 +22,7 @@ extern logger logProcessKills   ;
 extern logger logSocketAccept;
 extern logger logProcessStats;
 extern logger logPlumbing;
+extern logger logEmail  ;
 extern FormatExpressions consoleFormat;
 extern Calculator theParser;
 

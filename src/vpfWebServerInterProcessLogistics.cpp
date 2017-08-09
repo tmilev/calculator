@@ -540,12 +540,14 @@ void Pipe::Read(bool restartServerOnFail, bool dontCrashOnFail)
   safetyFirst.UnlockMe(); //preventing threads from locking one another
 }
 
-logger::logger(const std::string& logFileName)
+logger::logger(const std::string& logFileName, logger* inputCarbonCopy, bool inputResetLogWhenTooLarge)
 { this->flagInitialized=false;
   this->theFileName=logFileName;
   this->currentColor=logger::normalColor;
   this->flagTagColorHtmlOpened=false;
   this->flagTagColorConsoleOpened=false;
+  this->carbonCopy=inputCarbonCopy;
+  this->flagResetLogFileWhenTooLarge=inputResetLogWhenTooLarge;
 }
 
 void logger::initializeIfNeeded()
@@ -562,7 +564,7 @@ void logger::reset()
   this->MaxLogSize=50000000;
   if (theGlobalVariables.flagRunningApache)
     return;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(this->theFile, this->theFileName, false, true, false, true);
+  FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(this->theFile, this->theFileName, false, true, false, true);
   if (! this->theFile.is_open())
   { this->currentColor=logger::red;
     std::string computedFileName;
@@ -578,7 +580,11 @@ void logger::CheckLogSize()
 { this->initializeIfNeeded();
   theFile.seekg(0, std::ios::end);
   if (theFile.tellg()>this->MaxLogSize)
-    this->flagStopWritingToFile=true;
+  { if (this->flagResetLogFileWhenTooLarge)
+      this->reset();
+    else
+      this->flagStopWritingToFile=true;
+  }
 }
 
 void logger::flush()

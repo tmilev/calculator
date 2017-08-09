@@ -1388,15 +1388,9 @@ bool DatabaseRoutines::SendActivationEmail
   UserCalculator currentUser;
   currentUser.currentTable=DatabaseStrings::usersTableName;
   bool result=true;
-  TimeWrapper now;
-  now.AssignLocalTime();
-  now.ComputeTimeStringNonReadable();
-  std::string emailActivationLogFileName = "LogFileEmailsDebug"+now.theTimeStringNonReadable + ".html";
-  logger emailActivationLogFile(theGlobalVariables.PhysicalPathHtmlFolder+emailActivationLogFileName);
-  emailActivationLogFile.MaxLogSize=10000000;
   DatabaseRoutines theRoutines;
   for (int i=0; i<theEmails.size; i++)
-  { emailActivationLogFile << "Sending activation email, user "
+  { logEmail << "Sending activation email, user "
     << i+1 << " out of " << theEmails.size << " ... ";
     currentUser.username=theEmails[i];
     currentUser.email=theEmails[i];
@@ -1404,11 +1398,11 @@ bool DatabaseRoutines::SendActivationEmail
     (theRoutines, currentUser, commentsOnFailure, commentsGeneral, commentsGeneralSensitive);
   }
   if (commentsOnFailure!=0)
-    emailActivationLogFile << commentsOnFailure->str();
+    logEmail << commentsOnFailure->str();
   if (commentsGeneral!=0 && commentsOnFailure!=commentsGeneral)
-    emailActivationLogFile << commentsGeneral->str();
+    logEmail << commentsGeneral->str();
   if (commentsGeneralSensitive!=0 && commentsGeneralSensitive!=commentsOnFailure)
-    emailActivationLogFile << commentsGeneralSensitive->str();
+    logEmail << commentsGeneralSensitive->str();
   return result;
 }
 

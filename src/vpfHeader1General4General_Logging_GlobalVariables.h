@@ -245,7 +245,9 @@ class logger
   bool flagInitialized;
   bool flagTagColorHtmlOpened;
   bool flagTagColorConsoleOpened;
-  logger(const std::string& logFileName);
+  bool flagResetLogFileWhenTooLarge;
+  logger* carbonCopy;
+  logger(const std::string& logFileName, logger* inputCarbonCopy, bool inputResetLogWhenTooLarge);
   void CheckLogSize();
   enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
   std::string closeTagConsole();
@@ -261,6 +263,8 @@ class logger
   { if (theGlobalVariables.flagRunningApache)
       return *this;
     this->initializeIfNeeded();
+    if (this->carbonCopy!=0)
+      (*(this->carbonCopy)) << toBePrinted;
     if (theGlobalVariables.flagRunningBuiltInWebServer)
       std::cout << toBePrinted;
     this->CheckLogSize();

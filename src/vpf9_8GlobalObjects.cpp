@@ -23,15 +23,16 @@ std::string GlobalVariables::GetDateForLogFiles()
   return tempDate;
 }
 
-logger logHttpErrors("LogFiles/LogHttpErrors"+GlobalVariables::GetDateForLogFiles()+".html");
-logger theLog("LogFiles/LogStandard"+GlobalVariables::GetDateForLogFiles()+".html");
-logger logBlock( "LogFiles/LogBlockingEvents"+GlobalVariables::GetDateForLogFiles()+".html");
-logger logIO( "LogFiles/LogIOErrorsEvents"+GlobalVariables::GetDateForLogFiles()+".html");
-logger logProcessKills( "LogFiles/LogMultiprocessing"+GlobalVariables::GetDateForLogFiles()+".html");
-logger logPlumbing( "LogFiles/LogServerPlumbing"+GlobalVariables::GetDateForLogFiles()+".html");
-logger logSocketAccept( "LogFiles/LogSocketAccept"+GlobalVariables::GetDateForLogFiles()+".html");
-logger logProcessStats( "LogFiles/LogWorkerProcessStats"+GlobalVariables::GetDateForLogFiles()+".html");
-logger logOpenSSL( "LogFiles/LogOpenSSL"+GlobalVariables::GetDateForLogFiles()+".html");
+logger theLog("LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/log.html", 0, true);
+logger logHttpErrors("LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogHttpErrors.html", &theLog, false);
+logger logBlock( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogBlockingEvents.html", &theLog, false);
+logger logIO( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogIOErrorsEvents.html", &theLog, false);
+logger logProcessKills( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogMultiprocessing.html", &theLog, false);
+logger logPlumbing( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogServerPlumbing.html", &theLog, false);
+logger logSocketAccept( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogSocketAccept.html", &theLog, false);
+logger logProcessStats( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogWorkerProcessStats.html", &theLog, false);
+logger logOpenSSL( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogOpenSSL.html", &theLog, false);
+logger logEmail("LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogEmail.html", &theLog, false);
 Calculator theParser;
 FormatExpressions consoleFormat;
 Crasher crash;

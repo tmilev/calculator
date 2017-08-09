@@ -228,6 +228,7 @@ std::string DatabaseStrings::databaseUser="ace";
 std::string DatabaseStrings::theDatabaseName="aceDB";
 std::string DatabaseStrings::deadlinesTableName="deadlines";
 std::string DatabaseStrings::infoColumnInDeadlinesTable="deadlines";
+std::string DatabaseStrings::courseInfoColumnLabel="courseInfo";
 
 std::string DatabaseStrings::problemWeightsTableName="problemWeights";
 std::string DatabaseStrings::problemWeightsIdColumnName="idInProblemInfo";
@@ -1999,15 +2000,26 @@ bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expressi
 bool DatabaseRoutines::innerRepairDatabaseEmailRecords
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerRepairDatabaseEmailRecords");
-  return false;
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "Function available to logged-in admins only. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=20000;
+  (void) input;//prevent unused parameter, portable
   DatabaseRoutines theRoutines;
+  out << "Testing/repairing database ... Comments:<br>";
+  std::stringstream comments;
+  theRoutines.startMySQLDatabase(&comments, 0);
+  out << comments.str();
   List<List<std::string> > theUserTable;
   List<std::string> labels;
-  std::stringstream out;
   if (!theRoutines.FetchAllUsers(theUserTable, labels, out))
     return output.AssignValue(out.str(), theCommands);
   int emailColumn=labels.GetIndex("email");
   int usernameColumn=labels.GetIndex(DatabaseStrings::userColumnLabel);
+  int passwordColumn=labels.GetIndex("password");
+  int activationTokenColumn=labels.GetIndex("activationToken");
   if (emailColumn==-1)
   { out << "Couldn't find email column. ";
     return output.AssignValue(out.str(), theCommands);
@@ -2016,84 +2028,65 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
   { out << "Couldn't find username column. ";
     return output.AssignValue(out.str(), theCommands);
   }
+  if (passwordColumn==-1)
+  { out << "Couldn't find password column. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  if (activationTokenColumn==-1)
+  { out << "Couldn't find activation token column. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
   HashedList<std::string, MathRoutines::hashString> emailsRegistered;
   for (int i=0; i<theUserTable.size; i++)
   { std::string currentEmail=theUserTable[i][emailColumn];
     if (emailsRegistered.Contains(currentEmail))
-    { out << "Email " << currentEmail << "repeated. ";
+    { out << "Fatal error: email " << currentEmail << "repeated. ";
       return output.AssignValue(out.str(), theCommands);
     }
   }
-/*
+  int numCorrections=0;
+  UserCalculator currentUser;
+  currentUser.currentTable=DatabaseStrings::usersTableName;
   for (int i=0; i<theUserTable.size; i++)
   { std::string currentUserName=theUserTable[i][usernameColumn];
-    std::string currentEmail=theUserTable[emailColumn];
+    std::string currentEmail=theUserTable[i][emailColumn];
     if (currentEmail!="")
       continue;
-    if (currentUserName.find('@')==std::string::npos)
+    if (!EmailRoutines::IsOKEmail(currentUserName, 0))
       continue;
-        if (emailsRegistered.Contains(currentEmail))
-        { out << "This shouldn't happen: username: " << currentUserName
-          << " has no corresponding email. At the same time, the username appears to be an email, and "
-          << " that same email has been registered with another account. "
-          << " Please resolve the matter with the user. ";
-          continue;
-        }
-    if (!currentUser.Iexist(*this,0))
-    { if (!currentUser.CreateMeIfUsernameUnique(*this, &comments))
-      { comments << "Failed to create user: " << currentUser.username.value;
-        result=false;
-        continue;
-      } else
-        outputNumNewUsers++;
-      if (isEmail)
-        currentUser.SetColumnEntry("email", theEmails[i], *this, &comments);
-    } else
-    { if (!currentUser.FetchOneUserRow(*this, &comments))
-        result=false;
-      outputNumUpdatedUsers++;
+    if (emailsRegistered.Contains(currentEmail))
+    { out << "<br>This shouldn't happen: username: " << currentUserName
+      << " has no corresponding email. At the same time, the username appears to be an email, and "
+      << " that same email has been registered with another account. "
+      << " Please resolve the matter with the user. ";
+      continue;
     }
-    //currentUser may have its updated entries modified by the functions above.
-    currentUser.currentTable=DatabaseStrings::usersTableName;
-    currentUser.currentCourses = theGlobalVariables.GetWebInput("courseHome");
-    currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
-    currentUser.SetColumnEntry
-    (DatabaseStrings::userCurrentCoursesColumnLabel,
-     currentUser.currentCourses.value, *this, &comments);
-    currentUser.SetColumnEntry
-    (DatabaseStrings::problemWeightsIdColumnName,
-     currentUser.currentCourses.value, *this, &comments);
-    if (thePasswords.size==0 || thePasswords.size!=theEmails.size)
-    { if (!currentUser.ComputeAndStoreActivationToken(&comments, *this))
-        result=false;
-    } else
-    { currentUser.enteredPassword=thePasswords[i];
-      //stOutput << "Debug: user:<br>" << currentUser.username.value << "<br>password:<br>"
-      //<< HtmlRoutines::ConvertStringToURLString(thePasswords[i]) << "<br>";
-      if (!currentUser.SetPassword(*this, &comments))
-        result=false;
-      currentUser.SetColumnEntry("activationToken", "activated", *this, &comments);
-      if (currentUser.email!="")
-        currentUser.ComputeAndStoreActivationStats(&comments, &comments, *this);
+    currentUser.username=currentUserName;
+    currentUser.email=currentUserName;
+    if (!currentUser.SetColumnEntry("email", currentUser.email.value, theRoutines, &comments))
+    { out << "<br>This shouldn't happen: failed to set email for " << currentUser.username.value << ". ";
+      continue;
     }
+    numCorrections++;
+    out << "<br>Correction " << numCorrections << ": user " << currentUser.username.value
+    << " had no email but the username appears to be a valid email. "
+    << "I have therefore set the user's email address equal to the user's username. ";
   }
-
-
-
-
-  std::stringstream out;
-  if (!theGlobalVariables.UserDefaultHasAdminRights())
-  { out << "Function available to logged-in admins only. ";
-    return output.AssignValue(out.str(), theCommands);
+  for (int i=0; i<theUserTable.size; i++)
+  { currentUser.username=theUserTable[i][usernameColumn];
+    std::string currentPassword=theUserTable[i][passwordColumn];
+    std::string currentActivationToken=theUserTable[i][activationTokenColumn];
+    if (currentActivationToken=="activated")
+      continue;
+    if (currentPassword=="")
+      continue;
+    numCorrections++;
+    out << "<br>Correction " << numCorrections << ": "
+    << " user: " << currentUser.username.value << " has a password but his activation token "
+    << "has not been set to activated. Fixing. ";
+    currentUser.SetColumnEntry("activationToken", "activated", theRoutines, &comments);
   }
-  (void) input;//prevent unused parameter, portable
-  DatabaseRoutines theRoutines;
-  out << "Testing database ... Comments:<br>";
-  std::stringstream comments;
-  theRoutines.startMySQLDatabase(&comments, 0);
-  out << comments.str();
   return output.AssignValue(out.str(), theCommands);
-  */
 }
 
 bool EmailRoutines::SendEmailWithMailGun

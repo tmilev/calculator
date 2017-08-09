@@ -447,6 +447,19 @@ std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileNa
   return "";
 }
 
+std::string FileOperations::ConvertStringToLatexFileName(const std::string& input)
+{ MacroRegisterFunctionWithName("FileOperations::ConvertStringToLatexFileName");
+  std::stringstream out;
+  for (unsigned i=0; i<input.size(); i++)
+    if (MathRoutines::isADigit(input[i]) || MathRoutines::isALatinLetter(input[i]))
+      out << input[i];
+    else
+      out << "_" << (int) input[i];
+  std::string result=out.str();
+  MathRoutines::StringTrimToLength(result, 220);
+  return result;
+}
+
 std::string FileOperations::ConvertStringToEscapedStringFileNameSafe(const std::string& input)
 { MacroRegisterFunctionWithName("FileOperations::ConvertStringToEscapedStringFileNameSafe");
   std::stringstream out;

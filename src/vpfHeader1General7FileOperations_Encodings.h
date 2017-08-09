@@ -24,6 +24,7 @@ public:
   static List<bool>& GetSafeFileChars();
 
   static std::string ConvertStringToEscapedStringFileNameSafe(const std::string& input);
+  static std::string ConvertStringToLatexFileName(const std::string& input);
   static bool LoadFileToStringUnsecure
   (const std::string& fileNameUnsecure, std::string& output, std::stringstream& commentsOnFailure);
   static bool LoadFileToStringVirtual

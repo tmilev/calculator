@@ -65,6 +65,7 @@ class UserCalculatorData
   MySQLdata currentCourses;
   MySQLdata currentCoursesDeadlineInfoString;
   MySQLdata userGroup;
+  MySQLdata courseInfo;
 
   std::string enteredPassword;
   std::string actualShaonedSaltedPassword;
@@ -106,6 +107,7 @@ public:
   static std::string usersTableName;
   static std::string userGroupLabel;
   static std::string userCurrentCoursesColumnLabel;
+  static std::string courseInfoColumnLabel;
 
   static std::string deadlinesTableName;
   static std::string infoColumnInDeadlinesTable;

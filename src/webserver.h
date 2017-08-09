@@ -162,6 +162,7 @@ public:
   std::string closeIndentTag(const std::string& theTag);
   int ProcessSetProblemDatabaseInfo();
   int ProcessSlidesFromSource();
+  int ProcessSlidesSource();
   int ProcessClonePage();
   int ProcessModifyPage();
   int ProcessAddUserEmails();

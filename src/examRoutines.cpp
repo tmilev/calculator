@@ -4062,31 +4062,41 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   if (this->slidesPrintable!="")
     this->displaySlidesPrintableLink = "<a href=\"" + this->slidesPrintable + "\" class=\"slidesLink\">Printable slides</a>";
   if (this->slidesProjector=="" && this->slidesPrintable=="" && this->slidesSources.size>0)
-  { std::stringstream slideFromSourceStreamHandout, slideFromSourceStreamProjector;
+  { std::stringstream slideFromSourceStreamHandout, slideFromSourceStreamProjector, sourceStream, sourceStreamCommon;
     slideFromSourceStreamHandout << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
     << "?request=slidesFromSource&";
-    slideFromSourceStreamHandout << "title="
+    sourceStream << "<a href=\""
+    << theGlobalVariables.DisplayNameExecutable
+    << "?request=slidesSource&";
+    sourceStreamCommon << "title="
     << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
-    //stOutput << "DEBUG, round 2: header: "  << owner.slidesSourcesHeaders.ToStringCommaDelimited()
-    //<< "; slide sources: " << this->slidesSources.ToStringCommaDelimited();
     int sourceCounter=0;
     for (int i=0; i<owner.slidesSourcesHeaders.size; i++)
     { sourceCounter++;
-      slideFromSourceStreamHandout << "file" << sourceCounter
+      sourceStreamCommon << "file" << sourceCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(owner.slidesSourcesHeaders[i], false) << "&";
     }
     for (int i=0; i<this->slidesSources.size; i++)
     { sourceCounter++;
-      slideFromSourceStreamHandout << "file" << sourceCounter
+      sourceStreamCommon << "file" << sourceCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(this->slidesSources[i], false) << "&";
     }
+    slideFromSourceStreamHandout << sourceStreamCommon.str();
     slideFromSourceStreamProjector << slideFromSourceStreamHandout.str();
+    sourceStream << sourceStreamCommon.str();
     slideFromSourceStreamHandout << "layout=printable&";
     slideFromSourceStreamHandout << "\" class=\"slidesLink\" target=\"_blank\">Printable slides</a>";
     slideFromSourceStreamProjector << "layout=projector&";
     slideFromSourceStreamProjector << "\" class=\"slidesLink\" target=\"_blank\">Slides</a>";
+    sourceStream << "layout=printable&";
+    sourceStream << "\" class=\"slidesLink\" download=\""
+    << FileOperations::ConvertStringToLatexFileName(this->displayTitle) << ".tex\">.tex</a>";
     this->displaySlidesLink=slideFromSourceStreamHandout.str() + slideFromSourceStreamProjector.str();
+    if (theGlobalVariables.UserDefaultHasAdminRights())
+      this->displaySlidesLink+=sourceStream.str();
+    if (theGlobalVariables.UserDefaultHasAdminRights())
+      this->displaySlidesLink+="<a class=\"slidesLink\" href=\"__modify()\">Modify</a>";
   }
   bool problemSolved=false;
   bool returnEmptyStringIfNoDeadline=false;

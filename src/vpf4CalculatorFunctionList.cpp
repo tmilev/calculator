@@ -103,10 +103,10 @@ void Calculator::initAdminFunctions()
    true);
   this->AddOperationInnerHandler
   ("RepairDatabaseEmailRecords", DatabaseRoutines::innerRepairDatabaseEmailRecords, "",
-   "Tests the connection to/existence of the database. ",
-   "TestDatabase(0)", false, true,
-   "DatabaseRoutines::innerTestDatabase",
-   "TestDatabase",
+   "Repairs username/email mismatches. Admin use only. ",
+   "TurnOnRules(RepairDatabaseEmailRecords); RepairDatabaseEmailRecords(0)", false, true,
+   "DatabaseRoutines::innerRepairDatabaseEmailRecords",
+   "RepairDatabaseEmailRecords",
    true);
 
 #endif // MACRO_use_MySQL

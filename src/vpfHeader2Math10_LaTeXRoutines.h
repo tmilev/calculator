@@ -19,6 +19,7 @@ class LaTeXcrawler
   std::string theFileNameWorkingCopy;
   std::string theFileNameWorkinGCopyPDF;
 
+  std::string targetLaTeX;
   std::string targetPDFbinaryContent;
   std::string targetPDFFileNameWithPathVirtual;
   std::string targetPDFFileNameWithLatexPath;
@@ -52,6 +53,7 @@ class LaTeXcrawler
   bool flagProjectorMode;
   bool flagForceSlideRebuild;
   bool flagDoChangeDirs;
+  bool flagCrawlTexSourcesRecursively;
   void AdjustDisplayTitle();
   bool ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
   bool ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
@@ -64,14 +66,7 @@ class LaTeXcrawler
   std::stringstream displayResult;
   std::stringstream errorStream;
   std::string ToString();
-  LaTeXcrawler()
-  { this->flagBuildSingleSlides=false;
-    this->flagProjectorMode=true;
-    this->flagForceSlideRebuild=false;
-    this->flagAddSlideToSVN=false;
-    this->flagDoChangeDirs=true;
-    this->ownerCalculator=0;
-  }
+  LaTeXcrawler();
 };
 
 #endif

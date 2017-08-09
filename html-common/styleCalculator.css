@@ -526,11 +526,11 @@ margin: 0 auto;
 }
 button.buttonLogin{
   display: inline;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
-  border-radius: 3px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
   background-color: #ccffcc;
-  padding: 3px;
+  padding: 5px;
   color: #444;
   cursor: pointer;
   margin-top: 0px;
@@ -539,6 +539,7 @@ button.buttonLogin{
   text-align: left;
   outline: none;
   font-size: 1.25em;
+  font-weight: bold;
   transition: 0.6s;
 }
 button.buttonLogin:hover {
@@ -579,11 +580,13 @@ problemLinkStyleSelectionTab{
 problemLinkStyleSelectionTab:hover{
   background-color: #dfdfdf;
 }
-
+.textInputUsername{
+font-size: 0.9em;
+font-weight: bold;
+}
 .g-signin2{
   width: 100%;
 }
-
 .g-signin2 > div{
   margin: 0 auto;
 }

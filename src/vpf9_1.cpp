@@ -59,7 +59,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     if (succeededToOpen)
       stOutput << "<hr>Crash dumped in file "
       << "<a href=\"/LogFiles/crashes/"
-      << HtmlRoutines::ConvertStringToURLString( theGlobalVariables.RelativePhysicalNameCrashLog, false)
+      << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.RelativePhysicalNameCrashLog, false)
       << "\" >"
       << theGlobalVariables.RelativePhysicalNameCrashLog
       << "</a>"

@@ -2697,7 +2697,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "<b>User:</b>"
   << "</td>"
   << "<td>"
-  << "<input type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
+  << "<input class=\"textInputUsername\" type=\"text\" id=\"username\" name=\"username\" placeholder=\"username\" ";
   if (theGlobalVariables.GetWebInput("username")!="")
     out << "value=\"" << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("username"), false) << "\" ";
   out << "required>";
@@ -2710,7 +2710,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "</td>";
   out
   << "<td>"
-  << "<input type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">"
+  << "<input class=\"textInputUsername\" type=\"password\" id=\"password\" name=\"password\" placeholder=\"password\" autocomplete=\"on\">"
   << "</td></tr>";
 //  out << "<tr><td></td><td>";
 //  out << "</td></tr>";
@@ -2724,12 +2724,12 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
     out << "value=\"selectCourseFromHtml\"";
   out << ">";
   out << "<input type=\"hidden\" name=\"googleToken\" id=\"googleToken\" value=\"\">";
-  out << "</form>";
+  out << "<br>";
   out << "<button class=\"buttonLogin\" type=\"submit\" value=\"Submit\" ";
   out << "action=\"" << theWebServer.GetActiveWorker().addressComputed;
   out << "\"";
   out << ">Login</button>";
-//  out << "<button onclick=\"submitLoginInfo();\">Login</button>";
+  out << "</form>";
   out << "<span id=\"loginResult\"></span>";
   out << "</div>";
   out << "<br>"
@@ -2746,7 +2746,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "<div class=\"divExternalLogin\">";
   out << "<script src=\"https://apis.google.com/js/platform.js\" async defer></script>";
   out << "<meta name=\"google-signin-client_id\" content=\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
-  out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\">button</div> "
+  out << "<div class=\"g-signin2\" data-onsuccess=\"onSignIn\">Google login unavailable (no Internet?).</div> "
   << "<br><br><button class=\"buttonLogin\" style=\"opacity:0; transition: 0.6s\" id=\"doSignInWithGoogleToken\" "
   << "onclick=\""
   << "document.getElementById('username').required=false;"
@@ -2762,9 +2762,11 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "}\n"
   << "</script>\n";
 
-  out << "<br><br><small>Log-in with google: creates account automatically if not already present.<br> "
-  << "<b style=\"color:green\">We do not store any personal information from google except your gmail email."
-  << "<br>We do not have access (and don't wish to have one) to your google password or other sensitive information.</span></b><br>"
+  out << "<br><small>Log-in with google: if not already present, creates account automatically. "
+  << "<br>Your username will be set to your gmail address. <br> "
+  << "<b style=\"color:green\">We do not store any personal information from google except your gmail address. "
+  << "<br>We do not have access (and don't wish to have one) "
+  << "<br>to your google password or other sensitive information. </span></b><br>"
   << "<br></small>"
   ;
   out << "</div>";
@@ -3466,6 +3468,50 @@ int WebWorker::ProcessSlidesFromSource()
   return 0;
 }
 
+int WebWorker::ProcessSlidesSource()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSlidesSource");
+  this->SetHeaderOKNoContentLength();
+  LaTeXcrawler theCrawler;
+  for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
+  { std::string theKey=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
+    //stOutput << "DEBUG: considering key: " << theKey
+    //<< " with value: " << theGlobalVariables.webArguments.theValues[i] << "<br>";
+    if (theKey!="fileName" && MathRoutines::StringBeginsWith(theKey, "file"))
+    { theCrawler.slideFileNamesVirtualWithPatH.AddOnTop
+      (MathRoutines::StringTrimWhiteSpace
+       (HtmlRoutines::ConvertURLStringToNormal
+       (theGlobalVariables.webArguments.theValues[i], false)));
+    }
+  }
+  theCrawler.desiredPresentationTitle=
+  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("title"), false);
+  std::stringstream comments;
+  if (theGlobalVariables.GetWebInput("layout")=="printable")
+    theCrawler.flagProjectorMode=false;
+  theCrawler.flagForceSlideRebuild=true;
+  theCrawler.flagCrawlTexSourcesRecursively=true;
+  if (!theCrawler.BuildOrFetchFromCachePresentationFromSlides(&comments, &comments))
+  { this->flagDoAddContentLength=true;
+    stOutput << "<!DOCTYPE html>"
+    << "<html>"
+    << "<head>"
+    << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+    << "</head>"
+    << "<body>"
+    << "<calculatorNavigation>"
+    << HtmlInterpretation::ToStringNavigation()
+    << "</calculatorNavigation>";
+    stOutput << comments.str();
+    stOutput << "</body></html>";
+    return 0;
+  }
+  this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: application/x-latex; Access-Control-Allow-Origin: *");
+  this->flagDoAddContentLength=true;
+  stOutput << theCrawler.targetLaTeX;
+  return 0;
+}
+
+
 int WebWorker::ProcessClonePage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessClonePage");
   this->SetHeaderOKNoContentLength();
@@ -4059,6 +4105,8 @@ int WebWorker::ServeClient()
     return this->ProcessModifyPage();
   else if (theGlobalVariables.userCalculatorRequestType=="slidesFromSource")
     return this->ProcessSlidesFromSource();
+  else if (theGlobalVariables.userCalculatorRequestType=="slidesSource")
+    return this->ProcessSlidesSource();
   else if (theGlobalVariables.userCalculatorRequestType=="clonePage")
     return this->ProcessClonePage();
   else if (theGlobalVariables.userCalculatorRequestType=="calculator")

@@ -453,6 +453,8 @@ std::string FileOperations::ConvertStringToLatexFileName(const std::string& inpu
   for (unsigned i=0; i<input.size(); i++)
     if (MathRoutines::isADigit(input[i]) || MathRoutines::isALatinLetter(input[i]))
       out << input[i];
+    else if (input[i]==' ' || input[i]==':')
+      out << "_";
     else
       out << "_" << (int) input[i];
   std::string result=out.str();
@@ -489,7 +491,7 @@ bool FileOperations::IsOKfileNameVirtual
   }
   if (theFilePath[0]=='.')
   { if (commentsOnFailure!=0)
-      *commentsOnFailure << "Invalid file name: " << theFileName << ": starts with dot.";
+      *commentsOnFailure << "Invalid file name: " << theFileName << ": starts with dot. ";
     return false;
   }
   for (unsigned i=0; i<theFilePath.size(); i++)
@@ -497,7 +499,7 @@ bool FileOperations::IsOKfileNameVirtual
       if (i+1<theFilePath.size())
         if (theFilePath[i+1]=='.')
         { if (commentsOnFailure!=0)
-           *commentsOnFailure << "Invalid file name: " << theFileName << ": has two consecutive dots.";
+           *commentsOnFailure << "Invalid file name: " << theFileName << ": has two consecutive dots. ";
           return false;
         }
   if (theFileNameNoPath.size()>0)

@@ -387,6 +387,31 @@ void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
   //this->crawlingResult << "%DEBUG: before error stream: opening: " << currentFileName << "\n";
   if (this->errorStream.str()!="")
     return;
+  std::string trimmedFileName=MathRoutines::StringTrimWhiteSpace(currentFileName);
+
+  ///////////
+  /// ALERT
+  ////potential security risk.
+  /// Not sure if the code below is secure enough.
+  /// If the folders read are not sanitized properly,
+  /// an attacker could get a .tex file with our site's private keys!
+  /// Touch very carefully.
+  std::string OKBeginning;
+  if (this->baseFolderStartFilePhysical!="")
+    OKBeginning = this->baseFolderStartFilePhysical + "../../";
+  else
+    OKBeginning = "../../freecalc";
+  std::string endFileName;
+  bool isOKfileName=false;
+  if (MathRoutines::StringBeginsWith(trimmedFileName, OKBeginning, &endFileName))
+    isOKfileName=FileOperations::IsOKfileNameVirtual(endFileName, false,  &this->errorStream);
+  else
+    isOKfileName=FileOperations::IsOKfileNameVirtual(currentFileName, false, &this->errorStream);
+  if (!isOKfileName)
+  { this->errorStream << "%Error fetching file: " << currentFileName;
+    this->crawlingResult << "%Error fetching file: " << currentFileName;
+    return;
+  }
   std::fstream theFile;
   //this->crawlingResult << "%DEBUG: opening: " << currentFileName << "\n";
   if (!FileOperations::OpenFileUnsecure(theFile, currentFileName, false, false, false))
@@ -521,8 +546,9 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   return true;
 }
 
-void LaTeXcrawler::AdjustDisplayTitle()
+std::string LaTeXcrawler::AdjustDisplayTitle(const std::string& input)
 { MacroRegisterFunctionWithName("LaTeXcrawler::AdjustDisplayTitle");
+  std::string result=input;
   List<std::string> ignoredTags;
   ignoredTags.AddOnTop("actualExamProblem");
   ignoredTags.AddOnTop("lectureTag");
@@ -531,28 +557,24 @@ void LaTeXcrawler::AdjustDisplayTitle()
   for (int i=0; i<ignoredTags.size; i++)
   { std::string closeTag = "</" + ignoredTags[i] + ">";
     std::string openTag  = "<"  + ignoredTags[i] + ">";
-    if (this->desiredPresentationTitle.find(openTag)!=std::string::npos &&
-        this->desiredPresentationTitle.find(closeTag)!=std::string::npos
-        )
-    { int start=this->desiredPresentationTitle.find(openTag);
-      int finish=this->desiredPresentationTitle.find(closeTag)+closeTag.size();
-      this->desiredPresentationTitle=this->desiredPresentationTitle.substr(0, start)+
-      this->desiredPresentationTitle.substr(finish);
+    if (input.find(openTag)!=std::string::npos && input.find(closeTag)!=std::string::npos)
+    { int start=input.find(openTag);
+      int finish=input.find(closeTag)+closeTag.size();
+      result=result.substr(0, start)+result.substr(finish);
     }
   }
-  if (this->desiredPresentationTitle.find("\\(\\LaTeX\\)")!=std::string::npos )
-  { int pos=this->desiredPresentationTitle.find("\\(\\LaTeX\\)");
-    this->desiredPresentationTitle=
-    this->desiredPresentationTitle.substr(0, pos)+"\\LaTeX"+
-    this->desiredPresentationTitle.substr(pos + ((std::string) "\\(\\LaTeX\\)").size());
+  if (result.find("\\(\\LaTeX\\)")!=std::string::npos)
+  { int pos=result.find("\\(\\LaTeX\\)");
+    result = result.substr(0, pos)+"\\LaTeX"+ result.substr(pos + ((std::string) "\\(\\LaTeX\\)").size());
   }
-  this->desiredPresentationTitle=MathRoutines::StringTrimWhiteSpace(this->desiredPresentationTitle);
+  result=MathRoutines::StringTrimWhiteSpace(result);
+  return result;
 }
 
 bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides");
-  this->AdjustDisplayTitle();
+  this->desiredPresentationTitle = this->AdjustDisplayTitle(this->desiredPresentationTitle);
   if (!this->ExtractPresentationFileNames(commentsOnFailure, commentsGeneral))
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "Failed to extract file names. ";

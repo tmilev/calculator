@@ -7,6 +7,7 @@
 #include "vpfHeader8HtmlInterpretation.h"
 #include "vpfHeader8HtmlSnippets.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
+#include "vpfHeader2Math10_LaTeXRoutines.h"
 #include <iomanip>
 
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCustomCode
@@ -4091,11 +4092,10 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     slideFromSourceStreamProjector << "\" class=\"slidesLink\" target=\"_blank\">Slides</a>";
     sourceStream << "layout=printable&";
     sourceStream << "\" class=\"slidesLink\" download=\""
-    << FileOperations::ConvertStringToLatexFileName(this->displayTitle) << ".tex\">.tex</a>";
+    << FileOperations::ConvertStringToLatexFileName(LaTeXcrawler::AdjustDisplayTitle(this->title)) << ".tex\">.tex</a>";
     this->displaySlidesLink=slideFromSourceStreamHandout.str() + slideFromSourceStreamProjector.str();
-    if (theGlobalVariables.UserDefaultHasAdminRights())
-      this->displaySlidesLink+=sourceStream.str();
-    if (theGlobalVariables.UserDefaultHasAdminRights())
+    this->displaySlidesLink+=sourceStream.str();
+    if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn())
       this->displaySlidesLink+="<a class=\"slidesLink\" style=\"color:gray\" href=\""
       + theGlobalVariables.DisplayNameExecutable
       + "?request=modifySlide&topicID=" + this->id + "\">Modify</a>";

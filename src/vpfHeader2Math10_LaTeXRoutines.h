@@ -54,7 +54,7 @@ class LaTeXcrawler
   bool flagForceSlideRebuild;
   bool flagDoChangeDirs;
   bool flagCrawlTexSourcesRecursively;
-  void AdjustDisplayTitle();
+  static std::string AdjustDisplayTitle(const std::string& input);
   bool ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
   bool ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void Crawl();

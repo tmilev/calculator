@@ -4096,7 +4096,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     if (theGlobalVariables.UserDefaultHasAdminRights())
       this->displaySlidesLink+=sourceStream.str();
     if (theGlobalVariables.UserDefaultHasAdminRights())
-      this->displaySlidesLink+="<a class=\"slidesLink\" href=\"__modify()\">Modify</a>";
+      this->displaySlidesLink+="<a class=\"slidesLink\" style=\"color:gray\" href=\""
+      + theGlobalVariables.DisplayNameExecutable
+      + "?request=modifySlide&topicID=" + this->id + "\">Modify</a>";
   }
   bool problemSolved=false;
   bool returnEmptyStringIfNoDeadline=false;

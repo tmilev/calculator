@@ -50,6 +50,10 @@ int JSData::GetKeyIndex(const std::string& key)
   return -1;
 }
 
+void JSData::SetKeyValue(const std::string& key, const JSData& value)
+{ (*this)[key]=value;
+}
+
 JSData& JSData::operator[](const std::string& key)
 { this->type = this->JSObject;
   for (int i=0; i<this->obj.size; i++)

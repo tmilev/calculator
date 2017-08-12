@@ -736,8 +736,11 @@ std::string DatabaseRoutines::ToString()
 std::string UserCalculator::ToString()
 { MacroRegisterFunctionWithName("UserCalculator::ToString");
   std::stringstream out;
-  out << "Calculator user: " << this->username.value << "<br>Section: " << this->userGroup.value
-  << "<br>Sections taught: " << this->sectionsTaughtByUserString.value
+
+  out << "Calculator user: " << this->username.value
+  << "<br>Section: computed: " << this->courseInfo.currentSectionComputed
+  << ", in DB: " << this->courseInfo.currentSectionInDB
+  << "<br>Sections taught: " << this->courseInfo.sectionsTaughtByUserString
   << ""
   ;
 
@@ -751,14 +754,15 @@ std::string UserCalculator::ToString()
     << "; points: "
     << this->theProblemData.theValues[i].Points
     << ";";
-    if (!this->theProblemData.theValues[i].adminData.GetWeightFromSection(this->userGroup.value, weightRat))
+    if (!this->theProblemData.theValues[i].adminData.GetWeightFromSection
+        (this->courseInfo.currentSectionComputed, weightRat))
       out << " (weight not available). ";
     else
       out << " weight: " << weightRat.ToString();
   }
   out << "<br>Deadline info: "
   << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml
-  (this->currentCoursesDeadlineInfoString.value);
+  (this->courseInfo.deadlinesString);
   return out.str();
 }
 
@@ -857,15 +861,6 @@ bool UserCalculator::FetchOneUserRow
   //<-Important! Database lookup may be
   //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
   //The preceding line of code guarantees we have read the username as it is stored in the DB.
-  if (theGlobalVariables.UserStudentVieWOn() && this->userRole=="admin" &&
-      theGlobalVariables.GetWebInput("studentSection")!="")
-  //<- warning, the user may not be
-  //fully logged-in yet so theGlobalVariables.UserDefaultHasAdminRights()
-  //does not work right.
-    this->userGroup=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
-  else
-    this->userGroup=this->GetSelectedRowEntry(DatabaseStrings::userGroupLabel);
-
   this->actualShaonedSaltedPassword=this->GetSelectedRowEntry("password");
   this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
   this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");
@@ -877,37 +872,26 @@ bool UserCalculator::FetchOneUserRow
     this->flagUserHasActivationToken=true;
   if (this->actualShaonedSaltedPassword=="")
     this->flagUserHasNoPassword=true;
-  bool courseHomeFromDB=true;
-  if (this->userRole=="admin")
-    if (theGlobalVariables.GetWebInput("courseHome")!="")
-    { this->currentCourses=
-      HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"),false);
-      this->problemInfoRowId=
-      this->currentCourses.value;
-      courseHomeFromDB=false;
-    }
-  if (courseHomeFromDB)
-  { this->currentCourses=this->GetSelectedRowEntry
-    (DatabaseStrings::userCurrentCoursesColumnLabel);
-    this->problemInfoRowId=this->GetSelectedRowEntry
-    (DatabaseStrings::problemWeightsIdColumnName);
-  }
-  this->sectionsTaughtByUserString=this->GetSelectedRowEntry(DatabaseStrings::sectionsTaughtByUser);
+  this->courseInfo.rawStringStoredInDB=
+  this->GetSelectedRowEntry(DatabaseStrings::courseInfoColumnLabel);
+  if (this->courseInfo.rawStringStoredInDB=="")
+    this->ComputeCourseInfoFromOtherEntriesOld(theRoutines, failureStream);
+  this->AssignCourseInfoString(failureStream);
   std::string reader;
   //stOutput << "DEBUG:  GOT to hereE!!!";
-  if (this->currentCourses!="")
+  if (this->courseInfo.deadlineSchemaIDComputed!="")
   { std::stringstream localFailureStream;
     if (theRoutines.FetchEntry
         (DatabaseStrings::userCurrentCoursesColumnLabel,
-         this->currentCourses,
+         this->courseInfo.deadlineSchemaIDComputed,
          DatabaseStrings::deadlinesTableName,
          DatabaseStrings::infoColumnInDeadlinesTable,
          reader,
          &localFailureStream))
-      this->currentCoursesDeadlineInfoString=reader;
-    else if(! theRoutines.InsertRow
+      this->courseInfo.deadlinesString=reader;
+    else if(!theRoutines.InsertRow
         (DatabaseStrings::userCurrentCoursesColumnLabel,
-         this->currentCourses.value,
+         this->courseInfo.deadlineSchemaIDComputed,
          DatabaseStrings::deadlinesTableName,
          &localFailureStream))
       if (failureStream!=0)
@@ -916,23 +900,90 @@ bool UserCalculator::FetchOneUserRow
   //  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
   //  << " this->currentCoursesInfoString:  " << this->currentCoursesInfoString.value;
   //stOutput << "DEBUG: problem info row id: " << this->problemInfoRowId.value;
-  if (this->problemInfoRowId!="")
+  if (this->courseInfo.problemWeightSchemaIDComputed!="")
   { std::stringstream localFailureStream;
     if (theRoutines.FetchEntry
         (DatabaseStrings::problemWeightsIdColumnName,
-         this->problemInfoRowId,
+         this->courseInfo.problemWeightSchemaIDComputed,
          DatabaseStrings::problemWeightsTableName,
          DatabaseStrings::infoColumnInProblemWeightsTable,
          reader,
          &localFailureStream))
-      this->problemInfoString=reader;
+      this->courseInfo.problemWeightString=reader;
     else if(! theRoutines.InsertRow
         (DatabaseStrings::problemWeightsIdColumnName,
-         this->problemInfoRowId.value, DatabaseStrings::problemWeightsTableName,
+         this->courseInfo.problemWeightSchemaIDComputed,
+         DatabaseStrings::problemWeightsTableName,
          &localFailureStream))
       if (failureStream!=0)
         *failureStream << localFailureStream.str();
   }
+  return true;
+}
+
+std::string CourseAndUserInfo::ToStringHumanReadable()
+{ MacroRegisterFunctionWithName("CourseAndUserInfo::ToStringHumanReadable");
+  std::stringstream out;
+  out << "problemWeightSchema: " << this->problemWeightSchemaIDComputed << "\n<br>\n";
+  out << "sectionsTaught: "      << this->sectionsTaughtByUserString << "\n<br>\n";
+  out << "instructor: "          << this->currentInstructorInDB      << "\n<br>\n";
+  out << "currentCourse: "       << this->currentCourseComputed      << "\n<br>\n";
+  out << "studentSection: "      << this->currentSectionInDB         << "\n<br>\n";
+  return out.str();
+}
+
+std::string CourseAndUserInfo::ToStringForDBStorage()
+{ MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
+  JSData theCourseInfo;
+  theCourseInfo.type=theCourseInfo.JSObject;
+  theCourseInfo["problemWeightSchema"]= this->problemWeightSchemaIDComputed;
+  theCourseInfo["sectionsTaught"]     = this->sectionsTaughtByUserString;
+  theCourseInfo["instructor"]         = this->currentInstructorInDB;
+  theCourseInfo["currentCourse"]      = this->currentCourseComputed;
+  theCourseInfo["studentSection"]     = this->currentSectionInDB;
+  return theCourseInfo.ToString(false);
+}
+
+bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
+{ MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
+  JSData theCourseInfo;
+  theCourseInfo.readstring(this->courseInfo.rawStringStoredInDB, errorStream);
+  this->courseInfo.problemWeightSchemaIDComputed=theCourseInfo["problemWeightSchema"].string;
+  this->courseInfo.sectionsTaughtByUserString=theCourseInfo["sectionsTaught"].string;
+  this->courseInfo.currentInstructorInDB=theCourseInfo["instructor"].string;
+  this->courseInfo.currentCourseComputed=theCourseInfo["currentCourse"].string;
+  this->courseInfo.currentSectionInDB=theCourseInfo["studentSection"].string;
+  if (theGlobalVariables.UserStudentVieWOn() && this->userRole=="admin" &&
+      theGlobalVariables.GetWebInput("studentSection")!="")
+  //<- warning, the user may not be
+  //fully logged-in yet so theGlobalVariables.UserDefaultHasAdminRights()
+  //does not work right.
+    this->courseInfo.currentSectionComputed=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
+  else
+    this->courseInfo.currentSectionComputed=this->courseInfo.currentSectionInDB;
+  this->courseInfo.currentCourseComputed=this->courseInfo.currentCourseInDB;
+  if (this->userRole=="admin")
+    if (theGlobalVariables.GetWebInput("courseHome")!="")
+    { this->courseInfo.currentCourseComputed=
+      HtmlRoutines::ConvertURLStringToNormal
+      (theGlobalVariables.GetWebInput("courseHome"), false);
+    }
+  return true;
+}
+
+bool UserCalculator::ComputeCourseInfoFromOtherEntriesOld(DatabaseRoutines& theRoutines, std::stringstream* failureStream)
+{ MacroRegisterFunctionWithName("UserCalculator::ComputeCourseInfo");
+  JSData theCourseInfo;
+  theCourseInfo.type=theCourseInfo.JSObject;
+  theCourseInfo["sectionTaught"]=this->GetSelectedRowEntry(DatabaseStrings::sectionsTaughtByUser);
+  theCourseInfo["currentCourse"]=this->GetSelectedRowEntry(DatabaseStrings::userCurrentCoursesColumnLabel);
+  theCourseInfo["studentSection"]=this->GetSelectedRowEntry(DatabaseStrings::userGroupLabel);
+  this->courseInfo.rawStringStoredInDB=theCourseInfo.ToString(false);
+  this->SetColumnEntry(DatabaseStrings::courseInfoColumnLabel, this->courseInfo.rawStringStoredInDB, theRoutines, failureStream);
+  this->SetColumnEntry(DatabaseStrings::problemWeightsIdColumnName, "", theRoutines, failureStream);
+  this->SetColumnEntry(DatabaseStrings::sectionsTaughtByUser, "", theRoutines, failureStream);
+  this->SetColumnEntry(DatabaseStrings::userGroupLabel, "", theRoutines, failureStream);
+  this->SetColumnEntry(DatabaseStrings::userCurrentCoursesColumnLabel, "", theRoutines, failureStream);
   return true;
 }
 
@@ -1588,14 +1639,11 @@ bool DatabaseRoutines::AddUsersFromEmails
     }
     //currentUser may have its updated entries modified by the functions above.
     currentUser.currentTable=DatabaseStrings::usersTableName;
-    currentUser.currentCourses = theGlobalVariables.GetWebInput("courseHome");
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
-    currentUser.SetColumnEntry
-    (DatabaseStrings::userCurrentCoursesColumnLabel,
-     currentUser.currentCourses.value, *this, &comments);
-    currentUser.SetColumnEntry
-    (DatabaseStrings::problemWeightsIdColumnName,
-     currentUser.currentCourses.value, *this, &comments);
+    currentUser.courseInfo.currentCourseInDB= theGlobalVariables.GetWebInput("courseHome");
+    currentUser.courseInfo.currentSectionInDB=userGroup;
+    currentUser.courseInfo.currentInstructorInDB=theGlobalVariables.userDefault.username.value;
+    currentUser.courseInfo.rawStringStoredInDB=currentUser.courseInfo.ToStringForDBStorage();
     if (thePasswords.size==0 || thePasswords.size!=theEmails.size)
     { if (!currentUser.ComputeAndStoreActivationToken(&comments, *this))
         result=false;
@@ -2005,6 +2053,12 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
   out << "Testing/repairing database ... Comments:<br>";
   std::stringstream comments;
   theRoutines.startMySQLDatabase(&comments, 0);
+  if (!theRoutines.ColumnExists(DatabaseStrings::courseInfoColumnLabel, DatabaseStrings::usersTableName, out))
+  { out << "Column " << DatabaseStrings::courseInfoColumnLabel << ": "
+    << " does not exist, creating ...";
+    if (!theRoutines.CreateColumn(DatabaseStrings::courseInfoColumnLabel, DatabaseStrings::usersTableName, out))
+      out << "Failed to create column: " << DatabaseStrings::courseInfoColumnLabel << "<br>";
+  }
   out << comments.str();
   List<List<std::string> > theUserTable;
   List<std::string> labels;
@@ -2079,6 +2133,10 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
     << " user: " << currentUser.username.value << " has a password but his activation token "
     << "has not been set to activated. Fixing. ";
     currentUser.SetColumnEntry("activationToken", "activated", theRoutines, &comments);
+  }
+  for (int i=0; i<theUserTable.size; i++)
+  { currentUser.username=theUserTable[i][usernameColumn];
+    currentUser.FetchOneUserRow(theRoutines, &comments);
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -2569,16 +2627,16 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std
   }
   std::stringstream queryStream;
   queryStream << "INSERT INTO " << theRoutines.theDatabaseName
-  << ".users(username, " << DatabaseStrings::userCurrentCoursesColumnLabel << ", "
-  << DatabaseStrings::problemWeightsIdColumnName;
+  << ".users(username, " << DatabaseStrings::courseInfoColumnLabel;
+  MySQLdata courseInfoData;
+  courseInfoData=this->courseInfo.ToStringForDBStorage();
   if (this->email.value!="")
     queryStream << ", email";
   queryStream << ")"
   << " VALUES("
   << this->username.GetDatA() << ", "
-  << this->currentCourses.GetDatA()
-  << ", "
-  << this->currentCourses.GetDatA();
+  << courseInfoData.GetDatA()
+  ;
   if (this->email.value!="")
     queryStream << ", " << this->email.GetDatA();
   queryStream << ")";
@@ -2673,9 +2731,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   << "activationTokenCreationTime LONGTEXT, "
   << "userRole LONGTEXT, "
   << "userInfo LONGTEXT, "
-  << DatabaseStrings::problemWeightsIdColumnName << " LONGTEXT, "
-  << DatabaseStrings::userCurrentCoursesColumnLabel << " LONGTEXT, "
-  << DatabaseStrings::sectionsTaughtByUser << " LONGTEXT, "
+  << DatabaseStrings::courseInfoColumnLabel << " LONGTEXT, "
   << "problemData LONGTEXT "
   ;
   if (!this->CreateTable

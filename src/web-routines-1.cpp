@@ -894,7 +894,10 @@ int WebWorker::ProcessForgotLogin()
   stOutput << "<span style=\"color:green\"><b>"
   << "Your email is on record. "
   << "</b></span>";
-  this->DoSetEmail(theRoutines, theUser, &out, &out, 0);
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    this->DoSetEmail(theRoutines, theUser, &out, &out, 0);
+  else
+    this->DoSetEmail(theRoutines, theUser, &out, &out, &out);
   stOutput << out.str();
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
   << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";

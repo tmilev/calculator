@@ -44,6 +44,27 @@ public:
   std::string GetIdentifieR()const;
 };
 
+struct CourseAndUserInfo
+{
+public:
+  std::string problemWeightSchemaIDComputed;
+  std::string deadlineSchemaIDComputed;
+  std::string currentInstructorComputed;
+  std::string currentInstructorInDB;
+  std::string currentSemesterComputed;
+  std::string currentSemesterInDB;
+  std::string currentSectionInDB;
+  std::string currentSectionComputed;
+  std::string currentCourseComputed;
+  std::string currentCourseInDB;
+  std::string rawStringStoredInDB;
+  std::string sectionsTaughtByUserString;
+  std::string deadlinesString;
+  std::string problemWeightString;
+  std::string ToStringForDBStorage();
+  std::string ToStringHumanReadable();
+};
+
 class UserCalculatorData
 {
   public:
@@ -59,13 +80,7 @@ class UserCalculatorData
   MySQLdata enteredAuthenticationToken;
   MySQLdata actualAuthenticationToken;
   MySQLdata problemDataString;
-  MySQLdata problemInfoRowId;
-  MySQLdata problemInfoString;
-  MySQLdata sectionsTaughtByUserString;
-  MySQLdata currentCourses;
-  MySQLdata currentCoursesDeadlineInfoString;
-  MySQLdata userGroup;
-  MySQLdata courseInfo;
+  CourseAndUserInfo courseInfo;
 
   std::string enteredPassword;
   std::string actualShaonedSaltedPassword;
@@ -91,6 +106,7 @@ class UserCalculatorData
   bool flagUserHasActivationToken;
   bool flagUserHasNoPassword;
   UserCalculatorData();
+  bool AssignCourseInfoString(std::stringstream* errorStream);
   void reset();
   void clearPasswordFromMemory();
   void clearAuthenticationTokenAndPassword();

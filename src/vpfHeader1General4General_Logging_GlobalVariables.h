@@ -265,7 +265,7 @@ class logger
     this->initializeIfNeeded();
     if (this->carbonCopy!=0)
       (*(this->carbonCopy)) << toBePrinted;
-    if (theGlobalVariables.flagRunningBuiltInWebServer)
+    else if (theGlobalVariables.flagRunningBuiltInWebServer)
       std::cout << toBePrinted;
     this->CheckLogSize();
     if (this->flagStopWritingToFile)

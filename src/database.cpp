@@ -808,7 +808,7 @@ bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
 }
 
 bool UserCalculator::FetchOneUserRow
-(DatabaseRoutines& theRoutines, std::stringstream* failureStream)
+(DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
   if (this->currentTable=="")
     crash << "Calling UserCalculator::FetchOneUserRow with an empty table is forbidden. " << crash;
@@ -875,7 +875,7 @@ bool UserCalculator::FetchOneUserRow
   this->courseInfo.rawStringStoredInDB=
   this->GetSelectedRowEntry(DatabaseStrings::courseInfoColumnLabel);
   if (this->courseInfo.rawStringStoredInDB=="")
-    this->ComputeCourseInfoFromOtherEntriesOld(theRoutines, failureStream);
+    this->ComputeCourseInfoFromOtherEntriesOld(theRoutines, failureStream, commentsGeneral);
   this->AssignCourseInfoString(failureStream);
   std::string reader;
   //stOutput << "DEBUG:  GOT to hereE!!!";
@@ -971,7 +971,7 @@ bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
   return true;
 }
 
-bool UserCalculator::ComputeCourseInfoFromOtherEntriesOld(DatabaseRoutines& theRoutines, std::stringstream* failureStream)
+bool UserCalculator::ComputeCourseInfoFromOtherEntriesOld(DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("UserCalculator::ComputeCourseInfo");
   JSData theCourseInfo;
   theCourseInfo.type=theCourseInfo.JSObject;
@@ -984,6 +984,8 @@ bool UserCalculator::ComputeCourseInfoFromOtherEntriesOld(DatabaseRoutines& theR
   this->SetColumnEntry(DatabaseStrings::sectionsTaughtByUser, "", theRoutines, failureStream);
   this->SetColumnEntry(DatabaseStrings::userGroupLabel, "", theRoutines, failureStream);
   this->SetColumnEntry(DatabaseStrings::userCurrentCoursesColumnLabel, "", theRoutines, failureStream);
+  if (commentsGeneral!=0)
+    *commentsGeneral << "<br>Erasing old column entries for user: " << this->username.value;
   return true;
 }
 
@@ -2068,6 +2070,7 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
   int usernameColumn=labels.GetIndex(DatabaseStrings::userColumnLabel);
   int passwordColumn=labels.GetIndex("password");
   int activationTokenColumn=labels.GetIndex("activationToken");
+  ProgressReport theReport;
   if (emailColumn==-1)
   { out << "Couldn't find email column. ";
     return output.AssignValue(out.str(), theCommands);
@@ -2116,9 +2119,12 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
       continue;
     }
     numCorrections++;
-    out << "<br>Correction " << numCorrections << ": user " << currentUser.username.value
+    std::stringstream currentCorrection;
+    currentCorrection << "<br>Correction " << numCorrections << ": user " << currentUser.username.value
     << " had no email but the username appears to be a valid email. "
     << "I have therefore set the user's email address equal to the user's username. ";
+    out << currentCorrection.str();
+    theReport.Report(currentCorrection.str());
   }
   for (int i=0; i<theUserTable.size; i++)
   { currentUser.username=theUserTable[i][usernameColumn];
@@ -2129,14 +2135,29 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
     if (currentPassword=="")
       continue;
     numCorrections++;
-    out << "<br>Correction " << numCorrections << ": "
+    std::stringstream currentCorrection;
+    currentCorrection << "<br>Correction " << numCorrections << ": "
     << " user: " << currentUser.username.value << " has a password but his activation token "
     << "has not been set to activated. Fixing. ";
     currentUser.SetColumnEntry("activationToken", "activated", theRoutines, &comments);
+    out << currentCorrection.str();
+    theReport.Report(currentCorrection.str());
   }
   for (int i=0; i<theUserTable.size; i++)
-  { currentUser.username=theUserTable[i][usernameColumn];
-    currentUser.FetchOneUserRow(theRoutines, &comments);
+  { currentUser.reset();
+    std::stringstream currentUserComments;
+    currentUser.username=theUserTable[i][usernameColumn];
+    currentUser.FetchOneUserRow(theRoutines, &out, &currentUserComments);
+    if (currentUserComments.str().size()>0)
+    { numCorrections++;
+      std::stringstream currentCorrection;
+      currentCorrection
+      << "<br>Correction " << numCorrections << ": "
+      << " user: " << currentUser.username.value << " has old course info format in the database. "
+      << currentUserComments.str();
+      out << currentCorrection.str();
+      theReport.Report(currentCorrection.str());
+    }
   }
   return output.AssignValue(out.str(), theCommands);
 }

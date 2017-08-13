@@ -452,6 +452,7 @@ void UserCalculatorData::reset()
   for (unsigned i=0; i<this->username.value.size(); i++)
     this->username.value[i]=' ';
   this->username="";
+  this->email="";
   this->clearAuthenticationTokenAndPassword();
 }
 

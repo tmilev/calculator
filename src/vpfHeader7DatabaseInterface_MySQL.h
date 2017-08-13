@@ -277,9 +277,9 @@ public:
   std::string GetSelectedRowEntry(const std::string& theKey);
   std::string GetMySQLclauseIdentifyingUserByEmailOrID();
   bool ComputeCourseInfoFromOtherEntriesOld
-  (DatabaseRoutines& theRoutines, std::stringstream* failureStream);
+  (DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral);
   bool FetchOneUserRow
-  (DatabaseRoutines& theRoutines, std::stringstream* failureStream);
+  (DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral=0);
   bool FetchOneColumn
   (const std::string& columnNameUnsafe, std::string& outputUnsafe,
    DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);

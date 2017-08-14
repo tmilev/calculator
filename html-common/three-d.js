@@ -360,12 +360,12 @@ function PointsTwoD(inputLocation, inputColor)
   this.color=colorToRGB(inputColor);
   this.type="points";
   this.accountBoundingBox= function(inputOutputBox)
-  { for (i=0; i<this.location.length; i++)
+  { for (var i=0; i<this.location.length; i++)
       accountBoundingBox(this.location[i], inputOutputBox);
   };
   this.draw=function(theCanvas)
   { var theSurface=theCanvas.surface;
-    for (i=0; i < this.location.length; i++)
+    for (var i=0; i < this.location.length; i++)
     { theSurface.beginPath();
       theSurface.strokeStyle=colorRGBToString(this.color);
       theSurface.fillStyle=colorRGBToString(this.color );

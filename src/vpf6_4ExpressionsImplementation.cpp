@@ -2568,6 +2568,7 @@ std::string Expression::ToStringAllSlidersInExpression()const
 { HashedList<std::string, MathRoutines::hashString> boxNames;
   if (!this->HasInputBoxVariables(&boxNames))
     return "";
+  //stOutput << "DEBUG: I do have input boxes";
   if (this->owner->theObjectContainer.userInputBoxSliderDisplayed.size <
       this->owner->theObjectContainer.theUserInputTextBoxesWithValues.size())
     this->owner->theObjectContainer.resetSliders();
@@ -3147,8 +3148,15 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << "\\sqcup " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->owner->opEndStatement()))
   { bool createTable=(startingExpression!=0);
-    if (!createTable && this->size()>2)
+    bool createSingleTable=false;
+    if (createTable==false && theFormat!=0)
+    { createSingleTable= theFormat->flagMakingExpressionTableWithLatex;
+      theFormat->flagMakingExpressionTableWithLatex=false;
+    }
+    if (!createSingleTable && !createTable && this->size()>2)
       out << "(";
+    if (createSingleTable)
+      out << "<table class=\"tableCalculatorOutput\">";
     for (int i=1; i<this->children.size; i++)
     { const Expression currentE=(*this)[i];
       if (createTable)
@@ -3176,14 +3184,30 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << currentE.ToStringAllSlidersInExpression();
         out << "</td></tr>";
       } else
-      { out << currentE.ToString(theFormat);
-        if (i!=this->children.size-1)
+      { bool addLatexDelimiter=true;
+        if (createSingleTable)
+        { out << "<tr><td>\n";
+          addLatexDelimiter=!currentE.HasType<Plot>();
+          if (addLatexDelimiter)
+            out << "\\(";
+        }
+        out << currentE.ToString(theFormat);
+        //stOutput << "<hr>DEBUG: GOT TO HERE";
+        if (createSingleTable && addLatexDelimiter)
+          out << "\\)";
+        out << currentE.ToStringAllSlidersInExpression();
+        //stOutput << "<hr>DEBUG: GOT TO HERE";
+        if (createSingleTable)
+          out << "</td><tr>\n";
+        if (i!=this->children.size-1 && !createSingleTable)
           out << ";";
       }
       if (theFormat!=0)
         theFormat->flagExpressionIsFinal=isFinal;
     }
-    if (!createTable && this->size()>2)
+    if (createSingleTable)
+      out << "</table>";
+    if (!createSingleTable && !createTable && this->size()>2)
       out << ")";
   } else if (this->StartsWith(this->owner->opError(), 2))
   { this->owner->NumErrors++;

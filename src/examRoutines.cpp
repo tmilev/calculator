@@ -1840,6 +1840,7 @@ bool CalculatorHTML::InterpretProcessExecutedCommands
   (void) comments;
   FormatExpressions theFormat;
   theFormat.flagExpressionIsFinal=true;
+  theFormat.flagMakingExpressionTableWithLatex=true;
   theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
   theFormat.flagUseQuotes=false;
   theFormat.flagUseLatex=true;
@@ -1869,7 +1870,10 @@ bool CalculatorHTML::InterpretProcessExecutedCommands
     Expression currentExpr=theInterpreter.theProgramExpression[currentElt.commandIndex][1];
     if (currentExpr.StartsWith(theInterpreter.opEndStatement()) && currentExpr.size()==2)
       currentExpr=currentExpr[1];
+    if (currentExpr.StartsWith(theInterpreter.opEndStatement()))
+      currentElt.flagUseMathMode=false;
     theFormat.flagUseQuotes=false;
+    theFormat.flagMakingExpressionTableWithLatex=true;
     currentElt.interpretedCommand=  currentExpr.ToString(&theFormat);
     currentElt.flagUseDisplaystyleInMathMode= ( currentElt.content.find("\\displaystyle")!=std::string::npos);
     currentElt.flagUseMathMode=true;
@@ -2716,6 +2720,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before execution");
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
     return false;
+  if (theInterpreter.theProgramExpression.HasInputBoxVariables() )
+    outHeadPt2 << HtmlRoutines::GetJavascriptCalculatorPage();
 //////////////////////////////interpretation takes place before javascript generation as the latter depends on the former.
   if (this->flagIsExamProblem)
     outHeadPt2 << this->GetJavascriptSubmitAnswers();
@@ -2771,6 +2777,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time after execution");
   //first command and first syntactic element are the random seed and are ignored.
+  theInterpreter.theObjectContainer.resetSliders();
   if (!this->InterpretProcessExecutedCommands(theInterpreter, this->theContent, comments))
   { outBody << comments.str();
     this->outputHtmlBodyNoTag=outBody.str();

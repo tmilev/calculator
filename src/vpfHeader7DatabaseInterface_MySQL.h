@@ -334,7 +334,7 @@ class DatabaseRoutines
 public:
   std::string databasePassword;
   std::string hostname;
-  std::string databaseUser;
+  std::string theDatabaseUser;
   std::string theDatabaseName;
   int MaxNumRowsToFetch;
   bool flagFirstLogin;

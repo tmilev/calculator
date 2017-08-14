@@ -78,7 +78,7 @@ bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights()
     DatabaseRoutinesGlobalFunctions::CreateTable("instructors", comments);
   std::string notUsed;
   return DatabaseRoutinesGlobalFunctions::FetchEntry
-  (theGlobalVariables.userDefault.username.value, "instructors", DatabaseStrings::usersTableName, notUsed, comments);
+  (theGlobalVariables.userDefault.username.value, "instructors", DatabaseStrings::tableUsers, notUsed, comments);
 #else
   return false;
 #endif
@@ -207,7 +207,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
   DatabaseRoutines theRoutines;
   UserCalculator theUser;
   theUser.UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  theUser.currentTable=DatabaseStrings::usersTableName;
+  theUser.currentTable=DatabaseStrings::tableUsers;
   //stOutput << "<hr>DEBUG: logout: resetting token ... ";
   theUser.ResetAuthenticationToken(theRoutines, 0);
 //  stOutput << "token reset!... <hr>";
@@ -219,22 +219,33 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 #endif
 }
 
-std::string DatabaseStrings::userId="id";
-std::string DatabaseStrings::userColumnLabel="username";
-std::string DatabaseStrings::usersTableName="users";
-std::string DatabaseStrings::userGroupLabel="userInfo";
-std::string DatabaseStrings::userCurrentCoursesColumnLabel="currentCourses";
-std::string DatabaseStrings::databaseUser="ace";
+std::string DatabaseStrings::columnUserId="id";
+std::string DatabaseStrings::columnUsername="username";
+std::string DatabaseStrings::tableUsers="users";
+std::string DatabaseStrings::columnSection="userInfo";
+std::string DatabaseStrings::columnCurrentCourses="currentCourses";
+std::string DatabaseStrings::theDatabaseUser="ace";
 std::string DatabaseStrings::theDatabaseName="aceDB";
-std::string DatabaseStrings::deadlinesTableName="deadlines";
-std::string DatabaseStrings::infoColumnInDeadlinesTable="deadlines";
-std::string DatabaseStrings::courseInfoColumnLabel="courseInfo";
+std::string DatabaseStrings::tableDeadlines="deadlines";
+std::string DatabaseStrings::columnDeadlines="deadlines";
+std::string DatabaseStrings::columnDeadlinesSchema="deadlineSchema";
+std::string DatabaseStrings::columnCourseInfo="courseInfo";
+std::string DatabaseStrings::columnInstructor="instructor";
 
-std::string DatabaseStrings::problemWeightsTableName="problemWeights";
-std::string DatabaseStrings::problemWeightsIdColumnName="idInProblemInfo";
-std::string DatabaseStrings::infoColumnInProblemWeightsTable="problemWeights";
+std::string DatabaseStrings::tableProblemWeights="problemWeights";
+std::string DatabaseStrings::columnProblemWeightsSchema="problemWeightsSchema";
+std::string DatabaseStrings::columnProblemWeights="problemWeights";
 
-std::string DatabaseStrings::sectionsTaughtByUser="sectionList";
+std::string DatabaseStrings::columnSectionsTaught="sectionsTaught";
+List<std::string> DatabaseStrings::modifyableColumns;
+
+List<std::string>& DatabaseStrings::GetModifyableColumnsNotThreadSafe()
+{ MacroRegisterFunctionWithName("DatabaseStrings::GetModifyableColumnsNotThreadSafe");
+  if (DatabaseStrings::modifyableColumns.size==0) //<-warning: this is not thread-safe
+  { DatabaseStrings::modifyableColumns.AddOnTop(DatabaseStrings::columnCourseInfo);
+  }
+  return DatabaseStrings::modifyableColumns;
+}
 
 std::string MySQLdata::GetDatA()const
 { return "'" + this->GetDataNoQuotes() + "'";
@@ -405,8 +416,9 @@ std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string
     out << "<td>" << columnLabels[i] << "</td>";
   out << "</tr>";
   List<int> modifyableCols;
-  modifyableCols.AddOnTop(columnLabels.GetIndex("currentCourses"));
-  modifyableCols.AddOnTop(columnLabels.GetIndex(DatabaseStrings::problemWeightsIdColumnName));
+  modifyableCols.SetSize(DatabaseStrings::GetModifyableColumnsNotThreadSafe().size);
+  for (int i=0; i<modifyableCols.size; i++)
+    modifyableCols[i]=columnLabels.GetIndex(DatabaseStrings::columnCourseInfo);
   outputDatabaseKeyId= columnLabels[0];
   for (int i=0; i<theTable.size; i++)
   { out << "<tr>";
@@ -510,9 +522,7 @@ std::string DatabaseRoutines::ToStringModifyEntry()
   ("currentDatabaseDesiredColumn"), false);
   std::string desiredContent=HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
   ("desiredContent"), false);
-  List<std::string> allowedColumns;
-  allowedColumns.AddOnTop("currentCourses");
-  allowedColumns.AddOnTop(DatabaseStrings::problemWeightsIdColumnName);
+  List<std::string>& allowedColumns= DatabaseStrings::GetModifyableColumnsNotThreadSafe();
   if (!allowedColumns.Contains(currentDesiredColumn))
   { std::stringstream out;
     out << "<b style=\"color:red\">Modifying column: " << currentDesiredColumn << " is forbidden. "
@@ -738,10 +748,9 @@ std::string UserCalculator::ToString()
   std::stringstream out;
 
   out << "Calculator user: " << this->username.value
-  << "<br>Section: computed: " << this->courseInfo.currentSectionComputed
-  << ", in DB: " << this->courseInfo.currentSectionInDB
-  << "<br>Sections taught: " << this->courseInfo.sectionsTaughtByUserString
-  << ""
+  << "<br>Section: computed: " << this->courseInfo.sectionComputed
+  << ", in DB: " << this->courseInfo.getSectionInDB()
+  << "<br>Sections taught: " << this->courseInfo.getSectonsTaughtByUser()
   ;
 
   Rational weightRat;
@@ -755,7 +764,7 @@ std::string UserCalculator::ToString()
     << this->theProblemData.theValues[i].Points
     << ";";
     if (!this->theProblemData.theValues[i].adminData.GetWeightFromSection
-        (this->courseInfo.currentSectionComputed, weightRat))
+        (this->courseInfo.sectionComputed, weightRat))
       out << " (weight not available). ";
     else
       out << " weight: " << weightRat.ToString();
@@ -787,7 +796,7 @@ bool UserCalculator::FetchOneColumn
  DatabaseRoutines& theRoutines, std::stringstream* failureComments)
 { MacroRegisterFunctionWithName("UserCalculator::FetchOneColumn");
   return theRoutines.FetchEntry
-  (DatabaseStrings::userColumnLabel, this->username, this->currentTable,
+  (DatabaseStrings::columnUsername, this->username, this->currentTable,
    columnNameUnsafe, outputUnsafe, failureComments);
 }
 
@@ -851,13 +860,13 @@ bool UserCalculator::FetchOneUserRow
   for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
     if (theFieldQuery.allQueryResultStrings[i].size>0 )
       this->selectedRowFieldNamesUnsafe[i]=HtmlRoutines::ConvertURLStringToNormal(theFieldQuery.allQueryResultStrings[i][0], false);
-  if (this->currentTable!=DatabaseStrings::usersTableName)
+  if (this->currentTable!=DatabaseStrings::tableUsers)
     return true;
   this->actualActivationToken= this->GetSelectedRowEntry("activationToken");
-  this->userId=this->GetSelectedRowEntry(DatabaseStrings::userId);
+  this->userId=this->GetSelectedRowEntry(DatabaseStrings::columnUserId);
   this->email= this->GetSelectedRowEntry("email");
   this->userRole= this->GetSelectedRowEntry("userRole");
-  this->username=this->GetSelectedRowEntry(DatabaseStrings::userColumnLabel);
+  this->username=this->GetSelectedRowEntry(DatabaseStrings::columnUsername);
   //<-Important! Database lookup may be
   //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
   //The preceding line of code guarantees we have read the username as it is stored in the DB.
@@ -873,26 +882,30 @@ bool UserCalculator::FetchOneUserRow
   if (this->actualShaonedSaltedPassword=="")
     this->flagUserHasNoPassword=true;
   this->courseInfo.rawStringStoredInDB=
-  this->GetSelectedRowEntry(DatabaseStrings::courseInfoColumnLabel);
-  if (this->courseInfo.rawStringStoredInDB=="")
-    this->ComputeCourseInfoFromOtherEntriesOld(theRoutines, failureStream, commentsGeneral);
+  this->GetSelectedRowEntry(DatabaseStrings::columnCourseInfo);
+  if (this->courseInfo.rawStringStoredInDB=="" || this->GetSelectedRowEntry("userInfo")!="")
+  { if (commentsGeneral!=0)
+      this->ComputeCourseInfoFromOtherEntriesOld(theRoutines, failureStream, commentsGeneral);
+    else
+      this->ComputeCourseInfoFromOtherEntriesOld(theRoutines, failureStream, failureStream);
+  }
   this->AssignCourseInfoString(failureStream);
   std::string reader;
   //stOutput << "DEBUG:  GOT to hereE!!!";
   if (this->courseInfo.deadlineSchemaIDComputed!="")
   { std::stringstream localFailureStream;
     if (theRoutines.FetchEntry
-        (DatabaseStrings::userCurrentCoursesColumnLabel,
+        (DatabaseStrings::columnCurrentCourses,
          this->courseInfo.deadlineSchemaIDComputed,
-         DatabaseStrings::deadlinesTableName,
-         DatabaseStrings::infoColumnInDeadlinesTable,
+         DatabaseStrings::tableDeadlines,
+         DatabaseStrings::columnDeadlines,
          reader,
          &localFailureStream))
       this->courseInfo.deadlinesString=reader;
     else if(!theRoutines.InsertRow
-        (DatabaseStrings::userCurrentCoursesColumnLabel,
+        (DatabaseStrings::columnCurrentCourses,
          this->courseInfo.deadlineSchemaIDComputed,
-         DatabaseStrings::deadlinesTableName,
+         DatabaseStrings::tableDeadlines,
          &localFailureStream))
       if (failureStream!=0)
         *failureStream << localFailureStream.str();
@@ -903,17 +916,17 @@ bool UserCalculator::FetchOneUserRow
   if (this->courseInfo.problemWeightSchemaIDComputed!="")
   { std::stringstream localFailureStream;
     if (theRoutines.FetchEntry
-        (DatabaseStrings::problemWeightsIdColumnName,
+        (DatabaseStrings::columnProblemWeightsSchema,
          this->courseInfo.problemWeightSchemaIDComputed,
-         DatabaseStrings::problemWeightsTableName,
-         DatabaseStrings::infoColumnInProblemWeightsTable,
+         DatabaseStrings::tableProblemWeights,
+         DatabaseStrings::columnProblemWeights,
          reader,
          &localFailureStream))
       this->courseInfo.problemWeightString=reader;
     else if(! theRoutines.InsertRow
-        (DatabaseStrings::problemWeightsIdColumnName,
+        (DatabaseStrings::columnProblemWeightsSchema,
          this->courseInfo.problemWeightSchemaIDComputed,
-         DatabaseStrings::problemWeightsTableName,
+         DatabaseStrings::tableProblemWeights,
          &localFailureStream))
       if (failureStream!=0)
         *failureStream << localFailureStream.str();
@@ -924,50 +937,75 @@ bool UserCalculator::FetchOneUserRow
 std::string CourseAndUserInfo::ToStringHumanReadable()
 { MacroRegisterFunctionWithName("CourseAndUserInfo::ToStringHumanReadable");
   std::stringstream out;
-  out << "problemWeightSchema: " << this->problemWeightSchemaIDComputed << "\n<br>\n";
-  out << "sectionsTaught: "      << this->sectionsTaughtByUserString << "\n<br>\n";
-  out << "instructor: "          << this->currentInstructorInDB      << "\n<br>\n";
-  out << "currentCourse: "       << this->currentCourseComputed      << "\n<br>\n";
-  out << "studentSection: "      << this->currentSectionInDB         << "\n<br>\n";
+  out << this->courseInfoJSON.GetElement().ToString(true);
   return out.str();
+}
+
+CourseAndUserInfo::~CourseAndUserInfo()
+{
+
+}
+
+void CourseAndUserInfo::setCurrentCourseInDB(const std::string& input)
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnCurrentCourses]=input;
+}
+
+std::string CourseAndUserInfo::getCurrentCourseInDB()
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnCurrentCourses].string;
+}
+
+void CourseAndUserInfo::setSectionInDB(const std::string& input)
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSection]=input;
+}
+
+std::string CourseAndUserInfo::getSectionInDB()
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSection].string;
+}
+
+void CourseAndUserInfo::setSectonsTaughtByUser(const std::string& input)
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught]=input;
+}
+
+std::string CourseAndUserInfo::getSectonsTaughtByUser()
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught].string;
+}
+
+void CourseAndUserInfo::setInstructorInDB(const std::string& input)
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnInstructor]=input;
+}
+
+std::string CourseAndUserInfo::getInstructorInDB()
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnInstructor].string;
 }
 
 std::string CourseAndUserInfo::ToStringForDBStorage()
 { MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
-  JSData theCourseInfo;
-  theCourseInfo.type=theCourseInfo.JSObject;
-  theCourseInfo["problemWeightSchema"]= this->problemWeightSchemaIDComputed;
-  theCourseInfo["sectionsTaught"]     = this->sectionsTaughtByUserString;
-  theCourseInfo["instructor"]         = this->currentInstructorInDB;
-  theCourseInfo["currentCourse"]      = this->currentCourseComputed;
-  theCourseInfo["studentSection"]     = this->currentSectionInDB;
-  return theCourseInfo.ToString(false);
+//  JSData theCourseInfo;
+//  theCourseInfo.type=theCourseInfo.JSObject;
+//  theCourseInfo["problemWeightSchema"]= this->problemWeightString;
+//  theCourseInfo["sectionsTaught"]     = this->sectionsTaughtByUserString;
+//  theCourseInfo["instructor"]         = this->currentInstructorInDB;
+//  theCourseInfo["currentCourse"]      = this->currentCourseComputed;
+//  theCourseInfo["studentSection"]     = this->currentSectionInDB;
+  return this->courseInfoJSON.GetElement().ToString(false);
 }
 
 bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
 { MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
-  JSData theCourseInfo;
+  JSData& theCourseInfo=this->courseInfo.courseInfoJSON.GetElement();
   theCourseInfo.readstring(this->courseInfo.rawStringStoredInDB, errorStream);
-  this->courseInfo.problemWeightSchemaIDComputed=theCourseInfo["problemWeightSchema"].string;
-  this->courseInfo.sectionsTaughtByUserString=theCourseInfo["sectionsTaught"].string;
-  this->courseInfo.currentInstructorInDB=theCourseInfo["instructor"].string;
-  this->courseInfo.currentCourseComputed=theCourseInfo["currentCourse"].string;
-  this->courseInfo.currentSectionInDB=theCourseInfo["studentSection"].string;
   if (theGlobalVariables.UserStudentVieWOn() && this->userRole=="admin" &&
       theGlobalVariables.GetWebInput("studentSection")!="")
   //<- warning, the user may not be
   //fully logged-in yet so theGlobalVariables.UserDefaultHasAdminRights()
   //does not work right.
-    this->courseInfo.currentSectionComputed=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
+    this->courseInfo.sectionComputed=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
   else
-    this->courseInfo.currentSectionComputed=this->courseInfo.currentSectionInDB;
-  this->courseInfo.currentCourseComputed=this->courseInfo.currentCourseInDB;
-  if (this->userRole=="admin")
-    if (theGlobalVariables.GetWebInput("courseHome")!="")
-    { this->courseInfo.currentCourseComputed=
-      HtmlRoutines::ConvertURLStringToNormal
-      (theGlobalVariables.GetWebInput("courseHome"), false);
-    }
+    this->courseInfo.sectionComputed=this->courseInfo.getSectionInDB();
+  if (this->userRole=="admin" && theGlobalVariables.GetWebInput("courseHome")!="")
+    this->courseInfo.courseComputed=theGlobalVariables.GetWebInput("courseHome");
+  else
+    this->courseInfo.courseComputed=theCourseInfo[DatabaseStrings::columnCurrentCourses].string;
   return true;
 }
 
@@ -975,15 +1013,15 @@ bool UserCalculator::ComputeCourseInfoFromOtherEntriesOld(DatabaseRoutines& theR
 { MacroRegisterFunctionWithName("UserCalculator::ComputeCourseInfo");
   JSData theCourseInfo;
   theCourseInfo.type=theCourseInfo.JSObject;
-  theCourseInfo["sectionTaught"]=this->GetSelectedRowEntry(DatabaseStrings::sectionsTaughtByUser);
-  theCourseInfo["currentCourse"]=this->GetSelectedRowEntry(DatabaseStrings::userCurrentCoursesColumnLabel);
-  theCourseInfo["studentSection"]=this->GetSelectedRowEntry(DatabaseStrings::userGroupLabel);
+  theCourseInfo[DatabaseStrings::columnSectionsTaught]=this->GetSelectedRowEntry("sectionList");
+  theCourseInfo[DatabaseStrings::columnCurrentCourses]=this->GetSelectedRowEntry("currentCourses");
+  theCourseInfo[DatabaseStrings::columnSection]=this->GetSelectedRowEntry("userInfo");
   this->courseInfo.rawStringStoredInDB=theCourseInfo.ToString(false);
-  this->SetColumnEntry(DatabaseStrings::courseInfoColumnLabel, this->courseInfo.rawStringStoredInDB, theRoutines, failureStream);
-  this->SetColumnEntry(DatabaseStrings::problemWeightsIdColumnName, "", theRoutines, failureStream);
-  this->SetColumnEntry(DatabaseStrings::sectionsTaughtByUser, "", theRoutines, failureStream);
-  this->SetColumnEntry(DatabaseStrings::userGroupLabel, "", theRoutines, failureStream);
-  this->SetColumnEntry(DatabaseStrings::userCurrentCoursesColumnLabel, "", theRoutines, failureStream);
+  this->SetColumnEntry(DatabaseStrings::columnCourseInfo, this->courseInfo.rawStringStoredInDB, theRoutines, failureStream);
+  this->SetColumnEntry(DatabaseStrings::columnProblemWeightsSchema, "", theRoutines, failureStream);
+  this->SetColumnEntry(DatabaseStrings::columnSectionsTaught, "", theRoutines, failureStream);
+  this->SetColumnEntry(DatabaseStrings::columnSection, "", theRoutines, failureStream);
+  this->SetColumnEntry(DatabaseStrings::columnCurrentCourses, "", theRoutines, failureStream);
   if (commentsGeneral!=0)
     *commentsGeneral << "<br>Erasing old column entries for user: " << this->username.value;
   return true;
@@ -992,7 +1030,7 @@ bool UserCalculator::ComputeCourseInfoFromOtherEntriesOld(DatabaseRoutines& theR
 bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   //stOutput << "<hr>DEBUG: Authenticating user: " << this->username.value << " with password: " << this->enteredPassword;
-  this->currentTable = DatabaseStrings::usersTableName;
+  this->currentTable = DatabaseStrings::tableUsers;
   std::stringstream secondCommentsStream;
   if (!this->FetchOneUserRow(theRoutines, &secondCommentsStream))
   { if (!this->Iexist(theRoutines, 0))
@@ -1045,7 +1083,7 @@ std::string UserCalculator::GetPassword(DatabaseRoutines& theRoutines)
 
 bool UserCalculator::Iexist(DatabaseRoutines& theRoutines, std::stringstream* comments)
 { MacroRegisterFunctionWithName("UserCalculator::Iexist");
-  return this->IamPresentInTable(theRoutines, DatabaseStrings::usersTableName, comments);
+  return this->IamPresentInTable(theRoutines, DatabaseStrings::tableUsers, comments);
 }
 
 bool UserCalculator::DeleteMe(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure)
@@ -1089,7 +1127,7 @@ bool UserCalculator::SetColumnEntry
     crash << "Programming error: attempting to change column " << columnNameUnsafe
     << " without specifying a table. " << crash;
   //stOutput << "<hr>DEBUG: value to set: " << theValueUnsafe;
-  return theRoutines.SetEntry(DatabaseStrings::userColumnLabel, this->username, this->currentTable, columnNameUnsafe, theValueUnsafe, failureComments);
+  return theRoutines.SetEntry(DatabaseStrings::columnUsername, this->username, this->currentTable, columnNameUnsafe, theValueUnsafe, failureComments);
 }
 
 bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
@@ -1121,7 +1159,7 @@ bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines, std
 
 bool UserCalculator::SetPassword(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::SetPassword");
-  this->currentTable=DatabaseStrings::usersTableName;
+  this->currentTable=DatabaseStrings::tableUsers;
   if (this->enteredPassword=="")
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "Empty password not allowed. ";
@@ -1142,7 +1180,7 @@ bool DatabaseRoutines::startMySQLDatabaseIfNotAlreadyStarted(std::stringstream* 
 }
 
 std::string DatabaseRoutines::GetTableUnsafeNameUsersOfFile(const std::string& inputFileName)
-{ return DatabaseStrings::usersTableName+ inputFileName;
+{ return DatabaseStrings::tableUsers+ inputFileName;
 }
 
 bool DatabaseRoutines::CreateTable
@@ -1264,9 +1302,9 @@ bool DatabaseRoutines::FetchAllUsers
   bool tableTruncated=false;
   int numRows=-1;
   if (!DatabaseRoutinesGlobalFunctions::FetchTablE
-      (outputUserTable, outputLabelsUserTable, tableTruncated, numRows, DatabaseStrings::usersTableName, commentsOnFailure))
+      (outputUserTable, outputLabelsUserTable, tableTruncated, numRows, DatabaseStrings::tableUsers, commentsOnFailure))
   { commentsOnFailure << "<span style=\"color:red\"><b>Failed to fetch table: "
-    << DatabaseStrings::usersTableName << "</b></span>";
+    << DatabaseStrings::tableUsers << "</b></span>";
     return false;
   }
   if (tableTruncated)
@@ -1349,7 +1387,7 @@ bool UserCalculator::ComputeAndStoreActivationStats
     << numActivationsThisEmail.ToString() << ".\n <br>\n";
   if (this->userId.value!="")
   { if (!theRoutines.SetEntry
-        (DatabaseStrings::userId, this->userId, DatabaseStrings::usersTableName,
+        (DatabaseStrings::columnUserId, this->userId, DatabaseStrings::tableUsers,
          (std::string) "activationTokenCreationTime", now.ToString(), commentsOnFailure))
     { if (commentsOnFailure!=0)
         *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
@@ -1357,7 +1395,7 @@ bool UserCalculator::ComputeAndStoreActivationStats
     }
   } else if (this->username.value!="")
   { if (!theRoutines.SetEntry
-        (DatabaseStrings::userColumnLabel, this->username, DatabaseStrings::usersTableName,
+        (DatabaseStrings::columnUsername, this->username, DatabaseStrings::tableUsers,
          (std::string) "activationTokenCreationTime", now.ToString(), commentsOnFailure))
     { if (commentsOnFailure!=0)
         *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
@@ -1439,7 +1477,7 @@ bool DatabaseRoutines::SendActivationEmail
 )
 { MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   UserCalculator currentUser;
-  currentUser.currentTable=DatabaseStrings::usersTableName;
+  currentUser.currentTable=DatabaseStrings::tableUsers;
   bool result=true;
   DatabaseRoutines theRoutines;
   for (int i=0; i<theEmails.size; i++)
@@ -1571,7 +1609,7 @@ bool UserCalculator::InterpretDatabaseProblemData
 bool UserCalculator::LoadProblemStringFromDatabase
 (DatabaseRoutines& theRoutines, std::string& output, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::LoadProblemStringFromDatabase");
-  this->currentTable=DatabaseStrings::usersTableName;
+  this->currentTable=DatabaseStrings::tableUsers;
   return this->FetchOneColumn("problemData", output, theRoutines, &commentsOnFailure);
 }
 
@@ -1585,7 +1623,7 @@ bool UserCalculator::StoreProblemDataToDatabase
 //  stOutput << "DEBUG: storing in database ... stack trace: "
 //  << crash.GetStackTraceEtcErrorMessage();
   //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
-  this->currentTable=DatabaseStrings::usersTableName;
+  this->currentTable=DatabaseStrings::tableUsers;
   bool result= this->SetColumnEntry("problemData", problemDataStream.str(), theRoutines, &commentsOnFailure);
   return result;
 }
@@ -1610,7 +1648,7 @@ bool DatabaseRoutines::AddUsersFromEmails
   //stOutput << " <br>Debug: creating users: " << theEmails.ToStringCommaDelimited() << "<br>Number of users: " << theEmails.size
   //<< "<br>Number of passwords: " << thePasswords.size << "<hr>Passwords string: " << thePasswords;
   UserCalculator currentUser;
-  currentUser.currentTable=DatabaseStrings::usersTableName;
+  currentUser.currentTable=DatabaseStrings::tableUsers;
   bool result=true;
   bool doSendEmails=false;
   outputNumNewUsers=0;
@@ -1618,7 +1656,8 @@ bool DatabaseRoutines::AddUsersFromEmails
   //stOutput << "DEBUG: courseHome: " << currentUser.currentCourses.value
   //<< "\n<br>\ncurrentUser.currentTable: " << currentUser.currentTable.value << "\n<br>\n";
   for (int i=0; i<theEmails.size; i++)
-  { currentUser.username=theEmails[i];
+  { currentUser.reset();
+    currentUser.username=theEmails[i];
     bool isEmail=true;
     if (theEmails[i].find('@')==std::string::npos)
     { isEmail=false;
@@ -1640,12 +1679,14 @@ bool DatabaseRoutines::AddUsersFromEmails
       outputNumUpdatedUsers++;
     }
     //currentUser may have its updated entries modified by the functions above.
-    currentUser.currentTable=DatabaseStrings::usersTableName;
+    currentUser.currentTable=DatabaseStrings::tableUsers;
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
-    currentUser.courseInfo.currentCourseInDB= theGlobalVariables.GetWebInput("courseHome");
-    currentUser.courseInfo.currentSectionInDB=userGroup;
-    currentUser.courseInfo.currentInstructorInDB=theGlobalVariables.userDefault.username.value;
+    currentUser.courseInfo.setCurrentCourseInDB(theGlobalVariables.GetWebInput("courseHome"));
+    currentUser.courseInfo.setSectionInDB(userGroup);
+    currentUser.courseInfo.setInstructorInDB(theGlobalVariables.userDefault.username.value);
     currentUser.courseInfo.rawStringStoredInDB=currentUser.courseInfo.ToStringForDBStorage();
+    if (!currentUser.SetColumnEntry(DatabaseStrings::columnCourseInfo, currentUser.courseInfo.rawStringStoredInDB, *this, &comments))
+      result=false;
     if (thePasswords.size==0 || thePasswords.size!=theEmails.size)
     { if (!currentUser.ComputeAndStoreActivationToken(&comments, *this))
         result=false;
@@ -1654,8 +1695,6 @@ bool DatabaseRoutines::AddUsersFromEmails
       //<-Passwords are ONE-LAYER url-encoded
       //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
       //<-Incoming pluses must be re-coded as spaces (%20).
-
-
       //stOutput << "Debug: user:<br>" << currentUser.username.value << "<br>password:<br>"
       //<< HtmlRoutines::ConvertStringToURLString(thePasswords[i]) << "<br>";
       if (!currentUser.SetPassword(*this, &comments))
@@ -1664,15 +1703,6 @@ bool DatabaseRoutines::AddUsersFromEmails
       if (currentUser.email!="")
         currentUser.ComputeAndStoreActivationStats(&comments, &comments, *this);
     }
-  }
-  currentUser.currentTable=DatabaseStrings::usersTableName;
-  for (int i=0; i<theEmails.size; i++)
-  { currentUser.username=theEmails[i];
-    //if (!currentUser.IamPresentInTable(*this, currentFileUsersTableName))
-      //if (!this->InsertRow(DatabaseStrings::userColumnLabel, theEmails[i], currentFileUsersTableName, comments))
-        //result=false;
-    if (!currentUser.SetColumnEntry(DatabaseStrings::userGroupLabel, userGroup, *this, &comments))
-      result=false;
   }
   if (!result)
     comments << "<br>Failed to create all users. ";
@@ -2055,11 +2085,11 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
   out << "Testing/repairing database ... Comments:<br>";
   std::stringstream comments;
   theRoutines.startMySQLDatabase(&comments, 0);
-  if (!theRoutines.ColumnExists(DatabaseStrings::courseInfoColumnLabel, DatabaseStrings::usersTableName, out))
-  { out << "Column " << DatabaseStrings::courseInfoColumnLabel << ": "
+  if (!theRoutines.ColumnExists(DatabaseStrings::columnCourseInfo, DatabaseStrings::tableUsers, out))
+  { out << "Column " << DatabaseStrings::columnCourseInfo << ": "
     << " does not exist, creating ...";
-    if (!theRoutines.CreateColumn(DatabaseStrings::courseInfoColumnLabel, DatabaseStrings::usersTableName, out))
-      out << "Failed to create column: " << DatabaseStrings::courseInfoColumnLabel << "<br>";
+    if (!theRoutines.CreateColumn(DatabaseStrings::columnCourseInfo, DatabaseStrings::tableUsers, out))
+      out << "Failed to create column: " << DatabaseStrings::columnCourseInfo << "<br>";
   }
   out << comments.str();
   List<List<std::string> > theUserTable;
@@ -2067,7 +2097,7 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
   if (!theRoutines.FetchAllUsers(theUserTable, labels, out))
     return output.AssignValue(out.str(), theCommands);
   int emailColumn=labels.GetIndex("email");
-  int usernameColumn=labels.GetIndex(DatabaseStrings::userColumnLabel);
+  int usernameColumn=labels.GetIndex(DatabaseStrings::columnUsername);
   int passwordColumn=labels.GetIndex("password");
   int activationTokenColumn=labels.GetIndex("activationToken");
   ProgressReport theReport;
@@ -2097,7 +2127,7 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
   }
   int numCorrections=0;
   UserCalculator currentUser;
-  currentUser.currentTable=DatabaseStrings::usersTableName;
+  currentUser.currentTable=DatabaseStrings::tableUsers;
   for (int i=0; i<theUserTable.size; i++)
   { std::string currentUserName=theUserTable[i][usernameColumn];
     std::string currentEmail=theUserTable[i][emailColumn];
@@ -2319,7 +2349,7 @@ std::string DatabaseRoutines::ToStringSuggestionsReasonsForFailure
   }
   if (userFound)
   { std::string recommendedNewName;
-    if (!theUser.FetchOneColumn(DatabaseStrings::userColumnLabel, recommendedNewName, theRoutines, &out))
+    if (!theUser.FetchOneColumn(DatabaseStrings::columnUsername, recommendedNewName, theRoutines, &out))
       return out.str();
     theUser.username.value=recommendedNewName;
   }
@@ -2339,7 +2369,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
 #ifdef MACRO_use_MySQL
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
-  userWrapper.currentTable=DatabaseStrings::usersTableName;
+  userWrapper.currentTable=DatabaseStrings::tableUsers;
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded");
   if (userWrapper.enteredGoogleToken=="")
     return false;
@@ -2396,7 +2426,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   userWrapper.::UserCalculatorData::operator=(theUseR);
   //*comments << "<br>DEBUG: Logging in: " << userWrapper.username.value;
   //*comments << "<br>DEBUG: password: " << userWrapper.enteredPassword;
-  userWrapper.currentTable=DatabaseStrings::usersTableName;
+  userWrapper.currentTable=DatabaseStrings::tableUsers;
   if (userWrapper.Authenticate(theRoutines, comments))
   { theUseR=userWrapper;
     return true;
@@ -2408,13 +2438,13 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   { *comments << "<b> Authentication of user: " << userWrapper.username.value
     << " with token " << userWrapper.enteredAuthenticationToken.value << " failed. </b>";
     //*comments << "<br>DEBUG: actual token: " << userWrapper.actualAuthenticationToken.value
-    //<< "<br>database user: " << theRoutines.databaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>"
+    //<< "<br>database user: " << theRoutines.theDatabaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>"
     //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
   }
   if (userWrapper.enteredActivationToken!="" && comments!=0)
   { //*comments << "<br>DEBUG: actual activation token: " << userWrapper.actualActivationToken.value
     //<< ". Entered activation token: " << userWrapper.enteredActivationToken.value
-    //<< "<br>database user: " << theRoutines.databaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>"
+    //<< "<br>database user: " << theRoutines.theDatabaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>"
     //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
   }
   //stOutput << "<br>DEBUG: Got to this point";
@@ -2468,7 +2498,7 @@ DatabaseRoutines::DatabaseRoutines()
   this->MaxNumRowsToFetch=1000;
   this->flagFirstLogin=false;
   this->theDatabaseName=DatabaseStrings::theDatabaseName;
-  this->databaseUser=DatabaseStrings::databaseUser;
+  this->theDatabaseUser=DatabaseStrings::theDatabaseUser;
 }
 
 bool DatabaseRoutines::RowExists
@@ -2648,7 +2678,7 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std
   }
   std::stringstream queryStream;
   queryStream << "INSERT INTO " << theRoutines.theDatabaseName
-  << ".users(username, " << DatabaseStrings::courseInfoColumnLabel;
+  << ".users(username, " << DatabaseStrings::columnCourseInfo;
   MySQLdata courseInfoData;
   courseInfoData=this->courseInfo.ToStringForDBStorage();
   if (this->email.value!="")
@@ -2662,7 +2692,7 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std
     queryStream << ", " << this->email.GetDatA();
   queryStream << ")";
   DatabaseQuery theQuery(theRoutines, queryStream.str());
-  this->currentTable=DatabaseStrings::usersTableName;
+  this->currentTable=DatabaseStrings::tableUsers;
   if (!this->FetchOneUserRow(theRoutines,commentsOnFailure))
     return false;
   if (this->enteredPassword=="")
@@ -2724,7 +2754,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   }
   //real connection to the database follows.
   this->connection=mysql_real_connect
-  (this->connection, this->hostname.c_str(), this->databaseUser.c_str(), this->databasePassword.c_str(),
+  (this->connection, this->hostname.c_str(), this->theDatabaseUser.c_str(), this->databasePassword.c_str(),
    this->theDatabaseName.c_str(), 0, 0, 0);
   if(this->connection==0)
   { if (commentsOnFailure!=0)
@@ -2742,8 +2772,8 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   mysql_free_result( mysql_use_result(this->connection));
   std::stringstream tableCols, deadlineTableCols, probWeightTableCols;
   tableCols
-  << "id int NOT NULL AUTO_INCREMENT PRIMARY KEY, "
-  << "username VARCHAR(255) NOT NULL, "
+  << DatabaseStrings::columnUserId << " int NOT NULL AUTO_INCREMENT PRIMARY KEY, "
+  << DatabaseStrings::columnUsername << " VARCHAR(255) NOT NULL, "
   << "password LONGTEXT, "
   << "email LONGTEXT, "
   << "authenticationCreationTime LONGTEXT, "
@@ -2752,23 +2782,22 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   << "activationTokenCreationTime LONGTEXT, "
   << "userRole LONGTEXT, "
   << "userInfo LONGTEXT, "
-  << DatabaseStrings::courseInfoColumnLabel << " LONGTEXT, "
+  << DatabaseStrings::columnCourseInfo << " LONGTEXT, "
   << "problemData LONGTEXT "
   ;
   if (!this->CreateTable
-      (DatabaseStrings::usersTableName, tableCols.str(), commentsOnFailure, outputfirstLogin))
+      (DatabaseStrings::tableUsers, tableCols.str(), commentsOnFailure, outputfirstLogin))
     return false;
-  deadlineTableCols << DatabaseStrings::userCurrentCoursesColumnLabel
+  deadlineTableCols << DatabaseStrings::columnDeadlinesSchema
   << " VARCHAR(1000) not null, "
-  << DatabaseStrings::infoColumnInDeadlinesTable << " LONGTEXT";
+  << DatabaseStrings::columnDeadlines << " LONGTEXT";
   if (!this->CreateTable
-      (DatabaseStrings::deadlinesTableName,
-      deadlineTableCols.str(), commentsOnFailure, 0))
+      (DatabaseStrings::tableDeadlines, deadlineTableCols.str(), commentsOnFailure, 0))
     return false;
-  probWeightTableCols << DatabaseStrings::problemWeightsIdColumnName
-  << " VARCHAR(1000) not null, " << DatabaseStrings::infoColumnInProblemWeightsTable << " LONGTEXT";
+  probWeightTableCols << DatabaseStrings::columnProblemWeightsSchema
+  << " VARCHAR(1000) not null, " << DatabaseStrings::columnProblemWeights << " LONGTEXT";
   if(!this->CreateTable
-    (DatabaseStrings::problemWeightsTableName, probWeightTableCols.str(), commentsOnFailure, 0))
+    (DatabaseStrings::tableProblemWeights, probWeightTableCols.str(), commentsOnFailure, 0))
     return false;
   return true;
 }
@@ -2853,7 +2882,7 @@ bool DatabaseRoutines::PrepareClassData
   if (!theRoutines.TableExists(classTableName, &commentsOnFailure))
     if (!theRoutines.CreateTable
         (classTableName, "username VARCHAR(255) NOT NULL PRIMARY KEY, " +
-         DatabaseStrings::userGroupLabel +" LONGTEXT ", &commentsOnFailure, 0))
+         DatabaseStrings::columnSection +" LONGTEXT ", &commentsOnFailure, 0))
       return false;
   bool tableTruncated=false;
   int numRows=-1;

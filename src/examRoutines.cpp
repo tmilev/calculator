@@ -207,17 +207,17 @@ bool DatabaseRoutines::StoreProblemDatabaseInfo
   if (!this->startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
     return false;
   if (!this->SetEntry
-      (DatabaseStrings::userCurrentCoursesColumnLabel,
+      (DatabaseStrings::columnCurrentCourses,
        theUser.courseInfo.deadlineSchemaIDComputed,
-       DatabaseStrings::deadlinesTableName,
-       DatabaseStrings::infoColumnInDeadlinesTable,
+       DatabaseStrings::tableDeadlines,
+       DatabaseStrings::columnDeadlines,
        theUser.courseInfo.deadlinesString, &commentsOnFailure))
     return false;
   if (!this->SetEntry
-      (DatabaseStrings::problemWeightsIdColumnName,
+      (DatabaseStrings::columnProblemWeightsSchema,
        theUser.courseInfo.problemWeightSchemaIDComputed,
-       DatabaseStrings::problemWeightsTableName,
-       DatabaseStrings::infoColumnInProblemWeightsTable,
+       DatabaseStrings::tableProblemWeights,
+       DatabaseStrings::columnProblemWeights,
        theUser.courseInfo.problemWeightString, &commentsOnFailure))
     return false;
   return true;
@@ -1330,14 +1330,14 @@ bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure)
   if (this->flagSectionsPrepared)
     return true;
   this->flagSectionsPrepared=true;
-  if (this->currentUseR.courseInfo.sectionsTaughtByUserString=="" ||
+  if (this->currentUseR.courseInfo.getSectonsTaughtByUser()=="" ||
       (this->currentUseR.userRole!="admin" && this->currentUseR.userRole!="teacher") )
-    if (this->currentUseR.courseInfo.currentSectionComputed!="")
-    { this->databaseStudentSections.AddOnTop(this->currentUseR.courseInfo.currentSectionComputed);
+    if (this->currentUseR.courseInfo.sectionComputed!="")
+    { this->databaseStudentSections.AddOnTop(this->currentUseR.courseInfo.sectionComputed);
       return true;
     }
   List<std::string> sectionList;
-  MathRoutines::StringSplitDefaultDelimiters(this->currentUseR.courseInfo.sectionsTaughtByUserString, sectionList);
+  MathRoutines::StringSplitDefaultDelimiters(this->currentUseR.courseInfo.getSectonsTaughtByUser(), sectionList);
   this->databaseStudentSections.AddListOnTop(sectionList);
   return true;
 #else
@@ -1675,7 +1675,7 @@ std::string CalculatorHTML::ToStringDeadline
      returnEmptyStringIfNoDeadline, isSection);
   } else
     return this->ToStringOnEDeadlineFormatted
-    (topicID, this->currentUseR.courseInfo.currentSectionComputed, problemAlreadySolved,
+    (topicID, this->currentUseR.courseInfo.sectionComputed, problemAlreadySolved,
      returnEmptyStringIfNoDeadline, isSection);
 #endif // MACRO_use_MySQL
   return "";
@@ -3166,7 +3166,7 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
     if (!theProbData.flagProblemWeightIsOK)
     { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
       if (!theProbData.adminData.GetWeightFromSection
-          (this->currentUseR.courseInfo.currentSectionComputed, currentWeight))
+          (this->currentUseR.courseInfo.sectionComputed, currentWeight))
         currentWeight=0;
       if (theProbData.theAnswers.size==1)
       { if (theProbData.numCorrectlyAnswered==1)
@@ -3217,7 +3217,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
     percentSolved.AssignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size);
     theProbData.flagProblemWeightIsOK=
     theProbData.adminData.GetWeightFromSection
-    (this->currentUseR.courseInfo.currentSectionComputed, currentWeight, &currentWeightAsGivenByInstructor);
+    (this->currentUseR.courseInfo.sectionComputed, currentWeight, &currentWeightAsGivenByInstructor);
     if (!theProbData.flagProblemWeightIsOK)
     { problemWeight << "?";
       if (currentWeightAsGivenByInstructor!="")
@@ -3277,7 +3277,7 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
   #ifdef MACRO_use_MySQL
   Rational unusedRat;
   weightIsOK=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName).
-  adminData.GetWeightFromSection(this->currentUseR.courseInfo.currentSectionComputed, unusedRat, &problemWeightAsGivenByInstructor);
+  adminData.GetWeightFromSection(this->currentUseR.courseInfo.sectionComputed, unusedRat, &problemWeightAsGivenByInstructor);
   out << problemWeightAsGivenByInstructor;
   #endif
   out << "</textarea>";
@@ -3697,7 +3697,7 @@ std::string CalculatorHTML::GetSectionSelector()
     << this->databaseStudentSections[i]
     << "'"
     << ");\"";
-    if (this->databaseStudentSections[i]==this->currentUseR.courseInfo.currentSectionComputed)
+    if (this->databaseStudentSections[i]==this->currentUseR.courseInfo.sectionComputed)
       out << "checked";
     out <<  ">"
     << this->databaseStudentSections[i]
@@ -3940,7 +3940,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 
   topicListJS << "var currentStudentSection=";
 #ifdef MACRO_use_MySQL
-  topicListJS << "'" << this->currentUseR.courseInfo.currentSectionComputed << "'" << ";\n";
+  topicListJS << "'" << this->currentUseR.courseInfo.sectionComputed << "'" << ";\n";
 #else
   topicListJS << "''" << ";\n";
 #endif

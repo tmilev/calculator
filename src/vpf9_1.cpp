@@ -487,7 +487,7 @@ std::string UserCalculatorData::ToStringUnsecure()
 { MacroRegisterFunctionWithName("UserCalculatorData::ToStringUnsecure");
   std::stringstream out;
   out << "User: " << this->username.value
-  << "\n<br>Course name:\n" << this->courseInfo.currentCourseComputed
+  << "\n<br>Course name:\n" << this->courseInfo.courseComputed
   << "\n<br>Deadline info:\n" << this->courseInfo.deadlinesString
   << "\n<hr>Prob weight id:\n" << this->courseInfo.problemWeightSchemaIDComputed
   << "\n<br>Prob weight info:\n" << this->courseInfo.problemWeightString

@@ -961,7 +961,6 @@ std::string HtmlInterpretation::SubmitProblem
   if (hasCommentsBeforeSubmission)
     out << "<tr><td>" << HtmlInterpretation::GetCommentsInterpretation
     (theInterpreter, 3, theFormat) << "</td></tr>\n";
-
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   UserCalculator& theUser=theProblem.currentUseR;
@@ -975,7 +974,7 @@ std::string HtmlInterpretation::SubmitProblem
     if (!theProblem.LoadAndParseTopicList(out))
       hasDeadline=false;
     MySQLdata theSQLstring;
-    theSQLstring=theUser.courseInfo.currentSectionComputed;
+    theSQLstring=theUser.courseInfo.sectionComputed;
     if (hasDeadline)
     { bool unused=false;
       std::string theDeadlineString=
@@ -1102,9 +1101,8 @@ std::string HtmlInterpretation::AddTeachersSections()
   HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent("teachers"), false);
   std::string desiredSections=
   HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent("sections"), false);
-  List<std::string> theDelimiters;
 #ifdef MACRO_use_MySQL
-  List<std::string> theTeachers, theSections;
+  List<std::string> theTeachers;
   List<char> delimiters;
   delimiters.AddOnTop(' ');
   delimiters.AddOnTop('\r');
@@ -1124,15 +1122,22 @@ std::string HtmlInterpretation::AddTeachersSections()
 //    return out.str();
 //  }
   DatabaseRoutines theRoutines;
+  UserCalculator currentTeacher;
   for (int i=0; i<theTeachers.size; i++)
-    if (!theRoutines.SetEntry
-        (DatabaseStrings::userColumnLabel, theTeachers[i], DatabaseStrings::usersTableName,
-         DatabaseStrings::sectionsTaughtByUser, desiredSections, &out))
-      out << "<span style=\"color:red\">Failed to assign: " << theTeachers[i] << " to section: "
-      << desiredSections << "</span><br>";
+  { currentTeacher.reset();
+    currentTeacher.username=theTeachers[i];
+    if (!currentTeacher.FetchOneUserRow(theRoutines, &out, &out))
+    { out << "<span style=\"color:red\">Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
+      continue;
+    }
+    currentTeacher.courseInfo.courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught]=desiredSections;
+    if(!currentTeacher.SetColumnEntry
+       (DatabaseStrings::columnCourseInfo, currentTeacher.courseInfo.ToStringForDBStorage(), theRoutines, &out))
+      out << "<span style=\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
     else
-      out << "<span style=\"color:red\">Assigned " << theTeachers[i] << " to section: "
+      out << "<span style=\"color:green\">Assigned " << theTeachers[i] << " to section: "
       << desiredSections << "</span><br>";
+  }
   return out.str();
 #else
   return "<b>no database present.</b>";
@@ -1152,7 +1157,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   std::string userPasswords=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("passwordList"), false);
   std::string userGroup=
   MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal
-  (theGlobalVariables.GetWebInput(DatabaseStrings::userGroupLabel), false));
+  (theGlobalVariables.GetWebInput(DatabaseStrings::columnSection), false));
   std::string userRole=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userRole"), false);
 
   if (inputEmails=="")
@@ -1375,7 +1380,7 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   List<std::string> columnLabels;
   std::stringstream commentsOnFailure;
   out << "Database: " << theRoutines.theDatabaseName
-  << "<br>Database user: " << theRoutines.databaseUser;
+  << "<br>Database user: " << theRoutines.theDatabaseUser << "<br>";
   if (!theRoutines.PrepareClassData(notUsed, userTable, columnLabels, commentsOnFailure))
   { out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
     return out.str();
@@ -1497,7 +1502,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   << "<th>Activation manual email</th>"
   << "<th>Section/Group</th>  <th>Pre-filled login link</th><th>Course</th></tr>";
   UserCalculator currentUser;
-  currentUser.currentTable=DatabaseStrings::usersTableName;
+  currentUser.currentTable=DatabaseStrings::tableUsers;
   int indexUser=-1;
   int indexEmail=-1;
   int indexActivationToken=-1;
@@ -1507,7 +1512,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   int indexCourseInfo=-1;
   //int indexProblemData=-1;
   for (int i=0; i<columnLabels.size; i++)
-  { if (columnLabels[i]==DatabaseStrings::userColumnLabel)
+  { if (columnLabels[i]==DatabaseStrings::columnUsername)
       indexUser=i;
     if (columnLabels[i]=="email")
       indexEmail=i;
@@ -1515,11 +1520,11 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       indexActivationToken=i;
     if (columnLabels[i]=="userRole")
       indexUserRole=i;
-    if (columnLabels[i]==DatabaseStrings::userGroupLabel)
+    if (columnLabels[i]==DatabaseStrings::columnSection)
       indexExtraInfo=i;
-    if (columnLabels[i]==DatabaseStrings::userCurrentCoursesColumnLabel)
+    if (columnLabels[i]==DatabaseStrings::columnCurrentCourses)
       indexCurrentCourse=i;
-    if (columnLabels[i]==DatabaseStrings::courseInfoColumnLabel)
+    if (columnLabels[i]==DatabaseStrings::columnCourseInfo)
       indexCourseInfo=i;
   }
   if (
@@ -1556,7 +1561,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   std::stringstream preFilledLoginLinks;
   for (int i=0; i<userTable.size; i++)
   { currentUser.username=userTable[i][indexUser];
-    currentUser.courseInfo.currentSectionComputed=
+    currentUser.courseInfo.sectionComputed=
     HtmlRoutines::ConvertURLStringToNormal(userTable[i][indexExtraInfo], false);
     currentUser.email=userTable[i][indexEmail];
     currentUser.actualActivationToken=userTable[i][indexActivationToken];
@@ -1570,8 +1575,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     //  << currentUser.currentCourses.value
     //  << " contains the % symbol. </b></span><br>";
     //}
-    if (!adminsOnly && flagFilterCourse &&
-         currentUser.courseInfo.currentCourseComputed!=currentCourse)
+    if (!adminsOnly && flagFilterCourse && currentUser.courseInfo.courseComputed!=currentCourse)
       continue;
     if (adminsOnly xor (currentUser.userRole=="admin"))
       continue;
@@ -1581,8 +1585,8 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     << "<td>" << currentUser.username.value << "</td>"
     << "<td>" << currentUser.email.value << "</td>"
     ;
-    bool isActivated=true;
-    std::string webAddress="https://"+ hostWebAddressWithPort+"/cgi-bin/calculator";
+    bool isActivated = true;
+    std::string webAddress = "https://" + hostWebAddressWithPort + "/cgi-bin/calculator";
     if (currentUser.actualActivationToken.value!="activated" && currentUser.actualActivationToken.value!="error")
     { isActivated=false;
       numActivatedUsers++;
@@ -1716,8 +1720,7 @@ void UserCalculator::ComputePointsEarned
     currentP.numCorrectlyAnswered=0;
     Rational currentWeight;
     currentP.flagProblemWeightIsOK=
-    currentP.adminData.GetWeightFromSection
-    (this->courseInfo.currentSectionComputed, currentWeight);
+    currentP.adminData.GetWeightFromSection(this->courseInfo.sectionComputed, currentWeight);
     if (!currentP.flagProblemWeightIsOK)
     { currentWeight=0;
       //stOutput << "Debug: weight not ok: " << problemName << "<br>";
@@ -1788,16 +1791,16 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   DatabaseRoutines theRoutines;
   if (!theRoutines.FetchAllUsers(userTablE, userLabels, comments))
     return false;
-  int usernameIndex=userLabels.GetIndex(DatabaseStrings::userColumnLabel);
+  int usernameIndex=userLabels.GetIndex(DatabaseStrings::columnUsername);
   if (usernameIndex==-1)
     return "Could not find username column. ";
-  int userGroupIndex=userLabels.GetIndex(DatabaseStrings::userGroupLabel);
+  int userGroupIndex=userLabels.GetIndex(DatabaseStrings::columnSection);
   if (userGroupIndex==-1)
     return "Could not find user group column. ";
   int problemDataIndex=userLabels.GetIndex("problemData");
   if (problemDataIndex==-1)
     return "Could not find problem data column. ";
-  int courseInfoIndex=userLabels.GetIndex(DatabaseStrings::courseInfoColumnLabel);
+  int courseInfoIndex=userLabels.GetIndex(DatabaseStrings::columnCourseInfo);
   if (courseInfoIndex==-1)
     return "Could not find course info column. ";
   CalculatorHTML currentUserRecord;
@@ -1826,12 +1829,12 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   { currentUserRecord.currentUseR.courseInfo.rawStringStoredInDB=this->userTablE[i][courseInfoIndex];
     currentUserRecord.currentUseR.AssignCourseInfoString(&comments);
     if (ignoreSectionsIdontTeach)
-    { if (currentUserRecord.currentUseR.courseInfo.currentCourseComputed!=
-          theGlobalVariables.userDefault.courseInfo.currentCourseComputed)
+    { if (currentUserRecord.currentUseR.courseInfo.courseComputed!=
+          theGlobalVariables.userDefault.courseInfo.courseComputed)
         continue;
       if (theGlobalVariables.UserStudentVieWOn())
-      { if (currentUserRecord.currentUseR.courseInfo.currentSectionComputed!=
-            theGlobalVariables.userDefault.courseInfo.currentSectionComputed)
+      { if (currentUserRecord.currentUseR.courseInfo.sectionComputed!=
+            theGlobalVariables.userDefault.courseInfo.sectionComputed)
           continue;
       } else
       { if (this->userTablE[i][userGroupIndex]!=this->currentSection)
@@ -2140,8 +2143,8 @@ std::string HtmlInterpretation::ToStringNavigation()
       else
         out << "<b>Account settings: requires secure connection</b>" << linkSeparator;
     }
-    if (theGlobalVariables.userDefault.courseInfo.currentSectionComputed!="")
-      out << "Section: " << theGlobalVariables.userDefault.courseInfo.currentSectionComputed
+    if (theGlobalVariables.userDefault.courseInfo.sectionComputed!="")
+      out << "Section: " << theGlobalVariables.userDefault.courseInfo.sectionComputed
       << linkSeparator;
     //if (theGlobalVariables.UserDefaultHasAdminRights())
     //  out << "Course home: "

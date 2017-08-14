@@ -3,6 +3,7 @@
 #ifndef vpfHeader1General8DatabaseSystemIndependent_already_included
 #define vpfHeader1General8DatabaseSystemIndependent_already_included
 
+
 #include "vpfHeader1General0_General.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemIndependentinstance(__FILE__, "Header, system independent database data structures. ");
 
@@ -44,25 +45,33 @@ public:
   std::string GetIdentifieR()const;
 };
 
+class JSData;
+
 struct CourseAndUserInfo
 {
 public:
+  MemorySaving<JSData> courseInfoJSON;
+  std::string rawStringStoredInDB;
   std::string problemWeightSchemaIDComputed;
   std::string deadlineSchemaIDComputed;
-  std::string currentInstructorComputed;
-  std::string currentInstructorInDB;
-  std::string currentSemesterComputed;
-  std::string currentSemesterInDB;
-  std::string currentSectionInDB;
-  std::string currentSectionComputed;
-  std::string currentCourseComputed;
-  std::string currentCourseInDB;
-  std::string rawStringStoredInDB;
-  std::string sectionsTaughtByUserString;
+  std::string instructorComputed;
+  std::string semesterComputed;
+  std::string sectionComputed;
+  std::string courseComputed;
   std::string deadlinesString;
   std::string problemWeightString;
+  std::string getCurrentCourseInDB();
+  void setCurrentCourseInDB(const std::string& input);
+  std::string getSectionInDB();
+  void setSectionInDB(const std::string& input);
+  std::string getSectonsTaughtByUser();
+  void setSectonsTaughtByUser(const std::string& input);
+  std::string getInstructorInDB();
+  void setInstructorInDB(const std::string& input);
+
   std::string ToStringForDBStorage();
   std::string ToStringHumanReadable();
+  ~CourseAndUserInfo();
 };
 
 class UserCalculatorData
@@ -114,25 +123,32 @@ class UserCalculatorData
 };
 
 struct DatabaseStrings{
+  static List<std::string> modifyableColumns;
 public:
-  static std::string userId;
-
-  static std::string databaseUser;
+///credentials of calculator to use database
+  static std::string theDatabaseUser;
   static std::string theDatabaseName;
-  static std::string userColumnLabel;
-  static std::string usersTableName;
-  static std::string userGroupLabel;
-  static std::string userCurrentCoursesColumnLabel;
-  static std::string courseInfoColumnLabel;
+///user column names
+  static std::string columnUserId;
+  static std::string columnUsername;
+  static std::string columnEmail;
+  static std::string tableUsers;
+  static std::string columnCourseInfo;
+///course info column names
+  static std::string columnCurrentCourses;
+  static std::string columnSection;
+  static std::string columnDeadlinesSchema;
+  static std::string columnProblemWeightsSchema;
+  static std::string columnSectionsTaught;
+  static std::string columnInstructor;
+///deadlines info
+  static std::string columnDeadlines;
+  static std::string tableDeadlines;
+///problem weights info
+  static std::string tableProblemWeights;
+  static std::string columnProblemWeights;
 
-  static std::string deadlinesTableName;
-  static std::string infoColumnInDeadlinesTable;
-
-  static std::string problemWeightsTableName;
-  static std::string problemWeightsIdColumnName;
-  static std::string infoColumnInProblemWeightsTable;
-
-  static std::string sectionsTaughtByUser;
+  static List<std::string>& GetModifyableColumnsNotThreadSafe();
 
 };
 #endif

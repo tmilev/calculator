@@ -1289,7 +1289,7 @@ std::string WebWorker::GetDatabasePage()
     dbOutput << "Browsing database allowed only for logged-in admins.";
   else
     dbOutput << "Database: " << DatabaseStrings::theDatabaseName
-    << "<br>Database user: " << DatabaseStrings::databaseUser
+    << "<br>Database user: " << DatabaseStrings::theDatabaseUser << "<br>"
     << theRoutines.ToStringCurrentTableHTML(keyColName);
 #else
   dbOutput << "<b>Database not available. </b>";
@@ -2840,8 +2840,8 @@ std::string WebWorker::GetChangePasswordPage()
            (std::string) "activationToken",(std::string)"", &out))
         out << "\n<span style=\"color:red\"><b>Could not reset the activation token (database is down?). </b></span>";
       else if (!theRoutines.SetEntry
-       (DatabaseStrings::userColumnLabel, theGlobalVariables.userDefault.username,
-        DatabaseStrings::usersTableName, (std::string) "email", claimedEmail,&out))
+       (DatabaseStrings::columnUsername, theGlobalVariables.userDefault.username,
+        DatabaseStrings::tableUsers, (std::string) "email", claimedEmail,&out))
         out << "\n<span style=\"color:red\"><b>Could not store your email (database is down?). </b></span>";
       else
       { theGlobalVariables.userDefault.email=claimedEmail;
@@ -2855,8 +2855,8 @@ std::string WebWorker::GetChangePasswordPage()
           << "?request=changePasswordPage\">click here</a>. ";
           doShowPasswordChangeField=false;
           theRoutines.SetEntry
-          (DatabaseStrings::userId, theGlobalVariables.userDefault.userId,
-           DatabaseStrings::usersTableName, (std::string) "activationToken",
+          (DatabaseStrings::columnUserId, theGlobalVariables.userDefault.userId,
+           DatabaseStrings::tableUsers, (std::string) "activationToken",
            (std::string) "activated", &out)
           ;
         } else
@@ -2875,8 +2875,8 @@ std::string WebWorker::GetChangePasswordPage()
       << "- probably by an admin/instructor. ";
       DatabaseRoutines theRoutines;
       if (!theRoutines.SetEntry
-          (DatabaseStrings::userId, theGlobalVariables.userDefault.userId,
-           DatabaseStrings::usersTableName, (std::string) "activationToken",
+          (DatabaseStrings::columnUserId, theGlobalVariables.userDefault.userId,
+           DatabaseStrings::tableUsers, (std::string) "activationToken",
            (std::string) "activated", &out))
         out << " <span style=\"color:red\"><b>Failed to activate your account. </b></span>";
       else
@@ -3034,7 +3034,7 @@ int WebWorker::ProcessChangePassword()
     return 0;
   }
   if (!DatabaseRoutinesGlobalFunctions::SetEntry
-      (theUser.username.value, DatabaseStrings::usersTableName, "activationToken", "activated", commentsOnFailure))
+      (theUser.username.value, DatabaseStrings::tableUsers, "activationToken", "activated", commentsOnFailure))
     stOutput << "<span style=\"color:red\"><b>Failed to set activationToken: "
     << commentsOnFailure.str() << "</b></span>";
 

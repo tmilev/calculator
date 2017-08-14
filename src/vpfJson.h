@@ -28,6 +28,7 @@ static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, wor
 // error: 'JSType' is not a cass or namespace
 
 //struct JSHashData;
+class Rational;
 class JSData
 {
 public:
@@ -67,10 +68,7 @@ public:
   { this->reset();
   }
   // there has to be a better way to do this
-  void operator=(const Rational& other)
-  { this->type = this->JSnumber;
-    this->number = other.GetDoubleValue();
-  }
+  void operator=(const Rational& other);
 
   template <typename coefficient>
   void operator=(const Vector<coefficient>& other);

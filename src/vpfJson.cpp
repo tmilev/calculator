@@ -77,6 +77,11 @@ void JSData::readfile(const char* filename)
   this->readstring(json);
 }
 
+void JSData::operator=(const Rational& other)
+{ this->type = this->JSnumber;
+  this->number = other.GetDoubleValue();
+}
+
 bool JSData::IsValidElement()
 { return
   this->type==this->JSnull   ||
@@ -184,6 +189,7 @@ bool JSData::Tokenize
 bool JSData::readstring
 (const std::string& json, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("JSData::readstring");
+  this->reset();
   List<JSData> theTokenS;
   JSData::Tokenize(json, theTokenS);
   if (theTokenS.size==0)

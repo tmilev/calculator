@@ -653,7 +653,9 @@ public:
   std::string colorVU;
   std::string lineWidthJS;
   List<std::string> numSegmenTsJS;
-  Vectors<double> thePoints;
+  Matrix<Expression> thePointS;
+  Matrix<std::string> thePointsJS;
+  Vectors<double> thePointsDouble;
   List<Vectors<double> > theRectangles;
   // each rectangle is a list of two 2-dim vectors. First vector gives the (x,y)-coords
   //of the lower left corner of the rectangle. Second vector gives the (width,height) of the rectangle.
@@ -696,6 +698,10 @@ public:
    int& funCounter)
   ;
   std::string GetJavascriptParametricCurve2D
+  (std::string& outputPlotInstantiationJS, const std::string& canvasName,
+   int& funCounter)
+  ;
+  std::string GetJavascriptPoints
   (std::string& outputPlotInstantiationJS, const std::string& canvasName,
    int& funCounter)
   ;

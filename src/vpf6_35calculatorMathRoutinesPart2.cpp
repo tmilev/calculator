@@ -71,8 +71,8 @@ void MeshTriangles::PlotGrid(int theColor)
 //  List<Vector<double> > currentLine;
 //  currentLine.SetSize(2);
   PlotObject currentLinePlot;
-  List<Vector<double> >& pointsVector=currentLinePlot.thePoints;
-  currentLinePlot.thePoints.SetSize(4);
+  List<Vector<double> >& pointsVector=currentLinePlot.thePointsDouble;
+  currentLinePlot.thePointsDouble.SetSize(4);
   currentLinePlot.colorRGB=theColor;
   for (int i=0; i<this->theTriangles.size; i++)
   { pointsVector[0]=this->theTriangles[i][0];
@@ -214,7 +214,7 @@ void MeshTriangles::ComputeImplicitPlotPart2()
   double minSide=MathRoutines::Minimum(this->Height, this->Width)*this->minTriangleSideAsPercentOfWidthPlusHeight;
   PlotObject currentPlot;
   currentPlot.colorRGB=HtmlRoutines::RedGreenBlue(255, 0, 0);
-  Vectors<double>& theSegment=currentPlot.thePoints;
+  Vectors<double>& theSegment=currentPlot.thePointsDouble;
   List<Vector<double> > currentTriangle;
   for (int i=0; i<this->theTriangles.size; i++)
   { currentTriangle=this->theTriangles[i]; //making a copy in case this->theTriangles changes underneath.
@@ -320,8 +320,8 @@ bool CalculatorFunctionsGeneral::innerGetPointsImplicitly
     return false;
   HashedList<Vector<double>, MathRoutines::HashVectorDoubles> thePoints;
   for (int i=0; i<theMesh.theCurve.thePlots.size; i++)
-  { thePoints.AddOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePoints[0]);
-    thePoints.AddOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePoints[1]);
+  { thePoints.AddOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[0]);
+    thePoints.AddOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[1]);
   }
   Matrix<double> theMatrix;
   theMatrix.AssignVectorsToRows(thePoints);
@@ -959,7 +959,7 @@ bool CalculatorFunctionsGeneral::innerPlotLabel
   PlotObject thePlot;
   thePlot.dimension=labelPosition.size;
   thePlot.thePlotString=theLabel;
-  thePlot.thePoints.AddOnTop(labelPosition);
+  thePlot.thePointsDouble.AddOnTop(labelPosition);
   thePlot.thePlotType="label";
   thePlot.colorJS="black";
   return output.AssignValue(thePlot, theCommands);
@@ -980,18 +980,18 @@ bool CalculatorFunctionsGeneral::innerPlotRectangle
   Vector<double> currentCorner=theRectangle[0];
   Vector<double>& dimensions=theRectangle[1];
 
-  thePlot.thePoints.AddOnTop(currentCorner);
+  thePlot.thePointsDouble.AddOnTop(currentCorner);
   currentCorner[0]+=dimensions[0];
-  thePlot.thePoints.AddOnTop(currentCorner);
+  thePlot.thePointsDouble.AddOnTop(currentCorner);
   currentCorner[1]+=dimensions[1];
-  thePlot.thePoints.AddOnTop(currentCorner);
+  thePlot.thePointsDouble.AddOnTop(currentCorner);
   currentCorner[0]-=dimensions[0];
-  thePlot.thePoints.AddOnTop(currentCorner);
+  thePlot.thePointsDouble.AddOnTop(currentCorner);
   currentCorner[1]-=dimensions[1];
-  thePlot.thePoints.AddOnTop(currentCorner);
+  thePlot.thePointsDouble.AddOnTop(currentCorner);
   thePlot.colorFillJS="cyan";
   thePlot.colorJS="blue";
-  thePlot.thePoints.AddOnTop(currentCorner);
+  thePlot.thePointsDouble.AddOnTop(currentCorner);
   thePlot.theRectangles.AddOnTop(theRectangle);
   thePlot.colorRGB=HtmlRoutines::RedGreenBlue(0,0,255);
   thePlot.colorFillRGB=HtmlRoutines::RedGreenBlue(0,255,255);
@@ -1233,7 +1233,7 @@ bool CalculatorFunctionsGeneral::innerPlotPath(Calculator& theCommands, const Ex
   }
   theSegment.thePlotType="segmentPath";
   theSegment.dimension=theMat.NumCols;
-  theMat.GetVectorsFromRows(theSegment.thePoints);
+  theMat.GetVectorsFromRows(theSegment.thePointsDouble);
   if (input.size()>=4)
     if (!input[3].EvaluatesToDouble(&theSegment.lineWidth))
       theSegment.lineWidth=1;
@@ -1282,8 +1282,8 @@ bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const
     theSegment.dimension=3;
   else
     theSegment.dimension=2;
-  theSegment.thePoints.AddOnTop(leftV);
-  theSegment.thePoints.AddOnTop(rightV);
+  theSegment.thePointsDouble.AddOnTop(leftV);
+  theSegment.thePointsDouble.AddOnTop(rightV);
   if (input.size()>=5)
     if (!input[4].EvaluatesToDouble(&theSegment.lineWidth))
       theSegment.lineWidth=1;
@@ -1602,8 +1602,8 @@ bool CalculatorFunctionsGeneral::innerPlotSetProjectionScreenBasis(Calculator& t
   resultPlot.dimension=3;
   PlotObject thePlot;
   thePlot.thePlotType="setProjectionScreen";
-  thePlot.thePoints.AddOnTop(v1);
-  thePlot.thePoints.AddOnTop(v2);
+  thePlot.thePointsDouble.AddOnTop(v1);
+  thePlot.thePointsDouble.AddOnTop(v2);
   resultPlot+=thePlot;
   return output.AssignValue(resultPlot, theCommands);
 }
@@ -1623,21 +1623,21 @@ bool CalculatorFunctionsGeneral::innerPlotCoordinateSystem(Calculator& theComman
   PlotObject thePlot;
   thePlot.colorJS="black";
   thePlot.thePlotType="segment";
-  thePlot.thePoints.SetSize(2);
+  thePlot.thePointsDouble.SetSize(2);
   for (int i=0; i<3; i++)
-  { thePlot.thePoints[0].MakeZero(3);
-    thePlot.thePoints[1].MakeZero(3);
-    thePlot.thePoints[0][i]=corner1[i];
-    thePlot.thePoints[1][i]=corner2[i];
+  { thePlot.thePointsDouble[0].MakeZero(3);
+    thePlot.thePointsDouble[1].MakeZero(3);
+    thePlot.thePointsDouble[0][i]=corner1[i];
+    thePlot.thePointsDouble[1][i]=corner2[i];
     resultPlot+=(thePlot);
   }
   PlotObject plotLabels;
   plotLabels.thePlotType="label";
-  plotLabels.thePoints.SetSize(1);
+  plotLabels.thePointsDouble.SetSize(1);
   plotLabels.colorJS="blue";
   for (char i=0; i<3; i++)
-  { plotLabels.thePoints[0].MakeZero(3);
-    plotLabels.thePoints[0][i]=corner2[i];
+  { plotLabels.thePointsDouble[0].MakeZero(3);
+    plotLabels.thePointsDouble[0][i]=corner2[i];
     std::stringstream out;
     out << (char) ('x'+i);
     plotLabels.thePlotString=out.str();

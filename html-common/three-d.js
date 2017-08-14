@@ -355,21 +355,24 @@ function calculatorResetCanvas(inputCanvas)
   }
 }
 
-function PointTwoD(inputLocation, inputColor)
-{ this.location=inputLocation;
+function PointsTwoD(inputLocation, inputColor)
+{ this.location=inputLocation.slice();
   this.color=colorToRGB(inputColor);
-  this.type="point";
+  this.type="points";
   this.accountBoundingBox= function(inputOutputBox)
-  { accountBoundingBox(this.location, inputOutputBox);
+  { for (i=0; i<this.location.length; i++)
+      accountBoundingBox(this.location[i], inputOutputBox);
   };
   this.draw=function(theCanvas)
   { var theSurface=theCanvas.surface;
-    theSurface.beginPath();
-    theSurface.strokeStyle=colorRGBToString(this.color);
-    theSurface.fillStyle=colorRGBToString(this.color );
-    var theCoords=theCanvas.coordsMathToScreen(this.location);
-    theSurface.arc(theCoords[0], theCoords[1],3, 0, Math.PI*2);
-    theSurface.fill();
+    for (i=0; i < this.location.length; i++)
+    { theSurface.beginPath();
+      theSurface.strokeStyle=colorRGBToString(this.color);
+      theSurface.fillStyle=colorRGBToString(this.color );
+      var theCoords=theCanvas.coordsMathToScreen(this.location[i]);
+      theSurface.arc(theCoords[0], theCoords[1],3, 0, Math.PI*2);
+      theSurface.fill();
+    }
   };
 }
 
@@ -851,8 +854,8 @@ function CanvasTwoD(inputCanvas)
   this.flagShowPerformance=true;
   this.flagShowAxesTicks=false;
   this.flagShowGrid=false;
-  this.drawPoint= function (inputPoint, inputColor)
-  { this.theObjects.push(new PointTwoD(inputPoint, inputColor));
+  this.drawPoints= function (inputPoints, inputColor)
+  { this.theObjects.push(new PointsTwoD(inputPoints, inputColor));
   };
   this.drawLine= function (inputLeftPt, inputRightPt, inputColor, inputLineWidth)
   { var newLine=new SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth);
@@ -1263,8 +1266,9 @@ function Canvas(inputCanvas)
 
     theContours[theContours.length-1].adjacentPatches.push(patchIndex);
   };
-  this.drawPoint= function (inputPoint, inputColor)
-  { this.theIIIdObjects.thePoints.push(new Point(inputPoint, inputColor));
+  this.drawPoints= function (inputPoints, inputColor)
+  { for (var i=0; i<inputPoints.length; i++)
+        this.theIIIdObjects.thePoints.push(new Point(inputPoints[i], inputColor));
   };
   this.drawLine= function (leftPt, rightPt, inputColor, inputLineWidth)
   { var newContour= new Contour([], inputColor, inputLineWidth);

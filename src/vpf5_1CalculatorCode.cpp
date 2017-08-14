@@ -841,7 +841,9 @@ bool PlotObject::operator==(const PlotObject& other)const
   this->colorJS                      == other.colorJS                      &&
   this->lineWidthJS                  == other.lineWidthJS                  &&
   this->numSegmenTsJS                == other.numSegmenTsJS                &&
-  this->thePoints                    == other.thePoints                    &&
+  this->thePointS                    == other.thePointS                    &&
+  this->thePointsDouble              == other.thePointsDouble              &&
+  this->thePointsJS                  == other.thePointsJS                  &&
   this->theRectangles                == other.theRectangles                &&
   this->thePlotType                  == other.thePlotType                  &&
   this->manifoldImmersion            == other.manifoldImmersion            &&
@@ -883,9 +885,9 @@ PlotObject::PlotObject()
 
 void PlotObject::ComputeYbounds()
 { MacroRegisterFunctionWithName("PlotObject::ComputeYbounds");
-  for (int i=0; i<this->thePoints.size; i++)
-  { this->yHigh=MathRoutines::Maximum(this->yHigh, this->thePoints[i][1]);
-    this->yLow=MathRoutines::Minimum(this->yLow, this->thePoints[i][1]);
+  for (int i=0; i<this->thePointsDouble.size; i++)
+  { this->yHigh=MathRoutines::Maximum(this->yHigh, this->thePointsDouble[i][1]);
+    this->yLow=MathRoutines::Minimum(this->yLow, this->thePointsDouble[i][1]);
   }
 }
 
@@ -948,8 +950,8 @@ void Plot::ComputeAxesAndBoundingBox()
       this->highBoundY=MathRoutines::Maximum (currentLine[0][1], this->highBoundY);
       this->highBoundY=MathRoutines::Maximum (currentLine[1][1], this->highBoundY);
     }*/
-    for (int j=0; j<this->thePlots[k].thePoints.size; j++)
-    { Vector<double>& currentPoint=this->thePlots[k].thePoints[j];
+    for (int j=0; j<this->thePlots[k].thePointsDouble.size; j++)
+    { Vector<double>& currentPoint=this->thePlots[k].thePointsDouble[j];
       if (!this->IsOKVector(currentPoint))
         continue;
       this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
@@ -984,8 +986,8 @@ void Plot::ComputeAxesAndBoundingBox3d()
       this->highBoundY=MathRoutines::Maximum (currentLine[0][1], this->highBoundY);
       this->highBoundY=MathRoutines::Maximum (currentLine[1][1], this->highBoundY);
     }*/
-    for (int j=0; j<this->thePlots[k].thePoints.size; j++)
-    { Vector<double>& currentPoint=this->thePlots[k].thePoints[j];
+    for (int j=0; j<this->thePlots[k].thePointsDouble.size; j++)
+    { Vector<double>& currentPoint=this->thePlots[k].thePointsDouble[j];
       if (!this->IsOKVector(currentPoint))
         continue;
       this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
@@ -1076,13 +1078,13 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
       << ");\n"
       ;
     }
-    if (currentPlot.thePlotType=="setProjectionScreen" && currentPlot.thePoints.size>=2)
+    if (currentPlot.thePlotType=="setProjectionScreen" && currentPlot.thePointsDouble.size>=2)
     { out
       << "theCanvas.screenBasisUserDefault="
       << "["
-      << currentPlot.thePoints[0].ToStringSquareBracketsBasicType()
+      << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
       << ","
-      << currentPlot.thePoints[1].ToStringSquareBracketsBasicType()
+      << currentPlot.thePointsDouble[1].ToStringSquareBracketsBasicType()
       << "];\n";
       out << "theCanvas.screenBasisUser=theCanvas.screenBasisUserDefault.slice();\n";
     }
@@ -1090,7 +1092,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     { out
       << "theCanvas.drawText({"
       << "location: "
-      << currentPlot.thePoints[0].ToStringSquareBracketsBasicType()
+      << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
       << ", "
       << "text:"
       << "'" << currentPlot.thePlotString << "'"
@@ -1103,12 +1105,12 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
       ;
 
     }
-    if (currentPlot.thePlotType=="segment" && currentPlot.thePoints.size>=2)
+    if (currentPlot.thePlotType=="segment" && currentPlot.thePointsDouble.size>=2)
     { out
       << "theCanvas.drawLine("
-      << currentPlot.thePoints[0].ToStringSquareBracketsBasicType()
+      << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
       << ", "
-      << currentPlot.thePoints[1].ToStringSquareBracketsBasicType()
+      << currentPlot.thePointsDouble[1].ToStringSquareBracketsBasicType()
       << ", "
       << "'"
       << currentPlot.colorJS
@@ -1426,13 +1428,38 @@ std::string PlotObject::GetJavascript2dPlot
   return out.str();
 }
 
+std::string PlotObject::GetJavascriptPoints
+(std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter)
+{ MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptPoints");
+  (void) (canvasName);
+  (void) funCounter;
+  //stOutput << "<hr>DEBUG: Plotting points from: " << this->thePointsJS << "<hr>";
+  std::stringstream fnInstStream;
+  fnInstStream << "drawPoints([";
+  for (int i=0; i<this->thePointsJS.NumRows; i++)
+  { fnInstStream << "[";
+    for (int j=0; j<this->thePointsJS.NumCols; j++)
+    { fnInstStream << this->thePointsJS(i, j);
+      if (j!=this->thePointsJS.NumCols-1)
+        fnInstStream << ", ";
+    }
+    fnInstStream << "]";
+    if (i!=this->thePointsJS.NumRows-1)
+      fnInstStream << ", ";
+  }
+  fnInstStream << "], ";
+  fnInstStream << "'" << this->colorJS << "');\n";
+  outputPlotInstantiationJS=fnInstStream.str();
+  return "";
+}
+
 std::string PlotObject::ToStringPointsList()
 { MacroRegisterFunctionWithName("PlotObject::ToStringPointsList");
   std::stringstream out;
   out << "[";
-  for (int j=0; j<this->thePoints.size; j++)
-  { out << this->thePoints[j].ToStringSquareBracketsBasicType();
-    if (j!=this->thePoints.size-1)
+  for (int j=0; j<this->thePointsDouble.size; j++)
+  { out << this->thePointsDouble[j].ToStringSquareBracketsBasicType();
+    if (j!=this->thePointsDouble.size-1)
       out << ",";
   }
   out << "]";
@@ -1482,7 +1509,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     ;
   }
   out << "<script language=\"javascript\">\n";
-  std::string canvasFunctionName="functionMake"+ this->canvasName;
+  std::string canvasFunctionName = "functionMake"+ this->canvasName;
   out << "function " << canvasFunctionName << "()\n"
   << "{ ";
   for (int i=0; i<this->boxesThatUpdateMe.size; i++)
@@ -1516,6 +1543,9 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
       << "\n "
       ;
     }
+    if (currentPlot.thePlotType=="points")
+      currentPlot.GetJavascriptPoints
+      (theFnPlots[i], this->canvasName, funCounter);
   }
   out << "calculatorResetCanvas(document.getElementById('"
   << this->canvasName << "'));\n";
@@ -1542,10 +1572,15 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     { out << "theCanvas." << theFnPlots[i];
       continue;
     }
+    if (currentPlot.thePlotType=="points")
+    { out
+      << "theCanvas." << theFnPlots[i];
+      continue;
+    }
     if (currentPlot.thePlotType=="label")
-    { if (currentPlot.thePoints.size>0)
+    { if (currentPlot.thePointsDouble.size>0)
         out << "theCanvas.drawText("
-        << currentPlot.thePoints[0].ToStringSquareBracketsBasicType()
+        << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
         << ", "
         << "'" << currentPlot.thePlotString << "'"
         << ", "
@@ -1572,17 +1607,6 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
       << ","
       << "\"" << currentPlot.colorFillJS << "\""
       << ");\n";
-      continue;
-    }
-    if (currentPlot.thePlotType=="point")
-    { for (int j=0; j<currentPlot.thePoints.size; j++)
-        out
-        << "theCanvas.drawPoint("
-        << currentPlot.thePoints[j].ToStringSquareBracketsBasicType()
-        << ", "
-        << "\"" << currentPlot.colorJS << "\""
-        << ");\n";
-        ;
       continue;
     }
     out << "theCanvas.drawPath( ";

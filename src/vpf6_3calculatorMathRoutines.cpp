@@ -4648,7 +4648,7 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
   for (int i=firstGoodXIndex; i<=lastGoodXIndex; i++)
   { currentPt[0]=XValues[i];
     currentPt[1]=YValues[i];
-    thePlot.thePoints.AddOnTop(currentPt);
+    thePlot.thePointsDouble.AddOnTop(currentPt);
   }
   thePlot.xLow=XValues[0];
   thePlot.xHigh=*XValues.LastObject();
@@ -4761,7 +4761,7 @@ bool CalculatorFunctionsGeneral::innerPlotFill(Calculator& theCommands, const Ex
     theCommands << "Failed to extract color from: " << colorE.ToString() << "; using default color value. ";
   theFilledPlot.colorFillJS=colorString;
   for (int i=0; i<startPlot.thePlots.size; i++)
-    theFilledPlot.thePoints.AddListOnTop(startPlot.thePlots[i].thePoints);
+    theFilledPlot.thePointsDouble.AddListOnTop(startPlot.thePlots[i].thePointsDouble);
   theFilledPlot.fillStyle="filled";
   theFilledPlot.thePlotType="plotFillStart";
   outputPlot.DesiredHtmlHeightInPixels=startPlot.DesiredHtmlHeightInPixels;
@@ -4914,14 +4914,14 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
     thePlotObj.numSegmentsE.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else
     thePlotObj.thePlotType="plotFunctionPrecomputed";
-  Vectors<double>& thePoints=thePlotObj.thePoints;
+  Vectors<double>& thePointsDouble=thePlotObj.thePointsDouble;
   if (thePlot.boxesThatUpdateMe.size==0)
     if (!input[1].EvaluatesToDoubleInRange
          (theVarString, thePlotObj.xLow, thePlotObj.xHigh, numIntervals,
-          &thePlotObj.yLow, &thePlotObj.yHigh, &thePoints))
+          &thePlotObj.yLow, &thePlotObj.yHigh, &thePointsDouble))
     { bool hasOneGoodPoint=false;
-      for (int i=0; i<thePoints.size; i++)
-        if (!std::isnan(thePoints[i][1]))
+      for (int i=0; i<thePointsDouble.size; i++)
+        if (!std::isnan(thePointsDouble[i][1]))
         { hasOneGoodPoint=true;
           break;
         }
@@ -4956,31 +4956,36 @@ bool CalculatorFunctionsGeneral::innerPlotPoint(Calculator& theCommands, const E
     return output.MakeError
     ("Plotting a point takes at least two arguments, location and color. ",
     theCommands, true);
-  Matrix<double> theMat;
-  if (!theCommands.GetMatrixDoubles(input[1], theMat))
-    return theCommands << "<hr>Failed to extract coordinates from: " << input[1].ToString();
-  if (theMat.NumCols<1 || theMat.NumRows<1)
-    return theCommands << "<hr>Failed to extract coordinates from: " << input[1].ToString();
   Plot theFinalPlot;
-  theFinalPlot.dimension=theMat.NumCols;
   PlotObject thePlot;
+  if (!theCommands.GetMatrixExpressions(input[1], thePlot.thePointS))
+    return theCommands << "The first argument of PlotPoint is expected to be a sequence, instead I had: " << input[1].ToString();
+  theFinalPlot.dimension=thePlot.thePointS.NumCols;
+  thePlot.dimension=theFinalPlot.dimension;
+  thePlot.coordinateFunctionsE.SetSize(thePlot.dimension);
+  thePlot.coordinateFunctionsJS.SetSize(thePlot.dimension);
+  Expression jsConverterE;
+  thePlot.thePointsJS.init(thePlot.thePointS.NumRows, thePlot.thePointS.NumCols);
+  for (int i=0; i< thePlot.thePointS.NumRows; i++)
+    for (int j=0; j<thePlot.thePointS.NumCols; j++)
+    { if(! CalculatorFunctionsGeneral::
+           innerMakeJavascriptExpression
+          (theCommands, thePlot.thePointS(i,j), jsConverterE))
+        return theCommands << "Failed to extract coordinate " << i+1 << " from: " << thePlot.coordinateFunctionsE[i].ToString();
+      thePlot.thePointsJS(i,j)=jsConverterE.ToString();
+      thePlot.thePointS(i,j).HasInputBoxVariables(&theFinalPlot.boxesThatUpdateMe);
+    }
   thePlot.dimension=theFinalPlot.dimension;
   thePlot.colorRGB=HtmlRoutines::RedGreenBlue(0, 0, 0);
   if (input[2].IsOfType<std::string>())
     DrawingVariables::GetColorIntFromColorString
     (input[2].GetValue<std::string>(), thePlot.colorRGB);
   thePlot.colorJS=input[2].ToString();
-  thePlot.thePlotType="point";
-  for (int i=0; i<theMat.NumRows; i++)
-  { Vector<double> theV;
-    theMat.GetVectorFromRow(i, theV);
-    thePlot.thePoints.SetSize(0);
-    thePlot.thePoints.AddOnTop(theV);
-    theFinalPlot.thePlots.AddOnTop(thePlot);
-  }
+  thePlot.thePlotType="points";
+  theFinalPlot.thePlots.AddOnTop(thePlot);
   theFinalPlot.DesiredHtmlHeightInPixels=100;
   theFinalPlot.DesiredHtmlWidthInPixels=100;
-//  stOutput << "DEBUG: plotting point with coords: " << theV;
+  //stOutput << "DEBUG: plotting points : " << thePlot.thePointsJS;
   return output.AssignValue(theFinalPlot, theCommands);
 }
 
@@ -5182,7 +5187,7 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
     return theCommands
     << "Parametric curve plots take 3+ arguments. The first argument gives "
     << "the coordinate functions in the format (f_1, f_2) or (f_1, f_2,f_3), "
-    << " the next two arguments stands for the variable range.";
+    << " the next two arguments stands for the variable range. ";
   if (input.HasBoundVariables())
     return false;
   PlotObject thePlot;
@@ -5279,7 +5284,7 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
         (theCommands, thePlot.coordinateFunctionsE[i], converterE))
       thePlot.coordinateFunctionsJS[i]=converterE.ToString();
     else
-    { thePlot.thePlotType="parametricCurvePrecomputed";
+    { thePlot.thePlotType = "parametricCurvePrecomputed";
       theCommands << "Failed to convert: "
       << thePlot.coordinateFunctionsE[i] << " to js. ";
     }
@@ -5317,11 +5322,11 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
         (thePlot.variablesInPlay[0].ToString(), thePlot.paramLow, thePlot.paramHigh, numPoints,
          &thePlot.yLow, &thePlot.yHigh, &theYs))
       theCommands << "<hr>Failed to evaluate curve function. ";
-    thePlot.thePoints.SetSize(theXs.size);
+    thePlot.thePointsDouble.SetSize(theXs.size);
     for (int i=0; i<theXs.size; i++)
-    { thePlot.thePoints[i].SetSize(2);
-      thePlot.thePoints[i][0]=theXs[i][1];
-      thePlot.thePoints[i][1]=theYs[i][1];
+    { thePlot.thePointsDouble[i].SetSize(2);
+      thePlot.thePointsDouble[i][0]=theXs[i][1];
+      thePlot.thePointsDouble[i][1]=theYs[i][1];
     }
   }
   Plot outputPlot;
@@ -7479,15 +7484,15 @@ public:
         arrowHead[1]+=this->charHeight.GetDoubleValue() /2;
         PlotObject theSegment;
         theSegment.thePlotString="segment";
-        theSegment.thePoints.AddOnTop(arrowBase);
-        theSegment.thePoints.AddOnTop(arrowHead);
+        theSegment.thePointsDouble.AddOnTop(arrowBase);
+        theSegment.thePointsDouble.AddOnTop(arrowHead);
         theSegment.colorJS="black";
         this->thePlot+=theSegment;
       }
       if (this->DisplayedEstrings[i]!="")
       { PlotObject theText;
         theText.thePlotType="label";
-        theText.thePoints.AddOnTop(this->NodePositionsDouble[i]);
+        theText.thePointsDouble.AddOnTop(this->NodePositionsDouble[i]);
         theText.colorJS=
         this->DisplayedStringIsLeaf[i] ? "red" : "gray";
         theText.thePlotString=
@@ -7498,7 +7503,7 @@ public:
       { PlotObject thePoint;
         thePoint.thePlotType="point";
         thePoint.colorJS="blue";
-        thePoint.thePoints.AddOnTop(this->NodePositionsDouble[i]);
+        thePoint.thePointsDouble.AddOnTop(this->NodePositionsDouble[i]);
         this->thePlot+=thePoint;
       }
     }

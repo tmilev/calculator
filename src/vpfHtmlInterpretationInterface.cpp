@@ -1386,17 +1386,22 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
     return out.str();
   }
 //  out << "DEBUG: Usertable: " << userTable.ToStringCommaDelimited();
-  int indexExtraInfo=-1;
+  int indexCourseInfo=-1;
   for (int i=0; i<columnLabels.size; i++)
-    if (columnLabels[i]=="userInfo")
-      indexExtraInfo=i;
-  if (indexExtraInfo==-1)
+    if (columnLabels[i]==DatabaseStrings::columnCourseInfo)
+      indexCourseInfo=i;
+  if (indexCourseInfo==-1)
   { out << "Failed to load extra user info. ";
     return out.str();
   }
   HashedList<std::string, MathRoutines::hashString> theSections;
+  UserCalculator currentUser;
   for (int i=0; i<userTable.size; i++)
-    theSections.AddOnTopNoRepetition(userTable[i][indexExtraInfo]);
+  { currentUser.reset();
+    currentUser.courseInfo.rawStringStoredInDB=userTable[i][indexCourseInfo];
+    currentUser.AssignCourseInfoString(&out);
+    theSections.AddOnTopNoRepetition(currentUser.courseInfo.getSectionInDB());
+  }
   theSections.QuickSortAscending();
   out << "<hr>";
   out << HtmlInterpretation::ToStringAssignSection();

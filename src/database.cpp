@@ -937,7 +937,13 @@ bool UserCalculator::FetchOneUserRow
 std::string CourseAndUserInfo::ToStringHumanReadable()
 { MacroRegisterFunctionWithName("CourseAndUserInfo::ToStringHumanReadable");
   std::stringstream out;
-  out << this->courseInfoJSON.GetElement().ToString(true);
+  out << "Instructor: " << this->instructorComputed
+  << "<br>Course: " << this->courseComputed
+  << "<br>Section: " << this->sectionComputed << ". ";
+  out << "<br>Deadline schema: " << this->deadlineSchemaIDComputed
+  << "<br>Problem weight schema: " << this->problemWeightSchemaIDComputed << ". ";
+
+//  out << this->courseInfoJSON.GetElement().ToString(true);
   return out.str();
 }
 
@@ -1015,7 +1021,6 @@ bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
   this->courseInfo.deadlineSchemaIDComputed="deadlines"+
   this->courseInfo.instructorComputed+
   this->courseInfo.courseComputed+
-  this->courseInfo.sectionComputed+
   this->courseInfo.semesterComputed;
   this->courseInfo.problemWeightSchemaIDComputed="problemWeights"+
   this->courseInfo.instructorComputed;

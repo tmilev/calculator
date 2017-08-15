@@ -222,7 +222,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 std::string DatabaseStrings::columnUserId="id";
 std::string DatabaseStrings::columnUsername="username";
 std::string DatabaseStrings::tableUsers="users";
-std::string DatabaseStrings::columnSection="userInfo";
+std::string DatabaseStrings::columnSection="studentSection";
 std::string DatabaseStrings::columnCurrentCourses="currentCourses";
 std::string DatabaseStrings::theDatabaseUser="ace";
 std::string DatabaseStrings::theDatabaseName="aceDB";
@@ -994,7 +994,8 @@ bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
 { MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
   JSData& theCourseInfo=this->courseInfo.courseInfoJSON.GetElement();
   theCourseInfo.readstring(this->courseInfo.rawStringStoredInDB, errorStream);
-  if (theGlobalVariables.UserStudentVieWOn() && this->userRole=="admin" &&
+  bool isAdmin=(this->userRole=="admin" && this->username.value==theGlobalVariables.userDefault.username.value);
+  if (theGlobalVariables.UserStudentVieWOn() && isAdmin &&
       theGlobalVariables.GetWebInput("studentSection")!="")
   //<- warning, the user may not be
   //fully logged-in yet so theGlobalVariables.UserDefaultHasAdminRights()
@@ -1002,10 +1003,22 @@ bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
     this->courseInfo.sectionComputed=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
   else
     this->courseInfo.sectionComputed=this->courseInfo.getSectionInDB();
-  if (this->userRole=="admin" && theGlobalVariables.GetWebInput("courseHome")!="")
+  if (isAdmin && theGlobalVariables.GetWebInput("courseHome")!="")
     this->courseInfo.courseComputed=theGlobalVariables.GetWebInput("courseHome");
   else
     this->courseInfo.courseComputed=theCourseInfo[DatabaseStrings::columnCurrentCourses].string;
+  if (isAdmin)
+    this->courseInfo.instructorComputed=this->username.value;
+  else
+    this->courseInfo.instructorComputed=this->courseInfo.getInstructorInDB();
+
+  this->courseInfo.deadlineSchemaIDComputed="deadlines"+
+  this->courseInfo.instructorComputed+
+  this->courseInfo.courseComputed+
+  this->courseInfo.sectionComputed+
+  this->courseInfo.semesterComputed;
+  this->courseInfo.problemWeightSchemaIDComputed="problemWeights"+
+  this->courseInfo.instructorComputed;
   return true;
 }
 

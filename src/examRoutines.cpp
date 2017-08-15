@@ -207,7 +207,7 @@ bool DatabaseRoutines::StoreProblemDatabaseInfo
   if (!this->startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
     return false;
   if (!this->SetEntry
-      (DatabaseStrings::columnCurrentCourses,
+      (DatabaseStrings::columnDeadlinesSchema,
        theUser.courseInfo.deadlineSchemaIDComputed,
        DatabaseStrings::tableDeadlines,
        DatabaseStrings::columnDeadlines,

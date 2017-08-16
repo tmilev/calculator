@@ -1582,7 +1582,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   if (currentDeadline=="")
   { if (returnEmptyStringIfNoDeadline)
       return "";
-    out << "<span style=\"color:orange\">No deadline yet. </span>";
+    out << "<span style=\"color:orange\">No deadline yet</span>";
     //out << "DEBUG: section: " << sectionNumber;
     return out.str();
   }
@@ -3749,7 +3749,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     << " points earned.\n" ;
     out << "<br>The total score includes problems without deadline but does not count problems whose weights have not been set yet. "
     << "If a problem was assigned a new weight, and you haven't solved that problem yet, your % score may drop. <br>";
-    out << "Course info: " << this->currentUseR.courseInfo.ToStringHumanReadable() << "<br>";
+    out << "<courseInfoPanel><b>Course info</b>\n<br>\n" << this->currentUseR.courseInfo.ToStringHumanReadable() << "<br></courseInfoPanel>";
   }
   #endif
   this->initTopicElementNames();

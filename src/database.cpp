@@ -893,9 +893,10 @@ bool UserCalculator::FetchOneUserRow
   std::string reader;
   //stOutput << "DEBUG:  GOT to hereE!!!";
   if (this->courseInfo.deadlineSchemaIDComputed!="")
-  { std::stringstream localFailureStream;
+  { //stOutput << "DEBUG: Fetching deadline schema id: " << this->courseInfo.deadlineSchemaIDComputed;
+    std::stringstream localFailureStream;
     if (theRoutines.FetchEntry
-        (DatabaseStrings::columnCurrentCourses,
+        (DatabaseStrings::columnDeadlinesSchema,
          this->courseInfo.deadlineSchemaIDComputed,
          DatabaseStrings::tableDeadlines,
          DatabaseStrings::columnDeadlines,
@@ -903,12 +904,13 @@ bool UserCalculator::FetchOneUserRow
          &localFailureStream))
       this->courseInfo.deadlinesString=reader;
     else if(!theRoutines.InsertRow
-        (DatabaseStrings::columnCurrentCourses,
+        (DatabaseStrings::columnDeadlinesSchema,
          this->courseInfo.deadlineSchemaIDComputed,
          DatabaseStrings::tableDeadlines,
          &localFailureStream))
       if (failureStream!=0)
         *failureStream << localFailureStream.str();
+    //stOutput << "DEBUG: Fetched deadline string: " << this->courseInfo.deadlinesString;
   }
   //  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
   //  << " this->currentCoursesInfoString:  " << this->currentCoursesInfoString.value;
@@ -939,10 +941,13 @@ std::string CourseAndUserInfo::ToStringHumanReadable()
   std::stringstream out;
   out << "Instructor: " << this->instructorComputed
   << "<br>Course: " << this->courseComputed
-  << "<br>Section: " << this->sectionComputed << ". ";
+  << "<br>Section: " << this->sectionComputed;
   out << "<br>Deadline schema: " << this->deadlineSchemaIDComputed
   << "<br>Problem weight schema: " << this->problemWeightSchemaIDComputed << ". ";
-
+  if (theGlobalVariables.UserDebugFlagOn())
+  { out << "<br>Deadline string: " << HtmlRoutines::ConvertURLStringToNormal(this->deadlinesString, false);
+    out << "<br>Problem string: " << this->problemWeightString;
+  }
 //  out << this->courseInfoJSON.GetElement().ToString(true);
   return out.str();
 }
@@ -1706,8 +1711,9 @@ bool DatabaseRoutines::AddUsersFromEmails
     if (!currentUser.SetColumnEntry(DatabaseStrings::columnCourseInfo, currentUser.courseInfo.rawStringStoredInDB, *this, &comments))
       result=false;
     if (thePasswords.size==0 || thePasswords.size!=theEmails.size)
-    { if (!currentUser.ComputeAndStoreActivationToken(&comments, *this))
-        result=false;
+    { if (currentUser.actualShaonedSaltedPassword=="" && currentUser.actualAuthenticationToken=="")
+        if (!currentUser.ComputeAndStoreActivationToken(&comments, *this))
+          result=false;
     } else
     { currentUser.enteredPassword= HtmlRoutines::ConvertStringToURLString(thePasswords[i], false);
       //<-Passwords are ONE-LAYER url-encoded

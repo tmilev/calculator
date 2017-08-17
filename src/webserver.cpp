@@ -1524,7 +1524,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   if (shouldDisplayMessage)
   { theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
     //stOutput << "<br>DEBUG: Invalid user or pass";
-    argumentProcessingFailureComments << "<b>Invalid user and/or authentication. </b>";
+    argumentProcessingFailureComments << "Invalid user and/or authentication. ";
   }
   //stOutput << "<br>DEBUG: Login success: " << theGlobalVariables.flagLoggedIn
   //<< " entered auth token: " << theUser.enteredAuthenticationToken.value

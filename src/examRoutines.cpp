@@ -3736,7 +3736,11 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   theGlobalVariables.UserDefaultHasAdminRights() &&
   !theGlobalVariables.UserStudentVieWOn() &&
   theGlobalVariables.userCalculatorRequestType!="templateNoLogin";
-  this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys, &this->theTopicS);
+  HashedList<std::string, MathRoutines::hashString> gradableProblems;
+  for (int i=0; i<this->theTopicS.size(); i++)
+    if (this->theTopicS[i].type==TopicElement::tProblem)
+      gradableProblems.AddOnTopNoRepetition(this->theTopicS[i].id);
+  this->currentUseR.ComputePointsEarned(gradableProblems, &this->theTopicS);
   out << this->GetSectionSelector();
   if (this->currentUseR.pointsMax!=0)
   { double percent=100*this->currentUseR.pointsEarned.GetDoubleValue()/

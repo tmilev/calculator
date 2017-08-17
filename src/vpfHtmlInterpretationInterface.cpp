@@ -1762,6 +1762,7 @@ struct UserScores
 public:
   CalculatorHTML theProblem;
   std::string currentSection;
+  std::string currentCourse;
   List<MapLisT<std::string, Rational, MathRoutines::hashString> > scoresBreakdown;
   List<List<std::string> > userTablE;
   List<Rational> userScores;
@@ -1776,6 +1777,7 @@ public:
 bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
 { MacroRegisterFunctionWithName("UserScores::ComputeScoresAndStats");
 #ifdef MACRO_use_MySQL
+  //stOutput << "DEBUG: Computing scores and stats. ";
   theProblem.currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
 
   this->theProblem.LoadFileNames();
@@ -1785,6 +1787,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
     return false;
   if (!this->theProblem.LoadDatabaseInfo(comments))
     comments << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
+  //stOutput << "DEBUG: got to here";
   theProblem.currentUseR.ComputePointsEarned
   (theProblem.currentUseR.theProblemData.theKeys, &theProblem.theTopicS);
   List<std::string> userLabels;
@@ -1794,9 +1797,6 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   int usernameIndex=userLabels.GetIndex(DatabaseStrings::columnUsername);
   if (usernameIndex==-1)
     return "Could not find username column. ";
-  int userGroupIndex=userLabels.GetIndex(DatabaseStrings::columnSection);
-  if (userGroupIndex==-1)
-    return "Could not find user group column. ";
   int problemDataIndex=userLabels.GetIndex("problemData");
   if (problemDataIndex==-1)
     return "Could not find problem data column. ";
@@ -1820,30 +1820,34 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   (this->theProblem.theTopicS.size(),0);
 
   bool ignoreSectionsIdontTeach=true;
+  this->currentSection=theGlobalVariables.userDefault.courseInfo.sectionComputed;
+  this->currentCourse=theGlobalVariables.GetWebInput("courseHome");
   if (theGlobalVariables.GetWebInput("request")== "scoresInCoursePage")
     this->currentSection =
     MathRoutines::StringTrimWhiteSpace(
     HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false)
     );
+  //stOutput << "<br>DEBUG: ignoreSectionIdontTEach: " << ignoreSectionsIdontTeach;
+  //stOutput << "<br>DEBUG: currentSection: " << this->currentSection;
   for (int i=0; i<this->userTablE.size; i++)
   { currentUserRecord.currentUseR.courseInfo.rawStringStoredInDB=this->userTablE[i][courseInfoIndex];
     currentUserRecord.currentUseR.AssignCourseInfoString(&comments);
+    //if (i<0)
+    //stOutput << "<br>DEBUG: currentsection: " << currentUserRecord.currentUseR.courseInfo.getSectionInDB();
     if (ignoreSectionsIdontTeach)
-    { if (currentUserRecord.currentUseR.courseInfo.courseComputed!=
-          theGlobalVariables.userDefault.courseInfo.courseComputed)
+    { if (currentUserRecord.currentUseR.courseInfo.courseComputed!=this->currentCourse)
         continue;
       if (theGlobalVariables.UserStudentVieWOn())
-      { if (currentUserRecord.currentUseR.courseInfo.sectionComputed!=
-            theGlobalVariables.userDefault.courseInfo.sectionComputed)
+      { if (currentUserRecord.currentUseR.courseInfo.getSectionInDB()!=this->currentSection)
           continue;
       } else
-      { if (this->userTablE[i][userGroupIndex]!=this->currentSection)
+      { if (currentUserRecord.currentUseR.courseInfo.getSectionInDB()!=this->currentSection)
           continue;
       }
     }
     this->userScores.AddOnTop(-1);
     this->userNames.AddOnTop(this->userTablE[i][usernameIndex]);
-    this->userInfos.AddOnTop(this->userTablE[i][userGroupIndex]);
+    this->userInfos.AddOnTop(currentUserRecord.currentUseR.courseInfo.getSectionInDB());
     this->scoresBreakdown.SetSize(this->scoresBreakdown.size+1);
     currentUserRecord.currentUseR.username=this->userTablE[i][usernameIndex];
 
@@ -1952,6 +1956,9 @@ std::string HtmlInterpretation::ToStringUserScores()
   if (!theScores.ComputeScoresAndStats(out))
     return out.str();
 //  out << "DBUG: prob names: " << theProblem.problemNamesNoTopics.ToStringCommaDelimited();
+  out << "<b>Section: </b>" << theScores.currentSection
+  << "<br><b>Course: </b>"
+  << theScores.currentCourse << "\n<br>\n";
   out << "<table class=\"scoreTable\"><tr><th rowspan=\"3\">User</th>"
   << "<th rowspan=\"3\">Section</th><th rowspan=\"3\"> Total score</th>";
   for (int i=0; i<theScores.theProblem.theTopicS.size(); i++)
@@ -1960,7 +1967,7 @@ std::string HtmlInterpretation::ToStringUserScores()
       continue;
     int numCols=currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan=\"" << numCols << "\"";
-    if (currentElt.totalSubSectionsUnderME==0 &&
+    if (currentElt.totalSubSectionsUnderME == 0 &&
         currentElt.flagContainsProblemsNotInSubsection)
       out << " rowspan=\"3\"";
     out << ">" << currentElt.title << "</td>";

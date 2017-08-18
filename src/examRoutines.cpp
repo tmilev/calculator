@@ -2987,18 +2987,18 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         (theGlobalVariables.userCalculatorRequestType, "true", "")
         << "\">Student view</a>";
     } else
-      out << "Student view: ";
+      out << "Student view, section: ";
     for (int i=0; i<this->databaseStudentSections.size; i++)
       if (this->databaseStudentSections[i]!="")
       { if (theGlobalVariables.UserStudentVieWOn() &&
             this->databaseStudentSections[i] == HtmlRoutines::ConvertURLStringToNormal
             (theGlobalVariables.GetWebInput("studentSection"), false))
-          out << "<b>section " << this->databaseStudentSections[i] << "</b>";
+          out << "<b>" << this->databaseStudentSections[i] << "</b>";
         else
           out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?"
           << this->ToStringCalculatorArgumentsForProblem
           (theGlobalVariables.userCalculatorRequestType, "true", this->databaseStudentSections[i])
-          << "\">section " << this->databaseStudentSections[i] << " </a>";
+          << "\">" << this->databaseStudentSections[i] << " </a>";
         if (i!=this->databaseStudentSections.size-1)
           out << linkSeparator;
         //stOutput << "DEBUG: student section: " << this->databaseStudentSections[i];
@@ -3746,18 +3746,18 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   { double percent=100*this->currentUseR.pointsEarned.GetDoubleValue()/
     this->currentUseR.pointsMax.GetDoubleValue();
     out.precision(2);
-    out << "Total score: "
+    out << "<panelStudentScores>Total score: "
     << std::fixed << percent << "% = ";
     out << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
     << " out of " << this->currentUseR.pointsMax.GetDoubleValue()
-    << " points earned.\n" ;
-    out << "<br>The total score includes problems without deadline but does not count problems whose weights have not been set yet. "
-    << "If a problem was assigned a new weight, and you haven't solved that problem yet, your % score may drop. <br>";
-    out << "<courseInfoPanel><b>Course info</b>\n<br>\n" << this->currentUseR.courseInfo.ToStringHumanReadable() << "<br></courseInfoPanel>";
+    << " points earned.</panelStudentScores>\n" ;
+    out << "<br><small>Includes problems without deadline; but not problems without weights.<br> "
+    << "If a problem is assigned a new weight, your % score may drop. </small><br>";
+    out << "<panelCourseInfo>" << this->currentUseR.courseInfo.ToStringHumanReadable() << "</panelCourseInfo>";
   }
   #endif
   this->initTopicElementNames();
-  out << "<problemLinkStyleSelectionTab>Problem links open in: ";
+  out << "<panelProblemLinkStyleSelection>Problem links open in: ";
 //  out << "<br>DEBUG: problinkstyle: "
 //  << theGlobalVariables.GetWebInput("problemLinkStyle")
 //  << "<br>";
@@ -3773,7 +3773,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   if (theGlobalVariables.GetWebInput("problemLinkStyle")=="newWindow")
     out << "checked";
   out << ">new tab</input>"
-  << ". </problemLinkStyleSelectionTab>"
+  << ". </panelProblemLinkStyleSelection>"
  ;
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
   bool tableStarted=false;

@@ -939,11 +939,16 @@ bool UserCalculator::FetchOneUserRow
 std::string CourseAndUserInfo::ToStringHumanReadable()
 { MacroRegisterFunctionWithName("CourseAndUserInfo::ToStringHumanReadable");
   std::stringstream out;
-  out << "Instructor: " << this->instructorComputed
-  << "<br>Course: " << this->courseComputed
-  << "<br>Section: " << this->sectionComputed;
-  out << "<br>Deadline schema: " << this->deadlineSchemaIDComputed
-  << "<br>Problem weight schema: " << this->problemWeightSchemaIDComputed << ". ";
+  out
+  << "<table><tr><td style=\"text-align:right\"><b>Instructor:&nbsp;</b></td><td>" << this->instructorComputed << "</td></tr>"
+  << "<tr><td style=\"text-align:right\"><b>Course:&nbsp;</b></td><td>" << this->courseComputed << "</td></tr>"
+  << "<tr><td style=\"text-align:right\"><b><b>Section:&nbsp;</b></td><td>" << this->sectionComputed << "</td></tr>";
+  out
+  << "<tr><td style=\"text-align:right\"><b>Deadline schema:&nbsp;</b></td><td>" << this->deadlineSchemaIDComputed
+  << "</td><td>(computed from your instructor and course name)" << "</td></tr>"
+  << "<tr><td style=\"text-align:right\"><b>Problem weight schema:&nbsp;</b></td><td>" << this->problemWeightSchemaIDComputed
+  << "</td><td>(computed from your instructor). </td></tr>"
+  << "</table>";
   if (theGlobalVariables.UserDebugFlagOn())
   { out << "<br>Deadline string: " << HtmlRoutines::ConvertURLStringToNormal(this->deadlinesString, false);
     out << "<br>Problem string: " << this->problemWeightString;

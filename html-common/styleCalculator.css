@@ -211,11 +211,33 @@ button.studentScoresButton{
   transition: 0.6s;
 }
 button.studentScoresButton.active, button.studentScoresButton:hover {
-  background-color: #ddd;
+  background-color: #d0d0d0;
 }
 span.studentScoresContent{
   transition: opacity 1s linear;
   opacity: 1;
+}
+panelStudentScores{
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  font-size: 1em;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+panelCourseInfo{
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  font-size: 1em;
+  border-radius: 3px;
+  transition: 0.6s;
 }
 span.panelProblemWeights{
   display: block;
@@ -569,11 +591,10 @@ font-weight: bold;
 color: green;
 font-size: 1.25em;
 }
-problemLinkStyleSelectionTab{
-  display: block;
+panelProblemLinkStyleSelection{
+  display: inline-block;
   margin:  3px;
   padding: 3px;
-  text-align: center;
   background-color: #efefef;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -581,7 +602,7 @@ problemLinkStyleSelectionTab{
   border-radius: 3px;
   transition: 0.6s;
 }
-problemLinkStyleSelectionTab:hover{
+panelProblemLinkStyleSelection:hover{
   background-color: #dfdfdf;
 }
 .textInputUsername{

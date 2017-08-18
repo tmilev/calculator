@@ -221,7 +221,7 @@ panelStudentScores{
   display: inline-block;
   margin:  3px;
   padding: 3px;
-  background-color: #efefef;
+  background-color: #fafafa;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   font-size: 1em;
@@ -232,7 +232,7 @@ panelCourseInfo{
   display: inline-block;
   margin:  3px;
   padding: 3px;
-  background-color: #efefef;
+  background-color: #fafafa;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   font-size: 1em;
@@ -595,7 +595,7 @@ panelProblemLinkStyleSelection{
   display: inline-block;
   margin:  3px;
   padding: 3px;
-  background-color: #efefef;
+  background-color: #eaeaea;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   font-size: 1em;

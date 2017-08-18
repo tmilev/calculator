@@ -61,8 +61,7 @@ class LaTeXcrawler
   bool BuildOrFetchFromCachePresentationFromSlides(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void BuildFreecalc();
-  void CrawlRecursive(const std::string& currentFileName);
-  std::stringstream crawlingResult;
+  void CrawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileName);
   std::stringstream displayResult;
   std::stringstream errorStream;
   std::string ToString();

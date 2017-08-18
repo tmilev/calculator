@@ -350,7 +350,8 @@ void LaTeXcrawler::Crawl()
   if (!this->ExtractFileNamesFromRelativeFileName(0))
     return;
   this->recursionDepth=0;
-  this->CrawlRecursive(this->theFileNameToCrawlPhysical);
+  std::stringstream crawlingResult;
+  this->CrawlRecursive(crawlingResult, this->theFileNameToCrawlPhysical);
   std::fstream outputFile;
   std::string outputFileName = "latexOutput.tex";
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(outputFile, "output/"+ outputFileName, false, true, false, true))
@@ -359,7 +360,7 @@ void LaTeXcrawler::Crawl()
     //<< this->crawlingResult.str();
     return;
   }
-  outputFile << this->crawlingResult.str();
+  outputFile << crawlingResult.str();
   if (this->errorStream.str()!="")
     this->displayResult << "Errors encountered. " << this->errorStream.str();
   this->displayResult << "Output file: <a href=\"" << theGlobalVariables.DisplayPathOutputFolder
@@ -377,7 +378,7 @@ LaTeXcrawler::LaTeXcrawler()
   this->recursionDepth=0;
 }
 
-void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
+void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileName)
 { MacroRegisterFunctionWithName("LaTeXcrawler::CrawlRecursive");
   RecursionDepthCounter theCounter(&this->recursionDepth);
   if (this->recursionDepth>1000)
@@ -409,15 +410,15 @@ void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
     isOKfileName=FileOperations::IsOKfileNameVirtual(currentFileName, false, &this->errorStream);
   if (!isOKfileName)
   { this->errorStream << "%Error fetching file: " << currentFileName;
-    this->crawlingResult << "%Error fetching file: " << currentFileName;
+    crawlingResult << "%Error fetching file: " << currentFileName;
     return;
   }
   std::fstream theFile;
-  //this->crawlingResult << "%DEBUG: opening: " << currentFileName << "\n";
+  //crawlingResult << "%DEBUG: opening: " << currentFileName << "\n";
   if (!FileOperations::OpenFileUnsecure(theFile, currentFileName, false, false, false))
   { this->errorStream << "Failed to open file "
     << currentFileName << ", aborting. ";
-    this->crawlingResult << "%Failed to open file: " << currentFileName << "\n";
+    crawlingResult << "%Failed to open file: " << currentFileName << "\n";
     return;
   }
   std::string buffer;
@@ -433,23 +434,23 @@ void LaTeXcrawler::CrawlRecursive(const std::string& currentFileName)
     int foundInput= buffer.find("\\input");
     if (isGood)
       if (((unsigned) foundInput)<buffer.size())
-      { this->crawlingResult << buffer.substr(0, foundInput);
+      { crawlingResult << buffer.substr(0, foundInput);
         buffer=buffer.substr(foundInput);
         newFileName << this->baseFolderStartFilePhysical;
         unsigned i=0;
         for (i=7; buffer[i]!='}' && i< buffer.size(); i++)
           newFileName << buffer[i];
         newFileName << ".tex";
-        this->crawlingResult << "%input from file: " << newFileName.str() << "\n";
-        this->CrawlRecursive(newFileName.str());
-        this->crawlingResult << "\n";
+        crawlingResult << "%input from file: " << newFileName.str() << "\n";
+        this->CrawlRecursive(crawlingResult, newFileName.str());
+        crawlingResult << "\n";
         if (i+1<buffer.size())
           buffer = buffer.substr(i+1);
         else
           continue;
       }
-    this->crawlingResult << buffer;
-    this->crawlingResult << "\n";
+    crawlingResult << buffer;
+    crawlingResult << "\n";
   }
 }
 
@@ -592,6 +593,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   std::stringstream tempStream;
   if (commentsOnFailure==0)
     commentsOnFailure = &tempStream;
+  std::stringstream crawlingResult;
   std::fstream theFile;
   if (!this->flagCrawlTexSourcesRecursively)
   { if (!FileOperations::OpenFileVirtual
@@ -601,10 +603,10 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
     do
     { std::getline(theFile, buffer);
       if (!MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "[handout]"))
-        this->crawlingResult << buffer << "\n";
+        crawlingResult << buffer << "\n";
       if (!this->flagProjectorMode)
         if (MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\documentclass"))
-          this->crawlingResult << "[handout]" << "\n";
+          crawlingResult << "[handout]" << "\n";
     } while (!theFile.eof());
     theFile.close();
   }
@@ -613,42 +615,44 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   bool addExtraTex=(this->slideFileNamesVirtualWithPatH.size>1);
   if (this->flagDoChangeDirs)
   { theGlobalVariables.ChDir(this->workingFilePathPhysical);
-    //this->crawlingResult << "%DEBUG: changed dir to: " << this->workingFilePathPhysical << "\n";
+    //outputTex << "%DEBUG: changed dir to: " << this->workingFilePathPhysical << "\n";
   }
   if (this->flagCrawlTexSourcesRecursively)
-  { this->crawlingResult << "%file automatically generated from file: " << this->headerFileNameNoPath
+  { crawlingResult << "%file automatically generated from file: " << this->headerFileNameNoPath
     << "\n%This file compiles with pdflatex -shell-escape\n"
     << "\n%Comment out/in the [handout] line to get the slide in projector/handout mode.\n"
     ;
-    this->CrawlRecursive(this->headerFileNameNoPath);
+    this->CrawlRecursive(crawlingResult, this->headerFileNameNoPath);
   }
   if (addExtraTex)
-  { this->crawlingResult << "\\begin{document}\n"
+  { crawlingResult << "\\begin{document}\n"
     << "\\providecommand{\\currentLecture}{1}"
     << "\\lect{\\semester}{" << this->desiredPresentationTitle << "}{1}{\n";
     for (int i=1; i<this->slideFileNamesVirtualWithPatH.size; i++)
       if (this->latexSnippets[i]=="")
       { if (this->flagCrawlTexSourcesRecursively)
-        { this->crawlingResult << "%input from file: " << this->slideFileNamesWithLatexPathNoExtension[i] << ".tex\n";
-          this->CrawlRecursive(this->slideFileNamesWithLatexPathNoExtension[i]+".tex");
+        { crawlingResult << "%input from file: " << this->slideFileNamesWithLatexPathNoExtension[i] << ".tex\n";
+          this->CrawlRecursive(crawlingResult, this->slideFileNamesWithLatexPathNoExtension[i]+".tex");
         } else
-          this->crawlingResult << "\\input{" << this->slideFileNamesWithLatexPathNoExtension[i] << "}\n";
+          crawlingResult << "\\input{" << this->slideFileNamesWithLatexPathNoExtension[i] << "}\n";
       } else
-        this->crawlingResult << this->latexSnippets[i] << "\n";
-    this->crawlingResult << "}\n"
+        crawlingResult << this->latexSnippets[i] << "\n";
+    crawlingResult << "}\n"
     << "\\end{document}";
   }
   if (this->flagCrawlTexSourcesRecursively)
-  { this->targetLaTeX=this->crawlingResult.str();
+  { this->targetLaTeX=crawlingResult.str();
     //if (commentsGeneral!=0)
     //  *commentsGeneral << "<br>Target .tex:<hr>" << HtmlRoutines::ConvertStringToHtmlString(this->targetLaTeX, true);
     return true;
   }
   if (FileOperations::OpenFileCreateIfNotPresentUnsecure(theFile, this->workingFileNameNoPathTex, false, true, false))
-    theFile << this->crawlingResult.str();
+  { theFile << crawlingResult.str();
+    if (commentsGeneral!=0)
+      *commentsGeneral << "Stored working file: " << this->workingFileNameNoPathTex << "<br>";
+  } else if (commentsGeneral!=0)
+    *commentsGeneral << "FAILED to stored file: " << this->workingFileNameNoPathTex << "<br>";
   theFile.close();
-  if (commentsGeneral!=0)
-    *commentsGeneral << "Stored working file: " << this->workingFileNameNoPathTex << "<br>";
   std::string currentSysCommand = "pdflatex -shell-escape " + this->workingFileNameNoPathTex;
   if (commentsGeneral!=0)
     *commentsGeneral << "Executing command: " << currentSysCommand << " ... ";
@@ -699,7 +703,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   if (commentsGeneral!=0)
   { *commentsGeneral << "Loaded topic list: " << topicParser.topicListFileName;
     *commentsGeneral << "<br> " << numSlidePairsToBuild << " slide pairs to build ";
-    *commentsGeneral << "(" << topicParser.theTopicS.size() << " total topic elements)<br>";
+    *commentsGeneral << "(" << topicParser.theTopicS.size() << " total topic elements)";
   }
   bool result=true;
   int numProcessed=0;
@@ -724,7 +728,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     this->flagProjectorMode=false;
     this->flagAddSlideToSVN=false;
     if (commentsGeneral!=0)
-      *commentsGeneral << "Build slide pair from: " << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
+      *commentsGeneral << "<br>Build slide pair from: " << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
     if(!this->BuildOrFetchFromCachePresentationFromSlides
         (commentsOnFailure, commentsGeneral))
       result=false;

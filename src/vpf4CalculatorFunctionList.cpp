@@ -2590,6 +2590,13 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerIsPower",
    "IsPower");
   this->AddOperationInnerHandler
+  ("IsSquare", CalculatorFunctionsGeneral::innerIsSquare, "",
+   "If the argument is an integer, returns 1 if the number is the square of an integer. ",
+   "IsSquare(8); IsSquare(16); IsSquare(100);",
+   true, false,
+   "CalculatorFunctionsGeneral::innerIsSquare",
+   "IsSquare");
+  this->AddOperationInnerHandler
   ("[)", CalculatorFunctionsGeneral::innerIntervalLeftClosedFromSequence,
    "",
    "Internal data structure transformation: \
@@ -4304,13 +4311,21 @@ this->AddOperationInnerHandler
    true, false,
    "CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat");
     this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber, this->opAlgNumber(), this->opAlgNumber(),
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber,
+   this->opAlgNumber(), this->opAlgNumber(),
    "Multiplies two algebraic numbers. ",
-   "\\sqrt{}2(\\sqrt {2}* \\sqrt {3} +\\sqrt{}2)", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber");
+   "\\sqrt{}2(\\sqrt {2}* \\sqrt {3} +\\sqrt{}2)",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber",
+   "MultiplyAlgebraicNumbers");
     this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber, this->opRational(), this->opAlgNumber(),
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber,
+   this->opRational(), this->opAlgNumber(),
    "Multiplies two algebraic number by rational. ",
-   "2(\\sqrt {2}+\\sqrt{}3)", true, false, "CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber");
+   "2(\\sqrt {2}+\\sqrt{}3)",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerMultiplyAlgebraicNumberByAlgebraicNumber",
+   "MultiplyAlgebraicNumbers");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps:: innerMultiplyRatByRat, this->opRational(), this->opRational(),
    "Multiplies two rationals. ",
@@ -4753,26 +4768,35 @@ this->AddOperationInnerHandler
    "CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx",
    "LeibnizDifferentialOperatorNotation");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat, this->opAlgNumber(), this->opAlgNumber(),
+  ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,
+   this->opAlgNumber(), this->opAlgNumber(),
    "Divides algebraic numbers. ",
    "1/(1+\\sqrt{}2+\\sqrt{}3+\\sqrt{}5+\\sqrt{}7)",
    true, false,
-   "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat");
+   "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat",
+   "DivideAlgebraicNumbers");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat, this->opRational(), this->opAlgNumber(),
+  ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,
+   this->opRational(), this->opAlgNumber(),
    "Divides rational by algebraic number. ",
-   "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)", true, false, "");
+   "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)", true, false,
+   "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat",
+   "DivideAlgebraicNumbers");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat, this->opAlgNumber(), this->opRational(),
+  ("/", CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,
+   this->opAlgNumber(), this->opRational(),
    "Divides algebraic number by rational. ",
    "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)/5",
    true, false,
-   "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat");
+   "CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat",
+   "DivideAlgebraicNumbers");
   this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::outerDivideByNumber, "",
-    "If b is rational, algebraic, or double, substitutes (anything)/b with anything* (1/b).",
-    "6/15+(a+b)/5; a/\\sqrt{}2; x/DoubleValue{}10^10;x/DoubleValue{}5 ; 6/4+3/0", true, false,
-    "CalculatorFunctionsGeneral::outerDivideByNumber", "DivideByNumber");
+   "If b is rational, algebraic, or double, substitutes (anything)/b with anything* (1/b).",
+   "6/15+(a+b)/5; a/\\sqrt{}2; x/DoubleValue{}10^10;x/DoubleValue{}5 ; 6/4+3/0",
+   true, false,
+   "CalculatorFunctionsGeneral::outerDivideByNumber",
+   "DivideByNumber");
   this->AddOperationOuterHandler
   ("/", Calculator::innerSubZeroDivAnythingWithZero, "",
    "Provided that x is not equal to zero, substitutes 0/x with 0. ",

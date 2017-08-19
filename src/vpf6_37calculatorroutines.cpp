@@ -564,6 +564,28 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
   return output.AssignValue(out.str(),theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerIsSquare(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsSquare");
+  LargeInt theLI;
+  if (!input.IsInteger(&theLI))
+    return false;
+  if (theLI<0)
+    return output.AssignValue(0, theCommands);
+  if (theLI==0)
+    return output.AssignValue(1, theCommands);
+  List<int> theMults;
+  List<LargeInt> theFactors;
+  if (!theLI.value.Factor(theFactors, theMults))
+    return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
+  int result=1;
+  for (int i=0; i<theMults.size; i++)
+    if ((theMults[i]%2)!=0)
+    { result=0;
+      break;
+    }
+  return output.AssignValue(result, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerIsSquareFree(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsSquareFree");
   LargeInt theLI;

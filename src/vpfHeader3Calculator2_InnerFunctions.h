@@ -407,6 +407,7 @@ public:
   static bool innerIntervalRightClosedFromSequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsNonEmptySequence(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerIsSquare(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsSquareFree(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsPower(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsEven(Calculator& theCommands, const Expression& input, Expression& output);

@@ -366,6 +366,15 @@ void Calculator::initPredefinedInnerFunctions()
    true, false,
    "CalculatorFunctionsGeneral::innerThaw"
    "Thaw");
+  this->AddOperationInnerHandler
+  ("LogEvaluationStepsHumanReadable", Calculator::innerLogEvaluationStepsHumanReadable, "",
+   "Show a step-by step evaluation of the calculator. \
+    Some steps my be combined or omitted for improved human readability. \
+    ",
+   "LogEvaluationStepsHumanReadable((x+2)(x+3))",
+   true, false,
+   "CalculatorFunctionsGeneral::innerLogEvaluationStepsHumanReadable"
+   "LogEvaluationStepsHumanReadable");
 
   this->AddOperationInnerHandler
   ("PlotExpressionTreeFull",
@@ -5614,4 +5623,5 @@ void Calculator::initAtomsThatFreezeArguments()
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Freeze");
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Bind");
+  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluationStepsHumanReadable");
 }

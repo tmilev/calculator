@@ -1061,6 +1061,7 @@ public:
   std::string theTestFileName;
   int numOutputFileS;
   std::string userLabel;
+  List<std::string> logEvaluationSteps;
   std::stringstream Comments;
   std::stringstream errorsPublic;
   FormatExpressions formatVisibleStrings;
@@ -1777,6 +1778,8 @@ public:
   }
   bool ExpressionMatchesPattern
   (const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions, std::stringstream* theLog=0);
+  static bool innerLogEvaluationStepsHumanReadable(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerReverseOrdeR(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerReverseOrderRecursively(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialWithEWA(Calculator& theCommands, const Expression& input, Expression& output)

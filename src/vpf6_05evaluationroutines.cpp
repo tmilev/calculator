@@ -399,6 +399,7 @@ bool Calculator::EvaluateExpression
     theCommands.flagAbortComputationASAP=true;
     return output.MakeError(errorStream.str(), theCommands);
   }
+  bool logEvaluationStepsRequested=theCommands.logEvaluationSteps.size>0;
   theCommands.EvaluatedExpressionsStack.AddOnTop(input);
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(theCommands, 3);
@@ -436,10 +437,17 @@ bool Calculator::EvaluateExpression
   std::string inputIfAtom;
   outputIsNonCacheable=false;
   //////////////////////////////////
+  std::stringstream logStream;
+  if (logEvaluationStepsRequested)
+    logStream << "\\(" << output.ToString() << "\\)";
   while (ReductionOcurred && !theCommands.flagAbortComputationASAP)
   { StackMaintainerRules theRuleStackMaintainer(&theCommands);
     ReductionOcurred=false;
     counterNumTransformations++;
+    if (counterNumTransformations>1 && logEvaluationStepsRequested)
+    { logStream << "->\\(" << output.ToString() << "\\)";
+    }
+
     if (output.IsAtom(&inputIfAtom))
       if (theCommands.atomsThatMustNotBeCached.Contains(inputIfAtom))
         outputIsNonCacheable=true;
@@ -574,6 +582,10 @@ bool Calculator::EvaluateExpression
       theCommands << "&nbsp&nbsp&nbsp&nbsp";
     theCommands << "to get: " << output.Lispify();
   }
+  if (logEvaluationStepsRequested && counterNumTransformations>1)
+  { logStream << "<br>";
+    *theCommands.logEvaluationSteps.LastObject()=logStream.str()+*theCommands.logEvaluationSteps.LastObject();
+  }
   return true;
 }
 
@@ -606,7 +618,6 @@ Expression* Calculator::PatternMatch
   tempExp.CheckInitialization();
   if (theLog!=0 && logAttempts)
     (*theLog) << "<hr>Specialized condition: " << tempExp.ToString() << "; evaluating...";
-  BoundVariablesSubstitution tempPairs;
   Expression conditionResult;
   this->EvaluateExpression(*this, tempExp, conditionResult);
   if (theLog!=0 && logAttempts)

@@ -2047,3 +2047,20 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   out << "<br>End result: " << splittingNormal.ToString();
   return output.AssignValue(out.str(), theCommands);
 }
+
+bool Calculator::innerLogEvaluationStepsHumanReadable(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadable");
+  int startLogEvaluationSize=theCommands.logEvaluationSteps.size;
+  theCommands.logEvaluationSteps.AddOnTop("");
+  Expression inputCopy=input;
+  Expression outputTransformation;
+  if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadable"))
+    inputCopy.SetChildAtomValue(0, theCommands.opSequence());
+  bool notUsed=false;
+  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed);
+  if (startLogEvaluationSize>=theCommands.logEvaluationSteps.size)
+    return theCommands << "This should not happen: the log evaluation stack size was smaller than expected";
+  output.AssignValue(theCommands.logEvaluationSteps[startLogEvaluationSize], theCommands);
+  theCommands.logEvaluationSteps.SetSize(startLogEvaluationSize);
+  return true;
+}

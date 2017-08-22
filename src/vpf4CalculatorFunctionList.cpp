@@ -5445,6 +5445,7 @@ void Calculator::initPredefinedStandardOperationsWithoutHandler()
 //  this->AddOperationNoRepetitionAllowed("\\diff");
   this->AddOperationNoRepetitionAllowed("CommandEnclosureStart");
   this->AddOperationNoRepetitionAllowed("CommandEnclosureFinish");
+  this->AddOperationNoRepetitionAllowed("ExpressionHistory");
 }
 
 void Calculator::initAtomsNonCacheable()

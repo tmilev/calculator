@@ -79,7 +79,7 @@ void Calculator::reset()
   this->theObjectContainer.reset();
   this->controlSequences.Clear();
 
-  this->logEvaluationSteps.SetSize(0);
+  //this->logEvaluationSteps.SetSize(0);
 
   this->theAtoms.Clear();
   this->operationsComposite.Clear();

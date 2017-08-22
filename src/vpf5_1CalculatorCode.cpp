@@ -2013,7 +2013,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   DynkinDiagramRootSubalgebra theDiagram;
   theWeyl.TransformToSimpleBasisGenerators(outputRoots, theWeyl.RootSystem);
   theDiagram.AmbientBilinearForm=theWeyl.CartanSymmetric;
-  theDiagram.AmbientRootSystem =theWeyl.RootSystem;
+  theDiagram.AmbientRootSystem = theWeyl.RootSystem;
   theDiagram.ComputeDiagramInputIsSimple(outputRoots);
   out << "Diagram final: " << theDiagram.ToString()
   << ". Simple basis: " << theDiagram.SimpleBasesConnectedComponents.ToString();
@@ -2048,19 +2048,51 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool Expression::GetRegularExpressionFromExpressionHistoryRecursive(Expression& output)const
+{ MacroRegisterFunctionWithName("Expression::GetRegularExpressionFromExpressionHistoryRecursive");
+  if (this->owner==0)
+  { output=*this;
+    return true;
+  }
+  if (!this->StartsWith(this->owner->opExpressionHistory()))
+  { output=*this;
+    return true;
+  }
+  if (this->size()==2)
+  { return (*this)[1].GetRegularExpressionFromExpressionHistoryRecursive(output);
+  }
+  output.reset(*this->owner);
+  for (int i=0; i<this->size(); i++)
+  { Expression newE;
+    if ((*this)[i].GetRegularExpressionFromExpressionHistoryRecursive(newE))
+      output.AddChildOnTop(newE);
+  }
+  return true;
+}
+
+std::string Expression::ToStringExpressionHistoryRecursive()
+{ MacroRegisterFunctionWithName("Expression::ToStringExpressionHistoryRecursive");
+  std::stringstream out;
+  if (this->owner==0)
+    return "(no owner)";
+  Expression cleanedUpE;
+  if (this->GetRegularExpressionFromExpressionHistoryRecursive(cleanedUpE))
+    out << cleanedUpE.ToString();
+  else
+    out << this->ToString();
+  return out.str();
+}
+
 bool Calculator::innerLogEvaluationStepsHumanReadable(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadable");
-  int startLogEvaluationSize=theCommands.logEvaluationSteps.size;
-  theCommands.logEvaluationSteps.AddOnTop("");
   Expression inputCopy=input;
   Expression outputTransformation;
   if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadable"))
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
   bool notUsed=false;
-  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed);
-  if (startLogEvaluationSize>=theCommands.logEvaluationSteps.size)
-    return theCommands << "This should not happen: the log evaluation stack size was smaller than expected";
-  output.AssignValue(theCommands.logEvaluationSteps[startLogEvaluationSize], theCommands);
-  theCommands.logEvaluationSteps.SetSize(startLogEvaluationSize);
-  return true;
+  Expression theExpressionHistory;
+  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed, &theExpressionHistory);
+  std::stringstream out;
+  out << theExpressionHistory.ToStringExpressionHistoryRecursive();
+  return output.AssignValue(out.str(), theCommands);
 }

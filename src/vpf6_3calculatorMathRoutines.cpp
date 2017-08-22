@@ -6869,7 +6869,9 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides(Calculator& theC
   theCrawler.flagBuildSingleSlides=true;
   theCrawler.ownerCalculator=&theCommands;
   theCrawler.theFileNameToCrawlRelative=input.GetValue<std::string>();
-  theCrawler.BuildFreecalc();
+  std::string startingFolder=FileOperations::GetCurrentFolder();
+  theCrawler.BuildFreecalC();
+  theGlobalVariables.ChDir(startingFolder);
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
 
@@ -6886,7 +6888,9 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalc(Calculator& theCommands, con
   theCrawler.flagBuildSingleSlides=false;
   theCrawler.ownerCalculator=&theCommands;
   theCrawler.theFileNameToCrawlRelative=input.GetValue<std::string>();
-  theCrawler.BuildFreecalc();
+  std::string startingFolder=FileOperations::GetCurrentFolder();
+  theCrawler.BuildFreecalC();
+  theGlobalVariables.ChDir(startingFolder);
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
 

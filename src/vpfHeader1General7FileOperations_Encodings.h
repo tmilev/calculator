@@ -43,6 +43,8 @@ public:
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
    List<std::string>* outputFileTypes=0)
    ;
+  static std::string GetCurrentFolder();
+  static std::string GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath);
   static bool GetFolderFileNamesVirtual
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
    List<std::string>* outputFileTypes=0, bool accessSensitiveFolders=false,

@@ -489,11 +489,12 @@ bool FileOperations::IsOKfileNameVirtual
       *commentsOnFailure << "Invalid file name: too long. ";
     return false;
   }
-  if (theFilePath[0]=='.')
-  { if (commentsOnFailure!=0)
-      *commentsOnFailure << "Invalid file name: " << theFileName << ": starts with dot. ";
-    return false;
-  }
+  if (theFilePath.size()>0)
+    if (theFilePath[0]=='.')
+    { if (commentsOnFailure!=0)
+        *commentsOnFailure << "Invalid file name: " << theFileName << ": starts with dot but not with ./. ";
+      return false;
+    }
   for (unsigned i=0; i<theFilePath.size(); i++)
     if (theFilePath[i]=='.')
       if (i+1<theFilePath.size())
@@ -723,8 +724,35 @@ bool FileOperations::OpenFileVirtual(std::fstream& theFile, const std::string& t
   return FileOperations::OpenFileUnsecure(theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
 }
 
+#include <unistd.h>
+
+std::string FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath)
+{ //I have no idea how safe this code is.
+  //This definitely will need a rewrite.
+  //Unfortunately no time to investigate the matter further and do things the right way:
+  //I need a solution
+  //to this problem now.
+  //If anyone (including myself at another time) sees this and you have time,
+  //please fix this. -Todor
+  std::string currentFolder=FileOperations::GetCurrentFolder();
+  theGlobalVariables.ChDir(wouldBePath);
+  std::string result=FileOperations::GetCurrentFolder();
+  theGlobalVariables.ChDir(currentFolder);
+  return result;
+}
+
+std::string FileOperations::GetCurrentFolder()
+{ char cwd[100000];
+  if (getcwd(cwd, sizeof(cwd))!= NULL)
+    return std::string(cwd);
+  else
+    crash << "Error: getcwd returned NULL. This shouldn't happen. " << crash;
+  return "";
+}
+
 bool FileOperations::OpenFileUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
-{ if (OpenInAppendMode)
+{ //stOutput << "DEBUG: currentFolder: " << FileOperations::GetCurrentFolder() << ", trying to open: " << theFileName << "<br>";
+  if (OpenInAppendMode)
   { if (openAsBinary)
       theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app|std::fstream::binary);
     else
@@ -817,8 +845,10 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtual
 { std::string computedFileName;
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
+  { //stOutput << "DEBUG: couldn't get physical file name from: " << theFileName << "<br>";
     return false;
-  //stOutput << "DEBUG: computed file name: " << computedFileName;
+  }
+  //stOutput << "DEBUG: computed file name: " << computedFileName << "<br>";
 
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
   (theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);

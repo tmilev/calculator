@@ -350,12 +350,12 @@ bool Calculator::EvaluateExpression
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
   bool notUsed=false;
-  return theCommands.EvaluateExpression(theCommands, input, output, notUsed);
+  return theCommands.EvaluateExpression(theCommands, input, output, notUsed, 0);
 }
 
 bool Calculator::EvaluateExpression
 (Calculator& theCommands, const Expression& input, Expression& output,
- bool& outputIsNonCacheable)
+ bool& outputIsNonCacheable, Expression* outputExpressionHistory)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
   //////////////////////////////
@@ -399,7 +399,7 @@ bool Calculator::EvaluateExpression
     theCommands.flagAbortComputationASAP=true;
     return output.MakeError(errorStream.str(), theCommands);
   }
-  bool logEvaluationStepsRequested=theCommands.logEvaluationSteps.size>0;
+  //bool logEvaluationStepsRequested=theCommands.logEvaluationSteps.size>0;
   theCommands.EvaluatedExpressionsStack.AddOnTop(input);
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(theCommands, 3);
@@ -437,17 +437,22 @@ bool Calculator::EvaluateExpression
   std::string inputIfAtom;
   outputIsNonCacheable=false;
   //////////////////////////////////
-  std::stringstream logStream;
-  if (logEvaluationStepsRequested)
-    logStream << "\\(" << output.ToString() << "\\)";
+  //std::stringstream logStream;
+  //if (logEvaluationStepsRequested)
+  //  logStream << "\\(" << output.ToString() << "\\)";
+  MemorySaving<Expression> currentExpressionHistory;
+  if (outputExpressionHistory!=0)
+  { (*outputExpressionHistory).reset(theCommands);
+    (*outputExpressionHistory).AddChildAtomOnTop(theCommands.opExpressionHistory());
+    (*outputExpressionHistory).AddChildOnTop(output);
+
+  }
   while (ReductionOcurred && !theCommands.flagAbortComputationASAP)
   { StackMaintainerRules theRuleStackMaintainer(&theCommands);
     ReductionOcurred=false;
     counterNumTransformations++;
-    if (counterNumTransformations>1 && logEvaluationStepsRequested)
-    { logStream << "->\\(" << output.ToString() << "\\)";
-    }
-
+    if (counterNumTransformations>1 && outputExpressionHistory!=0)
+      outputExpressionHistory->AddChildOnTop(output);
     if (output.IsAtom(&inputIfAtom))
       if (theCommands.atomsThatMustNotBeCached.Contains(inputIfAtom))
         outputIsNonCacheable=true;
@@ -514,8 +519,14 @@ bool Calculator::EvaluateExpression
           }
         }
         bool childIsNonCacheable=false;
-        if (theCommands.EvaluateExpression(theCommands, output[i], transformationE, childIsNonCacheable))
+        Expression *newExpressionHistory=0;
+        if (outputExpressionHistory!=0)
+          newExpressionHistory=&currentExpressionHistory.GetElement();
+        if (theCommands.EvaluateExpression(theCommands, output[i], transformationE, childIsNonCacheable, newExpressionHistory))
           output.SetChilD(i, transformationE);
+        if (outputExpressionHistory!=0)
+          outputExpressionHistory->AddChildOnTop(*newExpressionHistory);
+
         //important: here we check if the child is non-cache-able.
         if (childIsNonCacheable)
           outputIsNonCacheable=true;
@@ -582,10 +593,10 @@ bool Calculator::EvaluateExpression
       theCommands << "&nbsp&nbsp&nbsp&nbsp";
     theCommands << "to get: " << output.Lispify();
   }
-  if (logEvaluationStepsRequested && counterNumTransformations>1)
-  { logStream << "<br>";
-    *theCommands.logEvaluationSteps.LastObject()=logStream.str()+*theCommands.logEvaluationSteps.LastObject();
-  }
+  //if (logEvaluationStepsRequested && counterNumTransformations>1)
+  //{ logStream << "<br>";
+  //  *theCommands.logEvaluationSteps.LastObject()=logStream.str()+*theCommands.logEvaluationSteps.LastObject();
+  //}
   return true;
 }
 

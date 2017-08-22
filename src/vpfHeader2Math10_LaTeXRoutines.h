@@ -10,12 +10,13 @@ class LaTeXcrawler
 {
   public:
   int recursionDepth;
-  std::string theFileNameToCrawlPhysical;
+  std::string theFileNameToCrawlPhysicalNoPathName;
+  std::string theFileNameToCrawlPhysicalWithPath;
   std::string theFileNameToCrawlRelative;
   std::string baseFolderStartFilePhysical;
+  std::string baseFolderCrawlableFilesPhysical;
 
   std::string theFileToCrawlContent;
-  std::string theFileNameToCrawlNoPathPhysical;
   std::string theFileNameWorkingCopy;
   std::string theFileNameWorkinGCopyPDF;
 
@@ -60,7 +61,7 @@ class LaTeXcrawler
   void Crawl();
   bool BuildOrFetchFromCachePresentationFromSlides(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  void BuildFreecalc();
+  void BuildFreecalC();
   void CrawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileName);
   std::stringstream displayResult;
   std::stringstream errorStream;

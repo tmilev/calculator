@@ -419,6 +419,8 @@ private:
   std::string ToStringFull()const;
   std::string ToStringAllSlidersInExpression()const;
   std::string ToUTF8String(FormatExpressions* theFormat=0)const;
+  bool GetRegularExpressionFromExpressionHistoryRecursive(Expression& output)const;
+  std::string ToStringExpressionHistoryRecursive();
   std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0, bool unfoldCommandEnclosures=true)const;
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();
@@ -1061,7 +1063,7 @@ public:
   std::string theTestFileName;
   int numOutputFileS;
   std::string userLabel;
-  List<std::string> logEvaluationSteps;
+  //List<std::string> logEvaluationSteps;
   std::stringstream Comments;
   std::stringstream errorsPublic;
   FormatExpressions formatVisibleStrings;
@@ -1486,6 +1488,9 @@ public:
   }
   int opIntervalClosed()
   { return this->theAtoms.GetIndexIMustContainTheObject("IntervalClosed");
+  }
+  int opExpressionHistory()
+  { return this->theAtoms.GetIndexIMustContainTheObject("ExpressionHistory");
   }
   int opQuote()
   { return this->theAtoms.GetIndexIMustContainTheObject("\"");
@@ -2073,7 +2078,7 @@ public:
   ;
   static bool EvaluateExpression
   (Calculator& theCommands, const Expression& input, Expression& output,
-   bool& outputIsCacheable)
+   bool& outputIsCacheable, Expression* outputExpressionHistory)
   ;
   void Evaluate(const std::string& theInput);
   bool ParseAndExtractExpressions

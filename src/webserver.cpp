@@ -2312,7 +2312,7 @@ int WebWorker::ProcessFolder()
     out << theFileNamesHtml[i];
   //out << "DEBUG: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   //out << this->ToStringMessageFullUnsafe();
-  out << "</body></html>";
+  out << "\n</body></html>";
   stOutput << out.str();
   return 0;
 }

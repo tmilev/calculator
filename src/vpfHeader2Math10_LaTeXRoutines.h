@@ -14,7 +14,7 @@ class LaTeXcrawler
   std::string theFileNameToCrawlPhysicalWithPath;
   std::string theFileNameToCrawlRelative;
   std::string baseFolderStartFilePhysical;
-  std::string baseFolderCrawlableFilesPhysical;
+  List<std::string> baseFoldersCrawlableFilesPhysical;
 
   std::string theFileToCrawlContent;
   std::string theFileNameWorkingCopy;
@@ -56,6 +56,8 @@ class LaTeXcrawler
   bool flagDoChangeDirs;
   bool flagCrawlTexSourcesRecursively;
   static std::string AdjustDisplayTitle(const std::string& input);
+  bool IsInCrawlableFolder(const std::string& folderName, std::stringstream* commentsOnFailure);
+  void ComputeAllowedFolders();
   bool ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
   bool ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void Crawl();

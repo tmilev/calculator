@@ -7,6 +7,34 @@
 
 ProjectInformationInstance ProjectInfoVpf6_38LaTeXRoutines(__FILE__, "LaTeX routines. ");
 
+bool LaTeXcrawler::IsInCrawlableFolder(const std::string& folderName, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("LaTeXcrawler::IsInCrawlableFolder");
+  for (int i=0; i<this->baseFoldersCrawlableFilesPhysical.size; i++)
+    if (MathRoutines::StringBeginsWith(folderName, this->baseFoldersCrawlableFilesPhysical[i]))
+      return true;
+  if (commentsOnFailure!=0)
+    *commentsOnFailure << "File folder: " << folderName
+    << " does not appear to be in one of the allowed folders: " << this->baseFoldersCrawlableFilesPhysical.ToStringCommaDelimited()
+    << ". ";
+  return false;
+}
+
+void LaTeXcrawler::ComputeAllowedFolders()
+{ MacroRegisterFunctionWithName("LaTeXcrawler::ComputeAllowedFolders");
+  if (this->baseFoldersCrawlableFilesPhysical.size>0)
+    return;
+  List<std::string> allowedFoldersVirtual;
+  allowedFoldersVirtual.AddOnTop("freecalc/");
+  allowedFoldersVirtual.AddOnTop("LaTeX-materials/");
+  this->baseFoldersCrawlableFilesPhysical.SetSize(allowedFoldersVirtual.size);
+  for (int i=0; i<this->baseFoldersCrawlableFilesPhysical.size; i++)
+  { FileOperations::GetPhysicalFileNameFromVirtual(allowedFoldersVirtual[i], this->baseFoldersCrawlableFilesPhysical[i]);
+    this->baseFoldersCrawlableFilesPhysical[i]=
+    FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(this->baseFoldersCrawlableFilesPhysical[i])
+    + "/";
+  }
+}
+
 bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("LaTeXcrawler::ExtractFileNamesFromRelativeFileName");
   if (!FileOperations::IsOKfileNameVirtual(this->theFileNameToCrawlRelative))
@@ -22,20 +50,11 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* comme
   this->baseFolderStartFilePhysical=
   FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(
   FileOperations::GetPathFromFileNameWithPath(this->theFileNameToCrawlPhysicalWithPath)
-  )+"/";
+  ) + "/";
 
   this->theFileNameToCrawlPhysicalNoPathName=FileOperations::GetFileNameFromFileNameWithPath(this->theFileNameToCrawlPhysicalWithPath);
-  FileOperations::GetPhysicalFileNameFromVirtual("freecalc/", this->baseFolderCrawlableFilesPhysical);
-  this->baseFolderCrawlableFilesPhysical=FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(this->baseFolderCrawlableFilesPhysical)
-  +"/";
-  if (!MathRoutines::StringBeginsWith(this->baseFolderStartFilePhysical, this->baseFolderCrawlableFilesPhysical))
-  { if (commentsOnFailure!=0)
-      *commentsOnFailure << "File folder: " << this->baseFolderStartFilePhysical
-      << " containing file: " << this->theFileNameToCrawlPhysicalWithPath
-      << " appears to not contain folder: " << this->baseFolderCrawlableFilesPhysical
-      << " which is required. ";
+  if (!this->IsInCrawlableFolder(this->baseFolderStartFilePhysical, commentsOnFailure))
     return false;
-  }
   return true;
 }
 
@@ -263,7 +282,7 @@ void LaTeXcrawler::BuildFreecalC()
         thePdfFileNameHandout << "_" << lectureFileNameEnd;
       thePdfFileNameHandout << ".pdf";
     }
-    currentSysCommand="mv " +theFileNameWorkingCopyPDF+" " + thePdfFileNameHandout.str();
+    currentSysCommand="mv " + theFileNameWorkingCopyPDF + " " + thePdfFileNameHandout.str();
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture/Homework " << i+1 << " handout compiled, renaming file ... ";
     theReport.Report(reportStream.str());
@@ -422,20 +441,20 @@ void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
   /// If the folders read are not sanitized properly,
   /// an attacker could get a .tex file with our site's private keys!
   /// Touch very carefully.
-  if (this->baseFolderCrawlableFilesPhysical=="")
-    crash << "Error: this->baseFolderCrawlableFilesPhysical is empty which is not allowed here. " << crash;
+  if (this->baseFoldersCrawlableFilesPhysical.size==0)
+    crash << "Error: this->baseFoldersCrawlableFilesPhysical is empty which is not allowed here. " << crash;
   std::string trimmedFileName=MathRoutines::StringTrimWhiteSpace(currentFileNamE);
   std::string trimmedFolder=FileOperations::GetPathFromFileNameWithPath(trimmedFileName);
   std::string resultingFolder=FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(trimmedFolder);
-  if (!MathRoutines::StringBeginsWith(resultingFolder, this->baseFolderCrawlableFilesPhysical) )
+  if (this->IsInCrawlableFolder(resultingFolder, &this->errorStream))
   { this->errorStream << "Error: file " << trimmedFileName << " appears to be located in "
     << resultingFolder << ", which in turn does not appear to be a sub-folder "
-    << "of the designated folder crawlable files: "
-    << this->baseFolderCrawlableFilesPhysical;
+    << "of the designated crawlable folders: "
+    << this->baseFoldersCrawlableFilesPhysical.ToStringCommaDelimited();
     crawlingResult << "%Error: file " << trimmedFileName << " appears to be located in "
     << resultingFolder << ", which in turn does not appear to be a sub-folder "
-    << "of the designated folder crawlable files: "
-    << this->baseFolderCrawlableFilesPhysical;
+    << "of the designated crawlable folders: "
+    << this->baseFoldersCrawlableFilesPhysical.ToStringCommaDelimited() << "\n";
     return;
   }
   std::fstream theFile;
@@ -646,6 +665,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
     << "\n%This file compiles with pdflatex -shell-escape\n"
     << "\n%Comment out/in the [handout] line to get the slide in projector/handout mode.\n"
     ;
+    this->ComputeAllowedFolders();
     this->CrawlRecursive(crawlingResult, this->headerFileNameNoPath);
   }
   if (addExtraTex)
@@ -661,8 +681,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
           crawlingResult << "\\input{" << this->slideFileNamesWithLatexPathNoExtension[i] << "}\n";
       } else
         crawlingResult << this->latexSnippets[i] << "\n";
-    crawlingResult << "}\n"
-    << "\\end{document}";
+    crawlingResult << "}\n" << "\\end{document}";
   }
   if (this->flagCrawlTexSourcesRecursively)
   { this->targetLaTeX=crawlingResult.str();
@@ -753,18 +772,15 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     this->flagAddSlideToSVN=false;
     if (commentsGeneral!=0)
       *commentsGeneral << "<br>Build slide pair from: " << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
-    if(!this->BuildOrFetchFromCachePresentationFromSlides
-        (commentsOnFailure, commentsGeneral))
+    if (!this->BuildOrFetchFromCachePresentationFromSlides(commentsOnFailure, commentsGeneral))
       result=false;
     this->flagDoChangeDirs=false;
     this->flagAddSlideToSVN=true;
     this->flagProjectorMode=false;
-    if(!this->BuildOrFetchFromCachePresentationFromSlides
-        (commentsOnFailure, commentsGeneral))
+    if (!this->BuildOrFetchFromCachePresentationFromSlides(commentsOnFailure, commentsGeneral))
       result=false;
     this->flagProjectorMode=true;
-    if(!this->BuildOrFetchFromCachePresentationFromSlides
-        (commentsOnFailure, commentsGeneral))
+    if (!this->BuildOrFetchFromCachePresentationFromSlides(commentsOnFailure, commentsGeneral))
       result=false;
   }
   return result;

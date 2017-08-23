@@ -446,7 +446,7 @@ void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
   std::string trimmedFileName=MathRoutines::StringTrimWhiteSpace(currentFileNamE);
   std::string trimmedFolder=FileOperations::GetPathFromFileNameWithPath(trimmedFileName);
   std::string resultingFolder=FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(trimmedFolder);
-  if (this->IsInCrawlableFolder(resultingFolder, &this->errorStream))
+  if (!this->IsInCrawlableFolder(resultingFolder, &this->errorStream))
   { this->errorStream << "Error: file " << trimmedFileName << " appears to be located in "
     << resultingFolder << ", which in turn does not appear to be a sub-folder "
     << "of the designated crawlable folders: "

@@ -53,6 +53,7 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* comme
   ) + "/";
 
   this->theFileNameToCrawlPhysicalNoPathName=FileOperations::GetFileNameFromFileNameWithPath(this->theFileNameToCrawlPhysicalWithPath);
+  this->ComputeAllowedFolders();
   if (!this->IsInCrawlableFolder(this->baseFolderStartFilePhysical, commentsOnFailure))
     return false;
   return true;

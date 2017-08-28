@@ -227,9 +227,9 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
   return true;
 }
 
-void StackMaintainerRules::AddRule(const Expression& theRule)
+void StackMaintainerCalculator::AddRule(const Expression& theRule)
 { if (this->owner==0)
-    crash << "StackMaintainerRules has zero owner. " << crash;
+    crash << "StackMaintainerCalculator has zero owner. " << crash;
   this->owner->RuleStack.AddChildOnTop(theRule);
   std::string currentRule;
   if (theRule.StartsWith(this->owner->opRulesOn() ) ||
@@ -253,7 +253,7 @@ void StackMaintainerRules::AddRule(const Expression& theRule)
     << this->owner->RuleStackCacheIndex;
 }
 
-StackMaintainerRules::StackMaintainerRules(Calculator* inputBoss)
+StackMaintainerCalculator::StackMaintainerCalculator(Calculator* inputBoss)
 { this->owner=inputBoss;
   if (this->owner==0)
     return;
@@ -261,7 +261,7 @@ StackMaintainerRules::StackMaintainerRules(Calculator* inputBoss)
   this->startingRuleStackSize=inputBoss->RuleStack.size();
 }
 
-StackMaintainerRules::~StackMaintainerRules()
+StackMaintainerCalculator::~StackMaintainerCalculator()
 { if (this->owner==0)
     return;
   Expression& theRuleStack=this->owner->RuleStack;
@@ -324,7 +324,7 @@ Expression Calculator::GetNewAtom()
 
 }
 
-bool Calculator::AccountRule(const Expression& ruleE, StackMaintainerRules& theRuleStackMaintainer)
+bool Calculator::AccountRule(const Expression& ruleE, StackMaintainerCalculator& theRuleStackMaintainer)
 { MacroRegisterFunctionWithName("Calculator::AccountRule");
   RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
@@ -441,18 +441,23 @@ bool Calculator::EvaluateExpression
   //if (logEvaluationStepsRequested)
   //  logStream << "\\(" << output.ToString() << "\\)";
   MemorySaving<Expression> currentExpressionHistory;
+  MemorySaving<Expression> oldChild;
   if (outputExpressionHistory!=0)
   { (*outputExpressionHistory).reset(theCommands);
     (*outputExpressionHistory).AddChildAtomOnTop(theCommands.opExpressionHistory());
-    (*outputExpressionHistory).AddChildOnTop(output);
-
   }
   while (ReductionOcurred && !theCommands.flagAbortComputationASAP)
-  { StackMaintainerRules theRuleStackMaintainer(&theCommands);
+  { StackMaintainerCalculator theRuleStackMaintainer(&theCommands);
     ReductionOcurred=false;
     counterNumTransformations++;
-    if (counterNumTransformations>1 && outputExpressionHistory!=0)
-      outputExpressionHistory->AddChildOnTop(output);
+    if (outputExpressionHistory!=0)
+    { Expression theHistoryE;
+      theHistoryE.reset(theCommands);
+      theHistoryE.AddChildAtomOnTop(theCommands.opSequence());
+      theHistoryE.AddChildOnTop(theCommands.EMOne());
+      theHistoryE.AddChildOnTop(output);
+      (*outputExpressionHistory).AddChildOnTop(theHistoryE);
+    }
     if (output.IsAtom(&inputIfAtom))
       if (theCommands.atomsThatMustNotBeCached.Contains(inputIfAtom))
         outputIsNonCacheable=true;
@@ -502,6 +507,7 @@ bool Calculator::EvaluateExpression
     //bool foundError=false;
     /////-------Children evaluation-------
     ProgressReport theReport;
+    bool HistoryShouldBeRecorded=false;
     if (!output.IsFrozen())
       for (int i=0; i<output.size() && !theCommands.flagAbortComputationASAP; i++)
       { if (i>0 && output.StartsWith(theCommands.opEndStatement()))
@@ -521,12 +527,23 @@ bool Calculator::EvaluateExpression
         bool childIsNonCacheable=false;
         Expression *newExpressionHistory=0;
         if (outputExpressionHistory!=0)
-          newExpressionHistory=&currentExpressionHistory.GetElement();
+        { newExpressionHistory=&currentExpressionHistory.GetElement();
+          oldChild.GetElement()=output[i];
+        }
         if (theCommands.EvaluateExpression(theCommands, output[i], transformationE, childIsNonCacheable, newExpressionHistory))
-          output.SetChilD(i, transformationE);
-        if (outputExpressionHistory!=0)
-          outputExpressionHistory->AddChildOnTop(*newExpressionHistory);
+        { output.SetChilD(i, transformationE);
 
+        }
+        if (outputExpressionHistory!=0)
+        { if (transformationE!=oldChild.GetElement())
+            HistoryShouldBeRecorded=true;Expression theHistoryE, eLabel;
+          theHistoryE.reset(theCommands);
+          eLabel.AssignValue(i, theCommands);
+          theHistoryE.AddChildAtomOnTop(theCommands.opSequence());
+          theHistoryE.AddChildOnTop(eLabel);
+          theHistoryE.AddChildOnTop(*newExpressionHistory);
+          (*outputExpressionHistory).AddChildOnTop(theHistoryE);
+        }
         //important: here we check if the child is non-cache-able.
         if (childIsNonCacheable)
           outputIsNonCacheable=true;
@@ -544,6 +561,14 @@ bool Calculator::EvaluateExpression
             break;
           }
       }
+    if (HistoryShouldBeRecorded)
+    { Expression theHistoryE;
+      theHistoryE.reset(theCommands);
+      theHistoryE.AddChildAtomOnTop(theCommands.opSequence());
+      theHistoryE.AddChildOnTop(theCommands.EMOne());
+      theHistoryE.AddChildOnTop(output);
+      (*outputExpressionHistory).AddChildOnTop(theHistoryE);
+    }
     /////-------Children evaluation end-------
     if (theCommands.flagAbortComputationASAP)
       break;

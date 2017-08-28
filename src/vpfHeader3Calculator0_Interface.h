@@ -419,7 +419,7 @@ private:
   std::string ToStringFull()const;
   std::string ToStringAllSlidersInExpression()const;
   std::string ToUTF8String(FormatExpressions* theFormat=0)const;
-  bool GetRegularExpressionFromExpressionHistoryRecursive(Expression& output)const;
+  bool GetListExpressionsFromExpressionHistoryRecursive(Expression& outputAppend)const;
   std::string ToStringExpressionHistoryRecursive();
   std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0, bool unfoldCommandEnclosures=true)const;
   static unsigned int HashFunction(const Expression& input)
@@ -846,15 +846,15 @@ struct ExpressionTripleCrunchers
   }
 };
 
-struct StackMaintainerRules
+struct StackMaintainerCalculator
 {
 public:
   Calculator* owner;
   int startingRuleStackIndex;
   int startingRuleStackSize;
-  StackMaintainerRules(Calculator* inputBoss);
+  StackMaintainerCalculator(Calculator* inputBoss);
   void AddRule(const Expression& theRule);
-  ~StackMaintainerRules();
+  ~StackMaintainerCalculator();
 };
 
 class Calculator
@@ -1300,7 +1300,7 @@ public:
   int GetOperationIndexFromControlIndex(int controlIndex);
   int GetExpressionIndex();
   SyntacticElement GetEmptySyntacticElement();
-  bool AccountRule(const Expression& ruleE, StackMaintainerRules& theRuleStackMaintainer);
+  bool AccountRule(const Expression& ruleE, StackMaintainerCalculator& theRuleStackMaintainer);
   bool ApplyOneRule();
   void resetStack()
   { SyntacticElement emptyElement=this->GetEmptySyntacticElement();

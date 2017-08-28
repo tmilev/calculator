@@ -2048,25 +2048,38 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Expression::GetRegularExpressionFromExpressionHistoryRecursive(Expression& output)const
-{ MacroRegisterFunctionWithName("Expression::GetRegularExpressionFromExpressionHistoryRecursive");
+bool Expression::GetListExpressionsFromExpressionHistoryRecursive(Expression& outputAppend)const
+{ MacroRegisterFunctionWithName("Expression::GetListExpressionsFromExpressionHistoryRecursive");
   if (this->owner==0)
-  { output=*this;
+  { outputAppend.AddChildOnTop(*this);
     return true;
   }
   if (!this->StartsWith(this->owner->opExpressionHistory()))
-  { output=*this;
+  { outputAppend.AddChildOnTop(*this);
     return true;
   }
   if (this->size()==2)
-  { return (*this)[1].GetRegularExpressionFromExpressionHistoryRecursive(output);
-  }
-  output.reset(*this->owner);
+    return true;
+  int numTransformationPhases=0;
   for (int i=0; i<this->size(); i++)
-  { Expression newE;
-    if ((*this)[i].GetRegularExpressionFromExpressionHistoryRecursive(newE))
-      output.AddChildOnTop(newE);
-  }
+    if ((*this)[i].IsSequenceNElementS(2))
+      if ((*this)[i][1].IsEqualToMOne())
+        numTransformationPhases++;
+  if (numTransformationPhases<=1)
+    return true;
+  Expression theTransformations;
+  List<Expression> transformationPhases;
+  transformationPhases.Reserve(numTransformationPhases);
+  for (int i=0; i<this->size(); i++)
+    if ((*this)[i].IsSequenceNElementS(2))
+      if ((*this)[i][1].IsEqualToMOne())
+        transformationPhases.AddOnTop((*this)[i][2]);
+  theTransformations.MakeSequence(*this->owner, &transformationPhases);
+  outputAppend.AddChildOnTop(theTransformations);
+  for (int i=0; i<this->size(); i++)
+    if ((*this)[i].IsSequenceNElementS(2))
+      if (!(*this)[i][1].IsEqualToMOne())
+        (*this)[i][2].GetListExpressionsFromExpressionHistoryRecursive(outputAppend);
   return true;
 }
 
@@ -2075,11 +2088,24 @@ std::string Expression::ToStringExpressionHistoryRecursive()
   std::stringstream out;
   if (this->owner==0)
     return "(no owner)";
-  Expression cleanedUpE;
-  if (this->GetRegularExpressionFromExpressionHistoryRecursive(cleanedUpE))
-    out << cleanedUpE.ToString();
+  Expression processedHistory;
+  processedHistory.reset(*this->owner);
+  processedHistory.AddChildAtomOnTop(this->owner->opEndStatement());
+  if (!this->GetListExpressionsFromExpressionHistoryRecursive(processedHistory))
+    out << "Failed to extract expression tree. ";
   else
-    out << this->ToString();
+  { for (int i=1; i<processedHistory.size(); i++)
+    { out << "Step " << i << ": \\(";
+      for (int j=1; j<processedHistory[i].size(); j++)
+      { out  << processedHistory[i][j].ToString();
+        if (j!=processedHistory[i].size()-1)
+          out << "=";
+      }
+      out << "\\)<br>";
+    }
+    out << "DEBUG: expression history: this->ToString(): <br>"
+    << this->ToString();
+  }
   return out.str();
 }
 

@@ -2818,12 +2818,12 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       else
         out << firstE;
       if (!firstNeedsBrackets && !secondNeedsBrackets && firstE!="" && firstE!="-")
+      { if (MathRoutines::isADigit(secondE[0]))
+          mustHaveTimes=true;
         if (MathRoutines::isADigit(firstE[firstE.size()-1]) )
-        { if (MathRoutines::isADigit(secondE[0]))
-            mustHaveTimes=true;
           if (MathRoutines::StringBeginsWith(secondE, "\\frac"))
             mustHaveTimes=true;
-        }
+      }
       if (mustHaveTimes)
         out << "\\cdot ";
       else

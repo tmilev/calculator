@@ -2365,7 +2365,7 @@ int WebWorker::ProcessFile()
   }  
   theFile.seekp(0, std::ifstream::end);
   unsigned int fileSize=theFile.tellp();
-  if (fileSize>50000000)
+  if (fileSize>100000000)
   { this->SetHeadeR( "HTTP/1.0 413 Payload Too Large", "");
     stOutput << "<html><body><b>Error: user requested file: "
     << this->VirtualFileName

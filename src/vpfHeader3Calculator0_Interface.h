@@ -958,6 +958,8 @@ public:
   HashedList<Expression> knownDoubleConstants;
   List<double> knownDoubleConstantValues;
 
+  ListReferences<ListReferences<Expression> > ExpressionHistoryStack;
+  ListReferences<ListReferences<std::string> > ExpressionHistoryRuleNames;
   List<Expression> buffer1, buffer2;
   int MaxRecursionDeptH;
   int RecursionDeptH;
@@ -1078,6 +1080,11 @@ public:
   operator bool()const
   { return false;
   }
+  void ExpressionHistoryPop();
+  void ExpressionHistoryAddEmptyHistory();
+  void ExpressionHistoryAdd(Expression& theExpression, int expressionLabel);
+  void ExpressionHistoryStackAdd();
+  void ExpressionHistoryStackPop();
   void RegisterCalculatorFunctionIdentifier(const Function& theFun, int indexOp, int functionType, int theFunIndex);
   std::string ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat=0);
   std::string ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat=0);
@@ -2078,7 +2085,7 @@ public:
   ;
   static bool EvaluateExpression
   (Calculator& theCommands, const Expression& input, Expression& output,
-   bool& outputIsCacheable, Expression* outputExpressionHistory)
+   bool& outputIsCacheable)
   ;
   void Evaluate(const std::string& theInput);
   bool ParseAndExtractExpressions

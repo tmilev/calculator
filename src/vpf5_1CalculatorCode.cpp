@@ -2062,7 +2062,7 @@ bool Expression::GetListExpressionsFromExpressionHistoryRecursive(Expression& ou
     return true;
   int numTransformationPhases=0;
   for (int i=0; i<this->size(); i++)
-    if ((*this)[i].IsSequenceNElementS(2))
+    if ((*this)[i].IsSequenceNElementS() && (*this)[i].size()>2)
       if ((*this)[i][1].IsEqualToMOne())
         numTransformationPhases++;
   if (numTransformationPhases<=1)
@@ -2071,13 +2071,13 @@ bool Expression::GetListExpressionsFromExpressionHistoryRecursive(Expression& ou
   List<Expression> transformationPhases;
   transformationPhases.Reserve(numTransformationPhases);
   for (int i=0; i<this->size(); i++)
-    if ((*this)[i].IsSequenceNElementS(2))
+    if ((*this)[i].IsSequenceNElementS() && (*this)[i].size()>2)
       if ((*this)[i][1].IsEqualToMOne())
-        transformationPhases.AddOnTop((*this)[i][2]);
+        transformationPhases.AddOnTop((*this)[i]);
   theTransformations.MakeSequence(*this->owner, &transformationPhases);
   outputAppend.AddChildOnTop(theTransformations);
   for (int i=0; i<this->size(); i++)
-    if ((*this)[i].IsSequenceNElementS(2))
+    if ((*this)[i].IsSequenceNElementS())
       if (!(*this)[i][1].IsEqualToMOne())
         (*this)[i][2].GetListExpressionsFromExpressionHistoryRecursive(outputAppend);
   return true;
@@ -2095,18 +2095,72 @@ std::string Expression::ToStringExpressionHistoryRecursive()
     out << "Failed to extract expression tree. ";
   else
   { for (int i=1; i<processedHistory.size(); i++)
-    { out << "Step " << i << ": \\(";
+    { out << "Step " << i << ": \\(\\begin{array}{ll|l}&";
       for (int j=1; j<processedHistory[i].size(); j++)
-      { out  << processedHistory[i][j].ToString();
-        if (j!=processedHistory[i].size()-1)
-          out << "=";
+      { if (j>1)
+          out << "=&";
+        out << processedHistory[i][j][2].ToString();
+        if (processedHistory[i][j].size()>3 )
+        { std::string theString=processedHistory[i][j][3].ToString();
+          if (theString!="")
+            out << "&\\text{" << theString << "}";
+        }
+        out << "\\\\";
       }
-      out << "\\)<br>";
+      out << "\\end{array}\\)<hr>";
     }
     out << "DEBUG: expression history: this->ToString(): <br>"
     << this->ToString();
   }
   return out.str();
+}
+
+void Calculator::ExpressionHistoryAddEmptyHistory()
+{ MacroRegisterFunctionWithName("Calculator::ExpressionHistoryAddEmptyHistory");
+  ListReferences<Expression>& currentExpressionHistoryStack=this->ExpressionHistoryStack.LastObject();
+  currentExpressionHistoryStack.SetSize(currentExpressionHistoryStack.size+1);
+  Expression& currentExpressionHistory= currentExpressionHistoryStack.LastObject();
+  currentExpressionHistory.reset(*this);
+  currentExpressionHistory.AddChildAtomOnTop(this->opExpressionHistory());
+  this->ExpressionHistoryRuleNames.LastObject().SetSize(currentExpressionHistoryStack.size);
+  this->ExpressionHistoryRuleNames.LastObject().LastObject()=(std::string) "";
+}
+
+void Calculator::ExpressionHistoryAdd
+(Expression& theExpression, int expressionLabel)
+{ MacroRegisterFunctionWithName("Calculator::ExpressionHistoryAdd");
+  Expression theHistoryE;
+  theHistoryE.reset(*this);
+  theHistoryE.AddChildAtomOnTop(this->opSequence());
+  Expression indexE;
+  indexE.AssignValue(expressionLabel, *this);
+  theHistoryE.AddChildOnTop(indexE);
+  theHistoryE.AddChildOnTop(theExpression);
+  Expression ruleNameE;
+  ruleNameE.AssignValue(this->ExpressionHistoryRuleNames.LastObject().LastObject() , *this);
+  theHistoryE.AddChildOnTop(ruleNameE);
+  this->ExpressionHistoryRuleNames.LastObject().LastObject()="";
+  this->ExpressionHistoryStack.LastObject().LastObject().AddChildOnTop(theHistoryE);
+}
+
+void Calculator::ExpressionHistoryPop()
+{ MacroRegisterFunctionWithName("Calculator::ExpressionHistoryPop");
+  this->ExpressionHistoryStack.LastObject().SetSize(this->ExpressionHistoryStack.LastObject().size-1);
+  this->ExpressionHistoryRuleNames.LastObject().SetSize(this->ExpressionHistoryStack.LastObject().size);
+}
+
+void Calculator::ExpressionHistoryStackAdd()
+{ MacroRegisterFunctionWithName("Calculator::ExpressionHistoryStackAdd");
+  this->ExpressionHistoryStack.SetSize(this->ExpressionHistoryStack.size+1);
+  this->ExpressionHistoryStack.LastObject().SetSize(0);
+  this->ExpressionHistoryRuleNames.SetSize(this->ExpressionHistoryStack.size);
+  this->ExpressionHistoryRuleNames.LastObject().SetSize(0);
+}
+
+void Calculator::ExpressionHistoryStackPop()
+{ MacroRegisterFunctionWithName("Calculator::ExpressionHistoryStackPop");
+  this->ExpressionHistoryStack.SetSize(this->ExpressionHistoryStack.size-1);
+  this->ExpressionHistoryRuleNames.SetSize(this->ExpressionHistoryStack.size);
 }
 
 bool Calculator::innerLogEvaluationStepsHumanReadable(Calculator& theCommands, const Expression& input, Expression& output)
@@ -2116,9 +2170,15 @@ bool Calculator::innerLogEvaluationStepsHumanReadable(Calculator& theCommands, c
   if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadable"))
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
   bool notUsed=false;
-  Expression theExpressionHistory;
-  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed, &theExpressionHistory);
+  theCommands.ExpressionHistoryStackAdd();
+  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed);
   std::stringstream out;
-  out << theExpressionHistory.ToStringExpressionHistoryRecursive();
+  ListReferences<Expression>& currentStack=theCommands.ExpressionHistoryStack.LastObject();
+  for (int i=0; i<currentStack.size; i++)
+  { out << "Stack " << i+1 << ":<br>" << currentStack[i].ToStringExpressionHistoryRecursive();
+    if (i!=currentStack.size-1)
+      out << "<hr>";
+  }
+  theCommands.ExpressionHistoryStackPop();
   return output.AssignValue(out.str(), theCommands);
 }

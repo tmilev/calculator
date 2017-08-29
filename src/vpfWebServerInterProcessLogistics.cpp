@@ -561,9 +561,13 @@ void logger::reset()
   this->flagTagColorHtmlOpened=false;
   this->flagTagColorConsoleOpened=false;
   this->flagStopWritingToFile=false;
-  this->MaxLogSize=50000000;
+  this->MaxLogSize=
+  50000000
+  ;
   if (theGlobalVariables.flagRunningApache)
     return;
+  if (this->theFile.is_open())
+    this->theFile.close();
   FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(this->theFile, this->theFileName, false, true, false, true);
   if (! this->theFile.is_open())
   { this->currentColor=logger::red;
@@ -574,12 +578,13 @@ void logger::reset()
     << computedFileName << this->closeTagConsole()
     << std::endl;
   }
+  this->theFile.seekg(0);
+  this->theFile.seekp(0);
 }
 
 void logger::CheckLogSize()
 { this->initializeIfNeeded();
-  theFile.seekg(0, std::ios::end);
-  if (theFile.tellg()>this->MaxLogSize)
+  if (theFile.tellp()>this->MaxLogSize)
   { if (this->flagResetLogFileWhenTooLarge)
       this->reset();
     else

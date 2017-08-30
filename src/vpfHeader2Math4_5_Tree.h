@@ -25,12 +25,14 @@ public:
     return true;
   }
   void AddChild(const data& inputData);
+  void RemoveAllChildren();
+  TreeNode<data>& GetChild(int i);
 };
 
 template <typename data>
 class Tree{
 public:
-  List<TreeNode<data> > theNodes;
+  ListReferences<TreeNode<data> > theNodes;
   void ResetAddRoot(const data& inputData)
   { this->reset();
     this->theNodes.SetSize(1);
@@ -57,5 +59,22 @@ void TreeNode<data>::AddChild(const data& inputData)
   this->owner->theNodes[newNodeIndex].myIndex=newNodeIndex;
 }
 
+template <typename data>
+void TreeNode<data>::RemoveAllChildren()
+{ for (int i=0; i<this->children.size; i++)
+  { TreeNode<data>& currentNode=this->owner->theNodes[this->children[i]];
+    if (currentNode.myIndex==-1)
+      crash << "Faulty index in tree node: " << this->children[i] << crash;
+    currentNode.myIndex=-1;
+    currentNode.RemoveAllChildren();
+  }
+  this->children.SetSize(0);
+}
+
+template <typename data>
+TreeNode<data>& TreeNode<data>::GetChild(int i)
+{ this->CheckInitialization();
+  return this->owner->theNodes[this->children[i]];
+}
 
 #endif

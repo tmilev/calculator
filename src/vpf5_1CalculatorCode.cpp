@@ -2185,11 +2185,11 @@ bool Calculator::innerLogEvaluationStepsHumanReadableNested(Calculator& theComma
 
 #include "vpfHeader2Math4_5_Tree.h"
 
-struct HistorySubExression{
+struct HistorySubExpression{
 public:
   const Expression* currentE;
-  int activeChild;
-  HistorySubExression(): currentE(0), activeChild(-1)
+  int lastActiveSubexpression;
+  HistorySubExpression(): currentE(0), lastActiveSubexpression(-1)
   {
   }
 };
@@ -2198,7 +2198,7 @@ class ExpressionHistoryEnumerator{
 public:
   Expression theHistory;
   Expression currentState;
-  Tree<HistorySubExression> currentSubTree;
+  Tree<HistorySubExpression> currentSubTree;
   List<Expression> output;
   Calculator* owner;
   bool initialized;
@@ -2210,11 +2210,13 @@ public:
   { this->initialized=false;
     this->owner=0;
   }
+  bool IncrementRecursivelyReturnFalseIfPastLast(TreeNode<HistorySubExpression>& currentNode);
   bool CheckInitialization()
   { if (this->owner==0)
       crash << "Expression history enumerator has zero owner. " << crash;
     return true;
   }
+  Expression GetExpression(TreeNode<HistorySubExpression>& currentNode);
   void ComputeAll();
 };
 
@@ -2236,23 +2238,75 @@ bool ExpressionHistoryEnumerator::initialize()
   { this->errorStream << "Expression history element at start is not labeled by -1. ";
     return false;
   }
-  this->currentState=this->theHistory[1][2];
   this->currentSubTree.reset();
-  HistorySubExression currentNode;
+  HistorySubExpression currentNode;
   currentNode.currentE=&this->theHistory;
-  currentNode.activeChild=1;
+  currentNode.lastActiveSubexpression=1;
   this->currentSubTree.ResetAddRoot(currentNode);
-  currentNode.currentE=&this->theHistory[1];
-  currentNode.activeChild=-1;
+  currentNode.currentE=&this->theHistory[1][2];
+  currentNode.lastActiveSubexpression=-1;
   this->currentSubTree.theNodes[0].AddChild(currentNode);
   return true;
+}
+
+Expression ExpressionHistoryEnumerator::GetExpression(TreeNode<HistorySubExpression>& currentNode)
+{ MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::GetExpression");
+  Expression result;
+  if (currentNode.children.size==0)
+  { result=*currentNode.theData.currentE;
+    return result;
+  }
+  result.reset(*this->owner);
+  for (int i=0; i<currentNode.children.size; i++)
+    result.AddChildOnTop(this->GetExpression(currentNode.GetChild(i)  ));
+  return result;
 }
 
 void ExpressionHistoryEnumerator::ComputeAll()
 { MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::ComputeAll");
   while (this->IncrementReturnFalseIfPastLast())
-  { this->output.AddOnTop(this->currentState);
+  { this->output.AddOnTop(this->GetExpression(this->currentSubTree.theNodes[0]));
   }
+}
+
+bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast(TreeNode<HistorySubExpression>& currentNode)
+{ MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast");
+  bool didWork=false;
+  for (int i=0; i<currentNode.children.size; i++)
+    if (this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[currentNode.children[i]]))
+      didWork=true;
+  if (didWork)
+    return true;
+  if (!currentNode.theData.currentE->StartsWith(this->owner->opExpressionHistory()) )
+    return false;
+  const Expression& currentE=*currentNode.theData.currentE;
+  HistorySubExpression nextChild;
+  while(!didWork)
+  { currentNode.RemoveAllChildren();
+    if (currentNode.theData.lastActiveSubexpression==currentE.size()-1)
+      return false;
+    int nextGoodIndex=currentNode.theData.lastActiveSubexpression+1;
+    for (;nextGoodIndex<currentE.size(); nextGoodIndex++)
+      if (currentE[nextGoodIndex].IsSequenceNElementS() && currentE[nextGoodIndex].size()>2)
+      { if (currentE[nextGoodIndex][1].IsEqualToMOne())
+          if (currentNode.children.size>0)
+            break;
+        nextChild.currentE=&currentE[nextGoodIndex][2];
+        nextChild.lastActiveSubexpression=0;
+        currentNode.AddChild(nextChild);
+        currentNode.theData.lastActiveSubexpression=nextGoodIndex;
+        if (currentE[nextGoodIndex][1].IsEqualToMOne())
+        { didWork=true;
+          break;
+        }
+      }
+    for (int i=0; i<currentNode.children.size; i++)
+      if (this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[currentNode.children[i]]))
+        didWork=true;
+    if (nextGoodIndex>=currentE.size())
+      break;
+   }
+  return didWork;
 }
 
 bool ExpressionHistoryEnumerator::IncrementReturnFalseIfPastLast()
@@ -2260,11 +2314,10 @@ bool ExpressionHistoryEnumerator::IncrementReturnFalseIfPastLast()
   if (!this->initialized)
     return this->initialize();
   this->CheckInitialization();
-  for (int i=0; i<this->currentSubTree.theNodes.size; i++)
-  {
-
-  }
-  return false;
+  if (this->currentSubTree.theNodes.size<1)
+    return false;
+  bool result=this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[0]);
+  return result;
 }
 
 bool Calculator::innerLogEvaluationStepsHumanReadableMerged(Calculator& theCommands, const Expression& input, Expression& output)
@@ -2286,8 +2339,9 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(Calculator& theComma
     theHistoryEnumerator.owner=&theCommands;
     theHistoryEnumerator.ComputeAll();
     out << theHistoryEnumerator.errorStream.str();
-    out << theHistoryEnumerator.output.ToStringCommaDelimited();
-    out << "<br>DEBUG: " << theHistoryEnumerator.theHistory.ToString();
+    for (int j=0; j<theHistoryEnumerator.output.size; j++)
+      out << theHistoryEnumerator.output[j].ToString() << "<hr>";
+    out << "DEBUG: " << theHistoryEnumerator.theHistory.ToString();
     if (i!=currentStack.size-1)
       out << "<hr>";
   }

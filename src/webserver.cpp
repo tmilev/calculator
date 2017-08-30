@@ -3857,10 +3857,10 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection()
   newAddressStream << this->addressGetOrPost;
   if (theGlobalVariables.flagRunningApache)
     redirectStream << "Content-Type: text/html\r\n";
-  //redirectStream << "Location: " << newAddressStream.str();
-  double fixme;
-  //this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectStream.str());
-  this->SetHeaderOKNoContentLength();
+  redirectStream << "Location: " << newAddressStream.str();
+  //double fixme;
+  this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectStream.str());
+  //this->SetHeaderOKNoContentLength();
   stOutput << "<html><body>Address available through secure (SSL) connection only. "
   << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
   if (theGlobalVariables.flagRunningApache)

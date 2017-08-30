@@ -2260,7 +2260,10 @@ bool ExpressionHistoryEnumerator::IncrementReturnFalseIfPastLast()
   if (!this->initialized)
     return this->initialize();
   this->CheckInitialization();
-//  for (int i=0; )
+  for (int i=0; i<this->currentSubTree.theNodes.size; i++)
+  {
+
+  }
   return false;
 }
 

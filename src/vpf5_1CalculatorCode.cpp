@@ -2048,8 +2048,8 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Expression::GetListExpressionsFromExpressionHistoryRecursive(Expression& outputAppend)const
-{ MacroRegisterFunctionWithName("Expression::GetListExpressionsFromExpressionHistoryRecursive");
+bool Expression::GetListExpressionsFromExpressionHistoryRecursiveNested(Expression& outputAppend)const
+{ MacroRegisterFunctionWithName("Expression::GetListExpressionsFromExpressionHistoryRecursiveNested");
   if (this->owner==0)
   { outputAppend.AddChildOnTop(*this);
     return true;
@@ -2079,19 +2079,19 @@ bool Expression::GetListExpressionsFromExpressionHistoryRecursive(Expression& ou
   for (int i=0; i<this->size(); i++)
     if ((*this)[i].IsSequenceNElementS())
       if (!(*this)[i][1].IsEqualToMOne())
-        (*this)[i][2].GetListExpressionsFromExpressionHistoryRecursive(outputAppend);
+        (*this)[i][2].GetListExpressionsFromExpressionHistoryRecursiveNested(outputAppend);
   return true;
 }
 
-std::string Expression::ToStringExpressionHistoryRecursive()
-{ MacroRegisterFunctionWithName("Expression::ToStringExpressionHistoryRecursive");
+std::string Expression::ToStringExpressionHistoryRecursiveNested()
+{ MacroRegisterFunctionWithName("Expression::ToStringExpressionHistoryRecursiveNested");
   std::stringstream out;
   if (this->owner==0)
     return "(no owner)";
   Expression processedHistory;
   processedHistory.reset(*this->owner);
   processedHistory.AddChildAtomOnTop(this->owner->opEndStatement());
-  if (!this->GetListExpressionsFromExpressionHistoryRecursive(processedHistory))
+  if (!this->GetListExpressionsFromExpressionHistoryRecursiveNested(processedHistory))
     out << "Failed to extract expression tree. ";
   else
   { for (int i=1; i<processedHistory.size(); i++)
@@ -2109,8 +2109,8 @@ std::string Expression::ToStringExpressionHistoryRecursive()
       }
       out << "\\end{array}\\)<hr>";
     }
-    out << "DEBUG: expression history: this->ToString(): <br>"
-    << this->ToString();
+    //out << "DEBUG: expression history: this->ToString(): <br>"
+    //<< this->ToString();
   }
   return out.str();
 }
@@ -2163,11 +2163,11 @@ void Calculator::ExpressionHistoryStackPop()
   this->ExpressionHistoryRuleNames.SetSize(this->ExpressionHistoryStack.size);
 }
 
-bool Calculator::innerLogEvaluationStepsHumanReadable(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadable");
+bool Calculator::innerLogEvaluationStepsHumanReadableNested(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadableNested");
   Expression inputCopy=input;
   Expression outputTransformation;
-  if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadable"))
+  if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadableNested"))
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
   bool notUsed=false;
   theCommands.ExpressionHistoryStackAdd();
@@ -2175,7 +2175,116 @@ bool Calculator::innerLogEvaluationStepsHumanReadable(Calculator& theCommands, c
   std::stringstream out;
   ListReferences<Expression>& currentStack=theCommands.ExpressionHistoryStack.LastObject();
   for (int i=0; i<currentStack.size; i++)
-  { out << "Stack " << i+1 << ":<br>" << currentStack[i].ToStringExpressionHistoryRecursive();
+  { out << "Stack " << i+1 << ":<br>" << currentStack[i].ToStringExpressionHistoryRecursiveNested();
+    if (i!=currentStack.size-1)
+      out << "<hr>";
+  }
+  theCommands.ExpressionHistoryStackPop();
+  return output.AssignValue(out.str(), theCommands);
+}
+
+#include "vpfHeader2Math4_5_Tree.h"
+
+struct HistorySubExression{
+public:
+  const Expression* currentE;
+  int activeChild;
+  HistorySubExression(): currentE(0), activeChild(-1)
+  {
+  }
+};
+
+class ExpressionHistoryEnumerator{
+public:
+  Expression theHistory;
+  Expression currentState;
+  Tree<HistorySubExression> currentSubTree;
+  List<Expression> output;
+  Calculator* owner;
+  bool initialized;
+  bool IncrementReturnFalseIfPastLast();
+  bool initialize();
+  std::stringstream errorStream;
+  const Expression* getCurrentE(const List<Expression>& input);
+  ExpressionHistoryEnumerator()
+  { this->initialized=false;
+    this->owner=0;
+  }
+  bool CheckInitialization()
+  { if (this->owner==0)
+      crash << "Expression history enumerator has zero owner. " << crash;
+    return true;
+  }
+  void ComputeAll();
+};
+
+bool ExpressionHistoryEnumerator::initialize()
+{ MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::initialize");
+  if (this->initialized)
+    return true;
+  this->initialized=true;
+  this->CheckInitialization();
+  if (!this->theHistory.StartsWith(this->owner->opExpressionHistory()) || this->theHistory.size()<2)
+  { this->errorStream << "Expression history does not start with the right atom. ";
+    return false;
+  }
+  if (!this->theHistory[1].StartsWith(this->owner->opSequence()) || this->theHistory[1].size()<3)
+  { this->errorStream << "Expression history element is not a sequence. ";
+    return false;
+  }
+  if (!this->theHistory[1][1].IsEqualToMOne())
+  { this->errorStream << "Expression history element at start is not labeled by -1. ";
+    return false;
+  }
+  this->currentState=this->theHistory[1][2];
+  this->currentSubTree.reset();
+  HistorySubExression currentNode;
+  currentNode.currentE=&this->theHistory;
+  currentNode.activeChild=1;
+  this->currentSubTree.ResetAddRoot(currentNode);
+  currentNode.currentE=&this->theHistory[1];
+  currentNode.activeChild=-1;
+  this->currentSubTree.theNodes[0].AddChild(currentNode);
+  return true;
+}
+
+void ExpressionHistoryEnumerator::ComputeAll()
+{ MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::ComputeAll");
+  while (this->IncrementReturnFalseIfPastLast())
+  { this->output.AddOnTop(this->currentState);
+  }
+}
+
+bool ExpressionHistoryEnumerator::IncrementReturnFalseIfPastLast()
+{ MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::IncrementReturnFalseIfPastLast");
+  if (!this->initialized)
+    return this->initialize();
+  this->CheckInitialization();
+//  for (int i=0; )
+  return false;
+}
+
+bool Calculator::innerLogEvaluationStepsHumanReadableMerged(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadableMerged");
+  Expression inputCopy=input;
+  Expression outputTransformation;
+  if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadableMerged"))
+    inputCopy.SetChildAtomValue(0, theCommands.opSequence());
+  bool notUsed=false;
+  theCommands.ExpressionHistoryStackAdd();
+  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed);
+  std::stringstream out;
+  ListReferences<Expression>& currentStack=theCommands.ExpressionHistoryStack.LastObject();
+  for (int i=0; i<currentStack.size; i++)
+  { if (currentStack.size>1)
+      out << "Stack " << i+1 << ":<br>";
+    ExpressionHistoryEnumerator theHistoryEnumerator;
+    theHistoryEnumerator.theHistory=currentStack[i];
+    theHistoryEnumerator.owner=&theCommands;
+    theHistoryEnumerator.ComputeAll();
+    out << theHistoryEnumerator.errorStream.str();
+    out << theHistoryEnumerator.output.ToStringCommaDelimited();
+    out << "<br>DEBUG: " << theHistoryEnumerator.theHistory.ToString();
     if (i!=currentStack.size-1)
       out << "<hr>";
   }

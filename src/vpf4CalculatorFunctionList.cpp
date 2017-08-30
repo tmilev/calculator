@@ -367,14 +367,23 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorFunctionsGeneral::innerThaw"
    "Thaw");
   this->AddOperationInnerHandler
-  ("LogEvaluationStepsHumanReadable", Calculator::innerLogEvaluationStepsHumanReadable, "",
+  ("LogEvaluationStepsHumanReadableNested", Calculator::innerLogEvaluationStepsHumanReadableNested, "",
    "Show a step-by step evaluation of the calculator. \
     Some steps my be combined or omitted for improved human readability. \
     ",
-   "LogEvaluationStepsHumanReadable((x+2)(x+3))",
+   "LogEvaluationStepsHumanReadableNested((x+2)(x+3))",
    true, false,
-   "CalculatorFunctionsGeneral::innerLogEvaluationStepsHumanReadable"
-   "LogEvaluationStepsHumanReadable");
+   "CalculatorFunctionsGeneral::innerLogEvaluationStepsHumanReadableNested"
+   "LogEvaluationStepsHumanReadableNested");
+  this->AddOperationInnerHandler
+  ("LogEvaluationStepsHumanReadableMerged", Calculator::innerLogEvaluationStepsHumanReadableMerged, "",
+   "Show a step-by step evaluation of the calculator. \
+    Some steps my be combined or omitted for improved human readability. \
+    ",
+   "LogEvaluationStepsHumanReadableMerged((x+2)(x+3))",
+   true, false,
+   "CalculatorFunctionsGeneral::innerLogEvaluationStepsHumanReadableMerged"
+   "LogEvaluationStepsHumanReadableMerged");
 
   this->AddOperationInnerHandler
   ("PlotExpressionTreeFull",
@@ -5624,5 +5633,6 @@ void Calculator::initAtomsThatFreezeArguments()
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Freeze");
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("Bind");
-  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluationStepsHumanReadable");
+  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluationStepsHumanReadableNested");
+  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("LogEvaluationStepsHumanReadableMerged");
 }

@@ -114,7 +114,8 @@ HEADERS += \
     vpfHeader8HtmlInterpretationInterface.h \
     vpfHeader8HtmlSnippets.h \
     vpfHeader1General8DatabaseSystemIndependent.h \
-    vpfHeader2Math10_LaTeXRoutines.h
+    vpfHeader2Math10_LaTeXRoutines.h \
+    vpfHeader2Math4_5_Tree.h
 
 DISTFILES += \
     ../html-common/three-d.js \

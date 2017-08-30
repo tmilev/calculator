@@ -419,8 +419,8 @@ private:
   std::string ToStringFull()const;
   std::string ToStringAllSlidersInExpression()const;
   std::string ToUTF8String(FormatExpressions* theFormat=0)const;
-  bool GetListExpressionsFromExpressionHistoryRecursive(Expression& outputAppend)const;
-  std::string ToStringExpressionHistoryRecursive();
+  bool GetListExpressionsFromExpressionHistoryRecursiveNested(Expression& outputAppend)const;
+  std::string ToStringExpressionHistoryRecursiveNested();
   std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0, bool unfoldCommandEnclosures=true)const;
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();
@@ -1790,7 +1790,8 @@ public:
   }
   bool ExpressionMatchesPattern
   (const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions, std::stringstream* theLog=0);
-  static bool innerLogEvaluationStepsHumanReadable(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLogEvaluationStepsHumanReadableNested(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLogEvaluationStepsHumanReadableMerged(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerReverseOrdeR(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerReverseOrderRecursively(Calculator& theCommands, const Expression& input, Expression& output);

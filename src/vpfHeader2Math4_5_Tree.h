@@ -27,6 +27,7 @@ public:
   void AddChild(const data& inputData);
   void RemoveAllChildren();
   TreeNode<data>& GetChild(int i);
+  std::string ToStringTextFormat(int indentation);
 };
 
 template <typename data>
@@ -57,6 +58,7 @@ void TreeNode<data>::AddChild(const data& inputData)
   this->owner->theNodes[newNodeIndex].theData=inputData;
   this->owner->theNodes[newNodeIndex].parent=this->myIndex;
   this->owner->theNodes[newNodeIndex].myIndex=newNodeIndex;
+  this->children.AddOnTop(newNodeIndex);
 }
 
 template <typename data>
@@ -75,6 +77,21 @@ template <typename data>
 TreeNode<data>& TreeNode<data>::GetChild(int i)
 { this->CheckInitialization();
   return this->owner->theNodes[this->children[i]];
+}
+
+template <typename data>
+std::string TreeNode<data>::ToStringTextFormat(int indentation)
+{ std::stringstream out;
+  for (int i=0; i<indentation; i++)
+    out << "&nbsp;";
+  out << this->myIndex << ": ";
+  out << this->theData;
+  if (this->children.size>0)
+    out << "-> " << this->children.ToStringCommaDelimited();
+  indentation+=2;
+  for (int i=0; i<this->children.size; i++)
+    out << "<br>" << this->GetChild(i).ToStringTextFormat(indentation);
+  return out.str();
 }
 
 #endif

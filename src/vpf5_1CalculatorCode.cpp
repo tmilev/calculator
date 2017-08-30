@@ -2187,6 +2187,15 @@ bool Calculator::innerLogEvaluationStepsHumanReadableNested(Calculator& theComma
 
 struct HistorySubExpression{
 public:
+  friend std::ostream& operator << (std::ostream& output, const HistorySubExpression& theH)
+  { if (theH.currentE==0)
+      output << "(no expression)";
+    else
+      output << theH.currentE->ToString();
+    output << " active: " << theH.lastActiveSubexpression;
+    //output << "<br>Lispified: " << theH.currentE->ToStringSemiFull();
+    return output;
+  }
   const Expression* currentE;
   int lastActiveSubexpression;
   HistorySubExpression(): currentE(0), lastActiveSubexpression(-1)
@@ -2256,9 +2265,17 @@ Expression ExpressionHistoryEnumerator::GetExpression(TreeNode<HistorySubExpress
   { result=*currentNode.theData.currentE;
     return result;
   }
+  if (currentNode.children.size==1)
+  { result=this->GetExpression(currentNode.GetChild(0));
+    return result;
+  }
   result.reset(*this->owner);
   for (int i=0; i<currentNode.children.size; i++)
-    result.AddChildOnTop(this->GetExpression(currentNode.GetChild(i)  ));
+  { Expression currentE=this->GetExpression(currentNode.GetChild(i)  );
+    stOutput << "<br>Adding expression: " << currentE.ToStringFull();
+    result.AddChildOnTop(currentE);
+  }
+  stOutput << "<br>Final expression: " << result.ToStringFull();
   return result;
 }
 
@@ -2266,6 +2283,8 @@ void ExpressionHistoryEnumerator::ComputeAll()
 { MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::ComputeAll");
   while (this->IncrementReturnFalseIfPastLast())
   { this->output.AddOnTop(this->GetExpression(this->currentSubTree.theNodes[0]));
+    stOutput << "<br>DEBUG:<br>" << this->currentSubTree.theNodes[0].ToStringTextFormat(0)
+    ;
   }
 }
 
@@ -2281,7 +2300,7 @@ bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast(Tree
     return false;
   const Expression& currentE=*currentNode.theData.currentE;
   HistorySubExpression nextChild;
-  while(!didWork)
+  while (!didWork)
   { currentNode.RemoveAllChildren();
     if (currentNode.theData.lastActiveSubexpression==currentE.size()-1)
       return false;

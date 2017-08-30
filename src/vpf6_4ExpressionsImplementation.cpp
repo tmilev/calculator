@@ -2922,9 +2922,10 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       }
     }
 //    stOutput << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
-  } else if (this->IsListStartingWithAtom(this->owner->opPlus() ))
+  } else if (this->StartsWith(this->owner->opPlus()))
   { if (this->children.size<3)
-      crash << "Plus operation takes at least 2 arguments. " << crash;
+      crash << "Plus operation takes at least 2 arguments, whereas this expression has "
+      << this->children.size-1 << " arguments. " << crash;
     const Expression& left=(*this)[1];
     const Expression& right=(*this)[2];
     std::string leftString;
@@ -2941,9 +2942,10 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       if (rightString[0]!='-')
         out << "+";
     out << rightString;
-  } else if (this->IsListStartingWithAtom(this->owner->opDirectSum() ))
+  } else if (this->IsListStartingWithAtom(this->owner->opDirectSum()))
   { if (this->children.size<3)
-      crash << "Plus operation takes at least 2 arguments. " << crash;
+      crash << "Direct sum operation takes at least 2 arguments, whereas this expression has "
+      << this->children.size << " arguments. " << crash;
     const Expression& left=(*this)[1];
     const Expression& right=(*this)[2];
     std::string leftString;
@@ -3220,6 +3222,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->size()>=2)
   { //stOutput << "I'm at the second place";
     out << (*this)[0].ToString(theFormat);
+    //if ((*this)[0].ToString(theFormat)=="+")
+    //  stOutput << "What the fuck is going on: " << (*this)[0].ToStringFull();
     bool needParenthesis=true;
     if (this->size()==2)
     { if ((*this)[0].IsAtomWhoseExponentsAreInterpretedAsFunction())

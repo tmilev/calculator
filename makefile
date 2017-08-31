@@ -1,21 +1,23 @@
-# Featureflags should be self-explanatory.  Pthreads are (so far 2015-11) only
-# used for calculator code, but this is likely to change.  Openmp was lightly
-# used in some code in late 2015.
-# Optimization flags have not actually been tested.  -Og is not used for
+# Pthreads are  being phased out in favor of std::mutex and similar.
+# Openmp was lightly used in some code by Thomas in late 2015.
+# Optimization flags have not actually been tested. 
+# 1. -Og is not used for
 # debug builds because building performance matters more than running
-# performance.  -O3 doesn't slow down non-debug builds too much, and it is
+# performance.  
+# 2. -O3 doesn't slow down non-debug builds too much, and it is
 # expected that this will be built on systems that use it, thus -march=native.
-# -flto was experimented with, as it is the way to achieve the vaunted
+# 3. -flto was experimented with, as it is the way to achieve the vaunted
 # benefits of seeing the program before running it, but was ultimately too
 # slow
-# Those -MMD -Mp things create files that notify make about what the
-# header dependencies so things can be correctly rebuilt.  A 'make clean'
+# The -MMD -Mp flags create files that notify make about 
+# header dependencies so sources can be correctly rebuilt.  
+# A 'make clean'
 # is of course suggested when changing compilation options, not that something
 # bad will happen, but something bad is not guaranteed not to happen.
 # AllocationStatistics is Thomas' feature to notify the user with a glibc
 # prepared stack trace every time an object is allocated that crosses a
-# megabyte boundary, in order to find hot spots of massive memory allocation
-# it needs -rdynamic due to implementation
+# megabyte boundary, in order to find hot spots of massive memory allocation.
+# This needs -rdynamic due to implementation.
 # 
 FEATUREFLAGS= -std=c++0x -pthread -fopenmp
 CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c

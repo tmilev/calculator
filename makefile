@@ -50,17 +50,44 @@ ifeq ($(AllocationStatistics), 1)
 	LDFLAGS += -rdynamic
 endif
 
+########################
+########################
+##We include mysql and ssl depending on their availability
+##This code may need more work in the future
+
 ifeq ($(nossl),1)
 else
-	CFLAGS+= -DMACRO_use_open_ssl
-	LIBRARYINCLUDESEND+= -lssl -lcrypto #WARNING believe it or not, the libraries must come AFTER the executable name
+sslLocation=
+ifneq ($(wildcard /usr/lib64/libssl.so),)#location of ssl in CENTOS
+  sslLocation=found
+endif
+ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubuntu
+  sslLocation=found
+endif
+ifneq ($(sslLocation),)
+	CFLAGS+= -DMACRO_use_open_ssl 
+	LIBRARYINCLUDESEND+= -lssl -lcrypto  #WARNING believe it or not, the libraries must come AFTER the executable name 
+endif
 endif
 
 ifeq ($(nosql),1)
 else
-	CFLAGS+= -DMACRO_use_MySQL
-	LIBRARYINCLUDESEND+= -L/usr/lib64/mysql -lmysqlclient  #WARNING believe it or not, the libraries must come AFTER the executable name
+mysqlLocation=
+ifneq ($(wildcard /usr/lib64/mysql),)#location of mysql in CENTOS
+  mysqlLocation=/usr/lib64/mysql
 endif
+ifneq ($(wildcard /usr/lib/mysql),)#location of mysql in Ubuntu
+  mysqlLocation=/usr/lib/mysql
+endif
+ifneq ($(mysqlLocation),)
+  CFLAGS+= -DMACRO_use_MySQL
+  LIBRARYINCLUDESEND+= -L$(mysqlLocation) -lmysqlclient  #WARNING believe it or not, the libraries must come AFTER the executable name
+endif
+endif
+########################
+########################
+
+$(info Compiling with flags: $(LIBRARYINCLUDESEND)) 
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
 SOURCES=\

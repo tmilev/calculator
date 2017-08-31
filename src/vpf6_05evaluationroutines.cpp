@@ -502,6 +502,9 @@ bool Calculator::EvaluateExpression
     /////-------Children evaluation-------
     ProgressReport theReport;
     bool HistoryShouldBeRecorded=false;
+    int historyStackSizeAtStart=-1;
+    if (doExpressionHistory)
+      historyStackSizeAtStart = theCommands.ExpressionHistoryStack.LastObject().LastObject().size();
     if (!output.IsFrozen())
       for (int i=0; i<output.size() && !theCommands.flagAbortComputationASAP; i++)
       { if (i>0 && output.StartsWith(theCommands.opEndStatement()))
@@ -547,9 +550,12 @@ bool Calculator::EvaluateExpression
             break;
           }
       }
-    if (HistoryShouldBeRecorded)
-    { theCommands.ExpressionHistoryRuleNames.LastObject().LastObject()="Sub-expression simplification";
-      theCommands.ExpressionHistoryAdd(output, -1);
+    if (doExpressionHistory)
+    { if (HistoryShouldBeRecorded)
+      { theCommands.ExpressionHistoryRuleNames.LastObject().LastObject()="Sub-expression simplification";
+        theCommands.ExpressionHistoryAdd(output, -1);
+      } else
+        theCommands.ExpressionHistoryStack.LastObject().LastObject().children.SetSize(historyStackSizeAtStart);
     }
     /////-------Children evaluation end-------
     if (theCommands.flagAbortComputationASAP)

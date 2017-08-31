@@ -2100,11 +2100,12 @@ std::string Expression::ToStringExpressionHistoryRecursiveNested()
       { if (j>1)
           out << "=&";
         out << processedHistory[i][j][2].ToString();
-        if (processedHistory[i][j].size()>3 )
-        { std::string theString=processedHistory[i][j][3].ToString();
-          if (theString!="")
-            out << "&\\text{" << theString << "}";
-        }
+        if (j+1<processedHistory[i].size())
+          if (processedHistory[i][j+1].size()>3 )
+          { std::string theString=processedHistory[i][j+1][3].ToString();
+            if (theString!="")
+              out << "&\\text{" << theString << "}";
+          }
         out << "\\\\";
       }
       out << "\\end{array}\\)<hr>";
@@ -2209,6 +2210,7 @@ public:
   Expression currentState;
   Tree<HistorySubExpression> currentSubTree;
   List<Expression> output;
+  List<List<std::string> > ruleNames;
   Calculator* owner;
   bool initialized;
   bool IncrementReturnFalseIfPastLast();
@@ -2225,7 +2227,7 @@ public:
       crash << "Expression history enumerator has zero owner. " << crash;
     return true;
   }
-  Expression GetExpression(TreeNode<HistorySubExpression>& currentNode);
+  Expression GetExpression(TreeNode<HistorySubExpression>& currentNode, List<std::string>& outputRuleNames);
   void ComputeAll();
 };
 
@@ -2258,33 +2260,48 @@ bool ExpressionHistoryEnumerator::initialize()
   return true;
 }
 
-Expression ExpressionHistoryEnumerator::GetExpression(TreeNode<HistorySubExpression>& currentNode)
+Expression ExpressionHistoryEnumerator::GetExpression(TreeNode<HistorySubExpression>& currentNode, List<std::string>& outputRuleNames)
 { MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::GetExpression");
   Expression result;
+  if (currentNode.theData.lastActiveSubexpression< currentNode.theData.currentE->size() && currentNode.theData.lastActiveSubexpression>=0)
+  { const Expression& currentRuleSequence=(*currentNode.theData.currentE)[currentNode.theData.lastActiveSubexpression];
+    //stOutput << " current sequence: " << currentRuleSequence.ToString() << "<br>";
+    if (currentRuleSequence.size()>3)
+    { std::string ruleName=currentRuleSequence[3].ToString();
+      if (ruleName!="" && ruleName!="Sub-expression simplification")
+        outputRuleNames.AddOnTop(ruleName);
+    }
+  }
+
   if (currentNode.children.size==0)
   { result=*currentNode.theData.currentE;
     return result;
   }
   if (currentNode.children.size==1)
-  { result=this->GetExpression(currentNode.GetChild(0));
+  { result=this->GetExpression(currentNode.GetChild(0), outputRuleNames);
     return result;
   }
+  //stOutput << "<hr>Rule names from: " << currentNode.theData.currentE->ToString()
+  //<< "<br> lastActive sub: " << currentNode.theData.lastActiveSubexpression << "<br>";
   result.reset(*this->owner);
   for (int i=0; i<currentNode.children.size; i++)
-  { Expression currentE=this->GetExpression(currentNode.GetChild(i)  );
-    stOutput << "<br>Adding expression: " << currentE.ToStringFull();
+  { Expression currentE=this->GetExpression(currentNode.GetChild(i), outputRuleNames);
+    //stOutput << "<br>Adding expression: " << currentE.ToStringFull();
     result.AddChildOnTop(currentE);
   }
-  stOutput << "<br>Final expression: " << result.ToStringFull();
+  //stOutput << "<br>Final expression: " << result.ToString();
   return result;
 }
 
 void ExpressionHistoryEnumerator::ComputeAll()
 { MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::ComputeAll");
+  List<std::string> currentRuleNames;
   while (this->IncrementReturnFalseIfPastLast())
-  { this->output.AddOnTop(this->GetExpression(this->currentSubTree.theNodes[0]));
-    stOutput << "<br>DEBUG:<br>" << this->currentSubTree.theNodes[0].ToStringTextFormat(0)
-    ;
+  { currentRuleNames.SetSize(0);
+    this->output.AddOnTop(this->GetExpression(this->currentSubTree.theNodes[0], currentRuleNames));
+    this->ruleNames.AddOnTop(currentRuleNames);
+    //stOutput << "<br>DEBUG:<br>" << this->currentSubTree.theNodes[0].ToStringTextFormat(0)
+    //;
   }
 }
 
@@ -2301,9 +2318,9 @@ bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast(Tree
   const Expression& currentE=*currentNode.theData.currentE;
   HistorySubExpression nextChild;
   while (!didWork)
-  { currentNode.RemoveAllChildren();
-    if (currentNode.theData.lastActiveSubexpression==currentE.size()-1)
+  { if (currentNode.theData.lastActiveSubexpression==currentE.size()-1)
       return false;
+    currentNode.RemoveAllChildren();
     int nextGoodIndex=currentNode.theData.lastActiveSubexpression+1;
     for (;nextGoodIndex<currentE.size(); nextGoodIndex++)
       if (currentE[nextGoodIndex].IsSequenceNElementS() && currentE[nextGoodIndex].size()>2)
@@ -2314,6 +2331,7 @@ bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast(Tree
         nextChild.lastActiveSubexpression=0;
         currentNode.AddChild(nextChild);
         currentNode.theData.lastActiveSubexpression=nextGoodIndex;
+        this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[*currentNode.children.LastObject()]);
         if (currentE[nextGoodIndex][1].IsEqualToMOne())
         { didWork=true;
           break;
@@ -2358,9 +2376,30 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(Calculator& theComma
     theHistoryEnumerator.owner=&theCommands;
     theHistoryEnumerator.ComputeAll();
     out << theHistoryEnumerator.errorStream.str();
+    out << "\\(\\begin{array}{ll|l}";
+    std::string prevEstring="";
+    List<std::string> currentRules;
     for (int j=0; j<theHistoryEnumerator.output.size; j++)
-      out << theHistoryEnumerator.output[j].ToString() << "<hr>";
-    out << "DEBUG: " << theHistoryEnumerator.theHistory.ToString();
+    { std::string currentEstring=theHistoryEnumerator.output[j].ToString();
+      if (currentEstring==prevEstring)
+      { currentRules.AddListOnTop(theHistoryEnumerator.ruleNames[j]);
+        continue;
+      }
+      prevEstring=currentEstring;
+      currentRules.AddListOnTop(theHistoryEnumerator.ruleNames[j]);
+      if (j>0)
+      { if (currentRules.size>0)
+          out << "&\\text{" << currentRules.ToStringCommaDelimited() << "}";
+        currentRules.SetSize(0);
+        out << "\\\\";
+        out << "=";
+      }
+      out << "&" << currentEstring;
+    }
+    if (currentRules.size>0)
+      out << "&\\text{" << currentRules.ToStringCommaDelimited() << "}";
+    out << "\\end{array}\\)";
+    //out << "DEBUG: " << theHistoryEnumerator.theHistory.ToString();
     if (i!=currentStack.size-1)
       out << "<hr>";
   }

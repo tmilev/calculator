@@ -111,7 +111,7 @@ void Calculator::DoLogEvaluationIfNeedBe(Function& inputF)
   this->LastLogEvaluationTime=theGlobalVariables.GetElapsedSeconds();
 }
 
-bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable)
 { MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   //if (theCommands.RecursionDepthExceededHandleRoughly("Evaluating built-in user functions. "))
@@ -124,7 +124,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
   { const List<Function>* theHandlers=theCommands.GetOperationCompositeHandlers(functionNameNode[0].theData);
     if (theHandlers!=0)
       for (int i=0; i<theHandlers->size; i++)
-        if (!((*theHandlers)[i].flagDisabledByUser))
+        if((*theHandlers)[i].ShouldBeApplied(opIndexParentIfAvailable))
           if ((*theHandlers)[i].theFunction(theCommands, input, output))
           { theCommands.DoLogEvaluationIfNeedBe((*theHandlers)[i]);
             return true;
@@ -138,7 +138,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
   for (int i=0; i<theCommands.FunctionHandlers[functionNameNode.theData].size; i++)
     if (!theCommands.FunctionHandlers[functionNameNode.theData][i].flagIsInner)
     { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
-      if (outerFun.flagDisabledByUser)
+      if (!outerFun.ShouldBeApplied(opIndexParentIfAvailable ))
         continue;
       if (outerFun.theFunction(theCommands, input, output))
         if(output!=input)
@@ -152,7 +152,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
         }
     } else
     { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
-      if (innerFun.flagDisabledByUser)
+      if (!innerFun.ShouldBeApplied(opIndexParentIfAvailable))
         continue;
       if (input.children.size>2)
       { //stOutput << "more than 2 children: " << input.Lispify();
@@ -352,12 +352,12 @@ bool Calculator::EvaluateExpression
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
   bool notUsed=false;
-  return theCommands.EvaluateExpression(theCommands, input, output, notUsed);
+  return theCommands.EvaluateExpression(theCommands, input, output, notUsed, -1);
 }
 
 bool Calculator::EvaluateExpression
 (Calculator& theCommands, const Expression& input, Expression& output,
- bool& outputIsNonCacheable)
+ bool& outputIsNonCacheable, int opIndexParentIfAvailable)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
   theCommands.NumCallsEvaluateExpression++;
@@ -507,6 +507,10 @@ bool Calculator::EvaluateExpression
     if (doExpressionHistory)
       historyStackSizeAtStart = theCommands.ExpressionHistoryStack.LastObject().LastObject().size();
     if (!output.IsFrozen())
+    { int indexOp=-1;
+      if (output.size()>0)
+        if (output[0].IsAtom())
+          indexOp=output[0].theData;
       for (int i=0; i<output.size() && !theCommands.flagAbortComputationASAP; i++)
       { if (i>0 && output.StartsWith(theCommands.opEndStatement()))
         { if (theGlobalVariables.flagReportEverything)
@@ -525,7 +529,7 @@ bool Calculator::EvaluateExpression
         bool childIsNonCacheable=false;
         if (doExpressionHistory)
           oldChild.GetElement()=output[i];
-        if (theCommands.EvaluateExpression(theCommands, output[i], transformationE, childIsNonCacheable))
+        if (theCommands.EvaluateExpression(theCommands, output[i], transformationE, childIsNonCacheable, indexOp))
           output.SetChilD(i, transformationE);
         if (doExpressionHistory)
         { if (transformationE!=oldChild.GetElement())
@@ -551,6 +555,7 @@ bool Calculator::EvaluateExpression
             break;
           }
       }
+    }
     if (doExpressionHistory)
     { if (HistoryShouldBeRecorded)
       { theCommands.ExpressionHistoryRuleNames.LastObject().LastObject()="Sub-expression simplification";
@@ -562,7 +567,7 @@ bool Calculator::EvaluateExpression
     if (theCommands.flagAbortComputationASAP)
       break;
     /////-------Built-in evaluation-------
-    if (theCommands.outerStandardFunction(theCommands, output, transformationE))
+    if (theCommands.outerStandardFunction(theCommands, output, transformationE, opIndexParentIfAvailable))
     { ReductionOcurred=true;
       if (theCommands.flagLogEvaluatioN)
       { /* *this << "<br>";

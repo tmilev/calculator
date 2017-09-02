@@ -533,6 +533,7 @@ class Function
   std::string additionalIdentifier;
   int indexOperation;
   int indexAmongOperationHandlers;
+  int indexOperationParentThatBansHandler;
 
   bool flagIsCompositeHandler;
   bool flagIsInner;
@@ -546,6 +547,7 @@ class Function
   std::string ToStringShort()const;
   std::string ToStringSummary()const;
   std::string ToStringFull()const;
+  bool ShouldBeApplied(int parentOpIfAvailable);
   bool operator==(const Function& other)const
   { return this->theArgumentTypes==other.theArgumentTypes &&
     this->theFunction==other.theFunction &&
@@ -561,6 +563,7 @@ class Function
   { this->theFunction=0;
     this->indexAmongOperationHandlers=-1;
     this->indexOperation=-1;
+    this->indexOperationParentThatBansHandler=-1;
     this->owner=0;
     this->flagIsCompositeHandler=false;
     this->flagDisabledByUserDefaultValue=false;
@@ -575,7 +578,8 @@ class Function
    bool inputflagIsInner, bool inputIsVisible=true,
    bool inputIsExperimental=false,
    bool inputflagMayActOnBoundVars=false,
-   bool inputDisabledByUser=false)
+   bool inputDisabledByUser=false,
+   int inputIndexParentThatBansHandler=-1)
   { this->owner=&inputOwner;
     this->indexOperation=inputIndexOperation;
     this->indexAmongOperationHandlers=inputIndexAmongOperationHandlers;
@@ -591,6 +595,7 @@ class Function
     this->flagIsCompositeHandler=false;
     this->flagDisabledByUserDefaultValue=inputDisabledByUser;
     this->flagDisabledByUser=inputDisabledByUser;
+    this->indexOperationParentThatBansHandler=inputIndexParentThatBansHandler;
   }
   inline static unsigned int HashFunction(const Function& input)
   { return input.HashFunction();
@@ -1818,7 +1823,8 @@ public:
   static bool innerTranspose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetElementWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
   static bool EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool outerStandardFunction(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool outerStandardFunction
+  (Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable);
   static bool outerPlus(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output);
   static bool CollectCoefficientsPowersVar
@@ -2035,38 +2041,33 @@ public:
   (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
    const std::string& opExample, bool isInner, bool visible, bool experimental,
    const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier,
-   bool inputDisabledByDefault)
-   ;
-  void AddOperationChildrenWhenOpIsNot
-  (const std::string& theOpName, Expression::FunctionAddress handler,
-   const std::string& opArgumentListIgnoredForTheTimeBeing,
-   const std::string& opDescription,
-   const std::string& opExample, bool isInner, bool visible, bool experimental,
-   const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier,
-   bool inputDisabledByDefault)
+   bool inputDisabledByDefault,
+   const std::string& parentOpThatBansHandler)
    ;
   void AddOperationInnerHandler
   (const std::string& theOpName, Expression::FunctionAddress innerHandler, const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false,
    const std::string& inputAdditionalIdentifier="",
    const std::string& inputCalculatorIdentifier="",
-   bool inputDisabledByDefault=false
+   bool inputDisabledByDefault=false,
+   const std::string& parentOpThatBansHandler=""
   )
   { this->AddOperationHandler
     (theOpName, innerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, true,
-     visible, experimental, inputAdditionalIdentifier, inputCalculatorIdentifier, inputDisabledByDefault);
+     visible, experimental, inputAdditionalIdentifier, inputCalculatorIdentifier, inputDisabledByDefault, parentOpThatBansHandler);
   }
   void AddOperationOuterHandler
   (const std::string& theOpName, Expression::FunctionAddress outerHandler, const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample, bool visible=true, bool experimental=false,
    const std::string& inputAdditionalIdentifier="",
    const std::string& inputCalculatorIdentifier="",
-   bool inputDisabledByDefault=false
+   bool inputDisabledByDefault=false,
+   const std::string& parentOpThatBansHandler=""
    )
   { this->AddOperationHandler
     (theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, false,
      visible, experimental, inputAdditionalIdentifier, inputCalculatorIdentifier,
-     inputDisabledByDefault);
+     inputDisabledByDefault, parentOpThatBansHandler);
   }
   void init();
   void reset();
@@ -2095,7 +2096,7 @@ public:
   ;
   static bool EvaluateExpression
   (Calculator& theCommands, const Expression& input, Expression& output,
-   bool& outputIsCacheable)
+   bool& outputIsCacheable, int opIndexParentIfAvailable)
   ;
   void Evaluate(const std::string& theInput);
   bool ParseAndExtractExpressions

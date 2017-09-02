@@ -4054,7 +4054,7 @@ void Calculator::initPredefinedStandardOperations()
     proportional up to a rational number. \
     Zero summands are removed, unless zero is the only term left. ",
     "1+a-2a_1+1/2+a_1", true, false,
-    "Calculator::outerPlus", "AddTerms");
+    "Calculator::outerPlus", "AddTerms", false, "+");
   this->AddOperationOuterHandler
   ("+", CalculatorFunctionsGeneral::outerCombineFractionsCommutative, "",
    "Combines fractions on condition that all participants commute. \
@@ -4515,7 +4515,7 @@ this->AddOperationInnerHandler
    "x 6^{1/3}; (x 10^{1/2})^{1/3}",
    true, true, false,
    "CalculatorFunctionsGeneral::outerCommuteConstants",
-   "CommuteConstants", false);
+   "CommuteConstants", false, "");
   this->AddOperationHandler
   ("*",
    CalculatorFunctionsGeneral::outerMergeConstantRadicals, "",
@@ -4523,7 +4523,7 @@ this->AddOperationInnerHandler
    "\\sqrt{}2 \\sqrt{}3",
    true, true, false,
    "CalculatorFunctionsGeneral::outerMergeConstantRadicals",
-   "MergeConstantRadicals", false);
+   "MergeConstantRadicals", false, "");
   this->AddOperationOuterHandler
   ("*", Calculator::outerAssociate, "",
    "Associative law: reorders the multiplicative tree in standard form. ",
@@ -4964,7 +4964,7 @@ this->AddOperationInnerHandler
    "Replaces p^0 by 1 if p is non-zero, and by an error message if p is zero.",
    "A=x^0; x=0; A; B=x^0; 0^0; ",
    true, true, false, "CalculatorFunctionsGeneral::innerPowerAnyToZero",
-   "PowerAnytoZero", false);
+   "PowerAnytoZero", false, "");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger,
     this->opPoly(), this->opRational(),
@@ -5063,7 +5063,7 @@ this->AddOperationInnerHandler
    "A=\\int_a^b; Lispify(A); PlotExpressionTree(A); ",
    true, true, false,
    "CalculatorFunctionsGeneral::innerIntegralUpperBound",
-   "OperatorBoundsSuperscript", false);
+   "OperatorBoundsSuperscript", false, "");
   this->AddOperationInnerHandler
   ("_", CalculatorFunctionsGeneral::innerOperatorBounds, "",
    "Takes care of the integral superscript notation \\int^a ",

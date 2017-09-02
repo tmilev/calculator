@@ -2172,7 +2172,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableNested(Calculator& theComma
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
   bool notUsed=false;
   theCommands.ExpressionHistoryStackAdd();
-  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed);
+  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed, -1);
   std::stringstream out;
   ListReferences<Expression>& currentStack=theCommands.ExpressionHistoryStack.LastObject();
   for (int i=0; i<currentStack.size; i++)
@@ -2365,7 +2365,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(Calculator& theComma
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
   bool notUsed=false;
   theCommands.ExpressionHistoryStackAdd();
-  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed);
+  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed,-1);
   std::stringstream out;
   ListReferences<Expression>& currentStack=theCommands.ExpressionHistoryStack.LastObject();
   for (int i=0; i<currentStack.size; i++)

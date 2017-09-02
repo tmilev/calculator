@@ -2144,8 +2144,13 @@ void Calculator::AddOperationHandler
  bool experimental,
  const std::string& inputAdditionalIdentifier,
  const std::string& inputCalculatorIdentifier,
- bool inputDisabledByDefault)
+ bool inputDisabledByDefault,
+ const std::string& parentOpThatBansHandler
+ )
 { int indexOp=this->theAtoms.GetIndex(theOpName);
+  int indexParentOpThatBansHandler=-1;
+  if (parentOpThatBansHandler!="")
+    indexParentOpThatBansHandler=this->theAtoms.GetIndexIMustContainTheObject(parentOpThatBansHandler);
   if (indexOp==-1)
   { this->theAtoms.AddOnTop(theOpName);
     indexOp=this->theAtoms.size-1;
@@ -2158,9 +2163,10 @@ void Calculator::AddOperationHandler
   (*this, indexOp, this->FunctionHandlers[indexOp].size, handler,
    0, opDescription, opExample,
    isInner, visible, experimental, false,
-   inputDisabledByDefault);
+   inputDisabledByDefault, indexParentOpThatBansHandler);
   theFun.additionalIdentifier=inputAdditionalIdentifier;
   theFun.calculatorIdentifier=inputCalculatorIdentifier;
+
   if (theOpName=="*" || theOpName=="+" || theOpName=="/" || theOpName=="\\otimes" || theOpName=="^")
     this->FunctionHandlers[indexOp].Reserve(100);
   else
@@ -2263,6 +2269,14 @@ std::string Function::ToStringSummary()const
   if (this->additionalIdentifier!="")
     out << "Handler: " << this->additionalIdentifier << ". ";
   return out.str();
+}
+
+bool Function::ShouldBeApplied(int parentOpIfAvailable)
+{ if (this->flagDisabledByUser)
+    return false;
+  if (parentOpIfAvailable<0 || this->indexOperationParentThatBansHandler<0)
+    return true;
+  return this->indexOperationParentThatBansHandler!=parentOpIfAvailable;
 }
 
 std::string Function::ToStringFull()const

@@ -970,6 +970,7 @@ public:
   int MaxRuleStacksCached;
   int NumErrors;
   int RuleStackCacheIndex;
+  int NumCallsEvaluateExpression;
   ///////////////////////////////////////////////////////////////////////////
   bool flagAbortComputationASAP;
   bool flagTimeLimitErrorDetected;
@@ -2032,6 +2033,14 @@ public:
    const std::string& inputAdditionalIdentifier="", const std::string& inputCalculatorIdentifier="");
   void AddOperationHandler
   (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
+   const std::string& opExample, bool isInner, bool visible, bool experimental,
+   const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier,
+   bool inputDisabledByDefault)
+   ;
+  void AddOperationChildrenWhenOpIsNot
+  (const std::string& theOpName, Expression::FunctionAddress handler,
+   const std::string& opArgumentListIgnoredForTheTimeBeing,
+   const std::string& opDescription,
    const std::string& opExample, bool isInner, bool visible, bool experimental,
    const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier,
    bool inputDisabledByDefault)

@@ -360,6 +360,7 @@ bool Calculator::EvaluateExpression
  bool& outputIsNonCacheable)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
+  theCommands.NumCallsEvaluateExpression++;
   //////////////////////////////
   //  stOutput << "DEBUG: temporary check comment me out. Evaluating:"
   //  << input.ToString()

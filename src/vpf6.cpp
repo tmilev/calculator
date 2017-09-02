@@ -2372,7 +2372,8 @@ std::string Calculator::ToStringPerformance()
   << " (" << (elapsedSecs-this->StartTimeEvaluationInSecondS)*1000
   << " ms), total: " << elapsedSecs << " ("
   << ((elapsedSecs)*1000) << " ms).";
-  out << "<br>";
+  out << "<br>Total expressions created: " << this->theExpressionContainer.size;
+  out << "<br>Expression evaluations: " << this->NumCallsEvaluateExpression;
   std::stringstream moreDetails;
   moreDetails << "Max computation time: "
   << (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)

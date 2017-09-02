@@ -2682,7 +2682,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
     out
 //    << "DEBUG: reasonforlogin<br>" << theGlobalVariables.CookiesToSetUsingHeaders.ToStringHtml() << "<br>"
 
-    << "<br><div style=\"text-align:center\">"
+    << "<div style=\"text-align:center\">"
     << reasonForLogin
     << "</div>";
   if (theGlobalVariables.GetWebInput("error")!="")
@@ -2690,6 +2690,21 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
     << HtmlRoutines::ConvertStringToHtmlString
     (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), false), true)
     << "</div>";
+  if (theGlobalVariables.userCalculatorRequestType=="template" ||
+      theGlobalVariables.userCalculatorRequestType=="exercise")
+  { std::string topicList=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
+    std::string courseHome=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
+    out << "<div style=\"text-align:center\">"
+    << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?"
+    << "request=" << theGlobalVariables.userCalculatorRequestType << "NoLogin"
+    << "&"
+    << "topicList=" << topicList << "&"
+    << "courseHome=" << courseHome << "&"
+    << "\" class=\"courseLink\">Proceed without login</a><br>"
+    << "<b style=\"color:red\">Your scores will not be recorded.</b>"
+    << "<br><br><b>OR</b><br></div>";
+  }
   out << "<br><div class=\"divLogin\"><form class=\"formLogin\" name=\"login\" id=\"login\">";
   out << "<table class=\"tableLogin\">";
   out
@@ -4373,6 +4388,7 @@ WebServer::WebServer()
   this->requestStartsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("selectCourseFromHtml");
+  this->requestStartsNotNeedingLogin.AddOnTop("slidesFromSource");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.6-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("MathJax-2.6-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery.min.js");

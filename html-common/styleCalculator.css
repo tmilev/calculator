@@ -532,6 +532,22 @@ a.linkSignUp{
 a.linkSignUp:hover{ 
   background-color: LawnGreen;
 }
+a.courseLink{
+  display: inline-block;
+  margin:  10px;
+  padding: 3px;
+  background-color: #dfffdf;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  font-weight: bold;
+  font-size: 2em;
+  border-radius: 7px;
+  transition: 0.6s;
+  text-decoration: none;
+}
+a.courseLink:hover{
+  background-color: #bfffbf;
+}
 div.divLogin{
 text-align: center;
 }

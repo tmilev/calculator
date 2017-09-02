@@ -586,7 +586,11 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   MathRoutines::StringTrimToLength(this->targetPDFNoPath, 230);
   this->targetPDFNoPath+=".pdf";
   this->targetPDFFileNameWithPathVirtual=this->targetPDFVirtualPath+this->targetPDFNoPath;
-  this->targetPDFLatexPath="../../" + this->targetPDFVirtualPath;
+  this->targetPDFLatexPath = "../../" + this->targetPDFVirtualPath;
+  if (!MathRoutines::StringBeginsWith(this->targetPDFVirtualPath, "slides-videos/modules/", &tempString))
+    this->targetVideoLatexPath = "";
+  else
+    this->targetVideoLatexPath = "../../slides-videos/modules-video/" + tempString;
   this->targetPDFFileNameWithLatexPath=this->targetPDFLatexPath+this->targetPDFNoPath;
   return true;
 }
@@ -703,10 +707,18 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   theGlobalVariables.CallSystemNoOutput(currentSysCommand);
   if (commentsGeneral!=0)
     *commentsGeneral << "done!<br>";
+
   currentSysCommand = "mkdir -p "+ this->targetPDFLatexPath;
   std::string commandResult=  theGlobalVariables.CallSystemWithOutput(currentSysCommand);
   if (commentsGeneral!=0)
     *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
+  if (this->targetVideoLatexPath!="")
+  { currentSysCommand = "mkdir -p " + this->targetVideoLatexPath;
+    std::string commandResult = theGlobalVariables.CallSystemWithOutput(currentSysCommand);
+    if (commentsGeneral!=0)
+      *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
+    //return false;
+  }
   currentSysCommand = "mv " + this->workingFileNameNoPathPDF + " " + this->targetPDFFileNameWithLatexPath;
   commandResult = theGlobalVariables.CallSystemWithOutput(currentSysCommand);
   if (commentsGeneral!=0)

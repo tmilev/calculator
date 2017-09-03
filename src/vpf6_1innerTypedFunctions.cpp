@@ -1544,6 +1544,8 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded");
   if (!input.StartsWith(theCommands.opLieBracket(), 3))
     return false;
+  if (input[1].IsEqualToZero() || input[2].IsEqualToZero())
+    return output.AssignValue(0, theCommands);
   if (input[2]>input[1])
     return false;
   if (input[1]==input[2])

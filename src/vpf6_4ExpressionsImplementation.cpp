@@ -2826,8 +2826,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       }
       if (mustHaveTimes)
         out << "\\cdot ";
-      else
-        out << " ";
+//      else
+//        out << " ";
       if (secondNeedsBrackets)
         out << "\\left(" << secondE << "\\right)";
       else
@@ -2863,7 +2863,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     else
       out << "\\sqrt[" << (*this)[1].ToString(theFormat)
       << "]{" << (*this)[2].ToString(theFormat) << "}";
-  } else if (this->StartsWith(this->owner->opFactorial(),2))
+  } else if (this->StartsWith(this->owner->opFactorial(), 2))
   { if ((*this)[1].NeedsParenthesisForBaseOfExponent())
       out << "\\left(" << (*this)[1].ToString(theFormat) << "\\right) !";
     else
@@ -2957,7 +2957,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if (allowNewLine && !useFrac && leftString.size()>(unsigned)lineBreak)
       out << "\\\\\n";
     std::string rightString= right.NeedsParenthesisForAddition() ?
-    ("\\left("+right.ToString(theFormat)+"\\right)") : right.ToString(theFormat);
+    ("\\left(" + right.ToString(theFormat) + "\\right)") : right.ToString(theFormat);
     if (rightString.size()>0)
       if (rightString[0]!='-')
         out << "\\oplus ";

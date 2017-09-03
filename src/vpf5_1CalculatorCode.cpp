@@ -2210,7 +2210,10 @@ public:
   Expression currentState;
   Tree<HistorySubExpression> currentSubTree;
   List<Expression> output;
-  List<List<std::string> > ruleNames;
+  List<List<std::string> > rulesNames;
+  List<List<std::string> > rulesDisplayNames;
+  HashedList<std::string, MathRoutines::hashString> rulesToBeIgnored;
+  MapLisT<std::string, std::string, MathRoutines::hashString> rulesDisplayNamesMap;
   Calculator* owner;
   bool initialized;
   bool IncrementReturnFalseIfPastLast();
@@ -2227,6 +2230,7 @@ public:
       crash << "Expression history enumerator has zero owner. " << crash;
     return true;
   }
+  std::string ToStringExpressionHistoryMerged();
   Expression GetExpression(TreeNode<HistorySubExpression>& currentNode, List<std::string>& outputRuleNames);
   void ComputeAll();
 };
@@ -2235,6 +2239,14 @@ bool ExpressionHistoryEnumerator::initialize()
 { MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::initialize");
   if (this->initialized)
     return true;
+  this->rulesToBeIgnored.Clear();
+  this->rulesDisplayNamesMap.Clear();
+  this->rulesDisplayNamesMap.SetKeyValue("Minus","");
+  this->rulesDisplayNamesMap.SetKeyValue("DistributeMultiplication","");
+  this->rulesDisplayNamesMap.SetKeyValue("MultiplyRationals","");
+  this->rulesDisplayNamesMap.SetKeyValue("ConstantExtraction","");
+  this->rulesDisplayNamesMap.SetKeyValue("MultiplyByOne","");
+  this->rulesDisplayNamesMap.SetKeyValue("AddTerms","");
   this->initialized=true;
   this->CheckInitialization();
   if (!this->theHistory.StartsWith(this->owner->opExpressionHistory()) || this->theHistory.size()<2)
@@ -2299,7 +2311,16 @@ void ExpressionHistoryEnumerator::ComputeAll()
   while (this->IncrementReturnFalseIfPastLast())
   { currentRuleNames.SetSize(0);
     this->output.AddOnTop(this->GetExpression(this->currentSubTree.theNodes[0], currentRuleNames));
-    this->ruleNames.AddOnTop(currentRuleNames);
+    this->rulesNames.AddOnTop(currentRuleNames);
+    this->rulesDisplayNames.SetSize(this->rulesDisplayNames.size+1);
+    this->rulesDisplayNames.LastObject()->SetSize(0);
+    for (int i=0; i<currentRuleNames.size; i++)
+    { std::string currentRule= currentRuleNames[i];
+      if (this->rulesDisplayNamesMap.Contains(currentRuleNames[i]))
+        currentRule=this->rulesDisplayNamesMap.GetValueCreateIfNotPresent(currentRuleNames[i]);
+      if (currentRule!="")
+        this->rulesDisplayNames.LastObject()->AddOnTop(currentRule);
+    }
     //stOutput << "<br>DEBUG:<br>" << this->currentSubTree.theNodes[0].ToStringTextFormat(0)
     //;
   }
@@ -2357,6 +2378,36 @@ bool ExpressionHistoryEnumerator::IncrementReturnFalseIfPastLast()
   return result;
 }
 
+std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged()
+{ std::stringstream out;
+  out << this->errorStream.str();
+  out << "\\(\\begin{array}{ll|l}";
+  std::string prevEstring="";
+  List<std::string> currentRules;
+  for (int j=0; j<this->output.size; j++)
+  { std::string currentEstring=this->output[j].ToString();
+
+    if (currentEstring==prevEstring)
+    { currentRules.AddListOnTop(this->rulesDisplayNames[j]);
+      continue;
+    }
+    prevEstring=currentEstring;
+    currentRules.AddListOnTop(this->rulesDisplayNames[j]);
+    if (j>0)
+    { if (currentRules.size>0)
+        out << "&\\text{" << currentRules.ToStringCommaDelimited() << "}";
+      currentRules.SetSize(0);
+      out << "\\\\";
+      out << "=";
+    }
+    out << "&\n" << currentEstring;
+  }
+  if (currentRules.size>0)
+    out << "&\\text{" << currentRules.ToStringCommaDelimited() << "}";
+  out << "\\end{array}\\)";
+  return out.str();
+}
+
 bool Calculator::innerLogEvaluationStepsHumanReadableMerged(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadableMerged");
   Expression inputCopy=input;
@@ -2375,30 +2426,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(Calculator& theComma
     theHistoryEnumerator.theHistory=currentStack[i];
     theHistoryEnumerator.owner=&theCommands;
     theHistoryEnumerator.ComputeAll();
-    out << theHistoryEnumerator.errorStream.str();
-    out << "\\(\\begin{array}{ll|l}";
-    std::string prevEstring="";
-    List<std::string> currentRules;
-    for (int j=0; j<theHistoryEnumerator.output.size; j++)
-    { std::string currentEstring=theHistoryEnumerator.output[j].ToString();
-      if (currentEstring==prevEstring)
-      { currentRules.AddListOnTop(theHistoryEnumerator.ruleNames[j]);
-        continue;
-      }
-      prevEstring=currentEstring;
-      currentRules.AddListOnTop(theHistoryEnumerator.ruleNames[j]);
-      if (j>0)
-      { if (currentRules.size>0)
-          out << "&\\text{" << currentRules.ToStringCommaDelimited() << "}";
-        currentRules.SetSize(0);
-        out << "\\\\";
-        out << "=";
-      }
-      out << "&" << currentEstring;
-    }
-    if (currentRules.size>0)
-      out << "&\\text{" << currentRules.ToStringCommaDelimited() << "}";
-    out << "\\end{array}\\)";
+    out << theHistoryEnumerator.ToStringExpressionHistoryMerged();
     //out << "DEBUG: " << theHistoryEnumerator.theHistory.ToString();
     if (i!=currentStack.size-1)
       out << "<hr>";

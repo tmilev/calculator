@@ -2381,7 +2381,8 @@ std::string Calculator::ToStringPerformance()
 { MacroRegisterFunctionWithName("Calculator::ToStringPerformance");
   std::stringstream out;
   double elapsedSecs=theGlobalVariables.GetElapsedSeconds();
-  out << "Double-click formulas to get their LaTeX. ";
+  out << "<b>Double-click formulas to get their LaTeX.</b>"
+  << "<br>Double-click back to hide the LaTeX. ";
   out << "<br>Time: computation: " << (elapsedSecs-this->StartTimeEvaluationInSecondS)
   << " (" << (elapsedSecs-this->StartTimeEvaluationInSecondS)*1000
   << " ms), total: " << elapsedSecs << " ("

@@ -536,7 +536,7 @@ a.courseLink{
   display: inline-block;
   margin:  10px;
   padding: 3px;
-  background-color: #dfffdf;
+  background-color: #ccffcc;
   -moz-border-radius: 7px;
   -webkit-border-radius: 7px;
   font-weight: bold;
@@ -546,7 +546,7 @@ a.courseLink{
   text-decoration: none;
 }
 a.courseLink:hover{
-  background-color: #bfffbf;
+  background-color: LawnGreen;
 }
 div.divLogin{
 text-align: center;

@@ -65,8 +65,12 @@ public:
   static bool innerMultiplyRatOrPolyByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyWeylGroupEltByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerLieBracketExtractConstant(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLieBracketDistribute(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLieBracketRatOrUEWithRatOrUE(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLieBracketSwapTermsIfNeeded(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLieBracketJacobiIdentityIfNeeded(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerDivideRatByRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDivideDoubleByDouble(Calculator& theCommands, const Expression& input, Expression& output);
@@ -103,7 +107,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theComman
   if (input.size()!=3)
     return false;
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged))
+  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments))
     return false;
 //  stOutput << "Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
   theType result=inputContextsMerged[1].GetValue<theType>();
@@ -117,7 +121,7 @@ bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, c
   if (input.size()!=3)
     return false;
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged))
+  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments))
     return false;
   theType result=inputContextsMerged[1].GetValue<theType>();
   result+=inputContextsMerged[2].GetValue<theType>();
@@ -130,7 +134,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands
   if (input.size()!=3)
     return false;
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged))
+  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments))
     return false;
   if (inputContextsMerged[2].GetValue<theType>().IsEqualToZero())
     return output.MakeError("Division by zero. ", theCommands, true);

@@ -332,7 +332,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(Calculator& t
     return false;
 //  stOutput << "<br>Attempting to tensor " << input[1].ToString() << " and " << input[2].ToString();
   Expression inputConverted;
-  if (!input.MergeContextsMyArumentsAndConvertThem<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(inputConverted))
+  if (!input.MergeContextsMyArumentsAndConvertThem<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(inputConverted, &theCommands.Comments))
     return false;
   ElementTensorsGeneralizedVermas<RationalFunctionOld>
   resultTensor=inputConverted[1].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
@@ -354,7 +354,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(Calculator
     return false;
   }
   Expression inputConverted;
-  if (!input.MergeContextsMyAruments(inputConverted))
+  if (!input.MergeContextsMyAruments(inputConverted, &theCommands.Comments))
     return false;
   Weight<Polynomial<Rational> > theWeight;
   Rational cfRat;
@@ -379,7 +379,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calcula
     return false;
   }
   Expression inputConverted;
-  if (!input.MergeContextsMyAruments(inputConverted))
+  if (!input.MergeContextsMyAruments(inputConverted, &theCommands.Comments))
     return false;
   Weight<Polynomial<Rational> > theWeight;
   if (!inputConverted[2].IsOfType<Weight<Polynomial<Rational> > >(&theWeight))
@@ -404,7 +404,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCo
     return false;
   }
   Expression inputConverted;
-  if (!input.MergeContextsMyAruments(inputConverted))
+  if (!input.MergeContextsMyAruments(inputConverted, &theCommands.Comments))
     return false;
   if (!inputConverted[2].IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
     return false;
@@ -454,7 +454,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(C
     return false;
   Expression inputContextsMerged;
 //  stOutput << "<hr>Merging contexts: " << input.ToString();
-  if (!input.MergeContextsMyArumentsAndConvertThem<ElementWeylAlgebra<Rational> >(inputContextsMerged))
+  if (!input.MergeContextsMyArumentsAndConvertThem<ElementWeylAlgebra<Rational> >(inputContextsMerged, &theCommands.Comments))
     return false;
 //  stOutput << "<hr>Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
   if (inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation() ||
@@ -513,7 +513,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands,
   if (input.size()!=3)
     return false;
   Expression inputContextsMerged;
-  if (!input.MergeContextsMyArumentsAndConvertThem<ElementUniversalEnveloping<RationalFunctionOld> >(inputContextsMerged))
+  if (!input.MergeContextsMyArumentsAndConvertThem<ElementUniversalEnveloping<RationalFunctionOld> >(inputContextsMerged, &theCommands.Comments))
     return false;
   ElementUniversalEnveloping<RationalFunctionOld> result=inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   result*=inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
@@ -926,7 +926,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(Calculator
   if (!input.IsListNElements(3))
     return false;
   Expression inputConverted;
-  if (!input.MergeContextsMyAruments(inputConverted))
+  if (!input.MergeContextsMyAruments(inputConverted, &theCommands.Comments))
     return false;
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
   Expression copyExponent=inputConverted[2];
@@ -1458,12 +1458,49 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTe
   return output.AssignValue(result, theCommands);
 }
 
+bool CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant");
+  if (!input.StartsWith(theCommands.opLieBracket(), 3))
+    return false;
+  Rational theCF=1;
+  Rational tempRat;
+  Expression leftE=input[1], rightE=input[2];
+  bool found=false;
+  if (input[1].StartsWith(theCommands.opTimes(), 3))
+    if(input[1][1].IsOfType(&tempRat))
+    { found=true;
+      theCF*=tempRat;
+      leftE=input[1][2];
+    }
+  if (input[2].StartsWith(theCommands.opTimes(), 3))
+    if(input[2][1].IsOfType(&tempRat))
+    { found=true;
+      theCF*=tempRat;
+      rightE=input[2][2];
+    }
+  if (!found)
+    return false;
+  Expression theBracket;
+  theBracket.MakeXOX(theCommands, theCommands.opLieBracket(), leftE, rightE);
+  output.AssignValue(theCF, theCommands);
+  output*=theBracket;
+  return true;
+}
+
+bool CalculatorFunctionsBinaryOps::innerLieBracketDistribute
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketDistribute");
+  return theCommands.outerDistribute
+  (theCommands, input, output, theCommands.opPlus(),theCommands.opLieBracket());
+}
+
 bool CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE");
   if (!input.IsListNElements(3))
     return false;
   Expression inputConverted;
-  if (!input.MergeContextsMyAruments(inputConverted))
+  if (!input.MergeContextsMyAruments(inputConverted, 0))
     return false;
   const Expression& leftE=inputConverted[1];
   const Expression& rightE=inputConverted[2];
@@ -1480,12 +1517,35 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE(Calculator&
   return false;
 }
 
+bool CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded");
+  if (!input.StartsWith(theCommands.opLieBracket(), 3))
+    return false;
+  return false;
+}
+
+bool CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded");
+  if (!input.StartsWith(theCommands.opLieBracket(), 3))
+    return false;
+  if (input[2]>input[1])
+    return false;
+  if (input[1]==input[2])
+    return output.AssignValue(0, theCommands);
+  Expression theBracket;
+  theBracket.MakeXOX(theCommands, theCommands.opLieBracket(), input[2], input[1]);
+  output=theCommands.EMOne()*theBracket;
+  return true;
+}
+
 bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA");
   if (!input.IsListNElements(3))
     return false;
   Expression inputConverted;
-  if (!input.MergeContextsMyAruments(inputConverted))
+  if (!input.MergeContextsMyAruments(inputConverted, 0))
     return false;
   const Expression& leftE=inputConverted[1];
   const Expression& rightE=inputConverted[2];

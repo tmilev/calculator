@@ -1511,7 +1511,7 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft
     theMultiplicativeOp=theCommands.opTimes();
   if (!input.StartsWith(theMultiplicativeOp, 3))
     return false;
-  if (!input[1].StartsWith(theAdditiveOp,3))
+  if (!input[1].StartsWith(theAdditiveOp, 3))
     return false;
   if (constantsOnly)
     if (!input[2].IsConstantNumber())
@@ -2778,7 +2778,7 @@ bool Expression::IsMeltable(int* numResultingChildren)const
   return true;
 }
 
-bool Expression::MergeContextsMyAruments(Expression& output)const
+bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* commentsOnFailure)const
 { MacroRegisterFunctionWithName("Expression::MergeContextsMyAruments");
 //  stOutput << "<hr>Merging contexts of expression " << this->ToString();
   this->CheckInitialization();
@@ -2787,8 +2787,9 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
 //  stOutput << " ... continuing to merge..." ;
   for (int i=1; i< this->size(); i++)
     if (!(*this)[i].IsBuiltInTypE())
-    { *this->owner << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
-      << (*this)[i].ToString() << "is not of built-in type";
+    { if (commentsOnFailure!=0)
+        *commentsOnFailure << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
+        << (*this)[i].ToString() << "is not of built-in type";
       return false;
     }
   Expression commonContext=(*this)[1].GetContext();
@@ -2808,7 +2809,8 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
   }
   for (int i=2; i<this->size(); i++)
   { if (!(*this)[i].IsBuiltInTypE())
-    { *this->owner << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
+    { if (commentsOnFailure!=0)
+        *commentsOnFailure << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
       return false;
     }
 //    stOutput << "<br>Merging context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();

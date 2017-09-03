@@ -5125,16 +5125,49 @@ this->AddOperationInnerHandler
    "CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor",
    "TensorElementGeneralizedVermaModuleByElementGeneralizedVermaModule");
   this->AddOperationInnerHandler
+  ("[]", CalculatorFunctionsBinaryOps::innerLieBracketDistribute, "",
+   "Implementation of the rules [{{a}}+{{b}},{{c}}]=[a,c]+[b,c] and  [{{c}},{{a}}+{{b}}]=[c,a]+[c,b]",
+   " ",
+   true,false,
+   "CalculatorFunctionsBinaryOps::innerLieBracketDistribute",
+   "LieBracketDistribute");
+
+  this->AddOperationInnerHandler
+  ("[]", CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant, "",
+   "Extracts constants from Lie brackets. ",
+   "[2a,3b] ",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant",
+   "LieBracketConstants");
+  this->AddOperationInnerHandler
   ("[]", CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA, "",
    "Lie bracket of elements of Weyl algebras=differential operators with polynomial coefficients. ",
    "\\partial_{{i}}=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}=Polynomial{}x_i; \n[\\partial_1, x_1]; ",
-   true);
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA",
+   "LieBracketWeylAlgebraElements");
   this->AddOperationInnerHandler
   ("[]", CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE, "",
    "Lie bracket of elements of semisimple Lie algebra. ",
    "X=A_1;\ng_{{i}}=GetChevalleyGenerator{}(X,i);\
     \nh_{{i}}=GetCartanGenerator{}(X,i);\n[g_1,g_{-1}] ",
-   true);
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE",
+   "LieBracketSemisimpleLieAlgebras");
+  this->AddOperationInnerHandler
+  ("[]", CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded, "",
+   "Swaps terms in Lie brackets if needed. ",
+   "[b,a] ",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded",
+   "LieBracketSwapTermsIfNeeded");
+  this->AddOperationInnerHandler
+  ("[]", CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded, "",
+   "Extracts constants from Lie brackets. ",
+   "[2a,3b] ",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant",
+   "LieBracketJacobiIfNeeded");
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", CalculatorFunctionsWeylGroup::innerTensorWeylReps,

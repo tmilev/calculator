@@ -324,9 +324,9 @@ private:
   bool HasNonEmptyContext()const;
   Expression GetContext()const;
   static bool MergeContexts(Expression& leftE, Expression& rightE);
-  bool MergeContextsMyAruments(Expression& output)const;
+  bool MergeContextsMyAruments(Expression& output, std::stringstream* commentsOnFailure)const;
   template <class theType>
-  bool MergeContextsMyArumentsAndConvertThem(Expression& output)const;
+  bool MergeContextsMyArumentsAndConvertThem(Expression& output, std::stringstream* commentsOnFailure)const;
 
   bool ContainsAsSubExpressionNoBuiltInTypes
   (const Expression& input)const;
@@ -2313,12 +2313,12 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner)
 }
 
 template <class theType>
-bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
+bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output, std::stringstream* commentsOnFailure)const
 { MacroRegisterFunctionWithName("Expression::MergeContextsMyArumentsAndConvertThem");
 //  stOutput << "<hr>Merging context arguments of " << this->ToString();
   this->CheckInitialization();
   Expression mergedContexts;
-  if (!this->MergeContextsMyAruments(mergedContexts))
+  if (!this->MergeContextsMyAruments(mergedContexts, commentsOnFailure))
     return false;
 //  stOutput << "<br> continuing to merge " << mergedContexts.ToString();
   output.reset(*this->owner, this->children.size);
@@ -2326,7 +2326,9 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
   Expression convertedE;
   for (int i=1; i<mergedContexts.children.size; i++)
   { if (!mergedContexts[i].ConvertToType<theType>(convertedE))
-    { *this->owner << "<hr>Failed to convert " << mergedContexts[i].ToString() << " to the desired type. ";
+    { if (commentsOnFailure!=0)
+        *commentsOnFailure << "<hr>Failed to convert "
+        << mergedContexts[i].ToString() << " to the desired type. ";
       return false;
     }
     output.AddChildOnTop(convertedE);

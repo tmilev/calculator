@@ -1522,7 +1522,21 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded");
   if (!input.StartsWith(theCommands.opLieBracket(), 3))
     return false;
-  return false;
+  if (!input[2].StartsWith(theCommands.opLieBracket()))
+    return false;
+  bool doContinue=(input[1]>input[2][1] && input[1]>input[2][2]);
+  if (!doContinue)
+    return false;
+  Expression leftE, rightE;
+  Expression lieBracket;
+  lieBracket.MakeXOX(theCommands, theCommands.opLieBracket(), input[2][2],input[1]);
+  leftE.MakeXOX(theCommands, theCommands.opLieBracket(), input[2][1], lieBracket);
+  lieBracket.MakeXOX(theCommands, theCommands.opLieBracket(), input[1],input[2][1]);
+  rightE.MakeXOX(theCommands, theCommands.opLieBracket(), input[2][2], lieBracket);
+  leftE=theCommands.EMOne()*leftE;
+  rightE=theCommands.EMOne()*rightE;
+  output=leftE+rightE;
+  return true;
 }
 
 bool CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded

@@ -1358,7 +1358,7 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
     { output.MakeDegreeOne(1, 0, 1, -theArgument[0]);
       //stOutput << "<hr>Found a divisor, and it is: " << output.ToString();
       *this/=output;
-      //stOutput << "<br>divident: " << this->ToString();
+      //stOutput << "<br>dividend: " << this->ToString();
       return true;
     }
     //stOutput << "<br>value at " << AllPointsOfEvaluation[i].ToString() << " = " << theValuesAtPoints[i].ToString();

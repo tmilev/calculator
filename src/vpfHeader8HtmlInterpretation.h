@@ -72,7 +72,14 @@ public:
   TopicElement()
   { this->reset(0);
   }
-  static void GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output, CalculatorHTML& owner);
+  static void GetTopicList
+  (const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output,
+   CalculatorHTML& owner
+   );
+  static bool LoadTopicBundle
+  (const std::string& inputFileName, MapLisT<std::string, List<std::string>, MathRoutines::hashString>& output,
+   CalculatorHTML& owner, std::stringstream& errorStream
+   );
   static void AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output);
 };
 
@@ -118,6 +125,7 @@ public:
   static std::string stringScoredQuizzes;
   static std::string stringPracticE;
   static std::string stringProblemLink;
+  List<std::string> loadedTopicBundles;
   List<std::string> slidesSourcesHeaders;
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
@@ -132,6 +140,7 @@ public:
 
   static const std::string BugsGenericMessage;
   HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
+  HashedList<std::string, MathRoutines::hashString> calculatorTopicBundles;
   List<std::string> calculatorTopicElementNames;
   List<std::string> calculatorClasses;
   List<std::string> calculatorClassesAnswerFields;
@@ -238,6 +247,7 @@ public:
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
   void InterpretTopicList(SyntacticElementHTML& inputOutput);
   void InterpretTableOfContents(SyntacticElementHTML& inputOutput);
+  std::string GetEditPagePanel();
   void InterpretEditPagePanel(SyntacticElementHTML& inputOutput);
   void InterpretProblemNavigationBar(SyntacticElementHTML& inputOutput);
   void InterpretCalculatorNavigationBar(SyntacticElementHTML& inputOutput);

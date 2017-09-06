@@ -2240,6 +2240,7 @@ bool ExpressionHistoryEnumerator::initialize()
   if (this->initialized)
     return true;
   this->rulesToBeIgnored.Clear();
+  this->rulesToBeIgnored.AddOnTop("CommuteIfUnivariate");
   this->rulesDisplayNamesMap.Clear();
   this->rulesDisplayNamesMap.SetKeyValue("Minus","");
   this->rulesDisplayNamesMap.SetKeyValue("DistributeMultiplication","");
@@ -2247,6 +2248,7 @@ bool ExpressionHistoryEnumerator::initialize()
   this->rulesDisplayNamesMap.SetKeyValue("ConstantExtraction","");
   this->rulesDisplayNamesMap.SetKeyValue("MultiplyByOne","");
   this->rulesDisplayNamesMap.SetKeyValue("AddTerms","");
+  this->rulesDisplayNamesMap.SetKeyValue("AssociativeRule","");
   this->initialized=true;
   this->CheckInitialization();
   if (!this->theHistory.StartsWith(this->owner->opExpressionHistory()) || this->theHistory.size()<2)
@@ -2326,7 +2328,8 @@ void ExpressionHistoryEnumerator::ComputeAll()
   }
 }
 
-bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast(TreeNode<HistorySubExpression>& currentNode)
+bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast
+(TreeNode<HistorySubExpression>& currentNode)
 { MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast");
   bool didWork=false;
   for (int i=0; i<currentNode.children.size; i++)
@@ -2338,6 +2341,7 @@ bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast(Tree
     return false;
   const Expression& currentE=*currentNode.theData.currentE;
   HistorySubExpression nextChild;
+  std::string currentRule;
   while (!didWork)
   { if (currentNode.theData.lastActiveSubexpression==currentE.size()-1)
       return false;
@@ -2348,6 +2352,10 @@ bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast(Tree
       { if (currentE[nextGoodIndex][1].IsEqualToMOne())
           if (currentNode.children.size>0)
             break;
+        if (currentE[nextGoodIndex].size()>3)
+          if (currentE[nextGoodIndex][3].IsOfType(&currentRule))
+            if (this->rulesToBeIgnored.Contains(currentRule))
+              continue;
         nextChild.currentE=&currentE[nextGoodIndex][2];
         nextChild.lastActiveSubexpression=0;
         currentNode.AddChild(nextChild);
@@ -2403,7 +2411,7 @@ std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged()
     out << "&\n" << currentEstring;
   }
   if (currentRules.size>0)
-    out << "&\\text{" << currentRules.ToStringCommaDelimited() << "}";
+    out << "&\\text{apply: " << currentRules.ToStringCommaDelimited() << "}";
   out << "\\end{array}\\)";
   return out.str();
 }

@@ -650,14 +650,14 @@ std::string HtmlInterpretation::GetBrowseProblems()
 
 std::string HtmlInterpretation::GetEditPageHTML()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetEditPageHTML");
-  std::stringstream out;
+  std::stringstream ouT, outHead, outBody;
   if ((!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights()) &&
       !theGlobalVariables.flagRunningApache)
     return "<b>Only logged-in admins are allowed to edit pages. </b>";
   CalculatorHTML theFile;
   theFile.LoadFileNames();
-  out << "<html>"
-  << "<head>"
+  ouT << "<html>";
+  outHead << "<head>"
   << HtmlRoutines::GetJavascriptStandardCookies()
   //  << HtmlRoutines::GetLaTeXProcessingJavascript()
   //  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
@@ -671,7 +671,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "</style>\n";
 
 
-  out << HtmlRoutines::GetJavascriptAceEditorScript();
+  outHead << HtmlRoutines::GetJavascriptAceEditorScript();
 
 //  << "<script src=\"/html-common-calculator/ace.min.js\" type=\"text/javascript\" charset=\"utf-8\"></script>"
 //  << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n"
@@ -679,42 +679,45 @@ std::string HtmlInterpretation::GetEditPageHTML()
 
   //  << "<link rel=\"stylesheet\" href=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css\">"
   //  << "<script src=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js\"></script>"
-  out << "<script type=\"text/javascript\">\n";
-
-  Calculator tempCalculator;
-  tempCalculator.init();
-  tempCalculator.ComputeAutoCompleteKeyWords();
-  CalculatorHTML tempParser;
-  tempParser.initBuiltInSpanClasses();
-  tempParser.initTopicElementNames();
+  outBody << "<body onload=\"loadSettings();\">\n";
+  outBody << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
+  << "</calculatorNavigation>";
+  std::stringstream failureStream;
+  if (!theFile.LoadMe(false, failureStream, theGlobalVariables.GetWebInput("randomSeed")))
+  { outBody << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";
+    outBody << "</body></html>";
+    ouT << outHead.str() << outBody.str();
+    return ouT.str();
+  }
+  if (!theFile.ParseHTML(failureStream))
+    outBody << "<b>Failed to parse file: " << theFile.fileName
+    << ".</b> Details:<br>" << failureStream.str();
   HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
-  theAutocompleteKeyWords.AddOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
-  theAutocompleteKeyWords.AddOnTopNoRepetition(tempParser.calculatorClasses);
-  theAutocompleteKeyWords.AddOnTopNoRepetition(tempParser.calculatorClassesAnswerFields);
-  theAutocompleteKeyWords.AddOnTopNoRepetition(tempParser.calculatorTopicElementNames);
-  out << "var AceEditorAutoCompletionWordList=[";
+  if (theFile.flagIsExamProblem)
+  { Calculator tempCalculator;
+    tempCalculator.init();
+    tempCalculator.ComputeAutoCompleteKeyWords();
+    theAutocompleteKeyWords.AddOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
+  } else
+  { theFile.LoadAndParseTopicList(outBody);
+    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClasses);
+    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClassesAnswerFields);
+    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicElementNames);
+    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicBundles);
+  }
+  outHead << "<script type=\"text/javascript\">\n";
+  outHead << "var AceEditorAutoCompletionWordList=[";
   bool found=false;
   for (int i=0; i<theAutocompleteKeyWords.size; i++)
     if (theAutocompleteKeyWords[i].size()>2)
     { if (found)
-        out << ", ";
+        outHead << ", ";
       found=true;
-      out << "\"" << theAutocompleteKeyWords[i] << "\"";
+      outHead << "\"" << theAutocompleteKeyWords[i] << "\"";
     }
-  out << "];\n";
-  out << "\n</script>";
-  out << "</head>"
-  << "<body onload=\"loadSettings();\">\n";
-  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
-  << "</calculatorNavigation>";
-  std::stringstream failureStream;
-  if (!theFile.LoadMe(false, failureStream, theGlobalVariables.GetWebInput("randomSeed")))
-  { out << "<b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>";
-    out << "</body></html>";
-    return out.str();
-  }
-  if (!theFile.ParseHTML(failureStream))
-    out << "<b>Failed to parse file: " << theFile.fileName << ".</b> Details:<br>" << failureStream.str();
+  outHead << "];\n";
+  outHead << "\n</script>";
+  outHead << "</head>";
   std::stringstream buttonStream, submitModPageJS;
   submitModPageJS
   << "submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage', null, 'spanSubmitReport');"
@@ -724,24 +727,24 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "onclick=\"" << submitModPageJS.str() << "\" >Save changes</button>";
   //  out << "<form>";
   //  out << "<input type=\"submit\" value=\"Save changes\"> ";
-  out << buttonStream.str();
-  out << "To include the problem in your topic list, add the following two lines. <br>"
+  outBody << buttonStream.str();
+  outBody << "To include the problem in your topic list, add the following two lines. <br>"
   << "<textarea cols=\"70\", rows=\"3\">"
   << theFile.ToStringCalculatorProblemSourceFromFileName(theFile.fileName) << "</textarea>";
-  out << "<br>\n";
-  out << "Ctrl+S saves your changes. Edit bravely, all files are backed-up/stored in a svn history tree."
+  outBody << "<br>\n";
+  outBody << "Ctrl+S saves your changes. Edit bravely, all files are backed-up/stored in a svn history tree."
   << " You only risk losing your own changes.";
-  out << "<br>\n";
-  out
+  outBody << "<br>\n";
+  outBody
   << "Many thanks to the <a href=\"https://ace.c9.io\">ace editor</a> project. <br>"
   << "<div id=\"editor\" onkeydown=\"ctrlSPress(event);\" name=\"editor\">"
   //<< "<textarea cols=\"150\", rows=\"30\" id=\"mainInput\" name=\"mainInput\" onkeydown=\"ctrlSPress(event);\">"
   ;
-  out
+  outBody
   //<< "</textarea>"
   << "</div>"
   << "\n<br>\n";
-  out << "<script type=\"text/javascript\"> \n"
+  outBody << "<script type=\"text/javascript\"> \n"
   << "function ctrlSPress(event){\n"
   << "   if (event.ctrlKey!=true)\n"
   << "     return;\n"
@@ -751,10 +754,10 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << submitModPageJS.str() << "\n"
   << "}\n"
   << "</script>\n";
-  out
+  outBody
   << "<script src=\"/html-common-calculator/ace/src-min/ext-language_tools.js\"></script>";
-  out << "";
-  out << "<script type=\"text/javascript\"> \n"
+  outBody << "";
+  outBody << "<script type=\"text/javascript\"> \n"
   //<< " document.getElementById('mainInput').value=decodeURIComponent(\""
   << " document.getElementById('editor').textContent=decodeURIComponent(\""
   << HtmlRoutines::ConvertStringToURLString(theFile.inputHtml, false)
@@ -770,13 +773,14 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "    editor.completers = [staticWordCompleter];"
   << "    editor.$blockScrolling = Infinity;"
   << "</script>\n";
-  out << buttonStream.str();
-  out << "<span id=\"spanSubmitReport\"></span><br>";
-  out << theFile.ToStringLinkFromFileName(theFile.fileName);
+  outBody << buttonStream.str();
+  outBody << "<span id=\"spanSubmitReport\"></span><br>";
+  outBody << theFile.ToStringLinkFromFileName(theFile.fileName);
   //  out << "<input type=\"submit\" value=\"Save changes\">";
   //  out << "</form>";
-  out << "</body></html>";
-  return out.str();
+  outBody << "</body>";
+  ouT << outHead.str() << outBody.str() << "</html>";
+  return ouT.str();
 }
 
 std::string HtmlInterpretation::SubmitProblem()

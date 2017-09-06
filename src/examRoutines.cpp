@@ -2069,6 +2069,10 @@ void CalculatorHTML::initTopicElementNames()
     this->calculatorTopicElementNames.AddOnTop("SlidesLatex");
     this->calculatorTopicElementNames.AddOnTop("SlidesSource");
     this->calculatorTopicElementNames.AddOnTop("SlidesSourceHeader");
+    this->calculatorTopicElementNames.AddOnTop("LoadTopicBundles");
+    this->calculatorTopicElementNames.AddOnTop("TopicBundle");
+    this->calculatorTopicElementNames.AddOnTop("BundleBegin");
+    this->calculatorTopicElementNames.AddOnTop("BundleEnd");
   }
 }
 
@@ -2880,13 +2884,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     navigationAndEditTagStream << this->ToStringProblemNavigation();
   if (this->flagDoPrependEditPagePanel)
     if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn())
-    { navigationAndEditTagStream
-      << "<editPagePanel>"
-      << this->GetEditPageButton(this->fileName);
-      if (this->flagIsExamHome)
-        navigationAndEditTagStream << this->GetEditPageButton(this->topicListFileName);
-      navigationAndEditTagStream << "</editPagePanel>";
-    }
+      navigationAndEditTagStream << this->GetEditPagePanel();
   this->outputProblemNavigatioN=navigationAndEditTagStream.str();
   this->outputHtmlBodyNoTag=outBody.str();
   outHeaD << outHeadPt1.str() << outHeadPt2.str();
@@ -3046,10 +3044,6 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
 std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
-  if (theGlobalVariables.UserDebugFlagOn())
-    out << this->ToStringLinkCurrentAdmin("Turn off debug", false, false);
-  else
-    out << this->ToStringLinkCurrentAdmin("Debug page", true, true);
   out << "\n<a class=\"linkStandardButtonLike\" href=\""
   << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
   std::string urledProblem=HtmlRoutines::ConvertStringToURLString(desiredFileName, false);
@@ -3395,31 +3389,107 @@ void TopicElement::reset(int parentSize)
     this->type=this->tProblem;
 }
 
-void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output, CalculatorHTML& owner)
+bool TopicElement::LoadTopicBundle
+(const std::string& inputFileName, MapLisT<std::string, List<std::string>, MathRoutines::hashString>& output,
+ CalculatorHTML& owner, std::stringstream& errorStream)
+{ MacroRegisterFunctionWithName("TopicElement::LoadTopicBundle");
+  std::string fileName=MathRoutines::StringTrimWhiteSpace(inputFileName);
+  std::string newTopicBundles;
+  if (!FileOperations::IsOKfileNameVirtual(fileName, false, &errorStream))
+  { errorStream << "The file name " << fileName << " is not a valid topic bundle file name. ";
+    return false;
+  }
+  if (!FileOperations::LoadFileToStringVirtual(fileName, newTopicBundles, errorStream, false, false))
+  { errorStream << "Could not open topic bundle file. ";
+    return false;
+  }
+  owner.loadedTopicBundles.AddOnTop(fileName);
+  std::string currentLine, currentId;
+  List<std::string> bundleNameStack;
+  std::stringstream bundleReader(newTopicBundles);
+  while (std::getline(bundleReader, currentLine, '\n'))
+  { if (MathRoutines::StringBeginsWith(currentLine, "BundleBegin:", &currentId))
+      bundleNameStack.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentId));
+    else if (MathRoutines::StringBeginsWith(currentLine, "BundleEnd:", &currentId))
+      bundleNameStack.RemoveLastObject();
+    else
+      for (int i=0; i<bundleNameStack.size; i++)
+        output.GetValueCreateIfNotPresent(bundleNameStack[i]).AddOnTop(currentLine);
+  }
+  return true;
+}
+
+void TopicElement::GetTopicList
+(const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output,
+ CalculatorHTML& owner)
 { MacroRegisterFunctionWithName("TopicElement::GetTopicList");
   std::stringstream tableReader(inputString);
   std::string currentLine, currentArgument;
   TopicElement currentElt;
   bool found=false;
-  currentElt.problemNumber.initFillInObject(4,0);
-  while(std::getline(tableReader, currentLine, '\n'))
-  { if (MathRoutines::StringTrimWhiteSpace(currentLine)=="")
+  currentElt.problemNumber.initFillInObject(4, 0);
+  MemorySaving<MapLisT<std::string, List<std::string>, MathRoutines::hashString> > topicBundles;
+  List<std::string> lineStack;
+  owner.initTopicElementNames();
+  int numLinesSoFar=0;
+  bool showedAllowedDataEntries=false;
+  for (;;)
+  { if (lineStack.size==0)
+      if (std::getline(tableReader, currentLine, '\n'))
+        lineStack.AddOnTop(currentLine);
+    if (lineStack.size<=0)
+      break;
+    if (numLinesSoFar>10000)
+    { std::stringstream errorStream;
+      errorStream << "More than 10000 topic lines have been read so far; this is not allowed. "
+      << "Could this be an error due to infinite inclusion of topic bundles -"
+      << "perhaps a topic bundle file is requesting to load itself? ";
+      currentElt.error=errorStream.str();
+      currentElt.type=currentElt.tError;
+      found=true;
+      break;
+    }
+    currentLine=lineStack.PopLastObject();
+    if (MathRoutines::StringTrimWhiteSpace(currentLine)=="")
       continue;
     if (currentLine.size()>0)
       if (currentLine[0]=='%')
         continue;
-    if (MathRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument))
+    if (MathRoutines::StringBeginsWith(currentLine, "LoadTopicBundles:", &currentArgument))
+    { std::stringstream errorStream;
+      if (!TopicElement::LoadTopicBundle(MathRoutines::StringTrimWhiteSpace(currentArgument), topicBundles.GetElement(), owner, errorStream))
+      { currentElt.error=errorStream.str();
+        currentElt.type=currentElt.tError;
+        found=true;
+      }
+    } else if (MathRoutines::StringBeginsWith(currentLine, "TopicBundle:", &currentArgument))
+    { currentArgument=MathRoutines::StringTrimWhiteSpace(currentArgument);
+      std::stringstream errorStream;
+      if (topicBundles.GetElement().Contains(currentArgument))
+      { List<std::string>& currentBundle=topicBundles.GetElement().GetValueCreateIfNotPresent(currentArgument);
+        for (int j=currentBundle.size-1; j>=0; j--)
+          lineStack.AddOnTop(currentBundle[j]);
+      } else
+      { if (found)
+          TopicElement::AddTopic(currentElt, output);
+        found=true;
+        errorStream << "Topic bundle does not appear to contain the desired element: "
+        << currentArgument;
+        currentElt.error=errorStream.str();
+        currentElt.type=currentElt.tError;
+      }
+    } else if (MathRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument))
     { owner.slidesSourcesHeaders.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
       continue;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
-    { if(found)
+    { if (found)
         TopicElement::AddTopic(currentElt, output);
       found=true;
       currentElt.reset(0);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
     } else if (MathRoutines::StringBeginsWith(currentLine, "Section:", &currentArgument))
-    { if(found)
+    { if (found)
         TopicElement::AddTopic(currentElt, output);
       found=true;
       currentElt.reset(1);
@@ -3427,7 +3497,7 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id=currentElt.title;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Topic:", &currentArgument))
-    { if(found)
+    { if (found)
         TopicElement::AddTopic(currentElt, output);
       found=true;
       currentElt.reset(2);
@@ -3435,7 +3505,7 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       currentElt.title=MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id=currentElt.title;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument))
-    { if(found)
+    { if (found)
         TopicElement::AddTopic(currentElt, output);
       found=true;
       currentElt.reset(3);
@@ -3457,12 +3527,29 @@ void TopicElement::GetTopicList(const std::string& inputString, MapLisT<std::str
       currentElt.id=currentElt.problem;
       found=true;
     } else
-    { currentElt.error+="Unrecognized entry: " + currentLine + ". ";
+    { std::stringstream errorStream;
+      errorStream << "Failed to parse topic element: " << currentLine << ". ";
+      if (!showedAllowedDataEntries)
+      { errorStream << "<br>The allowed data labels are CASE SENSITIVE: ";
+        for (int j=0; j< owner.calculatorTopicElementNames.size; j++)
+          errorStream << "<br>" << owner.calculatorTopicElementNames[j];
+        errorStream << "<br>You need to include the column character  <b>:</b> "
+        << "immediately after the data labels. The data entries are terminated by new line. "
+        << " Here is a correctly entered example:"
+        << "<br>Title: Complex multiplication"
+        << "<br>Problem: DefaultProblemLocation/Complex-multiplication-z-times-w.html"
+        << "<br>SlidesSource: freecalc/modules/complex-numbers/complex-numbers-addition-multiplication-example-1"
+        << "<br>\n";
+      }
+      showedAllowedDataEntries=true;
+      currentElt.error=errorStream.str();
       currentElt.type=currentElt.tError;
       found=true;
     }
   }
-  if(found)
+  owner.calculatorTopicBundles.AddOnTopNoRepetition(topicBundles.GetElement().theKeys);
+  //stOutput << "DEBUG: topicBundles: " << topicBundles.GetElement().ToStringHtml();
+  if (found)
     TopicElement::AddTopic(currentElt, output);
 }
 
@@ -3545,16 +3632,29 @@ void CalculatorHTML::InterpretProblemNavigationBar(SyntacticElementHTML& inputOu
   this->flagDoPrependProblemNavigationBar=false;
 }
 
-void CalculatorHTML::InterpretEditPagePanel(SyntacticElementHTML& inputOutput)
-{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretCalculatorNavigationBar");
+std::string CalculatorHTML::GetEditPagePanel()
+{ MacroRegisterFunctionWithName("CalculatorHTML::GetEditPagePanel");
   std::stringstream out;
   out
-  << "<editPagePanel>"
-  << this->GetEditPageButton(this->fileName);
+  << "<editPagePanel>";
+//  out << "DEbug: loaded topic bundles: " << this->loadedTopicBundles.ToStringCommaDelimited();
+  if (theGlobalVariables.UserDebugFlagOn())
+    out << this->ToStringLinkCurrentAdmin("Turn off debug", false, false);
+  else
+    out << this->ToStringLinkCurrentAdmin("Debug page", true, true);
+  out << this->GetEditPageButton(this->fileName);
   if (this->flagIsExamHome)
-    out << this->GetEditPageButton(this->topicListFileName);
+  { out << this->GetEditPageButton(this->topicListFileName);
+    for (int i=0; i<this->loadedTopicBundles.size; i++)
+      out << this->GetEditPageButton(this->loadedTopicBundles[i]);
+  }
   out << "</editPagePanel>";
-  inputOutput.interpretedCommand=out.str();
+  return out.str();
+}
+
+void CalculatorHTML::InterpretEditPagePanel(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretCalculatorNavigationBar");
+  inputOutput.interpretedCommand=this->GetEditPagePanel();
   this->flagDoPrependEditPagePanel=false;
 }
 
@@ -3603,27 +3703,7 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
       subSectionStarted=false;
       out << "<ul>";
     } else if (currentElt.type==currentElt.tError)
-    { out << "Error parsing topic list. Could not make sense of: " << currentElt.error << ". "
-      << "The allowed data labels are CASE SENSITIVE: "
-      << "<br>Chapter"
-      << "<br>Section"
-      << "<br>Topic"
-      << "<br>Title"
-      << "<br>Video"
-      << "<br>Problem"
-      << "<br>SlidesProjector"
-      << "<br>SlidesPrintable"
-      << "<br>SlidesSourceHeader"
-      << "<br>SlidesSource"
-      << "<br>SlidesLatex"
-      << "<br>You need to include columns immediately after the data labels. The data entries are terminated by new line. "
-      << " Here is a correctly entered example:"
-      << "<br>Title: Complex multiplication"
-      << "<br>Video: -"
-      << "<br>Problem: DefaultProblemLocation/Complex-multiplication-z-times-w.html"
-      << "<br>SlidesSource: freecalc/modules/complex-numbers/complex-numbers-addition-multiplication-example-1"
-      << "<br>\n";
-    }
+      out << "Error parsing topic list. " << currentElt.error << ". ";
   }
   if (subSectionStarted)
       out << "</li>";
@@ -3889,20 +3969,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       subSectionStarted=true;
       tableStarted=false;
     } else if (currentElt.type==currentElt.tError)
-    { out << "Error parsing topic list. Could not make sense of: " << currentElt.error << ". "
-      << "The entry labels are [CASE SENSITIVE!]: <br>";
-      for (int k=0; k<this->calculatorTopicElementNames.size; k++)
-        out << "<span style='color:green'>" << this->calculatorTopicElementNames[k]
-        << ":</span><br>";
-      out
-      << "You need to include columns immediately after the data labels. The data entries are terminated by new line. "
-      << " Here is a correctly entered example:"
-      << "Title: What is a logarithmic derivative?<br>\n"
-      << "Video: modules/substitution-rule/videos/integral-derivative-f-over-f-intro.html<br>\n"
-      << "Slides: modules/substitution-rule/pdf/integral-derivative-f-over-f-intro.pdf<br>\n"
-      << "PrintableSlides: modules/substitution-rule/pdf/printable-integral-derivative-f-over-f-intro.pdf<br>\n"
-      << "\n";
-    } else
+      out << "Error parsing topic list line: " << currentElt.error << ". ";
+    else
     { out << "<tr class=\"calculatorProblem\" "
       << "id=\"" << currentElt.idBase64 << "\"" << ">\n";
       out << "  <td>\n";

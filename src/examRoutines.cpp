@@ -3833,7 +3833,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     << " points earned.</panelStudentScores>\n" ;
     out << "<br><small>Includes problems without deadline, but not problems without weights.<br> "
     << "If a problem is assigned a new weight, your % score may drop. </small><br>";
-    out << "<panelCourseInfo>" << this->currentUseR.courseInfo.ToStringHumanReadable() << "</panelCourseInfo>";
+    out << "<panelCourseInfo>" << this->currentUseR.courseInfo.ToStringHumanReadable() << "</panelCourseInfo><br>";
   }
   #endif
   this->initTopicElementNames();

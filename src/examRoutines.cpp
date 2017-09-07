@@ -511,7 +511,8 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
     << theGlobalVariables.ToStringNavigation()
     << "</calculatorNavigation>"
     << commentsStream.str();
-    this->comments << "<a href=\"/selectCourse.html\">Go to course list page.</a>";
+    this->comments << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?request=selectCourseFromHtml\">Go to course list page.</a>";
   }
   this->theProblemData.CheckConsistency();
 }
@@ -3325,11 +3326,12 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicEl
 { MacroRegisterFunctionWithName("TopicElement::AddTopic");
   if (output.size()<3 && inputElt.type!=inputElt.tTexHeader && inputElt.type!=inputElt.tChapter)
   { bool startsWithChapter=false;
-    for (int i=0; i<2; i++)
-      if (output.theValues[i].type==inputElt.tChapter)
-      { startsWithChapter=true;
-        break;
-      }
+    if (output.size()>=2)
+      for (int i=0; i<2; i++)
+        if (output.theValues[i].type==inputElt.tChapter)
+        { startsWithChapter=true;
+          break;
+        }
     if (!startsWithChapter)
     { TopicElement chapterlessChapter;
       chapterlessChapter.parentTopics.AddOnTop(output.size());

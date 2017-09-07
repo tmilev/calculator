@@ -5095,8 +5095,6 @@ void WebServer::BackupDatabaseIfNeeded()
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
-  theParser.init();
-  theParser.ComputeAutoCompleteKeyWords();
   if (!this->flagTryToKillOlderProcesses)
   { theLog.reset();
     logBlock.reset();
@@ -5116,6 +5114,8 @@ int WebServer::Run()
       return 0;
     }
   }
+  theParser.init();
+  theParser.ComputeAutoCompleteKeyWords();
   HtmlRoutines::LoadStrings();
   theParser.flagShowCalculatorExamples=false;
   if (!this->initPrepareWebServerALL())

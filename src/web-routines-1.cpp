@@ -62,12 +62,14 @@ public:
 
 void MonitorWebServer()
 { MacroRegisterFunctionWithName("MonitorWebServer");
-  WebCrawler theCrawler;
-  theCrawler.init();
   int maxNumPingFailures=3;
   //warning: setting theWebServer.WebServerPingIntervalInSeconds to more than 1000
   //may overflow the variable int microsecondsToSleep.
   //theWebServer.WebServerPingIntervalInSeconds=1000;
+  int microsecondsToSleep=1000000*theWebServer.WebServerPingIntervalInSeconds;//
+  if (theWebServer.flagTryToKillOlderProcesses)
+    for (;;)
+      theGlobalVariables.FallAsleep(microsecondsToSleep);
   if (theWebServer.WebServerPingIntervalInSeconds>30)
     theLog << logger::red << "**********WARNING**************"
     << logger::endL
@@ -75,7 +77,14 @@ void MonitorWebServer()
     << theWebServer.WebServerPingIntervalInSeconds
     << " is set to a large value. "
     << "Set the ping interval to less than 30 seconds to remove this message. " << logger::endL;
-  int microsecondsToSleep=1000000*theWebServer.WebServerPingIntervalInSeconds;//
+  std::fstream theFile;
+  FileOperations::OpenFileCreateIfNotPresentVirtual
+  (theFile,"LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true);
+  theFile << "<a href=\"/LogFiles/" << GlobalVariables::GetDateForLogFiles() << "/\">"
+  << GlobalVariables::GetDateForLogFiles() << "</a>" << "<br>\n";
+  theFile.close();
+  WebCrawler theCrawler;
+  theCrawler.init();
   theLog << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
   << theCrawler.portOrService << " every " << (microsecondsToSleep/1000000) << " second(s). "
   << logger::endL;
@@ -106,11 +115,10 @@ void MonitorWebServer()
     if (numConsecutiveFailedPings>=maxNumPingFailures)
     { logProcessKills << logger::red << "Server stopped responding (probably locked pipe?)"
       << ", restarting. " << logger::endL;
-      std::fstream theFile;
       FileOperations::OpenFileCreateIfNotPresentVirtual
-      (theFile,"/LogFiles/_unexpected_Restart_Log.txt",true, false, false, true);
-      theFile << "Unexpected server restart: server stopped responding (locked pipe?). Time: "
-      << now.ToStringHumanReadable() << "\n";
+      (theFile,"LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true);
+      theFile << "<b style='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: "
+      << now.ToStringHumanReadable() << "</b><br>\n";
       theFile.flush();
       theWebServer.Restart();
     }

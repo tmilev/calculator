@@ -248,15 +248,17 @@ void WebCrawler::PingCalculatorStatus()
     } else
       reportStream << "<br>connected: " << this->addressToConnectTo << " port: " << this->portOrService << ". ";
     std::string getMessage=  "GET /cgi-bin/calculator?request=statusPublic";
-    int numBytes =Pipe::WriteWithTimeoutViaSelect(this->theSocket,getMessage, 1, 10, &reportStream);
+    std::stringstream errorStream1;
+    int numBytes =Pipe::WriteWithTimeoutViaSelect(this->theSocket,getMessage, 1, 10, &errorStream1);
     if ((unsigned) numBytes !=getMessage.size())
-    { this->lastTransactionErrors+= "\nERROR writing to socket";
+    { this->lastTransactionErrors+= "\nERROR writing to socket. "+ errorStream1.str();
       close(this->theSocket);
       continue;
     }
-    numBytes =Pipe::ReadWithTimeOutViaSelect(this->theSocket, this->buffer,1,10, &reportStream);
+    std::stringstream errorStream2;
+    numBytes = Pipe::ReadWithTimeOutViaSelect(this->theSocket, this->buffer, 1, 10, &errorStream2);
     if (numBytes < 0)
-    { this->lastTransactionErrors+= "\nERROR reading from socket";
+    { this->lastTransactionErrors+= "\nERROR reading from socket. " + errorStream2.str();
       close(this->theSocket);
       continue;
     }

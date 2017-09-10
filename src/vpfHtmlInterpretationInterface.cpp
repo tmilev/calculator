@@ -669,14 +669,9 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "      font-size: 100%;\n"
   << "   }\n"
   << "</style>\n";
-
-
   outHead << HtmlRoutines::GetJavascriptAceEditorScript();
-
-//  << "<script src=\"/html-common-calculator/ace.min.js\" type=\"text/javascript\" charset=\"utf-8\"></script>"
-//  << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n"
-
-
+  //  << "<script src=\"/html-common-calculator/ace.min.js\" type=\"text/javascript\" charset=\"utf-8\"></script>"
+  //  << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n"
   //  << "<link rel=\"stylesheet\" href=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css\">"
   //  << "<script src=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js\"></script>"
   outBody << "<body onload=\"loadSettings();\">\n";
@@ -756,7 +751,6 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "</script>\n";
   outBody
   << "<script src=\"/html-common-calculator/ace/src-min/ext-language_tools.js\"></script>";
-  outBody << "";
   outBody << "<script type=\"text/javascript\"> \n"
   //<< " document.getElementById('mainInput').value=decodeURIComponent(\""
   << " document.getElementById('editor').textContent=decodeURIComponent(\""

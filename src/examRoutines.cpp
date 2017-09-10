@@ -729,7 +729,8 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
     refStreamNoRequest << "topicList=" << this->topicListFileName << "&";
   if (this->courseHome!="")
     refStreamNoRequest << "courseHome=" << this->courseHome << "&";
-  if (theFileName==this->topicListFileName || theFileName==this->courseHome)
+  if (theFileName==this->topicListFileName || theFileName==this->courseHome ||
+      MathRoutines::StringEndsWith(theFileName,".txt"))
   { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
     return out.str();

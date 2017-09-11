@@ -891,9 +891,9 @@ bool WebWorker::ReceiveAllHttpSSL()
       return false;
     }
     logIO << logger::orange << out.str() << logger::endL;
-    std::string bufferCopy(buffer, bufferSize);
+    //std::string bufferCopy(buffer, bufferSize);
     logIO << this->parent->ToStringConnection()
-    << " Bytes in buffer so far: " << bufferCopy;
+    << " Number of bytes in buffer so far: " << bufferSize;
     numBytesInBuffer=this->parent->theSSLdata.SSLread
     (this->parent->theSSLdata.sslServeR, &buffer, bufferSize-1, &errorStream, 0, true);
   }
@@ -1713,10 +1713,11 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
   logIO << logger::red << this->parent->ToStringConnection()
   << " Unknown request. " << logger::endL;
   logIO << logger::blue << this->parent->ToStringConnection()
-  << " Message head (length " << this->messageHead.size()
-  << "): " << this->messageHead << logger::endL;
+  << " Message head length: " << this->messageHead.size();
+//logIO  << ".  " << this->messageHead ;
+  logIO << logger::endL;
   logIO << logger::orange << this->parent->ToStringConnection()
-  << " Message body: " << this->messageBody << logger::endL;
+  << " Message body length: " << this->messageBody.size() << logger::endL;
   logIO << logger::green << "Attempting to correct unknown request.\n";
   if (this->messageBody.size()==0)
     if (*this->theStrings.LastObject()!="\n")
@@ -1742,11 +1743,12 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
   }
   logIO << logger::endL;
   logIO << logger::blue << this->parent->ToStringConnection()
-  << "Full message head (length " << this->messageHead.size() << "): "
-  << this->messageHead << logger::endL;
+  << "Unrecognized message head, length: " << this->messageHead.size() << ". ";
+  //<< this->messageHead << logger::endL;
   logIO << logger::red << this->parent->ToStringConnection()
-  << "Full message body: (length " << this->messageBody.size() << "): "
-  << this->messageBody << logger::endL;
+  << "Message body length: " << this->messageBody.size() << ". "
+  //<< this->messageBody
+  << logger::endL;
 }
 
 bool WebWorker::ReceiveAllHttp()
@@ -1788,9 +1790,9 @@ bool WebWorker::ReceiveAllHttp()
       break;
     }
     logIO << logger::orange << out.str() << logger::endL;
-    std::string bufferCopy(buffer, bufferSize);
+    //std::string bufferCopy(buffer, bufferSize);
     logIO << this->parent->ToStringConnection()
-    << "Bytes in buffer so far: " << bufferCopy;
+    << "Number of bytes in buffer so far: " << bufferSize << logger::endL;
     numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);

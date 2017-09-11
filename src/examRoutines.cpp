@@ -4181,7 +4181,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     this->displaySlidesLink=slideFromSourceStreamHandout.str() + slideFromSourceStreamProjector.str();
     this->displaySlidesLink+=sourceStream.str();
     if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn())
-      this->displaySlidesLink+="<a class=\"slidesLink\" style=\"color:gray\" href=\""
+      this->displaySlidesLink+="<a class=\"slidesLink\" style=\"color:gray; display:none\" href=\""
       + theGlobalVariables.DisplayNameExecutable
       + "?request=modifySlide&topicID=" + this->id + "\">Modify</a>";
   }

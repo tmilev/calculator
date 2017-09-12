@@ -2296,7 +2296,7 @@ function calculatorGetCanvasTwoD(inputCanvas)
 
 function testPicture(inputCanvas)
 { var theCanvas=calculatorGetCanvas(document.getElementById(inputCanvas));
-  theCanvas.screenBasisUserDefault= [[1,0,-0.1],[0,1,-0.2]];
+  theCanvas.screenBasisUserDefault= [[0.59,0.78,0.18],[ 0.46,-0.15,-0.87]];
   theCanvas.screenBasisUser=theCanvas.screenBasisUserDefault.slice();
   theCanvas.init(inputCanvas, false);
   theCanvas.drawLine([-1,0,0],[1,0,0], 'black', 2);
@@ -2310,9 +2310,9 @@ function testPicture(inputCanvas)
   theCanvas.scale=100;
   theCanvas.drawSurface(testGetMoebiusSurface());
   theCanvas.drawSurface(testGetMoebiusSurface2());
-  theCanvas.drawPoint([1,0,0], 'red');
-  theCanvas.drawPoint([0,1,0], 'green');
-  theCanvas.drawPoint([0,0,1], 'blue');
+  theCanvas.drawPoints([[1,0,0]], 'red');
+  theCanvas.drawPoints([[0,1,0]], 'green');
+  theCanvas.drawPoints([[0,0,1]], 'blue');
   theCanvas.drawText({location:[1,0,0], text: "x", color:"green"});
   theCanvas.drawText({location:[0,1,0], text: "y", color:"green"});
   theCanvas.drawText({location:[0,0,1], text: "z", color:"green"});

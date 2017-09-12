@@ -746,7 +746,7 @@ bool SSLdata::SSLreadLoop
   }
   if (numBytes < 0)
   { if (commentsOnFailure!=0)
-      *commentsOnFailure << "\nERROR reading from socket. ";
+      *commentsOnFailure << "\nSSL-ERROR reading from socket. ";
     return false;
   }
   return true;

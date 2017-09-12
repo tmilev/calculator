@@ -173,7 +173,9 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
   return false;
 }
 
-bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions, std::stringstream* theLog)
+bool Calculator::ExpressionMatchesPattern
+(const Expression& thePattern, const Expression& input, MapLisT<Expression, Expression>& matchedExpressions,
+ std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("Calculator::ExpressionMatchesPattern");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -185,15 +187,12 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
     << "is a stack trace, however beware that the error might be in code preceding the stack loading. "
     << crash;
 //  static int ExpressionMatchesPatternDebugCounter=-1;
-  static const bool printLocalDebugInfo=false;
-//  if (input.ToString()=="f{}((a))=a+5")
-//    printLocalDebugInfo=true;
   //ExpressionMatchesPatternDebugCounter++;
 //  stOutput << " ExpressionMatchesPatternDebugCounter: " << ExpressionMatchesPatternDebugCounter;
 //  printLocalDebugInfo=(ExpressionMatchesPatternDebugCounter>-1);
-  if (printLocalDebugInfo)
-  { stOutput << " <hr> current input: " << input.ToString() << "<br>current pattern: " << thePattern.ToString();
-    stOutput << "<br> current matched expressions: " << matchedExpressions.ToString();
+  if (commentsGeneral!=0)
+  { *commentsGeneral << " <hr> current input: " << input.ToString() << "<br>current pattern: " << thePattern.ToString();
+    *commentsGeneral << "<br> current matched expressions: " << matchedExpressions.ToStringHtml();
   }
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
@@ -207,25 +206,37 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
 //    return false;
   int opVarB=this->opBind();
   if (thePattern.IsListStartingWithAtom(opVarB))
-  { int indexLeft= matchedExpressions.theBoundVariables.GetIndex(thePattern);
-    if (indexLeft==-1)
-    { matchedExpressions.theBoundVariables.AddOnTop(thePattern);
-      matchedExpressions.variableImages.AddOnTop(input);
-      indexLeft=matchedExpressions.theBoundVariables.size-1;
-    }
-    if (matchedExpressions.variableImages[indexLeft]!=input)
+  { if (!matchedExpressions.Contains(thePattern))
+      matchedExpressions.SetKeyValue(thePattern,input);
+    if (matchedExpressions.GetValueCreateIfNotPresent(thePattern)!=input)
       return false;
-    if (printLocalDebugInfo)
-      stOutput << "<br><b>Match!</b>";
+    if (commentsGeneral!=0)
+      *commentsGeneral << "<br><b>Match!</b>";
     return true;
   }
-  if (thePattern.theData!=input.theData || thePattern.children.size!=input.children.size )
+  if (thePattern.theData!=input.theData || thePattern.size()!=input.size() )
     return false;
-  for (int i=0; i<thePattern.children.size; i++)
-    if (!(this->ExpressionMatchesPattern(thePattern[i], input[i], matchedExpressions, theLog)))
+  bool isGoodRegularOrder=true;
+  int numMatchedExpressionsAtStart=matchedExpressions.size();
+  for (int i=0; i<thePattern.size(); i++)
+    if (!(this->ExpressionMatchesPattern(thePattern[i], input[i], matchedExpressions, commentsGeneral)))
+    { if (i==0)
+        return false;
+      isGoodRegularOrder=false;
+      break;
+    }
+
+  if (!isGoodRegularOrder)
+  { if (!input.StartsWith(thePattern.owner->opPlus()))
       return false;
-  if (printLocalDebugInfo)
-    stOutput << "<br><b>Match!</b>";
+    matchedExpressions.theValues.SetSize(numMatchedExpressionsAtStart);
+    matchedExpressions.theKeys.SetSize(numMatchedExpressionsAtStart);
+    for (int i=1; i<thePattern.size(); i++)
+      if (!(this->ExpressionMatchesPattern(thePattern[i], input[thePattern.size()- i], matchedExpressions, commentsGeneral)))
+        return false;
+  }
+  if (commentsGeneral!=0)
+    *commentsGeneral << "<br><b>Match!</b>";
   return true;
 }
 
@@ -589,10 +600,9 @@ bool Calculator::EvaluateExpression
       theCommands.TotalNumPatternMatchedPerformed++;
       if (theCommands.flagLogEvaluatioN)
         beforePatternMatch=output;
-      BoundVariablesSubstitution bufferPairs;
-      if (theCommands.ProcessOneExpressionOnePatternOneSub
-          (currentPattern, output, bufferPairs, &theCommands.Comments,
-           theCommands.flagLogPatternMatching))
+      MapLisT<Expression, Expression> bufferPairs;
+      std::stringstream* theLog=theCommands.flagLogPatternMatching ? &theCommands.Comments : 0;
+      if (theCommands.ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, theLog))
       { ReductionOcurred=true;
         if (theCommands.flagLogEvaluatioN)
         { theCommands << "<hr>Rule cache index: " << theCommands.RuleStackCacheIndex
@@ -620,12 +630,13 @@ bool Calculator::EvaluateExpression
 }
 
 Expression* Calculator::PatternMatch
-(const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, const Expression* condition, std::stringstream* theLog, bool logAttempts)
+(const Expression& thePattern, Expression& theExpression, MapLisT<Expression, Expression>& bufferPairs, const Expression* condition, std::stringstream* theLog)
 { MacroRegisterFunctionWithName("Calculator::PatternMatch");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
-    out << "Error: while trying to evaluate expression, the maximum recursion depth of " << this->MaxRecursionDeptH << " was exceeded";
+    out << "Error: while trying to evaluate expression, the maximum recursion depth of "
+    << this->MaxRecursionDeptH << " was exceeded";
     theExpression.MakeError(out.str(), *this);
     return 0;
   }
@@ -636,34 +647,35 @@ Expression* Calculator::PatternMatch
   theExpression.CheckInitialization();
   if (!this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs, theLog))
     return 0;
-  if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>found pattern: " << theExpression.ToString() << " -> " << thePattern.ToString() << " with " << bufferPairs.ToString();
+  if (theLog!=0)
+    (*theLog) << "<hr>found pattern: " << theExpression.ToString() << " -> "
+    << thePattern.ToString() << " with " << bufferPairs.ToStringHtml();
   if (condition==0)
     return &theExpression;
   Expression tempExp=*condition;
   tempExp.CheckInitialization();
-  if (theLog!=0 && logAttempts)
+  if (theLog!=0)
     (*theLog) << "<hr>Specializing condition pattern: " << tempExp.ToString();
   this->SpecializeBoundVars(tempExp, bufferPairs);
   tempExp.CheckInitialization();
-  if (theLog!=0 && logAttempts)
+  if (theLog!=0)
     (*theLog) << "<hr>Specialized condition: " << tempExp.ToString() << "; evaluating...";
   Expression conditionResult;
   this->EvaluateExpression(*this, tempExp, conditionResult);
-  if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>The evaluated specialized condition: " << conditionResult.ToString() << "; evaluating...";
+  if (theLog!=0)
+    (*theLog) << "<hr>The evaluated specialized condition: " << conditionResult.ToString()
+    << "; evaluating...";
   if (conditionResult.IsEqualToOne())
     return &theExpression;
   return 0;
 }
 
-void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, BoundVariablesSubstitution& matchedPairs)
+void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapLisT<Expression, Expression>& matchedPairs)
 { MacroRegisterFunctionWithName("Calculator::SpecializeBoundVars");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (toBeSubbedIn.IsListOfTwoAtomsStartingWith(this->opBind()))
-  { int indexMatching= matchedPairs.theBoundVariables.GetIndex(toBeSubbedIn);
-    if (indexMatching!=-1)
-    { toBeSubbedIn=matchedPairs.variableImages[indexMatching];
+  { if (matchedPairs.Contains(toBeSubbedIn))
+    { toBeSubbedIn=matchedPairs.GetValueCreateIfNotPresent(toBeSubbedIn);
       //this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
       return;
     }
@@ -678,12 +690,12 @@ void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, BoundVariablesSub
 }
 
 bool Calculator::ProcessOneExpressionOnePatternOneSub
-(const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* theLog, bool logAttempts)
+(const Expression& thePattern, Expression& theExpression, MapLisT<Expression, Expression>& bufferPairs, std::stringstream* theLog)
 { MacroRegisterFunctionWithName("Calculator::ProcessOneExpressionOnePatternOneSub");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (!thePattern.StartsWith(this->opDefine(), 3) && !thePattern.StartsWith(this->opDefineConditional(), 4))
     return false;
-  if (theLog!=0 && logAttempts)
+  if (theLog!=0)
   { (*theLog) << "<hr>attempting to reduce expression " << theExpression.ToString();
     (*theLog) << " by pattern " << thePattern.ToString();
   }
@@ -695,10 +707,10 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub
   if (isConditionalDefine)
     theCondition=&thePattern[2];
   Expression* toBeSubbed=this->PatternMatch
-  (currentPattern, theExpression, bufferPairs, theCondition, theLog, logAttempts);
+  (currentPattern, theExpression, bufferPairs, theCondition, theLog);
   if (toBeSubbed==0)
     return false;
-  if (theLog!=0 && logAttempts)
+  if (theLog!=0)
     *theLog << "<br><b>found a match!</b>";
   if (isConditionalDefine)
     *toBeSubbed=thePattern[3];

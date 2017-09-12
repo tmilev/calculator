@@ -688,10 +688,12 @@ std::string HtmlInterpretation::GetEditPageHTML()
     outBody << "<b>Failed to parse file: " << theFile.fileName
     << ".</b> Details:<br>" << failureStream.str();
   HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
+  theFile.initBuiltInSpanClasses();
   if (theFile.flagIsExamProblem)
   { Calculator tempCalculator;
     tempCalculator.init();
     tempCalculator.ComputeAutoCompleteKeyWords();
+    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClasses);
     theAutocompleteKeyWords.AddOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
   } else
   { theFile.LoadAndParseTopicList(outBody);

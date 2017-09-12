@@ -234,6 +234,11 @@ int Pipe::WriteWithTimeoutViaSelect
 int Pipe::ReadWithTimeOutViaSelect
 (int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("Pipe::ReadWithTimeOutViaSelect");
+  if (theFD<0)
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "Attempting to read from a negative file descriptor: " << theFD;
+    return -1;
+  }
   fd_set theFDcontainer;
   FD_ZERO(&theFDcontainer);
   FD_SET(theFD, &theFDcontainer);
@@ -253,6 +258,7 @@ int Pipe::ReadWithTimeOutViaSelect
     << strerror(errno) << ". \n";
     numFails++;
   } while (numSelected<0);
+  //numSelected==0 most probably means timeout has expired.
   if (numSelected<=0)
   { if (commentsOnFailure!=0)
       *commentsOnFailure << failStream.str();

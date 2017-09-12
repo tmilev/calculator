@@ -875,25 +875,25 @@ bool CalculatorFunctionsGeneral::innerMatchesPattern(Calculator& theCommands, co
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMatchesPattern");
   if (input.size()!=3)
     return false;
-  BoundVariablesSubstitution matchedExpressions;
-  if(!theCommands.ExpressionMatchesPattern(input[2], input[1], matchedExpressions))
+  MapLisT<Expression, Expression> matchedExpressions;
+  if (!theCommands.ExpressionMatchesPattern(input[2], input[1], matchedExpressions, &theCommands.Comments))
     return output.AssignValue(0, theCommands);
   Expression commandList;
   commandList.reset(theCommands);
   commandList.AddChildAtomOnTop(theCommands.opEndStatement());
-  for (int i=0; i<matchedExpressions.theBoundVariables.size; i++)
+  for (int i=0; i<matchedExpressions.size(); i++)
   { Expression currentCommand;
     //stOutput << "<hr>DEBUG: Bound var: " << matchedExpressions.theBoundVariables[i].ToString()
     //<< ", image: " << matchedExpressions.variableImages[i].ToString();
-    if (!matchedExpressions.theBoundVariables[i].StartsWith(theCommands.opBind(),2) )
+    if (!matchedExpressions.theKeys[i].StartsWith(theCommands.opBind(), 2) )
     { std::stringstream errorStream;
-      errorStream << "Bound variable " << matchedExpressions.theBoundVariables[i].ToString()
+      errorStream << "Bound variable " << matchedExpressions.theKeys[i].ToString()
       << " does not start with the bind atom. ";
       return output.MakeError(errorStream.str(), theCommands);
     }
     currentCommand.MakeXOX
-    (theCommands, theCommands.opDefine(), matchedExpressions.theBoundVariables[i][1],
-     matchedExpressions.variableImages[i]);
+    (theCommands, theCommands.opDefine(), matchedExpressions.theKeys[i][1],
+     matchedExpressions.theValues[i]);
     commandList.AddChildOnTop(currentCommand);
   }
   output.reset(theCommands);

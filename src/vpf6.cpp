@@ -90,14 +90,6 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
   return true;
 }
 
-std::string BoundVariablesSubstitution::ToString()
-{ std::stringstream out;
-  out << "the pairs: ";
-  for (int i=0; i<this->theBoundVariables.size; i++)
-    out << this->theBoundVariables[i].ToString() << "->" << this->variableImages[i].ToString() << "<br>";
-  return out.str();
-}
-
 template <class coefficient>
 bool ModuleSSalgebra<coefficient>::IsNotInParabolic(int theGeneratorIndex)
 { Vector<Rational> theWeight=this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);

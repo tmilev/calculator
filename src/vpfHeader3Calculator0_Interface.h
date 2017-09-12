@@ -605,18 +605,6 @@ class Function
   }
 };
 
-class BoundVariablesSubstitution
-{
-public:
-  std::string ToString();
-  HashedList<Expression> theBoundVariables;
-  HashedList<Expression> variableImages;
-  void reset()
-  { this->theBoundVariables.Clear();
-    this->variableImages.Clear();
-  }
-};
-
 class SyntacticElement
 {
   public:
@@ -1749,12 +1737,12 @@ public:
   bool AppendSummandsReturnTrueIfOrderNonCanonical(const Expression& theExpression, List<Expression>& output)
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus());
   }
-  void SpecializeBoundVars(Expression& toBeSubbedIn, BoundVariablesSubstitution& matchedPairs);
+  void SpecializeBoundVars(Expression& toBeSubbedIn, MapLisT<Expression, Expression>& matchedPairs);
   Expression* PatternMatch
-  (const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, const Expression* condition=0,
-   std::stringstream* theLog=0, bool logAttempts=false);
+  (const Expression& thePattern, Expression& theExpression, MapLisT<Expression, Expression>& bufferPairs, const Expression* condition=0,
+   std::stringstream* theLog=0);
   bool ProcessOneExpressionOnePatternOneSub
-  (const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* theLog=0, bool logAttempts=false);
+  (const Expression& thePattern, Expression& theExpression, MapLisT<Expression, Expression>& bufferPairs, std::stringstream* theLog=0);
   static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output)
   { if (&input==&output)
       crash << "This is a programming error: the input expression, equal to " << input.ToString() << " has the same address as the output expression. "
@@ -1795,7 +1783,9 @@ public:
     return !output.IsError();
   }
   bool ExpressionMatchesPattern
-  (const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions, std::stringstream* theLog=0);
+  (const Expression& thePattern, const Expression& input,
+   MapLisT<Expression, Expression>& matchedExpressions,
+   std::stringstream* commentsGeneral=0);
   static bool innerLogEvaluationStepsHumanReadableNested(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLogEvaluationStepsHumanReadableMerged(Calculator& theCommands, const Expression& input, Expression& output);
 

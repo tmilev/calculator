@@ -941,8 +941,15 @@ std::string CourseAndUserInfo::ToStringHumanReadable()
   std::stringstream out;
   out
   << "<table><tr><td style=\"text-align:right\"><b>Instructor:&nbsp;</b></td><td>" << this->instructorComputed << "</td></tr>"
-  << "<tr><td style=\"text-align:right\"><b>Course:&nbsp;</b></td><td>" << this->courseComputed << "</td></tr>"
-  << "<tr><td style=\"text-align:right\"><b><b>Section:&nbsp;</b></td><td>" << this->sectionComputed << "</td></tr>";
+  << "<tr><td style=\"text-align:right\"><b>Course:&nbsp;</b></td><td>" << this->courseComputed << "</td></tr>";
+  if ( this->courseComputed.find("%")!=std::string::npos)
+  { out << "<tr><td style=\"text-align:right\"><b style=\"color:red\">Possible error:&nbsp;</b></td><td>"
+    << "<b style=\"color:red\">Your course name contains the % sign.<br> "
+    << "This is unexpected behavior which may or may not be a bug.<br>"
+    << "Please report the issue using our bug tracker (top right corner of the page). <br>"
+    << "If possible, attach a screenshot. <br>Thanks in advance!</b>"<< "</td></tr>";
+  }
+  out << "<tr><td style=\"text-align:right\"><b>Section:&nbsp;</b></td><td>" << this->sectionComputed << "</td></tr>";
   out
   << "<tr><td style=\"text-align:right\"><b>Deadline schema:&nbsp;</b></td><td>" << this->deadlineSchemaIDComputed
   << "</td><td>(computed from your instructor and course name)" << "</td></tr>"
@@ -1020,7 +1027,11 @@ bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
   else
     this->courseInfo.sectionComputed=this->courseInfo.getSectionInDB();
   if (isAdmin && theGlobalVariables.GetWebInput("courseHome")!="")
-    this->courseInfo.courseComputed=theGlobalVariables.GetWebInput("courseHome");
+    this->courseInfo.courseComputed=
+    HtmlRoutines::ConvertURLStringToNormal(
+    theGlobalVariables.GetWebInput("courseHome")
+    , false)
+    ;
   else
     this->courseInfo.courseComputed=theCourseInfo[DatabaseStrings::columnCurrentCourses].string;
   if (isAdmin)

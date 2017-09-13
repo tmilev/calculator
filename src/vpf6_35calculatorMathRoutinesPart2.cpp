@@ -1217,7 +1217,7 @@ bool CalculatorFunctionsGeneral::innerPlotPath(Calculator& theCommands, const Ex
     const Expression& colorE=input[2];
     if (!colorE.IsOfType<std::string>(&theSegment.colorJS))
       theSegment.colorJS= colorE.ToString();
-    if(!DrawingVariables::GetColorIntFromColorString
+    if (!DrawingVariables::GetColorIntFromColorString
         (theSegment.colorJS, theSegment.colorRGB))
       theCommands << "Unrecognized color: " << theSegment.colorJS;
   }

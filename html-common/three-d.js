@@ -1020,6 +1020,10 @@ function CanvasTwoD(inputCanvas)
   this.mouseWheel=function(wheelDelta, screenX, screenY)
   { var screenPos=this.coordsScreenAbsoluteToScreen(screenX, screenY);
     var mathScreenPos= this.coordsScreenToMathScreen(screenPos);
+    if (wheelDelta/this.scale>0.1)
+      wheelDelta=this.scale*0.1;
+    if (wheelDelta/this.scale<-0.1)
+      wheelDelta=-this.scale*0.1;
     this.scale+=wheelDelta;
     if (this.scale<=0)
       this.scale=1;

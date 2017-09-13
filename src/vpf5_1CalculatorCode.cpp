@@ -1611,9 +1611,12 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     }
     out << "theCanvas.drawPath( ";
     out << currentPlot.ToStringPointsList();
-    out << ", "
-    << "\"" << DrawingVariables::GetColorHtmlFromColorIndex
-    (currentPlot.colorRGB) << "\"";
+    out << ", " << "\"";
+    if (currentPlot.colorJS=="")
+      out << DrawingVariables::GetColorHtmlFromColorIndex (currentPlot.colorRGB);
+    else
+      out << currentPlot.colorJS;
+    out << "\"";
     if (currentPlot.lineWidthJS!="")
       out << ", " << "\"" << currentPlot.lineWidthJS << "\"";
     else

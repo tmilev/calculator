@@ -1487,7 +1487,6 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   std::stringstream out;
   //std::string userRole = adminsOnly ? "admin" : "student";
   int numUsers=0;
-  std::stringstream tableStream;
   bool flagFilterCourse=(!adminsOnly) && (theGlobalVariables.GetWebInput("filterAccounts")=="true");
   std::string currentCourse=
   HtmlRoutines::ConvertURLStringToNormal(
@@ -1495,7 +1494,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   , false)
   ;
   if (flagFilterCourse)
-  { tableStream << "<br>Displaying only students in course: <span style=\"color:blue\"><b>"
+  { out << "<br>Displaying only students in course: <span style=\"color:blue\"><b>"
     << currentCourse << "</b></span>. "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=accounts&"
@@ -1504,9 +1503,6 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     << "\">Show all. </a>"
     << "<br>";
   }
-  tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
-  << "<th>Activation manual email</th>"
-  << " <th>Pre-filled login link</th><th>Course info</th></tr>";
   UserCalculator currentUser;
   currentUser.currentTable=DatabaseStrings::tableUsers;
   int indexUser=-1;
@@ -1528,11 +1524,11 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       indexCourseInfo=i;
   }
   if (
-      indexUser           ==-1 ||
-      indexEmail          ==-1 ||
-      indexActivationToken==-1 ||
-      indexUserRole       ==-1 ||
-      indexCourseInfo     ==-1
+      indexUser            ==-1 ||
+      indexEmail           ==-1 ||
+      indexActivationToken ==-1 ||
+      indexUserRole        ==-1 ||
+      indexCourseInfo      ==-1
       )
   { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
     << "column entries in the database. "
@@ -1545,20 +1541,37 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     ;
     return out.str();
   }
-  HashedList<std::string, MathRoutines::hashString> sectionNames;
+  HashedList<std::string, MathRoutines::hashString> sectionIDs;
+  List<std::string> theSections;
+
   List<List<std::string> > activatedAccountBucketsBySection;
+  List<List<std::string> > preFilledLinkBucketsBySection;
   List<List<std::string> > nonActivatedAccountBucketsBySection;
   for (int i=0; i<userTable.size; i++)
   { currentUser.reset();
     currentUser.courseInfo.rawStringStoredInDB=userTable[i][indexCourseInfo];
-    currentUser.AssignCourseInfoString(&tableStream);
-    sectionNames.AddOnTopNoRepetition(currentUser.courseInfo.getSectionInDB());
+    currentUser.AssignCourseInfoString(&out);
+    if (flagFilterCourse &&
+        ( currentUser.courseInfo.getCurrentCourseInDB()!=currentCourse ||
+          currentUser.courseInfo.getInstructorInDB()!=theGlobalVariables.userDefault.username.value)
+        )
+      continue;
+    std::string currentID=currentUser.ToStringIdSectionCourse();
+    if (!sectionIDs.Contains(currentID))
+    { std::stringstream currentSectionInfo;
+      currentSectionInfo << "<b>Section: </b>" << currentUser.courseInfo.getSectionInDB()
+      << ", <b>Course: </b>" << currentUser.courseInfo.getCurrentCourseInDB()
+      << ", <b>Instructor: </b>" << currentUser.courseInfo.getInstructorInDB();
+      theSections.AddOnTop(currentSectionInfo.str());
+      sectionIDs.AddOnTopNoRepetition(currentID);
+    }
   }
-  sectionNames.QuickSortAscending();
-  activatedAccountBucketsBySection.SetSize(sectionNames.size);
-  nonActivatedAccountBucketsBySection.SetSize(sectionNames.size);
+  sectionIDs.QuickSortAscending(0, &theSections);
+  //out << "DEBUG: Section ids: " << sectionIDs.ToStringCommaDelimited();
+  activatedAccountBucketsBySection.SetSize(sectionIDs.size);
+  nonActivatedAccountBucketsBySection.SetSize(sectionIDs.size);
+  preFilledLinkBucketsBySection.SetSize(sectionIDs.size);
   int numActivatedUsers=0;
-  std::stringstream preFilledLoginLinks;
   for (int i=0; i<userTable.size; i++)
   { currentUser.username=userTable[i][indexUser];
     currentUser.email=userTable[i][indexEmail];
@@ -1566,6 +1579,8 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     currentUser.userRole=userTable[i][indexUserRole];
     currentUser.courseInfo.rawStringStoredInDB=userTable[i][indexCourseInfo];
     currentUser.AssignCourseInfoString(&out);
+    std::string currentCourseID=currentUser.ToStringIdSectionCourse();
+
     //if (currentUser. currentCourses.value.find('%')!=std::string::npos)
     //{ out << "<span style=\"color:red\"><b>Non-expected behavior: user: "
     //  << currentUser.username.value
@@ -1573,7 +1588,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     //  << currentUser.currentCourses.value
     //  << " contains the % symbol. </b></span><br>";
     //}
-    if (!adminsOnly && flagFilterCourse && currentUser.courseInfo.getCurrentCourseInDB()!=currentCourse)
+    if (!adminsOnly && !sectionIDs.Contains(currentCourseID))
       continue;
     if (adminsOnly xor (currentUser.userRole=="admin"))
       continue;
@@ -1609,7 +1624,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
       << HtmlRoutines::ConvertStringToURLString( UserCalculator::GetActivationAddressFromActivationToken
         (currentUser.actualActivationToken.value, hostWebAddressWithPort,
-         userTable[i][indexUser], currentUser.email.value), false )
+         userTable[i][indexUser], currentUser.email.value), false)
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
       << " Once you activate your account, you can log in safely here: \n"
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
@@ -1632,30 +1647,57 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     oneTableLineStream << "<td>" << oneLink.str() << "</td>";
     oneTableLineStream << "<td>" << userTable[i][indexCourseInfo] << "</td>";
     //oneTableLineStream << "<td>" << currentUser.courseInfo.ToStringHumanReadable() << "</td>";
-    preFilledLoginLinks << oneLink.str() << "<br>";
     oneTableLineStream << "</tr>";
-    if (isActivated)
-      activatedAccountBucketsBySection[sectionNames.GetIndex( currentUser.courseInfo.getSectionInDB() )]
-      .AddOnTop(oneTableLineStream.str());
-    else
-      nonActivatedAccountBucketsBySection[sectionNames.GetIndex(currentUser.courseInfo.getSectionInDB() )]
-      .AddOnTop(oneTableLineStream.str());
+
+    int indexCurrentBucket=sectionIDs.GetIndex(currentCourseID);
+    if (indexCurrentBucket!=-1)
+    { if (isActivated)
+        activatedAccountBucketsBySection[indexCurrentBucket].AddOnTop(oneTableLineStream.str());
+      else
+        nonActivatedAccountBucketsBySection[indexCurrentBucket].AddOnTop(oneTableLineStream.str());
+      preFilledLinkBucketsBySection[indexCurrentBucket].AddOnTop(oneLink.str());
+    }
   }
   for (int i=0; i<nonActivatedAccountBucketsBySection.size; i++)
     nonActivatedAccountBucketsBySection[i].QuickSortAscending();
   for (int i=0; i<activatedAccountBucketsBySection.size; i++)
     activatedAccountBucketsBySection[i].QuickSortAscending();
+  for (int i=0; i<preFilledLinkBucketsBySection.size; i++)
+    preFilledLinkBucketsBySection[i].QuickSortAscending();
+  std::stringstream tableStream;
+  tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
+  << "<th>Activation manual email</th>"
+  << " <th>Pre-filled login link</th><th>Course info</th></tr>";
   for (int i=0; i<nonActivatedAccountBucketsBySection.size; i++)
+  { if (!adminsOnly)
+      if (nonActivatedAccountBucketsBySection[i].size>0)
+        tableStream << "<tr><td colspan=\"6\" style=\"text-align:center\">" << theSections[i] << "</td></tr>";
     for (int j=0; j<nonActivatedAccountBucketsBySection[i].size; j++)
       tableStream << nonActivatedAccountBucketsBySection[i][j];
-    for (int i=0; i<activatedAccountBucketsBySection.size; i++)
-      for (int j=0; j<activatedAccountBucketsBySection[i].size; j++)
-        tableStream << activatedAccountBucketsBySection[i][j];
-    tableStream << "</table>";
-    out << "\n" << numUsers << " user(s)";
-    if (numActivatedUsers>0)
-      out << ", <span style=\"color:red\">" << numActivatedUsers << " have not activated their accounts. </span>";
-    out << tableStream.str() << preFilledLoginLinks.str();
+  }
+  for (int i=0; i<activatedAccountBucketsBySection.size; i++)
+  { if (!adminsOnly)
+      if (activatedAccountBucketsBySection[i].size>0)
+        tableStream << "<tr><td colspan=\"7\" style=\"text-align:center\">"
+        << theSections[i] << "</td></tr>";
+    for (int j=0; j<activatedAccountBucketsBySection[i].size; j++)
+      tableStream << activatedAccountBucketsBySection[i][j];
+  }
+  tableStream << "</table>";
+  std::stringstream preFilledLoginLinks;
+  if (!adminsOnly)
+  { for (int i=0; i<preFilledLinkBucketsBySection.size; i++)
+    { if (preFilledLinkBucketsBySection[i].size>0)
+        preFilledLoginLinks << theSections[i] << "<br>";
+      for (int j=0; j<preFilledLinkBucketsBySection[i].size; j++)
+        preFilledLoginLinks << preFilledLinkBucketsBySection[i][j] << "<br>";
+    }
+  }
+  out << "\n" << numUsers << " user(s)";
+  if (numActivatedUsers>0)
+    out << ", <span style=\"color:red\">" << numActivatedUsers
+    << " have not activated their accounts. </span>";
+  out << tableStream.str() << preFilledLoginLinks.str();
 
   return out.str();
 #else
@@ -2052,15 +2094,18 @@ std::string HtmlInterpretation::ToStringUserDetails
   std::string idExtraTextarea= "inputAddExtraInfo"+userRole;
   std::string idOutput="idOutput"+userRole;
   std::string idPasswordTextarea="inputAddDefaultPasswords"+userRole;
-  out << "Add/update <b>" << userRole << "(s)</b>.\n<br> ";
-  out << "Both newly added and updated users will "
-  << "have their current course set to: "
-  << "<span style=\"color:purple\"><b>"
-  << theGlobalVariables.GetWebInput("courseHome")
-  << "</b></span>.\n"
-  << "<br>\nUpdated fields: "
-  << "section, password, current course and problem weight schema.<br>\n";
-//  out << "<b>Warning: there's no remove button yet.</b><br>";
+  out << "<ul><li>Add <b>" << userRole << "(s)</b> here.</li> ";
+  out << "<li>Added/updated users will have their current course set to: <br>"
+  << "<span class=\"currentCourseIndicator\">"
+  << HtmlRoutines::ConvertURLStringToNormal( theGlobalVariables.GetWebInput("courseHome"), false)
+  << "</span></li>"
+  << "<li>To change course use the select course link in the top panel.</li>"
+  << "<li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>"
+  << "<li>List default passwords with a similarly separated list.</li> "
+  << "<li>If left blank, password(s) are not (re)set.</li> "
+  << "<li>If the password entries are not left blank and the number of passwords "
+  << "does not match the number of added users, the operation will fail (no users will be added).</li> "
+  << "</ul>\n";
   out << "<textarea width=\"500px\" ";
   out << "id=\"" << idAddressTextarea << "\"";
   out << "placeholder=\"user list, comma, space or ; separated\">";

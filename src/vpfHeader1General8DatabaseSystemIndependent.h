@@ -116,6 +116,7 @@ class UserCalculatorData
   bool flagUserHasNoPassword;
   UserCalculatorData();
   bool AssignCourseInfoString(std::stringstream* errorStream);
+  std::string ToStringIdSectionCourse();
   void reset();
   void clearPasswordFromMemory();
   void clearAuthenticationTokenAndPassword();

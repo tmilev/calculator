@@ -621,6 +621,19 @@ panelProblemLinkStyleSelection{
 panelProblemLinkStyleSelection:hover{
   background-color: #dfdfdf;
 }
+span.currentCourseIndicator{
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  background-color: #eaeaea;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  font-size: 1.25em;
+  font-weight: bold;
+  border-radius: 3px;
+  transition: 0.6s;
+}
+
 .textInputUsername{
 font-size: 0.9em;
 font-weight: bold;

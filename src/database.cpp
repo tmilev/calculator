@@ -1013,6 +1013,12 @@ std::string CourseAndUserInfo::ToStringForDBStorage()
   return this->courseInfoJSON.GetElement().ToString(false);
 }
 
+std::string UserCalculatorData::ToStringIdSectionCourse()
+{ return this->courseInfo.getInstructorInDB()+
+  this->courseInfo.getSectionInDB()+this->courseInfo.getCurrentCourseInDB();
+
+}
+
 bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
 { MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
   JSData& theCourseInfo=this->courseInfo.courseInfoJSON.GetElement();

@@ -876,7 +876,7 @@ bool CalculatorFunctionsGeneral::innerMatchesPattern(Calculator& theCommands, co
   if (input.size()!=3)
     return false;
   MapLisT<Expression, Expression> matchedExpressions;
-  if (!theCommands.ExpressionMatchesPattern(input[2], input[1], matchedExpressions, &theCommands.Comments))
+  if (!theCommands.ExpressionMatchesPattern(input[2], input[1], matchedExpressions, 0))
     return output.AssignValue(0, theCommands);
   Expression commandList;
   commandList.reset(theCommands);

@@ -9,6 +9,8 @@
 ProjectInformationInstance projectInfoInstanceHtmlSnippets
 (__FILE__, "Html Snippets.");
 
+MapLisT<std::string, std::string, MathRoutines::hashString> HtmlRoutines::preLoadedFiles;
+
 std::string HtmlRoutines::GetJavascriptSubmitEmails()
 { std::stringstream out;
   std::string deadlineInfoRowId="defaultDeadlines";
@@ -45,7 +47,7 @@ std::string HtmlRoutines::GetJavascriptSubmitEmails()
   return out.str();
 }
 
-std::string HtmlRoutines::GetJavascriptHideHtml()
+std::string HtmlRoutines::GetJavascriptHideHtmlWithTags()
 { std::stringstream output;
   output << " <!>\n";
   output << " <script type=\"text/javascript\"> \n";
@@ -67,97 +69,27 @@ std::string HtmlRoutines::GetJavascriptHideHtml()
   return output.str();
 }
 
-std::string HtmlRoutines::GetJavascriptCookieFunctions()
-{ std::stringstream out;
-  out
-  << "function getCookie(c_name)\n"
-  << "{ VPFcookie=document.cookie.split(\";\");\n"
-  << "  for (i=0;i<VPFcookie.length;i++)\n"
-  << "  { x=VPFcookie[i].substr(0,VPFcookie[i].indexOf(\"=\"));\n"
-  << "  	y=VPFcookie[i].substr(VPFcookie[i].indexOf(\"=\")+1);\n"
-  << "    x=x.replace(/^\\s+|\\s+$/g,\"\");\n"
-  << "    if (x==c_name)\n"
-  << "      return unescape(y);\n"
-  << "  }\n"
-  << "  return \"\";\n"
-  << "}\n"
-  << "\n"
-  << "function addCookie(theName, theValue, exdays, secure)\n"
-  << "{ exdate= new Date();\n"
-  << "  exdate.setDate(exdate.getDate() + exdays);\n"
-  << "  c_value=escape(theValue) + ((exdays==null) ? \"\" : \"; expires=\"+exdate.toUTCString());\n"
-  << "  if(secure)\n"
-  << "    c_value+=\"; Secure\"; \n"
-  << "  document.cookie=theName + \"=\" + c_value+\"; Path=/;\";\n"
-  << "}\n";
-  return out.str();
+const std::string& HtmlRoutines::GetJavascriptCookieFunctionsNoTags()
+{ return HtmlRoutines::GetFile("html-common-calculator/cookie-functions.js");
 }
 
-std::string HtmlRoutines::GetJavascriptProblemLinksWithTags()
+const std::string& HtmlRoutines::GetJavascriptProblemLinksWithTags()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptProblemLinksWithTags");
-  if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::JavascriptProblemLinksWithTags!="")
-      return HtmlRoutines::JavascriptProblemLinksWithTags;
-
-  std::stringstream out, commentsOnFailure;
-  std::string fileReader;
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/problemlinkstyles.js", fileReader, commentsOnFailure))
-    out << "Javascript file problemlinkstyles.js not found. ";
-  else
-    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
-  if (theGlobalVariables.flagCachingInternalFilesOn)
-    HtmlRoutines::JavascriptProblemLinksWithTags=out.str();
-  return out.str();
+  return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/problemlinkstyles.js");
 }
 
-std::string HtmlRoutines::GetJavascriptTopicListWithTags()
+const std::string& HtmlRoutines::GetJavascriptTopicListWithTags()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptTopicListWithTags");
-  if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::JavascriptTopicListWithTags!="")
-      return HtmlRoutines::JavascriptTopicListWithTags;
-  std::stringstream out, commentsOnFailure;
-  std::string fileReader;
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/topiclist.js", fileReader, commentsOnFailure))
-    out << "Javascript file topiclist.js not found. ";
-  else
-    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
-//  HtmlRoutines::JavascriptAceEditorScript=out.str();
-//  return HtmlRoutines::JavascriptAceEditorScript;
-  if (theGlobalVariables.flagCachingInternalFilesOn)
-    HtmlRoutines::JavascriptTopicListWithTags=out.str();
-  return out.str();
+  return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/topiclist.js");
 }
 
-std::string HtmlRoutines::GetJavascriptCanvasGraphicsWithTags()
-{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptCanvasGraphicsWithTags");
-  if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::JavascriptCanvasGraphicsWithTags!="")
-      return HtmlRoutines::JavascriptCanvasGraphicsWithTags;
-  std::stringstream out, commentsOnFailure;
-  std::string fileReader;
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/three-d.js", fileReader, commentsOnFailure))
-    out << "Javascript file three-d.js not found. ";
-  else
-    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
-  if (theGlobalVariables.flagCachingInternalFilesOn)
-    HtmlRoutines::JavascriptCanvasGraphicsWithTags=out.str();
-  return out.str();
+const std::string& HtmlRoutines::GetJavascriptCanvasGraphicsWithTags()
+{ return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/three-d.js");
 }
 
-std::string HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags()
+const std::string& HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags");
-  if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::JavascriptDBroutinesWithTags!="")
-      return HtmlRoutines::JavascriptDBroutinesWithTags;
-  std::stringstream out, commentsOnFailure;
-  std::string fileReader;
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/database-routines.js", fileReader, commentsOnFailure))
-    out << "Javascript file database-routines.js not found. ";
-  else
-    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
-  if (theGlobalVariables.flagCachingInternalFilesOn)
-    HtmlRoutines::JavascriptDBroutinesWithTags=out.str();
-  return out.str();
+  return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/database-routines.js");
 }
 
 std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar)
@@ -260,25 +192,12 @@ std::string HtmlRoutines::GetMathSpanBeginArrayL(const std::string& input, int u
     return HtmlRoutines::GetMathSpanPure(input, upperNumChars);
 }
 
-std::string HtmlRoutines::StyleSheetCalculatorWithTags;
-std::string HtmlRoutines::StyleSheetMathQuillWithTags;
-std::string HtmlRoutines::JavascriptAutoCompleteWithTags;
-std::string HtmlRoutines::JavascriptSha1;
-std::string HtmlRoutines::JavascriptMathjax;
-std::string HtmlRoutines::JavascriptMathQuillMatrixSupport;
-std::string HtmlRoutines::JavascriptMathQuillDefault;
-std::string HtmlRoutines::JavascriptInitializeButtons;
-std::string HtmlRoutines::JavascriptAceEditorScript;
-std::string HtmlRoutines::JavascriptCalculatorPage;
-std::string HtmlRoutines::JavascriptAccountManagement;
-std::string HtmlRoutines::JavascriptProblemLinksWithTags;
-std::string HtmlRoutines::JavascriptTopicListWithTags;
-std::string HtmlRoutines::JavascriptCanvasGraphicsWithTags;
-std::string HtmlRoutines::JavascriptDBroutinesWithTags;
-
 void HtmlRoutines::LoadStrings()
-{ HtmlRoutines::GetMathQuillStyleSheetWithTags();
-  HtmlRoutines::GetJavascriptInitializeButtons();
+{ if (HtmlRoutines::preLoadedFiles.size()>0)
+    return;
+  HtmlRoutines::GetJavascriptCookieFunctionsNoTags();
+  HtmlRoutines::GetMathQuillStyleSheetWithTags();
+  HtmlRoutines::GetJavascriptInitializeButtonsWithTags();
   HtmlRoutines::GetJavascriptAceEditorScript();
   HtmlRoutines::GetJavascriptCalculatorPage();
   HtmlRoutines::GetJavascriptAccountManagementWithTags();
@@ -286,190 +205,103 @@ void HtmlRoutines::LoadStrings()
   HtmlRoutines::GetJavascriptAutocompleteWithTags();
   HtmlRoutines::GetJavascriptSha1();
   HtmlRoutines::GetJavascriptMathjax();
-  HtmlRoutines::GetJavascriptMathQuillDefault();
-  HtmlRoutines::GetJavascriptMathQuillMatrixSupport();
-  HtmlRoutines::GetJavascriptCanvasGraphicsWithTags();
-  HtmlRoutines::GetJavascriptTopicListWithTags();
+  HtmlRoutines::GetJavascriptMathQuillDefaultWithTags();
+  HtmlRoutines::GetJavascriptMathQuillMatrixSupportWithTags();
   HtmlRoutines::GetJavascriptProblemLinksWithTags();
   HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags();
+  HtmlRoutines::GetJavascriptCanvasGraphicsWithTags();
+  HtmlRoutines::GetJavascriptTopicListWithTags();
 }
 
 extern logger theLog;
 
-std::string& HtmlRoutines::GetJavascriptCalculatorPage()
+const std::string& HtmlRoutines::GetJavascriptCalculatorPage()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptCalculatorPage");
+  return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/calculatorPage.js");
+}
+
+const std::string& HtmlRoutines::GetJavascriptAccountManagementWithTags()
+{ return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/account-management.js");
+}
+
+const std::string& HtmlRoutines::GetJavascriptAceEditorScript()
+{ return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/ace-editor-settings.js");
+}
+
+const std::string& HtmlRoutines::GetFile
+(const std::string& fileNameVirtual, const std::string& additionalBeginTag,
+ const std::string& additionalEndTag)
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetFile");
+  std::string theID = fileNameVirtual+additionalBeginTag+additionalEndTag;
   if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::JavascriptCalculatorPage!="")
-      return HtmlRoutines::JavascriptCalculatorPage;
+    if (HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent(theID)!="")
+      return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent(theID);
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
-  bool found=true;
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/calculatorPage.js", fileReader, commentsOnFailure))
-  { theLog << logger::red  << "Javascript file calculatorPage.js not found. " << logger::endL;
-    found=false;
-  }
-  if (found)
-    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
-  HtmlRoutines::JavascriptCalculatorPage=out.str();
-  return HtmlRoutines::JavascriptCalculatorPage;
-}
-
-std::string& HtmlRoutines::GetJavascriptAccountManagementWithTags()
-{ if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::JavascriptAccountManagement!="")
-      return HtmlRoutines::JavascriptAccountManagement;
-  std::stringstream out, commentsOnFailure;
-  std::string fileReader;
-  bool found=true;
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/account-management.js", fileReader, commentsOnFailure))
-  { theLog << logger::red  << "Javascript file calculatorPage.js not found. " << logger::endL;
-    found=false;
-  }
-  if (found)
-    out << "<script type=\"text/javascript\">" << fileReader << "</script>";
-  HtmlRoutines::JavascriptAccountManagement=out.str();
-  return HtmlRoutines::JavascriptAccountManagement;
-}
-
-std::string& HtmlRoutines::GetJavascriptAceEditorScript()
-{ if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::JavascriptAceEditorScript!="")
-      return HtmlRoutines::JavascriptAceEditorScript;
-  std::stringstream out, commentsOnFailure;
-  std::string fileReader;
-  bool found=true;
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/ace.min.js", fileReader, commentsOnFailure))
-  { theLog << logger::red  << "Javascript file ace.min.js not found. " << logger::endL;
-    found=false;
-  }
-  if (found)
-    out << "<script type=\"text/javascript\" src=\"/html-common-calculator/ace/src-min/ace.js\" charset=\"utf-8\"></script>";
+  if (FileOperations::LoadFileToStringVirtual(fileNameVirtual, fileReader, commentsOnFailure))
+    out << additionalBeginTag << fileReader << additionalEndTag;
   else
-    out << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\""
-    << " type=\"text/javascript\" charset=\"utf-8\"></script>\n";
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/ace-editor-settings.js", fileReader, commentsOnFailure))
-  { theLog << logger::red  << "Javascript file ace-editor-settings.js not found. " << logger::endL;
-    found=false;
+  { theLog << logger::red << "File: "
+    << fileNameVirtual << " not found. " << logger::endL;
+    out << "<b style=\"color:red\">Failed to load file: " << fileNameVirtual
+    << ". Comments: " << commentsOnFailure.str() << "</b>";
   }
-  out << "<script type=\"text/javascript\">\n";
-  out << fileReader;
-  out << "\n</script>";
-  HtmlRoutines::JavascriptAceEditorScript=out.str();
-  return HtmlRoutines::JavascriptAceEditorScript;
+  HtmlRoutines::preLoadedFiles.SetKeyValue(theID, out.str());
+  return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent(theID);
 }
 
-std::string& HtmlRoutines::GetJavascriptInitializeButtons()
-{ if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::JavascriptInitializeButtons!="")
-      return HtmlRoutines::JavascriptInitializeButtons;
-  std::stringstream out, commentsOnFailure;
-  std::string fileReader;
-  out << "<script type=\"text/javascript\">";
-  bool found=true;
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/initializebuttons.js", fileReader, commentsOnFailure))
-  { theLog << logger::red  << "Javascript file initializebuttons.js not found. " << logger::endL;
-    found=false;
-  }
-  if (found)
-    out << fileReader;
-  out << "</script>";
-  HtmlRoutines::JavascriptInitializeButtons=out.str();
-  return HtmlRoutines::JavascriptInitializeButtons;
+const std::string& HtmlRoutines::GetJavascriptAddScriptTags(const std::string& fileNameVirtual)
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptAddScriptTags");
+  return HtmlRoutines::GetFile(fileNameVirtual, "<script>", "</script>");
 }
 
-std::string& HtmlRoutines::GetMathQuillStyleSheetWithTags()
-{ if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::StyleSheetMathQuillWithTags!="")
-      return HtmlRoutines::StyleSheetMathQuillWithTags;
-  std::stringstream out, commentsOnFailure;
-  std::string fileReader;
-  out << "<style>";
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/mathquill.css", fileReader, commentsOnFailure))
-  { theLog << logger::red  << "Style file mathquill.css is missing. " << logger::endL;
-    out << "Style file mathquill.css is missing. ";
-  } else
-    out << fileReader;
-  out << "</style>";
-  HtmlRoutines::StyleSheetMathQuillWithTags=out.str();
-  return HtmlRoutines::StyleSheetMathQuillWithTags;
+const std::string& HtmlRoutines::GetCSSAddStyleTags(const std::string& fileNameVirtual)
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetCSSAddStyleTags");
+  return HtmlRoutines::GetFile(fileNameVirtual, "<style>", "</style>");
 }
 
-std::string& HtmlRoutines::GetCalculatorStyleSheetWithTags()
-{ if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::StyleSheetCalculatorWithTags!="")
-      return HtmlRoutines::StyleSheetCalculatorWithTags;
-  std::stringstream out, commentsOnFailure;
-  std::string fileReader;
-  out << "<style>";
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/styleCalculator.css", fileReader, commentsOnFailure))
-    out << commentsOnFailure.str();
-  else
-    out << fileReader;
-  out << "</style>";
-  HtmlRoutines::StyleSheetCalculatorWithTags=out.str();
-  return HtmlRoutines::StyleSheetCalculatorWithTags;
+const std::string& HtmlRoutines::GetJavascriptInitializeButtonsWithTags()
+{ return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/initializebuttons.js");
 }
 
-std::string& HtmlRoutines::GetJavascriptMathQuillDefault()
-{ if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::JavascriptMathQuillDefault!="")
-      return HtmlRoutines::JavascriptMathQuillDefault;
-  std::stringstream commentsOnError;
-  std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/mathquill.min.js", theJS, commentsOnError))
-  { HtmlRoutines::JavascriptMathQuillDefault=commentsOnError.str();
-    return HtmlRoutines::JavascriptMathQuillDefault;
-  }
-  std::stringstream out;
+const std::string& HtmlRoutines::GetMathQuillStyleSheetWithTags()
+{ return HtmlRoutines::GetCSSAddStyleTags("html-common-calculator/mathquill.css");
+}
+
+const std::string& HtmlRoutines::GetCalculatorStyleSheetWithTags()
+{ return HtmlRoutines::GetCSSAddStyleTags("html-common-calculator/styleCalculator.css");
+}
+
+const std::string& HtmlRoutines::GetJavascriptMathQuillDefaultWithTags()
+{ return  HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/mathquill.min.js");
+}
+
+const std::string& HtmlRoutines::GetJavascriptMathQuillMatrixSupportWithTags()
+{ return  HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/mathquill.min-matrix.js");
+}
+
+std::string HtmlRoutines::GetJavascriptMathQuillDefaultFull()
+{ std::stringstream out;
   out << "<script src=\"/html-common-calculator/jquery.min.js\"></script>\n"
-  << "<script type=\"text/javascript\">" << theJS << "</script>\n"
+  << HtmlRoutines::GetJavascriptMathQuillDefaultWithTags() << "\n"
   << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
-  HtmlRoutines::JavascriptMathQuillDefault=out.str();
-  return HtmlRoutines::JavascriptMathQuillDefault;
+  return out.str();
 }
 
-std::string& HtmlRoutines::GetJavascriptMathQuillMatrixSupport()
-{ if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::JavascriptMathQuillMatrixSupport!="")
-      return HtmlRoutines::JavascriptMathQuillMatrixSupport;
-  std::stringstream commentsOnError;
-  std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/mathquill.min-matrix.js", theJS, commentsOnError))
-  { HtmlRoutines::JavascriptMathQuillMatrixSupport=commentsOnError.str();
-    return HtmlRoutines::JavascriptMathQuillMatrixSupport;
-  }
-  std::stringstream out;
+std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull()
+{ std::stringstream out;
   out << "<script src=\"/html-common-calculator/jquery.min.js\"></script>\n"
-  << "<script type=\"text/javascript\">" << theJS << "</script>\n"
+  << HtmlRoutines::GetJavascriptMathQuillMatrixSupportWithTags() << "\n"
   << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
-  HtmlRoutines::JavascriptMathQuillMatrixSupport=out.str();
-  return HtmlRoutines::JavascriptMathQuillMatrixSupport;
+  return out.str();
 }
 
-std::string& HtmlRoutines::GetJavascriptAutocompleteWithTags()
-{ if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::JavascriptAutoCompleteWithTags!="")
-      return HtmlRoutines::JavascriptAutoCompleteWithTags;
-  std::stringstream out;
-  std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/autocomplete.js", theJS, out))
-    HtmlRoutines::JavascriptAutoCompleteWithTags=out.str();
-  else
-    HtmlRoutines::JavascriptAutoCompleteWithTags= "<script type=\"text/javascript\">" + theJS + "</script>\n";
-  return HtmlRoutines::JavascriptAutoCompleteWithTags;
+const std::string& HtmlRoutines::GetJavascriptAutocompleteWithTags()
+{ return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/autocomplete.js");
 }
 
-std::string& HtmlRoutines::GetJavascriptSha1()
-{ if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::JavascriptSha1!="")
-      return HtmlRoutines::JavascriptSha1;
-  std::stringstream out;
-  std::string theJS;
-  if (!FileOperations::LoadFileToStringVirtual("html-common-calculator/sha1.js", theJS, out))
-    HtmlRoutines::JavascriptSha1=out.str();
-  else
-    HtmlRoutines::JavascriptSha1= "<script type=\"text/javascript\">" + theJS + "</script>\n";
-  return HtmlRoutines::JavascriptSha1;
+const std::string& HtmlRoutines::GetJavascriptSha1()
+{ return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/sha1.js");
 }
 
 std::string HtmlRoutines::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)
@@ -589,9 +421,10 @@ void HtmlRoutines::ConvertURLStringToNormal(const std::string& input, std::strin
   output=out.str();
 }
 
-std::string& HtmlRoutines::GetJavascriptMathjax()
-{ if (HtmlRoutines::JavascriptMathjax!="")
-    return HtmlRoutines::JavascriptMathjax;
+const std::string& HtmlRoutines::GetJavascriptMathjax()
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptMathjax");
+  if (HtmlRoutines::preLoadedFiles.Contains("MathJax"))
+    return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("MathJax");
   std::stringstream out;
   if (theGlobalVariables.flagAceIsAvailable)
     out << "<script type=\"text/javascript\" async src=\"/MathJax-2.6-latest/MathJax.js?config=TeX-AMS_HTML-full,local/local\"></script>\n";
@@ -703,8 +536,8 @@ std::string& HtmlRoutines::GetJavascriptMathjax()
     << "<script src=\"//beta.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full\"></script>"
     ;
   }
-  HtmlRoutines::JavascriptMathjax=out.str();
-  return HtmlRoutines::JavascriptMathjax;
+  HtmlRoutines::preLoadedFiles.SetKeyValue("MathJax", out.str());
+  return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("MathJax");
 }
 
 bool HtmlRoutines::AccountOneInputCGIString

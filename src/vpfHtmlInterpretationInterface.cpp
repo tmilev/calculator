@@ -568,10 +568,10 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   << ".-->\n";
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;
-  out << HtmlRoutines::GetJavascriptStandardCookies();
+  out << HtmlRoutines::GetJavascriptStandardCookiesWithTags();
   out << HtmlRoutines::GetJavascriptProblemLinksWithTags();
   if (includeDeadlineJavascript || includeInitializeButtonsJS)
-  { out << HtmlRoutines::GetJavascriptInitializeButtons();
+  { out << HtmlRoutines::GetJavascriptInitializeButtonsWithTags();
     out << HtmlRoutines::GetJavascriptCalculatorPage();
   }
   if (theGlobalVariables.UserDefaultHasProblemComposingRights())
@@ -605,15 +605,15 @@ std::string HtmlInterpretation::GetExamPage()
   std::stringstream out;
   out << "<html>"
   << "<head>"
-  << HtmlRoutines::GetJavascriptStandardCookies() << "\n"
+  << HtmlRoutines::GetJavascriptStandardCookiesWithTags() << "\n"
   << HtmlRoutines::GetJavascriptMathjax() << "\n";
   if (theFile.flagMathQuillWithMatrices)
-    out << HtmlRoutines::GetJavascriptMathQuillMatrixSupport() << "\n";
+    out << HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull() << "\n";
   else
-    out << HtmlRoutines::GetJavascriptMathQuillDefault() << "\n";
+    out << HtmlRoutines::GetJavascriptMathQuillDefaultFull() << "\n";
   out << HtmlRoutines::GetMathQuillStyleSheetWithTags() << "\n"
   << HtmlRoutines::GetCalculatorStyleSheetWithTags() << "\n"  ;
-  out << HtmlRoutines::GetJavascriptInitializeButtons() << "\n";
+  out << HtmlRoutines::GetJavascriptInitializeButtonsWithTags() << "\n";
   if (theFile.flagLoadedSuccessfully)
     out << theFile.outputHtmlHeadNoTag;
   //<-must come after theFile.outputHtmlHeadNoTag
@@ -658,7 +658,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   theFile.LoadFileNames();
   ouT << "<html>";
   outHead << "<head>"
-  << HtmlRoutines::GetJavascriptStandardCookies()
+  << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   //  << HtmlRoutines::GetLaTeXProcessingJavascript()
   //  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
@@ -1432,7 +1432,7 @@ std::string HtmlInterpretation::GetScoresPage()
   out << "<html>"
   << "<head>"
   << HtmlRoutines::GetCalculatorStyleSheetWithTags()
-  << HtmlRoutines::GetJavascriptStandardCookies()
+  << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << "<link rel=\"stylesheet\" href=\"/html-common-calculator/styleScorePage.css\">"
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
@@ -1454,7 +1454,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   out << "<html>"
   << "<head>"
   << HtmlRoutines::GetCalculatorStyleSheetWithTags()
-  << HtmlRoutines::GetJavascriptStandardCookies()
+  << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << HtmlRoutines::GetJavascriptSubmitEmails()
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"

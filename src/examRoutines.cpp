@@ -2733,7 +2733,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     outHeadPt2 << this->GetJavascriptSubmitAnswers();
   if (this->flagIsExamHome && theGlobalVariables.UserDefaultHasAdminRights() &&
       !theGlobalVariables.UserStudentVieWOn())
-  { outHeadPt2 << HtmlRoutines::GetJavascriptHideHtml();
+  { outHeadPt2 << HtmlRoutines::GetJavascriptHideHtmlWithTags();
     outHeadPt2 << HtmlRoutines::GetDatePickerJavascriptInit();
   }
   std::string problemLabel="";

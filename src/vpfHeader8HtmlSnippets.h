@@ -12,21 +12,7 @@ class HtmlRoutines
 {
 public:
 public:
-  static std::string StyleSheetMathQuillWithTags;
-  static std::string StyleSheetCalculatorWithTags;
-  static std::string JavascriptAutoCompleteWithTags;
-  static std::string JavascriptMathjax;
-  static std::string JavascriptMathQuillDefault;
-  static std::string JavascriptMathQuillMatrixSupport;
-  static std::string JavascriptSha1;
-  static std::string JavascriptInitializeButtons;
-  static std::string JavascriptAceEditorScript;
-  static std::string JavascriptCalculatorPage;
-  static std::string JavascriptAccountManagement;
-  static std::string JavascriptProblemLinksWithTags;
-  static std::string JavascriptTopicListWithTags;
-  static std::string JavascriptCanvasGraphicsWithTags;
-  static std::string JavascriptDBroutinesWithTags;
+  static MapLisT<std::string, std::string, MathRoutines::hashString> preLoadedFiles;
   static std::stringstream outputStream;
   static int GlobalMathSpanID;
   static int GlobalCanvasID;
@@ -39,6 +25,7 @@ public:
   static int shiftY;
   static int scale;
   static void LoadStrings();
+
   static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
   static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
   static std::string URLKeyValuePairsToNormalRecursiveHtml(const std::string& input, int recursionDepth=0);
@@ -61,28 +48,37 @@ public:
   static std::string GetLatexEmbeddableLinkFromCalculatorInput(const std::string& address, const std::string& display);
   static std::string DoubleBackslashes(const std::string& input);
 
-  static std::string& GetMathQuillStyleSheetWithTags();
-  static std::string& GetJavascriptInitializeButtons();
-  static std::string& GetJavascriptAceEditorScript();
-  static std::string& GetJavascriptCalculatorPage();
-  static std::string& GetJavascriptAccountManagementWithTags();
-  static std::string& GetCalculatorStyleSheetWithTags();
-  static std::string& GetJavascriptAutocompleteWithTags();
-  static std::string& GetJavascriptSha1();
-  static std::string& GetJavascriptMathjax();
-  static std::string& GetJavascriptMathQuillDefault();
-  static std::string& GetJavascriptMathQuillMatrixSupport();
+  static const std::string& GetCSSAddStyleTags(const std::string& fileNameVirtual);
+  static const std::string& GetJavascriptAddScriptTags(const std::string& fileNameVirtual);
+  static const std::string& GetFile
+  (const std::string& fileNameVirtual, const std::string& additionalBeginTag="",
+   const std::string& additionalEndTag="");
 
-  static std::string GetJavascriptStandardCookies();
-  static std::string GetJavascriptHideHtml();
+
+  static const std::string& GetJavascriptCookieFunctionsNoTags();
+  static const std::string& GetMathQuillStyleSheetWithTags();
+  static const std::string& GetJavascriptInitializeButtonsWithTags();
+  static const std::string& GetJavascriptAceEditorScript();
+  static const std::string& GetJavascriptCalculatorPage();
+  static const std::string& GetJavascriptAccountManagementWithTags();
+  static const std::string& GetCalculatorStyleSheetWithTags();
+  static const std::string& GetJavascriptAutocompleteWithTags();
+  static const std::string& GetJavascriptSha1();
+  static const std::string& GetJavascriptMathjax();
+  static const std::string& GetJavascriptMathQuillDefaultWithTags();
+  static const std::string& GetJavascriptMathQuillMatrixSupportWithTags();
+  static const std::string& GetJavascriptProblemLinksWithTags();
+  static const std::string& GetJavascriptDatabaseRoutinesWithTags();
+  static const std::string& GetJavascriptCanvasGraphicsWithTags();
+  static const std::string& GetJavascriptTopicListWithTags();
+
+  static std::string GetJavascriptMathQuillDefaultFull();
+  static std::string GetJavascriptMathQuillMatrixSupportFull();
+  static std::string GetJavascriptStandardCookiesWithTags();
+  static std::string GetJavascriptHideHtmlWithTags();
   static std::string GetJavascriptSubmitEmails();
-  static std::string GetJavascriptCookieFunctions();
   static std::string GetJavascriptSubmitMainInputIncludeCurrentFile();
   static std::string GetJavascriptSubmitURLString();
-  static std::string GetJavascriptCanvasGraphicsWithTags();
-  static std::string GetJavascriptDatabaseRoutinesWithTags();
-  static std::string GetJavascriptTopicListWithTags();
-  static std::string GetJavascriptProblemLinksWithTags();
   static std::string GetDatePickerJavascriptInit();
   static std::string GetJavascriptVariable(const std::string& theVar);
 

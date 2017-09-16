@@ -69,11 +69,11 @@ bool WebWorker::IsAllowedAsRequestCookie(const std::string& input)
   && input!="activateAccount";
 }
 
-std::string HtmlRoutines::GetJavascriptStandardCookies()
+std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
-  << HtmlRoutines::GetJavascriptCookieFunctions()
+  << HtmlRoutines::GetJavascriptCookieFunctionsNoTags()
   << "function storeSettings()\n"
   << "{ theCalculatorForm=document.getElementById(\"mainInputID\");  \n"
   << "  //alert(theCalculatorForm.style.width);\n"
@@ -1274,7 +1274,7 @@ std::string WebWorker::GetDatabasePage()
   out << "<html>"
   << "<head>"
   << HtmlRoutines::GetCalculatorStyleSheetWithTags()
-  << HtmlRoutines::GetJavascriptStandardCookies()
+  << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile();
 
   std::string currentTable=
@@ -3107,13 +3107,13 @@ int WebWorker::ProcessCalculator()
   << __DATE__ << ", " << __TIME__ << "</title>";
   stOutput << HtmlRoutines::GetJavascriptMathjax();
   stOutput << HtmlRoutines::GetCalculatorStyleSheetWithTags();
-  stOutput << HtmlRoutines::GetJavascriptHideHtml();
-  stOutput << HtmlRoutines::GetJavascriptStandardCookies();
+  stOutput << HtmlRoutines::GetJavascriptHideHtmlWithTags();
+  stOutput << HtmlRoutines::GetJavascriptStandardCookiesWithTags();
   stOutput << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile();
   stOutput << HtmlRoutines::GetJavascriptCanvasGraphicsWithTags();
   stOutput << HtmlRoutines::GetJavascriptAutocompleteWithTags();
-  stOutput << HtmlRoutines::GetJavascriptInitializeButtons();
-  stOutput << HtmlRoutines::GetJavascriptMathQuillMatrixSupport();
+  stOutput << HtmlRoutines::GetJavascriptInitializeButtonsWithTags();
+  stOutput << HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull();
 //  stOutput << HtmlRoutines::GetJavascriptMathQuillDefault();
   stOutput << HtmlRoutines::GetMathQuillStyleSheetWithTags();
 
@@ -3633,7 +3633,7 @@ std::string WebWorker::GetForgotLoginPage()
   std::stringstream out;
   out << "<html>"
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
-  << HtmlRoutines::GetJavascriptHideHtml()
+  << HtmlRoutines::GetJavascriptHideHtmlWithTags()
   << HtmlRoutines::GetCalculatorStyleSheetWithTags();
   out << HtmlInterpretation::GetJavascriptCaptcha();
   out << "<script language=\"javascript\">\n";
@@ -3698,7 +3698,7 @@ std::string WebWorker::GetSignUpPage()
   std::stringstream out;
   out << "<html>"
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
-  << HtmlRoutines::GetJavascriptHideHtml()
+  << HtmlRoutines::GetJavascriptHideHtmlWithTags()
   << HtmlRoutines::GetCalculatorStyleSheetWithTags();
   out << "<script language=\"javascript\">\n";
   out
@@ -3777,7 +3777,7 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
 { MacroRegisterFunctionWithName("WebWorker::GetLoginPage");
   std::stringstream out;
   out << "<html>"
-  << HtmlRoutines::GetJavascriptStandardCookies()
+  << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << WebWorker::GetJavascriptSubmitLoginInfo()
   << HtmlRoutines::GetCalculatorStyleSheetWithTags()
   << "<body";

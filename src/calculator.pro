@@ -126,5 +126,6 @@ DISTFILES += \
     ../html-common/problemlinkstyles.js \
     ../html-common/ace-editor-settings.js \
     ../html-common/database-routines.js \
-    ../html-common/styleCalculator.css
+    ../html-common/styleCalculator.css \
+    ../html-common/cookie-functions.js
 

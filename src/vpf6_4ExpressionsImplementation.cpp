@@ -2875,7 +2875,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     const Expression& firstE=(*this)[1];
     const Expression& secondE=(*this)[2];
     if (firstE.StartsWith(-1, 2))
-    { bool shouldProceed=firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction() && !secondE.IsEqualToMOne();
+    { bool shouldProceed=firstE[0].IsAtomWhoseExponentsAreInterpretedAsFunction() &&
+      !secondE.IsEqualToMOne() && secondE.IsRational();
       if (shouldProceed && firstE[0].IsAtomGivenData(this->owner->opLog()) &&
           this->owner->flagUseLnAbsInsteadOfLogForIntegrationNotation)
         shouldProceed=false;

@@ -225,7 +225,13 @@ const std::string& HtmlRoutines::GetJavascriptAccountManagementWithTags()
 }
 
 const std::string& HtmlRoutines::GetJavascriptAceEditorScript()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/ace-editor-settings.js");
+{ if (HtmlRoutines::preLoadedFiles.Contains("AceEditor"))
+    return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("AceEditor");
+  std::stringstream out;
+  out << "<script type=\"text/javascript\" src=\"/html-common-calculator/ace/src-min/ace.js\" charset=\"utf-8\"></script>";
+  out << HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/ace-editor-settings.js");
+  HtmlRoutines::preLoadedFiles.SetKeyValue("AceEditor", out.str());
+  return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("AceEditor");
 }
 
 const std::string& HtmlRoutines::GetFile

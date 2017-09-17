@@ -3325,10 +3325,11 @@ void TopicElement::ComputeID()
 
 void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
 { MacroRegisterFunctionWithName("TopicElement::AddTopic");
-  if (output.size()<3 && inputElt.type!=inputElt.tTexHeader && inputElt.type!=inputElt.tChapter)
+  int numToCheck=4;
+  if (output.size()<numToCheck && inputElt.type!=inputElt.tTexHeader && inputElt.type!=inputElt.tChapter)
   { bool startsWithChapter=false;
-    if (output.size()>=2)
-      for (int i=0; i<2; i++)
+//    if (output.size()>=numToCheck-1)
+      for (int i=0; i<numToCheck-1; i++)
         if (output.theValues[i].type==inputElt.tChapter)
         { startsWithChapter=true;
           break;
@@ -3475,7 +3476,6 @@ void TopicElement::GetTopicList
       } else
       { if (found)
           TopicElement::AddTopic(currentElt, output);
-        found=true;
         errorStream << "Topic bundle does not appear to contain the desired element: "
         << currentArgument;
         currentElt.error=errorStream.str();

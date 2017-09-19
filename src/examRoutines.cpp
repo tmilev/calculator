@@ -2764,8 +2764,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       !this->flagIsExamHome &&
       theGlobalVariables.userCalculatorRequestType!="template" &&
       theGlobalVariables.userCalculatorRequestType!="templateNoLogin")
-  { bool problemAlreadySolved=false;
+  {
 #ifdef MACRO_use_MySQL
+    bool problemAlreadySolved=false;
     if (this->currentUseR.theProblemData.Contains(this->fileName))
     { ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(this->fileName);
       if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
@@ -3163,6 +3164,7 @@ std::string HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
 
 std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemScoreFull");
+  (void) theFileName;
   std::stringstream out;
   if (theGlobalVariables.UserGuestMode())
   { out << "scores require login";
@@ -3207,6 +3209,8 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
 
 std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFileName, bool& outputAlreadySolved)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemScoreShort");
+  (void) theFileName;
+  (void) outputAlreadySolved;
 #ifdef MACRO_use_MySQL
   std::stringstream out;
   if (theGlobalVariables.UserGuestMode())

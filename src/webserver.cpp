@@ -5318,6 +5318,67 @@ void WebServer::Release(int& theDescriptor)
 
 extern int mainTest(List<std::string>& remainingArgs);
 
+void WebServer::CheckOpenSSLMySQLInstallation()
+{ MacroRegisterFunctionWithName("WebServer::CheckOpenSSLMySQLInstallation");
+  if (theGlobalVariables.flagRunningApache)
+    return;
+  bool doInstallMysql=false;
+  bool doInstallOpenSSL=false;
+#ifndef MACRO_use_open_ssl
+  doInstallMysql=true;
+#endif
+#ifndef MACRO_use_MySQL
+  doInstallOpenSSL=true;
+#endif
+  if (!doInstallMysql && !doInstallOpenSSL)
+    return;
+  std::string osName;
+  List<std::string> supportedOSes;
+  supportedOSes.AddOnTop("Ubuntu");
+  supportedOSes.AddOnTop("CentOS");
+  logger result("", 0, false);
+  if (doInstallMysql || doInstallOpenSSL)
+  { std::string commandOutput= theGlobalVariables.CallSystemWithOutput("cat /etc/*-release");
+    if (commandOutput.find("ubuntu")!=std::string::npos || commandOutput.find("Ubuntu")!=std::string::npos ||
+        commandOutput.find("UBUNTU")!=std::string::npos)
+      osName="Ubuntu";
+    if (commandOutput.find("CentOS")!=std::string::npos)
+      osName="CentOS";
+  }
+  if (osName=="")
+  { //std::cout << "Debug: run apache? " << theGlobalVariables.flagRunningApache;
+    result << logger::red << "Your Linux flavor is not currently supported. " << logger::endL;
+    result << "We support the following Linux distros: "
+    << logger::blue << supportedOSes.ToStringCommaDelimited() << logger::endL;
+
+    //std::cout << logger::red << "DEBUG: Your Linux flavor is not currently supported. " << logger::endL;
+    //result << "We support the following Linux distros: "
+    //<< logger::blue << supportedOSes.ToStringCommaDelimited() << logger::endL;
+
+    result << "Please post a request for support of your Linux flavor on our bug tracker: " << logger::endL
+    << logger::green << "https://github.com/tmilev/calculator"
+    << logger::endL << " and we will add your Linux flavor to the list of supported distros. " << logger::endL;
+    result.flush();
+    return;
+  }
+  if (doInstallMysql)
+  { result << "You appear to be missing a mysql installation. Let me try to install that for you. "
+    << logger::green << "Enter your password as prompted please. " << logger::endL;
+    if (osName=="Ubuntu")
+      theGlobalVariables.CallSystemNoOutput("sudo apt-get install libmysqlclient-dev");
+    else if (osName=="CentOS")
+      theGlobalVariables.CallSystemNoOutput("sudo yum install mysql-devel");
+  }
+  if (doInstallOpenSSL)
+  { result << "You appear to be missing an openssl installation. Let me try to install that for you. "
+    << logger::green << "Enter your password as prompted please. " << logger::endL;
+    if (osName=="Ubuntu")
+      theGlobalVariables.CallSystemNoOutput("sudo apt-get install libssl-dev");
+    else if (osName=="CentOS")
+      theGlobalVariables.CallSystemNoOutput("sudo yum install mysql-devel");
+  }
+}
+
 void WebServer::AnalyzeMainArguments(int argC, char **argv)
 { MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
   if (argC<0)
@@ -5485,8 +5546,8 @@ int WebServer::main(int argc, char **argv)
   MacroRegisterFunctionWithName("main");
   try {
   InitializeGlobalObjects();
-
   theWebServer.AnalyzeMainArguments(argc, argv);
+  theWebServer.CheckOpenSSLMySQLInstallation();
   if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
     theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=
     theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit+20;
@@ -5495,7 +5556,7 @@ int WebServer::main(int argc, char **argv)
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
   theGlobalVariables.flagCachingInternalFilesOn=false;
-  if (!theGlobalVariables.flagCachingInternalFilesOn)
+  if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
     << logger::purple << "************************" << logger::endL
     << logger::red << "WARNING: caching files is off. " << logger::endL
@@ -5547,6 +5608,7 @@ int WebServer::mainCommandLine()
   //  return 0;
 //std::cout << "Running cmd line. \n";
   theParser.init();
+  logger result("", 0, false);
   if (theGlobalVariables.programArguments.size>1)
     for (int i=1; i<theGlobalVariables.programArguments.size; i++)
     { theParser.inputString+=theGlobalVariables.programArguments[i];
@@ -5554,7 +5616,7 @@ int WebServer::mainCommandLine()
         theParser.inputString+=" ";
     }
   else
-  { std::cout << "Input: ";
+  { result << "Input: ";
     std::cin >> theParser.inputString;
   }
   theParser.flagUseHtml=false;
@@ -5566,11 +5628,11 @@ int WebServer::mainCommandLine()
   }
   FileOperations::OpenFileCreateIfNotPresentVirtual
   (outputFile, "output/outputFileCommandLine.html", false, true, false);
-  stOutput << theParser.outputString;
+  result << theParser.outputString;
   outputFile << theParser.outputString;
-  stOutput << "\nTotal running time: " << logger::blueConsole() << GetElapsedTimeInSeconds() << " seconds. "
-  << logger::normalConsole() << "\n"
-  << "Output written in: " << logger::greenConsole() << outputFileName;
+  result << "\nTotal running time: " << logger::blue << GetElapsedTimeInSeconds() << " seconds. "
+  << logger::endL
+  << "Output written in: " << logger::green << outputFileName << logger::endL << "\n";
   return 0;
 }
 

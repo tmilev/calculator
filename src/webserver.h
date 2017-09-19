@@ -349,6 +349,7 @@ public:
   bool flagPort8155;
   WebServer();
   ~WebServer();
+  static void CheckOpenSSLMySQLInstallation();
   static void AnalyzeMainArguments(int argC, char **argv);
   static void InitializeGlobalVariables();
   bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);

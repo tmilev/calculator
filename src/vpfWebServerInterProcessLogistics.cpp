@@ -570,8 +570,10 @@ void logger::reset()
   this->MaxLogSize=
   50000000
   ;
-  if (theGlobalVariables.flagRunningApache)
+  if (theGlobalVariables.flagRunningApache || this->theFileName=="")
+  { this->flagStopWritingToFile=true;
     return;
+  }
   if (this->theFile.is_open())
     this->theFile.close();
   FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(this->theFile, this->theFileName, false, true, false, true);

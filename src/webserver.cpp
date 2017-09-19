@@ -2975,6 +2975,12 @@ bool WebWorker::DoSetEmail
   inputOutputUser=userCopy;
   return true;
 #else
+  (void) theRoutines;
+  (void) inputOutputUser;
+  (void) commentsOnFailure;
+  (void) commentsGeneralNonSensitive;
+  (void) commentsGeneralSensitive;
+
   return false; //MACRO_use_MySQL
 #endif
 }

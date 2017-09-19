@@ -8,10 +8,15 @@ QMAKE_CXXFLAGS += -std=c++11
 
 TEMPLATE = app
 
+DEFINES+=MACRO_use_MySQL
+DEFINES+=MACRO_use_open_ssl
+
 LIBS+=-L/usr/lib64/mysql
 LIBS+=-lmysqlclient
 LIBS+=-lssl
 LIBS+=-lcrypto
+
+
 
 SOURCES += \
     webserver.cpp \

@@ -250,6 +250,14 @@ class logger
   logger(const std::string& logFileName, logger* inputCarbonCopy, bool inputResetLogWhenTooLarge);
   void CheckLogSize();
   enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
+  static std::string redConsole();
+  static std::string blueConsole();
+  static std::string yellowConsole();
+  static std::string greenConsole();
+  static std::string purpleConsole();
+  static std::string cyanConsole();
+  static std::string orangeConsole();
+  static std::string normalConsole();
   std::string closeTagConsole();
   std::string closeTagHtml();
   std::string openTagConsole();

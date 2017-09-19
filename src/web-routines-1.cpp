@@ -274,6 +274,7 @@ void WebCrawler::PingCalculatorStatus()
 void WebCrawler::FetchWebPage
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("WebCrawler::FetchWebPage");
+  (void) commentsOnFailure; (void) commentsGeneral;
 #ifdef MACRO_use_open_ssl
   //logOpenSSL << logger::green  << "DEBUG: got to FetchWebPage start. " << logger::endL;
   this->lastTransaction="";
@@ -386,6 +387,7 @@ void WebCrawler::FetchWebPage
 void WebCrawler::FetchWebPagePart2
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("WebCrawler::FetchWebPagePart2");
+  (void) commentsOnFailure; (void) commentsGeneral;
 #ifdef MACRO_use_open_ssl
   std::stringstream theMessageHeader, theContinueHeader;
   if (this->flagDoUseGET)

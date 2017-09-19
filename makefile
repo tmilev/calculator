@@ -69,6 +69,8 @@ endif
 ifneq ($(sslLocation),)
 	CFLAGS+= -DMACRO_use_open_ssl 
 	LIBRARYINCLUDESEND+= -lssl -lcrypto  #WARNING believe it or not, the libraries must come AFTER the executable name 
+else
+$(info NOT FOUND: (Open)ssl. I will attempt to install it once the calculator is compiled.) 
 endif
 endif
 
@@ -84,6 +86,8 @@ endif
 ifneq ($(mysqlLocation),)
   CFLAGS+= -DMACRO_use_MySQL
   LIBRARYINCLUDESEND+= -L$(mysqlLocation) -lmysqlclient  #WARNING believe it or not, the libraries must come AFTER the executable name
+else
+$(info NOT FOUND: Mysql. I will attempt to install it once the calculator is compiled.) 
 endif
 endif
 ########################

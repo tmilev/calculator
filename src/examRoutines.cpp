@@ -1551,6 +1551,7 @@ std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
 std::string CalculatorHTML::GetDeadline
 (const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited)
 { MacroRegisterFunctionWithName("CalculatorHTML::GetDeadline");
+  (void) problemName; (void) sectionNumber; (void) outputIsInherited;
   outputIsInherited=true;
   std::string result;
   #ifdef MACRO_use_MySQL
@@ -1578,6 +1579,8 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
 (const std::string& topicID, const std::string& sectionNumber,
  bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection)
 { std::stringstream out;
+  (void) problemAlreadySolved;
+  (void) isSection;
   bool deadlineIsInherited=false;
   std::string currentDeadline =
   this->GetDeadline(topicID, sectionNumber, deadlineIsInherited);
@@ -1665,6 +1668,10 @@ std::string CalculatorHTML::ToStringAllSectionDeadlines
 std::string CalculatorHTML::ToStringDeadline
 (const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringDeadlineWithModifyButton");
+  (void) topicID;
+  (void) problemAlreadySolved;
+  (void) returnEmptyStringIfNoDeadline;
+  (void) isSection;
 #ifdef MACRO_use_MySQL
   if (theGlobalVariables.UserGuestMode())
   { return "deadlines require login";

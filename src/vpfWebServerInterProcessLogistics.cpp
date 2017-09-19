@@ -604,6 +604,26 @@ void logger::flush()
   theFile.flush();
 }
 
+std::string logger::blueConsole()
+{ return "\e[1;34m";
+}
+
+std::string logger::yellowConsole()
+{ return "\e[1;33m";
+}
+
+std::string logger::greenConsole()
+{ return "\e[1;32m";
+}
+
+std::string logger::redConsole()
+{ return "\e[1;31m";
+}
+
+std::string logger::normalConsole()
+{ return "\e[0m";
+}
+
 std::string logger::closeTagConsole()
 { if (!this->flagTagColorConsoleOpened)
     return "";

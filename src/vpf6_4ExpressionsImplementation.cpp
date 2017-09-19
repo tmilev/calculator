@@ -3152,7 +3152,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   else if (this->IsListStartingWithAtom(this->owner->opEndStatement()))
   { bool createTable=(startingExpression!=0);
     bool createSingleTable=false;
-    if (createTable==false && theFormat!=0)
+    if (createTable==false && theFormat!=0 && !theGlobalVariables.flagRunningCommandLine)
     { createSingleTable= theFormat->flagMakingExpressionTableWithLatex;
       theFormat->flagMakingExpressionTableWithLatex=false;
     }

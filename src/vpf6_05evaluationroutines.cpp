@@ -454,6 +454,11 @@ bool Calculator::EvaluateExpression
   //std::stringstream logStream;
   //if (logEvaluationStepsRequested)
   //  logStream << "\\(" << output.ToString() << "\\)";
+  bool doReportEvalRules=
+  theGlobalVariables.flagReportEverything &&
+  !theGlobalVariables.flagRunningCommandLine &&
+  !theGlobalVariables.flagRunningApache;
+
   MemorySaving<Expression> oldChild;
   bool doExpressionHistory=(theCommands.ExpressionHistoryStack.size>0);
   if (doExpressionHistory)
@@ -524,7 +529,7 @@ bool Calculator::EvaluateExpression
           indexOp=output[0].theData;
       for (int i=0; i<output.size() && !theCommands.flagAbortComputationASAP; i++)
       { if (i>0 && output.StartsWith(theCommands.opEndStatement()))
-        { if (theGlobalVariables.flagReportEverything)
+        { if (doReportEvalRules)
           { std::stringstream reportStream;
             reportStream << "Substitution rules so far:";
             for (int j=1; j<i; j++)
@@ -762,7 +767,10 @@ void Calculator::EvaluateCommands()
 //this->ToString();
   //std::stringstream comments;
   if (this->syntaxErrors!="")
-  { out << "<hr><b>Syntax errors encountered</b><br>";
+  { if (!theGlobalVariables.flagRunningCommandLine)
+      out << "<hr><b>Syntax errors encountered</b><br>";
+    else
+      out << logger::redConsole() << "Syntax errors encountered: " << logger::normalConsole();
     out << this->syntaxErrors;
     out << "<hr>";
   }
@@ -788,15 +796,15 @@ void Calculator::EvaluateCommands()
   if(theGlobalVariables.flagRunningCommandLine)
   { theGlobalVariables.theDefaultFormat.GetElement().flagUseQuotes=false;
     theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
-    out << "Input: " << "\e[1;32m"
-    << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement())
-    << "\033[0m" << std::endl;
+    if (theGlobalVariables.programArguments.size>1)
+      out << "Input: " << logger::yellowConsole()
+      << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << std::endl;
     theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
     this->theObjectContainer.resetSliders();
-    out << "Output: " << "\e[1;33m"
+    out << logger::normalConsole() << "Output: " << logger::greenConsole()
     << this->theProgramExpression.ToString
     (&theGlobalVariables.theDefaultFormat.GetElement())
-    << "\033[0m" << std::endl;
+    << logger::normalConsole() << std::endl;
   } else if (!this->flagDisplayFullExpressionTree)
   { std::string badCharsString=
     this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
@@ -824,7 +832,7 @@ void Calculator::EvaluateCommands()
   if (this->Comments.str()!="")
     commentsStream << "<br><span>" << this->Comments.str() << "</span>";
   this->outputCommentsString=commentsStream.str();
-  if(theGlobalVariables.flagRunningCommandLine && this->Comments.str()!="")
+  if (theGlobalVariables.flagRunningCommandLine && this->Comments.str()!="")
     this->outputString+=this->outputCommentsString;
   //std::cout << "DEBUG: got to end of story. " ;
 }

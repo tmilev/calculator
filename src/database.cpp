@@ -936,83 +936,6 @@ bool UserCalculator::FetchOneUserRow
   return true;
 }
 
-std::string CourseAndUserInfo::ToStringHumanReadable()
-{ MacroRegisterFunctionWithName("CourseAndUserInfo::ToStringHumanReadable");
-  std::stringstream out;
-  out
-  << "<table><tr><td style=\"text-align:right\"><b>Instructor:&nbsp;</b></td><td>" << this->instructorComputed << "</td></tr>"
-  << "<tr><td style=\"text-align:right\"><b>Course:&nbsp;</b></td><td>" << this->courseComputed << "</td></tr>";
-  if ( this->courseComputed.find("%")!=std::string::npos)
-  { out << "<tr><td style=\"text-align:right\"><b style=\"color:red\">Possible error:&nbsp;</b></td><td>"
-    << "<b style=\"color:red\">Your course name contains the % sign.<br> "
-    << "This is unexpected behavior which may or may not be a bug.<br>"
-    << "Please report the issue using our bug tracker (top right corner of the page). <br>"
-    << "If possible, attach a screenshot. <br>Thanks in advance!</b>"<< "</td></tr>";
-  }
-  out << "<tr><td style=\"text-align:right\"><b>Section:&nbsp;</b></td><td>" << this->sectionComputed << "</td></tr>";
-  out
-  << "<tr><td style=\"text-align:right\"><b>Deadline schema:&nbsp;</b></td><td>" << this->deadlineSchemaIDComputed
-  << "</td><td>(computed from your instructor and course name)" << "</td></tr>"
-  << "<tr><td style=\"text-align:right\"><b>Problem weight schema:&nbsp;</b></td><td>" << this->problemWeightSchemaIDComputed
-  << "</td><td>(computed from your instructor). </td></tr>"
-  << "</table>";
-  if (theGlobalVariables.UserDebugFlagOn())
-  { out << "<br>Deadline string: " << HtmlRoutines::ConvertURLStringToNormal(this->deadlinesString, false);
-    out << "<br>Problem string: " << this->problemWeightString;
-  }
-//  out << this->courseInfoJSON.GetElement().ToString(true);
-  return out.str();
-}
-
-CourseAndUserInfo::~CourseAndUserInfo()
-{
-
-}
-
-void CourseAndUserInfo::setCurrentCourseInDB(const std::string& input)
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnCurrentCourses]=input;
-}
-
-std::string CourseAndUserInfo::getCurrentCourseInDB()
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnCurrentCourses].string;
-}
-
-void CourseAndUserInfo::setSectionInDB(const std::string& input)
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSection]=input;
-}
-
-std::string CourseAndUserInfo::getSectionInDB()
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSection].string;
-}
-
-void CourseAndUserInfo::setSectonsTaughtByUser(const std::string& input)
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught]=input;
-}
-
-std::string CourseAndUserInfo::getSectonsTaughtByUser()
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught].string;
-}
-
-void CourseAndUserInfo::setInstructorInDB(const std::string& input)
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnInstructor]=input;
-}
-
-std::string CourseAndUserInfo::getInstructorInDB()
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnInstructor].string;
-}
-
-std::string CourseAndUserInfo::ToStringForDBStorage()
-{ MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
-//  JSData theCourseInfo;
-//  theCourseInfo.type=theCourseInfo.JSObject;
-//  theCourseInfo["problemWeightSchema"]= this->problemWeightString;
-//  theCourseInfo["sectionsTaught"]     = this->sectionsTaughtByUserString;
-//  theCourseInfo["instructor"]         = this->currentInstructorInDB;
-//  theCourseInfo["currentCourse"]      = this->currentCourseComputed;
-//  theCourseInfo["studentSection"]     = this->currentSectionInDB;
-  return this->courseInfoJSON.GetElement().ToString(false);
-}
-
 std::string UserCalculatorData::ToStringIdSectionCourse()
 { return this->courseInfo.getInstructorInDB()+
   this->courseInfo.getSectionInDB()+this->courseInfo.getCurrentCourseInDB();
@@ -2412,6 +2335,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
 (UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { (void) commentsOnFailure;
   (void) theUseR;
+  (void) commentsGeneral;
 #ifdef MACRO_use_MySQL
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
@@ -2947,3 +2871,80 @@ bool DatabaseRoutines::PrepareClassData
 }
 
 #endif
+
+std::string CourseAndUserInfo::ToStringHumanReadable()
+{ MacroRegisterFunctionWithName("CourseAndUserInfo::ToStringHumanReadable");
+  std::stringstream out;
+  out
+  << "<table><tr><td style=\"text-align:right\"><b>Instructor:&nbsp;</b></td><td>" << this->instructorComputed << "</td></tr>"
+  << "<tr><td style=\"text-align:right\"><b>Course:&nbsp;</b></td><td>" << this->courseComputed << "</td></tr>";
+  if ( this->courseComputed.find("%")!=std::string::npos)
+  { out << "<tr><td style=\"text-align:right\"><b style=\"color:red\">Possible error:&nbsp;</b></td><td>"
+    << "<b style=\"color:red\">Your course name contains the % sign.<br> "
+    << "This is unexpected behavior which may or may not be a bug.<br>"
+    << "Please report the issue using our bug tracker (top right corner of the page). <br>"
+    << "If possible, attach a screenshot. <br>Thanks in advance!</b>"<< "</td></tr>";
+  }
+  out << "<tr><td style=\"text-align:right\"><b>Section:&nbsp;</b></td><td>" << this->sectionComputed << "</td></tr>";
+  out
+  << "<tr><td style=\"text-align:right\"><b>Deadline schema:&nbsp;</b></td><td>" << this->deadlineSchemaIDComputed
+  << "</td><td>(computed from your instructor and course name)" << "</td></tr>"
+  << "<tr><td style=\"text-align:right\"><b>Problem weight schema:&nbsp;</b></td><td>" << this->problemWeightSchemaIDComputed
+  << "</td><td>(computed from your instructor). </td></tr>"
+  << "</table>";
+  if (theGlobalVariables.UserDebugFlagOn())
+  { out << "<br>Deadline string: " << HtmlRoutines::ConvertURLStringToNormal(this->deadlinesString, false);
+    out << "<br>Problem string: " << this->problemWeightString;
+  }
+//  out << this->courseInfoJSON.GetElement().ToString(true);
+  return out.str();
+}
+
+CourseAndUserInfo::~CourseAndUserInfo()
+{
+
+}
+
+void CourseAndUserInfo::setCurrentCourseInDB(const std::string& input)
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnCurrentCourses]=input;
+}
+
+std::string CourseAndUserInfo::getCurrentCourseInDB()
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnCurrentCourses].string;
+}
+
+void CourseAndUserInfo::setSectionInDB(const std::string& input)
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSection]=input;
+}
+
+std::string CourseAndUserInfo::getSectionInDB()
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSection].string;
+}
+
+void CourseAndUserInfo::setSectonsTaughtByUser(const std::string& input)
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught]=input;
+}
+
+std::string CourseAndUserInfo::getSectonsTaughtByUser()
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught].string;
+}
+
+void CourseAndUserInfo::setInstructorInDB(const std::string& input)
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnInstructor]=input;
+}
+
+std::string CourseAndUserInfo::getInstructorInDB()
+{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnInstructor].string;
+}
+
+std::string CourseAndUserInfo::ToStringForDBStorage()
+{ MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
+//  JSData theCourseInfo;
+//  theCourseInfo.type=theCourseInfo.JSObject;
+//  theCourseInfo["problemWeightSchema"]= this->problemWeightString;
+//  theCourseInfo["sectionsTaught"]     = this->sectionsTaughtByUserString;
+//  theCourseInfo["instructor"]         = this->currentInstructorInDB;
+//  theCourseInfo["currentCourse"]      = this->currentCourseComputed;
+//  theCourseInfo["studentSection"]     = this->currentSectionInDB;
+  return this->courseInfoJSON.GetElement().ToString(false);
+}

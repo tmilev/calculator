@@ -5344,17 +5344,17 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
     return;
   }
   theGlobalVariables.initDefaultFolderAndFileNames(theGlobalVariables.programArguments[0]);
-  if (argC<2)
-  { theGlobalVariables.flagRunningApache=true;
-    return;
-  }
   std::string envRequestMethodApache=WebServer::GetEnvironment("REQUEST_METHOD");
   if (envRequestMethodApache =="GET" || envRequestMethodApache=="POST" || envRequestMethodApache=="HEAD")
   { theGlobalVariables.flagRunningApache=true;
     return;
   }
+  if (argC<2)
+  { if (!theGlobalVariables.flagRunningApache)
+      theGlobalVariables.flagRunningCommandLine=true;
+    return;
+  }
   std::string& secondArgument=theGlobalVariables.programArguments[1];
-
   if (secondArgument=="server" || secondArgument=="server8080")
   { if (secondArgument=="server8080")
       theWebServer.flagPort8155=false;
@@ -5547,15 +5547,30 @@ int WebServer::mainCommandLine()
   //  return 0;
 //std::cout << "Running cmd line. \n";
   theParser.init();
-  theParser.inputString=theGlobalVariables.programArguments[0];
+  if (theGlobalVariables.programArguments.size>1)
+    for (int i=1; i<theGlobalVariables.programArguments.size; i++)
+    { theParser.inputString+=theGlobalVariables.programArguments[i];
+      if (i!=theGlobalVariables.programArguments.size-1)
+        theParser.inputString+=" ";
+    }
+  else
+  { std::cout << "Input: ";
+    std::cin >> theParser.inputString;
+  }
   theParser.flagUseHtml=false;
   theParser.Evaluate(theParser.inputString);
   std::fstream outputFile;
+  std::string outputFileName;
+  if (! FileOperations::GetPhysicalFileNameFromVirtual("output/outputFileCommandLine.html", outputFileName))
+  { outputFileName = "Failed to extract output file from output/outputFileCommandLine.html";
+  }
   FileOperations::OpenFileCreateIfNotPresentVirtual
   (outputFile, "output/outputFileCommandLine.html", false, true, false);
   stOutput << theParser.outputString;
   outputFile << theParser.outputString;
-  stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds. \nOutput written in file ./outputFileCommandLine.html\n";
+  stOutput << "\nTotal running time: " << logger::blueConsole() << GetElapsedTimeInSeconds() << " seconds. "
+  << logger::normalConsole() << "\n"
+  << "Output written in: " << logger::greenConsole() << outputFileName;
   return 0;
 }
 

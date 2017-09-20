@@ -9,14 +9,13 @@ At the moment, you can only install the calculator from source. Here's what you 
 ```
 mkdir baseFolder
 ```
-
 2. Download the source code **inside** that folder. 
 ```
 cd baseFolder
 svn checkout https://github.com/tmilev/calculator.git/trunk
 
 ```
-**Please note that the calculator will modify files inside the baseFolder**, i.e., inside the first folder you created (the one inside of which you are checking-out the calculator. The calculator may help you create math problems which will be placed in the baseFolder, which you can in turn put in a repository of your own. 
+**Please note that the calculator will modify files inside the baseFolder**, i.e., inside the first folder you created and where you checked out the calculator. Files created by the calculator will be placed in **baseFolder**, i.e., outside of the scope of our repository. You can put **baseFolder** in a repository of your own. 
 3. Compile the calculator.
 ```
 cd trunk
@@ -34,7 +33,6 @@ Follow the prompts - you may be asked for your sudo password
 ./calculator server 10000
 ```
 You do not close the terminal window, leave it open to see what's going on. The calculator will tell you on which port it got bound. The defaults are 8155 (http) and 8166 (https). 
-
 6. Open your favorite browser and navigate to http://localhost:8155
 
 This completes the setup and your first run.

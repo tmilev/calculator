@@ -5336,7 +5336,16 @@ void WebServer::CheckOpenSSLMySQLInstallation()
   List<std::string> supportedOSes;
   supportedOSes.AddOnTop("Ubuntu");
   supportedOSes.AddOnTop("CentOS");
-  logger result("", 0, false);
+  std::string attemptedSetupVirtualFileName="/LogFiles/attemptedDBandSSLsetup.html";
+  if (FileOperations::FileExistsVirtual(attemptedSetupVirtualFileName, true))
+  { std::string attemptedSetupPhysicalFileName;
+    logger result("", 0, false);
+    FileOperations::GetPhysicalFileNameFromVirtual(attemptedSetupVirtualFileName, attemptedSetupPhysicalFileName);
+    result << logger::green << "Mysql or ssl setup previously attempted, skipping. Erase file "
+    << attemptedSetupPhysicalFileName << " to try setting up again. " << logger::endL;
+    return;
+  }
+  logger result(attemptedSetupVirtualFileName, 0, false);
   if (doInstallMysql || doInstallOpenSSL)
   { std::string commandOutput= theGlobalVariables.CallSystemWithOutput("cat /etc/*-release");
     if (commandOutput.find("ubuntu")!=std::string::npos || commandOutput.find("Ubuntu")!=std::string::npos ||
@@ -5345,16 +5354,6 @@ void WebServer::CheckOpenSSLMySQLInstallation()
     if (commandOutput.find("CentOS")!=std::string::npos)
       osName="CentOS";
   }
-  std::string attemptedSetupVirtualFileName="/LogFiles/attemptedDBandSSLsetup.txt";
-  if (FileOperations::FileExistsVirtual(attemptedSetupVirtualFileName, true))
-  { std::string attemptedSetupPhysicalFileName;
-    FileOperations::GetPhysicalFileNameFromVirtual(attemptedSetupVirtualFileName, attemptedSetupPhysicalFileName);
-    result << logger::green << "Mysql or ssl setup missing, skipping installation. Erase file "
-    << attemptedSetupPhysicalFileName << " to try setting up again. " << logger::endL;
-    return;
-  }
-  std::fstream temp;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(temp, attemptedSetupVirtualFileName, false, true, false, true);
   if (osName=="")
   { //std::cout << "Debug: run apache? " << theGlobalVariables.flagRunningApache;
     result << logger::red << "Your Linux flavor is not currently supported. " << logger::endL;
@@ -5371,11 +5370,10 @@ void WebServer::CheckOpenSSLMySQLInstallation()
     result.flush();
     return;
   }
-  temp.close();
   if (doInstallMysql)
   { result << "You appear to be missing a mysql installation. Let me try to install that for you. "
-    << logger::green << "Enter your password as prompted please. "
-    << "Also, leave the root password for mysql blank. " << logger::endL;
+    << logger::green << "Enter the sudo password as prompted please. "
+    << logger::endL;
     if (osName=="Ubuntu")
       theGlobalVariables.CallSystemNoOutput("sudo apt-get install mysql-client mysql-server libmysqlclient-dev");
     else if (osName=="CentOS")
@@ -5394,8 +5392,39 @@ void WebServer::CheckOpenSSLMySQLInstallation()
   theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
   result << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
   theGlobalVariables.CallSystemNoOutput("make clean");
+  result << "Proceeding to rebuild the calculator. " << logger::red
+  << "This is expected to take 10+ minutes. "
+  << logger::endL;
   theGlobalVariables.CallSystemNoOutput("make");
   theGlobalVariables.ChDir(currentFolder);
+}
+
+void WebServer::CheckMySQLSetup()
+{ MacroRegisterFunctionWithName("WebServer::CheckMySQLSetup");
+  std::fstream temp;
+  std::string attemptedMYSQLSetupVirtualFileName="/LogFiles/attemptedMYSQLsetup.html";
+  if (FileOperations::FileExistsVirtual(attemptedMYSQLSetupVirtualFileName, true))
+  { std::string attemptedMYSQLSetupPhysicalFileName;
+    logger result("", 0, false);
+    FileOperations::GetPhysicalFileNameFromVirtual(attemptedMYSQLSetupVirtualFileName, attemptedMYSQLSetupPhysicalFileName);
+    result << logger::green << "Mysql setup previously attempted, skipping. Erase file "
+    << attemptedMYSQLSetupPhysicalFileName << " to try setting up again. " << logger::endL;
+    return;
+  }
+  logger result(attemptedMYSQLSetupVirtualFileName, 0, false);
+  result << logger::yellow << "Mysql setup file missing, proceeding with setup. "
+  << "(Re)-starting mysql: " << logger::endL;
+  theGlobalVariables.CallSystemNoOutput("sudo /etc/init.d/mysql start");
+  std::stringstream commandCreateMysqlDB;
+  commandCreateMysqlDB << "sudo mysql -u root -e \"create database "
+  << DatabaseStrings::theDatabaseName << ";\"";
+  result << theGlobalVariables.CallSystemWithOutput(commandCreateMysqlDB.str());
+  std::stringstream commandGRANTprivileges;
+  result << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
+  commandGRANTprivileges << "sudo mysql -u root -e \"grant all privileges on "
+  << "*.* to  "
+  << "'" << DatabaseStrings::theDatabaseUser << "'@'localhost';\"";
+  result << theGlobalVariables.CallSystemWithOutput(commandGRANTprivileges.str());
 }
 
 void WebServer::AnalyzeMainArguments(int argC, char **argv)
@@ -5574,6 +5603,7 @@ int WebServer::main(int argc, char **argv)
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
   theWebServer.CheckOpenSSLMySQLInstallation();
+  theWebServer.CheckMySQLSetup();
   theGlobalVariables.flagCachingInternalFilesOn=false;
   if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog

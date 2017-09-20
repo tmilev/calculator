@@ -58,6 +58,7 @@ endif
 ##This code may need more work in the future
 
 ifeq ($(nossl),1)
+$(info [1;33mNo openssl requested.[0m) 
 else
 sslLocation=
 ifneq ($(wildcard /usr/lib64/libssl.so),)#location of ssl in CENTOS
@@ -76,6 +77,7 @@ endif
 endif
 
 ifeq ($(nosql),1)
+$(info [1;33mNo mysql requested.[0m) 
 else
 mysqlLocation=
 ifneq ($(wildcard /usr/lib64/mysql),)#location of mysql in CENTOS

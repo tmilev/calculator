@@ -32,7 +32,7 @@ class Rational;
 class JSData
 {
 public:
-  static const char numEmptyTokensAtStart= 6;
+  static const int numEmptyTokensAtStart= 6;
   static const char JSUndefined   = 0;
   static const char JSnull        = 1;
   static const char JSbool        = 2;

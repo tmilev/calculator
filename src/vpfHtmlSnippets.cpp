@@ -433,7 +433,7 @@ const std::string& HtmlRoutines::GetJavascriptMathjax()
     return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("MathJax");
   std::stringstream out;
   if (theGlobalVariables.flagAceIsAvailable)
-    out << "<script type=\"text/javascript\" async src=\"/MathJax-2.6-latest/MathJax.js?config=TeX-AMS_HTML-full,local/local\"></script>\n";
+    out << "<script type=\"text/javascript\" async src=\"/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full,/html-common-calculator/mathjax-calculator-setup.js\"></script>\n";
   else
   { out
     << "<script type=\"text/x-mathjax-config\">\n"

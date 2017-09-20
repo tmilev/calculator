@@ -4397,8 +4397,8 @@ WebServer::WebServer()
   this->requestStartsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("selectCourseFromHtml");
   this->requestStartsNotNeedingLogin.AddOnTop("slidesFromSource");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.6-latest/");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("MathJax-2.6-latest/");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.7-latest/");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("MathJax-2.7-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery.min.js");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/jquery.min.js");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery-ui.css");
@@ -4430,8 +4430,8 @@ WebServer::WebServer()
   this->addressStartsNotNeedingLogin.AddOnTop("/css/");
   this->addressStartsNotNeedingLogin.AddOnTop("javascriptlibs/");
   this->addressStartsNotNeedingLogin.AddOnTop("/javascriptlibs/");
-  this->addressStartsNotNeedingLogin.AddOnTop("MathJax-2.6-latest/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/MathJax-2.6-latest/");
+  this->addressStartsNotNeedingLogin.AddOnTop("MathJax-2.7-latest/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/MathJax-2.7-latest/");
   this->addressStartsNotNeedingLogin.AddOnTop("login");
   this->addressStartsNotNeedingLogin.AddOnTop("/login");  
   //NO! Adding "logout", for example: this->addressStartsNotNeedingLogin.AddOnTop("logout");
@@ -5318,6 +5318,31 @@ void WebServer::Release(int& theDescriptor)
 
 extern int mainTest(List<std::string>& remainingArgs);
 
+void WebServer::FigureOutOperatingSystem()
+{ MacroRegisterFunctionWithName("WebServer::FigureOutOperatingSystem");
+  if (theGlobalVariables.OperatingSystem!="")
+    return;
+  List<std::string> supportedOSes;
+  supportedOSes.AddOnTop("Ubuntu");
+  supportedOSes.AddOnTop("CentOS");
+  std::string commandOutput= theGlobalVariables.CallSystemWithOutput("cat /etc/*-release");
+  if (commandOutput.find("ubuntu")!=std::string::npos || commandOutput.find("Ubuntu")!=std::string::npos ||
+      commandOutput.find("UBUNTU")!=std::string::npos)
+    theGlobalVariables.OperatingSystem="Ubuntu";
+  else if (commandOutput.find("CentOS")!=std::string::npos)
+    theGlobalVariables.OperatingSystem="CentOS";
+  else
+    theGlobalVariables.OperatingSystem="";
+  if (theGlobalVariables.OperatingSystem!="")
+    return;
+  theLog << logger::red << "Your Linux flavor is not currently supported. " << logger::endL;
+  theLog << "We support the following Linux distros: "
+  << logger::blue << supportedOSes.ToStringCommaDelimited() << logger::endL;
+  theLog << "Please post a request for support of your Linux flavor on our bug tracker: " << logger::endL
+  << logger::green << "https://github.com/tmilev/calculator"
+  << logger::endL << "and we will add your Linux flavor to the list of supported distros. " << logger::endL;
+}
+
 void WebServer::CheckOpenSSLMySQLInstallation()
 { MacroRegisterFunctionWithName("WebServer::CheckOpenSSLMySQLInstallation");
   if (theGlobalVariables.flagRunningApache)
@@ -5332,10 +5357,7 @@ void WebServer::CheckOpenSSLMySQLInstallation()
 #endif
   if (!doInstallMysql && !doInstallOpenSSL)
     return;
-  std::string osName;
-  List<std::string> supportedOSes;
-  supportedOSes.AddOnTop("Ubuntu");
-  supportedOSes.AddOnTop("CentOS");
+  WebServer::FigureOutOperatingSystem();
   std::string attemptedSetupVirtualFileName="/LogFiles/attemptedDBandSSLsetup.html";
   if (FileOperations::FileExistsVirtual(attemptedSetupVirtualFileName, true))
   { std::string attemptedSetupPhysicalFileName;
@@ -5346,45 +5368,23 @@ void WebServer::CheckOpenSSLMySQLInstallation()
     return;
   }
   logger result(attemptedSetupVirtualFileName, 0, false);
-  if (doInstallMysql || doInstallOpenSSL)
-  { std::string commandOutput= theGlobalVariables.CallSystemWithOutput("cat /etc/*-release");
-    if (commandOutput.find("ubuntu")!=std::string::npos || commandOutput.find("Ubuntu")!=std::string::npos ||
-        commandOutput.find("UBUNTU")!=std::string::npos)
-      osName="Ubuntu";
-    if (commandOutput.find("CentOS")!=std::string::npos)
-      osName="CentOS";
-  }
-  if (osName=="")
-  { //std::cout << "Debug: run apache? " << theGlobalVariables.flagRunningApache;
-    result << logger::red << "Your Linux flavor is not currently supported. " << logger::endL;
-    result << "We support the following Linux distros: "
-    << logger::blue << supportedOSes.ToStringCommaDelimited() << logger::endL;
-
-    //std::cout << logger::red << "DEBUG: Your Linux flavor is not currently supported. " << logger::endL;
-    //result << "We support the following Linux distros: "
-    //<< logger::blue << supportedOSes.ToStringCommaDelimited() << logger::endL;
-
-    result << "Please post a request for support of your Linux flavor on our bug tracker: " << logger::endL
-    << logger::green << "https://github.com/tmilev/calculator"
-    << logger::endL << "and we will add your Linux flavor to the list of supported distros. " << logger::endL;
-    result.flush();
+  if (theGlobalVariables.OperatingSystem=="")
     return;
-  }
   if (doInstallMysql)
   { result << "You appear to be missing a mysql installation. Let me try to install that for you. "
     << logger::green << "Enter the sudo password as prompted please. "
     << logger::endL;
-    if (osName=="Ubuntu")
+    if (theGlobalVariables.OperatingSystem=="Ubuntu")
       theGlobalVariables.CallSystemNoOutput("sudo apt-get install mysql-client mysql-server libmysqlclient-dev");
-    else if (osName=="CentOS")
+    else if (theGlobalVariables.OperatingSystem=="CentOS")
       theGlobalVariables.CallSystemNoOutput("sudo yum install mysql-devel");
   }
   if (doInstallOpenSSL)
   { result << "You appear to be missing an openssl installation. Let me try to install that for you. "
-    << logger::green << "Enter your password as prompted please. " << logger::endL;
-    if (osName=="Ubuntu")
+    << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
+    if (theGlobalVariables.OperatingSystem=="Ubuntu")
       theGlobalVariables.CallSystemNoOutput("sudo apt-get install libssl-dev");
-    else if (osName=="CentOS")
+    else if (theGlobalVariables.OperatingSystem=="CentOS")
       theGlobalVariables.CallSystemNoOutput("sudo yum install openssl-devel");
   }
   std::string currentFolder=FileOperations::GetCurrentFolder();
@@ -5401,7 +5401,6 @@ void WebServer::CheckOpenSSLMySQLInstallation()
 
 void WebServer::CheckMySQLSetup()
 { MacroRegisterFunctionWithName("WebServer::CheckMySQLSetup");
-  std::fstream temp;
   std::string attemptedMYSQLSetupVirtualFileName="/LogFiles/attemptedMYSQLsetup.html";
   if (FileOperations::FileExistsVirtual(attemptedMYSQLSetupVirtualFileName, true))
   { std::string attemptedMYSQLSetupPhysicalFileName;
@@ -5412,6 +5411,7 @@ void WebServer::CheckMySQLSetup()
     return;
   }
   logger result(attemptedMYSQLSetupVirtualFileName, 0, false);
+  WebServer::FigureOutOperatingSystem();
   result << logger::yellow << "Mysql setup file missing, proceeding with setup. "
   << "(Re)-starting mysql: " << logger::endL;
   theGlobalVariables.CallSystemNoOutput("sudo /etc/init.d/mysql start");
@@ -5425,6 +5425,36 @@ void WebServer::CheckMySQLSetup()
   << "*.* to  "
   << "'" << DatabaseStrings::theDatabaseUser << "'@'localhost';\"";
   result << theGlobalVariables.CallSystemWithOutput(commandGRANTprivileges.str());
+}
+
+void WebServer::CheckMathJaxSetup()
+{ MacroRegisterFunctionWithName("WebServer::CheckMathJaxSetup");
+  std::string attemptedMathJaxSetupVirtualFileName="/LogFiles/attemptedMathJaxSetup.html";
+  if (FileOperations::FileExistsVirtual(attemptedMathJaxSetupVirtualFileName, true))
+  { std::string attemptedSetupPhysicalFileName;
+    logger result("", 0, false);
+    FileOperations::GetPhysicalFileNameFromVirtual(attemptedMathJaxSetupVirtualFileName, attemptedSetupPhysicalFileName);
+    result << logger::green << "Mysql setup previously attempted, skipping. Erase file "
+    << attemptedSetupPhysicalFileName << " to try setting up again. " << logger::endL;
+    return;
+  }
+  logger result(attemptedMathJaxSetupVirtualFileName, 0, false);
+  WebServer::FigureOutOperatingSystem();
+  result << logger::yellow << "MathJax setup file missing, proceeding to set it up. " << logger::endL
+  << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
+  if (theGlobalVariables.OperatingSystem=="Ubuntu")
+    theGlobalVariables.CallSystemNoOutput("sudo apt-get install unzip");
+  else if (theGlobalVariables.OperatingSystem=="CentOS")
+    theGlobalVariables.CallSystemNoOutput("sudo yum install unzip");
+  result << "Proceeding to unzip MathJax. ";
+  //std::string currentFolder=FileOperations::GetCurrentFolder();
+  //result << "Changing folder to: " << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
+  //theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
+  result << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
+  theGlobalVariables.CallSystemNoOutput("mkdir -p ../../public_html");
+  theGlobalVariables.CallSystemNoOutput("unzip ./../html-common/MathJax-2.7-latest.zip -d ./../../public_html/");
+  theGlobalVariables.CallSystemNoOutput("mv ./../../public_html/MathJax-2.7.2 ./../../public_html/MathJax-2.7-latest");
+  //theGlobalVariables.ChDir(currentFolder);
 }
 
 void WebServer::AnalyzeMainArguments(int argC, char **argv)
@@ -5526,8 +5556,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("pagetemplates/", "../pagetemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.6-latest/", "../public_html/MathJax-2.6-latest/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");
   folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");
   folderSubstitutionsNonSensitive.SetKeyValue("LaTeX-materials/", "../LaTeX-materials/");
   folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");//<-internal use
@@ -5604,6 +5634,7 @@ int WebServer::main(int argc, char **argv)
   theWebServer.InitializeGlobalVariables();
   theWebServer.CheckOpenSSLMySQLInstallation();
   theWebServer.CheckMySQLSetup();
+  theWebServer.CheckMathJaxSetup();
   theGlobalVariables.flagCachingInternalFilesOn=false;
   if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
@@ -5613,8 +5644,9 @@ int WebServer::main(int argc, char **argv)
     << logger::purple << "************************" << logger::endL;
   }
 
-  theGlobalVariables.flagAceIsAvailable=
-  FileOperations::FileExistsVirtual("MathJax-2.6-latest/", false);
+  theGlobalVariables.flagAceIsAvailable= FileOperations::FileExistsVirtual("MathJax-2.7-latest/", false);
+  if (!theGlobalVariables.flagAceIsAvailable && theGlobalVariables.flagRunningBuiltInWebServer)
+    theLog << logger::red << "MathJax not available. " << logger::endL;
   if (false &&
       theGlobalVariables.flagRunningBuiltInWebServer)
   { theWebServer.TurnProcessMonitoringOn();

@@ -16,6 +16,7 @@ svn checkout https://github.com/tmilev/calculator.git/trunk
 
 ```
 Please note that **the files you create with the calculator will be placed in baseFolder**, i.e., inside the first folder you created and where you checked out the calculator trunk. You can put **baseFolder** in a repository of your own. 
+
 3. Compile the calculator.
 ```
 cd trunk
@@ -26,7 +27,7 @@ make
 cd bin
 ./calculator
 ```
-Follow the prompts - you may be asked for your sudo password
+Follow the prompts - you **will be asked for your sudo password**.
 ### Running the calculator
 5. Once the installation steps are complete start the calculator as a web server:
 ```
@@ -39,19 +40,13 @@ This completes the setup and your first run.
 
 ### Prerequisites
 1. **OS**. For now, we support Linux only. Windows and Mac OS support could be added in the future (depending on resources). We have explicit support for:
-
-Ubuntu   (should work on all systems using the apt-get package manager)
-CentOS   (should work on all systems using the yum package manager)
-
+- Ubuntu   (should work on all systems using the apt-get package manager);
+- CentOS   (should work on all systems using the yum package manager).
 We will add your Linux flavor upon request. We may need your help for the commands needed by your package manager. 
-
 2. **subversion/git**. needed to download the source. 
-
 3. **sudo**. The initial calculator setup uses the sudo command, make sure that is installed on your system (should be there out of the box on most machines). 
-
 4. [Optional] **mysql development libraries**. If you don't have these libraries, the calculator will attempt to install them on first run.
-
-4. [Optional] **openssl development libraries**. If you don't have these libraries, the calculator will attempt to install them on first run.
+5. [Optional] **openssl development libraries**. If you don't have these libraries, the calculator will attempt to install them on first run.
 
 ## Authors
 The following people have contributed code directly:

@@ -42,17 +42,16 @@ This completes the setup and your first run.
 1. **OS**. For now, we support Linux only. Windows and Mac OS support could be added in the future (depending on resources). We have explicit support for:
 - Ubuntu   (should work on all systems using the apt-get package manager);
 - CentOS   (should work on all systems using the yum package manager).
-We will add your Linux flavor upon request. We may need your help for the commands needed by your package manager. 
+- We will add your Linux flavor upon request. We may need your help with your package manager. 
 2. **subversion/git**. needed to download the source. 
 3. **sudo**. The initial calculator setup uses the sudo command, make sure that is installed on your system (should be there out of the box on most machines). 
-4. [Optional] **mysql development libraries**. If you don't have these libraries, the calculator will attempt to install them on first run.
-5. [Optional] **openssl development libraries**. If you don't have these libraries, the calculator will attempt to install them on first run.
+4. [Optional] **mysql development libraries**. If you don't have these, the calculator will attempt to install them on first run.
+5. [Optional] **openssl development libraries**. If you don't have these, the calculator will attempt to install them on first run.
 
 ## Authors
 The following people have contributed code directly:
-**Todor Milev** (project mastermind)
-**Thomas-Folz Donahue**
+- **Todor Milev** (project mastermind)
+- **Thomas-Folz Donahue**
 
 ## License
-
 This project is licensed under the LGPL license (see the license file in the source code.

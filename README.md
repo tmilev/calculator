@@ -15,7 +15,7 @@ cd baseFolder
 svn checkout https://github.com/tmilev/calculator.git/trunk
 
 ```
-**Please note that the calculator will modify files inside the baseFolder**, i.e., inside the first folder you created and where you checked out the calculator. Files created by the calculator will be placed in **baseFolder**, i.e., outside of the scope of our repository. You can put **baseFolder** in a repository of your own. 
+Please note that **the files you create with the calculator will be placed in baseFolder**, i.e., inside the first folder you created and where you checked out the calculator trunk. You can put **baseFolder** in a repository of your own. 
 3. Compile the calculator.
 ```
 cd trunk

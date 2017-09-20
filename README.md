@@ -34,6 +34,7 @@ Follow the prompts - you **will be asked for your sudo password**.
 ./calculator server 10000
 ```
 Leave the terminal window open if you'd like to monitor what's going on. The calculator will tell you on which port it got bound. The defaults are 8155 (http) and 8166 (https). 
+
 6. Open your favorite browser and navigate to 
 
 http://localhost:8155/cgi-bin/calculator

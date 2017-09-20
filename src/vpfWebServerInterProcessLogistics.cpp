@@ -715,11 +715,12 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
     return *this;
   this->initializeIfNeeded();
   this->CheckLogSize();
+  bool doUseColors=theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningCommandLine;
   switch (input)
   { case logger::endL:
-      if (theGlobalVariables.flagRunningBuiltInWebServer)
+      if (doUseColors)
         std::cout << this->closeTagConsole() << std::endl;
-        std::cout.flush();
+      std::cout.flush();
       this->currentColor=logger::normalColor;
       if (this->flagStopWritingToFile)
         return *this;
@@ -734,14 +735,14 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
     case logger::orange:
     case logger::cyan:
       this->currentColor=input;
-      if (theGlobalVariables.flagRunningBuiltInWebServer)
+      if (doUseColors)
         std::cout << this->openTagConsole();
       if (this->flagStopWritingToFile)
         return *this;
       this->theFile << this->openTagHtml();
       return *this;
     case logger::normalColor:
-      if (theGlobalVariables.flagRunningBuiltInWebServer)
+      if (doUseColors)
         std::cout << this->closeTagConsole();
       this->currentColor=logger::normalColor;
       if (this->flagStopWritingToFile)

@@ -5345,6 +5345,16 @@ void WebServer::CheckOpenSSLMySQLInstallation()
     if (commandOutput.find("CentOS")!=std::string::npos)
       osName="CentOS";
   }
+  std::string attemptedSetupVirtualFileName="/LogFiles/attemptedDBandSSLsetup.txt";
+  if (FileOperations::FileExistsVirtual(attemptedSetupVirtualFileName, true))
+  { std::string attemptedSetupPhysicalFileName;
+    FileOperations::GetPhysicalFileNameFromVirtual(attemptedSetupVirtualFileName, attemptedSetupPhysicalFileName);
+    result << logger::green << "Mysql or ssl setup missing, skipping installation. Erase file "
+    << attemptedSetupPhysicalFileName << " to try setting up again. " << logger::endL;
+    return;
+  }
+  std::fstream temp;
+  FileOperations::OpenFileCreateIfNotPresentVirtual(temp, attemptedSetupVirtualFileName, false, true, false, true);
   if (osName=="")
   { //std::cout << "Debug: run apache? " << theGlobalVariables.flagRunningApache;
     result << logger::red << "Your Linux flavor is not currently supported. " << logger::endL;
@@ -5357,15 +5367,17 @@ void WebServer::CheckOpenSSLMySQLInstallation()
 
     result << "Please post a request for support of your Linux flavor on our bug tracker: " << logger::endL
     << logger::green << "https://github.com/tmilev/calculator"
-    << logger::endL << " and we will add your Linux flavor to the list of supported distros. " << logger::endL;
+    << logger::endL << "and we will add your Linux flavor to the list of supported distros. " << logger::endL;
     result.flush();
     return;
   }
+  temp.close();
   if (doInstallMysql)
   { result << "You appear to be missing a mysql installation. Let me try to install that for you. "
-    << logger::green << "Enter your password as prompted please. " << logger::endL;
+    << logger::green << "Enter your password as prompted please. "
+    << "Also, leave the root password for mysql blank. " << logger::endL;
     if (osName=="Ubuntu")
-      theGlobalVariables.CallSystemNoOutput("sudo apt-get install libmysqlclient-dev");
+      theGlobalVariables.CallSystemNoOutput("sudo apt-get install mysql-client mysql-server libmysqlclient-dev");
     else if (osName=="CentOS")
       theGlobalVariables.CallSystemNoOutput("sudo yum install mysql-devel");
   }
@@ -5375,8 +5387,15 @@ void WebServer::CheckOpenSSLMySQLInstallation()
     if (osName=="Ubuntu")
       theGlobalVariables.CallSystemNoOutput("sudo apt-get install libssl-dev");
     else if (osName=="CentOS")
-      theGlobalVariables.CallSystemNoOutput("sudo yum install mysql-devel");
+      theGlobalVariables.CallSystemNoOutput("sudo yum install openssl-devel");
   }
+  std::string currentFolder=FileOperations::GetCurrentFolder();
+  result << "Changing folder to: " << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
+  theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
+  result << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
+  theGlobalVariables.CallSystemNoOutput("make clean");
+  theGlobalVariables.CallSystemNoOutput("make");
+  theGlobalVariables.ChDir(currentFolder);
 }
 
 void WebServer::AnalyzeMainArguments(int argC, char **argv)
@@ -5547,7 +5566,6 @@ int WebServer::main(int argc, char **argv)
   try {
   InitializeGlobalObjects();
   theWebServer.AnalyzeMainArguments(argc, argv);
-  theWebServer.CheckOpenSSLMySQLInstallation();
   if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
     theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=
     theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit+20;
@@ -5555,6 +5573,7 @@ int WebServer::main(int argc, char **argv)
     theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=-1;
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
+  theWebServer.CheckOpenSSLMySQLInstallation();
   theGlobalVariables.flagCachingInternalFilesOn=false;
   if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
@@ -5616,7 +5635,7 @@ int WebServer::mainCommandLine()
         theParser.inputString+=" ";
     }
   else
-  { result << "Input: ";
+  { result << "Input: " << logger::yellow;
     std::cin >> theParser.inputString;
   }
   theParser.flagUseHtml=false;

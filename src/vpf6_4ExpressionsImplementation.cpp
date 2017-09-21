@@ -2817,6 +2817,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << "\\left(" << firstE << "\\right)";
       else
         out << firstE;
+      bool mustHaveSpace=true;
       if (!firstNeedsBrackets && !secondNeedsBrackets && firstE!="" && firstE!="-")
       { if (MathRoutines::isADigit(secondE[0]))
           mustHaveTimes=true;
@@ -2824,10 +2825,12 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
           if (MathRoutines::StringBeginsWith(secondE, "\\frac"))
             mustHaveTimes=true;
       }
+      if (firstNeedsBrackets || mustHaveTimes || firstE=="" || firstE=="-")
+        mustHaveSpace=false;
       if (mustHaveTimes)
         out << "\\cdot ";
-//      else
-//        out << " ";
+      else if (mustHaveSpace)
+        out << " ";
       if (secondNeedsBrackets)
         out << "\\left(" << secondE << "\\right)";
       else

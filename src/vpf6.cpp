@@ -1710,7 +1710,7 @@ bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expressio
 { MacroRegisterFunctionWithName("Calculator::outerPowerRaiseToFirst");
   if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
-  if (input[1].StartsWith(theCommands.opIntegral(),2) ||
+  if (input[1].StartsWith(theCommands.opIntegral(), 2) ||
       input[1].IsAtomGivenData(theCommands.opIntegral()))
     return false;
   if (input[2].IsEqualToOne())

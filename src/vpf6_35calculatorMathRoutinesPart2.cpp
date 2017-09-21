@@ -1083,8 +1083,8 @@ bool CalculatorFunctionsGeneral::innerOperatorBounds(Calculator& theCommands, co
     output.AddChildOnTop(theLimitsE);
     return true;
   }
-  if (!baseE.StartsWith(theCommands.opIntegral(),2) &&
-      !baseE.StartsWith(theCommands.opSum(),2))
+  if (!baseE.StartsWith(theCommands.opIntegral() ,2) &&
+      !baseE.StartsWith(theCommands.opSum(), 2))
     return false;
   theLimitsE.reset(theCommands);
   theLimitsE.AddChildAtomOnTop(theCommands.opLimitBoundary());

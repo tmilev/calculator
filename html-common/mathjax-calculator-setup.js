@@ -33,16 +33,15 @@ function selectElementContents(el)
   var sel = window.getSelection();
   sel.removeAllRanges();
   sel.addRange(range);
+  el.focus();
 }
 
-
 function showTex(originalTex, item, event)
-{
-  if (item['calculatorTexShown']==undefined)
+{ if (item['calculatorTexShown']===undefined)
     item['calculatorTexShown']=false;
   item['calculatorTexShown']=!item['calculatorTexShown'];
-  if (!item['calculatorTexShown']){
-    item.parentNode.removeChild(item.nextSibling);
+  if (!item['calculatorTexShown'])
+  { item.parentNode.removeChild(item.nextSibling);
     return;
   }
   flaSpan=document.createElement('span');
@@ -50,6 +49,7 @@ function showTex(originalTex, item, event)
     originalTex=originalTex.slice(14);
   flaSpan.textContent=originalTex;
   item.parentNode.insertBefore(flaSpan, item.nextSibling);
+  item.blur();
   selectElementContents(flaSpan);
   //MathJax.Menu.ShowSource.Text(originalTex||"No Original Source to Show", event);
 }
@@ -86,14 +86,11 @@ MathJax.Hub.Register.StartupHook("MathEvents Ready", function () {
   //  if not, load it and call the double-click handler again afterward.
   //
   EVENT.DblClick = function(event) 
-  {
-    if (MENU) 
-    {
-      var jax = HUB.getJaxFor(this);
+  { if (MENU)
+    { var jax = HUB.getJaxFor(this);
       showTex(jax.originalText, this, event);
     } else 
-    {
-      MathJax.Callback.Queue(["Require", MathJax.Ajax, "[MathJax]/extensions/MathMenu.js"],
+    { MathJax.Callback.Queue(["Require", MathJax.Ajax, "[MathJax]/extensions/MathMenu.js"],
         ["DblClick",this,{}]);
     }
     return EVENT.False(event);

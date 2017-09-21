@@ -130,5 +130,6 @@ DISTFILES += \
     ../html-common/ace-editor-settings.js \
     ../html-common/database-routines.js \
     ../html-common/styleCalculator.css \
-    ../html-common/cookie-functions.js
+    ../html-common/cookie-functions.js \
+    ../html-common/mathjax-calculator-setup.js
 

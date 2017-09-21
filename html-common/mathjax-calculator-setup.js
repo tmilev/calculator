@@ -186,7 +186,7 @@ function waitForMathJax()
   if (waitingForMathJaxCounter>100)
     return;
   if ((typeof MathJax)==="undefined")
-  { setTimeout(100, waitForMathJax);
+  { setTimeout(waitForMathJax,100);
     return;
   }
   ConfigureMathJaxForCalculator();

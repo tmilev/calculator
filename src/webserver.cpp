@@ -4413,6 +4413,8 @@ WebServer::WebServer()
   this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/mathquill.min.js");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/mathquill.min-matrix.js");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/mathquill.min-matrix.js");
+//  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/mathjax-calculator-setup.js");
+//  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/mathjax-calculator-setup.js");
   this->addressStartsNotNeedingLogin.AddOnTop("cache.appcache");
   this->addressStartsNotNeedingLogin.AddOnTop("/.well-known/");
   this->addressStartsNotNeedingLogin.AddOnTop(".well-known/");

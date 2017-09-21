@@ -432,7 +432,8 @@ const std::string& HtmlRoutines::GetJavascriptMathjax()
   if (HtmlRoutines::preLoadedFiles.Contains("MathJax"))
     return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("MathJax");
   std::stringstream out;
-  out << "<script type=\"text/javascript\" async src=\"/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full,/html-common-calculator/mathjax-calculator-setup.js\"></script>\n";
+  out << "<script type=\"text/javascript\" async src=\"/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full\"></script>\n";
+  out << "<script type=\"text/javascript\" async src=\"/html-common-calculator/mathjax-calculator-setup.js\"></script>\n";
   HtmlRoutines::preLoadedFiles.SetKeyValue("MathJax", out.str());
   return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("MathJax");
 }

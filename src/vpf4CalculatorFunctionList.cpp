@@ -5044,12 +5044,19 @@ this->AddOperationInnerHandler
    "Calculator::innerAssociateExponentExponent",
    "RaisePowerToPower");
   this->AddOperationOuterHandler
-  ("^", Calculator::innerDistributeExponent, "",
-   "If a is a constant, substitutes (a*b)^c with a^c b^c.",
+  ("^", CalculatorFunctionsGeneral::innerDistributeExponent, "",
+   "If a is a positive constant, substitutes (a*b)^c with a^c b^c.",
    "(a*b)^n; (\\sqrt(2)*b)^2",
    true, false,
-   "Calculator::innerDistributeExponent",
+   "CalculatorFunctionsGeneral::innerDistributeExponent",
    "DistributeExponent");
+  this->AddOperationOuterHandler
+  ("\\sqrt", CalculatorFunctionsGeneral::innerDistributeSqrt, "",
+   "If a is a positive constant, substitutes sqrt(a b) by sqrt(a) sqrt(b).",
+   " TurnOffApproximations 0; \\sqrt{\\frac{676}{25} ln 3}",
+   true, false,
+   "Calculator::innerDistributeSqrt",
+   "innerDistributeSqrt");
   this->AddOperationOuterHandler
   ("^", Calculator::outerPowerRaiseToFirst, "",
    "Realizes the tranformation {{anything}}^1=a. ",

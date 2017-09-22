@@ -75,6 +75,10 @@ public:
   static bool innerUnionNoRepetition(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCrossProduct(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerDistributeExponent(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDistributeSqrt(Calculator& theCommands, const Expression& input, Expression& output);
+
+
   static bool innerChooseCartanSA(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPolynomialDivisionSlidesGrLex

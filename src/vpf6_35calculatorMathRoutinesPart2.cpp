@@ -1115,6 +1115,37 @@ bool CalculatorFunctionsGeneral::innerPowerExponentToLog(Calculator& theCommands
   return false;
 }
 
+bool CalculatorFunctionsGeneral::innerDistributeExponent(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerDistributeExponent");
+  if (!input.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  const Expression& base = input[1];
+  const Expression& exponentE=input[2];
+  if (exponentE.IsAtomGivenData(theCommands.opCirc()))
+    return false;
+  if (!input[1].StartsWith(theCommands.opTimes(), 3))
+    return false;
+  if (!base[1].IsConstantNumber())
+    return false;
+  bool isGood=base[1].IsPositiveNumber() || base[2].IsPositiveNumber();
+  if (!isGood)
+  { if (exponentE.IsInteger())
+      isGood=true;
+    else
+    { Rational exponentRat;
+      if (exponentE.IsRational(&exponentRat))
+        if (!exponentRat.GetDenominator().IsEven())
+          isGood=true;
+    }
+  }
+  if (!isGood)
+    return false;
+  Expression leftE, rightE;
+  leftE.MakeXOX(theCommands, theCommands.opThePower(), input[1][1], input[2]);
+  rightE.MakeXOX(theCommands, theCommands.opThePower(), input[1][2], input[2]);
+  return output.MakeXOX(theCommands, theCommands.opTimes(), leftE, rightE);
+}
+
 bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerSqrt");
   if (input.size()!=3)

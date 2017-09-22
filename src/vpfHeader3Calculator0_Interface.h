@@ -1836,7 +1836,6 @@ public:
   static bool outerAssociate(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSubZeroDivAnythingWithZero(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCancelMultiplicativeInverse(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerDistributeExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateTimesDivision(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFlattenCommandEnclosuresOneLayer(Calculator& theCommands, const Expression& input, Expression& output);

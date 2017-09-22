@@ -1502,6 +1502,35 @@ bool CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerDistributeSqrt(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerDistributeSqrt");
+  if (!input.StartsWith(theCommands.opSqrt(), 3))
+    return false;
+  const Expression& base = input[2];
+  const Expression& oneOverExponentE = input[1];
+  if (!base.StartsWith(theCommands.opTimes(), 3))
+    return false;
+  if (!base[1].IsConstantNumber())
+    return false;
+  bool isGood=base[1].IsPositiveNumber() || base[2].IsPositiveNumber();
+  if (!isGood)
+  { if (oneOverExponentE.IsInteger())
+      isGood=true;
+    else
+    { Rational exponentRat;
+      if (oneOverExponentE.IsRational(&exponentRat))
+        if (!exponentRat.GetDenominator().IsEven())
+          isGood=true;
+    }
+  }
+  if (!isGood)
+    return false;
+  Expression leftE, rightE;
+  leftE.MakeXOX(theCommands, theCommands.opSqrt(), oneOverExponentE, base[1]);
+  rightE.MakeXOX(theCommands, theCommands.opSqrt(), oneOverExponentE, base[2]);
+  return output.MakeXOX(theCommands, theCommands.opTimes(), leftE, rightE);
+}
+
 bool CalculatorFunctionsGeneral::innerIsAlgebraicRadical(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsAlgebraicRadical");
   //stOutput << "<br>Evaluating isconstant on: " << input.ToString();

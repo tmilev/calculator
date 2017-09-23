@@ -3872,6 +3872,8 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection()
 { MacroRegisterFunctionWithName("WebWorker::ProcessLoginNeededOverUnsecureConnection");
   std::stringstream redirectStream, newAddressStream;
   newAddressStream << "https://" << this->hostNoPort;
+  if (this->hostNoPort=="")
+    newAddressStream << "calculator-algebra.org";
   if (!this->parent->flagPort8155)
     newAddressStream << ":" << this->parent->httpSSLPort;
   if (this->addressGetOrPost.size()!=0)
@@ -3883,11 +3885,18 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection()
   if (this->hostNoPort!="")
   { redirectStream << "Location: " << newAddressStream.str();
     this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectStream.str());
+    stOutput << "<html><body>Address available through secure (SSL) connection only. "
+    << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. "
+    ;
   } else
-    this->SetHeaderOKNoContentLength();
-  stOutput << "<html><body>Address available through secure (SSL) connection only. "
-  << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. "
-  ;
+  { this->SetHeaderOKNoContentLength();
+    stOutput << "<html><body>Address available through secure (SSL) connection only. <br>"
+    << "<b style='color:red'>In the web address, please change http to https. </b><br>"
+    << "Unfortunately, I can't redirect you automatically as your browser did not tell me "
+    << "under what domain name it sees me, and the server responds to multiple domain names. "
+    ;
+
+  }
 //  stOutput << "<br>" << redirectStream.str();
   if (theGlobalVariables.flagRunningApache)
     stOutput << "To avoid seeing this message, <b><span \"style=color:red\">please use the secure version:</span></b> "

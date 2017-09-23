@@ -149,6 +149,8 @@ struct Answer
   std::string htmlSpanSolution;
   std::string htmlSpanMQButtonPanel;
   //////////////////////////////////////
+  std::string MQpanelButtonOptions;
+  //////////////////////////////////////
   std::string varMQfield;
   std::string MQobject;
   std::string idSpanSolution;
@@ -199,11 +201,9 @@ public:
   std::string commandsGenerateProblem;
   std::string commandsGenerateProblemNoEnclosures;
   std::string commandsGenerateProblemLink;
-  List<Answer> theAnswers;
+  MapLisT<std::string, Answer, MathRoutines::hashString> theAnswers;
   List<std::string> inputNonAnswerIds;
   void AddEmptyAnswerIdOnTop(const std::string& inputAnswerId);
-  int GetAnswerIdIndex(const std::string& inputAnswerId);
-//  List<List<std::string> > allAnswers;
   ProblemData();
   bool CheckConsistency()const;
   bool CheckConsistencyMQids()const;

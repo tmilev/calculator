@@ -125,7 +125,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     bool answersWork=false;
     std::string answerGeneration;
     std::string solutionReport;
-    for (int j=0; j<theProblem.theProblemData.theAnswers.size; j++)
+    for (int j=0; j<theProblem.theProblemData.theAnswers.size(); j++)
     { std::string currentAnswer;
       std::string currentKey="calculatorAnswer"+
       theProblem.theProblemData.theAnswers[j].answerId;

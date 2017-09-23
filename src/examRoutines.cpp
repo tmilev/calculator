@@ -26,6 +26,8 @@ CalculatorHTML::CalculatorHTML()
   this->flagIsExamProblem=false;
   this->flagParentInvestigated=false;
   this->NumProblemsFound=0;
+  this->NumVideosFound=0;
+  this->NumSlidesFound=0;
   this->flagIsForReal=false;
   this->flagLoadedFromDB=false;
   this->flagLoadedClassDataSuccessfully=false;
@@ -674,7 +676,6 @@ std::string CalculatorHTML::ToStringCalculatorProblemSourceFromFileName(const st
 
 void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateLink");
-  this->NumProblemsFound++;
 //  stOutput << "Figuring out current prob list ...";
 //  std::stringstream notUsed;
 //  this->FigureOutCurrentProblemList(notUsed);
@@ -763,7 +764,7 @@ std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, 
   bool problemAlreadySolved=false;
   if (this->currentUseR.theProblemData.Contains(theFileName))
   { ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
-    if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
+    if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size())
       problemAlreadySolved=true;
   }
   out << this->ToStringDeadline(theFileName, problemAlreadySolved, false, false);
@@ -1129,7 +1130,7 @@ bool CalculatorHTML::PrepareCommands(std::stringstream &comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareCommands");
   if (!this->PrepareCommandsGenerateProblem(comments))
     return false;
-  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
+  for (int i=0; i<this->theProblemData.theAnswers.size(); i++)
   { if (!this->PrepareCommandsAnswer(this->theProblemData.theAnswers[i], comments))
       return false;
     if (!this->PrepareCommandsAnswerOnGiveUp(this->theProblemData.theAnswers[i], comments))
@@ -1285,7 +1286,7 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   this->timeIntermediateComments.LastObject()->AddOnTop("calculator init time");
 
   //stOutput << "nput cmds: " << calculatorCommands.str();
-  if(theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights())
+  if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasProblemComposingRights())
   { this->logCommandsProblemGeneratioN << "<b>Input commands:</b> "
     << this->theProblemData.commandsGenerateProblemLink
     << "<br>\n"
@@ -1421,7 +1422,8 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   "</div>";
   //currentA.htmlMQjavascript= CalculatorHtmlFunctions::GetJavascriptMathQuillBox(currentA);
   currentA.htmlSpanMQButtonPanel=
-  "<span id=\"" + currentA.idMQButtonPanelLocation + "\"></span>";
+  "<span id=\"" + currentA.idMQButtonPanelLocation + "\" "+  "buttons=\"" +
+  currentA.MQpanelButtonOptions + "\"></span>";
   currentA.htmlSpanSolution=  "<span id=\"" + currentA.idSpanSolution + "\"></span>";
   std::stringstream verifyStream;
   verifyStream << "<span id=\"" << currentA.idVerificationSpan << "\">";
@@ -1457,12 +1459,12 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     return;
   }
   std::stringstream out;
+  out << "<br><span class=\"panelAnswer\">";
   out << "<table>";
-//  out << "<tr><td><small>answer:</small><td></tr>";
   out << "<tr><td>";
   out << "<table><tr>";
   if (currentA.flagAutoGenerateMQfield)
-    out << "<td>" << currentA.htmlSpanMQfield  << "</td>";
+    out << "<td class=\"tableCellMQfield\">" << currentA.htmlSpanMQfield  << "</td>";
   if (currentA.flagAutoGenerateMQButtonPanel)
     out << "<td>" << currentA.htmlSpanMQButtonPanel << "</td>";
   out << "</tr></table>";
@@ -1495,6 +1497,7 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   out << "</table>";
   if (currentA.flagAutoGenerateVerificationField)
     out << currentA.htmlSpanVerifyAnswer;
+  out << "</span>";
   inputOutput.interpretedCommand=out.str();
 }
 
@@ -2011,10 +2014,7 @@ std::string CalculatorHTML::ToStringParsingStack(List<SyntacticElementHTML>& the
 }
 
 int CalculatorHTML::GetAnswerIndex(const std::string& desiredAnswerId)
-{ for (int i=0; i<this->theProblemData.theAnswers.size; i++)
-    if (this->theProblemData.theAnswers[i].answerId==desiredAnswerId)
-      return i;
-  return -1;
+{ return this->theProblemData.theAnswers.GetIndex(desiredAnswerId);
 }
 
 bool CalculatorHTML::CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right)
@@ -2520,6 +2520,8 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
         return false;
       }
       answerIdsSeenSoFar.AddOnTopNoRepetition(currentId);
+      this->theProblemData.theAnswers.GetValueCreateIfNotPresent(currentId).MQpanelButtonOptions=
+      currentE.GetKeyValue("buttons");
       continue;
     }
     if (!currentE.IsCommentBeforeSubmission() &&
@@ -2627,27 +2629,27 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
   ////////////////////////////////////////////////////////////////////
   out << "<script type=\"text/javascript\">\n";
   out << "answerMQspanIds = [";
-  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
+  for (int i=0; i<this->theProblemData.theAnswers.size(); i++)
   { out << "\"" << this->theProblemData.theAnswers[i].idMQfield << "\"";
-    if (i!=this->theProblemData.theAnswers.size-1)
+    if (i!=this->theProblemData.theAnswers.size()-1)
       out << ", ";
   }
   out << "];\n";
   out << "preferredButtonContainers = [";
-  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
+  for (int i=0; i<this->theProblemData.theAnswers.size(); i++)
   { out << "\"" << this->theProblemData.theAnswers[i].idMQButtonPanelLocation << "\"";
-    if (i!=this->theProblemData.theAnswers.size-1)
+    if (i!=this->theProblemData.theAnswers.size()-1)
       out << ", ";
   }
   out << "];\n";
   out << "answerIdsPureLatex = [";
-  for (int i=0; i<this->theProblemData.theAnswers.size; i++)
+  for (int i=0; i<this->theProblemData.theAnswers.size(); i++)
   { out << "\"" << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theAnswers[i].answerId, false) << "\"";
-    if (i!=this->theProblemData.theAnswers.size-1)
+    if (i!=this->theProblemData.theAnswers.size()-1)
       out << ", ";
   }
   out << "];\n";
-  for (int answerCounter=0; answerCounter<this->theProblemData.theAnswers.size; answerCounter++)
+  for (int answerCounter=0; answerCounter<this->theProblemData.theAnswers.size(); answerCounter++)
   { Answer& currentA=this->theProblemData.theAnswers[answerCounter];
     out << "var " << currentA.varMQfield << ";\n";
     out << "var " << currentA.varAnswerId << ";\n";
@@ -2664,7 +2666,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
     << "var ignoreNextMathQuillUpdateEvent=false;\n"
     << "function initializeMathQuill(){\n";
 
-  for (int answerCounter=0; answerCounter<this->theProblemData.theAnswers.size; answerCounter++)
+  for (int answerCounter=0; answerCounter<this->theProblemData.theAnswers.size(); answerCounter++)
   { Answer& currentA=this->theProblemData.theAnswers[answerCounter];
     out << "////////////////////////\n";
     out << currentA.varMQfield  << " = document.getElementById('" << currentA.idMQfield << "');\n"
@@ -2769,7 +2771,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     bool problemAlreadySolved=false;
     if (this->currentUseR.theProblemData.Contains(this->fileName))
     { ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(this->fileName);
-      if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size)
+      if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size())
         problemAlreadySolved=true;
     }
     std::string theDeadlineString=this->ToStringDeadline(this->fileName, problemAlreadySolved, true, true);
@@ -3180,20 +3182,20 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
       if (!theProbData.adminData.GetWeightFromSection
           (this->currentUseR.courseInfo.sectionComputed, currentWeight))
         currentWeight=0;
-      if (theProbData.theAnswers.size==1)
+      if (theProbData.theAnswers.size()==1)
       { if (theProbData.numCorrectlyAnswered==1)
           out << theProbData.totalNumSubmissions << " submission(s), problem correctly answered. ";
         else
           out << theProbData.totalNumSubmissions << " submission(s), problem not correctly answered yet. ";
-      } else if (theProbData.theAnswers.size>1)
+      } else if (theProbData.theAnswers.size()>1)
         out << theProbData.totalNumSubmissions << " submission(s), " << theProbData.numCorrectlyAnswered
-        << " out of "<< theProbData.theAnswers.size << " subproblems correctly answered. ";
+        << " out of "<< theProbData.theAnswers.size() << " subproblems correctly answered. ";
     } else if (theProbData.totalNumSubmissions!=0)
-    { if (theProbData.numCorrectlyAnswered<theProbData.theAnswers.size)
+    { if (theProbData.numCorrectlyAnswered<theProbData.theAnswers.size())
       { out << "<span style=\"color:red\"><b> "
         << theProbData.Points << " out of "
         << currentWeight << " point(s). </b></span>";
-      } else if (theProbData.numCorrectlyAnswered==theProbData.theAnswers.size)
+      } else if (theProbData.numCorrectlyAnswered==theProbData.theAnswers.size())
       { out << "<span style=\"color:green\"><b> "
         << theProbData.Points << " out of "
         << currentWeight << " point(s). </b></span>";
@@ -3228,7 +3230,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   if (this->currentUseR.theProblemData.Contains(theFileName))
   { theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
     Rational percentSolved=0, totalPoints=0;
-    percentSolved.AssignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size);
+    percentSolved.AssignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size());
     theProbData.flagProblemWeightIsOK=
     theProbData.adminData.GetWeightFromSection
     (this->currentUseR.courseInfo.sectionComputed, currentWeight, &currentWeightAsGivenByInstructor);
@@ -3814,7 +3816,7 @@ std::string CalculatorHTML::GetSectionSelector()
 
 void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTopicList");
-  std::stringstream out;
+  std::stringstream out, outFinal, outHead;
   if (!this->LoadAndParseTopicList(out))
   { inputOutput.interpretedCommand=out.str();
     return;
@@ -3835,19 +3837,19 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     if (this->theTopicS[i].type==TopicElement::tProblem)
       gradableProblems.AddOnTopNoRepetition(this->theTopicS[i].id);
   this->currentUseR.ComputePointsEarned(gradableProblems, &this->theTopicS);
-  out << this->GetSectionSelector();
+  outHead << this->GetSectionSelector();
   if (this->currentUseR.pointsMax!=0)
   { double percent=100*this->currentUseR.pointsEarned.GetDoubleValue()/
     this->currentUseR.pointsMax.GetDoubleValue();
-    out.precision(2);
-    out << "<panelStudentScores>Total score: "
+    outHead.precision(2);
+    outHead << "<panelStudentScores>Total score: "
     << std::fixed << percent << "% = ";
-    out << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
+    outHead << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
     << " out of " << this->currentUseR.pointsMax.GetDoubleValue()
-    << " points earned.</panelStudentScores>\n" ;
-    out << "<br><small>Includes problems without deadline, but not problems without weights.<br> "
+    << " points earned.</panelStudentScores><br>\n" ;
+    outHead << "<small>Includes problems without deadline, but not problems without weights.<br> "
     << "If a problem is assigned a new weight, your % score may drop. </small><br>";
-    out << "<panelCourseInfo>" << this->currentUseR.courseInfo.ToStringHumanReadable() << "</panelCourseInfo><br>";
+    outHead << "<panelCourseInfo>" << this->currentUseR.courseInfo.ToStringHumanReadable() << "</panelCourseInfo><br>";
   }
   #endif
   this->initTopicElementNames();
@@ -4028,7 +4030,12 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     out << TopicElement::GetTableFinish(plainStyle);
   out << "</ol>";
   tableStarted=false;
-  inputOutput.interpretedCommand=out.str();
+  outHead << "<panelStudentScores>The course contains "
+  << this->NumProblemsFound << " problem templates, "
+  << this->NumSlidesFound << " slides (printable+projector mode counted as a single slide) and "
+  << this->NumVideosFound << " videos.</panelStudentScores><br>";
+  outFinal << outHead.str() << out.str();
+  inputOutput.interpretedCommand=outFinal.str();
   std::stringstream topicListJS;
   topicListJS << "<script type=\"text/javascript\">";
 
@@ -4246,6 +4253,12 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     //;
     //this->displayTitleWithDeadline=titleAndDeadlineStream.str();
   }
+  if (this->problem!="")
+    owner.NumProblemsFound++;
+  if (this->video!="")
+    owner.NumVideosFound++;
+  if (this->displaySlidesLink!="")
+    owner.NumSlidesFound++;
 }
 
 std::string TopicElement::ToString()const

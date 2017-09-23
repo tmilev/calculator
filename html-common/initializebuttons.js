@@ -65,48 +65,93 @@ function initializeButtonsCommon()
 //  }
 }
 
+function initializeOneButtonPanel(currentButtonPanel, panelIndex)
+{ var buttonArray= currentButtonPanel.attributes.buttons.value.toLowerCase().split(/(?:,| )+/);
+  //console.log(buttonArray);
+  var buttonBindings = [];
+  function addBinding(theFun)
+  { if (buttonBindings.indexOf(theFun)>-1)
+      return;
+    buttonBindings.push(theFun);
+  }
+  var noOptions=false;
+  if (buttonArray.length===0)
+    noOptions=true;
+  if (buttonArray.length===1)
+    if (buttonArray[0]==="")
+      noOptions=true;
+  if (buttonArray.indexOf("algebra")>-1 || noOptions)
+  { addBinding(getPlusButton);
+    addBinding(getMinusButton);
+    addBinding(getTimesButton);
+    addBinding(getDivideButton);
+
+    addBinding(getSqrtButton);
+    addBinding(getSqrt_N_Button);
+    addBinding(getPowerButton);
+    addBinding(getLParenButton);
+    addBinding(getRParenButton);
+  }
+  if (buttonArray.indexOf("brackets")>-1 )
+  { addBinding(getLBracketButton);
+    addBinding(getRBracketButton);
+    addBinding(getCommaButton);
+  }
+  if (buttonArray.indexOf("complex")>-1 || buttonArray.indexOf("imaginary")>-1)
+  { addBinding(getiButton);
+  }
+  if (buttonArray.indexOf("variables")>-1)
+  { addBinding(getxButton);
+    addBinding(getyButton);
+    addBinding(getEqualsButton);
+  }
+  if (buttonArray.indexOf("logarithms")>-1 || noOptions)
+  { addBinding(getLogBaseButton);
+    addBinding(getUnderscoreButton);
+    addBinding(getLnButton);
+    addBinding(geteButton);
+  }
+  if (noOptions)
+  { addBinding(getBinomButton);
+    addBinding(getFactorialButton);
+    addBinding(getSumButton);
+    addBinding(getInftyButton);
+    addBinding(getCircButton);
+  }
+  if (buttonArray.indexOf("interval")>-1 || buttonArray.indexOf("intervals")>-1 || noOptions)
+  { addBinding(getOrButton);
+    addBinding(getUnionButton);
+    addBinding(getBelongsToButton);
+    addBinding(getEmptySetButton);
+  }
+  if (buttonArray.indexOf("angle")>-1 || buttonArray.indexOf("angles")>-1 || noOptions)
+  { addBinding(getPiButton);
+    addBinding(getDegreesButton);
+    addBinding(getAlphaButton);
+    addBinding(getBetaButton);
+    addBinding(getGammaButton);
+    addBinding(getThetaButton);
+  }
+
+  var theContent="<table>";
+  var numButtonsPerLine=4;
+  for (var j=0; j<buttonBindings.length; j++)
+  { if (j%numButtonsPerLine===0)
+    { if (j!==0)
+        theContent+="</tr>";
+      theContent+="<tr>";
+    }
+    theContent+="<td>"+ buttonBindings[j](panelIndex)+"</td>";
+  }
+  if (buttonBindings.length>0)
+    theContent+="</tr>";
+  currentButtonPanel.innerHTML=theContent;
+}
+
 function initializeButtons()
 { for (var i=0; i<answerIdsPureLatex.length; i++)
   { var currentButtonPanel=document.getElementById(preferredButtonContainers[i]);
-    currentButtonPanel.innerHTML=
-"<table><tr>"+
-"<td>" + getSqrtButton(i)+ "</td>"+
-"<td>"+getSqrt_N_Button(i) + "</td>"+
-"<td>"+getPowerButton(i) + "</td>"+
-"<td>" + getFactorialButton(i) + "</td>"+
-"</tr>"+
-"<tr>"+
-"<td>" + getPlusButton(i)  + "</td>"+
-"<td>" + getMinusButton(i) + "</td>"+
-"<td>" + getTimesButton(i) + "</td>"+
-"<td>" + getDivideButton(i)+ "</td>"+
-"</tr>"+
-"<tr>"+
-"<td>" + getUnderscoreButton(i)+ "</td>"+
-"<td>" + getLogBaseButton(i) + "</td>"+
-"<td>" + getBinomButton(i) + "</td>"+
-"<td>" + getSumButton(i)+ "</td>"+
-"</tr>"+
-"<tr>"+
-"<td>" + getInftyButton(i)+ "</td>"+
-"<td>" + getPiButton(i) + "</td>"+
-"<td>" + getDegreesButton(i) + "</td>"+
-"<td>" + getCircButton(i) + "</td>"+
-"</tr>"+
-"<tr>"+
-"<td>" + getOrButton(i)+ "</td>"+
-"<td>" + getUnionButton(i) + "</td>"+
-"<td>" + getBelongsToButton(i) + "</td>"+
-"<td>" + getEmptySetButton(i) + "</td>"+
-"</tr>"+
-"<tr>"+
-"<td>" + getAlphaButton(i)+ "</td>"+
-"<td>" + getBetaButton(i) + "</td>"+
-"<td>" + getGammaButton(i) + "</td>"+
-"<td>" + getThetaButton(i) + "</td>"+
-"</tr>"+
-"</table>"
-;
+    initializeOneButtonPanel(currentButtonPanel, i);
   }
   initializeButtonsCommon();
 }
@@ -331,6 +376,96 @@ function binomButtonClick(currentMathField){
   event.preventDefault();
 }
 
+function geteButton(indexMathField){
+  return "<button style='padding:0; width:25; font-size : 9px; height:21.2;' onmousedown='eButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>e</button>";
+}
+
+function eButtonClick(currentMathField){
+  currentMathField.cmd("e");
+  event.preventDefault();
+}
+
+function getxButton(indexMathField){
+  return "<button style='padding:0; width:25; font-size : 9px; height:21.2;' onmousedown='xButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>x</button>";
+}
+
+function xButtonClick(currentMathField){
+  currentMathField.cmd("x");
+  event.preventDefault();
+}
+
+function getLParenButton(indexMathField){
+  return "<button style='padding:0; width:25; font-size : 9px; height:21.2;' onmousedown='lParenButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>(</button>";
+}
+
+function lParenButtonClick(currentMathField){
+  currentMathField.cmd("(");
+  event.preventDefault();
+}
+
+function getRParenButton(indexMathField){
+  return "<button style='padding:0; width:25; font-size : 9px; height:21.2;' onmousedown='rParenButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>)</button>";
+}
+
+function rParenButtonClick(currentMathField){
+  currentMathField.cmd(")");
+  event.preventDefault();
+}
+
+function getLBracketButton(indexMathField){
+  return "<button style='padding:0; width:25; font-size : 9px; height:21.2;' onmousedown='lBracketButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>[</button>";
+}
+
+function lBracketButtonClick(currentMathField){
+  currentMathField.cmd("[");
+  event.preventDefault();
+}
+
+function getRBracketButton(indexMathField){
+  return "<button style='padding:0; width:25; font-size : 9px; height:21.2;' onmousedown='rBracketButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>]</button>";
+}
+
+function rBracketButtonClick(currentMathField){
+  currentMathField.cmd("]");
+  event.preventDefault();
+}
+
+function getCommaButton(indexMathField){
+  return "<button style='padding:0; width:25; font-size : 9px; height:21.2;' onmousedown='commaButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>,</button>";
+}
+
+function commaButtonClick(currentMathField){
+  currentMathField.cmd(",");
+  event.preventDefault();
+}
+
+function getyButton(indexMathField){
+  return "<button style='padding:0; width:25; font-size : 9px; height:21.2;' onmousedown='yButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>y</button>";
+}
+
+function yButtonClick(currentMathField){
+  currentMathField.cmd("y");
+  event.preventDefault();
+}
+
+function getEqualsButton(indexMathField){
+  return "<button style='padding:0; width:25; font-size : 9px; height:21.2;' onmousedown='equalsButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>=</button>";
+}
+
+function equalsButtonClick(currentMathField){
+  currentMathField.cmd("=");
+  event.preventDefault();
+}
+
+function getLnButton(indexMathField){
+  return "<button style='padding:0; width:25; font-size : 9px; height:21.2;' onmousedown='lnButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>ln</button>";
+}
+
+function lnButtonClick(currentMathField){
+  currentMathField.cmd("ln");
+  event.preventDefault();
+}
+
 function getLogBaseButton(indexMathField){
   return "<button style='padding:0; width:25; font-size : 9px; height:21.2;' onmousedown='logBaseButtonClick(answerMathQuillObjects[" + indexMathField + "]);'>log</button>";
 }
@@ -347,6 +482,15 @@ function getOrButton(indexMathField){
 
 function orClick(currentMathField){
   currentMathField.cmd(" or ");
+  event.preventDefault();
+}
+
+function getiButton(indexMathField){
+  return "<button style='width:25' onmousedown='iClick(answerMathQuillObjects[" + indexMathField + "]);'>i</button>";
+}
+
+function iClick(currentMathField){
+  currentMathField.cmd("i");
   event.preventDefault();
 }
 

@@ -278,15 +278,15 @@ ProblemData::ProblemData()
 void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId)
 { Answer theAnswer;
   theAnswer.answerId=inputAnswerId;
-  this->theAnswers.AddOnTop(theAnswer);
+  this->theAnswers.SetKeyValue(inputAnswerId, theAnswer);
 }
 
 std::string ProblemData::ToStringAvailableAnswerIds()
 { std::stringstream out;
   out << "Available answer ids: ";
-  for (int i=0; i<this->theAnswers.size; i++)
+  for (int i=0; i<this->theAnswers.size(); i++)
   { out << this->theAnswers[i].answerId;
-    if (i!=this->theAnswers.size-1)
+    if (i!=this->theAnswers.size()-1)
       out << ", ";
   }
   return out.str();
@@ -313,7 +313,7 @@ std::string ProblemDataAdministrative::ToString()const
 
 bool ProblemData::CheckConsistency()const
 { MacroRegisterFunctionWithName("ProblemData::CheckConsistency");
-  for (int i=0; i<this->theAnswers.size; i++)
+  for (int i=0; i<this->theAnswers.size(); i++)
   { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].answerId)=="")
       crash << "This is not supposed to happen: empty answer id." << crash;
 //    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
@@ -326,7 +326,7 @@ bool ProblemData::CheckConsistency()const
 
 bool ProblemData::CheckConsistencyMQids()const
 { MacroRegisterFunctionWithName("ProblemData::CheckConsistencyMQids");
-  for (int i=0; i<this->theAnswers.size; i++)
+  for (int i=0; i<this->theAnswers.size(); i++)
   { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
       crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
       << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>All the answers are: "
@@ -342,7 +342,7 @@ std::string ProblemData::ToString()const
   if (this->flagRandomSeedGiven)
     out << " (given)";
   out << ". ";
-  for (int i=0; i<this->theAnswers.size; i++)
+  for (int i=0; i<this->theAnswers.size(); i++)
   { Answer& currentA=this->theAnswers[i];
     out << "AnswerId: " << currentA.answerId;
     out << ", numCorrectSubmissions: " << currentA.numCorrectSubmissions;
@@ -1493,14 +1493,14 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
     } //else
       //stOutput << "<br>DEBUG: random seed  NOT NOT NOT found. <br>";
   }
-  this->theAnswers.SetSize(0);
+  this->theAnswers.Clear();
   bool result=true;
   MapLisT<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
   for (int i=0; i<theMap.size(); i++)
   { if (theMap.theKeys[i]=="randomSeed")
       continue;
     this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
-    Answer& currentA=*this->theAnswers.LastObject();
+    Answer& currentA=*this->theAnswers.theValues.LastObject();
     std::string currentQuestion=HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false);
     result=HtmlRoutines::ChopCGIString(currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result)
@@ -1530,7 +1530,7 @@ std::string ProblemData::Store()
   std::stringstream out;
   if (this->flagRandomSeedGiven)
     out << "randomSeed=" << this->randomSeed;
-  for (int i=0; i<this->theAnswers.size; i++)
+  for (int i=0; i<this->theAnswers.size(); i++)
   { Answer& currentA=this->theAnswers[i];
     if (this->flagRandomSeedGiven || i!=0)
       out << "&";

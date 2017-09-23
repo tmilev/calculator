@@ -99,6 +99,8 @@ public:
   int NumAttemptsToInterpret;
   int MaxInterpretationAttempts;
   int NumProblemsFound;
+  int NumVideosFound;
+  int NumSlidesFound;
   int NumAnswerIdsMathquilled;
   List<int> randomSeedsIfInterpretationFails;
   bool flagIsExamHome;

@@ -806,7 +806,7 @@ std::string HtmlInterpretation::SubmitProblem
   if (theProblem.fileName=="")
     crash << "This shouldn't happen: empty file name: theProblem.fileName." << crash;
   std::string studentAnswerNameReader;
-  theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size);
+  theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size());
   MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
   int answerIdIndex=-1;
   for (int i=0; i<theArgs.size(); i++)
@@ -1770,13 +1770,13 @@ void UserCalculator::ComputePointsEarned
      // stOutput << "Debug: weight IS ok: " << problemName << "<br>";
 
 //    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
-    for (int j=0; j<currentP.theAnswers.size; j++)
+    for (int j=0; j<currentP.theAnswers.size(); j++)
     { if (currentP.theAnswers[j].numCorrectSubmissions>0)
         currentP.numCorrectlyAnswered++;
       currentP.totalNumSubmissions+=currentP.theAnswers[j].numSubmissions;
     }
-    if (currentP.flagProblemWeightIsOK && currentP.theAnswers.size>0)
-    { currentP.Points=(currentWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size;
+    if (currentP.flagProblemWeightIsOK && currentP.theAnswers.size()>0)
+    { currentP.Points=(currentWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size();
       this->pointsEarned+= currentP.Points;
       //stOutput << "<br>DEBUG: Accounting points: " << currentP.Points
       //<< " to get: " << this->pointsEarned ;

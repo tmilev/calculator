@@ -65,8 +65,78 @@ function initializeButtonsCommon()
 //  }
 }
 
-function initializeOneButtonPanel(currentButtonPanel, panelIndex)
-{ var buttonArray= currentButtonPanel.attributes.buttons.value.toLowerCase().split(/(?:,| )+/);
+var MathQuillCommandButtonCollection=new Object;
+
+function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle)
+{ var commandObject=new Object;
+  commandObject.theCommand=inputCommand;
+  commandObject.theLabel=inputLabel;
+  commandObject.isComposite=false;
+  if (typeof(inputCommand)!=="string")
+    commandObject.isComposite=true;
+  if (!commandObject.isComposite)
+    commandObject.id=commandObject.theCommand;
+  else
+  { commandObject.id="";
+    for (var i=0; i<inputCommand.length; i++)
+      commandObject.id+=inputCommand[i];
+  }
+  commandObject.getButton=function (indexMathField)
+  { var resultString="";
+    resultString+="<button style='";
+    resultString+="width:25; height:21.2; padding:0; ";
+    if (additionalStyle!=="" && additionalStyle!==undefined)
+      resultString+=additionalStyle;
+    resultString+="'";
+    resultString+=" onmousedown=\"MathQuillCommandButtonCollection['" +
+    commandObject.id + "']."+
+    "clickFunction(answerMathQuillObjects[" + indexMathField + "]);\">" +
+    commandObject.theLabel + "</button>";
+    return resultString;
+  }
+  commandObject.clickFunction = function(currentMathField)
+  { if (!commandObject.isComposite)
+      currentMathField.cmd(commandObject.theCommand);
+    else
+      for (var i=0; i<commandObject.theCommand.length; i++)
+        currentMathField.cmd(commandObject.theCommand[i]);
+    currentMathField.focus();
+    event.preventDefault();
+  }
+  MathQuillCommandButtonCollection[commandObject.id]=commandObject;
+}
+
+mathQuillCommandButton("+","+");
+mathQuillCommandButton("-","-");
+mathQuillCommandButton("*","*");
+mathQuillCommandButton("/","/");
+mathQuillCommandButton("sqrt","&#8730;");
+mathQuillCommandButton("\\nthroot","&#8731;");
+mathQuillCommandButton("^","^");
+mathQuillCommandButton("(","(");
+mathQuillCommandButton(")",")");
+mathQuillCommandButton(",",",");
+mathQuillCommandButton("[","[");
+mathQuillCommandButton("]","]");
+mathQuillCommandButton("i","i");
+mathQuillCommandButton("x","x");
+mathQuillCommandButton("y","y");
+mathQuillCommandButton("=","=");
+mathQuillCommandButton(["log","_"],"log_", "font-size:10px; ");
+mathQuillCommandButton("_","_");
+mathQuillCommandButton("ln","ln");
+mathQuillCommandButton("e","e");
+
+mathQuillCommandButton("sin","sin", "font-size:10px; ");
+mathQuillCommandButton("cos","cos", "font-size:10px; ");
+mathQuillCommandButton("tan","tan", "font-size:10px; ");
+mathQuillCommandButton("cot","cot", "font-size:10px; ");
+mathQuillCommandButton("sec","sec", "font-size:10px; ");
+mathQuillCommandButton("csc","csc", "font-size:10px; ");
+
+function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll)
+{ var currentButtonPanel=document.getElementById(IDcurrentButtonPanel);
+  var buttonArray= currentButtonPanel.attributes.buttons.value.toLowerCase().split(/(?:,| )+/);
   //console.log(buttonArray);
   var buttonBindings = [];
   function addBinding(theFun)
@@ -74,8 +144,13 @@ function initializeOneButtonPanel(currentButtonPanel, panelIndex)
       return;
     buttonBindings.push(theFun);
   }
+  function addCommand(theCmd)
+  { buttonBindings.push(MathQuillCommandButtonCollection[theCmd].getButton);
+  }
   var noOptions=false;
   var includeAll=false;
+  if (forceShowAll)
+    includeAll=true;
   if (buttonArray.indexOf("all")>-1)
     includeAll=true;
   if (buttonArray.length===0)
@@ -84,35 +159,43 @@ function initializeOneButtonPanel(currentButtonPanel, panelIndex)
     if (buttonArray[0]==="")
       noOptions=true;
   if (buttonArray.indexOf("algebra")>-1 || noOptions || includeAll)
-  { addBinding(getPlusButton);
-    addBinding(getMinusButton);
-    addBinding(getTimesButton);
-    addBinding(getDivideButton);
+  { addCommand("+");
+    addCommand("-");
+    addCommand("*");
+    addCommand("/");
 
-    addBinding(getSqrtButton);
-    addBinding(getSqrt_N_Button);
-    addBinding(getPowerButton);
-    addBinding(getLParenButton);
-    addBinding(getRParenButton);
+    addCommand("sqrt");
+    addCommand("\\nthroot");
+    addCommand("^");
+    addCommand("(");
+    addCommand(")");
+  }
+  if (buttonArray.indexOf("trig")>-1 || includeAll)
+  { addCommand("sin");
+    addCommand("cos");
+    addCommand("tan");
+    addCommand("cot");
+    addCommand("sec");
+    addCommand("csc");
   }
   if (buttonArray.indexOf("brackets")>-1 || includeAll)
-  { addBinding(getLBracketButton);
-    addBinding(getRBracketButton);
-    addBinding(getCommaButton);
+  { addCommand("[");
+    addCommand("]");
+    addCommand(",");
   }
   if (buttonArray.indexOf("complex")>-1 || buttonArray.indexOf("imaginary")>-1 || includeAll)
-  { addBinding(getiButton);
+  { addCommand("i");
   }
   if (buttonArray.indexOf("variables")>-1 || includeAll)
-  { addBinding(getxButton);
-    addBinding(getyButton);
-    addBinding(getEqualsButton);
+  { addCommand("x");
+    addCommand("y");
+    addCommand("=");
   }
   if (buttonArray.indexOf("logarithms")>-1 || noOptions || includeAll)
-  { addBinding(getLogBaseButton);
-    addBinding(getUnderscoreButton);
-    addBinding(getLnButton);
-    addBinding(geteButton);
+  { addCommand("log_");
+    addCommand("_");
+    addCommand("ln");
+    addCommand("e");
   }
   if (noOptions || includeAll)
   { addBinding(getBinomButton);
@@ -135,7 +218,6 @@ function initializeOneButtonPanel(currentButtonPanel, panelIndex)
     addBinding(getGammaButton);
     addBinding(getThetaButton);
   }
-
   var theContent="<table>";
   var numButtonsPerLine=4;
   for (var j=0; j<buttonBindings.length; j++)
@@ -148,14 +230,17 @@ function initializeOneButtonPanel(currentButtonPanel, panelIndex)
   }
   if (buttonBindings.length>0)
     theContent+="</tr>";
+  theContent+="</table>";
+  if (!forceShowAll && !includeAll)
+    theContent+= "<small><a href=\"#\" onclick=\"initializeOneButtonPanel('" +IDcurrentButtonPanel+   "'," +panelIndex +",true);\">Show all</a></small>";
+  else
+    theContent+= "<small><a href=\"#\" onclick=\"initializeOneButtonPanel('" +IDcurrentButtonPanel+   "'," +panelIndex +",false);\">Show relevant</a></small>";
   currentButtonPanel.innerHTML=theContent;
 }
 
 function initializeButtons()
 { for (var i=0; i<answerIdsPureLatex.length; i++)
-  { var currentButtonPanel=document.getElementById(preferredButtonContainers[i]);
-    initializeOneButtonPanel(currentButtonPanel, i);
-  }
+    initializeOneButtonPanel(preferredButtonContainers[i], i, false);
   initializeButtonsCommon();
 }
 
@@ -248,6 +333,15 @@ function getBelongsToButton(indexMathField)
 
 function belongsToClick(currentMathField)
 { currentMathField.cmd('\\in');
+  event.preventDefault();
+}
+
+function getSinButton(indexMathField)
+{ return "<button style='width:25' onmousedown='sinClick(answerMathQuillObjects[" + indexMathField + "]);'>sin</button>";
+}
+
+function sinClick(currentMathField)
+{ currentMathField.cmd('sin');
   event.preventDefault();
 }
 

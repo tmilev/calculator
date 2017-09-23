@@ -5038,8 +5038,12 @@ this->AddOperationInnerHandler
    "RaiseFloatingToPower");
   this->AddOperationOuterHandler
   ("^", Calculator::innerAssociateExponentExponent, "",
-   "Substitutes (a^b)^c with a^{b*c}.",
-   "(a^m)^n",
+   "If the rule doesn't break over the complex numbers, substitutes (a^b)^c with a^{b*c}. \
+    The rule acts when one of the following holds:\
+    1) a is real and positive;\
+    2) c is an integer;\
+    3) a evaluates to real (double), b and c are rational and b*c is an even integer. ",
+   "(a^m)^n; ((ln(3))^m)^n; ((ln(0.5))^m)^n; (a^m)^2; (a^2)^m",
    true, false,
    "Calculator::innerAssociateExponentExponent",
    "RaisePowerToPower");

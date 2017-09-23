@@ -197,7 +197,7 @@ span.panelAnswer{
   transition: 0.6s;
 }
 span.panelAnswer:hover{
-  background-color: #fcfcfc;
+  background-color: #fbfbfb;
 }
 /*span.panelAnswer:hover .calculatorMQfieldEnclosureOuter{
   background-color: orange;

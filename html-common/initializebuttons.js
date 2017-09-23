@@ -75,12 +75,15 @@ function initializeOneButtonPanel(currentButtonPanel, panelIndex)
     buttonBindings.push(theFun);
   }
   var noOptions=false;
+  var includeAll=false;
+  if (buttonArray.indexOf("all")>-1)
+    includeAll=true;
   if (buttonArray.length===0)
     noOptions=true;
   if (buttonArray.length===1)
     if (buttonArray[0]==="")
       noOptions=true;
-  if (buttonArray.indexOf("algebra")>-1 || noOptions)
+  if (buttonArray.indexOf("algebra")>-1 || noOptions || includeAll)
   { addBinding(getPlusButton);
     addBinding(getMinusButton);
     addBinding(getTimesButton);
@@ -92,39 +95,39 @@ function initializeOneButtonPanel(currentButtonPanel, panelIndex)
     addBinding(getLParenButton);
     addBinding(getRParenButton);
   }
-  if (buttonArray.indexOf("brackets")>-1 )
+  if (buttonArray.indexOf("brackets")>-1 || includeAll)
   { addBinding(getLBracketButton);
     addBinding(getRBracketButton);
     addBinding(getCommaButton);
   }
-  if (buttonArray.indexOf("complex")>-1 || buttonArray.indexOf("imaginary")>-1)
+  if (buttonArray.indexOf("complex")>-1 || buttonArray.indexOf("imaginary")>-1 || includeAll)
   { addBinding(getiButton);
   }
-  if (buttonArray.indexOf("variables")>-1)
+  if (buttonArray.indexOf("variables")>-1 || includeAll)
   { addBinding(getxButton);
     addBinding(getyButton);
     addBinding(getEqualsButton);
   }
-  if (buttonArray.indexOf("logarithms")>-1 || noOptions)
+  if (buttonArray.indexOf("logarithms")>-1 || noOptions || includeAll)
   { addBinding(getLogBaseButton);
     addBinding(getUnderscoreButton);
     addBinding(getLnButton);
     addBinding(geteButton);
   }
-  if (noOptions)
+  if (noOptions || includeAll)
   { addBinding(getBinomButton);
     addBinding(getFactorialButton);
     addBinding(getSumButton);
     addBinding(getInftyButton);
     addBinding(getCircButton);
   }
-  if (buttonArray.indexOf("interval")>-1 || buttonArray.indexOf("intervals")>-1 || noOptions)
+  if (buttonArray.indexOf("interval")>-1 || buttonArray.indexOf("intervals")>-1 || noOptions || includeAll)
   { addBinding(getOrButton);
     addBinding(getUnionButton);
     addBinding(getBelongsToButton);
     addBinding(getEmptySetButton);
   }
-  if (buttonArray.indexOf("angle")>-1 || buttonArray.indexOf("angles")>-1 || noOptions)
+  if (buttonArray.indexOf("angle")>-1 || buttonArray.indexOf("angles")>-1 || noOptions || includeAll)
   { addBinding(getPiButton);
     addBinding(getDegreesButton);
     addBinding(getAlphaButton);

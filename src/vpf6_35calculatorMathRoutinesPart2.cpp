@@ -1171,7 +1171,7 @@ bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expres
   if (!input[1].IsSmallInteger(&thePower))
     return false;
 //  stOutput << "<br>the power that be: " << thePower ;
-  if (!input[2].IsConstantNumber())
+  if (!input[2].IsRational() )
   {// stOutput << "<br>input is: " << input[2].ToString();
     theCommands.CheckInputNotSameAsOutput(input, output);
     Expression theExponent;

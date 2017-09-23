@@ -1669,6 +1669,21 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
     return false;
   if (!input[1].StartsWith(opPower, 3))
     return false;
+  bool isGood=false;
+  double theDouble=0;
+  if (input[1][1].EvaluatesToDouble(&theDouble))
+  { Rational powerInner, powerOuter;
+    if (theDouble>0)
+      isGood=true;
+    else
+      if (input[2].IsRational(&powerOuter) && input[1][2].IsRational(&powerInner))
+        if ((powerInner*powerOuter).IsEven())
+          isGood=true;
+  }
+  if (input[2].IsInteger())
+    isGood=true;
+  if (!isGood)
+    return false;
   Expression tempE;
   tempE.MakeProducT(theCommands, input[1][2], input[2]);
   output.MakeXOX(theCommands, opPower, input[1][1], tempE);

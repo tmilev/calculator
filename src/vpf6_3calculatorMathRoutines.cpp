@@ -4968,10 +4968,11 @@ bool CalculatorFunctionsGeneral::innerPlotPoint(Calculator& theCommands, const E
   thePlot.thePointsJS.init(thePlot.thePointS.NumRows, thePlot.thePointS.NumCols);
   for (int i=0; i< thePlot.thePointS.NumRows; i++)
     for (int j=0; j<thePlot.thePointS.NumCols; j++)
-    { if(! CalculatorFunctionsGeneral::
+    { if (! CalculatorFunctionsGeneral::
            innerMakeJavascriptExpression
           (theCommands, thePlot.thePointS(i,j), jsConverterE))
-        return theCommands << "Failed to extract coordinate " << i+1 << " from: " << thePlot.coordinateFunctionsE[i].ToString();
+        return theCommands << "Failed to extract coordinate " << i+1 << " from: "
+        << thePlot.coordinateFunctionsE[i].ToString();
       thePlot.thePointsJS(i,j)=jsConverterE.ToString();
       thePlot.thePointS(i,j).HasInputBoxVariables(&theFinalPlot.boxesThatUpdateMe);
     }

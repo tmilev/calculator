@@ -1668,7 +1668,7 @@ bool Calculator::GetMatrixExpressionsFromArguments(const Expression& input, Matr
 
 bool Calculator::GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols)
 { MacroRegisterFunctionWithName("Calculator::GetMatrixExpressions");
-  if (!input.IsSequenceNElementS() && !input.IsMatrix())
+  if (!input.IsSequenceNElementS() && !input.IsMatrix() && !input.IsIntervalRealLine())
   { output.init(1, 1);
     output(0,0)=input;
     return true;

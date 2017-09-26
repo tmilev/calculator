@@ -5445,18 +5445,31 @@ void WebServer::CheckMySQLSetup()
   }
   logger result(attemptedMYSQLSetupVirtualFileName, 0, false);
   WebServer::FigureOutOperatingSystem();
-  result << logger::yellow << "Mysql setup file missing, proceeding with setup. "
-  << "(Re)-starting mysql: " << logger::endL;
+  result << logger::yellow << "Mysql setup file missing, proceeding with setup. " << logger::endL;
+  result << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
+  result << logger::yellow << "(Re)-starting mysql: " << logger::endL;
+  result << logger::green << "sudo /etc/init.d/mysql start" << logger::endL;
   theGlobalVariables.CallSystemNoOutput("sudo /etc/init.d/mysql start");
+
   std::stringstream commandCreateMysqlDB;
   commandCreateMysqlDB << "sudo mysql -u root -e \"create database "
   << DatabaseStrings::theDatabaseName << ";\"";
+
+  result << logger::green << commandCreateMysqlDB.str() << logger::endL;
   result << theGlobalVariables.CallSystemWithOutput(commandCreateMysqlDB.str());
+  std::stringstream commandCreateUser; //please note: grant all privileges may fail to auto-create user if a certain option is selected.
+  commandCreateUser << "sudo mysql -u root -e \"create user '"
+  << DatabaseStrings::theDatabaseUser << "'@'localhost';\"";
+  result << logger::green << commandCreateUser.str() << logger::endL;
+  result << theGlobalVariables.CallSystemWithOutput(commandCreateUser.str());
   std::stringstream commandGRANTprivileges;
-  result << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
   commandGRANTprivileges << "sudo mysql -u root -e \"grant all privileges on "
   << "*.* to  "
   << "'" << DatabaseStrings::theDatabaseUser << "'@'localhost';\"";
+
+  result << logger::green
+  << commandGRANTprivileges.str()
+  << logger::endL;
   result << theGlobalVariables.CallSystemWithOutput(commandGRANTprivileges.str());
 }
 

@@ -355,7 +355,8 @@ bool SSLdata::initSSLkeyFiles()
       !FileOperations::FileExistsVirtual(fileKey, true, true))
   { theGlobalVariables.flagSSLisAvailable=false;
     return false;
-  }
+  } else
+    return true;
 #endif
   return false;
 }

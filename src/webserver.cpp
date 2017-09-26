@@ -336,6 +336,30 @@ void WebServer::SSLServerSideHandShake()
 #ifdef MACRO_use_open_ssl
 bool SSLdata::flagSSLlibraryInitialized=false;
 
+bool SSLdata::initSSLkeyFiles()
+{
+#ifdef MACRO_use_open_ssl
+  if (!FileOperations::FileExistsVirtual(fileCertificate, true, true) ||
+      !FileOperations::FileExistsVirtual(fileKey, true, true))
+  { theLog << logger::red << "SSL is available but CERTIFICATE files are missing." << logger::endL;
+    theLog << logger::green << "Let me try to create those files for you." << logger::endL;
+    std::stringstream theCommand;
+    std::string certificatePhysicalName,keyPhysicalName;
+    FileOperations::GetPhysicalFileNameFromVirtual(fileCertificate, certificatePhysicalName,true, true);
+    FileOperations::GetPhysicalFileNameFromVirtual(fileKey, keyPhysicalName,true, true);
+    theCommand <<  "openssl req -x509 -newkey rsa:2048 -nodes -keyout " << keyPhysicalName
+    << " -out " << certificatePhysicalName << " -days 3001";
+    theGlobalVariables.CallSystemNoOutput(theCommand.str());
+  }
+  if (!FileOperations::FileExistsVirtual(fileCertificate, true, true) ||
+      !FileOperations::FileExistsVirtual(fileKey, true, true))
+  { theGlobalVariables.flagSSLisAvailable=false;
+    return false;
+  }
+#endif
+  return false;
+}
+
 void SSLdata::initSSLlibrary()
 { if (this->flagSSLlibraryInitialized)
     return;
@@ -359,12 +383,8 @@ void SSLdata::initSSLserver()
   //std::cout << "\n\nproject base: " << theGlobalVariables.PhysicalPathProjectBase;
   //std::cout << "\n\nfileKey physical: " << fileKeyPhysical;
   //////////////////////////////////////////////////////////
-  if (!FileOperations::FileExistsVirtual(fileCertificate, true, true) ||
-      !FileOperations::FileExistsVirtual(fileKey, true, true))
-  { theLog << logger::red << "SSL is available but CERTIFICATE files are missing." << logger::endL;
-    theGlobalVariables.flagSSLisAvailable=false;
+  if (!this->initSSLkeyFiles())
     return;
-  }
   theLog << logger::green << "SSL is available." << logger::endL;
   this->theSSLMethod = SSLv23_method();
   this->contextServer= SSL_CTX_new(this->theSSLMethod);
@@ -5114,6 +5134,7 @@ void WebServer::BackupDatabaseIfNeeded()
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
+  SSLdata::initSSLkeyFiles();
   if (!this->flagTryToKillOlderProcesses)
   { theLog.reset();
     logBlock.reset();

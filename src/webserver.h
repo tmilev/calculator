@@ -47,6 +47,7 @@ public:
   void ClearErrorQueue
   (int errorCode, SSL* theSSL, std::stringstream* commentsOnError,
    std::stringstream* commentsGeneral, bool includeNoErrorInComments);
+  static bool initSSLkeyFiles();
   void initSSLlibrary();
   void initSSLserver();
   void initSSLclient();

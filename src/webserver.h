@@ -354,6 +354,8 @@ public:
   static void CheckOpenSSLMySQLInstallation();
   static void CheckMySQLSetup();
   static void CheckMathJaxSetup();
+  static void CheckFreecalcSetup();
+  static void CheckSVNSetup();
   static void AnalyzeMainArguments(int argC, char **argv);
   static void InitializeGlobalVariables();
   bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);

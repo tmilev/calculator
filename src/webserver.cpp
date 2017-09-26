@@ -5473,6 +5473,52 @@ void WebServer::CheckMySQLSetup()
   result << theGlobalVariables.CallSystemWithOutput(commandGRANTprivileges.str());
 }
 
+void WebServer::CheckFreecalcSetup()
+{ MacroRegisterFunctionWithName("WebServer::CheckFreecalcSetup");
+  std::string attemptedSetupVirtual="/LogFiles/attemptedFreecalcSetup.html";
+  if (FileOperations::FileExistsVirtual(attemptedSetupVirtual, true))
+  { std::string attemptedSetupPhysical;
+    logger result("", 0, false);
+    FileOperations::GetPhysicalFileNameFromVirtual(attemptedSetupVirtual, attemptedSetupPhysical);
+    result << logger::green << "freecalc setup previously attempted, skipping. Erase file "
+    << attemptedSetupPhysical << " to try setting up again. " << logger::endL;
+    return;
+  }
+  logger result(attemptedSetupVirtual, 0, false);
+  WebServer::FigureOutOperatingSystem();
+  result << logger::yellow << "Freelcalc setup file missing, proceeding to set it up. " << logger::endL;
+  std::string startingDir=FileOperations::GetCurrentFolder();
+  theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase+"../");
+  result << logger::green << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
+  result << logger::green << "svn checkout https://github.com/tmilev/freecalc.git/trunk ./freecalc" << logger::endL;
+  result << theGlobalVariables.CallSystemWithOutput("svn checkout https://github.com/tmilev/freecalc.git/trunk ./freecalc");
+  theGlobalVariables.ChDir(startingDir);
+}
+
+void WebServer::CheckSVNSetup()
+{ MacroRegisterFunctionWithName("WebServer::CheckSVNSetup");
+  std::string attemptedSetupVirtual="/LogFiles/attemptedSVNSetup.html";
+  if (FileOperations::FileExistsVirtual(attemptedSetupVirtual, true))
+  { std::string attemptedSetupPhysical;
+    logger result("", 0, false);
+    FileOperations::GetPhysicalFileNameFromVirtual(attemptedSetupVirtual, attemptedSetupPhysical);
+    result << logger::green << "SVN setup previously attempted, skipping. Erase file "
+    << attemptedSetupPhysical << " to try setting up again. " << logger::endL;
+    return;
+  }
+  logger result(attemptedSetupVirtual, 0, false);
+  WebServer::FigureOutOperatingSystem();
+  result << logger::yellow << "SVN setup file missing, proceeding to set it up. " << logger::endL
+  << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
+  if (theGlobalVariables.OperatingSystem=="Ubuntu")
+  { result << logger::yellow << "sudo apt-get install subversion" << logger::endL;
+    theGlobalVariables.CallSystemNoOutput("sudo apt-get install subversion");
+  } else if (theGlobalVariables.OperatingSystem=="CentOS")
+  { result << logger::yellow << "sudo yum install subversion" << logger::endL;
+    theGlobalVariables.CallSystemNoOutput("sudo yum install subversion");
+  }
+}
+
 void WebServer::CheckMathJaxSetup()
 { MacroRegisterFunctionWithName("WebServer::CheckMathJaxSetup");
   std::string attemptedMathJaxSetupVirtualFileName="/LogFiles/attemptedMathJaxSetup.html";
@@ -5681,6 +5727,8 @@ int WebServer::main(int argc, char **argv)
   theWebServer.CheckOpenSSLMySQLInstallation();
   theWebServer.CheckMySQLSetup();
   theWebServer.CheckMathJaxSetup();
+  theWebServer.CheckSVNSetup();
+  theWebServer.CheckFreecalcSetup();
   theGlobalVariables.flagCachingInternalFilesOn=false;
   if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog

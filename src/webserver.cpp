@@ -1132,7 +1132,7 @@ void WebServer::ReapChildren()
         { this->theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close", false, true);
           this->theWorkers[i].flagInUse=false;
           this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
-          theLog << logger::green << "Child with pid " << waitResult << " successfully reaped. " << logger::endL;
+          logServer << logger::green << "Child with pid " << waitResult << " successfully reaped. " << logger::endL;
           this->NumProcessesReaped++;
         }
   } while (waitResult>0);
@@ -4349,6 +4349,7 @@ void WebServer::ReleaseEverything()
 #ifdef MACRO_use_open_ssl
   this->theSSLdata.FreeSSL();
 #endif
+  logger& currentLog = (this->flagIsChildProcess) ? theLog : logServer;
   ProgressReportWebServer::flagServerExists=false;
   for (int i=0; i<this->theWorkers.size; i++)
     this->theWorkers[i].Release();
@@ -4357,14 +4358,14 @@ void WebServer::ReleaseEverything()
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.PauseUponUserRequest=0;
   this->activeWorker=-1;
-  //theLog << logger::red << "DEBUG: About to close: " << this->listeningSocketHTTP << logger::endL;
+  currentLog << logger::red << "DEBUG: About to close: " << this->listeningSocketHTTP << logger::endL;
   if (this->listeningSocketHTTP!=-1)
     close(this->listeningSocketHTTP);
-  //theLog << logger::red << "DEBUG: Just closed: " << this->listeningSocketHTTP << logger::endL;
+  currentLog << logger::red << "DEBUG: Just closed: " << this->listeningSocketHTTP << logger::endL;
   this->listeningSocketHTTP=-1;
   if (this->listeningSocketHttpSSL!=-1)
     close(this->listeningSocketHttpSSL);
-  //theLog << logger::red << "DEBUG: Just closed: " << this->listeningSocketHttpSSL << logger::endL;
+  currentLog << logger::red << "DEBUG: Just closed: " << this->listeningSocketHttpSSL << logger::endL;
   this->listeningSocketHttpSSL=-1;
 }
 
@@ -4416,6 +4417,7 @@ WebServer::WebServer()
   this->NumWorkersNormallyExited=0;
   this->WebServerPingIntervalInSeconds=10;
   this->flagThisIsWorkerProcess=false;
+  this->flagIsChildProcess=false;
   this->requestStartsNotNeedingLogin.AddOnTop("about");
   this->requestStartsNotNeedingLogin.AddOnTop("signUp");
   this->requestStartsNotNeedingLogin.AddOnTop("signUpPage");
@@ -4836,10 +4838,10 @@ void WebServer::initDates()
 
 void WebServer::ReleaseWorkerSideResources()
 { MacroRegisterFunctionWithName("WebServer::ReleaseWorkerSideResources");
-  logProcessStats << logger::red << "DEBUG: server about to RELEASE: " << this->ToStringActiveWorker() << logger::endL;
+  logger& currentLog = (this->flagIsChildProcess) ? theLog : logProcessKills;
+  currentLog << logger::red << "DEBUG: server about to RELEASE: " << this->ToStringActiveWorker() << logger::endL;
   this->Release(this->GetActiveWorker().connectedSocketID);
-  logProcessStats << logger::green << "DEBUG: server RELEASED: " << this->ToStringActiveWorker() << logger::endL;
-
+  currentLog << logger::green << "DEBUG: server RELEASED: " << this->ToStringActiveWorker() << logger::endL;
   //<-release socket- communication is handled by the worker.
   this->activeWorker=-1; //<-The active worker is needed only in the child process.
 }
@@ -5159,6 +5161,7 @@ int WebServer::Run()
     logSocketAccept.reset();
     logProcessStats.reset();
     logOpenSSL.reset();
+    logServer.reset();
   }
   if (true)
   { int pidServer=fork();
@@ -5175,7 +5178,7 @@ int WebServer::Run()
   theParser.flagShowCalculatorExamples=false;
   if (!this->initPrepareWebServerALL())
     return 1;
-  theLog << logger::purple << "server: waiting for connections...\r\n" << logger::endL;
+  logServer << logger::purple << "server: waiting for connections...\r\n" << logger::endL;
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size = sizeof their_addr;
   char userAddressBuffer[INET6_ADDRSTRLEN];
@@ -5191,17 +5194,17 @@ int WebServer::Run()
     FD_ZERO(&FDListenSockets);
     for (int i=0; i<this->theListeningSockets.size; i++)
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
-    logIO << logger::red << "DEBUG:  About to enter select loop. " << logger::endL;
+    logServer << logger::red << "DEBUG:  About to enter select loop. " << logger::endL;
     while (select(this->highestSocketNumber+1, &FDListenSockets, 0, 0, 0)==-1)
     { if (this->flagReapingChildren)
-        logIO << logger::yellow << "Select interrupted while reaping children. "
+        logServer << logger::yellow << "Select interrupted while reaping children. "
         << logger::endL;
       else
-        logIO << logger::red << "Select failed: possibly due to reaping children. Error message: "
+        logServer << logger::red << "Select failed: possibly due to reaping children. Error message: "
         << strerror(errno) << logger::endL;
       this->NumFailedSelectsSoFar++;
     }
-    logIO << logger::green << "DEBUG:  select success. " << logger::endL;
+    logServer << logger::green << "DEBUG:  select success. " << logger::endL;
     gettimeofday(&timeBeforeProcessFork, NULL);
     this->NumSuccessfulSelectsSoFar++;
     if ((this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar)-previousReportedNumberOfSelects>100)
@@ -5224,15 +5227,15 @@ int WebServer::Run()
       { //if (this->theListeningSockets[i]==this->listeningSocketHTTP)
         newConnectedSocket=accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
         if (newConnectedSocket>=0)
-        { logIO << logger::green << "Connection candidate  "
+        { logServer << logger::green << "Connection candidate  "
           << this->NumConnectionsSoFar+1 << ". "
           << "Connected via listening socket " << this->theListeningSockets[i]
           << " on socket: " << newConnectedSocket;
           if (this->theListeningSockets[i]==this->listeningSocketHttpSSL)
           { theGlobalVariables.flagUsingSSLinCurrentConnection=true;
-            logIO << logger::purple << " (SSL encrypted). " << logger::endL;
+            logServer << logger::purple << " (SSL encrypted). " << logger::endL;
           } else
-            logIO << logger::yellow << " (non-encrypted). " << logger::endL;
+            logServer << logger::yellow << " (non-encrypted). " << logger::endL;
           break;
         } else
         { logSocketAccept << logger::red << "This is not supposed to happen: accept failed. Error: "
@@ -5244,7 +5247,7 @@ int WebServer::Run()
       logSocketAccept << logger::red << "This is not supposed to to happen: select succeeded "
       << "but I found no set socket. " << logger::endL;
     if (newConnectedSocket <0)
-    { logIO << "DEBUG: newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. ";
+    { logServer << "DEBUG: newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. ";
       continue;
     }
     inet_ntop
@@ -5253,8 +5256,8 @@ int WebServer::Run()
     this->RecycleChildrenIfPossible();
     if (!this->CreateNewActiveWorker())
     { logPlumbing << logger::purple << "Failed to create an active worker. System error string: "
-      << strerror(errno) << logger::endL;
-      logIO << logger::red << "Failed to create active worker: closing connection. " << logger::endL;
+      << strerror(errno) << logger::endL
+      << logger::red << "Failed to create active worker: closing connection. " << logger::endL;
       close (newConnectedSocket);
       continue;
     }
@@ -5276,15 +5279,16 @@ int WebServer::Run()
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
-    if (this->GetActiveWorker().ProcessPID==-1)
+    if (this->GetActiveWorker().ProcessPID<0)
       logProcessKills << logger::red << "FAILED to spawn a child process. " << logger::endL;
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
-      logProcessStats << "DEBUG: fork successful, running worker. " << logger::endL;
+      this->flagIsChildProcess=true;
+      theLog << "DEBUG: fork successful, running worker. " << logger::endL;
       int result=this->GetActiveWorker().Run();
-      logProcessStats << "DEBUG: worker run finished, releasing resources. " << logger::endL;
+      theLog << "DEBUG: worker run finished, releasing resources. " << logger::endL;
       this->ReleaseEverything();
-      logProcessStats << logger::green << "DEBUG: resources released, returning. " << logger::endL;
+      theLog << logger::green << "DEBUG: resources released, returning. " << logger::endL;
       return result;
     }
     this->ReleaseWorkerSideResources();

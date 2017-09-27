@@ -23,16 +23,20 @@ std::string GlobalVariables::GetDateForLogFiles()
   return tempDate;
 }
 
-logger theLog("LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/log.html", 0, true);
+logger theLog("LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/logCommon.html", 0, true);
 logger logHttpErrors("LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogHttpErrors.html", &theLog, false);
 logger logBlock( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogBlockingEvents.html", &theLog, false);
 logger logIO( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogIOErrorsEvents.html", &theLog, false);
-logger logProcessKills( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogMultiprocessing.html", &theLog, false);
-logger logPlumbing( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogServerPlumbing.html", &theLog, false);
-logger logSocketAccept( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogSocketAccept.html", &theLog, false);
-logger logProcessStats( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogWorkerProcessStats.html", &theLog, false);
 logger logOpenSSL( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogOpenSSL.html", &theLog, false);
 logger logEmail("LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogEmail.html", &theLog, false);
+
+logger logServer("LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/logServer.html", 0, false);
+logger logSocketAccept( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogSocketAccept.html", &logServer, false);
+logger logProcessStats( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogWorkerProcessStats.html", &logServer, false);
+logger logPlumbing( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogServerPlumbing.html", &logServer, false);
+logger logProcessKills( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogMultiprocessing.html", &logServer, false);
+logger logServerMonitor( "LogFiles/"+GlobalVariables::GetDateForLogFiles()+"/LogServerMonitor.html", &logServer, false);
+
 Calculator theParser;
 FormatExpressions consoleFormat;
 Crasher crash;

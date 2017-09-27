@@ -71,7 +71,7 @@ void MonitorWebServer()
     for (;;)
       theGlobalVariables.FallAsleep(microsecondsToSleep);
   if (theWebServer.WebServerPingIntervalInSeconds>30)
-    theLog << logger::red << "**********WARNING**************"
+    logServerMonitor << logger::red << "**********WARNING**************"
     << logger::endL
     << logger::red << " The ping interval: "
     << theWebServer.WebServerPingIntervalInSeconds
@@ -85,10 +85,10 @@ void MonitorWebServer()
   theFile.close();
   WebCrawler theCrawler;
   theCrawler.init();
-  theLog << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
+  logServerMonitor << logger::blue << "Pinging " << theCrawler.addressToConnectTo << " at port/service "
   << theCrawler.portOrService << " every " << (microsecondsToSleep/1000000) << " second(s). "
   << logger::endL;
-  theLog << logger::red << "Please beware that the server will restart and you will lose all computations "
+  logServerMonitor << logger::red << "Please beware that the server will restart and you will lose all computations "
   << "if " << maxNumPingFailures << " consecutive pings fail. " << logger::endL;
   int numConsecutiveFailedPings=0;
   int numPings=0;
@@ -103,7 +103,7 @@ void MonitorWebServer()
     if (theCrawler.lastTransactionErrors!="")
     { now.AssignLocalTime();
       numConsecutiveFailedPings++;
-      logIO << logger::red << "Connection monitor: Ping of " << theCrawler.addressToConnectTo
+      logServerMonitor << logger::red << "Connection monitor: Ping of " << theCrawler.addressToConnectTo
       << " at port/service " << theCrawler.portOrService
       << " failed on " << now.ToStringHumanReadable() << ". " << "Got the following errors/messages: "
       << theCrawler.lastTransactionErrors << theCrawler.lastTransaction << ". "

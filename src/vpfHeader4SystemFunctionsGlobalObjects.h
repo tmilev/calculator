@@ -14,6 +14,7 @@ static ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystemHe
 class logger;
 class Calculator;
 extern logger theLog  ;
+extern logger logServerMonitor  ;
 extern logger logHttpErrors;
 extern logger logBlock;
 extern logger logIO   ;
@@ -23,6 +24,7 @@ extern logger logSocketAccept;
 extern logger logProcessStats;
 extern logger logPlumbing;
 extern logger logEmail  ;
+extern logger logServer  ;
 extern FormatExpressions consoleFormat;
 extern Calculator theParser;
 

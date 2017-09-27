@@ -1122,6 +1122,7 @@ void WebServer::ReapChildren()
 { MacroRegisterFunctionWithName("WebServer::ReapChildren");
   int waitResult=0;
   int exitFlags= WNOHANG| WEXITED;
+  logProcessStats << logger::red << "DEBUG: Enter the reaper. " << logger::endL;
   do
   { waitResult= waitpid(-1, NULL, exitFlags);
 //    theLog << "waitresult is: " << waitResult << logger::endL;
@@ -1135,6 +1136,7 @@ void WebServer::ReapChildren()
           this->NumProcessesReaped++;
         }
   } while (waitResult>0);
+  logProcessStats << logger::green << "DEBUG: EXIT the reaper. " << logger::endL;
 
 }
 
@@ -2516,11 +2518,14 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
 
 void WebWorker::WrapUpConnection()
 { MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
+  logProcessStats << "DEBUG: wrapping up " << this->parent->ToStringActiveWorker() << ". " << logger::endL;
   if (this->flagToggleMonitoring)
     this->pipeWorkerToServerControls.WriteAfterEmptying("toggleMonitoring", false, false);
   else
     this->pipeWorkerToServerControls.WriteAfterEmptying("close", false, false);
+  logProcessStats << "DEBUG: done with pipes, releasing " << this->parent->ToStringActiveWorker() << ". " << logger::endL;
   this->Release();
+  logProcessStats << "DEBUG: " << this->parent->ToStringActiveWorker() << " released resources. " << logger::endL;
   theGlobalVariables.flagComputationCompletE=true;
   theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
 }
@@ -4831,7 +4836,10 @@ void WebServer::initDates()
 
 void WebServer::ReleaseWorkerSideResources()
 { MacroRegisterFunctionWithName("WebServer::ReleaseWorkerSideResources");
+  logProcessStats << logger::red << "DEBUG: server about to RELEASE: " << this->ToStringActiveWorker() << logger::endL;
   this->Release(this->GetActiveWorker().connectedSocketID);
+  logProcessStats << logger::green << "DEBUG: server RELEASED: " << this->ToStringActiveWorker() << logger::endL;
+
   //<-release socket- communication is handled by the worker.
   this->activeWorker=-1; //<-The active worker is needed only in the child process.
 }
@@ -4870,6 +4878,7 @@ void WebServer::TerminateChildSystemCall(int i)
 
 void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
 { MacroRegisterFunctionWithName("WebServer::HandleTooManyConnections");
+  logProcessStats << logger::red << "DEBUG: Too many connections handler start. " << logger::endL;
   MonomialWrapper<std::string, MathRoutines::hashString>
   incomingAddress(incomingUserAddress);
   bool purgeIncomingAddress=
@@ -4898,6 +4907,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     logProcessKills << logger::red  << errorStream.str() << logger::endL;
     this->NumProcessAssassinated++;
   }
+  logProcessStats << logger::green << "DEBUG: connection cleanup successful. " << logger::endL;
 }
 
 void WebServer::RecycleChildrenIfPossible()
@@ -4905,6 +4915,7 @@ void WebServer::RecycleChildrenIfPossible()
   //This might need to be rewritten: I wasn't able to make this work with any
   //mechanism other than pipes.
   MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
+  logProcessStats << logger::red << "DEBUG: RecycleChildrenIfPossible start. " << logger::endL;
 //  this->ReapChildren();
   int numInUse=0;
   for (int i=0; i<this->theWorkers.size; i++)
@@ -4967,7 +4978,9 @@ void WebServer::RecycleChildrenIfPossible()
       }
     }
   if (numInUse<=this->MaxTotalUsedWorkers)
+  { logProcessStats << logger::green << "DEBUG: RecycleChildrenIfPossible exit point 1. " << logger::endL;
     return;
+  }
   for (int i=0; i<this->theWorkers.size && numInUse>1; i++)
   { if (this->theWorkers[i].flagInUse)
     { this->TerminateChildSystemCall(i);
@@ -4982,6 +4995,7 @@ void WebServer::RecycleChildrenIfPossible()
       this->NumProcessAssassinated++;
     }
   }
+  logProcessStats << logger::green << "DEBUG: RecycleChildrenIfPossible exit point 2. " << logger::endL;
 }
 
 bool WebServer::initPrepareWebServerALL()
@@ -5177,8 +5191,8 @@ int WebServer::Run()
     FD_ZERO(&FDListenSockets);
     for (int i=0; i<this->theListeningSockets.size; i++)
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
-
-    while (select(this->highestSocketNumber+1, & FDListenSockets, 0, 0, 0)==-1)
+    logIO << logger::red << "DEBUG:  About to enter select loop. " << logger::endL;
+    while (select(this->highestSocketNumber+1, &FDListenSockets, 0, 0, 0)==-1)
     { if (this->flagReapingChildren)
         logIO << logger::yellow << "Select interrupted while reaping children. "
         << logger::endL;
@@ -5187,6 +5201,7 @@ int WebServer::Run()
         << strerror(errno) << logger::endL;
       this->NumFailedSelectsSoFar++;
     }
+    logIO << logger::green << "DEBUG:  select success. " << logger::endL;
     gettimeofday(&timeBeforeProcessFork, NULL);
     this->NumSuccessfulSelectsSoFar++;
     if ((this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar)-previousReportedNumberOfSelects>100)
@@ -5215,9 +5230,9 @@ int WebServer::Run()
           << " on socket: " << newConnectedSocket;
           if (this->theListeningSockets[i]==this->listeningSocketHttpSSL)
           { theGlobalVariables.flagUsingSSLinCurrentConnection=true;
-            logIO << logger::purple << " (SSL encrypted)." << logger::endL;
+            logIO << logger::purple << " (SSL encrypted). " << logger::endL;
           } else
-            logIO << logger::yellow << " (non-encrypted)." << logger::endL;
+            logIO << logger::yellow << " (non-encrypted). " << logger::endL;
           break;
         } else
         { logSocketAccept << logger::red << "This is not supposed to happen: accept failed. Error: "
@@ -5229,7 +5244,9 @@ int WebServer::Run()
       logSocketAccept << logger::red << "This is not supposed to to happen: select succeeded "
       << "but I found no set socket. " << logger::endL;
     if (newConnectedSocket <0)
+    { logIO << "DEBUG: newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. ";
       continue;
+    }
     inet_ntop
     (their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), userAddressBuffer, sizeof userAddressBuffer);
     this->HandleTooManyConnections(userAddressBuffer);
@@ -5255,6 +5272,7 @@ int WebServer::Run()
     this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1 );
 //    theLog << this->ToStringStatus();
     /////////////
+    logProcessStats << "DEBUG: about to fork. " << logger::endL;
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
@@ -5262,8 +5280,11 @@ int WebServer::Run()
       logProcessKills << logger::red << "FAILED to spawn a child process. " << logger::endL;
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
+      logProcessStats << "DEBUG: fork successful, running worker. " << logger::endL;
       int result=this->GetActiveWorker().Run();
+      logProcessStats << "DEBUG: worker run finished, releasing resources. " << logger::endL;
       this->ReleaseEverything();
+      logProcessStats << logger::green << "DEBUG: resources released, returning. " << logger::endL;
       return result;
     }
     this->ReleaseWorkerSideResources();

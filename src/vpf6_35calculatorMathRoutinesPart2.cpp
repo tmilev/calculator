@@ -1273,6 +1273,44 @@ bool CalculatorFunctionsGeneral::innerPlotPath(Calculator& theCommands, const Ex
   return output.AssignValue(thePlot, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerPlotMarkSegment(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotMarkSegment");
+  if (input.size()<3)
+    return false;
+//  stOutput << "DEBUG: Here i am";
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  Vector<double> leftV, rightV;
+  if (!theCommands.GetVectorDoubles(leftE, leftV) || !theCommands.GetVectorDoubles(rightE, rightV))
+    return false;
+  if (leftV.size!=rightV.size)
+    return false;
+  if (leftV.size!=2)
+    return false;
+  int numSegments=1;
+  if (input.size()>=4)
+    if (!input[3].IsSmallInteger(&numSegments))
+      return theCommands << "Could not extract small integer from " << input[3].ToString();
+  if (numSegments<1 || numSegments>100)
+    return theCommands << "Bad number of segments: " << numSegments;
+  Expression theVector=(rightE-leftE);
+  Expression midPt=(rightE+leftE)/2;
+  Expression theVectorX, theVectorY;
+  theVectorX.MakeXOX(theCommands, theCommands.opUnderscore(), theVector, theCommands.EOne());
+  theVectorY.MakeXOX(theCommands, theCommands.opUnderscore(), theVector, theCommands.ETwo());
+  Expression theOrthoV;
+  theOrthoV.MakeXOX(theCommands, theCommands.opSequence(), theVectorY*(-1), theVectorX);
+  Expression leftPt=midPt-theOrthoV/25;
+  Expression rightPt=midPt+theOrthoV/25;
+  output.reset(theCommands);
+  output.AddChildAtomOnTop("PlotSegment");
+  output.AddChildOnTop(leftPt);
+  output.AddChildOnTop(rightPt);
+  for (int i=4; i<input.size(); i++)
+    output.AddChildOnTop(input[i]);
+  return true;
+}
+
 bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSegment");
   if (input.size()<3)

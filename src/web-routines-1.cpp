@@ -107,7 +107,7 @@ void MonitorWebServer()
       << " at port/service " << theCrawler.portOrService
       << " failed on " << now.ToStringHumanReadable() << ". " << "Got the following errors/messages: "
       << theCrawler.lastTransactionErrors << theCrawler.lastTransaction << ". "
-      <<  numConsecutiveFailedPings << " consecutive fails so far, restarting on " << maxNumPingFailures << "." << logger::endL;
+      << numConsecutiveFailedPings << " consecutive fails so far, restarting on " << maxNumPingFailures << ". " << logger::endL;
     } else
     { std::cout << "Connection monitor: Ping success #" << numPings << std::endl;
       numConsecutiveFailedPings=0;

@@ -2324,15 +2324,24 @@ PlotSurface(( x+2, z, y ),    u\\in(0, 2\\pi), v\\in(-r,r), color1=red, color2=p
    "CalculatorFunctionsGeneral::innerPlotParametricCurve",
    "PlotCurve")
    ;
-  this->AddOperationInnerHandler ("PlotSegment",
-    CalculatorFunctionsGeneral::innerPlotSegment, "",
-   " Plots a segment connecting two points. \
-   ",
-   "PlotSegment( (1,2), (3,4))",
-   true, false,
-   "CalculatorFunctionsGeneral::innerPlotSegment",
-   "PlotSegment")
-   ;
+this->AddOperationInnerHandler ("PlotSegment",
+  CalculatorFunctionsGeneral::innerPlotSegment, "",
+ " Plots a segment connecting two points. \
+ ",
+ "PlotSegment( (1,2), (3,4))",
+ true, false,
+ "CalculatorFunctionsGeneral::innerPlotSegment",
+ "PlotSegment")
+ ;
+this->AddOperationInnerHandler ("PlotMarkSegment",
+  CalculatorFunctionsGeneral::innerPlotMarkSegment, "",
+ " Plots a segment mark. \
+ ",
+ "PlotSegment( (1,2), (3,4)) + PlotMarkSegment( (1,2), (3,4))",
+ true, false,
+ "CalculatorFunctionsGeneral::innerPlotMarkSegment",
+ "PlotMarkSegment")
+ ;
   this->AddOperationInnerHandler ("PlotPath",
     CalculatorFunctionsGeneral::innerPlotPath, "",
    "Plots a straight segment path. The path should be enclosed in parentheses, and color must be indicated. \

@@ -5151,7 +5151,9 @@ void WebServer::BackupDatabaseIfNeeded()
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
+#ifdef MACRO_use_open_ssl
   SSLdata::initSSLkeyFiles();
+#endif
   if (!this->flagTryToKillOlderProcesses)
   { theLog.reset();
     logBlock.reset();

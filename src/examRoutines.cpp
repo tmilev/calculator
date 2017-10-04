@@ -1422,8 +1422,8 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   "</div>";
   //currentA.htmlMQjavascript= CalculatorHtmlFunctions::GetJavascriptMathQuillBox(currentA);
   currentA.htmlSpanMQButtonPanel=
-  "<span id=\"" + currentA.idMQButtonPanelLocation + "\" "+  "buttons=\"" +
-  currentA.MQpanelButtonOptions + "\"></span>";
+  "<div class=\"mqButtonPanel\" id=\"" + currentA.idMQButtonPanelLocation + "\" "+  "buttons=\"" +
+  currentA.MQpanelButtonOptions + "\"></div>";
   currentA.htmlSpanSolution=  "<span id=\"" + currentA.idSpanSolution + "\"></span>";
   std::stringstream verifyStream;
   verifyStream << "<span id=\"" << currentA.idVerificationSpan << "\">";

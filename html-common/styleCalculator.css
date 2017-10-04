@@ -594,6 +594,14 @@ text-align: center;
 div.divExternalLogin{
 text-align: center;
 }
+div.mqButtonPanel{
+display: inline-block;
+margin: 0;
+padding: 0;
+-webkit-transition: max-height 2s ease;
+-moz-transition: max-height 2s ease;
+transition: max-height 2s ease;
+}
 form.formLogin > * {
 font-size: 1.1em;
 }

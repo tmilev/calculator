@@ -2518,14 +2518,14 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
 
 void WebWorker::WrapUpConnection()
 { MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
-  logProcessStats << "DEBUG: wrapping up " << this->parent->ToStringActiveWorker() << ". " << logger::endL;
+  logIO << "DEBUG: wrapping up " << this->parent->ToStringActiveWorker() << ". " << logger::endL;
   if (this->flagToggleMonitoring)
     this->pipeWorkerToServerControls.WriteAfterEmptying("toggleMonitoring", false, false);
   else
     this->pipeWorkerToServerControls.WriteAfterEmptying("close", false, false);
-  logProcessStats << "DEBUG: done with pipes, releasing " << this->parent->ToStringActiveWorker() << ". " << logger::endL;
+  logIO << "DEBUG: done with pipes, releasing " << this->parent->ToStringActiveWorker() << ". " << logger::endL;
   this->Release();
-  logProcessStats << "DEBUG: " << this->parent->ToStringActiveWorker() << " released resources. " << logger::endL;
+  logIO << "DEBUG: " << this->parent->ToStringActiveWorker() << " released resources. " << logger::endL;
   theGlobalVariables.flagComputationCompletE=true;
   theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
 }
@@ -4450,8 +4450,8 @@ WebServer::WebServer()
   this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/mathquill.min.js");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/mathquill.min-matrix.js");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/mathquill.min-matrix.js");
-//  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/mathjax-calculator-setup.js");
-//  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/mathjax-calculator-setup.js");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/font/");
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/font/");
   this->addressStartsNotNeedingLogin.AddOnTop("cache.appcache");
   this->addressStartsNotNeedingLogin.AddOnTop("/.well-known/");
   this->addressStartsNotNeedingLogin.AddOnTop(".well-known/");
@@ -5658,6 +5658,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsSensitive=FileOperations::FolderVirtualLinksSensitive();
   FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
   folderSubstitutionsNonSensitive.Clear();
+  //Warning: order of substitutions is important. Only the first rule that applies is applied, only once.
+  //No further rules are applied after that.
   folderSubstitutionsNonSensitive.SetKeyValue("output/", "output/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("certificates-public/", "certificates-public/");//<-internal use
@@ -5666,11 +5668,14 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("problemtemplates/", "../problemtemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("html/", "../public_html/"); //<-internal use
+  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", "./html-common/font/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("html-common/font/", "./html-common/font/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "../public_html/html-common/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("html-common/", "../public_html/html-common/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/html-common-calculator/", "./html-common/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("html-common-calculator/", "./html-common/");//<-internal use
-  folderSubstitutionsNonSensitive.SetKeyValue("/font/", "../public_html/html-common/font/");
+  folderSubstitutionsNonSensitive.SetKeyValue("/font/", "./html-common/font/");
+  folderSubstitutionsNonSensitive.SetKeyValue("font/", "./html-common/font/");
   folderSubstitutionsNonSensitive.SetKeyValue("/DefaultProblemLocation/", "../problemtemplates/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("pagetemplates/", "../pagetemplates/");

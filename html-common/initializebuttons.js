@@ -232,10 +232,18 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
     theContent+="</tr>";
   theContent+="</table>";
   if (!forceShowAll && !includeAll)
-    theContent+= "<small><a href=\"#\" onclick=\"initializeOneButtonPanel('" +IDcurrentButtonPanel+   "'," +panelIndex +",true);\">Show all</a></small>";
+    theContent+= "<small><a href=\"#" + IDcurrentButtonPanel + "\" onclick=\"initializeOneButtonPanel('" + IDcurrentButtonPanel + "'," +panelIndex +",true);\">Show all</a></small>";
   else
-    theContent+= "<small><a href=\"#\" onclick=\"initializeOneButtonPanel('" +IDcurrentButtonPanel+   "'," +panelIndex +",false);\">Show relevant</a></small>";
+    theContent+= "<small><a href=\"#" + IDcurrentButtonPanel + "\" onclick=\"initializeOneButtonPanel('" + IDcurrentButtonPanel + "'," +panelIndex +",false);\">Show relevant</a></small>";
+  //var oldHeight=window.getComputedStyle(IDcurrentButtonPanel).height;
   currentButtonPanel.innerHTML=theContent;
+  //currentButtonPanel.style.maxHeight=oldHeight;
+  //currentButtonPanel.style.height=oldHeight;
+
+  //  currentButtonPanel.style.maxHeight=currentButtonPanel.style.height;
+
+  //currentButtonPanel.scrollIntoView({behavior: "smooth"});
+  return false;
 }
 
 function initializeButtons()

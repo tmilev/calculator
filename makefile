@@ -64,7 +64,13 @@ sslLocation=
 ifneq ($(wildcard /usr/lib64/libssl.so),)#location of ssl in CENTOS
   sslLocation=found
 endif
-ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubuntu
+ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubuntu x86
+  sslLocation=found
+endif
+ifneq ($(wildcard /usr/lib/arm-linux-gnueabihf/libssl.so),)#location of ssl in Ubuntu x86
+  sslLocation=found
+endif
+ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubuntu x86
   sslLocation=found
 endif
 ifneq ($(sslLocation),)

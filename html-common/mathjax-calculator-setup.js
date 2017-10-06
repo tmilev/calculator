@@ -54,7 +54,7 @@ function showTex(originalTex, item, event)
   //MathJax.Menu.ShowSource.Text(originalTex||"No Original Source to Show", event);
 }
 
-function ConfigureMathJaxForCalculator()
+function configureMathJaxForCalculator()
 { //mathjax configuration comes before loading the mathjax script, as requested by the documentation.
   MathJax.Hub.Config({
     extensions: ["tex2jax.js"],
@@ -176,7 +176,7 @@ function ConfigureMathJaxForCalculator()
 
   //});
 
-  //MathJax.Ajax.loadComplete("[MathJax]/config/local/local.js");
+  MathJax.Ajax.loadComplete("/html-common-calculator/mathjax-calculator-setup.js");
 }
 
 var waitingForMathJaxCounter=0;
@@ -189,6 +189,8 @@ function waitForMathJax()
   { setTimeout(waitForMathJax,100);
     return;
   }
-  ConfigureMathJaxForCalculator();
+  configureMathJaxForCalculator();
+//  setTimeout(ConfigureMathJaxForCalculator,2000);
 }
-waitForMathJax();
+//waitForMathJax();
+configureMathJaxForCalculator();

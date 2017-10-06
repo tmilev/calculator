@@ -1773,8 +1773,13 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   out.precision(7);
   bool hasDoubleValue=false;;
   double theDoubleValue=-1;
-  if (input.IsOfType<Rational>())
-  { hasDoubleValue=true;
+  Rational theRat;
+  if (input.IsOfType<Rational>(&theRat))
+  { if (theRat.GetDenominator().IsIntegerFittingInInt(0) && theRat.GetNumerator().IsIntegerFittingInInt(0))
+    { out << " " << theRat.GetNumerator().ToString() << " " << theRat.GetDenominator() << " div ";
+      return output.AssignValue(out.str(), theCommands);
+    }
+    hasDoubleValue=true;
     theDoubleValue=input.GetValue<Rational>().GetDoubleValue();
   }
   if (input.IsOfType<AlgebraicNumber>())

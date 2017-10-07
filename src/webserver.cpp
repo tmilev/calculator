@@ -5794,8 +5794,7 @@ int WebServer::main(int argc, char **argv)
   theWebServer.CheckMathJaxSetup();
   theWebServer.CheckSVNSetup();
   theWebServer.CheckFreecalcSetup();
-  theGlobalVariables.flagCachingInternalFilesOn=false;
-  theGlobalVariables.flagServerDetailedLog=false;
+  theGlobalVariables.flagServerDetailedLog=FileOperations::FileExistsVirtual("LogFiles/serverDebugOn.txt", true, false);
   if (theGlobalVariables.flagServerDetailedLog)
   { logServer
     << logger::purple << "************************" << logger::endL
@@ -5803,27 +5802,29 @@ int WebServer::main(int argc, char **argv)
     << logger::purple << "************************" << logger::endL
     << logger::red << "WARNING: DETAILED server logging is on. " << logger::endL
     << "This is strictly for development purposes, please do not deploy on live systems. " << logger::endL
+    << "To turn off/on server logging simply delete/create file LogFiles/serverDebugOn.txt"
     << logger::purple << "************************" << logger::endL
     << logger::purple << "************************" << logger::endL
     << logger::purple << "************************" << logger::endL
        ;
   }
-
+  theGlobalVariables.flagCachingInternalFilesOn=FileOperations::FileExistsVirtual("LogFiles/serverRAMCachingOff.txt", true, false);;
   if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
     << logger::purple << "************************" << logger::endL
     << logger::red << "WARNING: caching files is off. " << logger::endL
     << "This is for development purposes only, please do not deploy on live systems. " << logger::endL
+    << "To turn off/on server logging simply delete/create file LogFiles/serverRAMCachingOff.txt"
     << logger::purple << "************************" << logger::endL;
   }
 
   theGlobalVariables.flagAceIsAvailable= FileOperations::FileExistsVirtual("MathJax-2.7-latest/", false);
   if (!theGlobalVariables.flagAceIsAvailable && theGlobalVariables.flagRunningBuiltInWebServer)
     theLog << logger::red << "MathJax not available. " << logger::endL;
-  if (false &&
-      theGlobalVariables.flagRunningBuiltInWebServer)
-  { theWebServer.TurnProcessMonitoringOn();
-  }
+//  if (false &&
+//      theGlobalVariables.flagRunningBuiltInWebServer)
+//  { theWebServer.TurnProcessMonitoringOn();
+//  }
   if (theGlobalVariables.flagRunningBuiltInWebServer)
   { if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)
       theLog

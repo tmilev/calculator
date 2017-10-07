@@ -5808,7 +5808,7 @@ int WebServer::main(int argc, char **argv)
     << logger::purple << "************************" << logger::endL
        ;
   }
-  theGlobalVariables.flagCachingInternalFilesOn=FileOperations::FileExistsVirtual("LogFiles/serverRAMCachingOff.txt", true, false);;
+  theGlobalVariables.flagCachingInternalFilesOn=!FileOperations::FileExistsVirtual("LogFiles/serverRAMCachingOff.txt", true, false);;
   if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
     << logger::purple << "************************" << logger::endL

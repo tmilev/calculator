@@ -75,9 +75,9 @@ unsigned long long int Rational::TotalSmallGCDcalls=0;
 unsigned long long int Rational::TotalSmallMultiplications=0;
 
 
-void GlobalVariables::CallSystemNoOutput(const std::string& systemCommand)
+void GlobalVariables::CallSystemNoOutput(const std::string& systemCommand, bool ignoreNonZeroReturn)
 { if (this->pointerCallSystemNoOutput!=0)
-    this->pointerCallSystemNoOutput(systemCommand);
+    this->pointerCallSystemNoOutput(systemCommand, ignoreNonZeroReturn);
 }
 
 std::string GlobalVariables::CallSystemWithOutput(const std::string& systemCommand)
@@ -124,6 +124,7 @@ GlobalVariables::GlobalVariables()
   this->flagRunningAce=false;
   this->flagLoggedIn=false;
   this->flagLogInAttempted=false;
+  this->flagServerDetailedLog=false;
   this->flagUsingSSLinCurrentConnection=false;
   this->flagSSLisAvailable=false;
   this->MaxTimeNoPingBeforeChildIsPresumedDead= 10;
@@ -834,7 +835,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded
   std::string folderName = FileOperations::GetPathFromFileNameWithPath(computedFileName);
   std::stringstream mkDirCommand;
   mkDirCommand << "mkdir -p " << folderName;
-  theGlobalVariables.CallSystemNoOutput(mkDirCommand.str());
+  theGlobalVariables.CallSystemNoOutput(mkDirCommand.str(), true);
   //stOutput << "DEBUG: computed file name: " << computedFileName;
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
   (theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);

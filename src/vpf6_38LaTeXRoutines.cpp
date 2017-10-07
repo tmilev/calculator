@@ -224,14 +224,14 @@ void LaTeXcrawler::BuildFreecalC()
     printableFolder = "homework_" + folderEnd + "/";
   else
     printableFolder = "lectures_printable_" + folderEnd + "/";
-  theGlobalVariables.CallSystemNoOutput("mkdir " + printableFolder);
+  theGlobalVariables.CallSystemNoOutput("mkdir " + printableFolder, true);
   if (isLecturE)
-  { theGlobalVariables.CallSystemNoOutput("mkdir " + lectureProjectorFolder);
+  { theGlobalVariables.CallSystemNoOutput("mkdir " + lectureProjectorFolder, true);
     if (this->flagBuildSingleSlides)
     { slideProjectorFolder = "slides_projector_" + folderEnd + "/";
       slideHandoutFolder = "slides_handout_" + folderEnd + "/";
-      theGlobalVariables.CallSystemNoOutput("mkdir " + slideProjectorFolder);
-      theGlobalVariables.CallSystemNoOutput("mkdir " + slideHandoutFolder);
+      theGlobalVariables.CallSystemNoOutput("mkdir " + slideProjectorFolder, true);
+      theGlobalVariables.CallSystemNoOutput("mkdir " + slideHandoutFolder, true);
     }
   }
   //this->theFileNameWorkingCopy=this->baseFolderStartFilePhysical+ "working_file_"+ this->theFileNameToCrawlNoPathPhysical;
@@ -266,10 +266,10 @@ void LaTeXcrawler::BuildFreecalC()
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
-    theGlobalVariables.CallSystemNoOutput(currentSysCommand);
+    theGlobalVariables.CallSystemNoOutput(currentSysCommand, true);
     reportStream << "<b>[x2]</b>";
     theReport.Report(reportStream.str());
-    theGlobalVariables.CallSystemNoOutput(currentSysCommand);
+    theGlobalVariables.CallSystemNoOutput(currentSysCommand, true);
     std::stringstream thePdfFileNameHandout;
     if (isLecturE)
     { thePdfFileNameHandout << "./" << printableFolder << "Lecture" << theLectureNumbers[i] << "Handout_"
@@ -287,7 +287,7 @@ void LaTeXcrawler::BuildFreecalC()
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture/Homework " << i+1 << " handout compiled, renaming file ... ";
     theReport.Report(reportStream.str());
-    theGlobalVariables.CallSystemNoOutput(currentSysCommand);
+    theGlobalVariables.CallSystemNoOutput(currentSysCommand, true);
     reportStream << " done.";
     theReport.Report(reportStream.str());
     if (!isLecturE)
@@ -310,7 +310,7 @@ void LaTeXcrawler::BuildFreecalC()
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
-    theGlobalVariables.CallSystemNoOutput(currentSysCommand);
+    theGlobalVariables.CallSystemNoOutput(currentSysCommand, true);
     std::stringstream thePdfFileNameNormal;
     thePdfFileNameNormal << "./" << lectureProjectorFolder << "Lecture"
     << theLectureNumbers[i] << "_" << theLectureDesiredNames[i] << "_"
@@ -319,7 +319,7 @@ void LaTeXcrawler::BuildFreecalC()
     executedCommands << "<br>" << currentSysCommand;
     reportStream << "<br>Lecture " << i+1 << " regular slides compiled, renaming file ... ";
     theReport.Report(reportStream.str());
-    theGlobalVariables.CallSystemNoOutput(currentSysCommand);
+    theGlobalVariables.CallSystemNoOutput(currentSysCommand, true);
     reportStream << " done.";
     theReport.Report(reportStream.str());
     resultTable << "<td>" << thePdfFileNameNormal.str() << "</td>" << "<td>" << thePdfFileNameHandout.str() << "</td>";
@@ -357,7 +357,7 @@ void LaTeXcrawler::BuildFreecalC()
       executedCommands << "<br>" << currentSysCommand;
       reportStream << currentSysCommand;
       theReport.Report(reportStream.str());
-      theGlobalVariables.CallSystemNoOutput(currentSysCommand);
+      theGlobalVariables.CallSystemNoOutput(currentSysCommand, true);
 //      executedCommands << "<br>result: "
 //      << theGlobalVariables.CallSystemWithOutput(currentSysCommand);
       std::stringstream thePdfFileNameNormal;
@@ -704,7 +704,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   std::string currentSysCommand = "pdflatex -shell-escape " + this->workingFileNameNoPathTex;
   if (commentsGeneral!=0)
     *commentsGeneral << "Executing command: " << currentSysCommand << " ... ";
-  theGlobalVariables.CallSystemNoOutput(currentSysCommand);
+  theGlobalVariables.CallSystemNoOutput(currentSysCommand, true);
   if (commentsGeneral!=0)
     *commentsGeneral << "done!<br>";
 

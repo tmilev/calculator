@@ -194,9 +194,9 @@ void CreateTimerThread()
 { ThreadData::CreateThread(RunTimerThread, "timer");
 }
 
-void CallSystemWrapperNoOutput(const std::string& theCommand)
+void CallSystemWrapperNoOutput(const std::string& theCommand, bool ignoreNonZeroReturn)
 { int systemOutput= system(theCommand.c_str());
-  if (systemOutput!=0)
+  if (systemOutput!=0 && !ignoreNonZeroReturn)
     theLog << logger::red << "System command: " << theCommand << " exited with " << systemOutput << ". " << logger::endL;
 }
 

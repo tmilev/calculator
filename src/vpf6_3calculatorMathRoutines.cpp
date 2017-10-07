@@ -6783,8 +6783,8 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
     (outSltwoPath.str(), outSl2Folder, false, false);
     outMkDirCommand1 << "mkdir " << baseFolder;
     outMkDirCommand2 << "mkdir " << outSl2Folder;
-    theGlobalVariables.CallSystemNoOutput(outMkDirCommand1.str());
-    theGlobalVariables.CallSystemNoOutput(outMkDirCommand2.str());
+    theGlobalVariables.CallSystemNoOutput(outMkDirCommand1.str(), false);
+    theGlobalVariables.CallSystemNoOutput(outMkDirCommand2.str(), false);
   }
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
   if (!FileOperations::FileExistsVirtual(outSltwoMainFile.str()) ||

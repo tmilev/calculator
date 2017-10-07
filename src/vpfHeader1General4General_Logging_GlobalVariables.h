@@ -49,7 +49,7 @@ class GlobalVariables
 private:
   double (*getElapsedTimePrivate)();
 public:
-  void (*pointerCallSystemNoOutput)(const std::string& theSystemCommand);
+  void (*pointerCallSystemNoOutput)(const std::string& theSystemCommand, bool ignoreOutput);
   std::string (*pointerCallSystemWithOutput)(const std::string& theSystemCommand);
   void (*pointerCallChDir)(const std::string& theDirectoryName);
   void (*IndicatorStringOutputFunction)(const std::string& input);
@@ -83,6 +83,7 @@ public:
   bool flagAceIsAvailable;
 //webserver flags and variables
   bool flagCachingInternalFilesOn;
+  bool flagServerDetailedLog;
 
   bool flagLoggedIn;
   bool flagLogInAttempted;
@@ -218,7 +219,7 @@ public:
 //  inline void DrawBufferNoIniT()
 //  { this->theDrawingVariables.drawBufferNoIniT();
 //  }
-  void CallSystemNoOutput(const std::string& systemCommand);
+  void CallSystemNoOutput(const std::string& systemCommand, bool ignoreNonZeroReturn);
   std::string CallSystemWithOutput(const std::string& systemCommand);
   void ChDir(const std::string& systemCommand);
   std::string ToStringHTMLTopCommandLinuxSystem();

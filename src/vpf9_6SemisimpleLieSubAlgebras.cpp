@@ -280,18 +280,18 @@ void SemisimpleSubalgebras::CheckFileWritePermissions()
   this->ComputeFolderNames(this->currentFormat);
   std::fstream testFile;
   std::string testFileNameRelative=
-  this->owner->VirtualNameSSAlgOutputFolder+ "testFileWritePermissionsSSsas.txt";
+  this->owner->VirtualNameSSAlgOutputFolder + "testFileWritePermissionsSSsas.txt";
   std::string testFileFolderPhysical;
   FileOperations::GetPhysicalFileNameFromVirtual
-  (this->owner->VirtualNameSSAlgOutputFolder, testFileFolderPhysical,false, false);
-  theGlobalVariables.CallSystemNoOutput("mkdir " +testFileFolderPhysical);
+  (this->owner->VirtualNameSSAlgOutputFolder, testFileFolderPhysical, false, false);
+  theGlobalVariables.CallSystemNoOutput("mkdir " + testFileFolderPhysical, false);
 
   if(!FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, testFileNameRelative, false, true, false))
     crash << "<br>This may or may not be a programming error. I requested to create file "
     << this->VirtualNameMainFile1
     << " for output. However, the file failed to create. Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
     << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
-  FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, "output/"+testFileNameRelative, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, "output/" + testFileNameRelative, false, true, false);
   testFile << "Write permissions test file.";
 }
 
@@ -355,7 +355,6 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFo
   int numNoLinfRelFound=0;
   int numNonCentralizerConditionWithConeCondition=0;
   int numBadParabolics=0;
-
   for (int i=0; i<this->theSubalgebras.theValues.size; i++)
   { numIsotypicallyCompleteNilrads+=this->theSubalgebras[i].FKNilradicalCandidates.size;
     numFailingConeCondition+=this->theSubalgebras[i].NumConeIntersections;
@@ -381,7 +380,6 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFo
     else
       out << "<br><span style=\"color:#0000FF\"> In each of " << numFailingConeCondition << " case(s) of intersecting cones, an L-infinite relation was found. </span>";
   }
-
   return out.str();
 }
 

@@ -349,7 +349,7 @@ bool SSLdata::initSSLkeyFiles()
     FileOperations::GetPhysicalFileNameFromVirtual(fileKey, keyPhysicalName,true, true);
     theCommand <<  "openssl req -x509 -newkey rsa:2048 -nodes -keyout " << keyPhysicalName
     << " -out " << certificatePhysicalName << " -days 3001";
-    theGlobalVariables.CallSystemNoOutput(theCommand.str());
+    theGlobalVariables.CallSystemNoOutput(theCommand.str(), false);
   }
   if (!FileOperations::FileExistsVirtual(fileCertificate, true, true) ||
       !FileOperations::FileExistsVirtual(fileKey, true, true))
@@ -1122,7 +1122,8 @@ void WebServer::ReapChildren()
 { MacroRegisterFunctionWithName("WebServer::ReapChildren");
   int waitResult=0;
   int exitFlags= WNOHANG| WEXITED;
-  logProcessStats << logger::red << "DEBUG: Enter the reaper. " << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    logProcessStats << logger::red << "DEBUG: Enter the reaper. " << logger::endL;
   do
   { waitResult= waitpid(-1, NULL, exitFlags);
 //    theLog << "waitresult is: " << waitResult << logger::endL;
@@ -1136,7 +1137,8 @@ void WebServer::ReapChildren()
           this->NumProcessesReaped++;
         }
   } while (waitResult>0);
-  logProcessStats << logger::green << "DEBUG: EXIT the reaper. " << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    logProcessStats << logger::green << "DEBUG: EXIT the reaper. " << logger::endL;
 
 }
 
@@ -2518,14 +2520,17 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
 
 void WebWorker::WrapUpConnection()
 { MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
-  logIO << "DEBUG: wrapping up " << this->parent->ToStringActiveWorker() << ". " << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    logIO << "DEBUG: wrapping up " << this->parent->ToStringActiveWorker() << ". " << logger::endL;
   if (this->flagToggleMonitoring)
     this->pipeWorkerToServerControls.WriteAfterEmptying("toggleMonitoring", false, false);
   else
     this->pipeWorkerToServerControls.WriteAfterEmptying("close", false, false);
-  logIO << "DEBUG: done with pipes, releasing " << this->parent->ToStringActiveWorker() << ". " << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    logIO << "DEBUG: done with pipes, releasing " << this->parent->ToStringActiveWorker() << ". " << logger::endL;
   this->Release();
-  logIO << "DEBUG: " << this->parent->ToStringActiveWorker() << " released resources. " << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    logIO << "DEBUG: " << this->parent->ToStringActiveWorker() << " released resources. " << logger::endL;
   theGlobalVariables.flagComputationCompletE=true;
   theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
 }
@@ -4358,14 +4363,17 @@ void WebServer::ReleaseEverything()
   theGlobalVariables.IndicatorStringOutputFunction=0;
   theGlobalVariables.PauseUponUserRequest=0;
   this->activeWorker=-1;
-  currentLog << logger::red << "DEBUG: About to close: " << this->listeningSocketHTTP << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    currentLog << logger::red << "DEBUG: About to close: " << this->listeningSocketHTTP << logger::endL;
   if (this->listeningSocketHTTP!=-1)
     close(this->listeningSocketHTTP);
-  currentLog << logger::red << "DEBUG: Just closed: " << this->listeningSocketHTTP << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    currentLog << logger::red << "DEBUG: Just closed: " << this->listeningSocketHTTP << logger::endL;
   this->listeningSocketHTTP=-1;
   if (this->listeningSocketHttpSSL!=-1)
     close(this->listeningSocketHttpSSL);
-  currentLog << logger::red << "DEBUG: Just closed: " << this->listeningSocketHttpSSL << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    currentLog << logger::red << "DEBUG: Just closed: " << this->listeningSocketHttpSSL << logger::endL;
   this->listeningSocketHttpSSL=-1;
 }
 
@@ -4792,7 +4800,7 @@ void WebServer::Restart()
   else
     theCommand << " server8080 " << " nokill " << timeInteger;
 //  std::cout << "\nCalling: " << theCommand.str() << "\n";
-  theGlobalVariables.CallSystemNoOutput(theCommand.str()); //kill any other running copies of the calculator.
+  theGlobalVariables.CallSystemNoOutput(theCommand.str(), true); //kill any other running copies of the calculator.
 }
 
 void WebServer::initPortsITry()
@@ -4839,9 +4847,11 @@ void WebServer::initDates()
 void WebServer::ReleaseWorkerSideResources()
 { MacroRegisterFunctionWithName("WebServer::ReleaseWorkerSideResources");
   logger& currentLog = (this->flagIsChildProcess) ? theLog : logProcessKills;
-  currentLog << logger::red << "DEBUG: server about to RELEASE: " << this->ToStringActiveWorker() << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    currentLog << logger::red << "DEBUG: server about to RELEASE: " << this->ToStringActiveWorker() << logger::endL;
   this->Release(this->GetActiveWorker().connectedSocketID);
-  currentLog << logger::green << "DEBUG: server RELEASED: " << this->ToStringActiveWorker() << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    currentLog << logger::green << "DEBUG: server RELEASED: " << this->ToStringActiveWorker() << logger::endL;
   //<-release socket- communication is handled by the worker.
   this->activeWorker=-1; //<-The active worker is needed only in the child process.
 }
@@ -4874,13 +4884,15 @@ void fperror_sigaction(int signal)
 void WebServer::TerminateChildSystemCall(int i)
 { this->theWorkers[i].flagInUse=false;
   this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
-  kill(this->theWorkers[i].ProcessPID, SIGKILL);
+  if (this->theWorkers[i].ProcessPID>0)
+    kill(this->theWorkers[i].ProcessPID, SIGKILL);
   this->theWorkers[i].ResetPipesNoAllocation();
 }
 
 void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
 { MacroRegisterFunctionWithName("WebServer::HandleTooManyConnections");
-  logProcessStats << logger::red << "DEBUG: Too many connections handler start. " << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    logProcessStats << logger::red << "DEBUG: Too many connections handler start. " << logger::endL;
   MonomialWrapper<std::string, MathRoutines::hashString>
   incomingAddress(incomingUserAddress);
   bool purgeIncomingAddress=
@@ -4909,7 +4921,8 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     logProcessKills << logger::red  << errorStream.str() << logger::endL;
     this->NumProcessAssassinated++;
   }
-  logProcessStats << logger::green << "DEBUG: connection cleanup successful. " << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    logProcessStats << logger::green << "DEBUG: connection cleanup successful. " << logger::endL;
 }
 
 void WebServer::RecycleChildrenIfPossible()
@@ -4917,7 +4930,8 @@ void WebServer::RecycleChildrenIfPossible()
   //This might need to be rewritten: I wasn't able to make this work with any
   //mechanism other than pipes.
   MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
-  logProcessStats << logger::red << "DEBUG: RecycleChildrenIfPossible start. " << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    logProcessStats << logger::red << "DEBUG: RecycleChildrenIfPossible start. " << logger::endL;
 //  this->ReapChildren();
   int numInUse=0;
   for (int i=0; i<this->theWorkers.size; i++)
@@ -4980,7 +4994,8 @@ void WebServer::RecycleChildrenIfPossible()
       }
     }
   if (numInUse<=this->MaxTotalUsedWorkers)
-  { logProcessStats << logger::green << "DEBUG: RecycleChildrenIfPossible exit point 1. " << logger::endL;
+  { if (theGlobalVariables.flagServerDetailedLog)
+      logProcessStats << logger::green << "DEBUG: RecycleChildrenIfPossible exit point 1. " << logger::endL;
     return;
   }
   for (int i=0; i<this->theWorkers.size && numInUse>1; i++)
@@ -4997,7 +5012,8 @@ void WebServer::RecycleChildrenIfPossible()
       this->NumProcessAssassinated++;
     }
   }
-  logProcessStats << logger::green << "DEBUG: RecycleChildrenIfPossible exit point 2. " << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    logProcessStats << logger::green << "DEBUG: RecycleChildrenIfPossible exit point 2. " << logger::endL;
 }
 
 bool WebServer::initPrepareWebServerALL()
@@ -5154,17 +5170,20 @@ int WebServer::Run()
 #ifdef MACRO_use_open_ssl
   SSLdata::initSSLkeyFiles();
 #endif
-  if (!this->flagTryToKillOlderProcesses)
-  { theLog.reset();
-    logBlock.reset();
-    logIO.reset();
-    logProcessKills.reset();
-    logPlumbing.reset();
-    logSocketAccept.reset();
-    logProcessStats.reset();
-    logOpenSSL.reset();
-    logServer.reset();
-  }
+  //if (!this->flagTryToKillOlderProcesses)
+  //{ theLog.reset();
+  //  logServerMonitor.reset();
+  //  logHttpErrors   .reset();
+  //  logBlock        .reset();
+  //  logIO           .reset();
+  //  logOpenSSL      .reset();
+  //  logProcessKills .reset();
+  //  logSocketAccept .reset();
+  //  logProcessStats .reset();
+  //  logPlumbing     .reset();
+  //  logEmail        .reset();
+  //  logServer       .reset();
+  //}
   if (true)
   { int pidServer=fork();
     if (pidServer<0)
@@ -5196,7 +5215,8 @@ int WebServer::Run()
     FD_ZERO(&FDListenSockets);
     for (int i=0; i<this->theListeningSockets.size; i++)
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
-    logServer << logger::red << "DEBUG:  About to enter select loop. " << logger::endL;
+    if (theGlobalVariables.flagServerDetailedLog)
+      logServer << logger::red << "DEBUG: About to enter select loop. " << logger::endL;
     while (select(this->highestSocketNumber+1, &FDListenSockets, 0, 0, 0)==-1)
     { if (this->flagReapingChildren)
         logServer << logger::yellow << "Select interrupted while reaping children. "
@@ -5206,7 +5226,8 @@ int WebServer::Run()
         << strerror(errno) << logger::endL;
       this->NumFailedSelectsSoFar++;
     }
-    logServer << logger::green << "DEBUG:  select success. " << logger::endL;
+    if (theGlobalVariables.flagServerDetailedLog)
+      logServer << logger::green << "DEBUG: select success. " << logger::endL;
     gettimeofday(&timeBeforeProcessFork, NULL);
     this->NumSuccessfulSelectsSoFar++;
     if ((this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar)-previousReportedNumberOfSelects>100)
@@ -5249,7 +5270,8 @@ int WebServer::Run()
       logSocketAccept << logger::red << "This is not supposed to to happen: select succeeded "
       << "but I found no set socket. " << logger::endL;
     if (newConnectedSocket <0)
-    { logServer << "DEBUG: newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. ";
+    { if (theGlobalVariables.flagServerDetailedLog)
+        logServer << "DEBUG: newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. ";
       continue;
     }
     inet_ntop
@@ -5277,7 +5299,8 @@ int WebServer::Run()
     this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1 );
 //    theLog << this->ToStringStatus();
     /////////////
-    logProcessStats << "DEBUG: about to fork. " << logger::endL;
+    if (theGlobalVariables.flagServerDetailedLog)
+      logProcessStats << "DEBUG: about to fork. " << logger::endL;
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
@@ -5286,13 +5309,18 @@ int WebServer::Run()
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
       this->flagIsChildProcess=true;
-      theLog << "DEBUG: fork successful, running worker. " << logger::endL;
+      if (theGlobalVariables.flagServerDetailedLog)
+        theLog << logger::green << "DEBUG: Worker: FORK successful, running worker. " << logger::endL;
       int result=this->GetActiveWorker().Run();
-      theLog << "DEBUG: worker run finished, releasing resources. " << logger::endL;
+      if (theGlobalVariables.flagServerDetailedLog)
+        theLog << "DEBUG: worker run finished, releasing resources. " << logger::endL;
       this->ReleaseEverything();
-      theLog << logger::green << "DEBUG: resources released, returning. " << logger::endL;
+      if (theGlobalVariables.flagServerDetailedLog)
+        theLog << logger::green << "DEBUG: resources released, returning. " << logger::endL;
       return result;
     }
+    if (theGlobalVariables.flagServerDetailedLog)
+      logProcessStats << logger::green << "DEBUG: Server: FORK successful. " << logger::endL;
     this->ReleaseWorkerSideResources();
   }
   this->ReleaseEverything();
@@ -5435,27 +5463,27 @@ void WebServer::CheckOpenSSLMySQLInstallation()
     << logger::green << "Enter the sudo password as prompted please. "
     << logger::endL;
     if (theGlobalVariables.OperatingSystem=="Ubuntu")
-      theGlobalVariables.CallSystemNoOutput("sudo apt-get install mysql-client mysql-server libmysqlclient-dev");
+      theGlobalVariables.CallSystemNoOutput("sudo apt-get install mysql-client mysql-server libmysqlclient-dev", false);
     else if (theGlobalVariables.OperatingSystem=="CentOS")
-      theGlobalVariables.CallSystemNoOutput("sudo yum install mysql-devel");
+      theGlobalVariables.CallSystemNoOutput("sudo yum install mysql-devel", false);
   }
   if (doInstallOpenSSL)
   { result << "You appear to be missing an openssl installation. Let me try to install that for you. "
     << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
     if (theGlobalVariables.OperatingSystem=="Ubuntu")
-      theGlobalVariables.CallSystemNoOutput("sudo apt-get install libssl-dev");
+      theGlobalVariables.CallSystemNoOutput("sudo apt-get install libssl-dev", false);
     else if (theGlobalVariables.OperatingSystem=="CentOS")
-      theGlobalVariables.CallSystemNoOutput("sudo yum install openssl-devel");
+      theGlobalVariables.CallSystemNoOutput("sudo yum install openssl-devel", false);
   }
   std::string currentFolder=FileOperations::GetCurrentFolder();
   result << "Changing folder to: " << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
   theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
   result << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("make clean");
+  theGlobalVariables.CallSystemNoOutput("make clean", false);
   result << "Proceeding to rebuild the calculator. " << logger::red
   << "This is expected to take 10+ minutes. "
   << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("make");
+  theGlobalVariables.CallSystemNoOutput("make", false);
   theGlobalVariables.ChDir(currentFolder);
 }
 
@@ -5476,7 +5504,7 @@ void WebServer::CheckMySQLSetup()
   result << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
   result << logger::yellow << "(Re)-starting mysql: " << logger::endL;
   result << logger::green << "sudo /etc/init.d/mysql start" << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("sudo /etc/init.d/mysql start");
+  theGlobalVariables.CallSystemNoOutput("sudo /etc/init.d/mysql start", false);
 
   std::stringstream commandCreateMysqlDB;
   commandCreateMysqlDB << "sudo mysql -u root -e \"create database "
@@ -5539,10 +5567,10 @@ void WebServer::CheckSVNSetup()
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
   if (theGlobalVariables.OperatingSystem=="Ubuntu")
   { result << logger::yellow << "sudo apt-get install subversion" << logger::endL;
-    theGlobalVariables.CallSystemNoOutput("sudo apt-get install subversion");
+    theGlobalVariables.CallSystemNoOutput("sudo apt-get install subversion", false);
   } else if (theGlobalVariables.OperatingSystem=="CentOS")
   { result << logger::yellow << "sudo yum install subversion" << logger::endL;
-    theGlobalVariables.CallSystemNoOutput("sudo yum install subversion");
+    theGlobalVariables.CallSystemNoOutput("sudo yum install subversion", false);
   }
 }
 
@@ -5562,17 +5590,17 @@ void WebServer::CheckMathJaxSetup()
   result << logger::yellow << "MathJax setup file missing, proceeding to set it up. " << logger::endL
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
   if (theGlobalVariables.OperatingSystem=="Ubuntu")
-    theGlobalVariables.CallSystemNoOutput("sudo apt-get install unzip");
+    theGlobalVariables.CallSystemNoOutput("sudo apt-get install unzip", false);
   else if (theGlobalVariables.OperatingSystem=="CentOS")
-    theGlobalVariables.CallSystemNoOutput("sudo yum install unzip");
+    theGlobalVariables.CallSystemNoOutput("sudo yum install unzip", false);
   result << "Proceeding to unzip MathJax. ";
   //std::string currentFolder=FileOperations::GetCurrentFolder();
   //result << "Changing folder to: " << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
   //theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
   result << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("mkdir -p ../../public_html");
-  theGlobalVariables.CallSystemNoOutput("unzip ./../html-common/MathJax-2.7-latest.zip -d ./../../public_html/");
-  theGlobalVariables.CallSystemNoOutput("mv ./../../public_html/MathJax-2.7.2 ./../../public_html/MathJax-2.7-latest");
+  theGlobalVariables.CallSystemNoOutput("mkdir -p ../../public_html", false);
+  theGlobalVariables.CallSystemNoOutput("unzip ./../html-common/MathJax-2.7-latest.zip -d ./../../public_html/", false);
+  theGlobalVariables.CallSystemNoOutput("mv ./../../public_html/MathJax-2.7.2 ./../../public_html/MathJax-2.7-latest", false);
   //theGlobalVariables.ChDir(currentFolder);
 }
 
@@ -5762,6 +5790,20 @@ int WebServer::main(int argc, char **argv)
   theWebServer.CheckSVNSetup();
   theWebServer.CheckFreecalcSetup();
   theGlobalVariables.flagCachingInternalFilesOn=false;
+  theGlobalVariables.flagServerDetailedLog=true;
+  if (theGlobalVariables.flagServerDetailedLog)
+  { logServer
+    << logger::purple << "************************" << logger::endL
+    << logger::purple << "************************" << logger::endL
+    << logger::purple << "************************" << logger::endL
+    << logger::red << "WARNING: DETAILED server logging is on. " << logger::endL
+    << "This is strictly for development purposes, please do not deploy on live systems. " << logger::endL
+    << logger::purple << "************************" << logger::endL
+    << logger::purple << "************************" << logger::endL
+    << logger::purple << "************************" << logger::endL
+       ;
+  }
+
   if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
   { theLog
     << logger::purple << "************************" << logger::endL

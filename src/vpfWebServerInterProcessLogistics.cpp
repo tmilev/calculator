@@ -552,6 +552,7 @@ logger::logger(const std::string& logFileName, logger* inputCarbonCopy, bool inp
   this->currentColor=logger::normalColor;
   this->flagTagColorHtmlOpened=false;
   this->flagTagColorConsoleOpened=false;
+  this->flagStopWritingToFile=true;
   this->carbonCopy=inputCarbonCopy;
   this->flagResetLogFileWhenTooLarge=inputResetLogWhenTooLarge;
 }

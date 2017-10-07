@@ -372,7 +372,7 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output)
       { result=false;
         break;
       }
-      char theDigit=-1;
+      char theDigit=255;
       //stOutput << "DEBUG: Digit from: " << input[i];
       if (input[i+j]>='A' && input[i+j]<='F')
         theDigit=10+input[i+j]-'A';
@@ -381,7 +381,7 @@ bool Crypto::ConvertHexToString(const std::string& input, std::string& output)
       if (input[i+j]>='0' && input[i+j]<='9')
         theDigit=input[i+j]-'0';
       //stOutput << "DEBUG: got digit: " << theDigit;
-      if (theDigit!=-1)
+      if (theDigit!=255)
       { nextByte*=16;
         nextByte+=theDigit;
       } else

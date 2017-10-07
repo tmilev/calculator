@@ -90,7 +90,7 @@ void MutexRecursiveWrapper::LockMe()
         << this->mutexName << "] thread: "
         << currentThreadId
         << "." << logger::endL
-        << theGlobalVariables.ToStringProgressReportHtml();
+        << theGlobalVariables.ToStringProgressReportHtml() << logger::endL;
       }
     }
     ((std::mutex*)this->theMutexImplementation)->lock();

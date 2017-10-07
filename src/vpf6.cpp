@@ -42,14 +42,14 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   theFile.flush();
   theFile.close();
   systemCommand1 << " latex -output-directory=" << baseFolder << " " << fileName.str() << ".tex";
-  theGlobalVariables.CallSystemNoOutput(systemCommand1.str());
+  theGlobalVariables.CallSystemNoOutput(systemCommand1.str(), false);
   if (useLatexDviPSpsToPNG)
   { systemCommand2 << " dvips -o " << fileNameWithPathPhysical << ".ps "
     << fileNameWithPathPhysical << ".dvi";
-    theGlobalVariables.CallSystemNoOutput(systemCommand2.str());
+    theGlobalVariables.CallSystemNoOutput(systemCommand2.str(), false);
     systemCommand3 << " convert " << fileNameWithPathPhysical
     << ".ps " << fileNameWithPathPhysical << ".png";
-    theGlobalVariables.CallSystemNoOutput(systemCommand3.str());
+    theGlobalVariables.CallSystemNoOutput(systemCommand3.str(), false);
   }
   std::stringstream out;
   out << "<img src=\"" << theGlobalVariables.DisplayPathOutputFolder
@@ -122,7 +122,6 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
   int varShift=0;
   if (shiftPowersByNumVarsBaseField)
     varShift=this->GetMinNumVars();
-  int numVars=varShift+eltsNilrad.size;
   for (int i=0; i<eltsNilrad.size; i++)
   { tempRF.MakeOneLetterMoN(i+varShift, 1);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);

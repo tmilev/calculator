@@ -327,11 +327,9 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
     input[7].EvaluatesToDouble(&thePlotObj.lineWidth);
   Vector<double> lowLeft, upRight;
   if (!theCommands.GetVectorDoubles(input[2], lowLeft, 2))
-    return theCommands << "Failed to low left corner from: "
-    << input[2].ToString();
+    return theCommands << "Failed to low left corner from: " << input[2].ToString();
   if (!theCommands.GetVectorDoubles(input[3], upRight, 2))
-    return theCommands << "Failed to up right corner from: "
-    << input[3].ToString();
+    return theCommands << "Failed to up right corner from: " << input[3].ToString();
   thePlotObj.yHigh=upRight[1];
   thePlotObj.yLow=lowLeft[1];
   thePlotObj.xHigh=upRight[0];
@@ -351,29 +349,18 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   //thePlotObj.defaultLengthJS="0.5";
   if (input.size()>=6)
   { //stOutput << "DEBUG: got to here";
-    if (CalculatorFunctionsGeneral::
-        innerMakeJavascriptExpression
-        (theCommands, input[5], jsConverterE)
-        )
-    { thePlotObj.defaultLengthJS=jsConverterE.ToString();
-    } else
-      return theCommands << "Failed to extract javascript from "
-      << input[5].ToString();
+    if (CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[5], jsConverterE))
+      thePlotObj.defaultLengthJS=jsConverterE.ToString();
+    else
+      return theCommands << "Failed to extract javascript from " << input[5].ToString();
   }
 //stOutput << "DEBUG: defaultLengthJS: " << thePlotObj.defaultLengthJS;
-
-  if (CalculatorFunctionsGeneral::
-      innerMakeJavascriptExpression
-      (theCommands, thePlotObj.manifoldImmersion, jsConverterE)
-      )
+  if (CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, thePlotObj.manifoldImmersion, jsConverterE))
   { thePlotObj.manifoldImmersionJS=jsConverterE.ToString();
-    thePlotObj.manifoldImmersion.HasInputBoxVariables
-    (&thePlot.boxesThatUpdateMe);
+    thePlotObj.manifoldImmersion.HasInputBoxVariables(&thePlot.boxesThatUpdateMe);
   } else
-    return theCommands << "Failed to extract javascript from "
-    << input[1].ToString();
-  thePlotObj.manifoldImmersion.GetFreeVariables
-  (thePlotObj.variablesInPlay, true);
+    return theCommands << "Failed to extract javascript from " << input[1].ToString();
+  thePlotObj.manifoldImmersion.GetFreeVariables(thePlotObj.variablesInPlay, true);
   Expression xE, yE;
   xE.MakeAtom("x", theCommands);
   yE.MakeAtom("y", theCommands);
@@ -390,19 +377,15 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   for (int i=0; i<thePlotObj.variablesInPlay.size; i++)
     thePlotObj.variablesInPlayJS[i]=thePlotObj.variablesInPlay[i].ToString();
   thePlotObj.thePlotType="plotDirectionField";
-  if (!input[4].IsSequenceNElementS(2))
+  if (!input[4].IsSequenceNElementS(2) && !input[4].StartsWith(theCommands.opIntervalOpen(), 3))
     return theCommands
     << "<hr>Could not extract a list of elements for the "
     << "number of segments from: " << input[4].ToString();
   thePlotObj.numSegmenTsJS.SetSize(2);
   for (int i=0; i<2; i++)
-  { if (!CalculatorFunctionsGeneral::
-        innerMakeJavascriptExpression
-        (theCommands, input[4][i+1], jsConverterE))
-      return theCommands << "Failed to convert "
-      << input[4][i+1].ToString()
-      << " to javascript. ";
-    thePlotObj.numSegmenTsJS[i]=jsConverterE.ToString();
+  { if (!CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[4][i+1], jsConverterE))
+      return theCommands << "Failed to convert " << input[4][i+1].ToString() << " to javascript. ";
+    thePlotObj.numSegmenTsJS[i] = jsConverterE.ToString();
   }
   thePlot.thePlots.AddOnTop(thePlotObj);
 //  stOutput << "DEBUG: height, width: " << desiredHtmlHeightPixels << ", " << desiredHtmlWidthPixels;

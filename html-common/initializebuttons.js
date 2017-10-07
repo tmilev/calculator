@@ -197,12 +197,18 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
     addCommand("ln");
     addCommand("e");
   }
-  if (noOptions || includeAll)
+  if (buttonArray.indexOf("infinity")>-1 || buttonArray.indexOf("infty")>-1 ||
+      buttonArray.indexOf("\infty")>-1 ||
+      includeAll || noOptions)
+    addBinding(getInftyButton);
+  if (buttonArray.indexOf("sum")>-1 ||
+      buttonArray.indexOf("series")>-1 || noOptions || includeAll)
   { addBinding(getBinomButton);
     addBinding(getFactorialButton);
     addBinding(getSumButton);
-    addBinding(getInftyButton);
-    addBinding(getCircButton);
+  }
+  if (noOptions || includeAll)
+  { addBinding(getCircButton);
   }
   if (buttonArray.indexOf("interval")>-1 || buttonArray.indexOf("intervals")>-1 || noOptions || includeAll)
   { addBinding(getOrButton);

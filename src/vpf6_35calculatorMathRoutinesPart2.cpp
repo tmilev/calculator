@@ -1533,9 +1533,9 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
     return false;
   std::string atomString;
   if (input==theCommands.EMInfinity())
-    return output.AssignValue<std::string>( "\"minusInfinity\"", theCommands);
+    return output.AssignValue<std::string>("\"minusInfinity\"", theCommands);
   if (input==theCommands.EInfinity())
-    return output.AssignValue<std::string>( "\"infinity\"", theCommands);
+    return output.AssignValue<std::string>("\"infinity\"", theCommands);
   if (input.IsAtom(&atomString))
   { if (input.IsAtomGivenData(theCommands.opE()))
       return output.AssignValue<std::string>(" 2.718281828 ", theCommands);
@@ -1550,8 +1550,7 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
   std::stringstream out;
   InputBox theBox;
   if (input.IsOfType(&theBox))
-  { out << "parseFloat(document.getElementById('"
-    << theBox.GetSliderName() << "').value)";
+  { out << "parseFloat(document.getElementById('" << theBox.GetSliderName() << "').value)";
     return output.AssignValue(out.str(),theCommands);
   }
   out.precision(7);
@@ -1578,11 +1577,11 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
     return output.AssignValue(out.str(), theCommands);
   }
   Expression opE, leftE, rightE;
-  if (input.StartsWith(theCommands.opSequence()))
+  if (input.StartsWith(theCommands.opSequence()) || input.StartsWith(theCommands.opIntervalOpen()))
   { out << "[";
     for (int i=1; i<input.size(); i++)
     { if (!CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[i], opE))
-        return output.AssignValue("(Failed to convert "+input[i].ToString()+")", theCommands);
+        return output.AssignValue("(Failed to convert " + input[i].ToString() + ")", theCommands);
       out << opE.ToString();
       if (i!=input.size()-1)
         out << ", ";
@@ -1597,9 +1596,9 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
     std::string* currentString=&opString;
     for (int i=0; i<input.size(); i++)
     { if (!CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[i], *currentE))
-        return output.AssignValue("(Failed to convert "+input[i].ToString()+")", theCommands);
+        return output.AssignValue("(Failed to convert " + input[i].ToString() + ")", theCommands);
       if (!currentE->IsOfType(currentString))
-        return output.AssignValue("(Failed to convert "+input[i].ToString()+")", theCommands);
+        return output.AssignValue("(Failed to convert " + input[i].ToString() + ")", theCommands);
       logStream << "Converted: " << input[i].ToString() << " to: "
       << *currentString << ". ";
       if (i==0)

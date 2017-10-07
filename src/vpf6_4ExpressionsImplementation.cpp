@@ -1492,6 +1492,7 @@ bool Expression::GetFreeVariables(HashedList<Expression>& outputAccumulateFreeVa
           atomName=="<" || atomName=="Sequence" || atomName=="Matrix" ||
           atomName=="\\circ" || atomName=="\\emptyset" || atomName=="\\in" ||
           atomName=="\\cup" || atomName=="\\infty" || atomName=="IntervalClosed" ||
+          atomName=="IntervalOpen" ||
           atomName=="[)" || atomName=="(]" || atomName=="and" || atomName=="or" ||
           atomName=="not")
         doAddExpression=false;

@@ -5795,7 +5795,7 @@ int WebServer::main(int argc, char **argv)
   theWebServer.CheckSVNSetup();
   theWebServer.CheckFreecalcSetup();
   theGlobalVariables.flagCachingInternalFilesOn=false;
-  theGlobalVariables.flagServerDetailedLog=true;
+  theGlobalVariables.flagServerDetailedLog=false;
   if (theGlobalVariables.flagServerDetailedLog)
   { logServer
     << logger::purple << "************************" << logger::endL

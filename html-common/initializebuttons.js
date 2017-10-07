@@ -134,6 +134,11 @@ mathQuillCommandButton("cot","cot", "font-size:10px; ");
 mathQuillCommandButton("sec","sec", "font-size:10px; ");
 mathQuillCommandButton("csc","csc", "font-size:10px; ");
 
+function modifyHeightForTimeout(currentButtonPanel, newHeight)
+{ currentButtonPanel.style.maxHeight = newHeight;
+  currentButtonPanel.style.height    = newHeight;
+}
+
 function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll)
 { var currentButtonPanel=document.getElementById(IDcurrentButtonPanel);
   var buttonArray= currentButtonPanel.attributes.buttons.value.toLowerCase().split(/(?:,| )+/);
@@ -241,14 +246,18 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
     theContent+= "<small><a href=\"#" + IDcurrentButtonPanel + "\" onclick=\"initializeOneButtonPanel('" + IDcurrentButtonPanel + "'," +panelIndex +",true);\">Show all</a></small>";
   else
     theContent+= "<small><a href=\"#" + IDcurrentButtonPanel + "\" onclick=\"initializeOneButtonPanel('" + IDcurrentButtonPanel + "'," +panelIndex +",false);\">Show relevant</a></small>";
-  //var oldHeight=window.getComputedStyle(IDcurrentButtonPanel).height;
+
+  var oldHeight=window.getComputedStyle(currentButtonPanel).height;
+  //console.log("oldHeight: " + oldHeight);
+  currentButtonPanel.style.maxHeight="";
+  currentButtonPanel.style.height="";
   currentButtonPanel.innerHTML=theContent;
-  //currentButtonPanel.style.maxHeight=oldHeight;
-  //currentButtonPanel.style.height=oldHeight;
-
-  //  currentButtonPanel.style.maxHeight=currentButtonPanel.style.height;
-
-  //currentButtonPanel.scrollIntoView({behavior: "smooth"});
+  if (oldHeight!==0 && oldHeight!=="0px")
+  { var newHeight=window.getComputedStyle(currentButtonPanel).height;
+    currentButtonPanel.style.maxHeight = oldHeight ;
+    currentButtonPanel.style.height = oldHeight ;
+    setTimeout(function(){ modifyHeightForTimeout(currentButtonPanel, newHeight)},0)
+  }
   return false;
 }
 

@@ -5209,6 +5209,9 @@ int WebServer::Run()
   this->NumFailedSelectsSoFar=0;
   long long previousReportedNumberOfSelects=0;
   int previousServerStatReport=0;
+  sigset_t maskSigChild;
+  sigemptyset(&maskSigChild);
+  sigaddset(&maskSigChild,SIGCHLD);
   while(true)
   { // main accept() loop
     //    theLog << logger::red << "select returned!" << logger::endL;
@@ -5301,6 +5304,7 @@ int WebServer::Run()
     /////////////
     if (theGlobalVariables.flagServerDetailedLog)
       logProcessStats << "DEBUG: about to fork. " << logger::endL;
+    sigprocmask(SIG_BLOCK, &maskSigChild, NULL);
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
@@ -5319,6 +5323,7 @@ int WebServer::Run()
         theLog << logger::green << "DEBUG: resources released, returning. " << logger::endL;
       return result;
     }
+    sigprocmask(SIG_UNBLOCK,&maskSigChild, NULL);
     if (theGlobalVariables.flagServerDetailedLog)
       logProcessStats << logger::green << "DEBUG: Server: FORK successful. " << logger::endL;
     this->ReleaseWorkerSideResources();
@@ -5790,7 +5795,7 @@ int WebServer::main(int argc, char **argv)
   theWebServer.CheckSVNSetup();
   theWebServer.CheckFreecalcSetup();
   theGlobalVariables.flagCachingInternalFilesOn=false;
-  theGlobalVariables.flagServerDetailedLog=false;
+  theGlobalVariables.flagServerDetailedLog=true;
   if (theGlobalVariables.flagServerDetailedLog)
   { logServer
     << logger::purple << "************************" << logger::endL

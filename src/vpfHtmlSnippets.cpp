@@ -290,7 +290,7 @@ std::string HtmlRoutines::GetJavascriptMathQuillDefaultFull()
 { std::stringstream out;
   out << "<script src=\"/html-common-calculator/jquery.min.js\"></script>\n"
   << HtmlRoutines::GetJavascriptMathQuillDefaultWithTags() << "\n"
-  << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
+  << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport=false;</script>";
   return out.str();
 }
 
@@ -298,7 +298,7 @@ std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull()
 { std::stringstream out;
   out << "<script src=\"/html-common-calculator/jquery.min.js\"></script>\n"
   << HtmlRoutines::GetJavascriptMathQuillMatrixSupportWithTags() << "\n"
-  << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2);</script>";
+  << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport=true;</script>";
   return out.str();
 }
 

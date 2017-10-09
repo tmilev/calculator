@@ -67,7 +67,7 @@ function initializeButtonsCommon()
 
 var MathQuillCommandButtonCollection=new Object;
 
-function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle)
+function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWriteInsteadOfCmdInput)
 { var commandObject=new Object;
   commandObject.theCommand=inputCommand;
   commandObject.theLabel=inputLabel;
@@ -81,6 +81,10 @@ function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle)
     for (var i=0; i<inputCommand.length; i++)
       commandObject.id+=inputCommand[i];
   }
+  if (doWriteInsteadOfCmdInput!==undefined)
+    commandObject.doWriteInsteadOfCmd=doWriteInsteadOfCmdInput;
+  else
+    commandObject.doWriteInsteadOfCmd=false;
   commandObject.getButton=function (indexMathField)
   { var resultString="";
     resultString+="<button style='";
@@ -88,18 +92,31 @@ function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle)
     if (additionalStyle!=="" && additionalStyle!==undefined)
       resultString+=additionalStyle;
     resultString+="'";
+    var commandObjectIDescaped="";
+    for (var i=0; i<commandObject.id.length; i++)
+    { commandObjectIDescaped+=commandObject.id[i];
+      if (commandObject.id[i]==='\\')
+        commandObjectIDescaped+="\\";
+    }
     resultString+=" onmousedown=\"MathQuillCommandButtonCollection['" +
-    commandObject.id + "']."+
+    commandObjectIDescaped + "']."+
     "clickFunction(answerMathQuillObjects[" + indexMathField + "]);\">" +
     commandObject.theLabel + "</button>";
     return resultString;
   }
   commandObject.clickFunction = function(currentMathField)
   { if (!commandObject.isComposite)
-      currentMathField.cmd(commandObject.theCommand);
-    else
-      for (var i=0; i<commandObject.theCommand.length; i++)
-        currentMathField.cmd(commandObject.theCommand[i]);
+    { if (!this.doWriteInsteadOfCmd)
+        currentMathField.cmd(commandObject.theCommand);
+      else
+        currentMathField.write(commandObject.theCommand);
+    } else
+    { for (var i=0; i<commandObject.theCommand.length; i++)
+        if (!this.doWriteInsteadOfCmd)
+          currentMathField.cmd(commandObject.theCommand[i]);
+        else
+          currentMathField.write(commandObject.theCommand[i]);
+    }
     currentMathField.focus();
     event.preventDefault();
   }
@@ -150,10 +167,10 @@ mathQuillCommandButton(" or ", "or");
 mathQuillCommandButton("in", "&#8712;");
 mathQuillCommandButton(["^","circ"], "&#176;");
 mathQuillCommandButton("circ", "&#9675;");
-mathQuillCommandButton("\\begin{pmatrix} \\\\ \\end{pmatrix}", "2x1");
-mathQuillCommandButton("\\begin{pmatrix} \\\\ \\\\ \\end{pmatrix}", "3x1");
-mathQuillCommandButton("\\begin{pmatrix} & \\\\ & \\end{pmatrix}", "2x2");
-mathQuillCommandButton("\\begin{pmatrix} & & \\\\ & & \\\\ & & \\end{pmatrix}", "3x3");
+mathQuillCommandButton("\\begin{pmatrix} \\\\ \\end{pmatrix}", "2x1","font-size : 7px;", true);
+mathQuillCommandButton("\\begin{pmatrix} \\\\ \\\\ \\end{pmatrix}", "3x1", "font-size : 7px;", true);
+mathQuillCommandButton("\\begin{pmatrix} & \\\\ & \\end{pmatrix}", "2x2", "font-size : 7px;", true);
+mathQuillCommandButton("\\begin{pmatrix} & & \\\\ & & \\\\ & & \\end{pmatrix}", "3x3", "font-size : 7px;", true);
 
 mathQuillCommandButton("\\mathbf{i}", "i", "font-weight: bold");
 mathQuillCommandButton("\\mathbf{j}", "j", "font-weight: bold");
@@ -245,6 +262,12 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
     addCommand("cup");
     addCommand("in");
     addCommand("emptyset");
+  }
+  if (buttonArray.indexOf("matrix")>-1 || buttonArray.indexOf("matrices")>-1 || (includeAll && MathQuillHasMatrixSupport))
+  { addCommand("\\begin{pmatrix} \\\\ \\end{pmatrix}");
+    addCommand("\\begin{pmatrix} \\\\ \\\\ \\end{pmatrix}");
+    addCommand("\\begin{pmatrix} & \\\\ & \\end{pmatrix}");
+    addCommand("\\begin{pmatrix} & & \\\\ & & \\\\ & & \\end{pmatrix}");
   }
   if (buttonArray.indexOf("angle")>-1 || buttonArray.indexOf("angles")>-1 || noOptions || includeAll)
   { addCommand("pi");

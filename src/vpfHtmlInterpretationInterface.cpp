@@ -619,10 +619,7 @@ std::string HtmlInterpretation::GetExamPage()
   //<-must come after theFile.outputHtmlHeadNoTag
   out << "</head>"
   << "<body onload=\"loadSettings(); initializeMathQuill(); ";
-  if (!theFile.flagMathQuillWithMatrices)
-    out << "initializeButtons();";
-  else
-    out << "initializeButtonsMatrixSupport();";
+  out << "initializeButtons();";
   out << "\">\n";
   out << problemBody;
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();

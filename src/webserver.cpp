@@ -3236,7 +3236,7 @@ int WebWorker::ProcessCalculator()
   out << "<span style=\"vertical-align:top\" id=\"mainInputMQfield\"></span>";
   out << "</td>";
   out << "<td style=\"vertical-align:top\">";
-  out << "<span style=\"vertical-align:top\" id=\"mainInputMQfieldButtons\"></span>";
+  out << "<div class=\"mqButtonPanel\" style=\"vertical-align:top\" id=\"mainInputMQfieldButtons\" buttons=\"algebra, logarithms, integrals, matrices\"></div>";
   out << "</td>";
   out << "</tr></table>";
   out << this->closeIndentTag("</td>");
@@ -5802,7 +5802,7 @@ int WebServer::main(int argc, char **argv)
     << logger::purple << "************************" << logger::endL
     << logger::red << "WARNING: DETAILED server logging is on. " << logger::endL
     << "This is strictly for development purposes, please do not deploy on live systems. " << logger::endL
-    << "To turn off/on server logging simply delete/create file LogFiles/serverDebugOn.txt"
+    << "To turn off/on server logging simply delete/create file LogFiles/serverDebugOn.txt" << logger::endL
     << logger::purple << "************************" << logger::endL
     << logger::purple << "************************" << logger::endL
     << logger::purple << "************************" << logger::endL

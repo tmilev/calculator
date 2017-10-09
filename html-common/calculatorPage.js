@@ -90,7 +90,7 @@ function initializeCalculatorPage()
    );
   answerMathQuillObjects=[calculatorMQobject];
   preferredButtonContainers=['mainInputMQfieldButtons'];
-  initializeButtonsCalculator();
+  initializeButtons();
   mQHelpCalculator();
   //I am getting mq errors if calculatorMQobject.write()
   //is called before mQHelpCalculator() is called.

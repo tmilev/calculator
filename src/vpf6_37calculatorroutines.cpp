@@ -1607,3 +1607,13 @@ bool CalculatorFunctionsGeneral::innerIsProductTermsUpToPower(Calculator& theCom
   }
   return output.AssignValue(1, theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerScaleToLeadingUnit(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerScaleToLeadingUnit");
+  if (input.StartsWithGivenAtom("ScaleToLeadingUnit"))
+    return false;
+  MonomialCollection<Expression, Rational> theCollection;
+  theCommands.CollectSummands(theCommands, input, theCollection);
+  theCollection/=theCollection.GetLeadingCoefficient();
+  return output.MakeSum(theCommands, theCollection);
+}

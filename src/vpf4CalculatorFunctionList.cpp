@@ -4057,6 +4057,11 @@ void Calculator::initPredefinedStandardOperations()
    "Plot2D{}(sin{}(x), -5, 5)+ Plot2D{}(1/sin{}(x ), 0.1, 3.041592654)",
    true, false,
    "CalculatorFunctionsBinaryOps::innerAddPlotToPlot", "AddPlots");//must come before outer plus.
+  this->AddOperationInnerHandler
+  ("ScaleToLeadingUnit", CalculatorFunctionsGeneral::innerScaleToLeadingUnit, "",
+   "Rescales an expression over the rationals so that the leading term has coefficient 1. ",
+    "ScaleToLeadingUnit(1/2 x + 1/3 y+ 1/7 a b)", true, false,
+    "Calculator::innerScaleToLeadingUnit", "ScaleToLeadingUnit");
   this->AddOperationOuterHandler
   ("+", Calculator::outerPlus, "",
    "Collects all terms (over the rationals), adding up terms \

@@ -4364,16 +4364,21 @@ void WebServer::ReleaseEverything()
   theGlobalVariables.PauseUponUserRequest=0;
   this->activeWorker=-1;
   if (theGlobalVariables.flagServerDetailedLog)
-    currentLog << logger::red << "DEBUG: About to close: " << this->listeningSocketHTTP << logger::endL;
+    currentLog << logger::red << "DEBUG: " << this->ToStringActiveWorker()
+    << " About to close: " << this->listeningSocketHTTP << logger::endL;
   if (this->listeningSocketHTTP!=-1)
-    close(this->listeningSocketHTTP);
-  if (theGlobalVariables.flagServerDetailedLog)
-    currentLog << logger::red << "DEBUG: Just closed: " << this->listeningSocketHTTP << logger::endL;
-  this->listeningSocketHTTP=-1;
+  { close(this->listeningSocketHTTP);
+    if (theGlobalVariables.flagServerDetailedLog)
+      currentLog << logger::red << "DEBUG: " << this->ToStringActiveWorker()
+      << " Just closed: " << this->listeningSocketHTTP << logger::endL;
+    this->listeningSocketHTTP=-1;
+  }
   if (this->listeningSocketHttpSSL!=-1)
-    close(this->listeningSocketHttpSSL);
-  if (theGlobalVariables.flagServerDetailedLog)
-    currentLog << logger::red << "DEBUG: Just closed: " << this->listeningSocketHttpSSL << logger::endL;
+  { close(this->listeningSocketHttpSSL);
+    if (theGlobalVariables.flagServerDetailedLog)
+      currentLog << logger::red << "DEBUG: " << this->ToStringActiveWorker()
+      << " Just closed: " << this->listeningSocketHttpSSL << logger::endL;
+  }
   this->listeningSocketHttpSSL=-1;
 }
 
@@ -4650,10 +4655,12 @@ std::string WebServer::ToStringLastErrorDescription()
 }
 
 std::string WebServer::ToStringActiveWorker()
-{ if (theWebServer.activeWorker==-1)
-    return "server";
-  std::stringstream out;
-  out << "worker " << theWebServer.activeWorker;
+{ std::stringstream out;
+  if (theWebServer.flagIsChildProcess)
+    out << "server, ";
+  else
+    out << "worker, ";
+  out << "active container: " << theWebServer.activeWorker;
   return out.str();
 }
 
@@ -5209,9 +5216,8 @@ int WebServer::Run()
   this->NumFailedSelectsSoFar=0;
   long long previousReportedNumberOfSelects=0;
   int previousServerStatReport=0;
-  sigset_t maskSigChild;
-  sigemptyset(&maskSigChild);
-  sigaddset(&maskSigChild,SIGCHLD);
+  sigset_t allSignals, oldSignals;
+  sigfillset(&allSignals);
   while(true)
   { // main accept() loop
     //    theLog << logger::red << "select returned!" << logger::endL;
@@ -5219,13 +5225,13 @@ int WebServer::Run()
     for (int i=0; i<this->theListeningSockets.size; i++)
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
     if (theGlobalVariables.flagServerDetailedLog)
-      logServer << logger::red << "DEBUG: About to enter select loop. " << logger::endL;
+      logServer << logger::red << "DEBUG:" << this->ToStringActiveWorker() << " About to enter select loop. " << logger::endL;
     while (select(this->highestSocketNumber+1, &FDListenSockets, 0, 0, 0)==-1)
     { if (this->flagReapingChildren)
-        logServer << logger::yellow << "Select interrupted while reaping children. "
+        logServer << logger::yellow << this->ToStringActiveWorker() << " select interrupted while reaping children. "
         << logger::endL;
       else
-        logServer << logger::red << "Select failed: possibly due to reaping children. Error message: "
+        logServer << logger::red << this->ToStringActiveWorker() << " select failed: possibly due to reaping children. Error message: "
         << strerror(errno) << logger::endL;
       this->NumFailedSelectsSoFar++;
     }
@@ -5253,7 +5259,7 @@ int WebServer::Run()
       { //if (this->theListeningSockets[i]==this->listeningSocketHTTP)
         newConnectedSocket=accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
         if (newConnectedSocket>=0)
-        { logServer << logger::green << "Connection candidate  "
+        { logServer << logger::green << this->ToStringActiveWorker() << " connection candidate  "
           << this->NumConnectionsSoFar+1 << ". "
           << "Connected via listening socket " << this->theListeningSockets[i]
           << " on socket: " << newConnectedSocket;
@@ -5264,7 +5270,7 @@ int WebServer::Run()
             logServer << logger::yellow << " (non-encrypted). " << logger::endL;
           break;
         } else
-        { logSocketAccept << logger::red << "This is not supposed to happen: accept failed. Error: "
+        { logSocketAccept << logger::red << this->ToStringActiveWorker() << "This is not supposed to happen: accept failed. Error: "
           << this->ToStringLastErrorDescription() << logger::endL;
           found=true;
         }
@@ -5274,7 +5280,7 @@ int WebServer::Run()
       << "but I found no set socket. " << logger::endL;
     if (newConnectedSocket <0)
     { if (theGlobalVariables.flagServerDetailedLog)
-        logServer << "DEBUG: newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. ";
+        logServer << "DEBUG: " << this->ToStringActiveWorker() << " newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. ";
       continue;
     }
     inet_ntop
@@ -5282,9 +5288,9 @@ int WebServer::Run()
     this->HandleTooManyConnections(userAddressBuffer);
     this->RecycleChildrenIfPossible();
     if (!this->CreateNewActiveWorker())
-    { logPlumbing << logger::purple << "Failed to create an active worker. System error string: "
+    { logPlumbing << logger::purple << this->ToStringActiveWorker() << "Failed to create an active worker. System error string: "
       << strerror(errno) << logger::endL
-      << logger::red << "Failed to create active worker: closing connection. " << logger::endL;
+      << logger::red << this->ToStringActiveWorker() << "Failed to create active worker: closing connection. " << logger::endL;
       close (newConnectedSocket);
       continue;
     }
@@ -5303,29 +5309,40 @@ int WebServer::Run()
 //    theLog << this->ToStringStatus();
     /////////////
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << "DEBUG: about to fork. " << logger::endL;
-    sigprocmask(SIG_BLOCK, &maskSigChild, NULL);
+      logProcessStats << "DEBUG: " << this->ToStringActiveWorker() << "about to fork, sigprocmasking " << logger::endL;
+    sigprocmask(SIG_BLOCK, &allSignals, &oldSignals);
+    if (theGlobalVariables.flagServerDetailedLog)
+      logProcessStats << "DEBUG:" << this->ToStringActiveWorker() << " Sigprocmask done. Proceeding to fork using "
+      << this->ToStringActiveWorker() << logger::endL;
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
     if (this->GetActiveWorker().ProcessPID<0)
-      logProcessKills << logger::red << "FAILED to spawn a child process. " << logger::endL;
+      logProcessKills << logger::red << this->ToStringActiveWorker()
+      << "FAILED to spawn a child process. " << logger::endL;
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
       this->flagIsChildProcess=true;
       if (theGlobalVariables.flagServerDetailedLog)
-        theLog << logger::green << "DEBUG: Worker: FORK successful, running worker. " << logger::endL;
+        theLog << logger::green << "DEBUG:" << this->ToStringActiveWorker()
+               << "FORK successful, calling sigprocmask. " << logger::endL;
+      sigprocmask(SIG_SETMASK, &oldSignals, NULL);
+      if (theGlobalVariables.flagServerDetailedLog)
+        theLog << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " sigprocmask success, running... " << logger::endL;
       int result=this->GetActiveWorker().Run();
       if (theGlobalVariables.flagServerDetailedLog)
-        theLog << "DEBUG: worker run finished, releasing resources. " << logger::endL;
+        theLog << "DEBUG: " << this->ToStringActiveWorker() << " run finished, releasing resources. " << logger::endL;
       this->ReleaseEverything();
       if (theGlobalVariables.flagServerDetailedLog)
-        theLog << logger::green << "DEBUG: resources released, returning. " << logger::endL;
+        theLog << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " resources released, returning. " << logger::endL;
       return result;
     }
-    sigprocmask(SIG_UNBLOCK,&maskSigChild, NULL);
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << logger::green << "DEBUG: Server: FORK successful. " << logger::endL;
+      logProcessStats << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " fork successful using "
+      << this->ToStringActiveWorker() << ". About to unmask signals. " << logger::endL;
+    sigprocmask(SIG_SETMASK, &oldSignals, NULL);
+    if (theGlobalVariables.flagServerDetailedLog)
+      logProcessStats << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " unmask successful. " << logger::endL;
     this->ReleaseWorkerSideResources();
   }
   this->ReleaseEverything();

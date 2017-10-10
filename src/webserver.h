@@ -326,7 +326,6 @@ public:
   long long NumSuccessfulSelectsSoFar;
   bool flagTryToKillOlderProcesses;
   bool flagReapingChildren;
-  bool flagThisIsWorkerProcess;
   double timeAtLastBackup;
 #ifdef MACRO_use_open_ssl
   SSLdata theSSLdata;

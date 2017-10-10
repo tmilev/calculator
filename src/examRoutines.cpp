@@ -3314,7 +3314,8 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
 }
 
 void TopicElement::ComputeID()
-{ if (this->problem!="")
+{ MacroRegisterFunctionWithName("TopicElement::ComputeID");
+  if (this->problem!="")
   { this->id=this->problem;
     this->type=this->tProblem;
   } else
@@ -3339,14 +3340,13 @@ void TopicElement::ComputeID()
 void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output)
 { MacroRegisterFunctionWithName("TopicElement::AddTopic");
   int numToCheck=4;
-  if (output.size()<numToCheck && inputElt.type!=inputElt.tTexHeader && inputElt.type!=inputElt.tChapter)
+  if (output.size()>=numToCheck && inputElt.type!=inputElt.tTexHeader && inputElt.type!=inputElt.tChapter)
   { bool startsWithChapter=false;
-//    if (output.size()>=numToCheck-1)
-      for (int i=0; i<numToCheck-1; i++)
-        if (output.theValues[i].type==inputElt.tChapter)
-        { startsWithChapter=true;
-          break;
-        }
+    for (int i=0; i<numToCheck-1; i++)
+      if (output.theValues[i].type==inputElt.tChapter)
+      { startsWithChapter=true;
+        break;
+      }
     if (!startsWithChapter)
     { TopicElement chapterlessChapter;
       chapterlessChapter.parentTopics.AddOnTop(output.size());
@@ -3428,8 +3428,13 @@ bool TopicElement::LoadTopicBundle
   { if (MathRoutines::StringBeginsWith(currentLine, "BundleBegin:", &currentId))
       bundleNameStack.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentId));
     else if (MathRoutines::StringBeginsWith(currentLine, "BundleEnd:", &currentId))
-      bundleNameStack.RemoveLastObject();
-    else
+    { if (bundleNameStack.size>0)
+        bundleNameStack.RemoveLastObject();
+      else
+      { errorStream << "<b style=\"color:red\">BundleEnd command without BungleBegin.</b>";
+        return false;
+      }
+    } else
       for (int i=0; i<bundleNameStack.size; i++)
         output.GetValueCreateIfNotPresent(bundleNameStack[i]).AddOnTop(currentLine);
   }
@@ -3475,7 +3480,7 @@ void TopicElement::GetTopicList
     if (MathRoutines::StringBeginsWith(currentLine, "LoadTopicBundles:", &currentArgument))
     { std::stringstream errorStream;
       if (!TopicElement::LoadTopicBundle(MathRoutines::StringTrimWhiteSpace(currentArgument), topicBundles.GetElement(), owner, errorStream))
-      { currentElt.error=errorStream.str();
+      { currentElt.error= errorStream.str();
         currentElt.type=currentElt.tError;
         found=true;
       }
@@ -3719,7 +3724,7 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
       subSectionStarted=false;
       out << "<ul>";
     } else if (currentElt.type==currentElt.tError)
-      out << "Error parsing topic list. " << currentElt.error << ". ";
+      out << "Error parsing topic list. " << currentElt.error;
   }
   if (subSectionStarted)
       out << "</li>";
@@ -3985,7 +3990,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       subSectionStarted=true;
       tableStarted=false;
     } else if (currentElt.type==currentElt.tError)
-      out << "Error parsing topic list line: " << currentElt.error << ". ";
+      out << "Error parsing topic list line. " << currentElt.error;
     else
     { out << "<tr class=\"calculatorProblem\" "
       << "id=\"" << currentElt.idBase64 << "\"" << ">\n";

@@ -1098,19 +1098,21 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 
 void WebServer::Signal_SIGINT_handler(int s)
 { MacroRegisterFunctionWithName("WebServer::Signal_SIGINT_handler");
-  theLog << "Signal interrupt handler called with input: " << s;
+  if (theWebServer.flagIsChildProcess)
+    return;
+  logProcessKills << theWebServer.ToStringActiveWorker() << "Signal interrupt handler called with input: " << s;
 //  << ". Waiting for children to exit... " << logger::endL;
   theWebServer.ReleaseActiveWorker();
   theWebServer.ReleaseNonActiveWorkers();
   while(waitpid(-1, NULL, WNOHANG | WEXITED) > 0)
   { }
-  theLog << "All children have exited. " << logger::endL;
+  logProcessKills << theWebServer.ToStringActiveWorker() << "All children have exited. " << logger::endL;
   exit(0);
 }
 
 void WebServer::Signal_SIGCHLD_handler(int s)
 { (void) s; //avoid unused parameter warning, portable.
-  if (theWebServer.flagThisIsWorkerProcess)
+  if (theWebServer.flagIsChildProcess)
     return;
   theLog << "Received SIGCHLD signal." << logger::endL;
   theWebServer.flagReapingChildren=true;
@@ -1133,13 +1135,15 @@ void WebServer::ReapChildren()
         { this->theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close", false, true);
           this->theWorkers[i].flagInUse=false;
           this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
-          logServer << logger::green << "Child with pid " << waitResult << " successfully reaped. " << logger::endL;
+          logServer << logger::green << this->ToStringActiveWorker()
+          << " child " << i
+          << " with pid " << waitResult << " successfully reaped. " << logger::endL;
           this->NumProcessesReaped++;
         }
   } while (waitResult>0);
   if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << logger::green << "DEBUG: EXIT the reaper. " << logger::endL;
-
+    logProcessStats << logger::green << this->ToStringActiveWorker()
+    << " DEBUG: EXIT the reaper. " << logger::endL;
 }
 
 // get sockaddr, IPv4 or IPv6:
@@ -4429,7 +4433,6 @@ WebServer::WebServer()
   this->NumConnectionsSoFar=0;
   this->NumWorkersNormallyExited=0;
   this->WebServerPingIntervalInSeconds=10;
-  this->flagThisIsWorkerProcess=false;
   this->flagIsChildProcess=false;
   this->requestStartsNotNeedingLogin.AddOnTop("about");
   this->requestStartsNotNeedingLogin.AddOnTop("signUp");
@@ -4657,9 +4660,9 @@ std::string WebServer::ToStringLastErrorDescription()
 std::string WebServer::ToStringActiveWorker()
 { std::stringstream out;
   if (theWebServer.flagIsChildProcess)
-    out << "server, ";
-  else
     out << "worker, ";
+  else
+    out << "server, ";
   out << "active container: " << theWebServer.activeWorker;
   return out.str();
 }
@@ -4898,8 +4901,11 @@ void WebServer::TerminateChildSystemCall(int i)
 
 void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
 { MacroRegisterFunctionWithName("WebServer::HandleTooManyConnections");
+  if (this->flagIsChildProcess)
+    return;
   if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << logger::red << "DEBUG: Too many connections handler start. " << logger::endL;
+    logProcessStats << logger::red << "DEBUG: " << this->ToStringActiveWorker()
+    << " too many connections handler start. " << logger::endL;
   MonomialWrapper<std::string, MathRoutines::hashString>
   incomingAddress(incomingUserAddress);
   bool purgeIncomingAddress=
@@ -4925,11 +4931,12 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     << ": address: " << incomingAddress << " opened more than "
     << this->MaxNumWorkersPerIPAdress << " simultaneous connections. ";
     this->theWorkers[theIndices[j]].pingMessage=errorStream.str();
-    logProcessKills << logger::red  << errorStream.str() << logger::endL;
+    logProcessKills << logger::red  << this->ToStringActiveWorker() << errorStream.str() << logger::endL;
     this->NumProcessAssassinated++;
   }
   if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << logger::green << "DEBUG: connection cleanup successful. " << logger::endL;
+    logProcessStats << logger::green << this->ToStringActiveWorker()
+    << "DEBUG: connection cleanup successful. " << logger::endL;
 }
 
 void WebServer::RecycleChildrenIfPossible()
@@ -4937,6 +4944,8 @@ void WebServer::RecycleChildrenIfPossible()
   //This might need to be rewritten: I wasn't able to make this work with any
   //mechanism other than pipes.
   MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
+  if (this->flagIsChildProcess)
+    return;
   if (theGlobalVariables.flagServerDetailedLog)
     logProcessStats << logger::red << "DEBUG: RecycleChildrenIfPossible start. " << logger::endL;
 //  this->ReapChildren();
@@ -5002,7 +5011,8 @@ void WebServer::RecycleChildrenIfPossible()
     }
   if (numInUse<=this->MaxTotalUsedWorkers)
   { if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << logger::green << "DEBUG: RecycleChildrenIfPossible exit point 1. " << logger::endL;
+      logProcessStats << logger::green << this->ToStringActiveWorker()
+      << "DEBUG: RecycleChildrenIfPossible exit point 1. " << logger::endL;
     return;
   }
   for (int i=0; i<this->theWorkers.size && numInUse>1; i++)
@@ -5014,13 +5024,14 @@ void WebServer::RecycleChildrenIfPossible()
       << this->theWorkers[i].ProcessPID
       << ": too many workers in use. ";
       this->theWorkers[i].pingMessage=errorStream.str();
-      logProcessKills << logger::red  << errorStream.str() << logger::endL;
+      logProcessKills << logger::red << this->ToStringActiveWorker() << errorStream.str() << logger::endL;
       numInUse--;
       this->NumProcessAssassinated++;
     }
   }
   if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << logger::green << "DEBUG: RecycleChildrenIfPossible exit point 2. " << logger::endL;
+    logProcessStats << logger::green << this->ToStringActiveWorker()
+    << "DEBUG: RecycleChildrenIfPossible exit point 2. " << logger::endL;
 }
 
 bool WebServer::initPrepareWebServerALL()
@@ -5124,14 +5135,14 @@ void WebServer::initPrepareSignals()
     crash << "Failed to register null SIGINT handler. Crashing to let you know. " << crash;
   ////////////////////
   //reap children
-  if(sigemptyset(&SignalChild.sa_mask)==-1)
+  if (sigemptyset(&SignalChild.sa_mask)==-1)
     crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
-  if(sigaddset(&SignalChild.sa_mask, SIGINT)==-1)
+  if (sigaddset(&SignalChild.sa_mask, SIGINT)==-1)
     crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   ////////////////////////////////
   //sigchld signal should automatically be blocked when calling the sigchld handler.
   //Nevertheless, let's explicitly add it:
-  if(sigaddset(&SignalChild.sa_mask, SIGCHLD)==-1)
+  if (sigaddset(&SignalChild.sa_mask, SIGCHLD)==-1)
     crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   ////////////////////////////////
   if(sigaddset(&SignalChild.sa_mask, SIGFPE)==-1)
@@ -5288,7 +5299,8 @@ int WebServer::Run()
     this->HandleTooManyConnections(userAddressBuffer);
     this->RecycleChildrenIfPossible();
     if (!this->CreateNewActiveWorker())
-    { logPlumbing << logger::purple << this->ToStringActiveWorker() << "Failed to create an active worker. System error string: "
+    { logPlumbing << logger::purple << this->ToStringActiveWorker()
+      << " failed to create an active worker. System error string: "
       << strerror(errno) << logger::endL
       << logger::red << this->ToStringActiveWorker() << "Failed to create active worker: closing connection. " << logger::endL;
       close (newConnectedSocket);
@@ -5309,23 +5321,23 @@ int WebServer::Run()
 //    theLog << this->ToStringStatus();
     /////////////
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << "DEBUG: " << this->ToStringActiveWorker() << "about to fork, sigprocmasking " << logger::endL;
+      logProcessStats << "DEBUG: " << this->ToStringActiveWorker() << " about to fork, sigprocmasking " << logger::endL;
     sigprocmask(SIG_BLOCK, &allSignals, &oldSignals);
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << "DEBUG:" << this->ToStringActiveWorker() << " Sigprocmask done. Proceeding to fork using "
-      << this->ToStringActiveWorker() << logger::endL;
+      logProcessStats << "DEBUG: " << this->ToStringActiveWorker() << " Sigprocmask done. Proceeding to fork using "
+      << logger::endL;
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
     if (this->GetActiveWorker().ProcessPID<0)
       logProcessKills << logger::red << this->ToStringActiveWorker()
-      << "FAILED to spawn a child process. " << logger::endL;
+      << " FAILED to spawn a child process. " << logger::endL;
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
       this->flagIsChildProcess=true;
       if (theGlobalVariables.flagServerDetailedLog)
         theLog << logger::green << "DEBUG:" << this->ToStringActiveWorker()
-               << "FORK successful, calling sigprocmask. " << logger::endL;
+        << " FORK successful, calling sigprocmask. " << logger::endL;
       sigprocmask(SIG_SETMASK, &oldSignals, NULL);
       if (theGlobalVariables.flagServerDetailedLog)
         theLog << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " sigprocmask success, running... " << logger::endL;
@@ -5357,7 +5369,6 @@ int WebWorker::Run()
   this->CheckConsistency();
   if (this->connectedSocketID==-1)
     crash << "Worker::Run() started on a connecting with ID equal to -1. " << crash;
-  this->parent->flagThisIsWorkerProcess=true;
   this->ResetPipesNoAllocation();
   std::stringstream processNameStream;
   processNameStream << "W" << this->indexInParent+1 << ": ";

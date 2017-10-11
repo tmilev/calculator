@@ -420,6 +420,7 @@ public:
   static bool innerIsEven(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIsAlgebraicRadical(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIsReal(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm(Calculator& theCommands, const Expression& input, Expression& output);

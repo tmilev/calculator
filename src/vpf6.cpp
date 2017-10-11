@@ -2644,20 +2644,6 @@ void ObjectContainer::reset()
   srand (this->CurrentRandomSeed);
 }
 
-bool Calculator::IsBoundVarInContext(int inputOp)
-{ for (int i=0; i<this->BoundVariablesStack.size; i++)
-    if (this->BoundVariablesStack[i].Contains(inputOp))
-      return true;
-  return false;
-}
-
-bool Calculator::IsNonBoundVarInContext(int inputOp)
-{ for (int i=0; i<this->NonBoundVariablesStack.size; i++)
-    if (this->NonBoundVariablesStack[i].Contains(inputOp))
-      return true;
-  return false;
-}
-
 bool Calculator::innerWriteGenVermaModAsDiffOperators
 (Calculator& theCommands, const Expression& input, Expression& output, bool AllGenerators,
  bool useNilWeight, bool ascending)

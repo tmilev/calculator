@@ -959,13 +959,22 @@ bool Calculator::ReplaceXXByEEmptySequence()
   return this->DecreaseStackSetCharacterRangeS(1);
 }
 
+bool Calculator::IsBoundVarInContext(int inputOp)
+{ return this->BoundVariablesInContext.Contains(inputOp);
+}
+
+bool Calculator::IsNonBoundVarInContext(int inputOp)
+{ return this->NonBoundVariablesInContext.Contains(inputOp);
+}
+
 bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numXs-1];
   int theBoundVar=theElt.theData.theData;
 //  stOutput << "<br>Registering bound variable index: " << theBoundVar;
   if (this->IsNonBoundVarInContext(theBoundVar))
   { std::stringstream out;
-    out << "Syntax error. In the same syntactic scope, the string " << this->theAtoms[theBoundVar] << " is first used to denote a non-bound variable"
+    out << "Syntax error. In the same syntactic scope, the string " << this->theAtoms[theBoundVar]
+    << " is first used to denote a non-bound variable"
     << " but later to denote a bound variable. This is not allowed. ";
     theElt.errorString=out.str();
     theElt.controlIndex=this->conError();
@@ -974,7 +983,7 @@ bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
     return true;
   }
   if (!this->IsBoundVarInContext(theBoundVar))
-    this->BoundVariablesStack.LastObject()->AddOnTopNoRepetition(theBoundVar);
+    this->BoundVariablesInContext.AddOnTopNoRepetition(theBoundVar);
   theElt.theData.reset(*this, 2);
   theElt.theData.AddChildAtomOnTop(this->opBind());
   theElt.theData.AddChildAtomOnTop(theBoundVar);
@@ -998,7 +1007,7 @@ bool Calculator::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs)
   } else
   { theElt.theData.MakeAtom(theBoundVar, *this);
     if (!this->IsNonBoundVarInContext(theBoundVar))
-      this->NonBoundVariablesStack.LastObject()->AddOnTop(theBoundVar);
+      this->NonBoundVariablesInContext.AddOnTop(theBoundVar);
   }
   theElt.controlIndex=this->conExpression();
   return true;
@@ -1414,6 +1423,20 @@ bool Calculator::ReplaceXEXEXByEusingO(int theControlIndex)
 
 bool Calculator::ReplaceEXdotsXbySsXdotsX(int numDots)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-1];
+  bool found=false;
+  for (int i=(*this->CurrentSyntacticStacK).size-numDots-2; i>=0; i--)
+  { SyntacticElement& current=(*this->CurrentSyntacticStacK)[i];
+    if (current.numBoundVariablesInherited>=0 && current.numNonBoundVariablesInherited>=0)
+    { this->NonBoundVariablesInContext.SetSize(current.numNonBoundVariablesInherited);
+      this->BoundVariablesInContext.SetSize(current.numBoundVariablesInherited);
+      found=true;
+      break;
+    }
+  }
+  if (!found)
+  { this->NonBoundVariablesInContext.Clear();
+    this->BoundVariablesInContext.Clear();
+  }
   Expression newExpr;
   newExpr.reset(*this);
   newExpr.children.Reserve(2);
@@ -1747,10 +1770,8 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
   for (int i=0; i<this->numEmptyTokensStart; i++)
     (*this->CurrentSyntacticStacK)[i]=this->GetEmptySyntacticElement();
   this->parsingLog="";
-  this->NonBoundVariablesStack.SetSize(1);
-  this->BoundVariablesStack.SetSize(1);
-  this->NonBoundVariablesStack.LastObject()->Clear();
-  this->BoundVariablesStack.LastObject()->Clear();
+  this->NonBoundVariablesInContext.Clear();
+  this->BoundVariablesInContext.Clear();
   const int maxNumTimesOneRuleCanBeCalled=1000;
   for (this->counterInSyntacticSoup=0; this->counterInSyntacticSoup<(*this->CurrrentSyntacticSouP).size; this->counterInSyntacticSoup++)
   { (*this->CurrentSyntacticStacK).AddOnTop((*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup]);
@@ -1819,6 +1840,10 @@ bool Calculator::ApplyOneRule()
   { if (this->flagLogSyntaxRules)
       this->parsingLog+= "[Rule: remove white space]";
     return this->PopTopSyntacticStack();
+  }
+  if (lastS=="(" || lastS=="{")
+  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].numNonBoundVariablesInherited=this->NonBoundVariablesInContext.size;
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].numBoundVariablesInherited=this->BoundVariablesInContext.size;
   }
   const SyntacticElement& thirdToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   const std::string& thirdToLastS=this->controlSequences[thirdToLastE.controlIndex];
@@ -2297,10 +2322,6 @@ bool Calculator::ApplyOneRule()
       thirdToLastS=="=" && secondToLastS=="Expression" &&
       this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEXXEXEXByEXusingO(this->conDefineConditional());
-  if (lastS==";")
-  { this->NonBoundVariablesStack.LastObject()->Clear();
-    this->BoundVariablesStack.LastObject()->Clear();
-  }
   if (thirdToLastS=="SequenceStatements" && secondToLastS=="Expression" && (lastS==")" || lastS =="}"))
     return this->ReplaceEXdotsXbySsXdotsX(1);
   if (secondToLastS=="Expression" && lastS==";")

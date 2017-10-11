@@ -609,8 +609,8 @@ class SyntacticElement
 {
   public:
   int controlIndex;
-//  int IndexFirstChar;
-//  int IndexLastCharPlusOne;
+  int numNonBoundVariablesInherited;
+  int numBoundVariablesInherited;
   std::string errorString;
   Expression theData;
   List<Expression> dataList;
@@ -618,8 +618,8 @@ class SyntacticElement
   SyntacticElement()
   { this->controlIndex=0;//controlIndex=0 *MUST* point to the empty control sequence.
     this->errorString="";
-//    this->IndexFirstChar=-1;
-//    this->IndexLastCharPlusOne=-1;
+    this->numNonBoundVariablesInherited=-1; // -1 stands for unknown
+    this->numBoundVariablesInherited=-1; // -1 stands for unknown
   }
 };
 
@@ -1034,8 +1034,8 @@ public:
   List<Expression> imagesCachedExpressions;
   ////
   HashedList<Expression> EvaluatedExpressionsStack;
-  List<HashedList<int, MathRoutines::IntUnsignIdentity> > NonBoundVariablesStack;
-  List<HashedList<int, MathRoutines::IntUnsignIdentity> > BoundVariablesStack;
+  HashedList<int, MathRoutines::IntUnsignIdentity> NonBoundVariablesInContext;
+  HashedList<int, MathRoutines::IntUnsignIdentity> BoundVariablesInContext;
 
   Expression RuleStack;
   HashedList<Expression> cachedRuleStacks;

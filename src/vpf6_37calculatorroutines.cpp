@@ -1521,6 +1521,13 @@ bool CalculatorFunctionsGeneral::innerIsAlgebraicRadical(Calculator& theCommands
   return output.AssignValue(result, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerIsReal(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsReal");
+  if (!input.EvaluatesToDouble())
+    return output.AssignValue(0, theCommands);
+  return output.AssignValue(1, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerExpressionToUTF8String
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionToUTF8String");

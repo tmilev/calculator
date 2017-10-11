@@ -177,9 +177,9 @@ struct Answer
 struct ProblemDataAdministrative
 {
 public:
-  MapLisT<std::string, std::string, MathRoutines::hashString> problemWeightsPerSectionDB;
+  MapLisT<std::string, std::string, MathRoutines::hashString> problemWeightsPerCoursE;
   MapLisT<std::string, std::string, MathRoutines::hashString> deadlinesPerSection;
-  bool GetWeightFromSection(const std::string& theSection, Rational& output, std::string* outputAsGivenByInstructor=0);
+  bool GetWeightFromCoursE(const std::string& theCourseNonURLed, Rational& output, std::string* outputAsGivenByInstructor=0);
   std::string ToString()const;
 };
 

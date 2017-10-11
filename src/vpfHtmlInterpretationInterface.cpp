@@ -1759,7 +1759,7 @@ void UserCalculator::ComputePointsEarned
     currentP.numCorrectlyAnswered=0;
     Rational currentWeight;
     currentP.flagProblemWeightIsOK=
-    currentP.adminData.GetWeightFromSection(this->courseInfo.sectionComputed, currentWeight);
+    currentP.adminData.GetWeightFromCoursE(this->courseInfo.courseComputed, currentWeight);
     if (!currentP.flagProblemWeightIsOK)
     { currentWeight=0;
       //stOutput << "Debug: weight not ok: " << problemName << "<br>";

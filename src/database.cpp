@@ -292,22 +292,22 @@ std::string ProblemData::ToStringAvailableAnswerIds()
   return out.str();
 }
 
-bool ProblemDataAdministrative::GetWeightFromSection
-(const std::string& theSection, Rational& output, std::string *outputAsGivenByInstructor)
+bool ProblemDataAdministrative::GetWeightFromCoursE
+(const std::string& theCourseNonURLed, Rational& output, std::string *outputAsGivenByInstructor)
 { MacroRegisterFunctionWithName("ProblemDataAdministrative::GetWeightFromSection");
-  if (!this->problemWeightsPerSectionDB.Contains(theSection))
+  if (!this->problemWeightsPerCoursE.Contains(theCourseNonURLed))
     return false;
   std::string tempString;
   if (outputAsGivenByInstructor==0)
     outputAsGivenByInstructor=&tempString;
-  *outputAsGivenByInstructor=this->problemWeightsPerSectionDB.GetValueCreateIfNotPresent(theSection);
+  *outputAsGivenByInstructor=this->problemWeightsPerCoursE.GetValueCreateIfNotPresent(theCourseNonURLed);
   return output.AssignStringFailureAllowed(*outputAsGivenByInstructor);
 }
 
 std::string ProblemDataAdministrative::ToString()const
 { std::stringstream out;
   out << this->deadlinesPerSection.ToStringHtml();
-  out << this->problemWeightsPerSectionDB.ToStringHtml();
+  out << this->problemWeightsPerCoursE.ToStringHtml();
   return out.str();
 }
 
@@ -763,8 +763,8 @@ std::string UserCalculator::ToString()
     << "; points: "
     << this->theProblemData.theValues[i].Points
     << ";";
-    if (!this->theProblemData.theValues[i].adminData.GetWeightFromSection
-        (this->courseInfo.sectionComputed, weightRat))
+    if (!this->theProblemData.theValues[i].adminData.GetWeightFromCoursE
+        (this->courseInfo.courseComputed, weightRat))
       out << " (weight not available). ";
     else
       out << " weight: " << weightRat.ToString();

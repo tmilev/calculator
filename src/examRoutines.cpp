@@ -52,7 +52,7 @@ bool CalculatorHTML::ReadProblemInfoAppend
    )
 { MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemInfoAppend");
   MapLisT<std::string, std::string, MathRoutines::hashString>
-  CGIedProbs, currentKeyValues, sectionDeadlineInfo, sectionProblemInfo;
+  CGIedProbs, currentKeyValues, sectionDeadlineInfo, problemWeightInfo;
   if (!HtmlRoutines::ChopCGIString(inputInfoString, CGIedProbs, commentsOnFailure) )
     return false;
   //stOutput << "<hr>Debug: reading problem info from: " << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(inputInfoString);
@@ -75,12 +75,12 @@ bool CalculatorHTML::ReadProblemInfoAppend
     std::string deadlineString=HtmlRoutines::ConvertURLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("deadlines"), false);
     std::string problemWeightsCollectionString=HtmlRoutines::ConvertURLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("weights"), false);
     if (problemWeightsCollectionString!="")
-    { if (!HtmlRoutines::ChopCGIString(problemWeightsCollectionString, sectionProblemInfo, commentsOnFailure))
+    { if (!HtmlRoutines::ChopCGIString(problemWeightsCollectionString, problemWeightInfo, commentsOnFailure))
         return false;
-      for (int j=0; j<sectionProblemInfo.size(); j++)
-        currentProblemValue.adminData.problemWeightsPerSectionDB.SetKeyValue
-        (HtmlRoutines::ConvertURLStringToNormal(sectionProblemInfo.theKeys[j],false),
-         HtmlRoutines::ConvertURLStringToNormal(sectionProblemInfo.theValues[j],false));
+      for (int j=0; j<problemWeightInfo.size(); j++)
+        currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
+        (HtmlRoutines::ConvertURLStringToNormal(problemWeightInfo.theKeys[j],false),
+         HtmlRoutines::ConvertURLStringToNormal(problemWeightInfo.theValues[j],false));
     }
     if (deadlineString!="")
     { if (!HtmlRoutines::ChopCGIString(deadlineString, sectionDeadlineInfo, commentsOnFailure))
@@ -90,19 +90,12 @@ bool CalculatorHTML::ReadProblemInfoAppend
         (HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theKeys[j], false),
          HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theValues[j], false));
     }
-    std::string problemWeightNoSectionsString=MathRoutines::StringTrimWhiteSpace
+    std::string problemWeightString=MathRoutines::StringTrimWhiteSpace
     (currentKeyValues.GetValueCreateIfNotPresent("weight"));
-    if (problemWeightNoSectionsString!="")
-    { if (this->databaseStudentSections.size<=0)
-      { commentsOnFailure << "<span style=\"color:red\"><b>Got default weight: "
-        << problemWeightNoSectionsString << " but "
-        << "user does not appear to be teaching any sections.</b></span> ";
-        return false;
-      }
-      for (int j=0; j<this->databaseStudentSections.size; j++)
-        currentProblemValue.adminData.problemWeightsPerSectionDB.SetKeyValue
-        (HtmlRoutines::ConvertURLStringToNormal(this->databaseStudentSections[j], false),
-         HtmlRoutines::ConvertURLStringToNormal(problemWeightNoSectionsString, false));
+    if (problemWeightString!="")
+    { currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
+      (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.userDefault.courseInfo.courseComputed, false),
+       HtmlRoutines::ConvertURLStringToNormal(problemWeightString, false));
     }
 
   }
@@ -117,25 +110,25 @@ void CalculatorHTML::StoreProblemWeightInfo
   std::stringstream out;
   for (int i=0; i<inputProblemInfo.size(); i++)
   { ProblemDataAdministrative& currentProblem=inputProblemInfo.theValues[i].adminData;
-    if (currentProblem.problemWeightsPerSectionDB.size()==0)
+    if (currentProblem.problemWeightsPerCoursE.size()==0)
       continue;
-    std::string currentProbName=inputProblemInfo.theKeys[i];
+    std::string currentProblemName=inputProblemInfo.theKeys[i];
     std::stringstream currentProblemStream, currentWeightStream;
-    for (int j=0; j<currentProblem.problemWeightsPerSectionDB.size(); j++)
+    for (int j=0; j<currentProblem.problemWeightsPerCoursE.size(); j++)
     { std::string currentWeight=MathRoutines::StringTrimWhiteSpace
-      (currentProblem.problemWeightsPerSectionDB.theValues[j]);
+      (currentProblem.problemWeightsPerCoursE.theValues[j]);
       if (currentWeight=="")
         continue;
-      std::string currentSection=MathRoutines::StringTrimWhiteSpace
-      (currentProblem.problemWeightsPerSectionDB.theKeys[j]);
+      std::string currentCourse=MathRoutines::StringTrimWhiteSpace
+      (currentProblem.problemWeightsPerCoursE.theKeys[j]);
       currentWeightStream
-      << HtmlRoutines::ConvertStringToURLString(currentSection, false)
+      << HtmlRoutines::ConvertStringToURLString(currentCourse, false)
       << "="
       << HtmlRoutines::ConvertStringToURLString(currentWeight, false)
       << "&";
     }
     currentProblemStream << "weights=" << HtmlRoutines::ConvertStringToURLString(currentWeightStream.str(), false) << "&";
-    out << HtmlRoutines::ConvertStringToURLString(currentProbName, false) << "="
+    out << HtmlRoutines::ConvertStringToURLString(currentProblemName, false) << "="
     << HtmlRoutines::ConvertStringToURLString(currentProblemStream.str(), false) << "&";
   }
   outputString= out.str();
@@ -248,9 +241,9 @@ bool CalculatorHTML::MergeOneProblemAdminData
   MapLisT<std::string, std::string, MathRoutines::hashString>&
   incomingDeadlines=inputProblemInfo.adminData.deadlinesPerSection;
   MapLisT<std::string, std::string, MathRoutines::hashString>&
-  currentWeights=currentProblem.problemWeightsPerSectionDB;
+  currentWeightS=currentProblem.problemWeightsPerCoursE;
   MapLisT<std::string, std::string, MathRoutines::hashString>&
-  incomingWeights=inputProblemInfo.adminData.problemWeightsPerSectionDB;
+  incomingWeightS=inputProblemInfo.adminData.problemWeightsPerCoursE;
 
   for (int i=0; i<incomingDeadlines.size(); i++)
   { if (this->databaseStudentSections.size>=1000)
@@ -260,18 +253,10 @@ bool CalculatorHTML::MergeOneProblemAdminData
     this->databaseStudentSections.AddOnTopNoRepetition(incomingDeadlines.theKeys[i]);
   }
   ////////////////////////////////////////////
-  for (int i=0; i<incomingWeights.size(); i++)
-  { if (this->databaseStudentSections.size>=1000)
-    { commentsOnFailure << "Failed to account deadlines: max 999 sections allowed. ";
-      return false;
-    }
-    this->databaseStudentSections.AddOnTopNoRepetition(incomingWeights.theKeys[i]);
-  }
-
   for (int i=0; i<incomingDeadlines.size(); i++)
     currentDeadlines.SetKeyValue(incomingDeadlines.theKeys[i], incomingDeadlines.theValues[i]);
-  for (int i=0; i<incomingWeights.size(); i++)
-    currentWeights.SetKeyValue(incomingWeights.theKeys[i], incomingWeights.theValues[i]);
+  for (int i=0; i<incomingWeightS.size(); i++)
+    currentWeightS.SetKeyValue(incomingWeightS.theKeys[i], incomingWeightS.theValues[i]);
   return true;
 }
 
@@ -3179,8 +3164,8 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
   { ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
     if (!theProbData.flagProblemWeightIsOK)
     { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
-      if (!theProbData.adminData.GetWeightFromSection
-          (this->currentUseR.courseInfo.sectionComputed, currentWeight))
+      if (!theProbData.adminData.GetWeightFromCoursE
+          (this->currentUseR.courseInfo.courseComputed, currentWeight))
         currentWeight=0;
       if (theProbData.theAnswers.size()==1)
       { if (theProbData.numCorrectlyAnswered==1)
@@ -3232,8 +3217,8 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
     Rational percentSolved=0, totalPoints=0;
     percentSolved.AssignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size());
     theProbData.flagProblemWeightIsOK=
-    theProbData.adminData.GetWeightFromSection
-    (this->currentUseR.courseInfo.sectionComputed, currentWeight, &currentWeightAsGivenByInstructor);
+    theProbData.adminData.GetWeightFromCoursE
+    (this->currentUseR.courseInfo.courseComputed, currentWeight, &currentWeightAsGivenByInstructor);
     if (!theProbData.flagProblemWeightIsOK)
     { problemWeight << "?";
       if (currentWeightAsGivenByInstructor!="")
@@ -3293,7 +3278,7 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
   #ifdef MACRO_use_MySQL
   Rational unusedRat;
   weightIsOK=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName).
-  adminData.GetWeightFromSection(this->currentUseR.courseInfo.sectionComputed, unusedRat, &problemWeightAsGivenByInstructor);
+  adminData.GetWeightFromCoursE(this->currentUseR.courseInfo.courseComputed, unusedRat, &problemWeightAsGivenByInstructor);
   out << problemWeightAsGivenByInstructor;
   #endif
   out << "</textarea>";

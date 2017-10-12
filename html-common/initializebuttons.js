@@ -225,10 +225,16 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
     addCommand("sec");
     addCommand("csc");
   }
-  if (buttonArray.indexOf("brackets")>-1 || includeAll)
+
+  if (buttonArray.indexOf("brackets")>-1 ||
+      buttonArray.indexOf("comma")>-1 ||
+      buttonArray.indexOf("intervals")>-1 ||
+      includeAll)
+    addCommand(",");
+  if (buttonArray.indexOf("brackets")>-1 ||
+      buttonArray.indexOf("intervals")>-1 || includeAll)
   { addCommand("[");
     addCommand("]");
-    addCommand(",");
   }
   if (buttonArray.indexOf("complex")>-1 || buttonArray.indexOf("imaginary")>-1 || includeAll)
   { addCommand("i");
@@ -257,9 +263,11 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
   if (noOptions || includeAll)
   { addCommand("circ");
   }
+  if (buttonArray.indexOf("interval")>-1 || buttonArray.indexOf("intervals")>-1 ||
+      buttonArray.indexOf("or")>-1 || noOptions || includeAll)
+    addCommand(" or ");
   if (buttonArray.indexOf("interval")>-1 || buttonArray.indexOf("intervals")>-1 || noOptions || includeAll)
-  { addCommand(" or ");
-    addCommand("cup");
+  { addCommand("cup");
     addCommand("in");
     addCommand("emptyset");
   }

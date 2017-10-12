@@ -1114,7 +1114,9 @@ void WebServer::Signal_SIGCHLD_handler(int s)
 { (void) s; //avoid unused parameter warning, portable.
   if (theWebServer.flagIsChildProcess)
     return;
-  theLog << "Received SIGCHLD signal." << logger::endL;
+  if (theGlobalVariables.flagServerDetailedLog)
+    logProcessStats << "DEBUG: "
+    << theWebServer.ToStringActiveWorker() << " received SIGCHLD signal. " << logger::endL;
   theWebServer.flagReapingChildren=true;
   theWebServer.ReapChildren();
   theWebServer.flagReapingChildren=false;
@@ -1125,19 +1127,22 @@ void WebServer::ReapChildren()
   int waitResult=0;
   int exitFlags= WNOHANG| WEXITED;
   if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << logger::red << "DEBUG: Enter the reaper. " << logger::endL;
+    logProcessStats << logger::red
+    << this->ToStringActiveWorker() << " DEBUG: Enter the reaper. " << logger::endL;
   do
   { waitResult= waitpid(-1, NULL, exitFlags);
 //    theLog << "waitresult is: " << waitResult << logger::endL;
     if (waitResult>0)
       for (int i=0; i<this->theWorkers.size; i++)
         if (this->theWorkers[i].ProcessPID==waitResult)
-        { this->theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close", false, true);
-          this->theWorkers[i].flagInUse=false;
-          this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
-          logServer << logger::green << this->ToStringActiveWorker()
+        { logProcessStats << logger::yellow << this->ToStringActiveWorker()
           << " child " << i
           << " with pid " << waitResult << " successfully reaped. " << logger::endL;
+          this->theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close", false, true);
+          logProcessStats << logger::green << this->ToStringActiveWorker()
+          << " Close message sent through pipe successfully. " << logger::endL;
+          this->theWorkers[i].flagInUse=false;
+          this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
           this->NumProcessesReaped++;
         }
   } while (waitResult>0);
@@ -5324,7 +5329,8 @@ int WebServer::Run()
       logProcessStats << "DEBUG: " << this->ToStringActiveWorker() << " about to fork, sigprocmasking " << logger::endL;
     sigprocmask(SIG_BLOCK, &allSignals, &oldSignals);
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << "DEBUG: " << this->ToStringActiveWorker() << " Sigprocmask done. Proceeding to fork using "
+      logProcessStats << "DEBUG: " << this->ToStringActiveWorker() << " Sigprocmask done. Proceeding to fork. "
+      << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
       << logger::endL;
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
@@ -5337,7 +5343,8 @@ int WebServer::Run()
       this->flagIsChildProcess=true;
       if (theGlobalVariables.flagServerDetailedLog)
         theLog << logger::green << "DEBUG:" << this->ToStringActiveWorker()
-        << " FORK successful, calling sigprocmask. " << logger::endL;
+        << " FORK successful. Time elapsed: " << theGlobalVariables.GetElapsedSeconds()
+        << " second(s). Calling sigprocmask. " << logger::endL;
       sigprocmask(SIG_SETMASK, &oldSignals, NULL);
       if (theGlobalVariables.flagServerDetailedLog)
         theLog << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " sigprocmask success, running... " << logger::endL;
@@ -5350,11 +5357,13 @@ int WebServer::Run()
       return result;
     }
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " fork successful using "
-      << this->ToStringActiveWorker() << ". About to unmask signals. " << logger::endL;
+      logProcessStats << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " fork successful. Time elapsed: "
+      << theGlobalVariables.GetElapsedSeconds() << " second(s). "
+      << "About to unmask signals. " << logger::endL;
     sigprocmask(SIG_SETMASK, &oldSignals, NULL);
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " unmask successful. " << logger::endL;
+      logProcessStats << logger::green << "DEBUG: "
+      << this->ToStringActiveWorker() << " unmask successful. " << logger::endL;
     this->ReleaseWorkerSideResources();
   }
   this->ReleaseEverything();

@@ -546,7 +546,7 @@ void Pipe::Read(bool restartServerOnFail, bool dontCrashOnFail)
   safetyFirst.UnlockMe(); //preventing threads from locking one another
 }
 
-logger::logger(const std::string& logFileName, logger* inputCarbonCopy, bool inputResetLogWhenTooLarge)
+logger::logger(const std::string& logFileName, logger* inputCarbonCopy, bool inputResetLogWhenTooLarge, const std::string& inputProcessType)
 { this->flagInitialized=false;
   this->theFileName=logFileName;
   this->currentColor=logger::normalColor;
@@ -555,6 +555,7 @@ logger::logger(const std::string& logFileName, logger* inputCarbonCopy, bool inp
   this->flagStopWritingToFile=true;
   this->carbonCopy=inputCarbonCopy;
   this->flagResetLogFileWhenTooLarge=inputResetLogWhenTooLarge;
+  this->processType=inputProcessType;
 }
 
 void logger::initializeIfNeeded()

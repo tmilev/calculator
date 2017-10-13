@@ -143,6 +143,9 @@ mathQuillCommandButton(["log","_"],"log_", "font-size:10px; ");
 mathQuillCommandButton("_","_");
 mathQuillCommandButton("ln","ln");
 mathQuillCommandButton("e","e");
+mathQuillCommandButton("arcsin","asin", "font-size:7px");
+mathQuillCommandButton("arccos","acos", "font-size:7px");
+mathQuillCommandButton("arctan","atan", "font-size:7px");
 
 
 mathQuillCommandButton("sin","sin", "font-size:10px; ");
@@ -225,9 +228,22 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
     addCommand("sec");
     addCommand("csc");
   }
-
+  if (buttonArray.indexOf("inversetrig")>-1 ||
+      buttonArray.indexOf("inverse_trig")>-1 ||
+      buttonArray.indexOf("inverse-trig")>-1 ||
+      buttonArray.indexOf("inverseTrig")>-1 ||
+      buttonArray.indexOf("InverseTrig")>-1 ||
+      buttonArray.indexOf("inversetrigonometry")>-1 ||
+      buttonArray.indexOf("inverse_trigonometry")>-1 ||
+      buttonArray.indexOf("inverse-trigonometry")>-1 ||
+      includeAll)
+  { addCommand("arcsin");
+    addCommand("arccos");
+    addCommand("arctan");
+  }
   if (buttonArray.indexOf("brackets")>-1 ||
       buttonArray.indexOf("comma")>-1 ||
+      buttonArray.indexOf("commas")>-1 ||
       buttonArray.indexOf("intervals")>-1 ||
       includeAll)
     addCommand(",");

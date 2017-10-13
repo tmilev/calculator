@@ -1098,7 +1098,7 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 
 void WebServer::Signal_SIGINT_handler(int s)
 { MacroRegisterFunctionWithName("WebServer::Signal_SIGINT_handler");
-  if (theWebServer.flagIsChildProcess)
+  if (theGlobalVariables.flagIsChildProcess)
     return;
   logProcessKills << theWebServer.ToStringActiveWorker() << "Signal interrupt handler called with input: " << s;
 //  << ". Waiting for children to exit... " << logger::endL;
@@ -1112,7 +1112,7 @@ void WebServer::Signal_SIGINT_handler(int s)
 
 void WebServer::Signal_SIGCHLD_handler(int s)
 { (void) s; //avoid unused parameter warning, portable.
-  if (theWebServer.flagIsChildProcess)
+  if (theGlobalVariables.flagIsChildProcess)
     return;
   if (theGlobalVariables.flagServerDetailedLog)
     logProcessStats << "DEBUG: "
@@ -4363,7 +4363,7 @@ void WebServer::ReleaseEverything()
 #ifdef MACRO_use_open_ssl
   this->theSSLdata.FreeSSL();
 #endif
-  logger& currentLog = (this->flagIsChildProcess) ? theLog : logServer;
+  logger& currentLog = theGlobalVariables.flagIsChildProcess ? theLog : logServer;
   ProgressReportWebServer::flagServerExists=false;
   for (int i=0; i<this->theWorkers.size; i++)
     this->theWorkers[i].Release();
@@ -4438,7 +4438,6 @@ WebServer::WebServer()
   this->NumConnectionsSoFar=0;
   this->NumWorkersNormallyExited=0;
   this->WebServerPingIntervalInSeconds=10;
-  this->flagIsChildProcess=false;
   this->requestStartsNotNeedingLogin.AddOnTop("about");
   this->requestStartsNotNeedingLogin.AddOnTop("signUp");
   this->requestStartsNotNeedingLogin.AddOnTop("signUpPage");
@@ -4664,10 +4663,7 @@ std::string WebServer::ToStringLastErrorDescription()
 
 std::string WebServer::ToStringActiveWorker()
 { std::stringstream out;
-  if (theWebServer.flagIsChildProcess)
-    out << "worker, ";
-  else
-    out << "server, ";
+  out << "Process: " << theGlobalVariables.processType << ", ";
   out << "active container: " << theWebServer.activeWorker;
   return out.str();
 }
@@ -4688,9 +4684,10 @@ std::string WebServer::ToStringStatusPublicNoTop()
   if (theGlobalVariables.flagRunningApache)
      return "Running through standard Apache web server, no connection details to display. ";
   std::stringstream out;
-  out << "<b>The calculator web server status.</b><hr>";
+  out << "<b>The calculator web server status.</b><br>";
+  out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><hr>";
   out
-  << "<br>" << this->GetActiveWorker().timeOfLastPingServerSideOnly
+  << this->GetActiveWorker().timeOfLastPingServerSideOnly
   << " seconds = "
   << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
   (this->GetActiveWorker().timeOfLastPingServerSideOnly, false, false)
@@ -4861,7 +4858,7 @@ void WebServer::initDates()
 
 void WebServer::ReleaseWorkerSideResources()
 { MacroRegisterFunctionWithName("WebServer::ReleaseWorkerSideResources");
-  logger& currentLog = (this->flagIsChildProcess) ? theLog : logProcessKills;
+  logger& currentLog = theGlobalVariables.flagIsChildProcess ? theLog : logProcessKills;
   if (theGlobalVariables.flagServerDetailedLog)
     currentLog << logger::red << "DEBUG: server about to RELEASE: " << this->ToStringActiveWorker() << logger::endL;
   this->Release(this->GetActiveWorker().connectedSocketID);
@@ -4906,7 +4903,7 @@ void WebServer::TerminateChildSystemCall(int i)
 
 void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
 { MacroRegisterFunctionWithName("WebServer::HandleTooManyConnections");
-  if (this->flagIsChildProcess)
+  if (theGlobalVariables.flagIsChildProcess)
     return;
   if (theGlobalVariables.flagServerDetailedLog)
     logProcessStats << logger::red << "DEBUG: " << this->ToStringActiveWorker()
@@ -4949,7 +4946,7 @@ void WebServer::RecycleChildrenIfPossible()
   //This might need to be rewritten: I wasn't able to make this work with any
   //mechanism other than pipes.
   MacroRegisterFunctionWithName("WebServer::RecycleChildrenIfPossible");
-  if (this->flagIsChildProcess)
+  if (theGlobalVariables.flagIsChildProcess)
     return;
   if (theGlobalVariables.flagServerDetailedLog)
     logProcessStats << logger::red << "DEBUG: RecycleChildrenIfPossible start. " << logger::endL;
@@ -4968,7 +4965,7 @@ void WebServer::RecycleChildrenIfPossible()
       { this->theWorkers[i].flagInUse=false;
         this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
         std::string messageStr= this->theWorkers[i].pipeWorkerToServerControls.GetLastRead();
-        theLog << logger::green << "Worker "
+        logServer << logger::green << "Worker "
         << i+1 << " done with message: "
         << messageStr
         << ". Marking for reuse. " << logger::endL;
@@ -4978,7 +4975,7 @@ void WebServer::RecycleChildrenIfPossible()
           this->ToggleProcessMonitoring();
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
-        theLog << logger::orange << "Worker " << i+1 << " not done yet. " << logger::endL;
+        logServer << logger::orange << "Worker " << i+1 << " not done yet. " << logger::endL;
       PipePrimitive& currentPingPipe= this->theWorkers[i].pipeWorkerToServerTimerPing;
       if (currentPingPipe.flagReadEndBlocks)
         crash << "Pipe: " << currentPingPipe.ToString() << " has blocking read end. " << crash;
@@ -5180,10 +5177,10 @@ void WebServer::BackupDatabaseIfNeeded()
   << theGlobalVariables.PhysicalPathProjectBase
   << "database-backups/dbBackup"
   << theGlobalVariables.GetDateForLogFiles() << ".sql";
-  theLog << logger::orange << "Backing up database with command: " << logger::endL;
-  theLog << commandStream.str() << logger::endL;
+  logServerMonitor << logger::orange << "Backing up database with command: " << logger::endL;
+  logServerMonitor << commandStream.str() << logger::endL;
   theGlobalVariables.CallSystemWithOutput(commandStream.str());
-  theLog << logger::green << "Backing up completed. " << logger::endL;
+  logServerMonitor << logger::green << "Backing up completed. " << logger::endL;
   this->timeAtLastBackup=theGlobalVariables.GetElapsedSeconds();
 }
 
@@ -5208,11 +5205,13 @@ int WebServer::Run()
   //  logServer       .reset();
   //}
   if (true)
-  { int pidServer=fork();
-    if (pidServer<0)
+  { int pidMonitor=fork();
+    if (pidMonitor<0)
       crash << "Failed to create server process. " << crash;
-    if (pidServer!=0)
-    { MonitorWebServer();//<-this attempts to connect to the server over the internet and restarts if it can't.
+    if (pidMonitor==0)
+    { theGlobalVariables.processType="serverMonitor";
+      theGlobalVariables.flagIsChildProcess=true;
+      MonitorWebServer();//<-this attempts to connect to the server over the internet and restarts if it can't.
       return 0;
     }
   }
@@ -5340,7 +5339,8 @@ int WebServer::Run()
       << " FAILED to spawn a child process. " << logger::endL;
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
-      this->flagIsChildProcess=true;
+      theGlobalVariables.flagIsChildProcess=true;
+      theGlobalVariables.processType="worker";
       if (theGlobalVariables.flagServerDetailedLog)
         theLog << logger::green << "DEBUG:" << this->ToStringActiveWorker()
         << " FORK successful. Time elapsed: " << theGlobalVariables.GetElapsedSeconds()
@@ -5491,13 +5491,13 @@ void WebServer::CheckOpenSSLMySQLInstallation()
   std::string attemptedSetupVirtualFileName="/LogFiles/attemptedDBandSSLsetup.html";
   if (FileOperations::FileExistsVirtual(attemptedSetupVirtualFileName, true))
   { std::string attemptedSetupPhysicalFileName;
-    logger result("", 0, false);
+    logger result("", 0, false, "server");
     FileOperations::GetPhysicalFileNameFromVirtual(attemptedSetupVirtualFileName, attemptedSetupPhysicalFileName);
     result << logger::green << "Mysql or ssl setup previously attempted, skipping. Erase file "
     << attemptedSetupPhysicalFileName << " to try setting up again. " << logger::endL;
     return;
   }
-  logger result(attemptedSetupVirtualFileName, 0, false);
+  logger result(attemptedSetupVirtualFileName, 0, false, "server");
   if (theGlobalVariables.OperatingSystem=="")
     return;
   if (doInstallMysql)
@@ -5534,13 +5534,13 @@ void WebServer::CheckMySQLSetup()
   std::string attemptedMYSQLSetupVirtualFileName="/LogFiles/attemptedMYSQLsetup.html";
   if (FileOperations::FileExistsVirtual(attemptedMYSQLSetupVirtualFileName, true))
   { std::string attemptedMYSQLSetupPhysicalFileName;
-    logger result("", 0, false);
+    logger result("", 0, false, "server");
     FileOperations::GetPhysicalFileNameFromVirtual(attemptedMYSQLSetupVirtualFileName, attemptedMYSQLSetupPhysicalFileName);
     result << logger::green << "Mysql setup previously attempted, skipping. Erase file "
     << attemptedMYSQLSetupPhysicalFileName << " to try setting up again. " << logger::endL;
     return;
   }
-  logger result(attemptedMYSQLSetupVirtualFileName, 0, false);
+  logger result(attemptedMYSQLSetupVirtualFileName, 0, false, "server");
   WebServer::FigureOutOperatingSystem();
   result << logger::yellow << "Mysql setup file missing, proceeding with setup. " << logger::endL;
   result << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
@@ -5575,13 +5575,13 @@ void WebServer::CheckFreecalcSetup()
   std::string attemptedSetupVirtual="/LogFiles/attemptedFreecalcSetup.html";
   if (FileOperations::FileExistsVirtual(attemptedSetupVirtual, true))
   { std::string attemptedSetupPhysical;
-    logger result("", 0, false);
+    logger result("", 0, false, "server");
     FileOperations::GetPhysicalFileNameFromVirtual(attemptedSetupVirtual, attemptedSetupPhysical);
     result << logger::green << "freecalc setup previously attempted, skipping. Erase file "
     << attemptedSetupPhysical << " to try setting up again. " << logger::endL;
     return;
   }
-  logger result(attemptedSetupVirtual, 0, false);
+  logger result(attemptedSetupVirtual, 0, false, "server");
   WebServer::FigureOutOperatingSystem();
   result << logger::yellow << "Freelcalc setup file missing, proceeding to set it up. " << logger::endL;
   std::string startingDir=FileOperations::GetCurrentFolder();
@@ -5597,13 +5597,13 @@ void WebServer::CheckSVNSetup()
   std::string attemptedSetupVirtual="/LogFiles/attemptedSVNSetup.html";
   if (FileOperations::FileExistsVirtual(attemptedSetupVirtual, true))
   { std::string attemptedSetupPhysical;
-    logger result("", 0, false);
+    logger result("", 0, false, "server");
     FileOperations::GetPhysicalFileNameFromVirtual(attemptedSetupVirtual, attemptedSetupPhysical);
     result << logger::green << "SVN setup previously attempted, skipping. Erase file "
     << attemptedSetupPhysical << " to try setting up again. " << logger::endL;
     return;
   }
-  logger result(attemptedSetupVirtual, 0, false);
+  logger result(attemptedSetupVirtual, 0, false, "server");
   WebServer::FigureOutOperatingSystem();
   result << logger::yellow << "SVN setup file missing, proceeding to set it up. " << logger::endL
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
@@ -5621,13 +5621,13 @@ void WebServer::CheckMathJaxSetup()
   std::string attemptedMathJaxSetupVirtualFileName="/LogFiles/attemptedMathJaxSetup.html";
   if (FileOperations::FileExistsVirtual(attemptedMathJaxSetupVirtualFileName, true))
   { std::string attemptedSetupPhysicalFileName;
-    logger result("", 0, false);
+    logger result("", 0, false, "server");
     FileOperations::GetPhysicalFileNameFromVirtual(attemptedMathJaxSetupVirtualFileName, attemptedSetupPhysicalFileName);
     result << logger::green << "Mysql setup previously attempted, skipping. Erase file "
     << attemptedSetupPhysicalFileName << " to try setting up again. " << logger::endL;
     return;
   }
-  logger result(attemptedMathJaxSetupVirtualFileName, 0, false);
+  logger result(attemptedMathJaxSetupVirtualFileName, 0, false, "server");
   WebServer::FigureOutOperatingSystem();
   result << logger::yellow << "MathJax setup file missing, proceeding to set it up. " << logger::endL
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
@@ -5847,30 +5847,30 @@ int WebServer::main(int argc, char **argv)
   }
   theGlobalVariables.flagCachingInternalFilesOn=!FileOperations::FileExistsVirtual("LogFiles/serverRAMCachingOff.txt", true, false);;
   if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
-  { theLog
+  { logServer
     << logger::purple << "************************" << logger::endL
     << logger::red << "WARNING: caching files is off. " << logger::endL
     << "This is for development purposes only, please do not deploy on live systems. " << logger::endL
-    << "To turn off/on server logging simply delete/create file LogFiles/serverRAMCachingOff.txt"
+    << "To turn off/on server logging simply delete/create file LogFiles/serverRAMCachingOff.txt" << logger::endL
     << logger::purple << "************************" << logger::endL;
   }
 
   theGlobalVariables.flagAceIsAvailable= FileOperations::FileExistsVirtual("MathJax-2.7-latest/", false);
   if (!theGlobalVariables.flagAceIsAvailable && theGlobalVariables.flagRunningBuiltInWebServer)
-    theLog << logger::red << "MathJax not available. " << logger::endL;
+    logServer << logger::red << "MathJax not available. " << logger::endL;
 //  if (false &&
 //      theGlobalVariables.flagRunningBuiltInWebServer)
 //  { theWebServer.TurnProcessMonitoringOn();
 //  }
   if (theGlobalVariables.flagRunningBuiltInWebServer)
   { if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)
-      theLog
+      logServer
       << logger::purple << "************************" << logger::endL
       << logger::red << "WARNING: no computation time limit set. " << logger::endL
       << logger::purple << "************************" << logger::endL
       ;
     if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>500)
-      theLog
+      logServer
       << logger::purple << "************************" << logger::endL
       << logger::red << "WARNING: computation time limit is high: "
       << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << " seconds. " << logger::endL
@@ -5900,7 +5900,7 @@ int WebServer::mainCommandLine()
   //  return 0;
 //std::cout << "Running cmd line. \n";
   theParser.init();
-  logger result("", 0, false);
+  logger result("", 0, false, "server");
   if (theGlobalVariables.programArguments.size>1)
     for (int i=1; i<theGlobalVariables.programArguments.size; i++)
     { theParser.inputString+=theGlobalVariables.programArguments[i];

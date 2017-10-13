@@ -3535,15 +3535,11 @@ void TestFiniteFields()
   stOutput << (a/b).n << "\n";
 }
 
-
-
-
 //   std::string s;
 //   std::cin >> s;
 
 int mainTest(List<std::string>& inputArguments)
-{ InitializeGlobalObjects();
-  stOutput << inputArguments.ToStringCommaDelimited() << '\n';
+{ stOutput << inputArguments.ToStringCommaDelimited() << '\n';
   if(inputArguments.size == 0)
     LegacyTest();
   else

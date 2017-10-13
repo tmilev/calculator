@@ -84,6 +84,8 @@ public:
 //webserver flags and variables
   bool flagCachingInternalFilesOn;
   bool flagServerDetailedLog;
+  bool flagIsChildProcess;
+  std::string processType;
 
   bool flagLoggedIn;
   bool flagLogInAttempted;
@@ -248,8 +250,11 @@ class logger
   bool flagTagColorHtmlOpened;
   bool flagTagColorConsoleOpened;
   bool flagResetLogFileWhenTooLarge;
+  std::string processType;
   logger* carbonCopy;
-  logger(const std::string& logFileName, logger* inputCarbonCopy, bool inputResetLogWhenTooLarge);
+  logger
+  (const std::string& logFileName, logger* inputCarbonCopy,
+   bool inputResetLogWhenTooLarge, const std::string& inputProcessType);
   void CheckLogSize();
   enum loggerSpecialSymbols{ endL, red, blue, yellow, green, purple, cyan, normalColor, orange};
   static std::string redConsole();
@@ -281,6 +286,9 @@ class logger
     if (this->flagStopWritingToFile)
       return *this;
     std::stringstream out;
+    if (this->processType!=theGlobalVariables.processType)
+      out << "WARNING: logger is for process type: " << this->processType
+      << " but current process is of type: " << theGlobalVariables.processType << ". ";
     out << toBePrinted;
     theFile << out.str();
     return *this;

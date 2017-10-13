@@ -321,7 +321,6 @@ public:
   int NumProcessAssassinated;
   int NumWorkersNormallyExited;
   int WebServerPingIntervalInSeconds;
-  bool flagIsChildProcess;
   long long NumFailedSelectsSoFar;
   long long NumSuccessfulSelectsSoFar;
   bool flagTryToKillOlderProcesses;

@@ -23,20 +23,20 @@ std::string GlobalVariables::GetDateForLogFiles()
   return tempDate;
 }
 
-logger theLog("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html", 0, true);
-logger logServerMonitor("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServerMonitor.html", 0, false);
-logger logServer("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServer.html", 0, false);
+logger theLog("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html", 0, true, "worker");
+logger logServerMonitor("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServerMonitor.html", 0, false, "serverMonitor");
+logger logServer("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServer.html", 0, false, "server");
 
-logger logHttpErrors("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogHttpErrors.html", &theLog, false);
-logger logBlock("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogBlockingEvents.html", &theLog, false);
-logger logIO("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogIOErrorsEvents.html", &theLog, false);
-logger logOpenSSL("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogOpenSSL.html", &theLog, false);
-logger logEmail("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogEmail.html", &theLog, false);
+logger logHttpErrors("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogHttpErrors.html", &theLog, false, "worker");
+logger logBlock("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogBlockingEvents.html", &theLog, false, "worker");
+logger logIO("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogIOErrorsEvents.html", &theLog, false, "worker");
+logger logOpenSSL("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogOpenSSL.html", &theLog, false, "worker");
+logger logEmail("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogEmail.html", &theLog, false, "worker");
 
-logger logSocketAccept("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogSocketAccept.html", &logServer, false);
-logger logProcessStats("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogWorkerProcessStats.html", &logServer, false);
-logger logPlumbing("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogServerPlumbing.html", &logServer, false);
-logger logProcessKills("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogMultiprocessing.html", &logServer, false);
+logger logSocketAccept("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogSocketAccept.html", &logServer, false, "server");
+logger logProcessStats("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogWorkerProcessStats.html", &logServer, false, "server");
+logger logPlumbing("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogServerPlumbing.html", &logServer, false, "server");
+logger logProcessKills("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogMultiprocessing.html", &logServer, false, "server");
 
 Calculator theParser;
 FormatExpressions consoleFormat;
@@ -45,6 +45,8 @@ StdoutClass stOutput;
 
 void InitializeGlobalObjects()
 { //stOutput << "Content-Type: text/html\n\n";
+  theGlobalVariables.processType="server";
+  theGlobalVariables.flagIsChildProcess=false;
   InitializeTimer();
   theGlobalVariables.IndicatorStringOutputFunction=&HtmlRoutines::MakeReportIndicatorFile;
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);

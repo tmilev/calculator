@@ -113,7 +113,7 @@ void MonitorWebServer()
       numConsecutiveFailedPings=0;
     }
     if (numConsecutiveFailedPings>=maxNumPingFailures)
-    { logProcessKills << logger::red << "Server stopped responding (probably locked pipe?)"
+    { logServerMonitor << logger::red << "Server stopped responding (probably locked pipe?)"
       << ", restarting. " << logger::endL;
       FileOperations::OpenFileCreateIfNotPresentVirtual
       (theFile,"LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true);

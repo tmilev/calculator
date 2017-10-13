@@ -386,7 +386,7 @@ void SSLdata::initSSLserver()
   //////////////////////////////////////////////////////////
   if (!this->initSSLkeyFiles())
     return;
-  theLog << logger::green << "SSL is available." << logger::endL;
+  logServer << logger::green << "SSL is available." << logger::endL;
   this->theSSLMethod = SSLv23_method();
   this->contextServer= SSL_CTX_new(this->theSSLMethod);
   if (!this->contextServer)
@@ -395,7 +395,7 @@ void SSLdata::initSSLserver()
   }
   //////////Safari web browser: no further use of foul language necessary
   if (SSL_CTX_use_certificate_chain_file(this->contextServer, signedFileCertificate3Physical.c_str()) <=0)
-  { theLog << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
+  { logServer << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << logger::endL;
     if (SSL_CTX_use_certificate_file(this->contextServer, fileCertificatePhysical.c_str(), SSL_FILETYPE_PEM) <= 0)
     { ERR_print_errors_fp(stderr);
@@ -406,7 +406,7 @@ void SSLdata::initSSLserver()
       exit(4);
     }
   } else
-  { theLog << logger::green << "Found officially signed certificate... " << logger::endL;
+  { logServer << logger::green << "Found officially signed certificate... " << logger::endL;
 //    if (SSL_CTX_use_certificate_chain_file(theSSLdata.ctx, signedFileCertificate2.c_str()) <=0)
 //    { ERR_print_errors_fp(stderr);
 //      exit(3);
@@ -422,7 +422,7 @@ void SSLdata::initSSLserver()
     theGlobalVariables.flagCertificatesAreOfficiallySigned=true;
   }
   if (!SSL_CTX_check_private_key(this->contextServer))
-  { logOpenSSL << "Private key does not match the certificate public key.";
+  { logServer << "Private key does not match the certificate public key.";
     crash << "Private key does not match the certificate public key." << crash;
   }
 ////////Safari web browser: no further use of foul language necessary.
@@ -4685,7 +4685,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
      return "Running through standard Apache web server, no connection details to display. ";
   std::stringstream out;
   out << "<b>The calculator web server status.</b><br>";
-  out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><hr>";
+  out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html>" << "Log files</a><hr>";
   out
   << this->GetActiveWorker().timeOfLastPingServerSideOnly
   << " seconds = "
@@ -5082,7 +5082,7 @@ bool WebServer::initBindToPorts()
         if (bind(*theListeningSocket, p->ai_addr, p->ai_addrlen) == -1)
         { close(*theListeningSocket);
           *theListeningSocket=-1;
-          theLog << "Error: bind failed at port: " << (*thePorts)[i] << ". Error: "
+          logServer << "Error: bind failed at port: " << (*thePorts)[i] << ". Error: "
           << this->ToStringLastErrorDescription() << logger::endL;
           continue;
         }
@@ -5094,7 +5094,7 @@ bool WebServer::initBindToPorts()
         break;
       }
       if (p!=NULL)
-      { theLog << logger::yellow << "Successfully bound to port " << (*thePorts)[i] << logger::endL;
+      { logServer << logger::yellow << "Successfully bound to port " << (*thePorts)[i] << logger::endL;
         if (j==0)
           this->httpPort=(*thePorts)[i];
         else

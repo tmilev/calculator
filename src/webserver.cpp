@@ -4437,7 +4437,7 @@ WebServer::WebServer()
   this->NumProcessAssassinated=0;
   this->NumConnectionsSoFar=0;
   this->NumWorkersNormallyExited=0;
-  this->WebServerPingIntervalInSeconds=10;
+  this->WebServerPingIntervalInSeconds=2;
   this->requestStartsNotNeedingLogin.AddOnTop("about");
   this->requestStartsNotNeedingLogin.AddOnTop("signUp");
   this->requestStartsNotNeedingLogin.AddOnTop("signUpPage");
@@ -4685,7 +4685,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
      return "Running through standard Apache web server, no connection details to display. ";
   std::stringstream out;
   out << "<b>The calculator web server status.</b><br>";
-  out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html>" << "Log files</a><hr>";
+  out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><hr>";
   out
   << this->GetActiveWorker().timeOfLastPingServerSideOnly
   << " seconds = "
@@ -4804,7 +4804,13 @@ void WebServer::Restart()
   if (this->listeningSocketHttpSSL!=-1)
     this->Release(this->listeningSocketHttpSSL);  std::stringstream theCommand;
   int timeInteger=(int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
-  theLog << logger::red << " restarting with time limit " << timeInteger << logger::endL;
+  logger* currentLog=0;
+  currentLog=&theLog;
+  if (theGlobalVariables.processType=="serverMonitor")
+    currentLog=&logServerMonitor;
+  if (theGlobalVariables.processType=="server")
+    currentLog=&logServer;
+  *currentLog << logger::red << " restarting with time limit " << timeInteger << logger::endL;
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
   if (theWebServer.flagPort8155)
@@ -4894,10 +4900,17 @@ void fperror_sigaction(int signal)
 }
 
 void WebServer::TerminateChildSystemCall(int i)
-{ this->theWorkers[i].flagInUse=false;
+{ if (!this->theWorkers[i].flagInUse)
+    return;
+  this->theWorkers[i].flagInUse=false;
   this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
   if (this->theWorkers[i].ProcessPID>0)
+  { if (theGlobalVariables.flagServerDetailedLog)
+      logProcessKills << "DEBUG: " << this->ToStringActiveWorker()
+      << " killing child index: " << i << "." << logger::endL;
     kill(this->theWorkers[i].ProcessPID, SIGKILL);
+    this->theWorkers[i].ProcessPID=-1;
+  }
   this->theWorkers[i].ResetPipesNoAllocation();
 }
 
@@ -5331,9 +5344,16 @@ int WebServer::Run()
       logProcessStats << "DEBUG: " << this->ToStringActiveWorker() << " Sigprocmask done. Proceeding to fork. "
       << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
       << logger::endL;
-    this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
+    int incomingPID=fork(); //creates an almost identical copy of this process.
+    //<- Please don't assign directly to this->GetActiveWorker().ProcessPID.
+    //<- There may be a race condition around this line of code and I
+    //want as little code as possible between the fork and the logFile.
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
+    if (theGlobalVariables.flagServerDetailedLog)
+      if (incomingPID>0)
+        logServer << "DEBUG: " << this->ToStringActiveWorker() << ": fork() successful. ";
+    this->GetActiveWorker().ProcessPID=incomingPID;
     if (this->GetActiveWorker().ProcessPID<0)
       logProcessKills << logger::red << this->ToStringActiveWorker()
       << " FAILED to spawn a child process. " << logger::endL;

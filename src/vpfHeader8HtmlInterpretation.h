@@ -146,6 +146,7 @@ public:
   List<std::string> calculatorTopicElementNames;
   List<std::string> calculatorClasses;
   List<std::string> calculatorClassesAnswerFields;
+  List<std::string> autoCompleteExtras;
   List<char> splittingChars;
   List<SyntacticElementHTML> eltsStack;
   List<SyntacticElementHTML> theContent;
@@ -169,6 +170,7 @@ public:
   bool LoadDatabaseInfo(std::stringstream& comments);
   std::string GetSectionSelector();
   std::string CleanUpFileName(const std::string& inputLink);
+  void initAutocompleteExtras();
   void initBuiltInSpanClasses();
   void initTopicElementNames();
   bool ParseHTML(std::stringstream& comments);

@@ -268,6 +268,8 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
   }
   if (buttonArray.indexOf("infinity")>-1 || buttonArray.indexOf("infty")>-1 ||
       buttonArray.indexOf("\infty")>-1 ||
+      buttonArray.indexOf("interval")>-1 ||
+      buttonArray.indexOf("intervals")>-1 ||
       includeAll || noOptions)
     addCommand("infty");
   if (buttonArray.indexOf("sum")>-1 ||

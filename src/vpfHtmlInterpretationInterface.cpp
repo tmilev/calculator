@@ -692,6 +692,8 @@ std::string HtmlInterpretation::GetEditPageHTML()
     tempCalculator.ComputeAutoCompleteKeyWords();
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClasses);
     theAutocompleteKeyWords.AddOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
+    theFile.initAutocompleteExtras();
+    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.autoCompleteExtras);
   } else
   { theFile.LoadAndParseTopicList(outBody);
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClasses);

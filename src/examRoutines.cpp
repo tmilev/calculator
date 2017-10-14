@@ -2070,6 +2070,16 @@ void CalculatorHTML::initTopicElementNames()
   }
 }
 
+void CalculatorHTML::initAutocompleteExtras()
+{ MacroRegisterFunctionWithName("CalculatorHTML::initAutocompleteExtras");
+  if (this->autoCompleteExtras.size>0)
+    return;
+  this->autoCompleteExtras.AddOnTop("answerCalculatorHighlight");
+  this->autoCompleteExtras.AddOnTop("algebra");
+  this->autoCompleteExtras.AddOnTop("logarithms");
+  this->autoCompleteExtras.AddOnTop("buttons");
+}
+
 void CalculatorHTML::initBuiltInSpanClasses()
 { MacroRegisterFunctionWithName("CalculatorHTML::initBuiltInSpanClasses");
   if (this->calculatorClassesAnswerFields.size==0)

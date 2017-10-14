@@ -895,7 +895,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   while ((numBytesInBuffer<0) || (numBytesInBuffer>((signed)bufferSize)))
   { numFailedReceives++;
     std::stringstream out;
-    out << this->parent->ToStringConnection()
+    out << this->parent->ToStringActiveWorker()
     << " WebWorker::ReceiveAllHttpSSL on socket "
     << this->connectedSocketID
     << " failed (so far "
@@ -904,7 +904,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     << ". Error description: " << errorStream.str()
     ;
     if (numFailedReceives>5)
-    { out << this->parent->ToStringConnection()
+    { out << this->parent->ToStringActiveWorker()
       << ". 5+ failed receives so far, aborting. ";
       this->error=out.str();
       logIO << out.str() << logger::endL;
@@ -913,7 +913,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     }
     logIO << logger::orange << out.str() << logger::endL;
     //std::string bufferCopy(buffer, bufferSize);
-    logIO << this->parent->ToStringConnection()
+    logIO << this->parent->ToStringActiveWorker()
     << " Number of bytes in buffer so far: " << bufferSize;
     numBytesInBuffer=this->parent->theSSLdata.SSLread
     (this->parent->theSSLdata.sslServeR, &buffer, bufferSize-1, &errorStream, 0, true);
@@ -1744,42 +1744,42 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
 { MacroRegisterFunctionWithName("WebWorker::AttemptUnknownRequestErrorCorrection");
   if (this->requestTypE!=this->requestUnknown)
     return;
-  logIO << logger::red << this->parent->ToStringConnection()
+  logIO << logger::red << this->parent->ToStringActiveWorker()
   << " Unknown request. " << logger::endL;
-  logIO << logger::blue << this->parent->ToStringConnection()
+  logIO << logger::blue << this->parent->ToStringActiveWorker()
   << " Message head length: " << this->messageHead.size();
 //logIO  << ".  " << this->messageHead ;
   logIO << logger::endL;
-  logIO << logger::orange << this->parent->ToStringConnection()
+  logIO << logger::orange << this->parent->ToStringActiveWorker()
   << " Message body length: " << this->messageBody.size() << logger::endL;
   logIO << logger::green << "Attempting to correct unknown request.\n";
   if (this->messageBody.size()==0)
     if (*this->theStrings.LastObject()!="\n")
     { logIO << logger::green
-      << this->parent->ToStringConnection()
+      << this->parent->ToStringActiveWorker()
       << "Message body set to last message chunk." << logger::endL;
       this->messageBody=*this->theStrings.LastObject();
     }
   if (this->messageBody.size()!=0)
-  { logIO << this->parent->ToStringConnection() << "Request set to: POST"
+  { logIO << this->parent->ToStringActiveWorker() << "Request set to: POST"
     << logger::endL;
     this->requestTypE=this->requestPost;
   } else
-  { logIO << this->parent->ToStringConnection() << "Request set to: GET"
+  { logIO << this->parent->ToStringActiveWorker() << "Request set to: GET"
     << logger::endL;
     this->requestTypE=this->requestGet;
   }
   if (this->addressGetOrPost=="")
-  { logIO << this->parent->ToStringConnection() << "Address set to: "
+  { logIO << this->parent->ToStringActiveWorker() << "Address set to: "
     << theGlobalVariables.DisplayNameExecutable
     << logger::endL;
     this->addressGetOrPost=theGlobalVariables.DisplayNameExecutable;
   }
   logIO << logger::endL;
-  logIO << logger::blue << this->parent->ToStringConnection()
+  logIO << logger::blue << this->parent->ToStringActiveWorker()
   << "Unrecognized message head, length: " << this->messageHead.size() << ". ";
   //<< this->messageHead << logger::endL;
-  logIO << logger::red << this->parent->ToStringConnection()
+  logIO << logger::red << this->parent->ToStringActiveWorker()
   << "Message body length: " << this->messageBody.size() << ". "
   //<< this->messageBody
   << logger::endL;
@@ -1806,7 +1806,7 @@ bool WebWorker::ReceiveAllHttp()
   while ((numBytesInBuffer<0) || (numBytesInBuffer>((signed)bufferSize)))
   { std::stringstream out;
     numFailedReceives++;
-    out << this->parent->ToStringConnection()
+    out << this->parent->ToStringActiveWorker()
     << "WebWorker::ReceiveAllHttp on socket " << this->connectedSocketID
     << " failed (so far "
     << numFailedReceives << " fails). "
@@ -1814,7 +1814,7 @@ bool WebWorker::ReceiveAllHttp()
     << ". Error description: "
     << this->parent->ToStringLastErrorDescription();
     if (numFailedReceives>5)
-    { out << this->parent->ToStringConnection()
+    { out << this->parent->ToStringActiveWorker()
       << ". 5+ failed receives so far, aborting. ";
       this->displayUserInput=out.str();
       this->error=out.str();
@@ -1825,7 +1825,7 @@ bool WebWorker::ReceiveAllHttp()
     }
     logIO << logger::orange << out.str() << logger::endL;
     //std::string bufferCopy(buffer, bufferSize);
-    logIO << this->parent->ToStringConnection()
+    logIO << this->parent->ToStringActiveWorker()
     << "Number of bytes in buffer so far: " << bufferSize << logger::endL;
     numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   }
@@ -1898,7 +1898,7 @@ bool WebWorker::ReceiveAllHttp()
   }
   if ((signed) this->messageBody.size()!=this->ContentLength)
     if (this->requestTypE!=this->requestChunked)
-    { logIO << logger::red << this->parent->ToStringConnection()
+    { logIO << logger::red << this->parent->ToStringActiveWorker()
       << "Message body is of length: " << this->messageBody.size()
       << " yet this->ContentLength equals: "
       << this->ContentLength
@@ -4649,12 +4649,6 @@ bool WebServer::CreateNewActiveWorker()
   return true;
 }
 
-std::string WebServer::ToStringConnection()
-{ std::stringstream out;
-  out << "Connection " << this->NumConnectionsSoFar << ". ";
-  return out.str();
-}
-
 std::string WebServer::ToStringLastErrorDescription()
 { std::stringstream out;
   out << logger::red << "Process " << this->ToStringActiveWorker() << ": " << strerror(errno) << ". ";
@@ -4663,8 +4657,9 @@ std::string WebServer::ToStringLastErrorDescription()
 
 std::string WebServer::ToStringActiveWorker()
 { std::stringstream out;
-  out << "Process: " << theGlobalVariables.processType << ", ";
-  out << "active container: " << theWebServer.activeWorker;
+  out << theGlobalVariables.processType << ": ";
+  out << "w: " << theWebServer.activeWorker << ", c: " << theWebServer.NumConnectionsSoFar
+  ; //<-abbreviating worker to w and connection to c to reduce the log size.
   return out.str();
 }
 
@@ -5364,6 +5359,7 @@ int WebServer::Run()
     if (theGlobalVariables.flagServerDetailedLog)
       if (incomingPID>0)
       { logServer << "DEBUG: fork() successful. " << logger::endL;
+        logServer << "DEBUG: elapsed seconds @ fork(): " << theGlobalVariables.GetElapsedSeconds() << logger::endL;
         logServer << "DEBUG: reported by: " << this->ToStringActiveWorker() << logger::endL;
       }
     if (incomingPID<0)

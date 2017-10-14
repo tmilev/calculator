@@ -5339,7 +5339,11 @@ int WebServer::Run()
     /////////////
     if (theGlobalVariables.flagServerDetailedLog)
       logProcessStats << "DEBUG: " << this->ToStringActiveWorker() << " about to fork, sigprocmasking " << logger::endL;
-    sigprocmask(SIG_BLOCK, &allSignals, &oldSignals);
+    int error=sigprocmask(SIG_BLOCK, &allSignals, &oldSignals);
+    if (error<0)
+    { logServer << logger::red << "DEBUG: Sigprocmask failed. The server is going to crash. " << logger::endL;
+      crash << "Sigprocmas failed. This should not happen. " << crash;
+    }
     if (theGlobalVariables.flagServerDetailedLog)
       logProcessStats << "DEBUG: " << this->ToStringActiveWorker() << " Sigprocmask done. Proceeding to fork. "
       << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
@@ -5351,19 +5355,27 @@ int WebServer::Run()
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
     if (theGlobalVariables.flagServerDetailedLog)
+      if (incomingPID==0)
+      { theGlobalVariables.processType="worker";
+        theLog << "DEBUG: fork() successful in worker. " << logger::endL;
+        theLog << "DEBUG: elapsed seconds @ fork(): " << theGlobalVariables.GetElapsedSeconds() << logger::endL;
+        theLog << "DEBUG: reported by: " << this->ToStringActiveWorker() << logger::endL;
+      }
+    if (theGlobalVariables.flagServerDetailedLog)
       if (incomingPID>0)
-        logServer << "DEBUG: " << this->ToStringActiveWorker() << ": fork() successful. ";
-    this->GetActiveWorker().ProcessPID=incomingPID;
-    if (this->GetActiveWorker().ProcessPID<0)
+      { logServer << "DEBUG: fork() successful. " << logger::endL;
+        logServer << "DEBUG: reported by: " << this->ToStringActiveWorker() << logger::endL;
+      }
+    if (incomingPID<0)
       logProcessKills << logger::red << this->ToStringActiveWorker()
       << " FAILED to spawn a child process. " << logger::endL;
+    this->GetActiveWorker().ProcessPID=incomingPID;
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
       theGlobalVariables.flagIsChildProcess=true;
-      theGlobalVariables.processType="worker";
       if (theGlobalVariables.flagServerDetailedLog)
         theLog << logger::green << "DEBUG:" << this->ToStringActiveWorker()
-        << " FORK successful. Time elapsed: " << theGlobalVariables.GetElapsedSeconds()
+        << " FORK successful in worker, next step. Time elapsed: " << theGlobalVariables.GetElapsedSeconds()
         << " second(s). Calling sigprocmask. " << logger::endL;
       sigprocmask(SIG_SETMASK, &oldSignals, NULL);
       if (theGlobalVariables.flagServerDetailedLog)
@@ -5380,7 +5392,11 @@ int WebServer::Run()
       logProcessStats << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " fork successful. Time elapsed: "
       << theGlobalVariables.GetElapsedSeconds() << " second(s). "
       << "About to unmask signals. " << logger::endL;
-    sigprocmask(SIG_SETMASK, &oldSignals, NULL);
+    error= sigprocmask(SIG_SETMASK, &oldSignals, NULL);
+    if (error<0)
+    { logServer << "Sigprocmask failed on server, I shall now crash. " << logger::endL;
+      crash << "Sigprocmask failed on server." << crash;
+    }
     if (theGlobalVariables.flagServerDetailedLog)
       logProcessStats << logger::green << "DEBUG: "
       << this->ToStringActiveWorker() << " unmask successful. " << logger::endL;
@@ -5811,7 +5827,7 @@ void WebServer::ToggleProcessMonitoring()
 
 void WebServer::TurnProcessMonitoringOn()
 { MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOn");
-  theLog
+  logServer
   << logger::purple << "************************" << logger::endL
   << logger::red << "WARNING: process monitoring IS ON. " << logger::endL
   << logger::purple << "************************" << logger::endL
@@ -5822,7 +5838,7 @@ void WebServer::TurnProcessMonitoringOn()
 
 void WebServer::TurnProcessMonitoringOff()
 { MacroRegisterFunctionWithName("WebServer::TurnProcessMonitoringOn");
-  theLog
+  logServer
   << logger::green << "************************" << logger::endL
   << logger::green << "Process monitoring is now off. " << logger::endL
   << logger::green << "************************" << logger::endL

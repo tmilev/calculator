@@ -569,7 +569,7 @@ void logger::reset()
   this->flagTagColorHtmlOpened=false;
   this->flagTagColorConsoleOpened=false;
   this->flagStopWritingToFile=false;
-  this->MaxLogSize=
+  this->MaxLogSize= //10000
   50000000
   ;
   if (theGlobalVariables.flagRunningApache || this->theFileName=="")

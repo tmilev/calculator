@@ -1096,33 +1096,33 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
   theWebServer.GetActiveWorker().pipeWorkerToWorkerStatus.WriteAfterEmptying(toBePiped.str(), false, false);
 }
 
-void WebServer::Signal_SIGINT_handler(int s)
-{ MacroRegisterFunctionWithName("WebServer::Signal_SIGINT_handler");
-  if (theGlobalVariables.flagIsChildProcess)
-    return;
-  logProcessKills << theWebServer.ToStringActiveWorker() << "Signal interrupt handler called with input: " << s;
-//  << ". Waiting for children to exit... " << logger::endL;
-  theWebServer.ReleaseActiveWorker();
-  theWebServer.ReleaseNonActiveWorkers();
-  while(waitpid(-1, NULL, WNOHANG | WEXITED) > 0)
-  { }
-  logProcessKills << theWebServer.ToStringActiveWorker() << "All children have exited. " << logger::endL;
-  exit(0);
-}
+//void WebServer::Signal_SIGINT_handler(int s)
+//{ MacroRegisterFunctionWithName("WebServer::Signal_SIGINT_handler");
+//  if (theGlobalVariables.flagIsChildProcess)
+//    return;
+//  logProcessKills << theWebServer.ToStringActiveWorker() << "Signal interrupt handler called with input: " << s;
+////  << ". Waiting for children to exit... " << logger::endL;
+//  theWebServer.ReleaseActiveWorker();
+//  theWebServer.ReleaseNonActiveWorkers();
+//  while(waitpid(-1, NULL, WNOHANG | WEXITED) > 0)
+//  { }
+//  logProcessKills << theWebServer.ToStringActiveWorker() << "All children have exited. " << logger::endL;
+//  exit(0);
+//}
 
-void WebServer::Signal_SIGCHLD_handler(int s)
-{ (void) s; //avoid unused parameter warning, portable.
-  if (theGlobalVariables.flagIsChildProcess)
-    return;
-  if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << "DEBUG: "
-    << theWebServer.ToStringActiveWorker() << " received SIGCHLD signal. " << logger::endL;
-  theWebServer.flagReapingChildren=true;
-  theWebServer.ReapChildren();
-  theWebServer.flagReapingChildren=false;
-}
+//void WebServer::Signal_SIGCHLD_handler(int s)
+//{ (void) s; //avoid unused parameter warning, portable.
+//  if (theGlobalVariables.flagIsChildProcess)
+//    return;
+//  if (theGlobalVariables.flagServerDetailedLog)
+//    logProcessStats << "DEBUG: "
+//    << theWebServer.ToStringActiveWorker() << " received SIGCHLD signal. " << logger::endL;
+//  theWebServer.flagReapingChildren=true;
+//  theWebServer.ReapChildren();
+//  theWebServer.flagReapingChildren=false;
+//}
 
-void WebServer::ReapChildren()
+void WebServer::ReapChildren() //<-Code not used, propose deletion of this code
 { MacroRegisterFunctionWithName("WebServer::ReapChildren");
   int waitResult=0;
   int exitFlags= WNOHANG| WEXITED;
@@ -4437,7 +4437,7 @@ WebServer::WebServer()
   this->NumProcessAssassinated=0;
   this->NumConnectionsSoFar=0;
   this->NumWorkersNormallyExited=0;
-  this->WebServerPingIntervalInSeconds=2;
+  this->WebServerPingIntervalInSeconds=10;
   this->requestStartsNotNeedingLogin.AddOnTop("about");
   this->requestStartsNotNeedingLogin.AddOnTop("signUp");
   this->requestStartsNotNeedingLogin.AddOnTop("signUpPage");
@@ -4882,13 +4882,16 @@ bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string
 }
 
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
+//<- this signal should never happen in
+//<- server, so even if racy, we take the risk of a hang.
+//<- racy-ness in child process does not bother us: hanged children are still fine.
 { (void) signal; //avoid unused parameter warning, portable.
   (void) arg;
   crash << "Caught segfault at address: " << si->si_addr << crash;
   exit(0);
 }
 
-void fperror_sigaction(int signal)
+void WebServer::fperror_sigaction(int signal)
 { (void) signal;
   crash << "Fatal arithmetic error. " << crash;
   exit(0);
@@ -5132,35 +5135,36 @@ void WebServer::initPrepareSignals()
   if (sigemptyset(&SignalFPE.sa_mask)==-1)
     crash << "Failed to initialize SignalFPE mask. Crashing to let you know. " << crash;
   SignalFPE.sa_sigaction=0;
-  SignalFPE.sa_handler= &fperror_sigaction;
+  SignalFPE.sa_handler= &WebServer::fperror_sigaction;
   if (sigaction(SIGFPE, &SignalFPE, NULL) == -1)
     crash << "Failed to register SIGFPE handler (fatal arithmetic error). Crashing to let you know. " << crash;
   ////////////////////
   //ignore interrupts
-  if (sigemptyset(&SignalINT.sa_mask)==-1)
-    crash << "Failed to initialize SignalINT mask. Crashing to let you know. " << crash;
-  SignalINT.sa_sigaction=0;
-  SignalINT.sa_handler=&WebServer::Signal_SIGINT_handler;
-  if (sigaction(SIGINT, &SignalINT, NULL) == -1)
-    crash << "Failed to register null SIGINT handler. Crashing to let you know. " << crash;
+  //if (sigemptyset(&SignalINT.sa_mask)==-1)
+  //  crash << "Failed to initialize SignalINT mask. Crashing to let you know. " << crash;
+  //SignalINT.sa_sigaction=0;
+  //SignalINT.sa_handler=&WebServer::Signal_SIGINT_handler;
+  //if (sigaction(SIGINT, &SignalINT, NULL) == -1)
+  //  crash << "Failed to register null SIGINT handler. Crashing to let you know. " << crash;
   ////////////////////
   //reap children
-  if (sigemptyset(&SignalChild.sa_mask)==-1)
-    crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
-  if (sigaddset(&SignalChild.sa_mask, SIGINT)==-1)
-    crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  //if (sigemptyset(&SignalChild.sa_mask)==-1)
+  //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  //if (sigaddset(&SignalChild.sa_mask, SIGINT)==-1)
+  //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   ////////////////////////////////
   //sigchld signal should automatically be blocked when calling the sigchld handler.
   //Nevertheless, let's explicitly add it:
-  if (sigaddset(&SignalChild.sa_mask, SIGCHLD)==-1)
-    crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  //if (sigaddset(&SignalChild.sa_mask, SIGCHLD)==-1)
+  //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   ////////////////////////////////
-  if(sigaddset(&SignalChild.sa_mask, SIGFPE)==-1)
-    crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
-  if(sigaddset(&SignalChild.sa_mask, SIGSEGV)==-1)
-    crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  //if(sigaddset(&SignalChild.sa_mask, SIGFPE)==-1)
+  //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
+  //if (sigaddset(&SignalChild.sa_mask, SIGSEGV)==-1)
+  //  crash << "Failed to initialize SignalChild mask. Crashing to let you know. " << crash;
   SignalChild.sa_flags = SA_NOCLDWAIT;
-  SignalChild.sa_handler =  &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
+  SignalChild.sa_handler =  NULL;
+  //&WebServer::Signal_SIGCHLD_handler; // reap all dead processes
   if (sigaction(SIGCHLD, &SignalChild, NULL) == -1)
     crash << "Was not able to register SIGCHLD handler (reaping child processes). Crashing to let you know." << crash;
 //  sigemptyset(&sa.sa_mask);

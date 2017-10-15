@@ -2078,6 +2078,7 @@ void CalculatorHTML::initAutocompleteExtras()
   this->autoCompleteExtras.AddOnTop("algebra");
   this->autoCompleteExtras.AddOnTop("logarithms");
   this->autoCompleteExtras.AddOnTop("buttons");
+  this->autoCompleteExtras.AddOnTop("displaystyle");
 }
 
 void CalculatorHTML::initBuiltInSpanClasses()

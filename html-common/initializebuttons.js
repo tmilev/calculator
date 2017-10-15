@@ -163,6 +163,7 @@ mathQuillCommandButton("theta", "&theta;");
 mathQuillCommandButton("pi", "&pi;");
 mathQuillCommandButton("sum", "&#8721;");
 mathQuillCommandButton("infty", "&#8734;");
+mathQuillCommandButton(" DNE ", "DNE", "font-size: 7px");
 mathQuillCommandButton("!", "!");
 mathQuillCommandButton("binom", "binom", "font-size : 7px;");
 mathQuillCommandButton("cup", "&#8746;");
@@ -270,8 +271,14 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
       buttonArray.indexOf("\infty")>-1 ||
       buttonArray.indexOf("interval")>-1 ||
       buttonArray.indexOf("intervals")>-1 ||
+      buttonArray.indexOf("limits")>-1 ||
+      buttonArray.indexOf("limit")>-1 ||
       includeAll || noOptions)
     addCommand("infty");
+  if (buttonArray.indexOf("limits")>-1 ||
+      buttonArray.indexOf("limit")>-1 ||
+      includeAll )
+    addCommand(" DNE ");
   if (buttonArray.indexOf("sum")>-1 ||
       buttonArray.indexOf("series")>-1 || noOptions || includeAll)
   { addCommand("binom");

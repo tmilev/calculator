@@ -376,8 +376,12 @@ public:
   static void ReturnActiveIndicatorAlthoughComputationIsNotDone();
   static void SendStringThroughActiveWorker(const std::string& input);
   static void PipeProgressReportToParentProcess(const std::string& input);
-  static void Signal_SIGINT_handler(int s);
-  static void Signal_SIGCHLD_handler(int s);
+  //static void Signal_SIGINT_handler(int s); //<- signals appear to be racy. No signals please!
+  //static void Signal_SIGCHLD_handler(int s);//<- signals appear to be racy. No signals please!
+  static void fperror_sigaction(int signal);
+  //<- this signal should never happen in
+  //<- server, so even if racy, we take the risk of a hang.
+  //<- racy-ness in child process does not bother us: hanged children are still fine.
   void ReapChildren();
   static std::string ToStringActiveWorker();
   bool initPrepareWebServerALL();

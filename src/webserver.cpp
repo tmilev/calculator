@@ -4379,14 +4379,14 @@ void WebServer::ReleaseEverything()
   { close(this->listeningSocketHTTP);
     if (theGlobalVariables.flagServerDetailedLog)
       currentLog << logger::red << "DEBUG: " << this->ToStringActiveWorker()
-      << " Just closed: " << this->listeningSocketHTTP << logger::endL;
+      << " Just closed socket: " << this->listeningSocketHTTP << logger::endL;
     this->listeningSocketHTTP=-1;
   }
   if (this->listeningSocketHttpSSL!=-1)
   { close(this->listeningSocketHttpSSL);
     if (theGlobalVariables.flagServerDetailedLog)
       currentLog << logger::red << "DEBUG: " << this->ToStringActiveWorker()
-      << " Just closed: " << this->listeningSocketHttpSSL << logger::endL;
+      << " Just closed socket: " << this->listeningSocketHttpSSL << logger::endL;
   }
   this->listeningSocketHttpSSL=-1;
 }
@@ -5198,20 +5198,23 @@ int WebServer::Run()
 #ifdef MACRO_use_open_ssl
   SSLdata::initSSLkeyFiles();
 #endif
-  //if (!this->flagTryToKillOlderProcesses)
-  //{ theLog.reset();
-  //  logServerMonitor.reset();
-  //  logHttpErrors   .reset();
-  //  logBlock        .reset();
-  //  logIO           .reset();
-  //  logOpenSSL      .reset();
-  //  logProcessKills .reset();
-  //  logSocketAccept .reset();
-  //  logProcessStats .reset();
-  //  logPlumbing     .reset();
-  //  logEmail        .reset();
-  //  logServer       .reset();
-  //}
+  if (!this->flagTryToKillOlderProcesses)//<-worker log resets are needed, else forked processes reset their common log.
+  //<-resets of the server logs are not needed, but I put them here nonetheless.
+  { theLog            .reset();
+    logServerMonitor  .reset();
+    logHttpErrors     .reset();
+    logBlock          .reset();
+    logIO             .reset();
+    logOpenSSL        .reset();
+    logProcessKills   .reset();
+    logSocketAccept   .reset();
+    logProcessStats   .reset();
+    logPlumbing       .reset();
+    logEmail          .reset();
+    logServer         .reset();
+    logSuccessfulForks.reset();
+    logSuccessfulForks.flagWriteImmediately=true;
+  }
   if (true)
   { int pidMonitor=fork();
     if (pidMonitor<0)
@@ -5358,9 +5361,9 @@ int WebServer::Run()
       }
     if (theGlobalVariables.flagServerDetailedLog)
       if (incomingPID>0)
-      { logServer << "DEBUG: fork() successful. " << logger::endL;
-        logServer << "DEBUG: elapsed seconds @ fork(): " << theGlobalVariables.GetElapsedSeconds() << logger::endL;
-        logServer << "DEBUG: reported by: " << this->ToStringActiveWorker() << logger::endL;
+      { logSuccessfulForks << "DEBUG: fork() successful. " << logger::endL;
+        logSuccessfulForks << "DEBUG: elapsed seconds @ fork(): " << theGlobalVariables.GetElapsedSeconds() << logger::endL;
+        logSuccessfulForks << "DEBUG: reported by: " << this->ToStringActiveWorker() << logger::endL;
       }
     if (incomingPID<0)
       logProcessKills << logger::red << this->ToStringActiveWorker()

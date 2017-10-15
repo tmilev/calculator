@@ -37,6 +37,7 @@ logger logSocketAccept("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/L
 logger logProcessStats("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogWorkerProcessStats.html", &logServer, false, "server");
 logger logPlumbing("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogServerPlumbing.html", &logServer, false, "server");
 logger logProcessKills("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogMultiprocessing.html", &logServer, false, "server");
+logger logSuccessfulForks("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogForkSuccess.html", &logServer, false, "server");
 
 Calculator theParser;
 FormatExpressions consoleFormat;

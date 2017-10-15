@@ -25,6 +25,7 @@ extern logger logProcessStats;
 extern logger logPlumbing;
 extern logger logEmail  ;
 extern logger logServer  ;
+extern logger logSuccessfulForks  ;
 extern FormatExpressions consoleFormat;
 extern Calculator theParser;
 

@@ -86,8 +86,7 @@ bool PipePrimitive::CreateMe
  bool restartServerOnFail, bool dontCrashOnFail)
 { this->name=inputPipeName;
   if (pipe(this->pipeEnds.TheObjects)<0)
-  { logBlock << logger::red << "FAILED to create pipe: "
-    << this->name << ". " << logger::endL;
+  { logServer << logger::red << "FAILED to create pipe: " << this->name << ". " << logger::endL;
     this->Release();
     return false;
   }
@@ -556,6 +555,7 @@ logger::logger(const std::string& logFileName, logger* inputCarbonCopy, bool inp
   this->carbonCopy=inputCarbonCopy;
   this->flagResetLogFileWhenTooLarge=inputResetLogWhenTooLarge;
   this->processType=inputProcessType;
+  this->flagWriteImmediately=false;
 }
 
 void logger::initializeIfNeeded()
@@ -596,8 +596,10 @@ void logger::CheckLogSize()
 { this->initializeIfNeeded();
   if (theFile.tellp()>this->MaxLogSize)
   { if (this->flagResetLogFileWhenTooLarge)
-      this->reset();
-    else
+    { this->reset();
+      if (this->MaxLogSize>1000)
+        *this << logger::endL << "Log file reset. " << logger::endL;
+    } else
       this->flagStopWritingToFile=true;
   }
 }
@@ -606,6 +608,7 @@ void logger::flush()
 { this->initializeIfNeeded();
   std::cout.flush();
   theFile.flush();
+  theFile.clear();
 }
 
 std::string logger::blueConsole()

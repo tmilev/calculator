@@ -250,6 +250,7 @@ class logger
   bool flagTagColorHtmlOpened;
   bool flagTagColorConsoleOpened;
   bool flagResetLogFileWhenTooLarge;
+  bool flagWriteImmediately;
   std::string processType;
   logger* carbonCopy;
   logger
@@ -278,19 +279,21 @@ class logger
   { if (theGlobalVariables.flagRunningApache)
       return *this;
     this->initializeIfNeeded();
+    if (!this->flagStopWritingToFile)
+    { std::stringstream out;
+      if (this->processType!=theGlobalVariables.processType)
+        out << "WARNING: logger is for process type: " << this->processType
+        << " but current process is of type: " << theGlobalVariables.processType << ". ";
+      out << toBePrinted;
+      this->theFile << out.str();
+      if (this->flagWriteImmediately)
+        this->theFile.flush();
+    }
     if (this->carbonCopy!=0)
       (*(this->carbonCopy)) << toBePrinted;
     else if (theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningCommandLine)
       std::cout << toBePrinted;
     this->CheckLogSize();
-    if (this->flagStopWritingToFile)
-      return *this;
-    std::stringstream out;
-    if (this->processType!=theGlobalVariables.processType)
-      out << "WARNING: logger is for process type: " << this->processType
-      << " but current process is of type: " << theGlobalVariables.processType << ". ";
-    out << toBePrinted;
-    theFile << out.str();
     return *this;
   }
 };

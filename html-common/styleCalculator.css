@@ -187,7 +187,7 @@ button.buttonClone:hover{
 }
 answerCalculatorHighlight{
 display: inline-block;
-background-color: #f5f5f5;
+background-color: #fbfbfb;
 -moz-border-radius: 3px;
 -webkit-border-radius: 3px;
 font-size: 1em;

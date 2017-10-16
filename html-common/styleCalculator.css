@@ -54,7 +54,7 @@ textarea{
 td.tableCellMQfield{
 vertical-align: center;
 padding: 5px;
-min-width: 100px;
+/*min-width: 100px;*/
 text-align: center;
 }
 .calculatorMQfieldEnclosure{
@@ -194,6 +194,7 @@ background-color: #fbfbfb;
 font-size: 1em;
 border-radius: 3px;
 font-weight: bold;
+/*max-width: 200px;*/
 }
 span.panelAnswer{
   display: inline-block;

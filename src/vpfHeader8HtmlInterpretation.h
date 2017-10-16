@@ -144,6 +144,7 @@ public:
   HashedList<std::string, MathRoutines::hashString> tagKeysNoValue;
   HashedList<std::string, MathRoutines::hashString> calculatorTopicBundles;
   List<std::string> calculatorTopicElementNames;
+  List<std::string> calculatorTagsRecordedLiterally;
   List<std::string> calculatorClasses;
   List<std::string> calculatorClassesAnswerFields;
   List<std::string> autoCompleteExtras;
@@ -153,6 +154,7 @@ public:
 //  List<std::string> answerFirstCorrectSubmission;
   Selection studentTagsAnswered;
   ProblemData theProblemData;
+  List<std::string> answerHighlights;
   std::string topicListContent;
   std::string topicListFileName;
   HashedList<std::string, MathRoutines::hashString> problemNamesNoTopics;
@@ -185,6 +187,7 @@ public:
   void LogProblemGenerationObsolete(Calculator& theInterpreter);
   bool InterpretProcessExecutedCommands(Calculator& theInterpreter, List<SyntacticElementHTML>& theElements, std::stringstream& comments);
   bool PrepareAnswerElements(std::stringstream& comments);
+  bool InterpretAnswerHighlights(std::stringstream& comments);
   bool InterpretAnswerElements(std::stringstream& comments);
   bool InterpretOneAnswerElement(SyntacticElementHTML& inputOutput);
   bool PrepareAndExecuteCommands(Calculator& theInterpreter, std::stringstream& comments);
@@ -203,7 +206,8 @@ public:
 
   bool PrepareCommands(std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
-  void InterpretNotByCalculator(SyntacticElementHTML& inputOutput);
+  void InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inputOutput);
+  void InterpretIfAnswer(SyntacticElementHTML& inputOutput);
   std::string GetDeadline
   (const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited);
   bool MergeOneProblemAdminData

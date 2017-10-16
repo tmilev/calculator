@@ -382,7 +382,7 @@ public:
   //<- this signal should never happen in
   //<- server, so even if racy, we take the risk of a hang.
   //<- racy-ness in child process does not bother us: hanged children are still fine.
-  void ReapChildren();
+  //void ReapChildren();
   static std::string ToStringActiveWorker();
   bool initPrepareWebServerALL();
   void initPrepareSignals();

@@ -148,6 +148,7 @@ struct Answer
   std::string htmlSpanVerifyAnswer;
   std::string htmlSpanSolution;
   std::string htmlSpanMQButtonPanel;
+  std::string htmlAnswerHighlight;
   //////////////////////////////////////
   std::string MQpanelButtonOptions;
   //////////////////////////////////////

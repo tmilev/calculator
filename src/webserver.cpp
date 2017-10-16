@@ -1122,34 +1122,34 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 //  theWebServer.flagReapingChildren=false;
 //}
 
-void WebServer::ReapChildren() //<-Code not used, propose deletion of this code
-{ MacroRegisterFunctionWithName("WebServer::ReapChildren");
-  int waitResult=0;
-  int exitFlags= WNOHANG| WEXITED;
-  if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << logger::red
-    << this->ToStringActiveWorker() << " DEBUG: Enter the reaper. " << logger::endL;
-  do
-  { waitResult= waitpid(-1, NULL, exitFlags);
-//    theLog << "waitresult is: " << waitResult << logger::endL;
-    if (waitResult>0)
-      for (int i=0; i<this->theWorkers.size; i++)
-        if (this->theWorkers[i].ProcessPID==waitResult)
-        { logProcessStats << logger::yellow << this->ToStringActiveWorker()
-          << " child " << i
-          << " with pid " << waitResult << " successfully reaped. " << logger::endL;
-          this->theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close", false, true);
-          logProcessStats << logger::green << this->ToStringActiveWorker()
-          << " Close message sent through pipe successfully. " << logger::endL;
-          this->theWorkers[i].flagInUse=false;
-          this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
-          this->NumProcessesReaped++;
-        }
-  } while (waitResult>0);
-  if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << logger::green << this->ToStringActiveWorker()
-    << " DEBUG: EXIT the reaper. " << logger::endL;
-}
+//void WebServer::ReapChildren() //<-Code not used, propose deletion of this code
+//{ MacroRegisterFunctionWithName("WebServer::ReapChildren");
+//  int waitResult=0;
+//  int exitFlags= WNOHANG| WEXITED;
+//  if (theGlobalVariables.flagServerDetailedLog)
+//    logProcessStats << logger::red
+//    << this->ToStringActiveWorker() << " DEBUG: Enter the reaper. " << logger::endL;
+//  do
+//  { waitResult= waitpid(-1, NULL, exitFlags);
+////    theLog << "waitresult is: " << waitResult << logger::endL;
+//    if (waitResult>0)
+//      for (int i=0; i<this->theWorkers.size; i++)
+//        if (this->theWorkers[i].ProcessPID==waitResult)
+//        { logProcessStats << logger::yellow << this->ToStringActiveWorker()
+//          << " child " << i
+//          << " with pid " << waitResult << " successfully reaped. " << logger::endL;
+//          this->theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close", false, true);
+//          logProcessStats << logger::green << this->ToStringActiveWorker()
+//          << " Close message sent through pipe successfully. " << logger::endL;
+//          this->theWorkers[i].flagInUse=false;
+//          this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
+//          this->NumProcessesReaped++;
+//        }
+//  } while (waitResult>0);
+//  if (theGlobalVariables.flagServerDetailedLog)
+//    logProcessStats << logger::green << this->ToStringActiveWorker()
+//    << " DEBUG: EXIT the reaper. " << logger::endL;
+//}
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)

@@ -928,6 +928,10 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
 { MacroRegisterFunctionWithName("SyntacticElementHTML::IsInterpretedNotByCalculator");
   if (this->syntacticRole!="command")
     return false;
+  if (this->tag=="answerCalculatorHighlightStart" ||
+      this->tag=="answerCalculatorHighlightFinish"
+      )
+    return true;
   std::string tagClass=this->GetKeyValue("class");
   return
   tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate" ||
@@ -939,6 +943,7 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   tagClass== "calculatorNavigationHere" ||
   tagClass== "calculatorProblemNavigationHere"||
   tagClass== "calculatorEditPageHere" ||
+
 //  tagClass=="htmlStart" || tagClass=="htmlFinish" ||
 //  tagClass=="bodyStart" || tagClass=="bodyFinish" ||
 //  tagClass=="headStart" || tagClass=="headFinish" ||
@@ -1361,6 +1366,10 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     << desiredAnswerId << " but the answerId is missing from the list of known answer ids. "
     << this->theProblemData.ToStringAvailableAnswerIds() << crash;
   Answer& currentA=this->theProblemData.theAnswers[theIndex];
+  if (theIndex< this->answerHighlights.size)
+    currentA.htmlAnswerHighlight=this->answerHighlights[theIndex];
+  else
+    currentA.htmlAnswerHighlight="";
   std::string& answerId=currentA.answerId;
   currentA.varAnswerId = answerId+"spanVariable";
   currentA.varMQfield=answerId+"MQspanVar";
@@ -1448,6 +1457,8 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   out << "<table>";
   out << "<tr><td>";
   out << "<table><tr>";
+  if (currentA.htmlAnswerHighlight!="")
+    out << "<td><answerCalculatorHighlight>" << currentA.htmlAnswerHighlight << "</answerCalculatorHighlight></td>";
   if (currentA.flagAutoGenerateMQfield)
     out << "<td class=\"tableCellMQfield\">" << currentA.htmlSpanMQfield  << "</td>";
   if (currentA.flagAutoGenerateMQButtonPanel)
@@ -1483,16 +1494,24 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
   if (currentA.flagAutoGenerateVerificationField)
     out << currentA.htmlSpanVerifyAnswer;
   out << "</span>";
+
   inputOutput.interpretedCommand=out.str();
 }
 
-void CalculatorHTML::InterpretNotByCalculator(SyntacticElementHTML& inputOutput)
-{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretNotByCalculator");
+void CalculatorHTML::InterpretIfAnswer(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretIfAnswer");
   std::string tagClass=inputOutput.GetTagClass();
+  if (tagClass!="calculatorAnswer")
+    return;
+  this->InterpretGenerateStudentAnswerButton(inputOutput);
+}
+
+void CalculatorHTML::InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretNotByCalculatorNotAnswer");
+  std::string tagClass=inputOutput.GetTagClass();
+  //std::string tag= inputOutput.tag;
   if (tagClass=="calculatorExamProblem" || tagClass=="calculatorExamIntermediate")
     this->InterpretGenerateLink(inputOutput);
-  else if (tagClass=="calculatorAnswer")
-    this->InterpretGenerateStudentAnswerButton(inputOutput);
   else if (tagClass=="calculatorManageClass")
     this->InterpretManageClass(inputOutput);
   else if (tagClass=="generateTopicTable")
@@ -1810,7 +1829,6 @@ std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpre
   for (int eltCounter=theElements.size-1; eltCounter>0; eltCounter--)
   { SyntacticElementHTML& currentElt=theElements[eltCounter];
     std::string currentEltString=currentElt.GetTagClass()+ "[" + currentElt.content.substr(0,10) + "...]";
-    std::stringstream currentStream;
     if (!currentElt.IsInterpretedByCalculatorDuringProblemGeneration())
     { out << "<tr><td>" << currentEltString << "</td>"
       << "<td>"
@@ -2047,6 +2065,9 @@ bool CalculatorHTML::SetTagClassFromOpenTag(SyntacticElementHTML& output)
   { output.SetKeyValue("class", "htmlStart");
     this->flagTagHtmlPresent=true;
     return true;
+  } else if (this->calculatorTagsRecordedLiterally.Contains(lastTag))
+  { output.SetKeyValue("class", lastTag);
+    return true;
   }
   return false;
 }
@@ -2083,6 +2104,9 @@ void CalculatorHTML::initAutocompleteExtras()
 
 void CalculatorHTML::initBuiltInSpanClasses()
 { MacroRegisterFunctionWithName("CalculatorHTML::initBuiltInSpanClasses");
+  if (this->calculatorTagsRecordedLiterally.size==0)
+  { this->calculatorTagsRecordedLiterally.AddOnTopNoRepetition("answerCalculatorHighlight");
+  }
   if (this->calculatorClassesAnswerFields.size==0)
   { this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonSubmit");
     this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonInterpret");
@@ -2178,7 +2202,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     SyntacticElementHTML& fourthToLast = eltsStack[eltsStack.size-4];
     SyntacticElementHTML& fifthToLast  = eltsStack[eltsStack.size-5];
     SyntacticElementHTML& sixthToLast  = eltsStack[eltsStack.size-6];
-//    SyntacticElementHTML& seventhToLast = eltsStack[eltsStack.size-7];
+    //SyntacticElementHTML& seventhToLast = eltsStack[eltsStack.size-7];
     if ((secondToLast.syntacticRole=="<openTagCalc>" ||
          secondToLast.syntacticRole=="<calculatorSolution>") &&
         last.syntacticRole=="</closeTag>" &&
@@ -2190,8 +2214,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       continue;
     }
     if (thirdToLast.syntacticRole=="<openTag" &&
-        secondToLast=="/" &&
-        last.syntacticRole==">")
+        secondToLast=="/" && last.syntacticRole==">")
     { tagClass=thirdToLast.GetKeyValue("class");
       if (tagClass=="calculatorSolution")
         thirdToLast.syntacticRole="<calculatorSolution>";
@@ -2205,6 +2228,13 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       eltsStack.RemoveLastObject();
       if (this->IsStateModifierApplyIfYes(thirdToLast))
         eltsStack.RemoveLastObject();
+      continue;
+    }
+    if (last.syntacticRole=="</closeTag>" && this->calculatorTagsRecordedLiterally.Contains(last.tag))
+    { last.content=last.ToStringCloseTag();
+      last.syntacticRole="command";
+      last.tag+="Finish";
+      //this->SetTagClassFromTag(last, true);
       continue;
     }
     if (last.syntacticRole=="</closeTag>")
@@ -2314,12 +2344,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
         last.content=last.syntacticRole;
       secondToLast.content+=last.content;
       //stOutput << "<hr>Rule quote executed<hr> ";
-
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (sixthToLast.syntacticRole=="<openTag" &&
-        fourthToLast=="=" && thirdToLast=="\"" &&
+    if (sixthToLast.syntacticRole=="<openTag" && fourthToLast=="=" && thirdToLast=="\"" &&
         last=="\"" )
     { sixthToLast.SetKeyValue(fifthToLast.content, secondToLast.content);
       eltsStack.SetSize(eltsStack.size-5);
@@ -2346,7 +2374,10 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
         secondToLast.syntacticRole="<calculatorSolution>";
       else if (this->calculatorClasses.Contains(tagClass))
         secondToLast.syntacticRole="<openTagCalc>";
-      else if (this->SetTagClassFromOpenTag(secondToLast))
+      else if (this->calculatorTagsRecordedLiterally.Contains(secondToLast.tag))
+      { secondToLast.syntacticRole="command";
+        secondToLast.tag+="Start";
+      } else if (this->SetTagClassFromOpenTag(secondToLast))
         secondToLast.syntacticRole="command";
       else
       { secondToLast.content=secondToLast.ToStringOpenTag();
@@ -2394,8 +2425,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       this->theContent.LastObject()->content+=eltsStack[i].content;
     else
     { if (this->theContent.size>0)
-        if (this->theContent.LastObject()->
-            IsInterpretedByCalculatorDuringProblemGeneration() &&
+        if (this->theContent.LastObject()->IsInterpretedByCalculatorDuringProblemGeneration() &&
             eltsStack[i].IsInterpretedByCalculatorDuringProblemGeneration())
         { SyntacticElementHTML emptyElt;
           this->theContent.AddOnTop(emptyElt);
@@ -2405,7 +2435,6 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   }
 //  stOutput << "<hr>DEBUG: About to check consistency while parsing<hr>";
   //this->theProblemData.CheckConsistency();
-
   if (!result)
     comments << "<hr>Parsing stack.<hr>" << this->ToStringParsingStack(this->eltsStack);
   //this->theProblemData.CheckConsistency();
@@ -2456,7 +2485,35 @@ bool CalculatorHTML::InterpretOneAnswerElement(SyntacticElementHTML& inputOutput
   return true;
 }
 
-bool CalculatorHTML::InterpretAnswerElements(std::stringstream &comments)
+bool CalculatorHTML::InterpretAnswerHighlights(std::stringstream& comments)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretAnswerHighlights");
+  (void) comments;
+  this->answerHighlights.SetSize(0);
+  bool answerHighlightStarted=false;
+  for (int i=0; i<this->theContent.size; i++)
+  { if (this->theContent[i].tag=="answerCalculatorHighlightStart")
+    { answerHighlightStarted=true;
+      this->answerHighlights.AddOnTop("");
+      this->theContent[i].content="";
+      continue;
+    }
+    if (!answerHighlightStarted)
+      continue;
+    if (this->theContent[i].IsAnswerElement(0))
+      continue;
+    if (this->theContent[i].tag=="answerCalculatorHighlightFinish")
+    { answerHighlightStarted=false;
+      this->theContent[i].content="";
+      continue;
+    }
+    *this->answerHighlights.LastObject() += this->theContent[i].ToStringInterpretedBody();
+    this->theContent[i].content="";
+    this->theContent[i].interpretedCommand="";
+  }
+  return true;
+}
+
+bool CalculatorHTML::InterpretAnswerElements(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretAnswerElements");
   (void) comments;
   for (int i=0; i<this->theContent.size; i++)
@@ -2784,7 +2841,6 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
              theGlobalVariables.userCalculatorRequestType!="templateNoLogin")
     outBody << "<span style=\"color:green\"><b>Scores not recorded. </b></span>"
     << problemLabel << "<hr>";
-
   //////////////////////////////
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time after execution");
@@ -2803,7 +2859,10 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->NumAnswerIdsMathquilled=0;
   for (int i=0; i<this->theContent.size; i++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
-      this->InterpretNotByCalculator(this->theContent[i]);
+      this->InterpretNotByCalculatorNotAnswer(this->theContent[i]);
+  this->InterpretAnswerHighlights(comments);
+  for (int i=0; i<this->theContent.size; i++)
+    this->InterpretIfAnswer(this->theContent[i]);
   outHeadPt2 << this->topicListJavascriptWithTag;
   this->InterpretAnswerElements(comments);
   //stOutput << "<hr>DEBUG: All answers interpreted. <hr>";

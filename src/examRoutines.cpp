@@ -2187,7 +2187,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   this->flagTagHeadPresent=false;
   this->flagTagBodyPresent=false;
   this->flagTagHtmlPresent=false;
-  std::string tagClass;
+  std::string tagClass, tag;
   do
   { if (!reduced)
     { indexInElts++;
@@ -2370,11 +2370,16 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     if (secondToLast.syntacticRole=="<openTag" && last.syntacticRole==">")
     { //stOutput << "<hr>DEBUG: " << secondToLast.ToStringDebug() << " class key value: " << secondToLast.GetKeyValue("class");
       tagClass=secondToLast.GetKeyValue("class");
-      if (tagClass=="calculatorSolution")
+      tag = secondToLast.tag;
+      if (tagClass=="calculatorSolution" || tag=="calculatorSolution")
         secondToLast.syntacticRole="<calculatorSolution>";
-      else if (this->calculatorClasses.Contains(tagClass))
-        secondToLast.syntacticRole="<openTagCalc>";
-      else if (this->calculatorTagsRecordedLiterally.Contains(secondToLast.tag))
+      else if (this->calculatorClasses.Contains(tagClass) || this->calculatorClasses.Contains(tag))
+      { secondToLast.syntacticRole="<openTagCalc>";
+        if (this->calculatorClasses.Contains(tag))
+        { tagClass=tag;
+          secondToLast.SetKeyValue("class", tagClass);
+        }
+      } else if (this->calculatorTagsRecordedLiterally.Contains(secondToLast.tag))
       { secondToLast.syntacticRole="command";
         secondToLast.tag+="Start";
       } else if (this->SetTagClassFromOpenTag(secondToLast))

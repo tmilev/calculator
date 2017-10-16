@@ -4057,7 +4057,8 @@ void Calculator::initPredefinedStandardOperations()
    addition, returning double. ",
    "DoubleValue{}(3.14159265358979323846)+1",
    true, false,
-   "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat");
+   "CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat",
+   "AddDoubleToRational");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddPlotToPlot,
    this->opCalculusPlot(), this->opCalculusPlot(),
@@ -4383,7 +4384,8 @@ this->AddOperationInnerHandler
    \n y=101^200;\
    \nDoubleValue(y)",
    true, false,
-   "CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat");
+   "CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat",
+   "MultiplyDoubleByRational");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat, this->opDouble(), this->opRational(),
    "Multiplies rational by a double approximately using the built-in cpp multiplication \
@@ -4937,7 +4939,8 @@ this->AddOperationInnerHandler
    \nXcardano=( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
    \nq=DoubleValue{}1; \np=DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
    true, false,
-   "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat");
+   "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat",
+   "PowerDoubleToDouble");
   this->AddOperationInnerHandler
   ("^",
     CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT, "",

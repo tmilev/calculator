@@ -84,7 +84,6 @@ public:
 
   static bool innerPowerRatByRatReducePrimeFactors(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerRatByRat(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerRatByRatGetAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerAlgNumPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerAlgebraicNumberBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);

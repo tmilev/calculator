@@ -895,31 +895,6 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRat(Calculator& theCommands, c
   return output.AssignValue(base, theCommands);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber");
-  theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3))
-    return false;
-  //  stOutput << "<br>raising " << input[1].ToString() << " to power " << input[2].ToString();
-  Rational base, exp;
-  if(!input[1].IsRational(&base))
-    return false;
-  if(!input[2].IsRational(&exp))
-    return false;
-  if (exp.IsInteger())
-    return false;
-  LargeInt theDen=exp.GetDenominator();
-  int theRadical=0;
-  if (!theDen.IsIntegerFittingInInt(&theRadical))
-    return false;
-  if (theDen==1)
-    return false;
-  Expression sqrtE, powerE;
-  sqrtE.MakeSqrt(theCommands, base, theRadical);
-  powerE.AssignValue((Rational) exp.GetNumerator(), theCommands);
-  return output.MakeXOX(theCommands, theCommands.opThePower(), sqrtE, powerE);
-}
-
 bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF");
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -1011,12 +986,23 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors
       return output.MakeError("Division by zero while evaluating " + input.ToString(), theCommands, true);
     return output.AssignValue(0, theCommands);
   }
+  if (!base.IsInteger())
+    if (base.GetNumerator()==1)
+    { Expression theDenBase, theDenominator;
+      theDenBase.AssignValue((Rational)base.GetDenominator(), theCommands);
+      theDenominator.MakeXOX(theCommands, theCommands.opThePower(), theDenBase, input[2]);
+      output=theCommands.EOne()/theDenominator;
+      return true;
+    }
+  if ( exponent.GetDenominator()==2)
+  { return false;
+  }
   if (exponent<0)
   { exponent*=-1;
     base.Invert();
   }
-  LargeInt exponentDenominator=exponent.GetDenominator();
-  LargeInt exponentNumerator=exponent.GetNumerator();
+  LargeInt exponentDenominator = exponent.GetDenominator();
+  LargeInt exponentNumerator = exponent.GetNumerator();
   List<LargeInt> numFactors, denFactors;
   List<LargeIntUnsigned> numMults, denMults;
   if (!base.GetPrimeFactorsAbsoluteValue(numFactors, numMults, denFactors, denMults))
@@ -1025,13 +1011,13 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors
   LargeInt currentMult, currentContribution;
   int currentPower=-1;
   for (int i=0; i<numMults.size; i++)
-  { currentMult= numMults[i]*exponentNumerator;
-    if(!(currentMult%exponentDenominator).IsIntegerFittingInInt(&currentPower))
+  { currentMult = numMults[i]*exponentNumerator;
+    if (!(currentMult%exponentDenominator).IsIntegerFittingInInt(&currentPower))
       return false;
     currentContribution=numFactors[i];
     currentContribution.RaiseToPower(currentPower);
     insideTheRadical*=currentContribution;
-    if(!(currentMult/exponentDenominator).IsIntegerFittingInInt(&currentPower))
+    if (!(currentMult/exponentDenominator).IsIntegerFittingInInt(&currentPower))
       return false;
     currentContribution=numFactors[i];
     currentContribution.RaiseToPower(currentPower);
@@ -1039,12 +1025,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors
   }
   for (int i=0; i<denMults.size; i++)
   { currentMult= denMults[i]*exponentNumerator;
-    if(!(currentMult%exponentDenominator).IsIntegerFittingInInt(&currentPower))
+    if (!(currentMult%exponentDenominator).IsIntegerFittingInInt(&currentPower))
       return false;
     currentContribution=denFactors[i];
     currentContribution.RaiseToPower(currentPower);
     insideTheRadical/=currentContribution;
-    if(!(currentMult/exponentDenominator).IsIntegerFittingInInt(&currentPower))
+    if (!(currentMult/exponentDenominator).IsIntegerFittingInInt(&currentPower))
       return false;
     currentContribution=denFactors[i];
     currentContribution.RaiseToPower(currentPower);
@@ -1058,7 +1044,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors
   }
   Rational exponentFinal=exponentDenominator;
   exponentFinal.Invert();
-  if (exponentFinal==exponent && outsideOfTheRadical==1)
+  if ( exponentFinal*exponent>0 &&
+  //exponentFinal==exponent &&
+      outsideOfTheRadical==1)
     return false;
   Expression insideTheRadicalE, theRadicalE, theRadicalCFE, exponentE;
   theRadicalCFE.AssignValue(outsideOfTheRadical, theCommands);

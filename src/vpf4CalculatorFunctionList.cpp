@@ -4906,14 +4906,6 @@ this->AddOperationInnerHandler
    true, false,
    "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber,
-    this->opRational(), this->opRational(),
-   "Convert rational exponent to the sqrt function. ",
-   "10^{1/2}- 10* \\sqrt{1/10}",
-   true, false,
-   "CalculatorFunctionsBinaryOps::innerPowerRatByRatGetAlgebraicNumber",
-   "RaiseRationalToRational");
-  this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRat,
    this->opRational(), this->opRational(),
    "Raises rational to power, provided the power is a small integer. ",

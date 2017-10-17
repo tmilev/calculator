@@ -1293,23 +1293,33 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theComman
     if (right->StartsWith(theCommands.opThePower(), 3))
     { if ((*right)[1]==(*left))
       { bool isGood=true;
-//        stOutput << "<br>Right is: " << right->ToString();
-       // if ((*right)[2].IsOfType<Rational>())
-       //   if (!(*right)[2].GetValue<Rational>().IsInteger())
-       //   { Rational ratBase;
-       //     if ((*right)[1].IsRational(&ratBase))
-       //       if (ratBase<0)
-       //         isGood=false;
-       //   }
-        if(isGood)
-        { constPower.AssignValue(1, theCommands);
-          thePower.MakeXOX(theCommands, theCommands.opPlus(), (*right)[2], constPower);
+        if ((*right)[2].IsOfType<Rational>())
+          if (!(*right)[2].GetValue<Rational>().IsInteger())
+          { Rational ratBase;
+            if ((*right)[1].IsRational(&ratBase))
+              if (ratBase>0)
+                isGood=false;
+          }
+        if (isGood)
+        { thePower.MakeXOX(theCommands, theCommands.opPlus(), (*right)[2], theCommands.EOne());
           return output.MakeXOX(theCommands, theCommands.opThePower(), *left, thePower);
         }
       }
       if (left->StartsWith(theCommands.opThePower(), 3))
         if ((*left)[1]==(*right)[1])
-        { thePower.MakeXOX(theCommands, theCommands.opPlus(), (*left)[2], (*right)[2]);
+        { double theDouble=0;
+          if (!(*left)[1].EvaluatesToDouble(&theDouble))
+            continue;
+          if (theDouble<=0)
+            continue;
+          Rational leftRat, rightRat;
+          if ((*left)[2].IsOfType<Rational>(&leftRat) && (*right)[2].IsOfType<Rational>(&rightRat))
+          { if ( leftRat.IsInteger() && !rightRat.IsInteger())
+              continue;
+            if (!leftRat.IsInteger() &&  rightRat.IsInteger())
+              continue;
+          }
+          thePower.MakeXOX(theCommands, theCommands.opPlus(), (*left)[2], (*right)[2]);
           return output.MakeXOX(theCommands, theCommands.opThePower(), (*left)[1], thePower);
           //stOutput << "<br>output be at second place: " << output.ToString();
         }

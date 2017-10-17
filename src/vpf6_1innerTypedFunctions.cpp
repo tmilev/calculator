@@ -1010,6 +1010,15 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors
   Rational outsideOfTheRadical=1, insideTheRadical=1;
   LargeInt currentMult, currentContribution;
   int currentPower=-1;
+  if (numMults.size==1 && denMults.size==0)
+    if (numMults[0]>1 && numFactors[0]>1)
+    { output.reset(theCommands);
+      output.AddChildAtomOnTop(theCommands.opThePower());
+      output.AddChildRationalOnTop(numFactors[0]);
+      exponent*=numMults[0];
+      output.AddChildRationalOnTop(exponent);
+      return true;
+    }
   for (int i=0; i<numMults.size; i++)
   { currentMult = numMults[i]*exponentNumerator;
     if (!(currentMult%exponentDenominator).IsIntegerFittingInInt(&currentPower))

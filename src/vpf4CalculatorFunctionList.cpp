@@ -643,8 +643,11 @@ JWTverifyRSA256(token,modulus\
   ("AutomatedTestProblemInterpretation",
     CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation, "",
    "Runs a big bad automated test of all built in \
-    problems located in the DefaultProblemLocation/ folder. ",
-   "AutomatedTestProblemInterpretation{}(0)",
+    problems located in the DefaultProblemLocation/ folder. \
+    <b style='color:red'>The example below will not work out of the box: \
+    the automated test rule has to be activated first.</b> To activate the test, please first use\
+    the command: TurnOnRules(AutomatedTestProblemInterpretation).",
+   "AutomatedTestProblemInterpretation{}(0,0,0)",
    false, false,
    "CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation",
    "AutomatedTestProblemInterpretation",

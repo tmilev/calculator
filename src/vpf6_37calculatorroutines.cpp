@@ -143,19 +143,26 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
       globalKeys.RemoveKey(currentKey);
     }
     if (!answerGenerated)
-    { out << "<td><span style=\"color:red\"><b>Failure.</b></span>";
-      out << "</td>"
-      << "<td>"
-      << answerGeneration
-      << "</td>"
-      << "</tr>";
-      break;
+    { if (theProblem.theProblemData.theAnswers.size()>0)
+      { out << "<td><span style=\"color:red\"><b>Failure.</b></span>";
+        out << "</td>"
+        << "<td>"
+        << answerGeneration
+        << "</td>"
+        << "</tr>";
+        break;
+      } else
+        out << "<td><b style=\"color:brown\">No built-in answer.</b></td>";
     } else
       out << "<td><span style=\"color:green\">Success</span></td>";
     if (!answersWork)
-    { out << "<td><span style=\"color:red\"><b>Failure.</b></span>";
-      out << "</td></tr>";
-      break;
+    { if (theProblem.theProblemData.theAnswers.size()>0)
+      { out << "<td><span style=\"color:red\"><b>Failure.</b></span>";
+        //<< "DEBUG: " << theProblem.theProblemData.theAnswers.size() << " answers."//;
+        out << "</td></tr>";
+        break;
+      } else
+        out << "<td>-</td>";
     } else
       out << "<td><span style=\"color:green\">Success</span></td>";
     if (numInterpretations<=numSamples)

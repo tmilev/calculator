@@ -4918,7 +4918,7 @@ this->AddOperationInnerHandler
    this->opRational(), this->opRational(),
    "If a rational number is small enough to factor, reduces the \
     rational exponents of the rational number. ",
-   "\n(4/9)^{17/3}; (12/7)^{7/2} ",
+   "\n%LogEvaluation (4/9)^{17/3}; (12/7)^{7/2}; 12^{2/3}; 12^{-2/3}; 5^{-1/3}; 5^{-1/3}-\\sqrt[3]{5^-1} ; \\sqrt[20]{200!}",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors",
    "PowerRationalByRational");

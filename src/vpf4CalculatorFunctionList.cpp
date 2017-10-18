@@ -4524,7 +4524,7 @@ this->AddOperationInnerHandler
   this->AddOperationInnerHandler
   ("*", Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY, "",
    "Collects multiplicand exponents. ",
-   "x*(x*y)*x*(x*x^3*x); ",
+   "x*(x*y)*x*(x*x^3*x);  x^{2/3}x^{1/2}; (x>0)=1; x^{2/3}x^{1/2}; (x^{1/2})^2",
    true, false,
    "Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY",
    "CombineExponents");

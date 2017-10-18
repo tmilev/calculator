@@ -1307,10 +1307,25 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theComman
       }
       if (left->StartsWith(theCommands.opThePower(), 3))
         if ((*left)[1]==(*right)[1])
-        { double theDouble=0;
+        { bool isGood=false;
+          double theDouble=0;
           if (!(*left)[1].EvaluatesToDouble(&theDouble))
-            continue;
-          if (theDouble<=0)
+          { Expression testLeftGreaterThanZero, testResult;
+            testLeftGreaterThanZero.MakeXOX(theCommands, theCommands.opGreaterThan(),(*left)[1],theCommands.EZero());
+            if (theCommands.EvaluateExpression(theCommands,testLeftGreaterThanZero,testResult))
+              if (testResult.IsEqualToOne())
+                isGood=true;
+            if (!isGood)
+            { testLeftGreaterThanZero.MakeXOX(theCommands, theCommands.opGreaterThanOrEqualTo(),(*left)[1],theCommands.EZero());
+              if (theCommands.EvaluateExpression(theCommands,testLeftGreaterThanZero,testResult))
+                if (testResult.IsEqualToOne())
+                  isGood=true;
+            }
+            if (!isGood)
+              continue;
+          } else
+            isGood=(theDouble<=0);
+          if (!isGood)
             continue;
           Rational leftRat, rightRat;
           if ((*left)[2].IsOfType<Rational>(&leftRat) && (*right)[2].IsOfType<Rational>(&rightRat))

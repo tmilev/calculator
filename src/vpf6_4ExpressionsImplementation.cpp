@@ -2663,15 +2663,20 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   if (this->ToStringData(tempS, theFormat))
     out << tempS;
   else if (this->StartsWith(this->owner->opDefine(), 3))
-  { std::string firstE=(*this)[1].ToString(theFormat);
-    std::string secondE=(*this)[2].ToString(theFormat);
-    if ((*this)[1].IsListStartingWithAtom(this->owner->opDefine()))
-      out << "(" << firstE << ")";
+  { std::string firstE  = (*this)[1].ToString(theFormat);
+    std::string secondE = (*this)[2].ToString(theFormat);
+    if ((*this)[1].IsListStartingWithAtom(this->owner->opDefine()) ||
+        (*this)[1].IsListStartingWithAtom(this->owner->opGreaterThan()) ||
+        (*this)[1].IsListStartingWithAtom(this->owner->opGreaterThanOrEqualTo()) ||
+        (*this)[1].IsListStartingWithAtom(this->owner->opLessThan()) ||
+        (*this)[1].IsListStartingWithAtom(this->owner->opLessThanOrEqualTo())
+        )
+      out << "\\left(" << firstE << "\\right)";
     else
       out << firstE;
     out << "=";
     if ((*this)[2].IsListStartingWithAtom(this->owner->opDefine()))
-      out << "(" << secondE << ")";
+      out << "\\left(" << secondE << "\\right)";
     else
       out << secondE;
   } else if (this->IsListStartingWithAtom(this->owner->opIsDenotedBy()))

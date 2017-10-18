@@ -81,7 +81,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     theReport.Report(reportStream.str());
     CalculatorHTML theProblem;
     std::stringstream problemComments;
-    theProblem.fileName="DefaultProblemLocation/"+theFileNames[i];
+    theProblem.fileName="DefaultProblemLocation/" + theFileNames[i];
     bool isGoodLoad=theProblem.LoadMe(false, problemComments, randomSeedCurrent);
     bool isGoodInterpretation=false;
     out << "<tr>";

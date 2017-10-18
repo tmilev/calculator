@@ -662,7 +662,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << HtmlRoutines::GetCalculatorStyleSheetWithTags()
   << "<style type=\"text/css\" media=\"screen\">\n"
   << "    #editor { \n"
-  << "      height: 400px;\n"
+  << "      height: 380px;\n"
   << "      font-size: 100%;\n"
   << "   }\n"
   << "</style>\n";
@@ -684,6 +684,10 @@ std::string HtmlInterpretation::GetEditPageHTML()
   if (!theFile.ParseHTML(failureStream))
     outBody << "<b>Failed to parse file: " << theFile.fileName
     << ".</b> Details:<br>" << failureStream.str();
+  if (theFile.flagIsExamProblem)
+  { theFile.FigureOutCurrentProblemList(outBody);
+    outBody << "<problemNavigation>" << theFile.ToStringProblemNavigation() << "</problemNavigation>";
+  }
   HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
   theFile.initBuiltInSpanClasses();
   if (theFile.flagIsExamProblem)
@@ -725,12 +729,11 @@ std::string HtmlInterpretation::GetEditPageHTML()
   //  out << "<input type=\"submit\" value=\"Save changes\"> ";
   outBody << buttonStream.str();
   outBody << "To include the problem in your topic list, add the following two lines. <br>"
-  << "<textarea cols=\"70\", rows=\"3\">"
+  << "<textarea cols=\"140\", rows=\"2\">"
   << theFile.ToStringCalculatorProblemSourceFromFileName(theFile.fileName) << "</textarea>";
   outBody << "<br>\n";
-  outBody << "Ctrl+S saves your changes. Edit bravely, all files are backed-up/stored in a svn history tree."
-  << " You only risk losing your own changes.";
-  outBody << "<br>\n";
+  outBody << "Ctrl+S saves your changes. Edit bravely, files are stored in a svn history tree. ";
+//  outBody << "<br>\n";
   outBody
   << "Many thanks to the <a href=\"https://ace.c9.io\">ace editor</a> project. <br>"
   << "<div id=\"editor\" onkeydown=\"ctrlSPress(event);\" name=\"editor\">"
@@ -2151,6 +2154,7 @@ std::string HtmlInterpretation::ToStringNavigation()
   std::stringstream out;
   //out << "<table>";
   //out << "DEBUG: auth token: " << theGlobalVariables.GetWebInput("authenticationToken") << "<br>";
+  //out << "DEBUG: to string nav";
   std::string linkSeparator=" | ";
   std::string linkBigSeparator=" || ";
   if (theGlobalVariables.userCalculatorRequestType=="template" ||

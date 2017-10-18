@@ -490,16 +490,22 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
 //  stOutput << "<hr>DEBUG: got to before loading<hr>";
   std::stringstream commentsStream;
   if (!this->LoadMe(needToLoadDatabaseMayIgnore, commentsStream, inputRandomSeed))
-    this->flagLoadedSuccessfully =false;
+    this->flagLoadedSuccessfully = false;
 //  stOutput << "<hr>DEBUG: loaded<hr>";
 //  stOutput << "<hr>DEBUG: OK<hr>";
   if (!this->flagLoadedSuccessfully)
   { this->comments << "<calculatorNavigation>"
     << theGlobalVariables.ToStringNavigation()
-    << "</calculatorNavigation>"
-    << commentsStream.str();
+    << "</calculatorNavigation>";
+    this->FigureOutCurrentProblemList(this->comments);
+    this->flagIsExamProblem=true;
+    this->comments << "<problemNavigation>"
+    << this->ToStringProblemNavigation()
+    << "</problemNavigation>";
+    this->comments << commentsStream.str();
     this->comments << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=selectCourseFromHtml\">Go to course list page.</a>";
+    << "?request=selectCourseFromHtml\">Go to course list page.</a>"
+    ;
   }
   this->theProblemData.CheckConsistency();
 }

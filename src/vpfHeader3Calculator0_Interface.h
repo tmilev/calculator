@@ -365,6 +365,7 @@ private:
   bool IsEqualToTwo()const;
   bool IsEqualToHalf()const;
   bool IsEqualToMOne()const;
+  bool IsKnownToBeNonNegative()const;
   bool IsNegativeConstant()const;
   bool MakeIdMatrixExpressions(int theDim, Calculator& inputBoss);
   void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, Calculator& newBoss);

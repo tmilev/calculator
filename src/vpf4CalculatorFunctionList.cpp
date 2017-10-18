@@ -4524,7 +4524,7 @@ this->AddOperationInnerHandler
   this->AddOperationInnerHandler
   ("*", Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY, "",
    "Collects multiplicand exponents. ",
-   "x*(x*y)*x*(x*x^3*x);  x^{2/3}x^{1/2}; (x>0)=1; x^{2/3}x^{1/2}; (x^{1/2})^2",
+   "x*(x*y)*x*(x*x^3*x);  x^{2/3}x^{1/2}; (x>0)=1; x^{2/3}x^{1/2}; (x^{1/2})^2;",
    true, false,
    "Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY",
    "CombineExponents");
@@ -5061,9 +5061,10 @@ this->AddOperationInnerHandler
    "If the rule doesn't break over the complex numbers, substitutes (a^b)^c with a^{b*c}. \
     The rule acts when one of the following holds:\
     1) a is real and positive;\
-    2) c is an integer;\
-    3) a evaluates to real (double), b and c are rational and b*c is an even integer. ",
-   "(a^m)^n; ((ln(3))^m)^n; ((ln(0.5))^m)^n; (a^m)^2; (a^2)^m",
+    2) a>0 or a\\geq 0 equals 1 (those can be user-defined, for example via (a>0)=1;)\
+    3) c is an integer;\
+    4) a evaluates to real (double), b and c are rational and b*c is an even integer. ",
+   "(a^m)^n; ((ln(3))^m)^n; ((ln(0.5))^m)^n; (a^m)^2; (a^2)^m; (a^{1/2})^2; (a^{2})^{1/2}; (a>0)=1; (a^{2})^{1/2};",
    true, false,
    "Calculator::innerAssociateExponentExponent",
    "RaisePowerToPower");

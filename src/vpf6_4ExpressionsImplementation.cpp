@@ -1656,6 +1656,26 @@ bool Expression::IsEqualToHalf()const
   return false;
 }
 
+bool Expression::IsKnownToBeNonNegative()const
+{ MacroRegisterFunctionWithName("Expression::IsKnownToBeNonNegative");
+  double theDouble=0;
+  if (this->EvaluatesToDouble(&theDouble))
+    return theDouble>=0;
+  if (this->owner==0)
+    return false;
+  Expression testInequality, testResult;
+  Calculator& theCommands=*(this->owner);
+  testInequality.MakeXOX(theCommands, theCommands.opGreaterThan(), *this, theCommands.EZero());
+  if (this->owner->EvaluateExpression(theCommands, testInequality, testResult))
+    if (testResult.IsEqualToOne())
+      return true;
+  testInequality.MakeXOX(theCommands, theCommands.opGreaterThanOrEqualTo(), *this, theCommands.EZero());
+  if (theCommands.EvaluateExpression(theCommands, testInequality, testResult))
+    if (testResult.IsEqualToOne())
+      return true;
+  return false;
+}
+
 bool Expression::IsNegativeConstant()const
 { if (this->owner==0)
     return false;

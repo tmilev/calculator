@@ -1307,24 +1307,13 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theComman
       }
       if (left->StartsWith(theCommands.opThePower(), 3))
         if ((*left)[1]==(*right)[1])
-        { bool isGood=false;
-          double theDouble=0;
-          if (!(*left)[1].EvaluatesToDouble(&theDouble))
-          { Expression testLeftGreaterThanZero, testResult;
-            testLeftGreaterThanZero.MakeXOX(theCommands, theCommands.opGreaterThan(),(*left)[1],theCommands.EZero());
-            if (theCommands.EvaluateExpression(theCommands,testLeftGreaterThanZero,testResult))
-              if (testResult.IsEqualToOne())
+        { bool isGood=(*left)[1].IsKnownToBeNonNegative();
+          if (!isGood)
+          { Rational powerInner, powerOuter;
+            if (input[2].IsRational(&powerOuter) && input[1][2].IsRational(&powerInner))
+              if ((powerInner*powerOuter).IsEven())
                 isGood=true;
-            if (!isGood)
-            { testLeftGreaterThanZero.MakeXOX(theCommands, theCommands.opGreaterThanOrEqualTo(),(*left)[1],theCommands.EZero());
-              if (theCommands.EvaluateExpression(theCommands,testLeftGreaterThanZero,testResult))
-                if (testResult.IsEqualToOne())
-                  isGood=true;
-            }
-            if (!isGood)
-              continue;
-          } else
-            isGood=(theDouble<=0);
+          }
           if (!isGood)
             continue;
           Rational leftRat, rightRat;
@@ -1694,16 +1683,8 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
   if (!input[1].StartsWith(opPower, 3))
     return false;
   bool isGood=false;
-  double theDouble=0;
-  if (input[1][1].EvaluatesToDouble(&theDouble))
-  { Rational powerInner, powerOuter;
-    if (theDouble>0)
-      isGood=true;
-    else
-      if (input[2].IsRational(&powerOuter) && input[1][2].IsRational(&powerInner))
-        if ((powerInner*powerOuter).IsEven())
-          isGood=true;
-  }
+  if (input[1][1].IsKnownToBeNonNegative())
+    isGood=true;
   if (input[2].IsInteger())
     isGood=true;
   if (!isGood)

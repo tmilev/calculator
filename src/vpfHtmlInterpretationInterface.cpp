@@ -1333,9 +1333,12 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     { if (currentE[j].StartsWith(theInterpreteR.opRulesOff()) ||
           currentE[j].StartsWith(theInterpreteR.opRulesOn()))
         continue;
+      std::string stringAnswer;
+      if (currentE[j].IsOfType<std::string>(&stringAnswer))
+        if (MathRoutines::StringBeginsWith(stringAnswer, "Approximations have been"))
+          continue;
       if (!isFirst)
         out << "<br>";
-      isFirst=false;
       theFormat.flagExpressionIsFinal=true;
       theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
       theFormat.flagUseQuotes=false;
@@ -1344,12 +1347,14 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
         out << currentE[j].GetValue<std::string>();
       else
         out << "\\(\\displaystyle " << currentE[j].ToString(&theFormat) << "\\)";
-      if (j==currentE.size()-1)
+//      if (j==currentE.size()-1)
+      if (isFirst)
       { if (outputNakedAnswer!=0)
           *outputNakedAnswer=currentE[j].ToString(&theFormat);
         if (outputDidSucceed!=0)
           *outputDidSucceed=true;
       }
+      isFirst=false;
     }
   out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())

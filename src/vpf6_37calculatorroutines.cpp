@@ -132,12 +132,12 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
       theGlobalVariables.SetWebInpuT(currentKey, "1");
       theGlobalVariables.SetWebInpuT("fileName", theProblem.fileName);
       answerGeneration+=HtmlInterpretation::GetAnswerOnGiveUp
-      (randomSeedCurrent, &currentAnswer, &answerGenerated)+"<hr>";
+      (randomSeedCurrent, &currentAnswer, &answerGenerated) + "<hr>";
       if (!answerGenerated)
         break;
       theGlobalVariables.SetWebInpuT(currentKey, HtmlRoutines::ConvertStringToURLString(currentAnswer, false));
       solutionReport+=
-      HtmlInterpretation::SubmitProblem(randomSeedCurrent, &answersWork, false)+"<hr>";
+      HtmlInterpretation::SubmitProblem(randomSeedCurrent, &answersWork, false) + "<hr>";
       if (!answersWork)
         break;
       globalKeys.RemoveKey(currentKey);

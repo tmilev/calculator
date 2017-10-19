@@ -1158,7 +1158,7 @@ bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expres
       ratPower.Invert();
       theExponentE.AssignValue(ratPower, theCommands);
       powerE.MakeXOX(theCommands,theCommands.opThePower(), input[2], theExponentE);
-      if (CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors
+      if (CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors
           (theCommands, powerE, powerEreduced))
         if (powerEreduced!=powerE && powerEreduced!=input)
         { output=powerEreduced;

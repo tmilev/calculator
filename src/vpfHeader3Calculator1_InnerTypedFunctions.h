@@ -82,8 +82,9 @@ public:
   static bool innerPowerMatExpressionsBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerMatNumbersByLargeIntegerIfPossible(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerPowerRatByRatReducePrimeFactors(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerRatByRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerRationalByRationalOutputAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerRationalByRationalReducePrimeFactors(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerRationalByInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerAlgNumPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerAlgebraicNumberBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);

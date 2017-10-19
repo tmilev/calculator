@@ -965,10 +965,10 @@ D-B;\
   this->AddOperationInnerHandler
   ("^", CalculatorFunctionsGeneral::innerPowerImaginaryUnit, "",
    "Raises imaginary unit to an integer power. ",
-   "TurnOnRules(\"RaiseImaginaryUnitToPower\");i^{-50!+1}; ",
+   "TurnOnRules(\"PowerImaginaryUnit\");i^{-50!+1}; ",
    true, false,
    "CalculatorFunctionsGeneral::innerPowerImaginaryUnit",
-   "RaiseImaginaryUnitToPower", true);
+   "PowerImaginaryUnit", true);
   this->AddOperationInnerHandler
   ("+", CalculatorFunctionsGeneral::innerTrigSumToTrigProduct, "",
    "Implementation of sum-to-product trig rules. ",
@@ -4909,22 +4909,31 @@ this->AddOperationInnerHandler
    true, false,
    "CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRat,
+  ("^", CalculatorFunctionsBinaryOps::innerPowerRationalByInteger,
    this->opRational(), this->opRational(),
    "Raises rational to power, provided the power is a small integer. ",
    "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ",
    true, false,
-   "CalculatorFunctionsBinaryOps::innerPowerRatByRat",
+   "CalculatorFunctionsBinaryOps::innerPowerRationalByInteger",
    "PowerIntegerByInteger");
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors,
+  ("^", CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors,
    this->opRational(), this->opRational(),
    "If a rational number is small enough to factor, reduces the \
     rational exponents of the rational number. ",
    "\n%LogEvaluation (4/9)^{17/3}; (12/7)^{7/2}; 12^{2/3}; 12^{-2/3}; 5^{-1/3}; 5^{-1/3}-\\sqrt[3]{5^-1} ; \\sqrt[20]{200!}",
    true, false,
-   "CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors",
+   "CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors",
    "PowerRationalByRational");
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic,
+   this->opRational(), this->opRational(),
+   "If the rational power is small enough, converts to an algebraic number. \
+    At the moment works with rational powers whose denominator is 2, may be extended to larger powers in the future. ",
+   "\n%",
+   true, false,
+   "CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic",
+   "PowerRationalByRationalOutputAlgebraic");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat, this->opRational(), this->opDouble(),
    "Calls the built-in cpp functions to approximately raise a double to a power,\
@@ -5032,7 +5041,7 @@ this->AddOperationInnerHandler
     \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF",
-   "RaiseUEelementToPolyPower");
+   "PowerUEelementToPolyPower");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF,
     this->opElementUEoverRF(), this->opRationalFunction(),
@@ -5043,7 +5052,7 @@ this->AddOperationInnerHandler
     \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF",
-   "RaiseUEelementToRFPower");
+   "PowerUEelementToRFPower");
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat, this->opDouble(), this->opRational(),
    "Calls the built-in cpp functions to approximately raise a double to a power,\
@@ -5055,7 +5064,7 @@ this->AddOperationInnerHandler
    \nq=DoubleValue{}1; \np=DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat",
-   "RaiseFloatingToPower");
+   "PowerFloatingToPower");
   this->AddOperationOuterHandler
   ("^", Calculator::innerAssociateExponentExponent, "",
    "If the rule doesn't break over the complex numbers, substitutes (a^b)^c with a^{b*c}. \
@@ -5067,7 +5076,7 @@ this->AddOperationInnerHandler
    "(a^m)^n; ((ln(3))^m)^n; ((ln(0.5))^m)^n; (a^m)^2; (a^2)^m; (a^{1/2})^2; (a^{2})^{1/2}; (a>0)=1; (a^{2})^{1/2};",
    true, false,
    "Calculator::innerAssociateExponentExponent",
-   "RaisePowerToPower");
+   "PowerPowerToPower");
   this->AddOperationOuterHandler
   ("^", CalculatorFunctionsGeneral::innerDistributeExponent, "",
    "If a is a positive constant, substitutes (a*b)^c with a^c b^c.",
@@ -5088,7 +5097,7 @@ this->AddOperationInnerHandler
   "x^1+x^2; A^1",
   true, false,
   "Calculator::outerPowerRaiseToFirst",
-  "RaiseToPowerOne");
+  "PowerToOne");
   this->AddOperationHandler
   ("^", CalculatorFunctionsGeneral::innerOperatorBounds, "",
    "Replaces \\int_a^b by (\\int, a, b) .",

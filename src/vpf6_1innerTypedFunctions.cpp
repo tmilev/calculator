@@ -871,7 +871,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(Calculator& theCo
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerRatByRat(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsBinaryOps::innerPowerRationalByInteger(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -971,7 +971,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger(Calcul
   return output.AssignMatrixExpressions(theMat, theCommands, true);
 }
 
-bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors
+bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors");
   if (!input.StartsWith(theCommands.opThePower(), 3))

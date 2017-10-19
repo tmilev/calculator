@@ -1631,3 +1631,26 @@ bool CalculatorFunctionsGeneral::innerScaleToLeadingUnit(Calculator& theCommands
   theCollection/=theCollection.GetLeadingCoefficient();
   return output.MakeSum(theCommands, theCollection);
 }
+
+bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors");
+  if (!input.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  Rational exponent;
+  if (!input[1].IsOfType<Rational>())
+    return false;
+  if (!input[2].IsOfType<Rational>(&exponent))
+    return false;
+  if (exponent.GetDenominator()!=2)
+    return false;
+  Expression theRadical, reduced;
+  theRadical.MakeXOX(theCommands, theCommands.opSqrt(), theCommands.ETwo(), input[1]);
+  if (!CalculatorFunctionsGeneral::innerSqrt(theCommands, theRadical, reduced))
+    return false;
+  if (!reduced.IsOfType<AlgebraicNumber>())
+    return false;
+  Expression theIntegerPower;
+  theIntegerPower.AssignValue((Rational) exponent.GetNumerator(), theCommands);
+  return output.MakeXOX(theCommands, theCommands.opThePower(),reduced, theIntegerPower);
+}

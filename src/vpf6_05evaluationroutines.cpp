@@ -99,8 +99,8 @@ const Expression& Calculator::EMInfinity()
 }
 
 void Calculator::DoLogEvaluationIfNeedBe(Function& inputF)
-{ if (this->ExpressionHistoryStack.size>0)
-    this->ExpressionHistoryRuleNames.LastObject().LastObject()=inputF.calculatorIdentifier;
+{ if (this->historyStack.size>0)
+    this->historyRuleNames.LastObject().LastObject()=inputF.calculatorIdentifier;
   if (!this->flagLogEvaluatioN)
     return;
   *this << "<hr>Built-in substitution: " << inputF.ToStringSummary()
@@ -240,7 +240,7 @@ bool Calculator::ExpressionMatchesPattern
   return true;
 }
 
-void StackMaintainerCalculator::AddRule(const Expression& theRule)
+void StateMaintainerCalculator::AddRule(const Expression& theRule)
 { if (this->owner==0)
     crash << "StackMaintainerCalculator has zero owner. " << crash;
   this->owner->RuleStack.AddChildOnTop(theRule);
@@ -266,17 +266,35 @@ void StackMaintainerCalculator::AddRule(const Expression& theRule)
     << this->owner->RuleStackCacheIndex;
 }
 
-StackMaintainerCalculator::StackMaintainerCalculator(Calculator* inputBoss)
-{ this->owner=inputBoss;
-  if (this->owner==0)
-    return;
-  this->startingRuleStackIndex=inputBoss->RuleStackCacheIndex;
-  this->startingRuleStackSize=inputBoss->RuleStack.size();
+Expression& StateMaintainerCalculator::GetCurrentHistory()
+{ MacroRegisterFunctionWithName("StateMaintainerCalculator::GetCurrentHistory");
+  return this->owner->historyStack[this->historyOuterSize-1][this->historyMiddleSize-1];
 }
 
-StackMaintainerCalculator::~StackMaintainerCalculator()
+std::string& StateMaintainerCalculator::GetCurrentHistoryRuleNames()
+{ MacroRegisterFunctionWithName("StateMaintainerCalculator::GetCurrentHistoryRuleNames");
+  return this->owner->historyRuleNames[this->historyOuterSize-1][this->historyMiddleSize-1];
+}
+
+StateMaintainerCalculator::StateMaintainerCalculator(Calculator& inputBoss)
+{ this->owner=&inputBoss;
+  this->historyOuterSize=inputBoss.historyStack.size;
+  this->historyMiddleSize=-1;
+  if (inputBoss.historyStack.size>0)
+    this->historyMiddleSize=inputBoss.historyStack.LastObject().size;
+  this->startingRuleStackIndex=inputBoss.RuleStackCacheIndex;
+  this->startingRuleStackSize=inputBoss.RuleStack.size();
+}
+
+StateMaintainerCalculator::~StateMaintainerCalculator()
 { if (this->owner==0)
     return;
+  this->owner->historyStack.SetSize(this->historyOuterSize);
+  this->owner->historyRuleNames.SetSize(this->historyOuterSize);
+  if (this->owner->historyStack.size>0)
+  { this->owner->historyStack.LastObject().SetSize(this->historyMiddleSize);
+    this->owner->historyRuleNames.LastObject().SetSize(this->historyMiddleSize);
+  }
   Expression& theRuleStack=this->owner->RuleStack;
   std::string currentRuleName;
   bool shouldUpdateRules=false;
@@ -337,7 +355,7 @@ Expression Calculator::GetNewAtom()
 
 }
 
-bool Calculator::AccountRule(const Expression& ruleE, StackMaintainerCalculator& theRuleStackMaintainer)
+bool Calculator::AccountRule(const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer)
 { MacroRegisterFunctionWithName("Calculator::AccountRule");
   RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
@@ -460,11 +478,12 @@ bool Calculator::EvaluateExpression
   !theGlobalVariables.flagRunningApache;
 
   MemorySaving<Expression> oldChild;
-  bool doExpressionHistory=(theCommands.ExpressionHistoryStack.size>0);
+  bool doExpressionHistory=(theCommands.historyStack.size>0);
   if (doExpressionHistory)
     theCommands.ExpressionHistoryAddEmptyHistory();
+  //stOutput << "Debug: got here pt1.";
   while (ReductionOcurred && !theCommands.flagAbortComputationASAP)
-  { StackMaintainerCalculator theRuleStackMaintainer(&theCommands);
+  { StateMaintainerCalculator theRuleStackMaintainer(theCommands);
     ReductionOcurred=false;
     counterNumTransformations++;
     if (doExpressionHistory)
@@ -521,7 +540,7 @@ bool Calculator::EvaluateExpression
     bool HistoryShouldBeRecorded=false;
     int historyStackSizeAtStart=-1;
     if (doExpressionHistory)
-      historyStackSizeAtStart = theCommands.ExpressionHistoryStack.LastObject().LastObject().size();
+      historyStackSizeAtStart=theRuleStackMaintainer.GetCurrentHistory().size();
     if (!output.IsFrozen())
     { int indexOp=-1;
       if (output.size()>0)
@@ -550,7 +569,7 @@ bool Calculator::EvaluateExpression
         if (doExpressionHistory)
         { if (transformationE!=oldChild.GetElement())
             HistoryShouldBeRecorded=true;
-          Expression lastHistory=theCommands.ExpressionHistoryStack.LastObject().LastObject();
+          Expression lastHistory=theRuleStackMaintainer.GetCurrentHistory();
           theCommands.ExpressionHistoryPop();
           theCommands.ExpressionHistoryAdd(lastHistory, i);
         }
@@ -572,13 +591,23 @@ bool Calculator::EvaluateExpression
           }
       }
     }
+    //stOutput << "Debug: got here pt2.";
     if (doExpressionHistory)
     { if (HistoryShouldBeRecorded)
-      { theCommands.ExpressionHistoryRuleNames.LastObject().LastObject()="Sub-expression simplification";
+      { theRuleStackMaintainer.GetCurrentHistoryRuleNames()="Sub-expression simplification";
         theCommands.ExpressionHistoryAdd(output, -1);
       } else
-        theCommands.ExpressionHistoryStack.LastObject().LastObject().children.SetSize(historyStackSizeAtStart);
+      { if (historyStackSizeAtStart>theRuleStackMaintainer.GetCurrentHistory().size())
+          crash << "Error: we have historyStackSizeAtStart= " << historyStackSizeAtStart
+          << " yet the expression history has size: "
+          << theRuleStackMaintainer.GetCurrentHistory().size()
+          << "<br>Expression history so far: "
+          << theRuleStackMaintainer.GetCurrentHistory().ToString()
+          << crash;
+        theRuleStackMaintainer.GetCurrentHistory().children.SetSize(historyStackSizeAtStart);
+      }
     }
+    //stOutput << "Debug: got here pt3.";
     /////-------Children evaluation end-------
     if (theCommands.flagAbortComputationASAP)
       break;

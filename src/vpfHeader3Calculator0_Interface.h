@@ -840,15 +840,20 @@ struct ExpressionTripleCrunchers
   }
 };
 
-struct StackMaintainerCalculator
+struct StateMaintainerCalculator
 {
 public:
   Calculator* owner;
   int startingRuleStackIndex;
   int startingRuleStackSize;
-  StackMaintainerCalculator(Calculator* inputBoss);
+  int historyOuterSize; //<-outermost layer of expression history
+  int historyMiddleSize; //<- inner layer of expression history
+  //int historyInnerSize; //<- inner-most layer of expression history
+  std::string& GetCurrentHistoryRuleNames();
+  Expression& GetCurrentHistory();
+  StateMaintainerCalculator(Calculator& inputBoss);
   void AddRule(const Expression& theRule);
-  ~StackMaintainerCalculator();
+  ~StateMaintainerCalculator();
 };
 
 class Calculator
@@ -952,8 +957,8 @@ public:
   HashedList<Expression> knownDoubleConstants;
   List<double> knownDoubleConstantValues;
 
-  ListReferences<ListReferences<Expression> > ExpressionHistoryStack;
-  ListReferences<ListReferences<std::string> > ExpressionHistoryRuleNames;
+  ListReferences<ListReferences<Expression> > historyStack;
+  ListReferences<ListReferences<std::string> > historyRuleNames;
   List<Expression> buffer1, buffer2;
   int MaxRecursionDeptH;
   int RecursionDeptH;
@@ -1302,7 +1307,7 @@ public:
   int GetOperationIndexFromControlIndex(int controlIndex);
   int GetExpressionIndex();
   SyntacticElement GetEmptySyntacticElement();
-  bool AccountRule(const Expression& ruleE, StackMaintainerCalculator& theRuleStackMaintainer);
+  bool AccountRule(const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer);
   bool ApplyOneRule();
   void resetStack()
   { SyntacticElement emptyElement=this->GetEmptySyntacticElement();

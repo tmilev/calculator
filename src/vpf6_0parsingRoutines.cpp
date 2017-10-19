@@ -81,7 +81,8 @@ void Calculator::reset()
   this->controlSequences.Clear();
 
   //this->logEvaluationSteps.SetSize(0);
-  this->ExpressionHistoryStack.SetSize(0);
+  this->historyStack.SetSize(0);
+  this->historyRuleNames.SetSize(0);
   this->theAtoms.Clear();
   this->operationsComposite.Clear();
   this->operationsCompositeHandlers.SetSize(0);

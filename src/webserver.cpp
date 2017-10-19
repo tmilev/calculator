@@ -5356,10 +5356,11 @@ int WebServer::Run()
     //want as little code as possible between the fork and the logFile.
     //The original process is the parent, the almost identical copy is the child.
     //theLog << "\r\nChildPID: " << this->childPID;
+    if (incomingPID==0)
+      theGlobalVariables.processType="worker";
     if (theGlobalVariables.flagServerDetailedLog)
       if (incomingPID==0)
-      { theGlobalVariables.processType="worker";
-        theLog << "DEBUG: fork() successful in worker. " << logger::endL;
+      { theLog << "DEBUG: fork() successful in worker. " << logger::endL;
         theLog << "DEBUG: elapsed seconds @ fork(): " << theGlobalVariables.GetElapsedSeconds() << logger::endL;
         theLog << "DEBUG: reported by: " << this->ToStringActiveWorker() << logger::endL;
       }

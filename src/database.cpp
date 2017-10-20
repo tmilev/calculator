@@ -1003,7 +1003,14 @@ bool UserCalculator::Authenticate(DatabaseRoutines& theRoutines, std::stringstre
   if (!this->FetchOneUserRow(theRoutines, &secondCommentsStream))
   { if (!this->Iexist(theRoutines, 0))
       if (commentsOnFailure!=0)
-        *commentsOnFailure << "User " << this->username.value << " does not exist. ";
+      { *commentsOnFailure << "User " << this->username.value << " does not exist. ";
+        if (theGlobalVariables.hostNoPort=="localhost" ||
+            theGlobalVariables.hostNoPort=="127.0.0.1")
+          *commentsOnFailure << "If this is your first run, set the username to "
+          << "admin and enter the password you desire. "
+          << "The password will be automatically set on your first attempt to login. "
+          << "To add further accounts login as admin and go to 'Accounts'. ";
+      }
     //stOutput << "<hr>DEBUG: user " << this->username.value << " does not exist. More details: "
     //<< secondCommentsStream.str() << "<hr>";
     return false;

@@ -6,7 +6,7 @@ algebra system that serves the computational needs of
 both researchers and teachers.
 We aspire to get our system to be as powerful and useful as Mathematica and SAGE.
 
-## Calculator installation 
+## calculator installation 
 At the moment, you can only install the calculator from source. Here's what you need to do get started.
 1. Create a folder where you want the calculator project to be.
 ```
@@ -46,7 +46,7 @@ This completes the setup and your first run.
 
 ### Prerequisites
 1. **OS**. For now, we support **Linux only**. Windows and Mac OS support could be added in the future (depending on resources). We have explicit support for the following distros.
-- Ubuntu   (all systems using the apt-get package manager should work too, but that hasn't been tested);
+- Ubuntu   (all systems using the apt package manager should work too, but that hasn't been tested).
 - CentOS   (all systems using the yum package manager should work too, but that hasn't been tested).
 - We will add your Linux flavor upon request. We may need your help with your package manager. 
 2. **subversion/git**. needed to download the source. 

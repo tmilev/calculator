@@ -455,7 +455,7 @@ void Calculator::initPredefinedInnerFunctions()
    "StringToAtom");
   this->AddOperationInnerHandler
   ("\"", CalculatorFunctionsGeneral::innerQuoteToString, "",
-   "Creates a string.",
+   "Creates a string. ",
    "\"The quick brown fox jumps over the lazy dog.\"",
    true, false,
    "CalculatorFunctionsGeneral::innerQuoteToString",

@@ -335,7 +335,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("Crash", CalculatorFunctionsGeneral::innerCrash, "",
    "Crashes the calculator: tests the \
-    crashing mechanism (are crash logs properly created, etc.).",
+    crashing mechanism (are crash logs properly created, etc.). ",
    "Crash(0)",
    true, false,
    "CalculatorFunctionsGeneral::innerCrash",
@@ -343,7 +343,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("CrashListOutOfBounds",
     CalculatorFunctionsGeneral::innerCrashByListOutOfBounds, "",
-   "Crashes the calculator by attempting to use data out-of-bounds in a List data structure.",
+   "Crashes the calculator by attempting to use data out-of-bounds in a List data structure. ",
    "CrashListOutOfBounds(0)", true, false,
    "CalculatorFunctionsGeneral::innerCrashByListOutOfBounds",
    "CrashListOutOfBounds");

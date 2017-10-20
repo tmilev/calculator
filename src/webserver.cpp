@@ -2776,8 +2776,8 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "<input type=\"hidden\" name=\"request\" id=\"request\"";
   if (theGlobalVariables.userCalculatorRequestType!="logout" &&
       theGlobalVariables.userCalculatorRequestType!="login")
-  { out << " value=\"" << theGlobalVariables.userCalculatorRequestType << "\"";
-  } else
+    out << " value=\"" << theGlobalVariables.userCalculatorRequestType << "\"";
+  else
     out << "value=\"selectCourseFromHtml\"";
   out << ">";
   out << "<input type=\"hidden\" name=\"googleToken\" id=\"googleToken\" value=\"\">";

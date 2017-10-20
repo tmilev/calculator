@@ -794,35 +794,35 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
       std::string toAppend=theGlobalVariables.hostNoPort;
       if (MathRoutines::StringBeginsWith(toAppend, "www."))
         toAppend=toAppend.substr(4);
-      if (MathRoutines::StringBeginsWith(toAppend, "localhost"))
+      if (MathRoutines::StringBeginsWith(toAppend, "localhost") || toAppend=="")
         toAppend="calculator-algebra.org";
       std::string fileStart, fileExtension;
-      fileExtension=FileOperations::GetFileExtensionWithDot(inputCopy, &fileStart);
-      inputCopy=fileStart+"-"+toAppend+fileExtension;
+      fileExtension = FileOperations::GetFileExtensionWithDot(inputCopy, &fileStart);
+      inputCopy = fileStart + "-" + toAppend + fileExtension;
       //stOutput << "DEBUG: inputCopy: " << inputCopy;
     }
   std::string folderEnd;
   for (int i=0; i<FileOperations::FolderVirtualLinksNonSensitive().size(); i++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd))
-    { output=theGlobalVariables.PhysicalPathProjectBase+FileOperations::FolderVirtualLinksNonSensitive().theValues[i]+folderEnd;
+    { output=theGlobalVariables.PhysicalPathProjectBase + FileOperations::FolderVirtualLinksNonSensitive().theValues[i] + folderEnd;
       //stOutput << inputFileName << " transformed to: " << output;
       return true;
     }
   if (accessSensitiveFolders)
     for (int i=0; i<FileOperations::FolderVirtualLinksSensitive().size(); i++)
       if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd))
-      { output=theGlobalVariables.PhysicalPathProjectBase+FileOperations::FolderVirtualLinksSensitive().theValues[i]+folderEnd;
+      { output=theGlobalVariables.PhysicalPathProjectBase + FileOperations::FolderVirtualLinksSensitive().theValues[i] + folderEnd;
         //stOutput << inputFileName << " transformed to: " << output;
         return true;
       }
   if (accessULTRASensitiveFolders)
     for (int i=0; i<FileOperations::FolderVirtualLinksULTRASensitive().size(); i++)
       if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd))
-      { output=theGlobalVariables.PhysicalPathProjectBase+FileOperations::FolderVirtualLinksULTRASensitive().theValues[i]+folderEnd;
+      { output=theGlobalVariables.PhysicalPathProjectBase + FileOperations::FolderVirtualLinksULTRASensitive().theValues[i] + folderEnd;
         //stOutput << inputFileName << " transformed to: " << output;
         return true;
       }
-  output=theGlobalVariables.PhysicalPathHtmlFolder+inputCopy;
+  output = theGlobalVariables.PhysicalPathHtmlFolder + inputCopy;
 //  stOutput << "<br>No key matching: " << inputFileName << ". Selecting default: " << output << "<br>";
   return true;
 }

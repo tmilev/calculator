@@ -199,7 +199,7 @@ void Calculator::initPredefinedInnerFunctions()
    "If the two arguments of or are identical, replaces the expression with the argument.\
    Works even if the individual expression cannot be evaluated to 1 or 0. \
    Please note that mathematically equal objects may fail to be identical, for example\
-   a rational number 5 and an algebraic number 5.",
+   a rational number 5 and an algebraic number 5. ",
    "a or b; a or a",
    true, false,
    "CalculatorConversions::innerOrIdentical",
@@ -208,14 +208,14 @@ void Calculator::initPredefinedInnerFunctions()
   ("if", CalculatorFunctionsGeneral::innerIf, "",
    "if function. Takes 3 arguments. If first argument is true (equal to 1)\
    then returns the second argument. If the first argument is false (equal to 0)\
-   returns the third argument. In any other situation the expression is not reduced.",
+   returns the third argument. In any other situation the expression is not reduced. ",
    "if (1, x,y); if (0, x, y); if (2, x,y)",
    true, false,
    "CalculatorConversions::innerIf",
    "if");
   this->AddOperationInnerHandler
   ("and", CalculatorFunctionsGeneral::innerAnd, "",
-   "Logical and.",
+   "Logical and. ",
    "0 and 0; 0 and 1; 1 and 0; 1 and 1; a and 1; a and 0;",
    true, false,
    "CalculatorConversions::innerAnd",
@@ -223,7 +223,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("URLStringToNormalString",
     CalculatorFunctionsGeneral::innerUrlStringToNormalString, "",
-   "Converts an url-encoded string to a normal string.",
+   "Converts an url-encoded string to a normal string. ",
    "URLStringToNormalString(\"randomSeed%3d92742048%26submissionsAlgebraAnswer%3\")",
    true, false,
    "CalculatorConversions::innerUrlStringToNormalString",
@@ -231,7 +231,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("ConvertStringToURL",
     CalculatorFunctionsGeneral::innerStringToURL, "",
-   "Converts a normal string to a url-encoded one.",
+   "Converts a normal string to a url-encoded one. ",
    "ConvertStringToURL(\"+ %\")",
    true, false,
    "CalculatorConversions::innerStringToURL",

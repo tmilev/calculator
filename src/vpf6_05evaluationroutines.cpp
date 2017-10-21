@@ -337,6 +337,13 @@ StateMaintainerCalculator::~StateMaintainerCalculator()
   this->owner=0;
 }
 
+Expression Calculator::GetNewBoundVar()
+{ Expression result(*this);
+  result.AddChildAtomOnTop(this->opBind());
+  result.AddChildOnTop(this->GetNewAtom());
+  return result;
+}
+
 Expression Calculator::GetNewAtom()
 { std::string atomPrefix;
   std::string candidate;
@@ -352,7 +359,6 @@ Expression Calculator::GetNewAtom()
     }
     atomPrefix=candidate;
   }
-
 }
 
 bool Calculator::AccountRule(const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer)

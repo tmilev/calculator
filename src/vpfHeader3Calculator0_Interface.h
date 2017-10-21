@@ -494,6 +494,13 @@ bool EvaluatesToDoubleUnderSubstitutions
   bool AreEqualExcludingChildren(const Expression& other) const
   { return this->owner==other.owner && this->theData==other.theData && this->children.size==other.children.size;
   }
+  //The following function creates an expression by parsing a calculator-like string.
+  //The purpose of this function is to reduce the number of lines needed to create an Expression using C++.
+  //Consider creating the expression f{}{{a}}={{a}}+1; f{}b;
+  //We would need to create a large expression tree, so many calls of Expression::MakeXOX.
+  //Instead, we can simply parse the expression from a string.
+  //The inputExpressions give us the ability to specify substitutions
+  bool AssignStringParsed(const std::string& theString, MapLisT<std::string, Expression, MathRoutines::hashString>* substitutions, Calculator& owner);
   void operator/=(const Expression& other);
   void operator+=(const Expression& other);
   void operator-=(const Expression& other);
@@ -521,6 +528,8 @@ bool EvaluatesToDoubleUnderSubstitutions
 //  void operator=(const Expression& other);
   bool operator>(const Expression& other)const;
   bool GreaterThanNoCoeff(const Expression& other)const;
+  void SubstituteRecursively(MapLisT<Expression, Expression>& theSubs);
+  void SubstituteRecursivelyInChildren(MapLisT<Expression, Expression>& theSubs);
 };
 
 class Function
@@ -598,7 +607,7 @@ class Function
     this->flagDisabledByUser=inputDisabledByUser;
     this->indexOperationParentThatBansHandler=inputIndexParentThatBansHandler;
   }
-  inline static unsigned int HashFunction(const Function& input)
+  static unsigned int HashFunction(const Function& input)
   { return input.HashFunction();
   }
   unsigned int HashFunction()const
@@ -1071,6 +1080,7 @@ public:
   FormatExpressions formatVisibleStrings;
   std::string ToString();
   std::string ToStringPerformance();
+  Expression GetNewBoundVar();
   Expression GetNewAtom();
   void ComputeAutoCompleteKeyWords();
   std::string ElementToStringNonBoundVars();

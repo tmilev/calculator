@@ -1685,10 +1685,36 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
   return resultStream.str();
 }
 
+bool Expression::AssignStringParsed(const std::string& theString, MapLisT<std::string, Expression, MathRoutines::hashString>* substitutions, Calculator& owner)
+{ MacroRegisterFunctionWithName("Expression::AssignStringParsed");
+  Expression commands, result;
+  List<SyntacticElement> outputSyntacticSoup, outputSyntacticStack;
+  std::string outputSyntacticErrors;
+  if (!owner.ParseAndExtractExpressions(theString, commands, outputSyntacticSoup, outputSyntacticStack, &outputSyntacticErrors))
+  { this->AssignValue(outputSyntacticErrors, owner);
+    return false;
+  }
+  if (commands.StartsWith(owner.opEndStatement(), 2))
+    result=commands[1];
+  else
+    result=commands;
+  if (substitutions!=0)
+  { MapLisT<Expression, Expression> theSubs;
+    for (int i=0; i<substitutions->size(); i++)
+    { Expression theSubbed;
+      theSubbed.MakeAtom(substitutions->theKeys[i], owner);
+      theSubs.SetKeyValue(theSubbed, substitutions->theValues[i]);
+    }
+    result.SubstituteRecursively(theSubs);
+  }
+  *this=result;
+  return true;
+}
+
 bool Expression::IsSuitableForSubstitution()const
 { if (this->owner==0)
     return false;
-  if(this->IsBuiltInTypE() || this->StartsWith(this->owner->opBind()))
+  if (this->IsBuiltInTypE() || this->StartsWith(this->owner->opBind()))
     return false;
   return true;
 }
@@ -1696,10 +1722,33 @@ bool Expression::IsSuitableForSubstitution()const
 bool Expression::IsSuitableForRecursion()const
 { if (this->owner==0)
     return false;
-  if(this->IsAtom() || this->IsBuiltInTypE() ||
+  if (this->IsAtom() || this->IsBuiltInTypE() ||
      this->StartsWith(this->owner->opBind()))
     return false;
   return true;
+}
+
+void Expression::SubstituteRecursively(MapLisT<Expression, Expression>& theSubs)
+{ if (theSubs.Contains(*this))
+  { (*this)=theSubs.GetValueCreateIfNotPresent(*this);
+    return;
+  }
+  this->SubstituteRecursivelyInChildren(theSubs);
+}
+
+void Expression::SubstituteRecursivelyInChildren(MapLisT<Expression, Expression>& theSubs)
+{ if (!this->IsSuitableForSubstitution())
+    return;
+  Expression tempE;
+  for (int i=0; i<this->size(); i++)
+    if (theSubs.Contains((*this)[i]))
+      this->SetChilD(i, theSubs.GetValueCreateIfNotPresent((*this)[i]));
+    else
+    { tempE=(*this)[i];
+      tempE.SubstituteRecursivelyInChildren(theSubs);
+      if (!(tempE==(*this)[i]))
+        this->SetChilD(i, tempE);
+    }
 }
 
 void Expression::SubstituteRecursively(const Expression& toBeSubbed, const Expression& toBeSubbedWith)

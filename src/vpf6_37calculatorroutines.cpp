@@ -1654,3 +1654,37 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic
   theIntegerPower.AssignValue((Rational) exponent.GetNumerator(), theCommands);
   return output.MakeXOX(theCommands, theCommands.opThePower(),reduced, theIntegerPower);
 }
+
+bool CalculatorFunctionsGeneral::innerNewtonsMethod(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerNewtonsMethod");
+  if (input.size()!=4)
+    return false;
+  Expression theFun;
+  if (!CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression(theCommands, input[1], theFun))
+    theFun=input[1];
+  HashedList<Expression> theVars;
+  if (!theFun.GetFreeVariables(theVars,true))
+    return theCommands << "Failed to get free variables from: " << theFun.ToString();
+  if (theVars.size!=1)
+    return theCommands << "While trying to extract a function from: " << theFun.ToString()
+    << ", got " << theVars.size << " variables. Newton's method requires an expression that depends "
+    << "on exactly one variable. The variables I got were: "
+    << theVars.ToStringCommaDelimited();
+  MapLisT<std::string, Expression, MathRoutines::hashString> theSub;
+  theSub.SetKeyValue("x", theVars[0]);
+  theSub.SetKeyValue("f", theFun);
+  theSub.SetKeyValue("a", theCommands.GetNewAtom());
+  theSub.SetKeyValue("iteratedMap", theCommands.GetNewAtom());
+  theSub.SetKeyValue("NewtonMap", theCommands.GetNewAtom());
+  theSub.SetKeyValue("y", theCommands.GetNewAtom());
+  theSub.SetKeyValue("startingPoint", input[2]);
+  theSub.SetKeyValue("numIterations", input[3]);
+
+  return output.AssignStringParsed(
+  "(NewtonMap{}{{a}}= DoubleValue( (iteratedMap=x- f/ Differentiate{}(x, f); x={{a}}; iteratedMap )_3); \
+   y_{0} = startingPoint;\
+   y_{{a}}=NewtonMap{}(y_{a-1});\
+   y_{numIterations})_4"
+
+  , &theSub, theCommands);
+}

@@ -198,6 +198,7 @@ public:
   static bool innerDiffdivDiffxToDifferentiation(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDdivDxToDiffDivDiffx(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestMathMouseHover(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerNewtonsMethod(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBuildFreecalc(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBuildFreecalcSingleSlides(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBuildFreecalcSlidesOnTopic(Calculator& theCommands, const Expression& input, Expression& output);

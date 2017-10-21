@@ -2113,6 +2113,20 @@ D-B;\
    "CalculatorFunctionsGeneral::innerDFQsEulersMethod",
    "DFQEuler")
    ;
+    this->AddOperationInnerHandler
+    ("NewtonsMethod",
+     CalculatorFunctionsGeneral::innerNewtonsMethod, "",
+     "Applies Newton's method with a given starting point and given number of iterations.\
+     The first argument gives the function whose zeroes we are trying to find. \
+     The second argument gives the starting point.\
+     The last argument gives the number of iterations of the method.\
+     ",
+     "NewtonsMethod(e^x-( 200 sin{} x  +x^7), 0, 10);\n\
+      NewtonsMethod(e^x=( 200 sin{} x  +x^7), 0, 10);",
+     true, false,
+     "CalculatorFunctionsGeneral::innerNewtonsMethod",
+     "NewtonsMethod")
+     ;
   this->AddOperationInnerHandler ("FetchWebPageGET",
   CalculatorFunctionsGeneral::innerFetchWebPageGET, "",
    "Attempts to GET a web page. For logged-in admins only.",

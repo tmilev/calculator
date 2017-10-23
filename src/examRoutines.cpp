@@ -834,11 +834,14 @@ void SyntacticElementHTML::resetAllExceptContent()
   this->children.SetSize(0);
 }
 
-std::string SyntacticElementHTML::ToStringOpenTag(bool immediatelyClose)
+std::string SyntacticElementHTML::ToStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose)
 { if (this->tag=="" || this->flagUseMathSpan==false)
     return "";  
   std::stringstream out;
-  out << "<" << this->tag;
+  if (overrideTagIfNonEmpty=="")
+    out << "<" << this->tag;
+  else
+    out << "<" << overrideTagIfNonEmpty;
   for (int i=0; i<this->tagKeys.size; i++)
     out << " " << this->tagKeys[i] << "=\"" << this->tagValues[i] << "\"";
   for (int i=0; i<this->defaultKeysIfMissing.size; i++)
@@ -852,10 +855,13 @@ std::string SyntacticElementHTML::ToStringOpenTag(bool immediatelyClose)
   return out.str();
 }
 
-std::string SyntacticElementHTML::ToStringCloseTag()
+std::string SyntacticElementHTML::ToStringCloseTag(const std::string& overrideTagIfNonEmpty)
 { if (this->tag=="" || this->flagUseMathSpan==false)
     return "";
-  return "</" + this->tag + ">";
+  if (overrideTagIfNonEmpty=="")
+    return "</" + this->tag + ">";
+  else
+    return "</" + overrideTagIfNonEmpty + ">";
 }
 
 std::string SyntacticElementHTML::ToStringTagAndContent()
@@ -863,7 +869,7 @@ std::string SyntacticElementHTML::ToStringTagAndContent()
   if (this->syntacticRole=="")
     return this->content;
   std::stringstream out;
-  out << this->ToStringOpenTag() + this->content + this->ToStringCloseTag();
+  out << this->ToStringOpenTag("") + this->content + this->ToStringCloseTag("");
   if (this->children.size>0)
   { out << "[";
     for (int i=0; i< this->children.size; i++)
@@ -915,7 +921,7 @@ std::string SyntacticElementHTML::ToStringInterpretedBody()
   if (this->IsInterpretedNotByCalculator())
     return this->interpretedCommand;
   std::stringstream out;
-  out << this->ToStringOpenTag();
+  out << this->ToStringOpenTag("");
   if (this->interpretedCommand!="")
   { if (this->flagUseMathMode)
     { out << "\\( ";
@@ -926,7 +932,7 @@ std::string SyntacticElementHTML::ToStringInterpretedBody()
     if (this->flagUseMathMode)
       out << " \\)";
   }
-  out << this->ToStringCloseTag();
+  out << this->ToStringCloseTag("");
   return out.str();
 }
 
@@ -1415,7 +1421,7 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
 //  inputOutput.defaultKeysIfMissing.AddOnTop("style");
 //  inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
   currentA.htmlTextareaLatexAnswer=
-  inputOutput.ToStringOpenTag() + inputOutput.ToStringCloseTag();
+  inputOutput.ToStringOpenTag("textarea") + inputOutput.ToStringCloseTag("textarea");
   currentA.htmlSpanMQfield =
   (std::string)"<div class=\"calculatorMQfieldEnclosure\">"+
   "<span id='" + currentA.idMQfield + "'>" + "</span>"+
@@ -2227,7 +2233,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       else if (this->calculatorClasses.Contains(tagClass))
         thirdToLast.syntacticRole="command";
       else
-      { thirdToLast.content=thirdToLast.ToStringOpenTag(true);
+      { thirdToLast.content=thirdToLast.ToStringOpenTag("",true);
         thirdToLast.resetAllExceptContent();
       }
       eltsStack.RemoveLastObject();
@@ -2237,14 +2243,14 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       continue;
     }
     if (last.syntacticRole=="</closeTag>" && this->calculatorTagsRecordedLiterally.Contains(last.tag))
-    { last.content=last.ToStringCloseTag();
+    { last.content=last.ToStringCloseTag("");
       last.syntacticRole="command";
       last.tag+="Finish";
       //this->SetTagClassFromTag(last, true);
       continue;
     }
     if (last.syntacticRole=="</closeTag>")
-    { last.content=last.ToStringCloseTag();
+    { last.content=last.ToStringCloseTag("");
       last.resetAllExceptContent();
       //this->SetTagClassFromTag(last, true);
       continue;
@@ -2391,7 +2397,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       } else if (this->SetTagClassFromOpenTag(secondToLast))
         secondToLast.syntacticRole="command";
       else
-      { secondToLast.content=secondToLast.ToStringOpenTag();
+      { secondToLast.content=secondToLast.ToStringOpenTag("");
         if (theGlobalVariables.UserDefaultHasProblemComposingRights())
           if (MathRoutines::StringBeginsWith(tagClass, "calculator"))
             if (!this->calculatorClasses.Contains(tagClass))

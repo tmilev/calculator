@@ -1663,13 +1663,28 @@ bool CalculatorFunctionsGeneral::innerNewtonsMethod(Calculator& theCommands, con
   if (!CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression(theCommands, input[1], theFun))
     theFun=input[1];
   HashedList<Expression> theVars;
-  if (!theFun.GetFreeVariables(theVars,true))
+  if (!theFun.GetFreeVariables(theVars, true))
     return theCommands << "Failed to get free variables from: " << theFun.ToString();
   if (theVars.size!=1)
     return theCommands << "While trying to extract a function from: " << theFun.ToString()
     << ", got " << theVars.size << " variables. Newton's method requires an expression that depends "
     << "on exactly one variable. The variables I got were: "
     << theVars.ToStringCommaDelimited();
+  int numIterations=-1;
+  if (!input[3].IsSmallInteger(&numIterations))
+  { std::stringstream errorStream;
+    errorStream << "While doing Newton's method, could not extract a **small** integer from the third argument "
+    << input[3].ToString() << " of "
+    << input.ToString() << ". Please enter a number as the third argument of Newton's method. ";
+    return output.MakeError(errorStream.str(), theCommands);
+  }
+  if (numIterations<1 || numIterations>50)
+  { std::stringstream errorStream;
+    errorStream << "While doing Newton's method with the command: " << input.ToString()
+    << ", the third argument requests " << numIterations
+    << " iterations. However, the number of iterations is required to be a number between 1 and 50. ";
+    return output.MakeError(errorStream.str(), theCommands);
+  }
   MapLisT<std::string, Expression, MathRoutines::hashString> theSub;
   theSub.SetKeyValue("x", theVars[0]);
   theSub.SetKeyValue("f", theFun);

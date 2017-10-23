@@ -89,8 +89,8 @@ public:
   std::string ToStringInterpretedBody();
   std::string ToStringInterpretedHead();
   std::string ToStringTagAndContent();
-  std::string ToStringOpenTag(bool immediatelyClose=false);
-  std::string ToStringCloseTag();
+  std::string ToStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose=false);
+  std::string ToStringCloseTag(const std::string& overrideTagIfNonEmpty);
   std::string GetTagClass();
   std::string ToStringDebug();
   SyntacticElementHTML()

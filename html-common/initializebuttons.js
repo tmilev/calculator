@@ -67,11 +67,12 @@ function initializeButtonsCommon()
 
 var MathQuillCommandButtonCollection=new Object;
 
-function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWriteInsteadOfCmdInput)
+function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection)
 { var commandObject=new Object;
   commandObject.theCommand=inputCommand;
   commandObject.theLabel=inputLabel;
   commandObject.isComposite=false;
+  commandObject.extraDirection=inputExtraDirection;
   if (typeof(inputCommand)!=="string")
     commandObject.isComposite=true;
   if (!commandObject.isComposite)
@@ -81,6 +82,7 @@ function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWri
     for (var i=0; i<inputCommand.length; i++)
       commandObject.id+=inputCommand[i];
   }
+//  console.log(commandObject.id);
   if (doWriteInsteadOfCmdInput!==undefined)
     commandObject.doWriteInsteadOfCmd=doWriteInsteadOfCmdInput;
   else
@@ -112,11 +114,20 @@ function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWri
         currentMathField.write(commandObject.theCommand);
     } else
     { for (var i=0; i<commandObject.theCommand.length; i++)
-        if (!this.doWriteInsteadOfCmd)
+      { var doCMD=!this.doWriteInsteadOfCmd;
+        if (!doCMD)
+          if (commandObject.theCommand[i]==='(' ||
+              commandObject.theCommand[i]===')' ||
+              commandObject.theCommand[i]===' ')
+            doCMD=true;
+        if (doCMD)
           currentMathField.cmd(commandObject.theCommand[i]);
         else
           currentMathField.write(commandObject.theCommand[i]);
+      }
     }
+    if (commandObject.extraDirection!==undefined)
+      currentMathField.moveToDirEnd(MQ.L);
     currentMathField.focus();
     event.preventDefault();
   }
@@ -171,6 +182,7 @@ mathQuillCommandButton(" or ", "or");
 mathQuillCommandButton("in", "&#8712;");
 mathQuillCommandButton(["^","circ"], "&#176;");
 mathQuillCommandButton("circ", "&#9675;");
+mathQuillCommandButton(["NewtonsMethod ","(", ",", ",", ")"], "Newton", "font-size: 7px", false, -4);
 mathQuillCommandButton("\\begin{pmatrix} \\\\ \\end{pmatrix}", "2x1","font-size : 7px;", true);
 mathQuillCommandButton("\\begin{pmatrix} \\\\ \\\\ \\end{pmatrix}", "3x1", "font-size : 7px;", true);
 mathQuillCommandButton("\\begin{pmatrix} & \\\\ & \\end{pmatrix}", "2x2", "font-size : 7px;", true);
@@ -309,6 +321,9 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
     addCommand("beta");
     addCommand("gamma");
     addCommand("theta");
+  }
+  if (buttonArray.indexOf("NewtonsMethod (,,)")>-1 || includeAll)
+  { addCommand("NewtonsMethod (,,)");
   }
   var theContent="<table>";
   var numButtonsPerLine=4;

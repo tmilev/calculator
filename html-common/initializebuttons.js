@@ -182,7 +182,7 @@ mathQuillCommandButton(" or ", "or");
 mathQuillCommandButton("in", "&#8712;");
 mathQuillCommandButton(["^","circ"], "&#176;");
 mathQuillCommandButton("circ", "&#9675;");
-mathQuillCommandButton(["NewtonsMethod ","(", ",", ",", ")"], "Newton", "font-size: 7px", false, -4);
+mathQuillCommandButton(["NewtonsMethod ","(", ",", ",", ")"], "Newton", "font-size: 6px", false);
 mathQuillCommandButton("\\begin{pmatrix} \\\\ \\end{pmatrix}", "2x1","font-size : 7px;", true);
 mathQuillCommandButton("\\begin{pmatrix} \\\\ \\\\ \\end{pmatrix}", "3x1", "font-size : 7px;", true);
 mathQuillCommandButton("\\begin{pmatrix} & \\\\ & \\end{pmatrix}", "2x2", "font-size : 7px;", true);
@@ -322,7 +322,12 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
     addCommand("gamma");
     addCommand("theta");
   }
-  if (buttonArray.indexOf("NewtonsMethod (,,)")>-1 || includeAll)
+  if (buttonArray.indexOf("NewtonsMethod")>-1 ||
+      buttonArray.indexOf("newtonsmethod")>-1 ||
+      buttonArray.indexOf("NewtonMethod")>-1 ||
+      buttonArray.indexOf("newtonmethod")>-1 ||
+      buttonArray.indexOf("newton")>-1 ||
+      includeAll)
   { addCommand("NewtonsMethod (,,)");
   }
   var theContent="<table>";

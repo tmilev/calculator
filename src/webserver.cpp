@@ -4674,13 +4674,60 @@ std::string WebServer::ToStringStatusActive()
   return out.str();
 }
 
+std::string WebServer::ToStringStatusForLogFile()
+{ MacroRegisterFunctionWithName("WebServer::ToStringStatusForLogFile");
+  if (theGlobalVariables.flagRunningApache)
+     return "Running through standard Apache web server, no connection details to display. ";
+  std::stringstream out;
+  out << "<b>The calculator web server status.</b><br>";
+  double timeSoFar=theGlobalVariables.GetElapsedSeconds();
+  out
+  << timeSoFar
+  << " seconds = "
+  << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
+  (timeSoFar, false, false)
+  << " web server uptime. ";
+  int approxNumPings= timeSoFar/this->WebServerPingIntervalInSeconds;
+  if (approxNumPings<0)
+    approxNumPings=0;
+  int numConnectionsSoFarApprox=this->NumConnectionsSoFar-approxNumPings;
+  if (numConnectionsSoFarApprox<0)
+    numConnectionsSoFarApprox=0;
+  out << "~" << numConnectionsSoFarApprox << " actual connections + ~"
+  << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
+  << " served since last restart. "
+  << "This counts one connection per problem answer preview, page visit, progress report ping, etc. "
+  ;
+  int numInUse=0;
+  for (int i=0; i<this->theWorkers.size; i++)
+    if (this->theWorkers[i].flagInUse)
+      numInUse++;
+  out << "<hr>Currently, there are " << numInUse << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
+
+  out
+  << " The number tends to be high as many browsers open more than one connection per page visit. <br>"
+  << "<b>The following policies are only temporary and will be relaxed as we roll the webserver into"
+  << " production. </b><br>"
+  << this->MaxTotalUsedWorkers << " global maximum of simultaneous non-closed connections allowed. "
+  << "When the limit is exceeded, all connections except a randomly chosen one will be terminated. "
+  << "<br> " << this->MaxNumWorkersPerIPAdress
+  << " maximum simultaneous connection per IP address. "
+  << "When the limit is exceeded, all connections from that IP address are terminated. "
+  ;
+  out
+  << "<br>kill commands: " << this->NumProcessAssassinated
+  << ", processes reaped: " << this->NumProcessesReaped
+  << ", normally reclaimed workers: " << this->NumWorkersNormallyExited
+  << ", connections so far: " << this->NumConnectionsSoFar;
+  return out.str();
+}
+
 std::string WebServer::ToStringStatusPublicNoTop()
 { MacroRegisterFunctionWithName("WebServer::ToStringStatusPublicNoTop");
   if (theGlobalVariables.flagRunningApache)
      return "Running through standard Apache web server, no connection details to display. ";
   std::stringstream out;
   out << "<b>The calculator web server status.</b><br>";
-  out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><hr>";
   out
   << this->GetActiveWorker().timeOfLastPingServerSideOnly
   << " seconds = "
@@ -4699,8 +4746,13 @@ std::string WebServer::ToStringStatusPublicNoTop()
   << " served since last restart. "
   << "This counts one connection per problem answer preview, page visit, progress report ping, etc. "
   ;
+  int numInUse=0;
+  for (int i=0; i<this->theWorkers.size; i++)
+    if (this->theWorkers[i].flagInUse)
+      numInUse++;
+  out << "<hr>Currently, there are " << numInUse << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
 
-  out << "<br>" << this->theWorkers.size  << " = peak number of concurrent connections. "
+  out
   << " The number tends to be high as many browsers open more than one connection per page visit. <br>"
   << "<b>The following policies are only temporary and will be relaxed as we roll the webserver into"
   << " production. </b><br>"
@@ -4740,6 +4792,7 @@ std::string WebServer::ToStringStatusAll()
   if (theGlobalVariables.flagRunningApache)
     return "Running through Apache. ";
   std::stringstream out;
+  out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><hr>";
   out << this->ToStringStatusPublicNoTop() << "<hr>";
   if (this->activeWorker==-1)
     out << "The process is functioning as a server.";
@@ -4747,10 +4800,6 @@ std::string WebServer::ToStringStatusAll()
   { out << "The process is functioning as a worker. The active worker is number " << this->activeWorker+1 << ". ";
     out << "<br>" << this->ToStringStatusActive();
   }
-  int numInUse=0;
-  for (int i=0; i<this->theWorkers.size; i++)
-    if (this->theWorkers[i].flagInUse)
-      numInUse++;
   for (int i=0; i<this->theWorkers.size; i++)
   { WebWorker& currentWorker=this->theWorkers[i];
     if (!currentWorker.flagInUse)
@@ -4758,7 +4807,7 @@ std::string WebServer::ToStringStatusAll()
     currentWorker.pipeWorkerToWorkerStatus.ReadWithoutEmptying(false, false);
     currentWorker.status = currentWorker.pipeWorkerToWorkerStatus.GetLastRead();
   }
-  out << "<hr><hr>" << numInUse << " workers in use out of total " << this->theWorkers.size << " workers. ";
+  out << "<hr>";
   out << "Connections: " << this->currentlyConnectedAddresses.ToString();
   for (int i=0; i<this->theWorkers.size; i++)
     out << "<hr>" << this->theWorkers[i].ToStringStatus();
@@ -5246,6 +5295,7 @@ int WebServer::Run()
   this->NumFailedSelectsSoFar=0;
   long long previousReportedNumberOfSelects=0;
   int previousServerStatReport=0;
+  int previousServerStatDetailedReport=0;
   sigset_t allSignals, oldSignals;
   sigfillset(&allSignals);
   while(true)
@@ -5280,6 +5330,10 @@ int WebServer::Run()
       << " #processes reaped: " << this->NumProcessesReaped
       << " #normally reclaimed workers: " << this->NumWorkersNormallyExited
       << " #connections so far: " << this->NumConnectionsSoFar << logger::endL;
+    }
+    if (this->NumProcessAssassinated+this->NumProcessesReaped+this->NumWorkersNormallyExited+this->NumConnectionsSoFar-previousServerStatDetailedReport>499)
+    { previousServerStatDetailedReport=this->NumProcessAssassinated+this->NumProcessesReaped+this->NumWorkersNormallyExited+this->NumConnectionsSoFar;
+      logProcessStats << this->ToStringStatusForLogFile() << logger::endL;
     }
     int newConnectedSocket =-1;
     theGlobalVariables.flagUsingSSLinCurrentConnection=false;

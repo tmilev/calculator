@@ -402,6 +402,7 @@ public:
   std::string ToStringStatusAll();
   std::string ToStringStatusPublic();
   std::string ToStringStatusPublicNoTop();
+  std::string ToStringStatusForLogFile();
   static void TurnProcessMonitoringOn();
   static void TurnProcessMonitoringOff();
   static void ToggleProcessMonitoring();

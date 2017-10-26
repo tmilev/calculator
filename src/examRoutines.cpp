@@ -4107,7 +4107,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     out << TopicElement::GetTableFinish(plainStyle);
   out << "</ol>";
   tableStarted=false;
-  outHead << "<panelStudentScores>The course contains "
+  outHead << "<panelStudentScores>Calculator build " << theGlobalVariables.buildVersion << ". The course contains "
   << this->NumProblemsFound << " problem templates, "
   << this->NumSlidesFound << " slides (printable+projector mode counted as a single slide) and "
   << this->NumVideosFound << " videos.</panelStudentScores><br>";

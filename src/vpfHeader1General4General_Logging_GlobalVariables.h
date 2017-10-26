@@ -93,6 +93,7 @@ public:
   bool flagSSLisAvailable;
   bool flagCertificatesAreOfficiallySigned;
   bool flagCrashInitiated;
+  std::string buildVersion;
   std::string OperatingSystem;
   std::string hostWithPort;
   std::string hostNoPort;

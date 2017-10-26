@@ -3149,8 +3149,8 @@ int WebWorker::ProcessCalculator()
   this->SetHeaderOKNoContentLength();
   theParser.inputString=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
   theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
-  stOutput << "<html><head> <title>calculator version  "
-  << __DATE__ << ", " << __TIME__ << "</title>";
+  stOutput << "<html><head> <title>Calculator build " << theGlobalVariables.buildVersion
+  << "</title>";
   stOutput << HtmlRoutines::GetJavascriptMathjax();
   stOutput << HtmlRoutines::GetCalculatorStyleSheetWithTags();
   stOutput << HtmlRoutines::GetJavascriptHideHtmlWithTags();
@@ -5268,6 +5268,10 @@ int WebServer::Run()
     logSuccessfulForks.reset();
     logSuccessfulForks.flagWriteImmediately=true;
   }
+  std::string theDir= FileOperations::GetCurrentFolder();
+  theGlobalVariables.ChDir("../");
+  theGlobalVariables.buildVersion=MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("svn info | grep \"Revision\" | awk '{print $2}'"));
+  theGlobalVariables.ChDir(theDir);
   if (true)
   { int pidMonitor=fork();
     if (pidMonitor<0)

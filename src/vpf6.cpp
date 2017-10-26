@@ -1307,18 +1307,21 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theComman
       }
       if (left->StartsWith(theCommands.opThePower(), 3))
         if ((*left)[1]==(*right)[1])
-        { bool isGood=(*left)[2].IsInteger() && (*right)[2].IsInteger();
+        { bool isGood=(*left)[2].IsInteger() || (*right)[2].IsInteger();
           if (!isGood)
             isGood=(*left)[1].IsKnownToBeNonNegative();
           if (!isGood)
             continue;
           Rational leftRat, rightRat;
-          if ((*left)[2].IsOfType<Rational>(&leftRat) && (*right)[2].IsOfType<Rational>(&rightRat))
-          { if ( leftRat.IsInteger() && !rightRat.IsInteger())
-              continue;
-            if (!leftRat.IsInteger() &&  rightRat.IsInteger())
-              continue;
-          }
+          if (!isGood)
+            if ((*left)[2].IsOfType<Rational>(&leftRat) && (*right)[2].IsOfType<Rational>(&rightRat))
+            { if ( leftRat.IsInteger() && !rightRat.IsInteger())
+                isGood=true;
+              if (!leftRat.IsInteger() &&  rightRat.IsInteger())
+                isGood=true;
+            }
+          if (!isGood)
+            continue;
           thePower.MakeXOX(theCommands, theCommands.opPlus(), (*left)[2], (*right)[2]);
           return output.MakeXOX(theCommands, theCommands.opThePower(), (*left)[1], thePower);
           //stOutput << "<br>output be at second place: " << output.ToString();

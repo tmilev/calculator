@@ -1307,13 +1307,9 @@ bool Calculator::innerMultiplyAtoXtimesAtoYequalsAtoXplusY(Calculator& theComman
       }
       if (left->StartsWith(theCommands.opThePower(), 3))
         if ((*left)[1]==(*right)[1])
-        { bool isGood=(*left)[1].IsKnownToBeNonNegative();
+        { bool isGood=(*left)[2].IsInteger() && (*right)[2].IsInteger();
           if (!isGood)
-          { Rational powerInner, powerOuter;
-            if (input[2].IsRational(&powerOuter) && input[1][2].IsRational(&powerInner))
-              if ((powerInner*powerOuter).IsEven())
-                isGood=true;
-          }
+            isGood=(*left)[1].IsKnownToBeNonNegative();
           if (!isGood)
             continue;
           Rational leftRat, rightRat;
@@ -1687,6 +1683,12 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
     isGood=true;
   if (input[2].IsInteger())
     isGood=true;
+  if (!isGood)
+  { Rational powerInner, powerOuter;
+    if (input[2].IsRational(&powerOuter) && input[1][2].IsRational(&powerInner))
+      if ((powerInner*powerOuter).IsEven())
+        isGood=true;
+  }
   if (!isGood)
     return false;
   Expression tempE;

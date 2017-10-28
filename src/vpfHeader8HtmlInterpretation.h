@@ -155,6 +155,7 @@ public:
   Selection studentTagsAnswered;
   ProblemData theProblemData;
   List<std::string> answerHighlights;
+  int topicLectureCounter;
   std::string topicListContent;
   std::string topicListFileName;
   HashedList<std::string, MathRoutines::hashString> problemNamesNoTopics;

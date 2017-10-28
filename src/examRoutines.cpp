@@ -41,6 +41,7 @@ CalculatorHTML::CalculatorHTML()
   this->timeToParseHtml=0;
   this->flagMathQuillWithMatrices=false;
   this->flagSectionsPrepared=false;
+  this->topicLectureCounter=0;
 }
 
 #ifdef MACRO_use_MySQL
@@ -4228,10 +4229,30 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   }
   problemLabel << " ";
   this->problemNumberString=problemLabel.str();
+  std::string titleWithLectureNumber=this->title;
+  int lectureTagStart=titleWithLectureNumber.find("<lectureTag>");
+  if (lectureTagStart>=0)
+  { int lectureTagFinish=titleWithLectureNumber.find("</lectureTag>");
+    if (lectureTagFinish>=0)
+    { owner.topicLectureCounter++;
+      lectureTagFinish+=13;
+      std::stringstream newTitle;
+      newTitle
+      << titleWithLectureNumber.substr(0,lectureTagStart)
+      << "<lectureTag>\\(\\mathcal L\\) "
+      << "</lectureTag>"
+      << "Lecture "
+      << owner.topicLectureCounter
+      << "."
+      << titleWithLectureNumber.substr(lectureTagFinish)
+      ;
+      titleWithLectureNumber=newTitle.str();
+    }
+  }
   if (this->title=="")
     this->displayTitle= this->problemNumberString + "-" ;//+ "<br>DEBUG: "+this->ToString();
   else
-    this->displayTitle= this->problemNumberString + this->title ;//+ "<br>DEBUG: "+this->ToString();
+    this->displayTitle= this->problemNumberString + titleWithLectureNumber;//+ "<br>DEBUG: "+this->ToString();
   if (this->video=="" || this->video=="-" || this->video=="--")
     this->displayVideoLink = "";
   else

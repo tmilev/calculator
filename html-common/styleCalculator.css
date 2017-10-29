@@ -372,13 +372,7 @@ textarea.currentFileNameArea {
   height: 20px;
   margin-bottom: -8px;
 }
-ol.listItem{
-  margin-left: 0;
-  margin-right: 0;
-  padding-left: 0;
-  padding-bottom: 5px;
-}
-li.listChapter{
+div.listChapter{
   padding-bottom: 10px; 
   padding-left: 0;
   margin-left: 0;
@@ -386,25 +380,32 @@ li.listChapter{
   padding-bottom: 5px;
   display: block;
   font-weight: bold;
-  font-size: 1.3em;
+  font-size: 1.3rem;
 }
-li.listSection{
+div.listSection{
   padding-bottom: 10px; 
   margin-left: 0;
   margin-right: 0;
   padding-bottom: 5px;
   display: block;
   font-weight: bold;
-  font-size: 0.9em;
+  font-size: 1.2rem;
 }
-li.listSubsection{
+div.listSubsection{
   padding-bottom: 10px; 
   margin-left: 0;
   margin-right: 0;
   padding-bottom: 5px;
   display: block;
   font-weight: bold;
-  font-size: 0.9em;
+  font-size: 1.1rem;
+}
+div.listItem{
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-bottom: 5px;
+  font-size: 1rem;
 }
 table.tableDatabase {
   border-collapse: collapse;
@@ -419,15 +420,13 @@ table.tableItem{
 }
 table.tableItem td, table.tableItem th {
   text-align: left;
-  padding-left: 8px;
+  padding-left: 0px;
 }
 table.topicList {
   border-collapse: collapse;
   width: 100%;
   font-weight: normal;
   font-size: 1em;
-}
-table.topicList {
   margin-top: 4px;
   counter-reset: rowNumber;
 }

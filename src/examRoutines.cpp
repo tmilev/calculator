@@ -41,6 +41,11 @@ CalculatorHTML::CalculatorHTML()
   this->flagDoPrependProblemNavigationBar=true;
   this->flagDoPrependEditPagePanel=true;
 
+  this->flagTopicTableStarted     =false;
+  this->flagTopicSectionStarted   =false;
+  this->flagTopicSubSectionStarted=false;
+  this->flagTopicChapterStarted   =false;
+
   this->timeToParseHtml=0;
   this->flagMathQuillWithMatrices=false;
   this->flagSectionsPrepared=false;
@@ -3765,7 +3770,7 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   bool sectionStarted=false;
   bool subSectionStarted=false;
   bool chapterStarted=false;
-  out << "<!--Topic list automatically generated from topic list: " << this->topicListFileName
+  out << "\n\n\n<!--Topic list automatically generated from topic list: " << this->topicListFileName
   << ".-->";
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
   << "?request=template&fileName=" << this->fileName << "&"
@@ -3819,8 +3824,117 @@ void CalculatorHTML::InterpretJavascripts(SyntacticElementHTML& inputOutput)
     inputOutput.interpretedCommand=HtmlRoutines::GetJavascriptMathjax();
 }
 
-std::string TopicElement::ToStringItemInTable(bool doIncludeScoreButton)
+std::string TopicElement::GetItemFinish(CalculatorHTML& owner)
 { std::stringstream out;
+  if (this->type==this->tChapter)
+  { if (owner.flagTopicTableStarted)
+      out << "\n</tbody>\n</table>\n</div><!--listItem-->";
+    if (owner.flagTopicSubSectionStarted)
+      out << "\n</div><!--listSubsection-->";
+    if (owner.flagTopicSectionStarted)
+      out << "\n</div><!--listSection-->";
+    if (owner.flagTopicChapterStarted)
+      out << "\n</div><!--listChapter-->";
+    owner.flagTopicSectionStarted=false;
+    owner.flagTopicSubSectionStarted=false;
+    owner.flagTopicTableStarted=false;
+  }
+  if (this->type==this->tSection)
+  { if (owner.flagTopicTableStarted)
+      out << "\n</tbody>\n</table>\n</div><!--listItem-->";
+    if (owner.flagTopicSubSectionStarted)
+      out << "\n</div><!--listSubsection-->";
+    if (owner.flagTopicSectionStarted)
+      out << "\n</div><!--listSection-->";
+    owner.flagTopicSubSectionStarted=false;
+    owner.flagTopicTableStarted=false;
+  }
+  if (this->type==this->tSubSection)
+  { if (owner.flagTopicTableStarted)
+      out << "\n</tbody>\n</table>\n</div><!--listItem-->";
+    if (owner.flagTopicSubSectionStarted)
+      out << "\n</div><!--listSubsection-->";
+    owner.flagTopicTableStarted=false;
+  }
+  return out.str();
+}
+
+std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScoreButton, bool plainStyle)
+{ std::stringstream out;
+  out << this->GetItemFinish(owner);
+  std::string theClass;
+  if (this->type==this->tChapter)
+  { theClass="listChapter";
+    owner.flagTopicChapterStarted=true;
+    owner.flagTopicSectionStarted=false;
+    owner.flagTopicSubSectionStarted=false;
+    owner.flagTopicTableStarted=false;
+  } else if (this->type==this->tSection)
+  { theClass="listSection";
+    if (!owner.flagTopicChapterStarted)
+      out << "\n<div class=\"listChapter\">";
+    owner.flagTopicChapterStarted=true;
+    owner.flagTopicSectionStarted=true;
+    owner.flagTopicSubSectionStarted=false;
+    owner.flagTopicTableStarted=false;
+  } else if (this->type==this->tSubSection)
+  { theClass="listSubsection";
+    if (!owner.flagTopicChapterStarted)
+      out << "\n<div class=\"listChapter\">";
+    if (!owner.flagTopicSectionStarted)
+      out << "\n<div class=\"listSection\">";
+    owner.flagTopicChapterStarted=true;
+    owner.flagTopicSectionStarted=true;
+    owner.flagTopicSubSectionStarted=true;
+    owner.flagTopicTableStarted=false;
+  } else
+  { if (!owner.flagTopicTableStarted)
+    { if (!owner.flagTopicChapterStarted)
+        out << "\n<div class=\"listChapter\">";
+      if (!owner.flagTopicSectionStarted)
+        out << "\n<div class=\"listSection\">";
+      if (!owner.flagTopicSubSectionStarted)
+        out << "\n<div class=\"listSubection\">";
+      owner.flagTopicChapterStarted=true;
+      owner.flagTopicSectionStarted=true;
+      owner.flagTopicSubSectionStarted=true;
+      owner.flagTopicTableStarted=true;
+      out
+      << "\n<div class=\"listItem\">"
+      << "\n<table class=\"topicList\">";
+      out << "\n<colgroup><col><col><col><col><col></colgroup>";
+      out << "\n<tbody>\n";
+      if (!plainStyle)
+        out
+        << "\n<tr> <th>Sub-Topic</th>"
+        << "<th>Resource Links</th>"
+        << "<th>Current Score</th>"
+        << "<th>Deadlines</th>"
+        << "</tr>";
+    }
+    out << "<tr class=\"calculatorProblem\" "
+    << "id=\"" << this->idBase64 << "\"" << ">\n";
+    out << "  <td>\n";
+    out << this->displayTitle;
+    if (owner.flagIncludeStudentScores)
+      out << this->ToStringStudentScoreReportPanel();
+    out << "  </td>\n";
+    out << "  <td>\n" << this->displayResourcesLinks << "</td>";
+    out << "<td>";
+    out << this->displayProblemLink;
+    out << "  </td>\n";
+    out << "  <td>";
+    if (this->problem=="")
+      out << "-";
+    else
+      out << this->displayScore;
+    out << "  </td>\n";
+    out << "  <td class=\"deadlineCell\">\n" << this->displayDeadlinE << " </td>\n";
+    out << "</tr>\n";
+    return out.str();
+  }
+  out << "\n<div class=\"" << theClass << "\" "
+  << "id=\"" << this->idBase64 << "\"" << ">";
   out << "\n\n<table class=\"tableItem\">";
   out << "<colgroup><col><col><col><col><col></colgroup>\n";
   out << "<tr>"
@@ -3953,151 +4067,31 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   << ". </panelProblemLinkStyleSelection>"
  ;
   bool plainStyle=(inputOutput.GetKeyValue("topicListStyle")=="plain");
-  bool tableStarted=false;
-  bool sectionStarted=false;
-  bool subSectionStarted=false;
-  bool chapterStarted=false;
+
   std::string desiredChapter= HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("chapter"), false);
   std::string currentChapter="";
-  out << "<!--Topic list automatically generated from topic list: "
+  out << "\n\n\n<!--Topic list automatically generated from topic list: "
   << this->topicListFileName
   << ".-->";
-  //out << "<br>DEBUG: Desired chapter: " << desiredChapter << "<hr>Total chapters: " << this->theTopics.size;
-  bool firstListStarted=false;
-  int chapterCounter=0;
-  //CalculatorHTML currentProblem;
+  this->flagTopicChapterStarted=false;
+  this->flagTopicSectionStarted=false;
+  this->flagTopicSubSectionStarted=false;
+  this->flagTopicTableStarted=false;
   for (int i=0; i<this->theTopicS.size(); i++)
   { TopicElement& currentElt=this->theTopicS[i];
-    //stOutput << "DEBUG: Slide type:: " << currentElt.type;
     if (currentElt.type==currentElt.tTexHeader)
       continue;
     if (currentElt.type==currentElt.tChapter)
-    { currentChapter=currentElt.title;
-      chapterCounter++;
-    }
+      currentChapter=currentElt.title;
     if (desiredChapter!="")
       if (currentChapter!=desiredChapter)
-      { //out << "<br>DEBUG: Chapter: " << currentChapter << " skipped. ";
         continue;
-      }
-    if (!firstListStarted)
-    { firstListStarted=true;
-      out << "\n<style>ol{counter-reset: item " << chapterCounter-1 << "}"
-      << "</style>\n";
-      out << "<ol class=\"listItem\" start=\"" << chapterCounter << "\">";
-    }
     currentElt.ComputeLinks(*this, plainStyle);
-    if (!tableStarted &&
-         ( currentElt.type!=currentElt.tSection    &&
-           currentElt.type!=currentElt.tSubSection &&
-           currentElt.type!=currentElt.tChapter    &&
-           currentElt.type!=currentElt.tError
-         ))
-    { //stOutput << "DEBUG: here be I, item is: " << currentElt.id << " sectionStarted: "
-      //<< sectionStarted
-      //<< " subsectionStarted: " << subSectionStarted << "<br>";
-      if (!subSectionStarted && !sectionStarted)
-      { //stOutput << "DEBUG: here be I at sectionStart";
-        sectionStarted=true;
-        out << "<li class='listSection'><ol class=\"listItem\">";
-      }
-      if (!subSectionStarted)
-      { //stOutput << "DEBUG: here be I at subsecstart";
-        subSectionStarted=true;
-        out << "<li class='listSubsection'>";
-      }
-      out << TopicElement::GetTableStart(plainStyle);
-      tableStarted=true;
-    }
-    if ((currentElt.type==currentElt.tSection ||
-         currentElt.type==currentElt.tSubSection ||
-         currentElt.type==currentElt.tChapter ||
-         currentElt.type==currentElt.tError)
-        && tableStarted)
-    { out << TopicElement::GetTableFinish(plainStyle);
-      tableStarted=false;
-    }
-    if (subSectionStarted)
-      if (currentElt.type==currentElt.tSubSection ||
-          currentElt.type==currentElt.tSection ||
-          currentElt.type==currentElt.tChapter)
-        out << "</li>\n";
-    if (sectionStarted)
-      if (currentElt.type==currentElt.tSection ||
-          currentElt.type==currentElt.tChapter)
-        out << "</ol></li>\n";
-    if (chapterStarted)
-      if (currentElt.type==currentElt.tChapter)
-        out << "</ol></li>\n";
-    if (currentElt.type==currentElt.tChapter)
-    { out << "<li class=\"listChapter\" "
-      << "id=\"" << currentElt.idBase64 << "\"" << ">\n";
-      out << currentElt.ToStringItemInTable(this->flagIncludeStudentScores);
-      chapterStarted=true;
-      sectionStarted=false;
-      subSectionStarted=false;
-      tableStarted=false;
-//      out << " DEBUG: max possible pts: "
-//      << currentElt.maxPointsInAllChildren
-//      << ", pts: "
-//      << currentElt.totalPointsEarned;
-      out << "<ol class=\"listItem\">\n";
-    } else if (currentElt.type==currentElt.tSection)
-    { out << "<li class=\"listSection\""
-      << "id=\"" << currentElt.idBase64 << "\"" << ">\n";
-      out << currentElt.ToStringItemInTable(this->flagIncludeStudentScores);
-      sectionStarted=true;
-      subSectionStarted=false;
-      tableStarted=false;
-      out << "<ol class=\"listItem\">\n";
-    } else if (currentElt.type==currentElt.tSubSection)
-    { if (!sectionStarted)
-      { out << "<li class=\"listSection\">\n<ol class=\"listItem\">\n";
-        sectionStarted=true;
-      }
-      out << "<li class=\"listSubsection\""
-      << "id=\"" << currentElt.idBase64 << "\"" << ">\n"
-      ;
-      out << currentElt.ToStringItemInTable(this->flagIncludeStudentScores);
-//      out << " DEBUG: total possible answers: "
-//      << currentElt.maxPointsInAllChildren
-//      << ", answered: "
-//      << currentElt.totalPointsEarned;
-      subSectionStarted=true;
-      tableStarted=false;
-    } else if (currentElt.type==currentElt.tError)
-      out << "Error parsing topic list line. " << currentElt.error;
-    else
-    { out << "<tr class=\"calculatorProblem\" "
-      << "id=\"" << currentElt.idBase64 << "\"" << ">\n";
-      out << "  <td>\n";
-      out << currentElt.displayTitle;
-      if (this->flagIncludeStudentScores)
-        out << currentElt.ToStringStudentScoreReportPanel();
-//      out << " DEBUG: total possible answers: "
-//      << currentElt.maxPointsInAllChildren
-//      << ", answered: "
-//      << currentElt.totalPointsEarned;
-      out << "  </td>\n";
-      out << "  <td>\n" << currentElt.displayResourcesLinks << "</td>";
-      out << "<td>";
-      out << currentElt.displayProblemLink;
-
-      out << "  </td>\n";
-      out << "  <td>";
-      if (currentElt.problem=="")
-        out << "-";
-      else
-        out << currentElt.displayScore;
-      out << "  </td>\n";
-      out << "  <td class=\"deadlineCell\">\n" << currentElt.displayDeadlinE << " </td>\n";
-      out << "</tr>\n";
-    }
+    out << currentElt.GetItemStart(*this, this->flagIncludeStudentScores, plainStyle);
   }
-  if (tableStarted)
-    out << TopicElement::GetTableFinish(plainStyle);
-  out << "</ol>";
-  tableStarted=false;
+  TopicElement finishChapter;
+  finishChapter.type=finishChapter.tChapter;
+  out << finishChapter.GetItemFinish(*this);
   this->NumVideosFound=this->NumVideosHandwrittenFound+this->NumVideosWithSlidesFound;
   outHead << "<panelStudentScores>Calculator build " << theGlobalVariables.buildVersion << ". The course contains "
   << this->NumProblemsFound << " problem templates, "
@@ -4378,28 +4372,5 @@ std::string TopicElement::ToString()const
   if (this->type==this->tSubSection)
     out << "(subsection)";
   out << "<br>Parents: " << this->parentTopics.ToStringCommaDelimited();
-  return out.str();
-}
-
-std::string TopicElement::GetTableStart(bool plainStyle)
-{ std::stringstream out;
-  out << "\n\n<table class=\"topicList\">\n";
-  out << "<colgroup><col><col><col><col><col></colgroup>\n";
-  out << "<tbody>\n";
-  if (!plainStyle)
-    out
-    << "<tr> <th>Sub-Topic</th>"
-    << "<th>Resource Links</th>"
-    << "<th>Current Score</th>"
-    << "<th>Deadlines</th>"
-    << "</tr>\n";
-  return out.str();
-}
-
-std::string TopicElement::GetTableFinish(bool plainStyle)
-{ std::stringstream out;
-  (void) plainStyle;
-  out << "</tbody>\n";
-  out << "</table>\n\n";
   return out.str();
 }

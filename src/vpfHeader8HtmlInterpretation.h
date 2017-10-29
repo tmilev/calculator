@@ -67,12 +67,11 @@ public:
   { output << theElt.ToString();
     return output;
   }
-  std::string ToStringItemInTable(bool doIncludeScoreButton);
+  std::string GetItemStart(CalculatorHTML& owner, bool doIncludeScoreButton, bool plainStyle);
   std::string ToStringStudentScoreButton();
   std::string ToStringStudentScoreReportPanel();
   std::string ToString()const;
-  static std::string GetTableStart(bool plainStyle);
-  static std::string GetTableFinish(bool plainStyle);
+  std::string GetItemFinish(CalculatorHTML& owner);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
   TopicElement()
   { this->reset(0);
@@ -125,6 +124,10 @@ public:
   bool flagMathQuillWithMatrices;
   bool flagSectionsPrepared;
   bool flagIncludeStudentScores;
+  bool flagTopicTableStarted;
+  bool flagTopicSectionStarted;
+  bool flagTopicSubSectionStarted;
+  bool flagTopicChapterStarted;
   double timeToParseHtml;
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;

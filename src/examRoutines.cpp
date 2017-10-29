@@ -27,6 +27,9 @@ CalculatorHTML::CalculatorHTML()
   this->flagParentInvestigated=false;
   this->NumProblemsFound=0;
   this->NumVideosFound=0;
+  this->NumHandwrittenSolutionsFound=0;
+  this->NumVideosHandwrittenFound=0;
+  this->NumVideosWithSlidesFound=0;
   this->NumSlidesFound=0;
   this->flagIsForReal=false;
   this->flagLoadedFromDB=false;
@@ -2094,6 +2097,7 @@ void CalculatorHTML::initTopicElementNames()
     this->calculatorTopicElementNames.AddOnTop("Title");
     this->calculatorTopicElementNames.AddOnTop("Problem");
     this->calculatorTopicElementNames.AddOnTop("Video");
+    this->calculatorTopicElementNames.AddOnTop("VideoHandwritten");
     this->calculatorTopicElementNames.AddOnTop("SlidesLatex");
     this->calculatorTopicElementNames.AddOnTop("SlidesSource");
     this->calculatorTopicElementNames.AddOnTop("SlidesSourceHeader");
@@ -2823,15 +2827,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (this->theTopicS.Contains(this->fileName))
     { TopicElement& current=this->theTopicS.GetValueCreateIfNotPresent(this->fileName);
       current.ComputeLinks(*this, true);
-      problemLabel= current.displayTitle+ "&nbsp;&nbsp;";
+      problemLabel= current.displayTitle + "&nbsp;&nbsp;";
       if (this->flagDoPrependProblemNavigationBar)
-      { if (current.displaySlidesPrintableLink!="")
-          problemLabel += current.displaySlidesPrintableLink;
-        if (current.displaySlidesLink!="")
-          problemLabel += current.displaySlidesLink;
-        if (current.displayVideoLink!="")
-          problemLabel += current.displayVideoLink;
-      }
+        problemLabel += current.displayResourcesLinks;
     }
   if (this->flagIsExamProblem && this->flagIsForReal &&
       !this->flagIsExamHome &&
@@ -3449,6 +3447,7 @@ void TopicElement::reset(int parentSize)
   this->title="empty";
   this->id="";
   this->video="";
+  this->videoHandwritten="";
   this->slidesProjector="";
   this->slidesPrintable="";
   this->slidesSources.SetSize(0);
@@ -3608,6 +3607,8 @@ void TopicElement::GetTopicList
       currentElt.id=currentElt.title;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Video:", &currentArgument))
       currentElt.video=MathRoutines::StringTrimWhiteSpace(currentArgument);
+    else if (MathRoutines::StringBeginsWith(currentLine, "VideoHandwritten:", &currentArgument))
+      currentElt.videoHandwritten=MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "SlidesProjector:", &currentArgument))
       currentElt.slidesProjector=MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "SlidesSource:", &currentArgument))
@@ -3616,6 +3617,8 @@ void TopicElement::GetTopicList
       currentElt.slidesSources.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
     else if (MathRoutines::StringBeginsWith(currentLine, "SlidesPrintable:", &currentArgument))
       currentElt.slidesPrintable=MathRoutines::StringTrimWhiteSpace(currentArgument);
+    else if (MathRoutines::StringBeginsWith(currentLine, "HandwrittenSolutions:", &currentArgument))
+      currentElt.handwrittenSolution=MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "Problem:", &currentArgument))
     { currentElt.problem=MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id=currentElt.problem;
@@ -3825,7 +3828,7 @@ std::string TopicElement::ToStringItemInTable(bool doIncludeScoreButton)
   if (doIncludeScoreButton)
     out << this->ToStringStudentScoreReportPanel();
   out  << "</td>";
-  out << "<td>" << this->displayVideoLink << this->displayProblemLink << "</td>";
+  out << "<td>" << this->displayResourcesLinks << "</td>";
   out << "<td></td>";
   if (doIncludeScoreButton)
     out << "<td>" << this->ToStringStudentScoreButton() << "</td>";
@@ -4076,20 +4079,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 //      << ", answered: "
 //      << currentElt.totalPointsEarned;
       out << "  </td>\n";
-      out << "  <td>\n";
-      List<std::string> theLinks;
-      if (currentElt.displayVideoLink!="")
-        theLinks.AddOnTop(currentElt.displayVideoLink);
-      if (currentElt.displaySlidesLink!="")
-        theLinks.AddOnTop(currentElt.displaySlidesLink);
-      if (currentElt.displaySlidesPrintableLink!="")
-        theLinks.AddOnTop(currentElt.displaySlidesPrintableLink);
-      for (int k=0; k<theLinks.size; k++)
-      { out << theLinks[k];
-//        if (k!=theLinks.size-1)
-//          out << " | ";
-      }
-      out << "</td>";
+      out << "  <td>\n" << currentElt.displayResourcesLinks << "</td>";
       out << "<td>";
       out << currentElt.displayProblemLink;
 
@@ -4108,10 +4098,12 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     out << TopicElement::GetTableFinish(plainStyle);
   out << "</ol>";
   tableStarted=false;
+  this->NumVideosFound=this->NumVideosHandwrittenFound+this->NumVideosWithSlidesFound;
   outHead << "<panelStudentScores>Calculator build " << theGlobalVariables.buildVersion << ". The course contains "
   << this->NumProblemsFound << " problem templates, "
   << this->NumSlidesFound << " slides (printable+projector mode counted as a single slide) and "
-  << this->NumVideosFound << " videos.</panelStudentScores><br>";
+  << this->NumVideosFound << "=" << this->NumVideosWithSlidesFound << " with-slide + "
+  << this->NumVideosHandwrittenFound << " handwritten videos.</panelStudentScores><br>";
   outFinal << outHead.str() << out.str();
   inputOutput.interpretedCommand=outFinal.str();
   std::stringstream topicListJS;
@@ -4256,13 +4248,17 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   if (this->video=="" || this->video=="-" || this->video=="--")
     this->displayVideoLink = "";
   else
-  { // stOutput <<"DEBUG: Video: " << this->video;
     this->displayVideoLink= "<a href=\"" + this->video + "\" class=\"videoLink\" class=\"videoLink\" target=\"_blank\">Video</a>";
-  }
+  if (this->videoHandwritten=="" || this->videoHandwritten=="-" || this->videoHandwritten=="--")
+    this->displayVideoHandwrittenLink = "";
+  else
+    this->displayVideoHandwrittenLink = "<a href=\"" + this->videoHandwritten + "\" class=\"videoLink\" class=\"videoLink\" target=\"_blank\">Video <b>(H)</b></a>";
   if (this->slidesProjector!="")
     this->displaySlidesLink = "<a href=\"" + this->slidesProjector + "\" class=\"slidesLink\">Slides</a>";
   if (this->slidesPrintable!="")
     this->displaySlidesPrintableLink = "<a href=\"" + this->slidesPrintable + "\" class=\"slidesLink\">Printable slides</a>";
+  if (this->handwrittenSolution!="")
+    this->displayHandwrittenSolution = "<a href=\"" + this->handwrittenSolution + "\" class=\"slidesLink\">Handwritten solutions</a>";
   if (this->slidesProjector=="" && this->slidesPrintable=="" && this->slidesSources.size>0)
   { std::stringstream slideFromSourceStreamHandout, slideFromSourceStreamProjector, sourceStream, sourceStreamCommon;
     slideFromSourceStreamHandout << "<a href=\""
@@ -4351,10 +4347,21 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     //;
     //this->displayTitleWithDeadline=titleAndDeadlineStream.str();
   }
+  std::stringstream displayResourcesLinksStream;
+  displayResourcesLinksStream
+  << this->displayVideoLink
+  << this->displayVideoHandwrittenLink
+  << this->displaySlidesLink
+  << this->displaySlidesPrintableLink
+  << this->displayHandwrittenSolution
+  ;
+  this->displayResourcesLinks=displayResourcesLinksStream.str();
   if (this->problem!="")
     owner.NumProblemsFound++;
   if (this->video!="")
-    owner.NumVideosFound++;
+    owner.NumVideosWithSlidesFound++;
+  if (this->videoHandwritten!="")
+    owner.NumVideosHandwrittenFound++;
   if (this->displaySlidesLink!="")
     owner.NumSlidesFound++;
 }

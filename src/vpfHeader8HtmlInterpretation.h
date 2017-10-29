@@ -36,16 +36,21 @@ public:
 
   std::string title;
   std::string video;
+  std::string videoHandwritten;
   std::string slidesProjector;
+  std::string handwrittenSolution;
   List<std::string> slidesSources;
   std::string slidesPrintable;
   std::string problem;
   std::string error;
   std::string displayTitle;
   std::string displayVideoLink;
+  std::string displayVideoHandwrittenLink;
   std::string displaySlidesLink;
   std::string displaySlidesPrintableLink;
+  std::string displayHandwrittenSolution;
   std::string displayProblemLink;
+  std::string displayResourcesLinks;
   std::string displayDeadlinE;
   std::string displayScore;
   std::string displayModifyWeight;
@@ -100,7 +105,10 @@ public:
   int MaxInterpretationAttempts;
   int NumProblemsFound;
   int NumVideosFound;
+  int NumVideosWithSlidesFound;
+  int NumVideosHandwrittenFound;
   int NumSlidesFound;
+  int NumHandwrittenSolutionsFound;
   int NumAnswerIdsMathquilled;
   List<int> randomSeedsIfInterpretationFails;
   bool flagIsExamHome;

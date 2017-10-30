@@ -3828,32 +3828,32 @@ std::string TopicElement::GetItemFinish(CalculatorHTML& owner)
 { std::stringstream out;
   if (this->type==this->tChapter)
   { if (owner.flagTopicTableStarted)
-      out << "\n</tbody>\n</table>\n</div><!--listItem-->";
+      out << "\n</tbody>\n</table>\n</div><!--bodyItem-->";
     if (owner.flagTopicSubSectionStarted)
-      out << "\n</div><!--listSubsection-->";
+      out << "\n</div><!--bodySubsection-->";
     if (owner.flagTopicSectionStarted)
-      out << "\n</div><!--listSection-->";
+      out << "\n</div><!--bodySection-->";
     if (owner.flagTopicChapterStarted)
-      out << "\n</div><!--listChapter-->";
+      out << "\n</div><!--bodyChapter-->";
     owner.flagTopicSectionStarted=false;
     owner.flagTopicSubSectionStarted=false;
     owner.flagTopicTableStarted=false;
   }
   if (this->type==this->tSection)
   { if (owner.flagTopicTableStarted)
-      out << "\n</tbody>\n</table>\n</div><!--listItem-->";
+      out << "\n</tbody>\n</table>\n</div><!--bodyItem-->";
     if (owner.flagTopicSubSectionStarted)
-      out << "\n</div><!--listSubsection-->";
+      out << "\n</div><!--bodySubsection-->";
     if (owner.flagTopicSectionStarted)
-      out << "\n</div><!--listSection-->";
+      out << "\n</div><!--bodySection-->";
     owner.flagTopicSubSectionStarted=false;
     owner.flagTopicTableStarted=false;
   }
   if (this->type==this->tSubSection)
   { if (owner.flagTopicTableStarted)
-      out << "\n</tbody>\n</table>\n</div><!--listItem-->";
+      out << "\n</tbody>\n</table>\n</div><!--bodyItem-->";
     if (owner.flagTopicSubSectionStarted)
-      out << "\n</div><!--listSubsection-->";
+      out << "\n</div><!--bodySubsection-->";
     owner.flagTopicTableStarted=false;
   }
   return out.str();
@@ -3864,25 +3864,25 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
   out << this->GetItemFinish(owner);
   std::string theClass;
   if (this->type==this->tChapter)
-  { theClass="listChapter";
+  { theClass="Chapter";
     owner.flagTopicChapterStarted=true;
     owner.flagTopicSectionStarted=false;
     owner.flagTopicSubSectionStarted=false;
     owner.flagTopicTableStarted=false;
   } else if (this->type==this->tSection)
-  { theClass="listSection";
+  { theClass="Section";
     if (!owner.flagTopicChapterStarted)
-      out << "\n<div class=\"listChapter\">";
+      out << "\n<div class=\"bodyChapter\">";
     owner.flagTopicChapterStarted=true;
     owner.flagTopicSectionStarted=true;
     owner.flagTopicSubSectionStarted=false;
     owner.flagTopicTableStarted=false;
   } else if (this->type==this->tSubSection)
-  { theClass="listSubsection";
+  { theClass="Subsection";
     if (!owner.flagTopicChapterStarted)
-      out << "\n<div class=\"listChapter\">";
+      out << "\n<div class=\"bodyChapter\">";
     if (!owner.flagTopicSectionStarted)
-      out << "\n<div class=\"listSection\">";
+      out << "\n<div class=\"bodySection\">";
     owner.flagTopicChapterStarted=true;
     owner.flagTopicSectionStarted=true;
     owner.flagTopicSubSectionStarted=true;
@@ -3890,17 +3890,17 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
   } else
   { if (!owner.flagTopicTableStarted)
     { if (!owner.flagTopicChapterStarted)
-        out << "\n<div class=\"listChapter\">";
+        out << "\n<div class=\"bodyChapter\">";
       if (!owner.flagTopicSectionStarted)
-        out << "\n<div class=\"listSection\">";
+        out << "\n<div class=\"bodySection\">";
       if (!owner.flagTopicSubSectionStarted)
-        out << "\n<div class=\"listSubection\">";
+        out << "\n<div class=\"bodySubsection\">";
       owner.flagTopicChapterStarted=true;
       owner.flagTopicSectionStarted=true;
       owner.flagTopicSubSectionStarted=true;
       owner.flagTopicTableStarted=true;
       out
-      << "\n<div class=\"listItem\">"
+      << "\n<div class=\"bodyItem\">"
       << "\n<table class=\"topicList\">";
       out << "\n<colgroup><col><col><col><col><col></colgroup>";
       out << "\n<tbody>\n";
@@ -3933,12 +3933,13 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
     out << "</tr>\n";
     return out.str();
   }
-  out << "\n<div class=\"" << theClass << "\" "
+  out << "\n<div class=\"head" << theClass << "\" "
   << "id=\"" << this->idBase64 << "\"" << ">";
-  out << "\n\n<table class=\"tableItem\">";
+  out << "\n<table class=\"tableItem\">";
   out << "<colgroup><col><col><col><col><col></colgroup>\n";
   out << "<tr>"
   << "<td>" << this->displayTitle;
+  out << "<button class=\"buttonToggleTopics\" onclick=\"toggleHeight(this, 'body" << this->idBase64 << "');\">&#9650;</button>";
   if (doIncludeScoreButton)
     out << this->ToStringStudentScoreReportPanel();
   out  << "</td>";
@@ -3949,7 +3950,8 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
   else
     out << "<td></td>";
   out << "<td class=\"deadlineCell\">" << this->displayDeadlinE << "</td>";
-  out << "</tr></table>\n\n";
+  out << "</tr></table></div>\n";
+  out << "<div class=\"body" << theClass << "\" id=\"body" << this->idBase64 << "\">";
   return out.str();
 }
 

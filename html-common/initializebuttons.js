@@ -197,6 +197,64 @@ function modifyHeightForTimeout(currentButtonPanel, newHeight)
   currentButtonPanel.style.height    = newHeight;
 }
 
+function toggleHeight(currentButton, currentPanelID)
+{ var currentPanel=document.getElementById(currentPanelID);
+  currentPanel.buttonThatModifiesMe=currentButton;
+  if (currentPanel.startingMaxHeight===undefined || currentPanel.startingMaxHeight===null)
+  { currentPanel.startingMaxHeight=window.getComputedStyle(currentPanel).height;
+    currentPanel.style.maxHeight=currentPanel.startingMaxHeight;
+    currentPanel.style.height=currentPanel.startingMaxHeight;
+  }
+  var currentContainer=currentPanel;
+  while (true)
+  { currentContainer=currentContainer.parentNode;
+    //console.log("processing "+ currentContainer.tagName+"."+ currentContainer.className);
+    if (!currentContainer.className.startsWith("body"))
+      break;
+    currentContainer.style.maxHeight="";
+    currentContainer.style.height="";
+    currentContainer.startingMaxHeight=null;
+  }
+  if (currentPanel.style.display==="none" || currentPanel.transitionState==="collapsed")
+    currentPanel.style.display="";
+
+  if (currentPanel.transitionState==="collapsing" ||
+      currentPanel.transitionState==="collapsed")
+  { currentPanel.transitionState="expanding";
+    currentButton.innerHTML="&#9650;";
+  } else if (currentPanel.transitionState===null || currentPanel.transitionState===undefined ||
+      currentPanel.transitionState==="expanding" || currentPanel.transitionState==="expanded")
+  { currentPanel.transitionState="collapsing";
+    currentButton.innerHTML="&#9660;";
+  }
+  currentPanel.addEventListener("transitionend", transitionDone);
+  setTimeout(function(){ toggleHeightForTimeout(currentPanel);},0);
+}
+
+function transitionDone(event)
+{ //console.log("CAlled transitionDone");
+  this.removeEventListener("transitionend", transitionDone);
+  if (this.transitionState==="collapsing")
+  { this.style.display="none";
+    this.transitionState="collapsed";
+  } else if (this.transitionState==="expanding")
+  { this.style.display="";
+    this.transitionState="expanded";
+  }
+}
+
+function toggleHeightForTimeout(currentPanel)
+{ if (currentPanel.transitionState==="expanding")
+  { currentPanel.style.maxHeight=currentPanel.startingMaxHeight;
+    currentPanel.style.height=currentPanel.startingMaxHeight;
+    currentPanel.style.opacity="1";
+  } else if (currentPanel.transitionState==="collapsing")
+  { currentPanel.style.opacity="0";
+    currentPanel.style.maxHeight="0px";
+    currentPanel.style.height="0px";
+  }
+}
+
 function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll)
 { var currentButtonPanel=document.getElementById(IDcurrentButtonPanel);
   var buttonArray= currentButtonPanel.attributes.buttons.value.toLowerCase().split(/(?:,| )+/);

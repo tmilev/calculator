@@ -237,6 +237,28 @@ span.panel.show {
   opacity: 1;
   max-height: 500px;
 }
+button.buttonToggleTopics{
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-left: 5px;
+  font-size: medium;
+  font-weight: normal;
+  background-color: Transparent;
+  padding: 2px;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background-repeat:no-repeat;
+  border: none;
+  cursor:pointer;
+  overflow: hidden;
+  outline:none;
+  transition: 0.6s;
+}
+button.buttonToggleTopics.active, button.buttonToggleTopics:hover {
+  background-color: #d0d0d0;
+}
 button.studentScoresButton{
   margin-top: 0;
   margin-bottom: 0px;
@@ -372,7 +394,7 @@ textarea.currentFileNameArea {
   height: 20px;
   margin-bottom: -8px;
 }
-div.listChapter{
+div.headChapter{
   padding-bottom: 10px; 
   padding-left: 0;
   margin-left: 0;
@@ -382,7 +404,15 @@ div.listChapter{
   font-weight: bold;
   font-size: 1.3rem;
 }
-div.listSection{
+div.bodyChapter{
+  padding: 0px; 
+  margin: 0px;
+  display: block;
+  -webkit-transition: all 2s ease;
+  -moz-transition: all 2s ease;
+  transition: all 2s ease;
+}
+div.headSection{
   padding-bottom: 10px; 
   margin-left: 0;
   margin-right: 0;
@@ -391,7 +421,15 @@ div.listSection{
   font-weight: bold;
   font-size: 1.2rem;
 }
-div.listSubsection{
+div.bodySection{
+  padding: 0px; 
+  margin: 0px;
+  display: block;
+  -webkit-transition: all 2s ease;
+  -moz-transition: all 2s ease;
+  transition: all 2s ease;
+}
+div.headSubsection{
   padding-bottom: 10px; 
   margin-left: 0;
   margin-right: 0;
@@ -400,12 +438,24 @@ div.listSubsection{
   font-weight: bold;
   font-size: 1.1rem;
 }
-div.listItem{
+div.bodySubsection{
+  padding: 0px; 
+  margin: 0px;
+  display: block;
+  -webkit-transition: all 2s ease;
+  -moz-transition: all 2s ease;
+  transition: all 2s ease;
+}
+div.bodyItem{
   margin-left: 0;
   margin-right: 0;
   padding-left: 0;
   padding-bottom: 5px;
+  display: block;
   font-size: 1rem;
+  -webkit-transition: all 2s ease;
+  -moz-transition: all 2s ease;
+  transition: all 2s ease;
 }
 table.tableDatabase {
   border-collapse: collapse;
@@ -424,7 +474,7 @@ table.tableItem td, table.tableItem th {
 }
 table.topicList {
   border-collapse: collapse;
-  width: 100%;
+/*  width: 100%;*/
   font-weight: normal;
   font-size: 1em;
   margin-top: 4px;

@@ -3939,7 +3939,8 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
   out << "<colgroup><col><col><col><col><col></colgroup>\n";
   out << "<tr>"
   << "<td>" << this->displayTitle;
-  out << "<button class=\"buttonToggleTopics\" onclick=\"toggleHeight(this, 'body" << this->idBase64 << "');\">&#9650;</button>";
+  out << "<button id=\"buttonToggle" << this->idBase64
+  << "\" class=\"buttonToggleTopics\" onclick=\"toggleHeight(this, 'body" << this->idBase64 << "');\">&#9650;</button>";
   if (doIncludeScoreButton)
     out << this->ToStringStudentScoreReportPanel();
   out  << "</td>";
@@ -4043,10 +4044,12 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     << std::fixed << percent << "% = ";
     outHead << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
     << " out of " << this->currentUseR.pointsMax.GetDoubleValue()
-    << " points earned.</panelStudentScores><br>\n" ;
-    outHead << "<small>Includes problems without deadline, but not problems without weights.<br> "
+    << " points earned.</panelStudentScores>"
+    << "<button id=\"buttonToggleCourseInfo\" class=\"buttonToggleTopics\" onclick=\"toggleHeight(this,'bodyCourseInformation')\">&#9650;</button><br>\n" ;
+    outHead << "<div class =\"bodySection\" id = \"bodyCourseInformation\">"
+    << "<small>Includes problems without deadline, but not problems without weights.<br> "
     << "If a problem is assigned a new weight, your % score may drop. </small><br>";
-    outHead << "<panelCourseInfo>" << this->currentUseR.courseInfo.ToStringHumanReadable() << "</panelCourseInfo><br>";
+    outHead << "<panelCourseInfo>" << this->currentUseR.courseInfo.ToStringHumanReadable() << "</panelCourseInfo></div><br>";
   }
   #endif
   this->initTopicElementNames();

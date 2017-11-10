@@ -6,6 +6,7 @@ var preferredButtonContainers=[];
 var studentScoresInHomePage=[];
 //var lastFocus;
 var charsToSplit=['x','y'];
+var panelsCollapseStatus={};
 
 function processMathQuillLatex(theText)
 { for (var i=0; i<theText.length; i++)
@@ -35,34 +36,6 @@ function processMathQuillLatex(theText)
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function initializeButtonsCommon()
-{ ///initializing accordions
-  var acc = document.getElementsByClassName("accordion");
-  for (var i = 0; i < acc.length; i++)
-  { acc[i].onclick = //async
-    function()
-    { if (this.firstLoad===undefined)
-      { this.firstLoad=true;
-        var theDeadlines=this.nextElementSibling.getElementsByClassName("modifyDeadlineInput");
-        for (var j=0; j<theDeadlines.length; j++)
-          $('#'+ theDeadlines[j].id).datepicker();
-//        console.log("first run: "+theDeadlines);
-        this.nextElementSibling.style.display="inline-block";
-        //await sleep(400);
-      }
-      //this.nextElementSibling.style.transition="0.6s linear";
-      this.classList.toggle("active");
-      this.nextElementSibling.classList.toggle("show");
-    }
-  }
-//  for (i=0; i<answerIdsPureLatex.length; i++){ 
-//    currentButtonPanel=document.getElementById(answerMQspanIds[i]);	
-//    document.addEventListener("blur", function(){
-//      lastfocus=this;
-//    });
-//  }
 }
 
 var MathQuillCommandButtonCollection=new Object;
@@ -198,7 +171,7 @@ function modifyHeightForTimeout(currentButtonPanel, newHeight)
 }
 
 function toggleHeight(currentButton, currentPanelID)
-{ var currentPanel=document.getElementById(currentPanelID);
+{ var currentPanel = document.getElementById(currentPanelID);
   currentPanel.buttonThatModifiesMe=currentButton;
   if (currentPanel.startingMaxHeight===undefined || currentPanel.startingMaxHeight===null)
   { currentPanel.startingMaxHeight=window.getComputedStyle(currentPanel).height;
@@ -231,15 +204,62 @@ function toggleHeight(currentButton, currentPanelID)
   setTimeout(function(){ toggleHeightForTimeout(currentPanel);},0);
 }
 
+function initializeButtonsCommon()
+{ ///initializing accordions
+  if (typeof(localStorage)!== undefined)
+    if (localStorage.panels!==undefined)
+    { panelsCollapseStatus = JSON.parse(localStorage.panels)
+      var theProps=Object.getOwnPropertyNames(panelsCollapseStatus);
+      for (var i=0; i<theProps.length; i++)
+      { var current=panelsCollapseStatus[theProps[i]];
+        if(current.isCollapsed)
+          toggleHeight(document.getElementById(current.button),theProps[i]);
+      }
+    }
+  var acc = document.getElementsByClassName("accordion");
+  for (i = 0; i < acc.length; i++)
+  { acc[i].onclick = //async
+    function()
+    { if (this.firstLoad===undefined)
+      { this.firstLoad=true;
+        var theDeadlines=this.nextElementSibling.getElementsByClassName("modifyDeadlineInput");
+        for (var j=0; j<theDeadlines.length; j++)
+          $('#'+ theDeadlines[j].id).datepicker();
+//        console.log("first run: "+theDeadlines);
+        this.nextElementSibling.style.display="inline-block";
+        //await sleep(400);
+      }
+      //this.nextElementSibling.style.transition="0.6s linear";
+      this.classList.toggle("active");
+      this.nextElementSibling.classList.toggle("show");
+    }
+  }
+//  for (i=0; i<answerIdsPureLatex.length; i++){
+//    currentButtonPanel=document.getElementById(answerMQspanIds[i]);
+//    document.addEventListener("blur", function(){
+//      lastfocus=this;
+//    });
+//  }
+}
+
+function registerStatus(thePanel, isCollapsed)
+{ panelsCollapseStatus[thePanel.id] = {'button' : thePanel.buttonThatModifiesMe.id, 'isCollapsed' : isCollapsed};
+  if (localStorage===undefined)
+    return;
+  localStorage.panels = JSON.stringify(panelsCollapseStatus);
+}
+
 function transitionDone(event)
 { //console.log("CAlled transitionDone");
   this.removeEventListener("transitionend", transitionDone);
   if (this.transitionState==="collapsing")
   { this.style.display="none";
     this.transitionState="collapsed";
+    registerStatus(this, true)
   } else if (this.transitionState==="expanding")
   { this.style.display="";
     this.transitionState="expanded";
+    registerStatus(this, false)
   }
 }
 
@@ -421,7 +441,7 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
 }
 
 function initializeButtons()
-{ for (var i=0; i<answerIdsPureLatex.length; i++)
+{ for (i=0; i<answerIdsPureLatex.length; i++)
     initializeOneButtonPanel(preferredButtonContainers[i], i, false);
   initializeButtonsCommon();
 }

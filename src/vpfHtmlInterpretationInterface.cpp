@@ -570,16 +570,15 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   out << thePage.outputHtmlHeadNoTag;
   out << HtmlRoutines::GetJavascriptStandardCookiesWithTags();
   out << HtmlRoutines::GetJavascriptProblemLinksWithTags();
+  out << HtmlRoutines::GetJavascriptInitializeButtonsWithTags();
   if (includeDeadlineJavascript || includeInitializeButtonsJS)
-  { out << HtmlRoutines::GetJavascriptInitializeButtonsWithTags();
     out << HtmlRoutines::GetJavascriptCalculatorPage();
-  }
   if (theGlobalVariables.UserDefaultHasProblemComposingRights())
     out << HtmlRoutines::GetJavascriptTopicListWithTags();
   out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << "<body" //<< ">"
   << " onload=\"loadSettings();";
-  if (includeDeadlineJavascript)
+//  if (includeDeadlineJavascript)
     out << " initializeButtonsCommon(); ";
   out <<"\"><!-- tag added automatically; user-specified body tag ignored-->\n"
   ;

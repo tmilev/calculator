@@ -14,11 +14,12 @@ timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
 
 double GetElapsedTimeInSeconds()
 { gettimeofday(&LastMeasureOfCurrentTime, NULL);
-  int miliSeconds =(LastMeasureOfCurrentTime.tv_sec- ComputationStartGlobal.tv_sec)*1000+(LastMeasureOfCurrentTime.tv_usec- ComputationStartGlobal.tv_usec)/1000;
+  int miliSeconds =(LastMeasureOfCurrentTime.tv_sec- ComputationStartGlobal.tv_sec)*1000 +
+    (LastMeasureOfCurrentTime.tv_usec- ComputationStartGlobal.tv_usec)/1000;
   return ((double) miliSeconds)/1000;
 }
 
-void InitializeTimer( void* desiredStartTime)
+void InitializeTimer(void* desiredStartTime)
 { if (desiredStartTime!=0)
   { ComputationStartGlobal=*( static_cast<timeval*>(desiredStartTime) );
     return;

@@ -325,7 +325,6 @@ public:
   long long NumSuccessfulSelectsSoFar;
   bool flagTryToKillOlderProcesses;
   bool flagReapingChildren;
-  double timeAtLastBackup;
 #ifdef MACRO_use_open_ssl
   SSLdata theSSLdata;
 #endif
@@ -358,7 +357,6 @@ public:
   static void AnalyzeMainArguments(int argC, char **argv);
   static void InitializeGlobalVariables();
   bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);
-  void BackupDatabaseIfNeeded();
   void ReleaseWorkerSideResources();
   void ReleaseActiveWorker();
   void ReleaseSocketsNonActiveWorkers();
@@ -383,7 +381,6 @@ public:
   //<- server, so even if racy, we take the risk of a hang.
   //<- racy-ness in child process does not bother us: hanged children are still fine.
   //void ReapChildren();
-  static std::string ToStringActiveWorker();
   bool initPrepareWebServerALL();
   void initPrepareSignals();
   bool initBindToPorts();

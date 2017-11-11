@@ -715,6 +715,19 @@ std::string logger::openTagHtml()
   }
 }
 
+std::string logger::getStamp()
+{ std::stringstream out;
+  out << theGlobalVariables.processType << ", ";
+  out
+  << theGlobalVariables.GetDateForLogFiles() << ", "
+  << theGlobalVariables.GetElapsedSeconds() << " s, ";
+  if (theWebServer.activeWorker!=-1)
+    out << "w: " << theWebServer.activeWorker << ",";
+  out << " c: " << theWebServer.NumConnectionsSoFar << ". ";
+  //<-abbreviating worker to w and connection to c to reduce the log size.
+  return out.str();
+}
+
 logger& logger::operator << (const loggerSpecialSymbols& input)
 { if (theGlobalVariables.flagRunningApache)
     return *this;
@@ -729,7 +742,9 @@ logger& logger::operator << (const loggerSpecialSymbols& input)
       this->currentColor=logger::normalColor;
       if (this->flagStopWritingToFile)
         return *this;
-      theFile << this->closeTagHtml() << "\n<br>\n";
+      this->buffer+= this->closeTagHtml() + "\n<br>\n";
+      theFile << this->getStamp() << this->buffer;
+      this->buffer = "";
       theFile.flush();
       return *this;
     case logger::red:

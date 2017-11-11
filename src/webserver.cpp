@@ -895,7 +895,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   while ((numBytesInBuffer<0) || (numBytesInBuffer>((signed)bufferSize)))
   { numFailedReceives++;
     std::stringstream out;
-    out << this->parent->ToStringActiveWorker()
+    out
     << " WebWorker::ReceiveAllHttpSSL on socket "
     << this->connectedSocketID
     << " failed (so far "
@@ -904,8 +904,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     << ". Error description: " << errorStream.str()
     ;
     if (numFailedReceives>5)
-    { out << this->parent->ToStringActiveWorker()
-      << ". 5+ failed receives so far, aborting. ";
+    { out << ". 5+ failed receives so far, aborting. ";
       this->error=out.str();
       logIO << out.str() << logger::endL;
       numBytesInBuffer=0;
@@ -913,7 +912,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     }
     logIO << logger::orange << out.str() << logger::endL;
     //std::string bufferCopy(buffer, bufferSize);
-    logIO << this->parent->ToStringActiveWorker()
+    logIO
     << " Number of bytes in buffer so far: " << bufferSize;
     numBytesInBuffer=this->parent->theSSLdata.SSLread
     (this->parent->theSSLdata.sslServeR, &buffer, bufferSize-1, &errorStream, 0, true);
@@ -1614,7 +1613,7 @@ void WebWorker::OutputResultAfterTimeout()
 
 void WebWorker::OutputCrashAfterTimeout()
 { MacroRegisterFunctionWithName("WebWorker::OutputCrashAfterTimeout");
-  theLog << logger::red << theWebServer.ToStringActiveWorker() << ": crashing AFTER timeout!" << logger::endL;
+  theLog << logger::red << "Crashing AFTER timeout!" << logger::endL;
   WebWorker::OutputSendAfterTimeout(standardOutputStreamAfterTimeout.str());
   theWebServer.SignalActiveWorkerDoneReleaseEverything();
 }
@@ -1744,45 +1743,31 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
 { MacroRegisterFunctionWithName("WebWorker::AttemptUnknownRequestErrorCorrection");
   if (this->requestTypE!=this->requestUnknown)
     return;
-  logIO << logger::red << this->parent->ToStringActiveWorker()
-  << " Unknown request. " << logger::endL;
-  logIO << logger::blue << this->parent->ToStringActiveWorker()
-  << " Message head length: " << this->messageHead.size();
-//logIO  << ".  " << this->messageHead ;
-  logIO << logger::endL;
-  logIO << logger::orange << this->parent->ToStringActiveWorker()
-  << " Message body length: " << this->messageBody.size() << logger::endL;
+  logIO << logger::red << " Unknown request. \n";
+  logIO << logger::blue << " Message head length: " << this->messageHead.size();
+  logIO << logger::orange << " Message body length: " << this->messageBody.size() << logger::endL;
   logIO << logger::green << "Attempting to correct unknown request.\n";
   if (this->messageBody.size()==0)
     if (*this->theStrings.LastObject()!="\n")
     { logIO << logger::green
-      << this->parent->ToStringActiveWorker()
-      << "Message body set to last message chunk." << logger::endL;
+      << "Message body set to last message chunk.\n";
       this->messageBody=*this->theStrings.LastObject();
     }
   if (this->messageBody.size()!=0)
-  { logIO << this->parent->ToStringActiveWorker() << "Request set to: POST"
-    << logger::endL;
+  { logIO << "Request set to: POST\n";
     this->requestTypE=this->requestPost;
   } else
-  { logIO << this->parent->ToStringActiveWorker() << "Request set to: GET"
-    << logger::endL;
+  { logIO << "Request set to: GET\n";
     this->requestTypE=this->requestGet;
   }
   if (this->addressGetOrPost=="")
-  { logIO << this->parent->ToStringActiveWorker() << "Address set to: "
-    << theGlobalVariables.DisplayNameExecutable
-    << logger::endL;
+  { logIO << "Address set to: " << theGlobalVariables.DisplayNameExecutable << "\n";
     this->addressGetOrPost=theGlobalVariables.DisplayNameExecutable;
   }
+  logIO << logger::blue
+  << "Unrecognized message head, length: " << this->messageHead.size() << ".\n";
+  logIO << logger::red << "Message body length: " << this->messageBody.size() << ". ";
   logIO << logger::endL;
-  logIO << logger::blue << this->parent->ToStringActiveWorker()
-  << "Unrecognized message head, length: " << this->messageHead.size() << ". ";
-  //<< this->messageHead << logger::endL;
-  logIO << logger::red << this->parent->ToStringActiveWorker()
-  << "Message body length: " << this->messageBody.size() << ". "
-  //<< this->messageBody
-  << logger::endL;
 }
 
 bool WebWorker::ReceiveAllHttp()
@@ -1806,7 +1791,7 @@ bool WebWorker::ReceiveAllHttp()
   while ((numBytesInBuffer<0) || (numBytesInBuffer>((signed)bufferSize)))
   { std::stringstream out;
     numFailedReceives++;
-    out << this->parent->ToStringActiveWorker()
+    out
     << "WebWorker::ReceiveAllHttp on socket " << this->connectedSocketID
     << " failed (so far "
     << numFailedReceives << " fails). "
@@ -1814,7 +1799,7 @@ bool WebWorker::ReceiveAllHttp()
     << ". Error description: "
     << this->parent->ToStringLastErrorDescription();
     if (numFailedReceives>5)
-    { out << this->parent->ToStringActiveWorker()
+    { out
       << ". 5+ failed receives so far, aborting. ";
       this->displayUserInput=out.str();
       this->error=out.str();
@@ -1823,10 +1808,10 @@ bool WebWorker::ReceiveAllHttp()
       result=false;
       break;
     }
-    logIO << logger::orange << out.str() << logger::endL;
+    logIO << logger::orange << out.str() << "\n";
     //std::string bufferCopy(buffer, bufferSize);
-    logIO << this->parent->ToStringActiveWorker()
-    << "Number of bytes in buffer so far: " << bufferSize << logger::endL;
+    logIO << "Number of bytes in buffer so far: " << bufferSize;
+    logIO << logger::endL;
     numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);
@@ -1898,12 +1883,13 @@ bool WebWorker::ReceiveAllHttp()
   }
   if ((signed) this->messageBody.size()!=this->ContentLength)
     if (this->requestTypE!=this->requestChunked)
-    { logIO << logger::red << this->parent->ToStringActiveWorker()
+    { logIO << logger::red
       << "Message body is of length: " << this->messageBody.size()
       << " yet this->ContentLength equals: "
       << this->ContentLength
       << ". Perhaps very long headers got truncated? "
-      << logger::endL; this->messageHead+=this->messageBody;
+      << logger::endL;
+      this->messageHead+=this->messageBody;
       this->ParseMessageHead();
       this->AttemptUnknownRequestErrorCorrection();
     }
@@ -2271,7 +2257,7 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   //theReport.SetStatus(debugStream2.str());
   if (this->PauseWorker.CheckPauseIsRequested(false, false, false))
   { //std::cout << "DEBUG: PipeProgressReportToParentProcess: pausing as requested...";
-    logBlock << theWebServer.ToStringActiveWorker() << ": pausing as requested ...";
+    logBlock << ": pausing as requested ..." << logger::endL;
     this->WriteProgressReportToFile(input);
   }
   this->PauseWorker.PauseIfRequested(false, false);     //if pause was requested, here we block
@@ -2530,16 +2516,16 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
 void WebWorker::WrapUpConnection()
 { MacroRegisterFunctionWithName("WebWorker::WrapUpConnection");
   if (theGlobalVariables.flagServerDetailedLog)
-    logIO << "DEBUG: wrapping up " << this->parent->ToStringActiveWorker() << ". " << logger::endL;
+    logIO << "DEBUG: wrapping up connection. " << logger::endL;
   if (this->flagToggleMonitoring)
     this->pipeWorkerToServerControls.WriteAfterEmptying("toggleMonitoring", false, false);
   else
     this->pipeWorkerToServerControls.WriteAfterEmptying("close", false, false);
   if (theGlobalVariables.flagServerDetailedLog)
-    logIO << "DEBUG: done with pipes, releasing " << this->parent->ToStringActiveWorker() << ". " << logger::endL;
+    logIO << "DEBUG: done with pipes, releasing resources. " << logger::endL;
   this->Release();
   if (theGlobalVariables.flagServerDetailedLog)
-    logIO << "DEBUG: " << this->parent->ToStringActiveWorker() << " released resources. " << logger::endL;
+    logIO << "DEBUG: released. " << logger::endL;
   theGlobalVariables.flagComputationCompletE=true;
   theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
 }
@@ -4373,19 +4359,19 @@ void WebServer::ReleaseEverything()
   theGlobalVariables.PauseUponUserRequest=0;
   this->activeWorker=-1;
   if (theGlobalVariables.flagServerDetailedLog)
-    currentLog << logger::red << "DEBUG: " << this->ToStringActiveWorker()
-    << " About to close: " << this->listeningSocketHTTP << logger::endL;
+    currentLog << logger::red << "DEBUG: "
+    << " About to close socket: " << this->listeningSocketHTTP << ". " << logger::endL;
   if (this->listeningSocketHTTP!=-1)
   { close(this->listeningSocketHTTP);
     if (theGlobalVariables.flagServerDetailedLog)
-      currentLog << logger::red << "DEBUG: " << this->ToStringActiveWorker()
+      currentLog << logger::red << "DEBUG: "
       << " Just closed socket: " << this->listeningSocketHTTP << logger::endL;
     this->listeningSocketHTTP=-1;
   }
   if (this->listeningSocketHttpSSL!=-1)
   { close(this->listeningSocketHttpSSL);
     if (theGlobalVariables.flagServerDetailedLog)
-      currentLog << logger::red << "DEBUG: " << this->ToStringActiveWorker()
+      currentLog << logger::red << "DEBUG: "
       << " Just closed socket: " << this->listeningSocketHttpSSL << logger::endL;
   }
   this->listeningSocketHttpSSL=-1;
@@ -4423,7 +4409,6 @@ WebServer::WebServer()
   this->flagDeallocated=false;
   this->flagTryToKillOlderProcesses=true;
   this->activeWorker=-1;
-  this->timeAtLastBackup=-1;
   this->timeLastExecutableModification=-1;
   this->listeningSocketHTTP=-1;
   this->listeningSocketHttpSSL=-1;
@@ -4651,15 +4636,7 @@ bool WebServer::CreateNewActiveWorker()
 
 std::string WebServer::ToStringLastErrorDescription()
 { std::stringstream out;
-  out << logger::red << "Process " << this->ToStringActiveWorker() << ": " << strerror(errno) << ". ";
-  return out.str();
-}
-
-std::string WebServer::ToStringActiveWorker()
-{ std::stringstream out;
-  out << theGlobalVariables.processType << ": ";
-  out << "w: " << theWebServer.activeWorker << ", c: " << theWebServer.NumConnectionsSoFar
-  ; //<-abbreviating worker to w and connection to c to reduce the log size.
+  out << strerror(errno) << ". ";
   return out.str();
 }
 
@@ -4792,7 +4769,8 @@ std::string WebServer::ToStringStatusAll()
   if (theGlobalVariables.flagRunningApache)
     return "Running through Apache. ";
   std::stringstream out;
-  out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><hr>";
+  out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><br>";
+  out << "<a href=\"/LogFiles/" << GlobalVariables::GetDateForLogFiles() << "/\">" << "Current log files</a><hr>";
   out << this->ToStringStatusPublicNoTop() << "<hr>";
   if (this->activeWorker==-1)
     out << "The process is functioning as a server.";
@@ -4910,10 +4888,10 @@ void WebServer::ReleaseWorkerSideResources()
 { MacroRegisterFunctionWithName("WebServer::ReleaseWorkerSideResources");
   logger& currentLog = theGlobalVariables.flagIsChildProcess ? theLog : logProcessKills;
   if (theGlobalVariables.flagServerDetailedLog)
-    currentLog << logger::red << "DEBUG: server about to RELEASE: " << this->ToStringActiveWorker() << logger::endL;
+    currentLog << logger::red << "DEBUG: server about to RELEASE active workder. " << logger::endL;
   this->Release(this->GetActiveWorker().connectedSocketID);
   if (theGlobalVariables.flagServerDetailedLog)
-    currentLog << logger::green << "DEBUG: server RELEASED: " << this->ToStringActiveWorker() << logger::endL;
+    currentLog << logger::green << "DEBUG: server RELEASED active worker. " << logger::endL;
   //<-release socket- communication is handled by the worker.
   this->activeWorker=-1; //<-The active worker is needed only in the child process.
 }
@@ -4953,8 +4931,7 @@ void WebServer::TerminateChildSystemCall(int i)
   this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
   if (this->theWorkers[i].ProcessPID>0)
   { if (theGlobalVariables.flagServerDetailedLog)
-      logProcessKills << "DEBUG: " << this->ToStringActiveWorker()
-      << " killing child index: " << i << "." << logger::endL;
+      logProcessKills << "DEBUG: " << " killing child index: " << i << "." << logger::endL;
     kill(this->theWorkers[i].ProcessPID, SIGKILL);
     this->theWorkers[i].ProcessPID=-1;
   }
@@ -4966,7 +4943,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
   if (theGlobalVariables.flagIsChildProcess)
     return;
   if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << logger::red << "DEBUG: " << this->ToStringActiveWorker()
+    logProcessStats << logger::red << "DEBUG: "
     << " too many connections handler start. " << logger::endL;
   MonomialWrapper<std::string, MathRoutines::hashString>
   incomingAddress(incomingUserAddress);
@@ -4993,11 +4970,11 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     << ": address: " << incomingAddress << " opened more than "
     << this->MaxNumWorkersPerIPAdress << " simultaneous connections. ";
     this->theWorkers[theIndices[j]].pingMessage=errorStream.str();
-    logProcessKills << logger::red  << this->ToStringActiveWorker() << errorStream.str() << logger::endL;
+    logProcessKills << logger::red << errorStream.str() << logger::endL;
     this->NumProcessAssassinated++;
   }
   if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << logger::green << this->ToStringActiveWorker()
+    logProcessStats << logger::green
     << "DEBUG: connection cleanup successful. " << logger::endL;
 }
 
@@ -5073,7 +5050,7 @@ void WebServer::RecycleChildrenIfPossible()
     }
   if (numInUse<=this->MaxTotalUsedWorkers)
   { if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << logger::green << this->ToStringActiveWorker()
+      logProcessStats << logger::green
       << "DEBUG: RecycleChildrenIfPossible exit point 1. " << logger::endL;
     return;
   }
@@ -5086,13 +5063,13 @@ void WebServer::RecycleChildrenIfPossible()
       << this->theWorkers[i].ProcessPID
       << ": too many workers in use. ";
       this->theWorkers[i].pingMessage=errorStream.str();
-      logProcessKills << logger::red << this->ToStringActiveWorker() << errorStream.str() << logger::endL;
+      logProcessKills << logger::red << errorStream.str() << logger::endL;
       numInUse--;
       this->NumProcessAssassinated++;
     }
   }
   if (theGlobalVariables.flagServerDetailedLog)
-    logProcessStats << logger::green << this->ToStringActiveWorker()
+    logProcessStats << logger::green
     << "DEBUG: RecycleChildrenIfPossible exit point 2. " << logger::endL;
 }
 
@@ -5227,24 +5204,6 @@ extern void MonitorWebServer();
 #include <sys/time.h>
 timeval timeBeforeProcessFork;
 
-void WebServer::BackupDatabaseIfNeeded()
-{ MacroRegisterFunctionWithName("WebServer::BackupDatabaseIfNeeded");
-  if (this->timeAtLastBackup>0 &&
-      theGlobalVariables.GetElapsedSeconds()-this->timeAtLastBackup <
-      (24*3600))
-    return;
-  std::stringstream commandStream;
-  commandStream << "mysqldump -u ace --databases aceDB > "
-  << theGlobalVariables.PhysicalPathProjectBase
-  << "database-backups/dbBackup"
-  << theGlobalVariables.GetDateForLogFiles() << ".sql";
-  logServerMonitor << logger::orange << "Backing up database with command: " << logger::endL;
-  logServerMonitor << commandStream.str() << logger::endL;
-  theGlobalVariables.CallSystemWithOutput(commandStream.str());
-  logServerMonitor << logger::green << "Backing up completed. " << logger::endL;
-  this->timeAtLastBackup=theGlobalVariables.GetElapsedSeconds();
-}
-
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
@@ -5309,13 +5268,13 @@ int WebServer::Run()
     for (int i=0; i<this->theListeningSockets.size; i++)
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
     if (theGlobalVariables.flagServerDetailedLog)
-      logServer << logger::red << "DEBUG:" << this->ToStringActiveWorker() << " About to enter select loop. " << logger::endL;
+      logServer << logger::red << "DEBUG: About to enter select loop. " << logger::endL;
     while (select(this->highestSocketNumber+1, &FDListenSockets, 0, 0, 0)==-1)
     { if (this->flagReapingChildren)
-        logServer << logger::yellow << this->ToStringActiveWorker() << " select interrupted while reaping children. "
+        logServer << logger::yellow << "Select interrupted while reaping children. "
         << logger::endL;
       else
-        logServer << logger::red << this->ToStringActiveWorker() << " select failed: possibly due to reaping children. Error message: "
+        logServer << logger::red << " Select failed: possibly due to reaping children. Error message: "
         << strerror(errno) << logger::endL;
       this->NumFailedSelectsSoFar++;
     }
@@ -5347,7 +5306,7 @@ int WebServer::Run()
       { //if (this->theListeningSockets[i]==this->listeningSocketHTTP)
         newConnectedSocket=accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
         if (newConnectedSocket>=0)
-        { logServer << logger::green << this->ToStringActiveWorker() << " connection candidate  "
+        { logServer << logger::green << " Connection candidate  "
           << this->NumConnectionsSoFar+1 << ". "
           << "Connected via listening socket " << this->theListeningSockets[i]
           << " on socket: " << newConnectedSocket;
@@ -5358,7 +5317,7 @@ int WebServer::Run()
             logServer << logger::yellow << " (non-encrypted). " << logger::endL;
           break;
         } else
-        { logSocketAccept << logger::red << this->ToStringActiveWorker() << "This is not supposed to happen: accept failed. Error: "
+        { logSocketAccept << logger::red << "This is not supposed to happen: accept failed. Error: "
           << this->ToStringLastErrorDescription() << logger::endL;
           found=true;
         }
@@ -5368,7 +5327,7 @@ int WebServer::Run()
       << "but I found no set socket. " << logger::endL;
     if (newConnectedSocket <0)
     { if (theGlobalVariables.flagServerDetailedLog)
-        logServer << "DEBUG: " << this->ToStringActiveWorker() << " newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. ";
+        logServer << "DEBUG: newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. " << logger::endL;
       continue;
     }
     inet_ntop
@@ -5376,10 +5335,10 @@ int WebServer::Run()
     this->HandleTooManyConnections(userAddressBuffer);
     this->RecycleChildrenIfPossible();
     if (!this->CreateNewActiveWorker())
-    { logPlumbing << logger::purple << this->ToStringActiveWorker()
+    { logPlumbing << logger::purple
       << " failed to create an active worker. System error string: "
-      << strerror(errno) << logger::endL
-      << logger::red << this->ToStringActiveWorker() << "Failed to create active worker: closing connection. " << logger::endL;
+      << strerror(errno) << "\n"
+      << logger::red << "Failed to create active worker: closing connection. " << logger::endL;
       close (newConnectedSocket);
       continue;
     }
@@ -5398,14 +5357,14 @@ int WebServer::Run()
 //    theLog << this->ToStringStatus();
     /////////////
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << "DEBUG: " << this->ToStringActiveWorker() << " about to fork, sigprocmasking " << logger::endL;
+      logProcessStats << "DEBUG: about to fork, sigprocmasking " << logger::endL;
     int error=sigprocmask(SIG_BLOCK, &allSignals, &oldSignals);
     if (error<0)
     { logServer << logger::red << "DEBUG: Sigprocmask failed. The server is going to crash. " << logger::endL;
       crash << "Sigprocmas failed. This should not happen. " << crash;
     }
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << "DEBUG: " << this->ToStringActiveWorker() << " Sigprocmask done. Proceeding to fork. "
+      logProcessStats << "DEBUG: Sigprocmask done. Proceeding to fork. "
       << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
       << logger::endL;
     int incomingPID=fork(); //creates an almost identical copy of this process.
@@ -5418,40 +5377,37 @@ int WebServer::Run()
       theGlobalVariables.processType="worker";
     if (theGlobalVariables.flagServerDetailedLog)
       if (incomingPID==0)
-      { theLog << "DEBUG: fork() successful in worker. " << logger::endL;
-        theLog << "DEBUG: elapsed seconds @ fork(): " << theGlobalVariables.GetElapsedSeconds() << logger::endL;
-        theLog << "DEBUG: reported by: " << this->ToStringActiveWorker() << logger::endL;
+      { theLog << "DEBUG: fork() successful in worker; elapsed seconds @ fork(): "
+        << theGlobalVariables.GetElapsedSeconds() << logger::endL;
       }
     if (theGlobalVariables.flagServerDetailedLog)
       if (incomingPID>0)
-      { logSuccessfulForks << "DEBUG: fork() successful. " << logger::endL;
-        logSuccessfulForks << "DEBUG: elapsed seconds @ fork(): " << theGlobalVariables.GetElapsedSeconds() << logger::endL;
-        logSuccessfulForks << "DEBUG: reported by: " << this->ToStringActiveWorker() << logger::endL;
+      { logSuccessfulForks << "DEBUG: fork() successful; elapsed seconds @ fork(): "
+        << theGlobalVariables.GetElapsedSeconds() << logger::endL;
       }
     if (incomingPID<0)
-      logProcessKills << logger::red << this->ToStringActiveWorker()
-      << " FAILED to spawn a child process. " << logger::endL;
+      logProcessKills << logger::red << " FAILED to spawn a child process. " << logger::endL;
     this->GetActiveWorker().ProcessPID=incomingPID;
     if (this->GetActiveWorker().ProcessPID==0)
     { // this is the child (worker) process
       theGlobalVariables.flagIsChildProcess=true;
       if (theGlobalVariables.flagServerDetailedLog)
-        theLog << logger::green << "DEBUG:" << this->ToStringActiveWorker()
+        theLog << logger::green << "DEBUG: "
         << " FORK successful in worker, next step. Time elapsed: " << theGlobalVariables.GetElapsedSeconds()
         << " second(s). Calling sigprocmask. " << logger::endL;
       sigprocmask(SIG_SETMASK, &oldSignals, NULL);
       if (theGlobalVariables.flagServerDetailedLog)
-        theLog << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " sigprocmask success, running... " << logger::endL;
+        theLog << logger::green << "DEBUG: sigprocmask success, running... " << logger::endL;
       int result=this->GetActiveWorker().Run();
       if (theGlobalVariables.flagServerDetailedLog)
-        theLog << "DEBUG: " << this->ToStringActiveWorker() << " run finished, releasing resources. " << logger::endL;
+        theLog << "DEBUG: run finished, releasing resources. " << logger::endL;
       this->ReleaseEverything();
       if (theGlobalVariables.flagServerDetailedLog)
-        theLog << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " resources released, returning. " << logger::endL;
+        theLog << logger::green << "DEBUG: resources released, returning. " << logger::endL;
       return result;
     }
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << logger::green << "DEBUG: " << this->ToStringActiveWorker() << " fork successful. Time elapsed: "
+      logProcessStats << logger::green << "DEBUG: fork successful. Time elapsed: "
       << theGlobalVariables.GetElapsedSeconds() << " second(s). "
       << "About to unmask signals. " << logger::endL;
     error= sigprocmask(SIG_SETMASK, &oldSignals, NULL);
@@ -5460,8 +5416,7 @@ int WebServer::Run()
       crash << "Sigprocmask failed on server." << crash;
     }
     if (theGlobalVariables.flagServerDetailedLog)
-      logProcessStats << logger::green << "DEBUG: "
-      << this->ToStringActiveWorker() << " unmask successful. " << logger::endL;
+      logProcessStats << logger::green << "DEBUG: unmask successful. " << logger::endL;
     this->ReleaseWorkerSideResources();
   }
   this->ReleaseEverything();

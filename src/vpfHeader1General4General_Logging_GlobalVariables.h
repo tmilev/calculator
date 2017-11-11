@@ -204,6 +204,7 @@ public:
   std::string ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude);
 
   static std::string GetDateForLogFiles();
+  static std::string GetDateTime();
   void SetWebInpuT(const std::string& inputName, const std::string& inputValue);
   std::string GetWebInput(const std::string& inputName);
   void initDefaultFolderAndFileNames
@@ -245,6 +246,7 @@ class logger
   int currentColor;
   int MaxLogSize;
   std::string theFileName;
+  std::string buffer;
   std::fstream theFile;
   bool flagStopWritingToFile;
   bool flagInitialized;
@@ -267,6 +269,7 @@ class logger
   static std::string cyanConsole();
   static std::string orangeConsole();
   static std::string normalConsole();
+  std::string getStamp();
   std::string closeTagConsole();
   std::string closeTagHtml();
   std::string openTagConsole();
@@ -286,9 +289,14 @@ class logger
         out << "WARNING: logger is for process type: " << this->processType
         << " but current process is of type: " << theGlobalVariables.processType << ". ";
       out << toBePrinted;
-      this->theFile << out.str();
+      this->buffer += out.str();
       if (this->flagWriteImmediately)
+      //<- Please do not use flagWriteImmediately
+      //unless it is an extremely time-sensitive logging
+      //issue such as investigating fork hangups.
+      { this->theFile << this->buffer;
         this->theFile.flush();
+      }
     }
     if (this->carbonCopy!=0)
       (*(this->carbonCopy)) << toBePrinted;

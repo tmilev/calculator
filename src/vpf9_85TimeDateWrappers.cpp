@@ -100,8 +100,9 @@ double TimeWrapper::SubtractAnotherTimeFromMeInSeconds(TimeWrapper& other)
 }
 
 std::string TimeWrapper::ToStringHumanReadable()
-{ std::string result(std::asctime(&this->theTime), 24);
-  return result;
+{ char buffer[80];
+  strftime(buffer, sizeof(buffer), "%Y-%m-%d-%I:%M:%S", &this->theTime);
+  return std::string(buffer);
 }
 
 std::string TimeWrapper::ToString()

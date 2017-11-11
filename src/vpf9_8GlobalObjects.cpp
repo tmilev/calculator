@@ -23,6 +23,12 @@ std::string GlobalVariables::GetDateForLogFiles()
   return tempDate;
 }
 
+std::string GlobalVariables::GetDateTime()
+{ TimeWrapper now;
+  now.AssignLocalTime();
+  return now.ToStringHumanReadable();
+}
+
 logger theLog("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html", 0, true, "worker");
 logger logServerMonitor("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServerMonitor.html", 0, false, "serverMonitor");
 logger logServer("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServer.html", 0, false, "server");
@@ -72,8 +78,7 @@ void HtmlRoutines::MakeReportIndicatorFile(const std::string& input)
   std::fstream theFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual
   (theFile, "output/" + theGlobalVariables.RelativePhysicalNameProgressReport, false, true, false);
-  std::stringstream outStream;
-  theFile << " Elapsed calculator time: " << GetElapsedTimeInSeconds() << " second(s).";
+  theFile << " Elapsed calculator time: " << theGlobalVariables.GetElapsedSeconds() << " second(s).";
   theFile << input;
   theFile.flush();
   theFile.close();

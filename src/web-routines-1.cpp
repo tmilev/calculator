@@ -60,8 +60,44 @@ public:
  ;
 };
 
+class WebServerMonitor{
+public:
+  void BackupDatabaseIfNeeded();
+  double timeAtLastBackup;
+  void Monitor();
+  WebServerMonitor();
+};
+
 void MonitorWebServer()
-{ MacroRegisterFunctionWithName("MonitorWebServer");
+{ WebServerMonitor theMonitor;
+  theMonitor.Monitor();
+}
+
+WebServerMonitor::WebServerMonitor()
+{ this->timeAtLastBackup =-1;
+
+}
+
+void WebServerMonitor::BackupDatabaseIfNeeded()
+{ MacroRegisterFunctionWithName("WebServer::BackupDatabaseIfNeeded");
+  if (this->timeAtLastBackup>0 &&
+      theGlobalVariables.GetElapsedSeconds()-this->timeAtLastBackup <
+      (24*3600))
+    return;
+  std::stringstream commandStream;
+  commandStream << "mysqldump -u ace --databases aceDB > "
+  << theGlobalVariables.PhysicalPathProjectBase
+  << "database-backups/dbBackup"
+  << theGlobalVariables.GetDateForLogFiles() << ".sql";
+  logServerMonitor << logger::orange << "Backing up database with command: " << logger::endL;
+  logServerMonitor << commandStream.str() << logger::endL;
+  theGlobalVariables.CallSystemWithOutput(commandStream.str());
+  logServerMonitor << logger::green << "Backing up completed. " << logger::endL;
+  this->timeAtLastBackup=theGlobalVariables.GetElapsedSeconds();
+}
+
+void WebServerMonitor::Monitor()
+{ MacroRegisterFunctionWithName("Monitor");
   int maxNumPingFailures=3;
   //warning: setting theWebServer.WebServerPingIntervalInSeconds to more than 1000
   //may overflow the variable int microsecondsToSleep.
@@ -95,7 +131,7 @@ void MonitorWebServer()
   TimeWrapper now;
   for (;;)
   { theGlobalVariables.FallAsleep(microsecondsToSleep);
-    theWebServer.BackupDatabaseIfNeeded();
+    this->BackupDatabaseIfNeeded();
     //std::cout << "Pinging " << theCrawler.addressToConnectTo
     //<< " at port/service " << theCrawler.portOrService << ".\n";
     theCrawler.PingCalculatorStatus();

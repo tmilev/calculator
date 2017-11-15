@@ -432,32 +432,8 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
   return out.str();
 }
 
-std::string HtmlInterpretation::GetSelectCourseFromHtml()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourseFromHtml");
-  std::stringstream out;
-  out << "<!DOCTYPE html>";
-  out << "<html>";
-  out << "<head>"
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
-  << "</head>";
-  out << "<body>";
-  out << "<calculatorNavigation>"
-  << HtmlInterpretation::ToStringNavigation()
-  << "</calculatorNavigation>";
-  std::string theFile;
-  if (!FileOperations::LoadFileToStringVirtual("html/selectCourse.html", theFile, out, false, false))
-  { out << "<span style=\"color:red\"><b>" << "File: selectCourse.html is missing. " << "</b></span>"
-    << "<br>The file needs to be located at <br>calculator-base-folder/../public_html/selectCourse.html"
-    << "<br>i.e., the file must be in a folder named public_html, parallel to the installation folder." ;
-  } else
-  { out << theFile;
-  }
-  out << "</body></html>";
-  return out.str();
-}
-
 std::string HtmlInterpretation::GetAboutPage()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourseFromHtml");
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetAboutPage");
   std::stringstream out;
   out << "<!DOCTYPE html>";
   out << "<html>";
@@ -505,7 +481,7 @@ std::string HtmlInterpretation::GetSelectCourse()
     if (theExtensions[i]==".txt")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=template&topicList=topiclists/" << theFileNames[i]
-    << "&courseHome=pagetemplates/ace-learning-Singapore-H1-syllabus.html\">"
+    << "&courseHome=coursetemplates/ace-learning-Singapore-H1-syllabus.html\">"
     << theFileNames[i] << "</a><br>";
   out << "</body></html>";
   return out.str();
@@ -2181,10 +2157,10 @@ std::string HtmlInterpretation::ToStringNavigation()
       << linkSeparator;
     }
   }
-  if (theGlobalVariables.userCalculatorRequestType=="selectCourseFromHtml")
+  if (theGlobalVariables.userCalculatorRequestType=="selectCourse")
     out << "<b>Select course</b>" << linkBigSeparator;
   else
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=selectCourseFromHtml\">Select course</a>" << linkBigSeparator;
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=selectCourse\">Select course</a>" << linkBigSeparator;
   if (theGlobalVariables.flagLoggedIn)
   { out << "User";
     if (theGlobalVariables.UserDefaultHasAdminRights())

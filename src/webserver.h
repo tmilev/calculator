@@ -194,7 +194,6 @@ public:
   int ProcessExamPage();
   int ProcessTemplate();
   int ProcessSelectCourse();
-  int ProcessSelectCourseFromHtml();
   int ProcessTopicTable();
   int ProcessExamPageInterpreter();
   int ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication);

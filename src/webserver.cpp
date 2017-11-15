@@ -2764,7 +2764,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
       theGlobalVariables.userCalculatorRequestType!="login")
     out << " value=\"" << theGlobalVariables.userCalculatorRequestType << "\"";
   else
-    out << "value=\"selectCourseFromHtml\"";
+    out << "value=\"selectCourse\"";
   out << ">";
   out << "<input type=\"hidden\" name=\"googleToken\" id=\"googleToken\" value=\"\">";
   out << "<br>";
@@ -3335,13 +3335,6 @@ int WebWorker::ProcessAbout()
   return 0;
 }
 
-int WebWorker::ProcessSelectCourseFromHtml()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourseFromHtml");
-  this->SetHeaderOKNoContentLength();
-  stOutput << HtmlInterpretation::GetSelectCourseFromHtml();
-  return 0;
-}
-
 int WebWorker::ProcessTemplate()
 { MacroRegisterFunctionWithName("WebWorker::ProcessTemplate");
   this->SetHeaderOKNoContentLength();
@@ -3837,7 +3830,7 @@ bool WebWorker::CorrectRequestsBEFORELoginReturnFalseIfModified()
     }
   if (this->addressComputed=="/" || this->addressComputed=="")
   { this->addressComputed=theGlobalVariables.DisplayNameExecutable;
-    theGlobalVariables.userCalculatorRequestType="selectCourseFromHtml";
+    theGlobalVariables.userCalculatorRequestType="selectCourse";
     stateNotModified=false;
   }
   return stateNotModified;
@@ -3866,7 +3859,7 @@ bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified()
   }
   if (shouldFallBackToDefaultPage)
   { this->addressComputed=theGlobalVariables.DisplayNameExecutable;
-    theGlobalVariables.userCalculatorRequestType="selectCourseFromHtml";
+    theGlobalVariables.userCalculatorRequestType="selectCourse";
     stateNotModified=false;
   }
   return stateNotModified;
@@ -4174,8 +4167,6 @@ int WebWorker::ServeClient()
     return this->ProcessCalculator();
   else if (theGlobalVariables.userCalculatorRequestType=="compute")
     return this->ProcessCompute();
-  else if (theGlobalVariables.userCalculatorRequestType=="selectCourseFromHtml")
-    return this->ProcessSelectCourseFromHtml();
   else if (theGlobalVariables.userCalculatorRequestType=="selectCourse")
     return this->ProcessSelectCourse();
   else if (theGlobalVariables.userCalculatorRequestType=="about")
@@ -4437,7 +4428,7 @@ WebServer::WebServer()
   this->requestStartsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
-  this->requestStartsNotNeedingLogin.AddOnTop("selectCourseFromHtml");
+  this->requestStartsNotNeedingLogin.AddOnTop("selectCourse");
   this->requestStartsNotNeedingLogin.AddOnTop("slidesFromSource");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.7-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("MathJax-2.7-latest/");
@@ -4460,10 +4451,6 @@ WebServer::WebServer()
   this->addressStartsNotNeedingLogin.AddOnTop("cache.appcache");
   this->addressStartsNotNeedingLogin.AddOnTop("/.well-known/");
   this->addressStartsNotNeedingLogin.AddOnTop(".well-known/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/selectCourse.html");
-  this->addressStartsNotNeedingLogin.AddOnTop("selectCourse.html");
-  this->addressStartsNotNeedingLogin.AddOnTop("html/selectCourse.html");
-  this->addressStartsNotNeedingLogin.AddOnTop("/html/selectCourse.html");
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("html-common/");
@@ -5801,7 +5788,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("font/", "./html-common/font/");
   folderSubstitutionsNonSensitive.SetKeyValue("/DefaultProblemLocation/", "../problemtemplates/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use
-  folderSubstitutionsNonSensitive.SetKeyValue("pagetemplates/", "../pagetemplates/");
+  folderSubstitutionsNonSensitive.SetKeyValue("coursetemplates/", "../coursetemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");
@@ -5819,12 +5806,18 @@ void WebServer::InitializeGlobalVariables()
 
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("favicon.ico");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/favicon.ico");
-  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("html/selectCourse.html");
-  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/html/selectCourse.html");
+  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("coursesavailable/default/default.txt");
+  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/coursesavailable/default/default.txt");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("html-common-calculator/about.html");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/html-common-calculator/about.html");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("html/about.html");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/html/about.html");
+
+  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("topiclists/");
+  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/topiclists/");
+  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("coursesavailable/");
+  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/coursesavailable/");
+
 
 }
 

@@ -671,6 +671,12 @@ FileOperations::FilesStartsToWhichWeAppendHostName()
   return result;
 }
 
+HashedList<std::string, MathRoutines::hashString>&
+FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()
+{ static HashedList<std::string, MathRoutines::hashString> result;
+  return result;
+}
+
 MapLisT<std::string, std::string, MathRoutines::hashString>&
 FileOperations::FolderVirtualLinksSensitive()
 { static MapLisT<std::string, std::string, MathRoutines::hashString> result;
@@ -801,6 +807,17 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
       inputCopy = fileStart + "-" + toAppend + fileExtension;
       //stOutput << "DEBUG: inputCopy: " << inputCopy;
     }
+  std::string fileEnd;
+  for (int i=0; i<FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().size; i++)
+    if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i], &fileEnd))
+    { std::string instructor=theGlobalVariables.userDefault.courseInfo.instructorComputed;
+      if (instructor=="")
+        instructor= "default";
+      instructor += "/";
+      inputCopy = FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i]+ instructor+ fileEnd;
+      break;
+    }
+
   std::string folderEnd;
   for (int i=0; i<FileOperations::FolderVirtualLinksNonSensitive().size(); i++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd))

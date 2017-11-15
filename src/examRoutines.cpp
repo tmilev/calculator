@@ -513,7 +513,7 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
     << "</problemNavigation>";
     this->comments << commentsStream.str();
     this->comments << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=selectCourseFromHtml\">Go to course list page.</a>"
+    << "?request=selectCourse\">Go to course list page.</a>"
     ;
   }
   this->theProblemData.CheckConsistency();

@@ -5215,7 +5215,14 @@ int WebServer::Run()
   }
   std::string theDir= FileOperations::GetCurrentFolder();
   theGlobalVariables.ChDir("../");
-  theGlobalVariables.buildVersion=MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("svn info | grep \"Revision\" | awk '{print $2}'"));
+  theGlobalVariables.buildVersion =
+  MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("svn info | grep \"Revision\" | awk '{print $2}'"));
+  //<- if using svn, this will return the svn revision number
+  if (theGlobalVariables.buildVersion == "")
+    theGlobalVariables.buildVersion =
+    MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
+
+
   theGlobalVariables.ChDir(theDir);
   if (true)
   { int pidMonitor=fork();

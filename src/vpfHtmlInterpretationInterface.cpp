@@ -460,6 +460,35 @@ std::string HtmlInterpretation::GetAboutPage()
   return out.str();
 }
 
+class Course
+{
+public:
+  std::string courseTemplate;
+  std::string courseTopics;
+};
+
+class CourseList
+{
+public:
+  List<Course> theCourses;
+  void LoadFromString(const std::string& input, std::stringstream* commentsOnFailure);
+  std::string ToHtml();
+};
+
+std::string CourseList::ToHtml()
+{ return "";
+
+}
+
+void CourseList::LoadFromString(const std::string& input, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("CourseList::LoadFromString");
+  std::stringstream tableReader(input);
+  std::string currentLine, currentArgument;
+  while (std::getline(tableReader, currentLine, '\n'))
+  {
+  }
+}
+
 std::string HtmlInterpretation::GetSelectCourse()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetSelectCourse");
   std::stringstream out;
@@ -472,17 +501,14 @@ std::string HtmlInterpretation::GetSelectCourse()
   out << "<calculatorNavigation>"
   << HtmlInterpretation::ToStringNavigation()
   << "</calculatorNavigation>";
-  List<std::string> theFileNames, theExtensions;
-  if (!FileOperations::GetFolderFileNamesVirtual("topiclists/", theFileNames, &theExtensions))
-  { out << "<b>Failed to fetch file names from topiclists/</b>. </body></html>";
+  std::string theTopicFile;
+  std::stringstream commentsOnFailure;
+  if (!FileOperations::LoadFileToStringVirtual("coursesavailable/default.txt", theTopicFile, commentsOnFailure))
+  { out << "<b>Failed to fetch available courses from coursesavailable/default.txt</b>. </body></html>";
     return out.str();
   }
-  for (int i=0; i<theFileNames.size; i++)
-    if (theExtensions[i]==".txt")
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=template&topicList=topiclists/" << theFileNames[i]
-    << "&courseHome=coursetemplates/ace-learning-Singapore-H1-syllabus.html\">"
-    << theFileNames[i] << "</a><br>";
+  CourseList theCourses;
+  out << theCourses.ToHtml();
   out << "</body></html>";
   return out.str();
 }

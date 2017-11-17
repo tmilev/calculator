@@ -44,17 +44,21 @@ public:
   static bool IsFolderUnsecure(const std::string& theFolderName);
   static bool GetFolderFileNamesUnsecure
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
-   List<std::string>* outputFileTypes=0)
-   ;
+   List<std::string>* outputFileTypes=0);
   static std::string GetCurrentFolder();
   static std::string GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath);
   static bool GetFolderFileNamesVirtual
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
    List<std::string>* outputFileTypes=0, bool accessSensitiveFolders=false,
-   bool accessULTRASensitiveFolders=false)
-   ;
+   bool accessULTRASensitiveFolders=false);
+  static bool GetPhysicalFileNameFromVirtualCustomized
+  (const std::string& inputFileName, std::string& output,
+   std::stringstream* commentsOnFailure);
+
   static bool GetPhysicalFileNameFromVirtual
-  (const std::string& inputFileName, std::string& output, bool accessSensitiveFolders=false, bool accessULTRASensitiveFolders=false);
+  (const std::string& inputFileName, std::string& output,
+   bool accessSensitiveFolders, bool accessULTRASensitiveFolders,
+   std::stringstream* commentsOnFailure);
 
   static bool OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
   static bool OpenFileCreateIfNotPresentVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders=false);

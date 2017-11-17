@@ -28,7 +28,8 @@ void LaTeXcrawler::ComputeAllowedFolders()
   allowedFoldersVirtual.AddOnTop("LaTeX-materials/");
   this->baseFoldersCrawlableFilesPhysical.SetSize(allowedFoldersVirtual.size);
   for (int i=0; i<this->baseFoldersCrawlableFilesPhysical.size; i++)
-  { FileOperations::GetPhysicalFileNameFromVirtual(allowedFoldersVirtual[i], this->baseFoldersCrawlableFilesPhysical[i]);
+  { FileOperations::GetPhysicalFileNameFromVirtual
+    (allowedFoldersVirtual[i], this->baseFoldersCrawlableFilesPhysical[i], false, false, 0);
     this->baseFoldersCrawlableFilesPhysical[i]=
     FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(this->baseFoldersCrawlableFilesPhysical[i])
     + "/";
@@ -44,7 +45,7 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* comme
     return false;
   }
   FileOperations::GetPhysicalFileNameFromVirtual
-  (this->theFileNameToCrawlRelative, this->theFileNameToCrawlPhysicalWithPath, true, false);
+  (this->theFileNameToCrawlRelative, this->theFileNameToCrawlPhysicalWithPath, true, false, commentsOnFailure);
 //  =theGlobalVariables.PhysicalPathProjectBase+ "../freecalc/" +
 //  this->theFileNameToCrawlRelative;
   this->baseFolderStartFilePhysical=
@@ -553,7 +554,8 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
     this->headerPathBelowFileNameVirtual=
     FileOperations::GetFileNameFromFileNameWithPath(this->headerPathBelowFileNameVirtual);
   }
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(this->headerFilePathVirtual, this->workingFilePathPhysical, false, false))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual
+      (this->headerFilePathVirtual, this->workingFilePathPhysical, false, false, commentsOnFailure))
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "Failed to extract physical path from: " << this->headerFilePathVirtual;
     return false;

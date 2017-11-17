@@ -380,12 +380,11 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, co
   std::ifstream theFile;
   if (!FileOperations::OpenFileVirtualReadOnly(theFile, this->RelativePhysicalFileNameWithFolder, false))
   { std::string theFileName;
-    FileOperations::GetPhysicalFileNameFromVirtual(this->RelativePhysicalFileNameWithFolder, theFileName);
-    comments << "<b>Failed to open:<br>\n"
-    << this->RelativePhysicalFileNameWithFolder << "<br>computed file name: <br>"
-    << theFileName
-    << "</b> ";
-    //comments << "Call stack: " << crash.GetStackTraceEtcErrorMessage();
+    if (FileOperations::GetPhysicalFileNameFromVirtual(this->RelativePhysicalFileNameWithFolder, theFileName, false, false, &comments))
+      comments << "<b>Failed to open:<br>\n"
+      << this->RelativePhysicalFileNameWithFolder << "<br>computed file name: <br>"
+      << theFileName
+      << "</b> ";
     return false;
   }
   //stOutput << "Debug: got to here pt1";

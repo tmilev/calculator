@@ -407,8 +407,8 @@ std::string HtmlInterpretation::ClonePageResult()
   std::stringstream svnAddCommand;
   std::string fileNameNonVirtual;
   std::stringstream commandResult;
-  if (FileOperations::GetPhysicalFileNameFromVirtual(fileNameResulT, fileNameNonVirtual, false, false))
-  { if (FileOperations::IsFileNameSafeForSystemCommands( fileNameNonVirtual, &commandResult))
+  if (FileOperations::GetPhysicalFileNameFromVirtual(fileNameResulT, fileNameNonVirtual, false, false, &commandResult))
+  { if (FileOperations::IsFileNameSafeForSystemCommands(fileNameNonVirtual, &commandResult))
     { svnAddCommand << "svn add " << fileNameNonVirtual;
       commandResult << "<b>Command:</b> " << svnAddCommand.str() << "<br>";
       commandResult << "<b>Result: </b>"
@@ -503,8 +503,13 @@ std::string HtmlInterpretation::GetSelectCourse()
   << "</calculatorNavigation>";
   std::string theTopicFile;
   std::stringstream commentsOnFailure;
+  std::string temp;
+  FileOperations::GetPhysicalFileNameFromVirtualCustomized("coursesavailable/default.txt", temp, commentsOnFailure);
+  out << "DEBUG: physical file name: " << temp;
+
   if (!FileOperations::LoadFileToStringVirtual("coursesavailable/default.txt", theTopicFile, commentsOnFailure))
-  { out << "<b>Failed to fetch available courses from coursesavailable/default.txt</b>. </body></html>";
+  { out << "<b>Failed to fetch available courses from coursesavailable/default.txt</b>.";
+    out << " </body></html>";
     return out.str();
   }
   CourseList theCourses;

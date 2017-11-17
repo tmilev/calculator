@@ -580,7 +580,8 @@ bool FileOperations::GetFolderFileNamesVirtual
 (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes, bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
 { MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesOnTopOfProjectBase");
   std::string computedFolderName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFolderName, computedFolderName, accessSensitiveFolders, accessULTRASensitiveFolders))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual
+      (theFolderName, computedFolderName, accessSensitiveFolders, accessULTRASensitiveFolders, 0))
     return false;
   //stOutput << "DEBUG: Getting folder names from physical folder: "
   //<< computedFolderName;
@@ -592,10 +593,10 @@ bool FileOperations::GetFolderFileNamesUnsecure
 (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes)
 { MacroRegisterFunctionWithName("FileOperations::GetFolderFileNamesUnsecure");
   DIR *theDirectory = opendir(theFolderName.c_str());
-  if (theDirectory==NULL)
+  if (theDirectory == NULL)
     return false;
   outputFileNamesNoPath.Reserve(1000);
-  if (outputFileTypes!=0)
+  if (outputFileTypes != 0)
     outputFileTypes->Reserve(1000);
   std::string fileNameNoPath, fullName, theExtension;
   for (dirent *fileOrFolder=readdir(theDirectory); fileOrFolder!=0; fileOrFolder= readdir (theDirectory))
@@ -622,7 +623,7 @@ bool FileOperations::LoadFileToStringVirtual
  bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
 { std::string computedFileName;
 //  stOutput << "DEBUG: loading string virtual from: " << theFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, &commentsOnFailure))
     return false;
   return FileOperations::LoadFileToStringUnsecure
   (computedFileName, output, commentsOnFailure);
@@ -651,9 +652,9 @@ bool FileOperations::LoadFileToStringUnsecure
 MapLisT<std::string, std::string, MathRoutines::hashString>&
 FileOperations::FolderVirtualLinksNonSensitive()
 { static MapLisT<std::string, std::string, MathRoutines::hashString> result;
-  static bool firstRun=false;
+  static bool firstRun = false;
   if (!firstRun)
-  { firstRun=true;
+  { firstRun = true;
     static MutexRecursiveWrapper theMutex;
     MutexLockGuard theGuard(theMutex);
     result.SetKeyValue("output/", "output/");
@@ -682,7 +683,7 @@ FileOperations::FolderVirtualLinksSensitive()
 { static MapLisT<std::string, std::string, MathRoutines::hashString> result;
   static bool firstRun=false;
   if (!firstRun)
-  { firstRun=true;
+  { firstRun = true;
     result.SetKeyValue("freecalc/", "../freecalc/");
     result.SetKeyValue("LogFiles/", "LogFiles/");
     result.SetKeyValue("crashes/", "LogFiles/crashes/");
@@ -695,7 +696,7 @@ FileOperations::FolderVirtualLinksULTRASensitive()
 { static MapLisT<std::string, std::string, MathRoutines::hashString> result;
   static bool firstRun=false;
   if (!firstRun)
-  { firstRun=true;
+  { firstRun = true;
     result.SetKeyValue("certificates/", "certificates/");
   }
   return result;
@@ -703,7 +704,8 @@ FileOperations::FolderVirtualLinksULTRASensitive()
 
 bool FileOperations::FileExistsVirtual(const std::string& theFileName, bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
 { std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual
+      (theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, 0))
     return false;
   return FileOperations::FileExistsUnsecure(computedFileName);
 }
@@ -720,14 +722,14 @@ bool FileOperations::FileExistsUnsecure(const std::string& theFileName)
 
 bool FileOperations::OpenFileVirtualReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary, bool accessSensitiveFolders)
 { std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, false, 0))
     return false;
   return FileOperations::OpenFileUnsecureReadOnly(theFile, computedFileName, openAsBinary);
 }
 
 bool FileOperations::OpenFileVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders)
 { std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, false, 0))
     return false;
   return FileOperations::OpenFileUnsecure(theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
 }
@@ -742,9 +744,9 @@ std::string FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(
   //to this problem now.
   //If anyone (including myself at another time) sees this and you have time,
   //please fix this. -Todor
-  std::string currentFolder=FileOperations::GetCurrentFolder();
+  std::string currentFolder = FileOperations::GetCurrentFolder();
   theGlobalVariables.ChDir(wouldBePath);
-  std::string result=FileOperations::GetCurrentFolder();
+  std::string result = FileOperations::GetCurrentFolder();
   theGlobalVariables.ChDir(currentFolder);
   return result;
 }
@@ -786,18 +788,45 @@ bool FileOperations::OpenFileUnsecureReadOnly(std::ifstream& theFile, const std:
   return theFile.is_open();
 }
 
+bool FileOperations::GetPhysicalFileNameFromVirtualCustomized
+(const std::string& inputFileName, std::string& output, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtualCustomized");
+  std::string fileEnd = "";
+  std::string inputStart = "";
+  for (int i=0; i<FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().size; i++)
+    if (MathRoutines::StringBeginsWith(inputFileName, FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i], &fileEnd))
+    { inputStart = FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i];
+      break;
+    }
+  if (inputStart == "")
+    return FileOperations::GetPhysicalFileNameFromVirtualCustomized(inputFileName, output, commentsOnFailure);
+  std::string customized =
+  HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.courseInfo.instructorComputed, false);
+  if (customized == "")
+    customized = "default/";
+  std::string inputCopy = inputStart + customized + fileEnd;
+  if (!FileExistsVirtual(inputCopy, false, false))
+    customized = "default/";
+  inputCopy = inputStart + customized + fileEnd;
+  return FileOperations::GetPhysicalFileNameFromVirtual(inputCopy, output, false, false, commentsOnFailure);
+}
+
 bool FileOperations::GetPhysicalFileNameFromVirtual
-(const std::string& inputFileNamE, std::string& output, bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
+(const std::string& inputFileNamE, std::string& output, bool accessSensitiveFolders,
+ bool accessULTRASensitiveFolders, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtual");
   //stOutput << "<br>DEBUG: processing " << inputFileNamE << " -> ... <br>";
   if (!FileOperations::IsOKfileNameVirtual(inputFileNamE, accessSensitiveFolders))
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "File name: " << inputFileNamE << " not allowed. ";
     return false;
+  }
   std::string inputCopy=inputFileNamE;
   for (int i=0; i<FileOperations::FilesStartsToWhichWeAppendHostName().size; i++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FilesStartsToWhichWeAppendHostName()[i]))
     { if (!FileOperations::IsOKfileNameVirtual(theGlobalVariables.hostNoPort))
         return false;
-      std::string toAppend=theGlobalVariables.hostNoPort;
+      std::string toAppend = theGlobalVariables.hostNoPort;
       if (MathRoutines::StringBeginsWith(toAppend, "www."))
         toAppend=toAppend.substr(4);
       if (MathRoutines::StringBeginsWith(toAppend, "localhost") || toAppend=="")
@@ -807,17 +836,6 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
       inputCopy = fileStart + "-" + toAppend + fileExtension;
       //stOutput << "DEBUG: inputCopy: " << inputCopy;
     }
-  std::string fileEnd;
-  for (int i=0; i<FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().size; i++)
-    if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i], &fileEnd))
-    { std::string instructor=theGlobalVariables.userDefault.courseInfo.instructorComputed;
-      if (instructor=="")
-        instructor= "default";
-      instructor += "/";
-      inputCopy = FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i]+ instructor+ fileEnd;
-      break;
-    }
-
   std::string folderEnd;
   for (int i=0; i<FileOperations::FolderVirtualLinksNonSensitive().size(); i++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd))
@@ -828,7 +846,8 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
   if (accessSensitiveFolders)
     for (int i=0; i<FileOperations::FolderVirtualLinksSensitive().size(); i++)
       if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd))
-      { output=theGlobalVariables.PhysicalPathProjectBase + FileOperations::FolderVirtualLinksSensitive().theValues[i] + folderEnd;
+      { output = theGlobalVariables.PhysicalPathProjectBase +
+        FileOperations::FolderVirtualLinksSensitive().theValues[i] + folderEnd;
         //stOutput << inputFileName << " transformed to: " << output;
         return true;
       }
@@ -848,7 +867,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded
 (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders)
 { std::string computedFileName;
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, false, 0))
     return false;
   std::string folderName = FileOperations::GetPathFromFileNameWithPath(computedFileName);
   std::stringstream mkDirCommand;
@@ -863,7 +882,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtual
 (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders)
 { std::string computedFileName;
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, false, 0))
   { //stOutput << "DEBUG: couldn't get physical file name from: " << theFileName << "<br>";
     return false;
   }
@@ -11084,7 +11103,7 @@ void Lattice::RefineByOtherLattice(const Lattice& other)
   if (other.basis==this->basis && this->Den==other.Den)
     return;
   if(other.GetDim()!=this->GetDim())
-    crash << crash;
+    crash << "Dimension mismatch" << crash;
   int theDim=this->GetDim();
   LargeIntUnsigned oldDen=this->Den;
   LargeIntUnsigned::lcm(other.Den, oldDen, this->Den);
@@ -11097,12 +11116,12 @@ void Lattice::RefineByOtherLattice(const Lattice& other)
   this->basis.Resize(this->basis.NumRows+other.basis.NumRows, theDim, true);
   for (int i=oldNumRows; i<this->basis.NumRows; i++)
     for (int j=0; j<this->basis.NumCols; j++)
-      this->basis.elements[i][j]=other.basis.elements[i-oldNumRows][j]*scaleOther;
+      this->basis.elements[i][j] = other.basis.elements[i-oldNumRows][j]*scaleOther;
   this->Reduce();
 }
 
-void Lattice::MakeFromMat(const Matrix<Rational> & input)
-{ this->basisRationalForm=input;
+void Lattice::MakeFromMat(const Matrix<Rational>& input)
+{ this->basisRationalForm = input;
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
   this->Reduce();
 }

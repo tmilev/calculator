@@ -345,8 +345,8 @@ bool SSLdata::initSSLkeyFiles()
     theLog << logger::green << "Let me try to create those files for you." << logger::endL;
     std::stringstream theCommand;
     std::string certificatePhysicalName,keyPhysicalName;
-    FileOperations::GetPhysicalFileNameFromVirtual(fileCertificate, certificatePhysicalName,true, true);
-    FileOperations::GetPhysicalFileNameFromVirtual(fileKey, keyPhysicalName,true, true);
+    FileOperations::GetPhysicalFileNameFromVirtual(fileCertificate, certificatePhysicalName, true, true, 0);
+    FileOperations::GetPhysicalFileNameFromVirtual(fileKey, keyPhysicalName, true, true, 0);
     theCommand <<  "openssl req -x509 -newkey rsa:2048 -nodes -keyout " << keyPhysicalName
     << " -out " << certificatePhysicalName << " -days 3001";
     theGlobalVariables.CallSystemNoOutput(theCommand.str(), false);
@@ -376,11 +376,11 @@ void SSLdata::initSSLserver()
   std::string fileCertificatePhysical, fileKeyPhysical,
   singedFileCertificate1Physical, signedFileCertificate3Physical,
   signedFileKeyPhysical;
-  FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate1, singedFileCertificate1Physical, true, true);
-  FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate3, signedFileCertificate3Physical, true, true);
-  FileOperations::GetPhysicalFileNameFromVirtual(fileCertificate, fileCertificatePhysical, true, true);
-  FileOperations::GetPhysicalFileNameFromVirtual(fileKey, fileKeyPhysical, true, true);
-  FileOperations::GetPhysicalFileNameFromVirtual(signedFileKey, signedFileKeyPhysical, true, true);
+  FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate1, singedFileCertificate1Physical, true, true, 0);
+  FileOperations::GetPhysicalFileNameFromVirtual(signedFileCertificate3, signedFileCertificate3Physical, true, true, 0);
+  FileOperations::GetPhysicalFileNameFromVirtual(fileCertificate, fileCertificatePhysical, true, true, 0);
+  FileOperations::GetPhysicalFileNameFromVirtual(fileKey, fileKeyPhysical, true, true, 0);
+  FileOperations::GetPhysicalFileNameFromVirtual(signedFileKey, signedFileKeyPhysical, true, true, 0);
   //std::cout << "\n\nproject base: " << theGlobalVariables.PhysicalPathProjectBase;
   //std::cout << "\n\nfileKey physical: " << fileKeyPhysical;
   //////////////////////////////////////////////////////////
@@ -4174,8 +4174,10 @@ int WebWorker::ServeClient()
   this->VirtualFileName=HtmlRoutines::ConvertURLStringToNormal(this->addressComputed, true);
   this->SanitizeVirtualFileName();
 //    std::cout << "GOT TO file names!" << std::endl;
+  std::stringstream commentsOnFailure;
   if (!FileOperations::GetPhysicalFileNameFromVirtual
-      (this->VirtualFileName, this->RelativePhysicalFileNamE, theGlobalVariables.UserDefaultHasAdminRights()))
+      (this->VirtualFileName, this->RelativePhysicalFileNamE, theGlobalVariables.UserDefaultHasAdminRights()), false,
+       &commentsOnFailure)
   { //  std::cout << "GOT TO not found!" << std::endl;
     this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
     stOutput << "<html><body><b>File name deemed unsafe. "
@@ -5749,20 +5751,20 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   }
   ////////////////////////////////
   if (secondArgument=="test")
-  { theGlobalVariables.flagRunningConsoleTest=true;
+  { theGlobalVariables.flagRunningConsoleTest = true;
     return;
   }
-  theGlobalVariables.flagRunningCommandLine=true;
+  theGlobalVariables.flagRunningCommandLine = true;
 }
 
 void WebServer::InitializeGlobalVariables()
-{ theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=0;
-  theGlobalVariables.flagReportEverything=true;
-  ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
+{ theGlobalVariables.MaxComputationTimeBeforeWeTakeAction = 0;
+  theGlobalVariables.flagReportEverything = true;
+  ParallelComputing::cgiLimitRAMuseNumPointersInList = 4000000000;
   MapLisT<std::string, std::string, MathRoutines::hashString>&
-  folderSubstitutionsNonSensitive=FileOperations::FolderVirtualLinksNonSensitive();
+  folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();
   MapLisT<std::string, std::string, MathRoutines::hashString>&
-  folderSubstitutionsSensitive=FileOperations::FolderVirtualLinksSensitive();
+  folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
   FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
   folderSubstitutionsNonSensitive.Clear();
   //Warning: order of substitutions is important. Only the first rule that applies is applied, only once.
@@ -5786,6 +5788,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("/DefaultProblemLocation/", "../problemtemplates/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("coursetemplates/", "../coursetemplates/");
+  folderSubstitutionsNonSensitive.SetKeyValue("coursesavailable/", "../coursesavailable/"); //<-web server
+  folderSubstitutionsNonSensitive.SetKeyValue("/coursesavailable/", "../coursesavailable/"); //<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");

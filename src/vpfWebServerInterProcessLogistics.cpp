@@ -582,7 +582,7 @@ void logger::reset()
   if (! this->theFile.is_open())
   { this->currentColor=logger::red;
     std::string computedFileName;
-    FileOperations::GetPhysicalFileNameFromVirtual(this->theFileName, computedFileName, true);
+    FileOperations::GetPhysicalFileNameFromVirtual(this->theFileName, computedFileName, true, false, 0);
     std::cout << this->openTagConsole() << "Could not open log file with virtual name: "
     << this->theFileName << " and computed name: "
     << computedFileName << this->closeTagConsole()

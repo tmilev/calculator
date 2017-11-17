@@ -283,7 +283,7 @@ void SemisimpleSubalgebras::CheckFileWritePermissions()
   this->owner->VirtualNameSSAlgOutputFolder + "testFileWritePermissionsSSsas.txt";
   std::string testFileFolderPhysical;
   FileOperations::GetPhysicalFileNameFromVirtual
-  (this->owner->VirtualNameSSAlgOutputFolder, testFileFolderPhysical, false, false);
+  (this->owner->VirtualNameSSAlgOutputFolder, testFileFolderPhysical, false, false, 0);
   theGlobalVariables.CallSystemNoOutput("mkdir " + testFileFolderPhysical, false);
 
   if(!FileOperations::OpenFileCreateIfNotPresentVirtual(testFile, testFileNameRelative, false, true, false))

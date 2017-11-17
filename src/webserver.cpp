@@ -3191,10 +3191,7 @@ int WebWorker::ProcessCalculator()
 
   out << this->GetHtmlHiddenInputs(true, true);
   out << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"compute\">\n";
-  out << "<textarea rows=\"3\" cols=\"30\" ";
-  out << "style=\"white-space:normal\" ";
-  //out << "<div contenteditable=\"true\" ";
-  //out << "style=\"white-space:normal; resize:both; border: 1px solid; overflow:auto\" ";
+  out << "<textarea class=\"textareaCalculatorMain\" rows=\"3\" cols=\"30\"";
   out << "name=\"mainInput\" id=\"mainInputID\" ";
   out << "onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {"
   << "submitStringAsMainInput(document.getElementById('mainInputID').value,"

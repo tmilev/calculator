@@ -42,8 +42,14 @@ editPagePanel{
   padding-top: 2px;
   padding-bottom: 2px;
 }
-textarea{
-  resize: both;
+textarea.textareaCalculatorMain{
+  white-space:normal;
+  resize: auto;
+  width: 300px;
+  height: 100px;
+}
+textarea.textAreaStudentPoints{
+resize: both
 }
 .calculatorHidden{
   display:none;

@@ -172,6 +172,8 @@ function modifyHeightForTimeout(currentButtonPanel, newHeight)
 
 function toggleHeight(currentButton, currentPanelID)
 { var currentPanel = document.getElementById(currentPanelID);
+  if (currentPanel === null)
+    return;
   currentPanel.buttonThatModifiesMe=currentButton;
   if (currentPanel.startingMaxHeight===undefined || currentPanel.startingMaxHeight===null)
   { currentPanel.startingMaxHeight=window.getComputedStyle(currentPanel).height;

@@ -3363,7 +3363,7 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
 //  std::string idNumTries= "numTries"+urledProblem;
   std::string idButtonModifyPoints = "modifyPoints" + urledProblem;
   std::string idPointsModOutput = "modifyPointsOutputSpan" + urledProblem;
-  out << "Pts: <textarea rows=\"1\" cols=\"2\" id=\"" << idPoints << "\">";
+  out << "Pts: <textarea class=\"textareaStudentPoints\" rows=\"1\" cols=\"2\" id=\"" << idPoints << "\">";
   bool weightIsOK=false;
   std::string problemWeightAsGivenByInstructor;
   #ifdef MACRO_use_MySQL

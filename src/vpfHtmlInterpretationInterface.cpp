@@ -466,6 +466,7 @@ class Course
 public:
   std::string courseTemplate;
   std::string courseTopics;
+  std::string title;
   bool IsEmpty();
   void reset();
   std::string ToString() const;
@@ -479,12 +480,13 @@ std::string Course::ToString() const
 }
 
 bool Course::IsEmpty()
-{ return this->courseTemplate == "" && this->courseTopics == "";
+{ return this->courseTemplate == "" && this->courseTopics == "" && this->title == "";
 }
 
 void Course::reset()
 { this->courseTemplate = "";
   this->courseTopics = "";
+  this->title = "";
 }
 
 class CourseList
@@ -522,7 +524,16 @@ void CourseList::LoadFromString(const std::string& input, std::stringstream* com
       }
       current.courseTopics = MathRoutines::StringTrimWhiteSpace(currentArgument);
     }
+    if (MathRoutines::StringBeginsWith(currentLine, "Title:", &currentArgument))
+    { if (current.title != "")
+      { this->theCourses.AddOnTop(current);
+        current.reset();
+      }
+      current.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
+    }
   }
+  if (!current.IsEmpty())
+    this->theCourses.AddOnTop(current);
 }
 
 std::string HtmlInterpretation::GetSelectCourse()
@@ -550,7 +561,18 @@ std::string HtmlInterpretation::GetSelectCourse()
   }
   CourseList theCourses;
   theCourses.LoadFromString(theTopicFile, &out);
-  out << theCourses.ToHtml();
+  out << "<div style=\"text-align:center\">";
+  for (int i=0; i<theCourses.theCourses.size; i++)
+  { out << "<a class=\"courseLink\" href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?request=template&courseHome=coursetemplates/"
+    << theCourses.theCourses[i].courseTemplate
+    << "&topicList=topiclists/"
+    << theCourses.theCourses[i].courseTopics
+    << "\">" << theCourses.theCourses[i].title << "</a>";
+    if (i != theCourses.theCourses.size-1)
+      out << "<br>";
+  }
+  out << "</div>";
   out << "</body></html>";
   return out.str();
 }

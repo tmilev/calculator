@@ -948,31 +948,28 @@ bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
   theCourseInfo.readstring(this->courseInfo.rawStringStoredInDB, errorStream);
   bool isAdmin=(this->userRole=="admin" && this->username.value==theGlobalVariables.userDefault.username.value);
   if (theGlobalVariables.UserStudentVieWOn() && isAdmin &&
-      theGlobalVariables.GetWebInput("studentSection")!="")
+      theGlobalVariables.GetWebInput("studentSection") != "")
   //<- warning, the user may not be
   //fully logged-in yet so theGlobalVariables.UserDefaultHasAdminRights()
   //does not work right.
-    this->courseInfo.sectionComputed=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
+    this->courseInfo.sectionComputed = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
   else
-    this->courseInfo.sectionComputed=this->courseInfo.getSectionInDB();
+    this->courseInfo.sectionComputed = this->courseInfo.getSectionInDB();
   if (isAdmin && theGlobalVariables.GetWebInput("courseHome")!="")
-    this->courseInfo.courseComputed=
-    HtmlRoutines::ConvertURLStringToNormal(
-    theGlobalVariables.GetWebInput("courseHome")
-    , false)
-    ;
+    this->courseInfo.courseComputed =
+    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   else
     this->courseInfo.courseComputed=theCourseInfo[DatabaseStrings::columnCurrentCourses].string;
   if (isAdmin)
-    this->courseInfo.instructorComputed=this->username.value;
+    this->courseInfo.instructorComputed = this->username.value;
   else
-    this->courseInfo.instructorComputed=this->courseInfo.getInstructorInDB();
+    this->courseInfo.instructorComputed = this->courseInfo.getInstructorInDB();
 
-  this->courseInfo.deadlineSchemaIDComputed="deadlines"+
-  this->courseInfo.instructorComputed+
-  this->courseInfo.courseComputed+
+  this->courseInfo.deadlineSchemaIDComputed = "deadlines" +
+  this->courseInfo.instructorComputed +
+  this->courseInfo.courseComputed +
   this->courseInfo.semesterComputed;
-  this->courseInfo.problemWeightSchemaIDComputed="problemWeights"+
+  this->courseInfo.problemWeightSchemaIDComputed = "problemWeights" +
   this->courseInfo.instructorComputed;
   return true;
 }
@@ -2174,9 +2171,7 @@ bool EmailRoutines::SendEmailWithMailGun
 { MacroRegisterFunctionWithName("EmailRoutines::SendEmailWithMailGun");
   std::string mailGunKey;
   std::stringstream temp;
-  if (commentsOnFailure==0)
-    commentsOnFailure=&temp;
-  if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-api.txt", mailGunKey, *commentsOnFailure, true, true))
+  if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-api.txt", mailGunKey, true, true, commentsOnFailure))
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "Could not find mailgun key. The key must be located in file: "
       << "<br>\ncertificates/mailgun-api.txt\n<br>\n "

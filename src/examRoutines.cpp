@@ -3492,7 +3492,7 @@ bool TopicElement::LoadTopicBundle
   { errorStream << "The file name " << fileName << " is not a valid topic bundle file name. ";
     return false;
   }
-  if (!FileOperations::LoadFileToStringVirtual(fileName, newTopicBundles, errorStream, false, false))
+  if (!FileOperations::LoadFileToStringVirtual(fileName, newTopicBundles, false, false, &errorStream))
   { errorStream << "Could not open topic bundle file. ";
     return false;
   }
@@ -3679,7 +3679,8 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
   if (this->theTopicS.size()!=0)
     return true;
   if (this->topicListContent=="")
-    if (!FileOperations::LoadFileToStringVirtual(this->topicListFileName, this->topicListContent, comments))
+    if (!FileOperations::LoadFileToStringVirtual
+        (this->topicListFileName, this->topicListContent, false, false, &comments))
       return false;
   if (this->topicListContent=="")
     return false;

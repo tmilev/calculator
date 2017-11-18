@@ -618,28 +618,41 @@ bool FileOperations::GetFolderFileNamesUnsecure
   return true;
 }
 
+bool FileOperations::LoadFileToStringVirtualCustomized
+(const std::string& theFileName, std::string& output,
+ std::stringstream* commentsOnFailure)
+{ std::string computedFileName;
+  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomized
+      (theFileName, computedFileName, commentsOnFailure))
+    return false;
+  return FileOperations::LoadFileToStringUnsecure(computedFileName, output, commentsOnFailure);
+}
+
 bool FileOperations::LoadFileToStringVirtual
-(const std::string& theFileName, std::string& output, std::stringstream& commentsOnFailure,
- bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
+(const std::string& theFileName, std::string& output,
+ bool accessSensitiveFolders, bool accessULTRASensitiveFolders, std::stringstream* commentsOnFailure)
 { std::string computedFileName;
 //  stOutput << "DEBUG: loading string virtual from: " << theFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, &commentsOnFailure))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual
+      (theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, commentsOnFailure))
     return false;
   return FileOperations::LoadFileToStringUnsecure
   (computedFileName, output, commentsOnFailure);
 }
 
 bool FileOperations::LoadFileToStringUnsecure
-(const std::string& fileNameUnsecure, std::string& output, std::stringstream& commentsOnFailure)
+(const std::string& fileNameUnsecure, std::string& output, std::stringstream* commentsOnFailure)
 { if (!FileOperations::FileExistsUnsecure(fileNameUnsecure))
-  { commentsOnFailure << "The requested file " << fileNameUnsecure
-    << " appears not to exist. ";
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "The requested file " << fileNameUnsecure
+      << " appears not to exist. ";
     return false;
   }
   std::ifstream theFile;
-  if(!FileOperations::OpenFileUnsecureReadOnly(theFile, fileNameUnsecure, false))
-  { commentsOnFailure << "The requested file " << fileNameUnsecure
-    << " exists but I failed to open it in text mode (perhaps not a valid ASCII/UTF8 file). ";
+  if (!FileOperations::OpenFileUnsecureReadOnly(theFile, fileNameUnsecure, false))
+  { if (commentsOnFailure!=0)
+      *commentsOnFailure << "The requested file " << fileNameUnsecure
+      << " exists but I failed to open it in text mode (perhaps not a valid ASCII/UTF8 file). ";
     return false;
   }
   std::stringstream contentStream;
@@ -804,7 +817,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomized
   HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.courseInfo.instructorComputed, false);
   if (customized == "")
     customized = "default/";
-  std::string inputCopy = inputStart + customized + fileEnd;
+  std::string inputCopy = inputStart + customized + "/" + fileEnd;
   if (!FileExistsVirtual(inputCopy, false, false))
     customized = "default/";
   inputCopy = inputStart + customized + fileEnd;
@@ -829,8 +842,11 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
       std::string toAppend = theGlobalVariables.hostNoPort;
       if (MathRoutines::StringBeginsWith(toAppend, "www."))
         toAppend=toAppend.substr(4);
-      if (MathRoutines::StringBeginsWith(toAppend, "localhost") || toAppend=="")
-        toAppend="calculator-algebra.org";
+      if (MathRoutines::StringBeginsWith(toAppend, "localhost") || toAppend == "calculator-algebra.org" ||
+          toAppend == "www.calculator-algebra.org")
+        toAppend = "";
+      if (toAppend == "")
+        continue;
       std::string fileStart, fileExtension;
       fileExtension = FileOperations::GetFileExtensionWithDot(inputCopy, &fileStart);
       inputCopy = fileStart + "-" + toAppend + fileExtension;

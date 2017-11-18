@@ -241,7 +241,6 @@ int recursionDepth=0)
   void OutputResultAfterTimeout();
   static void OutputCrashAfterTimeout();
   void OutputShowIndicatorOnTimeout();
-  static std::string GetInsecureConnectionAngryMessage();
   void QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll=false);
   void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll=false);
   void QueueBytesForSendingNoHeadeR

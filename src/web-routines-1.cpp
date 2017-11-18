@@ -764,7 +764,7 @@ bool WebCrawler::VerifyRecaptcha
   if (commentsOnFailure==0)
     commentsOnFailure=&notUsed;
   if (!FileOperations::LoadFileToStringVirtual
-      ("certificates/recaptcha-secret.txt", secret, *commentsOnFailure, true, true))
+      ("certificates/recaptcha-secret.txt", secret, true, true, commentsOnFailure))
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "<span style=\"color:red\"><b>"
       << "Failed to load recaptcha secret."

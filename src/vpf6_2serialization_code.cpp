@@ -1050,7 +1050,7 @@ bool CalculatorConversions::innerLoadFileIntoString(Calculator& theCommands, con
     theRelativeFileName=input.ToString();
   }
   std::string outputString;
-  if (!FileOperations::LoadFileToStringVirtual(theRelativeFileName, outputString, theCommands.Comments))
+  if (!FileOperations::LoadFileToStringVirtual(theRelativeFileName, outputString, false, false, &theCommands.Comments))
     return false;
   return output.AssignValue(outputString, theCommands);
 }

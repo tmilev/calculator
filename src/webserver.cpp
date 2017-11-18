@@ -2645,17 +2645,6 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
   return out.str();
 }
 
-std::string WebWorker::GetInsecureConnectionAngryMessage()
-{ MacroRegisterFunctionWithName("WebWorker::GetInsecureConnectionAngryMessage");
-  std::stringstream out;
-  out
-  << "<b>This is a reduced security connection.</b><br>"
-  << "For secure connection: close safari & open in another browser: "
-  << "<a href=\"https://calculator-algebra.org/calculator\">https://calculator-algebra.org/calculator</a>."
-  ;
-  return out.str();
-}
-
 std::string WebWorker::GetAuthenticationToken(const std::string& reasonForNoAuthentication)
 { MacroRegisterFunctionWithName("WebWorker::GetAuthenticationToken");
 //  std::stringstream out;
@@ -3643,7 +3632,7 @@ std::string HtmlInterpretation::GetCaptchaDiv()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetCaptchaDiv");
   std::stringstream out;
   std::string recaptchaPublic;
-  if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-public.txt", recaptchaPublic, out, true, true))
+  if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-public.txt", recaptchaPublic, true, true, &out))
     out << "<span style=\"color:red\"><b>Couldn't find the recaptcha key in file: certificates/recaptcha-public.txt. </b></span>";
   else
     out << "<div class=\"g-recaptcha\" data-sitekey=\"" << recaptchaPublic << "\"></div>";
@@ -4176,8 +4165,8 @@ int WebWorker::ServeClient()
 //    std::cout << "GOT TO file names!" << std::endl;
   std::stringstream commentsOnFailure;
   if (!FileOperations::GetPhysicalFileNameFromVirtual
-      (this->VirtualFileName, this->RelativePhysicalFileNamE, theGlobalVariables.UserDefaultHasAdminRights()), false,
-       &commentsOnFailure)
+      (this->VirtualFileName, this->RelativePhysicalFileNamE, theGlobalVariables.UserDefaultHasAdminRights(), false,
+       &commentsOnFailure))
   { //  std::cout << "GOT TO not found!" << std::endl;
     this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
     stOutput << "<html><body><b>File name deemed unsafe. "
@@ -5222,7 +5211,6 @@ int WebServer::Run()
     theGlobalVariables.buildVersion =
     MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
 
-
   theGlobalVariables.ChDir(theDir);
   if (true)
   { int pidMonitor=fork();
@@ -5538,7 +5526,8 @@ void WebServer::CheckOpenSSLMySQLInstallation()
   if (FileOperations::FileExistsVirtual(attemptedSetupVirtualFileName, true))
   { std::string attemptedSetupPhysicalFileName;
     logger result("", 0, false, "server");
-    FileOperations::GetPhysicalFileNameFromVirtual(attemptedSetupVirtualFileName, attemptedSetupPhysicalFileName);
+    FileOperations::GetPhysicalFileNameFromVirtual
+    (attemptedSetupVirtualFileName, attemptedSetupPhysicalFileName, true, false, 0);
     result << logger::green << "Mysql or ssl setup previously attempted, skipping. Erase file "
     << attemptedSetupPhysicalFileName << " to try setting up again. " << logger::endL;
     return;
@@ -5581,7 +5570,8 @@ void WebServer::CheckMySQLSetup()
   if (FileOperations::FileExistsVirtual(attemptedMYSQLSetupVirtualFileName, true))
   { std::string attemptedMYSQLSetupPhysicalFileName;
     logger result("", 0, false, "server");
-    FileOperations::GetPhysicalFileNameFromVirtual(attemptedMYSQLSetupVirtualFileName, attemptedMYSQLSetupPhysicalFileName);
+    FileOperations::GetPhysicalFileNameFromVirtual
+    (attemptedMYSQLSetupVirtualFileName, attemptedMYSQLSetupPhysicalFileName, true, false, 0);
     result << logger::green << "Mysql setup previously attempted, skipping. Erase file "
     << attemptedMYSQLSetupPhysicalFileName << " to try setting up again. " << logger::endL;
     return;
@@ -5622,7 +5612,8 @@ void WebServer::CheckFreecalcSetup()
   if (FileOperations::FileExistsVirtual(attemptedSetupVirtual, true))
   { std::string attemptedSetupPhysical;
     logger result("", 0, false, "server");
-    FileOperations::GetPhysicalFileNameFromVirtual(attemptedSetupVirtual, attemptedSetupPhysical);
+    FileOperations::GetPhysicalFileNameFromVirtual
+    (attemptedSetupVirtual, attemptedSetupPhysical, true, false, 0);
     result << logger::green << "freecalc setup previously attempted, skipping. Erase file "
     << attemptedSetupPhysical << " to try setting up again. " << logger::endL;
     return;
@@ -5644,7 +5635,8 @@ void WebServer::CheckSVNSetup()
   if (FileOperations::FileExistsVirtual(attemptedSetupVirtual, true))
   { std::string attemptedSetupPhysical;
     logger result("", 0, false, "server");
-    FileOperations::GetPhysicalFileNameFromVirtual(attemptedSetupVirtual, attemptedSetupPhysical);
+    FileOperations::GetPhysicalFileNameFromVirtual
+    (attemptedSetupVirtual, attemptedSetupPhysical, true, false, 0);
     result << logger::green << "SVN setup previously attempted, skipping. Erase file "
     << attemptedSetupPhysical << " to try setting up again. " << logger::endL;
     return;
@@ -5668,7 +5660,8 @@ void WebServer::CheckMathJaxSetup()
   if (FileOperations::FileExistsVirtual(attemptedMathJaxSetupVirtualFileName, true))
   { std::string attemptedSetupPhysicalFileName;
     logger result("", 0, false, "server");
-    FileOperations::GetPhysicalFileNameFromVirtual(attemptedMathJaxSetupVirtualFileName, attemptedSetupPhysicalFileName);
+    FileOperations::GetPhysicalFileNameFromVirtual
+    (attemptedMathJaxSetupVirtualFileName, attemptedSetupPhysicalFileName, true, false, 0);
     result << logger::green << "Mysql setup previously attempted, skipping. Erase file "
     << attemptedSetupPhysicalFileName << " to try setting up again. " << logger::endL;
     return;
@@ -5969,7 +5962,8 @@ int WebServer::mainCommandLine()
   theParser.Evaluate(theParser.inputString);
   std::fstream outputFile;
   std::string outputFileName;
-  if (! FileOperations::GetPhysicalFileNameFromVirtual("output/outputFileCommandLine.html", outputFileName))
+  if (!FileOperations::GetPhysicalFileNameFromVirtual
+      ("output/outputFileCommandLine.html", outputFileName, false, false, 0))
   { outputFileName = "Failed to extract output file from output/outputFileCommandLine.html";
   }
   FileOperations::OpenFileCreateIfNotPresentVirtual

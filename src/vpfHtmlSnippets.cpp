@@ -238,13 +238,13 @@ const std::string& HtmlRoutines::GetFile
 (const std::string& fileNameVirtual, const std::string& additionalBeginTag,
  const std::string& additionalEndTag)
 { MacroRegisterFunctionWithName("HtmlRoutines::GetFile");
-  std::string theID = fileNameVirtual+additionalBeginTag+additionalEndTag;
+  std::string theID = fileNameVirtual + additionalBeginTag + additionalEndTag;
   if (theGlobalVariables.flagCachingInternalFilesOn)
     if (HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent(theID)!="")
       return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent(theID);
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
-  if (FileOperations::LoadFileToStringVirtual(fileNameVirtual, fileReader, commentsOnFailure))
+  if (FileOperations::LoadFileToStringVirtual(fileNameVirtual, fileReader, false, false, &commentsOnFailure))
     out << additionalBeginTag << fileReader << additionalEndTag;
   else
   { theLog << logger::red << "File: "

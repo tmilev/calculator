@@ -634,7 +634,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   if (!this->flagForceSlideRebuild)
     if (FileOperations::FileExistsVirtual(this->targetPDFFileNameWithPathVirtual, false, false))
       return FileOperations::LoadFileToStringVirtual
-      (this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, *commentsOnFailure, false, false);
+      (this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, false, false, commentsOnFailure);
   if (!theGlobalVariables.UserDefaultHasAdminRights())
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. ";
@@ -725,8 +725,8 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
   commandResult = theGlobalVariables.CallSystemWithOutput(currentSysCommand);
   if (commentsGeneral!=0)
     *commentsGeneral << "Executed command: " << currentSysCommand << " ... to get result: " << commandResult << "<br>";
-  if(!FileOperations::LoadFileToStringUnsecure
-     (this->targetPDFFileNameWithLatexPath, this->targetPDFbinaryContent, *commentsOnFailure))
+  if (!FileOperations::LoadFileToStringUnsecure
+     (this->targetPDFFileNameWithLatexPath, this->targetPDFbinaryContent, commentsOnFailure))
     return false;
   std::stringstream svnAddFileCommand, svnAddDirCommand, svnResult;
   if (!FileOperations::IsFileNameSafeForSystemCommands(this->targetPDFFileNameWithLatexPath, commentsOnFailure))

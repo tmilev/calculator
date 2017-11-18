@@ -948,7 +948,8 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
     if (MathRoutines::StringBeginsWith(theFileNames[i],"debug"))
       continue;
     std::string currentCert;
-    if (!FileOperations::LoadFileToStringVirtual("certificates-public/"+theFileNames[i], currentCert, *commentsOnFailure, false))
+    if (!FileOperations::LoadFileToStringVirtual
+        ("certificates-public/" + theFileNames[i], currentCert, false, false, commentsOnFailure))
       continue;
     if (!Crypto::LoadOneKnownCertificate(currentCert, commentsOnFailure, commentsGeneral))
       return false;

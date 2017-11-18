@@ -6778,9 +6778,9 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
     std::string baseFolder, outSl2Folder;
     FileOperations::GetPhysicalFileNameFromVirtual
-    (ownerSS->VirtualNameSSAlgOutputFolder, baseFolder, false, false);
+    (ownerSS->VirtualNameSSAlgOutputFolder, baseFolder, false, false, 0);
     FileOperations::GetPhysicalFileNameFromVirtual
-    (outSltwoPath.str(), outSl2Folder, false, false);
+    (outSltwoPath.str(), outSl2Folder, false, false, 0);
     outMkDirCommand1 << "mkdir " << baseFolder;
     outMkDirCommand2 << "mkdir " << outSl2Folder;
     theGlobalVariables.CallSystemNoOutput(outMkDirCommand1.str(), false);

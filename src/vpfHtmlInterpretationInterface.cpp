@@ -389,7 +389,7 @@ std::string HtmlInterpretation::ClonePageResult()
   std::string fileNameToBeCloned = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
   std::stringstream out;
   std::string startingFileString;
-  if (!FileOperations::LoadFileToStringVirtual(fileNameToBeCloned, startingFileString, out))
+  if (!FileOperations::LoadFileToStringVirtual(fileNameToBeCloned, startingFileString, false, false, &out))
   { out << "Could not find file: " << fileNameToBeCloned;
     return out.str();
   }
@@ -446,9 +446,10 @@ std::string HtmlInterpretation::GetAboutPage()
   << "</calculatorNavigation>";
   std::string theFile;
   std::stringstream commentsOnFailure;
-  bool isGood=FileOperations::LoadFileToStringVirtual("html-common-calculator/about.html", theFile, commentsOnFailure, false, false);
+  bool isGood=FileOperations::LoadFileToStringVirtual
+  ("html-common-calculator/about.html", theFile, false, false, &commentsOnFailure);
   if (!isGood)
-    isGood=FileOperations::LoadFileToStringVirtual("html/about.html", theFile, commentsOnFailure, false, false);
+    isGood=FileOperations::LoadFileToStringVirtual("html/about.html", theFile, false, false, &commentsOnFailure);
   if (!isGood)
   { out << "<span style=\"color:red\"><b>"
     << commentsOnFailure.str()
@@ -465,7 +466,26 @@ class Course
 public:
   std::string courseTemplate;
   std::string courseTopics;
+  bool IsEmpty();
+  void reset();
+  std::string ToString() const;
 };
+
+std::string Course::ToString() const
+{ std::stringstream out;
+  out << "Html: " << this->courseTemplate
+  << "\n" << "Topics: " << this->courseTopics;
+  return out.str();
+}
+
+bool Course::IsEmpty()
+{ return this->courseTemplate == "" && this->courseTopics == "";
+}
+
+void Course::reset()
+{ this->courseTemplate = "";
+  this->courseTopics = "";
+}
 
 class CourseList
 {
@@ -473,19 +493,35 @@ public:
   List<Course> theCourses;
   void LoadFromString(const std::string& input, std::stringstream* commentsOnFailure);
   std::string ToHtml();
+
 };
 
 std::string CourseList::ToHtml()
-{ return "";
+{ return this->theCourses.ToString();
 
 }
 
 void CourseList::LoadFromString(const std::string& input, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("CourseList::LoadFromString");
+  (void) commentsOnFailure;
   std::stringstream tableReader(input);
   std::string currentLine, currentArgument;
+  Course current;
   while (std::getline(tableReader, currentLine, '\n'))
-  {
+  { if (MathRoutines::StringBeginsWith(currentLine, "Html:", &currentArgument))
+    { if (current.courseTemplate != "")
+      { this->theCourses.AddOnTop(current);
+        current.reset();
+      }
+      current.courseTemplate = MathRoutines::StringTrimWhiteSpace(currentArgument);
+    }
+    if (MathRoutines::StringBeginsWith(currentLine, "Topics:", &currentArgument))
+    { if (current.courseTopics != "")
+      { this->theCourses.AddOnTop(current);
+        current.reset();
+      }
+      current.courseTopics = MathRoutines::StringTrimWhiteSpace(currentArgument);
+    }
   }
 }
 
@@ -504,15 +540,16 @@ std::string HtmlInterpretation::GetSelectCourse()
   std::string theTopicFile;
   std::stringstream commentsOnFailure;
   std::string temp;
-  FileOperations::GetPhysicalFileNameFromVirtualCustomized("coursesavailable/default.txt", temp, commentsOnFailure);
-  out << "DEBUG: physical file name: " << temp;
-
-  if (!FileOperations::LoadFileToStringVirtual("coursesavailable/default.txt", theTopicFile, commentsOnFailure))
+  FileOperations::GetPhysicalFileNameFromVirtualCustomized
+  ("coursesavailable/default.txt", temp, &commentsOnFailure);
+  if (!FileOperations::LoadFileToStringVirtualCustomized
+      ("coursesavailable/default.txt", theTopicFile, &commentsOnFailure))
   { out << "<b>Failed to fetch available courses from coursesavailable/default.txt</b>.";
     out << " </body></html>";
     return out.str();
   }
   CourseList theCourses;
+  theCourses.LoadFromString(theTopicFile, &out);
   out << theCourses.ToHtml();
   out << "</body></html>";
   return out.str();

@@ -29,10 +29,14 @@ public:
   static std::string ConvertStringToEscapedStringFileNameSafe(const std::string& input);
   static std::string ConvertStringToLatexFileName(const std::string& input);
   static bool LoadFileToStringUnsecure
-  (const std::string& fileNameUnsecure, std::string& output, std::stringstream& commentsOnFailure);
+  (const std::string& fileNameUnsecure, std::string& output, std::stringstream* commentsOnFailure);
+  static bool LoadFileToStringVirtualCustomized
+  (const std::string& fileName, std::string& output,
+   std::stringstream* commentsOnFailure);
   static bool LoadFileToStringVirtual
-  (const std::string& fileName, std::string& output, std::stringstream& commentsOnFailure,
-   bool accessSensitiveFolders=false, bool accessULTRASensitiveFolders=false);
+  (const std::string& fileName, std::string& output,
+   bool accessSensitiveFolders, bool accessULTRASensitiveFolders,
+   std::stringstream* commentsOnFailure);
   static bool IsOKfileNameVirtual(const std::string& fileName, bool accessSensitiveFolders=false, std::stringstream* commentsOnFailure=0);
   static bool IsFileNameWithoutDotsAndSlashes(const std::string& fileName);
   static bool IsFileNameSafeForSystemCommands(const std::string& fileName, std::stringstream* commentsOnFailure);

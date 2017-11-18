@@ -373,36 +373,30 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 
 bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, const std::string& inputRandomSeed)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
-  this->RelativePhysicalFileNameWithFolder=
-  this->fileName
-  ;
+  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomized
+        (this->fileName, this->RelativePhysicalFileNameWithFolder, &comments))
+  { comments << "Failed to get physical file name from " << this->fileName << ". ";
+    return false;
+  }
   (void) doLoadDatabase;
-  std::ifstream theFile;
-  if (!FileOperations::OpenFileVirtualReadOnly(theFile, this->RelativePhysicalFileNameWithFolder, false))
-  { std::string theFileName;
-    if (FileOperations::GetPhysicalFileNameFromVirtual(this->RelativePhysicalFileNameWithFolder, theFileName, false, false, &comments))
-      comments << "<b>Failed to open:<br>\n"
-      << this->RelativePhysicalFileNameWithFolder << "<br>computed file name: <br>"
-      << theFileName
-      << "</b> ";
+  if (!FileOperations::LoadFileToStringVirtualCustomized(this->fileName, this->inputHtml, &comments))
+  { comments << "<b>Failed to open: " << this->fileName
+      << " with computed file name: " << this->RelativePhysicalFileNameWithFolder << "</b> ";
     return false;
   }
   //stOutput << "Debug: got to here pt1";
-  std::stringstream contentStream;
-  contentStream << theFile.rdbuf();
-  this->inputHtml=contentStream.str();
   this->flagIsForReal=theGlobalVariables.UserRequestRequiresLoadingRealExamData();
 #ifdef MACRO_use_MySQL
   this->topicListFileName=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
-//  stOutput << "Debug: got to here pt2";
-//  this->theProblemData.CheckConsistency();
-//  stOutput << "Debug: got to here pt3";
+  //stOutput << "Debug: got to here pt2";
+  //this->theProblemData.CheckConsistency();
+  //stOutput << "Debug: got to here pt3";
   if (doLoadDatabase)
     this->LoadDatabaseInfo(comments);
 #endif // MACRO_use_MySQL
-//  stOutput << "<hr>DEBUG: Loaded successfully, checking: <hr>";
+  //stOutput << "<hr>DEBUG: Loaded successfully, checking: <hr>";
   this->theProblemData.CheckConsistency();
-//  stOutput << "<hr>OK<hr> ";
+  //stOutput << "<hr>OK<hr> ";
 
   //stOutput << "DEBUG: flagIsForReal: " << this->flagIsForReal;
   if (!this->flagIsForReal)
@@ -412,7 +406,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, co
       //stOutput << "radSeedStream: " << randString;
       randSeedStream >> this->theProblemData.randomSeed;
       //stOutput << ", interpreted as: " << this->theProblemData.randomSeed;
-      this->theProblemData.flagRandomSeedGiven=true;
+      this->theProblemData.flagRandomSeedGiven = true;
     }
   }
   //  stOutput << "debug info: rand seed after all's been said and done: " << this->theProblemData.randomSeed;
@@ -431,7 +425,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
   if (!this->InterpretHtml(this->comments))
   { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in "
-    << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
+    << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds() - startTime)
     << " second(s).</small>"
     << "</calculatorNavigation>";
     if (theGlobalVariables.UserDefaultHasAdminRights())
@@ -483,14 +477,13 @@ void CalculatorHTML::LoadFileNames()
 void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadCurrentProblemItem");
   this->LoadFileNames();
-  this->flagLoadedSuccessfully=false;
+  this->flagLoadedSuccessfully = false;
   if (theGlobalVariables.UserGuestMode())
-    needToLoadDatabaseMayIgnore=false;
-  this->flagDoPrependCalculatorNavigationBar=
-  (theGlobalVariables.GetWebInput("navigationBar")!="false");
-  this->flagLoadedSuccessfully=true;
-  if (this->fileName=="")
-  { this->flagLoadedSuccessfully=false;
+    needToLoadDatabaseMayIgnore = false;
+  this->flagDoPrependCalculatorNavigationBar = (theGlobalVariables.GetWebInput("navigationBar") != "false");
+  this->flagLoadedSuccessfully = true;
+  if (this->fileName == "")
+  { this->flagLoadedSuccessfully = false;
     this->comments << "<b>No problem file name found. </b>";
   }
 

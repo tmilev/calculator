@@ -622,8 +622,7 @@ bool FileOperations::LoadFileToStringVirtualCustomized
 (const std::string& theFileName, std::string& output,
  std::stringstream* commentsOnFailure)
 { std::string computedFileName;
-  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomized
-      (theFileName, computedFileName, commentsOnFailure))
+  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomized(theFileName, computedFileName, commentsOnFailure))
     return false;
   return FileOperations::LoadFileToStringUnsecure(computedFileName, output, commentsOnFailure);
 }
@@ -636,8 +635,7 @@ bool FileOperations::LoadFileToStringVirtual
   if (!FileOperations::GetPhysicalFileNameFromVirtual
       (theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, commentsOnFailure))
     return false;
-  return FileOperations::LoadFileToStringUnsecure
-  (computedFileName, output, commentsOnFailure);
+  return FileOperations::LoadFileToStringUnsecure(computedFileName, output, commentsOnFailure);
 }
 
 bool FileOperations::LoadFileToStringUnsecure
@@ -812,7 +810,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomized
       break;
     }
   if (inputStart == "")
-    return FileOperations::GetPhysicalFileNameFromVirtualCustomized(inputFileName, output, commentsOnFailure);
+    return FileOperations::GetPhysicalFileNameFromVirtual(inputFileName, output, false, false, commentsOnFailure);
   std::string customized =
   HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.courseInfo.instructorComputed, false);
   if (customized == "")

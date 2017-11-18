@@ -5181,7 +5181,7 @@ timeval timeBeforeProcessFork;
 
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
-  theGlobalVariables.RelativePhysicalNameCrashLog="crash_WebServerRun.html";
+  theGlobalVariables.RelativePhysicalNameCrashLog = "crash_WebServerRun.html";
 #ifdef MACRO_use_open_ssl
   SSLdata::initSSLkeyFiles();
 #endif
@@ -5202,7 +5202,7 @@ int WebServer::Run()
     logSuccessfulForks.reset();
     logSuccessfulForks.flagWriteImmediately=true;
   }
-  std::string theDir= FileOperations::GetCurrentFolder();
+  std::string theDir = FileOperations::GetCurrentFolder();
   theGlobalVariables.ChDir("../");
   theGlobalVariables.buildVersion =
   MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("svn info | grep \"Revision\" | awk '{print $2}'"));
@@ -5222,8 +5222,8 @@ int WebServer::Run()
     if (pidMonitor<0)
       crash << "Failed to create server process. " << crash;
     if (pidMonitor==0)
-    { theGlobalVariables.processType="serverMonitor";
-      theGlobalVariables.flagIsChildProcess=true;
+    { theGlobalVariables.processType = "serverMonitor";
+      theGlobalVariables.flagIsChildProcess = true;
       MonitorWebServer();//<-this attempts to connect to the server over the internet and restarts if it can't.
       return 0;
     }
@@ -5231,7 +5231,7 @@ int WebServer::Run()
   theParser.init();
   theParser.ComputeAutoCompleteKeyWords();
   HtmlRoutines::LoadStrings();
-  theParser.flagShowCalculatorExamples=false;
+  theParser.flagShowCalculatorExamples = false;
   if (!this->initPrepareWebServerALL())
     return 1;
   logServer << logger::purple << "server: waiting for connections...\r\n" << logger::endL;
@@ -5255,7 +5255,7 @@ int WebServer::Run()
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
     if (theGlobalVariables.flagServerDetailedLog)
       logServer << logger::red << "DEBUG: About to enter select loop. " << logger::endL;
-    while (select(this->highestSocketNumber+1, &FDListenSockets, 0, 0, 0)==-1)
+    while (select(this->highestSocketNumber+1, &FDListenSockets, 0, 0, 0) == -1)
     { if (this->flagReapingChildren)
         logServer << logger::yellow << "Select interrupted while reaping children. "
         << logger::endL;
@@ -5271,17 +5271,17 @@ int WebServer::Run()
     if ((this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar)-previousReportedNumberOfSelects>100)
     { logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and " << this->NumFailedSelectsSoFar << " bad ("
       << this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar << " total) selects. " << logger::endL;
-      previousReportedNumberOfSelects=this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar;
+      previousReportedNumberOfSelects = this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar;
     }
-    if (this->NumProcessAssassinated+this->NumProcessesReaped+this->NumWorkersNormallyExited+this->NumConnectionsSoFar-previousServerStatReport>99)
-    { previousServerStatReport=this->NumProcessAssassinated+this->NumProcessesReaped+this->NumWorkersNormallyExited+this->NumConnectionsSoFar;
+    if (this->NumProcessAssassinated + this->NumProcessesReaped + this->NumWorkersNormallyExited + this->NumConnectionsSoFar - previousServerStatReport > 99)
+    { previousServerStatReport = this->NumProcessAssassinated + this->NumProcessesReaped + this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
       logProcessStats << "# kill commands: " << this->NumProcessAssassinated
       << " #processes reaped: " << this->NumProcessesReaped
       << " #normally reclaimed workers: " << this->NumWorkersNormallyExited
       << " #connections so far: " << this->NumConnectionsSoFar << logger::endL;
     }
-    if (this->NumProcessAssassinated+this->NumProcessesReaped+this->NumWorkersNormallyExited+this->NumConnectionsSoFar-previousServerStatDetailedReport>499)
-    { previousServerStatDetailedReport=this->NumProcessAssassinated+this->NumProcessesReaped+this->NumWorkersNormallyExited+this->NumConnectionsSoFar;
+    if (this->NumProcessAssassinated + this->NumProcessesReaped + this->NumWorkersNormallyExited + this->NumConnectionsSoFar - previousServerStatDetailedReport > 499)
+    { previousServerStatDetailedReport = this->NumProcessAssassinated + this->NumProcessesReaped + this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
       logProcessStats << this->ToStringStatusForLogFile() << logger::endL;
     }
     int newConnectedSocket =-1;
@@ -5291,7 +5291,7 @@ int WebServer::Run()
       if (FD_ISSET(this->theListeningSockets[i], &FDListenSockets))
       { //if (this->theListeningSockets[i]==this->listeningSocketHTTP)
         newConnectedSocket=accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
-        if (newConnectedSocket>=0)
+        if (newConnectedSocket >= 0)
         { logServer << logger::green << " Connection candidate  "
           << this->NumConnectionsSoFar+1 << ". "
           << "Connected via listening socket " << this->theListeningSockets[i]
@@ -5308,10 +5308,10 @@ int WebServer::Run()
           found=true;
         }
       }
-    if (newConnectedSocket<0 && !found)
+    if (newConnectedSocket < 0 && !found)
       logSocketAccept << logger::red << "This is not supposed to to happen: select succeeded "
       << "but I found no set socket. " << logger::endL;
-    if (newConnectedSocket <0)
+    if (newConnectedSocket < 0)
     { if (theGlobalVariables.flagServerDetailedLog)
         logServer << "DEBUG: newConnectedSocket is negative: " << newConnectedSocket << ". Not accepting. " << logger::endL;
       continue;
@@ -5415,11 +5415,11 @@ int WebServer::Run()
 int WebWorker::Run()
 { MacroRegisterFunctionWithName("WebWorker::Run");
   this->CheckConsistency();
-  if (this->connectedSocketID==-1)
+  if (this->connectedSocketID == -1)
     crash << "Worker::Run() started on a connecting with ID equal to -1. " << crash;
   this->ResetPipesNoAllocation();
   std::stringstream processNameStream;
-  processNameStream << "W" << this->indexInParent+1 << ": ";
+  processNameStream << "W" << this->indexInParent + 1 << ": ";
   PauseProcess::currentProcessName=processNameStream.str();
   //theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
@@ -5430,7 +5430,7 @@ int WebWorker::Run()
   theWebServer.SSLServerSideHandShake();
   if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection &&
       !this->parent->theSSLdata.flagSSLHandshakeSuccessful)
-  { theGlobalVariables.flagUsingSSLinCurrentConnection=false;
+  { theGlobalVariables.flagUsingSSLinCurrentConnection = false;
     this->parent->SignalActiveWorkerDoneReleaseEverything();
     this->parent->ReleaseEverything();
     logOpenSSL << logger::red << "ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
@@ -5441,8 +5441,8 @@ int WebWorker::Run()
     logOpenSSL << logger::green << "ssl success #: " << this->parent->NumConnectionsSoFar << ". " << logger::endL;
   /////////////////////////////////////////////////////////////////////////
   stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
-  int result=0;
-  int numReceivesThisConnection=0;
+  int result = 0;
+  int numReceivesThisConnection = 0;
   while (true)
   { if (!this->ReceiveAll())
     { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
@@ -5467,10 +5467,10 @@ int WebWorker::Run()
       return -1;
     }
     numReceivesThisConnection++;
-    if (this->messageHead.size()==0)
+    if (this->messageHead.size() == 0)
       break;
     result=this->ServeClient();
-    if (this->connectedSocketID==-1)
+    if (this->connectedSocketID == -1)
       break;
     this->SendAllBytesWithHeaders();
 //    double fixthis;
@@ -5495,14 +5495,14 @@ void WebServer::FigureOutOperatingSystem()
   supportedOSes.AddOnTop("Ubuntu");
   supportedOSes.AddOnTop("CentOS");
   std::string commandOutput= theGlobalVariables.CallSystemWithOutput("cat /etc/*-release");
-  if (commandOutput.find("ubuntu")!=std::string::npos || commandOutput.find("Ubuntu")!=std::string::npos ||
-      commandOutput.find("UBUNTU")!=std::string::npos)
+  if (commandOutput.find("ubuntu") != std::string::npos || commandOutput.find("Ubuntu") != std::string::npos ||
+      commandOutput.find("UBUNTU") != std::string::npos)
     theGlobalVariables.OperatingSystem="Ubuntu";
-  else if (commandOutput.find("CentOS")!=std::string::npos)
-    theGlobalVariables.OperatingSystem="CentOS";
+  else if (commandOutput.find("CentOS") != std::string::npos)
+    theGlobalVariables.OperatingSystem = "CentOS";
   else
-    theGlobalVariables.OperatingSystem="";
-  if (theGlobalVariables.OperatingSystem!="")
+    theGlobalVariables.OperatingSystem = "";
+  if (theGlobalVariables.OperatingSystem != "")
     return;
   theLog << logger::red << "Your Linux flavor is not currently supported. " << logger::endL;
   theLog << "We support the following Linux distros: "
@@ -5527,7 +5527,7 @@ void WebServer::CheckOpenSSLMySQLInstallation()
   if (!doInstallMysql && !doInstallOpenSSL)
     return;
   WebServer::FigureOutOperatingSystem();
-  std::string attemptedSetupVirtualFileName="/LogFiles/attemptedDBandSSLsetup.html";
+  std::string attemptedSetupVirtualFileName = "/LogFiles/attemptedDBandSSLsetup.html";
   if (FileOperations::FileExistsVirtual(attemptedSetupVirtualFileName, true))
   { std::string attemptedSetupPhysicalFileName;
     logger result("", 0, false, "server");
@@ -5538,7 +5538,7 @@ void WebServer::CheckOpenSSLMySQLInstallation()
     return;
   }
   logger result(attemptedSetupVirtualFileName, 0, false, "server");
-  if (theGlobalVariables.OperatingSystem=="")
+  if (theGlobalVariables.OperatingSystem == "")
     return;
   if (doInstallMysql)
   { result << "You appear to be missing a mysql installation. Let me try to install that for you. "
@@ -5821,10 +5821,12 @@ void WebServer::InitializeGlobalVariables()
 
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("topiclists/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/topiclists/");
+  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("coursetemplates/");
+  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/coursetemplates/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("coursesavailable/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/coursesavailable/");
-
-
+  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("problemtemplates/");
+  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/problemtemplates/");
 }
 
 int main(int argc, char **argv)

@@ -5234,7 +5234,7 @@ int WebServer::Run()
     MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
   theGlobalVariables.buildVersion= MathRoutines::StringTrimWhiteSpace(theGlobalVariables.buildVersion);
   for (unsigned i=0; i<theGlobalVariables.buildVersion.size(); i++)
-    if (!MathRoutines::IsInteger( theGlobalVariables.buildVersion[i]))
+    if (MathRoutines::isALatinLetter(theGlobalVariables.buildVersion[i]))
     { theGlobalVariables.buildVersion = "?";
       break;
     }

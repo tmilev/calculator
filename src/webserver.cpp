@@ -5210,7 +5210,12 @@ int WebServer::Run()
   if (theGlobalVariables.buildVersion == "")
     theGlobalVariables.buildVersion =
     MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
-
+  theGlobalVariables.buildVersion= MathRoutines::StringTrimWhiteSpace(theGlobalVariables.buildVersion);
+  for (unsigned i=0; i<theGlobalVariables.buildVersion.size(); i++)
+    if (MathRoutines::isALatinLetter(theGlobalVariables.buildVersion[i]))
+    { theGlobalVariables.buildVersion = "?";
+      break;
+    }
   theGlobalVariables.ChDir(theDir);
   if (true)
   { int pidMonitor=fork();

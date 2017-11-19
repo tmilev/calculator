@@ -274,7 +274,7 @@ public:
 
   void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
   void InterpretJavascripts(SyntacticElementHTML& inputOutput);
-  std::string GetEditPageButton(const std::string& desiredFileName);
+  std::string GetEditPageButton(const std::string& desiredFileName, bool includeCloneButton = true);
   std::string GetJavascriptSubmitAnswers();
   std::string GetJavascriptMathQuillBoxes();
   void LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed);

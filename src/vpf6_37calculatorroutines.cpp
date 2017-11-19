@@ -186,7 +186,7 @@ bool CalculatorFunctionsGeneral::innerIntervalClosedFromSequence(Calculator& the
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntervalClosedFromSequence");
   if (!input.IsSequenceNElementS(2))
     return false;
-  output=input;
+  output = input;
   return output.SetChildAtomValue(0, theCommands.opIntervalClosed());
 }
 
@@ -194,7 +194,7 @@ bool CalculatorFunctionsGeneral::innerIntervalOpenFromSequence(Calculator& theCo
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntervalOpenFromSequence");
   if (!input.IsSequenceNElementS(2))
     return false;
-  output=input;
+  output = input;
   return output.SetChildAtomValue(0, theCommands.opIntervalOpen());
 }
 
@@ -202,7 +202,7 @@ bool CalculatorFunctionsGeneral::innerIntervalRightClosedFromSequence(Calculator
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntervalRightClosedFromSequence");
   if (!input.IsSequenceNElementS())
     return false;
-  output=input;
+  output = input;
   return output.SetChildAtomValue(0, theCommands.opIntervalRightClosed());
 }
 
@@ -210,7 +210,7 @@ bool CalculatorFunctionsGeneral::innerIntervalLeftClosedFromSequence(Calculator&
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntervalLeftClosedFromSequence");
   if (!input.IsSequenceNElementS())
     return false;
-  output=input;
+  output = input;
   return output.SetChildAtomValue(0, theCommands.opIntervalLeftClosed());
 }
 
@@ -220,9 +220,9 @@ bool CalculatorFunctionsGeneral::innerGetFirstSummandContaining(Calculator& theC
     return false;
   List<Expression> theSummands;
   theCommands.CollectOpands(input[1], theCommands.opPlus(), theSummands);
-  for (int i=0; i<theSummands.size; i++)
+  for (int i = 0; i < theSummands.size; i++)
     if (theSummands[i].ContainsAsSubExpressionNoBuiltInTypes(input[2]))
-    { output=theSummands[i];
+    { output = theSummands[i];
       return true;
     }
   return false;
@@ -230,66 +230,66 @@ bool CalculatorFunctionsGeneral::innerGetFirstSummandContaining(Calculator& theC
 
 bool CalculatorFunctionsGeneral::innerGetSummand(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetSummand");
-  if (! input.StartsWithGivenAtom("GetSummand", 3))
+  if (!input.StartsWithGivenAtom("GetSummand", 3))
     return false;
-  const Expression& theExpression=input[1];
+  const Expression& theExpression = input[1];
   if (theExpression.StartsWith(theCommands.opPlus(), 3))
-  { int summandIndex=-1;
+  { int summandIndex = -1;
     if (!input[2].IsSmallInteger(&summandIndex))
       return false;
     if (summandIndex<0)
       return false;
     List<Expression> theSummands;
     List<Expression> theSums;
-    theCommands.CollectOpands(theExpression, theCommands.opPlus(),theSummands);
-    for (int i=0; i<theSummands.size; i++)
+    theCommands.CollectOpands(theExpression, theCommands.opPlus(), theSummands);
+    for (int i = 0; i < theSummands.size; i++)
       if (theSummands[i].ContainsAsSubExpressionNoBuiltInTypes(theCommands.opSum()))
       { theSums.AddOnTop(theSummands[i]);
         theSummands.RemoveIndexShiftDown(i);
         i--;
       }
-    if (theSums.size>1)
+    if (theSums.size > 1)
       return false;
-    if (summandIndex< theSummands.size)
-    { output=theSummands[summandIndex];
+    if (summandIndex < theSummands.size)
+    { output = theSummands[summandIndex];
       return true;
     }
-    if (theSums.size==0)
+    if (theSums.size == 0)
       return false;
     output.reset(theCommands);
     output.AddChildAtomOnTop("GetSummand");
     output.AddChildOnTop(theSums[0]);
     Expression shiftE;
     shiftE.AssignValue(theSummands.size, theCommands);
-    return output.AddChildOnTop(input[2]-shiftE);
+    return output.AddChildOnTop(input[2] - shiftE);
   }
   List<Expression> theMultiplicands;
   theExpression.GetMultiplicandsRecursive(theMultiplicands);
-  Expression theSum=*theMultiplicands.LastObject();
+  Expression theSum = *theMultiplicands.LastObject();
   theMultiplicands.RemoveLastObject();
   Expression theCoeff;
-  if (theMultiplicands.size>0)
+  if (theMultiplicands.size > 0)
     theCoeff.MakeProducT(theCommands, theMultiplicands);
   else
     theCoeff.AssignValue(1, theCommands);
-  if (!theSum.StartsWith(theCommands.opSum(),3))
+  if (!theSum.StartsWith(theCommands.opSum(), 3))
     return false;
-  const Expression& theLimits=theSum[1];
-  if (!theLimits.StartsWith(theCommands.opLimitBoundary(),3))
+  const Expression& theLimits = theSum[1];
+  if (!theLimits.StartsWith(theCommands.opLimitBoundary(), 3))
     return false;
-  const Expression& theBottomBoundary=theLimits[1];
-  if (!theBottomBoundary.StartsWith(theCommands.opDefine(),3))
+  const Expression& theBottomBoundary = theLimits[1];
+  if (!theBottomBoundary.StartsWith(theCommands.opDefine(), 3))
     return false;
-  Expression theSub=theBottomBoundary;
+  Expression theSub = theBottomBoundary;
   Expression //oneE,
   valueToSubWith;
   //oneE.AssignValue(1, theCommands);
-  valueToSubWith=theBottomBoundary[2]+input[2];
+  valueToSubWith = theBottomBoundary[2] + input[2];
   theSub.SetChilD(2, valueToSubWith);
   Expression theCommandSequence(theCommands);
   theCommandSequence.AddChildAtomOnTop(theCommands.opEndStatement());
   theCommandSequence.AddChildOnTop(theSub);
-  theCommandSequence.AddChildOnTop(theCoeff*theSum[2]);
+  theCommandSequence.AddChildOnTop(theCoeff * theSum[2]);
   return output.MakeXOX
   (theCommands, theCommands.opUnderscore(), theCommandSequence,
    theCommands.ETwo());
@@ -307,7 +307,7 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField");
   (void) vectorsAreNormalized;
   //stOutput << input.ToString();
-  if (input.size()<5)
+  if (input.size() < 5)
     return output.MakeError
     ("Vector fields take at least four arguments: \
       the vector field, the low left corner, \
@@ -317,11 +317,11 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   if (input.HasBoundVariables())
     return false;
   Plot thePlot;
-  thePlot.dimension=2;
+  thePlot.dimension = 2;
   PlotObject thePlotObj;
-  thePlotObj.leftPtE=input[2];
-  thePlotObj.rightPtE=input[3];
-  if (input.size()>=7)
+  thePlotObj.leftPtE = input[2];
+  thePlotObj.rightPtE = input[3];
+  if (input.size() >= 7)
   { if (!input[6].IsOfType<std::string>(&thePlotObj.colorJS))
       thePlotObj.colorJS=input[6].ToString();
   } else
@@ -329,35 +329,35 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   thePlotObj.colorRGB=HtmlRoutines::RedGreenBlue(0, 0, 255);
   DrawingVariables::GetColorIntFromColorString
   (thePlotObj.colorJS, thePlotObj.colorRGB);
-  thePlotObj.lineWidth=1;
-  if (input.size()>=8)
+  thePlotObj.lineWidth = 1;
+  if (input.size() >= 8)
     input[7].EvaluatesToDouble(&thePlotObj.lineWidth);
   Vector<double> lowLeft, upRight;
   if (!theCommands.GetVectorDoubles(input[2], lowLeft, 2))
     return theCommands << "Failed to low left corner from: " << input[2].ToString();
   if (!theCommands.GetVectorDoubles(input[3], upRight, 2))
     return theCommands << "Failed to up right corner from: " << input[3].ToString();
-  thePlotObj.yHigh=upRight[1];
-  thePlotObj.yLow=lowLeft[1];
-  thePlotObj.xHigh=upRight[0];
-  thePlotObj.xLow=lowLeft[0];
+  thePlotObj.yHigh = upRight[1];
+  thePlotObj.yLow = lowLeft[1];
+  thePlotObj.xHigh = upRight[0];
+  thePlotObj.xLow = lowLeft[0];
   List<std::string> lowLeftStrings, upRightStrings;
   lowLeft.ToListStringsBasicType(lowLeftStrings);
   upRight.ToListStringsBasicType(upRightStrings);
   thePlotObj.theVarRangesJS.SetSize(2);
   thePlotObj.theVarRangesJS[0].SetSize(2);
   thePlotObj.theVarRangesJS[1].SetSize(2);
-  thePlotObj.theVarRangesJS[0][0]=lowLeftStrings[0];
-  thePlotObj.theVarRangesJS[0][1]=upRightStrings[0];
-  thePlotObj.theVarRangesJS[1][0]=lowLeftStrings[1];
-  thePlotObj.theVarRangesJS[1][1]=upRightStrings[1];
-  thePlotObj.manifoldImmersion=input[1];
+  thePlotObj.theVarRangesJS[0][0] = lowLeftStrings[0];
+  thePlotObj.theVarRangesJS[0][1] = upRightStrings[0];
+  thePlotObj.theVarRangesJS[1][0] = lowLeftStrings[1];
+  thePlotObj.theVarRangesJS[1][1] = upRightStrings[1];
+  thePlotObj.manifoldImmersion = input[1];
   Expression jsConverterE;
   //thePlotObj.defaultLengthJS="0.5";
-  if (input.size()>=6)
+  if (input.size() >= 6)
   { //stOutput << "DEBUG: got to here";
     if (CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[5], jsConverterE))
-      thePlotObj.defaultLengthJS=jsConverterE.ToString();
+      thePlotObj.defaultLengthJS = jsConverterE.ToString();
     else
       return theCommands << "Failed to extract javascript from " << input[5].ToString();
   }
@@ -371,9 +371,9 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   Expression xE, yE;
   xE.MakeAtom("x", theCommands);
   yE.MakeAtom("y", theCommands);
-  if (thePlotObj.variablesInPlay.size==0)
+  if (thePlotObj.variablesInPlay.size == 0)
     thePlotObj.variablesInPlay.AddOnTop(xE);
-  if (thePlotObj.variablesInPlay.size==1)
+  if (thePlotObj.variablesInPlay.size == 1)
   { if (thePlotObj.variablesInPlay.Contains(xE))
       thePlotObj.variablesInPlay.AddOnTop(yE);
     else
@@ -381,17 +381,17 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   }
   thePlotObj.variablesInPlay.QuickSortAscending();
   thePlotObj.variablesInPlayJS.SetSize(thePlotObj.variablesInPlay.size);
-  for (int i=0; i<thePlotObj.variablesInPlay.size; i++)
-    thePlotObj.variablesInPlayJS[i]=thePlotObj.variablesInPlay[i].ToString();
-  thePlotObj.thePlotType="plotDirectionField";
+  for (int i = 0; i < thePlotObj.variablesInPlay.size; i++)
+    thePlotObj.variablesInPlayJS[i] = thePlotObj.variablesInPlay[i].ToString();
+  thePlotObj.thePlotType = "plotDirectionField";
   if (!input[4].IsSequenceNElementS(2) && !input[4].StartsWith(theCommands.opIntervalOpen(), 3))
     return theCommands
     << "<hr>Could not extract a list of elements for the "
     << "number of segments from: " << input[4].ToString();
   thePlotObj.numSegmenTsJS.SetSize(2);
-  for (int i=0; i<2; i++)
-  { if (!CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[4][i+1], jsConverterE))
-      return theCommands << "Failed to convert " << input[4][i+1].ToString() << " to javascript. ";
+  for (int i = 0; i < 2; i++)
+  { if (!CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[4][i + 1], jsConverterE))
+      return theCommands << "Failed to convert " << input[4][i + 1].ToString() << " to javascript. ";
     thePlotObj.numSegmenTsJS[i] = jsConverterE.ToString();
   }
   thePlot.thePlots.AddOnTop(thePlotObj);
@@ -401,7 +401,7 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
 
 bool CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerJWTverifyAgainstRSA256");
-  if (input.size()!=4)
+  if (input.size() != 4)
     return theCommands << "The JWT verify command expects 3 arguments:"
     << " string with the token in the usual format (\"a.b.c\"),"
     << " the modulus of the key and the exponent of the key. ";
@@ -436,7 +436,7 @@ bool CalculatorFunctionsGeneral::innerJWTverifyAgainstKnownKeys(Calculator& theC
     return theCommands << "This function is only available to logged-in admins. ";
   if (!input.IsOfType<std::string>())
     return false;
-  const std::string& inputString=input.GetValue<std::string>();
+  const std::string& inputString = input.GetValue<std::string>();
   std::stringstream out;
   //out << "DEBUG: Input string: " << inputString << "<br>";
   Crypto::VerifyJWTagainstKnownKeys(inputString, &out, &out);
@@ -447,7 +447,7 @@ bool CalculatorFunctionsGeneral::innerHexToString(Calculator& theCommands, const
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerHexToString");
   std::string inputString;
   if (!input.IsOfType(&inputString))
-    inputString=input.ToString();
+    inputString = input.ToString();
   std::string result;
   if (!Crypto::ConvertHexToString(inputString, result))
     return theCommands << "Failed to interpret " << inputString
@@ -460,7 +460,7 @@ bool CalculatorFunctionsGeneral::innerIntegerToHex(Calculator& theCommands, cons
   LargeInt theLI;
   if (!input.IsInteger(&theLI))
     return false;
-  if (theLI<0)
+  if (theLI < 0)
     return theCommands << "I only convert positive integers to hex strings. ";
   std::string result;
   if (!Crypto::ConvertLargeUnsignedIntToHex(theLI.value, result))
@@ -511,7 +511,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToHex(Calculator& theCommands, const
 bool CalculatorFunctionsGeneral::innerRSAencrypt(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRSAencrypt");
   //stOutput << "DEBUG: here be i";
-  if (input.size()!=4)
+  if (input.size() != 4)
     return false;
   LargeInt theExponent, theModulus, theMessage, result;
   if (!input[1].IsInteger(& theModulus) ||
@@ -519,13 +519,13 @@ bool CalculatorFunctionsGeneral::innerRSAencrypt(Calculator& theCommands, const 
       !input[3].IsInteger(&theMessage))
     return theCommands << "Failed to extract three (large) integers from the arguments of "
     << input.ToString();
-  if (theModulus<0)
-    theModulus*=-1;
-  if (theModulus==0 || theExponent==0)
+  if (theModulus < 0)
+    theModulus *= -1;
+  if (theModulus == 0 || theExponent == 0)
     return theCommands << "The modulus and exponent must be non-zero.";
-  if (theModulus==1)
+  if (theModulus == 1)
     return theCommands << "Modulus 1 not allowed";
-  result=Crypto::RSAencrypt(theModulus.value, theExponent, theMessage);
+  result = Crypto::RSAencrypt(theModulus.value, theExponent, theMessage);
   return output.AssignValue((Rational)result, theCommands);
 }
 
@@ -536,7 +536,7 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
     return theCommands << "Sending mail available to logged-in admins only. ";
   std::stringstream out;
 #ifdef MACRO_use_MySQL
-  if (input.size()!=4)
+  if (input.size() != 4)
     return theCommands << "Send email requires three arguments. ";
   EmailRoutines theEmail;
   if (! input[1].IsOfType(&theEmail.toEmail) ||
@@ -551,7 +551,7 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
 #else
   out << "Error: database not running. ";
 #endif
-  return output.AssignValue(out.str(),theCommands);
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerIsSquare(Calculator& theCommands, const Expression& input, Expression& output)
@@ -559,17 +559,17 @@ bool CalculatorFunctionsGeneral::innerIsSquare(Calculator& theCommands, const Ex
   LargeInt theLI;
   if (!input.IsInteger(&theLI))
     return false;
-  if (theLI<0)
+  if (theLI < 0)
     return output.AssignValue(0, theCommands);
-  if (theLI==0)
+  if (theLI == 0)
     return output.AssignValue(1, theCommands);
   List<int> theMults;
   List<LargeInt> theFactors;
   if (!theLI.value.Factor(theFactors, theMults))
     return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
-  int result=1;
-  for (int i=0; i<theMults.size; i++)
-    if ((theMults[i]%2)!=0)
+  int result = 1;
+  for (int i = 0; i < theMults.size; i++)
+    if ((theMults[i] % 2) != 0)
     { result=0;
       break;
     }
@@ -585,10 +585,10 @@ bool CalculatorFunctionsGeneral::innerIsSquareFree(Calculator& theCommands, cons
   List<LargeInt> theFactors;
   if (!theLI.value.Factor(theFactors, theMults))
     return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
-  int result=1;
-  for (int i=0; i<theMults.size; i++)
-    if (theMults[i]>1)
-    { result=0;
+  int result = 1;
+  for (int i = 0; i < theMults.size; i++)
+    if (theMults[i] > 1)
+    { result = 0;
       break;
     }
   return output.AssignValue(result, theCommands);
@@ -605,11 +605,11 @@ bool CalculatorFunctionsGeneral::innerIsPower(Calculator& theCommands, const Exp
   List<LargeInt> theFactors;
   if (!theLI.value.Factor(theFactors, theMults))
     return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
-  int result=1;
-  if (theMults.size>0)
-    result = (theMults[0]>1);
-  for (int i=1; i<theMults.size; i++)
-    if (theMults[i]!=theMults[0])
+  int result = 1;
+  if (theMults.size > 0)
+    result = (theMults[0] > 1);
+  for (int i = 1; i < theMults.size; i++)
+    if (theMults[i] != theMults[0])
     { result=0;
       break;
     }

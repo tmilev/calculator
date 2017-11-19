@@ -397,8 +397,9 @@ textarea.calculatorAnswer.show {
   max-height: 500px;
 }
 textarea.currentFileNameArea {
-  height: 20px;
+  height: 25px;
   margin-bottom: -8px;
+  overflow-x: hidden;
 }
 div.headChapter{
   padding-bottom: 10px; 

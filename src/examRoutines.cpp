@@ -2969,10 +2969,10 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 std::string CalculatorHTML::ToStringProblemNavigation()const
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemNavigation");
   std::stringstream out;
-  std::string exerciseRequest="exercise";
-  std::string studentView= theGlobalVariables.UserStudentVieWOn() ? "true" : "false";
-  std::string linkSeparator=" | ";
-  std::string linkBigSeparator=" || ";
+  std::string exerciseRequest = "exercise";
+  std::string studentView = theGlobalVariables.UserStudentVieWOn() ? "true" : "false";
+  std::string linkSeparator = " | ";
+  std::string linkBigSeparator = " || ";
   if (theGlobalVariables.UserGuestMode())
     exerciseRequest="exerciseNoLogin";
   if (theGlobalVariables.UserGuestMode())
@@ -2982,7 +2982,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
      << "?request=login\">Log in</a> " << linkSeparator;
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
-  std::string calcArgsNoPassExamDetails=
+  std::string calcArgsNoPassExamDetails =
   theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType=="exercise")
@@ -3014,28 +3014,28 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
         out << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
         out << "courseHome=" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
-        out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent-1], false)
+        out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent - 1], false)
         << "\">&#8592;</a>" << linkSeparator;
       } else
         out << "<a disabled=\"disabled\">&#8592;</a>" << linkSeparator;
-      if (indexInParent<this->problemNamesNoTopics.size-1)
+      if (indexInParent < this->problemNamesNoTopics.size - 1)
       { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
         << theGlobalVariables.userCalculatorRequestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
-        if (theGlobalVariables.GetWebInput("studentSection")!="")
+        if (theGlobalVariables.GetWebInput("studentSection") != "")
           out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
         out << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
         out << "courseHome=" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
-        out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent+1], false)
+        out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent + 1], false)
         << "\">&#8594;</a>" << linkSeparator;
       } else
         out << "<a disabled=\"disabled\">&#8594;</a>" << linkSeparator;
     }
   }
   if (this->flagIsExamProblem &&
-      (theGlobalVariables.userCalculatorRequestType=="exercise" ||
-       theGlobalVariables.userCalculatorRequestType=="exerciseNoLogin"))
+      (theGlobalVariables.userCalculatorRequestType == "exercise" ||
+       theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin"))
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
@@ -3050,7 +3050,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       << "\">Admin view</a>" << linkSeparator;
     else
       out << "<b>Admin view</b>" << linkSeparator;
-    if (this->databaseStudentSections.size==0)
+    if (this->databaseStudentSections.size == 0)
     { if (theGlobalVariables.UserStudentVieWOn())
         out << "<b>Student View</b>";
       else
@@ -3060,8 +3060,8 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << "\">Student view</a>";
     } else
       out << "Student view, section: ";
-    for (int i=0; i<this->databaseStudentSections.size; i++)
-      if (this->databaseStudentSections[i]!="")
+    for (int i = 0; i < this->databaseStudentSections.size; i++)
+      if (this->databaseStudentSections[i] != "")
       { if (theGlobalVariables.UserStudentVieWOn() &&
             this->databaseStudentSections[i] == HtmlRoutines::ConvertURLStringToNormal
             (theGlobalVariables.GetWebInput("studentSection"), false))
@@ -3071,12 +3071,12 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
           << this->ToStringCalculatorArgumentsForProblem
           (theGlobalVariables.userCalculatorRequestType, "true", this->databaseStudentSections[i])
           << "\">" << this->databaseStudentSections[i] << " </a>";
-        if (i!=this->databaseStudentSections.size-1)
+        if (i != this->databaseStudentSections.size - 1)
           out << linkSeparator;
         //stOutput << "DEBUG: student section: " << this->databaseStudentSections[i];
       }
   }
-  if (out.str()=="")
+  if (out.str() == "")
     return "";
   std::stringstream outFinal;
   outFinal << "<problemNavigation>" << out.str();
@@ -3092,7 +3092,7 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
 (const std::string& requestType, const std::string& studentView,
  const std::string& studentSection, bool includeRandomSeedIfAppropriate)const
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsForProblem");
-  if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode() )
+  if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode())
     return "";
   std::stringstream out;
   out << "request=" << requestType << "&";
@@ -3100,14 +3100,14 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
   excludedTags.AddOnTop("randomSeed");
   out << theGlobalVariables.ToStringCalcArgsNoNavigation(&excludedTags)
   << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
-  if  (!theGlobalVariables.flagRunningApache && this->fileName!="")
+  if  (!theGlobalVariables.flagRunningApache && this->fileName != "")
     out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->fileName, false) << "&";
   else
     out << "fileName=" << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.GetWebInput("fileName"), false)
     << "&";
   out << "topicList=" << theGlobalVariables.GetWebInput("topicList") << "&";
   out << "studentView=" << studentView << "&";
-    if (studentSection!="")
+    if (studentSection != "")
       out << "studentSection=" << HtmlRoutines::ConvertStringToURLString(studentSection, false) << "&";
   if (includeRandomSeedIfAppropriate)
     out << "randomSeed=" << this->theProblemData.randomSeed << "&";
@@ -3115,15 +3115,15 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
   return out.str();
 }
 
-std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName)
+std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName, bool includeCloneButton)
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
   out << "\n<a class=\"linkStandardButtonLike\" href=\""
   << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
-  std::string urledProblem=HtmlRoutines::ConvertStringToURLString(desiredFileName, false);
+  std::string urledProblem = HtmlRoutines::ConvertStringToURLString(desiredFileName, false);
   std::stringstream refStreamNoRequest;
-  std::string spanCloningAttemptResultID="spanCloningAttemptResultID"+desiredFileName;
-  std::string clonePageAreaID="clonePageAreaID"+desiredFileName;
+  std::string spanCloningAttemptResultID = "spanCloningAttemptResultID" + desiredFileName;
+  std::string clonePageAreaID = "clonePageAreaID" + desiredFileName;
   //  out << "cleaned up link: " << cleaneduplink;
   //  out << "<br>urled link: " <<  urledProblem;
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
@@ -3131,16 +3131,18 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&"
   << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
   out << refStreamNoRequest.str() << "\">" << "Edit" << "</a>";
-  out << "<textarea class=\"currentFileNameArea\" id=\""<< clonePageAreaID << "\" cols=\""
-  << desiredFileName.size()+4 << "\">" << desiredFileName << "</textarea>\n"
-  << "<button class=\"buttonClone\" onclick=\""
-  << "submitStringAsMainInput(document.getElementById('"
-  << clonePageAreaID << "').value, '" << spanCloningAttemptResultID << "', 'clonePage'"
-  << ", '"
-  << spanCloningAttemptResultID
-  << "'"
-  << ");"
-  << "\" >Clone</button> <span id=\"" << spanCloningAttemptResultID <<"\"></span>";
+  out << "<textarea class=\"currentFileNameArea\" id=\"" << clonePageAreaID << "\" cols=\""
+  << desiredFileName.size() + 7 << "\">" << desiredFileName << "</textarea>\n";
+  if (includeCloneButton)
+    out
+    << "<button class=\"buttonClone\" onclick=\""
+    << "submitStringAsMainInput(document.getElementById('"
+    << clonePageAreaID << "').value, '" << spanCloningAttemptResultID << "', 'clonePage'"
+    << ", '"
+    << spanCloningAttemptResultID
+    << "'"
+    << ");"
+    << "\" >Clone</button> <span id=\"" << spanCloningAttemptResultID <<"\"></span>";
   return out.str();
 }
 

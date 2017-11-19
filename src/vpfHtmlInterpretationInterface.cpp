@@ -548,11 +548,19 @@ std::string HtmlInterpretation::GetSelectCourse()
   out << "<calculatorNavigation>"
   << HtmlInterpretation::ToStringNavigation()
   << "</calculatorNavigation>";
+  CalculatorHTML tempObject;
+  std::string coursesAvailableList = "coursesavailable/default.txt";
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    out
+    << "<editPagePanel>"
+    << tempObject.GetEditPageButton(coursesAvailableList, false)
+    << "</editPagePanel>";
+
   std::string theTopicFile;
   std::stringstream commentsOnFailure;
   std::string temp;
   FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
-  ("coursesavailable/default.txt", temp, &commentsOnFailure);
+  (coursesAvailableList, temp, &commentsOnFailure);
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly
       ("coursesavailable/default.txt", theTopicFile, &commentsOnFailure))
   { out << "<b>Failed to fetch available courses from coursesavailable/default.txt</b>. " << commentsOnFailure.str();
@@ -562,7 +570,7 @@ std::string HtmlInterpretation::GetSelectCourse()
   CourseList theCourses;
   theCourses.LoadFromString(theTopicFile, &out);
   out << "<div style=\"text-align:center\">";
-  for (int i=0; i<theCourses.theCourses.size; i++)
+  for (int i=0; i < theCourses.theCourses.size; i++)
   { out << "<a class=\"courseLink\" href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=template&courseHome=coursetemplates/"
     << theCourses.theCourses[i].courseTemplate

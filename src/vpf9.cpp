@@ -13,31 +13,31 @@ ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Math routines implement
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
 //used to guard the web server from abuse.
 #ifdef AllocationLimitsSafeguard
-long long ParallelComputing::cgiLimitRAMuseNumPointersInList=2000000000;
+long long ParallelComputing::cgiLimitRAMuseNumPointersInList = 2000000000;
 #endif
 
 ControllerStartsRunning ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly;
-bool ParallelComputing::flagUngracefulExitInitiated=false;
+bool ParallelComputing::flagUngracefulExitInitiated = false;
 
-long long ParallelComputing::GlobalPointerCounter=0;
-long long ParallelComputing::PointerCounterPeakRamUse=0;
-unsigned int ParallelComputing::NumHashResizes=0;
-unsigned int ParallelComputing::NumListResizesTotal=0;
-unsigned int ParallelComputing::NumListsCreated=0;
+long long ParallelComputing::GlobalPointerCounter = 0;
+long long ParallelComputing::PointerCounterPeakRamUse = 0;
+unsigned int ParallelComputing::NumHashResizes = 0;
+unsigned int ParallelComputing::NumListResizesTotal = 0;
+unsigned int ParallelComputing::NumListsCreated = 0;
 
 //CombinatorialChamberContainer GlobalCollectorChambers;
 //FacetPointers GlobalCollectorFacets;
 
 Vector<Rational> PartFraction::theVectorToBePartitioned;
-bool PartFraction::MakingConsistencyCheck=false;
+bool PartFraction::MakingConsistencyCheck = false;
 Rational PartFractions::CheckSum;
 Rational PartFraction::CheckSum;
 Rational PartFraction::CheckSum2;
 
-int DrawingVariables::NumHtmlGraphics=0;
-int HtmlRoutines::GlobalMathSpanID=0;
-int HtmlRoutines::GlobalCanvasID=0;
-int HtmlRoutines::GlobalGeneralPurposeID=0;
+int DrawingVariables::NumHtmlGraphics = 0;
+int HtmlRoutines::GlobalMathSpanID = 0;
+int HtmlRoutines::GlobalCanvasID = 0;
+int HtmlRoutines::GlobalGeneralPurposeID = 0;
 
 template < > bool Matrix<Rational>::flagComputingDebugInfo=true;
 template < > bool Polynomial<Rational>::flagAnErrorHasOccuredTimeToPanic=true;
@@ -852,13 +852,13 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly
   std::string outputCandidate;
   bool result = FileOperations::GetPhysicalFileNameFromVirtual(inputCopy, outputCandidate, false, false, commentsOnFailure);
   if (!FileOperations::FileExistsVirtual(outputCandidate, false, false))
-  { stOutput << "DEBUG: got to here<br>";
+  { //stOutput << "DEBUG: got to here<br>";
     std::string fileContent;
-    stOutput << "DEBUG: trying to open: " << inputCopy << "<br>";
+    //stOutput << "DEBUG: trying to open: " << inputCopy << "<br>";
     std::string inputDefault = inputStart + "default/" + fileEnd;
     if (FileOperations::LoadFileToStringVirtual(inputDefault, fileContent, false, false, commentsOnFailure))
     { std::fstream theFile;
-      stOutput << "DEBUG: successfully opened: " << inputDefault << "<br>";
+      //stOutput << "DEBUG: successfully opened: " << inputDefault << "<br>";
       if (FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(theFile, inputCopy, false, true, false, false))
       { theFile << fileContent;
         result = true;
@@ -958,7 +958,7 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded
   std::stringstream mkDirCommand;
   mkDirCommand << "mkdir -p " << folderName;
   theGlobalVariables.CallSystemNoOutput(mkDirCommand.str(), true);
-  stOutput << "DEBUG: about to execute: " << mkDirCommand.str();
+  //stOutput << "DEBUG: about to execute: " << mkDirCommand.str();
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
   (theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
 }
@@ -4269,14 +4269,14 @@ LargeInt DynkinType::GetWeylGroupSizeByFormula()const
 { MacroRegisterFunctionWithName("DynkinType::GetWeylGroupSizeByFormula");
   this->CheckFlagDeallocated();
 //  stOutput << "DEBUG: Getting Weyl group size by f-la of type: " << this->ToString() << ": ";
-  LargeInt result=1;
+  LargeInt result = 1;
   LargeInt tempLI;
-  for (int i=0; i<this->size(); i++)
-  { tempLI=WeylGroupData::SizeByFormulaOrNeg1((*this)[i].theLetter, (*this)[i].theRank);
+  for (int i = 0; i < this->size(); i++)
+  { tempLI = WeylGroupData::SizeByFormulaOrNeg1((*this)[i].theLetter, (*this)[i].theRank);
     tempLI.RaiseToPower(this->GetMult(i));
-    result*=tempLI;
+    result *= tempLI;
   }
-  if (result<=0)
+  if (result <= 0)
     crash << "Something has gone very wrong: Weyl group size reported to be " << result.ToString()
     << " which appears to not be a positive integer! " << crash;
   //stOutput << "DEBUG: result: " << result.ToString();
@@ -4316,19 +4316,19 @@ Rational DynkinSimpleType::GetEpsilonRealizationLongRootLengthSquared()const
 
 std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
-  bool includeTechnicalNames= theFormat==0 ? true : theFormat->flagIncludeLieAlgebraTypes;
-  bool includeNonTechnicalNames=theFormat==0 ? false : theFormat->flagIncludeLieAlgebraNonTechnicalNames;
-  bool usePlusesAndExponents= theFormat==0? true: !theFormat->flagDynkinTypeDontUsePlusAndExponent;
-  bool supressDynkinIndexOne= theFormat==0 ? false : theFormat->flagSupressDynkinIndexOne;
+  bool includeTechnicalNames = theFormat == 0 ? true : theFormat->flagIncludeLieAlgebraTypes;
+  bool includeNonTechnicalNames = theFormat == 0 ? false : theFormat->flagIncludeLieAlgebraNonTechnicalNames;
+  bool usePlusesAndExponents = theFormat == 0 ? true: !theFormat->flagDynkinTypeDontUsePlusAndExponent;
+  bool supressDynkinIndexOne = theFormat ==0 ? false : theFormat->flagSupressDynkinIndexOne;
   if (!includeNonTechnicalNames && !includeTechnicalNames)
-    includeTechnicalNames=true;
-  bool hasAmbient=false;
-  if (theFormat!=0)
-    hasAmbient=(theFormat->AmbientWeylLetter!='X');
+    includeTechnicalNames = true;
+  bool hasAmbient = false;
+  if (theFormat != 0)
+    hasAmbient = (theFormat->AmbientWeylLetter != 'X');
   if (includeTechnicalNames)
   { if (!hasAmbient)
     { out << theLetter;
-      if (!supressDynkinIndexOne || this->CartanSymmetricInverseScale!=1)
+      if (!supressDynkinIndexOne || this->CartanSymmetricInverseScale != 1)
       { if (usePlusesAndExponents)
           out << "^{";
         out << this->CartanSymmetricInverseScale.ToString();
@@ -4337,13 +4337,13 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
       }
     } else
     { DynkinSimpleType ambientType;
-      ambientType.theLetter=theFormat->AmbientWeylLetter;
-      ambientType.CartanSymmetricInverseScale=theFormat->AmbientCartanSymmetricInverseScale;
-      Rational theDynkinIndex= ambientType.GetLongRootLengthSquared()/this->GetLongRootLengthSquared();
+      ambientType.theLetter = theFormat->AmbientWeylLetter;
+      ambientType.CartanSymmetricInverseScale = theFormat->AmbientCartanSymmetricInverseScale;
+      Rational theDynkinIndex = ambientType.GetLongRootLengthSquared() / this->GetLongRootLengthSquared();
 //      (this->CartanSymmetricInverseScale/this->GetDefaultLongRootLengthSquared())/
 //      (ambientType.CartanSymmetricInverseScale/ambientType.GetDefaultLongRootLengthSquared());
       out << theLetter;
-      if (!supressDynkinIndexOne || theDynkinIndex!=1)
+      if (!supressDynkinIndexOne || theDynkinIndex != 1)
       { if (usePlusesAndExponents)
           out << "^{" ;
         out << theDynkinIndex.ToString();
@@ -4351,7 +4351,7 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
           out << "}";
       }
     }
-    if (this->theRank>=10)
+    if (this->theRank >= 10)
     { out << "_";
       if (usePlusesAndExponents)
         out << "{";
@@ -4363,9 +4363,9 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
     //out << "[" << this->theLetter << "^{" << this->CartanSymmetricInverseScale << "}_" << this->theRank << "]";
   }
   if (includeNonTechnicalNames)
-    if (this->theLetter!='E' && this->theLetter!='F' && this->theLetter!='G')
+    if (this->theLetter != 'E' && this->theLetter != 'F' && this->theLetter != 'G')
       switch (this->theLetter)
-      { case 'A':  out << "(sl(" <<   this->theRank+1  << "))"; break;
+      { case 'A':  out << "(sl(" <<   this->theRank+1 << "))"; break;
         case 'B':  out << "(so(" << 2*this->theRank+1 << "))"; break;
         case 'C':  out << "(sp(" << 2*this->theRank   << "))"; break;
         case 'D':  out << "(so(" << 2*this->theRank   << "))"; break;
@@ -4375,14 +4375,14 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
 }
 
 int DynkinSimpleType::GetRootSystemSize()const
-{ switch(this->theLetter)
+{ switch (this->theLetter)
   { case 'A':
-      return this->theRank*(this->theRank+1);
+      return this->theRank * (this->theRank + 1);
     case 'B':
     case 'C':
-      return this->theRank*this->theRank*2;
+      return this->theRank * this->theRank * 2;
     case 'D':
-      return this->theRank*(this->theRank-1) *2;
+      return this->theRank * (this->theRank - 1) * 2;
     case 'E':
       switch(this->theRank)
       { case 6: return 72;
@@ -4399,9 +4399,9 @@ int DynkinSimpleType::GetRootSystemSize()const
 }
 
 Rational DynkinSimpleType::GetDefaultCoRootLengthSquared(int rootIndex)const
-{ Rational result=this->GetDefaultRootLengthSquared(rootIndex);
+{ Rational result = this->GetDefaultRootLengthSquared(rootIndex);
   result.Invert();
-  result*=4;
+  result *= 4;
   return result;
 }
 
@@ -4413,22 +4413,22 @@ Rational DynkinSimpleType::GetRatioRootSquaredToFirstSquared(int rootIndex)const
     case 'E':
       return 1;
     case 'B':
-      if (rootIndex==this->theRank-1)
-      { result.AssignNumeratorAndDenominator(1,2);
+      if (rootIndex == this->theRank - 1)
+      { result.AssignNumeratorAndDenominator(1, 2);
         return result;
       }
       return 1;
     case 'C':
-      if (rootIndex==this->theRank-1)
+      if (rootIndex == this->theRank-1)
         return 2;
       return 1;
     case 'F':
-      if (rootIndex<2)
+      if (rootIndex < 2)
         return 1;
-      result.AssignNumeratorAndDenominator(1,2);
+      result.AssignNumeratorAndDenominator(1, 2);
       return result;
     case 'G':
-      if (rootIndex==1)
+      if (rootIndex == 1)
         return 3;
       return 1;
     default:
@@ -4437,7 +4437,7 @@ Rational DynkinSimpleType::GetRatioRootSquaredToFirstSquared(int rootIndex)const
 }
 
 Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex)const
-{ if (rootIndex>=this->theRank)
+{ if (rootIndex >= this->theRank)
     crash << "This is a programming error: attempting to get the squared length of simple root number " << rootIndex+1
     << ", however the root system if of rank " << this->theRank << ". " << crash;
   switch (this->theLetter)
@@ -4446,21 +4446,21 @@ Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex)const
     case 'E':
       return 2;
     case 'B':
-      if (rootIndex==this->theRank-1)
+      if (rootIndex == this->theRank - 1)
         return 1;
       return 2;
     case 'F':
-      if (rootIndex<2)
+      if (rootIndex < 2)
         return 2;
       return 1;
     case 'C':
-      if (rootIndex==this->theRank-1)
+      if (rootIndex == this->theRank - 1)
         return 2;
       return 1;
     case 'G':
-      if (rootIndex==1)
+      if (rootIndex == 1)
         return 2;
-      return Rational(2,3);
+      return Rational(2, 3);
     default:
       crash << "This is a programming error: calling DynkinSimpleType::GetDefaultRootLengthSquared on the non-initialized Dynkin type "
       << this->ToString() << crash;
@@ -4469,140 +4469,140 @@ Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex)const
 }
 
 void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output)
-{ if (WeylLetter=='A')
-  { output.init(WeylRank+1, WeylRank);
+{ if (WeylLetter == 'A')
+  { output.init(WeylRank + 1, WeylRank);
     output.MakeZero();
-    for (int i=0; i<WeylRank; i++)
-    { output(i,i)=1;
-      output(i+1,i)=-1;
+    for (int i = 0; i < WeylRank; i++)
+    { output(i, i) = 1;
+      output(i + 1, i) = -1;
     }
-    output(WeylRank,WeylRank-1)=-1;
+    output(WeylRank, WeylRank - 1) = -1;
   }
-  if (WeylLetter=='B')
+  if (WeylLetter == 'B')
   { output.init(WeylRank, WeylRank);
     output.MakeZero();
-    for (int i=0; i<WeylRank-1; i++)
-    { output(i,i)=1;
-      output(i+1,i)=-1;
+    for (int i = 0; i < WeylRank - 1; i++)
+    { output(i, i) = 1;
+      output(i + 1, i) = -1;
     }
-    output(WeylRank-1, WeylRank-1)=1;
+    output(WeylRank - 1, WeylRank - 1) = 1;
   }
-  if (WeylLetter=='C')
+  if (WeylLetter == 'C')
   { output.init(WeylRank, WeylRank);
     output.MakeZero();
-    for (int i=0; i<WeylRank-1; i++)
-    { output(i,i)=1;
-      output(i+1,i)=-1;
+    for (int i = 0; i < WeylRank - 1; i++)
+    { output(i, i) = 1;
+      output(i + 1, i) = -1;
     }
-    output(WeylRank-1,WeylRank-1)=2;
+    output(WeylRank - 1, WeylRank - 1) = 2;
   }
-  if (WeylLetter=='D')
+  if (WeylLetter == 'D')
   { output.init(WeylRank, WeylRank);
     output.MakeZero();
-    for (int i=0; i<WeylRank-1; i++)
-    { output(i,i)=1;
-      output(i+1,i)=-1;
+    for (int i = 0; i < WeylRank - 1; i++)
+    { output(i, i) = 1;
+      output(i + 1, i) = -1;
     }
-    output(WeylRank-1,WeylRank-1)=1;
-    output(WeylRank-2,WeylRank-1)=1;
+    output(WeylRank - 1, WeylRank - 1) = 1;
+    output(WeylRank - 2, WeylRank - 1) = 1;
   }
-  Rational RHalf(1,2);
-  Rational RMHalf(-1,2);
-  if (WeylLetter=='E')
+  Rational RHalf(1, 2);
+  Rational RMHalf(-1, 2);
+  if (WeylLetter == 'E')
   { //Epsilon convention taken with slight modification from
     //Humpreys, Introduction to Lie algebras and representation theory, page 65
     //first comes first root, then the sticky part, then string with the rest of the roots.
     output.init(8, WeylRank);
     output.MakeZero();
     //first simple root: -1/2e_1-1/2e_8+1/2e_2+1/2e_3+1/2e_4+1/2e_5+1/2e_6+1/2e_7
-    output(0,0)=RMHalf;
-    output(1,0)=RHalf;
-    output(2,0)=RHalf;
-    output(3,0)=RHalf;
-    output(4,0)=RHalf;
-    output(5,0)=RHalf;
-    output(6,0)=RHalf;
-    output(7,0)=RMHalf;
+    output(0, 0) = RMHalf;
+    output(1, 0) = RHalf;
+    output(2, 0) = RHalf;
+    output(3, 0) = RHalf;
+    output(4, 0) = RHalf;
+    output(5, 0) = RHalf;
+    output(6, 0) = RHalf;
+    output(7, 0) = RMHalf;
     //2nd simple root: -e_1-e_2 (that is the sticky piece of the Dynkin diagram)
-    output(0,1)=-1;
-    output(1,1)=-1;
+    output(0, 1) = -1;
+    output(1, 1) = -1;
     //3rd simple root: e_1-e_2
-    output(0,2)=1;
-    output(1,2)=-1;
+    output(0, 2) = 1;
+    output(1, 2) = -1;
     //4th simple root: e_2-e_3
-    output(1,3)=1;
-    output(2,3)=-1;
+    output(1, 3) = 1;
+    output(2, 3) = -1;
     //5th simple root: e_3-e_4
-    output(2,4)=1;
-    output(3,4)=-1;
+    output(2, 4) = 1;
+    output(3, 4) = -1;
     //6th simple root: e_4-e_5
-    output(3,5)=1;
-    output(4,5)=-1;
-    if (WeylRank>6)
+    output(3, 5) = 1;
+    output(4, 5) = -1;
+    if (WeylRank > 6)
     {//7th simple root: e_5-e_6
-      output(4,6)=1;
-      output(5,6)=-1;
+      output(4, 6) = 1;
+      output(5, 6) = -1;
     }
-    if(WeylRank>7)
+    if(WeylRank > 7)
     {//8th simple root: e_6-e_7
-      output(5,7)=1;
-      output(6,7)=-1;
+      output(5, 7) = 1;
+      output(6, 7) = -1;
     }
   }
-  if (WeylLetter=='F')
+  if (WeylLetter == 'F')
   { //as of May 11 2013 the convention has been changed to coincide with that of
     //Wikipedia
     output.init(4, 4);
     output.MakeZero();
 
     //image of first simple root = e_1-e_2 (long one):
-    output(0,0)=1;
-    output(1,0)=-1;
+    output(0, 0) = 1;
+    output(1, 0) = -1;
     //image of second simple root = e_2-e_3 (long one)
-    output(1,1)=1;
-    output(2,1)=-1;
+    output(1, 1) = 1;
+    output(2, 1) = -1;
     //image of third simple root = e_3 (short one):
-    output(2,2)=1;
+    output(2, 2) = 1;
     //image of fourth simple root (short one)
-    output(0,3)=RMHalf;
-    output(1,3)=RMHalf;
-    output(2,3)=RMHalf;
-    output(3,3)=RMHalf;
+    output(0, 3) = RMHalf;
+    output(1, 3) = RMHalf;
+    output(2, 3) = RMHalf;
+    output(3, 3) = RMHalf;
     //eps_2:
     //eps_4:
   }
-  if (WeylLetter=='G')
+  if (WeylLetter == 'G')
   { //taken from Humpreys, Introduction to Lie algebras and representation theory, page 65
     // the long root has the higher index
     output.init(3, 2);
     output.MakeZero();
     //image of the first simple root(short one):
-    output(0,0)=1;
-    output(1,0)=-1;
+    output(0, 0) = 1;
+    output(1, 0) = -1;
     //image of second simple root:
-    output(0,1)=-2;
-    output(1,1)=1;
-    output(2,1)=1;
+    output(0, 1) = -2;
+    output(1, 1) = 1;
+    output(2, 1) = 1;
   }
 }
 
 void DynkinSimpleType::GetAn(int n, Matrix<Rational>& output)const
-{ if (n<=0 || n>30000)
+{ if (n <= 0 || n > 30000)
     crash << "This is a programming error: attempting to create type A_n with n=" << n << " is illegal. If this was a bad user input, it should "
     << " be handled at an earlier stage. " << crash;
   output.init(n, n);
   output.MakeZero();
-  for (int i=0; i<n-1; i++)
-  { output(i,i)=2;
-    output(i+1,i)=-1;
-    output(i,i+1)=-1;
+  for (int i = 0; i < n - 1; i++)
+  { output(i, i) = 2;
+    output(i + 1, i) = -1;
+    output(i, i + 1) = -1;
   }
-  output(n-1,n-1)=2;
+  output(n - 1, n - 1) = 2;
 }
 
 void DynkinSimpleType::GetBn(int n, Matrix<Rational>& output)const
 { this->GetAn(n, output);
-  output(n-1,n-1)=1;
+  output(n - 1, n - 1) = 1;
 }
 
 Rational DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra(char inputType)
@@ -4626,25 +4626,25 @@ Rational DynkinSimpleType::GetDynkinIndexParabolicallyInducingSubalgebra(char in
 bool DynkinSimpleType::CanBeExtendedParabolicallyTo(const DynkinSimpleType& other)const
 { MacroRegisterFunctionWithName("DynkinSimpleType::CanBeExtendedParabolicallyTo");
   //stOutput << "<br>checking whether " << this->ToString() << " can be extended to " << other.ToString();
-  if (other.theRank<=this->theRank)
+  if (other.theRank <= this->theRank)
     return false;
-  if (this->CartanSymmetricInverseScale/this->GetDynkinIndexParabolicallyInducingSubalgebra(other.theLetter)!=other.CartanSymmetricInverseScale)
+  if (this->CartanSymmetricInverseScale / this->GetDynkinIndexParabolicallyInducingSubalgebra(other.theLetter) != other.CartanSymmetricInverseScale)
     return false;
-  if (other.theLetter=='F')
-  { if (this->theLetter=='A' && this->theRank<3)
+  if (other.theLetter == 'F')
+  { if (this->theLetter == 'A' && this->theRank < 3)
       return true;
-    if (this->theLetter=='B' && this->theRank==3)
+    if (this->theLetter == 'B' && this->theRank == 3)
       return true;
     return false;
   }
-  if (other.theLetter=='E')
-  { if (this->theRank<5)
-      return this->theLetter=='A';
-    if (this->theRank==5)
-      return this->theLetter=='D';
-    return this->theLetter=='E';
+  if (other.theLetter == 'E')
+  { if (this->theRank < 5)
+      return this->theLetter == 'A';
+    if (this->theRank == 5)
+      return this->theLetter == 'D';
+    return this->theLetter == 'E';
   }
-  return this->theLetter=='A';
+  return this->theLetter == 'A';
 }
 
 void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots)const

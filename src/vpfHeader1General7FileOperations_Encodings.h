@@ -30,7 +30,7 @@ public:
   static std::string ConvertStringToLatexFileName(const std::string& input);
   static bool LoadFileToStringUnsecure
   (const std::string& fileNameUnsecure, std::string& output, std::stringstream* commentsOnFailure);
-  static bool LoadFileToStringVirtualCustomized
+  static bool LoadFileToStringVirtualCustomizedReadOnly
   (const std::string& fileName, std::string& output,
    std::stringstream* commentsOnFailure);
   static bool LoadFileToStringVirtual
@@ -45,6 +45,7 @@ public:
   static std::string GetFileExtensionWithDot(const std::string& theFileName, std::string* outputFileNameNoExtension=0);
   static bool FileExistsUnsecure(const std::string& theFileName);
   static bool FileExistsVirtual(const std::string& theFileName, bool accessSensitiveFolders=false, bool accessULTRASensitiveFolders=false);
+  static bool FileExistsVirtualCustomizedReadOnly(const std::string& theFileName, std::stringstream* commentsOnFailure);
   static bool IsFolderUnsecure(const std::string& theFolderName);
   static bool GetFolderFileNamesUnsecure
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
@@ -55,7 +56,10 @@ public:
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
    List<std::string>* outputFileTypes=0, bool accessSensitiveFolders=false,
    bool accessULTRASensitiveFolders=false);
-  static bool GetPhysicalFileNameFromVirtualCustomized
+  static bool GetPhysicalFileNameFromVirtualCustomizedReadOnly
+  (const std::string& inputFileName, std::string& output,
+   std::stringstream* commentsOnFailure);
+  static bool GetPhysicalFileNameFromVirtualCustomizedWriteOnly
   (const std::string& inputFileName, std::string& output,
    std::stringstream* commentsOnFailure);
 
@@ -71,6 +75,12 @@ public:
   static bool OpenFileUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
   static bool OpenFileUnsecureReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary);
   static bool OpenFileVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders=false);
+  static bool OpenFileVirtualCustomizedReadOnly
+  (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode,
+   bool truncate, bool openAsBinary, std::stringstream* commentsOnFailure);
+  static bool OpenFileVirtualCustomizedWriteOnly
+  (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode,
+   bool truncate, bool openAsBinary, std::stringstream* commentsOnFailure);
   static bool OpenFileVirtualReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary, bool accessSensitiveFolders=false);
 };
 #endif

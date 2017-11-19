@@ -551,9 +551,9 @@ std::string HtmlInterpretation::GetSelectCourse()
   std::string theTopicFile;
   std::stringstream commentsOnFailure;
   std::string temp;
-  FileOperations::GetPhysicalFileNameFromVirtualCustomized
+  FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
   ("coursesavailable/default.txt", temp, &commentsOnFailure);
-  if (!FileOperations::LoadFileToStringVirtualCustomized
+  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly
       ("coursesavailable/default.txt", theTopicFile, &commentsOnFailure))
   { out << "<b>Failed to fetch available courses from coursesavailable/default.txt</b>.";
     out << " </body></html>";
@@ -664,7 +664,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
 std::string HtmlInterpretation::GetExamPage()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPage");
   CalculatorHTML theFile;
-  std::string problemBody= theFile.LoadAndInterpretCurrentProblemItem
+  std::string problemBody = theFile.LoadAndInterpretCurrentProblemItem
   (theGlobalVariables.UserRequestRequiresLoadingRealExamData(),
    theGlobalVariables.GetWebInput("randomSeed"));
   std::stringstream out;

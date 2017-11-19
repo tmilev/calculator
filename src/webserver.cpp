@@ -3580,18 +3580,21 @@ std::string WebWorker::GetAddUserEmails()
 }
 
 std::string HtmlInterpretation::ModifyProblemReport()
-{ MacroRegisterFunctionWithName("WebWorker::GetModifyProblemReport");
-  bool shouldProceed=theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
+{ MacroRegisterFunctionWithName("WebWorker::ModifyProblemReport");
+  bool shouldProceed = theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
   if (shouldProceed)
-    shouldProceed= theGlobalVariables.flagUsingSSLinCurrentConnection;
+    shouldProceed = theGlobalVariables.flagUsingSSLinCurrentConnection;
   if (!shouldProceed)
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
-  std::string mainInput=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
-  std::string fileName=
-  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
-  std::fstream theFile;
+  std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  std::string fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
   std::stringstream out;
-  if (!FileOperations::OpenFileVirtual(theFile, fileName, false, true, false))
+  if (!FileOperations::FileExistsVirtualCustomizedReadOnly(fileName, &out))
+  { out << "<b>File " << fileName << " does not appear to exist. </b>";
+    return out.str();
+  }
+  std::fstream theFile;
+  if (!FileOperations::OpenFileVirtualCustomizedWriteOnly(theFile, fileName, false, true, false, &out))
   { out << "<b><span style=\"color:red\">Failed to open file: " << fileName << ". </span></b>";
     return out.str();
   }
@@ -4033,129 +4036,129 @@ int WebWorker::ServeClient()
   if (theUser.flagMustLogin)
     this->errorLogin=argumentProcessingFailureComments.str();
   if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.flagLoggedIn)
-    if (theGlobalVariables.GetWebInput("spoofHostName")!="")
+    if (theGlobalVariables.GetWebInput("spoofHostName") != "")
     { theGlobalVariables.hostNoPort=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("spoofHostName"), false);
       theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", theGlobalVariables.hostNoPort);
     }
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-      theGlobalVariables.userCalculatorRequestType=="database")
+      theGlobalVariables.userCalculatorRequestType == "database")
     return this->ProcessDatabase();
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-           theGlobalVariables.userCalculatorRequestType=="databaseOneEntry")
+           theGlobalVariables.userCalculatorRequestType == "databaseOneEntry")
     return this->ProcessDatabaseOneEntry();
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-           theGlobalVariables.userCalculatorRequestType=="databaseModifyEntry")
+           theGlobalVariables.userCalculatorRequestType == "databaseModifyEntry")
     return this->ProcessDatabaseModifyEntry();
-  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType=="accounts")
+  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accounts")
     return this->ProcessAccounts();
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
-           theGlobalVariables.userCalculatorRequestType=="navigation")
+           theGlobalVariables.userCalculatorRequestType == "navigation")
     return this->ProcessNavigation();
-  else if (theGlobalVariables.userCalculatorRequestType=="calculatorExamples")
+  else if (theGlobalVariables.userCalculatorRequestType == "calculatorExamples")
     return this->ProcessCalculatorExamples();
-  else if (theGlobalVariables.GetWebInput("error")!="")
+  else if (theGlobalVariables.GetWebInput("error") != "")
     stOutput << "<div style=\"text-align:center\">"
     << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), false)
     << "</div>";
-  else if (this->errorLogin!="")
+  else if (this->errorLogin != "")
     stOutput << this->errorLogin;
-  else if (theGlobalVariables.userCalculatorRequestType=="toggleMonitoring")
+  else if (theGlobalVariables.userCalculatorRequestType == "toggleMonitoring")
     return this->ProcessToggleMonitoring();
-  else if (theGlobalVariables.userCalculatorRequestType=="status")
+  else if (theGlobalVariables.userCalculatorRequestType == "status")
     return this->ProcessServerStatus();
-  else if (theGlobalVariables.userCalculatorRequestType=="statusPublic")
+  else if (theGlobalVariables.userCalculatorRequestType == "statusPublic")
     return this->ProcessServerStatusPublic();
-  if (theGlobalVariables.userCalculatorRequestType=="monitor")
+  if (theGlobalVariables.userCalculatorRequestType == "monitor")
     return this->ProcessMonitor();
-  else if (theGlobalVariables.userCalculatorRequestType=="pause" && theGlobalVariables.flagAllowProcessMonitoring)
+  else if (theGlobalVariables.userCalculatorRequestType == "pause" && theGlobalVariables.flagAllowProcessMonitoring)
     return this->ProcessPauseWorker();
-  else if (theGlobalVariables.userCalculatorRequestType=="indicator" && theGlobalVariables.flagAllowProcessMonitoring)
+  else if (theGlobalVariables.userCalculatorRequestType == "indicator" && theGlobalVariables.flagAllowProcessMonitoring)
     return this->ProcessComputationIndicator();
   //The following line is NOT ALLOWED:
   //this->parent->ReleaseNonActiveWorkers();
   //Reason: the architecture changed, now multiple requests
   //can be piped through one worker.
-  else if (theGlobalVariables.userCalculatorRequestType=="setProblemData")
+  else if (theGlobalVariables.userCalculatorRequestType == "setProblemData")
     return this->ProcessSetProblemDatabaseInfo();
-  else if (theGlobalVariables.userCalculatorRequestType=="changePassword")
+  else if (theGlobalVariables.userCalculatorRequestType == "changePassword")
     return this->ProcessChangePassword();
-  else if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage" ||
-           theGlobalVariables.userCalculatorRequestType=="activateAccount")
+  else if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
+           theGlobalVariables.userCalculatorRequestType == "activateAccount")
     return this->ProcessChangePasswordPage();
-  else if (theGlobalVariables.userCalculatorRequestType=="signUp")
+  else if (theGlobalVariables.userCalculatorRequestType == "signUp")
     return this->ProcessSignUP();
-  else if (theGlobalVariables.userCalculatorRequestType=="signUpPage")
+  else if (theGlobalVariables.userCalculatorRequestType == "signUpPage")
     return this->ProcessSignUpPage();
-  else if (theGlobalVariables.userCalculatorRequestType=="forgotLogin")
+  else if (theGlobalVariables.userCalculatorRequestType == "forgotLogin")
     return this->ProcessForgotLogin();
-  else if (theGlobalVariables.userCalculatorRequestType=="forgotLoginPage")
+  else if (theGlobalVariables.userCalculatorRequestType == "forgotLoginPage")
     return this->ProcessForgotLoginPage();
-  else if (theGlobalVariables.userCalculatorRequestType=="login")
+  else if (theGlobalVariables.userCalculatorRequestType == "login")
     return this->ProcessLoginPage();
-  else if (theGlobalVariables.userCalculatorRequestType=="logout")
+  else if (theGlobalVariables.userCalculatorRequestType == "logout")
     return this->ProcessLogout();
-  else if ((theGlobalVariables.userCalculatorRequestType=="addEmails"||
-            theGlobalVariables.userCalculatorRequestType=="addUsers") &&
+  else if ((theGlobalVariables.userCalculatorRequestType == "addEmails"||
+            theGlobalVariables.userCalculatorRequestType == "addUsers") &&
             theGlobalVariables.flagLoggedIn)
     return this->ProcessAddUserEmails();
-  else if (theGlobalVariables.userCalculatorRequestType=="setTeacher"
+  else if (theGlobalVariables.userCalculatorRequestType == "setTeacher"
            && theGlobalVariables.flagLoggedIn)
     return this->ProcessAssignTeacherToSection();
-  else if ((theGlobalVariables.userCalculatorRequestType=="submitProblem" ||
-            theGlobalVariables.userCalculatorRequestType=="submitExercise")
+  else if ((theGlobalVariables.userCalculatorRequestType == "submitProblem" ||
+            theGlobalVariables.userCalculatorRequestType == "submitExercise")
             && theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitProblem();
-  else if (theGlobalVariables.userCalculatorRequestType=="scores" && theGlobalVariables.flagLoggedIn)
+  else if (theGlobalVariables.userCalculatorRequestType == "scores" && theGlobalVariables.flagLoggedIn)
     return this->ProcessScores();
-  else if (theGlobalVariables.userCalculatorRequestType=="scoresInCoursePage" && theGlobalVariables.flagLoggedIn)
+  else if (theGlobalVariables.userCalculatorRequestType == "scoresInCoursePage" && theGlobalVariables.flagLoggedIn)
     return this->ProcessScoresInCoursePage();
-  else if (theGlobalVariables.UserGuestMode() && theGlobalVariables.userCalculatorRequestType=="submitExerciseNoLogin")
+  else if (theGlobalVariables.UserGuestMode() && theGlobalVariables.userCalculatorRequestType == "submitExerciseNoLogin")
     return this->ProcessSubmitProblem();
-  else if ((theGlobalVariables.userCalculatorRequestType=="problemGiveUp" &&
+  else if ((theGlobalVariables.userCalculatorRequestType == "problemGiveUp" &&
             theGlobalVariables.flagLoggedIn) ||
-            theGlobalVariables.userCalculatorRequestType== "problemGiveUpNoLogin")
+            theGlobalVariables.userCalculatorRequestType == "problemGiveUpNoLogin")
     return this->ProcessProblemGiveUp();
-  else if ((theGlobalVariables.userCalculatorRequestType=="problemSolution" &&
+  else if ((theGlobalVariables.userCalculatorRequestType == "problemSolution" &&
             theGlobalVariables.flagLoggedIn) ||
-            theGlobalVariables.userCalculatorRequestType== "problemSolutionNoLogin")
+            theGlobalVariables.userCalculatorRequestType == "problemSolutionNoLogin")
     return this->ProcessProblemSolution();
-  else if ((theGlobalVariables.userCalculatorRequestType=="submitProblemPreview" ||
-            theGlobalVariables.userCalculatorRequestType=="submitExercisePreview" ) &&
+  else if ((theGlobalVariables.userCalculatorRequestType == "submitProblemPreview" ||
+            theGlobalVariables.userCalculatorRequestType == "submitExercisePreview" ) &&
            theGlobalVariables.flagLoggedIn)
     return this->ProcessSubmitProblemPreview();
-  else if (theGlobalVariables.userCalculatorRequestType=="submitExercisePreviewNoLogin" &&
+  else if (theGlobalVariables.userCalculatorRequestType == "submitExercisePreviewNoLogin" &&
            theGlobalVariables.UserGuestMode())
     return this->ProcessSubmitProblemPreview();
-  else if ((theGlobalVariables.userCalculatorRequestType=="scoredQuiz" ||
-            theGlobalVariables.userCalculatorRequestType=="exercise"))
+  else if ((theGlobalVariables.userCalculatorRequestType == "scoredQuiz" ||
+            theGlobalVariables.userCalculatorRequestType == "exercise"))
   { if (theGlobalVariables.UserSecureNonAdminOperationsAllowed())
       return this->ProcessExamPage();
     else
       return this->ProcessLoginPage();
-  } else if (theGlobalVariables.userCalculatorRequestType=="exerciseNoLogin")
+  } else if (theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin")
     return this->ProcessExamPage();
-  else if (theGlobalVariables.userCalculatorRequestType=="template" ||
-           theGlobalVariables.userCalculatorRequestType=="templateNoLogin")
+  else if (theGlobalVariables.userCalculatorRequestType == "template" ||
+           theGlobalVariables.userCalculatorRequestType == "templateNoLogin")
     return this->ProcessTemplate();
-  else if (theGlobalVariables.userCalculatorRequestType=="topicTable")
+  else if (theGlobalVariables.userCalculatorRequestType == "topicTable")
     return this->ProcessTopicTable();
-  else if (theGlobalVariables.userCalculatorRequestType=="editPage")
+  else if (theGlobalVariables.userCalculatorRequestType == "editPage")
     return this->ProcessEditPage();
-  else if (theGlobalVariables.userCalculatorRequestType=="modifyPage")
+  else if (theGlobalVariables.userCalculatorRequestType == "modifyPage")
     return this->ProcessModifyPage();
-  else if (theGlobalVariables.userCalculatorRequestType=="slidesFromSource")
+  else if (theGlobalVariables.userCalculatorRequestType == "slidesFromSource")
     return this->ProcessSlidesFromSource();
-  else if (theGlobalVariables.userCalculatorRequestType=="slidesSource")
+  else if (theGlobalVariables.userCalculatorRequestType == "slidesSource")
     return this->ProcessSlidesSource();
-  else if (theGlobalVariables.userCalculatorRequestType=="clonePage")
+  else if (theGlobalVariables.userCalculatorRequestType == "clonePage")
     return this->ProcessClonePage();
-  else if (theGlobalVariables.userCalculatorRequestType=="calculator")
+  else if (theGlobalVariables.userCalculatorRequestType == "calculator")
     return this->ProcessCalculator();
-  else if (theGlobalVariables.userCalculatorRequestType=="compute")
+  else if (theGlobalVariables.userCalculatorRequestType == "compute")
     return this->ProcessCompute();
-  else if (theGlobalVariables.userCalculatorRequestType=="selectCourse")
+  else if (theGlobalVariables.userCalculatorRequestType == "selectCourse")
     return this->ProcessSelectCourse();
-  else if (theGlobalVariables.userCalculatorRequestType=="about")
+  else if (theGlobalVariables.userCalculatorRequestType == "about")
   { return this->ProcessAbout();
   }
 //  stOutput << "<html><body> got to here pt 2";
@@ -5827,6 +5830,8 @@ void WebServer::InitializeGlobalVariables()
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/coursesavailable/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("problemtemplates/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/problemtemplates/");
+  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("DefaultProblemLocation/");
+  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/DefaultProblemLocation/");
 }
 
 int main(int argc, char **argv)

@@ -373,21 +373,21 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 
 bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, const std::string& inputRandomSeed)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
-  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomized
+  if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
         (this->fileName, this->RelativePhysicalFileNameWithFolder, &comments))
   { comments << "Failed to get physical file name from " << this->fileName << ". ";
     return false;
   }
   (void) doLoadDatabase;
-  if (!FileOperations::LoadFileToStringVirtualCustomized(this->fileName, this->inputHtml, &comments))
+  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(this->fileName, this->inputHtml, &comments))
   { comments << "<b>Failed to open: " << this->fileName
-      << " with computed file name: " << this->RelativePhysicalFileNameWithFolder << "</b> ";
+    << " with computed file name: " << this->RelativePhysicalFileNameWithFolder << "</b> ";
     return false;
   }
   //stOutput << "Debug: got to here pt1";
-  this->flagIsForReal=theGlobalVariables.UserRequestRequiresLoadingRealExamData();
+  this->flagIsForReal = theGlobalVariables.UserRequestRequiresLoadingRealExamData();
 #ifdef MACRO_use_MySQL
-  this->topicListFileName=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
+  this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
   //stOutput << "Debug: got to here pt2";
   //this->theProblemData.CheckConsistency();
   //stOutput << "Debug: got to here pt3";
@@ -400,8 +400,8 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, co
 
   //stOutput << "DEBUG: flagIsForReal: " << this->flagIsForReal;
   if (!this->flagIsForReal)
-  { std::string randString=inputRandomSeed;
-    if (randString!="")
+  { std::string randString = inputRandomSeed;
+    if (randString != "")
     { std::stringstream randSeedStream(randString);
       //stOutput << "radSeedStream: " << randString;
       randSeedStream >> this->theProblemData.randomSeed;
@@ -415,7 +415,7 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, co
 
 std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItem");
-  double startTime=theGlobalVariables.GetElapsedSeconds();
+  double startTime = theGlobalVariables.GetElapsedSeconds();
 //  this->theProblemData.CheckConsistency();
   this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore, desiredRandomSeed);
 //  this->theProblemData.CheckConsistency();
@@ -471,7 +471,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
 void CalculatorHTML::LoadFileNames()
 { this->fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
   this->courseHome = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-  this->topicListFileName=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
+  this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
 }
 
 void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed)
@@ -499,7 +499,7 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
     << theGlobalVariables.ToStringNavigation()
     << "</calculatorNavigation>";
     this->FigureOutCurrentProblemList(this->comments);
-    this->flagIsExamProblem=true;
+    this->flagIsExamProblem = true;
     this->comments << "<problemNavigation>"
     << this->ToStringProblemNavigation()
     << "</problemNavigation>";
@@ -543,16 +543,16 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   } else
   { requestTypeSubmit  = "submitExercise";
     requestTypePreview = "submitExercisePreview";
-    submitRandomSeed=true;
+    submitRandomSeed = true;
   }
   if (!theGlobalVariables.UserGuestMode())
-    requestGiveUp="problemGiveUp";
+    requestGiveUp = "problemGiveUp";
   else
-    requestGiveUp="problemGiveUpNoLogin";
+    requestGiveUp = "problemGiveUpNoLogin";
   if (!theGlobalVariables.UserGuestMode())
-    requestSolution="problemSolution";
+    requestSolution = "problemSolution";
   else
-    requestSolution="problemSolutionNoLogin";
+    requestSolution = "problemSolutionNoLogin";
   out
   << "<script type=\"text/javascript\"> \n"
   << "var JavascriptInsertionAlreadyCalled;\n"
@@ -671,7 +671,7 @@ void CalculatorHTML::InterpretGenerateLink(SyntacticElementHTML& inputOutput)
 //  stOutput << "Figuring out current prob list ...";
 //  std::stringstream notUsed;
 //  this->FigureOutCurrentProblemList(notUsed);
-  inputOutput.interpretedCommand= this->ToStringProblemInfo(this->CleanUpFileName(inputOutput.content));
+  inputOutput.interpretedCommand = this->ToStringProblemInfo(this->CleanUpFileName(inputOutput.content));
 }
 
 std::string CalculatorHTML::ToStringLinkCurrentAdmin
@@ -709,7 +709,7 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin
 std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringLinkFromFileName");
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
-  std::string urledProblem=HtmlRoutines::ConvertStringToURLString(theFileName, false);
+  std::string urledProblem = HtmlRoutines::ConvertStringToURLString(theFileName, false);
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
   << "fileName=" << urledProblem << "&";
   if (theGlobalVariables.UserStudentVieWOn())
@@ -718,11 +718,11 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
       refStreamNoRequest << "studentSection="
       << theGlobalVariables.GetWebInput("studentSection") << "&";
   }
-  if (this->topicListFileName!="")
+  if (this->topicListFileName != "")
     refStreamNoRequest << "topicList=" << this->topicListFileName << "&";
-  if (this->courseHome!="")
+  if (this->courseHome != "")
     refStreamNoRequest << "courseHome=" << this->courseHome << "&";
-  if (theFileName==this->topicListFileName || theFileName==this->courseHome ||
+  if (theFileName == this->topicListFileName || theFileName == this->courseHome ||
       MathRoutines::StringEndsWith(theFileName, ".txt"))
   { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
@@ -753,17 +753,17 @@ std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, 
   out << this->ToStringProblemScoreFull(theFileName);
   out << this->ToStringProblemWeightButton(theFileName);
 #ifdef MACRO_use_MySQL
-  bool problemAlreadySolved=false;
+  bool problemAlreadySolved = false;
   if (this->currentUseR.theProblemData.Contains(theFileName))
-  { ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
-    if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size())
-      problemAlreadySolved=true;
+  { ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
+    if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size())
+      problemAlreadySolved = true;
   }
   out << this->ToStringDeadline(theFileName, problemAlreadySolved, false, false);
 #endif // MACRO_use_MySQL
-  std::string finalStringToDisplay=stringToDisplay;
-  if (finalStringToDisplay=="")
-    finalStringToDisplay= FileOperations::GetFileNameFromFileNameWithPath(theFileName);
+  std::string finalStringToDisplay = stringToDisplay;
+  if (finalStringToDisplay == "")
+    finalStringToDisplay = FileOperations::GetFileNameFromFileNameWithPath(theFileName);
   out << finalStringToDisplay;
   return out.str();
 }
@@ -803,8 +803,8 @@ std::string CalculatorHTML::ToStringExtractedCommands()
   std::stringstream out;
   out << "<hr><b>The commands extracted from the HTML follow.</b><br>";
   out << "<table>";
-  for (int i=0; i<this->theContent.size; i++)
-    if (this->theContent[i].syntacticRole!="")
+  for (int i = 0; i < this->theContent.size; i++)
+    if (this->theContent[i].syntacticRole != "")
       out << "<tr>" << "<td>" << this->theContent[i].ToStringDebug() << "</td>"
       << "</tr>";
     else
@@ -820,7 +820,7 @@ std::string CalculatorHTML::ToStringContent()
   std::stringstream out;
 //  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.ToStringCommaDelimited();
   out << "<hr><b>The extracted commands follow.</b><br>";
-  for (int i=0; i<this->theContent.size; i++)
+  for (int i = 0; i < this->theContent.size; i++)
     out << this->theContent[i].ToStringTagAndContent();
   out << "<hr><b>The html read follows.</b><br>" << this->inputHtml << "<hr>";
   return out.str();
@@ -836,16 +836,16 @@ void SyntacticElementHTML::resetAllExceptContent()
 }
 
 std::string SyntacticElementHTML::ToStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose)
-{ if (this->tag=="" || this->flagUseMathSpan==false)
+{ if (this->tag == "" || this->flagUseMathSpan == false)
     return "";  
   std::stringstream out;
-  if (overrideTagIfNonEmpty=="")
+  if (overrideTagIfNonEmpty == "")
     out << "<" << this->tag;
   else
     out << "<" << overrideTagIfNonEmpty;
-  for (int i=0; i<this->tagKeys.size; i++)
+  for (int i = 0; i < this->tagKeys.size; i++)
     out << " " << this->tagKeys[i] << "=\"" << this->tagValues[i] << "\"";
-  for (int i=0; i<this->defaultKeysIfMissing.size; i++)
+  for (int i = 0; i < this->defaultKeysIfMissing.size; i++)
     if (!this->tagKeys.Contains(this->defaultKeysIfMissing[i]))
       out << " " << this->defaultKeysIfMissing[i] << "=\"" << this->defaultValuesIfMissing[i] << "\"";
   if (this->tagKeysWithoutValue.size>0)
@@ -857,9 +857,9 @@ std::string SyntacticElementHTML::ToStringOpenTag(const std::string& overrideTag
 }
 
 std::string SyntacticElementHTML::ToStringCloseTag(const std::string& overrideTagIfNonEmpty)
-{ if (this->tag=="" || this->flagUseMathSpan==false)
+{ if (this->tag == "" || this->flagUseMathSpan == false)
     return "";
-  if (overrideTagIfNonEmpty=="")
+  if (overrideTagIfNonEmpty == "")
     return "</" + this->tag + ">";
   else
     return "</" + overrideTagIfNonEmpty + ">";
@@ -867,15 +867,15 @@ std::string SyntacticElementHTML::ToStringCloseTag(const std::string& overrideTa
 
 std::string SyntacticElementHTML::ToStringTagAndContent()
 { MacroRegisterFunctionWithName("SyntacticElementHTML::ToStringTagAndContent");
-  if (this->syntacticRole=="")
+  if (this->syntacticRole == "")
     return this->content;
   std::stringstream out;
   out << this->ToStringOpenTag("") + this->content + this->ToStringCloseTag("");
-  if (this->children.size>0)
+  if (this->children.size > 0)
   { out << "[";
-    for (int i=0; i< this->children.size; i++)
+    for (int i = 0; i < this->children.size; i++)
     { out << this->children[i].ToStringDebug();
-      if (i!=this->children.size-1)
+      if (i != this->children.size-1)
         out << ", ";
     }
     out << "]";
@@ -885,7 +885,7 @@ std::string SyntacticElementHTML::ToStringTagAndContent()
 
 std::string SyntacticElementHTML::ToStringDebug()
 { MacroRegisterFunctionWithName("SyntacticElementHTML::ToString");
-  if (this->syntacticRole=="")
+  if (this->syntacticRole == "")
     return HtmlRoutines::ConvertStringToHtmlString(this->ToStringTagAndContent(), false);
   std::stringstream out;
   out << "<span style=\"color:green\">";
@@ -897,33 +897,33 @@ std::string SyntacticElementHTML::ToStringDebug()
 
 std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey)const
 { MacroRegisterFunctionWithName("SyntacticElementHTML::GetKeyValue");
-  int theIndex=this->tagKeys.GetIndex(theKey);
-  if (theIndex==-1)
+  int theIndex = this->tagKeys.GetIndex(theKey);
+  if (theIndex == -1)
     return "";
   return this->tagValues[theIndex];
 }
 
 void SyntacticElementHTML::SetKeyValue(const std::string& theKey, const std::string& theValue)
 { MacroRegisterFunctionWithName("SyntacticElementHTML::SetKeyValue");
-  if (this->tagKeys.size!=this->tagValues.size)
+  if (this->tagKeys.size != this->tagValues.size)
     crash << "Programming error: number of keys different from number of values" << crash;
-  int theIndex=this->tagKeys.GetIndex(theKey);
-  if (theIndex==-1)
-  { theIndex=this->tagKeys.size;
+  int theIndex = this->tagKeys.GetIndex(theKey);
+  if (theIndex == -1)
+  { theIndex = this->tagKeys.size;
     this->tagKeys.AddOnTop(theKey);
     this->tagValues.SetSize(this->tagKeys.size);
   }
-  this->tagValues[theIndex]=theValue;
+  this->tagValues[theIndex] = theValue;
 }
 
 std::string SyntacticElementHTML::ToStringInterpretedBody()
-{ if (this->syntacticRole=="")
+{ if (this->syntacticRole == "")
     return this->content;
   if (this->IsInterpretedNotByCalculator())
     return this->interpretedCommand;
   std::stringstream out;
   out << this->ToStringOpenTag("");
-  if (this->interpretedCommand!="")
+  if (this->interpretedCommand != "")
   { if (this->flagUseMathMode)
     { out << "\\( ";
       if (this->flagUseDisplaystyleInMathMode)
@@ -939,71 +939,65 @@ std::string SyntacticElementHTML::ToStringInterpretedBody()
 
 bool SyntacticElementHTML::IsInterpretedNotByCalculator()
 { MacroRegisterFunctionWithName("SyntacticElementHTML::IsInterpretedNotByCalculator");
-  if (this->syntacticRole!="command")
+  if (this->syntacticRole != "command")
     return false;
-  if (this->tag=="answerCalculatorHighlightStart" ||
-      this->tag=="answerCalculatorHighlightFinish"
+  if (this->tag == "answerCalculatorHighlightStart" ||
+      this->tag == "answerCalculatorHighlightFinish"
       )
     return true;
-  std::string tagClass=this->GetKeyValue("class");
+  std::string tagClass = this->GetKeyValue("class");
   return
-  tagClass=="calculatorExamProblem" || tagClass== "calculatorExamIntermediate" ||
-  tagClass=="calculatorAnswer" || tagClass=="calculatorManageClass" ||
-  tagClass=="generateTopicTable" ||
-  tagClass=="calculatorJavascript" ||
-  tagClass=="accountInformationLinks" ||
-  tagClass=="generateTableOfContents" ||
-  tagClass== "calculatorNavigationHere" ||
-  tagClass== "calculatorProblemNavigationHere"||
-  tagClass== "calculatorEditPageHere" ||
-
-//  tagClass=="htmlStart" || tagClass=="htmlFinish" ||
-//  tagClass=="bodyStart" || tagClass=="bodyFinish" ||
-//  tagClass=="headStart" || tagClass=="headFinish" ||
+  tagClass == "calculatorExamProblem" || tagClass == "calculatorExamIntermediate" ||
+  tagClass == "calculatorAnswer" || tagClass =="calculatorManageClass" ||
+  tagClass == "generateTopicTable" ||
+  tagClass == "calculatorJavascript" ||
+  tagClass == "accountInformationLinks" ||
+  tagClass == "generateTableOfContents" ||
+  tagClass == "calculatorNavigationHere" ||
+  tagClass == "calculatorProblemNavigationHere"||
+  tagClass == "calculatorEditPageHere" ||
   this->IsAnswerElement(0)
   ;
 }
 
 bool SyntacticElementHTML::IsInterpretedByCalculatorDuringProblemGeneration()
-{ if (this->syntacticRole!="command")
+{ if (this->syntacticRole != "command")
     return false;
-  std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculator" || tagClass=="calculatorHidden" ||
-  tagClass=="calculatorShowToUserOnly" ;
+  std::string tagClass = this->GetKeyValue("class");
+  return tagClass == "calculator" || tagClass == "calculatorHidden" ||
+  tagClass == "calculatorShowToUserOnly" ;
 }
 
 bool SyntacticElementHTML::IsInterpretedByCalculatorDuringSubmission()
-{ if (this->syntacticRole!="command")
+{ if (this->syntacticRole != "command")
     return false;
-  std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculator" || tagClass=="calculatorHidden"
-;
+  std::string tagClass = this->GetKeyValue("class");
+  return tagClass == "calculator" || tagClass == "calculatorHidden";
 }
 
 bool SyntacticElementHTML::IsAnswer()
-{ if (this->syntacticRole!="command")
+{ if (this->syntacticRole != "command")
     return false;
-  return this->GetKeyValue("class")=="calculatorAnswer";
+  return this->GetKeyValue("class") == "calculatorAnswer";
 }
 
 bool SyntacticElementHTML::IsCalculatorCommand()
-{ if (this->syntacticRole!="command")
+{ if (this->syntacticRole != "command")
     return false;
-  return this->GetKeyValue("class")=="calculator";
+  return this->GetKeyValue("class") == "calculator";
 }
 
 bool SyntacticElementHTML::IsCalculatorHidden()
-{ if (this->syntacticRole!="command")
+{ if (this->syntacticRole != "command")
     return false;
-  return this->GetKeyValue("class")=="calculatorHidden";
+  return this->GetKeyValue("class") == "calculatorHidden";
 }
 
 bool SyntacticElementHTML::IsHidden()
-{ if (this->syntacticRole!="command")
+{ if (this->syntacticRole != "command")
     return false;
-  std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculatorHidden" || tagClass== "calculatorCommentsBeforeInterpretation"
-;
+  std::string tagClass = this->GetKeyValue("class");
+  return tagClass == "calculatorHidden" || tagClass == "calculatorCommentsBeforeInterpretation";
 }
 
 bool SyntacticElementHTML::IsSolution()
@@ -3485,7 +3479,7 @@ bool TopicElement::LoadTopicBundle
   { errorStream << "The file name " << fileName << " is not a valid topic bundle file name. ";
     return false;
   }
-  if (!FileOperations::LoadFileToStringVirtual(fileName, newTopicBundles, false, false, &errorStream))
+  if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly(fileName, newTopicBundles, &errorStream))
   { errorStream << "Could not open topic bundle file. ";
     return false;
   }
@@ -3629,7 +3623,7 @@ void TopicElement::GetTopicList
           errorStream << "<br>" << owner.calculatorTopicElementNames[j];
         errorStream << "<br>You need to include the column character  <b>:</b> "
         << "immediately after the data labels. The data entries are terminated by new line. "
-        << " Here is a correctly entered example:"
+        << "Here is a correctly entered example:"
         << "<br>Title: Complex multiplication"
         << "<br>Problem: DefaultProblemLocation/Complex-multiplication-z-times-w.html"
         << "<br>SlidesSource: freecalc/modules/complex-numbers/complex-numbers-addition-multiplication-example-1"
@@ -3672,9 +3666,12 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
   if (this->theTopicS.size()!=0)
     return true;
   if (this->topicListContent=="")
-    if (!FileOperations::LoadFileToStringVirtual
-        (this->topicListFileName, this->topicListContent, false, false, &comments))
+    if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly
+        (this->topicListFileName, this->topicListContent, &comments))
+    { comments << "Failed to load the topic list associated with this course. "
+      << "Go to  ``Select course'' from the menu to see a list of available courses. ";
       return false;
+    }
   if (this->topicListContent=="")
     return false;
   TopicElement::GetTopicList(this->topicListContent, this->theTopicS, *this);

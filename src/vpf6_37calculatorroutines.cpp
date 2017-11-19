@@ -20,7 +20,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation");
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return theCommands << "Automated tests available to logged-in admins only. ";
-  if (input.size()!=4)
+  if (input.size() != 4)
     return theCommands
     << "I expected three arguments: "
     << "1) first problem number to test (1 or less= start at the beginning) "
@@ -29,9 +29,9 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   std::stringstream out;
   ProgressReport theReport;
   List<std::string> theFileNames, theFileTypes;
-  int numDesiredTests=0;
-  int numSamples=1;
-  int firstTestToRun=1;
+  int numDesiredTests = 0;
+  int numSamples = 1;
+  int firstTestToRun = 1;
   input[1].IsSmallInteger(&firstTestToRun);
   input[2].IsSmallInteger(&numDesiredTests);
   input[3].IsSmallInteger(&numSamples);
@@ -49,25 +49,25 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   << "<th>AnswerGeneration</th>"
   << "<th>Accepting built in answer?</th>"
   << "</tr>";
-  if (numDesiredTests<=0)
-    numDesiredTests=theFileNames.size;
-  if (firstTestToRun<1)
-    firstTestToRun=1;
-  int numInterpretations=0;
-  int totalToInterpret=0;
-  for (int i=0; i< theFileNames.size; i++)
-    if (theFileTypes[i]==".html")
+  if (numDesiredTests <= 0)
+    numDesiredTests = theFileNames.size;
+  if (firstTestToRun < 1)
+    firstTestToRun = 1;
+  int numInterpretations = 0;
+  int totalToInterpret = 0;
+  for (int i = 0; i < theFileNames.size; i++)
+    if (theFileTypes[i] == ".html")
       totalToInterpret++;
-  totalToInterpret= MathRoutines::Minimum(numDesiredTests, totalToInterpret);
+  totalToInterpret = MathRoutines::Minimum(numDesiredTests, totalToInterpret);
   MapLisT<std::string, std::string, MathRoutines::hashString>&
-  globalKeys= theGlobalVariables.webArguments;
-  for (int i=0; i< theFileNames.size; i++)
-  { if (numInterpretations>=numDesiredTests)
+  globalKeys = theGlobalVariables.webArguments;
+  for (int i = 0; i < theFileNames.size; i++)
+  { if (numInterpretations >= numDesiredTests)
       break;
-    if (theFileTypes[i]!=".html")
+    if (theFileTypes[i] != ".html")
       continue;
     numInterpretations++;
-    if (numInterpretations<firstTestToRun)
+    if (numInterpretations < firstTestToRun)
       continue;
     std::stringstream reportStream;
     reportStream << "Interpreting file "
@@ -81,9 +81,9 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     theReport.Report(reportStream.str());
     CalculatorHTML theProblem;
     std::stringstream problemComments;
-    theProblem.fileName="DefaultProblemLocation/" + theFileNames[i];
-    bool isGoodLoad=theProblem.LoadMe(false, problemComments, randomSeedCurrent);
-    bool isGoodInterpretation=false;
+    theProblem.fileName = "DefaultProblemLocation/" + theFileNames[i];
+    bool isGoodLoad = theProblem.LoadMe(false, problemComments, randomSeedCurrent);
+    bool isGoodInterpretation = false;
     out << "<tr>";
 //    out << "<td>DEBUG: Random seed at start: "
 //    << theProblem.theProblemData.randomSeed;
@@ -121,29 +121,29 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
       break;
     } else
       out << "<td><span style=\"color:green\">Success</span></td>";
-    bool answerGenerated=false;
-    bool answersWork=false;
+    bool answerGenerated = false;
+    bool answersWork = false;
     std::string answerGeneration;
     std::string solutionReport;
-    for (int j=0; j<theProblem.theProblemData.theAnswers.size(); j++)
+    for (int j = 0; j < theProblem.theProblemData.theAnswers.size(); j++)
     { std::string currentAnswer;
-      std::string currentKey="calculatorAnswer"+
+      std::string currentKey = "calculatorAnswer"+
       theProblem.theProblemData.theAnswers[j].answerId;
       theGlobalVariables.SetWebInpuT(currentKey, "1");
       theGlobalVariables.SetWebInpuT("fileName", theProblem.fileName);
-      answerGeneration+=HtmlInterpretation::GetAnswerOnGiveUp
+      answerGeneration += HtmlInterpretation::GetAnswerOnGiveUp
       (randomSeedCurrent, &currentAnswer, &answerGenerated) + "<hr>";
       if (!answerGenerated)
         break;
       theGlobalVariables.SetWebInpuT(currentKey, HtmlRoutines::ConvertStringToURLString(currentAnswer, false));
-      solutionReport+=
+      solutionReport +=
       HtmlInterpretation::SubmitProblem(randomSeedCurrent, &answersWork, false) + "<hr>";
       if (!answersWork)
         break;
       globalKeys.RemoveKey(currentKey);
     }
     if (!answerGenerated)
-    { if (theProblem.theProblemData.theAnswers.size()>0)
+    { if (theProblem.theProblemData.theAnswers.size() > 0)
       { out << "<td><span style=\"color:red\"><b>Failure.</b></span>";
         out << "</td>"
         << "<td>"
@@ -156,7 +156,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     } else
       out << "<td><span style=\"color:green\">Success</span></td>";
     if (!answersWork)
-    { if (theProblem.theProblemData.theAnswers.size()>0)
+    { if (theProblem.theProblemData.theAnswers.size() > 0)
       { out << "<td><span style=\"color:red\"><b>Failure.</b></span>";
         //<< "DEBUG: " << theProblem.theProblemData.theAnswers.size() << " answers."//;
         out << "</td></tr>";
@@ -165,7 +165,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
         out << "<td>-</td>";
     } else
       out << "<td><span style=\"color:green\">Success</span></td>";
-    if (numInterpretations<=numSamples)
+    if (numInterpretations <= numSamples)
     { out << "<td><b>Problem</b><hr>" << theProblem.outputHtmlBodyNoTag
       << "</td>"
       ;

@@ -555,7 +555,7 @@ std::string HtmlInterpretation::GetSelectCourse()
   ("coursesavailable/default.txt", temp, &commentsOnFailure);
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly
       ("coursesavailable/default.txt", theTopicFile, &commentsOnFailure))
-  { out << "<b>Failed to fetch available courses from coursesavailable/default.txt</b>.";
+  { out << "<b>Failed to fetch available courses from coursesavailable/default.txt</b>. " << commentsOnFailure.str();
     out << " </body></html>";
     return out.str();
   }
@@ -797,7 +797,8 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "<textarea cols=\"140\", rows=\"2\">"
   << theFile.ToStringCalculatorProblemSourceFromFileName(theFile.fileName) << "</textarea>";
   outBody << "<br>\n";
-  outBody << "Ctrl+S saves your changes. Edit bravely, files are stored in a svn history tree. ";
+  outBody << "Ctrl+S saves your changes. Edit bravely, you are not overwriting the defaults, "
+  << "but only editing your (and your students') version. ";
 //  outBody << "<br>\n";
   outBody
   << "Many thanks to the <a href=\"https://ace.c9.io\">ace editor</a> project. <br>"

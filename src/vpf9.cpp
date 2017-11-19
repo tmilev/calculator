@@ -393,26 +393,26 @@ void HtmlRoutines::FormatCPPSourceCode(const std::string& FileName)
     crash << "Can't open file for code formatting: something is wrong." << crash;
   fileIn.clear(std::ios::goodbit);
   fileIn.seekg(0, std::ios_base::end);
-  int theSize= fileIn.tellg();
+  int theSize = fileIn.tellg();
   fileIn.seekg(0);
   List<char> theBuffer;
-  theBuffer.SetSize(theSize*2+1);
-  fileIn.read(theBuffer.TheObjects, theSize*2);
-  std::string nameFileOut= FileName;
+  theBuffer.SetSize(theSize * 2 + 1);
+  fileIn.read(theBuffer.TheObjects, theSize * 2);
+  std::string nameFileOut = FileName;
   nameFileOut.append(".new");
   FileOperations::OpenFileCreateIfNotPresentVirtual(fileOut, "output/"+nameFileOut, false, true, false);
-  for (int i=0; i<theSize; i++)
-  { char lookAhead= (i< theSize-1)? theBuffer[i+1] : ' ';
+  for (int i = 0; i < theSize; i++)
+  { char lookAhead = (i < theSize - 1) ? theBuffer[i + 1] : ' ';
     switch(theBuffer[i])
     { case'\t': fileOut << "  "; break;
       case ',':
         fileOut << theBuffer[i];
-        if (lookAhead!=' ' && lookAhead!='\n' && lookAhead!='\'')
+        if (lookAhead != ' ' && lookAhead != '\n' && lookAhead != '\'')
           fileOut << " ";
         break;
       case ';':
         fileOut << theBuffer[i];
-        if (lookAhead!=' ' && lookAhead!='\n' && lookAhead!='\'')
+        if (lookAhead != ' ' && lookAhead != '\n' && lookAhead != '\'')
           fileOut << " ";
         break;
       default:  fileOut << theBuffer[i]; break;
@@ -433,17 +433,17 @@ bool FileOperations::IsFolderUnsecure(const std::string& theFolderName)
 
 std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileName, std::string* outputFileNameNoExtension)
 { MacroRegisterFunctionWithName("FileOperations::GetFileExtensionWithDot");
-  if (theFileName=="" || theFileName.size()<=0)
+  if (theFileName == "" || theFileName.size() <= 0)
     return "";
-  if (&theFileName==outputFileNameNoExtension)
-  { std::string theCopy=theFileName;
+  if (&theFileName == outputFileNameNoExtension)
+  { std::string theCopy = theFileName;
     return FileOperations::GetFileExtensionWithDot(theCopy, outputFileNameNoExtension);
   }
 //  std::cout << "file name size: " << theFileName.size() ;
-  for (int i=(signed) theFileName.size()-1; i>=0; i--)
-    if (theFileName[i]=='.')
-    { if (outputFileNameNoExtension!=0)
-        *outputFileNameNoExtension=theFileName.substr(0,i);
+  for (int i = (signed) theFileName.size() - 1; i >= 0; i--)
+    if (theFileName[i] == '.')
+    { if (outputFileNameNoExtension != 0)
+        *outputFileNameNoExtension = theFileName.substr(0, i);
       return theFileName.substr(i, std::string::npos);
     }
   return "";
@@ -452,14 +452,14 @@ std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileNa
 std::string FileOperations::ConvertStringToLatexFileName(const std::string& input)
 { MacroRegisterFunctionWithName("FileOperations::ConvertStringToLatexFileName");
   std::stringstream out;
-  for (unsigned i=0; i<input.size(); i++)
+  for (unsigned i = 0; i < input.size(); i++)
     if (MathRoutines::isADigit(input[i]) || MathRoutines::isALatinLetter(input[i]))
       out << input[i];
-    else if (input[i]==' ' || input[i]==':')
+    else if (input[i] == ' ' || input[i] == ':')
       out << "_";
     else
       out << "_" << (int) input[i];
-  std::string result=out.str();
+  std::string result = out.str();
   MathRoutines::StringTrimToLength(result, 220);
   return result;
 }
@@ -467,12 +467,12 @@ std::string FileOperations::ConvertStringToLatexFileName(const std::string& inpu
 std::string FileOperations::ConvertStringToEscapedStringFileNameSafe(const std::string& input)
 { MacroRegisterFunctionWithName("FileOperations::ConvertStringToEscapedStringFileNameSafe");
   std::stringstream out;
-  for (unsigned i=0; i<input.size(); i++)
-    if (input[i]==' ')
+  for (unsigned i = 0; i < input.size(); i++)
+    if (input[i] == ' ')
       out << " ";
-    else if (input[i]=='"')
+    else if (input[i] == '"')
       out << "\\\"";
-    else if (input[i]=='\\')
+    else if (input[i] == '\\')
       out << "\\\\";
     else out << input[i];
   return out.str();
@@ -482,32 +482,32 @@ bool FileOperations::IsOKfileNameVirtual
 (const std::string& theFileName, bool accessSensitiveFolders, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("FileOperations::IsOKfileNameVirtual");
   (void) accessSensitiveFolders;
-  std::string theFileNameNoPath=FileOperations::GetFileNameFromFileNameWithPath(theFileName);
-  std::string theFilePath=FileOperations::GetPathFromFileNameWithPath(theFileName);
+  std::string theFileNameNoPath = FileOperations::GetFileNameFromFileNameWithPath(theFileName);
+  std::string theFilePath = FileOperations::GetPathFromFileNameWithPath(theFileName);
 //  std::cout << "Calling IsOKfileNameVirtual, theFilePath: "
 //  << theFilePath << "\ntheFileNameNoPath: " << theFileNameNoPath << "\n";
-  if (theFilePath.size()>10000000)
-  { if (commentsOnFailure!=0)
+  if (theFilePath.size() > 10000000)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "Invalid file name: too long. ";
     return false;
   }
-  if (theFilePath.size()>0)
-    if (theFilePath[0]=='.')
-    { if (commentsOnFailure!=0)
+  if (theFilePath.size() > 0)
+    if (theFilePath[0] == '.')
+    { if (commentsOnFailure != 0)
         *commentsOnFailure << "Invalid file name: " << theFileName << ": starts with dot but not with ./. ";
       return false;
     }
-  for (unsigned i=0; i<theFilePath.size(); i++)
-    if (theFilePath[i]=='.')
-      if (i+1<theFilePath.size())
-        if (theFilePath[i+1]=='.')
-        { if (commentsOnFailure!=0)
+  for (unsigned i = 0; i < theFilePath.size(); i++)
+    if (theFilePath[i] == '.')
+      if (i + 1 < theFilePath.size())
+        if (theFilePath[i + 1] == '.')
+        { if (commentsOnFailure != 0)
            *commentsOnFailure << "Invalid file name: " << theFileName << ": has two consecutive dots. ";
           return false;
         }
-  if (theFileNameNoPath.size()>0)
-    if (theFileNameNoPath[0]=='.')
-    { if (commentsOnFailure!=0)
+  if (theFileNameNoPath.size() > 0)
+    if (theFileNameNoPath[0] == '.')
+    { if (commentsOnFailure != 0)
        *commentsOnFailure << "Invalid file name: " << theFileName << ": starts with dot. ";
       return false;
     }
@@ -516,22 +516,22 @@ bool FileOperations::IsOKfileNameVirtual
 
 bool FileOperations::IsFileNameWithoutDotsAndSlashes(const std::string& theFileName)
 { MacroRegisterFunctionWithName("FileOperations::IsFileNameWithoutDotsAndSlashes");
-  for (unsigned i=0; i<theFileName.size(); i++)
-    if (theFileName[i]=='/' || theFileName[i]=='\\' || theFileName[i]=='.')
+  for (unsigned i = 0; i < theFileName.size(); i++)
+    if (theFileName[i] == '/' || theFileName[i] == '\\' || theFileName[i] == '.')
       return false;
   return true;
 }
 
 List<bool> FileOperations::safeFileCharacters;
 List<bool>& FileOperations::GetSafeFileChars()
-{ if (FileOperations::safeFileCharacters.size==0)
+{ if (FileOperations::safeFileCharacters.size == 0)
   { FileOperations::safeFileCharacters.initFillInObject(256, false);
-    std::string theChars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    theChars+="0123456789";
-    theChars+="@";
-    theChars+="+-/=._%";
-    for (unsigned i=0; i<theChars.size(); i++)
-      FileOperations::safeFileCharacters[ ((unsigned char)theChars[i])]=true;
+    std::string theChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    theChars += "0123456789";
+    theChars += "@";
+    theChars += "+-/=._%";
+    for (unsigned i = 0; i < theChars.size(); i++)
+      FileOperations::safeFileCharacters[ ((unsigned char)theChars[i])] = true;
   }
   return FileOperations::safeFileCharacters;
 }
@@ -539,13 +539,13 @@ List<bool>& FileOperations::GetSafeFileChars()
 bool FileOperations::IsFileNameSafeForSystemCommands(const std::string& theFileName, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("FileOperations::IsFileNameSafeForSystemCommands");
   const unsigned maxAllowedFileNameSize=1000;
-  if (theFileName.size()>maxAllowedFileNameSize)
+  if (theFileName.size() > maxAllowedFileNameSize)
   { if (commentsOnFailure!=0)
       *commentsOnFailure << "File name has length: " << theFileName.size()
       << "; max allowed file name size is: " << maxAllowedFileNameSize;
     return false;
   }
-  for (unsigned i=0; i<theFileName.size(); i++)
+  for (unsigned i = 0; i < theFileName.size(); i++)
     if(!FileOperations::GetSafeFileChars()[theFileName[i]])
     { if (commentsOnFailure!=0)
         *commentsOnFailure << "Character: " << theFileName[i] << " not allowed in file name. ";
@@ -556,22 +556,22 @@ bool FileOperations::IsFileNameSafeForSystemCommands(const std::string& theFileN
 
 std::string FileOperations::GetFileNameFromFileNameWithPath(const std::string& fileName)
 { unsigned startNameWithoutFolderInfo=0;
-  for (unsigned i=0; i<fileName.size(); i++)
-    if (fileName[i]=='/' || fileName[i]=='\\')
-      startNameWithoutFolderInfo=i+1;
+  for (unsigned i = 0; i < fileName.size(); i++)
+    if (fileName[i] == '/' || fileName[i] == '\\')
+      startNameWithoutFolderInfo = i + 1;
   std::stringstream nameWithoutFolderInfo;
-  for (unsigned i=startNameWithoutFolderInfo; i<fileName.size(); i++)
+  for (unsigned i = startNameWithoutFolderInfo; i < fileName.size(); i++)
     nameWithoutFolderInfo << fileName[i];
   return nameWithoutFolderInfo.str();
 }
 
 std::string FileOperations::GetPathFromFileNameWithPath(const std::string& fileName)
 { unsigned startNameWithoutFolderInfo=0;
-  for (unsigned i=0; i<fileName.size(); i++)
-    if (fileName[i]=='/' || fileName[i]=='\\')
-      startNameWithoutFolderInfo=i+1;
+  for (unsigned i = 0; i < fileName.size(); i++)
+    if (fileName[i] == '/' || fileName[i] == '\\')
+      startNameWithoutFolderInfo = i + 1;
   std::stringstream folderName;
-  for (unsigned i=0; i<startNameWithoutFolderInfo; i++)
+  for (unsigned i = 0; i < startNameWithoutFolderInfo; i++)
     folderName << fileName[i];
   return folderName.str();
 }
@@ -599,17 +599,17 @@ bool FileOperations::GetFolderFileNamesUnsecure
   if (outputFileTypes != 0)
     outputFileTypes->Reserve(1000);
   std::string fileNameNoPath, fullName, theExtension;
-  for (dirent *fileOrFolder=readdir(theDirectory); fileOrFolder!=0; fileOrFolder= readdir (theDirectory))
+  for (dirent *fileOrFolder = readdir(theDirectory); fileOrFolder != 0; fileOrFolder = readdir (theDirectory))
   { outputFileNamesNoPath.AddOnTop(fileOrFolder->d_name);
-    if (outputFileTypes!=0)
-    { fileNameNoPath=fileOrFolder->d_name;
-      fullName=theFolderName + fileNameNoPath;
+    if (outputFileTypes != 0)
+    { fileNameNoPath = fileOrFolder->d_name;
+      fullName = theFolderName + fileNameNoPath;
       if (FileOperations::IsFolderUnsecure(fullName))
         outputFileTypes->AddOnTop(".d");
       else
-      { theExtension=FileOperations::GetFileExtensionWithDot(fileNameNoPath);
-        if (theExtension==".d")
-          theExtension="";
+      { theExtension = FileOperations::GetFileExtensionWithDot(fileNameNoPath);
+        if (theExtension == ".d")
+          theExtension = "";
         outputFileTypes->AddOnTop(theExtension);
       }
     }
@@ -641,21 +641,21 @@ bool FileOperations::LoadFileToStringVirtual
 bool FileOperations::LoadFileToStringUnsecure
 (const std::string& fileNameUnsecure, std::string& output, std::stringstream* commentsOnFailure)
 { if (!FileOperations::FileExistsUnsecure(fileNameUnsecure))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "The requested file " << fileNameUnsecure
       << " does not appear to exist. ";
     return false;
   }
   std::ifstream theFile;
   if (!FileOperations::OpenFileUnsecureReadOnly(theFile, fileNameUnsecure, false))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "The requested file " << fileNameUnsecure
       << " exists but I failed to open it in text mode (perhaps not a valid ASCII/UTF8 file). ";
     return false;
   }
   std::stringstream contentStream;
   contentStream << theFile.rdbuf();
-  output=contentStream.str();
+  output = contentStream.str();
   return true;
 }
 
@@ -692,7 +692,7 @@ FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()
 MapLisT<std::string, std::string, MathRoutines::hashString>&
 FileOperations::FolderVirtualLinksSensitive()
 { static MapLisT<std::string, std::string, MathRoutines::hashString> result;
-  static bool firstRun=false;
+  static bool firstRun = false;
   if (!firstRun)
   { firstRun = true;
     result.SetKeyValue("freecalc/", "../freecalc/");
@@ -705,7 +705,7 @@ FileOperations::FolderVirtualLinksSensitive()
 MapLisT<std::string, std::string, MathRoutines::hashString>&
 FileOperations::FolderVirtualLinksULTRASensitive()
 { static MapLisT<std::string, std::string, MathRoutines::hashString> result;
-  static bool firstRun=false;
+  static bool firstRun = false;
   if (!firstRun)
   { firstRun = true;
     result.SetKeyValue("certificates/", "certificates/");
@@ -791,7 +791,7 @@ std::string FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(
 
 std::string FileOperations::GetCurrentFolder()
 { char cwd[100000];
-  if (getcwd(cwd, sizeof(cwd))!= NULL)
+  if (getcwd(cwd, sizeof(cwd)) != NULL)
     return std::string(cwd);
   else
     crash << "Error: getcwd returned NULL. This shouldn't happen. " << crash;
@@ -831,7 +831,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly
 { MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly");
   std::string fileEnd = "";
   std::string inputStart = "";
-  for (int i=0; i<FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().size; i++)
+  for (int i = 0; i < FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().size; i++)
     if (MathRoutines::StringBeginsWith(inputFileName, FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i], &fileEnd))
     { inputStart = FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()[i];
       break;
@@ -849,7 +849,25 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly
     return false;
   }
   std::string inputCopy = inputStart + customized + "/" + fileEnd;
-  return FileOperations::GetPhysicalFileNameFromVirtual(inputCopy, output, false, false, commentsOnFailure);
+  std::string outputCandidate;
+  bool result = FileOperations::GetPhysicalFileNameFromVirtual(inputCopy, outputCandidate, false, false, commentsOnFailure);
+  if (!FileOperations::FileExistsVirtual(outputCandidate, false, false))
+  { stOutput << "DEBUG: got to here<br>";
+    std::string fileContent;
+    stOutput << "DEBUG: trying to open: " << inputCopy << "<br>";
+    std::string inputDefault = inputStart + "default/" + fileEnd;
+    if (FileOperations::LoadFileToStringVirtual(inputDefault, fileContent, false, false, commentsOnFailure))
+    { std::fstream theFile;
+      stOutput << "DEBUG: successfully opened: " << inputDefault << "<br>";
+      if (FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(theFile, inputCopy, false, true, false, false))
+      { theFile << fileContent;
+        result = true;
+      }
+    }
+  }
+  if (result)
+    output = outputCandidate;
+  return result;
 }
 
 bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
@@ -865,10 +883,10 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
   if (inputStart == "")
     return FileOperations::GetPhysicalFileNameFromVirtual(inputFileName, output, false, false, commentsOnFailure);
   std::string customized =
-  HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.courseInfo.instructorComputed, false);
+  HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.courseInfo.instructorComputed, false) + "/";
   if (customized == "")
     customized = "default/";
-  std::string inputCopy = inputStart + customized + "/" + fileEnd;
+  std::string inputCopy = inputStart + customized + fileEnd;
   if (!FileExistsVirtual(inputCopy, false, false))
     customized = "default/";
   inputCopy = inputStart + customized + fileEnd;
@@ -881,18 +899,18 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
 { MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtual");
   //stOutput << "<br>DEBUG: processing " << inputFileNamE << " -> ... <br>";
   if (!FileOperations::IsOKfileNameVirtual(inputFileNamE, accessSensitiveFolders))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "File name: " << inputFileNamE << " not allowed. ";
     return false;
   }
   std::string inputCopy=inputFileNamE;
-  for (int i=0; i<FileOperations::FilesStartsToWhichWeAppendHostName().size; i++)
+  for (int i = 0; i < FileOperations::FilesStartsToWhichWeAppendHostName().size; i++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FilesStartsToWhichWeAppendHostName()[i]))
     { if (!FileOperations::IsOKfileNameVirtual(theGlobalVariables.hostNoPort))
         return false;
       std::string toAppend = theGlobalVariables.hostNoPort;
       if (MathRoutines::StringBeginsWith(toAppend, "www."))
-        toAppend=toAppend.substr(4);
+        toAppend = toAppend.substr(4);
       if (MathRoutines::StringBeginsWith(toAppend, "localhost") || toAppend == "calculator-algebra.org" ||
           toAppend == "www.calculator-algebra.org")
         toAppend = "";
@@ -904,14 +922,14 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
       //stOutput << "DEBUG: inputCopy: " << inputCopy;
     }
   std::string folderEnd;
-  for (int i=0; i<FileOperations::FolderVirtualLinksNonSensitive().size(); i++)
+  for (int i = 0; i < FileOperations::FolderVirtualLinksNonSensitive().size(); i++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd))
-    { output=theGlobalVariables.PhysicalPathProjectBase + FileOperations::FolderVirtualLinksNonSensitive().theValues[i] + folderEnd;
+    { output = theGlobalVariables.PhysicalPathProjectBase + FileOperations::FolderVirtualLinksNonSensitive().theValues[i] + folderEnd;
       //stOutput << inputFileName << " transformed to: " << output;
       return true;
     }
   if (accessSensitiveFolders)
-    for (int i=0; i<FileOperations::FolderVirtualLinksSensitive().size(); i++)
+    for (int i = 0; i < FileOperations::FolderVirtualLinksSensitive().size(); i++)
       if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd))
       { output = theGlobalVariables.PhysicalPathProjectBase +
         FileOperations::FolderVirtualLinksSensitive().theValues[i] + folderEnd;
@@ -919,9 +937,9 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
         return true;
       }
   if (accessULTRASensitiveFolders)
-    for (int i=0; i<FileOperations::FolderVirtualLinksULTRASensitive().size(); i++)
+    for (int i = 0; i < FileOperations::FolderVirtualLinksULTRASensitive().size(); i++)
       if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd))
-      { output=theGlobalVariables.PhysicalPathProjectBase + FileOperations::FolderVirtualLinksULTRASensitive().theValues[i] + folderEnd;
+      { output = theGlobalVariables.PhysicalPathProjectBase + FileOperations::FolderVirtualLinksULTRASensitive().theValues[i] + folderEnd;
         //stOutput << inputFileName << " transformed to: " << output;
         return true;
       }
@@ -940,13 +958,14 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded
   std::stringstream mkDirCommand;
   mkDirCommand << "mkdir -p " << folderName;
   theGlobalVariables.CallSystemNoOutput(mkDirCommand.str(), true);
-  //stOutput << "DEBUG: computed file name: " << computedFileName;
+  stOutput << "DEBUG: about to execute: " << mkDirCommand.str();
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
   (theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
 }
 
 bool FileOperations::OpenFileCreateIfNotPresentVirtual
-(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders)
+(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode,
+ bool truncate, bool openAsBinary, bool accessSensitiveFolders)
 { std::string computedFileName;
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, false, 0))
@@ -1013,68 +1032,68 @@ XML::XML()
 
 bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& outputString)
 { MacroRegisterFunctionWithName("XML::GetStringEnclosedIn");
-  std::string charReader="";
-  std::string theOpenTagWithSymbols=this->GetOpenTagNoInputCheck(theTagName);
-  std::string theCloseTagWithSymbols=this->GetCloseTagNoInputCheck(theTagName);
-  int lengthOpenTag=theOpenTagWithSymbols.size();
-  int lengthCloseTag=theCloseTagWithSymbols.size();
-  int positionInOpenTag=0;
-  int positionInCloseTag=0;
-  int numTags=0;
+  std::string charReader = "";
+  std::string theOpenTagWithSymbols = this->GetOpenTagNoInputCheck(theTagName);
+  std::string theCloseTagWithSymbols = this->GetCloseTagNoInputCheck(theTagName);
+  int lengthOpenTag = theOpenTagWithSymbols.size();
+  int lengthCloseTag = theCloseTagWithSymbols.size();
+  int positionInOpenTag = 0;
+  int positionInCloseTag = 0;
+  int numTags = 0;
   //stOutput << "open tag with symbols: " << theOpenTagWithSymbols << ", close tag: " << theCloseTagWithSymbols;
 //  stOutput << "lengths are :" << lengthOpenTag << " and "<< lengthCloseTag;
   std::stringstream out;
-  if (this->positionInString<0)
-    this->positionInString=0;
-  bool tagWasClosed=false;
-  int numCharRead=0;
-  for (; this->positionInString<(signed)this->theString.size(); this->positionInString++)
+  if (this->positionInString < 0)
+    this->positionInString = 0;
+  bool tagWasClosed = false;
+  int numCharRead = 0;
+  for (; this->positionInString < (signed)this->theString.size(); this->positionInString++)
   { numCharRead++;
     charReader.push_back(this->theString[this->positionInString]);
-    bool tagStarted=false;
-    if (this->theString[this->positionInString]==theOpenTagWithSymbols[positionInOpenTag])
+    bool tagStarted = false;
+    if (this->theString[this->positionInString] == theOpenTagWithSymbols[positionInOpenTag])
     { positionInOpenTag++;
-      if (positionInOpenTag>=lengthOpenTag)
-      { charReader="";
+      if (positionInOpenTag >= lengthOpenTag)
+      { charReader = "";
         numTags++;
 //        stOutput << "<br>numTags: " << numTags;
-        positionInOpenTag=0;
+        positionInOpenTag = 0;
       }
       //stOutput << "<br>found " << charReader << " from " << theOpenTagWithSymbols;
-      tagStarted=true;
+      tagStarted = true;
     } else
-      positionInOpenTag=0;
-    if (this->theString[this->positionInString]==theCloseTagWithSymbols[positionInCloseTag])
+      positionInOpenTag = 0;
+    if (this->theString[this->positionInString] == theCloseTagWithSymbols[positionInCloseTag])
     { positionInCloseTag++;
-      if (positionInCloseTag>=lengthCloseTag)
-      { positionInCloseTag=0;
-        charReader= "";
+      if (positionInCloseTag >= lengthCloseTag)
+      { positionInCloseTag = 0;
+        charReader = "";
         numTags--;
 //        stOutput << "<br>numTags: " << numTags;
-        if (numTags<0)
+        if (numTags < 0)
           return false;
-        if (numTags==0)
+        if (numTags == 0)
         { this->positionInString++;
-          tagWasClosed=true;
+          tagWasClosed = true;
           break;
         }
       }
       //stOutput << "<br>found " << charReader << " from " << theCloseTagWithSymbols;
-      tagStarted=true;
+      tagStarted = true;
     } else
-      positionInCloseTag=0;
+      positionInCloseTag = 0;
     if (tagStarted)
       continue;
-    if (numTags>0)
+    if (numTags > 0)
       out << charReader;
-    charReader="";
+    charReader = "";
   }
   if (!tagWasClosed)
   { //stOutput << "tag wasn't closed. Read so far: " << out.str();
     //stOutput << "num chars read: " << numCharRead;
     return false;
   }
-  outputString=out.str();
+  outputString = out.str();
   return true;
 }
 
@@ -1132,8 +1151,8 @@ void DrawingVariables::drawCircleAtVectorBufferDouble
 }
 
 void DrawingVariables::drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
-{ if (this->theDrawTextFunction!=0)
-    this->theDrawTextFunction(X1-7, Y1-7, inputText.c_str(), inputText.length(), color, this->fontSizeNormal);
+{ if (this->theDrawTextFunction != 0)
+    this->theDrawTextFunction(X1 - 7, Y1 - 7, inputText.c_str(), inputText.length(), color, this->fontSizeNormal);
   if (LatexOutFile!=0)
     LaTeXProcedures::drawTextDirectly(X1, Y1, inputText, color, *LatexOutFile);
 }
@@ -1143,11 +1162,11 @@ void DrawingVariables::ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
   Vector<Rational> normal; Vector<Rational> basepoint;
   Rational tempRat2, tempRat, tempRat3;
   normal.MakeZero(input.size);
-  for (int i=0; i<input.size; i++)
+  for (int i = 0; i < input.size; i++)
   { if (input[i].IsPositiveOrZero())
-      normal[i]+=1;
+      normal[i] += 1;
     else
-      normal[i]+=-1;
+      normal[i] += -1;
   }
   basepoint.MakeZero(input.size);
   basepoint[0].AssignInteger(1);
@@ -1157,9 +1176,9 @@ void DrawingVariables::ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
   output.ScalarEuclidean(normal, tempRat2);
   basepoint.ScalarEuclidean(normal, tempRat);
   if (!tempRat2.IsEqualToZero())
-  { tempRat3=tempRat;
+  { tempRat3 = tempRat;
     tempRat3.DivideBy(tempRat2);
-    output*=tempRat3;
+    output *= tempRat3;
   } else
     output.MakeZero(input.size);
 }
@@ -1171,16 +1190,16 @@ bool WeylGroupData::IsStronglyPerpendicularTo(const Vector<Rational>& input, con
 bool WeylGroupData::HasStronglyPerpendicularDecompositionWRT
 (Vector<Rational>& input, int UpperBoundNumBetas, Vectors<Rational>& theSet, Vectors<Rational>& output,
  List<Rational>& outputCoeffs, bool IntegralCoefficientsOnly)
-{ if (UpperBoundNumBetas>0 && output.size>UpperBoundNumBetas)
+{ if (UpperBoundNumBetas > 0 && output.size > UpperBoundNumBetas)
     return false;
   if (input.IsEqualToZero())
     return true;
-  if (theSet.size==0)
+  if (theSet.size == 0)
     return false;
-  if (output.size==0)
+  if (output.size == 0)
   { if (theSet.Contains(input))
     { output.SetSize(1);
-      *output.LastObject()=input;
+      *output.LastObject() = input;
       outputCoeffs.SetSize(1);
       outputCoeffs.LastObject()->MakeOne();
       return true;
@@ -1192,18 +1211,18 @@ bool WeylGroupData::HasStronglyPerpendicularDecompositionWRT
   theNewSet.Reserve(theSet.size);
   Vector<Rational> tempRoot;
   Rational tempRat;
-  for (int indexFirstNonZeroRoot=0; indexFirstNonZeroRoot<theSet.size; indexFirstNonZeroRoot++)
+  for (int indexFirstNonZeroRoot = 0; indexFirstNonZeroRoot < theSet.size; indexFirstNonZeroRoot++)
   { Vector<Rational>& currentRoot = theSet[indexFirstNonZeroRoot];
-    tempRat= this->RootScalarCartanRoot(input, currentRoot)/this->RootScalarCartanRoot(currentRoot, currentRoot);
+    tempRat = this->RootScalarCartanRoot(input, currentRoot)/this->RootScalarCartanRoot(currentRoot, currentRoot);
     if (tempRat.IsPositive())
-      if (!IntegralCoefficientsOnly || tempRat.DenShort==1)
-       { theNewSet.size=0;
-         for (int i=indexFirstNonZeroRoot; i<theSet.size; i++)
+      if (!IntegralCoefficientsOnly || tempRat.DenShort == 1)
+       { theNewSet.size = 0;
+         for (int i = indexFirstNonZeroRoot; i < theSet.size; i++)
            if (this->IsStronglyPerpendicularTo(currentRoot, theSet[i]))
              theNewSet.AddOnTop(theSet[i]);
          outputCoeffs.AddOnTop(tempRat);
          output.AddOnTop(currentRoot);
-         tempRoot = input-currentRoot*tempRat;
+         tempRoot = input - currentRoot * tempRat;
          if (this->HasStronglyPerpendicularDecompositionWRT(tempRoot, UpperBoundNumBetas, theNewSet, output, outputCoeffs, IntegralCoefficientsOnly))
            return true;
          output.size--;
@@ -1242,34 +1261,34 @@ char MathRoutines::ConvertHumanReadableHexToCharValue(char input)
 }
 
 unsigned int MathRoutines::ListIntsHash(const List<int>& input)
-{ unsigned int result=0;
-  int numCycles=MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
-  for (int i =0; i<numCycles; i++)
-    result+=SomeRandomPrimes[i]*input[i];
+{ unsigned int result = 0;
+  int numCycles = MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
+  for (int i =0; i < numCycles; i++)
+    result += SomeRandomPrimes[i] * input[i];
   return result;
 }
 
 unsigned int MathRoutines::HashListDoubles(const List<double>& input)
-{ unsigned int result=0;
-  int numCycles=MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
-  for (int i =0; i<numCycles; i++)
-    result+=SomeRandomPrimes[i]*MathRoutines::HashDouble(input[i]);
+{ unsigned int result = 0;
+  int numCycles = MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
+  for (int i = 0; i < numCycles; i++)
+    result += SomeRandomPrimes[i] * MathRoutines::HashDouble(input[i]);
   return result;
 }
 
 unsigned int MathRoutines::HashListInts(const List<int>& input)
-{ unsigned int result=0;
+{ unsigned int result = 0;
   int numCycles=MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
-  for (int i =0; i<numCycles; i++)
-    result+=SomeRandomPrimes[i]*MathRoutines::IntUnsignIdentity(input[i]);
+  for (int i = 0; i < numCycles; i++)
+    result += SomeRandomPrimes[i] * MathRoutines::IntUnsignIdentity(input[i]);
   return result;
 }
 
 unsigned int MathRoutines::hashString(const std::string& x)
-{ int numCycles=x.size();
-  unsigned int result=0;
-  for (int i=0; i<numCycles; i++)
-    result+=x[i]*SomeRandomPrimes[i%SomeRandomPrimesSize];
+{ int numCycles = x.size();
+  unsigned int result = 0;
+  for (int i = 0; i < numCycles; i++)
+    result += x[i] * SomeRandomPrimes[i % SomeRandomPrimesSize];
   return result;
 }
 
@@ -1278,13 +1297,13 @@ unsigned int MathRoutines::HashVectorDoubles(const Vector<double>& input)
 }
 
 std::string MathRoutines::StringShortenInsertDots(const std::string& inputString, int maxNumChars)
-{ if (inputString.size()<=(unsigned) maxNumChars)
+{ if (inputString.size() <= (unsigned) maxNumChars)
     return inputString;
   std::stringstream out;
-  int numCharsBeginEnd=maxNumChars/2-2;
-  int numCharsOmitted=inputString.size()-numCharsBeginEnd*2;
+  int numCharsBeginEnd = maxNumChars / 2 - 2;
+  int numCharsOmitted = inputString.size() - numCharsBeginEnd * 2;
   out << inputString.substr(0, numCharsBeginEnd) << "... (" << numCharsOmitted << " characters omitted)..."
-  << inputString.substr(inputString.size()-numCharsBeginEnd);
+  << inputString.substr(inputString.size() - numCharsBeginEnd);
   return out.str();
 }
 
@@ -1302,12 +1321,12 @@ std::string MathRoutines::StringTrimWhiteSpace(const std::string& inputString)
 }
 
 void MathRoutines::StringTrimToLength(std::string& inputOutput, int desiredLength50AtLeast)
-{ if (((signed) inputOutput.size())<=desiredLength50AtLeast)
+{ if (((signed) inputOutput.size()) <= desiredLength50AtLeast)
     return;
-  if (desiredLength50AtLeast<40)
+  if (desiredLength50AtLeast < 40)
     return;
   std::stringstream inputAbbreviatedStream;
-  inputAbbreviatedStream << inputOutput.substr(0, desiredLength50AtLeast-30)
+  inputAbbreviatedStream << inputOutput.substr(0, desiredLength50AtLeast - 30)
   << "_abbrev_hash_" << MathRoutines::hashString(inputOutput)
   ;
   inputOutput=inputAbbreviatedStream.str();
@@ -1316,24 +1335,24 @@ void MathRoutines::StringTrimToLength(std::string& inputOutput, int desiredLengt
 void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::string& output)
 { //this function needs to be rewritten to do one substr call (no time now).
   std::stringstream out;
-  output="";
+  output = "";
   output.reserve(inputString.size());
-  unsigned i=0;
-  for (i=0; i<inputString.size(); i++)
-    if (inputString[i]!=' ' && inputString[i]!='\r' &&
-        inputString[i]!='\t' && inputString[i]!='\n')
+  unsigned i = 0;
+  for (i = 0; i < inputString.size(); i++)
+    if (inputString[i] != ' ' && inputString[i] != '\r' &&
+        inputString[i] != '\t' && inputString[i] != '\n')
       break;
-  output=inputString.substr(i, std::string::npos);
-  if (output.size()==0)
+  output = inputString.substr(i, std::string::npos);
+  if (output.size() == 0)
     return;
-  signed j=0;
-  for (j=(signed) output.size()-1; j>=0; j--)
-    if (output[j]!=' ' && output[j]!='\r' &&
-        output[j]!='\t' && output[j]!='\n' &&
-        output[j]!='\0')
+  signed j = 0;
+  for (j =(signed) output.size() - 1; j >= 0; j--)
+    if (output[j] != ' ' && output[j] != '\r' &&
+        output[j] != '\t' && output[j] != '\n' &&
+        output[j] != '\0')
       break;
   j++;
-  output=output.substr(0, j);
+  output = output.substr(0, j);
 }
 
 void MathRoutines::StringSplitDefaultDelimiters
@@ -1355,34 +1374,34 @@ void MathRoutines::StringSplitExcludeDelimiters
 { MacroRegisterFunctionWithName("MathRoutines::StringSplit");
   output.SetSize(0);
   std::string reader;
-  for (unsigned i=0; i<inputString.size(); i++)
+  for (unsigned i = 0; i < inputString.size(); i++)
     if (delimiters.Contains(inputString[i]))
-    { if (reader!="")
+    { if (reader != "")
       { output.AddOnTop(reader);
-        reader="";
+        reader = "";
       }
     } else
       reader.push_back(inputString[i]);
-  if (reader!="")
+  if (reader != "")
     output.AddOnTop(reader);
 }
 
 void MathRoutines::SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond)
-{ if (&outputFirst==&inputString || &outputSecond==&inputString)
-  { std::string inputCopy=inputString;
+{ if (&outputFirst == &inputString || &outputSecond == &inputString)
+  { std::string inputCopy =inputString;
     MathRoutines::SplitStringInTwo(inputCopy, firstStringSize, outputFirst, outputSecond);
     return;
   }
-  if (firstStringSize<0)
-    firstStringSize=0;
-  if (firstStringSize>(signed) inputString.size())
-    firstStringSize=inputString.size();
-  outputFirst="";
-  outputFirst=inputString.substr(0, firstStringSize);
-  outputSecond="";
-  int secondStringSize=inputString.size()-firstStringSize;
-  if (secondStringSize>0)
-    outputSecond= inputString.substr(firstStringSize, secondStringSize);
+  if (firstStringSize < 0)
+    firstStringSize = 0;
+  if (firstStringSize > (signed) inputString.size())
+    firstStringSize = inputString.size();
+  outputFirst = "";
+  outputFirst = inputString.substr(0, firstStringSize);
+  outputSecond = "";
+  int secondStringSize = inputString.size() - firstStringSize;
+  if (secondStringSize > 0)
+    outputSecond = inputString.substr(firstStringSize, secondStringSize);
 }
 
 void MathRoutines::NChooseK(int n, int k, LargeInt& result)

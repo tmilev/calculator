@@ -85,14 +85,14 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     bool isGoodLoad = theProblem.LoadMe(false, problemComments, randomSeedCurrent);
     bool isGoodInterpretation = false;
     out << "<tr>";
-//    out << "<td>DEBUG: Random seed at start: "
-//    << theProblem.theProblemData.randomSeed;
+    //out << "<td>DEBUG: Random seed at start: "
+    //<< theProblem.theProblemData.randomSeed;
 
     if (isGoodLoad)
       isGoodInterpretation=theProblem.InterpretHtml(problemComments);
-//    out << ".<br>DEBUG: random seed end: "
-//    << theProblem.theProblemData.randomSeed
-//    << "</td>";
+    //out << ".<br>DEBUG: random seed end: "
+    //<< theProblem.theProblemData.randomSeed
+    //<< "</td>";
     std::stringstream randSeedCurrentStream;
     randSeedCurrentStream << theProblem.theProblemData.randomSeed;
     randomSeedCurrent=randSeedCurrentStream.str();

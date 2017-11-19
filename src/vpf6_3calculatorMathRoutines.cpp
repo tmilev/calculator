@@ -21,12 +21,12 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
   inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   theType theOpResult;
   ProgressReport theReport1, theReport2;
-  bool flagDoReport=theGlobalVariables.flagReportEverything|| theGlobalVariables.flagReportGaussianElimination;
+  bool flagDoReport=theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination;
   if (flagDoReport)
     theReport1.Report("Extending vector space to closed with respect to binary operation. ");
   List<theType> theEltsForGaussianElimination=inputOutputElts;
-  for (int i=0; i<inputOutputElts.size; i++)
-    for (int j=i; j<inputOutputElts.size; j++)
+  for (int i = 0; i < inputOutputElts.size; i++)
+    for (int j = i; j < inputOutputElts.size; j++)
     { theBinaryOperation(inputOutputElts[i], inputOutputElts[j], theOpResult);
       //int oldNumElts=inputOutputElts.size;
       theEltsForGaussianElimination.AddOnTop(theOpResult);
@@ -40,7 +40,7 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
         return false;
       if (flagDoReport)
       { std::stringstream reportStream;
-        reportStream << "Accounted operation between elements " << i+1 << " and " << j+1 << " out of " << inputOutputElts.size;
+        reportStream << "Accounted operation between elements " << i + 1 << " and " << j + 1 << " out of " << inputOutputElts.size;
         theReport2.Report(reportStream.str());
       }
     }
@@ -55,12 +55,12 @@ bool CalculatorFunctionsGeneral::innerConstructCartanSA(Calculator& theCommands,
   if (input.ConvertsToType(&theElt))
     theSA.theGenerators.AddOnTop(theElt);
   else
-    for (int i=1; i<input.size(); i++)
+    for (int i = 1; i < input.size(); i++)
       if (input[i].ConvertsToType(&theElt))
         theSA.theGenerators.AddOnTop(theElt);
       else
         return theCommands << "Failed to extract element of a semisimple Lie algebra from " << input[i].ToString();
-  for (int i=0; i<theSA.theGenerators.size; i++)
+  for (int i = 0; i < theSA.theGenerators.size; i++)
     if (!theSA.theGenerators[i].IsEqualToZero())
     { if (theSA.owner!=0)
         if (theSA.owner!=theSA.theGenerators[i].GetOwner())
@@ -98,7 +98,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
     theContext.ContextGetFormatExpressions(theFormat);
     std::stringstream out;
     out << "Starting elements: <br>";
-    for (int i=0; i<theLieAlgElts.size; i++)
+    for (int i = 0; i < theLieAlgElts.size; i++)
       out << HtmlRoutines::GetMathSpanPure(theLieAlgElts[i].ToString(&theFormat)) << "<br>";
     bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theLieAlgElts, upperBound);
     if (!success)
@@ -108,7 +108,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
     { out << "<br>Lie bracket generates vector space of dimension " << theLieAlgElts.size << " with basis:";
       for (int i=0; i<theLieAlgElts.size; i++)
       { out << "<br>";
-        if (theLieAlgElts.size>50)
+        if (theLieAlgElts.size > 50)
           out << theLieAlgElts[i].ToString(&theFormat);
         else
           out << HtmlRoutines::GetMathSpanPure(theLieAlgElts[i].ToString(&theFormat));
@@ -120,7 +120,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
   theContext.ContextGetFormatExpressions(theFormat);
   std::stringstream out;
   out << "Starting elements: <br>";
-  for (int i=0; i<theOps.size; i++)
+  for (int i = 0; i < theOps.size; i++)
     out << HtmlRoutines::GetMathSpanPure(theOps[i].ToString(&theFormat)) << "<br>";
   bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, upperBound);
   if (!success)
@@ -128,9 +128,9 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
     << "The basis generated before exceeding the limit was: " << theOps.ToString();
   else
   { out << "<br>Lie bracket generates vector space of dimension " << theOps.size << " with basis:";
-    for (int i=0; i<theOps.size; i++)
+    for (int i = 0; i < theOps.size; i++)
     { out << "<br>";
-      if (theOps.size>50)
+      if (theOps.size > 50)
         out << theOps[i].ToString(&theFormat);
       else
         out << HtmlRoutines::GetMathSpanPure(theOps[i].ToString(&theFormat));
@@ -146,9 +146,9 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
     return false;
   if (!FileOperations::IsFileNameWithoutDotsAndSlashes(theCertificateFileNameNoFolder))
     return theCommands << "The file name contains forbidden characters, computation aborted. ";
-  std::string theCertificateFileName=theCertificateFileNameNoFolder;
+  std::string theCertificateFileName = theCertificateFileNameNoFolder;
   std::fstream theCertFile;
-  if (!FileOperations::OpenFileVirtual(theCertFile, "output/"+ theCertificateFileName, false, false, false))
+  if (!FileOperations::OpenFileVirtual(theCertFile, "output/" + theCertificateFileName, false, false, false))
     return theCommands << "Failed to open file " << theCertificateFileName;
   theCertFile.seekg(0);
   List<std::string> theCerts, theShas, certsAndShas;
@@ -161,15 +161,15 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
   theCertsRAWuchars.SetSize(sampleSize);
   theCertsRAWstrings.SetSize(sampleSize);
   std::stringstream out;
-  for (int i=0; i<sampleSize; i++)
+  for (int i = 0; i < sampleSize; i++)
   { theCertFile >> certsAndShas[i];
-    unsigned commaPosition=0;
-    for (;commaPosition< certsAndShas[i].size(); commaPosition++)
-      if (certsAndShas[i][commaPosition]==',')
+    unsigned commaPosition = 0;
+    for (;commaPosition < certsAndShas[i].size(); commaPosition++)
+      if (certsAndShas[i][commaPosition] == ',')
         break;
-    MathRoutines::SplitStringInTwo(certsAndShas[i], commaPosition+1, theShas[i], theCerts[i]);
-    if (theShas[i].size()>0)
-      theShas[i].resize(theShas[i].size()-1);
+    MathRoutines::SplitStringInTwo(certsAndShas[i], commaPosition + 1, theShas[i], theCerts[i]);
+    if (theShas[i].size() > 0)
+      theShas[i].resize(theShas[i].size() - 1);
     out << "Raw cert+sha:<br>" << certsAndShas[i] << "<br>Certificate " << i+1
     << " (base64):<br>" << theCerts[i] << "<br>Sha1:<br>" << theShas[i]
     << "<br>Comments while extracting the raw certificate: ";

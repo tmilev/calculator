@@ -69,27 +69,49 @@ std::string HtmlRoutines::GetJavascriptHideHtmlWithTags()
   return output.str();
 }
 
-const std::string& HtmlRoutines::GetJavascriptCookieFunctionsNoTags()
-{ return HtmlRoutines::GetFile("html-common-calculator/cookie-functions.js");
+const std::string HtmlRoutines::GetJavascriptCookieFunctionsLink()
+{ return HtmlRoutines::GetJavascriptLink("/html-common-calculator/cookie-functions.js");
 }
 
-const std::string& HtmlRoutines::GetJavascriptProblemLinksWithTags()
-{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptProblemLinksWithTags");
-  return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/problemlinkstyles.js");
+const std::string& HtmlRoutines::GetJavascriptCookieFunctionSNoTags()
+{ return HtmlRoutines::GetFile("/html-common-calculator/cookie-functions.js");
 }
 
-const std::string& HtmlRoutines::GetJavascriptTopicListWithTags()
+const std::string HtmlRoutines::GetJavascriptProblemLinksLink()
+{ return HtmlRoutines::GetJavascriptLink("/html-common-calculator/problemlinkstyles.js");
+}
+
+const std::string& HtmlRoutines::GetJavascriptProblemLinkSWithTags()
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptProblemLinkSWithTags");
+  return HtmlRoutines::GetJavascriptAddScriptTags("/html-common-calculator/problemlinkstyles.js");
+}
+
+const std::string& HtmlRoutines::GetJavascriptTopicLisTWithTags()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptTopicListWithTags");
-  return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/topiclist.js");
+  return HtmlRoutines::GetJavascriptAddScriptTags("/html-common-calculator/topiclist.js");
 }
 
-const std::string& HtmlRoutines::GetJavascriptCanvasGraphicsWithTags()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/three-d.js");
+const std::string HtmlRoutines::GetJavascriptTopicListLink()
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptTopicListLink");
+  return HtmlRoutines::GetJavascriptLink("/html-common-calculator/topiclist.js");
 }
 
-const std::string& HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags()
+const std::string& HtmlRoutines::GetJavascriptCanvasGraphicSWithTags()
+{ return HtmlRoutines::GetJavascriptAddScriptTags("/html-common-calculator/three-d.js");
+}
+
+const std::string HtmlRoutines::GetJavascriptCanvasGraphicsLink()
+{ return HtmlRoutines::GetJavascriptLink("/html-common-calculator/three-d.js");
+}
+
+const std::string& HtmlRoutines::GetJavascriptDatabaseRoutineSWithTags()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags");
-  return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/database-routines.js");
+  return HtmlRoutines::GetJavascriptAddScriptTags("/html-common-calculator/database-routines.js");
+}
+
+const std::string HtmlRoutines::GetJavascriptDatabaseRoutinesLink()
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags");
+  return HtmlRoutines::GetJavascriptLink("/html-common-calculator/database-routines.js");
 }
 
 std::string HtmlRoutines::GetJavascriptVariable(const std::string& theVar)
@@ -195,40 +217,51 @@ std::string HtmlRoutines::GetMathSpanBeginArrayL(const std::string& input, int u
 void HtmlRoutines::LoadStrings()
 { if (HtmlRoutines::preLoadedFiles.size()>0)
     return;
-  HtmlRoutines::GetJavascriptCookieFunctionsNoTags();
-  HtmlRoutines::GetMathQuillStyleSheetWithTags();
-  HtmlRoutines::GetJavascriptInitializeButtonsWithTags();
-  HtmlRoutines::GetJavascriptAceEditorScript();
-  HtmlRoutines::GetJavascriptCalculatorPage();
-  HtmlRoutines::GetJavascriptAccountManagementWithTags();
-  HtmlRoutines::GetCalculatorStyleSheetWithTags();
-  HtmlRoutines::GetJavascriptAutocompleteWithTags();
+  HtmlRoutines::GetJavascriptCookieFunctionSNoTags();
+  HtmlRoutines::GetMathQuillStyleSheeTWithTags();
+  HtmlRoutines::GetJavascriptInitializeButtonSWithTags();
+  HtmlRoutines::GetJavascriptAceEditorScriptWithTags();
+  HtmlRoutines::GetJavascriptCalculatorPageWithTags();
+  HtmlRoutines::GetJavascriptAccountManagemenTWithTags();
+  HtmlRoutines::GetCSSLinkCalculator();
+  HtmlRoutines::GetJavascriptAutocompletEWithTags();
   HtmlRoutines::GetJavascriptSha1();
   HtmlRoutines::GetJavascriptMathjax();
-  HtmlRoutines::GetJavascriptMathQuillDefaultWithTags();
-  HtmlRoutines::GetJavascriptMathQuillMatrixSupportWithTags();
-  HtmlRoutines::GetJavascriptProblemLinksWithTags();
-  HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags();
-  HtmlRoutines::GetJavascriptCanvasGraphicsWithTags();
-  HtmlRoutines::GetJavascriptTopicListWithTags();
+  HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags();
+  HtmlRoutines::GetJavascriptMathQuillMatrixSupporTWithTags();
+  HtmlRoutines::GetJavascriptProblemLinkSWithTags();
+  HtmlRoutines::GetJavascriptDatabaseRoutineSWithTags();
+  HtmlRoutines::GetJavascriptCanvasGraphicSWithTags();
+  HtmlRoutines::GetJavascriptTopicLisTWithTags();
 }
 
 extern logger theLog;
 
-const std::string& HtmlRoutines::GetJavascriptCalculatorPage()
+const std::string& HtmlRoutines::GetJavascriptCalculatorPageWithTags()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptCalculatorPage");
-  return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/calculatorPage.js");
+  return HtmlRoutines::GetJavascriptAddScriptTags("/html-common-calculator/calculatorPage.js");
 }
 
-const std::string& HtmlRoutines::GetJavascriptAccountManagementWithTags()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/account-management.js");
+const std::string HtmlRoutines::GetJavascriptCalculatorPageLink()
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptCalculatorPageLink");
+  return HtmlRoutines::GetJavascriptLink("/html-common-calculator/calculatorPage.js");
 }
 
-const std::string& HtmlRoutines::GetJavascriptAceEditorScript()
+const std::string& HtmlRoutines::GetJavascriptAccountManagemenTWithTags()
+{ return HtmlRoutines::GetJavascriptAddScriptTags("/html-common-calculator/account-management.js");
+}
+
+const std::string HtmlRoutines::GetJavascriptAccountManagementLink()
+{ return HtmlRoutines::GetJavascriptLink("/html-common-calculator/account-management.js");
+}
+
+const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags()
 { if (HtmlRoutines::preLoadedFiles.Contains("AceEditor"))
     return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("AceEditor");
   std::stringstream out;
-  out << "<script type=\"text/javascript\" src=\"/html-common-calculator/ace/src-min/ace.js\" charset=\"utf-8\"></script>";
+  out << "<script type=\"text/javascript\" src=\""
+  << FileOperations::GetVirtualNameWithHash("/html-common-calculator/ace/src-min/ace.js")
+  << "\" charset=\"utf-8\"></script>";
   out << HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/ace-editor-settings.js");
   HtmlRoutines::preLoadedFiles.SetKeyValue("AceEditor", out.str());
   return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("AceEditor");
@@ -261,35 +294,69 @@ const std::string& HtmlRoutines::GetJavascriptAddScriptTags(const std::string& f
   return HtmlRoutines::GetFile(fileNameVirtual, "<script>", "</script>");
 }
 
+std::string HtmlRoutines::GetJavascriptLink(const std::string& fileNameVirtual)
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptLink");
+  std::stringstream out;
+  std::string theFileName = FileOperations::GetVirtualNameWithHash(fileNameVirtual);
+  out << "<script src=\"" << theFileName << "\"></script>";
+  return out.str();
+}
+
+std::string HtmlRoutines::GetCSSLink(const std::string& fileNameVirtual)
+{ MacroRegisterFunctionWithName("HtmlRoutines::GetCSSLink");
+  std::stringstream out;
+  std::string theFileName = FileOperations::GetVirtualNameWithHash(fileNameVirtual);
+  out << "<link rel=\"stylesheet\" href= \"" << theFileName << "\">";
+  return out.str();
+}
+
 const std::string& HtmlRoutines::GetCSSAddStyleTags(const std::string& fileNameVirtual)
 { MacroRegisterFunctionWithName("HtmlRoutines::GetCSSAddStyleTags");
   return HtmlRoutines::GetFile(fileNameVirtual, "<style>", "</style>");
 }
 
-const std::string& HtmlRoutines::GetJavascriptInitializeButtonsWithTags()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/initializebuttons.js");
+const std::string& HtmlRoutines::GetJavascriptInitializeButtonSWithTags()
+{ return HtmlRoutines::GetJavascriptAddScriptTags("/html-common-calculator/initializebuttons.js");
 }
 
-const std::string& HtmlRoutines::GetMathQuillStyleSheetWithTags()
-{ return HtmlRoutines::GetCSSAddStyleTags("html-common-calculator/mathquill.css");
+const std::string HtmlRoutines::GetJavascriptInitializeButtonsLink()
+{ return HtmlRoutines::GetJavascriptLink("/html-common-calculator/initializebuttons.js");
 }
 
-const std::string& HtmlRoutines::GetCalculatorStyleSheetWithTags()
-{ return HtmlRoutines::GetCSSAddStyleTags("html-common-calculator/styleCalculator.css");
+const std::string& HtmlRoutines::GetMathQuillStyleSheeTWithTags()
+{ return HtmlRoutines::GetCSSAddStyleTags("/html-common-calculator/mathquill.css");
 }
 
-const std::string& HtmlRoutines::GetJavascriptMathQuillDefaultWithTags()
-{ return  HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/mathquill.min.js");
+const std::string HtmlRoutines::GetMathQuillStyleSheetLink()
+{ return HtmlRoutines::GetCSSLink("/html-common-calculator/mathquill.css");
 }
 
-const std::string& HtmlRoutines::GetJavascriptMathQuillMatrixSupportWithTags()
-{ return  HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/mathquill.min-matrix.js");
+const std::string HtmlRoutines::GetCSSLinkCalculator()
+{ return HtmlRoutines::GetCSSLink("/html-common-calculator/styleCalculator.css");
+}
+
+const std::string& HtmlRoutines::GetJavascriptMathQuillDefaulTWithTags()
+{ return  HtmlRoutines::GetJavascriptAddScriptTags("/html-common-calculator/mathquill.min.js");
+}
+
+const std::string HtmlRoutines::GetJavascriptMathQuillDefaultLink()
+{ return  HtmlRoutines::GetJavascriptLink("/html-common-calculator/mathquill.min.js");
+}
+
+const std::string& HtmlRoutines::GetJavascriptMathQuillMatrixSupporTWithTags()
+{ return  HtmlRoutines::GetJavascriptAddScriptTags("/html-common-calculator/mathquill.min-matrix.js");
+}
+
+const std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportLink()
+{ return  HtmlRoutines::GetJavascriptLink("/html-common-calculator/mathquill.min-matrix.js");
 }
 
 std::string HtmlRoutines::GetJavascriptMathQuillDefaultFull()
 { std::stringstream out;
-  out << "<script src=\"/html-common-calculator/jquery.min.js\"></script>\n"
-  << HtmlRoutines::GetJavascriptMathQuillDefaultWithTags() << "\n"
+  out << "<script src=\""
+  << FileOperations::GetVirtualNameWithHash("/html-common-calculator/jquery.min.js")
+  << "\"></script>\n"
+  << HtmlRoutines::GetJavascriptMathQuillDefaultLink() << "\n"
   << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport=false;</script>";
   return out.str();
 }
@@ -297,17 +364,21 @@ std::string HtmlRoutines::GetJavascriptMathQuillDefaultFull()
 std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull()
 { std::stringstream out;
   out << "<script src=\"/html-common-calculator/jquery.min.js\"></script>\n"
-  << HtmlRoutines::GetJavascriptMathQuillMatrixSupportWithTags() << "\n"
+  << HtmlRoutines::GetJavascriptMathQuillMatrixSupportLink() << "\n"
   << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport=true;</script>";
   return out.str();
 }
 
-const std::string& HtmlRoutines::GetJavascriptAutocompleteWithTags()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/autocomplete.js");
+const std::string& HtmlRoutines::GetJavascriptAutocompletEWithTags()
+{ return HtmlRoutines::GetJavascriptAddScriptTags("/html-common-calculator/autocomplete.js");
+}
+
+const std::string HtmlRoutines::GetJavascriptAutocompleteLink()
+{ return HtmlRoutines::GetJavascriptLink("/html-common-calculator/autocomplete.js");
 }
 
 const std::string& HtmlRoutines::GetJavascriptSha1()
-{ return HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/sha1.js");
+{ return HtmlRoutines::GetJavascriptAddScriptTags("/html-common-calculator/sha1.js");
 }
 
 std::string HtmlRoutines::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)
@@ -432,8 +503,10 @@ const std::string& HtmlRoutines::GetJavascriptMathjax()
   if (HtmlRoutines::preLoadedFiles.Contains("MathJax"))
     return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("MathJax");
   std::stringstream out;
-  out << "<script type=\"text/javascript\" async src=\"/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full,/html-common-calculator/mathjax-calculator-setup.js\"></script>\n";
-  //out << "<script type=\"text/javascript\" async src=\"/html-common-calculator/mathjax-calculator-setup.js\"></script>\n";
+
+  out << "<script type=\"text/javascript\" async src=\"/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full,"
+  << FileOperations::GetVirtualNameWithHash("/html-common-calculator/mathjax-calculator-setup.js")
+  << "\"></script>\n";
   HtmlRoutines::preLoadedFiles.SetKeyValue("MathJax", out.str());
   return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("MathJax");
 }

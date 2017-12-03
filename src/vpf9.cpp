@@ -660,6 +660,7 @@ bool FileOperations::LoadFileToStringUnsecure
 }
 
 #include "vpfHeader1General2Multitasking.h"
+
 MapLisT<std::string, std::string, MathRoutines::hashString>&
 FileOperations::FolderVirtualLinksNonSensitive()
 { static MapLisT<std::string, std::string, MathRoutines::hashString> result;
@@ -685,6 +686,12 @@ FileOperations::FilesStartsToWhichWeAppendHostName()
 
 HashedList<std::string, MathRoutines::hashString>&
 FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()
+{ static HashedList<std::string, MathRoutines::hashString> result;
+  return result;
+}
+
+HashedList<std::string, MathRoutines::hashString>&
+FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash()
 { static HashedList<std::string, MathRoutines::hashString> result;
   return result;
 }
@@ -826,6 +833,20 @@ bool FileOperations::OpenFileUnsecureReadOnly(std::ifstream& theFile, const std:
   return theFile.is_open();
 }
 
+std::string FileOperations::GetVirtualNameWithHash(const std::string& inputFileName)
+{ MacroRegisterFunctionWithName("FileOperations::GetVirtualNameWithHash");
+  std::string result = inputFileName;
+  std::string fileNameEnd;
+  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().size; i++)
+  { const std::string& currentStart = FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash()[i];
+    if (MathRoutines::StringBeginsWith(result, currentStart, &fileNameEnd))
+    { result = currentStart + theGlobalVariables.buildHeadHash + fileNameEnd;
+      break;
+    }
+  }
+  return result;
+}
+
 bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly
 (const std::string& inputFileName, std::string& output, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly");
@@ -903,7 +924,12 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
       *commentsOnFailure << "File name: " << inputFileNamE << " not allowed. ";
     return false;
   }
-  std::string inputCopy=inputFileNamE;
+  std::string inputCopy = inputFileNamE;
+  std::string folderEnd, folderEnd2;
+  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().size; i++)
+    if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash()[i], &folderEnd))
+      if (MathRoutines::StringBeginsWith(folderEnd, theGlobalVariables.buildHeadHash, &folderEnd2))
+        inputCopy = FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash()[i] + folderEnd2;
   for (int i = 0; i < FileOperations::FilesStartsToWhichWeAppendHostName().size; i++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FilesStartsToWhichWeAppendHostName()[i]))
     { if (!FileOperations::IsOKfileNameVirtual(theGlobalVariables.hostNoPort))
@@ -921,7 +947,6 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
       inputCopy = fileStart + "-" + toAppend + fileExtension;
       //stOutput << "DEBUG: inputCopy: " << inputCopy;
     }
-  std::string folderEnd;
   for (int i = 0; i < FileOperations::FolderVirtualLinksNonSensitive().size(); i++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd))
     { output = theGlobalVariables.PhysicalPathProjectBase + FileOperations::FolderVirtualLinksNonSensitive().theValues[i] + folderEnd;
@@ -1388,7 +1413,7 @@ void MathRoutines::StringSplitExcludeDelimiters
 
 void MathRoutines::SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond)
 { if (&outputFirst == &inputString || &outputSecond == &inputString)
-  { std::string inputCopy =inputString;
+  { std::string inputCopy = inputString;
     MathRoutines::SplitStringInTwo(inputCopy, firstStringSize, outputFirst, outputSecond);
     return;
   }
@@ -1405,43 +1430,43 @@ void MathRoutines::SplitStringInTwo(const std::string& inputString, int firstStr
 }
 
 void MathRoutines::NChooseK(int n, int k, LargeInt& result)
-{ result=1;
-  for (int i=0; i<k; i++)
-  { result*=(n-i);
-    result/=(i+1);
+{ result = 1;
+  for (int i = 0; i < k; i++)
+  { result *= n - i;
+    result /= i + 1;
   }
 }
 
 double MathRoutines::ReducePrecision(double x)
-{ if (x<0.00001 && x>-0.00001)
+{ if (x < 0.00001 && x > -0.00001)
     return 0;
   return x;
 }
 
 int MathRoutines::parity(int n)
-{ if (n%2==0)
+{ if (n % 2 == 0)
     return 1;
   else
     return -1;
 }
 
 int MathRoutines::Factorial(int n)
-{ if(n<1)
+{ if(n < 1)
     crash << "What exactly is Factorial(" << n << ") supposed to mean?  If you have an interpretation, implement it at " << __FILE__ << ":" << __LINE__ << crash;
   int fac = 1;
-  for(int i=1; i<=n; i++)
+  for(int i = 1; i <= n; i++)
     fac *= i;
   return fac;
 }
 
 int MathRoutines::NChooseK(int n, int k)
-{ int result=1;
-  for (int i =0; i<k; i++)
-  { result*=(n-i);
-    if (result <0)
+{ int result = 1;
+  for (int i = 0; i < k; i++)
+  { result *= n-i;
+    if (result < 0)
       return -1;
-    result/=(i+1);
-    if (result <0)
+    result /= i+1;
+    if (result < 0)
       return -1;
   }
   return result;
@@ -1449,31 +1474,31 @@ int MathRoutines::NChooseK(int n, int k)
 
 bool MathRoutines::StringEndsWith(const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning)
 { MacroRegisterFunctionWithName("MathRoutines::StringEndsWith");
-  if (desiredEnd.size()==0)
-  { if (outputStringBeginning==0)
-      *outputStringBeginning=theString;
+  if (desiredEnd.size() == 0)
+  { if (outputStringBeginning == 0)
+      *outputStringBeginning = theString;
     return true;
   }
-  int indexInTheString=theString.size()-1;
-  for (int i= ((signed)desiredEnd.size())-1; i>=0; i--)
-  { if (indexInTheString<0)
+  int indexInTheString = theString.size() - 1;
+  for (int i = ((signed)desiredEnd.size()) - 1; i >= 0; i--)
+  { if (indexInTheString < 0)
       return false;
-    if (desiredEnd[i]!=theString[indexInTheString])
+    if (desiredEnd[i] != theString[indexInTheString])
       return false;
     indexInTheString--;
   }
-  if (outputStringBeginning!=0)
-    *outputStringBeginning=theString.substr(0, theString.size()-desiredEnd.size());
+  if (outputStringBeginning != 0)
+    *outputStringBeginning = theString.substr(0, theString.size() - desiredEnd.size());
   return true;
 }
 
 bool MathRoutines::StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd)
 { std::string actualBeginning, stringEnd;
   MathRoutines::SplitStringInTwo(theString, desiredBeginning.size(), actualBeginning, stringEnd);
-  bool result=(actualBeginning==desiredBeginning);
+  bool result=(actualBeginning == desiredBeginning);
   //outputstring is only modified if result is true
-  if (result && outputStringEnd!=0)
-    *outputStringEnd=stringEnd;
+  if (result && outputStringEnd != 0)
+    *outputStringEnd = stringEnd;
   return result;
 }
 
@@ -1496,65 +1521,65 @@ bool MathRoutines::isADigit(char theChar, int* whichDigit)
 bool MathRoutines::IsAHexDigit(char digitCandidate)
 { if(MathRoutines::isADigit(digitCandidate))
     return true;
-  if (digitCandidate>='A' && digitCandidate <='F')
+  if (digitCandidate >= 'A' && digitCandidate <= 'F')
     return true;
-  if (digitCandidate>='a' && digitCandidate <='f')
+  if (digitCandidate >= 'a' && digitCandidate <= 'f')
     return true;
   return false;
 }
 
 bool MathRoutines::isADigit(const std::string& input, int* whichDigit)
-{ if (input.size()!=1)
+{ if (input.size() != 1)
     return false;
   return MathRoutines::isADigit(input[0], whichDigit);
 }
 
 int MathRoutines::lcm(int a, int b)
-{ if (a<0)
-    a=-a;
-  if (b<0)
-    b=-b;
-  return ((a*b)/Rational::gcdSigned(a, b));
+{ if (a < 0)
+    a = -a;
+  if (b < 0)
+    b = -b;
+  return ((a * b) / Rational::gcdSigned(a, b));
 }
 
 int MathRoutines::TwoToTheNth(int n)
-{ int result=1;
-  for(int i=0; i<n; i++)
-    result*=2;
+{ int result = 1;
+  for(int i = 0; i < n; i++)
+    result *= 2;
   return result;
 }
 
 int MathRoutines::KToTheNth(int k, int n)
-{ int result=1;
-  for(int i=0; i<n; i++)
-    result*=k;
+{ int result = 1;
+  for(int i = 0; i < n; i++)
+    result *= k;
   return result;
 }
 
 void MathRoutines::KToTheNth(int k, int n, LargeInt& output)
-{ output=1;
-  for(int i=0; i<n; i++)
-    output*=k;
+{ output = 1;
+  for(int i = 0; i < n; i++)
+    output *= k;
 }
 
 Vector<double> MathRoutines::GetVectorDouble(Vector<Rational>& input)
 { Vector<double> result;
   result.SetSize(input.size);
-  for (int i=0; i<input.size; i++)
-    result[i]=input[i].GetDoubleValue();
+  for (int i = 0; i < input.size; i++)
+    result[i] = input[i].GetDoubleValue();
   return result;
 }
 
 int MathRoutines::BinomialCoefficientMultivariate(int N, List<int>& theChoices)
-{ int ChoiceIndex=0;
-  int denominator=1;
-  int result=0;
-  for( int i=N; i>0; i--)
-  { result*=i;
-    result/=denominator;
+{ int ChoiceIndex = 0;
+  int denominator = 1;
+  int result = 0;
+  for( int i = N; i > 0; i--)
+  { result *= i;
+    result /= denominator;
     denominator++;
-    if (denominator>theChoices[ChoiceIndex])
-    { denominator=1;
+    if (denominator > theChoices[ChoiceIndex])
+    { denominator = 1;
       ChoiceIndex++;
     }
   }
@@ -1564,51 +1589,51 @@ int MathRoutines::BinomialCoefficientMultivariate(int N, List<int>& theChoices)
 void Selection::init(int maxNumElements)
 { this->selected.SetSize(maxNumElements);
   this->elements.SetSize(maxNumElements);
-  this->MaxSize=maxNumElements;
-  for (int i=0; i<this->MaxSize; i++)
-    this->selected[i]=false;
-  this->CardinalitySelection=0;
+  this->MaxSize = maxNumElements;
+  for (int i = 0; i < this->MaxSize; i++)
+    this->selected[i] = false;
+  this->CardinalitySelection = 0;
 }
 
 void Selection::AddSelectionAppendNewIndex(int index)
-{ if (index>=this->MaxSize || index<0)
+{ if (index >= this->MaxSize || index < 0)
     return;
   if (this->selected[index])
     return;
-  this->selected[index]=true;
-  this->elements[this->CardinalitySelection]=index;
+  this->selected[index] = true;
+  this->elements[this->CardinalitySelection] = index;
   this->CardinalitySelection++;
 }
 
 Selection::Selection()
-{ this->MaxSize=-1;
+{ this->MaxSize = -1;
 //  this->elementsInverseSelection=0;
-  this->selected=0;
-  this->elements=0;
-  this->CardinalitySelection=0;
+  this->selected = 0;
+  this->elements = 0;
+  this->CardinalitySelection = 0;
 }
 
 Selection::Selection(int m)
 {  //this->elementsInverseSelection=0;
-  this->selected=0;
-  this->elements=0;
-  this->CardinalitySelection=0;
+  this->selected = 0;
+  this->elements = 0;
+  this->CardinalitySelection = 0;
   this->init(m);
 }
 
 void Selection::RemoveLastSelection()
-{ if (this->CardinalitySelection==0)
+{ if (this->CardinalitySelection == 0)
     return;
-  this->selected[this->elements[this->CardinalitySelection-1]]=false;
+  this->selected[this->elements[this->CardinalitySelection - 1]] = false;
   this->CardinalitySelection--;
 }
 
 int Selection::SelectionToIndex()
-{ int result=0;
-  for (int i=0; i<MaxSize; i++)
-  { result*=2;
+{ int result = 0;
+  for (int i = 0; i < MaxSize; i++)
+  { result *= 2;
     if (this->selected[i])
-      result+=1;
+      result += 1;
   }
   return result;
 }
@@ -1620,15 +1645,15 @@ void Selection::ShrinkMaxSize()
 }
 
 void Selection::ExpandMaxSize()
-{ this->elements[this->CardinalitySelection]=this->MaxSize;
-  this->selected[this->MaxSize]=true;
+{ this->elements[this->CardinalitySelection] = this->MaxSize;
+  this->selected[this->MaxSize] = true;
   this->MaxSize++;
   this->CardinalitySelection++;
 }
 
 void Selection::WriteToFile(std::fstream& output)
 { output << "Sel_max_size: " << this->MaxSize << " cardinality: " << this->CardinalitySelection << " ";
-  for (int i=0; i<this->CardinalitySelection; i++)
+  for (int i = 0; i < this->CardinalitySelection; i++)
     output << this->elements[i] << " ";
 }
 
@@ -1637,9 +1662,9 @@ void Selection::ReadFromFile(std::fstream& input)
   input >> tempS >> tempI;
   this->init(tempI);
   input >> tempS >> card;
-  if(tempS!="cardinality:")
+  if(tempS != "cardinality:")
     crash << crash;
-  for (int i=0; i<card; i++)
+  for (int i = 0; i < card; i++)
   { input >> tempI;
     this->AddSelectionAppendNewIndex(tempI);
   }
@@ -1652,8 +1677,8 @@ std::string Selection::ToString()const
 }
 
 void Selection::incrementSelection()
-{ for (int i=this->MaxSize-1; i>=0; i--)
-  { this->selected[i]=!this->selected[i];
+{ for (int i = this->MaxSize - 1; i >= 0; i--)
+  { this->selected[i] = !this->selected[i];
     if (this->selected[i])
     { this->ComputeIndicesFromSelection();
       return;

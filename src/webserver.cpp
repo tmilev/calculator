@@ -73,7 +73,7 @@ std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
 { std::stringstream out;
   out
   << "<script type=\"text/javascript\"> \n"
-  << HtmlRoutines::GetJavascriptCookieFunctionsNoTags()
+  << HtmlRoutines::GetJavascriptCookieFunctionSNoTags()
   << "function storeSettings()\n"
   << "{ theCalculatorForm=document.getElementById(\"mainInputID\");  \n"
   << "  //alert(theCalculatorForm.style.width);\n"
@@ -1306,7 +1306,7 @@ std::string WebWorker::GetDatabasePage()
   std::stringstream out;
   out << "<html>"
   << "<head>"
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << HtmlRoutines::GetCSSLinkCalculator()
   << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile();
 
@@ -1333,7 +1333,7 @@ std::string WebWorker::GetDatabasePage()
   << "currentDatabaseKeyColumn=" << keyColName << "&"
   << "\";\n"
   << "</script>"
-  << HtmlRoutines::GetJavascriptDatabaseRoutinesWithTags()
+  << HtmlRoutines::GetJavascriptDatabaseRoutinesLink()
   ;
   out << "</head>"
   << "<body onload=\"loadSettings();\">\n";
@@ -2043,7 +2043,7 @@ int WebWorker::ProcessToggleMonitoring()
 { MacroRegisterFunctionWithName("WebWorker::ToggleMonitoring");
   this->SetHeaderOKNoContentLength();
   stOutput << "<html><head> ";
-  stOutput << HtmlRoutines::GetCalculatorStyleSheetWithTags();
+  stOutput << HtmlRoutines::GetCSSLinkCalculator();
   stOutput << "</head>";
   stOutput << "<body>";
   stOutput << "<calculatorNavigation>"
@@ -2070,7 +2070,7 @@ int WebWorker::ProcessServerStatus()
   std::stringstream out;
   out << "<html>"
   << "<head>"
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << HtmlRoutines::GetCSSLinkCalculator()
   << "</head>"
   << "<body>";
   std::stringstream pageBody;
@@ -2138,7 +2138,7 @@ int WebWorker::ProcessMonitor()
   int inputWebWorkerNumber= atoi(theMainInput.c_str());
   stOutput << "<html>"
   << "<head>"
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << HtmlRoutines::GetCSSLinkCalculator()
   << this->GetJavaScriptIndicatorBuiltInServer()
   << "</head>"
   << "<body>";
@@ -2346,7 +2346,7 @@ int WebWorker::ProcessFile()
     this->SetHeadeR("HTTP/1.0 404 Object not found", "Content-Type: text/html");
 //    if (stOutput.theOutputFunction==0)
     stOutput << "<html>"
-    << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+    << HtmlRoutines::GetCSSLinkCalculator()
     << "<body>";
     stOutput << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
     stOutput << "<b>File does not exist.</b>";
@@ -2577,7 +2577,7 @@ int WebWorker::ProcessUnknown()
 { MacroRegisterFunctionWithName("WebWorker::ProcessUnknown");
   this->SetHeadeR("HTTP/1.0 501 Method Not Implemented", "Content-Type: text/html");
   stOutput << "<html><head>"
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << HtmlRoutines::GetCSSLinkCalculator()
   << "</head>";
   stOutput << "<body>";
   stOutput << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
@@ -2813,8 +2813,8 @@ std::string WebWorker::GetChangePasswordPage()
   std::stringstream out;
   out << "<html>";
   out << "<head>";
-  out << HtmlRoutines::GetJavascriptAccountManagementWithTags();
-  out << HtmlRoutines::GetCalculatorStyleSheetWithTags();
+  out << HtmlRoutines::GetJavascriptAccountManagementLink();
+  out << HtmlRoutines::GetCSSLinkCalculator();
   out << "</head>";
   out << "<body> ";
 #ifdef MACRO_use_MySQL
@@ -3127,19 +3127,19 @@ int WebWorker::ProcessCalculator()
   stOutput << "<html><head> <title>Calculator build " << theGlobalVariables.buildVersionSimple
   << "</title>";
   stOutput << HtmlRoutines::GetJavascriptMathjax();
-  stOutput << HtmlRoutines::GetCalculatorStyleSheetWithTags();
+  stOutput << HtmlRoutines::GetCSSLinkCalculator();
   stOutput << HtmlRoutines::GetJavascriptHideHtmlWithTags();
   stOutput << HtmlRoutines::GetJavascriptStandardCookiesWithTags();
   stOutput << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile();
-  stOutput << HtmlRoutines::GetJavascriptCanvasGraphicsWithTags();
-  stOutput << HtmlRoutines::GetJavascriptAutocompleteWithTags();
-  stOutput << HtmlRoutines::GetJavascriptInitializeButtonsWithTags();
+  stOutput << HtmlRoutines::GetJavascriptCanvasGraphicsLink();
+  stOutput << HtmlRoutines::GetJavascriptAutocompleteLink();
+  stOutput << HtmlRoutines::GetJavascriptInitializeButtonsLink();
   stOutput << HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull();
 //  stOutput << HtmlRoutines::GetJavascriptMathQuillDefault();
-  stOutput << HtmlRoutines::GetMathQuillStyleSheetWithTags();
+  stOutput << HtmlRoutines::GetMathQuillStyleSheetLink();
 
   stOutput << this->GetJavaScriptIndicatorBuiltInServer();
-  stOutput << HtmlRoutines::GetJavascriptCalculatorPage();
+  stOutput << HtmlRoutines::GetJavascriptCalculatorPageLink();
 
   stOutput << "\n\n<script language=\"javascript\">\n"
   << "  var theAutocompleteDictionary = [\n  ";
@@ -3480,7 +3480,7 @@ int WebWorker::ProcessSlidesFromSource()
     stOutput << "<!DOCTYPE html>"
     << "<html>"
     << "<head>"
-    << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+    << HtmlRoutines::GetCSSLinkCalculator()
     << "</head>"
     << "<body>"
     << "<calculatorNavigation>"
@@ -3523,7 +3523,7 @@ int WebWorker::ProcessSlidesSource()
     stOutput << "<!DOCTYPE html>"
     << "<html>"
     << "<head>"
-    << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+    << HtmlRoutines::GetCSSLinkCalculator()
     << "</head>"
     << "<body>"
     << "<calculatorNavigation>"
@@ -3648,7 +3648,7 @@ std::string WebWorker::GetForgotLoginPage()
   out << "<html>"
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << HtmlRoutines::GetJavascriptHideHtmlWithTags()
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags();
+  << HtmlRoutines::GetCSSLinkCalculator();
   out << HtmlInterpretation::GetJavascriptCaptcha();
   out << "<script language=\"javascript\">\n";
   out
@@ -3713,7 +3713,7 @@ std::string WebWorker::GetSignUpPage()
   out << "<html>"
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << HtmlRoutines::GetJavascriptHideHtmlWithTags()
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags();
+  << HtmlRoutines::GetCSSLinkCalculator();
   out << "<script language=\"javascript\">\n";
   out
   << "function resetRecaptchaOnLoad()\n"
@@ -3793,7 +3793,7 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   out << "<html>"
   << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << WebWorker::GetJavascriptSubmitLoginInfo()
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << HtmlRoutines::GetCSSLinkCalculator()
   << "<body";
   out << " onload=\"loadSettings();";
   out << "\"";
@@ -5203,29 +5203,6 @@ int WebServer::Run()
     logSuccessfulForks.reset();
     logSuccessfulForks.flagWriteImmediately=true;
   }
-  std::string theDir = FileOperations::GetCurrentFolder();
-  theGlobalVariables.ChDir("../");
-  theGlobalVariables.buildVersionSimple =
-  MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("svn info | grep \"Revision\" | awk '{print $2}'"));
-  //<- if using svn, this will return the svn revision number
-  if (theGlobalVariables.buildVersionSimple == "")
-    theGlobalVariables.buildVersionSimple =
-    MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
-  theGlobalVariables.buildVersionSimple= MathRoutines::StringTrimWhiteSpace(theGlobalVariables.buildVersionSimple);
-  for (unsigned i=0; i<theGlobalVariables.buildVersionSimple.size(); i++)
-    if (MathRoutines::isALatinLetter(theGlobalVariables.buildVersionSimple[i]))
-    { theGlobalVariables.buildVersionSimple = "?";
-      break;
-    }
-  theGlobalVariables.buildHeadHash =
-  MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-parse HEAD"));
-  for (unsigned i=0; i<theGlobalVariables.buildHeadHash.size(); i++)
-    if (!MathRoutines::IsAHexDigit(theGlobalVariables.buildHeadHash[i]))
-    { theGlobalVariables.buildHeadHash = "x";
-      break;
-    }
-
-  theGlobalVariables.ChDir(theDir);
   if (true)
   { int pidMonitor=fork();
     if (pidMonitor<0)
@@ -5457,7 +5434,7 @@ int WebWorker::Run()
     { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
       stOutput << "<html>"
       << "<head>"
-      << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+      << HtmlRoutines::GetCSSLinkCalculator()
       << "</head>"
       << "<body>"
       << "<calculatorNavigation>"
@@ -5781,63 +5758,76 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
   FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
   folderSubstitutionsNonSensitive.Clear();
+
+  std::string theDir = FileOperations::GetCurrentFolder();
+  theGlobalVariables.ChDir("../");
+  theGlobalVariables.buildVersionSimple =
+  MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("svn info | grep \"Revision\" | awk '{print $2}'"));
+  //<- if using svn, this will return the svn revision number
+  if (theGlobalVariables.buildVersionSimple == "")
+    theGlobalVariables.buildVersionSimple =
+    MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
+  theGlobalVariables.buildVersionSimple= MathRoutines::StringTrimWhiteSpace(theGlobalVariables.buildVersionSimple);
+  for (unsigned i=0; i<theGlobalVariables.buildVersionSimple.size(); i++)
+    if (MathRoutines::isALatinLetter(theGlobalVariables.buildVersionSimple[i]))
+    { theGlobalVariables.buildVersionSimple = "?";
+      break;
+    }
+  theGlobalVariables.buildHeadHash =
+  MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-parse HEAD"));
+  for (unsigned i=0; i<theGlobalVariables.buildHeadHash.size(); i++)
+    if (!MathRoutines::IsAHexDigit(theGlobalVariables.buildHeadHash[i]))
+    { theGlobalVariables.buildHeadHash = "x";
+      break;
+    }
+  theGlobalVariables.ChDir(theDir);
+
+  FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
+  ("/html-common-calculator");
+  FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
+  ("font");
+  FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
+  ("/font");
+
   //Warning: order of substitutions is important. Only the first rule that applies is applied, only once.
   //No further rules are applied after that.
-  folderSubstitutionsNonSensitive.SetKeyValue("output/", "output/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("certificates-public/", "certificates-public/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/certificates-public/", "certificates-public/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("ProblemCollections/", "ProblemCollections/");
   folderSubstitutionsNonSensitive.SetKeyValue("problemtemplates/", "../problemtemplates/");
+
   folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("html/", "../public_html/"); //<-internal use
+
   folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", "./html-common/font/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("html-common/font/", "./html-common/font/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "../public_html/html-common/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("html-common/", "../public_html/html-common/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/html-common-calculator/", "./html-common/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("html-common-calculator/", "./html-common/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/font/", "./html-common/font/");
-  folderSubstitutionsNonSensitive.SetKeyValue("font/", "./html-common/font/");
-  folderSubstitutionsNonSensitive.SetKeyValue("/DefaultProblemLocation/", "../problemtemplates/");//<-coming from webserver
+
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("coursetemplates/", "../coursetemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("coursesavailable/", "../coursesavailable/"); //<-web server
-  folderSubstitutionsNonSensitive.SetKeyValue("/coursesavailable/", "../coursesavailable/"); //<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
+
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");
+
   folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");
-  folderSubstitutionsNonSensitive.SetKeyValue("LaTeX-materials/", "../LaTeX-materials/");
-  folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/freecalc/", "../freecalc/");
-  folderSubstitutionsNonSensitive.SetKeyValue("slides-videos/", "../slides-videos/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("/slides-videos/", "../slides-videos/");
 
   folderSubstitutionsSensitive.Clear();
-  folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");//<-internal use
   folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");//<-coming from webserver
-  folderSubstitutionsSensitive.SetKeyValue("crashes/", "LogFiles/crashes/");
+  folderSubstitutionsSensitive.SetKeyValue("/crashes/", "/LogFiles/crashes/");
 
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("favicon.ico");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/favicon.ico");
-  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("coursesavailable/default/default.txt");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/coursesavailable/default/default.txt");
-  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("html-common-calculator/about.html");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/html-common-calculator/about.html");
-  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("html/about.html");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/html/about.html");
 
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("topiclists/");
-  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/topiclists/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("coursetemplates/");
-  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/coursetemplates/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("coursesavailable/");
-  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/coursesavailable/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("problemtemplates/");
-  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/problemtemplates/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("DefaultProblemLocation/");
-  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/DefaultProblemLocation/");
 }
 
 int main(int argc, char **argv)
@@ -5896,7 +5886,7 @@ int WebServer::main(int argc, char **argv)
   theWebServer.CheckMathJaxSetup();
   theWebServer.CheckSVNSetup();
   theWebServer.CheckFreecalcSetup();
-  theGlobalVariables.flagServerDetailedLog=FileOperations::FileExistsVirtual("LogFiles/serverDebugOn.txt", true, false);
+  theGlobalVariables.flagServerDetailedLog = FileOperations::FileExistsVirtual("/LogFiles/serverDebugOn.txt", true, false);
   if (theGlobalVariables.flagServerDetailedLog)
   { logServer
     << logger::purple << "************************" << logger::endL
@@ -5910,7 +5900,7 @@ int WebServer::main(int argc, char **argv)
     << logger::purple << "************************" << logger::endL
        ;
   }
-  theGlobalVariables.flagCachingInternalFilesOn=!FileOperations::FileExistsVirtual("LogFiles/serverRAMCachingOff.txt", true, false);;
+  theGlobalVariables.flagCachingInternalFilesOn=!FileOperations::FileExistsVirtual("/LogFiles/serverRAMCachingOff.txt", true, false);;
   if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
   { logServer
     << logger::purple << "************************" << logger::endL
@@ -5920,7 +5910,7 @@ int WebServer::main(int argc, char **argv)
     << logger::purple << "************************" << logger::endL;
   }
 
-  theGlobalVariables.flagAceIsAvailable= FileOperations::FileExistsVirtual("MathJax-2.7-latest/", false);
+  theGlobalVariables.flagAceIsAvailable= FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
   if (!theGlobalVariables.flagAceIsAvailable && theGlobalVariables.flagRunningBuiltInWebServer)
     logServer << logger::red << "MathJax not available. " << logger::endL;
 //  if (false &&

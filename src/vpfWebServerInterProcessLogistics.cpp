@@ -492,10 +492,10 @@ bool PipePrimitive::ReadIfFailThenCrash(bool restartServerOnFail, bool dontCrash
 { MacroRegisterFunctionWithName("PipePrimitive::ReadIfFailThenCrash");
   this->CheckConsistency();
   this->lastRead.SetSize(0);
-  if (this->pipeEnds[0]==-1)
+  if (this->pipeEnds[0] == -1)
     return false;
   int counter=0;
-  const unsigned int bufferSize=200000;
+  const unsigned int bufferSize = 200000;
   this->buffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
   int numReadBytes=0;
   for (;;)
@@ -517,12 +517,12 @@ bool PipePrimitive::ReadIfFailThenCrash(bool restartServerOnFail, bool dontCrash
     if (errno==EWOULDBLOCK)
       return true;
   }
-  if (numReadBytes>150000)
+  if (numReadBytes > 150000)
     logIO << logger::red << this->ToString()
     << "This is not supposed to happen: pipe read more than 150000 bytes. " << logger::endL;
-  if (numReadBytes>0)
+  if (numReadBytes > 0)
   { this->buffer.SetSize(numReadBytes);
-    this->lastRead=this->buffer;
+    this->lastRead = this->buffer;
   }
   return true;
 }
@@ -535,7 +535,7 @@ void Pipe::ReadWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail)
   this->thePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   if (this->thePipe.lastRead.size>0)
   { std::string tempS;
-    tempS=this->GetLastRead();
+    tempS = this->GetLastRead();
     this->thePipe.WriteIfFailThenCrash(tempS, restartServerOnFail, dontCrashOnFail);
   }
   this->theMutexPipe.ResumePausedProcessesIfAny(restartServerOnFail, dontCrashOnFail);

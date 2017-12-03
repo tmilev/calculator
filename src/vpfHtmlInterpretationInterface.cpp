@@ -438,7 +438,7 @@ std::string HtmlInterpretation::GetAboutPage()
   out << "<!DOCTYPE html>";
   out << "<html>";
   out << "<head>"
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << HtmlRoutines::GetCSSLinkCalculator()
   << "</head>";
   out << "<body>";
   out << "<calculatorNavigation>"
@@ -542,7 +542,7 @@ std::string HtmlInterpretation::GetSelectCourse()
   out << "<!DOCTYPE html>";
   out << "<html>";
   out << "<head>"
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << HtmlRoutines::GetCSSLinkCalculator()
   << "</head>";
   out << "<body>";
   out << "<calculatorNavigation>"
@@ -618,7 +618,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   thePage.fileName=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   if (!thePage.LoadMe(true, comments, theGlobalVariables.GetWebInput("randomSeed")))
   { out << "<html>"
-    << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+    << "<head>" << HtmlRoutines::GetCSSLinkCalculator() << "</head>"
     << "<body>"
     << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
     << "<b>Failed to load file: "
@@ -628,7 +628,9 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   }
   if (!thePage.InterpretHtml(comments))
   { out << "<html>"
-    << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+    << "<head>"
+    << HtmlRoutines::GetCSSLinkCalculator()
+    << "</head>"
     << "<body>"
     << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
     << "<b>Failed to interpret as template the following file: "
@@ -643,12 +645,12 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   out << "<head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << thePage.outputHtmlHeadNoTag;
   out << HtmlRoutines::GetJavascriptStandardCookiesWithTags();
-  out << HtmlRoutines::GetJavascriptProblemLinksWithTags();
-  out << HtmlRoutines::GetJavascriptInitializeButtonsWithTags();
+  out << HtmlRoutines::GetJavascriptProblemLinksLink();
+  out << HtmlRoutines::GetJavascriptInitializeButtonsLink();
   if (includeDeadlineJavascript || includeInitializeButtonsJS)
-    out << HtmlRoutines::GetJavascriptCalculatorPage();
+    out << HtmlRoutines::GetJavascriptCalculatorPageLink();
   if (theGlobalVariables.UserDefaultHasProblemComposingRights())
-    out << HtmlRoutines::GetJavascriptTopicListWithTags();
+    out << HtmlRoutines::GetJavascriptTopicListLink();
   out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << "<body" //<< ">"
   << " onload=\"loadSettings();";
@@ -684,9 +686,9 @@ std::string HtmlInterpretation::GetExamPage()
     out << HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull() << "\n";
   else
     out << HtmlRoutines::GetJavascriptMathQuillDefaultFull() << "\n";
-  out << HtmlRoutines::GetMathQuillStyleSheetWithTags() << "\n"
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags() << "\n"  ;
-  out << HtmlRoutines::GetJavascriptInitializeButtonsWithTags() << "\n";
+  out << HtmlRoutines::GetMathQuillStyleSheetLink() << "\n"
+  << HtmlRoutines::GetCSSLinkCalculator() << "\n"  ;
+  out << HtmlRoutines::GetJavascriptInitializeButtonsLink() << "\n";
   if (theFile.flagLoadedSuccessfully)
     out << theFile.outputHtmlHeadNoTag;
   //<-must come after theFile.outputHtmlHeadNoTag
@@ -706,7 +708,7 @@ std::string HtmlInterpretation::GetBrowseProblems()
   out << "<!DOCTYPE html>";
   out << "<html>";
   out << "<head>"
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << HtmlRoutines::GetCSSLinkCalculator()
   << "</head>";
   out << "<body>";
   out << "<calculatorNavigation>"
@@ -732,18 +734,14 @@ std::string HtmlInterpretation::GetEditPageHTML()
   //  << HtmlRoutines::GetLaTeXProcessingJavascript()
   //  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << HtmlRoutines::GetCSSLinkCalculator()
   << "<style type=\"text/css\" media=\"screen\">\n"
   << "    #editor { \n"
   << "      height: 380px;\n"
   << "      font-size: 100%;\n"
   << "   }\n"
   << "</style>\n";
-  outHead << HtmlRoutines::GetJavascriptAceEditorScript();
-  //  << "<script src=\"/html-common-calculator/ace.min.js\" type=\"text/javascript\" charset=\"utf-8\"></script>"
-  //  << "<script src=\"https://cdn.jsdelivr.net/ace/1.2.3/min/ace.js\" type=\"text/javascript\" charset=\"utf-8\"></script>\n"
-  //  << "<link rel=\"stylesheet\" href=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/styles/default.min.css\">"
-  //  << "<script src=\"//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.2.0/highlight.min.js\"></script>"
+  outHead << HtmlRoutines::GetJavascriptAceEditorScriptWithTags();
   outBody << "<body onload=\"loadSettings();\">\n";
   outBody << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</calculatorNavigation>";
@@ -1512,7 +1510,7 @@ std::string HtmlInterpretation::GetScoresPage()
   std::stringstream out;
   out << "<html>"
   << "<head>"
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << HtmlRoutines::GetCSSLinkCalculator()
   << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << "<link rel=\"stylesheet\" href=\"/html-common-calculator/styleScorePage.css\">"
   << "</head>"
@@ -1534,7 +1532,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   std::stringstream out;
   out << "<html>"
   << "<head>"
-  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
+  << HtmlRoutines::GetCSSLinkCalculator()
   << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << HtmlRoutines::GetJavascriptSubmitEmails()
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()

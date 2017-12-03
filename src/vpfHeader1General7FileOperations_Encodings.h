@@ -12,9 +12,10 @@ struct FileOperations
 public:
   static HashedList<std::string, MathRoutines::hashString>&
   FilesStartsToWhichWeAppendHostName();
-
   static HashedList<std::string, MathRoutines::hashString>&
   FolderStartsToWhichWeAppendInstructorUsernameSlash();
+  static HashedList<std::string, MathRoutines::hashString>&
+  FolderVirtualLinksToWhichWeAppendBuildHash();
 
   static MapLisT<std::string, std::string, MathRoutines::hashString>&
   FolderVirtualLinksNonSensitive();
@@ -62,6 +63,8 @@ public:
   static bool GetPhysicalFileNameFromVirtualCustomizedWriteOnly
   (const std::string& inputFileName, std::string& output,
    std::stringstream* commentsOnFailure);
+
+  static std::string GetVirtualNameWithHash(const std::string& inputFileName);
 
   static bool GetPhysicalFileNameFromVirtual
   (const std::string& inputFileName, std::string& output,

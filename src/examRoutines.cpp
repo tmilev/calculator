@@ -2802,7 +2802,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (!this->PrepareAndExecuteCommands(theInterpreter, comments))
     return false;
   if (theInterpreter.theProgramExpression.HasInputBoxVariables() )
-    outHeadPt2 << HtmlRoutines::GetJavascriptCalculatorPage();
+    outHeadPt2 << HtmlRoutines::GetJavascriptCalculatorPageLink();
 //////////////////////////////interpretation takes place before javascript generation as the latter depends on the former.
   if (this->flagIsExamProblem)
     outHeadPt2 << this->GetJavascriptSubmitAnswers();
@@ -2901,7 +2901,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsExamProblem)
   { outHeadPt2 << this->GetJavascriptMathQuillBoxes();
     if (theInterpreter.flagHasGraphics)
-      outHeadPt2 << HtmlRoutines::GetJavascriptCanvasGraphicsWithTags();
+      outHeadPt2 << HtmlRoutines::GetJavascriptCanvasGraphicsLink();
   }
   ////////////////////////////////////////////////////////////////////
   //out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";

@@ -396,11 +396,19 @@ bool PipePrimitive::WriteIfFailThenCrash(const std::string& toBeSent, bool resta
       if (errno==EAI_AGAIN || errno==EWOULDBLOCK ||
           errno == EINTR || errno ==EIO)
       { numBadAttempts++;
-        logIO << logger::red << "Failed write on pipe: " << this->ToString() << numBadAttempts
-        << " times. Last error: " << strerror(errno) << ". " << logger::endL;
-        if (numBadAttempts>30)
-        { logIO << logger::red << "Failed write on pipe: " << this->ToString() << ". Last error: "
-          << strerror(errno) << ". " << logger::endL;
+        if (theGlobalVariables.processType == ProcessTypes::worker)
+          logIO << logger::red << "Failed write on pipe: " << this->ToString() << numBadAttempts
+          << " times. Last error: " << strerror(errno) << ". " << logger::endL;
+        if (theGlobalVariables.processType == ProcessTypes::server)
+          logServer << logger::red << "Failed write on pipe: " << this->ToString() << numBadAttempts
+          << " times. Last error: " << strerror(errno) << ". " << logger::endL;
+        if (numBadAttempts > 30)
+        { if (theGlobalVariables.processType == ProcessTypes::worker)
+            logIO << logger::red << "Failed write on pipe: " << this->ToString() << ". Last error: "
+            << strerror(errno) << ". " << logger::endL;
+          if (theGlobalVariables.processType == ProcessTypes::server)
+            logServer << logger::red << "Failed write on pipe: " << this->ToString() << ". Last error: "
+            << strerror(errno) << ". " << logger::endL;
           if (restartServerOnFail)
             theWebServer.Restart();
           else if (!dontCrashOnFail)
@@ -414,9 +422,13 @@ bool PipePrimitive::WriteIfFailThenCrash(const std::string& toBeSent, bool resta
   }
   if (numBytesWritten<0)
     return false;
-  if ((unsigned) numBytesWritten<toBeSent.size())
-  { logIO << logger::red << this->ToString() << ": wrote only "
-    << numBytesWritten << " bytes out of " << toBeSent.size() << " total. " << logger::endL;
+  if ((unsigned) numBytesWritten < toBeSent.size())
+  { if (theGlobalVariables.processType == ProcessTypes::worker)
+      logIO << logger::red << this->ToString() << ": wrote only "
+      << numBytesWritten << " bytes out of " << toBeSent.size() << " total. " << logger::endL;
+    if (theGlobalVariables.processType == ProcessTypes::server)
+      logServer << logger::red << this->ToString() << ": wrote only "
+      << numBytesWritten << " bytes out of " << toBeSent.size() << " total. " << logger::endL;
   }
   return true;
 }

@@ -1478,18 +1478,18 @@ bool MathRoutines::StringBeginsWith(const std::string& theString, const std::str
 }
 
 bool MathRoutines::isALatinLetter(char input)
-{ if (input>='a' && input<='z')
+{ if (input >= 'a' && input <= 'z')
     return true;
-  if (input>='A' && input<='Z')
+  if (input >= 'A' && input <= 'Z')
     return true;
   return false;
 }
 
 bool MathRoutines::isADigit(char theChar, int* whichDigit)
-{ int theDigit=theChar-'0';
-  bool result=(theDigit<10 && theDigit>=0);
-  if (result && whichDigit!=0)
-    *whichDigit=theDigit;
+{ int theDigit = theChar - '0';
+  bool result = (theDigit < 10 && theDigit >= 0);
+  if (result && whichDigit != 0)
+    *whichDigit = theDigit;
   return result;
 }
 

@@ -4090,11 +4090,12 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   finishChapter.type=finishChapter.tChapter;
   out << finishChapter.GetItemFinish(*this);
   this->NumVideosFound=this->NumVideosHandwrittenFound+this->NumVideosWithSlidesFound;
-  outHead << "<panelStudentScores>Calculator build " << theGlobalVariables.buildVersion << ". The course contains "
+  outHead << "<panelStudentScores>Calculator build " << theGlobalVariables.buildVersionSimple << ". The course contains "
   << this->NumProblemsFound << " problem templates, "
   << this->NumSlidesFound << " slides (printable+projector mode counted as a single slide) and "
   << this->NumVideosFound << "=" << this->NumVideosWithSlidesFound << " with-slide + "
   << this->NumVideosHandwrittenFound << " handwritten videos.</panelStudentScores><br>";
+  //outHead << "DEBUG: " << theGlobalVariables.buildHeadHash;
   outFinal << outHead.str() << out.str();
   inputOutput.interpretedCommand=outFinal.str();
   std::stringstream topicListJS;

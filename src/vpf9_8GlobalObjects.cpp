@@ -29,21 +29,25 @@ std::string GlobalVariables::GetDateTime()
   return now.ToStringHumanReadable();
 }
 
-logger theLog("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html", 0, true, "worker");
-logger logServerMonitor("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServerMonitor.html", 0, false, "serverMonitor");
-logger logServer("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServer.html", 0, false, "server");
+std::string ProcessTypes::worker = "worker";
+std::string ProcessTypes::server = "server";
+std::string ProcessTypes::serverMonitor = "serverMonitor";
 
-logger logHttpErrors("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogHttpErrors.html", &theLog, false, "worker");
-logger logBlock("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogBlockingEvents.html", &theLog, false, "worker");
-logger logIO("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogIOErrorsEvents.html", &theLog, false, "worker");
-logger logOpenSSL("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogOpenSSL.html", &theLog, false, "worker");
-logger logEmail("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogEmail.html", &theLog, false, "worker");
+logger theLog("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html", 0, true, ProcessTypes::worker);
+logger logServerMonitor("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServerMonitor.html", 0, false, ProcessTypes::serverMonitor);
+logger logServer("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServer.html", 0, false, ProcessTypes::server);
 
-logger logSocketAccept("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogSocketAccept.html", &logServer, false, "server");
-logger logProcessStats("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogWorkerProcessStats.html", &logServer, false, "server");
-logger logPlumbing("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogServerPlumbing.html", &logServer, false, "server");
-logger logProcessKills("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogMultiprocessing.html", &logServer, false, "server");
-logger logSuccessfulForks("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogForkSuccess.html", &logServer, false, "server");
+logger logHttpErrors("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogHttpErrors.html", &theLog, false, ProcessTypes::worker);
+logger logBlock("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogBlockingEvents.html", &theLog, false, ProcessTypes::worker);
+logger logIO("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogIOErrorsEvents.html", &theLog, false, ProcessTypes::worker);
+logger logOpenSSL("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogOpenSSL.html", &theLog, false, ProcessTypes::worker);
+logger logEmail("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogEmail.html", &theLog, false, ProcessTypes::worker);
+
+logger logSocketAccept("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogSocketAccept.html", &logServer, false, ProcessTypes::server);
+logger logProcessStats("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogWorkerProcessStats.html", &logServer, false, ProcessTypes::server);
+logger logPlumbing("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogServerPlumbing.html", &logServer, false, ProcessTypes::server);
+logger logProcessKills("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogMultiprocessing.html", &logServer, false, ProcessTypes::server);
+logger logSuccessfulForks("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogForkSuccess.html", &logServer, false, ProcessTypes::server);
 
 Calculator theParser;
 FormatExpressions consoleFormat;
@@ -52,15 +56,15 @@ StdoutClass stOutput;
 
 void InitializeGlobalObjects()
 { //stOutput << "Content-Type: text/html\n\n";
-  theGlobalVariables.processType="server";
-  theGlobalVariables.flagIsChildProcess=false;
+  theGlobalVariables.processType = ProcessTypes::server;
+  theGlobalVariables.flagIsChildProcess = false;
   InitializeTimer();
-  theGlobalVariables.IndicatorStringOutputFunction=&HtmlRoutines::MakeReportIndicatorFile;
+  theGlobalVariables.IndicatorStringOutputFunction = &HtmlRoutines::MakeReportIndicatorFile;
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
-  theGlobalVariables.sleepFunction=SleepFunction;
-  theGlobalVariables.pointerCallSystemNoOutput=&CallSystemWrapperNoOutput;
-  theGlobalVariables.pointerCallSystemWithOutput=&CallSystemWrapperReturnStandardOutput;
-  theGlobalVariables.pointerCallChDir=&CallChDirWrapper;
+  theGlobalVariables.sleepFunction = SleepFunction;
+  theGlobalVariables.pointerCallSystemNoOutput = &CallSystemWrapperNoOutput;
+  theGlobalVariables.pointerCallSystemWithOutput = &CallSystemWrapperReturnStandardOutput;
+  theGlobalVariables.pointerCallChDir = &CallChDirWrapper;
 
   //stOutput << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
   //Change the below line to modify the computation time of the calculator.
@@ -70,7 +74,7 @@ void InitializeGlobalObjects()
 
 void HtmlRoutines::MakeReportIndicatorFile(const std::string& input)
 { //calling stOutput forbidden! stOutput itself calls HtmlRoutines::MakeReportIndicatorFile.
-  static int counter =-1;
+  static int counter = -1;
   counter++;
   //  if (counter%10!=0)
   //    return;

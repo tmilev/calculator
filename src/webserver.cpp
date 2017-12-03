@@ -3124,7 +3124,7 @@ int WebWorker::ProcessCalculator()
   this->SetHeaderOKNoContentLength();
   theParser.inputString=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
   theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
-  stOutput << "<html><head> <title>Calculator build " << theGlobalVariables.buildVersion
+  stOutput << "<html><head> <title>Calculator build " << theGlobalVariables.buildVersionSimple
   << "</title>";
   stOutput << HtmlRoutines::GetJavascriptMathjax();
   stOutput << HtmlRoutines::GetCalculatorStyleSheetWithTags();
@@ -4439,9 +4439,8 @@ WebServer::WebServer()
   this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common-calculator/mathquill.min-matrix.js");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("html-common/font/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/font/");
-  this->addressStartsNotNeedingLogin.AddOnTop("cache.appcache");
-  this->addressStartsNotNeedingLogin.AddOnTop("/.well-known/");
-  this->addressStartsNotNeedingLogin.AddOnTop(".well-known/");
+  //this->addressStartsNotNeedingLogin.AddOnTop("/.well-known/");
+  //this->addressStartsNotNeedingLogin.AddOnTop(".well-known/");
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("html-common/");
@@ -4460,7 +4459,6 @@ WebServer::WebServer()
   //is FORBIDDEN! Logging someone out definitely requires authentication (imagine someone
   //asking for logouts on your account once every second: this would be fatal as proper logout resets
   //the authentication tokens.
-
 }
 
 WebWorker& WebServer::GetActiveWorker()
@@ -4932,18 +4930,18 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     return;
   List<double> theTimes;
   List<int> theIndices;
-  for (int i=0; i<this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
-      if (this->theWorkers[i].userAddress==incomingAddress)
+      if (this->theWorkers[i].userAddress == incomingAddress)
       { theTimes.AddOnTop(this->theWorkers[i].timeServerAtWorkerStart);
         theIndices.AddOnTop(i);
       }
   theTimes.QuickSortAscending(0, &theIndices);
-  for (int j=0; j<theTimes.size; j++)
+  for (int j = 0; j < theTimes.size; j++)
   { this->TerminateChildSystemCall(theIndices[j]);
     std::stringstream errorStream;
     errorStream
-    << "Terminating child " << theIndices[j]+1 << " with PID "
+    << "Terminating child " << theIndices[j] + 1 << " with PID "
     << this->theWorkers[theIndices[j]].ProcessPID
     << ": address: " << incomingAddress << " opened more than "
     << this->MaxNumWorkersPerIPAdress << " simultaneous connections. ";
@@ -4967,30 +4965,30 @@ void WebServer::RecycleChildrenIfPossible()
     logProcessStats << logger::red << "DEBUG: RecycleChildrenIfPossible start. " << logger::endL;
 //  this->ReapChildren();
   int numInUse=0;
-  for (int i=0; i<this->theWorkers.size; i++)
+  for (int i=0; i < this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
       numInUse++;
-  for (int i=0; i<this->theWorkers.size; i++)
+  for (int i=0; i < this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
     { PipePrimitive& currentControlPipe=this->theWorkers[i].pipeWorkerToServerControls;
       if (currentControlPipe.flagReadEndBlocks)
         crash << "Pipe: " << currentControlPipe.ToString() << " has blocking read end. " << crash;
       currentControlPipe.ReadIfFailThenCrash(false, true);
-      if (currentControlPipe.lastRead.size>0)
-      { this->theWorkers[i].flagInUse=false;
+      if (currentControlPipe.lastRead.size > 0)
+      { this->theWorkers[i].flagInUse = false;
         this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
-        std::string messageStr= this->theWorkers[i].pipeWorkerToServerControls.GetLastRead();
+        std::string messageStr = this->theWorkers[i].pipeWorkerToServerControls.GetLastRead();
         logServer << logger::green << "Worker "
-        << i+1 << " done with message: "
+        << i + 1 << " done with message: "
         << messageStr
         << ". Marking for reuse. " << logger::endL;
         numInUse--;
         this->NumWorkersNormallyExited++;
-        if (messageStr=="toggleMonitoring")
+        if (messageStr == "toggleMonitoring")
           this->ToggleProcessMonitoring();
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
-        logServer << logger::orange << "Worker " << i+1 << " not done yet. " << logger::endL;
+        logServer << logger::orange << "Worker " << i + 1 << " not done yet. " << logger::endL;
       PipePrimitive& currentPingPipe= this->theWorkers[i].pipeWorkerToServerTimerPing;
       if (currentPingPipe.flagReadEndBlocks)
         crash << "Pipe: " << currentPingPipe.ToString() << " has blocking read end. " << crash;
@@ -5207,18 +5205,26 @@ int WebServer::Run()
   }
   std::string theDir = FileOperations::GetCurrentFolder();
   theGlobalVariables.ChDir("../");
-  theGlobalVariables.buildVersion =
+  theGlobalVariables.buildVersionSimple =
   MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("svn info | grep \"Revision\" | awk '{print $2}'"));
   //<- if using svn, this will return the svn revision number
-  if (theGlobalVariables.buildVersion == "")
-    theGlobalVariables.buildVersion =
+  if (theGlobalVariables.buildVersionSimple == "")
+    theGlobalVariables.buildVersionSimple =
     MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
-  theGlobalVariables.buildVersion= MathRoutines::StringTrimWhiteSpace(theGlobalVariables.buildVersion);
-  for (unsigned i=0; i<theGlobalVariables.buildVersion.size(); i++)
-    if (MathRoutines::isALatinLetter(theGlobalVariables.buildVersion[i]))
-    { theGlobalVariables.buildVersion = "?";
+  theGlobalVariables.buildVersionSimple= MathRoutines::StringTrimWhiteSpace(theGlobalVariables.buildVersionSimple);
+  for (unsigned i=0; i<theGlobalVariables.buildVersionSimple.size(); i++)
+    if (MathRoutines::isALatinLetter(theGlobalVariables.buildVersionSimple[i]))
+    { theGlobalVariables.buildVersionSimple = "?";
       break;
     }
+  theGlobalVariables.buildHeadHash =
+  MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-parse HEAD"));
+  for (unsigned i=0; i<theGlobalVariables.buildHeadHash.size(); i++)
+    if (!MathRoutines::IsAHexDigit(theGlobalVariables.buildHeadHash[i]))
+    { theGlobalVariables.buildHeadHash = "x";
+      break;
+    }
+
   theGlobalVariables.ChDir(theDir);
   if (true)
   { int pidMonitor=fork();

@@ -29,6 +29,12 @@ public:
   ~ThreadData();
 };
 
+struct ProcessTypes{
+  static std::string worker;
+  static std::string server;
+  static std::string serverMonitor;
+};
+
 class GlobalVariables
 {
   //Warning: please pay attention to the static initialization order fiasco.
@@ -65,7 +71,6 @@ public:
   { if (this->sleepFunction!=0)
       this->sleepFunction(microseconds);
   }
-
 //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
   double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   double MaxTimeNoPingBeforeChildIsPresumedDead;
@@ -93,7 +98,8 @@ public:
   bool flagSSLisAvailable;
   bool flagCertificatesAreOfficiallySigned;
   bool flagCrashInitiated;
-  std::string buildVersion;
+  std::string buildVersionSimple;
+  std::string buildHeadHash;
   std::string OperatingSystem;
   std::string hostWithPort;
   std::string hostNoPort;

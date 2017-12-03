@@ -2453,12 +2453,12 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   //this->theProblemData.CheckConsistency();
   //stOutput << "<hr>DEBUG: got to extracting answer ids<hr>";
   if (result)
-    result=this->ExtractAnswerIds(comments);
+    result = this->ExtractAnswerIds(comments);
   //stOutput << "<hr>DEBUG: after extracting answer ids<hr>";
-  for (int i=0; i<this->theContent.size; i++)
-    this->theContent[i].indexInOwner=i;
+  for (int i = 0; i < this->theContent.size; i++)
+    this->theContent[i].indexInOwner = i;
   if (result)
-    result=this->CheckContent(comments);
+    result = this->CheckContent(comments);
   this->theProblemData.CheckConsistency();
   return result;
 }
@@ -2468,33 +2468,33 @@ bool CalculatorHTML::InterpretOneAnswerElement(SyntacticElementHTML& inputOutput
   std::string answerId;
   if (!inputOutput.IsAnswerElement(&answerId))
     return true;
-  int theIndex=this->GetAnswerIndex(answerId);
-  std::string tagClass=inputOutput.GetTagClass();
-  if (theIndex==-1)
+  int theIndex = this->GetAnswerIndex(answerId);
+  std::string tagClass = inputOutput.GetTagClass();
+  if (theIndex == -1)
   { std::stringstream out;
     out << "<b>Element of class " << tagClass << " has name: "
     << answerId << " but that does not match any answerId value. "
     << this->theProblemData.ToStringAvailableAnswerIds() << ". </b>";
-    inputOutput.interpretedCommand=out.str();
+    inputOutput.interpretedCommand = out.str();
     return true;
   }
-  Answer& currentA=this->theProblemData.theAnswers[theIndex];
-  if (tagClass=="calculatorButtonInterpret")
-    inputOutput.interpretedCommand=currentA.htmlButtonInterpret;
-  if (tagClass=="calculatorButtonGiveUp")
-    inputOutput.interpretedCommand=currentA.htmlButtonAnswer;
-  if (tagClass=="calculatorButtonSolution")
-    inputOutput.interpretedCommand=currentA.htmlButtonSolution;
-  if (tagClass=="calculatorMQField")
-    inputOutput.interpretedCommand=currentA.htmlSpanMQfield;
-  if (tagClass=="calculatorMQButtonPanel")
-    inputOutput.interpretedCommand=currentA.htmlSpanMQButtonPanel;
-  if (tagClass=="calculatorAnswerVerification")
-    inputOutput.interpretedCommand=currentA.htmlSpanVerifyAnswer;
-  if (tagClass=="calculatorButtonSubmit")
-    inputOutput.interpretedCommand=currentA.htmlButtonSubmit;
-  if (tagClass=="calculatorSolution")
-    inputOutput.interpretedCommand=currentA.htmlSpanSolution;
+  Answer& currentA = this->theProblemData.theAnswers[theIndex];
+  if (tagClass == "calculatorButtonInterpret")
+    inputOutput.interpretedCommand = currentA.htmlButtonInterpret;
+  if (tagClass == "calculatorButtonGiveUp")
+    inputOutput.interpretedCommand = currentA.htmlButtonAnswer;
+  if (tagClass == "calculatorButtonSolution")
+    inputOutput.interpretedCommand = currentA.htmlButtonSolution;
+  if (tagClass == "calculatorMQField")
+    inputOutput.interpretedCommand = currentA.htmlSpanMQfield;
+  if (tagClass == "calculatorMQButtonPanel")
+    inputOutput.interpretedCommand = currentA.htmlSpanMQButtonPanel;
+  if (tagClass == "calculatorAnswerVerification")
+    inputOutput.interpretedCommand = currentA.htmlSpanVerifyAnswer;
+  if (tagClass == "calculatorButtonSubmit")
+    inputOutput.interpretedCommand = currentA.htmlButtonSubmit;
+  if (tagClass == "calculatorSolution")
+    inputOutput.interpretedCommand = currentA.htmlSpanSolution;
   return true;
 }
 
@@ -2502,21 +2502,21 @@ bool CalculatorHTML::InterpretAnswerHighlights(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretAnswerHighlights");
   (void) comments;
   this->answerHighlights.SetSize(0);
-  bool answerHighlightStarted=false;
-  for (int i=0; i<this->theContent.size; i++)
-  { if (this->theContent[i].tag=="answerCalculatorHighlightStart")
-    { answerHighlightStarted=true;
+  bool answerHighlightStarted = false;
+  for (int i = 0; i < this->theContent.size; i++)
+  { if (this->theContent[i].tag == "answerCalculatorHighlightStart")
+    { answerHighlightStarted = true;
       this->answerHighlights.AddOnTop("");
-      this->theContent[i].content="";
+      this->theContent[i].content = "";
       continue;
     }
     if (!answerHighlightStarted)
       continue;
     if (this->theContent[i].IsAnswerElement(0))
       continue;
-    if (this->theContent[i].tag=="answerCalculatorHighlightFinish")
-    { answerHighlightStarted=false;
-      this->theContent[i].content="";
+    if (this->theContent[i].tag == "answerCalculatorHighlightFinish")
+    { answerHighlightStarted = false;
+      this->theContent[i].content = "";
       continue;
     }
     *this->answerHighlights.LastObject() += this->theContent[i].ToStringInterpretedBody();
@@ -2793,7 +2793,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
-  outHeadPt2 << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile();
+  outHeadPt2 << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
+  << HtmlRoutines::GetJavascriptMathjax();
 //  else
 //    out << " no date picker";
   //stOutput << "DEBUG: theInterpreter.flagPlotNoControls: " << theInterpreter.flagPlotNoControls;

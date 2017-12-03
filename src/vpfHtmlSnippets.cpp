@@ -503,9 +503,10 @@ const std::string& HtmlRoutines::GetJavascriptMathjax()
   if (HtmlRoutines::preLoadedFiles.Contains("MathJax"))
     return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("MathJax");
   std::stringstream out;
-
+  std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash("/html-common-calculator/mathjax-calculator-setup.js");
+  out << "<script type=\"text/javascript\">MathJaxSetupScriptURL=\"" << mathjaxSetupScript << "\"</script>";
   out << "<script type=\"text/javascript\" async src=\"/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full,"
-  << FileOperations::GetVirtualNameWithHash("/html-common-calculator/mathjax-calculator-setup.js")
+  << mathjaxSetupScript
   << "\"></script>\n";
   HtmlRoutines::preLoadedFiles.SetKeyValue("MathJax", out.str());
   return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("MathJax");

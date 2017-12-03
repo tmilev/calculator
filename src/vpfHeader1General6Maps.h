@@ -67,9 +67,9 @@ public:
 //using C++11, not sure if that is a good idea:
 //In case this does not compile, please see the commented code below.
 template <class key, class value, unsigned int hashFunction(const key&)=key::HashFunction>
-using MapReferenceS=MapTemplatE<ListReferences<value>, key, value, hashFunction>;
+using MapReferenceS = MapTemplatE<ListReferences<value>, key, value, hashFunction>;
 template <class key, class value, unsigned int hashFunction(const key&)=key::HashFunction>
-using MapLisT=MapTemplatE<List<value>, key, value, hashFunction>;
+using MapLisT = MapTemplatE<List<value>, key, value, hashFunction>;
 
 /*
 template <class value, class key, unsigned int hashFunction(const key&)=key::HashFunction>

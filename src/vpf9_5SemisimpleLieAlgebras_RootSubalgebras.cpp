@@ -1092,7 +1092,7 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat)
   std::fstream output;
   std::stringstream myPath;
   myPath << this->ownEr->owner->VirtualNameSSAlgOutputFolder;
-  myPath << "rootSubalgebra_" << index+1 << ".html";
+  myPath << "rootSubalgebra_" << index + 1 << ".html";
   FileOperations::OpenFileCreateIfNotPresentVirtual(output, myPath.str(), false, true, false);
   output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName() << " root subalgebra of type "
   << this->theDynkinDiagram.ToString() << "</title>";

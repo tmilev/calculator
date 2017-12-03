@@ -135,7 +135,8 @@ public:
   bool flagUsingSSLInWorkerProcess;
   bool flagDidSendAll;
   bool flagToggleMonitoring;
-  List<std::string> theStrings;
+  List<std::string> theMessageHeaderStrings;
+  MapLisT<std::string, std::string, MathRoutines::hashString> requestHeaders;
   int ContentLength;
   int requestTypE;
   int connectedSocketID;
@@ -173,6 +174,7 @@ public:
   int ProcessComputationIndicator();
   int ProcessBrowseProblems();
   int ProcessEditPage();
+  int ProcessFolderOrFile();
   int ProcessFolder();
   int ProcessFile();
   int ProcessChangePassword();
@@ -353,7 +355,7 @@ public:
   static void CheckFreecalcSetup();
   static void CheckSVNSetup();
   static void AnalyzeMainArguments(int argC, char **argv);
-  static void InitializeGlobalVariables();
+  void InitializeGlobalVariables();
   bool RequiresLogin(const std::string& inputRequest, const std::string& inputAddress);
   void ReleaseWorkerSideResources();
   void ReleaseActiveWorker();

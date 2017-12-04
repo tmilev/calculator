@@ -345,18 +345,18 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input)
 }
 
 void Pipe::WriteAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail)
-{ //theLog << "Step -1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
+{ //logWorker << "Step -1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
   MacroRegisterFunctionWithName("Pipe::WriteAfterEmptying");
-  //theLog << "Step 1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
+  //logWorker << "Step 1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
   MutexLockGuard safety(theGlobalVariables.MutexWebWorkerPipeWriteLock);
   this->theMutexPipe.RequestPausePauseIfLocked(restartServerOnFail, dontCrashOnFail);
-//  theLog << logger::endL << "Step 2: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
+//  logWorker << logger::endL << "Step 2: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
 //  << logger::endL;
   this->thePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   this->thePipe.lastRead.SetSize(0);
   this->thePipe.WriteIfFailThenCrash(toBeSent, restartServerOnFail, dontCrashOnFail);
   this->theMutexPipe.ResumePausedProcessesIfAny(restartServerOnFail, dontCrashOnFail);
-//  theLog << logger::endL << "Step 3: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
+//  logWorker << logger::endL << "Step 3: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction
 //  << logger::endL;
 }
 
@@ -499,7 +499,7 @@ bool PipePrimitive::ReadIfFailThenCrash(bool restartServerOnFail, bool dontCrash
   this->buffer.SetSize(bufferSize); // <-once the buffer is resized, this operation does no memory allocation and is fast.
   int numReadBytes=0;
   for (;;)
-  { //theLog << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString() << " calling read." << logger::endL;
+  { //logWorker << logger::blue << theWebServer.ToStringActiveWorker() << " pipe, " << this->ToString() << " calling read." << logger::endL;
     numReadBytes =read(this->pipeEnds[0], this->buffer.TheObjects, bufferSize);
     if (numReadBytes>=0)
       break;
@@ -576,12 +576,12 @@ void logger::initializeIfNeeded()
 }
 
 void logger::reset()
-{ this->flagInitialized=true;
-  this->currentColor=logger::normalColor;
-  this->flagTagColorHtmlOpened=false;
-  this->flagTagColorConsoleOpened=false;
-  this->flagStopWritingToFile=false;
-  this->MaxLogSize= //10000
+{ this->flagInitialized = true;
+  this->currentColor = logger::normalColor;
+  this->flagTagColorHtmlOpened = false;
+  this->flagTagColorConsoleOpened = false;
+  this->flagStopWritingToFile = false;
+  this->MaxLogSize = //10000
   50000000
   ;
   if (theGlobalVariables.flagRunningApache || this->theFileName=="")
@@ -592,7 +592,7 @@ void logger::reset()
     this->theFile.close();
   FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(this->theFile, this->theFileName, false, true, false, true);
   if (! this->theFile.is_open())
-  { this->currentColor=logger::red;
+  { this->currentColor = logger::red;
     std::string computedFileName;
     FileOperations::GetPhysicalFileNameFromVirtual(this->theFileName, computedFileName, true, false, 0);
     std::cout << this->openTagConsole() << "Could not open log file with virtual name: "

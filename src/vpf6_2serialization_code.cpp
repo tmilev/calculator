@@ -417,8 +417,8 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
     outputSubalgebra.flagSystemSolved=true;
   } else
     return theCommands << "<hr>Failed to extract subalgebra generators from expression " << input.ToString() << ". ";
-  SemisimpleLieAlgebra& currentNonEmbededSA=
-  owner.theSubalgebrasNonEmbedded->GetValueCreateIfNotPresent(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
+  SemisimpleLieAlgebra& currentNonEmbededSA =
+  owner.theSubalgebrasNonEmbedded->GetValueCreateNoInit(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
   outputSubalgebra.indexNonEmbeddedMeStandard =
   owner.theSubalgebrasNonEmbedded->GetIndex(outputSubalgebra.theWeylNonEmbedded->theDynkinType);
   currentNonEmbededSA.theWeyl.ComputeRho(true);

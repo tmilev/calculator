@@ -235,7 +235,8 @@ void HtmlRoutines::LoadStrings()
   HtmlRoutines::GetJavascriptTopicLisTWithTags();
 }
 
-extern logger theLog;
+extern logger logWorker;
+extern logger logServer;
 
 const std::string& HtmlRoutines::GetJavascriptCalculatorPageWithTags()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptCalculatorPage");
@@ -257,14 +258,14 @@ const std::string HtmlRoutines::GetJavascriptAccountManagementLink()
 
 const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags()
 { if (HtmlRoutines::preLoadedFiles.Contains("AceEditor"))
-    return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("AceEditor");
+    return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("AceEditor");
   std::stringstream out;
   out << "<script type=\"text/javascript\" src=\""
   << FileOperations::GetVirtualNameWithHash("/html-common-calculator/ace/src-min/ace.js")
   << "\" charset=\"utf-8\"></script>";
   out << HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/ace-editor-settings.js");
   HtmlRoutines::preLoadedFiles.SetKeyValue("AceEditor", out.str());
-  return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("AceEditor");
+  return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("AceEditor");
 }
 
 const std::string& HtmlRoutines::GetFile
@@ -273,20 +274,24 @@ const std::string& HtmlRoutines::GetFile
 { MacroRegisterFunctionWithName("HtmlRoutines::GetFile");
   std::string theID = fileNameVirtual + additionalBeginTag + additionalEndTag;
   if (theGlobalVariables.flagCachingInternalFilesOn)
-    if (HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent(theID)!="")
-      return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent(theID);
+    if (HtmlRoutines::preLoadedFiles.GetValueCreate(theID) != "")
+      return HtmlRoutines::preLoadedFiles.GetValueCreate(theID);
   std::stringstream out, commentsOnFailure;
   std::string fileReader;
   if (FileOperations::LoadFileToStringVirtual(fileNameVirtual, fileReader, false, false, &commentsOnFailure))
     out << additionalBeginTag << fileReader << additionalEndTag;
   else
-  { theLog << logger::red << "File: "
-    << fileNameVirtual << " not found. " << logger::endL;
+  { if (theGlobalVariables.processType == ProcessTypes::worker)
+      logWorker << logger::red << "File: "
+      << fileNameVirtual << " not found. " << logger::endL;
+    if (theGlobalVariables.processType == ProcessTypes::server)
+      logServer << logger::red << "File: "
+      << fileNameVirtual << " not found. " << logger::endL;
     out << "<b style=\"color:red\">Failed to load file: " << fileNameVirtual
     << ". Comments: " << commentsOnFailure.str() << "</b>";
   }
   HtmlRoutines::preLoadedFiles.SetKeyValue(theID, out.str());
-  return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent(theID);
+  return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit(theID);
 }
 
 const std::string& HtmlRoutines::GetJavascriptAddScriptTags(const std::string& fileNameVirtual)
@@ -501,7 +506,7 @@ void HtmlRoutines::ConvertURLStringToNormal(const std::string& input, std::strin
 const std::string& HtmlRoutines::GetJavascriptMathjax()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptMathjax");
   if (HtmlRoutines::preLoadedFiles.Contains("MathJax"))
-    return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("MathJax");
+    return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("MathJax");
   std::stringstream out;
   std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash("/html-common-calculator/mathjax-calculator-setup.js");
   out << "<script type=\"text/javascript\">MathJaxSetupScriptURL=\"" << mathjaxSetupScript << "\"</script>";
@@ -509,7 +514,7 @@ const std::string& HtmlRoutines::GetJavascriptMathjax()
   << mathjaxSetupScript
   << "\"></script>\n";
   HtmlRoutines::preLoadedFiles.SetKeyValue("MathJax", out.str());
-  return HtmlRoutines::preLoadedFiles.GetValueCreateIfNotPresent("MathJax");
+  return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("MathJax");
 }
 
 bool HtmlRoutines::AccountOneInputCGIString

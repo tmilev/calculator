@@ -1791,34 +1791,33 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
   MapLisT<std::string, Expression, MathRoutines::hashString> theKeys;
   if (CalculatorConversions::innerLoadKeysFromStatementList(theCommands, input, theKeys, &theCommands.Comments, true))
   { if (theKeys.Contains("color1"))
-      thePlot.colorUV=theKeys.GetValueCreateIfNotPresent("color1").ToString();
+      thePlot.colorUV = theKeys.GetValueCreate("color1").ToString();
     if (theKeys.Contains("color2"))
-      thePlot.colorVU=theKeys.GetValueCreateIfNotPresent("color2").ToString();
-    MapLisT<std::string, std::string, MathRoutines::hashString>
-    keysToConvert;
-    keysToConvert.GetValueCreateIfNotPresent("numSegments1");
-    keysToConvert.GetValueCreateIfNotPresent("numSegments2");
-    keysToConvert.GetValueCreateIfNotPresent("lineWidth");
-    for (int i=0; i<keysToConvert.size(); i++)
+      thePlot.colorVU = theKeys.GetValueCreate("color2").ToString();
+    MapLisT<std::string, std::string, MathRoutines::hashString> keysToConvert;
+    keysToConvert.GetValueCreate("numSegments1");
+    keysToConvert.GetValueCreate("numSegments2");
+    keysToConvert.GetValueCreate("lineWidth");
+    for (int i =0; i < keysToConvert.size(); i++)
     { if (!theKeys.Contains(keysToConvert.theKeys[i]))
         continue;
-      Expression expressionToConvert=theKeys.GetValueCreateIfNotPresent(keysToConvert.theKeys[i]);
-      bool isGood=CalculatorFunctionsGeneral::innerMakeJavascriptExpression
+      Expression expressionToConvert = theKeys.GetValueCreate(keysToConvert.theKeys[i]);
+      bool isGood = CalculatorFunctionsGeneral::innerMakeJavascriptExpression
       (theCommands, expressionToConvert, jsConverter);
-      if (isGood )
-        isGood= jsConverter.IsOfType<std::string>(&keysToConvert.theValues[i]);
+      if (isGood)
+        isGood = jsConverter.IsOfType<std::string>(&keysToConvert.theValues[i]);
       if (!isGood)
         return theCommands << "Failed to convert "
         << expressionToConvert.ToString()
         << " to a javascript expression. ";
     }
     thePlot.numSegmenTsJS.SetSize(2);
-    if(keysToConvert.GetValueCreateIfNotPresent("numSegments1")!="")
-      thePlot.numSegmenTsJS[0]=keysToConvert.GetValueCreateIfNotPresent("numSegments1");
-    if(keysToConvert.GetValueCreateIfNotPresent("numSegments2")!="")
-      thePlot.numSegmenTsJS[1]=keysToConvert.GetValueCreateIfNotPresent("numSegments2");
-    if(keysToConvert.GetValueCreateIfNotPresent("lineWidth")!="")
-    { thePlot.lineWidthJS=keysToConvert.GetValueCreateIfNotPresent("lineWidth");
+    if (keysToConvert.GetValueCreate("numSegments1") != "")
+      thePlot.numSegmenTsJS[0] = keysToConvert.GetValueCreate("numSegments1");
+    if (keysToConvert.GetValueCreate("numSegments2") != "")
+      thePlot.numSegmenTsJS[1] = keysToConvert.GetValueCreate("numSegments2");
+    if (keysToConvert.GetValueCreate("lineWidth") != "")
+    { thePlot.lineWidthJS = keysToConvert.GetValueCreate("lineWidth");
       //stOutput << "DEBUG: line width set to: " << thePlot.lineWidthJS;
     }
   }

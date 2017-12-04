@@ -15,27 +15,37 @@ public:
   { return this->theKeys.GetIndex(input);
   }
   bool Contains(const key& inputKey)const
-  { return this->GetIndex(inputKey)!=-1;
+  { return this->GetIndex(inputKey) != -1;
   }
   void RemoveKey(const key& theKey)
-  { int theIndex=this->theKeys.GetIndex(theKey);
-    if (theIndex==-1)
+  { int theIndex = this->theKeys.GetIndex(theKey);
+    if (theIndex == -1)
       return;
     this->theKeys.RemoveIndexSwapWithLast(theIndex);
     this->theValues.RemoveIndexSwapWithLast(theIndex);
   }
-  value& GetValueCreateIfNotPresent(const key& input)
-  { int theIndex=this->theKeys.GetIndex(input);
-    if (theIndex==-1)
-    { theIndex=this->theKeys.size;
+  value& GetValueCreate(const key& input)
+  { int theIndex = this->theKeys.GetIndex(input);
+    if (theIndex == -1)
+    { theIndex = this->theKeys.size;
       this->theKeys.AddOnTop(input);
-      this->theValues.SetSize(this->theValues.size+1);
+      value object;
+      this->theValues.AddOnTop(object);
+    }
+    return this->theValues[theIndex];
+  }
+  value& GetValueCreateNoInit(const key& input)
+  { int theIndex = this->theKeys.GetIndex(input);
+    if (theIndex == -1)
+    { theIndex = this->theKeys.size;
+      this->theKeys.AddOnTop(input);
+      this->theValues.SetSize(this->theValues.size + 1);
     }
     return this->theValues[theIndex];
   }
   void SetKeyValue(const key& inputKey, const value& inputValue)
   { if (this->Contains(inputKey))
-    { this->theValues[this->theKeys.GetIndex(inputKey)]=inputValue;
+    { this->theValues[this->theKeys.GetIndex(inputKey)] = inputValue;
       return;
     }
     this->theValues.AddOnTop(inputValue);
@@ -58,7 +68,7 @@ public:
   std::string ToStringHtml()const
   { std::stringstream out;
     out << this->size() << " key-value pairs. ";
-    for (int i=0; i<this->size(); i++)
+    for (int i = 0; i < this->size(); i++)
       out << "<br>" << this->theKeys[i] << ": " << this->theValues[i];
     return out.str();
   }

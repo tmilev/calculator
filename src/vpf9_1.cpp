@@ -346,7 +346,7 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
 }
 
 std::string GlobalVariables::GetWebInput(const std::string& inputName)
-{ return this->webArguments.GetValueCreateIfNotPresent(inputName);
+{ return this->webArguments.GetValueCreate(inputName);
 }
 
 void GlobalVariables::MakeReport()
@@ -437,22 +437,22 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
 }
 
 UserCalculatorData::UserCalculatorData()
-{ this->approximateHoursSinceLastTokenWasIssued=-1;
-  this->flagEnteredAuthenticationToken=false;
-  this->flagMustLogin=true;
-  this->flagEnteredPassword=false;
-  this->flagStopIfNoLogin=true;
-  this->flagUserHasNoPassword=false;
-  this->flagUserHasActivationToken=false;
-  this->flagEnteredActivationToken=false;
+{ this->approximateHoursSinceLastTokenWasIssued = -1;
+  this->flagEnteredAuthenticationToken = false;
+  this->flagMustLogin = true;
+  this->flagEnteredPassword = false;
+  this->flagStopIfNoLogin = true;
+  this->flagUserHasNoPassword = false;
+  this->flagUserHasActivationToken = false;
+  this->flagEnteredActivationToken = false;
 }
 
 void UserCalculatorData::reset()
 { MacroRegisterFunctionWithName("UserCalculatorData::reset");
-  for (unsigned i=0; i<this->username.value.size(); i++)
-    this->username.value[i]=' ';
-  this->username="";
-  this->email="";
+  for (unsigned i = 0; i < this->username.value.size(); i++)
+    this->username.value[i] = ' ';
+  this->username = "";
+  this->email = "";
   this->clearAuthenticationTokenAndPassword();
 }
 

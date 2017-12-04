@@ -300,7 +300,7 @@ bool ProblemDataAdministrative::GetWeightFromCoursE
   std::string tempString;
   if (outputAsGivenByInstructor==0)
     outputAsGivenByInstructor=&tempString;
-  *outputAsGivenByInstructor=this->problemWeightsPerCoursE.GetValueCreateIfNotPresent(theCourseNonURLed);
+  *outputAsGivenByInstructor = this->problemWeightsPerCoursE.GetValueCreate(theCourseNonURLed);
   return output.AssignStringFailureAllowed(*outputAsGivenByInstructor);
 }
 
@@ -512,16 +512,11 @@ std::string DatabaseRoutines::ToStringModifyEntry()
   }
 //  out << "DEBUG: getting info from: " << theGlobalVariables.GetWebInput("mainInput")
 //  << "<br> got: <hr>" << theMap.ToStringHtml();
-  std::string currentTable=HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
-  ("currentDatabaseTable"), false);
-  std::string currentRow = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
-  ("currentDatabaseRow"), false);
-  std::string currentKeyColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
-  ("currentDatabaseKeyColumn"), false);
-  std::string currentDesiredColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
-  ("currentDatabaseDesiredColumn"), false);
-  std::string desiredContent=HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
-  ("desiredContent"), false);
+  std::string currentTable = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate("currentDatabaseTable"), false);
+  std::string currentRow = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate("currentDatabaseRow"), false);
+  std::string currentKeyColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate("currentDatabaseKeyColumn"), false);
+  std::string currentDesiredColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate("currentDatabaseDesiredColumn"), false);
+  std::string desiredContent = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate("desiredContent"), false);
   List<std::string>& allowedColumns= DatabaseStrings::GetModifyableColumnsNotThreadSafe();
   if (!allowedColumns.Contains(currentDesiredColumn))
   { std::stringstream out;
@@ -583,13 +578,13 @@ std::string DatabaseRoutines::ToStringOneEntry()
   out << "<hr>";
 //  out << "DEBUG: getting info from: " << theGlobalVariables.GetWebInput("mainInput")
 //  << "<br> got: <hr>" << theMap.ToStringHtml();
-  std::string currentTable=HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  std::string currentTable=HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate
   ("currentDatabaseTable"), false);
-  std::string currentRow = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  std::string currentRow = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate
   ("currentDatabaseRow"), false);
-  std::string currentKeyColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  std::string currentKeyColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate
   ("currentDatabaseKeyColumn"), false);
-  std::string currentDesiredColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent
+  std::string currentDesiredColumn = HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate
   ("currentDatabaseDesiredColumn"), false);
 
   if (currentTable.find("`")!=std::string::npos ||
@@ -1471,7 +1466,7 @@ bool DatabaseRoutines::SendActivationEmail
 
 ProblemData& UserCalculator::GetProblemDataAddIfNotPresent(const std::string& problemName)
 { MacroRegisterFunctionWithName("UserCalculator::GetProblemDataAddIfNotPresent");
-  return this->theProblemData.GetValueCreateIfNotPresent(problemName);
+  return this->theProblemData.GetValueCreate(problemName);
 }
 
 void UserCalculator::SetProblemData(const std::string& problemName, const ProblemData& inputData)
@@ -1491,14 +1486,14 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
   this->flagRandomSeedGiven=false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
   { if (theMap.Contains("randomSeed"))
-    { this->randomSeed=atoi(theMap.GetValueCreateIfNotPresent("randomSeed").c_str());
-      this->flagRandomSeedGiven=true;
+    { this->randomSeed = atoi(theMap.GetValueCreate("randomSeed").c_str());
+      this->flagRandomSeedGiven = true;
       //stOutput << "<br>DEBUG: random seed found. <br>";
     } //else
       //stOutput << "<br>DEBUG: random seed  NOT NOT NOT found. <br>";
   }
   this->theAnswers.Clear();
-  bool result=true;
+  bool result = true;
   MapLisT<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
   for (int i=0; i<theMap.size(); i++)
   { if (theMap.theKeys[i]=="randomSeed")
@@ -1513,15 +1508,15 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
       continue;
     }
     if (currentQuestionMap.Contains("numCorrectSubmissions"))
-      currentA.numCorrectSubmissions=
-      atoi(currentQuestionMap.GetValueCreateIfNotPresent("numCorrectSubmissions").c_str());
+      currentA.numCorrectSubmissions =
+      atoi(currentQuestionMap.GetValueCreate("numCorrectSubmissions").c_str());
     if (currentQuestionMap.Contains("numSubmissions"))
-      currentA.numSubmissions=
-      atoi(currentQuestionMap.GetValueCreateIfNotPresent("numSubmissions").c_str());
+      currentA.numSubmissions =
+      atoi(currentQuestionMap.GetValueCreate("numSubmissions").c_str());
     if (currentQuestionMap.Contains("firstCorrectAnswer"))
-    { currentA.firstCorrectAnswerURLed=currentQuestionMap.GetValueCreateIfNotPresent("firstCorrectAnswer");
-      currentA.firstCorrectAnswerClean= HtmlRoutines::ConvertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
-      currentA.firstCorrectAnswerURLed=HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
+    { currentA.firstCorrectAnswerURLed = currentQuestionMap.GetValueCreate("firstCorrectAnswer");
+      currentA.firstCorrectAnswerClean = HtmlRoutines::ConvertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
+      currentA.firstCorrectAnswerURLed = HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
       //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly.
     }
   }

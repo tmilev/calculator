@@ -1031,12 +1031,11 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     << "<span id=\"" << this->canvasName << "Messages\"></span>";
   }
   out << "<script language=\"javascript\">\n";
-  std::string canvasFunctionName="functionMake"+ this->canvasName;
+  std::string canvasFunctionName = "functionMake" + this->canvasName;
   out << "function " << canvasFunctionName << "()\n"
   << "{ ";
-  for (int i=0; i<this->boxesThatUpdateMe.size; i++)
-  { InputBox& currentBox=owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreateIfNotPresent
-    (this->boxesThatUpdateMe[i]);
+  for (int i = 0; i < this->boxesThatUpdateMe.size; i++)
+  { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
     out << "  calculatorPlotUpdaters['"
     << currentBox.GetSliderName() << "']=" << "'" << this->canvasName << "'"
     << ";\n";
@@ -1512,9 +1511,9 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   std::string canvasFunctionName = "functionMake"+ this->canvasName;
   out << "function " << canvasFunctionName << "()\n"
   << "{ ";
-  for (int i=0; i<this->boxesThatUpdateMe.size; i++)
-  { InputBox& currentBox=owner.theObjectContainer.theUserInputTextBoxesWithValues.
-    GetValueCreateIfNotPresent(this->boxesThatUpdateMe[i]);
+  for (int i = 0; i < this->boxesThatUpdateMe.size; i++)
+  { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.
+    GetValueCreate(this->boxesThatUpdateMe[i]);
     out << " calculatorPlotUpdaters['"
     << currentBox.GetSliderName() << "']="
     << "'" << this->canvasName << "'"
@@ -1730,7 +1729,7 @@ bool Expression::IsSuitableForRecursion()const
 
 void Expression::SubstituteRecursively(MapLisT<Expression, Expression>& theSubs)
 { if (theSubs.Contains(*this))
-  { (*this)=theSubs.GetValueCreateIfNotPresent(*this);
+  { (*this) = theSubs.GetValueCreate(*this);
     return;
   }
   this->SubstituteRecursivelyInChildren(theSubs);
@@ -1740,13 +1739,13 @@ void Expression::SubstituteRecursivelyInChildren(MapLisT<Expression, Expression>
 { if (!this->IsSuitableForSubstitution())
     return;
   Expression tempE;
-  for (int i=0; i<this->size(); i++)
+  for (int i = 0; i < this->size(); i++)
     if (theSubs.Contains((*this)[i]))
-      this->SetChilD(i, theSubs.GetValueCreateIfNotPresent((*this)[i]));
+      this->SetChilD(i, theSubs.GetValueCreate((*this)[i]));
     else
-    { tempE=(*this)[i];
+    { tempE = (*this)[i];
       tempE.SubstituteRecursivelyInChildren(theSubs);
-      if (!(tempE==(*this)[i]))
+      if (!(tempE == (*this)[i]))
         this->SetChilD(i, tempE);
     }
 }
@@ -2371,13 +2370,13 @@ void ExpressionHistoryEnumerator::ComputeAll()
   { currentRuleNames.SetSize(0);
     this->output.AddOnTop(this->GetExpression(this->currentSubTree.theNodes[0], currentRuleNames));
     this->rulesNames.AddOnTop(currentRuleNames);
-    this->rulesDisplayNames.SetSize(this->rulesDisplayNames.size+1);
+    this->rulesDisplayNames.SetSize(this->rulesDisplayNames.size + 1);
     this->rulesDisplayNames.LastObject()->SetSize(0);
-    for (int i=0; i<currentRuleNames.size; i++)
-    { std::string currentRule= currentRuleNames[i];
+    for (int i = 0; i < currentRuleNames.size; i++)
+    { std::string currentRule = currentRuleNames[i];
       if (this->rulesDisplayNamesMap.Contains(currentRuleNames[i]))
-        currentRule=this->rulesDisplayNamesMap.GetValueCreateIfNotPresent(currentRuleNames[i]);
-      if (currentRule!="")
+        currentRule = this->rulesDisplayNamesMap.GetValueCreate(currentRuleNames[i]);
+      if (currentRule != "")
         this->rulesDisplayNames.LastObject()->AddOnTop(currentRule);
     }
     //stOutput << "<br>DEBUG:<br>" << this->currentSubTree.theNodes[0].ToStringTextFormat(0)

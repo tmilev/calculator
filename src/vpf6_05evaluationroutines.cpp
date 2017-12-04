@@ -208,7 +208,7 @@ bool Calculator::ExpressionMatchesPattern
   if (thePattern.IsListStartingWithAtom(opVarB))
   { if (!matchedExpressions.Contains(thePattern))
       matchedExpressions.SetKeyValue(thePattern,input);
-    if (matchedExpressions.GetValueCreateIfNotPresent(thePattern)!=input)
+    if (matchedExpressions.GetValueCreate(thePattern) != input)
       return false;
     if (commentsGeneral!=0)
       *commentsGeneral << "<br><b>Match!</b>";
@@ -715,14 +715,14 @@ void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapLisT<Expressio
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (toBeSubbedIn.IsListOfTwoAtomsStartingWith(this->opBind()))
   { if (matchedPairs.Contains(toBeSubbedIn))
-    { toBeSubbedIn=matchedPairs.GetValueCreateIfNotPresent(toBeSubbedIn);
+    { toBeSubbedIn = matchedPairs.GetValueCreate(toBeSubbedIn);
       //this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
       return;
     }
   }
   Expression subbedE;
-  for (int i=0; i<toBeSubbedIn.children.size; i++)
-  { subbedE=toBeSubbedIn[i];
+  for (int i = 0; i < toBeSubbedIn.size(); i++)
+  { subbedE = toBeSubbedIn[i];
     this->SpecializeBoundVars(subbedE, matchedPairs);
     toBeSubbedIn.SetChilD(i, subbedE);
   }

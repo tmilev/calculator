@@ -74,19 +74,18 @@ bool CalculatorHTML::ReadProblemInfoAppend
       continue;
     currentProbString=HtmlRoutines::ConvertURLStringToNormal(CGIedProbs.theValues[i], false);
     if (!outputProblemInfo.Contains(currentProbName))
-      outputProblemInfo.GetValueCreateIfNotPresent(currentProbName)=emptyData;
-    ProblemData& currentProblemValue=
-    outputProblemInfo.GetValueCreateIfNotPresent(currentProbName);
+      outputProblemInfo.GetValueCreate(currentProbName) = emptyData;
+    ProblemData& currentProblemValue = outputProblemInfo.GetValueCreate(currentProbName);
     if (!HtmlRoutines::ChopCGIString(currentProbString, currentKeyValues, commentsOnFailure))
       return false;
     //stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
     //<< currentKeyValues.ToStringHtml();
-    std::string deadlineString=HtmlRoutines::ConvertURLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("deadlines"), false);
-    std::string problemWeightsCollectionString=HtmlRoutines::ConvertURLStringToNormal(currentKeyValues.GetValueCreateIfNotPresent("weights"), false);
-    if (problemWeightsCollectionString!="")
+    std::string deadlineString = HtmlRoutines::ConvertURLStringToNormal(currentKeyValues.GetValueCreate("deadlines"), false);
+    std::string problemWeightsCollectionString = HtmlRoutines::ConvertURLStringToNormal(currentKeyValues.GetValueCreate("weights"), false);
+    if (problemWeightsCollectionString != "")
     { if (!HtmlRoutines::ChopCGIString(problemWeightsCollectionString, problemWeightInfo, commentsOnFailure))
         return false;
-      for (int j=0; j<problemWeightInfo.size(); j++)
+      for (int j = 0; j < problemWeightInfo.size(); j++)
         currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
         (HtmlRoutines::ConvertURLStringToNormal(problemWeightInfo.theKeys[j],false),
          HtmlRoutines::ConvertURLStringToNormal(problemWeightInfo.theValues[j],false));
@@ -99,8 +98,7 @@ bool CalculatorHTML::ReadProblemInfoAppend
         (HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theKeys[j], false),
          HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theValues[j], false));
     }
-    std::string problemWeightString=MathRoutines::StringTrimWhiteSpace
-    (currentKeyValues.GetValueCreateIfNotPresent("weight"));
+    std::string problemWeightString = MathRoutines::StringTrimWhiteSpace(currentKeyValues.GetValueCreate("weight"));
     if (problemWeightString!="")
     { currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
       (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.userDefault.courseInfo.courseComputed, false),
@@ -243,19 +241,19 @@ bool CalculatorHTML::MergeOneProblemAdminData
   //stOutput << "Debug: MERGING-in prob data: " << inputProblemInfo.ToString();
   if (!this->currentUseR.theProblemData.Contains(inputProblemName))
     this->currentUseR.theProblemData.SetKeyValue(inputProblemName, inputProblemInfo);
-  ProblemDataAdministrative& currentProblem=
-  this->currentUseR.theProblemData.GetValueCreateIfNotPresent(inputProblemName).adminData;
+  ProblemDataAdministrative& currentProblem =
+  this->currentUseR.theProblemData.GetValueCreate(inputProblemName).adminData;
   MapLisT<std::string, std::string, MathRoutines::hashString>&
-  currentDeadlines=currentProblem.deadlinesPerSection;
+  currentDeadlines = currentProblem.deadlinesPerSection;
   MapLisT<std::string, std::string, MathRoutines::hashString>&
-  incomingDeadlines=inputProblemInfo.adminData.deadlinesPerSection;
+  incomingDeadlines = inputProblemInfo.adminData.deadlinesPerSection;
   MapLisT<std::string, std::string, MathRoutines::hashString>&
-  currentWeightS=currentProblem.problemWeightsPerCoursE;
+  currentWeightS = currentProblem.problemWeightsPerCoursE;
   MapLisT<std::string, std::string, MathRoutines::hashString>&
-  incomingWeightS=inputProblemInfo.adminData.problemWeightsPerCoursE;
+  incomingWeightS = inputProblemInfo.adminData.problemWeightsPerCoursE;
 
-  for (int i=0; i<incomingDeadlines.size(); i++)
-  { if (this->databaseStudentSections.size>=1000)
+  for (int i = 0; i < incomingDeadlines.size(); i++)
+  { if (this->databaseStudentSections.size >= 1000)
     { commentsOnFailure << "Failed to account deadlines: max 999 sections allowed. ";
       return false;
     }
@@ -325,7 +323,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 #ifdef MACRO_use_MySQL
   this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   //this->theProblemData.CheckConsistency();
-  if (! this->PrepareSectionList(comments))
+  if (!this->PrepareSectionList(comments))
     return false;
   //this->theProblemData.CheckConsistency();
 //  stOutput << "<hr>DEBug: got to before InterpretDatabaseProblemData.<hr>";
@@ -339,7 +337,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   //stOutput << "<hr>DEBug: got to before this->currentUseR.theProblemData.Contains.<hr>";
   //stOutput << this->currentUseR.theProblemData.ToStringHtml() << "<hr><hr>";
   if (this->currentUseR.theProblemData.Contains(this->fileName))
-  { this->theProblemData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(this->fileName);
+  { this->theProblemData = this->currentUseR.theProblemData.GetValueCreate(this->fileName);
     //stOutput << "<hr>Debug: found problem data! " << this->theProblemData.ToString() << "<hr>";
   } //else
     //stOutput << "<hr>Did not find problem data for filename: " << this->fileName << ". USer details: " << this->currentUseR.ToString() << "<hr>";
@@ -755,7 +753,7 @@ std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, 
 #ifdef MACRO_use_MySQL
   bool problemAlreadySolved = false;
   if (this->currentUseR.theProblemData.Contains(theFileName))
-  { ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
+  { ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
     if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size())
       problemAlreadySolved = true;
   }
@@ -771,7 +769,7 @@ std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, 
 bool CalculatorHtmlFunctions::innerInterpretProblemGiveUp
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInterpretProblemGiveUp");
-  (void)input;
+  (void) input;
   return output.AssignValue
   (HtmlInterpretation::GetAnswerOnGiveUp(theGlobalVariables.GetWebInput("randomSeed")), theCommands);
 }
@@ -1572,15 +1570,15 @@ std::string CalculatorHTML::GetDeadline
   int topicIndex=this->theTopicS.GetIndex(problemName);
   if (topicIndex==-1)
     return problemName + " not found in topic list. ";
-  TopicElement& currentTopic=this->theTopicS.GetValueCreateIfNotPresent(problemName);
-  for(int i=currentTopic.parentTopics.size-1; i>=0; i--)
-  { const std::string& containerName=this->theTopicS.theKeys[currentTopic.parentTopics[i]];
+  TopicElement& currentTopic = this->theTopicS.GetValueCreate(problemName);
+  for(int i = currentTopic.parentTopics.size - 1; i >= 0; i--)
+  { const std::string& containerName = this->theTopicS.theKeys[currentTopic.parentTopics[i]];
     if (this->currentUseR.theProblemData.Contains(containerName))
-    { ProblemDataAdministrative& currentProb=
-      this->currentUseR.theProblemData.GetValueCreateIfNotPresent(containerName).adminData;
-      result=currentProb.deadlinesPerSection.GetValueCreateIfNotPresent(sectionNumber);
-      if (MathRoutines::StringTrimWhiteSpace(result)!="")
-      { outputIsInherited=(containerName!=problemName);
+    { ProblemDataAdministrative& currentProb =
+      this->currentUseR.theProblemData.GetValueCreateNoInit(containerName).adminData;
+      result = currentProb.deadlinesPerSection.GetValueCreate(sectionNumber);
+      if (MathRoutines::StringTrimWhiteSpace(result) != "")
+      { outputIsInherited = (containerName != problemName);
         return result;
       }
     }
@@ -2586,7 +2584,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
         return false;
       }
       answerIdsSeenSoFar.AddOnTopNoRepetition(currentId);
-      this->theProblemData.theAnswers.GetValueCreateIfNotPresent(currentId).MQpanelButtonOptions=
+      this->theProblemData.theAnswers.GetValueCreate(currentId).MQpanelButtonOptions =
       currentE.GetKeyValue("buttons");
       continue;
     }
@@ -2817,7 +2815,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       theGlobalVariables.userCalculatorRequestType!="template" &&
       theGlobalVariables.userCalculatorRequestType!="templateNoLogin")
     if (this->theTopicS.Contains(this->fileName))
-    { TopicElement& current=this->theTopicS.GetValueCreateIfNotPresent(this->fileName);
+    { TopicElement& current = this->theTopicS.GetValueCreate(this->fileName);
       current.ComputeLinks(*this, true);
       problemLabel= current.displayTitle + "&nbsp;&nbsp;";
       if (this->flagDoPrependProblemNavigationBar)
@@ -2831,9 +2829,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
 #ifdef MACRO_use_MySQL
     bool problemAlreadySolved=false;
     if (this->currentUseR.theProblemData.Contains(this->fileName))
-    { ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(this->fileName);
+    { ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(this->fileName);
       if (theProbData.numCorrectlyAnswered>=theProbData.theAnswers.size())
-        problemAlreadySolved=true;
+        problemAlreadySolved = true;
     }
     std::string theDeadlineString=this->ToStringDeadline(this->fileName, problemAlreadySolved, true, true);
     if (theDeadlineString=="")
@@ -3241,7 +3239,7 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
   #ifdef MACRO_use_MySQL
   Rational currentWeight;
   if (this->currentUseR.theProblemData.Contains(theFileName))
-  { ProblemData& theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
+  { ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
     if (!theProbData.flagProblemWeightIsOK)
     { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
       if (!theProbData.adminData.GetWeightFromCoursE
@@ -3293,7 +3291,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   Rational currentWeight;
   std::string currentWeightAsGivenByInstructor;
   if (this->currentUseR.theProblemData.Contains(theFileName))
-  { theProbData=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName);
+  { theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
     Rational percentSolved=0, totalPoints=0;
     percentSolved.AssignNumeratorAndDenominator(theProbData.numCorrectlyAnswered, theProbData.theAnswers.size());
     theProbData.flagProblemWeightIsOK=
@@ -3357,7 +3355,7 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
   std::string problemWeightAsGivenByInstructor;
   #ifdef MACRO_use_MySQL
   Rational unusedRat;
-  weightIsOK=this->currentUseR.theProblemData.GetValueCreateIfNotPresent(theFileName).
+  weightIsOK = this->currentUseR.theProblemData.GetValueCreate(theFileName).
   adminData.GetWeightFromCoursE(this->currentUseR.courseInfo.courseComputed, unusedRat, &problemWeightAsGivenByInstructor);
   out << problemWeightAsGivenByInstructor;
   #endif
@@ -3502,7 +3500,7 @@ bool TopicElement::LoadTopicBundle
       }
     } else
       for (int i=0; i<bundleNameStack.size; i++)
-        output.GetValueCreateIfNotPresent(bundleNameStack[i]).AddOnTop(currentLine);
+        output.GetValueCreate(bundleNameStack[i]).AddOnTop(currentLine);
   }
   return true;
 }
@@ -3554,8 +3552,8 @@ void TopicElement::GetTopicList
     { currentArgument=MathRoutines::StringTrimWhiteSpace(currentArgument);
       std::stringstream errorStream;
       if (topicBundles.GetElement().Contains(currentArgument))
-      { List<std::string>& currentBundle=topicBundles.GetElement().GetValueCreateIfNotPresent(currentArgument);
-        for (int j=currentBundle.size-1; j>=0; j--)
+      { List<std::string>& currentBundle = topicBundles.GetElement().GetValueCreate(currentArgument);
+        for (int j = currentBundle.size - 1; j >= 0; j--)
           lineStack.AddOnTop(currentBundle[j]);
       } else
       { if (found)

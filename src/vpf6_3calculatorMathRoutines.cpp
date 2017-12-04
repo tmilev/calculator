@@ -4693,10 +4693,10 @@ bool CalculatorFunctionsGeneral::innerPlotViewWindow
       isGood=false;
     else
     { if (theMap.Contains("width"))
-        if (!theMap.GetValueCreateIfNotPresent("width").EvaluatesToDouble(&widthHeight[0]))
-          isGood=false;
+        if (!theMap.GetValueCreateNoInit("width").EvaluatesToDouble(&widthHeight[0]))
+          isGood = false;
       if (theMap.Contains("height"))
-        if (!theMap.GetValueCreateIfNotPresent("height").EvaluatesToDouble(&widthHeight[1]))
+        if (!theMap.GetValueCreateNoInit("height").EvaluatesToDouble(&widthHeight[1]))
           isGood=false;
     }
   }

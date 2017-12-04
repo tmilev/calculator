@@ -775,20 +775,20 @@ void SemisimpleSubalgebras::MakeEmptyCandidateSA(CandidateSSSubalgebra& output)
   DynkinType zeroType;
   this->MakeCandidateSA(zeroType, output);
   Matrix<Rational> theZeroCartan;
-  output.theSubalgebraNonEmbeddedDefaultScale=
-  &this->theSubalgebrasNonDefaultCartanAndScale.GetValueCreateIfNotPresent(theZeroCartan);
-  output.indexNonEmbeddedMeNonStandardCartan=
+  output.theSubalgebraNonEmbeddedDefaultScale =
+  &this->theSubalgebrasNonDefaultCartanAndScale.GetValueCreateNoInit(theZeroCartan);
+  output.indexNonEmbeddedMeNonStandardCartan =
   this->theSubalgebrasNonDefaultCartanAndScale.GetIndex(theZeroCartan);
 }
 
 void SemisimpleSubalgebras::MakeCandidateSA(const DynkinType& input, CandidateSSSubalgebra& output)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::MakeCandidateSA");
-  output.owner=this;
-  bool needsInit=false;
+  output.owner = this;
+  bool needsInit = false;
   if (!this->theSubalgebrasNonEmbedded->Contains(input))
-    needsInit=true;
-  output.theWeylNonEmbedded=&this->theSubalgebrasNonEmbedded->GetValueCreateIfNotPresent(input).theWeyl;
-  output.indexNonEmbeddedMeStandard=this->theSubalgebrasNonEmbedded->GetIndex(input);
+    needsInit = true;
+  output.theWeylNonEmbedded = &this->theSubalgebrasNonEmbedded->GetValueCreateNoInit(input).theWeyl;
+  output.indexNonEmbeddedMeStandard = this->theSubalgebrasNonEmbedded->GetIndex(input);
   if (needsInit)
     output.theWeylNonEmbedded->MakeFromDynkinType(input);
 }
@@ -905,13 +905,13 @@ void CandidateSSSubalgebra::ComputeHsAndHsScaledToActByTwoFromComponents()
   this->theHs.SetSize(this->theHsScaledToActByTwo.size);
   Matrix<Rational> cartanInComponentOrder;
   this->theWeylNonEmbedded->theDynkinType.GetCartanSymmetricDefaultLengthKeepComponentOrder(cartanInComponentOrder);
-  this->theSubalgebraNonEmbeddedDefaultScale=
-  &this->owner->theSubalgebrasNonDefaultCartanAndScale.GetValueCreateIfNotPresent(cartanInComponentOrder);
+  this->theSubalgebraNonEmbeddedDefaultScale =
+  &this->owner->theSubalgebrasNonDefaultCartanAndScale.GetValueCreateNoInit(cartanInComponentOrder);
   this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.MakeFromDynkinTypeDefaultLengthKeepComponentOrder
   (this->theWeylNonEmbedded->theDynkinType);
   this->theSubalgebraNonEmbeddedDefaultScale->theWeyl.ComputeRho(true);
   this->theSubalgebraNonEmbeddedDefaultScale->ComputeChevalleyConstants();
-  this->indexNonEmbeddedMeNonStandardCartan=
+  this->indexNonEmbeddedMeNonStandardCartan =
   this->owner->theSubalgebrasNonDefaultCartanAndScale.GetIndex(cartanInComponentOrder);
   int counter=-1;
   List<DynkinSimpleType> theTypes;

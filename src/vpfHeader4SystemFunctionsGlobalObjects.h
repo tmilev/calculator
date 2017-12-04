@@ -13,7 +13,7 @@ static ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystemHe
 
 class logger;
 class Calculator;
-extern logger theLog  ;
+extern logger logWorker  ;
 extern logger logServerMonitor  ;
 extern logger logHttpErrors;
 extern logger logBlock;

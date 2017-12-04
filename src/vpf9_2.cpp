@@ -750,10 +750,9 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
 { MacroRegisterFunctionWithName("HomomorphismSemisimpleLieAlgebra::MakeGinGWithId");
   DynkinType theType;
   theType.MakeSimpleType(theWeylLetter, theWeylDim);
-  this->domainAlg=&ownerOfAlgebras.GetValueCreateIfNotPresent(theType);
-  this->rangeAlg=this->domainAlg;
+  this->domainAlg = &ownerOfAlgebras.GetValueCreateNoInit(theType);
+  this->rangeAlg = this->domainAlg;
   this->domainAlg->theWeyl.MakeArbitrarySimple(theWeylLetter, theWeylDim);
-
   this->theDomain().ComputeChevalleyConstants();
   int numPosRoots=this->theDomain().theWeyl.RootsOfBorel.size;
   this->imagesAllChevalleyGenerators.SetSize(numPosRoots*2+theWeylDim);

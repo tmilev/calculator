@@ -15,20 +15,20 @@ bool CalculatorHtmlFunctions::innerUserInputBox
     return false;
   if (!theArguments.Contains("name"))
     return theCommands << "User input name not specified in: " << input.ToString();
-  std::string boxName= CalculatorHtmlFunctions::GetUserInputBoxName(input);
+  std::string boxName = CalculatorHtmlFunctions::GetUserInputBoxName(input);
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName))
-    return output.AssignValue(theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreateIfNotPresent(boxName), theCommands);
+    return output.AssignValue(theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName), theCommands);
   InputBox newBox;
-  newBox.name=boxName;
-  for (int i=0; i<theArguments.theKeys.size; i++ )
-  { if (theArguments.theKeys[i]=="value")
-      newBox.value=theArguments.theValues[i];
-    if (theArguments.theKeys[i]=="min")
-      newBox.min=theArguments.theValues[i];
-    if (theArguments.theKeys[i]=="max")
-      newBox.max=theArguments.theValues[i];
-    if (theArguments.theKeys[i]=="step")
-      newBox.step=theArguments.theValues[i];
+  newBox.name = boxName;
+  for (int i = 0; i<theArguments.theKeys.size; i++ )
+  { if (theArguments.theKeys[i] == "value")
+      newBox.value = theArguments.theValues[i];
+    if (theArguments.theKeys[i] == "min")
+      newBox.min = theArguments.theValues[i];
+    if (theArguments.theKeys[i] == "max")
+      newBox.max = theArguments.theValues[i];
+    if (theArguments.theKeys[i] == "step")
+      newBox.step = theArguments.theValues[i];
   }
   return output.AssignValue(newBox, theCommands);
 }
@@ -82,8 +82,8 @@ bool CalculatorHtmlFunctions::innerSetInputBox
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName))
     return theCommands << "Input box with name: " << boxName << " already has value.";
   InputBox& theBox=
-  theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreateIfNotPresent(boxName);
-  theBox.value=theArguments.GetValueCreateIfNotPresent("value");
+  theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName);
+  theBox.value=theArguments.GetValueCreate("value");
   std::stringstream out;
   out << "Set value to input box name: " << boxName;
   return output.AssignValue(out.str(), theCommands);
@@ -100,8 +100,8 @@ std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBo
     return "corrupt-box";
   if (!theArguments.Contains("name"))
     return "box-without-name";
-  std::string theBoxName="faultyBoxName";
-  if (!theArguments.GetValueCreateIfNotPresent("name").IsOfType<std::string>(&theBoxName))
-    theBoxName=theArguments.GetValueCreateIfNotPresent("name").ToString();
+  std::string theBoxName = "faultyBoxName";
+  if (!theArguments.GetValueCreate("name").IsOfType<std::string>(&theBoxName))
+    theBoxName = theArguments.GetValueCreate("name").ToString();
   return theBoxName;
 }

@@ -2549,10 +2549,10 @@ std::string Calculator::ToStringSyntacticStackHTMLTable(bool ignoreCommandEnclos
 
 SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent(const DynkinType& input)
 { MacroRegisterFunctionWithName("ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPresent");
-  bool needToHookUpPointers=false;
+  bool needToHookUpPointers = false;
   if (!this->theSSSubalgebraS.Contains(input))
-    needToHookUpPointers=true;
-  SemisimpleSubalgebras& currentSAs=this->theSSSubalgebraS.GetValueCreateIfNotPresent(input);
+    needToHookUpPointers = true;
+  SemisimpleSubalgebras& currentSAs = this->theSSSubalgebraS.GetValueCreateNoInit(input);
   if (needToHookUpPointers)
   { SemisimpleLieAlgebra& ownerSS=this->GetLieAlgebraCreateIfNotPresent(input);
     currentSAs.initHookUpPointers(ownerSS, &this->theAlgebraicClosure, &this->theSSLieAlgebras, &this->theSltwoSAs);
@@ -2567,7 +2567,7 @@ SemisimpleLieAlgebra& ObjectContainer::GetLieAlgebraCreateIfNotPresent(const Dyn
   if (!this->theSSLieAlgebras.Contains(input))
     needToInit=true;
   //  stOutput << "got to here pt2<br>";
-  SemisimpleLieAlgebra& theLA=this->theSSLieAlgebras.GetValueCreateIfNotPresent(input);
+  SemisimpleLieAlgebra& theLA=this->theSSLieAlgebras.GetValueCreateNoInit(input);
   //  stOutput << "got to here pt3<br>";
   if (needToInit)
     theLA.theWeyl.MakeFromDynkinType(input);

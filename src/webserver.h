@@ -230,6 +230,7 @@ public:
   bool Login(std::stringstream& argumentProcessingFailureComments);
   bool CorrectRequestsBEFORELoginReturnFalseIfModified();
   bool CorrectRequestsAFTERLoginReturnFalseIfModified();
+  bool RedirectIfNeeded(std::stringstream& argumentProcessingFailureComments);
 
   bool ExtractArgumentsFromMessage
 (const std::string& input, std::stringstream& argumentProcessingFailureComments,
@@ -254,6 +255,7 @@ int recursionDepth=0)
   void ResetPipesNoAllocation();
   void reset();
   void resetMessageComponentsExceptRawMessage();
+  void resetConnection();
   void Release();
   void ReleaseKeepInUseFlag();
   void SendAllBytesWithHeaders();
@@ -285,6 +287,7 @@ int recursionDepth=0)
   void SetHeaderOKNoContentLength();
   void SetHeadeR(const std::string& httpResponseNoTermination, const std::string& remainingHeaderNoTermination);
   std::string GetHeaderConnectionClose();
+  std::string GetHeaderConnectionKeepAlive();
   std::string GetHeaderSetCookie();
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   WebWorker();

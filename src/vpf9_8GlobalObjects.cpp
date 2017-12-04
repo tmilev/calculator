@@ -33,21 +33,21 @@ std::string ProcessTypes::worker = "worker";
 std::string ProcessTypes::server = "server";
 std::string ProcessTypes::serverMonitor = "serverMonitor";
 
-logger theLog("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html", 0, true, ProcessTypes::worker);
-logger logServerMonitor("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServerMonitor.html", 0, false, ProcessTypes::serverMonitor);
-logger logServer("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServer.html", 0, false, ProcessTypes::server);
+logger logWorker("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logCommon.html", 0, true, ProcessTypes::worker);
+logger logServerMonitor("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServerMonitor.html", 0, false, ProcessTypes::serverMonitor);
+logger logServer("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/logServer.html", 0, false, ProcessTypes::server);
 
-logger logHttpErrors("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogHttpErrors.html", &theLog, false, ProcessTypes::worker);
-logger logBlock("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogBlockingEvents.html", &theLog, false, ProcessTypes::worker);
-logger logIO("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogIOErrorsEvents.html", &theLog, false, ProcessTypes::worker);
-logger logOpenSSL("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogOpenSSL.html", &theLog, false, ProcessTypes::worker);
-logger logEmail("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogEmail.html", &theLog, false, ProcessTypes::worker);
+logger logHttpErrors("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogHttpErrors.html", &logWorker, false, ProcessTypes::worker);
+logger logBlock("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogBlockingEvents.html", &logWorker, false, ProcessTypes::worker);
+logger logIO("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogIOErrorsEvents.html", &logWorker, false, ProcessTypes::worker);
+logger logOpenSSL("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogOpenSSL.html", &logWorker, false, ProcessTypes::worker);
+logger logEmail("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogEmail.html", &logWorker, false, ProcessTypes::worker);
 
-logger logSocketAccept("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogSocketAccept.html", &logServer, false, ProcessTypes::server);
-logger logProcessStats("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogWorkerProcessStats.html", &logServer, false, ProcessTypes::server);
-logger logPlumbing("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogServerPlumbing.html", &logServer, false, ProcessTypes::server);
-logger logProcessKills("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogMultiprocessing.html", &logServer, false, ProcessTypes::server);
-logger logSuccessfulForks("LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogForkSuccess.html", &logServer, false, ProcessTypes::server);
+logger logSocketAccept("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogSocketAccept.html", &logServer, false, ProcessTypes::server);
+logger logProcessStats("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogWorkerProcessStats.html", &logServer, false, ProcessTypes::server);
+logger logPlumbing("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogServerPlumbing.html", &logServer, false, ProcessTypes::server);
+logger logProcessKills("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogMultiprocessing.html", &logServer, false, ProcessTypes::server);
+logger logSuccessfulForks("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogForkSuccess.html", &logServer, false, ProcessTypes::server);
 
 Calculator theParser;
 FormatExpressions consoleFormat;

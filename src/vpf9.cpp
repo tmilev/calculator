@@ -978,12 +978,15 @@ bool FileOperations::OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded
 { std::string computedFileName;
   //USING loggers FORBIDDEN here! Loggers call this function themselves in their constructors.
   if (!FileOperations::GetPhysicalFileNameFromVirtual(theFileName, computedFileName, accessSensitiveFolders, false, 0))
+  { //std::cout << "\nDEBUG: OH NO couldn't create file! \n";
     return false;
+  }
   std::string folderName = FileOperations::GetPathFromFileNameWithPath(computedFileName);
   std::stringstream mkDirCommand;
   mkDirCommand << "mkdir -p " << folderName;
-  theGlobalVariables.CallSystemNoOutput(mkDirCommand.str(), true);
-  //stOutput << "DEBUG: about to execute: " << mkDirCommand.str();
+  //std::cout << "\nDEBUG: about to execute: " << mkDirCommand.str() << "\n";
+  std::string commandResult = theGlobalVariables.CallSystemWithOutput(mkDirCommand.str());
+  //std::cout << "\nDEBUG: result: " << commandResult << "\n";
   return FileOperations::OpenFileCreateIfNotPresentUnsecure
   (theFile, computedFileName, OpenInAppendMode, truncate, openAsBinary);
 }

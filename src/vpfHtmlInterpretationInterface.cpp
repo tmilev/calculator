@@ -1171,10 +1171,10 @@ std::string HtmlInterpretation::AddTeachersSections()
   { out << "<b>Failed to extract input from: " << mainInput << ".</b>";
     return out.str();
   }
-  std::string desiredUsers=
-  HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent("teachers"), false);
-  std::string desiredSections=
-  HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreateIfNotPresent("sections"), false);
+  std::string desiredUsers =
+  HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate("teachers"), false);
+  std::string desiredSections =
+  HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate("sections"), false);
 #ifdef MACRO_use_MySQL
   List<std::string> theTeachers;
   List<char> delimiters;
@@ -1862,8 +1862,8 @@ void UserCalculator::ComputePointsEarned
     }
     if (theTopics!=0)
       if (theTopics->Contains(problemName))
-      { TopicElement& currentElt=theTopics->GetValueCreateIfNotPresent(problemName);
-        this->pointsMax+=currentWeight;
+      { TopicElement& currentElt = theTopics->GetValueCreate(problemName);
+        this->pointsMax += currentWeight;
         for (int j=0; j<currentElt.parentTopics.size; j++)
         { (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned+=currentP.Points;
           (*theTopics).theValues[currentElt.parentTopics[j]].maxPointsInAllChildren+=currentWeight;

@@ -1277,12 +1277,12 @@ bool Calculator::ReplaceEOXbyEX()
 
 bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits()
 { MacroRegisterFunctionWithName("Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits");
-  SyntacticElement& theE =  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  const std::string& currentVar=this->theAtoms[theE.theData.theData];
+  SyntacticElement& theE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
+  const std::string& currentVar = this->theAtoms[theE.theData.theData];
   if (!this->predefinedWordSplits.Contains( currentVar))
     crash << "Predefined word splits array does not contain the variable: " << theE.theData.ToString()
     << ". This should not happen in the body of this function. " << crash;
-  List<std::string>& theSplit=this->predefinedWordSplits.GetValueCreateIfNotPresent(currentVar);
+  List<std::string>& theSplit=this->predefinedWordSplits.GetValueCreate(currentVar);
   SyntacticElement newElt;
   this->PopTopSyntacticStack();
   *this << "Predefined symbol replacement: replacing "
@@ -1292,12 +1292,11 @@ bool Calculator::ReplaceVbyVdotsVAccordingToPredefinedWordSplits()
   << " The predefined symbol replacements are used to guard the user from accidental typos such as confusing  "
   << " x y (the product of x and y) with xy (a single variable whose name contains the letters x and y). "
   ;
-
-  for (int i=0; i<theSplit.size; i++)
+  for (int i = 0; i < theSplit.size; i++)
   { newElt.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(theSplit[i]), *this);
-    newElt.controlIndex=this->controlSequences.GetIndex(theSplit[i]);
-    if (newElt.controlIndex==-1)
-      newElt.controlIndex=this->conVariable();
+    newElt.controlIndex = this->controlSequences.GetIndex(theSplit[i]);
+    if (newElt.controlIndex == -1)
+      newElt.controlIndex = this->conVariable();
     (*this->CurrentSyntacticStacK).AddOnTop(newElt);
   }
   return true;

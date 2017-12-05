@@ -2453,7 +2453,7 @@ int WebWorker::ProcessFile()
     debugBytesStream << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
     << "-->";
   }
-  if (theGlobalVariables.UserDebugFlagOn() && fileExtension==".appcache")
+  if (theGlobalVariables.UserDebugFlagOn() && fileExtension == ".appcache")
   { debugBytesStream << "#" << this->GetMIMEtypeFromFileExtension(fileExtension);
   }
   if (theGlobalVariables.flagRunningApache)
@@ -2588,27 +2588,27 @@ WebWorker::~WebWorker()
 
 std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExtension)
 { MacroRegisterFunctionWithName("WebWorker::GetMIMEtypeFromFileExtension");
-  if (fileExtension==".html")
+  if (fileExtension == ".html")
     return "Content-Type: text/html\r\n";
-  if (fileExtension==".txt")
+  if (fileExtension == ".txt")
     return "Content-Type: text/plain\r\n";
-  if (fileExtension==".png")
+  if (fileExtension == ".png")
     return "Content-Type: image/png\r\n";
-  if (fileExtension==".js")
+  if (fileExtension == ".js")
     return "Content-Type: text/javascript\r\n";
-  if (fileExtension==".ico")
+  if (fileExtension == ".ico")
     return "Content-Type: image/x-icon\r\n";
-  if (fileExtension==".css")
+  if (fileExtension == ".css")
     return "Content-Type: text/css\r\n";
-  if (fileExtension==".eot")
+  if (fileExtension == ".eot")
     return "Content-Type: application/vnd.ms-fontobject\r\n";
-  if (fileExtension==".ttf")
+  if (fileExtension == ".ttf")
     return "Content-Type: application/octet-stream\r\n";
-  if (fileExtension==".svg")
+  if (fileExtension == ".svg")
     return "Content-Type: image/svg+xml\r\n";
-  if (fileExtension==".appcache")
+  if (fileExtension == ".appcache")
     return "Content-Type: text/cache-manifest\r\n";
-  if (fileExtension==".woff")
+  if (fileExtension == ".woff")
     return "Content-Type: application/font-woff\r\n";
   return "Content-Type: application/octet-stream\r\n";
 }
@@ -3830,11 +3830,11 @@ std::string WebWorker::GetSignUpPage()
 std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
 { MacroRegisterFunctionWithName("WebWorker::GetLoginPage");
   std::stringstream out;
-  out << "<html>"
+  out << "<html><head>\n"
   << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << WebWorker::GetJavascriptSubmitLoginInfo()
   << HtmlRoutines::GetCSSLinkCalculator()
-  << "<body";
+  << "\n</head><body";
   out << " onload=\"loadSettings();";
   out << "\"";
   out << ">\n";
@@ -4854,11 +4854,11 @@ void WebServer::ReleaseWorkerSideResources()
 
 bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string& inputAddress)
 { MacroRegisterFunctionWithName("WebServer::RequiresLogin");
-  if (inputAddress==theGlobalVariables.DisplayNameExecutable)
-    for (int i=0; i<this->requestStartsNotNeedingLogin.size; i++)
+  if (inputAddress == theGlobalVariables.DisplayNameExecutable)
+    for (int i = 0; i < this->requestStartsNotNeedingLogin.size; i++)
       if (MathRoutines::StringBeginsWith(inputRequest, this->requestStartsNotNeedingLogin[i]))
         return false;
-  for (int i=0; i<this->addressStartsNotNeedingLogin.size; i++)
+  for (int i = 0; i < this->addressStartsNotNeedingLogin.size; i++)
     if (MathRoutines::StringBeginsWith(inputAddress, this->addressStartsNotNeedingLogin[i]))
       return false;
   return true;
@@ -5724,7 +5724,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
     return;
   }
   ////////////////////////////////
-  if (secondArgument=="test")
+  if (secondArgument == "test")
   { theGlobalVariables.flagRunningConsoleTest = true;
     return;
   }
@@ -5765,10 +5765,6 @@ void WebServer::InitializeGlobalVariables()
   //asking for logouts on your account once every second: this would be fatal as proper logout resets
   //the authentication tokens.
 
-
-
-
-
   MapLisT<std::string, std::string, MathRoutines::hashString>&
   folderSubstitutionsNonSensitive = FileOperations::FolderVirtualLinksNonSensitive();
   MapLisT<std::string, std::string, MathRoutines::hashString>&
@@ -5805,6 +5801,8 @@ void WebServer::InitializeGlobalVariables()
   ("font");
   FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
   ("/font");
+
+  this->addressStartsNotNeedingLogin.AddListOnTop(FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash());
 
 
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.7-latest/");

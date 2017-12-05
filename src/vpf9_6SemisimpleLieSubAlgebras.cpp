@@ -832,7 +832,7 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImag
 (const DynkinType& input, const List<int>& imagesOldSimpleRootsAndNewRoot,
  CandidateSSSubalgebra& theSSSubalgebraToBeModified)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot");
-  theSSSubalgebraToBeModified.owner=this;
+  theSSSubalgebraToBeModified.owner = this;
   Vector<Rational> result;
   if (input.IsEqualToZero())
   { this->MakeEmptyCandidateSA(theSSSubalgebraToBeModified);
@@ -2463,31 +2463,31 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition()
 
 void CandidateSSSubalgebra::reset(SemisimpleSubalgebras* inputOwner)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::reset");
-  this->owner=inputOwner;
-  this->indexInOwner=(-1);
-  this->indexIamInducedFrom=-1;
-  this->indexNonEmbeddedMeNonStandardCartan=(-1);
-  this->indexNonEmbeddedMeStandard=(-1);
-  this->indexHcandidateBeingGrown=(-1);
-  this->indexMaxSSContainer=(-1);
-  this->indexSSPartCentralizer=-1;
-  this->flagSubalgebraPreloadedButNotVerified=false;
-  this->flagSystemSolved=(false);
-  this->flagSystemProvedToHaveNoSolution=(false);
-  this->flagSystemGroebnerBasisFound=(false);
-  this->flagCentralizerIsWellChosen=(false);
-  this->flagCentralizerTypeIsComputed=false;
-  this->flagUsedInducingSubalgebraRealization=true;
-  this->totalNumUnknownsNoCentralizer=(0);
-  this->totalNumUnknownsWithCentralizer=(0);
-  this->totalArithmeticOpsToSolveSystem=0;
-  this->NumConeIntersections=(-1);
-  this->NumCasesNoLinfiniteRelationFound=(-1);
-  this->NumBadParabolics=(0);
-  this->NumCentralizerConditionFailsConeConditionHolds=(0);
-  this->centralizerRank=-1;
-  this->theWeylNonEmbedded=0;
-  this->theSubalgebraNonEmbeddedDefaultScale=0;
+  this->owner = inputOwner;
+  this->indexInOwner = -1;
+  this->indexIamInducedFrom = -1;
+  this->indexNonEmbeddedMeNonStandardCartan = -1;
+  this->indexNonEmbeddedMeStandard = -1;
+  this->indexHcandidateBeingGrown = -1;
+  this->indexMaxSSContainer = -1;
+  this->indexSSPartCentralizer = -1;
+  this->flagSubalgebraPreloadedButNotVerified = false;
+  this->flagSystemSolved = false;
+  this->flagSystemProvedToHaveNoSolution = false;
+  this->flagSystemGroebnerBasisFound = false;
+  this->flagCentralizerIsWellChosen = false;
+  this->flagCentralizerTypeIsComputed = false;
+  this->flagUsedInducingSubalgebraRealization = true;
+  this->totalNumUnknownsNoCentralizer = 0;
+  this->totalNumUnknownsWithCentralizer = 0;
+  this->totalArithmeticOpsToSolveSystem = 0;
+  this->NumConeIntersections = -1;
+  this->NumCasesNoLinfiniteRelationFound = -1;
+  this->NumBadParabolics = 0;
+  this->NumCentralizerConditionFailsConeConditionHolds = 0;
+  this->centralizerRank = -1;
+  this->theWeylNonEmbedded = 0;
+  this->theSubalgebraNonEmbeddedDefaultScale = 0;
 }
 
 CandidateSSSubalgebra::CandidateSSSubalgebra()

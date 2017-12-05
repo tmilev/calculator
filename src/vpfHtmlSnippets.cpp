@@ -303,7 +303,7 @@ std::string HtmlRoutines::GetJavascriptLink(const std::string& fileNameVirtual)
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptLink");
   std::stringstream out;
   std::string theFileName = FileOperations::GetVirtualNameWithHash(fileNameVirtual);
-  out << "<script src=\"" << theFileName << "\"></script>";
+  out << "<script src=\"" << theFileName << "\"></script>\n";
   return out.str();
 }
 
@@ -311,7 +311,7 @@ std::string HtmlRoutines::GetCSSLink(const std::string& fileNameVirtual)
 { MacroRegisterFunctionWithName("HtmlRoutines::GetCSSLink");
   std::stringstream out;
   std::string theFileName = FileOperations::GetVirtualNameWithHash(fileNameVirtual);
-  out << "<link rel=\"stylesheet\" href= \"" << theFileName << "\">";
+  out << "<link rel=\"stylesheet\" href= \"" << theFileName << "\">\n";
   return out.str();
 }
 

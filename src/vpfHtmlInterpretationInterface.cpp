@@ -549,7 +549,7 @@ std::string HtmlInterpretation::GetSelectCourse()
   << HtmlInterpretation::ToStringNavigation()
   << "</calculatorNavigation>";
   CalculatorHTML tempObject;
-  std::string coursesAvailableList = "coursesavailable/default.txt";
+  std::string coursesAvailableList = "/coursesavailable/default.txt";
   if (theGlobalVariables.UserDefaultHasAdminRights())
     out
     << "<editPagePanel>"
@@ -561,26 +561,28 @@ std::string HtmlInterpretation::GetSelectCourse()
   std::string temp;
   FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
   (coursesAvailableList, temp, &commentsOnFailure);
+  //stOutput << "DEBUG: coursesAvailableList: " << temp;
   if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly
-      ("coursesavailable/default.txt", theTopicFile, &commentsOnFailure))
-  { out << "<b>Failed to fetch available courses from coursesavailable/default.txt</b>. " << commentsOnFailure.str();
+      ("/coursesavailable/default.txt", theTopicFile, &commentsOnFailure))
+  { out << "<b>Failed to fetch available courses from /coursesavailable/default.txt</b>. " << commentsOnFailure.str();
     out << " </body></html>";
     return out.str();
   }
   CourseList theCourses;
   theCourses.LoadFromString(theTopicFile, &out);
   out << "<div style=\"text-align:center\">";
-  for (int i=0; i < theCourses.theCourses.size; i++)
+  for (int i = 0; i < theCourses.theCourses.size; i++)
   { out << "<a class=\"courseLink\" href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=template&courseHome=coursetemplates/"
     << theCourses.theCourses[i].courseTemplate
     << "&topicList=topiclists/"
     << theCourses.theCourses[i].courseTopics
     << "\">" << theCourses.theCourses[i].title << "</a>";
-    if (i != theCourses.theCourses.size-1)
+    if (i != theCourses.theCourses.size - 1)
       out << "<br>";
   }
   out << "</div>";
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
 }
@@ -2041,8 +2043,8 @@ std::string HtmlInterpretation::GetScoresInCoursePage()
   out << "<script type=\"text/javascript\">\n";
   out << "studentScoresInHomePage= new Array("
   << theScores.theProblem.theTopicS.size() << ");\n";
-  for (int i=0; i<theScores.theProblem.theTopicS.size(); i++)
-  { TopicElement& currentElt=theScores.theProblem.theTopicS[i];
+  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i++)
+  { TopicElement& currentElt = theScores.theProblem.theTopicS[i];
     out << "studentScoresInHomePage[" << i << "]= new Object;\n";
     if (currentElt.flagSubproblemHasNoWeight)
       out << "studentScoresInHomePage[" << i << "].weightsOK=false;\n";

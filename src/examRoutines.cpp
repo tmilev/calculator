@@ -4091,8 +4091,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   this->NumVideosFound=this->NumVideosHandwrittenFound+this->NumVideosWithSlidesFound;
   outHead << "<panelStudentScores>Calculator build " << theGlobalVariables.buildVersionSimple << ". The course contains "
   << this->NumProblemsFound << " problem templates, "
-  << this->NumSlidesFound << " slides (printable+projector mode counted as a single slide) and "
-  << this->NumVideosFound << "=" << this->NumVideosWithSlidesFound << " with-slide + "
+  << this->NumSlidesFound << " slides (printable + projector mode counted as a single slide) and "
+  << this->NumVideosFound << " = " << this->NumVideosWithSlidesFound << " with-slide + "
   << this->NumVideosHandwrittenFound << " handwritten videos.</panelStudentScores><br>";
   //outHead << "DEBUG: " << theGlobalVariables.buildHeadHash;
   outFinal << outHead.str() << out.str();

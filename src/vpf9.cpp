@@ -949,7 +949,8 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
     }
   for (int i = 0; i < FileOperations::FolderVirtualLinksNonSensitive().size(); i++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd))
-    { output = theGlobalVariables.PhysicalPathProjectBase + FileOperations::FolderVirtualLinksNonSensitive().theValues[i] + folderEnd;
+    { output = theGlobalVariables.PhysicalPathProjectBase +
+      FileOperations::FolderVirtualLinksNonSensitive().theValues[i] + folderEnd;
       //stOutput << inputFileName << " transformed to: " << output;
       return true;
     }
@@ -964,7 +965,8 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
   if (accessULTRASensitiveFolders)
     for (int i = 0; i < FileOperations::FolderVirtualLinksULTRASensitive().size(); i++)
       if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd))
-      { output = theGlobalVariables.PhysicalPathProjectBase + FileOperations::FolderVirtualLinksULTRASensitive().theValues[i] + folderEnd;
+      { output = theGlobalVariables.PhysicalPathProjectBase +
+        FileOperations::FolderVirtualLinksULTRASensitive().theValues[i] + folderEnd;
         //stOutput << inputFileName << " transformed to: " << output;
         return true;
       }

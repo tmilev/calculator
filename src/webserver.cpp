@@ -3163,7 +3163,7 @@ int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   this->SetHeaderOKNoContentLength();
   theParser.inputString=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
-  theParser.flagShowCalculatorExamples=(theGlobalVariables.GetWebInput("showExamples")=="true");
+  theParser.flagShowCalculatorExamples = (theGlobalVariables.GetWebInput("showExamples") == "true");
   stOutput << "<html><head> <title>Calculator build " << theGlobalVariables.buildVersionSimple
   << "</title>";
   stOutput << HtmlRoutines::GetJavascriptMathjax();
@@ -4070,7 +4070,9 @@ int WebWorker::ServeClient()
     this->errorLogin = argumentProcessingFailureComments.str();
   if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.flagLoggedIn)
     if (theGlobalVariables.GetWebInput("spoofHostName") != "")
-    { theGlobalVariables.hostNoPort=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("spoofHostName"), false);
+    { theGlobalVariables.hostNoPort = HtmlRoutines::ConvertURLStringToNormal
+      (theGlobalVariables.GetWebInput("spoofHostName"), false);
+      //stOutput << "spoofhostname: " << theGlobalVariables.GetWebInput("spoofHostName");
       theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", theGlobalVariables.hostNoPort);
     }
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
@@ -4198,7 +4200,7 @@ int WebWorker::ServeClient()
 
 int WebWorker::ProcessFolderOrFile()
 { MacroRegisterFunctionWithName("WebWorker::ProcessFolderOrFile");
-  this->VirtualFileName=HtmlRoutines::ConvertURLStringToNormal(this->addressComputed, true);
+  this->VirtualFileName = HtmlRoutines::ConvertURLStringToNormal(this->addressComputed, true);
   this->SanitizeVirtualFileName();
   std::stringstream commentsOnFailure;
   if (!FileOperations::GetPhysicalFileNameFromVirtual
@@ -4285,8 +4287,8 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   stOutput << "\n<br>\n<div id=\"idProgressReport\"></div>\n";
 
   this->SendAllBytesWithHeaders();
-  for (int i=0; i<this->parent->theWorkers.size; i++)
-    if (i!=this->indexInParent)
+  for (int i = 0; i < this->parent->theWorkers.size; i++)
+    if (i != this->indexInParent)
       this->parent->theWorkers[i].Release();
   //this->parent->Release(this->pipeServerToWorkerControls[0]);
   //this->parent->Release(this->pipeServerToWorkerControls[1]);
@@ -4312,17 +4314,17 @@ void WebWorker::OutputShowIndicatorOnTimeout()
 std::string WebWorker::ToStringStatus()const
 { std::stringstream out;
 //  if (theWebServer.currentlyConnectedAddresses.GetCoefficientsSum()!=theWebServer.
-  out << "<br>Worker " << this->indexInParent+1;
+  out << "<br>Worker " << this->indexInParent + 1;
   if (this->flagInUse)
   { if (this->parent->activeWorker==this->indexInParent)
       out << ", <span style=\"color:green\"><b>current process</b></span>";
     else
       out << ", <b>in use</b>";
-    out << ", <a href=\"calculator?request=monitor&mainInput=" << this->indexInParent +1 << "\">monitor process "
-    << this->indexInParent +1 << "</a>";
+    out << ", <a href=\"calculator?request=monitor&mainInput=" << this->indexInParent + 1 << "\">monitor process "
+    << this->indexInParent + 1 << "</a>";
   } else
     out << ", not in use";
-  if (this->displayUserInput!="")
+  if (this->displayUserInput != "")
     out << ", user input: <span style=\"color:blue\">" << this->displayUserInput << "</span>";
   out << ", connection " << this->connectionID << ", process ID: ";
   if (this->ProcessPID!=0)
@@ -4330,15 +4332,15 @@ std::string WebWorker::ToStringStatus()const
   else
     out << "(not accessible)";
   out << ", socketID: ";
-  if (this->connectedSocketID==-1)
+  if (this->connectedSocketID == -1)
     out << "released in current process, value before release: " << this->connectedSocketIDLastValueBeforeRelease;
   else
     out << this->connectedSocketID;
   out << ". ";
   out << " Server time at last ping: " << this->timeOfLastPingServerSideOnly << " seconds. ";
-  if (this->pingMessage!="")
+  if (this->pingMessage != "")
     out << " Message at last ping: " << this->pingMessage;
-  if (this->status!="")
+  if (this->status != "")
     out << "<br><span style=\"color:red\"><b> Status: " << this->status << "</b></span><br>";
   out << "Pipes: " << this->pipeWorkerToServerControls.ToString()
   << ", " << this->pipeWorkerToServerTimerPing.ToString()
@@ -4367,30 +4369,30 @@ void WebServer::ReleaseEverything()
 #endif
   logger& currentLog = theGlobalVariables.flagIsChildProcess ? logWorker : logServer;
   ProgressReportWebServer::flagServerExists=false;
-  for (int i=0; i<this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i++)
     this->theWorkers[i].Release();
-  theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection=0;
+  theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection = 0;
   //theGlobalVariables.WebServerTimerPing=0;
-  theGlobalVariables.IndicatorStringOutputFunction=0;
-  theGlobalVariables.PauseUponUserRequest=0;
-  this->activeWorker=-1;
+  theGlobalVariables.IndicatorStringOutputFunction = 0;
+  theGlobalVariables.PauseUponUserRequest = 0;
+  this->activeWorker = -1;
   if (theGlobalVariables.flagServerDetailedLog)
     currentLog << logger::red << "DEBUG: "
     << " About to close socket: " << this->listeningSocketHTTP << ". " << logger::endL;
-  if (this->listeningSocketHTTP!=-1)
+  if (this->listeningSocketHTTP != -1)
   { close(this->listeningSocketHTTP);
     if (theGlobalVariables.flagServerDetailedLog)
       currentLog << logger::red << "DEBUG: "
       << " Just closed socket: " << this->listeningSocketHTTP << logger::endL;
-    this->listeningSocketHTTP=-1;
+    this->listeningSocketHTTP = -1;
   }
-  if (this->listeningSocketHttpSSL!=-1)
+  if (this->listeningSocketHttpSSL != -1)
   { close(this->listeningSocketHttpSSL);
     if (theGlobalVariables.flagServerDetailedLog)
       currentLog << logger::red << "DEBUG: "
       << " Just closed socket: " << this->listeningSocketHttpSSL << logger::endL;
   }
-  this->listeningSocketHttpSSL=-1;
+  this->listeningSocketHttpSSL = -1;
 }
 
 WebServer::~WebServer()
@@ -4415,65 +4417,64 @@ void WebServer::SendStringThroughActiveWorker(const std::string& theString)
 }
 
 void WebServer::PipeProgressReportToParentProcess(const std::string& theString)
-{ if (theWebServer.activeWorker==-1)
+{ if (theWebServer.activeWorker == -1)
     return;
   theWebServer.GetActiveWorker().PipeProgressReportToParentProcess(theString);
 }
 
 WebServer::WebServer()
-{ this->flagPort8155=true;
-  this->flagDeallocated=false;
-  this->flagTryToKillOlderProcesses=true;
-  this->activeWorker=-1;
-  this->timeLastExecutableModification=-1;
-  this->listeningSocketHTTP=-1;
-  this->listeningSocketHttpSSL=-1;
-  this->highestSocketNumber=-1;
-  this->flagReapingChildren=false;
-  this->MaxNumWorkersPerIPAdress=24;
-  this->MaxTotalUsedWorkers=40;
-  this->NumFailedSelectsSoFar=0;
-  this->NumSuccessfulSelectsSoFar=0;
-  this->NumProcessesReaped=0;
-  this->NumProcessAssassinated=0;
-  this->NumConnectionsSoFar=0;
-  this->NumWorkersNormallyExited=0;
-  this->WebServerPingIntervalInSeconds=10;
+{ this->flagPort8155 = true;
+  this->flagDeallocated = false;
+  this->flagTryToKillOlderProcesses = true;
+  this->activeWorker = -1;
+  this->timeLastExecutableModification = -1;
+  this->listeningSocketHTTP = -1;
+  this->listeningSocketHttpSSL = -1;
+  this->highestSocketNumber = -1;
+  this->flagReapingChildren = false;
+  this->MaxNumWorkersPerIPAdress = 24;
+  this->MaxTotalUsedWorkers = 40;
+  this->NumFailedSelectsSoFar = 0;
+  this->NumSuccessfulSelectsSoFar = 0;
+  this->NumProcessesReaped = 0;
+  this->NumProcessAssassinated = 0;
+  this->NumConnectionsSoFar = 0;
+  this->NumWorkersNormallyExited = 0;
+  this->WebServerPingIntervalInSeconds = 10;
 }
 
 WebWorker& WebServer::GetActiveWorker()
 { MacroRegisterFunctionWithName("WebServer::GetActiveWorker");
-  void (*oldOutputFunction)(const std::string& stringToOutput) =stOutput.theOutputFunction;
-  stOutput.theOutputFunction=0; //<- We are checking if the web server is in order.
+  void (*oldOutputFunction)(const std::string& stringToOutput) = stOutput.theOutputFunction;
+  stOutput.theOutputFunction = 0; //<- We are checking if the web server is in order.
   //Before that we prevent the crashing mechanism from trying to use (the eventually corrupt) web server
   //to report the error over the Internet.
-  if (this->activeWorker<0 || this->activeWorker>=this->theWorkers.size)
+  if (this->activeWorker < 0 || this->activeWorker >= this->theWorkers.size)
     crash << "Active worker index is " << this->activeWorker << " however I have " << this->theWorkers.size
     << " workers. " << crash;
-  stOutput.theOutputFunction=oldOutputFunction;//<-the web server is in order,
+  stOutput.theOutputFunction = oldOutputFunction;//<-the web server is in order,
   //therefore we restore the ability to report crashes over the internet.
   return this->theWorkers[this->activeWorker];
 }
 
 void WebServer::SignalActiveWorkerDoneReleaseEverything()
 { MacroRegisterFunctionWithName("WebServer::SignalActiveWorkerDoneReleaseEverything");
-  if (theWebServer.activeWorker==-1)
+  if (theWebServer.activeWorker == -1)
     return;
   theWebServer.GetActiveWorker().SendAllAndWrapUp();
-  theWebServer.activeWorker=-1;
+  theWebServer.activeWorker = -1;
 }
 
 void WebServer::ReleaseActiveWorker()
 { MacroRegisterFunctionWithName("WebServer::ReleaseActiveWorker");
-  if (this->activeWorker==-1)
+  if (this->activeWorker == -1)
     return;
   this->GetActiveWorker().Release();
-  this->activeWorker=-1;
+  this->activeWorker = -1;
 }
 
 void WebServer::WorkerTimerPing(double pingTime)
-{
-  if (theWebServer.activeWorker==-1)
+{ if (theWebServer.activeWorker == -1)
   { if (!theGlobalVariables.flagComputationFinishedAllOutputSentClosing)
       crash << "WebServer::WorkerTimerPing called when the computation is not entirely complete. " << crash;
     return;
@@ -4485,55 +4486,55 @@ void WebServer::WorkerTimerPing(double pingTime)
 
 void WebServer::ReleaseNonActiveWorkers()
 { MacroRegisterFunctionWithName("WebServer::ReleaseNonActiveWorkers");
-  for (int i=0; i<this->theWorkers.size; i++)
-    if (i!=this->activeWorker)
+  for (int i = 0; i < this->theWorkers.size; i++)
+    if (i != this->activeWorker)
       this->theWorkers[i].ReleaseKeepInUseFlag();
 }
 
 void WebServer::ReleaseSocketsNonActiveWorkers()
 { MacroRegisterFunctionWithName("WebServer::ReleaseSocketsNonActiveWorkers");
-  for (int i=0; i<this->theWorkers.size; i++)
-    if (i!=this->activeWorker)
+  for (int i = 0; i < this->theWorkers.size; i++)
+    if (i != this->activeWorker)
       this->Release(this->theWorkers[i].connectedSocketID);
 }
 
 bool WebServer::EmergencyRemoval_LastCreatedWorker()
 { this->GetActiveWorker().Release();
-  this->activeWorker=-1;
+  this->activeWorker = -1;
   this->theWorkers.SetSize(this->theWorkers.size-1);
   return false;
 }
 
 bool WebServer::CreateNewActiveWorker()
 { MacroRegisterFunctionWithName("WebServer::CreateNewActiveWorker");
-  if (this->activeWorker!=-1)
+  if (this->activeWorker != -1)
   { crash << "Calling CreateNewActiveWorker requires the active worker index to be -1." << crash;
     return false;
   }
-  bool found=false;
-  for (int i=0; i<this->theWorkers.size; i++)
+  bool found = false;
+  for (int i = 0; i < this->theWorkers.size; i++)
     if (!this->theWorkers[i].flagInUse)
-    { this->activeWorker=i;
-      found=true;
+    { this->activeWorker = i;
+      found = true;
       break;
     }
-  if (this->activeWorker==-1)
+  if (this->activeWorker == -1)
   { this->activeWorker=this->theWorkers.size;
-    this->theWorkers.SetSize(this->theWorkers.size+1);
+    this->theWorkers.SetSize(this->theWorkers.size + 1);
   }
-  this->GetActiveWorker().indexInParent=this->activeWorker;
-  this->GetActiveWorker().parent=this;
-  this->GetActiveWorker().pingMessage="";
+  this->GetActiveWorker().indexInParent = this->activeWorker;
+  this->GetActiveWorker().parent = this;
+  this->GetActiveWorker().pingMessage = "";
   if (found)
-  { this->theWorkers[this->activeWorker].flagInUse=true;
+  { this->theWorkers[this->activeWorker].flagInUse = true;
     return true;
   }
   this->GetActiveWorker().Release();
-  this->theWorkers[this->activeWorker].flagInUse=false; //<-until everything is initialized, we cannot be in use.
+  this->theWorkers[this->activeWorker].flagInUse = false; //<-until everything is initialized, we cannot be in use.
   std::stringstream stowstream, wtosStream, wtowStream;
-  stowstream << "S->W" << this->activeWorker+1 << ": ";
-  wtosStream << "W" << this->activeWorker+1 << "->S: ";
-  wtowStream << "W<->W" << this->activeWorker+1 << ": ";
+  stowstream << "S->W" << this->activeWorker + 1 << ": ";
+  wtosStream << "W" << this->activeWorker + 1 << "->S: ";
+  wtowStream << "W<->W" << this->activeWorker + 1 << ": ";
   std::string stow = stowstream.str();
   std::string wtos = wtosStream.str();
   std::string wtow = wtowStream.str();
@@ -4586,7 +4587,7 @@ bool WebServer::CreateNewActiveWorker()
   << "Allocated new worker & plumbing data structures. Total worker data structures: "
   << this->theWorkers.size << ". "
   << logger::endL;
-  this->theWorkers[this->activeWorker].flagInUse=true;
+  this->theWorkers[this->activeWorker].flagInUse = true;
   return true;
 }
 
@@ -4598,10 +4599,10 @@ std::string WebServer::ToStringLastErrorDescription()
 
 std::string WebServer::ToStringStatusActive()
 { MacroRegisterFunctionWithName("WebServer::ToStringStatusActive");
-  if (this->activeWorker==-1)
+  if (this->activeWorker == -1)
     return "server.";
   std::stringstream out;
-  if (this->activeWorker!=this->GetActiveWorker().indexInParent)
+  if (this->activeWorker != this->GetActiveWorker().indexInParent)
     crash << "Bad index in parent!" << crash;
   out << this->GetActiveWorker().ToStringStatus();
   return out.str();
@@ -4613,26 +4614,26 @@ std::string WebServer::ToStringStatusForLogFile()
      return "Running through standard Apache web server, no connection details to display. ";
   std::stringstream out;
   out << "<b>The calculator web server status.</b><br>";
-  double timeSoFar=theGlobalVariables.GetElapsedSeconds();
+  double timeSoFar = theGlobalVariables.GetElapsedSeconds();
   out
   << timeSoFar
   << " seconds = "
   << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
   (timeSoFar, false, false)
   << " web server uptime. ";
-  int approxNumPings= timeSoFar/this->WebServerPingIntervalInSeconds;
-  if (approxNumPings<0)
-    approxNumPings=0;
-  int numConnectionsSoFarApprox=this->NumConnectionsSoFar-approxNumPings;
-  if (numConnectionsSoFarApprox<0)
-    numConnectionsSoFarApprox=0;
+  int approxNumPings = timeSoFar / this->WebServerPingIntervalInSeconds;
+  if (approxNumPings < 0)
+    approxNumPings = 0;
+  int numConnectionsSoFarApprox = this->NumConnectionsSoFar - approxNumPings;
+  if (numConnectionsSoFarApprox < 0)
+    numConnectionsSoFarApprox = 0;
   out << "~" << numConnectionsSoFarApprox << " actual connections + ~"
   << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
   << " served since last restart. "
   << "This counts one connection per problem answer preview, page visit, progress report ping, etc. "
   ;
-  int numInUse=0;
-  for (int i=0; i<this->theWorkers.size; i++)
+  int numInUse = 0;
+  for (int i = 0; i < this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
       numInUse++;
   out << "<hr>Currently, there are " << numInUse << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
@@ -4667,20 +4668,20 @@ std::string WebServer::ToStringStatusPublicNoTop()
   << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
   (this->GetActiveWorker().timeOfLastPingServerSideOnly, false, false)
   << " web server uptime. ";
-  int approxNumPings=
+  int approxNumPings =
   this->GetActiveWorker().timeOfLastPingServerSideOnly/this->WebServerPingIntervalInSeconds;
-  if (approxNumPings<0)
-    approxNumPings=0;
-  int numConnectionsSoFarApprox=this->NumConnectionsSoFar-approxNumPings;
-  if (numConnectionsSoFarApprox<0)
-    numConnectionsSoFarApprox=0;
+  if (approxNumPings < 0)
+    approxNumPings = 0;
+  int numConnectionsSoFarApprox = this->NumConnectionsSoFar - approxNumPings;
+  if (numConnectionsSoFarApprox < 0)
+    numConnectionsSoFarApprox = 0;
   out << "~" << numConnectionsSoFarApprox << " actual connections + ~"
   << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
   << " served since last restart. "
   << "This counts one connection per problem answer preview, page visit, progress report ping, etc. "
   ;
-  int numInUse=0;
-  for (int i=0; i<this->theWorkers.size; i++)
+  int numInUse = 0;
+  for (int i = 0; i < this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
       numInUse++;
   out << "<hr>Currently, there are " << numInUse << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
@@ -4708,7 +4709,7 @@ std::string WebServer::ToStringStatusPublic()
   std::string lineString, wordString;
   std::stringstream topStream(topString);
   out << "<hr><b>Server machine details.</b><br>";
-  for (int i=0; i<5; i++)
+  for (int i = 0; i < 5; i++)
   { std::getline(topStream, lineString);
     out << lineString << "<br>\n ";
   }
@@ -4728,14 +4729,14 @@ std::string WebServer::ToStringStatusAll()
   out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><br>";
   out << "<a href=\"/LogFiles/" << GlobalVariables::GetDateForLogFiles() << "/\">" << "Current log files</a><hr>";
   out << this->ToStringStatusPublicNoTop() << "<hr>";
-  if (this->activeWorker==-1)
+  if (this->activeWorker == -1)
     out << "The process is functioning as a server.";
   else
-  { out << "The process is functioning as a worker. The active worker is number " << this->activeWorker+1 << ". ";
+  { out << "The process is functioning as a worker. The active worker is number " << this->activeWorker + 1 << ". ";
     out << "<br>" << this->ToStringStatusActive();
   }
-  for (int i=0; i<this->theWorkers.size; i++)
-  { WebWorker& currentWorker=this->theWorkers[i];
+  for (int i = 0; i < this->theWorkers.size; i++)
+  { WebWorker& currentWorker = this->theWorkers[i];
     if (!currentWorker.flagInUse)
       continue;
     currentWorker.pipeWorkerToWorkerStatus.ReadWithoutEmptying(false, false);
@@ -4743,7 +4744,7 @@ std::string WebServer::ToStringStatusAll()
   }
   out << "<hr>";
   out << "Connections: " << this->currentlyConnectedAddresses.ToString();
-  for (int i=0; i<this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i++)
     out << "<hr>" << this->theWorkers[i].ToStringStatus();
   return out.str();
 }
@@ -4752,8 +4753,8 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
 { struct stat theFileStat;
   if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat)!=0)
     return;
-  if (this->timeLastExecutableModification!=-1)
-    if (this->timeLastExecutableModification!=theFileStat.st_ctime)
+  if (this->timeLastExecutableModification != -1)
+    if (this->timeLastExecutableModification != theFileStat.st_ctime)
     { stOutput << "<b>The server executable was updated, but the server has not been restarted yet. "
       << "Restarting in 0.5 seconds...</b>";
       if (callReload)
@@ -4762,7 +4763,7 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
       else
         stOutput << "<script language=\"javascript\">setTimeout(resubmit, 500); "
         << " function resubmit() { document.getElementById('formCalculator').submit();}</script>";
-      if (this->activeWorker!=-1)
+      if (this->activeWorker != -1)
       { this->GetActiveWorker().SendAllBytesWithHeaders();
         this->ReleaseActiveWorker();
       }
@@ -4777,17 +4778,17 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
 void WebServer::Restart()
 { //logWorker << "Killing all copies of the calculator and restarting..." << logger::endL;
   //logWorker << "Time limit after restart: " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
-  if (this->listeningSocketHTTP!=-1)
+  if (this->listeningSocketHTTP != -1)
     this->Release(this->listeningSocketHTTP);
-  if (this->listeningSocketHttpSSL!=-1)
+  if (this->listeningSocketHttpSSL != -1)
     this->Release(this->listeningSocketHttpSSL);  std::stringstream theCommand;
-  int timeInteger=(int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
-  logger* currentLog=0;
-  currentLog=&logWorker;
-  if (theGlobalVariables.processType=="serverMonitor")
-    currentLog=&logServerMonitor;
-  if (theGlobalVariables.processType=="server")
-    currentLog=&logServer;
+  int timeInteger = (int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
+  logger* currentLog = 0;
+  currentLog = &logWorker;
+  if (theGlobalVariables.processType == "serverMonitor")
+    currentLog = &logServerMonitor;
+  if (theGlobalVariables.processType == "server")
+    currentLog = &logServer;
   *currentLog << logger::red << " restarting with time limit " << timeInteger << logger::endL;
   theCommand << "killall " << theGlobalVariables.PhysicalNameExecutableNoPath << " \r\n./";
   theCommand << theGlobalVariables.PhysicalNameExecutableNoPath;
@@ -4821,21 +4822,21 @@ void WebServer::initListeningSockets()
   if (theGlobalVariables.flagSSLisAvailable)
     if (listen(this->listeningSocketHttpSSL, WebServer::maxNumPendingConnections) == -1)
       crash << "Listen function failed on https port." << crash;
-  this->highestSocketNumber=-1;
-  if (this->listeningSocketHTTP!=-1)
+  this->highestSocketNumber = -1;
+  if (this->listeningSocketHTTP != -1)
   { this->theListeningSockets.AddOnTop(this->listeningSocketHTTP);
-    this->highestSocketNumber=MathRoutines::Maximum(this->listeningSocketHTTP, this->highestSocketNumber);
+    this->highestSocketNumber = MathRoutines::Maximum(this->listeningSocketHTTP, this->highestSocketNumber);
   }
-  if (this->listeningSocketHttpSSL!=-1)
+  if (this->listeningSocketHttpSSL != -1)
   { this->theListeningSockets.AddOnTop(this->listeningSocketHttpSSL);
-    this->highestSocketNumber=MathRoutines::Maximum(this->listeningSocketHttpSSL, this->highestSocketNumber);
+    this->highestSocketNumber = MathRoutines::Maximum(this->listeningSocketHttpSSL, this->highestSocketNumber);
   }
 }
 
 void WebServer::initDates()
-{ this->timeLastExecutableModification=-1;
+{ this->timeLastExecutableModification = -1;
   struct stat theFileStat;
-  if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat)!=0)
+  if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0)
     return;
   this->timeLastExecutableModification=theFileStat.st_ctime;
 }
@@ -4849,7 +4850,7 @@ void WebServer::ReleaseWorkerSideResources()
   if (theGlobalVariables.flagServerDetailedLog)
     currentLog << logger::green << "DEBUG: server RELEASED active worker. " << logger::endL;
   //<-release socket- communication is handled by the worker.
-  this->activeWorker=-1; //<-The active worker is needed only in the child process.
+  this->activeWorker = -1; //<-The active worker is needed only in the child process.
 }
 
 bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string& inputAddress)
@@ -4969,18 +4970,18 @@ void WebServer::RecycleChildrenIfPossible()
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
       } else
         logServer << logger::orange << "Worker " << i + 1 << " not done yet. " << logger::endL;
-      PipePrimitive& currentPingPipe= this->theWorkers[i].pipeWorkerToServerTimerPing;
+      PipePrimitive& currentPingPipe = this->theWorkers[i].pipeWorkerToServerTimerPing;
       if (currentPingPipe.flagReadEndBlocks)
         crash << "Pipe: " << currentPingPipe.ToString() << " has blocking read end. " << crash;
       currentPingPipe.ReadIfFailThenCrash(false, true);
-      if (currentPingPipe.lastRead.size>0)
+      if (currentPingPipe.lastRead.size > 0)
       { this->theWorkers[i].pingMessage = currentPingPipe.GetLastRead();
-        this->theWorkers[i].timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
+        this->theWorkers[i].timeOfLastPingServerSideOnly = theGlobalVariables.GetElapsedSeconds();
       } else if (this->theWorkers[i].PauseWorker.CheckPauseIsRequested(false, true, true))
       { this->theWorkers[i].pingMessage = "worker paused, no pings.";
         this->theWorkers[i].timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
       } else
-      { bool presumedDead=false;
+      { bool presumedDead = false;
         if (this->theWorkers[i].flagInUse)
           if (theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead>0)
             if (theGlobalVariables.GetElapsedSeconds()-
@@ -4992,13 +4993,13 @@ void WebServer::RecycleChildrenIfPossible()
           std::stringstream pingTimeoutStream;
           pingTimeoutStream
           << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
-          << " seconds passed since worker " << i+1
+          << " seconds passed since worker " << i + 1
           << " last pinged the server; killing connection "
           << this->theWorkers[i].connectionID
           << ", pid: "
           << this->theWorkers[i].ProcessPID << ". ";
           logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
-          this->theWorkers[i].pingMessage="<span style=\"color:red\"><b>" + pingTimeoutStream.str()+"</b></span>";
+          this->theWorkers[i].pingMessage = "<span style=\"color:red\"><b>" + pingTimeoutStream.str() + "</b></span>";
           numInUse--;
           this->NumProcessAssassinated++;
         }
@@ -5010,12 +5011,12 @@ void WebServer::RecycleChildrenIfPossible()
       << "DEBUG: RecycleChildrenIfPossible exit point 1. " << logger::endL;
     return;
   }
-  for (int i=0; i<this->theWorkers.size && numInUse>1; i++)
+  for (int i = 0; i < this->theWorkers.size && numInUse > 1; i++)
   { if (this->theWorkers[i].flagInUse)
     { this->TerminateChildSystemCall(i);
       std::stringstream errorStream;
       errorStream
-      << "Terminating child " << i+1 << " with PID "
+      << "Terminating child " << i + 1 << " with PID "
       << this->theWorkers[i].ProcessPID
       << ": too many workers in use. ";
       this->theWorkers[i].pingMessage=errorStream.str();
@@ -5046,20 +5047,20 @@ bool WebServer::initPrepareWebServerALL()
 bool WebServer::initBindToPorts()
 { MacroRegisterFunctionWithName("WebServer::initBindToPorts");
   addrinfo hints;
-  addrinfo *servinfo=0;
-  addrinfo *p=0;
-  int yes=1;
+  addrinfo *servinfo = 0;
+  addrinfo *p = 0;
+  int yes = 1;
   int rv;
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE; // use my IP
   // loop through all the results and bind to the first we can
-  List<std::string>* thePorts=&this->PortsITryHttp;
-  int* theListeningSocket=0;
-  theListeningSocket=& this->listeningSocketHTTP;
-  for (int j=0; j<2; j++, thePorts=& this->PortsITryHttpSSL, theListeningSocket=& this->listeningSocketHttpSSL)
-    for (int i=0; i<(*thePorts).size; i++)
+  List<std::string>* thePorts = &this->PortsITryHttp;
+  int* theListeningSocket = 0;
+  theListeningSocket = &this->listeningSocketHTTP;
+  for (int j = 0; j < 2; j++, thePorts = &this->PortsITryHttpSSL, theListeningSocket = &this->listeningSocketHttpSSL)
+    for (int i = 0; i < (*thePorts).size; i++)
     { if ((rv = getaddrinfo(NULL, (*thePorts)[i].c_str(), &hints, &servinfo)) != 0)
       { logWorker << "getaddrinfo: " << gai_strerror(rv) << logger::endL;
         return false;
@@ -5074,38 +5075,38 @@ bool WebServer::initBindToPorts()
           crash << "Error: setsockopt failed, error: \n" << strerror(errno) << crash;
         if (bind(*theListeningSocket, p->ai_addr, p->ai_addrlen) == -1)
         { close(*theListeningSocket);
-          *theListeningSocket=-1;
+          *theListeningSocket = -1;
           logServer << "Error: bind failed at port: " << (*thePorts)[i] << ". Error: "
           << this->ToStringLastErrorDescription() << logger::endL;
           continue;
         }
-        int setFlagCounter=0;
+        int setFlagCounter = 0;
         while (fcntl(*theListeningSocket, F_SETFL, O_NONBLOCK)!=0)
-        { if (++setFlagCounter>10)
+        { if (++setFlagCounter > 10)
             crash << "Error: failed to set non-blocking status to listening socket. " << crash;
         }
         break;
       }
-      if (p!=NULL)
+      if (p != NULL)
       { logServer << logger::yellow << "Successfully bound to port " << (*thePorts)[i] << logger::endL;
-        if (j==0)
-          this->httpPort=(*thePorts)[i];
+        if (j == 0)
+          this->httpPort = (*thePorts)[i];
         else
-          this->httpSSLPort=(*thePorts)[i];
+          this->httpSSLPort = (*thePorts)[i];
         break;
       }
       freeaddrinfo(servinfo); // all done with this structure
     }
   if (this->listeningSocketHTTP == -1)
     crash << "Failed to bind to any of the ports " << this->PortsITryHttp.ToStringCommaDelimited() << "\n" << crash;
-  if (theGlobalVariables.flagSSLisAvailable && this->listeningSocketHttpSSL==-1)
+  if (theGlobalVariables.flagSSLisAvailable && this->listeningSocketHttpSSL == -1)
     crash << "Failed to bind to any of the ports " << this->PortsITryHttpSSL.ToStringCommaDelimited() << "\n" << crash;
   return true;
 }
 
 void WebServer::initPrepareSignals()
 { MacroRegisterFunctionWithName("WebServer::initPrepareSignals");
-  if (sigemptyset(&SignalSEGV.sa_mask)==-1)
+  if (sigemptyset(&SignalSEGV.sa_mask) == -1)
     crash << "Failed to initialize SignalSEGV mask. Crashing to let you know. " << crash;
   SignalSEGV.sa_sigaction = &segfault_sigaction;
   SignalSEGV.sa_flags = SA_SIGINFO;
@@ -5114,9 +5115,9 @@ void WebServer::initPrepareSignals()
     << " Crashing to let you know. " << crash;
   ///////////////////////
   //catch floating point exceptions
-  if (sigemptyset(&SignalFPE.sa_mask)==-1)
+  if (sigemptyset(&SignalFPE.sa_mask) == -1)
     crash << "Failed to initialize SignalFPE mask. Crashing to let you know. " << crash;
-  SignalFPE.sa_sigaction=0;
+  SignalFPE.sa_sigaction = 0;
   SignalFPE.sa_handler= &WebServer::fperror_sigaction;
   if (sigaction(SIGFPE, &SignalFPE, NULL) == -1)
     crash << "Failed to register SIGFPE handler (fatal arithmetic error). Crashing to let you know. " << crash;
@@ -5181,13 +5182,13 @@ int WebServer::Run()
     logEmail          .reset();
     logServer         .reset();
     logSuccessfulForks.reset();
-    logSuccessfulForks.flagWriteImmediately=true;
+    logSuccessfulForks.flagWriteImmediately = true;
   }
   if (true)
-  { int pidMonitor=fork();
-    if (pidMonitor<0)
+  { int pidMonitor = fork();
+    if (pidMonitor < 0)
       crash << "Failed to create server process. " << crash;
-    if (pidMonitor==0)
+    if (pidMonitor == 0)
     { theGlobalVariables.processType = "serverMonitor";
       theGlobalVariables.flagIsChildProcess = true;
       MonitorWebServer();//<-this attempts to connect to the server over the internet and restarts if it can't.
@@ -5206,22 +5207,22 @@ int WebServer::Run()
   char userAddressBuffer[INET6_ADDRSTRLEN];
   this->initSSL();
   fd_set FDListenSockets;
-  this->NumSuccessfulSelectsSoFar=0;
-  this->NumFailedSelectsSoFar=0;
-  long long previousReportedNumberOfSelects=0;
-  int previousServerStatReport=0;
-  int previousServerStatDetailedReport=0;
+  this->NumSuccessfulSelectsSoFar = 0;
+  this->NumFailedSelectsSoFar = 0;
+  long long previousReportedNumberOfSelects = 0;
+  int previousServerStatReport = 0;
+  int previousServerStatDetailedReport = 0;
   sigset_t allSignals, oldSignals;
   sigfillset(&allSignals);
   while(true)
   { // main accept() loop
     //    logWorker << logger::red << "select returned!" << logger::endL;
     FD_ZERO(&FDListenSockets);
-    for (int i=0; i<this->theListeningSockets.size; i++)
+    for (int i = 0; i < this->theListeningSockets.size; i++)
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
     if (theGlobalVariables.flagServerDetailedLog)
       logServer << logger::red << "DEBUG: About to enter select loop. " << logger::endL;
-    while (select(this->highestSocketNumber+1, &FDListenSockets, 0, 0, 0) == -1)
+    while (select(this->highestSocketNumber + 1, &FDListenSockets, 0, 0, 0) == -1)
     { if (this->flagReapingChildren)
         logServer << logger::yellow << "Select interrupted while reaping children. "
         << logger::endL;
@@ -5234,35 +5235,40 @@ int WebServer::Run()
       logServer << logger::green << "DEBUG: select success. " << logger::endL;
     gettimeofday(&timeBeforeProcessFork, NULL);
     this->NumSuccessfulSelectsSoFar++;
-    if ((this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar)-previousReportedNumberOfSelects>100)
-    { logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and " << this->NumFailedSelectsSoFar << " bad ("
+    if ((this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar) - previousReportedNumberOfSelects > 100)
+    { logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and "
+      << this->NumFailedSelectsSoFar << " bad ("
       << this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar << " total) selects. " << logger::endL;
       previousReportedNumberOfSelects = this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar;
     }
-    if (this->NumProcessAssassinated + this->NumProcessesReaped + this->NumWorkersNormallyExited + this->NumConnectionsSoFar - previousServerStatReport > 99)
-    { previousServerStatReport = this->NumProcessAssassinated + this->NumProcessesReaped + this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
+    if (this->NumProcessAssassinated + this->NumProcessesReaped + this->NumWorkersNormallyExited +
+        this->NumConnectionsSoFar - previousServerStatReport > 99)
+    { previousServerStatReport = this->NumProcessAssassinated + this->NumProcessesReaped +
+      this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
       logProcessStats << "# kill commands: " << this->NumProcessAssassinated
       << " #processes reaped: " << this->NumProcessesReaped
       << " #normally reclaimed workers: " << this->NumWorkersNormallyExited
       << " #connections so far: " << this->NumConnectionsSoFar << logger::endL;
     }
-    if (this->NumProcessAssassinated + this->NumProcessesReaped + this->NumWorkersNormallyExited + this->NumConnectionsSoFar - previousServerStatDetailedReport > 499)
-    { previousServerStatDetailedReport = this->NumProcessAssassinated + this->NumProcessesReaped + this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
+    if (this->NumProcessAssassinated + this->NumProcessesReaped + this->NumWorkersNormallyExited +
+        this->NumConnectionsSoFar - previousServerStatDetailedReport > 499)
+    { previousServerStatDetailedReport = this->NumProcessAssassinated + this->NumProcessesReaped +
+      this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
       logProcessStats << this->ToStringStatusForLogFile() << logger::endL;
     }
-    int newConnectedSocket =-1;
-    theGlobalVariables.flagUsingSSLinCurrentConnection=false;
-    bool found=false;
-    for (int i=theListeningSockets.size-1; i>=0; i--)
+    int newConnectedSocket = -1;
+    theGlobalVariables.flagUsingSSLinCurrentConnection = false;
+    bool found = false;
+    for (int i = theListeningSockets.size - 1; i >= 0; i--)
       if (FD_ISSET(this->theListeningSockets[i], &FDListenSockets))
       { //if (this->theListeningSockets[i]==this->listeningSocketHTTP)
-        newConnectedSocket=accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
+        newConnectedSocket = accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
         if (newConnectedSocket >= 0)
         { logServer << logger::green << " Connection candidate  "
-          << this->NumConnectionsSoFar+1 << ". "
+          << this->NumConnectionsSoFar + 1 << ". "
           << "Connected via listening socket " << this->theListeningSockets[i]
           << " on socket: " << newConnectedSocket;
-          if (this->theListeningSockets[i]==this->listeningSocketHttpSSL)
+          if (this->theListeningSockets[i] == this->listeningSocketHttpSSL)
           { theGlobalVariables.flagUsingSSLinCurrentConnection=true;
             logServer << logger::purple << " (SSL encrypted). " << logger::endL;
           } else
@@ -5295,23 +5301,23 @@ int WebServer::Run()
       continue;
     }
     /////////////
-    this->GetActiveWorker().connectedSocketID=newConnectedSocket;
-    this->GetActiveWorker().flagUsingSSLInWorkerProcess=theGlobalVariables.flagUsingSSLinCurrentConnection;
-    this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease=newConnectedSocket;
-    this->GetActiveWorker().timeServerAtWorkerStart=
+    this->GetActiveWorker().connectedSocketID = newConnectedSocket;
+    this->GetActiveWorker().flagUsingSSLInWorkerProcess = theGlobalVariables.flagUsingSSLinCurrentConnection;
+    this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease = newConnectedSocket;
+    this->GetActiveWorker().timeServerAtWorkerStart =
     theGlobalVariables.GetElapsedSeconds();
-    this->GetActiveWorker().timeOfLastPingServerSideOnly=
+    this->GetActiveWorker().timeOfLastPingServerSideOnly =
     this->GetActiveWorker().timeServerAtWorkerStart;
     this->NumConnectionsSoFar++;
-    this->GetActiveWorker().connectionID=this->NumConnectionsSoFar;
-    this->GetActiveWorker().userAddress.theObject=userAddressBuffer;
-    this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1 );
+    this->GetActiveWorker().connectionID = this->NumConnectionsSoFar;
+    this->GetActiveWorker().userAddress.theObject = userAddressBuffer;
+    this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1);
 //    logWorker << this->ToStringStatus();
     /////////////
     if (theGlobalVariables.flagServerDetailedLog)
       logProcessStats << "DEBUG: about to fork, sigprocmasking " << logger::endL;
     int error=sigprocmask(SIG_BLOCK, &allSignals, &oldSignals);
-    if (error<0)
+    if (error < 0)
     { logServer << logger::red << "DEBUG: Sigprocmask failed. The server is going to crash. " << logger::endL;
       crash << "Sigprocmas failed. This should not happen. " << crash;
     }
@@ -5319,30 +5325,30 @@ int WebServer::Run()
       logProcessStats << "DEBUG: Sigprocmask done. Proceeding to fork. "
       << "Time elapsed: " << theGlobalVariables.GetElapsedSeconds() << " second(s). <br>"
       << logger::endL;
-    int incomingPID=fork(); //creates an almost identical copy of this process.
+    int incomingPID = fork(); //creates an almost identical copy of this process.
     //<- Please don't assign directly to this->GetActiveWorker().ProcessPID.
     //<- There may be a race condition around this line of code and I
     //want as little code as possible between the fork and the logFile.
     //The original process is the parent, the almost identical copy is the child.
     //logWorker << "\r\nChildPID: " << this->childPID;
-    if (incomingPID==0)
+    if (incomingPID == 0)
       theGlobalVariables.processType="worker";
     if (theGlobalVariables.flagServerDetailedLog)
-      if (incomingPID==0)
+      if (incomingPID == 0)
       { logWorker << "DEBUG: fork() successful in worker; elapsed seconds @ fork(): "
         << theGlobalVariables.GetElapsedSeconds() << logger::endL;
       }
     if (theGlobalVariables.flagServerDetailedLog)
-      if (incomingPID>0)
+      if (incomingPID > 0)
       { logSuccessfulForks << "DEBUG: fork() successful; elapsed seconds @ fork(): "
         << theGlobalVariables.GetElapsedSeconds() << logger::endL;
       }
-    if (incomingPID<0)
+    if (incomingPID < 0)
       logProcessKills << logger::red << " FAILED to spawn a child process. " << logger::endL;
-    this->GetActiveWorker().ProcessPID=incomingPID;
-    if (this->GetActiveWorker().ProcessPID==0)
+    this->GetActiveWorker().ProcessPID = incomingPID;
+    if (this->GetActiveWorker().ProcessPID == 0)
     { // this is the child (worker) process
-      theGlobalVariables.flagIsChildProcess=true;
+      theGlobalVariables.flagIsChildProcess = true;
       if (theGlobalVariables.flagServerDetailedLog)
         logWorker << logger::green << "DEBUG: "
         << " FORK successful in worker, next step. Time elapsed: " << theGlobalVariables.GetElapsedSeconds()
@@ -5350,7 +5356,7 @@ int WebServer::Run()
       sigprocmask(SIG_SETMASK, &oldSignals, NULL);
       if (theGlobalVariables.flagServerDetailedLog)
         logWorker << logger::green << "DEBUG: sigprocmask success, running... " << logger::endL;
-      int result=this->GetActiveWorker().Run();
+      int result = this->GetActiveWorker().Run();
       if (theGlobalVariables.flagServerDetailedLog)
         logWorker << "DEBUG: run finished, releasing resources. " << logger::endL;
       this->ReleaseEverything();
@@ -5362,8 +5368,8 @@ int WebServer::Run()
       logProcessStats << logger::green << "DEBUG: fork successful. Time elapsed: "
       << theGlobalVariables.GetElapsedSeconds() << " second(s). "
       << "About to unmask signals. " << logger::endL;
-    error= sigprocmask(SIG_SETMASK, &oldSignals, NULL);
-    if (error<0)
+    error = sigprocmask(SIG_SETMASK, &oldSignals, NULL);
+    if (error < 0)
     { logServer << "Sigprocmask failed on server, I shall now crash. " << logger::endL;
       crash << "Sigprocmask failed on server." << crash;
     }
@@ -5485,13 +5491,13 @@ void WebServer::CheckOpenSSLMySQLInstallation()
 { MacroRegisterFunctionWithName("WebServer::CheckOpenSSLMySQLInstallation");
   if (theGlobalVariables.flagRunningApache)
     return;
-  bool doInstallMysql=false;
-  bool doInstallOpenSSL=false;
+  bool doInstallMysql = false;
+  bool doInstallOpenSSL = false;
 #ifndef MACRO_use_open_ssl
-  doInstallMysql=true;
+  doInstallMysql = true;
 #endif
 #ifndef MACRO_use_MySQL
-  doInstallOpenSSL=true;
+  doInstallOpenSSL = true;
 #endif
   if (!doInstallMysql && !doInstallOpenSSL)
     return;
@@ -5513,20 +5519,20 @@ void WebServer::CheckOpenSSLMySQLInstallation()
   { result << "You appear to be missing a mysql installation. Let me try to install that for you. "
     << logger::green << "Enter the sudo password as prompted please. "
     << logger::endL;
-    if (theGlobalVariables.OperatingSystem=="Ubuntu")
+    if (theGlobalVariables.OperatingSystem == "Ubuntu")
       theGlobalVariables.CallSystemNoOutput("sudo apt-get install mysql-client mysql-server libmysqlclient-dev", false);
-    else if (theGlobalVariables.OperatingSystem=="CentOS")
+    else if (theGlobalVariables.OperatingSystem == "CentOS")
       theGlobalVariables.CallSystemNoOutput("sudo yum install mysql-devel", false);
   }
   if (doInstallOpenSSL)
   { result << "You appear to be missing an openssl installation. Let me try to install that for you. "
     << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
-    if (theGlobalVariables.OperatingSystem=="Ubuntu")
+    if (theGlobalVariables.OperatingSystem == "Ubuntu")
       theGlobalVariables.CallSystemNoOutput("sudo apt-get install libssl-dev", false);
-    else if (theGlobalVariables.OperatingSystem=="CentOS")
+    else if (theGlobalVariables.OperatingSystem == "CentOS")
       theGlobalVariables.CallSystemNoOutput("sudo yum install openssl-devel", false);
   }
-  std::string currentFolder=FileOperations::GetCurrentFolder();
+  std::string currentFolder = FileOperations::GetCurrentFolder();
   result << "Changing folder to: " << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
   theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
   result << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
@@ -5619,10 +5625,10 @@ void WebServer::CheckSVNSetup()
   WebServer::FigureOutOperatingSystem();
   result << logger::yellow << "SVN setup file missing, proceeding to set it up. " << logger::endL
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
-  if (theGlobalVariables.OperatingSystem=="Ubuntu")
+  if (theGlobalVariables.OperatingSystem == "Ubuntu")
   { result << logger::yellow << "sudo apt-get install subversion" << logger::endL;
     theGlobalVariables.CallSystemNoOutput("sudo apt-get install subversion", false);
-  } else if (theGlobalVariables.OperatingSystem=="CentOS")
+  } else if (theGlobalVariables.OperatingSystem == "CentOS")
   { result << logger::yellow << "sudo yum install subversion" << logger::endL;
     theGlobalVariables.CallSystemNoOutput("sudo yum install subversion", false);
   }
@@ -5646,7 +5652,7 @@ void WebServer::CheckMathJaxSetup()
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
   if (theGlobalVariables.OperatingSystem == "Ubuntu")
     theGlobalVariables.CallSystemNoOutput("sudo apt-get install unzip", false);
-  else if (theGlobalVariables.OperatingSystem=="CentOS")
+  else if (theGlobalVariables.OperatingSystem == "CentOS")
     theGlobalVariables.CallSystemNoOutput("sudo yum install unzip", false);
   result << "Proceeding to unzip MathJax. ";
   //std::string currentFolder=FileOperations::GetCurrentFolder();
@@ -5661,64 +5667,64 @@ void WebServer::CheckMathJaxSetup()
 
 void WebServer::AnalyzeMainArguments(int argC, char **argv)
 { MacroRegisterFunctionWithName("WebServer::AnalyzeMainArguments");
-  if (argC<0)
-    argC=0;
+  if (argC < 0)
+    argC = 0;
   theGlobalVariables.programArguments.SetSize(argC);
   //std::cout << "RAND_MAX: " << RAND_MAX;
   //std::cout << "Program arguments: \n";
-  for (int i=0; i<argC; i++)
-  { theGlobalVariables.programArguments[i]=argv[i];
+  for (int i = 0; i < argC; i++)
+  { theGlobalVariables.programArguments[i] = argv[i];
     //std::cout << "Argument " << i+1 << ": " << theGlobalVariables.programArguments[i] << "\n";
   }
   ////////////////////////////////////////////////////
-  theGlobalVariables.flagRunningAce=true;
-  theGlobalVariables.flagRunningCommandLine=false;
-  theGlobalVariables.flagRunningConsoleTest=false;
-  theGlobalVariables.flagRunningApache=false;
+  theGlobalVariables.flagRunningAce = true;
+  theGlobalVariables.flagRunningCommandLine = false;
+  theGlobalVariables.flagRunningConsoleTest = false;
+  theGlobalVariables.flagRunningApache = false;
   #ifdef MACRO_use_open_ssl
-  theGlobalVariables.flagSSLisAvailable=true;
+  theGlobalVariables.flagSSLisAvailable = true;
   #endif
-  theGlobalVariables.flagRunningBuiltInWebServer=false;
+  theGlobalVariables.flagRunningBuiltInWebServer = false;
   ////////////////////////////////////////////////////
-  if (argC==0)
-  { theGlobalVariables.flagRunningCommandLine=true;
+  if (argC == 0)
+  { theGlobalVariables.flagRunningCommandLine = true;
     return;
   }
   theGlobalVariables.initDefaultFolderAndFileNames(theGlobalVariables.programArguments[0]);
-  std::string envRequestMethodApache=WebServer::GetEnvironment("REQUEST_METHOD");
-  if (envRequestMethodApache =="GET" || envRequestMethodApache=="POST" || envRequestMethodApache=="HEAD")
-  { theGlobalVariables.flagRunningApache=true;
+  std::string envRequestMethodApache = WebServer::GetEnvironment("REQUEST_METHOD");
+  if (envRequestMethodApache == "GET" || envRequestMethodApache == "POST" || envRequestMethodApache == "HEAD")
+  { theGlobalVariables.flagRunningApache = true;
     return;
   }
-  if (argC<2)
+  if (argC < 2)
   { if (!theGlobalVariables.flagRunningApache)
-      theGlobalVariables.flagRunningCommandLine=true;
+      theGlobalVariables.flagRunningCommandLine = true;
     return;
   }
-  std::string& secondArgument=theGlobalVariables.programArguments[1];
-  if (secondArgument=="server" || secondArgument=="server8080")
-  { if (secondArgument=="server8080")
-      theWebServer.flagPort8155=false;
-    theGlobalVariables.flagRunningBuiltInWebServer=true;
-    theGlobalVariables.flagRunningAce=false;
-    theWebServer.flagTryToKillOlderProcesses=true;
-    if (argC==2)
+  std::string& secondArgument = theGlobalVariables.programArguments[1];
+  if (secondArgument == "server" || secondArgument == "server8080")
+  { if (secondArgument == "server8080")
+      theWebServer.flagPort8155 = false;
+    theGlobalVariables.flagRunningBuiltInWebServer = true;
+    theGlobalVariables.flagRunningAce = false;
+    theWebServer.flagTryToKillOlderProcesses = true;
+    if (argC == 2)
       return;
-    std::string& thirdArgument=theGlobalVariables.programArguments[2];
-    std::string timeLimitString="100";
-    std::string killOrder="";
-    if (thirdArgument=="nokill")
-      killOrder="nokill";
+    std::string& thirdArgument = theGlobalVariables.programArguments[2];
+    std::string timeLimitString = "100";
+    std::string killOrder = "";
+    if (thirdArgument == "nokill")
+      killOrder = "nokill";
     else
-      timeLimitString=thirdArgument;
-    if (argC>=4 && killOrder=="nokill")
-      timeLimitString=theGlobalVariables.programArguments[3];
-    theWebServer.flagTryToKillOlderProcesses=!(killOrder=="nokill");
+      timeLimitString = thirdArgument;
+    if (argC >= 4 && killOrder == "nokill")
+      timeLimitString = theGlobalVariables.programArguments[3];
+    theWebServer.flagTryToKillOlderProcesses = !(killOrder == "nokill");
     Rational timeLimit;
     timeLimit.AssignString(timeLimitString);
-    int timeLimitInt=0;
+    int timeLimitInt = 0;
     if (timeLimit.IsIntegerFittingInInt(&timeLimitInt))
-    { theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=timeLimitInt;
+    { theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = timeLimitInt;
       std::cout << "Max computation time: " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << std::endl;
     }
     return;
@@ -5831,7 +5837,7 @@ void WebServer::InitializeGlobalVariables()
 
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("coursetemplates/", "../coursetemplates/");
-  folderSubstitutionsNonSensitive.SetKeyValue("coursesavailable/", "../coursesavailable/"); //<-web server
+  folderSubstitutionsNonSensitive.SetKeyValue("/coursesavailable/", "../coursesavailable/"); //<-web server
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
 
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");//<-coming from webserver
@@ -5852,7 +5858,7 @@ void WebServer::InitializeGlobalVariables()
 
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("topiclists/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("coursetemplates/");
-  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("coursesavailable/");
+  FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("/coursesavailable/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("problemtemplates/");
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("DefaultProblemLocation/");
 }
@@ -5878,8 +5884,8 @@ void WebServer::TurnProcessMonitoringOn()
   << logger::red << "WARNING: process monitoring IS ON. " << logger::endL
   << logger::purple << "************************" << logger::endL
   ;
-  theGlobalVariables.flagAllowProcessMonitoring=true;
-  theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=5;
+  theGlobalVariables.flagAllowProcessMonitoring = true;
+  theGlobalVariables.MaxComputationTimeBeforeWeTakeAction = 5;
 }
 
 void WebServer::TurnProcessMonitoringOff()
@@ -5889,8 +5895,8 @@ void WebServer::TurnProcessMonitoringOff()
   << logger::green << "Process monitoring is now off. " << logger::endL
   << logger::green << "************************" << logger::endL
   ;
-  theGlobalVariables.flagAllowProcessMonitoring=false;
-  theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=0;
+  theGlobalVariables.flagAllowProcessMonitoring = false;
+  theGlobalVariables.MaxComputationTimeBeforeWeTakeAction = 0;
 }
 
 int WebServer::main(int argc, char **argv)
@@ -5901,11 +5907,11 @@ int WebServer::main(int argc, char **argv)
   try {
   InitializeGlobalObjects();
   theWebServer.AnalyzeMainArguments(argc, argv);
-  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
-    theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=
-    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit+20;
+  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 0)
+    theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead =
+    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit + 20;
   else
-    theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead=-1;
+    theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead = -1;
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
   theWebServer.CheckOpenSSLMySQLInstallation();
@@ -5927,7 +5933,8 @@ int WebServer::main(int argc, char **argv)
     << logger::purple << "************************" << logger::endL
        ;
   }
-  theGlobalVariables.flagCachingInternalFilesOn=!FileOperations::FileExistsVirtual("/LogFiles/serverRAMCachingOff.txt", true, false);;
+  theGlobalVariables.flagCachingInternalFilesOn =
+  !FileOperations::FileExistsVirtual("/LogFiles/serverRAMCachingOff.txt", true, false);
   if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
   { logServer
     << logger::purple << "************************" << logger::endL
@@ -5945,7 +5952,7 @@ int WebServer::main(int argc, char **argv)
 //  { theWebServer.TurnProcessMonitoringOn();
 //  }
   if (theGlobalVariables.flagRunningBuiltInWebServer)
-  { if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)
+  { if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit <= 0)
       logServer
       << logger::purple << "************************" << logger::endL
       << logger::red << "WARNING: no computation time limit set. " << logger::endL
@@ -5983,17 +5990,17 @@ int WebServer::mainCommandLine()
 //std::cout << "Running cmd line. \n";
   theParser.init();
   logger result("", 0, false, "server");
-  if (theGlobalVariables.programArguments.size>1)
-    for (int i=1; i<theGlobalVariables.programArguments.size; i++)
-    { theParser.inputString+=theGlobalVariables.programArguments[i];
-      if (i!=theGlobalVariables.programArguments.size-1)
-        theParser.inputString+=" ";
+  if (theGlobalVariables.programArguments.size > 1)
+    for (int i = 1; i < theGlobalVariables.programArguments.size; i++)
+    { theParser.inputString += theGlobalVariables.programArguments[i];
+      if (i!=theGlobalVariables.programArguments.size - 1)
+        theParser.inputString += " ";
     }
   else
   { result << "Input: " << logger::yellow;
     std::cin >> theParser.inputString;
   }
-  theParser.flagUseHtml=false;
+  theParser.flagUseHtml = false;
   theParser.Evaluate(theParser.inputString);
   std::fstream outputFile;
   std::string outputFileName;
@@ -6012,8 +6019,8 @@ int WebServer::mainCommandLine()
 }
 
 std::string WebServer::GetEnvironment(const std::string& envVarName)
-{ char* queryStringPtr=getenv(envVarName.c_str());
-  if (queryStringPtr==0)
+{ char* queryStringPtr = getenv(envVarName.c_str());
+  if (queryStringPtr == 0)
     return "";
   return queryStringPtr;
 
@@ -6023,14 +6030,14 @@ std::string WebServer::GetEnvironment(const std::string& envVarName)
 int WebServer::mainApache()
 { MacroRegisterFunctionWithName("main_apache");
   rlimit theLimit;
-  theLimit.rlim_cur=30;
-  theLimit.rlim_max=60;
+  theLimit.rlim_cur = 30;
+  theLimit.rlim_max = 60;
   setrlimit(RLIMIT_CPU, &theLimit);
-  stOutput.theOutputFunction=0;
+  stOutput.theOutputFunction = 0;
   //stOutput << "Content-Type: text/html\r\nSet-cookie: test=1;\r\n\r\nThe output bytes start here:\n";
-  theGlobalVariables.IndicatorStringOutputFunction=0;
-  theGlobalVariables.flagAllowUseOfThreadsAndMutexes=true;
-  theGlobalVariables.flagComputationStarted=true;
+  theGlobalVariables.IndicatorStringOutputFunction = 0;
+  theGlobalVariables.flagAllowUseOfThreadsAndMutexes = true;
+  theGlobalVariables.flagComputationStarted = true;
 //  stOutput << "<hr>First line<hr>";
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 30; //<-30 second computation time restriction!
   theWebServer.initPrepareSignals();
@@ -6045,30 +6052,31 @@ int WebServer::mainApache()
   theWorker.cookiesApache = WebServer::GetEnvironment("HTTP_COOKIE");
   std::string thePort = WebServer::GetEnvironment("SERVER_PORT");
   theGlobalVariables.IPAdressCaller = WebServer::GetEnvironment("REMOTE_ADDR");
-  theWorker.hostWithPort = WebServer::GetEnvironment("SERVER_NAME")+":"+thePort;
+  theWorker.hostWithPort = WebServer::GetEnvironment("SERVER_NAME") + ":" + thePort;
   theGlobalVariables.hostWithPort = theWorker.hostWithPort;
   theGlobalVariables.hostNoPort = theWorker.hostNoPort;
   std::string theURL = WebServer::GetEnvironment("REQUEST_URI");
-  unsigned numBytesBeforeQuestionMark=0;
-  for (numBytesBeforeQuestionMark=0; numBytesBeforeQuestionMark<theURL.size(); numBytesBeforeQuestionMark++)
-    if (theURL[numBytesBeforeQuestionMark]=='?')
+  unsigned numBytesBeforeQuestionMark = 0;
+  for (numBytesBeforeQuestionMark = 0; numBytesBeforeQuestionMark < theURL.size(); numBytesBeforeQuestionMark++)
+    if (theURL[numBytesBeforeQuestionMark] == '?')
       break;
-  theGlobalVariables.DisplayNameExecutable=theURL.substr(0, numBytesBeforeQuestionMark);
-  theWorker.addressGetOrPost = theGlobalVariables.DisplayNameExecutable+"?"+ WebServer::GetEnvironment("QUERY_STRING");
+  theGlobalVariables.DisplayNameExecutable = theURL.substr(0, numBytesBeforeQuestionMark);
+  theWorker.addressGetOrPost = theGlobalVariables.DisplayNameExecutable +
+  "?" + WebServer::GetEnvironment("QUERY_STRING");
 
-  if (thePort=="443")
-  { theGlobalVariables.flagUsingSSLinCurrentConnection=true;
-    theGlobalVariables.flagSSLisAvailable=true;
+  if (thePort == "443")
+  { theGlobalVariables.flagUsingSSLinCurrentConnection = true;
+    theGlobalVariables.flagSSLisAvailable = true;
   }
-  if (theRequestMethod=="GET")
-    theWorker.requestTypE=theWorker.requestGet;
-  if (theRequestMethod=="POST")
-    theWorker.requestTypE=theWorker.requestPost;
-  theParser.javaScriptDisplayingIndicator=WebWorker::GetJavaScriptIndicatorFromHD();
-  theGlobalVariables.flagComputationCompletE=true;
+  if (theRequestMethod == "GET")
+    theWorker.requestTypE = theWorker.requestGet;
+  if (theRequestMethod == "POST")
+    theWorker.requestTypE = theWorker.requestPost;
+  theParser.javaScriptDisplayingIndicator = WebWorker::GetJavaScriptIndicatorFromHD();
+  theGlobalVariables.flagComputationCompletE = true;
   MathRoutines::StringSplitExcludeDelimiter(theWorker.cookiesApache, ' ', theWorker.cookies);
-  for (int i=0; i<theWorker.cookies.size; i++)
-    theWorker.cookies[i]=MathRoutines::StringTrimWhiteSpace(theWorker.cookies[i]);
+  for (int i = 0; i < theWorker.cookies.size; i++)
+    theWorker.cookies[i] = MathRoutines::StringTrimWhiteSpace(theWorker.cookies[i]);
 /*  stOutput << "<html><body>";
   stOutput << "DEBUG: your input, bounced back: "
   << "\n<hr>server port: <br>\n" << thePort
@@ -6086,13 +6094,13 @@ int WebServer::mainApache()
 //  std::string theOutputHeader(theWorker.remainingHeaderToSend.TheObjects, theWorker.remainingHeaderToSend.size);
   //std::string theOutputBody(theWorker.remainingBodyToSend.TheObjects, theWorker.remainingBodyToSend.size);
   //stOutput << theOutputBody;
-  theGlobalVariables.flagComputationFinishedAllOutputSentClosing=true;
+  theGlobalVariables.flagComputationFinishedAllOutputSentClosing = true;
   return 0;
 }
 
 std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsHumanReadable");
-  if (!theGlobalVariables.UserDebugFlagOn() )
+  if (!theGlobalVariables.UserDebugFlagOn())
     return "";
   std::stringstream out;
   out << "<hr>\n";
@@ -6108,10 +6116,10 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
   else
     out << "\n<br>\nAddress <b>does not</b> require any login. ";
   out << "\n<hr>\n";
-  for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
+  for (int i = 0; i < theGlobalVariables.webArguments.size(); i++)
   { out << theGlobalVariables.webArguments.theKeys[i] << ": "
     << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.webArguments[i], true);
-    if (i!=theGlobalVariables.webArguments.size()-1)
+    if (i != theGlobalVariables.webArguments.size() - 1)
       out << "\n<br>\n";
   }
   out << "\n<hr>\n";
@@ -6165,7 +6173,7 @@ void WebWorker::SendAllBytesWithHeaders()
 
 void WebWorker::SendAllBytesHttp()
 { MacroRegisterFunctionWithName("WebWorker::SendAllBytesHttp");
-  if (this->remainingBytesToSenD.size==0)
+  if (this->remainingBytesToSenD.size == 0)
     return;
   this->CheckConsistency();
 //  firstCallStream << "WebWorker::SendAllBytesHttp called once. Input: \n "
@@ -6186,44 +6194,44 @@ void WebWorker::SendAllBytesHttp()
 //    firstCallStream << theBytes;
 //    logHttpErrors << firstCallStream.str() << logger::endL;
 //  }
-  this->flagDidSendAll=true;
+  this->flagDidSendAll = true;
   //std::string tempS(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
   //logWorker << logger::green << "Sending: " << tempS << logger::endL;
-  if (this->connectedSocketID==-1)
+  if (this->connectedSocketID == -1)
   { logWorker << logger::red << "Socket::SendAllBytes failed: connectedSocketID=-1." << logger::endL;
     return;
   }
   logWorker << "Sending " << this->remainingBytesToSenD.size << " bytes in chunks of: ";
   logWorker.flush();
-  double startTime=theGlobalVariables.GetElapsedSeconds();
+  double startTime = theGlobalVariables.GetElapsedSeconds();
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5; // 5 Secs Timeout
   tv.tv_usec = 0; // Not init'ing this can cause strange errors
   int numTimesRunWithoutSending=0;
   int timeOutInSeconds =20;
   setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));
-  while (this->remainingBytesToSenD.size>0)
-  { if (theGlobalVariables.GetElapsedSeconds()-startTime>timeOutInSeconds)
+  while (this->remainingBytesToSenD.size > 0)
+  { if (theGlobalVariables.GetElapsedSeconds() - startTime > timeOutInSeconds)
     { logWorker << "WebWorker::SendAllBytes failed: more than " << timeOutInSeconds << " seconds have elapsed. "
       << logger::endL;
       return;
     }
     int numBytesSent=send
     (this->connectedSocketID, &this->remainingBytesToSenD[0], this->remainingBytesToSenD.size,0);
-    if (numBytesSent<0)
-    { if (errno==EAGAIN || errno ==EWOULDBLOCK || errno== EINTR || errno==EIO )
+    if (numBytesSent < 0)
+    { if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR || errno == EIO)
       logIO << "WebWorker::SendAllBytes failed. Error: " << this->parent->ToStringLastErrorDescription() << logger::endL;
       return;
     }
-    if (numBytesSent==0)
+    if (numBytesSent == 0)
       numTimesRunWithoutSending++;
     else
-      numTimesRunWithoutSending=0;
+      numTimesRunWithoutSending = 0;
     logWorker << numBytesSent;
-    this->remainingBytesToSenD.Slice(numBytesSent, this->remainingBytesToSenD.size-numBytesSent);
-    if (this->remainingBytesToSenD.size>0)
+    this->remainingBytesToSenD.Slice(numBytesSent, this->remainingBytesToSenD.size - numBytesSent);
+    if (this->remainingBytesToSenD.size > 0)
       logWorker << ", ";
-    if (numTimesRunWithoutSending>3)
+    if (numTimesRunWithoutSending > 3)
     { logWorker << "WebWorker::SendAllBytes failed: send function went through 3 cycles without "
       << " sending any bytes. "
       << logger::endL;
@@ -6245,19 +6253,19 @@ void WebWorker::QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool
 void WebWorker::QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll)
 { MacroRegisterFunctionWithName("WebWorker::QueueStringForSendingWithHeadeR");
   (void) MustSendAll;
-  int oldSize=this->remainingBodyToSend.size;
-  this->remainingBodyToSend.SetSize(this->remainingBodyToSend.size+stringToSend.size());
-  for (unsigned i=0; i<stringToSend.size(); i++)
-    this->remainingBodyToSend[i+oldSize]=stringToSend[i];
+  int oldSize = this->remainingBodyToSend.size;
+  this->remainingBodyToSend.SetSize(this->remainingBodyToSend.size + stringToSend.size());
+  for (unsigned i = 0; i < stringToSend.size(); i++)
+    this->remainingBodyToSend[i + oldSize] = stringToSend[i];
 }
 
 void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll)
 { MacroRegisterFunctionWithName("WebWorker::QueueStringForSendingNoHeadeR");
   (void) MustSendAll;
-  int oldSize=this->remainingBytesToSenD.size;
-  this->remainingBytesToSenD.SetSize(this->remainingBytesToSenD.size+stringToSend.size());
-  for (unsigned i=0; i<stringToSend.size(); i++)
-    this->remainingBytesToSenD[i+oldSize]=stringToSend[i];
+  int oldSize = this->remainingBytesToSenD.size;
+  this->remainingBytesToSenD.SetSize(this->remainingBytesToSenD.size + stringToSend.size());
+  for (unsigned i = 0; i < stringToSend.size(); i++)
+    this->remainingBytesToSenD[i + oldSize] = stringToSend[i];
 }
 
 void WebWorker::SendAllBytesNoHeaders()

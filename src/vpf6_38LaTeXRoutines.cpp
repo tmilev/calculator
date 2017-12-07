@@ -26,11 +26,13 @@ void LaTeXcrawler::ComputeAllowedFolders()
   List<std::string> allowedFoldersVirtual;
   allowedFoldersVirtual.AddOnTop("freecalc/");
   allowedFoldersVirtual.AddOnTop("LaTeX-materials/");
+  allowedFoldersVirtual.AddOnTop("/freecalc/");
+  allowedFoldersVirtual.AddOnTop("/LaTeX-materials/");
   this->baseFoldersCrawlableFilesPhysical.SetSize(allowedFoldersVirtual.size);
-  for (int i=0; i<this->baseFoldersCrawlableFilesPhysical.size; i++)
+  for (int i = 0; i < this->baseFoldersCrawlableFilesPhysical.size; i++)
   { FileOperations::GetPhysicalFileNameFromVirtual
     (allowedFoldersVirtual[i], this->baseFoldersCrawlableFilesPhysical[i], false, false, 0);
-    this->baseFoldersCrawlableFilesPhysical[i]=
+    this->baseFoldersCrawlableFilesPhysical[i] =
     FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(this->baseFoldersCrawlableFilesPhysical[i])
     + "/";
   }

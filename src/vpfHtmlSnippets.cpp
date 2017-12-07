@@ -263,7 +263,7 @@ const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags()
   out << "<script type=\"text/javascript\" src=\""
   << FileOperations::GetVirtualNameWithHash("/html-common-calculator/ace/src-min/ace.js")
   << "\" charset=\"utf-8\"></script>";
-  out << HtmlRoutines::GetJavascriptAddScriptTags("html-common-calculator/ace-editor-settings.js");
+  out << HtmlRoutines::GetJavascriptAddScriptTags("/html-common-calculator/ace-editor-settings.js");
   HtmlRoutines::preLoadedFiles.SetKeyValue("AceEditor", out.str());
   return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("AceEditor");
 }

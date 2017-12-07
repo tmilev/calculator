@@ -5844,6 +5844,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");//<-coming from webserver
 
   folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");
+  //referred to by site:
+  folderSubstitutionsNonSensitive.SetKeyValue("LaTeX-materials/", "../LaTeX-materials/");
   folderSubstitutionsNonSensitive.SetKeyValue("/freecalc/", "../freecalc/");
   //referred to by site:
   folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");

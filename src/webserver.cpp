@@ -5836,6 +5836,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("/font/", "./html-common/font/");
 
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use
+  //referred to by site:
   folderSubstitutionsNonSensitive.SetKeyValue("coursetemplates/", "../coursetemplates/");
   folderSubstitutionsNonSensitive.SetKeyValue("/coursesavailable/", "../coursesavailable/"); //<-web server
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
@@ -5844,6 +5845,8 @@ void WebServer::InitializeGlobalVariables()
 
   folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");
   folderSubstitutionsNonSensitive.SetKeyValue("/freecalc/", "../freecalc/");
+  //referred to by site:
+  folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");
   folderSubstitutionsNonSensitive.SetKeyValue("/slides-videos/", "../slides-videos/");
 
   folderSubstitutionsSensitive.Clear();

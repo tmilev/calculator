@@ -502,17 +502,17 @@ void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
 bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("LaTeXcrawler::ExtractPresentationFileNames");
   (void) commentsGeneral;
-  if (this->slideFileNamesVirtualWithPatH.size<1)
-  { if (commentsOnFailure!=0)
+  if (this->slideFileNamesVirtualWithPatH.size < 1)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "Could not find slide file names. ";
     return false;
   }
   this->slideFileNamesWithLatexPathNoExtension.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
   this->latexSnippets.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
-  for (int i=0; i<this->slideFileNamesVirtualWithPatH.size; i++)
+  for (int i = 0; i < this->slideFileNamesVirtualWithPatH.size; i++)
   { if (MathRoutines::StringBeginsWith(this->slideFileNamesVirtualWithPatH[i], "LaTeX: ", &this->latexSnippets[i]))
-    { if (i==0)
-      { if (commentsOnFailure!=0)
+    { if (i == 0)
+      { if (commentsOnFailure != 0)
           *commentsOnFailure << "Found LaTeX snippet without a header file. "
           << this->slideFileNamesVirtualWithPatH[i] << "<br>";
         return false;
@@ -520,20 +520,20 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
       continue;
     }
     if (!MathRoutines::StringEndsWith(this->slideFileNamesVirtualWithPatH[i], ".tex"))
-      this->slideFileNamesVirtualWithPatH[i]+=".tex";
+      this->slideFileNamesVirtualWithPatH[i] += ".tex";
     if (!FileOperations::IsFileNameSafeForSystemCommands(this->slideFileNamesVirtualWithPatH[i], commentsOnFailure))
-    { if (commentsOnFailure!=0)
+    { if (commentsOnFailure != 0)
         *commentsOnFailure << "Found unsafe slide name: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
       return false;
     }
     if (!FileOperations::IsOKfileNameVirtual(this->slideFileNamesVirtualWithPatH[i], false, commentsOnFailure))
-    { if (commentsOnFailure!=0)
+    { if (commentsOnFailure != 0)
         *commentsOnFailure << "Found invalid slide name: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
       return false;
     }
     if (theGlobalVariables.UserDefaultHasAdminRights())
       if (!FileOperations::FileExistsVirtual(this->slideFileNamesVirtualWithPatH[i], false, false))
-      { if (commentsOnFailure!=0)
+      { if (commentsOnFailure != 0)
           *commentsOnFailure << "Failed to find file: " << this->slideFileNamesVirtualWithPatH[i] << "<br>";
         return false;
       }
@@ -544,34 +544,34 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
     if (MathRoutines::StringBeginsWith(this->slideFileNamesWithLatexPathNoExtension[i], "LaTeX-materials", 0))
       this->slideFileNamesWithLatexPathNoExtension[i] = "../../" + this->slideFileNamesWithLatexPathNoExtension[i];
   }
-  this->headerFileNameWithPathVirtual=this->slideFileNamesVirtualWithPatH[0];
+  this->headerFileNameWithPathVirtual = this->slideFileNamesVirtualWithPatH[0];
   this->headerFilePathVirtual = FileOperations::GetPathFromFileNameWithPath(this->headerFileNameWithPathVirtual);
   this->headerFileNameNoPath = FileOperations::GetFileNameFromFileNameWithPath(this->headerFileNameWithPathVirtual);
   this->headerPathBelowFileNameVirtual = this->headerFilePathVirtual;
-  if (this->headerPathBelowFileNameVirtual.size()>0)
-  { this->headerPathBelowFileNameVirtual=
-    this->headerPathBelowFileNameVirtual.substr(0, this->headerPathBelowFileNameVirtual.size()-1);
-    this->headerPathBelowFileNameVirtual=
+  if (this->headerPathBelowFileNameVirtual.size() > 0)
+  { this->headerPathBelowFileNameVirtual =
+    this->headerPathBelowFileNameVirtual.substr(0, this->headerPathBelowFileNameVirtual.size() - 1);
+    this->headerPathBelowFileNameVirtual =
     FileOperations::GetFileNameFromFileNameWithPath(this->headerPathBelowFileNameVirtual);
   }
   if (!FileOperations::GetPhysicalFileNameFromVirtual
       (this->headerFilePathVirtual, this->workingFilePathPhysical, false, false, commentsOnFailure))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "Failed to extract physical path from: " << this->headerFilePathVirtual;
     return false;
   }
   FileOperations::GetFileExtensionWithDot(this->headerFileNameNoPath, &this->headerFileNameNoPathNoExtension);
   this->workingFileNameNoPathTex = "workingfile" + this->headerFileNameNoPathNoExtension + ".tex";
   this->workingFileNameNoPathPDF = "workingfile" + this->headerFileNameNoPathNoExtension + ".pdf";
-  std::string firstSignificantSlideName="";
-  if (this->slideFileNamesVirtualWithPatH.size>=1)
-    firstSignificantSlideName=this->slideFileNamesVirtualWithPatH[0];
-  for (int i=1; i<this->slideFileNamesVirtualWithPatH.size; i++)
-    if (this->latexSnippets[i]=="")
-    { firstSignificantSlideName=this->slideFileNamesVirtualWithPatH[i];
+  std::string firstSignificantSlideName = "";
+  if (this->slideFileNamesVirtualWithPatH.size >= 1)
+    firstSignificantSlideName = this->slideFileNamesVirtualWithPatH[0];
+  for (int i = 1; i < this->slideFileNamesVirtualWithPatH.size; i++)
+    if (this->latexSnippets[i] == "")
+    { firstSignificantSlideName = this->slideFileNamesVirtualWithPatH[i];
       break;
     }
-  this->targetPDFVirtualPath= FileOperations::GetPathFromFileNameWithPath(firstSignificantSlideName);
+  this->targetPDFVirtualPath = FileOperations::GetPathFromFileNameWithPath(firstSignificantSlideName);
   std::string tempString;
   if (MathRoutines::StringBeginsWith(this->targetPDFVirtualPath, "freecalc", &tempString))
     this->targetPDFVirtualPath = "slides-videos" + tempString;
@@ -580,14 +580,14 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   this->targetPDFNoPath = FileOperations::GetFileNameFromFileNameWithPath(firstSignificantSlideName);
   FileOperations::GetFileExtensionWithDot(this->targetPDFNoPath, &this->targetPDFNoPath);
   if (this->flagProjectorMode)
-    this->targetPDFNoPath+="-projector-" + this->headerPathBelowFileNameVirtual;
+    this->targetPDFNoPath += "-projector-" + this->headerPathBelowFileNameVirtual;
   else
-    this->targetPDFNoPath+="-printable-" + this->headerPathBelowFileNameVirtual;
-  this->targetPDFNoPath+=this->desiredPresentationTitle;
-  this->targetPDFNoPath= HtmlRoutines::ConvertStringToURLString(this->targetPDFNoPath, false);
+    this->targetPDFNoPath += "-printable-" + this->headerPathBelowFileNameVirtual;
+  this->targetPDFNoPath += this->desiredPresentationTitle;
+  this->targetPDFNoPath = HtmlRoutines::ConvertStringToURLString(this->targetPDFNoPath, false);
   MathRoutines::StringTrimToLength(this->targetPDFNoPath, 230);
-  this->targetPDFNoPath+=".pdf";
-  this->targetPDFFileNameWithPathVirtual=this->targetPDFVirtualPath+this->targetPDFNoPath;
+  this->targetPDFNoPath += ".pdf";
+  this->targetPDFFileNameWithPathVirtual=this->targetPDFVirtualPath + this->targetPDFNoPath;
   this->targetPDFLatexPath = "../../" + this->targetPDFVirtualPath;
   if (!MathRoutines::StringBeginsWith(this->targetPDFVirtualPath, "slides-videos/modules/", &tempString))
     this->targetVideoLatexPath = "";
@@ -599,26 +599,26 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
 
 std::string LaTeXcrawler::AdjustDisplayTitle(const std::string& input)
 { MacroRegisterFunctionWithName("LaTeXcrawler::AdjustDisplayTitle");
-  std::string result=input;
+  std::string result = input;
   List<std::string> ignoredTags;
   ignoredTags.AddOnTop("actualExamProblem");
   ignoredTags.AddOnTop("lectureTag");
   ignoredTags.AddOnTop("advancedTopic");
   ignoredTags.AddOnTop("reviewProblem");
-  for (int i=0; i<ignoredTags.size; i++)
+  for (int i = 0; i < ignoredTags.size; i++)
   { std::string closeTag = "</" + ignoredTags[i] + ">";
     std::string openTag  = "<"  + ignoredTags[i] + ">";
-    if (input.find(openTag)!=std::string::npos && input.find(closeTag)!=std::string::npos)
-    { int start=input.find(openTag);
-      int finish=input.find(closeTag)+closeTag.size();
-      result=result.substr(0, start)+result.substr(finish);
+    if (input.find(openTag) != std::string::npos && input.find(closeTag) != std::string::npos)
+    { int start = input.find(openTag);
+      int finish = input.find(closeTag) + closeTag.size();
+      result = result.substr(0, start) + result.substr(finish);
     }
   }
-  if (result.find("\\(\\LaTeX\\)")!=std::string::npos)
-  { int pos=result.find("\\(\\LaTeX\\)");
-    result = result.substr(0, pos)+"\\LaTeX"+ result.substr(pos + ((std::string) "\\(\\LaTeX\\)").size());
+  if (result.find("\\(\\LaTeX\\)") != std::string::npos)
+  { int pos = result.find("\\(\\LaTeX\\)");
+    result = result.substr(0, pos) + "\\LaTeX" + result.substr(pos + ((std::string) "\\(\\LaTeX\\)").size());
   }
-  result=MathRoutines::StringTrimWhiteSpace(result);
+  result = MathRoutines::StringTrimWhiteSpace(result);
   return result;
 }
 

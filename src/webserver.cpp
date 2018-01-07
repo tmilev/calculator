@@ -3499,24 +3499,24 @@ int WebWorker::ProcessSlidesFromSource()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSlidesFromSource");
   this->SetHeaderOKNoContentLength();
   LaTeXcrawler theCrawler;
-  for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
-  { std::string theKey=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
+  for (int i = 0; i<theGlobalVariables.webArguments.size(); i++)
+  { std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
     //stOutput << "DEBUG: considering key: " << theKey
     //<< " with value: " << theGlobalVariables.webArguments.theValues[i] << "<br>";
-    if (theKey!="fileName" && MathRoutines::StringBeginsWith(theKey, "file"))
+    if (theKey != "fileName" && MathRoutines::StringBeginsWith(theKey, "file"))
     { theCrawler.slideFileNamesVirtualWithPatH.AddOnTop
       (MathRoutines::StringTrimWhiteSpace
        (HtmlRoutines::ConvertURLStringToNormal
        (theGlobalVariables.webArguments.theValues[i], false)));
     }
   }
-  theCrawler.desiredPresentationTitle=
+  theCrawler.desiredPresentationTitle =
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("title"), false);
   std::stringstream comments;
-  if (theGlobalVariables.GetWebInput("layout")=="printable")
-    theCrawler.flagProjectorMode=false;
+  if (theGlobalVariables.GetWebInput("layout") == "printable")
+    theCrawler.flagProjectorMode = false;
   if (!theCrawler.BuildOrFetchFromCachePresentationFromSlides(&comments, &comments))
-  { this->flagDoAddContentLength=true;
+  { this->flagDoAddContentLength = true;
     stOutput << "<!DOCTYPE html>"
     << "<html>"
     << "<head>"
@@ -3531,7 +3531,7 @@ int WebWorker::ProcessSlidesFromSource()
     return 0;
   }
   this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: application/pdf; Access-Control-Allow-Origin: *");
-  this->flagDoAddContentLength=true;
+  this->flagDoAddContentLength = true;
   stOutput << theCrawler.targetPDFbinaryContent;
   return 0;
 }
@@ -3540,11 +3540,11 @@ int WebWorker::ProcessSlidesSource()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSlidesSource");
   this->SetHeaderOKNoContentLength();
   LaTeXcrawler theCrawler;
-  for (int i=0; i<theGlobalVariables.webArguments.size(); i++)
+  for (int i = 0; i < theGlobalVariables.webArguments.size(); i++)
   { std::string theKey=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
     //stOutput << "DEBUG: considering key: " << theKey
     //<< " with value: " << theGlobalVariables.webArguments.theValues[i] << "<br>";
-    if (theKey!="fileName" && MathRoutines::StringBeginsWith(theKey, "file"))
+    if (theKey != "fileName" && MathRoutines::StringBeginsWith(theKey, "file"))
     { theCrawler.slideFileNamesVirtualWithPatH.AddOnTop
       (MathRoutines::StringTrimWhiteSpace
        (HtmlRoutines::ConvertURLStringToNormal
@@ -5850,6 +5850,7 @@ void WebServer::InitializeGlobalVariables()
   //referred to by site:
   folderSubstitutionsNonSensitive.SetKeyValue("freecalc/", "../freecalc/");
   folderSubstitutionsNonSensitive.SetKeyValue("/slides-videos/", "../slides-videos/");
+  folderSubstitutionsNonSensitive.SetKeyValue("slides-videos/", "../slides-videos/");
 
   folderSubstitutionsSensitive.Clear();
   folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");//<-coming from webserver

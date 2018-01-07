@@ -431,7 +431,7 @@ LaTeXcrawler::LaTeXcrawler()
 void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileNamE)
 { MacroRegisterFunctionWithName("LaTeXcrawler::CrawlRecursive");
   RecursionDepthCounter theCounter(&this->recursionDepth);
-  if (this->recursionDepth>1000)
+  if (this->recursionDepth > 1000)
   { this->errorStream << "While crawling theFileToCrawl, reached max recursion depth of 1000";
     return;
   }
@@ -445,11 +445,11 @@ void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
   /// If the folders read are not sanitized properly,
   /// an attacker could get a .tex file with our site's private keys!
   /// Touch very carefully.
-  if (this->baseFoldersCrawlableFilesPhysical.size==0)
+  if (this->baseFoldersCrawlableFilesPhysical.size == 0)
     crash << "Error: this->baseFoldersCrawlableFilesPhysical is empty which is not allowed here. " << crash;
-  std::string trimmedFileName=MathRoutines::StringTrimWhiteSpace(currentFileNamE);
-  std::string trimmedFolder=FileOperations::GetPathFromFileNameWithPath(trimmedFileName);
-  std::string resultingFolder=FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(trimmedFolder);
+  std::string trimmedFileName = MathRoutines::StringTrimWhiteSpace(currentFileNamE);
+  std::string trimmedFolder = FileOperations::GetPathFromFileNameWithPath(trimmedFileName);
+  std::string resultingFolder = FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(trimmedFolder);
   if (!this->IsInCrawlableFolder(resultingFolder, &this->errorStream))
   { this->errorStream << "Error: file " << trimmedFileName << " appears to be located in "
     << resultingFolder << ", which in turn does not appear to be a sub-folder "
@@ -473,26 +473,26 @@ void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
   while (!theFile.eof())
   { std::getline(theFile, buffer);
     std::stringstream newFileName;
-    bool isGood=true;
-    if (buffer.find("IfFileExists")!=std::string::npos)
-      isGood=false;
-    if (buffer.size()>0)
-      if (buffer[0]=='%')
-        isGood=false;
-    int foundInput= buffer.find("\\input");
+    bool isGood = true;
+    if (buffer.find("IfFileExists") != std::string::npos)
+      isGood = false;
+    if (buffer.size() > 0)
+      if (buffer[0] == '%')
+        isGood = false;
+    int foundInput = buffer.find("\\input");
     if (isGood)
-      if (((unsigned) foundInput)<buffer.size())
+      if (((unsigned) foundInput) < buffer.size())
       { crawlingResult << buffer.substr(0, foundInput);
-        buffer=buffer.substr(foundInput);
-        unsigned i=0;
-        for (i=7; buffer[i]!='}' && i< buffer.size(); i++)
+        buffer = buffer.substr(foundInput);
+        unsigned i = 0;
+        for (i = 7; buffer[i] != '}' && i < buffer.size(); i++)
           newFileName << buffer[i];
         newFileName << ".tex";
         crawlingResult << "%input from file: " << newFileName.str() << "\n";
         this->CrawlRecursive(crawlingResult, newFileName.str());
         crawlingResult << "\n";
-        if (i+1<buffer.size())
-          buffer = buffer.substr(i+1);
+        if (i + 1 < buffer.size())
+          buffer = buffer.substr(i + 1);
         else
           continue;
       }
@@ -589,13 +589,13 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   this->targetPDFNoPath = HtmlRoutines::ConvertStringToURLString(this->targetPDFNoPath, false);
   MathRoutines::StringTrimToLength(this->targetPDFNoPath, 230);
   this->targetPDFNoPath += ".pdf";
-  this->targetPDFFileNameWithPathVirtual=this->targetPDFVirtualPath + this->targetPDFNoPath;
+  this->targetPDFFileNameWithPathVirtual = this->targetPDFVirtualPath + this->targetPDFNoPath;
   this->targetPDFLatexPath = "../../" + this->targetPDFVirtualPath;
   if (!MathRoutines::StringBeginsWith(this->targetPDFVirtualPath, "slides-videos/modules/", &tempString))
     this->targetVideoLatexPath = "";
   else
     this->targetVideoLatexPath = "../../slides-videos/modules-video/" + tempString;
-  this->targetPDFFileNameWithLatexPath=this->targetPDFLatexPath+this->targetPDFNoPath;
+  this->targetPDFFileNameWithLatexPath = this->targetPDFLatexPath + this->targetPDFNoPath;
   return true;
 }
 
@@ -629,21 +629,24 @@ bool LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides
 { MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePresentationFromSlides");
   this->desiredPresentationTitle = this->AdjustDisplayTitle(this->desiredPresentationTitle);
   if (!this->ExtractPresentationFileNames(commentsOnFailure, commentsGeneral))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "Failed to extract file names. ";
     return false;
   }
   if (!this->flagForceSlideRebuild)
-    if (FileOperations::FileExistsVirtual(this->targetPDFFileNameWithPathVirtual, false, false))
+    if (FileOperations::FileExistsVirtual(this->targetPDFFileNameWithPathVirtual, false, false, commentsOnFailure))
       return FileOperations::LoadFileToStringVirtual
       (this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, false, false, commentsOnFailure);
   if (!theGlobalVariables.UserDefaultHasAdminRights())
-  { if (commentsOnFailure!=0)
-      *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. ";
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. "
+      << "Computed file name: <br>"
+      << HtmlRoutines::ConvertStringToHtmlString(this->targetPDFFileNameWithPathVirtual, false)
+      ;
     return false;
   }
   std::stringstream tempStream;
-  if (commentsOnFailure==0)
+  if (commentsOnFailure == 0)
     commentsOnFailure = &tempStream;
   std::stringstream crawlingResult;
   std::fstream theFile;

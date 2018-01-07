@@ -642,14 +642,16 @@ bool FileOperations::LoadFileToStringUnsecure
 (const std::string& fileNameUnsecure, std::string& output, std::stringstream* commentsOnFailure)
 { if (!FileOperations::FileExistsUnsecure(fileNameUnsecure))
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "The requested file " << fileNameUnsecure
+      *commentsOnFailure << "The requested file "
+      << HtmlRoutines::ConvertStringToHtmlString(fileNameUnsecure, false)
       << " does not appear to exist. ";
     return false;
   }
   std::ifstream theFile;
   if (!FileOperations::OpenFileUnsecureReadOnly(theFile, fileNameUnsecure, false))
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "The requested file " << fileNameUnsecure
+      *commentsOnFailure << "The requested file "
+      << HtmlRoutines::ConvertStringToHtmlString(fileNameUnsecure, false)
       << " exists but I failed to open it in text mode (perhaps not a valid ASCII/UTF8 file). ";
     return false;
   }
@@ -727,10 +729,11 @@ bool FileOperations::FileExistsVirtualCustomizedReadOnly(const std::string& theF
   return FileOperations::FileExistsUnsecure(computedFileName);
 }
 
-bool FileOperations::FileExistsVirtual(const std::string& theFileName, bool accessSensitiveFolders, bool accessULTRASensitiveFolders)
+bool FileOperations::FileExistsVirtual
+(const std::string& theFileName, bool accessSensitiveFolders, bool accessULTRASensitiveFolders, std::stringstream* commentsOnFailure)
 { std::string computedFileName;
   if (!FileOperations::GetPhysicalFileNameFromVirtual
-      (theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, 0))
+      (theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, commentsOnFailure))
     return false;
   return FileOperations::FileExistsUnsecure(computedFileName);
 }

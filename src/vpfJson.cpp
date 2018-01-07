@@ -129,59 +129,59 @@ bool JSData::Tokenize
 { output.SetSize(0);
   output.SetExpectedSize(input.size());
   JSData currentElt;
-  bool inQuotes=false;
-  for (unsigned i=0; i<input.size(); i++)
-  { if (input[i]=='"')
-    { if (currentElt.type==currentElt.JSstring)
+  bool inQuotes = false;
+  for (unsigned i = 0; i < input.size(); i++)
+  { if (input[i] == '"')
+    { if (currentElt.type == currentElt.JSstring)
       { output.AddOnTop(currentElt);
         currentElt.reset();
-        inQuotes=false;
+        inQuotes = false;
       } else
       { currentElt.TryToComputeType();
-        if (currentElt.type!=currentElt.JSUndefined)
+        if (currentElt.type != currentElt.JSUndefined)
           output.AddOnTop(currentElt);
         currentElt.reset();
-        currentElt.type=currentElt.JSstring;
-        inQuotes=true;
+        currentElt.type = currentElt.JSstring;
+        inQuotes = true;
       }
       continue;
     }
-    if (inQuotes && currentElt.type==currentElt.JSstring)
-    { currentElt.string+=input[i];
+    if (inQuotes && currentElt.type == currentElt.JSstring)
+    { currentElt.string += input[i];
       continue;
     }
-    if (input[i]==' ' || input[i]=='\r' || input[i]=='\n')
+    if (input[i] == ' ' || input[i] == '\r' || input[i] == '\n')
     { currentElt.TryToComputeType();
-      if (currentElt.type!=currentElt.JSUndefined)
+      if (currentElt.type != currentElt.JSUndefined)
       { output.AddOnTop(currentElt);
         currentElt.reset();
       }
       continue;
     }
-    if (input[i]=='{' || input[i]=='}' ||
-        input[i]=='[' || input[i]==']' ||
-        input[i]==':' || input[i]== ',')
+    if (input[i] == '{' || input[i] == '}' ||
+        input[i] == '[' || input[i] == ']' ||
+        input[i] == ':' || input[i] ==  ',')
     { currentElt.TryToComputeType();
-      if (currentElt.type!=JSData::JSUndefined)
+      if (currentElt.type != JSData::JSUndefined)
         output.AddOnTop(currentElt);
       currentElt.reset();
-      if (input[i]=='{')
-        currentElt.type=currentElt.JSopenBrace;
-      if (input[i]=='[')
-        currentElt.type=currentElt.JSopenBracket;
-      if (input[i]=='}')
-        currentElt.type=currentElt.JScloseBrace;
-      if (input[i]==']')
-        currentElt.type=currentElt.JScloseBracket;
-      if (input[i]==':')
-        currentElt.type=currentElt.JScolon;
-      if (input[i]==',')
-        currentElt.type=currentElt.JScomma;
+      if (input[i] == '{')
+        currentElt.type = currentElt.JSopenBrace;
+      if (input[i] == '[')
+        currentElt.type = currentElt.JSopenBracket;
+      if (input[i] == '}')
+        currentElt.type = currentElt.JScloseBrace;
+      if (input[i] == ']')
+        currentElt.type = currentElt.JScloseBracket;
+      if (input[i] == ':')
+        currentElt.type = currentElt.JScolon;
+      if (input[i] == ',')
+        currentElt.type = currentElt.JScomma;
       output.AddOnTop(currentElt);
       currentElt.reset();
       continue;
     }
-    currentElt.string+=input[i];
+    currentElt.string += input[i];
   }
   return true;
 }
@@ -192,66 +192,66 @@ bool JSData::readstring
   this->reset();
   List<JSData> theTokenS;
   JSData::Tokenize(json, theTokenS);
-  if (theTokenS.size==0)
+  if (theTokenS.size == 0)
     return false;
   JSHashData pair;
   List<JSData> readingStack;
   JSData emptyElt;
-  for (int i=0; i<JSData::numEmptyTokensAtStart; i++)
+  for (int i = 0; i < JSData::numEmptyTokensAtStart; i++)
     readingStack.AddOnTop(emptyElt);
   readingStack.AddOnTop(theTokenS[0]);
-  for (int i=0; ; )
-  { JSData& last= readingStack[readingStack.size-1];
-    JSData& secondToLast=readingStack[readingStack.size-2];
-    JSData& thirdToLast=readingStack[readingStack.size-3];
-    JSData& fourthToLast=readingStack[readingStack.size-4];
+  for (int i = 0; ; )
+  { JSData& last = readingStack[(int) (readingStack.size - 1)];
+    JSData& secondToLast = readingStack[(int) (readingStack.size - 2)];
+    JSData& thirdToLast  = readingStack[(int) (readingStack.size - 3)];
+    JSData& fourthToLast = readingStack[(int) (readingStack.size - 4)];
     //JSData& fifthToLast=theTokenS[i-4];
-    if (fourthToLast.type==JSData::JSopenBrace &&
-        thirdToLast.type==JSData::JSstring &&
-        secondToLast.type==JSData::JScolon &&
+    if (fourthToLast.type == JSData::JSopenBrace &&
+        thirdToLast.type  == JSData::JSstring &&
+        secondToLast.type == JSData::JScolon &&
         last.IsValidElement())
-    { pair.key=thirdToLast.string;
-      pair.value=last;
+    { pair.key = thirdToLast.string;
+      pair.value = last;
       fourthToLast.obj.AddOnTop(pair);
-      readingStack.SetSize(readingStack.size-3);
+      readingStack.SetSize(readingStack.size - 3);
       continue;
     }
-    if (secondToLast.type==JSData::JSopenBracket && last.IsValidElement())
+    if (secondToLast.type == JSData::JSopenBracket && last.IsValidElement())
     { secondToLast.list.AddOnTop(last);
       readingStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.type==JSData::JSopenBracket && last.type==JSData::JScomma)
+    if (secondToLast.type == JSData::JSopenBracket && last.type == JSData::JScomma)
     { readingStack.RemoveLastObject();
       continue;
     }
-    if ((secondToLast.type==JSData::JSopenBrace ||
-         secondToLast.type==JSData::JSopenBracket)
+    if ((secondToLast.type == JSData::JSopenBrace ||
+         secondToLast.type == JSData::JSopenBracket)
         &&
-        last.type==JSData::JScomma)
+        last.type == JSData::JScomma)
     { readingStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.type==JSData::JSopenBrace &&
-        last.type==JSData::JScloseBrace)
-    { secondToLast.type=JSData::JSObject;
+    if (secondToLast.type == JSData::JSopenBrace &&
+        last.type == JSData::JScloseBrace)
+    { secondToLast.type = JSData::JSObject;
       readingStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.type==JSData::JSopenBracket &&
-        last.type==JSData::JScloseBracket)
-    { secondToLast.type=JSData::JSarray;
+    if (secondToLast.type == JSData::JSopenBracket &&
+        last.type == JSData::JScloseBracket)
+    { secondToLast.type = JSData::JSarray;
       readingStack.RemoveLastObject();
       continue;
     }
     i++;
-    if (i>=theTokenS.size)
+    if (i >= theTokenS.size)
       break;
     readingStack.AddOnTop(theTokenS[i]);
   }
 //  stOutput << "DEBUG: " << "go to here finally. ";
-  if (readingStack.size!=JSData::numEmptyTokensAtStart+1)
-  { if (commentsOnFailure!=0)
+  if (readingStack.size != JSData::numEmptyTokensAtStart + 1)
+  { if (commentsOnFailure != 0)
     { std::stringstream calculatorInput;
       calculatorInput
       << "TestJSON(\""
@@ -266,27 +266,27 @@ bool JSData::readstring
       << HtmlRoutines::ConvertStringToHtmlString(json, true)
       << "</a>"
       << "<br>Result:<br>\n ";
-      for (int i=JSData::numEmptyTokensAtStart; i<readingStack.size; i++)
+      for (int i = JSData::numEmptyTokensAtStart; i < readingStack.size; i++)
         *commentsOnFailure << i << ": " << readingStack[i].ToString(true) << "\n<br>\n";
     }
     return false;
   }
-  if (JSData::numEmptyTokensAtStart<readingStack.size)
-    *this=readingStack[JSData::numEmptyTokensAtStart];
+  if (JSData::numEmptyTokensAtStart < readingStack.size)
+    *this = readingStack[JSData::numEmptyTokensAtStart];
   return true;
 }
 
 template <typename somestream>
 somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) const
-{ std::string theIndentation="";
-  for (int i=0; i<indentation; i++)
+{ std::string theIndentation = "";
+  for (int i = 0; i < indentation; i++)
   { if (!useHTML)
-      theIndentation+=" ";
+      theIndentation += " ";
     else
-      theIndentation+="&nbsp;";
+      theIndentation += "&nbsp;";
   }
   out << theIndentation;
-  std::string newLine= useHTML ? "\n<br>\n" : "\n";
+  std::string newLine = useHTML ? "\n<br>\n" : "\n";
   indentation++;
   switch(this->type)
   { case JSnull:
@@ -306,16 +306,16 @@ somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) c
       return out;
     case JSarray:
       out << "[" << newLine;
-      for(int i=0; i<this->list.size; i++)
+      for(int i = 0; i < this->list.size; i++)
       { this->list[i].IntoStream(out, indentation, useHTML);
-        if(i!=this->list.size-1)
+        if(i != this->list.size - 1)
           out << ", ";
       }
       out << newLine << ']';
       return out;
     case JSObject:
       out << "{" << newLine;
-      for(int i=0; i<this->obj.size; i++)
+      for(int i = 0; i < this->obj.size; i++)
       { out << '"' << this->obj[i].key << '"';
         out << ':';
         this->obj[i].value.IntoStream(out, indentation, useHTML);
@@ -395,10 +395,10 @@ void JSData::writefile(const char* filename) const
 }
 
 void JSData::reset()
-{ this->type=this->JSUndefined;
-  this->boolean=false;
-  this->number=0;
-  this->string="";
+{ this->type = this->JSUndefined;
+  this->boolean = false;
+  this->number = 0;
+  this->string = "";
   this->list.SetSize(0);
   this->obj.SetSize(0);
 }

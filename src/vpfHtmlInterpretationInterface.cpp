@@ -446,10 +446,10 @@ std::string HtmlInterpretation::GetAboutPage()
   << "</calculatorNavigation>";
   std::string theFile;
   std::stringstream commentsOnFailure;
-  bool isGood=FileOperations::LoadFileToStringVirtual
-  ("html-common-calculator/about.html", theFile, false, false, &commentsOnFailure);
+  bool isGood = FileOperations::LoadFileToStringVirtual
+  ("/html-common-calculator/about.html", theFile, false, false, &commentsOnFailure);
   if (!isGood)
-    isGood=FileOperations::LoadFileToStringVirtual("html/about.html", theFile, false, false, &commentsOnFailure);
+    isGood = FileOperations::LoadFileToStringVirtual("/html/about.html", theFile, false, false, &commentsOnFailure);
   if (!isGood)
   { out << "<span style=\"color:red\"><b>"
     << commentsOnFailure.str()

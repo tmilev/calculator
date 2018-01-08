@@ -295,19 +295,19 @@ SSLdata::~SSLdata()
 void SSLdata::FreeSSL()
 { SSL_free(this->sslClient);
   SSL_free(this->sslServeR);
-  this->sslClient=0;
-  this->sslServeR=0;
+  this->sslClient = 0;
+  this->sslServeR = 0;
 }
 
 void SSLdata::FreeClientSSL()
 { SSL_free(this->sslClient);
-  this->sslClient=0;
+  this->sslClient = 0;
 }
 
 void SSLdata::FreeEverythingShutdownSSL()
 { if (!theGlobalVariables.flagSSLisAvailable)
     return;
-  theGlobalVariables.flagSSLisAvailable=false;
+  theGlobalVariables.flagSSLisAvailable = false;
   this->FreeSSL();
   this->FreeContext();
 }
@@ -318,7 +318,7 @@ void SSLdata::FreeContext()
   //SSL_CTX_free (this->contextClient);
   SSL_CTX_free (this->contextServer);
   //this->contextClient=0;
-  this->contextServer=0;
+  this->contextServer = 0;
 #endif // MACRO_use_open_ssl
 }
 
@@ -334,7 +334,7 @@ void WebServer::SSLServerSideHandShake()
 }
 
 #ifdef MACRO_use_open_ssl
-bool SSLdata::flagSSLlibraryInitialized=false;
+bool SSLdata::flagSSLlibraryInitialized = false;
 
 bool SSLdata::initSSLkeyFiles()
 {
@@ -371,7 +371,7 @@ void SSLdata::initSSLlibrary()
 
 void SSLdata::initSSLserver()
 { this->initSSLlibrary();
-  if (this->theSSLMethod!=0)
+  if (this->theSSLMethod != 0)
     return;
   std::string fileCertificatePhysical, fileKeyPhysical,
   singedFileCertificate1Physical, signedFileCertificate3Physical,
@@ -388,13 +388,13 @@ void SSLdata::initSSLserver()
     return;
   logServer << logger::green << "SSL is available." << logger::endL;
   this->theSSLMethod = SSLv23_method();
-  this->contextServer= SSL_CTX_new(this->theSSLMethod);
+  this->contextServer = SSL_CTX_new(this->theSSLMethod);
   if (!this->contextServer)
   { ERR_print_errors_fp(stderr);
     crash << "openssl error: failed to create CTX object." << crash;
   }
   //////////Safari web browser: no further use of foul language necessary
-  if (SSL_CTX_use_certificate_chain_file(this->contextServer, signedFileCertificate3Physical.c_str()) <=0)
+  if (SSL_CTX_use_certificate_chain_file(this->contextServer, signedFileCertificate3Physical.c_str()) <= 0)
   { logServer << logger::purple << "Found no officially signed certificate, trying self-signed certificate. "
     << logger::endL;
     if (SSL_CTX_use_certificate_file(this->contextServer, fileCertificatePhysical.c_str(), SSL_FILETYPE_PEM) <= 0)
@@ -411,7 +411,7 @@ void SSLdata::initSSLserver()
 //    { ERR_print_errors_fp(stderr);
 //      exit(3);
 //    }
-    if (SSL_CTX_use_certificate_chain_file(this->contextServer, singedFileCertificate1Physical.c_str()) <=0)
+    if (SSL_CTX_use_certificate_chain_file(this->contextServer, singedFileCertificate1Physical.c_str()) <= 0)
     { ERR_print_errors_fp(stderr);
       crash << "Failed to user certificate file." << crash;
     }
@@ -419,7 +419,7 @@ void SSLdata::initSSLserver()
     { ERR_print_errors_fp(stderr);
       crash << "Failed to use private key." << crash;
     }
-    theGlobalVariables.flagCertificatesAreOfficiallySigned=true;
+    theGlobalVariables.flagCertificatesAreOfficiallySigned = true;
   }
   if (!SSL_CTX_check_private_key(this->contextServer))
   { logServer << "Private key does not match the certificate public key.";
@@ -450,33 +450,31 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
 //  logWorker << "Got to here 1" << logger::endL;
   this->sslServeR = SSL_new(this->contextServer);
 //  logWorker << "Got to here 1.05" << logger::endL;
-  if (this->sslServeR==0)
+  if (this->sslServeR == 0)
   { logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
-//  logWorker << "Got to here 1.1" << logger::endL;
   this->SetSocketAddToStackServer(inputSocketID);
-//  logWorker << "Got to here 1.2" << logger::endL;
-  int maxNumHandshakeTries=3;
+  int maxNumHandshakeTries = 3;
 //  int theError=-1;
-  for (int i=0; i<maxNumHandshakeTries; i++)
+  for (int i = 0; i < maxNumHandshakeTries; i++)
   { this->errorCode = SSL_accept(this->sslServeR);
     this->flagSSLHandshakeSuccessful=false;
-    if (this->errorCode!=1)
-    { if (this->errorCode==0)
+    if (this->errorCode != 1)
+    { if (this->errorCode == 0)
         logOpenSSL << "OpenSSL handshake not successful in a controlled manner. ";
       else
         logOpenSSL << "OpenSSL handshake not successful with a fatal error. ";
-      logOpenSSL << "Attempt " << i+1 << " out of " << maxNumHandshakeTries << " failed. ";
+      logOpenSSL << "Attempt " << i + 1 << " out of " << maxNumHandshakeTries << " failed. ";
       switch(SSL_get_error(this->sslServeR, this->errorCode))
       {
       case SSL_ERROR_NONE:
         logOpenSSL << logger::red << "No error reported, this shouldn't happen. " << logger::endL;
-        maxNumHandshakeTries=1;
+        maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_ZERO_RETURN:
         logOpenSSL << logger::red << "The TLS/SSL connection has been closed (possibly cleanly). " << logger::endL;
-        maxNumHandshakeTries=1;
+        maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
@@ -491,7 +489,7 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
         logOpenSSL << logger::red << " Application callback set by SSL_CTX_set_client_cert_cb(): "
         << "repeat needed (not implemented). "
         << logger::endL;
-        maxNumHandshakeTries=1;
+        maxNumHandshakeTries = 1;
         break;
   //    case SSL_ERROR_WANT_ASYNC:
   //      logOpenSSL << logger::red << "Asynchronous engine is still processing data. "
@@ -500,7 +498,7 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
       case SSL_ERROR_SYSCALL:
         logOpenSSL << logger::red << "Error: some I/O error occurred. "
         << logger::endL;
-        maxNumHandshakeTries=1;
+        maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_SSL:
         logOpenSSL << logger::red << "A failure in the SSL library occurred. "
@@ -511,13 +509,13 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
         break;
       default:
         logOpenSSL << logger::red << "Unknown error. " << logger::endL;
-        maxNumHandshakeTries=1;
+        maxNumHandshakeTries = 1;
         break;
       }
       logOpenSSL << "Retrying connection in 0.5 seconds...";
       theGlobalVariables.FallAsleep(500000);
     } else
-    { this->flagSSLHandshakeSuccessful=true;
+    { this->flagSSLHandshakeSuccessful = true;
       break;
     }
   }
@@ -526,13 +524,13 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
 
 void SSLdata::DoSetSocket(int theSocket, SSL *theSSL)
 { MacroRegisterFunctionWithName("SSLdata::DoSetSocket");
-  int result=0;
-  for (int i=0; i<10; i++)
-  { result= SSL_set_fd(theSSL, theSocket);
-    if (result!=0)
+  int result = 0;
+  for (int i = 0; i < 10; i++)
+  { result = SSL_set_fd(theSSL, theSocket);
+    if (result != 0)
       break;
   }
-  if (result==0)
+  if (result == 0)
     crash << "Failed to set socket of server. " << crash;
 }
 
@@ -550,22 +548,22 @@ void SSLdata::SetSocketAddToStackClient(int theSocket)
 
 void SSLdata::RemoveLastSocketServer()
 { MacroRegisterFunctionWithName("SSLdata::RemoveLastSocketServer");
-  if (this->socketStackServer.size>0)
-  { int lastSocket=this->socketStackServer.PopLastObject();
+  if (this->socketStackServer.size > 0)
+  { int lastSocket = this->socketStackServer.PopLastObject();
     close(lastSocket);
   }
-  if (this->socketStackServer.size<=0)
+  if (this->socketStackServer.size <= 0)
     return;
   this->DoSetSocket(*this->socketStackServer.LastObject(), this->sslServeR);
 }
 
 void SSLdata::RemoveLastSocketClient()
 { MacroRegisterFunctionWithName("SSLdata::RemoveLastSocketClient");
-  if (this->socketStackClient.size>0)
-  { int lastSocket=this->socketStackClient.PopLastObject();
+  if (this->socketStackClient.size > 0)
+  { int lastSocket = this->socketStackClient.PopLastObject();
     close(lastSocket);
   }
-  if (this->socketStackClient.size<=0)
+  if (this->socketStackClient.size <= 0)
     return;
   this->DoSetSocket(*this->socketStackClient.LastObject(), this->sslClient);
 }
@@ -578,91 +576,91 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup
   MacroRegisterFunctionWithName("WebServer::HandShakeIamClientNoSocketCleanup");
   this->FreeClientSSL();
   this->sslClient = SSL_new(this->contextServer);
-  if (this->sslClient==0)
+  if (this->sslClient == 0)
   { logOpenSSL << logger::red << "Failed to allocate ssl" << logger::endL;
     crash << "Failed to allocate ssl: not supposed to happen" << crash;
   }
   this->SetSocketAddToStackClient(inputSocketID);
-  int maxNumHandshakeTries=4;
-  for (int i=0; i<maxNumHandshakeTries; i++)
-  { this->errorCode= SSL_connect (this->sslClient);
-    this->flagSSLHandshakeSuccessful=false;
-    if (this->errorCode!=1)
-    { if (this->errorCode==0)
-      { if (commentsOnFailure!=0)
-          *commentsOnFailure << "Attempt " << i+1
+  int maxNumHandshakeTries = 4;
+  for (int i = 0; i < maxNumHandshakeTries; i++)
+  { this->errorCode = SSL_connect(this->sslClient);
+    this->flagSSLHandshakeSuccessful = false;
+    if (this->errorCode != 1)
+    { if (this->errorCode == 0)
+      { if (commentsOnFailure != 0)
+          *commentsOnFailure << "Attempt " << i + 1
           << ": SSL handshake not successfull in a "
           << "controlled fashion (errorCode=0). <br>";
       } else
-      { if (commentsOnFailure!=0)
-          *commentsOnFailure << "Attempt " << i+1
+      { if (commentsOnFailure != 0)
+          *commentsOnFailure << "Attempt " << i + 1
           << ": SSL handshake not successfull with a fatal error with "
           << "errorCode: " << this->errorCode << ". <br>";
       }
       switch(SSL_get_error(this->sslClient, this->errorCode))
       {
       case SSL_ERROR_NONE:
-        if (commentsOnFailure!=0)
+        if (commentsOnFailure != 0)
           *commentsOnFailure << "No error reported, this shouldn't happen. <br>";
-        maxNumHandshakeTries=1;
+        maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_ZERO_RETURN:
-        if (commentsOnFailure!=0)
+        if (commentsOnFailure != 0)
           *commentsOnFailure <<"The TLS/SSL connection has been closed (possibly cleanly).  <br>";
-        maxNumHandshakeTries=1;
+        maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
-        if (commentsOnFailure!=0)
+        if (commentsOnFailure != 0)
           *commentsOnFailure << " During regular I/O: repeat needed (not implemented).  <br>";
         break;
       case SSL_ERROR_WANT_CONNECT:
       case SSL_ERROR_WANT_ACCEPT:
-        if (commentsOnFailure!=0)
+        if (commentsOnFailure != 0)
           *commentsOnFailure << " During handshake negotiations: repeat needed (not implemented). <br> ";
         break;
       case SSL_ERROR_WANT_X509_LOOKUP:
-        if (commentsOnFailure!=0)
+        if (commentsOnFailure != 0)
           *commentsOnFailure << " Application callback set by SSL_CTX_set_client_cert_cb(): "
           << "repeat needed (not implemented).  <br>";
-        maxNumHandshakeTries=1;
+        maxNumHandshakeTries = 1;
         break;
   //    case SSL_ERROR_WANT_ASYNC:
   //      logOpenSSL << logger::red << "Asynchronous engine is still processing data. <br>"
   //      << logger::endL;
   //      break;
       case SSL_ERROR_SYSCALL:
-        if (commentsOnFailure!=0)
+        if (commentsOnFailure != 0)
           *commentsOnFailure << logger::red << "Error: some I/O error occurred. <br>"
           << logger::endL;
-        maxNumHandshakeTries=1;
+        maxNumHandshakeTries = 1;
         break;
       case SSL_ERROR_SSL:
-        if (commentsOnFailure!=0)
+        if (commentsOnFailure != 0)
           *commentsOnFailure << "A failure in the SSL library occurred. <br>";
 //        theError=ERR_get_error(3ssl);
 //        if (theError!=SSL_ERROR_WANT_READ && theError!=SSL_ERROR_WANT_WRITE)
 //          maxNumHandshakeTries=1;
         break;
       default:
-        if (commentsOnFailure!=0)
+        if (commentsOnFailure != 0)
           *commentsOnFailure << "Unknown error. <br>";
-        maxNumHandshakeTries=1;
+        maxNumHandshakeTries = 1;
         break;
       }
-      if (commentsOnFailure!=0)
+      if (commentsOnFailure != 0)
         *commentsOnFailure << "Retrying connection in 0.5 seconds...<br>";
       theGlobalVariables.FallAsleep(500000);
     } else
-    { this->flagSSLHandshakeSuccessful=true;
+    { this->flagSSLHandshakeSuccessful = true;
       break;
     }
   }
   if (this->flagSSLHandshakeSuccessful)
-  { if (commentsGeneral!=0)
+  { if (commentsGeneral != 0)
       *commentsGeneral << "<span style=\"color:green\">SSL handshake successfull.</span>\n<br>\n";
   } else
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "<span style=\"color:red\">SSL handshake failed.</span>\n<br>\n";
     return false;
   }
@@ -733,7 +731,7 @@ int SSLdata::SSLread
 int SSLdata::SSLwrite
 (SSL *theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
  std::stringstream *commentsGeneral, bool includeNoErrorInComments)
-{ int result=SSL_write(theSSL, buffer, bufferSize);
+{ int result = SSL_write(theSSL, buffer, bufferSize);
   this->ClearErrorQueue
   (result, theSSL, commentsOnFailure, commentsGeneral, includeNoErrorInComments);
   return result;
@@ -745,28 +743,28 @@ bool SSLdata::SSLreadLoop
  std::stringstream *commentsGeneral, bool includeNoErrorInComments)
 { MacroRegisterFunctionWithName("SSLdata::SSLreadLoop");
   this->buffer.SetSize(100000);
-  output="";
-  int i=0;
+  output = "";
+  int i = 0;
   std::string next;
-  int numBytes=-1;
-  for (i=0; i<numTries; i++)
+  int numBytes = -1;
+  for (i = 0; i < numTries; i++)
   { numBytes = theWebServer.theSSLdata.SSLread
-    (theSSL, this->buffer.TheObjects,this->buffer.size,
+    (theSSL, this->buffer.TheObjects, this->buffer.size,
      commentsOnFailure, commentsGeneral, includeNoErrorInComments);
-    if (numBytes>0)
+    if (numBytes > 0)
     { next.assign(this->buffer.TheObjects, numBytes);
-      output+=next;
-      if (expectedLength<=0)
+      output += next;
+      if (expectedLength <= 0)
         break;
       else
-        if (expectedLength<=output.size())
+        if (expectedLength <= output.size())
           break;
     }
-    if (numBytes==0)
+    if (numBytes == 0)
       break;
   }
   if (numBytes < 0)
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "\nSSL-ERROR reading from socket. ";
     return false;
   }
@@ -779,17 +777,17 @@ bool SSLdata::SSLwriteLoop
  std::stringstream *commentsGeneral, bool includeNoErrorInComments)
 { MacroRegisterFunctionWithName("SSLdata::SSLwriteLoop");
   Crypto::ConvertStringToListBytesSigned(input, this->buffer);
-  int i=0;
-  int numBytes=-1;
-  for (i=0; i<numTries; i++)
-  { numBytes=this->SSLwrite
+  int i = 0;
+  int numBytes = -1;
+  for (i = 0; i < numTries; i++)
+  { numBytes = this->SSLwrite
     (theSSL, this->buffer.TheObjects, this->buffer.size,
      commentsOnFailure, commentsGeneral, includeNoErrorInComments);
-    if (numBytes ==this->buffer.size)
+    if (numBytes == this->buffer.size)
       break;
   }
-  if (numBytes !=this->buffer.size)
-  { if (commentsOnFailure!=0)
+  if (numBytes != this->buffer.size)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure  << i << " errors writing to socket.\n NumBytes: " << numBytes << ". ";
     return false;
   }
@@ -1764,17 +1762,19 @@ void WebWorker::ParseMessageHead()
           this->flagKeepAlive = true;
       }
     }
-  theGlobalVariables.hostWithPort=this->hostWithPort;
+  theGlobalVariables.hostWithPort = this->hostWithPort;
 //  std::cout << "Got thus far 14" << std::endl;
 }
 
 void WebWorker::AttemptUnknownRequestErrorCorrection()
 { MacroRegisterFunctionWithName("WebWorker::AttemptUnknownRequestErrorCorrection");
-  if (this->requestTypE!=this->requestUnknown)
+  if (this->requestTypE != this->requestUnknown)
     return;
-  logIO << logger::red << " Unknown request. \n";
-  logIO << logger::blue << " Message head length: " << this->messageHead.size();
-  logIO << logger::orange << " Message body length: " << this->messageBody.size() << logger::endL;
+  logIO << logger::red << "Unknown request." << logger::endL;
+  logIO << logger::blue << "Message head length: " << this->messageHead.size() << logger::endL;
+  logIO << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->messageHead, false, 300) << logger::endL;
+  logIO << logger::orange << "Message body length: " << this->messageBody.size() << logger::endL;
+  logIO << HtmlRoutines::ConvertStringToHtmlStringRestrictSize(this->messageBody, false, 300) << logger::endL;
   logIO << logger::green << "Attempting to correct unknown request.\n";
   if (this->messageBody.size() == 0)
     if (*this->theMessageHeaderStrings.LastObject() != "\n")
@@ -1782,14 +1782,14 @@ void WebWorker::AttemptUnknownRequestErrorCorrection()
       << "Message body set to last message chunk.\n";
       this->messageBody = *this->theMessageHeaderStrings.LastObject();
     }
-  if (this->messageBody.size()!=0)
+  if (this->messageBody.size() != 0)
   { logIO << "Request set to: POST\n";
-    this->requestTypE=this->requestPost;
+    this->requestTypE = this->requestPost;
   } else
   { logIO << "Request set to: GET\n";
-    this->requestTypE=this->requestGet;
+    this->requestTypE = this->requestGet;
   }
-  if (this->addressGetOrPost=="")
+  if (this->addressGetOrPost == "")
   { logIO << "Address set to: " << theGlobalVariables.DisplayNameExecutable << "\n";
     this->addressGetOrPost = theGlobalVariables.DisplayNameExecutable;
   }
@@ -4053,7 +4053,7 @@ int WebWorker::ServeClient()
   { if(theGlobalVariables.userCalculatorRequestType != "logout" &&
        theGlobalVariables.userCalculatorRequestType != "login")
     { argumentProcessingFailureComments << "<b>Accessing: ";
-      if (theGlobalVariables.userCalculatorRequestType!="")
+      if (theGlobalVariables.userCalculatorRequestType != "")
         argumentProcessingFailureComments << theGlobalVariables.userCalculatorRequestType;
       else
         argumentProcessingFailureComments << "[html base folder]";
@@ -4884,13 +4884,13 @@ void WebServer::fperror_sigaction(int signal)
 void WebServer::TerminateChildSystemCall(int i)
 { if (!this->theWorkers[i].flagInUse)
     return;
-  this->theWorkers[i].flagInUse=false;
+  this->theWorkers[i].flagInUse = false;
   this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
   if (this->theWorkers[i].ProcessPID>0)
   { if (theGlobalVariables.flagServerDetailedLog)
       logProcessKills << "DEBUG: " << " killing child index: " << i << "." << logger::endL;
     kill(this->theWorkers[i].ProcessPID, SIGKILL);
-    this->theWorkers[i].ProcessPID=-1;
+    this->theWorkers[i].ProcessPID = -1;
   }
   this->theWorkers[i].ResetPipesNoAllocation();
 }
@@ -4904,8 +4904,8 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     << " too many connections handler start. " << logger::endL;
   MonomialWrapper<std::string, MathRoutines::hashString>
   incomingAddress(incomingUserAddress);
-  bool purgeIncomingAddress=
-  (this->currentlyConnectedAddresses.GetMonomialCoefficient(incomingAddress)>
+  bool purgeIncomingAddress =
+  (this->currentlyConnectedAddresses.GetMonomialCoefficient(incomingAddress) >
    this->MaxNumWorkersPerIPAdress);
   if (!purgeIncomingAddress)
     return;
@@ -4926,7 +4926,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     << this->theWorkers[theIndices[j]].ProcessPID
     << ": address: " << incomingAddress << " opened more than "
     << this->MaxNumWorkersPerIPAdress << " simultaneous connections. ";
-    this->theWorkers[theIndices[j]].pingMessage=errorStream.str();
+    this->theWorkers[theIndices[j]].pingMessage = errorStream.str();
     logProcessKills << logger::red << errorStream.str() << logger::endL;
     this->NumProcessAssassinated++;
   }
@@ -4945,13 +4945,13 @@ void WebServer::RecycleChildrenIfPossible()
   if (theGlobalVariables.flagServerDetailedLog)
     logProcessStats << logger::red << "DEBUG: RecycleChildrenIfPossible start. " << logger::endL;
 //  this->ReapChildren();
-  int numInUse=0;
-  for (int i=0; i < this->theWorkers.size; i++)
+  int numInUse = 0;
+  for (int i = 0; i < this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
       numInUse++;
-  for (int i=0; i < this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i++)
     if (this->theWorkers[i].flagInUse)
-    { PipePrimitive& currentControlPipe=this->theWorkers[i].pipeWorkerToServerControls;
+    { PipePrimitive& currentControlPipe = this->theWorkers[i].pipeWorkerToServerControls;
       if (currentControlPipe.flagReadEndBlocks)
         crash << "Pipe: " << currentControlPipe.ToString() << " has blocking read end. " << crash;
       currentControlPipe.ReadIfFailThenCrash(false, true);
@@ -4983,9 +4983,9 @@ void WebServer::RecycleChildrenIfPossible()
       } else
       { bool presumedDead = false;
         if (this->theWorkers[i].flagInUse)
-          if (theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead>0)
-            if (theGlobalVariables.GetElapsedSeconds()-
-                this->theWorkers[i].timeOfLastPingServerSideOnly>
+          if (theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead > 0)
+            if (theGlobalVariables.GetElapsedSeconds() -
+                this->theWorkers[i].timeOfLastPingServerSideOnly >
                 theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead)
               presumedDead=true;
         if (presumedDead)
@@ -5005,7 +5005,7 @@ void WebServer::RecycleChildrenIfPossible()
         }
       }
     }
-  if (numInUse<=this->MaxTotalUsedWorkers)
+  if (numInUse <= this->MaxTotalUsedWorkers)
   { if (theGlobalVariables.flagServerDetailedLog)
       logProcessStats << logger::green
       << "DEBUG: RecycleChildrenIfPossible exit point 1. " << logger::endL;
@@ -5066,7 +5066,7 @@ bool WebServer::initBindToPorts()
         return false;
       }
       for(p = servinfo; p != NULL; p = p->ai_next)
-      { *theListeningSocket= socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+      { *theListeningSocket = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
         if (*theListeningSocket == -1)
         { logWorker << "Error: socket failed.\n";
           continue;
@@ -5118,7 +5118,7 @@ void WebServer::initPrepareSignals()
   if (sigemptyset(&SignalFPE.sa_mask) == -1)
     crash << "Failed to initialize SignalFPE mask. Crashing to let you know. " << crash;
   SignalFPE.sa_sigaction = 0;
-  SignalFPE.sa_handler= &WebServer::fperror_sigaction;
+  SignalFPE.sa_handler = &WebServer::fperror_sigaction;
   if (sigaction(SIGFPE, &SignalFPE, NULL) == -1)
     crash << "Failed to register SIGFPE handler (fatal arithmetic error). Crashing to let you know. " << crash;
   ////////////////////
@@ -5235,7 +5235,7 @@ int WebServer::Run()
       logServer << logger::green << "DEBUG: select success. " << logger::endL;
     gettimeofday(&timeBeforeProcessFork, NULL);
     this->NumSuccessfulSelectsSoFar++;
-    if ((this->NumSuccessfulSelectsSoFar+this->NumFailedSelectsSoFar) - previousReportedNumberOfSelects > 100)
+    if ((this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar) - previousReportedNumberOfSelects > 100)
     { logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and "
       << this->NumFailedSelectsSoFar << " bad ("
       << this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar << " total) selects. " << logger::endL;
@@ -5786,7 +5786,7 @@ void WebServer::InitializeGlobalVariables()
   if (theGlobalVariables.buildVersionSimple == "")
     theGlobalVariables.buildVersionSimple =
     MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
-  theGlobalVariables.buildVersionSimple= MathRoutines::StringTrimWhiteSpace(theGlobalVariables.buildVersionSimple);
+  theGlobalVariables.buildVersionSimple = MathRoutines::StringTrimWhiteSpace(theGlobalVariables.buildVersionSimple);
   for (unsigned i = 0; i < theGlobalVariables.buildVersionSimple.size(); i++)
     if (MathRoutines::isALatinLetter(theGlobalVariables.buildVersionSimple[i]))
     { theGlobalVariables.buildVersionSimple = "?";
@@ -5964,7 +5964,7 @@ int WebServer::main(int argc, char **argv)
       << logger::red << "WARNING: no computation time limit set. " << logger::endL
       << logger::purple << "************************" << logger::endL
       ;
-    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>500)
+    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 500)
       logServer
       << logger::purple << "************************" << logger::endL
       << logger::red << "WARNING: computation time limit is high: "

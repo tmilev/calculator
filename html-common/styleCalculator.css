@@ -479,23 +479,8 @@ table.tableItem td, table.tableItem th {
   text-align: left;
   padding-left: 0px;
 }
-table.topicList {
-  border-collapse: collapse;
-/*  width: 100%;*/
-  font-weight: normal;
-  font-size: 1em;
-  margin-top: 4px;
-  counter-reset: rowNumber;
-}
 tr.calculatorProblem {
   counter-increment: rowNumber;
-}
-table.topicList td, table.topicList th {
-  border: 1px solid #dfdfdf;
-  text-align: left;
-  padding-left: 8px;
-  padding-top: 8px;
-  padding-bottom: 8px;
 }
 table.tableItem col:nth-child(1){
   width: 35%;
@@ -511,6 +496,53 @@ table.tableItem col:nth-child(4){
 }
 table.tableItem col:nth-child(5){
   width: 20%;
+}
+
+table.lectureMaterials {
+  border-collapse: collapse;
+/*  width: 100%;*/
+  font-weight: normal;
+  font-size: 1em;
+  margin-top: 4px;
+  counter-reset: rowNumber;
+}
+table.lectureMaterials td, table.lectureMaterials th {
+  border: 1px solid #dfdfdf;
+  text-align: left;
+  padding-left: 8px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+table.lectureMaterials col:nth-child(1){
+  width: 45%;
+}
+table.lectureMaterials col:nth-child(2){
+  width: 40%;
+}
+table.lectureMaterials col:nth-child(3){
+  width: 15%;
+}
+table.lectureMaterials tr:nth-child(even){}
+table.lectureMaterials tr:nth-child(odd){background-color: #fafafa}
+table.lectureMaterials th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+table.topicList {
+  border-collapse: collapse;
+/*  width: 100%;*/
+  font-weight: normal;
+  font-size: 1em;
+  margin-top: 4px;
+  counter-reset: rowNumber;
+}
+table.topicList td, table.topicList th {
+  border: 1px solid #dfdfdf;
+  text-align: left;
+  padding-left: 8px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 table.topicList col:nth-child(1){
   width: 35%;

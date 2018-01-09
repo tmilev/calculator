@@ -17,6 +17,7 @@ public:
   enum topicType{tChapter, tSection, tSubSection, tError, tProblem, tTexHeader, tUndefined};
   bool flagContainsProblemsNotInSubsection;
   bool flagSubproblemHasNoWeight;
+  bool flagHasLectureTag;
   std::string problemNumberString;
   List<int> problemNumber;
   List<int> parentTopics;
@@ -266,6 +267,7 @@ public:
   bool PrepareSectionList(std::stringstream& commentsOnFailure);
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
   void InterpretTopicList(SyntacticElementHTML& inputOutput);
+  void InterpretLectureMaterials(SyntacticElementHTML& inputOutput);
   void InterpretTableOfContents(SyntacticElementHTML& inputOutput);
   std::string GetEditPagePanel();
   void InterpretEditPagePanel(SyntacticElementHTML& inputOutput);

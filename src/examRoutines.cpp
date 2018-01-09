@@ -948,6 +948,7 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   tagClass == "calculatorExamProblem" || tagClass == "calculatorExamIntermediate" ||
   tagClass == "calculatorAnswer" || tagClass =="calculatorManageClass" ||
   tagClass == "generateTopicTable" ||
+  tagClass == "generateLectureMaterials" ||
   tagClass == "calculatorJavascript" ||
   tagClass == "accountInformationLinks" ||
   tagClass == "generateTableOfContents" ||
@@ -1513,25 +1514,27 @@ void CalculatorHTML::InterpretIfAnswer(SyntacticElementHTML& inputOutput)
 
 void CalculatorHTML::InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretNotByCalculatorNotAnswer");
-  std::string tagClass=inputOutput.GetTagClass();
+  std::string tagClass = inputOutput.GetTagClass();
   //std::string tag= inputOutput.tag;
-  if (tagClass=="calculatorExamProblem" || tagClass=="calculatorExamIntermediate")
+  if (tagClass == "calculatorExamProblem" || tagClass == "calculatorExamIntermediate")
     this->InterpretGenerateLink(inputOutput);
-  else if (tagClass=="calculatorManageClass")
+  else if (tagClass == "calculatorManageClass")
     this->InterpretManageClass(inputOutput);
-  else if (tagClass=="generateTopicTable")
+  else if (tagClass == "generateTopicTable")
     this->InterpretTopicList(inputOutput);
-  else if (tagClass=="generateTableOfContents")
+  else if (tagClass == "generateLectureMaterials")
+    this->InterpretLectureMaterials(inputOutput);
+  else if (tagClass == "generateTableOfContents")
     this->InterpretTableOfContents(inputOutput);
-  else if (tagClass=="accountInformationLinks")
+  else if (tagClass == "accountInformationLinks")
     this->InterpretAccountInformationLinks(inputOutput);
-  else if (tagClass=="calculatorJavascript")
+  else if (tagClass == "calculatorJavascript")
     this->InterpretJavascripts(inputOutput);
-  else if (tagClass=="calculatorNavigationHere")
+  else if (tagClass == "calculatorNavigationHere")
     this->InterpretCalculatorNavigationBar(inputOutput);
-  else if (tagClass=="calculatorProblemNavigationHere")
+  else if (tagClass == "calculatorProblemNavigationHere")
     this->InterpretProblemNavigationBar(inputOutput);
-  else if (tagClass=="calculatorEditPageHere")
+  else if (tagClass == "calculatorEditPageHere")
     this->InterpretEditPagePanel(inputOutput);
 }
 
@@ -2140,6 +2143,7 @@ void CalculatorHTML::initBuiltInSpanClasses()
     this->calculatorClasses.AddOnTop("setCalculatorExamProblem");
     this->calculatorClasses.AddOnTop("setCalculatorExamHome");
     this->calculatorClasses.AddOnTop("generateTopicTable");
+    this->calculatorClasses.AddOnTop("generateLectureMaterials");
     this->calculatorClasses.AddOnTop("generateTableOfContents");
     this->calculatorClasses.AddOnTop("accountInformationLinks");
     this->calculatorClasses.AddOnTop("calculatorJavascript");
@@ -3456,6 +3460,7 @@ void TopicElement::reset(int parentSize)
   this->totalSubSectionsUnderME = 0;
   this->totalSubSectionsUnderMeIncludingEmptySubsections = 0;
   this->flagContainsProblemsNotInSubsection = false;
+  this->flagHasLectureTag = true;
   this->pointsEarnedInProblemsThatAreImmediateChildren = 0;
   this->totalPointsEarned = 0;
   this->maxPointsInAllChildren = 0;
@@ -4002,6 +4007,46 @@ std::string CalculatorHTML::GetSectionSelector()
 
 }
 
+void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretLectureMaterials");
+  std::stringstream out;
+  if (!this->LoadAndParseTopicList(out))
+  { inputOutput.interpretedCommand = out.str();
+    return;
+  }
+  bool plainStyle = (inputOutput.GetKeyValue("topicListStyle") == "plain");
+  out << "<div class=\"headChapter\">Lecture materials "
+  << "<button id=\"buttonToggleCourseInfo\" class=\"buttonToggleTopics\" "
+  << "onclick=\"toggleHeight(this,'tableWithLectureMaterialsFull')\">&#9650;</button>"
+  << "<span style=\"font-weight:normal; font-size:small\">(&larr; click to (un)hide)</span><br>\n"
+  << "</div>";
+  out
+  << "\n<div class=\"bodyChapter\" id =\"tableWithLectureMaterialsFull\">"
+  << "\n<table class=\"lectureMaterials\">";
+  out << "\n<colgroup><col><col><col></colgroup>";
+  out << "\n<tbody>\n";
+  if (!plainStyle)
+    out
+    << "\n<tr> <th>Sub-Topic</th>"
+    << "<th>Resource Links</th>"
+    << "</tr>";
+  this->topicLectureCounter = 0;
+  for (int i = 0; i < this->theTopicS.size(); i++)
+  { TopicElement currentTopic = this->theTopicS[i];
+    currentTopic.ComputeLinks(*this, plainStyle);
+    if (!currentTopic.flagHasLectureTag)
+      continue;
+    out << "<tr>"
+    << "<td>" << currentTopic.displayTitle << "</td>"
+    << "<td>" << currentTopic.displayResourcesLinks << "</td>"
+    << "<td>" << "<a href=\"#" << currentTopic.idBase64 << "\">" << "Go to section</a>" << "</td>"
+    << "</tr>";
+  }
+  out << "</table></div>";
+  this->topicLectureCounter = 0;
+  inputOutput.interpretedCommand = out.str();
+}
+
 void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTopicList");
   std::stringstream out, outFinal, outHead;
@@ -4016,7 +4061,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   //out << "DEBUG: sections: " << this->databaseStudentSections.ToStringCommaDelimited();
   //out << "DEBUG: prob data: " << this->currentUseR.theProblemData.ToStringHtml();
   #ifdef MACRO_use_MySQL
-  this->flagIncludeStudentScores=
+  this->flagIncludeStudentScores =
   theGlobalVariables.UserDefaultHasAdminRights() &&
   !theGlobalVariables.UserStudentVieWOn() &&
   theGlobalVariables.userCalculatorRequestType != "templateNoLogin";
@@ -4035,7 +4080,8 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     outHead << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
     << " out of " << this->currentUseR.pointsMax.GetDoubleValue()
     << " points earned.</panelStudentScores>"
-    << "<button id=\"buttonToggleCourseInfo\" class=\"buttonToggleTopics\" onclick=\"toggleHeight(this,'bodyCourseInformation')\">&#9650;</button><br>\n" ;
+    << "<button id=\"buttonToggleCourseInfo\" class=\"buttonToggleTopics\" onclick=\"toggleHeight(this,'bodyCourseInformation')\">&#9650;</button><br>\n"
+    ;
     outHead << "<div class =\"bodySection\" id = \"bodyCourseInformation\">"
     << "<small>Includes problems without deadline, but not problems without weights.<br> "
     << "If a problem is assigned a new weight, your % score may drop. </small><br>";
@@ -4211,6 +4257,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   problemLabel << " ";
   this->problemNumberString=problemLabel.str();
   std::string titleWithLectureNumber = this->title;
+  this->flagHasLectureTag = false;
   int lectureTagStart = titleWithLectureNumber.find("<lectureTag>");
   if (lectureTagStart >= 0)
   { int lectureTagFinish = titleWithLectureNumber.find("</lectureTag>");
@@ -4227,7 +4274,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
       << "."
       << titleWithLectureNumber.substr(lectureTagFinish)
       ;
-      titleWithLectureNumber=newTitle.str();
+      this->flagHasLectureTag = true;
+      titleWithLectureNumber = newTitle.str();
     }
   }
   if (this->title == "")

@@ -41,6 +41,7 @@ public:
   std::string slidesProjector;
   std::string handwrittenSolution;
   List<std::string> slidesSources;
+  List<std::string> sourceHomework;
   std::string slidesPrintable;
   std::string problem;
   std::string error;
@@ -141,6 +142,7 @@ public:
   static std::string stringProblemLink;
   List<std::string> loadedTopicBundles;
   List<std::string> slidesSourcesHeaders;
+  List<std::string> sourcesHomeworkHeaders;
   std::string fileName;
   std::string RelativePhysicalFileNameWithFolder;
   std::string inputHtml;

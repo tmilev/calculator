@@ -53,6 +53,8 @@ class LaTeXcrawler
   bool flagAddSlideToSVN;
   bool flagBuildSingleSlides;
   bool flagProjectorMode;
+  bool flagAnswerKey;
+  bool flagHomeworkRatherThanSlides;
   bool flagForceSlideRebuild;
   bool flagDoChangeDirs;
   bool flagCrawlTexSourcesRecursively;
@@ -62,7 +64,7 @@ class LaTeXcrawler
   bool ExtractFileNamesFromRelativeFileName(std::stringstream* commentsOnFailure);
   bool ExtractPresentationFileNames(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void Crawl();
-  bool BuildOrFetchFromCachePresentationFromSlides(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool BuildOrFetchFromCachePDF(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool BuildTopicList(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void BuildFreecalC();
   void CrawlRecursive(std::stringstream& crawlingResult, const std::string& currentFileName);

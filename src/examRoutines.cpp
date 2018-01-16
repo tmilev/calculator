@@ -2092,7 +2092,10 @@ void CalculatorHTML::initTopicElementNames()
     this->calculatorTopicElementNames.AddOnTop("VideoHandwritten");
     this->calculatorTopicElementNames.AddOnTop("SlidesLatex");
     this->calculatorTopicElementNames.AddOnTop("SlidesSource");
+    this->calculatorTopicElementNames.AddOnTop("HomeworkLatex");
+    this->calculatorTopicElementNames.AddOnTop("HomeworkSource");
     this->calculatorTopicElementNames.AddOnTop("SlidesSourceHeader");
+    this->calculatorTopicElementNames.AddOnTop("HomeworkSourceHeader");
     this->calculatorTopicElementNames.AddOnTop("LoadTopicBundles");
     this->calculatorTopicElementNames.AddOnTop("TopicBundle");
     this->calculatorTopicElementNames.AddOnTop("BundleBegin");
@@ -3570,6 +3573,9 @@ void TopicElement::GetTopicList
     } else if (MathRoutines::StringBeginsWith(currentLine, "SlidesSourceHeader:", &currentArgument))
     { owner.slidesSourcesHeaders.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
       continue;
+    } else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkSourceHeader:", &currentArgument))
+    { owner.sourcesHomeworkHeaders.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
+      continue;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Chapter:", &currentArgument))
     { if (found)
         TopicElement::AddTopic(currentElt, output);
@@ -3609,8 +3615,12 @@ void TopicElement::GetTopicList
       currentElt.slidesProjector = MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "SlidesSource:", &currentArgument))
       currentElt.slidesSources.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
+    else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkSource:", &currentArgument))
+      currentElt.sourceHomework.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
     else if (MathRoutines::StringBeginsWith(currentLine, "SlidesLatex:", &currentArgument))
       currentElt.slidesSources.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
+    else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkLatex:", &currentArgument))
+      currentElt.sourceHomework.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
     else if (MathRoutines::StringBeginsWith(currentLine, "SlidesPrintable:", &currentArgument))
       currentElt.slidesPrintable = MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "HandwrittenSolutions:", &currentArgument))
@@ -4299,42 +4309,82 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     this->displayHandwrittenSolution = "<a href=\"" +
     this->handwrittenSolution + "\" class=\"slidesLink\">Handwritten solutions</a>";
   if (this->slidesProjector == "" && this->slidesPrintable == "" && this->slidesSources.size > 0)
-  { std::stringstream slideFromSourceStreamHandout, slideFromSourceStreamProjector, sourceStream, sourceStreamCommon;
+  { std::stringstream
+    slideFromSourceStreamHandout, slideFromSourceStreamProjector,
+    homeworkFromSourceStreamNoAnswerKey, homeworkFromSourceStreamAnswerKey,
+    sourceStreamSlides,
+    sourceStreamSlidesCommon, sourceStreamHomeworkCommon;
+
     slideFromSourceStreamHandout << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
     << "?request=slidesFromSource&";
-    sourceStream << "<a href=\""
+    homeworkFromSourceStreamNoAnswerKey << "<a href=\""
+    << theGlobalVariables.DisplayNameExecutable
+    << "?request=homeworkFromSource&";
+
+    sourceStreamSlides << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
     << "?request=slidesSource&";
-    sourceStreamCommon << "title="
+
+    sourceStreamSlidesCommon << "title="
     << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
-    int sourceCounter = 0;
+    /////////
+    int sourceSlidesCounter = 0;
     for (int i = 0; i < owner.slidesSourcesHeaders.size; i++)
-    { sourceCounter++;
-      sourceStreamCommon << "file" << sourceCounter
+    { sourceSlidesCounter++;
+      sourceStreamSlidesCommon << "file" << sourceSlidesCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(owner.slidesSourcesHeaders[i], false) << "&";
     }
     for (int i = 0; i < this->slidesSources.size; i++)
-    { sourceCounter++;
-      sourceStreamCommon << "file" << sourceCounter
+    { sourceSlidesCounter++;
+      sourceStreamSlidesCommon << "file" << sourceSlidesCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(this->slidesSources[i], false) << "&";
     }
-    slideFromSourceStreamHandout << sourceStreamCommon.str();
+    /////////
+    int sourceHomeworkCounter = 0;
+    for (int i = 0; i < owner.sourcesHomeworkHeaders.size; i++)
+    { sourceHomeworkCounter++;
+      sourceStreamHomeworkCommon << "file" << sourceHomeworkCounter
+      << "=" << HtmlRoutines::ConvertStringToURLString(owner.slidesSourcesHeaders[i], false) << "&";
+    }
+    for (int i = 0; i < this->sourceHomework.size; i++)
+    { sourceHomeworkCounter++;
+      sourceStreamHomeworkCommon << "file" << sourceHomeworkCounter
+      << "=" << HtmlRoutines::ConvertStringToURLString(this->sourceHomework[i], false) << "&";
+    }
+    /////////
+    slideFromSourceStreamHandout << sourceStreamSlidesCommon.str();
     slideFromSourceStreamProjector << slideFromSourceStreamHandout.str();
-    sourceStream << sourceStreamCommon.str();
+
+    homeworkFromSourceStreamNoAnswerKey << sourceStreamHomeworkCommon.str();
+    homeworkFromSourceStreamAnswerKey << homeworkFromSourceStreamNoAnswerKey.str();
+
+    sourceStreamSlides << sourceStreamSlidesCommon.str();
     slideFromSourceStreamHandout << "layout=printable&";
     slideFromSourceStreamHandout << "\" class=\"slidesLink\" target=\"_blank\">Printable slides</a>";
+    homeworkFromSourceStreamNoAnswerKey << "withAnswerKey=false&";
+    homeworkFromSourceStreamNoAnswerKey << "\" class=\"slidesLink\" target=\"_blank\">Homework with answers</a>";
+    homeworkFromSourceStreamAnswerKey << "answerKey=true&";
+    homeworkFromSourceStreamAnswerKey << "\" class=\"slidesLink\" target=\"_blank\">Homework</a>";
+
     slideFromSourceStreamProjector << "layout=projector&";
     slideFromSourceStreamProjector << "\" class=\"slidesLink\" target=\"_blank\">Slides</a>";
-    sourceStream << "layout=printable&";
-    sourceStream << "\" class=\"slidesLink\" download=\""
+
+
+    sourceStreamSlides << "layout=printable&";
+    sourceStreamSlides << "\" class=\"slidesLink\" download=\""
     << FileOperations::ConvertStringToLatexFileName(LaTeXcrawler::AdjustDisplayTitle(this->title)) << ".tex\">.tex</a>";
-    this->displaySlidesLink = slideFromSourceStreamHandout.str() + slideFromSourceStreamProjector.str();
-    this->displaySlidesLink += sourceStream.str();
+    this->displaySlidesLink =
+    slideFromSourceStreamHandout.str() +
+    slideFromSourceStreamProjector.str(); ;
+    this->displaySlidesLink += sourceStreamSlides.str();
     if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn())
       this->displaySlidesLink += "<a class=\"slidesLink\" style=\"color:gray; display:none\" href=\""
       + theGlobalVariables.DisplayNameExecutable
       + "?request=modifySlide&topicID=" + this->id + "\">Modify</a>";
+    this->displaySlidesLink +=
+    homeworkFromSourceStreamAnswerKey.str() +
+    homeworkFromSourceStreamNoAnswerKey.str();
   }
   bool problemSolved = false;
   bool returnEmptyStringIfNoDeadline = false;

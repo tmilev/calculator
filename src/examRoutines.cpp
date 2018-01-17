@@ -4326,13 +4326,15 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     sourceStreamSlides << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
     << "?request=slidesSource&";
-
     sourceStreamHomework << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
     << "?request=homeworkSource&";
 
     sourceStreamSlidesCommon << "title="
     << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
+    sourceStreamHomeworkCommon << "title="
+    << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
+
     /////////
     int sourceSlidesCounter = 0;
     for (int i = 0; i < owner.slidesSourcesHeaders.size; i++)
@@ -4378,11 +4380,11 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
 
     sourceStreamSlides << "layout=printable&"
     << "\" class=\"slidesLink\" download=\""
-    << FileOperations::ConvertStringToLatexFileName(LaTeXcrawler::AdjustDisplayTitle(this->title))
+    << FileOperations::ConvertStringToLatexFileName(this->title)
     << ".tex\">.tex</a>";
     sourceStreamHomework << "answerKey=true&"
     << "\" class=\"slidesLink\" download=\""
-    << FileOperations::ConvertStringToLatexFileName(LaTeXcrawler::AdjustDisplayTitle(this->title))
+    << FileOperations::ConvertStringToLatexFileName(this->title)
     << ".tex\">.tex</a>";
     this->displaySlidesLink = "";
     if (this->sourceSlides.size > 0)

@@ -606,7 +606,7 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   return true;
 }
 
-std::string LaTeXcrawler::AdjustDisplayTitle(const std::string& input)
+std::string LaTeXcrawler::AdjustDisplayTitle(const std::string& input, bool isHomework)
 { MacroRegisterFunctionWithName("LaTeXcrawler::AdjustDisplayTitle");
   std::string result = input;
   List<std::string> ignoredTags;
@@ -628,13 +628,15 @@ std::string LaTeXcrawler::AdjustDisplayTitle(const std::string& input)
     result = result.substr(0, pos) + "\\LaTeX" + result.substr(pos + ((std::string) "\\(\\LaTeX\\)").size());
   }
   result = MathRoutines::StringTrimWhiteSpace(result);
+  if (isHomework && result.size() > 4)
+    result = "\\\\" + result;
   return result;
 }
 
 bool LaTeXcrawler::BuildOrFetchFromCachePDF
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePDF");
-  this->desiredPresentationTitle = this->AdjustDisplayTitle(this->desiredPresentationTitle);
+  this->desiredPresentationTitle = this->AdjustDisplayTitle(this->desiredPresentationTitle, this->flagHomeworkRatherThanSlides);
   if (!this->ExtractPresentationFileNames(commentsOnFailure, commentsGeneral))
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "Failed to extract file names. ";

@@ -9,10 +9,10 @@ ProjectInformationInstance ProjectInfoVpf6_38LaTeXRoutines(__FILE__, "LaTeX rout
 
 bool LaTeXcrawler::IsInCrawlableFolder(const std::string& folderName, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("LaTeXcrawler::IsInCrawlableFolder");
-  for (int i=0; i<this->baseFoldersCrawlableFilesPhysical.size; i++)
+  for (int i = 0; i < this->baseFoldersCrawlableFilesPhysical.size; i++)
     if (MathRoutines::StringBeginsWith(folderName, this->baseFoldersCrawlableFilesPhysical[i]))
       return true;
-  if (commentsOnFailure!=0)
+  if (commentsOnFailure != 0)
     *commentsOnFailure << "File folder: " << folderName
     << " does not appear to be in one of the allowed folders: " << this->baseFoldersCrawlableFilesPhysical.ToStringCommaDelimited()
     << ". ";
@@ -21,7 +21,7 @@ bool LaTeXcrawler::IsInCrawlableFolder(const std::string& folderName, std::strin
 
 void LaTeXcrawler::ComputeAllowedFolders()
 { MacroRegisterFunctionWithName("LaTeXcrawler::ComputeAllowedFolders");
-  if (this->baseFoldersCrawlableFilesPhysical.size>0)
+  if (this->baseFoldersCrawlableFilesPhysical.size > 0)
     return;
   List<std::string> allowedFoldersVirtual;
   allowedFoldersVirtual.AddOnTop("freecalc/");
@@ -42,7 +42,7 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* comme
 { MacroRegisterFunctionWithName("LaTeXcrawler::ExtractFileNamesFromRelativeFileName");
   if (!FileOperations::IsOKfileNameVirtual(this->theFileNameToCrawlRelative))
   { this->displayResult << "The folders below the file name contain dots. This is not allowed. ";
-    if (commentsOnFailure!=0)
+    if (commentsOnFailure != 0)
       *commentsOnFailure << "The folders below the file name contain dots. This is not allowed. ";
     return false;
   }
@@ -50,12 +50,13 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* comme
   (this->theFileNameToCrawlRelative, this->theFileNameToCrawlPhysicalWithPath, true, false, commentsOnFailure);
 //  =theGlobalVariables.PhysicalPathProjectBase+ "../freecalc/" +
 //  this->theFileNameToCrawlRelative;
-  this->baseFolderStartFilePhysical=
+  this->baseFolderStartFilePhysical =
   FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(
   FileOperations::GetPathFromFileNameWithPath(this->theFileNameToCrawlPhysicalWithPath)
   ) + "/";
 
-  this->theFileNameToCrawlPhysicalNoPathName=FileOperations::GetFileNameFromFileNameWithPath(this->theFileNameToCrawlPhysicalWithPath);
+  this->theFileNameToCrawlPhysicalNoPathName =
+  FileOperations::GetFileNameFromFileNameWithPath(this->theFileNameToCrawlPhysicalWithPath);
   this->ComputeAllowedFolders();
   if (!this->IsInCrawlableFolder(this->baseFolderStartFilePhysical, commentsOnFailure))
     return false;
@@ -86,11 +87,11 @@ void LaTeXcrawler::BuildFreecalC()
 //  stOutput << "Processing input file: extracting lecture numbers.";
   bool isLecturE = false;
   bool isHW = false;
-  int currentLineIndex = -1;
+  int currentLineIndex = - 1;
   while (!inputFile.eof())
   { std::getline(inputFile, buffer);
     currentLineIndex++;
-    bool isInput=false;
+    bool isInput = false;
     if (MathRoutines::StringBeginsWith(buffer, "\\lect") &&
         !MathRoutines::StringBeginsWith(buffer, "\\lecture"))
     { isInput = true;
@@ -102,7 +103,7 @@ void LaTeXcrawler::BuildFreecalC()
     }
     if (this->flagBuildSingleSlides && isLecturE)
     { //stOutput << "<br>DEBUG: Checking " << buffer << " trimmed to: " << MathRoutines::StringTrimWhiteSpace(buffer);
-      if (MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\input", 0) )
+      if (MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\input", 0))
         this->slideTexInputCommands.AddOnTop(MathRoutines::StringTrimWhiteSpace(buffer));
     }
     if (!isInput)
@@ -237,9 +238,6 @@ void LaTeXcrawler::BuildFreecalC()
       theGlobalVariables.CallSystemNoOutput("mkdir " + slideHandoutFolder, true);
     }
   }
-  //this->theFileNameWorkingCopy=this->baseFolderStartFilePhysical+ "working_file_"+ this->theFileNameToCrawlNoPathPhysical;
-  //std::string theFileNameWorkingCopyPDF=this->baseFolderStartFilePhysical+ "working_file_"
-  //+this->theFileNameToCrawlNoPathPhysical.substr(0, this->theFileNameToCrawlNoPathPhysical.size()-3)+"pdf";
   this->theFileNameWorkingCopy = "working_file_" + this->theFileNameToCrawlPhysicalNoPathName;
   std::string theFileNameWorkingCopyPDF = "working_file_"
   + this->theFileNameToCrawlPhysicalNoPathName.substr(0, this->theFileNameToCrawlPhysicalNoPathName.size() - 3)+"pdf";
@@ -288,7 +286,7 @@ void LaTeXcrawler::BuildFreecalC()
     }
     currentSysCommand = "mv " + theFileNameWorkingCopyPDF + " " + thePdfFileNameHandout.str();
     executedCommands << "<br>" << currentSysCommand;
-    reportStream << "<br>Lecture/Homework " << i+1 << " handout compiled, renaming file ... ";
+    reportStream << "<br>Lecture/Homework " << i + 1 << " handout compiled, renaming file ... ";
     theReport.Report(reportStream.str());
     theGlobalVariables.CallSystemNoOutput(currentSysCommand, true);
     reportStream << " done.";
@@ -309,7 +307,7 @@ void LaTeXcrawler::BuildFreecalC()
     << theLectureNumbers[i] << "}\n";
     workingFile << LectureContentNoDocumentClassNoCurrentLecture.str();
     workingFile.close();
-    currentSysCommand = "pdflatex -shell-escape "+this->theFileNameWorkingCopy;
+    currentSysCommand = "pdflatex -shell-escape " + this->theFileNameWorkingCopy;
     executedCommands << "<br>" << currentSysCommand;
     reportStream << currentSysCommand;
     theReport.Report(reportStream.str());
@@ -583,10 +581,17 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
     this->targetPDFVirtualPath = "slides-videos" + tempString;
   this->targetPDFNoPath = FileOperations::GetFileNameFromFileNameWithPath(firstSignificantSlideName);
   FileOperations::GetFileExtensionWithDot(this->targetPDFNoPath, &this->targetPDFNoPath);
-  if (this->flagProjectorMode)
-    this->targetPDFNoPath += "-projector-" + this->headerPathBelowFileNameVirtual;
-  else
-    this->targetPDFNoPath += "-printable-" + this->headerPathBelowFileNameVirtual;
+  if (!this->flagHomeworkRatherThanSlides)
+  { if (this->flagProjectorMode)
+      this->targetPDFNoPath += "-projector-" + this->headerPathBelowFileNameVirtual;
+    else
+      this->targetPDFNoPath += "-printable-" + this->headerPathBelowFileNameVirtual;
+  } else
+  { if (this->flagAnswerKey)
+      this->targetPDFNoPath += "-answer-key-" + this->headerPathBelowFileNameVirtual;
+    else
+      this->targetPDFNoPath += "-no-answers-" + this->headerPathBelowFileNameVirtual;
+  }
   this->targetPDFNoPath += this->desiredPresentationTitle;
   this->targetPDFNoPath = HtmlRoutines::ConvertStringToURLString(this->targetPDFNoPath, false);
   MathRoutines::StringTrimToLength(this->targetPDFNoPath, 230);
@@ -683,19 +688,35 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
     this->CrawlRecursive(crawlingResult, this->headerFileNameNoPath);
   }
   if (addExtraTex)
-  { crawlingResult << "\\begin{document}\n"
-    << "\\providecommand{\\currentLecture}{1}"
-    << "\\lect{\\semester}{" << this->desiredPresentationTitle << "}{1}{\n";
+  { if (this->flagHomeworkRatherThanSlides)
+    { if (this->flagAnswerKey)
+        crawlingResult << "\\toggletrue{solutions}\n\\toggletrue{answers}\n";
+      else
+        crawlingResult << "\\togglefalse{solutions}\n\\togglefalse{answers}\n";
+    }
+    crawlingResult << "\\begin{document}\n";
+    if (!this->flagHomeworkRatherThanSlides)
+      crawlingResult << "\\providecommand{\\currentLecture}{1}\n";
+    else
+      crawlingResult << "\\providecommand{\\currentHW}{1}\n";
+    if (!this->flagHomeworkRatherThanSlides)
+      crawlingResult << "\\lect{\\semester}{" << this->desiredPresentationTitle << "}{1}{\n";
+    else
+      crawlingResult << "\\homeworkOnATopic{}{" << this->desiredPresentationTitle << "}{1}{\n";
     for (int i = 1; i < this->slideFileNamesVirtualWithPatH.size; i++)
       if (this->latexSnippets[i] == "")
-      { if (this->flagCrawlTexSourcesRecursively)
+      { if (this->flagHomeworkRatherThanSlides)
+          crawlingResult << "\\item\n";
+        if (this->flagCrawlTexSourcesRecursively)
         { crawlingResult << "%input from file: " << this->slideFileNamesWithLatexPathNoExtension[i] << ".tex\n";
           this->CrawlRecursive(crawlingResult, this->slideFileNamesWithLatexPathNoExtension[i] + ".tex");
         } else
           crawlingResult << "\\input{" << this->slideFileNamesWithLatexPathNoExtension[i] << "}\n";
       } else
         crawlingResult << this->latexSnippets[i] << "\n";
-    crawlingResult << "}\n" << "\\end{document}";
+    crawlingResult << "}\n";
+
+    crawlingResult << "\\end{document}";
   }
   if (this->flagCrawlTexSourcesRecursively)
   { this->targetLaTeX = crawlingResult.str();
@@ -763,7 +784,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     return false;
   int numSlidePairsToBuild = 0;
   for (int i = 0; i < topicParser.theTopicS.size(); i++)
-    if (topicParser.theTopicS[i].slidesSources.size > 0)
+    if (topicParser.theTopicS[i].sourceSlides.size > 0)
       numSlidePairsToBuild++;
   if (commentsGeneral != 0)
   { *commentsGeneral << "Loaded topic list: " << topicParser.topicListFileName;
@@ -777,7 +798,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
 //  && numProcessed < 2
   ; i++)
   { TopicElement& currentElt = topicParser.theTopicS[i];
-    if (currentElt.slidesSources.size == 0)
+    if (currentElt.sourceSlides.size == 0)
       continue;
     std::stringstream reportStream;
     numProcessed++;
@@ -785,7 +806,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     theReport.Report(reportStream.str());
 
     this->slideFileNamesVirtualWithPatH.SetSize(topicParser.slidesSourcesHeaders.size);
-    this->slideFileNamesVirtualWithPatH.AddListOnTop(currentElt.slidesSources);
+    this->slideFileNamesVirtualWithPatH.AddListOnTop(currentElt.sourceSlides);
     this->desiredPresentationTitle = currentElt.title;
     this->flagForceSlideRebuild = true;
     this->flagProjectorMode = false;

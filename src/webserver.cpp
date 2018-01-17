@@ -3516,7 +3516,8 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource()
     theCrawler.flagProjectorMode = false;
   if (theGlobalVariables.GetWebInput("answerKey") == "true")
     theCrawler.flagAnswerKey = true;
-  if (theGlobalVariables.GetWebInput("homeworkFromSource") == "")
+  if (theGlobalVariables.userCalculatorRequestType == "homeworkFromSource" ||
+      theGlobalVariables.userCalculatorRequestType == "homeworkSource")
     theCrawler.flagHomeworkRatherThanSlides = true;
   if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments))
   { this->flagDoAddContentLength = true;
@@ -4187,7 +4188,8 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == "slidesFromSource" ||
            theGlobalVariables.userCalculatorRequestType == "homeworkFromSource")
     return this->ProcessSlidesOrHomeworkFromSource();
-  else if (theGlobalVariables.userCalculatorRequestType == "slidesSource")
+  else if (theGlobalVariables.userCalculatorRequestType == "slidesSource" ||
+           theGlobalVariables.userCalculatorRequestType == "homeworkSource")
     return this->ProcessSlidesSource();
   else if (theGlobalVariables.userCalculatorRequestType == "clonePage")
     return this->ProcessClonePage();

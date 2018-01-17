@@ -40,7 +40,7 @@ public:
   std::string videoHandwritten;
   std::string slidesProjector;
   std::string handwrittenSolution;
-  List<std::string> slidesSources;
+  List<std::string> sourceSlides;
   List<std::string> sourceHomework;
   std::string slidesPrintable;
   std::string problem;

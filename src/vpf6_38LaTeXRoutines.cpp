@@ -628,7 +628,7 @@ std::string LaTeXcrawler::AdjustDisplayTitle(const std::string& input, bool isHo
     result = result.substr(0, pos) + "\\LaTeX" + result.substr(pos + ((std::string) "\\(\\LaTeX\\)").size());
   }
   result = MathRoutines::StringTrimWhiteSpace(result);
-  if (isHomework && result.size() > 4)
+  if (isHomework && result.size() > 4 && !MathRoutines::StringBeginsWith(result, "\\\\"))
     result = "\\\\" + result;
   return result;
 }
@@ -668,7 +668,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
     { std::getline(theFile, buffer);
       if (!MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "[handout]"))
         crawlingResult << buffer << "\n";
-      if (!this->flagProjectorMode)
+      if (!this->flagProjectorMode && !this->flagHomeworkRatherThanSlides)
         if (MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\documentclass"))
           crawlingResult << "[handout]" << "\n";
     } while (!theFile.eof());
@@ -801,12 +801,56 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   }
   bool result = true;
   int numProcessed = 0;
-  this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.slidesSourcesHeaders);
+  this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.sourcesHomeworkHeaders);
+  this->slideFilesExtraFlags.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
   for (int i = 0; i < topicParser.theTopicS.size()
 //  && numProcessed < 2
   ; i++)
   { TopicElement& currentElt = topicParser.theTopicS[i];
-    if (currentElt.sourceSlides.size == 0 && currentElt.sourceHomework.size == 0)
+    if (currentElt.sourceHomework.size == 0)
+      continue;
+    std::stringstream reportStream;
+    numProcessed++;
+    reportStream << "Processing slide pair " << numProcessed << " out of " << numSlidePairsToBuild;
+    theReport.Report(reportStream.str());
+
+    this->slideFileNamesVirtualWithPatH.SetSize(topicParser.sourcesHomeworkHeaders.size);
+    this->slideFilesExtraFlags.SetSize(topicParser.sourcesHomeworkHeaders.size);
+    this->slideFileNamesVirtualWithPatH.AddListOnTop(currentElt.sourceHomework);
+    for (int i = 0; i < currentElt.sourceHomeworkIsSolution.size; i++)
+    { std::string currentFlag = "false";
+      if (currentElt.sourceHomeworkIsSolution[i])
+        currentFlag = "true";
+      this->slideFilesExtraFlags.AddOnTop(currentFlag);
+    }
+    this->desiredPresentationTitle = currentElt.title;
+    this->flagForceSlideRebuild = true;
+    this->flagProjectorMode = false;
+    this->flagAddSlideToSVN = false;
+    this->flagHomeworkRatherThanSlides = true;
+    this->flagAnswerKey = false;
+    if (commentsGeneral != 0)
+      *commentsGeneral << "<br>Build homework pair from: " << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
+    if (!this->BuildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral))
+      result = false;
+    this->flagDoChangeDirs = false;
+    this->flagAddSlideToSVN = true;
+    if (!this->BuildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral))
+      result = false;
+    this->flagAnswerKey = true;
+    if (!this->BuildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral))
+      result = false;
+  }
+
+  this->slideFileNamesVirtualWithPatH.SetSize(0);
+
+  numProcessed = 0;
+  this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.slidesSourcesHeaders);
+  for (int i = 0; i < topicParser.theTopicS.size()
+  //&& numProcessed < 0
+  ; i++)
+  { TopicElement& currentElt = topicParser.theTopicS[i];
+    if (currentElt.sourceSlides.size == 0)
       continue;
     std::stringstream reportStream;
     numProcessed++;
@@ -819,6 +863,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     this->flagForceSlideRebuild = true;
     this->flagProjectorMode = false;
     this->flagAddSlideToSVN = false;
+    this->flagHomeworkRatherThanSlides = false;
     if (commentsGeneral != 0)
       *commentsGeneral << "<br>Build slide pair from: " << this->slideFileNamesVirtualWithPatH.ToStringCommaDelimited();
     if (!this->BuildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral))

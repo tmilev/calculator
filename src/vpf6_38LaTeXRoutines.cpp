@@ -708,7 +708,13 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
     for (int i = 1; i < this->slideFileNamesVirtualWithPatH.size; i++)
       if (this->latexSnippets[i] == "")
       { if (this->flagHomeworkRatherThanSlides)
-          crawlingResult << "\\item\n";
+        { bool doIncludeItem = true;
+          if (i < this->slideFilesExtraFlags.size)
+            if (this->slideFilesExtraFlags[i]=="true")
+              doIncludeItem = false;
+          if (doIncludeItem)
+            crawlingResult << "\\item\n";
+        }
         if (this->flagCrawlTexSourcesRecursively)
         { crawlingResult << "%input from file: " << this->slideFileNamesWithLatexPathNoExtension[i] << ".tex\n";
           this->CrawlRecursive(crawlingResult, this->slideFileNamesWithLatexPathNoExtension[i] + ".tex");
@@ -800,7 +806,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
 //  && numProcessed < 2
   ; i++)
   { TopicElement& currentElt = topicParser.theTopicS[i];
-    if (currentElt.sourceSlides.size == 0)
+    if (currentElt.sourceSlides.size == 0 && currentElt.sourceHomework.size == 0)
       continue;
     std::stringstream reportStream;
     numProcessed++;

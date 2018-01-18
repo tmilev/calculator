@@ -2094,6 +2094,7 @@ void CalculatorHTML::initTopicElementNames()
     this->calculatorTopicElementNames.AddOnTop("SlidesSource");
     this->calculatorTopicElementNames.AddOnTop("HomeworkLatex");
     this->calculatorTopicElementNames.AddOnTop("HomeworkSource");
+    this->calculatorTopicElementNames.AddOnTop("HomeworkSolutionSource");
     this->calculatorTopicElementNames.AddOnTop("SlidesSourceHeader");
     this->calculatorTopicElementNames.AddOnTop("HomeworkSourceHeader");
     this->calculatorTopicElementNames.AddOnTop("LoadTopicBundles");
@@ -3450,6 +3451,7 @@ void TopicElement::reset(int parentSize)
   this->slidesPrintable = "";
   this->sourceSlides.SetSize(0);
   this->sourceHomework.SetSize(0);
+  this->sourceHomeworkIsSolution.SetSize(0);
   this->problem = "";
   this->error = "";
   if(parentSize != - 1)
@@ -3617,8 +3619,12 @@ void TopicElement::GetTopicList
     else if (MathRoutines::StringBeginsWith(currentLine, "SlidesSource:", &currentArgument))
       currentElt.sourceSlides.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
     else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkSource:", &currentArgument))
-      currentElt.sourceHomework.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
-    else if (MathRoutines::StringBeginsWith(currentLine, "SlidesLatex:", &currentArgument))
+    { currentElt.sourceHomework.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
+      currentElt.sourceHomeworkIsSolution.AddOnTop(false);
+    } else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkSolutionSource:", &currentArgument))
+    { currentElt.sourceHomework.AddOnTop(MathRoutines::StringTrimWhiteSpace(currentArgument));
+      currentElt.sourceHomeworkIsSolution.AddOnTop(true);
+    } else if (MathRoutines::StringBeginsWith(currentLine, "SlidesLatex:", &currentArgument))
       currentElt.sourceSlides.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
     else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkLatex:", &currentArgument))
       currentElt.sourceHomework.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
@@ -4352,12 +4358,18 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     for (int i = 0; i < owner.sourcesHomeworkHeaders.size; i++)
     { sourceHomeworkCounter++;
       sourceStreamHomeworkCommon << "file" << sourceHomeworkCounter
-      << "=" << HtmlRoutines::ConvertStringToURLString(owner.sourcesHomeworkHeaders[i], false) << "&";
+      << "=" << HtmlRoutines::ConvertStringToURLString(owner.sourcesHomeworkHeaders[i], false) << "&isSolutionFile"
+      << sourceHomeworkCounter << "=false&";
+
     }
     for (int i = 0; i < this->sourceHomework.size; i++)
     { sourceHomeworkCounter++;
       sourceStreamHomeworkCommon << "file" << sourceHomeworkCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(this->sourceHomework[i], false) << "&";
+      if (this->sourceHomeworkIsSolution[i])
+        sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "=true&";
+      else
+        sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "=false&";
     }
     /////////
     slideFromSourceStreamHandout << sourceStreamSlidesCommon.str();

@@ -45,6 +45,7 @@ class LaTeXcrawler
   List<std::string> theLectureNumbers;
   List<std::string> theLectureDesiredNames;
   List<std::string> slideTexInputCommands;
+  List<std::string> slideFilesExtraFlags;
   List<std::string> slideFileNamesVirtualWithPatH;
   List<std::string> slideFileNamesWithLatexPathNoExtension;
   List<std::string> slideFileNamesVirtualNoPathNoExtensioN;

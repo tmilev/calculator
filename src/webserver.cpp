@@ -3508,7 +3508,18 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource()
        (HtmlRoutines::ConvertURLStringToNormal
        (theGlobalVariables.webArguments.theValues[i], false)));
     }
+    if (MathRoutines::StringBeginsWith(theKey, "isSolutionFile"))
+    { theCrawler.slideFilesExtraFlags.AddOnTop
+      (MathRoutines::StringTrimWhiteSpace
+       (HtmlRoutines::ConvertURLStringToNormal
+       (theGlobalVariables.webArguments.theValues[i], false)));
+    }
   }
+  if (theCrawler.slideFilesExtraFlags.size > theCrawler.slideFileNamesVirtualWithPatH.size)
+    theCrawler.slideFilesExtraFlags.SetSize(theCrawler.slideFileNamesVirtualWithPatH.size);
+  else
+    for (int i = theCrawler.slideFilesExtraFlags.size; i < theCrawler.slideFileNamesVirtualWithPatH.size; i++)
+      theCrawler.slideFilesExtraFlags.AddOnTop("");
   theCrawler.desiredPresentationTitle =
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("title"), false);
   std::stringstream comments;

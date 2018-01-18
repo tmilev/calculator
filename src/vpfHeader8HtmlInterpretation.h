@@ -42,6 +42,7 @@ public:
   std::string handwrittenSolution;
   List<std::string> sourceSlides;
   List<std::string> sourceHomework;
+  List<bool> sourceHomeworkIsSolution;
   std::string slidesPrintable;
   std::string problem;
   std::string error;

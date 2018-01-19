@@ -5851,6 +5851,7 @@ void WebServer::InitializeGlobalVariables()
   //No further rules are applied after that.
   folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("/certificates-public/", "certificates-public/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("certificates-public/", "certificates-public/");//<-internal use
   folderSubstitutionsNonSensitive.SetKeyValue("problemtemplates/", "../problemtemplates/");
 
   folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");//<-coming from webserver

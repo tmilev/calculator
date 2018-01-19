@@ -4379,6 +4379,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     homeworkFromSourceStreamAnswerKey << homeworkFromSourceStreamNoAnswerKey.str();
 
     sourceStreamSlides << sourceStreamSlidesCommon.str();
+    sourceStreamHomework << sourceStreamHomeworkCommon.str();
+
     slideFromSourceStreamHandout << "layout=printable&";
     slideFromSourceStreamHandout << "\" class=\"slidesLink\" target=\"_blank\">Printable slides</a>";
     homeworkFromSourceStreamNoAnswerKey << "answerKey=true&";

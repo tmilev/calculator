@@ -472,7 +472,7 @@ void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
   std::string buffer;
   while (!theFile.eof())
   { std::getline(theFile, buffer);
-    std::stringstream newFileName;
+    std::string newFileName;
     bool isGood = true;
     if (buffer.find("IfFileExists") != std::string::npos)
       isGood = false;
@@ -485,11 +485,16 @@ void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
       { crawlingResult << buffer.substr(0, foundInput);
         buffer = buffer.substr(foundInput);
         unsigned i = 0;
+        newFileName = "";
         for (i = 7; buffer[i] != '}' && i < buffer.size(); i++)
-          newFileName << buffer[i];
-        newFileName << ".tex";
-        crawlingResult << "%input from file: " << newFileName.str() << "\n";
-        this->CrawlRecursive(crawlingResult, newFileName.str());
+          newFileName += buffer[i];
+        newFileName = MathRoutines::StringTrimWhiteSpace(newFileName);
+        std::string newFileNameEnd;
+        if (MathRoutines::StringBeginsWith(newFileName, "\\freecalcBaseFolder", &newFileNameEnd))
+          newFileName = "../../freecalc" + newFileNameEnd;
+        newFileName += ".tex";
+        crawlingResult << "%input from file: " << newFileName << "\n";
+        this->CrawlRecursive(crawlingResult, newFileName);
         crawlingResult << "\n";
         if (i + 1 < buffer.size())
           buffer = buffer.substr(i + 1);
@@ -506,7 +511,7 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   (void) commentsGeneral;
   if (this->slideFileNamesVirtualWithPatH.size < 1)
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "Could not find slide file names. ";
+      *commentsOnFailure << "Could not find slide/homework file names. ";
     return false;
   }
   this->slideFileNamesWithLatexPathNoExtension.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
@@ -683,9 +688,11 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
   }
   if (this->flagCrawlTexSourcesRecursively)
   { crawlingResult << "%file automatically generated from file: " << this->headerFileNameNoPath
-    << "\n%This file compiles with pdflatex -shell-escape\n"
-    << "\n%Comment out/in the [handout] line to get the slide in projector/handout mode.\n"
-    ;
+    << "\n%This file compiles with pdflatex -shell-escape\n";
+    if (!this->flagHomeworkRatherThanSlides)
+      crawlingResult << "\n%Comment out/in the [handout] line to get the slide in projector/handout mode.\n";
+    else
+      crawlingResult << "\n%Use \\togglefalse{answers} and \\togglefalse{solutions} to turn off the answer key/solutions.\n";
     this->ComputeAllowedFolders();
     this->CrawlRecursive(crawlingResult, this->headerFileNameNoPath);
   }

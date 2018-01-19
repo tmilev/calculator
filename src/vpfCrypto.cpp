@@ -936,14 +936,14 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
   Crypto::knownCertificates.SetSize(0);
   List<std::string> theFileNames;
   if (! FileOperations::GetFolderFileNamesVirtual("certificates-public/", theFileNames, 0))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "Could not open folder certificates-public/, no certificates loaded.";
     return false;
   }
-  if (commentsGeneral!=0)
+  if (commentsGeneral != 0)
     *commentsGeneral << "<br>Certificates: ";
-  for (int i=0; i<theFileNames.size; i++)
-  { if (theFileNames[i]=="." || theFileNames[i]=="..")
+  for (int i = 0; i < theFileNames.size; i++)
+  { if (theFileNames[i] == "." || theFileNames[i] == "..")
       continue;
     if (MathRoutines::StringBeginsWith(theFileNames[i],"debug"))
       continue;
@@ -954,8 +954,8 @@ bool Crypto::LoadKnownCertificates(std::stringstream* commentsOnFailure, std::st
     if (!Crypto::LoadOneKnownCertificate(currentCert, commentsOnFailure, commentsGeneral))
       return false;
   }
-  for (int i=0; i<Crypto::knownCertificates.size; i++)
-    if (commentsGeneral!=0)
+  for (int i = 0; i < Crypto::knownCertificates.size; i++)
+    if (commentsGeneral != 0)
       *commentsGeneral << "\n<hr>\nLoaded: "
       << Crypto::knownCertificates[i].ToString();
   return true;

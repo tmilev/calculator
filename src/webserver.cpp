@@ -264,7 +264,7 @@ void SSL_write_Wrapper(SSL* inputSSL, const std::string& theString)
 //openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 3001
 //Alternatively:
 //certificate with certificate signing request:
-//openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout privateKey.key
+//openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout calculator-algebra.key
 //then get the CSR.csr file to a signing authority,
 //from where you get the signedFileCertificate1 and signedFileCertificate3
 const std::string fileCertificate = "certificates/cert.pem";
@@ -3556,7 +3556,7 @@ int WebWorker::ProcessSlidesSource()
   this->SetHeaderOKNoContentLength();
   LaTeXcrawler theCrawler;
   for (int i = 0; i < theGlobalVariables.webArguments.size(); i++)
-  { std::string theKey=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
+  { std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
     //stOutput << "DEBUG: considering key: " << theKey
     //<< " with value: " << theGlobalVariables.webArguments.theValues[i] << "<br>";
     if (theKey != "fileName" && MathRoutines::StringBeginsWith(theKey, "file"))
@@ -3566,11 +3566,19 @@ int WebWorker::ProcessSlidesSource()
        (theGlobalVariables.webArguments.theValues[i], false)));
     }
   }
+  if (theGlobalVariables.userCalculatorRequestType == "homeworkSource")
+    theCrawler.flagHomeworkRatherThanSlides = true;
+  else
+    theCrawler.flagHomeworkRatherThanSlides = false;
   theCrawler.desiredPresentationTitle =
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("title"), false);
   std::stringstream comments;
   if (theGlobalVariables.GetWebInput("layout") == "printable")
     theCrawler.flagProjectorMode = false;
+  if (theGlobalVariables.GetWebInput("answerKey") == "false")
+    theCrawler.flagAnswerKey = false;
+  else
+    theCrawler.flagAnswerKey = true;
   theCrawler.flagForceSlideRebuild = true;
   theCrawler.flagCrawlTexSourcesRecursively = true;
   if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments))

@@ -55,6 +55,28 @@ This completes the setup and your first run.
 5. **mysql development libraries**. If not already present, the calculator will attempt to install them on first run.
 6. [Optional] **openssl development libraries**. If not already present, the calculator will attempt to install them on first run.
 
+### Port redirect with ip tables
+
+To redirect port 80 to port 8155:
+```
+sudo iptables -A INPUT -i eth0 -p tcp --dport 80 -j ACCEPT
+sudo iptables -A INPUT -i eth0 -p tcp --dport 8155 -j ACCEPT
+sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8155
+```
+Similarly for redirecting port 443 to 8166:
+```
+sudo iptables -A INPUT -i eth0 -p tcp --dport 443 -j ACCEPT
+sudo iptables -A INPUT -i eth0 -p tcp --dport 8166 -j ACCEPT
+sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 8166
+```
+
+###Gmail login client secret. 
+
+Get your login client secret from:
+
+https://console.developers.google.com/apis/credentials/oauthclient
+
+
 ## Authors
 The following people have contributed code directly.
 - **Todor Milev** (project mastermind)

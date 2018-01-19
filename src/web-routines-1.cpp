@@ -443,10 +443,10 @@ void WebCrawler::FetchWebPagePart2
       *commentsOnFailure << "Could not shake hands. ";
     return;
   }
-  this->headerReceived="";
-  this->bodyReceiveD="";
-  this->flagContinueWasNeeded=false;
-  if (commentsGeneral!=0)
+  this->headerReceived = "";
+  this->bodyReceiveD = "";
+  this->flagContinueWasNeeded = false;
+  if (commentsGeneral != 0)
     *commentsGeneral << "<hr>";
   if (!theWebServer.theSSLdata.SSLwriteLoop
       (10, theWebServer.theSSLdata.sslClient, theMessageHeader.str(),
@@ -459,8 +459,8 @@ void WebCrawler::FetchWebPagePart2
   unsigned bodyStart=0;
   int numcrlfs=0;
   //std::stringstream tempStream;
-  for (; bodyStart<this->headerReceived.size(); bodyStart++)
-  { if (numcrlfs>=4)
+  for (; bodyStart < this->headerReceived.size(); bodyStart++)
+  { if (numcrlfs >= 4)
       break;
     if (this->headerReceived[bodyStart]=='\n' ||
         this->headerReceived[bodyStart]=='\r')
@@ -486,27 +486,27 @@ void WebCrawler::FetchWebPagePart2
         theHeaderPieces[i]=="Content-Length:" ||
         theHeaderPieces[i]=="content-length:"
         )
-      if (i+1<theHeaderPieces.size)
+      if (i + 1<theHeaderPieces.size)
       { expectedLengthString=theHeaderPieces[i+1];
         break;
       }
-  this->expectedLength=-1;
-  if (expectedLengthString!="")
+  this->expectedLength = - 1;
+  if (expectedLengthString != "")
     expectedLength.AssignString(expectedLengthString);
-  if (commentsGeneral!=0)
+  if (commentsGeneral != 0)
     *commentsGeneral << "<br>Expected length: " << this->expectedLength;
   if (commentsGeneral!=0)
     *commentsGeneral << "<br>Header:<br>" << this->headerReceived;
-  if (this->headerReceived.find("200 OK")==std::string::npos)
-  { if (commentsOnFailure!=0)
-      *commentsOnFailure << "No http ok message found. " ;
+  if (this->headerReceived.find("200 OK") == std::string::npos)
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "No 200 ok message found. Headers received: " << this->headerReceived;
     return;
   }
-  if (expectedLength==this->bodyReceivedWithHeader.size())
-  { this->bodyReceiveD=this->bodyReceivedWithHeader;
+  if (expectedLength == this->bodyReceivedWithHeader.size())
+  { this->bodyReceiveD = this->bodyReceivedWithHeader;
     return;
   }
-  this->flagContinueWasNeeded=true;
+  this->flagContinueWasNeeded = true;
   //if (this->bodyReceivedWithHeader=="")
   //{
   theContinueHeader << "HTTP/1.0 100 Continue\r\n\r\n";

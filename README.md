@@ -69,13 +69,45 @@ sudo iptables -A INPUT -i eth0 -p tcp --dport 443 -j ACCEPT
 sudo iptables -A INPUT -i eth0 -p tcp --dport 8166 -j ACCEPT
 sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 8166
 ```
+Finally, save the IP table rules. For ubuntu:
 
-###Gmail login client secret. 
+```
+sudo apt-get install iptables-persistent
+```
+The package above should automagically save your ip table rules. If not, run
+```
+su
+iptables-save > /etc/iptables/rules.v4
+exit
+```
 
-Get your login client secret from:
+### Recaptcha secret. 
+Get your recaptcha client secret and public info from:
 
-https://console.developers.google.com/apis/credentials/oauthclient
+```
+https://www.google.com/recaptcha/admin#site/
+```
 
+Put the secret in a file:
+
+```
+certificates/recaptcha-secret.txt
+```
+and the public info in:
+
+```
+certificates/recaptcha-public.txt
+```
+
+To do that just copy and paste the secrets in plain text into the files.
+
+### Mailgun setup
+
+Put your mailgun secret in file:
+
+```
+certificates/mailgun-api.txt
+```
 
 ## Authors
 The following people have contributed code directly.

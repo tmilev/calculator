@@ -2106,7 +2106,7 @@ void CalculatorHTML::initTopicElementNames()
 
 void CalculatorHTML::initAutocompleteExtras()
 { MacroRegisterFunctionWithName("CalculatorHTML::initAutocompleteExtras");
-  if (this->autoCompleteExtras.size>0)
+  if (this->autoCompleteExtras.size > 0)
     return;
   this->autoCompleteExtras.AddOnTop("answerCalculatorHighlight");
   this->autoCompleteExtras.AddOnTop("algebra");
@@ -2117,10 +2117,10 @@ void CalculatorHTML::initAutocompleteExtras()
 
 void CalculatorHTML::initBuiltInSpanClasses()
 { MacroRegisterFunctionWithName("CalculatorHTML::initBuiltInSpanClasses");
-  if (this->calculatorTagsRecordedLiterally.size==0)
+  if (this->calculatorTagsRecordedLiterally.size == 0)
   { this->calculatorTagsRecordedLiterally.AddOnTopNoRepetition("answerCalculatorHighlight");
   }
-  if (this->calculatorClassesAnswerFields.size==0)
+  if (this->calculatorClassesAnswerFields.size == 0)
   { this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonSubmit");
     this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonInterpret");
     this->calculatorClassesAnswerFields.AddOnTop("calculatorButtonGiveUp");
@@ -2129,7 +2129,7 @@ void CalculatorHTML::initBuiltInSpanClasses()
     this->calculatorClassesAnswerFields.AddOnTop("calculatorMQButtonPanel");
     this->calculatorClassesAnswerFields.AddOnTop("calculatorAnswerVerification");
   }
-  if (this->calculatorClasses.size==0)
+  if (this->calculatorClasses.size == 0)
   { this->calculatorClasses.AddOnTop("calculator");
     this->calculatorClasses.AddOnTop("calculatorSolution");
     this->calculatorClasses.AddOnTop("calculatorShowToUserOnly");
@@ -2163,7 +2163,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   char currentChar;
   List<SyntacticElementHTML> theElements;
   theElements.SetSize(0);
-  theElements.SetExpectedSize(theReader.str().size()/4);
+  theElements.SetExpectedSize(theReader.str().size() / 4);
   this->splittingChars.AddOnTop('<');
   this->splittingChars.AddOnTop('\"');
   this->splittingChars.AddOnTop('>');
@@ -2172,16 +2172,16 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   this->splittingChars.AddOnTop(' ');
   while (theReader.get(currentChar))
   { if (splittingChars.Contains(currentChar))
-    { if (word!="")
+    { if (word != "")
         theElements.AddOnTop(word);
       std::string charToString;
       charToString.push_back(currentChar);
       theElements.AddOnTop(charToString);
-      word="";
+      word = "";
     } else
       word.push_back(currentChar);
   }
-  if (word!="")
+  if (word != "")
     theElements.AddOnTop(word);
   this->initBuiltInSpanClasses();
   this->eltsStack.SetSize(0);
@@ -3627,8 +3627,9 @@ void TopicElement::GetTopicList
     } else if (MathRoutines::StringBeginsWith(currentLine, "SlidesLatex:", &currentArgument))
       currentElt.sourceSlides.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
     else if (MathRoutines::StringBeginsWith(currentLine, "HomeworkLatex:", &currentArgument))
-      currentElt.sourceHomework.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
-    else if (MathRoutines::StringBeginsWith(currentLine, "SlidesPrintable:", &currentArgument))
+    { currentElt.sourceHomework.AddOnTop("LaTeX: " + MathRoutines::StringTrimWhiteSpace(currentArgument));
+      currentElt.sourceHomeworkIsSolution.AddOnTop(false);
+    } else if (MathRoutines::StringBeginsWith(currentLine, "SlidesPrintable:", &currentArgument))
       currentElt.slidesPrintable = MathRoutines::StringTrimWhiteSpace(currentArgument);
     else if (MathRoutines::StringBeginsWith(currentLine, "HandwrittenSolutions:", &currentArgument))
       currentElt.handwrittenSolution = MathRoutines::StringTrimWhiteSpace(currentArgument);
@@ -4366,10 +4367,16 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     { sourceHomeworkCounter++;
       sourceStreamHomeworkCommon << "file" << sourceHomeworkCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(this->sourceHomework[i], false) << "&";
-      if (this->sourceHomeworkIsSolution[i])
-        sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "=true&";
-      else
-        sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "=false&";
+      if (i < this->sourceHomeworkIsSolution.size)
+      { if (this->sourceHomeworkIsSolution[i])
+          sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "=true&";
+        else
+          sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "=false&";
+      } else
+      { stOutput << "<b>ERROR: </b>this->sourceHomeworkIsSolution is: "
+        << this->sourceHomeworkIsSolution.ToStringCommaDelimited()
+        << " but this->sourceHomework is: " << this->sourceHomework.ToStringCommaDelimited();
+      }
     }
     /////////
     slideFromSourceStreamHandout << sourceStreamSlidesCommon.str();

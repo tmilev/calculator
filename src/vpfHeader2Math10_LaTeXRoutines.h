@@ -57,6 +57,7 @@ class LaTeXcrawler
   bool flagAnswerKey;
   bool flagHomeworkRatherThanSlides;
   bool flagForceSlideRebuild;
+  bool flagSourceOnly;
   bool flagDoChangeDirs;
   bool flagCrawlTexSourcesRecursively;
   static std::string AdjustDisplayTitle(const std::string& input, bool isHomework);

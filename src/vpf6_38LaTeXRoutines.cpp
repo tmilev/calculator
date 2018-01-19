@@ -424,6 +424,7 @@ LaTeXcrawler::LaTeXcrawler()
   this->flagCrawlTexSourcesRecursively = false;
   this->flagAnswerKey = false;
   this->flagHomeworkRatherThanSlides = false;
+  this->flagSourceOnly = true;
   this->ownerCalculator = 0;
   this->recursionDepth = 0;
 }
@@ -647,18 +648,19 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
       *commentsOnFailure << "Failed to extract file names. ";
     return false;
   }
-  if (!this->flagForceSlideRebuild)
-    if (FileOperations::FileExistsVirtual(this->targetPDFFileNameWithPathVirtual, false, false, commentsOnFailure))
-      return FileOperations::LoadFileToStringVirtual
-      (this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, false, false, commentsOnFailure);
+  bool pdfExists = FileOperations::FileExistsVirtual(this->targetPDFFileNameWithPathVirtual, false, false, commentsOnFailure);
+  if (!this->flagForceSlideRebuild && pdfExists && !this->flagSourceOnly)
+    return FileOperations::LoadFileToStringVirtual
+    (this->targetPDFFileNameWithPathVirtual, this->targetPDFbinaryContent, false, false, commentsOnFailure);
   if (!theGlobalVariables.UserDefaultHasAdminRights())
-  { if (commentsOnFailure != 0)
-      *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. "
-      << "Computed file name: <br>"
-      << HtmlRoutines::ConvertStringToHtmlString(this->targetPDFFileNameWithPathVirtual, false)
-      ;
-    return false;
-  }
+    if (!pdfExists || !this->flagSourceOnly)
+    { if (commentsOnFailure != 0)
+        *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. "
+        << "Computed file name: <br>"
+        << HtmlRoutines::ConvertStringToHtmlString(this->targetPDFFileNameWithPathVirtual, false)
+        ;
+      return false;
+    }
   std::stringstream tempStream;
   if (commentsOnFailure == 0)
     commentsOnFailure = &tempStream;
@@ -733,8 +735,9 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
 
     crawlingResult << "\\end{document}";
   }
-  if (this->flagCrawlTexSourcesRecursively)
+  if (this->flagCrawlTexSourcesRecursively || this->flagSourceOnly)
   { this->targetLaTeX = crawlingResult.str();
+    //this->targetLaTeX += "Got to here";
     //if (commentsGeneral!=0)
     //  *commentsGeneral << "<br>Target .tex:<hr>" << HtmlRoutines::ConvertStringToHtmlString(this->targetLaTeX, true);
     return true;
@@ -744,7 +747,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
     if (commentsGeneral != 0)
       *commentsGeneral << "Stored working file: " << this->workingFileNameNoPathTex << "<br>";
   } else if (commentsGeneral != 0)
-    *commentsGeneral << "FAILED to stored file: " << this->workingFileNameNoPathTex << "<br>";
+    *commentsGeneral << "FAILED to store file: " << this->workingFileNameNoPathTex << "<br>";
   theFile.close();
   std::string currentSysCommand = "pdflatex -shell-escape " + this->workingFileNameNoPathTex;
   if (commentsGeneral != 0)

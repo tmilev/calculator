@@ -3579,7 +3579,7 @@ int WebWorker::ProcessSlidesSource()
     theCrawler.flagAnswerKey = false;
   else
     theCrawler.flagAnswerKey = true;
-  theCrawler.flagForceSlideRebuild = true;
+  theCrawler.flagSourceOnly = true;
   theCrawler.flagCrawlTexSourcesRecursively = true;
   if (!theCrawler.BuildOrFetchFromCachePDF(&comments, &comments))
   { this->flagDoAddContentLength = true;
@@ -5782,6 +5782,9 @@ void WebServer::InitializeGlobalVariables()
   this->requestStartsNotNeedingLogin.AddOnTop("problemSolutionNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("selectCourse");
   this->requestStartsNotNeedingLogin.AddOnTop("slidesFromSource");
+  this->requestStartsNotNeedingLogin.AddOnTop("homeworkFromSource");
+  this->requestStartsNotNeedingLogin.AddOnTop("slidesSource");
+  this->requestStartsNotNeedingLogin.AddOnTop("homeworkSource");
 
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");

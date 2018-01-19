@@ -761,18 +761,18 @@ bool WebCrawler::VerifyRecaptcha
   std::stringstream messageToSendStream;
   std::string secret;
   std::stringstream notUsed;
-  if (commentsOnFailure==0)
-    commentsOnFailure=&notUsed;
+  if (commentsOnFailure == 0)
+    commentsOnFailure = &notUsed;
   if (!FileOperations::LoadFileToStringVirtual
       ("certificates/recaptcha-secret.txt", secret, true, true, commentsOnFailure))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "<span style=\"color:red\"><b>"
       << "Failed to load recaptcha secret."
       << " </b></span>";
     return false;
   }
-  std::string recaptchaURLencoded= theGlobalVariables.GetWebInput("recaptchaToken");
-  if (commentsGeneralSensitive!=0)
+  std::string recaptchaURLencoded = theGlobalVariables.GetWebInput("recaptchaToken");
+  if (commentsGeneralSensitive != 0)
     *commentsGeneralSensitive << "Recaptcha: " << recaptchaURLencoded;
   if (recaptchaURLencoded=="")
   { if (commentsOnFailure!=0)

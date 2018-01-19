@@ -424,7 +424,7 @@ LaTeXcrawler::LaTeXcrawler()
   this->flagCrawlTexSourcesRecursively = false;
   this->flagAnswerKey = false;
   this->flagHomeworkRatherThanSlides = false;
-  this->flagSourceOnly = true;
+  this->flagSourceOnly = false;
   this->ownerCalculator = 0;
   this->recursionDepth = 0;
 }
@@ -642,7 +642,8 @@ std::string LaTeXcrawler::AdjustDisplayTitle(const std::string& input, bool isHo
 bool LaTeXcrawler::BuildOrFetchFromCachePDF
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePDF");
-  this->desiredPresentationTitle = this->AdjustDisplayTitle(this->desiredPresentationTitle, this->flagHomeworkRatherThanSlides);
+  this->desiredPresentationTitle = this->AdjustDisplayTitle
+  (this->desiredPresentationTitle, this->flagHomeworkRatherThanSlides);
   if (!this->ExtractPresentationFileNames(commentsOnFailure, commentsGeneral))
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "Failed to extract file names. ";

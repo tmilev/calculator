@@ -2439,7 +2439,7 @@ int WebWorker::ProcessFile()
   theHeader << "HTTP/1.0 200 OK\r\n"
   << this->GetMIMEtypeFromFileExtension(fileExtension)
   << "Access-Control-Allow-Origin: *\r\n";
-  for (int i=0; i<this->parent->addressStartsSentWithCacheMaxAge.size; i++)
+  for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i++)
     if (MathRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i]))
     { theHeader << "Cache-Control: max-age=129600000, public\r\n";
       withCacheHeader=true;
@@ -2582,7 +2582,7 @@ void WebWorker::SendAllAndWrapUp()
 WebWorker::~WebWorker()
 { //Workers are not allowed to release resources in the destructor:
   //a Worker's destructor is called when expanding List<WebWorker>.
-  this->flagDeallocated=true;
+  this->flagDeallocated = true;
 }
 
 std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExtension)
@@ -3182,7 +3182,7 @@ int WebWorker::ProcessCalculator()
 
   stOutput << "\n\n<script language=\"javascript\">\n"
   << "  var theAutocompleteDictionary = [\n  ";
-  for (int i = 0; i<theParser.autoCompleteKeyWords.size; i++)
+  for (int i = 0; i < theParser.autoCompleteKeyWords.size; i++)
     if (theParser.autoCompleteKeyWords[i].size() > 2)
     { stOutput << "\"" << theParser.autoCompleteKeyWords[i] << "\"";
       if (i != theParser.autoCompleteKeyWords.size - 1)

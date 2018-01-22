@@ -89,4 +89,12 @@ public:
    bool truncate, bool openAsBinary, std::stringstream* commentsOnFailure);
   static bool OpenFileVirtualReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary, bool accessSensitiveFolders=false);
 };
+
+class StateMaintainerCurrentFolder
+{
+public:
+  std::string currentFolderPhysicalAbsolute;
+  StateMaintainerCurrentFolder();
+  ~StateMaintainerCurrentFolder();
+};
 #endif

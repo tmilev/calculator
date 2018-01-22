@@ -4201,7 +4201,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     topicListJS << "idButton: '" << currentE.idDeadlineButton << "', ";
     //////////////////////////////////////////////////
     topicListJS << "deadlines: {";
-    bool found=false;
+    bool found = false;
     for (int j = 0; j < currentE.deadlinesPerSectioN.size; j++)
     { if (currentE.deadlinesPerSectioN[j] == "")
         continue;

@@ -1063,6 +1063,14 @@ bool FileOperations::OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, c
   return theFile.is_open();
 }
 
+StateMaintainerCurrentFolder::StateMaintainerCurrentFolder()
+{ this->currentFolderPhysicalAbsolute = FileOperations::GetCurrentFolder();
+}
+
+StateMaintainerCurrentFolder::~StateMaintainerCurrentFolder()
+{ theGlobalVariables.ChDir(this->currentFolderPhysicalAbsolute);
+}
+
 bool XML::ReadFromFile(std::fstream& inputFile)
 { MacroRegisterFunctionWithName("XML::ReadFromFile");
   inputFile.seekg(0, std::fstream::end);

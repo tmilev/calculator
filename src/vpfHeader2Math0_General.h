@@ -40,7 +40,9 @@ class ChevalleyGenerator
 public:
   SemisimpleLieAlgebra* owner;
   int theGeneratorIndex;
-  ChevalleyGenerator(): owner(0), theGeneratorIndex(-1){}
+  ChevalleyGenerator(): owner(0), theGeneratorIndex(- 1)
+  {
+  }
   friend std::ostream& operator << (std::ostream& output, const ChevalleyGenerator& theGen)
   { output << theGen.ToString();
     return output;
@@ -56,26 +58,26 @@ public:
   { return this->HashFunction(*this);
   }
   void MakeGenerator(SemisimpleLieAlgebra& inputOwner, int inputGeneratorIndex)
-  { this->owner=&inputOwner;
-    this->theGeneratorIndex=inputGeneratorIndex;
+  { this->owner = &inputOwner;
+    this->theGeneratorIndex = inputGeneratorIndex;
   }
   void operator=(const ChevalleyGenerator& other)
-  { this->owner=other.owner;
-    this->theGeneratorIndex=other.theGeneratorIndex;
+  { this->owner = other.owner;
+    this->theGeneratorIndex = other.theGeneratorIndex;
   }
   bool operator>(const ChevalleyGenerator& other)const;
-  std::string ToString(FormatExpressions* inputFormat=0)const;
+  std::string ToString(FormatExpressions* inputFormat = 0)const;
   void CheckConsistencyWithOther(const ChevalleyGenerator& other)const;
   bool operator==(const ChevalleyGenerator& other)const
   { this->CheckConsistencyWithOther(other);
-    return this->theGeneratorIndex==other.theGeneratorIndex;
+    return this->theGeneratorIndex == other.theGeneratorIndex;
   }
 };
 
 template <class coefficient, unsigned int inputHashFunction(const coefficient&)= coefficient::HashFunction>
 class MonomialTensor
 {
-  friend std::ostream& operator <<(std::ostream& output, const MonomialTensor<coefficient, inputHashFunction>& theMon)
+  friend std::ostream& operator << (std::ostream& output, const MonomialTensor<coefficient, inputHashFunction>& theMon)
   { return output << theMon.ToString();
   }
 private:
@@ -83,16 +85,18 @@ public:
   List<int> generatorsIndices;
   List<coefficient> Powers;
   bool flagDeallocated;
-  std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToString(FormatExpressions* theFormat = 0)const;
   bool IsEqualToOne()const
-  { return this->generatorsIndices.size==0;
+  { return this->generatorsIndices.size == 0;
   }
-  bool IsMonEqualToZero()const{return false;}
+  bool IsMonEqualToZero()const
+  { return false;
+  }
   void operator=(List<int>& other)
   { this->generatorsIndices.Reserve(other.size);
     this->Powers.Reserve(other.size);
     this->MakeConst();
-    for (int i=0; i<other.size; i++)
+    for (int i = 0; i < other.size; i++)
       this->MultiplyByGeneratorPowerOnTheRight(other[i], 1);
   }
   bool CheckConsistency()
@@ -101,85 +105,85 @@ public:
     return true;
   }
   void operator=(const MonomialTensor<coefficient, inputHashFunction>& other)
-  { this->generatorsIndices=(other.generatorsIndices);
-    this->Powers=other.Powers;
+  { this->generatorsIndices = other.generatorsIndices;
+    this->Powers = other.Powers;
   }
   MonomialTensor()
-  { this->flagDeallocated=false;
+  { this->flagDeallocated = false;
   }
   ~MonomialTensor()
-  { this->flagDeallocated =true;
+  { this->flagDeallocated = true;
   }
   int GetMinNumVars()
-  { int result=0;
-    for (int i=0; i<this->Powers.size; i++)
-      result=MathRoutines::Maximum(result, this->Powers[i].GetMinNumVars());
+  { int result = 0;
+    for (int i = 0; i < this->Powers.size; i++)
+      result = MathRoutines::Maximum(result, this->Powers[i].GetMinNumVars());
     return result;
   }
   template<class otherType>
   void operator=(const MonomialTensor<otherType>& other)
-  { this->generatorsIndices=(other.generatorsIndices);
+  { this->generatorsIndices = other.generatorsIndices;
     this->Powers.SetSize(other.Powers.size);
-    for (int i=0; i<other.Powers.size; i++)
-      this->Powers[i]=other.Powers[i];
+    for (int i = 0; i < other.Powers.size; i++)
+      this->Powers[i] = other.Powers[i];
   }
   bool SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex);
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const coefficient& thePower);
   void MultiplyByGeneratorPowerOnTheLeft(int theGeneratorIndexStandsToTheLeft, const coefficient& thePower);
   unsigned int HashFunction()const
-  { int top=MathRoutines::Minimum(SomeRandomPrimesSize, this->generatorsIndices.size);
-    unsigned int result=0;
-    for (int i=0; i<top; i++)
-      result+=SomeRandomPrimes[i]*this->generatorsIndices[i] + SomeRandomPrimes[top-1-i]* inputHashFunction(this->Powers[i]);
+  { int top = MathRoutines::Minimum(SomeRandomPrimesSize, this->generatorsIndices.size);
+    unsigned int result = 0;
+    for (int i = 0; i < top; i++)
+      result += SomeRandomPrimes[i] * this->generatorsIndices[i] + SomeRandomPrimes[top - 1 - i] * inputHashFunction(this->Powers[i]);
     return result;
   }
   static inline unsigned int HashFunction(const MonomialTensor<coefficient, inputHashFunction>& input)
   { return input.HashFunction();
   }
   void MakeConst()
-  { this->generatorsIndices.size=0;
-    this->Powers.size=0;
+  { this->generatorsIndices.size = 0;
+    this->Powers.size = 0;
   }
   bool operator>(const MonomialTensor<coefficient, inputHashFunction>& other)const
-  { if (other.generatorsIndices.size>this->generatorsIndices.size)
+  { if (other.generatorsIndices.size > this->generatorsIndices.size)
       return false;
-    if (other.generatorsIndices.size< this->generatorsIndices.size)
+    if (other.generatorsIndices.size < this->generatorsIndices.size)
       return true;
-    for (int i=0; i<this->generatorsIndices.size; i++)
-    { if (other.generatorsIndices[i]>this->generatorsIndices[i])
+    for (int i = 0; i < this->generatorsIndices.size; i++)
+    { if (other.generatorsIndices[i] > this->generatorsIndices[i])
         return false;
-      if (other.generatorsIndices[i]<this->generatorsIndices[i])
+      if (other.generatorsIndices[i] < this->generatorsIndices[i])
         return true;
-      if (other.Powers[i]>this->Powers[i])
+      if (other.Powers[i] > this->Powers[i])
         return false;
-      if (this->Powers[i]>other.Powers[i])
+      if (this->Powers[i] > other.Powers[i])
         return true;
     }
     return false;
   }
   bool operator==(const MonomialTensor<coefficient, inputHashFunction>& other)const
-  { return this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
+  { return this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
   }
   bool operator<(const MonomialTensor<coefficient, inputHashFunction>& right) const
   { coefficient leftrank = 0;
-    for(int i=0; i<this->Powers.size; i++)
+    for (int i = 0; i < this->Powers.size; i++)
       leftrank += this->Powers[i];
     coefficient rightrank = 0;
-    for(int i=0; i<right.Powers.size; i++)
+    for (int i = 0; i < right.Powers.size; i++)
       rightrank += right.Powers[i];
-    if(leftrank < rightrank)
+    if (leftrank < rightrank)
       return true;
-    if(rightrank < leftrank)
+    if (rightrank < leftrank)
       return false;
     // this provably does not crash for coefficient = int
-    for(int i=0; i<this->generatorsIndices.size; i++)
-    { if(this->generatorsIndices[i] < right.generatorsIndices[i])
+    for (int i = 0; i < this->generatorsIndices.size; i++)
+    { if (this->generatorsIndices[i] < right.generatorsIndices[i])
         return false;
-      if(right.generatorsIndices[i] < this->generatorsIndices[i])
+      if (right.generatorsIndices[i] < this->generatorsIndices[i])
         return true;
-      if(this->Powers[i] < right.Powers[i])
+      if (this->Powers[i] < right.Powers[i])
         return false;
-      if(right.Powers[i] < this->Powers[i])
+      if (right.Powers[i] < this->Powers[i])
         return true;
     }
     return false;
@@ -187,20 +191,20 @@ public:
   inline void operator*=(const MonomialTensor<coefficient, inputHashFunction>& standsOnTheRight)
   { if (standsOnTheRight.generatorsIndices.size==0)
       return;
-    if (this==&standsOnTheRight)
+    if (this == &standsOnTheRight)
     { MonomialTensor<coefficient, inputHashFunction> tempMon;
-      tempMon=standsOnTheRight;
-      (*this)*=(tempMon);
+      tempMon = standsOnTheRight;
+      (*this) *= (tempMon);
       return;
     }
-    this->generatorsIndices.SetExpectedSize(standsOnTheRight.generatorsIndices.size+this->generatorsIndices.size);
-    this->Powers.SetExpectedSize(standsOnTheRight.generatorsIndices.size+this->generatorsIndices.size);
-    int firstIndex=standsOnTheRight.generatorsIndices[0];
-    int i=0;
-    if (this->generatorsIndices.size>0)
-      if (firstIndex==(*this->generatorsIndices.LastObject()))
-      { *this->Powers.LastObject()+=standsOnTheRight.Powers[0];
-        i=1;
+    this->generatorsIndices.SetExpectedSize(standsOnTheRight.generatorsIndices.size + this->generatorsIndices.size);
+    this->Powers.SetExpectedSize(standsOnTheRight.generatorsIndices.size + this->generatorsIndices.size);
+    int firstIndex = standsOnTheRight.generatorsIndices[0];
+    int i = 0;
+    if (this->generatorsIndices.size > 0)
+      if (firstIndex == (*this->generatorsIndices.LastObject()))
+      { *this->Powers.LastObject() += standsOnTheRight.Powers[0];
+        i = 1;
       }
     for (; i<standsOnTheRight.generatorsIndices.size; i++)
     { this->Powers.AddOnTop(standsOnTheRight.Powers[i]);
@@ -209,23 +213,25 @@ public:
   }
 };
 
-template<typename theType, unsigned int hashFunction(const theType&)=theType::HashFunction>
+template<typename theType, unsigned int hashFunction(const theType&) = theType::HashFunction>
 class MonomialWrapper
 {
   public:
   theType theObject;
-  MonomialWrapper(){}
-  MonomialWrapper(const theType& input)
-  { this->theObject=input;
+  MonomialWrapper()
+  {
   }
-  std::string ToString(FormatExpressions* theFormat=0)const
+  MonomialWrapper(const theType& input)
+  { this->theObject = input;
+  }
+  std::string ToString(FormatExpressions* theFormat = 0)const
   { (void) theFormat;
     std::stringstream out;
     out << "(" << this->theObject << ")";
     return out.str();
   }
   bool operator>(const MonomialWrapper& other)const
-  { return this->theObject>other.theObject;
+  { return this->theObject > other.theObject;
   }
   friend std::ostream& operator << (std::ostream& output, const MonomialWrapper& theMon)
   { output << theMon.theObject;
@@ -238,9 +244,8 @@ class MonomialWrapper
   { return false;
   }
   bool operator==(const MonomialWrapper& other)const
-  { return this->theObject==other.theObject;
+  { return this->theObject == other.theObject;
   }
-
 };
 
 class MonomialP
@@ -266,32 +271,34 @@ private:
   List<Rational> monBody;
 public:
   MonomialP(int letterIndex)
-  { this->monBody.initFillInObject(letterIndex+1, 0);
-    this->monBody[letterIndex]=1;
+  { this->monBody.initFillInObject(letterIndex + 1, 0);
+    this->monBody[letterIndex] = 1;
   }
   MonomialP(int letterIndex, int power)
-  { this->monBody.initFillInObject(letterIndex+1, 0);
-    this->monBody[letterIndex]=power;
+  { this->monBody.initFillInObject(letterIndex + 1, 0);
+    this->monBody[letterIndex] = power;
   }
   MonomialP(const MonomialP& other)
-  { *this=other;
+  { *this = other;
   }
-  MonomialP(){}
+  MonomialP()
+  {
+  }
   friend std::ostream& operator << (std::ostream& output, const MonomialP& theMon)
   { output << theMon.ToString();
     return output;
   }
   Rational& operator[](int i)
-  { if (i<0)
+  { if (i < 0)
       crash << "This is a programming error: requested exponent of monomial variable with index " << i << " which is negative. " << crash;
-    if (i>=this->monBody.size)
-      this->SetNumVariablesSubDeletedVarsByOne(i+1);
+    if (i >= this->monBody.size)
+      this->SetNumVariablesSubDeletedVarsByOne(i + 1);
     return this->monBody[i];
   }
   Rational operator()(int i)const
-  { if (i<0)
+  { if (i < 0)
       crash << "This is a programming error: requested exponent of monomial variable " << " with index " << i << " which is negative. " << crash;
-    if (i>=this->monBody.size)
+    if (i >= this->monBody.size)
       return 0;
     return this->monBody[i];
   }
@@ -302,7 +309,7 @@ public:
   { return this->monBody.HashFunction();
   }
   bool HasPositiveOrZeroExponents()const
-  { for (int i=0; i<this->monBody.size; i++)
+  { for (int i = 0; i < this->monBody.size; i++)
       if (this->monBody[i].IsNegative())
         return false;
     return true;
@@ -315,28 +322,28 @@ public:
   //for equal monomials represented by different monBodies.
   // Two such different representation may differ by extra entries filled in with zeroes.
   static inline unsigned int HashFunction(const MonomialP& input)
-  { unsigned int result=0;
-    int numCycles=MathRoutines::Minimum(input.monBody.size, SomeRandomPrimesSize);
-    for (int i=0; i<numCycles; i++)
-      result+=input.monBody[i].HashFunction();
+  { unsigned int result = 0;
+    int numCycles = MathRoutines::Minimum(input.monBody.size, SomeRandomPrimesSize);
+    for (int i = 0; i < numCycles; i++)
+      result += input.monBody[i].HashFunction();
     return result;
   }
-  std::string ToString(FormatExpressions* PolyFormat=0)const;
-  void MakeOne(int ExpectedNumVars=0)
+  std::string ToString(FormatExpressions* PolyFormat = 0)const;
+  void MakeOne(int ExpectedNumVars = 0)
   { this->monBody.initFillInObject(ExpectedNumVars, (Rational) 0);
   }
   bool operator>(const MonomialP& other)const;
   bool IsDivisibleBy(const MonomialP& other)const;
   int TotalDegreeInt()const
-  { int result=-1;
+  { int result = - 1;
     if (!this->TotalDegree().IsSmallInteger(&result))
       crash << "This is a programming error: total degree of monomial must be a small integer to call this function. " << crash;
     return result;
   }
   Rational TotalDegree()const
-  { Rational result=0;
-    for (int i=0; i<this->monBody.size; i++)
-      result+=this->monBody[i];
+  { Rational result = 0;
+    for (int i = 0; i < this->monBody.size; i++)
+      result += this->monBody[i];
     return result;
   }
   inline void MultiplyBy(const MonomialP& other)
@@ -348,30 +355,30 @@ public:
   bool IsLinear()const
   { return this->IsConstant() || this->IsLinearNoConstantTerm();
   }
-  bool IsLinearNoConstantTerm(int* whichLetter=0)const
+  bool IsLinearNoConstantTerm(int* whichLetter = 0)const
   { return this->IsOneLetterFirstDegree(whichLetter);
   }
-  bool IsOneLetterFirstDegree(int* whichLetter=0)const
+  bool IsOneLetterFirstDegree(int* whichLetter = 0)const
   { Rational whichDegree;
     if (!this->IsOneLetterNthDegree(whichLetter, &whichDegree))
       return false;
-    return whichDegree==1;
+    return whichDegree == 1;
   }
-  bool IsOneLetterNthDegree(int* whichLetter=0, Rational* whichDegree=0)const
+  bool IsOneLetterNthDegree(int* whichLetter = 0, Rational* whichDegree = 0)const
   { int tempI1;
-    if (whichLetter==0)
-      whichLetter=&tempI1;
-    *whichLetter=-1;
-    for (int i=0; i<this->monBody.size; i++)
-      if (this->monBody[i]!=0)
-      { if (whichDegree!=0)
-          *whichDegree=this->monBody[i];
-        if ((*whichLetter)==-1)
-          *whichLetter=i;
+    if (whichLetter == 0)
+      whichLetter = &tempI1;
+    *whichLetter = - 1;
+    for (int i = 0; i < this->monBody.size; i++)
+      if (this->monBody[i] != 0)
+      { if (whichDegree != 0)
+          *whichDegree = this->monBody[i];
+        if ((*whichLetter) == - 1)
+          *whichLetter = i;
         else
           return false;
       }
-    return (*whichLetter)!=-1;
+    return (*whichLetter) != - 1;
   }
   bool CheckConsistency()const
   { return true;

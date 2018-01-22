@@ -642,6 +642,7 @@ std::string LaTeXcrawler::AdjustDisplayTitle(const std::string& input, bool isHo
 bool LaTeXcrawler::BuildOrFetchFromCachePDF
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("LaTeXcrawler::BuildOrFetchFromCachePDF");
+  StateMaintainerCurrentFolder preserveCurrentFolder;
   this->desiredPresentationTitle = this->AdjustDisplayTitle
   (this->desiredPresentationTitle, this->flagHomeworkRatherThanSlides);
   if (!this->ExtractPresentationFileNames(commentsOnFailure, commentsGeneral))

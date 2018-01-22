@@ -5441,7 +5441,8 @@ int WebWorker::Run()
   int result = 0;
   int numReceivesThisConnection = 0;
   while (true)
-  { if (!this->ReceiveAll())
+  { StateMaintainerCurrentFolder preserveCurrentFolder;
+    if (!this->ReceiveAll())
     { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
       stOutput << "<html>"
       << "<head>"

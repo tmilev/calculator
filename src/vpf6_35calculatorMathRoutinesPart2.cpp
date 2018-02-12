@@ -1842,16 +1842,16 @@ class QRFactorizationComputation{
 bool CalculatorFunctionsGeneral::innerGramSchmidtVerbose(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGramSchmidtVerbose");
   Matrix<AlgebraicNumber> theMatAlg;
-  bool matAlgWorks=false;
+  bool matAlgWorks = false;
   if (input.IsMatrixGivenType<AlgebraicNumber>(0, 0, &theMatAlg))
-    matAlgWorks=true;
+    matAlgWorks = true;
   if (!matAlgWorks)
-    if (theCommands.GetMatriXFromArguments(input, theMatAlg, 0, -1, 0))
-      matAlgWorks=true;
+    if (theCommands.GetMatriXFromArguments(input, theMatAlg, 0, - 1, 0))
+      matAlgWorks = true;
   if (matAlgWorks)
-  { if (theMatAlg.NumRows!=theMatAlg.NumCols || theMatAlg.NumCols<1)
+  { if (theMatAlg.NumRows != theMatAlg.NumCols || theMatAlg.NumCols < 1)
       return output.MakeError("The matrix is not square", theCommands, true);
-    if (theMatAlg.GetDeterminant()==0)
+    if (theMatAlg.GetDeterminant() == 0)
       return output.MakeError("Matrix determinant is zero.", theCommands, true);
     QRFactorizationComputation theComputation;
     theMatAlg.Invert();

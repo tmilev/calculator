@@ -131,5 +131,6 @@ DISTFILES += \
     ../html-common/database-routines.js \
     ../html-common/styleCalculator.css \
     ../html-common/cookie-functions.js \
-    ../html-common/mathjax-calculator-setup.js
+    ../html-common/mathjax-calculator-setup.js \
+    ../html-common/forgot-login.js
 

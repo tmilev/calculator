@@ -1375,23 +1375,14 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
   for (int i = 0; i < this->cookies.size; i++)
     if (!HtmlRoutines::ChopCGIStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments))
       result = false;
-  bool loginInfoAlreadyPresent = false;
-  if (theGlobalVariables.webArguments.Contains("email") ||
-      theGlobalVariables.webArguments.Contains("username") ||
-      theGlobalVariables.webArguments.Contains("googleToken"))
-    loginInfoAlreadyPresent = true;
-
   for (int i = 0; i < newlyFoundArgs.size(); i++)
   { if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i]))
-      continue; //<-if a key is already given cookie entries are ignored.
-    if (loginInfoAlreadyPresent)
-      if (newlyFoundArgs.theKeys[i] == "username" ||
-          newlyFoundArgs.theKeys[i] == "email")
-        continue; //<-username is ignored if email has beed submitted through the web address.
+      if (theGlobalVariables.webArguments.GetValueCreate(newlyFoundArgs.theKeys[i]) != "")
+        continue; //<-if a key is already given cookie entries are ignored.
     //argumentProcessingFailureComments << "Found new cookie key: " << newlyFoundArgs.theKeys[i] << "<br>";
     std::string trimmed = newlyFoundArgs.theValues[i];
     if (trimmed.size() > 0)
-      if (trimmed[trimmed.size()-1] == ';')
+      if (trimmed[trimmed.size() - 1] == ';')
         trimmed = trimmed.substr(0, trimmed.size() - 1);
     //<-except the last cookie, cookies have extra semicolumn at the end, trimming.
     bool isGood = true;
@@ -1407,7 +1398,7 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
           trimmed == "accounts" ||
           trimmed == "calculator" ||
           trimmed == "scoredQuiz")
-        isGood=true;
+        isGood = true;
     }
     if (isGood)
       theGlobalVariables.webArguments.SetKeyValue(newlyFoundArgs.theKeys[i], trimmed);
@@ -1449,9 +1440,11 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   theGlobalVariables.flagLoggedIn = false;
   MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
-
   theUser.username = HtmlRoutines::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("username"), true);
+  //stOutput << "<hr>DEBUG: debug stuff: "
+  //<< HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
+  //<< "<hr><hr><hr>";
   if (theUser.username.value.find('%') != std::string::npos)
     argumentProcessingFailureComments << "<b>Unusual behavior: % sign in username.</b>";
   theUser.enteredAuthenticationToken = HtmlRoutines::ConvertURLStringToNormal
@@ -1484,6 +1477,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   //<-Incoming pluses must be re-coded as spaces (%20).
 
+  //stOutput << "DEBUG: Got to here -1, login: " << theGlobalVariables.flagLoggedIn;
   theUser.flagEnteredPassword = (theUser.enteredPassword != "");
   if (theUser.flagEnteredPassword)
   { theUser.flagMustLogin = true;
@@ -1523,6 +1517,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     return false;
   bool doAttemptGoogleTokenLogin = false;
+  //stOutput << "<br>DEBUG: Got to here 0, login: " << theGlobalVariables.flagLoggedIn;
   if (theUser.enteredGoogleToken != "")
   { if (theUser.enteredActivationToken == "" &&
         theUser.enteredPassword == "" &&
@@ -1533,10 +1528,13 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     if (theUser.username.value == "")
       doAttemptGoogleTokenLogin = true;
   } else if (theUser.username.value == "")
+  { //stOutput << "<br>DEBUG: Got to here ABD, login: " << theGlobalVariables.flagLoggedIn;
     return !theUser.flagMustLogin;
+  }
   /////////////////
   //doAttemptGoogleTokenLogin=false;
   ////////////////////////////
+  //stOutput << "<br>DEBUG: Got to here xx, login: " << theGlobalVariables.flagLoggedIn;
   bool changingPass = theGlobalVariables.userCalculatorRequestType == "changePassword" ||
   theGlobalVariables.userCalculatorRequestType == "activateAccount";
   if (changingPass)
@@ -1552,6 +1550,8 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theGlobalVariables.flagLoggedIn =
     DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (theUser, &argumentProcessingFailureComments);
+  //stOutput << "<br>DEBUG: Got to here, login: " << theGlobalVariables.flagLoggedIn;
+
   theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("username",
   theUser.username.GetDataNoQuotes()
   //<-User name must be stored in URL-encoded fashion, NO PLUSES.
@@ -3021,9 +3021,14 @@ bool WebWorker::DoSetEmail
   if (commentsGeneralNonSensitive != 0)
     *commentsGeneralNonSensitive << "<br><b>Sending email... </b>";
   theEmail.SendEmailWithMailGun(commentsOnFailure, commentsGeneralSensitive, theGlobalVariables.UserDefaultHasAdminRights());
-  if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneralSensitive != 0)
-    *commentsGeneralSensitive << "<hr>Content of sent email (admin view only):<br>"
-    << HtmlRoutines::ConvertStringToHtmlString(theEmail.emailContent, true);
+  if (commentsGeneralSensitive != 0)
+  { if (theGlobalVariables.UserDefaultHasAdminRights())
+      *commentsGeneralSensitive << "<hr>Content of sent email (admin view only):<br>"
+      << HtmlRoutines::ConvertStringToHtmlString(theEmail.emailContent, true);
+  } else
+  { if (commentsGeneralNonSensitive != 0)
+      *commentsGeneralNonSensitive << "Email content not displayed. ";
+  }
   userCopy.clearAuthenticationTokenAndPassword();
   userCopy.actualActivationToken = "";
   inputOutputUser = userCopy;
@@ -3322,8 +3327,10 @@ int WebWorker::ProcessChangePasswordPage()
 int WebWorker::ProcessForgotLoginPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessForgotLoginPage");
   this->SetHeaderOKNoContentLength();
-  DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
-  theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
+    theGlobalVariables.userDefault.clearAuthenticationTokenAndPassword();
+  }
   stOutput << this->GetForgotLoginPage();
   return 0;
 }
@@ -3713,37 +3720,7 @@ std::string WebWorker::GetForgotLoginPage()
   << HtmlRoutines::GetJavascriptHideHtmlWithTags()
   << HtmlRoutines::GetCSSLinkCalculator();
   out << HtmlInterpretation::GetJavascriptCaptcha();
-  out << "<script language=\"javascript\">\n";
-  out
-  << "function resetRecaptchaOnLoad()\n"
-  << "{ grecaptcha.reset();\n"
-  << "}\n";
-  out << "function submitForgotLogin()\n";
-  out << "{";
-  out
-  << "  var theInput=\"request=forgotLogin&\";\n"
-  << "  theInput+=\"email=\" +encodeURIComponent(document.getElementById('email').value) + \"&\";\n"
-  << "  if (grecaptcha===undefined || grecaptcha===null)\n"
-  << "  { document.getElementById('forgotLoginResult').innerHTML="
-  << "\"<span style='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
-  << "   return false;\n"
-  << "  }\n"
-  << "  if (document.getElementById('email').value===\"\")\n"
-  << "  { document.getElementById('forgotLoginResult').innerHTML="
-  << "\"<span style='color:red'><b>Please enter an email address. </b></span>\";\n"
-  << "   return false;\n"
-  << "  }\n"
-  << "  var theToken=grecaptcha.getResponse();\n"
-  << "  if (theToken==='' || theToken===null)"
-  << "  { document.getElementById('forgotLoginResult').innerHTML="
-  << "\"<span style='color:red'><b>Please don't forget to solve the captcha. </b></span>\";\n"
-  << "   return false;\n"
-  << "  }\n"
-  << "  theInput+=\"recaptchaToken=\" +encodeURIComponent(theToken) + \"&\";\n"
-  << "  submitStringCalculatorArgument(theInput, 'forgotLoginResult', resetRecaptchaOnLoad, 'forgotLoginResultReport');\n"
-  << "}\n";
-  out << "</script>";
-
+  out << HtmlRoutines::GetJavascriptForgotLogin();
   out << "<body>\n";
   out << "<calculatorNavigation>"
   << theGlobalVariables.ToStringNavigation()
@@ -4863,7 +4840,7 @@ void WebServer::initDates()
   struct stat theFileStat;
   if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0)
     return;
-  this->timeLastExecutableModification=theFileStat.st_ctime;
+  this->timeLastExecutableModification = theFileStat.st_ctime;
 }
 
 void WebServer::ReleaseWorkerSideResources()
@@ -5012,7 +4989,7 @@ void WebServer::RecycleChildrenIfPossible()
             if (theGlobalVariables.GetElapsedSeconds() -
                 this->theWorkers[i].timeOfLastPingServerSideOnly >
                 theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead)
-              presumedDead=true;
+              presumedDead = true;
         if (presumedDead)
         { this->TerminateChildSystemCall(i);
           std::stringstream pingTimeoutStream;

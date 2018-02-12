@@ -620,28 +620,28 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   this->serverToConnectTo  = "www.googleapis.com";
   this->portOrService      = "https";
   this->addressToConnectTo = "https://www.googleapis.com/oauth2/v3/certs";
-  this->flagDoUseGET=true;
-  if (commentsGeneral!=0)
+  this->flagDoUseGET = true;
+  if (commentsGeneral != 0)
     *commentsGeneral << "<hr>"
     << "Updating public keys <hr>";
   this->FetchWebPage(commentsOnFailure, commentsGeneral);
-  if (this->bodyReceiveD=="")
-  { if (commentsOnFailure!=0)
+  if (this->bodyReceiveD == "")
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "Could not fetch google certificate list. ";
     return;
   }
-  std::string googleKeysFileName="certificates-public/google.txt";
-  std::string googleKeysDebugFileName="certificates-public/debug-google.txt";
+  std::string googleKeysFileName = "certificates-public/google.txt";
+  std::string googleKeysDebugFileName = "certificates-public/debug-google.txt";
   std::fstream googleKeysFile, googleKeysDebugFile;
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual
        (googleKeysFile, googleKeysFileName, false, true, false))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "<br>Failed to open: " << googleKeysFileName;
     return;
   }
   FileOperations::OpenFileCreateIfNotPresentVirtual
   (googleKeysDebugFile, googleKeysDebugFileName, false, true, false);
-  if (commentsGeneral!=0)
+  if (commentsGeneral != 0)
     *commentsGeneral << "<br>Updated file: " << googleKeysFileName;
   googleKeysFile << this->bodyReceiveD;
   googleKeysDebugFile
@@ -844,8 +844,8 @@ int WebWorker::ProcessSignUP()
 #ifdef MACRO_use_MySQL
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   UserCalculator theUser;
-  theUser.username=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
-  theUser.email=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
+  theUser.username = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
+  theUser.email = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
   DatabaseRoutines theRoutines;
   std::stringstream out;
   out << "<br><b> "
@@ -857,7 +857,7 @@ int WebWorker::ProcessSignUP()
   { stOutput << out.str();
     return 0;
   }
-  if (theUser.username=="")
+  if (theUser.username == "")
   { stOutput << "<span style=\"color:red\"><b>"
     << "Empty username not allowed. "
     << "</b></span>";
@@ -887,9 +887,9 @@ int WebWorker::ProcessSignUP()
   { stOutput << out.str();
     return 0;
   }
-  std::stringstream* adminOutputStream=0;
+  std::stringstream* adminOutputStream = 0;
   if (theGlobalVariables.UserDefaultHasAdminRights())
-    adminOutputStream=&out;
+    adminOutputStream = &out;
   this->DoSetEmail(theRoutines, theUser, &out, &out, adminOutputStream);
   stOutput << out.str();
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
@@ -905,12 +905,13 @@ int WebWorker::ProcessForgotLogin()
   //double startTime=theGlobalVariables.GetElapsedSeconds();
   this->SetHeaderOKNoContentLength();
 #ifdef MACRO_use_MySQL
-  DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   UserCalculator theUser;
-  theUser.email=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
+  theUser.email = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
   DatabaseRoutines theRoutines;
   WebCrawler theCrawler;
-  std::stringstream out;
   out << "<br><b> "
   << "Please excuse our verbose technical messages. </b>"
   << "<br><b>We are still testing our system; "
@@ -939,9 +940,9 @@ int WebWorker::ProcessForgotLogin()
     << "</b></span>";
     return 0;
   }
-  stOutput << "<span style=\"color:green\"><b>"
+  stOutput << "<b style=\"color:green\">"
   << "Your email is on record. "
-  << "</b></span>";
+  << "</b>";
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     this->DoSetEmail(theRoutines, theUser, &out, &out, 0);
   else

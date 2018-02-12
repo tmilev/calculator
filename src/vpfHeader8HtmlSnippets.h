@@ -86,6 +86,8 @@ public:
   static const std::string& GetJavascriptMathQuillMatrixSupporTWithTags();
   static const std::string GetJavascriptMathQuillMatrixSupportLink();
   static const std::string& GetJavascriptProblemLinkSWithTags();
+
+  static const std::string GetJavascriptForgotLogin();
   static const std::string GetJavascriptProblemLinksLink();
   static const std::string& GetJavascriptDatabaseRoutineSWithTags();
   static const std::string GetJavascriptDatabaseRoutinesLink();

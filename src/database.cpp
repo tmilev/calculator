@@ -207,7 +207,7 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
   DatabaseRoutines theRoutines;
   UserCalculator theUser;
   theUser.UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  theUser.currentTable=DatabaseStrings::tableUsers;
+  theUser.currentTable = DatabaseStrings::tableUsers;
   //stOutput << "<hr>DEBUG: logout: resetting token ... ";
   theUser.ResetAuthenticationToken(theRoutines, 0);
 //  stOutput << "token reset!... <hr>";
@@ -749,7 +749,7 @@ std::string UserCalculator::ToString()
   ;
 
   Rational weightRat;
-  for (int i=0; i<this->theProblemData.size(); i++)
+  for (int i = 0; i < this->theProblemData.size(); i++)
   { out << "<br>Problem: " << this->theProblemData.theKeys[i] << "; random seed: "
     << this->theProblemData.theValues[i].randomSeed << "; numSubmissions: "
     << this->theProblemData.theValues[i].totalNumSubmissions
@@ -771,19 +771,19 @@ std::string UserCalculator::ToString()
 }
 
 UserCalculator::UserCalculator()
-{ this->flagNewAuthenticationTokenComputedUserNeedsIt=false;
-  this->approximateHoursSinceLastTokenWasIssued=2;
+{ this->flagNewAuthenticationTokenComputedUserNeedsIt = false;
+  this->approximateHoursSinceLastTokenWasIssued = 2;
 }
 
 UserCalculator::~UserCalculator()
-{ for (unsigned i=0; i<this->enteredPassword.size(); i++)
-    this->enteredPassword[i]=' ';
-  for (unsigned i=0; i<this->usernamePlusPassWord.size(); i++)
-    this->usernamePlusPassWord[i]=' ';
-  for (unsigned i=0; i<this->enteredShaonedSaltedPassword.size(); i++)
-    this->enteredShaonedSaltedPassword[i]=' ';
-  for (unsigned i=0; i<this->actualShaonedSaltedPassword.size(); i++)
-    this->actualShaonedSaltedPassword[i]=' ';
+{ for (unsigned i = 0; i < this->enteredPassword.size(); i++)
+    this->enteredPassword[i] = ' ';
+  for (unsigned i = 0; i < this->usernamePlusPassWord.size(); i++)
+    this->usernamePlusPassWord[i] = ' ';
+  for (unsigned i = 0; i < this->enteredShaonedSaltedPassword.size(); i++)
+    this->enteredShaonedSaltedPassword[i] = ' ';
+  for (unsigned i = 0; i < this->actualShaonedSaltedPassword.size(); i++)
+    this->actualShaonedSaltedPassword[i] = ' ';
 }
 
 bool UserCalculator::FetchOneColumn
@@ -1445,21 +1445,21 @@ bool DatabaseRoutines::SendActivationEmail
 { MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   UserCalculator currentUser;
   currentUser.currentTable=DatabaseStrings::tableUsers;
-  bool result=true;
+  bool result = true;
   DatabaseRoutines theRoutines;
-  for (int i=0; i<theEmails.size; i++)
+  for (int i = 0; i < theEmails.size; i++)
   { logEmail << "Sending activation email, user "
-    << i+1 << " out of " << theEmails.size << " ... ";
-    currentUser.username=theEmails[i];
-    currentUser.email=theEmails[i];
+    << i + 1 << " out of " << theEmails.size << " ... ";
+    currentUser.username = theEmails[i];
+    currentUser.email = theEmails[i];
     theWebServer.GetActiveWorker().DoSetEmail
     (theRoutines, currentUser, commentsOnFailure, commentsGeneral, commentsGeneralSensitive);
   }
-  if (commentsOnFailure!=0)
+  if (commentsOnFailure != 0)
     logEmail << commentsOnFailure->str();
-  if (commentsGeneral!=0 && commentsOnFailure!=commentsGeneral)
+  if (commentsGeneral != 0 && commentsOnFailure != commentsGeneral)
     logEmail << commentsGeneral->str();
-  if (commentsGeneralSensitive!=0 && commentsGeneralSensitive!=commentsOnFailure)
+  if (commentsGeneralSensitive != 0 && commentsGeneralSensitive != commentsOnFailure)
     logEmail << commentsGeneralSensitive->str();
   return result;
 }
@@ -2164,37 +2164,42 @@ bool EmailRoutines::SendEmailWithMailGun
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral,
  bool includeEmailCommandInComments)
 { MacroRegisterFunctionWithName("EmailRoutines::SendEmailWithMailGun");
-  std::string mailGunKey;
-  std::stringstream temp;
+  std::string mailGunKey, hostnameToSendEmailFrom;
   if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-api.txt", mailGunKey, true, true, commentsOnFailure))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "Could not find mailgun key. The key must be located in file: "
       << "<br>\ncertificates/mailgun-api.txt\n<br>\n "
       << "The file must be uploaded manually to the server. ";
     return false;
   }
-  if (mailGunKey.size()>0)
-    mailGunKey.resize(mailGunKey.size()-1);
+  if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-hostname.txt", hostnameToSendEmailFrom, true, true, 0))
+  { hostnameToSendEmailFrom = theGlobalVariables.hostNoPort;
+    if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != 0)
+    { *commentsGeneral << "Did not find the mailgun hostname file: certificates/mailgun-hostname.txt. Using the "
+      << "domain name: " << hostnameToSendEmailFrom << " instead. ";
+    }
+  }
+  if (mailGunKey.size() > 0)
+    mailGunKey.resize(mailGunKey.size() - 1);
   std::stringstream commandToExecute;
   commandToExecute << "curl -s --user 'api:" << mailGunKey
   << "' ";
   commandToExecute
   << "https://api.mailgun.net/v3/mail2."
-
-  <<  theGlobalVariables.hostNoPort
+  << hostnameToSendEmailFrom
   << "/messages "
   ;
   commandToExecute << "-F from='Automated Email "
   << "<noreply@mail2."
-  << theGlobalVariables.hostNoPort
+  << hostnameToSendEmailFrom
   << ">' ";
-  if (this->toEmail=="")
-  { if (commentsOnFailure!=0)
+  if (this->toEmail == "")
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "Receiver address is missing. ";
     return false;
   }
-  if (this->subject=="" && this->emailContent=="")
-  { if (commentsOnFailure!=0)
+  if (this->subject == "" && this->emailContent == "")
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "Empty emails not allowed. ";
     return false;
   }
@@ -2210,19 +2215,18 @@ bool EmailRoutines::SendEmailWithMailGun
   << HtmlRoutines::ConvertStringToBackslashEscapedString(this->emailContent)
   << "\""
   ;
-  std::string commandResult=theGlobalVariables.CallSystemWithOutput(commandToExecute.str());
-  if (commentsGeneral!=0)
+  std::string commandResult = theGlobalVariables.CallSystemWithOutput(commandToExecute.str());
+  if (commentsGeneral != 0)
   { if (includeEmailCommandInComments)
       *commentsGeneral << "Command: " << HtmlRoutines::ConvertStringToHtmlString(commandToExecute.str(), true);
-    bool isBad=false;
-    if (commandResult.find("Forbidden")!=std::string::npos)
-    { isBad=true;
-    }
+    bool isBad = false;
+    if (commandResult.find("Forbidden") != std::string::npos)
+      isBad = true;
     *commentsGeneral << "<br>Result:<br>";
-    if(isBad)
+    if (isBad)
       *commentsGeneral << "<span style=\"color:red\"><b>";
     *commentsGeneral << HtmlRoutines::ConvertStringToHtmlString(commandResult, true);
-    if(isBad)
+    if (isBad)
       *commentsGeneral << "</b></span>";
   }
   return true;
@@ -2230,14 +2234,14 @@ bool EmailRoutines::SendEmailWithMailGun
 
 List<bool> EmailRoutines::recognizedEmailCharacters;
 List<bool>& EmailRoutines::GetRecognizedEmailChars()
-{ if (recognizedEmailCharacters.size==0)
+{ if (recognizedEmailCharacters.size == 0)
   { recognizedEmailCharacters.initFillInObject(256, false);
-    std::string theChars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    theChars+="0123456789";
-    theChars+="@";
-    theChars+="!#$%&'*+-/=?.";
-    for (unsigned i=0; i<theChars.size(); i++)
-      recognizedEmailCharacters[ ((unsigned char)theChars[i])]=true;
+    std::string theChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    theChars += "0123456789";
+    theChars += "@";
+    theChars += "!#$%&'*+-/=?.";
+    for (unsigned i = 0; i < theChars.size(); i++)
+      recognizedEmailCharacters[((unsigned char)theChars[i])]=true;
   }
   return EmailRoutines::recognizedEmailCharacters;
 }
@@ -2875,7 +2879,7 @@ std::string CourseAndUserInfo::ToStringHumanReadable()
   out
   << "<table><tr><td style=\"text-align:right\"><b>Instructor:&nbsp;</b></td><td>" << this->instructorComputed << "</td></tr>"
   << "<tr><td style=\"text-align:right\"><b>Course:&nbsp;</b></td><td>" << this->courseComputed << "</td></tr>";
-  if ( this->courseComputed.find("%")!=std::string::npos)
+  if ( this->courseComputed.find("%") != std::string::npos)
   { out << "<tr><td style=\"text-align:right\"><b style=\"color:red\">Possible error:&nbsp;</b></td><td>"
     << "<b style=\"color:red\">Your course name contains the % sign.<br> "
     << "This is unexpected behavior which may or may not be a bug.<br>"
@@ -2899,7 +2903,6 @@ std::string CourseAndUserInfo::ToStringHumanReadable()
 
 CourseAndUserInfo::~CourseAndUserInfo()
 {
-
 }
 
 void CourseAndUserInfo::setCurrentCourseInDB(const std::string& input)

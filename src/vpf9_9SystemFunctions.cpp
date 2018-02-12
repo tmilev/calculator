@@ -20,8 +20,8 @@ double GetElapsedTimeInSeconds()
 }
 
 void InitializeTimer(void* desiredStartTime)
-{ if (desiredStartTime!=0)
-  { ComputationStartGlobal=*( static_cast<timeval*>(desiredStartTime) );
+{ if (desiredStartTime != 0)
+  { ComputationStartGlobal = *(static_cast<timeval*>(desiredStartTime));
     return;
   }
   gettimeofday(&ComputationStartGlobal, NULL);
@@ -35,8 +35,8 @@ struct TimerThreadData{
   double elapsedtime;
   double elapsedComputationTime;
   double computationStartTime;
-  int counter=0;
-  int microsecondsleep=100000;
+  int counter = 0;
+  int microsecondsleep = 100000;
 //  ThreadWrapper theThread;
   void Run();
   bool HandleComputationTimer();
@@ -50,11 +50,11 @@ struct TimerThreadData{
 
 bool TimerThreadData::HandleComputationTimer()
 { if (theGlobalVariables.flagComputationStarted)
-    if (this->computationStartTime<0)
-      this->computationStartTime=GetElapsedTimeInSeconds();
-  this->elapsedtime=GetElapsedTimeInSeconds();
-  if (this->computationStartTime>0)
-    this->elapsedComputationTime=this->elapsedtime-this->computationStartTime;
+    if (this->computationStartTime < 0)
+      this->computationStartTime = GetElapsedTimeInSeconds();
+  this->elapsedtime = GetElapsedTimeInSeconds();
+  if (this->computationStartTime > 0)
+    this->elapsedComputationTime = this->elapsedtime - this->computationStartTime;
   return false;
 }
 

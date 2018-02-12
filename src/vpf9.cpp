@@ -42,8 +42,8 @@ int HtmlRoutines::GlobalGeneralPurposeID = 0;
 template < > bool Matrix<Rational>::flagComputingDebugInfo=true;
 template < > bool Polynomial<Rational>::flagAnErrorHasOccuredTimeToPanic=true;
 
-template < > bool CompleX<double>::flagEqualityIsApproximate=true;
-template < > double CompleX<double>::EqualityPrecision=0.00000001;
+template < > bool CompleX<double>::flagEqualityIsApproximate = true;
+template < > double CompleX<double>::EqualityPrecision = 0.00000001;
 
 template <class ElementLeft, class ElementRight, class coefficient>
 class TensorProductMonomial;
@@ -53,85 +53,85 @@ std::fstream PartFractions::ComputedContributionsList;
 
 //template < > int ListPointers<PartFraction>::MemoryAllocationIncrement=100;
 //ListPointers<PartFraction> PartFraction::GlobalCollectorPartFraction;
-bool PartFraction::UseGlobalCollector=true;
-bool PartFraction::flagAnErrorHasOccurredTimeToPanic=false;
-bool PartFractions::flagSplitTestModeNoNumerators=false;
-bool PartFractions::flagAnErrorHasOccurredTimeToPanic=false;
-bool PartFractions::flagUsingCheckSum=true;
-int PartFractions::NumMonomialsInNumeratorsRelevantFractions=0;
-int PartFractions::NumProcessedForVPFMonomialsTotal=0;
-int PartFractions::flagMaxNumStringOutputLines=500;
+bool PartFraction::UseGlobalCollector = true;
+bool PartFraction::flagAnErrorHasOccurredTimeToPanic = false;
+bool PartFractions::flagSplitTestModeNoNumerators = false;
+bool PartFractions::flagAnErrorHasOccurredTimeToPanic = false;
+bool PartFractions::flagUsingCheckSum = true;
+int PartFractions::NumMonomialsInNumeratorsRelevantFractions = 0;
+int PartFractions::NumProcessedForVPFMonomialsTotal = 0;
+int PartFractions::flagMaxNumStringOutputLines = 500;
 //int PartFraction::lastApplicationOfSVformulaNumNewGenerators=0;
 //int PartFraction::lastApplicationOfSVformulaNumNewMonomials=0;
-bool PartFractions::flagMakingProgressReport=true;
+bool PartFractions::flagMakingProgressReport = true;
 //FacetPointers TheBigFacetOutput;
 //DrawingVariables TDV(200, 400);
 
-unsigned long long int Rational::TotalLargeAdditions=0;
-unsigned long long int Rational::TotalLargeGCDcalls=0;
-unsigned long long int Rational::TotalLargeMultiplications=0;
-unsigned long long int Rational::TotalSmallAdditions=0;
-unsigned long long int Rational::TotalSmallGCDcalls=0;
-unsigned long long int Rational::TotalSmallMultiplications=0;
+unsigned long long int Rational::TotalLargeAdditions = 0;
+unsigned long long int Rational::TotalLargeGCDcalls = 0;
+unsigned long long int Rational::TotalLargeMultiplications = 0;
+unsigned long long int Rational::TotalSmallAdditions = 0;
+unsigned long long int Rational::TotalSmallGCDcalls = 0;
+unsigned long long int Rational::TotalSmallMultiplications = 0;
 
 
 void GlobalVariables::CallSystemNoOutput(const std::string& systemCommand, bool ignoreNonZeroReturn)
-{ if (this->pointerCallSystemNoOutput!=0)
+{ if (this->pointerCallSystemNoOutput != 0)
     this->pointerCallSystemNoOutput(systemCommand, ignoreNonZeroReturn);
 }
 
 std::string GlobalVariables::CallSystemWithOutput(const std::string& systemCommand)
-{ if (this->pointerCallSystemWithOutput==0)
+{ if (this->pointerCallSystemWithOutput == 0)
     return "Error";
   return this->pointerCallSystemWithOutput(systemCommand);
 }
 
 void GlobalVariables::ChDir(const std::string& systemCommand)
-{ if (this->pointerCallChDir!=0)
+{ if (this->pointerCallChDir != 0)
     this->pointerCallChDir(FileOperations::ConvertStringToEscapedStringFileNameSafe(systemCommand));
 }
 
 GlobalVariables::GlobalVariables()
-{ this->flagNotAllocated=false;
-  this->flagAllowProcessMonitoring=false;
-  this->flagCertificatesAreOfficiallySigned=false;
-  this->flagIsChildProcess=false;
-  this->IndicatorStringOutputFunction=0;
-  this->WebServerReturnDisplayIndicatorCloseConnection=0;
-  this->WebServerTimerPing=0;
-  this->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000000;
-  this->MaxComputationTimeBeforeWeTakeAction=0;
+{ this->flagNotAllocated = false;
+  this->flagAllowProcessMonitoring = false;
+  this->flagCertificatesAreOfficiallySigned = false;
+  this->flagIsChildProcess = false;
+  this->IndicatorStringOutputFunction = 0;
+  this->WebServerReturnDisplayIndicatorCloseConnection = 0;
+  this->WebServerTimerPing = 0;
+  this->MaxComputationTimeSecondsNonPositiveMeansNoLimit = 1000000;
+  this->MaxComputationTimeBeforeWeTakeAction = 0;
 //  this->MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit=5;
-  this->pointerCallSystemWithOutput=0;
-  this->pointerCallSystemNoOutput=0;
-  this->pointerCallChDir=0;
-  this->sleepFunction=0;
-  this->flagReportEverything=false;
-  this->flagReportGaussianElimination=false;
-  this->flagReportLargeIntArithmetic=false;
-  this->flagReportProductsMonomialAlgebras=false;
-  this->flagReportFileIO=true;
-  this->getElapsedTimePrivate=0;
-  this->flagTimeOutExplanationAlreadyDisplayed=false;
-  this->flagOutputTimedOut=false;
-  this->flagTimedOutComputationIsDone=false;
-  this->flagAllowUseOfThreadsAndMutexes=false;
-  this->flagComputationCompletE=false;
-  this->flagComputationFinishedAllOutputSentClosing=false;
-  this->flagRunningConsoleTest=false;
-  this->flagRunningCommandLine=false;
-  this->flagRunningApache=false;
-  this->flagRunningBuiltInWebServer=false;
-  this->flagRunningAce=false;
-  this->flagLoggedIn=false;
-  this->flagLogInAttempted=false;
-  this->flagServerDetailedLog=false;
-  this->flagUsingSSLinCurrentConnection=false;
-  this->flagSSLisAvailable=false;
-  this->MaxTimeNoPingBeforeChildIsPresumedDead= 10;
-  this->flagAceIsAvailable=false;
-  this->MutexProgressReportinG.mutexName="ProgressReport";
-  this->flagCachingInternalFilesOn=true;
+  this->pointerCallSystemWithOutput = 0;
+  this->pointerCallSystemNoOutput = 0;
+  this->pointerCallChDir = 0;
+  this->sleepFunction = 0;
+  this->flagReportEverything = false;
+  this->flagReportGaussianElimination = false;
+  this->flagReportLargeIntArithmetic = false;
+  this->flagReportProductsMonomialAlgebras = false;
+  this->flagReportFileIO = true;
+  this->getElapsedTimePrivate = 0;
+  this->flagTimeOutExplanationAlreadyDisplayed = false;
+  this->flagOutputTimedOut = false;
+  this->flagTimedOutComputationIsDone = false;
+  this->flagAllowUseOfThreadsAndMutexes = false;
+  this->flagComputationCompletE = false;
+  this->flagComputationFinishedAllOutputSentClosing = false;
+  this->flagRunningConsoleTest = false;
+  this->flagRunningCommandLine = false;
+  this->flagRunningApache = false;
+  this->flagRunningBuiltInWebServer = false;
+  this->flagRunningAce = false;
+  this->flagLoggedIn = false;
+  this->flagLogInAttempted = false;
+  this->flagServerDetailedLog = false;
+  this->flagUsingSSLinCurrentConnection = false;
+  this->flagSSLisAvailable = false;
+  this->MaxTimeNoPingBeforeChildIsPresumedDead = 10;
+  this->flagAceIsAvailable = false;
+  this->MutexProgressReportinG.mutexName = "ProgressReport";
+  this->flagCachingInternalFilesOn = true;
 //  this->flagIgnoreSecurityToWorkaroundSafarisBugs=false;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
@@ -145,35 +145,35 @@ HashedList<FileInformation>& GlobalVariables::theSourceCodeFiles()
 
 void ProgressReport::Report(const std::string& theReport)
 { if (crash.flagCrashInitiateD)
-  { this->threadIndex=-1;
+  { this->threadIndex = - 1;
     return;
   }
-  if (this->threadIndex==-1)
+  if (this->threadIndex == - 1)
     return;
   if (theGlobalVariables.ProgressReportStringS[this->threadIndex].size>this->currentLevel)
-  { theGlobalVariables.ProgressReportStringS[this->threadIndex][this->currentLevel]=theReport;
+  { theGlobalVariables.ProgressReportStringS[this->threadIndex][this->currentLevel] = theReport;
     theGlobalVariables.MakeReport();
   }
 }
 
 void ProgressReport::init()
 { if (crash.flagCrashInitiateD)
-  { this->threadIndex=-1;
+  { this->threadIndex = - 1;
     return;
   }
-  this->threadIndex=ThreadData::getCurrentThreadId();
-  if (this->threadIndex==-1)
+  this->threadIndex = ThreadData::getCurrentThreadId();
+  if (this->threadIndex == - 1)
     return;
-  this->currentLevel=theGlobalVariables.ProgressReportStringS[this->threadIndex].size;
+  this->currentLevel = theGlobalVariables.ProgressReportStringS[this->threadIndex].size;
   theGlobalVariables.ProgressReportStringS[this->threadIndex].AddOnTop((std::string)"");
 }
 
 ProgressReport::~ProgressReport()
 { if (crash.flagCrashInitiateD)
-  { this->threadIndex=-1;
+  { this->threadIndex = - 1;
     return;
   }
-  if (this->threadIndex==-1)
+  if (this->threadIndex == - 1)
     return;
   if (crash.flagCrashInitiateD)
     return;
@@ -185,33 +185,33 @@ ProjectInformationInstance::ProjectInformationInstance(const char* fileName, con
 }
 
 RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName)
-{ this->threadIndex= ThreadData::getCurrentThreadId();
-  if (this->threadIndex==-1)
+{ this->threadIndex = ThreadData::getCurrentThreadId();
+  if (this->threadIndex == - 1)
     return;
-  ListReferences<stackInfo>& theStack=theGlobalVariables.CustomStackTrace[this->threadIndex];
-  theStack.SetSize(theStack.size+1);
-  stackInfo& stackTop=theStack.LastObject();
-  stackTop.fileName=fileName;
-  stackTop.line=line;
-  stackTop.functionName=functionName;
-  if (theStack.size>20000)
+  ListReferences<stackInfo>& theStack = theGlobalVariables.CustomStackTrace[this->threadIndex];
+  theStack.SetSize(theStack.size + 1);
+  stackInfo& stackTop = theStack.LastObject();
+  stackTop.fileName = fileName;
+  stackTop.line = line;
+  stackTop.functionName = functionName;
+  if (theStack.size > 20000)
     crash << "Stack too deep: 20000 layers. " << crash;
 }
 
 RegisterFunctionCall::~RegisterFunctionCall()
-{ if (this->threadIndex==-1)
+{ if (this->threadIndex == - 1)
     return;
-  theGlobalVariables.CustomStackTrace[this->threadIndex].size--;
+  theGlobalVariables.CustomStackTrace[this->threadIndex].size --;
 }
 
 int DrawingVariables::GetColorFromChamberIndex(int index)
-{ static const int NumColorsBase=3;
-  int tempI=index%(NumColorsBase*NumColorsBase*NumColorsBase);
-  if (tempI<0)
-    tempI+=(NumColorsBase*NumColorsBase*NumColorsBase);
-  int r=(255* (tempI%NumColorsBase))/NumColorsBase;
-  int g=(255* (tempI%(NumColorsBase*NumColorsBase)))/(NumColorsBase*NumColorsBase);
-  int b=(255* (tempI%(NumColorsBase*NumColorsBase*NumColorsBase)))/(NumColorsBase*NumColorsBase*NumColorsBase);
+{ static const int NumColorsBase = 3;
+  int tempI = index % (NumColorsBase * NumColorsBase * NumColorsBase);
+  if (tempI < 0)
+    tempI += (NumColorsBase*NumColorsBase*NumColorsBase);
+  int r = (255 * (tempI % NumColorsBase)) / NumColorsBase;
+  int g = (255 * (tempI % (NumColorsBase * NumColorsBase))) / (NumColorsBase * NumColorsBase);
+  int b = (255 * (tempI % (NumColorsBase * NumColorsBase * NumColorsBase))) / (NumColorsBase * NumColorsBase * NumColorsBase);
   return HtmlRoutines::RedGreenBlue(r, g, b);
 }
 

@@ -253,7 +253,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     << " second(s).";
     return out.str();
   }
-  Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
+  Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
   if (!theProblem.PrepareCommands(comments))
   { out << "Something went wrong while interpreting the problem file. ";
     if (theGlobalVariables.UserDebugFlagOn() &&
@@ -2229,25 +2229,25 @@ std::string HtmlInterpretation::ToStringNavigation()
   //out << "<table>";
   //out << "DEBUG: auth token: " << theGlobalVariables.GetWebInput("authenticationToken") << "<br>";
   //out << "DEBUG: to string nav";
-  std::string linkSeparator=" | ";
-  std::string linkBigSeparator=" || ";
-  if (theGlobalVariables.userCalculatorRequestType=="template" ||
-      theGlobalVariables.userCalculatorRequestType=="templateNoLogin")
+  std::string linkSeparator = " | ";
+  std::string linkBigSeparator = " || ";
+  if (theGlobalVariables.userCalculatorRequestType == "template" ||
+      theGlobalVariables.userCalculatorRequestType == "templateNoLogin")
     out << "<b>Home</b>" << linkSeparator;
   else
-  { std::string topicList=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
-    std::string courseHome=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-    if (topicList!="" && courseHome!="")
-    { std::string studentView=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentView"), false);
-      std::string section=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
+  { std::string topicList = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
+    std::string courseHome = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
+    if (topicList != "" && courseHome != "")
+    { std::string studentView = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentView"), false);
+      std::string section = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable;
-      if (theGlobalVariables.userCalculatorRequestType=="exerciseNoLogin")
+      if (theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin")
         out << "?request=templateNoLogin";
       else
         out << "?request=template";
       out << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "studentView=" << studentView << "&";
-      if (section!="")
+      if (section != "")
         out << "studentSection="
         << theGlobalVariables.GetWebInput("studentSection") << "&";
       out << "topicList=" << topicList << "&";
@@ -2256,7 +2256,7 @@ std::string HtmlInterpretation::ToStringNavigation()
       << linkSeparator;
     }
   }
-  if (theGlobalVariables.userCalculatorRequestType=="selectCourse")
+  if (theGlobalVariables.userCalculatorRequestType == "selectCourse")
     out << "<b>Select course</b>" << linkBigSeparator;
   else
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=selectCourse\">Select course</a>" << linkBigSeparator;
@@ -2267,7 +2267,7 @@ std::string HtmlInterpretation::ToStringNavigation()
     out << ": " << theGlobalVariables.userDefault.username.value << linkSeparator;
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout&";
     out << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">Log out</a>" << linkSeparator;
-    if (theGlobalVariables.userCalculatorRequestType=="changePasswordPage")
+    if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage")
     { out << "<b>Account";
       out << "</b>" << linkSeparator;
     } else
@@ -2277,17 +2277,19 @@ std::string HtmlInterpretation::ToStringNavigation()
       else
         out << "<b>Account settings: requires secure connection</b>" << linkSeparator;
     }
-    if (theGlobalVariables.userDefault.courseInfo.sectionComputed!="")
+    if (theGlobalVariables.userDefault.courseInfo.sectionComputed != "")
       out << "Section: " << theGlobalVariables.userDefault.courseInfo.sectionComputed
       << linkSeparator;
     //if (theGlobalVariables.UserDefaultHasAdminRights())
     //  out << "Course home: "
     //  << theGlobalVariables.userDefault.currentCourses.value
     //  << linkSeparator;
+  } else
+  { out << "<b style='color:red'>logged out</b>" << linkSeparator;
   }
 
   if (theGlobalVariables.UserDefaultHasAdminRights())
-  { if (theGlobalVariables.userCalculatorRequestType!="accounts")
+  { if (theGlobalVariables.userCalculatorRequestType != "accounts")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=accounts&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
@@ -2295,31 +2297,31 @@ std::string HtmlInterpretation::ToStringNavigation()
       << "\">Accounts</a>" << linkSeparator;
     else
       out << "<b>Accounts</b>" << linkSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="scores")
+    if (theGlobalVariables.userCalculatorRequestType != "scores")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scores&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "\">Scores</a>" << linkSeparator;
     else
       out << "<b>Scores</b>" << linkSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="status")
+    if (theGlobalVariables.userCalculatorRequestType != "status")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=status&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "\">Server</a>" << linkSeparator;
     else
       out << "<b>Server</b>" << linkBigSeparator;
-    if (theGlobalVariables.userCalculatorRequestType!="database")
+    if (theGlobalVariables.userCalculatorRequestType != "database")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "\">Database</a>" << linkBigSeparator;
     else
       out << "<b>Database</b>" << linkBigSeparator;
   }
-  if (theGlobalVariables.userCalculatorRequestType!="calculator")
+  if (theGlobalVariables.userCalculatorRequestType != "calculator")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=calculator&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">Calculator</a>" << linkBigSeparator;
   else
     out << "<b>Calculator</b> " << linkBigSeparator;
-  if (theGlobalVariables.userCalculatorRequestType!="about")
+  if (theGlobalVariables.userCalculatorRequestType != "about")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=about&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">About</a>" << linkBigSeparator;
   else

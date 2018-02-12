@@ -25,12 +25,12 @@ Please note that **the files you create with the calculator will be placed in ba
 cd trunk
 make
 ```
-4. Run the calculator for the first time. This may prompt you for further setup (mysql, openssl, and initial setup).
+4. Run the calculator for the first time. This may prompt you for further setup (mysql, openssl, and initial setup). 
 ```
 cd bin
 ./calculator
 ```
-Follow the prompts - you **will be asked for your sudo password**.
+Follow the prompts - you **will be asked for your sudo password**. Leave the mysql password blank.
 ### Running the calculator
 5. Once the installation steps are complete start the calculator as a web server:
 ```
@@ -108,6 +108,19 @@ Put your mailgun secret in file:
 ```
 certificates/mailgun-api.txt
 ```
+
+Put the domain name from which you want emails sent in:
+
+```
+certificates/mailgun-hostname.txt
+```
+in format such as:
+
+localhost
+
+or:
+
+calculator-algebra.org
 
 ## Authors
 The following people have contributed code directly.

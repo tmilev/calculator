@@ -77,6 +77,10 @@ const std::string& HtmlRoutines::GetJavascriptCookieFunctionSNoTags()
 { return HtmlRoutines::GetFile("/html-common-calculator/cookie-functions.js");
 }
 
+const std::string HtmlRoutines::GetJavascriptForgotLogin()
+{ return HtmlRoutines::GetJavascriptLink("/html-common-calculator/forgot-login.js");
+}
+
 const std::string HtmlRoutines::GetJavascriptProblemLinksLink()
 { return HtmlRoutines::GetJavascriptLink("/html-common-calculator/problemlinkstyles.js");
 }

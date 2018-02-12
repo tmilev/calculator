@@ -234,31 +234,31 @@ void GlobalVariables::InitThreadsExecutableStart()
 
 void GlobalVariables::initDefaultFolderAndFileNames
 (const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow)
-{ this->PhysicalNameFolderBelowExecutable="";
-  this->PhysicalNameExecutableNoPath="";
-  this->PhysicalPathProjectBase="";
-  for (unsigned i=0; i<inputPhysicalExecutableWithPathServerBaseIsFolderBelow.size(); i++)
+{ this->PhysicalNameFolderBelowExecutable = "";
+  this->PhysicalNameExecutableNoPath = "";
+  this->PhysicalPathProjectBase = "";
+  for (unsigned i = 0; i < inputPhysicalExecutableWithPathServerBaseIsFolderBelow.size(); i++)
   { this->PhysicalNameExecutableNoPath.push_back(inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i]);
-    if (inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i]=='/')
-    { this->PhysicalPathProjectBase+=this->PhysicalNameFolderBelowExecutable;
+    if (inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i] == '/')
+    { this->PhysicalPathProjectBase += this->PhysicalNameFolderBelowExecutable;
       //this->DisplayPathServerBasE=this->PhysicalNameFolderBelowExecutable;
-      this->PhysicalNameFolderBelowExecutable=this->PhysicalNameExecutableNoPath;
-      this->PhysicalNameExecutableNoPath="";
+      this->PhysicalNameFolderBelowExecutable = this->PhysicalNameExecutableNoPath;
+      this->PhysicalNameExecutableNoPath = "";
     }
   }
-  this->PhysicalNameExecutableWithPath=this->PhysicalNameFolderBelowExecutable+this->PhysicalNameExecutableNoPath;
-  if (this->PhysicalPathProjectBase=="")
-    this->PhysicalPathProjectBase="./../";
+  this->PhysicalNameExecutableWithPath = this->PhysicalNameFolderBelowExecutable + this->PhysicalNameExecutableNoPath;
+  if (this->PhysicalPathProjectBase == "")
+    this->PhysicalPathProjectBase = "./../";
   this->PhysicalPathHtmlFolder = this->PhysicalPathProjectBase + "../public_html/";
-  this->PhysicalPathServerBasE=this->PhysicalPathHtmlFolder;
-  this->DisplayPathOutputFolder ="/output/";
+  this->PhysicalPathServerBasE = this->PhysicalPathHtmlFolder;
+  this->DisplayPathOutputFolder = "/output/";
 
-  this->PhysicalNameExtraOutputNoPatH="defaultoutput";
+  this->PhysicalNameExtraOutputNoPatH = "defaultoutput";
   this->RelativePhysicalNameExtraOutputWithPath = this->PhysicalNameExtraOutputNoPatH;
   this->DisplayNameExtraOutputNoPath = "defaultoutput";
   this->DisplayNameExtraOutputWithPath = this->DisplayPathOutputFolder + this->DisplayNameExtraOutputNoPath;
 
-  this->DisplayNameExecutable = "/cgi-bin/"+this->PhysicalNameExecutableNoPath;
+  this->DisplayNameExecutable = "/cgi-bin/" + this->PhysicalNameExecutableNoPath;
   this->initOutputReportAndCrashFileNames("", "");
 }
 
@@ -272,46 +272,47 @@ bool GlobalVariables::UserSecureNonAdminOperationsAllowed()
 }
 
 bool GlobalVariables::UserDebugFlagOn()
-{ return theGlobalVariables.GetWebInput("debugFlag")=="true";
+{ return theGlobalVariables.GetWebInput("debugFlag") == "true";
 }
 
 bool GlobalVariables::UserStudentVieWOn()
-{ return theGlobalVariables.GetWebInput("studentView")=="true";
+{ return theGlobalVariables.GetWebInput("studentView") == "true";
 }
 
 bool GlobalVariables::UserDefaultHasAdminRights()
-{ return this->flagLoggedIn && (this->userDefault.userRole=="admin");
+{ return this->flagLoggedIn && (this->userDefault.userRole == "admin");
 }
 
 bool GlobalVariables::UserDefaultHasProblemComposingRights()
 { return this->flagLoggedIn &&
-  (this->userDefault.userRole=="admin" || this->userDefault.userRole=="teacher") ;
+  (this->userDefault.userRole == "admin" || this->userDefault.userRole == "teacher") ;
 }
 
 bool GlobalVariables::UserGuestMode()
 { if (!this->flagUsingSSLinCurrentConnection)
     return true;
-  return this->userCalculatorRequestType=="exerciseNoLogin" ||
-  this->userCalculatorRequestType=="problemGiveUpNoLogin" ||
-  this->userCalculatorRequestType=="submitExerciseNoLogin" ||
-  this->userCalculatorRequestType=="submitExercisePreviewNoLogin" ||
-  this->userCalculatorRequestType=="templateNoLogin";
+  return
+  this->userCalculatorRequestType == "exerciseNoLogin" ||
+  this->userCalculatorRequestType == "problemGiveUpNoLogin" ||
+  this->userCalculatorRequestType == "submitExerciseNoLogin" ||
+  this->userCalculatorRequestType == "submitExercisePreviewNoLogin" ||
+  this->userCalculatorRequestType == "templateNoLogin";
 }
 
 bool GlobalVariables::UserRequestRequiresLoadingRealExamData()
 { if (this->UserGuestMode())
     return false;
   return this->flagLoggedIn &&
-  (this->userCalculatorRequestType=="scoredQuiz" ||
-   this->userCalculatorRequestType=="submitProblem" ||
-   this->userCalculatorRequestType=="submitProblemPreview"
+  (this->userCalculatorRequestType == "scoredQuiz" ||
+   this->userCalculatorRequestType == "submitProblem" ||
+   this->userCalculatorRequestType == "submitProblemPreview"
    );
 }
 
 bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn()
 { return
-  this->userCalculatorRequestType=="scoredQuiz" ||
-  this->userCalculatorRequestType=="exercise"
+  this->userCalculatorRequestType == "scoredQuiz" ||
+  this->userCalculatorRequestType == "exercise"
   ;
 }
 

@@ -260,9 +260,9 @@ bool CalculatorHTML::MergeOneProblemAdminData
     this->databaseStudentSections.AddOnTopNoRepetition(incomingDeadlines.theKeys[i]);
   }
   ////////////////////////////////////////////
-  for (int i=0; i<incomingDeadlines.size(); i++)
+  for (int i = 0; i < incomingDeadlines.size(); i++)
     currentDeadlines.SetKeyValue(incomingDeadlines.theKeys[i], incomingDeadlines.theValues[i]);
-  for (int i=0; i<incomingWeightS.size(); i++)
+  for (int i = 0; i < incomingWeightS.size(); i++)
     currentWeightS.SetKeyValue(incomingWeightS.theKeys[i], incomingWeightS.theValues[i]);
   return true;
 }
@@ -283,12 +283,12 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
   { commentsOnFailure << "Failed to parse your request";
     return false;
   }
-  bool result=true;
+  bool result = true;
   //stOutput << "<hr><hr>Debug: incoming problems: " << incomingProblems.ToStringHtml();
-  for (int i=0; i<incomingProblems.size(); i++)
+  for (int i = 0; i < incomingProblems.size(); i++)
     if (!this->MergeOneProblemAdminData
         (incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
-      result=false;
+      result = false;
   //stOutput << "<hr><hr>Debug: after merge, resulting MERGED probs: "
   //<< this->currentUseR.theProblemData.ToStringHtml() << "<hr>";
   this->StoreDeadlineInfo

@@ -1298,7 +1298,7 @@ bool DatabaseRoutines::SendActivationEmail
 bool UserCalculator::ComputeAndStoreActivationStats
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral, DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationStats");
-  std::string activationAddress=
+  std::string activationAddress =
   this->GetActivationAddressFromActivationToken
   (this->actualActivationToken.value, theGlobalVariables.hostNoPort,
    this->username.value, this->email.value);
@@ -1314,11 +1314,11 @@ bool UserCalculator::ComputeAndStoreActivationStats
   if (!theRoutines.CreateTable("emailActivationStats", tableCols.str() , commentsOnFailure, 0))
     return false;
   if (!theRoutines.RowExists((std::string) "email", this->email, (std::string) "emailActivationStats", commentsOnFailure))
-  { if (commentsGeneral!=0)
+  { if (commentsGeneral != 0)
       *commentsGeneral << "Row labeled by " << this->email.value << " does not exist. ";
     if(!theRoutines.InsertRow
         ((std::string) "email", this->email.value, (std::string) "emailActivationStats", commentsOnFailure))
-    { if (commentsGeneral!=0)
+    { if (commentsGeneral != 0)
         *commentsGeneral << "Insert row: " << this->email.value << " failed. ";
       return false;
     }
@@ -1332,44 +1332,44 @@ bool UserCalculator::ComputeAndStoreActivationStats
       ((std::string) "email", this->email, (std::string) "emailActivationStats",
        (std::string) "numActivationEmails", emailCountForThisEmail, commentsOnFailure))
     return false;
-  LargeInt numActivationsThisEmail=0;
-  if (emailCountForThisEmail!="")
+  LargeInt numActivationsThisEmail = 0;
+  if (emailCountForThisEmail != "")
     numActivationsThisEmail.AssignString(emailCountForThisEmail);
-  numActivationsThisEmail++;
+  numActivationsThisEmail ++;
   TimeWrapper now, lastActivationOnThisEmail, lastActivationOnThisAccount;
   now.AssignLocalTime();
-  if (lastEmailTime!="")
-  { lastActivationOnThisEmail.operator =(lastEmailTime);
-    lastActivationOnThisAccount.operator =(this->activationTokenCreationTime);
-    if (commentsGeneral!=0)
+  if (lastEmailTime != "")
+  { lastActivationOnThisEmail.operator=(lastEmailTime);
+    lastActivationOnThisAccount.operator=(this->activationTokenCreationTime);
+    if (commentsGeneral != 0)
       *commentsGeneral
       << "<br>Last activation on this email: "
       << lastActivationOnThisEmail.ToStringHumanReadable() << ".\n"
       << "<br>Last activation on this account: "
       << lastActivationOnThisEmail.ToStringHumanReadable() << ".\n";
   }
-  if (commentsGeneral!=0)
+  if (commentsGeneral != 0)
     *commentsGeneral
     << "<br>Total activations (attempted on) this email: "
     << numActivationsThisEmail.ToString() << ".\n <br>\n";
-  if (this->userId.value!="")
+  if (this->userId.value != "")
   { if (!theRoutines.SetEntry
         (DatabaseStrings::columnUserId, this->userId, DatabaseStrings::tableUsers,
          (std::string) "activationTokenCreationTime", now.ToString(), commentsOnFailure))
-    { if (commentsOnFailure!=0)
+    { if (commentsOnFailure != 0)
         *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
       return false;
     }
-  } else if (this->username.value!="")
+  } else if (this->username.value != "")
   { if (!theRoutines.SetEntry
         (DatabaseStrings::columnUsername, this->username, DatabaseStrings::tableUsers,
          (std::string) "activationTokenCreationTime", now.ToString(), commentsOnFailure))
-    { if (commentsOnFailure!=0)
+    { if (commentsOnFailure != 0)
         *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
       return false;
     }
   } else
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure
       << "This shouldn't happen: both the username and the user id are empty. ";
     return false;
@@ -1395,14 +1395,15 @@ bool UserCalculator::ComputeAndStoreActivationStats
        this->username, commentsOnFailure))
     return false;
   //stOutput << "DEBUG: Got to here. ";
-  this->activationEmailSubject="NO REPLY: Activation of your Math homework account. ";
+  this->activationEmailSubject = "NO REPLY: Activation of your Math homework account. ";
   std::stringstream emailBody;
   emailBody << "Dear user,"
-  << "\n\nto confirm your email change at our website calculator-algebra.org"
+  << "\n\nto confirm your email change at our website "
+  << theGlobalVariables.hostWithPort
   << ", please follow the activation link below.\n\n "
   << activationAddress
   << "\n\nSincerely, \nthe calculator-algebra.org team";
-  this->activationEmail=emailBody.str();
+  this->activationEmail = emailBody.str();
   return true;
 
 }
@@ -1423,12 +1424,12 @@ bool UserCalculator::ComputeAndStoreActivationToken
   now.AssignLocalTime();
   std::stringstream activationTokenStream;
   activationTokenStream << now.theTimeStringNonReadable << rand();
-  this->actualActivationToken=Crypto::computeSha1outputBase64(activationTokenStream.str());
-  this->currentTable="users";
+  this->actualActivationToken = Crypto::computeSha1outputBase64(activationTokenStream.str());
+  this->currentTable = "users";
   if (!this->SetColumnEntry("activationToken", this->actualActivationToken.value, theRoutines, commentsOnFailure))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "Setting activation token failed.";
-    this->actualActivationToken="";
+    this->actualActivationToken = "";
     return false;
   }
   return true;
@@ -1480,10 +1481,10 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
   if (!HtmlRoutines::ChopCGIString(inputData, theMap, commentsOnFailure))
     return false;
   //stOutput << "<hr>DEBUG: Interpreting: <br>" << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml( inputData )<< "<hr>";
-  this->Points=0;
-  this->numCorrectlyAnswered=0;
-  this->totalNumSubmissions=0;
-  this->flagRandomSeedGiven=false;
+  this->Points = 0;
+  this->numCorrectlyAnswered = 0;
+  this->totalNumSubmissions = 0;
+  this->flagRandomSeedGiven = false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
   { if (theMap.Contains("randomSeed"))
     { this->randomSeed = atoi(theMap.GetValueCreate("randomSeed").c_str());
@@ -1495,12 +1496,12 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
   this->theAnswers.Clear();
   bool result = true;
   MapLisT<std::string, std::string, MathRoutines::hashString> currentQuestionMap;
-  for (int i=0; i<theMap.size(); i++)
-  { if (theMap.theKeys[i]=="randomSeed")
+  for (int i = 0; i < theMap.size(); i++)
+  { if (theMap.theKeys[i] == "randomSeed")
       continue;
     this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
-    Answer& currentA=*this->theAnswers.theValues.LastObject();
-    std::string currentQuestion=HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false);
+    Answer& currentA = *this->theAnswers.theValues.LastObject();
+    std::string currentQuestion = HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false);
     result=HtmlRoutines::ChopCGIString(currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result)
     { commentsOnFailure << "Failed to interpret as key-value pair: "
@@ -1529,9 +1530,9 @@ std::string ProblemData::Store()
   std::stringstream out;
   if (this->flagRandomSeedGiven)
     out << "randomSeed=" << this->randomSeed;
-  for (int i=0; i<this->theAnswers.size(); i++)
-  { Answer& currentA=this->theAnswers[i];
-    if (this->flagRandomSeedGiven || i!=0)
+  for (int i = 0; i < this->theAnswers.size(); i++)
+  { Answer& currentA = this->theAnswers[i];
+    if (this->flagRandomSeedGiven || i != 0)
       out << "&";
     out << HtmlRoutines::ConvertStringToURLString(currentA.answerId, false) << "=";
     std::stringstream questionsStream;
@@ -1552,21 +1553,21 @@ bool UserCalculator::InterpretDatabaseProblemData
     return false;
   this->theProblemData.Clear();
   this->theProblemData.SetExpectedSize(theMap.size());
-  bool result=true;
+  bool result = true;
   //stOutput << "<hr>DEBUG: Interpreting: <br>" << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theInfo)
   //<< "<br>Map has: "
   //<< theMap.size() << " entries. ";
   ProblemData reader;
   std::string probNameNoWhiteSpace;
-  for (int i=0; i<theMap.size(); i++)
+  for (int i = 0; i < theMap.size(); i++)
   { //stOutput << "<hr>Reading data: " << theMap.theKeys[i] << ", value: "
     //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theMap[i]);
     if (!reader.LoadFrom(HtmlRoutines::ConvertURLStringToNormal(theMap[i], false), commentsOnFailure))
-    { result=false;
+    { result = false;
       continue;
     }
-    probNameNoWhiteSpace=MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
-    if (probNameNoWhiteSpace=="")
+    probNameNoWhiteSpace = MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
+    if (probNameNoWhiteSpace == "")
       continue;
     this->theProblemData.SetKeyValue(probNameNoWhiteSpace, reader);
   }
@@ -1576,7 +1577,7 @@ bool UserCalculator::InterpretDatabaseProblemData
 bool UserCalculator::LoadProblemStringFromDatabase
 (DatabaseRoutines& theRoutines, std::string& output, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::LoadProblemStringFromDatabase");
-  this->currentTable=DatabaseStrings::tableUsers;
+  this->currentTable = DatabaseStrings::tableUsers;
   return this->FetchOneColumn("problemData", output, theRoutines, &commentsOnFailure);
 }
 
@@ -1584,14 +1585,14 @@ bool UserCalculator::StoreProblemDataToDatabase
 (DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabase");
   std::stringstream problemDataStream;
-  for (int i=0; i<this->theProblemData.size(); i++)
+  for (int i = 0; i < this->theProblemData.size(); i++)
     problemDataStream << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false) << "="
     << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theValues[i].Store(), false) << "&";
 //  stOutput << "DEBUG: storing in database ... stack trace: "
 //  << crash.GetStackTraceEtcErrorMessage();
   //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
-  this->currentTable=DatabaseStrings::tableUsers;
-  bool result= this->SetColumnEntry("problemData", problemDataStream.str(), theRoutines, &commentsOnFailure);
+  this->currentTable = DatabaseStrings::tableUsers;
+  bool result = this->SetColumnEntry("problemData", problemDataStream.str(), theRoutines, &commentsOnFailure);
   return result;
 }
 
@@ -1600,13 +1601,13 @@ bool DatabaseRoutines::AddUsersFromEmails
  std::string& userRole, std::string& userGroup,
  std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers)
 { MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
-  theGlobalVariables.MaxComputationTimeBeforeWeTakeAction=1000;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 1000;
+  theGlobalVariables.MaxComputationTimeBeforeWeTakeAction = 1000;
   List<std::string> theEmails, thePasswords;
   MathRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
   MathRoutines::StringSplitDefaultDelimiters(userPasswords, thePasswords);
-  if (thePasswords.size>0)
-    if (thePasswords.size!=theEmails.size)
+  if (thePasswords.size > 0)
+    if (thePasswords.size != theEmails.size)
     { comments << "Different number of usernames/emails and passwords: " << theEmails.size << " emails and "
       << thePasswords.size << " passwords. "
       << "If you want to enter usernames without password, you need to leave the password input box empty. ";
@@ -1615,26 +1616,26 @@ bool DatabaseRoutines::AddUsersFromEmails
   //stOutput << " <br>Debug: creating users: " << theEmails.ToStringCommaDelimited() << "<br>Number of users: " << theEmails.size
   //<< "<br>Number of passwords: " << thePasswords.size << "<hr>Passwords string: " << thePasswords;
   UserCalculator currentUser;
-  currentUser.currentTable=DatabaseStrings::tableUsers;
-  bool result=true;
-  bool doSendEmails=false;
-  outputNumNewUsers=0;
-  outputNumUpdatedUsers=0;
+  currentUser.currentTable = DatabaseStrings::tableUsers;
+  bool result = true;
+  bool doSendEmails = false;
+  outputNumNewUsers = 0;
+  outputNumUpdatedUsers = 0;
   //stOutput << "DEBUG: courseHome: " << currentUser.currentCourses.value
   //<< "\n<br>\ncurrentUser.currentTable: " << currentUser.currentTable.value << "\n<br>\n";
-  for (int i=0; i<theEmails.size; i++)
+  for (int i = 0; i < theEmails.size; i++)
   { currentUser.reset();
-    currentUser.username=theEmails[i];
-    bool isEmail=true;
-    if (theEmails[i].find('@')==std::string::npos)
-    { isEmail=false;
-      currentUser.email.value="";
+    currentUser.username = theEmails[i];
+    bool isEmail = true;
+    if (theEmails[i].find('@') == std::string::npos)
+    { isEmail = false;
+      currentUser.email.value = "";
     } else
-      currentUser.email=theEmails[i];
+      currentUser.email = theEmails[i];
     if (!currentUser.Iexist(*this,0))
     { if (!currentUser.CreateMeIfUsernameUnique(*this, &comments))
       { comments << "Failed to create user: " << currentUser.username.value;
-        result=false;
+        result = false;
         continue;
       } else
         outputNumNewUsers++;
@@ -1642,22 +1643,22 @@ bool DatabaseRoutines::AddUsersFromEmails
         currentUser.SetColumnEntry("email", theEmails[i], *this, &comments);
     } else
     { if (!currentUser.FetchOneUserRow(*this, &comments))
-        result=false;
+        result = false;
       outputNumUpdatedUsers++;
     }
     //currentUser may have its updated entries modified by the functions above.
-    currentUser.currentTable=DatabaseStrings::tableUsers;
+    currentUser.currentTable = DatabaseStrings::tableUsers;
     currentUser.SetColumnEntry("userRole", userRole, *this, &comments);
     currentUser.courseInfo.setCurrentCourseInDB(theGlobalVariables.GetWebInput("courseHome"));
     currentUser.courseInfo.setSectionInDB(userGroup);
     currentUser.courseInfo.setInstructorInDB(theGlobalVariables.userDefault.username.value);
-    currentUser.courseInfo.rawStringStoredInDB=currentUser.courseInfo.ToStringForDBStorage();
+    currentUser.courseInfo.rawStringStoredInDB = currentUser.courseInfo.ToStringForDBStorage();
     if (!currentUser.SetColumnEntry(DatabaseStrings::columnCourseInfo, currentUser.courseInfo.rawStringStoredInDB, *this, &comments))
-      result=false;
-    if (thePasswords.size==0 || thePasswords.size!=theEmails.size)
-    { if (currentUser.actualShaonedSaltedPassword=="" && currentUser.actualAuthenticationToken=="")
+      result = false;
+    if (thePasswords.size == 0 || thePasswords.size != theEmails.size)
+    { if (currentUser.actualShaonedSaltedPassword == "" && currentUser.actualAuthenticationToken=="")
         if (!currentUser.ComputeAndStoreActivationToken(&comments, *this))
-          result=false;
+          result = false;
     } else
     { currentUser.enteredPassword= HtmlRoutines::ConvertStringToURLString(thePasswords[i], false);
       //<-Passwords are ONE-LAYER url-encoded
@@ -1666,9 +1667,9 @@ bool DatabaseRoutines::AddUsersFromEmails
       //stOutput << "Debug: user:<br>" << currentUser.username.value << "<br>password:<br>"
       //<< HtmlRoutines::ConvertStringToURLString(thePasswords[i]) << "<br>";
       if (!currentUser.SetPassword(*this, &comments))
-        result=false;
+        result = false;
       currentUser.SetColumnEntry("activationToken", "activated", *this, &comments);
-      if (currentUser.email!="")
+      if (currentUser.email != "")
         currentUser.ComputeAndStoreActivationStats(&comments, &comments, *this);
     }
   }
@@ -1677,9 +1678,9 @@ bool DatabaseRoutines::AddUsersFromEmails
   if (doSendEmails)
   { std::stringstream* commentsGeneralSensitive=0;
     if (theGlobalVariables.UserDefaultHasAdminRights())
-      commentsGeneralSensitive=&comments;
+      commentsGeneralSensitive = &comments;
     if (!this->SendActivationEmail(theEmails, &comments, &comments, commentsGeneralSensitive))
-      result=false;
+      result = false;
   }
   return result;
 }
@@ -1698,16 +1699,16 @@ bool UserCalculator::GetActivationAddress
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationAbsoluteAddress");
   if (!this->FetchOneUserRow(theRoutines, &comments))
     return false;
-  this->actualActivationToken= this->GetSelectedRowEntry("activationToken");
-  if (this->actualActivationToken.value=="")
+  this->actualActivationToken = this->GetSelectedRowEntry("activationToken");
+  if (this->actualActivationToken.value == "")
   { comments << "Failed to fetch activation token for user: " << this->username.value;
     return false;
   }
-  if (this->actualActivationToken=="activated")
+  if (this->actualActivationToken == "activated")
   { comments << "Account of user: " << this->username.value << "already activated";
     return false;
   }
-  output= this->GetActivationAddressFromActivationToken
+  output = this->GetActivationAddressFromActivationToken
   (this->actualActivationToken.value, calculatorBase, this->username.value, this->email.value);
   return true;
 }
@@ -1719,17 +1720,17 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
     return false;
 //  stOutput << "<hr> all result strings: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited();
 //  stOutput << "<br> all result string names: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();
-  this->email=this->GetSelectedRowEntry("email");
+  this->email = this->GetSelectedRowEntry("email");
   //theGlobalVariables.FallAsleep(1000000);
 
-  if (this->email=="")
+  if (this->email == "")
   { comments << "\nNo email address for user: " << this->username.value << ". ";
     return false;
   }
   EmailRoutines theEmailRoutines;
-  theEmailRoutines.toEmail=this->email.value;
-  theEmailRoutines.subject="NO REPLY: Activation of a Math homework account. ";
-  theEmailRoutines.emailContent="Activation link: " + activationAddress;
+  theEmailRoutines.toEmail = this->email.value;
+  theEmailRoutines.subject = "NO REPLY: Activation of a Math homework account. ";
+  theEmailRoutines.emailContent = "Activation link: " + activationAddress;
 //  std::stringstream emailStream;
 //  emailStream << "Dear student,\nthis is an automated email sent with an activation token for your "
 //  << " math homework account. To activate your account and set up your password, please follow the link below. "
@@ -1737,14 +1738,14 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
 //  << " instead, post your quesiton on piazza.com or email your question to "
 //  << " todor.milev@gmail.com\n\n";
 //  emailStream << this->activationTokenUnsafe << "\n\nGood luck with our course, \n Your calculus instructors.";
-  std::string emailLog=theGlobalVariables.CallSystemWithOutput(theEmailRoutines.GetCommandToSendEmailWithMailX());
-  size_t indexGoAhead= emailLog.find("Go ahead");
-  bool result=true;
-  if (indexGoAhead== std::string::npos)
-    result=false;
+  std::string emailLog = theGlobalVariables.CallSystemWithOutput(theEmailRoutines.GetCommandToSendEmailWithMailX());
+  size_t indexGoAhead = emailLog.find("Go ahead");
+  bool result = true;
+  if (indexGoAhead == std::string::npos)
+    result = false;
   else
-  { std::string choppedEmailLog=emailLog.substr(indexGoAhead+8);
-    result=(choppedEmailLog.find("OK")!=std::string::npos);
+  { std::string choppedEmailLog=emailLog.substr(indexGoAhead + 8);
+    result = (choppedEmailLog.find("OK") != std::string::npos);
   }
   //stOutput << "Calling system with:<br>" << theEmailRoutines.GetCommandToSendEmailWithMailX()
   //<< "<br>\n to get output: \n<br>" << emailLog;
@@ -1755,7 +1756,7 @@ bool UserCalculator::SendActivationEmail(DatabaseRoutines& theRoutines, std::str
 
 bool DatabaseRoutines::innerAddUsersFromEmailListAndCourseName(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerAddUsersFromEmailListAndCourseName");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return theCommands << "addUsers takes as input two arguments.";
   std::string inputEmailList, inputClassHome;
   if (!input[1].IsOfType(&inputEmailList))
@@ -2178,7 +2179,14 @@ bool EmailRoutines::SendEmailWithMailGun
     { *commentsGeneral << "Did not find the mailgun hostname file: certificates/mailgun-hostname.txt. Using the "
       << "domain name: " << hostnameToSendEmailFrom << " instead. ";
     }
+  } else
+  { hostnameToSendEmailFrom = MathRoutines::StringTrimWhiteSpace(hostnameToSendEmailFrom);
+    if (theGlobalVariables.UserDefaultHasAdminRights() && commentsGeneral != 0)
+    { *commentsGeneral << "Hostname loaded: "
+      << HtmlRoutines::ConvertStringToURLString(hostnameToSendEmailFrom, false) << " instead. ";
+    }
   }
+
   if (mailGunKey.size() > 0)
     mailGunKey.resize(mailGunKey.size() - 1);
   std::stringstream commandToExecute;

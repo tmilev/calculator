@@ -1223,7 +1223,8 @@ std::string WebWorker::ToStringMessageUnsafe(bool useHTML)const
   for (int i = 0; i < this->cookies.size; i++)
     out << "<br>" << this->cookies[i];
   if (useHTML)
-  { out << "\n<hr>\nFull message head:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageHead, true);
+  { out << "\n<hr>\nHost with port:<br>\n" << theGlobalVariables.hostWithPort;
+    out << "\n<hr>\nFull message head:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageHead, true);
     out << "\n<hr>\nFull message body:<br>\n" << HtmlRoutines::ConvertStringToHtmlString(this->messageBody, true);
   } else
   { out << "\nFull message head (length " << this->messageHead.size()

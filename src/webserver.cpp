@@ -1378,8 +1378,8 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
       result = false;
   for (int i = 0; i < newlyFoundArgs.size(); i++)
   { if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i]))
-      if (theGlobalVariables.webArguments.GetValueCreate(newlyFoundArgs.theKeys[i]) != "")
-        continue; //<-if a key is already given cookie entries are ignored.
+      //if (theGlobalVariables.webArguments.GetValueCreate(newlyFoundArgs.theKeys[i]) != "")
+      continue; //<-if a key is already given cookie entries are ignored.
     //argumentProcessingFailureComments << "Found new cookie key: " << newlyFoundArgs.theKeys[i] << "<br>";
     std::string trimmed = newlyFoundArgs.theValues[i];
     if (trimmed.size() > 0)
@@ -2331,7 +2331,7 @@ int WebWorker::ProcessFolder()
   out << "<html><body>";
 //  out << this->ToString();
   if (this->RelativePhysicalFileNamE.size() > 0)
-    if (this->RelativePhysicalFileNamE[this->RelativePhysicalFileNamE.size() - 1]!='/')
+    if (this->RelativePhysicalFileNamE[this->RelativePhysicalFileNamE.size() - 1] != '/')
       this->RelativePhysicalFileNamE.push_back('/');
   if (this->addressGetOrPost.size() > 0)
     if (this->addressGetOrPost[this->addressGetOrPost.size() - 1] != '/')

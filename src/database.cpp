@@ -641,69 +641,69 @@ DatabaseRoutines::~DatabaseRoutines()
 
 DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery, std::stringstream* outputFailureComments, int inputMaxNumRowsToRead)
 { MacroRegisterFunctionWithName("DatabaseQuery::DatabaseQuery");
-  this->theQueryString=inputQuery;
-  this->parent=&inputParent;
-  this->flagQuerySucceeded=false;
-  this->flagQueryReturnedResult=false;
-  this->theQueryResult=0;
-  this->flagOutputWasTruncated=false;
-  this->MaxNumRowsToRead=inputMaxNumRowsToRead;
-  this->numRowsRead=0;
+  this->theQueryString = inputQuery;
+  this->parent = &inputParent;
+  this->flagQuerySucceeded = false;
+  this->flagQueryReturnedResult = false;
+  this->theQueryResult = 0;
+  this->flagOutputWasTruncated = false;
+  this->MaxNumRowsToRead = inputMaxNumRowsToRead;
+  this->numRowsRead = 0;
 //  if (outputFailureComments!=0)
 //    *outputFailureComments << "\n<hr>DEBUG: querying: " << inputQuery;
-  if (this->parent->connection==0)
+  if (this->parent->connection == 0)
     if (!this->parent->startMySQLDatabase(outputFailureComments, 0))
-    { if (outputFailureComments!=0)
+    { if (outputFailureComments != 0)
         *outputFailureComments << "Failed to start database. ";
       return;
     }
 //  if (outputFailureComments!=0)
 //    *outputFailureComments << "<br>DEBUG: got to here in the queery query part -1";
-  int queryError=mysql_query(this->parent->connection, this->theQueryString.c_str());
-  if (queryError!=0)
-  { if (outputFailureComments!=0)
+  int queryError = mysql_query(this->parent->connection, this->theQueryString.c_str());
+  if (queryError != 0)
+  { if (outputFailureComments != 0)
     { *outputFailureComments << "Query<br>" << this->theQueryString << "<br>failed. ";
       *outputFailureComments << mysql_error(this->parent->connection);
     }
     return;
   }
-  this->flagQuerySucceeded=true;
-  this->theQueryResult= mysql_store_result(this->parent->connection);
+  this->flagQuerySucceeded = true;
+  this->theQueryResult = mysql_store_result(this->parent->connection);
 //  if (outputFailureComments!=0)
 //    *outputFailureComments << "\n<br>\nDEBUG: and even to here";
-  if (this->theQueryResult==0)
+  if (this->theQueryResult == 0)
   { //if (outputFailureComments!=0)
     //  *outputFailureComments << "\n<br>\nDEBUG: Query succeeded. ";
     return;
   }
-  this->numRowsRead=mysql_num_rows(this->theQueryResult);
-  int numRowsToFetch=this->numRowsRead;
-  if (numRowsToFetch>this->MaxNumRowsToRead)
-  { this->flagOutputWasTruncated=true;
-    numRowsToFetch=this->MaxNumRowsToRead;
+  this->numRowsRead = mysql_num_rows(this->theQueryResult);
+  int numRowsToFetch = this->numRowsRead;
+  if (numRowsToFetch > this->MaxNumRowsToRead)
+  { this->flagOutputWasTruncated = true;
+    numRowsToFetch = this->MaxNumRowsToRead;
   }
   this->allQueryResultStrings.SetSize(numRowsToFetch);
-  int numFields=mysql_num_fields(this->theQueryResult);
-  if (numFields<1)
+  int numFields = mysql_num_fields(this->theQueryResult);
+  if (numFields < 1)
     return;
 //  if (outputFailureComments!=0)
 //    *outputFailureComments << "DEBUG: got to this point in the query ...";
-  for (int i=0; i<this->allQueryResultStrings.size; i++)
-  { this->currentRow=mysql_fetch_row(this->theQueryResult);
-    if (this->currentRow==0)
-    { if (outputFailureComments!=0)
-        *outputFailureComments << "Query result row " << i+1 << " did not return properly. " ;
+  for (int i = 0; i < this->allQueryResultStrings.size; i++)
+  { this->currentRow = mysql_fetch_row(this->theQueryResult);
+    if (this->currentRow == 0)
+    { if (outputFailureComments != 0)
+        *outputFailureComments << "Query result row " << i + 1 << " did not return properly. " ;
       this->allQueryResultStrings[i].SetSize(0);
       continue;
     }
     this->allQueryResultStrings[i].SetSize(numFields);
-    for (int fieldCounter=0; fieldCounter<numFields; fieldCounter++)
+    for (int fieldCounter = 0; fieldCounter < numFields; fieldCounter++)
     { std::stringstream theDataCivilizer;
       theDataCivilizer << this->currentRow[fieldCounter];
-      this->allQueryResultStrings[i][fieldCounter]=theDataCivilizer.str();
-      if (i==0 && fieldCounter==0)
-      { this->flagQueryReturnedResult=true;
-        this->firstResultString=theDataCivilizer.str();
+      this->allQueryResultStrings[i][fieldCounter] = theDataCivilizer.str();
+      if (i == 0 && fieldCounter == 0)
+      { this->flagQueryReturnedResult = true;
+        this->firstResultString = theDataCivilizer.str();
       }
     }
   }
@@ -712,9 +712,9 @@ DatabaseQuery::DatabaseQuery(DatabaseRoutines& inputParent, const std::string& i
 }
 
 void DatabaseQuery::close()
-{ if (this->theQueryResult!=0)
+{ if (this->theQueryResult != 0)
     mysql_free_result(this->theQueryResult);
-  this->theQueryResult=0;
+  this->theQueryResult = 0;
 }
 
 DatabaseQuery::~DatabaseQuery()
@@ -814,31 +814,44 @@ bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
 bool UserCalculator::FetchOneUserRow
 (DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
-  if (this->currentTable=="")
+  if (this->currentTable == "")
     crash << "Calling UserCalculator::FetchOneUserRow with an empty table is forbidden. " << crash;
   std::stringstream queryStream;
   queryStream << "SELECT * FROM " << theRoutines.theDatabaseName << "." << this->currentTable.GetIdentifieR()
   << " WHERE " << this->GetMySQLclauseIdentifyingUserByEmailOrID();
   DatabaseQuery theQuery(theRoutines, queryStream.str(), failureStream, 5);
   if (!theQuery.flagQuerySucceeded)
-  { if (failureStream!=0)
+  { if (failureStream != 0)
       *failureStream << "Query: " << queryStream.str() << " failed. ";
     return false;
   }
   if (!theQuery.flagQueryReturnedResult)
-  { if (failureStream!=0)
+  { if (failureStream != 0)
       *failureStream << "The table appears to be empty: query: " << queryStream.str()
       << " succeeded but returned no result. ";
     return false;
   }
-  if (theQuery.allQueryResultStrings.size!=1)
-  { if (failureStream!=0)
-      *failureStream << "Could not find entries for user " << this->username.value << ".";
+  if (theQuery.allQueryResultStrings.size == 0)
+  { if (failureStream != 0)
+    { if (this->username.value == "" && this->email.value != "")
+        *failureStream << "Could not find entries for user: " << HtmlRoutines::ConvertStringToHtmlString(this->email.value, false) << ".";
+      else
+        *failureStream << "Could not find entries for user: " << HtmlRoutines::ConvertStringToHtmlString(this->username.value, false) << ".";
+    }
+    return false;
+  }
+  if (theQuery.allQueryResultStrings.size > 1)
+  { if (failureStream != 0)
+    { if (this->username.value == "" && this->email.value != "")
+        *failureStream << "Found more than one entry for user: " << HtmlRoutines::ConvertStringToHtmlString(this->email.value, false) << ".";
+      else
+        *failureStream << "Found more than one entry for user: " << HtmlRoutines::ConvertStringToHtmlString(this->username.value, false) << ".";
+    }
     return false;
   }
   this->selectedRowFieldsUnsafe.SetSize(theQuery.allQueryResultStrings[0].size);
-  for (int i=0; i<this->selectedRowFieldsUnsafe.size; i++)
-    this->selectedRowFieldsUnsafe[i]=HtmlRoutines::ConvertURLStringToNormal(theQuery.allQueryResultStrings[0][i], false);
+  for (int i = 0; i < this->selectedRowFieldsUnsafe.size; i ++)
+    this->selectedRowFieldsUnsafe[i] = HtmlRoutines::ConvertURLStringToNormal(theQuery.allQueryResultStrings[0][i], false);
   theQuery.close();
   std::stringstream queryStreamFields;
   queryStreamFields
@@ -847,39 +860,39 @@ bool UserCalculator::FetchOneUserRow
   << "AND TABLE_NAME='" << this->currentTable.GetIdentifierNoQuotes() << "' ";
   DatabaseQuery theFieldQuery(theRoutines, queryStreamFields.str(), failureStream);
   if (!theFieldQuery.flagQuerySucceeded)
-  { if (failureStream!=0)
+  { if (failureStream != 0)
       *failureStream << "Query: " << queryStreamFields.str() << " failed. ";
     return false;
   }
   this->selectedRowFieldNamesUnsafe.SetSize(theFieldQuery.allQueryResultStrings.size);
-  for (int i=0; i<theFieldQuery.allQueryResultStrings.size; i++)
-    if (theFieldQuery.allQueryResultStrings[i].size>0 )
-      this->selectedRowFieldNamesUnsafe[i]=HtmlRoutines::ConvertURLStringToNormal(theFieldQuery.allQueryResultStrings[i][0], false);
-  if (this->currentTable!=DatabaseStrings::tableUsers)
+  for (int i = 0; i < theFieldQuery.allQueryResultStrings.size; i ++)
+    if (theFieldQuery.allQueryResultStrings[i].size > 0)
+      this->selectedRowFieldNamesUnsafe[i] = HtmlRoutines::ConvertURLStringToNormal(theFieldQuery.allQueryResultStrings[i][0], false);
+  if (this->currentTable != DatabaseStrings::tableUsers)
     return true;
-  this->actualActivationToken= this->GetSelectedRowEntry("activationToken");
-  this->userId=this->GetSelectedRowEntry(DatabaseStrings::columnUserId);
-  this->email= this->GetSelectedRowEntry("email");
-  this->userRole= this->GetSelectedRowEntry("userRole");
-  this->username=this->GetSelectedRowEntry(DatabaseStrings::columnUsername);
+  this->actualActivationToken = this->GetSelectedRowEntry("activationToken");
+  this->userId = this->GetSelectedRowEntry(DatabaseStrings::columnUserId);
+  this->email = this->GetSelectedRowEntry("email");
+  this->userRole = this->GetSelectedRowEntry("userRole");
+  this->username = this->GetSelectedRowEntry(DatabaseStrings::columnUsername);
   //<-Important! Database lookup may be
   //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
   //The preceding line of code guarantees we have read the username as it is stored in the DB.
-  this->actualShaonedSaltedPassword=this->GetSelectedRowEntry("password");
-  this->authenticationTokenCreationTime=this->GetSelectedRowEntry("authenticationCreationTime");
-  this->actualAuthenticationToken=this->GetSelectedRowEntry("authenticationToken");
-  this->problemDataString=this->GetSelectedRowEntry("problemData");
-  this->activationTokenCreationTime=this->GetSelectedRowEntry("activationTokenCreationTime");
-  if (this->actualActivationToken.value!="" &&
-      this->actualActivationToken.value!="activated" &&
-      this->actualActivationToken.value!="error")
-    this->flagUserHasActivationToken=true;
-  if (this->actualShaonedSaltedPassword=="")
-    this->flagUserHasNoPassword=true;
-  this->courseInfo.rawStringStoredInDB=
+  this->actualShaonedSaltedPassword = this->GetSelectedRowEntry("password");
+  this->authenticationTokenCreationTime = this->GetSelectedRowEntry("authenticationCreationTime");
+  this->actualAuthenticationToken = this->GetSelectedRowEntry("authenticationToken");
+  this->problemDataString = this->GetSelectedRowEntry("problemData");
+  this->activationTokenCreationTime = this->GetSelectedRowEntry("activationTokenCreationTime");
+  if (this->actualActivationToken.value != "" &&
+      this->actualActivationToken.value != "activated" &&
+      this->actualActivationToken.value != "error")
+    this->flagUserHasActivationToken = true;
+  if (this->actualShaonedSaltedPassword == "")
+    this->flagUserHasNoPassword = true;
+  this->courseInfo.rawStringStoredInDB =
   this->GetSelectedRowEntry(DatabaseStrings::columnCourseInfo);
-  if (this->courseInfo.rawStringStoredInDB=="" || this->GetSelectedRowEntry("userInfo")!="")
-  { if (commentsGeneral!=0)
+  if (this->courseInfo.rawStringStoredInDB == "" || this->GetSelectedRowEntry("userInfo") != "")
+  { if (commentsGeneral != 0)
       this->ComputeCourseInfoFromOtherEntriesOld(theRoutines, failureStream, commentsGeneral);
     else
       this->ComputeCourseInfoFromOtherEntriesOld(theRoutines, failureStream, failureStream);
@@ -887,7 +900,7 @@ bool UserCalculator::FetchOneUserRow
   this->AssignCourseInfoString(failureStream);
   std::string reader;
   //stOutput << "DEBUG:  GOT to hereE!!!";
-  if (this->courseInfo.deadlineSchemaIDComputed!="")
+  if (this->courseInfo.deadlineSchemaIDComputed != "")
   { //stOutput << "DEBUG: Fetching deadline schema id: " << this->courseInfo.deadlineSchemaIDComputed;
     std::stringstream localFailureStream;
     if (theRoutines.FetchEntry
@@ -897,20 +910,20 @@ bool UserCalculator::FetchOneUserRow
          DatabaseStrings::columnDeadlines,
          reader,
          &localFailureStream))
-      this->courseInfo.deadlinesString=reader;
+      this->courseInfo.deadlinesString = reader;
     else if(!theRoutines.InsertRow
         (DatabaseStrings::columnDeadlinesSchema,
          this->courseInfo.deadlineSchemaIDComputed,
          DatabaseStrings::tableDeadlines,
          &localFailureStream))
-      if (failureStream!=0)
+      if (failureStream != 0)
         *failureStream << localFailureStream.str();
     //stOutput << "DEBUG: Fetched deadline string: " << this->courseInfo.deadlinesString;
   }
   //  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
   //  << " this->currentCoursesInfoString:  " << this->currentCoursesInfoString.value;
   //stOutput << "DEBUG: problem info row id: " << this->problemInfoRowId.value;
-  if (this->courseInfo.problemWeightSchemaIDComputed!="")
+  if (this->courseInfo.problemWeightSchemaIDComputed != "")
   { std::stringstream localFailureStream;
     if (theRoutines.FetchEntry
         (DatabaseStrings::columnProblemWeightsSchema,
@@ -919,29 +932,28 @@ bool UserCalculator::FetchOneUserRow
          DatabaseStrings::columnProblemWeights,
          reader,
          &localFailureStream))
-      this->courseInfo.problemWeightString=reader;
-    else if(! theRoutines.InsertRow
+      this->courseInfo.problemWeightString = reader;
+    else if(!theRoutines.InsertRow
         (DatabaseStrings::columnProblemWeightsSchema,
          this->courseInfo.problemWeightSchemaIDComputed,
          DatabaseStrings::tableProblemWeights,
          &localFailureStream))
-      if (failureStream!=0)
+      if (failureStream != 0)
         *failureStream << localFailureStream.str();
   }
   return true;
 }
 
 std::string UserCalculatorData::ToStringIdSectionCourse()
-{ return this->courseInfo.getInstructorInDB()+
-  this->courseInfo.getSectionInDB()+this->courseInfo.getCurrentCourseInDB();
-
+{ return this->courseInfo.getInstructorInDB() +
+  this->courseInfo.getSectionInDB() + this->courseInfo.getCurrentCourseInDB();
 }
 
 bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
 { MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
-  JSData& theCourseInfo=this->courseInfo.courseInfoJSON.GetElement();
+  JSData& theCourseInfo = this->courseInfo.courseInfoJSON.GetElement();
   theCourseInfo.readstring(this->courseInfo.rawStringStoredInDB, errorStream);
-  bool isAdmin=(this->userRole=="admin" && this->username.value==theGlobalVariables.userDefault.username.value);
+  bool isAdmin = (this->userRole == "admin" && this->username.value == theGlobalVariables.userDefault.username.value);
   if (theGlobalVariables.UserStudentVieWOn() && isAdmin &&
       theGlobalVariables.GetWebInput("studentSection") != "")
   //<- warning, the user may not be
@@ -950,16 +962,15 @@ bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
     this->courseInfo.sectionComputed = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
   else
     this->courseInfo.sectionComputed = this->courseInfo.getSectionInDB();
-  if (isAdmin && theGlobalVariables.GetWebInput("courseHome")!="")
+  if (isAdmin && theGlobalVariables.GetWebInput("courseHome") != "")
     this->courseInfo.courseComputed =
     HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   else
-    this->courseInfo.courseComputed=theCourseInfo[DatabaseStrings::columnCurrentCourses].string;
+    this->courseInfo.courseComputed = theCourseInfo[DatabaseStrings::columnCurrentCourses].string;
   if (isAdmin)
     this->courseInfo.instructorComputed = this->username.value;
   else
     this->courseInfo.instructorComputed = this->courseInfo.getInstructorInDB();
-
   this->courseInfo.deadlineSchemaIDComputed = "deadlines" +
   this->courseInfo.instructorComputed +
   this->courseInfo.courseComputed +
@@ -1266,8 +1277,8 @@ bool DatabaseRoutines::FetchAllUsers
   { commentsOnFailure << "<b>Failed to start database</b>";
     return false;
   }
-  bool tableTruncated=false;
-  int numRows=-1;
+  bool tableTruncated = false;
+  int numRows = -1;
   if (!DatabaseRoutinesGlobalFunctions::FetchTablE
       (outputUserTable, outputLabelsUserTable, tableTruncated, numRows, DatabaseStrings::tableUsers, commentsOnFailure))
   { commentsOnFailure << "<span style=\"color:red\"><b>Failed to fetch table: "
@@ -1300,7 +1311,7 @@ bool UserCalculator::ComputeAndStoreActivationStats
 { MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationStats");
   std::string activationAddress =
   this->GetActivationAddressFromActivationToken
-  (this->actualActivationToken.value, theGlobalVariables.hostNoPort,
+  (this->actualActivationToken.value, theGlobalVariables.hostWithPort,
    this->username.value, this->email.value);
   std::stringstream tableCols;
   this->currentTable = "emailActivationStats";
@@ -1445,7 +1456,7 @@ bool DatabaseRoutines::SendActivationEmail
 )
 { MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   UserCalculator currentUser;
-  currentUser.currentTable=DatabaseStrings::tableUsers;
+  currentUser.currentTable = DatabaseStrings::tableUsers;
   bool result = true;
   DatabaseRoutines theRoutines;
   for (int i = 0; i < theEmails.size; i++)
@@ -1812,11 +1823,11 @@ bool DatabaseRoutines::innerSetUserPassword(Calculator& theCommands, const Expre
   UserCalculator theUser;
   if (!theUser.getUserAndPass(theCommands, input))
     return false;
-  bool authorized=false;
-  if (theUser.username.value==theGlobalVariables.userDefault.username.value)
-    authorized=true;
+  bool authorized = false;
+  if (theUser.username.value == theGlobalVariables.userDefault.username.value)
+    authorized = true;
   else if (theGlobalVariables.UserDefaultHasAdminRights())
-  { authorized=true;
+  { authorized = true;
     theCommands << "Password change: invoking admin powers...";
   }
   if (!authorized)
@@ -1839,23 +1850,23 @@ bool UserCalculator::getUser(Calculator& theCommands, const Expression& input)
 
 bool UserCalculator::getUserAndPass(Calculator& theCommands, const Expression& input)
 { MacroRegisterFunctionWithName("UserCalculator::getUserAndPass");
-  if (input.children.size!=3)
+  if (input.children.size != 3)
     return theCommands << "UserCalculator::getUserAndPass takes as input 2 arguments (user name and password). ";
   if (!input[1].IsOfType<std::string>(&this->username.value))
   { theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string. ";
-    this->username=input[1].ToString();
+    this->username = input[1].ToString();
   }
   if (!input[2].IsOfType<std::string>(&this->enteredPassword))
   { theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string. ";
-    this->enteredPassword=input[2].ToString();
-    this->enteredAuthenticationToken=this->enteredPassword;
+    this->enteredPassword = input[2].ToString();
+    this->enteredAuthenticationToken = this->enteredPassword;
   }
   return true;
 }
 
 bool UserCalculator::getUserPassAndSelectedColumns(Calculator& theCommands, const Expression& input)
 { MacroRegisterFunctionWithName("UserCalculator::getUserPassAndSelectedColumns");
-  if (input.children.size<3)
+  if (input.children.size < 3)
     return theCommands << "UserCalculator::getUserPassAndSelectedColumns takes as input at least 2 arguments (user name and password). ";
   bool result = this->getUserPassAndExtraData(theCommands, input, this->selectedColumnsUnsafe);
   this->selectedColumnValuesUnsafe.initFillInObject(this->selectedColumnsUnsafe.size, "");
@@ -1865,56 +1876,56 @@ bool UserCalculator::getUserPassAndSelectedColumns(Calculator& theCommands, cons
 
 bool UserCalculator::getUserPassAndExtraData(Calculator& theCommands, const Expression& input, List<std::string>& outputData)
 { MacroRegisterFunctionWithName("UserCalculator::getUserPassAndExtraData");
-  if (input.children.size<4)
+  if (input.children.size < 4)
     return theCommands << "UserCalculator::getUserPassAndExtraData takes as input at least 2 arguments (user name and password). ";
   if (!input[1].IsOfType<std::string>(&this->username.value))
   { theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
-    this->username=input[1].ToString();
+    this->username = input[1].ToString();
   }
   if (!input[2].IsOfType<std::string>(&this->enteredPassword))
   { theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
-    this->enteredPassword=input[2].ToString();
-    this->enteredAuthenticationToken=this->enteredPassword;
+    this->enteredPassword = input[2].ToString();
+    this->enteredAuthenticationToken = this->enteredPassword;
   }
-  outputData.SetSize(input.children.size-3);
-  for (int i=3; i<input.children.size; i++ )
-    if (!input[i].IsOfType<std::string>(& outputData[i-3]))
+  outputData.SetSize(input.children.size - 3);
+  for (int i = 3; i < input.children.size; i++ )
+    if (!input[i].IsOfType<std::string>(& outputData[i - 3]))
     { theCommands << "<hr>Argument " << input[i].ToString() << " is supposed to be a string";
-      outputData[i-3]=input[i].ToString();
+      outputData[i - 3] = input[i].ToString();
     }
   return true;
 }
 
 bool UserCalculator::getUserPassAndEmail(Calculator& theCommands, const Expression& input)
 { MacroRegisterFunctionWithName("UserCalculator::getUserPassAndEmail");
-  if (input.children.size!=4)
+  if (input.children.size != 4)
     return theCommands << "UserCalculator::getUserPassAndEmail takes as input 3 arguments (user name, email and password). ";
   if (!input[1].IsOfType<std::string>(&this->username.value))
   { theCommands << "<hr>Argument " << input[1].ToString() << " is supposed to be a string.";
-    this->username=input[1].ToString();
+    this->username = input[1].ToString();
   }
   if (!input[2].IsOfType<std::string>(&this->enteredPassword))
   { theCommands << "<hr>Argument " << input[2].ToString() << " is supposed to be a string.";
-    this->enteredPassword=input[2].ToString();
-    this->enteredAuthenticationToken=this->enteredPassword;
+    this->enteredPassword = input[2].ToString();
+    this->enteredAuthenticationToken = this->enteredPassword;
   }
   if (!input[3].IsOfType<std::string>(&this->email.value))
   { theCommands << "<hr>Argument " << input[3].ToString() << " is supposed to be a string.";
-    this->email=input[3].ToString();
+    this->email = input[3].ToString();
   }
   return true;
 }
 
 void UserCalculator::FetchColumns(DatabaseRoutines& theRoutines)
 { MacroRegisterFunctionWithName("UserCalculator::FetchColumns");
-  if (this->selectedColumnsUnsafe.size!=this->selectedColumnValuesUnsafe.size ||
-      this->selectedColumnsUnsafe.size!=this->selectedColumnsRetrievalFailureRemarks.size)
+  if (this->selectedColumnsUnsafe.size != this->selectedColumnValuesUnsafe.size ||
+      this->selectedColumnsUnsafe.size != this->selectedColumnsRetrievalFailureRemarks.size)
     crash << "This is a programming error: selected columns not initialized properly" << crash;
-  for (int i=0; i<this->selectedColumnsUnsafe.size; i++)
+  for (int i = 0; i<this->selectedColumnsUnsafe.size; i++)
   { std::stringstream tempStream;
     this->FetchOneColumn
     (this->selectedColumnsUnsafe[i], this->selectedColumnValuesUnsafe[i], theRoutines, &tempStream);
-    this->selectedColumnsRetrievalFailureRemarks[i]=tempStream.str();
+    this->selectedColumnsRetrievalFailureRemarks[i] = tempStream.str();
   }
 }
 
@@ -1957,7 +1968,7 @@ bool DatabaseRoutines::innerDisplayTables(Calculator& theCommands, const Express
 bool DatabaseRoutines::innerUserExists
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerDisplayDatabaseTable");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return theCommands << "Required inputs are missing: username, email. ";
   std::string userName, email;
   if (!input[1].IsOfType<std::string>(&userName) || !input[2].IsOfType<std::string>(&email))
@@ -1965,8 +1976,8 @@ bool DatabaseRoutines::innerUserExists
     << input[2].ToString() << " are required to be strings. ";
   DatabaseRoutines theRoutines;
   UserCalculator theUser;
-  theUser.email=email;
-  theUser.username=userName;
+  theUser.email = email;
+  theUser.username = userName;
   std::stringstream out;
   if (theUser.Iexist(theRoutines, &out))
     out << "User identified by: " << userName << ", " << email << " is present in the database. ";
@@ -1983,7 +1994,7 @@ bool DatabaseRoutines::innerDisplayDatabaseTable
   std::string desiredTableName;
   if (!input.IsOfType<std::string>(&desiredTableName))
   { theCommands << "<hr>Argument " << input.ToString() << " is supposed to be a string. ";
-    desiredTableName=input.ToString();
+    desiredTableName = input.ToString();
   }
   DatabaseRoutines theRoutines;
   return output.AssignValue(theRoutines.ToStringTablE(desiredTableName), theCommands);
@@ -2048,7 +2059,7 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
   { out << "Function available to logged-in admins only. ";
     return output.AssignValue(out.str(), theCommands);
   }
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=20000;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 20000;
   (void) input;//prevent unused parameter, portable
   DatabaseRoutines theRoutines;
   out << "Testing/repairing database ... Comments:<br>";
@@ -2065,42 +2076,42 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
   List<std::string> labels;
   if (!theRoutines.FetchAllUsers(theUserTable, labels, out))
     return output.AssignValue(out.str(), theCommands);
-  int emailColumn=labels.GetIndex("email");
-  int usernameColumn=labels.GetIndex(DatabaseStrings::columnUsername);
-  int passwordColumn=labels.GetIndex("password");
-  int activationTokenColumn=labels.GetIndex("activationToken");
+  int emailColumn = labels.GetIndex("email");
+  int usernameColumn = labels.GetIndex(DatabaseStrings::columnUsername);
+  int passwordColumn = labels.GetIndex("password");
+  int activationTokenColumn = labels.GetIndex("activationToken");
   ProgressReport theReport;
-  if (emailColumn==-1)
+  if (emailColumn == - 1)
   { out << "Couldn't find email column. ";
     return output.AssignValue(out.str(), theCommands);
   }
-  if (usernameColumn==-1)
+  if (usernameColumn == - 1)
   { out << "Couldn't find username column. ";
     return output.AssignValue(out.str(), theCommands);
   }
-  if (passwordColumn==-1)
+  if (passwordColumn == - 1)
   { out << "Couldn't find password column. ";
     return output.AssignValue(out.str(), theCommands);
   }
-  if (activationTokenColumn==-1)
+  if (activationTokenColumn == - 1)
   { out << "Couldn't find activation token column. ";
     return output.AssignValue(out.str(), theCommands);
   }
   HashedList<std::string, MathRoutines::hashString> emailsRegistered;
-  for (int i=0; i<theUserTable.size; i++)
-  { std::string currentEmail=theUserTable[i][emailColumn];
+  for (int i = 0; i < theUserTable.size; i++)
+  { std::string currentEmail = theUserTable[i][emailColumn];
     if (emailsRegistered.Contains(currentEmail))
     { out << "Fatal error: email " << currentEmail << "repeated. ";
       return output.AssignValue(out.str(), theCommands);
     }
   }
-  int numCorrections=0;
+  int numCorrections = 0;
   UserCalculator currentUser;
-  currentUser.currentTable=DatabaseStrings::tableUsers;
-  for (int i=0; i<theUserTable.size; i++)
-  { std::string currentUserName=theUserTable[i][usernameColumn];
-    std::string currentEmail=theUserTable[i][emailColumn];
-    if (currentEmail!="")
+  currentUser.currentTable = DatabaseStrings::tableUsers;
+  for (int i = 0; i < theUserTable.size; i++)
+  { std::string currentUserName = theUserTable[i][usernameColumn];
+    std::string currentEmail = theUserTable[i][emailColumn];
+    if (currentEmail != "")
       continue;
     if (!EmailRoutines::IsOKEmail(currentUserName, 0))
       continue;
@@ -2111,13 +2122,13 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
       << " Please resolve the matter with the user. ";
       continue;
     }
-    currentUser.username=currentUserName;
-    currentUser.email=currentUserName;
+    currentUser.username = currentUserName;
+    currentUser.email = currentUserName;
     if (!currentUser.SetColumnEntry("email", currentUser.email.value, theRoutines, &comments))
     { out << "<br>This shouldn't happen: failed to set email for " << currentUser.username.value << ". ";
       continue;
     }
-    numCorrections++;
+    numCorrections ++;
     std::stringstream currentCorrection;
     currentCorrection << "<br>Correction " << numCorrections << ": user " << currentUser.username.value
     << " had no email but the username appears to be a valid email. "
@@ -2125,15 +2136,15 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
     out << currentCorrection.str();
     theReport.Report(currentCorrection.str());
   }
-  for (int i=0; i<theUserTable.size; i++)
-  { currentUser.username=theUserTable[i][usernameColumn];
-    std::string currentPassword=theUserTable[i][passwordColumn];
-    std::string currentActivationToken=theUserTable[i][activationTokenColumn];
-    if (currentActivationToken=="activated")
+  for (int i = 0; i < theUserTable.size; i ++)
+  { currentUser.username = theUserTable[i][usernameColumn];
+    std::string currentPassword = theUserTable[i][passwordColumn];
+    std::string currentActivationToken = theUserTable[i][activationTokenColumn];
+    if (currentActivationToken == "activated")
       continue;
-    if (currentPassword=="")
+    if (currentPassword == "")
       continue;
-    numCorrections++;
+    numCorrections ++;
     std::stringstream currentCorrection;
     currentCorrection << "<br>Correction " << numCorrections << ": "
     << " user: " << currentUser.username.value << " has a password but his activation token "
@@ -2142,13 +2153,13 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
     out << currentCorrection.str();
     theReport.Report(currentCorrection.str());
   }
-  for (int i=0; i<theUserTable.size; i++)
+  for (int i = 0; i < theUserTable.size; i++)
   { currentUser.reset();
     std::stringstream currentUserComments;
-    currentUser.username=theUserTable[i][usernameColumn];
+    currentUser.username = theUserTable[i][usernameColumn];
     currentUser.FetchOneUserRow(theRoutines, &out, &currentUserComments);
-    if (currentUserComments.str().size()>0)
-    { numCorrections++;
+    if (currentUserComments.str().size() > 0)
+    { numCorrections ++;
       std::stringstream currentCorrection;
       currentCorrection
       << "<br>Correction " << numCorrections << ": "

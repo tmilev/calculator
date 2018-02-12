@@ -281,6 +281,8 @@ public:
   (DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral);
   bool FetchOneUserRow
   (DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral=0);
+  bool FetchOneUserRowPartOne
+  (DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral=0);
   bool FetchOneColumn
   (const std::string& columnNameUnsafe, std::string& outputUnsafe,
    DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);

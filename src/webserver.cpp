@@ -3085,28 +3085,34 @@ int WebWorker::ProcessChangePassword()
     return 0;
   }
   std::string newPassword =
-    HtmlRoutines::ConvertStringToURLString(
-    HtmlRoutines::ConvertURLStringToNormal( theGlobalVariables.GetWebInput("newPassword"), true), false
-    )
-  ;
+    HtmlRoutines::ConvertStringToURLString
+    (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("newPassword"), true), false);
   //<-Passwords are ONE-LAYER url-encoded
   //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   //<-Incoming pluses must be re-coded as spaces (%20).
 
   std::string reenteredPassword =
-    HtmlRoutines::ConvertStringToURLString(
-    HtmlRoutines::ConvertURLStringToNormal( theGlobalVariables.GetWebInput("reenteredPassword"), true), false
-    )
-  ;
+    HtmlRoutines::ConvertStringToURLString
+    (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("reenteredPassword"), true), false);
   //<-Passwords are ONE-LAYER url-encoded
   //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   //<-Incoming pluses must be re-coded as spaces (%20).
 
   std::string newEmail = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
+  if (newEmail != "")
+  { UserCalculator userToCheckWhetherEmailIsTaken;
+    userToCheckWhetherEmailIsTaken.email = newEmail;
+    DatabaseRoutines theRoutines;
+    userToCheckWhetherEmailIsTaken.currentTable = "users";
+    if (userToCheckWhetherEmailIsTaken.FetchOneUserRowPartOne(theRoutines, 0, 0))
+    { stOutput << "<b style=\"color:red\">It appears the email is already taken. </b>";
+      return 0;
+    }
+  }
   if (newPassword == "" && reenteredPassword == "" && newEmail != "")
     return this->SetEmail(newEmail);
   if (newPassword != reenteredPassword)
-  { stOutput << "<span style=\"color:red\"><b> Passwords don't match.</b></span>";
+  { stOutput << "<b style=\"color:red\">Passwords don't match. </b>";
     return 0;
   }
   std::stringstream commentsOnFailure;

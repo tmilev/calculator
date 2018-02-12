@@ -24,7 +24,7 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword
   theUser.username = inputUsername;
   theUser.enteredPassword = inputNewPassword;
   //stOutput << "DEBUG: setting password: " << inputNewPassword;
-  bool result= theUser.SetPassword(theRoutines, &comments);
+  bool result = theUser.SetPassword(theRoutines, &comments);
   theUser.ResetAuthenticationToken(theRoutines, &comments);
   outputAuthenticationToken = theUser.actualAuthenticationToken.value;
   return result;
@@ -800,20 +800,21 @@ bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
   (void) commentsOnFailure;
 //  stOutput << "<br>DEBUG: token-authenticating user: " << this->username.value << " with entered token: " << this->enteredAuthenticationToken.value
 //  << " against actual token: " << this->actualAuthenticationToken.value;
-  if (this->enteredAuthenticationToken=="")
+  if (this->enteredAuthenticationToken == "")
     return false;
   TimeWrapper now;
   now.AssignLocalTime();
-  this->approximateHoursSinceLastTokenWasIssued=
+  this->approximateHoursSinceLastTokenWasIssued =
   now.SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours
   (this->authenticationCreationTime);
   //<-to do: revoke authentication token if expired.
-  return this->enteredAuthenticationToken.value==this->actualAuthenticationToken.value;
+  return this->enteredAuthenticationToken.value == this->actualAuthenticationToken.value;
 }
 
-bool UserCalculator::FetchOneUserRow
+bool UserCalculator::FetchOneUserRowPartOne
 (DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral)
-{ MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
+{ MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRowPartOne");
+  (void) commentsGeneral;
   if (this->currentTable == "")
     crash << "Calling UserCalculator::FetchOneUserRow with an empty table is forbidden. " << crash;
   std::stringstream queryStream;
@@ -841,18 +842,25 @@ bool UserCalculator::FetchOneUserRow
     return false;
   }
   if (theQuery.allQueryResultStrings.size > 1)
-  { if (failureStream != 0)
-    { if (this->username.value == "" && this->email.value != "")
-        *failureStream << "Found more than one entry for user: " << HtmlRoutines::ConvertStringToHtmlString(this->email.value, false) << ".";
-      else
-        *failureStream << "Found more than one entry for user: " << HtmlRoutines::ConvertStringToHtmlString(this->username.value, false) << ".";
-    }
-    return false;
+  { if (this->username.value == "" && this->email.value != "")
+      stOutput << "Found more than one entry for user: "
+      << HtmlRoutines::ConvertStringToHtmlString(this->email.value, false) << ". ";
+    else
+      stOutput << "Found more than one entry for user: "
+      << HtmlRoutines::ConvertStringToHtmlString(this->username.value, false) << ". ";
   }
   this->selectedRowFieldsUnsafe.SetSize(theQuery.allQueryResultStrings[0].size);
   for (int i = 0; i < this->selectedRowFieldsUnsafe.size; i ++)
     this->selectedRowFieldsUnsafe[i] = HtmlRoutines::ConvertURLStringToNormal(theQuery.allQueryResultStrings[0][i], false);
   theQuery.close();
+  return true;
+}
+
+bool UserCalculator::FetchOneUserRow
+(DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral)
+{ MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
+  if (!this->FetchOneUserRowPartOne(theRoutines, failureStream, commentsGeneral))
+    return false;
   std::stringstream queryStreamFields;
   queryStreamFields
   << "SELECT `COLUMN_NAME` FROM information_schema.COLUMNS WHERE "
@@ -1843,7 +1851,7 @@ bool UserCalculator::getUser(Calculator& theCommands, const Expression& input)
 { MacroRegisterFunctionWithName("UserCalculator::getUser");
   if (!input.IsOfType<std::string>(&this->username.value))
   { theCommands << "<hr>Argument " << input.ToString() << " is supposed to be a string.";
-    this->username=input.ToString();
+    this->username = input.ToString();
   }
   return true;
 }
@@ -1959,7 +1967,7 @@ bool DatabaseRoutines::innerDisplayTables(Calculator& theCommands, const Express
   if (!theRoutines.FetchTableNames(theTables, theCommands.Comments))
     return false;
   out << "<table>";
-  for (int i=0; i<theTables.size; i++)
+  for (int i = 0; i < theTables.size; i ++)
     out << "<tr><td>" << theTables[i] << "</td></tr>";
   out << "</table>";
   return output.AssignValue(out.str(), theCommands);
@@ -2108,7 +2116,7 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
   int numCorrections = 0;
   UserCalculator currentUser;
   currentUser.currentTable = DatabaseStrings::tableUsers;
-  for (int i = 0; i < theUserTable.size; i++)
+  for (int i = 0; i < theUserTable.size; i ++)
   { std::string currentUserName = theUserTable[i][usernameColumn];
     std::string currentEmail = theUserTable[i][emailColumn];
     if (currentEmail != "")
@@ -2153,7 +2161,7 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
     out << currentCorrection.str();
     theReport.Report(currentCorrection.str());
   }
-  for (int i = 0; i < theUserTable.size; i++)
+  for (int i = 0; i < theUserTable.size; i ++)
   { currentUser.reset();
     std::stringstream currentUserComments;
     currentUser.username = theUserTable[i][usernameColumn];
@@ -2268,26 +2276,26 @@ List<bool>& EmailRoutines::GetRecognizedEmailChars()
 bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* commentsOnError)
 { MacroRegisterFunctionWithName("EmailRoutines::IsOKEmail");
   //stOutput << "DEBUG: got to isokemail";
-  if (input.size()==0)
-  { if (commentsOnError!=0)
+  if (input.size() == 0)
+  { if (commentsOnError != 0)
       *commentsOnError << "Empty email not allowed. ";
     return false;
   }
-  int numAts=0;
-  for (unsigned i=0; i<input.size(); i++)
+  int numAts = 0;
+  for (unsigned i = 0; i < input.size(); i++)
   { if(!EmailRoutines::GetRecognizedEmailChars()[((unsigned char) input[i])])
-    { if (commentsOnError!=0)
+    { if (commentsOnError != 0)
         *commentsOnError << "Email: " << input << " contains the unrecognized character "
         << input[i] << ". ";
       return false;
     }
-    if (input[i]=='@')
+    if (input[i] == '@')
       numAts++;
   }
-  if (numAts!=1 && commentsOnError!=0)
+  if (numAts != 1 && commentsOnError != 0)
     *commentsOnError << "Email: "
     << input << " is required to have exactly one @ character. ";
-  return numAts==1;
+  return numAts == 1;
 }
 
 std::string EmailRoutines::GetCommandToSendEmailWithMailX()
@@ -2318,23 +2326,23 @@ std::string EmailRoutines::GetCommandToSendEmailWithMailX()
 }
 
 EmailRoutines::EmailRoutines()
-{ this->fromEmail="calculator.todor.milev@gmail.com";
+{ this->fromEmail = "calculator.todor.milev@gmail.com";
   //this->ccEmail="todor.milev@gmail.com";
-  this->smtpWithPort= "smtp.gmail.com:587";
-  this->fromEmailAuth=Crypto::ConvertStringToBase64("A good day to use a computer algebra system");
+  this->smtpWithPort = "smtp.gmail.com:587";
+  this->fromEmailAuth = Crypto::ConvertStringToBase64("A good day to use a computer algebra system");
 }
 
 std::string DatabaseRoutines::ToStringSuggestionsReasonsForFailure
 (const std::string& inputUsernameUnsafe, DatabaseRoutines& theRoutines, UserCalculator& theUser)
 { MacroRegisterFunctionWithName("ToStringSuggestionsReasonsForFailure");
   std::stringstream out;
-  bool userFound=false;
+  bool userFound = false;
   if (theUser.Iexist(theRoutines,0))
-    userFound=true;
-  else if (theUser.username.value.find('@')==std::string::npos)
-  { theUser.username.value+="@umb.edu";
+    userFound = true;
+  else if (theUser.username.value.find('@') == std::string::npos)
+  { theUser.username.value += "@umb.edu";
     if (theUser.Iexist(theRoutines, 0))
-      userFound=true;
+      userFound = true;
   }
   if (userFound)
   { std::string recommendedNewName;
@@ -2342,7 +2350,7 @@ std::string DatabaseRoutines::ToStringSuggestionsReasonsForFailure
       return out.str();
     theUser.username.value=recommendedNewName;
   }
-  if (theUser.username.value!=inputUsernameUnsafe)
+  if (theUser.username.value != inputUsernameUnsafe)
   { out << "<br>Username is CaSe SeNsItiVE and consists of the full email address: perhaps you meant: <br>"
     << theUser.username.value << "<br>";
     //out << "<hr>" << Crasher::GetStackTraceEtcErrorMessage() << "<hr>";
@@ -2359,9 +2367,9 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
 #ifdef MACRO_use_MySQL
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
-  userWrapper.currentTable=DatabaseStrings::tableUsers;
+  userWrapper.currentTable = DatabaseStrings::tableUsers;
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded");
-  if (userWrapper.enteredGoogleToken=="")
+  if (userWrapper.enteredGoogleToken == "")
     return false;
   if (!Crypto::VerifyJWTagainstKnownKeys(userWrapper.enteredGoogleToken, commentsOnFailure, commentsGeneral))
     return false;
@@ -2371,32 +2379,32 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   JSData theData;
   if (!theData.readstring(theToken.claimsJSON, commentsOnFailure))
     return false;
-  if (theData.GetValue("email").type!=JSData::JSstring)
-  { if (commentsOnFailure!=0)
+  if (theData.GetValue("email").type != JSData::JSstring)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "Could not find email entry in the json data " << theData.ToString(true);
     return false;
   }
-  userWrapper.email.value=theData.GetValue("email").string;
-  userWrapper.username.value="";
+  userWrapper.email.value = theData.GetValue("email").string;
+  userWrapper.username.value = "";
   DatabaseRoutines theRoutines;
   if (!userWrapper.Iexist(theRoutines, commentsOnFailure))
-  { if (commentsGeneral!=0)
+  { if (commentsGeneral != 0)
       *commentsGeneral << "User with email " << userWrapper.email.value << " does not exist. ";
     //stOutput << "\n<br>\nDEBUG: User with email " << userWrapper.email.value << " does not exist. ";
-    userWrapper.username=userWrapper.email;
+    userWrapper.username = userWrapper.email;
     if (!userWrapper.CreateMeIfUsernameUnique(theRoutines, commentsOnFailure))
       return false;
-    if (commentsGeneral!=0)
+    if (commentsGeneral != 0)
       *commentsGeneral << "Created new user with username: " << userWrapper.username.value;
     theUseR = userWrapper;
     return true;
   }
   if (!userWrapper.FetchOneUserRow(theRoutines, commentsOnFailure))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "Failed to fetch user with email " << userWrapper.email.value << ". ";
     return false;
   }
-  if (userWrapper.actualAuthenticationToken.value=="")
+  if (userWrapper.actualAuthenticationToken.value == "")
     userWrapper.ResetAuthenticationToken(theRoutines, commentsOnFailure);
   theUseR = userWrapper;
   return true;
@@ -2416,59 +2424,59 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   userWrapper.::UserCalculatorData::operator=(theUseR);
   //*comments << "<br>DEBUG: Logging in: " << userWrapper.username.value;
   //*comments << "<br>DEBUG: password: " << userWrapper.enteredPassword;
-  userWrapper.currentTable=DatabaseStrings::tableUsers;
+  userWrapper.currentTable = DatabaseStrings::tableUsers;
   if (userWrapper.Authenticate(theRoutines, comments))
-  { theUseR=userWrapper;
+  { theUseR = userWrapper;
     return true;
   }
-  if (userWrapper.enteredAuthenticationToken!="" &&
-      userWrapper.enteredActivationToken=="" &&
-      userWrapper.enteredAuthenticationToken!="0" &&
-      comments!=0)
+  if (userWrapper.enteredAuthenticationToken != "" &&
+      userWrapper.enteredActivationToken == "" &&
+      userWrapper.enteredAuthenticationToken != "0" &&
+      comments != 0)
   { *comments << "<b> Authentication of user: " << userWrapper.username.value
     << " with token " << userWrapper.enteredAuthenticationToken.value << " failed. </b>";
     //*comments << "<br>DEBUG: actual token: " << userWrapper.actualAuthenticationToken.value
     //<< "<br>database user: " << theRoutines.theDatabaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>"
     //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
   }
-  if (userWrapper.enteredActivationToken!="" && comments!=0)
+  if (userWrapper.enteredActivationToken != "" && comments != 0)
   { //*comments << "<br>DEBUG: actual activation token: " << userWrapper.actualActivationToken.value
     //<< ". Entered activation token: " << userWrapper.enteredActivationToken.value
     //<< "<br>database user: " << theRoutines.theDatabaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>"
     //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
   }
   //stOutput << "<br>DEBUG: Got to this point";
-  if (theGlobalVariables.userCalculatorRequestType=="changePassword" ||
-      theGlobalVariables.userCalculatorRequestType=="changePasswordPage" ||
-      theGlobalVariables.userCalculatorRequestType=="activateAccount" )
-    if (userWrapper.enteredActivationToken!="")
+  if (theGlobalVariables.userCalculatorRequestType == "changePassword" ||
+      theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
+      theGlobalVariables.userCalculatorRequestType == "activateAccount" )
+    if (userWrapper.enteredActivationToken != "")
     { //stOutput << "<br>DEBUG: Proceding to login with activation token. ";
-      if (userWrapper.actualActivationToken!="activated" &&
-          userWrapper.actualActivationToken!="" &&
-          userWrapper.actualActivationToken!="error")
-      { if (userWrapper.enteredActivationToken.value==userWrapper.actualActivationToken.value)
-        { theUseR=userWrapper;
+      if (userWrapper.actualActivationToken != "activated" &&
+          userWrapper.actualActivationToken != "" &&
+          userWrapper.actualActivationToken != "error")
+      { if (userWrapper.enteredActivationToken.value == userWrapper.actualActivationToken.value)
+        { theUseR = userWrapper;
           return true;
         }
-      } else if (comments!=0)
-      { if (userWrapper.actualActivationToken!="error")
+      } else if (comments != 0)
+      { if (userWrapper.actualActivationToken != "error")
           *comments << "<b>Account already activated. </b>";
         else
           *comments << "<b>An error during activation ocurred.</b>";
       }
     }
-  if (userWrapper.username.value=="admin" && userWrapper.enteredPassword!="")
+  if (userWrapper.username.value == "admin" && userWrapper.enteredPassword != "")
     if (!userWrapper.Iexist(theRoutines, 0))
-    { if (comments!=0)
+    { if (comments != 0)
         *comments << "<b>First login of user admin: setting admin pass. </b>";
       userWrapper.CreateMeIfUsernameUnique(theRoutines, comments);
       userWrapper.SetColumnEntry("activationToken", "activated", theRoutines, comments);
       userWrapper.SetColumnEntry("userRole", "admin", theRoutines, comments);
-      userWrapper.userRole="admin";
-      theUseR=userWrapper;
+      userWrapper.userRole = "admin";
+      theUseR = userWrapper;
       return true;
     }
-  if (comments!=0)
+  if (comments != 0)
     *comments << DatabaseRoutines::ToStringSuggestionsReasonsForFailure(userWrapper.username.value, theRoutines, userWrapper);
   return false;
 #else
@@ -2597,22 +2605,22 @@ bool DatabaseRoutines::FetchEntry
   << valueSearchKey.GetDatA() ;
   //stOutput << "<hr>DEBUG: fetch entry: firing up query: " << queryStream.str() << "<hr>";
   DatabaseQuery theQuery(*this, queryStream.str(), failureComments);
-  outputUnsafe="";
+  outputUnsafe = "";
   if (!theQuery.flagQuerySucceeded)
-  { if (failureComments!=0)
+  { if (failureComments != 0)
       *failureComments << "<br><b>Query failed - column may not exist (or some other error occurred). </b>";
   //stOutput << "<hr><b>Query failed - column may not exist (or some other error occurred). </b><hr>";
     return false;
   }
   if (!theQuery.flagQueryReturnedResult)
-  { if (failureComments!=0)
+  { if (failureComments != 0)
       *failureComments << "<b>Query: </b> "
       << queryStream.str()
       << " <b>did not return a result - column/row may not exist. </b>";
   //stOutput << "<hr>DEBUG: Query did not return a result - column may not exist. <hr>";
     return false;
   }
-  outputUnsafe= HtmlRoutines::ConvertURLStringToNormal(theQuery.firstResultString, false);
+  outputUnsafe = HtmlRoutines::ConvertURLStringToNormal(theQuery.firstResultString, false);
 //  stOutput << "Input entry as fetched from the system: " <<  theQuery.firstResultString
 //  << "<br>When made unsafe: " << outputUnsafe << "<br>";
   return true;
@@ -2620,15 +2628,15 @@ bool DatabaseRoutines::FetchEntry
 
 std::string UserCalculator::GetMySQLclauseIdentifyingUserByEmailOrID()
 { MacroRegisterFunctionWithName("UserCalculator::GetMySQLclauseIdentifyingUserByEmailOrID");
-  if (this->username.value=="" && this->email.value=="")
+  if (this->username.value == "" && this->email.value == "")
     crash << "Calculator user cannot be identified as both email and username are missing. " << crash;
   std::stringstream out;
-  if (this->username.value!="")
+  if (this->username.value != "")
   { out << " username=" << this->username.GetDatA();
-    if (this->email.value!="")
+    if (this->email.value != "")
       out << " OR ";
   }
-  if (this->email.value!="")
+  if (this->email.value != "")
     out << "email=" << this->email.GetDatA();
   return out.str();
 }
@@ -2636,12 +2644,12 @@ std::string UserCalculator::GetMySQLclauseIdentifyingUserByEmailOrID()
 bool UserCalculator::IamPresentInTable
 (DatabaseRoutines& theRoutines, const std::string& tableNameUnsafe, std::stringstream* comments)
 { MacroRegisterFunctionWithName("UserCalculator::IamPresentInTable");
-  if (this->username.value=="" && this->email.value=="")
-  { if (comments!=0)
+  if (this->username.value == "" && this->email.value == "")
+  { if (comments != 0)
       *comments << "Empty username and empty email not allowed simultaneously. ";
     return false;
   }
-  MySQLdata theTable=tableNameUnsafe;
+  MySQLdata theTable = tableNameUnsafe;
   std::stringstream theQueryStream;
   theQueryStream << "SELECT username FROM " << theRoutines.theDatabaseName
   << "." << theTable.GetIdentifieR()

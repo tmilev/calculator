@@ -722,6 +722,7 @@ FileOperations::FolderVirtualLinksSensitive()
   { firstRun = true;
     result.SetKeyValue("freecalc/", "../freecalc/");
     result.SetKeyValue("LogFiles/", "LogFiles/");
+    result.SetKeyValue("/LogFiles/", "LogFiles/");
     result.SetKeyValue("crashes/", "LogFiles/crashes/");
   }
   return result;

@@ -5867,6 +5867,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("slides-videos/", "../slides-videos/");
 
   folderSubstitutionsSensitive.Clear();
+  folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");//<-internal use
   folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");//<-coming from webserver
   folderSubstitutionsSensitive.SetKeyValue("/crashes/", "/LogFiles/crashes/");
 

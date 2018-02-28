@@ -5317,7 +5317,7 @@ int WebServer::Run()
     theGlobalVariables.GetElapsedSeconds();
     this->GetActiveWorker().timeOfLastPingServerSideOnly =
     this->GetActiveWorker().timeServerAtWorkerStart;
-    this->NumConnectionsSoFar++;
+    this->NumConnectionsSoFar ++;
     this->GetActiveWorker().connectionID = this->NumConnectionsSoFar;
     this->GetActiveWorker().userAddress.theObject = userAddressBuffer;
     this->currentlyConnectedAddresses.AddMonomial(this->GetActiveWorker().userAddress, 1);
@@ -5455,7 +5455,8 @@ int WebWorker::Run()
     if (this->connectedSocketID == -1)
       break;
     this->SendAllBytesWithHeaders();
-    if (!this->flagKeepAlive)
+    int fixthis;
+    if (!this->flagKeepAlive || true)
       break;
     //The function call needs security audit.
     this->resetConnection();

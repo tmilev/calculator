@@ -74,7 +74,7 @@ void MonitorWebServer()
 }
 
 WebServerMonitor::WebServerMonitor()
-{ this->timeAtLastBackup = -1;
+{ this->timeAtLastBackup = - 1;
 
 }
 
@@ -266,7 +266,7 @@ void WebCrawler::PingCalculatorStatus()
         numSelected = select(this->theSocket + 1, &fdConnectSockets, 0, 0, &timeOut);
         failStream << "While pinging, select failed. Error message: "
         << strerror(errno) << ". \n";
-        numPingFails++;
+        numPingFails ++;
       } while (numSelected < 0);
       if (numSelected <= 0)
       { logIO << logger::red << failStream.str() << logger::endL;
@@ -279,7 +279,7 @@ void WebCrawler::PingCalculatorStatus()
     { reportStream << "<br>Failed to connect: address: " << this->addressToConnectTo << " port: "
       << this->portOrService << ". ";
 //      << explain_errno_connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
-      this->lastTransactionErrors= reportStream.str();
+      this->lastTransactionErrors = reportStream.str();
       close(this->theSocket);
       continue;
     } else
@@ -727,10 +727,10 @@ bool Crypto::VerifyJWTagainstKnownKeys
       }
     if (theIndex != - 1 || i == 1)
       break;
-    if (commentsGeneral!=0 && i==0)
+    if (commentsGeneral != 0 && i == 0)
       *commentsGeneral << "<br><span style=\"color:red\"><b>Couldn't find key ID: "
       << keyIDstring << " from cached certificate.</b></span>";
-    if (commentsGeneral!=0 )
+    if (commentsGeneral != 0 )
       *commentsGeneral << "<br>Reloading google public keys. ";
     WebCrawler theCrawler;
     theCrawler.UpdatePublicKeys(commentsOnFailure, commentsGeneral);
@@ -738,16 +738,16 @@ bool Crypto::VerifyJWTagainstKnownKeys
   //stOutput << "DEBUG:Got to here, part 2";
   //if (commentsOnFailure!=0)
   //  *commentsOnFailure << "<hr>DEBUG: got to here, PART 2.";
-  if (theIndex==-1)
-  { if (commentsOnFailure!=0)
+  if (theIndex == - 1)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "<span style=\"color:red\"><b>Could not find key id: "
       << keyIDstring << "</b></span>. ";
     return false;
   }
-  if (commentsGeneral!=0)
+  if (commentsGeneral != 0)
     *commentsGeneral << "<span style=\"color:green\"><b>Found key id: "
     << keyIDstring << ".</b></span>";
-  Certificate& currentCert=Crypto::knownCertificates[theIndex];
+  Certificate& currentCert = Crypto::knownCertificates[theIndex];
   return theToken.VerifyRSA256
   (currentCert.theModuluS, currentCert.theExponenT,
    commentsOnFailure, commentsGeneral);
@@ -774,8 +774,8 @@ bool WebCrawler::VerifyRecaptcha
   std::string recaptchaURLencoded = theGlobalVariables.GetWebInput("recaptchaToken");
   if (commentsGeneralSensitive != 0)
     *commentsGeneralSensitive << "Recaptcha: " << recaptchaURLencoded;
-  if (recaptchaURLencoded=="")
-  { if (commentsOnFailure!=0)
+  if (recaptchaURLencoded == "")
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "<span style=\"color:red\"><b>Recaptcha appears to be missing. </b></span>";
     return false;
   }
@@ -784,17 +784,17 @@ bool WebCrawler::VerifyRecaptcha
   << "&"
   << "secret="
   << secret;
-  this->flagDoUseGET=true;
-  this->addressToConnectTo="https://www.google.com/recaptcha/api/siteverify";;
-  this->addressToConnectTo+="?"+messageToSendStream.str();
-  this->serverToConnectTo="www.google.com";
-  this->portOrService="https";
-  this->postMessageToSend=messageToSendStream.str();
+  this->flagDoUseGET = true;
+  this->addressToConnectTo = "https://www.google.com/recaptcha/api/siteverify";;
+  this->addressToConnectTo += "?"+messageToSendStream.str();
+  this->serverToConnectTo = "www.google.com";
+  this->portOrService = "https";
+  this->postMessageToSend = messageToSendStream.str();
   this->FetchWebPage(commentsOnFailure, commentsGeneralSensitive);
-  std::string response=this->bodyReceiveD;
+  std::string response = this->bodyReceiveD;
   JSData theJSparser;
   if (!theJSparser.readstring(response, commentsOnFailure))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "<span style=\"color:red\">"
       << "<b>" << "Failed to extract response token from captcha verification. "
       << "</b>"
@@ -804,7 +804,7 @@ bool WebCrawler::VerifyRecaptcha
     return 0;
   }
   if (!theJSparser.HasKey("success"))
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure
       << "<span style=\"color:red\">"
       << "<b>" << "Captcha failure: could not find key 'success'."
@@ -813,9 +813,9 @@ bool WebCrawler::VerifyRecaptcha
     return false;
   }
   JSData theSuccess;
-  theSuccess= theJSparser.GetValue("success");
-  if (theSuccess.type!=theJSparser.JSbool || theSuccess.boolean!=true)
-  { if (commentsOnFailure!=0)
+  theSuccess = theJSparser.GetValue("success");
+  if (theSuccess.type != theJSparser.JSbool || theSuccess.boolean != true)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "<br><span style=\"color:red\">"
       << "<b>" << "Could not verify your captcha solution. "
       << "</b>"
@@ -824,12 +824,12 @@ bool WebCrawler::VerifyRecaptcha
       << "</span>";
     return false;
   } else
-  { if (commentsGeneralNONsensitive!=0)
+  { if (commentsGeneralNONsensitive != 0)
       *commentsGeneralNONsensitive
       << "<br><span style=\"color:green\">"
       << "<b>" << "Your recaptcha answer appears to be valid. "
       << "</b></span>\n<br>\n";
-    if (commentsGeneralSensitive!=0)
+    if (commentsGeneralSensitive != 0)
       *commentsGeneralSensitive
       << "The response from google was: "
       << response;

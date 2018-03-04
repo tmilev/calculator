@@ -233,8 +233,8 @@ public:
   bool RedirectIfNeeded(std::stringstream& argumentProcessingFailureComments);
 
   bool ExtractArgumentsFromMessage
-(const std::string& input, std::stringstream& argumentProcessingFailureComments,
-int recursionDepth=0)
+  (const std::string& input, std::stringstream& argumentProcessingFailureComments,
+   int recursionDepth = 0)
 
   ;
   bool ExtractArgumentsFromCookies
@@ -244,10 +244,10 @@ int recursionDepth=0)
   void OutputResultAfterTimeout();
   static void OutputCrashAfterTimeout();
   void OutputShowIndicatorOnTimeout();
-  void QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll=false);
-  void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll=false);
+  void QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll = false);
+  void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll = false);
   void QueueBytesForSendingNoHeadeR
-  (const List<char>& bytesToSend, bool MustSendAll=false)
+  (const List<char>& bytesToSend, bool MustSendAll = false)
   ;
   bool ShouldDisplayLoginPage();
   void SendAllAndWrapUp();

@@ -27,7 +27,7 @@ extern logger logEmail  ;
 extern logger logServer  ;
 extern logger logSuccessfulForks  ;
 extern FormatExpressions consoleFormat;
-extern Calculator theParser;
+extern Calculator* theParser;
 
 extern double GetElapsedTimeInSeconds();
 extern void CallSystemWrapperNoOutput(const std::string& theCommand, bool ignoreNonZeroReturn);

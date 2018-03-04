@@ -911,53 +911,53 @@ public:
   //Second int gives the index of the atom handled by the named rule.
   //Third int gives the index of the rule within the list of handlers for that atom.
 
-//Calculator functions have as arguments two expressions passed by reference,
-//const Expression& input and Expression& output. Calculator functions
-//return bool. It is forbidden to pass the same object as input and output.
-//If a calculator function returns false this
-//means that the calculator failed to evaluate the
-//function. If that is the case, the value of output is not specified and
-//*MUST NOT* be used in the calling function.
-//If a function returns true this means that output contains the result of the function.
-//Note that the output of a function may be of type Error. Error results come, like any other
-//result, with a true return from the function.
-//-----------------------------------------------
-//In addition, built-in functions are split into two flavors:
-//inner functions (or just "functions")
-// and outer functions (or "laws").
-//The only difference between inner functions and outer functions is the
-//way they are applied when the calculator reduces an expression.
-//
-//Suppose the calculator is reducing Expression X.
-//1. Outer functions ("laws").
-//1.1. Let X be expression whose first child is an atom equal to the name of the outer function.
-//1.2  Call the outer function with input argument equal to X.
-//1.3. If the outer function returns true but the output argument is identically equal to
-//     X, nothing is done (the action of the outer function is ignored).
-//1.4. If an outer function returns true and the output argument is different from X,
-//     X is replaced by this output.
-//2. Inner functions ("functions").
-//2.1. Let X be expression whose first child is an atom equal to the name of the inner function. We define Argument as follows.
-//2.1.1. If X has two children, Argument is set to the second child of X.
-//2.1.2. If X does not have two children, Argument is set to be equal to the entire X.
-//2.2. The inner function is called with input argument equal to Argument.
-//2.3. If the inner function returns true, X is substituted with
-//     the output argument of the inner function, else nothing is done.
-//
-//As explained above, the distinction between inner functions and outer functions
-//is only practical. The notions of inner and outer functions do not apply to user-defined
-//substitution rules entered via the calculator. User-defined substitution rules are
-//processed like outer functions, with the
-//major difference that even if their output coincides
-//with their input the substitution is carried out, resulting in an infinite cycle.
-//Here, by ``infinite cycle'' we either mean a 100% CPU run until the timeout& algebraic
-//safety kicks in, or error interception with a ``detected substitution cycle'' or
-//similar error message.
-//
-//----------------------------------------------------------
+  //Calculator functions have as arguments two expressions passed by reference,
+  //const Expression& input and Expression& output. Calculator functions
+  //return bool. It is forbidden to pass the same object as input and output.
+  //If a calculator function returns false this
+  //means that the calculator failed to evaluate the
+  //function. If that is the case, the value of output is not specified and
+  //*MUST NOT* be used in the calling function.
+  //If a function returns true this means that output contains the result of the function.
+  //Note that the output of a function may be of type Error. Error results come, like any other
+  //result, with a true return from the function.
+  //-----------------------------------------------
+  //In addition, built-in functions are split into two flavors:
+  //inner functions (or just "functions")
+  // and outer functions (or "laws").
+  //The only difference between inner functions and outer functions is the
+  //way they are applied when the calculator reduces an expression.
+  //
+  //Suppose the calculator is reducing Expression X.
+  //1. Outer functions ("laws").
+  //1.1. Let X be expression whose first child is an atom equal to the name of the outer function.
+  //1.2  Call the outer function with input argument equal to X.
+  //1.3. If the outer function returns true but the output argument is identically equal to
+  //     X, nothing is done (the action of the outer function is ignored).
+  //1.4. If an outer function returns true and the output argument is different from X,
+  //     X is replaced by this output.
+  //2. Inner functions ("functions").
+  //2.1. Let X be expression whose first child is an atom equal to the name of the inner function. We define Argument as follows.
+  //2.1.1. If X has two children, Argument is set to the second child of X.
+  //2.1.2. If X does not have two children, Argument is set to be equal to the entire X.
+  //2.2. The inner function is called with input argument equal to Argument.
+  //2.3. If the inner function returns true, X is substituted with
+  //     the output argument of the inner function, else nothing is done.
+  //
+  //As explained above, the distinction between inner functions and outer functions
+  //is only practical. The notions of inner and outer functions do not apply to user-defined
+  //substitution rules entered via the calculator. User-defined substitution rules are
+  //processed like outer functions, with the
+  //major difference that even if their output coincides
+  //with their input the substitution is carried out, resulting in an infinite cycle.
+  //Here, by ``infinite cycle'' we either mean a 100% CPU run until the timeout& algebraic
+  //safety kicks in, or error interception with a ``detected substitution cycle'' or
+  //similar error message.
+  //
+  //----------------------------------------------------------
 
 
-//control sequences parametrize the syntactical elements
+  //control sequences parametrize the syntactical elements
   HashedList<std::string, MathRoutines::hashString> controlSequences;
 
   HashedList<ExpressionTripleCrunchers> theCruncherIds;
@@ -1016,7 +1016,7 @@ public:
 
   bool flagNoApproximationS;
 
-//  bool flagReplaceInputBoxesByValues;
+  //  bool flagReplaceInputBoxesByValues;
 
   bool flagForkingProcessAllowed;
 
@@ -1036,7 +1036,7 @@ public:
   int NumPredefinedAtoms;
   int numEmptyTokensStart;
   Expression theProgramExpression;
-//  std::vector<std::stringstream> theLogs;
+  //  std::vector<std::stringstream> theLogs;
   int registerPositionAfterDecimalPoint;
   int counterInSyntacticSoup;
   List<SyntacticElement> syntacticSouP;
@@ -1111,24 +1111,24 @@ public:
   { return this->builtInTypes;
   }
   const List<Function>* GetOperationCompositeHandlers(int theOp)
-  { int theIndex=this->operationsComposite.GetIndex(this->GetOperations()[theOp]);
-    if (theIndex==-1)
+  { int theIndex = this->operationsComposite.GetIndex(this->GetOperations()[theOp]);
+    if (theIndex == - 1)
       return 0;
     return &this->operationsCompositeHandlers[theIndex];
   }
   SyntacticElement GetSyntacticElementEnd()
   { SyntacticElement result;
-    result.controlIndex=this->controlSequences.GetIndex(";");
+    result.controlIndex = this->controlSequences.GetIndex(";");
     return result;
   }
   bool DecreaseStackSetCharacterRangeS(int decrease)
-  { if (decrease<=0)
+  { if (decrease <= 0)
       return true;
-    if ((*this->CurrentSyntacticStacK).size-decrease<=0)
+    if ((*this->CurrentSyntacticStacK).size - decrease <= 0)
       crash << crash;
 //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-1].IndexLastCharPlusOne=
 //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].IndexLastCharPlusOne;
-    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
+    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - decrease);
     return true;
   }
   const Expression& EZero();
@@ -1165,7 +1165,7 @@ public:
 //  Expression::FunctionAddress GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right);
   bool AllowsPowerInPreceding(const std::string& lookAhead);
   bool AllowsPowerInNext(const std::string& lookBehind);
-  bool RecursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo="");
+  bool RecursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo = "");
 
   bool AllowsLimitProcessInPreceding(const std::string& lookAhead);
   bool AllowsApplyFunctionInPreceding(const std::string& lookAhead);
@@ -1181,7 +1181,7 @@ public:
   bool AllowsTensorInPreceding(const std::string& lookAhead);
   bool AllowsDivideInPreceding(const std::string& lookAhead);
   bool PopTopSyntacticStack()
-  { (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-1);
+  { (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - 1);
     return true;
   }
   bool ReplaceEXXEXEByEusingO(int theOp);
@@ -1320,7 +1320,7 @@ public:
   bool AccountRule(const Expression& ruleE, StateMaintainerCalculator& theRuleStackMaintainer);
   bool ApplyOneRule();
   void resetStack()
-  { SyntacticElement emptyElement=this->GetEmptySyntacticElement();
+  { SyntacticElement emptyElement = this->GetEmptySyntacticElement();
     (*this->CurrentSyntacticStacK).initFillInObject(this->numEmptyTokensStart, emptyElement);
   }
   int conError()

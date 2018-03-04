@@ -1867,19 +1867,19 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
  const std::string& extraStyle,
  List<MonomialP>* theHighLightedMons)
 { std::stringstream out;
-  bool found=false;
-  int countMons=0;
-  for (int i=0; i<this->allMonomials.size; i++)
-  { int theIndex= thePoly.theMonomials.GetIndex(this->allMonomials[i]);
-    if (theIndex==-1)
+  bool found = false;
+  int countMons = 0;
+  for (int i = 0; i < this->allMonomials.size; i++)
+  { int theIndex = thePoly.theMonomials.GetIndex(this->allMonomials[i]);
+    if (theIndex == -1)
     { out << "<td" << extraStyle << ">" << "</td>";
       continue;
     }
-    countMons++;
-    bool useHighlightStyle=false;
-    if (theHighLightedMons!=0)
+    countMons ++;
+    bool useHighlightStyle = false;
+    if (theHighLightedMons != 0)
       if (theHighLightedMons->Contains(this->allMonomials[i]))
-        useHighlightStyle=true;
+        useHighlightStyle = true;
     out << "<td" << extraStyle << ">";
     if (useHighlightStyle)
       out << "<span style=\"color:red\">";
@@ -1887,12 +1887,12 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
       out << HtmlRoutines::GetMathSpanPure(Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat));
     else
       out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat);
-    found=true;
+    found = true;
     if (useHighlightStyle)
       out << "</span>";
     out << "</td>";
   }
-  if (countMons!=thePoly.size())
+  if (countMons != thePoly.size())
     out << "<td><b>Programming ERROR!</b></td>";
   return out.str();
 }
@@ -1902,15 +1902,15 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::GetDivisionStringHtml");
   //stOutput << "<br>DEBUG: got to here, pt -2.";
   std::stringstream out;
-  List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
-  List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
-  this->theFormat.thePolyMonOrder=this->thePolynomialOrder.theMonOrder;
-  std::string underlineStyle=" style=\"white-space: nowrap; border-bottom:1px solid black;\"";
+  List<Polynomial<Rational> >& theRemainders = this->intermediateRemainders.GetElement();
+  List<Polynomial<Rational> >& theSubtracands = this->intermediateSubtractands.GetElement();
+  this->theFormat.thePolyMonOrder = this->thePolynomialOrder.theMonOrder;
+  std::string underlineStyle = " style=\"white-space: nowrap; border-bottom:1px solid black;\"";
   this->allMonomials.Clear();
   this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
-  for (int i=0; i<theRemainders.size; i++)
+  for (int i = 0; i < theRemainders.size; i++)
   { this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
-    if (i<theSubtracands.size)
+    if (i < theSubtracands.size)
       this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);
   }
   //List<std::string> basisColorStyles;
@@ -1927,38 +1927,38 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
   (this->remainderDivision, underlineStyle, &this->remainderDivision.theMonomials)
   << "</td></tr>";
   out << "<tr><td style=\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan=\""
-  << this->allMonomials.size+1 << "\"><b>Quotient(s) </b></td>"
+  << this->allMonomials.size + 1 << "\"><b>Quotient(s) </b></td>"
   << "</tr>";
   //stOutput << "<br>DEBUG: got to here, pt -1.";
-  for (int i=0; i<this->theBasiS.size; i++)
+  for (int i = 0; i < this->theBasiS.size; i++)
   { //if (i==this->theBasiS.size-1)
 //    else
     out << "<tr>";
     out << "<td style=\"border-right:1px solid black; border-bottom: 1px solid gray;\">";
     if (this->theFormat.flagUseLatex)
-      out << HtmlRoutines::GetMathSpanPure(this->theBasiS[i].ToString(&this->theFormat),-1 );
+      out << HtmlRoutines::GetMathSpanPure(this->theBasiS[i].ToString(&this->theFormat), - 1);
     else
       out << this->theBasiS[i].ToString(&this->theFormat);
     out << "</td>";
     out << "<td style=\"border-bottom:1px solid gray;\" colspan=\""
-    << this->allMonomials.size+1 << "\">";
+    << this->allMonomials.size + 1 << "\">";
     out << HtmlRoutines::GetMathSpanPure(this->theQuotients[i].ToString(&this->theFormat));
     out << "</td></tr>";
   }
   out << "</tr>";
   //stOutput << "<br>DEBUG: got to here";
-  if (theRemainders.size!=this->intermediateHighlightedMons.GetElement().size)
+  if (theRemainders.size != this->intermediateHighlightedMons.GetElement().size)
     crash << "Should have as many remainders: " << theRemainders.size
     << " as intermediate highlighted mons: "
     << this->intermediateHighlightedMons.GetElement().size << crash;
-  if (theRemainders.size!=theSubtracands.size+1)
+  if (theRemainders.size != theSubtracands.size+1)
     crash << "Remainders should equal subtracands plus one. " << crash;
-  for (int i=0; i<theRemainders.size; i++)
+  for (int i = 0; i < theRemainders.size; i++)
   { out << "<tr><td></td>"
     << this->GetPolynomialStringSpacedMonomialsHtml
     (theRemainders[i], "", &this->intermediateHighlightedMons.GetElement()[i])
     << "</tr>";
-    if (i<theSubtracands.size)
+    if (i < theSubtracands.size)
     { out << "<tr><td>-</td></tr>";
       out << "<tr><td></td>" << this->GetPolynomialStringSpacedMonomialsHtml
       (theSubtracands[i], underlineStyle)
@@ -1976,11 +1976,11 @@ bool CalculatorFunctionsGeneral::innerPolynomialDivisionRemainder(Calculator& th
   if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
     return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   GroebnerBasisComputation<Rational> theGB;
-  theGB.theBasiS.SetSize(thePolys.size-1);
-  for (int i=1; i<thePolys.size; i++)
+  theGB.theBasiS.SetSize(thePolys.size - 1);
+  for (int i = 1; i < thePolys.size; i ++)
   { if (thePolys[i].IsEqualToZero())
       return output.MakeError("Division by zero.", theCommands, true);
-    theGB.theBasiS[i-1]=thePolys[i];
+    theGB.theBasiS[i - 1] = thePolys[i];
   }
 //  stOutput << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
 //  << theGB.theBasiS.ToString() << "<hr>";

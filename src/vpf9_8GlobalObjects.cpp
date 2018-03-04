@@ -12,14 +12,14 @@ ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global
 GlobalVariables theGlobalVariables;
 std::string GlobalVariables::GetDateForLogFiles()
 { static std::string tempDate;
-  if (tempDate!="")
+  if (tempDate != "")
     return tempDate;
   TimeWrapper now;
   now.AssignLocalTime();
-  tempDate=now.ToStringHumanReadable();
-  for (unsigned i=0; i<tempDate.size(); i++)
-    if (tempDate[i]==' ')
-      tempDate[i]='_';
+  tempDate = now.ToStringHumanReadable();
+  for (unsigned i = 0; i < tempDate.size(); i++)
+    if (tempDate[i] == ' ')
+      tempDate[i] = '_';
   return tempDate;
 }
 
@@ -49,7 +49,7 @@ logger logPlumbing("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogS
 logger logProcessKills("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogMultiprocessing.html", &logServer, false, ProcessTypes::server);
 logger logSuccessfulForks("/LogFiles/" + GlobalVariables::GetDateForLogFiles() + "/LogForkSuccess.html", &logServer, false, ProcessTypes::server);
 
-Calculator theParser;
+Calculator* theParser = 0;
 FormatExpressions consoleFormat;
 Crasher crash;
 StdoutClass stOutput;

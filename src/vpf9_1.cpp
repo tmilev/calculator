@@ -12,9 +12,9 @@
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
 Crasher::Crasher()
-{ this->flagCrashInitiateD=false;
-  this->flagFinishingCrash=false;
-  this->CleanUpFunction=0;
+{ this->flagCrashInitiateD = false;
+  this->flagFinishingCrash = false;
+  this->CleanUpFunction = 0;
 }
 
 void Crasher::FirstRun()
@@ -24,7 +24,7 @@ void Crasher::FirstRun()
   this->flagCrashInitiateD=true;
 }
 
-extern Calculator theParser;
+extern Calculator* theParser;
 
 Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
 { (void) dummyCrasherSignalsActualCrash;
@@ -44,17 +44,17 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
       << theGlobalVariables.userInputStringIfAvailable << "<hr>";
   this->theCrashReport << Crasher::GetStackTraceEtcErrorMessage();
   if (!theGlobalVariables.flagNotAllocated)
-    if (theGlobalVariables.ProgressReportStringS.size>0)
+    if (theGlobalVariables.ProgressReportStringS.size > 0)
     { this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>"
       << theGlobalVariables.ToStringProgressReportHtml();
     }
-  if (stOutput.theOutputFunction!=0)
+  if (stOutput.theOutputFunction != 0)
     std::cout << this->theCrashReport.str() << std::endl;
   stOutput << this->theCrashReport.str();
   stOutput.Flush();
   if (!theGlobalVariables.flagNotAllocated)
   { std::fstream theFile;
-    bool succeededToOpen=FileOperations::OpenFileCreateIfNotPresentVirtual
+    bool succeededToOpen = FileOperations::OpenFileCreateIfNotPresentVirtual
     (theFile, "crashes/"+theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false, true);
     if (succeededToOpen)
       stOutput << "<hr>Crash dumped in file "
@@ -70,12 +70,16 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
       << " located inside the output folder.";
     theFile << this->theCrashReport.str();
     theFile.flush();
-    theFile << "<hr>Additional comments follow. " << theParser.Comments.str();
+    if (theParser != 0)
+    { theFile << "<hr>Additional comments follow. " << theParser->Comments.str();
+    }
     theFile.close();
   } else
     stOutput << "GlobalVariables.flagNotAllocated is true. ";
-  stOutput << "<hr>Additional comments follow. " << theParser.Comments.str();
-  if (this->CleanUpFunction!=0)
+  if (theParser != 0)
+  { stOutput << "<hr>Additional comments follow. " << theParser->Comments.str();
+  }
+  if (this->CleanUpFunction != 0)
     this->CleanUpFunction();
   std::cout.flush();
   assert(false);
@@ -86,8 +90,8 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
 { std::stringstream out;
   out << "A partial stack trace follows (function calls not explicitly logged not included).";
   out << "<table><tr>";
-  for (int threadCounter=0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter++)
-  { if (threadCounter>= theGlobalVariables.theThreadData.size)
+  for (int threadCounter = 0; threadCounter < theGlobalVariables.CustomStackTrace.size; threadCounter++)
+  { if (threadCounter >= theGlobalVariables.theThreadData.size)
     { out << "<td><b>WARNING: the stack trace reports "
       << theGlobalVariables.CustomStackTrace.size
       << " threads but the thread data array has record of only "
@@ -98,10 +102,10 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
     out << "<td>" << theGlobalVariables.theThreadData[threadCounter].ToStringHtml() << "</td>";
   }
   out << "</tr> <tr>";
-  for (int threadCounter=0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter++)
-  { if (threadCounter>= theGlobalVariables.theThreadData.size)
+  for (int threadCounter = 0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter++)
+  { if (threadCounter >= theGlobalVariables.theThreadData.size)
       break;
-    if (ThreadData::getCurrentThreadId()!=threadCounter)
+    if (ThreadData::getCurrentThreadId() != threadCounter)
     { out << "<td>Stack trace available only for current thread.</td>";
       //<-to avoid coordinating threads
       continue;
@@ -109,10 +113,10 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
     ListReferences<stackInfo>& currentInfo=
     theGlobalVariables.CustomStackTrace[threadCounter];
     out << "<td><table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
-    for (int i=currentInfo.size-1; i>=0; i--)
+    for (int i = currentInfo.size - 1; i >= 0; i --)
     { out << "<tr><td>" << HtmlRoutines::GetHtmlLinkFromProjectFileName(currentInfo[i].fileName, "", currentInfo[i].line)
       << "</td><td>" << currentInfo[i].line << "</td>";
-      if (currentInfo[i].functionName!="")
+      if (currentInfo[i].functionName != "")
         out << "<td>" << currentInfo[i].functionName << "</td>";
       out << "</tr>";
     }
@@ -124,20 +128,20 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
 
 std::string Crasher::GetStackTraceShort()
 { std::stringstream out;
-  for (int threadCounter=0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter++)
-  { if (threadCounter>= theGlobalVariables.theThreadData.size)
+  for (int threadCounter = 0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter ++)
+  { if (threadCounter >= theGlobalVariables.theThreadData.size)
     { out << "WARNING: stack trace reports " << theGlobalVariables.CustomStackTrace.size << " threads "
       << "while I have only " << theGlobalVariables.theThreadData.size << " registered threads. ";
       break;
     }
     out << "********************\r\nThread index " << threadCounter << ": \r\n";
-    if (ThreadData::getCurrentThreadId()!=threadCounter)
+    if (ThreadData::getCurrentThreadId() != threadCounter)
     { out << "Stack trace available only for current thread.\n";
       //<-to avoid coordinating threads
       continue;
     }
-    ListReferences<stackInfo>& currentInfo=theGlobalVariables.CustomStackTrace[threadCounter];
-    for (int i=currentInfo.size-1; i>=0; i--)
+    ListReferences<stackInfo>& currentInfo = theGlobalVariables.CustomStackTrace[threadCounter];
+    for (int i = currentInfo.size - 1; i >= 0; i --)
       out << currentInfo[i].functionName << "\n";
   }
   return out.str();
@@ -145,7 +149,7 @@ std::string Crasher::GetStackTraceShort()
 
 std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringHTMLTopCommandLinuxSystem");
-  std::string topString= this->CallSystemWithOutput("top -b -n 1 -s");
+  std::string topString = this->CallSystemWithOutput("top -b -n 1 -s");
   std::stringstream out;
   std::string lineString, wordString;
   std::stringstream topStream(topString);
@@ -178,7 +182,7 @@ std::string GlobalVariables::ToStringFolderInfo()const
 std::string GlobalVariables::ToStringProgressReportHtml()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportHtml");
   std::stringstream reportStream;
-  for (int threadIndex=0; threadIndex<this->ProgressReportStringS.size; threadIndex++)
+  for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++)
   { reportStream << "<hr><b>" << this->theThreadData[threadIndex].ToStringHtml()
     << "</b><br>";
     int currentThreadID=ThreadData::getCurrentThreadId();
@@ -190,8 +194,8 @@ std::string GlobalVariables::ToStringProgressReportHtml()
       //<-to avoid coordinating threads
       continue;
     }
-    for (int i=0; i<this->ProgressReportStringS[threadIndex].size; i++)
-      if (this->ProgressReportStringS[threadIndex][i]!="")
+    for (int i = 0; i < this->ProgressReportStringS[threadIndex].size; i ++)
+      if (this->ProgressReportStringS[threadIndex][i] != "")
         reportStream << "\n<div id=\"divProgressReport" << i << "\">"
         << this->ProgressReportStringS[threadIndex][i] << "\n</div>\n<hr>";
   }
@@ -199,12 +203,12 @@ std::string GlobalVariables::ToStringProgressReportHtml()
   { reportStream << crash.GetStackTraceEtcErrorMessage();
     reportStream << theGlobalVariables.GetElapsedSeconds()
     << " second(s) passed. ";
-    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
+    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 0)
       reportStream << "<br>Hard limit: "
       << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
       << " second(s) [system crash if limit exceeded]."
       << "<br> Soft limit: "
-      << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2
+      << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit / 2
       << " second(s) [computation error if limit exceeded].";
   }
   return reportStream.str();
@@ -213,14 +217,14 @@ std::string GlobalVariables::ToStringProgressReportHtml()
 std::string GlobalVariables::ToStringProgressReportConsole()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportConsole");
   std::stringstream reportStream;
-  for (int threadIndex=0; threadIndex<this->ProgressReportStringS.size; threadIndex++)
-  { if (ThreadData::getCurrentThreadId()!=threadIndex)
+  for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex++)
+  { if (ThreadData::getCurrentThreadId() != threadIndex)
     { reportStream << "Progress report available only for current thread.<br>";
       //<-to avoid coordinating threads
       continue;
     }
     reportStream << this->theThreadData[threadIndex].ToStringConsole();
-    for (int i=0; i<this->ProgressReportStringS[threadIndex].size; i++)
+    for (int i = 0; i < this->ProgressReportStringS[threadIndex].size; i ++)
       reportStream << this->ProgressReportStringS[threadIndex][i];
   }
   reportStream << "\n";
@@ -237,7 +241,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
 { this->PhysicalNameFolderBelowExecutable = "";
   this->PhysicalNameExecutableNoPath = "";
   this->PhysicalPathProjectBase = "";
-  for (unsigned i = 0; i < inputPhysicalExecutableWithPathServerBaseIsFolderBelow.size(); i++)
+  for (unsigned i = 0; i < inputPhysicalExecutableWithPathServerBaseIsFolderBelow.size(); i ++)
   { this->PhysicalNameExecutableNoPath.push_back(inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i]);
     if (inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i] == '/')
     { this->PhysicalPathProjectBase += this->PhysicalNameFolderBelowExecutable;
@@ -321,22 +325,22 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
   if (!this->flagLoggedIn && !this->UserGuestMode())
     return "";
   std::stringstream out;
-  for (int i =0; i<this->webArguments.size(); i++)
-  { const std::string& currentName=this->webArguments.theKeys[i];
-    if (currentName=="request" ||  currentName=="password" ||
-        currentName=="fileName" || currentName=="courseHome" || currentName=="topicList" ||
-        currentName=="currentDatabaseTable" || currentName=="mainInput" || currentName=="studentView" ||
-        currentName=="studentSection" || currentName=="error" ||
-        currentName=="navigationBar" ||
-        currentName=="problemLinkStyle" ||
-        currentName=="googleToken" ||
-        currentName=="G_AUTHUSER_H" ||
-        currentName=="mjx.menu" ||
-        currentName=="username" ||
-        currentName=="authenticationToken"
+  for (int i = 0; i < this->webArguments.size(); i++)
+  { const std::string& currentName = this->webArguments.theKeys[i];
+    if (currentName == "request" || currentName == "password" ||
+        currentName == "fileName" || currentName == "courseHome" || currentName == "topicList" ||
+        currentName == "currentDatabaseTable" || currentName == "mainInput" || currentName == "studentView" ||
+        currentName == "studentSection" || currentName == "error" ||
+        currentName == "navigationBar" ||
+        currentName == "problemLinkStyle" ||
+        currentName == "googleToken" ||
+        currentName == "G_AUTHUSER_H" ||
+        currentName == "mjx.menu" ||
+        currentName == "username" ||
+        currentName == "authenticationToken"
         )
       continue;
-    if (tagsToExclude!=0)
+    if (tagsToExclude != 0)
       if (tagsToExclude->Contains(currentName))
         continue;
     out << theGlobalVariables.webArguments.theKeys[i] << "="
@@ -352,7 +356,7 @@ std::string GlobalVariables::GetWebInput(const std::string& inputName)
 
 void GlobalVariables::MakeReport()
 { MacroRegisterFunctionWithName("GlobalVariables::MakeReport");
-  if (this->IndicatorStringOutputFunction==0)
+  if (this->IndicatorStringOutputFunction == 0)
     return;
   if (this->flagRunningCommandLine || this->flagRunningConsoleTest)
     this->MakeReport(this->ToStringProgressReportConsole());
@@ -363,26 +367,26 @@ void GlobalVariables::MakeReport()
 void GlobalVariables::initOutputReportAndCrashFileNames
 (const std::string& inputUserStringRAW, const std::string& inputUserStringCivilized)
 { std::string inputAbbreviated;
-  this->userInputStringIfAvailable=
+  this->userInputStringIfAvailable =
   HtmlRoutines::CleanUpForFileNameUse
-  (HtmlRoutines::ConvertStringToURLString(inputUserStringCivilized,false));
+  (HtmlRoutines::ConvertStringToURLString(inputUserStringCivilized, false));
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { this->userInputStringRAWIfAvailable=inputUserStringRAW;
-    inputAbbreviated=this->userInputStringRAWIfAvailable;
+  { this->userInputStringRAWIfAvailable = inputUserStringRAW;
+    inputAbbreviated = this->userInputStringRAWIfAvailable;
   } else
-  { this->userInputStringRAWIfAvailable="Raw user input string not available in SSL mode. ";
-    inputAbbreviated=this->userInputStringIfAvailable;
+  { this->userInputStringRAWIfAvailable = "Raw user input string not available in SSL mode. ";
+    inputAbbreviated = this->userInputStringIfAvailable;
   }
   MathRoutines::StringTrimToLength(inputAbbreviated, 150);
-  this->RelativePhysicalNameCrashLog="crash_" + inputAbbreviated + ".html";
-  this->RelativePhysicalNameProgressReport="progressReport_" + inputAbbreviated + ".html";
-  this->RelativePhysicalNameOutpuT="output_" + inputAbbreviated + ".html";
+  this->RelativePhysicalNameCrashLog = "crash_" + inputAbbreviated + ".html";
+  this->RelativePhysicalNameProgressReport = "progressReport_" + inputAbbreviated + ".html";
+  this->RelativePhysicalNameOutpuT = "output_" + inputAbbreviated + ".html";
 }
 
 void FileInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription)
 { FileInformation theInfo;
-  theInfo.FileName=fileName;
-  theInfo.FileDescription=fileDescription;
+  theInfo.FileName = fileName;
+  theInfo.FileDescription = fileDescription;
   if (theGlobalVariables.flagNotAllocated)
   { std::cout << "The global variables are not allocated: this is the static initialization order fiasco at work! ";
     assert(false);//cannot crash with mechanisms: nothing works yet!

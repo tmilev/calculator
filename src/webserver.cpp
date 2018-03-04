@@ -1624,7 +1624,7 @@ void WebWorker::OutputResultAfterTimeout()
 //  out <<  "DEBUG: filename: " << theFileName << "<br>";
   if (standardOutputStreamAfterTimeout.str().size() != 0)
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
-  out << theParser.ToStringOutputAndSpecials();
+  out << theParser->ToStringOutputAndSpecials();
   std::fstream outputTimeOutFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual
   (outputTimeOutFile, theFileName, false, true, false);
@@ -2071,7 +2071,7 @@ void WebWorker::SanitizeVirtualFileName()
 int WebWorker::ProcessCalculatorExamples()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamples");
   this->SetHeaderOKNoContentLength();
-  stOutput << theParser.ToStringFunctionHandlers();
+  stOutput << theParser->ToStringFunctionHandlers();
   return 0;
 }
 
@@ -3143,10 +3143,10 @@ int WebWorker::ProcessCompute()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCompute");
   this->SetHeaderOKNoContentLength();
 //  theParser.initComputationStats();
-  theParser.inputString = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  theParser->inputString = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection = WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone;
   theGlobalVariables.initOutputReportAndCrashFileNames
-  (HtmlRoutines::ConvertStringToURLString(theParser.inputString, false), theParser.inputString);
+  (HtmlRoutines::ConvertStringToURLString(theParser->inputString, false), theParser->inputString);
 
   //std::cout << "DEBUG: input string: " << theParser.inputString;
   //std::cout.flush();
@@ -3155,14 +3155,14 @@ int WebWorker::ProcessCompute()
   //  theParser.init();
   ////////////////////////////////////////////////
   this->flagProgressReportAllowed = true;
-  theParser.Evaluate(theParser.inputString);
+  theParser->Evaluate(theParser->inputString);
   this->flagProgressReportAllowed = false;
   if (theGlobalVariables.flagRunningBuiltInWebServer)
     if (theGlobalVariables.flagOutputTimedOut)
     { this->OutputResultAfterTimeout();
       return 0;
     }
-  stOutput << theParser.ToStringOutputAndSpecials();
+  stOutput << theParser->ToStringOutputAndSpecials();
   if (theGlobalVariables.UserDebugFlagOn())
     stOutput << this->ToStringMessageFullUnsafe();
 
@@ -3173,8 +3173,8 @@ int WebWorker::ProcessCompute()
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   this->SetHeaderOKNoContentLength();
-  theParser.inputString = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
-  theParser.flagShowCalculatorExamples = (theGlobalVariables.GetWebInput("showExamples") == "true");
+  theParser->inputString = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
+  theParser->flagShowCalculatorExamples = (theGlobalVariables.GetWebInput("showExamples") == "true");
   stOutput << "<html><head> <title>Calculator build " << theGlobalVariables.buildVersionSimple
   << "</title>";
   stOutput << HtmlRoutines::GetJavascriptMathjax();
@@ -3194,17 +3194,17 @@ int WebWorker::ProcessCalculator()
 
   stOutput << "\n\n<script language=\"javascript\">\n"
   << "  var theAutocompleteDictionary = [\n  ";
-  for (int i = 0; i < theParser.autoCompleteKeyWords.size; i++)
-    if (theParser.autoCompleteKeyWords[i].size() > 2)
-    { stOutput << "\"" << theParser.autoCompleteKeyWords[i] << "\"";
-      if (i != theParser.autoCompleteKeyWords.size - 1)
+  for (int i = 0; i < theParser->autoCompleteKeyWords.size; i++)
+    if (theParser->autoCompleteKeyWords[i].size() > 2)
+    { stOutput << "\"" << theParser->autoCompleteKeyWords[i] << "\"";
+      if (i != theParser->autoCompleteKeyWords.size - 1)
         stOutput << ", ";
     }
   stOutput << "];\n";
   stOutput << "</script>\n";
 
   stOutput << "\n</head>\n<body onload=\"loadSettings(); initializeButtons(); initializeCalculatorPage();";
-  if (theParser.inputString != "")
+  if (theParser->inputString != "")
   { stOutput << "submitStringAsMainInput"
     << "(document.getElementById('mainInputID').value, "
     << " 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus');";
@@ -3226,7 +3226,7 @@ int WebWorker::ProcessCalculator()
   out << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
   std::string civilizedInputSafish;
   bool hashtmlChars =
-  HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(theParser.inputString, civilizedInputSafish, false);
+  HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(theParser->inputString, civilizedInputSafish, false);
 
 
   out << this->GetHtmlHiddenInputs(true, true);
@@ -3306,7 +3306,7 @@ int WebWorker::ProcessCalculator()
   theGlobalVariables.theSourceCodeFiles().QuickSortAscending();
   out << theGlobalVariables.ToStringSourceCodeInfo();
   out << "<hr>";
-  out << theParser.ToString();
+  out << theParser->ToString();
 
   out << this->closeIndentTag("</td>");
   if (theGlobalVariables.UserDebugFlagOn())
@@ -5204,10 +5204,13 @@ int WebServer::Run()
       return 0;
     }
   }
-  theParser.init();
-  theParser.ComputeAutoCompleteKeyWords();
+  if (theParser == 0)
+    theParser = new Calculator;
+  PointerObjectDestroyer<Calculator> calculatorDestroyer(theParser);
+  theParser->init();
+  theParser->ComputeAutoCompleteKeyWords();
   HtmlRoutines::LoadStrings();
-  theParser.flagShowCalculatorExamples = false;
+  theParser->flagShowCalculatorExamples = false;
   if (!this->initPrepareWebServerALL())
     return 1;
   logServer << logger::purple << "server: waiting for connections...\r\n" << logger::endL;
@@ -5415,7 +5418,7 @@ int WebWorker::Run()
     this->parent->SignalActiveWorkerDoneReleaseEverything();
     this->parent->ReleaseEverything();
     logOpenSSL << logger::red << "ssl fail #: " << this->parent->NumConnectionsSoFar << logger::endL;
-    return -1;
+    return - 1;
   }
 #endif //Macro_use_open_ssl
   if (theGlobalVariables.flagSSLisAvailable && theGlobalVariables.flagUsingSSLinCurrentConnection)
@@ -5448,15 +5451,20 @@ int WebWorker::Run()
       this->SendAllAndWrapUp();
       return -1;
     }
-    numReceivesThisConnection++;
+    numReceivesThisConnection ++;
+    if (theParser == 0)
+    { theParser = new Calculator;
+      theParser->init();
+      logWorker << logger::blue << "Created new calculator for connection: " << numReceivesThisConnection << logger::endL;
+    }
+    PointerObjectDestroyer<Calculator> calculatorDestroyer(theParser);
     if (this->messageHead.size() == 0)
       break;
     result = this->ServeClient();
     if (this->connectedSocketID == -1)
       break;
     this->SendAllBytesWithHeaders();
-    int fixthis;
-    if (!this->flagKeepAlive || true)
+    if (!this->flagKeepAlive)
       break;
     //The function call needs security audit.
     this->resetConnection();
@@ -5483,7 +5491,7 @@ void WebServer::FigureOutOperatingSystem()
   std::string commandOutput = theGlobalVariables.CallSystemWithOutput("cat /etc/*-release");
   if (commandOutput.find("ubuntu") != std::string::npos || commandOutput.find("Ubuntu") != std::string::npos ||
       commandOutput.find("UBUNTU") != std::string::npos)
-    theGlobalVariables.OperatingSystem="Ubuntu";
+    theGlobalVariables.OperatingSystem = "Ubuntu";
   else if (commandOutput.find("CentOS") != std::string::npos)
     theGlobalVariables.OperatingSystem = "CentOS";
   else
@@ -5557,7 +5565,7 @@ void WebServer::CheckOpenSSLMySQLInstallation()
 
 void WebServer::CheckMySQLSetup()
 { MacroRegisterFunctionWithName("WebServer::CheckMySQLSetup");
-  std::string attemptedMYSQLSetupVirtualFileName="/LogFiles/attemptedMYSQLsetup.html";
+  std::string attemptedMYSQLSetupVirtualFileName = "/LogFiles/attemptedMYSQLsetup.html";
   if (FileOperations::FileExistsVirtual(attemptedMYSQLSetupVirtualFileName, true))
   { std::string attemptedMYSQLSetupPhysicalFileName;
     logger result("", 0, false, "server");
@@ -5622,7 +5630,7 @@ void WebServer::CheckFreecalcSetup()
 
 void WebServer::CheckSVNSetup()
 { MacroRegisterFunctionWithName("WebServer::CheckSVNSetup");
-  std::string attemptedSetupVirtual="/LogFiles/attemptedSVNSetup.html";
+  std::string attemptedSetupVirtual = "/LogFiles/attemptedSVNSetup.html";
   if (FileOperations::FileExistsVirtual(attemptedSetupVirtual, true))
   { std::string attemptedSetupPhysical;
     logger result("", 0, false, "server");
@@ -5647,7 +5655,7 @@ void WebServer::CheckSVNSetup()
 
 void WebServer::CheckMathJaxSetup()
 { MacroRegisterFunctionWithName("WebServer::CheckMathJaxSetup");
-  std::string attemptedMathJaxSetupVirtualFileName="/LogFiles/attemptedMathJaxSetup.html";
+  std::string attemptedMathJaxSetupVirtualFileName = "/LogFiles/attemptedMathJaxSetup.html";
   if (FileOperations::FileExistsVirtual(attemptedMathJaxSetupVirtualFileName, true))
   { std::string attemptedSetupPhysicalFileName;
     logger result("", 0, false, "server");
@@ -6010,20 +6018,20 @@ int WebServer::mainCommandLine()
   //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
   //  return 0;
 //std::cout << "Running cmd line. \n";
-  theParser.init();
+  theParser->init();
   logger result("", 0, false, "server");
   if (theGlobalVariables.programArguments.size > 1)
     for (int i = 1; i < theGlobalVariables.programArguments.size; i++)
-    { theParser.inputString += theGlobalVariables.programArguments[i];
+    { theParser->inputString += theGlobalVariables.programArguments[i];
       if (i != theGlobalVariables.programArguments.size - 1)
-        theParser.inputString += " ";
+        theParser->inputString += " ";
     }
   else
   { result << "Input: " << logger::yellow;
-    std::cin >> theParser.inputString;
+    std::cin >> theParser->inputString;
   }
-  theParser.flagUseHtml = false;
-  theParser.Evaluate(theParser.inputString);
+  theParser->flagUseHtml = false;
+  theParser->Evaluate(theParser->inputString);
   std::fstream outputFile;
   std::string outputFileName;
   if (!FileOperations::GetPhysicalFileNameFromVirtual
@@ -6032,8 +6040,8 @@ int WebServer::mainCommandLine()
   }
   FileOperations::OpenFileCreateIfNotPresentVirtual
   (outputFile, "output/outputFileCommandLine.html", false, true, false);
-  result << theParser.outputString;
-  outputFile << theParser.outputString;
+  result << theParser->outputString;
+  outputFile << theParser->outputString;
   result << "\nTotal running time: " << logger::blue << GetElapsedTimeInSeconds() << " seconds. "
   << logger::endL
   << "Output written in: " << logger::green << outputFileName << logger::endL << "\n";
@@ -6066,7 +6074,9 @@ int WebServer::mainApache()
   CreateTimerThread();
   theWebServer.CreateNewActiveWorker();
   WebWorker& theWorker = theWebServer.GetActiveWorker();
-  theParser.init();
+  PointerObjectDestroyer<Calculator> theDestroyer(theParser);
+  theParser = new Calculator;
+  theParser->init();
   std::cin >> theWorker.messageBody;
   theWebServer.httpSSLPort = "443";
   theWebServer.httpPort = "80";
@@ -6094,7 +6104,7 @@ int WebServer::mainApache()
     theWorker.requestTypE = theWorker.requestGet;
   if (theRequestMethod == "POST")
     theWorker.requestTypE = theWorker.requestPost;
-  theParser.javaScriptDisplayingIndicator = WebWorker::GetJavaScriptIndicatorFromHD();
+  theParser->javaScriptDisplayingIndicator = WebWorker::GetJavaScriptIndicatorFromHD();
   theGlobalVariables.flagComputationCompletE = true;
   MathRoutines::StringSplitExcludeDelimiter(theWorker.cookiesApache, ' ', theWorker.cookies);
   for (int i = 0; i < theWorker.cookies.size; i++)

@@ -34,7 +34,9 @@ static ProjectInformationInstance vpfHeader1instance(__FILE__, "Header, general 
 //used for hashing various things.
 const int SomeRandomPrimesSize= 25;
 const int SomeRandomPrimes[SomeRandomPrimesSize]=
-{ 607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,  7057, 7411, 7417, 7681, 7883, 8011, 8209, 8369, 8447, 9539, 10267, 10657, 11489, 12071, 12613, 13933, 14759
+{ 607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,
+  7057, 7411, 7417, 7681, 7883, 8011, 8209, 8369, 8447,
+  9539, 10267, 10657, 11489, 12071, 12613, 13933, 14759
 };
 
 //the following class is for buffers, i/o function pointers, multitasking, general purpose.
@@ -346,7 +348,7 @@ public:
   { return in.HashFunction();
   }
   static unsigned int HashFunction(bool in)
-  { if(in)
+  { if (in)
       return 1;
     else
       return 0;
@@ -565,12 +567,27 @@ public:
   { if (inputCounter == 0)
       return;
     this->theCounter = inputCounter;
-    (*this->theCounter)++;
+    (*this->theCounter) ++;
   }
   ~RecursionDepthCounter()
   { if (this->theCounter != 0)
-      (*this->theCounter)--;
+      (*this->theCounter) --;
     this->theCounter = 0;
+  }
+};
+
+template <class Object>
+class PointerObjectDestroyer
+{
+  public:
+  Object** theObjectPointer;
+  PointerObjectDestroyer(Object*& inputObject): theObjectPointer(&inputObject)
+  { //std::cout << "Monitoring destruction of object at: " << inputObject << std::endl;
+  }
+  ~PointerObjectDestroyer()
+  { //std::cout << "Deleting object pointer at:  " << *(this->theObjectPointer) << std::endl;
+    delete *(this->theObjectPointer);
+    *(this->theObjectPointer) = 0;
   }
 };
 

@@ -432,6 +432,23 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
   return out.str();
 }
 
+std::string HtmlInterpretation::GetAppPage()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetAppPage");
+  std::stringstream out;
+  std::string theFile;
+  std::stringstream commentsOnFailure;
+  bool isGood = FileOperations::LoadFileToStringVirtual
+  ("/html-common-calculator/src/index.html", theFile, false, false, &commentsOnFailure);
+  if (!isGood)
+  { out << "<span style=\"color:red\"><b>"
+    << commentsOnFailure.str()
+    << "</b></span>"
+    ;
+  } else
+    out << theFile;
+  return out.str();
+}
+
 std::string HtmlInterpretation::GetAboutPage()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetAboutPage");
   std::stringstream out;
@@ -600,10 +617,7 @@ std::string HtmlInterpretation::GetHtmlTagWithManifest()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetHtmlTagWithManifest");
   std::stringstream out;
   out << "<!DOCTYPE HTML>\n";
-  out << "<html";
-  if (theGlobalVariables.flagAceIsAvailable && theGlobalVariables.flagCertificatesAreOfficiallySigned && false)
-    out << " manifest=\"/cache.appcache\" type=\"text/cache-manifest\"";
-  out << ">\n<!-- tag added automatically; user-specified html tag ignored-->\n";
+  out << "<html>\n<!-- tag added automatically; user-specified html tag ignored-->\n";
   return out.str();
 }
 
@@ -612,12 +626,12 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   std::stringstream out;
   CalculatorHTML thePage;
   std::stringstream comments;
-  bool includeDeadlineJavascript=
+  bool includeDeadlineJavascript =
   theGlobalVariables.UserDefaultHasAdminRights() &&
   !theGlobalVariables.UserStudentVieWOn();
-  bool includeInitializeButtonsJS=
+  bool includeInitializeButtonsJS =
   theGlobalVariables.UserDefaultHasAdminRights();
-  thePage.fileName=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
+  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   if (!thePage.LoadMe(true, comments, theGlobalVariables.GetWebInput("randomSeed")))
   { out << "<html>"
     << "<head>" << HtmlRoutines::GetCSSLinkCalculator() << "</head>"

@@ -16,7 +16,7 @@ var calculatorInputBoxNames=[];
 var numInsertedJavascriptChildren=0;
 var startingCharacterSectionUnderMathQuillEdit;
 var calculatorCanvases;
-var keyWordsKnownToMathQuill=['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times', 'pmatrix','int', 'begin', 'end'];
+var keyWordsKnownToMathQuill=['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times', 'oplus', 'pmatrix','int', 'begin', 'end'];
 function initializeCalculatorVariables()
 { answerIdsPureLatex=['mainInputID'];
   answerMQspanIds=['mainInputMQfield'];

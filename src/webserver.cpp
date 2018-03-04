@@ -4014,6 +4014,7 @@ int WebWorker::ServeClient()
   theGlobalVariables.flagComputationStarted = true;
   theGlobalVariables.userDefault.flagMustLogin = true;
   theGlobalVariables.userDefault.flagStopIfNoLogin = true;
+  InitializeTimer();
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theGlobalVariables.IndicatorStringOutputFunction = WebServer::PipeProgressReportToParentProcess;
   if (this->requestTypE != this->requestGet &&
@@ -5404,7 +5405,7 @@ int WebWorker::Run()
   this->ResetPipesNoAllocation();
   std::stringstream processNameStream;
   processNameStream << "W" << this->indexInParent + 1 << ": ";
-  PauseProcess::currentProcessName=processNameStream.str();
+  PauseProcess::currentProcessName = processNameStream.str();
   //theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
   theGlobalVariables.flagAllowUseOfThreadsAndMutexes = true;
   crash.CleanUpFunction = WebServer::SignalActiveWorkerDoneReleaseEverything;
@@ -5429,6 +5430,7 @@ int WebWorker::Run()
   int numReceivesThisConnection = 0;
   while (true)
   { StateMaintainerCurrentFolder preserveCurrentFolder;
+    InitializeTimer();
     if (!this->ReceiveAll())
     { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
       stOutput << "<html>"

@@ -132,5 +132,32 @@ DISTFILES += \
     ../html-common/styleCalculator.css \
     ../html-common/cookie-functions.js \
     ../html-common/mathjax-calculator-setup.js \
-    ../html-common/forgot-login.js
+    ../html-common/forgot-login.js \
+    ../html-common/account-management.js \
+    ../html-common/ace-editor-settings.js \
+    ../html-common/ace.min.js \
+    ../html-common/autocomplete.js \
+    ../html-common/calculatorPage.js \
+    ../html-common/cookie-functions.js \
+    ../html-common/database-routines.js \
+    ../html-common/forgot-login.js \
+    ../html-common/forminput.js \
+    ../html-common/initializebuttons.js \
+    ../html-common/jquery-ui.min.js \
+    ../html-common/jquery.min.js \
+    ../html-common/mathjax-calculator-setup.js \
+    ../html-common/mathquill.min-matrix.js \
+    ../html-common/mathquill.min.js \
+    ../html-common/problemlinkstyles.js \
+    ../html-common/sha1.js \
+    ../html-common/MathJax-2.7-latest.zip \
+    ../html-common/favicon.ico \
+    ../html-common/jquery-ui.css \
+    ../html-common/mathquill.css \
+    ../html-common/styleCalculator.css \
+    ../html-common/styleScorePage.css \
+    ../html-common/about.html \
+    ../html-common/test-mathquill.html \
+    ../html-common/test-three-d.html \
+    ../html-common/test-two-d.html
 

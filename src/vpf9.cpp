@@ -946,11 +946,11 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
   }
   std::string inputCopy = inputFileNamE;
   std::string folderEnd, folderEnd2;
-  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().size; i++)
+  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().size; i ++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash()[i], &folderEnd))
       if (MathRoutines::StringBeginsWith(folderEnd, theGlobalVariables.buildHeadHash, &folderEnd2))
         inputCopy = FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash()[i] + folderEnd2;
-  for (int i = 0; i < FileOperations::FilesStartsToWhichWeAppendHostName().size; i++)
+  for (int i = 0; i < FileOperations::FilesStartsToWhichWeAppendHostName().size; i ++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FilesStartsToWhichWeAppendHostName()[i]))
     { if (!FileOperations::IsOKfileNameVirtual(theGlobalVariables.hostNoPort))
         return false;
@@ -967,7 +967,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
       inputCopy = fileStart + "-" + toAppend + fileExtension;
       //stOutput << "DEBUG: inputCopy: " << inputCopy;
     }
-  for (int i = 0; i < FileOperations::FolderVirtualLinksNonSensitive().size(); i++)
+  for (int i = 0; i < FileOperations::FolderVirtualLinksNonSensitive().size(); i ++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksNonSensitive().theKeys[i], &folderEnd))
     { output = theGlobalVariables.PhysicalPathProjectBase +
       FileOperations::FolderVirtualLinksNonSensitive().theValues[i] + folderEnd;
@@ -975,7 +975,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
       return true;
     }
   if (accessSensitiveFolders)
-    for (int i = 0; i < FileOperations::FolderVirtualLinksSensitive().size(); i++)
+    for (int i = 0; i < FileOperations::FolderVirtualLinksSensitive().size(); i ++)
       if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd))
       { output = theGlobalVariables.PhysicalPathProjectBase +
         FileOperations::FolderVirtualLinksSensitive().theValues[i] + folderEnd;
@@ -983,7 +983,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
         return true;
       }
   if (accessULTRASensitiveFolders)
-    for (int i = 0; i < FileOperations::FolderVirtualLinksULTRASensitive().size(); i++)
+    for (int i = 0; i < FileOperations::FolderVirtualLinksULTRASensitive().size(); i ++)
       if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksULTRASensitive().theKeys[i], &folderEnd))
       { output = theGlobalVariables.PhysicalPathProjectBase +
         FileOperations::FolderVirtualLinksULTRASensitive().theValues[i] + folderEnd;

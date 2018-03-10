@@ -1528,7 +1528,7 @@ bool MathRoutines::StringEndsWith(const std::string& theString, const std::strin
 bool MathRoutines::StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd)
 { std::string actualBeginning, stringEnd;
   MathRoutines::SplitStringInTwo(theString, desiredBeginning.size(), actualBeginning, stringEnd);
-  bool result=(actualBeginning == desiredBeginning);
+  bool result = (actualBeginning == desiredBeginning);
   //outputstring is only modified if result is true
   if (result && outputStringEnd != 0)
     *outputStringEnd = stringEnd;

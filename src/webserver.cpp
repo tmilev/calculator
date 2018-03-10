@@ -1253,6 +1253,8 @@ void WebWorker::resetConnection()
   theGlobalVariables.userCalculatorRequestType = "";
   theGlobalVariables.userInputStringIfAvailable = "";
   theGlobalVariables.userInputStringRAWIfAvailable = "";
+  this->flagAllBytesSentUsingFile = false;
+  this->flagEncounteredErrorWhileServingFile = false;
 }
 
 void WebWorker::resetMessageComponentsExceptRawMessage()
@@ -2043,7 +2045,7 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
 void WebWorker::SetHeaderOKNoContentLength()
 { MacroRegisterFunctionWithName("WebWorker::SetHeaderOKNoContentLength");
   this->SetHeadeR("HTTP/1.0 200 OK", "Content-Type: text/html; charset=utf-8\r\nAccess-Control-Allow-Origin: *");
-  this->flagDoAddContentLength=true;
+  this->flagDoAddContentLength = true;
 }
 
 void WebWorker::SanitizeVirtualFileName()
@@ -2407,6 +2409,7 @@ int WebWorker::ProcessFile()
     << this->ToStringMessageFullUnsafe()
     ;
     stOutput << "</body></html>";
+    this->flagEncounteredErrorWhileServingFile = true;
     return 0;
   }
   std::string fileExtension = FileOperations::GetFileExtensionWithDot(this->RelativePhysicalFileNamE);
@@ -2476,8 +2479,9 @@ int WebWorker::ProcessFile()
   this->QueueStringForSendingNoHeadeR(theHeader.str());
   if (this->requestTypE == this->requestHead)
   { this->SendAllBytesNoHeaders();
+    this->flagAllBytesSentUsingFile = true;
+    this->flagEncounteredErrorWhileServingFile = false;
     return 0;
-
   }
   const int bufferSize = 64*1024;
   this->bufferFileIO.SetSize(bufferSize);
@@ -2500,6 +2504,8 @@ int WebWorker::ProcessFile()
   }
   stOutput << debugBytesStream.str();
   this->SendAllBytesNoHeaders();
+  this->flagAllBytesSentUsingFile = true;
+  this->flagEncounteredErrorWhileServingFile = false;
   return 0;
 }
 
@@ -2523,6 +2529,8 @@ void WebWorker::reset()
   this->flagKeepAlive = false;
   this->flagDidSendAll = false;
   this->flagUsingSSLInWorkerProcess = false;
+  this->flagAllBytesSentUsingFile = false;
+  this->flagEncounteredErrorWhileServingFile = false;
   theGlobalVariables.flagUsingSSLinCurrentConnection = false;
   theGlobalVariables.flagLoggedIn = false;
   theGlobalVariables.userDefault.reset();
@@ -3367,6 +3375,21 @@ int WebWorker::ProcessSelectCourse()
   return 0;
 }
 
+int WebWorker::ProcessApp()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessApp");
+  std::stringstream headerStream;
+  std::string theFileName =
+  FileOperations::GetVirtualNameWithHash("/html-common-calculator/src/index.html");
+  headerStream
+  << "Content-Type: text/html; charset=utf-8\r\n"
+  << "Access-Control-Allow-Origin: *\r\n"
+  << "Location: " << theFileName << "\r\n";
+  this->SetHeadeR("HTTP/1.0 303 See other",headerStream.str());
+  stOutput << "<meta http-equiv=\"refresh\" content=\"0; url="
+  << theFileName << "\" />";
+  return 0;
+}
+
 int WebWorker::ProcessAbout()
 { MacroRegisterFunctionWithName("WebWorker::ProcessAbout");
   this->SetHeaderOKNoContentLength();
@@ -4039,6 +4062,16 @@ int WebWorker::ServeClient()
   theGlobalVariables.userCalculatorRequestType = "";
   if (this->addressComputed == theGlobalVariables.DisplayNameExecutable)
     theGlobalVariables.userCalculatorRequestType = theGlobalVariables.GetWebInput("request");
+  //std::cout << "Address computed: " << this->addressComputed << std::endl;
+  if (theWebServer.addressStartsInterpretedAsCalculatorRequest.Contains(this->addressComputed))
+  { theGlobalVariables.userCalculatorRequestType = this->addressComputed;
+    std::string correctedRequest;
+    if (MathRoutines::StringBeginsWith(theGlobalVariables.userCalculatorRequestType, "/", &correctedRequest))
+    { //std::cout << "Got to here";
+      theGlobalVariables.userCalculatorRequestType = correctedRequest;
+    }
+    //std::cout << "Address request set to: " << theGlobalVariables.userCalculatorRequestType << std::endl;
+  }
   this->CorrectRequestsBEFORELoginReturnFalseIfModified();
   theUser.flagMustLogin = this->parent->RequiresLogin(theGlobalVariables.userCalculatorRequestType, this->addressComputed);
   if (theUser.flagMustLogin && !theGlobalVariables.flagUsingSSLinCurrentConnection && theGlobalVariables.flagSSLisAvailable)
@@ -4058,8 +4091,8 @@ int WebWorker::ServeClient()
       theUser.flagStopIfNoLogin = false;
   }
   if (theUser.flagStopIfNoLogin)
-  { if(theGlobalVariables.userCalculatorRequestType != "logout" &&
-       theGlobalVariables.userCalculatorRequestType != "login")
+  { if (theGlobalVariables.userCalculatorRequestType != "logout" &&
+        theGlobalVariables.userCalculatorRequestType != "login")
     { argumentProcessingFailureComments << "<b>Accessing: ";
       if (theGlobalVariables.userCalculatorRequestType != "")
         argumentProcessingFailureComments << theGlobalVariables.userCalculatorRequestType;
@@ -4205,6 +4238,8 @@ int WebWorker::ServeClient()
     return this->ProcessSelectCourse();
   else if (theGlobalVariables.userCalculatorRequestType == "about")
     return this->ProcessAbout();
+  else if (theGlobalVariables.userCalculatorRequestType == "app")
+    return this->ProcessApp();
   return this->ProcessFolderOrFile();
 }
 
@@ -5431,6 +5466,8 @@ int WebWorker::Run()
   while (true)
   { StateMaintainerCurrentFolder preserveCurrentFolder;
     InitializeTimer();
+    this->flagAllBytesSentUsingFile = false;
+    this->flagEncounteredErrorWhileServingFile = false;
     if (!this->ReceiveAll())
     { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
       stOutput << "<html>"
@@ -5465,8 +5502,9 @@ int WebWorker::Run()
     result = this->ServeClient();
     if (this->connectedSocketID == -1)
       break;
-    this->SendAllBytesWithHeaders();
-    if (!this->flagKeepAlive)
+    if (!this->flagAllBytesSentUsingFile)
+      this->SendAllBytesWithHeaders();
+    if (!this->flagKeepAlive || this->flagEncounteredErrorWhileServingFile)
       break;
     //The function call needs security audit.
     this->resetConnection();
@@ -5790,6 +5828,9 @@ void WebServer::InitializeGlobalVariables()
   this->addressStartsNotNeedingLogin.AddOnTop("/javascriptlibs/");
   this->addressStartsNotNeedingLogin.AddOnTop("/MathJax-2.7-latest/");
   this->addressStartsNotNeedingLogin.AddOnTop("/login");
+
+  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/app");
+  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("app");
   //NO! Adding "logout", for example: this->addressStartsNotNeedingLogin.AddOnTop("logout");
   //is FORBIDDEN! Logging someone out definitely requires authentication (imagine someone
   //asking for logouts on your account once every second: this would be fatal as proper logout resets
@@ -5811,14 +5852,14 @@ void WebServer::InitializeGlobalVariables()
     theGlobalVariables.buildVersionSimple =
     MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
   theGlobalVariables.buildVersionSimple = MathRoutines::StringTrimWhiteSpace(theGlobalVariables.buildVersionSimple);
-  for (unsigned i = 0; i < theGlobalVariables.buildVersionSimple.size(); i++)
+  for (unsigned i = 0; i < theGlobalVariables.buildVersionSimple.size(); i ++)
     if (MathRoutines::isALatinLetter(theGlobalVariables.buildVersionSimple[i]))
     { theGlobalVariables.buildVersionSimple = "?";
       break;
     }
   theGlobalVariables.buildHeadHash =
   MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-parse HEAD"));
-  for (unsigned i = 0; i < theGlobalVariables.buildHeadHash.size(); i++)
+  for (unsigned i = 0; i < theGlobalVariables.buildHeadHash.size(); i ++)
     if (!MathRoutines::IsAHexDigit(theGlobalVariables.buildHeadHash[i]))
     { theGlobalVariables.buildHeadHash = "x";
       break;
@@ -5866,6 +5907,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("/coursesavailable/", "../coursesavailable/"); //<-web server
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
 
+  folderSubstitutionsNonSensitive.SetKeyValue
+  ("/MathJax-2.7-latest/config/mathjax-calculator-setup.js", "./html-common/src/mathjax-calculator-setup.js");//<-coming from web server
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");//<-coming from webserver
 
   folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");

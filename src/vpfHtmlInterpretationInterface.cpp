@@ -432,23 +432,6 @@ std::string HtmlInterpretation::GetExamPageInterpreter()
   return out.str();
 }
 
-std::string HtmlInterpretation::GetAppPage()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetAppPage");
-  std::stringstream out;
-  std::string theFile;
-  std::stringstream commentsOnFailure;
-  bool isGood = FileOperations::LoadFileToStringVirtual
-  ("/html-common-calculator/src/index.html", theFile, false, false, &commentsOnFailure);
-  if (!isGood)
-  { out << "<span style=\"color:red\"><b>"
-    << commentsOnFailure.str()
-    << "</b></span>"
-    ;
-  } else
-    out << theFile;
-  return out.str();
-}
-
 std::string HtmlInterpretation::GetAboutPage()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetAboutPage");
   std::stringstream out;

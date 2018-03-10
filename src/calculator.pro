@@ -159,5 +159,7 @@ DISTFILES += \
     ../html-common/about.html \
     ../html-common/test-mathquill.html \
     ../html-common/test-three-d.html \
-    ../html-common/test-two-d.html
+    ../html-common/test-two-d.html \
+    ../html-common/src/app.js \
+    ../html-common/src/index.html
 

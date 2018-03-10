@@ -135,6 +135,8 @@ public:
   bool flagUsingSSLInWorkerProcess;
   bool flagDidSendAll;
   bool flagToggleMonitoring;
+  bool flagAllBytesSentUsingFile;
+  bool flagEncounteredErrorWhileServingFile;
   List<std::string> theMessageHeaderStrings;
   MapLisT<std::string, std::string, MathRoutines::hashString> requestHeaders;
   int ContentLength;
@@ -191,6 +193,7 @@ public:
   int ProcessAccounts();
   int ProcessScores();
   int ProcessAbout();
+  int ProcessApp();
   int ProcessScoresInCoursePage();
   int ProcessAssignTeacherToSection();
   int ProcessExamPage();
@@ -343,6 +346,7 @@ public:
   List<std::string> requestStartsNotNeedingLogin;
   List<std::string> addressStartsNotNeedingLogin;
   List<std::string> addressStartsSentWithCacheMaxAge;
+  HashedList<std::string, MathRoutines::hashString> addressStartsInterpretedAsCalculatorRequest;
 
   int activeWorker;
   int timeLastExecutableModification;

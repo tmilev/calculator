@@ -14,8 +14,8 @@ timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
 
 double GetElapsedTimeInSeconds()
 { gettimeofday(&LastMeasureOfCurrentTime, NULL);
-  int miliSeconds =(LastMeasureOfCurrentTime.tv_sec- ComputationStartGlobal.tv_sec)*1000 +
-    (LastMeasureOfCurrentTime.tv_usec- ComputationStartGlobal.tv_usec)/1000;
+  int miliSeconds = (LastMeasureOfCurrentTime.tv_sec - ComputationStartGlobal.tv_sec)*1000 +
+    (LastMeasureOfCurrentTime.tv_usec - ComputationStartGlobal.tv_usec)/1000;
   return ((double) miliSeconds)/1000;
 }
 
@@ -25,6 +25,11 @@ void InitializeTimer(void* desiredStartTime)
     return;
   }
   gettimeofday(&ComputationStartGlobal, NULL);
+}
+
+int GlobalVariables::GetGlobalTimeInSeconds()
+{ time_t result = time(0);
+  return (int) result;
 }
 
 void SleepFunction(int microseconds)
@@ -65,7 +70,7 @@ bool TimerThreadData::HandleComputationCompleteStandard()
 }
 
 bool TimerThreadData::HandleTimerSignalToServer()
-{ if (this->counter%20!=0)
+{ if (this->counter % 20 != 0)
     return false;
 //  std::stringstream reportStream;
 //  reportStream << "Timer: " << this->elapsedtime << " seconds elapsed since the timer was launched.";
@@ -76,9 +81,9 @@ bool TimerThreadData::HandleTimerSignalToServer()
 bool TimerThreadData::HandleMaxComputationTime()
 { if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0)
     return false;
-  if (elapsedComputationTime<=0)
+  if (elapsedComputationTime <= 0)
     return false;
-  if (elapsedComputationTime<=theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit)
+  if (elapsedComputationTime <= theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit)
     return false;
   if (theGlobalVariables.flagComputationCompletE)
   { //theReport2.SetStatus((std::string)"The allowed clock time has ran out, but it seems the computation is already done. "+

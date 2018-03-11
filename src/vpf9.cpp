@@ -137,6 +137,19 @@ GlobalVariables::GlobalVariables()
   //  stOutput << "Global variables created!";
 }
 
+void GlobalVariables::WriteSourceCodeFilesJS()
+{ this->theSourceCodeFiles().QuickSortAscending();
+  std::fstream theFile;
+  FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "/calculator-html/src/source_code_files.js", false, true, false, false);
+  theFile << "var theCPPsourceCodeFiles = [";
+  for (int i = 0; i < this->theSourceCodeFiles().size; i++)
+  { if (i != 0)
+      theFile << ", ";
+    theFile << "\"" << this->theSourceCodeFiles()[i] << "\"";
+  }
+  theFile << "];";
+}
+
 HashedList<FileInformation>& GlobalVariables::theSourceCodeFiles()
 { static HashedList<FileInformation> avoidingTheStaticInitializationOrderFiasco;
   avoidingTheStaticInitializationOrderFiasco.SetExpectedSize(200);
@@ -216,44 +229,44 @@ int DrawingVariables::GetColorFromChamberIndex(int index)
 }
 
 void DrawingVariables::initDrawingVariables()
-{ this->DefaultHtmlHeight=750;
-  this->DefaultHtmlWidth=750;
-  this->theDrawLineFunction=0;
-  this->theDrawTextFunction=0;
-  this->theDrawCircleFunction=0;
-  this->theDrawClearScreenFunction=0;
-  this->fontSizeNormal=10;
-  this->fontSizeSubscript=6;
-  this->flagLaTeXDraw= false;
-  this->flagDisplayingCreationNumbersInsteadOfDisplayNumbers=false;
-  this->flagDrawChamberIndices=true;
-  this->flagDrawingInvisibles=false;
-  this->flagDrawingLinkToOrigin=true;
-  this->flagFillUserDefinedProjection=false;
-  this->ColorDashes=HtmlRoutines::RedGreenBlue(200, 200, 200);
-  this->flag2DprojectionDraw=true;
-  this->flagIncludeExtraHtmlDescriptions=true;
-  this->flagAllowMovingCoordinateSystemFromArbitraryClick=true;
-  this->ColorChamberIndicator=HtmlRoutines::RedGreenBlue(220, 220, 0);
-  this->ColorWeylChamberWalls=HtmlRoutines::RedGreenBlue(220, 220, 0);
+{ this->DefaultHtmlHeight = 750;
+  this->DefaultHtmlWidth = 750;
+  this->theDrawLineFunction = 0;
+  this->theDrawTextFunction = 0;
+  this->theDrawCircleFunction = 0;
+  this->theDrawClearScreenFunction = 0;
+  this->fontSizeNormal = 10;
+  this->fontSizeSubscript = 6;
+  this->flagLaTeXDraw = false;
+  this->flagDisplayingCreationNumbersInsteadOfDisplayNumbers = false;
+  this->flagDrawChamberIndices = true;
+  this->flagDrawingInvisibles = false;
+  this->flagDrawingLinkToOrigin = true;
+  this->flagFillUserDefinedProjection = false;
+  this->ColorDashes = HtmlRoutines::RedGreenBlue(200, 200, 200);
+  this->flag2DprojectionDraw = true;
+  this->flagIncludeExtraHtmlDescriptions = true;
+  this->flagAllowMovingCoordinateSystemFromArbitraryClick = true;
+  this->ColorChamberIndicator = HtmlRoutines::RedGreenBlue(220, 220, 0);
+  this->ColorWeylChamberWalls = HtmlRoutines::RedGreenBlue(220, 220, 0);
   this->ColorTextPermanentlyZeroChamber = HtmlRoutines::RedGreenBlue(250, 220, 220);
   this->ColorTextZeroChamber = HtmlRoutines::RedGreenBlue(200, 100, 100);
-  this->ColorTextDefault= HtmlRoutines::RedGreenBlue(0, 0, 0);
-  this->Selected=-2;
-  this->textX=0;
-  this->textY=15;
-  this->flagPlotShowJavascriptOnly=false;
+  this->ColorTextDefault = HtmlRoutines::RedGreenBlue(0, 0, 0);
+  this->Selected = - 2;
+  this->textX = 0;
+  this->textY = 15;
+  this->flagPlotShowJavascriptOnly = false;
   this->theBuffer.init();
 }
 
 std::stringstream  HtmlRoutines::outputStream;
 int HtmlRoutines::numLinesAll;
-int HtmlRoutines::shiftX=0;
-int HtmlRoutines::numDashedLines=0;
-int HtmlRoutines::numRegularLines=0;
-int HtmlRoutines::numDottedLines=0;
-int HtmlRoutines::shiftY=-200;
-int HtmlRoutines::scale=100;
+int HtmlRoutines::shiftX = 0;
+int HtmlRoutines::numDashedLines = 0;
+int HtmlRoutines::numRegularLines = 0;
+int HtmlRoutines::numDottedLines = 0;
+int HtmlRoutines::shiftY = - 200;
+int HtmlRoutines::scale = 100;
 
 std::string HtmlRoutines::CleanUpForFileNameUse(const std::string& inputString)
 { std::stringstream out;
@@ -709,7 +722,7 @@ FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash()
 }
 
 HashedList<std::string, MathRoutines::hashString>&
-FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash()
+FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()
 { static HashedList<std::string, MathRoutines::hashString> result;
   return result;
 }
@@ -857,10 +870,10 @@ std::string FileOperations::GetVirtualNameWithHash(const std::string& inputFileN
 { MacroRegisterFunctionWithName("FileOperations::GetVirtualNameWithHash");
   std::string result = inputFileName;
   std::string fileNameEnd;
-  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().size; i++)
-  { const std::string& currentStart = FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash()[i];
+  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i++)
+  { const std::string& currentStart = FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i];
     if (MathRoutines::StringBeginsWith(result, currentStart, &fileNameEnd))
-    { result = currentStart + theGlobalVariables.buildHeadHash + fileNameEnd;
+    { result = currentStart + theGlobalVariables.buildHeadHashWithServerTime + fileNameEnd;
       break;
     }
   }
@@ -946,10 +959,12 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
   }
   std::string inputCopy = inputFileNamE;
   std::string folderEnd, folderEnd2;
-  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().size; i ++)
-    if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash()[i], &folderEnd))
-      if (MathRoutines::StringBeginsWith(folderEnd, theGlobalVariables.buildHeadHash, &folderEnd2))
-        inputCopy = FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash()[i] + folderEnd2;
+  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++)
+    if (MathRoutines::StringBeginsWith
+        (inputCopy, FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i], &folderEnd))
+      if (MathRoutines::StringBeginsWith
+          (folderEnd, theGlobalVariables.buildHeadHashWithServerTime, &folderEnd2))
+        inputCopy = FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] + folderEnd2;
   for (int i = 0; i < FileOperations::FilesStartsToWhichWeAppendHostName().size; i ++)
     if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FilesStartsToWhichWeAppendHostName()[i]))
     { if (!FileOperations::IsOKfileNameVirtual(theGlobalVariables.hostNoPort))
@@ -1211,7 +1226,7 @@ void DrawingVariables::drawCircleAtVectorBufferDouble
 void DrawingVariables::drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
 { if (this->theDrawTextFunction != 0)
     this->theDrawTextFunction(X1 - 7, Y1 - 7, inputText.c_str(), inputText.length(), color, this->fontSizeNormal);
-  if (LatexOutFile!=0)
+  if (LatexOutFile != 0)
     LaTeXProcedures::drawTextDirectly(X1, Y1, inputText, color, *LatexOutFile);
 }
 
@@ -1283,8 +1298,8 @@ bool WeylGroupData::HasStronglyPerpendicularDecompositionWRT
          tempRoot = input - currentRoot * tempRat;
          if (this->HasStronglyPerpendicularDecompositionWRT(tempRoot, UpperBoundNumBetas, theNewSet, output, outputCoeffs, IntegralCoefficientsOnly))
            return true;
-         output.size--;
-         outputCoeffs.size--;
+         output.size --;
+         outputCoeffs.size --;
        }
   }
   return false;
@@ -1321,7 +1336,7 @@ char MathRoutines::ConvertHumanReadableHexToCharValue(char input)
 unsigned int MathRoutines::ListIntsHash(const List<int>& input)
 { unsigned int result = 0;
   int numCycles = MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
-  for (int i =0; i < numCycles; i++)
+  for (int i = 0; i < numCycles; i++)
     result += SomeRandomPrimes[i] * input[i];
   return result;
 }
@@ -1336,8 +1351,8 @@ unsigned int MathRoutines::HashListDoubles(const List<double>& input)
 
 unsigned int MathRoutines::HashListInts(const List<int>& input)
 { unsigned int result = 0;
-  int numCycles=MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
-  for (int i = 0; i < numCycles; i++)
+  int numCycles = MathRoutines::Minimum(input.size, SomeRandomPrimesSize);
+  for (int i = 0; i < numCycles; i ++)
     result += SomeRandomPrimes[i] * MathRoutines::IntUnsignIdentity(input[i]);
   return result;
 }
@@ -1345,7 +1360,7 @@ unsigned int MathRoutines::HashListInts(const List<int>& input)
 unsigned int MathRoutines::hashString(const std::string& x)
 { int numCycles = x.size();
   unsigned int result = 0;
-  for (int i = 0; i < numCycles; i++)
+  for (int i = 0; i < numCycles; i ++)
     result += x[i] * SomeRandomPrimes[i % SomeRandomPrimesSize];
   return result;
 }
@@ -1396,7 +1411,7 @@ void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::str
   output = "";
   output.reserve(inputString.size());
   unsigned i = 0;
-  for (i = 0; i < inputString.size(); i++)
+  for (i = 0; i < inputString.size(); i ++)
     if (inputString[i] != ' ' && inputString[i] != '\r' &&
         inputString[i] != '\t' && inputString[i] != '\n')
       break;
@@ -1404,12 +1419,12 @@ void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::str
   if (output.size() == 0)
     return;
   signed j = 0;
-  for (j =(signed) output.size() - 1; j >= 0; j--)
+  for (j = (signed) output.size() - 1; j >= 0; j--)
     if (output[j] != ' ' && output[j] != '\r' &&
         output[j] != '\t' && output[j] != '\n' &&
         output[j] != '\0')
       break;
-  j++;
+  j ++;
   output = output.substr(0, j);
 }
 
@@ -1610,10 +1625,10 @@ int MathRoutines::BinomialCoefficientMultivariate(int N, List<int>& theChoices)
   for( int i = N; i > 0; i--)
   { result *= i;
     result /= denominator;
-    denominator++;
+    denominator ++;
     if (denominator > theChoices[ChoiceIndex])
     { denominator = 1;
-      ChoiceIndex++;
+      ChoiceIndex ++;
     }
   }
   return result;
@@ -1680,7 +1695,7 @@ void Selection::ShrinkMaxSize()
 void Selection::ExpandMaxSize()
 { this->elements[this->CardinalitySelection] = this->MaxSize;
   this->selected[this->MaxSize] = true;
-  this->MaxSize++;
+  this->MaxSize ++;
   this->CardinalitySelection++;
 }
 
@@ -1750,11 +1765,11 @@ void Selection::incrementSelectionFixedCardinality
   { this->initSelectionFixedCardinality(card);
     return;
   }
-  if(card == this->MaxSize || card == 0)
+  if (card == this->MaxSize || card == 0)
     return;
   int IndexLastZeroWithOneBefore = - 1;
   int NumOnesAfterLastZeroWithOneBefore=0;
-  for(int i = this->MaxSize - 1; i >= 0; i--)
+  for (int i = this->MaxSize - 1; i >= 0; i--)
     if (this->selected[i])
     { if (IndexLastZeroWithOneBefore == - 1)
         NumOnesAfterLastZeroWithOneBefore++;
@@ -1766,10 +1781,10 @@ void Selection::incrementSelectionFixedCardinality
   { this->initSelectionFixedCardinality(card);
     return;
   }
-  for(int i = 0; i < NumOnesAfterLastZeroWithOneBefore + 1; i++)
+  for (int i = 0; i < NumOnesAfterLastZeroWithOneBefore + 1; i ++)
     this->selected[this->elements[this->CardinalitySelection - i - 1]]=false;
   //***At this point in time the second column is recorded
-  for(int i = 0; i < NumOnesAfterLastZeroWithOneBefore + 1; i++)
+  for (int i = 0; i < NumOnesAfterLastZeroWithOneBefore + 1; i ++)
   { this->selected[i + IndexLastZeroWithOneBefore] = true;
     this->elements[this->CardinalitySelection + i - NumOnesAfterLastZeroWithOneBefore - 1] = i + IndexLastZeroWithOneBefore;
   }
@@ -2193,12 +2208,12 @@ void PartFraction::PrepareFraction
 
 int PartFraction::GetNumProportionalVectorsClassicalRootSystems(PartFractions& owner)
 { int result = 0;
-  for (int i = 0; i < owner.IndicesRedundantShortRoots.CardinalitySelection; i++)
+  for (int i = 0; i < owner.IndicesRedundantShortRoots.CardinalitySelection; i ++)
   { int tempI = owner.IndicesRedundantShortRoots.elements[i];
     int tempI2 = owner.getIndexDoubleOfARoot(owner.startingVectors[tempI]);
     if (tempI2 != -1)
       if (this->TheObjects[tempI2].Multiplicities.size > 0)
-        result++;
+        result ++;
   }
   return result;
 }
@@ -2228,7 +2243,7 @@ int PartFraction::ComputeGainingMultiplicityIndexInLinearRelation
 (bool flagUsingOrlikSolomon,  Matrix<Rational> & theLinearRelation)
 { int DesireToSelectAsGainingMultiplicity = - 1;
   int result = - 1;
-  for( int i = 0; i < theLinearRelation.NumRows; i++)
+  for( int i = 0; i < theLinearRelation.NumRows; i ++)
   { if(!theLinearRelation.elements[i][0].IsEqualToZero())
     { int currentIndex = this->IndicesNonZeroMults[i];
       int candidateDesire;
@@ -2252,7 +2267,7 @@ bool PartFraction::DecomposeFromLinRelation
 {//  theLinearRelation.ComputeDebugString();
   //theLinearRelation.ComputeDebugString();
   int GainingMultiplicityIndexInLinRelation = -1;
-  int GainingMultiplicityIndex = -1;
+  int GainingMultiplicityIndex = - 1;
   int ElongationGainingMultiplicityIndex = -1;
   List<int> ParticipatingIndices;
   List<int> theGreatestElongations;
@@ -2438,9 +2453,9 @@ void PartFraction::ApplySzenesVergneFormulA
     int LargestElongation = currentFrac.GetLargestElongation();
     currentFrac.AddMultiplicity(- 1, LargestElongation);
     tempM.MakeOne(theDim);
-    for (int j = 0; j < i; j++)
+    for (int j = 0; j < i; j ++)
     { int tempElongation = (int) (*this)[theSelectedIndices[j]].GetLargestElongation();
-      for (int k = 0; k < theDim; k++)
+      for (int k = 0; k < theDim; k ++)
         tempM[k] += startingVectors[theSelectedIndices[j]][k] * theElongations[j] * tempElongation;
     }
     ParallelComputing::SafePointDontCallMeFromDestructors();
@@ -2471,7 +2486,7 @@ void PartFraction::decomposeAMinusNB
   int powerB = (*this)[indexB].Multiplicities[0];
   output.MakeZero();
   this->PrepareFraction(indexA, indexB, indexAminusNB, true, tempFrac, AminusNbetaPoly, commonPoly);
-  for (int i = powerB; i >= 1; i--)
+  for (int i = powerB; i >= 1; i --)
   { LargeInt tempInt = MathRoutines::NChooseK(powerA + powerB - i - 1, powerA - 1);
     commonPoly *= tempInt;
     output.AddMonomial(tempFrac, commonPoly);
@@ -2483,14 +2498,14 @@ void PartFraction::decomposeAMinusNB
     }
   }
   this->PrepareFraction(indexA, indexB, indexAminusNB, false, tempFrac, AminusNbetaPoly, commonPoly);
-  for (int i = powerA; i >= 1; i--)
+  for (int i = powerA; i >= 1; i --)
   { LargeInt tempInt = MathRoutines::NChooseK(powerA + powerB - i - 1, powerB - 1);
     commonPoly *= tempInt;
     output.AddMonomial(tempFrac, commonPoly);
     commonPoly /= tempInt;
     if (i > 1)
     { tempFrac[indexAminusNB].AddMultiplicity(1, 1);
-      tempFrac[indexA].AddMultiplicity(-1, 1);
+      tempFrac[indexA].AddMultiplicity(- 1, 1);
 //      tempFrac.ComputeDebugString();
     }
   }
@@ -2505,7 +2520,7 @@ bool PartFraction::DecreasePowerOneFrac(int index, int increment)
 
 void PartFraction::ComputeIndicesNonZeroMults()
 { this->IndicesNonZeroMults.size = 0;
-  for (int i = 0; i < this->size; i++)
+  for (int i = 0; i < this->size; i ++)
     if((*this)[i].Multiplicities.size > 0)
       this->IndicesNonZeroMults.AddOnTop(i);
 }
@@ -2514,7 +2529,7 @@ void PartFraction::GetAlphaMinusNBetaPoly(PartFractions& owner, int indexA, int 
 { output.MakeZero();
   MonomialP tempM;
   tempM.MakeOne(owner.AmbientDimension);
-  for (int i = 0; i < n; i++)
+  for (int i = 0; i < n; i ++)
   { for (int j = 0; j < owner.AmbientDimension; j++)
       tempM[j] = owner.startingVectors[indexA][j] - owner.startingVectors[indexB][j] * (i + 1);
     output.AddMonomial(tempM, - 1);
@@ -2526,13 +2541,13 @@ void PartFraction::GetNElongationPoly(List<Vector<Rational> >& startingVectors, 
   MonomialP tempM;
   tempM.MakeOne(theDimension);
   if (LengthOfGeometricSeries > 0)
-    for (int i = 0; i < LengthOfGeometricSeries; i++)
+    for (int i = 0; i < LengthOfGeometricSeries; i ++)
     { for (int j = 0; j < theDimension; j++)
         tempM[j] = startingVectors[index][j] * baseElongation * i;
       output.AddMonomial(tempM, 1);
     }
   else
-    for (int i = - 1; i >= LengthOfGeometricSeries; i--)
+    for (int i = - 1; i >= LengthOfGeometricSeries; i --)
     { for (int j = 0; j < theDimension; j++)
         tempM[j] = startingVectors[index][j] * baseElongation * i;
       output.AddMonomial(tempM, - 1);
@@ -2549,10 +2564,10 @@ void PartFraction::MakePolynomialFromOneNormal(Vector<Rational>& normal, const M
   Polynomial<Rational> tempP;
   Vector<Rational> shiftRationalVector;
   shiftRationalVector.MakeZero(normal.size);
-  for (int i = 0; i < normal.size; i++)
+  for (int i = 0; i < normal.size; i ++)
     shiftRationalVector[i] = shiftRational(i);
   tempRat = normal.ScalarEuclidean(shiftRationalVector);
-  for (int j = 0; j < theMult - 1; j++)
+  for (int j = 0; j < theMult - 1; j ++)
   { tempP.MakeLinPolyFromRootNoConstantTerm(normal);
     if (PartFraction::flagAnErrorHasOccurredTimeToPanic)
     { //tempP.ComputeDebugString();
@@ -2583,12 +2598,12 @@ void PartFraction::ComputeNormals(PartFractions& owner, Vectors<Rational>& outpu
   tempRoot.SetSize(theDimension);
   dens.size = 0;
   output.size = 0;
-  for (int i = 0; i < theDimension; i++)
+  for (int i = 0; i < theDimension; i ++)
   { tempRoot = owner.startingVectors[this->IndicesNonZeroMults[i]];
     dens.AddOnTop(tempRoot);
   }
-  Rational tempRat, tempRat2;
-  for (int i = 0; i < theDimension; i++)
+  Rational tempRat;
+  for (int i = 0; i < theDimension; i ++)
   { dens.ComputeNormalExcludingIndex(tempRoot, i, buffer);
     tempRat = tempRoot.ScalarEuclidean(dens[i]);
     if(tempRat.IsEqualToZero())
@@ -2612,7 +2627,7 @@ void PartFraction::init(int numRoots)
 { this->IndicesNonZeroMults.Reserve(numRoots);
   this->IndicesNonZeroMults.size = 0;
   this->SetSize(numRoots);
-  for (int i = 0; i < this->size; i++)
+  for (int i = 0; i < this->size; i ++)
   { this->TheObjects[i].Elongations.SetSize(0);
     this->TheObjects[i].Multiplicities.SetSize(0);
   }
@@ -2628,7 +2643,7 @@ PartFraction::~PartFraction()
 
 unsigned int PartFraction::HashFunction() const
 { unsigned int result = 0;
-  for (int i = 0; i < this->size; i++)
+  for (int i = 0; i < this->size; i ++)
     result += SomeRandomPrimes[i] * this->TheObjects[i].HashFunction();
   return result;
 }
@@ -2636,7 +2651,7 @@ unsigned int PartFraction::HashFunction() const
 bool PartFraction::operator==(const PartFraction& right)const
 { if (this->size != right.size)
     return false;
-  for (int i = 0; i < this->size; i++)
+  for (int i = 0; i < this->size; i ++)
     if (!(this->TheObjects[i] == right[i]))
       return false;
 /*  for(int i=0; i<Vector<Rational>::AmbientDimension; i++)
@@ -2653,7 +2668,7 @@ void PartFraction::operator=(const PartFraction& right)
 int PartFractions::SizeWithoutDebugString()
 { int Accum = 0;
   Accum += this->theMonomials.SizeWithoutObjects();
-  for (int i = 0; i < this->size(); i++)
+  for (int i = 0; i < this->size(); i ++)
     Accum += (*this)[i].SizeWithoutDebugString();
   Accum += sizeof(this->HighestIndex) + sizeof(this->IndexLowestNonProcessed);
   return Accum;

@@ -10,6 +10,12 @@ static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretationInterface(_
 
 class HtmlInterpretation{
 public:
+  std::string htmlRaw;
+  std::string htmlJSbuild;
+  List<std::string> currentWords;
+  //List<bool> charIsSplitting;
+
+  void BuildHtmlJSpage();
   static std::string GetHtmlTagWithManifest();
   static std::string ModifyProblemReport();
   static std::string ClonePageResult();
@@ -33,6 +39,7 @@ public:
   static std::string GetSelectCourse();
   static std::string GetScoresPage();
   static std::string GetAboutPage();
+  static std::string GetApp();
   static std::string GetScoresInCoursePage();
   static std::string GetNavigationPanelWithGenerationTime();
   static std::string SubmitProblemPreview();

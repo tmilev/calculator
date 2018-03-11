@@ -3181,7 +3181,8 @@ int WebWorker::ProcessCompute()
 int WebWorker::ProcessCalculator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessCalculator");
   this->SetHeaderOKNoContentLength();
-  theParser->inputString = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"),false);
+  theParser->inputString = HtmlRoutines::ConvertURLStringToNormal
+  (theGlobalVariables.GetWebInput("mainInput"), false);
   theParser->flagShowCalculatorExamples = (theGlobalVariables.GetWebInput("showExamples") == "true");
   stOutput << "<html><head> <title>Calculator build " << theGlobalVariables.buildVersionSimple
   << "</title>";
@@ -3202,7 +3203,7 @@ int WebWorker::ProcessCalculator()
 
   stOutput << "\n\n<script language=\"javascript\">\n"
   << "  var theAutocompleteDictionary = [\n  ";
-  for (int i = 0; i < theParser->autoCompleteKeyWords.size; i++)
+  for (int i = 0; i < theParser->autoCompleteKeyWords.size; i ++)
     if (theParser->autoCompleteKeyWords[i].size() > 2)
     { stOutput << "\"" << theParser->autoCompleteKeyWords[i] << "\"";
       if (i != theParser->autoCompleteKeyWords.size - 1)
@@ -3377,16 +3378,8 @@ int WebWorker::ProcessSelectCourse()
 
 int WebWorker::ProcessApp()
 { MacroRegisterFunctionWithName("WebWorker::ProcessApp");
-  std::stringstream headerStream;
-  std::string theFileName =
-  FileOperations::GetVirtualNameWithHash("/html-common-calculator/src/index.html");
-  headerStream
-  << "Content-Type: text/html; charset=utf-8\r\n"
-  << "Access-Control-Allow-Origin: *\r\n"
-  << "Location: " << theFileName << "\r\n";
-  this->SetHeadeR("HTTP/1.0 303 See other",headerStream.str());
-  stOutput << "<meta http-equiv=\"refresh\" content=\"0; url="
-  << theFileName << "\" />";
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::GetApp();
   return 0;
 }
 
@@ -5245,6 +5238,8 @@ int WebServer::Run()
   PointerObjectDestroyer<Calculator> calculatorDestroyer(theParser);
   theParser->init();
   theParser->ComputeAutoCompleteKeyWords();
+  theParser->WriteAutoCompleteKeyWordsToFile();
+  theGlobalVariables.WriteSourceCodeFilesJS();
   HtmlRoutines::LoadStrings();
   theParser->flagShowCalculatorExamples = false;
   if (!this->initPrepareWebServerALL())
@@ -5823,7 +5818,7 @@ void WebServer::InitializeGlobalVariables()
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/html-common/");
-  this->addressStartsNotNeedingLogin.AddOnTop("/html-common-calculator/");
+  this->addressStartsNotNeedingLogin.AddOnTop("/calculator-html/");
   this->addressStartsNotNeedingLogin.AddOnTop("/css/");
   this->addressStartsNotNeedingLogin.AddOnTop("/javascriptlibs/");
   this->addressStartsNotNeedingLogin.AddOnTop("/MathJax-2.7-latest/");
@@ -5857,35 +5852,33 @@ void WebServer::InitializeGlobalVariables()
     { theGlobalVariables.buildVersionSimple = "?";
       break;
     }
-  theGlobalVariables.buildHeadHash =
-  MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-parse HEAD"));
-  for (unsigned i = 0; i < theGlobalVariables.buildHeadHash.size(); i ++)
-    if (!MathRoutines::IsAHexDigit(theGlobalVariables.buildHeadHash[i]))
-    { theGlobalVariables.buildHeadHash = "x";
+  theGlobalVariables.buildHeadHashWithServerTime = MathRoutines::StringTrimWhiteSpace
+  (theGlobalVariables.CallSystemWithOutput("git rev-parse HEAD"));
+  for (unsigned i = 0; i < theGlobalVariables.buildHeadHashWithServerTime.size(); i ++)
+    if (!MathRoutines::IsAHexDigit(theGlobalVariables.buildHeadHashWithServerTime[i]))
+    { theGlobalVariables.buildHeadHashWithServerTime = "x";
       break;
     }
+  std::stringstream buildHeadHashWithTimeStream;
+  buildHeadHashWithTimeStream << theGlobalVariables.buildHeadHashWithServerTime
+  << theGlobalVariables.GetGlobalTimeInSeconds();
+  theGlobalVariables.buildHeadHashWithServerTime = buildHeadHashWithTimeStream.str();
   theGlobalVariables.ChDir(theDir);
 
-  FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
-  ("/html-common-calculator");
-  FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
+  FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
+  ("/calculator-html");
+  FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
   ("font");
-  FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
+  FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
   ("/font");
 
-  this->addressStartsNotNeedingLogin.AddListOnTop(FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash());
-
+  this->addressStartsNotNeedingLogin.AddListOnTop
+  (FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash());
 
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.7-latest/");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery.min.js");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery-ui.css");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/jquery-ui.min.css");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/images");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/mathquill.css");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/mathquill.min.js");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common-calculator/mathquill.min-matrix.js");
-  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/font/");
-  this->addressStartsSentWithCacheMaxAge.AddListOnTop(FileOperations::FolderVirtualLinksToWhichWeAppendBuildHash());
+  this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/");
+  this->addressStartsSentWithCacheMaxAge.AddListOnTop
+  (FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash());
 
   //Warning: order of substitutions is important. Only the first rule that applies is applied, only once.
   //No further rules are applied after that.
@@ -5897,8 +5890,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");//<-coming from webserver
 
   folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", "./html-common/font/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "../public_html/html-common/");//<-coming from webserver
-  folderSubstitutionsNonSensitive.SetKeyValue("/html-common-calculator/", "./html-common/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "./html-common/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("/font/", "./html-common/font/");
 
   folderSubstitutionsNonSensitive.SetKeyValue("DefaultProblemLocation/", "../problemtemplates/");//<-internal use
@@ -5928,7 +5920,7 @@ void WebServer::InitializeGlobalVariables()
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("favicon.ico");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/favicon.ico");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/coursesavailable/default/default.txt");
-  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/html-common-calculator/about.html");
+  FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/calculator-html/about.html");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/html/about.html");
 
   FileOperations::FolderStartsToWhichWeAppendInstructorUsernameSlash().AddOnTop("topiclists/");

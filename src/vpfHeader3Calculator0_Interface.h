@@ -1083,6 +1083,7 @@ public:
   Expression GetNewBoundVar();
   Expression GetNewAtom();
   void ComputeAutoCompleteKeyWords();
+  void WriteAutoCompleteKeyWordsToFile();
   std::string ElementToStringNonBoundVars();
   std::string ToStringOutputAndSpecials();
   std::string ToStringFunctionHandlers();

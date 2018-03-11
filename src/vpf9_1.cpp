@@ -433,7 +433,7 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
   << " the 8155 in the address above with the port number reported by the calculator. ";
   out << "<hr>" << this->theSourceCodeFiles().size << " files total. ";
   out << "<br>svn checkout command:<br>svn checkout https://github.com/tmilev/calculator.git/trunk calculator";
-  for (int i=0; i<this->theSourceCodeFiles().size; i++)
+  for (int i = 0; i < this->theSourceCodeFiles().size; i++)
   { out << " <br>\n";
     out << HtmlRoutines::GetHtmlLinkFromProjectFileName(this->theSourceCodeFiles()[i].FileName, this->theSourceCodeFiles()[i].FileDescription);
   }

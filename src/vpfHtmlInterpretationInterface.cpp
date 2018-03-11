@@ -447,7 +447,7 @@ std::string HtmlInterpretation::GetAboutPage()
   std::string theFile;
   std::stringstream commentsOnFailure;
   bool isGood = FileOperations::LoadFileToStringVirtual
-  ("/html-common-calculator/about.html", theFile, false, false, &commentsOnFailure);
+  ("/calculator-html/about.html", theFile, false, false, &commentsOnFailure);
   if (!isGood)
     isGood = FileOperations::LoadFileToStringVirtual("/html/about.html", theFile, false, false, &commentsOnFailure);
   if (!isGood)
@@ -459,6 +459,41 @@ std::string HtmlInterpretation::GetAboutPage()
     out << theFile;
   out << "</body></html>";
   return out.str();
+}
+
+void HtmlInterpretation::BuildHtmlJSpage()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::BuildHtmlJSpage");
+  std::stringstream out;
+  std::stringstream theReader(this->htmlRaw);
+  theReader.seekg(0);
+  std::string theCalculatorHtmlFolder = "/calculator-html";
+  for (std::string currentLine; std::getline(theReader, currentLine, '\n');)
+  { int startChar = currentLine.find(theCalculatorHtmlFolder);
+    if (startChar == - 1)
+    { out << currentLine << "\n";
+      continue;
+    }
+    std::string firstPart, secondAndThirdPart, thirdPart, notUsed;
+    MathRoutines::SplitStringInTwo(currentLine, startChar, firstPart, secondAndThirdPart);
+    MathRoutines::SplitStringInTwo(secondAndThirdPart, theCalculatorHtmlFolder.size(), notUsed, thirdPart);
+    out << firstPart << FileOperations::GetVirtualNameWithHash(theCalculatorHtmlFolder) << thirdPart << "\n";
+  }
+  this->htmlJSbuild = out.str();
+}
+
+std::string HtmlInterpretation::GetApp()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetApp");
+  HtmlInterpretation theInterpretation;
+  std::stringstream out;
+  std::stringstream errorStream;
+  if (!FileOperations::LoadFileToStringVirtual
+      ("/calculator-html/src/index.html", theInterpretation.htmlRaw, false, false, &errorStream))
+  { out << "<html><body><b>Failed to load the application file. "
+    << "Further comments follow. " << errorStream.str() << "</body></html>";
+    return out.str();
+  }
+  theInterpretation.BuildHtmlJSpage();
+  return theInterpretation.htmlJSbuild;
 }
 
 class Course
@@ -825,7 +860,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "}\n"
   << "</script>\n";
   outBody
-  << "<script src=\"/html-common-calculator/ace/src-min/ext-language_tools.js\"></script>";
+  << "<script src=\"/calculator-html/ace/src-min/ext-language_tools.js\"></script>";
   outBody << "<script type=\"text/javascript\"> \n"
   //<< " document.getElementById('mainInput').value=decodeURIComponent(\""
   << " document.getElementById('editor').textContent=decodeURIComponent(\""
@@ -1511,7 +1546,7 @@ std::string HtmlInterpretation::GetScoresPage()
   << "<head>"
   << HtmlRoutines::GetCSSLinkCalculator()
   << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
-  << "<link rel=\"stylesheet\" href=\"/html-common-calculator/styleScorePage.css\">"
+  << "<link rel=\"stylesheet\" href=\"/calculator-html/styleScorePage.css\">"
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   CalculatorHTML thePage;

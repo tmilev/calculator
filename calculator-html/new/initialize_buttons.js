@@ -443,7 +443,7 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
 }
 
 function initializeButtons()
-{ for (i=0; i<answerIdsPureLatex.length; i++)
+{ for (var i = 0; i < answerIdsPureLatex.length; i++)
     initializeOneButtonPanel(preferredButtonContainers[i], i, false);
   initializeButtonsCommon();
 }

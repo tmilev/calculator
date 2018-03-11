@@ -161,5 +161,14 @@ DISTFILES += \
     ../html-common/test-three-d.html \
     ../html-common/test-two-d.html \
     ../html-common/src/app.js \
-    ../html-common/src/index.html
+    ../html-common/src/index.html \
+    ../html-common/src/hide_html_with_tags.js \
+    ../html-common/src/mathjax-calculator-setup.js \
+    ../html-common/src/styleCalculator.css \
+    ../html-common/src/styleScorePage.css \
+    ../html-common/src/cookies.js \
+    ../html-common/src/submit_requests.js \
+    ../html-common/src/autocomplete.js \
+    ../html-common/src/initialize_buttons.js \
+    ../html-common/src/three-d.js
 

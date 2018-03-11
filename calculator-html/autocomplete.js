@@ -17,16 +17,15 @@ var oldLastWord;
 var lastWordStart;
 var ignoreOninput;
 
-
 function initializeAutocomplete()
 { if (AutocompleteIsInitialized)
     return true;
-  if (typeof( theAutocompleteDictionary)=='undefined')
+  if (typeof( theAutocompleteDictionary) == 'undefined')
     return false;
-  AutocompleteIsInitialized=true;
-  theAutocompleteDictionaryLowerCase= new Array;
-  theAutocompleteDictionaryByKey= new Array;
-  theText= document.getElementById('mainInputID');
+  AutocompleteIsInitialized = true;
+  theAutocompleteDictionaryLowerCase = new Array;
+  theAutocompleteDictionaryByKey = new Array;
+  theText = document.getElementById('mainInputID');
   theSuggestions= new Array;
   theSuggestionsHighlighted= new Array;
   theAutoComplete=document.getElementById('idAutocompleteSpan');

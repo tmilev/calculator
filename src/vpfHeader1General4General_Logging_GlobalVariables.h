@@ -99,7 +99,7 @@ public:
   bool flagCertificatesAreOfficiallySigned;
   bool flagCrashInitiated;
   std::string buildVersionSimple;
-  std::string buildHeadHash;
+  std::string buildHeadHashWithServerTime;
   std::string OperatingSystem;
   std::string hostWithPort;
   std::string hostNoPort;
@@ -192,11 +192,13 @@ public:
   GlobalVariables();
   ~GlobalVariables();
   static HashedList<FileInformation>& theSourceCodeFiles();
+  void WriteSourceCodeFilesJS();
   void SetTimerFunction(double (*timerFunction)())
-  { this->getElapsedTimePrivate=timerFunction;
+  { this->getElapsedTimePrivate = timerFunction;
   }
+  int GetGlobalTimeInSeconds();
   double GetElapsedSeconds()
-  { if (this->getElapsedTimePrivate!=0)
+  { if (this->getElapsedTimePrivate != 0)
       return this->getElapsedTimePrivate();
     return -1;
   }

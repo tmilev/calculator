@@ -2186,30 +2186,30 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   this->initBuiltInSpanClasses();
   this->eltsStack.SetSize(0);
   SyntacticElementHTML dummyElt, tempElt;
-  dummyElt.content="<>";
-  dummyElt.syntacticRole="filler";
-  tempElt.syntacticRole="command";
-  tempElt.tag="";
-  tempElt.content="";
-  eltsStack.SetExpectedSize(theElements.size+SyntacticElementHTML::ParsingNumDummyElements);
-  for (int i=0; i<SyntacticElementHTML::ParsingNumDummyElements; i++)
+  dummyElt.content = "<>";
+  dummyElt.syntacticRole = "filler";
+  tempElt.syntacticRole = "command";
+  tempElt.tag = "";
+  tempElt.content = "";
+  eltsStack.SetExpectedSize(theElements.size + SyntacticElementHTML::ParsingNumDummyElements);
+  for (int i = 0; i < SyntacticElementHTML::ParsingNumDummyElements; i++)
     eltsStack.AddOnTop(dummyElt);
-  int indexInElts=-1;
-  bool reduced=false;
-  this->flagIsExamProblem=false;
-  this->flagIsExamHome=false;
-  this->flagTagHeadPresent=false;
-  this->flagTagBodyPresent=false;
-  this->flagTagHtmlPresent=false;
+  int indexInElts = - 1;
+  bool reduced = false;
+  this->flagIsExamProblem = false;
+  this->flagIsExamHome = false;
+  this->flagTagHeadPresent = false;
+  this->flagTagBodyPresent = false;
+  this->flagTagHtmlPresent = false;
   std::string tagClass, tag;
   do
   { if (!reduced)
-    { indexInElts++;
-      if (indexInElts<theElements.size)
+    { indexInElts ++;
+      if (indexInElts < theElements.size)
         eltsStack.AddOnTop(theElements[indexInElts]);
     }
     //stOutput << "<br>DEBUG: " << this->ToStringParsingStack(eltsStack);
-    reduced=true;
+    reduced = true;
     SyntacticElementHTML& last         = eltsStack[eltsStack.size-1];
     SyntacticElementHTML& secondToLast = eltsStack[eltsStack.size-2];
     SyntacticElementHTML& thirdToLast  = eltsStack[eltsStack.size-3];

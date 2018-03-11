@@ -3174,7 +3174,7 @@ int WebWorker::ProcessCompute()
   if (theGlobalVariables.UserDebugFlagOn())
     stOutput << this->ToStringMessageFullUnsafe();
 
-  theGlobalVariables.flagComputationCompletE=true;
+  theGlobalVariables.flagComputationCompletE = true;
   return 0;
 }
 
@@ -4406,31 +4406,31 @@ void WebServer::ReleaseEverything()
   this->theSSLdata.FreeSSL();
 #endif
   logger& currentLog = theGlobalVariables.flagIsChildProcess ? logWorker : logServer;
-  ProgressReportWebServer::flagServerExists=false;
-  for (int i = 0; i < this->theWorkers.size; i++)
+  ProgressReportWebServer::flagServerExists = false;
+  for (int i = 0; i < this->theWorkers.size; i ++)
     this->theWorkers[i].Release();
   theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection = 0;
   //theGlobalVariables.WebServerTimerPing=0;
   theGlobalVariables.IndicatorStringOutputFunction = 0;
   theGlobalVariables.PauseUponUserRequest = 0;
-  this->activeWorker = -1;
+  this->activeWorker = - 1;
   if (theGlobalVariables.flagServerDetailedLog)
     currentLog << logger::red << "DEBUG: "
     << " About to close socket: " << this->listeningSocketHTTP << ". " << logger::endL;
-  if (this->listeningSocketHTTP != -1)
+  if (this->listeningSocketHTTP != - 1)
   { close(this->listeningSocketHTTP);
     if (theGlobalVariables.flagServerDetailedLog)
       currentLog << logger::red << "DEBUG: "
       << " Just closed socket: " << this->listeningSocketHTTP << logger::endL;
-    this->listeningSocketHTTP = -1;
+    this->listeningSocketHTTP = - 1;
   }
-  if (this->listeningSocketHttpSSL != -1)
+  if (this->listeningSocketHttpSSL != - 1)
   { close(this->listeningSocketHttpSSL);
     if (theGlobalVariables.flagServerDetailedLog)
       currentLog << logger::red << "DEBUG: "
       << " Just closed socket: " << this->listeningSocketHttpSSL << logger::endL;
   }
-  this->listeningSocketHttpSSL = -1;
+  this->listeningSocketHttpSSL = - 1;
 }
 
 WebServer::~WebServer()
@@ -4497,22 +4497,22 @@ WebWorker& WebServer::GetActiveWorker()
 
 void WebServer::SignalActiveWorkerDoneReleaseEverything()
 { MacroRegisterFunctionWithName("WebServer::SignalActiveWorkerDoneReleaseEverything");
-  if (theWebServer.activeWorker == -1)
+  if (theWebServer.activeWorker == - 1)
     return;
   theWebServer.GetActiveWorker().SendAllAndWrapUp();
-  theWebServer.activeWorker = -1;
+  theWebServer.activeWorker = - 1;
 }
 
 void WebServer::ReleaseActiveWorker()
 { MacroRegisterFunctionWithName("WebServer::ReleaseActiveWorker");
-  if (this->activeWorker == -1)
+  if (this->activeWorker == - 1)
     return;
   this->GetActiveWorker().Release();
-  this->activeWorker = -1;
+  this->activeWorker = - 1;
 }
 
 void WebServer::WorkerTimerPing(double pingTime)
-{ if (theWebServer.activeWorker == -1)
+{ if (theWebServer.activeWorker == - 1)
   { if (!theGlobalVariables.flagComputationFinishedAllOutputSentClosing)
       crash << "WebServer::WorkerTimerPing called when the computation is not entirely complete. " << crash;
     return;
@@ -4524,39 +4524,39 @@ void WebServer::WorkerTimerPing(double pingTime)
 
 void WebServer::ReleaseNonActiveWorkers()
 { MacroRegisterFunctionWithName("WebServer::ReleaseNonActiveWorkers");
-  for (int i = 0; i < this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i ++)
     if (i != this->activeWorker)
       this->theWorkers[i].ReleaseKeepInUseFlag();
 }
 
 void WebServer::ReleaseSocketsNonActiveWorkers()
 { MacroRegisterFunctionWithName("WebServer::ReleaseSocketsNonActiveWorkers");
-  for (int i = 0; i < this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i ++)
     if (i != this->activeWorker)
       this->Release(this->theWorkers[i].connectedSocketID);
 }
 
 bool WebServer::EmergencyRemoval_LastCreatedWorker()
 { this->GetActiveWorker().Release();
-  this->activeWorker = -1;
-  this->theWorkers.SetSize(this->theWorkers.size-1);
+  this->activeWorker = - 1;
+  this->theWorkers.SetSize(this->theWorkers.size - 1);
   return false;
 }
 
 bool WebServer::CreateNewActiveWorker()
 { MacroRegisterFunctionWithName("WebServer::CreateNewActiveWorker");
-  if (this->activeWorker != -1)
+  if (this->activeWorker != - 1)
   { crash << "Calling CreateNewActiveWorker requires the active worker index to be -1." << crash;
     return false;
   }
   bool found = false;
-  for (int i = 0; i < this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i ++)
     if (!this->theWorkers[i].flagInUse)
     { this->activeWorker = i;
       found = true;
       break;
     }
-  if (this->activeWorker == -1)
+  if (this->activeWorker == - 1)
   { this->activeWorker=this->theWorkers.size;
     this->theWorkers.SetSize(this->theWorkers.size + 1);
   }
@@ -4637,7 +4637,7 @@ std::string WebServer::ToStringLastErrorDescription()
 
 std::string WebServer::ToStringStatusActive()
 { MacroRegisterFunctionWithName("WebServer::ToStringStatusActive");
-  if (this->activeWorker == -1)
+  if (this->activeWorker == - 1)
     return "server.";
   std::stringstream out;
   if (this->activeWorker != this->GetActiveWorker().indexInParent)
@@ -4671,9 +4671,9 @@ std::string WebServer::ToStringStatusForLogFile()
   << "This counts one connection per problem answer preview, page visit, progress report ping, etc. "
   ;
   int numInUse = 0;
-  for (int i = 0; i < this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i ++)
     if (this->theWorkers[i].flagInUse)
-      numInUse++;
+      numInUse ++;
   out << "<hr>Currently, there are " << numInUse << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
 
   out
@@ -4719,7 +4719,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
   << "This counts one connection per problem answer preview, page visit, progress report ping, etc. "
   ;
   int numInUse = 0;
-  for (int i = 0; i < this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i ++)
     if (this->theWorkers[i].flagInUse)
       numInUse++;
   out << "<hr>Currently, there are " << numInUse << " worker(s) in use. The peak number of worker(s)/concurrent connections was " << this->theWorkers.size << ". ";
@@ -4747,7 +4747,7 @@ std::string WebServer::ToStringStatusPublic()
   std::string lineString, wordString;
   std::stringstream topStream(topString);
   out << "<hr><b>Server machine details.</b><br>";
-  for (int i = 0; i < 5; i++)
+  for (int i = 0; i < 5; i ++)
   { std::getline(topStream, lineString);
     out << lineString << "<br>\n ";
   }
@@ -5889,7 +5889,7 @@ void WebServer::InitializeGlobalVariables()
 
   folderSubstitutionsNonSensitive.SetKeyValue("/html/", "../public_html/");//<-coming from webserver
 
-  folderSubstitutionsNonSensitive.SetKeyValue("/html-common/font/", "./html-common/font/");//<-coming from webserver
+  folderSubstitutionsNonSensitive.SetKeyValue("/calculator-html/", "./calculator-html/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("/html-common/", "./html-common/");//<-coming from webserver
   folderSubstitutionsNonSensitive.SetKeyValue("/font/", "./html-common/font/");
 
@@ -5900,7 +5900,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
 
   folderSubstitutionsNonSensitive.SetKeyValue
-  ("/MathJax-2.7-latest/config/mathjax-calculator-setup.js", "./html-common/src/mathjax-calculator-setup.js");//<-coming from web server
+  ("/MathJax-2.7-latest/config/mathjax-calculator-setup.js", "./calculator-html/src/mathjax-calculator-setup.js");//<-coming from web server
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");//<-coming from webserver
 
   folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");

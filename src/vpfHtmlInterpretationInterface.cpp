@@ -154,8 +154,8 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
 std::string HtmlInterpretation::GetSanitizedComment
 (const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot)
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetSanitizedComment");
-  theFormat.flagUseQuotes=false;
-  resultIsPlot=false;
+  theFormat.flagUseQuotes = false;
+  resultIsPlot = false;
   //if (input.IsOfType<std::string>(&theString))
   //{ stOutput << "<br>DEBUG: string input: "
   //  << theString;
@@ -167,13 +167,13 @@ std::string HtmlInterpretation::GetSanitizedComment
     return input.ToString(&theFormat);
   }
   if (input.IsOfType<Plot>())
-  { resultIsPlot=true;
+  { resultIsPlot = true;
     return input.ToString(&theFormat);
   }
   if (input.HasType<Plot>())
     return "";
   //<- expression has a partially drawn plot-> not displaying.
-  if (input.owner==0)
+  if (input.owner == 0)
     return "";
   if (input.StartsWith(input.owner->opRulesOff()) ||
       input.StartsWith(input.owner->opRulesOn()))
@@ -186,8 +186,8 @@ std::string HtmlInterpretation::GetCommentsInterpretation
  int indexShift, FormatExpressions& theFormat)
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetCommentsInterpretation");
   std::stringstream out;
-  theFormat.flagExpressionIsFinal=true;
-  theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
+  theFormat.flagExpressionIsFinal = true;
+  theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
   theInterpreterWithAdvice.theObjectContainer.resetPlots();
   //stOutput << "DEBUG: theInterpreterWithAdvice.flagPlotNoCtrls: "
   //<< theInterpreterWithAdvice.flagPlotNoControls;

@@ -287,10 +287,10 @@ const std::string& HtmlRoutines::GetFile
   else
   { if (theGlobalVariables.processType == ProcessTypes::worker)
       logWorker << logger::red << "File: "
-      << fileNameVirtual << " not found. " << logger::endL;
+      << fileNameVirtual << " not found. " << commentsOnFailure.str() << logger::endL;
     if (theGlobalVariables.processType == ProcessTypes::server)
       logServer << logger::red << "File: "
-      << fileNameVirtual << " not found. " << logger::endL;
+      << fileNameVirtual << " not found. " << commentsOnFailure.str() << logger::endL;
     out << "<b style=\"color:red\">Failed to load file: " << fileNameVirtual
     << ". Comments: " << commentsOnFailure.str() << "</b>";
   }

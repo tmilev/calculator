@@ -3376,10 +3376,10 @@ int WebWorker::ProcessSelectCourse()
   return 0;
 }
 
-int WebWorker::ProcessApp()
+int WebWorker::ProcessApp(bool appendBuildHash)
 { MacroRegisterFunctionWithName("WebWorker::ProcessApp");
   this->SetHeaderOKNoContentLength();
-  stOutput << HtmlInterpretation::GetApp();
+  stOutput << HtmlInterpretation::GetApp(appendBuildHash);
   return 0;
 }
 
@@ -4232,7 +4232,9 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == "about")
     return this->ProcessAbout();
   else if (theGlobalVariables.userCalculatorRequestType == "app")
-    return this->ProcessApp();
+    return this->ProcessApp(true);
+  else if (theGlobalVariables.userCalculatorRequestType == "appNoCache")
+    return this->ProcessApp(false);
   return this->ProcessFolderOrFile();
 }
 
@@ -4744,7 +4746,7 @@ std::string WebServer::ToStringStatusPublic()
   out << this->ToStringStatusPublicNoTop();
   std::string topString= theGlobalVariables.CallSystemWithOutput("top -b -n 1 -s");
   //out << "<br>" << topString;
-  std::string lineString, wordString;
+  std::string lineString;
   std::stringstream topStream(topString);
   out << "<hr><b>Server machine details.</b><br>";
   for (int i = 0; i < 5; i ++)
@@ -5257,27 +5259,27 @@ int WebServer::Run()
   int previousServerStatDetailedReport = 0;
   sigset_t allSignals, oldSignals;
   sigfillset(&allSignals);
-  while(true)
+  while (true)
   { // main accept() loop
     //    logWorker << logger::red << "select returned!" << logger::endL;
     FD_ZERO(&FDListenSockets);
-    for (int i = 0; i < this->theListeningSockets.size; i++)
+    for (int i = 0; i < this->theListeningSockets.size; i ++)
       FD_SET(this->theListeningSockets[i], &FDListenSockets);
     if (theGlobalVariables.flagServerDetailedLog)
       logServer << logger::red << "DEBUG: About to enter select loop. " << logger::endL;
-    while (select(this->highestSocketNumber + 1, &FDListenSockets, 0, 0, 0) == -1)
+    while (select(this->highestSocketNumber + 1, &FDListenSockets, 0, 0, 0) == - 1)
     { if (this->flagReapingChildren)
         logServer << logger::yellow << "Select interrupted while reaping children. "
         << logger::endL;
       else
         logServer << logger::red << " Select failed: possibly due to reaping children. Error message: "
         << strerror(errno) << logger::endL;
-      this->NumFailedSelectsSoFar++;
+      this->NumFailedSelectsSoFar ++;
     }
     if (theGlobalVariables.flagServerDetailedLog)
       logServer << logger::green << "DEBUG: select success. " << logger::endL;
     gettimeofday(&timeBeforeProcessFork, NULL);
-    this->NumSuccessfulSelectsSoFar++;
+    this->NumSuccessfulSelectsSoFar ++;
     if ((this->NumSuccessfulSelectsSoFar + this->NumFailedSelectsSoFar) - previousReportedNumberOfSelects > 100)
     { logSocketAccept << logger::blue << this->NumSuccessfulSelectsSoFar << " successful and "
       << this->NumFailedSelectsSoFar << " bad ("
@@ -5299,10 +5301,10 @@ int WebServer::Run()
       this->NumWorkersNormallyExited + this->NumConnectionsSoFar;
       logProcessStats << this->ToStringStatusForLogFile() << logger::endL;
     }
-    int newConnectedSocket = -1;
+    int newConnectedSocket = - 1;
     theGlobalVariables.flagUsingSSLinCurrentConnection = false;
     bool found = false;
-    for (int i = theListeningSockets.size - 1; i >= 0; i--)
+    for (int i = theListeningSockets.size - 1; i >= 0; i --)
       if (FD_ISSET(this->theListeningSockets[i], &FDListenSockets))
       { //if (this->theListeningSockets[i]==this->listeningSocketHTTP)
         newConnectedSocket = accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
@@ -5320,7 +5322,7 @@ int WebServer::Run()
         } else
         { logSocketAccept << logger::red << "This is not supposed to happen: accept failed. Error: "
           << this->ToStringLastErrorDescription() << logger::endL;
-          found=true;
+          found = true;
         }
       }
     if (newConnectedSocket < 0 && !found)
@@ -5826,6 +5828,8 @@ void WebServer::InitializeGlobalVariables()
 
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/app");
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("app");
+  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/appNoCache");
+  this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("appNoCache");
   //NO! Adding "logout", for example: this->addressStartsNotNeedingLogin.AddOnTop("logout");
   //is FORBIDDEN! Logging someone out definitely requires authentication (imagine someone
   //asking for logouts on your account once every second: this would be fatal as proper logout resets
@@ -5867,19 +5871,16 @@ void WebServer::InitializeGlobalVariables()
 
   FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
   ("/calculator-html");
-  FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
-  ("font");
-  FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().AddOnTopNoRepetitionMustBeNewCrashIfNot
-  ("/font");
 
   this->addressStartsNotNeedingLogin.AddListOnTop
   (FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash());
 
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/MathJax-2.7-latest/");
   this->addressStartsSentWithCacheMaxAge.AddOnTop("/html-common/");
-  this->addressStartsSentWithCacheMaxAge.AddListOnTop
-  (FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash());
-
+  for (int i = 0; i < FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i ++)
+    this->addressStartsSentWithCacheMaxAge.AddOnTop
+    (FileOperations::FolderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] +
+     theGlobalVariables.buildHeadHashWithServerTime);
   //Warning: order of substitutions is important. Only the first rule that applies is applied, only once.
   //No further rules are applied after that.
   folderSubstitutionsNonSensitive.SetKeyValue("/output/", "output/");//<-coming from webserver
@@ -5900,7 +5901,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsNonSensitive.SetKeyValue("topiclists/", "../topiclists/");
 
   folderSubstitutionsNonSensitive.SetKeyValue
-  ("/MathJax-2.7-latest/config/mathjax-calculator-setup.js", "./calculator-html/src/mathjax-calculator-setup.js");//<-coming from web server
+  ("/MathJax-2.7-latest/config/mathjax-calculator-setup.js", "./calculator-html/new/mathjax-calculator-setup.js");//<-coming from web server
   folderSubstitutionsNonSensitive.SetKeyValue("/MathJax-2.7-latest/", "../public_html/MathJax-2.7-latest/");//<-coming from webserver
 
   folderSubstitutionsNonSensitive.SetKeyValue("/LaTeX-materials/", "../LaTeX-materials/");
@@ -6193,7 +6194,11 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
   }
   out << "\n<hr>\n";
   if (theGlobalVariables.flagRunningBuiltInWebServer)
+  { out << "Sent with max cache: "
+    << theWebServer.addressStartsSentWithCacheMaxAge.ToStringCommaDelimited()
+    << "<hr>";
     out << theWebServer.GetActiveWorker().ToStringMessageUnsafe();
+  }
   return out.str();
 }
 

@@ -27,17 +27,17 @@ class MySQLdata
 public:
   std::string value;
   MySQLdata(const std::string& other)
-  { this->value=other;
+  { this->value = other;
   }
   MySQLdata(){}
   bool operator==(const std::string& other)
-  { return this->value==other;
+  { return this->value == other;
   }
   bool operator!=(const std::string& other)
-  { return !(*this==other);
+  { return !(*this == other);
   }
   void operator=(const std::string& other)
-  { this->value=other;
+  { this->value = other;
   }
   std::string GetDatA()const;
   std::string GetDataNoQuotes()const;

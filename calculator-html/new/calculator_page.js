@@ -306,7 +306,7 @@ function getSemiColumnEnclosure()
   if (leftPos>rightPos)
     leftPos=rightPos;
   if (rightPos-leftPos>1000)
-  { mqProblemSpan.innerHTML="<span style='color:red'><b></b></span>"
+  { mqProblemSpan.innerHTML = "<span style='color:red'><b></b></span>"
   }
   calculatorLeftPosition=leftPos;
   calculatorRightPosition=rightPos;
@@ -315,6 +315,21 @@ function getSemiColumnEnclosure()
       calculatorInput.value[leftPos]==='\t')
     startingCharacterSectionUnderMathQuillEdit=calculatorInput.value[leftPos];
   chopCalculatorStrings();
+}
+
+function toggleCalculatorExamples(theButton){
+  var theExamples = document.getElementById('divCalculatorExamples');
+  if (theExamples.innerHTML.length < 300) {
+    submitStringAsMainInput('', 'divCalculatorExamples', 'calculatorExamples', null, "spanProgressCalculatorExamples");
+    theButton.innerHTML = "&#9660;";
+  } else {
+    switchMenu('divCalculatorExamples');
+    if (theExamples.style.display === "none") {
+      theButton.innerHTML = "&#9656;";
+    } else {
+      theButton.innerHTML = "&#9660;";
+    }
+  }
 }
 
 /*function getCaretPosition (oField)

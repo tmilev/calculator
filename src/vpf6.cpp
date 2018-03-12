@@ -2443,19 +2443,19 @@ std::string Calculator::ToStringPerformance()
 std::string Calculator::ToString()
 { MacroRegisterFunctionWithName("Calculator::ToString");
   std::stringstream out2;
-  std::string openTag1="<span style=\"color:#0000FF\">";
-  std::string closeTag1="</span>";
-  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit>0)
+  std::string openTag1 = "<span style=\"color:#0000FF\">";
+  std::string closeTag1 = "</span>";
+  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 0)
     out2 << "Computation time limit: "
     << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
     << " second(s).<hr>";
   else
     out2 << "No computation time limit.<hr> ";
-  if (this->RuleStack.children.size>1)
+  if (this->RuleStack.children.size > 1)
   { out2 << "<b>Predefined rules.</b><br>";
-    for (int i=1; i<this->RuleStack.children.size; i++)
+    for (int i = 1; i < this->RuleStack.children.size; i ++)
     { out2 << this->RuleStack[i].ToString();
-      if (i!=this->RuleStack.children.size-1)
+      if (i != this->RuleStack.children.size - 1)
         out2 << "<br>";
     }
   }
@@ -2482,38 +2482,38 @@ std::string Calculator::ToString()
   out << "<br><b>Object container information</b>.The object container is the data structure storing all c++ built-in data types "
   << " requested by the user<br> " << this->theObjectContainer.ToString();
   out << "<hr>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
-  for (int i=0; i<this->controlSequences.size; i++)
+  for (int i = 0; i < this->controlSequences.size; i ++)
   { out << openTag1 << this->controlSequences[i] << closeTag1;
-    if (i!=this->controlSequences.size)
+    if (i != this->controlSequences.size)
       out << ", ";
   }
   out << "<br>\n User or run-time defined atoms = " << this->theAtoms.size << " (= " << this->NumPredefinedAtoms << " predefined + "
   << this->theAtoms.size-this->NumPredefinedAtoms << " user-defined):<br>\n";
-  for (int i=0; i<this->theAtoms.size; i++)
+  for (int i = 0; i < this->theAtoms.size; i ++)
   { out << "\n" << i << ": " << openTag1 << this->theAtoms[i] << closeTag1;
-    if(i!=this->theAtoms.size-1)
+    if (i != this->theAtoms.size - 1)
       out << ", ";
   }
   out << this->ElementToStringNonBoundVars();
   out << "<hr>";
   out << "Children expressions (" << this->theExpressionContainer.size << " total): <br>";
-  int numExpressionsToDisplay=this->theExpressionContainer.size;
-  if (this->theExpressionContainer.size>1000)
-  { numExpressionsToDisplay=1000;
+  int numExpressionsToDisplay = this->theExpressionContainer.size;
+  if (this->theExpressionContainer.size > 1000)
+  { numExpressionsToDisplay = 1000;
     out << " <b>Displaying first " << numExpressionsToDisplay << " only </b><br>";
   }
-  for (int i=0; i< numExpressionsToDisplay; i++)
+  for (int i = 0; i < numExpressionsToDisplay; i ++)
     out << this->theExpressionContainer[i].ToString() << ", ";
   out << "<hr>";
   out << "\n Cached expressions (" << this->cachedExpressions.size << " total):\n<br>\n";
-  numExpressionsToDisplay=this->cachedExpressions.size;
-  if (numExpressionsToDisplay>1000)
-  { numExpressionsToDisplay=1000;
+  numExpressionsToDisplay = this->cachedExpressions.size;
+  if (numExpressionsToDisplay > 1000)
+  { numExpressionsToDisplay = 1000;
     out << "<b>Displaying first " << numExpressionsToDisplay << " expressions only. </b><br>";
   }
-  for (int i=0; i<numExpressionsToDisplay; i++)
+  for (int i = 0; i < numExpressionsToDisplay; i ++)
   { out << this->cachedExpressions[i].ToString() << " -> " << this->imagesCachedExpressions[i].ToString();
-    if (i!=this->cachedExpressions.size-1)
+    if (i != this->cachedExpressions.size - 1)
       out << "<br>";
   }
   out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str(), "info expand/collapse", "calculatorInternalDetails");

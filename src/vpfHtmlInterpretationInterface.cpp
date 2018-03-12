@@ -481,19 +481,22 @@ void HtmlInterpretation::BuildHtmlJSpage()
   this->htmlJSbuild = out.str();
 }
 
-std::string HtmlInterpretation::GetApp()
+std::string HtmlInterpretation::GetApp(bool appendBuildHash)
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetApp");
   HtmlInterpretation theInterpretation;
   std::stringstream out;
   std::stringstream errorStream;
   if (!FileOperations::LoadFileToStringVirtual
-      ("/calculator-html/src/index.html", theInterpretation.htmlRaw, false, false, &errorStream))
+      ("/calculator-html/new/index.html", theInterpretation.htmlRaw, false, false, &errorStream))
   { out << "<html><body><b>Failed to load the application file. "
     << "Further comments follow. " << errorStream.str() << "</body></html>";
     return out.str();
   }
-  theInterpretation.BuildHtmlJSpage();
-  return theInterpretation.htmlJSbuild;
+  if (appendBuildHash)
+  { theInterpretation.BuildHtmlJSpage();
+    return theInterpretation.htmlJSbuild;
+  }
+  return theInterpretation.htmlRaw;
 }
 
 class Course

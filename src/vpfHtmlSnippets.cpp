@@ -513,7 +513,7 @@ const std::string& HtmlRoutines::GetJavascriptMathjax()
     return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("MathJax");
   std::stringstream out;
   std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash
-  ("/calculator-html/mathjax-calculator-setup.js");
+  ("/calculator-html/new/mathjax-calculator-setup.js");
   out << "<script type=\"text/javascript\">MathJaxSetupScriptURL=\"" << mathjaxSetupScript << "\"</script>";
   out << "<script type=\"text/javascript\" async src=\"/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full,"
   << mathjaxSetupScript

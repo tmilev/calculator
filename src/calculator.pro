@@ -121,54 +121,16 @@ HEADERS += \
     vpfHeader2Math4_5_Tree.h
 
 DISTFILES += \
-    ../html-common/three-d.js \
-    ../html-common/initializebuttons.js \
-    ../html-common/calculatorPage.js \
-    ../html-common/autocomplete.js \
-    ../html-common/topiclist.js \
-    ../html-common/problemlinkstyles.js \
-    ../html-common/ace-editor-settings.js \
-    ../html-common/database-routines.js \
-    ../html-common/styleCalculator.css \
-    ../html-common/cookie-functions.js \
-    ../html-common/mathjax-calculator-setup.js \
-    ../html-common/forgot-login.js \
-    ../html-common/account-management.js \
-    ../html-common/ace-editor-settings.js \
-    ../html-common/ace.min.js \
-    ../html-common/autocomplete.js \
-    ../html-common/calculatorPage.js \
-    ../html-common/cookie-functions.js \
-    ../html-common/database-routines.js \
-    ../html-common/forgot-login.js \
-    ../html-common/forminput.js \
-    ../html-common/initializebuttons.js \
-    ../html-common/jquery-ui.min.js \
-    ../html-common/jquery.min.js \
-    ../html-common/mathjax-calculator-setup.js \
-    ../html-common/mathquill.min-matrix.js \
-    ../html-common/mathquill.min.js \
-    ../html-common/problemlinkstyles.js \
-    ../html-common/sha1.js \
-    ../html-common/MathJax-2.7-latest.zip \
-    ../html-common/favicon.ico \
-    ../html-common/jquery-ui.css \
-    ../html-common/mathquill.css \
-    ../html-common/styleCalculator.css \
-    ../html-common/styleScorePage.css \
-    ../html-common/about.html \
-    ../html-common/test-mathquill.html \
-    ../html-common/test-three-d.html \
-    ../html-common/test-two-d.html \
-    ../html-common/src/app.js \
-    ../html-common/src/index.html \
-    ../html-common/src/hide_html_with_tags.js \
-    ../html-common/src/mathjax-calculator-setup.js \
-    ../html-common/src/styleCalculator.css \
-    ../html-common/src/styleScorePage.css \
-    ../html-common/src/cookies.js \
-    ../html-common/src/submit_requests.js \
-    ../html-common/src/autocomplete.js \
-    ../html-common/src/initialize_buttons.js \
-    ../html-common/src/three-d.js
-
+    ../calculator-html/new/app.js \
+    ../calculator-html/new/autocomplete.js \
+    ../calculator-html/new/calculator_page.js \
+    ../calculator-html/new/cookies.js \
+    ../calculator-html/new/hide_html_with_tags.js \
+    ../calculator-html/new/initialize_buttons.js \
+    ../calculator-html/new/submit_requests.js \
+    ../calculator-html/new/styleCalculator.css \
+    ../calculator-html/new/index.html \
+    ../calculator-html/new/mathjax-calculator-setup.js \
+    ../calculator-html/new/page_navigation.js \
+    ../calculator-html/new/panels.js \
+    ../calculator-html/new/three-d.js

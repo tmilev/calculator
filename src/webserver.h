@@ -193,7 +193,7 @@ public:
   int ProcessAccounts();
   int ProcessScores();
   int ProcessAbout();
-  int ProcessApp();
+  int ProcessApp(bool appendBuildHash);
   int ProcessScoresInCoursePage();
   int ProcessAssignTeacherToSection();
   int ProcessExamPage();

@@ -401,6 +401,30 @@ textarea.currentFileNameArea {
   margin-bottom: -8px;
   overflow-x: hidden;
 }
+div.divPage{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  visibility: visible;
+}
+div.divMainPage{
+}
+div.divTheMainMenu{
+  display: flex;
+  flex-direction: column;
+  transition: all 1s;
+  max-width: 120px;
+  width: 20%;
+  position: fixed;
+  right: 1%;
+}
+div.divMainMenuCollapsed{
+  display: flex;
+  max-width: 20px;
+  width: 20px;
+  flex-direction: column;
+  transition: all 1s;
+}
 div.headChapter{
   padding-bottom: 10px; 
   padding-left: 0;
@@ -708,6 +732,25 @@ font-size: 1.1em;
 table.tableLogin{
 margin: 0 auto;
 }
+button.buttonSelectPage{
+  border-radius: 3px;
+  background-color: #add8e6;
+  box-shadow: none;
+  border: none;
+  font-weight: bold;
+  padding: 8px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  transition: 1.5s;
+  width: 100%;
+  white-space: nowrap;
+  cursor:pointer;
+}
+button.buttonSelectPage:hover{
+  background-color: #8db8c6;
+  transition: background-color 1.5s;
+}
 button.buttonLogin{
   display: inline;
   -moz-border-radius: 5px;
@@ -786,4 +829,3 @@ font-weight: bold;
 .g-signin2 > div{
   margin: 0 auto;
 }
-

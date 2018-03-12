@@ -99,6 +99,7 @@ function submitGET(inputObject){
 }
 
 var GlobalSubmitStringAsMainInputCounter = 0;
+
 function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus)
 { var spanOutput = document.getElementById(idOutput);
   if (spanOutput === null)
@@ -120,7 +121,7 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   var postRequest = "<br>POST " + theAddress + "<br>" + inputParams;
   var stringSwitchMenu = "switchMenu('" + addressDetailsIndicatorID + "');";
   statusSpan.innerHTML = "<button style = 'background:none; border:0; cursor:pointer' id='" +
-  tranmissionIndicatorID + "' onclick = '" + stringSwitchMenu + "'>Connection details</button>" +
+  tranmissionIndicatorID + "' onclick = \"" + stringSwitchMenu + "\">Connection details</button>" +
   "<span style='display:none' id='" + addressDetailsIndicatorID + "'>" + postRequest + "</span>";
   var buttonHandle = document.getElementById(tranmissionIndicatorID);
   var lastRequestCounter = GlobalSubmitStringAsMainInputCounter;

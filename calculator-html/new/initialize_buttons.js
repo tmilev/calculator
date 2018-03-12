@@ -165,47 +165,6 @@ mathQuillCommandButton("\\mathbf{i}", "i", "font-weight: bold");
 mathQuillCommandButton("\\mathbf{j}", "j", "font-weight: bold");
 mathQuillCommandButton("\\mathbf{k}", "k", "font-weight: bold");
 
-function modifyHeightForTimeout(currentButtonPanel, newHeight)
-{ currentButtonPanel.style.maxHeight = newHeight;
-  currentButtonPanel.style.height    = newHeight;
-}
-
-function toggleHeight(currentButton, currentPanelID)
-{ var currentPanel = document.getElementById(currentPanelID);
-  if (currentPanel === null)
-    return;
-  currentPanel.buttonThatModifiesMe=currentButton;
-  if (currentPanel.startingMaxHeight===undefined || currentPanel.startingMaxHeight===null)
-  { currentPanel.startingMaxHeight=window.getComputedStyle(currentPanel).height;
-    currentPanel.style.maxHeight=currentPanel.startingMaxHeight;
-    currentPanel.style.height=currentPanel.startingMaxHeight;
-  }
-  var currentContainer=currentPanel;
-  while (true)
-  { currentContainer=currentContainer.parentNode;
-    //console.log("processing "+ currentContainer.tagName+"."+ currentContainer.className);
-    if (!currentContainer.className.startsWith("body"))
-      break;
-    currentContainer.style.maxHeight="";
-    currentContainer.style.height="";
-    currentContainer.startingMaxHeight=null;
-  }
-  if (currentPanel.style.display==="none" || currentPanel.transitionState==="collapsed")
-    currentPanel.style.display="";
-
-  if (currentPanel.transitionState==="collapsing" ||
-      currentPanel.transitionState==="collapsed")
-  { currentPanel.transitionState="expanding";
-    currentButton.innerHTML="&#9650;";
-  } else if (currentPanel.transitionState===null || currentPanel.transitionState===undefined ||
-      currentPanel.transitionState==="expanding" || currentPanel.transitionState==="expanded")
-  { currentPanel.transitionState="collapsing";
-    currentButton.innerHTML="&#9660;";
-  }
-  currentPanel.addEventListener("transitionend", transitionDone);
-  setTimeout(function(){ toggleHeightForTimeout(currentPanel);},0);
-}
-
 function initializeButtonsCommon()
 { ///initializing accordions
   if (typeof(localStorage)!== undefined)
@@ -424,9 +383,9 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
     theContent+="</tr>";
   theContent+="</table>";
   if (!forceShowAll && !includeAll)
-    theContent+= "<small><a href=\"#" + IDcurrentButtonPanel + "\" onclick=\"initializeOneButtonPanel('" + IDcurrentButtonPanel + "'," +panelIndex +",true);\">Show all</a></small>";
+    theContent+= "<small><a href=\"#\" onclick=\"initializeOneButtonPanel('" + IDcurrentButtonPanel + "'," +panelIndex +",true);\">Show all</a></small>";
   else
-    theContent+= "<small><a href=\"#" + IDcurrentButtonPanel + "\" onclick=\"initializeOneButtonPanel('" + IDcurrentButtonPanel + "'," +panelIndex +",false);\">Show relevant</a></small>";
+    theContent+= "<small><a href=\"#\" onclick=\"initializeOneButtonPanel('" + IDcurrentButtonPanel + "'," +panelIndex +",false);\">Show relevant</a></small>";
 
   var oldHeight=window.getComputedStyle(currentButtonPanel).height;
   //console.log("oldHeight: " + oldHeight);

@@ -489,10 +489,12 @@ bool EvaluatesToDoubleUnderSubstitutions
   ;
 
   bool HasBoundVariables()const;
-  bool HasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames=0)const;
-  bool IsMeltable(int* numResultingChildren=0)const;
-  bool AreEqualExcludingChildren(const Expression& other) const
-  { return this->owner==other.owner && this->theData==other.theData && this->children.size==other.children.size;
+  bool HasInputBoxVariables(HashedList<std::string, MathRoutines::hashString>* boxNames = 0)const;
+  bool IsMeltable(int* numResultingChildren = 0)const;
+  bool AreEqualExcludingChildren(const Expression& other)const
+  { return this->owner == other.owner &&
+    this->theData == other.theData &&
+    this->children.size == other.children.size;
   }
   //The following function creates an expression by parsing a calculator-like string.
   //The purpose of this function is to reduce the number of lines needed to create an Expression using C++.
@@ -557,27 +559,28 @@ class Function
   std::string ToStringShort()const;
   std::string ToStringSummary()const;
   std::string ToStringFull()const;
+  JSData ToJSON()const;
   bool ShouldBeApplied(int parentOpIfAvailable);
   bool operator==(const Function& other)const
-  { return this->theArgumentTypes==other.theArgumentTypes &&
-    this->theFunction==other.theFunction &&
-    this->flagIsInner==other.flagIsInner;
+  { return this->theArgumentTypes == other.theArgumentTypes &&
+    this->theFunction == other.theFunction &&
+    this->flagIsInner == other.flagIsInner;
   }
   void reset(Calculator& owner)
   { this->theArgumentTypes.reset(owner);
-    this->theFunction=0;
-    this->flagIsInner=true;
+    this->theFunction = 0;
+    this->flagIsInner = true;
   }
   bool inputFitsMyInnerType(const Expression& input);
   Function()
-  { this->theFunction=0;
-    this->indexAmongOperationHandlers=-1;
-    this->indexOperation=-1;
-    this->indexOperationParentThatBansHandler=-1;
-    this->owner=0;
-    this->flagIsCompositeHandler=false;
-    this->flagDisabledByUserDefaultValue=false;
-    this->flagDisabledByUser=false;
+  { this->theFunction = 0;
+    this->indexAmongOperationHandlers = - 1;
+    this->indexOperation = - 1;
+    this->indexOperationParentThatBansHandler = - 1;
+    this->owner = 0;
+    this->flagIsCompositeHandler = false;
+    this->flagDisabledByUserDefaultValue = false;
+    this->flagDisabledByUser = false;
   }
   Function
   (Calculator& inputOwner, int inputIndexOperation,
@@ -585,27 +588,27 @@ class Function
    const Expression::FunctionAddress& functionPointer,
    Expression* inputArgTypes, const std::string& description,
    const std::string& inputExample,
-   bool inputflagIsInner, bool inputIsVisible=true,
-   bool inputIsExperimental=false,
-   bool inputflagMayActOnBoundVars=false,
-   bool inputDisabledByUser=false,
-   int inputIndexParentThatBansHandler=-1)
-  { this->owner=&inputOwner;
-    this->indexOperation=inputIndexOperation;
-    this->indexAmongOperationHandlers=inputIndexAmongOperationHandlers;
-    this->theFunction=functionPointer;
-    this->theDescription=description;
-    this->theExample=inputExample;
-    if (inputArgTypes!=0)
-      this->theArgumentTypes=*inputArgTypes;
-    this->flagIsInner=inputflagIsInner;
-    this->flagIamVisible=inputIsVisible;
-    this->flagMayActOnBoundVars=inputflagMayActOnBoundVars;
-    this->flagIsExperimental=inputIsExperimental;
-    this->flagIsCompositeHandler=false;
-    this->flagDisabledByUserDefaultValue=inputDisabledByUser;
-    this->flagDisabledByUser=inputDisabledByUser;
-    this->indexOperationParentThatBansHandler=inputIndexParentThatBansHandler;
+   bool inputflagIsInner, bool inputIsVisible = true,
+   bool inputIsExperimental = false,
+   bool inputflagMayActOnBoundVars = false,
+   bool inputDisabledByUser = false,
+   int inputIndexParentThatBansHandler = - 1)
+  { this->owner = &inputOwner;
+    this->indexOperation = inputIndexOperation;
+    this->indexAmongOperationHandlers = inputIndexAmongOperationHandlers;
+    this->theFunction = functionPointer;
+    this->theDescription = description;
+    this->theExample = inputExample;
+    if (inputArgTypes != 0)
+      this->theArgumentTypes = *inputArgTypes;
+    this->flagIsInner = inputflagIsInner;
+    this->flagIamVisible = inputIsVisible;
+    this->flagMayActOnBoundVars = inputflagMayActOnBoundVars;
+    this->flagIsExperimental = inputIsExperimental;
+    this->flagIsCompositeHandler = false;
+    this->flagDisabledByUserDefaultValue = inputDisabledByUser;
+    this->flagDisabledByUser = inputDisabledByUser;
+    this->indexOperationParentThatBansHandler = inputIndexParentThatBansHandler;
   }
   static unsigned int HashFunction(const Function& input)
   { return input.HashFunction();
@@ -1087,6 +1090,7 @@ public:
   std::string ElementToStringNonBoundVars();
   std::string ToStringOutputAndSpecials();
   std::string ToStringFunctionHandlers();
+  std::string ToStringFunctionHandlersJSON();
   //the purpose of the operator below is to save on typing when returning false with a comment.
   operator bool()const
   { return false;

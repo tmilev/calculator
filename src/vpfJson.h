@@ -32,21 +32,21 @@ class Rational;
 class JSData
 {
 public:
-  static const int numEmptyTokensAtStart= 6;
-  static const char JSUndefined   = 0;
-  static const char JSnull        = 1;
-  static const char JSbool        = 2;
-  static const char JSnumber      = 3;
-  static const char JSstring      = 4;
-  static const char JSarray       = 5;
-  static const char JSObject      = 6;
-  static const char JSopenBrace   = 7;
-  static const char JScloseBrace  = 8;
-  static const char JSopenBracket = 9;
-  static const char JScloseBracket= 10;
-  static const char JScolon       = 11;
-  static const char JScomma       = 12;
-  static const char JSerror       = 13;
+  static const int numEmptyTokensAtStart = 6;
+  static const char JSUndefined    = 0;
+  static const char JSnull         = 1;
+  static const char JSbool         = 2;
+  static const char JSnumber       = 3;
+  static const char JSstring       = 4;
+  static const char JSarray        = 5;
+  static const char JSObject       = 6;
+  static const char JSopenBrace    = 7;
+  static const char JScloseBrace   = 8;
+  static const char JSopenBracket  = 9;
+  static const char JScloseBracket = 10;
+  static const char JScolon        = 11;
+  static const char JScomma        = 12;
+  static const char JSerror        = 13;
 
   char type;
   bool boolean;
@@ -56,6 +56,7 @@ public:
   List<struct JSHashData> obj;
 
   void operator=(const bool other);
+  void operator=(int other);
   void operator=(const double other);
   void operator=(const std::string& other);
   JSData& operator[](int i);
@@ -66,6 +67,21 @@ public:
   int GetKeyIndex(const std::string& key);
   JSData()
   { this->reset();
+  }
+  JSData(char inputType)
+  { this->reset();
+    this->type = inputType;
+  }
+  JSData(const JSData& other)
+  { this->operator=(other);
+  }
+  void operator=(const JSData& other)
+  { this->type = other.type;
+    this->boolean = other.boolean;
+    this->number = other.number;
+    this->string = other.string;
+    this->list = other.list;
+    this->obj = other.obj;
   }
   // there has to be a better way to do this
   void operator=(const Rational& other);
@@ -81,9 +97,9 @@ public:
   void reset();
   std::string ToString(bool useHTML) const;
   template <typename somestream>
-  somestream& IntoStream(somestream& out, int indentation=0, bool useHTML=false) const;
+  somestream& IntoStream(somestream& out, int indentation = 0, bool useHTML = false) const;
   void readfile(const char* filename);
-  bool readstring(const std::string& json, std::stringstream* commentsOnFailure=0);
+  bool readstring(const std::string& json, std::stringstream* commentsOnFailure = 0);
   void TryToComputeType();
   static bool Tokenize(const std::string& input, List<JSData>& output);
   void writefile(const char* filename) const;
@@ -98,15 +114,15 @@ std::ostream& operator<<(std::ostream& out, const JSData& data);
 
 template <typename coefficient>
 void JSData::operator=(const Vector<coefficient>& other)
-{ for(int i=0; i<other.size;i++)
+{ for (int i = 0; i < other.size; i ++)
     (*this)[i] = other.TheObjects[i];
 }
 
 template <typename coefficient>
 void JSData::operator=(const Matrix<coefficient>& other)
-{ for(int i=0; i<other.NumRows; i++)
-    for(int j=0; j<other.NumCols; j++)
-      (*this)[i][j] = other(i,j);
+{ for (int i = 0; i < other.NumRows; i ++)
+    for (int j = 0; j < other.NumCols; j ++)
+      (*this)[i][j] = other(i, j);
 }
 
 #endif

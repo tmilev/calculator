@@ -11,13 +11,13 @@
 ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Calculator parser, implementation. ");
 
 Calculator::Calculator()
-{ this->numOutputFileS=0;
-  this->flagHideLHS=false;
-  this->flagUseHtml=true;
-  this->flagShowCalculatorExamples=true;
-  this->flagWriteLatexPlots=true;
-  this->flagUseLnInsteadOfLog=false;
-  this->flagPlotShowJavascriptOnly=false;
+{ this->numOutputFileS = 0;
+  this->flagHideLHS = false;
+  this->flagUseHtml = true;
+  this->flagShowCalculatorExamples = true;
+  this->flagWriteLatexPlots = true;
+  this->flagUseLnInsteadOfLog = false;
+  this->flagPlotShowJavascriptOnly = false;
 }
 
 std::string Calculator::GetCalculatorLink(const std::string& input)
@@ -31,7 +31,7 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
   fileName << "defaultOutput" << MathRoutines::hashString(fileContent);
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual
-       (theFile, theGlobalVariables.DisplayPathOutputFolder+fileName.str()+".tex", false, true, false))
+       (theFile, theGlobalVariables.DisplayPathOutputFolder+fileName.str() + ".tex", false, true, false))
     return "failed to create file: " + fileName.str() + ".tex";
   std::string baseFolder;
   std::string fileNameWithPathPhysical;
@@ -57,9 +57,9 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   << theGlobalVariables.DisplayPathOutputFolder
   << fileName.str() << ".tex\">" << theGlobalVariables.DisplayPathOutputFolder
   << fileName.str() << ".tex</a>";
-  if (outputFileNameNoExtension!=0)
-    *outputFileNameNoExtension=theGlobalVariables.DisplayPathOutputFolder+fileName.str();
-  this->numOutputFileS++;
+  if (outputFileNameNoExtension != 0)
+    *outputFileNameNoExtension = theGlobalVariables.DisplayPathOutputFolder + fileName.str();
+  this->numOutputFileS ++;
   return out.str();
 }
 
@@ -72,37 +72,37 @@ bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>&
   output.Reserve(input.size());
   output.SetSize(0);
   if (!input.IsSequenceNElementS() && !input.StartsWith(this->opIntervalOpen()))
-  { if (targetDimNonMandatory>0)
-      if (targetDimNonMandatory!=1)
+  { if (targetDimNonMandatory > 0)
+      if (targetDimNonMandatory != 1)
         return *this << "<hr>GetVector failure: target dim is " << targetDimNonMandatory << " but the input " << input.ToString()
         << " can only be interpreted as a single element";
     output.AddOnTop(input);
     return true;
   }
-  if (targetDimNonMandatory>0)
-    if (targetDimNonMandatory!=input.size()-1)
+  if (targetDimNonMandatory > 0)
+    if (targetDimNonMandatory != input.size() - 1)
       return *this << "<hr>Failed to GetVector: the input is required to have "
       << targetDimNonMandatory << " columns but it has "
-      << input.size()-1 << " columns instead. <hr>";
-  targetDimNonMandatory=input.size()-1;
-  for (int i=0; i<targetDimNonMandatory; i++)
-    output.AddOnTop(input[i+1]);
+      << input.size() - 1 << " columns instead. <hr>";
+  targetDimNonMandatory = input.size() - 1;
+  for (int i = 0; i < targetDimNonMandatory; i ++)
+    output.AddOnTop(input[i + 1]);
   return true;
 }
 
 template <class coefficient>
 bool ModuleSSalgebra<coefficient>::IsNotInParabolic(int theGeneratorIndex)
-{ Vector<Rational> theWeight=this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
-  for (int j=0; j<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
-    if (!(theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]]<0))
+{ Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
+  for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
+    if (!(theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]] < 0))
       return true;
   return false;
 }
 
 template <class coefficient>
 bool ModuleSSalgebra<coefficient>::IsNotInLevi(int theGeneratorIndex)
-{ Vector<Rational> theWeight=this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
-  for (int j=0; j<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
+{ Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
+  for (int j = 0; j < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j ++)
     if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].IsEqualToZero())
       return true;
   return false;
@@ -2083,10 +2083,10 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes
  const std::string& opDescription,
  const std::string& opExample, bool visible, bool experimental,
  const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
-{ int indexOp=this->theAtoms.GetIndex(theOpName);
-  if (indexOp==-1)
+{ int indexOp = this->theAtoms.GetIndex(theOpName);
+  if (indexOp == - 1)
   { this->theAtoms.AddOnTop(theOpName);
-    indexOp=this->theAtoms.size-1;
+    indexOp = this->theAtoms.size - 1;
     this->FunctionHandlers.SetSize(this->theAtoms.size);
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
@@ -2094,32 +2094,32 @@ void Calculator::AddOperationBinaryInnerHandlerWithTypes
   innerFunction.theArgumentTypes.reset(*this, 2);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(leftType);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(rightType);
-  innerFunction.additionalIdentifier=inputAdditionalIdentifier;
-  innerFunction.calculatorIdentifier=inputCalculatorIdentifier;
+  innerFunction.additionalIdentifier = inputAdditionalIdentifier;
+  innerFunction.calculatorIdentifier = inputCalculatorIdentifier;
   this->FunctionHandlers[indexOp].Reserve(10);
   this->FunctionHandlers[indexOp].AddOnTop(innerFunction);
-  this->RegisterCalculatorFunctionIdentifier(innerFunction, indexOp, 0, this->FunctionHandlers[indexOp].size-1);
+  this->RegisterCalculatorFunctionIdentifier(innerFunction, indexOp, 0, this->FunctionHandlers[indexOp].size - 1);
 }
 
 void Calculator::RegisterCalculatorFunctionIdentifier
 (const Function& theFun, int indexOp, int functionType, int theFunIndex)
 { MacroRegisterFunctionWithName("Calculator::RegisterCalculatorFunctionIdentifier");
-  if (theFun.calculatorIdentifier=="")
+  if (theFun.calculatorIdentifier == "")
     return;
 //  stOutput << "Registering: " << theFun.ToStringShort();
-  int namedRuleIndex=this->namedRules.GetIndex(theFun.calculatorIdentifier);
-  if (namedRuleIndex==-1)
+  int namedRuleIndex = this->namedRules.GetIndex(theFun.calculatorIdentifier);
+  if (namedRuleIndex == - 1)
   { this->namedRules.AddOnTop(theFun.calculatorIdentifier);
-    this->namedRulesLocations.SetSize(this->namedRulesLocations.size+1);
+    this->namedRulesLocations.SetSize(this->namedRulesLocations.size + 1);
     this->namedRulesLocations.LastObject()->SetSize(0);
-    namedRuleIndex=this->namedRules.size-1;
+    namedRuleIndex = this->namedRules.size - 1;
   }
   List<int> triple;
   triple.SetSize(3);
-  triple[0]=functionType;
-  triple[1]=indexOp;
-  triple[2]=theFunIndex;
-  this->namedRulesLocations[namedRuleIndex]=(triple);
+  triple[0] = functionType;
+  triple[1] = indexOp;
+  triple[2] = theFunIndex;
+  this->namedRulesLocations[namedRuleIndex] = triple;
 }
 
 void Calculator::AddOperationHandler
@@ -2133,32 +2133,32 @@ void Calculator::AddOperationHandler
  bool inputDisabledByDefault,
  const std::string& parentOpThatBansHandler
  )
-{ int indexOp=this->theAtoms.GetIndex(theOpName);
-  int indexParentOpThatBansHandler=-1;
-  if (parentOpThatBansHandler!="")
-    indexParentOpThatBansHandler=this->theAtoms.GetIndexIMustContainTheObject(parentOpThatBansHandler);
-  if (indexOp==-1)
+{ int indexOp = this->theAtoms.GetIndex(theOpName);
+  int indexParentOpThatBansHandler = - 1;
+  if (parentOpThatBansHandler != "")
+    indexParentOpThatBansHandler = this->theAtoms.GetIndexIMustContainTheObject(parentOpThatBansHandler);
+  if (indexOp == - 1)
   { this->theAtoms.AddOnTop(theOpName);
-    indexOp=this->theAtoms.size-1;
+    indexOp = this->theAtoms.size - 1;
     this->FunctionHandlers.SetSize(this->theAtoms.size);
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
-  if (opArgumentListIgnoredForTheTimeBeing!="")
+  if (opArgumentListIgnoredForTheTimeBeing != "")
     crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
   Function theFun
   (*this, indexOp, this->FunctionHandlers[indexOp].size, handler,
    0, opDescription, opExample,
    isInner, visible, experimental, false,
    inputDisabledByDefault, indexParentOpThatBansHandler);
-  theFun.additionalIdentifier=inputAdditionalIdentifier;
-  theFun.calculatorIdentifier=inputCalculatorIdentifier;
+  theFun.additionalIdentifier = inputAdditionalIdentifier;
+  theFun.calculatorIdentifier = inputCalculatorIdentifier;
 
-  if (theOpName=="*" || theOpName=="+" || theOpName=="/" || theOpName=="\\otimes" || theOpName=="^")
+  if (theOpName == "*" || theOpName == "+" || theOpName == "/" || theOpName == "\\otimes" || theOpName == "^")
     this->FunctionHandlers[indexOp].Reserve(100);
   else
     this->FunctionHandlers[indexOp].Reserve(10);
   this->FunctionHandlers[indexOp].AddOnTop(theFun);
-  this->RegisterCalculatorFunctionIdentifier(theFun, indexOp, 0, this->FunctionHandlers[indexOp].size-1);
+  this->RegisterCalculatorFunctionIdentifier(theFun, indexOp, 0, this->FunctionHandlers[indexOp].size - 1);
 }
 
 void Calculator::AddOperationComposite
@@ -2167,51 +2167,51 @@ void Calculator::AddOperationComposite
    const std::string& opExample, bool isInner, bool visible, bool experimental,
    const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
 { MacroRegisterFunctionWithName("Calculator::AddOperationComposite");
-  int theIndex=this->operationsComposite.GetIndex(theOpName);
-  if (opArgumentListIgnoredForTheTimeBeing!="")
+  int theIndex = this->operationsComposite.GetIndex(theOpName);
+  if (opArgumentListIgnoredForTheTimeBeing != "")
     crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
-  if (theIndex==-1)
-  { theIndex=this->operationsComposite.size;
+  if (theIndex == - 1)
+  { theIndex = this->operationsComposite.size;
     this->operationsComposite.AddOnTop(theOpName);
-    this->operationsCompositeHandlers.SetSize(this->operationsCompositeHandlers.size+1);
+    this->operationsCompositeHandlers.SetSize(this->operationsCompositeHandlers.size + 1);
     this->operationsCompositeHandlers.LastObject()->SetSize(0);
   }
   Function theFun
   (*this, theIndex, this->operationsCompositeHandlers[theIndex].size, handler, 0, opDescription,
    opExample, isInner, visible, experimental);
-  theFun.additionalIdentifier=inputAdditionalIdentifier;
-  theFun.calculatorIdentifier=inputCalculatorIdentifier;
-  theFun.flagIsCompositeHandler=true;
+  theFun.additionalIdentifier = inputAdditionalIdentifier;
+  theFun.calculatorIdentifier = inputCalculatorIdentifier;
+  theFun.flagIsCompositeHandler = true;
   this->operationsCompositeHandlers[theIndex].AddOnTop(theFun);
-  this->RegisterCalculatorFunctionIdentifier(theFun, theIndex, 1, this->operationsCompositeHandlers[theIndex].size-1);
+  this->RegisterCalculatorFunctionIdentifier(theFun, theIndex, 1, this->operationsCompositeHandlers[theIndex].size - 1);
 }
 
 std::string Calculator::ElementToStringNonBoundVars()
 { std::stringstream out;
-  std::string openTag1="<span style=\"color:#0000FF\">";
-  std::string closeTag1="</span>";
-  std::string openTag2="<span style=\"color:#FF0000\">";
-  std::string closeTag2="</span>";
+  std::string openTag1 = "<span style=\"color:#0000FF\">";
+  std::string closeTag1 ="</span>";
+  std::string openTag2 = "<span style=\"color:#FF0000\">";
+  std::string closeTag2 = "</span>";
   out << "<br>\n" << this->theAtoms.size << " atoms " << " (= " << this->NumPredefinedAtoms << " predefined atoms+ "
-  << this->theAtoms.size-this->NumPredefinedAtoms << " user-or-run-time defined). <br>Predefined: \n<br>\n";
-  for (int i=0; i<this->theAtoms.size; i++)
+  << this->theAtoms.size - this->NumPredefinedAtoms << " user-or-run-time defined). <br>Predefined: \n<br>\n";
+  for (int i = 0; i < this->theAtoms.size; i ++)
   { out << openTag1 << this->theAtoms[i] << closeTag1;
-    if (this->FunctionHandlers[i].size>0)
+    if (this->FunctionHandlers[i].size > 0)
     { out << " [handled by: ";
-      for (int j=0; j<this->FunctionHandlers[i].size; j++)
+      for (int j = 0; j < this->FunctionHandlers[i].size; j ++)
       { out << std::hex << (unsigned long) this->FunctionHandlers[i][j].theFunction;
         if (this->FunctionHandlers[i][j].flagIsInner)
           out << "(inner)";
         else
           out << "(outer)";
-        if (j!=this->FunctionHandlers[i].size-1)
+        if (j!=this->FunctionHandlers[i].size - 1)
           out << ", ";
       }
       out << "]";
     }
-    if (i!=this->theAtoms.size-1)
+    if (i != this->theAtoms.size - 1)
     { out << ", ";
-      if (i==this->NumPredefinedAtoms-1 )
+      if (i == this->NumPredefinedAtoms - 1 )
         out << "<br>user or run-time defined:\n<br>\n";
     }
   }
@@ -2221,38 +2221,39 @@ std::string Calculator::ElementToStringNonBoundVars()
 bool Function::inputFitsMyInnerType(const Expression& input)
 { if (!this->flagIsInner)
     return false;
-  if (this->theArgumentTypes.children.size!=2)
+  if (this->theArgumentTypes.children.size != 2)
     return true;
-  if (input.children.size!=3)
+  if (input.children.size != 3)
     return false;
-  bool argument1good=this->theArgumentTypes[0].theData==-1 ? true :input[1].IsListStartingWithAtom(this->theArgumentTypes[0].theData);
-  bool argument2good=this->theArgumentTypes[1].theData==-1 ? true :input[2].IsListStartingWithAtom(this->theArgumentTypes[1].theData);
+  bool argument1good = this->theArgumentTypes[0].theData == - 1 ? true : input[1].IsListStartingWithAtom(this->theArgumentTypes[0].theData);
+  bool argument2good = this->theArgumentTypes[1].theData == - 1 ? true : input[2].IsListStartingWithAtom(this->theArgumentTypes[1].theData);
   return argument1good && argument2good;
 }
 
 std::string Function::ToStringShort()const
-{ if (this->owner==0)
+{ if (this->owner == 0)
     return "(non-initialized)";
   std::stringstream out;
   if (this->flagIsCompositeHandler)
     out << "<span style=\"color:#FF0000\">" << this->owner->operationsComposite[this->indexOperation]
-    << " </span><span style=\"color:#00FF00\">(composite)</span> (" << this->indexAmongOperationHandlers+1 << " out of "
+    << " </span><span style=\"color:#00FF00\">(composite)</span> ("
+    << this->indexAmongOperationHandlers + 1 << " out of "
     << this->owner->operationsCompositeHandlers[this->indexOperation].size << ") ";
   else
     out << "<span style=\"color:#FF0000\">" << this->owner->theAtoms[this->indexOperation]
-    << "</span> (" << this->indexAmongOperationHandlers+1 << " out of "
+    << "</span> (" << this->indexAmongOperationHandlers + 1 << " out of "
     << this->owner->FunctionHandlers[this->indexOperation].size << "). ";
   return out.str();
 }
 
 std::string Function::ToStringSummary()const
-{ if (this->owner==0)
+{ if (this->owner == 0)
     return "(non-initialized)";
   std::stringstream out;
   out << this->ToStringShort();
-  if (this->calculatorIdentifier!="")
+  if (this->calculatorIdentifier != "")
     out << "Rule name: <span style='color:blue'>" << this->calculatorIdentifier << "</span>. ";
-  if (this->additionalIdentifier!="")
+  if (this->additionalIdentifier != "")
     out << "Handler: " << this->additionalIdentifier << ". ";
   return out.str();
 }
@@ -2260,15 +2261,62 @@ std::string Function::ToStringSummary()const
 bool Function::ShouldBeApplied(int parentOpIfAvailable)
 { if (this->flagDisabledByUser)
     return false;
-  if (parentOpIfAvailable<0 || this->indexOperationParentThatBansHandler<0)
+  if (parentOpIfAvailable < 0 || this->indexOperationParentThatBansHandler < 0)
     return true;
-  return this->indexOperationParentThatBansHandler!=parentOpIfAvailable;
+  return this->indexOperationParentThatBansHandler != parentOpIfAvailable;
+}
+
+JSData Function::ToJSON()const
+{ MacroRegisterFunctionWithName("Function::ToJSON");
+  JSData result(JSData::JSObject);
+  if (this->owner == 0)
+  { result["error"] = "bad_owner";
+    return result;
+  }
+  //stOutput << "<br>tojson pt 1";
+  if (this->flagIamVisible)
+    result["visible"] = "true";
+  else
+    result["visible"] = "false";
+  //stOutput << "<br>tojson pt 1.5";
+  result["atom"] = this->owner->theAtoms[this->indexOperation];
+  //stOutput << "<br>tojson pt 2";
+  if (this->flagIsCompositeHandler)
+  { result["composite"] = "true";
+    result["number"] = this->indexAmongOperationHandlers + 1;
+    result["total"] = this->owner->operationsCompositeHandlers[this->indexOperation].size;
+  } else
+  { result["composite"] = "false";
+    result["number"] = this->indexAmongOperationHandlers + 1;
+    result["total"] = this->owner->FunctionHandlers[this->indexOperation].size;
+  }
+  //stOutput << "<br>tojson pt 3";
+  if (this->flagIsExperimental)
+    result["experimental"] = "true";
+  else
+    result["experimental"] = "false";
+  result["description"] = this->theDescription;
+  if (this->calculatorIdentifier != "")
+    result["ruleName"] = this->calculatorIdentifier;
+  if (this->additionalIdentifier != "")
+    result["additionalIdentifier"] = this->additionalIdentifier;
+  //stOutput << "<br>tojson pt 4";
+  std::stringstream functionAddress;
+  functionAddress << std::hex << (unsigned long) this->theFunction;
+  result["memoryAddress"] = functionAddress.str();
+  if (this->flagIsInner)
+    result["inner"] = "true";
+  else
+    result["inner"] = "false";
+  if (this->theExample != "")
+    result["example"] = this->theExample;
+  return result;
 }
 
 std::string Function::ToStringFull()const
 { if (!this->flagIamVisible)
     return "";
-  if (this->owner==0)
+  if (this->owner == 0)
     return "(non-intialized)";
   std::stringstream out2;
   out2 << this->ToStringShort();
@@ -2278,17 +2326,17 @@ std::string Function::ToStringFull()const
 //    out << " \nFunction memory address: " << std::hex << (int) this->theFunction << ". ";
     // use of unsigned long is correct on i386 and amd64
     // uintptr_t is only available in c++0x
-    if (this->calculatorIdentifier!="")
+    if (this->calculatorIdentifier != "")
       out << "Rule name: " << this->calculatorIdentifier << ". ";
-    if (this->additionalIdentifier!="")
+    if (this->additionalIdentifier != "")
       out << "Handler: " << this->additionalIdentifier << ". ";
     out << "Function memory address: " << std::hex << (unsigned long) this->theFunction << ". ";
     if (!this->flagIsInner)
       out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";
-    if (this->theExample!="")
+    if (this->theExample != "")
       out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
     out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str());
-    if (this->theExample!="")
+    if (this->theExample != "")
       out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=calculator&showExamples=true&mainInput="
       << HtmlRoutines::ConvertStringToURLString(this->theExample, false)
@@ -2301,20 +2349,21 @@ std::string Function::ToStringFull()const
 std::string ObjectContainer::ToString()
 { MacroRegisterFunctionWithName("ObjectContainer::ToString");
   std::stringstream out;
-  if (this->theSSLieAlgebras.theValues.size>0)
+  if (this->theSSLieAlgebras.theValues.size > 0)
   { out << "Lie algebras created (" << this->theSSLieAlgebras.theValues.size << " total): ";
-    for (int i=0; i<this->theSSLieAlgebras.theValues.size; i++)
+    for (int i = 0; i < this->theSSLieAlgebras.theValues.size; i ++)
     { out << this->theSSLieAlgebras.theValues[i].GetLieAlgebraName();
-      if (i!=this->theSSLieAlgebras.theValues.size-1)
+      if (i != this->theSSLieAlgebras.theValues.size - 1)
         out << ", ";
     }
   }
-  if (this->theSSSubalgebraS.theValues.size>0)
-  { out << "<br>Lie semisimple subalgebras computation data structures (" << this->theSSSubalgebraS.theValues.size << " total): ";
-    for (int i=0; i<this->theSSSubalgebraS.theValues.size; i++)
+  if (this->theSSSubalgebraS.theValues.size > 0)
+  { out << "<br>Lie semisimple subalgebras computation data structures ("
+    << this->theSSSubalgebraS.theValues.size << " total): ";
+    for (int i = 0; i < this->theSSSubalgebraS.theValues.size; i ++)
     { out << " Type " << this->theSSSubalgebraS.theValues[i].owner->GetLieAlgebraName() << " with "
       << this->theSSSubalgebraS.theValues[i].theSubalgebras.theValues.size << " candidates";
-      if (i!=this->theSSSubalgebraS.theValues.size-1)
+      if (i != this->theSSSubalgebraS.theValues.size - 1)
         out << ", ";
     }
   }
@@ -2323,11 +2372,11 @@ std::string ObjectContainer::ToString()
 
 std::string Calculator::ToStringOutputAndSpecials()
 { MacroRegisterFunctionWithName("Calculator::ToStringOutputSpecials");
-  if (this->inputString=="")
+  if (this->inputString == "")
     return "";
   std::stringstream out;
-  std::string urledInput=HtmlRoutines::ConvertStringToURLString(this->inputString, false);
-  if (this->inputString!="")
+  std::string urledInput = HtmlRoutines::ConvertStringToURLString(this->inputString, false);
+  if (this->inputString != "")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=calculator&mainInput="
     << urledInput << "\">Link to your input (reloads page).</a><br>";
@@ -2337,14 +2386,14 @@ std::string Calculator::ToStringOutputAndSpecials()
   ;
 
   out << this->ToStringPerformance();
-  if(this->outputCommentsString!="")
+  if (this->outputCommentsString != "")
     out << "<br><b>Comments.</b><br>" << this->outputCommentsString;
   out << "</td></tr></table>";
   if (this->flagProduceLatexLink)
     out << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
     << HtmlRoutines::GetLatexEmbeddableLinkFromCalculatorInput(urledInput, this->inputString)
     ;
-  if (this->parsingLog!="")
+  if (this->parsingLog != "")
     out << "<b> As requested, here is a calculator parsing log</b><br>"
     << this->parsingLog;
   return out.str();
@@ -2370,13 +2419,13 @@ void Calculator::WriteAutoCompleteKeyWordsToFile()
 
 void Calculator::ComputeAutoCompleteKeyWords()
 { MacroRegisterFunctionWithName("Calculator::ComputeAutoCompleteKeyWords");
-  this->autoCompleteKeyWords.SetExpectedSize(this->theAtoms.size*2);
-  for (int i=0; i<this->theAtoms.size; i++)
+  this->autoCompleteKeyWords.SetExpectedSize(this->theAtoms.size * 2);
+  for (int i = 0; i < this->theAtoms.size; i ++)
     this->autoCompleteKeyWords.AddOnTopNoRepetition(this->theAtoms[i]);
-  for (int i=0; i<this->namedRules.size; i++)
+  for (int i = 0; i < this->namedRules.size; i ++)
     this->autoCompleteKeyWords.AddOnTopNoRepetition(this->namedRules[i]);
-  for (int i=0; i<this->controlSequences.size; i++)
-    if (this->controlSequences[i].size()>0)
+  for (int i = 0; i < this->controlSequences.size; i ++)
+    if (this->controlSequences[i].size() > 0)
       if (MathRoutines::isALatinLetter(this->controlSequences[i][0]))
         autoCompleteKeyWords.AddOnTopNoRepetition(this->controlSequences[i]);
 }
@@ -2384,54 +2433,54 @@ void Calculator::ComputeAutoCompleteKeyWords()
 std::string Calculator::ToStringPerformance()
 { MacroRegisterFunctionWithName("Calculator::ToStringPerformance");
   std::stringstream out;
-  double elapsedSecs=theGlobalVariables.GetElapsedSeconds();
+  double elapsedSecs = theGlobalVariables.GetElapsedSeconds();
   out << "<b>Double-click formulas to get their LaTeX.</b>"
   << "<br>Double-click back to hide the LaTeX. ";
-  out << "<br>Time: computation: " << (elapsedSecs-this->StartTimeEvaluationInSecondS)
-  << " (" << (elapsedSecs-this->StartTimeEvaluationInSecondS)*1000
+  out << "<br>Time: computation: " << (elapsedSecs - this->StartTimeEvaluationInSecondS)
+  << " (" << (elapsedSecs - this->StartTimeEvaluationInSecondS) * 1000
   << " ms), total: " << elapsedSecs << " ("
-  << ((elapsedSecs)*1000) << " ms).";
+  << (elapsedSecs * 1000) << " ms).";
   out << "<br>Total expressions created: " << this->theExpressionContainer.size;
   out << "<br>Expression evaluations: " << this->NumCallsEvaluateExpression;
   std::stringstream moreDetails;
   moreDetails << "Max computation time: "
-  << (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
+  << (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit / 2)
   << " second(s). <br>"
   << "Total number of pattern matches performed: "
   << this->TotalNumPatternMatchedPerformed << "";
-  if (this->DepthRecursionReached>0)
+  if (this->DepthRecursionReached > 0)
     moreDetails << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   #ifdef MacroIncrementCounter
   moreDetails << "<br>Lists created: " << "computation: "
-  << (ParallelComputing::NumListsCreated-this->NumListsStart)
+  << (ParallelComputing::NumListsCreated - this->NumListsStart)
   << ", total: " << ParallelComputing::NumListsCreated;
   moreDetails << "<br> # List resizes: computation: "
-  << (ParallelComputing::NumListResizesTotal -this->NumListResizesStart)
+  << (ParallelComputing::NumListResizesTotal - this->NumListResizesStart)
   << ", total: " << ParallelComputing::NumListResizesTotal
-  << "<br> # hash resizing: computation: " << (ParallelComputing::NumHashResizes- this->NumHashResizesStart)
+  << "<br> # hash resizing: computation: " << (ParallelComputing::NumHashResizes - this->NumHashResizesStart)
   << ", total: " << ParallelComputing::NumHashResizes;
-  if (Rational::TotalSmallAdditions>0)
+  if (Rational::TotalSmallAdditions > 0)
     moreDetails << "<br>Small rational additions: computation: "
-    << Rational::TotalSmallAdditions- this->NumSmallAdditionsStart
+    << Rational::TotalSmallAdditions - this->NumSmallAdditionsStart
     << ", total: " << Rational::TotalSmallAdditions;
-  if (Rational::TotalSmallMultiplications>0)
+  if (Rational::TotalSmallMultiplications > 0)
     moreDetails << "<br>Small rational multiplications: computation: "
     << Rational::TotalSmallMultiplications - this->NumSmallMultiplicationsStart
     << ", total: " << Rational::TotalSmallMultiplications;
-  if (Rational::TotalSmallGCDcalls>0)
+  if (Rational::TotalSmallGCDcalls > 0)
     moreDetails << "<br>Small gcd calls: computation: "
     << Rational::TotalSmallGCDcalls - this->NumSmallGCDcallsStart
     << ", total: " << Rational::TotalSmallGCDcalls;
-  if (Rational::TotalLargeAdditions>0)
+  if (Rational::TotalLargeAdditions > 0)
     moreDetails << "<br>Large integer additions: "
     << Rational::TotalLargeAdditions - this->NumLargeAdditionsStart
     << ", total: "
     << Rational::TotalLargeAdditions;
-  if (Rational::TotalLargeMultiplications>0)
+  if (Rational::TotalLargeMultiplications > 0)
     moreDetails << "<br>Large integer multiplications: computation: "
     << Rational::TotalLargeMultiplications - this->NumLargeMultiplicationsStart
     << ", total: " << Rational::TotalLargeMultiplications;
-  if (Rational::TotalLargeGCDcalls>0)
+  if (Rational::TotalLargeGCDcalls > 0)
     moreDetails << "<br>Large gcd calls: "
     << Rational::TotalLargeGCDcalls - this->NumLargeGCDcallsStart
     << ", total: " << Rational::TotalLargeGCDcalls;
@@ -2526,35 +2575,35 @@ std::string Calculator::ToStringSyntacticStackHumanReadable
   std::stringstream out;
   if ((*this->CurrentSyntacticStacK).size<this->numEmptyTokensStart)
     return "Error: this is a programming error: not enough empty tokens in the start of the syntactic stack.";
-  bool isBad=((*this->CurrentSyntacticStacK).size>this->numEmptyTokensStart+1);
-  SyntacticElement& lastSyntacticElt=* (*this->CurrentSyntacticStacK).LastObject();
-  if ((*this->CurrentSyntacticStacK).size==this->numEmptyTokensStart+1)
-    if (lastSyntacticElt.controlIndex!=this->conExpression())
-      isBad=true;
+  bool isBad = ((*this->CurrentSyntacticStacK).size > this->numEmptyTokensStart + 1);
+  SyntacticElement& lastSyntacticElt = *(*this->CurrentSyntacticStacK).LastObject();
+  if ((*this->CurrentSyntacticStacK).size == this->numEmptyTokensStart + 1)
+    if (lastSyntacticElt.controlIndex != this->conExpression())
+      isBad = true;
   if (!isBad)
   { out << this->CurrentSyntacticStacK->LastObject()->ToStringHumanReadable(*this, includeLispifiedExpressions);
     return out.str();
   }
   out << "<table style=\"vertical-align:top;border-spacing:0px 0px;\"><tr>";
-  int counter=0;
-  for (int i=this->numEmptyTokensStart; i<(*this->CurrentSyntacticStacK).size; i++)
-  { SyntacticElement& currentElt=(*this->CurrentSyntacticStacK)[i];
+  int counter = 0;
+  for (int i = this->numEmptyTokensStart; i < (*this->CurrentSyntacticStacK).size; i++)
+  { SyntacticElement& currentElt = (*this->CurrentSyntacticStacK)[i];
     if (ignoreCommandEnclosures)
-      if (currentElt.controlIndex==this->conExpression() ||
-          currentElt.controlIndex==this->conSequenceStatements())
+      if (currentElt.controlIndex == this->conExpression() ||
+          currentElt.controlIndex == this->conSequenceStatements())
       { if (currentElt.theData.StartsWith(this->opCommandEnclosure()))
           continue;
-        if (currentElt.theData.StartsWith(this->opEndStatement() ))
-          if (currentElt.theData.size()>=2)
+        if (currentElt.theData.StartsWith(this->opEndStatement()))
+          if (currentElt.theData.size() >= 2)
             if (currentElt.theData[1].StartsWith(this->opCommandEnclosure()))
               continue;
       }
     out
     << "<td style=\"vertical-align:top;background-color:"
-    << ((counter%2==0) ?"#FAFAFA" : "#F0F0F0" ) << "\">"
+    << ((counter % 2 == 0) ? "#FAFAFA" : "#F0F0F0" ) << "\">"
     << currentElt.ToStringHumanReadable(*this, includeLispifiedExpressions)
     << "</td>";
-    counter++;
+    counter ++;
   }
   out << "</tr></table>";
   return out.str();
@@ -2580,12 +2629,12 @@ SemisimpleSubalgebras& ObjectContainer::GetSemisimpleSubalgebrasCreateIfNotPrese
 
 SemisimpleLieAlgebra& ObjectContainer::GetLieAlgebraCreateIfNotPresent(const DynkinType& input)
 { MacroRegisterFunctionWithName("ObjectContainer::GetLieAlgebraCreateIfNotPresent");
-  bool needToInit=false;
+  bool needToInit = false;
   //  stOutput << "got to here pt1<br>";
   if (!this->theSSLieAlgebras.Contains(input))
-    needToInit=true;
+    needToInit = true;
   //  stOutput << "got to here pt2<br>";
-  SemisimpleLieAlgebra& theLA=this->theSSLieAlgebras.GetValueCreateNoInit(input);
+  SemisimpleLieAlgebra& theLA = this->theSSLieAlgebras.GetValueCreateNoInit(input);
   //  stOutput << "got to here pt3<br>";
   if (needToInit)
     theLA.theWeyl.MakeFromDynkinType(input);
@@ -2602,16 +2651,16 @@ std::string ObjectContainer::ToStringJavascriptForUserInputBoxes()
 { std::stringstream out;
   out << "<script>\n";
   out << "calculatorInputBoxNames=[";
-  for (int i=0; i<this->theUserInputTextBoxesWithValues.size(); i++)
-  { InputBox& currentBox=this->theUserInputTextBoxesWithValues.theValues[i];
+  for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++)
+  { InputBox& currentBox = this->theUserInputTextBoxesWithValues.theValues[i];
     out << "'" << currentBox.name << "'";
-    if (i!=this->theUserInputTextBoxesWithValues.size()-1)
+    if (i != this->theUserInputTextBoxesWithValues.size() - 1)
       out << ", ";
   }
   out << "];\n";
   out << "calculatorInputBoxToSliderUpdaters= new Object;";
-  for (int i=0; i<this->theUserInputTextBoxesWithValues.size(); i++)
-  { InputBox& currentBox=this->theUserInputTextBoxesWithValues.theValues[i];
+  for (int i = 0; i < this->theUserInputTextBoxesWithValues.size(); i ++)
+  { InputBox& currentBox = this->theUserInputTextBoxesWithValues.theValues[i];
     out << "calculatorInputBoxToSliderUpdaters['"
     << currentBox.name << "']='"
     << currentBox.GetSliderName() << "';\n";
@@ -2621,8 +2670,8 @@ std::string ObjectContainer::ToStringJavascriptForUserInputBoxes()
 }
 
 void ObjectContainer::resetPlots()
-{ for (int i=0; i<this->thePlots.size; i++)
-    this->thePlots[i].flagDivAlreadyDisplayed=false;
+{ for (int i = 0; i < this->thePlots.size; i ++)
+    this->thePlots[i].flagDivAlreadyDisplayed = false;
 }
 
 void ObjectContainer::resetSliders()
@@ -2667,7 +2716,7 @@ void ObjectContainer::reset()
   this->theWeightsPoly.Clear();
   this->theHyperOctahedralGroups.SetSize(0);
   this->theElementsHyperOctGroup.Clear();
-  this->CurrentRandomSeed=  time(NULL);
+  this->CurrentRandomSeed = time(NULL);
   this->theUserInputTextBoxesWithValues.Clear();
    //Setting up a random seed.
   srand (this->CurrentRandomSeed);
@@ -2683,10 +2732,10 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators
   Expression theContext;
   Selection theParSel;
   SemisimpleLieAlgebra* theSSalgebra;
-  Expression truncatedInput=input;
-  if (truncatedInput.children.size>4)
-  { int numEltsToCut=truncatedInput.children.size-4;
-    for (int i=0; i<numEltsToCut; i++)
+  Expression truncatedInput = input;
+  if (truncatedInput.children.size > 4)
+  { int numEltsToCut=truncatedInput.children.size - 4;
+    for (int i = 0; i < numEltsToCut; i ++)
       truncatedInput.children.RemoveLastObject();
   }
   if (!theCommands.GetTypeHighestWeightParabolic<Polynomial<Rational> >
@@ -2694,15 +2743,15 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators
     return output.MakeError("Failed to extract type, highest weight, parabolic selection", theCommands);
   if (output.IsError())
     return true;
-  std::string letterString="x";
-  std::string partialString="\\partial";
-  std::string exponentLetterString="a";
-  if (input.children.size>4)
-    letterString=input[4].ToString();
-  if (input.children.size>5)
-    partialString=input[5].ToString();
-  if (input.children.size>6)
-    exponentLetterString=input[6].ToString();
+  std::string letterString = "x";
+  std::string partialString = "\\partial";
+  std::string exponentLetterString = "a";
+  if (input.children.size > 4)
+    letterString = input[4].ToString();
+  if (input.children.size > 5)
+    partialString = input[5].ToString();
+  if (input.children.size > 6)
+    exponentLetterString = input[6].ToString();
 
 //stOutput << "<br>theContext:" << theContext.ToString();
 //stOutput << ", numvars: " << theContext.ContextGetNumContextVariables();
@@ -2723,10 +2772,10 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
     return output.MakeError("Failed to extract highest weight and algebra", theCommands);
   if (output.IsError())
     return true;
-  if (tempSel.CardinalitySelection>0)
+  if (tempSel.CardinalitySelection > 0)
     return output.MakeError("Failed to extract highest weight. ", theCommands);
-  charSSAlgMod<Rational> startingChar, resultChar ;
-  hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
+  charSSAlgMod<Rational> startingChar, resultChar;
+  hwSimple = theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
   if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString))
@@ -2739,16 +2788,16 @@ bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression&
 bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression& input, Expression& output)
 { Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
-  SemisimpleLieAlgebra* theSSalg=0;
+  SemisimpleLieAlgebra* theSSalg = 0;
   Expression context;
   if (!theCommands.GetTypeHighestWeightParabolic<Rational>(theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
     return output.MakeError("Failed to extract highest weight and algebra", theCommands);
   if (output.IsError())
     return true;
-  if (tempSel.CardinalitySelection>0)
+  if (tempSel.CardinalitySelection > 0)
     return output.MakeError("Failed to extract highest weight. ", theCommands);
-  charSSAlgMod<Rational> startingChar, resultChar ;
-  hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
+  charSSAlgMod<Rational> startingChar, resultChar;
+  hwSimple = theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
   if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString))
@@ -2760,11 +2809,11 @@ bool Expression::IsMeltable(int* numResultingChildren)const
 { this->CheckInitialization();
   if (!this->StartsWith(this->owner->opMelt(), 2))
     return false;
-  if (numResultingChildren!=0)
+  if (numResultingChildren != 0)
   { if (!(*this)[1].StartsWith(this->owner->opEndStatement()))
-      *numResultingChildren=1;
+      *numResultingChildren = 1;
     else
-      *numResultingChildren=(*this)[1].children.size-1;
+      *numResultingChildren = (*this)[1].children.size - 1;
   }
   return true;
 }
@@ -2773,21 +2822,21 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
 { MacroRegisterFunctionWithName("Expression::MergeContextsMyAruments");
 //  stOutput << "<hr>Merging contexts of expression " << this->ToString();
   this->CheckInitialization();
-  if (this->size()<2)
+  if (this->size() < 2)
     return false;
 //  stOutput << " ... continuing to merge..." ;
-  for (int i=1; i< this->size(); i++)
+  for (int i = 1; i < this->size(); i ++)
     if (!(*this)[i].IsBuiltInTypE())
-    { if (commentsOnFailure!=0)
+    { if (commentsOnFailure != 0)
         *commentsOnFailure << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
         << (*this)[i].ToString() << "is not of built-in type";
       return false;
     }
-  Expression commonContext=(*this)[1].GetContext();
-  bool needsMerge=false;
-  for (int i=2; i<this->size(); i++)
-    if (!(commonContext==(*this)[i].GetContext()))
-    { needsMerge=true;
+  Expression commonContext = (*this)[1].GetContext();
+  bool needsMerge = false;
+  for (int i = 2; i < this->size(); i ++)
+    if (!(commonContext == (*this)[i].GetContext()))
+    { needsMerge = true;
       break;
     }
 //  if (needsMerge)
@@ -2795,12 +2844,12 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
 //  else
 //    stOutput << "no need merge no nothin";
   if (!needsMerge)
-  { output=*this;
+  { output = *this;
     return true;
   }
-  for (int i=2; i<this->size(); i++)
+  for (int i = 2; i < this->size(); i++)
   { if (!(*this)[i].IsBuiltInTypE())
-    { if (commentsOnFailure!=0)
+    { if (commentsOnFailure != 0)
         *commentsOnFailure << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
       return false;
     }
@@ -2814,8 +2863,8 @@ bool Expression::MergeContextsMyAruments(Expression& output, std::stringstream* 
   output.reset(*this->owner, this->size());
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;
-  for (int i=1; i<this->size(); i++)
-  { convertedE=(*this)[i];
+  for (int i = 1; i < this->size(); i ++)
+  { convertedE = (*this)[i];
     //stOutput << "<hr>Setting context of " << convertedE.ToString() << " to be the context " << commonContext.ToString();
     if (!convertedE.SetContextAtLeastEqualTo(commonContext))
     { *this->owner << "<hr>Failed to convert " << convertedE.ToString() << " to context " << commonContext.ToString();
@@ -2831,21 +2880,21 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
 { MacroRegisterFunctionWithName("Calculator::ConvertExpressionsToCommonContext");
   Expression commonContext;
   commonContext.MakeEmptyContext(*this);
-  if (inputOutputStartingContext!=0)
+  if (inputOutputStartingContext != 0)
     if (inputOutputStartingContext->IsContext())
-      commonContext=*inputOutputStartingContext;
-  for (int i=0; i<inputOutputEs.size; i++)
+      commonContext = *inputOutputStartingContext;
+  for (int i = 0; i < inputOutputEs.size; i ++)
   { if (!inputOutputEs[i].IsBuiltInTypE())
       return *this << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext on expressions without context. "
       << Crasher::GetStackTraceEtcErrorMessage();
     if (!commonContext.ContextMergeContexts(commonContext, inputOutputEs[i].GetContext(), commonContext))
       return *this << "<hr>Failed to merge context " << commonContext.ToString() << " with " << inputOutputEs[i].GetContext().ToString();
   }
-  for (int i=0; i<inputOutputEs.size; i++)
+  for (int i = 0; i < inputOutputEs.size; i ++)
     if (!inputOutputEs[i].::Expression::SetContextAtLeastEqualTo(commonContext))
       return false;
-  if (inputOutputStartingContext!=0)
-    *inputOutputStartingContext=commonContext;
+  if (inputOutputStartingContext != 0)
+    *inputOutputStartingContext = commonContext;
   return true;
 }
 
@@ -2857,13 +2906,13 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
     return false;
   //stOutput << "<br>outerMeltBrackets meldet sich!";
   int tempInt;
-  int ChildIncrease=0;
-  bool found=false;
-  for (int i=0; i<input.children.size; i++)
-  { const Expression& currentChild=input[i];
+  int ChildIncrease = 0;
+  bool found = false;
+  for (int i = 0; i < input.children.size; i++)
+  { const Expression& currentChild = input[i];
     if (currentChild.IsMeltable(&tempInt))
-    { found=true;
-      ChildIncrease+=tempInt-1;
+    { found = true;
+      ChildIncrease += tempInt - 1;
     }
   }
 //  if (!found)
@@ -2871,10 +2920,10 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
   if (!found)
     return false;
 //  stOutput << "<br>ChildIncrease: " << ChildIncrease;
-  output.reset(theCommands, input.children.size+ChildIncrease);
+  output.reset(theCommands, input.children.size + ChildIncrease);
   output.AddChildAtomOnTop(theCommands.opEndStatement());
-  for (int i=1; i<input.children.size; i++)
-  { const Expression& currentChild=input[i];
+  for (int i = 1; i < input.children.size; i ++)
+  { const Expression& currentChild = input[i];
     if (!currentChild.IsMeltable())
     { //output.SetChild(i+shift, input.children[i]);
       output.AddChildOnTop(input[i]);
@@ -2886,7 +2935,7 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
       output.AddChildOnTop(currentChild[1]);
       continue;
     }
-    for (int j=1; j<currentChild[1].children.size; j++)
+    for (int j = 1; j < currentChild[1].children.size; j ++)
     { //output.SetChild(i+shift, currentChild[1].children[j]);
       output.AddChildOnTop(currentChild[1][j]);
     }

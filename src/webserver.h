@@ -213,6 +213,7 @@ public:
   int ProcessNavigation();
   int ProcessCompute();
   int ProcessCalculatorExamples();
+  int ProcessCalculatorExamplesJSON();
   int ProcessSubmitProblem();
   int ProcessSubmitProblemPreview();
   int ProcessProblemGiveUp();

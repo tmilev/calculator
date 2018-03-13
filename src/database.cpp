@@ -2235,11 +2235,11 @@ bool EmailRoutines::SendEmailWithMailGun
   //Those MUST be sanitized (else an attacker would use username with " characters
   //to execute arbitrary code.
   commandToExecute << "-F to=\""
-  << HtmlRoutines::ConvertStringToBackslashEscapedString(this->toEmail) << "\" "
+  << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->toEmail) << "\" "
   << "-F subject=\""
-  << HtmlRoutines::ConvertStringToBackslashEscapedString(this->subject) << "\" "
+  << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->subject) << "\" "
   << "-F text=\""
-  << HtmlRoutines::ConvertStringToBackslashEscapedString(this->emailContent)
+  << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->emailContent)
   << "\""
   ;
   std::string commandResult = theGlobalVariables.CallSystemWithOutput(commandToExecute.str());

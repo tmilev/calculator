@@ -44,11 +44,6 @@ function recordResult(resultText, resultSpan){
  * inputObject.service: if url is missing, this is appended to the default server name and used
  *   in place of inputObject.url. If inputObject.url is specified, this argument is ignored.
  *
- * inputObject.authorization: Authorization token.
- *   If you omit it (undefined) or pass null, the function will automatically
- *   use globalVars.getAuthenticationToken().
- *   If you pass the empty string "", no authorization token will be passed.
- *
  * inputObject.callback: function to callback. The function will be passed on
  *   as arguments the received result.
  *   The result may in addition be displayed in the component inputObject.result, should
@@ -73,26 +68,15 @@ function submitGET(inputObject){
   var progress = inputObject.progress;
   var result = inputObject.result;
   var callback = inputObject.callback;
-  var callbackArguments = inputObject.callbackArguments;
   var xhr = new XMLHttpRequest();
-  var authorization = inputObject.authorization;
-  if (authorization === null || authorization === undefined){
-    authorization = globalVars.getAuthenticationToken();
-    if (authorization === null || authorization === undefined){
-      authorization = "";
-    }
-  }
   recordProgressStarted(progress, theAddress);
   xhr.open('GET', theAddress, true);
   xhr.setRequestHeader('Accept', 'text/html');
-  if (authorization !== ""){
-    xhr.setRequestHeader('Authorization', authorization);
-  }
   xhr.onload = function () {
     recordProgressDone(progress);
     recordResult(xhr.responseText, result);
     if (callback !== undefined && callback !== null){
-      callback(xhr.responseText, result, callbackArguments);
+      callback(xhr.responseText, result);
     }
   };
   xhr.send();

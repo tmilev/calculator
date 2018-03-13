@@ -3,8 +3,8 @@ var calculatorInput;
 var calculatorMQfield;
 var calculatorMQobject;
 var mqProblemSpan;
-var calculatorLeftString=undefined;
-var calculatorRightString=undefined;
+var calculatorLeftString = undefined;
+var calculatorRightString = undefined;
 var calculatorMQString;
 var calculatorMQStringIsOK=true;
 var ignoreNextMathQuillUpdateEvent=false;
@@ -274,53 +274,84 @@ function getSemiColumnEnclosure()
         break;
       }
   }
-  var calculatorSeparatorCounts=
+  var calculatorSeparatorCounts =
   new Array(calculatorSeparatorLeftDelimiters.length).fill(0);
-  var leftPos=rightPos-1;
-  lastWord='';
-  lastSeparator=rightPos;
-  for (; leftPos>0; leftPos--)
-  { currentChar=calculatorInput.value[leftPos];
-    if (currentChar===';')
-    { leftPos++;
+  var leftPos = rightPos - 1;
+  lastWord = '';
+  lastSeparator = rightPos;
+  for (; leftPos > 0; leftPos --)
+  { currentChar = calculatorInput.value[leftPos];
+    if (currentChar === ';')
+    { leftPos ++;
       break;
     }
     if (accountCalculatorDelimiterReturnMustEndSelection
         (calculatorInput.value, calculatorSeparatorCounts, leftPos)
        )
-    { leftPos++;
+    { leftPos ++;
       break;
     }
     if (isSeparatorCharacter(currentChar))
-    { lastWord='';
-      lastSeparator=leftPos;
+    { lastWord = '';
+      lastSeparator = leftPos;
     } else
-    { lastWord=currentChar+lastWord;
+    { lastWord = currentChar + lastWord;
     }
-    if (lastWord.length>3)
+    if (lastWord.length > 3)
       if (!isKeyWordEndKnownToMathQuill(lastWord))
-      { leftPos=lastSeparator;
+      { leftPos = lastSeparator;
         break;
       }
   }
-  if (leftPos>rightPos)
-    leftPos=rightPos;
-  if (rightPos-leftPos>1000)
-  { mqProblemSpan.innerHTML = "<span style='color:red'><b></b></span>"
+  if (leftPos > rightPos)
+    leftPos = rightPos;
+  if (rightPos - leftPos > 1000){
+    mqProblemSpan.innerHTML = "<span style='color:red'><b></b></span>"
   }
-  calculatorLeftPosition=leftPos;
-  calculatorRightPosition=rightPos;
-  startingCharacterSectionUnderMathQuillEdit='';
-  if (calculatorInput.value[leftPos]==='\n' || calculatorInput.value[leftPos]===' ' ||
-      calculatorInput.value[leftPos]==='\t')
-    startingCharacterSectionUnderMathQuillEdit=calculatorInput.value[leftPos];
+  calculatorLeftPosition = leftPos;
+  calculatorRightPosition = rightPos;
+  startingCharacterSectionUnderMathQuillEdit = '';
+  if (calculatorInput.value[leftPos] === '\n' || calculatorInput.value[leftPos] === ' ' ||
+      calculatorInput.value[leftPos] === '\t'){
+    startingCharacterSectionUnderMathQuillEdit = calculatorInput.value[leftPos];
+  }
   chopCalculatorStrings();
+}
+
+function processExamples(inputJSONtext){
+  try {
+    var theExamples = JSON.parse(inputJSONtext);
+    var resultString = "";
+    var atomsSorted = Object.keys(theExamples).slice().sort();
+    for (var counterAtoms = 0; counterAtoms < atomsSorted.length; counterAtoms ++){
+      var atom = atomsSorted[counterAtoms];
+
+      var handlersNormal = theExamples[atom].regular;
+      var handlersComposite = theExamples[atom].composite;
+
+      for (var counterHandlers = 0; counterHandlers < handlersNormal.length; counterHandlers ++){
+        if (resultString != ""){
+          resultString += "<br>";
+        }
+        resultString += "<calculatorAtom>" + atom + "</calculatorAtom> (" +
+        (counterHandlers + 1) + " out of " + handlersNormal.length +
+        ")";
+      }
+    }
+    document.getElementById("divCalculatorExamples").innerHTML = resultString;
+  } catch (e) {
+    console.log("Bad json: " + e + "\n Input JSON follows." );
+    console.log(inputJSONtext);
+  }
 }
 
 function toggleCalculatorExamples(theButton){
   var theExamples = document.getElementById('divCalculatorExamples');
   if (theExamples.innerHTML.length < 300) {
-    submitStringAsMainInput('', 'divCalculatorExamples', 'calculatorExamples', null, "spanProgressCalculatorExamples");
+    submitGET({
+      url: "/cgi-bin/calculator?request=calculatorExamplesJSON",
+      callback: processExamples
+    });
     theButton.innerHTML = "&#9660;";
   } else {
     switchMenu('divCalculatorExamples');

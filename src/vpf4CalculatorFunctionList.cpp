@@ -3434,7 +3434,7 @@ this->AddOperationInnerHandler ("PlotMarkSegment",
   ("LROdefine", Calculator::innerLittelmannOperator, "",
    "Littelmann root operator e_i, where e_i is the Littelmann root operator with \
    respect to root of index i. If i is negative then the e_i root operator is defined to be \
-   the f_\alpha operator.",
+   the f_\\alpha operator.",
    "e_{{i}}=LROdefine_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))",
    true, true,
    "Calculator::innerLittelmannOperator",

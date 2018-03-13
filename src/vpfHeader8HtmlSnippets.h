@@ -38,7 +38,8 @@ public:
   static std::string ConvertStringToHtmlString(const std::string& theString, bool doReplaceNewLineByBr);
   static std::string ConvertStringToHtmlStringRestrictSize
   (const std::string& theString, bool doReplaceNewLineByBr, int maxStringSize);
-  static std::string ConvertStringToBackslashEscapedString(const std::string& input);
+  static std::string ConvertStringEscapeQuotesAndBackslashes(const std::string& input);
+  static std::string ConvertStringEscapeNewLinesQuotesBackslashes(const std::string& input);
 
   static bool URLStringToNormalOneStep(std::string& readAhead, std::stringstream& out, bool replacePlusBySpace);
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);

@@ -127,10 +127,10 @@ DISTFILES += \
     ../calculator-html/new/cookies.js \
     ../calculator-html/new/hide_html_with_tags.js \
     ../calculator-html/new/initialize_buttons.js \
-    ../calculator-html/new/submit_requests.js \
     ../calculator-html/new/styleCalculator.css \
     ../calculator-html/new/index.html \
     ../calculator-html/new/mathjax-calculator-setup.js \
     ../calculator-html/new/page_navigation.js \
     ../calculator-html/new/panels.js \
-    ../calculator-html/new/three-d.js
+    ../calculator-html/new/three-d.js \
+    ../calculator-html/new/submit_requests.js

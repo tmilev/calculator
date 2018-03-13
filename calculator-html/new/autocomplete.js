@@ -1,7 +1,7 @@
 "use strict";
-var minLengthAutocompleteTrigger=2;
-var DebugCounter=0;
-var AutocompleteIsInitialized=false;
+var minLengthAutocompleteTrigger = 2;
+var DebugCounter = 0;
+var AutocompleteIsInitialized = false;
 
 var theAutocompleteDictionaryLowerCase;
 var theAutocompleteDictionaryByKey;

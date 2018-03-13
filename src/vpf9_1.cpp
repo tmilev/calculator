@@ -21,7 +21,7 @@ void Crasher::FirstRun()
 { if (!this->flagCrashInitiateD && (theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer) )
     this->theCrashReport << "\n<span style=\"color:red\"><b>Crash</b></span> "
     << theGlobalVariables.GetElapsedSeconds() << " second(s) from the start.<hr>";
-  this->flagCrashInitiateD=true;
+  this->flagCrashInitiateD = true;
 }
 
 extern Calculator* theParser;
@@ -39,7 +39,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   if (!theGlobalVariables.flagNotAllocated)
     this->theCrashReport << " ";
   if (!theGlobalVariables.flagNotAllocated)
-    if (theGlobalVariables.userInputStringIfAvailable!="")
+    if (theGlobalVariables.userInputStringIfAvailable != "")
       this->theCrashReport << "<hr>User input: <br> "
       << theGlobalVariables.userInputStringIfAvailable << "<hr>";
   this->theCrashReport << Crasher::GetStackTraceEtcErrorMessage();
@@ -55,7 +55,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   if (!theGlobalVariables.flagNotAllocated)
   { std::fstream theFile;
     bool succeededToOpen = FileOperations::OpenFileCreateIfNotPresentVirtual
-    (theFile, "crashes/"+theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false, true);
+    (theFile, "crashes/" + theGlobalVariables.RelativePhysicalNameCrashLog, false, true, false, true);
     if (succeededToOpen)
       stOutput << "<hr>Crash dumped in file "
       << "<a href=\"/LogFiles/crashes/"
@@ -90,7 +90,7 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
 { std::stringstream out;
   out << "A partial stack trace follows (function calls not explicitly logged not included).";
   out << "<table><tr>";
-  for (int threadCounter = 0; threadCounter < theGlobalVariables.CustomStackTrace.size; threadCounter++)
+  for (int threadCounter = 0; threadCounter < theGlobalVariables.CustomStackTrace.size; threadCounter ++)
   { if (threadCounter >= theGlobalVariables.theThreadData.size)
     { out << "<td><b>WARNING: the stack trace reports "
       << theGlobalVariables.CustomStackTrace.size
@@ -102,7 +102,7 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
     out << "<td>" << theGlobalVariables.theThreadData[threadCounter].ToStringHtml() << "</td>";
   }
   out << "</tr> <tr>";
-  for (int threadCounter = 0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter++)
+  for (int threadCounter = 0; threadCounter<theGlobalVariables.CustomStackTrace.size; threadCounter ++)
   { if (threadCounter >= theGlobalVariables.theThreadData.size)
       break;
     if (ThreadData::getCurrentThreadId() != threadCounter)
@@ -110,7 +110,7 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
       //<-to avoid coordinating threads
       continue;
     }
-    ListReferences<stackInfo>& currentInfo=
+    ListReferences<stackInfo>& currentInfo =
     theGlobalVariables.CustomStackTrace[threadCounter];
     out << "<td><table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
     for (int i = currentInfo.size - 1; i >= 0; i --)
@@ -153,7 +153,7 @@ std::string GlobalVariables::ToStringHTMLTopCommandLinuxSystem()
   std::stringstream out;
   std::string lineString, wordString;
   std::stringstream topStream(topString);
-  for (int i=0; i<4; i++)
+  for (int i = 0; i < 4; i ++)
   { std::getline(topStream, lineString);
     out << lineString << "<br>\n ";
   }
@@ -217,7 +217,7 @@ std::string GlobalVariables::ToStringProgressReportHtml()
 std::string GlobalVariables::ToStringProgressReportConsole()
 { MacroRegisterFunctionWithName("GlobalVariables::ToStringProgressReportConsole");
   std::stringstream reportStream;
-  for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex++)
+  for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++)
   { if (ThreadData::getCurrentThreadId() != threadIndex)
     { reportStream << "Progress report available only for current thread.<br>";
       //<-to avoid coordinating threads
@@ -433,7 +433,7 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
   << " the 8155 in the address above with the port number reported by the calculator. ";
   out << "<hr>" << this->theSourceCodeFiles().size << " files total. ";
   out << "<br>svn checkout command:<br>svn checkout https://github.com/tmilev/calculator.git/trunk calculator";
-  for (int i = 0; i < this->theSourceCodeFiles().size; i++)
+  for (int i = 0; i < this->theSourceCodeFiles().size; i ++)
   { out << " <br>\n";
     out << HtmlRoutines::GetHtmlLinkFromProjectFileName(this->theSourceCodeFiles()[i].FileName, this->theSourceCodeFiles()[i].FileDescription);
   }
@@ -442,7 +442,7 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
 }
 
 UserCalculatorData::UserCalculatorData()
-{ this->approximateHoursSinceLastTokenWasIssued = -1;
+{ this->approximateHoursSinceLastTokenWasIssued = - 1;
   this->flagEnteredAuthenticationToken = false;
   this->flagMustLogin = true;
   this->flagEnteredPassword = false;
@@ -454,7 +454,7 @@ UserCalculatorData::UserCalculatorData()
 
 void UserCalculatorData::reset()
 { MacroRegisterFunctionWithName("UserCalculatorData::reset");
-  for (unsigned i = 0; i < this->username.value.size(); i++)
+  for (unsigned i = 0; i < this->username.value.size(); i ++)
     this->username.value[i] = ' ';
   this->username = "";
   this->email = "";
@@ -463,29 +463,29 @@ void UserCalculatorData::reset()
 
 void UserCalculatorData::clearPasswordFromMemory()
 { MacroRegisterFunctionWithName("UserCalculatorData::resetPassword");
-  for (unsigned i=0; i<this->actualShaonedSaltedPassword.size(); i++)
-    this->actualShaonedSaltedPassword[i]=' ';
-  this->actualShaonedSaltedPassword="";
-  for (unsigned i=0; i<this->enteredPassword.size(); i++)
-    this->enteredPassword[i]=' ';
-  this->enteredPassword="";
-  for (unsigned i=0; i<this->enteredShaonedSaltedPassword.size(); i++)
-    this->enteredShaonedSaltedPassword[i]=' ';
-  this->enteredShaonedSaltedPassword="";
-  for (unsigned i=0; i<this->actualActivationToken.value.size(); i++)
-    this->actualActivationToken.value[i]=' ';
-  this->actualActivationToken="";
-  for (unsigned i=0; i<this->enteredActivationToken.value.size(); i++)
-    this->enteredActivationToken.value[i]=' ';
-  this->enteredActivationToken="";
+  for (unsigned i = 0; i < this->actualShaonedSaltedPassword.size(); i ++)
+    this->actualShaonedSaltedPassword[i] = ' ';
+  this->actualShaonedSaltedPassword = "";
+  for (unsigned i = 0; i < this->enteredPassword.size(); i ++)
+    this->enteredPassword[i] = ' ';
+  this->enteredPassword = "";
+  for (unsigned i = 0; i < this->enteredShaonedSaltedPassword.size(); i ++)
+    this->enteredShaonedSaltedPassword[i] = ' ';
+  this->enteredShaonedSaltedPassword = "";
+  for (unsigned i = 0; i < this->actualActivationToken.value.size(); i ++)
+    this->actualActivationToken.value[i] = ' ';
+  this->actualActivationToken = "";
+  for (unsigned i = 0; i < this->enteredActivationToken.value.size(); i ++)
+    this->enteredActivationToken.value[i] = ' ';
+  this->enteredActivationToken = "";
 }
 
 void UserCalculatorData::clearAuthenticationTokenAndPassword()
 { MacroRegisterFunctionWithName("UserCalculatorData::reset");
   this->clearPasswordFromMemory();
-  for (unsigned i=0; i<this->actualAuthenticationToken.value.size(); i++)
-    this->actualAuthenticationToken.value[i]=' ';
-  this->actualAuthenticationToken="";
+  for (unsigned i = 0; i < this->actualAuthenticationToken.value.size(); i ++)
+    this->actualAuthenticationToken.value[i] = ' ';
+  this->actualAuthenticationToken = "";
 }
 
 std::string UserCalculatorData::ToStringUnsecure()
@@ -531,30 +531,30 @@ void DynkinDiagramRootSubalgebra::SwapDynkinStrings(int i, int j)
 
 void DynkinDiagramRootSubalgebra::Sort()
 { //doing bubble sort
-  for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-    for (int j=i+1; j<this->SimpleBasesConnectedComponents.size; j++)
-    { bool tempBool=false;
-      if (this->SimpleBasesConnectedComponents[i].size<this->SimpleBasesConnectedComponents[j].size)
-        tempBool=true;
-      if (this->SimpleBasesConnectedComponents[i].size==this->SimpleBasesConnectedComponents[j].size)
-        tempBool=((this->SimpleComponentTypes[i])<(this->SimpleComponentTypes[j]));
+  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++)
+    for (int j = i + 1; j<this->SimpleBasesConnectedComponents.size; j ++)
+    { bool tempBool = false;
+      if (this->SimpleBasesConnectedComponents[i].size < this->SimpleBasesConnectedComponents[j].size)
+        tempBool = true;
+      if (this->SimpleBasesConnectedComponents[i].size == this->SimpleBasesConnectedComponents[j].size)
+        tempBool = ((this->SimpleComponentTypes[i]) < (this->SimpleComponentTypes[j]));
       if (tempBool)
         this->SwapDynkinStrings(i, j);
     }
-  this->sameTypeComponents.size=0;
+  this->sameTypeComponents.size = 0;
   this->indexInUniComponent.SetSize(this->SimpleBasesConnectedComponents.size);
   this->indexUniComponent.SetSize(this->SimpleBasesConnectedComponents.size);
   this->sameTypeComponents.Reserve(this->SimpleBasesConnectedComponents.size);
   DynkinSimpleType tempType;
-  for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-  { if (!(this->SimpleComponentTypes[i]==tempType))
-    { this->sameTypeComponents.SetSize(this->sameTypeComponents.size+1);
-      this->sameTypeComponents.LastObject()->size=0;
-      tempType=this->SimpleComponentTypes[i];
+  for (int i = 0; i < this->SimpleBasesConnectedComponents.size; i ++)
+  { if (!(this->SimpleComponentTypes[i] == tempType))
+    { this->sameTypeComponents.SetSize(this->sameTypeComponents.size + 1);
+      this->sameTypeComponents.LastObject()->size = 0;
+      tempType = this->SimpleComponentTypes[i];
     }
     this->sameTypeComponents.LastObject()->AddOnTop(i);
-    this->indexUniComponent[i]=this->sameTypeComponents.size-1;
-    this->indexInUniComponent[i]=this->sameTypeComponents.LastObject()->size-1;
+    this->indexUniComponent[i] = this->sameTypeComponents.size - 1;
+    this->indexInUniComponent[i] = this->sameTypeComponents.LastObject()->size - 1;
   }
 }
 

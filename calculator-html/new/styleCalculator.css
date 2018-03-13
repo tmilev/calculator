@@ -1,4 +1,8 @@
 /*styleCalculator.css*/
+calculatorAtom{
+  font-weight: bold;
+  color: red;
+}
 calculatorNavigation {
   background-color: #e8e8e8;
   display: block;

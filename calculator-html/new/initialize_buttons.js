@@ -1,15 +1,15 @@
 "use strict";
-var answerIdsPureLatex=[];
-var answerMathQuillObjects=[];
-var answerMQspanIds=[];
-var preferredButtonContainers=[];
-var studentScoresInHomePage=[];
+var answerIdsPureLatex = [];
+var answerMathQuillObjects = [];
+var answerMQspanIds = [];
+var preferredButtonContainers = [];
+var studentScoresInHomePage = [];
 //var lastFocus;
-var charsToSplit=['x','y'];
-var panelsCollapseStatus={};
+var charsToSplit = ['x','y'];
+var panelsCollapseStatus = {};
 
 function processMathQuillLatex(theText)
-{ for (var i=0; i<theText.length; i++)
+{ for (var i = 0; i < theText.length; i++)
     if (i+1<theText.length)
     { if ((theText[i]==='_' || theText[i]==='^') && theText[i+1]!=='{')
         theText=theText.slice(0,i+1)+'{'+theText[i+1]+'}'+theText.slice(i+2);
@@ -26,9 +26,9 @@ function processMathQuillLatex(theText)
             && theText[i+1]!=='='
             )
         { if (theText[i]==='x')
-            if (theText.slice(i-5,i+1)==='matrix')
+            if (theText.slice(i - 5, i + 1)==='matrix')
               continue;
-          theText=theText.slice(0,i+1)+" "+theText.slice(i+1);
+          theText = theText.slice(0, i + 1) + " " + theText.slice(i + 1);
         }
     }
   return theText;

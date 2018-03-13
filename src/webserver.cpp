@@ -2077,6 +2077,13 @@ int WebWorker::ProcessCalculatorExamples()
   return 0;
 }
 
+int WebWorker::ProcessCalculatorExamplesJSON()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessCalculatorExamplesJSON");
+  this->SetHeaderOKNoContentLength();
+  stOutput << theParser->ToStringFunctionHandlersJSON();
+  return 0;
+}
+
 int WebWorker::ProcessServerStatusPublic()
 { MacroRegisterFunctionWithName("WebWorker::ProcessServerStatusPublic");
   this->SetHeaderOKNoContentLength();
@@ -4125,6 +4132,8 @@ int WebWorker::ServeClient()
     return this->ProcessNavigation();
   else if (theGlobalVariables.userCalculatorRequestType == "calculatorExamples")
     return this->ProcessCalculatorExamples();
+  else if (theGlobalVariables.userCalculatorRequestType == "calculatorExamplesJSON")
+    return this->ProcessCalculatorExamplesJSON();
   else if (theGlobalVariables.GetWebInput("error") != "")
     stOutput << "<div style=\"text-align:center\">"
     << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), false)
@@ -5916,7 +5925,8 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsSensitive.Clear();
   folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");//<-internal use
   folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");//<-coming from webserver
-  folderSubstitutionsSensitive.SetKeyValue("/crashes/", "/LogFiles/crashes/");
+  folderSubstitutionsSensitive.SetKeyValue("/crashes/", "./LogFiles/crashes/");
+  folderSubstitutionsSensitive.SetKeyValue("crashes/", "./LogFiles/crashes/");
 
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("favicon.ico");
   FileOperations::FilesStartsToWhichWeAppendHostName().AddOnTop("/favicon.ico");

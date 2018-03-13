@@ -360,7 +360,7 @@ void HtmlRoutines::outputLineJavaScriptSpecific(const std::string& lineTypeName,
     stOutput << "\t" << lineTypeName << "2[" << lineCounter << "][" << j << "]=" << tempS << "; ";
   }
   stOutput << "\tclr" << lineTypeName << "[" << lineCounter << "]=" << stringColor << "; ";
-  lineCounter++;
+  lineCounter ++;
 }
 
 void HtmlRoutines::ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml)
@@ -374,7 +374,7 @@ std::string HtmlRoutines::GetStyleButtonLikeHtml()
 { return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";
 }
 
-std::string HtmlRoutines::ConvertStringToBackslashEscapedString(const std::string& input)
+std::string HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(const std::string& input)
 { MacroRegisterFunctionWithName("HtmlRoutines::ConvertStringToBackslashEscapedString");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i++)
@@ -383,6 +383,21 @@ std::string HtmlRoutines::ConvertStringToBackslashEscapedString(const std::strin
     else if (input[i] == '\\')
       out << "\\\\";
     else out << input[i];
+  return out.str();
+}
+
+std::string HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(const std::string& input)
+{ MacroRegisterFunctionWithName("HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes");
+  std::stringstream out;
+  for (unsigned i = 0; i < input.size(); i++)
+    if (input[i] == '"')
+      out << "\\\"";
+    else if (input[i] == '\\')
+      out << "\\\\";
+    else if (input[i] == '\n')
+      out << "\\n";
+    else
+      out << input[i];
   return out.str();
 }
 

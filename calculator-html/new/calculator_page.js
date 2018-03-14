@@ -318,26 +318,76 @@ function getSemiColumnEnclosure()
   chopCalculatorStrings();
 }
 
+function exampleCalculatorClick(theLink){
+  var theAtom = decodeURIComponent(theLink.atom);
+  var theIndex = theLink.index;
+  var isComposite = theLink.composite;
+  var theHandler = null;
+console.log(theLink);
+  if (isComposite){
+    theHandler = theCalculatorExamples[theAtom].composite[theIndex];
+  } else {
+    theHandler = theCalculatorExamples[theAtom].regular[theIndex];
+  }
+
+console.log(theHandler);
+
+  document.getElementById("mainInputID").innerHTML = theHandler.example;
+  submitCalculatorComputation();
+}
+
+function processOneFunctionAtom(handlers, isComposite){
+  var resultString = "";
+  for (var counterHandlers = 0; counterHandlers < handlers.length; counterHandlers ++){
+    resultString += "<br>";
+    var currentDescription = handlers[counterHandlers].description;
+    var currentExample = handlers[counterHandlers].example;
+    resultString += "<calculatorAtom>" + handlers[counterHandlers].atom + "</calculatorAtom>";
+    resultString += "<calculatorCompositeAtom>(composite)</calculatorCompositeAtom>";
+    resultString += " (" + (counterHandlers + 1) + " out of " + handlers.length + ")";
+    var currentId = "example_";
+    if (isComposite){
+      currentId += "t_";
+    } else {
+      currentId += "f_";
+    }
+    var encodedAtom = encodeURIComponent(handlers[counterHandlers].atom);
+    currentId += encodedAtom + "_" +
+    counterHandlers + "_" + handlers.length;
+    resultString += "<a href=\"#\" class=\"linkInfo\" " +
+    "onclick=\"switchMenu('" + currentId + "')\">info</a>";
+    resultString += "<calculatorExampleInfo id=\"" + currentId +
+    "\" class=\"hiddenClass\">" + currentDescription +
+    "<br><b>Example:</b><br>" + currentExample + "</calculatorExampleInfo>";
+    resultString += "<a href=\"#\" class=\"linkInfo\" " +
+    "onclick=\"" +
+    "this.composite=" + isComposite +  ";" +
+    "this.index=" + counterHandlers + "; "+
+    "this.atom='" + encodedAtom + "'; "+
+    " exampleCalculatorClick(this);\"" +
+    "> Example</a>";
+    //resultString += currentExample;
+    //console.log(handlers[counterHandlers]);
+  }
+  return resultString;
+}
+
+var theCalculatorExamples;
+
 function processExamples(inputJSONtext){
   try {
-    var theExamples = JSON.parse(inputJSONtext);
-    var resultString = "";
-    var atomsSorted = Object.keys(theExamples).slice().sort();
+    theCalculatorExamples = JSON.parse(inputJSONtext);
+    var examplesString = "";
+    var atomsSorted = Object.keys(theCalculatorExamples).slice().sort();
+    var numHandlers = 0;
     for (var counterAtoms = 0; counterAtoms < atomsSorted.length; counterAtoms ++){
       var atom = atomsSorted[counterAtoms];
-
-      var handlersNormal = theExamples[atom].regular;
-      var handlersComposite = theExamples[atom].composite;
-
-      for (var counterHandlers = 0; counterHandlers < handlersNormal.length; counterHandlers ++){
-        if (resultString != ""){
-          resultString += "<br>";
-        }
-        resultString += "<calculatorAtom>" + atom + "</calculatorAtom> (" +
-        (counterHandlers + 1) + " out of " + handlersNormal.length +
-        ")";
-      }
+      examplesString += processOneFunctionAtom(theCalculatorExamples[atom].regular, false);
+      examplesString += processOneFunctionAtom(theCalculatorExamples[atom].composite, false);
+      numHandlers += theCalculatorExamples[atom].regular.length + theCalculatorExamples[atom].composite.length;
     }
+    var resultString = "" + atomsSorted.length + " built-in atoms, " + numHandlers + " handlers. ";
+    resultString += examplesString;
     document.getElementById("divCalculatorExamples").innerHTML = resultString;
   } catch (e) {
     console.log("Bad json: " + e + "\n Input JSON follows." );
@@ -350,7 +400,8 @@ function toggleCalculatorExamples(theButton){
   if (theExamples.innerHTML.length < 300) {
     submitGET({
       url: "/cgi-bin/calculator?request=calculatorExamplesJSON",
-      callback: processExamples
+      callback: processExamples,
+      progress: "spanProgressCalculatorExamples"
     });
     theButton.innerHTML = "&#9660;";
   } else {

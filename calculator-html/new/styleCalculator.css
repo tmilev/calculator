@@ -1,7 +1,15 @@
 /*styleCalculator.css*/
+calculatorExampleInfo{
+  display: block;
+  transition: all 1s;
+  opacity: 1;
+}
 calculatorAtom{
   font-weight: bold;
   color: red;
+}
+calculatorCompositeAtom{
+  color:green;
 }
 calculatorNavigation {
   background-color: #e8e8e8;
@@ -194,6 +202,16 @@ button.buttonClone{
 }
 button.buttonClone:hover{
   background-color: green;
+}
+button.buttonProgress{
+  box-shadow: none;
+  border: none;
+  background: none;
+  font-size: x-small;
+  transition: 2s;
+}
+button.buttonProgress:hover{
+  background: lightgray;
 }
 answerCalculatorHighlight{
 display: inline-block;
@@ -594,6 +612,10 @@ table.topicList th {
   padding-top: 12px;
   padding-bottom: 12px;
 }
+a.linkInfo{
+  margin-left: 10px;
+  margin-right: 10px;
+}
 a.linkStandardButtonLike{
   margin:  3px;
   padding: 3px;
@@ -832,4 +854,12 @@ font-weight: bold;
 }
 .g-signin2 > div{
   margin: 0 auto;
+}
+
+.hiddenClass{
+  display: none;
+  max-height: 0px;
+  height: 0px;
+  opacity: 0;
+  transition: all 1s;
 }

@@ -89,7 +89,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     //<< theProblem.theProblemData.randomSeed;
 
     if (isGoodLoad)
-      isGoodInterpretation=theProblem.InterpretHtml(problemComments);
+      isGoodInterpretation = theProblem.InterpretHtml(problemComments);
     //out << ".<br>DEBUG: random seed end: "
     //<< theProblem.theProblemData.randomSeed
     //<< "</td>";

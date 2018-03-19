@@ -13,66 +13,66 @@
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCustomCode
 (__FILE__, "Routines for calculus teaching: calculator exam mode. Shared code. ");
 
-std::string CalculatorHTML::stringScoredQuizzes="Quiz";
-std::string CalculatorHTML::stringPracticE="Practice";
-std::string CalculatorHTML::stringProblemLink="Problem";
+std::string CalculatorHTML::stringScoredQuizzes = "Quiz";
+std::string CalculatorHTML::stringPracticE = "Practice";
+std::string CalculatorHTML::stringProblemLink = "Problem";
 
 CalculatorHTML::CalculatorHTML()
-{ this->NumAttemptsToInterpret=0;
-  this->NumAnswerIdsMathquilled=0;
-  this->MaxInterpretationAttempts=25;
-  this->flagLoadedSuccessfully=false;
-  this->flagIsExamHome=false;
-  this->flagIsExamProblem=false;
-  this->flagParentInvestigated=false;
-  this->NumProblemsFound=0;
-  this->NumVideosFound=0;
-  this->NumHandwrittenSolutionsFound=0;
-  this->NumVideosHandwrittenFound=0;
-  this->NumVideosWithSlidesFound=0;
-  this->NumSlidesFound=0;
-  this->flagIsForReal=false;
-  this->flagLoadedFromDB=false;
-  this->flagLoadedClassDataSuccessfully=false;
-  this->flagTagHeadPresent=false;
-  this->flagTagHtmlPresent=false;
-  this->flagTagBodyPresent=false;
-  this->flagDoPrependCalculatorNavigationBar=true;
-  this->flagDoPrependProblemNavigationBar=true;
-  this->flagDoPrependEditPagePanel=true;
+{ this->NumAttemptsToInterpret = 0;
+  this->NumAnswerIdsMathquilled = 0;
+  this->MaxInterpretationAttempts = 25;
+  this->flagUseJSON = false;
+  this->flagLoadedSuccessfully = false;
+  this->flagIsExamHome = false;
+  this->flagIsExamProblem = false;
+  this->flagParentInvestigated = false;
+  this->NumProblemsFound = 0;
+  this->NumVideosFound = 0;
+  this->NumHandwrittenSolutionsFound = 0;
+  this->NumVideosHandwrittenFound = 0;
+  this->NumVideosWithSlidesFound = 0;
+  this->NumSlidesFound = 0;
+  this->flagIsForReal = false;
+  this->flagLoadedFromDB = false;
+  this->flagLoadedClassDataSuccessfully = false;
+  this->flagTagHeadPresent = false;
+  this->flagTagHtmlPresent = false;
+  this->flagTagBodyPresent = false;
+  this->flagDoPrependCalculatorNavigationBar = true;
+  this->flagDoPrependProblemNavigationBar = true;
+  this->flagDoPrependEditPagePanel = true;
 
-  this->flagTopicTableStarted     =false;
-  this->flagTopicSectionStarted   =false;
-  this->flagTopicSubSectionStarted=false;
-  this->flagTopicChapterStarted   =false;
+  this->flagTopicTableStarted      = false;
+  this->flagTopicSectionStarted    = false;
+  this->flagTopicSubSectionStarted = false;
+  this->flagTopicChapterStarted    = false;
 
-  this->timeToParseHtml=0;
-  this->flagMathQuillWithMatrices=false;
-  this->flagSectionsPrepared=false;
-  this->topicLectureCounter=0;
+  this->timeToParseHtml = 0;
+  this->flagMathQuillWithMatrices = false;
+  this->flagSectionsPrepared = false;
+  this->topicLectureCounter = 0;
 }
 
 #ifdef MACRO_use_MySQL
 bool CalculatorHTML::ReadProblemInfoAppend
-  (const std::string& inputInfoString,
-   MapLisT<std::string, ProblemData, MathRoutines::hashString>&
-   outputProblemInfo,
-   std::stringstream& commentsOnFailure
-   )
+(const std::string& inputInfoString,
+ MapLisT<std::string, ProblemData, MathRoutines::hashString>&
+ outputProblemInfo,
+ std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemInfoAppend");
   MapLisT<std::string, std::string, MathRoutines::hashString>
   CGIedProbs, currentKeyValues, sectionDeadlineInfo, problemWeightInfo;
-  if (!HtmlRoutines::ChopCGIString(inputInfoString, CGIedProbs, commentsOnFailure) )
+  if (!HtmlRoutines::ChopCGIString(inputInfoString, CGIedProbs, commentsOnFailure))
     return false;
   //stOutput << "<hr>Debug: reading problem info from: " << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(inputInfoString);
-  outputProblemInfo.SetExpectedSize(outputProblemInfo.size()+ CGIedProbs.size());
+  outputProblemInfo.SetExpectedSize(outputProblemInfo.size() + CGIedProbs.size());
   std::string currentProbName, currentProbString;
   ProblemData emptyData;
-  for (int i=0; i<CGIedProbs.size(); i++)
-  { currentProbName=MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(CGIedProbs.theKeys[i], false));
-    if (currentProbName=="")
+  for (int i = 0; i < CGIedProbs.size(); i ++)
+  { currentProbName = MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(CGIedProbs.theKeys[i], false));
+    if (currentProbName == "")
       continue;
-    currentProbString=HtmlRoutines::ConvertURLStringToNormal(CGIedProbs.theValues[i], false);
+    currentProbString = HtmlRoutines::ConvertURLStringToNormal(CGIedProbs.theValues[i], false);
     if (!outputProblemInfo.Contains(currentProbName))
       outputProblemInfo.GetValueCreate(currentProbName) = emptyData;
     ProblemData& currentProblemValue = outputProblemInfo.GetValueCreate(currentProbName);
@@ -85,26 +85,25 @@ bool CalculatorHTML::ReadProblemInfoAppend
     if (problemWeightsCollectionString != "")
     { if (!HtmlRoutines::ChopCGIString(problemWeightsCollectionString, problemWeightInfo, commentsOnFailure))
         return false;
-      for (int j = 0; j < problemWeightInfo.size(); j++)
+      for (int j = 0; j < problemWeightInfo.size(); j ++)
         currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
-        (HtmlRoutines::ConvertURLStringToNormal(problemWeightInfo.theKeys[j],false),
-         HtmlRoutines::ConvertURLStringToNormal(problemWeightInfo.theValues[j],false));
+        (HtmlRoutines::ConvertURLStringToNormal(problemWeightInfo.theKeys[j], false),
+         HtmlRoutines::ConvertURLStringToNormal(problemWeightInfo.theValues[j], false));
     }
-    if (deadlineString!="")
+    if (deadlineString != "")
     { if (!HtmlRoutines::ChopCGIString(deadlineString, sectionDeadlineInfo, commentsOnFailure))
         return false;
-      for (int j=0; j<sectionDeadlineInfo.size(); j++)
+      for (int j = 0; j < sectionDeadlineInfo.size(); j ++)
         currentProblemValue.adminData.deadlinesPerSection.SetKeyValue
         (HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theKeys[j], false),
          HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theValues[j], false));
     }
     std::string problemWeightString = MathRoutines::StringTrimWhiteSpace(currentKeyValues.GetValueCreate("weight"));
-    if (problemWeightString!="")
+    if (problemWeightString != "")
     { currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
       (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.userDefault.courseInfo.courseComputed, false),
        HtmlRoutines::ConvertURLStringToNormal(problemWeightString, false));
     }
-
   }
   return true;
 }
@@ -115,18 +114,18 @@ void CalculatorHTML::StoreProblemWeightInfo
  inputProblemInfo)
 { MacroRegisterFunctionWithName("CalculatorHTML::StoreProblemWeightInfo");
   std::stringstream out;
-  for (int i=0; i<inputProblemInfo.size(); i++)
-  { ProblemDataAdministrative& currentProblem=inputProblemInfo.theValues[i].adminData;
-    if (currentProblem.problemWeightsPerCoursE.size()==0)
+  for (int i = 0; i < inputProblemInfo.size(); i ++)
+  { ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
+    if (currentProblem.problemWeightsPerCoursE.size() == 0)
       continue;
     std::string currentProblemName=inputProblemInfo.theKeys[i];
     std::stringstream currentProblemStream, currentWeightStream;
-    for (int j=0; j<currentProblem.problemWeightsPerCoursE.size(); j++)
-    { std::string currentWeight=MathRoutines::StringTrimWhiteSpace
+    for (int j = 0; j < currentProblem.problemWeightsPerCoursE.size(); j ++)
+    { std::string currentWeight = MathRoutines::StringTrimWhiteSpace
       (currentProblem.problemWeightsPerCoursE.theValues[j]);
-      if (currentWeight=="")
+      if (currentWeight == "")
         continue;
-      std::string currentCourse=MathRoutines::StringTrimWhiteSpace
+      std::string currentCourse = MathRoutines::StringTrimWhiteSpace
       (currentProblem.problemWeightsPerCoursE.theKeys[j]);
       currentWeightStream
       << HtmlRoutines::ConvertStringToURLString(currentCourse, false)
@@ -138,13 +137,12 @@ void CalculatorHTML::StoreProblemWeightInfo
     out << HtmlRoutines::ConvertStringToURLString(currentProblemName, false) << "="
     << HtmlRoutines::ConvertStringToURLString(currentProblemStream.str(), false) << "&";
   }
-  outputString= out.str();
+  outputString = out.str();
 }
 
 void CalculatorHTML::StoreDeadlineInfo
 (std::string& outputString,
- MapLisT<std::string, ProblemData, MathRoutines::hashString>&
- inputProblemInfo)
+ MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreDeadlineInfo");
   std::stringstream out;
   for (int i=0; i<inputProblemInfo.size(); i++)
@@ -511,17 +509,17 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
 
 bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
 { MacroRegisterFunctionWithName("CalculatorHTML::IsStateModifierApplyIfYes");
-  if (inputElt.syntacticRole!="command")
+  if (inputElt.syntacticRole != "command")
     return false;
-  std::string tagClass=inputElt.GetKeyValue("class");
-  if (tagClass=="setCalculatorExamHome")
-  { this->flagIsExamHome=true;
-    this->flagIsExamProblem=false;
+  std::string tagClass = inputElt.GetKeyValue("class");
+  if (tagClass == "setCalculatorExamHome")
+  { this->flagIsExamHome = true;
+    this->flagIsExamProblem = false;
     theGlobalVariables.SetWebInpuT("courseHome", HtmlRoutines::ConvertStringToURLString(this->fileName, false));
   }
-  if (tagClass=="setCalculatorExamProblem")
-  { this->flagIsExamHome=false;
-    this->flagIsExamProblem=true;
+  if (tagClass == "setCalculatorExamProblem")
+  { this->flagIsExamHome = false;
+    this->flagIsExamProblem = true;
     return true;
   }
   return false;
@@ -680,7 +678,7 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin
   std::stringstream out;
   out << "<a class=\"linkStandardButtonLike\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
   << theGlobalVariables.userCalculatorRequestType << "&";
-  std::string urledProblem=HtmlRoutines::ConvertStringToURLString(this->fileName, false);
+  std::string urledProblem = HtmlRoutines::ConvertStringToURLString(this->fileName, false);
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
   out << "fileName=" << urledProblem << "&"
@@ -691,9 +689,9 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin
     out << "debugFlag=true&";
   else
     out << "debugFlag=false&";
-  if (this->topicListFileName!="")
+  if (this->topicListFileName != "")
     out << "topicList=" << this->topicListFileName << "&";
-  if (this->courseHome!="")
+  if (this->courseHome != "")
     out << "courseHome=" << this->courseHome << "&";
   if (theGlobalVariables.UserStudentVieWOn())
   { out << "studentView=true&";
@@ -741,7 +739,6 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   //out << "DEBUG: topiclist: " << this->topicListFileName << " courseHome: " << this->courseHome
   //<< " filename: " << theFileName;
   return out.str();
-
 }
 
 std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay)
@@ -780,15 +777,15 @@ bool CalculatorHtmlFunctions::innerInterpretProblem
   CalculatorHTML theProblem;
   if (!input.IsOfType<std::string>(&theProblem.inputHtml))
     return theCommands << "Extracting calculator expressions from html takes as input strings. ";
-  theProblem.theProblemData.flagRandomSeedGiven=true;
-  theProblem.theProblemData.randomSeed=theCommands.theObjectContainer.CurrentRandomSeed;
+  theProblem.theProblemData.flagRandomSeedGiven = true;
+  theProblem.theProblemData.randomSeed = theCommands.theObjectContainer.CurrentRandomSeed;
   theProblem.InterpretHtml(theCommands.Comments);
   std::stringstream out;
   out << theProblem.outputHtmlBodyNoTag;
   out << "<hr>Time to parse html: " << std::fixed << theProblem.timeToParseHtml << " second(s). ";
   out << "<br>Intermediate interpretation times (per attempt): ";
-  for (int i=0; i<theProblem.timeIntermediatePerAttempt.size; i++)
-    for (int j=0; j<theProblem.timeIntermediateComments[i].size; j++ )
+  for (int i = 0; i < theProblem.timeIntermediatePerAttempt.size; i ++)
+    for (int j = 0; j < theProblem.timeIntermediateComments[i].size; j ++)
       out << "<br>" << theProblem.timeIntermediateComments[i][j]
       << ": " << theProblem.timeIntermediatePerAttempt[i][j] << " second(s)";
   out << "<br>Interpretation times (per attempt): "
@@ -801,7 +798,7 @@ std::string CalculatorHTML::ToStringExtractedCommands()
   std::stringstream out;
   out << "<hr><b>The commands extracted from the HTML follow.</b><br>";
   out << "<table>";
-  for (int i = 0; i < this->theContent.size; i++)
+  for (int i = 0; i < this->theContent.size; i ++)
     if (this->theContent[i].syntacticRole != "")
       out << "<tr>" << "<td>" << this->theContent[i].ToStringDebug() << "</td>"
       << "</tr>";
@@ -818,18 +815,18 @@ std::string CalculatorHTML::ToStringContent()
   std::stringstream out;
 //  out << "<hr><b>The split strings follow. </b><hr>" << splitStrings.ToStringCommaDelimited();
   out << "<hr><b>The extracted commands follow.</b><br>";
-  for (int i = 0; i < this->theContent.size; i++)
+  for (int i = 0; i < this->theContent.size; i ++)
     out << this->theContent[i].ToStringTagAndContent();
   out << "<hr><b>The html read follows.</b><br>" << this->inputHtml << "<hr>";
   return out.str();
 }
 
 void SyntacticElementHTML::resetAllExceptContent()
-{ this->tag="";
+{ this->tag = "";
   this->tagKeys.SetSize(0);
   this->tagValues.SetSize(0);
-  this->syntacticRole="";
-  this->flagUseDisplaystyleInMathMode=false;
+  this->syntacticRole = "";
+  this->flagUseDisplaystyleInMathMode = false;
   this->children.SetSize(0);
 }
 
@@ -841,12 +838,12 @@ std::string SyntacticElementHTML::ToStringOpenTag(const std::string& overrideTag
     out << "<" << this->tag;
   else
     out << "<" << overrideTagIfNonEmpty;
-  for (int i = 0; i < this->tagKeys.size; i++)
+  for (int i = 0; i < this->tagKeys.size; i ++)
     out << " " << this->tagKeys[i] << "=\"" << this->tagValues[i] << "\"";
-  for (int i = 0; i < this->defaultKeysIfMissing.size; i++)
+  for (int i = 0; i < this->defaultKeysIfMissing.size; i ++)
     if (!this->tagKeys.Contains(this->defaultKeysIfMissing[i]))
       out << " " << this->defaultKeysIfMissing[i] << "=\"" << this->defaultValuesIfMissing[i] << "\"";
-  if (this->tagKeysWithoutValue.size>0)
+  if (this->tagKeysWithoutValue.size > 0)
     out << " " << this->tagKeysWithoutValue[0];
   if (immediatelyClose)
     out << "/";
@@ -871,9 +868,9 @@ std::string SyntacticElementHTML::ToStringTagAndContent()
   out << this->ToStringOpenTag("") + this->content + this->ToStringCloseTag("");
   if (this->children.size > 0)
   { out << "[";
-    for (int i = 0; i < this->children.size; i++)
+    for (int i = 0; i < this->children.size; i ++)
     { out << this->children[i].ToStringDebug();
-      if (i != this->children.size-1)
+      if (i != this->children.size - 1)
         out << ", ";
     }
     out << "]";
@@ -896,7 +893,7 @@ std::string SyntacticElementHTML::ToStringDebug()
 std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey)const
 { MacroRegisterFunctionWithName("SyntacticElementHTML::GetKeyValue");
   int theIndex = this->tagKeys.GetIndex(theKey);
-  if (theIndex == -1)
+  if (theIndex == - 1)
     return "";
   return this->tagValues[theIndex];
 }
@@ -906,7 +903,7 @@ void SyntacticElementHTML::SetKeyValue(const std::string& theKey, const std::str
   if (this->tagKeys.size != this->tagValues.size)
     crash << "Programming error: number of keys different from number of values" << crash;
   int theIndex = this->tagKeys.GetIndex(theKey);
-  if (theIndex == -1)
+  if (theIndex == - 1)
   { theIndex = this->tagKeys.size;
     this->tagKeys.AddOnTop(theKey);
     this->tagValues.SetSize(this->tagKeys.size);
@@ -955,8 +952,7 @@ bool SyntacticElementHTML::IsInterpretedNotByCalculator()
   tagClass == "calculatorNavigationHere" ||
   tagClass == "calculatorProblemNavigationHere"||
   tagClass == "calculatorEditPageHere" ||
-  this->IsAnswerElement(0)
-  ;
+  this->IsAnswerElement(0);
 }
 
 bool SyntacticElementHTML::IsInterpretedByCalculatorDuringProblemGeneration()
@@ -1000,53 +996,48 @@ bool SyntacticElementHTML::IsHidden()
 }
 
 bool SyntacticElementHTML::IsSolution()
-{ if (this->syntacticRole!="command")
+{ if (this->syntacticRole != "command")
     return false;
-  std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculatorSolution"
+  std::string tagClass = this->GetKeyValue("class");
+  return tagClass == "calculatorSolution"
 ;
 }
 
 bool SyntacticElementHTML::IsAnswerOnGiveUp()
 { if (this->syntacticRole!="command")
     return false;
-  std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculatorAnswerOnGiveUp"
-;
+  std::string tagClass = this->GetKeyValue("class");
+  return tagClass == "calculatorAnswerOnGiveUp";
 }
 
 bool SyntacticElementHTML::IsCommentBeforeSubmission()
-{ if (this->syntacticRole!="command")
+{ if (this->syntacticRole != "command")
     return false;
-  std::string tagClass=this->GetKeyValue("class");
-  return
-  tagClass=="calculatorCommentsBeforeSubmission"
-;
+  std::string tagClass = this->GetKeyValue("class");
+  return tagClass == "calculatorCommentsBeforeSubmission";
 }
 
 bool SyntacticElementHTML::IsCommentBeforeInterpretation()
-{ if (this->syntacticRole!="command")
+{ if (this->syntacticRole != "command")
     return false;
-  std::string tagClass=this->GetKeyValue("class");
-  return tagClass=="calculatorCommentsBeforeInterpretation"
-;
+  std::string tagClass = this->GetKeyValue("class");
+  return tagClass == "calculatorCommentsBeforeInterpretation";
 }
 
 bool SyntacticElementHTML::IsAnswerElement(std::string* desiredAnswerId)
-{ if (this->syntacticRole!="command")
+{ if (this->syntacticRole != "command")
     return false;
-  std::string tagClass=this->GetKeyValue("class");
-  bool result= tagClass=="calculatorButtonSubmit" ||
-  tagClass=="calculatorButtonInterpret" ||
-  tagClass=="calculatorButtonGiveUp" ||
-  tagClass=="calculatorButtonSolution" ||
-  tagClass=="calculatorMQField" ||
-  tagClass=="calculatorMQButtonPanel" ||
-  tagClass=="calculatorAnswerVerification" ||
-  tagClass=="calculatorSolution"
-;
-  if (result && desiredAnswerId!=0)
-    *desiredAnswerId=this->GetKeyValue("name");
+  std::string tagClass = this->GetKeyValue("class");
+  bool result = tagClass == "calculatorButtonSubmit" ||
+  tagClass == "calculatorButtonInterpret" ||
+  tagClass == "calculatorButtonGiveUp" ||
+  tagClass == "calculatorButtonSolution" ||
+  tagClass == "calculatorMQField" ||
+  tagClass == "calculatorMQButtonPanel" ||
+  tagClass == "calculatorAnswerVerification" ||
+  tagClass == "calculatorSolution";
+  if (result && desiredAnswerId != 0)
+    *desiredAnswerId = this->GetKeyValue("name");
   return result;
 }
 
@@ -1055,11 +1046,11 @@ std::string CalculatorHTML::PrepareUserInputBoxes()
   if (this->flagIsForReal)
     return "";
   std::stringstream out;
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
   std::string inputNonAnswerReader;
-  for (int i=0; i<theArgs.size(); i++)
+  for (int i = 0; i < theArgs.size(); i ++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader))
-      if (inputNonAnswerReader!="" && theArgs.theValues[i]!="")
+      if (inputNonAnswerReader != "" && theArgs.theValues[i] != "")
       { out << "setInputBox(name="
         << inputNonAnswerReader
         << ", value=" << HtmlRoutines::ConvertURLStringToNormal(theArgs.theValues[i], false)
@@ -1353,97 +1344,97 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
   std::stringstream out;
   DatabaseRoutines theRoutines;
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\"> Manage accounts</a>";
-  inputOutput.interpretedCommand=out.str();
+  inputOutput.interpretedCommand = out.str();
 #else
-  inputOutput.interpretedCommand="<b>Managing class not available (no database).</b>";
+  inputOutput.interpretedCommand = "<b>Managing class not available (no database).</b>";
 #endif // MACRO_use_MySQL
 }
 
 bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::ComputeAnswerRelatedStrings");
   std::string desiredAnswerId = inputOutput.GetKeyValue("id");
-  if (desiredAnswerId=="")
-  { inputOutput.interpretedCommand= "<b>Error: could not generate submit button: the answer tag does not have a valid id. Please fix the problem template.</b>";
+  if (desiredAnswerId == "")
+  { inputOutput.interpretedCommand = "<b>Error: could not generate submit button: the answer tag does not have a valid id. Please fix the problem template.</b>";
     return false;
   }
-  int theIndex=this->GetAnswerIndex(desiredAnswerId);
-  if (theIndex==-1)
+  int theIndex = this->GetAnswerIndex(desiredAnswerId);
+  if (theIndex == - 1)
     crash  << "This is not supposed to happen: problem has syntactic element with answerId: "
     << desiredAnswerId << " but the answerId is missing from the list of known answer ids. "
     << this->theProblemData.ToStringAvailableAnswerIds() << crash;
-  Answer& currentA=this->theProblemData.theAnswers[theIndex];
-  if (theIndex< this->answerHighlights.size)
-    currentA.htmlAnswerHighlight=this->answerHighlights[theIndex];
+  Answer& currentA = this->theProblemData.theAnswers[theIndex];
+  if (theIndex < this->answerHighlights.size)
+    currentA.htmlAnswerHighlight = this->answerHighlights[theIndex];
   else
-    currentA.htmlAnswerHighlight="";
-  std::string& answerId=currentA.answerId;
-  currentA.varAnswerId = answerId+"spanVariable";
-  currentA.varMQfield=answerId+"MQspanVar";
-  currentA.MQobject= "answerMathQuillObjects["+ std::to_string(this->NumAnswerIdsMathquilled)+"]";
-  this->NumAnswerIdsMathquilled++;
-  currentA.MQUpdateFunction  = answerId+"MQFieldUpdate";
-  currentA.idVerificationSpan="verification"+answerId;
-  currentA.idSpanSolution="solution"+answerId;
-  if (currentA.idMQfield=="")
-    currentA.idMQfield = answerId+"MQspanId";
-  if (currentA.idMQButtonPanelLocation=="")
-    currentA.idMQButtonPanelLocation=answerId+"MQbuttonPanel";
+    currentA.htmlAnswerHighlight = "";
+  std::string& answerId = currentA.answerId;
+  currentA.varAnswerId = answerId + "spanVariable";
+  currentA.varMQfield = answerId + "MQspanVar";
+  currentA.MQobject = "answerMathQuillObjects[" + std::to_string(this->NumAnswerIdsMathquilled) + "]";
+  this->NumAnswerIdsMathquilled ++;
+  currentA.MQUpdateFunction = answerId + "MQFieldUpdate";
+  currentA.idVerificationSpan = "verification" + answerId;
+  currentA.idSpanSolution = "solution" + answerId;
+  if (currentA.idMQfield == "")
+    currentA.idMQfield = answerId + "MQspanId";
+  if (currentA.idMQButtonPanelLocation == "")
+    currentA.idMQButtonPanelLocation = answerId + "MQbuttonPanel";
   std::stringstream previewAnswerStream;
   previewAnswerStream << "previewAnswers('" << answerId << "', '"
   << currentA.idVerificationSpan << "');";
-  currentA.javascriptPreviewAnswer=previewAnswerStream.str();
-  currentA.htmlButtonSubmit= "<button class=\"submitButton\" onclick=\"submitAnswers('"
+  currentA.javascriptPreviewAnswer = previewAnswerStream.str();
+  currentA.htmlButtonSubmit = "<button class=\"submitButton\" onclick=\"submitAnswers('"
   + answerId + "', '" + currentA.idVerificationSpan + "')\">Submit</button>";
-  currentA.htmlButtonInterpret= (std::string)"<button class=\"previewButton\" onclick=\""
+  currentA.htmlButtonInterpret = (std::string)"<button class=\"previewButton\" onclick=\""
   + "previewAnswersNoTimeOut('" + answerId + "', '"
   + currentA.idVerificationSpan + "')" + "\">Interpret</button>";
   if (!this->flagIsForReal)
-  { if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly!="")
-      currentA.htmlButtonAnswer= "<button class=\"showAnswerButton\" onclick=\"giveUp('"
+  { if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly != "")
+      currentA.htmlButtonAnswer = "<button class=\"showAnswerButton\" onclick=\"giveUp('"
       + answerId + "', '" + currentA.idVerificationSpan + "')\">Answer</button>";
     else
-      currentA.htmlButtonAnswer= "No ``give-up'' answer available. ";
+      currentA.htmlButtonAnswer = "No ``give-up'' answer available. ";
     if (currentA.flagSolutionFound)
-      currentA.htmlButtonSolution="<button class=\"showSolutionButton\" onclick=\"showSolution('" +answerId+ "','"
-      + currentA.idSpanSolution +"')\"> Solution</button>";
+      currentA.htmlButtonSolution = "<button class=\"showSolutionButton\" onclick=\"showSolution('" + answerId + "','"
+      + currentA.idSpanSolution + "')\"> Solution</button>";
     else
-      currentA.htmlButtonSolution="";
+      currentA.htmlButtonSolution = "";
   }
   inputOutput.defaultKeysIfMissing.AddOnTop("onkeyup");
   inputOutput.defaultValuesIfMissing.AddOnTop
-  (currentA.javascriptPreviewAnswer+currentA.MQUpdateFunction +"();");
+  (currentA.javascriptPreviewAnswer + currentA.MQUpdateFunction + "();");
 //  inputOutput.defaultKeysIfMissing.AddOnTop("style");
 //  inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
-  currentA.htmlTextareaLatexAnswer=
+  currentA.htmlTextareaLatexAnswer =
   inputOutput.ToStringOpenTag("textarea") + inputOutput.ToStringCloseTag("textarea");
   currentA.htmlSpanMQfield =
   (std::string)"<div class=\"calculatorMQfieldEnclosure\">"+
   "<span id='" + currentA.idMQfield + "'>" + "</span>"+
   "</div>";
   //currentA.htmlMQjavascript= CalculatorHtmlFunctions::GetJavascriptMathQuillBox(currentA);
-  currentA.htmlSpanMQButtonPanel=
+  currentA.htmlSpanMQButtonPanel =
   "<div class=\"mqButtonPanel\" id=\"" + currentA.idMQButtonPanelLocation + "\" "+  "buttons=\"" +
   currentA.MQpanelButtonOptions + "\"></div>";
-  currentA.htmlSpanSolution=  "<span id=\"" + currentA.idSpanSolution + "\"></span>";
+  currentA.htmlSpanSolution = "<span id=\"" + currentA.idSpanSolution + "\"></span>";
   std::stringstream verifyStream;
   verifyStream << "<span id=\"" << currentA.idVerificationSpan << "\">";
-  int numCorrectSubmissions=currentA.numCorrectSubmissions;
-  int numSubmissions= currentA.numSubmissions;
-  if (theGlobalVariables.userCalculatorRequestType=="scoredQuiz")
-  { if (numCorrectSubmissions >0)
+  int numCorrectSubmissions = currentA.numCorrectSubmissions;
+  int numSubmissions = currentA.numSubmissions;
+  if (theGlobalVariables.userCalculatorRequestType == "scoredQuiz")
+  { if (numCorrectSubmissions > 0)
     { verifyStream << "<b><span style=\"color:green\">Correctly answered: \\("
       << currentA.firstCorrectAnswerClean << "\\) </span></b> ";
-      if (numSubmissions>0)
+      if (numSubmissions > 0)
         verifyStream << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
     } else
     { verifyStream << " <b><span style=\"color:brown\">Waiting for answer. </span></b>";
-      if (numSubmissions>0)
+      if (numSubmissions > 0)
         verifyStream << numSubmissions << " attempt(s) so far. ";
     }
   } else
     verifyStream << " <b><span style=\"color:brown\">Waiting for answer [unlimited tries]</span></b>";
   verifyStream << "</span>";
-  currentA.htmlSpanVerifyAnswer=verifyStream.str();
+  currentA.htmlSpanVerifyAnswer = verifyStream.str();
   return true;
 }
 
@@ -1451,11 +1442,11 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretGenerateStudentAnswerButton");
   if (!this->ComputeAnswerRelatedStrings(inputOutput))
     return;
-  Answer& currentA=this->theProblemData.
+  Answer& currentA = this->theProblemData.
   theAnswers[this->GetAnswerIndex(inputOutput.GetKeyValue("id"))];
   if (!currentA.flagAutoGenerateMQButtonPanel && !currentA.flagAutoGenerateMQfield &&
       !currentA.flagAutoGenerateSubmitButtons && !currentA.flagAutoGenerateVerificationField)
-  { inputOutput.interpretedCommand= currentA.htmlTextareaLatexAnswer;
+  { inputOutput.interpretedCommand = currentA.htmlTextareaLatexAnswer;
     return;
   }
   std::stringstream out;
@@ -1501,13 +1492,13 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     out << currentA.htmlSpanVerifyAnswer;
   out << "</span>";
 
-  inputOutput.interpretedCommand=out.str();
+  inputOutput.interpretedCommand = out.str();
 }
 
 void CalculatorHTML::InterpretIfAnswer(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretIfAnswer");
-  std::string tagClass=inputOutput.GetTagClass();
-  if (tagClass!="calculatorAnswer")
+  std::string tagClass = inputOutput.GetTagClass();
+  if (tagClass != "calculatorAnswer")
     return;
   this->InterpretGenerateStudentAnswerButton(inputOutput);
 }
@@ -1540,23 +1531,23 @@ void CalculatorHTML::InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inp
 
 std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
 { MacroRegisterFunctionWithName("CalculatorHTML::CleanUpFileName");
-  if (inputLink.size()==0)
+  if (inputLink.size() == 0)
     return inputLink;
-  unsigned firstMeaningfulChar=0;
-  for (; firstMeaningfulChar<inputLink.size(); firstMeaningfulChar++)
-    if (inputLink[firstMeaningfulChar]!='\n' &&
-        inputLink[firstMeaningfulChar]!='\r' &&
-        inputLink[firstMeaningfulChar]!='\t' &&
-        inputLink[firstMeaningfulChar]!=' ')
+  unsigned firstMeaningfulChar = 0;
+  for (; firstMeaningfulChar < inputLink.size(); firstMeaningfulChar ++)
+    if (inputLink[firstMeaningfulChar] != '\n' &&
+        inputLink[firstMeaningfulChar] != '\r' &&
+        inputLink[firstMeaningfulChar] != '\t' &&
+        inputLink[firstMeaningfulChar] != ' ')
       break;
-  unsigned lastMeaningfulChar=inputLink.size()-1;
-  for (;lastMeaningfulChar>firstMeaningfulChar; lastMeaningfulChar--)
-    if (inputLink[lastMeaningfulChar]!='\n' &&
-        inputLink[lastMeaningfulChar]!='\r' &&
-        inputLink[lastMeaningfulChar]!='\t' &&
-        inputLink[lastMeaningfulChar]!=' ')
+  unsigned lastMeaningfulChar=inputLink.size() - 1;
+  for (; lastMeaningfulChar > firstMeaningfulChar; lastMeaningfulChar --)
+    if (inputLink[lastMeaningfulChar] != '\n' &&
+        inputLink[lastMeaningfulChar] != '\r' &&
+        inputLink[lastMeaningfulChar] != '\t' &&
+        inputLink[lastMeaningfulChar] != ' ')
       break;
-  if (firstMeaningfulChar>=inputLink.size())
+  if (firstMeaningfulChar >= inputLink.size())
     return "";
   return inputLink.substr(firstMeaningfulChar, lastMeaningfulChar-firstMeaningfulChar+1);
 }
@@ -1570,8 +1561,8 @@ std::string CalculatorHTML::GetDeadline
   outputIsInherited=true;
   std::string result;
   #ifdef MACRO_use_MySQL
-  int topicIndex=this->theTopicS.GetIndex(problemName);
-  if (topicIndex==-1)
+  int topicIndex = this->theTopicS.GetIndex(problemName);
+  if (topicIndex == - 1)
     return problemName + " not found in topic list. ";
   TopicElement& currentTopic = this->theTopicS.GetValueCreate(problemName);
   for(int i = currentTopic.parentTopics.size - 1; i >= 0; i--)
@@ -1596,10 +1587,10 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
 { std::stringstream out;
   (void) problemAlreadySolved;
   (void) isSection;
-  bool deadlineIsInherited=false;
+  bool deadlineIsInherited = false;
   std::string currentDeadline =
   this->GetDeadline(topicID, sectionNumber, deadlineIsInherited);
-  if (currentDeadline=="")
+  if (currentDeadline == "")
   { if (returnEmptyStringIfNoDeadline)
       return "";
     out << "<span style=\"color:orange\">No deadline yet</span>";
@@ -1616,11 +1607,11 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   now.AssignLocalTime();
   //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
   //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
-  double secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
+  double secondsTillDeadline = deadline.SubtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
 
   std::stringstream hoursTillDeadlineStream;
-  bool deadlineIsNear=secondsTillDeadline<24*3600 && !problemAlreadySolved && !isSection;
-  bool deadlineHasPassed=(secondsTillDeadline<0);
+  bool deadlineIsNear = secondsTillDeadline < 24 * 3600 && !problemAlreadySolved && !isSection;
+  bool deadlineHasPassed = (secondsTillDeadline < 0);
   //if (isSection)
   //  out << "DEBUG: isSection=true";
   if (deadlineIsInherited && !theGlobalVariables.UserStudentVieWOn())
@@ -1668,8 +1659,8 @@ std::string CalculatorHTML::ToStringAllSectionDeadlines
     return "";
   std::stringstream out;
   out << "<table>";
-  for (int i=0; i<this->databaseStudentSections.size; i++)
-  { if (this->databaseStudentSections[i]=="")
+  for (int i = 0; i < this->databaseStudentSections.size; i ++)
+  { if (this->databaseStudentSections[i] == "")
       continue;
     out << "<tr><td>Section " << this->databaseStudentSections[i] << ":</td>";
     out << "<td>" << this->ToStringOnEDeadlineFormatted
@@ -1692,7 +1683,7 @@ std::string CalculatorHTML::ToStringDeadline
   { return "deadlines require login";
   } else if (theGlobalVariables.UserDefaultHasAdminRights() &&
              theGlobalVariables.UserStudentVieWOn())
-  { std::string sectionNum=HtmlRoutines::ConvertURLStringToNormal
+  { std::string sectionNum = HtmlRoutines::ConvertURLStringToNormal
     (theGlobalVariables.GetWebInput("studentSection"), false);
     return this->ToStringOnEDeadlineFormatted
     (topicID, sectionNum, problemAlreadySolved,
@@ -1714,9 +1705,9 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   (void) problemAlreadySolved;
   std::stringstream out;
   std::stringstream deadlineStream;
-  inputOutput.idDeadlineTable="deadlineTable" +
+  inputOutput.idDeadlineTable = "deadlineTable" +
   Crypto::computeSha1outputBase64(inputOutput.id);
-  inputOutput.idDeadlineButton="deadlineButton" +
+  inputOutput.idDeadlineButton = "deadlineButton" +
   Crypto::computeSha1outputBase64(inputOutput.id);
   deadlineStream << "<table class=\"deadlineTable\" id=\""
   << inputOutput.idDeadlineTable
@@ -1729,17 +1720,17 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   (this->databaseStudentSections.size, "");
   inputOutput.deadlinesAreInherited.initFillInObject
   (this->databaseStudentSections.size, false);
-  for (int i=0; i<this->databaseStudentSections.size; i++)
-  { std::string& currentDeadlineId=inputOutput.idsDeadlines[i];
-    if (this->databaseStudentSections[i]=="")
+  for (int i = 0; i < this->databaseStudentSections.size; i ++)
+  { std::string& currentDeadlineId = inputOutput.idsDeadlines[i];
+    if (this->databaseStudentSections[i] == "")
       continue;
     currentDeadlineId = "deadline" + Crypto::ConvertStringToBase64
-    (this->databaseStudentSections[i]+inputOutput.id);
-    if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
-      currentDeadlineId.resize(currentDeadlineId.size()-1);
-    if (currentDeadlineId[currentDeadlineId.size()-1]=='=')
-      currentDeadlineId.resize(currentDeadlineId.size()-1);
-    inputOutput.deadlinesAreInherited[i]=false;
+    (this->databaseStudentSections[i] + inputOutput.id);
+    if (currentDeadlineId[currentDeadlineId.size() - 1] == '=')
+      currentDeadlineId.resize(currentDeadlineId.size() - 1);
+    if (currentDeadlineId[currentDeadlineId.size() - 1] == '=')
+      currentDeadlineId.resize(currentDeadlineId.size() - 1);
+    inputOutput.deadlinesAreInherited[i] = false;
 //    std::string sectionNumber;
 //    std::string currentDeadline =
 //    this->GetDeadline(inputFileName, sectionNumber, deadlineInherited);
@@ -1750,12 +1741,11 @@ void CalculatorHTML::ComputeDeadlineModifyButton
      inputOutput.deadlinesAreInherited[i])
      ;
     if (inputOutput.deadlinesAreInherited[i])
-      inputOutput.deadlinesPerSectioN[i]="";
-    inputOutput.deadlinesPerSectionFormatted[i]=
+      inputOutput.deadlinesPerSectioN[i] = "";
+    inputOutput.deadlinesPerSectionFormatted[i] =
     this->ToStringOnEDeadlineFormatted
     (inputOutput.id, this->databaseStudentSections[i],
-     problemAlreadySolved, false, isProblemGroup)
-    ;
+     problemAlreadySolved, false, isProblemGroup);
     deadlineStream
     << "<td> <input class=\"modifyDeadlineInput\" type=\"text\" id=\""
     << currentDeadlineId << "\" value=\"";
@@ -1766,24 +1756,24 @@ void CalculatorHTML::ComputeDeadlineModifyButton
     deadlineStream << "</tr>";
   }
   deadlineStream << "<tr><td>\n";
-  inputOutput.idDeadlineReport="deadlineReport" +
+  inputOutput.idDeadlineReport = "deadlineReport" +
   Crypto::computeSha1outputBase64(inputOutput.id);
 
-  if (inputOutput.idDeadlineReport[inputOutput.idDeadlineReport.size()-1]=='=')
-    inputOutput.idDeadlineReport.resize(inputOutput.idDeadlineReport.size()-1);
-  if (inputOutput.idDeadlineReport[inputOutput.idDeadlineReport.size()-1]=='=')
-    inputOutput.idDeadlineReport.resize(inputOutput.idDeadlineReport.size()-1);
+  if (inputOutput.idDeadlineReport[inputOutput.idDeadlineReport.size() - 1] == '=')
+    inputOutput.idDeadlineReport.resize(inputOutput.idDeadlineReport.size() - 1);
+  if (inputOutput.idDeadlineReport[inputOutput.idDeadlineReport.size() - 1] == '=')
+    inputOutput.idDeadlineReport.resize(inputOutput.idDeadlineReport.size() - 1);
   deadlineStream << "<button onclick=\"";
   deadlineStream << "submitStringAsMainInput('"
   << HtmlRoutines::ConvertStringToURLString(inputOutput.id, false)
   << "='+encodeURIComponent('deadlines='+encodeURIComponent(";
-  bool isFirst=true;
-  for (int i=0; i<this->databaseStudentSections.size; i++)
-  { if (this->databaseStudentSections[i]=="")
+  bool isFirst = true;
+  for (int i = 0; i<this->databaseStudentSections.size; i ++)
+  { if (this->databaseStudentSections[i] == "")
       continue;
     if (!isFirst)
       deadlineStream << "+";
-    isFirst=false;
+    isFirst = false;
     deadlineStream << "'"
     << HtmlRoutines::ConvertStringToURLString(this->databaseStudentSections[i], false)
     << "='";
@@ -1826,30 +1816,30 @@ void CalculatorHTML::ComputeDeadlineModifyButton
 //  out << "</table>";
 
 //  out << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "deadline+ ");
-  inputOutput.displayDeadlinE=out.str();
+  inputOutput.displayDeadlinE = out.str();
 }
 
 std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpreter, List<SyntacticElementHTML> &theElements)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringInterprettedCommands");
   std::stringstream out;
   out << "<table>";
-  int commandCounter=theInterpreter.theProgramExpression.size()-1;
-  for (int eltCounter=theElements.size-1; eltCounter>0; eltCounter--)
-  { SyntacticElementHTML& currentElt=theElements[eltCounter];
-    std::string currentEltString=currentElt.GetTagClass()+ "[" + currentElt.content.substr(0,10) + "...]";
+  int commandCounter = theInterpreter.theProgramExpression.size() - 1;
+  for (int eltCounter = theElements.size - 1; eltCounter > 0; eltCounter --)
+  { SyntacticElementHTML& currentElt = theElements[eltCounter];
+    std::string currentEltString = currentElt.GetTagClass() + "[" + currentElt.content.substr(0, 10) + "...]";
     if (!currentElt.IsInterpretedByCalculatorDuringProblemGeneration())
     { out << "<tr><td>" << currentEltString << "</td>"
       << "<td>"
       << theInterpreter.theProgramExpression[commandCounter].ToString()
       << "</td></tr>";
-      commandCounter--;
+      commandCounter --;
       continue;
     }
-    for (; commandCounter>1; commandCounter--)
+    for (; commandCounter > 1; commandCounter --)
     { std::string currentString=theInterpreter.theProgramExpression[commandCounter].ToString();
       out << "<tr><td>" << currentEltString << "</td><td>"
       << currentString << "</td></tr>";
-      if (currentString=="SeparatorBetweenSpans")
+      if (currentString == "SeparatorBetweenSpans")
         break;
     }
   }
@@ -1862,21 +1852,21 @@ bool CalculatorHTML::InterpretProcessExecutedCommands
 { MacroRegisterFunctionWithName("CalculatorHTML::ProcessInterprettedCommands");
   (void) comments;
   FormatExpressions theFormat;
-  theFormat.flagExpressionIsFinal=true;
-  theFormat.flagMakingExpressionTableWithLatex=true;
-  theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
-  theFormat.flagUseQuotes=false;
-  theFormat.flagUseLatex=true;
-  bool result=true;
+  theFormat.flagExpressionIsFinal = true;
+  theFormat.flagMakingExpressionTableWithLatex = true;
+  theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
+  theFormat.flagUseQuotes = false;
+  theFormat.flagUseLatex = true;
+  bool result = true;
   theInterpreter.theObjectContainer.resetPlots();
-  for (int i=0; i<theElements.size; i++)
-  { SyntacticElementHTML& currentElt=theElements[i];
+  for (int i = 0; i < theElements.size; i ++)
+  { SyntacticElementHTML& currentElt = theElements[i];
     if (!currentElt.IsInterpretedByCalculatorDuringProblemGeneration())
-    { currentElt.interpretedCommand="";
+    { currentElt.interpretedCommand = "";
       continue;
     }
-    if (currentElt.commandIndex>= theInterpreter.theProgramExpression.size() ||
-        currentElt.commandIndex<0)
+    if (currentElt.commandIndex >= theInterpreter.theProgramExpression.size() ||
+        currentElt.commandIndex < 0)
     { std::stringstream errorStream;
       errorStream << "<b>This is a programming error: syntactic element "
       << currentElt.ToStringDebug() << " has wrongly computed commandIndex: "
@@ -1890,21 +1880,21 @@ bool CalculatorHTML::InterpretProcessExecutedCommands
       crash << "Element: " << theInterpreter.theProgramExpression[currentElt.commandIndex].ToString()
       << " in " << theInterpreter.theProgramExpression.ToString()
       << " is supposed to be a command enclosure but apparently isn't. " << crash;
-    Expression currentExpr=theInterpreter.theProgramExpression[currentElt.commandIndex][1];
-    if (currentExpr.StartsWith(theInterpreter.opEndStatement()) && currentExpr.size()==2)
-      currentExpr=currentExpr[1];
+    Expression currentExpr = theInterpreter.theProgramExpression[currentElt.commandIndex][1];
+    if (currentExpr.StartsWith(theInterpreter.opEndStatement()) && currentExpr.size() == 2)
+      currentExpr = currentExpr[1];
     if (currentExpr.StartsWith(theInterpreter.opEndStatement()))
-      currentElt.flagUseMathMode=false;
-    theFormat.flagUseQuotes=false;
-    theFormat.flagMakingExpressionTableWithLatex=true;
-    currentElt.interpretedCommand=  currentExpr.ToString(&theFormat);
-    currentElt.flagUseDisplaystyleInMathMode= ( currentElt.content.find("\\displaystyle")!=std::string::npos);
-    currentElt.flagUseMathMode=true;
-    currentElt.flagUseMathSpan=false;
+      currentElt.flagUseMathMode = false;
+    theFormat.flagUseQuotes = false;
+    theFormat.flagMakingExpressionTableWithLatex = true;
+    currentElt.interpretedCommand = currentExpr.ToString(&theFormat);
+    currentElt.flagUseDisplaystyleInMathMode = (currentElt.content.find("\\displaystyle") != std::string::npos);
+    currentElt.flagUseMathMode = true;
+    currentElt.flagUseMathSpan = false;
     if (currentExpr.IsOfType<std::string> () ||
         currentExpr.IsOfType<Plot>() ||
-        currentElt.GetKeyValue("noTags")=="true")
-    { currentElt.flagUseMathMode=false;
+        currentElt.GetKeyValue("noTags") == "true")
+    { currentElt.flagUseMathMode = false;
 //      stOutput << "<hr>currentExpr: " << currentExpr.ToString() << "is plot or string<hr>";
     }// else
     //{ stOutput << "<hr>currentExpr: " << currentExpr.ToString() << "not of type plot or string";
@@ -1917,14 +1907,14 @@ bool CalculatorHTML::InterpretProcessExecutedCommands
 }
 
 void CalculatorHTML::LogProblemGenerationObsolete(Calculator &theInterpreter)
-{ if(! theGlobalVariables.UserDebugFlagOn() || !theGlobalVariables.UserDefaultHasProblemComposingRights())
+{ if (! theGlobalVariables.UserDebugFlagOn() || !theGlobalVariables.UserDefaultHasProblemComposingRights())
     return;
   std::stringstream streamLog;
   streamLog << "<table border='1'>";
-  for (int i=0; i<theInterpreter.theProgramExpression.size(); i++)
+  for (int i = 0; i < theInterpreter.theProgramExpression.size(); i ++)
   { streamLog << "<tr>";
-    for (int j=0; j<this->theContent.size; j++)
-      if (this->theContent[j].commandIndex==i)
+    for (int j = 0; j < this->theContent.size; j ++)
+      if (this->theContent[j].commandIndex == i)
         streamLog << "<td>" << this->theContent[j].ToStringDebug() << "</td>";
     streamLog << "<td>" << theInterpreter.theProgramExpression[i].ToString()
     << "</td></tr>";
@@ -1937,62 +1927,61 @@ void CalculatorHTML::FigureOutCurrentProblemList(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::FigureOutCurrentProblemList");
   if (this->flagParentInvestigated)
     return;
-  this->flagParentInvestigated=true;
+  this->flagParentInvestigated = true;
   this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
   this->LoadAndParseTopicList(comments);
 }
 
 bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretHtml");
-  double startTime=theGlobalVariables.GetElapsedSeconds();
+  double startTime = theGlobalVariables.GetElapsedSeconds();
 //  stOutput << "<hr>DEBUG: Checking consistency 1 passed<hr>";
   if (!this->ParseHTML(comments))
-  { this->outputHtmlBodyNoTag="<b>Failed to interpret html input. </b><br>" +this->ToStringContent();
-    this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
+  { this->outputHtmlBodyNoTag = "<b>Failed to interpret html input. </b><br>" + this->ToStringContent();
+    this->timeToParseHtml = theGlobalVariables.GetElapsedSeconds() - startTime;
     return false;
   }
   //stOutput << "<hr>DEBUG: about to check 2nd time<hr>";
   //this->theProblemData.CheckConsistency();
   //stOutput << "<hr>DEBUG: Checking consistency 2 passed<hr>";
-  this->timeToParseHtml=theGlobalVariables.GetElapsedSeconds()-startTime;
+  this->timeToParseHtml = theGlobalVariables.GetElapsedSeconds() - startTime;
   //stOutput << "DEBUG: this->theProblemData.flagRandomSeedGiven: " << this->theProblemData.flagRandomSeedGiven;
-  this->MaxInterpretationAttempts=25;
+  this->MaxInterpretationAttempts = 25;
   this->randomSeedsIfInterpretationFails.SetSize(this->MaxInterpretationAttempts);
   if (!this->theProblemData.flagRandomSeedGiven)
-  { srand(1003+time(NULL));
-    this->randomSeedsIfInterpretationFails[0]=(103+rand())%100000000;
+  { srand(1003 + time(NULL));
+    this->randomSeedsIfInterpretationFails[0] = (103 + rand()) % 100000000;
   } else
-    this->randomSeedsIfInterpretationFails[0]=this->theProblemData.randomSeed;
+    this->randomSeedsIfInterpretationFails[0] = this->theProblemData.randomSeed;
   srand(this->randomSeedsIfInterpretationFails[0]);
-  for (int i=1; i<this->randomSeedsIfInterpretationFails.size; i++)
-    this->randomSeedsIfInterpretationFails[i]=(103+rand())%100000000;
+  for (int i = 1; i < this->randomSeedsIfInterpretationFails.size; i ++)
+    this->randomSeedsIfInterpretationFails[i] = (103 + rand()) % 100000000;
   this->timePerAttempt.SetSize(0);
   this->timeIntermediatePerAttempt.SetSize(0);
   this->timeIntermediateComments.SetSize(0);
-  this->NumAttemptsToInterpret=0;
-  while (this->NumAttemptsToInterpret<this->MaxInterpretationAttempts)
-  { startTime=theGlobalVariables.GetElapsedSeconds();
-    this->timeIntermediatePerAttempt.SetSize(this->timeIntermediatePerAttempt.size+1);
+  this->NumAttemptsToInterpret = 0;
+  while (this->NumAttemptsToInterpret < this->MaxInterpretationAttempts)
+  { startTime = theGlobalVariables.GetElapsedSeconds();
+    this->timeIntermediatePerAttempt.SetSize(this->timeIntermediatePerAttempt.size + 1);
     this->timeIntermediatePerAttempt.LastObject()->SetSize(0);
-    this->timeIntermediateComments.SetSize(this->timeIntermediateComments.size+1);
+    this->timeIntermediateComments.SetSize(this->timeIntermediateComments.size + 1);
     this->timeIntermediateComments.LastObject()->SetSize(0);
     Calculator theInterpreter;
-    this->NumAttemptsToInterpret++;
+    this->NumAttemptsToInterpret ++;
 //    stOutput << "DEBUG: Interpretation attempt #: " << this->NumAttemptsToInterpret;
 //    stOutput << "DEBUG: flagPlotNoControls: " << theInterpreter.flagPlotNoControls;
     std::stringstream commentsOnLastFailure;
     if (this->InterpretHtmlOneAttempt(theInterpreter, commentsOnLastFailure))
-    { this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
+    { this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
       this->theProblemData.CheckConsistency();
       return true;
     }
-    this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds()-startTime);
-    if (this->NumAttemptsToInterpret>=this->MaxInterpretationAttempts)
+    this->timePerAttempt.AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
+    if (this->NumAttemptsToInterpret >= this->MaxInterpretationAttempts)
       comments << commentsOnLastFailure.str();
   }
   comments << "<hr>Failed to evaluate the commands: " << this->NumAttemptsToInterpret
-  << " attempts made. "
-  ;
+  << " attempts made. ";
   if (this->flagIsForReal)
   { this->StoreRandomSeedCurrent(comments);
     comments << "<b>Your random seed has been reset due to a finicky problem generation. </b>";
@@ -2002,23 +1991,23 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
 }
 
 bool CalculatorHTML::IsSplittingChar(const std::string& input)
-{ if (input.size()!=1)
+{ if (input.size() != 1)
     return false;
   return this->splittingChars.Contains(input[0]);
 }
 
-int SyntacticElementHTML::ParsingNumDummyElements=8;
+int SyntacticElementHTML::ParsingNumDummyElements = 8;
 std::string CalculatorHTML::ToStringParsingStack(List<SyntacticElementHTML>& theStack)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringParsingStack");
   std::stringstream out;
-  out << "#Non-dummy elts: " << theStack.size-SyntacticElementHTML::ParsingNumDummyElements << ". ";
-  for (int i=SyntacticElementHTML::ParsingNumDummyElements; i<theStack.size; i++)
-  { out << "<span style=\"color:" << ((i%2==0) ? "orange":"blue") << "\">";
-    std::string theContent=theStack[i].ToStringDebug();
-    if (theContent.size()==0)
-      theContent= "<b>empty</b>";
-    else if (theContent==" ")
-      theContent="_";
+  out << "#Non-dummy elts: " << theStack.size - SyntacticElementHTML::ParsingNumDummyElements << ". ";
+  for (int i = SyntacticElementHTML::ParsingNumDummyElements; i < theStack.size; i ++)
+  { out << "<span style=\"color:" << ((i % 2 == 0) ? "orange" : "blue") << "\">";
+    std::string theContent = theStack[i].ToStringDebug();
+    if (theContent.size() == 0)
+      theContent = "<b>empty</b>";
+    else if (theContent == " ")
+      theContent = "_";
     out << theContent << "</span>";
   }
   return out.str();
@@ -2030,29 +2019,29 @@ int CalculatorHTML::GetAnswerIndex(const std::string& desiredAnswerId)
 
 bool CalculatorHTML::CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right)
 { MacroRegisterFunctionWithName("SyntacticElementHTML::CanBeMerged");
-  if (left.syntacticRole!="" || right.syntacticRole!="")
+  if (left.syntacticRole != "" || right.syntacticRole != "")
     return false;
-  if (this->IsSplittingChar(left.content) && left.content!=" ")
+  if (this->IsSplittingChar(left.content) && left.content != " ")
     return false;
-  if (this->IsSplittingChar(right.content) && right.content!=" ")
+  if (this->IsSplittingChar(right.content) && right.content != " ")
     return false;
   return true;
 }
 
 bool CalculatorHTML::SetTagClassFromCloseTag(SyntacticElementHTML& output)
 { MacroRegisterFunctionWithName("CalculatorHTML::SetTagClassFromCloseTag");
-  std::string& lastTag=output.tag;
-  if (lastTag=="head" || lastTag=="HEAD" || lastTag=="Head")
+  std::string& lastTag = output.tag;
+  if (lastTag == "head" || lastTag == "HEAD" || lastTag == "Head")
   { output.SetKeyValue("class", "headFinish");
-    this->flagTagHeadPresent=true;
+    this->flagTagHeadPresent = true;
     return true;
-  } else if (lastTag=="body" || lastTag=="BODY" || lastTag=="Body")
+  } else if (lastTag == "body" || lastTag == "BODY" || lastTag == "Body")
   { output.SetKeyValue("class", "bodyFinish");
-    this->flagTagBodyPresent=true;
+    this->flagTagBodyPresent = true;
     return true;
-  } else if (lastTag=="html" || lastTag=="HTML" || lastTag=="html")
+  } else if (lastTag == "html" || lastTag == "HTML" || lastTag == "html")
   { output.SetKeyValue("class", "htmlFinish");
-    this->flagTagHtmlPresent=true;
+    this->flagTagHtmlPresent = true;
     return true;
   }
   return false;
@@ -2060,18 +2049,18 @@ bool CalculatorHTML::SetTagClassFromCloseTag(SyntacticElementHTML& output)
 
 bool CalculatorHTML::SetTagClassFromOpenTag(SyntacticElementHTML& output)
 { MacroRegisterFunctionWithName("CalculatorHTML::SetTagClassFromOpenTag");
-  std::string& lastTag=output.tag;
-  if (lastTag=="head" || lastTag=="HEAD" || lastTag=="Head")
+  std::string& lastTag = output.tag;
+  if (lastTag == "head" || lastTag == "HEAD" || lastTag == "Head")
   { output.SetKeyValue("class", "headStart");
-    this->flagTagHeadPresent=true;
+    this->flagTagHeadPresent = true;
     return true;
-  } else if (lastTag=="body" || lastTag=="BODY" || lastTag=="Body")
+  } else if (lastTag == "body" || lastTag == "BODY" || lastTag == "Body")
   { output.SetKeyValue("class", "bodyStart");
-    this->flagTagBodyPresent=true;
+    this->flagTagBodyPresent = true;
     return true;
-  } else if (lastTag=="html" || lastTag=="HTML" || lastTag=="html")
+  } else if (lastTag == "html" || lastTag == "HTML" || lastTag == "html")
   { output.SetKeyValue("class", "htmlStart");
-    this->flagTagHtmlPresent=true;
+    this->flagTagHtmlPresent = true;
     return true;
   } else if (this->calculatorTagsRecordedLiterally.Contains(lastTag))
   { output.SetKeyValue("class", lastTag);
@@ -2082,7 +2071,7 @@ bool CalculatorHTML::SetTagClassFromOpenTag(SyntacticElementHTML& output)
 
 void CalculatorHTML::initTopicElementNames()
 { MacroRegisterFunctionWithName("CalculatorHTML::initTopicElementNames");
-  if (this->calculatorTopicElementNames.size==0)
+  if (this->calculatorTopicElementNames.size == 0)
   { this->calculatorTopicElementNames.AddOnTop("Chapter");
     this->calculatorTopicElementNames.AddOnTop("Section");
     this->calculatorTopicElementNames.AddOnTop("Topic");
@@ -2192,7 +2181,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   tempElt.tag = "";
   tempElt.content = "";
   eltsStack.SetExpectedSize(theElements.size + SyntacticElementHTML::ParsingNumDummyElements);
-  for (int i = 0; i < SyntacticElementHTML::ParsingNumDummyElements; i++)
+  for (int i = 0; i < SyntacticElementHTML::ParsingNumDummyElements; i ++)
     eltsStack.AddOnTop(dummyElt);
   int indexInElts = - 1;
   bool reduced = false;
@@ -2210,32 +2199,32 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
     }
     //stOutput << "<br>DEBUG: " << this->ToStringParsingStack(eltsStack);
     reduced = true;
-    SyntacticElementHTML& last         = eltsStack[eltsStack.size-1];
-    SyntacticElementHTML& secondToLast = eltsStack[eltsStack.size-2];
-    SyntacticElementHTML& thirdToLast  = eltsStack[eltsStack.size-3];
-    SyntacticElementHTML& fourthToLast = eltsStack[eltsStack.size-4];
-    SyntacticElementHTML& fifthToLast  = eltsStack[eltsStack.size-5];
-    SyntacticElementHTML& sixthToLast  = eltsStack[eltsStack.size-6];
+    SyntacticElementHTML& last         = eltsStack[eltsStack.size - 1];
+    SyntacticElementHTML& secondToLast = eltsStack[eltsStack.size - 2];
+    SyntacticElementHTML& thirdToLast  = eltsStack[eltsStack.size - 3];
+    SyntacticElementHTML& fourthToLast = eltsStack[eltsStack.size - 4];
+    SyntacticElementHTML& fifthToLast  = eltsStack[eltsStack.size - 5];
+    SyntacticElementHTML& sixthToLast  = eltsStack[eltsStack.size - 6];
     //SyntacticElementHTML& seventhToLast = eltsStack[eltsStack.size-7];
-    if ((secondToLast.syntacticRole=="<openTagCalc>" ||
-         secondToLast.syntacticRole=="<calculatorSolution>") &&
-        last.syntacticRole=="</closeTag>" &&
-        secondToLast.tag==last.tag)
-    { secondToLast.syntacticRole="command";
+    if ((secondToLast.syntacticRole == "<openTagCalc>" ||
+         secondToLast.syntacticRole == "<calculatorSolution>") &&
+        last.syntacticRole == "</closeTag>" &&
+        secondToLast.tag == last.tag)
+    { secondToLast.syntacticRole = "command";
       eltsStack.RemoveLastObject();
       if (this->IsStateModifierApplyIfYes(secondToLast))
         eltsStack.RemoveLastObject();
       continue;
     }
-    if (thirdToLast.syntacticRole=="<openTag" &&
-        secondToLast=="/" && last.syntacticRole==">")
-    { tagClass=thirdToLast.GetKeyValue("class");
-      if (tagClass=="calculatorSolution")
-        thirdToLast.syntacticRole="<calculatorSolution>";
+    if (thirdToLast.syntacticRole == "<openTag" &&
+        secondToLast == "/" && last.syntacticRole == ">")
+    { tagClass = thirdToLast.GetKeyValue("class");
+      if (tagClass == "calculatorSolution")
+        thirdToLast.syntacticRole = "<calculatorSolution>";
       else if (this->calculatorClasses.Contains(tagClass))
-        thirdToLast.syntacticRole="command";
+        thirdToLast.syntacticRole = "command";
       else
-      { thirdToLast.content=thirdToLast.ToStringOpenTag("",true);
+      { thirdToLast.content = thirdToLast.ToStringOpenTag("",true);
         thirdToLast.resetAllExceptContent();
       }
       eltsStack.RemoveLastObject();
@@ -2244,160 +2233,160 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
         eltsStack.RemoveLastObject();
       continue;
     }
-    if (last.syntacticRole=="</closeTag>" && this->calculatorTagsRecordedLiterally.Contains(last.tag))
-    { last.content=last.ToStringCloseTag("");
-      last.syntacticRole="command";
-      last.tag+="Finish";
+    if (last.syntacticRole == "</closeTag>" && this->calculatorTagsRecordedLiterally.Contains(last.tag))
+    { last.content = last.ToStringCloseTag("");
+      last.syntacticRole = "command";
+      last.tag += "Finish";
       //this->SetTagClassFromTag(last, true);
       continue;
     }
-    if (last.syntacticRole=="</closeTag>")
-    { last.content=last.ToStringCloseTag("");
+    if (last.syntacticRole == "</closeTag>")
+    { last.content = last.ToStringCloseTag("");
       last.resetAllExceptContent();
       //this->SetTagClassFromTag(last, true);
       continue;
     }
-    if (thirdToLast.syntacticRole=="<openTagCalc>" && secondToLast=="<" && last=="/")
-    { secondToLast.syntacticRole="</";
+    if (thirdToLast.syntacticRole == "<openTagCalc>" && secondToLast == "<" && last == "/")
+    { secondToLast.syntacticRole = "</";
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (thirdToLast.syntacticRole=="<openTagCalc>" && secondToLast.syntacticRole=="")
-    { thirdToLast.content+=secondToLast.content;
-      secondToLast=last;
-      eltsStack.SetSize(eltsStack.size-1);
+    if (thirdToLast.syntacticRole == "<openTagCalc>" && secondToLast.syntacticRole == "")
+    { thirdToLast.content += secondToLast.content;
+      secondToLast = last;
+      eltsStack.SetSize(eltsStack.size - 1);
       continue;
     }
-    if (secondToLast.syntacticRole!="<openTagCalc>" && last=="<")
-    { last.content="";
-      last.syntacticRole="<";
+    if (secondToLast.syntacticRole != "<openTagCalc>" && last == "<")
+    { last.content = "";
+      last.syntacticRole = "<";
       continue;
     }
-    if (secondToLast.syntacticRole!="<openTagCalc>" && last==">")
-    { last.content="";
-      last.syntacticRole=">";
+    if (secondToLast.syntacticRole != "<openTagCalc>" && last == ">")
+    { last.content = "";
+      last.syntacticRole = ">";
       continue;
     }
-    if (secondToLast.syntacticRole=="<" && last!="/")
-    { secondToLast.tag=last.content;
-      secondToLast.syntacticRole="<openTag";
-      secondToLast.content="";
+    if (secondToLast.syntacticRole == "<" && last != "/")
+    { secondToLast.tag = last.content;
+      secondToLast.syntacticRole = "<openTag";
+      secondToLast.content = "";
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.syntacticRole=="" && secondToLast!="\"" && last=="/")
-    { secondToLast.content+=last.content;
+    if (secondToLast.syntacticRole == "" && secondToLast != "\"" && last == "/")
+    { secondToLast.content += last.content;
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.syntacticRole=="<" && last=="/")
-    { secondToLast.syntacticRole="</";
-      secondToLast.tag="";
-      secondToLast.content="";
+    if (secondToLast.syntacticRole == "<" && last == "/")
+    { secondToLast.syntacticRole = "</";
+      secondToLast.tag = "";
+      secondToLast.content = "";
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.syntacticRole=="</" )
-    { secondToLast.syntacticRole="</closeTag";
-      secondToLast.tag=last.content;
-      secondToLast.content="";
+    if (secondToLast.syntacticRole == "</" )
+    { secondToLast.syntacticRole = "</closeTag";
+      secondToLast.tag = last.content;
+      secondToLast.content = "";
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.syntacticRole=="</closeTag" && last.syntacticRole==">")
-    { secondToLast.syntacticRole="</closeTag>";
+    if (secondToLast.syntacticRole == "</closeTag" && last.syntacticRole == ">")
+    { secondToLast.syntacticRole = "</closeTag>";
       if (this->SetTagClassFromCloseTag(secondToLast))
-        secondToLast.syntacticRole="command";
+        secondToLast.syntacticRole = "command";
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (last==" " &&
-        (secondToLast.syntacticRole=="<openTag" ||
-         thirdToLast.syntacticRole=="<openTag" ||
-         fourthToLast.syntacticRole=="<openTag"))
+    if (last == " " &&
+        (secondToLast.syntacticRole == "<openTag" ||
+         thirdToLast.syntacticRole == "<openTag" ||
+         fourthToLast.syntacticRole == "<openTag"))
     { eltsStack.RemoveLastObject();
       continue;
     }
-    if (thirdToLast.syntacticRole=="<openTag" && secondToLast.syntacticRole=="" && last.syntacticRole=="" &&
-        secondToLast!="=" && secondToLast!="\"" && last!="=" && last!="\"")
+    if (thirdToLast.syntacticRole == "<openTag" && secondToLast.syntacticRole == "" && last.syntacticRole == "" &&
+        secondToLast != "=" && secondToLast != "\"" && last != "=" && last!="\"")
     { thirdToLast.tagKeysWithoutValue.AddOnTop(secondToLast.content);
-      eltsStack[eltsStack.size-2]=*eltsStack.LastObject();
+      eltsStack[eltsStack.size - 2] = *eltsStack.LastObject();
       eltsStack.RemoveLastObject();
       continue;
     }
     if (this->CanBeMerged(secondToLast, last))
-    { secondToLast.content+=last.content;
+    { secondToLast.content += last.content;
       eltsStack.RemoveLastObject();
       //stOutput << "<hr>Merge<hr>";
       continue;
     }
-    if (thirdToLast.syntacticRole=="<calculatorSolution>" &&
-        (secondToLast.syntacticRole=="" || secondToLast.syntacticRole=="command" ||
-         secondToLast.syntacticRole=="<"))
+    if (thirdToLast.syntacticRole == "<calculatorSolution>" &&
+        (secondToLast.syntacticRole == "" || secondToLast.syntacticRole == "command" ||
+         secondToLast.syntacticRole == "<"))
     { thirdToLast.children.AddOnTop(secondToLast);
-      eltsStack[eltsStack.size-2]=last;
+      eltsStack[eltsStack.size - 2] = last;
       eltsStack.RemoveLastObject();
       //stOutput << "<hr>DEBUG: Rule 2: processed " << thirdToLast.ToStringOpenTag(true) << "<hr>";
       continue;
     }
-    if (sixthToLast.syntacticRole=="<openTag" &&
-        fourthToLast=="=" && thirdToLast=="\"" &&
-        last!="\"" )
-    { if (last.syntacticRole!="" && last.content=="")
-        secondToLast.content+=last.syntacticRole;
+    if (sixthToLast.syntacticRole == "<openTag" &&
+        fourthToLast == "=" && thirdToLast == "\"" &&
+        last != "\"" )
+    { if (last.syntacticRole != "" && last.content == "")
+        secondToLast.content += last.syntacticRole;
       else
-        secondToLast.content+=last.content;
+        secondToLast.content += last.content;
       eltsStack.RemoveLastObject();
       //stOutput << "<hr>Rule X executed<hr> ";
       continue;
     }
-    if (thirdToLast=="\"" && secondToLast!="\"" && last!="\"")
-    { if (secondToLast.syntacticRole!="" && secondToLast.content=="")
-        secondToLast.content=secondToLast.syntacticRole;
-      if (last.syntacticRole!="" && last.content=="")
-        last.content=last.syntacticRole;
-      secondToLast.content+=last.content;
+    if (thirdToLast == "\"" && secondToLast != "\"" && last != "\"")
+    { if (secondToLast.syntacticRole != "" && secondToLast.content == "")
+        secondToLast.content = secondToLast.syntacticRole;
+      if (last.syntacticRole != "" && last.content == "")
+        last.content = last.syntacticRole;
+      secondToLast.content += last.content;
       //stOutput << "<hr>Rule quote executed<hr> ";
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (sixthToLast.syntacticRole=="<openTag" && fourthToLast=="=" && thirdToLast=="\"" &&
-        last=="\"" )
+    if (sixthToLast.syntacticRole == "<openTag" && fourthToLast == "=" && thirdToLast == "\"" &&
+        last == "\"" )
     { sixthToLast.SetKeyValue(fifthToLast.content, secondToLast.content);
-      eltsStack.SetSize(eltsStack.size-5);
+      eltsStack.SetSize(eltsStack.size - 5);
       //stOutput << "<hr>Rule ZZ executed<hr> ";
       continue;
     }
-    if (thirdToLast=="\"" && secondToLast!="\"" && last=="\"")
-    { thirdToLast.content+=secondToLast.content;
-      thirdToLast.content+=last.content;
-      eltsStack.SetSize(eltsStack.size-2);
+    if (thirdToLast == "\"" && secondToLast != "\"" && last == "\"")
+    { thirdToLast.content += secondToLast.content;
+      thirdToLast.content += last.content;
+      eltsStack.SetSize(eltsStack.size - 2);
       continue;
     }
-    if (thirdToLast.syntacticRole=="<openTag" &&
-        secondToLast.syntacticRole=="" && last.syntacticRole==">")
+    if (thirdToLast.syntacticRole == "<openTag" &&
+        secondToLast.syntacticRole == "" && last.syntacticRole == ">")
     { thirdToLast.tagKeysWithoutValue.AddOnTop(secondToLast.content);
-      eltsStack[eltsStack.size-2]=*eltsStack.LastObject();
+      eltsStack[eltsStack.size - 2] = *eltsStack.LastObject();
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.syntacticRole=="<openTag" && last.syntacticRole==">")
+    if (secondToLast.syntacticRole == "<openTag" && last.syntacticRole == ">")
     { //stOutput << "<hr>DEBUG: " << secondToLast.ToStringDebug() << " class key value: " << secondToLast.GetKeyValue("class");
-      tagClass=secondToLast.GetKeyValue("class");
+      tagClass = secondToLast.GetKeyValue("class");
       tag = secondToLast.tag;
-      if (tagClass=="calculatorSolution" || tag=="calculatorSolution")
-        secondToLast.syntacticRole="<calculatorSolution>";
+      if (tagClass == "calculatorSolution" || tag == "calculatorSolution")
+        secondToLast.syntacticRole = "<calculatorSolution>";
       else if (this->calculatorClasses.Contains(tagClass) || this->calculatorClasses.Contains(tag))
-      { secondToLast.syntacticRole="<openTagCalc>";
+      { secondToLast.syntacticRole = "<openTagCalc>";
         if (this->calculatorClasses.Contains(tag))
-        { tagClass=tag;
+        { tagClass = tag;
           secondToLast.SetKeyValue("class", tagClass);
         }
       } else if (this->calculatorTagsRecordedLiterally.Contains(secondToLast.tag))
-      { secondToLast.syntacticRole="command";
-        secondToLast.tag+="Start";
+      { secondToLast.syntacticRole = "command";
+        secondToLast.tag += "Start";
       } else if (this->SetTagClassFromOpenTag(secondToLast))
-        secondToLast.syntacticRole="command";
+        secondToLast.syntacticRole = "command";
       else
       { secondToLast.content=secondToLast.ToStringOpenTag("");
         if (theGlobalVariables.UserDefaultHasProblemComposingRights())
@@ -2415,35 +2404,35 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       eltsStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.syntacticRole=="" && last.syntacticRole==">")
-    { secondToLast.content+=">";
+    if (secondToLast.syntacticRole == "" && last.syntacticRole == ">")
+    { secondToLast.content += ">";
       eltsStack.RemoveLastObject();
       continue;
     }
-    reduced=false;
-  } while (reduced || indexInElts<theElements.size);
+    reduced = false;
+  } while (reduced || indexInElts < theElements.size);
   this->theContent.SetSize(0);
-  bool result=true;
-  for (int i=SyntacticElementHTML::ParsingNumDummyElements; i<eltsStack.size; i++)
-  { bool needNewTag=false;
-    if (i==SyntacticElementHTML::ParsingNumDummyElements)
-      needNewTag=true;
-    else if (this->theContent.LastObject()->syntacticRole!="")
-      needNewTag=true;
-    if (eltsStack[i].syntacticRole!="")
-      needNewTag=true;
-    if (eltsStack[i].GetTagClass()=="calculatorAnswer")
-      if (eltsStack[i].GetKeyValue("mqMatrices")=="true")
-        this->flagMathQuillWithMatrices=true;
-    if (eltsStack[i].syntacticRole!="command" && eltsStack[i].syntacticRole!="" )
-    { result=false;
+  bool result = true;
+  for (int i = SyntacticElementHTML::ParsingNumDummyElements; i < eltsStack.size; i ++)
+  { bool needNewTag = false;
+    if (i == SyntacticElementHTML::ParsingNumDummyElements)
+      needNewTag = true;
+    else if (this->theContent.LastObject()->syntacticRole != "")
+      needNewTag = true;
+    if (eltsStack[i].syntacticRole != "")
+      needNewTag = true;
+    if (eltsStack[i].GetTagClass() == "calculatorAnswer")
+      if (eltsStack[i].GetKeyValue("mqMatrices") == "true")
+        this->flagMathQuillWithMatrices = true;
+    if (eltsStack[i].syntacticRole != "command" && eltsStack[i].syntacticRole != "" )
+    { result = false;
       comments << "<br>Syntactic element: " << eltsStack[i].ToStringDebug()
       << " is not a command but has non-empty syntactic role.";
     }
     if (!needNewTag)
-      this->theContent.LastObject()->content+=eltsStack[i].content;
+      this->theContent.LastObject()->content += eltsStack[i].content;
     else
-    { if (this->theContent.size>0)
+    { if (this->theContent.size > 0)
         if (this->theContent.LastObject()->IsInterpretedByCalculatorDuringProblemGeneration() &&
             eltsStack[i].IsInterpretedByCalculatorDuringProblemGeneration())
         { SyntacticElementHTML emptyElt;
@@ -2461,7 +2450,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
   if (result)
     result = this->ExtractAnswerIds(comments);
   //stOutput << "<hr>DEBUG: after extracting answer ids<hr>";
-  for (int i = 0; i < this->theContent.size; i++)
+  for (int i = 0; i < this->theContent.size; i ++)
     this->theContent[i].indexInOwner = i;
   if (result)
     result = this->CheckContent(comments);
@@ -2509,7 +2498,7 @@ bool CalculatorHTML::InterpretAnswerHighlights(std::stringstream& comments)
   (void) comments;
   this->answerHighlights.SetSize(0);
   bool answerHighlightStarted = false;
-  for (int i = 0; i < this->theContent.size; i++)
+  for (int i = 0; i < this->theContent.size; i ++)
   { if (this->theContent[i].tag == "answerCalculatorHighlightStart")
     { answerHighlightStarted = true;
       this->answerHighlights.AddOnTop("");
@@ -2526,8 +2515,8 @@ bool CalculatorHTML::InterpretAnswerHighlights(std::stringstream& comments)
       continue;
     }
     *this->answerHighlights.LastObject() += this->theContent[i].ToStringInterpretedBody();
-    this->theContent[i].content="";
-    this->theContent[i].interpretedCommand="";
+    this->theContent[i].content = "";
+    this->theContent[i].interpretedCommand = "";
   }
   return true;
 }
@@ -2535,7 +2524,7 @@ bool CalculatorHTML::InterpretAnswerHighlights(std::stringstream& comments)
 bool CalculatorHTML::InterpretAnswerElements(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretAnswerElements");
   (void) comments;
-  for (int i=0; i<this->theContent.size; i++)
+  for (int i = 0; i < this->theContent.size; i ++)
     this->InterpretOneAnswerElement(this->theContent[i]);
   return true;
 }
@@ -2544,27 +2533,27 @@ bool CalculatorHTML::PrepareAnswerElements(std::stringstream &comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareAnswerElements");
   (void) comments;
   std::string currentId;
-  for (int i=0; i<this->theContent.size; i++)
-    if (this->theContent[i].IsAnswerElement(& currentId))
-    { int index=this->GetAnswerIndex(currentId);
-      if (index==-1)
+  for (int i = 0; i < this->theContent.size; i ++)
+    if (this->theContent[i].IsAnswerElement(&currentId))
+    { int index = this->GetAnswerIndex(currentId);
+      if (index == - 1)
         continue;
-      Answer& currentA=this->theProblemData.theAnswers[index];
-      std::string tagClass=this->theContent[i].GetTagClass();
-      if (tagClass=="calculatorButtonSubmit" ||
-          tagClass=="calculatorButtonInterpret" ||
-          tagClass=="calculatorButtonGiveUp")
-        currentA.flagAutoGenerateSubmitButtons=false;
-      if (tagClass=="calculatorButtonSolution")
-        currentA.flagAutoGenerateButtonSolution=false;
-      if (tagClass=="calculatorSolution")
-        currentA.flagSolutionFound=true;
-      if (tagClass=="calculatorMQField")
-        currentA.flagAutoGenerateMQfield=false;
-      if (tagClass=="calculatorMQButtonPanel")
-        currentA.flagAutoGenerateMQButtonPanel=false;
-      if (tagClass=="calculatorAnswerVerification")
-        currentA.flagAutoGenerateVerificationField=false;
+      Answer& currentA = this->theProblemData.theAnswers[index];
+      std::string tagClass = this->theContent[i].GetTagClass();
+      if (tagClass == "calculatorButtonSubmit" ||
+          tagClass == "calculatorButtonInterpret" ||
+          tagClass == "calculatorButtonGiveUp")
+        currentA.flagAutoGenerateSubmitButtons = false;
+      if (tagClass == "calculatorButtonSolution")
+        currentA.flagAutoGenerateButtonSolution = false;
+      if (tagClass == "calculatorSolution")
+        currentA.flagSolutionFound = true;
+      if (tagClass == "calculatorMQField")
+        currentA.flagAutoGenerateMQfield = false;
+      if (tagClass == "calculatorMQButtonPanel")
+        currentA.flagAutoGenerateMQButtonPanel = false;
+      if (tagClass == "calculatorAnswerVerification")
+        currentA.flagAutoGenerateVerificationField = false;
     }
   return true;
 }
@@ -2575,16 +2564,16 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
   //outdated information loaded from the database. We don't want to loose that info
   //(say we renamed an answerId but students have already stored answers using the old answerId...).
   List<std::string> answerIdsSeenSoFar;
-  for (int i=0; i<this->theContent.size; i++)
-  { SyntacticElementHTML& currentE=this->theContent[i];
+  for (int i = 0; i < this->theContent.size; i ++)
+  { SyntacticElementHTML& currentE = this->theContent[i];
     if (currentE.IsAnswer())
-    { std::string currentId= MathRoutines::StringTrimWhiteSpace(currentE.GetKeyValue("id"));
-      if (currentId=="")
+    { std::string currentId = MathRoutines::StringTrimWhiteSpace(currentE.GetKeyValue("id"));
+      if (currentId == "")
       { comments << "The answer element: " << currentE.ToStringDebug() << " has empty id. This is not allowed. ";
         return false;
       }
-      int theIndex=this->GetAnswerIndex(currentId);
-      if (theIndex==-1)
+      int theIndex = this->GetAnswerIndex(currentId);
+      if (theIndex == - 1)
         this->theProblemData.AddEmptyAnswerIdOnTop(currentId);
       if (answerIdsSeenSoFar.Contains(currentId))
       { comments << "<b>Answer with id: "
@@ -2601,7 +2590,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
         !currentE.IsAnswerOnGiveUp() &&
         !currentE.IsSolution())
       continue;
-    if (answerIdsSeenSoFar.size==0 && currentE.GetKeyValue("name")=="")
+    if (answerIdsSeenSoFar.size == 0 && currentE.GetKeyValue("name") == "")
     { comments << "Auxilary answer element: " << currentE.ToStringDebug()
       << " has no name and appears before the first answer tag."
       << " Auxilary answers apply the answer tag whose id is specified in the name"
@@ -2612,7 +2601,7 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
       ;
       return false;
     }
-    if (currentE.GetKeyValue("name")=="")
+    if (currentE.GetKeyValue("name") == "")
       currentE.SetKeyValue("name", *answerIdsSeenSoFar.LastObject());
 //    stOutput << "<hr>Debug: processed element " << currentE.ToStringDebug();
   }
@@ -2623,12 +2612,12 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
 
 bool CalculatorHTML::CheckContent(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::CheckContent");
-  bool result=true;
-  for (int i=0; i<this->theContent.size; i++)
-  { SyntacticElementHTML& currentElt=this->theContent[i];
-    if (currentElt.syntacticRole=="command" && currentElt.IsAnswer() &&
-        currentElt.GetKeyValue("id").find('=')!=std::string::npos)
-    { result=false;
+  bool result = true;
+  for (int i = 0; i < this->theContent.size; i ++)
+  { SyntacticElementHTML& currentElt = this->theContent[i];
+    if (currentElt.syntacticRole == "command" && currentElt.IsAnswer() &&
+        currentElt.GetKeyValue("id").find('=') != std::string::npos)
+    { result = false;
       comments << "Error: the id of tag " << currentElt.ToStringDebug()
       << " contains the equality sign which is not allowed. ";
     }
@@ -2638,46 +2627,46 @@ bool CalculatorHTML::CheckContent(std::stringstream& comments)
 
 std::string CalculatorHTML::CleanUpCommandString(const std::string& inputCommand)
 { MacroRegisterFunctionWithName("CalculatorHTML::CleanUpCommandString");
-  if (inputCommand=="")
+  if (inputCommand == "")
     return "";
   //stOutput << "<br>DEBUG: Cleaning up: " << inputCommand;
-  int realStart=0;
-  int realEnd=inputCommand.size()-1;
-  for (; realStart< (signed) inputCommand.size(); realStart++)
-  { if (inputCommand[realStart]==' ' || inputCommand[realStart]=='\n')
+  int realStart = 0;
+  int realEnd = inputCommand.size() - 1;
+  for (; realStart < (signed) inputCommand.size(); realStart ++)
+  { if (inputCommand[realStart] == ' ' || inputCommand[realStart] == '\n')
       continue;
-    if (inputCommand[realStart]=='\\')
-      if (realStart+1<(signed) inputCommand.size())
-        if (inputCommand[realStart+1]=='(')
-        { realStart++;
+    if (inputCommand[realStart] == '\\')
+      if (realStart + 1 < (signed) inputCommand.size())
+        if (inputCommand[realStart + 1] == '(')
+        { realStart ++;
           continue;
         }
     break;
   }
-  for (;realEnd >=0; realEnd--)
-  { if (inputCommand[realEnd]==' ' || inputCommand[realEnd]=='\n')
+  for (; realEnd >= 0; realEnd --)
+  { if (inputCommand[realEnd] == ' ' || inputCommand[realEnd] == '\n')
       continue;
-    if (inputCommand[realEnd]==')')
-      if (realEnd>0)
-        if (inputCommand[realEnd-1]=='\\')
-        { realEnd--;
+    if (inputCommand[realEnd] == ')')
+      if (realEnd > 0)
+        if (inputCommand[realEnd - 1] == '\\')
+        { realEnd --;
           continue;
         }
     break;
   }
-  if (realEnd<realStart)
-    realEnd=realStart-1;
-  std::string result=inputCommand.substr(realStart, realEnd-realStart+1);
-  for (int i=(signed)result.size()-1; i>=0; i--)
-  { if (result[i]==' ' || result[i]=='\n')
+  if (realEnd < realStart)
+    realEnd = realStart - 1;
+  std::string result = inputCommand.substr(realStart, realEnd - realStart + 1);
+  for (int i = (signed)result.size() - 1; i >= 0; i --)
+  { if (result[i] == ' ' || result[i] == '\n')
       continue;
-    if (result[i]==';')
+    if (result[i] == ';')
     { //stOutput << " DEBUG: to get: " << result;
       return result;
     }
     break;
   }
-  if (result=="")
+  if (result == "")
     return "";
   result.push_back(';');
   //stOutput << "DEBUG: to get: " << result << "<br>";
@@ -2701,28 +2690,28 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
   ////////////////////////////////////////////////////////////////////
   out << "<script type=\"text/javascript\">\n";
   out << "answerMQspanIds = [";
-  for (int i=0; i<this->theProblemData.theAnswers.size(); i++)
+  for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++)
   { out << "\"" << this->theProblemData.theAnswers[i].idMQfield << "\"";
-    if (i!=this->theProblemData.theAnswers.size()-1)
+    if (i != this->theProblemData.theAnswers.size() - 1)
       out << ", ";
   }
   out << "];\n";
   out << "preferredButtonContainers = [";
-  for (int i=0; i<this->theProblemData.theAnswers.size(); i++)
+  for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++)
   { out << "\"" << this->theProblemData.theAnswers[i].idMQButtonPanelLocation << "\"";
-    if (i!=this->theProblemData.theAnswers.size()-1)
+    if (i != this->theProblemData.theAnswers.size() - 1)
       out << ", ";
   }
   out << "];\n";
   out << "answerIdsPureLatex = [";
-  for (int i=0; i<this->theProblemData.theAnswers.size(); i++)
+  for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++)
   { out << "\"" << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theAnswers[i].answerId, false) << "\"";
-    if (i!=this->theProblemData.theAnswers.size()-1)
+    if (i != this->theProblemData.theAnswers.size() - 1)
       out << ", ";
   }
   out << "];\n";
-  for (int answerCounter=0; answerCounter<this->theProblemData.theAnswers.size(); answerCounter++)
-  { Answer& currentA=this->theProblemData.theAnswers[answerCounter];
+  for (int answerCounter = 0; answerCounter < this->theProblemData.theAnswers.size(); answerCounter ++)
+  { Answer& currentA = this->theProblemData.theAnswers[answerCounter];
     out << "var " << currentA.varMQfield << ";\n";
     out << "var " << currentA.varAnswerId << ";\n";
     out
@@ -2738,8 +2727,8 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
     << "var ignoreNextMathQuillUpdateEvent=false;\n"
     << "function initializeMathQuill(){\n";
 
-  for (int answerCounter=0; answerCounter<this->theProblemData.theAnswers.size(); answerCounter++)
-  { Answer& currentA=this->theProblemData.theAnswers[answerCounter];
+  for (int answerCounter = 0; answerCounter < this->theProblemData.theAnswers.size(); answerCounter ++)
+  { Answer& currentA = this->theProblemData.theAnswers[answerCounter];
     out << "////////////////////////\n";
     out << currentA.varMQfield  << " = document.getElementById('" << currentA.idMQfield << "');\n"
     << currentA.varAnswerId << " = document.getElementById('" << currentA.answerId << "');\n"
@@ -2770,7 +2759,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
 bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::StoreRandomSeedCurrent");
 #ifdef MACRO_use_MySQL
-  this->theProblemData.flagRandomSeedGiven=true;
+  this->theProblemData.flagRandomSeedGiven = true;
   DatabaseRoutines theRoutines;
   this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
   if (!this->currentUseR.StoreProblemDataToDatabase(theRoutines, commentsOnFailure))
@@ -2852,7 +2841,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     //outBody << "<br>";
   } else if (!this->flagIsExamHome && !this->flagIsForReal &&
              theGlobalVariables.userCalculatorRequestType != "template" &&
-             theGlobalVariables.userCalculatorRequestType != "templateNoLogin")
+             theGlobalVariables.userCalculatorRequestType != "templateNoLogin" &&
+             theGlobalVariables.userCalculatorRequestType != "templateNoLoginJSON" &&
+             theGlobalVariables.userCalculatorRequestType != "templateJSON")
     outBody << "<span style=\"color:green\"><b>Scores not recorded. </b></span>"
     << problemLabel << "<hr>";
   //////////////////////////////
@@ -2871,11 +2862,11 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   //stOutput << "<hr>DEBUG: preparing answer elements... <hr>";
   this->PrepareAnswerElements(comments);
   this->NumAnswerIdsMathquilled = 0;
-  for (int i = 0; i < this->theContent.size; i++)
+  for (int i = 0; i < this->theContent.size; i ++)
     if (this->theContent[i].IsInterpretedNotByCalculator())
       this->InterpretNotByCalculatorNotAnswer(this->theContent[i]);
   this->InterpretAnswerHighlights(comments);
-  for (int i = 0; i < this->theContent.size; i++)
+  for (int i = 0; i < this->theContent.size; i ++)
     this->InterpretIfAnswer(this->theContent[i]);
   outHeadPt2 << this->topicListJavascriptWithTag;
   this->InterpretAnswerElements(comments);
@@ -2884,7 +2875,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->theProblemData.CheckConsistencyMQids();
   bool headFinished = !this->flagTagHeadPresent;
   std::string tagClass;
-  for (int i = 0; i < this->theContent.size; i++)
+  for (int i = 0; i < this->theContent.size; i ++)
     if (!this->theContent[i].IsHidden())
     { tagClass = this->theContent[i].GetTagClass();
       if (tagClass == "headFinish")
@@ -3066,7 +3057,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
         << "\">Student view</a>";
     } else
       out << "Student view, section: ";
-    for (int i = 0; i < this->databaseStudentSections.size; i++)
+    for (int i = 0; i < this->databaseStudentSections.size; i ++)
       if (this->databaseStudentSections[i] != "")
       { if (theGlobalVariables.UserStudentVieWOn() &&
             this->databaseStudentSections[i] == HtmlRoutines::ConvertURLStringToNormal
@@ -3412,7 +3403,7 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicEl
   int numToCheck = 4;
   if (output.size() >= numToCheck && inputElt.type != inputElt.tTexHeader && inputElt.type != inputElt.tChapter)
   { bool startsWithChapter = false;
-    for (int i = 0; i < numToCheck - 1; i++)
+    for (int i = 0; i < numToCheck - 1; i ++)
       if (output.theValues[i].type == inputElt.tChapter)
       { startsWithChapter = true;
         break;
@@ -3458,9 +3449,9 @@ void TopicElement::reset(int parentSize)
   { this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
     if (this->problemNumber.size < 4)
       this->problemNumber.initFillInObject(4, 0);
-    for (int i = parentSize + 1; i < this->problemNumber.size; i++)
+    for (int i = parentSize + 1; i < this->problemNumber.size; i ++)
       this->problemNumber[i] = 0;
-    this->problemNumber[parentSize]++;
+    this->problemNumber[parentSize] ++;
   }
   this->immediateChildren.SetSize(0);
   this->totalSubSectionsUnderME = 0;
@@ -3509,7 +3500,7 @@ bool TopicElement::LoadTopicBundle
         return false;
       }
     } else
-      for (int i = 0; i < bundleNameStack.size; i++)
+      for (int i = 0; i < bundleNameStack.size; i ++)
         output.GetValueCreate(bundleNameStack[i]).AddOnTop(currentLine);
   }
   return true;
@@ -3563,7 +3554,7 @@ void TopicElement::GetTopicList
       std::stringstream errorStream;
       if (topicBundles.GetElement().Contains(currentArgument))
       { List<std::string>& currentBundle = topicBundles.GetElement().GetValueCreate(currentArgument);
-        for (int j = currentBundle.size - 1; j >= 0; j--)
+        for (int j = currentBundle.size - 1; j >= 0; j --)
           lineStack.AddOnTop(currentBundle[j]);
       } else
       { if (found)
@@ -3642,7 +3633,7 @@ void TopicElement::GetTopicList
       errorStream << "Failed to parse topic element: " << currentLine << ". ";
       if (!showedAllowedDataEntries)
       { errorStream << "<br>The allowed data labels are CASE SENSITIVE: ";
-        for (int j = 0; j < owner.calculatorTopicElementNames.size; j++)
+        for (int j = 0; j < owner.calculatorTopicElementNames.size; j ++)
           errorStream << "<br>" << owner.calculatorTopicElementNames[j];
         errorStream << "<br>You need to include the column character  <b>:</b> "
         << "immediately after the data labels. The data entries are terminated by new line. "
@@ -3699,10 +3690,10 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
     return false;
   TopicElement::GetTopicList(this->topicListContent, this->theTopicS, *this);
   this->problemNamesNoTopics.Clear();
-  for (int i = 0; i < this->theTopicS.size(); i++)
+  for (int i = 0; i < this->theTopicS.size(); i ++)
     if (this->theTopicS[i].problem != "")
       this->problemNamesNoTopics.AddOnTop(this->theTopicS[i].problem);
-  for (int i = this->theTopicS.size() - 1; i >= 0; i--)
+  for (int i = this->theTopicS.size() - 1; i >= 0; i --)
   { TopicElement& currentElt = this->theTopicS.theValues[i];
     if (currentElt.problem != "")
       continue;
@@ -3714,20 +3705,20 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
     }
     currentElt.flagContainsProblemsNotInSubsection = false;
     currentElt.totalSubSectionsUnderME = 0;
-    for (int j = 0; j < currentElt.immediateChildren.size; j++)
+    for (int j = 0; j < currentElt.immediateChildren.size; j ++)
     { TopicElement& currentChild = this->theTopicS.theValues[currentElt.immediateChildren[j]];
       if (currentChild.type == currentChild.tSubSection)
-      { currentElt.totalSubSectionsUnderME++;
-        currentElt.totalSubSectionsUnderMeIncludingEmptySubsections++;
+      { currentElt.totalSubSectionsUnderME ++;
+        currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
       } else if (currentChild.problem != "")
-        currentElt.flagContainsProblemsNotInSubsection=true;
+        currentElt.flagContainsProblemsNotInSubsection = true;
       else
       { currentElt.totalSubSectionsUnderME += currentChild.totalSubSectionsUnderME;
         currentElt.totalSubSectionsUnderMeIncludingEmptySubsections += currentChild.totalSubSectionsUnderMeIncludingEmptySubsections;
       }
     }
     if (currentElt.flagContainsProblemsNotInSubsection)
-      currentElt.totalSubSectionsUnderMeIncludingEmptySubsections++;
+      currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
   }
   return true;
 }
@@ -3760,7 +3751,7 @@ std::string CalculatorHTML::GetEditPagePanel()
   out << this->GetEditPageButton(this->fileName);
   if (this->flagIsExamHome)
   { out << this->GetEditPageButton(this->topicListFileName);
-    for (int i = 0; i < this->loadedTopicBundles.size; i++)
+    for (int i = 0; i < this->loadedTopicBundles.size; i ++)
       out << this->GetEditPageButton(this->loadedTopicBundles[i]);
   }
   out << "</editPagePanel>";
@@ -3771,6 +3762,62 @@ void CalculatorHTML::InterpretEditPagePanel(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretCalculatorNavigationBar");
   inputOutput.interpretedCommand = this->GetEditPagePanel();
   this->flagDoPrependEditPagePanel = false;
+}
+
+std::string CalculatorHTML::ToStringTopicListJSON()
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToStringTopicListJSON");
+  std::stringstream out;
+  if (!this->LoadAndParseTopicList(out))
+    return "\"" + out.str() + "\"";
+/*  bool sectionStarted = false;
+  bool subSectionStarted = false;
+  bool chapterStarted = false;
+  JSData output, currentChapter, currentSection, currentSubSection, currentTopic;
+  for (int i = 0; i < this->theTopicS.size(); i ++)
+  { TopicElement& currentElt = this->theTopicS.theValues[i];
+    if (subSectionStarted)
+      if (currentElt.type == currentElt.tSubSection ||
+          currentElt.type == currentElt.tSection ||
+          currentElt.type == currentElt.tChapter)
+      { currentSection["subSections"].list.AddOnTop(currentSubSection);
+        currentSubSection.reset();
+      }
+    if (sectionStarted)
+      if (currentElt.type == currentElt.tSection ||
+          currentElt.type == currentElt.tChapter)
+      { currentChapter["sections"].list.AddOnTop(currentSection);
+        currentSection.reset();
+      }
+    if (chapterStarted)
+      if (currentElt.type == currentElt.tChapter)
+      { output["chapters"].list.AddOnTop(currentChapter);
+        currentChapter.reset();
+      }
+    if (currentElt.type == currentElt.tChapter)
+    { out << "<li>" << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+      << "?request=template&fileName=" << this->fileName << "&"
+      << "topicList=" << this->topicListFileName << "&" << "chapter=" << currentElt.title
+      << "\">" << currentElt.title << "</a>" << "<br>\n";
+      chapterStarted = true;
+      sectionStarted = false;
+      subSectionStarted = false;
+      out << "<ul>";
+    } else if (currentElt.type == currentElt.tSection)
+    { out << "<li>" << currentElt.title << "<br>\n";
+      sectionStarted = true;
+      subSectionStarted = false;
+      out << "<ul>";
+    } else if (currentElt.type == currentElt.tError)
+      out << "Error parsing topic list. " << currentElt.error;
+  }
+  if (subSectionStarted)
+      out << "</li>";
+  if (sectionStarted)
+      out << "</ul></li>";
+  if (chapterStarted)
+      out << "</ul></li>";
+  out << "</ul>";*/
+  return "\"not implemented\"";
 }
 
 void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
@@ -3789,7 +3836,7 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   << "?request=template&fileName=" << this->fileName << "&"
   << "topicList=" << this->topicListFileName << "&" << "\">All topics</a>";
   out << "<ul>";
-  for (int i = 0; i < this->theTopicS.size(); i++)
+  for (int i = 0; i < this->theTopicS.size(); i ++)
   { TopicElement& currentElt = this->theTopicS.theValues[i];
     if (subSectionStarted)
       if (currentElt.type == currentElt.tSubSection ||
@@ -4004,7 +4051,7 @@ std::string CalculatorHTML::GetSectionSelector()
 #ifdef MACRO_use_MySQL
   std::stringstream out;
   out << "<sectionSelection>Sections: ";
-  for (int i = 0; i < this->databaseStudentSections.size; i++)
+  for (int i = 0; i < this->databaseStudentSections.size; i ++)
   { out << "<input type=\"radio\" name=\"sectionSelector\" "
     << "onclick=\"populateTopicList("
     << "'"
@@ -4028,6 +4075,10 @@ std::string CalculatorHTML::GetSectionSelector()
 void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretLectureMaterials");
   std::stringstream out;
+  if (this->flagUseJSON)
+  { inputOutput.interpretedCommand = "<lectureList></lectureList>";
+    return;
+  }
   if (!this->LoadAndParseTopicList(out))
   { inputOutput.interpretedCommand = out.str();
     return;
@@ -4049,7 +4100,7 @@ void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput
     << "<th>Resource Links</th>"
     << "</tr>";
   this->topicLectureCounter = 0;
-  for (int i = 0; i < this->theTopicS.size(); i++)
+  for (int i = 0; i < this->theTopicS.size(); i ++)
   { TopicElement currentTopic = this->theTopicS[i];
     currentTopic.ComputeLinks(*this, plainStyle);
     if (!currentTopic.flagHasLectureTag)
@@ -4068,6 +4119,10 @@ void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput
 void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTopicList");
   std::stringstream out, outFinal, outHead;
+  if (this->flagUseJSON)
+  { inputOutput.interpretedCommand = "<topicList></topicList>";
+    return;
+  }
   if (!this->LoadAndParseTopicList(out))
   { inputOutput.interpretedCommand = out.str();
     return;
@@ -4084,7 +4139,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   !theGlobalVariables.UserStudentVieWOn() &&
   theGlobalVariables.userCalculatorRequestType != "templateNoLogin";
   HashedList<std::string, MathRoutines::hashString> gradableProblems;
-  for (int i = 0; i < this->theTopicS.size(); i++)
+  for (int i = 0; i < this->theTopicS.size(); i ++)
     if (this->theTopicS[i].type == TopicElement::tProblem)
       gradableProblems.AddOnTopNoRepetition(this->theTopicS[i].id);
   this->currentUseR.ComputePointsEarned(gradableProblems, &this->theTopicS);
@@ -4135,7 +4190,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   this->flagTopicSectionStarted = false;
   this->flagTopicSubSectionStarted = false;
   this->flagTopicTableStarted = false;
-  for (int i = 0; i < this->theTopicS.size(); i++)
+  for (int i = 0; i < this->theTopicS.size(); i ++)
   { TopicElement& currentElt = this->theTopicS[i];
     if (currentElt.type == currentElt.tTexHeader)
       continue;
@@ -4169,18 +4224,17 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   topicListJS << "''" << ";\n";
 #endif
   topicListJS << "var studentSections=[";
-  for (int i = 0; i < this->databaseStudentSections.size; i++)
+  for (int i = 0; i < this->databaseStudentSections.size; i ++)
   { topicListJS
     << "'"
     << HtmlRoutines::ConvertStringToURLString(this->databaseStudentSections[i], false)
-    << "'"
-    ;
+    << "'";
     if (i != this->databaseStudentSections.size - 1)
       topicListJS << ", ";
   }
   topicListJS << "];\n";
   topicListJS << "var listTopics=[";
-  for (int i = 0; i < this->theTopicS.size(); i++)
+  for (int i = 0; i < this->theTopicS.size(); i ++)
   { TopicElement& currentE = this->theTopicS[i];
     if (currentE.type == currentE.tTexHeader)
       continue;
@@ -4202,7 +4256,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     //////////////////////////////////////////////////
     topicListJS << "deadlines: {";
     bool found = false;
-    for (int j = 0; j < currentE.deadlinesPerSectioN.size; j++)
+    for (int j = 0; j < currentE.deadlinesPerSectioN.size; j ++)
     { if (currentE.deadlinesPerSectioN[j] == "")
         continue;
       if (found)
@@ -4215,7 +4269,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     //////////////////////////////////////////////////
     topicListJS << "deadlinesFormatted: {";
     found = false;
-    for (int j = 0; j < currentE.deadlinesPerSectionFormatted.size; j++)
+    for (int j = 0; j < currentE.deadlinesPerSectionFormatted.size; j ++)
     { if (currentE.deadlinesPerSectionFormatted[j] == "")
         continue;
       if (found)
@@ -4227,7 +4281,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     topicListJS << "}, ";
     ////////////////////////////
     topicListJS << "isInherited: {";
-    for (int j = 0; j < currentE.deadlinesAreInherited.size; j++)
+    for (int j = 0; j < currentE.deadlinesAreInherited.size; j ++)
     { topicListJS << "'" << this->databaseStudentSections[j] << "': ";
       if (currentE.deadlinesAreInherited[j])
         topicListJS << "true";
@@ -4239,7 +4293,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     topicListJS << "}, ";
     //////////////////////////////////////////////////
     topicListJS << "immediateChildren: [";
-    for (int j = 0; j < currentE.immediateChildren.size; j++)
+    for (int j = 0; j < currentE.immediateChildren.size; j ++)
     { topicListJS << currentE.immediateChildren[j];
       if (j != currentE.immediateChildren.size - 1)
         topicListJS << ", ";

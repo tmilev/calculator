@@ -323,14 +323,14 @@ function exampleCalculatorClick(theLink){
   var theIndex = theLink.index;
   var isComposite = theLink.composite;
   var theHandler = null;
-console.log(theLink);
+//console.log(theLink);
   if (isComposite){
     theHandler = theCalculatorExamples[theAtom].composite[theIndex];
   } else {
     theHandler = theCalculatorExamples[theAtom].regular[theIndex];
   }
 
-console.log(theHandler);
+//console.log(theHandler);
 
   document.getElementById("mainInputID").innerHTML = theHandler.example;
   submitCalculatorComputation();

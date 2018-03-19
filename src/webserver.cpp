@@ -26,9 +26,9 @@ bool WebWorker::CheckConsistency()
     crash << "Use after free of webworker." << crash;
   if (this->parent == 0)
     crash << "Parent of web worker is not initialized." << crash;
-  if (this->indexInParent == -1)
+  if (this->indexInParent == - 1)
     crash << "Index in parent is bad. " << crash;
-  if (this->connectionID == -1)
+  if (this->connectionID == - 1)
     crash << "Connection id is bad. " << crash;
   stOutput.theOutputFunction = oldOutputFn;
   return true;
@@ -36,7 +36,7 @@ bool WebWorker::CheckConsistency()
 
 bool WebWorker::ReceiveAll()
 { MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
-  if (this->connectedSocketID == -1)
+  if (this->connectedSocketID == - 1)
     crash << "Attempting to receive on a socket with ID equal to -1. " << crash;
   if (theGlobalVariables.flagUsingSSLinCurrentConnection)
     return this->ReceiveAllHttpSSL();
@@ -46,17 +46,17 @@ bool WebWorker::ReceiveAll()
 
 std::string WebWorker::openIndentTag(const std::string& theTag)
 { std::stringstream out;
-  for (int i = 0; i < this->indentationLevelHTML; i++)
+  for (int i = 0; i < this->indentationLevelHTML; i ++)
     out << "  ";
   out << theTag << "\n";
-  this->indentationLevelHTML++;
+  this->indentationLevelHTML ++;
   return out.str();
 }
 
 std::string WebWorker::closeIndentTag(const std::string& theTag)
 { std::stringstream out;
   this->indentationLevelHTML--;
-  for (int i = 0; i < this->indentationLevelHTML; i++)
+  for (int i = 0; i < this->indentationLevelHTML; i ++)
     out << "  ";
   out << theTag << "\n";
   return out.str();
@@ -457,9 +457,9 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
   this->SetSocketAddToStackServer(inputSocketID);
   int maxNumHandshakeTries = 3;
 //  int theError=-1;
-  for (int i = 0; i < maxNumHandshakeTries; i++)
+  for (int i = 0; i < maxNumHandshakeTries; i ++)
   { this->errorCode = SSL_accept(this->sslServeR);
-    this->flagSSLHandshakeSuccessful=false;
+    this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1)
     { if (this->errorCode == 0)
         logOpenSSL << "OpenSSL handshake not successful in a controlled manner. ";
@@ -525,7 +525,7 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
 void SSLdata::DoSetSocket(int theSocket, SSL *theSSL)
 { MacroRegisterFunctionWithName("SSLdata::DoSetSocket");
   int result = 0;
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 10; i ++)
   { result = SSL_set_fd(theSSL, theSocket);
     if (result != 0)
       break;
@@ -746,8 +746,8 @@ bool SSLdata::SSLreadLoop
   output = "";
   int i = 0;
   std::string next;
-  int numBytes = -1;
-  for (i = 0; i < numTries; i++)
+  int numBytes = - 1;
+  for (i = 0; i < numTries; i ++)
   { numBytes = theWebServer.theSSLdata.SSLread
     (theSSL, this->buffer.TheObjects, this->buffer.size,
      commentsOnFailure, commentsGeneral, includeNoErrorInComments);
@@ -778,8 +778,8 @@ bool SSLdata::SSLwriteLoop
 { MacroRegisterFunctionWithName("SSLdata::SSLwriteLoop");
   Crypto::ConvertStringToListBytesSigned(input, this->buffer);
   int i = 0;
-  int numBytes = -1;
-  for (i = 0; i < numTries; i++)
+  int numBytes = - 1;
+  for (i = 0; i < numTries; i ++)
   { numBytes = this->SSLwrite
     (theSSL, this->buffer.TheObjects, this->buffer.size,
      commentsOnFailure, commentsGeneral, includeNoErrorInComments);
@@ -847,7 +847,7 @@ void SSLdata::ClearErrorQueue
       if (extraErrorCode == 0)
       { if (commentsOnError != 0)
           *commentsOnError << "Bad eof.";
-      } else if (extraErrorCode == -1)
+      } else if (extraErrorCode == - 1)
       { if (commentsOnError != 0)
           *commentsOnError << "I/O error outside of ssl. "
           << theWebServer.ToStringLastErrorDescription();
@@ -879,7 +879,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   char buffer[bufferSize];
 //  std::cout << "Got thus far 9" << std::endl;
 //  std::cout.flush();
-  if (this->connectedSocketID == -1)
+  if (this->connectedSocketID == - 1)
     crash << "Attempting to receive on a socket with ID equal to -1. " << crash;
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 30 Secs Timeout
@@ -891,7 +891,7 @@ bool WebWorker::ReceiveAllHttpSSL()
   double numSecondsAtStart = theGlobalVariables.GetElapsedSeconds();
   int numFailedReceives = 0;
   while ((numBytesInBuffer < 0) || (numBytesInBuffer > ((signed)bufferSize)))
-  { numFailedReceives++;
+  { numFailedReceives ++;
     std::stringstream out;
     out
     << " WebWorker::ReceiveAllHttpSSL on socket "
@@ -912,7 +912,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     //std::string bufferCopy(buffer, bufferSize);
     logIO
     << " Number of bytes in buffer so far: " << bufferSize;
-    numBytesInBuffer=this->parent->theSSLdata.SSLread
+    numBytesInBuffer = this->parent->theSSLdata.SSLread
     (this->parent->theSSLdata.sslServeR, &buffer, bufferSize - 1, &errorStream, 0, true);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);
@@ -1087,7 +1087,7 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
   theWebServer.theProgressReports[this->indexProgressReport] = inputStatus;
 //    std::cout << "SetStatus: passed mutex section" << std::endl;
   std::stringstream toBePiped;
-  for (int i = 0; i < theWebServer.theProgressReports.size; i++)
+  for (int i = 0; i < theWebServer.theProgressReports.size; i ++)
     if (theWebServer.theProgressReports[i] != "")
       toBePiped << "<br>" << theWebServer.theProgressReports[i];
   safetyFirst.UnlockMe();
@@ -1194,7 +1194,7 @@ std::string WebWorker::ToStringMessageFullUnsafe(bool useHTML)const
   out << this->ToStringMessageUnsafe(useHTML);
   if (this->theMessageHeaderStrings.size>0)
   { out << "<hr>\nStrings extracted from message: ";
-    for (int i = 0; i < this->theMessageHeaderStrings.size; i++)
+    for (int i = 0; i < this->theMessageHeaderStrings.size; i ++)
       out << "<br>" << this->theMessageHeaderStrings[i];
   }
   return out.str();
@@ -1375,10 +1375,10 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
 { MacroRegisterFunctionWithName("WebWorker::ExtractArgumentsFromCookies");
   MapLisT<std::string, std::string, MathRoutines::hashString> newlyFoundArgs;
   bool result = true;
-  for (int i = 0; i < this->cookies.size; i++)
+  for (int i = 0; i < this->cookies.size; i ++)
     if (!HtmlRoutines::ChopCGIStringAppend(this->cookies[i], newlyFoundArgs, argumentProcessingFailureComments))
       result = false;
-  for (int i = 0; i < newlyFoundArgs.size(); i++)
+  for (int i = 0; i < newlyFoundArgs.size(); i ++)
   { if (theGlobalVariables.webArguments.Contains(newlyFoundArgs.theKeys[i]))
       //if (theGlobalVariables.webArguments.GetValueCreate(newlyFoundArgs.theKeys[i]) != "")
       continue; //<-if a key is already given cookie entries are ignored.
@@ -1678,10 +1678,10 @@ void WebWorker::ParseMessageHead()
   this->connectionFlags.size = 0;
   this->messageBody = "";
   this->flagKeepAlive = false;
-  this->ContentLength = -1;
+  this->ContentLength = - 1;
   this->addressGetOrPost = "";
   this->hostWithPort = "";
-  for (unsigned i = 0; i < this->messageHead.size(); i++)
+  for (unsigned i = 0; i < this->messageHead.size(); i ++)
     if (this->messageHead[i] != ' ' && this->messageHead[i] != '\n' && this->messageHead[i] != '\r')
     { buffer.push_back(this->messageHead[i]);
       if (i == this->messageHead.size() - 1)
@@ -1692,18 +1692,18 @@ void WebWorker::ParseMessageHead()
         buffer = "";
       }
       if (i > 0)
-        if (this->messageHead[i-1] == '\r' && this->messageHead[i] == '\n')
+        if (this->messageHead[i - 1] == '\r' && this->messageHead[i] == '\n')
           this->theMessageHeaderStrings.AddOnTop("\n");
     }
-  for (int i = 0; i < this->theMessageHeaderStrings.size; i++)
+  for (int i = 0; i < this->theMessageHeaderStrings.size; i ++)
     if (this->theMessageHeaderStrings[i] == "GET")
     { this->requestTypE = this->requestGet;
-      i++;
+      i ++;
       if (i < this->theMessageHeaderStrings.size)
         this->addressGetOrPost = this->theMessageHeaderStrings[i];
     } else if (this->theMessageHeaderStrings[i] == "POST")
     { this->requestTypE = this->requestPost;
-      i++;
+      i ++;
       //Short post messages may be attached to the message head
       //if that is the case the message does not end in \n
       if (i < this->theMessageHeaderStrings.size)
@@ -1715,13 +1715,13 @@ void WebWorker::ParseMessageHead()
       }
     } else if (this->theMessageHeaderStrings[i] == "HEAD")
     { this->requestTypE = this->requestHead;
-      i++;
+      i ++;
       if (i < this->theMessageHeaderStrings.size)
         this->addressGetOrPost = this->theMessageHeaderStrings[i];
     } else if ( this->theMessageHeaderStrings[i] == "transfer-coding:" ||
                 this->theMessageHeaderStrings[i] == "Transfer-coding:" ||
                 this->theMessageHeaderStrings[i] == "Transfer-Coding:" )
-    { i++;
+    { i ++;
       if (i < this->theMessageHeaderStrings.size)
         if(this->theMessageHeaderStrings[i] == "chunked" ||
            this->theMessageHeaderStrings[i] == "chunked;"||
@@ -1741,21 +1741,21 @@ void WebWorker::ParseMessageHead()
       }
     } else if (this->theMessageHeaderStrings[i] == "Host:" ||
                this->theMessageHeaderStrings[i] == "host:")
-    { i++;
+    { i ++;
       if (i < this->theMessageHeaderStrings.size)
         this->hostWithPort = this->theMessageHeaderStrings[i];
     } else if (this->theMessageHeaderStrings[i] == "Cookie:" ||
                this->theMessageHeaderStrings[i] == "cookie:")
-    { i++;
-      for (; i < this->theMessageHeaderStrings.size; i++)
+    { i ++;
+      for (; i < this->theMessageHeaderStrings.size; i ++)
       { if (this->theMessageHeaderStrings[i] == "\n")
           break;
         this->cookies.AddOnTop(this->theMessageHeaderStrings[i]);
       }
     } else if (this->theMessageHeaderStrings[i] == "Connection:" ||
                this->theMessageHeaderStrings[i] == "connection:")
-    { i++;
-      for (; i < this->theMessageHeaderStrings.size; i++)
+    { i ++;
+      for (; i < this->theMessageHeaderStrings.size; i ++)
       { if (this->theMessageHeaderStrings[i] == "\n")
           break;
         this->connectionFlags.AddOnTop(this->theMessageHeaderStrings[i]);
@@ -1954,7 +1954,7 @@ void WebWorker::ReportDisplayUserInput()
 void WebWorker::ExtractHostInfo()
 { MacroRegisterFunctionWithName("WebWorker::ExtractHostInfo");
   unsigned int i = 0;
-  for (i = 0; i < this->hostWithPort.size(); i++)
+  for (i = 0; i < this->hostWithPort.size(); i ++)
     if (this->hostWithPort[i] == ':')
       break;
   if (i < this->hostWithPort.size())
@@ -1968,7 +1968,7 @@ void WebWorker::ExtractHostInfo()
 void WebWorker::ExtractAddressParts()
 { MacroRegisterFunctionWithName("WebWorker::ExtractAdressParts");
   bool found = false;
-  for (signed i = 0; i < (signed) this->addressGetOrPost.size(); i++)
+  for (signed i = 0; i < (signed) this->addressGetOrPost.size(); i ++)
     if (this->addressGetOrPost[i] == '?')
     { this->addressComputed = this->addressGetOrPost.substr(0, i);
       this->argumentComputed = this->addressGetOrPost.substr(i + 1, std::string::npos);
@@ -2000,7 +2000,7 @@ std::string WebWorker::GetHeaderConnectionKeepAlive()
 std::string WebWorker::GetHeaderSetCookie()
 { std::stringstream out;
   //stOutput << "DEBUG: setting headers: " << theGlobalVariables.CookiesToSetUsingHeaders.ToStringHtml();
-  for (int i = 0; i < theGlobalVariables.CookiesToSetUsingHeaders.size(); i++)
+  for (int i = 0; i < theGlobalVariables.CookiesToSetUsingHeaders.size(); i ++)
   { out << "Set-Cookie: " << theGlobalVariables.CookiesToSetUsingHeaders.theKeys[i]
     << "="
     << theGlobalVariables.CookiesToSetUsingHeaders.theValues[i]
@@ -2038,7 +2038,7 @@ void WebWorker::SetHeadeR(const std::string& httpResponseNoTermination, const st
   //stOutput << "<br>DEBUG: final header: " << HtmlRoutines::ConvertStringToHtmlString(finalHeader, true);
   this->remainingHeaderToSend.SetSize(0);
   this->remainingHeaderToSend.SetExpectedSize(finalHeader.size());
-  for (unsigned i = 0; i < finalHeader.size(); i++)
+  for (unsigned i = 0; i < finalHeader.size(); i ++)
     this->remainingHeaderToSend.AddOnTop(finalHeader[i]);
 }
 
@@ -2053,7 +2053,7 @@ void WebWorker::SanitizeVirtualFileName()
   std::string resultName;
   resultName.reserve(this->VirtualFileName.size());
   bool foundslash = false;
-  for (signed i = (signed) this->VirtualFileName.size() - 1; i >= 0; i--)
+  for (signed i = (signed) this->VirtualFileName.size() - 1; i >= 0; i --)
   { bool isOK = true;
     if (foundslash && this->VirtualFileName[i] == '.')
       if (i > 0 && this->VirtualFileName[i - 1] == '.')
@@ -2066,7 +2066,7 @@ void WebWorker::SanitizeVirtualFileName()
       foundslash=true;
   }
   this->VirtualFileName = "";
-  for (int i = resultName.size() - 1; i >= 0; i--)
+  for (int i = resultName.size() - 1; i >= 0; i --)
     this->VirtualFileName.push_back(resultName[i]);
 }
 
@@ -2360,7 +2360,7 @@ int WebWorker::ProcessFolder()
   out << "Browsing folder: " << this->addressGetOrPost << "<br>Virtual name: "
   << this->VirtualFileName << "<hr>";
   List<std::string> theFolderNamesHtml, theFileNamesHtml;
-  for (int i = 0; i < theFileNames.size; i++)
+  for (int i = 0; i < theFileNames.size; i ++)
   { std::stringstream currentStream;
     bool isDir = (theFileTypes[i] == ".d");
 //    logWorker << logger::red << "Current file name: " << HtmlRoutines::ConvertStringToURLString(theFileNames[i]) << logger::endL;
@@ -2380,9 +2380,9 @@ int WebWorker::ProcessFolder()
   }
   theFolderNamesHtml.QuickSortAscending();
   theFileNamesHtml.QuickSortAscending();
-  for (int i = 0; i < theFolderNamesHtml.size; i++)
+  for (int i = 0; i < theFolderNamesHtml.size; i ++)
     out << theFolderNamesHtml[i];
-  for (int i = 0; i < theFileNamesHtml.size; i++)
+  for (int i = 0; i < theFileNamesHtml.size; i ++)
     out << theFileNamesHtml[i];
   //out << "DEBUG: " << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   //out << this->ToStringMessageFullUnsafe();
@@ -3383,6 +3383,13 @@ int WebWorker::ProcessSelectCourse()
   return 0;
 }
 
+int WebWorker::ProcessTopicListJSON()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessTopicListJSON");
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::GetTopicTableJSON();
+  return 0;
+}
+
 int WebWorker::ProcessApp(bool appendBuildHash)
 { MacroRegisterFunctionWithName("WebWorker::ProcessApp");
   this->SetHeaderOKNoContentLength();
@@ -3406,10 +3413,12 @@ int WebWorker::ProcessTemplate()
   return 0;
 }
 
-int WebWorker::ProcessTopicTable()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessTopicTable");
+int WebWorker::ProcessTemplateJSON()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessTemplate");
   this->SetHeaderOKNoContentLength();
-  stOutput << HtmlInterpretation::GetTopicTable();
+  stOutput << HtmlInterpretation::GetJSONFromTemplate();
+  //if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+  //  stOutput << "<!--" << this->ToStringMessageFullUnsafe() << "-->";
   return 0;
 }
 
@@ -4218,8 +4227,9 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == "template" ||
            theGlobalVariables.userCalculatorRequestType == "templateNoLogin")
     return this->ProcessTemplate();
-  else if (theGlobalVariables.userCalculatorRequestType == "topicTable")
-    return this->ProcessTopicTable();
+  else if (theGlobalVariables.userCalculatorRequestType == "templateJSON" ||
+           theGlobalVariables.userCalculatorRequestType == "templateNoLoginJSON")
+    return this->ProcessTemplateJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "editPage")
     return this->ProcessEditPage();
   else if (theGlobalVariables.userCalculatorRequestType == "modifyPage")
@@ -4240,6 +4250,8 @@ int WebWorker::ServeClient()
     return this->ProcessSelectCourse();
   else if (theGlobalVariables.userCalculatorRequestType == "about")
     return this->ProcessAbout();
+  else if (theGlobalVariables.userCalculatorRequestType == "topicListJSON")
+    return this->ProcessTopicListJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "app")
     return this->ProcessApp(true);
   else if (theGlobalVariables.userCalculatorRequestType == "appNoCache")
@@ -4336,7 +4348,7 @@ void WebWorker::OutputShowIndicatorOnTimeout()
   stOutput << "\n<br>\n<div id=\"idProgressReport\"></div>\n";
 
   this->SendAllBytesWithHeaders();
-  for (int i = 0; i < this->parent->theWorkers.size; i++)
+  for (int i = 0; i < this->parent->theWorkers.size; i ++)
     if (i != this->indexInParent)
       this->parent->theWorkers[i].Release();
   //this->parent->Release(this->pipeServerToWorkerControls[0]);
@@ -4381,7 +4393,7 @@ std::string WebWorker::ToStringStatus()const
   else
     out << "(not accessible)";
   out << ", socketID: ";
-  if (this->connectedSocketID == -1)
+  if (this->connectedSocketID == - 1)
     out << "released in current process, value before release: " << this->connectedSocketIDLastValueBeforeRelease;
   else
     out << this->connectedSocketID;
@@ -4778,13 +4790,13 @@ std::string WebServer::ToStringStatusAll()
   out << "<a href=\"/LogFiles/server_starts_and_unexpected_restarts.html\">" << "Log files</a><br>";
   out << "<a href=\"/LogFiles/" << GlobalVariables::GetDateForLogFiles() << "/\">" << "Current log files</a><hr>";
   out << this->ToStringStatusPublicNoTop() << "<hr>";
-  if (this->activeWorker == -1)
+  if (this->activeWorker == - 1)
     out << "The process is functioning as a server.";
   else
   { out << "The process is functioning as a worker. The active worker is number " << this->activeWorker + 1 << ". ";
     out << "<br>" << this->ToStringStatusActive();
   }
-  for (int i = 0; i < this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i ++)
   { WebWorker& currentWorker = this->theWorkers[i];
     if (!currentWorker.flagInUse)
       continue;
@@ -4793,7 +4805,7 @@ std::string WebServer::ToStringStatusAll()
   }
   out << "<hr>";
   out << "Connections: " << this->currentlyConnectedAddresses.ToString();
-  for (int i = 0; i < this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i ++)
     out << "<hr>" << this->theWorkers[i].ToStringStatus();
   return out.str();
 }
@@ -4802,7 +4814,7 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
 { struct stat theFileStat;
   if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0)
     return;
-  if (this->timeLastExecutableModification != -1)
+  if (this->timeLastExecutableModification != - 1)
     if (this->timeLastExecutableModification != theFileStat.st_ctime)
     { stOutput << "<b>The server executable was updated, but the server has not been restarted yet. "
       << "Restarting in 0.5 seconds...</b>";
@@ -4827,9 +4839,9 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
 void WebServer::Restart()
 { //logWorker << "Killing all copies of the calculator and restarting..." << logger::endL;
   //logWorker << "Time limit after restart: " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << logger::endL;
-  if (this->listeningSocketHTTP != -1)
+  if (this->listeningSocketHTTP != - 1)
     this->Release(this->listeningSocketHTTP);
-  if (this->listeningSocketHttpSSL != -1)
+  if (this->listeningSocketHttpSSL != - 1)
     this->Release(this->listeningSocketHttpSSL);  std::stringstream theCommand;
   int timeInteger = (int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   logger* currentLog = 0;
@@ -4866,24 +4878,24 @@ void WebServer::initPortsITry()
 
 void WebServer::initListeningSockets()
 { MacroRegisterFunctionWithName("WebServer::initListeningSockets");
-  if (listen(this->listeningSocketHTTP, WebServer::maxNumPendingConnections) == -1)
+  if (listen(this->listeningSocketHTTP, WebServer::maxNumPendingConnections) == - 1)
     crash << "Listen function failed on http port." << crash;
   if (theGlobalVariables.flagSSLisAvailable)
-    if (listen(this->listeningSocketHttpSSL, WebServer::maxNumPendingConnections) == -1)
+    if (listen(this->listeningSocketHttpSSL, WebServer::maxNumPendingConnections) == - 1)
       crash << "Listen function failed on https port." << crash;
-  this->highestSocketNumber = -1;
-  if (this->listeningSocketHTTP != -1)
+  this->highestSocketNumber = - 1;
+  if (this->listeningSocketHTTP != - 1)
   { this->theListeningSockets.AddOnTop(this->listeningSocketHTTP);
     this->highestSocketNumber = MathRoutines::Maximum(this->listeningSocketHTTP, this->highestSocketNumber);
   }
-  if (this->listeningSocketHttpSSL != -1)
+  if (this->listeningSocketHttpSSL != - 1)
   { this->theListeningSockets.AddOnTop(this->listeningSocketHttpSSL);
     this->highestSocketNumber = MathRoutines::Maximum(this->listeningSocketHttpSSL, this->highestSocketNumber);
   }
 }
 
 void WebServer::initDates()
-{ this->timeLastExecutableModification = -1;
+{ this->timeLastExecutableModification = - 1;
   struct stat theFileStat;
   if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0)
     return;
@@ -4905,10 +4917,10 @@ void WebServer::ReleaseWorkerSideResources()
 bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string& inputAddress)
 { MacroRegisterFunctionWithName("WebServer::RequiresLogin");
   if (inputAddress == theGlobalVariables.DisplayNameExecutable)
-    for (int i = 0; i < this->requestStartsNotNeedingLogin.size; i++)
+    for (int i = 0; i < this->requestStartsNotNeedingLogin.size; i ++)
       if (MathRoutines::StringBeginsWith(inputRequest, this->requestStartsNotNeedingLogin[i]))
         return false;
-  for (int i = 0; i < this->addressStartsNotNeedingLogin.size; i++)
+  for (int i = 0; i < this->addressStartsNotNeedingLogin.size; i ++)
     if (MathRoutines::StringBeginsWith(inputAddress, this->addressStartsNotNeedingLogin[i]))
       return false;
   return true;
@@ -4935,11 +4947,11 @@ void WebServer::TerminateChildSystemCall(int i)
     return;
   this->theWorkers[i].flagInUse = false;
   this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
-  if (this->theWorkers[i].ProcessPID>0)
+  if (this->theWorkers[i].ProcessPID > 0)
   { if (theGlobalVariables.flagServerDetailedLog)
       logProcessKills << "DEBUG: " << " killing child index: " << i << "." << logger::endL;
     kill(this->theWorkers[i].ProcessPID, SIGKILL);
-    this->theWorkers[i].ProcessPID = -1;
+    this->theWorkers[i].ProcessPID = - 1;
   }
   this->theWorkers[i].ResetPipesNoAllocation();
 }
@@ -4960,14 +4972,14 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     return;
   List<double> theTimes;
   List<int> theIndices;
-  for (int i = 0; i < this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i ++)
     if (this->theWorkers[i].flagInUse)
       if (this->theWorkers[i].userAddress == incomingAddress)
       { theTimes.AddOnTop(this->theWorkers[i].timeServerAtWorkerStart);
         theIndices.AddOnTop(i);
       }
   theTimes.QuickSortAscending(0, &theIndices);
-  for (int j = 0; j < theTimes.size; j++)
+  for (int j = 0; j < theTimes.size; j ++)
   { this->TerminateChildSystemCall(theIndices[j]);
     std::stringstream errorStream;
     errorStream
@@ -4995,10 +5007,10 @@ void WebServer::RecycleChildrenIfPossible()
     logProcessStats << logger::red << "DEBUG: RecycleChildrenIfPossible start. " << logger::endL;
 //  this->ReapChildren();
   int numInUse = 0;
-  for (int i = 0; i < this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i ++)
     if (this->theWorkers[i].flagInUse)
       numInUse++;
-  for (int i = 0; i < this->theWorkers.size; i++)
+  for (int i = 0; i < this->theWorkers.size; i ++)
     if (this->theWorkers[i].flagInUse)
     { PipePrimitive& currentControlPipe = this->theWorkers[i].pipeWorkerToServerControls;
       if (currentControlPipe.flagReadEndBlocks)
@@ -5013,7 +5025,7 @@ void WebServer::RecycleChildrenIfPossible()
         << messageStr
         << ". Marking for reuse. " << logger::endL;
         numInUse--;
-        this->NumWorkersNormallyExited++;
+        this->NumWorkersNormallyExited ++;
         if (messageStr == "toggleMonitoring")
           this->ToggleProcessMonitoring();
 //        waitpid(this->theWorkers[i].ProcessPID, 0, )
@@ -5060,7 +5072,7 @@ void WebServer::RecycleChildrenIfPossible()
       << "DEBUG: RecycleChildrenIfPossible exit point 1. " << logger::endL;
     return;
   }
-  for (int i = 0; i < this->theWorkers.size && numInUse > 1; i++)
+  for (int i = 0; i < this->theWorkers.size && numInUse > 1; i ++)
   { if (this->theWorkers[i].flagInUse)
     { this->TerminateChildSystemCall(i);
       std::stringstream errorStream;
@@ -5070,8 +5082,8 @@ void WebServer::RecycleChildrenIfPossible()
       << ": too many workers in use. ";
       this->theWorkers[i].pingMessage = errorStream.str();
       logProcessKills << logger::red << errorStream.str() << logger::endL;
-      numInUse--;
-      this->NumProcessAssassinated++;
+      numInUse --;
+      this->NumProcessAssassinated ++;
     }
   }
   if (theGlobalVariables.flagServerDetailedLog)
@@ -5109,22 +5121,22 @@ bool WebServer::initBindToPorts()
   int* theListeningSocket = 0;
   theListeningSocket = &this->listeningSocketHTTP;
   for (int j = 0; j < 2; j++, thePorts = &this->PortsITryHttpSSL, theListeningSocket = &this->listeningSocketHttpSSL)
-    for (int i = 0; i < (*thePorts).size; i++)
+    for (int i = 0; i < (*thePorts).size; i ++)
     { if ((rv = getaddrinfo(NULL, (*thePorts)[i].c_str(), &hints, &servinfo)) != 0)
       { logWorker << "getaddrinfo: " << gai_strerror(rv) << logger::endL;
         return false;
       }
       for(p = servinfo; p != NULL; p = p->ai_next)
       { *theListeningSocket = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (*theListeningSocket == -1)
+        if (*theListeningSocket == - 1)
         { logWorker << "Error: socket failed.\n";
           continue;
         }
-        if (setsockopt(*theListeningSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+        if (setsockopt(*theListeningSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == - 1)
           crash << "Error: setsockopt failed, error: \n" << strerror(errno) << crash;
-        if (bind(*theListeningSocket, p->ai_addr, p->ai_addrlen) == -1)
+        if (bind(*theListeningSocket, p->ai_addr, p->ai_addrlen) == - 1)
         { close(*theListeningSocket);
-          *theListeningSocket = -1;
+          *theListeningSocket = - 1;
           logServer << "Error: bind failed at port: " << (*thePorts)[i] << ". Error: "
           << this->ToStringLastErrorDescription() << logger::endL;
           continue;
@@ -5146,29 +5158,29 @@ bool WebServer::initBindToPorts()
       }
       freeaddrinfo(servinfo); // all done with this structure
     }
-  if (this->listeningSocketHTTP == -1)
+  if (this->listeningSocketHTTP == - 1)
     crash << "Failed to bind to any of the ports " << this->PortsITryHttp.ToStringCommaDelimited() << "\n" << crash;
-  if (theGlobalVariables.flagSSLisAvailable && this->listeningSocketHttpSSL == -1)
+  if (theGlobalVariables.flagSSLisAvailable && this->listeningSocketHttpSSL == - 1)
     crash << "Failed to bind to any of the ports " << this->PortsITryHttpSSL.ToStringCommaDelimited() << "\n" << crash;
   return true;
 }
 
 void WebServer::initPrepareSignals()
 { MacroRegisterFunctionWithName("WebServer::initPrepareSignals");
-  if (sigemptyset(&SignalSEGV.sa_mask) == -1)
+  if (sigemptyset(&SignalSEGV.sa_mask) == - 1)
     crash << "Failed to initialize SignalSEGV mask. Crashing to let you know. " << crash;
   SignalSEGV.sa_sigaction = &segfault_sigaction;
   SignalSEGV.sa_flags = SA_SIGINFO;
-  if (sigaction(SIGSEGV, &SignalSEGV, NULL) == -1)
+  if (sigaction(SIGSEGV, &SignalSEGV, NULL) == - 1)
     crash << "Failed to register SIGSEGV handler (segmentation fault (attempt to write memory without permission))."
     << " Crashing to let you know. " << crash;
   ///////////////////////
   //catch floating point exceptions
-  if (sigemptyset(&SignalFPE.sa_mask) == -1)
+  if (sigemptyset(&SignalFPE.sa_mask) == - 1)
     crash << "Failed to initialize SignalFPE mask. Crashing to let you know. " << crash;
   SignalFPE.sa_sigaction = 0;
   SignalFPE.sa_handler = &WebServer::fperror_sigaction;
-  if (sigaction(SIGFPE, &SignalFPE, NULL) == -1)
+  if (sigaction(SIGFPE, &SignalFPE, NULL) == - 1)
     crash << "Failed to register SIGFPE handler (fatal arithmetic error). Crashing to let you know. " << crash;
   ////////////////////
   //ignore interrupts
@@ -5197,7 +5209,7 @@ void WebServer::initPrepareSignals()
   SignalChild.sa_flags = SA_NOCLDWAIT;
   SignalChild.sa_handler =  NULL;
   //&WebServer::Signal_SIGCHLD_handler; // reap all dead processes
-  if (sigaction(SIGCHLD, &SignalChild, NULL) == -1)
+  if (sigaction(SIGCHLD, &SignalChild, NULL) == - 1)
     crash << "Was not able to register SIGCHLD handler (reaping child processes). Crashing to let you know." << crash;
 //  sigemptyset(&sa.sa_mask);
 //  sa.sa_flags = SA_RESTART;
@@ -5386,7 +5398,7 @@ int WebServer::Run()
     //The original process is the parent, the almost identical copy is the child.
     //logWorker << "\r\nChildPID: " << this->childPID;
     if (incomingPID == 0)
-      theGlobalVariables.processType="worker";
+      theGlobalVariables.processType = "worker";
     if (theGlobalVariables.flagServerDetailedLog)
       if (incomingPID == 0)
       { logWorker << "DEBUG: fork() successful in worker; elapsed seconds @ fork(): "
@@ -5494,7 +5506,7 @@ int WebWorker::Run()
 //      << this->ToStringMessageFullUnsafe()
       << "</body></html>";
       this->SendAllAndWrapUp();
-      return -1;
+      return - 1;
     }
     numReceivesThisConnection ++;
     if (theParser == 0)
@@ -5506,7 +5518,7 @@ int WebWorker::Run()
     if (this->messageHead.size() == 0)
       break;
     result = this->ServeClient();
-    if (this->connectedSocketID == -1)
+    if (this->connectedSocketID == - 1)
       break;
     if (!this->flagAllBytesSentUsingFile)
       this->SendAllBytesWithHeaders();
@@ -5737,7 +5749,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   theGlobalVariables.programArguments.SetSize(argC);
   //std::cout << "RAND_MAX: " << RAND_MAX;
   //std::cout << "Program arguments: \n";
-  for (int i = 0; i < argC; i++)
+  for (int i = 0; i < argC; i ++)
   { theGlobalVariables.programArguments[i] = argv[i];
     //std::cout << "Argument " << i+1 << ": " << theGlobalVariables.programArguments[i] << "\n";
   }
@@ -6069,7 +6081,7 @@ int WebServer::mainCommandLine()
   theParser->init();
   logger result("", 0, false, "server");
   if (theGlobalVariables.programArguments.size > 1)
-    for (int i = 1; i < theGlobalVariables.programArguments.size; i++)
+    for (int i = 1; i < theGlobalVariables.programArguments.size; i ++)
     { theParser->inputString += theGlobalVariables.programArguments[i];
       if (i != theGlobalVariables.programArguments.size - 1)
         theParser->inputString += " ";
@@ -6155,7 +6167,7 @@ int WebServer::mainApache()
   theParser->javaScriptDisplayingIndicator = WebWorker::GetJavaScriptIndicatorFromHD();
   theGlobalVariables.flagComputationCompletE = true;
   MathRoutines::StringSplitExcludeDelimiter(theWorker.cookiesApache, ' ', theWorker.cookies);
-  for (int i = 0; i < theWorker.cookies.size; i++)
+  for (int i = 0; i < theWorker.cookies.size; i ++)
     theWorker.cookies[i] = MathRoutines::StringTrimWhiteSpace(theWorker.cookies[i]);
 /*  stOutput << "<html><body>";
   stOutput << "DEBUG: your input, bounced back: "
@@ -6196,7 +6208,7 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
   else
     out << "\n<br>\nAddress <b>does not</b> require any login. ";
   out << "\n<hr>\n";
-  for (int i = 0; i < theGlobalVariables.webArguments.size(); i++)
+  for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++)
   { out << theGlobalVariables.webArguments.theKeys[i] << ": "
     << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.webArguments[i], true);
     if (i != theGlobalVariables.webArguments.size() - 1)
@@ -6231,7 +6243,7 @@ void WebWorker::PrepareFullMessageHeaderAndFooter()
     contentLengthStream << "Content-Length: " << this->remainingBodyToSend.size << "\r\n";
   contentLengthStream << "\r\n";
   std::string contentLengthString = contentLengthStream.str();
-  for (unsigned i = 0; i < contentLengthString.size(); i++)
+  for (unsigned i = 0; i < contentLengthString.size(); i ++)
     this->remainingBytesToSenD.AddOnTop(contentLengthString[i]);
   //std::string debugString(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
   //std::cout << "DEBUG: headers+ body="
@@ -6281,7 +6293,7 @@ void WebWorker::SendAllBytesHttp()
   this->flagDidSendAll = true;
   //std::string tempS(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
   //logWorker << logger::green << "Sending: " << tempS << logger::endL;
-  if (this->connectedSocketID == -1)
+  if (this->connectedSocketID == - 1)
   { logWorker << logger::red << "Socket::SendAllBytes failed: connectedSocketID=-1." << logger::endL;
     return;
   }
@@ -6339,7 +6351,7 @@ void WebWorker::QueueStringForSendingWithHeadeR(const std::string& stringToSend,
   (void) MustSendAll;
   int oldSize = this->remainingBodyToSend.size;
   this->remainingBodyToSend.SetSize(this->remainingBodyToSend.size + stringToSend.size());
-  for (unsigned i = 0; i < stringToSend.size(); i++)
+  for (unsigned i = 0; i < stringToSend.size(); i ++)
     this->remainingBodyToSend[i + oldSize] = stringToSend[i];
 }
 
@@ -6348,7 +6360,7 @@ void WebWorker::QueueStringForSendingNoHeadeR(const std::string& stringToSend, b
   (void) MustSendAll;
   int oldSize = this->remainingBytesToSenD.size;
   this->remainingBytesToSenD.SetSize(this->remainingBytesToSenD.size + stringToSend.size());
-  for (unsigned i = 0; i < stringToSend.size(); i++)
+  for (unsigned i = 0; i < stringToSend.size(); i ++)
     this->remainingBytesToSenD[i + oldSize] = stringToSend[i];
 }
 

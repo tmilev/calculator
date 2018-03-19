@@ -194,12 +194,13 @@ public:
   int ProcessScores();
   int ProcessAbout();
   int ProcessApp(bool appendBuildHash);
+  int ProcessTopicListJSON();
   int ProcessScoresInCoursePage();
   int ProcessAssignTeacherToSection();
   int ProcessExamPage();
   int ProcessTemplate();
+  int ProcessTemplateJSON();
   int ProcessSelectCourse();
-  int ProcessTopicTable();
   int ProcessExamPageInterpreter();
   int ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication);
   int ProcessLoginNeededOverUnsecureConnection();

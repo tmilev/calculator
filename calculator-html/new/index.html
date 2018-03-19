@@ -15,6 +15,7 @@
 <script type = "text/javascript" src = "/calculator-html/new/initialize_buttons.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/page_navigation.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/three-d.js"> </script>
+<script type = "text/javascript" src = "/calculator-html/new/course_page.js"> </script>
 <script type = "text/javascript">
 var globalMQ = MathQuill.getInterface(2);
 var MathQuillHasMatrixSupport = true;
@@ -26,6 +27,7 @@ var MathQuillHasMatrixSupport = true;
 <body onload = "initializePage();">
 <div id = "divPage" class = "divPage">
 <div id = "divCurrentCourse" class = "divMainPage">
+
 </div> <!--divCurrentCourse-->
 <div id = "divCalculatorPage" class = "divMainPage">
 <table><!-- Outermost table, 3 cells (3 columns 1 row)-->
@@ -49,7 +51,7 @@ var MathQuillHasMatrixSupport = true;
 </textarea>
 <br>
 <button title = "Shift+Enter=shortcut from input text box. "
- name = "Go" onclick = "submitCalculatorComputation(); event.preventDefault();">
+name = "Go" onclick = "submitCalculatorComputation(); event.preventDefault();">
 Go
 </button>
 <span id="mainComputationStatus">
@@ -112,6 +114,7 @@ ctrl+arrow = select</span>
 </button></div>
 <div><button class = "buttonSelectPage" id = "buttonSelectCurrentCourse">Current Course</button></div>
 <div><button class = "buttonSelectPage" id = "buttonSelectCalculator">Calculator</button></div>
+<div id = "spanProgressReportGeneral"></div>
 </div> <!--divTheMainMenuPanel-->
 
 </div><!--divMainPage-->

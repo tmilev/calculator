@@ -133,4 +133,6 @@ DISTFILES += \
     ../calculator-html/new/page_navigation.js \
     ../calculator-html/new/panels.js \
     ../calculator-html/new/three-d.js \
-    ../calculator-html/new/submit_requests.js
+    ../calculator-html/new/submit_requests.js \
+    ../calculator-html/new/autocomplete_keywords.js \
+    ../calculator-html/new/course_page.js

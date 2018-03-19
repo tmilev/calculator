@@ -625,15 +625,6 @@ std::string HtmlInterpretation::GetSelectCourse()
   return out.str();
 }
 
-std::string HtmlInterpretation::GetTopicTable()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::GetTopicTable");
-  std::stringstream out;
-  out << "<html><body>";
-  out << "Not implemented yet.";
-  out << "</body></html>";
-  return out.str();
-}
-
 std::string HtmlInterpretation::GetHtmlTagWithManifest()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetHtmlTagWithManifest");
   std::stringstream out;
@@ -656,11 +647,12 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   if (!thePage.LoadMe(true, comments, theGlobalVariables.GetWebInput("randomSeed")))
   { out << "<html>"
     << "<head>" << HtmlRoutines::GetCSSLinkCalculator() << "</head>"
-    << "<body>"
-    << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
+    << "<body>";
+    out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
     << "<b>Failed to load file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
-    << "<br>Comments:<br> " << comments.str() << "</body></html>";
+    << "<br>Comments:<br> " << comments.str();
+    out << "</body></html>";
     return out.str();
   }
   if (!thePage.InterpretHtml(comments))
@@ -668,11 +660,12 @@ std::string HtmlInterpretation::GetPageFromTemplate()
     << "<head>"
     << HtmlRoutines::GetCSSLinkCalculator()
     << "</head>"
-    << "<body>"
-    << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
+    << "<body>";
+    out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << " </calculatorNavigation>"
     << "<b>Failed to interpret as template the following file: "
     << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
-    << "<br>Comments:<br> " << comments.str() << "</body></html>";
+    << "<br>Comments:<br> " << comments.str();
+    out << "</body></html>";
     return out.str();
   }
   out << HtmlInterpretation::GetHtmlTagWithManifest();
@@ -691,10 +684,8 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << "<body" //<< ">"
   << " onload=\"loadSettings();";
-//  if (includeDeadlineJavascript)
-    out << " initializeButtonsCommon(); ";
-  out <<"\"><!-- tag added automatically; user-specified body tag ignored-->\n"
-  ;
+  out << " initializeButtonsCommon(); ";
+  out <<"\"><!-- tag added automatically; user-specified body tag ignored-->\n";
   if (thePage.flagDoPrependCalculatorNavigationBar)
   { out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in " << theGlobalVariables.GetElapsedSeconds()
@@ -705,6 +696,54 @@ std::string HtmlInterpretation::GetPageFromTemplate()
   out << thePage.outputHtmlBodyNoTag;
   out << "</body><!-- tag added automatically; user-specified body tag ignored-->\n";
   out << "</html><!-- tag added automatically; user-specified html tag ignored-->\n";
+  return out.str();
+}
+
+std::string HtmlInterpretation::GetTopicTableJSON()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetTopicTableJSON");
+  std::stringstream out;
+  CalculatorHTML thePage;
+  std::stringstream comments;
+  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
+  if (!thePage.LoadMe(true, comments, theGlobalVariables.GetWebInput("randomSeed")))
+  { out << "\"Failed to load file: "
+    << theGlobalVariables.GetWebInput("courseHome") << ""
+    << "<br>Comments:<br> " << comments.str();
+    out << "\"";
+    return out.str();
+  }
+  thePage.FigureOutCurrentProblemList(comments);
+  out << thePage.ToStringTopicListJSON();
+  return out.str();
+}
+
+std::string HtmlInterpretation::GetJSONFromTemplate()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONFromTemplate");
+  std::stringstream out;
+  CalculatorHTML thePage;
+  thePage.flagUseJSON = true;
+  std::stringstream comments;
+  thePage.fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
+  if (!thePage.LoadMe(true, comments, theGlobalVariables.GetWebInput("randomSeed")))
+  { out << "<b>Failed to load file: "
+    << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
+    << "<br>Comments:<br> " << comments.str();
+    return out.str();
+  }
+  if (!thePage.InterpretHtml(comments))
+  { out << "<b>Failed to interpret as template the following file: "
+    << theGlobalVariables.GetWebInput("courseHome") << ". </b>"
+    << "<br>Comments:<br> " << comments.str();
+    return out.str();
+  }
+  out << "<!-- File automatically generated from template: "
+  << theGlobalVariables.GetWebInput("fileName")
+  << ".-->\n";
+  out << "<small>Generated in " << theGlobalVariables.GetElapsedSeconds()
+  << " second(s).</small>";
+  if (thePage.flagDoPrependProblemNavigationBar)
+    out << thePage.outputProblemNavigatioN;
+  out << thePage.outputHtmlBodyNoTag;
   return out.str();
 }
 
@@ -815,12 +854,12 @@ std::string HtmlInterpretation::GetEditPageHTML()
   }
   outHead << "<script type=\"text/javascript\">\n";
   outHead << "var AceEditorAutoCompletionWordList=[";
-  bool found=false;
-  for (int i=0; i<theAutocompleteKeyWords.size; i++)
-    if (theAutocompleteKeyWords[i].size()>2)
+  bool found = false;
+  for (int i = 0; i < theAutocompleteKeyWords.size; i ++)
+    if (theAutocompleteKeyWords[i].size() > 2)
     { if (found)
         outHead << ", ";
-      found=true;
+      found = true;
       outHead << "\"" << theAutocompleteKeyWords[i] << "\"";
     }
   outHead << "];\n";
@@ -828,8 +867,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   outHead << "</head>";
   std::stringstream buttonStream, submitModPageJS;
   submitModPageJS
-  << "submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage', null, 'spanSubmitReport');"
-  ;
+  << "submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage', null, 'spanSubmitReport');";
   buttonStream
   << "<button class=\"buttonSaveEdit\" "
   << "onclick=\"" << submitModPageJS.str() << "\" >Save changes</button>";
@@ -863,7 +901,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "}\n"
   << "</script>\n";
   outBody
-  << "<script src=\"/calculator-html/ace/src-min/ext-language_tools.js\"></script>";
+  << "<script src=\"/html-common/ace/src-min/ext-language_tools.js\"></script>";
   outBody << "<script type=\"text/javascript\"> \n"
   //<< " document.getElementById('mainInput').value=decodeURIComponent(\""
   << " document.getElementById('editor').textContent=decodeURIComponent(\""

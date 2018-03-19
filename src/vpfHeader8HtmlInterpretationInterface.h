@@ -31,7 +31,8 @@ public:
   static std::string GetCaptchaDiv();
   static std::string GetExamPage();
   static std::string GetPageFromTemplate();
-  static std::string GetTopicTable();
+  static std::string GetJSONFromTemplate();
+  static std::string GetTopicTableJSON();
   static std::string GetExamPageInterpreter();
   static std::string GetAnswerOnGiveUp();
   static std::string GetAnswerOnGiveUp

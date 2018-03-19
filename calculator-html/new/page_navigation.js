@@ -3,12 +3,14 @@ function Page(){
     currentCourse : {
       id: "divCurrentCourse",
       menuButtonId: "buttonSelectCurrentCourse",
-      container: null
+      container: null,
+      selectFunction: selectCurrentCoursePage,
     },
     calculator: {
       id: "divCalculatorPage",
       menuButtonId: "buttonSelectCalculator",
-      container: null
+      container: null,
+      selectFunction: null,
     }
   }
   for (var page in this.pages){
@@ -25,6 +27,9 @@ function Page(){
       this.pages[page].container.style.display = "none";
     }
     this.pages[inputPage].container.style.display = "";
+    if (this.pages[inputPage].selectFunction !== null && this.pages[inputPage].selectFunction !== undefined){
+      this.pages[inputPage].selectFunction();
+    }
   }
   this.initializeCalculatorPage = function(){
     initializeButtons();

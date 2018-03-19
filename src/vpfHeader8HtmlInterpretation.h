@@ -81,12 +81,10 @@ public:
   }
   static void GetTopicList
   (const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output,
-   CalculatorHTML& owner
-   );
+   CalculatorHTML& owner);
   static bool LoadTopicBundle
   (const std::string& inputFileName, MapLisT<std::string, List<std::string>, MathRoutines::hashString>& output,
-   CalculatorHTML& owner, std::stringstream& errorStream
-   );
+   CalculatorHTML& owner, std::stringstream& errorStream);
   static void AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output);
 };
 
@@ -131,6 +129,7 @@ public:
   bool flagTopicSectionStarted;
   bool flagTopicSubSectionStarted;
   bool flagTopicChapterStarted;
+  bool flagUseJSON;
   double timeToParseHtml;
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;
@@ -227,36 +226,31 @@ public:
   std::string GetDeadline
   (const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited);
   bool MergeOneProblemAdminData
-(const std::string& inputProblemName, ProblemData& inputProblemInfo,
- std::stringstream& commentsOnFailure)
-  ;
+  (const std::string& inputProblemName, ProblemData& inputProblemInfo,
+   std::stringstream& commentsOnFailure);
   bool MergeProblemInfoInDatabase
   (std::string& incomingProblemInfo,
-   std::stringstream& commentsOnFailure)
-  ;
+   std::stringstream& commentsOnFailure);
   bool ReadProblemInfoAppend
   (const std::string& inputInfoString,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>&
    outputProblemInfo,
    std::stringstream& commentsOnFailure
-   )
-   ;
+   );
   void StoreDeadlineInfo
   (std::string& outputString,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>&
-   inputProblemInfo)
-   ;
+   inputProblemInfo);
   void StoreProblemWeightInfo
   (std::string& outputString,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>&
-   inputProblemInfo)
-   ;
+   inputProblemInfo);
   std::string ToStringDeadline
-(const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection)
-  ;
+  (const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection);
   void ComputeDeadlineModifyButton
   (TopicElement& inputOutput, bool problemAlreadySolved, bool isProblemGroup);
-  std::string ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay="");
+  std::string ToStringTopicListJSON();
+  std::string ToStringProblemInfo(const std::string& theFileName, const std::string& stringToDisplay = "");
   std::string ToStringLinkFromFileName(const std::string& theFileName);
   std::string ToStringLinkCurrentAdmin
   (const std::string& displayString, bool setDebugFlag, bool includeRandomSeed);
@@ -292,7 +286,7 @@ public:
   { return MathRoutines::hashString(this->fileName);
   }
   bool operator==(const CalculatorHTML& other)const
-  { return this->fileName==other.fileName;
+  { return this->fileName == other.fileName;
   }
   std::string ToStringAllSectionDeadlines
   (const std::string& topicID, bool isSection)
@@ -303,7 +297,7 @@ public:
   ;
   std::string ToStringCalculatorArgumentsForProblem
   (const std::string& requestType, const std::string& studentView,
-   const std::string& studentSection="", bool includeRandomSeedIfAppropriate=false)const;
+   const std::string& studentSection = "", bool includeRandomSeedIfAppropriate = false)const;
   std::string ToStringProblemNavigation()const;
   std::string ToStringExtractedCommands();
   std::string ToStringContent();

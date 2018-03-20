@@ -806,18 +806,18 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
 }
 
 bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString)
-{ LittelmannPath tempPath=*this;
+{ LittelmannPath tempPath = *this;
   LittelmannPath tempPath2;
 //  stOutput << "<hr>";
-  for (int i=0; i<theString.generatorsIndices.size; i++)
+  for (int i = 0; i < theString.generatorsIndices.size; i ++)
   { //stOutput << "e_" << -theString.generatorsIndices[i] << "^"
     //<< theString.Powers[i] << "(" << tempPath.ToString() << ") =";
-    for (int k=0; k<theString.Powers[i]; k++)
-      tempPath.ActByEalpha(-theString.generatorsIndices[i]-1);
+    for (int k = 0; k < theString.Powers[i]; k ++)
+      tempPath.ActByEalpha(- theString.generatorsIndices[i] - 1);
     if (tempPath.IsEqualToZero())
       return false;
-    tempPath2=tempPath;
-    tempPath2.ActByEalpha(-theString.generatorsIndices[i]-1);
+    tempPath2 = tempPath;
+    tempPath2.ActByEalpha(- theString.generatorsIndices[i] - 1);
     //stOutput << tempPath.ToString();
     if (!tempPath2.IsEqualToZero())
       return false;
@@ -829,7 +829,7 @@ bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsign
 
 void SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup<WeylGroupData> >& output)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup");
-  if (this->ExternalAutomorphisms.size>0)
+  if (this->ExternalAutomorphisms.size > 0)
     crash << "This is  a programming error: a function meant for subgroups that are Weyl groups of Levi parts of parabolics is called on a subgroup that is not of that type. "
     << crash;
   output.Reserve(this->size);
@@ -837,26 +837,26 @@ void SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup(List<ElementWey
   ElementWeylGroup<WeylGroupData> tempElt;
   Vector<int> indexShifts;
   indexShifts.SetSize(this->simpleGenerators.size);
-  for (int i=0; i<this->simpleGenerators.size; i++)
-    indexShifts[i]=this->simpleGenerators[i].GetIndexFirstNonZeroCoordinate();
-  for (int i=0; i<this->size; i++)
-  { tempElt=(*this)[i];
-    for (int j=0; j<tempElt.generatorsLastAppliedFirst.size; j++)
-      tempElt.generatorsLastAppliedFirst[j].index= indexShifts[tempElt.generatorsLastAppliedFirst[j].index];
+  for (int i = 0; i < this->simpleGenerators.size; i ++)
+    indexShifts[i] = this->simpleGenerators[i].GetIndexFirstNonZeroCoordinate();
+  for (int i = 0; i<this->size; i ++)
+  { tempElt = (*this)[i];
+    for (int j = 0; j < tempElt.generatorsLastAppliedFirst.size; j ++)
+      tempElt.generatorsLastAppliedFirst[j].index = indexShifts[tempElt.generatorsLastAppliedFirst[j].index];
     output.AddOnTop(tempElt);
   }
 }
 
 std::string LittelmannPath::ToString(bool useSimpleCoords, bool useArrows, bool includeDominance)const
-{ if (this->Waypoints.size==0)
+{ if (this->Waypoints.size == 0)
     return "0";
   std::stringstream out;
-  for (int i=0; i<this->Waypoints.size; i++)
+  for (int i = 0; i < this->Waypoints.size; i ++)
   { if (useSimpleCoords)
       out << this->Waypoints[i].ToString();
     else
       out << this->owner->GetFundamentalCoordinatesFromSimple(this->Waypoints[i]).ToString();
-    if (i!=this->Waypoints.size-1)
+    if (i != this->Waypoints.size - 1)
     { if (useArrows)
         out << "->";
       else
@@ -864,18 +864,16 @@ std::string LittelmannPath::ToString(bool useSimpleCoords, bool useArrows, bool 
     }
   }
   if (includeDominance)
-  { List<int> dominantIndices;
-    Vector<Rational> tempV;
-    out << " ";
-    for (int i=0; i<this->owner->GetDim(); i++)
-    { LittelmannPath tempP=*this;
-      tempP.ActByEFDisplayIndex(i+1);
+  { out << " ";
+    for (int i = 0; i < this->owner->GetDim(); i ++)
+    { LittelmannPath tempP = *this;
+      tempP.ActByEFDisplayIndex(i + 1);
       if (!tempP.IsEqualToZero())
-        out << "e_{" << i+1 << "}";
-      tempP=*this;
-      tempP.ActByEFDisplayIndex(-i-1);
+        out << "e_{" << i + 1 << "}";
+      tempP = *this;
+      tempP.ActByEFDisplayIndex(- i - 1);
       if (!tempP.IsEqualToZero())
-        out << "e_{" << -i-1 << "},";
+        out << "e_{" << - i - 1 << "},";
     }
   }
   return out.str();

@@ -68,15 +68,15 @@ public:
    std::stringstream *commentsOnFailure,
    std::stringstream *commentsGeneral, bool includeNoErrorInComments);
   SSLdata()
-  { this->errorCode=-1;
-    this->sslClient=0;
-    this->sslServeR=0;
-    this->my_certificate=0;
-    this->peer_certificate=0;
-    this->theSSLMethod=0;
-    this->contextServer=0;
+  { this->errorCode = - 1;
+    this->sslClient = 0;
+    this->sslServeR = 0;
+    this->my_certificate = 0;
+    this->peer_certificate = 0;
+    this->theSSLMethod = 0;
+    this->contextServer = 0;
 //    this->contextClient=0;
-    this->flagSSLHandshakeSuccessful=false;
+    this->flagSSLHandshakeSuccessful = false;
   }
   ~SSLdata();
   void FreeSSL();
@@ -201,11 +201,12 @@ public:
   int ProcessTemplate();
   int ProcessTemplateJSON();
   int ProcessSelectCourse();
+  int ProcessSelectCourseJSON();
   int ProcessExamPageInterpreter();
   int ProcessGetAuthenticationToken(const std::string& reasonForNoAuthentication);
   int ProcessLoginNeededOverUnsecureConnection();
   bool ProcessRedirectAwayFromWWW();
-  int ProcessLoginPage(const std::string& reasonForLogin="");
+  int ProcessLoginPage(const std::string& reasonForLogin = "");
   int ProcessLogout();
   int ProcessSignUP();
   int ProcessSignUpPage();
@@ -239,12 +240,9 @@ public:
 
   bool ExtractArgumentsFromMessage
   (const std::string& input, std::stringstream& argumentProcessingFailureComments,
-   int recursionDepth = 0)
-
-  ;
+   int recursionDepth = 0);
   bool ExtractArgumentsFromCookies
-  (std::stringstream& argumentProcessingFailureComments)
-  ;
+  (std::stringstream& argumentProcessingFailureComments);
   static void OutputSendAfterTimeout(const std::string& input);
   void OutputResultAfterTimeout();
   static void OutputCrashAfterTimeout();
@@ -272,11 +270,11 @@ public:
   std::string GetChangePasswordPage();
   std::string GetClonePageResult();
   std::string GetModifyProblemReport();
-  std::string GetLoginPage(const std::string& reasonForLogin="");
+  std::string GetLoginPage(const std::string& reasonForLogin = "");
   std::string GetForgotLoginPage();
   std::string GetSignUpPage();
-  std::string GetLoginHTMLinternal(const std::string& reasonForLogin="");
-  std::string GetAuthenticationToken(const std::string& reasonForNoAuthentication="");
+  std::string GetLoginHTMLinternal(const std::string& reasonForLogin = "");
+  std::string GetAuthenticationToken(const std::string& reasonForNoAuthentication = "");
   std::string GetBrowseProblems();
   std::string GetEditPageHTML();
   std::string GetExamPageInterpreter();
@@ -305,9 +303,9 @@ public:
   void ReportDisplayUserInput();
   enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
   std::string ToStringStatus()const;
-  std::string ToStringMessageUnsafe(bool useHTML=true)const;
-  std::string ToStringMessageShortUnsafe(FormatExpressions* theFormat=0)const;
-  std::string ToStringMessageFullUnsafe(bool useHTML=true)const;
+  std::string ToStringMessageUnsafe(bool useHTML = true)const;
+  std::string ToStringMessageShortUnsafe(FormatExpressions* theFormat = 0)const;
+  std::string ToStringMessageFullUnsafe(bool useHTML = true)const;
   void ParseMessageHead();
   void ExtractHostInfo();
   void ExtractAddressParts();
@@ -429,9 +427,6 @@ class ProgressReportWebServer
   void SetStatus (const std::string& inputStatus);
   ~ProgressReportWebServer();
 };
-
-
-
 
 #endif // WEBSERVER_H
 

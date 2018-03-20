@@ -2551,7 +2551,7 @@ WebWorker::WebWorker()
 }
 
 bool WebWorker::IamActive()
-{ if (this->parent == 0 || this->indexInParent == -1)
+{ if (this->parent == 0 || this->indexInParent == - 1)
     return false;
   return this->parent->activeWorker == this->indexInParent;
 }
@@ -2844,6 +2844,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "<script language=\"javascript\">\n"
   << "function onSignIn(googleUser)\n"
   << "{ document.getElementById(\"googleToken\").value=googleUser.getAuthResponse().id_token;\n"
+  << "  addCookie(\"googleToken\", googleUser.getAuthResponse().id_token, 5, true);\n"
   << "  document.getElementById(\"doSignInWithGoogleToken\").style.opacity=\"1\";\n"
 //  << "  document.getElementById(\"doSignInWithGoogleToken\").style.visibility=\"visible\";\n"
   << "}\n"
@@ -3380,6 +3381,13 @@ int WebWorker::ProcessSelectCourse()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourse");
   this->SetHeaderOKNoContentLength();
   stOutput << HtmlInterpretation::GetSelectCourse();
+  return 0;
+}
+
+int WebWorker::ProcessSelectCourseJSON()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSelectCourseJSON");
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::GetSelectCourseJSON();
   return 0;
 }
 
@@ -4248,6 +4256,8 @@ int WebWorker::ServeClient()
     return this->ProcessCompute();
   else if (theGlobalVariables.userCalculatorRequestType == "selectCourse")
     return this->ProcessSelectCourse();
+  else if (theGlobalVariables.userCalculatorRequestType == "selectCourseJSON")
+    return this->ProcessSelectCourseJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "about")
     return this->ProcessAbout();
   else if (theGlobalVariables.userCalculatorRequestType == "topicListJSON")

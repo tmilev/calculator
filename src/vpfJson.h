@@ -68,12 +68,11 @@ public:
   JSData()
   { this->reset();
   }
-  JSData(char inputType)
-  { this->reset();
-    this->type = inputType;
-  }
   JSData(const JSData& other)
   { this->operator=(other);
+  }
+  JSData(char other)
+  { this->reset(other);
   }
   void operator=(const JSData& other)
   { this->type = other.type;
@@ -94,8 +93,8 @@ public:
   // parsing
   void ExtractScalar(const std::string& json, int begin, int end);
   bool IsValidElement();
-  void reset();
-  std::string ToString(bool useHTML) const;
+  void reset(char inputType = JSData::JSUndefined);
+  std::string ToString(bool useHTML = false) const;
   template <typename somestream>
   somestream& IntoStream(somestream& out, int indentation = 0, bool useHTML = false) const;
   void readfile(const char* filename);

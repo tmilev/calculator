@@ -38,6 +38,7 @@ public:
   static std::string GetAnswerOnGiveUp
   (const std::string& inputRandomSeed, std::string* outputNakedAnswer=0, bool* outputDidSucceed=0);
   static std::string GetSelectCourse();
+  static std::string GetSelectCourseJSON();
   static std::string GetScoresPage();
   static std::string GetAboutPage();
   static std::string GetApp(bool appendBuildHash);

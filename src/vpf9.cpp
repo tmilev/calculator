@@ -11218,7 +11218,7 @@ bool ConeComplex::findMaxLFOverConeProjective
         isInitialized=true;
       }
   }
-  for (int i=0; i<this->size; i++)
+  for (int i = 0; i < this->size; i ++)
   { //stOutput << "<br>Chamber " << i+1 << " maximum linear function is the function of index " << outputMaximumOverEeachSubChamber[i] << ": " << inputLinPolys[outputMaximumOverEeachSubChamber[i]].ToString();
     //stOutput << "<br>The chamber is given by: " << this->TheObjects[i].ToString(false, true);
   }
@@ -11236,17 +11236,17 @@ void Lattice::Reduce
   //  this->TestGaussianEliminationEuclideanDomainRationals(testMatrix);
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   this->basis.GaussianEliminationEuclideanDomain();
-  int numRowsToTrim=0;
-  for (int i=this->basis.NumRows-1; i>=0; i--)
-  { bool foundNonZeroRow=false;
-    for (int j=0; j<this->basis.NumCols; j++)
+  int numRowsToTrim = 0;
+  for (int i = this->basis.NumRows - 1; i >= 0; i --)
+  { bool foundNonZeroRow = false;
+    for (int j = 0; j < this->basis.NumCols; j ++)
       if (!this->basis.elements[i][j].IsEqualToZero())
-      { foundNonZeroRow=true;
+      { foundNonZeroRow = true;
         break;
       }
     if (foundNonZeroRow)
       break;
-    numRowsToTrim++;
+    numRowsToTrim ++;
   }
   this->basis.Resize(this->basis.NumRows-numRowsToTrim, this->basis.NumCols, true);
   this->basisRationalForm.AssignMatrixIntWithDen(this->basis, this->Den);
@@ -11272,25 +11272,26 @@ void Lattice::TestGaussianEliminationEuclideanDomainRationals(Matrix<Rational> &
 }
 
 void Lattice::RefineByOtherLattice(const Lattice& other)
-{ if (other.basis.NumCols==0)
+{ if (other.basis.NumCols == 0)
     return;
-  if (other.basis==this->basis && this->Den==other.Den)
+  if (other.basis == this->basis && this->Den == other.Den)
     return;
-  if(other.GetDim()!=this->GetDim())
+  if(other.GetDim() != this->GetDim())
     crash << "Dimension mismatch" << crash;
-  int theDim=this->GetDim();
-  LargeIntUnsigned oldDen=this->Den;
+  int theDim = this->GetDim();
+  LargeIntUnsigned oldDen = this->Den;
   LargeIntUnsigned::lcm(other.Den, oldDen, this->Den);
   LargeIntUnsigned scaleThis, scaleOther;
-  scaleThis=this->Den/oldDen;
-  scaleOther=this->Den/other.Den;
-  int oldNumRows=this->basis.NumRows;
-  LargeInt tempI; tempI=scaleThis;
-  this->basis*=tempI;
+  scaleThis = this->Den / oldDen;
+  scaleOther = this->Den / other.Den;
+  int oldNumRows = this->basis.NumRows;
+  LargeInt tempI;
+  tempI = scaleThis;
+  this->basis *= tempI;
   this->basis.Resize(this->basis.NumRows+other.basis.NumRows, theDim, true);
-  for (int i=oldNumRows; i<this->basis.NumRows; i++)
-    for (int j=0; j<this->basis.NumCols; j++)
-      this->basis.elements[i][j] = other.basis.elements[i-oldNumRows][j]*scaleOther;
+  for (int i = oldNumRows; i < this->basis.NumRows; i ++)
+    for (int j = 0; j<this->basis.NumCols; j ++)
+      this->basis.elements[i][j] = other.basis.elements[i - oldNumRows][j] * scaleOther;
   this->Reduce();
 }
 
@@ -11312,9 +11313,9 @@ std::string Lattice::ToString()const
   out << "L=<";
   Vectors<Rational> tempRoots;
   tempRoots.AssignMatrixRows(this->basisRationalForm);
-  for (int i=0; i<this->basisRationalForm.NumRows; i++)
+  for (int i = 0; i < this->basisRationalForm.NumRows; i ++)
   { out << tempRoots[i].ToString();
-    if (i!=this->basisRationalForm.NumRows-1)
+    if (i != this->basisRationalForm.NumRows - 1)
       out << ",";
   }
   out << ">";

@@ -13,7 +13,7 @@ function getCookie(c_name)
 function addCookie(theName, theValue, exdays, secure)
 { exdate = new Date();
   exdate.setDate(exdate.getDate() + exdays);
-  c_value = escape(theValue) + ((exdays===null) ? "" : "; expires="+exdate.toUTCString());
+  c_value = escape(theValue) + ((exdays===null) ? "" : "; expires=" + exdate.toUTCString());
   if (secure)
     c_value += "; Secure";
   document.cookie = theName + "=" + c_value + "; Path=/;";

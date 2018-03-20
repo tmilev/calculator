@@ -74,6 +74,7 @@ public:
   std::string ToStringStudentScoreButton();
   std::string ToStringStudentScoreReportPanel();
   std::string ToString()const;
+  JSData ToJSON(CalculatorHTML& owner);
   std::string GetItemFinish(CalculatorHTML& owner);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
   TopicElement()
@@ -218,7 +219,6 @@ public:
   bool SetTagClassFromOpenTag(SyntacticElementHTML& output);
   bool SetTagClassFromCloseTag(SyntacticElementHTML& output);
   bool StoreRandomSeedCurrent(std::stringstream& commentsOnFailure);
-
   bool PrepareCommands(std::stringstream& comments);
   std::string CleanUpCommandString(const std::string& inputCommand);
   void InterpretNotByCalculatorNotAnswer(SyntacticElementHTML& inputOutput);
@@ -235,8 +235,7 @@ public:
   (const std::string& inputInfoString,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>&
    outputProblemInfo,
-   std::stringstream& commentsOnFailure
-   );
+   std::stringstream& commentsOnFailure);
   void StoreDeadlineInfo
   (std::string& outputString,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>&
@@ -270,7 +269,6 @@ public:
   void InterpretEditPagePanel(SyntacticElementHTML& inputOutput);
   void InterpretProblemNavigationBar(SyntacticElementHTML& inputOutput);
   void InterpretCalculatorNavigationBar(SyntacticElementHTML& inputOutput);
-
   void InterpretAccountInformationLinks(SyntacticElementHTML& inputOutput);
   void InterpretJavascripts(SyntacticElementHTML& inputOutput);
   std::string GetEditPageButton(const std::string& desiredFileName, bool includeCloneButton = true);

@@ -294,7 +294,7 @@ somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) c
   out << theIndentation;
   std::string newLine = useHTML ? "\n<br>\n" : "";
   indentation ++;
-  switch(this->type)
+  switch (this->type)
   { case JSnull:
       out << "null";
       return out;
@@ -400,8 +400,8 @@ void JSData::writefile(const char* filename) const
   this->IntoStream(out);
 }
 
-void JSData::reset()
-{ this->type = this->JSUndefined;
+void JSData::reset(char inputType)
+{ this->type = inputType;
   this->boolean = false;
   this->number = 0;
   this->string = "";

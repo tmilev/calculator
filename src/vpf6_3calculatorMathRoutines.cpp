@@ -21,22 +21,22 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
   inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   theType theOpResult;
   ProgressReport theReport1, theReport2;
-  bool flagDoReport=theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination;
+  bool flagDoReport = theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination;
   if (flagDoReport)
     theReport1.Report("Extending vector space to closed with respect to binary operation. ");
-  List<theType> theEltsForGaussianElimination=inputOutputElts;
-  for (int i = 0; i < inputOutputElts.size; i++)
-    for (int j = i; j < inputOutputElts.size; j++)
+  List<theType> theEltsForGaussianElimination = inputOutputElts;
+  for (int i = 0; i < inputOutputElts.size; i ++)
+    for (int j = i; j < inputOutputElts.size; j ++)
     { theBinaryOperation(inputOutputElts[i], inputOutputElts[j], theOpResult);
       //int oldNumElts=inputOutputElts.size;
       theEltsForGaussianElimination.AddOnTop(theOpResult);
       theEltsForGaussianElimination[0].GaussianEliminationByRowsDeleteZeroRows(theEltsForGaussianElimination);
-      if (theEltsForGaussianElimination.size>inputOutputElts.size)
+      if (theEltsForGaussianElimination.size > inputOutputElts.size)
         inputOutputElts.AddOnTop(theOpResult);
       //if (oldNumElts<inputOutputElts.size)
         //stOutput << "<hr>Operation between <br>" << inputOutputElts[i].ToString() << " <br> " << inputOutputElts[j].ToString() << " <br>=<br> "
         //<< theOpResult.ToString();
-      if (upperDimensionBound>0 && inputOutputElts.size>upperDimensionBound)
+      if (upperDimensionBound > 0 && inputOutputElts.size > upperDimensionBound)
         return false;
       if (flagDoReport)
       { std::stringstream reportStream;
@@ -55,22 +55,22 @@ bool CalculatorFunctionsGeneral::innerConstructCartanSA(Calculator& theCommands,
   if (input.ConvertsToType(&theElt))
     theSA.theGenerators.AddOnTop(theElt);
   else
-    for (int i = 1; i < input.size(); i++)
+    for (int i = 1; i < input.size(); i ++)
       if (input[i].ConvertsToType(&theElt))
         theSA.theGenerators.AddOnTop(theElt);
       else
         return theCommands << "Failed to extract element of a semisimple Lie algebra from " << input[i].ToString();
-  for (int i = 0; i < theSA.theGenerators.size; i++)
+  for (int i = 0; i < theSA.theGenerators.size; i ++)
     if (!theSA.theGenerators[i].IsEqualToZero())
-    { if (theSA.owner!=0)
-        if (theSA.owner!=theSA.theGenerators[i].GetOwner())
+    { if (theSA.owner != 0)
+        if (theSA.owner != theSA.theGenerators[i].GetOwner())
           return theCommands << "The input elements in " << input.ToString()
           << " belong to different semisimple Lie algebras";
-      theSA.owner=theSA.theGenerators[i].GetOwner();
+      theSA.owner = theSA.theGenerators[i].GetOwner();
     }
-  if (theSA.owner==0)
+  if (theSA.owner == 0)
     return theCommands << "Failed to extract input semisimple Lie algebra elements from the inputs of " << input.ToString();
-  theSA.theGlobalVariables=&theGlobalVariables;
+  theSA.theGlobalVariables = &theGlobalVariables;
   theSA.ComputeBasis();
   theSA.ComputeCartanSA();
   return output.AssignValue(theSA.ToString(), theCommands);
@@ -80,12 +80,12 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket");
   Vector<ElementWeylAlgebra<Rational> > theOps;
   Expression theContext;
-  if (!(input.size()>1))
+  if (!(input.size() > 1))
     return false;
-  int upperBound=-1;
+  int upperBound = - 1;
   if (!input[1].IsSmallInteger(&upperBound))
     return theCommands << "<hr>Failed to extract upper bound for the vector space dimension from the first argument. ";
-  Expression inputModded=input;
+  Expression inputModded = input;
   inputModded.children.RemoveIndexShiftDown(1);
 
   if (!theCommands.GetVectorFromFunctionArguments(inputModded, theOps, &theContext))
@@ -98,15 +98,15 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
     theContext.ContextGetFormatExpressions(theFormat);
     std::stringstream out;
     out << "Starting elements: <br>";
-    for (int i = 0; i < theLieAlgElts.size; i++)
+    for (int i = 0; i < theLieAlgElts.size; i ++)
       out << HtmlRoutines::GetMathSpanPure(theLieAlgElts[i].ToString(&theFormat)) << "<br>";
-    bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theLieAlgElts, upperBound);
+    bool success = MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theLieAlgElts, upperBound);
     if (!success)
       out << "<br>Did not succeed with generating vector space, instead got a vector space with basis " << theLieAlgElts.size << " exceeding the limit. "
       << "The basis generated before exceeding the limit was: " << theLieAlgElts.ToString();
     else
     { out << "<br>Lie bracket generates vector space of dimension " << theLieAlgElts.size << " with basis:";
-      for (int i=0; i<theLieAlgElts.size; i++)
+      for (int i = 0; i < theLieAlgElts.size; i ++)
       { out << "<br>";
         if (theLieAlgElts.size > 50)
           out << theLieAlgElts[i].ToString(&theFormat);
@@ -120,7 +120,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
   theContext.ContextGetFormatExpressions(theFormat);
   std::stringstream out;
   out << "Starting elements: <br>";
-  for (int i = 0; i < theOps.size; i++)
+  for (int i = 0; i < theOps.size; i ++)
     out << HtmlRoutines::GetMathSpanPure(theOps[i].ToString(&theFormat)) << "<br>";
   bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, upperBound);
   if (!success)
@@ -128,7 +128,7 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
     << "The basis generated before exceeding the limit was: " << theOps.ToString();
   else
   { out << "<br>Lie bracket generates vector space of dimension " << theOps.size << " with basis:";
-    for (int i = 0; i < theOps.size; i++)
+    for (int i = 0; i < theOps.size; i ++)
     { out << "<br>";
       if (theOps.size > 50)
         out << theOps[i].ToString(&theFormat);
@@ -161,7 +161,7 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
   theCertsRAWuchars.SetSize(sampleSize);
   theCertsRAWstrings.SetSize(sampleSize);
   std::stringstream out;
-  for (int i = 0; i < sampleSize; i++)
+  for (int i = 0; i < sampleSize; i ++)
   { theCertFile >> certsAndShas[i];
     unsigned commaPosition = 0;
     for (;commaPosition < certsAndShas[i].size(); commaPosition++)
@@ -170,7 +170,7 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
     MathRoutines::SplitStringInTwo(certsAndShas[i], commaPosition + 1, theShas[i], theCerts[i]);
     if (theShas[i].size() > 0)
       theShas[i].resize(theShas[i].size() - 1);
-    out << "Raw cert+sha:<br>" << certsAndShas[i] << "<br>Certificate " << i+1
+    out << "Raw cert+sha:<br>" << certsAndShas[i] << "<br>Certificate " << i + 1
     << " (base64):<br>" << theCerts[i] << "<br>Sha1:<br>" << theShas[i]
     << "<br>Comments while extracting the raw certificate: ";
     Crypto::ConvertBase64ToBitStream(theCerts[i], theCertsRAWuchars[i], &out);
@@ -213,27 +213,27 @@ bool CalculatorFunctionsGeneral::innerShaX
   if (!input.IsOfType<std::string>())
     return false;
   List<unsigned char> theBitStream;
-  const std::string& inputString=input.GetValue<std::string>();
+  const std::string& inputString = input.GetValue<std::string>();
   theBitStream.SetSize(inputString.size());
-  for (unsigned i =0; i<inputString.size(); i++)
-    theBitStream[i]=inputString[i];
+  for (unsigned i = 0; i < inputString.size(); i ++)
+    theBitStream[i] = inputString[i];
   std::stringstream out;
   out << "<br>Input: " << inputString;
   out << "<br>Base64 conversion: " << Crypto::ConvertStringToBase64(theBitStream);
   List<uint32_t> theSha1Uint;
   List<unsigned char> theSha1Uchar;
   std::string theSha1base64string;
-  if (shaId=="SHA1")
+  if (shaId == "SHA1")
     Crypto::computeSha1(inputString, theSha1Uint);
-  else if (shaId=="SHA256")
+  else if (shaId == "SHA256")
     Crypto::computeSha256(inputString, theSha1Uint);
-  else if (shaId=="SHA224")
+  else if (shaId == "SHA224")
     Crypto::computeSha224(inputString, theSha1Uint);
   Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, theSha1Uchar);
   theSha1base64string=Crypto::ConvertStringToBase64(theSha1Uchar);
   out << "<br>" << shaId << " in base64: " << theSha1base64string;
   out << "<br>" << shaId << " hex: ";
-  for (int i=0; i<theSha1Uint.size; i++)
+  for (int i = 0; i < theSha1Uint.size; i ++)
     out << std::hex << theSha1Uint[i];
   return output.AssignValue(out.str(), theCommands);
 }
@@ -242,7 +242,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToString(Calculator& theCommands, co
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBase64ToString");
   std::string theString, result;
   if (!input.IsOfType<std::string>(&theString))
-    theString=input.ToString();
+    theString = input.ToString();
   if (!Crypto::ConvertBase64ToString(theString, result, &theCommands.Comments))
     return false;
   return output.AssignValue(result, theCommands);
@@ -253,10 +253,10 @@ bool CalculatorFunctionsGeneral::innerCharToBase64(Calculator& theCommands, cons
   if (!input.IsOfType<std::string>())
     return false;
   List<unsigned char> theBitStream;
-  const std::string& inputString=input.GetValue<std::string>();
+  const std::string& inputString = input.GetValue<std::string>();
   theBitStream.SetSize(inputString.size());
-  for (unsigned i =0; i<inputString.size(); i++)
-    theBitStream[i]=inputString[i];
+  for (unsigned i = 0; i < inputString.size(); i ++)
+    theBitStream[i] = inputString[i];
   return output.AssignValue(Crypto::ConvertStringToBase64(theBitStream), theCommands);
 }
 
@@ -268,7 +268,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCo
   if (!Crypto::ConvertBase64ToBitStream(input.GetValue<std::string>(), theBitStream, &theCommands.Comments))
     return false;
   std::stringstream out;
-  std::string theConvertedBack=Crypto::ConvertStringToBase64(theBitStream);
+  std::string theConvertedBack = Crypto::ConvertStringToBase64(theBitStream);
   out << "Original string: " << input.GetValue<std::string>()
   << "<br>Converted to bitstream and back: " << theConvertedBack;
   if (theConvertedBack!=input.GetValue<std::string>())
@@ -339,16 +339,16 @@ bool CalculatorFunctionsGeneral::innerCasimirWRTlevi(Calculator& theCommands, co
   RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
     return false;
-  SemisimpleLieAlgebra* theSSalg=0;
+  SemisimpleLieAlgebra* theSSalg = 0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSalg))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
-    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
+  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit < 50)
+    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 50;
   Vector<Rational> leviSelection;
   if(!theCommands.GetVectoR(input[2], leviSelection, 0, theSSalg->GetRank()))
     return theCommands << "<hr>Failed to extract parabolic selection. ";
   Selection theParSel;
-  theParSel=leviSelection;
+  theParSel = leviSelection;
   theParSel.InvertSelection();
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir;
   theCasimir.MakeCasimirWRTLeviParabolic(*theSSalg, theParSel);
@@ -383,14 +383,14 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
       return output.AssignValue((Rational) 1, theCommands);
     return false;
   }
-  if (theArgument>0)
+  if (theArgument > 0)
   { if (input.IsAtomGivenData(theCommands.opE()))
       return output.AssignValue((Rational) 1, theCommands);
     return output.AssignValue(FloatingPoint::log(theArgument), theCommands);
   }
-  theArgument*=-1;
+  theArgument *= - 1;
   Expression iE, ipiE, piE, lnPart;
-  iE.MakeSqrt(theCommands, (Rational)-1, 2);
+  iE.MakeSqrt(theCommands, (Rational) - 1, 2);
   piE.MakeAtom(theCommands.opPi(), theCommands);
   ipiE.MakeXOX(theCommands, theCommands.opTimes(), piE, iE);
   lnPart.AssignValue(FloatingPoint::log(theArgument), theCommands);
@@ -399,12 +399,12 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
 
 bool CalculatorFunctionsGeneral::innerFactorial(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFactorial");
-  int inputInt=-1;
+  int inputInt = - 1;
   if (!input.IsIntegerFittingInInt(&inputInt))
     return false;
-  if (inputInt<0)
+  if (inputInt < 0)
     return false;
-  if (inputInt>30000)
+  if (inputInt > 30000)
     return theCommands << "Computing large factorials is disabled "
     << "(can be changed in the source code by modifying CalculatorFunctionsGeneral::innerFactorial).";
   Rational result;
@@ -415,13 +415,13 @@ bool CalculatorFunctionsGeneral::innerArctan(Calculator& theCommands, const Expr
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArctan");
   if (input.IsEqualToOne())
   { output.MakeAtom(theCommands.opPi(), theCommands);
-    output/=theCommands.EFour();
+    output /= theCommands.EFour();
     return true;
   }
   if (input.IsEqualToMOne())
   { output.MakeAtom(theCommands.opPi(), theCommands);
-    output/=theCommands.EFour();
-    output*=theCommands.EMOne();
+    output /= theCommands.EFour();
+    output *= theCommands.EMOne();
     return true;
   }
   if (theCommands.flagNoApproximationS)
@@ -456,20 +456,20 @@ bool CalculatorFunctionsGeneral::innerAbs(Calculator& theCommands, const Express
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAbs");
   Rational theRat;
   if (input.IsRational(&theRat))
-  { if (theRat<0)
+  { if (theRat < 0)
       return output.AssignValue(-theRat, theCommands);
     return output.AssignValue(theRat, theCommands);
   }
-  double theDouble=0;
+  double theDouble = 0;
   if (input.EvaluatesToDouble(&theDouble))
-  { if (theDouble<0)
+  { if (theDouble < 0)
     { Expression moneE;
-      moneE.AssignValue(-1, theCommands);
-      output=input;
-      output*=moneE;
+      moneE.AssignValue(- 1, theCommands);
+      output = input;
+      output *= moneE;
       return true;
     }
-    output=input;
+    output = input;
     return true;
   }
   return false;
@@ -495,7 +495,7 @@ bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Express
       }
   if (theCommands.flagNoApproximationS)
     return false;
-  double theArgument=0;
+  double theArgument = 0;
   if (!input.EvaluatesToDouble(&theArgument))
     return false;
   return output.AssignValue(FloatingPoint::sin(theArgument), theCommands);
@@ -504,7 +504,7 @@ bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Express
 bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCos");
   if (input.IsAtomGivenData(theCommands.opPi()))
-    return output.AssignValue(-1, theCommands);
+    return output.AssignValue(- 1, theCommands);
   if (input.IsEqualToZero())
     return output.AssignValue(1, theCommands);
   Rational piProportion;
@@ -521,7 +521,7 @@ bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Express
       }
   if (theCommands.flagNoApproximationS)
     return false;
-  double theArgument=0;
+  double theArgument = 0;
   if (!input.EvaluatesToDouble(&theArgument))
     return false;
   return output.AssignValue(FloatingPoint::cos(theArgument), theCommands );
@@ -567,7 +567,7 @@ bool Calculator::GetSumProductsExpressions(const Expression& inputSum, List<List
     return false;
   //stOutput << "DEBUG: Collected sum opands: "
   //<< theSummands.ToStringCommaDelimited();
-  for (int i=0; i<theSummands.size; i++)
+  for (int i = 0; i < theSummands.size; i ++)
   { this->CollectOpands(theSummands[i], this->opTimes(), currentMultiplicands);
     outputSumMultiplicands.AddOnTop(currentMultiplicands);
   }
@@ -576,16 +576,15 @@ bool Calculator::GetSumProductsExpressions(const Expression& inputSum, List<List
 
 bool CalculatorFunctionsGeneral::innerCoefficientOf(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCoefficientOf");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   List<List<Expression> > theSummands;
   List<Expression> currentListMultiplicands, survivingSummands;
   Expression currentMultiplicand;
   if (input[2].StartsWith(theCommands.opDivide()))
-  { Expression coefficientNumerator=input;
+  { Expression coefficientNumerator = input;
     coefficientNumerator.SetChilD(2, input[2][1]);
-    if (!CalculatorFunctionsGeneral::innerCoefficientOf
-        (theCommands, coefficientNumerator, output))
+    if (!CalculatorFunctionsGeneral::innerCoefficientOf(theCommands, coefficientNumerator, output))
       return false;
     return output.MakeXOX(theCommands, theCommands.opDivide(), output, input[2][2]);
   }
@@ -596,21 +595,21 @@ bool CalculatorFunctionsGeneral::innerCoefficientOf(Calculator& theCommands, con
     << input[2].ToString();
   //stOutput << "<hr>DEBUG: summands: " << theSummands.ToStringCommaDelimited()
   //<< "<hr>";
-  for(int i=0; i<theSummands.size; i++)
-  { bool isGood=false;
-    for (int j=0; j<theSummands[i].size; j++)
-      if (theSummands[i][j]==input[1])
+  for (int i = 0; i < theSummands.size; i ++)
+  { bool isGood = false;
+    for (int j = 0; j < theSummands[i].size; j ++)
+      if (theSummands[i][j] == input[1])
       { if (isGood)
-        { isGood=false;
+        { isGood = false;
           break;
         }
-        isGood=true;
+        isGood = true;
       }
     if (!isGood)
       continue;
     currentListMultiplicands.SetSize(0);
-    for (int j=0; j<theSummands[i].size; j++)
-      if (theSummands[i][j]!=input[1])
+    for (int j = 0; j < theSummands[i].size; j ++)
+      if (theSummands[i][j] != input[1])
         currentListMultiplicands.AddOnTop(theSummands[i][j]);
     currentMultiplicand.MakeProducT(theCommands, currentListMultiplicands);
     survivingSummands.AddOnTop(currentMultiplicand);
@@ -621,15 +620,15 @@ bool CalculatorFunctionsGeneral::innerCoefficientOf(Calculator& theCommands, con
 bool CalculatorFunctionsGeneral::innerChildExpression(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerChildExpression");
   (void) theCommands;
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
-  int theIndex=0;
+  int theIndex = 0;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
-  theIndex--;
-  if (theIndex<0 || theIndex>=input[1].size())
+  theIndex --;
+  if (theIndex < 0 || theIndex >= input[1].size())
     return false;
-  output=input[1][theIndex];
+  output = input[1][theIndex];
   return true;
 }
 
@@ -641,11 +640,11 @@ bool CalculatorFunctionsGeneral::innerDereferenceInterval(Calculator& theCommand
   if (!input[1].IsIntervalRealLine())
     return false;
   if (input[2].IsEqualToOne())
-  { output=input[1][1];
+  { output = input[1][1];
     return true;
   }
   if (input[2].IsEqualToTwo())
-  { output=input[1][2];
+  { output = input[1][2];
     return true;
   }
   return false;
@@ -662,8 +661,8 @@ bool CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix(Calculator& th
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
-  if (theIndex>0 && theIndex<input[1].size())
-  { output=input[1][theIndex];
+  if (theIndex>0 && theIndex < input[1].size())
+  { output = input[1][theIndex];
     return true;
   }
   return false;
@@ -672,15 +671,15 @@ bool CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix(Calculator& th
 bool CalculatorFunctionsGeneral::innerDereferenceSequenceStatements(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceSequenceStatements");
   (void) theCommands;
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   if (!input[1].StartsWith(theCommands.opEndStatement()))
     return false;
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
-  if (theIndex>0 && theIndex<input[1].size())
-  { output=input[1][theIndex];
+  if (theIndex > 0 && theIndex < input[1].size())
+  { output = input[1][theIndex];
     return true;
   }
   return false;
@@ -691,7 +690,7 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
 { MacroRegisterFunctionWithName("Calculator::innerSolveSerreLikeSystem");
   Vector<Polynomial<Rational> > thePolysRational;
   Expression theContext(theCommands);
-  bool useArguments=
+  bool useArguments =
   input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystem")) ||
   input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemAlgebraic")) ||
   input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemUpperLimit")) ||
@@ -706,7 +705,7 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
       return output.MakeError("Failed to extract list of polynomials. ", theCommands);
   GroebnerBasisComputation<AlgebraicNumber> theComputation;
   theContext.ContextGetFormatExpressions(theComputation.theFormat);
-  int upperLimit=2001;
+  int upperLimit = 2001;
   if (useUpperLimit)
   { Rational upperLimitRat;
     if (!thePolysRational[0].IsConstant(&upperLimitRat))
@@ -718,19 +717,19 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
     thePolysRational.PopIndexShiftDown(0);
   }
   Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
-  thePolysAlgebraic=thePolysRational;
+  thePolysAlgebraic = thePolysRational;
   //int numVars=theContext.GetNumContextVariables();
-  theComputation.MaxNumGBComputations=upperLimit;
-  theComputation.MaxNumSerreSystemComputationsPreferred=upperLimit;
-  theComputation.thePolynomialOrder.theMonOrder=
+  theComputation.MaxNumGBComputations = upperLimit;
+  theComputation.MaxNumSerreSystemComputationsPreferred = upperLimit;
+  theComputation.thePolynomialOrder.theMonOrder =
   MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
 //  stOutput << "Calling SolveSerreLikeSystem with upperLimit= " << upperLimit;
-  theComputation.theAlgebraicClosurE=&theCommands.theObjectContainer.theAlgebraicClosure;
-  theComputation.flagTryDirectlySolutionOverAlgebraicClosure=startWithAlgebraicClosure;
-  theGlobalVariables.theDefaultFormat.GetElement()=theComputation.theFormat;
+  theComputation.theAlgebraicClosurE = &theCommands.theObjectContainer.theAlgebraicClosure;
+  theComputation.flagTryDirectlySolutionOverAlgebraicClosure = startWithAlgebraicClosure;
+  theGlobalVariables.theDefaultFormat.GetElement() = theComputation.theFormat;
 //  stOutput << "<br>the alphabet:" << theComputation.theFormat.polyAlphabeT;
 //  stOutput << "<br>The context vars:<br>" << theContext.ToString();
-  theComputation.flagUseTheMonomialBranchingOptimization=true;
+  theComputation.flagUseTheMonomialBranchingOptimization = true;
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic);
 //  stOutput << "<br>Got to ere";
   std::stringstream out;
@@ -759,7 +758,7 @@ bool CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly(Calculator& 
   if (!polyE.IsOfType<Polynomial<AlgebraicNumber> >(&thePoly))
     return theCommands << "<hr>Failed to convert " << input.ToString()
     << " to polynomial, instead got " << polyE.ToString();
-  if (polyE.GetNumContextVariables()!=1)
+  if (polyE.GetNumContextVariables() != 1)
     return theCommands << "<hr>After conversion, I got the polynomial " << polyE.ToString()
     << ", which is not in one variable.";
   AlgebraicNumber theAN;
@@ -773,7 +772,7 @@ bool CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC(Calculator& t
   //stOutput << "<hr>input be: " << input.ToString();
   if (!input.IsListNElements())
     return false;
-  const Expression& firstE=input[0];
+  const Expression& firstE = input[0];
   if (!firstE.StartsWith(theCommands.opThePower(), 3))
     return false;
   if (firstE[1].IsSequenceNElementS())
@@ -782,7 +781,7 @@ bool CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC(Calculator& t
   Expression finalBase;
   finalBase.reset(theCommands, input.children.size);
   finalBase.AddChildOnTop(input[0][1]);
-  for (int i=1; i<input.children.size; i++)
+  for (int i = 1; i < input.children.size; i ++)
     finalBase.AddChildOnTop(input[i]);
   return output.MakeXOX(theCommands, theCommands.opThePower(), finalBase, input[0][2]);
 }
@@ -794,7 +793,7 @@ bool CalculatorFunctionsGeneral::innerConstantFunction(Calculator& theCommands, 
     return false;
   if (!input[0].IsConstantNumber())
     return false;
-  output=input[0];
+  output = input[0];
   return true;
 }
 
@@ -802,17 +801,17 @@ bool CalculatorFunctionsGeneral::outerCombineFractionsCommutative(Calculator& th
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCombineFractionsCommutative");
   if (!input.StartsWith(theCommands.opPlus(), 3))
     return false;
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
   if (!leftE.StartsWith(theCommands.opDivide(), 3) ||
       !rightE.StartsWith(theCommands.opDivide(), 3))
     return false;
   theCommands << "<br><b>To do: make function outerCombineFractionsCommutative work much better.</b>";
-  if (leftE[2]==rightE[2])
-  { output=(leftE[1]+rightE[1])/leftE[2];
+  if (leftE[2] == rightE[2])
+  { output = (leftE[1] + rightE[1]) / leftE[2];
     return true;
   }
-  output=(leftE[1]*rightE[2]+rightE[1]*leftE[2])/(leftE[2]*rightE[2]);
+  output = (leftE[1] * rightE[2] + rightE[1] * leftE[2]) / (leftE[2] * rightE[2]);
   return true;
 }
 
@@ -820,19 +819,19 @@ template<class coefficient>
 void Polynomial<coefficient>::GetPolyWithPolyCoeff
 (Selection& theNonCoefficientVariables, Polynomial<Polynomial<coefficient> >& output)const
 { MacroRegisterFunctionWithName("Polynomial::GetPolyWithPolyCoeff");
-  if (theNonCoefficientVariables.MaxSize!=this->GetMinNumVars())
+  if (theNonCoefficientVariables.MaxSize != this->GetMinNumVars())
     crash << "GetPolyWithPolyCoeff called with selection which has selects the wrong number of variables. " << crash;
   output.MakeZero();
   MonomialP coeffPart, polyPart;
   Polynomial<coefficient> currentCF;
-  for (int i=0; i<this->size(); i++)
+  for (int i = 0; i < this->size(); i ++)
   { coeffPart.MakeOne();
     polyPart.MakeOne();
-    for (int j=0; j<(*this)[i].GetMinNumVars(); j++)
+    for (int j = 0; j < (*this)[i].GetMinNumVars(); j ++)
       if (theNonCoefficientVariables.selected[j])
-        polyPart[j]=(*this)[i](j);
+        polyPart[j] = (*this)[i](j);
       else
-        coeffPart[j]=(*this)[i](j);
+        coeffPart[j] = (*this)[i](j);
     currentCF.MakeZero();
     currentCF.AddMonomial(coeffPart, this->theCoeffs[i]);
     output.AddMonomial(polyPart, currentCF);
@@ -854,20 +853,20 @@ bool Polynomial<coefficient>::GetLinearSystemFromLinearPolys
  Matrix<coefficient>& constTerms)
 { MacroRegisterFunctionWithName("Polynomial::GetLinearSystemFromLinearPolys");
   int theLetter;
-  int numVars=0;
-  for (int i=0; i<theLinPolys.size; i++)
-    numVars=MathRoutines::Maximum(theLinPolys[i].GetMinNumVars(), numVars);
+  int numVars = 0;
+  for (int i = 0; i < theLinPolys.size; i ++)
+    numVars = MathRoutines::Maximum(theLinPolys[i].GetMinNumVars(), numVars);
   homogenousPart.init(theLinPolys.size, numVars);
   homogenousPart.MakeZero();
-  constTerms.init(theLinPolys.size,1);
+  constTerms.init(theLinPolys.size, 1);
   constTerms.MakeZero();
-  for (int i=0; i<theLinPolys.size; i++)
-    for (int j=0; j<theLinPolys[i].size(); j++)
+  for (int i = 0; i < theLinPolys.size; i ++)
+    for (int j = 0; j < theLinPolys[i].size(); j ++)
       if (theLinPolys[i][j].IsLinearNoConstantTerm(&theLetter))
-        homogenousPart(i,theLetter)=theLinPolys[i].theCoeffs[j];
+        homogenousPart(i, theLetter) = theLinPolys[i].theCoeffs[j];
       else if (theLinPolys[i][j].IsConstant())
-      { constTerms(i,0)=theLinPolys[i].theCoeffs[j];
-        constTerms(i,0)*=-1;
+      { constTerms(i, 0) = theLinPolys[i].theCoeffs[j];
+        constTerms(i, 0) *= - 1;
       } else
         return false;
   return true;
@@ -876,14 +875,14 @@ bool Polynomial<coefficient>::GetLinearSystemFromLinearPolys
 template <class coefficient>
 coefficient Polynomial<coefficient>::GetDiscriminant()
 { MacroRegisterFunctionWithName("Polynomial::GetDiscriminant");
-  if (this->GetMinNumVars()>1)
+  if (this->GetMinNumVars() > 1)
     crash << "I do not have a definition of discriminant for more than one variable. " << crash;
-  if (this->TotalDegree()!=2)
+  if (this->TotalDegree() != 2)
     crash << "Discriminant not implemented for polynomial of degree not equal to 1." << crash;
-  coefficient a=this->GetMonomialCoefficient(MonomialP(0,2));
-  coefficient b=this->GetMonomialCoefficient(MonomialP(0,1));
-  coefficient c=this->GetMonomialCoefficient(MonomialP(0,0));
-  return b*b-a*c*4;
+  coefficient a = this->GetMonomialCoefficient(MonomialP(0, 2));
+  coefficient b = this->GetMonomialCoefficient(MonomialP(0, 1));
+  coefficient c = this->GetMonomialCoefficient(MonomialP(0, 0));
+  return b * b - a * c * 4;
 }
 
 class IntegralRFComputation
@@ -933,7 +932,7 @@ public:
 };
 
 bool IntegralRFComputation::CheckConsistency()const
-{ if (this->owner==0)
+{ if (this->owner == 0)
     crash << "Non-initialized rf computation" << crash;
   return true;
 }
@@ -947,21 +946,20 @@ bool IntegralRFComputation::PreparePFExpressionSummands()
   this->thePFSummands.SetSize(0);
   Polynomial<AlgebraicNumber> denRescaled, numRescaled;
   AlgebraicNumber currentCoefficient, numScale;
-  for (int i=0; i<this->theNumerators.size; i++)
-    for (int j=0; j<this->theNumerators[i].size; j++)
+  for (int i = 0; i < this->theNumerators.size; i ++)
+    for (int j = 0; j < this->theNumerators[i].size; j ++)
     { if (this->theNumerators[i][j].IsEqualToZero())
         continue;
-      denRescaled=this->theDenominatorFactorsWithMults[i];
-      numRescaled=this->theNumerators[i][j];
-      currentCoefficient=denRescaled.theCoeffs[denRescaled.GetIndexMaxMonomial()];
+      denRescaled = this->theDenominatorFactorsWithMults[i];
+      numRescaled = this->theNumerators[i][j];
+      currentCoefficient = denRescaled.theCoeffs[denRescaled.GetIndexMaxMonomial()];
       currentCoefficient.Invert();
-      denRescaled*=currentCoefficient;
-      MathRoutines::RaiseToPower(currentCoefficient, j+1, (AlgebraicNumber) 1);
-      numScale=numRescaled.theCoeffs[numRescaled.GetIndexMaxMonomial()];
-      numRescaled/=numScale;
-      currentCoefficient*=numScale;
+      denRescaled *= currentCoefficient;
+      MathRoutines::RaiseToPower(currentCoefficient, j + 1, (AlgebraicNumber) 1);
+      numScale = numRescaled.theCoeffs[numRescaled.GetIndexMaxMonomial()];
+      numRescaled /= numScale;
+      currentCoefficient *= numScale;
       polyE.AssignValueWithContext(numRescaled, this->contextE, *this->owner);
-
 //      stOutput << "<br>polyE is: " << polyE.ToString();
       if (!CalculatorConversions::innerExpressionFromBuiltInType(*this->owner, polyE, currentNum))
         return false;
@@ -970,16 +968,16 @@ bool IntegralRFComputation::PreparePFExpressionSummands()
       if(!CalculatorConversions::innerExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPowerMonic))
         return false;
 //      stOutput << "<br>currentDenNoPower is: " << currentDenNoPower.ToString();
-      if (j!=0)
-      { denExpE.AssignValue(j+1, *this->owner);
+      if (j != 0)
+      { denExpE.AssignValue(j + 1, *this->owner);
         currentDen.MakeXOX(*this->owner, this->owner->opThePower(), currentDenNoPowerMonic, denExpE);
       } else
-        currentDen=currentDenNoPowerMonic;
-      currentPFnoCoeff=currentNum;
-      currentPFnoCoeff/=currentDen;
+        currentDen = currentDenNoPowerMonic;
+      currentPFnoCoeff = currentNum;
+      currentPFnoCoeff /= currentDen;
 //      stOutput << "<br>CurrentIntegrand is: " << currentIntegrand.ToString();
       coeffE.AssignValue(currentCoefficient, *this->owner);
-      currentPFWithCoeff=coeffE*currentPFnoCoeff;
+      currentPFWithCoeff = coeffE * currentPFnoCoeff;
       currentPFWithCoeff.CheckConsistencyRecursively();
 //      stOutput << "<br>Current integral is: " << currentIntegral.ToString();
       this->thePFSummands.AddOnTop(currentPFWithCoeff);
@@ -1013,42 +1011,39 @@ bool IntegralRFComputation::IntegrateRF()
   this->theIntegralSummands.SetSize(0);
   Polynomial<AlgebraicNumber> denRescaled, numRescaled;
   AlgebraicNumber currentCoefficient, numScale;
-  for (int i=0; i<this->theNumerators.size; i++)
-    for (int j=0; j<this->theNumerators[i].size; j++)
+  for (int i = 0; i < this->theNumerators.size; i ++)
+    for (int j = 0; j < this->theNumerators[i].size; j ++)
     { if (this->theNumerators[i][j].IsEqualToZero())
         continue;
-      denRescaled=this->theDenominatorFactorsWithMults[i];
-      numRescaled=this->theNumerators[i][j];
-      currentCoefficient=denRescaled.theCoeffs[denRescaled.GetIndexMaxMonomial()];
+      denRescaled = this->theDenominatorFactorsWithMults[i];
+      numRescaled = this->theNumerators[i][j];
+      currentCoefficient = denRescaled.theCoeffs[denRescaled.GetIndexMaxMonomial()];
       currentCoefficient.Invert();
-      denRescaled*=currentCoefficient;
-      MathRoutines::RaiseToPower(currentCoefficient, j+1, (AlgebraicNumber) 1);
-      numScale=numRescaled.theCoeffs[numRescaled.GetIndexMaxMonomial()];
-      numRescaled/=numScale;
-      currentCoefficient*=numScale;
+      denRescaled *= currentCoefficient;
+      MathRoutines::RaiseToPower(currentCoefficient, j + 1, (AlgebraicNumber) 1);
+      numScale = numRescaled.theCoeffs[numRescaled.GetIndexMaxMonomial()];
+      numRescaled /= numScale;
+      currentCoefficient *= numScale;
       polyE.AssignValueWithContext(numRescaled, this->contextE, *this->owner);
-
-//      stOutput << "<br>polyE is: " << polyE.ToString();
       if (!CalculatorConversions::innerExpressionFromBuiltInType(*this->owner, polyE, currentNum))
         return false;
-//      stOutput << "<br>currentNum is: " << currentNum.ToString();
       polyE.AssignValueWithContext(denRescaled, this->contextE, *this->owner);
       if(!CalculatorConversions::innerExpressionFromBuiltInType(*this->owner, polyE, currentDenNoPowerMonic))
         return false;
 //      stOutput << "<br>currentDenNoPower is: " << currentDenNoPower.ToString();
-      if (j!=0)
-      { denExpE.AssignValue(j+1, *this->owner);
+      if (j != 0)
+      { denExpE.AssignValue(j + 1, *this->owner);
         currentDen.MakeXOX(*this->owner, this->owner->opThePower(), currentDenNoPowerMonic, denExpE);
       } else
-        currentDen=currentDenNoPowerMonic;
-      currentIntegrand=currentNum;
-      currentIntegrand/=currentDen;
+        currentDen = currentDenNoPowerMonic;
+      currentIntegrand = currentNum;
+      currentIntegrand /= currentDen;
 //      stOutput << "<br>CurrentIntegrand is: " << currentIntegrand.ToString();
       currentIntegralNoCoeff.MakeIntegral
       (*this->owner, this->integrationSetE, currentIntegrand,
        this->contextE.ContextGetContextVariable(0));
       coeffE.AssignValue(currentCoefficient, *this->owner);
-      currentIntegralWithCoeff=coeffE*currentIntegralNoCoeff;
+      currentIntegralWithCoeff = coeffE * currentIntegralNoCoeff;
       currentIntegralWithCoeff.CheckConsistencyRecursively();
 //      stOutput << "<br>Current integral is: " << currentIntegral.ToString();
       this->theIntegralSummands.AddOnTop(currentIntegralWithCoeff);
@@ -1084,11 +1079,10 @@ bool Polynomial<coefficient>::FactorMeNormalizedFactors
   List<Polynomial<Rational> > factorsToBeProcessed;
   outputFactors.SetSize(0);
   factorsToBeProcessed.AddOnTop(*this);
-
   factorsToBeProcessed.LastObject()->ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   Polynomial<Rational> currentFactor, divisor;
-  while (factorsToBeProcessed.size>0)
-  { currentFactor=factorsToBeProcessed.PopLastObject();
+  while (factorsToBeProcessed.size > 0)
+  { currentFactor = factorsToBeProcessed.PopLastObject();
 //    stOutput << "<hr>Factoring " << currentFactor.ToString() << "<br>";
     if(!currentFactor.FactorMeOutputIsADivisor(divisor, comments))
       return false;
@@ -1106,8 +1100,8 @@ bool Polynomial<coefficient>::FactorMeNormalizedFactors
   outputFactors.QuickSortAscending();
   Polynomial<Rational> checkComputations;
   checkComputations.MakeOne();
-  for (int i=0; i<outputFactors.size; i++)
-    checkComputations*=outputFactors[i];
+  for (int i = 0; i < outputFactors.size; i ++)
+    checkComputations *= outputFactors[i];
   if (!checkComputations.IsProportionalTo(*this, outputCoeff, 1))
     crash << "Error in polynomial factorization function." << crash;
   return true;
@@ -1118,104 +1112,105 @@ void IntegralRFComputation::PrepareFormatExpressions()
   std::stringstream rfStream, polyStream;
   rfStream << transformedRF.ToString(&this->currentFormaT) << " = ";
   polyStream << remainderRescaledAlgebraic.ToString(&this->currentFormaT) << " = ";
-  int varCounter=0;
-  for (int i =0; i<this->theDenominatorFactorsWithMults.size(); i++)
-  { int tempSize=-1;
+  int varCounter = 0;
+  for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++)
+  { int tempSize = - 1;
     this->theDenominatorFactorsWithMults.theCoeffs[i].IsSmallInteger(&tempSize);
-    for (int k=0; k<this->theDenominatorFactorsWithMults.theCoeffs[i]; k++)
+    for (int k = 0; k < this->theDenominatorFactorsWithMults.theCoeffs[i]; k ++)
     { rfStream << "\\frac{";
-      if (this->theDenominatorFactorsWithMults[i].TotalDegree()>1)
+      if (this->theDenominatorFactorsWithMults[i].TotalDegree() > 1)
         polyStream << "(";
-      for (int j=0; j<this->theDenominatorFactorsWithMults[i].TotalDegree(); j++)
-      { varCounter++;
+      for (int j = 0; j < this->theDenominatorFactorsWithMults[i].TotalDegree(); j ++)
+      { varCounter ++;
         std::stringstream varNameStream;
         varNameStream << "A_{" << varCounter << "} ";
         rfStream << varNameStream.str();
         polyStream << varNameStream.str();
         this->currentFormaT.polyAlphabeT.AddOnTop(varNameStream.str());
-        if (j>0)
+        if (j > 0)
         { rfStream << "x";
           polyStream << "x";
         }
-        if (j>1)
+        if (j > 1)
         { rfStream << "^{" << j << "}";
           polyStream << "^{" << j << "}";
         }
-        if ((this->theDenominatorFactorsWithMults[i].TotalDegree()-1)!=j)
+        if ((this->theDenominatorFactorsWithMults[i].TotalDegree() - 1) != j)
         { rfStream << " + ";
           polyStream << " + ";
         }
       }
-      if (this->theDenominatorFactorsWithMults[i].TotalDegree()>1)
+      if (this->theDenominatorFactorsWithMults[i].TotalDegree() > 1)
         polyStream << ")";
-      for (int j=0; j<this->theDenominatorFactorsWithMults.size(); j++)
-      { Rational theExp=this->theDenominatorFactorsWithMults.theCoeffs[j];
-        if (j==i)
-          theExp-=k+1;
-        if (theExp==0)
+      for (int j = 0; j < this->theDenominatorFactorsWithMults.size(); j ++)
+      { Rational theExp = this->theDenominatorFactorsWithMults.theCoeffs[j];
+        if (j == i)
+          theExp -= k + 1;
+        if (theExp == 0)
           continue;
         polyStream << "(" << this->theDenominatorFactorsWithMults[j].ToString(&this->currentFormaT) << ")";
-        if (theExp>1)
+        if (theExp > 1)
           polyStream << "^{" << theExp << "}";
       }
       rfStream << "}{";
-      if (k>0)
+      if (k > 0)
         rfStream << "(";
       rfStream << this->theDenominatorFactorsWithMults[i].ToString(&this->currentFormaT);
-      if (k>0)
-        rfStream << ")^{" << k+1 << "}";
+      if (k > 0)
+        rfStream << ")^{" << k + 1 << "}";
       rfStream << "}";
-      if (((this->theDenominatorFactorsWithMults.theCoeffs[i]-1)!=k) || (i!=this->theDenominatorFactorsWithMults.size()-1))
+      if (((this->theDenominatorFactorsWithMults.theCoeffs[i] - 1) != k) ||
+          (i != this->theDenominatorFactorsWithMults.size() - 1))
       { rfStream << "+";
         polyStream << "+";
       }
     }
   }
-  this->stringRationalFunctionLatex=rfStream.str();
-  this->stringPolyIndentityNonSimplifiedLatex=polyStream.str();
+  this->stringRationalFunctionLatex = rfStream.str();
+  this->stringPolyIndentityNonSimplifiedLatex = polyStream.str();
 }
 
 void IntegralRFComputation::PrepareNumerators()
 { MacroRegisterFunctionWithName("IntegralRFComputation::PrepareNumerators");
 //  stOutput << "DEBUG: Remainder rat: " << this->remainderRat.ToString();
-  this->transformedRF=this->remainderRat;
+  this->transformedRF = this->remainderRat;
   //stOutput << " denominator: " << this->theDen.ToString();
-  this->transformedRF/=this->theDen;
+  this->transformedRF /= this->theDen;
   //stOutput << " transformed rf: " << this->transformedRF.ToString();
-  this->remainderRescaledAlgebraic=this->remainderRat;
-  this->remainderRescaledAlgebraic/=additionalMultiple;
-  this->NumberOfSystemVariables=0;
+  this->remainderRescaledAlgebraic = this->remainderRat;
+  this->remainderRescaledAlgebraic /= additionalMultiple;
+  this->NumberOfSystemVariables = 0;
   Polynomial<AlgebraicNumber> currentSummand;
   MonomialP currentMon;
   this->thePolyThatMustVanish.MakeZero();
-  this->thePolyThatMustVanish-=remainderRescaledAlgebraic;
+  this->thePolyThatMustVanish -= remainderRescaledAlgebraic;
   this->theNumerators.SetSize(this->theDenominatorFactorsWithMults.size());
-  for (int i =0; i<this->theDenominatorFactorsWithMults.size(); i++)
-  { int tempSize=-1;
+  for (int i = 0; i < this->theDenominatorFactorsWithMults.size(); i ++)
+  { int tempSize = - 1;
     //stOutput << "<br>DEBUG: Accounting denominator: " << this->theDenominatorFactorsWithMults[i].ToString() << " with coeff: "
     //<< this->theDenominatorFactorsWithMults.theCoeffs[i].ToString();
     this->theDenominatorFactorsWithMults.theCoeffs[i].IsSmallInteger(&tempSize);
     this->theNumerators[i].SetSize(tempSize);
-    for (int k=0; k<this->theDenominatorFactorsWithMults.theCoeffs[i]; k++)
+    for (int k = 0; k < this->theDenominatorFactorsWithMults.theCoeffs[i]; k ++)
     { currentSummand.MakeZero();
       this->theNumerators[i][k].MakeZero();
-      for (int j=0; j<this->theDenominatorFactorsWithMults[i].TotalDegree(); j++)
-      { this->NumberOfSystemVariables++;
+      for (int j = 0; j < this->theDenominatorFactorsWithMults[i].TotalDegree(); j ++)
+      { this->NumberOfSystemVariables ++;
         currentMon.MakeEi(this->NumberOfSystemVariables);
-        currentMon[0]=j;
+        currentMon[0] = j;
         this->theNumerators[i][k].AddMonomial(currentMon, 1);
         currentSummand.AddMonomial(currentMon, 1);
       }
-      for (int j=0; j<this->theDenominatorFactorsWithMults.size(); j++)
-      { Rational theExp=this->theDenominatorFactorsWithMults.theCoeffs[j];
-        if (j==i)
-          theExp-=k+1;
-        if (theExp==0)
+      for (int j = 0; j < this->theDenominatorFactorsWithMults.size(); j ++)
+      { Rational theExp = this->theDenominatorFactorsWithMults.theCoeffs[j];
+        if (j == i)
+          theExp -= k + 1;
+        if (theExp == 0)
           continue;
-        for (int p=0; p<theExp; p++)
-          currentSummand*=this->theDenominatorFactorsWithMults[j];
+        for (int p = 0; p < theExp; p ++)
+          currentSummand *= this->theDenominatorFactorsWithMults[j];
       }
-      this->thePolyThatMustVanish+=currentSummand;
+      this->thePolyThatMustVanish += currentSummand;
     }
   }
 }
@@ -1223,18 +1218,19 @@ void IntegralRFComputation::PrepareNumerators()
 void IntegralRFComputation::PrepareFinalAnswer()
 { MacroRegisterFunctionWithName("IntegralRFComputation::PrepareFinalAnswer");
   std::stringstream rfComputedStream, answerFinalStream;
-  for (int i =0; i<theDenominatorFactorsWithMults.size(); i++)
-    for (int k=0; k<theDenominatorFactorsWithMults.theCoeffs[i]; k++)
+  for (int i = 0; i < theDenominatorFactorsWithMults.size(); i ++)
+    for (int k = 0; k < theDenominatorFactorsWithMults.theCoeffs[i]; k ++)
     { rfComputedStream << "\\frac{" << this->theNumerators[i][k].ToString(&this->currentFormaT) << "}";
       rfComputedStream << "{";
       rfComputedStream << "(" << theDenominatorFactorsWithMults[i].ToString(&this->currentFormaT) << ")";
-      if (k>0)
-        rfComputedStream << "^{" << k+1 << "}";
+      if (k > 0)
+        rfComputedStream << "^{" << k + 1 << "}";
       rfComputedStream << "}";
-      if (((theDenominatorFactorsWithMults.theCoeffs[i]-1)!=k) || (i!=theDenominatorFactorsWithMults.size()-1))
+      if (((theDenominatorFactorsWithMults.theCoeffs[i] - 1) != k) ||
+          (i != theDenominatorFactorsWithMults.size() - 1))
         rfComputedStream << "+";
     }
-  this->stringRationalFunctionPartialFractionLatex=rfComputedStream.str();
+  this->stringRationalFunctionPartialFractionLatex = rfComputedStream.str();
   answerFinalStream << this->theRF.ToString(&this->currentFormaT) << "=";
   if (!this->quotientRat.IsEqualToZero())
   { answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
@@ -1243,7 +1239,7 @@ void IntegralRFComputation::PrepareFinalAnswer()
   if (!this->quotientRat.IsEqualToZero())
     answerFinalStream << this->quotientRat.ToString(&this->currentFormaT) << "+ ";
   answerFinalStream << this->stringRationalFunctionPartialFractionLatex;
-  this->stringFinalAnswer=answerFinalStream.str();
+  this->stringFinalAnswer = answerFinalStream.str();
 }
 
 void IntegralRFComputation::PrepareDenominatorFactors()
@@ -1256,19 +1252,19 @@ void IntegralRFComputation::PrepareDenominatorFactors()
   << "(the denominator has been factored). \\[\\frac{"
   << this->theNum.ToString(&this->currentFormaT) << "}{" << this->theDen.ToString(&this->currentFormaT) << "}="
   << "\\frac{" << this->theNum.ToString(&this->currentFormaT)  << "}{ ";
-  this->allFactorsAreOfDegree2orless =true;
-  for (int i=0; i<this->theFactors.size; i++)
+  this->allFactorsAreOfDegree2orless = true;
+  for (int i = 0; i < this->theFactors.size; i ++)
   { this->printoutPFsHtml << HtmlRoutines::GetMathSpanPure(this->theFactors[i].ToString(&this->currentFormaT));
-    bool needsParenthesis= this->theFactors[i].NeedsParenthesisForMultiplication();
+    bool needsParenthesis = this->theFactors[i].NeedsParenthesisForMultiplication();
     if (needsParenthesis)
       this->printoutPFsLatex << "\\left(";
     this->printoutPFsLatex << this->theFactors[i].ToString(&this->currentFormaT);
     if (needsParenthesis)
       this->printoutPFsLatex << "\\right)";
-    if (i!=this->theFactors.size-1)
+    if (i != this->theFactors.size - 1)
       this->printoutPFsHtml << ", ";
-    if (this->theFactors[i].TotalDegree()>2)
-      allFactorsAreOfDegree2orless=false;
+    if (this->theFactors[i].TotalDegree() > 2)
+      allFactorsAreOfDegree2orless = false;
   }
   this->printoutPFsLatex << "}";
   this->printoutPFsLatex << "\\]";

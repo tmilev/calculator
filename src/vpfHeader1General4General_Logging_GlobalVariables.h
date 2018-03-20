@@ -20,8 +20,8 @@ public:
   std::string ToStringHtml()const;
   std::string ToStringConsole()const;
   static int getCurrentThreadId();
-  static void RegisterFirstThread(const std::string& inputName="");
-  static ThreadData& RegisterNewThread(const std::string& inputName="");
+  static void RegisterFirstThread(const std::string& inputName = "");
+  static ThreadData& RegisterNewThread(const std::string& inputName = "");
   static void CreateThread(void (*InputFunction)(int), const std::string& inputName);
   static std::string ToStringAllThreadsHtml();
   static std::string ToStringAllThreadsConsole();
@@ -64,11 +64,11 @@ public:
   void (*WebServerTimerPing)(double pingTime);
   void (*PauseUponUserRequest)();
   void Pause()
-  { if (this->PauseUponUserRequest!=0)
+  { if (this->PauseUponUserRequest != 0)
       this->PauseUponUserRequest();
   }
   void FallAsleep(int microseconds)
-  { if (this->sleepFunction!=0)
+  { if (this->sleepFunction != 0)
       this->sleepFunction(microseconds);
   }
 //  double MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
@@ -240,7 +240,7 @@ public:
   std::string ToStringProgressReportHtml();
   std::string ToStringProgressReportConsole();
   inline void MakeReport(const std::string& input)
-  { if (this->IndicatorStringOutputFunction!=0)
+  { if (this->IndicatorStringOutputFunction != 0)
       this->IndicatorStringOutputFunction(input);
   }
   void MakeReport();
@@ -293,7 +293,7 @@ class logger
     this->initializeIfNeeded();
     if (!this->flagStopWritingToFile)
     { std::stringstream out;
-      if (this->processType!=theGlobalVariables.processType)
+      if (this->processType != theGlobalVariables.processType)
         out << "WARNING: logger is for process type: " << this->processType
         << " but current process is of type: " << theGlobalVariables.processType << ". ";
       out << toBePrinted;
@@ -306,7 +306,7 @@ class logger
         this->theFile.flush();
       }
     }
-    if (this->carbonCopy!=0)
+    if (this->carbonCopy != 0)
       (*(this->carbonCopy)) << toBePrinted;
     else if (theGlobalVariables.flagRunningBuiltInWebServer || theGlobalVariables.flagRunningCommandLine)
       std::cout << toBePrinted;

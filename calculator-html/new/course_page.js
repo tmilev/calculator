@@ -67,10 +67,13 @@ function afterLoadTopics(incomingTopics, result){
   }
   stringHTMLContent += "<hr>" + incomingTopics;
   topicsElements[0].innerHTML = stringHTMLContent;
+  MathJax.Hub.Queue(['Typeset', MathJax.Hub, topicsElements[0]]);
 }
 
 function afterLoadCoursePage(incomingPage, result){
   document.getElementById("divCurrentCourse").innerHTML = incomingPage;
+  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentCourse")]);
+  //MathJax.Hub.Process();
   var theTopics = document.getElementsByTagName("topicList");
   if (theTopics.length  === 0)
     return;

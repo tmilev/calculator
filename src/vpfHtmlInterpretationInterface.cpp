@@ -767,11 +767,9 @@ std::string HtmlInterpretation::GetJSONFromTemplate()
   out << "<!-- File automatically generated from template: "
   << theGlobalVariables.GetWebInput("fileName")
   << ".-->\n";
+  out << thePage.outputHtmlBodyNoTag;
   out << "<small>Generated in " << theGlobalVariables.GetElapsedSeconds()
   << " second(s).</small>";
-  if (thePage.flagDoPrependProblemNavigationBar)
-    out << thePage.outputProblemNavigatioN;
-  out << thePage.outputHtmlBodyNoTag;
   return out.str();
 }
 

@@ -331,8 +331,8 @@ function exampleCalculatorClick(theLink){
   }
 
 //console.log(theHandler);
-
-  document.getElementById("mainInputID").innerHTML = theHandler.example;
+  var mainInput = document.getElementById("mainInputID");
+  mainInput.value = theHandler.example;
   submitCalculatorComputation();
 }
 

@@ -595,7 +595,8 @@ std::string HtmlInterpretation::GetSelectCourseJSON()
   for (int i = 0; i < theCourses.theCourses.size; i ++)
   { JSData currentCourse;
     currentCourse["title"] = theCourses.theCourses[i].title;
-    currentCourse["template"] = theCourses.theCourses[i].courseTemplate;
+    currentCourse["html"] = theCourses.theCourses[i].courseTemplate;
+    currentCourse["topics"] = theCourses.theCourses[i].courseTopics;
     output["courses"].list.AddOnTop(currentCourse);
   }
   return output.ToString();

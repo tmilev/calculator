@@ -430,6 +430,7 @@ div.divPage{
   visibility: visible;
 }
 div.divMainPage{
+  width: 90%;
 }
 div.divTheMainMenu{
   display: flex;

@@ -1,7 +1,7 @@
-function getCookie(c_name)
-{ VPFcookie = document.cookie.split(";");
-  for (i = 0; i < VPFcookie.length; i++)
-  { x = VPFcookie[i].substr(0, VPFcookie[i].indexOf("="));
+function getCookie(c_name){ 
+  VPFcookie = document.cookie.split(";");
+  for (i = 0; i < VPFcookie.length; i ++){ 
+    x = VPFcookie[i].substr(0, VPFcookie[i].indexOf("="));
     y = VPFcookie[i].substr(VPFcookie[i].indexOf("=") + 1);
     x = x.replace(/^\s+|\s+$/g,"");
     if (x === c_name)
@@ -10,11 +10,12 @@ function getCookie(c_name)
   return "";
 }
 
-function addCookie(theName, theValue, exdays, secure)
-{ exdate = new Date();
+function addCookie(theName, theValue, exdays, secure){ 
+  exdate = new Date();
   exdate.setDate(exdate.getDate() + exdays);
   c_value = escape(theValue) + ((exdays === null) ? "" : "; expires=" + exdate.toUTCString());
-  if (secure)
+  if (secure){
     c_value += "; Secure";
+  }
   document.cookie = theName + "=" + c_value + "; Path=/;";
 }

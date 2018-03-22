@@ -439,7 +439,7 @@ div.divTheMainMenu{
   max-width: 120px;
   width: 20%;
   position: fixed;
-  right: 1%;
+  right: 0.8%;
 }
 div.divMainMenuCollapsed{
   display: flex;
@@ -613,6 +613,14 @@ table.topicList th {
   padding-top: 12px;
   padding-bottom: 12px;
 }
+a.linkLogoutInactive{
+  transition: all 1s;
+  opacity: 0;
+}
+a.linkLogoutActive{
+  transition: all 1s;
+  opacity: 1;
+}
 a.linkInfo{
   margin-left: 10px;
   margin-right: 10px;
@@ -732,6 +740,37 @@ a.courseLink{
 a.courseLink:hover{
   background-color: LawnGreen;
 }
+
+div.divProfilePictureContainerExpanded{
+  width: 96px;
+  height: 96px;
+  transition: all 1s;
+  margin-left: auto;
+  margin-right: auto;  
+}
+
+div.divProfilePictureContainerCollapsed{
+  width: 25px;
+  height: 25px;
+  transition: all 1s;
+}
+img {
+  transition: all 1;
+  width: 100%; 
+  object-fit: scale-down;
+  /*object-fit: contain;*/
+}
+.profilePicture{
+  transition: all 1s;
+  display: block;
+}
+
+div.divLoginPanel{
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
 div.divLogin{
 text-align: center;
 }
@@ -752,7 +791,30 @@ overflow: hidden;
 -moz-transition: all 1s ease;
 transition: all 1s ease;
 }
-
+div.centerHorizontallyInPageContainer{
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+div.centerVerticallyInPageContainer{
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+div.divCenteredItem{
+  margin: 10px;
+  padding: 0px;
+}
 form.formLogin > * {
 font-size: 1.1em;
 }
@@ -777,27 +839,6 @@ button.buttonSelectPage{
 button.buttonSelectPage:hover{
   background-color: #8db8c6;
   transition: background-color 1.5s;
-}
-button.buttonLogin{
-  display: inline;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-  background-color: #ccffcc;
-  padding: 5px;
-  color: #444;
-  cursor: pointer;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: 1.25em;
-  font-weight: bold;
-  transition: 0.6s;
-}
-button.buttonLogin:hover {
-  background-color: LawnGreen
 }
 lectureTag{
 color: green;

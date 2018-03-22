@@ -582,7 +582,7 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup
   }
   this->SetSocketAddToStackClient(inputSocketID);
   int maxNumHandshakeTries = 4;
-  for (int i = 0; i < maxNumHandshakeTries; i++)
+  for (int i = 0; i < maxNumHandshakeTries; i ++)
   { this->errorCode = SSL_connect(this->sslClient);
     this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1)
@@ -1000,7 +1000,7 @@ void WebWorker::SendAllBytesHttpSSL()
   this->CheckConsistency();
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     crash << "Error: WebWorker::SendAllBytesHttpSSL called while flagUsingSSLinCurrentConnection is set to false. " << crash;
-  if (this->connectedSocketID == -1)
+  if (this->connectedSocketID == - 1)
   { logWorker << logger::red << "Socket::SendAllBytes failed: connectedSocketID=-1." << logger::endL;
     //theReport.SetStatus("Socket::SendAllBytes failed: connectedSocketID=-1. WebWorker::SendAllBytes - finished.");
     return;
@@ -1029,7 +1029,7 @@ void WebWorker::SendAllBytesHttpSSL()
       return;
     }
     if (numBytesSent == 0)
-      numTimesRunWithoutSending++;
+      numTimesRunWithoutSending ++;
     else
       numTimesRunWithoutSending = 0;
     logWorker << numBytesSent;
@@ -1220,7 +1220,7 @@ std::string WebWorker::ToStringMessageUnsafe(bool useHTML)const
   else
     out << "<br><b>NOT</b> keeping alive.<br>";
   out << "<br>Cookies (" << this->cookies.size << " total):";
-  for (int i = 0; i < this->cookies.size; i++)
+  for (int i = 0; i < this->cookies.size; i ++)
     out << "<br>" << this->cookies[i];
   if (useHTML)
   { out << "\n<hr>\nHost with port:<br>\n" << theGlobalVariables.hostWithPort;
@@ -1809,7 +1809,7 @@ bool WebWorker::ReceiveAllHttp()
   this->requestTypE = this->requestUnknown;
   unsigned const int bufferSize = 60000;
   char buffer[bufferSize];
-  if (this->connectedSocketID == -1)
+  if (this->connectedSocketID == - 1)
     crash << "Attempting to receive on a socket with ID equal to -1. " << crash;
 //  std::cout << "Got thus far 10" << std::endl;
   struct timeval tv; //<- code involving tv taken from stackexchange
@@ -2409,12 +2409,10 @@ int WebWorker::ProcessFile()
     << HtmlRoutines::ConvertStringToHtmlString(this->addressGetOrPost, true) << "<br><b>Virtual file name:</b> "
     << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true)
     << "<br><b>Computed relative physical file name:</b> "
-    << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true)
-    ;
+    << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
     stOutput << "<hr><hr><hr>Message details:<br>"
     << this->ToStringMessageUnsafe()
-    << this->ToStringMessageFullUnsafe()
-    ;
+    << this->ToStringMessageFullUnsafe();
     stOutput << "</body></html>";
     this->flagEncounteredErrorWhileServingFile = true;
     return 0;
@@ -2450,7 +2448,7 @@ int WebWorker::ProcessFile()
   theHeader << "HTTP/1.0 200 OK\r\n"
   << this->GetMIMEtypeFromFileExtension(fileExtension)
   << "Access-Control-Allow-Origin: *\r\n";
-  for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i++)
+  for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++)
     if (MathRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i]))
     { theHeader << "Cache-Control: max-age=129600000, public\r\n";
       withCacheHeader=true;
@@ -2517,11 +2515,11 @@ int WebWorker::ProcessFile()
 }
 
 void WebWorker::reset()
-{ this->connectedSocketID = -1;
-  this->ProcessPID = -1;
-  this->connectedSocketIDLastValueBeforeRelease = -1;
-  this->connectionID = -1;
-  this->indexInParent = -1;
+{ this->connectedSocketID = - 1;
+  this->ProcessPID = - 1;
+  this->connectedSocketIDLastValueBeforeRelease = - 1;
+  this->connectionID = - 1;
+  this->indexInParent = - 1;
   this->parent = 0;
   this->indentationLevelHTML = 0;
   this->displayUserInput = "";
@@ -2529,8 +2527,8 @@ void WebWorker::reset()
   this->flagToggleMonitoring = false;
   this->flagDoAddContentLength = false;
   this->flagFileNameSanitized = false;
-  this->timeOfLastPingServerSideOnly = -1;
-  this->timeServerAtWorkerStart = -1;
+  this->timeOfLastPingServerSideOnly = - 1;
+  this->timeServerAtWorkerStart = - 1;
   this->flagFoundMalformedFormInput = false;
   this->flagProgressReportAllowed = false;
   this->flagKeepAlive = false;
@@ -3150,8 +3148,7 @@ int WebWorker::ProcessChangePassword()
   << theGlobalVariables.DisplayNameExecutable  << "?request=logout"
   << "&username="
   << theGlobalVariables.userDefault.username.GetDataNoQuotes() << "&activationToken=&authenticationToken=&"
-  << "'\" />"
-  ;
+  << "'\" />";
   return 0;
 }
 
@@ -3401,6 +3398,7 @@ int WebWorker::ProcessTopicListJSON()
 int WebWorker::ProcessApp(bool appendBuildHash)
 { MacroRegisterFunctionWithName("WebWorker::ProcessApp");
   this->SetHeaderOKNoContentLength();
+  theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
   stOutput << HtmlInterpretation::GetApp(appendBuildHash);
   return 0;
 }
@@ -3552,7 +3550,7 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSlidesOrHomeworkFromSource");
   this->SetHeaderOKNoContentLength();
   LaTeXcrawler theCrawler;
-  for (int i = 0; i < theGlobalVariables.webArguments.size(); i++)
+  for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++)
   { std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
     //stOutput << "DEBUG: considering key: " << theKey
     //<< " with value: " << theGlobalVariables.webArguments.theValues[i] << "<br>";
@@ -3572,7 +3570,7 @@ int WebWorker::ProcessSlidesOrHomeworkFromSource()
   if (theCrawler.slideFilesExtraFlags.size > theCrawler.slideFileNamesVirtualWithPatH.size)
     theCrawler.slideFilesExtraFlags.SetSize(theCrawler.slideFileNamesVirtualWithPatH.size);
   else
-    for (int i = theCrawler.slideFilesExtraFlags.size; i < theCrawler.slideFileNamesVirtualWithPatH.size; i++)
+    for (int i = theCrawler.slideFilesExtraFlags.size; i < theCrawler.slideFileNamesVirtualWithPatH.size; i ++)
       theCrawler.slideFilesExtraFlags.AddOnTop("");
   theCrawler.desiredPresentationTitle =
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("title"), false);
@@ -3609,7 +3607,7 @@ int WebWorker::ProcessSlidesSource()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSlidesSource");
   this->SetHeaderOKNoContentLength();
   LaTeXcrawler theCrawler;
-  for (int i = 0; i < theGlobalVariables.webArguments.size(); i++)
+  for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++)
   { std::string theKey = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.webArguments.theKeys[i], false);
     //stOutput << "DEBUG: considering key: " << theKey
     //<< " with value: " << theGlobalVariables.webArguments.theValues[i] << "<br>";
@@ -3926,7 +3924,7 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
     << theGlobalVariables.userCalculatorRequestType << "&";
   else
     redirectedAddress << this->addressComputed << "?";
-  for (int i = 0; i < theGlobalVariables.webArguments.size(); i++)
+  for (int i = 0; i < theGlobalVariables.webArguments.size(); i ++)
     if (theGlobalVariables.webArguments.theKeys[i] != "password" &&
         theGlobalVariables.webArguments.theKeys[i] != "request" &&
         theGlobalVariables.webArguments.theKeys[i] != "googleToken" &&
@@ -4029,15 +4027,13 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection()
   { redirectStream << "Location: " << newAddressStream.str();
     this->SetHeadeR("HTTP/1.0 301 Moved Permanently", redirectStream.str());
     stOutput << "<html><body>Address available through secure (SSL) connection only. "
-    << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. "
-    ;
+    << "Click <a href=\"" << newAddressStream.str() << "\">here</a> if not redirected automatically. ";
   } else
   { this->SetHeaderOKNoContentLength();
     stOutput << "<html><body>Address available through secure (SSL) connection only. <br>"
     << "<b style='color:red'>In the web address, please change http to https. </b><br>"
     << "Unfortunately, I can't redirect you automatically as your browser did not tell me "
-    << "under what domain name it sees me, and the server responds to multiple domain names. "
-    ;
+    << "under what domain name it sees me, and the server responds to multiple domain names. ";
 
   }
 //  stOutput << "<br>" << redirectStream.str();
@@ -4497,11 +4493,11 @@ WebServer::WebServer()
 { this->flagPort8155 = true;
   this->flagDeallocated = false;
   this->flagTryToKillOlderProcesses = true;
-  this->activeWorker = -1;
-  this->timeLastExecutableModification = -1;
-  this->listeningSocketHTTP = -1;
-  this->listeningSocketHttpSSL = -1;
-  this->highestSocketNumber = -1;
+  this->activeWorker = - 1;
+  this->timeLastExecutableModification = - 1;
+  this->listeningSocketHTTP = - 1;
+  this->listeningSocketHttpSSL = - 1;
+  this->highestSocketNumber = - 1;
   this->flagReapingChildren = false;
   this->MaxNumWorkersPerIPAdress = 24;
   this->MaxTotalUsedWorkers = 40;
@@ -4775,7 +4771,7 @@ std::string WebServer::ToStringStatusPublic()
   std::stringstream out;
   out << "<html><body>";
   out << this->ToStringStatusPublicNoTop();
-  std::string topString= theGlobalVariables.CallSystemWithOutput("top -b -n 1 -s");
+  std::string topString = theGlobalVariables.CallSystemWithOutput("top -b -n 1 -s");
   //out << "<br>" << topString;
   std::string lineString;
   std::stringstream topStream(topString);
@@ -4822,6 +4818,7 @@ std::string WebServer::ToStringStatusAll()
 
 void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
 { struct stat theFileStat;
+  std::cout << "DEBUG: Checking for restart";
   if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0)
     return;
   if (this->timeLastExecutableModification != - 1)
@@ -4834,7 +4831,7 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
       else
         stOutput << "<script language=\"javascript\">setTimeout(resubmit, 500); "
         << " function resubmit() { document.getElementById('formCalculator').submit();}</script>";
-      if (this->activeWorker != -1)
+      if (this->activeWorker != - 1)
       { this->GetActiveWorker().SendAllBytesWithHeaders();
         this->ReleaseActiveWorker();
       }
@@ -4999,7 +4996,7 @@ void WebServer::HandleTooManyConnections(const std::string& incomingUserAddress)
     << this->MaxNumWorkersPerIPAdress << " simultaneous connections. ";
     this->theWorkers[theIndices[j]].pingMessage = errorStream.str();
     logProcessKills << logger::red << errorStream.str() << logger::endL;
-    this->NumProcessAssassinated++;
+    this->NumProcessAssassinated ++;
   }
   if (theGlobalVariables.flagServerDetailedLog)
     logProcessStats << logger::green
@@ -5050,7 +5047,7 @@ void WebServer::RecycleChildrenIfPossible()
         this->theWorkers[i].timeOfLastPingServerSideOnly = theGlobalVariables.GetElapsedSeconds();
       } else if (this->theWorkers[i].PauseWorker.CheckPauseIsRequested(false, true, true))
       { this->theWorkers[i].pingMessage = "worker paused, no pings.";
-        this->theWorkers[i].timeOfLastPingServerSideOnly=theGlobalVariables.GetElapsedSeconds();
+        this->theWorkers[i].timeOfLastPingServerSideOnly = theGlobalVariables.GetElapsedSeconds();
       } else
       { bool presumedDead = false;
         if (this->theWorkers[i].flagInUse)
@@ -5071,8 +5068,8 @@ void WebServer::RecycleChildrenIfPossible()
           << this->theWorkers[i].ProcessPID << ". ";
           logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
           this->theWorkers[i].pingMessage = "<span style=\"color:red\"><b>" + pingTimeoutStream.str() + "</b></span>";
-          numInUse--;
-          this->NumProcessAssassinated++;
+          numInUse --;
+          this->NumProcessAssassinated ++;
         }
       }
     }
@@ -5153,7 +5150,7 @@ bool WebServer::initBindToPorts()
         }
         int setFlagCounter = 0;
         while (fcntl(*theListeningSocket, F_SETFL, O_NONBLOCK)!=0)
-        { if (++setFlagCounter > 10)
+        { if (++ setFlagCounter > 10)
             crash << "Error: failed to set non-blocking status to listening socket. " << crash;
         }
         break;
@@ -5463,7 +5460,7 @@ int WebServer::Run()
 int WebWorker::Run()
 { MacroRegisterFunctionWithName("WebWorker::Run");
   this->CheckConsistency();
-  if (this->connectedSocketID == -1)
+  if (this->connectedSocketID == - 1)
     crash << "Worker::Run() started on a connecting with ID equal to -1. " << crash;
   this->ResetPipesNoAllocation();
   std::stringstream processNameStream;
@@ -6330,7 +6327,7 @@ void WebWorker::SendAllBytesHttp()
       return;
     }
     if (numBytesSent == 0)
-      numTimesRunWithoutSending++;
+      numTimesRunWithoutSending ++;
     else
       numTimesRunWithoutSending = 0;
     logWorker << numBytesSent;

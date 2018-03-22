@@ -10,7 +10,7 @@ ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImpleme
 
 std::string HtmlInterpretation::GetProblemSolution()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetProblemSolution");
-  double startTime=theGlobalVariables.GetElapsedSeconds();
+  double startTime = theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
   std::stringstream out;
   theProblem.LoadCurrentProblemItem(false, theGlobalVariables.GetWebInput("randomSeed"));
@@ -18,7 +18,7 @@ std::string HtmlInterpretation::GetProblemSolution()
   { out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::BugsGenericMessage << "</b>";
-    if(theProblem.comments.str()!="")
+    if(theProblem.comments.str() != "")
       out << " Comments: " << theProblem.comments.str();
     return out.str();
   }
@@ -26,7 +26,7 @@ std::string HtmlInterpretation::GetProblemSolution()
   { out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
     return out.str();
   }
-  if(theGlobalVariables.GetWebInput("randomSeed")=="")
+  if(theGlobalVariables.GetWebInput("randomSeed") == "")
   { out << " <b>I could not figure out the exercise problem (missing random seed). </b>";
     return out.str();
   }
@@ -36,14 +36,14 @@ std::string HtmlInterpretation::GetProblemSolution()
     return out.str();
   }
   std::string lastStudentAnswerID;
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
-  for (int i=0; i<theArgs.size(); i++)
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
+  for (int i = 0; i < theArgs.size(); i ++)
     MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
-  int indexLastAnswerId=theProblem.GetAnswerIndex(lastStudentAnswerID);
-  if (indexLastAnswerId==-1)
+  int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
+  if (indexLastAnswerId == - 1)
   { out << "<b>Student submitted answerID: " << lastStudentAnswerID
     << " but that is not an ID of an answer tag. "
-    << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    << "</b><br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     { out << "<hr>" << theProblem.theProblemData.ToStringAvailableAnswerIds();
       //out << "<hr>Client input: " << this->mainArgumentRAW << "<hr>";
@@ -51,16 +51,16 @@ std::string HtmlInterpretation::GetProblemSolution()
     }
     return out.str();
   }
-  Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
+  Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
   Calculator theInterpreteR;
   theInterpreteR.init();
-  theInterpreteR.flagPlotNoControls=true;
-  theInterpreteR.flagWriteLatexPlots=false;
+  theInterpreteR.flagPlotNoControls = true;
+  theInterpreteR.flagWriteLatexPlots = false;
   if(!theProblem.PrepareCommands(comments))
   { out << "<b>Failed to prepare calculator commands. </b> <br>Comments:<br>" << comments.str();
     return out.str();
   }
-  if (currentA.solutionElements.size==0)
+  if (currentA.solutionElements.size == 0)
   { out << "<b> Unfortunately there is no solution given for this question (answerID: " << lastStudentAnswerID << ").";
     return out.str();
   }
@@ -71,12 +71,12 @@ std::string HtmlInterpretation::GetProblemSolution()
   << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING
   << currentA.commandsSolutionOnly;
   theInterpreteR.Evaluate(answerCommands.str());
-  if (theInterpreteR.syntaxErrors!="")
+  if (theInterpreteR.syntaxErrors != "")
   { out << "<span style=\"color:red\"><b>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
-    << theInterpreteR.ToStringSyntacticStackHumanReadable(false,false);
-    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
+    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
   }
   if (theInterpreteR.flagAbortComputationASAP)
@@ -86,16 +86,15 @@ std::string HtmlInterpretation::GetProblemSolution()
     << theInterpreteR.outputString
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;
-    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
   }
-  if (!theProblem.InterpretProcessExecutedCommands
-       (theInterpreteR, currentA.solutionElements, out))
+  if (!theProblem.InterpretProcessExecutedCommands(theInterpreteR, currentA.solutionElements, out))
     return out.str();
-  for (int i=0; i<currentA.solutionElements.size; i++)
+  for (int i = 0; i < currentA.solutionElements.size; i ++)
     if (!currentA.solutionElements[i].IsHidden())
       out << currentA.solutionElements[i].ToStringInterpretedBody();
-  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     out << "<hr>"
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
@@ -113,8 +112,8 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "<b>Only admins may set problem weights.</b>";
   CalculatorHTML theProblem;
-  std::string inputProblemInfo=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
-  theProblem.topicListFileName=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
+  std::string inputProblemInfo = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  theProblem.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
   std::stringstream commentsOnFailure;
   if (!theProblem.LoadAndParseTopicList(commentsOnFailure))
     return "Failed to load topic list from file name: " + theProblem.topicListFileName + ". "+ commentsOnFailure.str();
@@ -348,7 +347,7 @@ std::string HtmlInterpretation::SubmitProblemPreview()
     << "Something went wrong when interpreting your answer "
     << "in the context of the current problem. "
     << "</b></span>";
-    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn() )
+    if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
     { out << "<br>Logged-in as admin with debug flag on=> printing error details. "
       << theInterpreterWithAdvice.outputString << "<br>"
       << theInterpreterWithAdvice.outputCommentsString;
@@ -451,8 +450,7 @@ std::string HtmlInterpretation::GetAboutPage()
   if (!isGood)
   { out << "<span style=\"color:red\"><b>"
     << commentsOnFailure.str()
-    << "</b></span>"
-    ;
+    << "</b></span>";
   } else
     out << theFile;
   out << "</body></html>";
@@ -595,8 +593,8 @@ std::string HtmlInterpretation::GetSelectCourseJSON()
   for (int i = 0; i < theCourses.theCourses.size; i ++)
   { JSData currentCourse;
     currentCourse["title"] = theCourses.theCourses[i].title;
-    currentCourse["html"] = theCourses.theCourses[i].courseTemplate;
-    currentCourse["topics"] = theCourses.theCourses[i].courseTopics;
+    currentCourse["html"] = "coursetemplates/" + theCourses.theCourses[i].courseTemplate;
+    currentCourse["topics"] = "topiclists/" + theCourses.theCourses[i].courseTopics;
     output["courses"].list.AddOnTop(currentCourse);
   }
   return output.ToString();
@@ -955,14 +953,14 @@ std::string HtmlInterpretation::GetEditPageHTML()
 }
 
 std::string HtmlInterpretation::SubmitProblem()
-{ return HtmlInterpretation::SubmitProblem(theGlobalVariables.GetWebInput("randomSeed"),0, true);
+{ return HtmlInterpretation::SubmitProblem(theGlobalVariables.GetWebInput("randomSeed"), 0, true);
 }
 
 std::string HtmlInterpretation::SubmitProblem
 (const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake)
 { MacroRegisterFunctionWithName("HtmlInterpretation::SubmitProblem");
   std::stringstream out;
-  double startTime=theGlobalVariables.GetElapsedSeconds();
+  double startTime = theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem
   (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), inputRandomSeed);
@@ -978,47 +976,47 @@ std::string HtmlInterpretation::SubmitProblem
   if (!theProblem.theProblemData.flagRandomSeedGiven && !theProblem.flagIsForReal)
     out << "<b>Random seed not given.</b>";
 //  stOutput << "<b>DEBUG remove when done: Random seed: " << theProblem.theProblemData.randomSeed << "</b>";
-  if (theProblem.fileName=="")
+  if (theProblem.fileName == "")
     crash << "This shouldn't happen: empty file name: theProblem.fileName." << crash;
   std::string studentAnswerNameReader;
   theProblem.studentTagsAnswered.init(theProblem.theProblemData.theAnswers.size());
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
-  int answerIdIndex=-1;
-  for (int i=0; i<theArgs.size(); i++)
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
+  int answerIdIndex = - 1;
+  for (int i = 0; i < theArgs.size(); i ++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &studentAnswerNameReader))
-    { int newAnswerIndex=theProblem.GetAnswerIndex(studentAnswerNameReader);
-      if (answerIdIndex==-1)
-        answerIdIndex=newAnswerIndex;
-      else if (answerIdIndex!=newAnswerIndex && answerIdIndex!=-1 && newAnswerIndex!=-1)
+    { int newAnswerIndex = theProblem.GetAnswerIndex(studentAnswerNameReader);
+      if (answerIdIndex == - 1)
+        answerIdIndex = newAnswerIndex;
+      else if (answerIdIndex != newAnswerIndex && answerIdIndex != - 1 && newAnswerIndex != - 1)
       { out << "<b>You submitted two or more answers [answer tags: "
         << theProblem.theProblemData.theAnswers[answerIdIndex].answerId
         << " and " << theProblem.theProblemData.theAnswers[newAnswerIndex].answerId
         << "].</b> At present, multiple answer submission is not supported. ";
         return out.str();
       }
-      if (answerIdIndex==-1)
+      if (answerIdIndex == - 1)
       { out << "<b> You submitted an answer to tag with id "
         << studentAnswerNameReader
         << " which is not on my list of answerable tags. </b>";
         return out.str();
       }
-      Answer& currentProblemData=theProblem.theProblemData.theAnswers[answerIdIndex];
+      Answer& currentProblemData = theProblem.theProblemData.theAnswers[answerIdIndex];
       currentProblemData.currentAnswerURLed = theArgs.theValues[i];
-      if (currentProblemData.currentAnswerURLed=="")
+      if (currentProblemData.currentAnswerURLed == "")
       { out << "<b> Your answer to tag with id " << studentAnswerNameReader
         << " appears to be empty, please resubmit. </b>";
         return out.str();
       }
     }
-  if (answerIdIndex==-1)
+  if (answerIdIndex == - 1)
   { out << "<b>Something is wrong: I found no submitted answers.</b>";
     return out.str();
   }
-  ProblemData& currentProblemData=theProblem.theProblemData;
-  Answer& currentA=currentProblemData.theAnswers[answerIdIndex];
+  ProblemData& currentProblemData = theProblem.theProblemData;
+  Answer& currentA = currentProblemData.theAnswers[answerIdIndex];
 
-  currentA.currentAnswerClean=HtmlRoutines::ConvertURLStringToNormal(currentA.currentAnswerURLed, false);
-  currentA.currentAnswerURLed=HtmlRoutines::ConvertStringToURLString(currentA.currentAnswerClean, false);//<-encoding back to overwrite malformed input
+  currentA.currentAnswerClean = HtmlRoutines::ConvertURLStringToNormal(currentA.currentAnswerURLed, false);
+  currentA.currentAnswerURLed = HtmlRoutines::ConvertStringToURLString(currentA.currentAnswerClean, false);//<-encoding back to overwrite malformed input
   //stOutput << "<hr>DEBUG: Processing answer: " << currentA.currentAnswerClean << " to answer object: " << currentA.ToString();
   theProblem.studentTagsAnswered.AddSelectionAppendNewIndex(answerIdIndex);
   std::stringstream completedProblemStreamNoEnclosures;
@@ -1036,7 +1034,7 @@ std::string HtmlInterpretation::SubmitProblem
   completedProblemStreamNoEnclosures << currentA.answerId << "= (" << currentA.currentAnswerClean << ");";
 
   //stOutput << "DEBUG: " << "adding: commands: " << currentA.commandsCommentsBeforeSubmissionOnly;
-  bool hasCommentsBeforeSubmission=
+  bool hasCommentsBeforeSubmission =
   (MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission)!="");
   if (hasCommentsBeforeSubmission)
   { completedProblemStream
@@ -1061,15 +1059,15 @@ std::string HtmlInterpretation::SubmitProblem
 
   //stOutput << "<br>DEBUG: input to the calculator: " << completedProblemStream.str() << "<hr>";
   if (timeSafetyBrake)
-    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
+    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds() + 20;
   Calculator theInterpreter;
   theInterpreter.init();
-  theInterpreter.flagWriteLatexPlots=false;
-  theInterpreter.flagPlotNoControls=true;
+  theInterpreter.flagWriteLatexPlots = false;
+  theInterpreter.flagPlotNoControls = true;
 
   theInterpreter.Evaluate(completedProblemStream.str());
-  if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors!="")
-  { if (theInterpreter.errorsPublic.str()!="")
+  if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors != "")
+  { if (theInterpreter.errorsPublic.str() != "")
       out << "While checking your answer, got the error: "
       << "<br><b><span style=\"color:red\">"
       << theInterpreter.errorsPublic.str()
@@ -1082,12 +1080,12 @@ std::string HtmlInterpretation::SubmitProblem
     out << "<br>Here's what I understood. ";
     Calculator isolatedInterpreter;
     isolatedInterpreter.init();
-    isolatedInterpreter.flagWriteLatexPlots=false;
-    isolatedInterpreter.flagPlotNoControls=true;
+    isolatedInterpreter.flagWriteLatexPlots = false;
+    isolatedInterpreter.flagPlotNoControls = true;
     if (timeSafetyBrake)
-      theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds()+20;
-    isolatedInterpreter.Evaluate("("+currentA.currentAnswerClean+")");
-    if (isolatedInterpreter.syntaxErrors!="")
+      theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = theGlobalVariables.GetElapsedSeconds() + 20;
+    isolatedInterpreter.Evaluate("(" + currentA.currentAnswerClean + ")");
+    if (isolatedInterpreter.syntaxErrors != "")
       out << isolatedInterpreter.ToStringSyntacticStackHumanReadable(false, true);
     else
       out << isolatedInterpreter.outputString;
@@ -1098,23 +1096,21 @@ std::string HtmlInterpretation::SubmitProblem
       << "<br>" << theInterpreter.outputCommentsString
       << "<hr>Input, no enclosures: <hr>"
       << completedProblemStreamNoEnclosures.str()
-      << "<br>"
-      ;
-
+      << "<br>";
     }
 //    stOutput << "yer input: " << completedProblemStream.str();
 //    stOutput << theInterpreter.outputString;
     return out.str();
   }
-  bool tempIsCorrect=false;
-  if (outputIsCorrect==0)
-    outputIsCorrect=&tempIsCorrect;
-  *outputIsCorrect=false;
-  int mustBeOne=-1;
-  if (!theInterpreter.theProgramExpression[theInterpreter.theProgramExpression.size()-1].IsSmallInteger(&mustBeOne))
-    *outputIsCorrect=false;
+  bool tempIsCorrect = false;
+  if (outputIsCorrect == 0)
+    outputIsCorrect = &tempIsCorrect;
+  *outputIsCorrect = false;
+  int mustBeOne = - 1;
+  if (!theInterpreter.theProgramExpression[theInterpreter.theProgramExpression.size() - 1].IsSmallInteger(&mustBeOne))
+    *outputIsCorrect = false;
   else
-    *outputIsCorrect=(mustBeOne==1);
+    *outputIsCorrect = (mustBeOne == 1);
   FormatExpressions theFormat;
   out << "<table width=\"300\">";
   if (!(*outputIsCorrect))
@@ -1138,21 +1134,21 @@ std::string HtmlInterpretation::SubmitProblem
     (theInterpreter, 3, theFormat) << "</td></tr>\n";
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
-  UserCalculator& theUser=theProblem.currentUseR;
+  UserCalculator& theUser = theProblem.currentUseR;
   theUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  bool deadLinePassed=false;
-  bool hasDeadline=true;
-  double secondsTillDeadline=-1;
+  bool deadLinePassed = false;
+  bool hasDeadline = true;
+  double secondsTillDeadline = - 1;
   if (theProblem.flagIsForReal)
   { //out << "<tr><td><hr><hr><hr>DEBUG: before interpreting anything prob data is: "
     //<< theUser.theProblemData.ToStringHtml() << "<hr><hr><hr></td></tr>";
     if (!theProblem.LoadAndParseTopicList(out))
-      hasDeadline=false;
+      hasDeadline = false;
     MySQLdata theSQLstring;
-    theSQLstring=theUser.courseInfo.sectionComputed;
+    theSQLstring = theUser.courseInfo.sectionComputed;
     if (hasDeadline)
-    { bool unused=false;
-      std::string theDeadlineString=
+    { bool unused = false;
+      std::string theDeadlineString =
       theProblem.GetDeadline(theProblem.fileName, theSQLstring.GetDataNoQuotes(), unused);
       //out << "<tr><td>DEBUG: getting deadline for section: " << theUser.userGroup.value
       //<< "<br>The prob data is: "
@@ -1162,8 +1158,8 @@ std::string HtmlInterpretation::SubmitProblem
       //<< " <br>getDeadline output: "
       //<< theProblem.GetDeadline(theProblem.fileName, theUser.userGroup.GetDataNoQuotes(), unused) << "</td></tr>";
 
-      if (theDeadlineString=="" || theDeadlineString==" ")
-        hasDeadline=false;
+      if (theDeadlineString == "" || theDeadlineString == " ")
+        hasDeadline = false;
       else
       { TimeWrapper now, deadline; //<-needs a fix for different time formats.
         //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
@@ -1178,18 +1174,18 @@ std::string HtmlInterpretation::SubmitProblem
         now.AssignLocalTime();
         //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
         //  << " deadline: " << asctime(&deadline.theTime) << " mktime: " << mktime(&deadline.theTime);
-        secondsTillDeadline= deadline.SubtractAnotherTimeFromMeInSeconds(now)+7*3600;
-        deadLinePassed=(secondsTillDeadline<-18000);
+        secondsTillDeadline = deadline.SubtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
+        deadLinePassed = (secondsTillDeadline < - 18000);
       }
     }
     if (deadLinePassed)
       out << "<tr><td><span style=\"color:red\"><b>Deadline passed, attempt not recorded.</b></span></td></tr>";
     else
-    { currentA.numSubmissions++;
+    { currentA.numSubmissions ++;
       if ((*outputIsCorrect))
-      { currentA.numCorrectSubmissions++;
-        if (currentA.firstCorrectAnswerClean=="")
-          currentA.firstCorrectAnswerClean=currentA.currentAnswerClean;
+      { currentA.numCorrectSubmissions ++;
+        if (currentA.firstCorrectAnswerClean == "")
+          currentA.firstCorrectAnswerClean = currentA.currentAnswerClean;
         else
           out << "<tr><td>[first correct answer: " << currentA.firstCorrectAnswerClean << "]</td></tr>";
       }
@@ -1214,11 +1210,11 @@ std::string HtmlInterpretation::SubmitProblem
       << comments.str() << "</td></tr>";
     else
       out << "<tr><td>So far " << currentA.numCorrectSubmissions << " correct and "
-      << currentA.numSubmissions-currentA.numCorrectSubmissions
+      << currentA.numSubmissions - currentA.numCorrectSubmissions
       << " incorrect submissions.</td></tr>";
     if (hasDeadline)
-    { if (secondsTillDeadline<0)
-        secondsTillDeadline*=-1;
+    { if (secondsTillDeadline < 0)
+        secondsTillDeadline *= - 1;
       if (deadLinePassed)
         out << "<tr><td><span style=\"color:red\"><b>Submission "
         << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
@@ -1239,8 +1235,8 @@ std::string HtmlInterpretation::SubmitProblem
   out << currentA.currentAnswerClean;
   out << "\\)";
   std::string errorMessage;
-  errorMessage=theInterpreter.ToStringIsCorrectAsciiCalculatorString(currentA.currentAnswerClean);
-  if (errorMessage!="")
+  errorMessage = theInterpreter.ToStringIsCorrectAsciiCalculatorString(currentA.currentAnswerClean);
+  if (errorMessage != "")
     out << "<br>" << errorMessage
     << "<hr><b>If you entered this expression through the keyboard (without copying + pasting) this is a bug: "
     << "please report it to the web site administrator. Don't forget to mention your keyboard/character setup. "
@@ -1249,7 +1245,7 @@ std::string HtmlInterpretation::SubmitProblem
     << " is considered cheating (example: answer from an online program for doing homework).</b> </span>";
   out << "</td></tr>";
   out << "</table>";
-  out << "Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).<hr>";
+  out << "Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).<hr>";
 
 //  stOutput << "<hr>" << theInterpreter.outputString << "<hr><hr><hr><hr><hr><hr>";
 //  stOutput << this->ToStringCalculatorArgumentsHumanReadable();
@@ -1266,7 +1262,7 @@ std::string HtmlInterpretation::AddTeachersSections()
   { out << "<b>Only admins may assign sections to teachers.</b>";
     return out.str();
   }
-  std::string mainInput=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::ChopCGIString(mainInput, theMap, out))
   { out << "<b>Failed to extract input from: " << mainInput << ".</b>";
@@ -1288,7 +1284,7 @@ std::string HtmlInterpretation::AddTeachersSections()
   delimiters.AddOnTop(160);//<-&nbsp
   MathRoutines::StringSplitExcludeDelimiters(desiredUsers, delimiters, theTeachers);
 //  MathRoutines::StringSplitExcludeDelimiters(desiredSections, delimiters, theSections);
-  if (theTeachers.size==0)
+  if (theTeachers.size == 0)
   { out << "<b>Could not extract teachers from " << desiredUsers << ".</b>";
     return out.str();
   }
@@ -1298,10 +1294,10 @@ std::string HtmlInterpretation::AddTeachersSections()
 //  }
   DatabaseRoutines theRoutines;
   UserCalculator currentTeacher;
-  for (int i=0; i<theTeachers.size; i++)
+  for (int i = 0; i < theTeachers.size; i ++)
   { currentTeacher.reset();
-    currentTeacher.username=theTeachers[i];
-    currentTeacher.currentTable=DatabaseStrings::tableUsers;
+    currentTeacher.username = theTeachers[i];
+    currentTeacher.currentTable = DatabaseStrings::tableUsers;
     if (!currentTeacher.FetchOneUserRow(theRoutines, &out, &out))
     { out << "<span style=\"color:red\">Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
       continue;
@@ -1329,26 +1325,26 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   }
   //stOutput << "<br>DEBUG: userlist: " << theGlobalVariables.GetWebInput("userList") << "<br>";
   //stOutput << "DEBUG: userlist: " << theGlobalVariables.GetWebInput("passwordList") << "<br>";
-  std::string inputEmails=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userList"), false);
-  std::string userPasswords=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("passwordList"), false);
-  std::string userGroup=
+  std::string inputEmails = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userList"), false);
+  std::string userPasswords = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("passwordList"), false);
+  std::string userGroup =
   MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput(DatabaseStrings::columnSection), false));
-  std::string userRole=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userRole"), false);
+  std::string userRole = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userRole"), false);
 
-  if (inputEmails=="")
+  if (inputEmails == "")
   { out << "<b>No emails to add</b>";
     return out.str();
   }
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
   std::stringstream comments;
-  bool sentEmails=true;
+  bool sentEmails = true;
   //stOutput << "DEBUG: here be i!";
-  bool doSendEmails= theGlobalVariables.userCalculatorRequestType=="sendEmails" ?  true : false;
-  int numNewUsers=0;
-  int numUpdatedUsers=0;
-  bool createdUsers=theRoutines.AddUsersFromEmails
+  bool doSendEmails = theGlobalVariables.userCalculatorRequestType == "sendEmails" ?  true : false;
+  int numNewUsers = 0;
+  int numUpdatedUsers = 0;
+  bool createdUsers = theRoutines.AddUsersFromEmails
   (inputEmails, userPasswords, userRole, userGroup, comments,
    numNewUsers, numUpdatedUsers);
   if (createdUsers)
@@ -1364,7 +1360,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
     else
       out << "<span style=\"color:red\">Failed to send all activation emails. </span>";
   }
-  bool usersAreAdmins= (userRole=="admin");
+  bool usersAreAdmins = (userRole == "admin");
   List<List<std::string> > userTable;
   List<std::string> userLabels;
   if (!theRoutines.FetchAllUsers(userTable, userLabels, comments))
@@ -1391,11 +1387,11 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp()
 std::string HtmlInterpretation::GetAnswerOnGiveUp
 (const std::string& inputRandomSeed, std::string* outputNakedAnswer, bool* outputDidSucceed)
 { MacroRegisterFunctionWithName("CalculatorHTML::GetAnswerOnGiveUp");
-  if (outputNakedAnswer!=0)
-    *outputNakedAnswer="";
-  if (outputDidSucceed!=0)
-    *outputDidSucceed=false;
-  double startTime=theGlobalVariables.GetElapsedSeconds();
+  if (outputNakedAnswer != 0)
+    *outputNakedAnswer = "";
+  if (outputDidSucceed != 0)
+    *outputDidSucceed = false;
+  double startTime = theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem(false, inputRandomSeed);
   std::stringstream out;
@@ -1403,7 +1399,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   { out << "Problem name is: " << theProblem.fileName
     << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::BugsGenericMessage << "</b>";
-    if(theProblem.comments.str()!="")
+    if(theProblem.comments.str() != "")
       out << " Comments: " << theProblem.comments.str();
     return out.str();
   }
@@ -1411,7 +1407,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   { out << " <b>Not allowed to show answer of a problem being tested for real. </b>";
     return out.str();
   }
-  if (inputRandomSeed=="")
+  if (inputRandomSeed == "")
   { out << " <b>I could not figure out the exercise problem (missing random seed). </b>";
     return out.str();
   }
@@ -1420,14 +1416,13 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   { out << "<br><b>Problem preparation failed.</b><br>" << comments.str();
     return out.str();
   }
-
   std::string lastStudentAnswerID;
-  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs=theGlobalVariables.webArguments;
-  for (int i=0; i<theArgs.size(); i++)
+  MapLisT<std::string, std::string, MathRoutines::hashString>& theArgs = theGlobalVariables.webArguments;
+  for (int i = 0; i < theArgs.size(); i ++)
     MathRoutines::StringBeginsWith
     (theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID);
-  int indexLastAnswerId=theProblem.GetAnswerIndex(lastStudentAnswerID);
-  if (indexLastAnswerId==-1)
+  int indexLastAnswerId = theProblem.GetAnswerIndex(lastStudentAnswerID);
+  if (indexLastAnswerId == - 1)
   { out << "File: "
     << theProblem.fileName
     << "<br><b>Student submitted answerID: " << lastStudentAnswerID
@@ -1440,26 +1435,26 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     }
     return out.str();
   }
-  Answer& currentA=theProblem.theProblemData.theAnswers[indexLastAnswerId];
-  if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly=="")
+  Answer& currentA = theProblem.theProblemData.theAnswers[indexLastAnswerId];
+  if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly == "")
   { out << "<b> Unfortunately there is no answer given for this "
     << "question (answerID: " << lastStudentAnswerID << ").</b>";
-    if (theGlobalVariables.UserDebugFlagOn()&&
+    if (theGlobalVariables.UserDebugFlagOn() &&
         theGlobalVariables.UserDefaultHasProblemComposingRights())
       out << "<br>Answer status: " << currentA.ToString();
     return out.str();
   }
   Calculator theInterpreteR;
   theInterpreteR.init();
-  theInterpreteR.flagPlotNoControls=true;
-  theInterpreteR.flagWriteLatexPlots=false;
+  theInterpreteR.flagPlotNoControls = true;
+  theInterpreteR.flagWriteLatexPlots = false;
   std::stringstream answerCommands, answerCommandsNoEnclosure;
   answerCommands << currentA.commandsBeforeAnswer;
   answerCommandsNoEnclosure << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   answerCommands << "CommandEnclosure{}(" << currentA.commandsNoEnclosureAnswerOnGiveUpOnly << ");";
   answerCommandsNoEnclosure << currentA.commandsNoEnclosureAnswerOnGiveUpOnly;
   theInterpreteR.Evaluate(answerCommands.str());
-  if (theInterpreteR.syntaxErrors!="")
+  if (theInterpreteR.syntaxErrors != "")
   { out << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>";
     if (theGlobalVariables.UserDefaultHasProblemComposingRights())
@@ -1470,7 +1465,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
       << "\">Calculator input no enclosures</a>";
     out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
-    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
   }
   if (theInterpreteR.flagAbortComputationASAP)
@@ -1486,26 +1481,26 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     << theInterpreteR.outputString
     << theInterpreteR.outputCommentsString
     << "<hr>Input: <br>" << theInterpreteR.inputString;
-    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+    out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
   }
   FormatExpressions theFormat;
-  theFormat.flagExpressionIsFinal=true;
-  theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
-  theFormat.flagUseQuotes=false;
-  theFormat.flagUseLatex=true;
-  theFormat.flagUsePmatrix=true;
-  bool isFirst=true;
-  const Expression& currentE=
-  theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size()-1][1];
+  theFormat.flagExpressionIsFinal = true;
+  theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
+  theFormat.flagUseQuotes = false;
+  theFormat.flagUseLatex = true;
+  theFormat.flagUsePmatrix = true;
+  bool isFirst = true;
+  const Expression& currentE =
+  theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size() - 1][1];
   if (!currentE.StartsWith(theInterpreteR.opEndStatement()))
   { out << "\\(\\displaystyle " << currentE.ToString(&theFormat) << "\\)";
-    if (outputNakedAnswer!=0)
-      *outputNakedAnswer=currentE.ToString(&theFormat);
-    if (outputDidSucceed!=0)
-      *outputDidSucceed=true;
+    if (outputNakedAnswer != 0)
+      *outputNakedAnswer = currentE.ToString(&theFormat);
+    if (outputDidSucceed != 0)
+      *outputDidSucceed = true;
   } else
-    for (int j=1; j<currentE.size(); j++)
+    for (int j = 1; j < currentE.size(); j ++)
     { if (currentE[j].StartsWith(theInterpreteR.opRulesOff()) ||
           currentE[j].StartsWith(theInterpreteR.opRulesOn()))
         continue;
@@ -1525,14 +1520,14 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
         out << "\\(\\displaystyle " << currentE[j].ToString(&theFormat) << "\\)";
 //      if (j==currentE.size()-1)
       if (isFirst)
-      { if (outputNakedAnswer!=0)
-          *outputNakedAnswer=currentE[j].ToString(&theFormat);
-        if (outputDidSucceed!=0)
-          *outputDidSucceed=true;
+      { if (outputNakedAnswer != 0)
+          *outputNakedAnswer = currentE[j].ToString(&theFormat);
+        if (outputDidSucceed != 0)
+          *outputDidSucceed = true;
       }
-      isFirst=false;
+      isFirst = false;
     }
-  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()-startTime << " second(s).";
+  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()- startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     out
     << "<hr><a href=\"" << theGlobalVariables.DisplayNameExecutable
@@ -1567,19 +1562,19 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
     return out.str();
   }
 //  out << "DEBUG: Usertable: " << userTable.ToStringCommaDelimited();
-  int indexCourseInfo=-1;
-  for (int i=0; i<columnLabels.size; i++)
-    if (columnLabels[i]==DatabaseStrings::columnCourseInfo)
-      indexCourseInfo=i;
-  if (indexCourseInfo==-1)
+  int indexCourseInfo = - 1;
+  for (int i = 0; i < columnLabels.size; i ++)
+    if (columnLabels[i] == DatabaseStrings::columnCourseInfo)
+      indexCourseInfo = i;
+  if (indexCourseInfo == - 1)
   { out << "Failed to load extra user info. ";
     return out.str();
   }
   HashedList<std::string, MathRoutines::hashString> theSections;
   UserCalculator currentUser;
-  for (int i=0; i<userTable.size; i++)
+  for (int i = 0; i < userTable.size; i ++)
   { currentUser.reset();
-    currentUser.courseInfo.rawStringStoredInDB=userTable[i][indexCourseInfo];
+    currentUser.courseInfo.rawStringStoredInDB = userTable[i][indexCourseInfo];
     currentUser.AssignCourseInfoString(&out);
     theSections.AddOnTopNoRepetition(currentUser.courseInfo.getSectionInDB());
   }
@@ -1618,8 +1613,8 @@ std::string HtmlInterpretation::GetScoresPage()
   << "<body onload=\"loadSettings();\">\n";
   CalculatorHTML thePage;
   thePage.LoadDatabaseInfo(out);
-  std::string theScoresHtml=HtmlInterpretation::ToStringUserScores();
-  std::string theDebugHtml=HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  std::string theScoresHtml = HtmlInterpretation::ToStringUserScores();
+  std::string theDebugHtml = HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
   out << "<problemNavigation>" << thePage.ToStringProblemNavigation() << "</problemNavigation>";
   out << theScoresHtml;
@@ -1639,10 +1634,10 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"
   << "<body onload=\"loadSettings();\">\n";
-  bool isOK=theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
+  bool isOK = theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
   std::string accountsPageBody;
   if (isOK)
-    accountsPageBody= HtmlInterpretation::GetAccountsPageBody(hostWebAddressWithPort);
+    accountsPageBody = HtmlInterpretation::GetAccountsPageBody(hostWebAddressWithPort);
   CalculatorHTML thePage;
   thePage.LoadDatabaseInfo(out);
   out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
@@ -1666,13 +1661,10 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
 #ifdef MACRO_use_MySQL
   std::stringstream out;
   //std::string userRole = adminsOnly ? "admin" : "student";
-  int numUsers=0;
-  bool flagFilterCourse=(!adminsOnly) && (theGlobalVariables.GetWebInput("filterAccounts")=="true");
-  std::string currentCourse=
-  HtmlRoutines::ConvertURLStringToNormal(
-  theGlobalVariables.GetWebInput("courseHome")
-  , false)
-  ;
+  int numUsers = 0;
+  bool flagFilterCourse = (!adminsOnly) && (theGlobalVariables.GetWebInput("filterAccounts") == "true");
+  std::string currentCourse =
+  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   if (flagFilterCourse)
   { out << "<br>Displaying only students in course: <span style=\"color:blue\"><b>"
     << currentCourse << "</b></span>. "
@@ -1684,32 +1676,31 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     << "<br>";
   }
   UserCalculator currentUser;
-  currentUser.currentTable=DatabaseStrings::tableUsers;
-  int indexUser=-1;
-  int indexEmail=-1;
-  int indexActivationToken=-1;
-  int indexUserRole=-1;
-  int indexCourseInfo=-1;
+  currentUser.currentTable = DatabaseStrings::tableUsers;
+  int indexUser = - 1;
+  int indexEmail = - 1;
+  int indexActivationToken = - 1;
+  int indexUserRole = - 1;
+  int indexCourseInfo = - 1;
   //int indexProblemData=-1;
-  for (int i=0; i<columnLabels.size; i++)
-  { if (columnLabels[i]==DatabaseStrings::columnUsername)
-      indexUser=i;
-    if (columnLabels[i]=="email")
-      indexEmail=i;
-    if (columnLabels[i]=="activationToken")
-      indexActivationToken=i;
-    if (columnLabels[i]=="userRole")
-      indexUserRole=i;
-    if (columnLabels[i]==DatabaseStrings::columnCourseInfo)
-      indexCourseInfo=i;
+  for (int i = 0; i < columnLabels.size; i ++)
+  { if (columnLabels[i] == DatabaseStrings::columnUsername)
+      indexUser = i;
+    if (columnLabels[i] == "email")
+      indexEmail = i;
+    if (columnLabels[i] == "activationToken")
+      indexActivationToken = i;
+    if (columnLabels[i] == "userRole")
+      indexUserRole = i;
+    if (columnLabels[i] == DatabaseStrings::columnCourseInfo)
+      indexCourseInfo = i;
   }
   if (
-      indexUser            ==-1 ||
-      indexEmail           ==-1 ||
-      indexActivationToken ==-1 ||
-      indexUserRole        ==-1 ||
-      indexCourseInfo      ==-1
-      )
+      indexUser            == - 1 ||
+      indexEmail           == - 1 ||
+      indexActivationToken == - 1 ||
+      indexUserRole        == - 1 ||
+      indexCourseInfo      == - 1)
   { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
     << "column entries in the database. "
     << "This is likely a software bug. Function: HtmlInterpretation::ToStringUserDetailsTable. </b></span>"
@@ -1727,16 +1718,15 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   List<List<std::string> > activatedAccountBucketsBySection;
   List<List<std::string> > preFilledLinkBucketsBySection;
   List<List<std::string> > nonActivatedAccountBucketsBySection;
-  for (int i=0; i<userTable.size; i++)
+  for (int i = 0; i < userTable.size; i ++)
   { currentUser.reset();
-    currentUser.courseInfo.rawStringStoredInDB=userTable[i][indexCourseInfo];
+    currentUser.courseInfo.rawStringStoredInDB = userTable[i][indexCourseInfo];
     currentUser.AssignCourseInfoString(&out);
     if (flagFilterCourse &&
-        ( currentUser.courseInfo.getCurrentCourseInDB()!=currentCourse ||
-          currentUser.courseInfo.getInstructorInDB()!=theGlobalVariables.userDefault.username.value)
-        )
+        (currentUser.courseInfo.getCurrentCourseInDB() != currentCourse ||
+         currentUser.courseInfo.getInstructorInDB() != theGlobalVariables.userDefault.username.value))
       continue;
-    std::string currentID=currentUser.ToStringIdSectionCourse();
+    std::string currentID = currentUser.ToStringIdSectionCourse();
     if (!sectionIDs.Contains(currentID))
     { std::stringstream currentSectionInfo;
       currentSectionInfo << "<b>Section: </b>" << currentUser.courseInfo.getSectionInDB()
@@ -1751,15 +1741,15 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   activatedAccountBucketsBySection.SetSize(sectionIDs.size);
   nonActivatedAccountBucketsBySection.SetSize(sectionIDs.size);
   preFilledLinkBucketsBySection.SetSize(sectionIDs.size);
-  int numActivatedUsers=0;
-  for (int i=0; i<userTable.size; i++)
-  { currentUser.username=userTable[i][indexUser];
-    currentUser.email=userTable[i][indexEmail];
-    currentUser.actualActivationToken=userTable[i][indexActivationToken];
-    currentUser.userRole=userTable[i][indexUserRole];
-    currentUser.courseInfo.rawStringStoredInDB=userTable[i][indexCourseInfo];
+  int numActivatedUsers = 0;
+  for (int i = 0; i < userTable.size; i ++)
+  { currentUser.username = userTable[i][indexUser];
+    currentUser.email = userTable[i][indexEmail];
+    currentUser.actualActivationToken = userTable[i][indexActivationToken];
+    currentUser.userRole = userTable[i][indexUserRole];
+    currentUser.courseInfo.rawStringStoredInDB = userTable[i][indexCourseInfo];
     currentUser.AssignCourseInfoString(&out);
-    std::string currentCourseID=currentUser.ToStringIdSectionCourse();
+    std::string currentCourseID = currentUser.ToStringIdSectionCourse();
 
     //if (currentUser. currentCourses.value.find('%')!=std::string::npos)
     //{ out << "<span style=\"color:red\"><b>Non-expected behavior: user: "
@@ -1770,9 +1760,9 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     //}
     if (!adminsOnly && !sectionIDs.Contains(currentCourseID))
       continue;
-    if (adminsOnly xor (currentUser.userRole=="admin"))
+    if (adminsOnly xor (currentUser.userRole == "admin"))
       continue;
-    numUsers++;
+    numUsers ++;
     std::stringstream oneTableLineStream;
     oneTableLineStream << "<tr>"
     << "<td>" << currentUser.username.value << "</td>"
@@ -1780,9 +1770,9 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     ;
     bool isActivated = true;
     std::string webAddress = "https://" + hostWebAddressWithPort + "/cgi-bin/calculator";
-    if (currentUser.actualActivationToken.value!="activated" && currentUser.actualActivationToken.value!="error")
-    { isActivated=false;
-      numActivatedUsers++;
+    if (currentUser.actualActivationToken.value != "activated" && currentUser.actualActivationToken.value != "error")
+    { isActivated = false;
+      numActivatedUsers ++;
       oneTableLineStream << "<td><span style=\"color:red\">not activated</span></td>";
       if (currentUser.actualActivationToken.value!="")
         oneTableLineStream << "<td>"
@@ -1810,10 +1800,8 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
       << webAddress
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
-      << "Best regards, \ncalculator-algebra.org."
-      ;
-      oneTableLineStream << emailBody.str() << "\">Send email manually.</a> "
-      ;
+      << "Best regards, \ncalculator-algebra.org.";
+      oneTableLineStream << emailBody.str() << "\">Send email manually.</a> ";
       oneTableLineStream << "</td>";
       //      else
         //  oneTableLineStream << "<td>Activation token: " << currentUser.activationToken.value << "</td>";
@@ -1829,8 +1817,8 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     //oneTableLineStream << "<td>" << currentUser.courseInfo.ToStringHumanReadable() << "</td>";
     oneTableLineStream << "</tr>";
 
-    int indexCurrentBucket=sectionIDs.GetIndex(currentCourseID);
-    if (indexCurrentBucket!=-1)
+    int indexCurrentBucket = sectionIDs.GetIndex(currentCourseID);
+    if (indexCurrentBucket != - 1)
     { if (isActivated)
         activatedAccountBucketsBySection[indexCurrentBucket].AddOnTop(oneTableLineStream.str());
       else
@@ -1838,43 +1826,43 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       preFilledLinkBucketsBySection[indexCurrentBucket].AddOnTop(oneLink.str());
     }
   }
-  for (int i=0; i<nonActivatedAccountBucketsBySection.size; i++)
+  for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++)
     nonActivatedAccountBucketsBySection[i].QuickSortAscending();
-  for (int i=0; i<activatedAccountBucketsBySection.size; i++)
+  for (int i = 0; i < activatedAccountBucketsBySection.size; i ++)
     activatedAccountBucketsBySection[i].QuickSortAscending();
-  for (int i=0; i<preFilledLinkBucketsBySection.size; i++)
+  for (int i = 0; i < preFilledLinkBucketsBySection.size; i ++)
     preFilledLinkBucketsBySection[i].QuickSortAscending();
   std::stringstream tableStream;
   tableStream << "<table><tr><th>User</th><th>Email</th><th>Activated?</th><th>Activation link</th>"
   << "<th>Activation manual email</th>"
   << " <th>Pre-filled login link</th><th>Course info</th></tr>";
-  for (int i=0; i<nonActivatedAccountBucketsBySection.size; i++)
+  for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++)
   { if (!adminsOnly)
-      if (nonActivatedAccountBucketsBySection[i].size>0)
+      if (nonActivatedAccountBucketsBySection[i].size > 0)
         tableStream << "<tr><td colspan=\"6\" style=\"text-align:center\">" << theSections[i] << "</td></tr>";
-    for (int j=0; j<nonActivatedAccountBucketsBySection[i].size; j++)
+    for (int j = 0; j < nonActivatedAccountBucketsBySection[i].size; j ++)
       tableStream << nonActivatedAccountBucketsBySection[i][j];
   }
-  for (int i=0; i<activatedAccountBucketsBySection.size; i++)
+  for (int i = 0; i < activatedAccountBucketsBySection.size; i ++)
   { if (!adminsOnly)
-      if (activatedAccountBucketsBySection[i].size>0)
+      if (activatedAccountBucketsBySection[i].size > 0)
         tableStream << "<tr><td colspan=\"7\" style=\"text-align:center\">"
         << theSections[i] << "</td></tr>";
-    for (int j=0; j<activatedAccountBucketsBySection[i].size; j++)
+    for (int j = 0; j < activatedAccountBucketsBySection[i].size; j ++)
       tableStream << activatedAccountBucketsBySection[i][j];
   }
   tableStream << "</table>";
   std::stringstream preFilledLoginLinks;
   if (!adminsOnly)
-  { for (int i=0; i<preFilledLinkBucketsBySection.size; i++)
-    { if (preFilledLinkBucketsBySection[i].size>0)
+  { for (int i = 0; i < preFilledLinkBucketsBySection.size; i ++)
+    { if (preFilledLinkBucketsBySection[i].size > 0)
         preFilledLoginLinks << theSections[i] << "<br>";
-      for (int j=0; j<preFilledLinkBucketsBySection[i].size; j++)
+      for (int j = 0; j < preFilledLinkBucketsBySection[i].size; j ++)
         preFilledLoginLinks << preFilledLinkBucketsBySection[i][j] << "<br>";
     }
   }
   out << "\n" << numUsers << " user(s)";
-  if (numActivatedUsers>0)
+  if (numActivatedUsers > 0)
     out << ", <span style=\"color:red\">" << numActivatedUsers
     << " have not activated their accounts. </span>";
   out << tableStream.str() << preFilledLoginLinks.str();
@@ -1888,9 +1876,9 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
 std::string HtmlInterpretation::ToStringAssignSection()
 { MacroRegisterFunctionWithName("HtmlInterpretation::ToStringAssignSection");
   std::stringstream out;
-  std::string idAddressTextarea= "inputSetTeacher";
-  std::string idExtraTextarea= "inputSections";
-  std::string idOutput="idOutputSections";
+  std::string idAddressTextarea = "inputSetTeacher";
+  std::string idExtraTextarea = "inputSections";
+  std::string idOutput = "idOutputSections";
   out << "Assign section(s) to teacher(s)<br> ";
   out << "<textarea width=\"500px\" ";
   out << "id=\"" << idAddressTextarea << "\"";
@@ -1918,62 +1906,61 @@ std::string HtmlInterpretation::ToStringAssignSection()
 #ifdef MACRO_use_MySQL
 void UserCalculator::ComputePointsEarned
 (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
- MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics
- )
+ MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics)
 { MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
-  this->pointsEarned=0;
-  this->pointsMax=0;
-  if (theTopics!=0)
-    for (int i=0; i<theTopics->size(); i++)
-    { (*theTopics).theValues[i].totalPointsEarned=0;
-      (*theTopics).theValues[i].pointsEarnedInProblemsThatAreImmediateChildren=0;
-      (*theTopics).theValues[i].maxPointsInAllChildren=0;
-      (*theTopics).theValues[i].flagSubproblemHasNoWeight=false;
+  this->pointsEarned = 0;
+  this->pointsMax = 0;
+  if (theTopics != 0)
+    for (int i = 0; i < theTopics->size(); i ++)
+    { (*theTopics).theValues[i].totalPointsEarned = 0;
+      (*theTopics).theValues[i].pointsEarnedInProblemsThatAreImmediateChildren = 0;
+      (*theTopics).theValues[i].maxPointsInAllChildren = 0;
+      (*theTopics).theValues[i].flagSubproblemHasNoWeight = false;
       //(*theTopics).theValues[i].maxCorrectAnswersInAllChildren=0;
       //(*theTopics).theValues[i].numAnsweredInAllChildren=0;
     }
-  for (int i=0; i<this->theProblemData.size(); i++)
-  { const std::string problemName=this->theProblemData.theKeys[i];
+  for (int i = 0; i < this->theProblemData.size(); i ++)
+  { const std::string problemName = this->theProblemData.theKeys[i];
     if (!gradableProblems.Contains(problemName) )
       continue;
-    ProblemData& currentP=this->theProblemData.theValues[i];
-    currentP.Points=0;
-    currentP.totalNumSubmissions=0;
-    currentP.numCorrectlyAnswered=0;
+    ProblemData& currentP = this->theProblemData.theValues[i];
+    currentP.Points = 0;
+    currentP.totalNumSubmissions = 0;
+    currentP.numCorrectlyAnswered = 0;
     Rational currentWeight;
-    currentP.flagProblemWeightIsOK=
+    currentP.flagProblemWeightIsOK =
     currentP.adminData.GetWeightFromCoursE(this->courseInfo.courseComputed, currentWeight);
     if (!currentP.flagProblemWeightIsOK)
-    { currentWeight=0;
+    { currentWeight = 0;
       //stOutput << "Debug: weight not ok: " << problemName << "<br>";
     }// else
      // stOutput << "Debug: weight IS ok: " << problemName << "<br>";
 
 //    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
-    for (int j=0; j<currentP.theAnswers.size(); j++)
-    { if (currentP.theAnswers[j].numCorrectSubmissions>0)
-        currentP.numCorrectlyAnswered++;
-      currentP.totalNumSubmissions+=currentP.theAnswers[j].numSubmissions;
+    for (int j = 0; j<currentP.theAnswers.size(); j ++)
+    { if (currentP.theAnswers[j].numCorrectSubmissions > 0)
+        currentP.numCorrectlyAnswered ++;
+      currentP.totalNumSubmissions += currentP.theAnswers[j].numSubmissions;
     }
-    if (currentP.flagProblemWeightIsOK && currentP.theAnswers.size()>0)
+    if (currentP.flagProblemWeightIsOK && currentP.theAnswers.size() > 0)
     { currentP.Points=(currentWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size();
-      this->pointsEarned+= currentP.Points;
+      this->pointsEarned += currentP.Points;
       //stOutput << "<br>DEBUG: Accounting points: " << currentP.Points
       //<< " to get: " << this->pointsEarned ;
     }
-    if (theTopics!=0)
+    if (theTopics != 0)
       if (theTopics->Contains(problemName))
       { TopicElement& currentElt = theTopics->GetValueCreate(problemName);
         this->pointsMax += currentWeight;
-        for (int j=0; j<currentElt.parentTopics.size; j++)
-        { (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned+=currentP.Points;
-          (*theTopics).theValues[currentElt.parentTopics[j]].maxPointsInAllChildren+=currentWeight;
-          if (currentWeight==0)
-            (*theTopics).theValues[currentElt.parentTopics[j]].flagSubproblemHasNoWeight=true;
+        for (int j = 0; j < currentElt.parentTopics.size; j ++)
+        { (*theTopics).theValues[currentElt.parentTopics[j]].totalPointsEarned += currentP.Points;
+          (*theTopics).theValues[currentElt.parentTopics[j]].maxPointsInAllChildren += currentWeight;
+          if (currentWeight == 0)
+            (*theTopics).theValues[currentElt.parentTopics[j]].flagSubproblemHasNoWeight = true;
         }
-        if (currentElt.parentTopics.size>1)
-          (*theTopics).theValues[currentElt.parentTopics[currentElt.parentTopics.size-2]]
-          .pointsEarnedInProblemsThatAreImmediateChildren+=currentP.Points;
+        if (currentElt.parentTopics.size > 1)
+          (*theTopics).theValues[currentElt.parentTopics[currentElt.parentTopics.size - 2]]
+          .pointsEarnedInProblemsThatAreImmediateChildren += currentP.Points;
       }
   }
 }
@@ -2016,14 +2003,14 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   DatabaseRoutines theRoutines;
   if (!theRoutines.FetchAllUsers(userTablE, userLabels, comments))
     return false;
-  int usernameIndex=userLabels.GetIndex(DatabaseStrings::columnUsername);
-  if (usernameIndex==-1)
+  int usernameIndex = userLabels.GetIndex(DatabaseStrings::columnUsername);
+  if (usernameIndex == - 1)
     return "Could not find username column. ";
-  int problemDataIndex=userLabels.GetIndex("problemData");
-  if (problemDataIndex==-1)
+  int problemDataIndex = userLabels.GetIndex("problemData");
+  if (problemDataIndex == - 1)
     return "Could not find problem data column. ";
-  int courseInfoIndex=userLabels.GetIndex(DatabaseStrings::columnCourseInfo);
-  if (courseInfoIndex==-1)
+  int courseInfoIndex = userLabels.GetIndex(DatabaseStrings::columnCourseInfo);
+  if (courseInfoIndex == - 1)
     return "Could not find course info column. ";
   CalculatorHTML currentUserRecord;
   this->userScores.Reserve(userTablE.size);
@@ -2035,43 +2022,41 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   this->userInfos.SetSize(0);
   this->scoresBreakdown.SetSize(0);
   this->numStudentsSolvedEntireTopic.initFillInObject
-  (this->theProblem.theTopicS.size(),0);
+  (this->theProblem.theTopicS.size(), 0);
   this->numStudentsSolvedPartOfTopic.initFillInObject
-  (this->theProblem.theTopicS.size(),0);
+  (this->theProblem.theTopicS.size(), 0);
   this->numStudentsSolvedNothingInTopic.initFillInObject
-  (this->theProblem.theTopicS.size(),0);
-
-  bool ignoreSectionsIdontTeach=true;
-  this->currentSection=theGlobalVariables.userDefault.courseInfo.sectionComputed;
-  this->currentCourse=theGlobalVariables.GetWebInput("courseHome");
-  if (theGlobalVariables.GetWebInput("request")== "scoresInCoursePage")
+  (this->theProblem.theTopicS.size(), 0);
+  bool ignoreSectionsIdontTeach = true;
+  this->currentSection = theGlobalVariables.userDefault.courseInfo.sectionComputed;
+  this->currentCourse = theGlobalVariables.GetWebInput("courseHome");
+  if (theGlobalVariables.GetWebInput("request") == "scoresInCoursePage")
     this->currentSection =
     MathRoutines::StringTrimWhiteSpace(
-    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false)
-    );
+    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false));
   //stOutput << "<br>DEBUG: ignoreSectionIdontTEach: " << ignoreSectionsIdontTeach;
   //stOutput << "<br>DEBUG: currentSection: " << this->currentSection;
-  for (int i=0; i<this->userTablE.size; i++)
-  { currentUserRecord.currentUseR.courseInfo.rawStringStoredInDB=this->userTablE[i][courseInfoIndex];
+  for (int i = 0; i < this->userTablE.size; i ++)
+  { currentUserRecord.currentUseR.courseInfo.rawStringStoredInDB = this->userTablE[i][courseInfoIndex];
     currentUserRecord.currentUseR.AssignCourseInfoString(&comments);
     //if (i<0)
     //stOutput << "<br>DEBUG: currentsection: " << currentUserRecord.currentUseR.courseInfo.getSectionInDB();
     if (ignoreSectionsIdontTeach)
-    { if (currentUserRecord.currentUseR.courseInfo.courseComputed!=this->currentCourse)
+    { if (currentUserRecord.currentUseR.courseInfo.courseComputed != this->currentCourse)
         continue;
       if (theGlobalVariables.UserStudentVieWOn())
-      { if (currentUserRecord.currentUseR.courseInfo.getSectionInDB()!=this->currentSection)
+      { if (currentUserRecord.currentUseR.courseInfo.getSectionInDB() != this->currentSection)
           continue;
       } else
-      { if (currentUserRecord.currentUseR.courseInfo.getSectionInDB()!=this->currentSection)
+      { if (currentUserRecord.currentUseR.courseInfo.getSectionInDB() != this->currentSection)
           continue;
       }
     }
-    this->userScores.AddOnTop(-1);
+    this->userScores.AddOnTop(- 1);
     this->userNames.AddOnTop(this->userTablE[i][usernameIndex]);
     this->userInfos.AddOnTop(currentUserRecord.currentUseR.courseInfo.getSectionInDB());
-    this->scoresBreakdown.SetSize(this->scoresBreakdown.size+1);
-    currentUserRecord.currentUseR.username=this->userTablE[i][usernameIndex];
+    this->scoresBreakdown.SetSize(this->scoresBreakdown.size + 1);
+    currentUserRecord.currentUseR.username = this->userTablE[i][usernameIndex];
 
 //    out << "<hr>Debug: reading db problem data from: "
 //    << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(userTable[i][problemDataIndex]) << "<br>";
@@ -2086,20 +2071,20 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
     currentUserRecord.currentUseR.ComputePointsEarned
     (theProblem.problemNamesNoTopics, &theProblem.theTopicS);
     this->scoresBreakdown.LastObject()->Clear();
-    for (int j=0; j< theProblem.theTopicS.size(); j++)
-    { TopicElement& currentTopic=theProblem.theTopicS[j];
-      Rational currentPts=currentTopic.totalPointsEarned;
-      Rational maxPts=currentTopic.maxPointsInAllChildren;
+    for (int j = 0; j < theProblem.theTopicS.size(); j ++)
+    { TopicElement& currentTopic = theProblem.theTopicS[j];
+      Rational currentPts = currentTopic.totalPointsEarned;
+      Rational maxPts = currentTopic.maxPointsInAllChildren;
       this->scoresBreakdown.LastObject()->SetKeyValue
       (theProblem.theTopicS.theKeys[j],currentPts);
-      if ( maxPts ==currentPts)
-        this->numStudentsSolvedEntireTopic[j]++;
-      else if (currentPts>0)
-        this->numStudentsSolvedPartOfTopic[j]++;
+      if ( maxPts == currentPts)
+        this->numStudentsSolvedEntireTopic[j] ++;
+      else if (currentPts > 0)
+        this->numStudentsSolvedPartOfTopic[j] ++;
       else
-        this->numStudentsSolvedNothingInTopic[j]++;
+        this->numStudentsSolvedNothingInTopic[j] ++;
     }
-    *this->userScores.LastObject()=currentUserRecord.currentUseR.pointsEarned;
+    *this->userScores.LastObject() = currentUserRecord.currentUseR.pointsEarned;
     //out << "<br>DEBUG: Computed scores from: " << currentUserRecord.currentUseR.ToString();
   }
   return true;
@@ -2142,7 +2127,7 @@ std::string HtmlInterpretation::GetScoresInCoursePage()
   out << "<script type=\"text/javascript\">\n";
   out << "studentScoresInHomePage= new Array("
   << theScores.theProblem.theTopicS.size() << ");\n";
-  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i++)
+  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
   { TopicElement& currentElt = theScores.theProblem.theTopicS[i];
     out << "studentScoresInHomePage[" << i << "]= new Object;\n";
     if (currentElt.flagSubproblemHasNoWeight)

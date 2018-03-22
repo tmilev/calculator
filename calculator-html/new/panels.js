@@ -93,6 +93,7 @@ function toggleMenu(){
     theMenuDiv.classList.add("divMainMenuCollapsed");
     mainMenuIsHidden = true;
     theToggleButton.innerHTML = "&#9656;";
+    document.getElementById("divProfilePicture").classList.add("divProfilePictureContainerCollapsed");
   } else {
     for (var counterDiv = 3; counterDiv < theMenuDiv.childNodes.length; counterDiv ++){
       var currentNode = theMenuDiv.childNodes[counterDiv];
@@ -100,8 +101,9 @@ function toggleMenu(){
         currentNode.style.display = "";
       }
     }
-    document.getElementById("divTheMainMenuPanel").classList.remove("divMainMenuCollapsed");
+    theMenuDiv.classList.remove("divMainMenuCollapsed");
     mainMenuIsHidden = false;
     theToggleButton.innerHTML = "&#9660;";
+    document.getElementById("divProfilePicture").classList.remove("divProfilePictureContainerCollapsed");
   }
 }

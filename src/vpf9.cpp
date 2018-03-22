@@ -10956,39 +10956,39 @@ bool Cone::CreateFromVertices(const Vectors<Rational>& inputVertices)
 }
 
 bool Cone::CreateFromNormalS(Vectors<Rational>& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices)
-{ this->flagIsTheZeroCone=false;
-  this->LowestIndexNotCheckedForChopping=0;
-  this->LowestIndexNotCheckedForSlicingInDirection=0;
-  int theDim=1;
-  if (inputNormals.size>0)
-    theDim=inputNormals[0].size;
-  this->Normals=inputNormals;
-  for (int i=0; i<this->Normals.size; i++)
+{ this->flagIsTheZeroCone = false;
+  this->LowestIndexNotCheckedForChopping = 0;
+  this->LowestIndexNotCheckedForSlicingInDirection = 0;
+  int theDim = 1;
+  if (inputNormals.size > 0)
+    theDim = inputNormals[0].size;
+  this->Normals = inputNormals;
+  for (int i = 0; i < this->Normals.size; i ++)
     if (this->Normals[i].IsEqualToZero())
     { this->Normals.RemoveIndexSwapWithLast(i);
-      i--;
+      i --;
     }
-  int numAddedFakeWalls=0;
+  int numAddedFakeWalls = 0;
   Matrix<Rational> tempMat;
   Selection tempSel;
   if (!UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices)
-    for (int i=0; i<theDim && this->Normals.GetRankOfSpanOfElements(&tempMat, &tempSel)<theDim; i++)
+    for (int i = 0; i < theDim && this->Normals.GetRankOfSpanOfElements(&tempMat, &tempSel) < theDim; i ++)
     { Vector<Rational> tempRoot;
       tempRoot.MakeEi(theDim, i);
       if(!this->Normals.LinSpanContainsVector(tempRoot, tempMat, tempSel))
-      { numAddedFakeWalls++;
+      { numAddedFakeWalls ++;
         this->Normals.AddOnTop(tempRoot);
       }
     }
 //  stOutput << "<br>Normals (" << inputNormals.size << " input " << numAddedFakeWalls << " fake): " << this->Normals.ToString();
   this->ComputeVerticesFromNormalsNoFakeVertices();
 //  stOutput << "<br>Vertices before adding minus vertices: " << this->Vertices.ToString();
-  if (numAddedFakeWalls>0)
-  { this->Normals.SetSize(this->Normals.size-numAddedFakeWalls);
+  if (numAddedFakeWalls > 0)
+  { this->Normals.SetSize(this->Normals.size - numAddedFakeWalls);
     Vector<Rational> tempRoot;
     int originalSize=this->Vertices.size;
-    for (int i=0; i<originalSize; i++)
-    { tempRoot=-this->Vertices[i];
+    for (int i = 0; i < originalSize; i ++)
+    { tempRoot = - this->Vertices[i];
       if (this->IsInCone(tempRoot))
         this->Vertices.AddOnTopNoRepetition(tempRoot);
     }
@@ -11000,8 +11000,8 @@ bool Cone::CreateFromNormalS(Vectors<Rational>& inputNormals, bool UseWithExtrem
 void ConeComplex::initFromCones(List<Cone>& NormalsOfCones, bool AssumeConesHaveSufficientlyManyProjectiveVertices)
 { List<Vectors<Rational> > tempRoots;
   tempRoots.SetSize(NormalsOfCones.size);
-  for (int i=0; i<NormalsOfCones.size; i++)
-    tempRoots[i]=NormalsOfCones[i].Normals;
+  for (int i = 0; i < NormalsOfCones.size; i ++)
+    tempRoots[i] = NormalsOfCones[i].Normals;
   this->initFromCones(tempRoots, AssumeConesHaveSufficientlyManyProjectiveVertices);
 }
 
@@ -11012,23 +11012,23 @@ void ConeComplex::initFromCones
   ProgressReport theReport;
   theReport.Report(NormalsOfCones.ToString());
 //  for (int i=0; i<10000000; i++){int j=i*i*i;}
-  for (int i=0; i<NormalsOfCones.size; i++)
+  for (int i = 0; i < NormalsOfCones.size; i ++)
   { if (tempCone.CreateFromNormalS(NormalsOfCones[i], UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices))
       this->AddNonRefinedChamberOnTopNoRepetition(tempCone);
     std::stringstream out;
-    out << "Initializing cone " << i+1 << " out of " << NormalsOfCones.size;
+    out << "Initializing cone " << i + 1 << " out of " << NormalsOfCones.size;
     theReport.Report(out.str());
   }
   Vector<Rational> tempRoot;
   this->splittingNormals.Clear();
-  for (int i=0; i<this->size; i++)
-    for (int j=0; j<this->TheObjects[i].Normals.size; j++)
-    { tempRoot=this->TheObjects[i].Normals[j];
+  for (int i = 0; i < this->size; i ++)
+    for (int j = 0; j < this->TheObjects[i].Normals.size; j ++)
+    { tempRoot = this->TheObjects[i].Normals[j];
       tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
       this->splittingNormals.AddOnTopNoRepetition(tempRoot);
       std::stringstream out;
-      out << "Extracting walls from cone " << i+1 << " out of " << this->size << " total distinct chambers.";
-      out << "\nProcessed " << j+1 << " out of " << this->TheObjects[i].Normals.size << " walls of the current chamber.";
+      out << "Extracting walls from cone " << i + 1 << " out of " << this->size << " total distinct chambers.";
+      out << "\nProcessed " << j + 1 << " out of " << this->TheObjects[i].Normals.size << " walls of the current chamber.";
       out << "\nTotal # of distinct walls found: " << this->splittingNormals.size;
       theReport.Report(out.str());
     }
@@ -11036,13 +11036,13 @@ void ConeComplex::initFromCones
 
 std::string Cone::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
-  bool PrepareMathReport= theFormat==0 ? false: theFormat->flagUseLatex;
-  bool useHtml= theFormat==0 ? false: theFormat->flagUseHTML;
-  bool useLatex= theFormat==0 ? false: theFormat->flagUseLatex;
-  bool lastVarIsConstant=false;
+  bool PrepareMathReport = theFormat == 0 ? false: theFormat->flagUseLatex;
+  bool useHtml = theFormat == 0 ? false: theFormat->flagUseHTML;
+  bool useLatex = theFormat == 0 ? false: theFormat->flagUseLatex;
+  bool lastVarIsConstant = false;
   if (this->flagIsTheZeroCone)
     out << "The cone is the zero cone.";
-  else if(this->Normals.size==0)
+  else if(this->Normals.size == 0)
     out << "The cone is the entire space";
   if (!PrepareMathReport)
   { out << "Index next wall to refine by: " << this->LowestIndexNotCheckedForChopping << "\n";
@@ -11058,15 +11058,15 @@ std::string Cone::ToString(FormatExpressions* theFormat)const
   if (useLatex)
     out << "\\[";
   FormatExpressions tempF;
-  if (theFormat==0)
-    theFormat=&tempF;
+  if (theFormat == 0)
+    theFormat = &tempF;
   out << this->Normals.ElementsToInequalitiesString(useLatex, useHtml, lastVarIsConstant, *theFormat);
   if (useLatex)
     out << "\\]";
   out << "\nProjectivized Vertices: " << this->Vertices.ToString();
   if (useHtml)
     out << "<br>";
-  if (this->Vertices.size>0)
+  if (this->Vertices.size > 0)
     out << "\nInternal point: " << this->GetInternalPoint().ToString();
   return out.str();
 }
@@ -11082,17 +11082,17 @@ std::string ConeComplex::ToString(bool useHtml)
     out << "<br>";
   out << "Normals of walls to refine by: ";
   Vectors<Rational> tempRoots;
-  tempRoots=(this->splittingNormals);
+  tempRoots = this->splittingNormals;
   out << tempRoots.ToString(&theFormat);
-  if (this->slicingDirections.size>0)
+  if (this->slicingDirections.size > 0)
   { if (useHtml)
       out << "<br>\n";
     out << " Directions to slice along: " << this->slicingDirections.ToString();
   }
-  for (int i=0; i<this->size; i++)
+  for (int i = 0; i < this->size; i ++)
   { if (useHtml)
       out << "<hr>";
-    out << "\n\n\nChamber " << i+1 << ":\n";
+    out << "\n\n\nChamber " << i + 1 << ":\n";
     if (useHtml)
       out << "<br>";
     out << this->TheObjects[i].ToString(&theFormat) << "\n\n\n";
@@ -11101,7 +11101,7 @@ std::string ConeComplex::ToString(bool useHtml)
 }
 
 int RationalFunctionOld::GetMinNumVars()const
-{ switch(this->expressionType)
+{ switch (this->expressionType)
   { case RationalFunctionOld::typeRational:
       return 0;
     case RationalFunctionOld::typePoly:
@@ -11109,7 +11109,7 @@ int RationalFunctionOld::GetMinNumVars()const
     case RationalFunctionOld::typeRationalFunction:
       return MathRoutines::Maximum(this->Numerator.GetElementConst().GetMinNumVars(), this->Denominator.GetElementConst().GetMinNumVars());
     default: //this should never happen! maybe crash << crash here...
-      return -1;
+      return - 1;
   }
 }
 
@@ -11120,26 +11120,25 @@ bool RationalFunctionOld::GetRelations
 { MacroRegisterFunctionWithName("RationalFunctionOld::GetRelationsGetRelations");
   outputGeneratorLabels.SetSize(inputElements.size);
   outputRelations.SetSize(0);
-  if (inputElements.size==0)
+  if (inputElements.size == 0)
     return true;
   List<Polynomial<Rational> > theGroebnerBasis;
-  theGroebnerBasis=inputElements;
-  int numStartingGenerators=inputElements.size;
-  int numStartingVariables=0;
-  for (int i=0; i<inputElements.size; i++)
-    numStartingVariables=MathRoutines::Maximum(numStartingVariables, inputElements[0].GetMinNumVars());
+  theGroebnerBasis = inputElements;
+  int numStartingGenerators = inputElements.size;
+  int numStartingVariables = 0;
+  for (int i = 0; i < inputElements.size; i ++)
+    numStartingVariables = MathRoutines::Maximum(numStartingVariables, inputElements[0].GetMinNumVars());
   Polynomial<Rational> currentGenerator;
-  FormatExpressions tempFormat;
-  for (int i=0; i<numStartingGenerators; i++)
-  { Polynomial<Rational>& currentPoly=theGroebnerBasis[i];
-    currentPoly.SetNumVariablesSubDeletedVarsByOne(numStartingVariables+numStartingGenerators);
-    currentGenerator.MakeDegreeOne(numStartingVariables+numStartingGenerators, i+numStartingVariables, 1);
-    outputGeneratorLabels[i]=currentGenerator;
-    currentPoly-=currentGenerator;
+  for (int i = 0; i < numStartingGenerators; i ++)
+  { Polynomial<Rational>& currentPoly = theGroebnerBasis[i];
+    currentPoly.SetNumVariablesSubDeletedVarsByOne(numStartingVariables + numStartingGenerators);
+    currentGenerator.MakeDegreeOne(numStartingVariables + numStartingGenerators, i + numStartingVariables, 1);
+    outputGeneratorLabels[i] = currentGenerator;
+    currentPoly -= currentGenerator;
 //  stOutput << currentPoly.ToString(false, tempFormat) << "<br>";
   }
   GroebnerBasisComputation<Rational> theComputation;
-  theComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
+  theComputation.thePolynomialOrder.theMonOrder = MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
   if (!theComputation.TransformToReducedGroebnerBasis(theGroebnerBasis))
   { comments << "Failed to find Groebner basis";
     return false;
@@ -11150,12 +11149,12 @@ bool RationalFunctionOld::GetRelations
 //  }
   outputRelations.Reserve(theGroebnerBasis.size);
   outputRelations.SetSize(0);
-  for (int i=0; i<theGroebnerBasis.size; i++)
-  { Polynomial<Rational>& currentPoly= theGroebnerBasis[i];
-    bool bad=false;
-    for (int j=0; j<numStartingVariables; j++)
-      if(currentPoly.GetMaxPowerOfVariableIndex(j)>0)
-      { bad=true;
+  for (int i = 0; i < theGroebnerBasis.size; i ++)
+  { Polynomial<Rational>& currentPoly = theGroebnerBasis[i];
+    bool bad = false;
+    for (int j = 0; j < numStartingVariables; j ++)
+      if(currentPoly.GetMaxPowerOfVariableIndex(j) > 0)
+      { bad = true;
         break;
       }
     if (!bad)
@@ -11167,23 +11166,23 @@ bool RationalFunctionOld::GetRelations
 bool ConeComplex::findMaxLFOverConeProjective
   (const Cone& input, List<Polynomial<Rational> >& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber)
 { Vectors<Rational> HyperPlanesCorrespondingToLF;
-  if (input.Normals.size<1 || inputLinPolys.size<1)
+  if (input.Normals.size < 1 || inputLinPolys.size < 1)
     return false;
-  int theDim=input.Normals[0].size;
+  int theDim = input.Normals[0].size;
   HyperPlanesCorrespondingToLF.SetSize(inputLinPolys.size);
-  for (int i=0; i<inputLinPolys.size; i++)
-  { Polynomial<Rational>& currentPoly=inputLinPolys[i];
-    if (currentPoly.TotalDegree()!=1 )
+  for (int i = 0; i < inputLinPolys.size; i ++)
+  { Polynomial<Rational>& currentPoly = inputLinPolys[i];
+    if (currentPoly.TotalDegree() != 1 )
     { stOutput << "You messed up the total degree which must be one, instead it is "
       << currentPoly.TotalDegree() << ". The dimension of the cone is " << theDim;
       return false;
     }
-    Vector<Rational>& newWall=HyperPlanesCorrespondingToLF[i];
+    Vector<Rational>& newWall = HyperPlanesCorrespondingToLF[i];
     newWall.MakeZero(theDim);
-    for (int j=0; j<currentPoly.size(); j++)
-      for (int k=0; k<theDim; k++)
-        if (currentPoly[j](k)==1)
-        { newWall[k]=currentPoly.theCoeffs[j];
+    for (int j = 0; j < currentPoly.size(); j ++)
+      for (int k = 0; k < theDim; k ++)
+        if (currentPoly[j](k) == 1)
+        { newWall[k] = currentPoly.theCoeffs[j];
           break;
         }
   }
@@ -11192,14 +11191,14 @@ bool ConeComplex::findMaxLFOverConeProjective
 }
 
 bool ConeComplex::findMaxLFOverConeProjective
-  (const Cone& input, Vectors<Rational>& inputLFsLastCoordConst,
-   List<int>& outputMaximumOverEeachSubChamber)
+(const Cone& input, Vectors<Rational>& inputLFsLastCoordConst,
+ List<int>& outputMaximumOverEeachSubChamber)
 { this->init();
   this->AddNonRefinedChamberOnTopNoRepetition(input);
   Vector<Rational> tempRoot;
-  for (int i=0; i<inputLFsLastCoordConst.size; i++)
-    for (int j=i+1; j<inputLFsLastCoordConst.size; j++)
-    { tempRoot=inputLFsLastCoordConst[i]-inputLFsLastCoordConst[j];
+  for (int i = 0; i < inputLFsLastCoordConst.size; i ++)
+    for (int j = i + 1; j < inputLFsLastCoordConst.size; j ++)
+    { tempRoot = inputLFsLastCoordConst[i] - inputLFsLastCoordConst[j];
       tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
       if (!tempRoot.IsEqualToZero())
         this->splittingNormals.AddOnTopNoRepetition(tempRoot);
@@ -11207,15 +11206,15 @@ bool ConeComplex::findMaxLFOverConeProjective
   stOutput << this->ToString(true);
   this->Refine();
   outputMaximumOverEeachSubChamber.SetSize(this->size);
-  Rational theMax=0;
-  for (int i=0; i<this->size; i++)
+  Rational theMax = 0;
+  for (int i = 0; i < this->size; i ++)
   { this->TheObjects[i].GetInternalPoint(tempRoot);
-    bool isInitialized=false;
-    for (int j=0; j<inputLFsLastCoordConst.size; j++)
-      if (!isInitialized || tempRoot.ScalarEuclidean(inputLFsLastCoordConst[j])>theMax)
-      { theMax=tempRoot.ScalarEuclidean(inputLFsLastCoordConst[j]);
-        outputMaximumOverEeachSubChamber[i]=j;
-        isInitialized=true;
+    bool isInitialized = false;
+    for (int j = 0; j < inputLFsLastCoordConst.size; j ++)
+      if (!isInitialized || tempRoot.ScalarEuclidean(inputLFsLastCoordConst[j]) > theMax)
+      { theMax = tempRoot.ScalarEuclidean(inputLFsLastCoordConst[j]);
+        outputMaximumOverEeachSubChamber[i] = j;
+        isInitialized = true;
       }
   }
   for (int i = 0; i < this->size; i ++)

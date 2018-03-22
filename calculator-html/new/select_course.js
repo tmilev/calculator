@@ -2,9 +2,7 @@
 
 function selectCourse(courseIndex){
   thePage.currentCourse = thePage.theCourses[courseIndex];
-  addCookie("courseHome",  "coursetemplates/" + thePage.currentCourse.html, 300);
-  addCookie("topicList", "topiclists/" + thePage.currentCourse.topics, 300);
-  thePage.storeCurrentCourse();
+  thePage.storeSettingsToCookies();
   thePage.selectPage("currentCourse");
 }
 

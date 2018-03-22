@@ -1,5 +1,13 @@
 function Page(){
+  thePage = this;
   this.pages = {
+    login: {
+      id: "divLoginPage", 
+      menuButtonId: "buttonLoginPage",
+      container: null,
+      selectFunction: selectLoginPage,
+      initialized: false
+    },
     currentCourse : {
       id: "divCurrentCourse",
       menuButtonId: "buttonCurrentCourse",
@@ -40,23 +48,45 @@ function Page(){
   this.theTopics = {};
   this.theCourses = {}; 
   this.currentPage  = null;
-  if (Storage !== undefined && localStorage !== undefined) {
-    this.currentPage = localStorage.currentPage; 
-  }
-  this.currentCourse = null;
-  this.loadCurrentCourse = function(){
-    try { 
-      var currentCourseString = getCookie("currentCourse");
-      this.currentCourse = JSON.parse(currentCourseString);
-    } catch (e){
-      console.log("Error reading current course. " + e);
-      this.currentCourse = null;
-    }  
-  }
-  this.storeCurrentCourse = function(){
-    addCookie("currentCourse", JSON.stringify(this.currentCourse), 300);
-  }
-  this.loadCurrentCourse();
+  this.logoutRequestFromUrl = null;
+  this.locationRequestFromUrl = null;
+  this.currentCourse = {};
+  this.googleProfile = {};
+  this.googleToken = null;
+  this.storeSettingsToLocalStorage = function(){
+    if (Storage === undefined && localStorage === undefined){
+      return;
+    }
+    localStorage.googleProfile = JSON.stringify(this.googleProfile);
+  };
+  this.loadSettingsFromLocalStorage = function(){    
+    if (Storage === undefined && localStorage === undefined){
+      return;
+    }
+    try {
+      this.currentPage = localStorage.currentPage;
+      this.googleProfile = JSON.parse(localStorage.googleProfile); 
+    } catch (e) {
+      console.log("Error loading settings from local storage: " + e);
+    }
+  };
+  this.storeSettingsToCookies = function(){
+    addCookie("courseHome", this.currentCourse.html, 300);
+    addCookie("topicList", this.currentCourse.topics, 300);
+    addCookie("googleToken", this.googleToken, 300, true); 
+  };
+  this.loadSettingsFromCookies = function(){
+    try {
+      this.currentCourse = {
+        "html": getCookie("courseHome"),
+        "topics": getCookie("topicList")
+      };
+    } catch (e) {
+      console.log("Error loading settings from cookies: " + e);
+    }
+  };
+  this.loadSettingsFromCookies();
+  this.loadSettingsFromLocalStorage();
   //////////////////////////////////////
   //////////////////////////////////////
   //Page manipulation functions
@@ -85,6 +115,26 @@ function Page(){
       this.pages[this.currentPage].selectFunction();
     }
   };
+  this.updateProfilePic = function(){
+    if (this.googleProfile.picture === undefined){
+      return;
+    }
+    if (document.getElementById("divProfilePicture").children.length > 0){
+      return;
+    }
+    try {
+      var theProfilePicElement = document.createElement("IMG");
+      theProfilePicElement.setAttribute("src", this.googleProfile.picture);
+      theProfilePicElement.setAttribute("alt", this.googleProfile.name);
+      theProfilePicElement.setAttribute("id", "imgProfilePicture");
+      theProfilePicElement.setAttribute("title", this.googleProfile.name);
+      theProfilePicElement.setAttribute("className", "profilePicture");
+      //theProfilePicElement.setAttribute("width", 50);
+      document.getElementById("divProfilePicture").appendChild(theProfilePicElement);
+    } catch (e) {
+      console.log("Failed to set profile picture: " + e);
+    }
+  }
   this.initializeCalculatorPage = function(){
     initializeButtons();
     initializeCalculatorPage();
@@ -104,6 +154,8 @@ function Page(){
   //////////////////////////////////////
   //////////////////////////////////////
   this.selectPage(this.currentPage);
+  document.getElementById("divPage").style.display = "";
+  document.getElementById("divPage").className = "divPage";
 }
 
 function loadProfilePic(){

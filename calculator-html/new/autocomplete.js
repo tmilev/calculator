@@ -139,7 +139,7 @@ function suggestWord()
     theSuggestionsHighlighted.push(currentString);
   }      
   if (theSuggestions.length>0)
-    theAutoCompleteHints.style.visibility="visible";
+    theAutoCompleteHints.style.visibility = "visible";
   indexInAutocomplete=0;
   displaySuggestions();
 }

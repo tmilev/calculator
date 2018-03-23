@@ -23,6 +23,7 @@ FEATUREFLAGS= -std=c++0x -pthread -fopenmp
 CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
 LDFLAGS=$(FEATUREFLAGS)
 LIBRARYINCLUDESEND=
+INCLUDEDIRS = -I/usr/include/libmongoc-1.0 -I/usr/include/libbson-1.0
 
 LD_LIBRARY_PATH=LD_LIBRARY_PATH:
 
@@ -165,13 +166,13 @@ bin:
 	mkdir ./bin
 
 bin_calculator: $(OBJECTS)
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o  ./bin/calculator $(LIBRARYINCLUDESEND)
+	$(CXX) $(LDFLAGS) $(OBJECTS) -o ./bin/calculator $(LIBRARYINCLUDESEND)
 
 testrun: bin/calculator
 	time ./bin/calculator test
 
 %.o:%.cpp
-	$(CXX) $(CFLAGS) -MMD -MP $< -o $@
+	$(CXX) $(INCLUDEDIRS) $(CFLAGS) -MMD -MP $< -o $@
 
 clean:
 	rm -f $(OBJECTS) $(DEPS)

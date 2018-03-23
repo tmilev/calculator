@@ -12,9 +12,13 @@ DEFINES+=MACRO_use_MySQL
 DEFINES+=MACRO_use_open_ssl
 
 LIBS+=-L/usr/lib64/mysql
+LIBS+=-L/usr/lib/libmongoc-1.0
 LIBS+=-lmysqlclient
 LIBS+=-lssl
 LIBS+=-lcrypto
+
+INCLUDEPATH+=/usr/include/libmongoc-1.0
+INCLUDEPATH+=/usr/include/libbson-1.0
 
 SOURCES += \
     webserver.cpp \

@@ -2996,7 +2996,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
   }
   if (this->flagIsExamProblem && this->flagParentInvestigated)
   { int indexInParent = this->problemNamesNoTopics.GetIndex(this->fileName);
-    if (indexInParent == -1)
+    if (indexInParent == - 1)
       out << "<b>Problem not in course</b>" << linkSeparator;
     else
     { if (indexInParent > 0)
@@ -3976,7 +3976,7 @@ int TopicElement::scoreButtonCounter = 0;
 
 std::string TopicElement::ToStringStudentScoreReportPanel()
 { std::stringstream out;
-  TopicElement::scoreButtonCounter++;
+  TopicElement::scoreButtonCounter ++;
   out << "<span class=\"studentScoresWrapper\">";
   out << "<span id='studentScoresLoadReport"
   << scoreButtonCounter << "'></span>"

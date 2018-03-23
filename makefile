@@ -57,7 +57,7 @@ endif
 ##We include mysql and ssl depending on their availability
 ##This code may need more work in the future
 
-ifeq ($(nossl),1)
+ifeq ($(nossl), 1)
 $(info [1;33mNo openssl requested.[0m) 
 else
 sslLocation=
@@ -107,6 +107,7 @@ $(info Compiling with flags: $(LIBRARYINCLUDESEND))
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
 SOURCES=\
+./src/databasemongo.cpp \
 ./src/webserver.cpp \
 ./src/web-routines-1.cpp \
 ./src/database.cpp \

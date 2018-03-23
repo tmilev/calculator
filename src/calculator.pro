@@ -62,7 +62,8 @@ SOURCES += \
     vpfHtmlInterpretationInterface.cpp \
     vpfHtmlSnippets.cpp \
     vpf6_37calculatorroutines.cpp \
-    vpf6_38LaTeXRoutines.cpp
+    vpf6_38LaTeXRoutines.cpp \
+    databasemongo.cpp
 
 HEADERS += \
     webserver.h \

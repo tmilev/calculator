@@ -176,7 +176,7 @@ function configureMathJaxForCalculator()
 
   //});
 
-  MathJax.Ajax.loadComplete(MathJaxSetupScriptURL);
+  MathJax.Ajax.loadComplete("mathjax-calculator-setup.js");
 }
 
 var waitingForMathJaxCounter=0;

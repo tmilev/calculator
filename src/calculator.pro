@@ -121,17 +121,18 @@ HEADERS += \
     vpfHeader2Math4_5_Tree.h
 
 DISTFILES += \
-    ../html-common/three-d.js \
-    ../html-common/initializebuttons.js \
-    ../html-common/calculatorPage.js \
-    ../html-common/autocomplete.js \
-    ../html-common/topiclist.js \
-    ../html-common/problemlinkstyles.js \
-    ../html-common/ace-editor-settings.js \
-    ../html-common/database-routines.js \
-    ../html-common/styleCalculator.css \
-    ../html-common/cookie-functions.js \
-    ../html-common/mathjax-calculator-setup.js \
-    ../html-common/forgot-login.js \
-    ../html-common/account-management.js
-
+    ../calculator-html/new/app.js \
+    ../calculator-html/new/autocomplete.js \
+    ../calculator-html/new/calculator_page.js \
+    ../calculator-html/new/cookies.js \
+    ../calculator-html/new/hide_html_with_tags.js \
+    ../calculator-html/new/initialize_buttons.js \
+    ../calculator-html/new/styleCalculator.css \
+    ../calculator-html/new/index.html \
+    ../calculator-html/new/mathjax-calculator-setup.js \
+    ../calculator-html/new/page_navigation.js \
+    ../calculator-html/new/panels.js \
+    ../calculator-html/new/three-d.js \
+    ../calculator-html/new/submit_requests.js \
+    ../calculator-html/new/autocomplete_keywords.js \
+    ../calculator-html/new/course_page.js

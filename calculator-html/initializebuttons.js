@@ -17,7 +17,7 @@ function processMathQuillLatex(theText)
         theText=theText.slice(0,i+2)+' '+theText.slice(i+2);
     }
   if (charsToSplit!=undefined)
-    for (i=0; i<theText.length-1; i++)
+    for (var i=0; i<theText.length-1; i++)
     { for (var j=0; j<charsToSplit.length; j++)
         if (theText[i]===charsToSplit[j] &&
             theText[i+1]!==' ' && theText[i+1]!=='\\'
@@ -443,7 +443,7 @@ function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll
 }
 
 function initializeButtons()
-{ for (i=0; i<answerIdsPureLatex.length; i++)
+{ for (var i = 0; i < answerIdsPureLatex.length; i++)
     initializeOneButtonPanel(preferredButtonContainers[i], i, false);
   initializeButtonsCommon();
 }

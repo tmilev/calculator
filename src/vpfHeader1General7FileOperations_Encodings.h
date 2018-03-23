@@ -15,7 +15,7 @@ public:
   static HashedList<std::string, MathRoutines::hashString>&
   FolderStartsToWhichWeAppendInstructorUsernameSlash();
   static HashedList<std::string, MathRoutines::hashString>&
-  FolderVirtualLinksToWhichWeAppendBuildHash();
+  FolderVirtualLinksToWhichWeAppendTimeAndBuildHash();
 
   static MapLisT<std::string, std::string, MathRoutines::hashString>&
   FolderVirtualLinksNonSensitive();

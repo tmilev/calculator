@@ -1,0 +1,18 @@
+{
+  "name": "calculator_externals",
+  "version": "1.0.0",
+  "description": "External modules for the calculator html.",
+  "main": "browserify.js",
+  "dependencies": {
+    "browserify": "^16.1.1",
+    "colors": "^1.2.1",
+    "fs": "^0.0.1-security",
+    "jsonwebtoken": "^8.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Todor Milev",
+  "license": "ISC"
+}

@@ -41,15 +41,15 @@ public:
   List<Object*> theReferences;
   int size;
   Object& operator[](int i)const
-  { if (i<0 || i>=this->size)
+  { if (i < 0 || i >= this->size)
       crash << "This is a programing error: attempting to access element of index " << i << " in ListReferences that has only " << this->size << " elements. " << crash;
-    if (this->theReferences[i]==0)
+    if (this->theReferences[i] == 0)
       crash << "This is a programing error: element of index " << i << " in ListReferences has zero pointer. This is not allowed. " << crash;
     return *this->theReferences[i];
   }
   bool Contains(const Object& theObject)const
-  { for (int i=0; i<this->size; i++)
-      if ((*this)[i]==theObject)
+  { for (int i = 0; i < this->size; i ++)
+      if ((*this)[i] == theObject)
         return true;
     return false;
   }
@@ -57,15 +57,17 @@ public:
   { this->theReferences.SwapTwoIndices(index1, index2);
   }
   void AllocateElements(int newSize);
-  void Reserve(int desiredSize){this->AllocateElements(desiredSize);}
+  void Reserve(int desiredSize)
+  { this->AllocateElements(desiredSize);
+  }
   void SetSize(int newSize)
   { //std::cout << "Setting size to: " << newSize << std::endl;
     this->AllocateElements(newSize);
     this->size=newSize;
   }
   void SetExpectedSize(int theSize)
-  { int newSize=(theSize*6)/5;
-    if (newSize>0)
+  { int newSize = (theSize * 6) / 5;
+    if (newSize > 0)
       this->AllocateElements(newSize);
   }
   void KillAllElements();
@@ -73,35 +75,35 @@ public:
   void AddOnTop(const Object& o);
   int GetIndex(const Object& o)const;
   bool ContainsExactlyOnce(const Object& o)const
-  { bool result=false;
-    for (int i=0; i<this->size; i++)
-      if ((*this)[i]==o)
+  { bool result = false;
+    for (int i = 0; i < this->size; i ++)
+      if ((*this)[i] == o)
       { if (result)
           return false;
-        result=true;
+        result = true;
       }
     return result;
   }
   int AddNoRepetitionOrReturnIndexFirst(const Object& o)
   { int indexOfObject=this->GetIndex(o);
-    if (indexOfObject==-1)
+    if (indexOfObject == - 1)
     { this->AddOnTop(o);
-      return this->size-1;
+      return this->size - 1;
     }
     return indexOfObject;
   }
 //  void operator=(const ListReferences<Object>& other);
   Object& LastObject()const
-  { return (*this)[this->size-1];
+  { return (*this)[this->size - 1];
   }
-  template <class otherType=Object>
-  void QuickSortAscending(bool theOrder(const Object& left, const Object& right)=0, List<otherType>* carbonCopy=0)
+  template <class otherType = Object>
+  void QuickSortAscending(bool theOrder(const Object& left, const Object& right) = 0, List<otherType>* carbonCopy = 0)
   { MathRoutines::QuickSortAscending(*this, theOrder, carbonCopy);
   }
   ListReferences():flagDeallocated(false), size(0)
   {}
   ~ListReferences()
-  { this->flagDeallocated=true;
+  { this->flagDeallocated = true;
     this->KillAllElements();
   }
 };
@@ -109,53 +111,53 @@ public:
 template<class Object>
 void ListReferences<Object>::AllocateElements(int newSize)
 { //std::cout << "Setting size to " << newSize << ", this->theReferences.size: " << this->theReferences.size << std::endl;
-  if (newSize<0)
+  if (newSize < 0)
     crash << "This is a programming error: requested to set negative size " << newSize << " of List of References. If a "
     << " List is to be set empty, then one should call SetSize(0), rather than provide a negative argument to SetSize." << crash;
   //std::cout << "newSize: " << newSize << ", this->theReferences.size: " << this->theReferences.size << std::endl;
-  if (newSize<=this->theReferences.size)
+  if (newSize <= this->theReferences.size)
   { //std::cout << "Got no f***ing clue what's going on here: " << newSize
     //<< ", this->theReferences.size: " << this->theReferences.size << std::endl;
     return;
   }
-  int oldReferencesSize=this->theReferences.size;
+  int oldReferencesSize = this->theReferences.size;
   this->theReferences.SetSize(newSize);
   //std::cout << "old ref size " << oldReferencesSize << ", newsize: " << newSize << std::endl;
-  for (int i=oldReferencesSize; i<newSize; i++)
-    this->theReferences[i]= (new Object);
+  for (int i = oldReferencesSize; i < newSize; i ++)
+    this->theReferences[i] = (new Object);
   //std::cout << "Elements allocated!" << std::endl;
 #ifdef AllocationLimitsSafeguard
-ParallelComputing::GlobalPointerCounter+=newSize-oldReferencesSize;
+  ParallelComputing::GlobalPointerCounter += newSize - oldReferencesSize;
   ParallelComputing::CheckPointerCounters();
 #endif
 }
 
 template<class Object>
 void ListReferences<Object>::KillAllElements()
-{ for (int i =0; i<this->theReferences.size; i++)
+{ for (int i = 0; i < this->theReferences.size; i ++)
   { delete this->theReferences[i];
 #ifdef AllocationLimitsSafeguard
-    ParallelComputing::GlobalPointerCounter--;
+    ParallelComputing::GlobalPointerCounter --;
     ParallelComputing::CheckPointerCounters();
 #endif
-    this->theReferences[i]=0;
+    this->theReferences[i] = 0;
   }
-  this->theReferences.size=0;
-  this->size=0;
+  this->theReferences.size = 0;
+  this->size = 0;
 }
 
 template<class Object>
 void ListReferences<Object>::AddOnTop(const Object& o)
-{ this->SetSize(this->size+1);
-  (*this)[this->size-1]=o;
+{ this->SetSize(this->size + 1);
+  (*this)[this->size - 1] = o;
 }
 
 template<class Object>
 int ListReferences<Object>::GetIndex(const Object& o) const
-{ for (int i=0; i<this->size; i++)
-    if ((*this)[i]==o)
+{ for (int i = 0; i < this->size; i ++)
+    if ((*this)[i] == o)
       return i;
-  return -1;
+  return - 1;
 }
 
 template <class Object, unsigned int hashFunction(const Object&)=Object::HashFunction>
@@ -186,10 +188,10 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   Object& GetElement(int theObjectIndex)const
   { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetElement(theObjectIndex);
   }
-  int GetIndex(const Object& o) const
+  int GetIndex(const Object& o)const
   { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetIndex(o);
   }
-  inline int GetIndexIMustContainTheObject(const Object& o) const
+  inline int GetIndexIMustContainTheObject(const Object& o)const
   { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetIndexIMustContainTheObject(o);
   }
   inline int AddNoRepetitionOrReturnIndexFirst(const Object& o)

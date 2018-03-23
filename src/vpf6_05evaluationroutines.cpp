@@ -6,89 +6,118 @@ ProjectInformationInstance ProjectInfoVpf6_05cpp(__FILE__, "Calculator core eval
 std::string Calculator::ToStringFunctionHandlers()
 { MacroRegisterFunctionWithName("Calculator::ToStringFunctionHandlers");
   std::stringstream out;
-  int numOpsHandled=0;
-  int numHandlers=0;
-  int numInnerHandlers=0;
-  for (int i=0; i<this->theAtoms.size; i++)
-  { if (this->FunctionHandlers[i].size!=0)
-      numOpsHandled++;
-    numHandlers+=this->FunctionHandlers[i].size;
-    for (int j=0; j<this->FunctionHandlers[i].size; j++)
+  int numOpsHandled = 0;
+  int numHandlers = 0;
+  int numInnerHandlers = 0;
+  for (int i = 0; i < this->theAtoms.size; i ++)
+  { if (this->FunctionHandlers[i].size != 0)
+      numOpsHandled ++;
+    numHandlers += this->FunctionHandlers[i].size;
+    for (int j = 0; j < this->FunctionHandlers[i].size; j ++)
       if (this->FunctionHandlers[i][j].flagIsInner)
-        numInnerHandlers++;
+        numInnerHandlers ++;
   }
   out << "\n <b> " << numOpsHandled << " built-in atoms are handled by a total of " << numHandlers << " handler functions ("
   << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer).</b><br>\n";
-  bool found=false;
-  List<std::string> atomsSorted=this->theAtoms;
+  bool found = false;
+  List<std::string> atomsSorted = this->theAtoms;
   List<int> theIndices;
   theIndices.SetSize(this->theAtoms.size);
-  for (int i=0; i<theIndices.size; i++)
-    theIndices[i]=i;
+  for (int i = 0; i < theIndices.size; i ++)
+    theIndices[i] = i;
   atomsSorted.QuickSortAscending(0, &theIndices);
 
-  for (int k=0; k<this->theAtoms.size; k++)
-  { int theAtomIndex=theIndices[k];
-    int indexCompositeHander=this->operationsComposite.GetIndex(this->theAtoms[theAtomIndex]);
-    if (this->FunctionHandlers[theAtomIndex].size>0)
-      for (int j=0; j<this->FunctionHandlers[theAtomIndex].size; j++)
+  for (int k = 0; k < this->theAtoms.size; k ++)
+  { int theAtomIndex = theIndices[k];
+    int indexCompositeHander = this->operationsComposite.GetIndex(this->theAtoms[theAtomIndex]);
+    if (this->FunctionHandlers[theAtomIndex].size > 0)
+      for (int j = 0; j < this->FunctionHandlers[theAtomIndex].size; j ++)
         if (this->FunctionHandlers[theAtomIndex][j].flagIamVisible)
         { if (found)
             out << "<br>\n";
-          found=true;
+          found = true;
           out << this->FunctionHandlers[theAtomIndex][j].ToStringFull();
         }
-    if (indexCompositeHander!=-1)
-      for (int j=0; j<this->operationsCompositeHandlers[indexCompositeHander].size; j++)
+    if (indexCompositeHander != - 1)
+      for (int j = 0; j < this->operationsCompositeHandlers[indexCompositeHander].size; j ++)
         if (this->operationsCompositeHandlers[indexCompositeHander][j].flagIamVisible)
         { if (found)
             out << "<br>\n";
-          found=true;
+          found = true;
           out << this->operationsCompositeHandlers[indexCompositeHander][j].ToStringFull();
         }
   }
   return out.str();
 }
 
+std::string Calculator::ToStringFunctionHandlersJSON()
+{ MacroRegisterFunctionWithName("Calculator::ToStringFunctionHandlersJSON");
+  JSData output(JSData::JSObject);
+  for (int currentAtomIndex = 0; currentAtomIndex < this->theAtoms.size; currentAtomIndex ++)
+  { const std::string& currentAtom = this->theAtoms[currentAtomIndex];
+    JSData currentAtomJSON(JSData::JSObject);
+    JSData currentFunctionListDirect(JSData::JSarray);
+    JSData currentFunctionListComposite(JSData::JSarray);
+    //stOutput << "got to here pt 1";
+    if (currentAtomIndex >= this->FunctionHandlers.size)
+      crash << "This shouldn't happen: bad atom index. " << crash;
+    if (this->FunctionHandlers[currentAtomIndex].size > 0)
+      for (int j = 0; j < this->FunctionHandlers[currentAtomIndex].size; j ++)
+        if (this->FunctionHandlers[currentAtomIndex][j].flagIamVisible)
+          currentFunctionListDirect[j] = this->FunctionHandlers[currentAtomIndex][j].ToJSON();
+    //stOutput << "got to here pt 2";
+    int indexCompositeHander = this->operationsComposite.GetIndex(currentAtom);
+    if (indexCompositeHander != - 1)
+      for (int j = 0; j < this->operationsCompositeHandlers[indexCompositeHander].size; j ++)
+        if (this->operationsCompositeHandlers[indexCompositeHander][j].flagIamVisible)
+          currentFunctionListComposite[j] = this->operationsCompositeHandlers[indexCompositeHander][j].ToJSON();
+    //stOutput << "got to here pt 3";
+    currentAtomJSON["regular"] = currentFunctionListDirect;
+    currentAtomJSON["composite"] = currentFunctionListComposite;
+    output[currentAtom] = currentAtomJSON;
+  }
+  return output.ToString(false);
+}
+
 const Expression& Calculator::EZero()
-{ if (this->frequentConstantZero.owner==0)
-    this->frequentConstantZero.AssignValue(0,*this);
+{ if (this->frequentConstantZero.owner == 0)
+    this->frequentConstantZero.AssignValue(0, *this);
   return this->frequentConstantZero;
 }
 
 const Expression& Calculator::EOne()
-{ if (this->frequentConstantOne.owner==0)
-    this->frequentConstantOne.AssignValue(1,*this);
+{ if (this->frequentConstantOne.owner == 0)
+    this->frequentConstantOne.AssignValue(1, *this);
   return this->frequentConstantOne;
 }
 
 const Expression& Calculator::EMOne()
-{ if (this->frequentConstantMinusOne.owner==0)
-    this->frequentConstantMinusOne.AssignValue(-1,*this);
+{ if (this->frequentConstantMinusOne.owner == 0)
+    this->frequentConstantMinusOne.AssignValue(- 1, *this);
   return this->frequentConstantMinusOne;
 }
 
 const Expression& Calculator::EFour()
-{ if (this->frequentConstantFour.owner==0)
-    this->frequentConstantFour.AssignValue(4,*this);
+{ if (this->frequentConstantFour.owner == 0)
+    this->frequentConstantFour.AssignValue(4, *this);
   return this->frequentConstantFour;
 }
 
 const Expression& Calculator::ETwo()
-{ if (this->frequentConstantTwo.owner==0)
-    this->frequentConstantTwo.AssignValue(2,*this);
+{ if (this->frequentConstantTwo.owner == 0)
+    this->frequentConstantTwo.AssignValue(2, *this);
   return this->frequentConstantTwo;
 }
 
 const Expression& Calculator::EMHalf()
-{ if (this->frequentConstantMinusHalf.owner==0)
-    this->frequentConstantMinusHalf.AssignValue(Rational(-1,2),*this);
+{ if (this->frequentConstantMinusHalf.owner == 0)
+    this->frequentConstantMinusHalf.AssignValue(Rational(- 1, 2), *this);
   return this->frequentConstantMinusHalf;
 }
 
 const Expression& Calculator::EInfinity()
-{ if (this->frequentEInfinity.owner==0)
-    this->frequentEInfinity.MakeAtom(this->opInfinity(),*this);
+{ if (this->frequentEInfinity.owner == 0)
+    this->frequentEInfinity.MakeAtom(this->opInfinity(), *this);
   return this->frequentEInfinity;
 }
 

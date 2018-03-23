@@ -5,6 +5,12 @@
 
 static ProjectInformationInstance ProjectInfoVpfJSON(__FILE__, "Implementation JSON.");
 
+void JSData::operator=(int other)
+{ this->reset();
+  this->type = this->JSnumber;
+  this->number = other;
+}
+
 void JSData::operator=(const bool other)
 { this->reset();
   this->type = this->JSbool;
@@ -25,52 +31,52 @@ void JSData::operator=(const std::string& other)
 
 JSData& JSData::operator[](int i)
 { this->type = this->JSarray;
-  if(this->list.size < i+1)
-    this->list.SetSize(i+1);
+  if (this->list.size < i + 1)
+    this->list.SetSize(i + 1);
   return this->list[i];
 }
 
 JSData JSData::GetValue(const std::string& key)
-{ int theIndex=this->GetKeyIndex(key);
-  if (theIndex!=-1)
+{ int theIndex = this->GetKeyIndex(key);
+  if (theIndex != - 1)
     return this->obj[theIndex].value;
   JSData result;
-  result.type=JSData::JSUndefined;
+  result.type = JSData::JSUndefined;
   return result;
 }
 
 bool JSData::HasKey(const std::string& key)
-{ return this->GetKeyIndex(key)!=-1;
+{ return this->GetKeyIndex(key) != - 1;
 }
 
 int JSData::GetKeyIndex(const std::string& key)
-{ for(int i=0; i<this->obj.size; i++)
-    if(this->obj[i].key == key)
+{ for (int i = 0; i < this->obj.size; i ++)
+    if (this->obj[i].key == key)
       return i;
   return -1;
 }
 
 void JSData::SetKeyValue(const std::string& key, const JSData& value)
-{ (*this)[key]=value;
+{ (*this)[key] = value;
 }
 
 JSData& JSData::operator[](const std::string& key)
 { this->type = this->JSObject;
-  for (int i=0; i<this->obj.size; i++)
+  for (int i = 0; i < this->obj.size; i ++)
     if (this->obj[i].key == key)
       return this->obj[i].value;
   int i = this->obj.size;
-  this->obj.SetSize(i+1);
+  this->obj.SetSize(i + 1);
   this->obj[i].key = key;
   return this->obj[i].value;
 }
 
 void JSData::readfile(const char* filename)
 { std::ifstream ifp(filename);
-  if(!ifp.is_open())
+  if (!ifp.is_open())
     return;
   struct stat f;
-  stat(filename,&f);
+  stat(filename, &f);
   std::string json;
   json.resize(f.st_size);
   ifp.read(&json[0], json.size());
@@ -84,44 +90,44 @@ void JSData::operator=(const Rational& other)
 
 bool JSData::IsValidElement()
 { return
-  this->type==this->JSnull   ||
-  this->type==this->JSbool   ||
-  this->type==this->JSnumber ||
-  this->type==this->JSstring ||
-  this->type==this->JSarray  ||
-  this->type==this->JSObject;
+  this->type == this->JSnull   ||
+  this->type == this->JSbool   ||
+  this->type == this->JSnumber ||
+  this->type == this->JSstring ||
+  this->type == this->JSarray  ||
+  this->type == this->JSObject;
 }
 
 void JSData::TryToComputeType()
-{ if (this->type!=this->JSUndefined)
+{ if (this->type != this->JSUndefined)
     return;
-  if (this->string=="")
+  if (this->string == "")
     return;
-  if (this->string=="null")
+  if (this->string == "null")
   { this->reset();
-    this->type=this->JSnull;
+    this->type = this->JSnull;
     return;
   }
-  if (this->string=="true")
+  if (this->string == "true")
   { this->reset();
-    this->type=this->JSbool;
-    this->boolean=true;
+    this->type = this->JSbool;
+    this->boolean = true;
     return;
   }
-  if (this->string=="false")
+  if (this->string == "false")
   { this->reset();
-    this->type=this->JSbool;
-    this->boolean=false;
+    this->type = this->JSbool;
+    this->boolean = false;
     return;
   }
-  if (this->string.size()>0)
-    if (this->string[0]=='-' || MathRoutines::isADigit(this->string[0]))
-    { this->number=  std::stod(this->string);
-      this->string="";
-      this->type=JSData::JSnumber;
+  if (this->string.size() > 0)
+    if (this->string[0] == '-' || MathRoutines::isADigit(this->string[0]))
+    { this->number = std::stod(this->string);
+      this->string = "";
+      this->type = JSData::JSnumber;
       return;
     }
-  this->type=JSData::JSstring;
+  this->type = JSData::JSstring;
 }
 
 bool JSData::Tokenize
@@ -130,7 +136,7 @@ bool JSData::Tokenize
   output.SetExpectedSize(input.size());
   JSData currentElt;
   bool inQuotes = false;
-  for (unsigned i = 0; i < input.size(); i++)
+  for (unsigned i = 0; i < input.size(); i ++)
   { if (input[i] == '"')
     { if (currentElt.type == currentElt.JSstring)
       { output.AddOnTop(currentElt);
@@ -197,7 +203,7 @@ bool JSData::readstring
   JSHashData pair;
   List<JSData> readingStack;
   JSData emptyElt;
-  for (int i = 0; i < JSData::numEmptyTokensAtStart; i++)
+  for (int i = 0; i < JSData::numEmptyTokensAtStart; i ++)
     readingStack.AddOnTop(emptyElt);
   readingStack.AddOnTop(theTokenS[0]);
   for (int i = 0; ; )
@@ -244,7 +250,7 @@ bool JSData::readstring
       readingStack.RemoveLastObject();
       continue;
     }
-    i++;
+    i ++;
     if (i >= theTokenS.size)
       break;
     readingStack.AddOnTop(theTokenS[i]);
@@ -255,7 +261,7 @@ bool JSData::readstring
     { std::stringstream calculatorInput;
       calculatorInput
       << "TestJSON(\""
-      << HtmlRoutines::ConvertStringToBackslashEscapedString(json)
+      << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(json)
       << "\")";
       *commentsOnFailure << "<hr>Failed to parse your JSON. Input:\n<br>\n "
       << "<a href=\""
@@ -266,7 +272,7 @@ bool JSData::readstring
       << HtmlRoutines::ConvertStringToHtmlString(json, true)
       << "</a>"
       << "<br>Result:<br>\n ";
-      for (int i = JSData::numEmptyTokensAtStart; i < readingStack.size; i++)
+      for (int i = JSData::numEmptyTokensAtStart; i < readingStack.size; i ++)
         *commentsOnFailure << i << ": " << readingStack[i].ToString(true) << "\n<br>\n";
     }
     return false;
@@ -281,14 +287,14 @@ somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) c
 { std::string theIndentation = "";
   for (int i = 0; i < indentation; i++)
   { if (!useHTML)
-      theIndentation += " ";
+      theIndentation += "";
     else
       theIndentation += "&nbsp;";
   }
   out << theIndentation;
-  std::string newLine = useHTML ? "\n<br>\n" : "\n";
-  indentation++;
-  switch(this->type)
+  std::string newLine = useHTML ? "\n<br>\n" : "";
+  indentation ++;
+  switch (this->type)
   { case JSnull:
       out << "null";
       return out;
@@ -296,17 +302,17 @@ somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) c
       out << this->number;
       return out;
     case JSbool:
-      if(this->boolean == true)
+      if (this->boolean == true)
         out << "true";
       else
         out << "false";
       return out;
     case JSstring:
-      out << '"' << this->string << '"';
+      out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->string) << '"';
       return out;
     case JSarray:
       out << "[" << newLine;
-      for(int i = 0; i < this->list.size; i++)
+      for (int i = 0; i < this->list.size; i ++)
       { this->list[i].IntoStream(out, indentation, useHTML);
         if(i != this->list.size - 1)
           out << ", ";
@@ -315,11 +321,11 @@ somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) c
       return out;
     case JSObject:
       out << "{" << newLine;
-      for(int i = 0; i < this->obj.size; i++)
-      { out << '"' << this->obj[i].key << '"';
+      for (int i = 0; i < this->obj.size; i ++)
+      { out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->obj[i].key) << '"';
         out << ':';
         this->obj[i].value.IntoStream(out, indentation, useHTML);
-        if(i!=this->obj.size-1)
+        if (i != this->obj.size - 1)
           out << ", ";
       }
       out << newLine << '}';
@@ -383,7 +389,7 @@ somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) c
     default:
       break;
   }
-  //unreachable
+  //supposed to be unreachable
   assert(false);
   return out;
 }
@@ -394,8 +400,8 @@ void JSData::writefile(const char* filename) const
   this->IntoStream(out);
 }
 
-void JSData::reset()
-{ this->type = this->JSUndefined;
+void JSData::reset(char inputType)
+{ this->type = inputType;
   this->boolean = false;
   this->number = 0;
   this->string = "";

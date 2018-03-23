@@ -123,7 +123,8 @@ HEADERS += \
     vpfHeader8HtmlSnippets.h \
     vpfHeader1General8DatabaseSystemIndependent.h \
     vpfHeader2Math10_LaTeXRoutines.h \
-    vpfHeader2Math4_5_Tree.h
+    vpfHeader2Math4_5_Tree.h \
+    vpfHeader3Calculator5_Database_Mongo.h
 
 DISTFILES += \
     ../calculator-html/new/app.js \

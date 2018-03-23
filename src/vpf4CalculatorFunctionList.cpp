@@ -7,6 +7,7 @@
 #include "vpfHeader3Calculator4HtmlFunctions.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h" //undefined reference to Polynomial<AlgebraicNumber>::MakeOne(int)
 #include "vpfHeader7DatabaseInterface_MySQL.h"
+#include "vpfHeader3Calculator5_Database_Mongo.h"
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
 //This file lists calculator functions and various hard-coded rules. Please do not use for any other purposes.
 
@@ -499,6 +500,16 @@ void Calculator::initPredefinedInnerFunctions()
    true, false,
    "CalculatorFunctionsGeneral::innerLoadKnownCertificates",
    "LoadKnownCertificates");
+  this->AddOperationInnerHandler
+  ("MongoQuery", CalculatorDatabaseFunctions::innerExecuteMongoQuery, "",
+   "Executes a mongoDB query. Requires admin rights. \
+    The database name is calculator (can't be modified). \
+    First argument: collection name. Second argument: query. ",
+   "MongoQuery(\"users\", \"{}\")",
+   true, false,
+   "CalculatorDatabaseFunctions::innerExecuteMongoQuery",
+   "X509CertificateCrunch");
+
   this->AddOperationInnerHandler
   ("X509CertificateCrunch", CalculatorFunctionsGeneral::innerX509certificateCrunch, "",
    "Processes a x509 certificate database. This function is part of a security research project and \

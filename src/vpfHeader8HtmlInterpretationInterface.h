@@ -32,6 +32,7 @@ public:
   static std::string GetExamPage();
   static std::string GetPageFromTemplate();
   static std::string GetJSONFromTemplate();
+  static std::string GetJSONUserInfo();
   static std::string GetTopicTableJSON();
   static std::string GetExamPageInterpreter();
   static std::string GetAnswerOnGiveUp();

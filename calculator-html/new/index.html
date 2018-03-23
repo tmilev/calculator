@@ -40,12 +40,14 @@ var MathQuillHasMatrixSupport = true;
         <div id = "divGoogleLoginButton">Google unavailable (did page fully load? Internet?).</div>
     </div><!--divCenteredItem-->
 
-    <div class = "divCenteredItem">
+    <div class = "divCenteredItem divVisible" id = "divLoginCalculatorPanel">
       <b>Local account:</b><br><br>
       <input class = "textInputUsername" type = "text" id = "username" name = "username" placeholder = "username" required><br>
       <input class = "textInputUsername" type = "password" id = "password" name = "password" placeholder = "password" autocomplete = "on"><br>
-      <button class = "buttonSelectPage" type="submit" value="Submit" action="/cgi-bin/calculator">Login</button><br>
-      <a href="#" onclick = "logout();" class = "linkLogoutInactive" >Log out</a> 
+      <button class = "buttonSelectPage" onclick = "loginCalculator();">Login</button><br>
+    </div>
+    <div class = "divCenteredItem">
+      <a href = "#" onclick = "logout();" class = "linkLogoutInactive linkStandardButtonLike" >Log out</a> 
     </div><!--divCenteredItem-->
   </div><!--centerVerticallyInPageContainer-->
 </div><!--centerHorizontallyInPageContainer-->
@@ -141,8 +143,9 @@ ctrl+arrow = select</span>
   <button id = "buttonToggleTheMainMenu" onclick = "toggleMenu(this);" class = "buttonToggleTopics">
   &#9660;
   </button>
-  <div id = "divProfilePicture" class = "divProfilePictureContainerExpanded"></div>
-  <a href="#" onclick = "logout();" class="linkLogoutInactive">Log out</a> 
+  <div id = "divProfilePicture" class = "divProfilePictureContainerExpanded divInvisible"></div>
+  <div id = "divLoginPanelUsernameReport" class = "divInvisible divSmall" style = "margin: 4px"></div>
+  <a href="#" onclick = "logout();" class = "linkLogoutInactive linkStandardButtonLike">Log out</a> 
 </div>
 <div><button class = "buttonSelectPage" id = "buttonLoginPage">Login</button></div>
 <div><button class = "buttonSelectPage" id = "buttonCurrentCourse">Current Course</button></div>

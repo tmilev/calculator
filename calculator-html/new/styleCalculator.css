@@ -569,7 +569,7 @@ table.lectureMaterials col:nth-child(2){
 table.lectureMaterials col:nth-child(3){
   width: 15%;
 }
-table.lectureMaterials tr:nth-child(even){}
+/*table.lectureMaterials tr:nth-child(even){}*/
 table.lectureMaterials tr:nth-child(odd){background-color: #fafafa}
 table.lectureMaterials th {
   padding-top: 12px;
@@ -606,7 +606,7 @@ table.topicList col:nth-child(4){
 table.topicList col:nth-child(5){
   width: 20%;
 }
-table.topicList tr:nth-child(even){}
+/*table.topicList tr:nth-child(even){}*/
 table.topicList tr:nth-child(odd){background-color: #fafafa}
 /*table.topicList tr:hover {background-color: #ddd;}*/
 table.topicList th {
@@ -742,16 +742,16 @@ a.courseLink:hover{
 }
 
 div.divProfilePictureContainerExpanded{
-  width: 96px;
-  height: 96px;
+  max-width: 96px;
+  max-height: 96px;
   transition: all 1s;
   margin-left: auto;
   margin-right: auto;  
 }
 
 div.divProfilePictureContainerCollapsed{
-  width: 25px;
-  height: 25px;
+  max-width: 25px;
+  max-height: 25px;
   transition: all 1s;
 }
 img {
@@ -815,6 +815,19 @@ div.divCenteredItem{
   margin: 10px;
   padding: 0px;
 }
+div.divVisible{
+  transition: all 1s;
+  opacity: 1;
+}
+
+div.divInvisible{
+  transition: all 1s;
+  opacity: 0;
+}
+div.divSmall{
+  font-size: x-small;
+}
+
 form.formLogin > * {
 font-size: 1.1em;
 }

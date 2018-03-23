@@ -29,7 +29,7 @@ function afterLoadSelectCoursePage(incomingPage, result){
 
 function selectSelectCoursePage(){
   submitGET({
-    url: "cgi-bin/calculator?request=selectCourseJSON",
+    url: `${thePage.calculator}?request=selectCourseJSON`,
     callback: afterLoadSelectCoursePage,
     progress: "spanProgressReportGeneral"
   });

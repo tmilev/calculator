@@ -53,6 +53,9 @@ function Page(){
   this.currentCourse = {};
   this.googleProfile = {};
   this.googleToken = null;
+  this.username = null;
+  this.authenticationToken = null;
+  this.calculator = "/cgi-bin/calculator";
   this.storeSettingsToLocalStorage = function(){
     if (Storage === undefined && localStorage === undefined){
       return;
@@ -74,6 +77,8 @@ function Page(){
     addCookie("courseHome", this.currentCourse.html, 300);
     addCookie("topicList", this.currentCourse.topics, 300);
     addCookie("googleToken", this.googleToken, 300, true); 
+    addCookie("username", this.username, 300, true);
+    addCookie("authenticationToken", this.authenticationToken, 300, true);
   };
   this.loadSettingsFromCookies = function(){
     try {
@@ -81,6 +86,9 @@ function Page(){
         "html": getCookie("courseHome"),
         "topics": getCookie("topicList")
       };
+      this.googleToken = getCookie("googleToken");
+      this.username = getCookie("username");
+      this.authenticationToken = getCookie("authenticationToken");
     } catch (e) {
       console.log("Error loading settings from cookies: " + e);
     }
@@ -115,7 +123,9 @@ function Page(){
       this.pages[this.currentPage].selectFunction();
     }
   };
-  this.updateProfilePic = function(){
+  this.showProfilePicture = function(){
+    document.getElementById("divProfilePicture").classList.remove("divInvisible");
+    document.getElementById("divProfilePicture").classList.add("divVisible");
     if (this.googleProfile.picture === undefined){
       return;
     }
@@ -134,6 +144,10 @@ function Page(){
     } catch (e) {
       console.log("Failed to set profile picture: " + e);
     }
+  }
+  this.hideProfilePicture = function(){
+    document.getElementById("divProfilePicture").classList.add("divInvisible");
+    document.getElementById("divProfilePicture").classList.remove("divVisible");
   }
   this.initializeCalculatorPage = function(){
     initializeButtons();

@@ -743,6 +743,16 @@ std::string HtmlInterpretation::GetTopicTableJSON()
   return out.str();
 }
 
+std::string HtmlInterpretation::GetJSONUserInfo()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONUserInfo");
+  if (! theGlobalVariables.flagLoggedIn)
+    return "\"not logged in\"";
+  JSData output;
+  output["username"] = theGlobalVariables.userDefault.username.value;
+  output["authenticationToken"] = theGlobalVariables.userDefault.actualAuthenticationToken.value;
+  return output.ToString();
+}
+
 std::string HtmlInterpretation::GetJSONFromTemplate()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONFromTemplate");
   std::stringstream out;
@@ -1376,7 +1386,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
 #endif // MACRO_use_MySQL
 }
 
-const std::string CalculatorHTML::BugsGenericMessage=
+const std::string CalculatorHTML::BugsGenericMessage =
 "Please take a screenshot, copy the link address and send those along \
 with a short explanation to the administrator of the web site. ";
 
@@ -2168,11 +2178,11 @@ std::string HtmlInterpretation::ToStringUserScores()
   << theScores.currentCourse << "\n<br>\n";
   out << "<table class=\"scoreTable\"><tr><th rowspan=\"3\">User</th>"
   << "<th rowspan=\"3\">Section</th><th rowspan=\"3\"> Total score</th>";
-  for (int i=0; i<theScores.theProblem.theTopicS.size(); i++)
-  { TopicElement& currentElt=theScores.theProblem.theTopicS.theValues[i];
-    if (currentElt.problem!="" || currentElt.type!=currentElt.tChapter)
+  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
+  { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
+    if (currentElt.problem != "" || currentElt.type != currentElt.tChapter)
       continue;
-    int numCols=currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
+    int numCols = currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan=\"" << numCols << "\"";
     if (currentElt.totalSubSectionsUnderME == 0 &&
         currentElt.flagContainsProblemsNotInSubsection)
@@ -2181,30 +2191,30 @@ std::string HtmlInterpretation::ToStringUserScores()
   }
   out << "</tr>\n";
   out << "<tr>";
-  for (int i=0; i<theScores.theProblem.theTopicS.size(); i++)
-  { TopicElement& currentElt=theScores.theProblem.theTopicS.theValues[i];
-    if (currentElt.problem!="" || currentElt.type!=currentElt.tSection)
+  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
+  { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
+    if (currentElt.problem != "" || currentElt.type != currentElt.tSection)
       continue;
-    int numCols=currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
+    int numCols = currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan=\"" << numCols << "\"";
-    if (currentElt.totalSubSectionsUnderME==0 &&
+    if (currentElt.totalSubSectionsUnderME == 0 &&
         currentElt.flagContainsProblemsNotInSubsection)
       out << " rowspan=\"2\"";
     out << ">" << currentElt.title << "</td>";
   }
   out << "</tr>\n";
   out << "<tr>";
-  for (int i=0; i<theScores.theProblem.theTopicS.size(); i++)
-  { TopicElement& currentElt=theScores.theProblem.theTopicS.theValues[i];
-    if (currentElt.problem=="" && currentElt.type!=currentElt.tProblem &&
-        currentElt.type!=currentElt.tSubSection && currentElt.type!=currentElt.tTexHeader)
+  for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
+  { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[i];
+    if (currentElt.problem == "" && currentElt.type != currentElt.tProblem &&
+        currentElt.type != currentElt.tSubSection && currentElt.type != currentElt.tTexHeader)
     { if ((currentElt.flagContainsProblemsNotInSubsection &&
-           currentElt.totalSubSectionsUnderMeIncludingEmptySubsections>1)
-          || currentElt.immediateChildren.size==0)
+           currentElt.totalSubSectionsUnderMeIncludingEmptySubsections > 1)
+          || currentElt.immediateChildren.size == 0)
         out << "<td></td>";
       continue;
     }
-    if (currentElt.problem!="" || currentElt.type!=currentElt.tSubSection)
+    if (currentElt.problem != "" || currentElt.type != currentElt.tSubSection)
       continue;
     out << "<td>" << currentElt.title << "</td>";
   }
@@ -2214,25 +2224,25 @@ std::string HtmlInterpretation::ToStringUserScores()
   << "<td>-</td>"
   << "<td>" << theScores.theProblem.currentUseR.pointsMax.GetDoubleValue()
   << "</td>";
-  for (int j=0; j< theScores.theProblem.theTopicS.size(); j++)
-  { TopicElement& currentElt=theScores.theProblem.theTopicS.theValues[j];
-    if (currentElt.problem!="")
+  for (int j = 0; j < theScores.theProblem.theTopicS.size(); j ++)
+  { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[j];
+    if (currentElt.problem != "")
       continue;
-    if (currentElt.type!=currentElt.tSubSection &&
+    if (currentElt.type != currentElt.tSubSection &&
         !currentElt.flagContainsProblemsNotInSubsection)
       continue;
     out << "<td>" << currentElt.maxPointsInAllChildren << "</td>";
   }
   out << "</tr>";
-  for (int i=0; i< theScores.userInfos.size; i++)
+  for (int i = 0; i < theScores.userInfos.size; i ++)
   { out << "<tr><td>" << theScores.userNames[i] << "</td>"
     << "<td>" << theScores.userInfos[i] << "</td>"
     << "<td>" << theScores.userScores[i].GetDoubleValue() << "</td>";
-    for (int j=0; j< theScores.theProblem.theTopicS.size(); j++)
-    { TopicElement& currentElt=theScores.theProblem.theTopicS.theValues[j];
-      if (currentElt.problem!="")
+    for (int j = 0; j < theScores.theProblem.theTopicS.size(); j ++)
+    { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[j];
+      if (currentElt.problem != "")
         continue;
-      if (currentElt.type!=currentElt.tSubSection && !currentElt.flagContainsProblemsNotInSubsection)
+      if (currentElt.type != currentElt.tSubSection && !currentElt.flagContainsProblemsNotInSubsection)
         continue;
       if (theScores.scoresBreakdown[i].Contains(theScores.theProblem.theTopicS.theKeys[j]))
         out << "<td>" << theScores.scoresBreakdown[i].theValues[j].GetDoubleValue() << "</td>";
@@ -2255,10 +2265,10 @@ std::string HtmlInterpretation::ToStringUserDetails
   std::stringstream out;
 #ifdef MACRO_use_MySQL
   std::string userRole = adminsOnly ? "admin" : "student";
-  std::string idAddressTextarea= "inputAddUsers"+userRole;
-  std::string idExtraTextarea= "inputAddExtraInfo"+userRole;
-  std::string idOutput="idOutput"+userRole;
-  std::string idPasswordTextarea="inputAddDefaultPasswords"+userRole;
+  std::string idAddressTextarea = "inputAddUsers" + userRole;
+  std::string idExtraTextarea = "inputAddExtraInfo" + userRole;
+  std::string idOutput = "idOutput" + userRole;
+  std::string idPasswordTextarea = "inputAddDefaultPasswords" + userRole;
   out << "<ul><li>Add <b>" << userRole << "(s)</b> here.</li> ";
   out << "<li>Added/updated users will have their current course set to: <br>"
   << "<span class=\"currentCourseIndicator\">"

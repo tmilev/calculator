@@ -200,6 +200,7 @@ public:
   int ProcessExamPage();
   int ProcessTemplate();
   int ProcessTemplateJSON();
+  int ProcessUserInfoJSON();
   int ProcessSelectCourse();
   int ProcessSelectCourseJSON();
   int ProcessExamPageInterpreter();

@@ -11,8 +11,10 @@ ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface.
 bool DatabaseRoutinesGlobalFunctions::SetPassword
 (const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
  std::stringstream& comments)
-{
-  (void) inputUsername; (void) inputNewPassword; (void) outputAuthenticationToken; (void) comments;
+{ (void) inputUsername;
+  (void) inputNewPassword;
+  (void) outputAuthenticationToken;
+  (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::SetPassword");
   if(!theGlobalVariables.flagLoggedIn)
@@ -35,7 +37,9 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword
 
 bool DatabaseRoutinesGlobalFunctions::RowExists
   (const std::string& inputUsername, const std::string& tableName, std::stringstream& comments)
-{ (void) inputUsername; (void) tableName; (void) comments;
+{ (void) inputUsername;
+  (void) tableName;
+  (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::RowExists");
   if (!theGlobalVariables.flagLoggedIn)
@@ -50,16 +54,20 @@ bool DatabaseRoutinesGlobalFunctions::RowExists
 bool DatabaseRoutinesGlobalFunctions::SetEntry
   (const std::string& inputUsername, const std::string& tableNameUnsafe, const std::string& keyNameUnsafe,
    const std::string& valueUnsafe, std::stringstream& comments)
-{ (void) inputUsername; (void) tableNameUnsafe; (void) keyNameUnsafe; (void) valueUnsafe; (void) comments;
+{ (void) inputUsername;
+  (void) tableNameUnsafe;
+  (void) keyNameUnsafe;
+  (void) valueUnsafe;
+  (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::SetEntry");
   if (!theGlobalVariables.flagLoggedIn)
     return false;
   DatabaseRoutines theRoutines;
   UserCalculator theUser;
-  theUser.username=inputUsername;
+  theUser.username = inputUsername;
 //  stOutput << "setting table name to: " << tableName << "<br>";
-  theUser.currentTable=tableNameUnsafe;
+  theUser.currentTable = tableNameUnsafe;
   return theUser.SetColumnEntry(keyNameUnsafe, valueUnsafe, theRoutines, &comments);
 #else
   return false;
@@ -86,7 +94,8 @@ bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights()
 
 bool DatabaseRoutinesGlobalFunctions::CreateTable
 (const std::string& tableName, std::stringstream& comments)
-{ (void) tableName; (void) comments;
+{ (void) tableName;
+  (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::CreateTable");
   if (!theGlobalVariables.flagLoggedIn)
@@ -101,7 +110,9 @@ bool DatabaseRoutinesGlobalFunctions::CreateTable
 
 bool DatabaseRoutinesGlobalFunctions::ColumnExists
 (const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream)
-{ (void) columnNameUnsafe; (void) tableNameUnsafe; (void) commentsStream;
+{ (void) columnNameUnsafe;
+  (void) tableNameUnsafe;
+  (void) commentsStream;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::ColumnExists");
   DatabaseRoutines theRoutines;
@@ -114,7 +125,9 @@ bool DatabaseRoutinesGlobalFunctions::ColumnExists
 bool DatabaseRoutinesGlobalFunctions::CreateColumn
 (const std::string& columnNameUnsafe, const std::string& tableNameUnsafe,
  std::stringstream& commentsOnCreation)
-{ (void) columnNameUnsafe; (void) tableNameUnsafe; (void) commentsOnCreation;
+{ (void) columnNameUnsafe;
+  (void) tableNameUnsafe;
+  (void) commentsOnCreation;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::CreateColumn");
   DatabaseRoutines theRoutines;
@@ -127,7 +140,8 @@ bool DatabaseRoutinesGlobalFunctions::CreateColumn
 
 bool DatabaseRoutinesGlobalFunctions::TableExists
 (const std::string& tableName, std::stringstream& comments)
-{ (void) tableName; (void) comments;
+{ (void) tableName;
+  (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::TableExists");
   if (!theGlobalVariables.flagLoggedIn)
@@ -146,7 +160,12 @@ bool DatabaseRoutinesGlobalFunctions::FetchTablE
  List<std::string>& outputColumnLabels,
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
  const std::string& tableName, std::stringstream& comments)
-{ (void) output; (void) outputColumnLabels; (void) outputWasTruncated; (void) actualNumRowsIfTruncated; (void) tableName; (void) comments;
+{ (void) output;
+  (void) outputColumnLabels;
+  (void) outputWasTruncated;
+  (void) actualNumRowsIfTruncated;
+  (void) tableName;
+  (void) comments;
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::FetchTable");
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
@@ -164,7 +183,12 @@ bool DatabaseRoutinesGlobalFunctions::FetchTableFromDatabaseIdentifier
  List<std::string>& outputColumnLabels,
  bool& outputWasTruncated, int& actualNumRowsIfTruncated,
  const std::string& tableIdentifier, std::stringstream& comments)
-{ (void) output; (void) outputColumnLabels; (void) outputWasTruncated; (void) actualNumRowsIfTruncated; (void) tableIdentifier; (void) comments;
+{ (void) output;
+  (void) outputColumnLabels;
+  (void) outputWasTruncated;
+  (void) actualNumRowsIfTruncated;
+  (void) tableIdentifier;
+  (void) comments;
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::FetchTable");
 #ifdef MACRO_use_MySQL
   DatabaseRoutines theRoutines;
@@ -180,15 +204,19 @@ bool DatabaseRoutinesGlobalFunctions::FetchTableFromDatabaseIdentifier
 bool DatabaseRoutinesGlobalFunctions::FetchEntry
 (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
  std::string& output, std::stringstream& comments)
-{ (void) inputUsername; (void) tableName; (void) keyName; (void) output; (void) comments;
+{ (void) inputUsername;
+  (void) tableName;
+  (void) keyName;
+  (void) output;
+  (void) comments;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::FetchEntry");
   if (!theGlobalVariables.flagLoggedIn)
     return false;
   DatabaseRoutines theRoutines;
   UserCalculator theUser;
-  theUser.username=inputUsername;
-  theUser.currentTable=tableName;
+  theUser.username = inputUsername;
+  theUser.currentTable = tableName;
   return theUser.FetchOneColumn(keyName, output, theRoutines, &comments);
 #else
   return true;
@@ -219,29 +247,29 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 #endif
 }
 
-std::string DatabaseStrings::columnUserId="id";
-std::string DatabaseStrings::columnUsername="username";
-std::string DatabaseStrings::tableUsers="users";
-std::string DatabaseStrings::columnSection="studentSection";
-std::string DatabaseStrings::columnCurrentCourses="currentCourses";
-std::string DatabaseStrings::theDatabaseUser="ace";
-std::string DatabaseStrings::theDatabaseName="aceDB";
-std::string DatabaseStrings::tableDeadlines="deadlines";
-std::string DatabaseStrings::columnDeadlines="deadlines";
-std::string DatabaseStrings::columnDeadlinesSchema="deadlineSchema";
-std::string DatabaseStrings::columnCourseInfo="courseInfo";
-std::string DatabaseStrings::columnInstructor="instructor";
+std::string DatabaseStrings::columnUserId = "id";
+std::string DatabaseStrings::columnUsername = "username";
+std::string DatabaseStrings::tableUsers = "users";
+std::string DatabaseStrings::columnSection = "studentSection";
+std::string DatabaseStrings::columnCurrentCourses = "currentCourses";
+std::string DatabaseStrings::theDatabaseUser = "ace";
+std::string DatabaseStrings::theDatabaseName = "aceDB";
+std::string DatabaseStrings::tableDeadlines = "deadlines";
+std::string DatabaseStrings::columnDeadlines = "deadlines";
+std::string DatabaseStrings::columnDeadlinesSchema = "deadlineSchema";
+std::string DatabaseStrings::columnCourseInfo = "courseInfo";
+std::string DatabaseStrings::columnInstructor = "instructor";
 
-std::string DatabaseStrings::tableProblemWeights="problemWeights";
-std::string DatabaseStrings::columnProblemWeightsSchema="problemWeightsSchema";
-std::string DatabaseStrings::columnProblemWeights="problemWeights";
+std::string DatabaseStrings::tableProblemWeights = "problemWeights";
+std::string DatabaseStrings::columnProblemWeightsSchema = "problemWeightsSchema";
+std::string DatabaseStrings::columnProblemWeights = "problemWeights";
 
-std::string DatabaseStrings::columnSectionsTaught="sectionsTaught";
+std::string DatabaseStrings::columnSectionsTaught = "sectionsTaught";
 List<std::string> DatabaseStrings::modifyableColumns;
 
 List<std::string>& DatabaseStrings::GetModifyableColumnsNotThreadSafe()
 { MacroRegisterFunctionWithName("DatabaseStrings::GetModifyableColumnsNotThreadSafe");
-  if (DatabaseStrings::modifyableColumns.size==0) //<-warning: this is not thread-safe
+  if (DatabaseStrings::modifyableColumns.size == 0) //<-warning: this is not thread-safe
   { DatabaseStrings::modifyableColumns.AddOnTop(DatabaseStrings::columnCourseInfo);
   }
   return DatabaseStrings::modifyableColumns;
@@ -256,37 +284,37 @@ std::string MySQLdata::GetDataNoQuotes()const
 }
 
 std::string MySQLdata::GetIdentifierNoQuotes()const
-{ std::string result=HtmlRoutines::ConvertStringToURLString(this->value, false);
-  if (result.size()<=30)
+{ std::string result = HtmlRoutines::ConvertStringToURLString(this->value, false);
+  if (result.size() <= 30)
     return result;
-  return result.substr(0,30)+ Crypto::computeSha1outputBase64(this->value);
+  return result.substr(0, 30) + Crypto::computeSha1outputBase64(this->value);
 }
 
 std::string MySQLdata::GetIdentifieR()const
 { MacroRegisterFunctionWithName("MySQLdata::GetIdentifieR");
-  return "`"+ this->GetIdentifierNoQuotes()+"`";
+  return "`" + this->GetIdentifierNoQuotes() + "`";
 }
 
 ProblemData::ProblemData()
-{ this->randomSeed=0;
-  this->flagRandomSeedGiven=false;
-  this->numCorrectlyAnswered=0;
-  this->totalNumSubmissions=0;
-  this->flagProblemWeightIsOK=false;
+{ this->randomSeed = 0;
+  this->flagRandomSeedGiven = false;
+  this->numCorrectlyAnswered = 0;
+  this->totalNumSubmissions = 0;
+  this->flagProblemWeightIsOK = false;
 }
 
 void ProblemData::AddEmptyAnswerIdOnTop(const std::string& inputAnswerId)
 { Answer theAnswer;
-  theAnswer.answerId=inputAnswerId;
+  theAnswer.answerId = inputAnswerId;
   this->theAnswers.SetKeyValue(inputAnswerId, theAnswer);
 }
 
 std::string ProblemData::ToStringAvailableAnswerIds()
 { std::stringstream out;
   out << "Available answer ids: ";
-  for (int i=0; i<this->theAnswers.size(); i++)
+  for (int i = 0; i < this->theAnswers.size(); i ++)
   { out << this->theAnswers[i].answerId;
-    if (i!=this->theAnswers.size()-1)
+    if (i != this->theAnswers.size() - 1)
       out << ", ";
   }
   return out.str();
@@ -298,8 +326,8 @@ bool ProblemDataAdministrative::GetWeightFromCoursE
   if (!this->problemWeightsPerCoursE.Contains(theCourseNonURLed))
     return false;
   std::string tempString;
-  if (outputAsGivenByInstructor==0)
-    outputAsGivenByInstructor=&tempString;
+  if (outputAsGivenByInstructor == 0)
+    outputAsGivenByInstructor = &tempString;
   *outputAsGivenByInstructor = this->problemWeightsPerCoursE.GetValueCreate(theCourseNonURLed);
   return output.AssignStringFailureAllowed(*outputAsGivenByInstructor);
 }
@@ -313,8 +341,8 @@ std::string ProblemDataAdministrative::ToString()const
 
 bool ProblemData::CheckConsistency()const
 { MacroRegisterFunctionWithName("ProblemData::CheckConsistency");
-  for (int i=0; i<this->theAnswers.size(); i++)
-  { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].answerId)=="")
+  for (int i = 0; i < this->theAnswers.size(); i ++)
+  { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].answerId) == "")
       crash << "This is not supposed to happen: empty answer id." << crash;
 //    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
 //      crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
@@ -326,8 +354,8 @@ bool ProblemData::CheckConsistency()const
 
 bool ProblemData::CheckConsistencyMQids()const
 { MacroRegisterFunctionWithName("ProblemData::CheckConsistencyMQids");
-  for (int i=0; i<this->theAnswers.size(); i++)
-  { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield)=="")
+  for (int i = 0; i < this->theAnswers.size(); i ++)
+  { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield) == "")
       crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
       << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>All the answers are: "
       << this->ToString() << crash;
@@ -342,13 +370,13 @@ std::string ProblemData::ToString()const
   if (this->flagRandomSeedGiven)
     out << " (given)";
   out << ". ";
-  for (int i=0; i<this->theAnswers.size(); i++)
-  { Answer& currentA=this->theAnswers[i];
+  for (int i = 0; i < this->theAnswers.size(); i ++)
+  { Answer& currentA = this->theAnswers[i];
     out << "AnswerId: " << currentA.answerId;
     out << ", numCorrectSubmissions: " << currentA.numCorrectSubmissions;
     out << ", numSubmissions: " << currentA.numSubmissions;
     out << ", firstCorrectAnswer: ";
-    if (currentA.firstCorrectAnswerClean=="")
+    if (currentA.firstCorrectAnswerClean == "")
       out << "[none yet], ";
     else
       out << "[" << currentA.firstCorrectAnswerClean << "], ";

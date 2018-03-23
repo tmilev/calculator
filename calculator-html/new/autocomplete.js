@@ -134,13 +134,13 @@ function suggestWord()
     if (startpos===-1)
       continue;
     var currentString=theAutocompleteDictionary[i].substr(0, startpos);
-    currentString+="<b>"+ theLastWord+ "</b>"+ theAutocompleteDictionary[i].substr(startpos+theLastWord.length);
+    currentString+="<b>" + theLastWord+ "</b>"+ theAutocompleteDictionary[i].substr(startpos+theLastWord.length);
     theSuggestions.push(theAutocompleteDictionary[i]);
     theSuggestionsHighlighted.push(currentString);
   }      
-  if (theSuggestions.length>0)
+  if (theSuggestions.length > 0)
     theAutoCompleteHints.style.visibility = "visible";
-  indexInAutocomplete=0;
+  indexInAutocomplete = 0;
   displaySuggestions();
 }
 

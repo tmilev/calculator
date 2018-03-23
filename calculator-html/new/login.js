@@ -2,19 +2,60 @@
 
 //var auth2Google = null;
 
+function loginCalculator(){
+  submitGET({
+    "url": `${thePage.calculator}?request=userInfoJSON&password=${document.getElementById("password").value}&username=${document.getElementById("username").value}`,
+    callback: loginWithServerCallback,
+    progress: "spanProgressReportGeneral"
+  });
+}
+
+function logout(){
+  logoutGoogle();
+  thePage.username = "";
+  thePage.authenticationToken = "";
+  thePage.storeSettingsToCookies();
+  thePage.storeSettingsToLocalStorage();
+  showLoginCalculatorButtons();
+}
+
 function selectLoginPage(){
   startGoogleLogin();
+}
+
+function loginWithServerCallback(incomingString, result){
+  if (incomingString === "not logged in"){
+    thePage.authenticationToken = "";
+    thePage.username = "";
+    showLoginCalculatorButtons();
+    return;
+  }
+  try {
+    var parsedAuthentication = JSON.parse(incomingString);
+    thePage.authenticationToken = parsedAuthentication.authenticationToken;
+    thePage.username = parsedAuthentication.username;
+    thePage.storeSettingsToCookies();
+    hideLoginCalculatorButtons();
+  } catch (e){
+    console.log("Bad authentication" + e);
+  }
 }
 
 function onGoogleSignIn(googleUser){ 
   var theToken = googleUser.getAuthResponse().id_token;
   thePage.googleToken = theToken;
+  thePage.username = "";
   try {
     thePage.googleProfile = window.calculator.jwt.decode(theToken);
     thePage.storeSettingsToCookies();
     thePage.storeSettingsToLocalStorage();
-    thePage.updateProfilePic();
+    thePage.showProfilePicture();
     showGoogleLogoutButton();
+    submitGET({
+      "url": `${thePage.calculator}?request=userInfoJSON`,
+      callback: loginWithServerCallback,
+      progress: "spanProgressReportGeneral"
+    });
   } catch (e) {
     console.log("Error decoding google token: " + e);
   }
@@ -40,13 +81,29 @@ function startGoogleLogin() {
 
 }
 
+function showLoginCalculatorButtons(){
+  document.getElementById("divLoginCalculatorPanel").classList.remove("divInvisible");
+  document.getElementById("divLoginCalculatorPanel").classList.add("divVisible");
+  document.getElementById("divLoginPanelUsernameReport").classList.remove("divVisible");
+  document.getElementById("divLoginPanelUsernameReport").classList.add("divInvisible");
+}
+
+function hideLoginCalculatorButtons(){
+  document.getElementById("divLoginCalculatorPanel").classList.remove("divVisible");
+  document.getElementById("divLoginCalculatorPanel").classList.add("divInvisible");
+  document.getElementById("divLoginPanelUsernameReport").innerHTML = thePage.username;
+  document.getElementById("divLoginPanelUsernameReport").classList.remove("divInvisible");
+  document.getElementById("divLoginPanelUsernameReport").classList.add("divVisible");
+}
+
 function showGoogleLogoutButton(){
   for (;;){
     var theLogoutLinks = document.getElementsByClassName("linkLogoutInactive");
     if (theLogoutLinks.length === 0){
       break;
     }
-    theLogoutLinks[0].className = "linkLogoutActive";
+    theLogoutLinks[0].classList.add("linkLogoutActive");
+    theLogoutLinks[0].classList.remove("linkLogoutInactive");
   }
 }
 
@@ -56,7 +113,8 @@ function hideGoogleLogoutButton(){
     if (theLogoutLinks.length === 0){
       break;
     }
-    theLogoutLinks[0].className = "linkLogoutInactive";
+    theLogoutLinks[0].classList.add("linkLogoutInactive");
+    theLogoutLinks[0].classList.remove("linkLogoutActive");
   }
 }
 
@@ -67,6 +125,7 @@ function logoutGoogle(){
   thePage.storeSettingsToLocalStorage();
   gapi.auth2.getAuthInstance().disconnect();
   hideGoogleLogoutButton();
+  thePage.hideProfilePicture();
 }
 
 function getQueryVariable(variable) {

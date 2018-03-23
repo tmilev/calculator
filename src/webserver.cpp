@@ -1609,8 +1609,7 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   << "<input type=\"hidden\" id=\"studentView\" name=\"studentView\">\n"
   << "<input type=\"hidden\" id=\"studentSection\" name=\"studentSection\">\n"
   << "<input type=\"hidden\" id=\"courseHome\" name=\"courseHome\">\n"
-  << "<input type=\"hidden\" id=\"fileName\" name=\"fileName\">\n"
-  ;
+  << "<input type=\"hidden\" id=\"fileName\" name=\"fileName\">\n";
   return out.str();
 }
 
@@ -1822,7 +1821,7 @@ bool WebWorker::ReceiveAllHttp()
   bool result = true;
   while ((numBytesInBuffer < 0) || (numBytesInBuffer > ((signed)bufferSize)))
   { std::stringstream out;
-    numFailedReceives++;
+    numFailedReceives ++;
     out
     << "WebWorker::ReceiveAllHttp on socket " << this->connectedSocketID
     << " failed (so far "
@@ -2451,7 +2450,7 @@ int WebWorker::ProcessFile()
   for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++)
     if (MathRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i]))
     { theHeader << "Cache-Control: max-age=129600000, public\r\n";
-      withCacheHeader=true;
+      withCacheHeader = true;
       break;
     }
   std::stringstream debugBytesStream;
@@ -3263,8 +3262,7 @@ int WebWorker::ProcessCalculator()
   out << "<br>";
   if (hashtmlChars)
     out << "Your input had some html characters (such as &lt;). <br>"
-    << "I've encoded your input in html format.<br>"
-    ;
+    << "I've encoded your input in html format.<br>";
 
   out << "<button title=\"Shift+Enter=shortcut from input text box. \" "
   << "name=\"Go\" onclick=\""
@@ -3419,8 +3417,17 @@ int WebWorker::ProcessTemplate()
   return 0;
 }
 
+int WebWorker::ProcessUserInfoJSON()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessUserInfoJSON");
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::GetJSONUserInfo();
+  //if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
+  //  stOutput << "<!--" << this->ToStringMessageFullUnsafe() << "-->";
+  return 0;
+}
+
 int WebWorker::ProcessTemplateJSON()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessTemplate");
+{ MacroRegisterFunctionWithName("WebWorker::ProcessTemplateJSON");
   this->SetHeaderOKNoContentLength();
   stOutput << HtmlInterpretation::GetJSONFromTemplate();
   //if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
@@ -3858,15 +3865,13 @@ std::string WebWorker::GetSignUpPage()
 //  << "<input type=\"password\" id=\"reenteredPassword\" name=\"reenteredPassword\" placeholder=\"re-enter password\">\n<br>\n"
 //  << "</td>\n"
 //  << "</tr>"
-  << "</table>"
-  ;
+  << "</table>";
   out << HtmlInterpretation::GetCaptchaDiv();
   out << "</form>";
   out << "<button onclick=\"submitSignUpInfo();\">Sign up</button>"
   << "<span id=\"signUpResultReport\"></span>"
   << "\n<br>\n"
-  << "<span id=\"signUpResult\"></span>"
-  ;
+  << "<span id=\"signUpResult\"></span>";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
@@ -3955,7 +3960,7 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
   //<< HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
   //<< this->ToStringMessageFullUnsafe();
   stOutput << "</body></html>";
-  return 0;
+  return true;
 }
 
 bool WebWorker::CorrectRequestsAFTERLoginReturnFalseIfModified()
@@ -4234,6 +4239,8 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.userCalculatorRequestType == "templateJSON" ||
            theGlobalVariables.userCalculatorRequestType == "templateNoLoginJSON")
     return this->ProcessTemplateJSON();
+  else if (theGlobalVariables.userCalculatorRequestType == "userInfoJSON")
+    return this->ProcessUserInfoJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "editPage")
     return this->ProcessEditPage();
   else if (theGlobalVariables.userCalculatorRequestType == "modifyPage")
@@ -4918,7 +4925,7 @@ void WebServer::ReleaseWorkerSideResources()
   if (theGlobalVariables.flagServerDetailedLog)
     currentLog << logger::green << "DEBUG: server RELEASED active worker. " << logger::endL;
   //<-release socket- communication is handled by the worker.
-  this->activeWorker = -1; //<-The active worker is needed only in the child process.
+  this->activeWorker = - 1; //<-The active worker is needed only in the child process.
 }
 
 bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string& inputAddress)
@@ -5844,6 +5851,9 @@ void WebServer::InitializeGlobalVariables()
   this->requestStartsNotNeedingLogin.AddOnTop("homeworkFromSource");
   this->requestStartsNotNeedingLogin.AddOnTop("slidesSource");
   this->requestStartsNotNeedingLogin.AddOnTop("homeworkSource");
+  this->requestStartsNotNeedingLogin.AddOnTop("app");
+  this->requestStartsNotNeedingLogin.AddOnTop("appNoCache");
+  this->requestStartsNotNeedingLogin.AddOnTop("userInfoJSON");
 
   this->addressStartsNotNeedingLogin.AddOnTop("favicon.ico");
   this->addressStartsNotNeedingLogin.AddOnTop("/favicon.ico");
@@ -5853,6 +5863,8 @@ void WebServer::InitializeGlobalVariables()
   this->addressStartsNotNeedingLogin.AddOnTop("/javascriptlibs/");
   this->addressStartsNotNeedingLogin.AddOnTop("/MathJax-2.7-latest/");
   this->addressStartsNotNeedingLogin.AddOnTop("/login");
+  this->addressStartsNotNeedingLogin.AddOnTop("/app");
+  this->addressStartsNotNeedingLogin.AddOnTop("/appNoCache");
 
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("/app");
   this->addressStartsInterpretedAsCalculatorRequest.AddOnTop("app");

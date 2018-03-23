@@ -417,7 +417,7 @@ function toggleCalculatorExamples(theButton){
   var theExamples = document.getElementById('divCalculatorExamples');
   if (theExamples.innerHTML.length < 300) {
     submitGET({
-      url: "/cgi-bin/calculator?request=calculatorExamplesJSON",
+      url: `${thePage.calculator}?request=calculatorExamplesJSON`,
       callback: processExamples,
       progress: "spanProgressCalculatorExamples"
     });

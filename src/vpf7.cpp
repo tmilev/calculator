@@ -9,34 +9,33 @@ ProjectInformationInstance ProjectInfoVpf7cpp(__FILE__, "Math routines implement
 void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
 (int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc, Rational& outputMultiplyLieBracketsToGetGenerator)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens");
-  outputIndicesFormatAd0Ad1Ad2etc.size=0;
+  outputIndicesFormatAd0Ad1Ad2etc.size = 0;
   if (this->IsGeneratorFromCartan(generatorIndex))
-  { int simpleIndex=generatorIndex-this->GetNumPosRoots();
-    outputIndicesFormatAd0Ad1Ad2etc.AddOnTop(generatorIndex+this->GetRank());
-    outputIndicesFormatAd0Ad1Ad2etc.AddOnTop( 2*this->GetNumPosRoots()-1-generatorIndex);
-    outputMultiplyLieBracketsToGetGenerator=this->theWeyl.CartanSymmetric.elements[simpleIndex][simpleIndex]/2;
+  { int simpleIndex = generatorIndex - this->GetNumPosRoots();
+    outputIndicesFormatAd0Ad1Ad2etc.AddOnTop(generatorIndex + this->GetRank());
+    outputIndicesFormatAd0Ad1Ad2etc.AddOnTop(2 * this->GetNumPosRoots() - 1 - generatorIndex);
+    outputMultiplyLieBracketsToGetGenerator = this->theWeyl.CartanSymmetric.elements[simpleIndex][simpleIndex] / 2;
     return;
   }
-  Vector<Rational> theWeight=this->GetWeightOfGenerator(generatorIndex);
-  outputMultiplyLieBracketsToGetGenerator=1;
+  Vector<Rational> theWeight = this->GetWeightOfGenerator(generatorIndex);
+  outputMultiplyLieBracketsToGetGenerator = 1;
   Vector<Rational> genWeight, newWeight;
   while (!theWeight.IsEqualToZero())
-    for (int i=0; i<this->GetRank(); i++)
+    for (int i = 0; i < this->GetRank(); i ++)
     { genWeight.MakeEi(this->GetRank(), i);
       if (theWeight.IsPositive())
         genWeight.Minus();
-      std::string debugString=theWeight.ToString();
-      newWeight=theWeight+genWeight;
+      newWeight = theWeight + genWeight;
       if (newWeight.IsEqualToZero() || this->theWeyl.IsARoot(newWeight))
-      { theWeight=newWeight;
-        int theIndex=this->GetGeneratorFromRoot(-genWeight);
+      { theWeight = newWeight;
+        int theIndex = this->GetGeneratorFromRoot(-genWeight);
         outputIndicesFormatAd0Ad1Ad2etc.AddOnTop(theIndex);
         if (!theWeight.IsEqualToZero())
-        { int currentIndex=this->theWeyl.RootSystem.GetIndex(theWeight);
-          theIndex=this->GetRootIndexFromGenerator(theIndex);
+        { int currentIndex = this->theWeyl.RootSystem.GetIndex(theWeight);
+          theIndex = this->GetRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex])
             crash << "This is a programming error. For some reason I am not computed. Here is me: " << this->ToString() << crash;
-          outputMultiplyLieBracketsToGetGenerator/=this->ChevalleyConstants.elements[theIndex][currentIndex];
+          outputMultiplyLieBracketsToGetGenerator /= this->ChevalleyConstants.elements[theIndex][currentIndex];
         }
         break;
       }
@@ -44,22 +43,22 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
 }
 
 bool PartFractions::ArgumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong)
-{ if (theArguments.size<1)
+{ if (theArguments.size < 1)
     return false;
   Cone tempCone;
-  bool result=tempCone.CreateFromVertices(theArguments);
+  bool result = tempCone.CreateFromVertices(theArguments);
   if (tempCone.IsTheEntireSpace())
-  { outputWhatWentWrong="Error: the vectors you gave as input span the entire space.";
+  { outputWhatWentWrong = "Error: the vectors you gave as input span the entire space.";
     return false;
   }
-  for (int i=0; i<tempCone.Vertices.size; i++)
-    if (tempCone.IsInCone(tempCone.Vertices[i]) && tempCone.IsInCone(-tempCone.Vertices[i]))
+  for (int i = 0; i < tempCone.Vertices.size; i ++)
+    if (tempCone.IsInCone(tempCone.Vertices[i]) && tempCone.IsInCone(- tempCone.Vertices[i]))
     { std::stringstream out;
       out << "Error: the Q_{>0} span of vectors you gave as input contains zero (as it contains the vector "
       << tempCone.Vertices[i].ToString() << " as well as its opposite vector "
-      << (-tempCone.Vertices[i]).ToString()
+      << (- tempCone.Vertices[i]).ToString()
       << "), hence the vector partition function is " << "can only take values infinity or zero. ";
-      outputWhatWentWrong=out.str();
+      outputWhatWentWrong = out.str();
       return false;
     }
   return result;
@@ -69,243 +68,240 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
 { Vectors<Rational> tempRoots;
   tempRoots.AddOnTop(inputLine);
   this->IntersectWithLinearSubspaceSpannedBy(tempRoots);
-  if (this->basisRationalForm.NumRows>1)
+  if (this->basisRationalForm.NumRows > 1)
     crash << crash;
-  if (this->basisRationalForm.NumRows==0)
+  if (this->basisRationalForm.NumRows == 0)
     outputGenerator.MakeZero(inputLine.size);
   else
     this->basisRationalForm.GetVectorFromRow(0, outputGenerator);
 }
 
 void LittelmannPath::ActByEFDisplayIndex(int displayIndex)
-{ if(this->owner==0)
+{ if (this->owner == 0)
     crash << " This is a programming error: LS path without initialized owner is begin acted upon. " << crash;
-  if (displayIndex>0)
-    this->ActByEalpha(displayIndex-1);
+  if (displayIndex > 0)
+    this->ActByEalpha(displayIndex - 1);
   else
-    this->ActByFalpha(-displayIndex-1);
+    this->ActByFalpha(- displayIndex - 1);
 }
 
 void LittelmannPath::ActByEalpha(int indexAlpha)
-{ if(this->owner==0)
+{ if (this->owner == 0)
     crash << " This is a programming error: LS path without initialized owner is begin acted upon. " << crash;
-  if (indexAlpha<0 || indexAlpha>=this->owner->GetDim())
+  if (indexAlpha < 0 || indexAlpha >= this->owner->GetDim())
     crash << " This is a programming error: index of Littelmann root operator out of range. " << crash;
- if (this->Waypoints.size==0)
+ if (this->Waypoints.size == 0)
     return;
-  Rational theMin=0;
-  int minIndex=-1;
-  if (this->owner==0)
+  Rational theMin = 0;
+  int minIndex = - 1;
+  if (this->owner == 0)
     crash << crash;
-  WeylGroupData& theWeyl=*this->owner;
+  WeylGroupData& theWeyl = *this->owner;
   theWeyl.ComputeRho(true);
-  Vector<Rational>& alpha=theWeyl.RootsOfBorel[indexAlpha];
-  Rational LengthAlpha=theWeyl.RootScalarCartanRoot(alpha, alpha);
-  Vector<Rational> alphaScaled=alpha*2/LengthAlpha;
-  for (int i=0; i<this->Waypoints.size; i++)
-  { Rational tempRat=this->owner->RootScalarCartanRoot(this->Waypoints[i], alphaScaled);
-    if (tempRat<=theMin)
-    { theMin=tempRat;
-      minIndex=i;
+  Vector<Rational>& alpha = theWeyl.RootsOfBorel[indexAlpha];
+  Rational LengthAlpha = theWeyl.RootScalarCartanRoot(alpha, alpha);
+  Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
+  for (int i = 0; i < this->Waypoints.size; i ++)
+  { Rational tempRat = this->owner->RootScalarCartanRoot(this->Waypoints[i], alphaScaled);
+    if (tempRat <= theMin)
+    { theMin = tempRat;
+      minIndex = i;
     }
   }
-  if (minIndex<=0 || theMin>-1)
-  { this->Waypoints.size=0;
+  if (minIndex <= 0 || theMin > - 1)
+  { this->Waypoints.size = 0;
     return;
   }
-  int precedingIndex=0;
-  for (int i=0; i<=minIndex; i++)
-  { Rational tempScalar=theWeyl.RootScalarCartanRoot(this->Waypoints[i], alphaScaled);
-    if (tempScalar>=theMin+1)
-      precedingIndex=i;
-    if (tempScalar<theMin+1)
+  int precedingIndex = 0;
+  for (int i = 0; i <= minIndex; i ++)
+  { Rational tempScalar = theWeyl.RootScalarCartanRoot(this->Waypoints[i], alphaScaled);
+    if (tempScalar >= theMin + 1)
+      precedingIndex = i;
+    if (tempScalar < theMin + 1)
       break;
   }
-  Rational s2= this->owner->RootScalarCartanRoot(this->Waypoints[precedingIndex], alphaScaled);
+  Rational s2 = this->owner->RootScalarCartanRoot(this->Waypoints[precedingIndex], alphaScaled);
 //  stOutput << "<hr>Starting path: " << this->ToString();
   if (!this->MinimaAreIntegral())
     stOutput << "<br>Something is bad: starting path is BAD!";
 //  stOutput << "<br>Min waypoint:" << this->Waypoints[minIndex].ToString();
 //  stOutput << " with minimum: " << theMin.ToString();
-  if (s2>theMin+1)
-  { this->Waypoints.SetSize(this->Waypoints.size+1);
-    for (int i=this->Waypoints.size-1; i>=precedingIndex+2; i--)
-      this->Waypoints[i]=this->Waypoints[i-1];
-    precedingIndex++;
-    minIndex++;
+  if (s2 > theMin + 1)
+  { this->Waypoints.SetSize(this->Waypoints.size + 1);
+    for (int i = this->Waypoints.size - 1; i >= precedingIndex + 2; i --)
+      this->Waypoints[i] = this->Waypoints[i - 1];
+    precedingIndex ++;
+    minIndex ++;
 //    stOutput << "<br>fake waypoint added: " << this->ToString();
-    Rational scalarNext=theWeyl.RootScalarCartanRoot(this->Waypoints[precedingIndex],alphaScaled);
-    Vector<Rational>& r1=this->Waypoints[precedingIndex];
-    Vector<Rational>& r2=this->Waypoints[precedingIndex-1];
-    Rational s1=theWeyl.RootScalarCartanRoot(r1, alphaScaled);
-    Rational x= (theMin+1-s2)/(s1-s2);
-    this->Waypoints[precedingIndex]= (r1-r2)*x+ r2;
+//    Rational scalarNext=theWeyl.RootScalarCartanRoot(this->Waypoints[precedingIndex],alphaScaled);
+    Vector<Rational>& r1 = this->Waypoints[precedingIndex];
+    Vector<Rational>& r2 = this->Waypoints[precedingIndex - 1];
+    Rational s1 = theWeyl.RootScalarCartanRoot(r1, alphaScaled);
+    Rational x = (theMin + 1 - s2) / (s1 - s2);
+    this->Waypoints[precedingIndex] = (r1 - r2) * x + r2;
 //    stOutput << "<br> fake waypoint corrected: " << this->ToString();
   }
 //  stOutput << "<br>Min waypoint:" << this->Waypoints[minIndex].ToString();
   Vectors<Rational> differences;
   differences.SetSize(minIndex-precedingIndex);
-  Rational currentDist=0;
-  Rational minDist=0;
-  for (int i=0; i<differences.size; i++)
-  { differences[i]=this->Waypoints[i+precedingIndex+1]-this->Waypoints[i+precedingIndex];
-    currentDist+=theWeyl.RootScalarCartanRoot(differences[i], alphaScaled);
-    if (currentDist<minDist)
+  Rational currentDist= 0;
+  Rational minDist = 0;
+  for (int i = 0; i < differences.size; i ++)
+  { differences[i] = this->Waypoints[i + precedingIndex + 1] - this->Waypoints[i + precedingIndex];
+    currentDist += theWeyl.RootScalarCartanRoot(differences[i], alphaScaled);
+    if (currentDist < minDist)
     { theWeyl.SimpleReflection(indexAlpha, differences[i]);
-      minDist=currentDist;
+      minDist = currentDist;
     }
   }
-  for (int i=0; i<differences.size; i++)
-    this->Waypoints[i+precedingIndex+1]=this->Waypoints[i+precedingIndex]+differences[i];
-  for (int i=minIndex+1; i<this->Waypoints.size; i++)
-    this->Waypoints[i]+=alpha;
+  for (int i = 0; i < differences.size; i ++)
+    this->Waypoints[i + precedingIndex + 1] = this->Waypoints[i + precedingIndex] + differences[i];
+  for (int i = minIndex + 1; i < this->Waypoints.size; i ++)
+    this->Waypoints[i] += alpha;
 //  stOutput << "<br> result before simplification: " << this->ToString();
   this->Simplify();
 //  stOutput << "<br> final: " << this->ToString();
 }
 
 void LittelmannPath::ActByFalpha(int indexAlpha)
-{ if (this->Waypoints.size==0)
+{ if (this->Waypoints.size == 0)
     return;
-  if(this->owner==0)
+  if (this->owner == 0)
     crash << " This is a programming error: LS path without initialized owner is begin acted upon. " << crash;
-  if (indexAlpha<0 || indexAlpha>=this->owner->GetDim())
+  if (indexAlpha < 0 || indexAlpha >= this->owner->GetDim())
     crash << " This is a programming error: index of Littelmann root operator out of range. " << crash;
-  Rational theMin=0;
-  int minIndex=-1;
-  WeylGroupData& theWeyl=*this->owner;
-  Vector<Rational>& alpha=theWeyl.RootsOfBorel[indexAlpha];
-  Rational LengthAlpha=this->owner->RootScalarCartanRoot(alpha, alpha);
-  Vector<Rational> alphaScaled=alpha*2/LengthAlpha;
-  for (int i=0; i<this->Waypoints.size; i++)
-  { Rational tempRat=this->owner->RootScalarCartanRoot(this->Waypoints[i], alphaScaled);
-    if (tempRat<=theMin)
-    { theMin=tempRat;
-      minIndex=i;
+  Rational theMin = 0;
+  int minIndex = - 1;
+  WeylGroupData& theWeyl = *this->owner;
+  Vector<Rational>& alpha = theWeyl.RootsOfBorel[indexAlpha];
+  Rational LengthAlpha = this->owner->RootScalarCartanRoot(alpha, alpha);
+  Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
+  for (int i = 0; i < this->Waypoints.size; i ++)
+  { Rational tempRat = this->owner->RootScalarCartanRoot(this->Waypoints[i], alphaScaled);
+    if (tempRat <= theMin)
+    { theMin = tempRat;
+      minIndex = i;
     }
   }
-  Rational lastScalar=this->owner->RootScalarCartanRoot(*this->Waypoints.LastObject(), alphaScaled);
-  if (minIndex<0 || lastScalar-theMin<1)
-  { this->Waypoints.size=0;
+  Rational lastScalar = this->owner->RootScalarCartanRoot(*this->Waypoints.LastObject(), alphaScaled);
+  if (minIndex < 0 || lastScalar - theMin < 1)
+  { this->Waypoints.size = 0;
     return;
   }
-  int succeedingIndex=0;
-  for (int i=this->Waypoints.size-1; i>=minIndex; i--)
-  { Rational tempScalar=theWeyl.RootScalarCartanRoot(alphaScaled, this->Waypoints[i]);
-    if (tempScalar>=theMin+1)
-      succeedingIndex=i;
-    if (tempScalar<theMin+1)
+  int succeedingIndex = 0;
+  for (int i = this->Waypoints.size - 1; i >= minIndex; i --)
+  { Rational tempScalar = theWeyl.RootScalarCartanRoot(alphaScaled, this->Waypoints[i]);
+    if (tempScalar >= theMin + 1)
+      succeedingIndex = i;
+    if (tempScalar < theMin + 1)
       break;
   }
-  Rational s1= this->owner->RootScalarCartanRoot(this->Waypoints[succeedingIndex], alphaScaled);
-  if (s1>theMin+1)
-  { this->Waypoints.SetSize(this->Waypoints.size+1);
-    for (int i=this->Waypoints.size-1; i>=succeedingIndex+1; i--)
-      this->Waypoints[i]=this->Waypoints[i-1];
-    Rational scalarNext=theWeyl.RootScalarCartanRoot(this->Waypoints[succeedingIndex], alphaScaled);
-    Vector<Rational>& r1=this->Waypoints[succeedingIndex];
-    Vector<Rational>& r2=this->Waypoints[succeedingIndex-1];
-    Rational s2=theWeyl.RootScalarCartanRoot(r2, alphaScaled);
-    Rational x= (theMin+1-s2)/(s1-s2);
-    this->Waypoints[succeedingIndex]= (r1-r2)*x+ r2;
+  Rational s1 = this->owner->RootScalarCartanRoot(this->Waypoints[succeedingIndex], alphaScaled);
+  if (s1 > theMin + 1)
+  { this->Waypoints.SetSize(this->Waypoints.size + 1);
+    for (int i = this->Waypoints.size - 1; i >= succeedingIndex + 1; i --)
+      this->Waypoints[i] = this->Waypoints[i - 1];
+    //Rational scalarNext = theWeyl.RootScalarCartanRoot(this->Waypoints[succeedingIndex], alphaScaled);
+    Vector<Rational>& r1 = this->Waypoints[succeedingIndex];
+    Vector<Rational>& r2 = this->Waypoints[succeedingIndex - 1];
+    Rational s2 = theWeyl.RootScalarCartanRoot(r2, alphaScaled);
+    Rational x = (theMin + 1 - s2) / (s1 - s2);
+    this->Waypoints[succeedingIndex] = (r1 - r2) * x + r2;
   }
 //  Vectors<Rational> differences;
   Vector<Rational> diff, oldWayPoint;
-  oldWayPoint=this->Waypoints[minIndex];
-  Rational currentDist=0;
-  for (int i=0; i<succeedingIndex-minIndex; i++)
-  { diff=this->Waypoints[i+minIndex+1]-oldWayPoint;
-    currentDist+=theWeyl.RootScalarCartanRoot(diff, alphaScaled);
-    if (currentDist>0)
+  oldWayPoint = this->Waypoints[minIndex];
+  Rational currentDist = 0;
+  for (int i = 0; i < succeedingIndex - minIndex; i ++)
+  { diff = this->Waypoints[i + minIndex + 1] - oldWayPoint;
+    currentDist += theWeyl.RootScalarCartanRoot(diff, alphaScaled);
+    if (currentDist > 0)
     { theWeyl.SimpleReflection(indexAlpha, diff);
-      currentDist=0;
+      currentDist = 0;
     }
-    oldWayPoint=this->Waypoints[i+minIndex+1];
-    this->Waypoints[i+minIndex+1]=this->Waypoints[i+minIndex]+diff;
+    oldWayPoint = this->Waypoints[i + minIndex + 1];
+    this->Waypoints[i + minIndex + 1] = this->Waypoints[i + minIndex] + diff;
   }
-  for (int i=succeedingIndex+1; i<this->Waypoints.size; i++)
-    this->Waypoints[i]-=alpha;
+  for (int i = succeedingIndex + 1; i < this->Waypoints.size; i ++)
+    this->Waypoints[i] -= alpha;
   this->Simplify();
 }
 
 void LittelmannPath::Simplify()
-{ if (this->Waypoints.size==0)
+{ if (this->Waypoints.size == 0)
     return;
-  Rational strech;
   Vector<Rational> d1, d2;
   Rational d11, d12, d22;
-  int leftIndex=0;
-  int rightIndex=2;
+  int leftIndex = 0;
+  int rightIndex = 2;
 //  std::stringstream tempStream;
 //  tempStream <<"<br>" << this->ToString();
-  while (rightIndex<this->Waypoints.size)
-  { Vector<Rational>& left=this->Waypoints[leftIndex];
-    Vector<Rational>& middle=this->Waypoints[rightIndex-1];
-    Vector<Rational>& right=this->Waypoints[rightIndex];
-    d1=left-middle;
-    d2=right-middle;
-    d11=d1.ScalarEuclidean(d1);
-    d12=d1.ScalarEuclidean(d2);
-    d22=d2.ScalarEuclidean(d2);
-    bool isBad=((d11*d22-d12*d12).IsEqualToZero() && (d12<=0));
+  while (rightIndex < this->Waypoints.size)
+  { Vector<Rational>& left = this->Waypoints[leftIndex];
+    Vector<Rational>& middle = this->Waypoints[rightIndex - 1];
+    Vector<Rational>& right = this->Waypoints[rightIndex];
+    d1 = left - middle;
+    d2 = right - middle;
+    d11 = d1.ScalarEuclidean(d1);
+    d12 = d1.ScalarEuclidean(d2);
+    d22 = d2.ScalarEuclidean(d2);
+    bool isBad = ((d11 * d22 - d12 * d12).IsEqualToZero() && (d12 <= 0));
     if (!isBad)
-    { leftIndex++;
-      this->Waypoints[leftIndex]=middle;
+    { leftIndex ++;
+      this->Waypoints[leftIndex] = middle;
     }
-    rightIndex++;
+    rightIndex ++;
   }
-  leftIndex++;
-  this->Waypoints[leftIndex]=*this->Waypoints.LastObject();
+  leftIndex ++;
+  this->Waypoints[leftIndex] = *this->Waypoints.LastObject();
 /*  if (leftIndex+1<this->Waypoints.size)
   { this->Waypoints.SetSize(leftIndex+1);
     tempStream << " reduced to " << this->ToString();
     stOutput << tempStream.str();
   }*/
-  this->Waypoints.SetSize(leftIndex+1);
+  this->Waypoints.SetSize(leftIndex + 1);
 }
 
 bool LittelmannPath::MinimaAreIntegral()
-{ if (this->Waypoints.size==0)
+{ if (this->Waypoints.size == 0)
     return true;
   List<Rational> theMinima;
-  WeylGroupData& theWeyl= *this->owner;
-  int theDim=theWeyl.GetDim();
+  WeylGroupData& theWeyl = *this->owner;
+  int theDim = theWeyl.GetDim();
   theMinima.SetSize(theDim);
-  for (int i=0; i<theDim; i++)
-    theMinima[i]=
-    theWeyl.GetScalarProdSimpleRoot
-    (this->Waypoints[0], i)*2/theWeyl.CartanSymmetric.elements[i][i];
-  for (int i=1; i<this->Waypoints.size; i++)
-    for (int j=0; j<theDim; j++)
-      theMinima[j]=MathRoutines::Minimum
-      (theWeyl.GetScalarProdSimpleRoot
-      (this->Waypoints[i],j)*2/theWeyl.CartanSymmetric.elements[j][j], theMinima[j]);
-  for (int i=0; i<theDim; i++)
+  for (int i = 0; i < theDim; i ++)
+    theMinima[i] = theWeyl.GetScalarProdSimpleRoot
+    (this->Waypoints[0], i) * 2 / theWeyl.CartanSymmetric.elements[i][i];
+  for (int i = 1; i < this->Waypoints.size; i ++)
+    for (int j = 0; j < theDim; j ++)
+      theMinima[j] = MathRoutines::Minimum(theWeyl.GetScalarProdSimpleRoot
+      (this->Waypoints[i], j) * 2 / theWeyl.CartanSymmetric.elements[j][j], theMinima[j]);
+  for (int i = 0; i < theDim; i ++)
     if (!theMinima[i].IsSmallInteger())
       return false;
   return true;
 }
 
 void LittelmannPath::MakeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroupData& theOwner)
-{ this->owner=& theOwner;
+{ this->owner = &theOwner;
   this->Waypoints.SetSize(2);
   this->Waypoints[0].MakeZero(theOwner.GetDim());
-  this->Waypoints[1]=weightInSimpleCoords;
+  this->Waypoints[1] = weightInSimpleCoords;
   this->Simplify();
 }
 
 std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input)
 { std::stringstream out;
-  for (int i=input.size-1; i>=0; i--)
-  { int displayIndex= input[i];
-    if (displayIndex>=0)
-      displayIndex++;
+  for (int i = input.size - 1; i >= 0; i --)
+  { int displayIndex = input[i];
+    if (displayIndex >= 0)
+      displayIndex ++;
     out << "eAlpha(" << displayIndex << ", ";
   }
   out << "littelmann"
   << inputStartingPath.owner->GetFundamentalCoordinatesFromSimple
-  (*inputStartingPath.Waypoints.LastObject() ).ToString();
-  for (int i=0; i<input.size; i++)
+  (*inputStartingPath.Waypoints.LastObject()).ToString();
+  for (int i = 0; i < input.size; i ++)
     out << " ) ";
   return out.str();
 }

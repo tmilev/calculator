@@ -20,10 +20,7 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerEvaluateSymbols
   (Calculator& theCommands, const Expression& input, Expression& output);
-
-
-  static std::string GetUserInputBoxName
-(const Expression& theBox);
+  static std::string GetUserInputBoxName(const Expression& theBox);
 };
 
 

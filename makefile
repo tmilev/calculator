@@ -23,6 +23,7 @@ FEATUREFLAGS= -std=c++0x -pthread -fopenmp
 CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
 LDFLAGS=$(FEATUREFLAGS)
 LIBRARYINCLUDESEND=
+LIBRARYINCLUDESEND+=-lmongoc-1.0 -lbson-1.0
 INCLUDEDIRS = -I/usr/include/libmongoc-1.0 -I/usr/include/libbson-1.0
 
 LD_LIBRARY_PATH=LD_LIBRARY_PATH:

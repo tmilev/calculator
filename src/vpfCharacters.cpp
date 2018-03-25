@@ -16,10 +16,10 @@ List<ElementWeylGroup<WeylGroupData> >::OrderLeftGreaterThanRight FormatExpressi
 
 Vector<Rational> WeylGroupData::ApplyReflectionList(const List<int>& rightReflectionsActFirst, const Vector<Rational>& vv)const
 { Vector<Rational> v = vv;
-  for(int i = rightReflectionsActFirst.size-1; i>=0; i--)
-  { Rational x=0;
-    for(int j=0; j<this->GetDim(); j++)
-      x += v[j] * CartanSymmetric(rightReflectionsActFirst[i],j);
+  for(int i = rightReflectionsActFirst.size - 1; i >= 0; i --)
+  { Rational x = 0;
+    for(int j = 0; j < this->GetDim(); j ++)
+      x += v[j] * CartanSymmetric(rightReflectionsActFirst[i], j);
     //CartanSymmetric(i,j) is slower than CartanSymmetric.elements[i][j] but includes index checking
     //(we want to catch a rogue call to ApplyReflectionList
     v[rightReflectionsActFirst[i]] -= x * 2 / CartanSymmetric(rightReflectionsActFirst[i], rightReflectionsActFirst[i]);
@@ -29,10 +29,10 @@ Vector<Rational> WeylGroupData::ApplyReflectionList(const List<int>& rightReflec
 
 void WeylGroupData::GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output) const
 { MacroRegisterFunctionWithName("WeylGroup::GetSimpleReflectionMatrix");
-  int rank=this->GetDim();
+  int rank = this->GetDim();
   output.MakeIdMatrix(rank);
-  for (int j=0; j<rank; j++)
-    output(indexSimpleRoot,j)-=(this->CartanSymmetric(indexSimpleRoot,j) / CartanSymmetric(indexSimpleRoot, indexSimpleRoot) )*2;
+  for (int j = 0; j < rank; j ++)
+    output(indexSimpleRoot, j) -= (this->CartanSymmetric(indexSimpleRoot, j) / CartanSymmetric(indexSimpleRoot, indexSimpleRoot)) * 2;
 }
 
 Matrix<Rational> WeylGroupData::SimpleReflectionMatrix(int i) const
@@ -45,19 +45,19 @@ ElementWeylGroup<WeylGroupData> WeylGroupData::SimpleConjugation(int i, const El
 { (void) vv;//avoid unused parameter warning, portable.
   ElementWeylGroup<WeylGroupData> eltSimpleReflection;
   eltSimpleReflection.MakeSimpleReflection(i, *this);
-  return eltSimpleReflection*this->theGroup.theElements[i]*eltSimpleReflection;
+  return eltSimpleReflection*this->theGroup.theElements[i] * eltSimpleReflection;
 }
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::ComputeSquaresCCReps()
 { MacroRegisterFunctionWithName("WeylGroup::ComputeSquares");
-  if(!this->flagCCsComputed)
+  if (!this->flagCCsComputed)
     this->ComputeCCfromAllElements();
   this->squaresCCReps.SetExpectedSize(this->ConjugacyClassCount());
   this->squaresCCReps.SetSize(this->ConjugacyClassCount());
   elementSomeGroup currentSquare;
-  for(int i=0;i<this->ConjugacyClassCount();i++)
-    this->squaresCCReps[i]=this->conjugacyClasseS[i].representative*this->conjugacyClasseS[i].representative;
+  for (int i = 0; i < this->ConjugacyClassCount(); i ++)
+    this->squaresCCReps[i] = this->conjugacyClasseS[i].representative * this->conjugacyClasseS[i].representative;
 }
 
 void WeylGroupData::ComputeInitialIrreps()
@@ -94,9 +94,9 @@ template <typename coefficient>
 void MatrixInBasis(Matrix<coefficient>& out, const Matrix<coefficient>& in, const List<Vector<coefficient> >& basis, const Matrix<coefficient>& gramMatrix)
 { int d = basis.size;
   out.init(d, d);
-  for(int i=0; i<d; i++)
-    for(int j=0; j<d; j++)
-      out.elements[i][j] = basis[i].ScalarEuclidean(in*basis[j]);
+  for (int i = 0; i < d; i ++)
+    for (int j = 0; j < d; j ++)
+      out.elements[i][j] = basis[i].ScalarEuclidean(in * basis[j]);
   out.MultiplyOnTheLeft(gramMatrix);
 }
 
@@ -108,22 +108,22 @@ void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, 
   inT.Transpose();
   M.MultiplyOnTheRight(inT);
   out.MakeZeroMatrix(d);
-  for(int i=0; i<d; i++)
+  for (int i = 0; i < d; i ++)
   { int jj = 0;
-    for(int j=0; j<d; j++)
-    {while((jj < M.NumCols) and (M.elements[i][jj] == 0))
-      jj++;
-     if(jj == M.NumCols){
-      out.elements[i][j] = 0;
-      continue;
-     }
-     if(BM.elements[j][jj] == 0){
-      out.elements[i][j] = 0;
-      continue;
-     }
-     out.elements[i][j] = M.elements[i][jj] / BM.elements[j][jj];
-     for(int k=jj; k<M.NumCols; k++)
-       M.elements[i][k] -= BM.elements[j][k] * out.elements[i][j];
+    for (int j = 0; j < d; j ++)
+    { while((jj < M.NumCols) and (M.elements[i][jj] == 0))
+        jj++;
+      if (jj == M.NumCols)
+      { out.elements[i][j] = 0;
+        continue;
+      }
+      if(BM.elements[j][jj] == 0)
+      { out.elements[i][j] = 0;
+        continue;
+      }
+      out.elements[i][j] = M.elements[i][jj] / BM.elements[j][jj];
+      for(int k = jj; k < M.NumCols; k ++)
+        M.elements[i][k] -= BM.elements[j][k] * out.elements[i][j];
     }
   }
 //  stOutput << "MatrixInBasisFast" << "\n";
@@ -145,7 +145,7 @@ public:
 template <typename coefficient>
 void SpaceTree<coefficient>::PlaceInTree(const List<Vector<coefficient> > &V)
 { List<Vector<coefficient> > U;
-  for(int i=0; i<subspaces.size; i++)
+  for (int i = 0; i < subspaces.size; i ++)
   { intersection(V, subspaces[i].space, U);
     if(U.size == 0)
       continue;
@@ -154,9 +154,9 @@ void SpaceTree<coefficient>::PlaceInTree(const List<Vector<coefficient> > &V)
     subspaces[i].PlaceInTree(U);
   }
   List<Vector<coefficient> > W, tempVspace;
-  for(int i=0; i<subspaces.size; i++)
+  for (int i = 0; i < subspaces.size; i ++)
   { getunion(W, subspaces[i].space, tempVspace);
-    W=tempVspace;
+    W = tempVspace;
   }
   intersection(W, V, tempVspace);
   if(tempVspace.size != V.size)
@@ -168,50 +168,50 @@ void SpaceTree<coefficient>::PlaceInTree(const List<Vector<coefficient> > &V)
 
 template <typename coefficient>
 void SpaceTree<coefficient>::GetLeaves(List<List<Vector<coefficient> > >& leaves) const
-{  if(subspaces.size > 0)
-      for(int i=0; i<subspaces.size; i++)
-         subspaces[i].GetLeaves(leaves);
-   else
-      leaves.AddOnTop(space);
+{ if (subspaces.size > 0)
+    for(int i = 0; i < subspaces.size; i ++)
+      subspaces[i].GetLeaves(leaves);
+  else
+    leaves.AddOnTop(space);
 }
 
 template <typename coefficient>
 void SpaceTree<coefficient>::DisplayTree() const
-{  stOutput << '[' << space.size << ',';
-   for(int i=0; i<subspaces.size; i++)
-      subspaces[i].DisplayTree();
-   stOutput << ']';
+{ stOutput << '[' << space.size << ',';
+  for (int i = 0; i < subspaces.size; i ++)
+    subspaces[i].DisplayTree();
+  stOutput << ']';
 }
 
 template <typename somegroup, typename coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy
 (const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other, GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output) const
 { //lazy programmers handling://////
-  if (&output==this || &output==&other)
+  if (&output == this || &output == &other)
   { GroupRepresentationCarriesAllMatrices<somegroup, coefficient> thisCopy, otherCopy;
-    thisCopy=*this;
-    otherCopy=other;
+    thisCopy = *this;
+    otherCopy = other;
     thisCopy.MultiplyBy(otherCopy, output);
     return;
   }
   //////////////////////////////////
-  if (this->ownerGroup!=other.ownerGroup)
+  if (this->ownerGroup != other.ownerGroup)
     crash << "This is a programming error: attempting to multiply representations with different owner groups. " << crash;
   output.reset(this->G);
   int Vd = this->basis[0].size;
   int Wd = other.basis[0].size;
   int Ud = Vd*Wd;
-  for(int vi=0; vi<this->basis.size; vi++)
-    for(int wi=0; wi<other.basis.size; wi++)
+  for (int vi = 0; vi < this->basis.size; vi ++)
+    for(int wi = 0; wi < other.basis.size; wi ++)
     { Vector<coefficient> u;
       u.SetSize(Ud);
-      for(int i=0; i<Vd; i++)
-        for(int j=0; j<Wd; j++)
-          u[i*Wd+j] = this->basis[vi][i] * other.basis[wi][j];
+      for (int i = 0; i < Vd; i ++)
+        for (int j = 0; j < Wd; j ++)
+          u[i * Wd + j] = this->basis[vi][i] * other.basis[wi][j];
       output.basis.AddOnTop(u);
     }
   output.generators.SetSize(this->generators.size);
-  for(int i=0; i<this->generators.size; i++)
+  for (int i = 0; i < this->generators.size; i ++)
     output.generators[i].AssignTensorProduct(this->generators[i],other.generators[i]);
   /* would that it be this simple
   if((classFunctionMatrices.size > 0) && (other.classFunctionMatrices.size > 0))
@@ -226,20 +226,19 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::MultiplyBy
 
 template <typename somegroup, typename coefficient>
 GroupRepresentationCarriesAllMatrices<somegroup, coefficient>
-  GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const
+GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const
 { int d = basis.size;
-
   Matrix<coefficient> GM;
   GM.init(d, d);
-  for(int i=0; i<d; i++)
-    for(int j=0; j<d; j++)
+  for (int i = 0; i < d; i ++)
+    for (int j = 0; j < d; j ++)
       GM.elements[i][j] = this->basis[i].ScalarEuclidean(this->basis[j]);
   GM.Invert();
   GroupRepresentationCarriesAllMatrices<somegroup, coefficient> out;
   out.generatorS.SetSize(this->generatorS.size);
-  for(int i=0; i<this->generatorS.size; i++)
+  for (int i = 0; i < this->generatorS.size; i ++)
 //     MatrixInBasisFast(out.generatorS[i], this->generatorS[i], BM);
-    MatrixInBasis(out.generatorS[i],this->generatorS[i],this->basis,GM);
+    MatrixInBasis(out.generatorS[i], this->generatorS[i], this->basis,GM);
 
    out.ownerGroup = ownerGroup;
    out.basis.MakeEiBasis(d);

@@ -12,7 +12,7 @@ class MonomialUniversalEnveloping : public MonomialTensor<coefficient>
 {
 private:
 public:
-  std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToString(FormatExpressions* theFormat = 0)const;
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
@@ -30,26 +30,26 @@ public:
   template<class otherType>
   void operator=(const MonomialUniversalEnveloping<otherType>& other)
   { this->MonomialTensor<coefficient>::operator=(other);
-    this->owners=other.owners;
-    this->indexInOwners=other.indexInOwners;
+    this->owners = other.owners;
+    this->indexInOwners = other.indexInOwners;
   }
   SemisimpleLieAlgebra& GetOwner()const
   { return *this->owner;
   }
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner)
-  { if (generatorIndex<0 || generatorIndex>inputOwner.GetNumGenerators())
+  { if (generatorIndex < 0 || generatorIndex>inputOwner.GetNumGenerators())
       crash << "This is a programming error: attempting to assign impossible index to monomial UE. " << crash;
-    this->owner=&inputOwner;
+    this->owner = &inputOwner;
     this->generatorsIndices.SetSize(1);
-    this->generatorsIndices[0]=generatorIndex;
+    this->generatorsIndices[0] = generatorIndex;
     this->Powers.SetSize(1);
-    this->Powers[0]=1;
+    this->Powers[0] = 1;
   }
   bool HWTAAbilinearForm
   (const MonomialUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
-   const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream=0);
+   const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0);
   void ModOutVermaRelations
-  (coefficient& outputCoeff, const Vector<coefficient>* subHiGoesToIthElement=0, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  (coefficient& outputCoeff, const Vector<coefficient>* subHiGoesToIthElement = 0, const coefficient& theRingUnit = 1, const coefficient& theRingZero=0);
   void SetNumVariables(int newNumVars);
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
   unsigned int HashFunction() const
@@ -59,21 +59,21 @@ public:
   { return input.HashFunction();
   }
   void GetDegree(coefficient& output)const
-  { if (this->Powers.size==0)
+  { if (this->Powers.size == 0)
     { output.MakeZero();
       return;
     }
-    output=this->Powers[0];
-    for (int i=1; i<this->generatorsIndices.size; i++)
-      output+=(this->Powers[i]);
+    output = this->Powers[0];
+    for (int i = 1; i < this->generatorsIndices.size; i ++)
+      output += (this->Powers[i]);
   }
   bool CommutingABntoBnAPlusLowerOrderAllowed(coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex);
   bool CommutingAnBtoBAnPlusLowerOrderAllowed(coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex);
   bool SwitchConsecutiveIndicesIfTheyCommute(int theLeftIndex);
   void MakeOne(SemisimpleLieAlgebra& inputOwner)
-  { this->generatorsIndices.size=0;
-    this->Powers.size=0;
-    this->owner=&inputOwner;
+  { this->generatorsIndices.size = 0;
+    this->Powers.size = 0;
+    this->owner = &inputOwner;
   }
   //we assume the standard order for being simplified to be Ascending.
   //this way the positive roots will end up being in the end, which is very
@@ -85,15 +85,15 @@ public:
   //in WeylGroup::RootSystem.
   // The "zero level roots" - i.e. the elements of the Cartan subalgebra lie in between
   // the negative and positive rootss.
-  void Simplify(ElementUniversalEnveloping<coefficient>& output, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit=1);
-  void CommuteABntoBnAPlusLowerOrder(int theIndeX, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit=1);
-  void CommuteAnBtoBAnPlusLowerOrder(int indexA, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit=1);
+  void Simplify(ElementUniversalEnveloping<coefficient>& output, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit = 1);
+  void CommuteABntoBnAPlusLowerOrder(int theIndeX, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
+  void CommuteAnBtoBAnPlusLowerOrder(int indexA, ElementUniversalEnveloping<coefficient>& output, const coefficient& theRingUnit = 1);
   MonomialUniversalEnveloping():owner(0){}
   bool operator>(const MonomialUniversalEnveloping& other)
   { return this->::MonomialTensor<coefficient>::operator>(other);
   }
   bool operator==(const MonomialUniversalEnveloping& other)const
-  { return this->owner==other.owner && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
+  { return this->owner == other.owner && this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
   }
   inline void operator=(const MonomialUniversalEnveloping& other)
   { this->::MonomialTensor<coefficient>::operator=(other);
@@ -115,16 +115,16 @@ public:
   bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output)const;
   bool ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output);
   bool IsEqualToZero()const
-  { return this->size()==0;
+  { return this->size() == 0;
   }
   bool HWMTAbilinearForm
   (const ElementUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement,
-   const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream=0);
+   const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0);
   std::string IsInProperSubmodule
   (const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero);
   bool HWTAAbilinearForm
   (const ElementUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement,
-   const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream=0)const;
+   const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0)const;
   bool HWTAAbilinearForm
   (const MonomialUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream=0)const
   { ElementUniversalEnveloping<coefficient> tempElt;
@@ -158,10 +158,10 @@ public:
   }
   void Simplify(const coefficient& theRingUnit=1);
   int GetMinNumVars()const
-  { int result=0;
-    for (int i=0; i<this->size; i++)
-    { result=MathRoutines::Maximum(result, this->theCoeffs[i].GetMinNumVars());
-      result=MathRoutines::Maximum(result, (*this)[i].GetMinNumVars());
+  { int result = 0;
+    for (int i = 0; i < this->size; i ++)
+    { result = MathRoutines::Maximum(result, this->theCoeffs[i].GetMinNumVars());
+      result = MathRoutines::Maximum(result, (*this)[i].GetMinNumVars());
     }
     return result;
   }

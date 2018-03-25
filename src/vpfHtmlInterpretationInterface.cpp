@@ -1154,7 +1154,7 @@ std::string HtmlInterpretation::SubmitProblem
     //<< theUser.theProblemData.ToStringHtml() << "<hr><hr><hr></td></tr>";
     if (!theProblem.LoadAndParseTopicList(out))
       hasDeadline = false;
-    MySQLdata theSQLstring;
+    DatabaseData theSQLstring;
     theSQLstring = theUser.courseInfo.sectionComputed;
     if (hasDeadline)
     { bool unused = false;

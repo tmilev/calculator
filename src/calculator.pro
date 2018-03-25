@@ -68,7 +68,8 @@ SOURCES += \
     vpfHtmlSnippets.cpp \
     vpf6_37calculatorroutines.cpp \
     vpf6_38LaTeXRoutines.cpp \
-    databasemongo.cpp
+    databasemongo.cpp \
+    database_mongo_calculator.cpp
 
 HEADERS += \
     webserver.h \
@@ -125,7 +126,8 @@ HEADERS += \
     vpfHeader1General8DatabaseSystemIndependent.h \
     vpfHeader2Math10_LaTeXRoutines.h \
     vpfHeader2Math4_5_Tree.h \
-    vpfHeader3Calculator5_Database_Mongo.h
+    vpfHeader3Calculator5_Database_Mongo.h \
+    vpfheader7databaseinterface_mongodb.h
 
 DISTFILES += \
     ../calculator-html/new/app.js \

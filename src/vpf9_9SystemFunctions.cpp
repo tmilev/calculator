@@ -14,9 +14,9 @@ timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
 
 double GetElapsedTimeInSeconds()
 { gettimeofday(&LastMeasureOfCurrentTime, NULL);
-  int miliSeconds = (LastMeasureOfCurrentTime.tv_sec - ComputationStartGlobal.tv_sec)*1000 +
-    (LastMeasureOfCurrentTime.tv_usec - ComputationStartGlobal.tv_usec)/1000;
-  return ((double) miliSeconds)/1000;
+  int miliSeconds = (LastMeasureOfCurrentTime.tv_sec - ComputationStartGlobal.tv_sec) * 1000 +
+    (LastMeasureOfCurrentTime.tv_usec - ComputationStartGlobal.tv_usec) / 1000;
+  return ((double) miliSeconds) / 1000;
 }
 
 void InitializeTimer(void* desiredStartTime)
@@ -98,7 +98,7 @@ bool TimerThreadData::HandleMaxComputationTime()
   std::stringstream out;
   out << "<b>This is a safety time-out crash. You may have requested a computation that takes too long."
   << "</b> Your computation ran for ";
-  if (elapsedComputationTime>0)
+  if (elapsedComputationTime > 0)
     out << elapsedComputationTime << " seconds";
   else
     out << " (unknown amount of time)";
@@ -130,18 +130,18 @@ bool TimerThreadData::HandleMaxComputationTime()
 bool TimerThreadData::HandleComputationTimeout()
 { if (!theGlobalVariables.flagRunningBuiltInWebServer)
     return false;
-  if (theGlobalVariables.MaxComputationTimeBeforeWeTakeAction<=0)
+  if (theGlobalVariables.MaxComputationTimeBeforeWeTakeAction <= 0)
     return false;
-  if (elapsedComputationTime<=0)
+  if (elapsedComputationTime <= 0)
     return false;
-  if (elapsedComputationTime<=theGlobalVariables.MaxComputationTimeBeforeWeTakeAction)
+  if (elapsedComputationTime <= theGlobalVariables.MaxComputationTimeBeforeWeTakeAction)
     return false;
   MacroRegisterFunctionWithName("TimerThreadData::HandleComputationTimeout");
 //  std::cout << "GOT TO HERE\n";
-  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection==0)
+  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection == 0)
     return false;
 //  std::cout << "GOT TO HERE pt 2\n";
-  if (theGlobalVariables.flagOutputTimedOut )
+  if (theGlobalVariables.flagOutputTimedOut)
     return false;
 //  std::cout << "GOT TO HERE pt 3\n";
   theGlobalVariables.flagTimeOutExplanationAlreadyDisplayed=true;
@@ -158,7 +158,7 @@ bool TimerThreadData::HandleEverythingIsDone()
 bool TimerThreadData::HandlePingServerIamAlive()
 { if (theGlobalVariables.flagComputationFinishedAllOutputSentClosing)
     return true;
-  if (theGlobalVariables.WebServerTimerPing==0)
+  if (theGlobalVariables.WebServerTimerPing == 0)
     return false;
   theGlobalVariables.WebServerTimerPing(this->elapsedtime);
   return false;
@@ -166,15 +166,15 @@ bool TimerThreadData::HandlePingServerIamAlive()
 
 void TimerThreadData::Run()
 { MacroRegisterFunctionWithName("TimerThreadData::Run");
-  this->elapsedtime=-1;
-  this->elapsedComputationTime=-1;
-  this->computationStartTime=-1;
-  this->counter=0;
-  this->microsecondsleep=100000;
+  this->elapsedtime = - 1;
+  this->elapsedComputationTime = - 1;
+  this->computationStartTime = - 1;
+  this->counter = 0;
+  this->microsecondsleep = 100000;
 //  ProgressReport theReport;
 //  std::cout << "Got thus far RunTimerVoidPtr - 2" << std::endl;
-  for (; ;)
-  { this->counter++;
+  for (;;)
+  { this->counter ++;
     this->HandleComputationTimer();
     SleepFunction(microsecondsleep);
     this->HandleComputationCompleteStandard();
@@ -188,8 +188,7 @@ void TimerThreadData::Run()
 }
 
 void RunTimerThread(int threadIndex)
-{ theGlobalVariables.theThreadData[threadIndex].theId=
-  std::this_thread::get_id();
+{ theGlobalVariables.theThreadData[threadIndex].theId = std::this_thread::get_id();
   MacroRegisterFunctionWithName("RunTimerThread");
 //  std::cout << "Got thus far RunTimerVoidPtr" << std::endl;
   TimerThreadData theThread;
@@ -201,18 +200,17 @@ void CreateTimerThread()
 }
 
 void CallSystemWrapperNoOutput(const std::string& theCommand, bool ignoreNonZeroReturn)
-{ int systemOutput= system(theCommand.c_str());
-  if (systemOutput!=0 && !ignoreNonZeroReturn)
+{ int systemOutput = system(theCommand.c_str());
+  if (systemOutput != 0 && !ignoreNonZeroReturn)
     logWorker << logger::red << "System command: " << theCommand << " exited with " << systemOutput << ". " << logger::endL;
 }
 
 std::string CallSystemWrapperReturnStandardOutput(const std::string& inputCommand)
-{ std::string inputCommandWithRedirection=inputCommand+" 2>&1";
-
+{ std::string inputCommandWithRedirection = inputCommand + " 2>&1";
   std::shared_ptr<FILE> pipe(popen(inputCommandWithRedirection.c_str(), "r"), pclose);
   if (!pipe)
     return "ERROR";
-  const int bufferSize=20000;
+  const int bufferSize = 20000;
   char buffer[bufferSize];
   std::string result = "";
   while (!feof(pipe.get()))
@@ -222,8 +220,8 @@ std::string CallSystemWrapperReturnStandardOutput(const std::string& inputComman
 }
 
 void CallChDirWrapper(const std::string& theDir)
-{ int systemOutput= chdir(theDir.c_str());;
-  if (systemOutput!=0)
+{ int systemOutput = chdir(theDir.c_str());
+  if (systemOutput != 0)
     logWorker << logger::red << "Chdir command to directory: " << theDir << " exited with " << systemOutput
     << ". " << logger::endL;
 }

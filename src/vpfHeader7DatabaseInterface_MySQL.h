@@ -348,7 +348,7 @@ public:
    std::stringstream& commentsOnCreation);
   bool TableExists(const std::string& tableNameUnsafe, std::stringstream* commentsOnFailure);
   bool RowExists
-  (const MySQLdata& key, const MySQLdata& value, const MySQLdata& tableName, std::stringstream* comments);
+  (const DatabaseData& key, const DatabaseData& value, const DatabaseData& tableName, std::stringstream* comments);
   bool FetchTableNames
   (List<std::string>& output, std::stringstream& comments);
   bool FetchTableFromDatabaseIdentifier
@@ -362,11 +362,11 @@ public:
   bool StoreProblemDatabaseInfo
   (const UserCalculatorData& theUser, std::stringstream& commentsOnFailure);
   bool FetchEntry
-  (const MySQLdata& key, const MySQLdata& valueSearchKey, const MySQLdata& tableName,
-   const MySQLdata& desiredColumn, std::string& outputUnsafe, std::stringstream* failureComments);
+  (const DatabaseData& key, const DatabaseData& valueSearchKey, const DatabaseData& tableName,
+   const DatabaseData& desiredColumn, std::string& outputUnsafe, std::stringstream* failureComments);
    bool SetEntry
-  (const MySQLdata& key, const MySQLdata& keyValue, const MySQLdata& table,
-   const MySQLdata& columnToSet, const MySQLdata& valueToSet,
+  (const DatabaseData& key, const DatabaseData& keyValue, const DatabaseData& table,
+   const DatabaseData& columnToSet, const DatabaseData& valueToSet,
    std::stringstream* failureComments);
   bool PrepareClassData
   (const std::string& classFileName, List<List<std::string> >& outputUserTable,
@@ -379,7 +379,7 @@ public:
   (List<List<std::string> >& output,
    List<std::string>& outputColumnLabels,
    bool& outputWasTruncated, int& actualNumRowsIfTruncated,
-   const MySQLdata& inputTable, std::stringstream& comments);
+   const DatabaseData& inputTable, std::stringstream& comments);
   bool AddUsersFromEmails
   (const std::string& emailList, const std::string& userPasswords, std::string& userRole, std::string& userGroup,
    std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers);
@@ -399,7 +399,7 @@ public:
   std::string ToStringOneEntry();
   std::string ToStringCurrentTableHTML(std::string& outputKeyColName);
   std::string ToStringAllTables();
-  std::string ToStringTablE(const MySQLdata& inputTable);
+  std::string ToStringTablE(const DatabaseData& inputTable);
   std::string ToStringTableFromTableIdentifier(const std::string& tableIdentifier, std::string& outputDatabaseKeyId);
   bool CreateTable
   (const std::string& tableNameUnsafe, const std::string& desiredTableContent,

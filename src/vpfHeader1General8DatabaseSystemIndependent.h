@@ -3,11 +3,10 @@
 #ifndef vpfHeader1General8DatabaseSystemIndependent_already_included
 #define vpfHeader1General8DatabaseSystemIndependent_already_included
 
-
 #include "vpfHeader1General0_General.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemIndependentinstance(__FILE__, "Header, system independent database data structures. ");
 
-class MySQLdata
+class DatabaseData
 {
 //This class is needed to attempt to deal with mySQL's
 //numerous design errors, to the extent possible.
@@ -26,10 +25,10 @@ class MySQLdata
 //the sequence we care about and want stored/loaded from DB.
 public:
   std::string value;
-  MySQLdata(const std::string& other)
+  DatabaseData(const std::string& other)
   { this->value = other;
   }
-  MySQLdata(){}
+  DatabaseData(){}
   bool operator==(const std::string& other)
   { return this->value == other;
   }
@@ -79,16 +78,16 @@ class UserCalculatorData
   public:
   double approximateHoursSinceLastTokenWasIssued;
   std::string usernamePlusPassWord;
-  MySQLdata userId;
-  MySQLdata username;
-  MySQLdata email;
-  MySQLdata currentTable;
-  MySQLdata timeOfActivationTokenCreation;
-  MySQLdata actualActivationToken;
-  MySQLdata enteredActivationToken;
-  MySQLdata enteredAuthenticationToken;
-  MySQLdata actualAuthenticationToken;
-  MySQLdata problemDataString;
+  DatabaseData userId;
+  DatabaseData username;
+  DatabaseData email;
+  DatabaseData currentTable;
+  DatabaseData timeOfActivationTokenCreation;
+  DatabaseData actualActivationToken;
+  DatabaseData enteredActivationToken;
+  DatabaseData enteredAuthenticationToken;
+  DatabaseData actualAuthenticationToken;
+  DatabaseData problemDataString;
   CourseAndUserInfo courseInfo;
 
   std::string enteredPassword;

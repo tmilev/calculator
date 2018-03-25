@@ -310,41 +310,41 @@ bool LittelmannPath::GenerateOrbit
 (List<LittelmannPath>& output, List<List<int> >& outputOperators, int UpperBoundNumElts, Selection* parabolicNonSelectedAreInLeviPart)
 { HashedList<LittelmannPath> hashedOutput;
   hashedOutput.AddOnTop(*this);
-  int theDim=this->owner->GetDim();
+  int theDim = this->owner->GetDim();
   outputOperators.SetSize(1);
   outputOperators[0].SetSize(0);
   List<int> currentSequence;
-  if (UpperBoundNumElts>0)
+  if (UpperBoundNumElts > 0)
     currentSequence.Reserve(UpperBoundNumElts);
   LittelmannPath currentPath;
-  bool result=true;
+  bool result = true;
   Selection parabolicSelectionSelectedAreInLeviPart;
   parabolicSelectionSelectedAreInLeviPart.init(theDim);
-  if (parabolicNonSelectedAreInLeviPart!=0)
-  { parabolicSelectionSelectedAreInLeviPart=*parabolicNonSelectedAreInLeviPart;
+  if (parabolicNonSelectedAreInLeviPart != 0)
+  { parabolicSelectionSelectedAreInLeviPart = *parabolicNonSelectedAreInLeviPart;
     parabolicSelectionSelectedAreInLeviPart.InvertSelection();
   }
   else
     parabolicSelectionSelectedAreInLeviPart.MakeFullSelection();
   //stOutput << "<br>parabolicSelectionSelectedAreInLeviPart = " << parabolicSelectionSelectedAreInLeviPart.ToString();
-  for (int lowestNonExplored=0; lowestNonExplored<hashedOutput.size; lowestNonExplored++)
-    if (UpperBoundNumElts>0 && UpperBoundNumElts< hashedOutput.size)
-    { result=false;
+  for (int lowestNonExplored = 0; lowestNonExplored < hashedOutput.size; lowestNonExplored ++)
+    if (UpperBoundNumElts > 0 && UpperBoundNumElts < hashedOutput.size)
+    { result = false;
       break;
     }
     else
-      for (int j=0; j<parabolicSelectionSelectedAreInLeviPart.CardinalitySelection; j++)
-      { bool found=true;
-        currentPath=hashedOutput[lowestNonExplored];
-        currentSequence=outputOperators[lowestNonExplored];
-        int theIndex=parabolicSelectionSelectedAreInLeviPart.elements[j];
+      for (int j = 0; j < parabolicSelectionSelectedAreInLeviPart.CardinalitySelection; j ++)
+      { bool found = true;
+        currentPath = hashedOutput[lowestNonExplored];
+        currentSequence = outputOperators[lowestNonExplored];
+        int theIndex = parabolicSelectionSelectedAreInLeviPart.elements[j];
         while (found)
-        { found=false;
+        { found = false;
           currentPath.ActByEalpha(theIndex);
           if (!currentPath.IsEqualToZero())
   //          hashedOutput.AddOnTopNoRepetition(currentPath);
             if (hashedOutput.AddOnTopNoRepetition(currentPath))
-            { found=true;
+            { found = true;
               currentSequence.AddOnTop(theIndex);
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral())
@@ -353,16 +353,16 @@ bool LittelmannPath::GenerateOrbit
               }
             }
         }
-        found=true;
-        currentPath=hashedOutput[lowestNonExplored];
-        currentSequence=outputOperators[lowestNonExplored];
+        found = true;
+        currentPath = hashedOutput[lowestNonExplored];
+        currentSequence = outputOperators[lowestNonExplored];
         while (found)
-        { found=false;
+        { found = false;
           currentPath.ActByFalpha(theIndex);
           if (!currentPath.IsEqualToZero())
             if (hashedOutput.AddOnTopNoRepetition(currentPath))
             { found=true;
-              currentSequence.AddOnTop(-theIndex-1);
+              currentSequence.AddOnTop(- theIndex - 1);
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral())
               { stOutput << "<hr>Found a bad path:<br> ";
@@ -371,13 +371,13 @@ bool LittelmannPath::GenerateOrbit
             }
         }
       }
-  output=(hashedOutput);
+  output = hashedOutput;
   return result;
 }
 
 std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe(List<int>& input)
 { MonomialTensor<Rational> tempMon;
-  tempMon=input;
+  tempMon = input;
   tempMon.generatorsIndices.ReverseOrderElements();
   tempMon.Powers.ReverseOrderElements();
   return tempMon.ToString();
@@ -386,42 +386,42 @@ std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe(List<in
 template <class coefficient>
 bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimental
 (GlobalVariables* theContext, const Vector<Rational>& theHWsimpleCoords, const coefficient& theRingUnit, const coefficient& theRingZero)
-{ WeylGroupData& theWeyl=this->owner->theOwner.theWeyl;
-  Vector<Rational> theHWsimpleCoordsTrue=theHWsimpleCoords;
+{ WeylGroupData& theWeyl = this->owner->theOwner.theWeyl;
+  Vector<Rational> theHWsimpleCoordsTrue = theHWsimpleCoords;
   theWeyl.RaiseToDominantWeight(theHWsimpleCoordsTrue);
-  Vector<Rational> theHWdualCoords=theWeyl.GetDualCoordinatesFromFundamental
+  Vector<Rational> theHWdualCoords = theWeyl.GetDualCoordinatesFromFundamental
   (theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimpleCoordsTrue));
   List<coefficient> theSub;
   theSub.SetSize(theHWdualCoords.size);
-  for (int i=0; i<theHWdualCoords.size; i++)
-    theSub[i]=theHWdualCoords[i];
+  for (int i = 0; i < theHWdualCoords.size; i ++)
+    theSub[i] = theHWdualCoords[i];
   this->ModOutVermaRelations(theContext, &theSub, theRingUnit, theRingZero);
-  int numPosRoots=this->owner->theOwner.GetNumPosRoots();
+  int numPosRoots = this->owner->theOwner.GetNumPosRoots();
   //int theDimension=this->owner->theOwner.GetRank();
-  Vector<Rational> currentWeight=theHWsimpleCoordsTrue;
+  Vector<Rational> currentWeight = theHWsimpleCoordsTrue;
   Vector<Rational> testWeight;
-  for (int k=this->generatorsIndices.size-1; k>=0; k--)
-  { int IndexCurrentGenerator=this->generatorsIndices[k];
-    if (IndexCurrentGenerator>=numPosRoots)
+  for (int k = this->generatorsIndices.size - 1; k >= 0; k --)
+  { int IndexCurrentGenerator = this->generatorsIndices[k];
+    if (IndexCurrentGenerator >= numPosRoots)
       return false;
-    ElementSemisimpleLieAlgebra<Rational>& currentElt=this->owner->theOrder[IndexCurrentGenerator];
-    if (!currentElt.GetCartanPart().IsEqualToZero() || currentElt.size()>1)
+    ElementSemisimpleLieAlgebra<Rational>& currentElt = this->owner->theOrder[IndexCurrentGenerator];
+    if (!currentElt.GetCartanPart().IsEqualToZero() || currentElt.size() > 1)
       return false;
-    int thePower=0;
+    int thePower = 0;
     if (!this->Powers[k].IsSmallInteger(thePower))
       return false;
-    int rootIndex= this->owner->theOwner.GetRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
-    Vector<Rational>& currentRoot=theWeyl.RootSystem[rootIndex];
+    int rootIndex = this->owner->theOwner.GetRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
+    Vector<Rational>& currentRoot = theWeyl.RootSystem[rootIndex];
 //    stOutput << "<hr>The power: " << thePower;
-    for (int j=0; j<thePower; j++)
-    { currentWeight+=currentRoot;
+    for (int j = 0; j < thePower; j ++)
+    { currentWeight += currentRoot;
 //      stOutput << "<br>current weight is: " << currentWeight.ToString();
-      testWeight=currentWeight;
+      testWeight = currentWeight;
       theWeyl.RaiseToDominantWeight(testWeight);
 //      stOutput << "; raised to highest: " << testWeight.ToString();
 //      stOutput << "<br>theHWsimpleCoordsTrue-currentWeight raised to highest = "
 //      << (theHWsimpleCoordsTrue-testWeight).ToString();
-      if (!(theHWsimpleCoordsTrue-testWeight).IsPositiveOrZero())
+      if (!(theHWsimpleCoordsTrue - testWeight).IsPositiveOrZero())
       { this->MakeZero(theRingZero, *this->owner);
         return true;
       }
@@ -436,12 +436,12 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperiment
 { MonomialUniversalEnvelopingOrdered<coefficient> tempMon;
   ElementUniversalEnvelopingOrdered<coefficient> output;
   output.MakeZero(*this->owner);
-  bool result=true;
-  for (int i=0; i<this->size; i++)
-  { tempMon= this->TheObjects[i];
+  bool result = true;
+  for (int i = 0; i < this->size; i ++)
+  { tempMon = this->TheObjects[i];
 //    tempMon.ComputeDebugString();
     if (!tempMon.ModOutFDRelationsExperimental(theContext, theHWsimpleCoords, theRingUnit, theRingZero))
-      result=false;
+      result = false;
 //    tempMon.ComputeDebugString();
     output.AddMonomial(tempMon);
   }
@@ -460,9 +460,9 @@ bool ElementUniversalEnveloping<coefficient>::GetCoordsInBasis
   if (!this->GetBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, theRingUnit, theRingZero))
     return false;
   Vector<coefficient> tempRoot;
-  tempRoot=*tempCoords.LastObject();
+  tempRoot = *tempCoords.LastObject();
   tempCoords.SetSize(theBasis.size);
-  return tempRoot.GetCoordsInBasiS(tempCoords, output, theRingUnit, theRingZero);
+  return tempRoot.GetCoordsInBasiS(tempCoords, output);
 }
 
 template<class coefficient>
@@ -471,32 +471,32 @@ bool ElementUniversalEnveloping<coefficient>::GetBasisFromSpanOfElements
 (List<ElementUniversalEnveloping<coefficient> >& theElements, Vectors<CoefficientTypeQuotientField>& outputCoords,
  List<ElementUniversalEnveloping<coefficient> >& outputTheBasis, const CoefficientTypeQuotientField& theFieldUnit,
  const CoefficientTypeQuotientField& theFieldZero, GlobalVariables& theGlobalVariables)
-{ if (theElements.size==0)
+{ if (theElements.size == 0)
     return false;
   ElementUniversalEnveloping<coefficient> outputCorrespondingMonomials;
   outputCorrespondingMonomials.MakeZero(*theElements[0].owner);
   Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
-  for (int i=0; i<theElements.size; i++)
-    for (int j=0; j<theElements[i].size; j++)
+  for (int i = 0; i < theElements.size; i ++)
+    for (int j = 0; j < theElements[i].size; j ++)
       outputCorrespondingMonomials.AddOnTopNoRepetition(theElements[i][j]);
   outputCoordsBeforeReduction.SetSize(theElements.size);
-  for (int i=0; i<theElements.size; i++)
-  { Vector<CoefficientTypeQuotientField>& currentList=outputCoordsBeforeReduction[i];
-    currentList.MakeZero(outputCorrespondingMonomials.size, theFieldZero);
-    ElementUniversalEnveloping<coefficient>& currentElt=theElements[i];
-    for (int j=0; j<currentElt.size; j++)
-    { MonomialUniversalEnveloping<coefficient>& currentMon=currentElt[j];
-      currentList[outputCorrespondingMonomials.GetIndex(currentMon)]=currentMon.Coefficient;
+  for (int i =0; i < theElements.size; i ++)
+  { Vector<CoefficientTypeQuotientField>& currentList = outputCoordsBeforeReduction[i];
+    currentList.MakeZero(outputCorrespondingMonomials.size);
+    ElementUniversalEnveloping<coefficient>& currentElt = theElements[i];
+    for (int j = 0; j < currentElt.size; j ++)
+    { MonomialUniversalEnveloping<coefficient>& currentMon = currentElt[j];
+      currentList[outputCorrespondingMonomials.GetIndex(currentMon)] = currentMon.Coefficient;
     }
   }
-  outputTheBasis.size=0;
+  outputTheBasis.size = 0;
   outputTheBasis.Reserve(theElements.size);
   Vectors<CoefficientTypeQuotientField> basisCoordForm;
   basisCoordForm.Reserve(theElements.size);
   Selection selectedBasis;
 //  outputCoordsBeforeReduction.ComputeDebugString();
   outputCoordsBeforeReduction.SelectABasis(basisCoordForm, theFieldZero, selectedBasis);
-  for (int i=0; i<selectedBasis.CardinalitySelection; i++)
+  for (int i = 0; i < selectedBasis.CardinalitySelection; i ++)
     outputTheBasis.AddOnTop(theElements.TheObjects[selectedBasis.elements[i]]);
   Matrix<coefficient> bufferMat;
   Vectors<coefficient> bufferVectors;
@@ -508,21 +508,21 @@ bool ElementUniversalEnveloping<coefficient>::GetBasisFromSpanOfElements
 template<class coefficient>
 void ElementUniversalEnveloping<coefficient>::ModToMinDegreeFormFDRels
 (const Vector<Rational>& theHWinSimpleCoords, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
-{ ElementUniversalEnveloping<coefficient> result, temp;
+{ ElementUniversalEnveloping<coefficient> result;
   result.MakeZero(*this->owner);
-  bool Found=true;
-  int numPosRoots=this->owner->GetNumPosRoots();
+  bool Found = true;
+  int numPosRoots = this->owner->GetNumPosRoots();
   while (Found)
-  { Found=false;
-    for (int j=numPosRoots-1; j>=0; j--)
-    { this->owner->UEGeneratorOrderIncludingCartanElts.SwapTwoIndices(j,numPosRoots-1);
-      this->Simplify(theGlobalVariables, theRingUnit, theRingZero);
-      this->owner->UEGeneratorOrderIncludingCartanElts.SwapTwoIndices(j,numPosRoots-1);
+  { Found = false;
+    for (int j = numPosRoots - 1; j >= 0; j --)
+    { this->owner->UEGeneratorOrderIncludingCartanElts.SwapTwoIndices(j, numPosRoots - 1);
+      this->Simplify(theRingUnit);
+      this->owner->UEGeneratorOrderIncludingCartanElts.SwapTwoIndices(j, numPosRoots - 1);
       if (this->ModOutFDRelationsExperimental(&theGlobalVariables, theHWinSimpleCoords, theRingUnit, theRingZero))
-        Found=true;
+        Found = true;
     }
   }
-  this->Simplify(theGlobalVariables, theRingUnit, theRingZero);
+  this->Simplify(theRingUnit);
 }
 
 template<class coefficient>
@@ -530,33 +530,31 @@ bool ElementUniversalEnveloping<coefficient>::ApplyMinusTransposeAutoOnMe()
 { MonomialUniversalEnveloping<coefficient> tempMon;
   ElementUniversalEnveloping<coefficient> result;
   result.MakeZero(*this->owner);
-  int numPosRoots=this->GetOwner().GetNumPosRoots();
-  int theRank=this->GetOwner().GetRank();
+  int numPosRoots = this->GetOwner().GetNumPosRoots();
+  int theRank = this->GetOwner().GetRank();
   coefficient theCoeff;
-  for (int i=0; i<this->size; i++)
-  { MonomialUniversalEnveloping<coefficient>& currentMon=this->TheObjects[i];
-    theCoeff=this->theCoeffs[i];
-    tempMon.owner=currentMon.owner;
-    tempMon.Powers.size=0;
-    tempMon.generatorsIndices.size=0;
-    for (int j=0; j<currentMon.Powers.size; j++)
- //   for (int j=currentMon.Powers.size-1; j>=0; j--)
+  for (int i = 0; i < this->size; i ++)
+  { MonomialUniversalEnveloping<coefficient>& currentMon = this->TheObjects[i];
+    theCoeff = this->theCoeffs[i];
+    tempMon.owner = currentMon.owner;
+    tempMon.Powers.size = 0;
+    tempMon.generatorsIndices.size = 0;
+    for (int j = 0; j < currentMon.Powers.size; j ++)
     { int thePower;
       if (!currentMon.Powers[j].IsSmallInteger(&thePower))
         return false;
-      int theGenerator=currentMon.generatorsIndices[j];
-      if (theGenerator<numPosRoots)
-        theGenerator=2*numPosRoots+theRank-1-theGenerator;
-      else if (theGenerator>=numPosRoots +theRank)
-        theGenerator=-theGenerator+2*numPosRoots+theRank-1;
+      int theGenerator = currentMon.generatorsIndices[j];
+      if (theGenerator < numPosRoots)
+        theGenerator = 2 * numPosRoots + theRank - 1 - theGenerator;
+      else if (theGenerator >= numPosRoots + theRank)
+        theGenerator = - theGenerator + 2 * numPosRoots + theRank - 1;
       tempMon.MultiplyByGeneratorPowerOnTheRight(theGenerator, currentMon.Powers[j]);
-      if (thePower%2==1)
-        theCoeff*=-1;
-//      ;
+      if (thePower % 2 == 1)
+        theCoeff *= - 1;
     }
     result.AddMonomial(tempMon, theCoeff);
   }
-  *this=result;
+  *this = result;
   return true;
 }
 
@@ -564,60 +562,59 @@ template <class coefficient>
 bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm
 (const ElementUniversalEnveloping<coefficient>& right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement,
  const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream)
-{ output=theRingZero;
-  coefficient tempCF;
+{ output = theRingZero;
   ElementUniversalEnveloping<coefficient> MTright;
-  MTright=right;
+  MTright = right;
   if (!MTright.ApplyMinusTransposeAutoOnMe())
     return false;
   ElementUniversalEnveloping<coefficient> Accum, intermediateAccum, tempElt;
   Accum.MakeZero(*this->owners, this->indexInOwners);
   MonomialUniversalEnveloping<coefficient> constMon;
-  constMon.MakeConst(*this->owners, this->indexInOwners);
-  if (logStream!=0)
+  constMon.MakeConst();
+  if (logStream != 0)
   { *logStream << "backtraced elt: " << MTright.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
     *logStream << "this element: " << this->ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
    // for (int i=0; i<subHiGoesToIthElement->size; i++)
    // { *logStream << subHiGoesToIthElement->TheObjects[i].ToString();
    // }
   }
-  for (int j=0; j<right.size; j++)
-  { intermediateAccum=*this;
+  for (int j = 0; j < right.size; j ++)
+  { intermediateAccum = *this;
     intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
-    if (logStream!=0)
+    if (logStream != 0)
       *logStream << "intermediate after simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
     intermediateAccum.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
-    MonomialUniversalEnveloping<coefficient>& rightMon=MTright[j];
-    coefficient& rightMonCoeff=MTright.theCoeffs[j];
+    MonomialUniversalEnveloping<coefficient>& rightMon = MTright[j];
+    coefficient& rightMonCoeff = MTright.theCoeffs[j];
     int thePower;
-    for (int i=rightMon.Powers.size-1; i>=0; i--)
+    for (int i = rightMon.Powers.size - 1; i >= 0; i --)
       if (rightMon.Powers[i].IsSmallInteger(&thePower))
-        for (int k=0; k<thePower; k++)
+        for (int k = 0; k < thePower; k ++)
         { tempElt.MakeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
-          if (logStream!=0)
+          if (logStream != 0)
           { *logStream << "tempElt before mult: " << tempElt.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
             *logStream << "intermediate before mult: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
           }
-          intermediateAccum*=(tempElt);
-          if (logStream!=0)
+          intermediateAccum *= (tempElt);
+          if (logStream != 0)
             *logStream << "intermediate before simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
-          intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
-          if (logStream!=0)
+          intermediateAccum.Simplify(theRingUnit);
+          if (logStream != 0)
             *logStream << "intermediate after simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
-          intermediateAccum.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
-          if (logStream!=0)
+          intermediateAccum.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
+          if (logStream != 0)
             *logStream << "intermediate after Verma rels: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
         }
       else
         return false;
-    intermediateAccum*=rightMonCoeff;
-    Accum+=intermediateAccum;
-    int theIndex= intermediateAccum.GetIndex(constMon);
-    if (theIndex!=-1)
-      output+=intermediateAccum.theCoeffs[theIndex];
+    intermediateAccum *= rightMonCoeff;
+    Accum += intermediateAccum;
+    int theIndex = intermediateAccum.GetIndex(constMon);
+    if (theIndex != - 1)
+      output += intermediateAccum.theCoeffs[theIndex];
   }
-  if (logStream!=0)
+  if (logStream != 0)
     *logStream << "final UE element: " << Accum.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
   return true;
 }
@@ -629,21 +626,21 @@ std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule
   List<ElementUniversalEnveloping<coefficient> > theOrbit;
   theOrbit.Reserve(1000);
   ElementUniversalEnveloping<coefficient> theElt;
-  int theDim=this->GetOwner().GetRank();
-  int numPosRoots=this->GetOwner().GetNumPosRoots();
+  int theDim = this->GetOwner().GetRank();
+  int numPosRoots = this->GetOwner().GetNumPosRoots();
   theOrbit.AddOnTop(*this);
-  for (int i=0; i<theOrbit.size; i++)
-    for (int j=0; j<theDim; j++)
-    { theElt.MakeOneGenerator(j+numPosRoots+theDim, *this->owner, theRingUnit);
-      theElt*=(theOrbit[i]);
-      theElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
-      theElt.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
+  for (int i = 0; i < theOrbit.size; i ++)
+    for (int j = 0; j < theDim; j ++)
+    { theElt.MakeOneGenerator(j + numPosRoots + theDim, *this->owner, theRingUnit);
+      theElt *= theOrbit[i];
+      theElt.Simplify(theRingUnit);
+      theElt.ModOutVermaRelations(subHiGoesToIthElement, theRingUnit, theRingZero);
 //      theElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
       if (!theElt.IsEqualToZero())
         theOrbit.AddOnTop(theElt);
     }
-  for (int i=0; i< theOrbit.size; i++)
-  { ElementUniversalEnveloping<coefficient>& current=theOrbit[i];
+  for (int i = 0; i < theOrbit.size; i ++)
+  { ElementUniversalEnveloping<coefficient>& current = theOrbit[i];
     out << "<br>" << current.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
   }
   return out.str();
@@ -654,32 +651,32 @@ bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniv
 { output.MakeZero(*this->owner);
   MonomialUniversalEnveloping<Rational> tempMon;
   Rational theCoeff;
-  for (int i=0; i<this->size; i++)
-  { MonomialUniversalEnveloping<coefficient>& currentMon=this->TheObjects[i];
+  for (int i = 0; i < this->size; i ++)
+  { MonomialUniversalEnveloping<coefficient>& currentMon = this->TheObjects[i];
     tempMon.MakeOne(*this->owner);
     if (!this->theCoeffs[i].IsConstant(theCoeff))
       return false;
-    for (int j=0; j<currentMon.Powers.size; j++)
+    for (int j = 0; j < currentMon.Powers.size; j ++)
     { Rational tempRat;
       if (!currentMon.Powers[j].IsConstant(tempRat))
         return false;
       tempMon.MultiplyByGeneratorPowerOnTheRight(currentMon.generatorsIndices[j], tempRat);
     }
-    output+=tempMon;
+    output += tempMon;
   }
   return true;
 }
 
 void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups()
 { MacroRegisterFunctionWithName("branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
-  this->WeylFDSmallAsSubInLarge.AmbientWeyl=&this->theHmm.theRange().theWeyl;
-  this->WeylFDSmall.AmbientWeyl=&this->theHmm.theDomain().theWeyl;
-  this->WeylFD.AmbientWeyl=&this->theHmm.theRange().theWeyl;
+  this->WeylFDSmallAsSubInLarge.AmbientWeyl = &this->theHmm.theRange().theWeyl;
+  this->WeylFDSmall.AmbientWeyl = &this->theHmm.theDomain().theWeyl;
+  this->WeylFD.AmbientWeyl = &this->theHmm.theRange().theWeyl;
   this->selSmallParSel.init(WeylFDSmall.AmbientWeyl->GetDim());
-  for (int i=0; i<this->theHmm.ImagesCartanDomain.size; i++)
-  { Vector<Rational>& currentV=this->theHmm.ImagesCartanDomain[i];
+  for (int i = 0; i < this->theHmm.ImagesCartanDomain.size; i ++)
+  { Vector<Rational>& currentV = this->theHmm.ImagesCartanDomain[i];
     this->generatorsSmallSub.AddOnTop(currentV);
-    for (int j=0; j<currentV.size; j++)
+    for (int j = 0; j < currentV.size; j ++)
       if (!currentV[j].IsEqualToZero() && this->selInducing.selected[j])
       { this->generatorsSmallSub.RemoveLastObject();
         this->selSmallParSel.AddSelectionAppendNewIndex(i);
@@ -695,16 +692,16 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups()
   this->indicesNilradicalLarge.SetSize(0);
   this->indicesNilradicalSmall.SetSize(0);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
-  WeylGroupData& theLargeWeyl=this->theHmm.theRange().theWeyl;
-  WeylGroupData& theSmallWeyl=this->theHmm.theDomain().theWeyl;
+  WeylGroupData& theLargeWeyl = this->theHmm.theRange().theWeyl;
+  WeylGroupData& theSmallWeyl = this->theHmm.theDomain().theWeyl;
   int numB3NegGenerators=this->theHmm.theRange().GetNumPosRoots();
-  int numG2NegGenerators=this->theHmm.theDomain().GetNumPosRoots();
-  for (int i=0; i<numB3NegGenerators; i++)
-  { const Vector<Rational>& currentWeight=theLargeWeyl.RootSystem[i];
-    bool isInNilradical=false;
-    for (int k=0; k<this->selInducing.CardinalitySelection; k++)
+  int numG2NegGenerators = this->theHmm.theDomain().GetNumPosRoots();
+  for (int i = 0; i < numB3NegGenerators; i ++)
+  { const Vector<Rational>& currentWeight = theLargeWeyl.RootSystem[i];
+    bool isInNilradical = false;
+    for (int k = 0; k < this->selInducing.CardinalitySelection; k ++)
       if (!currentWeight[this->selInducing.elements[k]].IsEqualToZero())
-      { isInNilradical=true;
+      { isInNilradical = true;
         break;
       }
     if (isInNilradical)
@@ -714,12 +711,12 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups()
       this->indicesNilradicalLarge.AddOnTop(i);
     }
   }
-  for (int i=0; i<numG2NegGenerators; i++)
-  { const Vector<Rational>& currentWeight=theSmallWeyl.RootSystem[i];
-    bool isInNilradical=false;
-    for (int k=0; k<this->selSmallParSel.CardinalitySelection; k++)
+  for (int i = 0; i < numG2NegGenerators; i ++)
+  { const Vector<Rational>& currentWeight = theSmallWeyl.RootSystem[i];
+    bool isInNilradical = false;
+    for (int k = 0; k < this->selSmallParSel.CardinalitySelection; k ++)
       if (!currentWeight[this->selSmallParSel.elements[k]].IsEqualToZero())
-      { isInNilradical=true;
+      { isInNilradical = true;
         break;
       }
     if (isInNilradical)
@@ -731,23 +728,23 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups()
   }
 //  stOutput << "<br>call stack look who is callng me: "
 //  << HtmlRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  this->NilModPreNil=this->nilradicalLarge;
-  this->weightsNilModPreNil=this->weightsNilradicalLarge;
+  this->NilModPreNil = this->nilradicalLarge;
+  this->weightsNilModPreNil = this->weightsNilradicalLarge;
   Vector<Rational> proj;
-  for (int i=0; i<this->nilradicalSmall.size; i++)
-  { ElementSemisimpleLieAlgebra<Rational>& eltImage=
+  for (int i = 0; i < this->nilradicalSmall.size; i ++)
+  { ElementSemisimpleLieAlgebra<Rational>& eltImage =
     this->theHmm.imagesAllChevalleyGenerators[this->indicesNilradicalSmall[i]];
-    int theIndex=this->NilModPreNil.GetIndex(eltImage);
-    if (theIndex!=-1)
+    int theIndex = this->NilModPreNil.GetIndex(eltImage);
+    if (theIndex != - 1)
     { this->NilModPreNil.RemoveIndexSwapWithLast(theIndex);
       this->weightsNilModPreNil.RemoveIndexSwapWithLast(theIndex);
       continue;
     }
-    bool isGood=false;
-    for (int j=0; j<this->weightsNilModPreNil.size; j++)
-    { proj=this->ProjectWeight(this->weightsNilModPreNil[j]);
-      if (proj==this->weightsNilradicalSmall[i])
-      { isGood=true;
+    bool isGood = false;
+    for (int j = 0; j < this->weightsNilModPreNil.size; j ++)
+    { proj = this->ProjectWeight(this->weightsNilModPreNil[j]);
+      if (proj == this->weightsNilradicalSmall[i])
+      { isGood = true;
         this->NilModPreNil.RemoveIndexSwapWithLast(j);
         this->weightsNilModPreNil.RemoveIndexSwapWithLast(j);
         break;
@@ -785,15 +782,15 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
   std::stringstream formulaStream1;
   HashedList<Vector<RationalFunctionOld> > accountedDiffs;
   accountedDiffs.SetExpectedSize(this->g2Weights.size);
-  bool found=false;
-  for (int i=0; i<this->g2Weights.size; i++)
-  { weightDifference= this->g2Weights[i]-this->g2Weights[theIndex];
+  bool found = false;
+  for (int i = 0; i < this->g2Weights.size; i ++)
+  { weightDifference = this->g2Weights[i] - this->g2Weights[theIndex];
     if (weightDifference.IsPositive() && !accountedDiffs.Contains(weightDifference))
     { accountedDiffs.AddOnTop(weightDifference);
-      if (additionalMultiple!=1)
+      if (additionalMultiple != 1)
         formulaStream1 << additionalMultiple.ToString(&this->theFormat);
       formulaStream1 << "(i(\\bar c) - (" << this->theChars[i].ToString(&this->theFormat) << "))";
-      found=true;
+      found = true;
     }
   }
   if (!found)

@@ -1694,7 +1694,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   int indexCourseInfo = - 1;
   //int indexProblemData=-1;
   for (int i = 0; i < columnLabels.size; i ++)
-  { if (columnLabels[i] == DatabaseStrings::columnUsername)
+  { if (columnLabels[i] == DatabaseStrings::labelUsername)
       indexUser = i;
     if (columnLabels[i] == "email")
       indexEmail = i;
@@ -2013,7 +2013,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   DatabaseRoutines theRoutines;
   if (!theRoutines.FetchAllUsers(userTablE, userLabels, comments))
     return false;
-  int usernameIndex = userLabels.GetIndex(DatabaseStrings::columnUsername);
+  int usernameIndex = userLabels.GetIndex(DatabaseStrings::labelUsername);
   if (usernameIndex == - 1)
     return "Could not find username column. ";
   int problemDataIndex = userLabels.GetIndex("problemData");

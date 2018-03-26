@@ -4874,11 +4874,11 @@ void DynkinSimpleType::GetF4(Matrix<Rational>& output)const
 
 void DynkinSimpleType::GetG2(Matrix<Rational>& output)const
 { output.init(2, 2);
-  output(0,0)=2;
-  output(1,1)=6;
-  output(1,0)=-3;
-  output(0,1)=-3;
-  output/=3;
+  output(0, 0) = 2;
+  output(1, 1) = 6;
+  output(1, 0) = - 3;
+  output(0, 1) = - 3;
+  output /= 3;
 }
 
 void DynkinSimpleType::GetCoCartanSymmetric(Matrix<Rational>& output)const
@@ -4890,39 +4890,39 @@ void DynkinSimpleType::GetCoCartanSymmetric(Matrix<Rational>& output)const
 Rational DynkinSimpleType::GetPrincipalSlTwoCSInverseScale()const
 { MacroRegisterFunctionWithName("DynkinSimpleType::GetPrincipalSlTwoCSInverseScale");
   //Reference: Panyushev, On the Dynkin index of a principal sl(2)-subalgebra, Advances in Mathematics, 2008.
-  Rational nonScaled=0;
+  Rational nonScaled = 0;
   switch(this->theLetter)
   { case 'A':
-      nonScaled=(this->theRank+2)*(this->theRank+1)*this->theRank/6;
+      nonScaled = (this->theRank + 2) * (this->theRank + 1) * this->theRank / 6;
     break;
     case 'B':
-      nonScaled= this->theRank*(this->theRank+1)*(2*this->theRank+1)/3;
+      nonScaled = this->theRank * (this->theRank + 1) * (2 * this->theRank + 1) / 3;
       break;
     case 'C':
-      nonScaled=(this->theRank*2+1)*(this->theRank*2)*(this->theRank*2-1)/6;
+      nonScaled = (this->theRank * 2 + 1) * (this->theRank * 2) * (this->theRank * 2 - 1) / 6;
       break;
     case 'D':
-      nonScaled=(this->theRank-1)*this->theRank*(2*this->theRank-1)/3;
+      nonScaled = (this->theRank - 1) * this->theRank * (2 * this->theRank - 1) / 3;
     break;
     case 'E':
-      if (this->theRank==6)
-        nonScaled=156;
-      if (this->theRank==7)
-        nonScaled=399;
-      if (this->theRank==8)
-        nonScaled=1240;
+      if (this->theRank == 6)
+        nonScaled = 156;
+      if (this->theRank == 7)
+        nonScaled = 399;
+      if (this->theRank == 8)
+        nonScaled = 1240;
     break;
     case 'F':
-      nonScaled=156;
+      nonScaled = 156;
       break;
     case 'G':
-      nonScaled=28;
+      nonScaled = 28;
       break;
     default:
       crash << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric from a non-initialized Dynkin simple type. " << crash;
       break;
   }
-  return nonScaled*this->CartanSymmetricInverseScale;
+  return nonScaled * this->CartanSymmetricInverseScale;
 }
 
 void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
@@ -4938,7 +4938,7 @@ void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
       crash << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric from a non-initialized Dynkin simple type. " << crash;
       break;
   }
-  output/=this->CartanSymmetricInverseScale;
+  output /= this->CartanSymmetricInverseScale;
 }
 
 Rational DynkinSimpleType::GetRatioLongRootToFirst(char inputWeylLetter, int inputRank)
@@ -4952,71 +4952,71 @@ Rational DynkinSimpleType::GetRatioLongRootToFirst(char inputWeylLetter, int inp
     case 'F': return 1;
     case 'G': return 3;
     default:
-      return -1;
+      return - 1;
   }
 }
 
 void DynkinSimpleType::operator++(int)
-{ if (this->theRank==1)
-  { this->theRank++;
+{ if (this->theRank == 1)
+  { this->theRank ++;
     return;
   }
-  if (this->theLetter=='A')
-  { if (this->theRank>=4)
-      this->theLetter='D';
+  if (this->theLetter == 'A')
+  { if (this->theRank >= 4)
+      this->theLetter = 'D';
     else
-      this->theLetter='B';
+      this->theLetter = 'B';
     return;
   }
-  if (this->theLetter=='D')
-  { this->theLetter='B';
+  if (this->theLetter == 'D')
+  { this->theLetter = 'B';
     return;
   }
-  if (this->theLetter=='B')
-  { if (this->theRank>=3)
-      this->theLetter='C';
+  if (this->theLetter == 'B')
+  { if (this->theRank >= 3)
+      this->theLetter = 'C';
     else
-      this->theLetter='G';
+      this->theLetter = 'G';
     return;
   }
-  if (this->theLetter=='C')
-  { if (this->theRank==4)
-    { this->theLetter='F';
+  if (this->theLetter == 'C')
+  { if (this->theRank == 4)
+    { this->theLetter = 'F';
       return;
     }
-    if (this->theRank==6 || this->theRank==7 || this->theRank==8)
-    { this->theLetter='E';
+    if (this->theRank == 6 || this->theRank == 7 || this->theRank == 8)
+    { this->theLetter = 'E';
       return;
     }
-    this->theLetter='A';
-    this->theRank++;
+    this->theLetter = 'A';
+    this->theRank ++;
     return;
   }
-  if (this->theLetter=='G'|| this->theLetter=='F' || this->theLetter=='E')
-  { this->theRank++;
-    this->theLetter='A';
+  if (this->theLetter == 'G' || this->theLetter == 'F' || this->theLetter == 'E')
+  { this->theRank ++;
+    this->theLetter = 'A';
     return;
   }
   crash << "This is a programming error. This is a portion of code that should never be reached. Something has gone very wrong. " << crash;
 }
 
 bool DynkinSimpleType::operator<(int otherRank)const
-{ return this->theRank<otherRank;
+{ return this->theRank < otherRank;
 }
 
 void WeylGroupData::SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement)
 { Rational coefficient, tempRat;
   coefficient.Assign(DualSpaceElement[index]);
   coefficient.DivideBy(this->CartanSymmetric.elements[index][index]);
-  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
+  for (int i = 0; i < this->CartanSymmetric.NumCols; i ++)
   { tempRat.Assign(coefficient);
-    tempRat.MultiplyBy(this->CartanSymmetric.elements[index][i]*(-2));
-    DualSpaceElement[i]+=(tempRat);
+    tempRat.MultiplyBy(this->CartanSymmetric.elements[index][i] * (- 2));
+    DualSpaceElement[i] += (tempRat);
   }
 }
 
 ElementWeylGroup<WeylGroupData> WeylGroupData::GetRootReflection(int rootIndex)
-{ if (!this->rho.size==0)
+{ if (!this->rho.size == 0)
     this->ComputeRho(true);
   Vector<Rational> rhoImage;
   this->ReflectBetaWRTAlpha(this->RootSystem[rootIndex], this->rho, false, rhoImage);
@@ -5030,36 +5030,36 @@ void WeylGroupData::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, b
   //  return;
   Rational alphaShift, tempRat;
   alphaShift.MakeZero();
-  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
-  { tempRat=(theRoot[i]);
-    tempRat.MultiplyBy(this->CartanSymmetric.elements[index][i]*(-2));
-    alphaShift+=(tempRat);
+  for (int i = 0; i < this->CartanSymmetric.NumCols; i ++)
+  { tempRat = theRoot[i];
+    tempRat.MultiplyBy(this->CartanSymmetric.elements[index][i] * (- 2));
+    alphaShift += tempRat;
   }
   alphaShift.DivideBy(this->CartanSymmetric.elements[index][index]);
   if (RhoAction)
-  { if(UseMinusRho)
+  { if (UseMinusRho)
       alphaShift.AddInteger(1);
     else
-      alphaShift.AddInteger(-1);
+      alphaShift.AddInteger(- 1);
   }
-  theRoot[index]+=(alphaShift);
+  theRoot[index] += (alphaShift);
 }
 
 void WeylGroupData::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)
-{ int lengthA=this->CartanSymmetric.elements[index][index].NumShort;
+{ int lengthA = this->CartanSymmetric.elements[index][index].NumShort;
   Polynomial<Rational> AscalarB, tempP;
   AscalarB.MakeZero();
-  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
+  for (int i = 0; i < this->CartanSymmetric.NumCols; i ++)
   { tempP.MakeZero();
-    tempP=theRoot[i];
-    tempP*=(CartanSymmetric.elements[index][i]);
-    AscalarB+=(tempP);
+    tempP = theRoot[i];
+    tempP *= CartanSymmetric.elements[index][i];
+    AscalarB += (tempP);
   }
-  AscalarB*=(-2);
-  AscalarB/=(lengthA);
-  theRoot[index]+=(AscalarB);
+  AscalarB *= - 2;
+  AscalarB /= lengthA;
+  theRoot[index] += AscalarB;
   if (RhoAction)
-    theRoot[index]+=-1;
+    theRoot[index] += - 1;
 }
 
 Matrix<Rational> WeylGroupData::GetMatrixStandardRep(int elementIndex)const
@@ -5069,14 +5069,14 @@ Matrix<Rational> WeylGroupData::GetMatrixStandardRep(int elementIndex)const
 }
 
 void WeylGroupData::init()
-{ this->flagFundamentalToSimpleMatricesAreComputed=false;
-  this->flagAllOuterAutosComputed=false;
-  this->flagOuterAutosGeneratorsComputed=false;
-  this->flagIrrepsAreComputed=false;
-  this->flagCharTableIsComputed=false;
+{ this->flagFundamentalToSimpleMatricesAreComputed = false;
+  this->flagAllOuterAutosComputed = false;
+  this->flagOuterAutosGeneratorsComputed = false;
+  this->flagIrrepsAreComputed = false;
+  this->flagCharTableIsComputed = false;
   this->MatrixSendsSimpleVectorsToEpsilonVectors.FreeMemory();
   this->theGroup.init();
-  this->theGroup.specificDataPointer=this;
+  this->theGroup.specificDataPointer = this;
   this->theGroup.GetWordByFormula = this->GetWordByFormulaImplementation;
   this->theGroup.GetSizeByFormula = this->GetSizeByFormulaImplementation;
   this->theGroup.ComputeCCSizesAndRepresentativesByFormula = 0;
@@ -5086,33 +5086,34 @@ void WeylGroupData::init()
 }
 
 void WeylGroupData::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho)
-{ int numGens= this->theGroup.theElements[index].generatorsLastAppliedFirst.size;
-  for (int i=numGens-1; i>=0; i--)
+{ int numGens = this->theGroup.theElements[index].generatorsLastAppliedFirst.size;
+  for (int i = numGens - 1; i >= 0; i --)
   { this->SimpleReflectionRoot
     (this->theGroup.theElements[index].generatorsLastAppliedFirst[i].index, output.affinePoint, RhoAction, UseMinusRho);
 //    output.affinePoint.ComputeDebugString();
     this->SimpleReflectionDualSpace
-    (this->theGroup.theElements[index].generatorsLastAppliedFirst[numGens-i-1].index, output.normal);
+    (this->theGroup.theElements[index].generatorsLastAppliedFirst[numGens - i - 1].index, output.normal);
   }
 }
 
 bool WeylGroupData::GetWordByFormulaImplementation(FiniteGroup<ElementWeylGroup<WeylGroupData> >& G, const ElementWeylGroup<WeylGroupData> &g, List<int> &out)
 { (void) G;// avoid unused parameter warning, portable.
   out.SetSize(g.generatorsLastAppliedFirst.size);
-  for(int i=0; i<g.generatorsLastAppliedFirst.size; i++)
-  { if(g.generatorsLastAppliedFirst[i].flagIsOuter)
-      crash << "wait, what?  is this okay to pass through or what should happen now?  see " << __FILE__ << ":" << __LINE__ << crash;
+  for (int i = 0; i < g.generatorsLastAppliedFirst.size; i ++)
+  { if (g.generatorsLastAppliedFirst[i].flagIsOuter)
+      crash << "wait, what?  is this okay to pass through or what should happen now?  see "
+      << __FILE__ << ":" << __LINE__ << crash;
     out[i] = g.generatorsLastAppliedFirst[i].index;
   }
   return true;
 }
 
 void WeylGroupData::GetSignCharacter(Vector<Rational>& out)
-{ if(!this->theGroup.flagCCRepresentativesComputed)
+{ if (!this->theGroup.flagCCRepresentativesComputed)
     this->theGroup.ComputeCCSizesAndRepresentatives();
   out.SetSize(this->theGroup.ConjugacyClassCount());
-  for(int i=0; i<this->theGroup.ConjugacyClassCount(); i++)
-    out[i]= this->theGroup.conjugacyClasseS[i].representative.Sign();
+  for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++)
+    out[i] = this->theGroup.conjugacyClasseS[i].representative.Sign();
 }
 
 /*
@@ -5135,7 +5136,7 @@ void WeylGroupData::GetTrivialRepresentation(GroupRepresentationCarriesAllMatric
   this->theGroup.CheckInitializationConjugacyClasses();
   output.init(this->theGroup);
   output.basis.MakeEiBasis(1);
-  for(int i=0; i<this->GetDim(); i++)
+  for (int i = 0; i < this->GetDim(); i ++)
     output.generatorS[i].MakeIdMatrix(1);
   output.GetCharacter();
 }
@@ -5146,10 +5147,10 @@ void WeylGroupData::GetSignRepresentation(GroupRepresentationCarriesAllMatrices<
   output.init(this->theGroup);
   output.basis.MakeEiBasis(1);
   ElementWeylGroup<WeylGroupData> currentElt;
-  for(int i=0; i<this->GetDim(); i++)
+  for (int i = 0; i < this->GetDim(); i ++)
   { currentElt.MakeSimpleReflection(i, *this);
     output.generatorS[i].MakeIdMatrix(1);
-    output.generatorS[i]*=currentElt.Sign();
+    output.generatorS[i] *= currentElt.Sign();
   }
   output.GetCharacter();
 }
@@ -5159,7 +5160,7 @@ void WeylGroupData::GetStandardRepresentation(GroupRepresentationCarriesAllMatri
   this->theGroup.CheckInitializationConjugacyClasses();
   output.init(this->theGroup);
   output.basis.MakeEiBasis(this->GetDim());
-  for(int i=0; i<this->GetDim(); i++)
+  for (int i = 0; i < this->GetDim(); i ++)
     this->GetSimpleReflectionMatrix(i, output.generatorS[i]);
 //  stOutput << output.ToString();
   output.GetCharacter();
@@ -5169,57 +5170,57 @@ void WeylGroupData::GetStandardRepresentation(GroupRepresentationCarriesAllMatri
 void WeylGroupData::GetStandardRepresentationMatrix(int g, Matrix<Rational>& output) const
 { // the rank is the number of rows of the Cartan form
   output.init(this->CartanSymmetric.NumRows,this->CartanSymmetric.NumRows);
-  for(int i=0; i<this->CartanSymmetric.NumRows; i++)
+  for (int i = 0; i < this->CartanSymmetric.NumRows; i ++)
   { Vector<Rational> v;
-    v.MakeEi(this->CartanSymmetric.NumRows,i);
-    this->ActOn(g,v);
-    for(int j=0; j<this->CartanSymmetric.NumRows; j++)
+    v.MakeEi(this->CartanSymmetric.NumRows, i);
+    this->ActOn(g, v);
+    for (int j = 0; j < this->CartanSymmetric.NumRows; j ++)
       output.elements[j][i] = v[j];
   }
 }
 
 void WeylGroupData::GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output)
-{ output=(input);
+{ output = (input);
   Vector<Rational> tempRoot;
-  for (int i=0; i<output.size; i++)
-    for (int j=i+1; j<output.size; j++)
-    { tempRoot=output[i]+output[j];
+  for (int i = 0; i < output.size; i ++)
+    for (int j = i + 1; j < output.size; j ++)
+    { tempRoot = output[i] + output[j];
       if (this->IsARoot(tempRoot))
         output.AddOnTopNoRepetition(tempRoot);
     }
 }
 
 void WeylGroupData::PerturbWeightToRegularWRTrootSystem(const Vector<Rational>& inputH, Vector<Rational>& output)
-{ output=(inputH);
+{ output = (inputH);
   int indexFirstNonRegular;
-  while(!this->IsRegular(output, &indexFirstNonRegular))
-  { const Vector<Rational>& theBadRoot= this->RootSystem[indexFirstNonRegular];
-    Rational maxMovement=0;
+  while (!this->IsRegular(output, &indexFirstNonRegular))
+  { const Vector<Rational>& theBadRoot = this->RootSystem[indexFirstNonRegular];
+    Rational maxMovement = 0;
     Rational tempRat1, tempRat2, tempMaxMovement;
-    for (int i=0; i<this->RootsOfBorel.size; i++)
+    for (int i = 0; i < this->RootsOfBorel.size; i ++)
     { this->RootScalarCartanRoot(theBadRoot, this->RootsOfBorel[i], tempRat1);
       this->RootScalarCartanRoot(output, this->RootsOfBorel[i], tempRat2);
       if ((!tempRat1.IsEqualToZero()) && (!tempRat2.IsEqualToZero()))
-      { tempMaxMovement = tempRat2/tempRat1;
+      { tempMaxMovement = tempRat2 / tempRat1;
         tempMaxMovement.AssignAbsoluteValue();
-        if ((tempMaxMovement< maxMovement) || maxMovement.IsEqualToZero())
+        if ((tempMaxMovement < maxMovement) || maxMovement.IsEqualToZero())
           maxMovement = tempMaxMovement;
       }
     }
-    int tempInt=2;
+    int tempInt = 2;
     if (this->RootScalarCartanRoot(theBadRoot, inputH).IsNegative())
-      tempInt=-2;
-    output+=theBadRoot*maxMovement/tempInt;
+      tempInt = - 2;
+    output += theBadRoot*maxMovement / tempInt;
   }
 }
 
 bool WeylGroupData::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicularRoot)
-{ if (indexFirstPerpendicularRoot!=0)
-    *indexFirstPerpendicularRoot=-1;
-  for (int i=0; i<this->RootSystem.size; i++)
+{ if (indexFirstPerpendicularRoot != 0)
+    *indexFirstPerpendicularRoot = - 1;
+  for (int i = 0; i < this->RootSystem.size; i ++)
     if (this->RootScalarCartanRoot(input, this->RootSystem[i]).IsEqualToZero())
-    { if (indexFirstPerpendicularRoot!=0)
-        *indexFirstPerpendicularRoot=i;
+    { if (indexFirstPerpendicularRoot != 0)
+        *indexFirstPerpendicularRoot = i;
       return false;
     }
   return true;
@@ -5227,117 +5228,117 @@ bool WeylGroupData::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicu
 
 LargeInt WeylGroupData::SizeByFormulaOrNeg1(char weylLetter, int theDim)
 { //Humphreys, Introduction to Lie algebras and representation theory(1980), page 66, Table 1
-  if (weylLetter!='A' && weylLetter!='B' && weylLetter!='C' && weylLetter!='D' &&
-      weylLetter!='E' && weylLetter!='F' && weylLetter!='G')
+  if (weylLetter != 'A' && weylLetter != 'B' && weylLetter != 'C' && weylLetter != 'D' &&
+      weylLetter != 'E' && weylLetter != 'F' && weylLetter != 'G')
     crash << "WeylGroupData::SizeByFormulaOrNeg1 called with impossible Weyl type: " << weylLetter << crash;
   //stOutput << "DEBUG: Calling WeylGroupData::SizeByFormulaOrNeg1 with input: " << weylLetter << ", " << theDim;
-  LargeInt theOutput=1;
-  if (weylLetter=='A')
-    theOutput= Rational::Factorial(theDim+1);
-  if (weylLetter=='B' || weylLetter=='C')
-    theOutput= Rational::Factorial(theDim)*Rational::TwoToTheNth(theDim);
-  if (weylLetter=='D')
-    theOutput= Rational::Factorial(theDim)*Rational::TwoToTheNth(theDim-1);
-  if (weylLetter=='E')
-  { if (theDim==6)
-      theOutput= 51840;
-    if (theDim==7)
-    { theOutput=1024;
-      theOutput*=81*35;
+  LargeInt theOutput = 1;
+  if (weylLetter == 'A')
+    theOutput = Rational::Factorial(theDim+1);
+  if (weylLetter == 'B' || weylLetter == 'C')
+    theOutput = Rational::Factorial(theDim)*Rational::TwoToTheNth(theDim);
+  if (weylLetter == 'D')
+    theOutput = Rational::Factorial(theDim)*Rational::TwoToTheNth(theDim - 1);
+  if (weylLetter == 'E')
+  { if (theDim == 6)
+      theOutput = 51840;
+    if (theDim == 7)
+    { theOutput = 1024;
+      theOutput *= 81 * 35;
     }
-    if (theDim==8)
-    { theOutput=1024*16;
-      theOutput*=81*3;
-      theOutput*=25*7;
+    if (theDim == 8)
+    { theOutput = 1024 * 16;
+      theOutput *= 81 * 3;
+      theOutput *= 25 * 7;
     }
   }
-  if (weylLetter=='F')
-    theOutput=128*9;
-  if (weylLetter=='G')
-    theOutput=12;
+  if (weylLetter == 'F')
+    theOutput = 128 * 9;
+  if (weylLetter == 'G')
+    theOutput = 12;
   return theOutput;
 }
 
 void WeylGroupData::GetWord(int g, List<int>& out) const
 { out.SetSize(this->theGroup.theElements[g].generatorsLastAppliedFirst.size);
-  for (int i=0; i<this->theGroup.theElements[g].generatorsLastAppliedFirst.size; i++)
+  for (int i = 0; i < this->theGroup.theElements[g].generatorsLastAppliedFirst.size; i ++)
     out[i] = this->theGroup.theElements[g].generatorsLastAppliedFirst[i].index;
 }
 
 bool WeylGroupData::operator==(const WeylGroupData& other)const
-{ return this->CartanSymmetric==other.CartanSymmetric && this->theDynkinType==other.theDynkinType;
+{ return this->CartanSymmetric == other.CartanSymmetric && this->theDynkinType == other.theDynkinType;
 }
 
 void WeylGroupData::ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho)
-{ const ElementWeylGroup<WeylGroupData>& currentElt=this->theGroup.theElements[index];
-  for (int i=currentElt.generatorsLastAppliedFirst.size-1; i>=0; i--)
+{ const ElementWeylGroup<WeylGroupData>& currentElt = this->theGroup.theElements[index];
+  for (int i = currentElt.generatorsLastAppliedFirst.size - 1; i >= 0; i --)
     this->SimpleReflectionRoot(currentElt.generatorsLastAppliedFirst[i].index, theRoot, RhoAction, UseMinusRho);
 }
 
 void WeylGroupData::GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output)
 { MacroRegisterFunctionWithName("DynkinType::GetCoCartanSymmetric");
-  if (&input==&output)
-  { Matrix<Rational> inputCopy=input;
+  if (&input == &output)
+  { Matrix<Rational> inputCopy = input;
     WeylGroupData::GetCoCartanSymmetric(inputCopy, output);
     return;
   }
   output.init(input.NumRows, input.NumCols);
-  for (int i=0; i<input.NumRows; i++)
-    for (int j=0; j<input.NumCols; j++)
-      output(i,j)= input(i,j)*4/(input(i,i)*input(j,j));
+  for (int i = 0; i < input.NumRows; i ++)
+    for (int j = 0; j < input.NumCols; j ++)
+      output(i, j) = input(i, j) * 4 / (input(i, i) * input(j, j));
 }
 
 void WeylGroupData::GenerateRootSystem()
 { Vectors<Rational> startRoots;
   HashedList<Vector<Rational> > theRootsFinder;
   startRoots.MakeEiBasis(this->GetDim());
-  int estimatedNumRoots=this->theDynkinType.GetRootSystemSize();
+  int estimatedNumRoots = this->theDynkinType.GetRootSystemSize();
 //  stOutput << "<hr><hr>Generating root system, startroots: " << startRoots.ToString();
   this->GenerateOrbit(startRoots, false, theRootsFinder, false, estimatedNumRoots);
 //  stOutput << " final roots: " << theRootsFinder.ToString() << "<hr>";
   this->RootSystem.Clear();
   this->RootSystem.SetExpectedSize(theRootsFinder.size);
   this->RootsOfBorel.SetSize(0);
-  this->RootsOfBorel.Reserve(theRootsFinder.size/2);
-  for (int i=0; i<theRootsFinder.size; i++)
+  this->RootsOfBorel.Reserve(theRootsFinder.size / 2);
+  for (int i = 0; i < theRootsFinder.size; i ++)
     if (theRootsFinder[i].IsPositiveOrZero())
       this->RootsOfBorel.AddOnTop(theRootsFinder[i]);
   this->RootsOfBorel.QuickSortAscending();
-  for (int i=this->RootsOfBorel.size-1; i>=0; i--)
-    this->RootSystem.AddOnTop(-this->RootsOfBorel[i]);
-  for (int i=0; i<this->RootsOfBorel.size; i++)
+  for (int i = this->RootsOfBorel.size - 1; i >= 0; i --)
+    this->RootSystem.AddOnTop(- this->RootsOfBorel[i]);
+  for (int i = 0; i < this->RootsOfBorel.size; i ++)
     this->RootSystem.AddOnTop(this->RootsOfBorel[i]);
 }
 
 void WeylGroupData::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)
-{ for (int i=this->theGroup.theElements[index].generatorsLastAppliedFirst.size-1; i>=0; i--)
+{ for (int i = this->theGroup.theElements[index].generatorsLastAppliedFirst.size - 1; i >= 0; i --)
     this->SimpleReflectionRootAlg(this->theGroup.theElements[index].generatorsLastAppliedFirst[i].index, theRoot, RhoAction);
 }
 
 void WeylGroupData::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
 { this->theGroup.ComputeAllElements(false);
-  output.size=0;
-  output.Reserve(this->RootSystem.size/2);
-  for (int i=0; i<this->RootSystem.size; i++)
+  output.size = 0;
+  output.Reserve(this->RootSystem.size / 2);
+  for (int i = 0; i < this->RootSystem.size; i ++)
     if (this->RootSystem[i].IsPositiveOrZero())
       output.AddOnTop(this->RootSystem[i]);
 }
 
 bool WeylGroupData::LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup<WeylGroupData>& left, ElementWeylGroup<WeylGroupData>& right)
 { Vector<Rational> leftImage;
-  leftImage=this->rho;
+  leftImage = this->rho;
   Vector<Rational> rightImage;
-  rightImage=this->rho;
+  rightImage = this->rho;
   this->ActOn(left, leftImage, leftImage);
   this->ActOn(right, rightImage, rightImage);
-  return (rightImage-leftImage).IsPositiveOrZero() && !(rightImage-leftImage).IsEqualToZero();
+  return (rightImage - leftImage).IsPositiveOrZero() && !(rightImage - leftImage).IsEqualToZero();
 }
 
 void WeylGroupData::ComputeRootsOfBorel(Vectors<Rational>& output)
-{ output.size=0;
+{ output.size = 0;
   this->RootSystem.Clear();
   this->GenerateRootSystem();
-  output=(this->RootsOfBorel);
+  output = this->RootsOfBorel;
 }
 
 std::string WeylGroupData::ToStringCppCharTable(FormatExpressions* theFormat)
@@ -5354,23 +5355,23 @@ std::string WeylGroupData::ToStringCppCharTable(FormatExpressions* theFormat)
   out << " output.characterTable.SetExpectedSize(" << this->theGroup.GetSize().ToString() << "); output.characterTable.SetSize(0);";
   out << "\n<br>&nbsp;&nbsp;ClassFunction&lt;FiniteGroup&lt;ElementWeylGroup&lt;WeylGroup&gt; &gt;, Rational&gt; currentCF;";
   out << "\n<br>&nbsp;&nbsp;currentCF.G=&output;";
-  for (int i=0; i<this->theGroup.characterTable.size; i++)
+  for (int i = 0; i < this->theGroup.characterTable.size; i ++)
   { out << "\n<br>&nbsp;&nbsp;currentCF.data.AssignString(\"";
     out << "(";
     //Print vector ensuring every number is at least 3 characters wide. (3 should suffice for E8... or does it?)
-    for (int j=0; j<this->theGroup.characterTable[i].data.size; j++)
-    { std::string theNumber= this->theGroup.characterTable[i].data[j].ToString();
+    for (int j = 0; j < this->theGroup.characterTable[i].data.size; j ++)
+    { std::string theNumber = this->theGroup.characterTable[i].data[j].ToString();
       out << theNumber;
-      for (int k=theNumber.size(); k<3; k++)
+      for (int k = theNumber.size(); k < 3; k ++)
         out << "&nbsp;";
-      if (j!=this->theGroup.characterTable[i].data.size-1)
+      if (j != this->theGroup.characterTable[i].data.size - 1)
         out << ", ";
     }
     out << ")";
     out << "\"); output.characterTable.AddOnTop(currentCF);";
   }
   out << "\n<br>&nbsp;&nbsp;output.irrepsCarterLabels.SetSize(0);";
-  for (int i=0; i<this->irrepsCarterLabels.size; i++)
+  for (int i = 0; i < this->irrepsCarterLabels.size; i ++)
     out << "\n<br>&nbsp;&nbsp;output.irrepsCarterLabels.AddOnTop(\"" << this->irrepsCarterLabels[i] << "\");";
   out << "\n<br>&nbsp;&nbsp;return true;";
   out << "\n<br>}";
@@ -5386,32 +5387,32 @@ std::string WeylGroupData::ToStringCppConjugacyClasses(FormatExpressions* theFor
   out << "<hr>Here is the c++ input code for the conjugacy class table.";
   out << "<br>";
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
-  theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent=true;
+  theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent = true;
   out << "bool LoadConjugacyClasses" << this->theDynkinType.ToString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
   out << "output.ComputeRho(true);";
   out << "\n<br>&nbsp;&nbsp;WeylGroup::ConjugacyClass emptyClass;";
   out << "\n<br>&nbsp;&nbsp;emptyClass.flagRepresentativeComputed=true;";
   out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS.initFillInObject(" << this->theGroup.conjugacyClasseS.size << ", emptyClass);";
-  for (int i=0; i<this->theGroup.ConjugacyClassCount(); i++)
+  for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++)
   { out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS[" << i;
-    for (int j=((Rational)i).ToString().size(); j<3; j++) //<-if the index i is smaller than 100, make sure it takes
+    for (int j = ((Rational) i).ToString().size(); j < 3; j ++) //<-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
     out << "].representative.MakeFromReadableReflections(output, false, \"";
-    for (int j=0; j<this->theGroup.conjugacyClasseS[i].representative.generatorsLastAppliedFirst.size; j++)
-    { out << this->theGroup.conjugacyClasseS[i].representative.generatorsLastAppliedFirst[j].index+1;
-      if (j!=this->theGroup.conjugacyClasseS[i].representative.generatorsLastAppliedFirst.size-1)
+    for (int j = 0; j < this->theGroup.conjugacyClasseS[i].representative.generatorsLastAppliedFirst.size; j ++)
+    { out << this->theGroup.conjugacyClasseS[i].representative.generatorsLastAppliedFirst[j].index + 1;
+      if (j != this->theGroup.conjugacyClasseS[i].representative.generatorsLastAppliedFirst.size - 1)
         out << ",";
     }
     out << "\");";
   }
-  for (int i=0; i<this->theGroup.ConjugacyClassCount(); i++)
+  for (int i = 0; i < this->theGroup.ConjugacyClassCount(); i ++)
   { out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS[" << i;
-    for (int j=((Rational)i).ToString().size(); j<3; j++) //<-if the index i is smaller than 100, make sure it takes
+    for (int j = ((Rational) i).ToString().size(); j < 3; j ++) //<-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
     out  << "].size=" << this->theGroup.conjugacyClasseS[i].size.ToString() << ";";
   }
   out << "\n<br>&nbsp;&nbsp;output.ccCarterLabels.SetSize(0);";
-  for (int i=0; i<this->ccCarterLabels.size; i++)
+  for (int i = 0; i < this->ccCarterLabels.size; i ++)
     out << "\n<br>&nbsp;&nbsp;output.ccCarterLabels.AddOnTop(\"" << this->ccCarterLabels[i] << "\");";
   out << "\n<br>&nbsp;&nbsp;output.LoadConjugacyClassesHelper();";
   out << "\n<br>&nbsp;&nbsp;return true;";
@@ -5429,17 +5430,17 @@ std::string WeylGroupData::ToStringRootsAndRootReflections(FormatExpressions* th
   Vectors<Rational> rootSystemEpsCoords;
   this->GetEpsilonCoords(this->RootSystem, rootSystemEpsCoords);
   ElementWeylGroup<WeylGroupData> currentRootReflection;
-  for (int i=0; i<this->RootSystem.size; i++)
-  { const Vector<Rational>& current=this->RootSystem[i];
+  for (int i = 0; i < this->RootSystem.size; i ++)
+  { const Vector<Rational>& current = this->RootSystem[i];
     currentRootReflection.MakeRootReflection(current, *this);
     out << "<tr><td>" << current.ToString() << "</td><td>" << rootSystemEpsCoords[i].ToStringLetterFormat("e") << "</td>"
     << "<td>" << HtmlRoutines::GetMathMouseHover(currentRootReflection.ToString()) << "</td>" << "</tr>";
   }
   out << "</table>";
   out << "Comma delimited list of roots: ";
-  for (int i=0; i<this->RootSystem.size; i++)
+  for (int i = 0; i < this->RootSystem.size; i ++)
   { out << this->RootSystem[i].ToString();
-    if (i!=this->RootSystem.size-1)
+    if (i != this->RootSystem.size - 1)
       out << ", ";
   }
   out << outLatex.str();

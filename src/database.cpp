@@ -248,13 +248,16 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 #endif
 }
 
-std::string DatabaseStrings::columnUserId = "id";
-std::string DatabaseStrings::columnUsername = "username";
+std::string DatabaseStrings::labelUserId = "id";
+std::string DatabaseStrings::labelUsername = "username";
+std::string DatabaseStrings::labelAuthenticationToken = "authenticationToken";
 std::string DatabaseStrings::tableUsers = "users";
+std::string DatabaseStrings::labelEmail = "email";
 std::string DatabaseStrings::columnSection = "studentSection";
 std::string DatabaseStrings::columnCurrentCourses = "currentCourses";
 std::string DatabaseStrings::theDatabaseUser = "ace";
 std::string DatabaseStrings::theDatabaseName = "aceDB";
+std::string DatabaseStrings::theDatabaseNameMongo = "calculator";
 std::string DatabaseStrings::tableDeadlines = "deadlines";
 std::string DatabaseStrings::columnDeadlines = "deadlines";
 std::string DatabaseStrings::columnDeadlinesSchema = "deadlineSchema";
@@ -817,7 +820,7 @@ bool UserCalculator::FetchOneColumn
  DatabaseRoutines& theRoutines, std::stringstream* failureComments)
 { MacroRegisterFunctionWithName("UserCalculator::FetchOneColumn");
   return theRoutines.FetchEntry
-  (DatabaseStrings::columnUsername, this->username, this->currentTable,
+  (DatabaseStrings::labelUsername, this->username, this->currentTable,
    columnNameUnsafe, outputUnsafe, failureComments);
 }
 
@@ -906,10 +909,10 @@ bool UserCalculator::FetchOneUserRow
     return true;
 
   this->actualActivationToken = this->GetSelectedRowEntry("activationToken");
-  this->userId = this->GetSelectedRowEntry(DatabaseStrings::columnUserId);
+  this->userId = this->GetSelectedRowEntry(DatabaseStrings::labelUserId);
   this->email = this->GetSelectedRowEntry("email");
   this->userRole = this->GetSelectedRowEntry("userRole");
-  this->username = this->GetSelectedRowEntry(DatabaseStrings::columnUsername);
+  this->username = this->GetSelectedRowEntry(DatabaseStrings::labelUsername);
   //<-Important! Database lookup may be
   //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
   //The preceding line of code guarantees we have read the username as it is stored in the DB.
@@ -983,6 +986,15 @@ bool UserCalculator::FetchOneUserRow
 std::string UserCalculatorData::ToStringIdSectionCourse()
 { return this->courseInfo.getInstructorInDB() +
   this->courseInfo.getSectionInDB() + this->courseInfo.getCurrentCourseInDB();
+}
+
+JSData UserCalculatorData::ToJSON()
+{ MacroRegisterFunctionWithName("UserCalculatorData::ToJSON");
+  JSData result;
+  result[DatabaseStrings::labelUsername] = this->username.value;
+  result[DatabaseStrings::labelAuthenticationToken] = this->actualAuthenticationToken.value;
+  result[DatabaseStrings::labelEmail] = this->email.value;
+  return result;
 }
 
 bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
@@ -1141,7 +1153,7 @@ bool UserCalculator::SetColumnEntry
     crash << "Programming error: attempting to change column " << columnNameUnsafe
     << " without specifying a table. " << crash;
   //stOutput << "<hr>DEBUG: value to set: " << theValueUnsafe;
-  return theRoutines.SetEntry(DatabaseStrings::columnUsername, this->username, this->currentTable, columnNameUnsafe, theValueUnsafe, failureComments);
+  return theRoutines.SetEntry(DatabaseStrings::labelUsername, this->username, this->currentTable, columnNameUnsafe, theValueUnsafe, failureComments);
 }
 
 bool UserCalculator::ResetAuthenticationToken(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure)
@@ -1401,7 +1413,7 @@ bool UserCalculator::ComputeAndStoreActivationStats
     << numActivationsThisEmail.ToString() << ".\n <br>\n";
   if (this->userId.value != "")
   { if (!theRoutines.SetEntry
-        (DatabaseStrings::columnUserId, this->userId, DatabaseStrings::tableUsers,
+        (DatabaseStrings::labelUserId, this->userId, DatabaseStrings::tableUsers,
          (std::string) "activationTokenCreationTime", now.ToString(), commentsOnFailure))
     { if (commentsOnFailure != 0)
         *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
@@ -1409,7 +1421,7 @@ bool UserCalculator::ComputeAndStoreActivationStats
     }
   } else if (this->username.value != "")
   { if (!theRoutines.SetEntry
-        (DatabaseStrings::columnUsername, this->username, DatabaseStrings::tableUsers,
+        (DatabaseStrings::labelUsername, this->username, DatabaseStrings::tableUsers,
          (std::string) "activationTokenCreationTime", now.ToString(), commentsOnFailure))
     { if (commentsOnFailure != 0)
         *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
@@ -2113,7 +2125,7 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
   if (!theRoutines.FetchAllUsers(theUserTable, labels, out))
     return output.AssignValue(out.str(), theCommands);
   int emailColumn = labels.GetIndex("email");
-  int usernameColumn = labels.GetIndex(DatabaseStrings::columnUsername);
+  int usernameColumn = labels.GetIndex(DatabaseStrings::labelUsername);
   int passwordColumn = labels.GetIndex("password");
   int activationTokenColumn = labels.GetIndex("activationToken");
   ProgressReport theReport;
@@ -2374,7 +2386,7 @@ std::string DatabaseRoutines::ToStringSuggestionsReasonsForFailure
   }
   if (userFound)
   { std::string recommendedNewName;
-    if (!theUser.FetchOneColumn(DatabaseStrings::columnUsername, recommendedNewName, theRoutines, &out))
+    if (!theUser.FetchOneColumn(DatabaseStrings::labelUsername, recommendedNewName, theRoutines, &out))
       return out.str();
     theUser.username.value=recommendedNewName;
   }
@@ -2798,8 +2810,8 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   mysql_free_result(mysql_use_result(this->connection));
   std::stringstream tableCols, deadlineTableCols, probWeightTableCols;
   tableCols
-  << DatabaseStrings::columnUserId << " int NOT NULL AUTO_INCREMENT PRIMARY KEY, "
-  << DatabaseStrings::columnUsername << " VARCHAR(255) NOT NULL, "
+  << DatabaseStrings::labelUserId << " int NOT NULL AUTO_INCREMENT PRIMARY KEY, "
+  << DatabaseStrings::labelUsername << " VARCHAR(255) NOT NULL, "
   << "password LONGTEXT, "
   << "email LONGTEXT, "
   << "authenticationCreationTime LONGTEXT, "

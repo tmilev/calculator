@@ -113,6 +113,7 @@ class UserCalculatorData
   bool flagStopIfNoLogin;
   bool flagUserHasActivationToken;
   bool flagUserHasNoPassword;
+  JSData ToJSON();
   UserCalculatorData();
   bool AssignCourseInfoString(std::stringstream* errorStream);
   std::string ToStringIdSectionCourse();
@@ -122,18 +123,21 @@ class UserCalculatorData
   std::string ToStringUnsecure();
 };
 
-struct DatabaseStrings{
+struct DatabaseStrings
+{
   static List<std::string> modifyableColumns;
 public:
 ///credentials of calculator to use database
   static std::string theDatabaseUser;
   static std::string theDatabaseName;
+  static std::string theDatabaseNameMongo;
 ///user column names
-  static std::string columnUserId;
-  static std::string columnUsername;
-  static std::string columnEmail;
+  static std::string labelUserId;
+  static std::string labelUsername;
+  static std::string labelEmail;
   static std::string tableUsers;
   static std::string columnCourseInfo;
+  static std::string labelAuthenticationToken;
 ///course info column names
   static std::string columnCurrentCourses;
   static std::string columnSection;

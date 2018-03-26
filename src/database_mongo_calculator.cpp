@@ -15,12 +15,18 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery
     return theCommands << "Expected at least 2 arguments: collection name and query";
   std::string inputCollection, inputQuery;
   if (!input[2].IsOfType(&inputQuery))
-    return theCommands << "Expected string as second argument, got: " << input[2].ToString() << " instead. ";
+  { theCommands << "Expected string as second argument. Using the string: "
+    << input[2].ToString() << " as second name. ";
+    inputQuery = input[2].ToString();
+  }
   if (!input[1].IsOfType(&inputCollection))
-    return theCommands << "Expected string as first argument, got: " << input[1].ToString() << " instead. ";
+  { theCommands << "Expected string as first argument. Using the string: "
+    << input[1].ToString() << " as collection name. ";
+    inputCollection = input[1].ToString();
+  }
   List<std::string> outputStrings;
   std::stringstream commentsOnFailure;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindQuery(inputCollection, inputQuery, outputStrings, -1, 0, &commentsOnFailure))
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromString(inputCollection, inputQuery, outputStrings, - 1, 0, &commentsOnFailure))
     return output.AssignValue(commentsOnFailure.str(), theCommands);
   return output.AssignValue(outputStrings.ToStringCommaDelimited(), theCommands);
 /*

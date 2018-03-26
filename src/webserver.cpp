@@ -4940,7 +4940,7 @@ bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string
   return true;
 }
 
-void segfault_sigaction(int signal, siginfo_t *si, void *arg)
+void segfault_sigaction(int signal, siginfo_t* si, void* arg)
 //<- this signal should never happen in
 //<- server, so even if racy, we take the risk of a hang.
 //<- racy-ness in child process does not bother us: hanged children are still fine.
@@ -5134,7 +5134,7 @@ bool WebServer::initBindToPorts()
   List<std::string>* thePorts = &this->PortsITryHttp;
   int* theListeningSocket = 0;
   theListeningSocket = &this->listeningSocketHTTP;
-  for (int j = 0; j < 2; j++, thePorts = &this->PortsITryHttpSSL, theListeningSocket = &this->listeningSocketHttpSSL)
+  for (int j = 0; j < 2; j ++, thePorts = &this->PortsITryHttpSSL, theListeningSocket = &this->listeningSocketHttpSSL)
     for (int i = 0; i < (*thePorts).size; i ++)
     { if ((rv = getaddrinfo(NULL, (*thePorts)[i].c_str(), &hints, &servinfo)) != 0)
       { logWorker << "getaddrinfo: " << gai_strerror(rv) << logger::endL;

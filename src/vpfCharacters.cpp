@@ -238,7 +238,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Reduced() const
   out.generatorS.SetSize(this->generatorS.size);
   for (int i = 0; i < this->generatorS.size; i ++)
 //     MatrixInBasisFast(out.generatorS[i], this->generatorS[i], BM);
-    MatrixInBasis(out.generatorS[i], this->generatorS[i], this->basis,GM);
+    MatrixInBasis(out.generatorS[i], this->generatorS[i], this->basis, GM);
 
    out.ownerGroup = ownerGroup;
    out.basis.MakeEiBasis(d);

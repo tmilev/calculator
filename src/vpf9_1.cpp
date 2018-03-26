@@ -35,7 +35,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     << "Crash report so far: " << this->theCrashReport.str() << std::endl;
     assert(false);
   }
-  this->flagFinishingCrash=true;
+  this->flagFinishingCrash = true;
   if (!theGlobalVariables.flagNotAllocated)
     this->theCrashReport << " ";
   if (!theGlobalVariables.flagNotAllocated)
@@ -185,8 +185,8 @@ std::string GlobalVariables::ToStringProgressReportHtml()
   for (int threadIndex = 0; threadIndex < this->ProgressReportStringS.size; threadIndex ++)
   { reportStream << "<hr><b>" << this->theThreadData[threadIndex].ToStringHtml()
     << "</b><br>";
-    int currentThreadID=ThreadData::getCurrentThreadId();
-    if (currentThreadID!=threadIndex)
+    int currentThreadID = ThreadData::getCurrentThreadId();
+    if (currentThreadID != threadIndex)
     { reportStream << "<b>Progress report available only "
       << "for the current thread of index: "
       << currentThreadID

@@ -1,6 +1,7 @@
 #include <mongoc.h>
 #include <bcon.h>
 #include "vpfHeader3Calculator5_Database_Mongo.h"
+#include "vpfheader7databaseinterface_mongodb.h"
 ProjectInformationInstance ProjectInfoVpfMongoCalculatorInterface(__FILE__, "Database mongo<->calculator interface.");
 
 extern logger logWorker;
@@ -14,9 +15,16 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery
     return theCommands << "Expected at least 2 arguments: collection name and query";
   std::string inputCollection, inputQuery;
   if (!input[2].IsOfType(&inputQuery))
-    return theCommands << "Expected string as second argument, got: " << input[1].ToString() << " instead. ";
+    return theCommands << "Expected string as second argument, got: " << input[2].ToString() << " instead. ";
   if (!input[1].IsOfType(&inputCollection))
     return theCommands << "Expected string as first argument, got: " << input[1].ToString() << " instead. ";
+  List<std::string> outputStrings;
+  std::stringstream commentsOnFailure;
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindQuery(inputCollection, inputQuery, outputStrings, -1, 0, &commentsOnFailure))
+    return output.AssignValue(commentsOnFailure.str(), theCommands);
+  return output.AssignValue(outputStrings.ToStringCommaDelimited(), theCommands);
+/*
+
   std::stringstream out;
   mongoc_client_t* client;
   mongoc_collection_t* collection;
@@ -44,6 +52,6 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery
   mongoc_collection_destroy (collection);
   mongoc_client_destroy (client);
   mongoc_cleanup ();
-  return output.AssignValue(out.str(), theCommands);
+  return output.AssignValue(out.str(), theCommands);*/
 }
 

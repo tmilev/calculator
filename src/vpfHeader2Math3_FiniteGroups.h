@@ -882,16 +882,16 @@ public:
   template <class leftType, class rightType>
   void RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output)const;
   double RootScalarCartanRoot(const Vector<double>& r1, const Vector<double>& r2)const
-  { if (r1.size!=r2.size || r1.size!=this->GetDim())
+  { if (r1.size != r2.size || r1.size != this->GetDim())
     { crash.theCrashReport << "This is a programming error: attempting to take the root system scalar product of "
       << "vectors of different dimension or of dimension different from that of the ambient Lie algebra. The two input vectors were "
       << r1 << " and " << r2 << " and the rank of the Weyl group is " << this->GetDim() << ". ";
       crash << crash;
     }
-    double result=0;
-    for (int i=0; i<this->GetDim(); i++)
-      for (int j=0; j<this->GetDim(); j++)
-        result+=this->CartanSymmetric.elements[i][j].GetDoubleValue()*r1[i]*r2[j];
+    double result = 0;
+    for (int i = 0; i < this->GetDim(); i ++)
+      for (int j = 0; j < this->GetDim(); j ++)
+        result += this->CartanSymmetric.elements[i][j].GetDoubleValue() * r1[i] * r2[j];
     return result;
   }
   template <class leftType, class rightType>

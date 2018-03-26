@@ -17,17 +17,17 @@ std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat)const
     return "1";
   std::stringstream out;
   FormatExpressions tempFormat;
-  if (theFormat==0)
-    tempFormat.polyDefaultLetter="\\partial";
+  if (theFormat == 0)
+    tempFormat.polyDefaultLetter = "\\partial";
   else
-  { tempFormat.polyDefaultLetter=theFormat->WeylAlgebraDefaultLetter;
-    tempFormat.polyAlphabeT=theFormat->weylAlgebraLetters;
+  { tempFormat.polyDefaultLetter = theFormat->WeylAlgebraDefaultLetter;
+    tempFormat.polyAlphabeT = theFormat->weylAlgebraLetters;
   }
-  std::string firstS=this->polynomialPart.ToString(theFormat);
-  std::string secondS=this->differentialPart.ToString(&tempFormat);
-  if (firstS!="1")
+  std::string firstS = this->polynomialPart.ToString(theFormat);
+  std::string secondS = this->differentialPart.ToString(&tempFormat);
+  if (firstS != "1")
     out << firstS;
-  if (secondS!="1")
+  if (secondS != "1")
     out << secondS;
   return out.str();
 }

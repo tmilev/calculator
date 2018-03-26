@@ -109,6 +109,15 @@ void Calculator::initAdminFunctions()
    "DatabaseRoutines::innerRepairDatabaseEmailRecords",
    "RepairDatabaseEmailRecords",
    true);
+  this->AddOperationInnerHandler
+  ("MongoQuery", CalculatorDatabaseFunctions::innerExecuteMongoQuery, "",
+   "Executes a mongoDB query. Requires admin rights. \
+    The database name is calculator (can't be modified). \
+    First argument: collection name. Second argument: query. ",
+   "MongoQuery(\"users\", \"{}\")",
+   true, false,
+   "CalculatorDatabaseFunctions::innerExecuteMongoQuery",
+   "MongoQuery");
 
 #endif // MACRO_use_MySQL
 }
@@ -500,15 +509,6 @@ void Calculator::initPredefinedInnerFunctions()
    true, false,
    "CalculatorFunctionsGeneral::innerLoadKnownCertificates",
    "LoadKnownCertificates");
-  this->AddOperationInnerHandler
-  ("MongoQuery", CalculatorDatabaseFunctions::innerExecuteMongoQuery, "",
-   "Executes a mongoDB query. Requires admin rights. \
-    The database name is calculator (can't be modified). \
-    First argument: collection name. Second argument: query. ",
-   "MongoQuery(\"users\", \"{}\")",
-   true, false,
-   "CalculatorDatabaseFunctions::innerExecuteMongoQuery",
-   "X509CertificateCrunch");
 
   this->AddOperationInnerHandler
   ("X509CertificateCrunch", CalculatorFunctionsGeneral::innerX509certificateCrunch, "",
@@ -585,8 +585,7 @@ JWTverifyRSA256(token,modulus\
   ("TestJSON", CalculatorFunctionsGeneral::innerTestJSON, "",
    "Tests the JSON parsing mechanism. Input: json string, use backslash escapes for \
     backslashes and quotes.",
-   "TestJSON(\"{a:1}\");"
-   ,
+   "TestJSON(\"{a:1}\"); TestJSON(\"{\\\"a\\\":\\\"\\\\\\\"\\\"}\");",
    true, false,
    "CalculatorFunctionsGeneral::innerTestJSON",
    "TestJSON");

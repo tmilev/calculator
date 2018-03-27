@@ -135,9 +135,12 @@ public:
   static std::string labelUserId;
   static std::string labelUsername;
   static std::string labelEmail;
-  static std::string tableUsers;
-  static std::string columnCourseInfo;
+  static std::string labelPassword;
+  static std::string labelCourseInfo;
   static std::string labelAuthenticationToken;
+  static std::string labelUserRole;
+  static std::string labelProblemData;
+  static std::string tableUsers;
 ///course info column names
   static std::string columnCurrentCourses;
   static std::string columnSection;

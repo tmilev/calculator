@@ -110,6 +110,13 @@ void Calculator::initAdminFunctions()
    "RepairDatabaseEmailRecords",
    true);
   this->AddOperationInnerHandler
+  ("RepairDatabase", DatabaseRoutines::innerRepairDatabase, "",
+   "Executes various database repair functions. The rule is off by default. Admin use only. ",
+   "TurnOnRules(RepairDatabase); RepairDatabase(0)", false, true,
+   "DatabaseRoutines::innerRepairDatabase",
+   "RepairDatabase",
+   true);
+  this->AddOperationInnerHandler
   ("MongoFind", CalculatorDatabaseFunctions::innerExecuteMongoQuery, "",
    "Executes a mongoDB query. Requires admin rights. \
     The database name is calculator (can't be modified). \

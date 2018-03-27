@@ -1314,7 +1314,7 @@ std::string HtmlInterpretation::AddTeachersSections()
     }
     currentTeacher.courseInfo.courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught]=desiredSections;
     if(!currentTeacher.SetColumnEntry
-       (DatabaseStrings::columnCourseInfo, currentTeacher.courseInfo.ToStringForDBStorage(), theRoutines, &out))
+       (DatabaseStrings::labelCourseInfo, currentTeacher.courseInfo.ToStringForDBStorage(), theRoutines, &out))
       out << "<span style=\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
     else
       out << "<span style=\"color:green\">Assigned " << theTeachers[i] << " to section: "
@@ -1574,7 +1574,7 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
 //  out << "DEBUG: Usertable: " << userTable.ToStringCommaDelimited();
   int indexCourseInfo = - 1;
   for (int i = 0; i < columnLabels.size; i ++)
-    if (columnLabels[i] == DatabaseStrings::columnCourseInfo)
+    if (columnLabels[i] == DatabaseStrings::labelCourseInfo)
       indexCourseInfo = i;
   if (indexCourseInfo == - 1)
   { out << "Failed to load extra user info. ";
@@ -1702,7 +1702,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       indexActivationToken = i;
     if (columnLabels[i] == "userRole")
       indexUserRole = i;
-    if (columnLabels[i] == DatabaseStrings::columnCourseInfo)
+    if (columnLabels[i] == DatabaseStrings::labelCourseInfo)
       indexCourseInfo = i;
   }
   if (
@@ -2019,7 +2019,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   int problemDataIndex = userLabels.GetIndex("problemData");
   if (problemDataIndex == - 1)
     return "Could not find problem data column. ";
-  int courseInfoIndex = userLabels.GetIndex(DatabaseStrings::columnCourseInfo);
+  int courseInfoIndex = userLabels.GetIndex(DatabaseStrings::labelCourseInfo);
   if (courseInfoIndex == - 1)
     return "Could not find course info column. ";
   CalculatorHTML currentUserRecord;

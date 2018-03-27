@@ -250,6 +250,9 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 
 std::string DatabaseStrings::labelUserId = "id";
 std::string DatabaseStrings::labelUsername = "username";
+std::string DatabaseStrings::labelPassword = "password";
+std::string DatabaseStrings::labelUserRole = "userRole";
+std::string DatabaseStrings::labelProblemData = "problemData";
 std::string DatabaseStrings::labelAuthenticationToken = "authenticationToken";
 std::string DatabaseStrings::tableUsers = "users";
 std::string DatabaseStrings::labelEmail = "email";
@@ -261,7 +264,7 @@ std::string DatabaseStrings::theDatabaseNameMongo = "calculator";
 std::string DatabaseStrings::tableDeadlines = "deadlines";
 std::string DatabaseStrings::columnDeadlines = "deadlines";
 std::string DatabaseStrings::columnDeadlinesSchema = "deadlineSchema";
-std::string DatabaseStrings::columnCourseInfo = "courseInfo";
+std::string DatabaseStrings::labelCourseInfo = "courseInfo";
 std::string DatabaseStrings::columnInstructor = "instructor";
 
 std::string DatabaseStrings::tableProblemWeights = "problemWeights";
@@ -274,7 +277,7 @@ List<std::string> DatabaseStrings::modifyableColumns;
 List<std::string>& DatabaseStrings::GetModifyableColumnsNotThreadSafe()
 { MacroRegisterFunctionWithName("DatabaseStrings::GetModifyableColumnsNotThreadSafe");
   if (DatabaseStrings::modifyableColumns.size == 0) //<-warning: this is not thread-safe
-  { DatabaseStrings::modifyableColumns.AddOnTop(DatabaseStrings::columnCourseInfo);
+  { DatabaseStrings::modifyableColumns.AddOnTop(DatabaseStrings::labelCourseInfo);
   }
   return DatabaseStrings::modifyableColumns;
 }
@@ -450,7 +453,7 @@ std::string DatabaseRoutines::ToStringTableFromTableIdentifier(const std::string
   List<int> modifyableCols;
   modifyableCols.SetSize(DatabaseStrings::GetModifyableColumnsNotThreadSafe().size);
   for (int i = 0; i < modifyableCols.size; i ++)
-    modifyableCols[i] = columnLabels.GetIndex(DatabaseStrings::columnCourseInfo);
+    modifyableCols[i] = columnLabels.GetIndex(DatabaseStrings::labelCourseInfo);
   outputDatabaseKeyId = columnLabels[0];
   for (int i = 0; i < theTable.size; i ++)
   { out << "<tr>";
@@ -642,7 +645,7 @@ std::string DatabaseRoutines::ToStringOneEntry()
   else
     out
     //<< "<hr>DEBUG<hr>"
-    << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml( outputString)
+    << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(outputString)
 //    << "<hr>DEBUG<hr>"
     ;
 //  out << "<hr>DEBUG: requesting: "
@@ -929,7 +932,7 @@ bool UserCalculator::FetchOneUserRow
     this->flagUserHasNoPassword = true;
   DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(*this);
   this->courseInfo.rawStringStoredInDB =
-  this->GetSelectedRowEntry(DatabaseStrings::columnCourseInfo);
+  this->GetSelectedRowEntry(DatabaseStrings::labelCourseInfo);
   if (this->courseInfo.rawStringStoredInDB == "" || this->GetSelectedRowEntry("userInfo") != "")
   { if (commentsGeneral != 0)
       this->ComputeCourseInfoFromOtherEntriesOld(theRoutines, failureStream, commentsGeneral);
@@ -1036,7 +1039,7 @@ bool UserCalculator::ComputeCourseInfoFromOtherEntriesOld(DatabaseRoutines& theR
   theCourseInfo[DatabaseStrings::columnCurrentCourses] = this->GetSelectedRowEntry("currentCourses");
   theCourseInfo[DatabaseStrings::columnSection] = this->GetSelectedRowEntry("userInfo");
   this->courseInfo.rawStringStoredInDB = theCourseInfo.ToString(false);
-  this->SetColumnEntry(DatabaseStrings::columnCourseInfo, this->courseInfo.rawStringStoredInDB, theRoutines, failureStream);
+  this->SetColumnEntry(DatabaseStrings::labelCourseInfo, this->courseInfo.rawStringStoredInDB, theRoutines, failureStream);
   this->SetColumnEntry(DatabaseStrings::columnProblemWeightsSchema, "", theRoutines, failureStream);
   this->SetColumnEntry(DatabaseStrings::columnSectionsTaught, "", theRoutines, failureStream);
   this->SetColumnEntry(DatabaseStrings::columnSection, "", theRoutines, failureStream);
@@ -1712,7 +1715,7 @@ bool DatabaseRoutines::AddUsersFromEmails
     currentUser.courseInfo.setSectionInDB(userGroup);
     currentUser.courseInfo.setInstructorInDB(theGlobalVariables.userDefault.username.value);
     currentUser.courseInfo.rawStringStoredInDB = currentUser.courseInfo.ToStringForDBStorage();
-    if (!currentUser.SetColumnEntry(DatabaseStrings::columnCourseInfo, currentUser.courseInfo.rawStringStoredInDB, *this, &comments))
+    if (!currentUser.SetColumnEntry(DatabaseStrings::labelCourseInfo, currentUser.courseInfo.rawStringStoredInDB, *this, &comments))
       result = false;
     if (thePasswords.size == 0 || thePasswords.size != theEmails.size)
     { if (currentUser.actualShaonedSaltedPassword == "" && currentUser.actualAuthenticationToken=="")
@@ -2099,6 +2102,72 @@ bool DatabaseRoutines::innerTestDatabase(Calculator& theCommands, const Expressi
   return output.AssignValue(out.str(), theCommands);
 }
 
+#include "vpfheader7databaseinterface_mongodb.h"
+
+bool DatabaseRoutines::innerRepairDatabase
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::innerRepairDatabase");
+  std::stringstream out;
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { out << "Function available to logged-in admins only. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 20000;
+  (void) input;//prevent unused parameter, portable
+  DatabaseRoutines theRoutines;
+  out << "Testing/repairing database ... Comments:<br>";
+  std::stringstream comments;
+  theRoutines.startMySQLDatabase(&comments, 0);
+  out << comments.str();
+  List<List<std::string> > theUserTable;
+  List<std::string> labels;
+  if (!theRoutines.FetchAllUsers(theUserTable, labels, out))
+    return output.AssignValue(out.str(), theCommands);
+  int columnEmail = labels.GetIndex(DatabaseStrings::labelEmail);
+  int columnUsername = labels.GetIndex(DatabaseStrings::labelUsername);
+  int columnPassword = labels.GetIndex(DatabaseStrings::labelPassword);
+  int columnAuthenticationToken = labels.GetIndex(DatabaseStrings::labelAuthenticationToken);
+  int columnUserRole = labels.GetIndex(DatabaseStrings::labelUserRole);
+  int columnCourseInfo = labels.GetIndex(DatabaseStrings::labelCourseInfo);
+  int columnProblemData = labels.GetIndex(DatabaseStrings::labelProblemData);
+  if (columnEmail == - 1)
+  { out << "Couldn't find email column. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  if (columnUsername == - 1)
+  { out << "Couldn't find username column. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  if (columnPassword == - 1)
+  { out << "Couldn't find password column. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  if (columnAuthenticationToken == - 1)
+  { out << "Couldn't find activation token column. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  if (columnUserRole == - 1 || columnCourseInfo == - 1 || columnProblemData == - 1)
+  { out << "Couldn't find required column. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  ProgressReport theReport;
+  for (int i = 0; i < theUserTable.size; i ++)
+  { std::stringstream reportStream;
+    reportStream << "Processing user " << (i + 1) << " out of " << theUserTable.size;
+    theReport.Report(reportStream.str());
+    JSData currentUser, findUser;
+    currentUser[DatabaseStrings::labelEmail] = theUserTable[i][columnEmail          ];
+    currentUser[DatabaseStrings::labelUsername] = theUserTable[i][columnUsername       ];
+    currentUser[DatabaseStrings::labelPassword] = theUserTable[i][columnPassword       ];
+    currentUser[DatabaseStrings::labelAuthenticationToken] = theUserTable[i][columnAuthenticationToken ];
+    currentUser[DatabaseStrings::labelUserRole] = theUserTable[i][columnUserRole       ];
+    currentUser[DatabaseStrings::labelProblemData] = theUserTable[i][columnProblemData    ];
+    findUser[DatabaseStrings::labelUsername] = currentUser[DatabaseStrings::labelUsername];
+    DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, currentUser, &out);
+  }
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool DatabaseRoutines::innerRepairDatabaseEmailRecords
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("DatabaseRoutines::innerRepairDatabaseEmailRecords");
@@ -2113,11 +2182,11 @@ bool DatabaseRoutines::innerRepairDatabaseEmailRecords
   out << "Testing/repairing database ... Comments:<br>";
   std::stringstream comments;
   theRoutines.startMySQLDatabase(&comments, 0);
-  if (!theRoutines.ColumnExists(DatabaseStrings::columnCourseInfo, DatabaseStrings::tableUsers, out))
-  { out << "Column " << DatabaseStrings::columnCourseInfo << ": "
+  if (!theRoutines.ColumnExists(DatabaseStrings::labelCourseInfo, DatabaseStrings::tableUsers, out))
+  { out << "Column " << DatabaseStrings::labelCourseInfo << ": "
     << " does not exist, creating ...";
-    if (!theRoutines.CreateColumn(DatabaseStrings::columnCourseInfo, DatabaseStrings::tableUsers, out))
-      out << "Failed to create column: " << DatabaseStrings::columnCourseInfo << "<br>";
+    if (!theRoutines.CreateColumn(DatabaseStrings::labelCourseInfo, DatabaseStrings::tableUsers, out))
+      out << "Failed to create column: " << DatabaseStrings::labelCourseInfo << "<br>";
   }
   out << comments.str();
   List<List<std::string> > theUserTable;
@@ -2716,7 +2785,7 @@ bool UserCalculator::CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std
   }
   std::stringstream queryStream;
   queryStream << "INSERT INTO " << theRoutines.theDatabaseName
-  << ".users(username, " << DatabaseStrings::columnCourseInfo;
+  << ".users(username, " << DatabaseStrings::labelCourseInfo;
   DatabaseData courseInfoData;
   courseInfoData=this->courseInfo.ToStringForDBStorage();
   if (this->email.value!="")
@@ -2820,7 +2889,7 @@ bool DatabaseRoutines::startMySQLDatabase(std::stringstream* commentsOnFailure, 
   << "activationTokenCreationTime LONGTEXT, "
   << "userRole LONGTEXT, "
   << "userInfo LONGTEXT, "
-  << DatabaseStrings::columnCourseInfo << " LONGTEXT, "
+  << DatabaseStrings::labelCourseInfo << " LONGTEXT, "
   << "problemData LONGTEXT "
   ;
   if (!this->CreateTable

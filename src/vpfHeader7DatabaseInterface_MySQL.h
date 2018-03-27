@@ -405,6 +405,7 @@ public:
   (const std::string& tableNameUnsafe, const std::string& desiredTableContent,
    std::stringstream* commentsOnCreation, bool* outputTableNewlyCreated);
   static bool innerRepairDatabaseEmailRecords(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerRepairDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSendActivationEmailUsers(Calculator& theCommands, const Expression& input, Expression& output);

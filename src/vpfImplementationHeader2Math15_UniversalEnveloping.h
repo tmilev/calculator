@@ -9,21 +9,21 @@ template <class coefficient>
 coefficient SemisimpleLieAlgebra::GetKillingFormProductWRTLevi
 (const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right, const Selection& rootsNotInLevi)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::GetKillingFormWRTLevi");
-  coefficient result=0;
+  coefficient result = 0;
   ElementSemisimpleLieAlgebra<coefficient> adadAppliedToMon, tempElt;
   ChevalleyGenerator baseGen;
-  Vector<Rational> rootsNotInLeviVectorForm=rootsNotInLevi;
+  Vector<Rational> rootsNotInLeviVectorForm = rootsNotInLevi;
   Vector<Rational> theWeight;
-  for (int i=0; i<this->GetNumGenerators(); i++)
-  { theWeight= this->GetWeightOfGenerator(i);
-    if (theWeight.ScalarEuclidean(rootsNotInLeviVectorForm)!=0)
+  for (int i = 0; i < this->GetNumGenerators(); i ++)
+  { theWeight = this->GetWeightOfGenerator(i);
+    if (theWeight.ScalarEuclidean(rootsNotInLeviVectorForm) != 0)
       continue;
     baseGen.MakeGenerator(*this, i);
     adadAppliedToMon.MakeZero();
     adadAppliedToMon.AddMonomial(baseGen, 1);
     this->LieBracket(right, adadAppliedToMon, tempElt);
     this->LieBracket(left, tempElt, adadAppliedToMon);
-    result+=adadAppliedToMon.GetMonomialCoefficient(baseGen);
+    result += adadAppliedToMon.GetMonomialCoefficient(baseGen);
   }
   return result;
 }
@@ -31,36 +31,36 @@ coefficient SemisimpleLieAlgebra::GetKillingFormProductWRTLevi
 template <class coefficient>
 void ElementUniversalEnveloping<coefficient>::MakeCasimirWRTLeviParabolic(SemisimpleLieAlgebra& theOwner, const Selection& theLeviRoots)
 { MacroRegisterFunctionWithName("ElementUniversalEnveloping::MakeCasimirWRTLeviParabolic");
-  if (theLeviRoots.CardinalitySelection==0)
+  if (theLeviRoots.CardinalitySelection == 0)
   { this->MakeZero(theOwner);
     return;
   }
-  coefficient result=0;
+  coefficient result = 0;
   ElementSemisimpleLieAlgebra<Rational> leftE, rightE;
   ChevalleyGenerator baseGen;
-  Selection rootsNotInLEvi=theLeviRoots;
+  Selection rootsNotInLEvi = theLeviRoots;
   rootsNotInLEvi.InvertSelection();
-  Vector<Rational> rootsNotInLeviVectorForm=rootsNotInLEvi;
+  Vector<Rational> rootsNotInLeviVectorForm = rootsNotInLEvi;
   Vector<Rational> theWeightLeft, theWeightRight;
   this->MakeZero(theOwner);
   MonomialUniversalEnveloping<coefficient> theMon;
   Rational theCF;
   //coefficient theCFconverted;
-  for (int i=0; i<theOwner.GetNumGenerators(); i++)
-  { theWeightLeft=theOwner.GetWeightOfGenerator(i);
-    if (theWeightLeft.ScalarEuclidean(rootsNotInLeviVectorForm)!=0)
+  for (int i = 0; i < theOwner.GetNumGenerators(); i ++)
+  { theWeightLeft = theOwner.GetWeightOfGenerator(i);
+    if (theWeightLeft.ScalarEuclidean(rootsNotInLeviVectorForm) != 0)
       continue;
     if (theWeightLeft.IsEqualToZero())
       continue;
     theMon.MakeOne(theOwner);
-    int indexOpposite=theOwner.GetGeneratorFromRoot(-theWeightLeft);
+    int indexOpposite = theOwner.GetGeneratorFromRoot(- theWeightLeft);
     theMon.generatorsIndices.AddOnTop(i);
     theMon.generatorsIndices.AddOnTop(indexOpposite);
     theMon.Powers.AddOnTop(1);
     theMon.Powers.AddOnTop(1);
     leftE.MakeGenerator(i, theOwner);
     rightE.MakeGenerator(indexOpposite, theOwner);
-    theCF=theOwner.GetKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
+    theCF = theOwner.GetKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
 //    stOutput << "<hr>Killing product: " << leftE.ToString() << " and " << rightE.ToString() << " = " << theCF.ToString();
     theCF.Invert();
 //    theCFconverted=theCF;
@@ -68,30 +68,30 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimirWRTLeviParabolic(Semisi
   }
   Matrix<Rational> killingRestrictedToCartan;
   killingRestrictedToCartan.init(theLeviRoots.CardinalitySelection, theLeviRoots.CardinalitySelection);
-  for (int i=0; i<theLeviRoots.CardinalitySelection; i++)
-    for (int j=i; j<theLeviRoots.CardinalitySelection; j++)
+  for (int i = 0; i < theLeviRoots.CardinalitySelection; i ++)
+    for (int j = i; j < theLeviRoots.CardinalitySelection; j ++)
     { theWeightLeft.MakeEi(theOwner.GetRank(), theLeviRoots.elements[i]);
       theWeightRight.MakeEi(theOwner.GetRank(), theLeviRoots.elements[j]);
       leftE.MakeHgenerator(theWeightLeft, theOwner);
       rightE.MakeHgenerator(theWeightRight, theOwner);
-      killingRestrictedToCartan(i,j)=theOwner.GetKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
-      killingRestrictedToCartan(j,i)=killingRestrictedToCartan(i,j);
+      killingRestrictedToCartan(i, j) = theOwner.GetKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
+      killingRestrictedToCartan(j, i) = killingRestrictedToCartan(i, j);
     }
 //  stOutput << "<br>The killing restricted to Cartan: " << killingRestrictedToCartan.ToString();
   killingRestrictedToCartan.Invert();
   ElementUniversalEnveloping<coefficient> leftUE, rightUE;
   Vector<Rational> currentEj;
-  for (int i=0; i<theLeviRoots.CardinalitySelection; i++)
+  for (int i = 0; i < theLeviRoots.CardinalitySelection; i ++)
   { theWeightLeft.MakeEi(theOwner.GetRank(), theLeviRoots.elements[i]);
     theWeightRight.MakeZero(theOwner.GetRank());
-    for (int j=0; j<theLeviRoots.CardinalitySelection; j++)
+    for (int j = 0; j < theLeviRoots.CardinalitySelection; j ++)
     { currentEj.MakeEi(theOwner.GetRank(), theLeviRoots.elements[j]);
-      theWeightRight+=currentEj*killingRestrictedToCartan(i,j);
+      theWeightRight += currentEj * killingRestrictedToCartan(i, j);
     }
     leftUE.MakeHgenerator(theWeightLeft, theOwner);
     rightUE.MakeHgenerator(theWeightRight, theOwner);
-    leftUE*=rightUE;
-    *this+=leftUE;
+    leftUE *= rightUE;
+    *this += leftUE;
   }
   this->Simplify();
 }
@@ -103,10 +103,10 @@ void ElementUniversalEnveloping<coefficient>::ModOutVermaRelations
   ElementUniversalEnveloping<coefficient> output;
   output.MakeZero(*this->owner);
   coefficient acquiredCoeff;
-  for (int i=0; i<this->size(); i++)
-  { tempMon= (*this)[i];
+  for (int i = 0; i < this->size(); i ++)
+  { tempMon = (*this)[i];
     tempMon.ModOutVermaRelations(acquiredCoeff, subHiGoesToIthElement, theRingUnit, theRingZero);
-    acquiredCoeff*=this->theCoeffs[i];
+    acquiredCoeff *= this->theCoeffs[i];
 //    stOutput << "<hr><hr>Adding " << tempMon.ToString() << " times " << acquiredCoeff.ToString() << " to " << output.ToString();
     output.AddMonomial(tempMon, acquiredCoeff);
 //    stOutput <<"<br> to obtain " << output.ToString();
@@ -123,7 +123,7 @@ void ElementUniversalEnveloping<coefficient>::LieBracketOnTheLeft(const ElementS
   ElementUniversalEnveloping<coefficient> tempElt1, tempElt2;
   tempElt1.AssignElementLieAlgebra
   (left, *this->owner, this->theCoeffs[0].GetOne());
-  tempElt2=*this;
+  tempElt2 = *this;
   tempElt2.LieBracketOnTheRight(tempElt1, *this);
 }
 
@@ -132,12 +132,12 @@ bool MonomialUniversalEnveloping<coefficient>::AdjointRepresentationAction
 (const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output)const
 { output.MakeZero(*this->owner);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
-  output=input;
-  for (int i=this->generatorsIndices.size-1; i>=0; i--)
+  output = input;
+  for (int i = this->generatorsIndices.size - 1; i >= 0; i --)
   { int nextCycleSize;
     if (!this->Powers[i].IsSmallInteger(&nextCycleSize))
       return false;
-    for (int j=0; j<nextCycleSize; j++)
+    for (int j = 0; j < nextCycleSize; j ++)
     { tempElt.MakeGenerator(this->generatorsIndices[i], *this->owner) ;
       output.LieBracketOnTheLeft(tempElt);
     }
@@ -152,11 +152,11 @@ bool ElementUniversalEnveloping<coefficient>::AdjointRepresentationAction
     crash << crash;
   output.MakeZero(*this->owner);
   ElementUniversalEnveloping<coefficient> summand;
-  for (int i=0; i<this->size(); i++)
-  { if(!(*this)[i].AdjointRepresentationAction(input, summand))
+  for (int i = 0; i < this->size(); i ++)
+  { if (!(*this)[i].AdjointRepresentationAction(input, summand))
       return false;
-    summand*=this->theCoeffs[i];
-    output+=summand;
+    summand *= this->theCoeffs[i];
+    output += summand;
   }
   return true;
 }
@@ -168,31 +168,31 @@ void ElementUniversalEnveloping<coefficient>::Simplify(const coefficient& theRin
   MonomialUniversalEnveloping<coefficient> tempMon;
   coefficient currentCoeff;
   outpuT.MakeZero(*this->owner);
-  for (; this->size()>0; )
+  for (; this->size() > 0;)
   {// FormatExpressions tempFormat;
     //tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
     //stOutput << "<hr>(At the start of reduction cycle) *this+output - (At the end of reduction cycle)(*this+output)=<br>" << (*this+outpuT).ToString(&tempFormat);
-    this->PopMonomial(this->size()-1, tempMon, currentCoeff);
-    bool reductionOccurred=false;
-    for (int i=0; i<tempMon.generatorsIndices.size-1; i++)
-      if (!this->GetOwner().AreOrderedProperly(tempMon.generatorsIndices[i], tempMon.generatorsIndices[i+1]))
+    this->PopMonomial(this->size() - 1, tempMon, currentCoeff);
+    bool reductionOccurred = false;
+    for (int i = 0; i < tempMon.generatorsIndices.size - 1; i ++)
+      if (!this->GetOwner().AreOrderedProperly(tempMon.generatorsIndices[i], tempMon.generatorsIndices[i + 1]))
       { if (tempMon.SwitchConsecutiveIndicesIfTheyCommute(i))
         { this->AddMonomial(tempMon, currentCoeff);
-          reductionOccurred=true;
+          reductionOccurred = true;
           break;
         }
         if (tempMon.CommutingAnBtoBAnPlusLowerOrderAllowed(tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+1], tempMon.generatorsIndices[i+1]))
         { tempMon.CommuteAnBtoBAnPlusLowerOrder(i, buffer, theRingUnit);
-          buffer*=currentCoeff;
-          *this+=buffer;
-          reductionOccurred=true;
+          buffer *= currentCoeff;
+          *this += buffer;
+          reductionOccurred = true;
           break;
         }
         if (tempMon.CommutingABntoBnAPlusLowerOrderAllowed(tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+1], tempMon.generatorsIndices[i+1]))
         { tempMon.CommuteABntoBnAPlusLowerOrder(i, buffer, theRingUnit);
-          buffer*=currentCoeff;
-          *this+=buffer;
-          reductionOccurred=true;
+          buffer *= currentCoeff;
+          *this += buffer;
+          reductionOccurred = true;
           break;
         }
       }
@@ -200,7 +200,7 @@ void ElementUniversalEnveloping<coefficient>::Simplify(const coefficient& theRin
       outpuT.AddMonomial(tempMon, currentCoeff);
 //    stOutput << "-<br>(" << (*this+outpuT).ToString() << ")<br>(this should simplify to zero).";
   }
-  *this=outpuT;
+  *this = outpuT;
 }
 
 template <class coefficient>

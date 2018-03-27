@@ -2925,7 +2925,7 @@ std::string WebWorker::GetChangePasswordPage()
            (std::string) "activationToken",(std::string)"", &out))
         out << "\n<span style=\"color:red\"><b>Could not reset the activation token (database is down?). </b></span>";
       else if (!theRoutines.SetEntry
-       (DatabaseStrings::columnUsername, theGlobalVariables.userDefault.username,
+       (DatabaseStrings::labelUsername, theGlobalVariables.userDefault.username,
         DatabaseStrings::tableUsers, (std::string) "email", claimedEmail,&out))
         out << "\n<span style=\"color:red\"><b>Could not store your email (database is down?). </b></span>";
       else
@@ -2940,7 +2940,7 @@ std::string WebWorker::GetChangePasswordPage()
           << "?request=changePasswordPage\">click here</a>. ";
           doShowPasswordChangeField = false;
           theRoutines.SetEntry
-          (DatabaseStrings::columnUserId, theGlobalVariables.userDefault.userId,
+          (DatabaseStrings::labelUserId, theGlobalVariables.userDefault.userId,
            DatabaseStrings::tableUsers, (std::string) "activationToken",
            (std::string) "activated", &out)
           ;
@@ -2960,7 +2960,7 @@ std::string WebWorker::GetChangePasswordPage()
       << "- probably by an admin/instructor. ";
       DatabaseRoutines theRoutines;
       if (!theRoutines.SetEntry
-          (DatabaseStrings::columnUserId, theGlobalVariables.userDefault.userId,
+          (DatabaseStrings::labelUserId, theGlobalVariables.userDefault.userId,
            DatabaseStrings::tableUsers, (std::string) "activationToken",
            (std::string) "activated", &out))
         out << " <span style=\"color:red\"><b>Failed to activate your account. </b></span>";
@@ -4940,7 +4940,7 @@ bool WebServer::RequiresLogin(const std::string& inputRequest, const std::string
   return true;
 }
 
-void segfault_sigaction(int signal, siginfo_t *si, void *arg)
+void segfault_sigaction(int signal, siginfo_t* si, void* arg)
 //<- this signal should never happen in
 //<- server, so even if racy, we take the risk of a hang.
 //<- racy-ness in child process does not bother us: hanged children are still fine.
@@ -5134,7 +5134,7 @@ bool WebServer::initBindToPorts()
   List<std::string>* thePorts = &this->PortsITryHttp;
   int* theListeningSocket = 0;
   theListeningSocket = &this->listeningSocketHTTP;
-  for (int j = 0; j < 2; j++, thePorts = &this->PortsITryHttpSSL, theListeningSocket = &this->listeningSocketHttpSSL)
+  for (int j = 0; j < 2; j ++, thePorts = &this->PortsITryHttpSSL, theListeningSocket = &this->listeningSocketHttpSSL)
     for (int i = 0; i < (*thePorts).size; i ++)
     { if ((rv = getaddrinfo(NULL, (*thePorts)[i].c_str(), &hints, &servinfo)) != 0)
       { logWorker << "getaddrinfo: " << gai_strerror(rv) << logger::endL;

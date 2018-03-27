@@ -11,10 +11,15 @@ TEMPLATE = app
 DEFINES+=MACRO_use_MySQL
 DEFINES+=MACRO_use_open_ssl
 
-LIBS+=-L/usr/lib64/mysql
+LIBS+=-lmongoc-1.0
+LIBS+=-lbson-1.0
+
 LIBS+=-lmysqlclient
 LIBS+=-lssl
 LIBS+=-lcrypto
+
+INCLUDEPATH+=/usr/include/libmongoc-1.0
+INCLUDEPATH+=/usr/include/libbson-1.0
 
 SOURCES += \
     webserver.cpp \
@@ -63,7 +68,8 @@ SOURCES += \
     vpfHtmlSnippets.cpp \
     vpf6_37calculatorroutines.cpp \
     vpf6_38LaTeXRoutines.cpp \
-    databasemongo.cpp
+    databasemongo.cpp \
+    database_mongo_calculator.cpp
 
 HEADERS += \
     webserver.h \
@@ -119,7 +125,9 @@ HEADERS += \
     vpfHeader8HtmlSnippets.h \
     vpfHeader1General8DatabaseSystemIndependent.h \
     vpfHeader2Math10_LaTeXRoutines.h \
-    vpfHeader2Math4_5_Tree.h
+    vpfHeader2Math4_5_Tree.h \
+    vpfHeader3Calculator5_Database_Mongo.h \
+    vpfheader7databaseinterface_mongodb.h
 
 DISTFILES += \
     ../calculator-html/new/app.js \

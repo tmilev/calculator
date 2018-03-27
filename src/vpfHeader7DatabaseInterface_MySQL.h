@@ -16,28 +16,23 @@ public:
   static bool LoginViaGoogleTokenCreateNewAccountIfNeeded
   (UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   static bool SetPassword
-(const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
- std::stringstream& comments)
-;
+  (const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
+   std::stringstream& comments);
   static bool SetEntry
   (const std::string& inputUsername, const std::string& tableNameUnsafe, const std::string& keyNameUnsafe,
-   const std::string& valueUnsafe, std::stringstream& comments)
-   ;
+   const std::string& valueUnsafe, std::stringstream& comments);
   static bool FetchTablE
-(List<List<std::string> >& output,
- List<std::string>& outputColumnLabels,
- bool& outputWasTruncated, int& actualNumRowsIfTruncated,
- const std::string& tableName, std::stringstream& comments)
-;
+  (List<List<std::string> >& output,
+   List<std::string>& outputColumnLabels,
+   bool& outputWasTruncated, int& actualNumRowsIfTruncated,
+   const std::string& tableName, std::stringstream& comments);
   static bool FetchTableFromDatabaseIdentifier
-(List<List<std::string> >& output,
- List<std::string>& outputColumnLabels,
- bool& outputWasTruncated, int& actualNumRowsIfTruncated,
- const std::string& tableIdentifier, std::stringstream& comments)
-;
+  (List<List<std::string> >& output,
+   List<std::string>& outputColumnLabels,
+   bool& outputWasTruncated, int& actualNumRowsIfTruncated,
+   const std::string& tableIdentifier, std::stringstream& comments);
   static bool RowExists
-  (const std::string& inputUsername, const std::string& tableName, std::stringstream& comments)
-   ;
+  (const std::string& inputUsername, const std::string& tableName, std::stringstream& comments);
   static bool FetchEntry
   (const std::string& inputUsername, const std::string& tableName, const std::string& keyName,
    std::string& output, std::stringstream& comments);
@@ -94,25 +89,25 @@ public:
   std::string GetTagClass();
   std::string ToStringDebug();
   SyntacticElementHTML()
-  { this->flagUseDisplaystyleInMathMode=false;
-    this->indexInOwner=-1;
-    this->commandIndex=-1;
-    this->flagUseMathMode=true;
-    this->flagUseMathSpan=true;
+  { this->flagUseDisplaystyleInMathMode = false;
+    this->indexInOwner = - 1;
+    this->commandIndex = - 1;
+    this->flagUseMathMode = true;
+    this->flagUseMathSpan = true;
   }
   SyntacticElementHTML(const std::string& inputContent)
-  { this->flagUseDisplaystyleInMathMode=false;
-    this->flagUseMathMode=true;
-    this->flagUseMathSpan=true;
-    this->content=inputContent;
-    this->indexInOwner=-1;
-    this->commandIndex=-1;
+  { this->flagUseDisplaystyleInMathMode = false;
+    this->flagUseMathMode = true;
+    this->flagUseMathSpan = true;
+    this->content = inputContent;
+    this->indexInOwner = - 1;
+    this->commandIndex = - 1;
   }
   bool operator==(const std::string& other)
-  { return this->content==other;
+  { return this->content == other;
   }
   bool operator!=(const std::string& other)
-  { return this->content!=other;
+  { return this->content != other;
   }
 };
 
@@ -163,14 +158,14 @@ struct Answer
   std::string firstCorrectAnswerURLed;
   std::string firstCorrectAnswerClean;
   Answer()
-  { this->numSubmissions=0;
-    this->numCorrectSubmissions=0;
-    this->flagAutoGenerateSubmitButtons=true;
-    this->flagAutoGenerateMQButtonPanel=true;
-    this->flagAutoGenerateMQfield=true;
-    this->flagAutoGenerateVerificationField=true;
-    this->flagAutoGenerateButtonSolution=true;
-    this->flagSolutionFound=false;
+  { this->numSubmissions = 0;
+    this->numCorrectSubmissions = 0;
+    this->flagAutoGenerateSubmitButtons = true;
+    this->flagAutoGenerateMQButtonPanel = true;
+    this->flagAutoGenerateMQfield = true;
+    this->flagAutoGenerateVerificationField = true;
+    this->flagAutoGenerateButtonSolution = true;
+    this->flagSolutionFound = false;
   }
   std::string ToString();
 };
@@ -244,7 +239,7 @@ public:
   std::string GetCommandToSendEmailWithMailX();
   bool SendEmailWithMailGun
   (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral,
-   bool includeEmailCommandInComments=false);
+   bool includeEmailCommandInComments = false);
 };
 
 class TopicElement;
@@ -263,11 +258,9 @@ public:
   TimeWrapper authenticationCreationTime;
   Rational pointsEarned;
   Rational pointsMax;
-
   void ComputePointsEarned
   (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
-   MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics
-   );
+   MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics);
   ProblemData& HasProblemData(const std::string& problemName);
   ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);
   void SetProblemData(const std::string& problemName, const ProblemData& inputData);
@@ -280,12 +273,12 @@ public:
   bool ComputeCourseInfoFromOtherEntriesOld
   (DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral);
   bool FetchOneUserRow
-  (DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral=0);
+  (DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral = 0);
   bool FetchOneUserRowPartOne
-  (DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral=0);
+  (DatabaseRoutines& theRoutines, std::stringstream* failureStream, std::stringstream* commentsGeneral = 0);
   bool FetchOneColumn
   (const std::string& columnNameUnsafe, std::string& outputUnsafe,
-   DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);
+   DatabaseRoutines& theRoutines, std::stringstream* failureComments = 0);
   void FetchColumns(DatabaseRoutines& theRoutines);
   bool AuthenticateWithUserNameAndPass(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   bool AuthenticateWithToken(std::stringstream* commentsOnFailure);
@@ -294,11 +287,11 @@ public:
   std::string GetPassword(DatabaseRoutines& theRoutines);
   bool SetColumnEntry
   (const std::string& columnNameUnsafe, const std::string& theValueUnsafe,
-   DatabaseRoutines& theRoutines, std::stringstream* failureComments=0);
+   DatabaseRoutines& theRoutines, std::stringstream* failureComments = 0);
   bool SetPassword(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   bool DeleteMe(DatabaseRoutines& theRoutines, std::stringstream& commentsOnFailure);
   bool Iexist(DatabaseRoutines& theRoutines, std::stringstream* comments);
-  bool IamPresentInTable(DatabaseRoutines& theRoutines, const std::string& tableNameUnsafe, std::stringstream* comments=0);
+  bool IamPresentInTable(DatabaseRoutines& theRoutines, const std::string& tableNameUnsafe, std::stringstream* comments = 0);
   bool CreateMeIfUsernameUnique(DatabaseRoutines& theRoutines, std::stringstream* commentsOnFailure);
   static bool IsAcceptableDatabaseInpuT(const std::string& input, std::stringstream* comments);
   static bool IsAcceptableCharDatabaseInpuT(char theChar);
@@ -310,17 +303,13 @@ public:
   bool ComputeAndStoreActivationToken(std::stringstream* commentsOnFailure, DatabaseRoutines& theRoutines);
   void ComputeShaonedSaltedPassword();
   bool GetActivationAbsoluteAddress
-  (std::string& output, DatabaseRoutines& theRoutines, std::stringstream& comments)
-  ;
+  (std::string& output, DatabaseRoutines& theRoutines, std::stringstream& comments);
   bool GetActivationAddress
   (std::string& output, const std::string& calculatorBase, DatabaseRoutines& theRoutines,
-   std::stringstream& comments)
-  ;
+   std::stringstream& comments);
   static std::string GetActivationAddressFromActivationToken
   (const std::string& theActivationToken, const std::string& calculatorBase,
-   const std::string& inputUserNameUnsafe, const std::string& inputEmailUnsafe
-   )
-  ;
+   const std::string& inputUserNameUnsafe, const std::string& inputEmailUnsafe);
   bool ComputeAndStoreActivationEmailAndTokens
   (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral, DatabaseRoutines& theRoutines);
   bool ComputeAndStoreActivationStats
@@ -349,91 +338,74 @@ public:
   bool startMySQLDatabaseIfNotAlreadyStarted(std::stringstream* commentsOnFailure);
   bool startMySQLDatabase(std::stringstream* commentsOnFailure, bool* outputfirstLogin);
   static std::string ToStringSuggestionsReasonsForFailure
-(const std::string& inputUsernameUnsafe, DatabaseRoutines& theRoutines, UserCalculator& theUser)
-;
+  (const std::string& inputUsernameUnsafe, DatabaseRoutines& theRoutines, UserCalculator& theUser);
   bool InsertRow
   (const std::string& primaryKeyUnsafe, const std::string& primaryValueUnsafe,
-   const std::string& tableNameUnsafe, std::stringstream* commentsOnFailure)
-  ;
+   const std::string& tableNameUnsafe, std::stringstream* commentsOnFailure);
   bool ColumnExists(const std::string& columnNameUnsafe, const std::string& tableNameUnsafe, std::stringstream& commentsStream);
-  bool CreateColumn(const std::string& columnNameNameUnsafe, const std::string& tableNameUnsafe,
-                    std::stringstream& commentsOnCreation);
+  bool CreateColumn
+  (const std::string& columnNameNameUnsafe, const std::string& tableNameUnsafe,
+   std::stringstream& commentsOnCreation);
   bool TableExists(const std::string& tableNameUnsafe, std::stringstream* commentsOnFailure);
   bool RowExists
-  (const MySQLdata& key, const MySQLdata& value, const MySQLdata& tableName, std::stringstream* comments)
-   ;
+  (const DatabaseData& key, const DatabaseData& value, const DatabaseData& tableName, std::stringstream* comments);
   bool FetchTableNames
-(List<std::string>& output, std::stringstream& comments)
-;
+  (List<std::string>& output, std::stringstream& comments);
   bool FetchTableFromDatabaseIdentifier
-(List<List<std::string> >& output,
- List<std::string>& outputColumnLabels,
- bool& outputWasTruncated, int& actualNumRowsIfTruncated,
- const std::string& tableIdentifier, std::stringstream& comments)
-;
+  (List<List<std::string> >& output,
+   List<std::string>& outputColumnLabels,
+   bool& outputWasTruncated, int& actualNumRowsIfTruncated,
+   const std::string& tableIdentifier, std::stringstream& comments);
   bool ReadProblemDatabaseInfo
   (const std::string& problemHomeName, std::string& outputString,
-   std::stringstream& commentsOnFailure)
-  ;
+   std::stringstream& commentsOnFailure);
   bool StoreProblemDatabaseInfo
-  (const UserCalculatorData& theUser, std::stringstream& commentsOnFailure)
-  ;
+  (const UserCalculatorData& theUser, std::stringstream& commentsOnFailure);
   bool FetchEntry
-  (const MySQLdata& key, const MySQLdata& valueSearchKey, const MySQLdata& tableName,
-   const MySQLdata& desiredColumn, std::string& outputUnsafe, std::stringstream* failureComments)
-  ;
-    bool SetEntry
-  (const MySQLdata& key, const MySQLdata& keyValue, const MySQLdata& table,
-   const MySQLdata& columnToSet, const MySQLdata& valueToSet,
-   std::stringstream* failureComments)
-   ;
-bool PrepareClassData
-(const std::string& classFileName, List<List<std::string> >& outputUserTable,
- List<std::string>& outputLabelsUserTable,
-  std::stringstream& commentsOnFailure)
-  ;
-bool FetchAllUsers
-(List<List<std::string> >& outputUserTable, List<std::string>& outputLabelsUserTable,
-  std::stringstream& commentsOnFailure)
-  ;
+  (const DatabaseData& key, const DatabaseData& valueSearchKey, const DatabaseData& tableName,
+   const DatabaseData& desiredColumn, std::string& outputUnsafe, std::stringstream* failureComments);
+   bool SetEntry
+  (const DatabaseData& key, const DatabaseData& keyValue, const DatabaseData& table,
+   const DatabaseData& columnToSet, const DatabaseData& valueToSet,
+   std::stringstream* failureComments);
+  bool PrepareClassData
+  (const std::string& classFileName, List<List<std::string> >& outputUserTable,
+   List<std::string>& outputLabelsUserTable,
+   std::stringstream& commentsOnFailure);
+  bool FetchAllUsers
+  (List<List<std::string> >& outputUserTable, List<std::string>& outputLabelsUserTable,
+   std::stringstream& commentsOnFailure);
   bool FetchTablE
-(List<List<std::string> >& output,
- List<std::string>& outputColumnLabels,
- bool& outputWasTruncated, int& actualNumRowsIfTruncated,
- const MySQLdata& inputTable, std::stringstream& comments)
-  ;
+  (List<List<std::string> >& output,
+   List<std::string>& outputColumnLabels,
+   bool& outputWasTruncated, int& actualNumRowsIfTruncated,
+   const DatabaseData& inputTable, std::stringstream& comments);
   bool AddUsersFromEmails
   (const std::string& emailList, const std::string& userPasswords, std::string& userRole, std::string& userGroup,
- std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers)
-
-  ;
+   std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers);
   bool SendActivationEmail
   (const std::string& emailList,
    std::stringstream* commentsOnFailure,
    std::stringstream* commentsGeneral,
-   std::stringstream* commentsGeneralSensitive
-  );
+   std::stringstream* commentsGeneralSensitive);
   bool SendActivationEmail
   (const List<std::string>& theEmails,
    std::stringstream* commentsOnFailure,
    std::stringstream* commentsGeneral,
-   std::stringstream* commentsGeneralSensitive
-  );
-
+   std::stringstream* commentsGeneralSensitive);
   std::string ToString();
   std::string ToStringAllUsersHTMLFormat();
   std::string ToStringModifyEntry();
   std::string ToStringOneEntry();
   std::string ToStringCurrentTableHTML(std::string& outputKeyColName);
   std::string ToStringAllTables();
-  std::string ToStringTablE(const MySQLdata& inputTable);
+  std::string ToStringTablE(const DatabaseData& inputTable);
   std::string ToStringTableFromTableIdentifier(const std::string& tableIdentifier, std::string& outputDatabaseKeyId);
-
   bool CreateTable
   (const std::string& tableNameUnsafe, const std::string& desiredTableContent,
    std::stringstream* commentsOnCreation, bool* outputTableNewlyCreated);
-
   static bool innerRepairDatabaseEmailRecords(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerRepairDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestDatabase(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserPassword(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSendActivationEmailUsers(Calculator& theCommands, const Expression& input, Expression& output);
@@ -447,7 +419,6 @@ bool FetchAllUsers
   static bool innerGetUserDBEntry(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDetails(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddStudentToClass(Calculator& theCommands, const Expression& input, Expression& output);
-
   DatabaseRoutines();
   ~DatabaseRoutines();
 };
@@ -468,10 +439,8 @@ public:
   bool flagQuerySucceeded;
   bool flagQueryReturnedResult;
   void close();
-  DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery, std::stringstream* outputFailureComments=0, int inputMaxNumRowsToRead=1000);
+  DatabaseQuery(DatabaseRoutines& inputParent, const std::string& inputQuery, std::stringstream* outputFailureComments = 0, int inputMaxNumRowsToRead = 1000);
   ~DatabaseQuery();
 };
-
-
 #endif // MACRO_use_MySQL
 #endif // vpfHeader7_databaseMySQL_already_included

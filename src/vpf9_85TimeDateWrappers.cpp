@@ -7,17 +7,17 @@
 static ProjectInformationInstance ProjectInfoDateAndtimeWrappers(__FILE__, "Date and time wrapper class implementation. ");
 
 TimeWrapper::TimeWrapper()
-{ this->theTime.tm_gmtoff=0;
-  this->theTime.tm_hour=0;
-  this->theTime.tm_isdst=0;
-  this->theTime.tm_mday=0;
-  this->theTime.tm_min=0;
-  this->theTime.tm_mon=0;
-  this->theTime.tm_sec=0;
-  this->theTime.tm_wday=0;
-  this->theTime.tm_yday=0;
-  this->theTime.tm_year=0;
-  this->theTime.tm_zone=0;
+{ this->theTime.tm_gmtoff = 0;
+  this->theTime.tm_hour = 0;
+  this->theTime.tm_isdst = 0;
+  this->theTime.tm_mday = 0;
+  this->theTime.tm_min = 0;
+  this->theTime.tm_mon = 0;
+  this->theTime.tm_sec = 0;
+  this->theTime.tm_wday = 0;
+  this->theTime.tm_yday = 0;
+  this->theTime.tm_year = 0;
+  this->theTime.tm_zone = 0;
 }
 
 bool TimeWrapper::AssignMonthDayYear(const std::string& input, std::stringstream& commentsOnFailure)
@@ -28,19 +28,19 @@ bool TimeWrapper::AssignMonthDayYear(const std::string& input, std::stringstream
   theDelimiters.AddOnTop('.');
   List<std::string> output;
   MathRoutines::StringSplitExcludeDelimiters(input, theDelimiters, output);
-  if (output.size<3)
+  if (output.size < 3)
   { commentsOnFailure << "Failed to extract a M/D/Y date from: " << input;
     return false;
   }
-  int month= atoi(output[0].c_str());
-  int day= atoi(output[1].c_str());
-  int year= atoi(output[2].c_str());
-  this->theTime.tm_sec=59;
-  this->theTime.tm_min=59;
-  this->theTime.tm_hour=23;
-  this->theTime.tm_mday=day;
-  this->theTime.tm_mon=month-1;
-  this->theTime.tm_year=year-1900;
+  int month = atoi(output[0].c_str());
+  int day = atoi(output[1].c_str());
+  int year = atoi(output[2].c_str());
+  this->theTime.tm_sec = 59;
+  this->theTime.tm_min = 59;
+  this->theTime.tm_hour = 23;
+  this->theTime.tm_mday = day;
+  this->theTime.tm_mon = month - 1;
+  this->theTime.tm_year = year - 1900;
   mktime(&this->theTime);
   return true;
 }
@@ -59,7 +59,7 @@ void TimeWrapper::ComputeTimeStringNonReadable()
 void TimeWrapper::AssignLocalTime()
 { std::time_t rawtime;
   time(&rawtime);
-  this->theTime=*std::gmtime(&rawtime);
+  this->theTime = *std::gmtime(&rawtime);
   mktime(&this->theTime);
   this->ComputeTimeStringNonReadable();
 }
@@ -67,32 +67,32 @@ void TimeWrapper::AssignLocalTime()
 std::string TimeWrapper::ToStringSecondsToDaysHoursSecondsString(double input, bool includeSeconds, bool beShort)
 { std::stringstream out;
   out.precision(2);
-  bool isPositive=(input>0);
+  bool isPositive = (input > 0);
   if (!isPositive)
-    input*=-1;
-  int days= (int ) FloatingPoint::floor( input/(24*3600));
-  if (beShort && days>0)
-  { double daysfloat=input/(24*3600);
+    input *= - 1;
+  int days = (int) FloatingPoint::floor(input / (24 * 3600));
+  if (beShort && days > 0)
+  { double daysfloat = input / (24 * 3600);
     out << "~" << daysfloat << " day(s)";
     return out.str();
   }
-  input-=days*24*3600;
+  input -= days * 24 * 3600;
   if (!isPositive)
     out << "-(";
   out << "~";
-  if (days>0)
+  if (days > 0)
     out << days << " day(s) ";
-  if (input>0)
-    out << std::fixed << input/3600 << " hour(s)";
+  if (input > 0)
+    out << std::fixed << input / 3600 << " hour(s)";
   if (includeSeconds && !beShort)
-    out << std::fixed << (((int)input) /60) << " minute(s) " << (((int)input) %60) << " second(s).";
+    out << std::fixed << (((int) input) / 60) << " minute(s) " << (((int) input) % 60) << " second(s).";
   if (!isPositive)
     out << ")";
   return out.str();
 }
 
 double TimeWrapper::SubtractAnotherTimeFromMeAndGet_APPROXIMATE_ResultInHours(TimeWrapper& other)
-{ return this->SubtractAnotherTimeFromMeInSeconds(other)/3600;
+{ return this->SubtractAnotherTimeFromMeInSeconds(other) / 3600;
 }
 
 double TimeWrapper::SubtractAnotherTimeFromMeInSeconds(TimeWrapper& other)
@@ -120,8 +120,8 @@ std::string TimeWrapper::ToString()
 void TimeWrapper::operator=(const std::string& input)
 { std::string inputNoDashes;
   inputNoDashes.reserve(input.size());
-  for (unsigned int i=0; i<input.size(); i++)
-    if (input[i]!='-')
+  for (unsigned int i = 0; i < input.size(); i ++)
+    if (input[i] != '-')
       inputNoDashes.push_back(input[i]);
     else
       inputNoDashes.push_back(' ');

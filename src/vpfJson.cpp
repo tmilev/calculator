@@ -136,12 +136,18 @@ bool JSData::Tokenize
   output.SetExpectedSize(input.size());
   JSData currentElt;
   bool inQuotes = false;
+  bool previousIsBackSlash = false;
   for (unsigned i = 0; i < input.size(); i ++)
   { if (input[i] == '"')
     { if (currentElt.type == currentElt.JSstring)
-      { output.AddOnTop(currentElt);
-        currentElt.reset();
-        inQuotes = false;
+      { if (previousIsBackSlash)
+        { currentElt.string[currentElt.string.size() - 1] = '\"';
+          previousIsBackSlash = false;
+        } else
+        { output.AddOnTop(currentElt);
+          currentElt.reset();
+          inQuotes = false;
+        }
       } else
       { currentElt.TryToComputeType();
         if (currentElt.type != currentElt.JSUndefined)
@@ -149,9 +155,21 @@ bool JSData::Tokenize
         currentElt.reset();
         currentElt.type = currentElt.JSstring;
         inQuotes = true;
+        previousIsBackSlash = false;
       }
       continue;
     }
+    if (inQuotes && currentElt.type == currentElt.JSstring)
+      if (input[i] == '\\')
+      { if (previousIsBackSlash)
+          previousIsBackSlash = false;
+        else
+        { previousIsBackSlash = true;
+          currentElt.string += '\\';
+        }
+        continue;
+      }
+    previousIsBackSlash = false;
     if (inQuotes && currentElt.type == currentElt.JSstring)
     { currentElt.string += input[i];
       continue;
@@ -206,7 +224,7 @@ bool JSData::readstring
   for (int i = 0; i < JSData::numEmptyTokensAtStart; i ++)
     readingStack.AddOnTop(emptyElt);
   readingStack.AddOnTop(theTokenS[0]);
-  for (int i = 0; ; )
+  for (int i = 0;;)
   { JSData& last = readingStack[(int) (readingStack.size - 1)];
     JSData& secondToLast = readingStack[(int) (readingStack.size - 2)];
     JSData& thirdToLast  = readingStack[(int) (readingStack.size - 3)];
@@ -285,7 +303,7 @@ bool JSData::readstring
 template <typename somestream>
 somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) const
 { std::string theIndentation = "";
-  for (int i = 0; i < indentation; i++)
+  for (int i = 0; i < indentation; i ++)
   { if (!useHTML)
       theIndentation += "";
     else

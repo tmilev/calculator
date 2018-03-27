@@ -20,30 +20,30 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra
   HashedList<ChevalleyGenerator> seedMons;
   ProgressReport theReport;
   List<ElementSemisimpleLieAlgebra<coefficient> > inputLinIndep;
-  for (int i=0; i<inputOutputGenerators.size; i++)
+  for (int i = 0; i < inputOutputGenerators.size; i ++)
   { inputLinIndep.AddOnTop(inputOutputGenerators[i]);
-    if (theBracket.GetRankOfSpanOfElements(inputLinIndep, &seedMons)< inputLinIndep.size)
+    if (theBracket.GetRankOfSpanOfElements(inputLinIndep, &seedMons) < inputLinIndep.size)
       inputLinIndep.RemoveLastObject();
   }
   inputOutputGenerators=inputLinIndep;
-  for (int i=0; i<inputOutputGenerators.size; i++)
-    for (int j=i+1; j<inputOutputGenerators.size; j++)
+  for (int i = 0; i < inputOutputGenerators.size; i ++)
+    for (int j = i + 1; j < inputOutputGenerators.size; j ++)
     { if (theGlobalVariables.flagReportEverything)
       { std::stringstream reportStream;
         reportStream << "Generating Lie subalgebra of a semisimple Lie algebra. "
         << "I am taking the Lie bracket of elements "
-        << i+1 << " and " << j+1 << " out of " << inputOutputGenerators.size;
+        << i + 1 << " and " << j + 1 << " out of " << inputOutputGenerators.size;
         theReport.Report(reportStream.str());
       }
       this->LieBracket(inputOutputGenerators[i], inputOutputGenerators[j], theBracket);
       inputOutputGenerators.AddOnTop(theBracket);
-      if (theBracket.GetRankOfSpanOfElements(inputOutputGenerators, &seedMons)<inputOutputGenerators.size)
+      if (theBracket.GetRankOfSpanOfElements(inputOutputGenerators, &seedMons) < inputOutputGenerators.size)
         inputOutputGenerators.RemoveLastObject();
     }
 }
 
 bool SemisimpleLieAlgebra::CheckConsistency()const
-{ if (this==0)
+{ if (this == 0)
     crash << "This pointer of semisimple Lie algebra is zero. " << crash;
   if (this->flagDeallocated)
     crash << "This is a programming error: use after free of SemisimpleLieAlgebra. " << crash;
@@ -57,31 +57,31 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptFindingHEF");
   List<Polynomial<AlgebraicNumber> > theSystem;
   GroebnerBasisComputation<AlgebraicNumber> theComputation;
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > mustBeZero, tempE;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > mustBeZero;
   this->LieBracket(inputOutputH, inputOutputE, mustBeZero);
-  mustBeZero-=inputOutputE*2;
-  for (int i=0; i<mustBeZero.size(); i++)
+  mustBeZero -= inputOutputE * 2;
+  for (int i = 0; i < mustBeZero.size(); i ++)
     theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
   this->LieBracket(inputOutputH, inputOutputF, mustBeZero);
-  mustBeZero+=inputOutputF*2;
-  for (int i=0; i<mustBeZero.size(); i++)
+  mustBeZero += inputOutputF * 2;
+  for (int i = 0; i < mustBeZero.size(); i ++)
     theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
   this->LieBracket(inputOutputE, inputOutputF, mustBeZero);
-  mustBeZero-=inputOutputH;
-  for (int i=0; i<mustBeZero.size(); i++)
+  mustBeZero -= inputOutputH;
+  for (int i = 0; i < mustBeZero.size(); i ++)
     theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
-  if(logStream!=0)
+  if (logStream != 0)
   { *logStream << "The system to solve: ";
-    for (int i=0; i<theSystem.size; i++)
+    for (int i = 0; i < theSystem.size; i ++)
       *logStream << "<br>" << theSystem[i].ToString() << " = 0 ";
   }
-  theComputation.MaxNumSerreSystemComputationsPreferred=4001;
-  theComputation.MaxNumGBComputations=2001;
-  theComputation.thePolynomialOrder.theMonOrder=
+  theComputation.MaxNumSerreSystemComputationsPreferred = 4001;
+  theComputation.MaxNumGBComputations = 2001;
+  theComputation.thePolynomialOrder.theMonOrder =
   MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
   theComputation.SolveSerreLikeSystem(theSystem);
   if (!theComputation.flagSystemSolvedOverBaseField)
-  { if (logStream!=0)
+  { if (logStream != 0)
     { if (theComputation.flagSystemProvenToHaveNoSolution)
         *logStream << "<br><b>System proven to have no solution. </b>";
       if (theComputation.flagSystemProvenToHaveSolution)
@@ -89,14 +89,14 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF
     }
     return false;
   }
-  if (logStream!=0)
+  if (logStream != 0)
     *logStream << "Solved successfully! One solution: " << theComputation.ToStringSerreLikeSolution();
   PolynomialSubstitution<AlgebraicNumber> theSolutionSub;
   theComputation.GetSubFromPartialSolutionSerreLikeSystem(theSolutionSub);
   inputOutputF.SubstitutionCoefficients(theSolutionSub);
   inputOutputH.SubstitutionCoefficients(theSolutionSub);
   inputOutputE.SubstitutionCoefficients(theSolutionSub);
-  if (logStream!=0)
+  if (logStream != 0)
     *logStream << "<br>H= " << inputOutputH.ToString() << "<br>E=" << inputOutputE.ToString() << "<br>F=" << inputOutputF.ToString();
   return true;
 }
@@ -108,23 +108,23 @@ bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan
   Matrix<AlgebraicNumber> theM;
   this->GetAd(theM, theE);
   MatrixTensor<AlgebraicNumber> theMatTensor, theId;
-  theMatTensor=theM;
+  theMatTensor = theM;
   theId.MakeId(theM.NumRows);
   MathRoutines::RaiseToPower(theMatTensor, this->GetNumPosRoots(), theId);
   if (!theMatTensor.IsEqualToZero())
-  { if (logStream!=0)
+  { if (logStream != 0)
       *logStream << "The input E element " << theE.ToString() << " is not nilpotent. The matrix tensor is: " << theMatTensor.ToString() ;
     return false;
   }
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > unknownH, unknownF, knownE;
-  knownE=theE;
+  knownE = theE;
   this->GetGenericElementCartan(unknownH, 0);
   this->GetGenericElementNegativeBorelNilradical(unknownF, this->GetRank());
-  bool success= this->AttempTFindingHEF(unknownH, knownE, unknownF, logStream);
+  bool success = this->AttempTFindingHEF(unknownH, knownE, unknownF, logStream);
   if (!success)
     return false;
-  outputH=unknownH;
-  outputF=unknownF;
+  outputH = unknownH;
+  outputF = unknownF;
   return true;
 }
 

@@ -29,14 +29,18 @@ class SparseSubspaceBasis
   bool CheckConsistency() const
   { if (this->flagDeallocated)
       crash << "This is a programming error: use of SparseSubspaceBasis after free. " << crash;
-    for (int i=0; i<this->involvedMonomials.size; i++)
+    for (int i = 0; i < this->involvedMonomials.size; i ++)
     { this->involvedMonomials[i].CheckConsistency();
     }
     this->projectionOperator.CheckConsistency();
     return true;
   }
-  SparseSubspaceBasis(){this->flagDeallocated=false;}
-  ~SparseSubspaceBasis(){this->flagDeallocated=true;}
+  SparseSubspaceBasis()
+  { this->flagDeallocated = false;
+  }
+  ~SparseSubspaceBasis()
+  { this->flagDeallocated = true;
+  }
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
   std::string ToString() const;
@@ -45,19 +49,18 @@ class SparseSubspaceBasis
 template <class templateVector, class templateMonomial, class coefficient>
 void SparseSubspaceBasis<templateVector, templateMonomial, coefficient>::SetBasis(const List<templateVector>& basis)
 { this->CheckConsistency();
-  if(basis.size == 0)
+  if (basis.size == 0)
     return;
-  for(int i=0; i<basis.size; i++)
-    for(int j=0; j<basis[i].theMonomials.size; j++)
+  for (int i = 0; i < basis.size; i ++)
+    for (int j = 0; j < basis[i].theMonomials.size; j ++)
       this->involvedMonomials.BSInsertDontDup(basis[i].theMonomials[j]);
   Matrix<coefficient> basisMatrix;
   basisMatrix.init(this->involvedMonomials.size, basis.size);
-  for(int j=0; j<basis.size; j++)
-    for(int i=0; i<involvedMonomials.size; i++)
+  for (int j = 0; j < basis.size; j ++)
+    for (int i = 0; i < involvedMonomials.size; i ++)
       basisMatrix.elements[i][j] = basis[j].GetMonomialCoefficient(involvedMonomials[i]);
   Matrix<coefficient> basisMatrixT = basisMatrix;
   basisMatrixT.Transpose();
-  Matrix<coefficient> tmp;
   basisMatrix.MultiplyOnTheLeft(basisMatrixT,this->projectionOperator);
   this->projectionOperator.Invert();
   this->projectionOperator *= basisMatrixT;
@@ -68,7 +71,7 @@ template <class templateVector, class templateMonomial, class coefficient>
 void SparseSubspaceBasis<templateVector,templateMonomial,coefficient>::DenseVectorInBasis(Vector<coefficient>& out, const templateVector& in)
 { Vector<coefficient> inDense;
   inDense.SetSize(this->involvedMonomials.size);
-  for(int i=0; i<involvedMonomials.size; i++)
+  for (int i = 0; i < involvedMonomials.size; i ++)
     inDense[i] = in.GetMonomialCoefficient(involvedMonomials[i]);
   out = this->projectionOperator * inDense;
 }

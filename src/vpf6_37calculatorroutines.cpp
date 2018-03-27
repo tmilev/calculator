@@ -486,12 +486,12 @@ bool CalculatorFunctionsGeneral::innerTestJSON(Calculator& theCommands, const Ex
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestJSON");
   std::string inputString;
   if (!input.IsOfType(&inputString))
-    inputString=input.ToString();
+    inputString = input.ToString();
   JSData theData;
   std::stringstream out;
   if (!theData.readstring(inputString, &out))
     return output.AssignValue(out.str(), theCommands);
-  out << "<hr>Output: <br>"
+  out << "Input:<br>" << HtmlRoutines::ConvertStringToHtmlString(inputString, false) << "<hr>Output: <br>"
   << theData.ToString(true);
   return output.AssignValue(out.str(), theCommands);
 }

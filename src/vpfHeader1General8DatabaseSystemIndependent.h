@@ -3,11 +3,10 @@
 #ifndef vpfHeader1General8DatabaseSystemIndependent_already_included
 #define vpfHeader1General8DatabaseSystemIndependent_already_included
 
-
 #include "vpfHeader1General0_General.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemIndependentinstance(__FILE__, "Header, system independent database data structures. ");
 
-class MySQLdata
+class DatabaseData
 {
 //This class is needed to attempt to deal with mySQL's
 //numerous design errors, to the extent possible.
@@ -26,10 +25,10 @@ class MySQLdata
 //the sequence we care about and want stored/loaded from DB.
 public:
   std::string value;
-  MySQLdata(const std::string& other)
+  DatabaseData(const std::string& other)
   { this->value = other;
   }
-  MySQLdata(){}
+  DatabaseData(){}
   bool operator==(const std::string& other)
   { return this->value == other;
   }
@@ -79,16 +78,16 @@ class UserCalculatorData
   public:
   double approximateHoursSinceLastTokenWasIssued;
   std::string usernamePlusPassWord;
-  MySQLdata userId;
-  MySQLdata username;
-  MySQLdata email;
-  MySQLdata currentTable;
-  MySQLdata timeOfActivationTokenCreation;
-  MySQLdata actualActivationToken;
-  MySQLdata enteredActivationToken;
-  MySQLdata enteredAuthenticationToken;
-  MySQLdata actualAuthenticationToken;
-  MySQLdata problemDataString;
+  DatabaseData userId;
+  DatabaseData username;
+  DatabaseData email;
+  DatabaseData currentTable;
+  DatabaseData timeOfActivationTokenCreation;
+  DatabaseData actualActivationToken;
+  DatabaseData enteredActivationToken;
+  DatabaseData enteredAuthenticationToken;
+  DatabaseData actualAuthenticationToken;
+  DatabaseData problemDataString;
   CourseAndUserInfo courseInfo;
 
   std::string enteredPassword;
@@ -114,6 +113,7 @@ class UserCalculatorData
   bool flagStopIfNoLogin;
   bool flagUserHasActivationToken;
   bool flagUserHasNoPassword;
+  JSData ToJSON();
   UserCalculatorData();
   bool AssignCourseInfoString(std::stringstream* errorStream);
   std::string ToStringIdSectionCourse();
@@ -123,18 +123,24 @@ class UserCalculatorData
   std::string ToStringUnsecure();
 };
 
-struct DatabaseStrings{
+struct DatabaseStrings
+{
   static List<std::string> modifyableColumns;
 public:
 ///credentials of calculator to use database
   static std::string theDatabaseUser;
   static std::string theDatabaseName;
+  static std::string theDatabaseNameMongo;
 ///user column names
-  static std::string columnUserId;
-  static std::string columnUsername;
-  static std::string columnEmail;
+  static std::string labelUserId;
+  static std::string labelUsername;
+  static std::string labelEmail;
+  static std::string labelPassword;
+  static std::string labelCourseInfo;
+  static std::string labelAuthenticationToken;
+  static std::string labelUserRole;
+  static std::string labelProblemData;
   static std::string tableUsers;
-  static std::string columnCourseInfo;
 ///course info column names
   static std::string columnCurrentCourses;
   static std::string columnSection;

@@ -14,11 +14,11 @@ FormatExpressions::GetMonOrder<ClassFunction<WeylGroupData::WeylGroupBase, Ratio
 }
 
 bool WeylGroupData::CheckConsistency()const
-{ if (this==0)
+{ if (this == 0)
     crash << "The this pointer of a Weyl group is zero. " << crash;
   if (this->flagDeallocated)
     crash << "This is a programming error: use after free of WeylGroup. " << crash;
-  for (int i=0; i<this->theGroup.generators.size; i++)
+  for (int i = 0; i < this->theGroup.generators.size; i ++)
     this->theGroup.generators[i].CheckConsistency();
   this->RootsOfBorel.CheckConsistency();
   return true;
@@ -26,7 +26,7 @@ bool WeylGroupData::CheckConsistency()const
 
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::CheckInitializationFDrepComputation()const
-{ if (this->theElements.size==0)
+{ if (this->theElements.size == 0)
   { crash << "This is a programming error: requesting to compute character hermitian product in a group whose "
     << "conjugacy classes and/or elements have not been computed. The group reports to have "
     << this->ConjugacyClassCount() << " conjugacy classes and " << this->theElements.size << " elements. "
@@ -38,16 +38,16 @@ bool FiniteGroup<elementSomeGroup>::CheckInitializationFDrepComputation()const
 
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::CheckInitializationConjugacyClasses()const
-{ if (this->ConjugacyClassCount()==0)
+{ if (this->ConjugacyClassCount() == 0)
   { crash << "This is a programming error: requesting to compute character hermitian product in a group whose "
     << "conjugacy classes and/or elements have not been computed. The group reports to have "
     << this->ConjugacyClassCount() << " conjugacy classes and " << this->theElements.size << " elements. "
     << crash;
     return false;
   }
-  for (int i=0; i<this->irreps.size; i++)
+  for (int i = 0; i < this->irreps.size; i ++)
     if (this->irreps[i].theCharacteR.data.IsEqualToZero())
-    { crash << "This is a programming error: irrep number " << i+1 << " has zero character!" << crash;
+    { crash << "This is a programming error: irrep number " << i + 1 << " has zero character!" << crash;
       return false;
     }
 /*  Rational sumSquares=0;
@@ -64,8 +64,8 @@ bool FiniteGroup<elementSomeGroup>::CheckInitializationConjugacyClasses()const
 template <typename somegroup, typename coefficient>
 bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckAllSimpleGensAreOK()const
 { this->CheckInitialization();
-  for (int i=0; i<this->ownerGroup->generators.size; i++)
-    if (this->generatorS[i].NumRows==0)
+  for (int i = 0; i < this->ownerGroup->generators.size; i ++)
+    if (this->generatorS[i].NumRows == 0)
     { crash << "This is a programming error: working with a representation in which the action of the simple generators is not computed. " << crash;
       return false;
     }
@@ -78,16 +78,16 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::CheckRepIsMu
   tempList.AddOnTop(this->theElementImages);
   Matrix<Rational> tempMat;
   ElementWeylGroup<WeylGroupData> tempElt;
-  for (int i=0; i<tempList.size; i++)
-    for (int j=0; j<tempList.size; j++)
-    { tempMat=tempList[i];
+  for (int i = 0; i < tempList.size; i ++)
+    for (int j = 0; j < tempList.size; j ++)
+    { tempMat = tempList[i];
       tempMat.MultiplyOnTheLeft(tempList[j]);
-      tempElt=this->ownerGroup->theElements[j];
-      tempElt*=this->ownerGroup->theElements[i];
+      tempElt = this->ownerGroup->theElements[j];
+      tempElt *= this->ownerGroup->theElements[i];
       tempElt.MakeCanonical();
-      int targetIndex=this->ownerGroup->theElements.GetIndex(tempElt);
-      if (!(tempMat==this->theElementImages[targetIndex]))
-        crash << "this is a programming error: element " << i+1 << " times element "<< j+1 << " is outside of the set, i.e.,  "
+      int targetIndex = this->ownerGroup->theElements.GetIndex(tempElt);
+      if (!(tempMat == this->theElementImages[targetIndex]))
+        crash << "this is a programming error: element " << i + 1 << " times element " << j + 1 << " is outside of the set, i.e.,  "
         << tempList[i].ToString() << " * " << tempList[j].ToString() << " is bad. " << crash;
     }
 }
@@ -145,17 +145,17 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ComputeAllEl
   this->theElementImageS[0].MakeIdMatrix(this->GetDim());
   auto currentElt = this->ownerGroup->generators[0];
   currentElt.MakeID(this->ownerGroup->generators[0]);
-  int theRank=this->ownerGroup->generators.size;
+  int theRank = this->ownerGroup->generators.size;
   auto& theGens = this->ownerGroup->generators;
 
   ElementsExplored.AddOnTop(currentElt);
-  for (int i=0; i<ElementsExplored.size; i++)
-  { int indexParentElement=this->ownerGroup->theElements.GetIndex(ElementsExplored[i]);
-    for (int j=0; j<theRank; j++)
-    { currentElt=theGens[j]* ElementsExplored[i];
+  for (int i = 0; i < ElementsExplored.size; i ++)
+  { int indexParentElement = this->ownerGroup->theElements.GetIndex(ElementsExplored[i]);
+    for (int j = 0; j < theRank; j ++)
+    { currentElt = theGens[j] * ElementsExplored[i];
       if (!ElementsExplored.Contains(currentElt))
-      { int indexCurrentElt=this->ownerGroup->theElements.GetIndex(currentElt);
-        this->theElementIsComputed[indexCurrentElt]=true;
+      { int indexCurrentElt = this->ownerGroup->theElements.GetIndex(currentElt);
+        this->theElementIsComputed[indexCurrentElt] = true;
         this->theElementImageS[indexParentElement].MultiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
         ElementsExplored.AddOnTop(currentElt);
       }
@@ -176,51 +176,51 @@ template <typename somegroup, typename coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::operator*=(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::operator*=");
   //lazy programmers handling://////
-  if (&other==this )
+  if (&other == this )
   { GroupRepresentationCarriesAllMatrices<somegroup, coefficient> otherCopy;
-    otherCopy=other;
-    *this*=otherCopy;
+    otherCopy = other;
+    *this *= otherCopy;
     return;
   }
   //////////////////////////////////
-  if (this->ownerGroup!=other.ownerGroup)
+  if (this->ownerGroup != other.ownerGroup)
     crash << "This is a programming error: attempting to multiply representations with different owner groups. " << crash;
   if (!this->flagCharacterIsComputed || !other.flagCharacterIsComputed)
     crash << "Attempting to multiply weyl group reps whose characters have not been computed. " << crash;
   GroupRepresentationCarriesAllMatrices<somegroup, coefficient> output;
   output.init(*this->ownerGroup);
-  output.theCharacteR=this->theCharacteR;
-  output.theCharacteR*=other.theCharacteR;
-  for (int i=0; i<output.generatorS.size; i++)
+  output.theCharacteR = this->theCharacteR;
+  output.theCharacteR *= other.theCharacteR;
+  for (int i = 0; i < output.generatorS.size; i ++)
     output.generatorS[i].AssignTensorProduct(this->generatorS[i], other.generatorS[i]);
-  for(int i=0; i<output.theElementImageS.size; i++)
+  for (int i = 0; i < output.theElementImageS.size; i ++)
     if (this->theElementIsComputed[i] && other.theElementIsComputed[i])
-    { output.theElementImageS[i].AssignTensorProduct(this->theElementImageS[i],other.theElementImageS[i]);
-      output.theElementIsComputed[i]=true;
+    { output.theElementImageS[i].AssignTensorProduct(this->theElementImageS[i], other.theElementImageS[i]);
+      output.theElementIsComputed[i] = true;
     }
-  *this=output;
+  *this = output;
 }
 
 template <typename somegroup, typename coefficient>
 void GroupRepresentation<somegroup, coefficient>::operator*=(const GroupRepresentation<somegroup, coefficient>& other)
 { MacroRegisterFunctionWithName("GroupRepresentation::operator*=");
   //lazy programmers handling://////
-  if (&other==this )
+  if (&other == this )
   { GroupRepresentation<somegroup, coefficient> otherCopy;
-    otherCopy=other;
-    *this*=otherCopy;
+    otherCopy = other;
+    *this *= otherCopy;
     return;
   }
   //////////////////////////////////
-  if (this->ownerGroup!=other.ownerGroup)
+  if (this->ownerGroup != other.ownerGroup)
     crash << "This is a programming error: attempting to multiply representations with different owner groups. " << crash;
   if (!this->flagCharacterIsComputed || !other.flagCharacterIsComputed)
     crash << "Attempting to multiply weyl group reps whose characters have not been computed. " << crash;
   GroupRepresentation<somegroup, coefficient> output;
   output.ownerGroup = this->ownerGroup;
-  output.theCharacteR=this->theCharacteR;
-  output.theCharacteR*=other.theCharacteR;
-  for (int i=0; i<output.generatorS.size; i++)
+  output.theCharacteR = this->theCharacteR;
+  output.theCharacteR *= other.theCharacteR;
+  for (int i = 0; i < output.generatorS.size; i ++)
     output.generatorS[i].AssignTensorProduct(this->generatorS[i], other.generatorS[i]);
   *this=output;
 }
@@ -231,15 +231,15 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict
  GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::Restrict");
   this->CheckAllSimpleGensAreOK();
-  if (VectorSpaceBasisSubrep.size==0)
+  if (VectorSpaceBasisSubrep.size == 0)
     crash << "This is a programming error: restriction of representation to a zero subspace is not allowed. " << crash;
   output.init(*this->ownerGroup);
   output.basis = VectorSpaceBasisSubrep;
   output.basis.GetGramMatrix(output.gramMatrixInverted, 0);
   output.gramMatrixInverted.Invert();
-  output.theCharacteR=remainingCharacter;
+  output.theCharacteR = remainingCharacter;
   ProgressReport theReport;
-  for(int i=0; i<this->generatorS.size; i++)
+  for (int i = 0; i < this->generatorS.size; i ++)
   { if (theGlobalVariables.flagReportEverything)
     { std::stringstream reportStream;
       reportStream << "Restricting the action of generator of index " << i;
@@ -266,14 +266,15 @@ void GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::Restrict
 }
 
 template <typename somegroup, typename coefficient>
-bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTodorsVersion(VirtualRepresentation<somegroup, coefficient>& outputIrrepMults,
-                                                                                           List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >* appendOnlyGRCAMSList)
+bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTodorsVersion
+(VirtualRepresentation<somegroup, coefficient>& outputIrrepMults,
+ List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >* appendOnlyGRCAMSList)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeTodorsVersion");
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   outputIrrepMults.MakeZero();
   List<GroupRepresentation<somegroup, coefficient> > appendOnlyIrrepsList;
-  for(int i=0; i<this->ownerGroup->irreps.size; i++)
+  for(int i = 0; i<this->ownerGroup->irreps.size; i ++)
     appendOnlyIrrepsList.AddOnTop(this->ownerGroup->irreps[i]);
   return this->DecomposeTodorsVersionRecursive(outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList);
 }
@@ -288,17 +289,17 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
   Vector<Element> theEigenValueCandidate;
   theEigenValueCandidate.SetSize(1);
   Matrix<Rational> tempMat;
-  for(int ii=0; ii<upperLimitComputations; ii++)
-  { int i = ((ii+1)/2) * (2*(ii%2)-1); // 0,1,-1,2,-2,3,-3,...
+  for(int ii = 0; ii < upperLimitComputations; ii ++)
+  { int i = ((ii + 1) / 2) * (2 * (ii % 2) - 1); // 0,1,-1,2,-2,3,-3,...
 //    stOutput << "checking " << i << " found " << found << "\n";
     theEigenValueCandidate[0] = i;
     if(theMinPoly.Evaluate(theEigenValueCandidate) == 0)
     { tempMat = *this;
 //      stOutput << "<hr>The min poly is: " << theMinPoly.ToString() << " and evaluates at "
 //      << theEigenValueCandidate << " to " << theMinPoly.Evaluate(theEigenValueCandidate).ToString();
-      output.SetSize(output.size+1);
+      output.SetSize(output.size + 1);
       tempMat.GetEigenspaceModifyMe(theEigenValueCandidate[0], *output.LastObject());
-      if (output.LastObject()->size==0)
+      if (output.LastObject()->size == 0)
         crash << "This is a programmig error: " << theEigenValueCandidate[0].ToString() << " is a zero of the minimal polynomial "
         << theMinPoly.ToString() << " of the operator " << this->ToString() << " but the corresponding eigenspace is empty. " << crash;
 //      stOutput << " <br> And the resulting eigenspace is: " << *output.LastObject();
@@ -320,11 +321,11 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
   // theRepresentations will be this->theGroup->irreps
   // currently we have the difficulty with GroupRepresentation<WeylGroup, coefficient> vs
   // GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroup> >, coefficient>
-  if((letters.size == 1)&&(letters[0] == 'A'))
+  if ((letters.size == 1)&&(letters[0] == 'A'))
   { int theRank = ranks[0];
     List<Partition> thePartitions;
-    Partition::GetPartitions(thePartitions,theRank+1);
-    for(int i=0; i<thePartitions.size; i++)
+    Partition::GetPartitions(thePartitions,theRank + 1);
+    for (int i = 0; i < thePartitions.size; i ++)
     { GroupRepresentation<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> irrep;
       thePartitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(irrep.generatorS);
       irrep.ownerGroup = &G;
@@ -333,7 +334,7 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
       G.AddIrreducibleRepresentation(irrep);
     }
   }
-  else if((letters.size == 1)&&(letters[0] == 'B'))
+  else if ((letters.size == 1) && (letters[0] == 'B'))
   { int theRank = ranks[0];
     HyperoctahedralGroupData HOG;
     HOG.MakeHyperoctahedralGroup(theRank);
@@ -341,9 +342,9 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
     GroupHomomorphism<ElementWeylGroup<WeylGroupData>, ElementHyperoctahedralGroupR2> phi;
     phi.preimageGroup = &G;
     phi.generatorImages.SetSize(G.generators.size);
-    for(int i=0; i<phi.generatorImages.size-1; i++)
-      phi.generatorImages[i].h.AddTransposition(i,i+1);
-    for(int i=0; i<phi.generatorImages.size-1; i++)
+    for (int i = 0; i < phi.generatorImages.size - 1; i ++)
+      phi.generatorImages[i].h.AddTransposition(i, i + 1);
+    for (int i = 0; i < phi.generatorImages.size - 1; i ++)
       phi.generatorImages.LastObject()->k.ToggleBit(i);
     stOutput << "Generator commutation relations of groups\n";
     stOutput << HOG.theGroup->PrettyPrintGeneratorCommutationRelations();
@@ -352,27 +353,27 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
     stOutput << phiG.PrettyPrintGeneratorCommutationRelations();
     stOutput << G.PrettyPrintGeneratorCommutationRelations();
     stOutput << "pulling back irreps:\n";
-    for(int i=0; i<HOG.theGroup->irreps.size; i++)
+    for (int i = 0; i < HOG.theGroup->irreps.size; i ++)
     { auto irrep = phi.PullbackRepresentation(HOG.theGroup->irreps[i]);
       irrep.ComputeCharacter();
       stOutput << HOG.theGroup->irreps[i].theCharacteR << "->" << irrep.theCharacteR << '\n';
       G.AddIrreducibleRepresentation(irrep);
     }
   }
-  else if((letters.size == 1) && (letters[0] == 'D'))
+  else if ((letters.size == 1) && (letters[0] == 'D'))
   { int theRank = ranks[0];
     HyperoctahedralGroupData HOG;
-    HOG.MakeHyperoctahedralGroup(theRank+1);
+    HOG.MakeHyperoctahedralGroup(theRank + 1);
     GroupHomomorphism<ElementWeylGroup<WeylGroupData>, ElementHyperoctahedralGroupR2> inclusionMap;
     inclusionMap.preimageGroup = &G;
     inclusionMap.generatorImages.SetSize(G.generators.size);
-    for(int i=0; i<inclusionMap.generatorImages.size-1; i++)
-    { inclusionMap.generatorImages[i].h.AddTransposition(i,i+1);
+    for (int i = 0; i < inclusionMap.generatorImages.size - 1; i ++)
+    { inclusionMap.generatorImages[i].h.AddTransposition(i, i + 1);
       inclusionMap.generatorImages[i].k.ToggleBit(i);
-      inclusionMap.generatorImages[i].k.ToggleBit(i+1);
+      inclusionMap.generatorImages[i].k.ToggleBit(i + 1);
     }
-    int oneortwo = (inclusionMap.generatorImages.size+1)%2;
-    for(int i=0; i<inclusionMap.generatorImages.size-1-oneortwo; i++)
+    int oneortwo = (inclusionMap.generatorImages.size + 1) % 2;
+    for (int i = 0; i < inclusionMap.generatorImages.size - 1 - oneortwo; i ++)
       inclusionMap.generatorImages.LastObject()->k.ToggleBit(i);
 
     FiniteGroup<ElementHyperoctahedralGroupR2> imG;
@@ -391,29 +392,29 @@ void WeylGroupData::ComputeIrreducibleRepresentationsWithFormulasImplementation(
 
 bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output, bool useOuter)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant");
-  if (input.children.size<2)
+  if (input.children.size < 2)
     return output.MakeError("Raising to maximally dominant takes at least 2 arguments, type and vector", theCommands);
-  const Expression& theSSalgebraNode=input[1];
+  const Expression& theSSalgebraNode = input[1];
   SemisimpleLieAlgebra* theSSalgebra;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   Vectors<Rational> theHWs;
-  theHWs.SetSize(input.children.size-2);
-  bool isGood=true;
-  for (int i=2; i<input.children.size; i++)
-    if (!theCommands.GetVectoR<Rational>(input[i], theHWs[i-2], 0, theSSalgebra->GetRank()))
-    { isGood=false;
+  theHWs.SetSize(input.children.size - 2);
+  bool isGood = true;
+  for (int i = 2; i < input.children.size; i ++)
+    if (!theCommands.GetVectoR<Rational>(input[i], theHWs[i - 2], 0, theSSalgebra->GetRank()))
+    { isGood = false;
       break;
     }
-  if (!isGood && input.children.size==3)
+  if (!isGood && input.children.size == 3)
   { //stOutput << "here be i";
     Matrix<Rational> theHWsMatForm;
     if (theCommands.GetMatrix(input[2], theHWsMatForm, 0, theSSalgebra->GetRank()))
     { theHWsMatForm.GetVectorsFromRows(theHWs);
-      isGood=true;
+      isGood = true;
     }
   }
-  if (theHWs.size==0 || !isGood)
+  if (theHWs.size == 0 || !isGood)
     return output.MakeError("Failed to extract rational vectors from expression " + input.ToString() + ". ", theCommands);
   std::stringstream out;
   out << "Input: " << theHWs.ToString()

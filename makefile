@@ -23,8 +23,7 @@ FEATUREFLAGS= -std=c++0x -pthread -fopenmp
 CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
 LDFLAGS=$(FEATUREFLAGS)
 LIBRARYINCLUDESEND=
-LIBRARYINCLUDESEND+=-lmongoc-1.0 -lbson-1.0
-INCLUDEDIRS = -I/usr/include/libmongoc-1.0 -I/usr/include/libbson-1.0
+INCLUDEDIRS=
 
 LD_LIBRARY_PATH=LD_LIBRARY_PATH:
 
@@ -84,7 +83,7 @@ $(info [1;31mNOT FOUND: Openssl.[0m I will attempt to install it once the calc
 endif
 endif
 
-ifeq ($(nosql),1)
+ifeq ($(nosql), 1)
 $(info [1;33mNo mysql requested.[0m) 
 else
 mysqlLocation=
@@ -102,14 +101,32 @@ else
 $(info [1;31mNOT FOUND: Mysql.[0m I will attempt to install it once the calculator is compiled.) 
 endif
 endif
+
+ifeq ($(noMongo), 1)
+$(info [1;33mNo mongo requested.[0m) 
+else
+mongoLocation =
+ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),)#location of mongoC in Ubuntu
+  INCLUDEDIRS = -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0
+  mongoLocation = /usr/local/
+endif
+ifneq ($(mongoLocation),)
+  CFLAGS+= -DMACRO_use_MySQL
+  LIBRARYINCLUDESEND+=-lmongoc-1.0 -lbson-1.0
+$(info [1;32mMongo found.[0m) 
+else
+$(info [1;31mNOT FOUND: Mongo.[0m I will attempt to install it once the calculator is compiled.) 
+endif
+endif
 ########################
 ########################
 
-$(info Compiling with flags: $(LIBRARYINCLUDESEND)) 
+$(info Compiling with flags and dirs: $(INCLUDEDIRS) $(LIBRARYINCLUDESEND)) 
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
 SOURCES=\
 ./src/databasemongo.cpp \
+./src/database_mongo_calculator.cpp \
 ./src/webserver.cpp \
 ./src/web-routines-1.cpp \
 ./src/database.cpp \

@@ -1,26 +1,34 @@
+#ifdef MACRO_use_MongoDB
 #include <mongoc.h>
 #include <bcon.h>
+mongoc_client_t* databaseClient = 0;
+#endif //MACRO_use_MongoDB
 #include "vpfheader7databaseinterface_mongodb.h"
 #include "vpfJson.h"
 ProjectInformationInstance ProjectInfoVpfDatabaseMongo(__FILE__, "Database mongoDB.");
 
 int DatabaseRoutinesGlobalFunctionsMongo::numDatabaseInstancesMustBeOneOrZero = 0;
 DatabaseRoutinesGlobalFunctionsMongo databaseMongo;
-mongoc_client_t* databaseClient = 0;
 
 extern logger logWorker;
 
 DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo()
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo");
+#ifdef MACRO_use_MongoDB
   mongoc_init();
   databaseClient = mongoc_client_new ("mongodb://localhost:27017");
+#endif
 }
 
 DatabaseRoutinesGlobalFunctionsMongo::~DatabaseRoutinesGlobalFunctionsMongo()
-{ mongoc_client_destroy(databaseClient);
+{
+#ifdef MACRO_use_MongoDB
+  mongoc_client_destroy(databaseClient);
   mongoc_cleanup();
+#endif
 }
 
+#ifdef MACRO_use_MongoDB
 class MongoCollection
 {
 public:
@@ -163,6 +171,7 @@ bool MongoQuery::FindMultiple(List<std::string>& output, std::stringstream* comm
   }
   return true;
 }
+#endif
 
 bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString
 (const std::string& collectionName, const std::string& findQuery,
@@ -182,6 +191,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
  List<std::string>& output, int maxOutputItems,
  long long* totalItems, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON");
+#ifdef MACRO_use_MongoDB
   logWorker << logger::blue << "Query input JSON: " << findQuery.ToString() << logger::endL;
   //stOutput << "Find query: " << theData.ToString();
   MongoQuery query;
@@ -192,12 +202,23 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
   if (totalItems != 0)
     *totalItems = query.totalItems;
   return result;
+#else
+  (void) collectionName;
+  (void) findQuery;
+  (void) output;
+  (void) maxOutputItems;
+  (void) totalItems;
+  if (commentsOnFailure != 0)
+    *commentsOnFailure << "Project compiled without mongoDB support. ";
+  return false;
+#endif
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
 (const std::string& collectionName, const JSData& findQuery,
  std::string& output, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON");
+#ifdef MACRO_use_MongoDB
   logWorker << logger::blue << "Query input: " << findQuery.ToString() << logger::endL;
   MongoQuery query;
 
@@ -210,12 +231,21 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
     return false;
   output = outputList[0];
   return true;
+#else
+  (void) collectionName;
+  (void) findQuery;
+  (void) output;
+  if (commentsOnFailure != 0)
+    *commentsOnFailure << "Project compiled without mongoDB support. ";
+  return false;
+#endif
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
 (const std::string& collectionName, const JSData& findQuery, const JSData& updateQuery,
  std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON");
+#ifdef MACRO_use_MongoDB
   MongoQuery query;
   query.collectionName = collectionName;
   query.findQuery = findQuery.ToString();
@@ -224,6 +254,14 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
   query.updateQuery = updateQueryStream.str();
 //  logWorker << logger::blue << "DEBUG: the update query stream: " << query.updateQuery << logger::endL;
   return query.UpdateOne(commentsOnFailure);
+#else
+  (void) collectionName;
+  (void) findQuery;
+  (void) updateQuery;
+  if (commentsOnFailure != 0)
+    *commentsOnFailure << "Project compiled without mongoDB support. ";
+  return false;
+#endif
 }
 
 void DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(UserCalculatorData& output)

@@ -5578,22 +5578,26 @@ void WebServer::FigureOutOperatingSystem()
   << logger::endL << "and we will add your Linux flavor to the list of supported distros. " << logger::endL;
 }
 
-void WebServer::CheckOpenSSLMySQLInstallation()
-{ MacroRegisterFunctionWithName("WebServer::CheckOpenSSLMySQLInstallation");
+void WebServer::CheckExternalPackageInstallation()
+{ MacroRegisterFunctionWithName("WebServer::CheckExternalPackageInstallation");
   if (theGlobalVariables.flagRunningApache)
     return;
   bool doInstallMysql = false;
   bool doInstallOpenSSL = false;
+  bool doInstallMongo = false;
 #ifndef MACRO_use_open_ssl
   doInstallMysql = true;
 #endif
 #ifndef MACRO_use_MySQL
   doInstallOpenSSL = true;
 #endif
-  if (!doInstallMysql && !doInstallOpenSSL)
+#ifndef MACRO_use_MongoDB
+  doInstallMongo = true;
+#endif
+  if (!doInstallMysql && !doInstallOpenSSL && doInstallMongo)
     return;
   WebServer::FigureOutOperatingSystem();
-  std::string attemptedSetupVirtualFileName = "/LogFiles/attemptedDBandSSLsetup.html";
+  std::string attemptedSetupVirtualFileName = "/LogFiles/attemptedExternalPackageSetup.html";
   if (FileOperations::FileExistsVirtual(attemptedSetupVirtualFileName, true))
   { std::string attemptedSetupPhysicalFileName;
     logger result("", 0, false, "server");
@@ -5623,6 +5627,14 @@ void WebServer::CheckOpenSSLMySQLInstallation()
     else if (theGlobalVariables.OperatingSystem == "CentOS")
       theGlobalVariables.CallSystemNoOutput("sudo yum install openssl-devel", false);
   }
+  if (doInstallOpenSSL)
+  { result << "You appear to be missing an openssl installation. Let me try to install that for you. "
+    << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
+    if (theGlobalVariables.OperatingSystem == "Ubuntu")
+      theGlobalVariables.CallSystemNoOutput("sudo apt-get install mongodb", false);
+    else if (theGlobalVariables.OperatingSystem == "CentOS")
+      theGlobalVariables.CallSystemNoOutput("sudo yum install mongodb", false);
+  }
   std::string currentFolder = FileOperations::GetCurrentFolder();
   result << "Changing folder to: " << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
   theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
@@ -5633,6 +5645,46 @@ void WebServer::CheckOpenSSLMySQLInstallation()
   << logger::endL;
   theGlobalVariables.CallSystemNoOutput("make", false);
   theGlobalVariables.ChDir(currentFolder);
+}
+
+void WebServer::CheckMongoDBSetup()
+{ MacroRegisterFunctionWithName("WebServer::CheckMongoDBSetup");
+  std::string attemptedMongoDBSetupVirtualFileName = "/LogFiles/attemptedMongoDBsetup.html";
+  if (FileOperations::FileExistsVirtual(attemptedMongoDBSetupVirtualFileName, true))
+  { std::string attemptedMongoSetupPhysicalFileName;
+    logger result("", 0, false, "server");
+    FileOperations::GetPhysicalFileNameFromVirtual
+    (attemptedMongoDBSetupVirtualFileName, attemptedMongoSetupPhysicalFileName, true, false, 0);
+    result << logger::green << "Mongo setup previously attempted, skipping. Erase file "
+    << attemptedMongoSetupPhysicalFileName << " to try setting up again. " << logger::endL;
+    return;
+  }
+  logger result(attemptedMongoDBSetupVirtualFileName, 0, false, "server");
+  WebServer::FigureOutOperatingSystem();
+  result << logger::yellow << "Mongo setup file missing, proceeding with setup. " << logger::endL;
+  result << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
+  //result << logger::yellow << "(Re)-starting mongo: " << logger::endL;
+  //result << logger::green << "sudo /etc/init.d/mysql start" << logger::endL;
+  //theGlobalVariables.CallSystemNoOutput("sudo /etc/init.d/mysql start", false);
+  StateMaintainerCurrentFolder maintainFolder;
+  theGlobalVariables.ChDir("../external-source");
+
+  std::stringstream commandUnzipMongoC, commandUnzipLibbson;
+  commandUnzipMongoC << "tar -xvzf mongo-c-driver-1.9.3.tar.gz";
+  result << logger::green << commandUnzipMongoC.str() << logger::endL;
+  result << theGlobalVariables.CallSystemWithOutput(commandUnzipMongoC.str());
+  commandUnzipLibbson << "tar -xvzf libbson-1.9.3.tar.gz";
+  result << logger::green << commandUnzipLibbson.str() << logger::endL;
+  result << theGlobalVariables.CallSystemWithOutput(commandUnzipLibbson.str());
+
+  theGlobalVariables.ChDir("./mongo-c-driver-1.9.3");
+  theGlobalVariables.CallSystemNoOutput("./configure", true);
+  theGlobalVariables.CallSystemNoOutput("make", true);
+  theGlobalVariables.CallSystemNoOutput("sudo make install", true);
+  theGlobalVariables.ChDir("../libbson-1.9.3");
+  theGlobalVariables.CallSystemNoOutput("./configure", true);
+  theGlobalVariables.CallSystemNoOutput("make", true);
+  theGlobalVariables.CallSystemNoOutput("sudo make install", true);
 }
 
 void WebServer::CheckMySQLSetup()
@@ -6023,7 +6075,8 @@ int WebServer::main(int argc, char **argv)
     theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead = - 1;
   //using loggers allowed from now on.
   theWebServer.InitializeGlobalVariables();
-  theWebServer.CheckOpenSSLMySQLInstallation();
+  theWebServer.CheckExternalPackageInstallation();
+  theWebServer.CheckMongoDBSetup();
   theWebServer.CheckMySQLSetup();
   theWebServer.CheckMathJaxSetup();
   theWebServer.CheckSVNSetup();

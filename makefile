@@ -25,8 +25,6 @@ LDFLAGS=$(FEATUREFLAGS)
 LIBRARYINCLUDESEND=
 INCLUDEDIRS=
 
-LD_LIBRARY_PATH=LD_LIBRARY_PATH:
-
 ifeq ($(hsa), 1)
 	CXX=/home/user/gcc/bin/g++
 	LDFLAGS+=-L/home/user/gcc/lib64 -Wl,-rpath,/home/user/gcc/lib64 -L/opt/hsa/lib -lhsa-runtime64 -lhsakmt

@@ -268,8 +268,9 @@ void DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(UserCalculatorData& outp
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo");
   JSData theQuery;
   theQuery[DatabaseStrings::labelUsername] = output.username.value;
+  std::string userEntry;
   if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
-      (DatabaseStrings::tableUsers, theQuery, output.actualAuthenticationToken.value))
+      (DatabaseStrings::tableUsers, theQuery, userEntry))
     return;
   logWorker << logger::green << "About to update one. " << logger::endL;
   DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON

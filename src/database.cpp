@@ -254,8 +254,10 @@ std::string DatabaseStrings::labelPassword = "password";
 std::string DatabaseStrings::labelUserRole = "userRole";
 std::string DatabaseStrings::labelProblemData = "problemData";
 std::string DatabaseStrings::labelAuthenticationToken = "authenticationToken";
-std::string DatabaseStrings::tableUsers = "users";
+std::string DatabaseStrings::labelCourseInfo = "courseInfo";
 std::string DatabaseStrings::labelEmail = "email";
+
+std::string DatabaseStrings::tableUsers = "users";
 std::string DatabaseStrings::columnSection = "studentSection";
 std::string DatabaseStrings::columnCurrentCourses = "currentCourses";
 std::string DatabaseStrings::theDatabaseUser = "ace";
@@ -264,7 +266,6 @@ std::string DatabaseStrings::theDatabaseNameMongo = "calculator";
 std::string DatabaseStrings::tableDeadlines = "deadlines";
 std::string DatabaseStrings::columnDeadlines = "deadlines";
 std::string DatabaseStrings::columnDeadlinesSchema = "deadlineSchema";
-std::string DatabaseStrings::labelCourseInfo = "courseInfo";
 std::string DatabaseStrings::columnInstructor = "instructor";
 
 std::string DatabaseStrings::tableProblemWeights = "problemWeights";
@@ -913,16 +914,16 @@ bool UserCalculator::FetchOneUserRow
 
   this->actualActivationToken = this->GetSelectedRowEntry("activationToken");
   this->userId = this->GetSelectedRowEntry(DatabaseStrings::labelUserId);
-  this->email = this->GetSelectedRowEntry("email");
-  this->userRole = this->GetSelectedRowEntry("userRole");
+  this->email = this->GetSelectedRowEntry(DatabaseStrings::labelEmail);
+  this->userRole = this->GetSelectedRowEntry(DatabaseStrings::labelUserRole);
   this->username = this->GetSelectedRowEntry(DatabaseStrings::labelUsername);
   //<-Important! Database lookup may be
   //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
   //The preceding line of code guarantees we have read the username as it is stored in the DB.
-  this->actualShaonedSaltedPassword = this->GetSelectedRowEntry("password");
+  this->actualShaonedSaltedPassword = this->GetSelectedRowEntry(DatabaseStrings::labelPassword);
   this->authenticationTokenCreationTime = this->GetSelectedRowEntry("authenticationCreationTime");
-  this->actualAuthenticationToken = this->GetSelectedRowEntry("authenticationToken");
-  this->problemDataString = this->GetSelectedRowEntry("problemData");
+  this->actualAuthenticationToken = this->GetSelectedRowEntry(DatabaseStrings::labelAuthenticationToken);
+  this->problemDataString = this->GetSelectedRowEntry(DatabaseStrings::labelProblemData);
   this->activationTokenCreationTime = this->GetSelectedRowEntry("activationTokenCreationTime");
   if (this->actualActivationToken.value != "" &&
       this->actualActivationToken.value != "activated" &&

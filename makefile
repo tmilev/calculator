@@ -110,6 +110,7 @@ ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),)#location of mongoC in Ubunt
 endif
 ifneq ($(mongoLocation),)
   CFLAGS+= -DMACRO_use_MySQL
+  LDFLAGS+= -L/usr/local/lib
   LIBRARYINCLUDESEND+=-lmongoc-1.0 -lbson-1.0
 $(info [1;32mMongo found.[0m) 
 else
@@ -119,7 +120,8 @@ endif
 ########################
 ########################
 
-$(info Compiling with flags and dirs: $(INCLUDEDIRS) $(LIBRARYINCLUDESEND)) 
+$(info [1;33mCompile flags:  $(INCLUDEDIRS) $(CFLAGS)[0m)
+$(info [1;34mLinker flags:  $(LDFLAGS) $(LIBRARYINCLUDESEND)[0m)
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
 SOURCES=\

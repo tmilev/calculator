@@ -20,10 +20,9 @@
 # This needs -rdynamic due to implementation.
 # 
 FEATUREFLAGS= -std=c++0x -pthread -fopenmp
-CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
+CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c 
 LDFLAGS=$(FEATUREFLAGS)
 LIBRARYINCLUDESEND=
-INCLUDEDIRS=
 
 ifeq ($(hsa), 1)
 	CXX=/home/user/gcc/bin/g++
@@ -105,11 +104,11 @@ $(info [1;33mNo mongo requested.[0m)
 else
 mongoLocation =
 ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),)#location of mongoC in Ubuntu
-  INCLUDEDIRS = -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0
+  CFLAGS += -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0
   mongoLocation = /usr/local/
 endif
 ifneq ($(mongoLocation),)
-  CFLAGS+= -DMACRO_use_MySQL
+  CFLAGS+= -DMACRO_use_MongoDB
   LDFLAGS+= -L/usr/local/lib
   LIBRARYINCLUDESEND+=-lmongoc-1.0 -lbson-1.0
 $(info [1;32mMongo found.[0m) 
@@ -120,7 +119,7 @@ endif
 ########################
 ########################
 
-$(info [1;33mCompile flags:  $(INCLUDEDIRS) $(CFLAGS)[0m)
+$(info [1;33mCompile flags:  $(CFLAGS)[0m)
 $(info [1;34mLinker flags:  $(LDFLAGS) $(LIBRARYINCLUDESEND)[0m)
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
@@ -190,7 +189,7 @@ testrun: bin/calculator
 	time ./bin/calculator test
 
 %.o:%.cpp
-	$(CXX) $(INCLUDEDIRS) $(CFLAGS) -MMD -MP $< -o $@
+	$(CXX) $(CFLAGS) -MMD -MP $< -o $@
 
 clean:
 	rm -f $(OBJECTS) $(DEPS)

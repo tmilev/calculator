@@ -20,7 +20,7 @@
 # This needs -rdynamic due to implementation.
 # 
 FEATUREFLAGS= -std=c++0x -pthread -fopenmp
-CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c 
+CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
 LDFLAGS=$(FEATUREFLAGS)
 LIBRARYINCLUDESEND=
 

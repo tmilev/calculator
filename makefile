@@ -109,8 +109,8 @@ ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),)#location of mongoC in Ubunt
 endif
 ifneq ($(mongoLocation),)
   CFLAGS+= -DMACRO_use_MongoDB
-  LDFLAGS+= -L/usr/local/lib
-  LIBRARYINCLUDESEND+=-lmongoc-1.0 -lbson-1.0
+#  LDFLAGS+= -L/usr/local/lib
+  LIBRARYINCLUDESEND+= -L/usr/local/lib -lmongoc-1.0 -lbson-1.0
 $(info [1;32mMongo found.[0m) 
 else
 $(info [1;31mNOT FOUND: Mongo.[0m I will attempt to install it once the calculator is compiled.) 
@@ -120,7 +120,8 @@ endif
 ########################
 
 $(info [1;33mCompile flags:  $(CFLAGS)[0m)
-$(info [1;34mLinker flags:  $(LDFLAGS) $(LIBRARYINCLUDESEND)[0m)
+$(info [1;34mLinker flags part 1:  $(LDFLAGS))
+$(info [1;34mLinker flags part 2: $(LIBRARYINCLUDESEND)[0m)
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
 SOURCES=\

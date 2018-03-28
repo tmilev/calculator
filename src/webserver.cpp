@@ -5685,6 +5685,7 @@ void WebServer::CheckMongoDBSetup()
   theGlobalVariables.CallSystemNoOutput("./configure", true);
   theGlobalVariables.CallSystemNoOutput("make", true);
   theGlobalVariables.CallSystemNoOutput("sudo make install", true);
+  theGlobalVariables.CallSystemNoOutput("sudo ldconfig", true);
 }
 
 void WebServer::CheckMySQLSetup()

@@ -5578,22 +5578,26 @@ void WebServer::FigureOutOperatingSystem()
   << logger::endL << "and we will add your Linux flavor to the list of supported distros. " << logger::endL;
 }
 
-void WebServer::CheckOpenSSLMySQLInstallation()
-{ MacroRegisterFunctionWithName("WebServer::CheckOpenSSLMySQLInstallation");
+void WebServer::CheckExternalPackageInstallation()
+{ MacroRegisterFunctionWithName("WebServer::CheckExternalPackageInstallation");
   if (theGlobalVariables.flagRunningApache)
     return;
   bool doInstallMysql = false;
   bool doInstallOpenSSL = false;
+  bool doInstallMongo = false;
 #ifndef MACRO_use_open_ssl
   doInstallMysql = true;
 #endif
 #ifndef MACRO_use_MySQL
   doInstallOpenSSL = true;
 #endif
-  if (!doInstallMysql && !doInstallOpenSSL)
+#ifndef MACRO_use_MongoDB
+  doInstallMongo = true;
+#endif
+  if (!doInstallMysql && !doInstallOpenSSL && doInstallMongo)
     return;
   WebServer::FigureOutOperatingSystem();
-  std::string attemptedSetupVirtualFileName = "/LogFiles/attemptedDBandSSLsetup.html";
+  std::string attemptedSetupVirtualFileName = "/LogFiles/attemptedExternalPackageSetup.html";
   if (FileOperations::FileExistsVirtual(attemptedSetupVirtualFileName, true))
   { std::string attemptedSetupPhysicalFileName;
     logger result("", 0, false, "server");
@@ -5623,6 +5627,14 @@ void WebServer::CheckOpenSSLMySQLInstallation()
     else if (theGlobalVariables.OperatingSystem == "CentOS")
       theGlobalVariables.CallSystemNoOutput("sudo yum install openssl-devel", false);
   }
+  if (doInstallOpenSSL)
+  { result << "You appear to be missing an openssl installation. Let me try to install that for you. "
+    << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
+    if (theGlobalVariables.OperatingSystem == "Ubuntu")
+      theGlobalVariables.CallSystemNoOutput("sudo apt-get install mongodb", false);
+    else if (theGlobalVariables.OperatingSystem == "CentOS")
+      theGlobalVariables.CallSystemNoOutput("sudo yum install mongodb", false);
+  }
   std::string currentFolder = FileOperations::GetCurrentFolder();
   result << "Changing folder to: " << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
   theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
@@ -5633,6 +5645,47 @@ void WebServer::CheckOpenSSLMySQLInstallation()
   << logger::endL;
   theGlobalVariables.CallSystemNoOutput("make", false);
   theGlobalVariables.ChDir(currentFolder);
+}
+
+void WebServer::CheckMongoDBSetup()
+{ MacroRegisterFunctionWithName("WebServer::CheckMongoDBSetup");
+  std::string attemptedMongoDBSetupVirtualFileName = "/LogFiles/attemptedMongoDBsetup.html";
+  if (FileOperations::FileExistsVirtual(attemptedMongoDBSetupVirtualFileName, true))
+  { std::string attemptedMongoSetupPhysicalFileName;
+    logger result("", 0, false, "server");
+    FileOperations::GetPhysicalFileNameFromVirtual
+    (attemptedMongoDBSetupVirtualFileName, attemptedMongoSetupPhysicalFileName, true, false, 0);
+    result << logger::green << "Mongo setup previously attempted, skipping. Erase file "
+    << attemptedMongoSetupPhysicalFileName << " to try setting up again. " << logger::endL;
+    return;
+  }
+  logger result(attemptedMongoDBSetupVirtualFileName, 0, false, "server");
+  WebServer::FigureOutOperatingSystem();
+  result << logger::yellow << "Mongo setup file missing, proceeding with setup. " << logger::endL;
+  result << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
+  //result << logger::yellow << "(Re)-starting mongo: " << logger::endL;
+  //result << logger::green << "sudo /etc/init.d/mysql start" << logger::endL;
+  //theGlobalVariables.CallSystemNoOutput("sudo /etc/init.d/mysql start", false);
+  StateMaintainerCurrentFolder maintainFolder;
+  theGlobalVariables.ChDir("../external-source");
+
+  std::stringstream commandUnzipMongoC, commandUnzipLibbson;
+  commandUnzipMongoC << "tar -xvzf mongo-c-driver-1.9.3.tar.gz";
+  result << logger::green << commandUnzipMongoC.str() << logger::endL;
+  result << theGlobalVariables.CallSystemWithOutput(commandUnzipMongoC.str());
+  commandUnzipLibbson << "tar -xvzf libbson-1.9.3.tar.gz";
+  result << logger::green << commandUnzipLibbson.str() << logger::endL;
+  result << theGlobalVariables.CallSystemWithOutput(commandUnzipLibbson.str());
+
+  theGlobalVariables.ChDir("./mongo-c-driver-1.9.3");
+  theGlobalVariables.CallSystemNoOutput("./configure", true);
+  theGlobalVariables.CallSystemNoOutput("make", true);
+  theGlobalVariables.CallSystemNoOutput("sudo make install", true);
+  theGlobalVariables.ChDir("../libbson-1.9.3");
+  theGlobalVariables.CallSystemNoOutput("./configure", true);
+  theGlobalVariables.CallSystemNoOutput("make", true);
+  theGlobalVariables.CallSystemNoOutput("sudo make install", true);
+  theGlobalVariables.CallSystemNoOutput("sudo ldconfig", true);
 }
 
 void WebServer::CheckMySQLSetup()
@@ -5733,7 +5786,7 @@ void WebServer::CheckMathJaxSetup()
     logger result("", 0, false, "server");
     FileOperations::GetPhysicalFileNameFromVirtual
     (attemptedMathJaxSetupVirtualFileName, attemptedSetupPhysicalFileName, true, false, 0);
-    result << logger::green << "Mysql setup previously attempted, skipping. Erase file "
+    result << logger::green << "Mathjax setup previously attempted, skipping. Erase file "
     << attemptedSetupPhysicalFileName << " to try setting up again. " << logger::endL;
     return;
   }
@@ -6013,76 +6066,78 @@ int WebServer::main(int argc, char **argv)
   //use of loggers forbidden before calling   theWebServer.AnalyzeMainArguments(...):
   //we need to initialize first the folder locations relative to the executable.
   MacroRegisterFunctionWithName("main");
-  try {
-  InitializeGlobalObjects();
-  theWebServer.AnalyzeMainArguments(argc, argv);
-  if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 0)
-    theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead =
-    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit + 20;
-  else
-    theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead = - 1;
-  //using loggers allowed from now on.
-  theWebServer.InitializeGlobalVariables();
-  theWebServer.CheckOpenSSLMySQLInstallation();
-  theWebServer.CheckMySQLSetup();
-  theWebServer.CheckMathJaxSetup();
-  theWebServer.CheckSVNSetup();
-  theWebServer.CheckFreecalcSetup();
-  theGlobalVariables.flagServerDetailedLog = FileOperations::FileExistsVirtual("/LogFiles/serverDebugOn.txt", true, false);
-  if (theGlobalVariables.flagServerDetailedLog)
-  { logServer
-    << logger::purple << "************************" << logger::endL
-    << logger::purple << "************************" << logger::endL
-    << logger::purple << "************************" << logger::endL
-    << logger::red << "WARNING: DETAILED server logging is on. " << logger::endL
-    << "This is strictly for development purposes, please do not deploy on live systems. " << logger::endL
-    << "To turn off/on server logging simply delete/create file LogFiles/serverDebugOn.txt" << logger::endL
-    << logger::purple << "************************" << logger::endL
-    << logger::purple << "************************" << logger::endL
-    << logger::purple << "************************" << logger::endL
-       ;
-  }
-  theGlobalVariables.flagCachingInternalFilesOn =
-  !FileOperations::FileExistsVirtual("/LogFiles/serverRAMCachingOff.txt", true, false);
-  if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
-  { logServer
-    << logger::purple << "************************" << logger::endL
-    << logger::red << "WARNING: caching files is off. " << logger::endL
-    << "This is for development purposes only, please do not deploy on live systems. " << logger::endL
-    << "To turn off/on server logging simply delete/create file LogFiles/serverRAMCachingOff.txt" << logger::endL
-    << logger::purple << "************************" << logger::endL;
-  }
+  try
+  { InitializeGlobalObjects();
+    theWebServer.AnalyzeMainArguments(argc, argv);
+    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 0)
+      theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead =
+      theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit + 20;
+    else
+      theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead = - 1;
+    //using loggers allowed from now on.
+    theWebServer.InitializeGlobalVariables();
+    theWebServer.CheckExternalPackageInstallation();
+    //logServer << "DEBUG: got to here pt 0" << logger::endL;
+    theWebServer.CheckMongoDBSetup();
+    //logServer << "DEBUG: got to here pt 0.5" << logger::endL;
+    theWebServer.CheckMySQLSetup();
+    theWebServer.CheckMathJaxSetup();
+    theWebServer.CheckSVNSetup();
+    theWebServer.CheckFreecalcSetup();
+    //logServer << "DEBUG: got to here pt 1" << logger::endL;
+    theGlobalVariables.flagServerDetailedLog = FileOperations::FileExistsVirtual("/LogFiles/serverDebugOn.txt", true, false);
+    if (theGlobalVariables.flagServerDetailedLog)
+    { logServer
+      << logger::purple << "************************" << logger::endL
+      << logger::purple << "************************" << logger::endL
+      << logger::purple << "************************" << logger::endL
+      << logger::red << "WARNING: DETAILED server logging is on. " << logger::endL
+      << "This is strictly for development purposes, please do not deploy on live systems. " << logger::endL
+      << "To turn off/on server logging simply delete/create file LogFiles/serverDebugOn.txt" << logger::endL
+      << logger::purple << "************************" << logger::endL
+      << logger::purple << "************************" << logger::endL
+      << logger::purple << "************************" << logger::endL;
+    }
+    theGlobalVariables.flagCachingInternalFilesOn =
+    !FileOperations::FileExistsVirtual("/LogFiles/serverRAMCachingOff.txt", true, false);
+    if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
+    { logServer
+      << logger::purple << "************************" << logger::endL
+      << logger::red << "WARNING: caching files is off. " << logger::endL
+      << "This is for development purposes only, please do not deploy on live systems. " << logger::endL
+      << "To turn off/on server logging simply delete/create file LogFiles/serverRAMCachingOff.txt" << logger::endL
+      << logger::purple << "************************" << logger::endL;
+    }
 
-  theGlobalVariables.flagAceIsAvailable = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
-  if (!theGlobalVariables.flagAceIsAvailable && theGlobalVariables.flagRunningBuiltInWebServer)
-    logServer << logger::red << "MathJax not available. " << logger::endL;
-//  if (false &&
-//      theGlobalVariables.flagRunningBuiltInWebServer)
-//  { theWebServer.TurnProcessMonitoringOn();
-//  }
-  if (theGlobalVariables.flagRunningBuiltInWebServer)
-  { if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit <= 0)
-      logServer
-      << logger::purple << "************************" << logger::endL
-      << logger::red << "WARNING: no computation time limit set. " << logger::endL
-      << logger::purple << "************************" << logger::endL
-      ;
-    if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 500)
-      logServer
-      << logger::purple << "************************" << logger::endL
-      << logger::red << "WARNING: computation time limit is high: "
-      << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << " seconds. " << logger::endL
-      << logger::purple << "************************" << logger::endL
-      ;
-  }
-  if (theGlobalVariables.flagRunningConsoleTest)
-    return mainTest(theGlobalVariables.programArguments);
-  if (theGlobalVariables.flagRunningApache)
-    return WebServer::mainApache();
-  if (theGlobalVariables.flagRunningBuiltInWebServer)
-    return theWebServer.Run();
-  if (theGlobalVariables.flagRunningCommandLine)
-    return WebServer::mainCommandLine();
+    theGlobalVariables.flagAceIsAvailable = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
+    if (!theGlobalVariables.flagAceIsAvailable && theGlobalVariables.flagRunningBuiltInWebServer)
+      logServer << logger::red << "MathJax not available. " << logger::endL;
+  //  if (false &&
+  //      theGlobalVariables.flagRunningBuiltInWebServer)
+  //  { theWebServer.TurnProcessMonitoringOn();
+  //  }
+    if (theGlobalVariables.flagRunningBuiltInWebServer)
+    { if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit <= 0)
+        logServer
+        << logger::purple << "************************" << logger::endL
+        << logger::red << "WARNING: no computation time limit set. " << logger::endL
+        << logger::purple << "************************" << logger::endL;
+      if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 500)
+        logServer
+        << logger::purple << "************************" << logger::endL
+        << logger::red << "WARNING: computation time limit is high: "
+        << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit << " seconds. " << logger::endL
+        << logger::purple << "************************" << logger::endL;
+    }
+    //logServer << "DEBUG: got to here pt 3" << logger::endL;
+    if (theGlobalVariables.flagRunningConsoleTest)
+      return mainTest(theGlobalVariables.programArguments);
+    if (theGlobalVariables.flagRunningApache)
+      return WebServer::mainApache();
+    if (theGlobalVariables.flagRunningBuiltInWebServer)
+      return theWebServer.Run();
+    if (theGlobalVariables.flagRunningCommandLine)
+      return WebServer::mainCommandLine();
   }
   catch (...)
   { crash << "Exception caught: something very wrong has happened. " << crash;
@@ -6097,8 +6152,13 @@ int WebServer::mainCommandLine()
   //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
   //  return 0;
 //std::cout << "Running cmd line. \n";
+  //logServer << "DEBUG: got to here pt 5" << logger::endL;
+  PointerObjectDestroyer<Calculator> theDestroyer(theParser);
+  theParser = new Calculator;
   theParser->init();
+  //logServer << "DEBUG: got to here pt 5.3" << logger::endL;
   logger result("", 0, false, "server");
+  //logServer << "DEBUG: got to here pt 5.5" << logger::endL;
   if (theGlobalVariables.programArguments.size > 1)
     for (int i = 1; i < theGlobalVariables.programArguments.size; i ++)
     { theParser->inputString += theGlobalVariables.programArguments[i];
@@ -6110,6 +6170,7 @@ int WebServer::mainCommandLine()
     std::cin >> theParser->inputString;
   }
   theParser->flagUseHtml = false;
+  //logServer << "DEBUG: got to here pt 6" << logger::endL;
   theParser->Evaluate(theParser->inputString);
   std::fstream outputFile;
   std::string outputFileName;

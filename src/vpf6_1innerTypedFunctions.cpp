@@ -904,8 +904,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(Calculator
   if (!input.MergeContextsMyAruments(inputConverted, &theCommands.Comments))
     return false;
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
-  Expression copyExponent=inputConverted[2];
-  Expression copyBase=inputConverted[1];
+  Expression copyExponent = inputConverted[2];
+  Expression copyBase = inputConverted[1];
   if (!copyBase.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&theUE))
     return false;
   if (!theUE.IsAPowerOfASingleGenerator())
@@ -919,8 +919,8 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(Calculator
   if (!copyExponent.ConvertToType<RationalFunctionOld>(exponentConverted))
     return false;
   MonomialUniversalEnveloping<RationalFunctionOld> theMon;
-  theMon=theUE[0];
-  theMon.Powers[0]*= exponentConverted.GetValue<RationalFunctionOld>();
+  theMon = theUE[0];
+  theMon.Powers[0] *= exponentConverted.GetValue<RationalFunctionOld>();
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
   outputUE.MakeZero(*theUE.owner);
   outputUE.AddMonomial(theMon, 1);
@@ -930,7 +930,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF(Calculator
 bool CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceOrMatrixByT");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.StartsWith(theCommands.opThePower(),3))
+  if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
   if (!input[1].IsSequenceNElementS() && !input[1].IsMatrix())
     return false;
@@ -947,10 +947,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger(Calcul
     return false;
   if (!input[1].IsMatrix())
     return false;
-  int thePower=0;
+  int thePower = 0;
   if (!input[2].IsSmallInteger(&thePower))
     return false;
-  if (thePower<=0)
+  if (thePower <= 0)
     return false;
   Matrix<Expression> theMat;
   if (!theCommands.GetMatrixExpressions(input[1], theMat))
@@ -958,9 +958,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger(Calcul
   if (!theMat.IsSquare())
     return output.MakeError("Attempting to raise non-square matrix to power", theCommands);
   LargeInt expectedNumTerms;
-  expectedNumTerms=theMat.NumCols;
+  expectedNumTerms = theMat.NumCols;
   expectedNumTerms.RaiseToPower(thePower);
-  if (expectedNumTerms>10000)
+  if (expectedNumTerms > 10000)
     return theCommands << "The expected number terms in the result of the exponentiation "
     << theMat.ToString() << " to the power of " << thePower << " is approximately ("
     << theMat.NumCols << ")^" << thePower << "=" << expectedNumTerms
@@ -981,21 +981,21 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     return false;
   if (!input[2].IsOfType<Rational>(&exponentStarting))
     return false;
-  if (base==0)
+  if (base == 0)
   { if (exponentStarting<0)
       return output.MakeError("Division by zero while evaluating " + input.ToString(), theCommands, true);
     return output.AssignValue(0, theCommands);
   }
   if (!base.IsInteger())
-    if (base.GetNumerator()==1)
+    if (base.GetNumerator() == 1)
     { Expression theDenBase, theDenominator;
-      theDenBase.AssignValue((Rational)base.GetDenominator(), theCommands);
+      theDenBase.AssignValue((Rational) base.GetDenominator(), theCommands);
       theDenominator.MakeXOX(theCommands, theCommands.opThePower(), theDenBase, input[2]);
-      output=theCommands.EOne()/theDenominator;
+      output = theCommands.EOne() / theDenominator;
       return true;
     }
-  exponentWorking=exponentStarting;
-  if (exponentWorking.GetDenominator()==2)
+  exponentWorking = exponentStarting;
+  if (exponentWorking.GetDenominator() == 2)
     return false;
   //if (exponentWorking<0)
   //{ exponentWorking*=-1;
@@ -1007,90 +1007,90 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   List<LargeIntUnsigned> numeratorPowers, denominatorPowers;
   if (!base.GetPrimeFactorsAbsoluteValue(numeratorFactors, numeratorPowers, denominatorFactors, denominatorPowers))
     return false;
-  for (int i=0; i<numeratorFactors.size; i++)
-    numeratorPowers[i]*=exponentNumeratorNoSign;
-  for (int i=0; i<denominatorFactors.size; i++)
-    denominatorPowers[i]*=exponentNumeratorNoSign;
+  for (int i = 0; i < numeratorFactors.size; i ++)
+    numeratorPowers[i] *= exponentNumeratorNoSign;
+  for (int i = 0; i < denominatorFactors.size; i ++)
+    denominatorPowers[i] *= exponentNumeratorNoSign;
   //stOutput << "DEBUG: part -1: exponent working: " << exponentWorking;
-  exponentWorking/=exponentNumeratorNoSign;
+  exponentWorking /= exponentNumeratorNoSign;
   //stOutput << "DEBUG: part 0: exponent working: " << exponentWorking;
-  Rational outsideOfTheRadical=1;
+  Rational outsideOfTheRadical = 1;
   LargeInt currentInsidePower, currentOutsidePower, currentOutside;
   LargeIntUnsigned currentPower;
-  int currentInsidePowerInt=-1, currentOutsidePowerInt=-1;
-  for (int k=0; k<2; k++)
-  { List<LargeIntUnsigned>& currentPowers= (k==0) ? numeratorPowers : denominatorPowers;
-    List<LargeInt>& currentFactors=(k==0) ? numeratorFactors : denominatorFactors;
-    for (int i=0; i<currentFactors.size; i++)
+  int currentInsidePowerInt = - 1, currentOutsidePowerInt = - 1;
+  for (int k = 0; k < 2; k ++)
+  { List<LargeIntUnsigned>& currentPowers = (k == 0) ? numeratorPowers : denominatorPowers;
+    List<LargeInt>& currentFactors = (k == 0) ? numeratorFactors : denominatorFactors;
+    for (int i = 0; i < currentFactors.size; i ++)
     { currentPower = currentPowers[i];
-      currentInsidePower=currentPower%exponentDenominator;
-      currentOutsidePower=currentPower/exponentDenominator;
+      currentInsidePower = currentPower % exponentDenominator;
+      currentOutsidePower = currentPower / exponentDenominator;
       if (!currentInsidePower.IsIntegerFittingInInt(&currentInsidePowerInt))
         return false;
       if (!currentOutsidePower.IsIntegerFittingInInt(&currentOutsidePowerInt))
         return false;
-      if (currentInsidePowerInt>1000 || currentInsidePowerInt<-1000 ||
-          currentOutsidePowerInt>1000 || currentOutsidePowerInt <-1000)
+      if (currentInsidePowerInt > 1000 || currentInsidePowerInt < - 1000 ||
+          currentOutsidePowerInt > 1000 || currentOutsidePowerInt < - 1000)
         return false;
-      currentPowers[i]= currentInsidePowerInt;
-      currentOutside=currentFactors[i];
+      currentPowers[i] = currentInsidePowerInt;
+      currentOutside = currentFactors[i];
       currentOutside.RaiseToPower(currentOutsidePowerInt);
-      if (k==0)
-        outsideOfTheRadical*=currentOutside;
+      if (k == 0)
+        outsideOfTheRadical *= currentOutside;
       else
-        outsideOfTheRadical/=currentOutside;
+        outsideOfTheRadical /= currentOutside;
     }
   }
-  LargeIntUnsigned theGCD=1;
-  if (numeratorPowers.size>0)
-    theGCD=numeratorPowers[0];
-  else if (denominatorPowers.size>0)
-    theGCD=denominatorPowers[0];
-  for (int i=0; i<numeratorPowers.size; i++)
-    theGCD=MathRoutines::gcd(theGCD, numeratorPowers[i]);
-  for (int i=0; i<denominatorPowers.size; i++)
-    theGCD=MathRoutines::gcd(theGCD, denominatorPowers[i]);
-  if (theGCD>0)
-  { for (int i=0; i<numeratorPowers.size; i++)
-      numeratorPowers[i]/=theGCD;
-    for (int i=0; i<denominatorPowers.size; i++)
-      denominatorPowers[i]/=theGCD;
-    exponentWorking*=theGCD;
+  LargeIntUnsigned theGCD = 1;
+  if (numeratorPowers.size > 0)
+    theGCD = numeratorPowers[0];
+  else if (denominatorPowers.size > 0)
+    theGCD = denominatorPowers[0];
+  for (int i = 0; i < numeratorPowers.size; i ++)
+    theGCD = MathRoutines::gcd(theGCD, numeratorPowers[i]);
+  for (int i = 0; i < denominatorPowers.size; i ++)
+    theGCD = MathRoutines::gcd(theGCD, denominatorPowers[i]);
+  if (theGCD > 0)
+  { for (int i = 0; i < numeratorPowers.size; i ++)
+      numeratorPowers[i] /= theGCD;
+    for (int i = 0; i < denominatorPowers.size; i ++)
+      denominatorPowers[i] /= theGCD;
+    exponentWorking *= theGCD;
     exponentDenominator = exponentWorking.GetDenominator();
-}
-  Rational insideTheRadical=1;
-  LargeInt currentContribution, currentNumerator=1, currentDenominator=1;
-  int currentExpSmallInt=-1;
-  for (int i=0; i<numeratorPowers.size; i++)
-  { currentContribution=numeratorFactors[i];
+  }
+  Rational insideTheRadical = 1;
+  LargeInt currentContribution, currentNumerator = 1, currentDenominator = 1;
+  int currentExpSmallInt = - 1;
+  for (int i = 0; i < numeratorPowers.size; i ++)
+  { currentContribution = numeratorFactors[i];
     if (!numeratorPowers[i].IsIntegerFittingInInt(&currentExpSmallInt))
       return false;
     currentContribution.RaiseToPower(currentExpSmallInt);
-    currentNumerator*=currentContribution;
+    currentNumerator *= currentContribution;
     if (!currentNumerator.IsIntegerFittingInInt(0))
       return false;
   }
-  for (int i=0; i<denominatorPowers.size; i++)
+  for (int i = 0; i < denominatorPowers.size; i ++)
   { currentContribution=denominatorFactors[i];
     if (!denominatorPowers[i].IsIntegerFittingInInt(&currentExpSmallInt))
       return false;
     currentContribution.RaiseToPower(currentExpSmallInt);
-    currentDenominator*=currentContribution;
+    currentDenominator *= currentContribution;
     if (!currentDenominator.IsIntegerFittingInInt(0))
       return false;
   }
-  insideTheRadical=currentNumerator;
-  insideTheRadical/=currentDenominator;
-  if (base<0)
+  insideTheRadical = currentNumerator;
+  insideTheRadical /= currentDenominator;
+  if (base < 0)
   { exponentDenominator = exponentWorking.GetDenominator();//<-just in case
-    if (exponentDenominator%2==1)
-      outsideOfTheRadical*=-1;
+    if (exponentDenominator % 2 == 1)
+      outsideOfTheRadical *= - 1;
     else
-      insideTheRadical*=-1;
+      insideTheRadical *= - 1;
   }
-  if (exponentStarting==exponentWorking &&
-      outsideOfTheRadical==1 &&
-      base==insideTheRadical)
+  if (exponentStarting == exponentWorking &&
+      outsideOfTheRadical == 1 &&
+      base == insideTheRadical)
     return false;
   //stOutput << "DEBUG: part 1: exponent working: " << exponentWorking;
   Expression insideTheRadicalE, theRadicalE, theRadicalCFE, exponentE;
@@ -1110,28 +1110,28 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(Calculator
 //  stOutput << "<br>attempting to exponentiate: " << input.ToString();
   Rational base, exp;
   double baseDouble, expDouble;
-  if(input[1].IsRational(&base))
-    baseDouble=base.GetDoubleValue();
+  if (input[1].IsRational(&base))
+    baseDouble = base.GetDoubleValue();
   else if (!input[1].IsOfType(&baseDouble))
     return false;
   if(input[2].IsRational(&exp))
-    expDouble=exp.GetDoubleValue();
+    expDouble = exp.GetDoubleValue();
   else if (!input[2].IsOfType(&expDouble))
     return false;
-  if (baseDouble<0)
+  if (baseDouble < 0)
   { if(!input[2].IsRational())
       return false;
-    int thePower=0;
+    int thePower = 0;
     if (exp.IsEven())
     { if (!exp.IsSmallInteger(&thePower))
         return false;
       return output.AssignValue(FloatingPoint::power(-baseDouble, thePower), theCommands);
     }
-    baseDouble*=-1;
+    baseDouble *= - 1;
     return output.AssignValue(-FloatingPoint::power (baseDouble, expDouble), theCommands);
   }
-  if (baseDouble==0)
-    if (expDouble>0)
+  if (baseDouble == 0)
+    if (expDouble > 0)
       return output.AssignValue<double>(0, theCommands);
   return output.AssignValue(FloatingPoint::power(baseDouble, expDouble), theCommands);
 }

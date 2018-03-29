@@ -82,12 +82,12 @@ class UserCalculatorData
   DatabaseData username;
   DatabaseData email;
   DatabaseData currentTable;
-  DatabaseData timeOfActivationTokenCreation;
   DatabaseData actualActivationToken;
   DatabaseData enteredActivationToken;
   DatabaseData enteredAuthenticationToken;
   DatabaseData actualAuthenticationToken;
   DatabaseData problemDataString;
+  DatabaseData courseInfoString;
   CourseAndUserInfo courseInfo;
 
   std::string enteredPassword;
@@ -95,8 +95,8 @@ class UserCalculatorData
   std::string enteredShaonedSaltedPassword;
   std::string enteredGoogleToken;
   std::string userRole;
-  std::string authenticationTokenCreationTime;
-  std::string activationTokenCreationTime;
+  std::string timeOfAuthenticationTokenCreation;
+  std::string timeOfActivationTokenCreation;
   std::string activationEmail;
   std::string activationEmailSubject;
   //List<std::string> sectionsViewableByUser;
@@ -113,6 +113,7 @@ class UserCalculatorData
   bool flagStopIfNoLogin;
   bool flagUserHasActivationToken;
   bool flagUserHasNoPassword;
+  bool LoadFromJSON(JSData& input);
   JSData ToJSON();
   UserCalculatorData();
   bool AssignCourseInfoString(std::stringstream* errorStream);
@@ -138,8 +139,13 @@ public:
   static std::string labelPassword;
   static std::string labelCourseInfo;
   static std::string labelAuthenticationToken;
+
+  static std::string labelActivationToken;
   static std::string labelUserRole;
   static std::string labelProblemData;
+  static std::string labelTimeOfActivationTokenCreation;
+  static std::string labelTimeOfAuthenticationTokenCreation;
+
   static std::string tableUsers;
 ///course info column names
   static std::string columnCurrentCourses;

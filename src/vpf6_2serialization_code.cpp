@@ -908,8 +908,8 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
 { MacroRegisterFunctionWithName("CalculatorConversions::innerRationalFunction");
   Expression intermediate(theCommands);
   if (input.StartsWith(theCommands.opPlus(), 3) ||
-      input.StartsWith(theCommands.opTimes(),3) ||
-      input.StartsWith(theCommands.opDivide(),3))
+      input.StartsWith(theCommands.opTimes(), 3) ||
+      input.StartsWith(theCommands.opDivide(), 3))
   { Expression leftE, rightE;
     if (!CalculatorConversions::innerRationalFunction(theCommands, input[1], leftE) ||
         !CalculatorConversions::innerRationalFunction(theCommands, input[2], rightE) )
@@ -931,7 +931,7 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
       return CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(theCommands, intermediate, output);
     crash << "This line of code should never be reached, something has gone wrong." << crash;
   }
-  int theSmallPower=-1;
+  int theSmallPower = - 1;
   if (input.StartsWith(theCommands.opThePower(), 3) )
   { if (input[2].IsSmallInteger(&theSmallPower))
     { Expression leftE;
@@ -949,7 +949,7 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
     << " as a single variable: please make sure that is what you want.";
   }
   if (input.IsOfType<RationalFunctionOld>())
-  { output=input;
+  { output = input;
     return true;
   }
   if (input.IsOfType<Polynomial<Rational> >() || input.IsOfType<Rational>())
@@ -957,7 +957,7 @@ bool CalculatorConversions::innerRationalFunction(Calculator& theCommands, const
     return input.ConvertToType<RationalFunctionOld> (output);
   }
   if (input.IsOfType<AlgebraicNumber>())
-  { AlgebraicNumber theNumber= input.GetValue<AlgebraicNumber>();
+  { AlgebraicNumber theNumber = input.GetValue<AlgebraicNumber>();
     Rational theRat;
     if (theNumber.IsRational(&theRat))
     { Expression tempE;
@@ -981,10 +981,10 @@ bool CalculatorConversions::innerMatrixRational(Calculator& theCommands, const E
 //  stOutput << "ere i am, jh";
   Matrix<Rational> outputMat;
   if (input.IsMatrixGivenType<Rational>())
-  { output=input;
+  { output = input;
     return true;
   }
-  if (!theCommands.GetMatriXFromArguments(input, outputMat, 0, -1, 0))
+  if (!theCommands.GetMatriXFromArguments(input, outputMat, 0, - 1, 0))
     return theCommands << "<br>Failed to get matrix of rationals. ";
   return output.AssignMatrix(outputMat, theCommands);
 }
@@ -1022,10 +1022,10 @@ bool CalculatorConversions::innerMatrixAlgebraic(Calculator& theCommands, const 
 //  stOutput << "ere i am, jh";
   Matrix<AlgebraicNumber> outputMat;
   if (input.IsMatrixGivenType<AlgebraicNumber>())
-  { output=input;
+  { output = input;
     return true;
   }
-  if (!theCommands.GetMatriXFromArguments(input, outputMat, 0, -1, CalculatorConversions::innerAlgebraicNumber))
+  if (!theCommands.GetMatriXFromArguments(input, outputMat, 0, - 1, CalculatorConversions::innerAlgebraicNumber))
     return theCommands << "<br>Failed to get matrix of algebraic numbers. ";
   return output.AssignMatrix(outputMat, theCommands);
 }
@@ -1063,22 +1063,22 @@ bool CalculatorConversions::innerMakeElementHyperOctahedral(Calculator& theComma
   { theElement.MakeFromString(inputStringFormat);
     return output.AssignValue(theElement, theCommands);
   }
-  if (input.children.size<3)
+  if (input.children.size < 3)
     return theCommands << "To make elements of hyperoctahedral group we need at least 3 inputs";
   List<int> oneCycle;
   if (!theCommands.GetVectoRInt(input[1], oneCycle))
     return theCommands << "Failed to extract a cycle structure from the first argument of input: " << input.ToString();
-  for (int i=0; i<oneCycle.size; i++)
-  { if (oneCycle[i]<1)
+  for (int i = 0; i < oneCycle.size; i ++)
+  { if (oneCycle[i] < 1)
       return theCommands << "Your input: " << input[1].ToString() << " had integers that were too small.";
-    oneCycle[i]--;
-    if (oneCycle[i]>1000)
+    oneCycle[i] --;
+    if (oneCycle[i] > 1000)
       return theCommands << "Your input: " << input[1].ToString() << " had integers that were too large.";
   }
   theElement.h.AddCycle(oneCycle);
-  for (int i=2; i<input.children.size; i++)
+  for (int i = 2; i < input.children.size; i ++)
   { if (input[i].IsEqualToOne())
-      theElement.k.ToggleBit(i-2);
+      theElement.k.ToggleBit(i - 2);
     else if (!input[i].IsEqualToZero())
       return theCommands << "Your input: " << input.ToString() << " had bit values that were not ones and zeroes.";
   }

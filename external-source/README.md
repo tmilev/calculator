@@ -15,7 +15,7 @@ https://github.com/mongodb/mongo-c-driver/releases
 
 1.3. Configure mongo.
 
-```./configure --prefix=/usr --libdir=/usr/lib --includedir=/usr/include --disable-automatic-init-and-cleanup ```
+```./configure --prefix=/usr --disable-automatic-init-and-cleanup ```
 
 1.4. Build and install.
 

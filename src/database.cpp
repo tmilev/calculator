@@ -254,8 +254,13 @@ std::string DatabaseStrings::labelPassword = "password";
 std::string DatabaseStrings::labelUserRole = "userRole";
 std::string DatabaseStrings::labelProblemData = "problemData";
 std::string DatabaseStrings::labelAuthenticationToken = "authenticationToken";
-std::string DatabaseStrings::tableUsers = "users";
+std::string DatabaseStrings::labelActivationToken = "activationToken";
+std::string DatabaseStrings::labelTimeOfActivationTokenCreation = "activationTokenCreationTime";
+std::string DatabaseStrings::labelTimeOfAuthenticationTokenCreation = "authenticationCreationTime";
+std::string DatabaseStrings::labelCourseInfo = "courseInfo";
 std::string DatabaseStrings::labelEmail = "email";
+
+std::string DatabaseStrings::tableUsers = "users";
 std::string DatabaseStrings::columnSection = "studentSection";
 std::string DatabaseStrings::columnCurrentCourses = "currentCourses";
 std::string DatabaseStrings::theDatabaseUser = "ace";
@@ -264,7 +269,6 @@ std::string DatabaseStrings::theDatabaseNameMongo = "calculator";
 std::string DatabaseStrings::tableDeadlines = "deadlines";
 std::string DatabaseStrings::columnDeadlines = "deadlines";
 std::string DatabaseStrings::columnDeadlinesSchema = "deadlineSchema";
-std::string DatabaseStrings::labelCourseInfo = "courseInfo";
 std::string DatabaseStrings::columnInstructor = "instructor";
 
 std::string DatabaseStrings::tableProblemWeights = "problemWeights";
@@ -777,8 +781,7 @@ std::string UserCalculator::ToString()
   out << "Calculator user: " << this->username.value
   << "<br>Section: computed: " << this->courseInfo.sectionComputed
   << ", in DB: " << this->courseInfo.getSectionInDB()
-  << "<br>Sections taught: " << this->courseInfo.getSectonsTaughtByUser()
-  ;
+  << "<br>Sections taught: " << this->courseInfo.getSectonsTaughtByUser();
 
   Rational weightRat;
   for (int i = 0; i < this->theProblemData.size(); i ++)
@@ -913,17 +916,17 @@ bool UserCalculator::FetchOneUserRow
 
   this->actualActivationToken = this->GetSelectedRowEntry("activationToken");
   this->userId = this->GetSelectedRowEntry(DatabaseStrings::labelUserId);
-  this->email = this->GetSelectedRowEntry("email");
-  this->userRole = this->GetSelectedRowEntry("userRole");
+  this->email = this->GetSelectedRowEntry(DatabaseStrings::labelEmail);
+  this->userRole = this->GetSelectedRowEntry(DatabaseStrings::labelUserRole);
   this->username = this->GetSelectedRowEntry(DatabaseStrings::labelUsername);
   //<-Important! Database lookup may be
   //case insensitive (this shouldn't be the case, so welcome to the insane design of mysql).
   //The preceding line of code guarantees we have read the username as it is stored in the DB.
-  this->actualShaonedSaltedPassword = this->GetSelectedRowEntry("password");
-  this->authenticationTokenCreationTime = this->GetSelectedRowEntry("authenticationCreationTime");
-  this->actualAuthenticationToken = this->GetSelectedRowEntry("authenticationToken");
-  this->problemDataString = this->GetSelectedRowEntry("problemData");
-  this->activationTokenCreationTime = this->GetSelectedRowEntry("activationTokenCreationTime");
+  this->actualShaonedSaltedPassword = this->GetSelectedRowEntry(DatabaseStrings::labelPassword);
+  this->timeOfAuthenticationTokenCreation = this->GetSelectedRowEntry("authenticationCreationTime");
+  this->actualAuthenticationToken = this->GetSelectedRowEntry(DatabaseStrings::labelAuthenticationToken);
+  this->problemDataString = this->GetSelectedRowEntry(DatabaseStrings::labelProblemData);
+  this->timeOfActivationTokenCreation = this->GetSelectedRowEntry("activationTokenCreationTime");
   if (this->actualActivationToken.value != "" &&
       this->actualActivationToken.value != "activated" &&
       this->actualActivationToken.value != "error")
@@ -991,12 +994,36 @@ std::string UserCalculatorData::ToStringIdSectionCourse()
   this->courseInfo.getSectionInDB() + this->courseInfo.getCurrentCourseInDB();
 }
 
+bool UserCalculatorData::LoadFromJSON(JSData& input)
+{ MacroRegisterFunctionWithName("UserCalculatorData::LoadFromJSON");
+  this->userId.value                      = input[DatabaseStrings::labelUserId                            ].string;
+  this->username.value                    = input[DatabaseStrings::labelUsername                          ].string;
+  this->email.value                       = input[DatabaseStrings::labelEmail                             ].string;
+  this->actualActivationToken             = input[DatabaseStrings::labelActivationToken                   ].string;
+  this->timeOfActivationTokenCreation     = input[DatabaseStrings::labelTimeOfActivationTokenCreation     ].string;
+  this->actualAuthenticationToken         = input[DatabaseStrings::labelAuthenticationToken               ].string;
+  this->timeOfAuthenticationTokenCreation = input[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ].string;
+  this->problemDataString                 = input[DatabaseStrings::labelProblemData                       ].string;
+  this->courseInfoString                  = input[DatabaseStrings::labelCourseInfo                        ].string;
+  this->actualShaonedSaltedPassword       = input[DatabaseStrings::labelPassword                          ].string;
+  this->userRole                          = input[DatabaseStrings::labelUserRole                          ].string;
+  return true;
+}
+
 JSData UserCalculatorData::ToJSON()
 { MacroRegisterFunctionWithName("UserCalculatorData::ToJSON");
   JSData result;
-  result[DatabaseStrings::labelUsername] = this->username.value;
-  result[DatabaseStrings::labelAuthenticationToken] = this->actualAuthenticationToken.value;
-  result[DatabaseStrings::labelEmail] = this->email.value;
+  result[DatabaseStrings::labelUserId                            ] = this->userId.value                          ;
+  result[DatabaseStrings::labelUsername                          ] = this->username.value                        ;
+  result[DatabaseStrings::labelEmail                             ] = this->email.value                           ;
+  result[DatabaseStrings::labelActivationToken                   ] = this->actualActivationToken.value           ;
+  result[DatabaseStrings::labelTimeOfActivationTokenCreation     ] = this->timeOfActivationTokenCreation         ;
+  result[DatabaseStrings::labelAuthenticationToken               ] = this->actualAuthenticationToken   .value    ;
+  result[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ] = this->timeOfAuthenticationTokenCreation     ;
+  result[DatabaseStrings::labelProblemData                       ] = this->problemDataString.value               ;
+  result[DatabaseStrings::labelCourseInfo                        ] = this->courseInfoString.value                ;
+  result[DatabaseStrings::labelPassword                          ] = this->actualShaonedSaltedPassword           ;
+  result[DatabaseStrings::labelUserRole                          ] = this->userRole                              ;
   return result;
 }
 
@@ -1402,7 +1429,7 @@ bool UserCalculator::ComputeAndStoreActivationStats
   now.AssignLocalTime();
   if (lastEmailTime != "")
   { lastActivationOnThisEmail.operator=(lastEmailTime);
-    lastActivationOnThisAccount.operator=(this->activationTokenCreationTime);
+    lastActivationOnThisAccount.operator=(this->timeOfActivationTokenCreation);
     if (commentsGeneral != 0)
       *commentsGeneral
       << "<br>Last activation on this email: "

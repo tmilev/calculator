@@ -5627,7 +5627,7 @@ void WebServer::CheckExternalPackageInstallation()
     else if (theGlobalVariables.OperatingSystem == "CentOS")
       theGlobalVariables.CallSystemNoOutput("sudo yum install openssl-devel", false);
   }
-  if (doInstallOpenSSL)
+  if (doInstallMongo)
   { result << "You appear to be missing an openssl installation. Let me try to install that for you. "
     << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
     if (theGlobalVariables.OperatingSystem == "Ubuntu")
@@ -5643,7 +5643,7 @@ void WebServer::CheckExternalPackageInstallation()
   result << "Proceeding to rebuild the calculator. " << logger::red
   << "This is expected to take 10+ minutes. "
   << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("make", false);
+  theGlobalVariables.CallSystemNoOutput("make -j4", false);
   theGlobalVariables.ChDir(currentFolder);
 }
 

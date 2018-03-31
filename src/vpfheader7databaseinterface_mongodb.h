@@ -31,6 +31,7 @@ public:
   (const std::string& tableName, List<std::string>& outputLabels, List<List<std::string> >& outputRows,
    long long* totalItems = 0, std::stringstream* commentsOnFailure = 0);
   static std::string ToHtmlDatabaseCollection(const std::string& currentTable);
+  void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
   DatabaseRoutinesGlobalFunctionsMongo();
   ~DatabaseRoutinesGlobalFunctionsMongo();
 };

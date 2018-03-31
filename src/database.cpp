@@ -462,7 +462,7 @@ bool UserCalculator::Authenticate(std::stringstream* commentsOnFailure)
   }
   if (this->AuthenticateWithToken(&secondCommentsStream))
     return true;
-  //stOutput << "<br>DEBUG: User could not authenticate with token.";
+  //*commentsOnFailure << " DEBUG: User could not authenticate with token.";
   bool result = this->AuthenticateWithUserNameAndPass(commentsOnFailure);
   if (this->enteredPassword != "")
     this->ResetAuthenticationToken(commentsOnFailure);
@@ -904,12 +904,14 @@ bool DatabaseRoutineS::AddUsersFromEmails
     } else
       currentUser.email = theEmails[i];
     if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableUsers, findUser, updateUser, &comments))
-    { if (!currentUser.CreateMeIfUsernameUnique(&comments))
-      { comments << "Failed to create user: " << currentUser.username;
-        result = false;
-        continue;
-      } else
-        outputNumNewUsers ++;
+    { if (!currentUser.Iexist(&comments))
+      { if (!currentUser.StoreToDB(false, &comments))
+        { comments << "Failed to create user: " << currentUser.username;
+          result = false;
+          continue;
+        } else
+          outputNumNewUsers ++;
+      }
       if (isEmail)
         DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, updateUser, &comments);
     } else
@@ -1128,7 +1130,7 @@ bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* comme
       return false;
     }
     if (input[i] == '@')
-      numAts++;
+      numAts ++;
   }
   if (numAts != 1 && commentsOnError != 0)
     *commentsOnError << "Email: "
@@ -1204,7 +1206,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
       *commentsGeneral << "User with email " << userWrapper.email << " does not exist. ";
     //stOutput << "\n<br>\nDEBUG: User with email " << userWrapper.email.value << " does not exist. ";
     userWrapper.username = userWrapper.email;
-    if (!userWrapper.CreateMeIfUsernameUnique(commentsOnFailure))
+    if (!userWrapper.StoreToDB(false, commentsOnFailure))
       return false;
     if (commentsGeneral != 0)
       *commentsGeneral << "Created new user with username: " << userWrapper.username;
@@ -1233,36 +1235,31 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
-  //*comments << "<br>DEBUG: Logging in: " << userWrapper.username.value;
-  //*comments << "<br>DEBUG: password: " << userWrapper.enteredPassword;
   userWrapper.currentTable = DatabaseStrings::tableUsers;
   if (userWrapper.Authenticate(comments))
   { theUseR = userWrapper;
     return true;
   }
+  //*comments << "DEBUG: entered pass: " << userWrapper.enteredPassword
+  //<< "shaone-ing to: " << userWrapper.enteredShaonedSaltedPassword
+  //<< ". Actual pass sha: " << userWrapper.actualShaonedSaltedPassword;
   if (userWrapper.enteredAuthenticationToken != "" &&
       userWrapper.enteredActivationToken == "" &&
       userWrapper.enteredAuthenticationToken != "0" &&
       comments != 0)
   { *comments << "<b> Authentication of user: " << userWrapper.username
     << " with token " << userWrapper.enteredAuthenticationToken << " failed. </b>";
-    //*comments << "<br>DEBUG: actual token: " << userWrapper.actualAuthenticationToken.value
-    //<< "<br>database user: " << theRoutines.theDatabaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>"
-    //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
   }
   if (userWrapper.enteredActivationToken != "" && comments != 0)
-  { //*comments << "<br>DEBUG: actual activation token: " << userWrapper.actualActivationToken.value
-    //<< ". Entered activation token: " << userWrapper.enteredActivationToken.value
-    //<< "<br>database user: " << theRoutines.theDatabaseUser << "<br>database name: " << theRoutines.theDatabaseName << "<br>"
+  { //*comments << "DEBUG: actual activation token: " << userWrapper.actualActivationToken
+    //<< ". Entered activation token: " << userWrapper.enteredActivationToken
     //<< "user request: " << theGlobalVariables.userCalculatorRequestType;
   }
-  //stOutput << "<br>DEBUG: Got to this point";
   if (theGlobalVariables.userCalculatorRequestType == "changePassword" ||
       theGlobalVariables.userCalculatorRequestType == "changePasswordPage" ||
       theGlobalVariables.userCalculatorRequestType == "activateAccount" )
     if (userWrapper.enteredActivationToken != "")
-    { //stOutput << "<br>DEBUG: Proceding to login with activation token. ";
-      if (userWrapper.actualActivationToken != "activated" &&
+    { if (userWrapper.actualActivationToken != "activated" &&
           userWrapper.actualActivationToken != "" &&
           userWrapper.actualActivationToken != "error")
       { if (userWrapper.enteredActivationToken == userWrapper.actualActivationToken)
@@ -1279,14 +1276,12 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
   if (userWrapper.username == "admin" && userWrapper.enteredPassword != "")
     if (!userWrapper.Iexist(0))
     { if (comments != 0)
-        *comments << "<b>First login of user admin: setting admin pass. </b>";
-      userWrapper.CreateMeIfUsernameUnique(comments);
-      JSData updateUser;
-      updateUser[DatabaseStrings::labelActivationToken] = "activated";
-      updateUser[DatabaseStrings::labelUserRole] = "admin";
-      DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-      (DatabaseStrings::tableUsers, userWrapper.GetFindMeFromUserNameQuery(), updateUser, comments);
+        *comments << "First login of user admin: setting admin pass.";
+      //*comments << "DEBUG: user before storing: " << userWrapper.ToJSON().ToString();
+      userWrapper.actualActivationToken = "activated";
       userWrapper.userRole = "admin";
+      userWrapper.StoreToDB(true, comments);
+      //*comments << "DEBUG: admin user: " << userWrapper.ToJSON().ToString() ;
       theUseR = userWrapper;
       return true;
     }
@@ -1303,27 +1298,19 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
 //#include <time.h>
 //#include <ctime>
 
-bool UserCalculator::CreateMeIfUsernameUnique(std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::CreateMeIfUsernameUnique");
-  if (this->Iexist(commentsOnFailure))
-  { if (commentsOnFailure != 0)
-      *commentsOnFailure << "User " << this->username << " already exists. ";
-    return false;
-  }
-  if (MathRoutines::StringBeginsWith(this->username, "deleted"))
-  { if (commentsOnFailure != 0)
-      *commentsOnFailure << "You requested creation of user: "
-      << this->username
-      << " however user names starting with 'deleted' are not allowed. ";
-    return false;
-  }
+bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("UserCalculator::StoreToDB");
   JSData findUser;
   findUser[DatabaseStrings::labelUsername] = this->username;
+  if (this->enteredPassword != "" && doSetPassword)
+  { //*commentsOnFailure << " DEBUG: Computing sha-1 salted pass from: " << this->enteredPassword;
+    this->ComputeShaonedSaltedPassword();
+    this->actualShaonedSaltedPassword = this->enteredShaonedSaltedPassword;
+  }
   JSData setUser = this->ToJSON();
-  DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, setUser, commentsOnFailure);
-  if (this->enteredPassword == "")
-    return true;
-  return this->SetPassword(commentsOnFailure);
+  //*commentsOnFailure << " DEBUG: About to Store: " << setUser.ToString();
+
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, setUser, commentsOnFailure);
 }
 
 std::string UserCalculator::GetActivationAddressFromActivationToken

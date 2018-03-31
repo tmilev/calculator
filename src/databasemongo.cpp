@@ -19,6 +19,8 @@ DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo()
   mongoc_init();
   databaseClient = mongoc_client_new("mongodb://localhost:27017");
   database = mongoc_client_get_database(databaseClient, DatabaseStrings::theDatabaseNameMongo.c_str());
+  DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername);
+  DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail);
 #endif
 }
 
@@ -66,6 +68,7 @@ public:
   bson_t* update;
   bson_t* options;
   bson_t* updateResult;
+  bson_t* command;
   bson_error_t theError;
   int maxOutputItems;
   long long totalItems;
@@ -82,6 +85,7 @@ public:
 
 MongoQuery::MongoQuery()
 { this->query = 0;
+  this->command = 0;
   this->update = 0;
   this->options = 0;
   this->cursor = 0;
@@ -92,7 +96,11 @@ MongoQuery::MongoQuery()
 }
 
 MongoQuery::~MongoQuery()
-{ if (this->cursor != 0)
+{ if (this->command != 0)
+  { bson_destroy (this->command);
+    this->command = 0;
+  }
+  if (this->cursor != 0)
   { mongoc_cursor_destroy(this->cursor);
     this->cursor = 0;
   }
@@ -181,6 +189,22 @@ bool MongoQuery::FindMultiple(List<std::string>& output, std::stringstream* comm
   return true;
 }
 #endif
+
+void DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex
+(const std::string& collectionName, const std::string& theKey)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex");
+  std::cout << "DEBUG Got to here" << std::endl;
+  MongoQuery query;
+  std::stringstream theCommand;
+  theCommand << "{\"createIndexes\":\"" << collectionName << "\", \"indexes\": [{\"key\":{\""
+  << theKey << "\": \"hashed\"}, \"name\": \"" << collectionName  << "_" << theKey << "_hash\"" << "}]} ";
+  std::cout << "pt 2 Got to here" << std::endl;
+  query.command = bson_new_from_json((const uint8_t*) theCommand.str().c_str(), theCommand.str().size(), &query.theError);
+  std::cout << "pt 3Got to here. Error: " << query.theError.message << std::endl;
+  mongoc_database_write_command_with_opts(database, query.command, NULL, query.updateResult, &query.theError);
+  std::cout << "and the error: " << query.theError.message << std::endl;
+}
+
 
 bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString
 (const std::string& collectionName, const std::string& findQuery,

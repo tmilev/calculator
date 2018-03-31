@@ -882,7 +882,7 @@ int WebWorker::ProcessSignUP()
     << ") with email ("
     << theUser.email
     << ") is available. </b></span>";
-  if (!theUser.CreateMeIfUsernameUnique(&out))
+  if (!theUser.StoreToDB(false, &out))
   { stOutput << out.str();
     return 0;
   }

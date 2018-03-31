@@ -1510,8 +1510,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     (theUser, &argumentProcessingFailureComments, 0);
   } else if (theUser.enteredAuthenticationToken != "" || theUser.enteredPassword != "" ||
              theUser.enteredActivationToken != "")
-    theGlobalVariables.flagLoggedIn =
-    DatabaseRoutinesGlobalFunctions::LoginViaDatabase
+    theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (theUser, &argumentProcessingFailureComments);
   //stOutput << "<br>DEBUG: Got to here, login: " << theGlobalVariables.flagLoggedIn;
 

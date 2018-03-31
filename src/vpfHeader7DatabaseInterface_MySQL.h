@@ -256,7 +256,7 @@ public:
   bool ResetAuthenticationToken(std::stringstream* commentsOnFailure);
   bool SetPassword(std::stringstream* commentsOnFailure);
   bool Iexist(std::stringstream* comments);
-  bool CreateMeIfUsernameUnique(std::stringstream* commentsOnFailure);
+  bool StoreToDB(bool doSetPassword, std::stringstream* commentsOnFailure);
   static bool IsAcceptableDatabaseInpuT(const std::string& input, std::stringstream* comments);
   static bool IsAcceptableCharDatabaseInpuT(char theChar);
   bool ComputeAndStoreActivationToken(std::stringstream* commentsOnFailure);

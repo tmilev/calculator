@@ -9,6 +9,7 @@
 #include "vpfHeader8HtmlInterpretationInterface.h"
 #include "vpfHeader2Math10_LaTeXRoutines.h"
 #include <iomanip>
+#include "vpfheader7databaseinterface_mongodb.h"
 
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCustomCode
 (__FILE__, "Routines for calculus teaching: calculator exam mode. Shared code. ");
@@ -167,44 +168,24 @@ void CalculatorHTML::StoreDeadlineInfo
   outputString = out.str();
 }
 
-bool DatabaseRoutines::ReadProblemDatabaseInfo
+bool DatabaseRoutineS::ReadProblemDatabaseInfo
 (const std::string& problemHomeName, std::string& outputString,
-  std::stringstream& commentsOnFailure)
+ std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemDatabaseInfo");
-  if (!this->startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
-    return false;
-  if (!this->TableExists("problemData", &commentsOnFailure))
-    if (!this->CreateTable("problemData", "problemCollection VARCHAR(255) NOT NULL PRIMARY KEY, \
-        problemInformation LONGTEXT", &commentsOnFailure, 0))
-      return false;
-  if (!this->RowExists
-      ((std::string) "problemCollection", problemHomeName,
-       (std::string) "problemData", &commentsOnFailure))
-    if (!this->SetEntry
-        ((std::string) "problemCollection", problemHomeName,
-         (std::string) "problemData", (std::string) "problemInformation",
-         (std::string) "", &commentsOnFailure))
-      return false;
-//  stOutput << " ... got to here ...";
-  return this->FetchEntry
-  ((std::string) "problemCollection", problemHomeName, (std::string) "problemData",
-   (std::string) "problemInformation", outputString, &commentsOnFailure);
+  (void) problemHomeName;
+  (void) outputString;
+  (void) commentsOnFailure;
+  crash << "Not implemented yet" << crash;
+  return false;
 }
 
-bool DatabaseRoutines::StoreProblemDatabaseInfo
+bool DatabaseRoutineS::StoreProblemDatabaseInfo
 (const UserCalculatorData& theUser, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
-  //stOutput << "<hr>DEBUG: About to store back: table row name: "
-  //<< theUser.problemInfoRowId.value;
-  //stOutput << "<hr>DEBUG: About to store back: "
-  //<< "<br>deadline:<br> "
-  //<< theUser.deadlineInfoString.value
-  //<< "<br>problem:<br> "
-  //<< theUser.problemInfoString.value
-  //<< "<br> problem row id: " << theUser.problemInfoRowId.value << "<hr>";
-  //;
-  if (!this->startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
-    return false;
+  (void) theUser;
+  (void) commentsOnFailure;
+/*  if (!this->startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
+      return false;
   if (!this->SetEntry
       (DatabaseStrings::columnDeadlinesSchema,
        theUser.courseInfo.deadlineSchemaIDComputed,
@@ -218,7 +199,8 @@ bool DatabaseRoutines::StoreProblemDatabaseInfo
        DatabaseStrings::tableProblemWeights,
        DatabaseStrings::columnProblemWeights,
        theUser.courseInfo.problemWeightString, &commentsOnFailure))
-    return false;
+    return false;*/
+  crash << "Not implemented yet" << crash;
   return true;
 }
 
@@ -303,13 +285,8 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
   //stOutput << "<hr>Resulting string: "
   //<< theGlobalVariables.userDefault.problemInfoString.value
   //<< "<hr>";
-  DatabaseRoutines theRoutines;
-  if (!theRoutines.StoreProblemDatabaseInfo(theGlobalVariables.userDefault, commentsOnFailure))
+  if (!DatabaseRoutineS::StoreProblemDatabaseInfo(theGlobalVariables.userDefault, commentsOnFailure))
     return false;
-  //stOutput << "<br>probs incoming: <br>" << incomingProblems.ToStringCommaDelimited()
-  //<< " with weights: " << incomingWeights.ToStringCommaDelimited()
-  //<< "Problems final: " <<  problemHome.databaseProblemAndHomeworkGroupList.ToStringCommaDelimited()
-  //<< " weights: " << problemHome.databaseProblemWeights.ToStringCommaDelimited() << "<br>";
   return result;
 }
 #endif // MACRO_use_MySQL
@@ -323,7 +300,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
     return false;
   //this->theProblemData.CheckConsistency();
 //  stOutput << "<hr>DEBug: got to before InterpretDatabaseProblemData.<hr>";
-  if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString.value, comments))
+  if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString, comments))
   { comments << "Failed to interpret user's problem saved data. ";
     //stOutput << "Failed to interpret user's problem saved data. ";
     return false;
@@ -1339,7 +1316,6 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
     return;
 #ifdef MACRO_use_MySQL
   std::stringstream out;
-  DatabaseRoutines theRoutines;
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\"> Manage accounts</a>";
   inputOutput.interpretedCommand = out.str();
 #else
@@ -2757,9 +2733,8 @@ bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream& commentsOnFailure
 { MacroRegisterFunctionWithName("CalculatorHTML::StoreRandomSeedCurrent");
 #ifdef MACRO_use_MySQL
   this->theProblemData.flagRandomSeedGiven = true;
-  DatabaseRoutines theRoutines;
   this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
-  if (!this->currentUseR.StoreProblemDataToDatabase(theRoutines, commentsOnFailure))
+  if (!this->currentUseR.StoreProblemDataToDatabase(commentsOnFailure))
   { commentsOnFailure << "<span style=\"color:red\"> <b>"
     << "Error: failed to store problem in database. "
     << "If you see this message, please take a screenshot and email your instructor. "

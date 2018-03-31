@@ -28,4 +28,3 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery
     return output.AssignValue(commentsOnFailure.str(), theCommands);
   return output.AssignValue(outputStrings.ToStringCommaDelimited(), theCommands);
 }
-

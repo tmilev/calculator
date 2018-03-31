@@ -600,7 +600,7 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   }
   this->targetPDFNoPath += this->desiredPresentationTitle;
   this->targetPDFNoPath = HtmlRoutines::ConvertStringToURLString(this->targetPDFNoPath, false);
-  MathRoutines::StringTrimToLength(this->targetPDFNoPath, 230);
+  MathRoutines::StringTrimToLengthWithHash(this->targetPDFNoPath, 230);
   this->targetPDFNoPath += ".pdf";
   this->targetPDFFileNameWithPathVirtual = this->targetPDFVirtualPath + this->targetPDFNoPath;
   this->targetPDFLatexPath = "../../" + this->targetPDFVirtualPath;

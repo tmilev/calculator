@@ -53,8 +53,7 @@ public:
   double number;
   std::string string;
   List<JSData> list;
-  List<struct JSHashData> obj;
-
+  MapLisT<std::string, JSData, MathRoutines::hashString> objects;
   void operator=(const bool other);
   void operator=(int other);
   void operator=(const double other);
@@ -80,7 +79,7 @@ public:
     this->number = other.number;
     this->string = other.string;
     this->list = other.list;
-    this->obj = other.obj;
+    this->objects = other.objects;
   }
   // there has to be a better way to do this
   void operator=(const Rational& other);
@@ -102,11 +101,6 @@ public:
   void TryToComputeType();
   static bool Tokenize(const std::string& input, List<JSData>& output);
   void writefile(const char* filename) const;
-};
-
-struct JSHashData
-{ std::string key;
-  JSData value;
 };
 
 std::ostream& operator<<(std::ostream& out, const JSData& data);

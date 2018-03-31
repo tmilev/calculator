@@ -6,44 +6,6 @@
 #include "vpfHeader1General0_General.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemIndependentinstance(__FILE__, "Header, system independent database data structures. ");
 
-class DatabaseData
-{
-//This class is needed to attempt to deal with mySQL's
-//numerous design errors, to the extent possible.
-//Documenting those errors for the interested reader.
-//1. Mysql identifiers have max length of 64 characters.
-//   Workaround this MySQL bug: when used as identifiers, strings are
-//   trimmed. We use the first 30 characters
-//   + we append SHA-1 of the entire string.
-//   Motivation: we don't lose human-readability for small strings.
-//2. Mysql identifiers cannot have ` characters in them.
-//   Workaround this MySQL bug: we url-encode any data stored in
-//   the database.
-//   Motivation: we retain limited human-readability.
-//-------------------------
-//The value entry of the class stores an arbitrary sequence of characters,
-//the sequence we care about and want stored/loaded from DB.
-public:
-  std::string value;
-  DatabaseData(const std::string& other)
-  { this->value = other;
-  }
-  DatabaseData(){}
-  bool operator==(const std::string& other)
-  { return this->value == other;
-  }
-  bool operator!=(const std::string& other)
-  { return !(*this == other);
-  }
-  void operator=(const std::string& other)
-  { this->value = other;
-  }
-  std::string GetDatA()const;
-  std::string GetDataNoQuotes()const;
-  std::string GetIdentifierNoQuotes()const;
-  std::string GetIdentifieR()const;
-};
-
 class JSData;
 
 struct CourseAndUserInfo
@@ -78,16 +40,16 @@ class UserCalculatorData
   public:
   double approximateHoursSinceLastTokenWasIssued;
   std::string usernamePlusPassWord;
-  DatabaseData userId;
-  DatabaseData username;
-  DatabaseData email;
-  DatabaseData currentTable;
-  DatabaseData actualActivationToken;
-  DatabaseData enteredActivationToken;
-  DatabaseData enteredAuthenticationToken;
-  DatabaseData actualAuthenticationToken;
-  DatabaseData problemDataString;
-  DatabaseData courseInfoString;
+  std::string userId;
+  std::string username;
+  std::string email;
+  std::string currentTable;
+  std::string actualActivationToken;
+  std::string enteredActivationToken;
+  std::string enteredAuthenticationToken;
+  std::string actualAuthenticationToken;
+  std::string problemDataString;
+  std::string courseInfoString;
   CourseAndUserInfo courseInfo;
 
   std::string enteredPassword;
@@ -147,6 +109,12 @@ public:
   static std::string labelTimeOfAuthenticationTokenCreation;
 
   static std::string tableUsers;
+///email info
+  static std::string tableEmailInfo;
+  static std::string labelLastActivationEmailTime;
+  static std::string labelNumActivationEmails;
+  static std::string labelUsernameAssociatedWithToken;
+
 ///course info column names
   static std::string columnCurrentCourses;
   static std::string columnSection;

@@ -641,44 +641,39 @@ void ComputeTauSignatures(WeylGroupData* G, List<List<bool> >& tauSignatures, bo
 template <typename elementSomeGroup>
 void ExportCharTable(FiniteGroup<elementSomeGroup>& G, JSData &data)
 { data.type = JSData::JSObject;
-  data.obj.SetSize(3);
-  data.obj[0].key = "representatives";
-  data.obj[1].key = "sizes";
-  data.obj[2].key = "characters";
+  JSData& representatives = data.objects.GetValueCreate("representatives");
+  JSData& sizes = data.objects.GetValueCreate("sizes");
+  JSData& characters = data.objects.GetValueCreate("characters");
+  representatives.type = JSData::JSarray;
+  representatives.list.SetSize(G.ConjugacyClassCount());
 
-  data.obj[0].value.type = JSData::JSarray;
-  data.obj[0].value.list.SetSize(G.ConjugacyClassCount());
-  for(int i=0; i<G.ConjugacyClassCount(); i++)
+  for (int i = 0; i < G.ConjugacyClassCount(); i ++)
   { List<int> reprefs;
-    G.GetWord(G.conjugacyClasseS[i].representative,reprefs);
-    data.obj[0].value.list[i].type = JSData::JSarray;
-    data.obj[0].value.list[i].list.SetSize(reprefs.size);
-    for(int j=0; j<reprefs.size; j++)
-    { data.obj[0].value.list[i].list[j].type = JSData::JSnumber;
-      data.obj[0].value.list[i].list[j].number = reprefs[j];
+    G.GetWord(G.conjugacyClasseS[i].representative, reprefs);
+    representatives.list[i].type = JSData::JSarray;
+    representatives.list[i].list.SetSize(reprefs.size);
+    for (int j = 0; j < reprefs.size; j ++)
+    { representatives.list[i].list[j].type = JSData::JSnumber;
+      representatives.list[i].list[j].number = reprefs[j];
     }
   }
-
-  data.obj[1].value.type = JSData::JSarray;
-  data.obj[1].value.list.SetSize(G.ConjugacyClassCount());
-  for(int i=0; i<G.ConjugacyClassCount(); i++)
-  { data.obj[1].value.list[i].type = JSData::JSnumber;
-    data.obj[1].value.list[i].number = ((Rational) G.conjugacyClasseS[i].size).GetDoubleValue();
+  sizes.type = JSData::JSarray;
+  sizes.list.SetSize(G.ConjugacyClassCount());
+  for (int i = 0; i < G.ConjugacyClassCount(); i ++)
+  { sizes.list[i].type = JSData::JSnumber;
+    sizes.list[i].number = ((Rational) G.conjugacyClasseS[i].size).GetDoubleValue();
   }
-
-  data.obj[2].value.type = JSData::JSarray;
-  data.obj[2].value.list.SetSize(G.characterTable.size);
-  for(int i=0; i<G.characterTable.size; i++)
-  { for(int j=0; j<G.characterTable[i].data.size; j++)
-    { data["characters"][i][j] = G.characterTable[i][j].GetDoubleValue();
-    }
-  }
+  characters.type = JSData::JSarray;
+  characters.list.SetSize(G.characterTable.size);
+  for (int i = 0; i < G.characterTable.size; i ++)
+    for (int j = 0; j < G.characterTable[i].data.size; j ++)
+      characters[i][j] = G.characterTable[i][j].GetDoubleValue();
 }
 
 void ExportTauSignatures(WeylGroupData& G, const List<List<bool> > ts, JSData &data)
 { ExportCharTable(G.theGroup, data["chartable"]);
-  for(int i=0; i<ts.size; i++)
-    for(int j=0; j<ts[i].size; j++)
+  for (int i = 0; i < ts.size; i ++)
+    for (int j = 0; j < ts[i].size; j ++)
       data["tausigs"][i][j] = ts[i][j];
 }
 

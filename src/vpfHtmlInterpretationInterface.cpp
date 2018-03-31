@@ -3,6 +3,7 @@
 #include "vpfHeader8HtmlInterpretation.h"
 #include "vpfHeader8HtmlSnippets.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
+#include "vpfheader7databaseinterface_mongodb.h"
 #include <iomanip>
 
 ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation
@@ -748,8 +749,8 @@ std::string HtmlInterpretation::GetJSONUserInfo()
   if (! theGlobalVariables.flagLoggedIn)
     return "\"not logged in\"";
   JSData output;
-  output["username"] = theGlobalVariables.userDefault.username.value;
-  output["authenticationToken"] = theGlobalVariables.userDefault.actualAuthenticationToken.value;
+  output["username"] = theGlobalVariables.userDefault.username;
+  output["authenticationToken"] = theGlobalVariables.userDefault.actualAuthenticationToken;
   return output.ToString();
 }
 
@@ -1131,8 +1132,7 @@ std::string HtmlInterpretation::SubmitProblem
       << "<br>The calculator output is: " << theInterpreter.outputString
       << "Comments: " << theInterpreter.Comments.str()
       << "<hr>Input, no enclosures: <hr>"
-      << completedProblemStreamNoEnclosures.str()
-      ;
+      << completedProblemStreamNoEnclosures.str();
       out << "<hr>Input, full:<hr>"
       << theInterpreter.inputString << "<hr></td></tr>";
     }
@@ -1143,7 +1143,6 @@ std::string HtmlInterpretation::SubmitProblem
     out << "<tr><td>" << HtmlInterpretation::GetCommentsInterpretation
     (theInterpreter, 3, theFormat) << "</td></tr>\n";
 #ifdef MACRO_use_MySQL
-  DatabaseRoutines theRoutines;
   UserCalculator& theUser = theProblem.currentUseR;
   theUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   bool deadLinePassed = false;
@@ -1154,12 +1153,13 @@ std::string HtmlInterpretation::SubmitProblem
     //<< theUser.theProblemData.ToStringHtml() << "<hr><hr><hr></td></tr>";
     if (!theProblem.LoadAndParseTopicList(out))
       hasDeadline = false;
-    DatabaseData theSQLstring;
+    std::string theSQLstring;
     theSQLstring = theUser.courseInfo.sectionComputed;
     if (hasDeadline)
     { bool unused = false;
       std::string theDeadlineString =
-      theProblem.GetDeadline(theProblem.fileName, theSQLstring.GetDataNoQuotes(), unused);
+      theProblem.GetDeadline
+      (theProblem.fileName, HtmlRoutines::ConvertStringToURLString(theSQLstring, false), unused);
       //out << "<tr><td>DEBUG: getting deadline for section: " << theUser.userGroup.value
       //<< "<br>The prob data is: "
       //<< theUser.theProblemData.ToStringHtml()
@@ -1214,7 +1214,7 @@ std::string HtmlInterpretation::SubmitProblem
     theUser.SetProblemData(theProblem.fileName, currentProblemData);
     //if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
     //  stOutput << "<hr>result: " << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString() << "<hr>";
-    if (!theUser.StoreProblemDataToDatabase(theRoutines, comments))
+    if (!theUser.StoreProblemDataToDatabase(comments))
       out << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
       << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
       << comments.str() << "</td></tr>";
@@ -1302,19 +1302,20 @@ std::string HtmlInterpretation::AddTeachersSections()
 //  { out << "<b>Could not extract sections from " << desiredSections << ".</b>";
 //    return out.str();
 //  }
-  DatabaseRoutines theRoutines;
   UserCalculator currentTeacher;
   for (int i = 0; i < theTeachers.size; i ++)
   { currentTeacher.reset();
     currentTeacher.username = theTeachers[i];
     currentTeacher.currentTable = DatabaseStrings::tableUsers;
-    if (!currentTeacher.FetchOneUserRow(theRoutines, &out, &out))
+    if (!currentTeacher.LoadFromDB(&out, &out))
     { out << "<span style=\"color:red\">Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
       continue;
     }
-    currentTeacher.courseInfo.courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught]=desiredSections;
-    if(!currentTeacher.SetColumnEntry
-       (DatabaseStrings::labelCourseInfo, currentTeacher.courseInfo.ToStringForDBStorage(), theRoutines, &out))
+    currentTeacher.courseInfo.courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught] = desiredSections;
+    JSData findQuery, setQuery;
+    findQuery[DatabaseStrings::labelUsername] = currentTeacher.username;
+    setQuery[DatabaseStrings::labelCourseInfo] = currentTeacher.courseInfo.ToStringForDBStorage();
+    if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findQuery, setQuery, &out))
       out << "<span style=\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
     else
       out << "<span style=\"color:green\">Assigned " << theTeachers[i] << " to section: "
@@ -1328,6 +1329,7 @@ std::string HtmlInterpretation::AddTeachersSections()
 
 std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressWithPort)
 { MacroRegisterFunctionWithName("HtmlInterpretation::AddUserEmails");
+  (void) hostWebAddressWithPort;
   std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagUsingSSLinCurrentConnection)
   { out << "<b>Only admins may add users, under ssl connection. </b>";
@@ -1347,14 +1349,13 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
     return out.str();
   }
 #ifdef MACRO_use_MySQL
-  DatabaseRoutines theRoutines;
   std::stringstream comments;
   bool sentEmails = true;
   //stOutput << "DEBUG: here be i!";
   bool doSendEmails = theGlobalVariables.userCalculatorRequestType == "sendEmails" ?  true : false;
   int numNewUsers = 0;
   int numUpdatedUsers = 0;
-  bool createdUsers = theRoutines.AddUsersFromEmails
+  bool createdUsers = DatabaseRoutineS::AddUsersFromEmails
   (inputEmails, userPasswords, userRole, userGroup, comments,
    numNewUsers, numUpdatedUsers);
   if (createdUsers)
@@ -1370,16 +1371,8 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
     else
       out << "<span style=\"color:red\">Failed to send all activation emails. </span>";
   }
-  bool usersAreAdmins = (userRole == "admin");
-  List<List<std::string> > userTable;
-  List<std::string> userLabels;
-  if (!theRoutines.FetchAllUsers(userTable, userLabels, comments))
-    out << comments.str();
-  out << HtmlInterpretation::ToStringUserDetailsTable
-  (usersAreAdmins, userTable, userLabels, hostWebAddressWithPort);
-//    out << "<hr>Debug: got to here. ";
-  if (!createdUsers || !sentEmails)
-    out << "<br>Comments:<br>" << comments.str();
+//  bool usersAreAdmins = (userRole == "admin");
+  out << "<b>Further comments missing</b>";
   return out.str();
 #else
   return "<b>no database present.</b>";
@@ -1520,10 +1513,10 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
           continue;
       if (!isFirst)
         out << "<br>";
-      theFormat.flagExpressionIsFinal=true;
-      theFormat.flagIncludeExtraHtmlDescriptionsInPlots=false;
-      theFormat.flagUseQuotes=false;
-      theFormat.flagUseLatex=true;
+      theFormat.flagExpressionIsFinal = true;
+      theFormat.flagIncludeExtraHtmlDescriptionsInPlots = false;
+      theFormat.flagUseQuotes = false;
+      theFormat.flagUseLatex = true;
       if (currentE[j].IsOfType<std::string>())
         out << currentE[j].GetValue<std::string>();
       else
@@ -1537,7 +1530,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
       }
       isFirst = false;
     }
-  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds()- startTime << " second(s).";
+  out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     out
     << "<hr><a href=\"" << theGlobalVariables.DisplayNameExecutable
@@ -1560,14 +1553,11 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   { out << "Browsing accounts allowed only for logged-in admins over ssl connection.";
     return out.str();
   }
-  DatabaseRoutines theRoutines;
   std::string notUsed;
   List<List<std::string> > userTable;
   List<std::string> columnLabels;
   std::stringstream commentsOnFailure;
-  out << "Database: " << theRoutines.theDatabaseName
-  << "<br>Database user: " << theRoutines.theDatabaseUser << "<br>";
-  if (!theRoutines.PrepareClassData(notUsed, userTable, columnLabels, commentsOnFailure))
+  if (!DatabaseRoutineS::PrepareClassData(notUsed, userTable, columnLabels, commentsOnFailure))
   { out << "<b>Failed to load user info.</b> Comments: " << commentsOnFailure.str();
     return out.str();
   }
@@ -1734,7 +1724,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     currentUser.AssignCourseInfoString(&out);
     if (flagFilterCourse &&
         (currentUser.courseInfo.getCurrentCourseInDB() != currentCourse ||
-         currentUser.courseInfo.getInstructorInDB() != theGlobalVariables.userDefault.username.value))
+         currentUser.courseInfo.getInstructorInDB() != theGlobalVariables.userDefault.username))
       continue;
     std::string currentID = currentUser.ToStringIdSectionCourse();
     if (!sectionIDs.Contains(currentID))
@@ -1775,26 +1765,26 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     numUsers ++;
     std::stringstream oneTableLineStream;
     oneTableLineStream << "<tr>"
-    << "<td>" << currentUser.username.value << "</td>"
-    << "<td>" << currentUser.email.value << "</td>"
+    << "<td>" << currentUser.username << "</td>"
+    << "<td>" << currentUser.email << "</td>"
     ;
     bool isActivated = true;
     std::string webAddress = "https://" + hostWebAddressWithPort + "/cgi-bin/calculator";
-    if (currentUser.actualActivationToken.value != "activated" && currentUser.actualActivationToken.value != "error")
+    if (currentUser.actualActivationToken != "activated" && currentUser.actualActivationToken != "error")
     { isActivated = false;
       numActivatedUsers ++;
       oneTableLineStream << "<td><span style=\"color:red\">not activated</span></td>";
-      if (currentUser.actualActivationToken.value!="")
+      if (currentUser.actualActivationToken != "")
         oneTableLineStream << "<td>"
         << "<a href=\""
         << UserCalculator::GetActivationAddressFromActivationToken
-        (currentUser.actualActivationToken.value, hostWebAddressWithPort,
-         userTable[i][indexUser], currentUser.email.value)
+        (currentUser.actualActivationToken, hostWebAddressWithPort,
+         userTable[i][indexUser], currentUser.email)
         << "\"> (Re)activate account and change password</a>"
         << "</td>";
       oneTableLineStream << "<td>";
       oneTableLineStream
-      << "<a href=\"mailto:" << currentUser.email.value
+      << "<a href=\"mailto:" << currentUser.email
       << "?subject=Math 140 Homework account activation&";
 
       oneTableLineStream << "body=";
@@ -1802,9 +1792,9 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       emailBody << "Dear user,\n you have not activated your homework server account yet. \n"
       << "To activate your account and set your password please use the link: "
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
-      << HtmlRoutines::ConvertStringToURLString( UserCalculator::GetActivationAddressFromActivationToken
-        (currentUser.actualActivationToken.value, hostWebAddressWithPort,
-         userTable[i][indexUser], currentUser.email.value), false)
+      << HtmlRoutines::ConvertStringToURLString(UserCalculator::GetActivationAddressFromActivationToken
+         (currentUser.actualActivationToken, hostWebAddressWithPort,
+          userTable[i][indexUser], currentUser.email), false)
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
       << " Once you activate your account, you can log in safely here: \n"
       << HtmlRoutines::ConvertStringToURLString("\n\n", false)
@@ -1815,13 +1805,13 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       oneTableLineStream << "</td>";
       //      else
         //  oneTableLineStream << "<td>Activation token: " << currentUser.activationToken.value << "</td>";
-    } else if (currentUser.actualActivationToken=="error")
+    } else if (currentUser.actualActivationToken == "error")
       oneTableLineStream << "<td>error</td><td></td>";
     else
       oneTableLineStream << "<td><span style=\"color:green\">activated</span></td><td></td><td></td>";
     std::stringstream oneLink;
     oneLink << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=login&username="
-    << currentUser.username.value << "\">" << currentUser.username.value << "</a>";
+    << currentUser.username << "\">" << currentUser.username << "</a>";
     oneTableLineStream << "<td>" << oneLink.str() << "</td>";
     oneTableLineStream << "<td>" << userTable[i][indexCourseInfo] << "</td>";
     //oneTableLineStream << "<td>" << currentUser.courseInfo.ToStringHumanReadable() << "</td>";
@@ -2009,10 +1999,9 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   //stOutput << "DEBUG: got to here";
   theProblem.currentUseR.ComputePointsEarned
   (theProblem.currentUseR.theProblemData.theKeys, &theProblem.theTopicS);
+  comments << "Not implemented yet";
+  return false;
   List<std::string> userLabels;
-  DatabaseRoutines theRoutines;
-  if (!theRoutines.FetchAllUsers(userTablE, userLabels, comments))
-    return false;
   int usernameIndex = userLabels.GetIndex(DatabaseStrings::labelUsername);
   if (usernameIndex == - 1)
     return "Could not find username column. ";
@@ -2358,7 +2347,7 @@ std::string HtmlInterpretation::ToStringNavigation()
   { out << "User";
     if (theGlobalVariables.UserDefaultHasAdminRights())
       out << " <b>(admin)</b>";
-    out << ": " << theGlobalVariables.userDefault.username.value << linkSeparator;
+    out << ": " << theGlobalVariables.userDefault.username << linkSeparator;
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout&";
     out << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">Log out</a>" << linkSeparator;
     if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage")

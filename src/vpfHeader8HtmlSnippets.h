@@ -45,9 +45,9 @@ public:
   static void ReplaceEqualitiesAndAmpersandsBySpaces(std::string& inputOutput);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
   static std::string GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input);
-  static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label="Expand/collapse", const std::string& desiredID="");
+  static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label = "Expand/collapse", const std::string& desiredID = "");
   static std::string GetHtmlLinkFromProjectFileName
-  (const std::string& fileName, const std::string& fileDesc="", int line=-1);
+  (const std::string& fileName, const std::string& fileDesc = "", int line = - 1);
   static std::string GetLatexEmbeddableLinkFromCalculatorInput(const std::string& address, const std::string& display);
   static std::string DoubleBackslashes(const std::string& input);
 
@@ -57,8 +57,8 @@ public:
   static const std::string& GetCSSAddStyleTags(const std::string& fileNameVirtual);
   static const std::string& GetJavascriptAddScriptTags(const std::string& fileNameVirtual);
   static const std::string& GetFile
-  (const std::string& fileNameVirtual, const std::string& additionalBeginTag="",
-   const std::string& additionalEndTag="");
+  (const std::string& fileNameVirtual, const std::string& additionalBeginTag = "",
+   const std::string& additionalEndTag = "");
 
   static const std::string& GetJavascriptCookieFunctionSNoTags();
   static const std::string GetJavascriptCookieFunctionsLink();
@@ -128,17 +128,14 @@ public:
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
   static bool AccountOneInputCGIString
-(const std::string& fieldName, const std::string& fieldValue, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
- std::stringstream& commentsOnFailure)
-  ;
+  (const std::string& fieldName, const std::string& fieldValue, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
+   std::stringstream& commentsOnFailure);
   static bool ChopCGIString
-(const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
- std::stringstream& commentsOnFailure)
-  ;
+  (const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
+   std::stringstream& commentsOnFailure);
   static bool ChopCGIStringAppend
-(const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
- std::stringstream& commentsOnFailure)
-  ;
+  (const std::string& input, MapLisT<std::string, std::string, MathRoutines::hashString>& outputMap,
+   std::stringstream& commentsOnFailure);
   static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; HtmlRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; }
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return HtmlRoutines::ElementToStringTooltip(input, inputTooltip, true); }
@@ -146,5 +143,6 @@ public:
   static void MakeStdCoutReport(const std::string& input);
   static void MakeReportIndicatorFile(const std::string& input);
   static void FormatCPPSourceCode(const std::string& FileName);
+  static std::string ToHtmlTable(List<std::string>& labels, List<List<std::string> >& content);
 };
 #endif

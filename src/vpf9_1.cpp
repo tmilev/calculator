@@ -377,7 +377,7 @@ void GlobalVariables::initOutputReportAndCrashFileNames
   { this->userInputStringRAWIfAvailable = "Raw user input string not available in SSL mode. ";
     inputAbbreviated = this->userInputStringIfAvailable;
   }
-  MathRoutines::StringTrimToLength(inputAbbreviated, 150);
+  MathRoutines::StringTrimToLengthWithHash(inputAbbreviated, 150);
   this->RelativePhysicalNameCrashLog = "crash_" + inputAbbreviated + ".html";
   this->RelativePhysicalNameProgressReport = "progressReport_" + inputAbbreviated + ".html";
   this->RelativePhysicalNameOutpuT = "output_" + inputAbbreviated + ".html";
@@ -454,8 +454,8 @@ UserCalculatorData::UserCalculatorData()
 
 void UserCalculatorData::reset()
 { MacroRegisterFunctionWithName("UserCalculatorData::reset");
-  for (unsigned i = 0; i < this->username.value.size(); i ++)
-    this->username.value[i] = ' ';
+  for (unsigned i = 0; i < this->username.size(); i ++)
+    this->username[i] = '*';
   this->username = "";
   this->email = "";
   this->clearAuthenticationTokenAndPassword();
@@ -472,41 +472,41 @@ void UserCalculatorData::clearPasswordFromMemory()
   for (unsigned i = 0; i < this->enteredShaonedSaltedPassword.size(); i ++)
     this->enteredShaonedSaltedPassword[i] = ' ';
   this->enteredShaonedSaltedPassword = "";
-  for (unsigned i = 0; i < this->actualActivationToken.value.size(); i ++)
-    this->actualActivationToken.value[i] = ' ';
+  for (unsigned i = 0; i < this->actualActivationToken.size(); i ++)
+    this->actualActivationToken[i] = ' ';
   this->actualActivationToken = "";
-  for (unsigned i = 0; i < this->enteredActivationToken.value.size(); i ++)
-    this->enteredActivationToken.value[i] = ' ';
+  for (unsigned i = 0; i < this->enteredActivationToken.size(); i ++)
+    this->enteredActivationToken[i] = ' ';
   this->enteredActivationToken = "";
 }
 
 void UserCalculatorData::clearAuthenticationTokenAndPassword()
 { MacroRegisterFunctionWithName("UserCalculatorData::reset");
   this->clearPasswordFromMemory();
-  for (unsigned i = 0; i < this->actualAuthenticationToken.value.size(); i ++)
-    this->actualAuthenticationToken.value[i] = ' ';
+  for (unsigned i = 0; i < this->actualAuthenticationToken.size(); i ++)
+    this->actualAuthenticationToken[i] = ' ';
   this->actualAuthenticationToken = "";
 }
 
 std::string UserCalculatorData::ToStringUnsecure()
 { MacroRegisterFunctionWithName("UserCalculatorData::ToStringUnsecure");
   std::stringstream out;
-  out << "User: " << this->username.value
+  out << "User: " << this->username
   << "\n<br>Course name:\n" << this->courseInfo.courseComputed
   << "\n<br>Deadline info:\n" << this->courseInfo.deadlinesString
   << "\n<hr>Prob weight id:\n" << this->courseInfo.problemWeightSchemaIDComputed
   << "\n<br>Prob weight info:\n" << this->courseInfo.problemWeightString
 
   << "\n<br>Actual authentication token: "
-  << this->actualAuthenticationToken.value
+  << this->actualAuthenticationToken
   << "\n<br>Entered authentication token: "
-  << this->enteredAuthenticationToken.value
+  << this->enteredAuthenticationToken
   << "\n<br>Entered password: "
   << this->enteredPassword
   << "\n<br>Entered activation token: "
-  << this->enteredActivationToken.value
+  << this->enteredActivationToken
   << "\n<br>Actual activation token: "
-  << this->actualActivationToken.value;
+  << this->actualActivationToken;
   return out.str();
 }
 

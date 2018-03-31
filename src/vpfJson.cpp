@@ -39,7 +39,7 @@ JSData& JSData::operator[](int i)
 JSData JSData::GetValue(const std::string& key)
 { int theIndex = this->GetKeyIndex(key);
   if (theIndex != - 1)
-    return this->obj[theIndex].value;
+    return this->objects.theValues[theIndex];
   JSData result;
   result.type = JSData::JSUndefined;
   return result;
@@ -50,10 +50,7 @@ bool JSData::HasKey(const std::string& key)
 }
 
 int JSData::GetKeyIndex(const std::string& key)
-{ for (int i = 0; i < this->obj.size; i ++)
-    if (this->obj[i].key == key)
-      return i;
-  return -1;
+{ return this->objects.GetIndex(key);
 }
 
 void JSData::SetKeyValue(const std::string& key, const JSData& value)
@@ -62,13 +59,7 @@ void JSData::SetKeyValue(const std::string& key, const JSData& value)
 
 JSData& JSData::operator[](const std::string& key)
 { this->type = this->JSObject;
-  for (int i = 0; i < this->obj.size; i ++)
-    if (this->obj[i].key == key)
-      return this->obj[i].value;
-  int i = this->obj.size;
-  this->obj.SetSize(i + 1);
-  this->obj[i].key = key;
-  return this->obj[i].value;
+  return this->objects.GetValueCreate(key);
 }
 
 void JSData::readfile(const char* filename)
@@ -218,7 +209,6 @@ bool JSData::readstring
   JSData::Tokenize(json, theTokenS);
   if (theTokenS.size == 0)
     return false;
-  JSHashData pair;
   List<JSData> readingStack;
   JSData emptyElt;
   for (int i = 0; i < JSData::numEmptyTokensAtStart; i ++)
@@ -234,9 +224,7 @@ bool JSData::readstring
         thirdToLast.type  == JSData::JSstring &&
         secondToLast.type == JSData::JScolon &&
         last.IsValidElement())
-    { pair.key = thirdToLast.string;
-      pair.value = last;
-      fourthToLast.obj.AddOnTop(pair);
+    { fourthToLast.objects.SetKeyValue(thirdToLast.string, last);
       readingStack.SetSize(readingStack.size - 3);
       continue;
     }
@@ -339,11 +327,11 @@ somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) c
       return out;
     case JSObject:
       out << "{" << newLine;
-      for (int i = 0; i < this->obj.size; i ++)
-      { out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->obj[i].key) << '"';
+      for (int i = 0; i < this->objects.size(); i ++)
+      { out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->objects.theKeys[i]) << '"';
         out << ':';
-        this->obj[i].value.IntoStream(out, indentation, useHTML);
-        if (i != this->obj.size - 1)
+        this->objects.theValues[i].IntoStream(out, indentation, useHTML);
+        if (i != this->objects.size() - 1)
           out << ", ";
       }
       out << newLine << '}';
@@ -424,7 +412,7 @@ void JSData::reset(char inputType)
   this->number = 0;
   this->string = "";
   this->list.SetSize(0);
-  this->obj.SetSize(0);
+  this->objects.Clear();
 }
 
 std::string JSData::ToString(bool useHTML) const

@@ -95,7 +95,6 @@ public:
 
 
 class WebServer;
-class DatabaseRoutines;
 
 class WebWorker
 {
@@ -182,7 +181,7 @@ public:
   int ProcessChangePassword();
   int SetEmail(const std::string& input);
   bool DoSetEmail
-  (DatabaseRoutines& theRoutines, UserCalculatorData& inputOutputUser,
+  (UserCalculatorData& inputOutputUser,
    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive,
    std::stringstream* commentsGeneralSensitive);
   int ProcessChangePasswordPage();
@@ -269,6 +268,7 @@ public:
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   std::string GetJavaScriptIndicatorBuiltInServer();
   std::string GetChangePasswordPage();
+  std::string GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
   std::string GetClonePageResult();
   std::string GetModifyProblemReport();
   std::string GetLoginPage(const std::string& reasonForLogin = "");
@@ -281,8 +281,6 @@ public:
   std::string GetExamPageInterpreter();
   std::string GetDatabasePage();
   //std::string GetEmailChangePage();
-  std::string GetDatabaseModifyEntry();
-  std::string GetDatabaseOneEntry();
   std::string GetNavigationPage();
   std::string GetAddUserEmails();
   static std::string GetJavaScriptIndicatorFromHD();

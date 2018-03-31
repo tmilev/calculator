@@ -2,6 +2,7 @@
 #include <mongoc.h>
 #include <bcon.h>
 mongoc_client_t* databaseClient = 0;
+mongoc_database_t *database = 0;
 #endif //MACRO_use_MongoDB
 #include "vpfheader7databaseinterface_mongodb.h"
 #include "vpfJson.h"
@@ -16,14 +17,22 @@ DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo()
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo");
 #ifdef MACRO_use_MongoDB
   mongoc_init();
-  databaseClient = mongoc_client_new ("mongodb://localhost:27017");
+  databaseClient = mongoc_client_new("mongodb://localhost:27017");
+  database = mongoc_client_get_database(databaseClient, DatabaseStrings::theDatabaseNameMongo.c_str());
 #endif
 }
 
 DatabaseRoutinesGlobalFunctionsMongo::~DatabaseRoutinesGlobalFunctionsMongo()
 {
 #ifdef MACRO_use_MongoDB
-  mongoc_client_destroy(databaseClient);
+  if (database != 0)
+  { mongoc_database_destroy(database);
+    database = 0;
+  }
+  if (databaseClient != 0)
+  { mongoc_client_destroy(databaseClient);
+    databaseClient = 0;
+  }
   mongoc_cleanup();
 #endif
 }
@@ -216,6 +225,16 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
 
 bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
 (const std::string& collectionName, const JSData& findQuery,
+ JSData& output, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON");
+  std::string outputStringFormat;
+  if (!FindOneFromJSON(collectionName, findQuery, outputStringFormat, commentsOnFailure))
+    return false;
+  return output.readstring(outputStringFormat,commentsOnFailure);
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
+(const std::string& collectionName, const JSData& findQuery,
  std::string& output, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON");
 #ifdef MACRO_use_MongoDB
@@ -264,15 +283,98 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
 #endif
 }
 
-void DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(UserCalculatorData& output)
+bool DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(UserCalculatorData& output)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo");
-  JSData theQuery;
-  theQuery[DatabaseStrings::labelUsername] = output.username.value;
-  std::string userEntry;
-  if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
+  JSData theQuery, userEntry;
+  theQuery[DatabaseStrings::labelUsername] = output.username;
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
       (DatabaseStrings::tableUsers, theQuery, userEntry))
-    return;
-  logWorker << logger::green << "About to update one. " << logger::endL;
-  DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-  (DatabaseStrings::tableUsers, theQuery, output.ToJSON(), 0);
+    return false;
+  return output.LoadFromJSON(userEntry);
 }
+
+bool DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames
+(List<std::string>& output, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames");
+  bson_t opts = BSON_INITIALIZER;
+  bson_error_t error;
+  mongoc_database_get_collection_names_with_opts(database, &opts, &error);
+  char **theCollectionChars = mongoc_database_get_collection_names_with_opts(database, &opts, &error);
+  bool result = true;
+  output.SetSize(0);
+  if (theCollectionChars != NULL)
+  { for (int i = 0; theCollectionChars[i]; i ++)
+    { std::string currentCollection(theCollectionChars[i]);
+      output.AddOnTop(currentCollection);
+    }
+    bson_strfreev (theCollectionChars);
+    theCollectionChars = 0;
+  } else
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "Failed to fetch all collections";
+    result = false;
+  }
+  bson_destroy(&opts);
+  return result;
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::FetchTable
+(const std::string& tableName, List<std::string>& outputLabels, List<List<std::string> >& outputRows, long long* totalItems,
+ std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FetchTable");
+  JSData findQuery;
+  findQuery.type = findQuery.JSObject;
+  List<std::string> theRows;
+  DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(tableName, findQuery, theRows, 200, totalItems, commentsOnFailure);
+  HashedList<std::string, MathRoutines::hashString> theLabels;
+  List<JSData> rowsJSON;
+  rowsJSON.SetSize(theRows.size);
+  for (int i = 0; i < theRows.size; i ++)
+  { if (!rowsJSON[i].readstring(theRows[i], commentsOnFailure))
+      return false;
+    for (int j = 0; j < rowsJSON[i].objects.size(); j++)
+      theLabels.AddOnTopNoRepetition(rowsJSON[i].objects.theKeys[j]);
+  }
+  outputLabels = theLabels;
+  outputRows.SetSize(rowsJSON.size);
+  for (int i = 0; i < rowsJSON.size; i ++)
+  { outputRows[i].SetSize(theLabels.size);
+    for (int j = 0; j < theLabels.size; j ++)
+      if (rowsJSON[i].objects.Contains(theLabels[j]))
+        outputRows[i][j] = rowsJSON[i].GetValue(theLabels[j]).ToString();
+      else
+        outputRows[i][j] = "";
+  }
+  return true;
+}
+
+std::string DatabaseRoutinesGlobalFunctionsMongo::ToHtmlDatabaseCollection(const std::string& currentTable)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::ToStringDatabaseCollection");
+  std::stringstream out;
+  if (currentTable == "")
+  { List<std::string> theCollectionNames;
+    if (DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames(theCollectionNames, &out))
+    { out << "There are " << theCollectionNames.size << " collections. ";
+      for (int i = 0; i < theCollectionNames.size; i ++)
+      { out << "<br>";
+        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+        << "?request=database&currentDatabaseTable="
+        << theCollectionNames[i] << "\">" << theCollectionNames[i] << "</a>";
+      }
+    }
+    return out.str();
+  }
+  out << "Current table: " << currentTable << "<br>";
+  List<std::string> theLabels;
+  List<List<std::string> > theRows;
+  long long totalItems = -1;
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FetchTable(currentTable, theLabels, theRows, &totalItems, &out))
+    return out.str();
+  out << "Total: " << totalItems << ". ";
+  if (totalItems > theRows.size)
+    out << "Only the first " << theRows.size << " are displayed. ";
+  out << "<br>" << HtmlRoutines::ToHtmlTable(theLabels, theRows);
+  return out.str();
+
+}
+

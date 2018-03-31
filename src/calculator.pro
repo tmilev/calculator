@@ -19,8 +19,8 @@ LIBS+=-lmysqlclient
 LIBS+=-lssl
 LIBS+=-lcrypto
 
-INCLUDEPATH+=/usr/include/libmongoc-1.0
-INCLUDEPATH+=/usr/include/libbson-1.0
+INCLUDEPATH+=/usr/local/include/libmongoc-1.0
+INCLUDEPATH+=/usr/local/include/libbson-1.0
 
 SOURCES += \
     webserver.cpp \

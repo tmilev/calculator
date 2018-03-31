@@ -5,7 +5,7 @@
 
 #include "vpfHeader1General0_General.h"
 static ProjectInformationInstance ProjectInfovpfHeader1General6Maps(__FILE__, "Header, Map implementation. ");
-template <class listType, class key, class value, unsigned int hashFunction(const key&)=key::HashFunction>
+template <class listType, class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
 class MapTemplatE
 {
 public:
@@ -15,11 +15,11 @@ public:
   { return this->theKeys.GetIndex(input);
   }
   bool Contains(const key& inputKey)const
-  { return this->GetIndex(inputKey) != -1;
+  { return this->GetIndex(inputKey) != - 1;
   }
   void RemoveKey(const key& theKey)
   { int theIndex = this->theKeys.GetIndex(theKey);
-    if (theIndex == -1)
+    if (theIndex == - 1)
       return;
     this->theKeys.RemoveIndexSwapWithLast(theIndex);
     this->theValues.RemoveIndexSwapWithLast(theIndex);
@@ -36,7 +36,7 @@ public:
   }
   value& GetValueCreateNoInit(const key& input)
   { int theIndex = this->theKeys.GetIndex(input);
-    if (theIndex == -1)
+    if (theIndex == - 1)
     { theIndex = this->theKeys.size;
       this->theKeys.AddOnTop(input);
       this->theValues.SetSize(this->theValues.size + 1);
@@ -68,7 +68,7 @@ public:
   std::string ToStringHtml()const
   { std::stringstream out;
     out << this->size() << " key-value pairs. ";
-    for (int i = 0; i < this->size(); i++)
+    for (int i = 0; i < this->size(); i ++)
       out << "<br>" << this->theKeys[i] << ": " << this->theValues[i];
     return out.str();
   }
@@ -76,9 +76,9 @@ public:
 
 //using C++11, not sure if that is a good idea:
 //In case this does not compile, please see the commented code below.
-template <class key, class value, unsigned int hashFunction(const key&)=key::HashFunction>
+template <class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
 using MapReferenceS = MapTemplatE<ListReferences<value>, key, value, hashFunction>;
-template <class key, class value, unsigned int hashFunction(const key&)=key::HashFunction>
+template <class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
 using MapLisT = MapTemplatE<List<value>, key, value, hashFunction>;
 
 /*

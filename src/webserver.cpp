@@ -15,6 +15,7 @@ WebServer theWebServer;
 #include <unistd.h>
 #include <sys/stat.h>//<-for file statistics
 #include <fcntl.h>//<-setting flags of file descriptors
+#include "vpfheader7databaseinterface_mongodb.h"
 
 struct sigaction SignalSEGV, SignalFPE, SignalChild, SignalINT;
 //sigset_t SignalSetToBlockWhileHandlingSIGCHLD;
@@ -446,7 +447,7 @@ void SSLdata::initSSLserver()
 #ifdef MACRO_use_open_ssl
 void SSLdata::HandShakeIamServer(int inputSocketID)
 {
-  MacroRegisterFunctionWithName("WebServer::SSLServerSideHandShake");
+  MacroRegisterFunctionWithName("WebServer::HandShakeIamServer");
 //  logWorker << "Got to here 1" << logger::endL;
   this->sslServeR = SSL_new(this->contextServer);
 //  logWorker << "Got to here 1.05" << logger::endL;
@@ -458,7 +459,10 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
   int maxNumHandshakeTries = 3;
 //  int theError=-1;
   for (int i = 0; i < maxNumHandshakeTries; i ++)
-  { this->errorCode = SSL_accept(this->sslServeR);
+  {
+    logWorker << logger::yellow << "DEBUG: ssl is server before call: " << SSL_is_server(this->sslServeR) << logger::endL;
+    this->errorCode = SSL_accept(this->sslServeR);
+    logWorker << logger::red << "DEBUG: ssl is server: " << SSL_is_server(this->sslServeR) << logger::endL;
     this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1)
     { if (this->errorCode == 0)
@@ -1296,38 +1300,6 @@ std::string WebWorker::GetNavigationPage()
   return out.str();
 }
 
-std::string WebWorker::GetDatabaseModifyEntry()
-{ MacroRegisterFunctionWithName("WebWorker::GetDatabaseModifyEntry");
-  std::stringstream out;
-#ifdef MACRO_use_MySQL
-  DatabaseRoutines theRoutines;
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
-    out << "<b>Modifying database allowed for logged-in admins only.</b>";
-  else
-    out << theRoutines.ToStringModifyEntry();
-#else
-out << "<b>Database not available. </b>";
-#endif // MACRO_use_MySQL
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  return out.str();
-}
-
-std::string WebWorker::GetDatabaseOneEntry()
-{ MacroRegisterFunctionWithName("WebWorker::GetDatabaseOneEntry");
-  std::stringstream out;
-#ifdef MACRO_use_MySQL
-  DatabaseRoutines theRoutines;
-  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
-    out << "<b>Browsing database allowed only for logged-in admins.</b>";
-  else
-    out << theRoutines.ToStringOneEntry();
-#else
-out << "<b>Database not available. </b>";
-#endif // MACRO_use_MySQL
-  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  return out.str();
-}
-
 std::string WebWorker::GetDatabasePage()
 { MacroRegisterFunctionWithName("WebWorker::GetDatabasePage");
   std::stringstream out;
@@ -1338,30 +1310,19 @@ std::string WebWorker::GetDatabasePage()
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile();
 
   std::string currentTable =
-  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"), false)
-  ;
+  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"), false);
   //  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << "</calculatorNavigation>\n";
   std::stringstream dbOutput;
-  std::string keyColName;
 #ifdef MACRO_use_MySQL
-  DatabaseRoutines theRoutines;
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
     dbOutput << "Browsing database allowed only for logged-in admins.";
   else
-    dbOutput << "Database: " << DatabaseStrings::theDatabaseName
-    << "<br>Database user: " << DatabaseStrings::theDatabaseUser << "<br>"
-    << theRoutines.ToStringCurrentTableHTML(keyColName);
+    dbOutput << "Database: " << DatabaseStrings::theDatabaseName << "<br>"
+    << DatabaseRoutinesGlobalFunctionsMongo::ToHtmlDatabaseCollection(currentTable);
 #else
   dbOutput << "<b>Database not available. </b>";
 #endif // MACRO_use_MySQL
-  out << "<script type=\"text/javascript\">\n"
-  << " var extraDatabaseRequestParameters=\"currentDatabaseTable="
-  << HtmlRoutines::ConvertStringToURLString(currentTable, false) << "&"
-  << "currentDatabaseKeyColumn=" << keyColName << "&"
-  << "\";\n"
-  << "</script>"
-  << HtmlRoutines::GetJavascriptDatabaseRoutinesLink()
-  ;
+  out << HtmlRoutines::GetJavascriptDatabaseRoutinesLink();
   out << "</head>"
   << "<body onload=\"loadSettings();\">\n";
   out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
@@ -1448,7 +1409,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   //stOutput << "<hr>DEBUG: debug stuff: "
   //<< HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
   //<< "<hr><hr><hr>";
-  if (theUser.username.value.find('%') != std::string::npos)
+  if (theUser.username.find('%') != std::string::npos)
     argumentProcessingFailureComments << "<b>Unusual behavior: % sign in username.</b>";
   theUser.enteredAuthenticationToken = HtmlRoutines::ConvertURLStringToNormal
   (theGlobalVariables.GetWebInput("authenticationToken"), false);
@@ -1473,9 +1434,8 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   //;
 
   theUser.enteredPassword =
-  HtmlRoutines::ConvertStringToURLString(
-  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("password"), true), false
-  );
+  HtmlRoutines::ConvertStringToURLString
+  (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("password"), true), false);
   //<-Passwords are ONE-LAYER url-encoded
   //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   //<-Incoming pluses must be re-coded as spaces (%20).
@@ -1491,7 +1451,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theUser.flagEnteredActivationToken = false;
     theGlobalVariables.flagLogInAttempted = true;
   }
-  if (theUser.enteredActivationToken.value != "")
+  if (theUser.enteredActivationToken != "")
   { theUser.enteredGoogleToken = "";
     theUser.enteredAuthenticationToken = "";
     theUser.flagEnteredAuthenticationToken = false;
@@ -1499,7 +1459,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     theGlobalVariables.flagLogInAttempted = true;
   }
   //stOutput << "DEBUG: logging-in: " << theUser.ToStringUnsecure();
-  if (theUser.username.value != "")
+  if (theUser.username != "")
     theUser.enteredGoogleToken = "";
   if (theUser.enteredAuthenticationToken != "")
   { theUser.flagEnteredAuthenticationToken = true;
@@ -1514,7 +1474,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   /////////////////////////////////////////////
   if (theUser.flagEnteredPassword &&
       theUser.flagEnteredAuthenticationToken &&
-      theUser.enteredActivationToken.value == "" &&
+      theUser.enteredActivationToken == "" &&
       theUser.enteredGoogleToken == "")
     return !theUser.flagMustLogin;
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
@@ -1525,12 +1485,12 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   { if (theUser.enteredActivationToken == "" &&
         theUser.enteredPassword == "" &&
         theUser.enteredAuthenticationToken == "")
-    { theUser.username.value = "";
+    { theUser.username = "";
       doAttemptGoogleTokenLogin = true;
     }
-    if (theUser.username.value == "")
+    if (theUser.username == "")
       doAttemptGoogleTokenLogin = true;
-  } else if (theUser.username.value == "")
+  } else if (theUser.username == "")
   { //stOutput << "<br>DEBUG: Got to here ABD, login: " << theGlobalVariables.flagLoggedIn;
     return !theUser.flagMustLogin;
   }
@@ -1556,27 +1516,33 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   //stOutput << "<br>DEBUG: Got to here, login: " << theGlobalVariables.flagLoggedIn;
 
   theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("username",
-  theUser.username.GetDataNoQuotes()
-  //<-User name must be stored in URL-encoded fashion, NO PLUSES.
+   HtmlRoutines::ConvertStringToURLString(theUser.username, false)
+   //<-User name must be stored in URL-encoded fashion, NO PLUSES.
   );
   //stOutput << "<br>DEBUG: did do the authentication.";
-  if (theGlobalVariables.flagLoggedIn && theUser.enteredActivationToken.value == "")
+  if (theGlobalVariables.flagLoggedIn && theUser.enteredActivationToken == "")
   { //in case the user logged in with password, we need
     //to give him/her the correct authentication token
     //stOutput << "DEBUG: disclosing auth token. Entered activation token: "
     //<< theUser.enteredActivationToken.value;
     theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue
-    ("authenticationToken", theUser.actualAuthenticationToken.GetDataNoQuotes());
-    theGlobalVariables.SetWebInpuT("authenticationToken", theUser.actualAuthenticationToken.GetDataNoQuotes());
+    (DatabaseStrings::labelAuthenticationToken,
+     HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false)
+     //<-URL-encoded fashion, NO PLUSES.
+    );
+    theGlobalVariables.SetWebInpuT
+    (DatabaseStrings::labelAuthenticationToken,
+     HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false)
+    );
   } else
     theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "0");
   bool shouldDisplayMessage = false;
-  if (!theGlobalVariables.flagLoggedIn && theUser.username.value != "")
+  if (!theGlobalVariables.flagLoggedIn && theUser.username != "")
   { if (theUser.flagEnteredPassword || theUser.flagEnteredActivationToken)
       shouldDisplayMessage = true;
     if (theUser.flagEnteredAuthenticationToken)
-      if (theUser.enteredActivationToken.value != "0" &&
-          theUser.enteredActivationToken.value != "")
+      if (theUser.enteredActivationToken != "0" &&
+          theUser.enteredActivationToken != "")
         shouldDisplayMessage = true;
   }
   theUser.clearPasswordFromMemory();
@@ -2703,7 +2669,7 @@ std::string WebWorker::GetAuthenticationToken(const std::string& reasonForNoAuth
 //  out << "DEBUG: username: " << theGlobalVariables.userDefault
 //  << "\npassword: " << theGlobalVariables.GetWebInput("password");
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection)
-    return theGlobalVariables.userDefault.actualActivationToken.value;
+    return theGlobalVariables.userDefault.actualActivationToken;
   return reasonForNoAuthentication;
 }
 
@@ -2861,6 +2827,70 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   return out.str();
 }
 
+std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordChangeField)
+{ MacroRegisterFunctionWithName("WebWorker::GetChangePasswordPagePartOne");
+  std::stringstream out;
+  std::string claimedActivationToken =
+  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false);
+  std::string claimedEmail =
+  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
+  out << "<input type=\"hidden\" id=\"activationToken\" value=\""
+  << claimedActivationToken
+  << "\">";
+  if (claimedActivationToken == "" || claimedEmail == "")
+  { out << "Activation token or email is empty";
+    return out.str();
+  }
+  std::string actualEmailActivationToken, usernameAssociatedWithToken;
+  if (theGlobalVariables.userDefault.email == claimedEmail)
+  { out << "\n<b><span style=\"color:green\">Email "
+    << claimedEmail << " already updated. </span></b>";
+    return out.str();
+  }
+  JSData findEmail, emailInfo, findUser, userInfo;
+  findEmail[DatabaseStrings::labelEmail] = claimedEmail;
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableEmailInfo, findEmail, emailInfo, &out))
+  { out << "\n<span style=\"color:red\"><b>Failed to fetch email activation token. </b></span>";
+    return out.str();
+  }
+  usernameAssociatedWithToken = emailInfo[DatabaseStrings::labelUsernameAssociatedWithToken].string;
+  if (actualEmailActivationToken != claimedActivationToken)
+  { out << "\n<span style=\"color:red\"><b>Bad activation token: could not activate your email. </b></span>";
+    return out.str();
+  }
+  if (usernameAssociatedWithToken != theGlobalVariables.userDefault.username)
+  { out << "\n<span style=\"color:red\"><b>Activation token was issued for another user. </b></span>";
+    return out.str();
+  }
+  emailInfo[DatabaseStrings::labelActivationToken] = "";
+  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableEmailInfo, findEmail, emailInfo, &out))
+  { out << "\n<span style=\"color:red\"><b>Could not reset the activation token (database is down?). </b></span>";
+    return out.str();
+  }
+  userInfo[DatabaseStrings::labelEmail] = claimedEmail;
+  findUser[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
+  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, userInfo, &out))
+  { out << "\n<span style=\"color:red\"><b>Could not store your email (database is down?). </b></span>";
+    return out.str();
+  }
+  theGlobalVariables.userDefault.email = claimedEmail;
+  out << "\n<span style=\"color:green\"><b>Email successfully updated. </b></span>";
+  if (theGlobalVariables.userDefault.actualActivationToken != "" &&
+      theGlobalVariables.userDefault.actualActivationToken != "activated" &&
+      theGlobalVariables.userDefault.actualShaonedSaltedPassword != "")
+  { out << "<br>It appears your password is already set. "
+    << "<br>If you'd like to change it using your old password, "
+    << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
+    << "?request=changePasswordPage\">click here</a>. ";
+    outputDoShowPasswordChangeField = false;
+    userInfo[DatabaseStrings::labelActivationToken] = "activated";
+  } else
+  { out << "<br>"
+    << "<span style=\"color:orange\">To fully activate your account, please choose a password.</span></b>";
+  }
+  return out.str();
+}
+
 std::string WebWorker::GetChangePasswordPage()
 { MacroRegisterFunctionWithName("WebWorker::GetChangePasswordPage");
   std::stringstream out;
@@ -2881,88 +2911,31 @@ std::string WebWorker::GetChangePasswordPage()
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
 //  out << "<form name=\"login\" id=\"login\" action=\"calculator\" method=\"GET\" accept-charset=\"utf-8\">";
   out
-  <<  "User: " << theGlobalVariables.userDefault.username.value
+  <<  "User: " << theGlobalVariables.userDefault.username
   << "<input type=\"hidden\" id=\"username\" placeholder=\"username\" "
-  << "value=\"" << theGlobalVariables.userDefault.username.value << "\" "
+  << "value=\"" << theGlobalVariables.userDefault.username << "\" "
   << "required>";
   bool doShowPasswordChangeField = true;
   out << "<table>";
+  JSData findUser, updateUser;
   if (theGlobalVariables.userDefault.flagUserHasActivationToken)
     out << "<tr><td colspan=\"2\">"
     << "<b><span style=\"color:orange\">"
     << "To fully activate your account, "
     << "please choose a password.</span></b></td></tr>";
   if (theGlobalVariables.userCalculatorRequestType == "activateAccount")
-  { out << "<tr><td colspan=\"2\">";
-    std::string claimedActivationToken =
-    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false);
-    std::string claimedEmail =
-    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"),false);
-    out << "<input type=\"hidden\" id=\"activationToken\" value=\""
-    << claimedActivationToken
-    << "\">";
-    if (theGlobalVariables.GetWebInput("activationToken") != "" && claimedEmail != "")
-    { DatabaseRoutines theRoutines;
-      std::string actualEmailActivationToken, usernameAssociatedWithToken;
-      if (theGlobalVariables.userDefault.email.value == claimedEmail)
-        out << "\n<b><span style=\"color:green\">Email "
-        << claimedEmail << " already updated. </span></b>"
-        ;
-      else if (!theRoutines.FetchEntry
-          ((std::string) "email", claimedEmail, (std::string)"emailActivationStats",
-           (std::string) "activationToken", actualEmailActivationToken, &out))
-        out << "\n<span style=\"color:red\"><b>Failed to fetch email activation token. </b></span>";
-      else if (!theRoutines.FetchEntry
-          ((std::string) "email", claimedEmail, (std::string)"emailActivationStats",
-           (std::string) "usernameAssociatedWithToken", usernameAssociatedWithToken, &out))
-        out << "\n<br>\n<span style=\"color:red\"><b>Failed to fetch username for this token. </b></span>";
-      else if (actualEmailActivationToken != claimedActivationToken)
-        out << "\n<span style=\"color:red\"><b>Bad activation token: could not activate your email. </b></span>";
-      else if (usernameAssociatedWithToken != theGlobalVariables.userDefault.username.value)
-        out << "\n<span style=\"color:red\"><b>Activation token was issued for another user. </b></span>";
-      else if (!theRoutines.SetEntry
-          ((std::string) "email", claimedEmail, (std::string)"emailActivationStats",
-           (std::string) "activationToken",(std::string)"", &out))
-        out << "\n<span style=\"color:red\"><b>Could not reset the activation token (database is down?). </b></span>";
-      else if (!theRoutines.SetEntry
-       (DatabaseStrings::labelUsername, theGlobalVariables.userDefault.username,
-        DatabaseStrings::tableUsers, (std::string) "email", claimedEmail,&out))
-        out << "\n<span style=\"color:red\"><b>Could not store your email (database is down?). </b></span>";
-      else
-      { theGlobalVariables.userDefault.email = claimedEmail;
-        out << "\n<span style=\"color:green\"><b>Email successfully updated. </b></span>";
-        if (theGlobalVariables.userDefault.actualActivationToken.value != "" &&
-            theGlobalVariables.userDefault.actualActivationToken.value != "activated" &&
-            theGlobalVariables.userDefault.actualShaonedSaltedPassword != "")
-        { out << "<br>It appears your password is already set. "
-          << "<br>If you'd like to change it using your old password, "
-          << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-          << "?request=changePasswordPage\">click here</a>. ";
-          doShowPasswordChangeField = false;
-          theRoutines.SetEntry
-          (DatabaseStrings::labelUserId, theGlobalVariables.userDefault.userId,
-           DatabaseStrings::tableUsers, (std::string) "activationToken",
-           (std::string) "activated", &out)
-          ;
-        } else
-          out << "<br>"
-          << "<span style=\"color:orange\">To fully activate your account, please choose a password.</span></b>";
-      }
-    }
-    out << "</td></tr>";
-  } else
-  { if (theGlobalVariables.userDefault.actualActivationToken.value != "" &&
-        theGlobalVariables.userDefault.actualActivationToken.value != "activated" &&
+    out << "<tr><td colspan=\"2\">" << WebWorker::GetChangePasswordPagePartOne(doShowPasswordChangeField) << "</td></tr>";
+  else
+  { if (theGlobalVariables.userDefault.actualActivationToken != "" &&
+        theGlobalVariables.userDefault.actualActivationToken != "activated" &&
         theGlobalVariables.userDefault.actualShaonedSaltedPassword != "" &&
         theGlobalVariables.userCalculatorRequestType == "changePasswordPage")
     { out << "<tr><td colspan=\"2\">";
       out << "You already have a password but your account was marked as not activated "
       << "- probably by an admin/instructor. ";
-      DatabaseRoutines theRoutines;
-      if (!theRoutines.SetEntry
-          (DatabaseStrings::labelUserId, theGlobalVariables.userDefault.userId,
-           DatabaseStrings::tableUsers, (std::string) "activationToken",
-           (std::string) "activated", &out))
+      findUser[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
+      updateUser[DatabaseStrings::labelActivationToken] = "activated";
+      if (! DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, updateUser, &out))
         out << " <span style=\"color:red\"><b>Failed to activate your account. </b></span>";
       else
         out << " <span style=\"color:green\"><b>Your account is now marked as activated.</b></span>";
@@ -3000,7 +2973,7 @@ std::string WebWorker::GetChangePasswordPage()
 //  << "</form>"
     ;
     out << "<hr>"
-    << "Email: " << theGlobalVariables.userDefault.email.value
+    << "Email: " << theGlobalVariables.userDefault.email
     << "<br>\n"
     << "Change/set email: <input type=\"email\" id=\"emailInputID\">\n "
     << "<button onclick=\"submitChangePassRequest('emailChangeResult') \"> Submit</button>\n";
@@ -3015,20 +2988,20 @@ std::string WebWorker::GetChangePasswordPage()
 }
 
 bool WebWorker::DoSetEmail
-(DatabaseRoutines& theRoutines, UserCalculatorData& inputOutputUser,
+(UserCalculatorData& inputOutputUser,
  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive,
  std::stringstream* commentsGeneralSensitive)
 { MacroRegisterFunctionWithName("WebWorker::DoSetEmail");
 #ifdef MACRO_use_MySQL
   EmailRoutines theEmail;
-  theEmail.toEmail = inputOutputUser.email.value;
+  theEmail.toEmail = inputOutputUser.email;
   if (!theEmail.IsOKEmail(theEmail.toEmail, commentsOnFailure))
     return false;
   //out << "DEBUG: got to here part 2. ";
   UserCalculator userCopy;
   userCopy.UserCalculatorData::operator=(inputOutputUser);
   userCopy.email = inputOutputUser.email;
-  if (!userCopy.ComputeAndStoreActivationEmailAndTokens(commentsOnFailure, commentsGeneralNonSensitive, theRoutines))
+  if (!userCopy.ComputeAndStoreActivationEmailAndTokens(commentsOnFailure, commentsGeneralNonSensitive))
     return false;
   theEmail.emailContent = userCopy.activationEmail;
   theEmail.subject = userCopy.activationEmailSubject;
@@ -3063,13 +3036,12 @@ int WebWorker::SetEmail(const std::string& input)
   (void) input;
 #ifdef MACRO_use_MySQL
   std::stringstream out, debugStream;
-  DatabaseRoutines theRoutines;
   //double startTime=theGlobalVariables.GetElapsedSeconds();
   theGlobalVariables.userDefault.email = input;
   std::stringstream* adminOutputStream = 0;
   if (theGlobalVariables.UserDefaultHasAdminRights())
     adminOutputStream = &out;
-  this->DoSetEmail(theRoutines, theGlobalVariables.userDefault, &out, &out, adminOutputStream);
+  this->DoSetEmail(theGlobalVariables.userDefault, &out, &out, adminOutputStream);
   stOutput << out.str();
   if (theGlobalVariables.UserDefaultHasAdminRights())
     stOutput << "<hr><b>Admin view only. </b>" << debugStream.str();
@@ -3113,11 +3085,9 @@ int WebWorker::ProcessChangePassword()
 
   std::string newEmail = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
   if (newEmail != "")
-  { UserCalculator userToCheckWhetherEmailIsTaken;
-    userToCheckWhetherEmailIsTaken.email = newEmail;
-    DatabaseRoutines theRoutines;
-    userToCheckWhetherEmailIsTaken.currentTable = "users";
-    if (userToCheckWhetherEmailIsTaken.FetchOneUserRowPartOne(theRoutines, 0, 0))
+  { JSData queryEmailTaken, notUsed;
+    queryEmailTaken[DatabaseStrings::labelEmail] = newEmail;
+    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableUsers, queryEmailTaken, notUsed, 0))
     { stOutput << "<b style=\"color:red\">It appears the email is already taken. </b>";
       return 0;
     }
@@ -3131,12 +3101,15 @@ int WebWorker::ProcessChangePassword()
   std::stringstream commentsOnFailure;
   std::string newAuthenticationToken;
   if (!DatabaseRoutinesGlobalFunctions::SetPassword
-      (theUser.username.value, newPassword, newAuthenticationToken, commentsOnFailure))
+      (theUser.username, newPassword, newAuthenticationToken, commentsOnFailure))
   { stOutput << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
     return 0;
   }
-  if (!DatabaseRoutinesGlobalFunctions::SetEntry
-      (theUser.username.value, DatabaseStrings::tableUsers, "activationToken", "activated", commentsOnFailure))
+  JSData findQuery, setQuery;
+  findQuery[DatabaseStrings::labelUsername] = theUser.username;
+  setQuery[DatabaseStrings::labelActivationToken] = "activated";
+  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+       (DatabaseStrings::tableUsers, findQuery, setQuery, &commentsOnFailure))
     stOutput << "<span style=\"color:red\"><b>Failed to set activationToken: "
     << commentsOnFailure.str() << "</b></span>";
 
@@ -3146,7 +3119,8 @@ int WebWorker::ProcessChangePassword()
   << "<meta http-equiv=\"refresh\" content=\"0; url='"
   << theGlobalVariables.DisplayNameExecutable  << "?request=logout"
   << "&username="
-  << theGlobalVariables.userDefault.username.GetDataNoQuotes() << "&activationToken=&authenticationToken=&"
+  << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.username, false)
+  << "&activationToken=&authenticationToken=&"
   << "'\" />";
   return 0;
 }
@@ -3527,14 +3501,14 @@ int WebWorker::ProcessDatabase()
 int WebWorker::ProcessDatabaseModifyEntry()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseModifyEntry");
   this->SetHeaderOKNoContentLength();
-  stOutput << this->GetDatabaseModifyEntry();
+  stOutput << "Not implemented yet";
   return 0;
 }
 
 int WebWorker::ProcessDatabaseOneEntry()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseOneEntry");
   this->SetHeaderOKNoContentLength();
-  stOutput << this->GetDatabaseOneEntry();
+  stOutput << "Not implemented yet";
   return 0;
 }
 
@@ -4825,7 +4799,7 @@ std::string WebServer::ToStringStatusAll()
 
 void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
 { struct stat theFileStat;
-  std::cout << "DEBUG: Checking for restart";
+  //std::cout << "DEBUG: Checking for restart";
   if (stat(theGlobalVariables.PhysicalNameExecutableWithPath.c_str(), &theFileStat) != 0)
     return;
   if (this->timeLastExecutableModification != - 1)
@@ -5023,7 +4997,7 @@ void WebServer::RecycleChildrenIfPossible()
   int numInUse = 0;
   for (int i = 0; i < this->theWorkers.size; i ++)
     if (this->theWorkers[i].flagInUse)
-      numInUse++;
+      numInUse ++;
   for (int i = 0; i < this->theWorkers.size; i ++)
     if (this->theWorkers[i].flagInUse)
     { PipePrimitive& currentControlPipe = this->theWorkers[i].pipeWorkerToServerControls;
@@ -6276,7 +6250,7 @@ std::string HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable()
     return "";
   std::stringstream out;
   out << "<hr>\n";
-  out << "Default user: " << theGlobalVariables.userDefault.username.value;
+  out << "Default user: " << HtmlRoutines::ConvertStringToHtmlString(theGlobalVariables.userDefault.username, false);
   if (theGlobalVariables.flagLoggedIn)
     out << "\n<br>\nLogged in.";
   out << "\n<br>\nAddress:\n" << HtmlRoutines::ConvertStringToHtmlString(theWebServer.GetActiveWorker().addressComputed, true);

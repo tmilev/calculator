@@ -846,7 +846,6 @@ int WebWorker::ProcessSignUP()
   UserCalculator theUser;
   theUser.username = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
   theUser.email = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
-  DatabaseRoutines theRoutines;
   std::stringstream out;
   out << "<br><b> "
   << "Please excuse our verbose messages, they are used"
@@ -863,34 +862,34 @@ int WebWorker::ProcessSignUP()
     << "</b></span>";
     return 0;
   }
-  if (!EmailRoutines::IsOKEmail(theUser.email.value, &out))
+  if (!EmailRoutines::IsOKEmail(theUser.email, &out))
   { stOutput << "<span style=\"color:red\"><b>Your email address does not appear to be valid. "
     << out.str() << "</b></span>";
     return 0;
   }
-  if (theUser.Iexist(theRoutines, &out))
+  if (theUser.Iexist(&out))
   { stOutput << "<span style=\"color:red\"><b>"
     << "Either the username ("
-    << theUser.username.value
+    << theUser.username
     << ") or the email ("
-    << theUser.email.value
+    << theUser.email
     << ") you requested is already taken.</b></span>";
     return 0;
   } else
     stOutput << "<span style=\"color:green\"><b>"
     << "Username ("
-    << theUser.username.value
+    << theUser.username
     << ") with email ("
-    << theUser.email.value
+    << theUser.email
     << ") is available. </b></span>";
-  if (!theUser.CreateMeIfUsernameUnique(theRoutines, &out))
+  if (!theUser.CreateMeIfUsernameUnique(&out))
   { stOutput << out.str();
     return 0;
   }
   std::stringstream* adminOutputStream = 0;
   if (theGlobalVariables.UserDefaultHasAdminRights())
     adminOutputStream = &out;
-  this->DoSetEmail(theRoutines, theUser, &out, &out, adminOutputStream);
+  this->DoSetEmail(theUser, &out, &out, adminOutputStream);
   stOutput << out.str();
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
   << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
@@ -910,19 +909,20 @@ int WebWorker::ProcessForgotLogin()
     DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   UserCalculator theUser;
   theUser.email = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
-  DatabaseRoutines theRoutines;
   WebCrawler theCrawler;
   out << "<br><b> "
   << "Please excuse our verbose technical messages. </b>"
   << "<br><b>We are still testing our system; "
   << "we will remove the technical garbage as soon as we are done. "
-  << "</b><br>\n"
-;
+  << "</b><br>\n";
   if (!theCrawler.VerifyRecaptcha(&out, &out, 0))
   { stOutput << out.str();
     return 0;
   }
-  if (!theRoutines.FetchEntry
+
+/*
+  if ( !
+  !theRoutines.FetchEntry
       ((std::string) "email", theUser.email,
        (std::string) "emailActivationStats", (std::string) "usernameAssociatedWithToken",
         theUser.username.value, &out))
@@ -949,7 +949,8 @@ int WebWorker::ProcessForgotLogin()
     this->DoSetEmail(theRoutines, theUser, &out, &out, &out);
   stOutput << out.str();
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
-  << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
+  << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";*/
+  crash << "Not implemented yet" << crash;
 #else
   stOutput << "Error: database not running. ";
 #endif

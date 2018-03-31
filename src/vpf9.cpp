@@ -504,7 +504,7 @@ std::string FileOperations::ConvertStringToLatexFileName(const std::string& inpu
     else
       out << "_" << (int) input[i];
   std::string result = out.str();
-  MathRoutines::StringTrimToLength(result, 220);
+  MathRoutines::StringTrimToLengthWithHash(result, 220);
   return result;
 }
 
@@ -1408,16 +1408,32 @@ std::string MathRoutines::StringTrimWhiteSpace(const std::string& inputString)
   return result;
 }
 
-void MathRoutines::StringTrimToLength(std::string& inputOutput, int desiredLength50AtLeast)
+void MathRoutines::StringTrimToLengthWithHash(std::string& inputOutput, int desiredLength50AtLeast)
 { if (((signed) inputOutput.size()) <= desiredLength50AtLeast)
     return;
   if (desiredLength50AtLeast < 40)
     return;
   std::stringstream inputAbbreviatedStream;
   inputAbbreviatedStream << inputOutput.substr(0, desiredLength50AtLeast - 30)
-  << "_abbrev_hash_" << MathRoutines::hashString(inputOutput)
-  ;
-  inputOutput=inputAbbreviatedStream.str();
+  << "_abbrev_hash_" << MathRoutines::hashString(inputOutput);
+  inputOutput = inputAbbreviatedStream.str();
+}
+
+std::string MathRoutines::StringTrimToLengthForDisplay(std::string& input, int desiredLength20AtLeast)
+{ if (desiredLength20AtLeast < 20)
+    desiredLength20AtLeast = 20;
+  if (((signed) input.size()) <= desiredLength20AtLeast)
+    return input;
+  std::stringstream abbreviationStream;
+  abbreviationStream << "...(" << input.size() << " characters) ...";
+  int numCharsAtEnds = (input.size() - desiredLength20AtLeast) / 2;
+  std::stringstream out;
+  for (int i = 0; i < numCharsAtEnds; i ++)
+    out << input[i];
+  out << abbreviationStream.str();
+  for (int i = 0; i < numCharsAtEnds; i ++)
+    out << input[input.size() - numCharsAtEnds + i];
+  return out.str();
 }
 
 void MathRoutines::StringTrimWhiteSpace(const std::string& inputString, std::string& output)
@@ -6263,12 +6279,12 @@ bool SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
   this->CheckInitialization();
   Vectors<Rational> selectedRoots;
   selectedRoots.Reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
-  if (this->AmbientWeyl->GetDim()!=ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize)
+  if (this->AmbientWeyl->GetDim() != ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize)
     crash << "This is a programming error: parabolic selection selects out of " << ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize
     << " elements while the Weyl group is of rank " << this->AmbientWeyl->GetDim() << ". " << crash;
-  for (int i=0; i<ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i++)
+  for (int i = 0; i < ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i ++)
     if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i])
-    { selectedRoots.SetSize(selectedRoots.size+1);
+    { selectedRoots.SetSize(selectedRoots.size + 1);
       selectedRoots.LastObject()->MakeEi(inputWeyl.GetDim(), i);
     }
   List<Vectors<Rational> > tempRootsCol;
@@ -6278,40 +6294,40 @@ bool SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
 std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph()
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ElementToStringCosetGraph");
   this->CheckInitialization();
-  if (this->size<1)
+  if (this->size < 1)
     return "Error, non-initialized group";
-  if (this->size==1)
+  if (this->size == 1)
     return "id";
   List<List<List<int> > > arrows;
   List<List<int> > Layers;
   Vector<Rational> tempRoot;
   Layers.Reserve(this->RepresentativesQuotientAmbientOrder.size);
-  int GraphWidth=1;
-  int oldLayerElementLength=-1;
-  for (int i=0; i< this->RepresentativesQuotientAmbientOrder.size; i++)
-  { if (this->RepresentativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.size!=oldLayerElementLength)
-    { Layers.SetSize(Layers.size+1);
-      oldLayerElementLength=this->RepresentativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.size;
+  int GraphWidth = 1;
+  int oldLayerElementLength = - 1;
+  for (int i = 0; i < this->RepresentativesQuotientAmbientOrder.size; i ++)
+  { if (this->RepresentativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.size != oldLayerElementLength)
+    { Layers.SetSize(Layers.size + 1);
+      oldLayerElementLength = this->RepresentativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.size;
     }
     Layers.LastObject()->AddOnTop(i);
     GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
   }
 //  HashedList<Vector<Rational>> orbit;
 //  orbit.Reserve(this->RepresentativesQuotientAmbientOrder.size);
-  for (int i=0; i<this->RepresentativesQuotientAmbientOrder.size; i++)
-  { tempRoot=this->AmbientWeyl->rho;
+  for (int i = 0; i < this->RepresentativesQuotientAmbientOrder.size; i ++)
+  { tempRoot = this->AmbientWeyl->rho;
     this->AmbientWeyl->ActOnRootByGroupElement
     (this->AmbientWeyl->theGroup.theElements.GetIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false);
 //    orbit.AddOnTop(tempRoot);
   }
   arrows.SetSize(Layers.size);
-  for (int i=0; i< Layers.size; i++)
+  for (int i = 0; i < Layers.size; i ++)
   { arrows[i].SetSize(Layers[i].size);
-    for (int j=0; j<Layers[i].size; j++)
-      for (int k=0; k<this->RepresentativesQuotientAmbientOrder.size; k++)
+    for (int j = 0; j < Layers[i].size; j ++)
+      for (int k = 0; k < this->RepresentativesQuotientAmbientOrder.size; k ++)
         if (this->AmbientWeyl->LeftIsHigherInBruhatOrderThanRight
             (this->RepresentativesQuotientAmbientOrder[k], this->RepresentativesQuotientAmbientOrder[Layers[i][j]]))
-          if (this->RepresentativesQuotientAmbientOrder[Layers[i][j]].generatorsLastAppliedFirst.size==this->RepresentativesQuotientAmbientOrder[k].generatorsLastAppliedFirst.size-1)
+          if (this->RepresentativesQuotientAmbientOrder[Layers[i][j]].generatorsLastAppliedFirst.size == this->RepresentativesQuotientAmbientOrder[k].generatorsLastAppliedFirst.size - 1)
             arrows[i][j].AddOnTop(k);
   }
   return this->ElementToStringFromLayersAndArrows(arrows, Layers, GraphWidth, true);
@@ -6322,15 +6338,15 @@ void SubgroupWeylGroupOLD::FindQuotientRepresentatives(int UpperLimit)
   this->CheckInitialization();
   this->AmbientWeyl->theGroup.ComputeAllElements(UpperLimit);
   Vector<Rational> image1;
-  this->RepresentativesQuotientAmbientOrder.size=0;
+  this->RepresentativesQuotientAmbientOrder.size = 0;
   this->RepresentativesQuotientAmbientOrder.Reserve(this->AmbientWeyl->theGroup.theElements.size);
-  for (int i=0; i<this->AmbientWeyl->theGroup.theElements.size; i++)
-  { image1=this->AmbientWeyl->rho;
+  for (int i = 0; i < this->AmbientWeyl->theGroup.theElements.size; i ++)
+  { image1 = this->AmbientWeyl->rho;
     this->AmbientWeyl->ActOnRootByGroupElement(i, image1, false, false);
-    bool isGood=true;
-    for (int j=0; j<this->simpleGenerators.size; j++)
+    bool isGood = true;
+    for (int j = 0; j < this->simpleGenerators.size; j ++)
       if (this->AmbientWeyl->RootScalarCartanRoot(image1, this->simpleGenerators[j]).IsNegative())
-      { isGood=false;
+      { isGood = false;
         break;
       }
     if (isGood)
@@ -6343,25 +6359,25 @@ bool SubgroupWeylGroupOLD::DrawContour
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::DrawContour");
   HashedList<Vector<Rational> > theOrbit;
   theOrbit.AddOnTop(highestWeightSimpleCoord);
-  WeylGroupData& theWeyl=*this->AmbientWeyl;
+  WeylGroupData& theWeyl = *this->AmbientWeyl;
   Vector<Rational> tempRoot;
-  for (int i=0; i<theOrbit.size; i++)
-    for (int j=0; j<this->simpleGenerators.size; j++)
-    { tempRoot=theOrbit[i];
+  for (int i = 0; i < theOrbit.size; i ++)
+    for (int j = 0; j < this->simpleGenerators.size; j ++)
+    { tempRoot = theOrbit[i];
       theWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], tempRoot, false, tempRoot);
       if (theOrbit.AddOnTopNoRepetition(tempRoot))
         theDV.drawLineBetweenTwoVectorsBufferRational
         (theOrbit[i], tempRoot, DrawingVariables::PenStyleNormal, theColor, 1);
-      if (theOrbit.size>UpperBoundVertices)
+      if (theOrbit.size > UpperBoundVertices)
         return false;
     }
   return true;
 }
 
 bool SubgroupWeylGroupOLD::CheckInitialization()
-{ if (this==0)
+{ if (this == 0)
     crash << "Subgroup of Weyl Group has 0 this pointer. " << crash;
-  if (this->AmbientWeyl==0)
+  if (this->AmbientWeyl == 0)
     crash << "Use of non-initialized subgroup of Weyl Group. " << crash;
   if (this->flagDeallocated)
     crash << "Use after free of subgroup of a Weyl group. " << crash;
@@ -6376,23 +6392,23 @@ void SubgroupWeylGroupOLD::ComputeRootSubsystem()
   this->RootSubsystem.AddOnTop(this->simpleGenerators);
   this->RootSubsystem.SetExpectedSize(100);
   Vector<Rational> currentRoot;
-  for (int i=0; i<this->RootSubsystem.size; i++)
-    for (int j=0; j<this->simpleGenerators.size; j++)
-    { currentRoot=(this->RootSubsystem[i]);
+  for (int i = 0; i < this->RootSubsystem.size; i ++)
+    for (int j = 0; j < this->simpleGenerators.size; j ++)
+    { currentRoot = this->RootSubsystem[i];
       this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[j], currentRoot, false, currentRoot);
       this->RootSubsystem.AddOnTopNoRepetition(currentRoot);
     }
   Vectors<Rational> tempRoots;
-  tempRoots=(this->RootSubsystem);
+  tempRoots = this->RootSubsystem;
   tempRoots.QuickSortAscending();
-  this->RootSubsystem=(tempRoots);
-  if (this->RootSubsystem.size%2!=0)
+  this->RootSubsystem = tempRoots;
+  if (this->RootSubsystem.size % 2 != 0)
     crash << "This is a programming error. I am getting that the number of weights of a root system is odd. The generating set of simple weights is "
     << this->simpleGenerators.ToString() << ", and the generated weight subsystem is " << tempRoots.ToString() << crash;
-  int numPosRoots=this->RootSubsystem.size/2;
+  int numPosRoots = this->RootSubsystem.size / 2;
   this->RootsOfBorel.SetSize(numPosRoots);
-  for (int i=0; i<numPosRoots; i++)
-    this->RootsOfBorel[i]=this->RootSubsystem[i+numPosRoots];
+  for (int i = 0; i < numPosRoots; i ++)
+    this->RootsOfBorel[i] = this->RootSubsystem[i + numPosRoots];
 }
 
 void KLpolys::WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int TopIndex)
@@ -6408,14 +6424,14 @@ int KLpolys::ReadKLCoeffsFromFile(std::fstream& input, List<int>& output)
   int TopIndex;
   input >> tempS >> TopIndex;
   output.SetSize(this->size);
-  for (int i=0; i<this->size; i++)
+  for (int i = 0; i < this->size; i ++)
     input >> tempS >> output[i];
   return TopIndex;
 }
 
 void KLpolys::KLcoeffsToString(List<int>& theKLCoeffs, std::string& output)
 { std::stringstream out;
-  for (int i=0; i<theKLCoeffs.size; i++)
+  for (int i = 0; i < theKLCoeffs.size; i ++)
     out << i << ".  " << theKLCoeffs[i] << "\n";
   output=out.str();
 }
@@ -6423,33 +6439,33 @@ void KLpolys::KLcoeffsToString(List<int>& theKLCoeffs, std::string& output)
 void KLpolys::initTheMults()
 { this->TheMultiplicities.SetSize(this->size);
   this->Explored.SetSize(this->size);
-  for (int i=0; i<this->size; i++)
-  { this->TheMultiplicities[i]=0;
-    this->Explored[i]=false;
+  for (int i = 0; i < this->size; i ++)
+  { this->TheMultiplicities[i] = 0;
+    this->Explored[i] = false;
   }
-  this->NextToExplore=0;
-  this->LowestNonExplored=0;
+  this->NextToExplore = 0;
+  this->LowestNonExplored = 0;
 }
 
 void KLpolys::Check()
-{ for (int i=0; i<this->size; i++)
+{ for (int i = 0; i < this->size; i ++)
   { this->Compute(i);
 //    bool found=false;
-    for (int j=0; j<this->size; j++)
-      if (this->TheMultiplicities[i]!=0 && this->TheMultiplicities[i]!=1 && this->TheMultiplicities[i]!=-1)
+    for (int j = 0; j < this->size; j ++)
+      if (this->TheMultiplicities[i] != 0 && this->TheMultiplicities[i] != 1 && this->TheMultiplicities[i] != - 1)
         this->ComputeDebugString();
   }
 }
 
 void KLpolys::Compute(int x)
 { this->initTheMults();
-  this->TheMultiplicities[x]=1;
-  while (this->NextToExplore!=-1)
-  { for (int i=0; i<this->BruhatOrder[this->NextToExplore].size; i++)
-    { int a=this->BruhatOrder[this->NextToExplore][i];
-      this->TheMultiplicities[a]-=this->TheMultiplicities[this->NextToExplore];
+  this->TheMultiplicities[x] = 1;
+  while (this->NextToExplore != - 1)
+  { for (int i = 0; i < this->BruhatOrder[this->NextToExplore].size; i ++)
+    { int a = this->BruhatOrder[this->NextToExplore][i];
+      this->TheMultiplicities[a] -= this->TheMultiplicities[this->NextToExplore];
     }
-    this->Explored[this->NextToExplore]=true;
+    this->Explored[this->NextToExplore] = true;
     this->FindNextToExplore();
   //  this->ComputeDebugString();
   }
@@ -6457,26 +6473,26 @@ void KLpolys::Compute(int x)
 
 void KLpolys::FindNextToExplore()
 { bool foundNonExplored=false;
-  for (int i=this->LowestNonExplored; i<this->size; i++)
+  for (int i = this->LowestNonExplored; i < this->size; i ++)
     if (!this->Explored[i])
     { if (!foundNonExplored)
-      { this->LowestNonExplored=i;
-        foundNonExplored=true;
+      { this->LowestNonExplored = i;
+        foundNonExplored = true;
       }
       if (this->IsMaxNonEplored(i))
-      { this->NextToExplore=i;
+      { this->NextToExplore = i;
         return;
       }
     }
-  this->NextToExplore=-1;
+  this->NextToExplore = - 1;
 }
 
 bool KLpolys::IsMaxNonEplored(int index)
-{ for (int i=this->LowestNonExplored; i<this->size; i++)
-    if (!this->Explored[i]&& i!=index)
+{ for (int i = this->LowestNonExplored; i < this->size; i ++)
+    if (!this->Explored[i]&& i != index)
     { Vector<Rational> tempRoot;
-      tempRoot=(*this)[i];
-      tempRoot-=(*this)[index];
+      tempRoot = (*this)[i];
+      tempRoot -= (*this)[index];
       if (tempRoot.IsPositiveOrZero())
         return false;
     }
@@ -6486,12 +6502,12 @@ bool KLpolys::IsMaxNonEplored(int index)
 std::string KLpolys::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("KLpolys::ToString");
   std::stringstream out;
-  bool useHtml=false;
-  if (theFormat!=0)
-    useHtml=theFormat->flagUseHTML;
+  bool useHtml = false;
+  if (theFormat != 0)
+    useHtml = theFormat->flagUseHTML;
   if (!useHtml)
   { out << "Next to explore: " << this->NextToExplore << "<br>\n Orbit of rho:<br>\n";
-    for (int i=0; i<this->size; i++)
+    for (int i = 0; i < this->size; i ++)
     { out << this->TheObjects[i].ToString() << "   :  " << this->TheMultiplicities[i];
       if (this->Explored[i])
         out << " Explored<br>\n";
@@ -6499,27 +6515,28 @@ std::string KLpolys::ToString(FormatExpressions* theFormat)
         out << " not Explored<br>\n";
     }
     out << "Bruhat order:<br>\n";
-    for (int i=0; i<this->size; i++)
+    for (int i = 0; i < this->size; i ++)
     { out << i << ".   ";
-      for(int j=0; j<this->BruhatOrder[i].size; j++)
+      for (int j = 0; j < this->BruhatOrder[i].size; j ++)
         out << this->BruhatOrder[i][j] << ", ";
       out << "<br>\n";
     }
   }
   out << "R Polynomials:<br>" << this->RPolysToString(theFormat);
-  if (this->theKLcoeffs.size==this->TheWeylGroup->theGroup.theElements.size)
+  if (this->theKLcoeffs.size == this->TheWeylGroup->theGroup.theElements.size)
   { out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(theFormat);
-    out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of " << HtmlRoutines::GetMathSpanPure("L_{w_2 \\cdot \\lambda}")
+    out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of "
+    << HtmlRoutines::GetMathSpanPure("L_{w_2 \\cdot \\lambda}")
     << " in " <<  HtmlRoutines::GetMathSpanPure(" M_{w_1\\cdot \\lambda }  ") << " where \\cdot stands for the \\rho-modified action"
     << " of the Weyl group, \\lambda is a dominant integral weight, M_{\\lambda} stands for Verma module "
     << "of highest weight \\lambda, L_\\lambda stands for irreducible highest weight of highest weight \\lambda: <br><table border=\"1\"><tr><td>Weyl elt.</td>";
-    for (int i=0; i<this->TheWeylGroup->theGroup.theElements.size; i++)
+    for (int i = 0; i < this->TheWeylGroup->theGroup.theElements.size; i ++)
       out << "<td>" << this->TheWeylGroup->theGroup.theElements[i].ToString() << "</td>";
     out << "</tr>";
-    for (int i=0; i<this->TheWeylGroup->theGroup.theElements.size; i++)
-      if (this->theKLPolys[i].size>0)
+    for (int i = 0; i < this->TheWeylGroup->theGroup.theElements.size; i ++)
+      if (this->theKLPolys[i].size > 0)
       { out << "<tr>" << "<td>" << this->TheWeylGroup->theGroup.theElements[i].ToString()  << "</td>";
-        for (int j=0; j<this->theKLcoeffs[i].size; j++)
+        for (int j = 0; j < this->theKLcoeffs[i].size; j ++)
           out << "<td>" << theKLcoeffs[i][j].ToString() << "</td>";
         out << "</tr>";
       }
@@ -6530,7 +6547,7 @@ std::string KLpolys::ToString(FormatExpressions* theFormat)
 }
 
 void KLpolys::ComputeDebugString()
-{ this->DebugString=this->ToString();
+{ this->DebugString = this->ToString();
 }
 
 void KLpolys::GeneratePartialBruhatOrder()
@@ -6542,20 +6559,20 @@ void KLpolys::GeneratePartialBruhatOrder()
   this->InverseBruhatOrder.SetSize(this->size);
   this->SimpleReflectionsActionList.SetSize(this->size);
   this->ComputeDebugString();
-  for (int i=0; i<this->size; i++)
+  for (int i = 0; i < this->size; i ++)
   { this->SimpleReflectionsActionList[i].Reserve(theDimension);
-    for (int j=0; j<theDimension; j++)
+    for (int j = 0; j < theDimension; j ++)
     { Vector<Rational> tempRoot, tempRoot2;
-      tempRoot=(*this)[i];
-      tempRoot2=(*this)[i];
+      tempRoot = (*this)[i];
+      tempRoot2 = (*this)[i];
       this->TheWeylGroup->SimpleReflectionRoot(j, tempRoot, false, false);
-      int x= this->GetIndex(tempRoot);
-      if (x==-1)
+      int x = this->GetIndex(tempRoot);
+      if (x == - 1)
         crash << "This is a programming error: something wrong has happened. A weight that is supposed to "
         << " be in a certain Weyl group orbit isn't there. There is an error in the code, crashing accordingly. " << crash;
       this->SimpleReflectionsActionList[i].AddOnTop(x);
-      tempRoot2-=(tempRoot);
-      if (tempRoot2.IsPositiveOrZero() && !tempRoot2.IsEqualToZero() )
+      tempRoot2 -= tempRoot;
+      if (tempRoot2.IsPositiveOrZero() && !tempRoot2.IsEqualToZero())
       { this->BruhatOrder[i].AddOnTop(x);
         this->InverseBruhatOrder[x].AddOnTop(i);
       }
@@ -6565,36 +6582,36 @@ void KLpolys::GeneratePartialBruhatOrder()
 }
 
 int KLpolys::FindMinimalBruhatNonExplored(List<bool>& theExplored)
-{ int lowestIndex=-1;
-  for (int i=0; i<this->size; i++)
+{ int lowestIndex = - 1;
+  for (int i = 0; i < this->size; i ++)
     if (!theExplored[i])
-    { if (lowestIndex==-1)
-        lowestIndex=i;
+    { if (lowestIndex == - 1)
+        lowestIndex = i;
       else
         if (this->IndexGreaterThanIndex(lowestIndex, i))
-          lowestIndex=i;
+          lowestIndex = i;
     }
   return lowestIndex;
 }
 
 int KLpolys::FindMaximalBruhatNonExplored(List<bool>& theExplored)
-{ int highestIndex=-1;
-  for (int i=0; i<this->size; i++)
+{ int highestIndex = - 1;
+  for (int i = 0; i < this->size; i ++)
     if (!theExplored[i])
-    { if (highestIndex==-1)
-        highestIndex=i;
+    { if (highestIndex == - 1)
+        highestIndex = i;
       else
         if (this->IndexGreaterThanIndex(i, highestIndex))
-          highestIndex=i;
+          highestIndex = i;
     }
   return highestIndex;
 }
 
 void KLpolys::MergeBruhatLists(int fromList, int toList)
-{ for (int i=0; i<this->BruhatOrder[fromList].size; i++)
-  { bool found=false;
-    for (int j=0; j<this->BruhatOrder[toList].size; j++)
-      if (this->BruhatOrder[toList][j]==this->BruhatOrder[fromList][i])
+{ for (int i = 0; i < this->BruhatOrder[fromList].size; i ++)
+  { bool found = false;
+    for (int j = 0; j < this->BruhatOrder[toList].size; j ++)
+      if (this->BruhatOrder[toList][j] == this->BruhatOrder[fromList][i])
       { found = true;
         break;
       }
@@ -6604,52 +6621,53 @@ void KLpolys::MergeBruhatLists(int fromList, int toList)
 }
 
 int KLpolys::ChamberIndicatorToIndex(Vector<Rational>& ChamberIndicator)
-{ int theDimension= this->TheWeylGroup->CartanSymmetric.NumRows;
-  Vector<Rational> tempRoot; tempRoot.SetSize(theDimension);
+{ int theDimension = this->TheWeylGroup->CartanSymmetric.NumRows;
+  Vector<Rational> tempRoot;
+  tempRoot.SetSize(theDimension);
   Vector<Rational> ChamberIndicatorPlusRho;
-  ChamberIndicatorPlusRho=(ChamberIndicator);
-  ChamberIndicatorPlusRho+=(this->TheWeylGroup->rho);
-  for (int i=0; i<this->size; i++)
+  ChamberIndicatorPlusRho = (ChamberIndicator);
+  ChamberIndicatorPlusRho += this->TheWeylGroup->rho;
+  for (int i = 0; i < this->size; i ++)
   { Rational tempRat1, tempRat2;
     bool tempBool1, tempBool2;
-    bool haveSameSigns=true;
-    for (int j=0; j<this->TheWeylGroup->RootSystem.size; j++)
+    bool haveSameSigns = true;
+    for (int j = 0; j < this->TheWeylGroup->RootSystem.size; j ++)
     { this->TheWeylGroup->RootScalarCartanRoot(ChamberIndicatorPlusRho, this->TheWeylGroup->RootSystem[j], tempRat1);
-      tempRoot=(*this)[i];
-      tempRoot+=(this->TheWeylGroup->rho);
+      tempRoot = (*this)[i];
+      tempRoot += (this->TheWeylGroup->rho);
       this->TheWeylGroup->RootScalarCartanRoot(tempRoot, this->TheWeylGroup->RootSystem[j], tempRat2);
-      tempBool1=tempRat1.IsPositive();
-      tempBool2=tempRat2.IsPositive();
+      tempBool1 = tempRat1.IsPositive();
+      tempBool2 = tempRat2.IsPositive();
       if(tempRat1.IsEqualToZero() || tempRat2.IsEqualToZero())
         crash << crash;
-      if (tempBool1!=tempBool2)
-      { haveSameSigns=false;
+      if (tempBool1 != tempBool2)
+      { haveSameSigns = false;
         break;
       }
     }
     if (haveSameSigns)
       return i;
   }
-  return -1;
+  return - 1;
 }
 
 void KLpolys::ComputeKLcoefficients()
 { MacroRegisterFunctionWithName("KLpolys::ComputeKLcoefficients");
   this->theKLcoeffs.SetSize(this->theKLPolys.size);
-  for (int i=0; i<this->theKLPolys.size; i++ )
+  for (int i = 0; i < this->theKLPolys.size; i ++)
   { this->theKLcoeffs[i].SetSize(this->theKLPolys[i].size);
-    for (int j=0; j<this->theKLcoeffs[i].size; j++)
-    { Polynomial<Rational>& currentPoly=this->theKLPolys[i][j];
-      this->theKLcoeffs[i][j]=0;
-      if (this->IndexGEQIndex(j,i))
-        for (int k=0; k<currentPoly.size(); k++)
-          this->theKLcoeffs[i][j]+=currentPoly.theCoeffs[k];
+    for (int j = 0; j < this->theKLcoeffs[i].size; j ++)
+    { Polynomial<Rational>& currentPoly = this->theKLPolys[i][j];
+      this->theKLcoeffs[i][j] = 0;
+      if (this->IndexGEQIndex(j, i))
+        for (int k = 0; k < currentPoly.size(); k ++)
+          this->theKLcoeffs[i][j] += currentPoly.theCoeffs[k];
     }
   }
 }
 
 void KLpolys::initFromWeyl(WeylGroupData* theWeylGroup)
-{ this->TheWeylGroup= theWeylGroup;
+{ this->TheWeylGroup = theWeylGroup;
   Vectors<Rational> tempRoots;
   this->TheWeylGroup->ComputeRho(true);
   tempRoots.AddOnTop(this->TheWeylGroup->rho);
@@ -6659,26 +6677,26 @@ void KLpolys::initFromWeyl(WeylGroupData* theWeylGroup)
 
 bool KLpolys::ComputeKLPolys(WeylGroupData* theWeylGroup)
 { MacroRegisterFunctionWithName("KLpolys::ComputeKLPolys");
-  theWeylGroup->theGroup.ComputeAllElements(-1);
+  theWeylGroup->theGroup.ComputeAllElements(- 1);
   this->initFromWeyl(theWeylGroup);
   this->GeneratePartialBruhatOrder();
   FormatExpressions PolyFormatLocal;
-  PolyFormatLocal.polyDefaultLetter="q";
+  PolyFormatLocal.polyDefaultLetter = "q";
   this->ComputeRPolys();
   this->theKLPolys.SetSize(this->size);
   this->theKLcoeffs.SetSize(this->size);
   this->Explored.initFillInObject(this->size, false);
-  for (int i=0; i<this->theKLPolys.size; i++)
+  for (int i = 0; i < this->theKLPolys.size; i ++)
   { this->theKLPolys[i].SetSize(this->size);
     this->theKLcoeffs[i].SetSize(this->size);
   }
-  for (int i=0; i<this->size; i++)
+  for (int i = 0; i < this->size; i ++)
   { this->Explored.initFillInObject(this->size, false);
-    int highestNonExplored= this->FindMaximalBruhatNonExplored(this->Explored);
-    while(highestNonExplored!=-1)
+    int highestNonExplored = this->FindMaximalBruhatNonExplored(this->Explored);
+    while(highestNonExplored != - 1)
     { this->ComputeKLxy(highestNonExplored, i);
-      this->Explored[highestNonExplored]=true;
-      highestNonExplored= this->FindMaximalBruhatNonExplored(this->Explored);
+      this->Explored[highestNonExplored] = true;
+      highestNonExplored = this->FindMaximalBruhatNonExplored(this->Explored);
     }
   }
   this->ComputeKLcoefficients();
@@ -6687,33 +6705,33 @@ bool KLpolys::ComputeKLPolys(WeylGroupData* theWeylGroup)
 
 void KLpolys::ComputeRPolys()
 { MacroRegisterFunctionWithName("KLpolys::ComputeRPolys");
-  int theDimension= this->TheWeylGroup->GetDim();
+  int theDimension = this->TheWeylGroup->GetDim();
   this->theRPolys.SetSize(this->size);
-  for (int i=0; i<this->size; i++)
-  { this->Explored[i]=false;
+  for (int i = 0; i < this->size; i ++)
+  { this->Explored[i] = false;
     this->theRPolys[i].SetSize(this->size);
   }
-  this->LowestNonExplored=this->FindMinimalBruhatNonExplored(this->Explored);
+  this->LowestNonExplored = this->FindMinimalBruhatNonExplored(this->Explored);
   List<bool> ExploredFromTop;
   ExploredFromTop.SetSize(this->size);
-  while(this->LowestNonExplored!=-1)
-  { for (int i=0; i<this->size; i++)
-      ExploredFromTop[i]=false;
-    int a= this->FindMaximalBruhatNonExplored(ExploredFromTop);
-    while (a!=-1)
+  while(this->LowestNonExplored != - 1)
+  { for (int i = 0; i < this->size; i ++)
+      ExploredFromTop[i] = false;
+    int a = this->FindMaximalBruhatNonExplored(ExploredFromTop);
+    while (a != - 1)
     { bool tempBool = false;
-      for (int j=0; j<theDimension; j++)
+      for (int j = 0; j < theDimension; j ++)
         if (this->ComputeRxy(a, this->LowestNonExplored, j))
-        { tempBool =true;
+        { tempBool = true;
           break;
         }
       if (!tempBool)
         crash << "This is a programming error: an algorithmic check failed while computing R-polynomials. " << crash;
-      ExploredFromTop[a]=true;
-      a= this->FindMaximalBruhatNonExplored(ExploredFromTop);
+      ExploredFromTop[a] = true;
+      a = this->FindMaximalBruhatNonExplored(ExploredFromTop);
     }
-    this->Explored[this->LowestNonExplored]=true;
-    this->LowestNonExplored= this->FindMinimalBruhatNonExplored(this->Explored);
+    this->Explored[this->LowestNonExplored] = true;
+    this->LowestNonExplored = this->FindMinimalBruhatNonExplored(this->Explored);
   }
   //this->ComputeDebugString();
 }
@@ -6727,29 +6745,29 @@ bool KLpolys::IndexGEQIndex(int a, int b)
       currentPointerInB++;
   return currentPointerInB==eltB.size;*/
   Vector<Rational> tempV;
-  tempV=(*this)[a];
-  tempV-=(*this)[b];
+  tempV = (*this)[a];
+  tempV -= (*this)[b];
   return tempV.IsNegativeOrZero();
 }
 
 bool KLpolys::IndexGreaterThanIndex(int a, int b)
-{ if (a==b)
+{ if (a == b)
     return false;
   return this->IndexGEQIndex(a, b);
 }
 
 int KLpolys::ComputeProductfromSimpleReflectionsActionList(int x, int y)
 { int start = y;
-  const ElementWeylGroup<WeylGroupData>& currentElement=this->TheWeylGroup->theGroup.theElements[x];
-  for (int i=currentElement.generatorsLastAppliedFirst.size-1; i>=0; i--)
-    start=this->SimpleReflectionsActionList[start][this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst[i].index];
+  const ElementWeylGroup<WeylGroupData>& currentElement = this->TheWeylGroup->theGroup.theElements[x];
+  for (int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --)
+    start = this->SimpleReflectionsActionList[start][this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst[i].index];
   return start;
 }
 
 void KLpolys::ComputeKLxy(int x, int y)
 { Polynomial<Rational> Accum, tempP1, tempP2;
-  if (x==y)
-  { this->theKLPolys[x][y].MakeOne(1);
+  if (x == y)
+  { this->theKLPolys[x][y].MakeOne();
     return;
   }
   if (!this->IndexGEQIndex(y, x))
@@ -6759,40 +6777,41 @@ void KLpolys::ComputeKLxy(int x, int y)
 //  stOutput << " <br>Computing KL " << x << ", " << y << "; ";
   Accum.MakeZero();
   MonomialP tempM;
-  for (int i=0; i<this->size; i++)
+  for (int i = 0; i < this->size; i ++)
     if (this->IndexGreaterThanIndex(i, x) && this->IndexGEQIndex(y, i))
     { tempP1.MakeZero();
-      for (int j=0; j<this->theRPolys[x][i].size(); j++)
-      { tempM=this->theRPolys[x][i][j];
+      for (int j = 0; j < this->theRPolys[x][i].size(); j++)
+      { tempM = this->theRPolys[x][i][j];
         tempM.Invert();
         tempP1.AddMonomial(tempM, this->theRPolys[x][i].theCoeffs[j]);
       }
       int tempI;
-      if ((this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst.size+this->TheWeylGroup->theGroup.theElements[i].generatorsLastAppliedFirst.size)%2==0)
-        tempI=1;
+      if ((this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst.size + this->TheWeylGroup->theGroup.theElements[i].generatorsLastAppliedFirst.size) % 2 == 0)
+        tempI = 1;
       else
-        tempI=-1;
-      Rational powerQ= -this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst.size+2*this->TheWeylGroup->theGroup.theElements[i].generatorsLastAppliedFirst.size -
+        tempI = - 1;
+      Rational powerQ = - this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst.size + 2 * this->TheWeylGroup->theGroup.theElements[i].generatorsLastAppliedFirst.size -
       this->TheWeylGroup->theGroup.theElements[y].generatorsLastAppliedFirst.size;
-      powerQ/=2;
+      powerQ /= 2;
       tempP2.MakeMonomiaL(0, powerQ, tempI, 1);
-      tempP1*=tempP2;
-      tempP1*=(this->theKLPolys[i][y]);
+      tempP1 *= tempP2;
+      tempP1 *= this->theKLPolys[i][y];
       if (!this->Explored[i])
         crash << "This is a programming error: an internal check during the Kazhdan-Lusztig polynomial computation fails. More precisely, while computing "
         << "KL poly of indices " << x << ", " << y << " I am using KL poly with indices " << i << ", " << y << " which hasn't been computed yet. "
         << crash;
-      Accum+=tempP1;
+      Accum += tempP1;
     }
   this->theKLPolys[x][y].MakeZero();
-  Rational lengthDiff= this->TheWeylGroup->theGroup.theElements[y].generatorsLastAppliedFirst.size-this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst.size;
-  lengthDiff/=2;
+  Rational lengthDiff = this->TheWeylGroup->theGroup.theElements[y].generatorsLastAppliedFirst.size -
+  this->TheWeylGroup->theGroup.theElements[x].generatorsLastAppliedFirst.size;
+  lengthDiff /= 2;
 //  stOutput << "Accum: " << Accum.ToString();
-  for (int i=0; i<Accum.size(); i++)
-    if(Accum[i].HasPositiveOrZeroExponents())
-    { tempM=Accum[i];
+  for (int i = 0; i < Accum.size(); i ++)
+    if (Accum[i].HasPositiveOrZeroExponents())
+    { tempM = Accum[i];
       tempM[0].Minus();
-      tempM[0]+=lengthDiff;
+      tempM[0] += lengthDiff;
       this->theKLPolys[x][y].AddMonomial(tempM, Accum.theCoeffs[i]);
     }
 
@@ -6801,33 +6820,33 @@ void KLpolys::ComputeKLxy(int x, int y)
 
 bool KLpolys::ComputeRxy(int x, int y, int SimpleReflectionIndex)
 { MacroRegisterFunctionWithName("KLpolys::ComputeRxy");
-  if (x==y)
-  { this->theRPolys[x][y].MakeOne(1);
+  if (x == y)
+  { this->theRPolys[x][y].MakeOne();
     return true;
   }
   if (this->IndexGreaterThanIndex(x, y))
   { this->theRPolys[x][y].MakeZero();
     return true;
   }
-  int sx= this->SimpleReflectionsActionList[x][SimpleReflectionIndex];
-  int sy= this->SimpleReflectionsActionList[y][SimpleReflectionIndex];
+  int sx = this->SimpleReflectionsActionList[x][SimpleReflectionIndex];
+  int sy = this->SimpleReflectionsActionList[y][SimpleReflectionIndex];
   bool boolX, boolY;
-  boolX=this->IndexGreaterThanIndex(x, sx);
-  boolY=this->IndexGreaterThanIndex(y, sy);
+  boolX = this->IndexGreaterThanIndex(x, sx);
+  boolY = this->IndexGreaterThanIndex(y, sy);
   if (boolX && boolY)
   { if (!this->Explored[sy])
       crash << "This is a programming error: the computaion of R-polynomials is attempting to use a non-computed R-polynomial. " << crash;
-    this->theRPolys[x][y]=this->theRPolys[sx][sy];
+    this->theRPolys[x][y] = this->theRPolys[sx][sy];
     return true;
   }
   if (!boolX && boolY)
   { Polynomial<Rational> qMinus1;
     qMinus1.MakeMonomiaL(0, 1, 1, 1);
-    this->theRPolys[x][y]=qMinus1;
-    this->theRPolys[x][y]*=(this->theRPolys[sx][sy]);
-    qMinus1-=1;
-    qMinus1*=(this->theRPolys[sx][y]);
-    this->theRPolys[x][y]+=qMinus1;
+    this->theRPolys[x][y] = qMinus1;
+    this->theRPolys[x][y] *= (this->theRPolys[sx][sy]);
+    qMinus1 -= 1;
+    qMinus1 *= this->theRPolys[sx][y];
+    this->theRPolys[x][y] += qMinus1;
     return true;
   }
   return false;
@@ -7981,39 +8000,39 @@ return false;
 
 bool Lattice::SubstitutionHomogeneous
   (const Matrix<Rational>& theSub)
-{ int targetDim=theSub.NumCols;
-  if (theSub.NumRows!=this->GetDim())
+{ int targetDim = theSub.NumCols;
+  if (theSub.NumRows != this->GetDim())
     return false;
   //stOutput <<"<br> the sub: " << theSub.ToString(true, false) << "<br>";
-  int startingDim=this->GetDim();
+  int startingDim = this->GetDim();
   Matrix<Rational> theMat, oldBasisTransformed, matRelationBetweenStartingVariables;
   theMat=theSub;
-  oldBasisTransformed=this->basisRationalForm;
+  oldBasisTransformed = this->basisRationalForm;
   oldBasisTransformed.Transpose();
   Selection nonPivotPoints;
   //stOutput << "<br>the matrices to be transformed: " << theMat.ToString(true, false) << "<br>" << oldBasisTransformed.ToString(true, false);
   theMat.GaussianEliminationByRows(&oldBasisTransformed, &nonPivotPoints);
   //stOutput << "<br>afer transformation: " << theMat.ToString(true, false) << "<br>" << oldBasisTransformed.ToString(true, false);
-  if (nonPivotPoints.CardinalitySelection!=0)
+  if (nonPivotPoints.CardinalitySelection != 0)
     return false;
-  int numNonZeroRows=nonPivotPoints.MaxSize;
-  int numZeroRows=theMat.NumRows-numNonZeroRows;
+  int numNonZeroRows = nonPivotPoints.MaxSize;
+  int numZeroRows = theMat.NumRows-numNonZeroRows;
   matRelationBetweenStartingVariables.init(numZeroRows, startingDim);
-  for (int i=0; i<numZeroRows; i++)
-    for (int j=0; j<startingDim; j++)
-      matRelationBetweenStartingVariables.elements[i][j]=oldBasisTransformed.elements[i+numNonZeroRows][j];
+  for (int i = 0; i < numZeroRows; i ++)
+    for (int j = 0; j < startingDim; j ++)
+      matRelationBetweenStartingVariables.elements[i][j] = oldBasisTransformed.elements[i + numNonZeroRows][j];
   Vectors<Rational> theEigenSpace;
   matRelationBetweenStartingVariables.GetZeroEigenSpaceModifyMe(theEigenSpace);
   //stOutput << "<br>matRelationBetweenStartingVariables" <<  matRelationBetweenStartingVariables.ToString(true, false);
-  for (int i=0; i<theEigenSpace.size; i++)
+  for (int i = 0; i < theEigenSpace.size; i ++)
     theEigenSpace[i].ScaleByPositiveRationalToIntegralMinHeight();
   //stOutput << "the basis: " << theEigenSpace.ToString();
   oldBasisTransformed.ActOnVectorsColumn(theEigenSpace);
   //stOutput << "<br>the basis transformed: " << theEigenSpace.ToString();
   this->basisRationalForm.init(targetDim, targetDim);
-  for (int i=0; i<targetDim; i++)
-    for (int j=0; j<targetDim; j++)
-      this->basisRationalForm.elements[i][j]=theEigenSpace[i][j];
+  for (int i = 0; i < targetDim; i ++)
+    for (int j = 0; j < targetDim; j ++)
+      this->basisRationalForm.elements[i][j] = theEigenSpace[i][j];
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
   this->Reduce();
   //stOutput << "<br><br>and the sub result is: <br>" << this->ToString(true, false);
@@ -8022,26 +8041,26 @@ bool Lattice::SubstitutionHomogeneous
 
 void QuasiPolynomial::operator*=(const Rational& theConst)
 { if (theConst.IsEqualToZero())
-  { this->valueOnEachLatticeShift.size=0;
-    this->LatticeShifts.size=0;
+  { this->valueOnEachLatticeShift.size = 0;
+    this->LatticeShifts.size = 0;
     return;
   }
-  for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
-    this->valueOnEachLatticeShift[i]*=theConst;
+  for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++)
+    this->valueOnEachLatticeShift[i] *= theConst;
 }
 
 void Cone::WriteToFile(std::fstream& output)
 { output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << "Cone( ";
-  for (int i=0; i<this->Normals.size; i++)
+  for (int i = 0; i < this->Normals.size; i ++)
   { output << "(";
-    for (int j=0; j<this->Normals[i].size; j++)
+    for (int j = 0; j < this->Normals[i].size; j ++)
     { output << this->Normals[i][j].ToString();
-      if (j!=this->Normals[i].size-1)
+      if (j != this->Normals[i].size - 1)
         output << ",";
     }
     output << ")";
-    if (i!=this->Normals.size-1)
+    if (i != this->Normals.size - 1)
       output << ", ";
   }
   output << " ) ";
@@ -8053,34 +8072,34 @@ bool Cone::ReadFromFile(std::fstream& input)
   Vectors<Rational> buffer;
   int NumWordsRead;
   XML::ReadThroughFirstOpenTag(input, NumWordsRead, this->GetXMLClassName());
-  if(NumWordsRead!=0)
+  if(NumWordsRead != 0)
     crash << crash;
   input >> tempS;
-  buffer.size=0;
+  buffer.size = 0;
   Vector<Rational> tempRoot;
-  if (tempS!="Cone(")
+  if (tempS != "Cone(")
   { stOutput << "tempS was instead " << tempS;
     XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
     return false;
   }
-  for (input >> tempS; tempS!=")" && tempS!=""; input >> tempS)
+  for (input >> tempS; tempS != ")" && tempS != ""; input >> tempS)
   { tempRoot.AssignString(tempS);
     buffer.AddOnTop(tempRoot);
     //stOutput << "vector input " << tempS << " read as " << tempRoot.ToString();
   }
-  if (buffer.size<1)
+  if (buffer.size < 1)
   { XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
     return false;
   }
   int theDim=buffer[0].size;
-  for (int i=1; i<buffer.size; i++)
-    if (buffer[i].size!=theDim)
+  for (int i = 1; i < buffer.size; i ++)
+    if (buffer[i].size != theDim)
     { XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
       return false;
     }
   bool result;
-  result=this->CreateFromNormals(buffer);
-  result= XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName()) && result;
+  result = this->CreateFromNormals(buffer);
+  result = XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName()) && result;
 //  if(!tempBool) crash << crash;
   return result;
 }
@@ -8229,7 +8248,7 @@ bool ConeLatticeAndShiftMaxComputation::ReadFromFile
   this->LPtoMaximizeSmallerDim.ReadFromFile(input);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, "LPtoMaximizeSmallerDim");
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
-  if(numReadWords!=0)
+  if(numReadWords != 0)
     crash << crash;
   return true;
 }
@@ -8259,7 +8278,7 @@ bool Lattice::ReadFromFile(std::fstream& input)
   bool result=this->basisRationalForm.ReadFromFile(input);
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
-  if(numReadWords!=0)
+  if(numReadWords != 0)
     crash << crash;
   return result;
 }
@@ -8279,7 +8298,7 @@ bool ConeComplex::ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes)
   }
   std::string tempS;
   input >> tempS >> this->indexLowestNonRefinedChamber;
-  if (tempS!="IndexLowestNonRefined:")
+  if (tempS != "IndexLowestNonRefined:")
   { crash << crash;
     return false;
   }
@@ -8295,48 +8314,45 @@ bool ConeComplex::ReadFromFile(std::fstream& input, int UpperLimitDebugPurposes)
 void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowerDim)
 { if(theNormal.IsEqualToZero())
     crash << crash;
-  int theDimension=theNormal.size;
+  int theDimension = theNormal.size;
   Matrix<Rational> tempMat, theEmbedding, theProjection;
   tempMat.AssignVectorRow(theNormal);
   Vectors<Rational> theBasis;
   tempMat.GetZeroEigenSpace(theBasis);
-  if(theBasis.size!=theNormal.size-1)
+  if(theBasis.size != theNormal.size - 1)
     crash << crash;
   theEmbedding.AssignVectorsToRows(theBasis);
   theEmbedding.Transpose();
   theBasis.AddOnTop(theNormal);
   Vectors<Rational> tempRoots, tempRoots2, tempRoots3;
-  Matrix<Rational> tempMat2;
   tempRoots.MakeEiBasis(theDimension);
   tempRoots.GetCoordsInBasis(theBasis, tempRoots2);
   theProjection.AssignVectorsToRows(tempRoots2);
   theProjection.Transpose();
-  theProjection.Resize(theDimension-1, theDimension, false);
-  Vectors<Rational> newNormals=this->Normals;
+  theProjection.Resize(theDimension - 1, theDimension, false);
+  Vectors<Rational> newNormals = this->Normals;
   theProjection.ActOnVectorsColumn(newNormals);
-  bool tempBool=outputConeLowerDim.CreateFromNormals(newNormals);
-  if(tempBool)
+  bool tempBool = outputConeLowerDim.CreateFromNormals(newNormals);
+  if (tempBool)
     crash << crash;
 }
 
 bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable(Polynomial<Rational>& inputLPoly, Vector<Rational>& output)
 { if (!inputLPoly.IsLinear())
     return false;
-  output.MakeZero(inputLPoly.GetMinNumVars()+1);
-  for (int i=0; i<inputLPoly.size(); i++)
+  output.MakeZero(inputLPoly.GetMinNumVars() + 1);
+  for (int i = 0; i < inputLPoly.size(); i ++)
   { int theIndex;
     if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(&theIndex))
-      output[theIndex]=inputLPoly.theCoeffs[i];
+      output[theIndex] = inputLPoly.theCoeffs[i];
     else
-      *output.LastObject()=inputLPoly.theCoeffs[i];
+      *output.LastObject() = inputLPoly.theCoeffs[i];
   }
   return true;
 }
 
 bool Cone::SolveLPolyEqualsZeroIAmProjective
-  ( Polynomial<Rational> & inputLPoly,
-   Cone& outputCone
-   )
+(Polynomial<Rational> & inputLPoly, Cone& outputCone)
 { Vector<Rational> theNormal;
   if (!this->GetRootFromLPolyConstantTermGoesToLastVariable(inputLPoly, theNormal))
     return false;
@@ -8345,41 +8361,60 @@ bool Cone::SolveLPolyEqualsZeroIAmProjective
 }
 
 bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective
-  ( QuasiPolynomial& inputLQP,
-   List<Cone>& outputConesOverEachLatticeShift
-   )
+(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift)
 { outputConesOverEachLatticeShift.SetSize(inputLQP.LatticeShifts.size);
-  bool result=true;
-  for (int i=0; i<inputLQP.LatticeShifts.size; i++)
-    result=result && this->SolveLPolyEqualsZeroIAmProjective(inputLQP.valueOnEachLatticeShift[i], outputConesOverEachLatticeShift[i]);
+  bool result = true;
+  for (int i = 0; i < inputLQP.LatticeShifts.size; i ++)
+    result = result && this->SolveLPolyEqualsZeroIAmProjective(inputLQP.valueOnEachLatticeShift[i], outputConesOverEachLatticeShift[i]);
   return result;
+}
+
+std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::string> >& content)
+{ MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTable");
+  std::stringstream out;
+  out << "<table>";
+  out << "<tr>";
+  for (int i = 0; i < labels.size; i ++)
+    out << "<th>" << MathRoutines::StringTrimToLengthForDisplay(labels[i], 60) << "</th>";
+  out << "</tr>";
+  for (int i = 0; i < content.size; i ++)
+  { out << "<tr>";
+    if (labels.size != content[i].size)
+      crash << "Error: while composing table, got " << labels.size << " labels but row index " << i
+      << " has " << content[i].size << " elements. " << crash;
+    for (int j = 0; j < content[i].size; j ++)
+      out << "<td>" << MathRoutines::StringTrimToLengthForDisplay(content[i][j], 60) << "</td>";
+    out << "</tr>";
+  }
+  out << "</table>";
+  return out.str();
 }
 
 bool HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(const std::string& input, std::string& output, bool doReplaceNewLineByBr)
 { std::stringstream out;
-  bool modified=false;
-  for (unsigned int i=0; i<input.size(); i++)
-  { bool currentlyModified=true;
-    bool isReturnNewLine=false;
-    if (i+1<input.size())
-      isReturnNewLine= input[i]=='\r' && input[i+1]=='\n';
+  bool modified = false;
+  for (unsigned int i = 0; i < input.size(); i ++)
+  { bool currentlyModified = true;
+    bool isReturnNewLine = false;
+    if (i + 1 < input.size())
+      isReturnNewLine = input[i] == '\r' && input[i + 1] == '\n';
     if (doReplaceNewLineByBr && isReturnNewLine)
     { out << "<br>\n";
-      i++;
-    } else if (input[i]=='<')
+      i ++;
+    } else if (input[i] == '<')
       out << "&lt;";
-    else if (input[i]=='>')
+    else if (input[i] == '>')
       out << "&gt;";
-    else if (input[i]=='&')
+    else if (input[i] == '&')
       out << "&amp;";
     else
     { out << input[i];
-      currentlyModified=false;
+      currentlyModified = false;
     }
     if (currentlyModified)
-      modified=true;
+      modified = true;
   }
-  output=out.str();
+  output = out.str();
   return modified;
 }
 
@@ -8388,26 +8423,26 @@ bool HtmlRoutines::IsRepresentedByItselfInURLs(char input)
     return true;
   if (MathRoutines::isALatinLetter(input))
     return true;
-  return input=='.';
+  return input == '.';
 }
 
 std::string HtmlRoutines::ConvertStringToURLStringExceptDashesAndSlashes(const std::string& input)
 { std::stringstream out;
-  for (unsigned int i=0; i<input.size(); i++)
-    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) || input[i]=='-' ||
-        input[i]=='/')
+  for (unsigned int i = 0; i < input.size(); i ++)
+    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) || input[i] == '-' ||
+        input[i] == '/')
       out << input[i];
     else
     { out << "%";
       int x = (char) input[i];
-      out << std::hex << ((x/16)%16) << (x%16) << std::dec;
+      out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
     }
   return out.str();
 }
 
 std::string HtmlRoutines::ConvertStringToURLString(const std::string& input, bool usePlusesForSpacebars)
 { std::stringstream out;
-  for (unsigned int i=0; i<input.size(); i++)
+  for (unsigned int i = 0; i < input.size(); i ++)
     if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]))
       out << input[i];
     else if (input[i] == ' ' && usePlusesForSpacebars)
@@ -8415,7 +8450,7 @@ std::string HtmlRoutines::ConvertStringToURLString(const std::string& input, boo
     else
     { out << "%";
       int x = (char) input[i];
-      out << std::hex << ((x/16)%16) << (x%16) << std::dec;
+      out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
     }
   return out.str();
 }

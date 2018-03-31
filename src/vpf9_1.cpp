@@ -488,15 +488,20 @@ void UserCalculatorData::clearAuthenticationTokenAndPassword()
   this->actualAuthenticationToken = "";
 }
 
+std::string UserCalculatorData::ToStringCourseInfo()
+{ std::stringstream out;
+  out << "Course name:\n" << this->courseComputed
+  << "\n<br>Deadline info:\n" << this->deadlinesString
+  << "\n<hr>Prob weight id:\n" << this->problemWeightSchema
+  << "\n<br>Prob weight info:\n" << this->problemWeightString;
+  return out.str();
+}
+
 std::string UserCalculatorData::ToStringUnsecure()
 { MacroRegisterFunctionWithName("UserCalculatorData::ToStringUnsecure");
   std::stringstream out;
-  out << "User: " << this->username
-  << "\n<br>Course name:\n" << this->courseInfo.courseComputed
-  << "\n<br>Deadline info:\n" << this->courseInfo.deadlinesString
-  << "\n<hr>Prob weight id:\n" << this->courseInfo.problemWeightSchemaIDComputed
-  << "\n<br>Prob weight info:\n" << this->courseInfo.problemWeightString
-
+  out << "User: " << this->username << "\n<br>"
+  << this->ToStringCourseInfo()
   << "\n<br>Actual authentication token: "
   << this->actualAuthenticationToken
   << "\n<br>Entered authentication token: "

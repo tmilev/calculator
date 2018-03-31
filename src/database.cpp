@@ -99,25 +99,26 @@ std::string DatabaseStrings::labelAuthenticationToken = "authenticationToken";
 std::string DatabaseStrings::labelActivationToken = "activationToken";
 std::string DatabaseStrings::labelTimeOfActivationTokenCreation = "activationTokenCreationTime";
 std::string DatabaseStrings::labelTimeOfAuthenticationTokenCreation = "authenticationCreationTime";
-std::string DatabaseStrings::labelCourseInfo = "courseInfo";
 std::string DatabaseStrings::labelEmail = "email";
 
 std::string DatabaseStrings::tableUsers = "users";
-std::string DatabaseStrings::columnSection = "studentSection";
-std::string DatabaseStrings::columnCurrentCourses = "currentCourses";
 std::string DatabaseStrings::theDatabaseUser = "ace";
 std::string DatabaseStrings::theDatabaseName = "aceDB";
 std::string DatabaseStrings::theDatabaseNameMongo = "calculator";
 std::string DatabaseStrings::tableDeadlines = "deadlines";
-std::string DatabaseStrings::columnDeadlines = "deadlines";
-std::string DatabaseStrings::columnDeadlinesSchema = "deadlineSchema";
-std::string DatabaseStrings::columnInstructor = "instructor";
+std::string DatabaseStrings::labelDeadlines = "deadlines";
+
+std::string DatabaseStrings::labelSection = "studentSection";
+std::string DatabaseStrings::labelCurrentCourses = "currentCourses";
+std::string DatabaseStrings::labelDeadlinesSchema = "deadlineSchema";
+std::string DatabaseStrings::labelInstructor = "instructor";
+std::string DatabaseStrings::labelSemester = "semester";
 
 std::string DatabaseStrings::tableProblemWeights = "problemWeights";
-std::string DatabaseStrings::columnProblemWeightsSchema = "problemWeightsSchema";
-std::string DatabaseStrings::columnProblemWeights = "problemWeights";
+std::string DatabaseStrings::labelProblemWeightsSchema = "problemWeightsSchema";
+std::string DatabaseStrings::labelProblemWeights = "problemWeights";
 
-std::string DatabaseStrings::columnSectionsTaught = "sectionsTaught";
+std::string DatabaseStrings::labelSectionsTaught = "sectionsTaught";
 
 std::string DatabaseStrings::tableEmailInfo = "emailInfo";
 std::string DatabaseStrings::labelLastActivationEmailTime = "lastActivationEmailTime";
@@ -128,9 +129,9 @@ List<std::string> DatabaseStrings::modifyableColumns;
 
 List<std::string>& DatabaseStrings::GetModifyableColumnsNotThreadSafe()
 { MacroRegisterFunctionWithName("DatabaseStrings::GetModifyableColumnsNotThreadSafe");
-  if (DatabaseStrings::modifyableColumns.size == 0) //<-warning: this is not thread-safe
-  { DatabaseStrings::modifyableColumns.AddOnTop(DatabaseStrings::labelCourseInfo);
-  }
+  //if (DatabaseStrings::modifyableColumns.size == 0) //<-warning: this is not thread-safe
+  //{ DatabaseStrings::modifyableColumns.AddOnTop(DatabaseStrings::labelCourseInfo);
+  //}
   return DatabaseStrings::modifyableColumns;
 }
 
@@ -240,9 +241,9 @@ std::string UserCalculator::ToString()
   std::stringstream out;
 
   out << "Calculator user: " << this->username
-  << "<br>Section: computed: " << this->courseInfo.sectionComputed
-  << ", in DB: " << this->courseInfo.getSectionInDB()
-  << "<br>Sections taught: " << this->courseInfo.getSectonsTaughtByUser();
+  << "<br>Section: computed: " << this->sectionComputed
+  << ", in DB: " << this->sectionInDB
+  << "<br>Sections taught: " << this->sectionsTaught.ToStringCommaDelimited();
 
   Rational weightRat;
   for (int i = 0; i < this->theProblemData.size(); i ++)
@@ -254,15 +255,13 @@ std::string UserCalculator::ToString()
     << "; points: "
     << this->theProblemData.theValues[i].Points
     << ";";
-    if (!this->theProblemData.theValues[i].adminData.GetWeightFromCoursE
-        (this->courseInfo.courseComputed, weightRat))
+    if (!this->theProblemData.theValues[i].adminData.GetWeightFromCoursE(this->courseComputed, weightRat))
       out << " (weight not available). ";
     else
       out << " weight: " << weightRat.ToString();
   }
   out << "<br>Deadline info: "
-  << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml
-  (this->courseInfo.deadlinesString);
+  << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(this->deadlinesString);
   return out.str();
 }
 
@@ -371,11 +370,6 @@ bool UserCalculator::LoadFromDB
   return true;
 }
 
-std::string UserCalculatorData::ToStringIdSectionCourse()
-{ return this->courseInfo.getInstructorInDB() +
-  this->courseInfo.getSectionInDB() + this->courseInfo.getCurrentCourseInDB();
-}
-
 bool UserCalculatorData::LoadFromJSON(JSData& input)
 { MacroRegisterFunctionWithName("UserCalculatorData::LoadFromJSON");
   this->userId                            = input[DatabaseStrings::labelUserId                            ].string;
@@ -386,9 +380,18 @@ bool UserCalculatorData::LoadFromJSON(JSData& input)
   this->actualAuthenticationToken         = input[DatabaseStrings::labelAuthenticationToken               ].string;
   this->timeOfAuthenticationTokenCreation = input[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ].string;
   this->problemDataString                 = input[DatabaseStrings::labelProblemData                       ].string;
-  this->courseInfoString                  = input[DatabaseStrings::labelCourseInfo                        ].string;
   this->actualShaonedSaltedPassword       = input[DatabaseStrings::labelPassword                          ].string;
   this->userRole                          = input[DatabaseStrings::labelUserRole                          ].string;
+
+  this->instructorInDB                    = input[DatabaseStrings::labelInstructor                        ].string;
+  this->semesterInDB                      = input[DatabaseStrings::labelSemester                          ].string;
+  this->sectionInDB                       = input[DatabaseStrings::labelSection                           ].string;
+  this->courseInDB                        = input[DatabaseStrings::labelCurrentCourses                    ].string;
+  this->sectionsTaught.SetSize(0);
+  JSData sectionsTaughtList = input[DatabaseStrings::labelSectionsTaught];
+  if (sectionsTaughtList.type == JSData::JSarray)
+    for (int i = 0; i < sectionsTaughtList.list.size; i++)
+      this->sectionsTaught.AddOnTop(sectionsTaughtList.list[i].string);
   return true;
 }
 
@@ -403,40 +406,50 @@ JSData UserCalculatorData::ToJSON()
   result[DatabaseStrings::labelAuthenticationToken               ] = this->actualAuthenticationToken             ;
   result[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ] = this->timeOfAuthenticationTokenCreation     ;
   result[DatabaseStrings::labelProblemData                       ] = this->problemDataString                     ;
-  result[DatabaseStrings::labelCourseInfo                        ] = this->courseInfoString                      ;
   result[DatabaseStrings::labelPassword                          ] = this->actualShaonedSaltedPassword           ;
   result[DatabaseStrings::labelUserRole                          ] = this->userRole                              ;
+
+  result[DatabaseStrings::labelInstructor                        ] = this->instructorInDB                        ;
+  result[DatabaseStrings::labelSemester                          ] = this->semesterInDB                          ;
+  result[DatabaseStrings::labelSection                           ] = this->sectionInDB                           ;
+  result[DatabaseStrings::labelCurrentCourses                    ] = this->courseInDB                            ;
+  JSData sectionsTaughtList;
+  sectionsTaughtList.type = JSData::JSarray;
+  for (int i = 0; i < this->sectionsTaught.size; i ++)
+    sectionsTaughtList[i] = this->sectionsTaught[i];
+  result[DatabaseStrings::labelSectionsTaught] = sectionsTaughtList;
+  for (int i = 0; i < result.objects.size(); i ++)
+  { JSData& currentValue = result.objects.theValues[i];
+    if (currentValue.string == "" && currentValue.type == JSData::JSstring)
+    { result.objects.RemoveKey(result.objects.theKeys[i]);
+      i --;
+    }
+  }
   return result;
 }
 
-bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
+bool UserCalculatorData::ComputeCourseInfo(std::stringstream* errorStream)
 { MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
-  JSData& theCourseInfo = this->courseInfo.courseInfoJSON.GetElement();
-  theCourseInfo.readstring(this->courseInfo.rawStringStoredInDB, errorStream);
   bool isAdmin = (this->userRole == "admin" && this->username == theGlobalVariables.userDefault.username);
   if (theGlobalVariables.UserStudentVieWOn() && isAdmin &&
       theGlobalVariables.GetWebInput("studentSection") != "")
   //<- warning, the user may not be
   //fully logged-in yet so theGlobalVariables.UserDefaultHasAdminRights()
   //does not work right.
-    this->courseInfo.sectionComputed = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
+    this->sectionComputed = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
   else
-    this->courseInfo.sectionComputed = this->courseInfo.getSectionInDB();
+    this->sectionComputed = this->sectionInDB;
   if (isAdmin && theGlobalVariables.GetWebInput("courseHome") != "")
-    this->courseInfo.courseComputed =
+    this->courseComputed =
     HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   else
-    this->courseInfo.courseComputed = theCourseInfo[DatabaseStrings::columnCurrentCourses].string;
+    this->courseComputed = this->courseInDB;
   if (isAdmin)
-    this->courseInfo.instructorComputed = this->username;
+    this->instructorComputed = this->username;
   else
-    this->courseInfo.instructorComputed = this->courseInfo.getInstructorInDB();
-  this->courseInfo.deadlineSchemaIDComputed = "deadlines" +
-  this->courseInfo.instructorComputed +
-  this->courseInfo.courseComputed +
-  this->courseInfo.semesterComputed;
-  this->courseInfo.problemWeightSchemaIDComputed = "problemWeights" +
-  this->courseInfo.instructorComputed;
+    this->instructorComputed = this->instructorInDB;
+  this->deadlineSchema = "deadlines" + this->instructorComputed + this->courseComputed + this->semesterComputed;
+  this->problemWeightSchema = "problemWeights" + this->instructorComputed;
   return true;
 }
 
@@ -880,16 +893,15 @@ bool DatabaseRoutineS::AddUsersFromEmails
   for (int i = 0; i < theEmails.size; i ++)
   { currentUser.reset();
     currentUser.username = theEmails[i];
+    currentUser.courseInDB = theGlobalVariables.GetWebInput("courseHome");
+    currentUser.sectionInDB = userGroup;
+    currentUser.instructorInDB = theGlobalVariables.userDefault.username;
+    currentUser.email = theEmails[i];
+    currentUser.userRole = userRole;
+
     JSData findUser, updateUser;
     findUser[DatabaseStrings::labelUsername] = currentUser.username;
-    updateUser[DatabaseStrings::labelEmail] = theEmails[i];
-    updateUser[DatabaseStrings::labelUserRole] = userRole;
-    currentUser.courseInfo.setCurrentCourseInDB(theGlobalVariables.GetWebInput("courseHome"));
-    currentUser.courseInfo.setSectionInDB(userGroup);
-    currentUser.courseInfo.setInstructorInDB(theGlobalVariables.userDefault.username);
-    currentUser.courseInfo.rawStringStoredInDB = currentUser.courseInfo.ToStringForDBStorage();
-    updateUser[DatabaseStrings::labelCourseInfo] = currentUser.courseInfo.rawStringStoredInDB;
-
+    updateUser = currentUser.ToJSON();
     bool isEmail = true;
     if (theEmails[i].find('@') == std::string::npos)
     { isEmail = false;
@@ -1336,79 +1348,3 @@ bool DatabaseRoutineS::PrepareClassData
 }
 
 #endif
-
-std::string CourseAndUserInfo::ToStringHumanReadable()
-{ MacroRegisterFunctionWithName("CourseAndUserInfo::ToStringHumanReadable");
-  std::stringstream out;
-  out
-  << "<table><tr><td style=\"text-align:right\"><b>Instructor:&nbsp;</b></td><td>" << this->instructorComputed << "</td></tr>"
-  << "<tr><td style=\"text-align:right\"><b>Course:&nbsp;</b></td><td>" << this->courseComputed << "</td></tr>";
-  if (this->courseComputed.find("%") != std::string::npos)
-  { out << "<tr><td style=\"text-align:right\"><b style=\"color:red\">Possible error:&nbsp;</b></td><td>"
-    << "<b style=\"color:red\">Your course name contains the % sign.<br> "
-    << "This is unexpected behavior which may or may not be a bug.<br>"
-    << "Please report the issue using our bug tracker (top right corner of the page). <br>"
-    << "If possible, attach a screenshot. <br>Thanks in advance!</b>"<< "</td></tr>";
-  }
-  out << "<tr><td style=\"text-align:right\"><b>Section:&nbsp;</b></td><td>" << this->sectionComputed << "</td></tr>";
-  out
-  << "<tr><td style=\"text-align:right\"><b>Deadline schema:&nbsp;</b></td><td>" << this->deadlineSchemaIDComputed
-  << "</td><td>(computed from your instructor and course name)" << "</td></tr>"
-  << "<tr><td style=\"text-align:right\"><b>Problem weight schema:&nbsp;</b></td><td>" << this->problemWeightSchemaIDComputed
-  << "</td><td>(computed from your instructor). </td></tr>"
-  << "</table>";
-  if (theGlobalVariables.UserDebugFlagOn())
-  { out << "<br>Deadline string: " << HtmlRoutines::ConvertURLStringToNormal(this->deadlinesString, false);
-    out << "<br>Problem string: " << this->problemWeightString;
-  }
-//  out << this->courseInfoJSON.GetElement().ToString(true);
-  return out.str();
-}
-
-CourseAndUserInfo::~CourseAndUserInfo()
-{
-}
-
-void CourseAndUserInfo::setCurrentCourseInDB(const std::string& input)
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnCurrentCourses]=input;
-}
-
-std::string CourseAndUserInfo::getCurrentCourseInDB()
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnCurrentCourses].string;
-}
-
-void CourseAndUserInfo::setSectionInDB(const std::string& input)
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSection]=input;
-}
-
-std::string CourseAndUserInfo::getSectionInDB()
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSection].string;
-}
-
-void CourseAndUserInfo::setSectonsTaughtByUser(const std::string& input)
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught]=input;
-}
-
-std::string CourseAndUserInfo::getSectonsTaughtByUser()
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught].string;
-}
-
-void CourseAndUserInfo::setInstructorInDB(const std::string& input)
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnInstructor]=input;
-}
-
-std::string CourseAndUserInfo::getInstructorInDB()
-{ return this->courseInfoJSON.GetElement()[DatabaseStrings::columnInstructor].string;
-}
-
-std::string CourseAndUserInfo::ToStringForDBStorage()
-{ MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
-//  JSData theCourseInfo;
-//  theCourseInfo.type=theCourseInfo.JSObject;
-//  theCourseInfo["problemWeightSchema"]= this->problemWeightString;
-//  theCourseInfo["sectionsTaught"]     = this->sectionsTaughtByUserString;
-//  theCourseInfo["instructor"]         = this->currentInstructorInDB;
-//  theCourseInfo["currentCourse"]      = this->currentCourseComputed;
-//  theCourseInfo["studentSection"]     = this->currentSectionInDB;
-  return this->courseInfoJSON.GetElement().ToString(false);
-}

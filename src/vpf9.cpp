@@ -911,7 +911,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedWriteOnly
     return false;
   }
   std::string customized =
-  HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.courseInfo.instructorComputed, false);
+  HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.instructorComputed, false);
   if (customized == "")
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "Customizing files not available for non-logged-in users. ";
@@ -952,7 +952,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
   if (inputStart == "")
     return FileOperations::GetPhysicalFileNameFromVirtual(inputFileName, output, false, false, commentsOnFailure);
   std::string customized =
-  HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.courseInfo.instructorComputed, false) + "/";
+  HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.instructorComputed, false) + "/";
   if (customized == "")
     customized = "default/";
   std::string inputCopy = inputStart + customized + fileEnd;

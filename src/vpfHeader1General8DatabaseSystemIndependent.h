@@ -8,33 +8,6 @@ static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemInd
 
 class JSData;
 
-struct CourseAndUserInfo
-{
-public:
-  MemorySaving<JSData> courseInfoJSON;
-  std::string rawStringStoredInDB;
-  std::string problemWeightSchemaIDComputed;
-  std::string deadlineSchemaIDComputed;
-  std::string instructorComputed;
-  std::string semesterComputed;
-  std::string sectionComputed;
-  std::string courseComputed;
-  std::string deadlinesString;
-  std::string problemWeightString;
-  std::string getCurrentCourseInDB();
-  void setCurrentCourseInDB(const std::string& input);
-  std::string getSectionInDB();
-  void setSectionInDB(const std::string& input);
-  std::string getSectonsTaughtByUser();
-  void setSectonsTaughtByUser(const std::string& input);
-  std::string getInstructorInDB();
-  void setInstructorInDB(const std::string& input);
-
-  std::string ToStringForDBStorage();
-  std::string ToStringHumanReadable();
-  ~CourseAndUserInfo();
-};
-
 class UserCalculatorData
 {
   public:
@@ -48,8 +21,6 @@ class UserCalculatorData
   std::string enteredAuthenticationToken;
   std::string actualAuthenticationToken;
   std::string problemDataString;
-  std::string courseInfoString;
-  CourseAndUserInfo courseInfo;
 
   std::string enteredPassword;
   std::string actualShaonedSaltedPassword;
@@ -60,6 +31,25 @@ class UserCalculatorData
   std::string timeOfActivationTokenCreation;
   std::string activationEmail;
   std::string activationEmailSubject;
+
+  std::string instructorInDB;
+  std::string semesterInDB;
+  std::string sectionInDB;
+  std::string courseInDB;
+
+  std::string instructorComputed;
+  std::string semesterComputed;
+  std::string sectionComputed;
+  std::string courseComputed;
+
+  std::string problemWeightSchema;
+  std::string problemWeightString;
+  std::string deadlineSchema;
+  std::string deadlinesString;
+
+  List<std::string> sectionsTaught;
+
+
   //List<std::string> sectionsViewableByUser;
   List<std::string> selectedColumnsUnsafe;
   List<std::string> selectedColumnValuesUnsafe;
@@ -77,12 +67,12 @@ class UserCalculatorData
   bool LoadFromJSON(JSData& input);
   JSData ToJSON();
   UserCalculatorData();
-  bool AssignCourseInfoString(std::stringstream* errorStream);
-  std::string ToStringIdSectionCourse();
+  bool ComputeCourseInfo(std::stringstream* errorStream);
   void reset();
   void clearPasswordFromMemory();
   void clearAuthenticationTokenAndPassword();
   std::string ToStringUnsecure();
+  std::string ToStringCourseInfo();
 };
 
 struct DatabaseStrings
@@ -98,7 +88,6 @@ public:
   static std::string labelUsername;
   static std::string labelEmail;
   static std::string labelPassword;
-  static std::string labelCourseInfo;
   static std::string labelAuthenticationToken;
 
   static std::string labelActivationToken;
@@ -115,18 +104,19 @@ public:
   static std::string labelUsernameAssociatedWithToken;
 
 ///course info column names
-  static std::string columnCurrentCourses;
-  static std::string columnSection;
-  static std::string columnDeadlinesSchema;
-  static std::string columnProblemWeightsSchema;
-  static std::string columnSectionsTaught;
-  static std::string columnInstructor;
+  static std::string labelCurrentCourses;
+  static std::string labelSection;
+  static std::string labelDeadlinesSchema;
+  static std::string labelProblemWeightsSchema;
+  static std::string labelSectionsTaught;
+  static std::string labelInstructor;
+  static std::string labelSemester;
 ///deadlines info
-  static std::string columnDeadlines;
+  static std::string labelDeadlines;
   static std::string tableDeadlines;
 ///problem weights info
   static std::string tableProblemWeights;
-  static std::string columnProblemWeights;
+  static std::string labelProblemWeights;
 
   static List<std::string>& GetModifyableColumnsNotThreadSafe();
 

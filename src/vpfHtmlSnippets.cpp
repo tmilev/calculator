@@ -30,7 +30,7 @@ std::string HtmlRoutines::GetJavascriptSubmitEmails()
   << "  params='request='+requestType+'&';\n"
   << "  params+='userRole='+userRole;\n"
   << "  params+='&userList=' + encodeURIComponent(spanEmailList.value);\n"
-  << "  params+='&" << DatabaseStrings::columnSection << "=' + encodeURIComponent(spanUserGroup.value);\n"
+  << "  params+='&" << DatabaseStrings::labelSection << "=' + encodeURIComponent(spanUserGroup.value);\n"
   << "  params+='&passwordList=' + encodeURIComponent(spanPasswords.value);\n"
   << "  params+='&deadlineInfoRowId=' + encodeURIComponent('" << deadlineInfoRowId << "');\n"
   << "  params+='&problemInfoRowId=' + encodeURIComponent('" << problemInfoRowId << "');\n"

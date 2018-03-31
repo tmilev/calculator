@@ -127,13 +127,12 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
 
   }
   if (!theProblem.ReadProblemInfoAppend
-      (theProblem.currentUseR.courseInfo.deadlinesString,
-       theProblem.currentUseR.theProblemData, out))
+      (theProblem.currentUseR.deadlinesString, theProblem.currentUseR.theProblemData, out))
   { out << "Failed to interpret the deadline string. ";
     return out.str();
   }
   if (!theProblem.ReadProblemInfoAppend
-      (theProblem.currentUseR.courseInfo.problemWeightString, theProblem.currentUseR.theProblemData, out))
+      (theProblem.currentUseR.problemWeightString, theProblem.currentUseR.theProblemData, out))
   { out << "Failed to interpret the problem weight string. ";
     return out.str();
   }
@@ -1154,12 +1153,11 @@ std::string HtmlInterpretation::SubmitProblem
     if (!theProblem.LoadAndParseTopicList(out))
       hasDeadline = false;
     std::string theSQLstring;
-    theSQLstring = theUser.courseInfo.sectionComputed;
+    theSQLstring = theUser.sectionComputed;
     if (hasDeadline)
     { bool unused = false;
       std::string theDeadlineString =
-      theProblem.GetDeadline
-      (theProblem.fileName, HtmlRoutines::ConvertStringToURLString(theSQLstring, false), unused);
+      theProblem.GetDeadline(theProblem.fileName, HtmlRoutines::ConvertStringToURLString(theSQLstring, false), unused);
       //out << "<tr><td>DEBUG: getting deadline for section: " << theUser.userGroup.value
       //<< "<br>The prob data is: "
       //<< theUser.theProblemData.ToStringHtml()
@@ -1280,8 +1278,10 @@ std::string HtmlInterpretation::AddTeachersSections()
   }
   std::string desiredUsers =
   HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate("teachers"), false);
-  std::string desiredSections =
+  std::string desiredSectionsOneString =
   HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate("sections"), false);
+  List<std::string> desiredSectionsList;
+
 #ifdef MACRO_use_MySQL
   List<std::string> theTeachers;
   List<char> delimiters;
@@ -1292,6 +1292,8 @@ std::string HtmlInterpretation::AddTeachersSections()
   delimiters.AddOnTop(',');
   delimiters.AddOnTop(';');
   delimiters.AddOnTop(160);//<-&nbsp
+  MathRoutines::StringSplitExcludeDelimiters(desiredSectionsOneString, delimiters, desiredSectionsList);
+
   MathRoutines::StringSplitExcludeDelimiters(desiredUsers, delimiters, theTeachers);
 //  MathRoutines::StringSplitExcludeDelimiters(desiredSections, delimiters, theSections);
   if (theTeachers.size == 0)
@@ -1310,15 +1312,15 @@ std::string HtmlInterpretation::AddTeachersSections()
     { out << "<span style=\"color:red\">Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
       continue;
     }
-    currentTeacher.courseInfo.courseInfoJSON.GetElement()[DatabaseStrings::columnSectionsTaught] = desiredSections;
+    currentTeacher.sectionsTaught = desiredSectionsList;
     JSData findQuery, setQuery;
     findQuery[DatabaseStrings::labelUsername] = currentTeacher.username;
-    setQuery[DatabaseStrings::labelCourseInfo] = currentTeacher.courseInfo.ToStringForDBStorage();
+    setQuery = currentTeacher.ToJSON();
     if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findQuery, setQuery, &out))
       out << "<span style=\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
     else
-      out << "<span style=\"color:green\">Assigned " << theTeachers[i] << " to section: "
-      << desiredSections << "</span><br>";
+      out << "<span style=\"color:green\">Assigned " << theTeachers[i] << " to section(s): "
+      << desiredSectionsList << "</span><br>";
   }
   return out.str();
 #else
@@ -1340,7 +1342,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   std::string userPasswords = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("passwordList"), false);
   std::string userGroup =
   MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal
-  (theGlobalVariables.GetWebInput(DatabaseStrings::columnSection), false));
+  (theGlobalVariables.GetWebInput(DatabaseStrings::labelSection), false));
   std::string userRole = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("userRole"), false);
 
   if (inputEmails == "")
@@ -1561,22 +1563,7 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
     return out.str();
   }
 //  out << "DEBUG: Usertable: " << userTable.ToStringCommaDelimited();
-  int indexCourseInfo = - 1;
-  for (int i = 0; i < columnLabels.size; i ++)
-    if (columnLabels[i] == DatabaseStrings::labelCourseInfo)
-      indexCourseInfo = i;
-  if (indexCourseInfo == - 1)
-  { out << "Failed to load extra user info. ";
-    return out.str();
-  }
   HashedList<std::string, MathRoutines::hashString> theSections;
-  UserCalculator currentUser;
-  for (int i = 0; i < userTable.size; i ++)
-  { currentUser.reset();
-    currentUser.courseInfo.rawStringStoredInDB = userTable[i][indexCourseInfo];
-    currentUser.AssignCourseInfoString(&out);
-    theSections.AddOnTopNoRepetition(currentUser.courseInfo.getSectionInDB());
-  }
   theSections.QuickSortAscending();
   out << "<hr>";
   out << HtmlInterpretation::ToStringAssignSection();
@@ -1679,7 +1666,6 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   int indexEmail = - 1;
   int indexActivationToken = - 1;
   int indexUserRole = - 1;
-  int indexCourseInfo = - 1;
   //int indexProblemData=-1;
   for (int i = 0; i < columnLabels.size; i ++)
   { if (columnLabels[i] == DatabaseStrings::labelUsername)
@@ -1690,14 +1676,11 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       indexActivationToken = i;
     if (columnLabels[i] == "userRole")
       indexUserRole = i;
-    if (columnLabels[i] == DatabaseStrings::labelCourseInfo)
-      indexCourseInfo = i;
   }
   if (indexUser            == - 1 ||
       indexEmail           == - 1 ||
       indexActivationToken == - 1 ||
-      indexUserRole        == - 1 ||
-      indexCourseInfo      == - 1)
+      indexUserRole        == - 1)
   { out << "<span style=\"color:red\"><b>This shouldn't happen: failed to find necessary "
     << "column entries in the database. "
     << "This is likely a software bug. Function: HtmlInterpretation::ToStringUserDetailsTable. </b></span>"
@@ -1716,7 +1699,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   List<List<std::string> > preFilledLinkBucketsBySection;
   List<List<std::string> > nonActivatedAccountBucketsBySection;
   for (int i = 0; i < userTable.size; i ++)
-  { currentUser.reset();
+  { /*currentUser.reset();
     currentUser.courseInfo.rawStringStoredInDB = userTable[i][indexCourseInfo];
     currentUser.AssignCourseInfoString(&out);
     if (flagFilterCourse &&
@@ -1731,7 +1714,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       << ", <b>Instructor: </b>" << currentUser.courseInfo.getInstructorInDB();
       theSections.AddOnTop(currentSectionInfo.str());
       sectionIDs.AddOnTopNoRepetition(currentID);
-    }
+    }*/
   }
   sectionIDs.QuickSortAscending(0, &theSections);
   //out << "DEBUG: Section ids: " << sectionIDs.ToStringCommaDelimited();
@@ -1740,14 +1723,14 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   preFilledLinkBucketsBySection.SetSize(sectionIDs.size);
   int numActivatedUsers = 0;
   for (int i = 0; i < userTable.size; i ++)
-  { currentUser.username = userTable[i][indexUser];
+  { /*currentUser.username = userTable[i][indexUser];
     currentUser.email = userTable[i][indexEmail];
     currentUser.actualActivationToken = userTable[i][indexActivationToken];
     currentUser.userRole = userTable[i][indexUserRole];
     currentUser.courseInfo.rawStringStoredInDB = userTable[i][indexCourseInfo];
     currentUser.AssignCourseInfoString(&out);
     std::string currentCourseID = currentUser.ToStringIdSectionCourse();
-
+*/
     //if (currentUser. currentCourses.value.find('%')!=std::string::npos)
     //{ out << "<span style=\"color:red\"><b>Non-expected behavior: user: "
     //  << currentUser.username.value
@@ -1755,16 +1738,15 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     //  << currentUser.currentCourses.value
     //  << " contains the % symbol. </b></span><br>";
     //}
-    if (!adminsOnly && !sectionIDs.Contains(currentCourseID))
-      continue;
+/*    if (!adminsOnly && !sectionIDs.Contains(currentCourseID))
+      continue;*/
     if (adminsOnly xor (currentUser.userRole == "admin"))
       continue;
     numUsers ++;
     std::stringstream oneTableLineStream;
     oneTableLineStream << "<tr>"
     << "<td>" << currentUser.username << "</td>"
-    << "<td>" << currentUser.email << "</td>"
-    ;
+    << "<td>" << currentUser.email << "</td>";
     bool isActivated = true;
     std::string webAddress = "https://" + hostWebAddressWithPort + "/cgi-bin/calculator";
     if (currentUser.actualActivationToken != "activated" && currentUser.actualActivationToken != "error")
@@ -1810,18 +1792,18 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     oneLink << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=login&username="
     << currentUser.username << "\">" << currentUser.username << "</a>";
     oneTableLineStream << "<td>" << oneLink.str() << "</td>";
-    oneTableLineStream << "<td>" << userTable[i][indexCourseInfo] << "</td>";
+    //oneTableLineStream << "<td>" << userTable[i][indexCourseInfo] << "</td>";
     //oneTableLineStream << "<td>" << currentUser.courseInfo.ToStringHumanReadable() << "</td>";
     oneTableLineStream << "</tr>";
 
-    int indexCurrentBucket = sectionIDs.GetIndex(currentCourseID);
+    /*int indexCurrentBucket = sectionIDs.GetIndex(currentCourseID);
     if (indexCurrentBucket != - 1)
     { if (isActivated)
         activatedAccountBucketsBySection[indexCurrentBucket].AddOnTop(oneTableLineStream.str());
       else
         nonActivatedAccountBucketsBySection[indexCurrentBucket].AddOnTop(oneTableLineStream.str());
       preFilledLinkBucketsBySection[indexCurrentBucket].AddOnTop(oneLink.str());
-    }
+    }*/
   }
   for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++)
     nonActivatedAccountBucketsBySection[i].QuickSortAscending();
@@ -1926,7 +1908,7 @@ void UserCalculator::ComputePointsEarned
     currentP.numCorrectlyAnswered = 0;
     Rational currentWeight;
     currentP.flagProblemWeightIsOK =
-    currentP.adminData.GetWeightFromCoursE(this->courseInfo.courseComputed, currentWeight);
+    currentP.adminData.GetWeightFromCoursE(this->courseComputed, currentWeight);
     if (!currentP.flagProblemWeightIsOK)
     { currentWeight = 0;
       //stOutput << "Debug: weight not ok: " << problemName << "<br>";
@@ -2005,9 +1987,9 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   int problemDataIndex = userLabels.GetIndex("problemData");
   if (problemDataIndex == - 1)
     return "Could not find problem data column. ";
-  int courseInfoIndex = userLabels.GetIndex(DatabaseStrings::labelCourseInfo);
-  if (courseInfoIndex == - 1)
-    return "Could not find course info column. ";
+//  int courseInfoIndex = userLabels.GetIndex(DatabaseStrings::labelCourseInfo);
+//  if (courseInfoIndex == - 1)
+//    return "Could not find course info column. ";
   CalculatorHTML currentUserRecord;
   this->userScores.Reserve(userTablE.size);
   this->userNames.Reserve(userTablE.size);
@@ -2024,7 +2006,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   this->numStudentsSolvedNothingInTopic.initFillInObject
   (this->theProblem.theTopicS.size(), 0);
   bool ignoreSectionsIdontTeach = true;
-  this->currentSection = theGlobalVariables.userDefault.courseInfo.sectionComputed;
+  this->currentSection = theGlobalVariables.userDefault.sectionComputed;
   this->currentCourse = theGlobalVariables.GetWebInput("courseHome");
   if (theGlobalVariables.GetWebInput("request") == "scoresInCoursePage")
     this->currentSection =
@@ -2033,24 +2015,24 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   //stOutput << "<br>DEBUG: ignoreSectionIdontTEach: " << ignoreSectionsIdontTeach;
   //stOutput << "<br>DEBUG: currentSection: " << this->currentSection;
   for (int i = 0; i < this->userTablE.size; i ++)
-  { currentUserRecord.currentUseR.courseInfo.rawStringStoredInDB = this->userTablE[i][courseInfoIndex];
-    currentUserRecord.currentUseR.AssignCourseInfoString(&comments);
-    //if (i<0)
-    //stOutput << "<br>DEBUG: currentsection: " << currentUserRecord.currentUseR.courseInfo.getSectionInDB();
+  { //currentUserRecord.currentUseR.courseInfo.rawStringStoredInDB = this->userTablE[i][courseInfoIndex];
+    //currentUserRecord.currentUseR.AssignCourseInfoString(&comments);
+
+
     if (ignoreSectionsIdontTeach)
-    { if (currentUserRecord.currentUseR.courseInfo.courseComputed != this->currentCourse)
+    { if (currentUserRecord.currentUseR.courseComputed != this->currentCourse)
         continue;
       if (theGlobalVariables.UserStudentVieWOn())
-      { if (currentUserRecord.currentUseR.courseInfo.getSectionInDB() != this->currentSection)
+      { if (currentUserRecord.currentUseR.sectionInDB != this->currentSection)
           continue;
       } else
-      { if (currentUserRecord.currentUseR.courseInfo.getSectionInDB() != this->currentSection)
+      { if (currentUserRecord.currentUseR.sectionInDB != this->currentSection)
           continue;
       }
     }
     this->userScores.AddOnTop(- 1);
     this->userNames.AddOnTop(this->userTablE[i][usernameIndex]);
-    this->userInfos.AddOnTop(currentUserRecord.currentUseR.courseInfo.getSectionInDB());
+    this->userInfos.AddOnTop(currentUserRecord.currentUseR.sectionInDB);
     this->scoresBreakdown.SetSize(this->scoresBreakdown.size + 1);
     currentUserRecord.currentUseR.username = this->userTablE[i][usernameIndex];
 
@@ -2061,8 +2043,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
       continue;
 //    out << "<br>DEBUG: after db data read: " << currentUserRecord.currentUseR.ToString();
     currentUserRecord.ReadProblemInfoAppend
-    (theProblem.currentUseR.courseInfo.problemWeightString,
-    currentUserRecord.currentUseR.theProblemData, comments);
+    (theProblem.currentUseR.problemWeightString, currentUserRecord.currentUseR.theProblemData, comments);
 //    out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
     currentUserRecord.currentUseR.ComputePointsEarned
     (theProblem.problemNamesNoTopics, &theProblem.theTopicS);
@@ -2357,17 +2338,15 @@ std::string HtmlInterpretation::ToStringNavigation()
       else
         out << "<b>Account settings: requires secure connection</b>" << linkSeparator;
     }
-    if (theGlobalVariables.userDefault.courseInfo.sectionComputed != "")
-      out << "Section: " << theGlobalVariables.userDefault.courseInfo.sectionComputed
+    if (theGlobalVariables.userDefault.sectionComputed != "")
+      out << "Section: " << theGlobalVariables.userDefault.sectionComputed
       << linkSeparator;
     //if (theGlobalVariables.UserDefaultHasAdminRights())
     //  out << "Course home: "
     //  << theGlobalVariables.userDefault.currentCourses.value
     //  << linkSeparator;
   } else
-  { out << "<b style='color:red'>logged out</b>" << linkSeparator;
-  }
-
+    out << "<b style='color:red'>logged out</b>" << linkSeparator;
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { if (theGlobalVariables.userCalculatorRequestType != "accounts")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable

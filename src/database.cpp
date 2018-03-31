@@ -79,7 +79,6 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
   }
   UserCalculator theUser;
   theUser.UserCalculatorData::operator=(theGlobalVariables.userDefault);
-  theUser.currentTable = DatabaseStrings::tableUsers;
   //stOutput << "<hr>DEBUG: logout: resetting token ... ";
   theUser.ResetAuthenticationToken(0);
 //  stOutput << "token reset!... <hr>";
@@ -444,7 +443,6 @@ bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)
 bool UserCalculator::Authenticate(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::Authenticate");
   //stOutput << "<hr>DEBUG: Authenticating user: " << this->username.value << " with password: " << this->enteredPassword;
-  this->currentTable = DatabaseStrings::tableUsers;
   std::stringstream secondCommentsStream;
   if (!this->LoadFromDB(&secondCommentsStream))
   { if (commentsOnFailure != 0)
@@ -462,7 +460,8 @@ bool UserCalculator::Authenticate(std::stringstream* commentsOnFailure)
   }
   if (this->AuthenticateWithToken(&secondCommentsStream))
     return true;
-  //*commentsOnFailure << " DEBUG: User could not authenticate with token.";
+  //*commentsOnFailure << " DEBUG: User could not authenticate with token. Actual auth token: "
+  //<< this->actualShaonedSaltedPassword;
   bool result = this->AuthenticateWithUserNameAndPass(commentsOnFailure);
   if (this->enteredPassword != "")
     this->ResetAuthenticationToken(commentsOnFailure);
@@ -483,7 +482,7 @@ bool UserCalculator::AuthenticateWithUserNameAndPass(std::stringstream* comments
     if (actualPasswordRFC4648[i] == '+')
       actualPasswordRFC4648[i] = '-';
   }
-  //if (commentsOnFailure!=0)
+  //if (commentsOnFailure != 0)
   //  *commentsOnFailure << "DEBUG: Comparing " << this->enteredShaonedSaltedPassword
   //  << " with: " << actualPasswordRFC4648;
   return this->enteredShaonedSaltedPassword == actualPasswordRFC4648;
@@ -525,12 +524,12 @@ bool UserCalculator::ResetAuthenticationToken(std::stringstream* commentsOnFailu
 
 bool UserCalculator::SetPassword(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::SetPassword");
-  this->currentTable = DatabaseStrings::tableUsers;
   if (this->enteredPassword == "")
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "Empty password not allowed. ";
     return false;
   }
+  this->ComputeShaonedSaltedPassword();
   JSData findUser, setUser;
   findUser[DatabaseStrings::labelUsername] = this->username;
   setUser[DatabaseStrings::labelPassword] = this->enteredShaonedSaltedPassword;
@@ -543,17 +542,16 @@ bool UserCalculator::IsAcceptableCharDatabaseInpuT(char theChar)
   if (MathRoutines::isALatinLetter(theChar))
     return true;
   switch (theChar)
-  {
-  case '.':
-  case '@':
-  case '+':
-  case '/':
-  case '%':
-  case '=':
-  case ' ':
-    return true;
-  default:
-    return false;
+  { case '.':
+    case '@':
+    case '+':
+    case '/':
+    case '%':
+    case '=':
+    case ' ':
+      return true;
+    default:
+      return false;
   }
 }
 
@@ -677,7 +675,6 @@ bool UserCalculator::ComputeAndStoreActivationToken(std::stringstream* commentsO
   std::stringstream activationTokenStream;
   activationTokenStream << now.theTimeStringNonReadable << rand();
   this->actualActivationToken = Crypto::computeSha1outputBase64(activationTokenStream.str());
-  this->currentTable = "users";
   JSData findUserQuery, setUserQuery;
   findUserQuery[DatabaseStrings::labelUsername] = this->username;
   setUserQuery[DatabaseStrings::labelActivationToken] = this->actualActivationToken;
@@ -699,7 +696,6 @@ bool DatabaseRoutineS::SendActivationEmail
  std::stringstream* commentsGeneralSensitive)
 { MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   UserCalculator currentUser;
-  currentUser.currentTable = DatabaseStrings::tableUsers;
   bool result = true;
   for (int i = 0; i < theEmails.size; i ++)
   { logEmail << "Sending activation email, user "
@@ -830,7 +826,6 @@ bool UserCalculator::InterpretDatabaseProblemData
 bool UserCalculator::LoadProblemStringFromDatabase
 (std::string& output, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::LoadProblemStringFromDatabase");
-  this->currentTable = DatabaseStrings::tableUsers;
   return this->FetchOneColumn("problemData", output, &commentsOnFailure);
 }
 
@@ -876,7 +871,6 @@ bool DatabaseRoutineS::AddUsersFromEmails
   //stOutput << " <br>Debug: creating users: " << theEmails.ToStringCommaDelimited() << "<br>Number of users: " << theEmails.size
   //<< "<br>Number of passwords: " << thePasswords.size << "<hr>Passwords string: " << thePasswords;
   UserCalculator currentUser;
-  currentUser.currentTable = DatabaseStrings::tableUsers;
   bool result = true;
   bool doSendEmails = false;
   outputNumNewUsers = 0;
@@ -890,7 +884,6 @@ bool DatabaseRoutineS::AddUsersFromEmails
     findUser[DatabaseStrings::labelUsername] = currentUser.username;
     updateUser[DatabaseStrings::labelEmail] = theEmails[i];
     updateUser[DatabaseStrings::labelUserRole] = userRole;
-    currentUser.currentTable = DatabaseStrings::tableUsers;
     currentUser.courseInfo.setCurrentCourseInDB(theGlobalVariables.GetWebInput("courseHome"));
     currentUser.courseInfo.setSectionInDB(userGroup);
     currentUser.courseInfo.setInstructorInDB(theGlobalVariables.userDefault.username);
@@ -1182,7 +1175,6 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
 #ifdef MACRO_use_MySQL
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
-  userWrapper.currentTable = DatabaseStrings::tableUsers;
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded");
   if (userWrapper.enteredGoogleToken == "")
     return false;
@@ -1227,15 +1219,13 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
 #endif
 }
 
-bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase
-(UserCalculatorData& theUseR, std::stringstream* comments)
+bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUseR, std::stringstream* comments)
 { (void) comments;
   (void) theUseR;
 #ifdef MACRO_use_MySQL
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
-  userWrapper.currentTable = DatabaseStrings::tableUsers;
   if (userWrapper.Authenticate(comments))
   { theUseR = userWrapper;
     return true;

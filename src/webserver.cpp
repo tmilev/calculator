@@ -459,10 +459,9 @@ void SSLdata::HandShakeIamServer(int inputSocketID)
   int maxNumHandshakeTries = 3;
 //  int theError=-1;
   for (int i = 0; i < maxNumHandshakeTries; i ++)
-  {
-    logWorker << logger::yellow << "DEBUG: ssl is server before call: " << SSL_is_server(this->sslServeR) << logger::endL;
+  { //logWorker << logger::yellow << "DEBUG: ssl is server before call: " << SSL_is_server(this->sslServeR) << logger::endL;
     this->errorCode = SSL_accept(this->sslServeR);
-    logWorker << logger::red << "DEBUG: ssl is server: " << SSL_is_server(this->sslServeR) << logger::endL;
+    //logWorker << logger::red << "DEBUG: ssl is server: " << SSL_is_server(this->sslServeR) << logger::endL;
     this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1)
     { if (this->errorCode == 0)
@@ -3113,7 +3112,8 @@ int WebWorker::ProcessChangePassword()
     << commentsOnFailure.str() << "</b></span>";
 
   stOutput << "<span style=\"color:green\"> <b>Password change successful. </b></span>";
-  //stOutput << "DEBUG: newpassword: " << newPassword;
+  //stOutput << "DEBUG: computed sha1salted, entered: " << theUser.actualShaonedSaltedPassword
+  //<< ", " << theUser.enteredShaonedSaltedPassword;
   stOutput
   << "<meta http-equiv=\"refresh\" content=\"0; url='"
   << theGlobalVariables.DisplayNameExecutable  << "?request=logout"

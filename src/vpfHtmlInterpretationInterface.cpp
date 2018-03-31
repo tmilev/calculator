@@ -1306,7 +1306,6 @@ std::string HtmlInterpretation::AddTeachersSections()
   for (int i = 0; i < theTeachers.size; i ++)
   { currentTeacher.reset();
     currentTeacher.username = theTeachers[i];
-    currentTeacher.currentTable = DatabaseStrings::tableUsers;
     if (!currentTeacher.LoadFromDB(&out, &out))
     { out << "<span style=\"color:red\">Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
       continue;
@@ -1676,7 +1675,6 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     << "<br>";
   }
   UserCalculator currentUser;
-  currentUser.currentTable = DatabaseStrings::tableUsers;
   int indexUser = - 1;
   int indexEmail = - 1;
   int indexActivationToken = - 1;
@@ -1695,8 +1693,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     if (columnLabels[i] == DatabaseStrings::labelCourseInfo)
       indexCourseInfo = i;
   }
-  if (
-      indexUser            == - 1 ||
+  if (indexUser            == - 1 ||
       indexEmail           == - 1 ||
       indexActivationToken == - 1 ||
       indexUserRole        == - 1 ||

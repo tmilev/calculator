@@ -205,7 +205,6 @@ void DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex
   std::cout << "and the error: " << query.theError.message << std::endl;
 }
 
-
 bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString
 (const std::string& collectionName, const std::string& findQuery,
  List<std::string>& output, int maxOutputItems,

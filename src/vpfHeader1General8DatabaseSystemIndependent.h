@@ -43,7 +43,6 @@ class UserCalculatorData
   std::string userId;
   std::string username;
   std::string email;
-  std::string currentTable;
   std::string actualActivationToken;
   std::string enteredActivationToken;
   std::string enteredAuthenticationToken;

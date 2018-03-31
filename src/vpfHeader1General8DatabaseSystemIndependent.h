@@ -67,7 +67,7 @@ class UserCalculatorData
   bool LoadFromJSON(JSData& input);
   JSData ToJSON();
   UserCalculatorData();
-  bool ComputeCourseInfo(std::stringstream* errorStream);
+  bool ComputeCourseInfo();
   void reset();
   void clearPasswordFromMemory();
   void clearAuthenticationTokenAndPassword();

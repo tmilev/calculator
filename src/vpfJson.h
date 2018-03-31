@@ -58,6 +58,7 @@ public:
   void operator=(int other);
   void operator=(const double other);
   void operator=(const std::string& other);
+  void operator=(const char* other);
   JSData& operator[](int i);
   JSData& operator[](const std::string& s);
   JSData GetValue(const std::string& key);
@@ -69,6 +70,10 @@ public:
   }
   JSData(const JSData& other)
   { this->operator=(other);
+  }
+  JSData(const char* other)
+  { this->reset();
+    this->operator =(other);
   }
   JSData(char other)
   { this->reset(other);

@@ -21,6 +21,8 @@ DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo()
   database = mongoc_client_get_database(databaseClient, DatabaseStrings::theDatabaseNameMongo.c_str());
   DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUsername);
   DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail);
+  DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelInstructor);
+  DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUserRole);
 #endif
 }
 
@@ -139,9 +141,9 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
   this->updateResult = bson_new();
   if (!mongoc_collection_update_one
       (theCollection.collection, this->query, this->update,
-      this->options,
-      this->updateResult,
-      &this->theError))
+       this->options,
+       this->updateResult,
+       &this->theError))
   { if (commentsOnFailure != 0)
       *commentsOnFailure << this->theError.message;
     logWorker << logger::red << "Mongo error: " << this->theError.message << logger::endL;
@@ -245,6 +247,23 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
   return false;
 #endif
 }
+
+bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
+(const std::string& collectionName, const JSData& findQuery,
+ List<JSData>& output, int maxOutputItems,
+ long long* totalItems, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON");
+  List<std::string> outputsStringFormat;
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(collectionName, findQuery, outputsStringFormat, maxOutputItems, totalItems, commentsOnFailure))
+    return false;
+  //stOutput << "DEBUG: Find query: " << findQuery.ToString();
+  output.SetSize(outputsStringFormat.size);
+  for (int i = 0; i < outputsStringFormat.size; i ++)
+    if (!output[i].readstring(outputsStringFormat[i], commentsOnFailure))
+      return false;
+  return true;
+}
+
 
 bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
 (const std::string& collectionName, const JSData& findQuery,

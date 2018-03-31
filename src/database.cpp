@@ -428,7 +428,7 @@ JSData UserCalculatorData::ToJSON()
   return result;
 }
 
-bool UserCalculatorData::ComputeCourseInfo(std::stringstream* errorStream)
+bool UserCalculatorData::ComputeCourseInfo()
 { MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
   bool isAdmin = (this->userRole == "admin" && this->username == theGlobalVariables.userDefault.username);
   if (theGlobalVariables.UserStudentVieWOn() && isAdmin &&
@@ -1316,8 +1316,8 @@ bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOn
 }
 
 std::string UserCalculator::GetActivationAddressFromActivationToken
-  (const std::string& theActivationToken, const std::string& calculatorBase,
-   const std::string& inputUserNameUnsafe, const std::string& inputEmailUnsafe)
+(const std::string& theActivationToken, const std::string& calculatorBase,
+ const std::string& inputUserNameUnsafe, const std::string& inputEmailUnsafe)
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationLinkFromActivationToken");
   std::stringstream out;
   if (MathRoutines::StringBeginsWith(calculatorBase, "localhost"))
@@ -1333,18 +1333,6 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
     out << "&email=" << HtmlRoutines::ConvertStringToURLString(inputEmailUnsafe, false);
   out << "&activationToken=" << HtmlRoutines::ConvertStringToURLString(theActivationToken, false);
   return out.str();
-}
-
-bool DatabaseRoutineS::PrepareClassData
-(const std::string& classFileName, List<List<std::string> >& outputUserTable,
- List<std::string>& outputLabelsUserTable, std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("CalculatorHTML::PrepareClassData");
-  (void) classFileName;
-  (void) outputUserTable;
-  (void) outputLabelsUserTable;
-  (void) commentsOnFailure;
-  commentsOnFailure << "Not implemented yet";
-  return false;
 }
 
 #endif

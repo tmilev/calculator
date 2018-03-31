@@ -7439,7 +7439,7 @@ std::string QuasiPolynomial::ToString(bool useHtml, bool useLatex, FormatExpress
     }
     out << this->valueOnEachLatticeShift[i].ToString(thePolyFormat);
     if (useLatex)
-    { if(!useHtml)
+    { if (!useHtml)
         out << "\\end{array}$";
       else
         out << "</span>";
@@ -7523,7 +7523,7 @@ void QuasiPolynomial::MakeFromPolyShiftAndLattice
 
 bool Lattice::ReduceVector(Vector<Rational>& theVector)const
 { Vector<Rational> output;
-  if(theVector.size != this->GetDim())
+  if (theVector.size != this->GetDim())
     crash << crash;
   Vectors<Rational> basisRoots;
   basisRoots.AssignMatrixRows(this->basisRationalForm);

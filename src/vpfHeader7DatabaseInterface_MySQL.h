@@ -303,10 +303,6 @@ public:
   (const std::string& emailList, const std::string& userPasswords,
    std::string& userRole, std::string& userGroup,
    std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers);
-  static bool PrepareClassData
-  (const std::string& classFileName, List<List<std::string> >& outputUserTable,
-   List<std::string>& outputLabelsUserTable, std::stringstream& commentsOnFailure);
-
 };
 
 #endif // MACRO_use_MySQL

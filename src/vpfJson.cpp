@@ -23,6 +23,11 @@ void JSData::operator=(const double other)
   this->number = other;
 }
 
+void JSData::operator=(const char* other)
+{ std::string otherString(other);
+  this->operator =(otherString);
+}
+
 void JSData::operator=(const std::string& other)
 { this->reset();
   this->type = this->JSstring;

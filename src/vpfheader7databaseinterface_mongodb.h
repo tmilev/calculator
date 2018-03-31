@@ -17,6 +17,10 @@ public:
   (const std::string& collectionName, const JSData& findQuery,
    List<std::string>& output, int maxOutputItems = -1,
    long long* totalItems = 0, std::stringstream* commentsOnFailure = 0);
+  static bool FindFromJSON
+  (const std::string& collectionName, const JSData& findQuery,
+   List<JSData>& output, int maxOutputItems = -1,
+   long long* totalItems = 0, std::stringstream* commentsOnFailure = 0);
   static bool FindOneFromJSON
   (const std::string& collectionName, const JSData& findQuery,
    std::string& output, std::stringstream* commentsOnFailure = 0);

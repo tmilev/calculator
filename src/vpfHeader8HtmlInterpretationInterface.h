@@ -37,7 +37,7 @@ public:
   static std::string GetExamPageInterpreter();
   static std::string GetAnswerOnGiveUp();
   static std::string GetAnswerOnGiveUp
-  (const std::string& inputRandomSeed, std::string* outputNakedAnswer=0, bool* outputDidSucceed=0);
+  (const std::string& inputRandomSeed, std::string* outputNakedAnswer = 0, bool* outputDidSucceed = 0);
   static std::string GetSelectCourse();
   static std::string GetSelectCourseJSON();
   static std::string GetScoresPage();
@@ -51,21 +51,15 @@ public:
   static std::string GetAccountsPageBody(const std::string& hostWebAddressWithPort);
   static std::string ToStringAssignSection();
   static std::string ToStringUserDetails
-  (bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& columnLabels,
-   const std::string& hostWebAddressWithPort);
+  (bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort);
   static std::string ToStringUserScores();
   static std::string ToStringUserDetailsTable
-  (bool adminsOnly, List<List<std::string> >& userTable, List<std::string>& columnLabels,
-   const std::string& hostWebAddressWithPort);
+  (bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort);
   static std::string ToStringCalculatorArgumentsHumanReadable();
   static std::string GetSanitizedComment
-  (const Expression& input,
-  FormatExpressions& theFormat, bool& resultIsPlot);
+  (const Expression& input, FormatExpressions& theFormat, bool& resultIsPlot);
   static std::string GetCommentsInterpretation
-  (Calculator& theInterpreterWithAdvice,
-   int indexShift, FormatExpressions& theFormat)
-
-  ;
+  (Calculator& theInterpreterWithAdvice, int indexShift, FormatExpressions& theFormat);
   static std::string ToStringNavigation();
 };
 

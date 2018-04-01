@@ -2852,8 +2852,10 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
     return out.str();
   }
   usernameAssociatedWithToken = emailInfo[DatabaseStrings::labelUsernameAssociatedWithToken].string;
+  actualEmailActivationToken = emailInfo[DatabaseStrings::labelActivationToken].string;
   if (actualEmailActivationToken != claimedActivationToken)
-  { out << "\n<span style=\"color:red\"><b>Bad activation token: could not activate your email. </b></span>";
+  { out << "\n<span style=\"color:red\"><b>Bad activation token. Could not activate your email. </b></span>";
+    out << "DEBUG: actual token: " << actualEmailActivationToken << ". Claimed token: " << claimedActivationToken;
     return out.str();
   }
   if (usernameAssociatedWithToken != theGlobalVariables.userDefault.username)
@@ -2986,8 +2988,7 @@ std::string WebWorker::GetChangePasswordPage()
 }
 
 bool WebWorker::DoSetEmail
-(UserCalculatorData& inputOutputUser,
- std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive,
+(UserCalculatorData& inputOutputUser, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive,
  std::stringstream* commentsGeneralSensitive)
 { MacroRegisterFunctionWithName("WebWorker::DoSetEmail");
 #ifdef MACRO_use_MySQL

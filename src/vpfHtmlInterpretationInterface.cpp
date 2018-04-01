@@ -1373,7 +1373,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
       out << "<span style=\"color:red\">Failed to send all activation emails. </span>";
   }
 //  bool usersAreAdmins = (userRole == "admin");
-  out << "<b>Further comments missing</b>";
+  //out << "<b>Further comments missing</b>";
   return out.str();
 #else
   return "<b>no database present.</b>";

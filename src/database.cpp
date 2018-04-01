@@ -588,10 +588,8 @@ std::string UserCalculator::GetSelectedRowEntry(const std::string& theKey)
 }
 
 bool DatabaseRoutineS::SendActivationEmail
-(const std::string& emailList,
- std::stringstream* commentsOnFailure,
- std::stringstream* commentsGeneral,
- std::stringstream* commentsGeneralSensitive)
+(const std::string& emailList, std::stringstream* commentsOnFailure,
+ std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive)
 { MacroRegisterFunctionWithName("DatabaseRoutines::SendActivationEmail");
   List<std::string> theEmails;
   MathRoutines::StringSplitDefaultDelimiters(emailList, theEmails);
@@ -602,10 +600,8 @@ bool DatabaseRoutineS::SendActivationEmail
 bool UserCalculator::ComputeAndStoreActivationStats
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("UserCalculator::ComputeAndStoreActivationStats");
-  std::string activationAddress =
-  this->GetActivationAddressFromActivationToken
-  (this->actualActivationToken, theGlobalVariables.hostWithPort,
-   this->username, this->email);
+  std::string activationAddress = this->GetActivationAddressFromActivationToken
+  (this->actualActivationToken, theGlobalVariables.hostWithPort, this->username, this->email);
   JSData findQuery, emailStatQuery;
   findQuery[DatabaseStrings::labelEmail] = this->email;
   DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON

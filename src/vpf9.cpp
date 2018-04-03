@@ -1419,7 +1419,7 @@ void MathRoutines::StringTrimToLengthWithHash(std::string& inputOutput, int desi
   inputOutput = inputAbbreviatedStream.str();
 }
 
-std::string MathRoutines::StringTrimToLengthForDisplay(std::string& input, int desiredLength20AtLeast)
+std::string MathRoutines::StringTrimToLengthForDisplay(const std::string& input, int desiredLength20AtLeast)
 { if (desiredLength20AtLeast < 20)
     desiredLength20AtLeast = 20;
   if (((signed) input.size()) <= desiredLength20AtLeast)
@@ -8299,7 +8299,7 @@ void Lattice::WriteToFile(std::fstream& output)
 bool Lattice::ReadFromFile(std::fstream& input)
 { int numReadWords;
   XML::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
-  bool result=this->basisRationalForm.ReadFromFile(input);
+  bool result = this->basisRationalForm.ReadFromFile(input);
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
   XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
   if(numReadWords != 0)
@@ -8376,7 +8376,7 @@ bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable(Polynomial<Rational>& 
 }
 
 bool Cone::SolveLPolyEqualsZeroIAmProjective
-(Polynomial<Rational> & inputLPoly, Cone& outputCone)
+(Polynomial<Rational>& inputLPoly, Cone& outputCone)
 { Vector<Rational> theNormal;
   if (!this->GetRootFromLPolyConstantTermGoesToLastVariable(inputLPoly, theNormal))
     return false;
@@ -8393,13 +8393,44 @@ bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective
   return result;
 }
 
-std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::string> >& content)
+std::string HtmlRoutines::ToHtmlTableRowsFromStringContainingJSON(const std::string& theJSON)
+{ MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromStringContainingJSON");
+  JSData parser;
+  if (!parser.readstring(theJSON, false))
+    return MathRoutines::StringTrimToLengthForDisplay(theJSON, 1000);
+  return HtmlRoutines::ToHtmlTableRowsFromJSON(parser);
+}
+
+std::string HtmlRoutines::ToHtmlTableRowsFromJSON(const JSData& input)
+{ MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromJSON");
+  if (input.type == JSData::JSObject)
+  { std::stringstream out;
+    out << "<table>";
+    for (int i = 0; i < input.objects.size(); i ++)
+      out << "<tr><td>" << input.objects.theKeys[i] << "</td>" << "<td>"
+      << HtmlRoutines::ToHtmlTableRowsFromJSON(input.objects.theValues[i]) << "</td>" << "</tr>";
+    out << "</table>";
+    return out.str();
+  }
+  if (input.type == JSData::JSarray)
+  { std::stringstream out;
+    out << "<table>";
+    for (int i = 0; i < input.objects.size(); i ++)
+      out << "<tr>" << "<td>"
+      << HtmlRoutines::ToHtmlTableRowsFromJSON(input.objects.theValues[i]) << "</td>" << "</tr>";
+    out << "</table>";
+    return out.str();
+  }
+  return input.ToString(false);
+}
+
+std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::string> >& content, bool nestTables)
 { MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTable");
   std::stringstream out;
   out << "<table>";
   out << "<tr>";
   for (int i = 0; i < labels.size; i ++)
-    out << "<th>" << MathRoutines::StringTrimToLengthForDisplay(labels[i], 60) << "</th>";
+    out << "<th>" << MathRoutines::StringTrimToLengthForDisplay(labels[i], 1000) << "</th>";
   out << "</tr>";
   for (int i = 0; i < content.size; i ++)
   { out << "<tr>";
@@ -8407,7 +8438,10 @@ std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::
       crash << "Error: while composing table, got " << labels.size << " labels but row index " << i
       << " has " << content[i].size << " elements. " << crash;
     for (int j = 0; j < content[i].size; j ++)
-      out << "<td>" << MathRoutines::StringTrimToLengthForDisplay(content[i][j], 60) << "</td>";
+      if (! nestTables)
+        out << "<td>" << MathRoutines::StringTrimToLengthForDisplay(content[i][j], 1000) << "</td>";
+      else
+        out << "<td>" << HtmlRoutines::ToHtmlTableRowsFromStringContainingJSON(content[i][j]) << "</td>";
     out << "</tr>";
   }
   out << "</table>";
@@ -8479,11 +8513,26 @@ std::string HtmlRoutines::ConvertStringToURLString(const std::string& input, boo
   return out.str();
 }
 
+std::string HtmlRoutines::ConvertStringToURLStringIncludingDots(const std::string& input, bool usePlusesForSpacebars)
+{ std::stringstream out;
+  for (unsigned int i = 0; i < input.size(); i ++)
+    if (HtmlRoutines::IsRepresentedByItselfInURLs(input[i]) && input[i] != '.')
+      out << input[i];
+    else if (input[i] == ' ' && usePlusesForSpacebars)
+      out << '+';
+    else
+    { out << "%";
+      int x = (char) input[i];
+      out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
+    }
+  return out.str();
+}
+
 Vector<Rational> oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(int NumVars)
 { Vector<Rational> output;
   output.SetSize(NumVars);
-  for (int i=0; i<NumVars; i++)
-    output[i]=i+2;
+  for (int i = 0; i < NumVars; i ++)
+    output[i] = i + 2;
   return output;
 }
 
@@ -8593,11 +8642,10 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
 { this->initFromModuleDecomposition(decompositionDimensions, false, false);
   SelectionWithMaxMultiplicity theSel;
   theSel.initMaxMultiplicity(this->theDimension, theDegree);
-  FormatExpressions PolyFormatLocal;
-  outputError="";
-  int numCycles=theSel.NumCombinationsOfCardinality(theDegree);
-  if (numCycles<=0)
-  { outputError= " Computation too large. ";
+  outputError = "";
+  int numCycles = theSel.NumCombinationsOfCardinality(theDegree);
+  if (numCycles <= 0)
+  { outputError = " Computation too large. ";
     return false;
   }
   Polynomial<Rational> basisMonsZeroWeight, basisMonsAll;
@@ -8611,14 +8659,14 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
   Vector<Rational> theCartanAction;
   theCartanAction.SetSize(this->theDimension);
   theWeight.SetSize(this->theDimension);
-  for (int j=0; j<this->theDimension; j++)
-    theCartanAction[j]=this->theH.elements[j][j];
+  for (int j = 0; j < this->theDimension; j ++)
+    theCartanAction[j] = this->theH.elements[j][j];
   theSel.IncrementSubsetFixedCardinality(theDegree);
-  Rational theMonCoeff=1;
-  for (int i=0; i<numCycles; i++, theSel.IncrementSubsetFixedCardinality(theDegree))
-  { for (int j=0; j<this->theDimension; j++)
-    { theMon[j]=theSel.Multiplicities[j];
-      theWeight[j]=theMon[j];
+  Rational theMonCoeff = 1;
+  for (int i = 0; i < numCycles; i ++, theSel.IncrementSubsetFixedCardinality(theDegree))
+  { for (int j = 0; j < this->theDimension; j ++)
+    { theMon[j] = theSel.Multiplicities[j];
+      theWeight[j] = theMon[j];
     }
     basisMonsAll.AddMonomial(theMon, theMonCoeff);
     if (theWeight.ScalarEuclidean(theCartanAction).IsEqualToZero())
@@ -8626,22 +8674,22 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
   }
 //  stOutput << "<br>Num cycles:" << numCycles << "<br>The basis mons (there are " << basisMonsZeroWeight.size << " of them): "  << basisMonsZeroWeight.ToString(PolyFormatLocal);
   Matrix<Rational> tempMat;
-  tempMat.init(basisMonsAll.size()*2, basisMonsZeroWeight.size());
+  tempMat.init(basisMonsAll.size() * 2, basisMonsZeroWeight.size());
 //  tempMat.init(basisMonsAll.size*numGenerators, basisMonsZeroWeight.size);
   Polynomial<Rational>  tempP;
-  for (int l=0; l<2; l++)
-    for (int k=0; k<basisMonsZeroWeight.size(); k++)
-    { if (l==0)
+  for (int l = 0; l < 2; l ++)
+    for (int k = 0; k < basisMonsZeroWeight.size(); k ++)
+    { if (l == 0)
         this->theE.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
       else
         this->theF.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
-      for (int j=0; j<basisMonsAll.size(); j++)
-      { int indexInResult=tempP.theMonomials.GetIndex(basisMonsAll[j]);
-        int currentRow=l*basisMonsAll.size()+j;
-        if (indexInResult==-1)
-          tempMat.elements[currentRow][k]=0;
+      for (int j = 0; j < basisMonsAll.size(); j ++)
+      { int indexInResult = tempP.theMonomials.GetIndex(basisMonsAll[j]);
+        int currentRow = l * basisMonsAll.size() + j;
+        if (indexInResult == - 1)
+          tempMat.elements[currentRow][k] = 0;
         else
-          tempMat.elements[currentRow][k]=tempP.theCoeffs[indexInResult];
+          tempMat.elements[currentRow][k] = tempP.theCoeffs[indexInResult];
       }
     }
 //  if (tempMat.NumRows<120)
@@ -8651,12 +8699,12 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
   output.SetSize(tempRoots.size);
 //  stOutput << "<br>invariants Vector<Rational> form: " << tempRoots.ToString();
 //  stOutput << "<br> .... and the invariants are: ";
-  for (int i=0; i<output.size; i++)
-  { Polynomial<Rational>& current=output[i];
+  for (int i = 0; i < output.size; i ++)
+  { Polynomial<Rational>& current = output[i];
     current.MakeZero();
-    for (int j=0; j<basisMonsZeroWeight.size(); j++)
+    for (int j = 0; j < basisMonsZeroWeight.size(); j ++)
       if (!tempRoots[i][j].IsEqualToZero())
-      { theMon=(basisMonsZeroWeight[j]);
+      { theMon = basisMonsZeroWeight[j];
         current.AddMonomial(theMon, tempRoots[i][j]);
       }
  //   stOutput << "<br>Invariant " << i << ":<br>" << current.ToString(PolyFormatLocal);
@@ -8666,32 +8714,32 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
 
 std::string DrawingVariables::GetColorPsTricksFromColorIndex(int colorIndex)
 { std::stringstream out;
-  int r=(colorIndex/65536)%256;
-  int g=(colorIndex/256)%256;
-  int b=colorIndex%256;
-  out << "\\\\newrgbcolor{currentColor}{" <<((double) r)/255 << ", " << ((double) g)/255 << ", " << ((double) b)/255 << "}";
+  int r = (colorIndex / 65536) % 256;
+  int g = (colorIndex / 256) % 256;
+  int b = colorIndex % 256;
+  out << "\\\\newrgbcolor{currentColor}{" << ((double) r) / 255 << ", " << ((double) g) / 255 << ", " << ((double) b) / 255 << "}";
   return out.str();
 }
 
 bool DrawingVariables::GetColorIntFromColorString(const std::string& input, int& output)
-{ if (input=="blue")
-  { output= HtmlRoutines::RedGreenBlue(0,0,255);
+{ if (input == "blue")
+  { output = HtmlRoutines::RedGreenBlue(0, 0, 255);
     return true;
   }
-  if (input=="green")
-  { output= HtmlRoutines::RedGreenBlue(0,255,0);
+  if (input == "green")
+  { output = HtmlRoutines::RedGreenBlue(0, 255, 0);
     return true;
   }
-  if (input=="red")
-  { output= HtmlRoutines::RedGreenBlue(255,0,0);
+  if (input == "red")
+  { output = HtmlRoutines::RedGreenBlue(255, 0, 0);
     return true;
   }
-  if (input=="cyan")
-  { output= HtmlRoutines::RedGreenBlue(0,255,255);
+  if (input == "cyan")
+  { output = HtmlRoutines::RedGreenBlue(0, 255, 255);
     return true;
   }
-  if (input=="orange")
-  { output= HtmlRoutines::RedGreenBlue(255,127,0);
+  if (input == "orange")
+  { output = HtmlRoutines::RedGreenBlue(255, 127, 0);
     return true;
   }
   return false;
@@ -8699,17 +8747,17 @@ bool DrawingVariables::GetColorIntFromColorString(const std::string& input, int&
 
 std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex)
 { std::stringstream out;
-  int r=(colorIndex/65536)%256;
-  int g=(colorIndex/256)%256;
-  int b=colorIndex%256;
+  int r= (colorIndex / 65536) % 256;
+  int g= (colorIndex / 256) % 256;
+  int b= colorIndex % 256;
   out << "#";
-  if (r<16)
+  if (r < 16)
     out << 0;
   out << std::hex << r;
-  if (g<16)
+  if (g < 16)
     out << 0;
   out << std::hex << g;
-  if (b<16)
+  if (b < 16)
     out << 0;
   out << std::hex << b;
   return out.str();
@@ -8723,56 +8771,56 @@ std::string ConeLatticeAndShift::ToString(FormatExpressions& theFormat)
 }
 
 void DrawOperations::MakeMeAStandardBasis(int theDim)
-{ if (theDim<1)
+{ if (theDim < 1)
     return;
-  if (theDim>3)
+  if (theDim > 3)
   { this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
-    for (int i=0; i<theDim; i++)
-    { this->ProjectionsEiVectors[i][0]=FloatingPoint::sin((double)i/(double)theDim* MathRoutines::Pi());
-      this->ProjectionsEiVectors[i][1]=FloatingPoint::cos((double)i/(double)theDim* MathRoutines::Pi());
+    for (int i = 0; i < theDim; i ++)
+    { this->ProjectionsEiVectors[i][0] = FloatingPoint::sin((double) i / (double) theDim * MathRoutines::Pi());
+      this->ProjectionsEiVectors[i][1] = FloatingPoint::cos((double) i / (double) theDim * MathRoutines::Pi());
     }
-  } else if (theDim==3)
+  } else if (theDim == 3)
   { this->ProjectionsEiVectors.SetSizeMakeMatrix(3, 2);
-    this->ProjectionsEiVectors[0][0]=1;
-    this->ProjectionsEiVectors[0][1]=-0.2;
-    this->ProjectionsEiVectors[1][0]=0.1;
-    this->ProjectionsEiVectors[1][1]=1;
-    this->ProjectionsEiVectors[2][0]=0.01;
-    this->ProjectionsEiVectors[2][1]=0.01;
+    this->ProjectionsEiVectors[0][0] = 1;
+    this->ProjectionsEiVectors[0][1] = - 0.2;
+    this->ProjectionsEiVectors[1][0] = 0.1;
+    this->ProjectionsEiVectors[1][1] = 1;
+    this->ProjectionsEiVectors[2][0] = 0.01;
+    this->ProjectionsEiVectors[2][1] = 0.01;
   } else //if (theDim==2)
   { this->ProjectionsEiVectors.SetSizeMakeMatrix(2, 2);
-    this->ProjectionsEiVectors[0][0]=1;
-    this->ProjectionsEiVectors[0][1]=0;
-    this->ProjectionsEiVectors[1][0]=0;
-    this->ProjectionsEiVectors[1][1]=-1;
+    this->ProjectionsEiVectors[0][0] = 1;
+    this->ProjectionsEiVectors[0][1] = 0;
+    this->ProjectionsEiVectors[1][0] = 0;
+    this->ProjectionsEiVectors[1][1] = - 1;
   }
-  if (this->BasisProjectionPlane.size<1)
+  if (this->BasisProjectionPlane.size < 1)
     this->BasisProjectionPlane.SetSize(1);
   this->BasisProjectionPlane[0].MakeEiBasis(theDim);
   this->BasisProjectionPlane[0].SetSize(2);
-  if (theDim!=3)
-  { for (int i=0; i<this->BasisProjectionPlane[0][1].size; i++)
-      this->BasisProjectionPlane[0][1][i]=2*i+1;
-    for (int i=0; i<this->BasisProjectionPlane[0][0].size; i++)
-      this->BasisProjectionPlane[0][0][i]=3*i+2;
-  } else if (theDim==3) //<-if not needed but good for documentation purposes
-  { this->BasisProjectionPlane[0][0][0]=0.6;
-    this->BasisProjectionPlane[0][0][1]=0.4;
-    this->BasisProjectionPlane[0][0][2]=0;
-    this->BasisProjectionPlane[0][1][0]=-0.4;
-    this->BasisProjectionPlane[0][1][1]=0.6;
-    this->BasisProjectionPlane[0][1][2]=1;
+  if (theDim != 3)
+  { for (int i = 0; i < this->BasisProjectionPlane[0][1].size; i ++)
+      this->BasisProjectionPlane[0][1][i] = 2 * i + 1;
+    for (int i = 0; i < this->BasisProjectionPlane[0][0].size; i ++)
+      this->BasisProjectionPlane[0][0][i] = 3 * i + 2;
+  } else if (theDim == 3) //<-if not needed but good for documentation purposes
+  { this->BasisProjectionPlane[0][0][0] = 0.6;
+    this->BasisProjectionPlane[0][0][1] = 0.4;
+    this->BasisProjectionPlane[0][0][2] = 0;
+    this->BasisProjectionPlane[0][1][0] = - 0.4;
+    this->BasisProjectionPlane[0][1][1] = 0.6;
+    this->BasisProjectionPlane[0][1][2] = 1;
   }
 
-  if (this->theBilinearForm.NumRows!=theDim)
+  if (this->theBilinearForm.NumRows != theDim)
     this->theBilinearForm.MakeIdMatrix(theDim, 1, 0);
 }
 
 std::string ConeComplex::DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
-{ bool isBad=false;
-  isBad=this->DrawMeLastCoordAffine(true, theDrawingVariables, theFormat);
+{ bool isBad = false;
+  isBad = this->DrawMeLastCoordAffine(true, theDrawingVariables, theFormat);
   std::stringstream out;
-  out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
+  out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim() - 1);
   if (isBad)
     out << "<hr>" << "found cones which I can't draw<hr>";
   out << this->ToString(true);
@@ -8785,8 +8833,8 @@ std::string ConeComplex::DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawin
 
 std::string ConeComplex::DrawMeToHtmlProjective
 (DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
-{ bool isGood=true;
-  isGood=this->DrawMeProjective(0, true, theDrawingVariables, theFormat);
+{ bool isGood = true;
+  isGood = this->DrawMeProjective(0, true, theDrawingVariables, theFormat);
   std::stringstream out;
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
   if (!isGood)
@@ -8801,20 +8849,20 @@ std::string ConeComplex::DrawMeToHtmlProjective
 
 bool ConeComplex::DrawMeLastCoordAffine
 (bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
-{ bool result=true;
+{ bool result = true;
   if (InitDrawVars)
-    theDrawingVariables.theBuffer.initDimensions(this->GetDim()-1, 1);
+    theDrawingVariables.theBuffer.initDimensions(this->GetDim() - 1, 1);
 
-  theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim()-1);
-  for (int i=0; i<this->size; i++)
+  theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim() - 1);
+  for (int i = 0; i < this->size; i ++)
   { //theDrawingVariables.theBuffer.init();
-    result=this->TheObjects[i].DrawMeLastCoordAffine(InitDrawVars, theDrawingVariables, theFormat) && result;
+    result = this->TheObjects[i].DrawMeLastCoordAffine(InitDrawVars, theDrawingVariables, theFormat) && result;
     std::stringstream tempStream;
-    tempStream << i+1;
-    Vector<Rational> tempRoot=this->TheObjects[i].GetInternalPoint();
+    tempStream << i + 1;
+    Vector<Rational> tempRoot = this->TheObjects[i].GetInternalPoint();
     tempRoot.MakeAffineUsingLastCoordinate();
     theDrawingVariables.drawTextAtVectorBufferRational
-    (tempRoot, tempStream.str(), HtmlRoutines::RedGreenBlue(0,0,0), theDrawingVariables.PenStyleNormal);
+    (tempRoot, tempStream.str(), HtmlRoutines::RedGreenBlue(0, 0, 0), theDrawingVariables.PenStyleNormal);
     //stOutput <<"<hr> drawing number " << i+1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
   }
   return result;
@@ -8822,70 +8870,66 @@ bool ConeComplex::DrawMeLastCoordAffine
 
 bool ConeComplex::DrawMeProjective
 (Vector<Rational>* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
-{ bool result=true;
+{ bool result = true;
   Vector<Rational> tempRoot;
   Vectors<Rational> tempRoots;
-  Matrix<Rational>  tempMat;
-  if (this->GetDim()<=1)
+  Matrix<Rational> tempMat;
+  if (this->GetDim() <= 1)
     return false;
   if (InitDrawVars)
   { theDrawingVariables.theBuffer.init();
     theDrawingVariables.theBuffer.initDimensions(this->GetDim(), 1);
     theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
     theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim());
-    if (this->GetDim()>2)
+    if (this->GetDim() > 2)
     { this->ConvexHull.GetInternalPoint(tempRoot);
       tempMat.AssignVectorRow(tempRoot);
       tempMat.GetZeroEigenSpace(tempRoots);
-      for (int i=0; i<2; i++)
-        for (int j=0; j<this->GetDim(); j++)
-          theDrawingVariables.theBuffer.BasisProjectionPlane[0][i][j]=tempRoots[i][j].GetDoubleValue();
+      for (int i = 0; i < 2; i ++)
+        for (int j = 0; j < this->GetDim(); j ++)
+          theDrawingVariables.theBuffer.BasisProjectionPlane[0][i][j] = tempRoots[i][j].GetDoubleValue();
     }
   }
-  for (int i=0; i<this->size; i++)
+  for (int i = 0; i < this->size; i ++)
   { //theDrawingVariables.theBuffer.init();
-    result=((*this)[i].DrawMeProjective(coordCenterTranslation, false, theDrawingVariables, theFormat) && result);
+    result = ((*this)[i].DrawMeProjective(coordCenterTranslation, false, theDrawingVariables, theFormat) && result);
     //stOutput <<"<hr> drawing number " << i+1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
   }
   return result;
 }
 
 bool Cone::DrawMeLastCoordAffine
-(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat,
- int ChamberWallColor)const
+(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat, int ChamberWallColor)const
 { (void) theFormat; //avoid unused parameter warning, portable.
   Vector<Rational> ZeroRoot;
-  ZeroRoot.MakeZero(this->GetDim()-1);
+  ZeroRoot.MakeZero(this->GetDim() - 1);
   Vectors<Rational> VerticesScaled;
 //  VerticesScaled.Reserve(this->Vertices.size*2);
-  VerticesScaled=this->Vertices;
+  VerticesScaled = this->Vertices;
   Rational tempRat;
   List<bool> DrawVertex;
   DrawVertex.initFillInObject(this->Vertices.size, true);
-  bool foundBadVertex=false;
-
-  for (int i=0; i<this->Vertices.size; i++)
-  { tempRat=*VerticesScaled[i].LastObject();
-    VerticesScaled[i].SetSize(this->GetDim()-1);
+  bool foundBadVertex = false;
+  for (int i = 0; i < this->Vertices.size; i ++)
+  { tempRat = *VerticesScaled[i].LastObject();
+    VerticesScaled[i].SetSize(this->GetDim() - 1);
     if (tempRat.IsPositive())
-      VerticesScaled[i]/=tempRat;
+      VerticesScaled[i] /= tempRat;
     if (tempRat.IsEqualToZero())
-    { VerticesScaled[i]*=10000;
-    }
+      VerticesScaled[i] *= 10000;
     if (tempRat.IsNegative())
-    { DrawVertex[i]=false;
-      foundBadVertex=true;
+    { DrawVertex[i] = false;
+      foundBadVertex = true;
     }
   }
-  Vector<Rational> iScaledVertex, jScaledVertex;
   if (InitDrawVars)
-    theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim()-1);
-  for (int k=0; k<this->Normals.size; k++)
-    for (int i=0; i<VerticesScaled.size; i++)
+    theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim() - 1);
+  for (int k = 0; k < this->Normals.size; k ++)
+    for (int i = 0; i < VerticesScaled.size; i ++)
       if (DrawVertex[i] && this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
-        for (int j=i+1; j<VerticesScaled.size; j++)
-          if(DrawVertex[j] && this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
-            if (this->IsAnHonest1DEdgeAffine(i,j))
+        for (int j = i + 1; j < VerticesScaled.size; j ++)
+          if (DrawVertex[j] && this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
+            if (this->IsAnHonest1DEdgeAffine(i, j))
             { /*bool iVertexLiesAtInfinity=this->Vertices[i].LastObject()->IsEqualToZero();
               bool jVertexLiesAtInfinity=this->Vertices[j].LastObject()->IsEqualToZero();
               if (iVertexLiesAtInfinity || jVertexLiesAtInfinity)
@@ -8907,18 +8951,18 @@ bool Cone::DrawMeLastCoordAffine
 std::string Cone::DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 { if (this->flagIsTheZeroCone)
     return "The cone is empty.";
-  if (this->Normals.size<1)
+  if (this->Normals.size < 1)
     return "The cone is the entire space";
-  if (this->Vertices.size<1)
+  if (this->Vertices.size < 1)
     return "The cone is empty";
   std::stringstream out;
-  theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim()-1);
-  bool foundBadVertex=this->DrawMeLastCoordAffine(false, theDrawingVariables, theFormat);
-  theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim()-1);
+  theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim() - 1);
+  bool foundBadVertex = this->DrawMeLastCoordAffine(false, theDrawingVariables, theFormat);
+  theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim() - 1);
   if (foundBadVertex)
     out << "<br>The cone does not lie in the upper half-space. ";
   else
-    out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
+    out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim() - 1);
   out << "<br>" << this->ToString(&theFormat);
   return out.str();
 }
@@ -8929,50 +8973,50 @@ bool Cone::DrawMeProjective
 { (void) theFormat;  //avoid unused parameter warning, portable.
   Vector<Rational> ZeroRoot, coordCenter;
   ZeroRoot.MakeZero(this->GetDim());
-  if (coordCenterTranslation==0)
-    coordCenter=ZeroRoot;
+  if (coordCenterTranslation == 0)
+    coordCenter = ZeroRoot;
   else
-    coordCenter=*coordCenterTranslation;
+    coordCenter = *coordCenterTranslation;
 //  theDrawingVariables.theBuffer.init();
-  Vectors<Rational> VerticesScaled=this->Vertices;
-  for (int i=0; i<VerticesScaled.size; i++)
-  { Rational sumAbsValuesCoords=0;
-    for (int j=0; j<this->GetDim(); j++)
-      sumAbsValuesCoords+=(VerticesScaled[i][j].IsPositive()) ? VerticesScaled[i][j] : -VerticesScaled[i][j];
-    if(sumAbsValuesCoords.IsEqualToZero())
+  Vectors<Rational> VerticesScaled = this->Vertices;
+  for (int i = 0; i < VerticesScaled.size; i ++)
+  { Rational sumAbsValuesCoords = 0;
+    for (int j = 0; j < this->GetDim(); j ++)
+      sumAbsValuesCoords += (VerticesScaled[i][j].IsPositive()) ? VerticesScaled[i][j] : - VerticesScaled[i][j];
+    if (sumAbsValuesCoords.IsEqualToZero())
       crash << crash;
-    VerticesScaled[i]/=sumAbsValuesCoords;
+    VerticesScaled[i] /= sumAbsValuesCoords;
   }
   Vector<Rational> tempRoot;
   if (initTheDrawVars)
   { theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
-    for (int i=0; i<this->GetDim(); i++)
+    for (int i = 0; i < this->GetDim(); i ++)
     { tempRoot.MakeEi(this->GetDim(), i);
       theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-      (ZeroRoot+coordCenter, tempRoot+coordCenter, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(205,205,205), 1);
+      (ZeroRoot + coordCenter, tempRoot + coordCenter, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(205, 205, 205), 1);
     }
   }
-  for (int i=0; i<this->Vertices.size; i++)
+  for (int i = 0; i < this->Vertices.size; i ++)
     theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-    (ZeroRoot+coordCenter, VerticesScaled[i]*10000+coordCenter, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(180,180,180), 1);
-  for (int k=0; k<this->Normals.size; k++)
-    for (int i=0; i<this->Vertices.size; i++)
+    (ZeroRoot + coordCenter, VerticesScaled[i] * 10000 + coordCenter, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(180, 180, 180), 1);
+  for (int k = 0; k < this->Normals.size; k ++)
+    for (int i = 0; i < this->Vertices.size; i ++)
       if (this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
-        for (int j=i+1; j<this->Vertices.size; j++)
-          if(this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
-            if (this->IsAnHonest1DEdgeAffine(i,j))
+        for (int j = i + 1; j < this->Vertices.size; j ++)
+          if (this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
+            if (this->IsAnHonest1DEdgeAffine(i, j))
               theDrawingVariables.drawLineBetweenTwoVectorsBufferRational
-              (VerticesScaled[i]+coordCenter, VerticesScaled[j]+coordCenter, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(0,0,0),1);
+              (VerticesScaled[i]+coordCenter, VerticesScaled[j] + coordCenter, theDrawingVariables.PenStyleNormal, HtmlRoutines::RedGreenBlue(0, 0, 0), 1);
   return true;
 }
 
 std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 { if (this->flagIsTheZeroCone)
     return "The cone is the zero cone (i.e. contains only the origin).";
-  if (this->Normals.size<=0)
+  if (this->Normals.size <= 0)
     return "The cone is the entire space.";
   std::stringstream out;
-  if (this->Vertices.size<1)
+  if (this->Vertices.size < 1)
   { out << "There has been a programming error. The cone is empty.<br>"
     << this->ToString(&theFormat);
     return out.str();
@@ -8999,7 +9043,7 @@ std::string HtmlRoutines::GetHtmlSpanHidableStartsHiddeN
   std::stringstream spanLabel;
   spanLabel << "hidableSpan" << desiredIdStart << HtmlRoutines::GlobalGeneralPurposeID;
   buttonLabel << "buttonHS" << HtmlRoutines::GlobalGeneralPurposeID;
-  out << HtmlRoutines::GetHtmlButton(buttonLabel.str(), "switchMenu('"+spanLabel.str() +"');", labelExpandButton);
+  out << HtmlRoutines::GetHtmlButton(buttonLabel.str(), "switchMenu('" + spanLabel.str() + "');", labelExpandButton);
   out << "<span";
   out << " id=\"" << spanLabel.str() << "\" style=\"display: none\">";
   out << input << "</span>";
@@ -9007,9 +9051,9 @@ std::string HtmlRoutines::GetHtmlSpanHidableStartsHiddeN
 }
 
 int DrawOperations::GetDimFirstDimensionDependentOperation()
-{ if (this->theDrawLineBetweenTwoRootsOperations.size>0)
+{ if (this->theDrawLineBetweenTwoRootsOperations.size > 0)
     return this->theDrawLineBetweenTwoRootsOperations[0].v1.size;
-  if (this->theDrawTextAtVectorOperations.size>0)
+  if (this->theDrawTextAtVectorOperations.size > 0)
     return this->theDrawTextAtVectorOperations[0].theVector.size;
   return 2;
 }
@@ -9019,13 +9063,13 @@ int DrawOperations::GetDimFromBilinearForm()
 }
 
 void DrawOperations::initDimensions(int theDim, int numAnimationFrames)
-{ if (theDim<2)
-    theDim=2;
+{ if (theDim < 2)
+    theDim = 2;
   this->theBilinearForm.MakeIdMatrix(theDim, 1, 0);
   this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
   Vectors<double> tempBasis;
   tempBasis.MakeEiBasis(theDim);
-  tempBasis.size=2;
+  tempBasis.size = 2;
 /*  for (int i=0; i<tempBasis[1].size; i++)
     tempBasis[1][i]=2*i+1;
   for (int i=0; i<tempBasis[0].size; i++)
@@ -9034,25 +9078,25 @@ void DrawOperations::initDimensions(int theDim, int numAnimationFrames)
 //  this->ModifyToOrthonormalNoShiftSecond(tempBasis[0], tempBasis[1]);
   this->BasisProjectionPlane.initFillInObject(numAnimationFrames, tempBasis);
   this->BasisToDrawCirclesAt.MakeEiBasis(theDim);
-  this->SelectedPlane=0;
-  this->SelectedCircleMinus2noneMinus1Center=-2;
+  this->SelectedPlane = 0;
+  this->SelectedCircleMinus2noneMinus1Center = - 2;
   this->centerX.initFillInObject(numAnimationFrames, 300);
   this->centerY.initFillInObject(numAnimationFrames, 300);
   this->GraphicsUnit.initFillInObject(numAnimationFrames, DrawOperations::GraphicsUnitDefault);
 }
 
 void DrawOperations::EnsureProperInitialization()
-{ int theDim=this->GetDimFirstDimensionDependentOperation();
-  bool isGood=(this->ProjectionsEiVectors.size==theDim && this->theBilinearForm.NumRows==theDim);
-  int numFrames=this->BasisProjectionPlane.size;
-  if (this->SelectedPlane>= this->BasisProjectionPlane.size)
-  { numFrames=this->SelectedPlane+1;
-    isGood=false;
+{ int theDim = this->GetDimFirstDimensionDependentOperation();
+  bool isGood = (this->ProjectionsEiVectors.size == theDim && this->theBilinearForm.NumRows == theDim);
+  int numFrames = this->BasisProjectionPlane.size;
+  if (this->SelectedPlane >= this->BasisProjectionPlane.size)
+  { numFrames = this->SelectedPlane + 1;
+    isGood = false;
   }
   if (isGood)
-    isGood=(this->BasisProjectionPlane[this->SelectedPlane].size==2);
+    isGood = (this->BasisProjectionPlane[this->SelectedPlane].size == 2);
   if (isGood)
-    isGood=(this->BasisProjectionPlane[this->SelectedPlane][0].size==theDim);
+    isGood = (this->BasisProjectionPlane[this->SelectedPlane][0].size == theDim);
   if (!isGood)
     this->initDimensions(theDim, numFrames);
 }
@@ -9063,26 +9107,26 @@ std::iostream& operator<< (std::iostream& output, const CompleX<Base>& input)
   { output << "0";
     return output;
   }
-  if (input.Re!=0)
+  if (input.Re != 0)
   { output << input.Re;
-    if (input.Im!=0)
+    if (input.Im != 0)
       output << " + ";
   }
-  if (input.Im!=0)
+  if (input.Im != 0)
     output << "i";
-  if (input.Im<0)
+  if (input.Im < 0)
     output << "(";
-  if (input.Im!=1)
+  if (input.Im != 1)
     output << input.Im;
-  if (input.Im<0)
+  if (input.Im < 0)
     output << ")";
   return output;
 }
 
 DrawFilledShapeOperation::DrawFilledShapeOperation()
-{ this->thePenStyle=DrawingVariables::PenStyleNormal;
-  this->ColorIndex=0;
-  this->lineWidth=1;
+{ this->thePenStyle = DrawingVariables::PenStyleNormal;
+  this->ColorIndex = 0;
+  this->lineWidth = 1;
 }
 
 void DrawOperations::init()
@@ -9091,35 +9135,35 @@ void DrawOperations::init()
   this->theDrawLineBetweenTwoRootsOperations.Reserve(10000);
   this->theDrawTextAtVectorOperations.Reserve(15);
   this->theDrawCircleAtVectorOperations.Reserve(280);
-  this->IndexNthDrawOperation.size=0;
-  this->TypeNthDrawOperation.size=0;
-  this->theDrawTextOperations.size=0;
-  this->theDrawLineOperations.size=0;
-  this->theDrawLineBetweenTwoRootsOperations.size=0;
-  this->theDrawTextAtVectorOperations.size=0;
-  this->theDrawCircleAtVectorOperations.size=0;
+  this->IndexNthDrawOperation.size = 0;
+  this->TypeNthDrawOperation.size = 0;
+  this->theDrawTextOperations.size = 0;
+  this->theDrawLineOperations.size = 0;
+  this->theDrawLineBetweenTwoRootsOperations.size = 0;
+  this->theDrawTextAtVectorOperations.size = 0;
+  this->theDrawCircleAtVectorOperations.size = 0;
   this->centerX.initFillInObject(this->BasisProjectionPlane.size, 300);
   this->centerY.initFillInObject(this->BasisProjectionPlane.size, 300);
   this->GraphicsUnit.initFillInObject(this->BasisProjectionPlane.size, DrawOperations::GraphicsUnitDefault);
   this->labeledVectors.SetSize(0);
   this->labelsOfLabeledVectors.SetSize(0);
-  this->ClickToleranceX=5;
-  this->ClickToleranceY=5;
-  this->SelectedCircleMinus2noneMinus1Center=-2;
-  this->SelectedPlane=0;
-  this->flagRotatingPreservingAngles=true;
-  this->flagAnimatingMovingCoordSystem=false;
-  this->flagIsPausedWhileAnimating=false;
+  this->ClickToleranceX = 5;
+  this->ClickToleranceY = 5;
+  this->SelectedCircleMinus2noneMinus1Center = - 2;
+  this->SelectedPlane = 0;
+  this->flagRotatingPreservingAngles = true;
+  this->flagAnimatingMovingCoordSystem = false;
+  this->flagIsPausedWhileAnimating = false;
 }
 
 void AnimationBuffer::operator=(const AnimationBuffer& other)
-{ this->stillFrame=other.stillFrame;
-  this->thePhysicalDrawOps=other.thePhysicalDrawOps;
-  this->theVirtualOpS=other.theVirtualOpS;
-  this->flagAnimating=other.flagAnimating;
-  this->flagIsPausedWhileAnimating=other.flagIsPausedWhileAnimating;
-  this->indexVirtualOp=other.indexVirtualOp;
-  if(this->indexVirtualOp>=this->theVirtualOpS.size)
+{ this->stillFrame = other.stillFrame;
+  this->thePhysicalDrawOps = other.thePhysicalDrawOps;
+  this->theVirtualOpS = other.theVirtualOpS;
+  this->flagAnimating = other.flagAnimating;
+  this->flagIsPausedWhileAnimating = other.flagIsPausedWhileAnimating;
+  this->indexVirtualOp = other.indexVirtualOp;
+  if (this->indexVirtualOp >= this->theVirtualOpS.size)
     crash << crash;
 }
 
@@ -9130,38 +9174,38 @@ AnimationBuffer::AnimationBuffer()
 
 void AnimationBuffer::operator+=(const DrawOperations& other)
 { VirtualDrawOp theOp;
-  theOp.theVirtualOp=this->typeDrawOps;
-  theOp.indexPhysicalDrawOp=this->thePhysicalDrawOps.size;
+  theOp.theVirtualOp = this->typeDrawOps;
+  theOp.indexPhysicalDrawOp = this->thePhysicalDrawOps.size;
   this->thePhysicalDrawOps.AddOnTop(other);
-  theOp.indexPhysicalFrame=0;
-  if (this->theVirtualOpS.size>0)
-    theOp.indexPhysicalFrame=this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
-  theOp.selectedPlaneInPhysicalDrawOp=0;
-  this->theVirtualOpS.Reserve(this->theVirtualOpS.size+other.BasisProjectionPlane.size);
-  for (int i=0; i<other.BasisProjectionPlane.size; i++)
+  theOp.indexPhysicalFrame = 0;
+  if (this->theVirtualOpS.size > 0)
+    theOp.indexPhysicalFrame = this->theVirtualOpS.LastObject()->indexPhysicalFrame + 1;
+  theOp.selectedPlaneInPhysicalDrawOp = 0;
+  this->theVirtualOpS.Reserve(this->theVirtualOpS.size + other.BasisProjectionPlane.size);
+  for (int i = 0; i < other.BasisProjectionPlane.size; i ++)
   { this->theVirtualOpS.AddOnTop(theOp);
-    theOp.indexPhysicalFrame++;
-    theOp.selectedPlaneInPhysicalDrawOp++;
+    theOp.indexPhysicalFrame ++;
+    theOp.selectedPlaneInPhysicalDrawOp ++;
   }
 }
 
 void AnimationBuffer::AddPause(int numFrames)
 { VirtualDrawOp theVOp;
-  theVOp.indexPhysicalFrame=this->GetNumPhysicalFramesNoStillFrame()-1;
-  theVOp.selectedPlaneInPhysicalDrawOp=-1;
-  theVOp.theVirtualOp=this->typePause;
-  theVOp.indexPhysicalDrawOp=this->thePhysicalDrawOps.size-1;
-  this->theVirtualOpS.Reserve(this->theVirtualOpS.size+numFrames);
-  for (int i=0; i<numFrames; i++)
+  theVOp.indexPhysicalFrame = this->GetNumPhysicalFramesNoStillFrame()-1;
+  theVOp.selectedPlaneInPhysicalDrawOp = - 1;
+  theVOp.theVirtualOp = this->typePause;
+  theVOp.indexPhysicalDrawOp = this->thePhysicalDrawOps.size - 1;
+  this->theVirtualOpS.Reserve(this->theVirtualOpS.size + numFrames);
+  for (int i = 0; i < numFrames; i ++)
     this->theVirtualOpS.AddOnTop(theVOp);
 }
 
 void AnimationBuffer::MakeZero()
-{ this->theVirtualOpS.size=0;
-  this->thePhysicalDrawOps.size=0;
-  this->indexVirtualOp=-1;
-  this->flagAnimating=false;
-  this->flagIsPausedWhileAnimating=false;
+{ this->theVirtualOpS.size = 0;
+  this->thePhysicalDrawOps.size = 0;
+  this->indexVirtualOp = - 1;
+  this->flagAnimating = false;
+  this->flagIsPausedWhileAnimating = false;
 }
 
 std::string VirtualDrawOp::ToString()
@@ -9188,124 +9232,123 @@ std::string VirtualDrawOp::ToString()
 
 std::string AnimationBuffer::ToString()
 { std::stringstream out;
-  for (int i=0; i<this->theVirtualOpS.size; i++)
+  for (int i = 0; i < this->theVirtualOpS.size; i ++)
     out << "Frame " << i << ": " << this->theVirtualOpS[i].ToString() << "\n";
   return out.str();
 }
 
 void AnimationBuffer::operator+=(const AnimationBuffer& other)
-{ if (other.theVirtualOpS.size<=0)
+{ if (other.theVirtualOpS.size <= 0)
     return;
-  int physicalOpShift=this->thePhysicalDrawOps.size;
-  int physicalFrameShift=0;
-  if (this->theVirtualOpS.size>0)
-    physicalFrameShift=this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
+  int physicalOpShift = this->thePhysicalDrawOps.size;
+  int physicalFrameShift = 0;
+  if (this->theVirtualOpS.size > 0)
+    physicalFrameShift = this->theVirtualOpS.LastObject()->indexPhysicalFrame + 1;
   this->thePhysicalDrawOps.Reserve(this->thePhysicalDrawOps.size+other.thePhysicalDrawOps.size);
-  for (int i=0; i<other.thePhysicalDrawOps.size; i++)
+  for (int i = 0; i < other.thePhysicalDrawOps.size; i ++)
     this->thePhysicalDrawOps.AddOnTop(other.thePhysicalDrawOps[i]);
-  this->theVirtualOpS.Reserve(this->theVirtualOpS.size+other.theVirtualOpS.size);
+  this->theVirtualOpS.Reserve(this->theVirtualOpS.size + other.theVirtualOpS.size);
   VirtualDrawOp currentOp;
-  for (int i=0; i<other.theVirtualOpS.size; i++)
-  { currentOp=other.theVirtualOpS[i];
-    currentOp.indexPhysicalDrawOp+=physicalOpShift;
-    currentOp.indexPhysicalFrame+=physicalFrameShift;
+  for (int i = 0; i < other.theVirtualOpS.size; i ++)
+  { currentOp = other.theVirtualOpS[i];
+    currentOp.indexPhysicalDrawOp += physicalOpShift;
+    currentOp.indexPhysicalFrame += physicalFrameShift;
     this->theVirtualOpS.AddOnTop(currentOp);
   }
-  if (this->thePhysicalDrawOps.size>0)
-    this->indexVirtualOp=0;
+  if (this->thePhysicalDrawOps.size > 0)
+    this->indexVirtualOp = 0;
   if (other.flagAnimating)
-    this->flagAnimating=true;
+    this->flagAnimating = true;
 }
 
 int AnimationBuffer::GetIndexCurrentDrawOps()
-{ if (!this->flagAnimating || this->thePhysicalDrawOps.size==0 || this->indexVirtualOp<0)
-    return -1;
-  if(this->indexVirtualOp>=this->theVirtualOpS.size)
+{ if (!this->flagAnimating || this->thePhysicalDrawOps.size == 0 || this->indexVirtualOp < 0)
+    return - 1;
+  if(this->indexVirtualOp >= this->theVirtualOpS.size)
     crash << crash;
   return this->theVirtualOpS[this->indexVirtualOp].indexPhysicalDrawOp;
 }
 
 DrawOperations& AnimationBuffer::GetCurrentDrawOps()
-{ int theIndex=this->GetIndexCurrentDrawOps();
-  if (theIndex==-1)
-  { return this->stillFrame;
-  }
-  DrawOperations& result=this->thePhysicalDrawOps[theIndex];
-  result.SelectedPlane=this->theVirtualOpS[this->indexVirtualOp].selectedPlaneInPhysicalDrawOp;
-  if (result.SelectedPlane<0 || result.BasisProjectionPlane.size<=result.SelectedPlane)
-    result.SelectedPlane=result.BasisProjectionPlane.size-1;
+{ int theIndex = this->GetIndexCurrentDrawOps();
+  if (theIndex == - 1)
+    return this->stillFrame;
+  DrawOperations& result = this->thePhysicalDrawOps[theIndex];
+  result.SelectedPlane = this->theVirtualOpS[this->indexVirtualOp].selectedPlaneInPhysicalDrawOp;
+  if (result.SelectedPlane < 0 || result.BasisProjectionPlane.size <= result.SelectedPlane)
+    result.SelectedPlane = result.BasisProjectionPlane.size - 1;
   return result;
 }
 
 int AnimationBuffer::GetNumPhysicalFramesNoStillFrame()
-{ if (this->theVirtualOpS.size<=0)
+{ if (this->theVirtualOpS.size <= 0)
     return 0;
-  int result = this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
-  if (result<=0)
-    result=1;
+  int result = this->theVirtualOpS.LastObject()->indexPhysicalFrame + 1;
+  if (result <= 0)
+    result = 1;
   return result;
 }
 
 bool AnimationBuffer::IncrementOpReturnNeedsRedraw()
 { if (!this->flagAnimating)
     return false;
-  if (this->theVirtualOpS.size<=0)
+  if (this->theVirtualOpS.size <= 0)
     return false;
-  int oldPhysicalFrame=this->GetIndexCurrentPhysicalFrame();
-  this->indexVirtualOp=(this->indexVirtualOp+1)% this->theVirtualOpS.size;
-  return (oldPhysicalFrame!=this->GetIndexCurrentPhysicalFrame());
+  int oldPhysicalFrame = this->GetIndexCurrentPhysicalFrame();
+  this->indexVirtualOp = (this->indexVirtualOp + 1) % this->theVirtualOpS.size;
+  return oldPhysicalFrame != this->GetIndexCurrentPhysicalFrame();
 }
 
 int AnimationBuffer::GetIndexCurrentPhysicalFrame()
-{ if (this->theVirtualOpS.size<=0 || this->indexVirtualOp<0)
+{ if (this->theVirtualOpS.size <= 0 || this->indexVirtualOp < 0)
     return 0;
-  if(this->indexVirtualOp>=this->theVirtualOpS.size)
+  if(this->indexVirtualOp >= this->theVirtualOpS.size)
     crash << crash;
-  int result=this->theVirtualOpS[this->indexVirtualOp].indexPhysicalFrame;
-  if (result<0)
-    result=0;
+  int result = this->theVirtualOpS[this->indexVirtualOp].indexPhysicalFrame;
+  if (result < 0)
+    result = 0;
   return result;
 }
 
 void AnimationBuffer::DrawNoInit(DrawingVariables& theDrawingVariables)
-{ int indexCurrentFrame=-2;
-  int numTotalPhysicalFrames=this->GetNumPhysicalFramesNoStillFrame();
+{ int indexCurrentFrame = - 2;
+  int numTotalPhysicalFrames = this->GetNumPhysicalFramesNoStillFrame();
   ProgressReport theReport;
-  for (this->indexVirtualOp=0;  this->indexVirtualOp<this->theVirtualOpS.size; this->indexVirtualOp++)
-    if (this->GetIndexCurrentPhysicalFrame()!=indexCurrentFrame)
-    { indexCurrentFrame=this->GetIndexCurrentPhysicalFrame();
+  for (this->indexVirtualOp = 0;  this->indexVirtualOp < this->theVirtualOpS.size; this->indexVirtualOp ++)
+    if (this->GetIndexCurrentPhysicalFrame() != indexCurrentFrame)
+    { indexCurrentFrame = this->GetIndexCurrentPhysicalFrame();
       std::stringstream tempStream;
-      tempStream << "Computing frame " << indexCurrentFrame+1 << " out of "
+      tempStream << "Computing frame " << indexCurrentFrame + 1 << " out of "
       << numTotalPhysicalFrames << " physical frames.";
       theReport.Report(tempStream.str());
       theDrawingVariables.drawBufferNoIniT(this->GetCurrentDrawOps());
     }
-  this->indexVirtualOp=0;
+  this->indexVirtualOp = 0;
 }
 
 double DrawOperations::getAngleFromXandY(double x, double y)
 { double result;
-  if (x!=0)
-    result= FloatingPoint::arctan(y/x);
+  if (x != 0)
+    result = FloatingPoint::arctan(y / x);
   else
-    if (y>0)
-      result= MathRoutines::Pi()/2;
+    if (y > 0)
+      result = MathRoutines::Pi() / 2;
     else
-      result= MathRoutines::Pi()/(-2);
+      result = MathRoutines::Pi() / (- 2);
   return result;
 }
 
 void DrawOperations::click(double x , double y)
 { this->EnsureProperInitialization();
-  this->SelectedCircleMinus2noneMinus1Center=-2;
+  this->SelectedCircleMinus2noneMinus1Center = - 2;
   if (this->AreWithinClickTolerance(x, y, this->centerX[this->SelectedPlane], this->centerY[this->SelectedPlane]))
-    this->SelectedCircleMinus2noneMinus1Center=-1;
-  int theDim=this->theBilinearForm.NumRows;
-  for (int i=0; i<theDim; i++)
+    this->SelectedCircleMinus2noneMinus1Center = - 1;
+  int theDim = this->theBilinearForm.NumRows;
+  for (int i = 0; i < theDim; i ++)
   { double Xbasis, Ybasis;
     this->GetCoordsDrawingComputeAll(this->BasisToDrawCirclesAt[i], Xbasis, Ybasis);
     if (this->AreWithinClickTolerance(x, y, Xbasis, Ybasis))
-    { this->SelectedCircleMinus2noneMinus1Center=i;
+    { this->SelectedCircleMinus2noneMinus1Center = i;
       return;
     }
   }
@@ -9313,108 +9356,108 @@ void DrawOperations::click(double x , double y)
 
 void DrawOperations::RotateOutOfPlane
 (std::stringstream& logger, Vector<double>& input, Vector<double>& output, Vector<double>& orthoBasis1, Vector<double>& orthoBasis2, double oldTanSquared, double newTanSquared)
-{ Vector<double> projection= orthoBasis1;
-  Vector<double> vComponent= input;
-  double scal1= this->theBilinearForm.ScalarProduct(orthoBasis1, input);
-  double scal2= this->theBilinearForm.ScalarProduct(orthoBasis2, input);
-  projection*=scal1;
-  projection+= orthoBasis2*scal2;
-  vComponent-=projection;
+{ Vector<double> projection = orthoBasis1;
+  Vector<double> vComponent = input;
+  double scal1 = this->theBilinearForm.ScalarProduct(orthoBasis1, input);
+  double scal2 = this->theBilinearForm.ScalarProduct(orthoBasis2, input);
+  projection *= scal1;
+  projection += orthoBasis2 * scal2;
+  vComponent -= projection;
   logger << "\ngetScalarProd=" << this->theBilinearForm.ScalarProduct(projection, vComponent);
-  if (oldTanSquared<0 || newTanSquared<0)
+  if (oldTanSquared < 0 || newTanSquared < 0)
     return;
-  double oldAngle=FloatingPoint::arctan(FloatingPoint::sqrt(oldTanSquared));
-  double newAngle=FloatingPoint::arctan(FloatingPoint::sqrt(newTanSquared));
-  double angleChange=-oldAngle+newAngle;
-  projection=orthoBasis1;
-  projection*=FloatingPoint::cos(angleChange)*scal1-FloatingPoint::sin(angleChange)*scal2;
-  projection+=orthoBasis2*(FloatingPoint::sin(angleChange)*scal1+FloatingPoint::sin(angleChange)*scal2);
+  double oldAngle = FloatingPoint::arctan(FloatingPoint::sqrt(oldTanSquared));
+  double newAngle = FloatingPoint::arctan(FloatingPoint::sqrt(newTanSquared));
+  double angleChange = - oldAngle + newAngle;
+  projection = orthoBasis1;
+  projection *= FloatingPoint::cos(angleChange) * scal1 - FloatingPoint::sin(angleChange) * scal2;
+  projection += orthoBasis2 * (FloatingPoint::sin(angleChange) * scal1 + FloatingPoint::sin(angleChange) * scal2);
   output = vComponent;
-  output+=projection;
+  output += projection;
 }
 
 void DrawOperations::ModifyToOrthonormalNoShiftSecond(Vector<double>& root1, Vector<double>& root2)
 { //if  (this->getScalarProduct(root2, root2)==0)
   //  root2.MakeEi(this->theWeyl.CartanSymmetric.NumRows,1);
-  double theScalar= this->theBilinearForm.ScalarProduct(root1, root2)/this->theBilinearForm.ScalarProduct(root2, root2);
-  root1-=root2*theScalar;
+  double theScalar = this->theBilinearForm.ScalarProduct(root1, root2) / this->theBilinearForm.ScalarProduct(root2, root2);
+  root1 -= root2 * theScalar;
   this->ScaleToUnitLength(root1);
   this->ScaleToUnitLength(root2);
 }
 
 void DrawOperations::ComputeProjectionsEiVectors()
-{ int theDimension=this->theBilinearForm.NumRows;
+{ int theDimension = this->theBilinearForm.NumRows;
   this->ProjectionsEiVectors.SetSizeMakeMatrix(theDimension, 2);
   Vector<double> tempRoot;
-  for (int i=0; i<theDimension; i++)
+  for (int i = 0; i < theDimension; i ++)
   { tempRoot.MakeEi(theDimension, i);
-    this->ProjectionsEiVectors[i][0]=this->theBilinearForm.ScalarProduct(tempRoot, this->BasisProjectionPlane[this->SelectedPlane][0]);
-    this->ProjectionsEiVectors[i][1]=this->theBilinearForm.ScalarProduct(tempRoot, this->BasisProjectionPlane[this->SelectedPlane][1]);
+    this->ProjectionsEiVectors[i][0] = this->theBilinearForm.ScalarProduct(tempRoot, this->BasisProjectionPlane[this->SelectedPlane][0]);
+    this->ProjectionsEiVectors[i][1] = this->theBilinearForm.ScalarProduct(tempRoot, this->BasisProjectionPlane[this->SelectedPlane][1]);
   }
 }
 
 void DrawOperations::ComputeXYsFromProjectionsEisAndGraphicsUnit()
-{ for (int i=0; i<this->theDrawLineBetweenTwoRootsOperations.size; i++)
-  { DrawLineBetweenTwoRootsOperation& theOperation= this->theDrawLineBetweenTwoRootsOperations[i];
+{ for (int i = 0; i < this->theDrawLineBetweenTwoRootsOperations.size; i ++)
+  { DrawLineBetweenTwoRootsOperation& theOperation = this->theDrawLineBetweenTwoRootsOperations[i];
     this->GetCoordsForDrawingProjectionsComputed(theOperation.v1, theOperation.v2, theOperation.precomputedX1, theOperation.precomputedY1, theOperation.precomputedX2, theOperation.precomputedY2);
   }
-  for (int i=0; i<this->theDrawTextAtVectorOperations.size; i++)
-  { DrawTextAtVectorOperation& theTextOperation=this->theDrawTextAtVectorOperations[i];
+  for (int i = 0; i < this->theDrawTextAtVectorOperations.size; i ++)
+  { DrawTextAtVectorOperation& theTextOperation = this->theDrawTextAtVectorOperations[i];
     this->GetCoordsForDrawingProjectionsComputed(theTextOperation.theVector, theTextOperation.precomputedX, theTextOperation.precomputedY);
   }
-  for (int i=0; i<this->theDrawCircleAtVectorOperations.size; i++)
-  { DrawCircleAtVectorOperation& theCircleOperation=this->theDrawCircleAtVectorOperations[i];
+  for (int i = 0; i < this->theDrawCircleAtVectorOperations.size; i ++)
+  { DrawCircleAtVectorOperation& theCircleOperation = this->theDrawCircleAtVectorOperations[i];
     this->GetCoordsForDrawingProjectionsComputed(theCircleOperation.theVector, theCircleOperation.precomputedX, theCircleOperation.precomputedY);
   }
 }
 
 void DrawOperations::changeBasisPReserveAngles(double newX, double newY)
-{ double bufferCenterX=this->centerX[this->SelectedPlane];
-  double bufferCenterY=this->centerY[this->SelectedPlane];
-  double bufferGraphicsUnit=this->GraphicsUnit[this->SelectedPlane];
-  newX=(newX-bufferCenterX)/bufferGraphicsUnit;
-  newY=(newY-bufferCenterY)/bufferGraphicsUnit;
-  if (newX==0 && newY==0)
+{ double bufferCenterX = this->centerX[this->SelectedPlane];
+  double bufferCenterY = this->centerY[this->SelectedPlane];
+  double bufferGraphicsUnit = this->GraphicsUnit[this->SelectedPlane];
+  newX = (newX - bufferCenterX) / bufferGraphicsUnit;
+  newY = (newY - bufferCenterY) / bufferGraphicsUnit;
+  if (newX == 0 && newY == 0)
     return;
   std::stringstream out;
-  Vector<double>& selectedRoot=this->BasisToDrawCirclesAt[this->SelectedCircleMinus2noneMinus1Center];
-  double selectedRootLength=this->theBilinearForm.ScalarProduct(selectedRoot, selectedRoot);
+  Vector<double>& selectedRoot = this->BasisToDrawCirclesAt[this->SelectedCircleMinus2noneMinus1Center];
+  double selectedRootLength = this->theBilinearForm.ScalarProduct(selectedRoot, selectedRoot);
   double oldX, oldY;
   this->GetCoordsDrawingComputeAll(selectedRoot, oldX, oldY);
-  oldX=(oldX- bufferCenterX)/bufferGraphicsUnit;
-  oldY=(oldY- bufferCenterY)/bufferGraphicsUnit;
+  oldX = (oldX - bufferCenterX) / bufferGraphicsUnit;
+  oldY = (oldY - bufferCenterY) / bufferGraphicsUnit;
 
-  double oldAngle= getAngleFromXandY(oldX, oldY);
-  double newAngle= getAngleFromXandY(newX, newY);
-  double AngleChange= -newAngle+oldAngle;
-  double epsilon=0.000000000001;
-  while (AngleChange>MathRoutines::Pi()/2+epsilon)
-  { AngleChange-=MathRoutines::Pi();
+  double oldAngle = getAngleFromXandY(oldX, oldY);
+  double newAngle = getAngleFromXandY(newX, newY);
+  double AngleChange = - newAngle + oldAngle;
+  double epsilon = 0.000000000001;
+  while (AngleChange > MathRoutines::Pi() / 2 + epsilon)
+  { AngleChange -= MathRoutines::Pi();
   }
-  while (AngleChange<=MathRoutines::Pi()/(-2)-epsilon)
-  { AngleChange+=MathRoutines::Pi();
+  while (AngleChange <= MathRoutines::Pi() / (- 2) - epsilon)
+  { AngleChange += MathRoutines::Pi();
   }
   out << "\nold angle: " << oldAngle;
   out << "\nnew angle:  " << newAngle;
   Vector<double> NewVectorE1, NewVectorE2;
-  Vectors<double>& currentBasisPlane=this->BasisProjectionPlane[this->SelectedPlane];
-  NewVectorE1= currentBasisPlane[0]*FloatingPoint::cos(AngleChange);
-  NewVectorE1+=currentBasisPlane[1]*FloatingPoint::sin(AngleChange);
-  NewVectorE2= currentBasisPlane[1]*FloatingPoint::cos(AngleChange);
-  NewVectorE2+=currentBasisPlane[0]*(-FloatingPoint::sin(AngleChange));
-  currentBasisPlane[0]=NewVectorE1;
-  currentBasisPlane[1]=NewVectorE2;
-  double RootTimesE1=this->theBilinearForm.ScalarProduct(selectedRoot, currentBasisPlane[0]);
-  double RootTimesE2=this->theBilinearForm.ScalarProduct(selectedRoot, currentBasisPlane[1]);
-  Vector<double> vOrthogonal=selectedRoot;
-  Vector<double> vProjection=currentBasisPlane[0]*RootTimesE1;
-  vProjection+=currentBasisPlane[1]*RootTimesE2;
-  vOrthogonal-= vProjection;
-  double oldRatioProjectionOverHeightSquared = (oldX*oldX+oldY*oldY)/ (selectedRootLength-oldX*oldX-oldY*oldY);
-  double newRatioProjectionOverHeightSquared = (newX*newX+newY*newY)/ (selectedRootLength-newX*newX-newY*newY);
+  Vectors<double>& currentBasisPlane = this->BasisProjectionPlane[this->SelectedPlane];
+  NewVectorE1 = currentBasisPlane[0] * FloatingPoint::cos(AngleChange);
+  NewVectorE1 += currentBasisPlane[1] * FloatingPoint::sin(AngleChange);
+  NewVectorE2 = currentBasisPlane[1] * FloatingPoint::cos(AngleChange);
+  NewVectorE2 += currentBasisPlane[0] * (- FloatingPoint::sin(AngleChange));
+  currentBasisPlane[0] = NewVectorE1;
+  currentBasisPlane[1] = NewVectorE2;
+  double RootTimesE1 = this->theBilinearForm.ScalarProduct(selectedRoot, currentBasisPlane[0]);
+  double RootTimesE2 = this->theBilinearForm.ScalarProduct(selectedRoot, currentBasisPlane[1]);
+  Vector<double> vOrthogonal = selectedRoot;
+  Vector<double> vProjection = currentBasisPlane[0] * RootTimesE1;
+  vProjection += currentBasisPlane[1] * RootTimesE2;
+  vOrthogonal -= vProjection;
+  double oldRatioProjectionOverHeightSquared = (oldX * oldX + oldY * oldY) / (selectedRootLength - oldX * oldX - oldY * oldY);
+  double newRatioProjectionOverHeightSquared = (newX * newX + newY * newY) / (selectedRootLength - newX * newX - newY * newY);
   out << "\noldRatio: " << oldRatioProjectionOverHeightSquared;
   out << "\nnewRatio: " << newRatioProjectionOverHeightSquared;
-  if (this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal)>epsilon || this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal)<-epsilon)
+  if (this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal) > epsilon || this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal) < - epsilon)
   { this->ScaleToUnitLength(vProjection);
     this->ScaleToUnitLength(vOrthogonal);
     out << "\nscaled vOrthogonal=" << vOrthogonal << "->"
@@ -9433,10 +9476,10 @@ void DrawOperations::changeBasisPReserveAngles(double newX, double newY)
   out << "\ne1=" << currentBasisPlane[0];
   out << "\ne2=" << currentBasisPlane[1];
   out << "\ne1*e2=" << this->theBilinearForm.ScalarProduct(currentBasisPlane[0], currentBasisPlane[1]);
-  if (this->specialOperationsOnBasisChange!=0)
+  if (this->specialOperationsOnBasisChange != 0)
     this->specialOperationsOnBasisChange(*this);
   this->ComputeProjectionsEiVectors();
-  this->DebugString= out.str();
+  this->DebugString = out.str();
 }
 
 class ImpreciseDouble
@@ -9445,93 +9488,93 @@ class ImpreciseDouble
   double precision;
   double theValue;
   public:
-  std::string ToString(FormatExpressions* theFormat=0)const
+  std::string ToString(FormatExpressions* theFormat = 0)const
   { (void) theFormat; //avoid unused parameter warning, portable.
     std::stringstream out;
     out << this->theValue;
     return out.str();
   }
   void operator=(const ImpreciseDouble& other)
-  { this->theValue=other.theValue;
-    this->precision=other.precision;
+  { this->theValue = other.theValue;
+    this->precision = other.precision;
   }
   void operator=(double other)
-  { this->theValue=other;
+  { this->theValue = other;
   }
   ImpreciseDouble(const ImpreciseDouble& other)
   { this->operator=(other);
   }
   ImpreciseDouble()
-  { this->theValue=0;
-    this->precision=0.1;
+  { this->theValue = 0;
+    this->precision = 0.1;
   }
   ImpreciseDouble(double other)
   { this->operator=(other);
   }
   void operator+=(const ImpreciseDouble& other)
   { if (!other.IsEqualToZero())
-      this->theValue+=other.theValue;
+      this->theValue += other.theValue;
   }
   void operator-=(const ImpreciseDouble& other)
   { if (!other.IsEqualToZero())
-      this->theValue-=other.theValue;
+      this->theValue -= other.theValue;
   }
   void operator=(const Rational& other)
-  { this->theValue=other.GetDoubleValue();
+  { this->theValue = other.GetDoubleValue();
   }
   bool IsEqualToZero()const
-  { if (this->theValue<0)
-      return (-theValue)< this->precision;
-    return this->theValue<this->precision;
+  { if (this->theValue < 0)
+      return (- theValue) < this->precision;
+    return this->theValue < this->precision;
   }
   bool operator<=(const ImpreciseDouble& other)
   { return ! (other<*this);
   }
   bool IsPositive()const
-  { return this->theValue>this->precision;
+  { return this->theValue > this->precision;
   }
   bool IsNegative()const
-  { return *this<this->GetZero();
+  { return *this < this->GetZero();
   }
   bool operator<(const ImpreciseDouble& other)const
-  { ImpreciseDouble temp=other;
-    temp-=*this;
+  { ImpreciseDouble temp = other;
+    temp -= *this;
     return temp.IsPositive();
   }
   void AssignFloor()
-  { this->theValue=FloatingPoint::floor(this->theValue);
+  { this->theValue = FloatingPoint::floor(this->theValue);
   }
   void operator/=(const ImpreciseDouble& other)
   { ImpreciseDouble copyMe;
-    copyMe=*this;
-    *this=copyMe/other;
+    copyMe = *this;
+    *this = copyMe / other;
   }
   ImpreciseDouble operator/(const ImpreciseDouble& other)const
   { ImpreciseDouble result;
-    result=*this;
+    result = *this;
     if (other.IsEqualToZero())
     { //the below is written like this to avoid this->theValue/0;
       //If the user attempts to divide by zero, I want a regular division by zero exception to be generated
-      result.theValue=this->theValue/(other.theValue-other.theValue);
+      result.theValue = this->theValue / (other.theValue - other.theValue);
       return result;
     }
-    result.theValue/=other.theValue;
+    result.theValue /= other.theValue;
     return result;
   }
   void operator*=(const ImpreciseDouble& other)
   { if (!other.IsEqualToZero())
-      this->theValue*=other.theValue;
+      this->theValue *= other.theValue;
     else
-      this->theValue=0;
+      this->theValue = 0;
   }
   bool operator==(const ImpreciseDouble& other)const
-  { int diff=this->theValue-other.theValue;
-    if (diff<0)
-      diff=-diff;
-    return diff<this->precision;
+  { int diff = this->theValue - other.theValue;
+    if (diff < 0)
+      diff = - diff;
+    return diff < this->precision;
   }
   static ImpreciseDouble GetMinusOne()
-  { return -1;
+  { return - 1;
   }
   static ImpreciseDouble GetOne()
   { return 1;
@@ -9543,13 +9586,13 @@ class ImpreciseDouble
 
 void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& theOps)
 { Matrix<ImpreciseDouble> theMat;
-  int theDim=theOps.theBilinearForm.NumRows;
+  int theDim = theOps.theBilinearForm.NumRows;
   theMat.init(theDim, 2);
 //we assume that the ComputeProjectionsEiVectors has been called
 //  theOps.ComputeProjectionsEiVectors();
-  for(int i=0; i<theOps.ProjectionsEiVectors.size; i++)
-    for (int j=0; j<2; j++)
-      theMat.elements[i][j]=theOps.ProjectionsEiVectors[i][j];
+  for(int i = 0; i < theOps.ProjectionsEiVectors.size; i ++)
+    for (int j = 0; j < 2; j ++)
+      theMat.elements[i][j] = theOps.ProjectionsEiVectors[i][j];
   ProgressReport theReport;
   std::stringstream out;
   out << "before elimination:\n" << theMat.ToString();
@@ -9559,7 +9602,7 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
 }
 
 void DrawOperations::operator+=(const DrawOperations& other)
-{ if (this->theBilinearForm.NumRows!=other.theBilinearForm.NumRows)
+{ if (this->theBilinearForm.NumRows != other.theBilinearForm.NumRows)
     return;
   this->TypeNthDrawOperation.AddListOnTop(other.TypeNthDrawOperation);
   int shiftDrawText=this->theDrawTextOperations.size;
@@ -10751,22 +10794,22 @@ bool ConeComplex::AddNonRefinedChamberOnTopNoRepetition(const Cone& newCone)
 }
 
 void ConeComplex::RefineOneStep()
-{ if (this->indexLowestNonRefinedChamber>=this->size)
+{ if (this->indexLowestNonRefinedChamber >= this->size)
     return;
-  Cone& currentCone=this->TheObjects[this->indexLowestNonRefinedChamber];
-  for (; currentCone.LowestIndexNotCheckedForChopping<this->splittingNormals.size; currentCone.LowestIndexNotCheckedForChopping++)
+  Cone& currentCone = this->TheObjects[this->indexLowestNonRefinedChamber];
+  for (; currentCone.LowestIndexNotCheckedForChopping < this->splittingNormals.size; currentCone.LowestIndexNotCheckedForChopping ++)
    if (this->SplitChamber(this->indexLowestNonRefinedChamber, true, this->splittingNormals[currentCone.LowestIndexNotCheckedForChopping]))
       return;
   Vector<Rational> currentNewWall;
-  for (; currentCone.LowestIndexNotCheckedForSlicingInDirection< this->slicingDirections.size; currentCone.LowestIndexNotCheckedForSlicingInDirection++)
-    for (int i=0; i<currentCone.Normals.size; i++)
+  for (; currentCone.LowestIndexNotCheckedForSlicingInDirection < this->slicingDirections.size; currentCone.LowestIndexNotCheckedForSlicingInDirection ++)
+    for (int i = 0; i < currentCone.Normals.size; i ++)
       if (this->slicingDirections[currentCone.LowestIndexNotCheckedForSlicingInDirection].ScalarEuclidean(currentCone.Normals[i]).IsPositive())
-        for (int j=i+1; j<currentCone.Normals.size; j++)
+        for (int j = i + 1; j < currentCone.Normals.size; j ++)
           if (this->slicingDirections[currentCone.LowestIndexNotCheckedForSlicingInDirection].ScalarEuclidean(currentCone.Normals[j]).IsPositive())
             if (currentCone.ProduceNormalFromTwoNormalsAndSlicingDirection(this->slicingDirections[currentCone.LowestIndexNotCheckedForSlicingInDirection], currentCone.Normals[i], currentCone.Normals[j], currentNewWall))
               if (this->SplitChamber(this->indexLowestNonRefinedChamber, false, currentNewWall))
                 return;
-  this->indexLowestNonRefinedChamber++;
+  this->indexLowestNonRefinedChamber ++;
 }
 
 void ConeComplex::InitFromDirectionsAndRefine(Vectors<Rational>& inputVectors)
@@ -10783,7 +10826,7 @@ void ConeComplex::Sort()
   tempList=*this;
   tempList.QuickSortAscending();
   this->Clear();
-  for (int i=0; i<tempList.size; i++)
+  for (int i = 0; i < tempList.size; i ++)
     this->AddOnTop(tempList[i]);
 }
 
@@ -10794,7 +10837,7 @@ void ConeComplex::RefineAndSort()
 
 void ConeComplex::Refine()
 { ProgressReport theReport;
-  while (this->indexLowestNonRefinedChamber<this->size)
+  while (this->indexLowestNonRefinedChamber < this->size)
   { this->RefineOneStep();
     std::stringstream out;
     out << "Refined " << this->indexLowestNonRefinedChamber << " out of " << this->size;
@@ -10803,47 +10846,47 @@ void ConeComplex::Refine()
 }
 
 void Cone::ComputeVerticesFromNormalsNoFakeVertices()
-{ this->Vertices.size=0;
+{ this->Vertices.size = 0;
   Selection theSel, nonPivotPoints;
-  for (int i=0; i<this->Normals.size; i++)
+  for (int i = 0; i < this->Normals.size; i ++)
     this->Normals[i].ScaleByPositiveRationalToIntegralMinHeight();
   int theDim=this->Normals[0].size;
   theSel.init(this->Normals.size);
-  int numCycles=theSel.GetNumCombinationsFixedCardinality(theDim-1);
-  if (theDim==1)
-  { numCycles=0;
-    bool foundNegative=false;
-    bool foundPositive=false;
-    for (int i=0; i<this->Normals.size; i++)
+  int numCycles = theSel.GetNumCombinationsFixedCardinality(theDim - 1);
+  if (theDim == 1)
+  { numCycles = 0;
+    bool foundNegative = false;
+    bool foundPositive = false;
+    for (int i = 0; i < this->Normals.size; i ++)
     { if(this->Normals[i].IsPositiveOrZero())
-        foundPositive=true;
+        foundPositive = true;
       if (this->Normals[i].IsNegativeOrZero())
-        foundNegative=true;
+        foundNegative = true;
     }
     if (foundNegative xor foundPositive)
-    { this->Vertices.SetSizeMakeMatrix(1,1);
+    { this->Vertices.SetSizeMakeMatrix(1, 1);
       if (foundNegative)
-        this->Vertices[0][0]=-1;
+        this->Vertices[0][0] = - 1;
       else
-        this->Vertices[0][0]=1;
+        this->Vertices[0][0] = 1;
     }
     return;
   }
   Matrix<Rational> theMat;
   Vector<Rational> tempRoot;
-  theMat.init(theDim-1, theDim);
-  for (int i=0; i<numCycles; i++)
-  { theSel.incrementSelectionFixedCardinality(theDim-1);
-    for (int j=0; j<theSel.CardinalitySelection; j++)
-      for (int k=0; k<theDim; k++)
-        theMat.elements[j][k]=this->Normals[theSel.elements[j]][k];
+  theMat.init(theDim - 1, theDim);
+  for (int i = 0; i < numCycles; i ++)
+  { theSel.incrementSelectionFixedCardinality(theDim - 1);
+    for (int j = 0; j < theSel.CardinalitySelection; j ++)
+      for (int k = 0; k < theDim; k ++)
+        theMat.elements[j][k] = this->Normals[theSel.elements[j]][k];
     theMat.GaussianEliminationByRows(0, &nonPivotPoints);
-    if (nonPivotPoints.CardinalitySelection==1)
+    if (nonPivotPoints.CardinalitySelection == 1)
     { theMat.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot);
-      bool tempBool=this->IsInCone(tempRoot);
+      bool tempBool = this->IsInCone(tempRoot);
       if (!tempBool)
       { tempRoot.Minus();
-        tempBool=this->IsInCone(tempRoot);
+        tempBool = this->IsInCone(tempRoot);
       }
       if (tempBool)
       { tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
@@ -10854,151 +10897,151 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices()
 }
 
 bool Cone::EliminateFakeNormalsUsingVertices(int numAddedFakeWalls)
-{ if(this->Vertices.size==0)
-  { this->flagIsTheZeroCone=true;
+{ if(this->Vertices.size == 0)
+  { this->flagIsTheZeroCone = true;
     this->Normals.SetSize(0);
     return false;
   }
   Vectors<Rational> verticesOnWall;
-  if (numAddedFakeWalls!=0)
+  if (numAddedFakeWalls != 0)
   { //we modify the normals so that they lie in the subspace spanned by the vertices
     Matrix<Rational> tempMat, matNormals, gramMatrixInverted;
     tempMat.AssignVectorsToRows(this->Vertices);
     Vectors<Rational> NormalsToSubspace;
     tempMat.GetZeroEigenSpaceModifyMe(NormalsToSubspace);
-    if (NormalsToSubspace.size>0)
+    if (NormalsToSubspace.size > 0)
     { matNormals.AssignVectorsToRows(NormalsToSubspace);
 //      stOutput << "<br>Normals to the subspace spanned by the vertices: " << NormalsToSubspace.ToString();
-      gramMatrixInverted=matNormals;
+      gramMatrixInverted = matNormals;
       gramMatrixInverted.Transpose();
       gramMatrixInverted.MultiplyOnTheLeft(matNormals);
       gramMatrixInverted.Invert();
       Vector<Rational> tempRoot;
-      for (int i=0; i<this->Normals.size; i++)
+      for (int i = 0; i < this->Normals.size; i ++)
       { matNormals.ActOnVectorColumn(this->Normals[i], tempRoot);
         gramMatrixInverted.ActOnVectorColumn(tempRoot);
-        for (int j=0; j<tempRoot.size; j++)
-          this->Normals[i]-=NormalsToSubspace[j]*tempRoot[j];
+        for (int j = 0; j < tempRoot.size; j ++)
+          this->Normals[i] -= NormalsToSubspace[j] * tempRoot[j];
         this->Normals[i].ScaleByPositiveRationalToIntegralMinHeight();
         if (this->Normals[i].IsEqualToZero())
         { this->Normals.RemoveIndexSwapWithLast(i);
-          i--;
+          i --;
         }
       }
       //all normals should now lie in the subspace spanned by the vertices
       //add the walls needed to go down to the subspace
-      this->Normals.Reserve(this->Normals.size+2*NormalsToSubspace.size);
-      for (int i=0; i<NormalsToSubspace.size; i++)
+      this->Normals.Reserve(this->Normals.size + 2 * NormalsToSubspace.size);
+      for (int i = 0; i < NormalsToSubspace.size; i ++)
       { NormalsToSubspace[i].ScaleByPositiveRationalToIntegralMinHeight();
         this->Normals.AddOnTop(NormalsToSubspace[i]);
-        this->Normals.AddOnTop(-NormalsToSubspace[i]);
+        this->Normals.AddOnTop(- NormalsToSubspace[i]);
       }
     }
   }
   Matrix<Rational> tempMatX;
   Selection tempSelX;
-  int DesiredRank=this->Vertices.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
-  if (DesiredRank>1)
-    for (int i=0; i<this->Normals.size; i++)
-    { Vector<Rational>& currentNormal=this->Normals[i];
-      verticesOnWall.size=0;
-      bool wallIsGood=false;
-      for (int j=0; j<this->Vertices.size; j++)
+  int DesiredRank = this->Vertices.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
+  if (DesiredRank > 1)
+    for (int i = 0; i < this->Normals.size; i ++)
+    { Vector<Rational>& currentNormal = this->Normals[i];
+      verticesOnWall.size = 0;
+      bool wallIsGood = false;
+      for (int j = 0; j < this->Vertices.size; j ++)
         if (currentNormal.ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
         { verticesOnWall.AddOnTop(this->Vertices[j]);
-          int theRank=verticesOnWall.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
-          if (theRank< verticesOnWall.size)
+          int theRank = verticesOnWall.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
+          if (theRank < verticesOnWall.size)
             verticesOnWall.RemoveLastObject();
           else
-            if (theRank==DesiredRank-1)
-            { wallIsGood=true;
+            if (theRank == DesiredRank - 1)
+            { wallIsGood = true;
               break;
             }
         }
       if (!wallIsGood)
       { this->Normals.RemoveIndexSwapWithLast(i);
-        i--;
+        i --;
       }
     }
   //eliminate identical normals
   this->Normals.QuickSortAscending();
-  int currentUniqueElementIndex=0;
-  for (int i=1; i<this->Normals.size; i++)
+  int currentUniqueElementIndex = 0;
+  for (int i = 1; i < this->Normals.size; i ++)
     if (this->Normals[currentUniqueElementIndex]!=this->Normals[i])
-    { currentUniqueElementIndex++;
+    { currentUniqueElementIndex ++;
       this->Normals.SwapTwoIndices(currentUniqueElementIndex, i);
     }
-  if (this->Normals.size>0)
-    this->Normals.SetSize(currentUniqueElementIndex+1);
-  for (int i=0; i<this->Vertices.size; i++)
+  if (this->Normals.size > 0)
+    this->Normals.SetSize(currentUniqueElementIndex + 1);
+  for (int i = 0; i < this->Vertices.size; i ++)
     if (this->Normals.HasAnElementWithNegativeScalarProduct(this->Vertices[i]))
       crash << crash;
-  for (int i=0; i<this->Normals.size; i++)
+  for (int i = 0; i < this->Normals.size; i ++)
     if (!this->Vertices.HasAnElementWithPositiveScalarProduct(this->Normals[i]))
       return false;
-  return numAddedFakeWalls==0;
+  return numAddedFakeWalls == 0;
 }
 
 bool Cone::ProduceNormalFromTwoNormalsAndSlicingDirection(Vector<Rational>& SlicingDirection, Vector<Rational>& normal1, Vector<Rational>& normal2, Vector<Rational>& output)
 { // we are looking for a normal n of the form n=t1*normal1+t2*normal2
   // such that  <t1*normal1+t2*normal2, slicingDirection>=0
-  Rational normal1ScalarDirection=normal1.ScalarEuclidean(SlicingDirection);
+  Rational normal1ScalarDirection = normal1.ScalarEuclidean(SlicingDirection);
   if (normal1ScalarDirection.IsEqualToZero())
-  { output=normal1;
+  { output = normal1;
     return false;
   }
   //from now on we assume t2=1;
-  Rational t1=-normal2.ScalarEuclidean(SlicingDirection)/normal1ScalarDirection;
-  output=normal2;
-  output+=normal1*t1;
+  Rational t1 = - normal2.ScalarEuclidean(SlicingDirection)/normal1ScalarDirection;
+  output = normal2;
+  output += normal1 * t1;
   output.ScaleByPositiveRationalToIntegralMinHeight();
   return true;
 }
 
 bool Cone::CreateFromVertices(const Vectors<Rational>& inputVertices)
-{ this->LowestIndexNotCheckedForChopping=0;
-  this->LowestIndexNotCheckedForSlicingInDirection=0;
+{ this->LowestIndexNotCheckedForChopping = 0;
+  this->LowestIndexNotCheckedForSlicingInDirection = 0;
  // stOutput << inputVertices.ToString();
-  this->flagIsTheZeroCone=false;
-  if (inputVertices.size<=0)
-  { this->Normals.size=0;
-    this->Vertices.size=0;
-    this->flagIsTheZeroCone=true;
+  this->flagIsTheZeroCone = false;
+  if (inputVertices.size <= 0)
+  { this->Normals.size = 0;
+    this->Vertices.size = 0;
+    this->flagIsTheZeroCone = true;
     return false;
   }
-  this->Normals.size=0;
+  this->Normals.size = 0;
   Matrix<Rational> tempMat;
   Selection tempSel;
-  int rankVerticesSpan=inputVertices.GetRankOfSpanOfElements(&tempMat, &tempSel);
-  int theDim=inputVertices.GetDim();
+  int rankVerticesSpan = inputVertices.GetRankOfSpanOfElements(&tempMat, &tempSel);
+  int theDim = inputVertices.GetDim();
   Vectors<Rational> extraVertices;
   extraVertices.SetSize(0);
-  if (rankVerticesSpan<theDim)
-  { Matrix<Rational>  tempMat;
+  if (rankVerticesSpan < theDim)
+  { Matrix<Rational> tempMat;
     tempMat.AssignVectorsToRows(inputVertices);
     tempMat.GetZeroEigenSpace(extraVertices);
-    for (int i=0; i<extraVertices.size; i++)
+    for (int i = 0; i < extraVertices.size; i ++)
     { this->Normals.AddOnTop(extraVertices[i]);
       this->Normals.AddOnTop(-extraVertices[i]);
     }
   }
-  int NumCandidates = MathRoutines::NChooseK(inputVertices.size, rankVerticesSpan-1);
+  int NumCandidates = MathRoutines::NChooseK(inputVertices.size, rankVerticesSpan - 1);
   Selection theSelection;
   theSelection.init(inputVertices.size);
   Vector<Rational> normalCandidate;
-  for (int i=0; i<NumCandidates; i++)
-  { theSelection.incrementSelectionFixedCardinality(rankVerticesSpan-1);
-    for (int j=0; j<theSelection.CardinalitySelection; j++)
+  for (int i = 0; i < NumCandidates; i ++)
+  { theSelection.incrementSelectionFixedCardinality(rankVerticesSpan - 1);
+    for (int j = 0; j < theSelection.CardinalitySelection; j ++)
       extraVertices.AddOnTop(inputVertices[theSelection.elements[j]]);
     if (extraVertices.ComputeNormal(normalCandidate, theDim))
-    { bool hasPositive; bool hasNegative;
-      hasPositive=false; hasNegative=false;
-      for (int j=0; j<inputVertices.size; j++)
-      { Rational tempRat= normalCandidate.ScalarEuclidean(inputVertices[j]);
+    { bool hasPositive = false;
+      bool hasNegative = false;
+      for (int j = 0; j < inputVertices.size; j ++)
+      { Rational tempRat = normalCandidate.ScalarEuclidean(inputVertices[j]);
         if (tempRat.IsNegative())
-          hasNegative=true;
+          hasNegative = true;
         if (tempRat.IsPositive())
-          hasPositive=true;
+          hasPositive = true;
         if (hasNegative && hasPositive)
           break;
       }
@@ -11008,7 +11051,7 @@ bool Cone::CreateFromVertices(const Vectors<Rational>& inputVertices)
       if (!(hasNegative && hasPositive))
         this->Normals.AddOnTopNoRepetition(normalCandidate);
     }
-    extraVertices.size=theDim-rankVerticesSpan;
+    extraVertices.size = theDim - rankVerticesSpan;
   }
 //  stOutput << "<br>Candidate normals: " << this->Normals.ToString();
   return this->CreateFromNormals(this->Normals);

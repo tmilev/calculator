@@ -98,11 +98,11 @@ public:
   void ExtractScalar(const std::string& json, int begin, int end);
   bool IsValidElement();
   void reset(char inputType = JSData::JSUndefined);
-  std::string ToString(bool useHTML = false) const;
+  std::string ToString(bool percentEncodeKeysIncludingDots, bool useHTML = false) const;
   template <typename somestream>
-  somestream& IntoStream(somestream& out, int indentation = 0, bool useHTML = false) const;
+  somestream& IntoStream(somestream& out, bool percentEncodeKeysIncludingDots, int indentation = 0, bool useHTML = false) const;
   void readfile(const char* filename);
-  bool readstring(const std::string& json, std::stringstream* commentsOnFailure = 0);
+  bool readstring(const std::string& json, bool keysWerePercentEncoded, std::stringstream* commentsOnFailure = 0);
   void TryToComputeType();
   static bool Tokenize(const std::string& input, List<JSData>& output);
   void writefile(const char* filename) const;

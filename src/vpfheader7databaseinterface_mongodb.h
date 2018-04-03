@@ -21,7 +21,7 @@ public:
   (const std::string& collectionName, const JSData& findQuery,
    List<JSData>& output, int maxOutputItems = -1,
    long long* totalItems = 0, std::stringstream* commentsOnFailure = 0);
-  static bool FindOneFromJSON
+  static bool FindOneFromJSONnoKeyDecoding
   (const std::string& collectionName, const JSData& findQuery,
    std::string& output, std::stringstream* commentsOnFailure = 0);
   static bool FindOneFromJSON

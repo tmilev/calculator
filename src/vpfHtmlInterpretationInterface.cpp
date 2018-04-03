@@ -597,7 +597,7 @@ std::string HtmlInterpretation::GetSelectCourseJSON()
     currentCourse["topics"] = "topiclists/" + theCourses.theCourses[i].courseTopics;
     output["courses"].list.AddOnTop(currentCourse);
   }
-  return output.ToString();
+  return output.ToString(false);
 }
 
 std::string HtmlInterpretation::GetSelectCourse()
@@ -745,12 +745,12 @@ std::string HtmlInterpretation::GetTopicTableJSON()
 
 std::string HtmlInterpretation::GetJSONUserInfo()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONUserInfo");
-  if (! theGlobalVariables.flagLoggedIn)
+  if (!theGlobalVariables.flagLoggedIn)
     return "\"not logged in\"";
   JSData output;
   output["username"] = theGlobalVariables.userDefault.username;
   output["authenticationToken"] = theGlobalVariables.userDefault.actualAuthenticationToken;
-  return output.ToString();
+  return output.ToString(false);
 }
 
 std::string HtmlInterpretation::GetJSONFromTemplate()

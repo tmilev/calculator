@@ -226,24 +226,17 @@ public:
   std::string GetDeadline
   (const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited);
   bool MergeOneProblemAdminData
-  (const std::string& inputProblemName, ProblemData& inputProblemInfo,
-   std::stringstream& commentsOnFailure);
-  bool MergeProblemInfoInDatabase
-  (std::string& incomingProblemInfo,
-   std::stringstream& commentsOnFailure);
+  (const std::string& inputProblemName, ProblemData& inputProblemInfo, std::stringstream& commentsOnFailure);
+  bool MergeProblemInfoInDatabase(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
   bool ReadProblemInfoAppend
   (const std::string& inputInfoString,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>&
-   outputProblemInfo,
-   std::stringstream& commentsOnFailure);
+   outputProblemInfo, std::stringstream& commentsOnFailure);
   void StoreDeadlineInfo
   (std::string& outputString,
-   MapLisT<std::string, ProblemData, MathRoutines::hashString>&
-   inputProblemInfo);
-  void StoreProblemWeightInfo
-  (std::string& outputString,
-   MapLisT<std::string, ProblemData, MathRoutines::hashString>&
-   inputProblemInfo);
+   MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
+  JSData ToJSONProblemWeights
+  (MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
   std::string ToStringDeadline
   (const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection);
   void ComputeDeadlineModifyButton
@@ -286,13 +279,10 @@ public:
   bool operator==(const CalculatorHTML& other)const
   { return this->fileName == other.fileName;
   }
-  std::string ToStringAllSectionDeadlines
-  (const std::string& topicID, bool isSection)
-  ;
+  std::string ToStringAllSectionDeadlines(const std::string& topicID, bool isSection);
   std::string ToStringOnEDeadlineFormatted
   (const std::string& topicID, const std::string& sectionNumber,
-  bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection)
-  ;
+  bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection);
   std::string ToStringCalculatorArgumentsForProblem
   (const std::string& requestType, const std::string& studentView,
    const std::string& studentSection = "", bool includeRandomSeedIfAppropriate = false)const;

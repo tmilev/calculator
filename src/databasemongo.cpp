@@ -127,8 +127,8 @@ MongoQuery::~MongoQuery()
 bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("MongoQuery::UpdateOne");
   MongoCollection theCollection(this->collectionName);
-  logWorker << "Update: " << this->findQuery << " to: "
-  << this->updateQuery << " inside: " << this->collectionName << logger::endL;
+  //logWorker << "Update: " << this->findQuery << " to: "
+  //<< this->updateQuery << " inside: " << this->collectionName << logger::endL;
   if (this->query != 0)
     crash << "At this point of code, query is supposed to be 0. " << crash;
   this->query = bson_new_from_json
@@ -153,14 +153,14 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
   bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
   std::string updateResultString(bufferOutpurStringFormat);
   bson_free(bufferOutpurStringFormat);
-  logWorker << logger::red << "Update result: " << updateResultString << logger::endL;
+  //logWorker << logger::red << "Update result: " << updateResultString << logger::endL;
   return true;
 }
 
 bool MongoQuery::FindMultiple(List<std::string>& output, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("MongoQuery::FindMultiple");
   MongoCollection theCollection(this->collectionName);
-  logWorker << "Query: " << this->findQuery << " inside: " << this->collectionName << logger::endL;
+  //logWorker << "Query: " << this->findQuery << " inside: " << this->collectionName << logger::endL;
   if (this->query != 0)
     crash << "At this point of code, query is supposed to be 0. " << crash;
   this->query = bson_new_from_json((const uint8_t*) this->findQuery.c_str(), this->findQuery.size(), &this->theError);
@@ -213,7 +213,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString
  long long* totalItems, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromString");
   JSData theData;
-  logWorker << logger::blue << "Query input: " << findQuery << logger::endL;
+  //logWorker << logger::blue << "Query input: " << findQuery << logger::endL;
   if (!theData.readstring(findQuery, commentsOnFailure))
     return false;
   return DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
@@ -226,11 +226,11 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
  long long* totalItems, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON");
 #ifdef MACRO_use_MongoDB
-  logWorker << logger::blue << "Query input JSON: " << findQuery.ToString() << logger::endL;
+  logWorker << logger::blue << "Query input JSON: " << findQuery.ToString(true) << logger::endL;
   //stOutput << "Find query: " << theData.ToString();
   MongoQuery query;
   query.collectionName = collectionName;
-  query.findQuery = findQuery.ToString();
+  query.findQuery = findQuery.ToString(true);
   query.maxOutputItems = maxOutputItems;
   bool result = query.FindMultiple(output, commentsOnFailure);
   if (totalItems != 0)
@@ -264,27 +264,26 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
   return true;
 }
 
-
 bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
 (const std::string& collectionName, const JSData& findQuery,
  JSData& output, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON");
   std::string outputStringFormat;
-  if (!FindOneFromJSON(collectionName, findQuery, outputStringFormat, commentsOnFailure))
+  if (!FindOneFromJSONnoKeyDecoding(collectionName, findQuery, outputStringFormat, commentsOnFailure))
     return false;
-  return output.readstring(outputStringFormat,commentsOnFailure);
+  return output.readstring(outputStringFormat, true, commentsOnFailure);
 }
 
-bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
+bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSONnoKeyDecoding
 (const std::string& collectionName, const JSData& findQuery,
  std::string& output, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON");
 #ifdef MACRO_use_MongoDB
-  logWorker << logger::blue << "Query input: " << findQuery.ToString() << logger::endL;
   MongoQuery query;
 
   query.collectionName = collectionName;
-  query.findQuery = findQuery.ToString();
+  query.findQuery = findQuery.ToString(true);
+  logWorker << logger::blue << "Query input: " << query.findQuery << logger::endL;
   query.maxOutputItems = 1;
   List<std::string> outputList;
   query.FindMultiple(outputList, commentsOnFailure);
@@ -309,11 +308,12 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
 #ifdef MACRO_use_MongoDB
   MongoQuery query;
   query.collectionName = collectionName;
-  query.findQuery = findQuery.ToString();
+  query.findQuery = findQuery.ToString(true);
   std::stringstream updateQueryStream;
-  updateQueryStream << "{\"$set\": " << updateQuery.ToString() << "}";
+  updateQueryStream << "{\"$set\": " << updateQuery.ToString(true) << "}";
   query.updateQuery = updateQueryStream.str();
-//  logWorker << logger::blue << "DEBUG: the update query stream: " << query.updateQuery << logger::endL;
+  logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
+  logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
   return query.UpdateOne(commentsOnFailure);
 #else
   (void) collectionName;
@@ -383,7 +383,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchTable
   { outputRows[i].SetSize(theLabels.size);
     for (int j = 0; j < theLabels.size; j ++)
       if (rowsJSON[i].objects.Contains(theLabels[j]))
-        outputRows[i][j] = rowsJSON[i].GetValue(theLabels[j]).ToString();
+        outputRows[i][j] = rowsJSON[i].GetValue(theLabels[j]).ToString(true);
       else
         outputRows[i][j] = "";
   }
@@ -409,13 +409,13 @@ std::string DatabaseRoutinesGlobalFunctionsMongo::ToHtmlDatabaseCollection(const
   out << "Current table: " << currentTable << "<br>";
   List<std::string> theLabels;
   List<List<std::string> > theRows;
-  long long totalItems = -1;
+  long long totalItems = - 1;
   if (!DatabaseRoutinesGlobalFunctionsMongo::FetchTable(currentTable, theLabels, theRows, &totalItems, &out))
     return out.str();
   out << "Total: " << totalItems << ". ";
   if (totalItems > theRows.size)
     out << "Only the first " << theRows.size << " are displayed. ";
-  out << "<br>" << HtmlRoutines::ToHtmlTable(theLabels, theRows);
+  out << "<br>" << HtmlRoutines::ToHtmlTable(theLabels, theRows, true);
   return out.str();
 
 }

@@ -694,7 +694,7 @@ bool Crypto::VerifyJWTagainstKnownKeys
   //stOutput << "DEBUG:Got to here, part -0.5";
   std::string keyIDstring = "";
   JSData header;
-  if (!header.readstring(theToken.headerJSON))
+  if (!header.readstring(theToken.headerJSON, false))
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "Couldn't load JSON from the user token.";
     return false;
@@ -713,11 +713,11 @@ bool Crypto::VerifyJWTagainstKnownKeys
   if (commentsGeneral != 0)
     *commentsGeneral << "Seeking key: <span style=\"color:brown\"><b>"
     << keyIDstring << "</b></span>. ";
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; i ++)
   { Crypto::LoadKnownCertificates(commentsOnFailure, commentsGeneral);
     //if (commentsOnFailure!=0)
     //  *commentsOnFailure << "DEBUG: got to after loading certificates.";
-    for (int j = 0; j < Crypto::knownCertificates.size; j++)
+    for (int j = 0; j < Crypto::knownCertificates.size; j ++)
       if (keyIDstring == Crypto::knownCertificates[j].keyid)
       { theIndex = j;
         //if (commentsGeneral!=0)
@@ -786,7 +786,7 @@ bool WebCrawler::VerifyRecaptcha
   << secret;
   this->flagDoUseGET = true;
   this->addressToConnectTo = "https://www.google.com/recaptcha/api/siteverify";;
-  this->addressToConnectTo += "?"+messageToSendStream.str();
+  this->addressToConnectTo += "?" + messageToSendStream.str();
   this->serverToConnectTo = "www.google.com";
   this->portOrService = "https";
   this->postMessageToSend = messageToSendStream.str();

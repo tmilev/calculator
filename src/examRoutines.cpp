@@ -108,35 +108,26 @@ bool CalculatorHTML::ReadProblemInfoAppend
   return true;
 }
 
-void CalculatorHTML::StoreProblemWeightInfo
-(std::string& outputString,
- MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo)
+JSData CalculatorHTML::ToJSONProblemWeights
+(MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo)
 { MacroRegisterFunctionWithName("CalculatorHTML::StoreProblemWeightInfo");
-  std::stringstream out;
+  JSData output;
   for (int i = 0; i < inputProblemInfo.size(); i ++)
   { ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
     if (currentProblem.problemWeightsPerCoursE.size() == 0)
       continue;
-    std::string currentProblemName=inputProblemInfo.theKeys[i];
-    std::stringstream currentProblemStream, currentWeightStream;
+    std::string currentProblemName = inputProblemInfo.theKeys[i];
+    JSData currentProblemJSON;
     for (int j = 0; j < currentProblem.problemWeightsPerCoursE.size(); j ++)
-    { std::string currentWeight = MathRoutines::StringTrimWhiteSpace
-      (currentProblem.problemWeightsPerCoursE.theValues[j]);
+    { std::string currentWeight = MathRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theValues[j]);
       if (currentWeight == "")
         continue;
-      std::string currentCourse = MathRoutines::StringTrimWhiteSpace
-      (currentProblem.problemWeightsPerCoursE.theKeys[j]);
-      currentWeightStream
-      << HtmlRoutines::ConvertStringToURLString(currentCourse, false)
-      << "="
-      << HtmlRoutines::ConvertStringToURLString(currentWeight, false)
-      << "&";
+      std::string currentCourse = MathRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theKeys[j]);
+      currentProblemJSON[currentCourse] = currentWeight;
     }
-    currentProblemStream << "weights=" << HtmlRoutines::ConvertStringToURLString(currentWeightStream.str(), false) << "&";
-    out << HtmlRoutines::ConvertStringToURLString(currentProblemName, false) << "="
-    << HtmlRoutines::ConvertStringToURLString(currentProblemStream.str(), false) << "&";
+    output[currentProblemName] = currentProblemJSON;
   }
-  outputString = out.str();
+  return output;
 }
 
 void CalculatorHTML::StoreDeadlineInfo
@@ -167,39 +158,23 @@ void CalculatorHTML::StoreDeadlineInfo
   outputString = out.str();
 }
 
-bool DatabaseRoutineS::ReadProblemDatabaseInfo
-(const std::string& problemHomeName, std::string& outputString,
- std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemDatabaseInfo");
-  (void) problemHomeName;
-  (void) outputString;
-  (void) commentsOnFailure;
-  crash << "Not implemented yet" << crash;
-  return false;
-}
-
 bool DatabaseRoutineS::StoreProblemDatabaseInfo
 (const UserCalculatorData& theUser, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
-  (void) theUser;
-  (void) commentsOnFailure;
-/*  if (!this->startMySQLDatabaseIfNotAlreadyStarted(&commentsOnFailure))
-      return false;
-  if (!this->SetEntry
-      (DatabaseStrings::columnDeadlinesSchema,
-       theUser.courseInfo.deadlineSchemaIDComputed,
-       DatabaseStrings::tableDeadlines,
-       DatabaseStrings::columnDeadlines,
-       theUser.courseInfo.deadlinesString, &commentsOnFailure))
+  JSData findQueryWeights, setQueryWeights, findQueryDeadlines, setQueryDeadlines;
+  findQueryWeights[DatabaseStrings::labelProblemWeightsSchema] = theUser.problemWeightSchema;
+  findQueryDeadlines[DatabaseStrings::labelDeadlinesSchema] = theUser.deadlineSchema;
+  JSData problemWeightsParsed, deadlinesParsed;
+  problemWeightsParsed.readstring(theUser.problemWeightString, false);
+  deadlinesParsed.readstring(theUser.deadlinesString, false);
+  setQueryWeights[DatabaseStrings::labelProblemWeights] = problemWeightsParsed;
+  setQueryDeadlines[DatabaseStrings::labelDeadlines] = deadlinesParsed;
+  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+       (DatabaseStrings::tableProblemWeights, findQueryWeights, setQueryWeights, &commentsOnFailure))
     return false;
-  if (!this->SetEntry
-      (DatabaseStrings::columnProblemWeightsSchema,
-       theUser.courseInfo.problemWeightSchemaIDComputed,
-       DatabaseStrings::tableProblemWeights,
-       DatabaseStrings::columnProblemWeights,
-       theUser.courseInfo.problemWeightString, &commentsOnFailure))
-    return false;*/
-  crash << "Not implemented yet" << crash;
+  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+       (DatabaseStrings::tableDeadlines, findQueryDeadlines, setQueryDeadlines, &commentsOnFailure))
+    return false;
   return true;
 }
 
@@ -249,37 +224,24 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
 (std::string& incomingProblemInfo, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
   //stOutput << "DEBUG: Here I am, merging in data: " << incomingProblemInfo;
-  MapLisT<std::string, ProblemData, MathRoutines::hashString>
-  incomingProblems;
-//  stOutput << "<hr>DEBUG: merging problem info with stack trace: "
-//  << crash.GetStackTraceEtcErrorMessage()
-  //<< incomingProblemInfo
-//  ;
-  if (!this->ReadProblemInfoAppend
-      (incomingProblemInfo, incomingProblems, commentsOnFailure))
+  MapLisT<std::string, ProblemData, MathRoutines::hashString> incomingProblems;
+  if (!this->ReadProblemInfoAppend(incomingProblemInfo, incomingProblems, commentsOnFailure))
   { commentsOnFailure << "Failed to parse your request";
     return false;
   }
   bool result = true;
   //stOutput << "<hr><hr>Debug: incoming problems: " << incomingProblems.ToStringHtml();
   for (int i = 0; i < incomingProblems.size(); i ++)
-    if (!this->MergeOneProblemAdminData
-        (incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
+    if (!this->MergeOneProblemAdminData(incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
       result = false;
-  //stOutput << "<hr><hr>Debug: after merge, resulting MERGED probs: "
-  //<< this->currentUseR.theProblemData.ToStringHtml() << "<hr>";
   this->StoreDeadlineInfo
-  (theGlobalVariables.userDefault.deadlinesString,
-   this->currentUseR.theProblemData);
+  (theGlobalVariables.userDefault.deadlinesString, this->currentUseR.theProblemData);
   //stOutput << "<hr>Debug: about to store WEIGHT with row id: "
   //<< this->currentUseR.problemInfoRowId.value << "<hr>";
   //stOutput << "<hr>About to transform to database string: "
   //<< this->currentUseR.theProblemData.ToStringHtml()
   //<< "<hr>";
-
-  this->StoreProblemWeightInfo
-  (theGlobalVariables.userDefault.problemWeightString,
-   this->currentUseR.theProblemData);
+  theGlobalVariables.userDefault.problemWeightString = this->ToJSONProblemWeights(this->currentUseR.theProblemData).ToString(false);
   //theGlobalVariables.userDefault=this->currentUseR;
   //stOutput << "<hr>Resulting string: "
   //<< theGlobalVariables.userDefault.problemInfoString.value
@@ -502,7 +464,7 @@ bool CalculatorHTML::IsStateModifierApplyIfYes(SyntacticElementHTML& inputElt)
 std::string CalculatorHTML::GetJavascriptSubmitAnswers()
 { std::stringstream out;
   std::string requestTypeSubmit, requestTypePreview, requestGiveUp, requestSolution;
-  bool submitRandomSeed=false;
+  bool submitRandomSeed = false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
   { requestTypeSubmit  = "submitProblem";
     requestTypePreview = "submitProblemPreview";
@@ -4012,6 +3974,7 @@ void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput
     return;
   }
   bool plainStyle = (inputOutput.GetKeyValue("topicListStyle") == "plain");
+  out << "DEBUG: course problem weight id: " << theGlobalVariables.userDefault.problemWeightSchema;
   out << "<div class=\"headChapter\">Lecture materials "
   << "<button id=\"buttonToggleCourseInfo\" class=\"buttonToggleTopics\" "
   << "onclick=\"toggleHeight(this,'tableWithLectureMaterialsFull')\">&#9650;</button>"
@@ -4081,8 +4044,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     outHead << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
     << " out of " << this->currentUseR.pointsMax.GetDoubleValue()
     << " points earned.</panelStudentScores>"
-    << "<button id=\"buttonToggleCourseInfo\" class=\"buttonToggleTopics\" onclick=\"toggleHeight(this,'bodyCourseInformation')\">&#9650;</button><br>\n"
-    ;
+    << "<button id=\"buttonToggleCourseInfo\" class=\"buttonToggleTopics\" onclick=\"toggleHeight(this,'bodyCourseInformation')\">&#9650;</button><br>\n";
     outHead << "<div class =\"bodySection\" id = \"bodyCourseInformation\">"
     << "<small>Includes problems without deadline, but not problems without weights.<br> "
     << "If a problem is assigned a new weight, your % score may drop. </small><br>";

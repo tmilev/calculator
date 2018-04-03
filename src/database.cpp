@@ -61,8 +61,8 @@ bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights()
 #ifdef MACRO_use_MySQL
   if (!theGlobalVariables.flagLoggedIn)
     return false;
-  crash << "Not implemented yet" << crash;
-  return false;
+  return theGlobalVariables.userDefault.userRole == "admin" || theGlobalVariables.userDefault.userRole == "instructor"
+  || theGlobalVariables.userDefault.userRole == "teacher";
 #else
   return false;
 #endif
@@ -314,59 +314,24 @@ bool UserCalculator::LoadFromDB
   (void) commentsGeneral;
   if (!DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(*this))
     return false;
-  return true;
-  /*this->courseInfo.rawStringStoredInDB =
-  this->GetSelectedRowEntry(DatabaseStrings::labelCourseInfo);
-  if (this->courseInfo.rawStringStoredInDB == "" || this->GetSelectedRowEntry("userInfo") != "")
-  { if (commentsGeneral != 0)
-      this->ComputeCourseInfoFromOtherEntriesOld(theRoutines, failureStream, commentsGeneral);
-    else
-      this->ComputeCourseInfoFromOtherEntriesOld(theRoutines, failureStream, failureStream);
-  }
-  this->AssignCourseInfoString(failureStream);
-  std::string reader;
+  this->ComputeCourseInfo();
   //stOutput << "DEBUG:  GOT to hereE!!!";
-  if (this->courseInfo.deadlineSchemaIDComputed != "")
+  if (this->deadlineSchema != "")
   { //stOutput << "DEBUG: Fetching deadline schema id: " << this->courseInfo.deadlineSchemaIDComputed;
-    std::stringstream localFailureStream;
-    if (theRoutines.FetchEntry
-        (DatabaseStrings::columnDeadlinesSchema,
-         this->courseInfo.deadlineSchemaIDComputed,
-         DatabaseStrings::tableDeadlines,
-         DatabaseStrings::columnDeadlines,
-         reader,
-         &localFailureStream))
-      this->courseInfo.deadlinesString = reader;
-    else if(!theRoutines.InsertRow
-        (DatabaseStrings::columnDeadlinesSchema,
-         this->courseInfo.deadlineSchemaIDComputed,
-         DatabaseStrings::tableDeadlines,
-         &localFailureStream))
-      if (failureStream != 0)
-        *failureStream << localFailureStream.str();
-    //stOutput << "DEBUG: Fetched deadline string: " << this->courseInfo.deadlinesString;
+    JSData findDeadlinesQuery, outDeadlinesQuery;
+    findDeadlinesQuery[DatabaseStrings::labelDeadlinesSchema] = this->deadlineSchema;
+    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableDeadlines, findDeadlinesQuery, outDeadlinesQuery, failureStream))
+      this->deadlinesString = outDeadlinesQuery[DatabaseStrings::labelDeadlines].string;
   }
   //  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
   //  << " this->currentCoursesInfoString:  " << this->currentCoursesInfoString.value;
   //stOutput << "DEBUG: problem info row id: " << this->problemInfoRowId.value;
-  if (this->courseInfo.problemWeightSchemaIDComputed != "")
-  { std::stringstream localFailureStream;
-    if (theRoutines.FetchEntry
-        (DatabaseStrings::columnProblemWeightsSchema,
-         this->courseInfo.problemWeightSchemaIDComputed,
-         DatabaseStrings::tableProblemWeights,
-         DatabaseStrings::columnProblemWeights,
-         reader,
-         &localFailureStream))
-      this->courseInfo.problemWeightString = reader;
-    else if(!theRoutines.InsertRow
-        (DatabaseStrings::columnProblemWeightsSchema,
-         this->courseInfo.problemWeightSchemaIDComputed,
-         DatabaseStrings::tableProblemWeights,
-         &localFailureStream))
-      if (failureStream != 0)
-        *failureStream << localFailureStream.str();
-  }*/
+  if (this->problemWeightSchema != "")
+  { JSData findProblemWeightsQuery, outProblemWeightsQuery;
+    findProblemWeightsQuery[DatabaseStrings::labelProblemWeightsSchema] = this->problemWeightSchema;
+    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableDeadlines, findProblemWeightsQuery, outProblemWeightsQuery, failureStream))
+      this->problemWeightString = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights].string;
+  }
   return true;
 }
 
@@ -844,8 +809,7 @@ JSData UserCalculator::GetFindMeFromUserNameQuery()
   return result;
 }
 
-bool UserCalculator::StoreProblemDataToDatabase
-(std::stringstream& commentsOnFailure)
+bool UserCalculator::StoreProblemDataToDatabase(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabase");
   std::stringstream problemDataStream;
   for (int i = 0; i < this->theProblemData.size(); i ++)

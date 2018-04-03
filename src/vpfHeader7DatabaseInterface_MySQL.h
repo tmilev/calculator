@@ -18,8 +18,7 @@ public:
   static bool SetPassword
   (const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
    std::stringstream& comments);
-  static bool UserExists
-  (const std::string& inputUsername, std::stringstream& comments);
+  static bool UserExists(const std::string& inputUsername, std::stringstream& comments);
   static bool UserDefaultHasInstructorRights();
 };
 
@@ -53,13 +52,13 @@ public:
   bool IsCommentBeforeInterpretation();
   bool IsCommentBeforeSubmission();
   bool IsAnswerOnGiveUp();
-  std::string GetKeyValue(const std::string& theKey)const;
+  std::string GetKeyValue(const std::string& theKey) const;
   void SetKeyValue(const std::string& theKey, const std::string& theValue);
   void resetAllExceptContent();
   std::string ToStringInterpretedBody();
   std::string ToStringInterpretedHead();
   std::string ToStringTagAndContent();
-  std::string ToStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose=false);
+  std::string ToStringOpenTag(const std::string& overrideTagIfNonEmpty, bool immediatelyClose = false);
   std::string ToStringCloseTag(const std::string& overrideTagIfNonEmpty);
   std::string GetTagClass();
   std::string ToStringDebug();
@@ -244,11 +243,9 @@ public:
   bool StoreProblemDataToDatabase(std::stringstream& commentsOnFailure);
   std::string GetSelectedRowEntry(const std::string& theKey);
   std::string GetMySQLclauseIdentifyingUserByEmailOrID();
-  bool LoadFromDB
-  (std::stringstream* failureStream, std::stringstream* commentsGeneral = 0);
+  bool LoadFromDB(std::stringstream* failureStream, std::stringstream* commentsGeneral = 0);
   bool FetchOneColumn
-  (const std::string& columnNameUnsafe, std::string& outputUnsafe,
-   std::stringstream* failureComments = 0);
+  (const std::string& columnNameUnsafe, std::string& outputUnsafe, std::stringstream* failureComments = 0);
   void FetchColumns();
   bool AuthenticateWithUserNameAndPass(std::stringstream* commentsOnFailure);
   bool AuthenticateWithToken(std::stringstream* commentsOnFailure);
@@ -264,8 +261,7 @@ public:
   bool GetActivationAbsoluteAddress
   (std::string& output, std::stringstream& comments);
   bool GetActivationAddress
-  (std::string& output, const std::string& calculatorBase,
-   std::stringstream& comments);
+  (std::string& output, const std::string& calculatorBase, std::stringstream& comments);
   static std::string GetActivationAddressFromActivationToken
   (const std::string& theActivationToken, const std::string& calculatorBase,
    const std::string& inputUserNameUnsafe, const std::string& inputEmailUnsafe);
@@ -284,21 +280,14 @@ public:
 class DatabaseRoutineS
 {
 public:
-  static bool ReadProblemDatabaseInfo
-  (const std::string& problemHomeName, std::string& outputString,
-   std::stringstream& commentsOnFailure);
   static bool StoreProblemDatabaseInfo
   (const UserCalculatorData& theUser, std::stringstream& commentsOnFailure);
   static bool SendActivationEmail
-  (const std::string& emailList,
-   std::stringstream* commentsOnFailure,
-   std::stringstream* commentsGeneral,
-   std::stringstream* commentsGeneralSensitive);
+  (const std::string& emailList, std::stringstream* commentsOnFailure,
+   std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive);
   static bool SendActivationEmail
-  (const List<std::string>& theEmails,
-   std::stringstream* commentsOnFailure,
-   std::stringstream* commentsGeneral,
-   std::stringstream* commentsGeneralSensitive);
+  (const List<std::string>& theEmails, std::stringstream* commentsOnFailure,
+   std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive);
   static bool AddUsersFromEmails
   (const std::string& emailList, const std::string& userPasswords,
    std::string& userRole, std::string& userGroup,

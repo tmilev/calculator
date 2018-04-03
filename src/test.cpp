@@ -600,9 +600,9 @@ void PrintCharTable(const somegroup& G, const char* filename)
   if (filename)
   { std::ofstream out;
     out.open(filename);
-    data.IntoStream(out);
+    data.IntoStream(out, false);
   } else
-    data.IntoStream(stOutput);
+    data.IntoStream(stOutput, false);
 }
 
 template <typename somegroup>

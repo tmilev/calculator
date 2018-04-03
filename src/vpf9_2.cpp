@@ -613,24 +613,24 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   }
 //  stOutput << this->ToString(theGlobalVariables) << "<br>";
   Vector<Rational> right;
-  while (NonExplored.CardinalitySelection>0)
-  { for (int i=0; i<NonExplored.CardinalitySelection; i++)
+  while (NonExplored.CardinalitySelection > 0)
+  { for (int i = 0; i < NonExplored.CardinalitySelection; i ++)
     { int theIndex = NonExplored.elements[i];
       const Vector<Rational>& current = this->theDomain().theWeyl.RootSystem[theIndex];
-      for (int j=0; j<NonExplored.MaxSize; j++)
+      for (int j = 0; j < NonExplored.MaxSize; j ++)
         if (!NonExplored.selected[j])
-        { const Vector<Rational>& left= this->theDomain().theWeyl.RootSystem[j];
-          right= current-left;
+        { const Vector<Rational>& left = this->theDomain().theWeyl.RootSystem[j];
+          right = current - left;
 //          left.ComputeDebugString(); right.ComputeDebugString(); current.ComputeDebugString();
           if (this->theDomain().theWeyl.IsARoot(right))
-          { int leftIndex= this->theDomain().theWeyl.RootSystem.GetIndex(left);
-            int rightIndex= this->theDomain().theWeyl.RootSystem.GetIndex(right);
+          { int leftIndex = this->theDomain().theWeyl.RootSystem.GetIndex(left);
+            int rightIndex = this->theDomain().theWeyl.RootSystem.GetIndex(right);
             if (!NonExplored.selected[rightIndex])
-            { ElementSemisimpleLieAlgebra<Rational>& leftDomainElt=tempDomain[leftIndex];
-              ElementSemisimpleLieAlgebra<Rational>& rightDomainElt= tempDomain[rightIndex];
+            { ElementSemisimpleLieAlgebra<Rational>& leftDomainElt = tempDomain[leftIndex];
+              ElementSemisimpleLieAlgebra<Rational>& rightDomainElt = tempDomain[rightIndex];
               this->theDomain().LieBracket(leftDomainElt, rightDomainElt, tempDomain[theIndex]);
-              ElementSemisimpleLieAlgebra<Rational>& leftRangeElt=tempRange[leftIndex];
-              ElementSemisimpleLieAlgebra<Rational>& rightRangeElt= tempRange[rightIndex];
+              ElementSemisimpleLieAlgebra<Rational>& leftRangeElt = tempRange[leftIndex];
+              ElementSemisimpleLieAlgebra<Rational>& rightRangeElt = tempRange[rightIndex];
               this->theRange().LieBracket(leftRangeElt, rightRangeElt, tempRange[theIndex]);
               NonExplored.RemoveSelection(theIndex);
               break;
@@ -639,17 +639,17 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
         }
     }
   }
-  for (int i=0; i<theDomainDimension; i++)
+  for (int i = 0; i < theDomainDimension; i ++)
   { tempRoot.MakeEi(theDomainDimension, i);
-    int leftIndex= this->theDomain().theWeyl.RootSystem.GetIndex(tempRoot);
-    int rightIndex= this->theDomain().theWeyl.RootSystem.GetIndex(-tempRoot);
-    this->theDomain().LieBracket(tempDomain.TheObjects[leftIndex], tempDomain.TheObjects[rightIndex], tempDomain.TheObjects[numRoots+i]);
-    this->theRange().LieBracket(tempRange.TheObjects[leftIndex], tempRange.TheObjects[rightIndex], tempRange.TheObjects[numRoots+i]);
+    int leftIndex = this->theDomain().theWeyl.RootSystem.GetIndex(tempRoot);
+    int rightIndex = this->theDomain().theWeyl.RootSystem.GetIndex(- tempRoot);
+    this->theDomain().LieBracket(tempDomain.TheObjects[leftIndex], tempDomain.TheObjects[rightIndex], tempDomain.TheObjects[numRoots + i]);
+    this->theRange().LieBracket(tempRange.TheObjects[leftIndex], tempRange.TheObjects[rightIndex], tempRange.TheObjects[numRoots + i]);
   }
   Vectors<Rational> vectorsLeft, vectorsRight;
   vectorsLeft.SetSize(tempDomain.size);
   vectorsRight.SetSize(tempDomain.size);
-  for (int i=0; i<tempRange.size; i++)
+  for (int i = 0; i < tempRange.size; i ++)
   { tempDomain[i].ElementToVectorNegativeRootSpacesFirst(vectorsLeft.TheObjects[i]);
     tempRange[i].ElementToVectorNegativeRootSpacesFirst(vectorsRight.TheObjects[i]);
   }
@@ -658,10 +658,9 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   Vector<Rational> imageRoot;
   this->domainAllChevalleyGenerators.SetSize(tempDomain.size);
   this->imagesAllChevalleyGenerators.SetSize(tempDomain.size);
-  ElementSemisimpleLieAlgebra<Rational> tempElt;
-  for (int i=0; i<this->theDomain().GetNumGenerators(); i++)
+  for (int i = 0; i < this->theDomain().GetNumGenerators(); i ++)
     this->domainAllChevalleyGenerators[i].MakeGenerator(i, this->theDomain());
-  for (int i=0; i<this->imagesAllChevalleyGenerators.size; i++)
+  for (int i = 0; i < this->imagesAllChevalleyGenerators.size; i ++)
   { this->domainAllChevalleyGenerators[i].ElementToVectorNegativeRootSpacesFirst(tempRoot);
     tempMat.ActOnVectorColumn(tempRoot, imageRoot);
     this->imagesAllChevalleyGenerators[i].AssignVectorNegRootSpacesCartanPosRootSpaces(imageRoot, this->theRange());
@@ -674,18 +673,18 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
 
 void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output)
 { output.SetSize(input.size);
-  for (int i=0; i<input.size; i++)
+  for (int i = 0; i < input.size; i ++)
     this->ProjectOntoSmallCartan(input[i], output[i]);
 }
 
 void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan(Vector<Rational>& input, Vector<Rational>& output)
 { Matrix<Rational> invertedSmallCartan;
-  invertedSmallCartan=this->theDomain().theWeyl.CartanSymmetric;
+  invertedSmallCartan = this->theDomain().theWeyl.CartanSymmetric;
   invertedSmallCartan.Invert();
-  int theSmallDimension=this->theDomain().theWeyl.CartanSymmetric.NumRows;
+  int theSmallDimension = this->theDomain().theWeyl.CartanSymmetric.NumRows;
   output.MakeZero(theSmallDimension);
-  for (int i=0; i<theSmallDimension; i++)
-    output[i]= this->theRange().theWeyl.RootScalarCartanRoot(this->imagesAllChevalleyGenerators[this->theDomain().theWeyl.RootsOfBorel.size+i].GetCartanPart(), input);
+  for (int i = 0; i < theSmallDimension; i ++)
+    output[i] = this->theRange().theWeyl.RootScalarCartanRoot(this->imagesAllChevalleyGenerators[this->theDomain().theWeyl.RootsOfBorel.size + i].GetCartanPart(), input);
   invertedSmallCartan.ActOnVectorColumn(output, output);
 }
 

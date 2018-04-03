@@ -7,10 +7,10 @@
 ProjectInformationInstance ProjectInfoVpf9_5RootSAsSl2sas(__FILE__, "Root and sl(2) subalgebras of semisimple Lie algebras. ");
 
 void rootSubalgebra::GetCoxeterElement(Matrix<Rational>& output)
-{ int theDim=this->GetAmbientWeyl().GetDim();
+{ int theDim = this->GetAmbientWeyl().GetDim();
   output.MakeIdMatrix(theDim);
-  Matrix<Rational>  tempMat;
-  for (int i=0; i<this->SimpleBasisK.size; i++)
+  Matrix<Rational> tempMat;
+  for (int i = 0; i < this->SimpleBasisK.size; i ++)
   { this->GetAmbientWeyl().GetMatrixReflection(this->SimpleBasisK[i], tempMat);
     output.MultiplyOnTheLeft(tempMat);
   }
@@ -18,15 +18,15 @@ void rootSubalgebra::GetCoxeterElement(Matrix<Rational>& output)
 
 void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2)
 { //this->ComputeRho(true);
-  int theDimension=this->GetAmbientWeyl().GetDim();
-  if (theDimension<2)
+  int theDimension = this->GetAmbientWeyl().GetDim();
+  if (theDimension < 2)
     return;
-  if (this->SimpleBasisK.size<2)
-  { if (this->SimpleBasisK.size==1)
-      outputBasis1=this->SimpleBasisK[0].GetVectorDouble();
+  if (this->SimpleBasisK.size < 2)
+  { if (this->SimpleBasisK.size == 1)
+      outputBasis1 = this->SimpleBasisK[0].GetVectorDouble();
     else
       outputBasis1.MakeEi(theDimension, 0);
-    if(outputBasis1[0]==0)
+    if (outputBasis1[0] == 0)
       outputBasis2.MakeEi(theDimension, 0);
     else
       outputBasis2.MakeEi(theDimension, 1);
@@ -40,30 +40,30 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
 //  tempMat=matCoxeterElt;
   this->ComputeDynkinDiagramKandCentralizer();
   SubgroupWeylGroupOLD tempGroup;
-  int coxeterNumber=1;
-  for (int i=0; i<this->theDynkinDiagram.SimpleBasesConnectedComponents.size; i++)
-  { tempGroup.AmbientWeyl=&this->GetAmbientWeyl();
-    tempGroup.simpleGenerators=this->theDynkinDiagram.SimpleBasesConnectedComponents[i];
+  int coxeterNumber = 1;
+  for (int i = 0; i < this->theDynkinDiagram.SimpleBasesConnectedComponents.size; i ++)
+  { tempGroup.AmbientWeyl = &this->GetAmbientWeyl();
+    tempGroup.simpleGenerators = this->theDynkinDiagram.SimpleBasesConnectedComponents[i];
     tempGroup.ComputeRootSubsystem();
-    Vector<Rational>& lastRoot= *tempGroup.RootSubsystem.LastObject();
+    Vector<Rational>& lastRoot = *tempGroup.RootSubsystem.LastObject();
     Vector<Rational> lastRootInSimpleCoords;
     lastRoot.GetCoordsInBasiS(tempGroup.simpleGenerators, lastRootInSimpleCoords);
-    coxeterNumber=MathRoutines::Maximum(lastRootInSimpleCoords.SumCoords().NumShort, coxeterNumber);
+    coxeterNumber = MathRoutines::Maximum(lastRootInSimpleCoords.SumCoords().NumShort, coxeterNumber);
   }
 //  stOutput << "<hr>the corresponding Coxeter number: " << coxeterNumber;
 //  for (int i=0; i<coxeterNumber-1; i++)
 //    tempMat.MultiplyOnTheLeft(matCoxeterElt);
 //  stOutput << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ToString(true, false);
   CompleX<double> theEigenValue;
-  theEigenValue.Re= FloatingPoint:: cos(2*MathRoutines::Pi()/coxeterNumber);
-  theEigenValue.Im= FloatingPoint:: sin(2*MathRoutines::Pi()/coxeterNumber);
-  Matrix<CompleX<double> > eigenMat, idMat;
+  theEigenValue.Re = FloatingPoint:: cos(2*MathRoutines::Pi() / coxeterNumber);
+  theEigenValue.Im = FloatingPoint:: sin(2*MathRoutines::Pi() / coxeterNumber);
+  Matrix<CompleX<double> > eigenMat;
   eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
-  for (int i =0; i<eigenMat.NumRows; i++)
-    for (int j=0; j<eigenMat.NumCols; j++)
-    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].GetDoubleValue();
-      if (i==j)
-        eigenMat.elements[i][i]-=theEigenValue;
+  for (int i = 0; i < eigenMat.NumRows; i ++)
+    for (int j = 0; j < eigenMat.NumCols; j ++)
+    { eigenMat.elements[i][j] = matCoxeterElt.elements[i][j].GetDoubleValue();
+      if (i == j)
+        eigenMat.elements[i][i] -= theEigenValue;
     }
   List<Vector<CompleX<double> > > theEigenSpaceList;
   eigenMat.GetZeroEigenSpace(theEigenSpaceList);
@@ -71,25 +71,23 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   theEigenSpace.operator=(theEigenSpaceList);
   DrawOperations tempDO;
   tempDO.initDimensions(theDimension, 1);
-  for (int i=0; i<theDimension; i++)
-    for (int j=0; j<theDimension; j++)
-      tempDO.theBilinearForm.elements[i][j]=
+  for (int i = 0; i < theDimension; i ++)
+    for (int j = 0; j < theDimension; j ++)
+      tempDO.theBilinearForm.elements[i][j] =
       this->GetAmbientWeyl().CartanSymmetric.elements[i][j].GetDoubleValue();
-  Vector<double> tempRoot;
   outputBasis1.SetSize(theDimension);
   outputBasis2.SetSize(theDimension);
-  if (theEigenSpace.size>0)
-  { if (coxeterNumber>2)
-    { for (int j=0; j<theDimension; j++)
-      { outputBasis1[j]=theEigenSpace[0][j].Re;
-        outputBasis2[j]=theEigenSpace[0][j].Im;
+  if (theEigenSpace.size > 0)
+  { if (coxeterNumber > 2)
+    { for (int j = 0; j < theDimension; j ++)
+      { outputBasis1[j] = theEigenSpace[0][j].Re;
+        outputBasis2[j] = theEigenSpace[0][j].Im;
       }
-      tempDO.ModifyToOrthonormalNoShiftSecond
-      (outputBasis2, outputBasis1);
-    } else if (coxeterNumber<=2 && theEigenSpace.size>1)
-    { for (int j=0; j<theDimension; j++)
-      { outputBasis1[j]=theEigenSpace[0][j].Re;
-        outputBasis2[j]=theEigenSpace[1][j].Re;
+      tempDO.ModifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
+    } else if (coxeterNumber <= 2 && theEigenSpace.size > 1)
+    { for (int j = 0; j < theDimension; j ++)
+      { outputBasis1[j] = theEigenSpace[0][j].Re;
+        outputBasis2[j] = theEigenSpace[1][j].Re;
       }
       tempDO.ModifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
     }
@@ -97,10 +95,10 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
 }
 
 void rootSubalgebra::ComputeDynkinDiagramKandCentralizer()
-{ this->SimpleBasisK=(this->genK);
+{ this->SimpleBasisK = this->genK;
   this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->GetAmbientWeyl());
-  this->SimpleBasisCentralizerRoots.size=0;
-  for (int i=0; i<this->GetAmbientWeyl().RootsOfBorel.size; i++)
+  this->SimpleBasisCentralizerRoots.size = 0;
+  for (int i = 0; i < this->GetAmbientWeyl().RootsOfBorel.size; i ++)
     if (this->rootIsInCentralizer(this->GetAmbientWeyl().RootsOfBorel[i]))
       this->SimpleBasisCentralizerRoots.AddOnTop(this->GetAmbientWeyl().RootsOfBorel[i]);
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
@@ -109,8 +107,8 @@ void rootSubalgebra::ComputeDynkinDiagramKandCentralizer()
 void rootSubalgebra::ComputeModuleDecompoAmbientAlgebraDimensionsOnly()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputeModuleDecompoAmbientAlgebraDimensionsOnly");
   this->moduleDecompoAmbientAlgebraDimensionsOnly.MakeZero();
-  for (int i=0; i<this->GetNumModules(); i++)
-    this->moduleDecompoAmbientAlgebraDimensionsOnly.AddMonomial(MonomialVector(this->Modules[i].size-1), 1);
+  for (int i = 0; i < this->GetNumModules(); i ++)
+    this->moduleDecompoAmbientAlgebraDimensionsOnly.AddMonomial(MonomialVector(this->Modules[i].size - 1), 1);
 }
 
 void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()

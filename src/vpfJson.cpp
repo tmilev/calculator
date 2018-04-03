@@ -76,7 +76,7 @@ void JSData::readfile(const char* filename)
   std::string json;
   json.resize(f.st_size);
   ifp.read(&json[0], json.size());
-  this->readstring(json);
+  this->readstring(json, false);
 }
 
 void JSData::operator=(const Rational& other)
@@ -207,7 +207,7 @@ bool JSData::Tokenize
 }
 
 bool JSData::readstring
-(const std::string& json, std::stringstream* commentsOnFailure)
+(const std::string& json, bool keysWerePercentEncoded, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("JSData::readstring");
   this->reset();
   List<JSData> theTokenS;
@@ -224,12 +224,13 @@ bool JSData::readstring
     JSData& secondToLast = readingStack[(int) (readingStack.size - 2)];
     JSData& thirdToLast  = readingStack[(int) (readingStack.size - 3)];
     JSData& fourthToLast = readingStack[(int) (readingStack.size - 4)];
-    //JSData& fifthToLast=theTokenS[i-4];
-    if (fourthToLast.type == JSData::JSopenBrace &&
-        thirdToLast.type  == JSData::JSstring &&
-        secondToLast.type == JSData::JScolon &&
-        last.IsValidElement())
-    { fourthToLast.objects.SetKeyValue(thirdToLast.string, last);
+    //JSData& fifthToLast=theTokenS[i - 4];
+    if (fourthToLast.type == JSData::JSopenBrace && thirdToLast.type  == JSData::JSstring &&
+        secondToLast.type == JSData::JScolon && last.IsValidElement())
+    { if (! keysWerePercentEncoded)
+        fourthToLast.objects.SetKeyValue(thirdToLast.string, last);
+      else
+        fourthToLast.objects.SetKeyValue(HtmlRoutines::ConvertURLStringToNormal(thirdToLast.string, false), last);
       readingStack.SetSize(readingStack.size - 3);
       continue;
     }
@@ -243,14 +244,11 @@ bool JSData::readstring
       continue;
     }
     if ((secondToLast.type == JSData::JSopenBrace ||
-         secondToLast.type == JSData::JSopenBracket)
-        &&
-        last.type == JSData::JScomma)
+         secondToLast.type == JSData::JSopenBracket) && last.type == JSData::JScomma)
     { readingStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.type == JSData::JSopenBrace &&
-        last.type == JSData::JScloseBrace)
+    if (secondToLast.type == JSData::JSopenBrace && last.type == JSData::JScloseBrace)
     { secondToLast.type = JSData::JSObject;
       readingStack.RemoveLastObject();
       continue;
@@ -294,7 +292,7 @@ bool JSData::readstring
 }
 
 template <typename somestream>
-somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) const
+somestream& JSData::IntoStream(somestream& out, bool percentEncodeKeys, int indentation, bool useHTML) const
 { std::string theIndentation = "";
   for (int i = 0; i < indentation; i ++)
   { if (!useHTML)
@@ -333,7 +331,10 @@ somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) c
     case JSObject:
       out << "{" << newLine;
       for (int i = 0; i < this->objects.size(); i ++)
-      { out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->objects.theKeys[i]) << '"';
+      { if (!percentEncodeKeys)
+          out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->objects.theKeys[i]) << '"';
+        else
+          out << '"' << HtmlRoutines::ConvertStringToURLStringIncludingDots(this->objects.theKeys[i], false) << '"';
         out << ':';
         this->objects.theValues[i].IntoStream(out, indentation, useHTML);
         if (i != this->objects.size() - 1)
@@ -408,7 +409,7 @@ somestream& JSData::IntoStream(somestream& out, int indentation, bool useHTML) c
 void JSData::writefile(const char* filename) const
 { std::ofstream out;
   out.open(filename);
-  this->IntoStream(out);
+  this->IntoStream(out, false);
 }
 
 void JSData::reset(char inputType)
@@ -420,13 +421,13 @@ void JSData::reset(char inputType)
   this->objects.Clear();
 }
 
-std::string JSData::ToString(bool useHTML) const
+std::string JSData::ToString(bool percentEncodeKeysIncludingDots, bool useHTML) const
 { std::stringstream out;
-  this->IntoStream(out, 2, useHTML);
+  this->IntoStream(out, percentEncodeKeysIncludingDots, 2, useHTML);
   return out.str();
 }
 
 std::ostream& operator<<(std::ostream& out, const JSData& data)
-{ return data.IntoStream(out);
+{ return data.IntoStream(out, false);
 }
 

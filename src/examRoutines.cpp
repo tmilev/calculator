@@ -165,8 +165,8 @@ bool DatabaseRoutineS::StoreProblemDatabaseInfo
   findQueryWeights[DatabaseStrings::labelProblemWeightsSchema] = theUser.problemWeightSchema;
   findQueryDeadlines[DatabaseStrings::labelDeadlinesSchema] = theUser.deadlineSchema;
   JSData problemWeightsParsed, deadlinesParsed;
-  problemWeightsParsed.readstring(theUser.problemWeightString, false);
-  deadlinesParsed.readstring(theUser.deadlinesString, false);
+  problemWeightsParsed.readstrinG(theUser.problemWeightString, false, &commentsOnFailure);
+  deadlinesParsed.readstrinG(theUser.deadlinesString, false, &commentsOnFailure);
   setQueryWeights[DatabaseStrings::labelProblemWeights] = problemWeightsParsed;
   setQueryDeadlines[DatabaseStrings::labelDeadlines] = deadlinesParsed;
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON

@@ -79,74 +79,140 @@ unsigned char Crypto::GetCharFrom6bit(uint32_t input)
   return -1;
 }
 
+bool Crypto::GetBase58FromChar(unsigned char input, uint32_t& output)
+{ switch (input)
+  { case '0': output = 0;  return true;
+    case '1': output = 1;  return true;
+    case '2': output = 2;  return true;
+    case '3': output = 3;  return true;
+    case '4': output = 4;  return true;
+    case '5': output = 5;  return true;
+    case '6': output = 6;  return true;
+    case '7': output = 7;  return true;
+    case '8': output = 8;  return true;
+    case '9': output = 9;  return true;
+    case 'A': output = 10; return true;
+    case 'B': output = 11; return true;
+    case 'C': output = 12; return true;
+    case 'D': output = 13; return true;
+    case 'E': output = 14; return true;
+    case 'F': output = 15; return true;
+    case 'G': output = 16; return true;
+    case 'H': output = 17; return true;
+    case 'J': output = 18; return true;
+    case 'K': output = 19; return true;
+    case 'M': output = 20; return true;
+    case 'L': output = 21; return true;
+    case 'P': output = 22; return true;
+    case 'Q': output = 23; return true;
+    case 'R': output = 24; return true;
+    case 'S': output = 25; return true;
+    case 'T': output = 26; return true;
+    case 'U': output = 27; return true;
+    case 'V': output = 28; return true;
+    case 'W': output = 29; return true;
+    case 'X': output = 30; return true;
+    case 'Y': output = 31; return true;
+    case 'Z': output = 32; return true;
+    case 'a': output = 33; return true;
+    case 'b': output = 34; return true;
+    case 'c': output = 35; return true;
+    case 'd': output = 36; return true;
+    case 'e': output = 37; return true;
+    case 'f': output = 38; return true;
+    case 'g': output = 39; return true;
+    case 'h': output = 40; return true;
+    case 'i': output = 41; return true;
+    case 'j': output = 42; return true;
+    case 'k': output = 43; return true;
+    case 'm': output = 44; return true;
+    case 'n': output = 45; return true;
+    case 'o': output = 46; return true;
+    case 'p': output = 47; return true;
+    case 'q': output = 48; return true;
+    case 'r': output = 49; return true;
+    case 's': output = 50; return true;
+    case 't': output = 51; return true;
+    case 'u': output = 52; return true;
+    case 'v': output = 53; return true;
+    case 'w': output = 54; return true;
+    case 'x': output = 55; return true;
+    case 'y': output = 56; return true;
+    case 'z': output = 57; return true;
+    default: return false;
+  }
+  return false;
+}
+
+
 bool Crypto::Get6bitFromChar(unsigned char input, uint32_t& output)
 { switch (input)
-  { case 'A': output= 0;  return true;
-    case 'B': output= 1;  return true;
-    case 'C': output= 2;  return true;
-    case 'D': output= 3;  return true;
-    case 'E': output= 4;  return true;
-    case 'F': output= 5;  return true;
-    case 'G': output= 6;  return true;
-    case 'H': output= 7;  return true;
-    case 'I': output= 8;  return true;
-    case 'J': output= 9;  return true;
-    case 'K': output= 10; return true;
-    case 'L': output= 11; return true;
-    case 'M': output= 12; return true;
-    case 'N': output= 13; return true;
-    case 'O': output= 14; return true;
-    case 'P': output= 15; return true;
-    case 'Q': output= 16; return true;
-    case 'R': output= 17; return true;
-    case 'S': output= 18; return true;
-    case 'T': output= 19; return true;
-    case 'U': output= 20; return true;
-    case 'V': output= 21; return true;
-    case 'W': output= 22; return true;
-    case 'X': output= 23; return true;
-    case 'Y': output= 24; return true;
-    case 'Z': output= 25; return true;
-    case 'a': output= 26; return true;
-    case 'b': output= 27; return true;
-    case 'c': output= 28; return true;
-    case 'd': output= 29; return true;
-    case 'e': output= 30; return true;
-    case 'f': output= 31; return true;
-    case 'g': output= 32; return true;
-    case 'h': output= 33; return true;
-    case 'i': output= 34; return true;
-    case 'j': output= 35; return true;
-    case 'k': output= 36; return true;
-    case 'l': output= 37; return true;
-    case 'm': output= 38; return true;
-    case 'n': output= 39; return true;
-    case 'o': output= 40; return true;
-    case 'p': output= 41; return true;
-    case 'q': output= 42; return true;
-    case 'r': output= 43; return true;
-    case 's': output= 44; return true;
-    case 't': output= 45; return true;
-    case 'u': output= 46; return true;
-    case 'v': output= 47; return true;
-    case 'w': output= 48; return true;
-    case 'x': output= 49; return true;
-    case 'y': output= 50; return true;
-    case 'z': output= 51; return true;
-    case '0': output= 52; return true;
-    case '1': output= 53; return true;
-    case '2': output= 54; return true;
-    case '3': output= 55; return true;
-    case '4': output= 56; return true;
-    case '5': output= 57; return true;
-    case '6': output= 58; return true;
-    case '7': output= 59; return true;
-    case '8': output= 60; return true;
-    case '9': output= 61; return true;
-    case '-': output= 62; return true;//RFC 7515 mandates these values.
-    case '_': output= 63; return true;//RFC 7515 mandates these values.
-    case '+': output= 62; return true;//Orinal base64, RFC 1421, deprecated (wikipedia).
-    case '/': output= 63; return true;//Orinal base64, RFC 1421, deprecated (wikipedia).
+  { case 'A': output = 0;  return true;
+    case 'B': output = 1;  return true;
+    case 'C': output = 2;  return true;
+    case 'D': output = 3;  return true;
+    case 'E': output = 4;  return true;
+    case 'F': output = 5;  return true;
+    case 'G': output = 6;  return true;
+    case 'H': output = 7;  return true;
+    case 'I': output = 8;  return true;
+    case 'J': output = 9;  return true;
+    case 'K': output = 10; return true;
+    case 'L': output = 11; return true;
+    case 'M': output = 12; return true;
+    case 'N': output = 13; return true;
+    case 'O': output = 14; return true;
+    case 'P': output = 15; return true;
+    case 'Q': output = 16; return true;
+    case 'R': output = 17; return true;
+    case 'S': output = 18; return true;
+    case 'T': output = 19; return true;
+    case 'U': output = 20; return true;
+    case 'V': output = 21; return true;
+    case 'W': output = 22; return true;
+    case 'X': output = 23; return true;
+    case 'Y': output = 24; return true;
+    case 'Z': output = 25; return true;
+    case 'a': output = 26; return true;
+    case 'b': output = 27; return true;
+    case 'c': output = 28; return true;
+    case 'd': output = 29; return true;
+    case 'e': output = 30; return true;
+    case 'f': output = 31; return true;
+    case 'g': output = 32; return true;
+    case 'h': output = 33; return true;
+    case 'i': output = 34; return true;
+    case 'j': output = 35; return true;
+    case 'k': output = 36; return true;
+    case 'l': output = 37; return true;
+    case 'm': output = 38; return true;
+    case 'n': output = 39; return true;
+    case 'o': output = 40; return true;
+    case 'p': output = 41; return true;
+    case 'q': output = 42; return true;
+    case 'r': output = 43; return true;
+    case 's': output = 44; return true;
+    case 't': output = 45; return true;
+    case 'u': output = 46; return true;
+    case 'v': output = 47; return true;
+    case 'w': output = 48; return true;
+    case 'x': output = 49; return true;
+    case 'y': output = 50; return true;
+    case 'z': output = 51; return true;
+    case '0': output = 52; return true;
+    case '1': output = 53; return true;
+    case '2': output = 54; return true;
+    case '3': output = 55; return true;
+    case '4': output = 56; return true;
+    case '5': output = 57; return true;
+    case '6': output = 58; return true;
+    case '7': output = 59; return true;
+    case '8': output = 60; return true;
+    case '9': output = 61; return true;
+    case '-': output = 62; return true;//RFC 7515 mandates these values.
+    case '_': output = 63; return true;//RFC 7515 mandates these values.
+    case '+': output = 62; return true;//Orinal base64, RFC 1421, deprecated (wikipedia).
+    case '/': output = 63; return true;//Orinal base64, RFC 1421, deprecated (wikipedia).
     //Note: there is no collision between the original base64 and RFC 7515,
     //both can be supported for input.
     case '=': return false;
@@ -170,44 +236,44 @@ bool Crypto::ConvertBase64ToBitStream
  std::stringstream* commentsOnFailure,
  std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("Crypto::Base64ToBitStream");
-  output.Reserve((3*input.size())/4+1);
+  output.Reserve((3 * input.size()) / 4 + 1);
   output.SetSize(0);
-  uint32_t theStack=0, sixBitDigit=0;
-  int numBitsInStack=0;
-  for (unsigned i=0; i<input.size(); i++)
+  uint32_t theStack = 0, sixBitDigit = 0;
+  int numBitsInStack = 0;
+  for (unsigned i = 0; i < input.size(); i ++)
   { if (!Crypto::Get6bitFromChar(input[i], sixBitDigit))
-    { if (input[i]!='=')
-      { if (commentsOnFailure!=0)
+    { if (input[i] != '=')
+      { if (commentsOnFailure != 0)
           *commentsOnFailure << "<hr>Error: the input string: <br>\n"
           << input << "\n<br>had characters outside of base64";
         return false;
       }
-      theStack=0;
-      numBitsInStack+=6;
-      numBitsInStack%=8;
+      theStack = 0;
+      numBitsInStack += 6;
+      numBitsInStack %= 8;
       continue;
     }
-    theStack*=64;
-    theStack+=sixBitDigit;
-    numBitsInStack+=6;
-    if (numBitsInStack==12)
-    { output.AddOnTop(theStack/16);
-      numBitsInStack=4;
-      theStack=theStack%16;
+    theStack *= 64;
+    theStack += sixBitDigit;
+    numBitsInStack += 6;
+    if (numBitsInStack == 12)
+    { output.AddOnTop(theStack / 16);
+      numBitsInStack = 4;
+      theStack=theStack % 16;
     }
-    if (numBitsInStack==8)
+    if (numBitsInStack == 8)
     { output.AddOnTop(theStack);
-      numBitsInStack=0;
-      theStack=0;
+      numBitsInStack = 0;
+      theStack = 0;
     }
-    if (numBitsInStack==10)
-    { output.AddOnTop(theStack/4);
-      numBitsInStack=2;
-      theStack=theStack%4;
+    if (numBitsInStack == 10)
+    { output.AddOnTop(theStack / 4);
+      numBitsInStack = 2;
+      theStack = theStack % 4;
     }
   }
 //  stOutput << "<br>output is: " << output << ", Converted back: " << Crypto::ConvertStringToBase64(output);
-  if (commentsGeneral!=0 && numBitsInStack!=0)
+  if (commentsGeneral != 0 && numBitsInStack != 0)
   { *commentsGeneral << "<br>Base64: input corresponds modulo 8 to " << numBitsInStack
     << " bits. Perhaps the input was not padded correctly with = signs. The input: "
     << input;
@@ -703,6 +769,32 @@ void Crypto::ConvertBitStreamToLargeUnsignedInt
   }
 }
 
+bool Crypto::ConvertBase58ToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output)
+{ output = 0;
+  bool result = true;
+  for (unsigned i = 0; i < input.size(); i ++)
+  { output *= 58;
+    uint32_t currentChar;
+    if (!Crypto::GetBase58FromChar(input[i], currentChar))
+    { result = false;
+      currentChar = 0;
+    }
+    output += currentChar;
+  }
+  return result;
+}
+
+bool Crypto::ConvertBase58ToHex(const std::string& input, std::string& output)
+{ MacroRegisterFunctionWithName("Crypto::ConvertBase58ToHex");
+  LargeIntUnsigned outputLIU;
+  bool result = false;
+  if (! Crypto::ConvertBase58ToLargeIntUnsigned(input, outputLIU))
+    result = false;
+  if (!Crypto::ConvertLargeUnsignedIntToHex(outputLIU, output))
+    return false;
+  return result;
+}
+
 void Crypto::ConvertStringToLargeIntUnsigned
 (const std::string& input, LargeIntUnsigned& output)
 { output=0;
@@ -889,19 +981,19 @@ List<Certificate> Crypto::knownCertificates;
 bool Crypto::LoadOneKnownCertificate
 (const std::string& input, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("Crypto::LoadOneKnownCertificate");
-  if (commentsGeneral!=0)
+  if (commentsGeneral != 0)
     *commentsGeneral << "Loading from: " << input;
   JSData certificateJSON;
-  if (!certificateJSON.readstring(input, commentsOnFailure))
+  if (!certificateJSON.readstrinG(input, commentsOnFailure))
     return false;
   Certificate currentCert;
-  bool isGood=false;
-  if (certificateJSON.type==JSData::JSObject)
+  bool isGood = false;
+  if (certificateJSON.type == JSData::JSObject)
     if (certificateJSON.HasKey("keys"))
-    { JSData theKeys=certificateJSON.GetValue("keys");
-      if (theKeys.type==JSData::JSarray)
-      { isGood=true;
-        for (int i=0; i<theKeys.list.size; i++)
+    { JSData theKeys = certificateJSON.GetValue("keys");
+      if (theKeys.type == JSData::JSarray)
+      { isGood = true;
+        for (int i = 0; i < theKeys.list.size; i ++)
         { if (!currentCert.LoadFromJSON(theKeys.list[i], commentsOnFailure, commentsGeneral))
             return false;
           Crypto::knownCertificates.AddOnTop(currentCert);
@@ -909,7 +1001,7 @@ bool Crypto::LoadOneKnownCertificate
       }
     }
   if (!isGood)
-  { if (commentsOnFailure!=0)
+  { if (commentsOnFailure != 0)
       *commentsOnFailure << "I expected an object with key 'keys'"
       << " consisting of an array of public keys. Instead, I got: "
       << certificateJSON.ToString(true);

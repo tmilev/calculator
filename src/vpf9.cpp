@@ -8396,7 +8396,7 @@ bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective
 std::string HtmlRoutines::ToHtmlTableRowsFromStringContainingJSON(const std::string& theJSON)
 { MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromStringContainingJSON");
   JSData parser;
-  if (!parser.readstring(theJSON, false))
+  if (!parser.readstrinG(theJSON, false))
     return MathRoutines::StringTrimToLengthForDisplay(theJSON, 1000);
   return HtmlRoutines::ToHtmlTableRowsFromJSON(parser);
 }
@@ -8405,7 +8405,7 @@ std::string HtmlRoutines::ToHtmlTableRowsFromJSON(const JSData& input)
 { MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromJSON");
   if (input.type == JSData::JSObject)
   { std::stringstream out;
-    out << "<table>";
+    out << "<table class = \"tableDatabaseItem\">";
     for (int i = 0; i < input.objects.size(); i ++)
       out << "<tr><td>" << input.objects.theKeys[i] << "</td>" << "<td>"
       << HtmlRoutines::ToHtmlTableRowsFromJSON(input.objects.theValues[i]) << "</td>" << "</tr>";
@@ -8414,7 +8414,7 @@ std::string HtmlRoutines::ToHtmlTableRowsFromJSON(const JSData& input)
   }
   if (input.type == JSData::JSarray)
   { std::stringstream out;
-    out << "<table>";
+    out << "<table class = \"tableDatabaseItem\">";
     for (int i = 0; i < input.objects.size(); i ++)
       out << "<tr>" << "<td>"
       << HtmlRoutines::ToHtmlTableRowsFromJSON(input.objects.theValues[i]) << "</td>" << "</tr>";
@@ -8427,7 +8427,7 @@ std::string HtmlRoutines::ToHtmlTableRowsFromJSON(const JSData& input)
 std::string HtmlRoutines::ToHtmlTable(List<std::string>& labels, List<List<std::string> >& content, bool nestTables)
 { MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTable");
   std::stringstream out;
-  out << "<table>";
+  out << "<table class =\"tableDatabase\">";
   out << "<tr>";
   for (int i = 0; i < labels.size; i ++)
     out << "<th>" << MathRoutines::StringTrimToLengthForDisplay(labels[i], 1000) << "</th>";

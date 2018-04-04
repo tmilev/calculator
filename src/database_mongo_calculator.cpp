@@ -22,9 +22,13 @@ bool CalculatorDatabaseFunctions::innerExecuteMongoQuery
     << input[1].ToString() << " as collection name. ";
     inputCollection = input[1].ToString();
   }
-  List<std::string> outputStrings;
+  List<JSData> outputList;
   std::stringstream commentsOnFailure;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromString(inputCollection, inputQuery, outputStrings, - 1, 0, &commentsOnFailure))
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromString(inputCollection, inputQuery, outputList, - 1, 0, &commentsOnFailure))
     return output.AssignValue(commentsOnFailure.str(), theCommands);
-  return output.AssignValue(outputStrings.ToStringCommaDelimited(), theCommands);
+  JSData finalOutput;
+  finalOutput.type = JSData::JSarray;
+  finalOutput.list = outputList;
+
+  return output.AssignValue(HtmlRoutines::ToHtmlTableRowsFromJSON(finalOutput), theCommands);
 }

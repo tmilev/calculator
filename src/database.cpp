@@ -45,7 +45,7 @@ bool DatabaseRoutinesGlobalFunctions::UserExists
     return false;
   JSData theUserQuery;
   theUserQuery[DatabaseStrings::labelUsername] = inputUsername;
-  List<std::string> theUsers;
+  List<JSData> theUsers;
   DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
   (DatabaseStrings::tableUsers, theUserQuery, theUsers, - 1, 0, &comments);
   return theUsers.size > 0;
@@ -429,7 +429,7 @@ bool UserCalculator::Authenticate(std::stringstream* commentsOnFailure)
           theGlobalVariables.hostNoPort == "127.0.0.1")
         *commentsOnFailure << "If this is your first run, set the username to "
         << "admin and enter the password you desire. "
-        << "The password will be automatically set on your first attempt to login. "
+        << "The password will then be automatically set. "
         << "To add further accounts login as admin and go to 'Accounts'. ";
     }
     //stOutput << "<hr>DEBUG: user " << this->username.value << " does not exist. More details: "
@@ -1156,7 +1156,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   if (!theToken.AssignString(userWrapper.enteredGoogleToken, commentsOnFailure))
     return false;
   JSData theData;
-  if (!theData.readstring(theToken.claimsJSON, commentsOnFailure))
+  if (!theData.readstrinG(theToken.claimsJSON, false, commentsOnFailure))
     return false;
   if (theData.GetValue("email").type != JSData::JSstring)
   { if (commentsOnFailure != 0)

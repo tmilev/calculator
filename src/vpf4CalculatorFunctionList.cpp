@@ -378,6 +378,15 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test",
    "TestBase64");
   this->AddOperationInnerHandler
+  ("ConvertBase58ToHex", CalculatorFunctionsGeneral::innerConvertBase58ToHex, "",
+   "Converts Base58 to hex. ",
+   "ConvertBase58ToHex(\"1Cdid9KFAaatwczBwBttQcwXYCpvK8h7FK\");\
+   ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerConvertBase58ToHex",
+   "ConvertBase58ToHex");
+
+  this->AddOperationInnerHandler
   ("CharToBase64", CalculatorFunctionsGeneral::innerCharToBase64, "",
    "Converts characters to bit stream and the bitstream to base64. The character to bit stream conversion is not fixed at the moment and may be \
    system/compiler dependent. I believe that the character to bit stream conversion should be standard for the standard letters in the alphabet.\
@@ -486,37 +495,37 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorFunctionsGeneral::innerTestJSON",
    "TestJSON");
   this->AddOperationInnerHandler
-  ("Base64ToHex", CalculatorFunctionsGeneral::innerBase64ToHex, "",
+  ("ConvertBase64ToHex", CalculatorFunctionsGeneral::innerBase64ToHex, "",
    "Converts base64 string to hexadecimal string. ",
-   "Base64ToHex(\"AQAB\");\
+   "ConvertBase64ToHex(\"AQAB\");\
    ",
    true, false,
    "CalculatorFunctionsGeneral::innerBase64ToHex",
-   "Base64ToHex");
+   "ConvertBase64ToHex");
   this->AddOperationInnerHandler
-  ("HexToInteger", CalculatorFunctionsGeneral::innerHexToInteger, "",
+  ("ConvertHexToInteger", CalculatorFunctionsGeneral::innerHexToInteger, "",
    "Converts a hex string to an integer. ",
-   "HexToInteger(Base64ToHex(\"AQAB\"));\
+   "ConvertHexToInteger(Base64ToHex(\"AQAB\"));\
    ",
    true, false,
    "CalculatorFunctionsGeneral::innerHexToInteger",
-   "HexToInteger");
+   "ConvertHexToInteger");
   this->AddOperationInnerHandler
-  ("IntegerToHex", CalculatorFunctionsGeneral::innerIntegerToHex, "",
+  ("ConvertIntegerToHex", CalculatorFunctionsGeneral::innerIntegerToHex, "",
    "Converts an integer to hex string. ",
-   "IntegerToHex(65537);\
+   "ConvertIntegerToHex(65537);\
    ",
    true, false,
    "CalculatorFunctionsGeneral::innerIntegerToHex",
-   "IntegerToHex");
+   "ConvertIntegerToHex");
   this->AddOperationInnerHandler
-  ("HexToString", CalculatorFunctionsGeneral::innerHexToString, "",
+  ("ConvertHexToString", CalculatorFunctionsGeneral::innerHexToString, "",
    "Converts a hex string to a string. ",
-   "HexToString(\"3031300d060960864801650304020105000420\");\
+   "ConvertHexToString(\"3031300d060960864801650304020105000420\");\
    ",
    true, false,
    "CalculatorFunctionsGeneral::innerHexToString",
-   "HexToString");
+   "ConvertHexToString");
   this->AddOperationInnerHandler
   ("MakeMakefile",
     CalculatorFunctionsGeneral::innerMakeMakeFile, "",

@@ -81,7 +81,7 @@ public:
   bool flagFindOneOnly;
   MongoQuery();
   ~MongoQuery();
-  bool FindMultiple(List<std::string>& output, std::stringstream* commentsOnFailure);
+  bool FindMultiple(List<JSData>& output, std::stringstream* commentsOnFailure);
   bool UpdateOne(std::stringstream* commentsOnFailure);
 };
 
@@ -157,7 +157,7 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
   return true;
 }
 
-bool MongoQuery::FindMultiple(List<std::string>& output, std::stringstream* commentsOnFailure)
+bool MongoQuery::FindMultiple(List<JSData>& output, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("MongoQuery::FindMultiple");
   MongoCollection theCollection(this->collectionName);
   //logWorker << "Query: " << this->findQuery << " inside: " << this->collectionName << logger::endL;
@@ -177,17 +177,22 @@ bool MongoQuery::FindMultiple(List<std::string>& output, std::stringstream* comm
   }
   this->totalItems = 0;
   const bson_t* bufferOutput;
+  List<std::string> outputString;
   while (mongoc_cursor_next(this->cursor, &bufferOutput))
   { char* bufferOutpurStringFormat = 0;
     bufferOutpurStringFormat = bson_as_canonical_extended_json(bufferOutput, NULL);
     std::string current(bufferOutpurStringFormat);
     bson_free(bufferOutpurStringFormat);
     if (this->maxOutputItems <= 0 || this->totalItems < this->maxOutputItems)
-      output.AddOnTop(current);
+      outputString.AddOnTop(current);
     this->totalItems ++;
     if (this->flagFindOneOnly)
       break;
   }
+  output.SetSize(outputString.size);
+  for (int i = 0; i < outputString.size; i ++)
+    output[i].readstrinG(outputString[i], true, commentsOnFailure);
+  //logWorker << logger::red << output.ToStringCommaDelimited();
   return true;
 }
 #endif
@@ -209,12 +214,12 @@ void DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex
 
 bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString
 (const std::string& collectionName, const std::string& findQuery,
- List<std::string>& output, int maxOutputItems,
+ List<JSData>& output, int maxOutputItems,
  long long* totalItems, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromString");
   JSData theData;
   //logWorker << logger::blue << "Query input: " << findQuery << logger::endL;
-  if (!theData.readstring(findQuery, commentsOnFailure))
+  if (!theData.readstrinG(findQuery, true, commentsOnFailure))
     return false;
   return DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
   (collectionName, theData, output, maxOutputItems, totalItems, commentsOnFailure);
@@ -222,11 +227,11 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString
 
 bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
 (const std::string& collectionName, const JSData& findQuery,
- List<std::string>& output, int maxOutputItems,
+ List<JSData>& output, int maxOutputItems,
  long long* totalItems, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON");
 #ifdef MACRO_use_MongoDB
-  logWorker << logger::blue << "Query input JSON: " << findQuery.ToString(true) << logger::endL;
+  //logWorker << logger::blue << "Query input JSON: " << findQuery.ToString(true) << logger::endL;
   //stOutput << "Find query: " << theData.ToString();
   MongoQuery query;
   query.collectionName = collectionName;
@@ -248,35 +253,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
 #endif
 }
 
-bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
-(const std::string& collectionName, const JSData& findQuery,
- List<JSData>& output, int maxOutputItems,
- long long* totalItems, std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON");
-  List<std::string> outputsStringFormat;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(collectionName, findQuery, outputsStringFormat, maxOutputItems, totalItems, commentsOnFailure))
-    return false;
-  //stOutput << "DEBUG: Find query: " << findQuery.ToString();
-  output.SetSize(outputsStringFormat.size);
-  for (int i = 0; i < outputsStringFormat.size; i ++)
-    if (!output[i].readstring(outputsStringFormat[i], commentsOnFailure))
-      return false;
-  return true;
-}
-
 bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
 (const std::string& collectionName, const JSData& findQuery,
  JSData& output, std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON");
-  std::string outputStringFormat;
-  if (!FindOneFromJSONnoKeyDecoding(collectionName, findQuery, outputStringFormat, commentsOnFailure))
-    return false;
-  return output.readstring(outputStringFormat, true, commentsOnFailure);
-}
-
-bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSONnoKeyDecoding
-(const std::string& collectionName, const JSData& findQuery,
- std::string& output, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON");
 #ifdef MACRO_use_MongoDB
   MongoQuery query;
@@ -285,7 +264,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSONnoKeyDecoding
   query.findQuery = findQuery.ToString(true);
   logWorker << logger::blue << "Query input: " << query.findQuery << logger::endL;
   query.maxOutputItems = 1;
-  List<std::string> outputList;
+  List<JSData> outputList;
   query.FindMultiple(outputList, commentsOnFailure);
   if (outputList.size == 0)
     return false;
@@ -366,24 +345,19 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchTable
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FetchTable");
   JSData findQuery;
   findQuery.type = findQuery.JSObject;
-  List<std::string> theRows;
-  DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(tableName, findQuery, theRows, 200, totalItems, commentsOnFailure);
-  HashedList<std::string, MathRoutines::hashString> theLabels;
   List<JSData> rowsJSON;
-  rowsJSON.SetSize(theRows.size);
-  for (int i = 0; i < theRows.size; i ++)
-  { if (!rowsJSON[i].readstring(theRows[i], commentsOnFailure))
-      return false;
+  DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(tableName, findQuery, rowsJSON, 200, totalItems, commentsOnFailure);
+  HashedList<std::string, MathRoutines::hashString> theLabels;
+  for (int i = 0; i < rowsJSON.size; i ++)
     for (int j = 0; j < rowsJSON[i].objects.size(); j++)
       theLabels.AddOnTopNoRepetition(rowsJSON[i].objects.theKeys[j]);
-  }
   outputLabels = theLabels;
   outputRows.SetSize(rowsJSON.size);
   for (int i = 0; i < rowsJSON.size; i ++)
   { outputRows[i].SetSize(theLabels.size);
     for (int j = 0; j < theLabels.size; j ++)
       if (rowsJSON[i].objects.Contains(theLabels[j]))
-        outputRows[i][j] = rowsJSON[i].GetValue(theLabels[j]).ToString(true);
+        outputRows[i][j] = rowsJSON[i].GetValue(theLabels[j]).ToString(false, false);
       else
         outputRows[i][j] = "";
   }

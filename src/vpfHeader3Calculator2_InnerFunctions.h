@@ -54,6 +54,7 @@ public:
   static bool innerBase64ToCharToBase64Test(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBase64ToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerConvertBase58ToHex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerJWTverifyAgainstKnownKeys(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerJWTverifyAgainstRSA256(Calculator& theCommands, const Expression& input, Expression& output);

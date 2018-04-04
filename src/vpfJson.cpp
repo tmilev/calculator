@@ -76,7 +76,7 @@ void JSData::readfile(const char* filename)
   std::string json;
   json.resize(f.st_size);
   ifp.read(&json[0], json.size());
-  this->readstring(json, false);
+  this->readstrinG(json, false);
 }
 
 void JSData::operator=(const Rational& other)
@@ -206,7 +206,7 @@ bool JSData::Tokenize
   return true;
 }
 
-bool JSData::readstring
+bool JSData::readstrinG
 (const std::string& json, bool keysWerePercentEncoded, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("JSData::readstring");
   this->reset();
@@ -253,8 +253,7 @@ bool JSData::readstring
       readingStack.RemoveLastObject();
       continue;
     }
-    if (secondToLast.type == JSData::JSopenBracket &&
-        last.type == JSData::JScloseBracket)
+    if (secondToLast.type == JSData::JSopenBracket && last.type == JSData::JScloseBracket)
     { secondToLast.type = JSData::JSarray;
       readingStack.RemoveLastObject();
       continue;
@@ -322,7 +321,7 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeKeys, int inde
     case JSarray:
       out << "[" << newLine;
       for (int i = 0; i < this->list.size; i ++)
-      { this->list[i].IntoStream(out, indentation, useHTML);
+      { this->list[i].IntoStream(out, percentEncodeKeys, indentation, useHTML);
         if(i != this->list.size - 1)
           out << ", ";
       }
@@ -336,7 +335,7 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeKeys, int inde
         else
           out << '"' << HtmlRoutines::ConvertStringToURLStringIncludingDots(this->objects.theKeys[i], false) << '"';
         out << ':';
-        this->objects.theValues[i].IntoStream(out, indentation, useHTML);
+        this->objects.theValues[i].IntoStream(out, percentEncodeKeys, indentation, useHTML);
         if (i != this->objects.size() - 1)
           out << ", ";
       }

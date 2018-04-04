@@ -45,10 +45,13 @@ public:
    std::stringstream* commentsGeneral=0);
 
   static void ConvertStringToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output);
+  static bool ConvertBase58ToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output);
+  static bool ConvertBase58ToHex(const std::string& input, std::string& output);
   static bool ConvertHexToString(const std::string& input, std::string& output);
   static bool ConvertHexToInteger(const std::string& input, LargeInt& output);
   static bool ConvertStringToHex(const std::string& input, std::string& output);
   static std::string ConvertStringToHex(const std::string& input);
+  static bool GetBase58FromChar(unsigned char input, uint32_t& output);
   static bool Get6bitFromChar(unsigned char input, uint32_t& output);
   static unsigned char GetCharFrom6bit(uint32_t input);
   static void ConvertBitStreamToString(const List<unsigned char>& input, std::string& output);

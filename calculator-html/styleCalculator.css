@@ -466,12 +466,23 @@ div.bodyItem{
 }
 table.tableDatabase {
   border-collapse: collapse;
-  width: 100%;
-  height: 100%;
+/*  width: 100%;
+  height: 100%;*/
 }
 table.tableDatabase td{
   border: 1px solid;
 }
+table.tableDatabase tr:nth-child(odd){
+  background-color: #eeeeee;
+}
+table.tableDatabaseItem{
+  border-collapse: collapse;
+  border: 1px solid;
+}
+table.tableDatabaseItem td{
+  border: 1px solid;
+}
+
 table.tableItem{
   width: 100%;
 }

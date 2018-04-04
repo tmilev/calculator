@@ -102,7 +102,7 @@ public:
   template <typename somestream>
   somestream& IntoStream(somestream& out, bool percentEncodeKeysIncludingDots, int indentation = 0, bool useHTML = false) const;
   void readfile(const char* filename);
-  bool readstring(const std::string& json, bool keysWerePercentEncoded, std::stringstream* commentsOnFailure = 0);
+  bool readstrinG(const std::string& json, bool keysWerePercentEncoded, std::stringstream* commentsOnFailure = 0);
   void TryToComputeType();
   static bool Tokenize(const std::string& input, List<JSData>& output);
   void writefile(const char* filename) const;

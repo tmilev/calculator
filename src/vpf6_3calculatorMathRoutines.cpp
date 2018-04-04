@@ -248,6 +248,18 @@ bool CalculatorFunctionsGeneral::innerBase64ToString(Calculator& theCommands, co
   return output.AssignValue(result, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerConvertBase58ToHex(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConvertBase58ToHex");
+  if (!input.IsOfType<std::string>())
+    return false;
+  const std::string& inputString = input.GetValue<std::string>();
+  std::string outputString;
+  if (!Crypto::ConvertBase58ToHex(inputString, outputString))
+    theCommands << "Failed to convert " << inputString << " to hex. ";
+  return output.AssignValue(outputString, theCommands);
+}
+
+
 bool CalculatorFunctionsGeneral::innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCharToBase64");
   if (!input.IsOfType<std::string>())

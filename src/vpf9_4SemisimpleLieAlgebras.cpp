@@ -412,34 +412,34 @@ bool SemisimpleLieAlgebra::TestForConsistency()
 }
 
 Rational SemisimpleLieAlgebra::GetConstant(const Vector<Rational>& root1, const Vector<Rational>& root2)
-{ int index1=this->theWeyl.RootSystem.GetIndex(root1);
-  int index2= this->theWeyl.RootSystem.GetIndex(root2);
-  if (index1==-1 || index2==-1)
+{ int index1 = this->theWeyl.RootSystem.GetIndex(root1);
+  int index2 = this->theWeyl.RootSystem.GetIndex(root2);
+  if (index1 == - 1 || index2 == - 1)
     return 0;
-  return this->ChevalleyConstants(index1,index2);
+  return this->ChevalleyConstants(index1, index2);
 }
 
 bool SemisimpleLieAlgebra::GetConstantOrHElement
 (const Vector<Rational>& root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH)
-{ if (!(root1+root2).IsEqualToZero())
-  { outputRat=this->GetConstant(root1, root2);
+{ if (!(root1 + root2).IsEqualToZero())
+  { outputRat = this->GetConstant(root1, root2);
     return true;
   }
-  if (this->theWeyl.RootSystem.GetIndex(root1)==-1 || this->theWeyl.RootSystem.GetIndex(root2)==-1)
+  if (this->theWeyl.RootSystem.GetIndex(root1) == - 1 || this->theWeyl.RootSystem.GetIndex(root2) == - 1)
   { outputRat.MakeZero();
     return true;
   }
-  outputH=(root1*2)/Vector<Rational>::ScalarProduct(root1, root1, this->theWeyl.CartanSymmetric);
+  outputH = (root1 * 2) / Vector<Rational>::ScalarProduct(root1, root1, this->theWeyl.CartanSymmetric);
   return false;
 }
 
 void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total)
-{ if (theGlobalVariables.IndicatorStringOutputFunction==0)
+{ if (theGlobalVariables.IndicatorStringOutputFunction == 0)
     return;
   std::stringstream out2, out3;
-  int x=(i*Total*Total+j*Total+k+1);
-  out2 << "i: " << i+1 << " of " << Total << " j: " << j+1 << " of " << Total << " k: " << k+1 << " of " << Total;
-  out3 << "Total progress: " << x << " out of " << (Total*Total*Total);
+  int x = (i * Total * Total + j * Total + k + 1);
+  out2 << "i: " << i + 1 << " of " << Total << " j: " << j + 1 << " of " << Total << " k: " << k + 1 << " of " << Total;
+  out3 << "Total progress: " << x << " out of " << (Total * Total * Total);
   ProgressReport theReport;
-  theReport.Report(out2.str()+out3.str());
+  theReport.Report(out2.str() + out3.str());
 }

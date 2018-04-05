@@ -117,14 +117,13 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   theProblem.topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
   std::stringstream commentsOnFailure;
   if (!theProblem.LoadAndParseTopicList(commentsOnFailure))
-    return "Failed to load topic list from file name: " + theProblem.topicListFileName + ". "+ commentsOnFailure.str();
+    return "Failed to load topic list from file name: " + theProblem.topicListFileName + ". " + commentsOnFailure.str();
   //stOutput << "DEBUG: userDefault: " << theGlobalVariables.userDefault.ToStringUnsecure();
   theProblem.currentUseR.UserCalculatorData::operator=(theGlobalVariables.userDefault);
   std::stringstream out;
-  if(!theProblem.PrepareSectionList(commentsOnFailure))
+  if (!theProblem.PrepareSectionList(commentsOnFailure))
   { out << "<span style=\"color:red\"><b>Failed to prepare section list. </b></span>" << commentsOnFailure.str();
     return out.str();
-
   }
   if (!theProblem.ReadProblemInfoAppend
       (theProblem.currentUseR.deadlinesString, theProblem.currentUseR.theProblemData, out))
@@ -199,8 +198,7 @@ std::string HtmlInterpretation::GetCommentsInterpretation
   bool resultIsPlot = false;
   if (!currentE.StartsWith(theInterpreterWithAdvice.opEndStatement()))
   { //out << "<hr>DEBUG: currentE is not starting with commands!<hr>";
-    out << HtmlInterpretation::GetSanitizedComment
-    (currentE, theFormat, resultIsPlot);
+    out << HtmlInterpretation::GetSanitizedComment(currentE, theFormat, resultIsPlot);
     return out.str();
   }
   //out << "<hr>DEBUG: case currentE is commandList!<hr>CurrentE: "
@@ -1225,13 +1223,11 @@ std::string HtmlInterpretation::SubmitProblem
         secondsTillDeadline *= - 1;
       if (deadLinePassed)
         out << "<tr><td><span style=\"color:red\"><b>Submission "
-        << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
-        (secondsTillDeadline, false, false)
+        << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, false)
         << " after deadline. </b></span></td></tr>";
       else
         out << "<tr><td><span style=\"color:green\"><b>Submission "
-        << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
-        (secondsTillDeadline, false, false)
+        << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, false)
         << " before deadline. </b></span></td></tr>";
     } else
       out << "<tr><td><span style=\"color:green\"><b>No deadline yet.</b></span></td></tr>";
@@ -1925,7 +1921,6 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
 #ifdef MACRO_use_MySQL
   //stOutput << "DEBUG: Computing scores and stats. ";
   theProblem.currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
-
   this->theProblem.LoadFileNames();
   if (!this->theProblem.LoadAndParseTopicList(comments))
     return false;
@@ -1934,10 +1929,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   if (!this->theProblem.LoadDatabaseInfo(comments))
     comments << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
   //stOutput << "DEBUG: got to here";
-  theProblem.currentUseR.ComputePointsEarned
-  (theProblem.currentUseR.theProblemData.theKeys, &theProblem.theTopicS);
-  comments << "Not implemented yet";
-  return false;
+  theProblem.currentUseR.ComputePointsEarned(theProblem.currentUseR.theProblemData.theKeys, &theProblem.theTopicS);
   List<std::string> userLabels;
   int usernameIndex = userLabels.GetIndex(DatabaseStrings::labelUsername);
   if (usernameIndex == - 1)
@@ -1957,26 +1949,21 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   this->userNames.SetSize(0);
   this->userInfos.SetSize(0);
   this->scoresBreakdown.SetSize(0);
-  this->numStudentsSolvedEntireTopic.initFillInObject
-  (this->theProblem.theTopicS.size(), 0);
-  this->numStudentsSolvedPartOfTopic.initFillInObject
-  (this->theProblem.theTopicS.size(), 0);
-  this->numStudentsSolvedNothingInTopic.initFillInObject
-  (this->theProblem.theTopicS.size(), 0);
+  this->numStudentsSolvedEntireTopic.initFillInObject(this->theProblem.theTopicS.size(), 0);
+  this->numStudentsSolvedPartOfTopic.initFillInObject(this->theProblem.theTopicS.size(), 0);
+  this->numStudentsSolvedNothingInTopic.initFillInObject(this->theProblem.theTopicS.size(), 0);
   bool ignoreSectionsIdontTeach = true;
   this->currentSection = theGlobalVariables.userDefault.sectionComputed;
   this->currentCourse = theGlobalVariables.GetWebInput("courseHome");
   if (theGlobalVariables.GetWebInput("request") == "scoresInCoursePage")
     this->currentSection =
-    MathRoutines::StringTrimWhiteSpace(
-    HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false));
+    MathRoutines::StringTrimWhiteSpace
+    (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false));
   //stOutput << "<br>DEBUG: ignoreSectionIdontTEach: " << ignoreSectionsIdontTeach;
   //stOutput << "<br>DEBUG: currentSection: " << this->currentSection;
   for (int i = 0; i < this->userTablE.size; i ++)
   { //currentUserRecord.currentUseR.courseInfo.rawStringStoredInDB = this->userTablE[i][courseInfoIndex];
     //currentUserRecord.currentUseR.AssignCourseInfoString(&comments);
-
-
     if (ignoreSectionsIdontTeach)
     { if (currentUserRecord.currentUseR.courseComputed != this->currentCourse)
         continue;
@@ -2012,7 +1999,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
       Rational maxPts = currentTopic.maxPointsInAllChildren;
       this->scoresBreakdown.LastObject()->SetKeyValue
       (theProblem.theTopicS.theKeys[j],currentPts);
-      if ( maxPts == currentPts)
+      if (maxPts == currentPts)
         this->numStudentsSolvedEntireTopic[j] ++;
       else if (currentPts > 0)
         this->numStudentsSolvedPartOfTopic[j] ++;

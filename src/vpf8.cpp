@@ -508,62 +508,62 @@ void LargeIntUnsigned::operator+=(const LargeIntUnsigned& x)
 
 LargeIntUnsigned LargeIntUnsigned::operator-(const LargeIntUnsigned& other) const
 { LargeIntUnsigned result;
-  result=*this;
+  result = *this;
   result.SubtractSmallerPositive(other);
   return std::move(result);
 }
 
 std::string LargeIntUnsigned::ToStringAbbreviate(FormatExpressions *theFormat) const
 { (void) theFormat;
-  std::string result=this->ToString(theFormat);
-  if (result.size()>90)
+  std::string result = this->ToString(theFormat);
+  if (result.size() > 90)
   { std::stringstream out;
-    out << result.substr(0,40)
-    << "...(" << (result.size()-80) << " omitted)"
-    << result.substr(result.size()-40);
-    result=out.str();
+    out << result.substr(0, 40)
+    << "...(" << (result.size() - 80) << " omitted)"
+    << result.substr(result.size() - 40);
+    result = out.str();
   }
   return result;
 }
 
 void LargeIntUnsigned::PadWithZeroesToAtLeastNDigits(int desiredMinNumDigits)
-{ if (this->theDigits.size>=desiredMinNumDigits)
+{ if (this->theDigits.size >= desiredMinNumDigits)
     return;
-  int i=this->theDigits.size;
+  int i = this->theDigits.size;
   this->theDigits.SetSize(desiredMinNumDigits);
-  for (; i<desiredMinNumDigits; i++)
-    this->theDigits[i]=0;
+  for (; i < desiredMinNumDigits; i ++)
+    this->theDigits[i] = 0;
 }
 
 void LargeIntUnsigned::AddLargeIntUnsignedShiftedTimesDigit(const LargeIntUnsigned& other, int digitShift, int theConst)
-{ if (theConst>=this->CarryOverBound || (-theConst) <=(-this->CarryOverBound))
+{ if (theConst >= this->CarryOverBound || (- theConst) <= (- this->CarryOverBound))
     crash << "Digit: " << theConst << " is too large" << crash;
   //stOutput << "<br>DEBUG: Adding " << other.ToString();
   //for (int i=0; i<digitShift; i++)
   //  stOutput << "0";
   //stOutput << " times " << theConst
   //<< " to " << this->ToString() << "\n";
-  int numDigits= MathRoutines::Maximum(other.theDigits.size+1+digitShift, this->theDigits.size+1);
+  int numDigits = MathRoutines::Maximum(other.theDigits.size + 1 + digitShift, this->theDigits.size + 1);
   this->PadWithZeroesToAtLeastNDigits(numDigits);
-  long long nextDigit=0;
-  for (int j=0; j<other.theDigits.size; j++)
-  { int currentIndex=j+digitShift;
-    int nextIndex=currentIndex+1;
-    nextDigit=other.theDigits[j];
-    nextDigit*=theConst;
-    nextDigit+=this->theDigits[currentIndex];
-    this->theDigits[currentIndex]=(int)(nextDigit% this->CarryOverBound);
-    this->theDigits[nextIndex]+=(int)(nextDigit/this->CarryOverBound);
-    if (this->theDigits[currentIndex]<0)
-    { this->theDigits[currentIndex]+=this->CarryOverBound;
-      this->theDigits[nextIndex]--;
+  long long nextDigit = 0;
+  for (int j = 0; j < other.theDigits.size; j ++)
+  { int currentIndex = j + digitShift;
+    int nextIndex = currentIndex + 1;
+    nextDigit = other.theDigits[j];
+    nextDigit *= theConst;
+    nextDigit += this->theDigits[currentIndex];
+    this->theDigits[currentIndex] = (int) (nextDigit % this->CarryOverBound);
+    this->theDigits[nextIndex] += (int) (nextDigit / this->CarryOverBound);
+    if (this->theDigits[currentIndex] < 0)
+    { this->theDigits[currentIndex] += this->CarryOverBound;
+      this->theDigits[nextIndex] --;
     }
-    if (this->theDigits[currentIndex]<0)
+    if (this->theDigits[currentIndex] < 0)
       crash << "Non-positive non-leading digit." << crash;
   }
   this->FitSize();
-  int lastDigit=*this->theDigits.LastObject();
-  if (lastDigit>=this->CarryOverBound || (-lastDigit) <=(-this->CarryOverBound))
+  int lastDigit =* this->theDigits.LastObject();
+  if (lastDigit >= this->CarryOverBound || (- lastDigit) <= (- this->CarryOverBound))
     crash << "Leading digit: " << lastDigit << " is too large" << crash;
   //stOutput << " to get: "
   //<< this->ToString() << "\n";
@@ -572,48 +572,48 @@ void LargeIntUnsigned::AddLargeIntUnsignedShiftedTimesDigit(const LargeIntUnsign
 }
 
 void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
-{ int CarryOver=0;
+{ int CarryOver = 0;
   //if (!this->IsGEQ(x))
   //  crash << "This is a programming error: attempting to subtract a larger LargeIntUnsigned from a smaller one. " << crash;
-  for (int i=0; i<x.theDigits.size; i++)
-  { int nextDigit=x.theDigits[i]+CarryOver;
-    if (this->theDigits[i]<nextDigit)
-    { this->theDigits[i]+=LargeIntUnsigned::CarryOverBound;
-      this->theDigits[i]-=nextDigit;
-      CarryOver=1;
+  for (int i = 0; i < x.theDigits.size; i ++)
+  { int nextDigit = x.theDigits[i] + CarryOver;
+    if (this->theDigits[i] < nextDigit)
+    { this->theDigits[i] += LargeIntUnsigned::CarryOverBound;
+      this->theDigits[i] -= nextDigit;
+      CarryOver = 1;
     } else
-    { this->theDigits[i]-=nextDigit;
-      CarryOver=0;
+    { this->theDigits[i] -= nextDigit;
+      CarryOver = 0;
     }
   }
-  if (CarryOver!=0)
-    for (int i=x.theDigits.size; i<this->theDigits.size; i++)
-      if (this->theDigits[i]>0)
-      { this->theDigits[i]--;
+  if (CarryOver != 0)
+    for (int i = x.theDigits.size; i < this->theDigits.size; i ++)
+      if (this->theDigits[i] > 0)
+      { this->theDigits[i] --;
         break;
       } else
-        this->theDigits[i]=LargeIntUnsigned::CarryOverBound-1;
+        this->theDigits[i] = LargeIntUnsigned::CarryOverBound - 1;
   this->FitSize();
 //  if(!this->CheckForConsistensy())crash << crash;
 }
 
 void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const
-{ if (this==&output || &x==&output)
-  { LargeIntUnsigned thisCopy=*this;
-    LargeIntUnsigned xCopy=x;
+{ if (this == &output || &x == &output)
+  { LargeIntUnsigned thisCopy = *this;
+    LargeIntUnsigned xCopy = x;
     return thisCopy.MultiplyBy(xCopy, output);
   }
   MacroIncrementCounter(Rational::TotalLargeMultiplications);
-  output.theDigits.SetSize(x.theDigits.size+this->theDigits.size);
-  for(int i=0; i<output.theDigits.size; i++)
-    output.theDigits[i]=0;
-  unsigned long long numCycles=0;
-  bool doProgressReporT=theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportLargeIntArithmetic;
+  output.theDigits.SetSize(x.theDigits.size + this->theDigits.size);
+  for (int i = 0; i < output.theDigits.size; i ++)
+    output.theDigits[i] = 0;
+  unsigned long long numCycles = 0;
+  bool doProgressReporT = theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportLargeIntArithmetic;
   ProgressReport theReport1, theReport2;
-  unsigned long long totalCycles=0;
+  unsigned long long totalCycles = 0;
   if (doProgressReporT)
-  { totalCycles=((unsigned long long) this->theDigits.size)* ((unsigned long long) x.theDigits.size);
-    doProgressReporT=totalCycles>2000;
+  { totalCycles = ((unsigned long long) this->theDigits.size) * ((unsigned long long) x.theDigits.size);
+    doProgressReporT = totalCycles > 2000;
   }
   if (doProgressReporT)
   { std::stringstream reportStream;
@@ -623,18 +623,18 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
     << "<br>\n" << x.ToStringAbbreviate();
     theReport1.Report(reportStream.str());
   }
-  for (int i=0; i<this->theDigits.size; i++)
-    for(int j=0; j<x.theDigits.size; j++)
-    { unsigned long long tempLong= this->theDigits[i];
-      unsigned long long tempLong2= x.theDigits[j];
-      tempLong= tempLong*tempLong2;
-      unsigned long long lowPart= tempLong%LargeIntUnsigned::CarryOverBound;
-      unsigned long long highPart= tempLong/LargeIntUnsigned::CarryOverBound;
-      output.AddShiftedUIntSmallerThanCarryOverBound((unsigned int) lowPart, i+j);
-      output.AddShiftedUIntSmallerThanCarryOverBound((unsigned int) highPart, i+j+1);
+  for (int i = 0; i < this->theDigits.size; i ++)
+    for (int j = 0; j < x.theDigits.size; j ++)
+    { unsigned long long tempLong = this->theDigits[i];
+      unsigned long long tempLong2 = x.theDigits[j];
+      tempLong = tempLong * tempLong2;
+      unsigned long long lowPart = tempLong % LargeIntUnsigned::CarryOverBound;
+      unsigned long long highPart = tempLong / LargeIntUnsigned::CarryOverBound;
+      output.AddShiftedUIntSmallerThanCarryOverBound((unsigned int) lowPart, i + j);
+      output.AddShiftedUIntSmallerThanCarryOverBound((unsigned int) highPart, i + j + 1);
       if (doProgressReporT)
-      { numCycles++;
-        if ((numCycles% 1024)==0)
+      { numCycles ++;
+        if ((numCycles % 1024) == 0)
         { std::stringstream out;
           out << "<br>Crunching " << numCycles << " out of " << totalCycles
           << " pairs of large integer ``digits'' = "
@@ -659,9 +659,9 @@ int LargeIntUnsigned::GetUnsignedIntValueTruncated()
 }
 
 double LargeIntUnsigned::GetDoubleValue()const
-{ double result=0;
-  for (int i=this->theDigits.size-1; i>=0; i--)
-    result=result*LargeIntUnsigned::CarryOverBound+this->theDigits[i];
+{ double result = 0;
+  for (int i = this->theDigits.size - 1; i >= 0; i --)
+    result = result * LargeIntUnsigned::CarryOverBound + this->theDigits[i];
   return result;
 }
 
@@ -670,7 +670,6 @@ LargeIntUnsigned LargeIntUnsigned::lcm(const LargeIntUnsigned& a, const LargeInt
   LargeIntUnsigned::lcm(a, b, output);
   return output;
 }
-
 
 LargeIntUnsigned LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b)
 { LargeIntUnsigned output;
@@ -681,22 +680,22 @@ LargeIntUnsigned LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeInt
 void LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output)
 { MacroIncrementCounter(Rational::TotalLargeGCDcalls);
   LargeIntUnsigned p, q, r, temp;
-  p=a;
-  q=b;
+  p = a;
+  q = b;
   while(!q.IsEqualToZero())
   { p.DivPositive(q, temp, r);
-    p=q;
-    q=r;
+    p = q;
+    q = r;
   }
-  output=p;
+  output = p;
 //  if(!output.CheckForConsistensy())crash << crash;
 }
 
 void LargeIntUnsigned::FitSize()
-{ int newSize=this->theDigits.size;
-  for (int i=this->theDigits.size-1; i>=1; i--)
-    if (this->theDigits[i]==0)
-      newSize--;
+{ int newSize = this->theDigits.size;
+  for (int i = this->theDigits.size - 1; i >= 1; i --)
+    if (this->theDigits[i] == 0)
+      newSize --;
     else
       break;
   this->theDigits.SetSize(newSize);
@@ -704,13 +703,13 @@ void LargeIntUnsigned::FitSize()
 }
 
 void LargeIntUnsigned::AccountPrimeFactor(const LargeInt& theP, List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMults)const
-{ if (outputPrimeFactors.size==0)
+{ if (outputPrimeFactors.size == 0)
   { outputPrimeFactors.AddOnTop(theP);
     outputMults.AddOnTop(1);
     return;
   }
   if ((*outputPrimeFactors.LastObject()).operator==(theP))
-    (*outputMults.LastObject())++;
+    (*outputMults.LastObject()) ++;
   else
   { outputPrimeFactors.AddOnTop(theP);
     outputMults.AddOnTop(1);
@@ -723,7 +722,7 @@ bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<int>& out
   if (!this->Factor(outputPrimeFactors, buffer))
     return false;
   outputMultiplicites.SetSize(buffer.size);
-  for (int i=0; i<buffer.size; i++)
+  for (int i = 0; i < buffer.size; i ++)
     if (!buffer[i].IsIntegerFittingInInt(&outputMultiplicites[i]))
       return false;
   return true;
@@ -731,32 +730,32 @@ bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<int>& out
 
 bool LargeIntUnsigned::Factor(List<LargeInt>& outputPrimeFactors, List<LargeIntUnsigned>& outputMultiplicites)const
 { MacroRegisterFunctionWithName("LargeIntUnsigned::Factor");
-  if (this->theDigits.size>1)
+  if (this->theDigits.size > 1)
     return false;
   if (this->IsEqualToZero())
     crash << "This is a programming error: it was requested that I factor 0, which is forbidden." << crash;
   //stOutput << "Factoring: " << this->ToString();
-  unsigned int n=this->theDigits[0];
+  unsigned int n = this->theDigits[0];
   outputPrimeFactors.SetSize(0);
   outputMultiplicites.SetSize(0);
-  while (n%2==0)
+  while (n % 2 == 0)
   { this->AccountPrimeFactor(2, outputPrimeFactors, outputMultiplicites);
-    n/=2;
+    n /= 2;
   }
-  unsigned int upperboundPrimeDivisors= (unsigned int) FloatingPoint::sqrt((double)n);
+  unsigned int upperboundPrimeDivisors = (unsigned int) FloatingPoint::sqrt((double) n);
   List<bool> theSieve;
-  theSieve.initFillInObject(upperboundPrimeDivisors+1,true);
-  for (unsigned int i=3; i<=upperboundPrimeDivisors; i+=2)
+  theSieve.initFillInObject(upperboundPrimeDivisors + 1,true);
+  for (unsigned int i = 3; i <= upperboundPrimeDivisors; i += 2)
     if (theSieve[i])
-    { while (n%i==0)
+    { while (n % i == 0)
       { this->AccountPrimeFactor(i, outputPrimeFactors, outputMultiplicites);
-        n/=i;
-        upperboundPrimeDivisors= (unsigned int) FloatingPoint::sqrt((double)n);
+        n /= i;
+        upperboundPrimeDivisors = (unsigned int) FloatingPoint::sqrt((double) n);
       }
-      for (unsigned int j=i; j<=upperboundPrimeDivisors; j+=i)
-        theSieve[j]=false;
+      for (unsigned int j = i; j <= upperboundPrimeDivisors; j += i)
+        theSieve[j] = false;
     }
-  if (n>1)
+  if (n > 1)
     this->AccountPrimeFactor(n, outputPrimeFactors, outputMultiplicites);
   //stOutput << " ... and the factors are: " << outputPrimeFactors
   //<< " with mults: " << outputMultiplicites;
@@ -769,39 +768,39 @@ void LargeIntUnsigned::lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b,
     crash << "This is a programming error: calling lcm on zero elements is not allowed. " << crash;
   LargeIntUnsigned::gcd(a, b, tempUI);
   a.MultiplyBy(b, tempUI2);
-  output=(tempUI2);
+  output = tempUI2;
   output.DivPositive(tempUI, output, tempUI2);
-  if(output.IsEqualToZero())
+  if (output.IsEqualToZero())
     crash << crash;
 }
 
 void LargeIntUnsigned::operator=(const LargeIntUnsigned& x)
-{ this->theDigits=x.theDigits;
+{ this->theDigits = x.theDigits;
   //stOutput << "<br>Copy assignment" << crash.GetStackTraceShort();
 }
 
 void LargeIntUnsigned::operator=(unsigned int x)
-{ this->AssignShiftedUInt(x,0);
+{ this->AssignShiftedUInt(x, 0);
 }
 
 unsigned int LargeIntUnsigned::HashFunction()const
-{ int numCycles=MathRoutines::Minimum(this->theDigits.size, SomeRandomPrimesSize);
-  unsigned int result=0;
-  for (int i=0; i<numCycles; i++)
-    result+=this->theDigits[i]*SomeRandomPrimes[i];
+{ int numCycles = MathRoutines::Minimum(this->theDigits.size, SomeRandomPrimesSize);
+  unsigned int result = 0;
+  for (int i = 0; i < numCycles; i ++)
+    result += this->theDigits[i] * SomeRandomPrimes[i];
   return result;
 }
 
 bool LargeIntUnsigned::IsPositive()const
-{ return this->theDigits.size>1 || this->theDigits[0]>0;
+{ return this->theDigits.size > 1 || this->theDigits[0] > 0;
 }
 
 bool LargeIntUnsigned::IsEqualToOne()const
-{ return this->theDigits.size==1 && this->theDigits[0]==1;
+{ return this->theDigits.size == 1 && this->theDigits[0] == 1;
 }
 
 bool LargeIntUnsigned::IsEqualToZero()const
-{ return this->theDigits.size==1 && this->theDigits[0]==0;
+{ return this->theDigits.size == 1 && this->theDigits[0] == 0;
 }
 
 void LargeIntUnsigned::AssignFactorial(unsigned int x)
@@ -810,18 +809,18 @@ void LargeIntUnsigned::AssignFactorial(unsigned int x)
   LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(x, primesBelowX);
   LargeIntUnsigned tempInt, tempOne;
   tempOne.MakeOne();
-  for (int i=0; i<primesBelowX.size; i++)
-  { unsigned int thePrime=primesBelowX.TheObjects[i];
-    unsigned int thePowerOfThePrime=0;
-    unsigned int currentPower=thePrime;
+  for (int i = 0; i < primesBelowX.size; i++)
+  { unsigned int thePrime = primesBelowX.TheObjects[i];
+    unsigned int thePowerOfThePrime = 0;
+    unsigned int currentPower = thePrime;
     do
-    { thePowerOfThePrime+=x/currentPower;
-      currentPower*=thePrime;
+    { thePowerOfThePrime += x / currentPower;
+      currentPower *= thePrime;
     }
-    while (currentPower<=x);
+    while (currentPower <= x);
     tempInt.AssignShiftedUInt(thePrime, 0);
     MathRoutines::RaiseToPower(tempInt, thePowerOfThePrime, tempOne);
-    *this*=tempInt;
+    *this *= tempInt;
 /*    if (theGlobalVariables!=0)
     { std::stringstream out;
       out << "processing prime " << thePrime << " (" << i+1 << " out of " << primesBelowX.size << ").";
@@ -849,30 +848,30 @@ void LargeInt::ReadFromFile(std::fstream& input)
 }
 
 void LargeInt::AssignString(const std::string& input)
-{ if (input.size()==0)
+{ if (input.size() == 0)
     return;
   this->MakeZero();
-  unsigned int startingIndex=0;
-  if (input[0]=='-')
-    startingIndex=1;
-  for (unsigned int i=startingIndex; i<input.size(); i++)
-  { int x=input[i]-'0';
-    if (x<0 || x>9)
+  unsigned int startingIndex = 0;
+  if (input[0] == '-')
+    startingIndex = 1;
+  for (unsigned int i = startingIndex; i < input.size(); i ++)
+  { int x = input[i] - '0';
+    if (x < 0 || x > 9)
       crash << "LargeInt::AssignString is not allowed to fail." << crash;
-    if (i>startingIndex)
-      this->value*=10;
-    this->value+=(unsigned) x;
+    if (i > startingIndex)
+      this->value *= 10;
+    this->value += (unsigned) x;
   }
   if (!this->IsEqualToZero())
-    if (input[0]=='-')
-      this->sign=-1;
+    if (input[0] == '-')
+      this->sign = - 1;
 }
 
 bool LargeInt::IsIntegerFittingInInt(int* whichInt)
 { if (!this->value.IsIntegerFittingInInt(whichInt))
     return false;
-  if (whichInt!=0)
-    *whichInt*=this->sign;
+  if (whichInt != 0)
+    *whichInt *= this->sign;
   return true;
 }
 
@@ -880,36 +879,36 @@ void LargeInt::MultiplyByInt(int x)
 {//  if (this->value.size==0) return;
   LargeInt tempI;
   tempI.AssignInt(x);
-  *this*=(tempI);
+  *this *= tempI;
 }
 
 bool LargeInt::TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& outputBase, int& outputPower) const
-{ if (this->sign==-1)
+{ if (this->sign == - 1)
     return false;
   return this->value.TryToFindWhetherIsPower(outputIsPower, outputBase, outputPower);
 }
 
 bool LargeInt::operator==(const LargeInt& x)const
-{ if (x.sign!=this->sign)
+{ if (x.sign != this->sign)
   { if (x.IsEqualToZero() && this->IsEqualToZero())
       return true;
     else
       return false;
   }
-  return this->value==x.value;
+  return this->value == x.value;
 }
 
 bool LargeInt::CheckForConsistensy()
-{ if (this->sign!=-1 && this->sign!=1)
+{ if (this->sign != - 1 && this->sign != 1)
     return false;
-  for (int i=0; i<this->value.theDigits.size; i++)
-    if (this->value.theDigits[i]>=LargeIntUnsigned::CarryOverBound)
+  for (int i = 0; i < this->value.theDigits.size; i ++)
+    if (this->value.theDigits[i] >= LargeIntUnsigned::CarryOverBound)
       return false;
   return true;
 }
 
 double LargeInt::GetDoubleValue()const
-{ return this->sign* this->value.GetDoubleValue();
+{ return this->sign * this->value.GetDoubleValue();
 }
 
 void LargeInt::ToString(std::string& output)const
@@ -918,70 +917,70 @@ void LargeInt::ToString(std::string& output)const
   { output.assign("0");
     return;
   }
-  if (this->sign==-1)
+  if (this->sign == - 1)
     out << "-";
   std::string tempS;
   this->value.ToString(tempS);
   out << tempS;
-  output=out.str();
+  output = out.str();
 }
 
 void LargeInt::AssignInt(int x)
-{ if (x==0)
+{ if (x == 0)
   { this->MakeZero();
     return;
   }
-  this->sign=1;
-  if (x<0)
-  { this->sign=-1;
-    x=-x;
+  this->sign = 1;
+  if (x < 0)
+  { this->sign = - 1;
+    x = - x;
   }
-  this->value.AssignShiftedUInt( (unsigned int)x, 0);
+  this->value.AssignShiftedUInt((unsigned int) x, 0);
 //  if(!this->CheckForConsistensy())crash << crash;
 }
 
 bool LargeInt::GetDivisors(List<int>& output, bool includeNegative)
-{ if (this->value.theDigits.size>1)
+{ if (this->value.theDigits.size > 1)
     return false;
-  int val= this->value.theDigits[0];
-  if (val>50000)
+  int val = this->value.theDigits[0];
+  if (val > 50000)
     return false;
   output.SetSize(0);
-  for (int i=1; i<= val; i++)
-    if (val% i==0)
+  for (int i = 1; i <= val; i ++)
+    if (val % i == 0)
     { output.AddOnTop(i);
       if (includeNegative)
-        output.AddOnTop(-i);
+        output.AddOnTop(- i);
     }
   return true;
 }
 
 void LargeInt::AddLargeIntUnsigned(const LargeIntUnsigned& x)
-{ if (this->sign==1)
-  { this->value+=x;
+{ if (this->sign == 1)
+  { this->value += x;
     return;
   }
   if (this->value.IsGEQ(x))
     this->value.SubtractSmallerPositive(x);
   else
-  { LargeIntUnsigned tempI=x;
+  { LargeIntUnsigned tempI = x;
     tempI.SubtractSmallerPositive(this->value);
-    this->value=tempI;
-    this->sign=1;
+    this->value = tempI;
+    this->sign = 1;
   }
 }
 
 void LargeInt::operator+=(const LargeInt& x)
-{ if (this->sign==x.sign)
-    this->value+=x.value;
+{ if (this->sign == x.sign)
+    this->value += x.value;
   else
   { if (this->value.IsGEQ(x.value))
       this->value.SubtractSmallerPositive(x.value);
     else
-    { LargeIntUnsigned tempI=this->value;
-      this->value=x.value;
+    { LargeIntUnsigned tempI = this->value;
+      this->value = x.value;
       this->value.SubtractSmallerPositive(tempI);
-      this->sign= x.sign;
+      this->sign = x.sign;
     }
   }
 //  if(!this->CheckForConsistensy())crash << crash;
@@ -989,7 +988,7 @@ void LargeInt::operator+=(const LargeInt& x)
 
 void LargeInt::MakeZero()
 { this->value.MakeZero();
-  this->sign=1;
+  this->sign = 1;
 }
 
 void LargeInt::operator=(const Rational& other)
@@ -1000,8 +999,8 @@ void LargeInt::operator=(const Rational& other)
 }
 
 void LargeInt::operator=(const LargeInt& x)
-{ this->sign=x.sign;
-  this->value=(x.value);
+{ this->sign = x.sign;
+  this->value = x.value;
 //  if(!this->CheckForConsistensy())crash << crash;
 }
 
@@ -1009,15 +1008,16 @@ LargeInt LargeInt::operator/(int x)const
 { LargeInt result;
   LargeIntUnsigned remainder;
   LargeIntUnsigned tempX;
-  int absX=x; signed char signX=1;
-  if (x<0)
-  { signX=-1;
-    absX=-absX;
+  int absX = x;
+  signed char signX = 1;
+  if (x < 0)
+  { signX = - 1;
+    absX = - absX;
   }
   tempX.AssignShiftedUInt(absX, 0);
   this->value.DivPositive(tempX, result.value, remainder);
 //  if(!result.CheckForConsistensy()) crash << crash;
-  result.sign=this->sign* signX;
+  result.sign = this->sign * signX;
   return result;
 }
 
@@ -1025,27 +1025,27 @@ LargeInt LargeInt::operator/(LargeInt& x)const
 { LargeInt result;
   LargeInt remainder;
   this->value.DivPositive(x.value, result.value, remainder.value);
-  result.sign= this->sign* x.sign;
-  if(!result.CheckForConsistensy())
+  result.sign = this->sign * x.sign;
+  if (!result.CheckForConsistensy())
     crash << crash;
   return result;
 }
 
 int LargeInt::operator%(int x)
-{ if(x<=0)
+{ if (x <= 0)
     crash << crash;
   LargeIntUnsigned result;
   LargeIntUnsigned remainder;
   LargeIntUnsigned tempX;
-  if (x<0)
-    x=-x;
+  if (x < 0)
+    x = - x;
   tempX.AssignShiftedUInt(x, 0);
   this->value.DivPositive(tempX, result, remainder);
-  if (remainder.theDigits.size ==0)
+  if (remainder.theDigits.size == 0)
     return 0;
   else
   { if(this->sign == -1)
-      return x-remainder.theDigits[0];
+      return x - remainder.theDigits[0];
     else
       return remainder.theDigits[0];
   }
@@ -1058,36 +1058,35 @@ void Rational::WriteToFile(std::fstream& output)
 void Rational::RaiseToPower(int x)
 { Rational tempRat;
   tempRat.MakeOne();
-  if (x<0)
-  { x=-x;
+  if (x < 0)
+  { x = - x;
     this->Invert();
   }
-  LargeInt tempNum=this->GetNumerator();
+  LargeInt tempNum = this->GetNumerator();
   LargeIntUnsigned oneLI;
   oneLI.MakeOne();
   MathRoutines::RaiseToPower(tempNum.value, x, oneLI);
-  LargeIntUnsigned tempDen= this->GetDenominator();
+  LargeIntUnsigned tempDen = this->GetDenominator();
   MathRoutines::RaiseToPower(tempDen, x, oneLI);
-  int theSign= (this->IsPositive() || x%2==0) ? 1 :-1;
+  int theSign = (this->IsPositive() || x % 2 == 0) ? 1 :- 1;
   this->AllocateExtended();
-  this->Extended->num.sign=(signed char)theSign;
-  this->Extended->den=tempDen;
-  this->Extended->num.value=tempNum.value;
+  this->Extended->num.sign = (signed char) theSign;
+  this->Extended->den = tempDen;
+  this->Extended->num.value = tempNum.value;
   this->ShrinkExtendedPartIfPossible();
 }
 
 void Rational::Invert()
-{ if (this->Extended==0)
-  { int tempI= this->DenShort;
-    if(tempI<=0)
+{ if (this->Extended == 0)
+  { int tempI = this->DenShort;
+    if (tempI <= 0)
       crash << crash;
-    if (this->NumShort<0)
-    { this->DenShort=-this->NumShort;
-      this->NumShort=-tempI;
-    }
-    else
-    { this->DenShort= this->NumShort;
-      this->NumShort= tempI;
+    if (this->NumShort < 0)
+    { this->DenShort = - this->NumShort;
+      this->NumShort = - tempI;
+    } else
+    { this->DenShort = this->NumShort;
+      this->NumShort = tempI;
     }
     return;
   }
@@ -1107,24 +1106,23 @@ void Rational::MultiplyByInt(int x)
 }
 
 void Rational::MultiplyBy(const Rational& r)
-{ if (r.Extended==0 && this->Extended==0)
+{ if (r.Extended == 0 && this->Extended == 0)
     if (this->TryToMultiplyQuickly(r.NumShort, r.DenShort))
       return;
   this->InitExtendedFromShortIfNeeded();
-  if (r.Extended!=0)
-  { this->Extended->num*=(r.Extended->num);
-    this->Extended->den*=(r.Extended->den);
-  }
-  else
+  if (r.Extended != 0)
+  { this->Extended->num *= r.Extended->num;
+    this->Extended->den *= r.Extended->den;
+  } else
   { this->Extended->num.MultiplyByInt(r.NumShort);
-    this->Extended->den.MultiplyByUInt((unsigned int)r.DenShort);
+    this->Extended->den.MultiplyByUInt((unsigned int) r.DenShort);
   }
   this->Simplify();
 }
 
 Rational operator/(int left, const Rational& right)
-{ Rational tempRat=left;
-  tempRat/=right;
+{ Rational tempRat = left;
+  tempRat /= right;
   return tempRat;
 }
 
@@ -1137,7 +1135,7 @@ Rational operator-(const Rational& argument)
 
 void Rational::MultiplyByLargeInt(LargeInt& x)
 { this->InitExtendedFromShortIfNeeded();
-  this->Extended->num*=(x);
+  this->Extended->num *= x;
   this->Simplify();
 }
 
@@ -1148,11 +1146,11 @@ void Rational::MultiplyByLargeIntUnsigned(LargeIntUnsigned& x)
 }
 
 void Rational::DivideBy(const Rational& r)
-{ if (this==&r)
+{ if (this == &r)
   { this->MakeOne();
     return;
   }
-  Rational tempRat=r;
+  Rational tempRat = r;
   tempRat.Invert();
   this->operator*=(tempRat);
 }
@@ -1174,43 +1172,43 @@ Rational Rational::operator*(const Rational& right) const
 Rational Rational::operator+(const Rational& right) const
 { Rational tempRat;
   tempRat.Assign(*this);
-  tempRat+=(right);
+  tempRat += right;
   return tempRat;
 }
 
 Rational Rational::operator-(const Rational& right) const
 { Rational tempRat;
   tempRat.Assign(*this);
-  tempRat-=(right);
+  tempRat -= right;
   return tempRat;
 }
 
 void Rational::Assign(const Rational& r)
 { this->NumShort = r.NumShort;
   this->DenShort = r.DenShort;
-  if (r.Extended==0)
-  { if (this->Extended==0)
+  if (r.Extended == 0)
+  { if (this->Extended == 0)
       return;
     this->FreeExtended();
     return;
   }
   this->InitExtendedFromShortIfNeeded();
-  this->Extended->num=(r.Extended->num);
-  this->Extended->den=(r.Extended->den);
+  this->Extended->num = r.Extended->num;
+  this->Extended->den = r.Extended->den;
 }
 
 void Rational::AssignFracValue()
-{ if (this->Extended==0)
-  { if (this->NumShort==0)
+{ if (this->Extended == 0)
+  { if (this->NumShort == 0)
       return;
-    if (this->DenShort==1)
-    { this->NumShort=0;
-      this->DenShort=1;
+    if (this->DenShort == 1)
+    { this->NumShort = 0;
+      this->DenShort = 1;
       return;
     }
-    this->NumShort=this->NumShort% this->DenShort;
-    if (this->NumShort<0)
-      this->NumShort+=this->DenShort;
+    this->NumShort = this->NumShort % this->DenShort;
+    if (this->NumShort < 0)
+      this->NumShort += this->DenShort;
     return;
   }
   if (this->IsEqualToZero())
@@ -1221,7 +1219,7 @@ void Rational::AssignFracValue()
   }
   LargeIntUnsigned newNum, tempI;
   this->Extended->num.value.DivPositive(this->Extended->den, tempI, newNum);
-  this->Extended->num.value=newNum;
+  this->Extended->num.value = newNum;
   if (this->Extended->num.IsNegative())
     this->Extended->num.AddLargeIntUnsigned(this->Extended->den);
   if(!this->Extended->num.IsPositiveOrZero())
@@ -1250,37 +1248,37 @@ void Rational::Subtract(const Rational& r)
 }
 
 bool Rational::GetSquareRootIfRational(Rational& output)const
-{ if (*this<0)
+{ if (*this < 0)
     return false;
-  LargeInt theNum=this->GetNumerator();
-  LargeIntUnsigned theDen= this->GetDenominator();
+  LargeInt theNum = this->GetNumerator();
+  LargeIntUnsigned theDen = this->GetDenominator();
   List<LargeInt> primeFactorsNum, primeFactorsDen;
   List<LargeIntUnsigned> multsNum, multsDen;
   if (!theNum.value.Factor(primeFactorsNum, multsNum))
     return false;
   if (!theDen.Factor(primeFactorsDen, multsDen))
     return false;
-  output=1;
+  output = 1;
   Rational tempRat;
-  for (int i=0; i<primeFactorsNum.size; i++)
-  { if (multsNum[i]%2!=0)
+  for (int i = 0; i < primeFactorsNum.size; i ++)
+  { if (multsNum[i] % 2 != 0)
       return false;
-    tempRat=primeFactorsNum[i];
-    int currentMult=-1;
+    tempRat = primeFactorsNum[i];
+    int currentMult = - 1;
     if (!multsNum[i].IsIntegerFittingInInt(&currentMult))
       return false;
-    tempRat.RaiseToPower(currentMult/2);
-    output*=tempRat;
+    tempRat.RaiseToPower(currentMult / 2);
+    output *= tempRat;
   }
-  for (int i=0; i<primeFactorsDen.size; i++)
-  { if (multsDen[i]%2!=0)
+  for (int i = 0; i < primeFactorsDen.size; i ++)
+  { if (multsDen[i] % 2 != 0)
       return false;
-    tempRat=primeFactorsDen[i];
-    int currentMult=-1;
+    tempRat = primeFactorsDen[i];
+    int currentMult = - 1;
     if (!multsDen[i].IsIntegerFittingInInt(&currentMult))
       return false;
-    tempRat.RaiseToPower(currentMult/2);
-    output/=tempRat;
+    tempRat.RaiseToPower(currentMult / 2);
+    output /= tempRat;
   }
   return true;
 }
@@ -1296,77 +1294,76 @@ bool Rational::GetPrimeFactorsAbsoluteValue
 
 void Rational::AssignInteger(int x)
 { this->FreeExtended();
-  this->DenShort=1;
-  this->NumShort=x;
+  this->DenShort = 1;
+  this->NumShort = x;
 }
 
 bool Rational::ShrinkExtendedPartIfPossible()
-{ if (this->Extended==0)
+{ if (this->Extended == 0)
     return true;
-  if (this->Extended->num.value.theDigits.size>1 ||
-      this->Extended->den.theDigits.size>1 ||
-      this->Extended->num.value.theDigits[0]>=LargeIntUnsigned::SquareRootOfCarryOverBound ||
-      this->Extended->den.theDigits[0]>=LargeIntUnsigned::SquareRootOfCarryOverBound)
+  if (this->Extended->num.value.theDigits.size > 1 ||
+      this->Extended->den.theDigits.size > 1 ||
+      this->Extended->num.value.theDigits[0] >= LargeIntUnsigned::SquareRootOfCarryOverBound ||
+      this->Extended->den.theDigits[0] >= LargeIntUnsigned::SquareRootOfCarryOverBound)
     return false;
-  this->NumShort= this->Extended->num.GetIntValueTruncated();
-  this->DenShort= this->Extended->den.GetUnsignedIntValueTruncated();
+  this->NumShort = this->Extended->num.GetIntValueTruncated();
+  this->DenShort = this->Extended->den.GetUnsignedIntValueTruncated();
   this->FreeExtended();
   return true;
 }
 
 Rational Rational::Factorial(int n)
-{ if (n<0)
+{ if (n < 0)
   { crash << "This is a programming error: taking factorial of the negative number " << n << ". " << crash;
     return 0;
   }
   LargeIntUnsigned result;
   result.AssignFactorial((unsigned int) n);
   Rational answer;
-  answer=result;
+  answer = result;
   return answer;
 }
 
 Rational Rational::TwoToTheNth(int n)
-{ Rational result=1;
-  if (n>=0)
-    for (int i=0; i<n; i++)
+{ Rational result = 1;
+  if (n>= 0)
+    for (int i = 0; i < n; i ++)
       result.MultiplyByInt(2);
   else
-    for (int i=0; i>n; i--)
+    for (int i = 0; i > n; i --)
       result.DivideByInteger(2);
   return result;
 }
 
-Rational Rational::NChooseK(const Rational &n, int k)
+Rational Rational::NChooseK(const Rational& n, int k)
 { Rational result;
   result.MakeOne();
-  for (int i=0; i<k; i++)
+  for (int i = 0; i < k; i ++)
   { //stOutput << "<br>" << result.ToString() << " * " << (n-i).ToString() << "/" << i+1;
-    result*=n-i;
-    result.DivideByInteger(i+1);
+    result *= n - i;
+    result.DivideByInteger(i + 1);
     //stOutput << "=" << result.ToString();
   }
   return result;
 }
 
 Rational Rational::NtoTheKth(int n, int k)
-{ Rational result=n;
+{ Rational result = n;
   result.RaiseToPower(k);
   return result;
 }
 
 bool Rational::IsInteger(LargeInt* whichInteger)const
-{ bool result=false;
-  if (this->Extended==0)
-  { result=(this->DenShort==1);
-    if (whichInteger!=0)
-      *whichInteger=this->NumShort;
-  }
-  else
+{ bool result = false;
+  if (this->Extended == 0)
+  { result = (this->DenShort == 1);
+    if (whichInteger != 0)
+      *whichInteger = this->NumShort;
+  } else
     if (this->Extended->den.IsEqualToOne())
-    { result=true;
-      if (whichInteger!=0)
-        *whichInteger=this->Extended->num;
+    { result = true;
+      if (whichInteger != 0)
+        *whichInteger = this->Extended->num;
     }
   return result;
 }
@@ -1376,26 +1373,26 @@ bool MathRoutines::IsInteger(Rational x)
 }
 
 double Rational::GetDoubleValue()const
-{ if (this->Extended==0)
-    return (double)this->NumShort/(double)this->DenShort;
+{ if (this->Extended == 0)
+    return (double) this->NumShort / (double) this->DenShort;
   else
-    return this->Extended->num.GetDoubleValue()/this->Extended->den.GetDoubleValue();
+    return this->Extended->num.GetDoubleValue() / this->Extended->den.GetDoubleValue();
 }
 
 void Rational::Simplify()
-{ if (this->Extended==0)
-  { if (this->NumShort==0)
-      this->DenShort=1;
+{ if (this->Extended == 0)
+  { if (this->NumShort == 0)
+      this->DenShort = 1;
     else
-    { if (this->DenShort==1)
+    { if (this->DenShort == 1)
         return;
       int tempGCD;
-      if (this->NumShort>0)
-        tempGCD= this->gcd(this->NumShort, this->DenShort);
+      if (this->NumShort > 0)
+        tempGCD = this->gcd(this->NumShort, this->DenShort);
       else
-        tempGCD= this->gcd(-this->NumShort, this->DenShort);
-      this->NumShort/=tempGCD;
-      this->DenShort/=tempGCD;
+        tempGCD = this->gcd(- this->NumShort, this->DenShort);
+      this->NumShort /= tempGCD;
+      this->DenShort /= tempGCD;
     }
     return;
   }
@@ -1478,7 +1475,7 @@ std::string Rational::ToStringForFileOperations(FormatExpressions* notUsed)const
   if (this->Extended == 0)
   { if (this->NumShort < 0)
       out << "-";
-    int numShortAbsoluteValue = this->NumShort < 0 ?- this->NumShort: this->NumShort;
+    int numShortAbsoluteValue = this->NumShort < 0 ? - this->NumShort: this->NumShort;
     if (this->DenShort == 1)
       out << numShortAbsoluteValue;
     else

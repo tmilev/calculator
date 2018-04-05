@@ -131,31 +131,25 @@ JSData CalculatorHTML::ToJSONProblemWeights
 }
 
 void CalculatorHTML::StoreDeadlineInfo
-(std::string& outputString,
+(JSData& outputData,
  MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreDeadlineInfo");
-  std::stringstream out;
+  outputData.reset();
   for (int i = 0; i < inputProblemInfo.size(); i ++)
   { ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
     if (currentProblem.deadlinesPerSection.size() == 0)
       continue;
     std::string currentProbName = inputProblemInfo.theKeys[i];
-    std::stringstream currentProblemStream, currentDeadlineStream;
+    JSData deadlines;
     for (int j = 0; j < currentProblem.deadlinesPerSection.size(); j ++)
     { std::string currentDeadline = MathRoutines::StringTrimWhiteSpace(currentProblem.deadlinesPerSection.theValues[j]);
       if (currentDeadline == "")
         continue;
       std::string currentSection = MathRoutines::StringTrimWhiteSpace(currentProblem.deadlinesPerSection.theKeys[j]);
-      currentDeadlineStream << HtmlRoutines::ConvertStringToURLString(currentSection, false)
-      << "="
-      << HtmlRoutines::ConvertStringToURLString(currentDeadline, false)
-      << "&";
+      deadlines[currentSection] = currentDeadline;
     }
-    currentProblemStream << "deadlines=" << HtmlRoutines::ConvertStringToURLString(currentDeadlineStream.str(), false) << "&";
-    out << HtmlRoutines::ConvertStringToURLString(currentProbName, false) << "="
-    << HtmlRoutines::ConvertStringToURLString(currentProblemStream.str(), false) << "&";
+    outputData[currentProbName] = deadlines;
   }
-  outputString = out.str();
 }
 
 bool DatabaseRoutineS::StoreProblemDatabaseInfo
@@ -169,12 +163,14 @@ bool DatabaseRoutineS::StoreProblemDatabaseInfo
   deadlinesParsed.readstrinG(theUser.deadlinesString, false, &commentsOnFailure);
   setQueryWeights[DatabaseStrings::labelProblemWeights] = problemWeightsParsed;
   setQueryDeadlines[DatabaseStrings::labelDeadlines] = deadlinesParsed;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-       (DatabaseStrings::tableProblemWeights, findQueryWeights, setQueryWeights, &commentsOnFailure))
-    return false;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-       (DatabaseStrings::tableDeadlines, findQueryDeadlines, setQueryDeadlines, &commentsOnFailure))
-    return false;
+  if (problemWeightsParsed.type != JSData::JSUndefined)
+    if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+         (DatabaseStrings::tableProblemWeights, findQueryWeights, setQueryWeights, &commentsOnFailure))
+      return false;
+  if (deadlinesParsed.type != JSData::JSUndefined)
+    if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+         (DatabaseStrings::tableDeadlines, findQueryDeadlines, setQueryDeadlines, &commentsOnFailure))
+      return false;
   return true;
 }
 
@@ -234,8 +230,9 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
   for (int i = 0; i < incomingProblems.size(); i ++)
     if (!this->MergeOneProblemAdminData(incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
       result = false;
-  this->StoreDeadlineInfo
-  (theGlobalVariables.userDefault.deadlinesString, this->currentUseR.theProblemData);
+  JSData theProblemJSON;
+  theProblemJSON.readstrinG(incomingProblemInfo, false, &commentsOnFailure);
+  this->StoreDeadlineInfo(theProblemJSON, this->currentUseR.theProblemData);
   //stOutput << "<hr>Debug: about to store WEIGHT with row id: "
   //<< this->currentUseR.problemInfoRowId.value << "<hr>";
   //stOutput << "<hr>About to transform to database string: "
@@ -246,6 +243,8 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
   //stOutput << "<hr>Resulting string: "
   //<< theGlobalVariables.userDefault.problemInfoString.value
   //<< "<hr>";
+  //commentsOnFailure << "About to store: " << theGlobalVariables.userDefault.problemWeightString;
+  //return false;
   if (!DatabaseRoutineS::StoreProblemDatabaseInfo(theGlobalVariables.userDefault, commentsOnFailure))
     return false;
   return result;
@@ -260,16 +259,19 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   if (!this->PrepareSectionList(comments))
     return false;
   //this->theProblemData.CheckConsistency();
-//  stOutput << "<hr>DEBug: got to before InterpretDatabaseProblemData.<hr>";
+  //stOutput << "<hr>DEBug: got to before InterpretDatabaseProblemData.<hr>";
+  stOutput << "Problem weight schema: " << this->currentUseR.problemWeightSchema
+  << "Problem weight string: " << this->currentUseR.problemWeightString
+  << " - of global vars: " << theGlobalVariables.userDefault.problemWeightString;
   if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString, comments))
   { comments << "Failed to interpret user's problem saved data. ";
     //stOutput << "Failed to interpret user's problem saved data. ";
     return false;
   }
-  //stOutput << "<hr>DEBUG: After interpretation of datastring: user: " << this->currentUseR.ToString();
+  stOutput << "<hr>DEBUG: After interpretation of datastring: user: " << this->currentUseR.ToString();
   //this->theProblemData.CheckConsistency();
-  //stOutput << "<hr>DEBug: got to before this->currentUseR.theProblemData.Contains.<hr>";
-  //stOutput << this->currentUseR.theProblemData.ToStringHtml() << "<hr><hr>";
+  stOutput << "<hr>DEBug: got to before this->currentUseR.theProblemData.Contains.<hr>";
+  stOutput << this->currentUseR.problemWeightString << "<hr><hr>";
   if (this->currentUseR.theProblemData.Contains(this->fileName))
   { this->theProblemData = this->currentUseR.theProblemData.GetValueCreate(this->fileName);
     //stOutput << "<hr>Debug: found problem data! " << this->theProblemData.ToString() << "<hr>";

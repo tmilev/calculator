@@ -233,7 +233,7 @@ public:
    MapLisT<std::string, ProblemData, MathRoutines::hashString>&
    outputProblemInfo, std::stringstream& commentsOnFailure);
   void StoreDeadlineInfo
-  (std::string& outputString,
+  (JSData& outputData,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
   JSData ToJSONProblemWeights
   (MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);

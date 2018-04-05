@@ -22,7 +22,8 @@ public:
   static bool UserDefaultHasInstructorRights();
 };
 
-class SyntacticElementHTML{
+class SyntacticElementHTML
+{
 public:
   int indexInOwner;
   int commandIndex;
@@ -86,8 +87,7 @@ public:
 };
 
 struct Answer
-{
-  bool flagAutoGenerateSubmitButtons;
+{ bool flagAutoGenerateSubmitButtons;
   bool flagAutoGenerateMQButtonPanel;
   bool flagAutoGenerateMQfield;
   bool flagAutoGenerateVerificationField;

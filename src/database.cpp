@@ -320,7 +320,8 @@ bool UserCalculator::LoadFromDB
   { //stOutput << "DEBUG: Fetching deadline schema id: " << this->courseInfo.deadlineSchemaIDComputed;
     JSData findDeadlinesQuery, outDeadlinesQuery;
     findDeadlinesQuery[DatabaseStrings::labelDeadlinesSchema] = this->deadlineSchema;
-    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableDeadlines, findDeadlinesQuery, outDeadlinesQuery, failureStream))
+    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
+        (DatabaseStrings::tableDeadlines, findDeadlinesQuery, outDeadlinesQuery, failureStream))
       this->deadlinesString = outDeadlinesQuery[DatabaseStrings::labelDeadlines].string;
   }
   //  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
@@ -328,9 +329,17 @@ bool UserCalculator::LoadFromDB
   //stOutput << "DEBUG: problem info row id: " << this->problemInfoRowId.value;
   if (this->problemWeightSchema != "")
   { JSData findProblemWeightsQuery, outProblemWeightsQuery;
+    //stOutput << "DEBUG: Problem weight schema: " << this->problemWeightSchema;
     findProblemWeightsQuery[DatabaseStrings::labelProblemWeightsSchema] = this->problemWeightSchema;
-    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableDeadlines, findProblemWeightsQuery, outProblemWeightsQuery, failureStream))
-      this->problemWeightString = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights].string;
+    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
+        (DatabaseStrings::tableProblemWeights, findProblemWeightsQuery, outProblemWeightsQuery, failureStream))
+      this->problemWeightString = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights].ToString(false);
+    else
+    { stOutput << "DEBUG: Failed to find";
+    }
+    stOutput << "Final problem weight string: " << this->problemWeightString
+    << " found with query: " << findProblemWeightsQuery.ToString(false)
+    << " that resulted in: " << outProblemWeightsQuery.ToString(false);
   }
   return true;
 }
@@ -768,8 +777,7 @@ std::string ProblemData::Store()
   return out.str();
 }
 
-bool UserCalculator::InterpretDatabaseProblemData
-(const std::string& theInfo, std::stringstream& commentsOnFailure)
+bool UserCalculator::InterpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::ChopCGIString(theInfo, theMap, commentsOnFailure))

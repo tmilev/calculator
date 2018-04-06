@@ -55,11 +55,48 @@ CalculatorHTML::CalculatorHTML()
 }
 
 #ifdef MACRO_use_MySQL
-bool CalculatorHTML::ReadProblemInfoAppend
+bool CalculatorHTML::LoadProblemInfoFromJSONStringAppend
+(const std::string& inputJSONString,
+ MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
+ std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromJSONStringAppend");
+  JSData inputJS;
+  if (!inputJS.readstrinG(inputJSONString, false, &commentsOnFailure))
+    return false;
+  outputProblemInfo.SetExpectedSize(inputJS.objects.size());
+  ProblemData emptyData;
+  for (int i = 0; i < inputJS.objects.size(); i ++)
+  { std::string currentProbName = inputJS.objects.theKeys[i];
+    JSData& currentProblem = inputJS.objects.theValues[i];
+    if (currentProbName == "")
+      continue;
+    if (!outputProblemInfo.Contains(currentProbName))
+      outputProblemInfo.GetValueCreate(currentProbName) = emptyData;
+    ProblemData& currentProblemValue = outputProblemInfo.GetValueCreate(currentProbName);
+    JSData& currentDeadlines = currentProblem["deadlines"];
+    JSData& currentWeight =  currentProblem["weight"];
+    if (currentWeight.type != JSData::JSUndefined)
+    { for (int j = 0; j < currentWeight.objects.size(); j ++)
+        currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
+        (currentWeight.objects.theKeys[j], currentWeight.objects.theValues[j].string);
+      std::string desiredCourse = theGlobalVariables.userDefault.courseComputed;
+      currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
+      (desiredCourse, currentWeight.objects.GetValueCreate(desiredCourse).string);
+    }
+    if (currentDeadlines.type != JSData::JSUndefined)
+    { for (int j = 0; j < currentDeadlines.objects.size(); j ++)
+        currentProblemValue.adminData.deadlinesPerSection.SetKeyValue
+        (currentDeadlines.objects.theKeys[j], currentDeadlines.objects.theValues[j].string);
+    }
+  }
+  return true;
+}
+
+bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend
 (const std::string& inputInfoString,
  MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
  std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::ReadProblemInfoAppend");
+{ MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromURLedInputAppend");
   MapLisT<std::string, std::string, MathRoutines::hashString>
   CGIedProbs, currentKeyValues, sectionDeadlineInfo, problemWeightInfo;
   if (!HtmlRoutines::ChopCGIString(inputInfoString, CGIedProbs, commentsOnFailure))
@@ -110,7 +147,7 @@ bool CalculatorHTML::ReadProblemInfoAppend
 
 JSData CalculatorHTML::ToJSONProblemWeights
 (MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo)
-{ MacroRegisterFunctionWithName("CalculatorHTML::StoreProblemWeightInfo");
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToJSONProblemWeights");
   JSData output;
   for (int i = 0; i < inputProblemInfo.size(); i ++)
   { ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
@@ -131,8 +168,7 @@ JSData CalculatorHTML::ToJSONProblemWeights
 }
 
 void CalculatorHTML::StoreDeadlineInfo
-(JSData& outputData,
- MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo)
+(JSData& outputData, MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreDeadlineInfo");
   outputData.reset();
   for (int i = 0; i < inputProblemInfo.size(); i ++)
@@ -221,7 +257,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
 { MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
   //stOutput << "DEBUG: Here I am, merging in data: " << incomingProblemInfo;
   MapLisT<std::string, ProblemData, MathRoutines::hashString> incomingProblems;
-  if (!this->ReadProblemInfoAppend(incomingProblemInfo, incomingProblems, commentsOnFailure))
+  if (!this->LoadProblemInfoFromURLedInputAppend(incomingProblemInfo, incomingProblems, commentsOnFailure))
   { commentsOnFailure << "Failed to parse your request";
     return false;
   }
@@ -263,6 +299,16 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   stOutput << "Problem weight schema: " << this->currentUseR.problemWeightSchema
   << "Problem weight string: " << this->currentUseR.problemWeightString
   << " - of global vars: " << theGlobalVariables.userDefault.problemWeightString;
+  if (!this->LoadProblemInfoFromJSONStringAppend
+      (this->currentUseR.problemWeightString, this->currentUseR.theProblemData, comments))
+  { comments << "Failed to load problem weights. ";
+    return false;
+  }
+  if (!this->LoadProblemInfoFromJSONStringAppend
+      (this->currentUseR.deadlinesString, this->currentUseR.theProblemData, comments))
+  { comments << "Failed to load problem deadlines. ";
+    return false;
+  }
   if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString, comments))
   { comments << "Failed to interpret user's problem saved data. ";
     //stOutput << "Failed to interpret user's problem saved data. ";
@@ -279,15 +325,6 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
     //stOutput << "<hr>Did not find problem data for filename: " << this->fileName << ". USer details: " << this->currentUseR.ToString() << "<hr>";
   //this->theProblemData.CheckConsistency();
   //stOutput << "<hr><hr>DEBug: got to before read prob append.";
-  if (!this->ReadProblemInfoAppend(this->currentUseR.deadlinesString, this->currentUseR.theProblemData, comments))
-  { comments << "Failed to interpret the deadline string. ";
-    return false;
-  }
-  //stOutput << "<hr>Debug: reading problem data from: " << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml( this->currentUseR.problemInfoString.value);
-  if (!this->ReadProblemInfoAppend(this->currentUseR.problemWeightString, this->currentUseR.theProblemData, comments))
-  { comments << "Failed to interpret the problem weight string. ";
-    return false;
-  }
   //stOutput << "<hr>Debug: user: " << this->currentUseR.ToString();
   //stOutput << "<hr><hr>DEBUG read databaseProblemAndHomeworkGroupList: "
   //<< this->databaseProblemAndHomeworkGroupList;

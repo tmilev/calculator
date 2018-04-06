@@ -805,12 +805,6 @@ bool UserCalculator::InterpretDatabaseProblemData(const std::string& theInfo, st
   return result;
 }
 
-bool UserCalculator::LoadProblemStringFromDatabase
-(std::string& output, std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("UserCalculator::LoadProblemStringFromDatabase");
-  return this->FetchOneColumn("problemData", output, &commentsOnFailure);
-}
-
 JSData UserCalculator::GetFindMeFromUserNameQuery()
 { JSData result;
   result[DatabaseStrings::labelUsername] = this->username;
@@ -923,16 +917,14 @@ bool DatabaseRoutineS::AddUsersFromEmails
   return result;
 }
 
-bool UserCalculator::GetActivationAbsoluteAddress
-  (std::string& output,
-   std::stringstream& comments)
+bool UserCalculator::GetActivationAbsoluteAddress(std::string& output, std::stringstream& comments)
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationAbsoluteAddress");
   return this->GetActivationAddress
   (output, theGlobalVariables.hopefullyPermanent_HTTPS_WebAdressOfServerExecutable, comments);
 }
 
 bool UserCalculator::GetActivationAddress
-  (std::string& output, const std::string& calculatorBase, std::stringstream& comments)
+(std::string& output, const std::string& calculatorBase, std::stringstream& comments)
 { MacroRegisterFunctionWithName("UserCalculator::GetActivationAbsoluteAddress");
   if (!this->LoadFromDB(&comments, &comments))
     return false;

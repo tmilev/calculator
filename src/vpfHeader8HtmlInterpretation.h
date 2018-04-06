@@ -228,10 +228,18 @@ public:
   bool MergeOneProblemAdminData
   (const std::string& inputProblemName, ProblemData& inputProblemInfo, std::stringstream& commentsOnFailure);
   bool MergeProblemInfoInDatabase(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
-  bool ReadProblemInfoAppend
+  bool LoadProblemInfoFromURLedInputAppend
   (const std::string& inputInfoString,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>&
    outputProblemInfo, std::stringstream& commentsOnFailure);
+  bool LoadProblemInfoFromJSONStringAppend
+  (const std::string& inputJSONString,
+   MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
+   std::stringstream& commentsOnFailure);
+//  bool LoadDeadlineInfoFromJSONStringAppend
+//  (const std::string& inputJSONString,
+//   MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputDeadlineInfo,
+//   std::stringstream& commentsOnFailure);
   void StoreDeadlineInfo
   (JSData& outputData,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);

@@ -238,7 +238,6 @@ public:
   ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);
   void SetProblemData(const std::string& problemName, const ProblemData& inputData);
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
-  bool LoadProblemStringFromDatabase(std::string& output, std::stringstream& commentsOnFailure);
   bool InterpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure);
   bool StoreProblemDataToDatabase(std::stringstream& commentsOnFailure);
   std::string GetSelectedRowEntry(const std::string& theKey);

@@ -125,14 +125,14 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   { out << "<span style=\"color:red\"><b>Failed to prepare section list. </b></span>" << commentsOnFailure.str();
     return out.str();
   }
-  if (!theProblem.ReadProblemInfoAppend
-      (theProblem.currentUseR.deadlinesString, theProblem.currentUseR.theProblemData, out))
-  { out << "Failed to interpret the deadline string. ";
-    return out.str();
-  }
-  if (!theProblem.ReadProblemInfoAppend
+  if (!theProblem.LoadProblemInfoFromJSONStringAppend
       (theProblem.currentUseR.problemWeightString, theProblem.currentUseR.theProblemData, out))
   { out << "Failed to interpret the problem weight string. ";
+    return out.str();
+  }
+  if (!theProblem.LoadProblemInfoFromJSONStringAppend
+      (theProblem.currentUseR.deadlinesString, theProblem.currentUseR.theProblemData, out))
+  { out << "Failed to interpret the deadline string. ";
     return out.str();
   }
   if (theProblem.MergeProblemInfoInDatabase(inputProblemInfo, commentsOnFailure))
@@ -1987,7 +1987,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
         (this->userTablE[i][problemDataIndex], comments))
       continue;
 //    out << "<br>DEBUG: after db data read: " << currentUserRecord.currentUseR.ToString();
-    currentUserRecord.ReadProblemInfoAppend
+    currentUserRecord.LoadProblemInfoFromJSONStringAppend
     (theProblem.currentUseR.problemWeightString, currentUserRecord.currentUseR.theProblemData, comments);
 //    out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
     currentUserRecord.currentUseR.ComputePointsEarned

@@ -44,58 +44,56 @@ struct MeshTriangles{
   void Subdivide(int triangleIndex);
   void AddPointFromVerticesValues
   (Vectors<double>& outputAppend, const Vector<double>& left,
-   const Vector<double>& right, double leftVal, double rightVal)
-   ;
+   const Vector<double>& right, double leftVal, double rightVal);
   bool ComputePoints
-  (Calculator& theCommands, const Expression& input, bool showGrid)
-;
+  (Calculator& theCommands, const Expression& input, bool showGrid);
   MeshTriangles();
 };
 
 MeshTriangles::MeshTriangles()
-{ this->XstartingGridCount=0;
-  this->YstartingGridCount=0;
-  this->numBadEvaluations=0;
-  this->numGoodEvaluations=0;
-  this->minTriangleSideAsPercentOfWidthPlusHeight=0.001;
-  this->maxNumTriangles=2000;
-  this->flagTriangleLimitReached=false;
-  this->flagShowGrid=false;
-  this->flagFunctionEvaluationFailed=false;
+{ this->XstartingGridCount = 0;
+  this->YstartingGridCount = 0;
+  this->numBadEvaluations = 0;
+  this->numGoodEvaluations = 0;
+  this->minTriangleSideAsPercentOfWidthPlusHeight = 0.001;
+  this->maxNumTriangles = 2000;
+  this->flagTriangleLimitReached = false;
+  this->flagShowGrid = false;
+  this->flagFunctionEvaluationFailed = false;
 }
 
 void MeshTriangles::PlotGrid(int theColor)
 { MacroRegisterFunctionWithName("MeshTriangles::PlotGrid");
   this->theGrid.thePlots.SetSize(0);
-  this->theGrid.thePlots.SetExpectedSize(this->theGrid.thePlots.size+this->theTriangles.size*3);
+  this->theGrid.thePlots.SetExpectedSize(this->theGrid.thePlots.size + this->theTriangles.size * 3);
 //  List<Vector<double> > currentLine;
 //  currentLine.SetSize(2);
   PlotObject currentLinePlot;
-  List<Vector<double> >& pointsVector=currentLinePlot.thePointsDouble;
+  List<Vector<double> >& pointsVector = currentLinePlot.thePointsDouble;
   currentLinePlot.thePointsDouble.SetSize(4);
-  currentLinePlot.colorRGB=theColor;
-  for (int i=0; i<this->theTriangles.size; i++)
-  { pointsVector[0]=this->theTriangles[i][0];
-    pointsVector[1]=this->theTriangles[i][1];
-    pointsVector[2]=this->theTriangles[i][2];
-    pointsVector[3]=this->theTriangles[i][0];
+  currentLinePlot.colorRGB = theColor;
+  for (int i = 0; i < this->theTriangles.size; i ++)
+  { pointsVector[0] = this->theTriangles[i][0];
+    pointsVector[1] = this->theTriangles[i][1];
+    pointsVector[2] = this->theTriangles[i][2];
+    pointsVector[3] = this->theTriangles[i][0];
     this->theGrid.thePlots.AddOnTop(currentLinePlot);
   }
 //  this->theGrid.the=theColor;
 }
 
 double MeshTriangles::GetValueAtPoint(const Vector<double>& thePoint)
-{ int theIndex= this->theEvaluatedPoints.GetIndex(thePoint);
-  if (theIndex!=-1)
+{ int theIndex = this->theEvaluatedPoints.GetIndex(thePoint);
+  if (theIndex != - 1)
     return this->theEvaluatedPoints[theIndex];
-  this->knownValues[this->knownValues.size-2]=thePoint[0];
-  this->knownValues[this->knownValues.size-1]=thePoint[1];
-  double functionValue=0;
+  this->knownValues[this->knownValues.size - 2] = thePoint[0];
+  this->knownValues[this->knownValues.size - 1] = thePoint[1];
+  double functionValue = 0;
   if (this->theFun.EvaluatesToDoubleUnderSubstitutions(this->knownEs, this->knownValues, &functionValue))
-    this->numGoodEvaluations++;
+    this->numGoodEvaluations ++;
   else
-  { this->numBadEvaluations++;
-    functionValue=NAN;
+  { this->numBadEvaluations ++;
+    functionValue = NAN;
   }
   this->theEvaluatedPoints.SetKeyValue(thePoint, functionValue);
   return functionValue;
@@ -103,156 +101,156 @@ double MeshTriangles::GetValueAtPoint(const Vector<double>& thePoint)
 
 void MeshTriangles::EvaluateFunAtTriangleVertices(int triangleIndex)
 { MacroRegisterFunctionWithName("MeshTriangles::EvaluateFunAtTriangleVertices");
-  for (int j=0; j<this->theTriangles[triangleIndex].size; j++)
+  for (int j = 0; j < this->theTriangles[triangleIndex].size; j ++)
     this->GetValueAtPoint(this->theTriangles[triangleIndex][j]);
 }
 
 double MeshTriangles::GetTriangleMaxSideLength(int triangleIndex)
 { MacroRegisterFunctionWithName("MeshTriangles::GetTriangleMaxSideLength");
-  if (this->theTriangles[triangleIndex].size!=3)
+  if (this->theTriangles[triangleIndex].size != 3)
     crash << "Error: triangle needs three vertices, instead it has vertices: " << this->theTriangles[triangleIndex] << crash;
   Vector<double>& firstV = this->theTriangles[triangleIndex][0];
-  Vector<double>& secondV= this->theTriangles[triangleIndex][1];
+  Vector<double>& secondV = this->theTriangles[triangleIndex][1];
   Vector<double>& thirdV = this->theTriangles[triangleIndex][2];
   List<Vector<double> > theSides;
-  theSides.AddOnTop(firstV-secondV);
-  theSides.AddOnTop(secondV-thirdV);
-  theSides.AddOnTop(thirdV-firstV);
-  double result=0;
-  for (int i=0; i<theSides.size; i++)
+  theSides.AddOnTop(firstV - secondV);
+  theSides.AddOnTop(secondV - thirdV);
+  theSides.AddOnTop(thirdV - firstV);
+  double result = 0;
+  for (int i = 0; i < theSides.size; i ++)
   { //stOutput << "<br>current side: " << theSides[i];
-    double normSquared= theSides[i][0]*theSides[i][0]+theSides[i][1]*theSides[i][1];
-    result=MathRoutines::Maximum(result, FloatingPoint::sqrt(normSquared));
+    double normSquared = theSides[i][0] * theSides[i][0] + theSides[i][1] * theSides[i][1];
+    result = MathRoutines::Maximum(result, FloatingPoint::sqrt(normSquared));
   }
   return result;
 }
 
 void MeshTriangles::AddPointFromVerticesValues
-  (Vectors<double>& outputAppend, const Vector<double>& left,
-   const Vector<double>& right, double leftVal, double rightVal)
+(Vectors<double>& outputAppend, const Vector<double>& left,
+ const Vector<double>& right, double leftVal, double rightVal)
 { //MacroRegisterFunctionWithName("MeshTriangles::AddPointFromVerticesValues");
-  double Delta=leftVal-rightVal;
-  if (Delta==0)
+  double Delta = leftVal - rightVal;
+  if (Delta == 0)
   { outputAppend.AddOnTop(left);
     return;
   }
-  double contributionLeft=rightVal/Delta;
-  if (contributionLeft<0)
-    contributionLeft*=-1;
-  double contributionRight=leftVal/Delta;
-  if (contributionRight<0)
-    contributionRight*=-1;
-  outputAppend.AddOnTop(left*contributionLeft+right*contributionRight);
+  double contributionLeft = rightVal / Delta;
+  if (contributionLeft < 0)
+    contributionLeft *= - 1;
+  double contributionRight = leftVal / Delta;
+  if (contributionRight < 0)
+    contributionRight *= - 1;
+  outputAppend.AddOnTop(left * contributionLeft + right * contributionRight);
 }
 
 int MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex)
 { MacroRegisterFunctionWithName("MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex");
-  if (this->flagTriangleLimitReached || this->theTriangles.size<this->maxNumTriangles*2)
+  if (this->flagTriangleLimitReached || this->theTriangles.size<this->maxNumTriangles * 2)
     return currentIndex;
   //clean up carried out only when we have twice exceeded the triangle limit
   //this way clean up will be carried only after we have generated at least maxNumTriangles since the last cleanup
   //(which leaves no more than maxNumTriangles alive).
-  if (this->theTriangles.size!=this->trianglesUsed.size)
+  if (this->theTriangles.size != this->trianglesUsed.size)
     crash << "this->theTriangles.size is not equal to this->trianglesUsed.size: the values are: "
     << this->theTriangles.size << " and " << this->trianglesUsed.size << ". " << crash;
-  int lowestFree=0;
-  for (int i=0; i<this->theTriangles.size; i++)
+  int lowestFree = 0;
+  for (int i = 0; i < this->theTriangles.size; i ++)
     if (this->trianglesUsed[i])
-    { this->theTriangles[lowestFree]=this->theTriangles[i];
-      this->trianglesUsed[lowestFree]=true;
-      if (i==currentIndex)
-        currentIndex=lowestFree;
-      lowestFree++;
+    { this->theTriangles[lowestFree] = this->theTriangles[i];
+      this->trianglesUsed[lowestFree] = true;
+      if (i == currentIndex)
+        currentIndex = lowestFree;
+      lowestFree ++;
     }
   this->theTriangles.SetSize(lowestFree);
   this->trianglesUsed.SetSize(lowestFree);
-  if (lowestFree>this->maxNumTriangles)
-    this->flagTriangleLimitReached=true;
+  if (lowestFree > this->maxNumTriangles)
+    this->flagTriangleLimitReached = true;
   return currentIndex;
 }
 
 void MeshTriangles::Subdivide(int triangleIndex)
 { MacroRegisterFunctionWithName("MeshTriangles::Subdivide");
-  List<Vector<double> > currentTriangle=this->theTriangles[triangleIndex];
-  if (currentTriangle.size!=3)
+  List<Vector<double> > currentTriangle = this->theTriangles[triangleIndex];
+  if (currentTriangle.size != 3)
     crash << "Triangle in mesh with less than 3 sides! " << crash;
   List<Vector<double> > insideTriange;
   insideTriange.SetSize(3);
-  insideTriange[0]=(currentTriangle[1]+currentTriangle[2])*0.5;
-  insideTriange[1]=(currentTriangle[2]+currentTriangle[0])*0.5;
-  insideTriange[2]=(currentTriangle[0]+currentTriangle[1])*0.5;
+  insideTriange[0] = (currentTriangle[1] + currentTriangle[2]) * 0.5;
+  insideTriange[1] = (currentTriangle[2] + currentTriangle[0]) * 0.5;
+  insideTriange[2] = (currentTriangle[0] + currentTriangle[1]) * 0.5;
   this->theTriangles.AddOnTop(insideTriange);
   this->trianglesUsed.AddOnTop(true);
   List<Vector<double> > newTriangle;
-  newTriangle=insideTriange;
-  newTriangle[0]=currentTriangle[0];
+  newTriangle = insideTriange;
+  newTriangle[0] = currentTriangle[0];
   this->theTriangles.AddOnTop(newTriangle);
   this->trianglesUsed.AddOnTop(true);
-  newTriangle=insideTriange;
-  newTriangle[1]=currentTriangle[1];
+  newTriangle = insideTriange;
+  newTriangle[1] = currentTriangle[1];
   this->theTriangles.AddOnTop(newTriangle);
   this->trianglesUsed.AddOnTop(true);
-  newTriangle=insideTriange;
-  newTriangle[2]=currentTriangle[2];
+  newTriangle = insideTriange;
+  newTriangle[2] = currentTriangle[2];
   this->theTriangles.AddOnTop(newTriangle);
   this->trianglesUsed.AddOnTop(true);
 }
 
 void MeshTriangles::ComputeImplicitPlotPart2()
 { MacroRegisterFunctionWithName("MeshTriangles::ComputeImplicitPlotPart2");
-  this->theTriangles.SetExpectedSize(this->maxNumTriangles*2);
-  this->trianglesUsed.SetExpectedSize(this->maxNumTriangles*2);
+  this->theTriangles.SetExpectedSize(this->maxNumTriangles * 2);
+  this->trianglesUsed.SetExpectedSize(this->maxNumTriangles * 2);
   this->trianglesUsed.initFillInObject(this->theTriangles.size, true);
-  this->theEvaluatedPoints.SetExpectedSize(this->maxNumTriangles*4);
-  this->flagTriangleLimitReached=false;
-  for (int i=0; i<this->theTriangles.size; i++)
+  this->theEvaluatedPoints.SetExpectedSize(this->maxNumTriangles * 4);
+  this->flagTriangleLimitReached = false;
+  for (int i = 0; i < this->theTriangles.size; i ++)
     this->EvaluateFunAtTriangleVertices(i);
-  if (this->numGoodEvaluations<5)
-  { this->flagFunctionEvaluationFailed=true;
+  if (this->numGoodEvaluations < 5)
+  { this->flagFunctionEvaluationFailed = true;
     return;
   }
-  double minSide=MathRoutines::Minimum(this->Height, this->Width)*this->minTriangleSideAsPercentOfWidthPlusHeight;
+  double minSide = MathRoutines::Minimum(this->Height, this->Width) * this->minTriangleSideAsPercentOfWidthPlusHeight;
   PlotObject currentPlot;
-  currentPlot.colorRGB=HtmlRoutines::RedGreenBlue(255, 0, 0);
-  Vectors<double>& theSegment=currentPlot.thePointsDouble;
+  currentPlot.colorRGB = HtmlRoutines::RedGreenBlue(255, 0, 0);
+  Vectors<double>& theSegment = currentPlot.thePointsDouble;
   List<Vector<double> > currentTriangle;
-  for (int i=0; i<this->theTriangles.size; i++)
-  { currentTriangle=this->theTriangles[i]; //making a copy in case this->theTriangles changes underneath.
-    if (currentTriangle.size!=3)
+  for (int i = 0; i < this->theTriangles.size; i ++)
+  { currentTriangle = this->theTriangles[i]; //making a copy in case this->theTriangles changes underneath.
+    if (currentTriangle.size != 3)
       crash << "Error: triangle needs three vertices, instead it has vertices: " << currentTriangle << crash;
-    bool isGood=true;
-    for (int j=0; j<currentTriangle.size; j++)
-      if (this->GetValueAtPoint(currentTriangle[j])==NAN )
-      { isGood=false;
+    bool isGood = true;
+    for (int j = 0; j < currentTriangle.size; j ++)
+      if (this->GetValueAtPoint(currentTriangle[j]) == NAN)
+      { isGood = false;
         break;
       }
     if (!isGood)
-    { this->trianglesUsed=false;
+    { this->trianglesUsed = false;
       continue;
     }
-    double val0=this->GetValueAtPoint(currentTriangle[0]);
-    double val1=this->GetValueAtPoint(currentTriangle[1]);
-    double val2=this->GetValueAtPoint(currentTriangle[2]);
-    double prod01=val0*val1;
-    double prod12=val1*val2;
-    double prod20=val2*val0;
-    if (prod01>0 && prod12>0 && prod20>0)
-    { this->trianglesUsed[i]=false;
+    double val0 = this->GetValueAtPoint(currentTriangle[0]);
+    double val1 = this->GetValueAtPoint(currentTriangle[1]);
+    double val2 = this->GetValueAtPoint(currentTriangle[2]);
+    double prod01 = val0 * val1;
+    double prod12 = val1 * val2;
+    double prod20 = val2 * val0;
+    if (prod01 > 0 && prod12 > 0 && prod20 > 0)
+    { this->trianglesUsed[i] = false;
       continue;
     }
-    i=this->CleanUpTrianglesReturnUpdatedCurrentIndex(i);
-    if (this->GetTriangleMaxSideLength(i)>minSide && !this->flagTriangleLimitReached)
+    i = this->CleanUpTrianglesReturnUpdatedCurrentIndex(i);
+    if (this->GetTriangleMaxSideLength(i) > minSide && !this->flagTriangleLimitReached)
     { this->Subdivide(i);
       continue;
     }
     theSegment.SetSize(0);
-    if (prod01<=0)
+    if (prod01 <= 0)
       this->AddPointFromVerticesValues(theSegment, currentTriangle[0], currentTriangle[1], val0, val1);
-    if (prod12<=0)
+    if (prod12 <= 0)
       this->AddPointFromVerticesValues(theSegment, currentTriangle[1], currentTriangle[2], val1, val2);
-    if (prod20<=0 && theSegment.size<2)
+    if (prod20 <= 0 && theSegment.size < 2)
       this->AddPointFromVerticesValues(theSegment, currentTriangle[2], currentTriangle[0], val2, val0);
-    if (theSegment.size!=2)
+    if (theSegment.size != 2)
       continue;
     this->theCurve.thePlots.AddOnTop(currentPlot);
   }
@@ -260,27 +258,27 @@ void MeshTriangles::ComputeImplicitPlotPart2()
 
 void MeshTriangles::ComputeImplicitPlot()
 { MacroRegisterFunctionWithName("MeshTriangles::ComputeImplicitPlot");
-  if (this->XstartingGridCount==0 || this->YstartingGridCount==0)
+  if (this->XstartingGridCount == 0 || this->YstartingGridCount == 0)
     return;
-  this->Width=this->upperRightCorner[0]-this->lowerLeftCorner[0];
-  this->Height=this->upperRightCorner[1]-this->lowerLeftCorner[1];
-  double DeltaX =(this->Width)/this->XstartingGridCount;
-  double DeltaY =(this->Height)/this->YstartingGridCount;
+  this->Width = this->upperRightCorner[0] - this->lowerLeftCorner[0];
+  this->Height = this->upperRightCorner[1] - this->lowerLeftCorner[1];
+  double DeltaX = (this->Width) / this->XstartingGridCount;
+  double DeltaY = (this->Height) / this->YstartingGridCount;
   Vector<double> currentPoint;
   currentPoint.initFillInObject(2, 0);
   List<Vector<double> > currentTriangle;
   currentTriangle.initFillInObject(3, currentPoint);
-  for (int i=0; i<this->XstartingGridCount; i++)
-    for (int j=0; j<this->YstartingGridCount; j++)
-    { currentTriangle[0][0]=this->lowerLeftCorner[0]+DeltaX*i;
-      currentTriangle[0][1]=this->lowerLeftCorner[1]+DeltaY*j;
-      currentTriangle[1]=currentTriangle[0];
-      currentTriangle[1][0]+=DeltaX;
-      currentTriangle[2]=currentTriangle[1];
-      currentTriangle[2][1]+=DeltaY;
+  for (int i = 0; i < this->XstartingGridCount; i ++)
+    for (int j = 0; j < this->YstartingGridCount; j ++)
+    { currentTriangle[0][0] = this->lowerLeftCorner[0] + DeltaX * i;
+      currentTriangle[0][1] = this->lowerLeftCorner[1] + DeltaY * j;
+      currentTriangle[1] = currentTriangle[0];
+      currentTriangle[1][0] += DeltaX;
+      currentTriangle[2] = currentTriangle[1];
+      currentTriangle[2][1] += DeltaY;
       this->theTriangles.AddOnTop(currentTriangle);
-      currentTriangle[1]=currentTriangle[0];
-      currentTriangle[1][1]+=DeltaY;
+      currentTriangle[1] = currentTriangle[0];
+      currentTriangle[1][1] += DeltaY;
       this->theTriangles.AddOnTop(currentTriangle);
     }
   if (this->flagShowGrid)
@@ -319,7 +317,7 @@ bool CalculatorFunctionsGeneral::innerGetPointsImplicitly
   if (!theMesh.ComputePoints(theCommands, input, false))
     return false;
   HashedList<Vector<double>, MathRoutines::HashVectorDoubles> thePoints;
-  for (int i=0; i<theMesh.theCurve.thePlots.size; i++)
+  for (int i = 0; i < theMesh.theCurve.thePlots.size; i ++)
   { thePoints.AddOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[0]);
     thePoints.AddOnTopNoRepetition(theMesh.theCurve.thePlots[i].thePointsDouble[1]);
   }
@@ -340,32 +338,32 @@ bool CalculatorFunctionsGeneral::innerPlotImplicitShowGridFunction(Calculator& t
 bool MeshTriangles::ComputePoints
 (Calculator& theCommands, const Expression& input, bool showGrid)
 { MacroRegisterFunctionWithName("MeshTriangles::ComputePoints");
-  if (input.size()<5)
+  if (input.size() < 5)
     return false;
-  this->thePlot.dimension=2;
-  this->flagShowGrid=showGrid;
-  this->owner=&theCommands;
-  this->theFun=input[1];
-  this->knownEs=theCommands.knownDoubleConstants;
-  this->knownValues=theCommands.knownDoubleConstantValues;
+  this->thePlot.dimension = 2;
+  this->flagShowGrid = showGrid;
+  this->owner = &theCommands;
+  this->theFun = input[1];
+  this->knownEs = theCommands.knownDoubleConstants;
+  this->knownValues = theCommands.knownDoubleConstantValues;
   this->knownValues.AddOnTop(0);
   this->knownValues.AddOnTop(0);
   HashedList<Expression> theFreeVars;
   if (!this->theFun.GetFreeVariables(theFreeVars, true))
     return theCommands << "Failed to extract free variables from: " << this->theFun.ToString();
   theFreeVars.QuickSortAscending();
-  if (theFreeVars.size>2)
+  if (theFreeVars.size > 2)
     return theCommands << "I got that your curve depends on " << theFreeVars.size << " expressions, namely: "
     << theFreeVars.ToStringCommaDelimited()
     << " and that is too many (2 max). ";
   Expression tempE;
-  if (theFreeVars.size==0)
+  if (theFreeVars.size == 0)
   { tempE.MakeAtom("x", theCommands);
     theFreeVars.AddOnTop(tempE);
   }
-  if (theFreeVars.size==1)
-  { tempE.MakeAtom("y",theCommands);
-    if (theFreeVars[0]==tempE)
+  if (theFreeVars.size == 1)
+  { tempE.MakeAtom("y", theCommands);
+    if (theFreeVars[0] == tempE)
       tempE.MakeAtom("x", theCommands);
     theFreeVars.AddOnTop(tempE);
   }
@@ -378,15 +376,15 @@ bool MeshTriangles::ComputePoints
   List<int> theGridCount;
   if (!theCommands.GetVectoRInt(input[4], theGridCount))
     return theCommands << "Failed to extract pair of small integers from: " << input[4].ToString();
-  if (theGridCount.size!=2)
+  if (theGridCount.size != 2)
     return theCommands << "Failed to extract pair of small integers from: " << input[4].ToString();
-  this->XstartingGridCount=theGridCount[0];
-  this->YstartingGridCount=theGridCount[1];
-  if (input.size()>=6)
+  this->XstartingGridCount = theGridCount[0];
+  this->YstartingGridCount = theGridCount[1];
+  if (input.size() >= 6)
   { if (!input[5].IsSmallInteger(&this->maxNumTriangles))
       return theCommands << "Failed to extract small integer from: " << input[5].ToString();
-    if (this->maxNumTriangles>20000)
-    { this->maxNumTriangles=20000;
+    if (this->maxNumTriangles > 20000)
+    { this->maxNumTriangles = 20000;
       theCommands << "Max number of triangles decreased from your input: " << input[5].ToString()
       << " to 20000. If you'd like to lift the restriction, modify code around: file: " << __FILE__
       << " line: " << __LINE__ << ". ";
@@ -441,14 +439,12 @@ bool CalculatorFunctionsGeneral::innerIntegrateSqrtOneMinusXsquared(Calculator& 
   Expression theFunCoeff, theFunNoCoeff;
   theFunctionE.GetCoefficientMultiplicandForm
   (theFunCoeff, theFunNoCoeff);
-  if (!theFunNoCoeff.StartsWith(theCommands.opThePower(),3))
+  if (!theFunNoCoeff.StartsWith(theCommands.opThePower(), 3))
     return false;
   if (!theFunNoCoeff[2].IsEqualToHalf())
     return false;
   Expression a, b, c;
-  if (!CalculatorFunctionsGeneral::
-       extractQuadraticCoeffsWRTvariable
-       (theFunNoCoeff[1], theVariableE, a, b, c))
+  if (!CalculatorFunctionsGeneral::extractQuadraticCoeffsWRTvariable(theFunNoCoeff[1], theVariableE, a, b, c))
     return false;
   if (!b.IsEqualToZero())
     return false;
@@ -457,18 +453,18 @@ bool CalculatorFunctionsGeneral::innerIntegrateSqrtOneMinusXsquared(Calculator& 
   if (!c.IsPositiveNumber())
     return false;
   Expression theSQRTedCoeff, theRadSquared, theRad;
-  theSQRTedCoeff.MakeSqrt(theCommands, a*(-1));
-  theFunCoeff*=theSQRTedCoeff;
-  theRadSquared=c/a*(-1);
+  theSQRTedCoeff.MakeSqrt(theCommands, a * (- 1));
+  theFunCoeff *= theSQRTedCoeff;
+  theRadSquared = c / a * (- 1);
   theRad.MakeSqrt(theCommands, theRadSquared);
   Expression rescaledArgument, arcCosPart, algSQRTPart, algPart;
-  rescaledArgument=theVariableE/theRad;
+  rescaledArgument = theVariableE / theRad;
   arcCosPart.MakeOX(theCommands, theCommands.opArcCos(), rescaledArgument);
-  arcCosPart*=theRadSquared/-2;
-  algSQRTPart=theRadSquared-theVariableE*theVariableE;
+  arcCosPart *= theRadSquared / - 2;
+  algSQRTPart = theRadSquared - theVariableE * theVariableE;
   algPart.MakeSqrt(theCommands, algSQRTPart);
-  algPart*=theVariableE/2;
-  output=theFunCoeff*(arcCosPart+algPart);
+  algPart *= theVariableE / 2;
+  output = theFunCoeff * (arcCosPart + algPart);
   return true;
 }
 
@@ -479,46 +475,46 @@ bool CalculatorFunctionsGeneral::innerIntegrateXpowerNePowerAx(Calculator& theCo
     return false;
   if (!theFunctionE.StartsWith(theCommands.opTimes(), 3))
     return false;
-  Expression exponentPartE=theFunctionE[1];//<- note: the seemingly odd order is intentional!
-  Expression polyPartE=theFunctionE[2]; //<- note: the seemingly odd order is intentional!
+  Expression exponentPartE = theFunctionE[1];//<- note: the seemingly odd order is intentional!
+  Expression polyPartE = theFunctionE[2]; //<- note: the seemingly odd order is intentional!
   Expression powerOfXE, powerOfEE;
   Expression aE, bE;//exponent is of form aX+b
   powerOfXE.AssignValue(1, theCommands);
-  bool isGood=false;
-  for (int i=0; i<2; i++)
+  bool isGood = false;
+  for (int i = 0; i < 2; i ++)
   { MathRoutines::swap(exponentPartE, polyPartE);
-    if (!exponentPartE.StartsWith(theCommands.opThePower(),3))
+    if (!exponentPartE.StartsWith(theCommands.opThePower(), 3))
       continue;
     if (!exponentPartE[1].IsAtomGivenData(theCommands.opE()))
       continue;
-    powerOfEE=exponentPartE[2];
+    powerOfEE = exponentPartE[2];
     if (!CalculatorFunctionsGeneral::extractLinearCoeffsWRTvariable(powerOfEE, theVariableE, aE, bE))
       continue;
     if (!aE.IsConstantNumber() || !bE.IsConstantNumber())
       continue;
-    if (polyPartE!=theVariableE)
-    { if (!polyPartE.StartsWith(theCommands.opThePower(),3))
+    if (polyPartE != theVariableE)
+    { if (!polyPartE.StartsWith(theCommands.opThePower(), 3))
         continue;
-      if (polyPartE[1]!=theVariableE)
+      if (polyPartE[1] != theVariableE)
         continue;
-      int theInt=-1;
-      if (!polyPartE[2].IsSmallInteger(& theInt))
+      int theInt = - 1;
+      if (!polyPartE[2].IsSmallInteger(&theInt))
         continue;
-      if (theInt<=0)
+      if (theInt <= 0)
         continue;
-      powerOfXE=polyPartE[2];
+      powerOfXE = polyPartE[2];
     }
-    isGood=true;
+    isGood = true;
     break;
   }
   if (!isGood)
     return false;
   Expression remainingIntegrand, integralPart;
   remainingIntegrand.MakeXOX
-  (theCommands, theCommands.opThePower(), theVariableE, powerOfXE-theCommands.EOne());
-  remainingIntegrand*=exponentPartE;
+  (theCommands, theCommands.opThePower(), theVariableE, powerOfXE - theCommands.EOne());
+  remainingIntegrand *= exponentPartE;
   integralPart.MakeIntegral(theCommands, theSetE,remainingIntegrand, theVariableE);
-  output= (polyPartE*exponentPartE-powerOfXE*integralPart)/aE;
+  output = (polyPartE * exponentPartE - powerOfXE * integralPart) / aE;
   return true;
 }
 
@@ -528,16 +524,13 @@ bool CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne(Calculator& 
   if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE, &theSetE))
     return false;
   Expression theFunCoeff, theFunNoCoeff;
-  theFunctionE.GetCoefficientMultiplicandForm
-  (theFunCoeff, theFunNoCoeff);
-  if (!theFunNoCoeff.StartsWith(theCommands.opThePower(),3))
+  theFunctionE.GetCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
+  if (!theFunNoCoeff.StartsWith(theCommands.opThePower(), 3))
     return false;
   if (!theFunNoCoeff[2].IsEqualToHalf())
     return false;
   Expression a, b, c;
-  if (!CalculatorFunctionsGeneral::
-       extractQuadraticCoeffsWRTvariable
-       (theFunNoCoeff[1], theVariableE, a, b, c))
+  if (!CalculatorFunctionsGeneral::extractQuadraticCoeffsWRTvariable(theFunNoCoeff[1], theVariableE, a, b, c))
     return false;
   if (!b.IsEqualToZero())
     return false;
@@ -547,17 +540,16 @@ bool CalculatorFunctionsGeneral::innerIntegrateSqrtXsquaredMinusOne(Calculator& 
     return false;
 
   Expression extraCF, theVarChangeCF, theNewVarE;
-  extraCF.MakeSqrt(theCommands,c*(-1));
-  theFunCoeff*=extraCF;
-  theVarChangeCF.MakeSqrt(theCommands, (a/c)*(-1));
-  theNewVarE=theVariableE* theVarChangeCF;
-  theFunCoeff/=theVarChangeCF;
+  extraCF.MakeSqrt(theCommands,c * (- 1));
+  theFunCoeff *= extraCF;
+  theVarChangeCF.MakeSqrt(theCommands, (a / c) * (- 1));
+  theNewVarE = theVariableE * theVarChangeCF;
+  theFunCoeff /= theVarChangeCF;
   Expression algSQRTPart, algPart, lnPart;
-  algSQRTPart=theNewVarE*theNewVarE-theCommands.EOne();
+  algSQRTPart = theNewVarE * theNewVarE - theCommands.EOne();
   algPart.MakeSqrt(theCommands, algSQRTPart);
-  lnPart.MakeOX
-  (theCommands,theCommands.opLog(), theNewVarE-algPart);
-  output=theFunCoeff*(algPart*theNewVarE+lnPart)/2;
+  lnPart.MakeOX(theCommands, theCommands.opLog(), theNewVarE - algPart);
+  output = theFunCoeff * (algPart * theNewVarE + lnPart) / 2;
   return true;
 }
 
@@ -592,9 +584,9 @@ bool CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral(Calculator& theC
   theVar.AddOnTop(theVariableE);
   theValue.AddOnTop(0);
   //stOutput << "<br>DEBUG: Got to before evaluates to double at " << theGlobalVariables.GetElapsedSeconds();
-  for (int i=1; i<=2; i++)
+  for (int i = 1; i <= 2; i ++)
     if (theSetE[i].EvaluatesToDouble(&theValue[0]))
-    { double theResult=0;
+    { double theResult = 0;
       if (!solvedIntegral.EvaluatesToDoubleUnderSubstitutions(theVar, theValue, &theResult))
         return false;
       //theCommands << "DEBUG: " << solvedIntegral << " at " << theVar[0].ToString()
@@ -606,7 +598,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral(Calculator& theC
   Expression theSubTop(theCommands), theSubBottom(theCommands);
   theSubTop.AddChildAtomOnTop(theCommands.opDefine());
   theSubTop.AddChildOnTop(theVariableE);
-  theSubBottom=theSubTop;
+  theSubBottom = theSubTop;
   theSubBottom.AddChildOnTop(theSetE[1]);
   theSubTop.AddChildOnTop(theSetE[2]);
   Expression theTopCommands(theCommands), theBottomCommands(theCommands);
@@ -621,18 +613,18 @@ bool CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral(Calculator& theC
   Expression theTop, theBottom;
   theTop.MakeXOX(theCommands, theCommands.opUnderscore(), theTopCommands, theCommands.ETwo());
   theBottom.MakeXOX(theCommands, theCommands.opUnderscore(), theBottomCommands, theCommands.ETwo());
-  output=theTop-theBottom;
+  output = theTop - theBottom;
   return true;
 }
 
 bool CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculusFunctions
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("innerApplyToSubexpressionsRecurseThroughCalculusFunctions");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   if (!input.StartsWithGivenAtom("ApplyToSubexpressionsRecurseThroughCalculusFunctions"))
     return false;
-  const Expression& theArg=input[2];
+  const Expression& theArg = input[2];
   if (theArg.StartsWith(theCommands.opPlus()) ||
       theArg.StartsWith(theCommands.opMinus()) ||
       theArg.StartsWith(theCommands.opTimes()) ||
@@ -641,15 +633,14 @@ bool CalculatorFunctionsGeneral::innerApplyToSubexpressionsRecurseThroughCalculu
       theArg.StartsWith(theCommands.opSequence()) ||
       theArg.StartsWith(theCommands.opSqrt()) ||
       theArg.StartsWith(theCommands.opCos()) ||
-      theArg.StartsWith(theCommands.opSin())
-        )
+      theArg.StartsWith(theCommands.opSin()))
   { output.reset(theCommands);
     output.AddChildOnTop(input[1]);
     Expression theRecursivelyModifiedE(theCommands), nextE(theCommands);
     theRecursivelyModifiedE.AddChildOnTop(theArg[0]);
     nextE.AddChildAtomOnTop("ApplyToSubexpressionsRecurseThroughCalculusFunctions");
     nextE.AddChildOnTop(input[1]);
-    for (int i=1; i<theArg.size(); i++)
+    for (int i = 1; i < theArg.size(); i ++)
     { nextE.children.SetSize(2);
       nextE.AddChildOnTop(theArg[i]);
       theRecursivelyModifiedE.AddChildOnTop(nextE);
@@ -668,11 +659,11 @@ bool CalculatorFunctionsGeneral::innerNumerator(Calculator& theCommands, const E
   if (input.IsRational(&theRat))
     return output.AssignValue((Rational) theRat.GetNumerator(), theCommands);
   if (input.StartsWith(theCommands.opDivide()))
-    if (input.size()>1)
-    { output=input[1];
+    if (input.size() > 1)
+    { output = input[1];
       return true;
     }
-  output=input;
+  output = input;
   return true;
 }
 
@@ -680,12 +671,12 @@ bool CalculatorFunctionsGeneral::innerDenominator(Calculator& theCommands, const
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDenominator");
   Rational theRat, theDen;
   if (input.IsRational(&theRat))
-  { theDen=theRat.GetDenominator();
+  { theDen = theRat.GetDenominator();
     return output.AssignValue(theDen, theCommands);
   }
   if (input.StartsWith(theCommands.opDivide()))
-    if (input.children.size>2)
-    { output=input[2];
+    if (input.children.size > 2)
+    { output = input[2];
       return true;
     }
   return output.AssignValue(1, theCommands);
@@ -694,32 +685,32 @@ bool CalculatorFunctionsGeneral::innerDenominator(Calculator& theCommands, const
 bool CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerHandleUnderscorePowerLimits");
-  if (!input.StartsWith(theCommands.opThePower(),  3) &&
-      !input.StartsWith(theCommands.opUnderscore(),3))
+  if (!input.StartsWith(theCommands.opThePower(), 3) &&
+      !input.StartsWith(theCommands.opUnderscore(), 3))
     return false;
   if (!input[1].StartsWith(theCommands.opLimitBoundary()))
     return false;
-  output=input[1];
-  for (int i=output.size(); i<3; i++)
+  output = input[1];
+  for (int i = output.size(); i < 3; i ++)
     output.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
   if (input.StartsWith(theCommands.opThePower()))
-    return output.SetChilD(2,input[2]);
+    return output.SetChilD(2, input[2]);
   else
-    return output.SetChilD(1,input[2]);
+    return output.SetChilD(1, input[2]);
 }
 
 bool CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSumAsOperatorToSumInternalNotation");
-  if (input.size()<=1)
+  if (input.size() <= 1)
     return false;
   if (!input[0].StartsWith(theCommands.opSum()))
     return false;
-  output=input[0];
-  if (input.size()==2)
+  output = input[0];
+  if (input.size() == 2)
     return output.AddChildOnTop(input[1]);
   List<Expression> theRemaining;
-  for (int i=1; i<input.size(); i++)
+  for (int i = 1; i < input.size(); i ++)
     theRemaining.AddOnTop(input[i]);
   Expression argumentE;
   argumentE.MakeSequence(theCommands, &theRemaining);
@@ -738,7 +729,7 @@ bool CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf
       !input.StartsWith(theCommands.opDivide()))
   { if (!input[1][1].StartsWith(theCommands.opLimitBoundary()))
       return false;
-    output=input[1];
+    output = input[1];
     return output.AddChildOnTop(input[2]);
   }
   if (input[1].StartsWith(theCommands.opSum(), 3))
@@ -748,7 +739,7 @@ bool CalculatorFunctionsGeneral::innerSumTimesExpressionToSumOf
     theSummed.AddChildOnTop(input[0]);
     theSummed.AddChildOnTop(input[1][2]);
     theSummed.AddChildOnTop(input[2]);
-    output=input[1];
+    output = input[1];
     return output.SetChilD(2,theSummed);
   }
 
@@ -760,20 +751,19 @@ bool CalculatorFunctionsGeneral::innerSumSequence
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSumSequence");
   //stOutput << "<br>DEBUG: making sum from: " << input.ToString()
   //<< "size of input: " << input.size();
-  if (input.size()<1)
+  if (input.size() < 1)
     return false;
   if (input.StartsWith(theCommands.opLimitBoundary()))
     return false;
-  if (!input.StartsWith(theCommands.opSum()) &&
-      !input.StartsWith(theCommands.opSequence()))
+  if (!input.StartsWith(theCommands.opSum()) && !input.StartsWith(theCommands.opSequence()))
     return false;
-  if (input.size()==1)
+  if (input.size() == 1)
     return output.AssignValue(1, theCommands);
   //stOutput << "DEBUG: making sum from: " << input.ToStringSemiFull();
   if (input[1].StartsWith(theCommands.opLimitBoundary()))
     return false;
   List<Expression> theTerms;
-  for (int i=1; i<input.size(); i++)
+  for (int i = 1; i < input.size(); i ++)
     theTerms.AddOnTop(input[i]);
   return output.MakeSum(theCommands, theTerms);
 }
@@ -781,12 +771,12 @@ bool CalculatorFunctionsGeneral::innerSumSequence
 bool CalculatorFunctionsGeneral::innerMultiplySequence
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMultiplySequence");
-  if (input.size()<1)
+  if (input.size() < 1)
     return false;
-  if (input.size()==1)
+  if (input.size() == 1)
     return output.AssignValue(1, theCommands);
   List<Expression> theTerms;
-  for (int i=1; i<input.size(); i++)
+  for (int i = 1; i < input.size(); i ++)
     theTerms.AddOnTop(input[i]);
   return output.MakeProducT(theCommands, theTerms);
 }
@@ -794,13 +784,13 @@ bool CalculatorFunctionsGeneral::innerMultiplySequence
 bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard");
-  if (input.size()<3)
+  if (input.size() < 3)
     return false;
-  const Expression& theExpression=input[1];
+  const Expression& theExpression = input[1];
   HashedList<Expression> allowedFreeVars, presentFreeVars;
-  allowedFreeVars.SetExpectedSize(input.size()-2);
-  presentFreeVars.SetExpectedSize(input.size()-2);
-  for (int i=2; i<input.size(); i++)
+  allowedFreeVars.SetExpectedSize(input.size() - 2);
+  presentFreeVars.SetExpectedSize(input.size() - 2);
+  for (int i = 2; i < input.size(); i ++)
     allowedFreeVars.AddOnTopNoRepetition(input[i]);
   std::stringstream out;
   theExpression.GetFreeVariables(presentFreeVars, true);
@@ -808,12 +798,12 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard
   { out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
     << "<br><span style='color:red'><b>contains the unexpected variable(s):</b></span><br><b>";
-    bool found=false;
-    for (int i=0; i< presentFreeVars.size; i++)
+    bool found = false;
+    for (int i = 0; i < presentFreeVars.size; i ++)
       if (!allowedFreeVars.Contains(presentFreeVars[i]))
       { if (found)
           out << ", ";
-        found=true;
+        found = true;
         out << presentFreeVars[i].ToString();
       }
     out << "</b>.";
@@ -829,12 +819,11 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard
 bool CalculatorFunctionsGeneral::innerSort(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSort");
   if (!input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("Sort"))
-      &&
-      !input.IsSequenceNElementS())
+      && !input.IsSequenceNElementS())
     return false;
   List<Expression> sortedExpressions;
-  sortedExpressions.Reserve(input.size()-1);
-  for (int i=1; i<input.size(); i++)
+  sortedExpressions.Reserve(input.size() - 1);
+  for (int i = 1; i < input.size(); i ++)
     sortedExpressions.AddOnTop(input[i]);
   sortedExpressions.QuickSortAscending();
   return output.MakeSequence(theCommands, &sortedExpressions);
@@ -844,12 +833,11 @@ bool CalculatorFunctionsGeneral::innerSortDescending
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSortDescending");
   if (!input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("SortDescending"))
-      &&
-      !input.IsSequenceNElementS())
+      && !input.IsSequenceNElementS())
     return false;
   List<Expression> sortedExpressions;
-  sortedExpressions.Reserve(input.children.size-1);
-  for (int i=1; i<input.children.size; i++)
+  sortedExpressions.Reserve(input.children.size - 1);
+  for (int i = 1; i < input.children.size; i ++)
     sortedExpressions.AddOnTop(input[i]);
   sortedExpressions.QuickSortDescending();
   return output.MakeSequence(theCommands, &sortedExpressions);
@@ -859,44 +847,44 @@ bool CalculatorFunctionsGeneral::innerLength(Calculator& theCommands, const Expr
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLength");
   if (input.IsListStartingWithAtom(theCommands.theAtoms.GetIndexIMustContainTheObject("Length")) ||
       input.IsSequenceNElementS())
-    return output.AssignValue(input.children.size-1, theCommands);
+    return output.AssignValue(input.children.size - 1, theCommands);
   return false;
 }
 
 bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables
 (Calculator& theCommands, const Expression& input, Expression& output, bool excludeNamedConstants)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVariables");
-  if (input.size()<3)
+  if (input.size() < 3)
     return false;
-  const Expression& theExpression=input[1];
+  const Expression& theExpression = input[1];
   HashedList<Expression> mandatoryFreeVars, allowedFreeVars, presentFreeVars;
   if (input[2].IsSequenceNElementS())
-  { mandatoryFreeVars.SetExpectedSize(input[2].size()-1);
-    for (int i=1; i<input[2].size(); i++)
+  { mandatoryFreeVars.SetExpectedSize(input[2].size() - 1);
+    for (int i = 1; i < input[2].size(); i ++)
       mandatoryFreeVars.AddOnTop(input[2][i]);
   } else
     mandatoryFreeVars.AddOnTop(input[2]);
   allowedFreeVars.AddOnTop(mandatoryFreeVars);
-  if (input.size()>3)
+  if (input.size() > 3)
   { if (input[3].IsSequenceNElementS())
-      for (int i=1; i<input[3].size(); i++)
+      for (int i = 1; i < input[3].size(); i ++)
         allowedFreeVars.AddOnTop(input[3][i]);
     else
       allowedFreeVars.AddOnTop(input[3]);
   }
-  presentFreeVars.SetExpectedSize(input.size()-2);
+  presentFreeVars.SetExpectedSize(input.size() - 2);
   theExpression.GetFreeVariables(presentFreeVars, excludeNamedConstants);
   std::stringstream out;
   if (!presentFreeVars.Contains(mandatoryFreeVars))
   { out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
     << "<br><span style='color:red'><b>is required to contain the variables:</b></span><br><b>";
-    bool found=false;
-    for (int i=0; i< mandatoryFreeVars.size; i++)
+    bool found = false;
+    for (int i = 0; i < mandatoryFreeVars.size; i ++)
       if (!presentFreeVars.Contains(mandatoryFreeVars[i]))
       { if (found)
           out << ", ";
-        found=true;
+        found = true;
         out << "\\(" << mandatoryFreeVars[i].ToString() << "\\)";
       }
     out << "</b>.";
@@ -906,18 +894,18 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
   { out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
     << "<br><span style='color:red'><b>contains the unexpected variable(s):</b></span><br><b>";
-    bool found=false;
-    for (int i=0; i< presentFreeVars.size; i++)
+    bool found = false;
+    for (int i = 0; i < presentFreeVars.size; i ++)
       if (!allowedFreeVars.Contains(presentFreeVars[i]))
       { if (found)
           out << ", ";
-        found=true;
+        found = true;
         out << presentFreeVars[i].ToString();
       }
     out << "</b>.";
     out << "<br>The expected variables are: " << allowedFreeVars.ToStringCommaDelimited() << ". ";
   }
-  if (out.str()!="")
+  if (out.str() != "")
     out << "<br>Beware of typos such as:<br>[wrong:] <span style='color:red'>lnx, sqrt2</span>  "
     << "<br>[correct:] <span style='color:green'>ln(x)</span> or <span style='color:green'>ln x</span>, "
     << "<span style='color:green'>sqrt(2)</span> or <span style='color:green'>sqrt 2</span>.<hr>";
@@ -925,13 +913,12 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerPlotGrid
-(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsGeneral::innerPlotGrid(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotGrid");
   (void) input;
   PlotObject thePlot;
-  thePlot.thePlotType="axesGrid";
-  thePlot.dimension=2;
+  thePlot.thePlotType = "axesGrid";
+  thePlot.dimension = 2;
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -940,75 +927,75 @@ bool CalculatorFunctionsGeneral::innerPlotRemoveCoordinateAxes
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotRemoveCoordinateAxes");
   (void) input;
   Plot thePlotFinal;
-  thePlotFinal.dimension=2;
-  thePlotFinal.flagIncludeCoordinateSystem=false;
+  thePlotFinal.dimension = 2;
+  thePlotFinal.flagIncludeCoordinateSystem = false;
   return output.AssignValue(thePlotFinal, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlotLabel
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotLabel");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   Vector<double> labelPosition;
-  if (!theCommands.GetVectorDoubles(input[1], labelPosition, -1))
+  if (!theCommands.GetVectorDoubles(input[1], labelPosition, - 1))
     return false;
   std::string theLabel;
   if (!input[2].IsOfType<std::string>(&theLabel))
-    theLabel=input[2].ToString();
+    theLabel = input[2].ToString();
   PlotObject thePlot;
-  thePlot.dimension=labelPosition.size;
-  thePlot.thePlotString=theLabel;
+  thePlot.dimension = labelPosition.size;
+  thePlot.thePlotString = theLabel;
   thePlot.thePointsDouble.AddOnTop(labelPosition);
-  thePlot.thePlotType="label";
-  thePlot.colorJS="black";
+  thePlot.thePlotType = "label";
+  thePlot.colorJS = "black";
   return output.AssignValue(thePlot, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlotRectangle
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotRectangle");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   Vectors<double> theRectangle;
   theRectangle.SetSize(2);
-  if (!theCommands.GetVectorDoubles(input[1], theRectangle[0],2) || !theCommands.GetVectorDoubles(input[2], theRectangle[1], 2))
+  if (!theCommands.GetVectorDoubles(input[1], theRectangle[0], 2) || !theCommands.GetVectorDoubles(input[2], theRectangle[1], 2))
     return false;
   PlotObject thePlot;
-  thePlot.dimension=2;
-  thePlot.thePlotType="pathFilled";
-  Vector<double> currentCorner=theRectangle[0];
-  Vector<double>& dimensions=theRectangle[1];
+  thePlot.dimension = 2;
+  thePlot.thePlotType = "pathFilled";
+  Vector<double> currentCorner = theRectangle[0];
+  Vector<double>& dimensions = theRectangle[1];
 
   thePlot.thePointsDouble.AddOnTop(currentCorner);
-  currentCorner[0]+=dimensions[0];
+  currentCorner[0] += dimensions[0];
   thePlot.thePointsDouble.AddOnTop(currentCorner);
-  currentCorner[1]+=dimensions[1];
+  currentCorner[1] += dimensions[1];
   thePlot.thePointsDouble.AddOnTop(currentCorner);
-  currentCorner[0]-=dimensions[0];
+  currentCorner[0] -= dimensions[0];
   thePlot.thePointsDouble.AddOnTop(currentCorner);
-  currentCorner[1]-=dimensions[1];
+  currentCorner[1] -= dimensions[1];
   thePlot.thePointsDouble.AddOnTop(currentCorner);
-  thePlot.colorFillJS="cyan";
-  thePlot.colorJS="blue";
+  thePlot.colorFillJS = "cyan";
+  thePlot.colorJS = "blue";
   thePlot.thePointsDouble.AddOnTop(currentCorner);
   thePlot.theRectangles.AddOnTop(theRectangle);
-  thePlot.colorRGB=HtmlRoutines::RedGreenBlue(0,0,255);
-  thePlot.colorFillRGB=HtmlRoutines::RedGreenBlue(0,255,255);
+  thePlot.colorRGB = HtmlRoutines::RedGreenBlue(0, 0, 255);
+  thePlot.colorFillRGB = HtmlRoutines::RedGreenBlue(0, 255, 255);
   return output.AssignValue(thePlot, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return theCommands << "SolveFor takes as input three arguments. ";
   if (input[1].HasBoundVariables() )
     return false;
   if (input[2].HasBoundVariables() )
     return false;
   Expression thePowers;
-  Expression modifiedInput=input;
+  Expression modifiedInput = input;
   if (!modifiedInput[2].StartsWith(theCommands.opDefine()))
   { if (!CalculatorFunctionsGeneral::innerCoefficientsPowersOf(theCommands, modifiedInput, thePowers))
       return theCommands << "Failed to extract the coefficients of " << modifiedInput[1].ToString()
@@ -1034,30 +1021,30 @@ bool CalculatorFunctionsGeneral::innerSolveUnivariatePolynomialWithRadicalsWRT
   if (!thePowers.IsSequenceNElementS())
     return theCommands << "This is not supposed to happen: expression "
     << thePowers.ToString() << " should be a list. This may be a programming bug. ";
-  if (thePowers.size()==2)
+  if (thePowers.size() == 2)
     return theCommands << "Cannot solve: " << modifiedInput[2].ToString()
     << ". The expression does not depend on " << modifiedInput[1].ToString() << ". The coefficients of "
     << modifiedInput[1].ToString() << " are: " << thePowers.ToString();
-  if (thePowers.size()==3)
-  { output=thePowers[1];
-    output*=-1;
-    output/=thePowers[2];
+  if (thePowers.size() == 3)
+  { output = thePowers[1];
+    output *= - 1;
+    output /= thePowers[2];
     return true;
   }
-  if (thePowers.children.size==4)
-  { const Expression& a=thePowers[3];
-    const Expression& b=thePowers[2];
-    const Expression& c=thePowers[1];
+  if (thePowers.children.size == 4)
+  { const Expression& a = thePowers[3];
+    const Expression& b = thePowers[2];
+    const Expression& c = thePowers[1];
     output.MakeSequence(theCommands);
 //    stOutput << "DEBIG: a,b,c" << thePowers[3] << thePowers[2] << thePowers[1] << "<br>";
     Expression currentRoot;
     Expression theDiscriminant;
-    theDiscriminant=b*b-a*c*4;
+    theDiscriminant = b * b - a * c * 4;
     Expression sqrtDiscriminant;
     sqrtDiscriminant.MakeSqrt(theCommands, theDiscriminant, 2);
-    currentRoot=(b*(-1)-sqrtDiscriminant)/(a*2);
+    currentRoot = (b* (- 1) - sqrtDiscriminant) / (a * 2);
     output.AddChildOnTop(currentRoot);
-    currentRoot=(b*(-1)+sqrtDiscriminant)/(a*2);
+    currentRoot = (b* (- 1) + sqrtDiscriminant) / (a * 2);
     output.AddChildOnTop(currentRoot);
     return true;
   }
@@ -1069,11 +1056,11 @@ bool CalculatorFunctionsGeneral::innerOperatorBounds(Calculator& theCommands, co
   if (!input.StartsWith(theCommands.opUnderscore(),3) &&
       !input.StartsWith(theCommands.opThePower(), 3 ))
     return false;
-  const Expression& baseE=input[1];
+  const Expression& baseE = input[1];
   Expression theLimitsE;
-  int theIntegralOp=baseE.theData;
-  if (theIntegralOp==theCommands.opIntegral() ||
-      theIntegralOp==theCommands.opSum())
+  int theIntegralOp = baseE.theData;
+  if (theIntegralOp == theCommands.opIntegral() ||
+      theIntegralOp == theCommands.opSum())
   { output.reset(theCommands);
     output.AddChildAtomOnTop(theIntegralOp);
     theLimitsE.reset(theCommands);
@@ -1083,33 +1070,33 @@ bool CalculatorFunctionsGeneral::innerOperatorBounds(Calculator& theCommands, co
     output.AddChildOnTop(theLimitsE);
     return true;
   }
-  if (!baseE.StartsWith(theCommands.opIntegral() ,2) &&
+  if (!baseE.StartsWith(theCommands.opIntegral(), 2) &&
       !baseE.StartsWith(theCommands.opSum(), 2))
     return false;
   theLimitsE.reset(theCommands);
   theLimitsE.AddChildAtomOnTop(theCommands.opLimitBoundary());
-  for (int i=1; i<3; i++)
-    if (i<baseE[1].size())
+  for (int i = 1; i < 3; i ++)
+    if (i < baseE[1].size())
       theLimitsE.AddChildOnTop(baseE[1][i]);
     else
       theLimitsE.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
   if (input[1].IsAtomGivenData(theCommands.opUnderscore()))
-    theLimitsE.SetChilD(1,input[2]);
+    theLimitsE.SetChilD(1, input[2]);
   else
-    theLimitsE.SetChilD(2,input[2]);
-  output=input[1];
-  return output.SetChilD(1,theLimitsE);
+    theLimitsE.SetChilD(2, input[2]);
+  output = input[1];
+  return output.SetChilD(1, theLimitsE);
 }
 
 bool CalculatorFunctionsGeneral::innerPowerExponentToLog(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPowerExponentToLog");
   if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
-  const Expression& baseE=input[1];
-  const Expression& powerE=input[2];
+  const Expression& baseE = input[1];
+  const Expression& powerE = input[2];
   if (baseE.IsAtomGivenData(theCommands.opE()))
     if (powerE.StartsWith(theCommands.opLog(), 2))
-    { output=powerE[1];
+    { output = powerE[1];
       return true;
     }
   return false;
@@ -1120,7 +1107,7 @@ bool CalculatorFunctionsGeneral::innerDistributeExponent(Calculator& theCommands
   if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
   const Expression& base = input[1];
-  const Expression& exponentE=input[2];
+  const Expression& exponentE = input[2];
   if (exponentE.IsAtomGivenData(theCommands.opCirc()))
     return false;
   if (!input[1].StartsWith(theCommands.opTimes(), 3))
@@ -1130,12 +1117,12 @@ bool CalculatorFunctionsGeneral::innerDistributeExponent(Calculator& theCommands
   bool isGood=base[1].IsPositiveNumber() || base[2].IsPositiveNumber();
   if (!isGood)
   { if (exponentE.IsInteger())
-      isGood=true;
+      isGood = true;
     else
     { Rational exponentRat;
       if (exponentE.IsRational(&exponentRat))
         if (!exponentRat.GetDenominator().IsEven())
-          isGood=true;
+          isGood = true;
     }
   }
   if (!isGood)
@@ -1148,26 +1135,26 @@ bool CalculatorFunctionsGeneral::innerDistributeExponent(Calculator& theCommands
 
 bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerSqrt");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
 //  stOutput << "<br>Calling sqrt with input: " << input.ToString();
   Rational ratPower;
   if (input[1].IsRational(&ratPower))
-    if (ratPower!=0)
+    if (ratPower != 0)
     { Expression powerE, powerEreduced, theExponentE;
       ratPower.Invert();
       theExponentE.AssignValue(ratPower, theCommands);
       powerE.MakeXOX(theCommands,theCommands.opThePower(), input[2], theExponentE);
       if (CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactors
           (theCommands, powerE, powerEreduced))
-        if (powerEreduced!=powerE && powerEreduced!=input)
-        { output=powerEreduced;
+        if (powerEreduced != powerE && powerEreduced != input)
+        { output = powerEreduced;
           return true;
         }
     }
   if (input[2].IsEqualToOne())
     return output.AssignValue(1, theCommands);
-  int thePower=0;
+  int thePower = 0;
   if (!input[1].IsSmallInteger(&thePower))
     return false;
 //  stOutput << "<br>the power that be: " << thePower ;
@@ -1179,20 +1166,20 @@ bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expres
     theExponent.AssignValue(thePowerRat, theCommands);
     return output.MakeXOX(theCommands, theCommands.opThePower(), input[2], theExponent);
   }
-  if (thePower>0 && input[2].IsEqualToZero())
+  if (thePower > 0 && input[2].IsEqualToZero())
     return output.AssignValue(0, theCommands);
-  if (thePower==0 && input[2].IsEqualToZero())
+  if (thePower == 0 && input[2].IsEqualToZero())
     return output.AssignValue(1, theCommands);
   Rational rationalValue;
   if (!input[2].IsRational(&rationalValue))
     return false;
-  if (thePower<0)
+  if (thePower < 0)
   { if (rationalValue.IsEqualToZero())
       return output.MakeError("Division by zero in expression: " + input.ToString(), theCommands, true);
-    thePower*=-1;
+    thePower *= - 1;
     rationalValue.Invert();
   }
-  if (thePower!=2)
+  if (thePower != 2)
     return false;
 //  stOutput << "<br>Got here: rat value is: " << rationalValue.ToString();
   AlgebraicNumber theNumber;
@@ -1204,11 +1191,11 @@ bool CalculatorFunctionsGeneral::innerSqrt(Calculator& theCommands, const Expres
 bool CalculatorFunctionsGeneral::innerFloor(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFloor");
   Rational theRat;
-  if(input.IsOfType<Rational>(&theRat))
+  if (input.IsOfType<Rational>(&theRat))
   { theRat.AssignFloor();
     return output.AssignValue(theRat, theCommands);
   }
-  double theDouble=0;
+  double theDouble = 0;
   if (input.EvaluatesToDouble(&theDouble))
     return output.AssignValue((int) std::floor(theDouble), theCommands);
   return false;
@@ -1217,11 +1204,11 @@ bool CalculatorFunctionsGeneral::innerFloor(Calculator& theCommands, const Expre
 bool CalculatorFunctionsGeneral::innerRound(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRound");
   Rational theRat;
-  if(input.IsOfType<Rational>(&theRat))
-  { Rational result=theRat;
+  if (input.IsOfType<Rational>(&theRat))
+  { Rational result = theRat;
     result.AssignFloor();
-    if (theRat-result>=Rational(1,2) )
-      result++;
+    if (theRat - result >= Rational(1, 2))
+      result ++;
     return output.AssignValue(result, theCommands);
   }
   double theDouble=0;
@@ -1232,147 +1219,145 @@ bool CalculatorFunctionsGeneral::innerRound(Calculator& theCommands, const Expre
 
 bool CalculatorFunctionsGeneral::innerPlotPath(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotPath");
-  if (input.size()<3)
+  if (input.size() < 3)
     return false;
 //  stOutput << "DEBUG: Here i am";
-  const Expression& theMatE=input[1];
+  const Expression& theMatE = input[1];
   Matrix<double> theMat;
   if (!theCommands.GetMatrixDoubles(theMatE, theMat))
     return theCommands << "Failed to extract matrix from: " << theMatE.ToString();
-  if (theMat.NumCols!=2 && theMat.NumCols!=3)
+  if (theMat.NumCols != 2 && theMat.NumCols != 3)
     return theCommands << "Only dimensions 2 and 3 are supported at the moment. ";
   PlotObject theSegment;
-  if (input.size()>=3)
-  { theSegment.colorJS="black";
-    theSegment.colorRGB=HtmlRoutines::RedGreenBlue(0,0,0);
-    const Expression& colorE=input[2];
+  if (input.size() >= 3)
+  { theSegment.colorJS = "black";
+    theSegment.colorRGB = HtmlRoutines::RedGreenBlue(0, 0, 0);
+    const Expression& colorE = input[2];
     if (!colorE.IsOfType<std::string>(&theSegment.colorJS))
-      theSegment.colorJS= colorE.ToString();
+      theSegment.colorJS = colorE.ToString();
     if (!DrawingVariables::GetColorIntFromColorString
         (theSegment.colorJS, theSegment.colorRGB))
       theCommands << "Unrecognized color: " << theSegment.colorJS;
   }
-  if (input.size()>=4)
-  { const Expression& lineWidthE=input[3];
+  if (input.size() >= 4)
+  { const Expression& lineWidthE = input[3];
     if (!lineWidthE.EvaluatesToDouble(&theSegment.lineWidth))
-      theCommands << "Failed to extract line width from: "
-      << lineWidthE.ToString();
+      theCommands << "Failed to extract line width from: " << lineWidthE.ToString();
     std::stringstream lineWidthStream;
     lineWidthStream.precision(4);
     lineWidthStream << theSegment.lineWidth;
-    theSegment.lineWidthJS=lineWidthStream.str();
+    theSegment.lineWidthJS = lineWidthStream.str();
   }
-  theSegment.thePlotType="segmentPath";
-  theSegment.dimension=theMat.NumCols;
+  theSegment.thePlotType = "segmentPath";
+  theSegment.dimension = theMat.NumCols;
   theMat.GetVectorsFromRows(theSegment.thePointsDouble);
-  if (input.size()>=4)
+  if (input.size() >= 4)
     if (!input[3].EvaluatesToDouble(&theSegment.lineWidth))
-      theSegment.lineWidth=1;
+      theSegment.lineWidth = 1;
   Plot thePlot;
-  thePlot+=theSegment;
+  thePlot += theSegment;
   return output.AssignValue(thePlot, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlotMarkSegment(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotMarkSegment");
-  if (input.size()<3)
+  if (input.size() < 3)
     return false;
 //  stOutput << "DEBUG: Here i am";
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
   Vector<double> leftV, rightV;
   if (!theCommands.GetVectorDoubles(leftE, leftV) || !theCommands.GetVectorDoubles(rightE, rightV))
     return false;
-  if (leftV.size!=rightV.size)
+  if (leftV.size != rightV.size)
     return false;
-  if (leftV.size!=2)
+  if (leftV.size != 2)
     return false;
-  int numSegments=1;
-  if (input.size()>=4)
+  int numSegments = 1;
+  if (input.size() >= 4)
     if (!input[3].IsSmallInteger(&numSegments))
       return theCommands << "Could not extract small integer from " << input[3].ToString();
-  if (numSegments<1 || numSegments>100)
+  if (numSegments < 1 || numSegments > 100)
     return theCommands << "Bad number of segments: " << numSegments;
-  Expression theVector=(rightE-leftE);
-  Expression midPt=(rightE+leftE)/2;
+  Expression theVector = (rightE - leftE);
+  Expression midPt = (rightE + leftE) / 2;
   Expression theVectorX, theVectorY;
   theVectorX.MakeXOX(theCommands, theCommands.opUnderscore(), theVector, theCommands.EOne());
   theVectorY.MakeXOX(theCommands, theCommands.opUnderscore(), theVector, theCommands.ETwo());
   Expression theOrthoV;
-  theOrthoV.MakeXOX(theCommands, theCommands.opSequence(), theVectorY*(-1), theVectorX);
-  Expression leftPt=midPt-theOrthoV/25;
-  Expression rightPt=midPt+theOrthoV/25;
+  theOrthoV.MakeXOX(theCommands, theCommands.opSequence(), theVectorY * (- 1), theVectorX);
+  Expression leftPt = midPt - theOrthoV / 25;
+  Expression rightPt = midPt + theOrthoV / 25;
   output.reset(theCommands);
   output.AddChildAtomOnTop("PlotSegment");
   output.AddChildOnTop(leftPt);
   output.AddChildOnTop(rightPt);
-  for (int i=4; i<input.size(); i++)
+  for (int i = 4; i < input.size(); i ++)
     output.AddChildOnTop(input[i]);
   return true;
 }
 
 bool CalculatorFunctionsGeneral::innerPlotSegment(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSegment");
-  if (input.size()<3)
+  if (input.size() < 3)
     return false;
 //  stOutput << "DEBUG: Here i am";
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
   Vector<double> leftV, rightV;
   if (!theCommands.GetVectorDoubles(leftE, leftV) || !theCommands.GetVectorDoubles(rightE, rightV))
     return false;
-  if (leftV.size!=rightV.size)
+  if (leftV.size != rightV.size)
     return false;
-  if (leftV.size!=2 && leftV.size!=3)
+  if (leftV.size != 2 && leftV.size != 3)
     return false;
   PlotObject theSegment;
-  if (input.size()>=4)
-  { theSegment.colorJS="black";
-    theSegment.colorRGB=HtmlRoutines::RedGreenBlue(0,0,0);
-    const Expression& colorE=input[3];
+  if (input.size() >= 4)
+  { theSegment.colorJS = "black";
+    theSegment.colorRGB = HtmlRoutines::RedGreenBlue(0, 0, 0);
+    const Expression& colorE = input[3];
     if (!colorE.IsOfType<std::string>(&theSegment.colorJS))
-      theSegment.colorJS= colorE.ToString();
-    if(!DrawingVariables::GetColorIntFromColorString
-        (theSegment.colorJS, theSegment.colorRGB))
+      theSegment.colorJS = colorE.ToString();
+    if (!DrawingVariables::GetColorIntFromColorString(theSegment.colorJS, theSegment.colorRGB))
       theCommands << "Unrecognized color: " << theSegment.colorJS;
   }
-  if (input.size()>=5)
-  { const Expression& lineWidthE=input[4];
+  if (input.size() >= 5)
+  { const Expression& lineWidthE = input[4];
     if (!lineWidthE.EvaluatesToDouble(&theSegment.lineWidth))
       theCommands << "Failed to extract line width from: "
       << lineWidthE.ToString();
     std::stringstream lineWidthStream;
     lineWidthStream.precision(4);
     lineWidthStream << theSegment.lineWidth;
-    theSegment.lineWidthJS=lineWidthStream.str();
+    theSegment.lineWidthJS = lineWidthStream.str();
   }
-  theSegment.thePlotType="segment";
-  if (leftV.size==3)
-    theSegment.dimension=3;
+  theSegment.thePlotType = "segment";
+  if (leftV.size == 3)
+    theSegment.dimension = 3;
   else
-    theSegment.dimension=2;
+    theSegment.dimension = 2;
   theSegment.thePointsDouble.AddOnTop(leftV);
   theSegment.thePointsDouble.AddOnTop(rightV);
-  if (input.size()>=5)
+  if (input.size() >= 5)
     if (!input[4].EvaluatesToDouble(&theSegment.lineWidth))
-      theSegment.lineWidth=1;
+      theSegment.lineWidth = 1;
   Plot thePlot;
-  thePlot+=theSegment;
+  thePlot += theSegment;
   return output.AssignValue(thePlot, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerThaw(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerThaw");
   if (!input.StartsWith(theCommands.opFreeze()))
-  { output=input;
+  { output = input;
     return true;
   }
-  if (input.size()>2)
-  { output=input;
+  if (input.size() > 2)
+  { output = input;
     return output.SetChildAtomValue(0, theCommands.opSequence());
   }
-  if (input.size()==2)
-  { output=input[1];
+  if (input.size() == 2)
+  { output = input[1];
     return true;
   }
   return false;
@@ -1380,46 +1365,46 @@ bool CalculatorFunctionsGeneral::innerThaw(Calculator& theCommands, const Expres
 
 bool CalculatorFunctionsGeneral::innerLCM(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLCM");
-  if (input.size()<3)
+  if (input.size() < 3)
     return false;
   Vector<LargeInt> theInts;
   if (!theCommands.GetVectorLargeIntFromFunctionArguments(input, theInts))
     return false;
-  if (theInts.size<1)//<-this shouldn't happen if GetVectorLargeIntFromFunctionArguments works as intended.
+  if (theInts.size < 1)//<-this shouldn't happen if GetVectorLargeIntFromFunctionArguments works as intended.
     return false;
-  LargeIntUnsigned theResult=theInts[0].value;
-  if (theResult==0)
+  LargeIntUnsigned theResult = theInts[0].value;
+  if (theResult == 0)
     return false;
-  for (int i=1; i<theInts.size; i++)
-  { if (theInts[i].value==0)
+  for (int i = 1; i < theInts.size; i ++)
+  { if (theInts[i].value == 0)
       return false;
-    theResult=LargeIntUnsigned::lcm(theResult, theInts[i].value);
+    theResult = LargeIntUnsigned::lcm(theResult, theInts[i].value);
   }
   return output.AssignValue(theResult, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerGCD(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGCD");
-  if (input.size()<3)
+  if (input.size() < 3)
     return false;
   Vector<LargeInt> theInts;
   if (!theCommands.GetVectorLargeIntFromFunctionArguments(input, theInts))
     return false;
-  if (theInts.size<1)//<-this shouldn't happen if GetVectorLargeIntFromFunctionArguments works as intended.
+  if (theInts.size < 1)//<-this shouldn't happen if GetVectorLargeIntFromFunctionArguments works as intended.
     return false;
-  LargeIntUnsigned theResult=theInts[0].value;
-  if (theResult==0)
+  LargeIntUnsigned theResult = theInts[0].value;
+  if (theResult == 0)
     return false;
-  for (int i=1; i<theInts.size; i++)
-  { if (theInts[i].value==0)
+  for (int i = 1; i < theInts.size; i ++)
+  { if (theInts[i].value == 0)
       return false;
-    theResult=LargeIntUnsigned::gcd(theResult, theInts[i].value);
+    theResult = LargeIntUnsigned::gcd(theResult, theInts[i].value);
   }
   return output.AssignValue(theResult, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerLogBaseNaturalToLn(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.StartsWith(theCommands.opLogBase(),3))
+{ if (!input.StartsWith(theCommands.opLogBase(), 3))
     return false;
   if (!input[1].IsAtomGivenData(theCommands.opE()))
     return false;
@@ -1434,87 +1419,87 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
   Rational theBase, theArg;
   if (!input[1].IsOfType<Rational>(&theBase) || !input[2].IsOfType<Rational>(&theArg))
     return false;
-  if (theBase<0 || theArg<0)
+  if (theBase < 0 || theArg < 0)
     return false;
-  if (theBase==1)
+  if (theBase == 1)
     return false;
-  if (theBase==0 || theArg==0)
+  if (theBase == 0 || theArg == 0)
   { std::stringstream errorStream;
     errorStream << "Attempt to take logarithm base " << theBase
     << " of " << theArg << " is not allowed. ";
     return output.MakeError(errorStream.str(), theCommands);
   }
-  if (theArg==1)
+  if (theArg == 1)
     return output.AssignValue(0, theCommands);
   Expression newBaseE, newArgE;
   newBaseE.AssignValue(theBase, theCommands);
   newArgE.AssignValue(theArg, theCommands);
-  if (theBase<1)
+  if (theBase < 1)
   { theBase.Invert();
     newBaseE.AssignValue(theBase, theCommands);
     output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
-    output*=-1;
+    output *= - 1;
     return true;
   }
-  if (theArg<1)
+  if (theArg < 1)
   { theArg.Invert();
     newArgE.AssignValue(theArg, theCommands);
     output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
-    output*=-1;
+    output *= - 1;
     return true;
   }
   LargeInt baseInt, argNum;
   if (!theBase.IsInteger(&baseInt))
     return false;
   LargeInt simplerBase;
-  int simplerPower=-1;
-  bool isPower=false;
+  int simplerPower = - 1;
+  bool isPower = false;
   if (baseInt.TryToFindWhetherIsPower(isPower, simplerBase, simplerPower))
     if (isPower)
     { newBaseE.AssignValue((Rational) simplerBase, theCommands);
       output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
-      output/=simplerPower;
+      output /= simplerPower;
       return true;
     }
-  argNum=theArg.GetNumerator();
-  LargeInt argDen=theArg.GetDenominator();
-  double doubleBase= baseInt.GetDoubleValue();
-  double doubleArgNum=argNum.GetDoubleValue();
-  if (FloatingPoint::log(doubleArgNum)/FloatingPoint::log(doubleBase)>1000)
+  argNum = theArg.GetNumerator();
+  LargeInt argDen = theArg.GetDenominator();
+  double doubleBase = baseInt.GetDoubleValue();
+  double doubleArgNum = argNum.GetDoubleValue();
+  if (FloatingPoint::log(doubleArgNum) / FloatingPoint::log(doubleBase) > 1000)
     return false;
-  int intPart=0;
-  bool changed =false;
-  while (argNum% baseInt ==0)
-  { intPart++;
-    argNum/=baseInt;
-    changed=true;
+  int intPart = 0;
+  bool changed = false;
+  while (argNum % baseInt == 0)
+  { intPart ++;
+    argNum /= baseInt;
+    changed = true;
   }
-  while (argDen% baseInt ==0)
-  { intPart--;
-    argDen/=baseInt;
-    changed=true;
+  while (argDen % baseInt == 0)
+  { intPart --;
+    argDen /= baseInt;
+    changed = true;
   }
   if (!changed)
     return false;
-  theArg=argNum;
-  theArg/=argDen;
+  theArg = argNum;
+  theArg /= argDen;
   newBaseE.AssignValue(theBase, theCommands);
   newArgE.AssignValue(theArg, theCommands);
   output.MakeXOX(theCommands, theCommands.opLogBase(), newBaseE, newArgE);
-  if (intPart==0)
+  if (intPart == 0)
     return true;
-  output+=intPart;
+  output += intPart;
   return true;
 }
 
 std::string InputBox::GetSliderName()const
-{ return this->name+ Crypto::computeSha1outputBase64(this->name);
+{ return this->name + Crypto::computeSha1outputBase64(this->name);
 }
 
 std::string InputBox::GetUserInputBox()const
 { MacroRegisterFunctionWithName("InputBox::GetUserInputBox");
   std::stringstream out;
-  double theReader=0;
+  double theReader = 0;
   out.precision(4);
   out << std::fixed;
   if (this->value.EvaluatesToDouble(&theReader))
@@ -1532,18 +1517,18 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
   if (theCommands.RecursionDepthExceededHandleRoughly())
     return false;
   std::string atomString;
-  if (input==theCommands.EMInfinity())
+  if (input == theCommands.EMInfinity())
     return output.AssignValue<std::string>("\"minusInfinity\"", theCommands);
-  if (input==theCommands.EInfinity())
+  if (input == theCommands.EInfinity())
     return output.AssignValue<std::string>("\"infinity\"", theCommands);
   if (input.IsAtom(&atomString))
   { if (input.IsAtomGivenData(theCommands.opE()))
       return output.AssignValue<std::string>(" 2.718281828 ", theCommands);
     if (input.IsAtomGivenData(theCommands.opPi()))
       return output.AssignValue<std::string>(" 3.141592654 ", theCommands);
-    if (input.theData>=theCommands.NumPredefinedAtoms)
+    if (input.theData >= theCommands.NumPredefinedAtoms)
       return output.AssignValue(HtmlRoutines::GetJavascriptVariable(atomString), theCommands);
-    if (atomString=="+" || atomString=="*" || atomString=="/" || atomString=="-")
+    if (atomString == "+" || atomString == "*" || atomString == "/" || atomString == "-")
       return output.AssignValue(atomString, theCommands);
     return output.AssignValue(atomString, theCommands);
   }
@@ -1551,25 +1536,25 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
   InputBox theBox;
   if (input.IsOfType(&theBox))
   { out << "parseFloat(document.getElementById('" << theBox.GetSliderName() << "').value)";
-    return output.AssignValue(out.str(),theCommands);
+    return output.AssignValue(out.str(), theCommands);
   }
   out.precision(7);
-  bool hasDoubleValue=false;;
-  double theDoubleValue=-1;
+  bool hasDoubleValue = false;;
+  double theDoubleValue = - 1;
   if (input.IsOfType<Rational>())
-  { hasDoubleValue=true;
-    theDoubleValue=input.GetValue<Rational>().GetDoubleValue();
+  { hasDoubleValue = true;
+    theDoubleValue = input.GetValue<Rational>().GetDoubleValue();
   }
   if (input.IsOfType<AlgebraicNumber>())
-    hasDoubleValue=input.GetValue<AlgebraicNumber>().EvaluatesToDouble(&theDoubleValue);
+    hasDoubleValue = input.GetValue<AlgebraicNumber>().EvaluatesToDouble(&theDoubleValue);
   if (input.IsOfType<double>())
-  { hasDoubleValue=true;
-    theDoubleValue=input.GetValue<double>();
+  { hasDoubleValue = true;
+    theDoubleValue = input.GetValue<double>();
   }
   if (hasDoubleValue)
-  { std::string theDoubleString=FloatingPoint::DoubleToString(theDoubleValue);
-    if (theDoubleString.size()>0)
-    { if (theDoubleString[0]=='-')
+  { std::string theDoubleString = FloatingPoint::DoubleToString(theDoubleValue);
+    if (theDoubleString.size() > 0)
+    { if (theDoubleString[0] == '-')
         out << "(" << theDoubleString << ")";
       else
         out << " " << theDoubleString;
@@ -1579,11 +1564,11 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
   Expression opE, leftE, rightE;
   if (input.StartsWith(theCommands.opSequence()) || input.StartsWith(theCommands.opIntervalOpen()))
   { out << "[";
-    for (int i=1; i<input.size(); i++)
+    for (int i = 1; i < input.size(); i ++)
     { if (!CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[i], opE))
         return output.AssignValue("(Failed to convert " + input[i].ToString() + ")", theCommands);
       out << opE.ToString();
-      if (i!=input.size()-1)
+      if (i != input.size() - 1)
         out << ", ";
     }
     out << "]";
@@ -1591,62 +1576,62 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
   }
   std::string opString, leftString, rightString;
   std::stringstream logStream;
-  if (input.size()==3 || input.size()==2)
-  { Expression* currentE=&opE;
-    std::string* currentString=&opString;
-    for (int i=0; i<input.size(); i++)
+  if (input.size() == 3 || input.size() == 2)
+  { Expression* currentE = &opE;
+    std::string* currentString = &opString;
+    for (int i = 0; i < input.size(); i ++)
     { if (!CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[i], *currentE))
         return output.AssignValue("(Failed to convert " + input[i].ToString() + ")", theCommands);
       if (!currentE->IsOfType(currentString))
         return output.AssignValue("(Failed to convert " + input[i].ToString() + ")", theCommands);
       logStream << "Converted: " << input[i].ToString() << " to: "
       << *currentString << ". ";
-      if (i==0)
-      { currentE=&leftE;
-        currentString=&leftString;
+      if (i == 0)
+      { currentE = &leftE;
+        currentString = &leftString;
       }
-      if (i==1)
-      { currentE=&rightE;
-        currentString=&rightString;
+      if (i == 1)
+      { currentE = &rightE;
+        currentString = &rightString;
       }
     }
-    if (input.size()==3)
-    { if (opString=="+" || opString=="-" || opString=="/" || opString=="*")
+    if (input.size() == 3)
+    { if (opString == "+" || opString == "-" || opString == "/" || opString == "*")
       { out << "(" << leftString <<  " " << opString << " " << rightString << ")";
         return output.AssignValue(out.str(), theCommands);
       }
-      if (opString=="\\sqrt")
+      if (opString == "\\sqrt")
       { out << "Math.pow(" << rightString << ", 1/" << leftString << ")";
         return output.AssignValue(out.str(), theCommands);
       }
-      if (opString=="^")
+      if (opString == "^")
       { out << "Math.pow(" << leftString << ", " << rightString << ")";
         return output.AssignValue(out.str(), theCommands);
       }
-      if (opString=="LogBase")
+      if (opString == "LogBase")
       { out << "Math.log(" << rightString << ") / Math.log(" << leftString << ")";
         return output.AssignValue(out.str(), theCommands);
       }
     }
-    if (input.size()==2)
+    if (input.size() == 2)
     { std::string theFunName="";
-      if (opString=="\\sin" || opString == "\\cos" ||
-          opString=="\\log" || opString == "\\tan" ||
-          opString=="\\cot")
-        theFunName=opString.substr(1);
-      if (opString=="\\arccos")
-        theFunName="acos";
-      if (opString=="\\arcsin")
-        theFunName="asin";
-      if (opString=="\\arctan")
-        theFunName="atan";
-      if (theFunName!="")
+      if (opString == "\\sin" || opString == "\\cos" ||
+          opString == "\\log" || opString == "\\tan" ||
+          opString == "\\cot")
+        theFunName = opString.substr(1);
+      if (opString == "\\arccos")
+        theFunName = "acos";
+      if (opString == "\\arcsin")
+        theFunName = "asin";
+      if (opString == "\\arctan")
+        theFunName = "atan";
+      if (theFunName != "")
       { out << "(Math." << theFunName << "( " << leftString << "))";
         return output.AssignValue(out.str(), theCommands);
       }
     }
-    if (input.size()==2)
-      if (opString=="|")
+    if (input.size() == 2)
+      if (opString == "|")
       { out << "(Math.abs( " << leftString << "))";
         return output.AssignValue(out.str(), theCommands);
       }
@@ -1658,27 +1643,26 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
 
 bool CalculatorFunctionsGeneral::innerPlotSetProjectionScreenBasis(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSetProjectionScreenBasis");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   Vector<double> v1, v2;
   if (!theCommands.GetVectorDoubles(input[1], v1, 3) ||
       !theCommands.GetVectorDoubles(input[2], v2, 3) )
     return theCommands << "Failed to extract 3d-vectors from "
-    << input[1].ToString() << ", "
-    << input[2].ToString() << ".";
+    << input[1].ToString() << ", " << input[2].ToString() << ".";
   Plot resultPlot;
-  resultPlot.dimension=3;
+  resultPlot.dimension = 3;
   PlotObject thePlot;
-  thePlot.thePlotType="setProjectionScreen";
+  thePlot.thePlotType = "setProjectionScreen";
   thePlot.thePointsDouble.AddOnTop(v1);
   thePlot.thePointsDouble.AddOnTop(v2);
-  resultPlot+=thePlot;
+  resultPlot += thePlot;
   return output.AssignValue(resultPlot, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlotCoordinateSystem(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotCoordinateSystem");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   Vector<double> corner1, corner2;
   if (!theCommands.GetVectorDoubles(input[1], corner1, 3) ||
@@ -1687,29 +1671,29 @@ bool CalculatorFunctionsGeneral::innerPlotCoordinateSystem(Calculator& theComman
     << input[1].ToString() << ", "
     << input[2].ToString() << ".";
   Plot resultPlot;
-  resultPlot.dimension=3;
+  resultPlot.dimension = 3;
   PlotObject thePlot;
-  thePlot.colorJS="black";
-  thePlot.thePlotType="segment";
+  thePlot.colorJS = "black";
+  thePlot.thePlotType = "segment";
   thePlot.thePointsDouble.SetSize(2);
-  for (int i=0; i<3; i++)
+  for (int i = 0; i < 3; i ++)
   { thePlot.thePointsDouble[0].MakeZero(3);
     thePlot.thePointsDouble[1].MakeZero(3);
-    thePlot.thePointsDouble[0][i]=corner1[i];
-    thePlot.thePointsDouble[1][i]=corner2[i];
-    resultPlot+=(thePlot);
+    thePlot.thePointsDouble[0][i] = corner1[i];
+    thePlot.thePointsDouble[1][i] = corner2[i];
+    resultPlot += thePlot;
   }
   PlotObject plotLabels;
-  plotLabels.thePlotType="label";
+  plotLabels.thePlotType = "label";
   plotLabels.thePointsDouble.SetSize(1);
-  plotLabels.colorJS="blue";
-  for (char i=0; i<3; i++)
+  plotLabels.colorJS = "blue";
+  for (char i = 0; i < 3; i ++)
   { plotLabels.thePointsDouble[0].MakeZero(3);
-    plotLabels.thePointsDouble[0][i]=corner2[i];
+    plotLabels.thePointsDouble[0][i] = corner2[i];
     std::stringstream out;
-    out << (char) ('x'+i);
-    plotLabels.thePlotString=out.str();
-    resultPlot+=plotLabels;
+    out << (char) ('x' + i);
+    plotLabels.thePlotString = out.str();
+    resultPlot += plotLabels;
   }
   return output.AssignValue(resultPlot, theCommands);
 }
@@ -1717,11 +1701,11 @@ bool CalculatorFunctionsGeneral::innerPlotCoordinateSystem(Calculator& theComman
 bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotSurface");
   PlotObject thePlot;
-  bool found=false;
-  for (int i=0; i<input.size(); i++)
+  bool found = false;
+  for (int i = 0; i < input.size(); i ++)
     if (input[i].IsSequenceNElementS(3))
-    { thePlot.manifoldImmersion=input[i];
-      found=true;
+    { thePlot.manifoldImmersion = input[i];
+      found = true;
       break;
     }
   if (!found)
@@ -1729,7 +1713,7 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
     << "functions expressions to use for "
     << " the surface. ";
   thePlot.manifoldImmersion.GetFreeVariables(thePlot.variablesInPlay, true);
-  if (thePlot.variablesInPlay.size>2)
+  if (thePlot.variablesInPlay.size > 2)
     return theCommands << "Got a surface with "
     << thePlot.variablesInPlay.size
     << " variables, namely: "
@@ -1739,53 +1723,53 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
   Expression uE,vE;
   uE.MakeAtom("u", theCommands);
   vE.MakeAtom("v", theCommands);
-  if (thePlot.variablesInPlay.size==1)
+  if (thePlot.variablesInPlay.size == 1)
   { if (thePlot.variablesInPlay.Contains(vE))
       thePlot.variablesInPlay.AddOnTop(uE);
     else
       thePlot.variablesInPlay.AddOnTop(vE);
   }
-  if (thePlot.variablesInPlay.size==0)
+  if (thePlot.variablesInPlay.size == 0)
   { thePlot.variablesInPlay.AddOnTop(uE);
     thePlot.variablesInPlay.AddOnTop(vE);
   }
   thePlot.variablesInPlay.QuickSortAscending();
-  thePlot.coordinateFunctionsE.SetSize(thePlot.manifoldImmersion.size()-1);
+  thePlot.coordinateFunctionsE.SetSize(thePlot.manifoldImmersion.size() - 1);
   thePlot.coordinateFunctionsJS.SetSize(thePlot.coordinateFunctionsE.size);
   thePlot.theVarRangesJS.SetSize(2);
   thePlot.variablesInPlayJS.SetSize(2);
-  for (int i=0; i<2; i++)
+  for (int i = 0; i < 2; i ++)
   { thePlot.theVarRangesJS[i].SetSize(2);
-    thePlot.variablesInPlayJS[i]=thePlot.variablesInPlay[i].ToString();
+    thePlot.variablesInPlayJS[i] = thePlot.variablesInPlay[i].ToString();
   }
   Expression jsConverter;
-  for (int i=1; i<thePlot.manifoldImmersion.size(); i++)
-  { thePlot.coordinateFunctionsE[i-1]=thePlot.manifoldImmersion[i];
-    bool isGood=CalculatorFunctionsGeneral::innerMakeJavascriptExpression
-    (theCommands, thePlot.coordinateFunctionsE[i-1], jsConverter);
+  for (int i = 1; i < thePlot.manifoldImmersion.size(); i ++)
+  { thePlot.coordinateFunctionsE[i - 1] = thePlot.manifoldImmersion[i];
+    bool isGood = CalculatorFunctionsGeneral::innerMakeJavascriptExpression
+    (theCommands, thePlot.coordinateFunctionsE[i - 1], jsConverter);
     if (isGood)
-      isGood= jsConverter.IsOfType<std::string>
-      (&thePlot.coordinateFunctionsJS[i-1]);
+      isGood = jsConverter.IsOfType<std::string>
+      (&thePlot.coordinateFunctionsJS[i - 1]);
     if (!isGood)
       return theCommands << "Failed to convert "
-      << thePlot.coordinateFunctionsE[i-1].ToString()
+      << thePlot.coordinateFunctionsE[i - 1].ToString()
       << " to a javascript expression. ";
   }
-  for (int i =1; i<input.size(); i++)
+  for (int i = 1; i < input.size(); i ++)
     if (input[i].StartsWith(theCommands.opIn(), 3))
-    { int theIndex=thePlot.variablesInPlay.GetIndex(input[i][1]);
-      if (theIndex<0 || theIndex>2) //theIndex>2 should never happen
+    { int theIndex = thePlot.variablesInPlay.GetIndex(input[i][1]);
+      if (theIndex < 0 || theIndex > 2) //theIndex>2 should never happen
         continue;
-      if (input[i][2].size()!=3)
+      if (input[i][2].size() != 3)
         continue;
-      for (int j=0; j<2; j++)
+      for (int j = 0; j < 2; j ++)
       { bool isGood=CalculatorFunctionsGeneral::innerMakeJavascriptExpression
-        (theCommands, input[i][2][j+1], jsConverter);
+        (theCommands, input[i][2][j + 1], jsConverter);
         if (isGood)
           isGood=jsConverter.IsOfType<std::string>(&thePlot.theVarRangesJS[theIndex][j]);
         if (!isGood)
           return theCommands << "Failed to convert "
-          << input[i][2][j+1].ToString() << " to a javascript expression. ";
+          << input[i][2][j + 1].ToString() << " to a javascript expression. ";
       }
     }
   MapLisT<std::string, Expression, MathRoutines::hashString> theKeys;
@@ -1798,7 +1782,7 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
     keysToConvert.GetValueCreate("numSegments1");
     keysToConvert.GetValueCreate("numSegments2");
     keysToConvert.GetValueCreate("lineWidth");
-    for (int i =0; i < keysToConvert.size(); i++)
+    for (int i = 0; i < keysToConvert.size(); i ++)
     { if (!theKeys.Contains(keysToConvert.theKeys[i]))
         continue;
       Expression expressionToConvert = theKeys.GetValueCreate(keysToConvert.theKeys[i]);
@@ -1821,15 +1805,15 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
       //stOutput << "DEBUG: line width set to: " << thePlot.lineWidthJS;
     }
   }
-  if (thePlot.theVarRangesJS[0][0]=="" || thePlot.theVarRangesJS[0][1]=="" ||
-      thePlot.theVarRangesJS[1][0]=="" || thePlot.theVarRangesJS[1][1]=="")
+  if (thePlot.theVarRangesJS[0][0] == "" || thePlot.theVarRangesJS[0][1] == "" ||
+      thePlot.theVarRangesJS[1][0] == "" || thePlot.theVarRangesJS[1][1] == "")
   { return theCommands << "Could not extract variable ranges, got the var ranges: "
     << thePlot.theVarRangesJS;
   }
   thePlot.thePlotType="surface";
   thePlot.dimension=thePlot.coordinateFunctionsE.size;
   Plot result;
-  result+=thePlot;
+  result += thePlot;
   input.HasInputBoxVariables(&result.boxesThatUpdateMe);
   return output.AssignValue(result, theCommands);
 }
@@ -1869,9 +1853,9 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
 { std::stringstream out;
   bool found = false;
   int countMons = 0;
-  for (int i = 0; i < this->allMonomials.size; i++)
+  for (int i = 0; i < this->allMonomials.size; i ++)
   { int theIndex = thePoly.theMonomials.GetIndex(this->allMonomials[i]);
-    if (theIndex == -1)
+    if (theIndex == - 1)
     { out << "<td" << extraStyle << ">" << "</td>";
       continue;
     }
@@ -1908,7 +1892,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
   std::string underlineStyle = " style=\"white-space: nowrap; border-bottom:1px solid black;\"";
   this->allMonomials.Clear();
   this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
-  for (int i = 0; i < theRemainders.size; i++)
+  for (int i = 0; i < theRemainders.size; i ++)
   { this->allMonomials.AddOnTopNoRepetition(theRemainders[i].theMonomials);
     if (i < theSubtracands.size)
       this->allMonomials.AddOnTopNoRepetition(theSubtracands[i].theMonomials);

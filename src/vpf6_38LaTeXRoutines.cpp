@@ -9,7 +9,7 @@ ProjectInformationInstance ProjectInfoVpf6_38LaTeXRoutines(__FILE__, "LaTeX rout
 
 bool LaTeXcrawler::IsInCrawlableFolder(const std::string& folderName, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("LaTeXcrawler::IsInCrawlableFolder");
-  for (int i = 0; i < this->baseFoldersCrawlableFilesPhysical.size; i++)
+  for (int i = 0; i < this->baseFoldersCrawlableFilesPhysical.size; i ++)
     if (MathRoutines::StringBeginsWith(folderName, this->baseFoldersCrawlableFilesPhysical[i]))
       return true;
   if (commentsOnFailure != 0)
@@ -29,7 +29,7 @@ void LaTeXcrawler::ComputeAllowedFolders()
   allowedFoldersVirtual.AddOnTop("/freecalc/");
   allowedFoldersVirtual.AddOnTop("/LaTeX-materials/");
   this->baseFoldersCrawlableFilesPhysical.SetSize(allowedFoldersVirtual.size);
-  for (int i = 0; i < this->baseFoldersCrawlableFilesPhysical.size; i++)
+  for (int i = 0; i < this->baseFoldersCrawlableFilesPhysical.size; i ++)
   { FileOperations::GetPhysicalFileNameFromVirtual
     (allowedFoldersVirtual[i], this->baseFoldersCrawlableFilesPhysical[i], false, false, 0);
     this->baseFoldersCrawlableFilesPhysical[i] =
@@ -51,9 +51,8 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* comme
 //  =theGlobalVariables.PhysicalPathProjectBase+ "../freecalc/" +
 //  this->theFileNameToCrawlRelative;
   this->baseFolderStartFilePhysical =
-  FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(
-  FileOperations::GetPathFromFileNameWithPath(this->theFileNameToCrawlPhysicalWithPath)
-  ) + "/";
+  FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe
+  (FileOperations::GetPathFromFileNameWithPath(this->theFileNameToCrawlPhysicalWithPath)) + "/";
 
   this->theFileNameToCrawlPhysicalNoPathName =
   FileOperations::GetFileNameFromFileNameWithPath(this->theFileNameToCrawlPhysicalWithPath);
@@ -90,7 +89,7 @@ void LaTeXcrawler::BuildFreecalC()
   int currentLineIndex = - 1;
   while (!inputFile.eof())
   { std::getline(inputFile, buffer);
-    currentLineIndex++;
+    currentLineIndex ++;
     bool isInput = false;
     if (MathRoutines::StringBeginsWith(buffer, "\\lect") &&
         !MathRoutines::StringBeginsWith(buffer, "\\lecture"))
@@ -112,17 +111,17 @@ void LaTeXcrawler::BuildFreecalC()
     int numBallancedBracketGroups = 0;
     std::string lectureNumber;
     bool recordingLectureNumber = false;
-    for (unsigned i = 0; i < buffer.size(); i++)
+    for (unsigned i = 0; i < buffer.size(); i ++)
     { if (buffer[i] == '}')
       { leftBracketsMinusRight--;
         if (leftBracketsMinusRight == 0)
-        { numBallancedBracketGroups++;
+        { numBallancedBracketGroups ++;
           if (recordingLectureNumber)
             break;
         }
       }
       if (buffer[i] == '{')
-      { leftBracketsMinusRight++;
+      { leftBracketsMinusRight ++;
         if (leftBracketsMinusRight == 1 && numBallancedBracketGroups == 2)
           recordingLectureNumber = true;
       }
@@ -140,7 +139,7 @@ void LaTeXcrawler::BuildFreecalC()
     if (!MathRoutines::StringBeginsWith(buffer, "%DesiredLectureName: ", &desiredName))
       if(!MathRoutines::StringBeginsWith(buffer, "%DesiredHomeworkName: ", &desiredName))
         desiredName = "";
-    for (unsigned i = 0; i < desiredName.size(); i++)
+    for (unsigned i = 0; i < desiredName.size(); i ++)
       if (desiredName[i] == '.' || desiredName[i] == '/' || desiredName[i] == '\\')
         desiredName = "";
     if (desiredName == "")
@@ -172,8 +171,7 @@ void LaTeXcrawler::BuildFreecalC()
       if (!MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\documentclass") &&
           !MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "[handout]") &&
           !MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "{beamer}") &&
-          !MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\newcommand{\\currentLecture}")
-         )
+          !MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\newcommand{\\currentLecture}"))
         LectureContentNoDocumentClassNoCurrentLecture << buffer << "\n";
       if (this->flagBuildSingleSlides)
       { if (MathRoutines::StringBeginsWith(MathRoutines::StringTrimWhiteSpace(buffer), "\\lect") &&

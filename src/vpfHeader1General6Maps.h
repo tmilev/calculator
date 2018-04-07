@@ -67,9 +67,13 @@ public:
   }
   std::string ToStringHtml()const
   { std::stringstream out;
-    out << this->size() << " key-value pairs. ";
+    out << "{";
     for (int i = 0; i < this->size(); i ++)
-      out << "<br>" << this->theKeys[i] << ": " << this->theValues[i];
+    { out << this->theKeys[i] << ": " << this->theValues[i];
+      if (i != this->size() - 1)
+        out << ", ";
+    }
+    out << "}";
     return out.str();
   }
 };

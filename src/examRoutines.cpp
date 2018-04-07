@@ -60,9 +60,13 @@ bool CalculatorHTML::LoadProblemInfoFromJSONStringAppend
  MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
  std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromJSONStringAppend");
+  if (inputJSONString == "")
+    return true;
   JSData inputJS;
   if (!inputJS.readstrinG(inputJSONString, false, &commentsOnFailure))
     return false;
+  //stOutput //<< crash.GetStackTraceShort()
+  //<< "<br>DEBUG: Read json: " << inputJS.ToString(false);
   outputProblemInfo.SetExpectedSize(inputJS.objects.size());
   ProblemData emptyData;
   for (int i = 0; i < inputJS.objects.size(); i ++)
@@ -70,11 +74,13 @@ bool CalculatorHTML::LoadProblemInfoFromJSONStringAppend
     JSData& currentProblem = inputJS.objects.theValues[i];
     if (currentProbName == "")
       continue;
+    //stOutput << "<br>DEBUG: current problem json: " << currentProblem.ToString(false)
+    //<< ";<br> currentProbName: " << currentProbName;
     if (!outputProblemInfo.Contains(currentProbName))
       outputProblemInfo.GetValueCreate(currentProbName) = emptyData;
     ProblemData& currentProblemValue = outputProblemInfo.GetValueCreate(currentProbName);
     JSData& currentDeadlines = currentProblem["deadlines"];
-    JSData& currentWeight =  currentProblem["weight"];
+    JSData& currentWeight = currentProblem["weight"];
     if (currentWeight.type != JSData::JSUndefined)
     { for (int j = 0; j < currentWeight.objects.size(); j ++)
         currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
@@ -88,6 +94,7 @@ bool CalculatorHTML::LoadProblemInfoFromJSONStringAppend
         currentProblemValue.adminData.deadlinesPerSection.SetKeyValue
         (currentDeadlines.objects.theKeys[j], currentDeadlines.objects.theValues[j].string);
     }
+    //stOutput << "<br>DEBUG: Current prob: " << currentProblemValue.ToString() << "<hr>";
   }
   return true;
 }
@@ -162,7 +169,9 @@ JSData CalculatorHTML::ToJSONProblemWeights
       std::string currentCourse = MathRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theKeys[j]);
       currentProblemJSON[currentCourse] = currentWeight;
     }
-    output[currentProblemName] = currentProblemJSON;
+    JSData currentWeight;
+    currentWeight["weight"] = currentProblemJSON;
+    output[currentProblemName] = currentWeight;
   }
   return output;
 }
@@ -296,9 +305,14 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
     return false;
   //this->theProblemData.CheckConsistency();
   //stOutput << "<hr>DEBug: got to before InterpretDatabaseProblemData.<hr>";
-  stOutput << "Problem weight schema: " << this->currentUseR.problemWeightSchema
-  << "Problem weight string: " << this->currentUseR.problemWeightString
-  << " - of global vars: " << theGlobalVariables.userDefault.problemWeightString;
+  //stOutput << "Problem weight schema: " << this->currentUseR.problemWeightSchema
+  //<< "Problem weight string: " << this->currentUseR.problemWeightString
+  //<< " - of global vars: " << theGlobalVariables.userDefault.problemWeightString;
+  if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString, comments))
+  { comments << "Failed to interpret user's problem saved data. ";
+    //stOutput << "Failed to interpret user's problem saved data. ";
+    return false;
+  }
   if (!this->LoadProblemInfoFromJSONStringAppend
       (this->currentUseR.problemWeightString, this->currentUseR.theProblemData, comments))
   { comments << "Failed to load problem weights. ";
@@ -309,15 +323,10 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   { comments << "Failed to load problem deadlines. ";
     return false;
   }
-  if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString, comments))
-  { comments << "Failed to interpret user's problem saved data. ";
-    //stOutput << "Failed to interpret user's problem saved data. ";
-    return false;
-  }
-  stOutput << "<hr>DEBUG: After interpretation of datastring: user: " << this->currentUseR.ToString();
+  //stOutput << "<hr>DEBUG: After interpretation of datastring: user: " << this->currentUseR.ToString();
   //this->theProblemData.CheckConsistency();
-  stOutput << "<hr>DEBug: got to before this->currentUseR.theProblemData.Contains.<hr>";
-  stOutput << this->currentUseR.problemWeightString << "<hr><hr>";
+  //stOutput << "<hr>DEBug: got to before this->currentUseR.theProblemData.Contains.<hr>";
+  //stOutput << this->currentUseR.problemWeightString << "<hr><hr>";
   if (this->currentUseR.theProblemData.Contains(this->fileName))
   { this->theProblemData = this->currentUseR.theProblemData.GetValueCreate(this->fileName);
     //stOutput << "<hr>Debug: found problem data! " << this->theProblemData.ToString() << "<hr>";
@@ -326,13 +335,11 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   //this->theProblemData.CheckConsistency();
   //stOutput << "<hr><hr>DEBug: got to before read prob append.";
   //stOutput << "<hr>Debug: user: " << this->currentUseR.ToString();
-  //stOutput << "<hr><hr>DEBUG read databaseProblemAndHomeworkGroupList: "
-  //<< this->databaseProblemAndHomeworkGroupList;
   //this->theProblemData.CheckConsistency();
-  //stOutput << "<hr>DEBUG: before computing points ...";
-  this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys, 0);
+  //stOutput << "<hr>DEBUG: before computing points ... Current problems that matter: " << this->currentUseR.theProblemData.theKeys.ToStringCommaDelimited();
+  //this->currentUseR.ComputePointsEarned(this->currentUseR.theProblemData.theKeys, 0);
   //stOutput << "<hr>DEBUG: after computing points ...";
-  this->theProblemData.CheckConsistency();
+  //this->theProblemData.CheckConsistency();
   theGlobalVariables.userDefault = this->currentUseR;
   //stOutput << "<hr>DEBUG: After interpretation of deadline and weight strings: user: " << this->currentUseR.ToString();
   return true;
@@ -428,9 +435,8 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
   { out << "<calculatorNavigation>"
     << theGlobalVariables.ToStringNavigation()
     << "<small>Generated in "
-    << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds()-startTime)
-    << " second(s).</small>" << "</calculatorNavigation>\n"
-    ;
+    << MathRoutines::ReducePrecision(theGlobalVariables.GetElapsedSeconds() - startTime)
+    << " second(s).</small>" << "</calculatorNavigation>\n";
   }
   if (this->flagDoPrependProblemNavigationBar)
     out << this->outputProblemNavigatioN;
@@ -476,8 +482,7 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
     << "</problemNavigation>";
     this->comments << commentsStream.str();
     this->comments << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=selectCourse\">Go to course list page.</a>"
-    ;
+    << "?request=selectCourse\">Go to course list page.</a>";
   }
   this->theProblemData.CheckConsistency();
 }
@@ -505,14 +510,14 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   std::string requestTypeSubmit, requestTypePreview, requestGiveUp, requestSolution;
   bool submitRandomSeed = false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
-  { requestTypeSubmit  = "submitProblem";
+  { requestTypeSubmit = "submitProblem";
     requestTypePreview = "submitProblemPreview";
   } else if (theGlobalVariables.UserGuestMode())
-  { requestTypeSubmit  = "submitExerciseNoLogin";
+  { requestTypeSubmit = "submitExerciseNoLogin";
     requestTypePreview = "submitExercisePreviewNoLogin";
     submitRandomSeed=true;
   } else
-  { requestTypeSubmit  = "submitExercise";
+  { requestTypeSubmit = "submitExercise";
     requestTypePreview = "submitExercisePreview";
     submitRandomSeed = true;
   }

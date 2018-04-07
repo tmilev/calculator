@@ -12,17 +12,17 @@ unsigned int Polynomial<Rational>::HashFunction(const Polynomial<Rational>& inpu
 template<class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::MakeFromReadableReflections
 (WeylGroupData& input, bool dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK, const std::string& inputReflections)
-{ this->owner=&input;
+{ this->owner = &input;
   Vector<Rational> theReflections;
   theReflections.AssignString(inputReflections);
   this->generatorsLastAppliedFirst.SetSize(theReflections.size);
 //  stOutput << "<br>Read reflection from " << inputReflections << " to get: " << theReflections.ToString();
-  for (int i=0; i<theReflections.size; i++)
+  for (int i = 0; i < theReflections.size; i ++)
   { if (!theReflections[i].IsSmallInteger(&this->generatorsLastAppliedFirst[i].index))
       crash << "Bad reflection list." << crash;
-    this->generatorsLastAppliedFirst[i].index--;
-    this->generatorsLastAppliedFirst[i].flagIsOuter=false;
-    if (this->generatorsLastAppliedFirst[i].index<0 || this->generatorsLastAppliedFirst[i].index>=input.GetDim())
+    this->generatorsLastAppliedFirst[i].index --;
+    this->generatorsLastAppliedFirst[i].flagIsOuter = false;
+    if (this->generatorsLastAppliedFirst[i].index < 0 || this->generatorsLastAppliedFirst[i].index >= input.GetDim())
       crash << "Bad reflection index: " << this->generatorsLastAppliedFirst[i].ToString() << crash;
   }
   if (!dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK)

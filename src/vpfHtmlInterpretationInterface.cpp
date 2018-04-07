@@ -1854,7 +1854,7 @@ void UserCalculator::ComputePointsEarned
     }
   for (int i = 0; i < this->theProblemData.size(); i ++)
   { const std::string problemName = this->theProblemData.theKeys[i];
-    if (!gradableProblems.Contains(problemName) )
+    if (!gradableProblems.Contains(problemName))
       continue;
     ProblemData& currentP = this->theProblemData.theValues[i];
     currentP.Points = 0;

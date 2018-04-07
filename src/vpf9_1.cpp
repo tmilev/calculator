@@ -316,8 +316,7 @@ bool GlobalVariables::UserRequestRequiresLoadingRealExamData()
 bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn()
 { return
   this->userCalculatorRequestType == "scoredQuiz" ||
-  this->userCalculatorRequestType == "exercise"
-  ;
+  this->userCalculatorRequestType == "exercise";
 }
 
 std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tagsToExclude)
@@ -325,7 +324,7 @@ std::string GlobalVariables::ToStringCalcArgsNoNavigation(List<std::string>* tag
   if (!this->flagLoggedIn && !this->UserGuestMode())
     return "";
   std::stringstream out;
-  for (int i = 0; i < this->webArguments.size(); i++)
+  for (int i = 0; i < this->webArguments.size(); i ++)
   { const std::string& currentName = this->webArguments.theKeys[i];
     if (currentName == "request" || currentName == "password" ||
         currentName == "fileName" || currentName == "courseHome" || currentName == "topicList" ||
@@ -565,24 +564,24 @@ void DynkinDiagramRootSubalgebra::Sort()
 
 Rational DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo(const Vector<Rational>& inputVector)
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo");
-  Rational result=0;
-  for (int i=0; i<this->AmbientRootSystem.size; i++)
-    if (inputVector.ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm)!=0)
-    { Rational squareLength=this->AmbientRootSystem[i].ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm);
-      if (result< squareLength)
-        result=squareLength;
+  Rational result = 0;
+  for (int i = 0; i < this->AmbientRootSystem.size; i ++)
+    if (inputVector.ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm) != 0)
+    { Rational squareLength = this->AmbientRootSystem[i].ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm);
+      if (result < squareLength)
+        result = squareLength;
     }
   return result;
 }
 
 Rational DynkinDiagramRootSubalgebra::GetSquareLengthShortestRootLinkedTo(const Vector<Rational>& inputVector)
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::GetSquareLengthLongestRootLinkedTo");
-  Rational result=inputVector.ScalarProduct(inputVector, this->AmbientBilinearForm);
-  for (int i=0; i<this->AmbientRootSystem.size; i++)
-    if (inputVector.ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm)!=0)
-    { Rational squareLength=this->AmbientRootSystem[i].ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm);
-      if (squareLength<result)
-        result=squareLength;
+  Rational result = inputVector.ScalarProduct(inputVector, this->AmbientBilinearForm);
+  for (int i = 0; i < this->AmbientRootSystem.size; i ++)
+    if (inputVector.ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm) != 0)
+    { Rational squareLength = this->AmbientRootSystem[i].ScalarProduct(this->AmbientRootSystem[i], this->AmbientBilinearForm);
+      if (squareLength < result)
+        result = squareLength;
     }
   return result;
 }
@@ -590,17 +589,17 @@ Rational DynkinDiagramRootSubalgebra::GetSquareLengthShortestRootLinkedTo(const 
 void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinString");
   this->CheckInitialization();
-  if(indexComponent>=this->SimpleBasesConnectedComponents.size)
+  if(indexComponent >= this->SimpleBasesConnectedComponents.size)
     crash << crash;
-  DynkinSimpleType& outputType=this->SimpleComponentTypes[indexComponent];
-  Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents[indexComponent];
+  DynkinSimpleType& outputType = this->SimpleComponentTypes[indexComponent];
+  Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents[indexComponent];
 //  stOutput << "<hr><hr>Computing dynkin string from " << currentComponent.ToString();
-  List<int>& currentEnds=this->indicesEnds[indexComponent];
-  if (currentComponent.size<1)
+  List<int>& currentEnds = this->indicesEnds[indexComponent];
+  if (currentComponent.size < 1)
     crash << "This is a programming error: currentComponent is empty which is impossible. " << crash;
 //  stOutput << "<hr> Extracting component from " << currentComponent.ToString() << " with bilinear form "
 //  << this->AmbientBilinearForm.ToString();
-  if (this->numberOfThreeValencyNodes(indexComponent)==1)
+  if (this->numberOfThreeValencyNodes(indexComponent) == 1)
   { //type D or E
     //in type D first comes the triple node, then the long string, then the one-root strings
     //the long string is oriented with the end that is connected to the triple node having
@@ -610,29 +609,29 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
     // then comes the second longest string (oriented in the same fashion)
     // and last the one-root string
     Vector<Rational> tripleNode;
-    tripleNode=currentComponent[this->indicesThreeNodes[indexComponent]];
+    tripleNode = currentComponent[this->indicesThreeNodes[indexComponent]];
     Vectors<Rational> rootsWithoutTripleNode=currentComponent;
     rootsWithoutTripleNode.RemoveIndexSwapWithLast(this->indicesThreeNodes[indexComponent]);
     DynkinDiagramRootSubalgebra diagramWithoutTripleNode;
-    diagramWithoutTripleNode.AmbientBilinearForm=this->AmbientBilinearForm;
-    diagramWithoutTripleNode.AmbientRootSystem=this->AmbientRootSystem;
+    diagramWithoutTripleNode.AmbientBilinearForm = this->AmbientBilinearForm;
+    diagramWithoutTripleNode.AmbientRootSystem = this->AmbientRootSystem;
 //    stOutput << "<br>Computing helper Dynkin diagram from: " << rootsWithoutTripleNode.ToString();
     diagramWithoutTripleNode.ComputeDiagramInputIsSimple(rootsWithoutTripleNode);
 //    stOutput << " ... to get: " << diagramWithoutTripleNode.ToStringRelativeToAmbientType(DynkinSimpleType('A',1));
-    if (diagramWithoutTripleNode.SimpleBasesConnectedComponents.size!=3)
+    if (diagramWithoutTripleNode.SimpleBasesConnectedComponents.size != 3)
       crash << "This is a programming error: Dynkin diagram has a triple node whose removal does not yield 3 connected components. " << crash;
-    for (int i=0; i<3; i++)
+    for (int i = 0; i < 3; i ++)
       if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i][0].ScalarProduct(tripleNode, this->AmbientBilinearForm)==0)
         diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].ReverseOrderElements();
-    for(int i=0; i<3; i++)
-      for(int j=i+1; j<3; j++)
-        if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].size<diagramWithoutTripleNode.SimpleBasesConnectedComponents[j].size)
-          diagramWithoutTripleNode.SwapDynkinStrings(i,j);
+    for (int i = 0; i < 3; i ++)
+      for (int j = i + 1; j < 3; j ++)
+        if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].size < diagramWithoutTripleNode.SimpleBasesConnectedComponents[j].size)
+          diagramWithoutTripleNode.SwapDynkinStrings(i, j);
     currentComponent.SetSize(0);
-    if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size==1)
+    if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size == 1)
     { //<- components are sorted by length, therefore the second and third component are of length 1,
       //therefore we have type D_n
-      Rational theScale=DynkinSimpleType::GetDefaultLongRootLengthSquared('D') /tripleNode.ScalarProduct(tripleNode, this->AmbientBilinearForm);
+      Rational theScale = DynkinSimpleType::GetDefaultLongRootLengthSquared('D') / tripleNode.ScalarProduct(tripleNode, this->AmbientBilinearForm);
       currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0]);//<-first long component
       if (!tripleNode.ScalarProduct(currentComponent[0], this->AmbientBilinearForm).IsEqualToZero())
         currentComponent.ReverseOrderElements();
@@ -642,8 +641,8 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
       outputType.MakeArbitrary('D', currentComponent.size, theScale);
     } else
     { //the second largest component has more than one element, hence we are in type E_n.
-      Rational theScale=DynkinSimpleType::GetDefaultLongRootLengthSquared('E') /tripleNode.ScalarProduct(tripleNode, this->AmbientBilinearForm);
-      if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size!=2)
+      Rational theScale = DynkinSimpleType::GetDefaultLongRootLengthSquared('E') / tripleNode.ScalarProduct(tripleNode, this->AmbientBilinearForm);
+      if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size != 2)
         crash << "This is a programming error: the dynkin diagram has two components of length larger than 2 linked to the triple node."
         << crash;
       if (!tripleNode.ScalarProduct(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][0], this->AmbientBilinearForm).IsEqualToZero())
@@ -660,68 +659,63 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent)
    return;
   }
   Rational length1, length2;
-  length1=currentComponent[0].ScalarProduct(currentComponent[0], this->AmbientBilinearForm);
-  int numLength1=1;
-  int numLength2=0;
-  for(int i=1; i<currentComponent.size; i++)
-    if (currentComponent[i].ScalarProduct(currentComponent[i], this->AmbientBilinearForm)==length1)
-      numLength1++;
+  length1 = currentComponent[0].ScalarProduct(currentComponent[0], this->AmbientBilinearForm);
+  int numLength1 = 1;
+  int numLength2 = 0;
+  for (int i = 1; i < currentComponent.size; i ++)
+    if (currentComponent[i].ScalarProduct(currentComponent[i], this->AmbientBilinearForm) == length1)
+      numLength1 ++;
     else
-    { numLength2++;
-      length2=currentComponent[i].ScalarProduct(currentComponent[i], this->AmbientBilinearForm);
+    { numLength2 ++;
+      length2 = currentComponent[i].ScalarProduct(currentComponent[i], this->AmbientBilinearForm);
     }
-  if (numLength2==0)
+  if (numLength2 == 0)
   { //type A
-    outputType.MakeArbitrary
-    ('A', numLength1, DynkinSimpleType::GetDefaultLongRootLengthSquared('A') /length1);
+    outputType.MakeArbitrary('A', numLength1, DynkinSimpleType::GetDefaultLongRootLengthSquared('A') / length1);
   } else
-  { if (length1<length2)
+  { if (length1 < length2)
     { MathRoutines::swap(length1, length2);
       MathRoutines::swap(numLength1, numLength2);
-      currentEnds.SwapTwoIndices(0,1);
+      currentEnds.SwapTwoIndices(0, 1);
     }//<-so far we made sure the first length is long
     //By convention, in types G and C, in the Dynkin diagram the long root comes last
     //This is handled at the very end of this function (outside all the if clauses).
-    if (numLength1==numLength2)
+    if (numLength1 == numLength2)
     {//B2, C2, F4 or G2
-      if (numLength1==2)
-        outputType.MakeArbitrary
-        ('F', 4, DynkinSimpleType::GetDefaultLongRootLengthSquared('F')/length1);
-      else if (length1/length2==3)
-        outputType.MakeArbitrary
-        ('G', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('G') /length1);
+      if (numLength1 == 2)
+        outputType.MakeArbitrary('F', 4, DynkinSimpleType::GetDefaultLongRootLengthSquared('F') / length1);
+      else if (length1 / length2 == 3)
+        outputType.MakeArbitrary('G', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('G') / length1);
       else
-        outputType.MakeArbitrary
-        ('B', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('B')/length1);
+        outputType.MakeArbitrary('B', 2, DynkinSimpleType::GetDefaultLongRootLengthSquared('B') / length1);
     } else
     { if (numLength1>numLength2)
         outputType.MakeArbitrary
-        ('B', currentComponent.size, DynkinSimpleType::GetDefaultLongRootLengthSquared('B')/length1);
+        ('B', currentComponent.size, DynkinSimpleType::GetDefaultLongRootLengthSquared('B') / length1);
       else
         outputType.MakeArbitrary
-        ('C', currentComponent.size, DynkinSimpleType::GetDefaultLongRootLengthSquared('C')/length1);
+        ('C', currentComponent.size, DynkinSimpleType::GetDefaultLongRootLengthSquared('C') / length1);
     }
   }
   //The following code ensures the Dynkin diagram is properly ordered
   currentComponent.SwapTwoIndices(0, currentEnds[0]);
-  for (int i=0; i<currentComponent.size; i++)
-    for (int j=i+1; j<currentComponent.size; j++)
+  for (int i = 0; i < currentComponent.size; i ++)
+    for (int j = i + 1; j < currentComponent.size; j ++)
       if (!currentComponent[i].ScalarProduct(currentComponent[j], this->AmbientBilinearForm).IsEqualToZero())
-      { currentComponent.SwapTwoIndices(i+1, j);
+      { currentComponent.SwapTwoIndices(i + 1, j);
         break;
       }
 //  stOutput << "<br>after swapping:" << currentComponent.ToString();
   //so far we made sure the entire component is one properly ordered string, starting with the long root.
-  if (outputType.theLetter=='G' || outputType.theLetter=='C' )
+  if (outputType.theLetter == 'G' || outputType.theLetter == 'C' )
     currentComponent.ReverseOrderElements();//<-in G_2 and C_n the short root comes first so we need to reverse elements.
   //stOutput << "The output type was computed to be: " << outputType.ToString();
 }
 
 std::string DynkinDiagramRootSubalgebra::ToString(FormatExpressions* theFormat)const
-{ std::stringstream out;
-  DynkinType theType;
+{ DynkinType theType;
   theType.MakeZero();
-  for (int j=0; j<this->SimpleComponentTypes.size; j++)
+  for (int j = 0; j < this->SimpleComponentTypes.size; j ++)
     theType.AddMonomial(this->SimpleComponentTypes[j], 1);
   return theType.ToString(theFormat);
 }

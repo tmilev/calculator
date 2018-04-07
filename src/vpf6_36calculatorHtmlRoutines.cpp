@@ -20,7 +20,7 @@ bool CalculatorHtmlFunctions::innerUserInputBox
     return output.AssignValue(theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName), theCommands);
   InputBox newBox;
   newBox.name = boxName;
-  for (int i = 0; i<theArguments.theKeys.size; i++ )
+  for (int i = 0; i<theArguments.theKeys.size; i ++)
   { if (theArguments.theKeys[i] == "value")
       newBox.value = theArguments.theValues[i];
     if (theArguments.theKeys[i] == "min")
@@ -44,23 +44,23 @@ bool CalculatorHtmlFunctions::innerEvaluateSymbols
   Expression evaluatedE;
   std::stringstream out;
   bool previousWasInteger=false;
-  for (int i=0; i<theElts.size; i++)
-  { SyntacticElement& currentElt=theElts[i];
-    if (currentElt.controlIndex==theCommands.conVariable())
+  for (int i = 0; i < theElts.size; i ++)
+  { SyntacticElement& currentElt = theElts[i];
+    if (currentElt.controlIndex == theCommands.conVariable())
     { theCommands.EvaluateExpression(theCommands, currentElt.theData, evaluatedE);
       out << evaluatedE.ToString();
       continue;
     }
-    if (currentElt.controlIndex==theCommands.conInteger())
+    if (currentElt.controlIndex == theCommands.conInteger())
     { if (!previousWasInteger)
         out << "{";
       out << currentElt.theData.ToString();
-      previousWasInteger=true;
+      previousWasInteger = true;
       continue;
     }
     if (previousWasInteger)
       out << "}";
-    previousWasInteger=false;
+    previousWasInteger = false;
     out << theCommands.controlSequences[currentElt.controlIndex];
   }
   if (previousWasInteger)
@@ -78,12 +78,12 @@ bool CalculatorHtmlFunctions::innerSetInputBox
     return theCommands << "User input name not specified in: " << input.ToString();
   if (!theArguments.Contains("value") )
     return theCommands << "Input box value not specified in: " << input.ToString();
-  std::string boxName= CalculatorHtmlFunctions::GetUserInputBoxName(input);
+  std::string boxName = CalculatorHtmlFunctions::GetUserInputBoxName(input);
   if (theCommands.theObjectContainer.theUserInputTextBoxesWithValues.Contains(boxName))
     return theCommands << "Input box with name: " << boxName << " already has value.";
-  InputBox& theBox=
+  InputBox& theBox =
   theCommands.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(boxName);
-  theBox.value=theArguments.GetValueCreate("value");
+  theBox.value = theArguments.GetValueCreate("value");
   std::stringstream out;
   out << "Set value to input box name: " << boxName;
   return output.AssignValue(out.str(), theCommands);
@@ -91,12 +91,11 @@ bool CalculatorHtmlFunctions::innerSetInputBox
 
 std::string CalculatorHtmlFunctions::GetUserInputBoxName(const Expression& theBox)
 { MacroRegisterFunctionWithName("CalculatorHtmlFunctions::GetUserInputBoxName");
-  if (theBox.owner==0)
+  if (theBox.owner == 0)
     return "non-initialized-expression";
-  Calculator& theCommands=*theBox.owner;
+  Calculator& theCommands = *theBox.owner;
   MapLisT<std::string, Expression, MathRoutines::hashString> theArguments;
-  if (!CalculatorConversions::innerLoadKeysFromStatementList
-      (theCommands, theBox, theArguments))
+  if (!CalculatorConversions::innerLoadKeysFromStatementList(theCommands, theBox, theArguments))
     return "corrupt-box";
   if (!theArguments.Contains("name"))
     return "box-without-name";

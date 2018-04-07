@@ -243,7 +243,8 @@ std::string UserCalculator::ToString()
   out << "Calculator user: " << this->username
   << "<br>Section: computed: " << this->sectionComputed
   << ", in DB: " << this->sectionInDB
-  << "<br>Sections taught: " << this->sectionsTaught.ToStringCommaDelimited();
+  << "<br>Sections taught: " << this->sectionsTaught.ToStringCommaDelimited()
+  << "<br>Course: computed: " << this->courseInDB << ", in DB: " << this->courseComputed;
 
   Rational weightRat;
   for (int i = 0; i < this->theProblemData.size(); i ++)
@@ -307,8 +308,7 @@ bool UserCalculator::AuthenticateWithToken(std::stringstream* commentsOnFailure)
   return this->enteredAuthenticationToken == this->actualAuthenticationToken;
 }
 
-bool UserCalculator::LoadFromDB
-(std::stringstream* failureStream, std::stringstream* commentsGeneral)
+bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
   (void) failureStream;
   (void) commentsGeneral;
@@ -334,12 +334,12 @@ bool UserCalculator::LoadFromDB
     if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
         (DatabaseStrings::tableProblemWeights, findProblemWeightsQuery, outProblemWeightsQuery, failureStream))
       this->problemWeightString = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights].ToString(false);
-    else
-    { stOutput << "DEBUG: Failed to find";
-    }
-    stOutput << "Final problem weight string: " << this->problemWeightString
-    << " found with query: " << findProblemWeightsQuery.ToString(false)
-    << " that resulted in: " << outProblemWeightsQuery.ToString(false);
+    //else
+    //{ stOutput << "DEBUG: Failed to find";
+    //}
+    //stOutput << "Final problem weight string: " << this->problemWeightString
+    //<< " found with query: " << findProblemWeightsQuery.ToString(false)
+    //<< " that resulted in: " << outProblemWeightsQuery.ToString(false);
   }
   return true;
 }

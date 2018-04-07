@@ -984,7 +984,7 @@ bool Crypto::LoadOneKnownCertificate
   if (commentsGeneral != 0)
     *commentsGeneral << "Loading from: " << input;
   JSData certificateJSON;
-  if (!certificateJSON.readstrinG(input, commentsOnFailure))
+  if (!certificateJSON.readstring(input, false, commentsOnFailure))
     return false;
   Certificate currentCert;
   bool isGood = false;

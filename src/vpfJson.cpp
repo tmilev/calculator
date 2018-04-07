@@ -76,7 +76,7 @@ void JSData::readfile(const char* filename)
   std::string json;
   json.resize(f.st_size);
   ifp.read(&json[0], json.size());
-  this->readstrinG(json, false);
+  this->readstring(json, false);
 }
 
 void JSData::operator=(const Rational& other)
@@ -126,8 +126,7 @@ void JSData::TryToComputeType()
   this->type = JSData::JSstring;
 }
 
-bool JSData::Tokenize
-(const std::string& input, List<JSData>& output)
+bool JSData::Tokenize(const std::string& input, List<JSData>& output)
 { output.SetSize(0);
   output.SetExpectedSize(input.size());
   JSData currentElt;
@@ -206,14 +205,18 @@ bool JSData::Tokenize
   return true;
 }
 
-bool JSData::readstrinG
-(const std::string& json, bool keysWerePercentEncoded, std::stringstream* commentsOnFailure)
+bool JSData::readstring
+(const std::string& json, bool stringsWerePercentEncoded, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("JSData::readstring");
   this->reset();
   List<JSData> theTokenS;
   JSData::Tokenize(json, theTokenS);
   if (theTokenS.size == 0)
     return false;
+  if (stringsWerePercentEncoded)
+    for (int i = 0; i < theTokenS.size; i ++)
+      if (theTokenS[i].type == JSData::JSstring)
+        theTokenS[i].string = HtmlRoutines::ConvertURLStringToNormal(theTokenS[i].string, false);
   List<JSData> readingStack;
   JSData emptyElt;
   for (int i = 0; i < JSData::numEmptyTokensAtStart; i ++)
@@ -227,10 +230,7 @@ bool JSData::readstrinG
     //JSData& fifthToLast=theTokenS[i - 4];
     if (fourthToLast.type == JSData::JSopenBrace && thirdToLast.type  == JSData::JSstring &&
         secondToLast.type == JSData::JScolon && last.IsValidElement())
-    { if (! keysWerePercentEncoded)
-        fourthToLast.objects.SetKeyValue(thirdToLast.string, last);
-      else
-        fourthToLast.objects.SetKeyValue(HtmlRoutines::ConvertURLStringToNormal(thirdToLast.string, false), last);
+    { fourthToLast.objects.SetKeyValue(thirdToLast.string, last);
       readingStack.SetSize(readingStack.size - 3);
       continue;
     }
@@ -275,7 +275,7 @@ bool JSData::readstrinG
       << "<a href=\""
       << theGlobalVariables.DisplayNameExecutable
       << "?request=calculator&mainInput="
-      << HtmlRoutines::ConvertStringToURLString(calculatorInput.str(),false)
+      << HtmlRoutines::ConvertStringToURLString(calculatorInput.str(), false)
       << "\">"
       << HtmlRoutines::ConvertStringToHtmlString(json, true)
       << "</a>"
@@ -291,7 +291,7 @@ bool JSData::readstrinG
 }
 
 template <typename somestream>
-somestream& JSData::IntoStream(somestream& out, bool percentEncodeKeys, int indentation, bool useHTML) const
+somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int indentation, bool useHTML) const
 { std::string theIndentation = "";
   for (int i = 0; i < indentation; i ++)
   { if (!useHTML)
@@ -316,12 +316,15 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeKeys, int inde
         out << "false";
       return out;
     case JSstring:
-      out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->string) << '"';
+      if (! percentEncodeStrings)
+        out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->string) << '"';
+      else
+        out << '"' << HtmlRoutines::ConvertStringToURLString(this->string, false) << '"';
       return out;
     case JSarray:
       out << "[" << newLine;
       for (int i = 0; i < this->list.size; i ++)
-      { this->list[i].IntoStream(out, percentEncodeKeys, indentation, useHTML);
+      { this->list[i].IntoStream(out, percentEncodeStrings, indentation, useHTML);
         if(i != this->list.size - 1)
           out << ", ";
       }
@@ -330,12 +333,12 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeKeys, int inde
     case JSObject:
       out << "{" << newLine;
       for (int i = 0; i < this->objects.size(); i ++)
-      { if (!percentEncodeKeys)
+      { if (!percentEncodeStrings)
           out << '"' << HtmlRoutines::ConvertStringEscapeNewLinesQuotesBackslashes(this->objects.theKeys[i]) << '"';
         else
           out << '"' << HtmlRoutines::ConvertStringToURLStringIncludingDots(this->objects.theKeys[i], false) << '"';
         out << ':';
-        this->objects.theValues[i].IntoStream(out, percentEncodeKeys, indentation, useHTML);
+        this->objects.theValues[i].IntoStream(out, percentEncodeStrings, indentation, useHTML);
         if (i != this->objects.size() - 1)
           out << ", ";
       }

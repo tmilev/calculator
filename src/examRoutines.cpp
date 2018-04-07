@@ -63,7 +63,7 @@ bool CalculatorHTML::LoadProblemInfoFromJSONStringAppend
   if (inputJSONString == "")
     return true;
   JSData inputJS;
-  if (!inputJS.readstrinG(inputJSONString, false, &commentsOnFailure))
+  if (!inputJS.readstring(inputJSONString, false, &commentsOnFailure))
     return false;
   //stOutput //<< crash.GetStackTraceShort()
   //<< "<br>DEBUG: Read json: " << inputJS.ToString(false);
@@ -204,8 +204,8 @@ bool DatabaseRoutineS::StoreProblemDatabaseInfo
   findQueryWeights[DatabaseStrings::labelProblemWeightsSchema] = theUser.problemWeightSchema;
   findQueryDeadlines[DatabaseStrings::labelDeadlinesSchema] = theUser.deadlineSchema;
   JSData problemWeightsParsed, deadlinesParsed;
-  problemWeightsParsed.readstrinG(theUser.problemWeightString, false, &commentsOnFailure);
-  deadlinesParsed.readstrinG(theUser.deadlinesString, false, &commentsOnFailure);
+  problemWeightsParsed.readstring(theUser.problemWeightString, false, &commentsOnFailure);
+  deadlinesParsed.readstring(theUser.deadlinesString, false, &commentsOnFailure);
   setQueryWeights[DatabaseStrings::labelProblemWeights] = problemWeightsParsed;
   setQueryDeadlines[DatabaseStrings::labelDeadlines] = deadlinesParsed;
   if (problemWeightsParsed.type != JSData::JSUndefined)
@@ -276,7 +276,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
     if (!this->MergeOneProblemAdminData(incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
       result = false;
   JSData theProblemJSON;
-  theProblemJSON.readstrinG(incomingProblemInfo, false, &commentsOnFailure);
+  theProblemJSON.readstring(incomingProblemInfo, false, &commentsOnFailure);
   this->StoreDeadlineInfo(theProblemJSON, this->currentUseR.theProblemData);
   //stOutput << "<hr>Debug: about to store WEIGHT with row id: "
   //<< this->currentUseR.problemInfoRowId.value << "<hr>";

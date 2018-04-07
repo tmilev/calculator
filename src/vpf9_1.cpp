@@ -490,9 +490,8 @@ void UserCalculatorData::clearAuthenticationTokenAndPassword()
 std::string UserCalculatorData::ToStringCourseInfo()
 { std::stringstream out;
   out << "Course name:\n" << this->courseComputed
-  << "\n<br>Deadline info:\n" << this->deadlinesString
-  << "\n<hr>Prob weight id:\n" << this->problemWeightSchema
-  << "\n<br>Prob weight info:\n" << this->problemWeightString;
+  << "\n<br>Deadline schema:\n" << this->deadlinesString
+  << "\n<hr>Problem weight schema:\n" << this->problemWeightSchema;
   return out.str();
 }
 

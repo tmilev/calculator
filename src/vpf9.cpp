@@ -8396,7 +8396,7 @@ bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective
 std::string HtmlRoutines::ToHtmlTableRowsFromStringContainingJSON(const std::string& theJSON)
 { MacroRegisterFunctionWithName("HtmlRoutines::ToHtmlTableFromStringContainingJSON");
   JSData parser;
-  if (!parser.readstrinG(theJSON, false))
+  if (!parser.readstring(theJSON, false))
     return MathRoutines::StringTrimToLengthForDisplay(theJSON, 1000);
   return HtmlRoutines::ToHtmlTableRowsFromJSON(parser);
 }

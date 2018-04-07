@@ -20,6 +20,8 @@ public:
   static bool FindOneFromJSON
   (const std::string& collectionName, const JSData& findQuery,
    JSData& output, std::stringstream* commentsOnFailure = 0);
+  static bool IsValidJSONMongoQuery
+  (const JSData& findQuery, std::stringstream* commentsOnFailure = 0, bool mustBeObject = true);
   static bool UpdateOneFromJSON
   (const std::string& collectionName, const JSData& findQuery, const JSData& updateQuery,
    std::stringstream* commentsOnFailure = 0);

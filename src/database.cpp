@@ -1156,7 +1156,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   if (!theToken.AssignString(userWrapper.enteredGoogleToken, commentsOnFailure))
     return false;
   JSData theData;
-  if (!theData.readstrinG(theToken.claimsJSON, false, commentsOnFailure))
+  if (!theData.readstring(theToken.claimsJSON, false, commentsOnFailure))
     return false;
   if (theData.GetValue("email").type != JSData::JSstring)
   { if (commentsOnFailure != 0)

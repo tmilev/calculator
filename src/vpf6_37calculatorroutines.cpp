@@ -489,7 +489,7 @@ bool CalculatorFunctionsGeneral::innerTestJSON(Calculator& theCommands, const Ex
     inputString = input.ToString();
   JSData theData;
   std::stringstream out;
-  if (!theData.readstrinG(inputString, false, &out))
+  if (!theData.readstring(inputString, false, &out))
     return output.AssignValue(out.str(), theCommands);
   out << "Input:<br>" << HtmlRoutines::ConvertStringToHtmlString(inputString, false) << "<hr>Output: <br>"
   << theData.ToString(true);

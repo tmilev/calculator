@@ -7,6 +7,8 @@ static ProjectInformationInstance ProjectInfoVpfHEADER7DATABASEINTERFACE_MONGODB
 class DatabaseRoutinesGlobalFunctionsMongo
 {
 public:
+  bool flagInitialized;
+  bool initialize(std::stringstream* commentsOnFailure);
   static int numDatabaseInstancesMustBeOneOrZero;
   static bool LoadUserInfo(UserCalculatorData& output);
   static bool FindFromString

@@ -5448,7 +5448,7 @@ int WebWorker::Run()
   processNameStream << "W" << this->indexInParent + 1 << ": ";
   PauseProcess::currentProcessName = processNameStream.str();
   //theGlobalVariables.WebServerTimerPing=this->WorkerTimerPing;
-  theGlobalVariables.flagAllowUseOfThreadsAndMutexes = true;
+  theGlobalVariables.flagServerForkedIntoWorker = true;
   crash.CleanUpFunction = WebServer::SignalActiveWorkerDoneReleaseEverything;
   InitializeTimer(&timeBeforeProcessFork);
   CreateTimerThread();
@@ -6180,7 +6180,7 @@ int WebServer::mainApache()
   stOutput.theOutputFunction = 0;
   //stOutput << "Content-Type: text/html\r\nSet-cookie: test=1;\r\n\r\nThe output bytes start here:\n";
   theGlobalVariables.IndicatorStringOutputFunction = 0;
-  theGlobalVariables.flagAllowUseOfThreadsAndMutexes = true;
+  theGlobalVariables.flagServerForkedIntoWorker = true;
   theGlobalVariables.flagComputationStarted = true;
 //  stOutput << "<hr>First line<hr>";
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 30; //<-30 second computation time restriction!

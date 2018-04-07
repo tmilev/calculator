@@ -14,8 +14,21 @@ DatabaseRoutinesGlobalFunctionsMongo databaseMongo;
 extern logger logWorker;
 
 DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo()
+{ this->flagInitialized = false;
+
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::initialize(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo");
 #ifdef MACRO_use_MongoDB
+  if (this->flagInitialized)
+    return true;
+  if (!theGlobalVariables.flagServerForkedIntoWorker)
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "MongoDB not allowed to run before server fork. ";
+    return false;
+  }
+  this->flagInitialized = true;
   mongoc_init();
   databaseClient = mongoc_client_new("mongodb://localhost:27017");
   database = mongoc_client_get_database(databaseClient, DatabaseStrings::theDatabaseNameMongo.c_str());
@@ -23,7 +36,13 @@ DatabaseRoutinesGlobalFunctionsMongo::DatabaseRoutinesGlobalFunctionsMongo()
   DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail);
   DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelInstructor);
   DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUserRole);
+  return true;
+#else
+  if (commentsOnFailure != 0)
+    *commentsOnFailure << "Calculator compiled without mongoDB support. ";
+  return false;
 #endif
+
 }
 
 DatabaseRoutinesGlobalFunctionsMongo::~DatabaseRoutinesGlobalFunctionsMongo()
@@ -126,6 +145,8 @@ MongoQuery::~MongoQuery()
 
 bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("MongoQuery::UpdateOne");
+  if (!databaseMongo.initialize(commentsOnFailure))
+    return false;
   MongoCollection theCollection(this->collectionName);
   logWorker << "Update: " << this->findQuery << " to: "
   << this->updateQuery << " inside: " << this->collectionName << logger::endL;
@@ -159,6 +180,8 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
 
 bool MongoQuery::FindMultiple(List<JSData>& output, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("MongoQuery::FindMultiple");
+  if (!databaseMongo.initialize(commentsOnFailure))
+    return false;
   MongoCollection theCollection(this->collectionName);
   //logWorker << "Query: " << this->findQuery << " inside: " << this->collectionName << logger::endL;
   if (this->query != 0)

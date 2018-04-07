@@ -56,7 +56,7 @@ ParallelComputing::GlobalPointerCounter++;
 bool MutexRecursiveWrapper::InitializeIfNeeded()
 { if (this->flagInitialized)
     return true;
-  if (!theGlobalVariables.flagAllowUseOfThreadsAndMutexes)
+  if (!theGlobalVariables.flagServerForkedIntoWorker)
     return false;
   this->theMutexImplementation = new std::mutex;
   this->flagInitialized = true;

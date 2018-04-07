@@ -105,7 +105,7 @@ public:
   std::string hostNoPort;
 
 //internal infrastructure flags
-  bool flagAllowUseOfThreadsAndMutexes;
+  bool flagServerForkedIntoWorker;
   bool flagNotAllocated;
 
   MemorySaving<FormatExpressions> theDefaultFormat;

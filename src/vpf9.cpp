@@ -115,7 +115,7 @@ GlobalVariables::GlobalVariables()
   this->flagTimeOutExplanationAlreadyDisplayed = false;
   this->flagOutputTimedOut = false;
   this->flagTimedOutComputationIsDone = false;
-  this->flagAllowUseOfThreadsAndMutexes = false;
+  this->flagServerForkedIntoWorker = false;
   this->flagComputationCompletE = false;
   this->flagComputationFinishedAllOutputSentClosing = false;
   this->flagRunningConsoleTest = false;

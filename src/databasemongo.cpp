@@ -154,8 +154,8 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
   if (!databaseMongo.initialize(commentsOnFailure))
     return false;
   MongoCollection theCollection(this->collectionName);
-  logWorker << "Update: " << this->findQuery << " to: "
-  << this->updateQuery << " inside: " << this->collectionName << logger::endL;
+  //logWorker << "Update: " << this->findQuery << " to: "
+  //<< this->updateQuery << " inside: " << this->collectionName << logger::endL;
   if (this->query != 0)
     crash << "At this point of code, query is supposed to be 0. " << crash;
   this->query = bson_new_from_json
@@ -174,11 +174,11 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
     logWorker << logger::red << "Mongo error: " << this->theError.message << logger::endL;
     return false;
   }
-  char* bufferOutpurStringFormat = 0;
-  bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
-  std::string updateResultString(bufferOutpurStringFormat);
-  bson_free(bufferOutpurStringFormat);
-  logWorker << logger::red << "Update result: " << updateResultString << logger::endL;
+  //char* bufferOutpurStringFormat = 0;
+  //bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
+  //std::string updateResultString(bufferOutpurStringFormat);
+  //bson_free(bufferOutpurStringFormat);
+  //logWorker << logger::red << "Update result: " << updateResultString << logger::endL;
   return true;
 }
 
@@ -225,8 +225,8 @@ bool MongoQuery::FindMultiple(List<JSData>& output, std::stringstream* commentsO
     { logWorker << logger::red << "Mongo/JSData error: failed to read string" << logger::endL;
       return false;
     }
-  logWorker << logger::green << "DEBUG: Query successful. Output size: " << output.size << ". "
-  << output.ToStringCommaDelimited() << logger::endL;
+  //logWorker << logger::green << "DEBUG: Query successful. Output size: " << output.size << ". "
+  //<< output.ToStringCommaDelimited() << logger::endL;
   return true;
 }
 #endif
@@ -345,7 +345,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString
   MongoQuery query;
   query.collectionName = collectionName;
   query.findQuery = findQuery;
-  logWorker << logger::blue << "DEBUG: Query input: " << query.findQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: Query input: " << query.findQuery << logger::endL;
   query.maxOutputItems = 1;
   List<JSData> outputList;
   query.FindMultiple(outputList, commentsOnFailure);
@@ -384,8 +384,8 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
   std::stringstream updateQueryStream;
   updateQueryStream << "{\"$set\": " << updateQuery.ToString(true) << "}";
   query.updateQuery = updateQueryStream.str();
-  logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
-  logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
   return query.UpdateOne(commentsOnFailure);
 #else
   (void) collectionName;

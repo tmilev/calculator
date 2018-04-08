@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader1General0_General.h"
+#include "vpfImplementationHeader2Math0_General.h"
 #include "vpfHeader2Math0_General.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
@@ -42,7 +43,7 @@ void SubgroupWeylGroupOLD::WriteToFile(std::fstream& output)
 Vector<Rational> SubgroupWeylGroupOLD::GetRho()
 { Vector<Rational> result;
   this->RootsOfBorel.sum(result, this->AmbientWeyl->GetDim());
-  result/=2;
+  result /= 2;
   return result;
 }
 
@@ -68,34 +69,34 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
   this->CheckInitialization();
   MemorySaving<HashedList<Vector<Rational> > > bufferOrbit;
   HashedList<Vector<Rational> > orbitRho;
-  this->truncated=false;
+  this->truncated = false;
   this->Clear();
   orbitRho.Clear();
-  if (this->AmbientWeyl->CartanSymmetric.NumRows<1)
+  if (this->AmbientWeyl->CartanSymmetric.NumRows < 1)
     return false;
   if (recomputeAmbientRho)
     this->AmbientWeyl->ComputeRho(false);
-  if (inputGenerators!=0)
-    this->simpleGenerators=(*inputGenerators);
-  if (inputExternalAutos!=0)
-    this->ExternalAutomorphisms=*inputExternalAutos;
+  if (inputGenerators != 0)
+    this->simpleGenerators = *inputGenerators;
+  if (inputExternalAutos != 0)
+    this->ExternalAutomorphisms = *inputExternalAutos;
   this->AmbientWeyl->TransformToSimpleBasisGenerators(this->simpleGenerators, this->AmbientWeyl->RootSystem);
   this->ComputeRootSubsystem();
   ElementWeylGroup<WeylGroupData> tempEW;
-  tempEW.generatorsLastAppliedFirst.size=0;
+  tempEW.generatorsLastAppliedFirst.size = 0;
   Vector<Rational> tempRoot;
   tempRoot=(this->AmbientWeyl->rho);
   // rho is invariant under external graph automorphisms (!)
   //Hence the below lines. Needs to be fixed (mathematically).
   //for the time being the below lines remain, until I think of how to do it properly.
-  tempRoot*=(50);
+  tempRoot *= 50;
   tempRoot[0].AddInteger(1);
   orbitRho.AddOnTop(tempRoot);
   this->AddOnTop(tempEW);
   Vector<Rational> currentRoot;
-  for (int i=0; i<this->size; i++)
-  { tempEW=(*this)[i];
-    for (int j=0; j<this->simpleGenerators.size; j++)
+  for (int i = 0; i < this->size; i ++)
+  { tempEW = (*this)[i];
+    for (int j = 0; j < this->simpleGenerators.size; j ++)
     { this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[j], orbitRho[i], false, currentRoot);
       if (!orbitRho.Contains(currentRoot))
       { orbitRho.AddOnTop(currentRoot);
@@ -104,7 +105,7 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
         tempEW.generatorsLastAppliedFirst.RemoveLastObject();
       }
     }
-    for (int j=1; j<this->ExternalAutomorphisms.size; j++)
+    for (int j = 1; j < this->ExternalAutomorphisms.size; j ++)
     { orbitRho[i].GetCoordsInBasiS(this->ExternalAutomorphisms[j], currentRoot);
       if (!orbitRho.Contains(currentRoot))
       { orbitRho.AddOnTop(currentRoot);

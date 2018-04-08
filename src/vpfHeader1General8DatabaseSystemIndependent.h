@@ -5,8 +5,7 @@
 
 #include "vpfHeader1General0_General.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1General8DatabaseSystemIndependentinstance(__FILE__, "Header, system independent database data structures. ");
-
-class JSData;
+#include "vpfJson.h"
 
 class UserCalculatorData
 {
@@ -43,9 +42,9 @@ class UserCalculatorData
   std::string courseComputed;
 
   std::string problemWeightSchema;
-  std::string problemWeightString;
+  JSData problemWeights;
   std::string deadlineSchema;
-  std::string deadlinesString;
+  JSData deadlines;
 
   List<std::string> sectionsTaught;
 

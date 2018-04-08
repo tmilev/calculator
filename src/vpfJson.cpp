@@ -1,4 +1,5 @@
 #include "vpfJson.h"
+#include "vpfHeader2Math0_General.h"
 
 #include <sys/stat.h>
 #include <cassert>

@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
+#include "vpfImplementationHeader2Math0_General.h"
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"

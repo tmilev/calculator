@@ -6,10 +6,10 @@
 #include "vpfHeader1General1_ListReferences.h"
 #include "vpfHeader1General6Maps.h"
 #include "vpfHeader1General8DatabaseSystemIndependent.h"
+#include "vpfHeader1General8DatabaseSystemIndependent.h"
 #include <thread>
 
-static ProjectInformationInstance projectInfoHeaderLoggingRoutines
-(__FILE__, "Logging routines, global variables. ");
+static ProjectInformationInstance projectInfoHeaderLoggingRoutines(__FILE__, "Logging routines, global variables. ");
 
 class ThreadData
 {

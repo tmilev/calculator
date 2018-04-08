@@ -3,7 +3,7 @@
 #include "vpfHeader8HtmlInterpretation.h"
 #include "vpfHeader8HtmlSnippets.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
-#include "vpfheader7databaseinterface_mongodb.h"
+#include "vpfHeader7DatabaseInterface_Mongodb.h"
 #include <iomanip>
 
 ProjectInformationInstance projectInfoInstanceHtmlInterpretationInterfaceImplementation
@@ -125,13 +125,13 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   { out << "<span style=\"color:red\"><b>Failed to prepare section list. </b></span>" << commentsOnFailure.str();
     return out.str();
   }
-  if (!theProblem.LoadProblemInfoFromJSONStringAppend
-      (theProblem.currentUseR.problemWeightString, theProblem.currentUseR.theProblemData, out))
+  if (!theProblem.LoadProblemInfoFromJSONAppend
+      (theProblem.currentUseR.problemWeights, theProblem.currentUseR.theProblemData, out))
   { out << "Failed to interpret the problem weight string. ";
     return out.str();
   }
-  if (!theProblem.LoadProblemInfoFromJSONStringAppend
-      (theProblem.currentUseR.deadlinesString, theProblem.currentUseR.theProblemData, out))
+  if (!theProblem.LoadProblemInfoFromJSONAppend
+      (theProblem.currentUseR.deadlines, theProblem.currentUseR.theProblemData, out))
   { out << "Failed to interpret the deadline string. ";
     return out.str();
   }
@@ -1987,11 +1987,10 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
         (this->userTablE[i][problemDataIndex], comments))
       continue;
 //    out << "<br>DEBUG: after db data read: " << currentUserRecord.currentUseR.ToString();
-    currentUserRecord.LoadProblemInfoFromJSONStringAppend
-    (theProblem.currentUseR.problemWeightString, currentUserRecord.currentUseR.theProblemData, comments);
+    currentUserRecord.LoadProblemInfoFromJSONAppend
+    (theProblem.currentUseR.problemWeights, currentUserRecord.currentUseR.theProblemData, comments);
 //    out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
-    currentUserRecord.currentUseR.ComputePointsEarned
-    (theProblem.problemNamesNoTopics, &theProblem.theTopicS);
+    currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.theTopicS);
     this->scoresBreakdown.LastObject()->Clear();
     for (int j = 0; j < theProblem.theTopicS.size(); j ++)
     { TopicElement& currentTopic = theProblem.theTopicS[j];

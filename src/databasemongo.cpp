@@ -4,8 +4,10 @@
 mongoc_client_t* databaseClient = 0;
 mongoc_database_t *database = 0;
 #endif //MACRO_use_MongoDB
-#include "vpfheader7databaseinterface_mongodb.h"
+#include "vpfHeader7DatabaseInterface_Mongodb.h"
 #include "vpfJson.h"
+#include "vpfHeader1General4General_Logging_GlobalVariables.h"
+#include "vpfHeader8HtmlSnippets.h"
 ProjectInformationInstance ProjectInfoVpfDatabaseMongo(__FILE__, "Database mongoDB.");
 
 int DatabaseRoutinesGlobalFunctionsMongo::numDatabaseInstancesMustBeOneOrZero = 0;

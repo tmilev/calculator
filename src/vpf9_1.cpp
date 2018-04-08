@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math0_General.h"
+#include "vpfImplementationHeader2Math0_General.h"
 #include "vpfHeader2Math1_LieTheoryExtras.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
@@ -490,8 +491,8 @@ void UserCalculatorData::clearAuthenticationTokenAndPassword()
 std::string UserCalculatorData::ToStringCourseInfo()
 { std::stringstream out;
   out << "Course name:\n" << this->courseComputed
-  << "\n<br>Deadline schema:\n" << this->deadlinesString
-  << "\n<hr>Problem weight schema:\n" << this->problemWeightSchema;
+  << "\n<br>Deadline schema:\n" << this->deadlines.ToString(false)
+  << "\n<hr>Problem weight schema:\n" << this->problemWeights.ToString(false);
   return out.str();
 }
 

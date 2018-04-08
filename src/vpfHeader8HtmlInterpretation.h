@@ -232,8 +232,8 @@ public:
   (const std::string& inputInfoString,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>&
    outputProblemInfo, std::stringstream& commentsOnFailure);
-  bool LoadProblemInfoFromJSONStringAppend
-  (const std::string& inputJSONString,
+  bool LoadProblemInfoFromJSONAppend
+  (const JSData& inputJSON,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
    std::stringstream& commentsOnFailure);
 //  bool LoadDeadlineInfoFromJSONStringAppend
@@ -244,6 +244,8 @@ public:
   (JSData& outputData,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
   JSData ToJSONProblemWeights
+  (MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
+  JSData ToJSONDeadlines
   (MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
   std::string ToStringDeadline
   (const std::string& topicID, bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection);

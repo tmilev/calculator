@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
 #include "vpfHeader3Calculator1_InnerTypedFunctions.h"
+#include "vpfImplementationHeader2Math0_General.h"
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
@@ -12,7 +13,7 @@
 ProjectInformationInstance ProjectInfoVpf6_1cpp(__FILE__, "Calculator inner binary typed functions. ");
 
 bool Calculator::innerOperationBinary(Calculator& theCommands, const Expression& input, Expression& output, int theOp)
-{ for (int i=0; i<theCommands.FunctionHandlers[theOp].size; i++)
+{ for (int i = 0; i < theCommands.FunctionHandlers[theOp].size; i ++)
     if (theCommands.FunctionHandlers[theOp][i].inputFitsMyInnerType(input))
       if (theCommands.FunctionHandlers[theOp][i].theFunction(theCommands, input, output))
         return true;
@@ -27,26 +28,26 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
 //    stOutput << "<hr>Here be trouble";
   if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
-  bool result=false;
+  bool result = false;
   //  stOutput << "<br>handling base extraction of: " << input.ToString();
   //handle Anything*Rational=Rational*Anything
-  output=input;
+  output = input;
 //  if (hereBeTrouble)
 //    stOutput << "handling: " << input.ToString() << ", semilisp: " << input.ToStringSemiFull() << ", lisp: " << input.ToStringFull();
   if (output[2].IsOfType<Rational>())
   { output.children.SwapTwoIndices(1, 2);
-    result=true;
+    result = true;
 //    stOutput << "swapped " << leftE.ToString() << " and " << rightE.ToString();
   }
   if (output[2].IsOfType<double>() && !output[1].IsOfType<Rational>())
   { output.children.SwapTwoIndices(1, 2);
-    result=true;
+    result = true;
 //    stOutput << "swapped " << leftE.ToString() << " and " << rightE.ToString();
   }
 //  Expression leftE=output[1];
 //  Expression rightE=output[2];
   if (output[2].IsListStartingWithAtom(theCommands.opTimes()))
-  { if (output[2].children.size!=3)
+  { if (output[2].children.size != 3)
       return result;
 //    Expression rightLeftE=rightE[1];
 //    Expression rightRightE=rightE[2];
@@ -64,7 +65,7 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
     tempExp.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][1]);
     if (theCommands.innerTimes(theCommands, tempExp, newExpr))
     { output.MakeProducT(theCommands, newExpr, output[2][2]);
-      result=true;
+      result = true;
     }
   }
   //handle 0*anything=0
@@ -79,23 +80,23 @@ bool CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat(Calculat
     return false;
   const Expression* leftE;
   const Expression* rightE;
-  leftE=&input[1];
-  rightE=&input[2];
+  leftE = &input[1];
+  rightE = &input[2];
   ElementZmodP theElt1, theElt2;
-  for (int i=0; i<2; i++, MathRoutines::swap(leftE, rightE))
+  for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE))
     if (leftE->IsOfType<ElementZmodP>(&theElt1))
     { if (rightE->IsOfType<ElementZmodP>(&theElt2))
-      { if (theElt1.theModulo!=theElt2.theModulo)
+      { if (theElt1.theModulo != theElt2.theModulo)
           return false;
       } else
       { Rational tempRat;
         if (!rightE->IsOfType<Rational>(&tempRat))
           return false;
-        theElt2.theModulo=theElt1.theModulo;
+        theElt2.theModulo = theElt1.theModulo;
         if (!theElt2.AssignRational(tempRat))
           return false;
       }
-      theElt1+=theElt2;
+      theElt1 += theElt2;
       return output.AssignValue(theElt1, theCommands);
     }
   return false;
@@ -107,23 +108,23 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEltZmodPorRatByEltZmodPorRat(Cal
     return false;
   const Expression* leftE;
   const Expression* rightE;
-  leftE=&input[1];
-  rightE=&input[2];
+  leftE = &input[1];
+  rightE = &input[2];
   ElementZmodP theElt1, theElt2;
-  for (int i=0; i<2; i++, MathRoutines::swap(leftE, rightE))
+  for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE))
     if (leftE->IsOfType<ElementZmodP>(&theElt1))
     { if (rightE->IsOfType<ElementZmodP>(&theElt2))
-      { if (theElt1.theModulo!=theElt2.theModulo)
+      { if (theElt1.theModulo != theElt2.theModulo)
           return false;
       } else
       { Rational tempRat;
         if (!rightE->IsOfType<Rational>(&tempRat))
           return false;
-        theElt2.theModulo=theElt1.theModulo;
+        theElt2.theModulo = theElt1.theModulo;
         if (!theElt2.AssignRational(tempRat))
           return false;
       }
-      theElt1*=theElt2;
+      theElt1 *= theElt2;
       return output.AssignValue(theElt1, theCommands);
     }
   return false;
@@ -135,25 +136,25 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(Calcu
     return false;
   const Expression* leftE;
   const Expression* rightE;
-  leftE=&input[1];
-  rightE=&input[2];
+  leftE = &input[1];
+  rightE = &input[2];
   ElementZmodP theElt1, theElt2;
-  for (int i=0; i<2; i++, MathRoutines::swap(leftE, rightE))
+  for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE))
     if (leftE->IsOfType<ElementZmodP>(&theElt1))
     { if (rightE->IsOfType<ElementZmodP>(&theElt2))
-      { if (theElt1.theModulo!=theElt2.theModulo)
+      { if (theElt1.theModulo != theElt2.theModulo)
           return false;
       } else
       { Rational tempRat;
         if (!rightE->IsOfType<Rational>(&tempRat))
           return false;
-        theElt2.theModulo=theElt1.theModulo;
+        theElt2.theModulo = theElt1.theModulo;
         if (!theElt2.AssignRational(tempRat))
           return false;
       }
-      if (i==1)
+      if (i == 1)
         MathRoutines::swap(theElt1, theElt2);
-      if (!(theElt1/=theElt2))
+      if (!(theElt1 /= theElt2))
       { std::stringstream out;
         out << "Got division by zero while attempting to divide "
         << theElt1.ToString() << " by " << theElt2.ToString();
@@ -166,22 +167,22 @@ bool CalculatorFunctionsBinaryOps::innerDivideEltZmodPorRatByEltZmodPorRat(Calcu
 
 bool CalculatorFunctionsBinaryOps::innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddRatToRat");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   Rational leftR, rightR;
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
-  return output.AssignValue(leftR+rightR, theCommands);
+  return output.AssignValue(leftR + rightR, theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddStringToString(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddStringToString");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   std::string left, right;
   if (!input[1].IsOfType(&left) || !input[2].IsOfType(&right))
     return false;
-  return output.AssignValue(left+right, theCommands);
+  return output.AssignValue(left + right, theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat(Calculator& theCommands, const Expression& input, Expression& output)
@@ -203,7 +204,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideAlgebraicNumberOrRatByAlgebraicNum
   }
   if (rightAN.IsEqualToZero())
     return output.MakeError("Division by zero. ", theCommands, true);
-  leftAN/=rightAN;
+  leftAN /= rightAN;
   output.AssignValue(leftAN, theCommands);
   output.CheckInitializationRecursively();
   return true;
@@ -216,7 +217,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyEltHypOctByEltHypOct(Calculator&
   ElementHyperoctahedralGroupR2 outElt, left, right;
   if (!input[1].IsOfType<ElementHyperoctahedralGroupR2>(& left) || !input[2].IsOfType<ElementHyperoctahedralGroupR2>(&right))
     return false;
-  outElt=left*right;
+  outElt = left * right;
   return output.AssignValue(outElt, theCommands);
 }
 

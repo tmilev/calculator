@@ -1,4 +1,5 @@
 #include "vpfHeader5Crypto.h"
+#include "vpfImplementationHeader2Math0_General.h"
 #include "vpfHeader1General1_ListReferences.h"
 #include "vpfHeader1General7FileOperations_Encodings.h"
 #include "vpfJson.h"
@@ -6,7 +7,7 @@
 ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA-1 and base64 implementation.");
 
 unsigned char Crypto::GetCharFrom6bit(uint32_t input)
-{ switch(input)
+{ switch (input)
   { case 0: return  'A';
     case 1: return  'B';
     case 2: return  'C';
@@ -285,22 +286,22 @@ void Crypto::ConvertBitStreamToString(const List<unsigned char>& input, std::str
 { MacroRegisterFunctionWithName("Crypto::ConvertBitStreamToString");
   output.clear();
   output.reserve(input.size);
-  for (int i=0; i<input.size; i++)
+  for (int i = 0; i < input.size; i ++)
     output.push_back(input[i]);
 }
 
 void Crypto::ConvertStringToListBytes(const std::string& input, List<unsigned char>& output)
 { MacroRegisterFunctionWithName("Crypto::ConvertStringToListBytes");
   output.SetSize(input.size());
-  for (unsigned i=0; i<input.size(); i++)
-    output[i]=input[i];
+  for (unsigned i = 0; i < input.size(); i ++)
+    output[i] = input[i];
 }
 
 void Crypto::ConvertStringToListBytesSigned(const std::string& input, List<char>& output)
 { MacroRegisterFunctionWithName("Crypto::ConvertStringToListBytesSigned");
   output.SetSize(input.size());
-  for (unsigned i=0; i<input.size(); i++)
-    output[i]=input[i];
+  for (unsigned i = 0; i < input.size(); i ++)
+    output[i] = input[i];
 }
 
 std::string Crypto::computeSha1outputBase64(const std::string& inputString)
@@ -315,8 +316,8 @@ std::string Crypto::computeSha1outputBase64(const std::string& inputString)
 List<int> Crypto::ConvertStringToListInt(const std::string& input)
 { List<int> result;
   result.SetSize(input.size());
-  for (unsigned i=0; i<input.size(); i++)
-    result[i]=input[i];
+  for (unsigned i = 0; i < input.size(); i++)
+    result[i] = input[i];
   return result;
 }
 

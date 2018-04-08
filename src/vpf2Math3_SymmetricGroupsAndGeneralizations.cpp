@@ -1,3 +1,4 @@
+#include "vpfImplementationHeader2Math0_General.h"
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
@@ -7,12 +8,12 @@ ProjectInformationInstance ProjectInfoVpf2Math3_SymmetricGroupsAndGeneralization
 int Partition::Fulton61z() const
 { int acc = 1;
   int samecount = 1;
-  for(int j=1; j<=this->p.size; j++)
+  for (int j = 1; j <= this->p.size; j ++)
   { // what kind of logic is this?  Make it a do...while loop.
-    if((j!=this->p.size) && (this->p[j-1] == this->p[j]))
-    { samecount++;
+    if ((j != this->p.size) && (this->p[j - 1] == this->p[j]))
+    { samecount ++;
     } else
-    { acc *= MathRoutines::KToTheNth(this->p[j-1], samecount);
+    { acc *= MathRoutines::KToTheNth(this->p[j - 1], samecount);
       acc *= MathRoutines::Factorial(samecount);
       samecount = 1;
     }

@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader3Calculator0_Interface.h"
+#include "vpfImplementationHeader2Math0_General.h"
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
@@ -21,10 +22,10 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   Selection BaseVariables;
   Rational GlobalGoal;
   GlobalGoal.MakeZero();
-  if (matA.NumRows!= matb.NumRows)
+  if (matA.NumRows != matb.NumRows)
     crash << crash;
-  for (int j=0; j<matb.NumRows; j++)
-  { GlobalGoal+=(matb.elements[j][0]);
+  for (int j = 0; j < matb.NumRows; j ++)
+  { GlobalGoal += matb.elements[j][0];
     if(matb.elements[j][0].IsNegative())
       crash << crash;
   }
@@ -41,37 +42,38 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   BaseVariables.init(tempMatA.NumCols);
   tempMatA.MakeZero();
   matX.MakeZero(tempMatA.NumCols);
-  for (int j=0; j<matA.NumCols; j++)
-    for (int i=0; i<matA.NumRows; i++)
+  for (int j = 0; j < matA.NumCols; j ++)
+    for (int i = 0; i < matA.NumRows; i ++)
       tempMatA.elements[i][j].Assign(matA.elements[i][j]);
-  for (int j=0; j<matA.NumRows; j++)
-  { tempMatA.elements[j][j+NumTrueVariables].MakeOne();
-    matX[j+NumTrueVariables]=(matb.elements[j][0]);
-    BaseVariables.AddSelectionAppendNewIndex(j+NumTrueVariables);
+  for (int j = 0; j < matA.NumRows; j ++)
+  { tempMatA.elements[j][j + NumTrueVariables].MakeOne();
+    matX[j + NumTrueVariables] = (matb.elements[j][0]);
+    BaseVariables.AddSelectionAppendNewIndex(j + NumTrueVariables);
   }
   Rational PotentialChangeGradient;
   Rational ChangeGradient; //Change, PotentialChange;
-  int EnteringVariable=0;
-  bool WeHaveNotEnteredACycle=true;
+  int EnteringVariable = 0;
+  bool WeHaveNotEnteredACycle = true;
 //  int ProblemCounter=0;
-  while (EnteringVariable!=-1 && WeHaveNotEnteredACycle && GlobalGoal.IsPositive())
+  while (EnteringVariable != - 1 && WeHaveNotEnteredACycle && GlobalGoal.IsPositive())
   {//  ProblemCounter++;
   //  if (ProblemCounter==8)
     //{ BaseVariables.ComputeDebugString();
     //}
     //tempMatA.ComputeDebugString(); matX.ComputeDebugString();
-    EnteringVariable=-1; ChangeGradient.MakeZero();
-    for (int i=0; i<tempMatA.NumCols; i++)
+    EnteringVariable = - 1; ChangeGradient.MakeZero();
+    for (int i = 0; i < tempMatA.NumCols; i ++)
       if (!BaseVariables.selected[i])
       { Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
-        Matrix<Rational> ::ComputePotentialChangeGradient(tempMatA, BaseVariables, NumTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable);
+        Matrix<Rational>::ComputePotentialChangeGradient(tempMatA, BaseVariables, NumTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable);
         if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable)
-        { EnteringVariable= i;
+        { EnteringVariable = i;
           ChangeGradient.Assign(PotentialChangeGradient);
         }
       }
-    if (EnteringVariable!=-1)
-    { int LeavingVariableRow;  Rational MaxMovement;
+    if (EnteringVariable != - 1)
+    { int LeavingVariableRow;
+      Rational MaxMovement;
       Matrix<Rational>::GetMaxMovementAndLeavingVariableRow(MaxMovement, LeavingVariableRow, EnteringVariable, tempMatA, matX, BaseVariables);
       Rational tempRat, tempTotalChange;
       if (tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero())
@@ -111,18 +113,18 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
           tempRat.Minus();
           tempMatA.AddTwoRows(LeavingVariableRow, i, 0, tempRat);
         }
-        if (i==LeavingVariableRow)
-          matX[BaseVariables.elements[i]]=0;
+        if (i == LeavingVariableRow)
+          matX[BaseVariables.elements[i]] = 0;
         //tempMatA.ComputeDebugString();
         //matX.ComputeDebugString();
       }
       if(!matX[BaseVariables.elements[LeavingVariableRow]].IsEqualToZero())
         crash << crash;
-      BaseVariables.selected[BaseVariables.elements[LeavingVariableRow]]=false;
-      BaseVariables.elements[LeavingVariableRow]= EnteringVariable;
-      BaseVariables.selected[EnteringVariable]= true;
+      BaseVariables.selected[BaseVariables.elements[LeavingVariableRow]] = false;
+      BaseVariables.elements[LeavingVariableRow] = EnteringVariable;
+      BaseVariables.selected[EnteringVariable] = true;
       //BaseVariables.ComputeDebugString();
-      for (int i=0; i<tempMatA.NumRows; i++)
+      for (int i = 0; i < tempMatA.NumRows; i ++)
         if(!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1))
           crash << crash;
     }

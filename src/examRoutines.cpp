@@ -9,7 +9,7 @@
 #include "vpfHeader8HtmlInterpretationInterface.h"
 #include "vpfHeader2Math10_LaTeXRoutines.h"
 #include <iomanip>
-#include "vpfheader7databaseinterface_mongodb.h"
+#include "vpfHeader7DatabaseInterface_Mongodb.h"
 
 ProjectInformationInstance projectInfoInstanceWebServerExamAndTeachingRoutinesCustomCode
 (__FILE__, "Routines for calculus teaching: calculator exam mode. Shared code. ");
@@ -55,23 +55,21 @@ CalculatorHTML::CalculatorHTML()
 }
 
 #ifdef MACRO_use_MySQL
-bool CalculatorHTML::LoadProblemInfoFromJSONStringAppend
-(const std::string& inputJSONString,
+bool CalculatorHTML::LoadProblemInfoFromJSONAppend
+(const JSData& inputJSON,
  MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
  std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromJSONStringAppend");
-  if (inputJSONString == "")
+  (void) commentsOnFailure;
+  if (inputJSON.type == inputJSON.JSUndefined)
     return true;
-  JSData inputJS;
-  if (!inputJS.readstring(inputJSONString, false, &commentsOnFailure))
-    return false;
   //stOutput //<< crash.GetStackTraceShort()
   //<< "<br>DEBUG: Read json: " << inputJS.ToString(false);
-  outputProblemInfo.SetExpectedSize(inputJS.objects.size());
+  outputProblemInfo.SetExpectedSize(inputJSON.objects.size());
   ProblemData emptyData;
-  for (int i = 0; i < inputJS.objects.size(); i ++)
-  { std::string currentProbName = inputJS.objects.theKeys[i];
-    JSData& currentProblem = inputJS.objects.theValues[i];
+  for (int i = 0; i < inputJSON.objects.size(); i ++)
+  { std::string currentProbName = inputJSON.objects.theKeys[i];
+    JSData& currentProblem = inputJSON.objects.theValues[i];
     if (currentProbName == "")
       continue;
     //stOutput << "<br>DEBUG: current problem json: " << currentProblem.ToString(false)
@@ -122,8 +120,8 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend
     ProblemData& currentProblemValue = outputProblemInfo.GetValueCreate(currentProbName);
     if (!HtmlRoutines::ChopCGIString(currentProbString, currentKeyValues, commentsOnFailure))
       return false;
-    //stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
-    //<< currentKeyValues.ToStringHtml();
+    stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
+    << currentKeyValues.ToStringHtml();
     std::string deadlineString = HtmlRoutines::ConvertURLStringToNormal(currentKeyValues.GetValueCreate("deadlines"), false);
     std::string problemWeightsCollectionString = HtmlRoutines::ConvertURLStringToNormal(currentKeyValues.GetValueCreate("weights"), false);
     if (problemWeightsCollectionString != "")
@@ -150,6 +148,30 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend
     }
   }
   return true;
+}
+
+JSData CalculatorHTML::ToJSONDeadlines
+(MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo)
+{ MacroRegisterFunctionWithName("CalculatorHTML::ToJSONDeadlines");
+  JSData output;
+  for (int i = 0; i < inputProblemInfo.size(); i ++)
+  { ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
+    if (currentProblem.problemWeightsPerCoursE.size() == 0)
+      continue;
+    std::string currentProblemName = inputProblemInfo.theKeys[i];
+    JSData currentProblemJSON;
+    for (int j = 0; j < currentProblem.problemWeightsPerCoursE.size(); j ++)
+    { std::string currentWeight = MathRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theValues[j]);
+      if (currentWeight == "")
+        continue;
+      std::string currentCourse = MathRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theKeys[j]);
+      currentProblemJSON[currentCourse] = currentWeight;
+    }
+    JSData currentWeight;
+    currentWeight["weight"] = currentProblemJSON;
+    output[currentProblemName] = currentWeight;
+  }
+  return output;
 }
 
 JSData CalculatorHTML::ToJSONProblemWeights
@@ -203,16 +225,13 @@ bool DatabaseRoutineS::StoreProblemDatabaseInfo
   JSData findQueryWeights, setQueryWeights, findQueryDeadlines, setQueryDeadlines;
   findQueryWeights[DatabaseStrings::labelProblemWeightsSchema] = theUser.problemWeightSchema;
   findQueryDeadlines[DatabaseStrings::labelDeadlinesSchema] = theUser.deadlineSchema;
-  JSData problemWeightsParsed, deadlinesParsed;
-  problemWeightsParsed.readstring(theUser.problemWeightString, false, &commentsOnFailure);
-  deadlinesParsed.readstring(theUser.deadlinesString, false, &commentsOnFailure);
-  setQueryWeights[DatabaseStrings::labelProblemWeights] = problemWeightsParsed;
-  setQueryDeadlines[DatabaseStrings::labelDeadlines] = deadlinesParsed;
-  if (problemWeightsParsed.type != JSData::JSUndefined)
+  setQueryWeights[DatabaseStrings::labelProblemWeights] = theUser.problemWeights;
+  setQueryDeadlines[DatabaseStrings::labelDeadlines] = theUser.deadlines;
+  if (theUser.problemWeights.type != JSData::JSUndefined)
     if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
          (DatabaseStrings::tableProblemWeights, findQueryWeights, setQueryWeights, &commentsOnFailure))
       return false;
-  if (deadlinesParsed.type != JSData::JSUndefined)
+  if (theUser.deadlines.type != JSData::JSUndefined)
     if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
          (DatabaseStrings::tableDeadlines, findQueryDeadlines, setQueryDeadlines, &commentsOnFailure))
       return false;
@@ -283,7 +302,8 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
   //stOutput << "<hr>About to transform to database string: "
   //<< this->currentUseR.theProblemData.ToStringHtml()
   //<< "<hr>";
-  theGlobalVariables.userDefault.problemWeightString = this->ToJSONProblemWeights(this->currentUseR.theProblemData).ToString(false);
+  theGlobalVariables.userDefault.problemWeights = this->ToJSONProblemWeights(this->currentUseR.theProblemData);
+  theGlobalVariables.userDefault.deadlines = this->ToJSONDeadlines(this->currentUseR.theProblemData);
   //theGlobalVariables.userDefault=this->currentUseR;
   //stOutput << "<hr>Resulting string: "
   //<< theGlobalVariables.userDefault.problemInfoString.value
@@ -313,13 +333,13 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
     //stOutput << "Failed to interpret user's problem saved data. ";
     return false;
   }
-  if (!this->LoadProblemInfoFromJSONStringAppend
-      (this->currentUseR.problemWeightString, this->currentUseR.theProblemData, comments))
+  if (!this->LoadProblemInfoFromJSONAppend
+      (this->currentUseR.problemWeights, this->currentUseR.theProblemData, comments))
   { comments << "Failed to load problem weights. ";
     return false;
   }
-  if (!this->LoadProblemInfoFromJSONStringAppend
-      (this->currentUseR.deadlinesString, this->currentUseR.theProblemData, comments))
+  if (!this->LoadProblemInfoFromJSONAppend
+      (this->currentUseR.deadlines, this->currentUseR.theProblemData, comments))
   { comments << "Failed to load problem deadlines. ";
     return false;
   }

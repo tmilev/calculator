@@ -1,4 +1,5 @@
 #include "vpf.h"
+#include "vpfImplementationHeader2Math0_General.h"
 #include "vpfHeader2Math3_FiniteGroups.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"

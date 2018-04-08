@@ -128,7 +128,8 @@ HEADERS += \
     vpfHeader2Math10_LaTeXRoutines.h \
     vpfHeader2Math4_5_Tree.h \
     vpfHeader3Calculator5_Database_Mongo.h \
-    vpfheader7databaseinterface_mongodb.h
+    vpfHeader7DatabaseInterface_Mongodb.h \
+    vpfImplementationHeader2Math0_General.h
 
 DISTFILES += \
     ../calculator-html/new/app.js \

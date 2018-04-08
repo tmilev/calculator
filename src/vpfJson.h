@@ -3,8 +3,8 @@
 #ifndef vpfJson_h_already_included
 #define vpfJson_h_already_included
 
-#include "vpfHeader2Math0_General.h" // Matrix
-#include "vpfHeader2Math01_LargeIntArithmetic.h" // Rational
+#include "vpfHeader1General1_ListReferences.h"
+#include "vpfHeader1General6Maps.h"
 static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, work in progress.");
 
 
@@ -29,6 +29,11 @@ static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, wor
 
 //struct JSHashData;
 class Rational;
+template <typename coefficient>
+class Matrix;
+template <typename coefficient>
+class Vector;
+
 class JSData
 {
 public:

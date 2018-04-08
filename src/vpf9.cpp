@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader1General0_General.h"
-#include "vpfHeader2Math0_General.h"
+#include "vpfImplementationHeader2Math0_General.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
@@ -142,7 +142,7 @@ void GlobalVariables::WriteSourceCodeFilesJS()
   std::fstream theFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, "/calculator-html/src/source_code_files.js", false, true, false, false);
   theFile << "var theCPPsourceCodeFiles = [";
-  for (int i = 0; i < this->theSourceCodeFiles().size; i++)
+  for (int i = 0; i < this->theSourceCodeFiles().size; i ++)
   { if (i != 0)
       theFile << ", ";
     theFile << "\"" << this->theSourceCodeFiles()[i] << "\"";
@@ -190,7 +190,7 @@ ProgressReport::~ProgressReport()
     return;
   if (crash.flagCrashInitiateD)
     return;
-  theGlobalVariables.ProgressReportStringS[this->threadIndex].size--;
+  theGlobalVariables.ProgressReportStringS[this->threadIndex].size --;
 }
 
 ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription)

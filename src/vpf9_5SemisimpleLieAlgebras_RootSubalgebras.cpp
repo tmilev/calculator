@@ -1,5 +1,6 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
+#include "vpfImplementationHeader2Math0_General.h"
 #include "vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"

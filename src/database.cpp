@@ -5,7 +5,7 @@
 #include "vpfHeader7DatabaseInterface_MySQL.h"
 #include "webserver.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
-#include "vpfheader7databaseinterface_mongodb.h"
+#include "vpfHeader7DatabaseInterface_Mongodb.h"
 
 ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
 
@@ -262,7 +262,7 @@ std::string UserCalculator::ToString()
       out << " weight: " << weightRat.ToString();
   }
   out << "<br>Deadline info: "
-  << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(this->deadlinesString);
+  << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(this->deadlines.ToString(false));
   return out.str();
 }
 
@@ -322,7 +322,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
     findDeadlinesQuery[DatabaseStrings::labelDeadlinesSchema] = this->deadlineSchema;
     if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
         (DatabaseStrings::tableDeadlines, findDeadlinesQuery, outDeadlinesQuery, failureStream))
-      this->deadlinesString = outDeadlinesQuery[DatabaseStrings::labelDeadlines].string;
+      this->deadlines = outDeadlinesQuery[DatabaseStrings::labelDeadlines];
   }
   //  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
   //  << " this->currentCoursesInfoString:  " << this->currentCoursesInfoString.value;
@@ -333,7 +333,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
     findProblemWeightsQuery[DatabaseStrings::labelProblemWeightsSchema] = this->problemWeightSchema;
     if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
         (DatabaseStrings::tableProblemWeights, findProblemWeightsQuery, outProblemWeightsQuery, failureStream))
-      this->problemWeightString = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights].ToString(false);
+      this->problemWeights = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights];
     //else
     //{ stOutput << "DEBUG: Failed to find";
     //}
@@ -997,7 +997,7 @@ bool UserCalculator::SendActivationEmail(std::stringstream& comments)
   return result;
 }
 
-#include "vpfheader7databaseinterface_mongodb.h"
+#include "vpfHeader7DatabaseInterface_Mongodb.h"
 
 bool EmailRoutines::SendEmailWithMailGun
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral,

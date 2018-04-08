@@ -19,13 +19,27 @@ public:
   (const std::string& collectionName, const JSData& findQuery,
    List<JSData>& output, int maxOutputItems = - 1,
    long long* totalItems = 0, std::stringstream* commentsOnFailure = 0);
+  static bool FindOneFromQueryString
+  (const std::string& collectionName, const std::string& findQuery,
+   JSData& output, std::stringstream* commentsOnFailure = 0);
+
+  static bool GetOrFindQuery(const List<JSData>& input, std::string& output, std::stringstream* commentsOnFailure = 0);
   static bool FindOneFromJSON
   (const std::string& collectionName, const JSData& findQuery,
+   JSData& output, std::stringstream* commentsOnFailure = 0);
+  static bool FindOneFromSome
+  (const std::string& collectionName, const List<JSData>& findOrQueries,
    JSData& output, std::stringstream* commentsOnFailure = 0);
   static bool IsValidJSONMongoQuery
   (const JSData& findQuery, std::stringstream* commentsOnFailure = 0, bool mustBeObject = true);
   static bool UpdateOneFromJSON
   (const std::string& collectionName, const JSData& findQuery, const JSData& updateQuery,
+   std::stringstream* commentsOnFailure = 0);
+  static bool UpdateOneFromSomeJSON
+  (const std::string& collectionName, const List<JSData>& findOrQueries, const JSData& updateQuery,
+   std::stringstream* commentsOnFailure = 0);
+  static bool UpdateOneFromQueryString
+  (const std::string& collectionName, const std::string& findQuery, const JSData& updateQuery,
    std::stringstream* commentsOnFailure = 0);
   static bool FetchCollectionNames(List<std::string>& output, std::stringstream* commentsOnFailure);
   static bool FetchTable

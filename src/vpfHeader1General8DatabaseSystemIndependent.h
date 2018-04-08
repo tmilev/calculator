@@ -73,6 +73,7 @@ class UserCalculatorData
   void clearAuthenticationTokenAndPassword();
   std::string ToStringUnsecure();
   std::string ToStringCourseInfo();
+  List<JSData> GetFindMeFromUserNameQuery();
 };
 
 struct DatabaseStrings

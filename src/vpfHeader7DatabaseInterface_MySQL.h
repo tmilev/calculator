@@ -271,7 +271,6 @@ public:
   bool SendActivationEmail(std::stringstream& comments);
   std::string ToString();
   std::string ToStringSelectedColumns();
-  JSData GetFindMeFromUserNameQuery();
   UserCalculator();
   ~UserCalculator();
 };
@@ -279,8 +278,7 @@ public:
 class DatabaseRoutineS
 {
 public:
-  static bool StoreProblemDatabaseInfo
-  (const UserCalculatorData& theUser, std::stringstream& commentsOnFailure);
+  static bool StoreProblemDatabaseInfo(const UserCalculatorData& theUser, std::stringstream& commentsOnFailure);
   static bool SendActivationEmail
   (const std::string& emailList, std::stringstream* commentsOnFailure,
    std::stringstream* commentsGeneral, std::stringstream* commentsGeneralSensitive);

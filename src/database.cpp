@@ -478,7 +478,7 @@ bool UserCalculator::AuthenticateWithUserNameAndPass(std::stringstream* comments
 bool UserCalculator::Iexist(std::stringstream* comments)
 { MacroRegisterFunctionWithName("UserCalculator::Iexist");
   JSData notUsed;
-  return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
+  return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome
   (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), notUsed, comments);
 }
 
@@ -805,9 +805,20 @@ bool UserCalculator::InterpretDatabaseProblemData(const std::string& theInfo, st
   return result;
 }
 
-JSData UserCalculator::GetFindMeFromUserNameQuery()
-{ JSData result;
-  result[DatabaseStrings::labelUsername] = this->username;
+List<JSData> UserCalculatorData::GetFindMeFromUserNameQuery()
+{ List<JSData> result;
+  if (this->username != "")
+  { JSData currentJS;
+    currentJS[DatabaseStrings::labelUsername] = this->username;
+    result.AddOnTop(currentJS);
+  }
+  if (this->email != "")
+  { JSData currentJS;
+    currentJS[DatabaseStrings::labelEmail] = this->email;
+    result.AddOnTop(currentJS);
+  }
+  if (result.size == 0)
+    crash << "User with find query not allowed to have neither username nor email. " << crash;
   return result;
 }
 
@@ -822,14 +833,13 @@ bool UserCalculator::StoreProblemDataToDatabase(std::stringstream& commentsOnFai
   //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemData] = problemDataStream.str();
-  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
   (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure);
 }
 
 bool DatabaseRoutineS::AddUsersFromEmails
-(const std::string& emailList, const std::string& userPasswords,
- std::string& userRole, std::string& userGroup,
- std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers)
+(const std::string& emailList, const std::string& userPasswords, std::string& userRole,
+ std::string& userGroup, std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers)
 { MacroRegisterFunctionWithName("DatabaseRoutines::AddUsersFromEmails");
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 1000;
   theGlobalVariables.MaxComputationTimeBeforeWeTakeAction = 1000;
@@ -843,7 +853,8 @@ bool DatabaseRoutineS::AddUsersFromEmails
       << "If you want to enter usernames without password, you need to leave the password input box empty. ";
       return false;
     }
-  //stOutput << " <br>Debug: creating users: " << theEmails.ToStringCommaDelimited() << "<br>Number of users: " << theEmails.size
+  //stOutput << " <br>Debug: creating users: " << theEmails.ToStringCommaDelimited()
+  //<< "<br>Number of users: " << theEmails.size
   //<< "<br>Number of passwords: " << thePasswords.size << "<hr>Passwords string: " << thePasswords;
   UserCalculator currentUser;
   bool result = true;
@@ -861,16 +872,19 @@ bool DatabaseRoutineS::AddUsersFromEmails
     currentUser.email = theEmails[i];
     currentUser.userRole = userRole;
 
-    JSData findUser, updateUser;
-    findUser[DatabaseStrings::labelUsername] = currentUser.username;
-    updateUser = currentUser.ToJSON();
     bool isEmail = true;
     if (theEmails[i].find('@') == std::string::npos)
     { isEmail = false;
       currentUser.email = "";
     } else
       currentUser.email = theEmails[i];
-    if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableUsers, findUser, updateUser, &comments))
+    JSData updateUser;
+    List<JSData> findUser;
+    findUser.SetSize(2);
+    findUser[0][DatabaseStrings::labelUsername] = currentUser.username;
+    findUser[1][DatabaseStrings::labelEmail] = currentUser.email;
+    updateUser = currentUser.ToJSON();
+    if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(DatabaseStrings::tableUsers, findUser, updateUser, &comments))
     { if (!currentUser.Iexist(&comments))
       { if (!currentUser.StoreToDB(false, &comments))
         { comments << "Failed to create user: " << currentUser.username;
@@ -880,11 +894,11 @@ bool DatabaseRoutineS::AddUsersFromEmails
           outputNumNewUsers ++;
       }
       if (isEmail)
-        DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, updateUser, &comments);
+        DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, updateUser, &comments);
     } else
       outputNumUpdatedUsers ++;
     //currentUser may have its updated entries modified by the functions above.
-    if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, updateUser, &comments))
+    if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, updateUser, &comments))
       result = false;
     if (thePasswords.size == 0 || thePasswords.size != theEmails.size)
     { if (currentUser.actualShaonedSaltedPassword == "" && currentUser.actualAuthenticationToken == "")
@@ -900,7 +914,7 @@ bool DatabaseRoutineS::AddUsersFromEmails
       if (!currentUser.SetPassword(&comments))
         result = false;
       updateUser[DatabaseStrings::labelActivationToken] = "activated";
-      DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, updateUser, &comments);
+      DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, updateUser, &comments);
       if (currentUser.email != "")
         currentUser.ComputeAndStoreActivationStats(&comments, &comments);
     }
@@ -1145,9 +1159,9 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
   (void) theUseR;
   (void) commentsGeneral;
 #ifdef MACRO_use_MySQL
+  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
-  MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded");
   if (userWrapper.enteredGoogleToken == "")
     return false;
   if (!Crypto::VerifyJWTagainstKnownKeys(userWrapper.enteredGoogleToken, commentsOnFailure, commentsGeneral))

@@ -77,8 +77,10 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend
     if (!outputProblemInfo.Contains(currentProbName))
       outputProblemInfo.GetValueCreate(currentProbName) = emptyData;
     ProblemData& currentProblemValue = outputProblemInfo.GetValueCreate(currentProbName);
-    JSData& currentDeadlines = currentProblem["deadlines"];
-    JSData& currentWeight = currentProblem["weight"];
+    JSData& currentDeadlines = currentProblem[DatabaseStrings::labelDeadlines];
+    JSData& currentWeight = currentProblem[DatabaseStrings::labelProblemWeights];
+    stOutput << "DEBUG: Current deadlines: " << currentDeadlines.ToString(false)
+    << "<br>Current weight: " << currentWeight.ToString(false);
     if (currentWeight.type != JSData::JSUndefined)
     { for (int j = 0; j < currentWeight.objects.size(); j ++)
         currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
@@ -136,9 +138,13 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend
     { if (!HtmlRoutines::ChopCGIString(deadlineString, sectionDeadlineInfo, commentsOnFailure))
         return false;
       for (int j = 0; j < sectionDeadlineInfo.size(); j ++)
-        currentProblemValue.adminData.deadlinesPerSection.SetKeyValue
+      { currentProblemValue.adminData.deadlinesPerSection.SetKeyValue
         (HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theKeys[j], false),
          HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theValues[j], false));
+        stOutput << "<hr>DEBUG: Current key, value pair: "
+        << HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theKeys[j], false)
+        << ", " << HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theValues[j], false) << ". ";
+      }
     }
     std::string problemWeightString = MathRoutines::StringTrimWhiteSpace(currentKeyValues.GetValueCreate("weight"));
     if (problemWeightString != "")
@@ -160,16 +166,16 @@ JSData CalculatorHTML::ToJSONDeadlines
       continue;
     std::string currentProblemName = inputProblemInfo.theKeys[i];
     JSData currentProblemJSON;
-    for (int j = 0; j < currentProblem.problemWeightsPerCoursE.size(); j ++)
-    { std::string currentWeight = MathRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theValues[j]);
-      if (currentWeight == "")
+    for (int j = 0; j < currentProblem.deadlinesPerSection.size(); j ++)
+    { std::string currentDeadline = MathRoutines::StringTrimWhiteSpace(currentProblem.deadlinesPerSection.theValues[j]);
+      if (currentDeadline == "")
         continue;
-      std::string currentCourse = MathRoutines::StringTrimWhiteSpace(currentProblem.problemWeightsPerCoursE.theKeys[j]);
-      currentProblemJSON[currentCourse] = currentWeight;
+      std::string currentSection = MathRoutines::StringTrimWhiteSpace(currentProblem.deadlinesPerSection.theKeys[j]);
+      currentProblemJSON[currentSection] = currentDeadline;
     }
-    JSData currentWeight;
-    currentWeight["weight"] = currentProblemJSON;
-    output[currentProblemName] = currentWeight;
+    JSData currentDeadline;
+    currentDeadline[DatabaseStrings::labelDeadlines] = currentProblemJSON;
+    output[currentProblemName] = currentDeadline;
   }
   return output;
 }
@@ -192,7 +198,7 @@ JSData CalculatorHTML::ToJSONProblemWeights
       currentProblemJSON[currentCourse] = currentWeight;
     }
     JSData currentWeight;
-    currentWeight["weight"] = currentProblemJSON;
+    currentWeight[DatabaseStrings::labelProblemWeights] = currentProblemJSON;
     output[currentProblemName] = currentWeight;
   }
   return output;

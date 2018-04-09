@@ -116,7 +116,7 @@ std::string DatabaseStrings::labelSemester = "semester";
 
 std::string DatabaseStrings::tableProblemWeights = "problemWeights";
 std::string DatabaseStrings::labelProblemWeightsSchema = "problemWeightsSchema";
-std::string DatabaseStrings::labelProblemWeights = "problemWeights";
+std::string DatabaseStrings::labelProblemWeights = "weights";
 
 std::string DatabaseStrings::labelSectionsTaught = "sectionsTaught";
 

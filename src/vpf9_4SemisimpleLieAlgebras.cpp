@@ -9,20 +9,20 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   std::stringstream out;
   std::string tempS;
   Vector<Rational> tempRoot, tempRoot2;
-  int numRoots=this->theWeyl.RootSystem.size;
+  int numRoots = this->theWeyl.RootSystem.size;
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
   ElementSemisimpleLieAlgebra<Rational> tempElt1, tempElt2, tempElt3;
 //  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
-  std::string hLetter="h";
-  std::string gLetter="g";
-  if (theFormat!=0)
-  { hLetter=theFormat->chevalleyHgeneratorLetter;
-    gLetter=theFormat->chevalleyGgeneratorLetter;
+  std::string hLetter = "h";
+  std::string gLetter = "g";
+  if (theFormat != 0)
+  { hLetter = theFormat->chevalleyHgeneratorLetter;
+    gLetter = theFormat->chevalleyGgeneratorLetter;
   }
   out << "Type " << this->theWeyl.theDynkinType.ToString() << ".";
   out << "The letter " << HtmlRoutines::GetMathSpanPure(hLetter) << " stands for elements of the Cartan subalgebra, <br>"
   << " the letter " << HtmlRoutines::GetMathSpanPure(gLetter) << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
-  << " The generator " << HtmlRoutines::GetMathSpanPure(hLetter+"_i") << " is the element of the Cartan subalgebra dual to the <br>"
+  << " The generator " << HtmlRoutines::GetMathSpanPure(hLetter + "_i") << " is the element of the Cartan subalgebra dual to the <br>"
   << "i^th simple root, that is, " << HtmlRoutines::GetMathSpanPure("[" + hLetter + "_i, g]=\\langle \\alpha_i , \\gamma\\rangle g")
   << ", <br> where g is a Chevalley generator, " << HtmlRoutines::GetMathSpanPure("\\gamma") << " is its weight, and <br>"
   << HtmlRoutines::GetMathSpanPure("\\alpha_i") << " is the i^th simple root. ";
@@ -30,11 +30,11 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   theHtmlStream << "<table><tr><td> roots simple coords </td><td>epsilon coordinates</td>"
   << "<td>[,]</td>";
   theTableLateXStream << "\\begin{array}{cc|";
-  for (int i=0; i<this->GetNumGenerators()+1; i++)
+  for (int i = 0; i < this->GetNumGenerators() + 1; i ++)
     theTableLateXStream << "c";
   theTableLateXStream << "}\n";
   theTableLateXStream << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
-  for (int i=0; i<numRoots+theDimension; i++)
+  for (int i = 0; i < numRoots + theDimension; i ++)
   { tempElt1.MakeGenerator(i, *this);
     tempS=tempElt1.ToString(theFormat);
     theHtmlStream << "<td>" << tempS << "</td>";
@@ -43,10 +43,9 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   }
   theTableLateXStream << "\\\\\n";
   theHtmlStream << "</tr>";
-  Rational tempRat;
   //int lineCounter=0;
-  for (int i=0; i<theDimension+numRoots; i++)
-  { tempRoot=this->GetWeightOfGenerator(i);
+  for (int i = 0; i < theDimension + numRoots; i ++)
+  { tempRoot = this->GetWeightOfGenerator(i);
     theTableLateXStream << tempRoot.ToString() << "&";
     theHtmlStream << "<tr><td>" << tempRoot.ToString() << "</td>";
     this->theWeyl.GetEpsilonCoords(tempRoot, tempRoot2);
@@ -56,10 +55,10 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
     tempS=tempElt1.ToString(theFormat);
     theTableLateXStream << tempS;
     theHtmlStream << "<td>" << tempS << "</td>";
-    for (int j=0; j<numRoots+theDimension; j++)
+    for (int j = 0; j < numRoots + theDimension; j ++)
     { tempElt2.MakeGenerator(j, *this);
       this->LieBracket(tempElt1, tempElt2, tempElt3);
-      tempS=tempElt3.ToString(theFormat);
+      tempS = tempElt3.ToString(theFormat);
       theTableLateXStream << "& ";
       theTableLateXStream << tempS;
       theHtmlStream << "<td>" << tempS << "</td>";
@@ -69,7 +68,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   }
   theHtmlStream << "</table>";
   theTableLateXStream << "\\end{array}";
-  if (this->GetNumGenerators()<22)
+  if (this->GetNumGenerators() < 22)
   { out << "<div class=\"math\">" << theTableLateXStream.str() << "</div>";
     return out.str();
   }
@@ -78,7 +77,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   << " Below you can find the same table in pure LaTeX, "
   << " which you can render in a separate LaTeX session, should "
   << " wish to do so on your own. " <<  theHtmlStream.str();
-  if (theFormat!=0)
+  if (theFormat != 0)
     if (theFormat->flagLatexDetailsInHtml)
       out << "The above table in LaTex format follows. <hr>"
       << theTableLateXStream.str() << "<hr>";
@@ -89,11 +88,11 @@ void SemisimpleLieAlgebra::ComputeFolderNames()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeFolderNames");
   std::stringstream outMainDisplayPath;
   this->CheckConsistency();
-  DynkinType& theType=this->theWeyl.theDynkinType;
-  this->VirtualNameSSAlgOutputFolder="output/"+ HtmlRoutines::CleanUpForFileNameUse(theType.ToString()) + "/";
+  DynkinType& theType = this->theWeyl.theDynkinType;
+  this->VirtualNameSSAlgOutputFolder = "output/" + HtmlRoutines::CleanUpForFileNameUse(theType.ToString()) + "/";
   outMainDisplayPath << theGlobalVariables.DisplayPathOutputFolder
   << HtmlRoutines::CleanUpForFileNameUse(theType.ToString()) << "/";
-  this->DisplayNameSSalgOutputFolder=outMainDisplayPath.str();
+  this->DisplayNameSSalgOutputFolder = outMainDisplayPath.str();
 }
 
 void SemisimpleLieAlgebra::ComputeChevalleyConstants()

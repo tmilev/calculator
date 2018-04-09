@@ -3058,6 +3058,7 @@ int WebWorker::ProcessChangePassword()
 //  theGlobalVariables.SetWebInpuT("debugFlag", "true");
 //  stOutput << "DEBUG: " << this->ToStringCalculatorArgumentsHumanReadable();
   this->SetHeaderOKNoContentLength();
+#if defined(MACRO_use_MongoDB) && defined(MACRO_use_MySQL)
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theUser.enteredAuthenticationToken = "";
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
@@ -3122,6 +3123,9 @@ int WebWorker::ProcessChangePassword()
   << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.username, false)
   << "&activationToken=&authenticationToken=&"
   << "'\" />";
+#else
+  stOutput << "Operation not possible: project compiled without database support.";
+#endif
   return 0;
 }
 
@@ -5560,10 +5564,10 @@ void WebServer::CheckExternalPackageInstallation()
   bool doInstallOpenSSL = false;
   bool doInstallMongo = false;
 #ifndef MACRO_use_open_ssl
-  doInstallMysql = true;
+  doInstallOpenSSL = true;
 #endif
 #ifndef MACRO_use_MySQL
-  doInstallOpenSSL = true;
+  doInstallMysql = true;
 #endif
 #ifndef MACRO_use_MongoDB
   doInstallMongo = true;
@@ -5617,7 +5621,7 @@ void WebServer::CheckExternalPackageInstallation()
   result << "Proceeding to rebuild the calculator. " << logger::red
   << "This is expected to take 10+ minutes. "
   << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("make -j4", false);
+  theGlobalVariables.CallSystemNoOutput("make -j8", false);
   theGlobalVariables.ChDir(currentFolder);
 }
 
@@ -5653,11 +5657,11 @@ void WebServer::CheckMongoDBSetup()
 
   theGlobalVariables.ChDir("./mongo-c-driver-1.9.3");
   theGlobalVariables.CallSystemNoOutput("./configure", true);
-  theGlobalVariables.CallSystemNoOutput("make", true);
+  theGlobalVariables.CallSystemNoOutput("make -j8", true);
   theGlobalVariables.CallSystemNoOutput("sudo make install", true);
   theGlobalVariables.ChDir("../libbson-1.9.3");
   theGlobalVariables.CallSystemNoOutput("./configure", true);
-  theGlobalVariables.CallSystemNoOutput("make", true);
+  theGlobalVariables.CallSystemNoOutput("make -j8", true);
   theGlobalVariables.CallSystemNoOutput("sudo make install", true);
   theGlobalVariables.CallSystemNoOutput("sudo ldconfig", true);
 }

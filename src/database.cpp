@@ -403,7 +403,7 @@ JSData UserCalculatorData::ToJSON()
 }
 
 bool UserCalculatorData::ComputeCourseInfo()
-{ MacroRegisterFunctionWithName("UserCalculator::AssignCourseInfoString");
+{ MacroRegisterFunctionWithName("UserCalculator::ComputeCourseInfo");
   bool isAdmin = (this->userRole == "admin" && this->username == theGlobalVariables.userDefault.username);
   if (theGlobalVariables.UserStudentVieWOn() && isAdmin &&
       theGlobalVariables.GetWebInput("studentSection") != "")

@@ -2132,9 +2132,15 @@ std::string HtmlInterpretation::ToStringUserScores()
   out << "</tr>\n";
 
   out << "<tr><td><b>Maximum score</b></td>"
-  << "<td>-</td>"
+  << "<td>-</td>";
+#ifdef MACRO_use_MongoDB
+  out
   << "<td>" << theScores.theProblem.currentUseR.pointsMax.GetDoubleValue()
   << "</td>";
+#else
+  out
+  << "<td>Database not running.</td>";
+#endif
   for (int j = 0; j < theScores.theProblem.theTopicS.size(); j ++)
   { TopicElement& currentElt = theScores.theProblem.theTopicS.theValues[j];
     if (currentElt.problem != "")

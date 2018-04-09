@@ -396,6 +396,39 @@ std::string ProblemData::ToString()const
   return out.str();
 }
 
+bool UserCalculatorData::LoadFromJSON(JSData& input)
+{ MacroRegisterFunctionWithName("UserCalculatorData::LoadFromJSON");
+  this->userId.value                      = input[DatabaseStrings::labelUserId                            ].string;
+  this->username.value                    = input[DatabaseStrings::labelUsername                          ].string;
+  this->email.value                       = input[DatabaseStrings::labelEmail                             ].string;
+  this->actualActivationToken             = input[DatabaseStrings::labelActivationToken                   ].string;
+  this->timeOfActivationTokenCreation     = input[DatabaseStrings::labelTimeOfActivationTokenCreation     ].string;
+  this->actualAuthenticationToken         = input[DatabaseStrings::labelAuthenticationToken               ].string;
+  this->timeOfAuthenticationTokenCreation = input[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ].string;
+  this->problemDataString                 = input[DatabaseStrings::labelProblemData                       ].string;
+  this->courseInfoString                  = input[DatabaseStrings::labelCourseInfo                        ].string;
+  this->actualShaonedSaltedPassword       = input[DatabaseStrings::labelPassword                          ].string;
+  this->userRole                          = input[DatabaseStrings::labelUserRole                          ].string;
+  return true;
+}
+
+JSData UserCalculatorData::ToJSON()
+{ MacroRegisterFunctionWithName("UserCalculatorData::ToJSON");
+  JSData result;
+  result[DatabaseStrings::labelUserId                            ] = this->userId.value                          ;
+  result[DatabaseStrings::labelUsername                          ] = this->username.value                        ;
+  result[DatabaseStrings::labelEmail                             ] = this->email.value                           ;
+  result[DatabaseStrings::labelActivationToken                   ] = this->actualActivationToken.value           ;
+  result[DatabaseStrings::labelTimeOfActivationTokenCreation     ] = this->timeOfActivationTokenCreation         ;
+  result[DatabaseStrings::labelAuthenticationToken               ] = this->actualAuthenticationToken   .value    ;
+  result[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ] = this->timeOfAuthenticationTokenCreation     ;
+  result[DatabaseStrings::labelProblemData                       ] = this->problemDataString.value               ;
+  result[DatabaseStrings::labelCourseInfo                        ] = this->courseInfoString.value                ;
+  result[DatabaseStrings::labelPassword                          ] = this->actualShaonedSaltedPassword           ;
+  result[DatabaseStrings::labelUserRole                          ] = this->userRole                              ;
+  return result;
+}
+
 #ifdef MACRO_use_MySQL
 bool DatabaseRoutines::CreateColumn
 (const std::string& columnNameUnsafe, const std::string& tableNameUnsafe,
@@ -992,39 +1025,6 @@ bool UserCalculator::FetchOneUserRow
 std::string UserCalculatorData::ToStringIdSectionCourse()
 { return this->courseInfo.getInstructorInDB() +
   this->courseInfo.getSectionInDB() + this->courseInfo.getCurrentCourseInDB();
-}
-
-bool UserCalculatorData::LoadFromJSON(JSData& input)
-{ MacroRegisterFunctionWithName("UserCalculatorData::LoadFromJSON");
-  this->userId.value                      = input[DatabaseStrings::labelUserId                            ].string;
-  this->username.value                    = input[DatabaseStrings::labelUsername                          ].string;
-  this->email.value                       = input[DatabaseStrings::labelEmail                             ].string;
-  this->actualActivationToken             = input[DatabaseStrings::labelActivationToken                   ].string;
-  this->timeOfActivationTokenCreation     = input[DatabaseStrings::labelTimeOfActivationTokenCreation     ].string;
-  this->actualAuthenticationToken         = input[DatabaseStrings::labelAuthenticationToken               ].string;
-  this->timeOfAuthenticationTokenCreation = input[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ].string;
-  this->problemDataString                 = input[DatabaseStrings::labelProblemData                       ].string;
-  this->courseInfoString                  = input[DatabaseStrings::labelCourseInfo                        ].string;
-  this->actualShaonedSaltedPassword       = input[DatabaseStrings::labelPassword                          ].string;
-  this->userRole                          = input[DatabaseStrings::labelUserRole                          ].string;
-  return true;
-}
-
-JSData UserCalculatorData::ToJSON()
-{ MacroRegisterFunctionWithName("UserCalculatorData::ToJSON");
-  JSData result;
-  result[DatabaseStrings::labelUserId                            ] = this->userId.value                          ;
-  result[DatabaseStrings::labelUsername                          ] = this->username.value                        ;
-  result[DatabaseStrings::labelEmail                             ] = this->email.value                           ;
-  result[DatabaseStrings::labelActivationToken                   ] = this->actualActivationToken.value           ;
-  result[DatabaseStrings::labelTimeOfActivationTokenCreation     ] = this->timeOfActivationTokenCreation         ;
-  result[DatabaseStrings::labelAuthenticationToken               ] = this->actualAuthenticationToken   .value    ;
-  result[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ] = this->timeOfAuthenticationTokenCreation     ;
-  result[DatabaseStrings::labelProblemData                       ] = this->problemDataString.value               ;
-  result[DatabaseStrings::labelCourseInfo                        ] = this->courseInfoString.value                ;
-  result[DatabaseStrings::labelPassword                          ] = this->actualShaonedSaltedPassword           ;
-  result[DatabaseStrings::labelUserRole                          ] = this->userRole                              ;
-  return result;
 }
 
 bool UserCalculatorData::AssignCourseInfoString(std::stringstream* errorStream)

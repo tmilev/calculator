@@ -4046,7 +4046,6 @@ void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput
     return;
   }
   bool plainStyle = (inputOutput.GetKeyValue("topicListStyle") == "plain");
-  out << "DEBUG: course problem weight id: " << theGlobalVariables.userDefault.problemWeightSchema;
   out << "<div class=\"headChapter\">Lecture materials "
   << "<button id=\"buttonToggleCourseInfo\" class=\"buttonToggleTopics\" "
   << "onclick=\"toggleHeight(this,'tableWithLectureMaterialsFull')\">&#9650;</button>"

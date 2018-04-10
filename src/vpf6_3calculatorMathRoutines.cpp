@@ -7549,19 +7549,19 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupport(Calculator& theCommands,
   //theNode.owner->theHmm.MakeG2InB3(theParser);
   if (!input.IsListNElements(3))
     return output.MakeError("Wrong number of arguments, must be 2. ", theCommands);
-  const Expression& typeNode=input[1];
-  const Expression& hwNode=input[2];
+  const Expression& typeNode = input[1];
+  const Expression& hwNode = input[2];
   SemisimpleLieAlgebra* theAlgPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, typeNode, theAlgPointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-  SemisimpleLieAlgebra& theAlg=*theAlgPointer;
+  SemisimpleLieAlgebra& theAlg = *theAlgPointer;
   Vector<Rational> highestWeightFundCoords;
   Expression tempContext;
   if (!theCommands.GetVectoR<Rational>(hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), 0))
     return false;
   Vector<Rational> highestWeightSimpleCoords;
-  WeylGroupData& theWeyl=theAlg.theWeyl;
-  highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  WeylGroupData& theWeyl = theAlg.theWeyl;
+  highestWeightSimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   //Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
   charSSAlgMod<Rational> theChar;
@@ -7578,11 +7578,11 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupport(Calculator& theCommands,
 bool CalculatorFunctionsGeneral::innerSetRandomSeed
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRandomInteger");
-  int theInt=-1;
+  int theInt = - 1;
   if (!input.IsIntegerFittingInInt(& theInt))
     return theCommands << "Failed to extract small integer";
   std::stringstream out;
-  theCommands.theObjectContainer.CurrentRandomSeed=theInt;
+  theCommands.theObjectContainer.CurrentRandomSeed = theInt;
   srand((unsigned) theInt);
   out << "Successfully set random seed to: " << (unsigned) theInt;
   return output.AssignValue(out.str(), theCommands);
@@ -7591,7 +7591,7 @@ bool CalculatorFunctionsGeneral::innerSetRandomSeed
 bool CalculatorFunctionsGeneral::innerAnd
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerAnd");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   if (input[1].IsEqualToZero())
     return output.AssignValue(0, theCommands);
@@ -7605,7 +7605,7 @@ bool CalculatorFunctionsGeneral::innerAnd
 bool CalculatorFunctionsGeneral::innerOr
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerOr");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   if (input[1].IsEqualToOne())
     return output.AssignValue(1, theCommands);

@@ -9,5 +9,7 @@ class CalculatorDatabaseFunctions
 public:
   static bool innerExecuteMongoQuery
   (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerRepairDatabaseEmailRecords
+  (Calculator& theCommands, const Expression& input, Expression& output);
 };
 #endif

@@ -24,6 +24,13 @@ void Calculator::initAdminFunctions()
    true, false,
    "CalculatorDatabaseFunctions::innerExecuteMongoQuery",
    "MongoFind");
+  this->AddOperationInnerHandler
+  ("RepairDatabaseEmailRecords", CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords, "",
+   "Repairs username/email mismatches. Admin use only. ",
+   "TurnOnRules(RepairDatabaseEmailRecords); RepairDatabaseEmailRecords(0)", false, true,
+   "DatabaseRoutines::innerRepairDatabaseEmailRecords",
+   "RepairDatabaseEmailRecords",
+   true);
 
 #endif // MACRO_use_MySQL
 }

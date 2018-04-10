@@ -7618,16 +7618,16 @@ bool CalculatorFunctionsGeneral::innerOr
 
 bool CalculatorFunctionsGeneral::innerIf
 (Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerOr");
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIf");
   (void) theCommands;//portable way of avoiding unused parameter warning
-  if (input.size()!=4)
+  if (input.size() != 4)
     return false;
   if (input[1].IsEqualToOne())
-  { output=input[2];
+  { output = input[2];
     return true;
   }
   if (input[1].IsEqualToZero())
-  { output=input[3];
+  { output = input[3];
     return true;
   }
   return false;
@@ -7646,7 +7646,7 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
     else
       return theCommands << "Could not extract rule to turn off from " << input.ToString() << ". ";
   } else
-    for (int i=1; i<input.children.size; i++)
+    for (int i = 1; i < input.size(); i ++)
       if (input[i].IsOfType<std::string>(&currentRule))
         rulesToConsider.AddOnTop(currentRule);
       else if (input[i].IsAtom(&currentRule))
@@ -7655,7 +7655,7 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
         return theCommands << "Could not extract rule to turn off from " << input[i].ToString() << ". ";
   HashedList<std::string, MathRoutines::hashString> rulesToSwitch;
   rulesToSwitch.Reserve(rulesToConsider.size);
-  for (int i=0; i<rulesToConsider.size; i++)
+  for (int i = 0; i < rulesToConsider.size; i ++)
     if (!theCommands.namedRules.Contains(rulesToConsider[i]))
       return theCommands << "Can't find named rule: " << rulesToConsider[i]
       << ". Turn-off rules command failed. "
@@ -7669,7 +7669,7 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
   else
     output.AddChildAtomOnTop(theCommands.opRulesOn());
   Expression currentRuleE;
-  for (int i=0; i<rulesToSwitch.size; i++)
+  for (int i = 0; i < rulesToSwitch.size; i ++)
   { currentRuleE.AssignValue(rulesToSwitch[i], theCommands);
     output.AddChildOnTop(currentRuleE);
   }
@@ -7677,18 +7677,18 @@ bool CalculatorFunctionsGeneral::innerTurnRulesOnOff
 }
 
 bool CalculatorFunctionsGeneral::innerTurnOnApproximations
-  (Calculator& theCommands, const Expression& input, Expression& output)
+(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTurnOnApproximations");
   (void) input;
-  theCommands.flagNoApproximationS=false;
+  theCommands.flagNoApproximationS = false;
   return output.AssignValue((std::string) "Approximations have been turned on. ", theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerTurnOffApproximations
-  (Calculator& theCommands, const Expression& input, Expression& output)
+(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTurnOffApproximations");
   (void) input;
-  theCommands.flagNoApproximationS=true;
+  theCommands.flagNoApproximationS = true;
   return output.AssignValue((std::string) "Approximations have been turned off. ", theCommands);
 }
 
@@ -7716,48 +7716,48 @@ bool CalculatorFunctionsGeneral::innerRandomInteger
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRandomInteger");
   Matrix<Expression> theMat;
-  if (!theCommands.GetMatrixExpressionsFromArguments(input, theMat, -1, 2))
+  if (!theCommands.GetMatrixExpressionsFromArguments(input, theMat, - 1, 2))
     return theCommands << "<hr>Failed to extract a Nx2 matrix giving the integer intervals";
-  if (theMat.NumRows==0)
+  if (theMat.NumRows == 0)
     return theCommands << "<hr>Failed to extract a Nx2 matrix giving the integer intervals";
   List<List<int> > theIntervals;
   theIntervals.SetSize(theMat.NumRows);
-  for (int i=0; i<theMat.NumRows; i++)
+  for (int i = 0; i < theMat.NumRows; i ++)
   { theIntervals[i].SetSize(theMat.NumCols);
-    for (int j=0; j<theMat.NumCols; j++)
-      if (!theMat(i,j).IsIntegerFittingInInt(& theIntervals[i][j]))
-        return theCommands << "<hr>Failed to convert " << theMat(i,j).ToString() << " to an integer. ";
+    for (int j = 0; j < theMat.NumCols; j ++)
+      if (!theMat(i, j).IsIntegerFittingInInt(&theIntervals[i][j]))
+        return theCommands << "<hr>Failed to convert " << theMat(i, j).ToString() << " to an integer. ";
   }
-  int accum=0;
-  for (int i=0; i<theIntervals.size; i++)
-  { int currentContribution= theIntervals[i][1]-theIntervals[i][0];
-    if (currentContribution<0)
-      currentContribution*=-1;
-    accum+=currentContribution+1;
+  int accum = 0;
+  for (int i = 0; i < theIntervals.size; i ++)
+  { int currentContribution = theIntervals[i][1] - theIntervals[i][0];
+    if (currentContribution < 0)
+      currentContribution *= - 1;
+    accum += currentContribution + 1;
   }
-  if (accum==0)
+  if (accum == 0)
     crash << "This shouldn't happen: accum should not be zero at this point. " << crash;
-  int generatedRandomInt = rand()%accum;
-  int resultRandomValue=theIntervals[0][0];
-  bool found=false;
+  int generatedRandomInt = rand() % accum;
+  int resultRandomValue = theIntervals[0][0];
+  bool found = false;
   //stOutput << "<br>The intervals: " << theIntervals.ToStringCommaDelimited()
   //<< "<br>The intervals size: " << theIntervals.size
   //<< "<br>accum: " << accum << " generatedRandomInt: " << generatedRandomInt;
-  accum=0;
-  for (int i=0; i<theIntervals.size; i++)
-  { int currentContribution= theIntervals[i][1]-theIntervals[i][0];
-    int sign=1;
-    if (currentContribution<0)
-    { currentContribution*=-1;
-      sign=-1;
+  accum = 0;
+  for (int i = 0; i < theIntervals.size; i ++)
+  { int currentContribution = theIntervals[i][1] - theIntervals[i][0];
+    int sign = 1;
+    if (currentContribution < 0)
+    { currentContribution *= - 1;
+      sign = - 1;
     }
-    currentContribution++;
-    int nextAccum=accum+currentContribution;
-    if (accum <= generatedRandomInt && generatedRandomInt <nextAccum)
-    { resultRandomValue= theIntervals[i][0]+sign*(generatedRandomInt-accum);
-      found=true;
+    currentContribution ++;
+    int nextAccum = accum + currentContribution;
+    if (accum <= generatedRandomInt && generatedRandomInt < nextAccum)
+    { resultRandomValue = theIntervals[i][0] + sign * (generatedRandomInt - accum);
+      found = true;
     }
-    accum=nextAccum;
+    accum = nextAccum;
   }
   if (!found)
     return theCommands << "<hr>Failed to generate a random number: this shouldn't happen - perhaps the requested "
@@ -7769,20 +7769,20 @@ bool CalculatorFunctionsGeneral::innerSelectAtRandom
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSelectAtRandom");
   if (!input.StartsWith(theCommands.theAtoms.GetIndex("SelectAtRandom")))
-  { output=input; //only one item to select from: returning the item
+  { output = input; //only one item to select from: returning the item
     return true;
   }
-  if (input.size()<2)
+  if (input.size() < 2)
     return false;
-  if (input.size()==2)
-  { output=input[1]; //only one item to select from: return that item
+  if (input.size() == 2)
+  { output = input[1]; //only one item to select from: return that item
     return true;
   }
-  int randomIndex= (rand()% (input.children.size-1))+1;
-  if (randomIndex<0 || randomIndex> input.children.size-1)
-    randomIndex=input.children.size-1;
+  int randomIndex = (rand() % (input.size() - 1)) + 1;
+  if (randomIndex < 0 || randomIndex > input.size() - 1)
+    randomIndex = input.size() - 1;
   //<-the line above should never be executed if the % operator works as it should,
   //but having an extra check never hurts (may be a life saver if I change the code above).
-  output=input[randomIndex];
+  output = input[randomIndex];
   return true;
 }

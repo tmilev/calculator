@@ -35,7 +35,6 @@ static ProjectInformationInstance ProjectInfoVpfHeader3(__FILE__, "Header, ListR
 template <class Object>
 class ListReferences
 {
-  void operator=(const ListReferences<Object>& other);//ListReferences can't be copied: it is not clear who owns the pointers.
 public:
   bool flagDeallocated;
   List<Object*> theReferences;
@@ -53,6 +52,12 @@ public:
         return true;
     return false;
   }
+  void RemoveIndexSwapWithLast(int theIndex)
+  { this->KillElementIndex(theIndex);
+    this->theReferences[theIndex] = *this->theReferences.LastObject();
+    this->theReferences[this->theReferences.size - 1] = 0;
+    this->theReferences.size --;
+  }
   void SwapTwoIndices(int index1, int index2)
   { this->theReferences.SwapTwoIndices(index1, index2);
   }
@@ -63,7 +68,7 @@ public:
   void SetSize(int newSize)
   { //std::cout << "Setting size to: " << newSize << std::endl;
     this->AllocateElements(newSize);
-    this->size=newSize;
+    this->size = newSize;
   }
   void SetExpectedSize(int theSize)
   { int newSize = (theSize * 6) / 5;
@@ -71,7 +76,10 @@ public:
       this->AllocateElements(newSize);
   }
   void KillAllElements();
-  void KillElementIndex(int i);
+  void KillElementIndex(int i)
+  { delete this->theReferences[i];
+    this->theReferences[i] = 0;
+  }
   void AddOnTop(const Object& o);
   int GetIndex(const Object& o)const;
   bool ContainsExactlyOnce(const Object& o)const
@@ -85,14 +93,21 @@ public:
     return result;
   }
   int AddNoRepetitionOrReturnIndexFirst(const Object& o)
-  { int indexOfObject=this->GetIndex(o);
+  { int indexOfObject = this->GetIndex(o);
     if (indexOfObject == - 1)
     { this->AddOnTop(o);
       return this->size - 1;
     }
     return indexOfObject;
   }
-//  void operator=(const ListReferences<Object>& other);
+  void operator=(const ListReferences<Object>& other)
+  { if (this == &other)
+      return;
+    this->KillAllElements();
+    this->Reserve(other.size);
+    for (int i = 0; i < other.size; i ++)
+      this->AddOnTop(other[i]);
+  }
   Object& LastObject()const
   { return (*this)[this->size - 1];
   }
@@ -101,7 +116,8 @@ public:
   { MathRoutines::QuickSortAscending(*this, theOrder, carbonCopy);
   }
   ListReferences():flagDeallocated(false), size(0)
-  {}
+  {
+  }
   ~ListReferences()
   { this->flagDeallocated = true;
     this->KillAllElements();

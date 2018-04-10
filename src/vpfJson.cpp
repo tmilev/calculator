@@ -293,7 +293,8 @@ bool JSData::readstring
 
 template <typename somestream>
 somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int indentation, bool useHTML) const
-{ std::string theIndentation = "";
+{ //MacroRegisterFunctionWithName("JSData::IntoStream");
+  std::string theIndentation = "";
   for (int i = 0; i < indentation; i ++)
   { if (!useHTML)
       theIndentation += "";

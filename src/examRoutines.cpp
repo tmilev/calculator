@@ -59,7 +59,7 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend
 (const JSData& inputJSON,
  MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
  std::stringstream& commentsOnFailure)
-{ MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromJSONStringAppend");
+{ MacroRegisterFunctionWithName("DatabaseRoutines::LoadProblemInfoFromJSONAppend");
   (void) commentsOnFailure;
   if (inputJSON.type == inputJSON.JSUndefined)
     return true;
@@ -72,15 +72,17 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend
     JSData& currentProblem = inputJSON.objects.theValues[i];
     if (currentProbName == "")
       continue;
-    //stOutput << "<br>DEBUG: current problem json: " << currentProblem.ToString(false)
-    //<< ";<br> currentProbName: " << currentProbName;
+    stOutput << "<br>DEBUG: current problem json: " << currentProblem.ToString(false)
+    << ";<br> currentProbName: " << currentProbName;
     if (!outputProblemInfo.Contains(currentProbName))
       outputProblemInfo.GetValueCreate(currentProbName) = emptyData;
     ProblemData& currentProblemValue = outputProblemInfo.GetValueCreate(currentProbName);
     JSData& currentDeadlines = currentProblem[DatabaseStrings::labelDeadlines];
     JSData& currentWeight = currentProblem[DatabaseStrings::labelProblemWeights];
-    stOutput << "DEBUG: Current deadlines: " << currentDeadlines.ToString(false)
+    stOutput << "<br>DEBUG: current deadlines: " << currentDeadlines.ToString(false);
+    stOutput << "<br>DEBUG: Current problems: " << currentProblem.ToString(false)
     << "<br>Current weight: " << currentWeight.ToString(false);
+    stOutput.Flush();
     if (currentWeight.type != JSData::JSUndefined)
     { for (int j = 0; j < currentWeight.objects.size(); j ++)
         currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue

@@ -76,6 +76,7 @@ public:
     out << "}";
     return out.str();
   }
+
 };
 
 //using C++11, not sure if that is a good idea:

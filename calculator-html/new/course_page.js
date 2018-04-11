@@ -78,7 +78,7 @@ function afterLoadCoursePage(incomingPage, result){
   if (theTopics.length  === 0)
     return;
   submitGET({
-    url: `${thePage.calculator}?request=topicListJSON`,
+    url: `${pathnames.calculator}?request=topicListJSON`,
     callback: afterLoadTopics,
     progress: "spanProgressReportGeneral"
   });
@@ -87,7 +87,7 @@ function afterLoadCoursePage(incomingPage, result){
 
 function selectCurrentCoursePage(){
   submitGET({
-    url: `${thePage.calculator}?request=templateNoLoginJSON`,
+    url: `${pathnames.calculator}?request=templateNoLoginJSON`,
     callback: afterLoadCoursePage,
     progress: "spanProgressReportGeneral"
   });

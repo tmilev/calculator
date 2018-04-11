@@ -90,7 +90,7 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
     spanOutput.innerHTML = `<span style='color:red'> ERROR: span with id ${idOutput} MISSING! </span>`;
   }
   var https = new XMLHttpRequest();
-  https.open("POST", thePage.calculator, true);
+  https.open("POST", pathnames.calculator, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   if (idStatus === undefined)
     idStatus = idOutput;
@@ -99,7 +99,7 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   GlobalSubmitStringAsMainInputCounter ++;
   var addressDetailsIndicatorID = "addressDetailsID" + GlobalSubmitStringAsMainInputCounter;
   var tranmissionIndicatorID = "transmissionIndicatorID" + GlobalSubmitStringAsMainInputCounter;
-  var postRequest = `<br>POST ${thePage.calculator}<br>${inputParams}`;
+  var postRequest = `<br>POST ${pathnames.calculator}<br>${inputParams}`;
   var stringSwitchMenu = "switchMenu('" + addressDetailsIndicatorID + "');";
   statusSpan.innerHTML = "<button style = 'background:none; border:0; cursor:pointer' id='" +
   tranmissionIndicatorID + "' onclick = \"" + stringSwitchMenu + "\">Connection details</button>" +
@@ -146,7 +146,7 @@ function progressReport()
   progReportTimer.innerHTML = "<hr>Refreshing every " + timeIncrementInTenthsOfSecond / 10 +
   " second(s). Client time: ~" + Math.floor(timeOutCounter / 10) + " second(s)<br>";
   timeOutCounter += timeIncrementInTenthsOfSecond;
-  var sURL  = `${thePage.calculator}?request=indicator&mainInput=${currentWorkerNumber}`;
+  var sURL  = `${pathnames.calculator}?request=indicator&mainInput=${currentWorkerNumber}`;
   var https = new XMLHttpRequest();
   https.open("GET", sURL, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -174,7 +174,7 @@ function SendTogglePauseRequest()
     return;
   var requestStatus = document.getElementById("idProgressReportRequestStatus");
   var pauseRequest = new XMLHttpRequest();
-  var pauseURL = `${thePage.calculator}?request=pause&mainInput=${currentWorkerNumber}`;
+  var pauseURL = `${pathnames.calculator}?request=pause&mainInput=${currentWorkerNumber}`;
   pauseRequest.open("GET", pauseURL, true);
   pauseRequest.onload = function() {
     if (pauseRequest.status !== 200)

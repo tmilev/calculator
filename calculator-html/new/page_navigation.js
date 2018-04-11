@@ -12,27 +12,29 @@ function Page(){
       id: "divCurrentCourse",
       menuButtonId: "buttonCurrentCourse",
       container: null,
-      selectFunction: selectCurrentCoursePage,
+      selectFunction: selectCurrentCoursePage
     },
     selectCourse : {
       id: "divSelectCourse",
       menuButtonId: "buttonSelectCourse",
       container: null,
-      selectFunction: selectSelectCoursePage,
+      selectFunction: selectSelectCoursePage
     },
     calculator: {
       id: "divCalculatorPage",
       menuButtonId: "buttonSelectCalculator",
       container: null,
-      selectFunction: null,
+      selectFunction: null
     },
     database: {
       id: "divDatabase",
       menuButtonId: "buttonSelectDatabase",
       container: null,
-      selectFunction: null,
+      selectFunction: updateDatabasePage,
+      storage: {
+        currentTable: null
+      }
     }
-
   }
   //////////////////////////////////////
   //////////////////////////////////////
@@ -62,12 +64,16 @@ function Page(){
   this.googleToken = null;
   this.username = null;
   this.authenticationToken = null;
-  this.calculator = "/cgi-bin/calculator";
   this.storeSettingsToLocalStorage = function(){
     if (Storage === undefined && localStorage === undefined){
       return;
     }
     localStorage.googleProfile = JSON.stringify(this.googleProfile);
+    for (label in this.pages){
+      var toStore = Object.assign(this.pages[label].storage);
+      localStorage[label] = toStore;
+    }
+    localStorage.databaseCurrentTable = this.pages.database.currentTable;
   };
   this.loadSettingsFromLocalStorage = function(){    
     if (Storage === undefined && localStorage === undefined){
@@ -75,7 +81,14 @@ function Page(){
     }
     try {
       this.currentPage = localStorage.currentPage;
+      this.pages.database.currentTable = localStorage.databaseCurrentTable;
       this.googleProfile = JSON.parse(localStorage.googleProfile); 
+      for (label in this.pages){
+        if (localStorage[label] === undefined || localStorage[label] === null){
+          continue;
+        }
+        this.pages[label].storage = JSON.parse(localStorage[label]);
+      }
     } catch (e) {
       console.log("Error loading settings from local storage: " + e);
     }

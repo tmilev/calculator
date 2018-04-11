@@ -29,7 +29,7 @@ function afterLoadSelectCoursePage(incomingPage, result){
 
 function selectSelectCoursePage(){
   submitGET({
-    url: `${thePage.calculator}?request=selectCourseJSON`,
+    url: `${pathnames.calculator}?request=selectCourseJSON`,
     callback: afterLoadSelectCoursePage,
     progress: "spanProgressReportGeneral"
   });

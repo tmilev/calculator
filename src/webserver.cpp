@@ -1299,6 +1299,21 @@ std::string WebWorker::GetNavigationPage()
   return out.str();
 }
 
+std::string WebWorker::GetDatabaseJSON()
+{ MacroRegisterFunctionWithName("WebWorker::GetDatabaseJSON");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return "Only logged-in admins can access database. ";
+  std::stringstream out;
+  std::string currentTable =
+  HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"), false);
+#ifdef MACRO_use_MongoDB
+  out << DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(currentTable);
+#else
+  dbOutput << "<b>Database not available. </b>";
+#endif // MACRO_use_MongoDB
+  return out.str();
+}
+
 std::string WebWorker::GetDatabasePage()
 { MacroRegisterFunctionWithName("WebWorker::GetDatabasePage");
   std::stringstream out;
@@ -3495,6 +3510,13 @@ int WebWorker::ProcessAccounts()
   return 0;
 }
 
+int WebWorker::ProcessDatabaseJSON()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseJSON");
+  this->SetHeaderOKNoContentLength();
+  stOutput << this->GetDatabaseJSON();
+  return 0;
+}
+
 int WebWorker::ProcessDatabase()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabase");
   this->SetHeaderOKNoContentLength();
@@ -4115,6 +4137,9 @@ int WebWorker::ServeClient()
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType == "database")
     return this->ProcessDatabase();
+  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
+      theGlobalVariables.userCalculatorRequestType == "databaseJSON")
+    return this->ProcessDatabaseJSON();
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
            theGlobalVariables.userCalculatorRequestType == "databaseOneEntry")
     return this->ProcessDatabaseOneEntry();

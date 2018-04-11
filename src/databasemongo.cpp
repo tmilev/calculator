@@ -479,6 +479,37 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchTable
   return true;
 }
 
+std::string DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(const std::string& currentTable)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection");
+  JSData result;
+  std::stringstream out;
+  if (currentTable == "")
+  { List<std::string> theCollectionNames;
+    if (DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames(theCollectionNames, &out))
+    { JSData collectionNames;
+      collectionNames.type = collectionNames.JSarray;
+      collectionNames.list = theCollectionNames;
+      result["collections"] = collectionNames;
+    } else
+      result.string = out.str();
+    return result.ToString(false);
+  }
+  JSData findQuery;
+  findQuery.type = findQuery.JSObject;
+  List<JSData> rowsJSON;
+  long long totalItems = 0;
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(currentTable, findQuery, rowsJSON, 200, &totalItems, &out))
+  { result.string = out.str();
+    return result.ToString(false);
+  }
+  JSData theRows;
+  theRows.type = theRows.JSarray;
+  theRows.list = rowsJSON;
+  result["rows"] = theRows;
+  result["totalRows"] = (int) totalItems;
+  return result.ToString(false);
+}
+
 std::string DatabaseRoutinesGlobalFunctionsMongo::ToHtmlDatabaseCollection(const std::string& currentTable)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::ToStringDatabaseCollection");
   std::stringstream out;

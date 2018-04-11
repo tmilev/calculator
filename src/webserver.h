@@ -187,6 +187,7 @@ public:
   int ProcessChangePasswordPage();
   int ProcessCalculator();
   int ProcessDatabase();
+  int ProcessDatabaseJSON();
   int ProcessDatabaseModifyEntry();
   int ProcessDatabaseOneEntry();
   int ProcessAccounts();
@@ -279,6 +280,7 @@ public:
   std::string GetBrowseProblems();
   std::string GetEditPageHTML();
   std::string GetExamPageInterpreter();
+  std::string GetDatabaseJSON();
   std::string GetDatabasePage();
   //std::string GetEmailChangePage();
   std::string GetNavigationPage();

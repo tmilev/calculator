@@ -2,9 +2,13 @@
 
 //var auth2Google = null;
 
+
+
 function loginCalculator(){
+  var password = document.getElementById("inputPassword").value;
+  var username = document.getElementById("inputUsername").value;
   submitGET({
-    "url": `${thePage.calculator}?request=userInfoJSON&password=${document.getElementById("password").value}&username=${document.getElementById("username").value}`,
+    "url": `${thePage.calculator}?request=userInfoJSON&password=${password}&username=${username}`,
     callback: loginWithServerCallback,
     progress: "spanProgressReportGeneral"
   });
@@ -19,25 +23,47 @@ function logout(){
   showLoginCalculatorButtons();
 }
 
-function selectLoginPage(){
+function loginTry(){
+  submitGET({
+    "url": `${thePage.calculator}?request=userInfoJSON`,
+    callback: loginWithServerCallback,
+    progress: "spanProgressReportGeneral"
+  });
   startGoogleLogin();
 }
 
+function toggleAdminPanels(){
+  var adminPanels = document.getElementsByClassName("divAdminPanel");
+  for (var counterPanels = 0; counterPanels < adminPanels.length; counterPanels ++) {
+    if (thePage.userRole === "admin"){
+      adminPanels[counterPanels].style.display = "";
+    } else {
+      adminPanels[counterPanels].style.display = "none";        
+    }
+  }
+}
+
 function loginWithServerCallback(incomingString, result){
-  if (incomingString === "not logged in"){
+  if (incomingString === "not logged in") {
     thePage.authenticationToken = "";
     thePage.username = "";
+    thePage.userRole = "";
     showLoginCalculatorButtons();
+    toggleAdminPanels();
     return;
   }
   try {
     var parsedAuthentication = JSON.parse(incomingString);
     thePage.authenticationToken = parsedAuthentication.authenticationToken;
     thePage.username = parsedAuthentication.username;
+    thePage.userRole = parsedAuthentication.userRole;
+    document.getElementById("inputUsername").value = thePage.username;
+    toggleAdminPanels();
     thePage.storeSettingsToCookies();
     hideLoginCalculatorButtons();
-  } catch (e){
-    console.log("Bad authentication" + e);
+    showLogoutButton();
+  } catch (e) {
+    console.log(`Bad authentication ${e}`);
   }
 }
 
@@ -50,7 +76,7 @@ function onGoogleSignIn(googleUser){
     thePage.storeSettingsToCookies();
     thePage.storeSettingsToLocalStorage();
     thePage.showProfilePicture();
-    showGoogleLogoutButton();
+    showLogoutButton();
     submitGET({
       "url": `${thePage.calculator}?request=userInfoJSON`,
       callback: loginWithServerCallback,
@@ -96,10 +122,10 @@ function hideLoginCalculatorButtons(){
   document.getElementById("divLoginPanelUsernameReport").classList.add("divVisible");
 }
 
-function showGoogleLogoutButton(){
-  for (;;){
+function showLogoutButton(){
+  for (;;) {
     var theLogoutLinks = document.getElementsByClassName("linkLogoutInactive");
-    if (theLogoutLinks.length === 0){
+    if (theLogoutLinks.length === 0) {
       break;
     }
     theLogoutLinks[0].classList.add("linkLogoutActive");
@@ -107,10 +133,10 @@ function showGoogleLogoutButton(){
   }
 }
 
-function hideGoogleLogoutButton(){
+function hideLogoutButton(){
   for (;;){
     var theLogoutLinks = document.getElementsByClassName("linkLogoutActive");
-    if (theLogoutLinks.length === 0){
+    if (theLogoutLinks.length === 0) {
       break;
     }
     theLogoutLinks[0].classList.add("linkLogoutInactive");
@@ -124,7 +150,7 @@ function logoutGoogle(){
   thePage.storeSettingsToCookies();
   thePage.storeSettingsToLocalStorage();
   gapi.auth2.getAuthInstance().disconnect();
-  hideGoogleLogoutButton();
+  hideLogoutButton();
   thePage.hideProfilePicture();
 }
 
@@ -143,7 +169,7 @@ function getQueryVariable(variable) {
 function init(){
   logoutRequestFromUrl = getQueryVariable("logout");
   locationRequestFromUrl = getQueryVariable("location");
-  if (logoutRequestFromUrl === "true"){
+  if (logoutRequestFromUrl === "true") {
     logout();
   }
 }

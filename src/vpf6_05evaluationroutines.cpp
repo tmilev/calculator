@@ -765,27 +765,27 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (!thePattern.StartsWith(this->opDefine(), 3) && !thePattern.StartsWith(this->opDefineConditional(), 4))
     return false;
-  if (theLog!=0)
+  if (theLog != 0)
   { (*theLog) << "<hr>attempting to reduce expression " << theExpression.ToString();
     (*theLog) << " by pattern " << thePattern.ToString();
   }
   theExpression.CheckInitialization();
-  const Expression& currentPattern=thePattern[1];
-  const Expression* theCondition=0;
-  bool isConditionalDefine=
+  const Expression& currentPattern = thePattern[1];
+  const Expression* theCondition = 0;
+  bool isConditionalDefine =
   thePattern.StartsWith(this->opDefineConditional(), 4);
   if (isConditionalDefine)
-    theCondition=&thePattern[2];
-  Expression* toBeSubbed=this->PatternMatch
+    theCondition = &thePattern[2];
+  Expression* toBeSubbed = this->PatternMatch
   (currentPattern, theExpression, bufferPairs, theCondition, theLog);
-  if (toBeSubbed==0)
+  if (toBeSubbed == 0)
     return false;
-  if (theLog!=0)
+  if (theLog != 0)
     *theLog << "<br><b>found a match!</b>";
   if (isConditionalDefine)
-    *toBeSubbed=thePattern[3];
+    *toBeSubbed = thePattern[3];
   else
-    *toBeSubbed=thePattern[2];
+    *toBeSubbed = thePattern[2];
   this->SpecializeBoundVars(*toBeSubbed, bufferPairs);
   return true;
 }
@@ -793,27 +793,27 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub
 bool Calculator::ParseAndExtractExpressions
 (const std::string& theInputString, Expression& outputExp, List<SyntacticElement>& outputSynSoup, List<SyntacticElement>& outputSynStack, std::string* outputSynErrors)
 { MacroRegisterFunctionWithName("Calculator::ParseAndExtractExpressions");
-  this->CurrentSyntacticStacK=&outputSynStack;
-  this->CurrrentSyntacticSouP=&outputSynSoup;
+  this->CurrentSyntacticStacK = &outputSynStack;
+  this->CurrrentSyntacticSouP = &outputSynSoup;
   this->ParseFillDictionary(theInputString);
-  bool result=this->ExtractExpressions(outputExp, outputSynErrors);
-  this->CurrentSyntacticStacK=&this->syntacticStacK;
-  this->CurrrentSyntacticSouP=&this->syntacticSouP;
+  bool result = this->ExtractExpressions(outputExp, outputSynErrors);
+  this->CurrentSyntacticStacK = &this->syntacticStacK;
+  this->CurrrentSyntacticSouP = &this->syntacticSouP;
   return result;
 }
 
 
 void Calculator::initComputationStats()
-{ this->StartTimeEvaluationInSecondS=theGlobalVariables.GetElapsedSeconds();
-  this->NumListsStart               =ParallelComputing::NumListsCreated;
-  this->NumListResizesStart         =ParallelComputing::NumListResizesTotal;
-  this->NumHashResizesStart         =ParallelComputing::NumHashResizes;
-  this->NumSmallAdditionsStart      =Rational::TotalSmallAdditions;
-  this->NumSmallMultiplicationsStart=Rational::TotalSmallMultiplications;
-  this->NumSmallGCDcallsStart       =Rational::TotalSmallGCDcalls;
-  this->NumLargeAdditionsStart      =Rational::TotalLargeAdditions;
-  this->NumLargeMultiplicationsStart=Rational::TotalLargeMultiplications;
-  this->NumLargeGCDcallsStart       =Rational::TotalLargeGCDcalls;
+{ this->StartTimeEvaluationInSecondS = theGlobalVariables.GetElapsedSeconds();
+  this->NumListsStart                = ParallelComputing::NumListsCreated;
+  this->NumListResizesStart          = ParallelComputing::NumListResizesTotal;
+  this->NumHashResizesStart          = ParallelComputing::NumHashResizes;
+  this->NumSmallAdditionsStart       = Rational::TotalSmallAdditions;
+  this->NumSmallMultiplicationsStart = Rational::TotalSmallMultiplications;
+  this->NumSmallGCDcallsStart        = Rational::TotalSmallGCDcalls;
+  this->NumLargeAdditionsStart       = Rational::TotalLargeAdditions;
+  this->NumLargeMultiplicationsStart = Rational::TotalLargeMultiplications;
+  this->NumLargeGCDcallsStart        = Rational::TotalLargeGCDcalls;
 }
 
 void Calculator::Evaluate(const std::string& theInput)
@@ -831,7 +831,7 @@ void Calculator::EvaluateCommands()
 //  this->theLogs.resize(this->theCommands.size());
 //this->ToString();
   //std::stringstream comments;
-  if (this->syntaxErrors!="")
+  if (this->syntaxErrors != "")
   { if (!theGlobalVariables.flagRunningCommandLine)
       out << "<hr><b>Syntax errors encountered</b><br>";
     else
@@ -842,38 +842,38 @@ void Calculator::EvaluateCommands()
 //  stOutput
 //  << "Starting expression: " << this->theProgramExpression.ToString()
 //  << "<hr>";
-  Expression StartingExpression=this->theProgramExpression;
-  this->flagAbortComputationASAP=false;
+  Expression StartingExpression = this->theProgramExpression;
+  this->flagAbortComputationASAP = false;
   this->Comments.clear();
   ProgressReport theReport;
   if (!theGlobalVariables.flagRunningCommandLine)
     theReport.Report("Evaluating expressions, current expression stack:\n");
   this->EvaluateExpression(*this, this->theProgramExpression, this->theProgramExpression);
-  if (this->RecursionDeptH!=0)
+  if (this->RecursionDeptH != 0)
     crash << "This is a programming error: the starting recursion depth before evaluation was 0, but after evaluation it is "
     << this->RecursionDeptH << "." << crash;
-  theGlobalVariables.theDefaultFormat.GetElement().flagMakingExpressionTableWithLatex=true;
-  theGlobalVariables.theDefaultFormat.GetElement().flagUseLatex=true;
-  theGlobalVariables.theDefaultFormat.GetElement().flagExpressionNewLineAllowed=true;
-  theGlobalVariables.theDefaultFormat.GetElement().flagIncludeExtraHtmlDescriptionsInPlots=!this->flagPlotNoControls;
-  theGlobalVariables.theDefaultFormat.GetElement().flagLatexDetailsInHtml=this->flagWriteLatexPlots;
-  theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
-  if(theGlobalVariables.flagRunningCommandLine)
-  { theGlobalVariables.theDefaultFormat.GetElement().flagUseQuotes=false;
-    theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
-    if (theGlobalVariables.programArguments.size>1)
+  theGlobalVariables.theDefaultFormat.GetElement().flagMakingExpressionTableWithLatex = true;
+  theGlobalVariables.theDefaultFormat.GetElement().flagUseLatex = true;
+  theGlobalVariables.theDefaultFormat.GetElement().flagExpressionNewLineAllowed = true;
+  theGlobalVariables.theDefaultFormat.GetElement().flagIncludeExtraHtmlDescriptionsInPlots = !this->flagPlotNoControls;
+  theGlobalVariables.theDefaultFormat.GetElement().flagLatexDetailsInHtml = this->flagWriteLatexPlots;
+  theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
+  if (theGlobalVariables.flagRunningCommandLine)
+  { theGlobalVariables.theDefaultFormat.GetElement().flagUseQuotes = false;
+    theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
+    if (theGlobalVariables.programArguments.size > 1)
       out << "Input: " << logger::yellowConsole()
       << StartingExpression.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << std::endl;
-    theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal=true;
+    theGlobalVariables.theDefaultFormat.GetElement().flagExpressionIsFinal = true;
     this->theObjectContainer.resetSliders();
     out << logger::normalConsole() << "Output: " << logger::greenConsole()
     << this->theProgramExpression.ToString
     (&theGlobalVariables.theDefaultFormat.GetElement())
     << logger::normalConsole() << std::endl;
   } else if (!this->flagDisplayFullExpressionTree)
-  { std::string badCharsString=
+  { std::string badCharsString =
     this->ToStringIsCorrectAsciiCalculatorString(this->inputString);
-    if (badCharsString!="")
+    if (badCharsString != "")
       out << badCharsString << "<hr>";
     this->theObjectContainer.resetSliders();
     this->theObjectContainer.resetPlots();
@@ -881,23 +881,23 @@ void Calculator::EvaluateCommands()
     out << this->theProgramExpression.ToString
     (&theGlobalVariables.theDefaultFormat.GetElement(), &StartingExpression);
   } else
-  { std::string badCharsString=this->ToStringIsCorrectAsciiCalculatorString
+  { std::string badCharsString = this->ToStringIsCorrectAsciiCalculatorString
     (this->inputString);
-    if (badCharsString!="")
+    if (badCharsString != "")
       out << badCharsString << "<hr>";
     this->theObjectContainer.resetSliders();
     out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"
     << "Output:<br>" << this->theProgramExpression.ToStringFull();
   }
-  this->outputString=out.str();
+  this->outputString = out.str();
   std::stringstream commentsStream;
-  if (this->theObjectContainer.theAlgebraicClosure.theBasisMultiplicative.size>1)
+  if (this->theObjectContainer.theAlgebraicClosure.theBasisMultiplicative.size > 1)
     commentsStream << "<b>Algebraic number closure status. </b><br>"
     << this->theObjectContainer.theAlgebraicClosure.ToString() << "<hr>";
-  if (this->Comments.str()!="")
+  if (this->Comments.str() != "")
     commentsStream << "<br><span>" << this->Comments.str() << "</span>";
-  this->outputCommentsString=commentsStream.str();
-  if (theGlobalVariables.flagRunningCommandLine && this->Comments.str()!="")
-    this->outputString+=this->outputCommentsString;
+  this->outputCommentsString = commentsStream.str();
+  if (theGlobalVariables.flagRunningCommandLine && this->Comments.str() != "")
+    this->outputString += this->outputCommentsString;
   //std::cout << "DEBUG: got to end of story. " ;
 }

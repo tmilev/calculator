@@ -6732,26 +6732,25 @@ bool CalculatorFunctionsGeneral::innerTestTopCommand
 bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
 //  stOutput << "Report html return!";
-  int numRuns=-1;
+  int numRuns = - 1;
   if (!input.IsIntegerFittingInInt(&numRuns))
     return theCommands << "Argument of CalculatorFunctionsGeneral::innerTestIndicator is not a small integer, instead it equals: " << numRuns << ".";
-  if (numRuns>200000)
+  if (numRuns > 200000)
   { theCommands << "The argument " << numRuns << " of CalculatorFunctionsGeneral::innerTestIndicator larger than 200000, trimming down to 200000.";
-    numRuns=200000;
+    numRuns = 200000;
   }
-  if (numRuns<0)
-    numRuns=0;
-  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection!=0)
+  if (numRuns < 0)
+    numRuns = 0;
+  if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != 0)
     theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
   else
     theCommands << "WebServerReturnDisplayIndicatorCloseConnection is zero.";
   ProgressReport theReport;
-
-  for (int i=0; i<numRuns; i++)
+  for (int i = 0; i < numRuns; i ++)
   { std::stringstream reportStream;
-    reportStream << " Running indicator test, " << i+1 << " out of " << numRuns << ".";
+    reportStream << " Running indicator test, " << i + 1 << " out of " << numRuns << ".";
     theReport.Report(reportStream.str());
-    if (theGlobalVariables.sleepFunction==0)
+    if (theGlobalVariables.sleepFunction == 0)
       crash << "fall asleep function is zero!" << crash;
     theGlobalVariables.FallAsleep(4000);
   }
@@ -6767,12 +6766,12 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   SemisimpleLieAlgebra* ownerSS;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input, ownerSS))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 10000;
   ownerSS->ComputeFolderNames();
   FormatExpressions theFormat;
-  theFormat.flagUseHTML=true;
-  theFormat.flagUseLatex=false;
-  theFormat.flagUsePNG=true;
+  theFormat.flagUseHTML = true;
+  theFormat.flagUseLatex = false;
+  theFormat.flagUsePNG = true;
 
   std::stringstream outSltwoPath, outSltwoDisplayPath;
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
@@ -6782,7 +6781,7 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   outSltwoFileDisplayName << "/" << outSltwoDisplayPath.str() << "sl2s.html";
   outRootHtmlFileName << ownerSS->VirtualNameSSAlgOutputFolder << "rootSubalgebras.html";
   outRootHtmlDisplayName << ownerSS->DisplayNameSSalgOutputFolder << "rootSubalgebras.html";
-  bool NeedToCreateFolders=!FileOperations::FileExistsVirtual(outSltwoMainFile.str());
+  bool NeedToCreateFolders = !FileOperations::FileExistsVirtual(outSltwoMainFile.str());
   if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
     std::string baseFolder, outSl2Folder;
@@ -6795,10 +6794,10 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
     theGlobalVariables.CallSystemNoOutput(outMkDirCommand1.str(), false);
     theGlobalVariables.CallSystemNoOutput(outMkDirCommand2.str(), false);
   }
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 1000;
   if (!FileOperations::FileExistsVirtual(outSltwoMainFile.str()) ||
       !FileOperations::FileExistsVirtual(outRootHtmlFileName.str()))
-    MustRecompute=true;
+    MustRecompute = true;
   std::stringstream out;
   if (MustRecompute)
   { //stOutput << theCommands.javaScriptDisplayingIndicator;
@@ -6841,8 +6840,8 @@ bool CalculatorFunctionsGeneral::innerCrawlTexFile(Calculator& theCommands, cons
   if (!input.IsOfType<std::string>())
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   LaTeXcrawler theCrawler;
-  theCrawler.ownerCalculator=&theCommands;
-  theCrawler.theFileNameToCrawlRelative=input.GetValue<std::string>();
+  theCrawler.ownerCalculator = &theCommands;
+  theCrawler.theFileNameToCrawlRelative = input.GetValue<std::string>();
   theCrawler.Crawl();
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
 }
@@ -6858,8 +6857,8 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic(Calculator& the
   //if (!input.IsOfType<std::string>())
   //  return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   LaTeXcrawler theCrawler;
-  theCrawler.flagBuildSingleSlides=true;
-  theCrawler.ownerCalculator=&theCommands;
+  theCrawler.flagBuildSingleSlides = true;
+  theCrawler.ownerCalculator = &theCommands;
   //theCrawler.topicListToBuild=input.GetValue<std::string>();
   std::stringstream out;
   theCrawler.BuildTopicList(&out, &out);
@@ -6876,10 +6875,10 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalcSingleSlides(Calculator& theC
   if (!input.IsOfType<std::string>())
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   LaTeXcrawler theCrawler;
-  theCrawler.flagBuildSingleSlides=true;
-  theCrawler.ownerCalculator=&theCommands;
-  theCrawler.theFileNameToCrawlRelative=input.GetValue<std::string>();
-  std::string startingFolder=FileOperations::GetCurrentFolder();
+  theCrawler.flagBuildSingleSlides = true;
+  theCrawler.ownerCalculator = &theCommands;
+  theCrawler.theFileNameToCrawlRelative = input.GetValue<std::string>();
+  std::string startingFolder = FileOperations::GetCurrentFolder();
   theCrawler.BuildFreecalC();
   theGlobalVariables.ChDir(startingFolder);
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
@@ -6895,10 +6894,10 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalc(Calculator& theCommands, con
   if (!input.IsOfType<std::string>())
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
   LaTeXcrawler theCrawler;
-  theCrawler.flagBuildSingleSlides=false;
-  theCrawler.ownerCalculator=&theCommands;
-  theCrawler.theFileNameToCrawlRelative=input.GetValue<std::string>();
-  std::string startingFolder=FileOperations::GetCurrentFolder();
+  theCrawler.flagBuildSingleSlides = false;
+  theCrawler.ownerCalculator = &theCommands;
+  theCrawler.theFileNameToCrawlRelative = input.GetValue<std::string>();
+  std::string startingFolder = FileOperations::GetCurrentFolder();
   theCrawler.BuildFreecalC();
   theGlobalVariables.ChDir(startingFolder);
   return output.AssignValue(theCrawler.displayResult.str(), theCommands);
@@ -6910,8 +6909,8 @@ bool CalculatorFunctionsGeneral::innerSetOutputFile(Calculator& theCommands, con
   std::stringstream out;
   if (!input.IsOfType<std::string>(&theFileName))
     return theCommands << "<hr>Input " << input.ToString() << " is not of type string. ";
-  for (unsigned i=0; i<theFileName.size(); i++)
-    if (theFileName[i]=='.' || theFileName[i]=='\\' || theFileName[i]=='/')
+  for (unsigned i = 0; i < theFileName.size(); i ++)
+    if (theFileName[i] == '.' || theFileName[i] == '\\' || theFileName[i] == '/')
     { out << theFileName << " rejected as a file name as it contains one of the three characters .\\/  ";
       return output.AssignValue(out.str(), theCommands);
     }
@@ -6923,63 +6922,62 @@ bool CalculatorFunctionsGeneral::innerSetOutputFile(Calculator& theCommands, con
 
 bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerFindProductDistanceModN");
-  if (input.children.size!=3)
+  if (input.children.size != 3)
     return theCommands << "<hr>Product distance f-n takes as input 2 arguments, modulo and a list of integers";
-  const Expression& theModuloE= input[1];
-  const Expression& theIntegersE=input[2];
+  const Expression& theModuloE = input[1];
+  const Expression& theIntegersE = input[2];
   int theSize;
   if (!theModuloE.IsIntegerFittingInInt(&theSize))
     return theCommands << " <hr> Failed to extract modulus from " << theModuloE.ToString();
-  if (theSize==0)
+  if (theSize == 0)
     return theCommands << "<hr>Zero modulus not allowed.";
-  if (theSize<0)
-    theSize*=-1;
-  if (theSize>10000000)
+  if (theSize < 0)
+    theSize *= - 1;
+  if (theSize > 10000000)
     return theCommands << "<hr>I've been instructed to compute with moduli no larger than 10000000.";
   List<int> theInts, theIntsReduced;
   if (!theCommands.GetVectoRInt(theIntegersE, theInts))
     return theCommands << "<hr>Failed to extract integer list from " << theIntegersE.ToString();
   theIntsReduced.SetSize(theInts.size);
-  for (int i=0; i<theInts.size; i++)
-  { if (theInts[i]<=0)
+  for (int i = 0; i < theInts.size; i ++)
+  { if (theInts[i] <= 0)
       return theCommands << "<hr>The integer list " << theInts << " contains non-positive numbers.";
-    theIntsReduced[i]=theInts[i]% theSize;
+    theIntsReduced[i] = theInts[i] % theSize;
   }
   List<LargeIntUnsigned> theList;
   List<int> theIndexStack;
   theList.initFillInObject(theSize, 0);
   theIndexStack.Reserve(theSize);
   LargeIntUnsigned theMod;
-  theMod=theSize;
-  int numElementsCovered=0;
-  for (int i=0; i<theInts.size; i++)
-  { if (theList[theIntsReduced[i]]==0)
-      numElementsCovered++;
-    theList[theIntsReduced[i]]=theInts[i];
+  theMod = theSize;
+  int numElementsCovered = 0;
+  for (int i = 0; i < theInts.size; i ++)
+  { if (theList[theIntsReduced[i]] == 0)
+      numElementsCovered ++;
+    theList[theIntsReduced[i]] = theInts[i];
     theIndexStack.AddOnTop(theIntsReduced[i]);
   }
   LargeIntUnsigned currentIndexLarge, currentDistance, maxDistanceGenerated;
   int currentIndex;
   ProgressReport theReport;
-  ProgressReport theReport0;
   std::stringstream reportstream;
   reportstream << "Finding product distance mod " << theMod.ToString() << " w.r.t. elements "
   << theInts;
-  int numElementsNotAddedToStack=0;
-  maxDistanceGenerated=0;
-  for (int i=0; i<theIndexStack.size; i++)
-  { for (int j=0; j<theIntsReduced.size; j++)
-    { currentIndexLarge=theIndexStack[i];
-      currentIndexLarge *=theIntsReduced[j];
-      currentIndexLarge%=theMod;
+  int numElementsNotAddedToStack = 0;
+  maxDistanceGenerated = 0;
+  for (int i = 0; i < theIndexStack.size; i ++)
+  { for (int j = 0; j < theIntsReduced.size; j ++)
+    { currentIndexLarge = theIndexStack[i];
+      currentIndexLarge *= theIntsReduced[j];
+      currentIndexLarge %= theMod;
       if (!currentIndexLarge.IsIntegerFittingInInt(&currentIndex))
         return theCommands << "An internal check has failed. This shouldn't happen, this is possibly a programming bug.";
-      currentDistance=theList[theIndexStack[i]];
-      currentDistance+=theIntsReduced[j];
-      if (theList[currentIndex]>0 )
-        if (theList[currentIndex]<currentDistance )
-        { numElementsNotAddedToStack++;
-          if (numElementsNotAddedToStack%50000==0)
+      currentDistance = theList[theIndexStack[i]];
+      currentDistance += theIntsReduced[j];
+      if (theList[currentIndex] > 0)
+        if (theList[currentIndex] < currentDistance)
+        { numElementsNotAddedToStack ++;
+          if (numElementsNotAddedToStack % 50000 == 0)
           { std::stringstream out;
             out << "While computing product distance, explored " << i+1 << " out of "
             << theIndexStack.size << " indices. " << numElementsNotAddedToStack << " candidates were not added to the stack. "
@@ -6989,26 +6987,26 @@ bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(Calculator& theCom
           }
           continue;
         }
-      if (theList[currentIndex]==0)
-        numElementsCovered++;
-      theList[currentIndex]=currentDistance;
-      if (currentDistance>maxDistanceGenerated)
-        maxDistanceGenerated=currentDistance;
+      if (theList[currentIndex] == 0)
+        numElementsCovered ++;
+      theList[currentIndex] = currentDistance;
+      if (currentDistance > maxDistanceGenerated)
+        maxDistanceGenerated = currentDistance;
       theIndexStack.AddOnTop(currentIndex);
-      if (theIndexStack.size%10000==0)
+      if (theIndexStack.size % 10000 == 0)
       { std::stringstream out;
-        out << "While computing product distance, explored " << i+1 << " out of "
+        out << "While computing product distance, explored " << i + 1 << " out of "
         << theIndexStack.size << " indices. " << numElementsNotAddedToStack << " candidates were not added to the stack. "
         << "Number of elements reached: " << numElementsCovered << ". "
         << "Max distance generated while searching: " << maxDistanceGenerated.ToString();
         theReport.Report(out.str());
       }
     }
-    if (theIndexStack.size>1000000000)
+    if (theIndexStack.size > 1000000000)
       return theCommands << "While computing product distance, exceeded allowed stack size of 1000000000";
   }
   std::stringstream out;
-  for (int i=0; i<theList.size; i++)
+  for (int i = 0; i < theList.size; i ++)
     out << "<br>" << i << ": " << theList[i].ToString();
   return output.AssignValue(out.str(), theCommands);
 }
@@ -7021,19 +7019,19 @@ bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(Calcula
   int theMod;
   if (!theModuloE.IsIntegerFittingInInt(&theMod))
     return theCommands << " <hr> Failed to extract modulus from " << theModuloE.ToString();
-  if (theMod==0)
+  if (theMod == 0)
     return theCommands << "<hr>Zero modulus not allowed.";
-  if (theMod<0)
-    theMod*=-1;
-  if (theMod>10000000)
+  if (theMod < 0)
+    theMod *= - 1;
+  if (theMod > 10000000)
     return theCommands << "<hr>I've been instructed to compute with moduli no larger than 10000000.";
   if (!CalculatorConversions::innerLoadKey(theCommands, input, "theSet", theIntegersE))
     return theCommands << "<hr>Value theSet not found.";
   List<int> theInts;
   if (!theCommands.GetVectoRInt(theIntegersE, theInts))
     return theCommands << "<hr>Failed to extract integer list from " << theIntegersE.ToString();
-  for (int i=0; i<theInts.size; i++)
-    if (theInts[i]<=0)
+  for (int i = 0; i < theInts.size; i ++)
+    if (theInts[i] <= 0)
       return theCommands << "<hr>The integer list " << theInts << " contains non-positive numbers.";
   if (!CalculatorConversions::innerLoadKey(theCommands, input, "theProduct", theProductE))
     return theCommands << "<hr>Value theProduct not found.";
@@ -7044,46 +7042,46 @@ bool CalculatorFunctionsGeneral::innerSolveProductSumEquationOverSetModN(Calcula
     return theCommands << "<hr>I am expecting a positive product as input. ";
   if (!CalculatorConversions::innerLoadKey(theCommands, input, "theSum", theSumE))
     return theCommands << "<hr>Value theSum not found.";
-  int theSum=-1;
+  int theSum = - 1;
   if (!theSumE.IsSmallInteger(&theSum))
     return theCommands << "Failed to extract small integer from " << theSumE.ToString();
   VectorPartition thePartition;
   Vectors<Rational> theOneDimVectors;
   theOneDimVectors.SetSize(theInts.size);
-  for (int i=0; i<theInts.size; i++)
+  for (int i = 0; i < theInts.size; i ++)
   { theOneDimVectors[i].MakeZero(1);
-    theOneDimVectors[i][0]=theInts[i];
+    theOneDimVectors[i][0] = theInts[i];
   }
   thePartition.goalVector.MakeZero(1);
-  thePartition.goalVector[0]=theSum;
-  if(!thePartition.init(theOneDimVectors, thePartition.goalVector))
+  thePartition.goalVector[0] = theSum;
+  if (!thePartition.init(theOneDimVectors, thePartition.goalVector))
     return theCommands << "Failed to initialize the computation. ";
   LargeIntUnsigned theModLarge;
-  theModLarge=theMod;
-  int numTestedSoFar=0;
+  theModLarge = theMod;
+  int numTestedSoFar = 0;
   ProgressReport theReport;
-  LargeIntUnsigned oneUI=1;
+  LargeIntUnsigned oneUI = 1;
   while (thePartition.IncrementReturnFalseIfPastLast())
-  { LargeIntUnsigned theProduct=1;
-    for (int i=0; i<thePartition.currentPartition.size; i++)
-    { LargeIntUnsigned theNumber=theInts[i];
+  { LargeIntUnsigned theProduct = 1;
+    for (int i = 0; i < thePartition.currentPartition.size; i ++)
+    { LargeIntUnsigned theNumber = theInts[i];
       MathRoutines::RaiseToPower(theNumber, thePartition.currentPartition[i], oneUI);
-      theProduct*=theNumber;
-      theProduct%=theModLarge;
+      theProduct *= theNumber;
+      theProduct %= theModLarge;
     }
-    if (theProduct==goalProduct.value)
+    if (theProduct == goalProduct.value)
     { std::stringstream out;
       out << "Found one solution: ";
-      for (int i=0; i<thePartition.currentPartition.size; i++)
-        if (thePartition.currentPartition[i]>0)
+      for (int i = 0; i < thePartition.currentPartition.size; i ++)
+        if (thePartition.currentPartition[i] > 0)
         { out << theInts[i];
-          if (thePartition.currentPartition[i]>1)
+          if (thePartition.currentPartition[i] > 1)
             out << "^{" << thePartition.currentPartition[i] << "}";
           out << " ";
         }
       return output.AssignValue(out.str(), theCommands);
     }
-    numTestedSoFar++;
+    numTestedSoFar ++;
     std::stringstream reportStream;
     reportStream << numTestedSoFar << " tested so far ...";
     theReport.Report(reportStream.str());
@@ -7098,33 +7096,33 @@ void Calculator::AutomatedTestRun
   int numFunctionsToTest=this->GetNumBuiltInFunctions();
   outputCommandStrings.SetExpectedSize(numFunctionsToTest);
   outputCommandStrings.SetSize(0);
-  for (int i=0; i<this->FunctionHandlers.size; i++)
-    for (int j=0; j<this->FunctionHandlers[i].size; j++)
-      if (this->FunctionHandlers[i][j].theFunction!=Calculator::innerAutomatedTest &&
-          this->FunctionHandlers[i][j].theFunction!=Calculator::innerAutomatedTestSetKnownGoodCopy &&
-          this->FunctionHandlers[i][j].theFunction!=CalculatorFunctionsGeneral::innerCrash &&
-          this->FunctionHandlers[i][j].theFunction!=CalculatorFunctionsGeneral::innerCrashByListOutOfBounds &&
+  for (int i = 0; i < this->FunctionHandlers.size; i ++)
+    for (int j = 0; j < this->FunctionHandlers[i].size; j ++)
+      if (this->FunctionHandlers[i][j].theFunction != Calculator::innerAutomatedTest &&
+          this->FunctionHandlers[i][j].theFunction != Calculator::innerAutomatedTestSetKnownGoodCopy &&
+          this->FunctionHandlers[i][j].theFunction != CalculatorFunctionsGeneral::innerCrash &&
+          this->FunctionHandlers[i][j].theFunction != CalculatorFunctionsGeneral::innerCrashByListOutOfBounds &&
           ! this->FunctionHandlers[i][j].flagIsExperimental)
         outputCommandStrings.AddOnTop(this->FunctionHandlers[i][j].theExample);
-  for (int i=0; i<this->operationsCompositeHandlers.size; i++)
-    for (int j=0; j<this->operationsCompositeHandlers[i].size; j++)
+  for (int i = 0; i < this->operationsCompositeHandlers.size; i ++)
+    for (int j = 0; j < this->operationsCompositeHandlers[i].size; j ++)
       outputCommandStrings.AddOnTop(this->operationsCompositeHandlers[i][j].theExample);
   outputResultsWithInit.SetSize(outputCommandStrings.size);
   outputResultsNoInit.SetSize(outputCommandStrings.size);
   ProgressReport theReport;
   FormatExpressions theFormat;
-  theFormat.flagExpressionIsFinal=true;
-  for (int i=0; i<outputCommandStrings.size; i++)
-  { double startingTime=theGlobalVariables.GetElapsedSeconds();
+  theFormat.flagExpressionIsFinal = true;
+  for (int i = 0; i < outputCommandStrings.size; i ++)
+  { double startingTime = theGlobalVariables.GetElapsedSeconds();
     std::stringstream reportStream;
     reportStream << "<br>Testing expression:<br> " << outputCommandStrings[i]
-    << "<br>Test progress: testing " << i+1 << " out of " << outputCommandStrings.size << ". ";
+    << "<br>Test progress: testing " << i + 1 << " out of " << outputCommandStrings.size << ". ";
     theReport.Report(reportStream.str());
     theTester.reset();
     theTester.CheckConsistencyAfterInitializationExpressionStackEmpty();
     theTester.init();
     theTester.Evaluate(outputCommandStrings[i]);
-    outputResultsWithInit[i]=theTester.theProgramExpression.ToString(&theFormat);
+    outputResultsWithInit[i] = theTester.theProgramExpression.ToString(&theFormat);
     reportStream << "<br>Result: " << theTester.theProgramExpression.ToString();
     reportStream << "<br>Done in: " << theGlobalVariables.GetElapsedSeconds()-startingTime << " seconds. ";
     theReport.Report(reportStream.str());
@@ -7144,7 +7142,7 @@ bool CalculatorFunctionsGeneral::innerCrash
   (void) input;//portable way of avoiding unused parameter warning
   crash << "This is a test of the crashing mechanism. Are log files created correctly? "
   << "If you're admin, check out the <a href=\"/LogFiles/crashes/\">crash report folder<a>." << crash;
-  return output.AssignValue((std::string)"Crashed succesfully", theCommands);
+  return output.AssignValue((std::string) "Crashed succesfully", theCommands);
 }
 
 #include <vector>
@@ -7154,14 +7152,14 @@ bool CalculatorFunctionsGeneral::innerCrashByListOutOfBounds
   (void) input;//portable way of avoiding unused parameter warning
   List<int> theList;
   std::vector<int> theVector;
-  for (int i=0; i<5; i++)
+  for (int i = 0; i < 5; i ++)
   { theList.AddOnTop(0);
     theVector.push_back(0);
   }
   theList.SetSize(0);
   theVector.resize(0);
-  theVector[1]=1;
-  theList[1]=1;
+  theVector[1] = 1;
+  theList[1] = 1;
   return output.AssignValue((std::string) "Crashing: list out of bounds.", theCommands);
 }
 
@@ -7170,7 +7168,7 @@ bool CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrashByVectorOutOfBounds");
   (void) input;//portable way of avoiding unused parameter warning
   std::vector<int> theVector;
-  theVector[1]=1;
+  theVector[1] = 1;
   return output.AssignValue((std::string) "Crashing: std::vector out of bounds.", theCommands);
 }
 
@@ -7178,18 +7176,18 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults(Calculator& the
 { //theNode.owner->theHmm.MakeG2InB3(theParser);
   if (!input.IsListNElements(3))
     return output.MakeError("Error: the function for drawing weight support takes two  arguments (type and highest weight)", theCommands);
-  const Expression& typeNode=input[1];
-  const Expression& hwNode=input[2];
-  SemisimpleLieAlgebra* theSSalgpointer=0;
+  const Expression& typeNode = input[1];
+  const Expression& hwNode = input[2];
+  SemisimpleLieAlgebra* theSSalgpointer = 0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, typeNode, theSSalgpointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   Vector<Rational> highestWeightFundCoords;
   Expression theContext;
-  if (!theCommands.GetVectoR<Rational>  (hwNode, highestWeightFundCoords, &theContext, theSSalgpointer->GetRank(), 0))
+  if (!theCommands.GetVectoR<Rational>(hwNode, highestWeightFundCoords, &theContext, theSSalgpointer->GetRank(), 0))
     return output.MakeError("Failed to extract highest weight vector", theCommands);
   Vector<Rational> highestWeightSimpleCoords;
-  WeylGroupData& theWeyl=theSSalgpointer->theWeyl;
-  highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  WeylGroupData& theWeyl = theSSalgpointer->theWeyl;
+  highestWeightSimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   //Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
   charSSAlgMod<Rational> theChar;
@@ -7203,17 +7201,17 @@ bool CalculatorFunctionsGeneral::innerDrawWeightSupportWithMults(Calculator& the
 
 bool CalculatorFunctionsGeneral::innerDrawRootSystem(Calculator& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser);
-  bool hasPreferredProjectionPlane= input.IsListNElements(4);
-  const Expression& typeNode= hasPreferredProjectionPlane ? input[1] : input;
+  bool hasPreferredProjectionPlane = input.IsListNElements(4);
+  const Expression& typeNode = hasPreferredProjectionPlane ? input[1] : input;
   SemisimpleLieAlgebra* theAlgPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, typeNode, theAlgPointer))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-  SemisimpleLieAlgebra& theAlg=*theAlgPointer;
-  WeylGroupData& theWeyl=theAlg.theWeyl;
+  SemisimpleLieAlgebra& theAlg = *theAlgPointer;
+  WeylGroupData& theWeyl = theAlg.theWeyl;
   Vectors<Rational> preferredProjectionPlane;
   if (hasPreferredProjectionPlane)
   { preferredProjectionPlane.SetSize(2);
-    bool isGood=
+    bool isGood =
     theCommands.GetVectoR(input[2], preferredProjectionPlane[0], 0, theWeyl.GetDim(), 0) && theCommands.GetVectoR(input[3], preferredProjectionPlane[1], 0, theWeyl.GetDim(), 0);
     if (!isGood)
       return output.MakeError("Failed to convert second or third argument to vector of desired dimension", theCommands);
@@ -7222,8 +7220,8 @@ bool CalculatorFunctionsGeneral::innerDrawRootSystem(Calculator& theCommands, co
   DrawingVariables theDV;
   theWeyl.DrawRootSystem(theDV, true, false, 0, true, 0);
   if (hasPreferredProjectionPlane)
-  { theDV.flagFillUserDefinedProjection=true;
-    theDV.FillUserDefinedProjection=preferredProjectionPlane;
+  { theDV.flagFillUserDefinedProjection = true;
+    theDV.FillUserDefinedProjection = preferredProjectionPlane;
   }
   out << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
   return output.AssignValue(out.str(), theCommands);
@@ -7233,11 +7231,11 @@ template <class coefficient>
 int charSSAlgMod<coefficient>::GetPosNstringSuchThatWeightMinusNalphaIsWeight
 (const Weight<coefficient>& theWeightInFundCoords, const Vector<coefficient>& theAlphaInFundCoords)
 { MacroRegisterFunctionWithName("charSSAlgMod_coefficient::GetMaxNSuchThatWeightMinusNalphaIsAWeight");
-  int result=-1;
+  int result = - 1;
   Weight<coefficient> currentWeight;
-  currentWeight=theWeightInFundCoords;
-  for (;this->theMonomials.Contains(currentWeight);
-       result++, currentWeight.weightFundamentalCoordS-=theAlphaInFundCoords){}
+  currentWeight = theWeightInFundCoords;
+  for (;this->theMonomials.Contains(currentWeight); result ++, currentWeight.weightFundamentalCoordS -= theAlphaInFundCoords)
+  {}
 //  if (result==-1)
 //    crash << "temporary wrong check" <<crash;
   return result;
@@ -7258,30 +7256,30 @@ std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable()
   Vector<coefficient> outputSimpleStringCoords, outputSimpleHalfStringCoords;
   Vector<coefficient> theSimpleRoot;
   Vector<coefficient> theSimpleRootFundCoords;
-  for (int k=0; k<outputChar.size(); k++)
+  for (int k = 0; k < outputChar.size(); k ++)
   { out << "<tr>";
     out << "<td>" << outputChar[k].weightFundamentalCoordS.ToString() << "</td>";
-    Vector<coefficient> weightSimple=this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental
+    Vector<coefficient> weightSimple = this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental
     (outputChar[k].weightFundamentalCoordS);
     out << "<td>" << weightSimple.ToString() << "</td>";
     outputSimpleStringCoords.MakeZero(this->GetOwner()->GetRank());
     outputSimpleHalfStringCoords.MakeZero(this->GetOwner()->GetRank());
-    for (int j=0; j<this->GetOwner()->GetRank(); j++)
+    for (int j = 0; j < this->GetOwner()->GetRank(); j ++)
     { theSimpleRoot.MakeEi(this->GetOwner()->GetRank(), j);
-      theSimpleRootFundCoords=
+      theSimpleRootFundCoords =
       this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(theSimpleRoot);
-      outputSimpleStringCoords[j]=outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight
-      (outputChar[k], theSimpleRootFundCoords)-
+      outputSimpleStringCoords[j] = outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight
+      (outputChar[k], theSimpleRootFundCoords) -
       outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight
-      (outputChar[k], -theSimpleRootFundCoords);
-      outputSimpleHalfStringCoords[j]=outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight
+      (outputChar[k], - theSimpleRootFundCoords);
+      outputSimpleHalfStringCoords[j] = outputChar.GetPosNstringSuchThatWeightMinusNalphaIsWeight
       (outputChar[k], theSimpleRootFundCoords);
     }
-    if (outputSimpleStringCoords!=outputChar[k].weightFundamentalCoordS)
+    if (outputSimpleStringCoords != outputChar[k].weightFundamentalCoordS)
       out << "<td><span style=\"color:#FF0000\"><b>" << outputSimpleStringCoords.ToString() << "</b></span></td>" ;
     else
       out << "<td>" << outputSimpleStringCoords.ToString() << "</td>";
-    if (outputSimpleHalfStringCoords!=outputChar[k].weightFundamentalCoordS)
+    if (outputSimpleHalfStringCoords != outputChar[k].weightFundamentalCoordS)
       out << "<td><span style=\"color:#FF0000\"><b>" << outputSimpleHalfStringCoords.ToString() << "</b></span></td>" ;
     else
       out << "<td>" << outputSimpleHalfStringCoords.ToString() << "</td>";
@@ -7318,20 +7316,20 @@ public:
   Calculator* owner;
   Rational charWidth, padding, layerHeight, charHeight;
   ExpressionTreeDrawer()
-  { this->MaxDepth=10;
-    this->MaxAllowedWidth=10;
-    this->MaxDisplayedNodes=1000;
-    this->flagUseFullTree=false;
-    this->indexInCurrentLayer=-1;
-    this->indexCurrentChild=-1;
-    this->maxNumCharsInString=100;
-    this->numLayers=0;
-    this->owner=0;
-    this->charWidth.AssignNumeratorAndDenominator(1,20);
-    this->padding=1;
-    this->layerHeight=2;
-    this->widthMaxLayer=0;
-    this->charHeight.AssignNumeratorAndDenominator(1,5);
+  { this->MaxDepth = 10;
+    this->MaxAllowedWidth = 10;
+    this->MaxDisplayedNodes = 1000;
+    this->flagUseFullTree = false;
+    this->indexInCurrentLayer = - 1;
+    this->indexCurrentChild = - 1;
+    this->maxNumCharsInString = 100;
+    this->numLayers = 0;
+    this->owner = 0;
+    this->charWidth.AssignNumeratorAndDenominator(1, 20);
+    this->padding = 1;
+    this->layerHeight = 2;
+    this->widthMaxLayer = 0;
+    this->charHeight.AssignNumeratorAndDenominator(1, 5);
   }
   Expression& GetCurrentE()
   { MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetCurrentE");
@@ -7343,11 +7341,11 @@ public:
     if (!this->flagUseFullTree)
       if (this->GetCurrentE().IsBuiltInTypE())
         return;
-    for (int i=0; i< this->GetCurrentE().children.size; i++)
+    for (int i = 0; i < this->GetCurrentE().children.size; i ++)
     { this->currentEchildrenTruncated.AddOnTop(this->GetCurrentE()[i]);
-      if (i+1+this->indexCurrentChild>this->MaxDisplayedNodes || i>this->MaxAllowedWidth)
+      if (i + 1 + this->indexCurrentChild > this->MaxDisplayedNodes || i > this->MaxAllowedWidth)
       { Expression dotsAtom;
-        dotsAtom.MakeAtom((std::string)"...", *this->owner);
+        dotsAtom.MakeAtom((std::string) "...", *this->owner);
         this->currentEchildrenTruncated.AddOnTop(dotsAtom);
         break;
       }
@@ -7366,7 +7364,7 @@ public:
     if (this->flagUseFullTree)
     { std::string atomName;
       if (input.IsAtom(&atomName))
-      { if (atomName!="...")
+      { if (atomName != "...")
           out << input.theData;
         else
           out << "...";
@@ -7381,7 +7379,7 @@ public:
     this->ComputeCurrentEchildrenTruncated();
     this->nextLayer.AddListOnTop(this->currentEchildrenTruncated);
     List<int> emptyArrows;
-    for (int i=0; i<this->currentEchildrenTruncated.size; i++)
+    for (int i = 0; i < this->currentEchildrenTruncated.size; i ++)
     { this->arrows[this->indexCurrentChild].AddOnTop(this->DisplayedEstrings.size);
       this->AddStringTruncate
       (this->GetDisplayString(this->currentEchildrenTruncated[i]),
@@ -7390,16 +7388,16 @@ public:
     }
   }
   void init()
-  { this->indexInCurrentLayer=0;
-    this->indexCurrentChild=0;
+  { this->indexInCurrentLayer = 0;
+    this->indexCurrentChild = 0;
     this->currentLayer.SetSize(1);
     this->LayerFirstIndices.SetSize(1);
-    this->LayerFirstIndices[0]=0;
+    this->LayerFirstIndices[0] = 0;
     this->LayerSizes.SetSize(1);
-    this->LayerSizes[0]=1;
+    this->LayerSizes[0] = 1;
     List<int> emptyArrows;
     this->arrows.AddOnTop(emptyArrows);
-    this->currentLayer[0]=this->baseExpression;
+    this->currentLayer[0] = this->baseExpression;
     this->DisplayedEstrings.Clear();
     this->AddStringTruncate(this->baseExpression.ToString(), this->isLeaf(this->baseExpression));
     this->ComputeCurrentEContributionToNextLayer();
@@ -7422,30 +7420,30 @@ public:
   }
   void AddStringTruncate(const std::string& input, bool isLeaf)
   { this->DisplayedStringIsLeaf.AddOnTop(isLeaf);
-    if (input.size()<= (unsigned) this->maxNumCharsInString)
+    if (input.size() <= (unsigned) this->maxNumCharsInString)
     { this->DisplayedEstrings.AddOnTop(input);
       return;
     }
-    std::string truncatedInput=input;
-    truncatedInput.resize(this->maxNumCharsInString-3);
-    truncatedInput+="...";
+    std::string truncatedInput = input;
+    truncatedInput.resize(this->maxNumCharsInString - 3);
+    truncatedInput += "...";
     this->DisplayedEstrings.AddOnTop(truncatedInput);
   }
   bool IncrementReturnFalseIfPastLast()
   { MacroRegisterFunctionWithName("ExpressionTreeDrawer::IncrementReturnFalseIfPastLast");
     //stOutput << "At start of incrementing function: " << this->ToString() << "<hr>";
-    this->indexInCurrentLayer++;
-    this->indexCurrentChild++;
-    if (this->indexInCurrentLayer>=this->currentLayer.size)
-    { this->indexInCurrentLayer=0;
-      this->currentLayer=this->nextLayer;
-      if (this->currentLayer.size==0)
+    this->indexInCurrentLayer ++;
+    this->indexCurrentChild ++;
+    if (this->indexInCurrentLayer >= this->currentLayer.size)
+    { this->indexInCurrentLayer = 0;
+      this->currentLayer = this->nextLayer;
+      if (this->currentLayer.size == 0)
         return false;
       this->LayerFirstIndices.AddOnTop(this->indexCurrentChild);
       this->LayerSizes.AddOnTop(this->nextLayer.size);
       this->nextLayer.SetSize(0);
       this->ComputeCurrentEContributionToNextLayer();
-      return this->currentLayer.size>0;
+      return this->currentLayer.size > 0;
     }
     this->ComputeCurrentEContributionToNextLayer();
     return true;
@@ -7456,22 +7454,22 @@ public:
   }
   Rational GetLayerWidth(int layerIndex)
   { MacroRegisterFunctionWithName("ExpressionTreeDrawer::GetLayerWidth");
-    Rational result=0;
-    for (int i=this->LayerFirstIndices[layerIndex]; i<this->LayerFirstIndices[layerIndex]+this->LayerSizes[layerIndex]; i++)
-      result+=this->GetStringWidthTruncated(i) +this->padding;
-    result-=this->padding;
-    if (result>this->widthMaxLayer)
-      this->widthMaxLayer=result;
+    Rational result = 0;
+    for (int i = this->LayerFirstIndices[layerIndex]; i < this->LayerFirstIndices[layerIndex] + this->LayerSizes[layerIndex]; i ++)
+      result += this->GetStringWidthTruncated(i) + this->padding;
+    result -= this->padding;
+    if (result > this->widthMaxLayer)
+      this->widthMaxLayer = result;
     return result;
   }
   void ComputeLayerPositions(int layerIndex)
   { MacroRegisterFunctionWithName("ExpressionTreeDrawer::ComputeLayerPositions");
-    Rational currentX =-this->GetLayerWidth(layerIndex)/2;
-    for (int i=this->LayerFirstIndices[layerIndex]; i<this->LayerFirstIndices[layerIndex]+this->LayerSizes[layerIndex]; i++)
+    Rational currentX = - this->GetLayerWidth(layerIndex) / 2;
+    for (int i = this->LayerFirstIndices[layerIndex]; i < this->LayerFirstIndices[layerIndex] + this->LayerSizes[layerIndex]; i ++)
     { this->NodePositions[i].SetSize(2);
-      this->NodePositions[i][0]=currentX+this->GetStringWidthTruncated(i)/2;
-      this->NodePositions[i][1]=this->layerHeight* layerIndex*(-1);
-      currentX+=this->charWidth*this->DisplayedEstrings[i].size()+this->padding;
+      this->NodePositions[i][0] = currentX + this->GetStringWidthTruncated(i) / 2;
+      this->NodePositions[i][1] = this->layerHeight * layerIndex * (- 1);
+      currentX += this->charWidth * this->DisplayedEstrings[i].size() + this->padding;
     }
   }
   void DrawToDV()
@@ -7479,46 +7477,45 @@ public:
     this->init();
     while (this->IncrementReturnFalseIfPastLast())
     {}
-    this->thePlot.dimension=2;
-    this->thePlot.flagIncludeCoordinateSystem=false;
+    this->thePlot.dimension = 2;
+    this->thePlot.flagIncludeCoordinateSystem = false;
     this->NodePositions.SetSize(this->DisplayedEstrings.size);
-    for (int i=0; i<this->LayerFirstIndices.size; i++)
+    for (int i = 0; i < this->LayerFirstIndices.size; i ++)
       this->ComputeLayerPositions(i);
     //stOutput << this->ToString();
     this->NodePositionsDouble.SetSize(this->NodePositions.size);
-    for (int i=0; i<this->NodePositionsDouble.size; i++)
-    { this->NodePositionsDouble[i]
-      = MathRoutines::GetVectorDouble(this->NodePositions[i]);
-    }
+    for (int i = 0; i < this->NodePositionsDouble.size; i ++)
+      this->NodePositionsDouble[i] = MathRoutines::GetVectorDouble(this->NodePositions[i]);
+
     Vector<double> arrowBase, arrowHead;
-    for (int i=0; i<this->DisplayedEstrings.size; i++)
-    { for (int j=0; j<this->arrows[i].size; j++)
-      { arrowBase= this->NodePositionsDouble[i];
-        arrowHead=this->NodePositionsDouble[this->arrows[i][j]];
-        arrowHead[1]+=this->charHeight.GetDoubleValue() /2;
+    for (int i = 0; i < this->DisplayedEstrings.size; i ++)
+    { for (int j = 0; j < this->arrows[i].size; j ++)
+      { arrowBase = this->NodePositionsDouble[i];
+        arrowHead = this->NodePositionsDouble[this->arrows[i][j]];
+        arrowHead[1] += this->charHeight.GetDoubleValue() / 2;
         PlotObject theSegment;
-        theSegment.thePlotString="segment";
+        theSegment.thePlotString = "segment";
         theSegment.thePointsDouble.AddOnTop(arrowBase);
         theSegment.thePointsDouble.AddOnTop(arrowHead);
-        theSegment.colorJS="black";
-        this->thePlot+=theSegment;
+        theSegment.colorJS = "black";
+        this->thePlot += theSegment;
       }
-      if (this->DisplayedEstrings[i]!="")
+      if (this->DisplayedEstrings[i] != "")
       { PlotObject theText;
-        theText.thePlotType="label";
+        theText.thePlotType = "label";
         theText.thePointsDouble.AddOnTop(this->NodePositionsDouble[i]);
-        theText.colorJS=
+        theText.colorJS =
         this->DisplayedStringIsLeaf[i] ? "red" : "gray";
-        theText.thePlotString=
+        theText.thePlotString =
         HtmlRoutines::clearNewLines
         (HtmlRoutines::backslashQuotes(HtmlRoutines::DoubleBackslashes(this->DisplayedEstrings[i]) ));
-        thePlot+=theText;
+        thePlot += theText;
       } else
       { PlotObject thePoint;
-        thePoint.thePlotType="point";
-        thePoint.colorJS="blue";
+        thePoint.thePlotType = "point";
+        thePoint.colorJS = "blue";
         thePoint.thePointsDouble.AddOnTop(this->NodePositionsDouble[i]);
-        this->thePlot+=thePoint;
+        this->thePlot += thePoint;
       }
     }
 //    double& theGraphicsUnit =theDV.theBuffer.GraphicsUnit[0];
@@ -7537,9 +7534,9 @@ bool CalculatorFunctionsGeneral::innerDrawExpressionGraphWithOptions
 (Calculator& theCommands, const Expression& input, Expression& output, bool useFullTree)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDrawExpressionGraph");
   ExpressionTreeDrawer theEdrawer;
-  theEdrawer.flagUseFullTree=useFullTree;
-  theEdrawer.owner=&theCommands;
-  theEdrawer.baseExpression=input;
+  theEdrawer.flagUseFullTree = useFullTree;
+  theEdrawer.owner = &theCommands;
+  theEdrawer.baseExpression = input;
   theEdrawer.DrawToDV();
   return output.AssignValue(theEdrawer.thePlot, theCommands);
 }

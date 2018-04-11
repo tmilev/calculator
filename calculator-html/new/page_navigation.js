@@ -5,7 +5,7 @@ function Page(){
       id: "divLoginPage", 
       menuButtonId: "buttonLoginPage",
       container: null,
-      selectFunction: selectLoginPage,
+      selectFunction: null,
       initialized: false
     },
     currentCourse : {
@@ -25,7 +25,14 @@ function Page(){
       menuButtonId: "buttonSelectCalculator",
       container: null,
       selectFunction: null,
+    },
+    database: {
+      id: "divDatabase",
+      menuButtonId: "buttonSelectDatabase",
+      container: null,
+      selectFunction: null,
     }
+
   }
   //////////////////////////////////////
   //////////////////////////////////////
@@ -168,6 +175,7 @@ function Page(){
   //////////////////////////////////////
   //////////////////////////////////////
   this.selectPage(this.currentPage);
+  loginTry();
   document.getElementById("divPage").style.display = "";
   document.getElementById("divPage").className = "divPage";
 }

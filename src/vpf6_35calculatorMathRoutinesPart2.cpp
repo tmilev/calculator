@@ -2596,12 +2596,12 @@ bool CalculatorFunctionsGeneral::innerPolynomialDivisionSlidesGrLex
     return theCommands << "Failed to extract integer from first argument";
 //  Polynomial<Rational> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS);
-  theGB.thePolynomialOrder.theMonOrder= MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
-  theGB.RemainderDivisionWithRespectToBasis(thePolys[1], &theGB.remainderDivision, -1);
+  theGB.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
+  theGB.RemainderDivisionWithRespectToBasis(thePolys[1], &theGB.remainderDivision, - 1);
   theContext.ContextGetFormatExpressions(theGB.theFormat);
 //  stOutput << "context vars: " << theFormat.polyAlphabeT;
-  theGB.theFormat.flagUseLatex=true;
-  theGB.theFormat.flagUseFrac=true;
+  theGB.theFormat.flagUseLatex = true;
+  theGB.theFormat.flagUseFrac = true;
   std::stringstream latexOutput;
   latexOutput
   << "In latex: \r\n \\documentclass{beamer}\n"
@@ -2617,5 +2617,5 @@ bool CalculatorFunctionsGeneral::innerPolynomialDivisionSlidesGrLex
   << "\\end{frame}"
   << "\\end{document}\r\n";
   return output.AssignValue
-  (HtmlRoutines::ConvertStringToHtmlString(latexOutput.str(),true), theCommands);
+  (HtmlRoutines::ConvertStringToHtmlString(latexOutput.str(), true), theCommands);
 }

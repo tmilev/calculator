@@ -331,7 +331,7 @@ void Vectors<coefficient>::SelectABasisInSubspace
   int currentRow = 0;
   for (int i = 0; i < input.size; i ++)
   { for (int j = 0; j < theDim; j ++)
-      theMat(currentRow, j)=input[i][j];
+      theMat(currentRow, j) = input[i][j];
     currentRow ++;
     if (currentRow == MaxNumRows || i == input.size - 1)
     { theMat.GaussianEliminationByRows(0, 0, &outputSelectedPivotColumns);

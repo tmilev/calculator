@@ -355,7 +355,9 @@ span.deadlineAndTitleContainer{
 }
 span.titleContainer{
 }
-
+span.spanProgressReport{
+  word-wrap: break-word;
+}
 table.tableCalculatorOutput{
   border-collapse: collapse;
 }
@@ -447,6 +449,11 @@ div.divMainMenuCollapsed{
   width: 20px;
   flex-direction: column;
   transition: all 1s;
+}
+div.divMenuSeparator{
+  font-size: small;
+  text-align: center;
+  border-bottom: 1px solid black;
 }
 div.headChapter{
   padding-bottom: 10px; 

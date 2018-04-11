@@ -1,10 +1,10 @@
 "use srict";
 
 function recordProgressDone(progress){
-  if (progress === null || progress === undefined){
+  if (progress === null || progress === undefined) {
     return;
   }
-  if (typeof progress === "string"){
+  if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
   var theButton = progress.childNodes[0];
@@ -12,24 +12,22 @@ function recordProgressDone(progress){
 }
 
 function recordProgressStarted(progress, address){
-  if (progress === null || progress === undefined){
+  if (progress === null || progress === undefined) {
     return;
   }
-  if (typeof progress === "string"){
+  if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
-  progress.innerHTML = "<button class = \"buttonProgress\"" +
-  "onclick=\"if (this.nextSibling.nextSibling.style.display === 'none')" +
-  "{this.nextSibling.nextSibling.style.display = ''; } else {" +
-  "this.nextSibling.nextSibling.style.display = 'none';}\">" +
-  "<b style=\"color:orange\">Sent</b></button><br><span style=\"display:none\">" + address + "</span>";
+  progress.innerHTML = `<button class = "buttonProgress" onclick="if (this.nextSibling.nextSibling.style.display === 'none')
+  {this.nextSibling.nextSibling.style.display = '';} else {this.nextSibling.nextSibling.style.display = 'none';}">
+  <b style="color:orange">Sent</b></button><br><span class="spanProgressReport" style="display:none">${address}</span>`;
 }
 
 function recordResult(resultText, resultSpan){
-  if (resultSpan === null || resultSpan === undefined){
+  if (resultSpan === null || resultSpan === undefined) {
     return;
   }
-  if (typeof resultSpan === "string"){
+  if (typeof resultSpan === "string") {
     resultSpan = document.getElementById(resultSpan);
   }
   resultSpan.innerHTML = escapeHtml(resultText);
@@ -62,7 +60,7 @@ function recordResult(resultText, resultSpan){
  */
 function submitGET(inputObject){
   var theAddress = inputObject.url;
-  if (theAddress === undefined || theAddress === null){
+  if (theAddress === undefined || theAddress === null) {
     theAddress = `${globalVars.serverInfo.imappServer}${inputObject.service}`;
   }
   var progress = inputObject.progress;
@@ -75,7 +73,7 @@ function submitGET(inputObject){
   xhr.onload = function () {
     recordProgressDone(progress);
     recordResult(xhr.responseText, result);
-    if (callback !== undefined && callback !== null){
+    if (callback !== undefined && callback !== null) {
       callback(xhr.responseText, result);
     }
   };
@@ -86,10 +84,10 @@ var GlobalSubmitStringAsMainInputCounter = 0;
 
 function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus)
 { var spanOutput = document.getElementById(idOutput);
-  if (spanOutput === null)
-  { spanOutput = document.createElement('span');
+  if (spanOutput === null){ 
+    spanOutput = document.createElement('span');
     document.body.appendChild(spanOutput);
-    spanOutput.innerHTML = "<span style='color:red'> ERROR: span with id " + idOutput + "MISSING! </span>";
+    spanOutput.innerHTML = `<span style='color:red'> ERROR: span with id ${idOutput} MISSING! </span>`;
   }
   var https = new XMLHttpRequest();
   https.open("POST", thePage.calculator, true);

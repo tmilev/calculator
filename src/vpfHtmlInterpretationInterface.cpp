@@ -744,10 +744,11 @@ std::string HtmlInterpretation::GetTopicTableJSON()
 std::string HtmlInterpretation::GetJSONUserInfo()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONUserInfo");
   if (!theGlobalVariables.flagLoggedIn)
-    return "\"not logged in\"";
+    return "not logged in";
   JSData output;
-  output["username"] = theGlobalVariables.userDefault.username;
-  output["authenticationToken"] = theGlobalVariables.userDefault.actualAuthenticationToken;
+  output[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
+  output[DatabaseStrings::labelAuthenticationToken] = theGlobalVariables.userDefault.actualAuthenticationToken;
+  output[DatabaseStrings::labelUserRole] = theGlobalVariables.userDefault.userRole;
   return output.ToString(false);
 }
 

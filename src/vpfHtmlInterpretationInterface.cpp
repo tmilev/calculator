@@ -109,7 +109,7 @@ std::string HtmlInterpretation::GetProblemSolution()
 
 std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetSetProblemDatabaseInfoHtml");
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "<b>Only admins may set problem weights.</b>";
   CalculatorHTML theProblem;
@@ -146,7 +146,7 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   return out.str();
 #else
   return "Cannot modify problem weights (no database available)";
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
 }
 
 std::string HtmlInterpretation::GetSanitizedComment
@@ -1139,7 +1139,7 @@ std::string HtmlInterpretation::SubmitProblem
   if (hasCommentsBeforeSubmission)
     out << "<tr><td>" << HtmlInterpretation::GetCommentsInterpretation
     (theInterpreter, 3, theFormat) << "</td></tr>\n";
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   UserCalculator& theUser = theProblem.currentUseR;
   theUser.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   bool deadLinePassed = false;
@@ -1197,8 +1197,8 @@ std::string HtmlInterpretation::SubmitProblem
       }
     }
   }
-#endif // MACRO_use_MySQL
-#ifdef MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
+#ifdef MACRO_use_MongoDB
   if (theProblem.flagIsForReal)
   { std::stringstream comments;
     //if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
@@ -1278,7 +1278,7 @@ std::string HtmlInterpretation::AddTeachersSections()
   HtmlRoutines::ConvertURLStringToNormal(theMap.GetValueCreate("sections"), false);
   List<std::string> desiredSectionsList;
 
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   List<std::string> theTeachers;
   List<char> delimiters;
   delimiters.AddOnTop(' ');
@@ -1321,7 +1321,7 @@ std::string HtmlInterpretation::AddTeachersSections()
   return out.str();
 #else
   return "<b>no database present.</b>";
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
 }
 
 std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressWithPort)
@@ -1345,7 +1345,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   { out << "<b>No emails to add</b>";
     return out.str();
   }
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   std::stringstream comments;
   bool sentEmails = true;
   //stOutput << "DEBUG: here be i!";
@@ -1373,7 +1373,7 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   return out.str();
 #else
   return "<b>no database present.</b>";
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
 }
 
 const std::string CalculatorHTML::BugsGenericMessage =
@@ -1544,7 +1544,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
 std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAddressWithPort)
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageBody");
   (void) hostWebAddressWithPort;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
   { out << "Browsing accounts allowed only for logged-in admins over ssl connection.";
@@ -1578,7 +1578,7 @@ std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAd
   return out.str();
 #else
   return "<b>Database not available. </b>";
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
 }
 
 std::string HtmlInterpretation::GetNavigationPanelWithGenerationTime()
@@ -1647,7 +1647,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
 std::string HtmlInterpretation::ToStringUserDetailsTable
 (bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort)
 { MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetailsTable");
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   std::stringstream out;
   //std::string userRole = adminsOnly ? "admin" : "student";
   bool flagFilterCourse = (!adminsOnly) && (theGlobalVariables.GetWebInput("filterAccounts") == "true");
@@ -1836,7 +1836,7 @@ std::string HtmlInterpretation::ToStringAssignSection()
   return out.str();
 }
 
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
 void UserCalculator::ComputePointsEarned
 (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
  MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics)
@@ -1918,7 +1918,7 @@ public:
 
 bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
 { MacroRegisterFunctionWithName("UserScores::ComputeScoresAndStats");
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   //stOutput << "DEBUG: Computing scores and stats. ";
   theProblem.currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   this->theProblem.LoadFileNames();
@@ -2179,7 +2179,7 @@ std::string HtmlInterpretation::ToStringUserDetails
 (bool adminsOnly, List<JSData>& theUsers, const std::string& hostWebAddressWithPort)
 { MacroRegisterFunctionWithName("HtmlInterpretation::ToStringUserDetails");
   std::stringstream out;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   std::string userRole = adminsOnly ? "admin" : "student";
   std::string idAddressTextarea = "inputAddUsers" + userRole;
   std::string idExtraTextarea = "inputAddExtraInfo" + userRole;
@@ -2225,7 +2225,7 @@ std::string HtmlInterpretation::ToStringUserDetails
   out << "</span>";
 #else
   out << "<b>Adding emails not available (database not present).</b> ";
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
   return out.str();
 }
 

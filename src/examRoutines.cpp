@@ -2,7 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfHeader3Calculator4HtmlFunctions.h"
-#include "vpfHeader7DatabaseInterface_MySQL.h"
+#include "vpfHeader7DatabaseInterface.h"
 #include "vpfHeader1General5TimeDate.h"
 #include "vpfHeader8HtmlInterpretation.h"
 #include "vpfHeader8HtmlSnippets.h"
@@ -54,7 +54,7 @@ CalculatorHTML::CalculatorHTML()
   this->topicLectureCounter = 0;
 }
 
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
 bool CalculatorHTML::LoadProblemInfoFromJSONAppend
 (const JSData& inputJSON,
  MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
@@ -322,11 +322,11 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
     return false;
   return result;
 }
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
 
 bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadDatabaseInfo");
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   this->currentUseR.::UserCalculatorData::operator=(theGlobalVariables.userDefault);
   //this->theProblemData.CheckConsistency();
   if (!this->PrepareSectionList(comments))
@@ -392,14 +392,14 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, co
   }
   //stOutput << "Debug: got to here pt1";
   this->flagIsForReal = theGlobalVariables.UserRequestRequiresLoadingRealExamData();
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   this->topicListFileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
   //stOutput << "Debug: got to here pt2";
   //this->theProblemData.CheckConsistency();
   //stOutput << "Debug: got to here pt3";
   if (doLoadDatabase)
     this->LoadDatabaseInfo(comments);
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
   //stOutput << "<hr>DEBUG: Loaded successfully, checking: <hr>";
   this->theProblemData.CheckConsistency();
   //stOutput << "<hr>OK<hr> ";
@@ -755,7 +755,7 @@ std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, 
   out << this->ToStringLinkFromFileName(theFileName);
   out << this->ToStringProblemScoreFull(theFileName);
   out << this->ToStringProblemWeightButton(theFileName);
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   bool problemAlreadySolved = false;
   if (this->currentUseR.theProblemData.Contains(theFileName))
   { ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
@@ -763,7 +763,7 @@ std::string CalculatorHTML::ToStringProblemInfo(const std::string& theFileName, 
       problemAlreadySolved = true;
   }
   out << this->ToStringDeadline(theFileName, problemAlreadySolved, false, false);
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
   std::string finalStringToDisplay = stringToDisplay;
   if (finalStringToDisplay == "")
     finalStringToDisplay = FileOperations::GetFileNameFromFileNameWithPath(theFileName);
@@ -1322,7 +1322,7 @@ std::string SyntacticElementHTML::GetTagClass()
 
 bool CalculatorHTML::PrepareSectionList(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::PrepareSectionList");
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   (void) commentsOnFailure;
   if (this->flagSectionsPrepared)
     return true;
@@ -1345,13 +1345,13 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretManageClass");
   if (!theGlobalVariables.UserDefaultHasAdminRights() || theGlobalVariables.UserStudentVieWOn())
     return;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   std::stringstream out;
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\"> Manage accounts</a>";
   inputOutput.interpretedCommand = out.str();
 #else
   inputOutput.interpretedCommand = "<b>Managing class not available (no database).</b>";
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
 }
 
 bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutput)
@@ -1566,7 +1566,7 @@ std::string CalculatorHTML::GetDeadline
   (void) outputIsInherited;
   outputIsInherited = true;
   std::string result;
-  #ifdef MACRO_use_MySQL
+  #ifdef MACRO_use_MongoDB
   int topicIndex = this->theTopicS.GetIndex(problemName);
   if (topicIndex == - 1)
     return problemName + " not found in topic list. ";
@@ -1602,7 +1602,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
     //out << "DEBUG: section: " << sectionNumber;
     return out.str();
   }
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   TimeWrapper now, deadline; //<-needs a fix for different time formats.
   //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
   std::stringstream badDateStream;
@@ -1654,7 +1654,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
 #else
   out  << "Database not running: no deadlines";
   return out.str();
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
 }
 
 std::string CalculatorHTML::ToStringAllSectionDeadlines
@@ -1683,10 +1683,10 @@ std::string CalculatorHTML::ToStringDeadline
   (void) problemAlreadySolved;
   (void) returnEmptyStringIfNoDeadline;
   (void) isSection;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   if (theGlobalVariables.UserGuestMode())
-  { return "deadlines require login";
-  } else if (theGlobalVariables.UserDefaultHasAdminRights() &&
+    return "deadlines require login";
+  else if (theGlobalVariables.UserDefaultHasAdminRights() &&
              theGlobalVariables.UserStudentVieWOn())
   { std::string sectionNum = HtmlRoutines::ConvertURLStringToNormal
     (theGlobalVariables.GetWebInput("studentSection"), false);
@@ -1697,7 +1697,7 @@ std::string CalculatorHTML::ToStringDeadline
     return this->ToStringOnEDeadlineFormatted
     (topicID, this->currentUseR.sectionComputed, problemAlreadySolved,
      returnEmptyStringIfNoDeadline, isSection);
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
   return "";
 }
 
@@ -2762,7 +2762,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
 
 bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::StoreRandomSeedCurrent");
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   this->theProblemData.flagRandomSeedGiven = true;
   this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
   if (!this->currentUseR.StoreProblemDataToDatabase(commentsOnFailure))
@@ -2826,7 +2826,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       theGlobalVariables.userCalculatorRequestType != "template" &&
       theGlobalVariables.userCalculatorRequestType != "templateNoLogin")
   {
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
     bool problemAlreadySolved = false;
     if (this->currentUseR.theProblemData.Contains(this->fileName))
     { ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(this->fileName);
@@ -2911,7 +2911,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   //out << "<hr> Between the commands:" << this->betweenTheCommands.ToStringCommaDelimited();
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before database storage");
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   bool shouldResetTheRandomSeed = false;
   if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven)
     shouldResetTheRandomSeed = true;
@@ -2952,7 +2952,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   //out << "Current collection problems: " << this->databaseProblemList.ToStringCommaDelimited()
   //<< " with weights: " << this->databaseProblemWeights.ToStringCommaDelimited();
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
   std::stringstream navigationAndEditTagStream;
   if (this->flagDoPrependProblemNavigationBar)
     navigationAndEditTagStream << this->ToStringProblemNavigation();
@@ -3237,7 +3237,7 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
     return out.str();
   }
   //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
-  #ifdef MACRO_use_MySQL
+  #ifdef MACRO_use_MongoDB
   Rational currentWeight;
   if (this->currentUseR.theProblemData.Contains(theFileName))
   { ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
@@ -3268,7 +3268,7 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
   } else
   { out << "<span style=\"color:brown\"><b>No submissions.</b> </span>" ;
   }
-  #endif // MACRO_use_MySQL
+  #endif // MACRO_use_MongoDB
   return out.str();
 
 }
@@ -3277,7 +3277,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemScoreShort");
   (void) theFileName;
   (void) outputAlreadySolved;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   std::stringstream out;
   if (theGlobalVariables.UserGuestMode())
   { out << "scores require login";
@@ -3334,7 +3334,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   return finalOut.str();
 #else
   return "Error: database not running. ";
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
 }
 
 std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFileName)
@@ -3354,7 +3354,7 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
   out << "Pts: <textarea class=\"textareaStudentPoints\" rows=\"1\" cols=\"2\" id=\"" << idPoints << "\">";
   bool weightIsOK = false;
   std::string problemWeightAsGivenByInstructor;
-  #ifdef MACRO_use_MySQL
+  #ifdef MACRO_use_MongoDB
   Rational unusedRat;
   weightIsOK = this->currentUseR.theProblemData.GetValueCreate(theFileName).
   adminData.GetWeightFromCoursE(this->currentUseR.courseComputed, unusedRat, &problemWeightAsGivenByInstructor);
@@ -4010,7 +4010,7 @@ std::string CalculatorHTML::GetSectionSelector()
 { if (!theGlobalVariables.UserDefaultHasProblemComposingRights() ||
       theGlobalVariables.UserStudentVieWOn())
     return "";
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   std::stringstream out;
   out << "<sectionSelection>Sections: ";
   for (int i = 0; i < this->databaseStudentSections.size; i ++)
@@ -4095,7 +4095,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     out << "<span style=\"color:red\">Error preparing section list.</span> <br>";
   //out << "DEBUG: sections: " << this->databaseStudentSections.ToStringCommaDelimited();
   //out << "DEBUG: prob data: " << this->currentUseR.theProblemData.ToStringHtml();
-  #ifdef MACRO_use_MySQL
+  #ifdef MACRO_use_MongoDB
   this->flagIncludeStudentScores =
   theGlobalVariables.UserDefaultHasAdminRights() &&
   !theGlobalVariables.UserStudentVieWOn() &&
@@ -4179,7 +4179,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   topicListJS << "<script type=\"text/javascript\">";
 
   topicListJS << "var currentStudentSection=";
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   topicListJS << "'" << this->currentUseR.sectionComputed << "'" << ";\n";
 #else
   topicListJS << "''" << ";\n";

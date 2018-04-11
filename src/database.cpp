@@ -1,13 +1,12 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader7DatabaseInterface_MySQL.h"
+#include "vpfHeader7DatabaseInterface.h"
 #include "vpfHeader5Crypto.h"
-#include "vpfHeader7DatabaseInterface_MySQL.h"
 #include "webserver.h"
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
 
-ProjectInformationInstance ProjectInfoVpf8_1MySQLcpp(__FILE__, "MySQL interface. ");
+ProjectInformationInstance ProjectInfoVpfDatabasecpp(__FILE__, "Database-related code. ");
 
 bool DatabaseRoutinesGlobalFunctions::SetPassword
 (const std::string& inputUsername, const std::string& inputNewPassword, std::string& outputAuthenticationToken,
@@ -16,7 +15,7 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword
   (void) inputNewPassword;
   (void) outputAuthenticationToken;
   (void) comments;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::SetPassword");
   if (!theGlobalVariables.flagLoggedIn)
   { comments << "Changing passwords allowed for logged-in users only. ";
@@ -32,14 +31,14 @@ bool DatabaseRoutinesGlobalFunctions::SetPassword
   return result;
 #else
   return false;
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
 }
 
 bool DatabaseRoutinesGlobalFunctions::UserExists
 (const std::string& inputUsername, std::stringstream& comments)
 { (void) inputUsername;
   (void) comments;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserExists");
   if (!theGlobalVariables.flagLoggedIn)
     return false;
@@ -51,14 +50,14 @@ bool DatabaseRoutinesGlobalFunctions::UserExists
   return theUsers.size > 0;
 #else
   return false;
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
 }
 
 bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights()
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights");
   if (theGlobalVariables.UserDefaultHasAdminRights())
     return true;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   if (!theGlobalVariables.flagLoggedIn)
     return false;
   return theGlobalVariables.userDefault.userRole == "admin" || theGlobalVariables.userDefault.userRole == "instructor"
@@ -70,7 +69,7 @@ bool DatabaseRoutinesGlobalFunctions::UserDefaultHasInstructorRights()
 
 bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 {
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LogoutViaDatabase");
   //stOutput << "<br>DEBUG: Got to logout";
   if (!theGlobalVariables.flagLoggedIn)
@@ -225,7 +224,7 @@ std::string ProblemData::ToString()const
   return out.str();
 }
 
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
 
 std::string UserCalculator::ToStringSelectedColumns()
 { MacroRegisterFunctionWithName("DatabaseRoutines::ToStringSelectedColumns");
@@ -1016,7 +1015,6 @@ bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords
 /*
 
   std::stringstream comments;
-  theRoutines.startMySQLDatabase(&comments, 0);
   if (!theRoutines.ColumnExists(DatabaseStrings::labelCourseInfo, DatabaseStrings::tableUsers, out))
   { out << "Column " << DatabaseStrings::labelCourseInfo << ": "
     << " does not exist, creating ...";
@@ -1276,14 +1274,14 @@ EmailRoutines::EmailRoutines()
   this->fromEmailAuth = Crypto::ConvertStringToBase64("A good day to use a computer algebra system");
 }
 
-#endif //MACRO_use_MySQL
+#endif //MACRO_use_MongoDB
 
 bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded
 (UserCalculatorData& theUseR, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { (void) commentsOnFailure;
   (void) theUseR;
   (void) commentsGeneral;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeeded");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
@@ -1333,7 +1331,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaGoogleTokenCreateNewAccountIfNeede
 bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUseR, std::stringstream* comments)
 { (void) comments;
   (void) theUseR;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LoginViaDatabase");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(theUseR);
@@ -1393,7 +1391,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
 }
 
 //meld comment
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
 
 #include "../../calculator/src/vpfHeader5Crypto.h"
 //#include <time.h>
@@ -1421,7 +1419,7 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   std::stringstream out;
   if (MathRoutines::StringBeginsWith(calculatorBase, "localhost"))
     out << "https://" << calculatorBase;
-  else if(MathRoutines::StringBeginsWith(calculatorBase, "https://localhost"))
+  else if (MathRoutines::StringBeginsWith(calculatorBase, "https://localhost"))
     out << calculatorBase;
   else
     out << theGlobalVariables.hopefullyPermanentWebAdress;

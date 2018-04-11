@@ -3,7 +3,7 @@
 #ifndef vpfHeaderHtmlInterpretationAlreadyDefined
 #define vpfHeaderHtmlInterpretationAlreadyDefined
 #include "vpfHeader1General0_General.h"
-#include "vpfHeader7DatabaseInterface_MySQL.h"
+#include "vpfHeader7DatabaseInterface.h"
 #include <ctime>
 
 static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretation(__FILE__, "Html interpretation.");
@@ -135,7 +135,7 @@ public:
   List<double> timePerAttempt;
   List<List<double> > timeIntermediatePerAttempt;
   List<List<std::string> > timeIntermediateComments;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   UserCalculator currentUseR;
 #endif
   static std::string stringScoredQuizzes;

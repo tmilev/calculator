@@ -8,14 +8,12 @@ QMAKE_CXXFLAGS += -std=c++11
 
 TEMPLATE = app
 
-DEFINES+=MACRO_use_MySQL
 DEFINES+=MACRO_use_open_ssl
 DEFINES+=MACRO_use_MongoDB
 
 LIBS+=-lmongoc-1.0
 LIBS+=-lbson-1.0
 
-LIBS+=-lmysqlclient
 LIBS+=-lssl
 LIBS+=-lcrypto
 
@@ -74,7 +72,7 @@ SOURCES += \
 
 HEADERS += \
     webserver.h \
-    vpfHeader7DatabaseInterface_MySQL.h \
+    vpfHeader7DatabaseInterface.h \
     vpf.h \
     vpfFiniteFields.h \
     vpfHeader1General0_General.h \

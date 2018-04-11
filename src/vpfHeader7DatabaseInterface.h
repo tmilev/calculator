@@ -183,18 +183,8 @@ public:
   std::string ToStringAvailableAnswerIds();
 };
 
-#ifdef MACRO_use_MySQL
-#include <mysql/mysql.h>
+#ifdef MACRO_use_MongoDB
 
-//Command for installation of mysql on Ubuntu:
-//sudo apt-get install libmysqlclient-dev
-
-
-//Command for installing mailx:
-//Ubuntu:
-//sudo apt-get install heirloom-mailx
-//CentOS:
-//sudo yum install mailx
 class EmailRoutines
 {
 public:
@@ -291,5 +281,5 @@ public:
    std::stringstream& comments, int& outputNumNewUsers, int& outputNumUpdatedUsers);
 };
 
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
 #endif // vpfHeader7_databaseMySQL_already_included

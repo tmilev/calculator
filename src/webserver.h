@@ -356,7 +356,6 @@ public:
   ~WebServer();
   static void FigureOutOperatingSystem();
   static void CheckExternalPackageInstallation();
-  static void CheckMySQLSetup();
   static void CheckMongoDBSetup();
   static void CheckMathJaxSetup();
   static void CheckFreecalcSetup();

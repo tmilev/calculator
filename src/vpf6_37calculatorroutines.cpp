@@ -535,14 +535,13 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return theCommands << "Sending mail available to logged-in admins only. ";
   std::stringstream out;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   if (input.size() != 4)
     return theCommands << "Send email requires three arguments. ";
   EmailRoutines theEmail;
   if (! input[1].IsOfType(&theEmail.toEmail) ||
       ! input[2].IsOfType(&theEmail.emailContent) ||
-      ! input[3].IsOfType(&theEmail.subject)
-      )
+      ! input[3].IsOfType(&theEmail.subject))
     return theCommands << "Arguments of "
     << input.ToString()
     << "expected to be strings (enclose in \"\" please). ";

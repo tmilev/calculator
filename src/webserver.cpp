@@ -2,7 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "webserver.h"
 #include "vpfHeader3Calculator0_Interface.h"
-#include "vpfHeader7DatabaseInterface_MySQL.h"
+#include "vpfHeader7DatabaseInterface.h"
 #include "vpfHeader8HtmlInterpretationInterface.h"
 #include "vpfHeader8HtmlSnippets.h"
 
@@ -56,7 +56,7 @@ std::string WebWorker::openIndentTag(const std::string& theTag)
 
 std::string WebWorker::closeIndentTag(const std::string& theTag)
 { std::stringstream out;
-  this->indentationLevelHTML--;
+  this->indentationLevelHTML --;
   for (int i = 0; i < this->indentationLevelHTML; i ++)
     out << "  ";
   out << theTag << "\n";
@@ -1312,7 +1312,7 @@ std::string WebWorker::GetDatabasePage()
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("currentDatabaseTable"), false);
   //  out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << "</calculatorNavigation>\n";
   std::stringstream dbOutput;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn)
     dbOutput << "Browsing database allowed only for logged-in admins.";
   else
@@ -1320,7 +1320,7 @@ std::string WebWorker::GetDatabasePage()
     << DatabaseRoutinesGlobalFunctionsMongo::ToHtmlDatabaseCollection(currentTable);
 #else
   dbOutput << "<b>Database not available. </b>";
-#endif // MACRO_use_MySQL
+#endif // MACRO_use_MongoDB
   out << HtmlRoutines::GetJavascriptDatabaseRoutinesLink();
   out << "</head>"
   << "<body onload=\"loadSettings();\">\n";
@@ -2900,7 +2900,7 @@ std::string WebWorker::GetChangePasswordPage()
   out << HtmlRoutines::GetCSSLinkCalculator();
   out << "</head>";
   out << "<body> ";
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   out << "<calculatorNavigation>" << HtmlInterpretation::ToStringNavigation() << "</calculatorNavigation>";
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
   { out << "Changing password requires secure connection. ";
@@ -2982,7 +2982,7 @@ std::string WebWorker::GetChangePasswordPage()
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
 #else
   out << "Database not available";
-#endif //Macro_use_mysql
+#endif //MACRO_use_MongoDB
   out << "</body></html>";
   return out.str();
 }
@@ -2991,7 +2991,7 @@ bool WebWorker::DoSetEmail
 (UserCalculatorData& inputOutputUser, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneralNonSensitive,
  std::stringstream* commentsGeneralSensitive)
 { MacroRegisterFunctionWithName("WebWorker::DoSetEmail");
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   EmailRoutines theEmail;
   theEmail.toEmail = inputOutputUser.email;
   if (!theEmail.IsOKEmail(theEmail.toEmail, commentsOnFailure))
@@ -3026,14 +3026,14 @@ bool WebWorker::DoSetEmail
   (void) commentsGeneralNonSensitive;
   (void) commentsGeneralSensitive;
 
-  return false; //MACRO_use_MySQL
+  return false; //MACRO_use_MongoDB
 #endif
 }
 
 int WebWorker::SetEmail(const std::string& input)
 { MacroRegisterFunctionWithName("WebWorker::SetEmail");
   (void) input;
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   std::stringstream out, debugStream;
   //double startTime=theGlobalVariables.GetElapsedSeconds();
   theGlobalVariables.userDefault.email = input;
@@ -3058,7 +3058,7 @@ int WebWorker::ProcessChangePassword()
 //  theGlobalVariables.SetWebInpuT("debugFlag", "true");
 //  stOutput << "DEBUG: " << this->ToStringCalculatorArgumentsHumanReadable();
   this->SetHeaderOKNoContentLength();
-#if defined(MACRO_use_MongoDB) && defined(MACRO_use_MySQL)
+#ifdef MACRO_use_MongoDB
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theUser.enteredAuthenticationToken = "";
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
@@ -5560,19 +5560,15 @@ void WebServer::CheckExternalPackageInstallation()
 { MacroRegisterFunctionWithName("WebServer::CheckExternalPackageInstallation");
   if (theGlobalVariables.flagRunningApache)
     return;
-  bool doInstallMysql = false;
   bool doInstallOpenSSL = false;
   bool doInstallMongo = false;
 #ifndef MACRO_use_open_ssl
   doInstallOpenSSL = true;
 #endif
-#ifndef MACRO_use_MySQL
-  doInstallMysql = true;
-#endif
 #ifndef MACRO_use_MongoDB
   doInstallMongo = true;
 #endif
-  if (!doInstallMysql && !doInstallOpenSSL && doInstallMongo)
+  if (!doInstallOpenSSL && doInstallMongo)
     return;
   WebServer::FigureOutOperatingSystem();
   std::string attemptedSetupVirtualFileName = "/LogFiles/attemptedExternalPackageSetup.html";
@@ -5581,22 +5577,13 @@ void WebServer::CheckExternalPackageInstallation()
     logger result("", 0, false, "server");
     FileOperations::GetPhysicalFileNameFromVirtual
     (attemptedSetupVirtualFileName, attemptedSetupPhysicalFileName, true, false, 0);
-    result << logger::green << "Mysql or ssl setup previously attempted, skipping. Erase file "
+    result << logger::green << "Ssl setup previously attempted, skipping. Erase file "
     << attemptedSetupPhysicalFileName << " to try setting up again. " << logger::endL;
     return;
   }
   logger result(attemptedSetupVirtualFileName, 0, false, "server");
   if (theGlobalVariables.OperatingSystem == "")
     return;
-  if (doInstallMysql)
-  { result << "You appear to be missing a mysql installation. Let me try to install that for you. "
-    << logger::green << "Enter the sudo password as prompted please. "
-    << logger::endL;
-    if (theGlobalVariables.OperatingSystem == "Ubuntu")
-      theGlobalVariables.CallSystemNoOutput("sudo apt-get install mysql-client mysql-server libmysqlclient-dev", false);
-    else if (theGlobalVariables.OperatingSystem == "CentOS")
-      theGlobalVariables.CallSystemNoOutput("sudo yum install mysql-devel", false);
-  }
   if (doInstallOpenSSL)
   { result << "You appear to be missing an openssl installation. Let me try to install that for you. "
     << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
@@ -5642,8 +5629,6 @@ void WebServer::CheckMongoDBSetup()
   result << logger::yellow << "Mongo setup file missing, proceeding with setup. " << logger::endL;
   result << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
   //result << logger::yellow << "(Re)-starting mongo: " << logger::endL;
-  //result << logger::green << "sudo /etc/init.d/mysql start" << logger::endL;
-  //theGlobalVariables.CallSystemNoOutput("sudo /etc/init.d/mysql start", false);
   StateMaintainerCurrentFolder maintainFolder;
   theGlobalVariables.ChDir("../external-source");
 
@@ -5664,48 +5649,6 @@ void WebServer::CheckMongoDBSetup()
   theGlobalVariables.CallSystemNoOutput("make -j8", true);
   theGlobalVariables.CallSystemNoOutput("sudo make install", true);
   theGlobalVariables.CallSystemNoOutput("sudo ldconfig", true);
-}
-
-void WebServer::CheckMySQLSetup()
-{ MacroRegisterFunctionWithName("WebServer::CheckMySQLSetup");
-  std::string attemptedMYSQLSetupVirtualFileName = "/LogFiles/attemptedMYSQLsetup.html";
-  if (FileOperations::FileExistsVirtual(attemptedMYSQLSetupVirtualFileName, true))
-  { std::string attemptedMYSQLSetupPhysicalFileName;
-    logger result("", 0, false, "server");
-    FileOperations::GetPhysicalFileNameFromVirtual
-    (attemptedMYSQLSetupVirtualFileName, attemptedMYSQLSetupPhysicalFileName, true, false, 0);
-    result << logger::green << "Mysql setup previously attempted, skipping. Erase file "
-    << attemptedMYSQLSetupPhysicalFileName << " to try setting up again. " << logger::endL;
-    return;
-  }
-  logger result(attemptedMYSQLSetupVirtualFileName, 0, false, "server");
-  WebServer::FigureOutOperatingSystem();
-  result << logger::yellow << "Mysql setup file missing, proceeding with setup. " << logger::endL;
-  result << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
-  result << logger::yellow << "(Re)-starting mysql: " << logger::endL;
-  result << logger::green << "sudo /etc/init.d/mysql start" << logger::endL;
-  theGlobalVariables.CallSystemNoOutput("sudo /etc/init.d/mysql start", false);
-
-  std::stringstream commandCreateMysqlDB;
-  commandCreateMysqlDB << "sudo mysql -u root -e \"create database "
-  << DatabaseStrings::theDatabaseName << ";\"";
-
-  result << logger::green << commandCreateMysqlDB.str() << logger::endL;
-  result << theGlobalVariables.CallSystemWithOutput(commandCreateMysqlDB.str());
-  std::stringstream commandCreateUser; //please note: grant all privileges may fail to auto-create user if a certain option is selected.
-  commandCreateUser << "sudo mysql -u root -e \"create user '"
-  << DatabaseStrings::theDatabaseUser << "'@'localhost';\"";
-  result << logger::green << commandCreateUser.str() << logger::endL;
-  result << theGlobalVariables.CallSystemWithOutput(commandCreateUser.str());
-  std::stringstream commandGRANTprivileges;
-  commandGRANTprivileges << "sudo mysql -u root -e \"grant all privileges on "
-  << "*.* to  "
-  << "'" << DatabaseStrings::theDatabaseUser << "'@'localhost';\"";
-
-  result << logger::green
-  << commandGRANTprivileges.str()
-  << logger::endL;
-  result << theGlobalVariables.CallSystemWithOutput(commandGRANTprivileges.str());
 }
 
 void WebServer::CheckFreecalcSetup()
@@ -6058,7 +6001,6 @@ int WebServer::main(int argc, char **argv)
     //logServer << "DEBUG: got to here pt 0" << logger::endL;
     theWebServer.CheckMongoDBSetup();
     //logServer << "DEBUG: got to here pt 0.5" << logger::endL;
-    theWebServer.CheckMySQLSetup();
     theWebServer.CheckMathJaxSetup();
     theWebServer.CheckSVNSetup();
     theWebServer.CheckFreecalcSetup();

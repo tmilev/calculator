@@ -15,7 +15,7 @@
 #include <arpa/inet.h>
 //#include <libexplain/connect.h>
 
-#include "vpfHeader7DatabaseInterface_MySQL.h"
+#include "vpfHeader7DatabaseInterface.h"
 
 extern WebServer theWebServer;
 ProjectInformationInstance ProjectInfoVpf6_5calculatorWebRoutines(__FILE__, "Calculator web routines. ");
@@ -85,10 +85,10 @@ void WebServerMonitor::BackupDatabaseIfNeeded()
       (24 * 3600))
     return;
   std::stringstream commandStream;
-  commandStream << "mysqldump -u ace --databases aceDB > "
+  commandStream << "mongodump --db calculator --archive="
   << theGlobalVariables.PhysicalPathProjectBase
   << "database-backups/dbBackup"
-  << theGlobalVariables.GetDateForLogFiles() << ".sql";
+  << theGlobalVariables.GetDateForLogFiles() << ".mongo";
   logServerMonitor << logger::orange << "Backing up database with command: " << logger::endL;
   logServerMonitor << commandStream.str() << logger::endL;
   theGlobalVariables.CallSystemWithOutput(commandStream.str());
@@ -135,7 +135,7 @@ void WebServerMonitor::Monitor()
     //std::cout << "Pinging " << theCrawler.addressToConnectTo
     //<< " at port/service " << theCrawler.portOrService << ".\n";
     theCrawler.PingCalculatorStatus();
-    numPings++;
+    numPings ++;
     if (theCrawler.lastTransactionErrors != "")
     { now.AssignLocalTime();
       numConsecutiveFailedPings ++;
@@ -164,7 +164,7 @@ void WebServerMonitor::Monitor()
 
 WebCrawler::WebCrawler()
 { this->flagInitialized = false;
-  this->theSocket = -1;
+  this->theSocket = - 1;
   this->serverOtherSide = 0;
   this->serverInfo = 0;
 }
@@ -197,7 +197,7 @@ WebCrawler::~WebCrawler()
     return;
   this->flagInitialized = false;
   close(this->theSocket);
-  this->theSocket = -1;
+  this->theSocket = - 1;
   this->FreeAddressInfo();
 }
 
@@ -245,7 +245,7 @@ void WebCrawler::PingCalculatorStatus()
     inet_ntop(p->ai_family, theAddress, ipString, sizeof ipString);
 //    std::string ipString()
     reportStream << this->addressToConnectTo << ": " << ipString << "<br>";
-    this->theSocket= socket(this->serverInfo->ai_family, this->serverInfo->ai_socktype, this->serverInfo->ai_protocol);
+    this->theSocket = socket(this->serverInfo->ai_family, this->serverInfo->ai_socktype, this->serverInfo->ai_protocol);
     int connectionResult = - 1;
     if (this->theSocket < 0)
     { this->lastTransactionErrors = "failed to create socket ";
@@ -484,8 +484,7 @@ void WebCrawler::FetchWebPagePart2
   for (int i = 0; i < theHeaderPieces.size; i++)
     if (theHeaderPieces[i] == "Content-length:" ||
         theHeaderPieces[i] == "Content-Length:" ||
-        theHeaderPieces[i] == "content-length:"
-        )
+        theHeaderPieces[i] == "content-length:")
       if (i + 1 < theHeaderPieces.size)
       { expectedLengthString=theHeaderPieces[i + 1];
         break;
@@ -841,7 +840,7 @@ int WebWorker::ProcessSignUP()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
   //double startTime=theGlobalVariables.GetElapsedSeconds();
   this->SetHeaderOKNoContentLength();
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   UserCalculator theUser;
   theUser.username = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
@@ -903,7 +902,7 @@ int WebWorker::ProcessForgotLogin()
 { MacroRegisterFunctionWithName("WebWorker::ProcessForgotLogin");
   //double startTime=theGlobalVariables.GetElapsedSeconds();
   this->SetHeaderOKNoContentLength();
-#ifdef MACRO_use_MySQL
+#ifdef MACRO_use_MongoDB
   std::stringstream out;
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();

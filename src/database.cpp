@@ -391,12 +391,10 @@ JSData UserCalculatorData::ToJSON()
   for (int i = 0; i < this->sectionsTaught.size; i ++)
     sectionsTaughtList[i] = this->sectionsTaught[i];
   result[DatabaseStrings::labelSectionsTaught] = sectionsTaughtList;
-  for (int i = 0; i < result.objects.size(); i ++)
+  for (int i = result.objects.size() - 1; i >=0; i --)
   { JSData& currentValue = result.objects.theValues[i];
     if (currentValue.string == "" && currentValue.type == JSData::JSstring)
-    { result.objects.RemoveKey(result.objects.theKeys[i]);
-      i --;
-    }
+      result.objects.RemoveKey(result.objects.theKeys[i]);
   }
   return result;
 }

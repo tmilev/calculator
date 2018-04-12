@@ -53,10 +53,11 @@ public:
     return false;
   }
   void RemoveIndexSwapWithLast(int theIndex)
-  { this->KillElementIndex(theIndex);
-    this->theReferences[theIndex] = *this->theReferences.LastObject();
-    this->theReferences[this->theReferences.size - 1] = 0;
-    this->theReferences.size --;
+  { //This is not thread-safe
+    this->KillElementIndex(theIndex);
+    this->theReferences[theIndex] = this->theReferences[this->size - 1];
+    this->theReferences[this->size - 1] = 0;
+    this->size --;
   }
   void SwapTwoIndices(int index1, int index2)
   { this->theReferences.SwapTwoIndices(index1, index2);
@@ -77,7 +78,7 @@ public:
   }
   void KillAllElements();
   void KillElementIndex(int i)
-  { delete this->theReferences[i];
+  { delete this->theReferences[i]; //<- NOT thread safe!
     this->theReferences[i] = 0;
   }
   void AddOnTop(const Object& o);

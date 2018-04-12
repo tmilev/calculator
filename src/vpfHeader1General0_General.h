@@ -1284,7 +1284,7 @@ public:
     for (int i = 0; i < this->TheHashedArrays.size; i ++)
     { maxHashSize = MathRoutines::Maximum(maxHashSize, this->TheHashedArrays[i].size);
       if (this->TheHashedArrays[i].size > 0)
-        numNonZeroHashes++;
+        numNonZeroHashes ++;
     }
     out << "<br>Max hash array size: " << maxHashSize;
     out << "<br>Average hash array size: " << ((double) this->size) / ((double) numNonZeroHashes);
@@ -1409,7 +1409,7 @@ public:
     int hashIndexTop = this->GetHash(*oTop);
     this->TheHashedArrays[hashIndexTop].RemoveFirstOccurenceSwapWithLast(tempI);
     this->TheHashedArrays[hashIndexTop].AddOnTop(index);
-    this->List<Object>::RemoveIndexSwapWithLast(index);
+    this->TemplateList::RemoveIndexSwapWithLast(index);
   }
   void SwapTwoIndices(int i1, int i2)
   { Object tempO;
@@ -1553,7 +1553,7 @@ public:
       return;
     this->Clear();
     this->SetExpectedSize(other.size);
-    for (int i = 0; i < other.size; i++)
+    for (int i = 0; i < other.size; i ++)
       this->AddOnTop(other.TheObjects[i]);
 //    int commentmewhendone;
 //    this->GrandMasterConsistencyCheck();

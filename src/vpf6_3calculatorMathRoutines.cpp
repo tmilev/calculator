@@ -674,7 +674,7 @@ bool CalculatorFunctionsGeneral::innerDereferenceSequenceOrMatrix(Calculator& th
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
-  if (theIndex>0 && theIndex < input[1].size())
+  if (theIndex > 0 && theIndex < input[1].size())
   { output = input[1][theIndex];
     return true;
   }
@@ -707,8 +707,7 @@ bool CalculatorFunctionsGeneral::innerSolveSerreLikeSystem
   input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystem")) ||
   input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemAlgebraic")) ||
   input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemUpperLimit")) ||
-  input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"))
-  ;
+  input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"));
 
   if (useArguments)
   { if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, CalculatorConversions::innerPolynomial<Rational>))
@@ -1287,20 +1286,20 @@ void IntegralRFComputation::PrepareDenominatorFactors()
 bool IntegralRFComputation::ComputePartialFractionDecomposition()
 { MacroRegisterFunctionWithName("IntegralRFComputation::ComputePartialFractionDecomposition");
   this->CheckConsistency();
-  this->contextE=this->inpuTE.GetContext();
+  this->contextE = this->inpuTE.GetContext();
   //stOutput << "<hr>Context: " << this->contextE.ToString();
   //stOutput << "<br>Context variable 1: " << this->contextE.ContextGetContextVariable(0).ToString();
   //stOutput << "<br>Context variable 2: " << this->contextE.ContextGetContextVariable(1).ToString();
 
   this->contextE.ContextGetFormatExpressions(this->currentFormaT);
-  if (this->theRF.GetMinNumVars()<1 || this->theRF.expressionType== this->theRF.typeRational ||
+  if (this->theRF.GetMinNumVars() < 1 || this->theRF.expressionType == this->theRF.typeRational ||
       this->theRF.expressionType==this->theRF.typePoly)
   { this->printoutPFsHtml << this->theRF.ToString(&this->currentFormaT) << " is already split into partial fractions. ";
     return true;
   }
   this->theRF.GetDenominator(this->theDen);
   this->theRF.GetNumerator(this->theNum);
-  this->theNum*= this->theDen.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  this->theNum *= this->theDen.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   //stOutput << "<br>The den: " << this->theDen << " the num: " << this->theNum.ToString();
   Rational theConstantCoeff;
   if (!this->theDen.FactorMeNormalizedFactors(theConstantCoeff, this->theFactors, &this->printoutPFsHtml))
@@ -1308,13 +1307,13 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     return false;
   }
 //  stOutput << "<br>The factors: " << this->theFactors.ToString() << "; <br> the const coeff: " << theConstantCoeff;
-  this->theNum/=theConstantCoeff;
-  this->theDen/=theConstantCoeff;
+  this->theNum /= theConstantCoeff;
+  this->theDen /= theConstantCoeff;
   Polynomial<Rational> tempP;
   tempP.MakeConst(1);
-  for (int i=0; i<this->theFactors.size; i++)
-    tempP*=this->theFactors[i];
-  if (tempP!=this->theDen)
+  for (int i = 0; i < this->theFactors.size; i ++)
+    tempP *= this->theFactors[i];
+  if (tempP != this->theDen)
     crash << "Something is very wrong: product of denominator factors is " << tempP.ToString(&this->currentFormaT)
     << ", but the denominator equals: " << this->theDen.ToString(&this->currentFormaT);
   this->printoutPFsLatex << "\\documentclass{article}\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol} \\begin{document}";
@@ -1323,28 +1322,28 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   { this->printoutPFsHtml << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
     return false;
   }
-  this->currentFormaT.flagUseFrac=true;
+  this->currentFormaT.flagUseFrac = true;
   this->theNum.DivideBy(this->theDen, this->quotientRat, this->remainderRat);
 //  stOutput << "this->TheDen= " << this->theDen.ToString(&this->currentFormaT)
 //  << "<br>this->quotientRat= " << this->quotientRat.ToString(&this->currentFormaT)
 //  << "<br>this->remainderRat= " << this->remainderRat.ToString(&this->currentFormaT);
-  needPolyDivision=!this->quotientRat.IsEqualToZero();
+  needPolyDivision = !this->quotientRat.IsEqualToZero();
   if (needPolyDivision)
   { this->printoutPFsHtml << "<br>The numerator " << HtmlRoutines::GetMathSpanPure(this->theNum.ToString(&this->currentFormaT))
     << " divided by the denominator " << HtmlRoutines::GetMathSpanPure(theDen.ToString(&this->currentFormaT)) << " yields "
     << HtmlRoutines::GetMathSpanPure(this->quotientRat.ToString(&this->currentFormaT)) << " with remainder "
     << HtmlRoutines::GetMathSpanPure(this->remainderRat.ToString(&this->currentFormaT)) << ". ";
     GroebnerBasisComputation<Rational> theGB;
-    theGB.flagDoLogDivision=true;
-    theGB.flagStoreQuotients=true;
+    theGB.flagDoLogDivision = true;
+    theGB.flagStoreQuotients = true;
     theGB.theBasiS.SetSize(1);
-    theGB.theBasiS[0]= this->theDen;
-    theGB.theFormat=this->currentFormaT;
+    theGB.theBasiS[0] = this->theDen;
+    theGB.theFormat = this->currentFormaT;
     //  Polynomial<Rational> outputRemainder;
-    theGB.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
+    theGB.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
     theGB.initForDivisionAlone(theGB.theBasiS);
-    Polynomial<Rational> theNumCopy=this->theNum;
-    theGB.RemainderDivisionWithRespectToBasis(theNumCopy, &theGB.remainderDivision, -1);
+    Polynomial<Rational> theNumCopy = this->theNum;
+    theGB.RemainderDivisionWithRespectToBasis(theNumCopy, &theGB.remainderDivision, - 1);
     this->printoutPFsLatex << "Here is a detailed long polynomial division. ";
     this->printoutPFsLatex << theGB.GetDivisionStringLaTeX();
     this->printoutPFsHtml << "<br>Here is a detailed long polynomial division:<br> ";
@@ -1352,7 +1351,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   }
   MonomialCollection<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
   theDenominatorFactorsWithMultsCopy.MakeZero();
-  for (int i=0; i<this->theFactors.size; i++)
+  for (int i = 0; i < this->theFactors.size; i ++)
   { theDenominatorFactorsWithMultsCopy.AddMonomial(this->theFactors[i], 1);
     //this->currentFormaT.flagSuppressOneIn1overXtimesY=false;
 //    stOutput << "<br>Factor: " << theFactors[i].ToString(&this->currentFormaT);
@@ -1361,17 +1360,17 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   Polynomial<Rational> currentSecondDegreePoly;
   this->theDenominatorFactorsWithMults.MakeZero();
   Polynomial<AlgebraicNumber> currentLinPoly, currentSecondDegreePolyAlgebraic;
-  this->additionalMultiple=1;
-  for (int i=0; i<theDenominatorFactorsWithMultsCopy.size(); i++)
-  { currentSecondDegreePoly=theDenominatorFactorsWithMultsCopy[i];
-    currentSecondDegreePolyAlgebraic=currentSecondDegreePoly;
-    if (currentSecondDegreePoly.TotalDegree()!=2)
+  this->additionalMultiple = 1;
+  for (int i = 0; i < theDenominatorFactorsWithMultsCopy.size(); i ++)
+  { currentSecondDegreePoly = theDenominatorFactorsWithMultsCopy[i];
+    currentSecondDegreePolyAlgebraic = currentSecondDegreePoly;
+    if (currentSecondDegreePoly.TotalDegree() != 2)
     { this->theDenominatorFactorsWithMults.AddMonomial(currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.theCoeffs[i]);
       continue;
     }
     Rational theDiscriminant=currentSecondDegreePoly.GetDiscriminant();
 //    stOutput << "The discriminant: " << theDiscriminant.ToString();
-    if (theDiscriminant<0)
+    if (theDiscriminant < 0)
     { this->theDenominatorFactorsWithMults.AddMonomial(currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.theCoeffs[i]);
       continue;
     }
@@ -1382,17 +1381,17 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     }
 //    stOutput << "<br>sqrt of discriminant: " << theDiscriminantSqrt.ToString();
     theDiscriminantSqrt.CheckConsistency();
-    AlgebraicNumber a=currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0,2));
-    AlgebraicNumber b=currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0,1));
+    AlgebraicNumber a = currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0, 2));
+    AlgebraicNumber b = currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0, 1));
     a.CheckConsistency();
     b.CheckConsistency();
-    currentLinPoly.MakeMonomiaL(0,1);
-    currentLinPoly-=(-b+theDiscriminantSqrt)/(a*2);
+    currentLinPoly.MakeMonomiaL(0, 1);
+    currentLinPoly -= (- b + theDiscriminantSqrt) / (a * 2);
     this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.theCoeffs[i]);
-    currentLinPoly.MakeMonomiaL(0,1);
-    currentLinPoly-=(-b-theDiscriminantSqrt)/(a*2);
+    currentLinPoly.MakeMonomiaL(0, 1);
+    currentLinPoly -= (- b - theDiscriminantSqrt) / (a * 2);
     this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.theCoeffs[i]);
-    additionalMultiple*=a;
+    additionalMultiple *= a;
 //    Rational c=currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0,0));
   }
   this->theDenominatorFactorsWithMults.QuickSortAscending();
@@ -1401,10 +1400,10 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   this->printoutPFsLatex << "We need to find $A_i$'s so that we have the following equality of rational functions. ";
   this->PrepareNumerators();
   this->PrepareFormatExpressions();
-  this->printoutPFsHtml << HtmlRoutines::GetMathSpanPure(this->stringRationalFunctionLatex, -1);
+  this->printoutPFsHtml << HtmlRoutines::GetMathSpanPure(this->stringRationalFunctionLatex, - 1);
   this->printoutPFsHtml << "<br><br>After clearing denominators, we get the equality: ";
   this->printoutPFsLatex << "After clearing denominators, we get the following equality. ";
-  this->printoutPFsHtml << "<br><br>" << HtmlRoutines::GetMathSpanPure(this->stringPolyIndentityNonSimplifiedLatex, -1);
+  this->printoutPFsHtml << "<br><br>" << HtmlRoutines::GetMathSpanPure(this->stringPolyIndentityNonSimplifiedLatex, - 1);
   this->printoutPFsLatex << "\\[" << this->stringPolyIndentityNonSimplifiedLatex << "\\]";
   Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustDie;
   thePolyThatMustVanish.GetPolyUnivariateWithPolyCoeffs(0, univariateThatMustDie);
@@ -1416,24 +1415,24 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   this->printoutPFsHtml << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
   Matrix<AlgebraicNumber> theSystemHomogeneous, theSystemHomogeneousForLaTeX, theConstTerms, theConstTermsForLaTeX;
   Polynomial<AlgebraicNumber>::GetLinearSystemFromLinearPolys(univariateThatMustDie.theCoeffs, theSystemHomogeneous, theConstTerms);
-  theSystemHomogeneousForLaTeX=theSystemHomogeneous;
-  theConstTermsForLaTeX=theConstTerms;
-  this->currentFormaT.flagFormatMatrixAsLinearSystem=true;
+  theSystemHomogeneousForLaTeX = theSystemHomogeneous;
+  theConstTermsForLaTeX = theConstTerms;
+  this->currentFormaT.flagFormatMatrixAsLinearSystem = true;
   this->printoutPFsHtml << "<br>In other words, we need to solve the system: "
-  << HtmlRoutines::GetMathSpanPure(theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT),-1);
+  << HtmlRoutines::GetMathSpanPure(theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT), - 1);
   this->printoutPFsLatex << "In other words, we need to solve the following system. "
   << "\\[" << theSystemHomogeneous.ToStringSystemLatex(&theConstTerms, &this->currentFormaT) << "\\]";
-  this->currentFormaT.flagUseHTML=true;
-  theSystemHomogeneous.GaussianEliminationByRows(&theConstTerms, 0,0, &this->printoutPFsHtml, &this->currentFormaT);
-  this->currentFormaT.flagUseHTML=false;
-  theSystemHomogeneousForLaTeX.GaussianEliminationByRows(&theConstTermsForLaTeX, 0,0, &this->printoutPFsLatex, &this->currentFormaT);
+  this->currentFormaT.flagUseHTML = true;
+  theSystemHomogeneous.GaussianEliminationByRows(&theConstTerms, 0, 0, &this->printoutPFsHtml, &this->currentFormaT);
+  this->currentFormaT.flagUseHTML = false;
+  theSystemHomogeneousForLaTeX.GaussianEliminationByRows(&theConstTermsForLaTeX, 0, 0, &this->printoutPFsLatex, &this->currentFormaT);
   PolynomialSubstitution<AlgebraicNumber> theSub;
-  theSub.MakeIdSubstitution(this->NumberOfSystemVariables+1);
-  for (int i=1; i<theSub.size; i++)
-    theSub[i].MakeConst(theConstTerms(i-1,0));
+  theSub.MakeIdSubstitution(this->NumberOfSystemVariables + 1);
+  for (int i = 1; i < theSub.size; i ++)
+    theSub[i].MakeConst(theConstTerms(i - 1, 0));
   //this->printoutPFsHtml << "The sub is: " << theSub.ToString();
-  for (int i =0; i<theDenominatorFactorsWithMults.size(); i++)
-    for (int k=0; k<theDenominatorFactorsWithMults.theCoeffs[i]; k++)
+  for (int i = 0; i < theDenominatorFactorsWithMults.size(); i ++)
+    for (int k = 0; k < theDenominatorFactorsWithMults.theCoeffs[i]; k ++)
       this->theNumerators[i][k].Substitution(theSub);
   this->PrepareFinalAnswer();
   this->printoutPFsHtml << "<br>Therefore, the final partial fraction decomposition is: "
@@ -1455,14 +1454,14 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRFComputation theComputation(&theCommands);
-  bool isGood=CalculatorConversions::innerRationalFunction(theCommands, input, theComputation.inpuTE);
+  bool isGood = CalculatorConversions::innerRationalFunction(theCommands, input, theComputation.inpuTE);
   if (isGood)
-    isGood=theComputation.inpuTE.IsOfType<RationalFunctionOld>();
+    isGood = theComputation.inpuTE.IsOfType<RationalFunctionOld>();
   if (!isGood)
     return theCommands << "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals: Failed to convert "
     << input.ToString() << " to rational function. ";
-  theComputation.theRF=theComputation.inpuTE.GetValue<RationalFunctionOld>();
-  if (theComputation.theRF.GetMinNumVars()>1)
+  theComputation.theRF = theComputation.inpuTE.GetValue<RationalFunctionOld>();
+  if (theComputation.theRF.GetMinNumVars() > 1)
     return theCommands << "The input rational function is of " << theComputation.theRF.GetMinNumVars() << " variables and "
     << " I can handle only 1.";
   if(!theComputation.ComputePartialFractionDecomposition())
@@ -1472,21 +1471,20 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals
     return theCommands << "Something went wrong while collecting summands "
     << "while splitting "
     << input.ToString() << " into partial fractions. ";
-
   return output.MakeSequence(theCommands, &theComputation.thePFSummands);
 }
 
 bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicRealsAlgorithm(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals");
   IntegralRFComputation theComputation(&theCommands);
-  bool isGood=CalculatorConversions::innerRationalFunction(theCommands, input, theComputation.inpuTE);
+  bool isGood = CalculatorConversions::innerRationalFunction(theCommands, input, theComputation.inpuTE);
   if (isGood)
-    isGood=theComputation.inpuTE.IsOfType<RationalFunctionOld>();
+    isGood = theComputation.inpuTE.IsOfType<RationalFunctionOld>();
   if (!isGood)
     return theCommands << "CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals: Failed to convert "
     << input.ToString() << " to rational function. ";
-  theComputation.theRF=theComputation.inpuTE.GetValue<RationalFunctionOld>();
-  if (theComputation.theRF.GetMinNumVars()>1)
+  theComputation.theRF = theComputation.inpuTE.GetValue<RationalFunctionOld>();
+  if (theComputation.theRF.GetMinNumVars() > 1)
     return theCommands << "The input rational function is of " << theComputation.theRF.GetMinNumVars() << " variables and "
     << " I can handle only 1.";
   theComputation.ComputePartialFractionDecomposition();
@@ -1502,12 +1500,12 @@ bool CalculatorFunctionsGeneral::innerGaussianEliminationMatrix(Calculator& theC
   if (!theConverted.IsMatrixGivenType<AlgebraicNumber>(0, 0, &theMat))
     return theCommands << "<hr>Failed to extract algebraic number matrix, got intermediate conversion to: "
     << theConverted.ToString();
-  if (theMat.NumRows<2)
+  if (theMat.NumRows < 2)
     return theCommands << "<hr>The matrix I got as input had only 1 row. Possible user typo?";
   std::stringstream out;
   FormatExpressions theFormat;
-  theFormat.flagUseFrac=true;
-  theMat.GaussianEliminationByRows(0, 0, 0, &out, & theFormat);
+  theFormat.flagUseFrac = true;
+  theMat.GaussianEliminationByRows(0, 0, 0, &out, &theFormat);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -1529,10 +1527,10 @@ bool CalculatorFunctionsGeneral::innerCompositeConstTimesAnyActOn(Calculator& th
 
 bool CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly");
-  if (input.size()!=2)
+  if (input.size() != 2)
     return false;
-  Expression theEWAE=input[0];
-  Expression theArgument=input[1];
+  Expression theEWAE = input[0];
+  Expression theArgument = input[1];
   if (!theEWAE.IsListStartingWithAtom(theCommands.opElementWeylAlgebra()))
     return false;
   if (!theArgument.IsBuiltInTypE())
@@ -1542,13 +1540,13 @@ bool CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly(Calculator& theComma
   Polynomial<Rational> theArgumentPoly;
   Expression theArgumentConverted;
   if (theArgument.ConvertToType<Polynomial<Rational> >(theArgumentConverted))
-    theArgumentPoly=theArgumentConverted.GetValue<Polynomial<Rational> >();
+    theArgumentPoly = theArgumentConverted.GetValue<Polynomial<Rational> >();
   else if (theArgument.ConvertToType<ElementWeylAlgebra<Rational> >(theArgumentConverted))
   { if(!theArgumentConverted.GetValue<ElementWeylAlgebra<Rational> >().IsPolynomial(&theArgumentPoly))
       return false;
   } else
     return false;
-  const ElementWeylAlgebra<Rational>& theEWA=theEWAE.GetValue<ElementWeylAlgebra<Rational> >();
+  const ElementWeylAlgebra<Rational>& theEWA = theEWAE.GetValue<ElementWeylAlgebra<Rational> >();
   if (theEWA.HasNonSmallPositiveIntegerDerivation())
     return theCommands << "<hr> I cannot apply " << theEWA.ToString() << " onto " << theArgumentPoly.ToString() << " as "
     << "the differential operator contains non-integral differential operator exponents. ";
@@ -1565,18 +1563,18 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMakeMakeFile");
   (void) input;
   List<std::string> cppFilesNoExtension;
-  for (int i=0; i<theGlobalVariables.theSourceCodeFiles().size; i++)
+  for (int i = 0; i < theGlobalVariables.theSourceCodeFiles().size; i ++)
   { std::string theFileNameWithPath=theGlobalVariables.theSourceCodeFiles()[i].FileName;
-    if (theFileNameWithPath[theFileNameWithPath.size()-1]=='h')
+    if (theFileNameWithPath[theFileNameWithPath.size() - 1] == 'h')
       continue;
-    theFileNameWithPath.resize(theFileNameWithPath.size()-4);
+    theFileNameWithPath.resize(theFileNameWithPath.size() - 4);
     std::string theFileNameNoPathNoExtensionReversed, theFileNameNoPathNoExtension;
-    for (int j=theFileNameWithPath.size()-1; j>=0; j--)
-      if (theFileNameWithPath[j]=='/')
+    for (int j = theFileNameWithPath.size() - 1; j >= 0; j --)
+      if (theFileNameWithPath[j] == '/')
         break;
       else
         theFileNameNoPathNoExtensionReversed.push_back(theFileNameWithPath[j]);
-    for (int j=theFileNameNoPathNoExtensionReversed.size()-1; j>=0; j--)
+    for (int j = theFileNameNoPathNoExtensionReversed.size() - 1; j >= 0; j --)
       theFileNameNoPathNoExtension.push_back(theFileNameNoPathNoExtensionReversed[j]);
     cppFilesNoExtension.AddOnTop(theFileNameNoPathNoExtension);
   }
@@ -1587,13 +1585,13 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
   theFileStream << "directories: bin\n";
   theFileStream << "bin:\n" << "\tmkdir ./bin\n";
   theFileStream << "calculator: ";
-  for (int i=0; i<cppFilesNoExtension.size; i++)
+  for (int i = 0; i < cppFilesNoExtension.size; i ++)
     theFileStream << cppFilesNoExtension[i] << ".o ";
   theFileStream << "\n\tg++ -std=c++11 -pthread ";
-  for (int i=0; i<cppFilesNoExtension.size; i++)
+  for (int i = 0; i < cppFilesNoExtension.size; i ++)
     theFileStream << cppFilesNoExtension[i] << ".o ";
   theFileStream << "-o ./bin/calculator\n\n";
-  for (int i=0; i<cppFilesNoExtension.size; i++)
+  for (int i = 0; i < cppFilesNoExtension.size; i ++)
     theFileStream << cppFilesNoExtension[i] << ".o: " << cppFilesNoExtension[i] << ".cpp\n\tg++ -std=c++0x -pthread -c " << cppFilesNoExtension[i] << ".cpp\n\n";
   outHtml << "<a href=\" " << theGlobalVariables.DisplayPathOutputFolder << "makefile" << "\"> makefile </a>";
   return output.AssignValue(outHtml.str(), theCommands);
@@ -1603,23 +1601,23 @@ bool CalculatorFunctionsGeneral::innerIntersection(Calculator& theCommands, cons
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntersection");
   if (!input.StartsWith(theCommands.opIntersection()))
     return false;
-  int numElts=1;
-  for (int i=1; i<input.size(); i++)
+  int numElts = 1;
+  for (int i = 1; i < input.size(); i ++)
     if (!input[i].IsSequenceNElementS())
       return false;
     else
-      numElts+=input[i].children.size-1;
+      numElts += input[i].size() - 1;
   List<List<Expression> > theListsToBeIntersected;
-  theListsToBeIntersected.SetSize(input.children.size-1);
-  for (int i=1; i<input.children.size; i++)
-  { theListsToBeIntersected[i-1].Reserve(input[i].children.size);
-    for (int j=1; j<input[i].children.size; j++)
-      theListsToBeIntersected[i-1].AddOnTop(input[i][j]);
+  theListsToBeIntersected.SetSize(input.size() - 1);
+  for (int i = 1; i < input.size(); i ++)
+  { theListsToBeIntersected[i - 1].Reserve(input[i].size());
+    for (int j = 1; j < input[i].size(); j ++)
+      theListsToBeIntersected[i - 1].AddOnTop(input[i][j]);
   }
-  if (theListsToBeIntersected.size==0)
+  if (theListsToBeIntersected.size == 0)
     return false;
-  List<Expression> outputList=theListsToBeIntersected[0];
-  for (int i=1; i<theListsToBeIntersected.size; i++)
+  List<Expression> outputList = theListsToBeIntersected[0];
+  for (int i = 1; i < theListsToBeIntersected.size; i ++)
     outputList.IntersectWith(theListsToBeIntersected[i], outputList);
   return output.MakeSequence(theCommands, &outputList);
 }
@@ -1629,14 +1627,14 @@ bool CalculatorFunctionsGeneral::innerUnion(Calculator& theCommands, const Expre
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUnion");
   if (!input.StartsWith(theCommands.opUnion()))
     return false;
-  int numElts=1;
-  for (int i=1; i<input.size(); i++)
+  int numElts = 1;
+  for (int i = 1; i < input.size(); i ++)
     if (!input[i].IsSequenceNElementS())
       return false;
   output.reset(theCommands, numElts);
   output.AddChildAtomOnTop(theCommands.opSequence());
-  for (int i=1; i<input.size(); i++)
-    for (int j=1; j<input[i].size(); j++)
+  for (int i = 1; i < input.size(); i ++)
+    for (int j = 1; j < input[i].size(); j ++)
       output.AddChildOnTop(input[i][j]);
   return true;
 }
@@ -1645,23 +1643,23 @@ bool CalculatorFunctionsGeneral::innerUnionNoRepetition(Calculator& theCommands,
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUnionNoRepetition");
   if (!input.IsLisT())
     return false;
-  int numElts=1;
-  for (int i=1; i<input.size(); i++)
+  int numElts = 1;
+  for (int i = 1; i < input.size(); i ++)
     if (!input[i].IsListStartingWithAtom(theCommands.opSequence()))
       return false;
     else
-      numElts+=input[i].size()-1;
+      numElts += input[i].size() - 1;
   HashedList<Expression> theList;
   List<int> theIndices;
   theList.SetExpectedSize(numElts);
-  for (int i=1; i<input.size(); i++)
-    for (int j=1; j<input[i].size(); j++)
+  for (int i = 1; i < input.size(); i ++)
+    for (int j = 1; j < input[i].size(); j ++)
       theList.AddOnTopNoRepetition(input[i][j]);
   theIndices.SetSize(theList.size);
-  for (int i=0; i<theList.size; i++)
-    theIndices[i]=theCommands.theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(theList[i]);
+  for (int i = 0; i < theList.size; i ++)
+    theIndices[i] = theCommands.theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(theList[i]);
   output.children.Reserve(numElts);
-  output.reset(theCommands, theIndices.size+1);
+  output.reset(theCommands, theIndices.size + 1);
   output.AddChildAtomOnTop(theCommands.opSequence());
   output.children.AddOnTop(theIndices);
   return true;
@@ -1669,10 +1667,10 @@ bool CalculatorFunctionsGeneral::innerUnionNoRepetition(Calculator& theCommands,
 
 bool CalculatorFunctionsGeneral::innerCrossProduct(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCrossProduct");
-  if (!input.IsListStartingWithAtom(theCommands.opCrossProduct()) || input.children.size!=3)
+  if (!input.IsListStartingWithAtom(theCommands.opCrossProduct()) || input.children.size != 3)
     return false;
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
   if (!leftE.IsSequenceNElementS(3) || !rightE.IsSequenceNElementS(3))
   { std::stringstream out;
     out << "Can't compute cross product of the non-3d vectors " << input[1].ToString() << " and "
@@ -1681,29 +1679,29 @@ bool CalculatorFunctionsGeneral::innerCrossProduct(Calculator& theCommands, cons
   }
   List<Expression> outputSequence;
   outputSequence.SetSize(3);
-  outputSequence[0]=leftE[2]*rightE[3]- leftE[3]*rightE[2];
-  outputSequence[1]=leftE[3]*rightE[1]- leftE[1]*rightE[3];
-  outputSequence[2]=leftE[1]*rightE[2]- leftE[2]*rightE[1];
+  outputSequence[0] = leftE[2] * rightE[3] - leftE[3] * rightE[2];
+  outputSequence[1] = leftE[3] * rightE[1] - leftE[1] * rightE[3];
+  outputSequence[2] = leftE[1] * rightE[2] - leftE[2] * rightE[1];
   return output.MakeSequence(theCommands, &outputSequence);
 }
 
 bool CalculatorFunctionsGeneral::innerDifferentiateConstPower(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateConstPower");
   //////////////////////
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
     << " - possible user typo?";
-  const Expression& theDOvar=input[1];
-  const Expression& theArgument=input[2];
+  const Expression& theDOvar = input[1];
+  const Expression& theArgument = input[2];
   //////////////////////
   if (!theArgument.StartsWith(theCommands.opThePower(), 3))
     return false;
   if (!theArgument[2].IsConstantNumber())
     return false;
   Expression theMonomial, theTerm, theExponent, basePrime, minusOne;
-  minusOne.AssignValue<Rational>(-1, theCommands);
+  minusOne.AssignValue<Rational>(- 1, theCommands);
   theExponent.MakeXOX(theCommands, theCommands.opPlus(), theArgument[2], minusOne);
   theMonomial.MakeXOX(theCommands, theCommands.opThePower(), theArgument[1], theExponent);
   basePrime.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
@@ -1714,13 +1712,13 @@ bool CalculatorFunctionsGeneral::innerDifferentiateConstPower(Calculator& theCom
 bool CalculatorFunctionsGeneral::innerDifferentiateAPowerB(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateAPowerB");
   //////////////////////
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
     << " - possible user typo?";
-  const Expression& theDOvar=input[1];
-  const Expression& theArgument=input[2];
+  const Expression& theDOvar = input[1];
+  const Expression& theArgument = input[2];
   //////////////////////
   //d/dx a^b= d/dx(e^{b\\ln a}) = a^b d/dx(b\\log a)
   if (!theArgument.StartsWith(theCommands.opThePower(), 3))
@@ -1737,12 +1735,12 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAPowerB(Calculator& theComman
 bool CalculatorFunctionsGeneral::innerDifferentiateConstant(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateConstant");
   //////////////////////
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
     << " - possible user typo?";
-  const Expression& theArgument=input[2];
+  const Expression& theArgument = input[2];
   //////////////////////
   if (!theArgument.IsConstantNumber())
     return false;
@@ -1752,15 +1750,15 @@ bool CalculatorFunctionsGeneral::innerDifferentiateConstant(Calculator& theComma
 bool CalculatorFunctionsGeneral::innerDifferentiateX(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateX");
   //////////////////////
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
     << " - possible user typo?";
-  const Expression& theDOvar=input[1];
-  const Expression& theArgument=input[2];
+  const Expression& theDOvar = input[1];
+  const Expression& theArgument = input[2];
   //////////////////////
-  if (theArgument!=theDOvar)
+  if (theArgument != theDOvar)
     return false;
   return output.AssignValue<Rational>(1, theCommands);
 }
@@ -1768,17 +1766,17 @@ bool CalculatorFunctionsGeneral::innerDifferentiateX(Calculator& theCommands, co
 bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig");
   /////////////////////
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString() << " - possible user typo?";
-  const Expression& theArgument=input[2];
+  const Expression& theArgument = input[2];
   //////////////////////
   if (theArgument.IsAtomGivenData(theCommands.opSin()))
     return output.MakeAtom(theCommands.opCos(), theCommands);
   if (theArgument.IsAtomGivenData(theCommands.opCos()))
   { Expression mOneE, sinE;
-    mOneE.AssignValue<Rational>(-1, theCommands);
+    mOneE.AssignValue<Rational>(- 1, theCommands);
     sinE.MakeAtom(theCommands.opSin(), theCommands);
     return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, sinE);
   }
@@ -1793,7 +1791,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(Calculator
     cscE.MakeAtom(theCommands.opCsc(), theCommands);
     twoE.AssignValue(2, theCommands);
     cscSquared.MakeXOX(theCommands, theCommands.opThePower(), cscE, twoE);
-    mOneE.AssignValue(-1, theCommands);
+    mOneE.AssignValue(- 1, theCommands);
     return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, cscSquared);
   }
   if (theArgument.IsAtomGivenData(theCommands.opSec()))
@@ -1806,17 +1804,17 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(Calculator
   { Expression cotE, cscE, mOneE, cotTimesCscE;
     cotE.MakeAtom(theCommands.opCot(), theCommands);
     cscE.MakeAtom(theCommands.opCsc(), theCommands);
-    mOneE.AssignValue(-1, theCommands);
+    mOneE.AssignValue(- 1, theCommands);
     cotTimesCscE.MakeXOX(theCommands, theCommands.opTimes(), cotE, cscE);
     return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, cotTimesCscE);
   }
   if (theArgument.IsAtomGivenData(theCommands.opArcTan()))
   { Polynomial<Rational> onePlusXsquared;
     RationalFunctionOld oneOverOnePlusXsquared;
-    onePlusXsquared.MakeMonomiaL(0,2);
-    onePlusXsquared+=1;
+    onePlusXsquared.MakeMonomiaL(0, 2);
+    onePlusXsquared += 1;
     oneOverOnePlusXsquared.MakeOne();
-    oneOverOnePlusXsquared/=onePlusXsquared;
+    oneOverOnePlusXsquared /= onePlusXsquared;
     Expression theContext;
     theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
     return output.AssignValueWithContext(oneOverOnePlusXsquared, theContext, theCommands);
@@ -1825,9 +1823,9 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(Calculator
   { Expression denE, theContext;
     theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
     RationalFunctionOld oneMinusXsquared;
-    oneMinusXsquared.MakeMonomiaL(0,2);
-    oneMinusXsquared*=-1;
-    oneMinusXsquared+=1;
+    oneMinusXsquared.MakeMonomiaL(0, 2);
+    oneMinusXsquared *= - 1;
+    oneMinusXsquared += 1;
     denE.AssignValueWithContext(oneMinusXsquared, theContext, theCommands);
     return output.MakeXOX(theCommands, theCommands.opThePower(), denE, theCommands.EMHalf());
   }
@@ -1835,12 +1833,12 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(Calculator
   { Expression denE, theContext;
     theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
     RationalFunctionOld oneMinusXsquared;
-    oneMinusXsquared.MakeMonomiaL(0,2);
-    oneMinusXsquared*=-1;
-    oneMinusXsquared+=1;
+    oneMinusXsquared.MakeMonomiaL(0, 2);
+    oneMinusXsquared *= - 1;
+    oneMinusXsquared += 1;
     denE.AssignValueWithContext(oneMinusXsquared, theContext, theCommands);
     output.MakeXOX(theCommands, theCommands.opThePower(), denE, theCommands.EMHalf());
-    output*=-1;
+    output *= - 1;
     return true;
   }
   return false;
@@ -1850,7 +1848,7 @@ bool CalculatorFunctionsGeneral::innerCompositeDifferentiateLog(Calculator& theC
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeDifferentiateLog");
   /////////////////////
 //  stOutput << "<hr>input composite: " << input.ToString();
-  if (input.size()!=2)
+  if (input.size() != 2)
     return false;
   if (!input[0].StartsWith(theCommands.opDifferentiate(), 3))
     return false;
@@ -1878,67 +1876,67 @@ bool CalculatorFunctionsGeneral::outerDivideByNumber
   AlgebraicNumber theAlgValue;
   double theDoubleValue;
   Expression theInvertedE;
-  bool result=false;
+  bool result = false;
   if (input[2].IsOfType<Rational>(&theRatValue))
   { theRatValue.Invert();
     theInvertedE.AssignValue(theRatValue, theCommands);
-    result=true;
+    result = true;
   }
   if (input[2].IsOfType<AlgebraicNumber>(&theAlgValue))
   { theAlgValue.Invert();
     theInvertedE.AssignValue(theAlgValue, theCommands);
-    result=true;
+    result = true;
   }
   if (input[2].IsOfType<double>(&theDoubleValue))
-  { theDoubleValue=1/theDoubleValue;
+  { theDoubleValue = 1 / theDoubleValue;
     theInvertedE.AssignValue(theDoubleValue, theCommands);
-    result=true;
+    result = true;
   }
   if (!result)
     return false;
-  output=theInvertedE*input[1];
+  output = theInvertedE * input[1];
   return true;
 }
 
 bool CalculatorFunctionsGeneral::innerMax(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMin");
   (void) theCommands;
-  if (input.size()<3)
+  if (input.size() < 3)
     return false;
   double theMax, current;
-  int bestIndex=1;
-  for (int i=1; i<input.size(); i++)
-  { if (!input[i].EvaluatesToDouble(& current))
+  int bestIndex = 1;
+  for (int i = 1; i < input.size(); i ++)
+  { if (!input[i].EvaluatesToDouble(&current))
       return false;
-    if (i==1)
-      theMax=current;
-    else if (theMax<current)
-    { theMax=current;
-      bestIndex=i;
+    if (i == 1)
+      theMax = current;
+    else if (theMax < current)
+    { theMax = current;
+      bestIndex = i;
     }
   }
-  output=input[bestIndex];
+  output = input[bestIndex];
   return true;
 }
 
 bool CalculatorFunctionsGeneral::innerMin(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMin");
   (void) theCommands;
-  if (input.size()<3)
+  if (input.size() < 3)
     return false;
   double theMin, current;
-  int bestIndex=1;
-  for (int i=1; i<input.size(); i++)
+  int bestIndex = 1;
+  for (int i = 1; i < input.size(); i ++)
   { if (!input[i].EvaluatesToDouble(& current))
       return false;
-    if (i==1)
-      theMin=current;
-    else if (theMin>current)
-    { theMin=current;
-      bestIndex=i;
+    if (i == 1)
+      theMin = current;
+    else if (theMin > current)
+    { theMin = current;
+      bestIndex = i;
     }
   }
-  output=input[bestIndex];
+  output = input[bestIndex];
   return true;
 }
 
@@ -1946,11 +1944,11 @@ bool CalculatorFunctionsGeneral::innerEqualEqualEqual(Calculator& theCommands, c
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerEqualEqualEqual");
   if (!input.IsListNElements(3))
     return false;
-  const Expression& left =input[1];
-  const Expression& right=input[2];
-  int result=0;
-  if (left==right)
-    result=1;
+  const Expression& left  = input[1];
+  const Expression& right = input[2];
+  int result = 0;
+  if (left == right)
+    result = 1;
   return output.AssignValue(result, theCommands);
 }
 
@@ -1958,11 +1956,11 @@ bool CalculatorFunctionsGeneral::outerEqualEqual(Calculator& theCommands, const 
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerEqualEqual");
   if (!input.IsListNElements(3))
     return false;
-  const Expression& left=input[1];
-  const Expression& right=input[2];
+  const Expression& left = input[1];
+  const Expression& right = input[2];
   if (left.HasBoundVariables() || right.HasBoundVariables())
     return false;
-  if (left==right)
+  if (left == right)
     return output.AssignValue(1, theCommands);
   if (left.IsEqualToMathematically(right))
     return output.AssignValue(1, theCommands);
@@ -1995,9 +1993,9 @@ bool CalculatorFunctionsGeneral::outerDivCancellations(Calculator& theCommands, 
     return false;
   if (!input[2].StartsWith(theCommands.opDivide(), 3))
     return false;
-  if (input[1][2]==input[2][2])
+  if (input[1][2] == input[2][2])
     return output.MakeXOX(theCommands, theCommands.opDivide(), input[1][1], input[2][1]);
-  if (input[1][1]==input[2][1])
+  if (input[1][1] == input[2][1])
     return output.MakeXOX(theCommands, theCommands.opDivide(), input[2][2], input[1][2]);
   return false;
 }
@@ -2022,15 +2020,15 @@ bool CalculatorFunctionsGeneral::outerAssociateDivisionDivision(Calculator& theC
 bool CalculatorFunctionsGeneral::innerDifferentiateChainRule(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateChainRule");
   /////////////////////
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
     << " - possible user typo?";
-  const Expression& theDOvar=input[1], theArgument=input[2];
+  const Expression& theDOvar = input[1], theArgument = input[2];
   //////////////////////
 //  stOutput << "ere be chain rule! Argument be: " << theArgument.ToString() << " Argument[0] be: " << theArgument[0].ToString();
-  if (!theArgument.StartsWith(-1, 2))
+  if (!theArgument.StartsWith(- 1, 2))
     return false;
 //  stOutput << " continues to rule! The argument be: " << theArgument.ToString() << " theArgument.IsGoodForChainRuleFunction()= "
 //  << theArgument.IsGoodForChainRuleFunction() << " theArgument[0].IsGoodForChainRuleFunction()="
@@ -2052,11 +2050,11 @@ bool CalculatorFunctionsGeneral::innerDifferentiateChainRule(Calculator& theComm
 bool CalculatorFunctionsGeneral::innerDifferentiateAplusB(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateAplusB");
   /////////////////////
-  if (input.children.size!=3)
+  if (input.size() != 3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString() << " - possible user typo?";
-  const Expression& theDOvar=input[1], theArgument=input[2];
+  const Expression& theDOvar = input[1], theArgument = input[2];
   //////////////////////
   if (!theArgument.StartsWith(theCommands.opPlus(), 3))
     return false;
@@ -2071,12 +2069,12 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAplusB(Calculator& theCommand
 bool CalculatorFunctionsGeneral::innerDifferentiateAtimesB(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateAtimesB");
     //////////////////////
-  if (input.children.size!=3)
+  if (input.size() != 3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
     << " - possible user typo?";
-  const Expression& theDOvar=input[1], theArgument=input[2];
+  const Expression& theDOvar = input[1], theArgument = input[2];
   //////////////////////
   if (!theArgument.StartsWith(theCommands.opTimes(), 3))
     return false;
@@ -2097,7 +2095,7 @@ bool CalculatorFunctionsGeneral::innerPowerAnyToZero(Calculator& theCommands, co
   if (!input[2].IsEqualToZero())
     return false;
   if (input[1].StartsWith(theCommands.opIntegral()))
-    if (input[1].size()!=3) //<- an expression of the form \int_a^b (without f*dx).
+    if (input[1].size() != 3) //<- an expression of the form \int_a^b (without f*dx).
       return false;
 //  stOutput << "input[1]: "<< input[1].ToString() << ", input[2]: " << input[2].ToString();
   if (input[1].IsEqualToZero())
@@ -2108,26 +2106,26 @@ bool CalculatorFunctionsGeneral::innerPowerAnyToZero(Calculator& theCommands, co
 bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative");
     //////////////////////
-  if (input.children.size!=3)
+  if (input.size() != 3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression " << input[1].ToString()
     << " - possible user typo?";
-  const Expression& theDOvar=input[1], theArgument=input[2];
+  const Expression& theDOvar = input[1], theArgument = input[2];
   //////////////////////
   //Quotient rule (commutative): (a/b^n)'=(a'b-n a b')/b^{n+1}
   if (!theArgument.StartsWith(theCommands.opDivide(), 3))
     return false;
-  const Expression& numeratorE=theArgument[1];
-  const Expression& denominatorE=theArgument[2];
+  const Expression& numeratorE = theArgument[1];
+  const Expression& denominatorE = theArgument[2];
   if (numeratorE.StartsWith(theCommands.opPlus()))
   { Expression leftE(theCommands), rightE(theCommands);
     leftE.AddChildAtomOnTop(theCommands.opDifferentiate());
     leftE.AddChildOnTop(theDOvar);
-    rightE=leftE;
-    leftE.AddChildOnTop(numeratorE[1]/denominatorE);
-    rightE.AddChildOnTop(numeratorE[2]/denominatorE);
-    output=leftE+rightE;
+    rightE = leftE;
+    leftE.AddChildOnTop(numeratorE[1] / denominatorE);
+    rightE.AddChildOnTop(numeratorE[2] / denominatorE);
+    output = leftE + rightE;
     return true;
   }
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -2135,16 +2133,16 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative(Calculato
   Expression theDenominatorBase, eOne, theDenominatorExponentPlusOne, theDenominatorExponent, changedMultiplicand,
   leftSummand, rightSummand, theDenominatorFinal, numerator;
   eOne.AssignValue(1, theCommands);
-  bool denBaseFound=false;
+  bool denBaseFound = false;
   if (theArgument[2].StartsWith(theCommands.opThePower(), 3))
     if (theArgument[2][2].IsConstantNumber())
-    { denBaseFound=true;
-      theDenominatorBase=theArgument[2][1];
-      theDenominatorExponent=theArgument[2][2];
+    { denBaseFound = true;
+      theDenominatorBase = theArgument[2][1];
+      theDenominatorExponent = theArgument[2][2];
       theDenominatorExponentPlusOne.MakeXOX(theCommands, theCommands.opPlus(), theDenominatorExponent, eOne);
     }
   if (!denBaseFound)
-  { theDenominatorBase=theArgument[2];
+  { theDenominatorBase = theArgument[2];
     theDenominatorExponentPlusOne.AssignValue(2, theCommands);
     theDenominatorExponent.AssignValue(1, theCommands);
   }
@@ -2161,12 +2159,12 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative(Calculato
 bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBNONCommutative(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateAdivideBNONCommutative");
     //////////////////////
-  if (input.children.size!=3)
+  if (input.size() != 3)
     return false;
   if (!input[1].IsAtom())
     theCommands << "<hr>Warning: differentiating with respect to the non-atomic expression " << input[1].ToString()
     << " - possible user typo?";
-  const Expression& theDOvar=input[1], theArgument=input[2];
+  const Expression& theDOvar = input[1], theArgument = input[2];
   //////////////////////
   //Quotient rule (non-commutative): (a/b)'=(ab^{-1})'=a' b - a b^{-1} b' b^{-1}
   if (!theArgument.StartsWith(theCommands.opDivide(), 3))
@@ -2175,7 +2173,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBNONCommutative(Calcul
   output.reset(theCommands);
   Expression changedMultiplicand, leftSummand, rightSummand;
   Expression bInverse, bPrime, eMOne;
-  eMOne.AssignValue<Rational>(-1, theCommands);
+  eMOne.AssignValue<Rational>(- 1, theCommands);
   changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
   leftSummand.MakeXOX(theCommands, theCommands.opDivide(), changedMultiplicand, theArgument[2]);
   bPrime.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
@@ -2194,34 +2192,34 @@ bool CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate(Calculator& the
     return false;
   HashedListSpecialized<Expression> theList;
   input.GetBlocksOfCommutativity(theList);
-  if (theList.size!=1)
+  if (theList.size != 1)
     return false;
-  if (input[2]>input[1] || input[2]==input[1])
+  if (input[2] > input[1] || input[2] == input[1])
     return false;
 //  stOutput << "<hr>" << input[2].ToString() << " less than " << input[1].ToString();
 //  stOutput << "ere be i, number 1!";
-  output=input;
-  output.children.SwapTwoIndices(1,2);
+  output = input;
+  output.children.SwapTwoIndices(1, 2);
   return true;
 }
 
 bool CalculatorFunctionsGeneral::outerCommuteAtimesBtimesCifUnivariate(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCommuteAtimesBtimesCifUnivariate");
-  if (!input.StartsWith(theCommands.opTimes(),3))
+  if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
-  const Expression& leftE=input[1];
+  const Expression& leftE = input[1];
   if (leftE.IsConstantNumber())
     return false;
-  if (!input[2].StartsWith(theCommands.opTimes(),3))
+  if (!input[2].StartsWith(theCommands.opTimes(), 3))
     return false;
-  const Expression& rightE=input[2][1];
+  const Expression& rightE = input[2][1];
   HashedListSpecialized<Expression> theList;
 
   leftE.GetBlocksOfCommutativity(theList);
   rightE.GetBlocksOfCommutativity(theList);
-  if (theList.size!=1)
+  if (theList.size != 1)
     return false;
-  if (rightE>leftE || leftE==rightE)
+  if (rightE > leftE || leftE == rightE)
     return false;
 //  stOutput << "<hr>" << rightE.ToString() << " less than " << leftE.ToString();
   Expression leftMultiplicand;
@@ -2251,41 +2249,41 @@ bool CalculatorFunctionsGeneral::innerGetFreeVariablesExcludeNamedConstants
 bool CalculatorFunctionsGeneral::innerCompareFunctionsNumerically
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareFunctionsNumerically");
-  if (input.size()<5)
+  if (input.size() < 5)
     return theCommands << "Comparing functions takes as input at least 4 arguments (two functions to compare and interval to compare over).";
-  Expression theFunE=input[1];
-  theFunE-=input[2];
+  Expression theFunE = input[1];
+  theFunE -= input[2];
   //stOutput << "Finding free vars in: " << theFunE.ToString();
   HashedList<Expression> theVars;
   if (!theFunE.GetFreeVariables(theVars, true))
     return theCommands << "Was not able to extract the function argument of your function. " ;
-  if (theVars.size<=0)
+  if (theVars.size <= 0)
   { Expression zeroE;
     zeroE.AssignValue(0, theCommands);
     return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
   }
   //stOutput << "The vars: " << theVars.ToStringCommaDelimited();
-  if (theVars.size>1)
+  if (theVars.size > 1)
     return theCommands << "I cannot compare the functions as they appear to depend on more than one variable, namely, on: "
     << theVars.ToStringCommaDelimited();
-  double leftBoundary=0;
-  double rightBoundary=0;
+  double leftBoundary = 0;
+  double rightBoundary = 0;
   if (!input[3].EvaluatesToDouble(&leftBoundary))
     return theCommands << "Failed to extract the left endpoint of the comparison interval. ";
   if (!input[4].EvaluatesToDouble(&rightBoundary))
     return theCommands << "Failed to extract the right endpoint of the comparison interval. ";
-  int numPoints=50;
-  if (input.size()>5)
+  int numPoints = 50;
+  if (input.size() > 5)
     if (!input[5].IsSmallInteger(&numPoints))
       return theCommands << "Failed to convert argument: " << input[5].ToString() << " to a small integer. ";
-  double minDiff=0, maxDiff=0;
+  double minDiff = 0, maxDiff = 0;
   if (!theFunE.EvaluatesToDoubleInRange(theVars[0].ToString(), leftBoundary, rightBoundary, numPoints, &minDiff, &maxDiff, 0))
     return theCommands << "Failed to evaluate your function to a number. The sampling interval may be outside of the domain of the function. ";
-  double tolerance=0.0001;
-  if (input.size()>6)
+  double tolerance = 0.0001;
+  if (input.size() > 6)
     if (!input[6].EvaluatesToDouble(&tolerance))
       return theCommands << "Failed to evaluate the argument " << input[6].ToString() << " to a floating point number. ";
-  if (minDiff<- tolerance || maxDiff> tolerance)
+  if (minDiff < - tolerance || maxDiff > tolerance)
     return output.AssignValue(0, theCommands);
   return output.AssignValue(1, theCommands);
 //  theFunE.
@@ -2294,73 +2292,73 @@ bool CalculatorFunctionsGeneral::innerCompareFunctionsNumerically
 bool CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints");
-  if (input.size()<5)
+  if (input.size() < 5)
     return theCommands << "Comparing functions at points takes as input at least 5 arguments "
     << "- two functions to compare, precision, variable belonging to an interval and number of sampling points).";
-  Expression theFunE=input[1];
-  theFunE-=input[2];
+  Expression theFunE = input[1];
+  theFunE -= input[2];
   HashedList<Expression> theFreeVars;
   if (!theFunE.GetFreeVariables(theFreeVars, true))
     return theCommands << "Was not able to extract the function argument of your function. " ;
-  if (theFreeVars.size<=0)
+  if (theFreeVars.size <= 0)
   { Expression zeroE;
     zeroE.AssignValue(0, theCommands);
     return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
   }
-  double tolerance=0.0001;
+  double tolerance = 0.0001;
   if (!input[3].EvaluatesToDouble(&tolerance))
     return theCommands << "Failed to evaluate tolerance limit from " << input[3].ToString()
     << " to a floating point number. ";
-  if (tolerance<0)
-    tolerance*=-1;
+  if (tolerance < 0)
+    tolerance *= - 1;
   if (!input[4].StartsWith(theCommands.opIn(), 3))
     return theCommands << "The fourth argument " << input[4].ToString() << " needs to be "
     << " of the form (x,y,...)\\in (...). ";
-  const Expression& theVarsE=input[4][1];
+  const Expression& theVarsE = input[4][1];
   HashedList<Expression> varsGiven;
   if (!theVarsE.IsSequenceNElementS())
     varsGiven.AddOnTop(theVarsE);
   else
-    for (int i=1; i< theVarsE.children.size; i++)
+    for (int i = 1; i < theVarsE.size(); i ++)
     { if (varsGiven.Contains(theVarsE[i]))
         return theCommands << theVarsE[i] << " given more than once. ";
       varsGiven.AddOnTop(theVarsE[i]);
     }
-  for (int i=0; i<theFreeVars.size; i++)
+  for (int i = 0; i < theFreeVars.size; i ++)
     if (!varsGiven.Contains(theFreeVars[i]))
       return theCommands << "The expression depends on  " << theFreeVars[i].ToString()
       << " but I no value given for that expression. ";
-  const Expression& thePointsE=input[4][2];
+  const Expression& thePointsE = input[4][2];
   Matrix<double> thePoints;
   if (!theCommands.GetMatrix(thePointsE, thePoints, 0, varsGiven.size, CalculatorFunctionsGeneral::innerEvaluateToDouble))
     return theCommands << "Failed to extract list of points from: " << thePointsE.ToString();
-  HashedList<Expression> knownEs= theCommands.knownDoubleConstants;
-  List<double> knownValues=theCommands.knownDoubleConstantValues;
-  for (int i=0; i<varsGiven.size; i++)
+  HashedList<Expression> knownEs = theCommands.knownDoubleConstants;
+  List<double> knownValues = theCommands.knownDoubleConstantValues;
+  for (int i = 0; i < varsGiven.size; i ++)
     if (knownEs.Contains(varsGiven[i]))
       return theCommands << varsGiven[i]
       << " is an already known constant and cannot be used as a variable in this context. ";
     else
       knownEs.AddOnTop(varsGiven[i]);
   knownValues.SetSize(knownEs.size);
-  int numFailedSamples=0;
-  int totalSamples=thePoints.NumRows;
+  int numFailedSamples = 0;
+  int totalSamples = thePoints.NumRows;
 /*  stOutput << "<br>Total number of samples: " << totalSamples;
   stOutput << "<br>Variables: " << theBoundaryVars.ToStringCommaDelimited();
   stOutput << "<br>Boundaries left: " << leftBoundaries.ToStringCommaDelimited();
   stOutput << "<br>Boundaries right: " << rightBoundaries.ToStringCommaDelimited();*/
-  for (int i=0; i<thePoints.NumRows; i++)
-  { for (int j=0; j<thePoints.NumCols; j++)
-      knownValues[j+theCommands.knownDoubleConstants.size]= thePoints(i,j);
-    double floatingResult=0;
+  for (int i = 0; i < thePoints.NumRows; i ++)
+  { for (int j = 0; j < thePoints.NumCols; j ++)
+      knownValues[j + theCommands.knownDoubleConstants.size] = thePoints(i, j);
+    double floatingResult = 0;
     if (!theFunE.EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &floatingResult))
-    { numFailedSamples++;
-      if ((numFailedSamples*100)/totalSamples>20)
+    { numFailedSamples ++;
+      if ((numFailedSamples * 100) / totalSamples > 20)
       { theCommands << "Failed to evaluate at least one of the functions in more than 20% of the sampling points. ";
         return output.AssignValue(0, theCommands);
       }
     }
-    if (floatingResult> tolerance || floatingResult <-tolerance)
+    if (floatingResult > tolerance || floatingResult < - tolerance)
     { //theCommands << "<hr>DEBUG: "
       //<< "floating result: " << floatingResult << " violates the tolerance: "
       //<< tolerance << " for: "
@@ -2377,15 +2375,15 @@ bool CalculatorFunctionsGeneral::innerCompareExpressionsNumericallyAtPoints
 bool CalculatorFunctionsGeneral::innerCompareExpressionsNumerically
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareFunctionsNumerically");
-  if (input.children.size<6)
+  if (input.size() < 6)
     return theCommands << "Comparing functions takes as input at least 5 arguments "
     << "- two functions to compare, precision, variable belonging to an interval and number of sampling points).";
-  Expression theFunE=input[1];
-  theFunE-=input[2];
+  Expression theFunE = input[1];
+  theFunE -= input[2];
   HashedList<Expression> theVars;
   if (!theFunE.GetFreeVariables(theVars, true))
     return theCommands << "Was not able to extract the function argument of your function. " ;
-  if (theVars.size<=0)
+  if (theVars.size <= 0)
   { Expression zeroE;
     zeroE.AssignValue(0, theCommands);
     return output.MakeXOX(theCommands, theCommands.opEqualEqual(), theFunE, zeroE);
@@ -2395,8 +2393,8 @@ bool CalculatorFunctionsGeneral::innerCompareExpressionsNumerically
   List<double> rightBoundaries;
   HashedList<Expression> theBoundaryVars;
   List<int> numSamples;
-  for (int i=4; i<input.children.size; i+=2)
-  { const Expression& currentIntervalWithVariable=input[i];
+  for (int i = 4; i < input.size(); i += 2)
+  { const Expression& currentIntervalWithVariable = input[i];
     if (!currentIntervalWithVariable.StartsWith(theCommands.opIn(), 3))
       return theCommands << "Expression " << currentIntervalWithVariable.ToString()
       << " is not a belonging relation (does not use the \\in symbol). ";
@@ -2414,27 +2412,27 @@ bool CalculatorFunctionsGeneral::innerCompareExpressionsNumerically
     leftBoundaries.AddOnTop(currentLeft);
     rightBoundaries.AddOnTop(currentRight);
     numSamples.AddOnTop(10);
-    int currentNumSamplingPoints=0;
-    if (i+1<input.children.size)
-    { if (input[i+1].IsSmallInteger(&currentNumSamplingPoints))
-        *numSamples.LastObject()=currentNumSamplingPoints;
+    int currentNumSamplingPoints = 0;
+    if (i + 1 < input.size())
+    { if (input[i + 1].IsSmallInteger(&currentNumSamplingPoints))
+        *numSamples.LastObject() = currentNumSamplingPoints;
       else
         return theCommands << "Failed to extract a small integer for the number of sampling points from: "
-        << input[i+1].ToString();
-      if (*numSamples.LastObject()>1000)
+        << input[i + 1].ToString();
+      if (*numSamples.LastObject() > 1000)
         return theCommands << *numSamples.LastObject() << " sampling points requested for variable/expression "
         << theBoundaryVars.LastObject()->ToString() << "; this exceeds the hard-coded limit of 1000. ";
-      if (*numSamples.LastObject()<1)
+      if (*numSamples.LastObject() < 1)
         return theCommands << *numSamples.LastObject() << " sampling points requested for variable/expression "
         << theBoundaryVars.LastObject()->ToString() << "; this is not allowed. ";
     }
   }
-  for (int i=0; i<theVars.size; i++)
+  for (int i = 0; i < theVars.size; i ++)
     if (!theBoundaryVars.Contains(theVars[i]))
       return theCommands << "Could not find an interval for variable/expression: " << theVars[i].ToString();
-  HashedList<Expression> knownEs= theCommands.knownDoubleConstants;
-  List<double> knownValues=theCommands.knownDoubleConstantValues;
-  for (int i=0; i<theBoundaryVars.size; i++)
+  HashedList<Expression> knownEs = theCommands.knownDoubleConstants;
+  List<double> knownValues = theCommands.knownDoubleConstantValues;
+  for (int i = 0; i < theBoundaryVars.size; i ++)
     if (knownEs.Contains(theBoundaryVars[i]))
       return theCommands << theBoundaryVars[i]
       << " is an already known constant and cannot be used as a variable in this context. ";
@@ -2443,39 +2441,39 @@ bool CalculatorFunctionsGeneral::innerCompareExpressionsNumerically
   knownValues.SetSize(knownEs.size);
   SelectionWithDifferentMaxMultiplicities theSamplingSelector;
   theSamplingSelector.initFromInts(numSamples);
-  if (theSamplingSelector.TotalNumSubsets()>1000000)
+  if (theSamplingSelector.TotalNumSubsets() > 1000000)
     return theCommands << "The total number of sampling points, "
     << theSamplingSelector.TotalNumSubsets().ToString() << " exceeds "
     << "the hard-coded limit of 1000000. ";
-  double tolerance=0.0001;
+  double tolerance = 0.0001;
   if (!input[3].EvaluatesToDouble(&tolerance))
     return theCommands << "Failed to evaluate tolerance limit from " << input[3].ToString()
     << " to a floating point number. ";
   if (tolerance<0)
-    tolerance*=-1;
-  Rational totalSamples=theSamplingSelector.TotalNumSubsetsMustBeSmalInt();
-  Rational numFailedSamples=0;
+    tolerance *= - 1;
+  Rational totalSamples = theSamplingSelector.TotalNumSubsetsMustBeSmalInt();
+  Rational numFailedSamples = 0;
 /*  stOutput << "<br>Total number of samples: " << totalSamples;
   stOutput << "<br>Variables: " << theBoundaryVars.ToStringCommaDelimited();
   stOutput << "<br>Boundaries left: " << leftBoundaries.ToStringCommaDelimited();
   stOutput << "<br>Boundaries right: " << rightBoundaries.ToStringCommaDelimited();*/
   do
-  { for (int i=0; i<theSamplingSelector.Multiplicities.size; i++)
-    { double& currentValue=knownValues[i+theCommands.knownDoubleConstants.size];
-      double& lBound=leftBoundaries[i];
-      double& rBound=rightBoundaries[i];
-      if (theSamplingSelector.MaxMultiplicities[i]==1)
-      { currentValue=(lBound+rBound)/2;
+  { for (int i = 0; i < theSamplingSelector.Multiplicities.size; i ++)
+    { double& currentValue = knownValues[i + theCommands.knownDoubleConstants.size];
+      double& lBound = leftBoundaries[i];
+      double& rBound = rightBoundaries[i];
+      if (theSamplingSelector.MaxMultiplicities[i] == 1)
+      { currentValue = (lBound + rBound) / 2;
         continue;
       }
-      double paramBnZeroAndOne=theSamplingSelector.Multiplicities[i];
-      paramBnZeroAndOne/=theSamplingSelector.MaxMultiplicities[i]-1;
-      currentValue=lBound*(1-paramBnZeroAndOne)+rBound*paramBnZeroAndOne;
+      double paramBnZeroAndOne = theSamplingSelector.Multiplicities[i];
+      paramBnZeroAndOne /= theSamplingSelector.MaxMultiplicities[i] - 1;
+      currentValue = lBound *(1 - paramBnZeroAndOne) + rBound * paramBnZeroAndOne;
     }
-    double floatingResult=0;
+    double floatingResult = 0;
     if (!theFunE.EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, &floatingResult))
-    { numFailedSamples++;
-      if ((numFailedSamples*100)/totalSamples>20)
+    { numFailedSamples ++;
+      if ((numFailedSamples * 100) / totalSamples > 20)
       { theCommands << "Failed to evaluate at least one of the functions in more than 20% of the sampling points. ";
         return output.AssignValue(0, theCommands);
       }
@@ -2486,7 +2484,7 @@ bool CalculatorFunctionsGeneral::innerCompareExpressionsNumerically
 /*    stOutput << "<br>Substitutions: " << knownEs.ToStringCommaDelimited()
     << ", values: " << knownValues.ToStringCommaDelimited()
     << ".  Output: " << floatingResult;*/
-    if (floatingResult> tolerance || floatingResult <-tolerance)
+    if (floatingResult > tolerance || floatingResult < - tolerance)
       return output.AssignValue(0, theCommands);
   } while(theSamplingSelector.IncrementReturnFalseIfPastLast());
   return output.AssignValue(1, theCommands);
@@ -2496,9 +2494,9 @@ bool CalculatorFunctionsGeneral::innerCompareExpressionsNumerically
 bool CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument");
-  if (input.children.size!=2)
+  if (input.size() != 2)
     return false;
-  if (input[0].children.size!=3)
+  if (input[0].size() != 3)
     return false;
   if (!input[0][0].IsArithmeticOperation())
     return false;
@@ -2526,7 +2524,7 @@ bool CalculatorFunctionsGeneral::innerIsEven(Calculator& theCommands, const Expr
 bool CalculatorFunctionsGeneral::innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsConstant");
   //stOutput << "<br>Evaluating isconstant on: " << input.ToString();
-  int result=(int) input.IsConstantNumber();
+  int result = (int) input.IsConstantNumber();
   return output.AssignValue(result, theCommands);
 }
 
@@ -2535,7 +2533,7 @@ bool CalculatorFunctionsGeneral::innerIsNonEmptySequence(Calculator& theCommands
   //stOutput << "<br>Evaluating isconstant on: " << input.ToString();
   if (input.HasBoundVariables())
     return false;
-  if (!input.IsSequenceNElementS() || input.children.size<2)
+  if (!input.IsSequenceNElementS() || input.size() < 2)
     return output.AssignValue(0, theCommands);
   return output.AssignValue(1, theCommands);
 }
@@ -2562,18 +2560,18 @@ bool CalculatorFunctionsGeneral::innerInterpretAsDifferential
     return false;
   if (!input[1].StartsWith(theCommands.opIntegral()))
     return false;
-  const Expression& theDiffFormCandidateE=input[2];
+  const Expression& theDiffFormCandidateE = input[2];
   std::string theDiff;
   if (theDiffFormCandidateE.IsAtom(&theDiff))
-    if (theDiff.size()>1)
-      if (theDiff[0]=='d')
+    if (theDiff.size() > 1)
+      if (theDiff[0] == 'd')
       { Expression variableE, diffFormE;
         variableE.MakeAtom(theDiff.substr(1, std::string::npos), theCommands);
         diffFormE.reset(theCommands);
         diffFormE.AddChildAtomOnTop(theCommands.opDifferential());
         diffFormE.AddChildOnTop(variableE);
         diffFormE.AddChildRationalOnTop(1);
-        output=input;
+        output = input;
         return output.SetChilD(2, diffFormE);
       }
   return false;
@@ -2583,51 +2581,50 @@ bool CalculatorFunctionsGeneral::innerIntegralOperator
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx");
   //stOutput << "called innerCompositeMultiplyIntegralFbyDx with input: " << input.ToString();
-  int theOp=theCommands.opTimes();
+  int theOp = theCommands.opTimes();
   if (!input.StartsWith(theOp, 3))
-  { theOp=theCommands.opDivide();
+  { theOp = theCommands.opDivide();
     if (!input.StartsWith(theOp, 3))
       return false;
   }
-  const Expression& integralE=input[1];
+  const Expression& integralE = input[1];
   if (integralE.IsAtomGivenData(theCommands.opIntegral()))
   { Expression integralOperatorE;
     integralOperatorE.reset(theCommands, 2);
     integralOperatorE.AddChildAtomOnTop(theCommands.opIntegral());
     integralOperatorE.AddChildAtomOnTop(theCommands.opIndefiniteIndicator());
-    output=input;
+    output = input;
     return output.SetChilD(1, integralOperatorE);
   }
   if (!integralE.StartsWith(theCommands.opIntegral()))
     return false;
-  if (integralE.size()<3)
-  { output=integralE;
+  if (integralE.size() < 3)
+  { output = integralE;
     return output.AddChildOnTop(input[2]);
   }
-  if (integralE.size()!=3)
+  if (integralE.size() != 3)
     return false;
-  const Expression& startingIntegrand=integralE[2];
+  const Expression& startingIntegrand = integralE[2];
   if (startingIntegrand.IsDifferentialOneFormOneVariablE())
     return false;
-  const Expression& incomingIntegrand=input[2];
+  const Expression& incomingIntegrand = input[2];
   Expression newIntegrand;
   Expression newFun;
   if (incomingIntegrand.IsDifferentialOneFormOneVariablE())
   { newFun.MakeXOX(theCommands, theOp, startingIntegrand, incomingIntegrand[2]);
-    newIntegrand.MakeXOX
-    (theCommands, theCommands.opDifferential(), incomingIntegrand[1], newFun);
-    output=integralE;
+    newIntegrand.MakeXOX(theCommands, theCommands.opDifferential(), incomingIntegrand[1], newFun);
+    output = integralE;
     return output.SetChilD(2, newIntegrand);
   }
   newIntegrand.MakeXOX(theCommands, theOp, startingIntegrand,incomingIntegrand);
-  output=integralE;
+  output = integralE;
   return output.SetChilD(2, newIntegrand);
 }
 
 bool CalculatorFunctionsGeneral::innerRationalFunctionSubstitution(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRationalFunctionSubstitution");
 //stOutput << "input of innerRationalFunctionSubstitution: " << input.ToString();
-  if (input.children.size!=2)
+  if (input.size() != 2)
     return false;
   if (!input[0].IsOfType<RationalFunctionOld>())
     return false;

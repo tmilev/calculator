@@ -70,6 +70,9 @@ function Page(){
     }
     localStorage.googleProfile = JSON.stringify(this.googleProfile);
     for (label in this.pages){
+      if (this.pages[label].storage === undefined){
+        continue;
+      }
       var toStore = Object.assign(this.pages[label].storage);
       localStorage[label] = toStore;
     }

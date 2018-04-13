@@ -1831,8 +1831,7 @@ public:
   static bool CollectCoefficientsPowersVar
   (const Expression& input, const Expression& theVariable,
    VectorSparse<Expression>& outputPositionIiscoeffXtoIth);
-  bool CollectOpands
-  (const Expression& input, int theOp, List<Expression>& outputOpands);
+  bool CollectOpands(const Expression& input, int theOp, List<Expression>& outputOpands);
   bool CollectOpandsAccumulate
   (const Expression& input, int theOp, List<Expression>& outputOpands);
   static bool CollectSummands(Calculator& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum);
@@ -2026,8 +2025,7 @@ public:
   (const std::string& theOpName, Expression::FunctionAddress handler,
    const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
    const std::string& opExample, bool isInner, bool visible, bool experimental,
-   const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier)
-   ;
+   const std::string& inputAdditionalIdentifier, const std::string& inputCalculatorIdentifier);
   void AddOperationBinaryInnerHandlerWithTypes
   (const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType,
    const std::string& opDescription,
@@ -2085,8 +2083,7 @@ public:
   void initComputationStats();
   bool ExtractExpressions(Expression& outputExpression, std::string* outputErrors);
   void EvaluateCommands();
-  static bool EvaluateExpression
-  (Calculator& theCommands, const Expression& input, Expression& output);
+  static bool EvaluateExpression(Calculator& theCommands, const Expression& input, Expression& output);
   static bool EvaluateExpression
   (Calculator& theCommands, const Expression& input, Expression& output,
    bool& outputIsCacheable, int opIndexParentIfAvailable);
@@ -2121,7 +2118,6 @@ public:
   static bool innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerElementUE
   (Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& inputOwner);
-
   static bool innerMakeMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixDouble(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixAlgebraic(Calculator& theCommands, const Expression& input, Expression& output);
@@ -2158,7 +2154,7 @@ public:
   (Calculator& theCommands, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output);
   static bool innerExpressionFromUE
   (Calculator& theCommands, const ElementUniversalEnveloping<RationalFunctionOld>& input,
-   Expression& output, Expression* inputContext=0);
+   Expression& output, Expression* inputContext = 0);
   static bool innerStoreCandidateSA(Calculator& theCommands, const CandidateSSSubalgebra& input, Expression& output);
   static bool innerExpressionFromDynkinType(Calculator& theCommands, const DynkinType& input, Expression& output);
   static bool innerExpressionFromDynkinSimpleType(Calculator& theCommands, const DynkinSimpleType& input, Expression& output);

@@ -7851,7 +7851,7 @@ void QuasiPolynomial::Substitution
   PolynomialSubstitution<Rational> theSub;
   theSub.MakeIdSubstitution(this->GetNumVars(), (Rational) 1);
   for (int i = 0; i < theSub.size; i ++)
-    theSub[i].AddConstant(-inputTranslationSubtractedFromArgument[i]);
+    theSub[i].AddConstant(- inputTranslationSubtractedFromArgument[i]);
   Polynomial<Rational> tempP;
   output.MakeZeroLatTiceZn(this->GetNumVars());
   output.AmbientLatticeReduced=this->AmbientLatticeReduced;
@@ -7861,7 +7861,7 @@ void QuasiPolynomial::Substitution
     if (!tempB)
       crash << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial " << tempP.ToString()
       << " failed but the current function does not handle this properly. " << crash;
-    output.AddLatticeShift(tempP, this->LatticeShifts[i]+inputTranslationSubtractedFromArgument);
+    output.AddLatticeShift(tempP, this->LatticeShifts[i] + inputTranslationSubtractedFromArgument);
   }
 }
 

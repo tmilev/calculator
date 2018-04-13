@@ -47,7 +47,7 @@ function getLabelsRows(input){
   };
   var labelFinder = {};
   for (var counterRow = 0; counterRow < input.length; counterRow ++) {
-    if (typeof label !== "object"){
+    if (typeof input[counterRow] !== "object"){
       return null;
     }
     for (var label in input[counterRow]) {

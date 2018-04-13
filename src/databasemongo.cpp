@@ -504,11 +504,14 @@ std::string DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(const
   { result.string = out.str();
     return result.ToString(false);
   }
+  if (rowsJSON.size == 0)
+    return DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection("");
   JSData theRows;
   theRows.type = theRows.JSarray;
   theRows.list = rowsJSON;
   result["rows"] = theRows;
   result["totalRows"] = (int) totalItems;
+  result["currentTable"] = currentTable;
   return result.ToString(false);
 }
 

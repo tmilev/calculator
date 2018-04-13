@@ -9,6 +9,7 @@
 <script src = "https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
 <script type = "text/javascript" src = "/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full"></script>
 <script type = "text/javascript" src = "/calculator-html/new/pathnames.js"></script>
+<script type = "text/javascript" src = "/calculator-html/new/json_to_html.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/mathjax-calculator-setup.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/hide_html_with_tags.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/cookies.js"></script>
@@ -80,7 +81,7 @@ var MathQuillHasMatrixSupport = true;
  onkeydown  = "suggestWord(); mQHelpCalculator(); arrowAction(event);"
  onmouseup  = "suggestWord(); mQHelpCalculator();"
  oninput    = "suggestWord(); mQHelpCalculator();"
- >
+>
 </textarea>
 <br>
 <button title = "Shift+Enter=shortcut from input text box. "
@@ -142,7 +143,7 @@ ctrl+arrow = select</span>
 </div><!--divCalculatorPage-->
 
 <div id = "divDatabase" class = "divMainPage">
-
+<div id = "divDatabaseOutput"> </div>
 </div>
 
 <div id = "divTheMainMenuPanel" class = "divTheMainMenu">

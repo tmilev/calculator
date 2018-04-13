@@ -24,6 +24,9 @@ calculatorNavigation {
 calculatorNavigation:after{
 clear:both;
 }
+tiny {
+  font-size: x-small
+}
 tr.problemContainerRow{
 /*height: 500px;*/
 }
@@ -536,6 +539,28 @@ table.tableDatabaseItem{
 table.tableDatabaseItem td{
   border: 1px solid;
 }
+table.tableJSON {
+  border-collapse: collapse;
+/*  width: 100%;
+  height: 100%;*/
+}
+table.tableJSON td{
+  border: 1px solid;
+}
+table.tableJSON tr:nth-child(even){
+  background-color: #eeeeee;
+}
+table.tableJSONItem{
+  border-collapse: collapse;
+  border: 1px solid;
+}
+table.tableJSONItem td{
+  border: 1px solid;
+}
+table.tableJSONItem tr:nth-child(even){
+  background-color: #eeeeee;
+}
+
 table.tableItem{
   width: 100%;
 }

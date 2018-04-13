@@ -166,11 +166,9 @@ JSData CalculatorHTML::ToJSONDeadlines
   JSData output;
   for (int i = 0; i < inputProblemInfo.size(); i ++)
   { ProblemDataAdministrative& currentProblem = inputProblemInfo.theValues[i].adminData;
-    if (currentProblem.problemWeightsPerCoursE.size() == 0)
-      continue;
-    std::string currentProblemName = inputProblemInfo.theKeys[i];
     if (currentProblem.deadlinesPerSection.size() == 0)
       continue;
+    std::string currentProblemName = inputProblemInfo.theKeys[i];
     JSData currentProblemJSON;
     for (int j = 0; j < currentProblem.deadlinesPerSection.size(); j ++)
     { std::string currentDeadline = MathRoutines::StringTrimWhiteSpace(currentProblem.deadlinesPerSection.theValues[j]);

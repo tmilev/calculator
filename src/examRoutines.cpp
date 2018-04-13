@@ -126,8 +126,9 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend
       return false;
     stOutput << "<hr>Debug: reading problem info from: " << currentProbString << " resulted in pairs: "
     << currentKeyValues.ToStringHtml();
-    std::string deadlineString = HtmlRoutines::ConvertURLStringToNormal(currentKeyValues.GetValueCreate("deadlines"), false);
-    std::string problemWeightsCollectionString = HtmlRoutines::ConvertURLStringToNormal(currentKeyValues.GetValueCreate("weights"), false);
+    std::string deadlineString = HtmlRoutines::ConvertURLStringToNormal(currentKeyValues.GetValueCreate(DatabaseStrings::labelDeadlines), false);
+    std::string problemWeightsCollectionString = HtmlRoutines::ConvertURLStringToNormal
+    (currentKeyValues.GetValueCreate(DatabaseStrings::labelProblemWeights), false);
     if (problemWeightsCollectionString != "")
     { if (!HtmlRoutines::ChopCGIString(problemWeightsCollectionString, problemWeightInfo, commentsOnFailure))
         return false;
@@ -148,7 +149,8 @@ bool CalculatorHTML::LoadProblemInfoFromURLedInputAppend
         << ", " << HtmlRoutines::ConvertURLStringToNormal(sectionDeadlineInfo.theValues[j], false) << ". ";
       }
     }
-    std::string problemWeightString = MathRoutines::StringTrimWhiteSpace(currentKeyValues.GetValueCreate("weight"));
+    std::string problemWeightString = MathRoutines::StringTrimWhiteSpace
+    (currentKeyValues.GetValueCreate(DatabaseStrings::labelProblemWeights));
     if (problemWeightString != "")
     { currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
       (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.userDefault.courseComputed, false),
@@ -167,6 +169,8 @@ JSData CalculatorHTML::ToJSONDeadlines
     if (currentProblem.problemWeightsPerCoursE.size() == 0)
       continue;
     std::string currentProblemName = inputProblemInfo.theKeys[i];
+    if (currentProblem.deadlinesPerSection.size() == 0)
+      continue;
     JSData currentProblemJSON;
     for (int j = 0; j < currentProblem.deadlinesPerSection.size(); j ++)
     { std::string currentDeadline = MathRoutines::StringTrimWhiteSpace(currentProblem.deadlinesPerSection.theValues[j]);
@@ -230,18 +234,18 @@ void CalculatorHTML::StoreDeadlineInfo
 bool DatabaseRoutineS::StoreProblemDatabaseInfo
 (const UserCalculatorData& theUser, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreProblemDatabaseInfo");
-  JSData findQueryWeights, setQueryWeights, findQueryDeadlines, setQueryDeadlines;
+  JSData findQueryWeights, setQueryWeights, findQueryDeadlines;
   findQueryWeights[DatabaseStrings::labelProblemWeightsSchema] = theUser.problemWeightSchema;
   findQueryDeadlines[DatabaseStrings::labelDeadlinesSchema] = theUser.deadlineSchema;
-  setQueryWeights[DatabaseStrings::labelProblemWeights] = theUser.problemWeights;
-  setQueryDeadlines[DatabaseStrings::labelDeadlines] = theUser.deadlines;
+  if (theUser.problemWeights.type != JSData::JSUndefined)
+    setQueryWeights[DatabaseStrings::labelProblemWeights] = theUser.problemWeights;
   if (theUser.problemWeights.type != JSData::JSUndefined)
     if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
          (DatabaseStrings::tableProblemWeights, findQueryWeights, setQueryWeights, &commentsOnFailure))
       return false;
   if (theUser.deadlines.type != JSData::JSUndefined)
     if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-         (DatabaseStrings::tableDeadlines, findQueryDeadlines, setQueryDeadlines, &commentsOnFailure))
+         (DatabaseStrings::tableDeadlines, findQueryDeadlines, theUser.deadlines, &commentsOnFailure))
       return false;
   return true;
 }

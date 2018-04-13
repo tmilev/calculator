@@ -21,7 +21,7 @@ function getTableHorizontallyLaidFromJSON(input){
     var result = "";
     result += "<table class='tableJSONItem'>";
     for (item in input){
-      result += `<tr><td> <tiny>${item}</tiny></td><td>${input[item]}</td></tr>`; 
+      result += `<tr><td> <tiny>${item}</tiny></td><td>${getTableHorizontallyLaidFromJSON(input[item])}</td></tr>`; 
     }
     result += "</table>";
     return result;
@@ -31,7 +31,7 @@ function getTableHorizontallyLaidFromJSON(input){
     var result = "";
     result += "<table class='tableJSONItem'>";
     for (item in input){
-      result += `<tr><td>${item}</td><td>${input[item]}</td></tr>`; 
+      result += `<tr><td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item])}</td></tr>`; 
     }
     result += "</table>";
     return result;

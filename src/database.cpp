@@ -115,7 +115,7 @@ std::string DatabaseStrings::labelSemester = "semester";
 
 std::string DatabaseStrings::tableProblemWeights = "problemWeights";
 std::string DatabaseStrings::labelProblemWeightsSchema = "problemWeightsSchema";
-std::string DatabaseStrings::labelProblemWeights = "weights";
+std::string DatabaseStrings::labelProblemWeights = "weight";
 
 std::string DatabaseStrings::labelSectionsTaught = "sectionsTaught";
 
@@ -323,8 +323,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
         (DatabaseStrings::tableDeadlines, findDeadlinesQuery, outDeadlinesQuery, failureStream))
       this->deadlines = outDeadlinesQuery[DatabaseStrings::labelDeadlines];
   }
-  //  stOutput << "DEBUG: deadlineInfo, rawest: " << reader
-  //  << " this->currentCoursesInfoString:  " << this->currentCoursesInfoString.value;
+    stOutput << "DEBUG: deadlineInfo: " << this->deadlines.ToString(false);
   //stOutput << "DEBUG: problem info row id: " << this->problemInfoRowId.value;
   if (this->problemWeightSchema != "")
   { JSData findProblemWeightsQuery, outProblemWeightsQuery;

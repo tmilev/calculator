@@ -323,7 +323,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
         (DatabaseStrings::tableDeadlines, findDeadlinesQuery, outDeadlinesQuery, failureStream))
       this->deadlines = outDeadlinesQuery[DatabaseStrings::labelDeadlines];
   }
-    stOutput << "DEBUG: deadlineInfo: " << this->deadlines.ToString(false);
+  //stOutput << "DEBUG: deadlineInfo: " << this->deadlines.ToString(false);
   //stOutput << "DEBUG: problem info row id: " << this->problemInfoRowId.value;
   if (this->problemWeightSchema != "")
   { JSData findProblemWeightsQuery, outProblemWeightsQuery;

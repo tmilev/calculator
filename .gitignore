@@ -26,3 +26,5 @@ src/calculator.pro.user
 node_modules
 
 external-source
+
+configuration

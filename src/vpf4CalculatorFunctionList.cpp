@@ -3352,15 +3352,14 @@ D-B;\
    true, false,
    "CalculatorFunctionsGeneral::innerInvertMatrix",
    "InvertMatrix");
-  this->AddOperationInnerHandler
-  ("GramSchmidtAlgebraicVerbose",
-    CalculatorFunctionsGeneral::innerGramSchmidtVerbose, "",
-   "(Attempts to) run Gram-Schmidt (over the algebraic numbers!) on a small matrix . \
-    The inputs are vector-rows.",
-   "X=GramSchmidtAlgebraicVerbose((1,2,1), (1,0,1), (-1,1,0)); InvertMatrix X- X^{-1}",
-   false, false,
-   "CalculatorFunctionsGeneral::innerInvertMatrix",
-   "InvertMatrix");
+  //this->AddOperationInnerHandler
+  //("GramSchmidtAlgebraicVerbose",
+  //  CalculatorFunctionsGeneral::innerGramSchmidtVerbose, "",
+  // "(Attempts to) run Gram-Schmidt (over the algebraic numbers!) on a small matrix . The inputs are vector-rows.",
+  // "X=GramSchmidtAlgebraicVerbose((1,2,1), (1,0,1), (-1,1,0)); InvertMatrix X- X^{-1}",
+  // false, false,
+  // "CalculatorFunctionsGeneral::innerInvertMatrix",
+  // "InvertMatrix");
   this->AddOperationInnerHandler
   ("Trace", CalculatorFunctionsGeneral::innerTrace, "",
    "Gets trace of a square matrix. ",

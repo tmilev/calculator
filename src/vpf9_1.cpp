@@ -413,7 +413,7 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
   << "On Ubuntu the command is the following.  <br>sudo apt-get install g++"
   << "\n<br>\n3) [Optional] Install the development packages for openssl. To do so, google-search ``how to install ... on ...''"
   << "\n<br>\n4) Checkout the calculator project. The command is as follows.<br>"
-  << "svn checkout https://github.com/tmilev/calculator.git/trunk calculator"
+  << "git clone https://github.com/tmilev/calculator.git"
   << "<br> The command fetches the latest source code from sourceforge."
   << "\n<br>\n5) Navigate to the newly created calculator folder.  "
   << "\n<br>\n6) Type the following command. <br>make nossl=1 nosql=1"

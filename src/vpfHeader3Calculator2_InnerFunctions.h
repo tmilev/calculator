@@ -231,7 +231,7 @@ public:
   static bool innerGCD(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIsNilpotent(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerGramSchmidtVerbose(Calculator& theCommands, const Expression& input, Expression& output);
+  //static bool innerGramSchmidtVerbose(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerInvertMatrixRFsVerbose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output);

@@ -139,6 +139,7 @@ public:
   UserCalculatorData userDefault;
   std::string userCalculatorRequestType;
 
+  JSData configuration;
   PauseThread theLocalPauseController;
 
   static std::string hopefullyPermanentWebAdress;
@@ -189,6 +190,8 @@ public:
   MemorySaving<DynkinDiagramRootSubalgebra > dynGetEpsCoords;
   MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
 
+  bool StoreConfiguration();
+  bool LoadConfiguration();
   GlobalVariables();
   ~GlobalVariables();
   static HashedList<FileInformation>& theSourceCodeFiles();

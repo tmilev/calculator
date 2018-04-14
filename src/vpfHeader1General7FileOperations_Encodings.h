@@ -90,7 +90,7 @@ public:
   static bool OpenFileVirtualReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary, bool accessSensitiveFolders=false);
 };
 
-class StateMaintainerCurrentFolder
+struct StateMaintainerCurrentFolder
 {
 public:
   std::string currentFolderPhysicalAbsolute;

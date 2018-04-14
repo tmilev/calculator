@@ -5694,23 +5694,18 @@ void WebServer::CheckFreecalcSetup()
   std::string startingDir = FileOperations::GetCurrentFolder();
   theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase + "../");
   result << logger::green << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
-  result << logger::green << "svn checkout https://github.com/tmilev/freecalc.git/trunk ./freecalc" << logger::endL;
-  result << theGlobalVariables.CallSystemWithOutput("svn checkout https://github.com/tmilev/freecalc.git/trunk ./freecalc");
+  result << logger::green << "git clone https://github.com/tmilev/freecalc.git" << logger::endL;
+  result << theGlobalVariables.CallSystemWithOutput("git clone https://github.com/tmilev/freecalc.git");
   theGlobalVariables.ChDir(startingDir);
 }
 
 void WebServer::CheckSVNSetup()
 { MacroRegisterFunctionWithName("WebServer::CheckSVNSetup");
-  std::string attemptedSetupVirtual = "/LogFiles/attemptedSVNSetup.html";
-  if (FileOperations::FileExistsVirtual(attemptedSetupVirtual, true))
-  { std::string attemptedSetupPhysical;
-    logger result("", 0, false, "server");
-    FileOperations::GetPhysicalFileNameFromVirtual
-    (attemptedSetupVirtual, attemptedSetupPhysical, true, false, 0);
-    result << logger::green << "SVN setup previously attempted, skipping. Erase file "
-    << attemptedSetupPhysical << " to try setting up again. " << logger::endL;
+  if (theGlobalVariables.configuration["attemptedSVNSetup"].type != JSData::JSUndefined)
     return;
-  }
+  theGlobalVariables.configuration["attemptedSVNSetup"] = "Attempted to install";
+  theGlobalVariables.StoreConfiguration();
+  std::string attemptedSetupVirtual = "/LogFiles/attemptedSVNSetup.html";
   logger result(attemptedSetupVirtual, 0, false, "server");
   WebServer::FigureOutOperatingSystem();
   result << logger::yellow << "SVN setup file missing, proceeding to set it up. " << logger::endL
@@ -5718,10 +5713,13 @@ void WebServer::CheckSVNSetup()
   if (theGlobalVariables.OperatingSystem == "Ubuntu")
   { result << logger::yellow << "sudo apt-get install subversion" << logger::endL;
     theGlobalVariables.CallSystemNoOutput("sudo apt-get install subversion", false);
+    theGlobalVariables.configuration["attemptedSVNSetup"] = "Attempted to install on Ubuntu. ";
   } else if (theGlobalVariables.OperatingSystem == "CentOS")
   { result << logger::yellow << "sudo yum install subversion" << logger::endL;
     theGlobalVariables.CallSystemNoOutput("sudo yum install subversion", false);
+    theGlobalVariables.configuration["attemptedSVNSetup"] = "Attempted to install on CentOS. ";
   }
+  theGlobalVariables.StoreConfiguration();
 }
 
 void WebServer::CheckMathJaxSetup()
@@ -5880,6 +5878,7 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsSensitive = FileOperations::FolderVirtualLinksSensitive();
   FileOperations::FolderVirtualLinksULTRASensitive(); //<- allocates data structure
   folderSubstitutionsNonSensitive.Clear();
+  StateMaintainerCurrentFolder preserveCurrentFolder;
 
   std::string theDir = FileOperations::GetCurrentFolder();
   theGlobalVariables.ChDir("../");
@@ -5955,6 +5954,9 @@ void WebServer::InitializeGlobalVariables()
   folderSubstitutionsSensitive.Clear();
   folderSubstitutionsSensitive.SetKeyValue("LogFiles/", "LogFiles/");//<-internal use
   folderSubstitutionsSensitive.SetKeyValue("/LogFiles/", "LogFiles/");//<-coming from webserver
+  folderSubstitutionsSensitive.SetKeyValue("configuration/", "configuration/");//<-internal use
+  folderSubstitutionsSensitive.SetKeyValue("/configuration/", "configuration/");//<-coming from webserver
+
   folderSubstitutionsSensitive.SetKeyValue("/crashes/", "./LogFiles/crashes/");
   folderSubstitutionsSensitive.SetKeyValue("crashes/", "./LogFiles/crashes/");
 
@@ -6007,6 +6009,40 @@ void WebServer::TurnProcessMonitoringOff()
   theGlobalVariables.MaxComputationTimeBeforeWeTakeAction = 0;
 }
 
+bool GlobalVariables::LoadConfiguration()
+{ MacroRegisterFunctionWithName("GlobalVariables::LoadConfiguration");
+  std::string configuration;
+  std::stringstream out;
+  bool resetConfiguration = false;
+  if (FileOperations::LoadFileToStringUnsecure("/configuration/configuration.json", configuration, &out))
+  { if (!theGlobalVariables.configuration.readstring(configuration, false, &out))
+    { logServer << logger::red << out.str() << logger::endL;
+      resetConfiguration = true;
+    }
+  } else
+  { resetConfiguration = true;
+    logServer << logger::yellow << out.str() << logger::endL;
+  }
+  if (resetConfiguration)
+  { this->StoreConfiguration();
+    return false;
+  }
+  return true;
+}
+
+bool GlobalVariables::StoreConfiguration()
+{ MacroRegisterFunctionWithName("GlobalVariables::StoreConfiguration");
+  theGlobalVariables.configuration.reset(JSData::JSObject);
+  std::fstream configurationFile;
+  if (!FileOperations::OpenFileCreateIfNotPresentVirtual
+      (configurationFile, "configuration/configuration.json", false, true, false, true))
+  { logServer << logger::red << "Could not open file: /configuration/configuration.json" << logger::endL;
+    return false;
+  }
+  configurationFile << theGlobalVariables.configuration.ToString(false);
+  return true;
+}
+
 int WebServer::main(int argc, char **argv)
 { theGlobalVariables.InitThreadsExecutableStart();
   //use of loggers forbidden before calling   theWebServer.AnalyzeMainArguments(...):
@@ -6014,6 +6050,7 @@ int WebServer::main(int argc, char **argv)
   MacroRegisterFunctionWithName("main");
   try
   { InitializeGlobalObjects();
+    theGlobalVariables.LoadConfiguration();
     theWebServer.AnalyzeMainArguments(argc, argv);
     if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 0)
       theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead =

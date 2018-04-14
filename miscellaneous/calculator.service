@@ -1,0 +1,38 @@
+# Configuration file to keep our server working as a service (so that when you close the terminal the server does not stop).
+# Copy this file to /etc/systemd/system:
+#
+# sudo cp scripts_configurations/calculator.service /etc/systemd/system/
+#
+# Start with:
+#
+# sudo systemctl start calculator
+#
+# or with:
+#
+# sudo systemctl restart calculator
+#
+# To see status of calculator:
+#
+# sudo journalctl -u calculator
+#
+# To see the syslog file where errors are logged:
+#
+# nano /var/log/syslog
+#
+# To have our server start automagically on reboot:
+#
+# systemctl enable calculator
+[Unit]
+Description=Imapp
+After=network.target
+
+[Service]
+User=todor
+# Note RHEL/Fedora uses 'nobody', Debian/Ubuntu uses 'nogroup'
+Group=todor  
+ExecStart=/home/todor/ace/calculator/bin
+Restart=always
+WorkingDirectory=/home/todor/ace/calculator/bin
+
+[Install]
+WantedBy=multi-user.target

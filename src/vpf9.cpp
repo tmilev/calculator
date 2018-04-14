@@ -132,6 +132,7 @@ GlobalVariables::GlobalVariables()
   this->flagAceIsAvailable = false;
   this->MutexProgressReportinG.mutexName = "ProgressReport";
   this->flagCachingInternalFilesOn = true;
+  this->flagRunServerOnEmptyCommandLine = false;
 //  this->flagIgnoreSecurityToWorkaroundSafarisBugs=false;
   //  this->flagLogInterProcessCommunication=true;
   //  stOutput << "Global variables created!";
@@ -679,6 +680,7 @@ bool FileOperations::LoadFileToStringVirtual
   if (!FileOperations::GetPhysicalFileNameFromVirtual
       (theFileName, computedFileName, accessSensitiveFolders, accessULTRASensitiveFolders, commentsOnFailure))
     return false;
+  //stOutput << "DEBUG: computed file name: " << computedFileName;
   return FileOperations::LoadFileToStringUnsecure(computedFileName, output, commentsOnFailure);
 }
 
@@ -1011,7 +1013,7 @@ bool FileOperations::GetPhysicalFileNameFromVirtual
       if (MathRoutines::StringBeginsWith(inputCopy, FileOperations::FolderVirtualLinksSensitive().theKeys[i], &folderEnd))
       { output = theGlobalVariables.PhysicalPathProjectBase +
         FileOperations::FolderVirtualLinksSensitive().theValues[i] + folderEnd;
-        //stOutput << inputFileName << " transformed to: " << output;
+        //stOutput << inputFileNamE << " transformed to: " << output;
         return true;
       }
   if (accessULTRASensitiveFolders)
@@ -1138,7 +1140,7 @@ bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& output
   bool tagWasClosed = false;
   int numCharRead = 0;
   for (; this->positionInString < (signed)this->theString.size(); this->positionInString++)
-  { numCharRead++;
+  { numCharRead ++;
     charReader.push_back(this->theString[this->positionInString]);
     bool tagStarted = false;
     if (this->theString[this->positionInString] == theOpenTagWithSymbols[positionInOpenTag])

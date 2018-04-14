@@ -98,7 +98,7 @@ public:
   void operator=(const Vector<coefficient>& other);
   template <typename coefficient>
   void operator=(const Matrix<coefficient>& other);
-
+  bool isTrueRepresentationInJSON();
   // parsing
   void ExtractScalar(const std::string& json, int begin, int end);
   bool IsValidElement();

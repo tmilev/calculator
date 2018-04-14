@@ -2643,8 +2643,8 @@ bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theComm
   Expression theContext;
   if (!input.IsMatrixGivenType<RationalFunctionOld>(0, 0, &mat))
     return output.MakeError("Failed to extract matrix. ", theCommands);
-  theContext=input.GetContext();
-  if (mat.NumRows!=mat.NumCols || mat.NumCols<1)
+  theContext = input.GetContext();
+  if (mat.NumRows != mat.NumCols || mat.NumCols < 1)
   { std::stringstream out;
     out << "The matrix " << mat.ToString( ) << " has " << mat.NumCols << " columns and " << mat.NumRows << " rows. "
     << "The matrix is not square.";
@@ -2658,55 +2658,55 @@ bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theComm
   RationalFunctionOld tempElement;
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
-  theFormat.flagUseLatex=true;
-  theFormat.flagUseHTML=false;
-  theFormat.flagUseFrac=true;
-  theFormat.MatrixColumnVerticalLineIndex=mat.NumCols-1;
+  theFormat.flagUseLatex = true;
+  theFormat.flagUseHTML = false;
+  theFormat.flagUseFrac = true;
+  theFormat.MatrixColumnVerticalLineIndex = mat.NumCols - 1;
   out << "Computing " << HtmlRoutines::GetMathSpanPure(mat.ToString(&theFormat) + "^{-1}");
-  tempMat=mat;
+  tempMat = mat;
   tempMat.AppendMatrixOnTheRight(outputMat);
   out << "<br>" << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat)) ;
   outLaTeX << "\\begin{tabular}{ll}";
   outLaTeX << "$" << tempMat.ToString(& theFormat) << "$";
 
-  for (int i=0; i<mat.NumCols; i++)
+  for (int i = 0; i < mat.NumCols; i ++)
   { tempI = mat.FindPivot(i, NumFoundPivots);
-    if (tempI!=-1)
-    { if (tempI!=NumFoundPivots)
+    if (tempI != - 1)
+    { if (tempI != NumFoundPivots)
       { mat.SwitchTwoRows(NumFoundPivots, tempI);
         outputMat.SwitchTwoRows (NumFoundPivots, tempI);
-        out << "<br>Swap row " << NumFoundPivots+1 << " and row " << tempI+1 << ": ";
-        outLaTeX << "& Swap row " << NumFoundPivots+1 << " and row " << tempI+1 << ". ";
-        tempMat=mat;
+        out << "<br>Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ": ";
+        outLaTeX << "& Swap row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ". ";
+        tempMat = mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
         out << "<br>" << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
         outLaTeX << "\\\\" << "$" << outputMat.ToString(&theFormat) << "$";
       }
-      tempElement=mat.elements[NumFoundPivots][i];
+      tempElement = mat.elements[NumFoundPivots][i];
       tempElement.Invert();
-      if (tempElement!=1)
-      { out << "<br> multiply row number " << NumFoundPivots+1 << " by "
+      if (tempElement != 1)
+      { out << "<br> multiply row number " << NumFoundPivots + 1 << " by "
         << tempElement.ToString(&theFormat) << ": ";
-        outLaTeX << "& multiply row number " << NumFoundPivots+1 << " by $"
+        outLaTeX << "& multiply row number " << NumFoundPivots + 1 << " by $"
         << tempElement.ToString(&theFormat) << "$. \\\\";
       }
       mat.RowTimesScalar(NumFoundPivots, tempElement);
       outputMat.RowTimesScalar(NumFoundPivots, tempElement);
-      if (tempElement!=1)
-      { tempMat=mat;
+      if (tempElement != 1)
+      { tempMat = mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
         out << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
         outLaTeX << "$" << tempMat.ToString(&theFormat) << "$";
       }
       bool found = false;
-      for (int j = 0; j<mat.NumRows; j++)
-        if (j!=NumFoundPivots)
+      for (int j = 0; j<mat.NumRows; j ++)
+        if (j != NumFoundPivots)
           if (!mat.elements[j][i].IsEqualToZero())
-          { tempElement=(mat.elements[j][i]);
+          { tempElement = mat.elements[j][i];
             tempElement.Minus();
             mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
             outputMat.AddTwoRows(NumFoundPivots, j, 0, tempElement);
-            if(!found)
+            if (!found)
             { out << "<br>";
               outLaTeX << "&";
               outLaTeX << "\\begin{tabular}{l}";
@@ -2714,28 +2714,27 @@ bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theComm
             { out << ", ";
               outLaTeX << ", ";
             }
-            found =true;
-            out << " Row index " << NumFoundPivots+1 << " times "
-            << tempElement.ToString(&theFormat) << " added to row index " << j+1;
-            outLaTeX << " Row index " << NumFoundPivots+1 << " times $"
-            << tempElement.ToString(&theFormat) << "$ added to row index " << j+1 << "\\\\";
+            found = true;
+            out << " Row index " << NumFoundPivots + 1 << " times "
+            << tempElement.ToString(&theFormat) << " added to row index " << j + 1;
+            outLaTeX << " Row index " << NumFoundPivots + 1 << " times $"
+            << tempElement.ToString(&theFormat) << "$ added to row index " << j + 1 << "\\\\";
           }
       if (found)
       { out << ": <br> ";
         outLaTeX << "\\end{tabular}";
         outLaTeX << "\\\\";
-        tempMat=mat;
+        tempMat = mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
         out << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
         outLaTeX << "$" << tempMat.ToString(&theFormat) << "$";
       }
-      NumFoundPivots++;
+      NumFoundPivots ++;
     }
   }
-
   outLaTeX << "\\end{tabular}";
-  theFormat.MatrixColumnVerticalLineIndex=-1;
-  if (NumFoundPivots<mat.NumRows)
+  theFormat.MatrixColumnVerticalLineIndex = - 1;
+  if (NumFoundPivots < mat.NumRows)
   { out << "<br>Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
     outLaTeX << "Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
   } else
@@ -2751,9 +2750,9 @@ bool CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(Calculator& theComm
 bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
   Matrix<Rational> mat, outputMat, tempMat;
-  if (!theCommands.GetMatriXFromArguments<Rational>(input, mat, 0, -1, 0))
+  if (!theCommands.GetMatriXFromArguments<Rational>(input, mat, 0, - 1, 0))
     return CalculatorFunctionsGeneral::innerInvertMatrixRFsVerbose(theCommands, input, output);
-  if (mat.NumRows!=mat.NumCols || mat.NumCols<1)
+  if (mat.NumRows != mat.NumCols || mat.NumCols < 1)
     return output.MakeError("The matrix is not square", theCommands, true);
   outputMat.MakeIdMatrix(mat.NumRows);
   int tempI;
@@ -2761,61 +2760,61 @@ bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Express
   std::stringstream out;
   Rational tempElement;
   FormatExpressions theFormat;
-  theFormat.flagUseLatex=true;
-  theFormat.flagUseHTML=false;
-  theFormat.MatrixColumnVerticalLineIndex=mat.NumCols-1;
+  theFormat.flagUseLatex = true;
+  theFormat.flagUseHTML = false;
+  theFormat.MatrixColumnVerticalLineIndex = mat.NumCols - 1;
   out << "Computing " << HtmlRoutines::GetMathSpanPure(mat.ToString(&theFormat) + "^{-1}");
-  tempMat=mat;
+  tempMat = mat;
   tempMat.AppendMatrixOnTheRight(outputMat);
-  out << "<br>" << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat)) ;
-  for (int i=0; i<mat.NumCols; i++)
+  out << "<br>" << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
+  for (int i = 0; i < mat.NumCols; i ++)
   { tempI = mat.FindPivot(i, NumFoundPivots);
-    if (tempI!=-1)
-    { if (tempI!=NumFoundPivots)
+    if (tempI != - 1)
+    { if (tempI != NumFoundPivots)
       { mat.SwitchTwoRows(NumFoundPivots, tempI);
         outputMat.SwitchTwoRows (NumFoundPivots, tempI);
-        out << "<br>switch row " << NumFoundPivots+1 << " and row " << tempI+1 << ": ";
-        tempMat=mat;
+        out << "<br>switch row " << NumFoundPivots + 1 << " and row " << tempI + 1 << ": ";
+        tempMat = mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
         out << "<br>" << HtmlRoutines::GetMathSpanPure(outputMat.ToString(&theFormat));
       }
-      tempElement=mat.elements[NumFoundPivots][i];
+      tempElement = mat.elements[NumFoundPivots][i];
       tempElement.Invert();
-      if (tempElement!=1)
-        out << "<br> multiply row " << NumFoundPivots+1 << " by " << tempElement << ": ";
+      if (tempElement != 1)
+        out << "<br> multiply row " << NumFoundPivots + 1 << " by " << tempElement << ": ";
       mat.RowTimesScalar(NumFoundPivots, tempElement);
       outputMat.RowTimesScalar(NumFoundPivots, tempElement);
-      if (tempElement!=1)
-      { tempMat=mat;
+      if (tempElement != 1)
+      { tempMat = mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
         out << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
       }
       bool found = false;
-      for (int j = 0; j<mat.NumRows; j++)
-        if (j!=NumFoundPivots)
+      for (int j = 0; j < mat.NumRows; j ++)
+        if (j != NumFoundPivots)
           if (!mat.elements[j][i].IsEqualToZero())
-          { tempElement=(mat.elements[j][i]);
+          { tempElement = mat.elements[j][i];
             tempElement.Minus();
             mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
             outputMat.AddTwoRows(NumFoundPivots, j, 0, tempElement);
-            if(!found)
+            if (!found)
               out << "<br>";
             else
               out << ", ";
             found =true;
-            out << " Row index " << NumFoundPivots+1 << " times "
-            << tempElement << " added to row index " << j+1;
+            out << " Row index " << NumFoundPivots + 1 << " times "
+            << tempElement << " added to row index " << j + 1;
           }
       if (found)
       { out << ": <br> ";
-        tempMat=mat;
+        tempMat = mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
         out << HtmlRoutines::GetMathSpanPure(tempMat.ToString(&theFormat));
       }
-      NumFoundPivots++;
+      NumFoundPivots ++;
     }
   }
-  if (NumFoundPivots<mat.NumRows)
+  if (NumFoundPivots < mat.NumRows)
     out << "<br>Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
   else
     out << "<br>The inverse of the starting matrix can be read off on the matrix to the left of the id matrix: "
@@ -2826,41 +2825,32 @@ bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Express
 bool CalculatorFunctionsGeneral::innerPolynomialRelations
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerGroebner");
- /* if (input.IsSequenceNElementS())
-  { output=input;
-    if (!useGr && !useRevLex)
-      return output.SetChildAtomValue(0, "GroebnerLexUpperLimit");
-    if (!useGr && useRevLex)
-      return output.SetChildAtomValue(0, "GroebnerRevLexUpperLimit");
-    if (useGr)
-      return output.SetChildAtomValue(0, "GroebnerGrLexUpperLimit");
-  }*/
   Vector<Polynomial<Rational> > inputVector;
   Expression theContext;
-  if (input.size()<3)
+  if (input.size() < 3)
     return output.MakeError("Function takes at least two arguments. ", theCommands);
-  const Expression& numComputationsE=input[1];
-  Rational upperBound=0;
+  const Expression& numComputationsE = input[1];
+  Rational upperBound = 0;
   if (!numComputationsE.IsOfType(&upperBound))
     return output.MakeError("Failed to convert the first argument of the expression to rational number.", theCommands);
-  if (upperBound>1000000)
+  if (upperBound > 1000000)
     return output.MakeError
     ("Error: your upper limit of polynomial operations exceeds 1000000, which is too large.\
      You may use negative or zero number give no computation bound, but please don't. ", theCommands);
 //  int upperBoundComputations=(int) upperBound.GetDoubleValue();
   output.reset(theCommands);
-  for (int i=1; i<input.children.size; i++)
+  for (int i = 1; i < input.size(); i ++)
     output.children.AddOnTop(input.children[i]);
   if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >
-      (output, inputVector, &theContext, -1, CalculatorConversions::innerPolynomial<Rational>))
+      (output, inputVector, &theContext, - 1, CalculatorConversions::innerPolynomial<Rational>))
     return output.MakeError("Failed to extract polynomial expressions", theCommands);
   Vector<Polynomial<Rational> > theRels, theGens;
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
-  for (char i=0; i<26; i++)
-  { char currentLetter='a'+i;
+  for (char i = 0; i < 26; i ++)
+  { char currentLetter = 'a' + i;
     std::string currentStr;
-    currentStr= currentLetter;
+    currentStr = currentLetter;
     if (!theFormat.polyAlphabeT.Contains(currentStr))
       theFormat.polyAlphabeT.AddOnTop(currentStr);
   }
@@ -2868,11 +2858,11 @@ bool CalculatorFunctionsGeneral::innerPolynomialRelations
     return theCommands << "Failed to extract relations. ";
   std::stringstream out;
   out << "Polynomials:";
-  for (int i=0; i<theGens.size; i++)
+  for (int i = 0; i < theGens.size; i ++)
     out << "<br>" << theGens[i].ToString(&theFormat) << "=" << inputVector[i].ToString(&theFormat);
 
   out << "<br>Relations: ";
-  for (int i=0; i<theRels.size; i++)
+  for (int i = 0; i < theRels.size; i ++)
   { theRels[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
     out << "<br>" << theRels[i].ToString(&theFormat);
   }
@@ -2906,20 +2896,20 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
   if (!theComputation.inpuTE.IsOfType<RationalFunctionOld>())
     return theCommands << "<hr>CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlocks: failed to convert "
     << theFunctionE.ToString() << " to rational function. Attempt to converted expression yielded: " << theComputation.inpuTE.ToString();
-  if (theComputation.inpuTE.GetNumContextVariables()>1)
+  if (theComputation.inpuTE.GetNumContextVariables() > 1)
     return theCommands << "<hr>I converted " << theFunctionE.ToString() << " to rational function, but it is of "
     << theComputation.inpuTE.GetNumContextVariables() << " variables. I have been taught to work with 1 variable only. "
     << "<br>The context of the rational function is: " << theComputation.inpuTE.GetContext().ToString();
-  if (theComputation.inpuTE.GetNumContextVariables()==1)
-    if (theComputation.inpuTE.GetContext().ContextGetContextVariable(0)!=theVariableE)
+  if (theComputation.inpuTE.GetNumContextVariables() == 1)
+    if (theComputation.inpuTE.GetContext().ContextGetContextVariable(0) != theVariableE)
       return theCommands << "<hr>The univariate rational function was in variable " << theComputation.inpuTE.GetContext().ToString()
       << " but the variable of integration is " << theVariableE.ToString();
-  theComputation.integrationSetE=integrationSetE;
-  theComputation.theRF=theComputation.inpuTE.GetValue<RationalFunctionOld>();
+  theComputation.integrationSetE = integrationSetE;
+  theComputation.theRF = theComputation.inpuTE.GetValue<RationalFunctionOld>();
   theComputation.theRF.GetDenominator(theComputation.theDen);
   theComputation.theRF.GetNumerator(theComputation.theNum);
   //stOutput << "<br>DEBUG: partial fraction decompo called, the den is: " << theComputation.theDen.ToString();
-  if (theComputation.theDen.TotalDegree()<1)
+  if (theComputation.theDen.TotalDegree() < 1)
     return false;
   //stOutput << "<br>DEBUG: calling integration... ";
   if (!theComputation.IntegrateRF())
@@ -2928,9 +2918,9 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
   theComputation.theIntegralSum.CheckConsistencyRecursively();
   //stOutput << "got before check consistency 3";
   //stOutput << "result of "
-  output=theComputation.theIntegralSum;
+  output = theComputation.theIntegralSum;
   if (output.StartsWith(theCommands.opIntegral()))
-    if (output[1]==input)
+    if (output[1] == input)
       return false;
   output.CheckConsistencyRecursively();
   output.CheckInitializationRecursively();
@@ -2941,22 +2931,22 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionSplitToBuidingBlo
 bool CalculatorFunctionsGeneral::innerCoefficientsPowersOf
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCoefficientsPowersOf");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
-  const Expression& theVarE=input[1];
-  const Expression& theExpressionE=input[2];
+  const Expression& theVarE = input[1];
+  const Expression& theExpressionE = input[2];
   VectorSparse<Expression> theCFs;
   if (!theCommands.CollectCoefficientsPowersVar(theExpressionE, theVarE, theCFs))
     return theCommands << "<hr>Failed to evaluate Calculator::CollectCoefficientsPowersVar";
-  int highestPowerPlus1=theCFs.GetLargestParticipatingBasisIndex()+1;
+  int highestPowerPlus1 = theCFs.GetLargestParticipatingBasisIndex() + 1;
   List<Expression> theCFsIncludingZeros;
   Expression currentCF;
-  for (int i =0; i<highestPowerPlus1; i++)
-  { int theIndex=theCFs.theMonomials.GetIndex(MonomialVector(i));
-    if (theIndex==-1)
+  for (int i = 0; i < highestPowerPlus1; i ++)
+  { int theIndex = theCFs.theMonomials.GetIndex(MonomialVector(i));
+    if (theIndex == - 1)
       currentCF.AssignValue(0, theCommands);
     else
-      currentCF=theCFs.theCoeffs[theIndex];
+      currentCF = theCFs.theCoeffs[theIndex];
 //    stOutput << "<br>cf: " << theCFs.theCoeffs[theIndex].ToString();
     theCFsIncludingZeros.AddOnTop(currentCF);
   }
@@ -2968,15 +2958,14 @@ bool CalculatorFunctionsGeneral::innerConstTermRelative(Calculator& theCommands,
   if (!input.StartsWithGivenAtom("ConstantTerm"))
     return false;
   Expression coeffExtractor, theCoeffs;
-  coeffExtractor=input;
+  coeffExtractor = input;
   coeffExtractor.SetChildAtomValue(0, "ConstantTerm");
   if (!CalculatorFunctionsGeneral::innerCoefficientsPowersOf(theCommands, coeffExtractor, theCoeffs))
     return false;
   if (theCoeffs.IsSequenceNElementS())
-    if (theCoeffs.size()>1)
-    { output=theCoeffs[1];
+    if (theCoeffs.size() > 1)
+    { output = theCoeffs[1];
       return true;
-
     }
   return false;
 }
@@ -2984,15 +2973,15 @@ bool CalculatorFunctionsGeneral::innerConstTermRelative(Calculator& theCommands,
 bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa");
-  Expression theFunctionE, theVariableE, integralE(theCommands);
+  Expression theFunctionE, theVariableE;
   if (!input.IsIndefiniteIntegralfdx(&theVariableE, &theFunctionE))
     return false;
 //  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
     return false;
-  const Expression& A=theFunctionE[1];
-  Expression a,b;
-  const Expression& axPlusb=theFunctionE[2];
+  const Expression& A = theFunctionE[1];
+  Expression a, b;
+  const Expression& axPlusb = theFunctionE[2];
   if (!A.IsConstantNumber())
     return false;
   if (!CalculatorFunctionsGeneral::extractLinearCoeffsWRTvariable(axPlusb, theVariableE, a, b))
@@ -3003,9 +2992,9 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIa
   logaxPlusb.reset(theCommands);
   logaxPlusb.AddChildAtomOnTop(theCommands.opLog());
   logaxPlusb.AddChildOnTop(axPlusb);
-  output=A;
-  output/=a;
-  output*=logaxPlusb;
+  output = A;
+  output /= a;
+  output *= logaxPlusb;
   output.CheckConsistencyRecursively();
   output.CheckInitializationRecursively();
   return true;
@@ -3019,13 +3008,13 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb(Ca
 //  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockI, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
     return false;
-  const Expression& A=theFunctionE[1];
-  const Expression& axPlusbPowerN=theFunctionE[2];
+  const Expression& A = theFunctionE[1];
+  const Expression& axPlusbPowerN = theFunctionE[2];
   if (!A.IsConstantNumber())
     return false;
   if (!axPlusbPowerN.StartsWith(theCommands.opThePower(), 3))
     return false;
-  Expression N= axPlusbPowerN[2];
+  Expression N = axPlusbPowerN[2];
   if (!N.IsConstantNumber())
     return false;
   Expression a,b;
@@ -3035,14 +3024,14 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIb(Ca
   if (!a.IsConstantNumber() || !b.IsConstantNumber())
     return false;
   Expression base, OneMinusN;
-  OneMinusN=N;
-  OneMinusN+=-1;
-  OneMinusN*=-1;
+  OneMinusN = N;
+  OneMinusN += - 1;
+  OneMinusN *= - 1;
   base.MakeXOX(theCommands, theCommands.opThePower(), axPlusb, OneMinusN);
-  output=A;
-  output/=a;
-  output/=OneMinusN;
-  output*=base;
+  output = A;
+  output /= a;
+  output /= OneMinusN;
+  output *= base;
   output.CheckConsistencyRecursively();
   output.CheckInitializationRecursively();
   return true;
@@ -3053,22 +3042,22 @@ bool CalculatorFunctionsGeneral::extractQuadraticCoeffsWRTvariable
    Expression& outputCoeffVarSquared, Expression& outputCoeffLinTerm, Expression& outputConstTerm)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::extractQuadraticCoeffsWRTvariable");
   VectorSparse<Expression> theCoeffs;
-  if (theQuadratic.owner==0)
+  if (theQuadratic.owner == 0)
     return false;
   Calculator& theCommands=*theQuadratic.owner;
   if(!theCommands.CollectCoefficientsPowersVar(theQuadratic, theVariable, theCoeffs))
     return false;
-  if (theCoeffs.GetLargestParticipatingBasisIndex()!=2)
+  if (theCoeffs.GetLargestParticipatingBasisIndex() != 2)
     return false;
   outputCoeffVarSquared.AssignValue(0, theCommands);
   outputCoeffLinTerm.AssignValue(0, theCommands);
   outputConstTerm.AssignValue(0, theCommands);
   if (theCoeffs.theMonomials.Contains(MonomialVector(0)))
-    outputConstTerm=theCoeffs.GetMonomialCoefficient(MonomialVector(0));
+    outputConstTerm = theCoeffs.GetMonomialCoefficient(MonomialVector(0));
   if (theCoeffs.theMonomials.Contains(MonomialVector(1)))
-    outputCoeffLinTerm=theCoeffs.GetMonomialCoefficient(MonomialVector(1));
+    outputCoeffLinTerm = theCoeffs.GetMonomialCoefficient(MonomialVector(1));
   if (theCoeffs.theMonomials.Contains(MonomialVector(2)))
-    outputCoeffVarSquared=theCoeffs.GetMonomialCoefficient(MonomialVector(2));
+    outputCoeffVarSquared = theCoeffs.GetMonomialCoefficient(MonomialVector(2));
   return true;
 }
 
@@ -3078,18 +3067,18 @@ bool CalculatorFunctionsGeneral::extractLinearCoeffsWRTvariable
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::extractLinearCoeffsWRTvariable");
   VectorSparse<Expression> theCoeffs;
   //stOutput << "extracting lin expression from : " << theLinearExpression.ToString();
-  if (theLinearExpression.owner==0)
+  if (theLinearExpression.owner == 0)
     return false;
-  Calculator& theCommands=*theLinearExpression.owner;
+  Calculator& theCommands = *theLinearExpression.owner;
   theCommands.CollectCoefficientsPowersVar(theLinearExpression, theVariable, theCoeffs);
-  if (theCoeffs.GetLargestParticipatingBasisIndex()>1)
+  if (theCoeffs.GetLargestParticipatingBasisIndex() > 1)
     return false;
   outputCoeffLinTerm.AssignValue(0, theCommands);
   outputConstTerm.AssignValue(0, theCommands);
   if (theCoeffs.theMonomials.Contains(MonomialVector(1)))
-    outputCoeffLinTerm=theCoeffs.GetMonomialCoefficient(MonomialVector(1));
+    outputCoeffLinTerm = theCoeffs.GetMonomialCoefficient(MonomialVector(1));
   if (theCoeffs.theMonomials.Contains(MonomialVector(0)))
-    outputConstTerm=theCoeffs.GetMonomialCoefficient(MonomialVector(0));
+    outputConstTerm = theCoeffs.GetMonomialCoefficient(MonomialVector(0));
   return true;
 }
 
@@ -3101,8 +3090,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaan
 //  stOutput << "<br>Calling CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaandIIIa, input: " << input.ToString();
   if (!theFunctionE.StartsWith(theCommands.opDivide(), 3))
     return false;
-  Expression denNoPower=theFunctionE[2];
-  std::stringstream out;
+  Expression denNoPower = theFunctionE[2];
   Expression a, b, c, A, B;
   if (!CalculatorFunctionsGeneral::extractQuadraticCoeffsWRTvariable(denNoPower, x, a, b, c))
   { //stOutput << "<br>couldn't extract quadratic from denominator.";
@@ -3121,7 +3109,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaan
   if (!a.EvaluatesToDouble(&approxa) || !b.EvaluatesToDouble(&approxb) || !c.EvaluatesToDouble(&approxc))
     return theCommands << "<hr>Failed to evaluate variable coefficients in denominator " << denNoPower.ToString()
     << " to double. Possible user typo. ";
-  if (approxb*approxb>=approxa* approxc*4)
+  if (approxb*approxb >= approxa * approxc * 4)
     return false;
   Expression xSquared, bSquared, aSquared;
   Expression twoE, oneE, fourE;
@@ -3132,20 +3120,20 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIaan
   bSquared.MakeXOX(theCommands, theCommands.opThePower(), b, twoE);
   aSquared.MakeXOX(theCommands, theCommands.opThePower(), a, twoE);
 
-  Expression theQuadraticDiva=xSquared+(b/a)*x+c/a;
-  Expression xplusbdiv2a = x+b/(twoE*a);
-  Expression D=(fourE*a*c-bSquared)/(fourE*aSquared);
+  Expression theQuadraticDiva = xSquared + (b / a) * x + c / a;
+  Expression xplusbdiv2a = x + b / (twoE * a);
+  Expression D = (fourE * a * c - bSquared) / (fourE * aSquared);
   Expression sqrtD;
   sqrtD.MakeSqrt(theCommands, D, 2);
-  Expression arcTanArgument= xplusbdiv2a/sqrtD;
+  Expression arcTanArgument = xplusbdiv2a / sqrtD;
   Expression theArcTan(theCommands);
   theArcTan.AddChildAtomOnTop(theCommands.opArcTan());
   theArcTan.AddChildOnTop(arcTanArgument);
   Expression theLog(theCommands);
   theLog.AddChildAtomOnTop(theCommands.opLog());
   theLog.AddChildOnTop(theQuadraticDiva);
-  Expression C=B-(A*b)/(twoE*a);
-  output= (oneE/a)*((A/twoE )*theLog+(C/sqrtD)*theArcTan);
+  Expression C = B - (A * b) / (twoE * a);
+  output = (oneE / a) * ((A / twoE) * theLog + (C / sqrtD) * theArcTan);
   output.CheckConsistencyRecursively();
   output.CheckInitializationRecursively();
   return true;
@@ -3161,13 +3149,13 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(
     return false;
   if (!theFunctionE[2].StartsWith(theCommands.opThePower(), 3))
     return false;
-  Expression numPowerE=theFunctionE[2][2];
-  int numPower=0;
+  Expression numPowerE = theFunctionE[2][2];
+  int numPower = 0;
   if (!numPowerE.IsSmallInteger(&numPower))
     return false;
-  if (numPower<=1)
+  if (numPower <= 1)
     return false;
-  Expression denNoPower=theFunctionE[2][1];
+  Expression denNoPower = theFunctionE[2][1];
   std::stringstream out;
   Expression a, b, c;
   if (!theFunctionE[1].IsEqualToOne())
@@ -3185,7 +3173,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(
     << " to double. Possible user typo. ";
     return false;
   }
-  if (approxb*approxb>=approxa* approxc*4)
+  if (approxb * approxb >= approxa * approxc * 4)
     return false;
   Expression xSquared, bSquared;
   Expression twoE, oneE, threeE, fourE;
@@ -3197,16 +3185,16 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIIb(
   xSquared.MakeXOX(theCommands, theCommands.opThePower(), x, twoE);
   bSquared.MakeXOX(theCommands, theCommands.opThePower(), b, twoE);
 
-  Expression theMonicQuadratic=xSquared+b*x+c;
-  Expression D=c-bSquared/(fourE);
+  Expression theMonicQuadratic = xSquared + b * x + c;
+  Expression D = c - bSquared / fourE;
   Expression remainingIntegral, functionRemainingToIntegrate, theQuadraticPowerOneMinusN, theQuadraticPowerNMinusOne;
-  theQuadraticPowerOneMinusN.MakeXOX(theCommands, theCommands.opThePower(), theMonicQuadratic, oneE-numPowerE);
-  theQuadraticPowerNMinusOne.MakeXOX(theCommands, theCommands.opThePower(), theMonicQuadratic, numPowerE-oneE);
-  functionRemainingToIntegrate=oneE/theQuadraticPowerNMinusOne;
+  theQuadraticPowerOneMinusN.MakeXOX(theCommands, theCommands.opThePower(), theMonicQuadratic, oneE - numPowerE);
+  theQuadraticPowerNMinusOne.MakeXOX(theCommands, theCommands.opThePower(), theMonicQuadratic, numPowerE - oneE);
+  functionRemainingToIntegrate = oneE / theQuadraticPowerNMinusOne;
   remainingIntegral.MakeIntegral(theCommands, integrationSetE, functionRemainingToIntegrate, x);
-  output =oneE/D *
-  ((x+b/twoE)/(twoE*numPowerE-twoE) * theQuadraticPowerOneMinusN+
-  (twoE*numPowerE-threeE)/(twoE*numPowerE-twoE)*remainingIntegral);
+  output = oneE / D *
+  ((x + b / twoE) / (twoE * numPowerE - twoE) * theQuadraticPowerOneMinusN +
+  (twoE * numPowerE - threeE) / (twoE * numPowerE - twoE) * remainingIntegral);
   output.CheckConsistencyRecursively();
   output.CheckInitializationRecursively();
   //stOutput << " <hr>innerIntegrateRationalFunctionBuidingBlockIIIb: replacing " << HtmlRoutines::GetMathSpanPure(input.ToString() ) << " by "

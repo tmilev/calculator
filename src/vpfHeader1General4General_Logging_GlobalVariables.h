@@ -87,6 +87,7 @@ public:
   bool flagRunningAce;
   bool flagAceIsAvailable;
 //webserver flags and variables
+  bool flagRunServerOnEmptyCommandLine;
   bool flagCachingInternalFilesOn;
   bool flagServerDetailedLog;
   bool flagIsChildProcess;
@@ -192,6 +193,7 @@ public:
 
   bool StoreConfiguration();
   bool LoadConfiguration();
+  void ComputeConfigurationFlags();
   GlobalVariables();
   ~GlobalVariables();
   static HashedList<FileInformation>& theSourceCodeFiles();
@@ -219,10 +221,10 @@ public:
   void SetWebInpuT(const std::string& inputName, const std::string& inputValue);
   std::string GetWebInput(const std::string& inputName);
   void initDefaultFolderAndFileNames
-(const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow);
+  (const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow);
   void initOutputReportAndCrashFileNames
-(const std::string& inputUserStringRAW,
- const std::string& inputUserStringCivilized);
+  (const std::string& inputUserStringRAW,
+   const std::string& inputUserStringCivilized);
   bool UserSecureNonAdminOperationsAllowed();
   bool UserGuestMode();
   bool UserDebugFlagOn();

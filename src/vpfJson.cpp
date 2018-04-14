@@ -85,6 +85,14 @@ void JSData::operator=(const Rational& other)
   this->number = other.GetDoubleValue();
 }
 
+bool JSData::isTrueRepresentationInJSON()
+{ if (this->type == JSData::JSbool)
+    return this->boolean;
+  if (this->type != JSData::JSstring)
+    return false;
+  return this->string == "true";
+}
+
 bool JSData::IsValidElement()
 { return
   this->type == this->JSnull   ||

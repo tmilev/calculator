@@ -5581,89 +5581,92 @@ void WebServer::FigureOutOperatingSystem()
   << logger::endL << "and we will add your Linux flavor to the list of supported distros. " << logger::endL;
 }
 
-void WebServer::CheckExternalPackageInstallation()
-{ MacroRegisterFunctionWithName("WebServer::CheckExternalPackageInstallation");
+void WebServer::CheckSystemInstallationOpenSSL()
+{ MacroRegisterFunctionWithName("WebServer::CheckSystemInstallationOpenSSL");
   if (theGlobalVariables.flagRunningApache)
     return;
   bool doInstallOpenSSL = false;
-  bool doInstallMongo = false;
-#ifndef MACRO_use_open_ssl
+#ifndef MACRO_use_MongoDB
   doInstallOpenSSL = true;
 #endif
-#ifndef MACRO_use_MongoDB
+  if (!doInstallOpenSSL)
+    return;
+  if (theGlobalVariables.configuration["openSSL"].type != JSData::JSUndefined)
+    return;
+  theGlobalVariables.configuration["openSSL"] = "Attempted installation";
+  theGlobalVariables.StoreConfiguration();
+  WebServer::FigureOutOperatingSystem();
+  StateMaintainerCurrentFolder preserveFolder;
+  logServer << "You appear to be missing an openssl installation. Let me try to install that for you. "
+  << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
+  if (theGlobalVariables.OperatingSystem == "Ubuntu")
+  { theGlobalVariables.CallSystemNoOutput("sudo apt-get install libssl-dev", false);
+    theGlobalVariables.configuration["openSSL"] = "Attempted installation on Ubuntu";
+  } else if (theGlobalVariables.OperatingSystem == "CentOS")
+  { theGlobalVariables.CallSystemNoOutput("sudo yum install openssl-devel", false);
+    theGlobalVariables.configuration["openSSL"] = "Attempted installation on CentOS";
+  }
+  theGlobalVariables.StoreConfiguration();
+}
+
+void WebServer::CheckSystemInstallationMongoDB()
+{ MacroRegisterFunctionWithName("WebServer::CheckSystemInstallationMongoDB");
+  if (theGlobalVariables.flagRunningApache)
+    return;
+  bool doInstallMongo = false;
+#ifndef MACRO_use_open_ssl
   doInstallMongo = true;
 #endif
-  if (!doInstallOpenSSL && doInstallMongo)
+  if (!doInstallMongo)
     return;
   WebServer::FigureOutOperatingSystem();
-  std::string attemptedSetupVirtualFileName = "/LogFiles/attemptedExternalPackageSetup.html";
-  if (FileOperations::FileExistsVirtual(attemptedSetupVirtualFileName, true))
-  { std::string attemptedSetupPhysicalFileName;
-    logger result("", 0, false, "server");
-    FileOperations::GetPhysicalFileNameFromVirtual
-    (attemptedSetupVirtualFileName, attemptedSetupPhysicalFileName, true, false, 0);
-    result << logger::green << "Ssl setup previously attempted, skipping. Erase file "
-    << attemptedSetupPhysicalFileName << " to try setting up again. " << logger::endL;
-    return;
-  }
-  logger result(attemptedSetupVirtualFileName, 0, false, "server");
   if (theGlobalVariables.OperatingSystem == "")
     return;
-  if (doInstallOpenSSL)
-  { result << "You appear to be missing an openssl installation. Let me try to install that for you. "
-    << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
-    if (theGlobalVariables.OperatingSystem == "Ubuntu")
-      theGlobalVariables.CallSystemNoOutput("sudo apt-get install libssl-dev", false);
-    else if (theGlobalVariables.OperatingSystem == "CentOS")
-      theGlobalVariables.CallSystemNoOutput("sudo yum install openssl-devel", false);
+  if (theGlobalVariables.configuration["mongoDB"].type != JSData::JSUndefined)
+    return;
+  theGlobalVariables.configuration["mongoDB"] = "Attempted installation";
+  theGlobalVariables.StoreConfiguration();
+
+  StateMaintainerCurrentFolder preserveFolder;
+  logServer << "You appear to be missing an openssl installation. Let me try to install that for you. "
+  << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
+  if (theGlobalVariables.OperatingSystem == "Ubuntu")
+  { theGlobalVariables.CallSystemNoOutput("sudo apt-get install mongodb", false);
+    theGlobalVariables.configuration["mongoDB"] = "Attempted installation on Ubuntu";
+  } else if (theGlobalVariables.OperatingSystem == "CentOS")
+  { theGlobalVariables.CallSystemNoOutput("sudo yum install mongodb", false);
+    theGlobalVariables.configuration["mongoDB"] = "Attempted installation on CentOS";
   }
-  if (doInstallMongo)
-  { result << "You appear to be missing an openssl installation. Let me try to install that for you. "
-    << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
-    if (theGlobalVariables.OperatingSystem == "Ubuntu")
-      theGlobalVariables.CallSystemNoOutput("sudo apt-get install mongodb", false);
-    else if (theGlobalVariables.OperatingSystem == "CentOS")
-      theGlobalVariables.CallSystemNoOutput("sudo yum install mongodb", false);
-  }
-  std::string currentFolder = FileOperations::GetCurrentFolder();
-  result << "Changing folder to: " << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
   theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
-  result << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
   theGlobalVariables.CallSystemNoOutput("make clean", false);
-  result << "Proceeding to rebuild the calculator. " << logger::red
-  << "This is expected to take 10+ minutes. "
-  << logger::endL;
+  logServer << "Proceeding to rebuild the calculator. " << logger::red
+  << "This is expected to take 10+ minutes. " << logger::endL;
   theGlobalVariables.CallSystemNoOutput("make -j8", false);
-  theGlobalVariables.ChDir(currentFolder);
+  theGlobalVariables.StoreConfiguration();
 }
 
 void WebServer::CheckMongoDBSetup()
 { MacroRegisterFunctionWithName("WebServer::CheckMongoDBSetup");
-  std::string attemptedMongoDBSetupVirtualFileName = "/LogFiles/attemptedMongoDBsetup.html";
-  if (FileOperations::FileExistsVirtual(attemptedMongoDBSetupVirtualFileName, true))
-  { std::string attemptedMongoSetupPhysicalFileName;
-    logger result("", 0, false, "server");
-    FileOperations::GetPhysicalFileNameFromVirtual
-    (attemptedMongoDBSetupVirtualFileName, attemptedMongoSetupPhysicalFileName, true, false, 0);
-    result << logger::green << "Mongo setup previously attempted, skipping. Erase file "
-    << attemptedMongoSetupPhysicalFileName << " to try setting up again. " << logger::endL;
-    return;
+  if (theGlobalVariables.configuration["mongoDBSetup"].type != JSData::JSUndefined)
+  { return;
   }
-  logger result(attemptedMongoDBSetupVirtualFileName, 0, false, "server");
+  logServer << logger::yellow << "configuration so far: " << theGlobalVariables.configuration.ToString(false);
+  theGlobalVariables.configuration["mongoDBSetup"] = "Attempting";
+  theGlobalVariables.StoreConfiguration();
   WebServer::FigureOutOperatingSystem();
-  result << logger::yellow << "Mongo setup file missing, proceeding with setup. " << logger::endL;
-  result << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
+  logServer << logger::yellow << "Mongo setup file missing, proceeding with setup. " << logger::endL;
+  logServer << logger::green << "Enter the sudo password as prompted please. " << logger::endL;
   //result << logger::yellow << "(Re)-starting mongo: " << logger::endL;
   StateMaintainerCurrentFolder maintainFolder;
   theGlobalVariables.ChDir("../external-source");
 
   std::stringstream commandUnzipMongoC, commandUnzipLibbson;
   commandUnzipMongoC << "tar -xvzf mongo-c-driver-1.9.3.tar.gz";
-  result << logger::green << commandUnzipMongoC.str() << logger::endL;
-  result << theGlobalVariables.CallSystemWithOutput(commandUnzipMongoC.str());
+  logServer << logger::green << commandUnzipMongoC.str() << logger::endL;
+  logServer << theGlobalVariables.CallSystemWithOutput(commandUnzipMongoC.str());
   commandUnzipLibbson << "tar -xvzf libbson-1.9.3.tar.gz";
-  result << logger::green << commandUnzipLibbson.str() << logger::endL;
-  result << theGlobalVariables.CallSystemWithOutput(commandUnzipLibbson.str());
+  logServer << logger::green << commandUnzipLibbson.str() << logger::endL;
+  logServer << theGlobalVariables.CallSystemWithOutput(commandUnzipLibbson.str());
 
   theGlobalVariables.ChDir("./mongo-c-driver-1.9.3");
   theGlobalVariables.CallSystemNoOutput("./configure", true);
@@ -5674,29 +5677,26 @@ void WebServer::CheckMongoDBSetup()
   theGlobalVariables.CallSystemNoOutput("make -j8", true);
   theGlobalVariables.CallSystemNoOutput("sudo make install", true);
   theGlobalVariables.CallSystemNoOutput("sudo ldconfig", true);
+  theGlobalVariables.configuration["mongoDBSetup"] = "Setup complete";
+  theGlobalVariables.StoreConfiguration();
 }
 
 void WebServer::CheckFreecalcSetup()
 { MacroRegisterFunctionWithName("WebServer::CheckFreecalcSetup");
-  std::string attemptedSetupVirtual = "/LogFiles/attemptedFreecalcSetup.html";
-  if (FileOperations::FileExistsVirtual(attemptedSetupVirtual, true))
-  { std::string attemptedSetupPhysical;
-    logger result("", 0, false, "server");
-    FileOperations::GetPhysicalFileNameFromVirtual
-    (attemptedSetupVirtual, attemptedSetupPhysical, true, false, 0);
-    result << logger::green << "freecalc setup previously attempted, skipping. Erase file "
-    << attemptedSetupPhysical << " to try setting up again. " << logger::endL;
+  if (theGlobalVariables.configuration["freecalcSetup"].type != JSData::JSUndefined)
     return;
-  }
-  logger result(attemptedSetupVirtual, 0, false, "server");
+  theGlobalVariables.configuration["freecalcSetup"] = "Setup started";
+  theGlobalVariables.StoreConfiguration();
   WebServer::FigureOutOperatingSystem();
-  result << logger::yellow << "Freelcalc setup file missing, proceeding to set it up. " << logger::endL;
+  logServer << logger::yellow << "Freelcalc setup file missing, proceeding to set it up. " << logger::endL;
+  StateMaintainerCurrentFolder preserveFolder;
   std::string startingDir = FileOperations::GetCurrentFolder();
   theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase + "../");
-  result << logger::green << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
-  result << logger::green << "git clone https://github.com/tmilev/freecalc.git" << logger::endL;
-  result << theGlobalVariables.CallSystemWithOutput("git clone https://github.com/tmilev/freecalc.git");
-  theGlobalVariables.ChDir(startingDir);
+  logServer << logger::green << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
+  logServer << logger::green << "git clone https://github.com/tmilev/freecalc.git" << logger::endL;
+  theGlobalVariables.CallSystemNoOutput("git clone https://github.com/tmilev/freecalc.git", true);
+  theGlobalVariables.configuration["freecalcSetup"] = "Setup complete";
+  theGlobalVariables.StoreConfiguration();
 }
 
 void WebServer::CheckSVNSetup()
@@ -5705,17 +5705,15 @@ void WebServer::CheckSVNSetup()
     return;
   theGlobalVariables.configuration["attemptedSVNSetup"] = "Attempted to install";
   theGlobalVariables.StoreConfiguration();
-  std::string attemptedSetupVirtual = "/LogFiles/attemptedSVNSetup.html";
-  logger result(attemptedSetupVirtual, 0, false, "server");
   WebServer::FigureOutOperatingSystem();
-  result << logger::yellow << "SVN setup file missing, proceeding to set it up. " << logger::endL
+  logServer << logger::yellow << "SVN setup file missing, proceeding to set it up. " << logger::endL
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
   if (theGlobalVariables.OperatingSystem == "Ubuntu")
-  { result << logger::yellow << "sudo apt-get install subversion" << logger::endL;
+  { logServer << logger::yellow << "sudo apt-get install subversion" << logger::endL;
     theGlobalVariables.CallSystemNoOutput("sudo apt-get install subversion", false);
     theGlobalVariables.configuration["attemptedSVNSetup"] = "Attempted to install on Ubuntu. ";
   } else if (theGlobalVariables.OperatingSystem == "CentOS")
-  { result << logger::yellow << "sudo yum install subversion" << logger::endL;
+  { logServer << logger::yellow << "sudo yum install subversion" << logger::endL;
     theGlobalVariables.CallSystemNoOutput("sudo yum install subversion", false);
     theGlobalVariables.configuration["attemptedSVNSetup"] = "Attempted to install on CentOS. ";
   }
@@ -5724,33 +5722,27 @@ void WebServer::CheckSVNSetup()
 
 void WebServer::CheckMathJaxSetup()
 { MacroRegisterFunctionWithName("WebServer::CheckMathJaxSetup");
-  std::string attemptedMathJaxSetupVirtualFileName = "/LogFiles/attemptedMathJaxSetup.html";
-  if (FileOperations::FileExistsVirtual(attemptedMathJaxSetupVirtualFileName, true))
-  { std::string attemptedSetupPhysicalFileName;
-    logger result("", 0, false, "server");
-    FileOperations::GetPhysicalFileNameFromVirtual
-    (attemptedMathJaxSetupVirtualFileName, attemptedSetupPhysicalFileName, true, false, 0);
-    result << logger::green << "Mathjax setup previously attempted, skipping. Erase file "
-    << attemptedSetupPhysicalFileName << " to try setting up again. " << logger::endL;
+  if (theGlobalVariables.configuration["MathJax"].type != JSData::JSUndefined)
     return;
-  }
-  logger result(attemptedMathJaxSetupVirtualFileName, 0, false, "server");
+  theGlobalVariables.configuration["MathJax"] = "Attempting to install";
+  theGlobalVariables.StoreConfiguration();
   WebServer::FigureOutOperatingSystem();
-  result << logger::yellow << "MathJax setup file missing, proceeding to set it up. " << logger::endL
+  logServer << logger::yellow << "MathJax setup file missing, proceeding to set it up. " << logger::endL
   << logger::green << "Enter your the sudo password as prompted please. " << logger::endL;
   if (theGlobalVariables.OperatingSystem == "Ubuntu")
     theGlobalVariables.CallSystemNoOutput("sudo apt-get install unzip", false);
   else if (theGlobalVariables.OperatingSystem == "CentOS")
     theGlobalVariables.CallSystemNoOutput("sudo yum install unzip", false);
-  result << "Proceeding to unzip MathJax. ";
+  logServer << "Proceeding to unzip MathJax. ";
   //std::string currentFolder=FileOperations::GetCurrentFolder();
   //result << "Changing folder to: " << theGlobalVariables.PhysicalPathProjectBase << logger::endL;
   //theGlobalVariables.ChDir(theGlobalVariables.PhysicalPathProjectBase);
-  result << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
+  logServer << "Current folder: " << FileOperations::GetCurrentFolder() << logger::endL;
   theGlobalVariables.CallSystemNoOutput("mkdir -p ../../public_html", false);
   theGlobalVariables.CallSystemNoOutput("unzip ./../html-common/MathJax-2.7-latest.zip -d ./../../public_html/", false);
   theGlobalVariables.CallSystemNoOutput("mv ./../../public_html/MathJax-2.7.2 ./../../public_html/MathJax-2.7-latest", false);
-  //theGlobalVariables.ChDir(currentFolder);
+  theGlobalVariables.configuration["MathJax"] = "Unzipped";
+  theGlobalVariables.StoreConfiguration();
 }
 
 void WebServer::AnalyzeMainArguments(int argC, char **argv)
@@ -5882,9 +5874,6 @@ void WebServer::InitializeGlobalVariables()
 
   std::string theDir = FileOperations::GetCurrentFolder();
   theGlobalVariables.ChDir("../");
-  theGlobalVariables.buildVersionSimple =
-  MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("svn info | grep \"Revision\" | awk '{print $2}'"));
-  //<- if using svn, this will return the svn revision number
   if (theGlobalVariables.buildVersionSimple == "")
     theGlobalVariables.buildVersionSimple =
     MathRoutines::StringTrimWhiteSpace(theGlobalVariables.CallSystemWithOutput("git rev-list --count HEAD"));
@@ -5992,8 +5981,7 @@ void WebServer::TurnProcessMonitoringOn()
   logServer
   << logger::purple << "************************" << logger::endL
   << logger::red << "WARNING: process monitoring IS ON. " << logger::endL
-  << logger::purple << "************************" << logger::endL
-  ;
+  << logger::purple << "************************" << logger::endL;
   theGlobalVariables.flagAllowProcessMonitoring = true;
   theGlobalVariables.MaxComputationTimeBeforeWeTakeAction = 5;
 }
@@ -6003,8 +5991,7 @@ void WebServer::TurnProcessMonitoringOff()
   logServer
   << logger::green << "************************" << logger::endL
   << logger::green << "Process monitoring is now off. " << logger::endL
-  << logger::green << "************************" << logger::endL
-  ;
+  << logger::green << "************************" << logger::endL;
   theGlobalVariables.flagAllowProcessMonitoring = false;
   theGlobalVariables.MaxComputationTimeBeforeWeTakeAction = 0;
 }
@@ -6013,26 +6000,30 @@ bool GlobalVariables::LoadConfiguration()
 { MacroRegisterFunctionWithName("GlobalVariables::LoadConfiguration");
   std::string configuration;
   std::stringstream out;
-  bool resetConfiguration = false;
-  if (FileOperations::LoadFileToStringUnsecure("/configuration/configuration.json", configuration, &out))
+  bool createConfiguration = false;
+  //std::cout << "DEBUG: loading config:" << std::endl;
+  if (FileOperations::LoadFileToStringVirtual("/configuration/configuration.json", configuration, true, false, &out))
   { if (!theGlobalVariables.configuration.readstring(configuration, false, &out))
     { logServer << logger::red << out.str() << logger::endL;
-      resetConfiguration = true;
+      createConfiguration = true;
     }
   } else
-  { resetConfiguration = true;
+  { createConfiguration = true;
+    //std::cout << "DEBUG: no congig:" << out.str() << std::endl;
     logServer << logger::yellow << out.str() << logger::endL;
   }
-  if (resetConfiguration)
-  { this->StoreConfiguration();
+  if (createConfiguration)
+  { logServer << logger::yellow << "Did not find configuration file." << logger::endL;
+    this->StoreConfiguration();
     return false;
   }
+  //logServer << logger::green << "Successfully loaded configuration: "
+  //<< theGlobalVariables.configuration.ToString(false) << logger::endL;
   return true;
 }
 
 bool GlobalVariables::StoreConfiguration()
 { MacroRegisterFunctionWithName("GlobalVariables::StoreConfiguration");
-  theGlobalVariables.configuration.reset(JSData::JSObject);
   std::fstream configurationFile;
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual
       (configurationFile, "configuration/configuration.json", false, true, false, true))
@@ -6043,6 +6034,44 @@ bool GlobalVariables::StoreConfiguration()
   return true;
 }
 
+void GlobalVariables::ComputeConfigurationFlags()
+{ MacroRegisterFunctionWithName("GlobalVariables::ComputeConfigurationFlags");
+  theGlobalVariables.flagServerDetailedLog = theGlobalVariables.configuration["serverDetailedLog"].isTrueRepresentationInJSON();
+  if (theGlobalVariables.flagServerDetailedLog)
+  { logServer
+    << logger::purple << "************************" << logger::endL
+    << logger::purple << "************************" << logger::endL
+    << logger::purple << "************************" << logger::endL
+    << logger::red << "WARNING: DETAILED server logging is on. " << logger::endL
+    << "This is strictly for development purposes, please do not deploy on live systems. " << logger::endL
+    << "To turn off/on server logging simply delete/create file LogFiles/serverDebugOn.txt" << logger::endL
+    << logger::purple << "************************" << logger::endL
+    << logger::purple << "************************" << logger::endL
+    << logger::purple << "************************" << logger::endL;
+  }
+  theGlobalVariables.flagCachingInternalFilesOn = !theGlobalVariables.configuration["serverRAMCachingOff"].isTrueRepresentationInJSON();
+  if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
+  { logServer
+    << logger::purple << "************************" << logger::endL
+    << logger::red << "WARNING: caching files is off. " << logger::endL
+    << "This is for development purposes only, please do not deploy on live systems. " << logger::endL
+    << "To turn  file LogFiles/serverRAMCachingOff.txt" << logger::endL
+    << logger::purple << "************************" << logger::endL;
+  }
+  theGlobalVariables.flagRunServerOnEmptyCommandLine = theGlobalVariables.configuration["runServerOnEmptyCommandLine"].isTrueRepresentationInJSON();
+  if (theGlobalVariables.flagRunningCommandLine &&
+      theGlobalVariables.programArguments.size == 1 &&
+      theGlobalVariables.flagRunServerOnEmptyCommandLine )
+  { logServer << logger::green
+    << "runServerOnEmptyCommandLine is set to true => Starting server with default configuration. "
+    << logger::endL;
+    theGlobalVariables.flagRunningBuiltInWebServer = true;
+    theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 30;
+    theWebServer.flagTryToKillOlderProcesses = false;
+    theWebServer.flagPort8155 = true;
+  }
+}
+
 int WebServer::main(int argc, char **argv)
 { theGlobalVariables.InitThreadsExecutableStart();
   //use of loggers forbidden before calling   theWebServer.AnalyzeMainArguments(...):
@@ -6050,8 +6079,8 @@ int WebServer::main(int argc, char **argv)
   MacroRegisterFunctionWithName("main");
   try
   { InitializeGlobalObjects();
-    theGlobalVariables.LoadConfiguration();
     theWebServer.AnalyzeMainArguments(argc, argv);
+    theGlobalVariables.LoadConfiguration();
     if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 0)
       theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead =
       theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit + 20;
@@ -6059,37 +6088,15 @@ int WebServer::main(int argc, char **argv)
       theGlobalVariables.MaxTimeNoPingBeforeChildIsPresumedDead = - 1;
     //using loggers allowed from now on.
     theWebServer.InitializeGlobalVariables();
-    theWebServer.CheckExternalPackageInstallation();
-    //logServer << "DEBUG: got to here pt 0" << logger::endL;
+    theGlobalVariables.ComputeConfigurationFlags();
+
+
+    theWebServer.CheckSystemInstallationOpenSSL();
+    theWebServer.CheckSystemInstallationMongoDB();
     theWebServer.CheckMongoDBSetup();
-    //logServer << "DEBUG: got to here pt 0.5" << logger::endL;
     theWebServer.CheckMathJaxSetup();
     theWebServer.CheckSVNSetup();
     theWebServer.CheckFreecalcSetup();
-    //logServer << "DEBUG: got to here pt 1" << logger::endL;
-    theGlobalVariables.flagServerDetailedLog = FileOperations::FileExistsVirtual("/LogFiles/serverDebugOn.txt", true, false);
-    if (theGlobalVariables.flagServerDetailedLog)
-    { logServer
-      << logger::purple << "************************" << logger::endL
-      << logger::purple << "************************" << logger::endL
-      << logger::purple << "************************" << logger::endL
-      << logger::red << "WARNING: DETAILED server logging is on. " << logger::endL
-      << "This is strictly for development purposes, please do not deploy on live systems. " << logger::endL
-      << "To turn off/on server logging simply delete/create file LogFiles/serverDebugOn.txt" << logger::endL
-      << logger::purple << "************************" << logger::endL
-      << logger::purple << "************************" << logger::endL
-      << logger::purple << "************************" << logger::endL;
-    }
-    theGlobalVariables.flagCachingInternalFilesOn =
-    !FileOperations::FileExistsVirtual("/LogFiles/serverRAMCachingOff.txt", true, false);
-    if (!theGlobalVariables.flagCachingInternalFilesOn && theGlobalVariables.flagRunningBuiltInWebServer)
-    { logServer
-      << logger::purple << "************************" << logger::endL
-      << logger::red << "WARNING: caching files is off. " << logger::endL
-      << "This is for development purposes only, please do not deploy on live systems. " << logger::endL
-      << "To turn off/on server logging simply delete/create file LogFiles/serverRAMCachingOff.txt" << logger::endL
-      << logger::purple << "************************" << logger::endL;
-    }
 
     theGlobalVariables.flagAceIsAvailable = FileOperations::FileExistsVirtual("/MathJax-2.7-latest/", false);
     if (!theGlobalVariables.flagAceIsAvailable && theGlobalVariables.flagRunningBuiltInWebServer)
@@ -6125,12 +6132,12 @@ int WebServer::main(int argc, char **argv)
   { crash << "Exception caught: something very wrong has happened. " << crash;
   }
   crash << "This point of code is not supposed to be reachable. " << crash;
-  return -1;
+  return - 1;
 }
 
 int WebServer::mainCommandLine()
 { MacroRegisterFunctionWithName("main_command_input");
-  theGlobalVariables.IndicatorStringOutputFunction=HtmlRoutines::MakeStdCoutReport;
+  theGlobalVariables.IndicatorStringOutputFunction = HtmlRoutines::MakeStdCoutReport;
   //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
   //  return 0;
 //std::cout << "Running cmd line. \n";

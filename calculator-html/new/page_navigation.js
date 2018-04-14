@@ -34,6 +34,12 @@ function Page(){
       storage: {
         currentTable: null
       }
+    },
+    account: {
+      id: "divAccount",
+      menuButtonId: "buttonSelectAccount",
+      container: null,
+      selectFunction: updateAccountPage
     }
   }
   //////////////////////////////////////
@@ -64,6 +70,7 @@ function Page(){
   this.googleToken = null;
   this.username = null;
   this.authenticationToken = null;
+  this.flagUserLoggedIn = false;
   this.storeSettingsToLocalStorage = function(){
     if (Storage === undefined && localStorage === undefined){
       return;

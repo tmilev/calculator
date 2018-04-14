@@ -17,10 +17,15 @@ function loginCalculator(){
 function logout(){
   logoutGoogle();
   thePage.username = "";
+  thePage.userRole = "";
+  thePage.flagUserLoggedIn = false;
+  document.getElementById("inputPassword").value = "";
   thePage.authenticationToken = "";
   thePage.storeSettingsToCookies();
   thePage.storeSettingsToLocalStorage();
   showLoginCalculatorButtons();
+  toggleAccountPanels();
+  toggleAdminPanels();
 }
 
 function loginTry(){
@@ -32,13 +37,28 @@ function loginTry(){
   startGoogleLogin();
 }
 
+function toggleAccountPanels(){
+  var accountPanels = document.getElementsByClassName("divAccountPanel");
+  for (var counterPanels = 0; counterPanels < accountPanels.length; counterPanels ++) {
+    if (thePage.flagUserLoggedIn === true){
+      accountPanels[counterPanels].classList.remove("divInvisible");
+      accountPanels[counterPanels].classList.add("divVisible");
+    } else {
+      accountPanels[counterPanels].classList.remove("divVisible");
+      accountPanels[counterPanels].classList.add("divInvisible");
+    }
+  }
+}
+
 function toggleAdminPanels(){
   var adminPanels = document.getElementsByClassName("divAdminPanel");
   for (var counterPanels = 0; counterPanels < adminPanels.length; counterPanels ++) {
     if (thePage.userRole === "admin"){
-      adminPanels[counterPanels].style.display = "";
+      adminPanels[counterPanels].classList.remove("divInvisible");
+      adminPanels[counterPanels].classList.add("divVisible");
     } else {
-      adminPanels[counterPanels].style.display = "none";        
+      adminPanels[counterPanels].classList.remove("divVisible");
+      adminPanels[counterPanels].classList.add("divInvisible");
     }
   }
 }
@@ -48,7 +68,9 @@ function loginWithServerCallback(incomingString, result){
     thePage.authenticationToken = "";
     thePage.username = "";
     thePage.userRole = "";
+    thePage.flagUserLoggedIn = false;
     showLoginCalculatorButtons();
+    toggleAccountPanels();
     toggleAdminPanels();
     return;
   }
@@ -57,7 +79,9 @@ function loginWithServerCallback(incomingString, result){
     thePage.authenticationToken = parsedAuthentication.authenticationToken;
     thePage.username = parsedAuthentication.username;
     thePage.userRole = parsedAuthentication.userRole;
+    thePage.flagUserLoggedIn = true;
     document.getElementById("inputUsername").value = thePage.username;
+    toggleAccountPanels();
     toggleAdminPanels();
     thePage.storeSettingsToCookies();
     hideLoginCalculatorButtons();

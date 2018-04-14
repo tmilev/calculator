@@ -2388,6 +2388,7 @@ int WebWorker::ProcessFile()
     << HtmlRoutines::ConvertStringToHtmlString(this->VirtualFileName, true)
     << "<br><b>Computed relative physical file name:</b> "
     << HtmlRoutines::ConvertStringToHtmlString(this->RelativePhysicalFileNamE, true);
+    stOutput << "<br><b> Request:</b> " << theGlobalVariables.userCalculatorRequestType;
     stOutput << "<hr><hr><hr>Message details:<br>"
     << this->ToStringMessageUnsafe()
     << this->ToStringMessageFullUnsafe();
@@ -4240,7 +4241,7 @@ int WebWorker::ServeClient()
            theGlobalVariables.userCalculatorRequestType == "templateNoLogin")
     return this->ProcessTemplate();
   else if (theGlobalVariables.userCalculatorRequestType == "templateJSON" ||
-           theGlobalVariables.userCalculatorRequestType == "templateNoLoginJSON")
+           theGlobalVariables.userCalculatorRequestType == "templateJSONNoLogin")
     return this->ProcessTemplateJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "userInfoJSON")
     return this->ProcessUserInfoJSON();
@@ -4266,7 +4267,8 @@ int WebWorker::ServeClient()
     return this->ProcessSelectCourseJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "about")
     return this->ProcessAbout();
-  else if (theGlobalVariables.userCalculatorRequestType == "topicListJSON")
+  else if (theGlobalVariables.userCalculatorRequestType == "topicListJSON" ||
+           theGlobalVariables.userCalculatorRequestType == "topicListJSONNoLogin")
     return this->ProcessTopicListJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "app")
     return this->ProcessApp(true);
@@ -5831,6 +5833,8 @@ void WebServer::InitializeGlobalVariables()
   this->requestStartsNotNeedingLogin.AddOnTop("calculatorExamples");
   this->requestStartsNotNeedingLogin.AddOnTop("exerciseNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("templateNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("templateJSONNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("topicListJSONNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("submitExerciseNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("submitExercisePreviewNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("problemGiveUpNoLogin");

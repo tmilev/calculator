@@ -144,11 +144,13 @@ function Page(){
     }
     for (var page in this.pages){
       this.pages[page].container.style.display = "none";
+      document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");
     }
     if (Storage !== undefined && localStorage !== undefined) {
       localStorage.setItem("currentPage", this.currentPage); 
     }
     this.pages[this.currentPage].container.style.display = "";
+    document.getElementById(this.pages[this.currentPage].menuButtonId).classList.add("buttonSelectPageSelected");
     if (this.pages[this.currentPage].selectFunction !== null && this.pages[this.currentPage].selectFunction !== undefined){
       this.pages[this.currentPage].selectFunction();
     }

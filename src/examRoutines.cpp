@@ -2847,8 +2847,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   } else if (!this->flagIsExamHome && !this->flagIsForReal &&
              theGlobalVariables.userCalculatorRequestType != "template" &&
              theGlobalVariables.userCalculatorRequestType != "templateNoLogin" &&
-             theGlobalVariables.userCalculatorRequestType != "templateNoLoginJSON" &&
-             theGlobalVariables.userCalculatorRequestType != "templateJSON")
+             theGlobalVariables.userCalculatorRequestType != "templateJSON" &&
+             theGlobalVariables.userCalculatorRequestType != "templateJSONNoLogin")
     outBody << "<span style=\"color:green\"><b>Scores not recorded. </b></span>"
     << problemLabel << "<hr>";
   //////////////////////////////

@@ -75,10 +75,14 @@ function afterLoadCoursePage(incomingPage, result){
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentCourse")]);
   //MathJax.Hub.Process();
   var theTopics = document.getElementsByTagName("topicList");
+  var theRequest = "topicListJSONNoLogin";
+  if (thePage.flagUserLoggedIn){
+    theRequest = "topicListJSON";
+  }
   if (theTopics.length  === 0)
     return;
   submitGET({
-    url: `${pathnames.calculator}?request=topicListJSON`,
+    url: `${pathnames.calculator}?request=${theRequest}`,
     callback: afterLoadTopics,
     progress: "spanProgressReportGeneral"
   });
@@ -86,8 +90,12 @@ function afterLoadCoursePage(incomingPage, result){
 }
 
 function selectCurrentCoursePage(){
+  var theRequest = "templateJSONNoLogin";
+  if (thePage.flagUserLoggedIn){
+    theRequest = "templateJSON";
+  }
   submitGET({
-    url: `${pathnames.calculator}?request=templateNoLoginJSON`,
+    url: `${pathnames.calculator}?request=${theRequest}`,
     callback: afterLoadCoursePage,
     progress: "spanProgressReportGeneral"
   });

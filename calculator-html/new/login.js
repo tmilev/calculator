@@ -6,6 +6,7 @@
 
 function loginCalculator(){
   var password = document.getElementById("inputPassword").value;
+  document.getElementById("inputPassword").value = "";
   var username = document.getElementById("inputUsername").value;
   submitGET({
     "url": `${pathnames.calculator}?request=userInfoJSON&password=${password}&username=${username}`,

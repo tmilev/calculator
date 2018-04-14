@@ -902,10 +902,13 @@ button.buttonSelectPage{
   width: 100%;
   white-space: nowrap;
   cursor:pointer;
+  transition: all 1.5s;
+}
+button.buttonSelectPageSelected{
+  background-color: skyblue;
 }
 button.buttonSelectPage:hover{
   background-color: lightskyblue;
-  transition: background-color 1.5s;
 }
 lectureTag{
 color: green;

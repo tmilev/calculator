@@ -4362,7 +4362,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     /////////
     int sourceSlidesCounter = 0;
     for (int i = 0; i < owner.slidesSourcesHeaders.size; i ++)
-    { sourceSlidesCounter++;
+    { sourceSlidesCounter ++;
       sourceStreamSlidesCommon << "file" << sourceSlidesCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(owner.slidesSourcesHeaders[i], false) << "&";
     }
@@ -4374,13 +4374,13 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     /////////
     int sourceHomeworkCounter = 0;
     for (int i = 0; i < owner.sourcesHomeworkHeaders.size; i ++)
-    { sourceHomeworkCounter++;
+    { sourceHomeworkCounter ++;
       sourceStreamHomeworkCommon << "file" << sourceHomeworkCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(owner.sourcesHomeworkHeaders[i], false) << "&isSolutionFile"
       << sourceHomeworkCounter << "=false&";
     }
     for (int i = 0; i < this->sourceHomework.size; i ++)
-    { sourceHomeworkCounter++;
+    { sourceHomeworkCounter ++;
       sourceStreamHomeworkCommon << "file" << sourceHomeworkCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(this->sourceHomework[i], false) << "&";
       if (i < this->sourceHomeworkIsSolution.size)
@@ -4518,6 +4518,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
   }
   output["title"] = this->title;
   output["problemNumberString"] = this->problemNumberString;
+  output["problem"] = this->problem;
   switch (this->type)
   { case TopicElement::tChapter:
       output["type"] = (std::string) "chapter";

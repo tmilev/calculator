@@ -24,7 +24,7 @@ function Page(){
       id: "divCurrentProblem",
       menuButtonId: "buttonCurrentProblem",
       container: null,
-      selectFunction: selectCurrentProblem
+      selectFunction: updateProblemPage
     },
     calculator: {
       id: "divCalculatorPage",
@@ -59,7 +59,7 @@ function Page(){
   //Common page initializations
   //////////////////////////////////////
   //////////////////////////////////////
-  for (var page in this.pages){
+  for (var page in this.pages) {
     this.pages[page].container = document.getElementById(this.pages[page].id);
     var currentButton = document.getElementById(this.pages[page].menuButtonId);
     currentButton.pageToSelect = page;
@@ -75,38 +75,41 @@ function Page(){
   this.theTopics = {};
   this.theCourses = {}; 
   this.currentPage  = null;
+  this.currentCourse = {
+    courseHome: "",
+    topicList: "",
+    fileName: "",
+    request: ""
+  };
+  this.flagCurrentProblemLoaded = false;
   this.logoutRequestFromUrl = null;
   this.locationRequestFromUrl = null;
-  this.currentCourse = {};
   this.googleProfile = {};
   this.googleToken = null;
   this.username = null;
   this.authenticationToken = null;
   this.flagUserLoggedIn = false;
-  this.storeSettingsToLocalStorage = function(){
-    if (Storage === undefined && localStorage === undefined){
+  this.storeSettingsToLocalStorage = function() {
+    if (Storage === undefined && localStorage === undefined) {
       return;
     }
     localStorage.googleProfile = JSON.stringify(this.googleProfile);
-    for (label in this.pages){
-      if (this.pages[label].storage === undefined){
+    for (label in this.pages) {
+      if (this.pages[label].storage === undefined) {
         continue;
       }
-      var toStore = Object.assign(this.pages[label].storage);
-      localStorage[label] = toStore;
+      localStorage[label] = JSON.stringify(this.pages[label].storage);
     }
-    localStorage.databaseCurrentTable = this.pages.database.currentTable;
   };
-  this.loadSettingsFromLocalStorage = function(){    
+  this.loadSettingsFromLocalStorage = function() {    
     if (Storage === undefined && localStorage === undefined){
       return;
     }
     try {
       this.currentPage = localStorage.currentPage;
-      this.pages.database.currentTable = localStorage.databaseCurrentTable;
       this.googleProfile = JSON.parse(localStorage.googleProfile); 
       for (label in this.pages){
-        if (localStorage[label] === undefined || localStorage[label] === null){
+        if (localStorage[label] === undefined || localStorage[label] === null) {
           continue;
         }
         this.pages[label].storage = JSON.parse(localStorage[label]);
@@ -115,19 +118,19 @@ function Page(){
       console.log("Error loading settings from local storage: " + e);
     }
   };
-  this.storeSettingsToCookies = function(){
-    addCookie("courseHome", this.currentCourse.html, 300);
-    addCookie("topicList", this.currentCourse.topics, 300);
+  this.storeSettingsToCookies = function() {
+    for (label in this.currentCourse){
+      addCookie(label, this.currentCourse[label], 300);
+    }    
     addCookie("googleToken", this.googleToken, 300, true); 
     addCookie("username", this.username, 300, true);
     addCookie("authenticationToken", this.authenticationToken, 300, true);
   };
-  this.loadSettingsFromCookies = function(){
+  this.loadSettingsFromCookies = function() {
     try {
-      this.currentCourse = {
-        "html": getCookie("courseHome"),
-        "topics": getCookie("topicList")
-      };
+      for (label in this.currentCourse){
+        this.currentCourse[label] = getCookie(label);
+      }
       this.googleToken = getCookie("googleToken");
       this.username = getCookie("username");
       this.authenticationToken = getCookie("authenticationToken");
@@ -142,16 +145,16 @@ function Page(){
   //Page manipulation functions
   //////////////////////////////////////
   //////////////////////////////////////
-  this.selectPage = function(inputPage){
-    if (inputPage === undefined || inputPage === null || typeof(inputPage) !== "string"){
-      if (typeof(this.currentPage) === "string"){
+  this.selectPage = function(inputPage) {
+    if (inputPage === undefined || inputPage === null || typeof(inputPage) !== "string") {
+      if (typeof(this.currentPage) === "string") {
         inputPage = this.currentPage;
       } else {
         inputPage = "calculator";
       }
     }
     this.currentPage = inputPage;
-    if (this.pages[this.currentPage] === undefined){
+    if (this.pages[this.currentPage] === undefined) {
       this.currentPage = "calculator";
     }
     for (var page in this.pages){
@@ -163,17 +166,17 @@ function Page(){
     }
     this.pages[this.currentPage].container.style.display = "";
     document.getElementById(this.pages[this.currentPage].menuButtonId).classList.add("buttonSelectPageSelected");
-    if (this.pages[this.currentPage].selectFunction !== null && this.pages[this.currentPage].selectFunction !== undefined){
+    if (this.pages[this.currentPage].selectFunction !== null && this.pages[this.currentPage].selectFunction !== undefined) {
       this.pages[this.currentPage].selectFunction();
     }
   };
-  this.showProfilePicture = function(){
+  this.showProfilePicture = function() {
     document.getElementById("divProfilePicture").classList.remove("divInvisible");
     document.getElementById("divProfilePicture").classList.add("divVisible");
     if (this.googleProfile.picture === undefined){
       return;
     }
-    if (document.getElementById("divProfilePicture").children.length > 0){
+    if (document.getElementById("divProfilePicture").children.length > 0) {
       return;
     }
     try {
@@ -189,15 +192,15 @@ function Page(){
       console.log("Failed to set profile picture: " + e);
     }
   }
-  this.hideProfilePicture = function(){
+  this.hideProfilePicture = function() {
     document.getElementById("divProfilePicture").classList.add("divInvisible");
     document.getElementById("divProfilePicture").classList.remove("divVisible");
   }
-  this.initializeCalculatorPage = function(){
+  this.initializeCalculatorPage = function() {
     initializeButtons();
     initializeCalculatorPage();
     console.log("Submit missing");
-    if (document.getElementById('mainInputID').value !== ""){
+    if (document.getElementById('mainInputID').value !== "") {
       submitStringAsMainInput(
         document.getElementById('calculatorOutput'),
         'compute',

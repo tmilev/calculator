@@ -82,8 +82,8 @@ function submitGET(inputObject){
 
 var GlobalSubmitStringAsMainInputCounter = 0;
 
-function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus)
-{ var spanOutput = document.getElementById(idOutput);
+function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus){ 
+  var spanOutput = document.getElementById(idOutput);
   if (spanOutput === null){ 
     spanOutput = document.createElement('span');
     document.body.appendChild(spanOutput);
@@ -92,8 +92,9 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   var https = new XMLHttpRequest();
   https.open("POST", pathnames.calculator, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  if (idStatus === undefined)
+  if (idStatus === undefined){
     idStatus = idOutput;
+  }
   var statusSpan = document.getElementById(idStatus);
   timeOutCounter = 0;
   GlobalSubmitStringAsMainInputCounter ++;
@@ -106,15 +107,16 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   "<span style='display:none' id='" + addressDetailsIndicatorID + "'>" + postRequest + "</span>";
   var buttonHandle = document.getElementById(tranmissionIndicatorID);
   var lastRequestCounter = GlobalSubmitStringAsMainInputCounter;
-  https.onload = function()
-  { if (lastRequestCounter !== GlobalSubmitStringAsMainInputCounter)
-    { statusSpan.innerHTML += "<br><span style='color:red'><b>Old request number " + lastRequestCounter + " just received, output suppressed.</b></span>"
+  https.onload = function(){ 
+    if (lastRequestCounter !== GlobalSubmitStringAsMainInputCounter) { 
+      statusSpan.innerHTML += "<br><span style='color:red'><b>Old request number " + lastRequestCounter + " just received, output suppressed.</b></span>"
       return;
     }
     buttonHandle.innerHTML = "<span style='color:green'><b>Received</b></span>";
     spanOutput.innerHTML = https.responseText;
-    if (onLoadFunction !== undefined && onLoadFunction !== null && onLoadFunction !== 0)
+    if (onLoadFunction !== undefined && onLoadFunction !== null && onLoadFunction !== 0) {
       onLoadFunction(idOutput);
+    }
   }
   buttonHandle.innerHTML = "<span style='color:orange'><b>Sent</b></span>";
   ////////////////////////////////////////////
@@ -134,8 +136,8 @@ var isFinished = false;
 var timeIncrementInTenthsOfSecond = 20; //measured in tenths of a second\n";
 var timeOutCounter = 0; //measured in tenths of a second\n";
 var currentWorkerNumber = - 1;
-function progressReport()
-{ if (isFinished)
+function progressReport(){ 
+  if (isFinished)
     return;
   clearTimeout(this.timeoutID);
   var progReport = document.getElementById("idProgressReport");
@@ -166,11 +168,11 @@ function progressReport()
   ////////////////////////////////////////////
   requestStatus.innerHTML = "<span style='color:orange'><b>Request sent</b></span>";
   https.send(null);
-    this.timeoutID = window.setTimeout("progressReport()", timeIncrementInTenthsOfSecond * 100);
+  this.timeoutID = window.setTimeout("progressReport()", timeIncrementInTenthsOfSecond * 100);
 }
 
-function SendTogglePauseRequest()
-{ if (isFinished) {
+function SendTogglePauseRequest(){ 
+  if (isFinished) {
     return;
   }
   var requestStatus = document.getElementById("idProgressReportRequestStatus");
@@ -201,15 +203,15 @@ function SendTogglePauseRequest()
   pauseRequest.send(null);
 }
 
-function submitCalculatorInputOnEnter()
-{ if (event.keyCode !== 13 || !(event.shiftKey))
+function submitCalculatorInputOnEnter(){ 
+  if (event.keyCode !== 13 || !(event.shiftKey))
     return;
   submitCalculatorComputation();
   event.preventDefault();
 }
 
-function submitCalculatorComputation()
-{ submitStringAsMainInput(
+function submitCalculatorComputation(){ 
+  submitStringAsMainInput(
     document.getElementById('mainInputID').value,
     'calculatorOutput', 'compute', onLoadDefaultFunction,
     'mainComputationStatus'

@@ -2,7 +2,7 @@
 
 function getHTMLSubSection(theSubSection){
   var result = "";
-  result += "<div class = \"headSubsection\">" + theSubSection.title + "</div>";
+  result += `<div class = \"headSubsection\">${theSubSection.problemNumberString} ${theSubSection.title}</div>`;
   result += "<div class = \"bodySubsection\">";
   result += "<table class = \"topicList\"><colgroup><col><col><col><col><col></colgroup>";
   for (var counterSubSection = 0; counterSubSection < theSubSection["children"].length; counterSubSection ++){
@@ -10,7 +10,14 @@ function getHTMLSubSection(theSubSection){
     result += "<tr>";
     result += `<td>${currentProblem.problemNumberString} ${currentProblem.title}</td>`;
     result += "<td></td>";
-    result += "<td></td>";
+    result += "<td>";
+    if (thePage.flagUserLoggedIn) {
+      result += `<a class = "problemLinkQuiz" href = "#request=scoredQuiz&fileName=${currentProblem.problem}" onclick = "selectCurrentProblem('${currentProblem.problem}', 'scoredQuiz');">Quiz</a>`;
+      result += `<a class = "problemLinkPractice" href = "#request=exercise&fileName=${currentProblem.problem}" onclick = "selectCurrentProblem('${currentProblem.problem}', 'exercise');">Practice</a>`;
+    } else {
+      result += `<a class = "problemLinkPractice" href = "#request=exerciseNoLogin&fileName=${currentProblem.problem}" onclick = "selectCurrentProblem('${currentProblem.problem}', 'exerciseNoLogin');">Practice</a>`;
+    }
+    result += "</td>";
     result += "<td></td>";
     result += "<td></td>";
     result += "</tr>";
@@ -54,6 +61,7 @@ function getHTMLfromTopics(theTopics){
 }
 
 function afterLoadTopics(incomingTopics, result){
+  console.log("DEBUG: topic list cookie @ afterLoadTopics: " + getCookie("topicList"));
   var topicsElements = document.getElementsByTagName("topicList");
   if (topicsElements.length === 0){
     return;
@@ -79,8 +87,10 @@ function afterLoadCoursePage(incomingPage, result){
   if (thePage.flagUserLoggedIn){
     theRequest = "topicListJSON";
   }
-  if (theTopics.length  === 0)
+  if (theTopics.length  === 0){
     return;
+  }
+  console.log("DEBUG: topic list cookie @ afterLoadCoursePage: " + getCookie("topicList"));
   submitGET({
     url: `${pathnames.calculator}?request=${theRequest}`,
     callback: afterLoadTopics,
@@ -89,6 +99,7 @@ function afterLoadCoursePage(incomingPage, result){
 }
 
 function selectCurrentCoursePage(){
+  console.log("DEBUG: topic list cookie @ selectCurrentCoursePage: " + getCookie("topicList"));
   var theRequest = "templateJSONNoLogin";
   if (thePage.flagUserLoggedIn){
     theRequest = "templateJSON";

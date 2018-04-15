@@ -700,7 +700,8 @@ a.problemLinkQuiz{
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
-  transition: 0.6s;
+  transition: all 1.5s;
+  font-weight: bold;
   text-decoration: none;
 }
 a.problemLinkQuiz:hover{ 
@@ -714,7 +715,7 @@ a.problemLinkPractice{
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
-  transition: 0.6s;
+  transition: all 1.5s;
   text-decoration: none;
 }
 a.problemLinkPractice:hover{

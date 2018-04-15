@@ -2093,9 +2093,8 @@ int WebWorker::ProcessToggleMonitoring()
   return 0;
 }
 
-
 int WebWorker::ProcessServerStatus()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestServerStatus");
+{ MacroRegisterFunctionWithName("WebWorker::ProcessServerStatus");
   this->SetHeaderOKNoContentLength();
   std::stringstream out;
   out << "<html>"
@@ -2115,6 +2114,23 @@ int WebWorker::ProcessServerStatus()
     out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
   out << pageBody.str();
   out << "</body></html>";
+  stOutput << out.str();
+  return 0;
+}
+
+int WebWorker::ProcessServerStatusJSON()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessServerStatusJSON");
+  this->SetHeaderOKNoContentLength();
+  std::stringstream out;
+  if (theGlobalVariables.UserDefaultHasAdminRights())
+    out << " <table><tr><td style=\"vertical-align:top\">"
+    << this->parent->ToStringStatusAll() << "</td><td>"
+    << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
+    << "</td></tr></table>";
+  else
+    out << "<b>Viewing server status available only to logged-in admins.</b>";
+  if (theGlobalVariables.flagLoggedIn)
+    out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
   stOutput << out.str();
   return 0;
 }
@@ -4168,6 +4184,8 @@ int WebWorker::ServeClient()
     return this->ProcessToggleMonitoring();
   else if (theGlobalVariables.userCalculatorRequestType == "status")
     return this->ProcessServerStatus();
+  else if (theGlobalVariables.userCalculatorRequestType == "serverStatusJSON")
+    return this->ProcessServerStatusJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "statusPublic")
     return this->ProcessServerStatusPublic();
   if (theGlobalVariables.userCalculatorRequestType == "monitor")

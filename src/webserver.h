@@ -170,6 +170,7 @@ public:
   int ProcessModifyPage();
   int ProcessAddUserEmails();
   int ProcessServerStatus();
+  int ProcessServerStatusJSON();
   int ProcessToggleMonitoring();
   int ProcessServerStatusPublic();
   int ProcessComputationIndicator();

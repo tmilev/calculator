@@ -24,6 +24,7 @@
 <script type = "text/javascript" src = "/calculator-html/new/select_course.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/login.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/database.js"> </script>
+<script type = "text/javascript" src = "/calculator-html/new/server_status.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/account.js"> </script>
 <script type = "text/javascript">
 var globalMQ = MathQuill.getInterface(2);
@@ -185,6 +186,12 @@ ctrl+arrow = select</span>
   <button class = "buttonStandard" onclick = "submitChangePassRequest()">Change email</button>
 </div>
 
+<div id = "divServer" class = "divMainPage">
+  <div id = "idServerStatus">
+
+  </div>
+</div>
+
 <div id = "divTheMainMenuPanel" class = "divTheMainMenu">
 <div class = "divLoginPanel">
   <button id = "buttonToggleTheMainMenu" onclick = "toggleMenu(this);" class = "buttonToggleTopics">
@@ -203,6 +210,7 @@ ctrl+arrow = select</span>
 
 <div class = "divMenuSeparator divAdminPanel divInvisible">Admin</div>
 <div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectDatabase">Database</button></div>
+<div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectServer">Server</button></div>
 
 <div id = "spanProgressReportGeneral"></div>
 </div> <!--divTheMainMenuPanel-->

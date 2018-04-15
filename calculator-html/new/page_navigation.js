@@ -35,6 +35,12 @@ function Page(){
         currentTable: null
       }
     },
+    server: {
+      id: "divServer",
+      menuButtonId: "buttonSelectServer",
+      container: null,
+      selectFunction: updateServerStatus
+    },
     account: {
       id: "divAccount",
       menuButtonId: "buttonSelectAccount",

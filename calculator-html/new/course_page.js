@@ -24,7 +24,7 @@ function getHTMLSection(theSection){
   var result = "";
   result += "<div class=\"headSection\">" + theSection.title + "</div>";
   result += "<div class=\"bodySection\">";
-  for (var counterSection = 0; counterSection < theSection["children"].length; counterSection++){
+  for (var counterSection = 0; counterSection < theSection["children"].length; counterSection ++){
     var currentSection = theSection["children"][counterSection];
     result += getHTMLSubSection(currentSection);
   }
@@ -36,7 +36,7 @@ function getHTMLChapter(theChapter){
   var result = "";
   result += "<div class=\"headChapter\">" + theChapter.title + "</div>";
   result += "<div class=\"bodyChapter\">";
-  for (var counterSection = 0; counterSection < theChapter["children"].length; counterSection++){
+  for (var counterSection = 0; counterSection < theChapter["children"].length; counterSection ++){
     var currentSection = theChapter["children"][counterSection];
     result += getHTMLSection(currentSection);
   }
@@ -46,7 +46,7 @@ function getHTMLChapter(theChapter){
 
 function getHTMLfromTopics(theTopics){
   var result = "";
-  for (var counterChapter = 0; counterChapter < theTopics["children"].length; counterChapter++){
+  for (var counterChapter = 0; counterChapter < theTopics["children"].length; counterChapter ++){
     var currentChapter = theTopics["children"][counterChapter];
     result += getHTMLChapter(currentChapter);
   }
@@ -86,7 +86,6 @@ function afterLoadCoursePage(incomingPage, result){
     callback: afterLoadTopics,
     progress: "spanProgressReportGeneral"
   });
-
 }
 
 function selectCurrentCoursePage(){

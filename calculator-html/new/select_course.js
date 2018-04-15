@@ -10,7 +10,7 @@ function afterLoadSelectCoursePage(incomingPage, result){
   var resultString = "";
   try {
     thePage.theCourses = JSON.parse(incomingPage)["courses"];
-    resultString += JSON.stringify(thePage.theCourses);
+    //resultString += JSON.stringify(thePage.theCourses);
     resultString += "<div style='text-align:center; width:100%'>";
     for (var counterCourses = 0; counterCourses < thePage.theCourses.length; counterCourses ++){
       var currentCourse = thePage.theCourses[counterCourses];

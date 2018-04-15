@@ -30,7 +30,7 @@ function recordResult(resultText, resultSpan){
   if (typeof resultSpan === "string") {
     resultSpan = document.getElementById(resultSpan);
   }
-  resultSpan.innerHTML = escapeHtml(resultText);
+  resultSpan.innerHTML = escape(resultText);
 }
 
 /**
@@ -170,27 +170,33 @@ function progressReport()
 }
 
 function SendTogglePauseRequest()
-{ if (isFinished)
+{ if (isFinished) {
     return;
+  }
   var requestStatus = document.getElementById("idProgressReportRequestStatus");
   var pauseRequest = new XMLHttpRequest();
   var pauseURL = `${pathnames.calculator}?request=pause&mainInput=${currentWorkerNumber}`;
   pauseRequest.open("GET", pauseURL, true);
   pauseRequest.onload = function() {
-    if (pauseRequest.status !== 200)
+    if (pauseRequest.status !== 200) {
       return;
+    }
     requestStatus.innerHTML = pauseRequest.responseText;
-    if (pauseRequest.responseText === "paused")
+    if (pauseRequest.responseText === "paused") {
       isPaused = true;
-    if (pauseRequest.responseText === "unpaused")
+    }
+    if (pauseRequest.responseText === "unpaused") {
       isPaused = false;
-    if (isPaused)
+    }
+    if (isPaused) {
       document.getElementById("idButtonSendTogglePauseRequest").innerHTML = "Continue";
-    else
+    } else {
       document.getElementById("idButtonSendTogglePauseRequest").innerHTML = "Pause";
+    }
     document.getElementById("idProgressReportRequestStatus").innerHTML = pauseRequest.responseText;
-    if (!isPaused)
+    if (!isPaused) {
       progressReport();
+    }
   };
   pauseRequest.send(null);
 }

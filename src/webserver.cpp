@@ -2871,7 +2871,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   actualEmailActivationToken = emailInfo[DatabaseStrings::labelActivationToken].string;
   if (actualEmailActivationToken != claimedActivationToken)
   { out << "\n<span style=\"color:red\"><b>Bad activation token. Could not activate your email. </b></span>";
-    out << "DEBUG: actual token: " << actualEmailActivationToken << ". Claimed token: " << claimedActivationToken;
+    //out << "DEBUG: actual token: " << actualEmailActivationToken << ". Claimed token: " << claimedActivationToken;
     return out.str();
   }
   if (usernameAssociatedWithToken != theGlobalVariables.userDefault.username)
@@ -3132,13 +3132,15 @@ int WebWorker::ProcessChangePassword()
   stOutput << "<span style=\"color:green\"> <b>Password change successful. </b></span>";
   //stOutput << "DEBUG: computed sha1salted, entered: " << theUser.actualShaonedSaltedPassword
   //<< ", " << theUser.enteredShaonedSaltedPassword;
-  stOutput
-  << "<meta http-equiv=\"refresh\" content=\"0; url='"
-  << theGlobalVariables.DisplayNameExecutable  << "?request=logout"
-  << "&username="
-  << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.username, false)
-  << "&activationToken=&authenticationToken=&"
-  << "'\" />";
+  if (theGlobalVariables.GetWebInput("doReload") != "false")
+  { stOutput
+    << "<meta http-equiv=\"refresh\" content=\"0; url='"
+    << theGlobalVariables.DisplayNameExecutable  << "?request=logout"
+    << "&username="
+    << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.username, false)
+    << "&activationToken=&authenticationToken=&"
+    << "'\" />";
+  }
 #else
   stOutput << "Operation not possible: project compiled without database support.";
 #endif

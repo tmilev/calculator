@@ -81,6 +81,7 @@ function loginWithServerCallback(incomingString, result){
     thePage.username = parsedAuthentication.username;
     thePage.userRole = parsedAuthentication.userRole;
     thePage.flagUserLoggedIn = true;
+    document.getElementById("spanUserIdInAccountsPage").innerHTML = thePage.username;
     document.getElementById("inputUsername").value = thePage.username;
     toggleAccountPanels();
     toggleAdminPanels();

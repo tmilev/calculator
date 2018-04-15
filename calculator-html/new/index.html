@@ -21,6 +21,7 @@
 <script type = "text/javascript" src = "/calculator-html/new/page_navigation.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/three-d.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/course_page.js"> </script>
+<script type = "text/javascript" src = "/calculator-html/new/problem_page.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/select_course.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/login.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/database.js"> </script>
@@ -58,13 +59,13 @@ var MathQuillHasMatrixSupport = true;
 </div><!--centerVerticallyInPageContainer-->
 </div><!--centerHorizontallyInPageContainer-->
 </div><!--divLoginPage-->
-
-<div id = "divSelectCourse" class = "divMainPage">
-</div> <!--divSelectCourse-->
-
+<div id = "divCurrentProblem" class = "divMainPage">
+</div><!--divCurrentProblem-->
 <div id = "divCurrentCourse" class = "divMainPage">
 </div> <!--divCurrentCourse-->
-
+  
+<div id = "divSelectCourse" class = "divMainPage">
+</div> <!--divSelectCourse-->
 <div id = "divCalculatorPage" class = "divMainPage">
 <table><!-- Outermost table, 3 cells (3 columns 1 row)-->
 <tr style = "vertical-align:top">
@@ -90,7 +91,7 @@ var MathQuillHasMatrixSupport = true;
 name = "Go" onclick = "submitCalculatorComputation(); event.preventDefault();">
 Go
 </button>
-<span id="mainComputationStatus">
+<span id = "mainComputationStatus">
 </span>
 </td>
 <td style = "vertical-align:top">
@@ -202,8 +203,9 @@ ctrl+arrow = select</span>
   <a href="#" onclick = "logout();" class = "linkLogoutInactive linkStandardButtonLike">Log out</a> 
 </div>
 <div><button class = "buttonSelectPage" id = "buttonLoginPage">Login</button></div>
-<div><button class = "buttonSelectPage" id = "buttonCurrentCourse">Current Course</button></div>
-<div><button class = "buttonSelectPage" id = "buttonSelectCourse">Select Course</button></div>
+<div><button class = "buttonSelectPage" id = "buttonCurrentProblem">Current problem</button></div>
+<div><button class = "buttonSelectPage" id = "buttonCurrentCourse">Current course</button></div>
+<div><button class = "buttonSelectPage" id = "buttonSelectCourse">Select course</button></div>
 <div><button class = "buttonSelectPage" id = "buttonSelectCalculator">Calculator</button></div>
 <div class = "divMenuSeparator divAccountPanel divInvisible">Account</div>
 <div class = "divAccountPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectAccount">Account</button></div>

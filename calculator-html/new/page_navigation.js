@@ -8,17 +8,23 @@ function Page(){
       selectFunction: null,
       initialized: false
     },
+    selectCourse : {
+      id: "divSelectCourse",
+      menuButtonId: "buttonSelectCourse",
+      container: null,
+      selectFunction: selectSelectCoursePage
+    },
     currentCourse : {
       id: "divCurrentCourse",
       menuButtonId: "buttonCurrentCourse",
       container: null,
       selectFunction: selectCurrentCoursePage
     },
-    selectCourse : {
-      id: "divSelectCourse",
-      menuButtonId: "buttonSelectCourse",
+    currentProblem : {
+      id: "divCurrentProblem",
+      menuButtonId: "buttonCurrentProblem",
       container: null,
-      selectFunction: selectSelectCoursePage
+      selectFunction: selectCurrentProblem
     },
     calculator: {
       id: "divCalculatorPage",

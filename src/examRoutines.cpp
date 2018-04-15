@@ -4511,11 +4511,13 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
 { MacroRegisterFunctionWithName("TopicElement::ToJSON");
   JSData output;
   output["children"].type = JSData::JSarray;
+  this->ComputeLinks(owner, true);
   for (int i = 0; i < this->immediateChildren.size; i ++)
   { TopicElement& currentChild = owner.theTopicS[this->immediateChildren[i]];
     output["children"].list.AddOnTop(currentChild.ToJSON(owner));
   }
   output["title"] = this->title;
+  output["problemNumberString"] = this->problemNumberString;
   switch (this->type)
   { case TopicElement::tChapter:
       output["type"] = (std::string) "chapter";

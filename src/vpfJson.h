@@ -94,6 +94,7 @@ public:
   // there has to be a better way to do this
   void operator=(const Rational& other);
 
+  void operator=(const List<int>& other);
   template <typename coefficient>
   void operator=(const Vector<coefficient>& other);
   template <typename coefficient>

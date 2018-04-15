@@ -8,7 +8,7 @@ function getHTMLSubSection(theSubSection){
   for (var counterSubSection = 0; counterSubSection < theSubSection["children"].length; counterSubSection ++){
     var currentProblem = theSubSection["children"][counterSubSection];
     result += "<tr>";
-    result += `<td>${currentProblem.title}</td>`;
+    result += `<td>${currentProblem.problemNumberString} ${currentProblem.title}</td>`;
     result += "<td></td>";
     result += "<td></td>";
     result += "<td></td>";
@@ -22,7 +22,7 @@ function getHTMLSubSection(theSubSection){
 
 function getHTMLSection(theSection){
   var result = "";
-  result += "<div class=\"headSection\">" + theSection.title + "</div>";
+  result += `<div class=\"headSection\">${theSection.problemNumberString} ${theSection.title}</div>`;
   result += "<div class=\"bodySection\">";
   for (var counterSection = 0; counterSection < theSection["children"].length; counterSection ++){
     var currentSection = theSection["children"][counterSection];
@@ -34,7 +34,7 @@ function getHTMLSection(theSection){
 
 function getHTMLChapter(theChapter){
   var result = "";
-  result += "<div class=\"headChapter\">" + theChapter.title + "</div>";
+  result += `<div class=\"headChapter\">${theChapter.problemNumberString} ${theChapter.title}</div>`;
   result += "<div class=\"bodyChapter\">";
   for (var counterSection = 0; counterSection < theChapter["children"].length; counterSection ++){
     var currentSection = theChapter["children"][counterSection];

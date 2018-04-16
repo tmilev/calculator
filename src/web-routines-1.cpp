@@ -748,8 +748,7 @@ bool Crypto::VerifyJWTagainstKnownKeys
     << keyIDstring << ".</b></span>";
   Certificate& currentCert = Crypto::knownCertificates[theIndex];
   return theToken.VerifyRSA256
-  (currentCert.theModuluS, currentCert.theExponenT,
-   commentsOnFailure, commentsGeneral);
+  (currentCert.theModuluS, currentCert.theExponenT, commentsOnFailure, commentsGeneral);
 }
 
 bool WebCrawler::VerifyRecaptcha

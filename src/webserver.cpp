@@ -3906,6 +3906,10 @@ std::string WebWorker::GetSignUpPage()
 std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
 { MacroRegisterFunctionWithName("WebWorker::GetLoginPage");
   std::stringstream out;
+  if (theGlobalVariables.GetWebInput("useJSON") == "true")
+  { out << "<b style='color:red'>Login required. </b>" << reasonForLogin;
+    return out.str();
+  }
   out << "<html><head>\n"
   << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << WebWorker::GetJavascriptSubmitLoginInfo()
@@ -5861,6 +5865,7 @@ void WebServer::InitializeGlobalVariables()
   this->requestStartsNotNeedingLogin.AddOnTop("calculator");
   this->requestStartsNotNeedingLogin.AddOnTop("calculatorExamples");
   this->requestStartsNotNeedingLogin.AddOnTop("exerciseNoLogin");
+  this->requestStartsNotNeedingLogin.AddOnTop("exerciseJSON");
   this->requestStartsNotNeedingLogin.AddOnTop("templateNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("templateJSONNoLogin");
   this->requestStartsNotNeedingLogin.AddOnTop("topicListJSONNoLogin");

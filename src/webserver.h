@@ -253,8 +253,7 @@ public:
   void QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll = false);
   void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll = false);
   void QueueBytesForSendingNoHeadeR
-  (const List<char>& bytesToSend, bool MustSendAll = false)
-  ;
+  (const List<char>& bytesToSend, bool MustSendAll = false);
   bool ShouldDisplayLoginPage();
   void SendAllAndWrapUp();
   void WrapUpConnection();

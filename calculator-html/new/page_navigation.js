@@ -54,6 +54,7 @@ function Page(){
       selectFunction: updateAccountPage
     }
   }
+  addCookie("useJSON", true, 300, false);
   //////////////////////////////////////
   //////////////////////////////////////
   //Common page initializations
@@ -121,7 +122,7 @@ function Page(){
   this.storeSettingsToCookies = function() {
     for (label in this.currentCourse){
       addCookie(label, this.currentCourse[label], 300);
-    }    
+    }
     addCookie("googleToken", this.googleToken, 300, true); 
     addCookie("username", this.username, 300, true);
     addCookie("authenticationToken", this.authenticationToken, 300, true);

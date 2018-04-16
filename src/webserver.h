@@ -199,6 +199,7 @@ public:
   int ProcessScoresInCoursePage();
   int ProcessAssignTeacherToSection();
   int ProcessExamPage();
+  int ProcessExamPageJSON();
   int ProcessTemplate();
   int ProcessTemplateJSON();
   int ProcessUserInfoJSON();

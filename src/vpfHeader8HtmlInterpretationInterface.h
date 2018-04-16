@@ -30,6 +30,7 @@ public:
   static std::string GetJavascriptCaptcha();
   static std::string GetCaptchaDiv();
   static std::string GetExamPage();
+  static std::string GetExamPageJSON();
   static std::string GetPageFromTemplate();
   static std::string GetJSONFromTemplate();
   static std::string GetJSONUserInfo();

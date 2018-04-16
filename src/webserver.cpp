@@ -3447,6 +3447,13 @@ int WebWorker::ProcessTemplateJSON()
   return 0;
 }
 
+int WebWorker::ProcessExamPageJSON()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessExamPageJSON");
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::GetExamPageJSON();
+  return 0;
+}
+
 int WebWorker::ProcessExamPage()
 { MacroRegisterFunctionWithName("WebWorker::ProcessExamPage");
   this->SetHeaderOKNoContentLength();
@@ -4120,8 +4127,7 @@ int WebWorker::ServeClient()
   if (this->RedirectIfNeeded(argumentProcessingFailureComments))
     return 0;
   theUser.flagStopIfNoLogin =
-  (!theGlobalVariables.flagLoggedIn &&
-   theGlobalVariables.flagUsingSSLinCurrentConnection &&
+  (!theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection &&
    theUser.flagMustLogin);
   if (theUser.flagStopIfNoLogin)
   { if (theGlobalVariables.userCalculatorRequestType == "changePassword")
@@ -4257,6 +4263,9 @@ int WebWorker::ServeClient()
       return this->ProcessLoginPage();
   } else if (theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin")
     return this->ProcessExamPage();
+  else if (theGlobalVariables.userCalculatorRequestType == "exerciseJSON" ||
+           theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON")
+    return this->ProcessExamPageJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "template" ||
            theGlobalVariables.userCalculatorRequestType == "templateNoLogin")
     return this->ProcessTemplate();

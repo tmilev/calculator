@@ -3694,62 +3694,61 @@ bool Expression::Sequencefy()
 }
 
 bool Expression::operator==(int other)const
-{ if (this->owner==0)
+{ if (this->owner == 0)
     return false;
   int theInt;
   if (!this->IsSmallInteger(&theInt))
     return false;
-  return theInt==other;
+  return theInt == other;
 }
 
 bool Expression::operator==(const std::string& other)const
 { std::string tempS;
   if (!this->IsAtom(&tempS))
     return false;
-  return tempS==other;
+  return tempS == other;
 }
 
 std::string Expression::ToUTF8String(FormatExpressions* theFormat) const
 { MacroRegisterFunctionWithName("Expression::ToUTF8String");
-  if (this->owner==0)
+  if (this->owner == 0)
     return this->ToString(theFormat);
   std::stringstream out;
   Rational theRat;
   if (this->IsOfType<Rational>(&theRat))
   { FormatExpressions tempFormat;
-    tempFormat.flagUseFrac=false;
+    tempFormat.flagUseFrac = false;
     return theRat.ToString(&tempFormat);
   } else if (this->IsAtomGivenData(this->owner->opPi()))
   { return "\\u03C0";
-  } else if (this->StartsWith(this->owner->opPlus(),3))
-    return (*this)[1].ToUTF8String(theFormat) + "+"+(*this)[2].ToUTF8String(theFormat);
-  else if (this->StartsWith(this->owner->opTimes(),3))
-  { std::string secondUTF8String=(*this)[2].ToUTF8String(theFormat);
-    std::string secondString=(*this)[2].ToString(theFormat);
+  } else if (this->StartsWith(this->owner->opPlus(), 3))
+    return (*this)[1].ToUTF8String(theFormat) + "+" + (*this)[2].ToUTF8String(theFormat);
+  else if (this->StartsWith(this->owner->opTimes(), 3))
+  { std::string secondUTF8String = (*this)[2].ToUTF8String(theFormat);
+    std::string secondString = (*this)[2].ToString(theFormat);
     if ((*this)[1].IsAtomGivenData(this->owner->opSqrt()))
       out << "sqrt(" << secondUTF8String << ")";
     else
-    { std::string firstE= (*this)[1].ToUTF8String(theFormat);
-      bool firstNeedsBrackets=(*this)[1].NeedsParenthesisForMultiplication();
-      bool secondNeedsBrackets=(*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(&((*this)[1]));
-      bool mustHaveTimes= false;
-      if (firstE=="-1" )
-      { firstE="-";
-        firstNeedsBrackets=false;
+    { std::string firstE = (*this)[1].ToUTF8String(theFormat);
+      bool firstNeedsBrackets = (*this)[1].NeedsParenthesisForMultiplication();
+      bool secondNeedsBrackets = (*this)[2].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost(&((*this)[1]));
+      bool mustHaveTimes = false;
+      if (firstE == "-1")
+      { firstE = "-";
+        firstNeedsBrackets = false;
       }
-      if (firstE=="1")
-        firstE="";
+      if (firstE == "1")
+        firstE = "";
       if (firstNeedsBrackets)
         out << "(" << firstE << ")";
       else
         out << firstE;
-      if (!firstNeedsBrackets && !secondNeedsBrackets && firstE!=""
-          && firstE!="-")
-        if (MathRoutines::isADigit(firstE[firstE.size()-1]) )
+      if (!firstNeedsBrackets && !secondNeedsBrackets && firstE != "" && firstE != "-")
+        if (MathRoutines::isADigit(firstE[firstE.size() - 1]) )
         { if (MathRoutines::isADigit(secondUTF8String[0]))
-            mustHaveTimes=true;
+            mustHaveTimes = true;
           if (MathRoutines::StringBeginsWith(secondString, "\\frac"))
-            mustHaveTimes=true;
+            mustHaveTimes = true;
         }
       if (mustHaveTimes)
         out << "* ";
@@ -3763,9 +3762,9 @@ std::string Expression::ToUTF8String(FormatExpressions* theFormat) const
     return out.str();
   } else if (this->StartsWith(this->owner->opSequence()))
   { out << "(";
-    for (int i=1; i<this->size(); i++)
+    for (int i = 1; i < this->size(); i ++)
     { out << (*this)[i].ToUTF8String(theFormat);
-      if (i<this->size()-1)
+      if (i < this->size() - 1)
         out << ", ";
     }
     out << ")";

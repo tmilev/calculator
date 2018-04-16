@@ -487,7 +487,11 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
   this->flagLoadedSuccessfully = false;
   if (theGlobalVariables.UserGuestMode())
     needToLoadDatabaseMayIgnore = false;
-  this->flagDoPrependCalculatorNavigationBar = (theGlobalVariables.GetWebInput("navigationBar") != "false");
+  this->flagDoPrependCalculatorNavigationBar = true;
+  if (theGlobalVariables.GetWebInput("navigationBar") == "false" ||
+      theGlobalVariables.userCalculatorRequestType == "exerciseJSON" ||
+      theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON")
+    this->flagDoPrependCalculatorNavigationBar = false;
   this->flagLoadedSuccessfully = true;
   if (this->fileName == "")
   { this->flagLoadedSuccessfully = false;

@@ -115,18 +115,18 @@ void rootSubalgebra::ComputeModuleDecompoAmbientAlgebraDimensionsOnly()
 void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules");
   this->CentralizerKmods.init(this->Modules.size);
-  this->CentralizerRoots.size=0;
+  this->CentralizerRoots.size = 0;
   this->CentralizerRoots.Reserve(this->Modules.size);
-  this->SimpleBasisCentralizerRoots.size=0;
+  this->SimpleBasisCentralizerRoots.size = 0;
   this->SimpleBasisCentralizerRoots.Reserve(this->Modules.size);
-  if (this->SimpleBasisK.size==0)
-  { if (this->Modules.size!=this->GetOwnerSSalg().GetNumGenerators())
+  if (this->SimpleBasisK.size == 0)
+  { if (this->Modules.size != this->GetOwnerSSalg().GetNumGenerators())
       crash << " bad number of modules!" << crash;
   } else
     if (this->theDynkinType.IsEqualToZero())
       crash << "Simple basis is " << this->SimpleBasisK.ToString() << " but Dynkin type is: " << this->theDynkinType.ToString() << crash;
-  for (int i=0; i<this->Modules.size; i++)
-    if (this->Modules[i].size==1)
+  for (int i = 0; i < this->Modules.size; i ++)
+    if (this->Modules[i].size == 1)
     { this->CentralizerKmods.AddSelectionAppendNewIndex(i);
       if (!this->WeightsModulesPrimalSimple[i][0].IsEqualToZero())
       { this->CentralizerRoots.AddOnTop(this->WeightsModulesPrimalSimple[i][0]);
@@ -136,8 +136,9 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
   this->theCentralizerDiagram.GetDynkinType(this->theCentralizerDynkinType);
   if (this->theDynkinType.IsEqualToZero())
-    if (this->theCentralizerDynkinType.GetRank()+this->theDynkinType.GetRank()!=this->ownEr->owner->GetRank())
-      crash << "Centralizer of " << this->theDynkinType.ToString() << " computed to be " << this->theCentralizerDynkinType.ToString()
+    if (this->theCentralizerDynkinType.GetRank() + this->theDynkinType.GetRank() != this->ownEr->owner->GetRank())
+      crash << "Centralizer of " << this->theDynkinType.ToString() << " computed to be "
+      << this->theCentralizerDynkinType.ToString()
       << " which is impossible. " << crash;
 }
 
@@ -155,12 +156,12 @@ void rootSubalgebra::ComputeLowestWeightInTheSameKMod(const Vector<Rational>& in
 
 bool rootSubalgebra::RootsDefineASubalgebra(Vectors<Rational>& theRoots)
 { Vector<Rational> tempRoot;
-  for (int i=0; i<theRoots.size; i++)
+  for (int i = 0; i < theRoots.size; i ++)
   { if (!this->IsARoot(theRoots[i]))
       return false;
-    for (int j=i+1; j<theRoots.size; j++)
-    { tempRoot=(theRoots[i]);
-      tempRoot+=(theRoots[j]);
+    for (int j = i + 1; j < theRoots.size; j ++)
+    { tempRoot = theRoots[i];
+      tempRoot += theRoots[j];
       if (this->IsARoot(tempRoot))
         if (!theRoots.Contains(tempRoot))
           return false;
@@ -170,14 +171,14 @@ bool rootSubalgebra::RootsDefineASubalgebra(Vectors<Rational>& theRoots)
 }
 
 bool rootSubalgebra::IsBKhighest(const Vector<Rational>& input)
-{ for (int i=0; i<this->SimpleBasisK.size; i++)
+{ for (int i = 0; i < this->SimpleBasisK.size; i ++)
     if (this->IsARootOrZero(input + this->SimpleBasisK[i]))
       return false;
   return true;
 }
 
 bool rootSubalgebra::IsBKlowest(const Vector<Rational>& input)
-{ for (int i=0; i<this->SimpleBasisK.size; i++)
+{ for (int i = 0; i < this->SimpleBasisK.size; i ++)
     if (this->IsARootOrZero(input - this->SimpleBasisK[i]))
       return false;
   return true;
@@ -185,11 +186,11 @@ bool rootSubalgebra::IsBKlowest(const Vector<Rational>& input)
 
 bool rootSubalgebra::rootIsInCentralizer(const Vector<Rational>& input)
 { Vector<Rational> tempRoot;
-  for(int i=0; i<this->SimpleBasisK.size; i++)
-  { tempRoot=input+this->SimpleBasisK[i];
+  for (int i = 0; i < this->SimpleBasisK.size; i ++)
+  { tempRoot = input + this->SimpleBasisK[i];
     if (this->IsARoot(tempRoot) || tempRoot.IsEqualToZero())
       return false;
-    tempRoot=input-this->SimpleBasisK[i];
+    tempRoot = input - this->SimpleBasisK[i];
     if (this->IsARoot(tempRoot) || tempRoot.IsEqualToZero())
       return false;
   }
@@ -198,14 +199,14 @@ bool rootSubalgebra::rootIsInCentralizer(const Vector<Rational>& input)
 
 void rootSubalgebra::WriteMultTableAndOppositeKmodsToFile(std::fstream &output, List<List<List<int> > >& inMultTable, List<int>& inOpposites)
 { output << "pairing_table_size: " << inMultTable.size << "\n";
-  for (int i=0; i<inMultTable.size; i++)
-    for (int j=0; j<inMultTable.size; j++)
+  for (int i = 0; i < inMultTable.size; i ++)
+    for (int j = 0; j < inMultTable.size; j ++)
     { output << inMultTable[i][j].size << " ";
-      for(int k=0; k<inMultTable[i][j].size; k++)
+      for (int k = 0; k < inMultTable[i][j].size; k ++)
         output << inMultTable[i][j][k] << " ";
     }
   output << "\nopposites: ";
-  for (int i=0; i<inMultTable.size; i++)
+  for (int i = 0; i < inMultTable.size; i ++)
     output << inOpposites[i] << " ";
 }
 
@@ -215,36 +216,36 @@ void rootSubalgebra::ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, 
   input >> tempS >> theSize;
   outMultTable.SetSize(theSize);
   outOpposites.SetSize(theSize);
-  for (int i=0; i<theSize; i++)
+  for (int i = 0; i < theSize; i ++)
   { outMultTable[i].SetSize(theSize);
-    for (int j=0; j<theSize; j++)
+    for (int j = 0; j < theSize; j ++)
     { input >> tempI;
       outMultTable[i][j].SetSize(tempI);
-      for(int k=0; k<outMultTable[i][j].size; k++)
+      for (int k = 0; k < outMultTable[i][j].size; k ++)
         input >> outMultTable[i][j][k];
     }
   }
   input >> tempS;
-  for (int i=0; i<outMultTable.size; i++)
+  for (int i = 0; i < outMultTable.size; i ++)
     input >> outOpposites[i];
-  if(tempS!="opposites:")
+  if (tempS != "opposites:")
     crash << crash;
 }
 
 bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, Vector<Rational>& input)
 { Vector<Rational> tempRoot;
-  bool found =true;
-  Vector<Rational> currentRoot=input;
-  bool foundPositive=false;
+  bool found = true;
+  Vector<Rational> currentRoot = input;
+  bool foundPositive = false;
   while(found)
-  { found=false;
-    for (int k=0; k<this->SimpleBasisCentralizerRoots.size; k++)
-    { tempRoot=currentRoot - this->SimpleBasisCentralizerRoots[k];
-      if (this->IsARoot(tempRoot)|| tempRoot.IsEqualToZero())
-      { currentRoot=(tempRoot);
-        found=true;
-        if(positiveSimpleRootsSel.selected[k])
-          foundPositive=true;
+  { found = false;
+    for (int k = 0; k < this->SimpleBasisCentralizerRoots.size; k ++)
+    { tempRoot = currentRoot - this->SimpleBasisCentralizerRoots[k];
+      if (this->IsARoot(tempRoot) || tempRoot.IsEqualToZero())
+      { currentRoot = tempRoot;
+        found = true;
+        if (positiveSimpleRootsSel.selected[k])
+          foundPositive = true;
         if (currentRoot.IsEqualToZero())
           return foundPositive;
       }
@@ -254,57 +255,55 @@ bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveS
 }
 
 void rootSubalgebra::GeneratePossibleNilradicalsRecursive(PauseThread& PauseMutex, List<List<List<int> > >& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner)
-{ int& RecursionDepth=owner.RecursionDepthNilradicalsGeneration;
-  std::string tempSsel, tempSopposite;
-  List<int>& counters=owner.CountersNilradicalsGeneration;
-  while (RecursionDepth>-1)
-  { while(counters[RecursionDepth]<this->Modules.size)
+{ int& RecursionDepth = owner.RecursionDepthNilradicalsGeneration;
+  List<int>& counters = owner.CountersNilradicalsGeneration;
+  while (RecursionDepth > - 1)
+  { while(counters[RecursionDepth] < this->Modules.size)
     { if (!impliedSelections[RecursionDepth].selected[counters[RecursionDepth]])
         if (this->IndexIsCompatibleWithPrevious(counters[RecursionDepth], RecursionDepth, multTable, impliedSelections, oppositeKmods, owner))
-        { RecursionDepth++;
-          counters[RecursionDepth]=counters[RecursionDepth-1];
+        { RecursionDepth ++;
+          counters[RecursionDepth] = counters[RecursionDepth - 1];
         }
     /*  if (this->flagAnErrorHasOccuredTimeToPanic)
       { impliedSelections.ElementToStringGeneric(tempSsel, RecursionDepth+1);
         impliedSelections.TheObjects[RecursionDepth].ComputeDebugString();
       }*/
-      counters[RecursionDepth]++;
+      counters[RecursionDepth] ++;
     }
     this->PossibleNilradicalComputation(impliedSelections[RecursionDepth], owner, indexInOwner);
 //    if (this->flagAnErrorHasOccuredTimeToPanic)
 //      tempSels.AddOnTop(impliedSelections.TheObjects[RecursionDepth]);
-    RecursionDepth--;
-    if (RecursionDepth>-1)
-      counters[RecursionDepth]++;
+    RecursionDepth --;
+    if (RecursionDepth > - 1)
+      counters[RecursionDepth] ++;
     PauseMutex.SafePointDontCallMeFromDestructors();
   }
 }
 
 bool rootSubalgebra::ListHasNonSelectedIndexLowerThanGiven(int index, List<int>& tempList, Selection& tempSel)
-{ for (int j=0; j<tempList.size; j++)
-    if (tempList[j]<index)
+{ for (int j = 0; j < tempList.size; j ++)
+    if (tempList[j] < index)
       if (!tempSel.selected[tempList[j]])
         return false;
   return true;
 }
 
 bool rootSubalgebra::IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,  List<List<List<int> > >& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner)
-{ Selection& targetSel= impliedSelections[RecursionDepth+1];
-  Selection& originalSel=impliedSelections[RecursionDepth];
-  targetSel=(originalSel);
+{ Selection& targetSel = impliedSelections[RecursionDepth + 1];
+  Selection& originalSel = impliedSelections[RecursionDepth];
+  targetSel = originalSel;
   targetSel.AddSelectionAppendNewIndex(startIndex);
-  for (int k=targetSel.CardinalitySelection-1; k<targetSel.CardinalitySelection; k++)
-  { int tempI=targetSel.elements[k];
-    for (int i=0; i<targetSel.CardinalitySelection; i++ )
+  for (int k = targetSel.CardinalitySelection - 1; k < targetSel.CardinalitySelection; k ++)
+  { int tempI = targetSel.elements[k];
+    for (int i = 0; i < targetSel.CardinalitySelection; i ++)
     { if (targetSel.selected[oppositeKmods[targetSel.elements[i]]])
         return false;
-      List<int>& tempList=multTable[tempI][targetSel.elements[i]];
-      for (int j=0; j<tempList.size; j++)
-      { if (tempList[j]<startIndex && !originalSel.selected[tempList[j]])
+      List<int>& tempList = multTable[tempI][targetSel.elements[i]];
+      for (int j = 0; j < tempList.size; j ++)
+        if (tempList[j] < startIndex && !originalSel.selected[tempList[j]])
           return false;
         else
           targetSel.AddSelectionAppendNewIndex(tempList[j]);
-      }
     }
   }
   if (!owner.ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(targetSel))
@@ -313,31 +312,30 @@ bool rootSubalgebra::IndexIsCompatibleWithPrevious(int startIndex, int Recursion
 }
 
 void rootSubalgebra::PossibleNilradicalComputation(Selection& selKmods, rootSubalgebras& owner, int indexInOwner)
-{ this->NumNilradicalsAllowed++;
+{ this->NumNilradicalsAllowed ++;
   if (owner.flagCountingNilradicalsOnlyNoComputation)
-  { owner.numNilradicalsBySA[indexInOwner]++;
+  { owner.numNilradicalsBySA[indexInOwner] ++;
     this->MakeProgressReportPossibleNilradicalComputation(owner);
     return;
   }
   //this->ComputeDebugString();
   if (this->flagFirstRoundCounting)
-    this->NumTotalSubalgebras=this->NumNilradicalsAllowed;
+    this->NumTotalSubalgebras = this->NumNilradicalsAllowed;
   if (!this->flagFirstRoundCounting)
-  { this->NilradicalKmods=selKmods;
+  { this->NilradicalKmods = selKmods;
     if(!this->ConeConditionHolds(owner, indexInOwner, owner.flagComputingLprohibitingWeights))
-    { this->NumConeConditionFailures++;
-      owner.NumConeConditionFailures++;
+    { this->NumConeConditionFailures ++;
+      owner.NumConeConditionFailures ++;
       if (owner.flagStoringNilradicals)
       { List<List<int> >& currentSAList = owner.storedNilradicals[indexInOwner];
         List<int> newNilradical;
         newNilradical.SetSize(selKmods.CardinalitySelection);
-        for (int i=0; i<selKmods.CardinalitySelection; i++)
-          newNilradical[i]=selKmods.elements[i];
+        for (int i = 0; i < selKmods.CardinalitySelection; i ++)
+          newNilradical[i] = selKmods.elements[i];
         currentSAList.AddOnTop(newNilradical);
       }
     } else
     {
-
       //the below commented out code should be incapsulated. It computes whether a given nilradical is a nilradical of a parabolic subalgebra.
       //this task is pushed on the end of the to-do list.
       /* owner.NumConeConditionHoldsBySSpart.TheObjects[indexInOwner]++;
@@ -373,7 +371,7 @@ void rootSubalgebra::PossibleNilradicalComputation(Selection& selKmods, rootSuba
 void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int found)
 { ProgressReport theReport;
   std::stringstream out4, out5;
-  out5 << progress+1 << " out of " << outOf << " checked; ";
+  out5 << progress + 1 << " out of " << outOf << " checked; ";
   out5 << found << " found pos. generators";
   theReport.Report(out5.str());
 }
@@ -388,12 +386,12 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(rootSubalge
     if (this->flagFirstRoundCounting)
     { out1 << "Counting ss part " << this->theDynkinDiagram.ToString();
       out2 << "# nilradicals for fixed ss part: " << this->NumTotalSubalgebras;
-      owner.NumSubalgebrasCounted++;
+      owner.NumSubalgebrasCounted ++;
       out3 << owner.NumSubalgebrasCounted << " total subalgebras counted";
     } else
     { out1 << "Computing ss part " << this->theDynkinDiagram.ToString();
       out2 << this->NumNilradicalsAllowed << " Nilradicals processed out of " << this->NumTotalSubalgebras;
-      owner.NumSubalgebrasProcessed++;
+      owner.NumSubalgebrasProcessed ++;
       out3 << "Total # subalgebras processed: " << owner.NumSubalgebrasProcessed;
       out4 << "Num cone condition failures: " << owner.NumConeConditionFailures;
       out5 << "Num failures to find l-prohibiting relations: " << owner.theBadRelations.size;

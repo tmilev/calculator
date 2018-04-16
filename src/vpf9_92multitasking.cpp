@@ -49,7 +49,7 @@ void MutexRecursiveWrapper::initConstructorCallOnly()
   this->theMutexImplementation = 0;
   this->lastLockerThread = - 1;
 #ifdef AllocationLimitsSafeguard
-ParallelComputing::GlobalPointerCounter++;
+ParallelComputing::GlobalPointerCounter ++;
 #endif
 }
 

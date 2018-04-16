@@ -5,18 +5,18 @@ function getHTMLSubSection(theSubSection){
   result += `<div class = \"headSubsection\">${theSubSection.problemNumberString} ${theSubSection.title}</div>`;
   result += "<div class = \"bodySubsection\">";
   result += "<table class = \"topicList\"><colgroup><col><col><col><col><col></colgroup>";
-  for (var counterSubSection = 0; counterSubSection < theSubSection["children"].length; counterSubSection ++){
+  for (var counterSubSection = 0; counterSubSection < theSubSection["children"].length; counterSubSection ++) {
     var currentProblem = theSubSection["children"][counterSubSection];
     result += "<tr>";
     result += `<td>${currentProblem.problemNumberString} ${currentProblem.title}</td>`;
     result += "<td></td>";
     result += "<td>";
     if (thePage.flagUserLoggedIn) {
-      result += `<a class = "problemLinkQuiz" href = "#request=scoredQuiz&fileName=${currentProblem.problem}" onclick = "selectCurrentProblem('${currentProblem.problem}', 'scoredQuiz');">Quiz</a>`;
-      result += `<a class = "problemLinkPractice" href = "#request=exercise&fileName=${currentProblem.problem}" onclick = "selectCurrentProblem('${currentProblem.problem}', 'exercise');">Practice</a>`;
-    } else {
-      result += `<a class = "problemLinkPractice" href = "#request=exerciseNoLogin&fileName=${currentProblem.problem}" onclick = "selectCurrentProblem('${currentProblem.problem}', 'exerciseNoLogin');">Practice</a>`;
+      result += `<a class = "problemLinkQuiz" href = "#request=scoredQuizJSON&fileName=${currentProblem.problem}" `; 
+      result += `onclick = "selectCurrentProblem('${currentProblem.problem}', 'scoredQuizJSON');">Quiz</a>`;
     }
+    result += `<a class = "problemLinkPractice" href = "#request=exerciseJSON&fileName=${currentProblem.problem}" `;
+    result += `onclick = "selectCurrentProblem('${currentProblem.problem}', 'exerciseJSON');">Practice</a>`;
     result += "</td>";
     result += "<td></td>";
     result += "<td></td>";

@@ -56,11 +56,11 @@ function initializeCalculatorPage(){
   initializeCalculatorVariables();
   ////////////////////////
   globalMQ.config({autoFunctionize: 'sin cos tan sec csc cot log ln'});
-  calculatorMQobject = globalMQ.MathField( calculatorMQfield, { 
+  calculatorMQobject = globalMQ.MathField(calculatorMQfield, { 
     spaceBehavesLikeTab: true, // configurable
     supSubsRequireOperand: true, // configurable
     autoSubscriptNumerals: true, // configurable
-    handlers:{ 
+    handlers: { 
       edit: function(){ // useful event handlers
         if (ignoreNextMathQuillUpdateEvent){ 
           return;
@@ -85,9 +85,8 @@ function initializeCalculatorPage(){
 
 //          createSelectionNoFocus(calculatorInput, calculatorLeftString.length, calculatorLeftString.length+theInserted.length);
         }
-      }
     }
-   );
+  });
   answerMathQuillObjects = [calculatorMQobject];
   preferredButtonContainers = ['mainInputMQfieldButtons'];
   initializeButtons();

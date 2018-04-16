@@ -811,6 +811,27 @@ std::string HtmlInterpretation::GetExamPage()
   return out.str();
 }
 
+std::string HtmlInterpretation::GetExamPageJSON()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPageJSON");
+  std::stringstream out;
+  if (!theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON")
+  { out << "<b style='color:red'>Scored quiz requires login</b>";
+    return out.str();
+  }
+  CalculatorHTML theFile;
+  theFile.flagDoPrependCalculatorNavigationBar = false;
+  theFile.flagDoPrependProblemNavigationBar = false;
+  std::string problemBody = theFile.LoadAndInterpretCurrentProblemItem
+  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(),
+   theGlobalVariables.GetWebInput("randomSeed"));
+  if (theFile.flagLoadedSuccessfully)
+    out << theFile.outputHtmlHeadNoTag;
+  //<-must come after theFile.outputHtmlHeadNoTag
+  out << problemBody;
+  out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  return out.str();
+}
+
 std::string HtmlInterpretation::GetBrowseProblems()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetBrowseProblems");
   std::stringstream out;

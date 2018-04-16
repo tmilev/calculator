@@ -52,7 +52,6 @@ SOURCES += \
     vpf9_8GlobalObjects.cpp \
     vpf9_9SystemFunctions.cpp \
     vpf9_85TimeDateWrappers.cpp \
-    vpf9_91html_routines_calculator.cpp \
     vpf9_92multitasking.cpp \
     vpf9.cpp \
     vpf99_HardcodedData.cpp \

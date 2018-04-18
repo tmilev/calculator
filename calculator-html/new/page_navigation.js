@@ -90,7 +90,7 @@ function Page(){
   this.username = null;
   this.authenticationToken = null;
   this.flagUserLoggedIn = false;
-  this.currentProblem = null;
+  this.currentProblem = {};
   this.storeSettingsToLocalStorage = function() {
     if (Storage === undefined && localStorage === undefined) {
       return;

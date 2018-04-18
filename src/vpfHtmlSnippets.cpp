@@ -141,14 +141,12 @@ std::string HtmlRoutines::GetDatePickerJavascriptInit()
     << "integrity=\"sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=\" "
     << "crossorigin=\"anonymous\"></script>\n"
     << "<script src=\"https://code.jquery.com/ui/1.12.0/jquery-ui.min.js\"   "
-    << "integrity=\"sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E=\" crossorigin=\"anonymous\"></script>\n"
-    ;
+    << "integrity=\"sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E=\" crossorigin=\"anonymous\"></script>\n";
   else
     out
     << "<link rel=\"stylesheet\" href=\"/html-common/jquery-ui.css\">\n"
     << "<script src=\"/html-common/jquery.min.js\"></script>\n"
-    << "<script src=\"/html-common/jquery-ui.min.js\"></script>\n"
-;
+    << "<script src=\"/html-common/jquery-ui.min.js\"></script>\n";
 
   return out.str();
 }

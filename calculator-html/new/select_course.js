@@ -25,10 +25,9 @@ function afterLoadSelectCoursePage(incomingPage, result){
     }
     resultString += "</div>";
     document.getElementById("divSelectCourse").innerHTML = resultString;
-  } catch (e){
+  } catch (e) {
     document.getElementById("divSelectCourse").innerHTML = "<b style='color:red'>Error</b>" + e;
   }
-
 }
 
 function selectSelectCoursePage(){

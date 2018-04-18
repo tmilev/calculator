@@ -130,12 +130,12 @@ bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan
 }
 
 SubalgebraSemisimpleLieAlgebra::SubalgebraSemisimpleLieAlgebra()
-{ this->theGlobalVariables=0;
-  this->owner=0;
+{ this->theGlobalVariables = 0;
+  this->owner = 0;
 }
 
 bool SubalgebraSemisimpleLieAlgebra::CheckInitialization()
-{ if (this->owner==0)
+{ if (this->owner == 0)
     crash << "Non-initilized (no owner) subalgebra of semisimple Lie algebra." << crash;
   return true;
 }
@@ -143,7 +143,7 @@ bool SubalgebraSemisimpleLieAlgebra::CheckInitialization()
 std::string SubalgebraSemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SubalgebraSemisimpleLieAlgebra::ToString");
   (void) theFormat;//avoid unused parameter warning in a portable way
-  if(this->owner==0)
+  if (this->owner == 0)
     return "A non-initialized subalgebra of a semisimple Lie algebra; ";
   std::stringstream out;
   out << "A subalgebra of dimension " << this->theBasis.size << " lying in "
@@ -155,7 +155,7 @@ std::string SubalgebraSemisimpleLieAlgebra::ToString(FormatExpressions* theForma
 void SubalgebraSemisimpleLieAlgebra::ComputeBasis()
 { MacroRegisterFunctionWithName("SubalgebraSemisimpleLieAlgebra::ComputeBasis");
   this->CheckInitialization();
-  this->theBasis=this->theGenerators;
+  this->theBasis = this->theGenerators;
   this->owner->GenerateLieSubalgebra(this->theBasis);
 }
 
@@ -634,22 +634,21 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand()
   this->theOrbiTs.SetSize(this->theSl2s.size);
   List<ElementWeylGroup<WeylGroupData> > theGens;
   ElementWeylGroup<WeylGroupData> theElt;
-  WeylGroupData& theWeyl=this->owner->theWeyl;
+  WeylGroupData& theWeyl = this->owner->theWeyl;
   theWeyl.ComputeOuterAutoGenerators();
-  for (int i=0; i<this->owner->GetRank(); i++)
+  for (int i = 0; i < this->owner->GetRank(); i ++)
   { theElt.MakeSimpleReflection(i, theWeyl);
     theGens.AddOnTop(theElt);
   }
-  List<MatrixTensor<Rational> >& outerAutos=theWeyl.theOuterAutos.GetElement().theGenerators;
-  for (int i=0; i<outerAutos.size; i++)
+  List<MatrixTensor<Rational> >& outerAutos = theWeyl.theOuterAutos.GetElement().theGenerators;
+  for (int i = 0; i < outerAutos.size; i ++)
     if (!outerAutos[i].IsID())
     { theElt.MakeOuterAuto(i, theWeyl);
       theGens.AddOnTop(theElt);
     }
-  for (int i=0; i<this->theSl2s.size; i++)
+  for (int i = 0; i < this->theSl2s.size; i ++)
   { this->theOrbitHelementLengths.AddOnTop(this->theSl2s[i].LengthHsquared);
-    this->theOrbitDynkinIndices.AddOnTop
-    (DynkinSimpleType('A', 1, this->theSl2s[i].LengthHsquared ));
+    this->theOrbitDynkinIndices.AddOnTop(DynkinSimpleType('A', 1, this->theSl2s[i].LengthHsquared));
     this->theOrbiTs[i].init(theGens, this->theSl2s[i].theH.GetCartanPart(), theElt.ActOn);
   }
 //  stOutput << "H lengths:" << this->theOrbitHelementLengths.ToString() << " types: "
@@ -660,7 +659,7 @@ bool SemisimpleSubalgebras::LoadState
 (List<int>& currentChainInt, List<int>& numExploredTypes, List<int>& numExploredHs, std::stringstream& reportStream)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::LoadState");
   this->FindTheSSSubalgebrasInit();
-  if (currentChainInt.size!=numExploredTypes.size || currentChainInt.size!=numExploredHs.size)
+  if (currentChainInt.size != numExploredTypes.size || currentChainInt.size != numExploredHs.size)
   { reportStream << "<hr>Input state is corrupt: currentChainInt.size: " << currentChainInt.size << ", numExploredTypes.size: "
     << numExploredTypes.size << ", numExploredHs.size: " << numExploredHs.size;
     return false;
@@ -676,8 +675,8 @@ bool SemisimpleSubalgebras::LoadState
   this->currentPossibleLargerDynkinTypes.SetSize(0);
   this->currentRootInjections.SetSize(0);
   this->currentSubalgebraChain.SetSize(0);
-  for (int i=0; i<currentChainInt.size; i++)
-  { if (currentChainInt[i]==-1 && i==0)
+  for (int i = 0; i<currentChainInt.size; i ++)
+  { if (currentChainInt[i] == - 1 && i == 0)
     { CandidateSSSubalgebra emptySA;
       this->MakeEmptyCandidateSA(emptySA);
       this->AddSubalgebraToStack(emptySA, numExploredTypes[i], numExploredHs[i]);
@@ -685,32 +684,32 @@ bool SemisimpleSubalgebras::LoadState
 //      << "," << numExploredHs[i];
       continue;
     }
-    if (currentChainInt[i]<0 || currentChainInt[i]>=this->theSubalgebras.theValues.size)
+    if (currentChainInt[i] < 0 || currentChainInt[i] >= this->theSubalgebras.theValues.size)
     { reportStream << "<hr>Corrupt subalgebra index: " << currentChainInt[i];
       return false;
     }
-    CandidateSSSubalgebra& currentSA=this->theSubalgebras[currentChainInt[i]];
+    CandidateSSSubalgebra& currentSA = this->theSubalgebras[currentChainInt[i]];
     if (!currentSA.ComputeAndVerifyFromGeneratorsAndHs())
     { reportStream << "<hr>Subalgebra " << currentSA.theWeylNonEmbedded->theDynkinType.ToString()
       << "is corrupt. " << currentSA.comments;
       return false;
     }
-    bool isGood=true;
-    if (! currentSA.theHs.ContainsAtLeastOneCopyOfEach(this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation))
-      isGood=false;
+    bool isGood = true;
+    if (!currentSA.theHs.ContainsAtLeastOneCopyOfEach(this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation))
+      isGood = false;
     else
-    { currentSA.theHsScaledToActByTwoInOrderOfCreation=this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation;
-      for (int i=0; i<currentSA.theHs.size; i++)
+    { currentSA.theHsScaledToActByTwoInOrderOfCreation = this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation;
+      for (int i = 0; i < currentSA.theHs.size; i ++)
         if (! this->baseSubalgebra().theHsScaledToActByTwoInOrderOfCreation.Contains(currentSA.theHs[i]))
         { currentSA.theHsScaledToActByTwoInOrderOfCreation.AddOnTop(currentSA.theHs[i]);
-          if (currentSA.theHsScaledToActByTwoInOrderOfCreation.size>currentSA.theHs.size)
-          { isGood=false;
+          if (currentSA.theHsScaledToActByTwoInOrderOfCreation.size > currentSA.theHs.size)
+          { isGood = false;
             break;
           }
         }
     }
-    if (currentSA.theHs.size!=this->baseSubalgebra().theHs.size+1)
-      isGood=false;
+    if (currentSA.theHs.size != this->baseSubalgebra().theHs.size + 1)
+      isGood = false;
     if (!isGood)
     { reportStream << "<hr>Subalgebra " << currentSA.theWeylNonEmbedded->theDynkinType.ToString()
       << " does not appear to be parabolically induced by " << this->baseSubalgebra().theWeylNonEmbedded->theDynkinType.ToString()
@@ -743,7 +742,7 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
   { theReport.Report(this->ToStringProgressReport());
 //    stOutput << "<hr>" << this->ToStringCurrentChain();
     if (!this->flagRealizedAllCandidates)
-    { this->comments=this->comments+  "Failed to realize all candidates, aborting computation.";
+    { this->comments = this->comments + "Failed to realize all candidates, aborting computation.";
       return false;
     }
   }
@@ -765,19 +764,19 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasContinue()
 void SemisimpleSubalgebras::FindTheSSSubalgebrasInit()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasInit");
   this->CheckConsistency();
-  if (this->owner==0)
+  if (this->owner == 0)
     crash << "<hr>Owner of semisimple subalgebras is zero" << crash;
   if (theGlobalVariables.flagReportEverything)
-  { this->fileNameToLogComments="LogFileComments_"+ HtmlRoutines::CleanUpForFileNameUse( this->owner->theWeyl.theDynkinType.ToString()) + ".html";
+  { this->fileNameToLogComments = "LogFileComments_" + HtmlRoutines::CleanUpForFileNameUse(this->owner->theWeyl.theDynkinType.ToString()) + ".html";
     std::fstream LogFile;
     if (!FileOperations::OpenFileCreateIfNotPresentVirtual
-        (LogFile, "output/"+this->fileNameToLogComments, true, false, false))
+         (LogFile, "output/" + this->fileNameToLogComments, true, false, false))
       crash << "Failed to open/create log file " << this->fileNameToLogComments
       << ". This is not fatal but I am crashing to let you know. ";
     LogFile.close();
   }
   this->ComputeSl2sInitOrbitsForComputationOnDemand();
-  this->currentSubalgebraChain.SetExpectedSize(this->owner->GetRank()+2);
+  this->currentSubalgebraChain.SetExpectedSize(this->owner->GetRank() + 2);
   this->currentSubalgebraChain.SetSize(0);
 }
 
@@ -806,10 +805,10 @@ void SemisimpleSubalgebras::MakeCandidateSA(const DynkinType& input, CandidateSS
 
 bool SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch");
-  this->owner=&newOwner;
+  this->owner = &newOwner;
   this->targetDynkinType.MakeZero();
-  if (targetType!=0)
-    this->targetDynkinType=*targetType;
+  if (targetType != 0)
+    this->targetDynkinType = *targetType;
   this->FindTheSSSubalgebrasInit();
   CandidateSSSubalgebra emptyCandidate;
   this->MakeEmptyCandidateSA(emptyCandidate);
@@ -819,10 +818,10 @@ bool SemisimpleSubalgebras::FindTheSSSubalgebrasFromScratch(SemisimpleLieAlgebra
 }
 
 bool SemisimpleSubalgebras::RanksAndIndicesFit(const DynkinType& input)const
-{ if (input.GetRank()>this->owner->GetRank())
+{ if (input.GetRank() > this->owner->GetRank())
     return false;
-  for (int i=0; i<input.size(); i++)
-    if (!this->theOrbitHelementLengths.Contains(input[i].CartanSymmetricInverseScale*2))
+  for (int i = 0; i < input.size(); i ++)
+    if (!this->theOrbitHelementLengths.Contains(input[i].CartanSymmetricInverseScale * 2))
       return false;
   return true;
 }
@@ -831,10 +830,10 @@ bool SemisimpleSubalgebras::GrowDynkinType(const DynkinType& input, List<DynkinT
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::GrowDynkinType");
   HashedList<Rational> theLengths;
   theLengths.SetExpectedSize(this->theOrbitHelementLengths.size);
-  for (int i=0; i<this->theOrbitHelementLengths.size; i++)
-    theLengths.AddOnTopNoRepetition(this->theOrbitHelementLengths[i]/2);
+  for (int i = 0; i < this->theOrbitHelementLengths.size; i ++)
+    theLengths.AddOnTopNoRepetition(this->theOrbitHelementLengths[i] / 2);
   output.SetSize(0);
-  if (outputImagesSimpleRoots!=0)
+  if (outputImagesSimpleRoots != 0)
     outputImagesSimpleRoots->SetSize(0);
   return input.Grow(theLengths, this->owner->GetRank(), output, outputImagesSimpleRoots);
 }
@@ -852,23 +851,23 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImag
   } else
     this->MakeCandidateSA(input, theSSSubalgebraToBeModified);
   Vector<Rational> newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords;
-  WeylGroupData& theWeyl=*theSSSubalgebraToBeModified.theWeylNonEmbedded;
+  WeylGroupData& theWeyl = *theSSSubalgebraToBeModified.theWeylNonEmbedded;
   theWeyl.ComputeRho(true);
   theSSSubalgebraToBeModified.CheckCandidateInitialization();
-  int newIndex=*imagesOldSimpleRootsAndNewRoot.LastObject();
-  int newRank=theWeyl.GetDim();
+  int newIndex = *imagesOldSimpleRootsAndNewRoot.LastObject();
+  int newRank = theWeyl.GetDim();
   newSimpleRoot.MakeEi(newRank, newIndex);
   Vectors<Rational> simpleBasisOld;
-  simpleBasisOld.SetSize(newRank-1);
-  if (imagesOldSimpleRootsAndNewRoot.size!=newRank)
+  simpleBasisOld.SetSize(newRank - 1);
+  if (imagesOldSimpleRootsAndNewRoot.size != newRank)
     crash << "This is a programming error: the root images must be " << newRank << " but there are " << imagesOldSimpleRootsAndNewRoot.size << " elements instead. "
     << "The type is " << input.ToString() << ". " << crash;
-  for (int i=0; i<newRank-1; i++)
+  for (int i = 0; i < newRank - 1; i ++)
     simpleBasisOld[i].MakeEi(newRank, imagesOldSimpleRootsAndNewRoot[i]);
   theWeyl.ComputeExtremeRootInTheSameKMod(simpleBasisOld, newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords, true);
-  result.SetSize(newRank-1);
-  for (int i=0; i<simpleBasisOld.size; i++)
-    result[i]=theWeyl.RootScalarCartanRoot(highestRootInSimpleRootModuleSimpleCoords, simpleBasisOld[i])*2/
+  result.SetSize(newRank - 1);
+  for (int i = 0; i < simpleBasisOld.size; i ++)
+    result[i] = theWeyl.RootScalarCartanRoot(highestRootInSimpleRootModuleSimpleCoords, simpleBasisOld[i]) * 2 /
     theWeyl.RootScalarCartanRoot(simpleBasisOld[i], simpleBasisOld[i]);
   return result;
 }
@@ -879,31 +878,31 @@ void CandidateSSSubalgebra::SetUpInjectionHs
   this->reset(baseSubalgebra.owner);
   this->owner->MakeCandidateSA(theNewType, *this);
   this->CheckCandidateInitialization();
-  this->theHsScaledToActByTwoInOrderOfCreation.Reserve(baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation.size+1);
-  this->theHsScaledToActByTwoInOrderOfCreation=baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation;
-  if (newHScaledToActByTwo!=0)
+  this->theHsScaledToActByTwoInOrderOfCreation.Reserve(baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation.size + 1);
+  this->theHsScaledToActByTwoInOrderOfCreation = baseSubalgebra.theHsScaledToActByTwoInOrderOfCreation;
+  if (newHScaledToActByTwo != 0)
     this->theHsScaledToActByTwoInOrderOfCreation.AddOnTop(*newHScaledToActByTwo);
-  DynkinSimpleType newComponent=this->theWeylNonEmbedded->theDynkinType.GetSmallestSimpleType();
-  this->CartanSAsByComponentScaledToActByTwo=baseSubalgebra.CartanSAsByComponentScaledToActByTwo;
-  int indexOffset=this->theWeylNonEmbedded->theDynkinType.GetRank()-newComponent.theRank;
-  int newIndexInNewComponent=0;
+  DynkinSimpleType newComponent = this->theWeylNonEmbedded->theDynkinType.GetSmallestSimpleType();
+  this->CartanSAsByComponentScaledToActByTwo = baseSubalgebra.CartanSAsByComponentScaledToActByTwo;
+  int indexOffset = this->theWeylNonEmbedded->theDynkinType.GetRank() - newComponent.theRank;
+  int newIndexInNewComponent = 0;
 //  if (!newComponent.IsEqualToZero())
-  newIndexInNewComponent=*theRootInjection.LastObject()-indexOffset;
-  if (newComponent.theRank==1)
-  { this->CartanSAsByComponentScaledToActByTwo.SetSize(this->CartanSAsByComponentScaledToActByTwo.size+1);
+  newIndexInNewComponent = *theRootInjection.LastObject() - indexOffset;
+  if (newComponent.theRank == 1)
+  { this->CartanSAsByComponentScaledToActByTwo.SetSize(this->CartanSAsByComponentScaledToActByTwo.size + 1);
     this->CartanSAsByComponentScaledToActByTwo.LastObject()->SetSize(1);
-    if (newHScaledToActByTwo!=0)
-      (*this->CartanSAsByComponentScaledToActByTwo.LastObject())[0]=*newHScaledToActByTwo;
+    if (newHScaledToActByTwo != 0)
+      (*this->CartanSAsByComponentScaledToActByTwo.LastObject())[0] = *newHScaledToActByTwo;
     else
       (*this->CartanSAsByComponentScaledToActByTwo.LastObject())[0].SetSize(0);
   } else
-  { Vectors<Rational>& oldComponentHs=*baseSubalgebra.CartanSAsByComponentScaledToActByTwo.LastObject();
-    Vectors<Rational>& currentHsScaledToActByTwo=*this->CartanSAsByComponentScaledToActByTwo.LastObject();
-    currentHsScaledToActByTwo.SetSize(currentHsScaledToActByTwo.size+1);
-    for (int i=0; i<newComponent.theRank-1; i++)
-      currentHsScaledToActByTwo[theRootInjection[indexOffset+i]-indexOffset]=oldComponentHs[i];
-    if (newHScaledToActByTwo!=0)
-      currentHsScaledToActByTwo[newIndexInNewComponent]=*newHScaledToActByTwo;
+  { Vectors<Rational>& oldComponentHs = *baseSubalgebra.CartanSAsByComponentScaledToActByTwo.LastObject();
+    Vectors<Rational>& currentHsScaledToActByTwo = *this->CartanSAsByComponentScaledToActByTwo.LastObject();
+    currentHsScaledToActByTwo.SetSize(currentHsScaledToActByTwo.size + 1);
+    for (int i = 0; i < newComponent.theRank - 1; i ++)
+      currentHsScaledToActByTwo[theRootInjection[indexOffset + i] - indexOffset] = oldComponentHs[i];
+    if (newHScaledToActByTwo != 0)
+      currentHsScaledToActByTwo[newIndexInNewComponent] = *newHScaledToActByTwo;
     else
       currentHsScaledToActByTwo[newIndexInNewComponent].SetSize(0);
   }
@@ -924,30 +923,30 @@ void CandidateSSSubalgebra::ComputeHsAndHsScaledToActByTwoFromComponents()
   this->theSubalgebraNonEmbeddedDefaultScale->ComputeChevalleyConstants();
   this->indexNonEmbeddedMeNonStandardCartan =
   this->owner->theSubalgebrasNonDefaultCartanAndScale.GetIndex(cartanInComponentOrder);
-  int counter=-1;
+  int counter = - 1;
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbedded->theDynkinType.GetTypesWithMults(theTypes);
 //  stOutput << "<br>type: " << this->theWeylNonEmbedded->theDynkinType.ToString()
 //  << " Computing h's scaled by two: Cartan is: " << this->theHs.ToString();
-  for (int i=0; i<this->CartanSAsByComponentScaledToActByTwo.size; i++)
-    for (int j=0; j< this->CartanSAsByComponentScaledToActByTwo[i].size; j++)
-    { counter++;
-      this->theHs[counter]=(this->theHsScaledToActByTwo[counter]*theTypes[i].GetDefaultRootLengthSquared(j))/2;
+  for (int i = 0; i < this->CartanSAsByComponentScaledToActByTwo.size; i ++)
+    for (int j = 0; j < this->CartanSAsByComponentScaledToActByTwo[i].size; j ++)
+    { counter ++;
+      this->theHs[counter] = (this->theHsScaledToActByTwo[counter] * theTypes[i].GetDefaultRootLengthSquared(j)) / 2;
     }
 }
 
 bool SemisimpleSubalgebras::SetUpParabolicInductionDataPrecomputedSA(CandidateSSSubalgebra& theCandidate)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::SetUpParabolicInductionDataPrecomputedSA");
-  int indexPrecomputed=this->theSubalgebras.GetIndex(theCandidate.theHs);
-  if (indexPrecomputed==-1)
+  int indexPrecomputed = this->theSubalgebras.GetIndex(theCandidate.theHs);
+  if (indexPrecomputed == - 1)
     return false;
-  if (this->theSubalgebras[indexPrecomputed].theHsScaledToActByTwoInOrderOfCreation.size!=
+  if (this->theSubalgebras[indexPrecomputed].theHsScaledToActByTwoInOrderOfCreation.size !=
       theCandidate.theHs.size)
-    this->theSubalgebras[indexPrecomputed].theHsScaledToActByTwoInOrderOfCreation=
+    this->theSubalgebras[indexPrecomputed].theHsScaledToActByTwoInOrderOfCreation =
     theCandidate.theHsScaledToActByTwoInOrderOfCreation;
-  this->theSubalgebras[indexPrecomputed].indexIamInducedFrom=theCandidate.indexIamInducedFrom;
-  this->theSubalgebras[indexPrecomputed].RootInjectionsFromInducer=theCandidate.RootInjectionsFromInducer;
-  theCandidate=this->theSubalgebras[indexPrecomputed];
+  this->theSubalgebras[indexPrecomputed].indexIamInducedFrom = theCandidate.indexIamInducedFrom;
+  this->theSubalgebras[indexPrecomputed].RootInjectionsFromInducer = theCandidate.RootInjectionsFromInducer;
+  theCandidate = this->theSubalgebras[indexPrecomputed];
   return theCandidate.ComputeAndVerifyFromGeneratorsAndHs();
 }
 
@@ -959,14 +958,14 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
   //  stOutput << "<hr><b>Testing actual extension!!! Type base: "
   //  << baseSubalgebra.theWeylNonEmbedded->theDynkinType.ToString()
   //  << ", type target: " << this->theWeylNonEmbedded->theDynkinType.ToString() << "</b><br>";
-  this->indexIamInducedFrom=baseSubalgebra.indexInOwner;
-  this->RootInjectionsFromInducer=theRootInjection;
+  this->indexIamInducedFrom = baseSubalgebra.indexInOwner;
+  this->RootInjectionsFromInducer = theRootInjection;
   //induction history is complete.
   if (this->owner->SetUpParabolicInductionDataPrecomputedSA(*this))
     return true;
 //  this->owner->RegisterPossibleCandidate(*this);
   this->CheckFullInitializatioN();
-  if (!baseSubalgebra.theWeylNonEmbedded->theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
+  if (!baseSubalgebra.theWeylNonEmbedded->theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner == - 1)
     crash << "This is a programming error: attempting to induce a subalgebra "
     << "from a non-registered base subalgebra of type "
     << baseSubalgebra.theWeylNonEmbedded->theDynkinType.ToString() << ". " << crash;
@@ -983,12 +982,12 @@ bool CandidateSSSubalgebra::CreateAndAddExtendBaseSubalgebra
     { theReport.Report("Candidate " + this->theWeylNonEmbedded->theDynkinType.ToString() + " -> no system solution.");
 //      stOutput << "No system solution.";
     }
-  for (int i=0; i<this->owner->theSubalgebras.theValues.size; i++)
-    if (this->theWeylNonEmbedded->theDynkinType==this->owner->theSubalgebras[i].theWeylNonEmbedded->theDynkinType)
+  for (int i = 0; i < this->owner->theSubalgebras.theValues.size; i ++)
+    if (this->theWeylNonEmbedded->theDynkinType == this->owner->theSubalgebras[i].theWeylNonEmbedded->theDynkinType)
     { if (this->IsDirectSummandOf(this->owner->theSubalgebras[i]))
         return false;
     } else
-      if (this->theWeylNonEmbedded->theDynkinType.ToString()==
+      if (this->theWeylNonEmbedded->theDynkinType.ToString() ==
           this->owner->theSubalgebras[i].theWeylNonEmbedded->theDynkinType.ToString())
         crash << "This is not supposed to happen: different Dynkin types with equal ToString outputs. "
         << crash;
@@ -1010,11 +1009,11 @@ bool OrbitFDRepIteratorWeylGroup::CheckConsistency()
       crash << "Current buffer index is: " << this->currentIndexInBuffer << " but the orbit has "
       << this->orbitBuffer.size << " elements. " << crash;
   if (this->flagOrbitEnumeratedOnce)
-    if (this->currentIndexInBuffer >=this->orbitSize)
+    if (this->currentIndexInBuffer >= this->orbitSize)
       crash << "Current buffer index is: " << this->currentIndexInBuffer << " but the orbit was computed to have "
       << this->orbitSize << " elements. " << crash;
   if (this->flagOrbitIsBuffered)
-    if (this->orbitSize!=this->orbitBuffer.size)
+    if (this->orbitSize != this->orbitBuffer.size)
      crash << "Orbit is supposed to be buffered but the orbit buffer has " << this->orbitBuffer.size << " elements "
      << " and the orbit size is reported to be: " << this->orbitSize << ". A detailed orbit printout: <br>"
      << this->ToString() << crash;
@@ -1028,36 +1027,36 @@ bool OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast()
 { MacroRegisterFunctionWithName("OrbitFDRepIteratorWeylGroup::IncrementReturnFalseIfPastLast");
   this->CheckConsistency();
   if (this->flagOrbitIsBuffered)
-  { this->currentIndexInBuffer++;
-    if (this->currentIndexInBuffer>=this->orbitSize)
-    { this->currentIndexInBuffer=-1;
+  { this->currentIndexInBuffer ++;
+    if (this->currentIndexInBuffer >= this->orbitSize)
+    { this->currentIndexInBuffer = - 1;
       return false;
     }
     return true;
   }
-  this->currentIndexInBuffer++;
+  this->currentIndexInBuffer ++;
   if (this->flagOrbitEnumeratedOnce)
     return this->theIterator.IncrementReturnFalseIfPastLastFALSE();
   if (!this->theIterator.IncrementReturnFalseIfPastLastFALSE())
-  { this->orbitSize=this->currentIndexInBuffer;
-    if (this->computedSize!=-1)
-      if (this->computedSize!=this->orbitSize)
+  { this->orbitSize = this->currentIndexInBuffer;
+    if (this->computedSize != - 1)
+      if (this->computedSize != this->orbitSize)
         crash << "This is a mathematical error: the computed size of the orbit is " << this->computedSize.ToString()
         << " but I enumerated an orbit of size " << this->orbitSize << ". More details on the orbit: "
         << this->ToString() << crash;
-    this->currentIndexInBuffer=-1;
-    this->flagOrbitEnumeratedOnce=true;
-    if (this->orbitSize<=this->maxOrbitBufferSize)
-      this->flagOrbitIsBuffered=true;
+    this->currentIndexInBuffer = - 1;
+    this->flagOrbitEnumeratedOnce = true;
+    if (this->orbitSize <= this->maxOrbitBufferSize)
+      this->flagOrbitIsBuffered = true;
     else
-    { this->flagOrbitIsBuffered=false;
+    { this->flagOrbitIsBuffered = false;
       this->orbitBuffer.SetSize(0);
       this->orbitBuffer.ReleaseMemory();
     }
     this->CheckConsistency();
     return false;
   }
-  if (this->orbitBuffer.size<this->maxOrbitBufferSize)
+  if (this->orbitBuffer.size < this->maxOrbitBufferSize)
     this->orbitBuffer.AddOnTop(this->theIterator.GetCurrentElement());
   return true;
 }

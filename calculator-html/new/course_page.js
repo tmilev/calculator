@@ -61,7 +61,7 @@ function getHTMLfromTopics(theTopics){
 }
 
 function afterLoadTopics(incomingTopics, result){
-  console.log("DEBUG: topic list cookie @ afterLoadTopics: " + getCookie("topicList"));
+  //console.log("DEBUG: topic list cookie @ afterLoadTopics: " + getCookie("topicList"));
   var topicsElements = document.getElementsByTagName("topicList");
   if (topicsElements.length === 0){
     return;
@@ -90,7 +90,7 @@ function afterLoadCoursePage(incomingPage, result){
   if (theTopics.length  === 0){
     return;
   }
-  console.log("DEBUG: topic list cookie @ afterLoadCoursePage: " + getCookie("topicList"));
+  //console.log("DEBUG: topic list cookie @ afterLoadCoursePage: " + getCookie("topicList"));
   submitGET({
     url: `${pathnames.calculator}?request=${theRequest}`,
     callback: afterLoadTopics,
@@ -99,7 +99,7 @@ function afterLoadCoursePage(incomingPage, result){
 }
 
 function selectCurrentCoursePage(){
-  console.log("DEBUG: topic list cookie @ selectCurrentCoursePage: " + getCookie("topicList"));
+  //console.log("DEBUG: topic list cookie @ selectCurrentCoursePage: " + getCookie("topicList"));
   var theRequest = "templateJSONNoLogin";
   if (thePage.flagUserLoggedIn){
     theRequest = "templateJSON";

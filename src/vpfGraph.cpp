@@ -10,8 +10,8 @@ GraphOLD::GraphOLD(int max_vertices, int max_edges){
 }
 
 void GraphOLD::AddEdge(int v1, int v2){
-    this->AddDiEdge(v1,v2);
-    this->AddDiEdge(v2,v1);
+    this->AddDiEdge(v1, v2);
+    this->AddDiEdge(v2, v1);
 }
         // assuming that -1 only happens after all the edges is okay because
         // the DeleteEdge method packs the vertices when it finishes

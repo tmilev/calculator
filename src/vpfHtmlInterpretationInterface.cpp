@@ -821,15 +821,19 @@ std::string HtmlInterpretation::GetExamPageJSON()
   CalculatorHTML theFile;
   theFile.flagDoPrependCalculatorNavigationBar = false;
   theFile.flagDoPrependProblemNavigationBar = false;
-  std::string problemBody = theFile.LoadAndInterpretCurrentProblemItem
-  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(),
-   theGlobalVariables.GetWebInput("randomSeed"));
-  if (theFile.flagLoadedSuccessfully)
-    out << theFile.outputHtmlHeadNoTag;
+  theFile.flagUseJSON = true;
+  std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON
+  (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"));
   //<-must come after theFile.outputHtmlHeadNoTag
   out << problemBody;
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
-  return out.str();
+  JSData output;
+  output["problem"] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
+  if (theFile.flagLoadedSuccessfully)
+  { output["scripts"] = HtmlRoutines::ConvertStringToURLString(theFile.outputHtmlHeadNoTag, false);
+    output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
+  }
+  return output.ToString(false, false);
 }
 
 std::string HtmlInterpretation::GetBrowseProblems()
@@ -1065,7 +1069,7 @@ std::string HtmlInterpretation::SubmitProblem
 
   //stOutput << "DEBUG: " << "adding: commands: " << currentA.commandsCommentsBeforeSubmissionOnly;
   bool hasCommentsBeforeSubmission =
-  (MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission)!="");
+  (MathRoutines::StringTrimWhiteSpace(currentA.commandsCommentsBeforeSubmission) != "");
   if (hasCommentsBeforeSubmission)
   { completedProblemStream
     << "CommandEnclosure{}("

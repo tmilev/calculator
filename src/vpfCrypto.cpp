@@ -77,7 +77,7 @@ unsigned char Crypto::GetCharFrom6bit(uint32_t input)
     default: crash << "Requesting character from a purported 6 bit integer, which in fact has more significant bits. " << crash;
       break;
   }
-  return -1;
+  return - 1;
 }
 
 bool Crypto::GetBase58FromChar(unsigned char input, uint32_t& output)
@@ -555,7 +555,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
   uint32_t h2 = 0x98BADCFE;
   uint32_t h3 = 0x10325476;
   uint32_t h4 = 0xC3D2E1F0;
-  uint64_t messageLength=inputString.size() * 8;//*sizeof(char);
+  uint64_t messageLength = inputString.size() * 8;//*sizeof(char);
   std::string inputStringPreprocessed = inputString;
   //Wikipedia appears to claim that if the message
   //is a multiple of 8 bits, padding with the bit 1
@@ -603,8 +603,8 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
     e = h4;
     for (int j = 0; j < 80; j ++)
     { if (j < 20)
-      { f= (b bitand c) bitor ((compl b) bitand d);
-        k=0x5A827999;
+      { f = (b bitand c) bitor ((compl b) bitand d);
+        k = 0x5A827999;
       } else if (20 <= j and j < 40)
       { f = b xor c xor d;
         k = 0x6ED9EBA1;
@@ -962,12 +962,12 @@ bool Certificate::LoadFromJSON(JSData& input, std::stringstream* commentsOnFailu
   if (input.HasKey("kid"))
     this->keyid = input.GetValue("kid").string;
   if (input.HasKey("n"))
-  { this->theModulusString=input.GetValue("n").string;
+  { this->theModulusString = input.GetValue("n").string;
     if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theModulusString, this->theModuluS, commentsOnFailure))
       return false;
   }
   if (input.HasKey("e"))
-  { this->theExponentString=input.GetValue("e").string;
+  { this->theExponentString = input.GetValue("e").string;
     if (!Crypto::ConvertBase64ToLargeUnsignedInt(this->theExponentString, this->theExponenT, commentsOnFailure))
       return false;
   }
@@ -1114,7 +1114,7 @@ bool JSONWebToken::VerifyRSA256
   std::string RSAresultBitstream, RSAresultLast32bytes;
   Crypto::ConvertLargeUnsignedIntToString(RSAresult, RSAresultBitstream);
   if (RSAresultBitstream.size() > 32)
-    RSAresultLast32bytes = RSAresultBitstream.substr(RSAresultBitstream.size()-32,32);
+    RSAresultLast32bytes = RSAresultBitstream.substr(RSAresultBitstream.size() - 32, 32);
   Crypto::ConvertStringToListUInt32BigendianZeroPad(RSAresultLast32bytes, RSAresultInts);
   bool result = (RSAresultInts == outputSha);
   if (!result)

@@ -9,7 +9,14 @@ function selectCurrentProblem(problem, exerciseType){
 }
 
 function updateProblemPageCallback(input, outputComponent){
-  document.getElementById("divCurrentProblemContentContainer").innerHTML = input;
+  var theProblem = JSON.parse(input);
+  var decodedProblem = decodeURIComponent(theProblem["problem"]);
+  var scripts = decodeURIComponent(theProblem["scripts"]);
+  document.getElementById("divCurrentProblemContentContainer").innerHTML = decodedProblem + scripts;
+  thePage.currentProblem = {};
+  thePage.currentProblem.answers = theProblem["answers"];
+  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentProblemContentContainer")]);
+  
 }
 
 function updateProblemPage(){

@@ -277,9 +277,11 @@ public:
   std::string GetEditPageButton(const std::string& desiredFileName, bool includeCloneButton = true);
   std::string GetJavascriptSubmitAnswers();
   std::string GetJavascriptMathQuillBoxes();
+  JSData GetJavascriptMathQuillBoxesForJSON();
   void LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& inputRandomSeed);
   void FigureOutCurrentProblemList(std::stringstream& comments);
   std::string LoadAndInterpretCurrentProblemItem(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed);
+  std::string LoadAndInterpretCurrentProblemItemJSON(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed);
   static unsigned int HashFunction(const CalculatorHTML& input)
   { return input.HashFunction();
   }

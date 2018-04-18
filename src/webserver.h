@@ -52,20 +52,16 @@ public:
   void initSSLserver();
   void initSSLclient();
   int SSLread
-  (SSL* theSSL, void *buffer, int bufferSize,
-   std::stringstream *commentsOnFailure,
+  (SSL* theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
    std::stringstream *commentsGeneral, bool includeNoErrorInComments);
   bool SSLreadLoop
-  (int numTries, SSL* theSSL, std::string& output, const LargeInt& expectedLength,
-   std::stringstream *commentsOnFailure,
+  (int numTries, SSL* theSSL, std::string& output, const LargeInt& expectedLength, std::stringstream *commentsOnFailure,
    std::stringstream *commentsGeneral, bool includeNoErrorInComments);
   bool SSLwriteLoop
-  (int numTries, SSL* theSSL, const std::string& input,
-   std::stringstream *commentsOnFailure,
+  (int numTries, SSL* theSSL, const std::string& input, std::stringstream *commentsOnFailure,
    std::stringstream *commentsGeneral, bool includeNoErrorInComments);
   int SSLwrite
-  (SSL* theSSL, void *buffer, int bufferSize,
-   std::stringstream *commentsOnFailure,
+  (SSL* theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
    std::stringstream *commentsGeneral, bool includeNoErrorInComments);
   SSLdata()
   { this->errorCode = - 1;
@@ -82,12 +78,8 @@ public:
   void FreeSSL();
   void FreeContext();
   void HandShakeIamServer(int inputSocketID);
-  bool InspectCertificates
-  (std::stringstream* commentsOnFailure,
-   std::stringstream* commentsGeneral);
-  bool HandShakeIamClientNoSocketCleanup
-  (int inputSocketID, std::stringstream* commentsOnFailure,
-   std::stringstream* commentsGeneral);
+  bool InspectCertificates(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
+  bool HandShakeIamClientNoSocketCleanup(int inputSocketID, std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   void FreeEverythingShutdownSSL();
 };
 #endif
@@ -244,16 +236,14 @@ public:
   bool ExtractArgumentsFromMessage
   (const std::string& input, std::stringstream& argumentProcessingFailureComments,
    int recursionDepth = 0);
-  bool ExtractArgumentsFromCookies
-  (std::stringstream& argumentProcessingFailureComments);
+  bool ExtractArgumentsFromCookies(std::stringstream& argumentProcessingFailureComments);
   static void OutputSendAfterTimeout(const std::string& input);
   void OutputResultAfterTimeout();
   static void OutputCrashAfterTimeout();
   void OutputShowIndicatorOnTimeout();
   void QueueStringForSendingWithHeadeR(const std::string& stringToSend, bool MustSendAll = false);
   void QueueStringForSendingNoHeadeR(const std::string& stringToSend, bool MustSendAll = false);
-  void QueueBytesForSendingNoHeadeR
-  (const List<char>& bytesToSend, bool MustSendAll = false);
+  void QueueBytesForSendingNoHeadeR(const List<char>& bytesToSend, bool MustSendAll = false);
   bool ShouldDisplayLoginPage();
   void SendAllAndWrapUp();
   void WrapUpConnection();

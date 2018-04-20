@@ -11,7 +11,7 @@ extern WebServer theWebServer;
 ProjectInformationInstance projectInfoInstanceWebServerInterProcessLogisticsImplementation
 (__FILE__, "Web server interprocess communication implementation.");
 
-std::string PauseProcess::currentProcessName="S: ";
+std::string PauseProcess::currentProcessName = "S: ";
 
 void PauseProcess::Release(int& theDescriptor)
 { if (theDescriptor == - 1)

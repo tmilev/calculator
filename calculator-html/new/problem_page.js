@@ -18,29 +18,19 @@ function updateProblemPageCallback(input, outputComponent){
   thePage.currentProblem[thePage.currentCourse.fileName] = {};
   thePage.currentProblem[thePage.currentCourse.fileName].answers = [];
   var answerVectors = theProblem["answers"];
-  for (var counterAnswer = 0;  counterAnswer < answerVectors.length; counterAnswer ++){
-    thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswer] = new InputPanelData({
+  for (var counterAnswers = 0;  counterAnswers < answerVectors.answerMQspanIds.length; counterAnswers ++){
+    thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswers] = new InputPanelData({
       fileName: thePage.currentCourse.fileName,
-      idMQSpan: answerVectors.answerMQspanIds[counterAnswer],
+      idMQSpan: answerVectors.answerMQspanIds[counterAnswers],
       idPureLatex: answerVectors.answerIdsPureLatex[counterAnswers],
-      idButtonContainer: "asdf"
+      idButtonContainer: answerVectors.preferredButtonContainers[counterAnswers]
     });
-    theProblem["answers"];
+    thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswers].initialize();
   }
-  initializeMathQuill(thePage.currentCourse.fileName);
 }
 
 function previewAnswers(answerData){
   
-}
-
-function initializeMathQuill(fileName){
-  var theAnswers = thePage.currentProblem[fileName].answers;
-  console.log(theAnswers);
-  initializeButtonsCommon();
-  for (var counterAnswers = 0; counterAnswers < theAnswers.length; counterAnswers ++) {
-    theAnswers[counterAnswers].initialize();
-  }
 }
 
 function updateProblemPage(){

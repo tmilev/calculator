@@ -287,7 +287,7 @@ InputPanelData.prototype.initialize = function(){
     autoFunctionize: 'sin cos tan sec csc cot log ln'
   });
   var currentMQspan = document.getElementById(this.idMQSpan);
-  var mqEditFunctionBound = answerData.mqEditFunction.bind(this);
+  var mqEditFunctionBound = this.mqEditFunction.bind(this);
   this.mqObject = globalMQ.MathField(currentMQspan, {
     spaceBehavesLikeTab: true, // configurable
     supSubsRequireOperand: true, // configurable
@@ -296,11 +296,11 @@ InputPanelData.prototype.initialize = function(){
       edit: mqEditFunctionBound
     }
   });
-  initializeOneButtonPanel(this.idButtonContainer, [counterAnswers], counterAnswers, false);
+  initializeOneButtonPanel(this.idButtonContainer, false);
 }
 
-function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll){ 
-  var currentButtonPanel = document.getElementById(IDcurrentButtonPanel);
+function initializeOneButtonPanel(inputPanel, forceShowAll){ 
+  var currentButtonPanel = document.getElementById(inputPanel.idButtonContainer);
   var buttonArray = currentButtonPanel.attributes.buttons.value.toLowerCase().split(/(?:,| )+/);
   //console.log(buttonArray);
   var buttonBindings = [];

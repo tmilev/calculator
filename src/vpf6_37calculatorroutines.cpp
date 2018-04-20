@@ -1059,77 +1059,74 @@ bool CalculatorFunctionsGeneral::innerIntersectIntervals
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntersectIntervals");
   if (!input.StartsWith(theCommands.opIntersection(), 3))
     return false;
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
-  if(!leftE.IsIntervalRealLine())
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
+  if (!leftE.IsIntervalRealLine())
     return false;
-  if(!rightE.IsIntervalRealLine())
+  if (!rightE.IsIntervalRealLine())
     return false;
-  double left1=0, left2=0, right1=0, right2=0;
+  double left1 = 0, left2 = 0, right1 = 0, right2 = 0;
   if (!leftE[1].EvaluatesToDouble(&left1) || !leftE[2].EvaluatesToDouble(&left2))
     return false;
   if (!rightE[1].EvaluatesToDouble(&right1) || !rightE[2].EvaluatesToDouble(&right2))
     return false;
   //stOutput << "intervals double: " << left1 << ", " << left2 << " , "
   //<< right1 << " " << right2;
-  if (left1>left2 || right1>right2)
+  if (left1 > left2 || right1 > right2)
     return false;
-  bool leftIsClosed =true;
-  bool rightIsClosed=true;
+  bool leftIsClosed = true;
+  bool rightIsClosed = true;
   Expression leftFinal, rightFinal;
-  double leftResult=0, rightResult=0;
-  if (left1<right1)
-  { leftFinal=rightE[1];
-    leftResult=right1;
+  double leftResult = 0, rightResult = 0;
+  if (left1 < right1)
+  { leftFinal = rightE[1];
+    leftResult = right1;
     if (rightE.StartsWith(theCommands.opSequence()) ||
         rightE.StartsWith(theCommands.opIntervalRightClosed()))
-      leftIsClosed=false;
+      leftIsClosed = false;
   }
-  if (left1==right1)
-  { leftFinal=leftE[1];
-    leftResult=left1;
+  if (left1 == right1)
+  { leftFinal = leftE[1];
+    leftResult = left1;
     if (leftE .StartsWith(theCommands.opSequence()) ||
         leftE .StartsWith(theCommands.opIntervalRightClosed())||
         rightE.StartsWith(theCommands.opSequence()) ||
-        rightE.StartsWith(theCommands.opIntervalRightClosed())
-        )
-      leftIsClosed=false;
+        rightE.StartsWith(theCommands.opIntervalRightClosed()))
+      leftIsClosed = false;
   }
-  if (left1>right1)
-  { leftFinal=leftE[1];
-    leftResult=left1;
+  if (left1 > right1)
+  { leftFinal = leftE[1];
+    leftResult = left1;
     if (leftE.StartsWith(theCommands.opSequence()) ||
-        leftE.StartsWith(theCommands.opIntervalRightClosed())
-        )
-      leftIsClosed=false;
+        leftE.StartsWith(theCommands.opIntervalRightClosed()))
+      leftIsClosed = false;
   }
 ///////////////////////////
-  if (left2>right2)
-  { rightFinal=rightE[2];
-    rightResult=right2;
+  if (left2 > right2)
+  { rightFinal = rightE[2];
+    rightResult = right2;
     if (rightE.StartsWith(theCommands.opSequence()) ||
         rightE.StartsWith(theCommands.opIntervalLeftClosed()))
-      rightIsClosed=false;
+      rightIsClosed = false;
   }
-  if (left2==right2)
-  { rightFinal=rightE[2];
-    rightResult=right2;
+  if (left2 == right2)
+  { rightFinal = rightE[2];
+    rightResult = right2;
     if (leftE .StartsWith(theCommands.opSequence()) ||
         leftE .StartsWith(theCommands.opIntervalLeftClosed())||
         rightE.StartsWith(theCommands.opSequence()) ||
         rightE.StartsWith(theCommands.opIntervalLeftClosed())
         )
-      rightIsClosed=false;
+      rightIsClosed = false;
   }
-  if (left2<right2)
-  { rightFinal=leftE[2];
-    rightResult=left2;
+  if (left2 < right2)
+  { rightFinal = leftE[2];
+    rightResult = left2;
     if (leftE.StartsWith(theCommands.opSequence()) ||
-        leftE.StartsWith(theCommands.opIntervalLeftClosed())
-        )
-      rightIsClosed=false;
+        leftE.StartsWith(theCommands.opIntervalLeftClosed()))
+      rightIsClosed = false;
   }
-  if (leftResult>rightResult)
+  if (leftResult > rightResult)
     return output.MakeAtom("\\emptyset", theCommands);
   if (leftIsClosed && rightIsClosed)
     return output.MakeXOX(theCommands, theCommands.opIntervalClosed(), leftFinal, rightFinal);
@@ -1145,13 +1142,13 @@ bool CalculatorFunctionsGeneral::innerIntersectIntervals
 bool CalculatorFunctionsGeneral::innerUnionUnionIntervals
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUnionUnionIntervals");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
-  const Expression& leftE=input[1];
-  const Expression& rightComposite=input[2];
+  const Expression& leftE = input[1];
+  const Expression& rightComposite = input[2];
   if (!rightComposite.StartsWith(theCommands.opUnion(), 3))
     return false;
-  const Expression& rightE=input[2][1];
+  const Expression& rightE = input[2][1];
   Expression theMiddleUnion, middleUnionReduced;
   theMiddleUnion.MakeXOX(theCommands, theCommands.opUnion(), leftE, rightE);
   if (!CalculatorFunctionsGeneral::innerUnionIntervals(theCommands, theMiddleUnion, middleUnionReduced))
@@ -1162,77 +1159,73 @@ bool CalculatorFunctionsGeneral::innerUnionUnionIntervals
 bool CalculatorFunctionsGeneral::innerUnionIntervals
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerUnionIntervals");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
-  if(!leftE.IsIntervalRealLine())
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
+  if (!leftE.IsIntervalRealLine())
     return false;
-  if(!rightE.IsIntervalRealLine())
+  if (!rightE.IsIntervalRealLine())
     return false;
-  double left1=0, left2=0, right1=0, right2=0;
+  double left1 = 0, left2 = 0, right1 = 0, right2 = 0;
   if (!leftE[1].EvaluatesToDouble(&left1) || !leftE[2].EvaluatesToDouble(&left2))
     return false;
   if (!rightE[1].EvaluatesToDouble(&right1) || !rightE[2].EvaluatesToDouble(&right2))
     return false;
-  if (left1>left2 || right1>right2)
+  if (left1 > left2 || right1 > right2)
     return false;
-  bool makeUnion=false;
-  if (right1<=left2 && left2<=right2)
-    makeUnion=true;
-  if (right1==left2 &&
+  bool makeUnion = false;
+  if (right1 <= left2 && left2 <= right2)
+    makeUnion = true;
+  if (right1 == left2 &&
       leftE.StartsWith(theCommands.opIntervalOpen(), 3) &&
       rightE.StartsWith(theCommands.opIntervalOpen(), 3))
-    makeUnion=false;
+    makeUnion = false;
   if (!makeUnion)
     return false;
-  bool leftIsClosed=false;
-  bool rightIsClosed=false;
+  bool leftIsClosed = false;
+  bool rightIsClosed = false;
   Expression leftFinal, rightFinal;
-  if (left1<right1)
-  { leftFinal=leftE[1];
+  if (left1 < right1)
+  { leftFinal = leftE[1];
     if (leftE.StartsWith(theCommands.opIntervalClosed()) ||
         leftE.StartsWith(theCommands.opIntervalLeftClosed()))
-      leftIsClosed=true;
+      leftIsClosed = true;
   }
-  if (left1==right1)
-  { leftFinal=leftE[1];
+  if (left1 == right1)
+  { leftFinal = leftE[1];
     if (leftE .StartsWith(theCommands.opIntervalClosed()) ||
         leftE .StartsWith(theCommands.opIntervalLeftClosed())||
         rightE.StartsWith(theCommands.opIntervalClosed()) ||
-        rightE.StartsWith(theCommands.opIntervalLeftClosed())
-        )
-      leftIsClosed=true;
+        rightE.StartsWith(theCommands.opIntervalLeftClosed()))
+      leftIsClosed = true;
   }
-  if (left1>right1)
-  { leftFinal=rightE[1];
+  if (left1 > right1)
+  { leftFinal = rightE[1];
     if (rightE.StartsWith(theCommands.opIntervalClosed()) ||
-        rightE.StartsWith(theCommands.opIntervalLeftClosed())
-        )
-      leftIsClosed=true;
+        rightE.StartsWith(theCommands.opIntervalLeftClosed()))
+      leftIsClosed = true;
   }
 ///////////////////////
-  if (left2>right2)
-  { rightFinal=leftE[2];
+  if (left2 > right2)
+  { rightFinal = leftE[2];
     if (leftE.StartsWith(theCommands.opIntervalClosed()) ||
         leftE.StartsWith(theCommands.opIntervalRightClosed()))
-      rightIsClosed=true;
+      rightIsClosed = true;
   }
-  if (left2==right2)
-  { rightFinal=rightE[2];
+  if (left2 == right2)
+  { rightFinal = rightE[2];
     if (leftE .StartsWith(theCommands.opIntervalClosed()) ||
         leftE .StartsWith(theCommands.opIntervalRightClosed())||
         rightE.StartsWith(theCommands.opIntervalClosed()) ||
-        rightE.StartsWith(theCommands.opIntervalRightClosed())
-        )
-      rightIsClosed=true;
+        rightE.StartsWith(theCommands.opIntervalRightClosed()))
+      rightIsClosed = true;
   }
-  if (left2<right2)
-  { rightFinal=rightE[2];
+  if (left2 < right2)
+  { rightFinal = rightE[2];
     if (rightE.StartsWith(theCommands.opIntervalClosed()) ||
-        rightE.StartsWith(theCommands.opIntervalRightClosed())
-        )
-      rightIsClosed=true;
+        rightE.StartsWith(theCommands.opIntervalRightClosed()))
+      rightIsClosed = true;
   }
   if (leftIsClosed && rightIsClosed)
     return output.MakeXOX(theCommands, theCommands.opIntervalClosed(), leftFinal, rightFinal);
@@ -1261,11 +1254,11 @@ bool CalculatorFunctionsGeneral::innerUnionEmptySet
   if (!input.StartsWith(theCommands.opUnion(), 3))
     return false;
   if (input[1].IsAtomGivenData("\\emptyset"))
-  { output=input[2];
+  { output = input[2];
     return true;
   }
   if (input[2].IsAtomGivenData("\\emptyset"))
-  { output=input[1];
+  { output = input[1];
     return true;
   }
   return false;
@@ -1279,9 +1272,9 @@ bool CalculatorFunctionsGeneral::innerIntersectUnion
 
 bool CalculatorFunctionsGeneral::innerCompareIntervalsNumerically(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompareIntervalsNumerically");
-  if (input.size()!=4)
+  if (input.size() != 4)
     return theCommands << "Comparing intervals numerically takes 3 arguments: two unions and precision. ";
-  double precision=0;
+  double precision = 0;
   if (!input[3].EvaluatesToDouble(&precision))
     return theCommands << "Could not extract precision from the last argument.";
   List<Expression> leftList, rightList;
@@ -1289,27 +1282,25 @@ bool CalculatorFunctionsGeneral::innerCompareIntervalsNumerically(Calculator& th
     return false;
   if (!theCommands.CollectOpands(input[2], theCommands.opUnion(), rightList))
     return false;
-  if (leftList.size!=rightList.size)
+  if (leftList.size != rightList.size)
     return output.AssignValue(0, theCommands);
   leftList.QuickSortAscending(CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight);
   rightList.QuickSortAscending(CalculatorFunctionsGeneral::LeftIntervalGreaterThanRight);
-  for (int i=0; i<leftList.size; i++)
-  { if (leftList[i]==rightList[i])
+  for (int i = 0; i < leftList.size; i ++)
+  { if (leftList[i] == rightList[i])
       continue;
     if ((!leftList[i].IsIntervalRealLine() ) || (!rightList[i].IsIntervalRealLine()))
       return output.AssignValue(0, theCommands);
-    if (leftList[i][0]!=rightList[i][0])
+    if (leftList[i][0] != rightList[i][0])
       return output.AssignValue(0, theCommands);
-    double left1=0, left2=0, right1=0, right2=0;
-    if (! leftList[i][1].EvaluatesToDouble(&left1) ||
-        ! rightList[i][1].EvaluatesToDouble(&right1)
-        )
-      if (leftList[i][1]!=rightList[i][1])
+    double left1 = 0, left2 = 0, right1 = 0, right2 = 0;
+    if (!leftList[i][1].EvaluatesToDouble(&left1) ||
+        !rightList[i][1].EvaluatesToDouble(&right1))
+      if (leftList[i][1] != rightList[i][1])
         return output.AssignValue(0, theCommands);
-    if (! rightList[i][2].EvaluatesToDouble(&right2)||
-        ! leftList[i][2].EvaluatesToDouble(&left2)
-        )
-      if (leftList[i][2]!=rightList[i][2])
+    if (!rightList[i][2].EvaluatesToDouble(&right2)||
+        !leftList[i][2].EvaluatesToDouble(&left2))
+      if (leftList[i][2] != rightList[i][2])
         return output.AssignValue(0, theCommands);
     //std::stringstream temp;
     //temp.precision(20);
@@ -1318,8 +1309,8 @@ bool CalculatorFunctionsGeneral::innerCompareIntervalsNumerically(Calculator& th
     //<< " diff1: " << FloatingPoint::DoubleToString(FloatingPoint::abs(left1-right1))
     //<< " diff2: " << FloatingPoint::DoubleToString(FloatingPoint::abs(left2-right2));
     //stOutput << temp.str();
-    if (FloatingPoint::abs(left1-right1)>precision ||
-        FloatingPoint::abs(left2-right2)>precision)
+    if (FloatingPoint::abs(left1 - right1) > precision ||
+        FloatingPoint::abs(left2 - right2) > precision)
       return output.AssignValue(0, theCommands);
   }
   return output.AssignValue(1, theCommands);
@@ -1332,11 +1323,11 @@ bool CalculatorFunctionsGeneral::innerIntersectEmptySet
   if (!input.StartsWith(theCommands.opIntersection(), 3))
     return false;
   if (input[1].IsAtomGivenData("\\emptyset"))
-  { output=input[1];
+  { output = input[1];
     return true;
   }
   if (input[2].IsAtomGivenData("\\emptyset"))
-  { output=input[2];
+  { output = input[2];
     return true;
   }
   return false;
@@ -1345,20 +1336,20 @@ bool CalculatorFunctionsGeneral::innerIntersectEmptySet
 
 bool CalculatorFunctionsGeneral::innerIsLinearOrConstantIn(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsLinearOrConstantIn");
-  if (input.size()<3)
+  if (input.size() < 3)
     return false;
   List<List<Expression> > theSummands;
   if (!theCommands.GetSumProductsExpressions(input[2], theSummands))
     return theCommands << "Failed to extract sum from "
     << input[2].ToString();
-  for(int i=0; i<theSummands.size; i++)
+  for (int i = 0; i < theSummands.size; i ++)
   { bool found=false;
-    for (int j=0; j<theSummands[i].size; j++)
-      if (theSummands[i][j]==input[1])
+    for (int j = 0; j < theSummands[i].size; j ++)
+      if (theSummands[i][j] == input[1])
       { if (found)
           return output.AssignValue(0, theCommands);
-        found=true;
-      } else if (! theSummands[i][j].EvaluatesToDouble())
+        found = true;
+      } else if (!theSummands[i][j].EvaluatesToDouble())
         return output.AssignValue(0, theCommands);
   }
   return output.AssignValue(1, theCommands);
@@ -1366,25 +1357,25 @@ bool CalculatorFunctionsGeneral::innerIsLinearOrConstantIn(Calculator& theComman
 
 bool CalculatorFunctionsGeneral::innerIsProductLinearOrConstTermsIn(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsProductLinearOrConstTermsIn");
-  if (input.size()<3)
+  if (input.size() < 3)
     return false;
   List<Expression> theMultiplicands;
   if (!theCommands.CollectOpands(input[2], theCommands.opTimes(),theMultiplicands))
     return theCommands << "Could not extract multiplicands from: "
     << input[2].ToString();
-  for (int k=0; k<theMultiplicands.size; k++)
+  for (int k = 0; k < theMultiplicands.size; k ++)
   { List<List<Expression> > theSummands;
     if (!theCommands.GetSumProductsExpressions(theMultiplicands[k], theSummands))
       return theCommands << "Failed to extract sum from "
       << theMultiplicands[k].ToString();
-    for(int i=0; i<theSummands.size; i++)
-    { bool found=false;
-      for (int j=0; j<theSummands[i].size; j++)
-        if (theSummands[i][j]==input[1])
+    for (int i = 0; i < theSummands.size; i ++)
+    { bool found = false;
+      for (int j = 0; j < theSummands[i].size; j ++)
+        if (theSummands[i][j] == input[1])
         { if (found)
             return output.AssignValue(0, theCommands);
-          found=true;
-        } else if (! theSummands[i][j].EvaluatesToDouble())
+          found = true;
+        } else if (!theSummands[i][j].EvaluatesToDouble())
           return output.AssignValue(0, theCommands);
     }
   }
@@ -1394,10 +1385,10 @@ bool CalculatorFunctionsGeneral::innerIsProductLinearOrConstTermsIn(Calculator& 
 bool CalculatorFunctionsGeneral::innerOrIdentical(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerOrIdentical");
   (void) theCommands;
-  if (!input.StartsWithGivenAtom("or",3))
+  if (!input.StartsWithGivenAtom("or", 3))
     return false;
-  if (input[1]==input[2])
-  { output=input[1];
+  if (input[1] == input[2])
+  { output = input[1];
     return true;
   }
   return false;
@@ -1406,14 +1397,14 @@ bool CalculatorFunctionsGeneral::innerOrIdentical(Calculator& theCommands, const
 bool CalculatorFunctionsGeneral::innerSineOfAngleSumToTrig
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSineOfAngleSumToTrig");
-  if (!input.StartsWith(theCommands.opPlus(),3))
+  if (!input.StartsWith(theCommands.opPlus(), 3))
     return false;
   Expression sinA, sinB, cosA, cosB;
-  sinA.MakeOX(theCommands, theCommands.opSin(),input[1]);
-  sinB.MakeOX(theCommands, theCommands.opSin(),input[2]);
-  cosA.MakeOX(theCommands, theCommands.opCos(),input[1]);
-  cosB.MakeOX(theCommands, theCommands.opCos(),input[2]);
-  output= sinA*cosB+cosA*sinB;
+  sinA.MakeOX(theCommands, theCommands.opSin(), input[1]);
+  sinB.MakeOX(theCommands, theCommands.opSin(), input[2]);
+  cosA.MakeOX(theCommands, theCommands.opCos(), input[1]);
+  cosB.MakeOX(theCommands, theCommands.opCos(), input[2]);
+  output = sinA * cosB + cosA * sinB;
   return true;
 }
 
@@ -1422,54 +1413,53 @@ bool CalculatorFunctionsGeneral::innerTrigSumToTrigProduct
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTrigSumToTrigProduct");
   if (!input.StartsWith(theCommands.opPlus(), 3))
     return false;
-  Expression leftE=input[1], rightE=input[2];
-  bool isGood=false;
-  int leftSign=1;
-  int rightSign=1;
-  if (leftE.StartsWith(theCommands.opTimes(),3))
+  Expression leftE = input[1], rightE = input[2];
+  bool isGood = false;
+  int leftSign = 1;
+  int rightSign = 1;
+  if (leftE.StartsWith(theCommands.opTimes(), 3))
     if (leftE[1].IsEqualToMOne())
-    { leftE=leftE[2];
-      leftSign=-1;
+    { leftE = leftE[2];
+      leftSign = - 1;
     }
-  if (rightE.StartsWith(theCommands.opTimes(),3))
+  if (rightE.StartsWith(theCommands.opTimes(), 3))
     if (rightE[1].IsEqualToMOne())
-    { rightE=rightE[2];
-      rightSign=-1;
+    { rightE = rightE[2];
+      rightSign = - 1;
     }
-
   if (leftE.StartsWith(theCommands.opSin(), 2) &&
       rightE.StartsWith(theCommands.opSin(), 2))
-    isGood=true;
-  else if ( leftE.StartsWith(theCommands.opCos(), 2) &&
-            rightE.StartsWith(theCommands.opCos(), 2))
-    isGood=true;
+    isGood = true;
+  else if (leftE.StartsWith(theCommands.opCos(), 2) &&
+           rightE.StartsWith(theCommands.opCos(), 2))
+    isGood = true;
   if (!isGood)
     return false;
   Expression argSum, argDiff, leftMultiplicand, rightMultiplicand;
-  if (leftE.StartsWith(theCommands.opSin(),2))
+  if (leftE.StartsWith(theCommands.opSin(), 2))
   { //stOutput << "DEBUG: leftSign: " << leftSign << "Right sign: " << rightSign;
-    argSum=  (leftE[1]*leftSign+ rightE[1]*rightSign)/2;
-    argDiff= (leftE[1]*leftSign- rightE[1]*rightSign)/2;
+    argSum =  (leftE[1] * leftSign + rightE[1] * rightSign) / 2;
+    argDiff = (leftE[1] * leftSign - rightE[1] * rightSign) / 2;
     leftMultiplicand.MakeOX(theCommands, theCommands.opCos(), argDiff);
     rightMultiplicand.MakeOX(theCommands, theCommands.opSin(), argSum);
-    output=leftMultiplicand*rightMultiplicand*2;
+    output = leftMultiplicand * rightMultiplicand * 2;
     return true;
   } else
-  { if (leftSign== rightSign)
-    { argSum=(leftE[1]+  rightE[1])/2;
-      argDiff= (leftE[1]-rightE[1])/2;
+  { if (leftSign == rightSign)
+    { argSum = (leftE[1] + rightE[1]) / 2;
+      argDiff = (leftE[1] - rightE[1]) / 2;
       leftMultiplicand.MakeOX(theCommands, theCommands.opCos(), argDiff);
       rightMultiplicand.MakeOX(theCommands, theCommands.opCos(), argSum);
-      output=leftMultiplicand*rightMultiplicand*2;
-      if (leftSign==-1)
-        output*=-1;
+      output = leftMultiplicand * rightMultiplicand * 2;
+      if (leftSign == - 1)
+        output *= - 1;
       return true;
     } else
-    { argSum=(leftE[1]+  rightE[1])/2;
-      argDiff= (leftE[1]*leftSign+rightE[1]*rightSign)/2;
+    { argSum = (leftE[1] + rightE[1]) / 2;
+      argDiff = (leftE[1] * leftSign + rightE[1] * rightSign) / 2;
       leftMultiplicand.MakeOX(theCommands, theCommands.opSin(), argDiff);
       rightMultiplicand.MakeOX(theCommands, theCommands.opSin(), argSum);
-      output=leftMultiplicand*rightMultiplicand*2;
+      output = leftMultiplicand * rightMultiplicand * 2;
       return true;
     }
     return true;
@@ -1480,14 +1470,14 @@ bool CalculatorFunctionsGeneral::innerTrigSumToTrigProduct
 bool CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCosineOfAngleSumToTrig");
-  if (!input.StartsWith(theCommands.opPlus(),3))
+  if (!input.StartsWith(theCommands.opPlus(), 3))
     return false;
   Expression sinA, sinB, cosA, cosB;
-  sinA.MakeOX(theCommands, theCommands.opSin(),input[1]);
-  sinB.MakeOX(theCommands, theCommands.opSin(),input[2]);
-  cosA.MakeOX(theCommands, theCommands.opCos(),input[1]);
-  cosB.MakeOX(theCommands, theCommands.opCos(),input[2]);
-  output= cosA*cosB-sinA*sinB;
+  sinA.MakeOX(theCommands, theCommands.opSin(), input[1]);
+  sinB.MakeOX(theCommands, theCommands.opSin(), input[2]);
+  cosA.MakeOX(theCommands, theCommands.opCos(), input[1]);
+  cosB.MakeOX(theCommands, theCommands.opCos(), input[2]);
+  output = cosA * cosB - sinA * sinB;
   return true;
 }
 
@@ -1501,15 +1491,15 @@ bool CalculatorFunctionsGeneral::innerDistributeSqrt(Calculator& theCommands, co
     return false;
   if (!base[1].IsConstantNumber())
     return false;
-  bool isGood=base[1].IsPositiveNumber() || base[2].IsPositiveNumber();
+  bool isGood = base[1].IsPositiveNumber() || base[2].IsPositiveNumber();
   if (!isGood)
   { if (oneOverExponentE.IsInteger())
-      isGood=true;
+      isGood = true;
     else
     { Rational exponentRat;
       if (oneOverExponentE.IsRational(&exponentRat))
         if (!exponentRat.GetDenominator().IsEven())
-          isGood=true;
+          isGood = true;
     }
   }
   if (!isGood)
@@ -1523,7 +1513,7 @@ bool CalculatorFunctionsGeneral::innerDistributeSqrt(Calculator& theCommands, co
 bool CalculatorFunctionsGeneral::innerIsAlgebraicRadical(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsAlgebraicRadical");
   //stOutput << "<br>Evaluating isconstant on: " << input.ToString();
-  int result=(int) input.IsAlgebraicRadical();
+  int result = (int) input.IsAlgebraicRadical();
   return output.AssignValue(result, theCommands);
 }
 
@@ -1547,7 +1537,7 @@ bool CalculatorFunctionsGeneral::innerExpressionToUTF8String
 
 bool CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite");
-  if (input.size()<1)
+  if (input.size() < 1)
     return false;
   if (!input[0].StartsWith(theCommands.opMatriX(), 1))
     return false;
@@ -1558,13 +1548,13 @@ bool CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite(Calculator& the
   Expression conversionAttempt;
   conversionAttempt.AssignMatrixExpressions(theMat, theCommands, true);
   if (!conversionAttempt.IsMatrix())
-  { output=conversionAttempt;
+  { output = conversionAttempt;
     return true;
   }
-  if (conversionAttempt.size()>=1)
+  if (conversionAttempt.size() >= 1)
     if (conversionAttempt[0].StartsWith(theCommands.opMatriX()))
-      if (conversionAttempt[0].size()>1)
-      { output=conversionAttempt;
+      if (conversionAttempt[0].size() > 1)
+      { output = conversionAttempt;
         return true;
       }
   return false;
@@ -1572,49 +1562,49 @@ bool CalculatorFunctionsGeneral::innerMatrixComputeTypeComposite(Calculator& the
 
 bool CalculatorFunctionsGeneral::innerIsProductTermsUpToPower(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsProductTermsUpToPower");
-  if (input.size()<3)
+  if (input.size() < 3)
     return false;
   Expression theBase;
-  theBase=input[1];
-  LargeInt desiredMaxPower=1;
+  theBase = input[1];
+  LargeInt desiredMaxPower = 1;
   if (theBase.StartsWith(theCommands.opThePower(), 3))
   { if (theBase[2].IsInteger(&desiredMaxPower))
-    { if (desiredMaxPower>0)
-        theBase=input[1][1];
+    { if (desiredMaxPower > 0)
+        theBase = input[1][1];
       else
-        desiredMaxPower=1;
+        desiredMaxPower = 1;
     } else
-      desiredMaxPower=1;
+      desiredMaxPower = 1;
   }
   List<Expression> theMultiplicands;
   if (!theCommands.CollectOpands(input[2], theCommands.opTimes(), theMultiplicands))
     return theCommands << "Could not extract multiplicands from: "
     << input[2].ToString();
 
-  for (int k=0; k<theMultiplicands.size; k++)
+  for (int k = 0; k < theMultiplicands.size; k ++)
   { List<List<Expression> > theSummands;
     if (!theCommands.GetSumProductsExpressions(theMultiplicands[k], theSummands))
       return theCommands << "Failed to extract sum from "
       << theMultiplicands[k].ToString();
-    for(int i=0; i<theSummands.size; i++)
-    { LargeInt foundPower=0;
-      for (int j=0; j<theSummands[i].size; j++)
-      { if (theSummands[i][j]==theBase)
-        { foundPower++;
+    for (int i = 0; i < theSummands.size; i ++)
+    { LargeInt foundPower = 0;
+      for (int j = 0; j < theSummands[i].size; j ++)
+      { if (theSummands[i][j] == theBase)
+        { foundPower ++;
           continue;
         }
-        if (theSummands[i][j].StartsWith(theCommands.opThePower(),3))
-          if (theSummands[i][j][1]==theBase)
+        if (theSummands[i][j].StartsWith(theCommands.opThePower(), 3))
+          if (theSummands[i][j][1] == theBase)
           { LargeInt localPower;
             if (theSummands[i][j][2].IsInteger(&localPower))
-            { foundPower+=localPower;
+            { foundPower += localPower;
               continue;
             }
           }
-        if (! theSummands[i][j].EvaluatesToDouble())
+        if (!theSummands[i][j].EvaluatesToDouble())
           return output.AssignValue(0, theCommands);
       }
-      if (foundPower>desiredMaxPower)
+      if (foundPower > desiredMaxPower)
         return output.AssignValue(0, theCommands);
     }
   }
@@ -1641,7 +1631,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic
     return false;
   if (!input[2].IsOfType<Rational>(&exponent))
     return false;
-  if (exponent.GetDenominator()!=2)
+  if (exponent.GetDenominator() != 2)
     return false;
   Expression theRadical, reduced;
   theRadical.MakeXOX(theCommands, theCommands.opSqrt(), theCommands.ETwo(), input[1]);
@@ -1656,20 +1646,20 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalOutputAlgebraic
 
 bool CalculatorFunctionsGeneral::innerNewtonsMethod(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerNewtonsMethod");
-  if (input.size()!=4)
+  if (input.size() != 4)
     return false;
   Expression theFun;
   if (!CalculatorFunctionsGeneral::innerEqualityToArithmeticExpression(theCommands, input[1], theFun))
-    theFun=input[1];
+    theFun = input[1];
   HashedList<Expression> theVars;
   if (!theFun.GetFreeVariables(theVars, true))
     return theCommands << "Failed to get free variables from: " << theFun.ToString();
-  if (theVars.size!=1)
+  if (theVars.size != 1)
     return theCommands << "While trying to extract a function from: " << theFun.ToString()
     << ", got " << theVars.size << " variables. Newton's method requires an expression that depends "
     << "on exactly one variable. The variables I got were: "
     << theVars.ToStringCommaDelimited();
-  int numIterations=-1;
+  int numIterations = - 1;
   if (!input[3].IsSmallInteger(&numIterations))
   { std::stringstream errorStream;
     errorStream << "While doing Newton's method, could not extract a **small** integer from the third argument "
@@ -1677,7 +1667,7 @@ bool CalculatorFunctionsGeneral::innerNewtonsMethod(Calculator& theCommands, con
     << input.ToString() << ". Please enter a number as the third argument of Newton's method. ";
     return output.MakeError(errorStream.str(), theCommands);
   }
-  if (numIterations<1 || numIterations>50)
+  if (numIterations < 1 || numIterations > 50)
   { std::stringstream errorStream;
     errorStream << "While doing Newton's method with the command: " << input.ToString()
     << ", the third argument requests " << numIterations

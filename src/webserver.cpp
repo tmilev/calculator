@@ -897,13 +897,12 @@ bool WebWorker::ReceiveAllHttpSSL()
   { numFailedReceives ++;
     std::stringstream out;
     out
-    << " WebWorker::ReceiveAllHttpSSL on socket "
+    << "WebWorker::ReceiveAllHttpSSL on socket "
     << this->connectedSocketID
     << " failed (so far "
     << numFailedReceives << " fails). "
     << "Return value: " << numBytesInBuffer
-    << ". Error description: " << errorStream.str()
-    ;
+    << ". Error description: " << errorStream.str();
     if (numFailedReceives > 5)
     { out << ". 5+ failed receives so far, aborting. ";
       this->error = out.str();
@@ -914,7 +913,7 @@ bool WebWorker::ReceiveAllHttpSSL()
     logIO << logger::orange << out.str() << logger::endL;
     //std::string bufferCopy(buffer, bufferSize);
     logIO
-    << " Number of bytes in buffer so far: " << bufferSize;
+    << "Number of bytes in buffer so far: " << bufferSize << logger::endL;
     numBytesInBuffer = this->parent->theSSLdata.SSLread
     (this->parent->theSSLdata.sslServeR, &buffer, bufferSize - 1, &errorStream, 0, true);
   }
@@ -5382,12 +5381,12 @@ int WebServer::Run()
       { //if (this->theListeningSockets[i]==this->listeningSocketHTTP)
         newConnectedSocket = accept(this->theListeningSockets[i], (struct sockaddr *)&their_addr, &sin_size);
         if (newConnectedSocket >= 0)
-        { logServer << logger::green << " Connection candidate  "
+        { logServer << logger::green << "Connection candidate  "
           << this->NumConnectionsSoFar + 1 << ". "
           << "Connected via listening socket " << this->theListeningSockets[i]
           << " on socket: " << newConnectedSocket;
           if (this->theListeningSockets[i] == this->listeningSocketHttpSSL)
-          { theGlobalVariables.flagUsingSSLinCurrentConnection=true;
+          { theGlobalVariables.flagUsingSSLinCurrentConnection = true;
             logServer << logger::purple << " (SSL encrypted). " << logger::endL;
           } else
             logServer << logger::yellow << " (non-encrypted). " << logger::endL;

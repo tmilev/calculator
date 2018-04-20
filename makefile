@@ -160,7 +160,6 @@ SOURCES=\
 ./src/vpf9_6SemisimpleLieSubAlgebras.cpp \
 ./src/vpf9_7floating_point_routines.cpp \
 ./src/vpf9_8GlobalObjects.cpp \
-./src/vpf9_91html_routines_calculator.cpp \
 ./src/vpf9_92multitasking.cpp \
 ./src/vpf99_HardcodedData.cpp \
 ./src/vpf9_9SystemFunctions.cpp \

@@ -17,7 +17,7 @@ var numInsertedJavascriptChildren = 0;
 var startingCharacterSectionUnderMathQuillEdit;
 var calculatorCanvases;
 var keyWordsKnownToMathQuill = ['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times', 'oplus', 'pmatrix','int', 'begin', 'end'];
-function initializeCalculatorVariables(){ 
+function initializeCalculatorVariables() { 
   answerIdsPureLatex = ['mainInputID'];
   answerMQspanIds = ['mainInputMQfield'];
   mqProblemSpan = document.getElementById('mqProblemSpan');
@@ -27,8 +27,8 @@ function initializeCalculatorVariables(){
 
 var calculatorMQobjectsInitialized = false;
 
-function createSelectionNoFocus(field, start, end){ 
-  if( field.createTextRange ){ 
+function createSelectionNoFocus(field, start, end) { 
+  if (field.createTextRange) { 
     var selRange = field.createTextRange();
     selRange.collapse(true);
     selRange.moveStart('character', start);
@@ -36,11 +36,11 @@ function createSelectionNoFocus(field, start, end){
     selRange.select();
     field.focus();
     calculatorMQfield.focus();
-  } else if( field.setSelectionRange ){ 
+  } else if (field.setSelectionRange){ 
     field.focus();
     field.setSelectionRange(start, end);
     calculatorMQfield.focus();
-  } else if( typeof field.selectionStart != 'undefined' ){ 
+  } else if (typeof field.selectionStart != 'undefined'){ 
     field.selectionStart = start;
     field.selectionEnd = end;
     field.focus();
@@ -49,7 +49,7 @@ function createSelectionNoFocus(field, start, end){
 }
 
 function initializeCalculatorPage(){ 
-  if (calculatorMQobjectsInitialized === true){
+  if (calculatorMQobjectsInitialized === true) {
     return;
   }
   calculatorMQobjectsInitialized = true;
@@ -62,10 +62,10 @@ function initializeCalculatorPage(){
     autoSubscriptNumerals: true, // configurable
     handlers: { 
       edit: function(){ // useful event handlers
-        if (ignoreNextMathQuillUpdateEvent){ 
+        if (ignoreNextMathQuillUpdateEvent) { 
           return;
         }
-        if (!calculatorMQStringIsOK){
+        if (!calculatorMQStringIsOK) {
           return;
         }
         var theBoxContent = calculatorMQobject.latex();
@@ -101,14 +101,14 @@ function initializeCalculatorPage(){
 function onLoadDefaultFunction(idElement){ 
   var spanVerification=document.getElementById(idElement);
   var scripts = spanVerification.getElementsByTagName('script');
-  for (var i = 0; i < numInsertedJavascriptChildren; i ++){ 
+  for (var i = 0; i < numInsertedJavascriptChildren; i ++) { 
     document.getElementsByTagName('head')[0].removeChild(document.getElementsByTagName('head')[0].lastChild);
   }
   numInsertedJavascriptChildren = 0;
   calculatorInputBoxNames = [];
   calculatorInputBoxToSliderUpdaters = new Object;
   calculatorCanvases = new Object;
-  for (var i = 0; i < scripts.length; i ++){ 
+  for (var i = 0; i < scripts.length; i ++) { 
     var scriptChild = document.createElement('script');
     scriptChild.innerHTML = scripts[i].innerHTML;
     scriptChild.type = 'text/javascript';
@@ -124,26 +124,27 @@ function calculatorAddListenersToInputBoxes(){
   //var theString=" updating: box names, slider names: ";
   for (var i = 0; i < calculatorInputBoxNames.length; i ++){ 
     var theBoxes = document.getElementsByName(calculatorInputBoxNames[i]);
-    for (var j = 0; j < theBoxes.length; j ++)
+    for (var j = 0; j < theBoxes.length; j ++){
       theBoxes[j].addEventListener("input", function(){ 
         var sliderName = calculatorInputBoxToSliderUpdaters[this.name];
         document.getElementById(sliderName).value = this.value;
         event.preventDefault();
         updateCalculatorSliderToInputBox(this.name, sliderName);
       });
+    }
   }
 }
 
 function updateCalculatorSliderToInputBox(boxName, sliderName){ 
   var theBoxes = document.getElementsByName(boxName);
   var theSlider = document.getElementById(sliderName);
-  for (var i = 0; i < theBoxes.length; i ++){
+  for (var i = 0; i < theBoxes.length; i ++) {
     theBoxes[i].value = theSlider.value;
   }
-  if (calculatorPlotUpdaters[sliderName] !== undefined){ 
+  if (calculatorPlotUpdaters[sliderName] !== undefined) { 
     var theCanvas = calculatorCanvases[calculatorPlotUpdaters[sliderName]];
-    if (theCanvas !== undefined){ 
-      if (theCanvas.canvasResetFunction !== null){
+    if (theCanvas !== undefined) { 
+      if (theCanvas.canvasResetFunction !== null) {
         theCanvas.canvasResetFunction();
       }
     }
@@ -152,32 +153,32 @@ function updateCalculatorSliderToInputBox(boxName, sliderName){
 
 function mQHelpCalculator(){ 
   //event.preventDefault();
-  if (calculatorMQobject === undefined){
+  if (calculatorMQobject === undefined) {
     return;
   }
   getSemiColumnEnclosure();
-  if (!calculatorMQobjectsInitialized){
+  if (!calculatorMQobjectsInitialized) {
     return;
   }
   ignoreNextMathQuillUpdateEvent = true;
-  if (calculatorMQStringIsOK){
+  if (calculatorMQStringIsOK) {
     calculatorMQobject.latex(calculatorMQString);
   }
   ignoreNextMathQuillUpdateEvent = false;
 }
 
 function createSelection(field, start, end){ 
-  if (field.createTextRange){ 
+  if (field.createTextRange) { 
     var selRange = field.createTextRange();
     selRange.collapse(true);
     selRange.moveStart('character', start);
     selRange.moveEnd('character', end);
     selRange.select();
     field.focus();
-  } else if (field.setSelectionRange){ 
+  } else if (field.setSelectionRange) { 
     field.focus();
     field.setSelectionRange(start, end);
-  } else if (field.selectionStart !== undefined){ 
+  } else if (field.selectionStart !== undefined) { 
     field.selectionStart = start;
     field.selectionEnd = end;
     field.focus();

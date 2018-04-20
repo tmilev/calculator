@@ -16,7 +16,17 @@ function updateProblemPageCallback(input, outputComponent){
   thePage.currentProblem = {};
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentProblemContentContainer")]);
   thePage.currentProblem[thePage.currentCourse.fileName] = {};
-  thePage.currentProblem[thePage.currentCourse.fileName].answers = theProblem["answers"];
+  thePage.currentProblem[thePage.currentCourse.fileName].answers = [];
+  var answerVectors = theProblem["answers"];
+  for (var counterAnswer = 0;  counterAnswer < answerVectors.length; counterAnswer ++){
+    thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswer] = new InputPanelData({
+      fileName: thePage.currentCourse.fileName,
+      idMQSpan: answerVectors.answerMQspanIds[counterAnswer],
+      idPureLatex: answerVectors.answerIdsPureLatex[counterAnswers],
+      idButtonContainer: "asdf"
+    });
+    theProblem["answers"];
+  }
   initializeMathQuill(thePage.currentCourse.fileName);
 }
 
@@ -26,38 +36,10 @@ function previewAnswers(answerData){
 
 function initializeMathQuill(fileName){
   var theAnswers = thePage.currentProblem[fileName].answers;
-  for (var counterAnswers = 0; counterAnswers < theAnswers.answerMQspanIds.length; counterAnswers ++) {
-    var currentMQSpanId = theAnswers.answerMQspanIds[counterAnswers];
-    var currentSpanVariable = document.getElementById(theAnswers.answerIdsPureLatex[counterAnswers]);
-    globalMQ.config({
-      autoFunctionize: 'sin cos tan sec csc cot log ln'
-    });
-    var answerData = {
-      fileName: fileName,
-      counter: counterAnswers,
-      latexId: theAnswers.answerIdsPureLatex[counterAnswers],
-      mqSpanId: currentMQSpanId,
-      mqObject: null,
-      ignoreNextMathQuillUpdateEvent: false,
-      mqEditFunction: function() { // useful event handlers
-        if (this.ignoreNextMathQuillUpdateEvent) {
-          return;
-        }
-        var currentIdLaTeX = this.latexId;
-        document.getElementById(currentIdLaTeX).value = processMathQuillLatex(this.mqObject.latex()); // simple API
-        previewAnswers(currentIdLaTeX, "verification" + currentIdLaTeX);
-      }
-    };
-    var currentMQspan = document.getElementById(currentMQSpanId);
-    var mqEditFunctionBound = answerData.mqEditFunction.bind(answerData);
-    answerData.mqObject = globalMQ.MathField(currentMQspan, {
-      spaceBehavesLikeTab: true, // configurable
-      supSubsRequireOperand: true, // configurable
-      autoSubscriptNumerals: true, // configurable
-      handlers: {
-        edit: mqEditFunctionBound
-      }
-    });
+  console.log(theAnswers);
+  initializeButtonsCommon();
+  for (var counterAnswers = 0; counterAnswers < theAnswers.length; counterAnswers ++) {
+    theAnswers[counterAnswers].initialize();
   }
 }
 

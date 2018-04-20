@@ -17,8 +17,8 @@ var oldLastWord;
 var lastWordStart;
 var ignoreOninput;
 
-function initializeAutocomplete()
-{ if (AutocompleteIsInitialized)
+function initializeAutocomplete() { 
+  if (AutocompleteIsInitialized)
     return true;
   if (typeof( theAutocompleteDictionary) == 'undefined')
     return false;
@@ -44,8 +44,8 @@ function initializeAutocomplete()
 }
 
 //displayDictionary();
-function displayDictionary()
-{ var result;
+function displayDictionary() { 
+  var result;
   result="";
   counter=0;
   for (var i in theAutocompleteDictionaryByKey)

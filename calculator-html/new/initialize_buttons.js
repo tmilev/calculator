@@ -231,8 +231,8 @@ function registerStatus(thePanel, isCollapsed){
   localStorage.panels = JSON.stringify(panelsCollapseStatus);
 }
 
-function transitionDone(event)
-{ //console.log("CAlled transitionDone");
+function transitionDone(event){ 
+  //console.log("CAlled transitionDone");
   this.removeEventListener("transitionend", transitionDone);
   if (this.transitionState === "collapsing"){ 
     this.style.display = "none";
@@ -255,6 +255,48 @@ function toggleHeightForTimeout(currentPanel){
     currentPanel.style.maxHeight = "0px";
     currentPanel.style.height = "0px";
   }
+}
+
+function InputPanelData(input){
+  this.idMQSpan = input.idMQSpan;
+  this.fileName = input.fileName;
+  this.idPureLatex = input.idPureLatex;
+  this.idButtonContainer = input.idButtonContainer;
+  this.mqObject = null;
+  this.ignoreNextMathQuillUpdateEvent = false;
+  this.flagAnswerPanel = false;
+  this.flagInitialized = false;
+}
+
+InputPanelData.prototype.mqEditFunction = function() { // useful event handlers
+  if (this.ignoreNextMathQuillUpdateEvent) {
+    return;
+  }
+  document.getElementById(this.idPureLatex).value = processMathQuillLatex(this.mqObject.latex()); // simple API
+  if (this.isAnswerPanel){
+    this.previewAnswers(this.idPureLatex, "verification" + this.idPureLatex);
+  }
+}
+
+InputPanelData.prototype.initialize = function(){
+  if (this.flagInitialized){
+    return;
+  }
+  var currentSpanVariable = document.getElementById(this.idPureLatex);
+  globalMQ.config({
+    autoFunctionize: 'sin cos tan sec csc cot log ln'
+  });
+  var currentMQspan = document.getElementById(this.idMQSpan);
+  var mqEditFunctionBound = answerData.mqEditFunction.bind(this);
+  this.mqObject = globalMQ.MathField(currentMQspan, {
+    spaceBehavesLikeTab: true, // configurable
+    supSubsRequireOperand: true, // configurable
+    autoSubscriptNumerals: true, // configurable
+    handlers: {
+      edit: mqEditFunctionBound
+    }
+  });
+  initializeOneButtonPanel(this.idButtonContainer, [counterAnswers], counterAnswers, false);
 }
 
 function initializeOneButtonPanel(IDcurrentButtonPanel, panelIndex, forceShowAll){ 

@@ -280,6 +280,7 @@ function initializeCalculatorPage(){
   }
   calculatorPanel = new InputPanelData({
     idMQSpan: "mainInputMQfield",
+    idMQcomments: "mqPanelComments",
     fileName: "",
     idPureLatex: "mainInputID",
     idButtonContainer: 'mainInputMQfieldButtons',
@@ -292,6 +293,7 @@ function initializeCalculatorPage(){
 
 function InputPanelData(input){
   this.idMQSpan = input.idMQSpan;
+  this.idMQcomments = input.idMQcomments;
   this.fileName = input.fileName;
 
   this.idPureLatex = input.idPureLatex;
@@ -304,15 +306,19 @@ function InputPanelData(input){
   this.flagCalculatorPanel = input.flagCalculatorPanel;
   this.calculatorLeftString = null;
   this.calculatorRightString = null;
+  this.selectionEnd = 0;
 
   if (this.flagCalculatorPanel === undefined){
     this.flagCalculatorPanel = false;
+  }
+  if (this.idMQcomments === undefined){
+    this.idMQcomments = null;
   }
 }
 
 InputPanelData.prototype.mQHelpCalculator = function(){ 
   //event.preventDefault();
-  getSemiColumnEnclosure();
+  this.getSemiColumnEnclosure();
   if (!calculatorMQobjectsInitialized) {
     return;
   }
@@ -380,10 +386,8 @@ function isSeparatorCharacter(theChar){
   return true;
 }
 
-function chopCalculatorStrings(){ 
-  if (mqProblemSpan === undefined){
-    initializeCalculatorPage();
-  }
+InputPanelData.prototype.chopStrings = function(){ 
+  var mqProblemSpan = document.getElementById(this.idMQcomments);
   if (calculatorRightPosition-calculatorLeftPosition > 1000){ 
     calculatorMQStringIsOK = false;
     mqProblemSpan.innerHTML = "<span style='color:red'><b>Formula too big </b></span>";
@@ -392,6 +396,7 @@ function chopCalculatorStrings(){
   calculatorMQStringIsOK = true;
   mqProblemSpan.innerHTML = "Equation assistant";
   calculatorMQfield.style.visibility = "visible";
+  var calculatorInput = document.getElementById(this.idPureLatex);
   calculatorMQString = calculatorInput.value.
   substring(calculatorLeftPosition, calculatorRightPosition + 1);
   calculatorLeftString = calculatorInput.value.
@@ -419,13 +424,8 @@ function isKeyWordEndKnownToMathQuill(input){
 }
 
 InputPanelData.prototype.getSemiColumnEnclosure = function(){ 
-  if (calculatorInput === undefined){
-    initializeCalculatorPage();
-  }
-  if (calculatorInput.selectionEnd === undefined){
-    calculatorInput.selectionEnd = 0;
-  }
-  var startPos = calculatorInput.selectionEnd;
+  var startPos = this.selectionEnd;
+  var calculatorInput = document.getElementById(this.idPureLatex);
   for (; startPos > 0 && startPos < calculatorInput.value.length; startPos --){
     if (isSeparatorCharacter(calculatorInput.value[startPos])){
       break;
@@ -499,7 +499,7 @@ InputPanelData.prototype.getSemiColumnEnclosure = function(){
       calculatorInput.value[leftPos] === '\t'){
     startingCharacterSectionUnderMathQuillEdit = calculatorInput.value[leftPos];
   }
-  chopCalculatorStrings();
+  this.chopStrings();
 }
 
 InputPanelData.prototype.initializePartTwo = function(forceShowAll){ 

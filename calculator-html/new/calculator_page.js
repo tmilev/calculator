@@ -1,6 +1,4 @@
 "use strict";
-var calculatorInput;
-var mqProblemSpan;
 var calculatorMQString;
 var calculatorMQStringIsOK = true;
 var ignoreNextMathQuillUpdateEvent = false;

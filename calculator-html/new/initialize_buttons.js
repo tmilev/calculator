@@ -3,6 +3,10 @@ var studentScoresInHomePage = [];
 //var lastFocus;
 var charsToSplit = ['x','y'];
 var panelsCollapseStatus = {};
+var calculatorSeparatorLeftDelimiters = ['(', '{'];
+var calculatorSeparatorRightDelimiters = [')', '}'];
+var panelDataRegistry = {};
+var calculatorPanel = null;
 
 function processMathQuillLatex(theText){ 
   for (var i = 0; i < theText.length; i ++){
@@ -176,9 +180,6 @@ mathQuillCommandButton("\\mathbf{i}", "i", "font-weight: bold");
 mathQuillCommandButton("\\mathbf{j}", "j", "font-weight: bold");
 mathQuillCommandButton("\\mathbf{k}", "k", "font-weight: bold");
 
-var calculatorSeparatorLeftDelimiters = ['(', '{'];
-var calculatorSeparatorRightDelimiters = [')', '}'];
-
 function accountCalculatorDelimiterReturnMustEndSelection(text, calculatorSeparatorCounts, thePos){ 
   var result = false;
   for (var j = 0; j < calculatorSeparatorLeftDelimiters.length; j ++){ 
@@ -272,7 +273,22 @@ function toggleHeightForTimeout(currentPanel){
   }
 }
 
-var panelDataRegistry = {};
+
+function initializeCalculatorPage(){ 
+  if (calculatorPanel !== null) {
+    return;
+  }
+  calculatorPanel = new InputPanelData({
+    idMQSpan: "mainInputMQfield",
+    fileName: "",
+    idPureLatex: "mainInputID",
+    idButtonContainer: 'mainInputMQfieldButtons',
+    flagCalculatorPanel: true
+
+  });
+  calculatorPanel.initialize();
+}
+
 
 function InputPanelData(input){
   this.idMQSpan = input.idMQSpan;
@@ -296,9 +312,6 @@ function InputPanelData(input){
 
 InputPanelData.prototype.mQHelpCalculator = function(){ 
   //event.preventDefault();
-  if (calculatorMQobject === undefined) {
-    return;
-  }
   getSemiColumnEnclosure();
   if (!calculatorMQobjectsInitialized) {
     return;

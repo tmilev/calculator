@@ -82,10 +82,10 @@ var MathQuillHasMatrixSupport = true;
 <textarea class = "textareaCalculatorMain"
  rows = "3" cols = "30" name = "mainInput" id = "mainInputID"
  onkeypress = "submitCalculatorInputOnEnter();"
- onkeyup    = "suggestWord(); mQHelpCalculator();"
- onkeydown  = "suggestWord(); mQHelpCalculator(); arrowAction(event);"
- onmouseup  = "suggestWord(); mQHelpCalculator();"
- oninput    = "suggestWord(); mQHelpCalculator();"
+ onkeyup    = "suggestWord(); calculatorPanel.mQHelpCalculator();"
+ onkeydown  = "suggestWord(); calculatorPanel.mQHelpCalculator(); arrowAction(event);"
+ onmouseup  = "suggestWord(); calculatorPanel.mQHelpCalculator();"
+ oninput    = "suggestWord(); calculatorPanel.mQHelpCalculator();"
 >
 </textarea>
 <br>

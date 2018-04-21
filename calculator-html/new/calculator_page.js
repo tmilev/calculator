@@ -35,22 +35,6 @@ function createSelectionNoFocus(field, start, end) {
   }
 }
 
-var calculatorPanel = null;
-function initializeCalculatorPage(){ 
-  if (calculatorPanel !== null) {
-    return;
-  }
-  calculatorPanel = new InputPanelData({
-    idMQSpan: "mainInputMQfield",
-    fileName: "",
-    idPureLatex: "mainInputID",
-    idButtonContainer: 'mainInputMQfieldButtons',
-    flagCalculatorPanel: true
-
-  });
-  calculatorPanel.initialize();
-}
-
 function onLoadDefaultFunction(idElement){ 
   var spanVerification=document.getElementById(idElement);
   var scripts = spanVerification.getElementsByTagName('script');

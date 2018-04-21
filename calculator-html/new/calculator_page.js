@@ -1,10 +1,6 @@
 "use strict";
 var calculatorInput;
-var calculatorMQfield;
-var calculatorMQobject;
 var mqProblemSpan;
-var calculatorLeftString = undefined;
-var calculatorRightString = undefined;
 var calculatorMQString;
 var calculatorMQStringIsOK = true;
 var ignoreNextMathQuillUpdateEvent = false;
@@ -17,15 +13,6 @@ var numInsertedJavascriptChildren = 0;
 var startingCharacterSectionUnderMathQuillEdit;
 var calculatorCanvases;
 var keyWordsKnownToMathQuill = ['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times', 'oplus', 'pmatrix','int', 'begin', 'end'];
-function initializeCalculatorVariables() { 
-  answerIdsPureLatex = ['mainInputID'];
-  answerMQspanIds = ['mainInputMQfield'];
-  mqProblemSpan = document.getElementById('mqProblemSpan');
-  calculatorInput = document.getElementById('mainInputID');
-  calculatorMQfield = document.getElementById('mainInputMQfield');
-}
-
-var calculatorMQobjectsInitialized = false;
 
 function createSelectionNoFocus(field, start, end) { 
   if (field.createTextRange) { 
@@ -48,54 +35,20 @@ function createSelectionNoFocus(field, start, end) {
   }
 }
 
+var calculatorPanel = null;
 function initializeCalculatorPage(){ 
-  if (calculatorMQobjectsInitialized === true) {
+  if (calculatorPanel !== null) {
     return;
   }
-  calculatorMQobjectsInitialized = true;
-  initializeCalculatorVariables();
-  ////////////////////////
-  globalMQ.config({autoFunctionize: 'sin cos tan sec csc cot log ln'});
-  calculatorMQobject = globalMQ.MathField(calculatorMQfield, { 
-    spaceBehavesLikeTab: true, // configurable
-    supSubsRequireOperand: true, // configurable
-    autoSubscriptNumerals: true, // configurable
-    handlers: { 
-      edit: function(){ // useful event handlers
-        if (ignoreNextMathQuillUpdateEvent) { 
-          return;
-        }
-        if (!calculatorMQStringIsOK) {
-          return;
-        }
-        var theBoxContent = calculatorMQobject.latex();
-        if (calculatorLeftString === undefined || calculatorRightString === undefined){
-          mQHelpCalculator();
-        }
-        var theInserted = processMathQuillLatex(theBoxContent);
-        if (theInserted.length > 0 && startingCharacterSectionUnderMathQuillEdit.length > 0){
-          if (theInserted[0] !== ' '){
-            theInserted = ' ' + theInserted;
-          }
-        }
-        calculatorInput.value = calculatorLeftString + theInserted + calculatorRightString;
-//          calculatorInput.innerHTML =calculatorLeftString+
-//          +"<span style='color:red'>" +theInserted+ "</span>"+
-//          calculatorRightString;
+  calculatorPanel = new InputPanelData({
+    idMQSpan: "mainInputMQfield",
+    fileName: "",
+    idPureLatex: "mainInputID",
+    idButtonContainer: 'mainInputMQfieldButtons',
+    flagCalculatorPanel: true
 
-//          createSelectionNoFocus(calculatorInput, calculatorLeftString.length, calculatorLeftString.length+theInserted.length);
-        }
-    }
   });
-  answerMathQuillObjects = [calculatorMQobject];
-  preferredButtonContainers = ['mainInputMQfieldButtons'];
-  initializeButtons();
-  mQHelpCalculator();
-  //I am getting mq errors if calculatorMQobject.write()
-  //is called before mQHelpCalculator() is called.
-  //I don't quite know what causes this behavior, so
-  //for the time being please leave the code above as is.
-  //I will resolve the issue later.
+  calculatorPanel.initialize();
 }
 
 function onLoadDefaultFunction(idElement){ 
@@ -151,22 +104,6 @@ function updateCalculatorSliderToInputBox(boxName, sliderName){
   }
 }
 
-function mQHelpCalculator(){ 
-  //event.preventDefault();
-  if (calculatorMQobject === undefined) {
-    return;
-  }
-  getSemiColumnEnclosure();
-  if (!calculatorMQobjectsInitialized) {
-    return;
-  }
-  ignoreNextMathQuillUpdateEvent = true;
-  if (calculatorMQStringIsOK) {
-    calculatorMQobject.latex(calculatorMQString);
-  }
-  ignoreNextMathQuillUpdateEvent = false;
-}
-
 function createSelection(field, start, end){ 
   if (field.createTextRange) { 
     var selRange = field.createTextRange();
@@ -183,157 +120,6 @@ function createSelection(field, start, end){
     field.selectionEnd = end;
     field.focus();
   }
-}
-
-var calculatorSeparatorLeftDelimiters = ['(', '{'];
-var calculatorSeparatorRightDelimiters = [')', '}'];
-
-function accountCalculatorDelimiterReturnMustEndSelection(text, calculatorSeparatorCounts, thePos){ 
-  var result = false;
-  for (var j = 0; j < calculatorSeparatorLeftDelimiters.length; j ++){ 
-    if (calculatorSeparatorLeftDelimiters[j] === text[thePos]){
-      calculatorSeparatorCounts[j] ++;
-    }
-    if (calculatorSeparatorRightDelimiters[j] === text[thePos]){
-      calculatorSeparatorCounts[j] --;
-    }
-    if (calculatorSeparatorLeftDelimiters[j] > 0){
-      result = true;
-    }
-  }
-  return result;
-}
-
-function chopCalculatorStrings(){ 
-  if (mqProblemSpan === undefined){
-    initializeCalculatorPage();
-  }
-  if (calculatorRightPosition-calculatorLeftPosition > 1000){ 
-    calculatorMQStringIsOK = false;
-    mqProblemSpan.innerHTML = "<span style='color:red'><b>Formula too big </b></span>";
-    return;
-  }
-  calculatorMQStringIsOK = true;
-  mqProblemSpan.innerHTML = "Equation assistant";
-  calculatorMQfield.style.visibility = "visible";
-  calculatorMQString = calculatorInput.value.
-  substring(calculatorLeftPosition, calculatorRightPosition + 1);
-  calculatorLeftString = calculatorInput.value.
-  substring(0, calculatorLeftPosition);
-  calculatorRightString = calculatorInput.value.
-  substring(calculatorRightPosition + 1);
-}
-
-function isSeparatorCharacter(theChar){ 
-  if (theChar[0] >= 'a' && theChar[0] <= 'z'){
-    return false;
-  }
-  if (theChar[0] >= 'A' && theChar[0] <= 'Z'){
-    return false;
-  }
-  return true;
-}
-
-function isKeyWordStartKnownToMathQuill(input){ 
-  for (var i = 0; i < keyWordsKnownToMathQuill.length; i ++){
-    if (keyWordsKnownToMathQuill[i].startsWith(input)){
-      return true;
-    }
-  }
-  return false;
-}
-
-function isKeyWordEndKnownToMathQuill(input){ 
-  for (var i = 0; i < keyWordsKnownToMathQuill.length; i ++){
-    if (keyWordsKnownToMathQuill[i].endsWith(input)){
-      return true;
-    }
-  }
-  return false;
-}
-
-function getSemiColumnEnclosure(){ 
-  if (calculatorInput === undefined){
-    initializeCalculatorPage();
-  }
-  if (calculatorInput.selectionEnd === undefined){
-    calculatorInput.selectionEnd = 0;
-  }
-  var startPos = calculatorInput.selectionEnd;
-  for (; startPos > 0 && startPos < calculatorInput.value.length; startPos --){
-    if (isSeparatorCharacter(calculatorInput.value[startPos])){
-      break;
-    }
-  }
-  if (startPos >= calculatorInput.value.length){
-    startPos = calculatorInput.value.length - 1;
-  }
-  var rightPos = startPos;
-  var lastSeparator = startPos;
-  var lastWord = '';
-  var currentChar = 'a';
-  for (; rightPos < calculatorInput.value.length - 1; rightPos ++){ 
-    currentChar = calculatorInput.value[rightPos];
-    if (currentChar === ';'){ 
-      if (rightPos > 0){
-        rightPos --;
-      }
-      break;
-    }
-    if (isSeparatorCharacter(currentChar)){ 
-      lastWord = '';
-      lastSeparator = rightPos;
-    } else {
-      lastWord += currentChar;
-    }
-    if (lastWord.length > 3){
-      if (!isKeyWordStartKnownToMathQuill(lastWord)){ 
-        rightPos = lastSeparator;
-        break;
-      }
-    }
-  }
-  var calculatorSeparatorCounts = new Array(calculatorSeparatorLeftDelimiters.length).fill(0);
-  var leftPos = rightPos - 1;
-  lastWord = '';
-  lastSeparator = rightPos;
-  for (; leftPos > 0; leftPos --){ 
-    currentChar = calculatorInput.value[leftPos];
-    if (currentChar === ';'){ 
-      leftPos ++;
-      break;
-    }
-    if (accountCalculatorDelimiterReturnMustEndSelection(calculatorInput.value, calculatorSeparatorCounts, leftPos)){ 
-      leftPos ++;
-      break;
-    }
-    if (isSeparatorCharacter(currentChar)){ 
-      lastWord = '';
-      lastSeparator = leftPos;
-    } else { 
-      lastWord = currentChar + lastWord;
-    }
-    if (lastWord.length > 3) {
-      if (!isKeyWordEndKnownToMathQuill(lastWord)){ 
-        leftPos = lastSeparator;
-        break;
-      }
-    }
-  }
-  if (leftPos > rightPos){
-    leftPos = rightPos;
-  }
-  if (rightPos - leftPos > 1000){
-    mqProblemSpan.innerHTML = "<span style='color:red'><b></b></span>"
-  }
-  calculatorLeftPosition = leftPos;
-  calculatorRightPosition = rightPos;
-  startingCharacterSectionUnderMathQuillEdit = '';
-  if (calculatorInput.value[leftPos] === '\n' || calculatorInput.value[leftPos] === ' ' ||
-      calculatorInput.value[leftPos] === '\t'){
-    startingCharacterSectionUnderMathQuillEdit = calculatorInput.value[leftPos];
-  }
-  chopCalculatorStrings();
 }
 
 function exampleCalculatorClick(theLink){

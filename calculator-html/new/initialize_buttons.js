@@ -1,8 +1,4 @@
 "use strict";
-var answerIdsPureLatex = [];
-var answerMathQuillObjects = [];
-var answerMQspanIds = [];
-var preferredButtonContainers = [];
 var studentScoresInHomePage = [];
 //var lastFocus;
 var charsToSplit = ['x','y'];
@@ -180,7 +176,26 @@ mathQuillCommandButton("\\mathbf{i}", "i", "font-weight: bold");
 mathQuillCommandButton("\\mathbf{j}", "j", "font-weight: bold");
 mathQuillCommandButton("\\mathbf{k}", "k", "font-weight: bold");
 
-function initializeButtonsCommon(){ 
+var calculatorSeparatorLeftDelimiters = ['(', '{'];
+var calculatorSeparatorRightDelimiters = [')', '}'];
+
+function accountCalculatorDelimiterReturnMustEndSelection(text, calculatorSeparatorCounts, thePos){ 
+  var result = false;
+  for (var j = 0; j < calculatorSeparatorLeftDelimiters.length; j ++){ 
+    if (calculatorSeparatorLeftDelimiters[j] === text[thePos]){
+      calculatorSeparatorCounts[j] ++;
+    }
+    if (calculatorSeparatorRightDelimiters[j] === text[thePos]){
+      calculatorSeparatorCounts[j] --;
+    }
+    if (calculatorSeparatorLeftDelimiters[j] > 0){
+      result = true;
+    }
+  }
+  return result;
+}
+
+function initializeButtons(){ 
   ///initializing accordions
   if (localStorage !== undefined) {
     if (localStorage.panels !== undefined){ 
@@ -257,15 +272,42 @@ function toggleHeightForTimeout(currentPanel){
   }
 }
 
+var panelDataRegistry = {};
+
 function InputPanelData(input){
   this.idMQSpan = input.idMQSpan;
   this.fileName = input.fileName;
+
   this.idPureLatex = input.idPureLatex;
   this.idButtonContainer = input.idButtonContainer;
+  panelDataRegistry[this.idButtonContainer] = this;
   this.mqObject = null;
   this.ignoreNextMathQuillUpdateEvent = false;
   this.flagAnswerPanel = false;
   this.flagInitialized = false;
+  this.flagCalculatorPanel = input.flagCalculatorPanel;
+  this.calculatorLeftString = null;
+  this.calculatorRightString = null;
+
+  if (this.flagCalculatorPanel === undefined){
+    this.flagCalculatorPanel = false;
+  }
+}
+
+InputPanelData.prototype.mQHelpCalculator = function(){ 
+  //event.preventDefault();
+  if (calculatorMQobject === undefined) {
+    return;
+  }
+  getSemiColumnEnclosure();
+  if (!calculatorMQobjectsInitialized) {
+    return;
+  }
+  ignoreNextMathQuillUpdateEvent = true;
+  if (calculatorMQStringIsOK) {
+    calculatorMQobject.latex(calculatorMQString);
+  }
+  ignoreNextMathQuillUpdateEvent = false;
 }
 
 InputPanelData.prototype.mqEditFunction = function() { // useful event handlers
@@ -273,9 +315,25 @@ InputPanelData.prototype.mqEditFunction = function() { // useful event handlers
     return;
   }
   document.getElementById(this.idPureLatex).value = processMathQuillLatex(this.mqObject.latex()); // simple API
-  if (this.isAnswerPanel){
+  if (this.flagAnswerPanel){
     this.previewAnswers(this.idPureLatex, "verification" + this.idPureLatex);
   }
+  if (this.flagCalculatorPanel){
+    if (!this.flagCalculatorMQStringIsOK) {
+      return;
+    }
+  }
+  var theBoxContent = calculatorMQobject.latex();
+  if (this.calculatorLeftString === null || this.calculatorRightString === null){
+    this.mQHelpCalculator();
+  }
+  var theInserted = processMathQuillLatex(theBoxContent);
+  if (theInserted.length > 0 && startingCharacterSectionUnderMathQuillEdit.length > 0){
+    if (theInserted[0] !== ' '){
+      theInserted = ' ' + theInserted;
+    }
+  }
+  calculatorInput.value = calculatorLeftString + theInserted + calculatorRightString;
 }
 
 InputPanelData.prototype.initialize = function(){
@@ -296,11 +354,143 @@ InputPanelData.prototype.initialize = function(){
       edit: mqEditFunctionBound
     }
   });
-  initializeOneButtonPanel(this.idButtonContainer, false);
+  this.initializePartTwo(false);
 }
 
-function initializeOneButtonPanel(inputPanel, forceShowAll){ 
-  var currentButtonPanel = document.getElementById(inputPanel.idButtonContainer);
+function isSeparatorCharacter(theChar){ 
+  if (theChar[0] >= 'a' && theChar[0] <= 'z'){
+    return false;
+  }
+  if (theChar[0] >= 'A' && theChar[0] <= 'Z'){
+    return false;
+  }
+  return true;
+}
+
+function chopCalculatorStrings(){ 
+  if (mqProblemSpan === undefined){
+    initializeCalculatorPage();
+  }
+  if (calculatorRightPosition-calculatorLeftPosition > 1000){ 
+    calculatorMQStringIsOK = false;
+    mqProblemSpan.innerHTML = "<span style='color:red'><b>Formula too big </b></span>";
+    return;
+  }
+  calculatorMQStringIsOK = true;
+  mqProblemSpan.innerHTML = "Equation assistant";
+  calculatorMQfield.style.visibility = "visible";
+  calculatorMQString = calculatorInput.value.
+  substring(calculatorLeftPosition, calculatorRightPosition + 1);
+  calculatorLeftString = calculatorInput.value.
+  substring(0, calculatorLeftPosition);
+  calculatorRightString = calculatorInput.value.
+  substring(calculatorRightPosition + 1);
+}
+
+function isKeyWordStartKnownToMathQuill(input){ 
+  for (var i = 0; i < keyWordsKnownToMathQuill.length; i ++){
+    if (keyWordsKnownToMathQuill[i].startsWith(input)){
+      return true;
+    }
+  }
+  return false;
+}
+
+function isKeyWordEndKnownToMathQuill(input){ 
+  for (var i = 0; i < keyWordsKnownToMathQuill.length; i ++){
+    if (keyWordsKnownToMathQuill[i].endsWith(input)){
+      return true;
+    }
+  }
+  return false;
+}
+
+InputPanelData.prototype.getSemiColumnEnclosure = function(){ 
+  if (calculatorInput === undefined){
+    initializeCalculatorPage();
+  }
+  if (calculatorInput.selectionEnd === undefined){
+    calculatorInput.selectionEnd = 0;
+  }
+  var startPos = calculatorInput.selectionEnd;
+  for (; startPos > 0 && startPos < calculatorInput.value.length; startPos --){
+    if (isSeparatorCharacter(calculatorInput.value[startPos])){
+      break;
+    }
+  }
+  if (startPos >= calculatorInput.value.length){
+    startPos = calculatorInput.value.length - 1;
+  }
+  var rightPos = startPos;
+  var lastSeparator = startPos;
+  var lastWord = '';
+  var currentChar = 'a';
+  for (; rightPos < calculatorInput.value.length - 1; rightPos ++){ 
+    currentChar = calculatorInput.value[rightPos];
+    if (currentChar === ';'){ 
+      if (rightPos > 0){
+        rightPos --;
+      }
+      break;
+    }
+    if (isSeparatorCharacter(currentChar)){ 
+      lastWord = '';
+      lastSeparator = rightPos;
+    } else {
+      lastWord += currentChar;
+    }
+    if (lastWord.length > 3){
+      if (!isKeyWordStartKnownToMathQuill(lastWord)){ 
+        rightPos = lastSeparator;
+        break;
+      }
+    }
+  }
+  var calculatorSeparatorCounts = new Array(calculatorSeparatorLeftDelimiters.length).fill(0);
+  var leftPos = rightPos - 1;
+  lastWord = '';
+  lastSeparator = rightPos;
+  for (; leftPos > 0; leftPos --){ 
+    currentChar = calculatorInput.value[leftPos];
+    if (currentChar === ';'){ 
+      leftPos ++;
+      break;
+    }
+    if (accountCalculatorDelimiterReturnMustEndSelection(calculatorInput.value, calculatorSeparatorCounts, leftPos)){ 
+      leftPos ++;
+      break;
+    }
+    if (isSeparatorCharacter(currentChar)){ 
+      lastWord = '';
+      lastSeparator = leftPos;
+    } else { 
+      lastWord = currentChar + lastWord;
+    }
+    if (lastWord.length > 3) {
+      if (!isKeyWordEndKnownToMathQuill(lastWord)){ 
+        leftPos = lastSeparator;
+        break;
+      }
+    }
+  }
+  if (leftPos > rightPos){
+    leftPos = rightPos;
+  }
+  if (rightPos - leftPos > 1000){
+    mqProblemSpan.innerHTML = "<span style='color:red'><b></b></span>"
+  }
+  calculatorLeftPosition = leftPos;
+  calculatorRightPosition = rightPos;
+  startingCharacterSectionUnderMathQuillEdit = '';
+  if (calculatorInput.value[leftPos] === '\n' || calculatorInput.value[leftPos] === ' ' ||
+      calculatorInput.value[leftPos] === '\t'){
+    startingCharacterSectionUnderMathQuillEdit = calculatorInput.value[leftPos];
+  }
+  chopCalculatorStrings();
+}
+
+InputPanelData.prototype.initializePartTwo = function(forceShowAll){ 
+  var currentButtonPanel = document.getElementById(this.idButtonContainer);
   var buttonArray = currentButtonPanel.attributes.buttons.value.toLowerCase().split(/(?:,| )+/);
   //console.log(buttonArray);
   var buttonBindings = [];
@@ -451,16 +641,16 @@ function initializeOneButtonPanel(inputPanel, forceShowAll){
       }
       theContent += "<tr>";
     }
-    theContent += "<td>" + buttonBindings[j](panelIndex) + "</td>";
+    theContent += "<td>" + buttonBindings[j](this.idButtonContainer) + "</td>";
   }
   if (buttonBindings.length > 0){
     theContent += "</tr>";
   }
   theContent += "</table>";
   if (!forceShowAll && !includeAll){
-    theContent+= "<small><a href=\"#\" onclick=\"initializeOneButtonPanel('" + IDcurrentButtonPanel + "'," + panelIndex + ",true);\">Show all</a></small>";
+    theContent+= `<small><a href=\"#\" onclick=\"panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(true);\">Show all</a></small>`;
   } else {
-    theContent+= "<small><a href=\"#\" onclick=\"initializeOneButtonPanel('" + IDcurrentButtonPanel + "'," + panelIndex + ",false);\">Show relevant</a></small>";
+    theContent+= `<small><a href=\"#\" onclick=\"panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(false);\">Show relevant</a></small>`;
   }
   var oldHeight = window.getComputedStyle(currentButtonPanel).height;
   //console.log("oldHeight: " + oldHeight);
@@ -477,12 +667,4 @@ function initializeOneButtonPanel(inputPanel, forceShowAll){
   }
   return false;
 }
-
-function initializeButtons(){ 
-  for (var i = 0; i < answerIdsPureLatex.length; i ++){
-    initializeOneButtonPanel(preferredButtonContainers[i], i, false);
-  }
-  initializeButtonsCommon();
-}
-
 

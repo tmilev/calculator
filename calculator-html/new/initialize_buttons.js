@@ -196,7 +196,7 @@ function accountCalculatorDelimiterReturnMustEndSelection(text, calculatorSepara
   return result;
 }
 
-function initializeButtons(){ 
+function initializeAccordionButtons(){ 
   ///initializing accordions
   if (localStorage !== undefined) {
     if (localStorage.panels !== undefined){ 
@@ -228,12 +228,10 @@ function initializeButtons(){
       this.nextElementSibling.classList.toggle("show");
     }
   }
-//  for (i=0; i<answerIdsPureLatex.length; i++){
-//    currentButtonPanel=document.getElementById(answerMQspanIds[i]);
-//    document.addEventListener("blur", function(){
-//      lastfocus=this;
-//    });
-//  }
+}
+
+function initializeButtons(){ 
+  initializeAccordionButtons();
 }
 
 function registerStatus(thePanel, isCollapsed){ 
@@ -301,11 +299,13 @@ function InputPanelData(input){
   panelDataRegistry[this.idButtonContainer] = this;
   this.mqObject = null;
   this.ignoreNextMathQuillUpdateEvent = false;
-  this.flagAnswerPanel = false;
+  this.flagAnswerPanel = input.flagAnswerPanel;
   this.flagInitialized = false;
   this.flagCalculatorPanel = input.flagCalculatorPanel;
-  this.calculatorLeftString = null;
-  this.calculatorRightString = null;
+  this.flagCalculatorMQStringIsOK = true;
+  this.calculatorLeftString = "";
+  this.calculatorRightString = "";
+  this.theLaTeXString = null;
   this.selectionEnd = 0;
 
   if (this.flagCalculatorPanel === undefined){
@@ -319,40 +319,53 @@ function InputPanelData(input){
 InputPanelData.prototype.mQHelpCalculator = function(){ 
   //event.preventDefault();
   this.getSemiColumnEnclosure();
-  if (!calculatorMQobjectsInitialized) {
+  if (this.mqObject === null) {
     return;
   }
-  ignoreNextMathQuillUpdateEvent = true;
-  if (calculatorMQStringIsOK) {
-    calculatorMQobject.latex(calculatorMQString);
+  this.ignoreNextMathQuillUpdateEvent = true;
+  if (this.flagCalculatorMQStringIsOK) {
+    this.mqObject.latex(this.theLaTeXString);
   }
-  ignoreNextMathQuillUpdateEvent = false;
+  this.ignoreNextMathQuillUpdateEvent = false;
 }
 
-InputPanelData.prototype.mqEditFunction = function() { // useful event handlers
+InputPanelData.prototype.previewAnswers = function() { // useful event handlers
+  console.log("Here I am");
+}
+
+InputPanelData.prototype.editLaTeX = function() { // useful event handlers
+  //console.log("here i am");
+  this.ignoreNextMathQuillUpdateEvent = true;
+  this.mqObject.latex(document.getElementById(this.idPureLatex).value + ' ');
+  this.ignoreNextMathQuillUpdateEvent = false;
+  this.previewAnswers();
+}
+
+InputPanelData.prototype.editMQFunction = function() { // useful event handlers
   if (this.ignoreNextMathQuillUpdateEvent) {
     return;
   }
-  document.getElementById(this.idPureLatex).value = processMathQuillLatex(this.mqObject.latex()); // simple API
   if (this.flagAnswerPanel){
-    this.previewAnswers(this.idPureLatex, "verification" + this.idPureLatex);
+    document.getElementById(this.idPureLatex).value = processMathQuillLatex(this.mqObject.latex()); // simple API
+    this.previewAnswers();
+    return;
   }
   if (this.flagCalculatorPanel){
     if (!this.flagCalculatorMQStringIsOK) {
       return;
     }
-  }
-  var theBoxContent = calculatorMQobject.latex();
-  if (this.calculatorLeftString === null || this.calculatorRightString === null){
-    this.mQHelpCalculator();
-  }
-  var theInserted = processMathQuillLatex(theBoxContent);
-  if (theInserted.length > 0 && startingCharacterSectionUnderMathQuillEdit.length > 0){
-    if (theInserted[0] !== ' '){
-      theInserted = ' ' + theInserted;
+    var theBoxContent = this.mqObject.latex();
+    if (this.calculatorLeftString === null || this.calculatorRightString === null){
+      this.mQHelpCalculator();
     }
+    var theInserted = processMathQuillLatex(theBoxContent);
+    if (theInserted.length > 0 && startingCharacterSectionUnderMathQuillEdit.length > 0){
+      if (theInserted[0] !== ' '){
+        theInserted = ' ' + theInserted;
+      }
+    }
+    document.getElementById(this.idPureLatex).value = this.calculatorLeftString + theInserted + this.calculatorRightString;
   }
-  calculatorInput.value = calculatorLeftString + theInserted + calculatorRightString;
 }
 
 InputPanelData.prototype.initialize = function(){
@@ -364,13 +377,13 @@ InputPanelData.prototype.initialize = function(){
     autoFunctionize: 'sin cos tan sec csc cot log ln'
   });
   var currentMQspan = document.getElementById(this.idMQSpan);
-  var mqEditFunctionBound = this.mqEditFunction.bind(this);
+  var editMQFunctionBound = this.editMQFunction.bind(this);
   this.mqObject = globalMQ.MathField(currentMQspan, {
     spaceBehavesLikeTab: true, // configurable
     supSubsRequireOperand: true, // configurable
     autoSubscriptNumerals: true, // configurable
     handlers: {
-      edit: mqEditFunctionBound
+      edit: editMQFunctionBound
     }
   });
   this.initializePartTwo(false);
@@ -387,21 +400,21 @@ function isSeparatorCharacter(theChar){
 }
 
 InputPanelData.prototype.chopStrings = function(){ 
-  var mqProblemSpan = document.getElementById(this.idMQcomments);
-  if (calculatorRightPosition-calculatorLeftPosition > 1000){ 
-    calculatorMQStringIsOK = false;
-    mqProblemSpan.innerHTML = "<span style='color:red'><b>Formula too big </b></span>";
+  var mqCommentsSpan = document.getElementById(this.idMQcomments);
+  if (calculatorRightPosition - calculatorLeftPosition > 1000){ 
+    this.flagCalculatorMQStringIsOK = false;
+    mqCommentsSpan.innerHTML = "<span style='color:red'><b>Formula too big </b></span>";
     return;
   }
-  calculatorMQStringIsOK = true;
-  mqProblemSpan.innerHTML = "Equation assistant";
-  calculatorMQfield.style.visibility = "visible";
+  this.flagCalculatorMQStringIsOK = true;
+  mqCommentsSpan.innerHTML = "Equation assistant";
+  document.getElementById(this.idMQSpan).style.visibility = "visible";
   var calculatorInput = document.getElementById(this.idPureLatex);
-  calculatorMQString = calculatorInput.value.
+  this.theLaTeXString = calculatorInput.value.
   substring(calculatorLeftPosition, calculatorRightPosition + 1);
-  calculatorLeftString = calculatorInput.value.
+  this.calculatorLeftString = calculatorInput.value.
   substring(0, calculatorLeftPosition);
-  calculatorRightString = calculatorInput.value.
+  this.calculatorRightString = calculatorInput.value.
   substring(calculatorRightPosition + 1);
 }
 

@@ -283,6 +283,8 @@ button.buttonToggleTopics{
   margin-top: 0px;
   margin-bottom: 0px;
   margin-left: 5px;
+  width: 20px;
+  height: 23px;
   font-size: medium;
   font-weight: normal;
   background-color: Transparent;

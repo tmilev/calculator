@@ -1443,10 +1443,12 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   if (currentA.idMQButtonPanelLocation == "")
     currentA.idMQButtonPanelLocation = answerId + "MQbuttonPanel";
   std::stringstream previewAnswerStream;
+
   previewAnswerStream << "previewAnswers('" << answerId << "', '"
   << currentA.idVerificationSpan << "');";
+
   currentA.javascriptPreviewAnswer = previewAnswerStream.str();
-  currentA.htmlButtonSubmit = "<button class=\"submitButton\" onclick=\"submitAnswers('"
+  currentA.htmlButtonSubmit = "<button class=\"submitButton\" onclick = \"submitAnswers('"
   + answerId + "', '" + currentA.idVerificationSpan + "')\">Submit</button>";
   currentA.htmlButtonInterpret = (std::string)"<button class=\"previewButton\" onclick=\""
   + "previewAnswersNoTimeOut('" + answerId + "', '"
@@ -1463,9 +1465,11 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
     else
       currentA.htmlButtonSolution = "";
   }
-  inputOutput.defaultKeysIfMissing.AddOnTop("onkeyup");
-  inputOutput.defaultValuesIfMissing.AddOnTop
-  (currentA.javascriptPreviewAnswer + currentA.MQUpdateFunction + "();");
+  if (!this->flagUseJSON)
+  { inputOutput.defaultKeysIfMissing.AddOnTop("onkeyup");
+    inputOutput.defaultValuesIfMissing.AddOnTop
+    (currentA.javascriptPreviewAnswer + currentA.MQUpdateFunction + "();");
+  }
 //  inputOutput.defaultKeysIfMissing.AddOnTop("style");
 //  inputOutput.defaultValuesIfMissing.AddOnTop("height:70px");
   currentA.htmlTextareaLatexAnswer =

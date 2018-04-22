@@ -192,10 +192,10 @@ function toggleCalculatorExamples(theButton){
     theButton.innerHTML = "&#9660;";
   } else {
     switchMenu('divCalculatorExamples');
-    if (theExamples.style.display === "none") {
-      theButton.innerHTML = "&#9656;";
-    } else {
+    if (! theExamples.classList.contains("hiddenClass")) {
       theButton.innerHTML = "&#9660;";
+    } else {
+      theButton.innerHTML = "&#9656;";
     }
   }
 }

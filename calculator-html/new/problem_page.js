@@ -17,20 +17,27 @@ function updateProblemPageCallback(input, outputComponent){
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentProblemContentContainer")]);
   thePage.currentProblem[thePage.currentCourse.fileName] = {};
   thePage.currentProblem[thePage.currentCourse.fileName].answers = [];
-  var answerVectors = theProblem["answers"];
+  var answerVectors = theProblem["answers"];  
   for (var counterAnswers = 0;  counterAnswers < answerVectors.answerMQspanIds.length; counterAnswers ++){
     thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswers] = new InputPanelData({
       fileName: thePage.currentCourse.fileName,
       idMQSpan: answerVectors.answerMQspanIds[counterAnswers],
       idPureLatex: answerVectors.answerIdsPureLatex[counterAnswers],
-      idButtonContainer: answerVectors.preferredButtonContainers[counterAnswers]
+      idButtonContainer: answerVectors.preferredButtonContainers[counterAnswers],
+      flagAnswerPanel: true,
+      flagCalculatorPanel: false,
     });
+    var latexChangeHandler = thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswers].editLaTeX;
+    var handlerBound = latexChangeHandler.bind(thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswers]);
+    var theElement = document.getElementById(answerVectors.answerIdsPureLatex[counterAnswers]);
+    theElement.addEventListener('keyup', handlerBound);
+    //theElement.addEventListener('onchange', latexChangeHandler);
+    //theElement.attributes.onkeyup = latexChangeHandler;
+    //console.log(theElement);
+    //console.log(latexChangeHandler);
     thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswers].initialize();
   }
-}
-
-function previewAnswers(answerData){
-  
+  initializeAccordionButtons();
 }
 
 function updateProblemPage(){

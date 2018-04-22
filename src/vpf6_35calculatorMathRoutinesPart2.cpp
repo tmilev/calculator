@@ -2151,26 +2151,26 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::GetSpacedMonomialsWithHighlightLaTeX");
   (void) slidesToUncoverAllMons;
   std::stringstream out;
-  bool found=false;
-  int countMons=0;
+  bool found = false;
+  int countMons = 0;
   if (thePoly.IsEqualToZero())
   { if (useColumnSeparator)
-      for (int i=0; i<this->allMonomials.size*2-1; i++)
+      for (int i = 0; i < this->allMonomials.size * 2 - 1; i ++)
         out << "&";
     std::stringstream highlightHeadStream;
     std::stringstream highlightTailStream;
     MonomialP tempM;
     tempM.MakeOne();
-    int monIndex=this->allMonomials.GetIndex(tempM);
-    if (slidesAdditionalHighlight!=0 && monIndex!=-1)
-      if ( (*slidesAdditionalHighlight)[monIndex]>0)
+    int monIndex = this->allMonomials.GetIndex(tempM);
+    if (slidesAdditionalHighlight != 0 && monIndex != - 1)
+      if ( (*slidesAdditionalHighlight)[monIndex] > 0)
       { highlightHeadStream << "{ \\only<"
         << (*slidesAdditionalHighlight)[monIndex]
         << "->{\\color{orange}}";
         highlightTailStream << "}";
       }
-    if (slidesToFcAnswer!=0 && monIndex!=-1)
-      if ((*slidesToFcAnswer)[monIndex]>1)
+    if (slidesToFcAnswer != 0 && monIndex != - 1)
+      if ((*slidesToFcAnswer)[monIndex] > 1)
       { highlightHeadStream << "\\fcAnswer{" << (*slidesToFcAnswer)[monIndex] << "}{";
         highlightTailStream << "}";
       }
@@ -2178,75 +2178,75 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
     << highlightTailStream.str() << "$";
     return out.str();
   }
-  for (int i=0; i<this->allMonomials.size; i++)
+  for (int i = 0; i < this->allMonomials.size; i ++)
   { int theIndex= thePoly.theMonomials.GetIndex(this->allMonomials[i]);
-    if (theIndex==-1)
+    if (theIndex == - 1)
     { if (useColumnSeparator)
-        if (i!=this->allMonomials.size-1)
+        if (i != this->allMonomials.size - 1)
           out << "&&";
       continue;
     }
     std::string highlightHead;
     std::string highlightTail;
-    int fcAnswerSlide=-1;
-    if (slidesToFcAnswer!=0)
-      if (i<(*slidesToFcAnswer).size)
-        if ((*slidesToFcAnswer)[i]>1)
-        { fcAnswerSlide=(*slidesToFcAnswer)[i];
-          if (slidesToHighlightMon!=0)
+    int fcAnswerSlide = - 1;
+    if (slidesToFcAnswer != 0)
+      if (i < (*slidesToFcAnswer).size)
+        if ((*slidesToFcAnswer)[i] > 1)
+        { fcAnswerSlide = (*slidesToFcAnswer)[i];
+          if (slidesToHighlightMon != 0)
             (*slidesToHighlightMon)[i].AddOnTop(fcAnswerSlide);
         }
-    if (slidesToUncover!=0)
-      if ((*slidesToUncover)[i]>1)
+    if (slidesToUncover != 0)
+      if ((*slidesToUncover)[i] > 1)
       { std::stringstream highlightStream;
         highlightStream << "\\uncover<" << (*slidesToUncover)[i] << "->{";
-        highlightHead+=highlightStream.str();
-        highlightTail="}"+highlightTail;
+        highlightHead += highlightStream.str();
+        highlightTail = "}" + highlightTail;
       }
-    if (slidesToHighlightMon!=0)
-      if ((*slidesToHighlightMon)[i].size>0)
-      { highlightHead+="\\alertNoH{" + (*slidesToHighlightMon)[i].ToStringCommaDelimited()+"}{";
-        highlightTail="}"+highlightTail;
+    if (slidesToHighlightMon != 0)
+      if ((*slidesToHighlightMon)[i].size > 0)
+      { highlightHead += "\\alertNoH{" + (*slidesToHighlightMon)[i].ToStringCommaDelimited() + "}{";
+        highlightTail = "}" + highlightTail;
       }
-    if (slidesAdditionalHighlight!=0)
-      if ((*slidesAdditionalHighlight)[i]>0)
+    if (slidesAdditionalHighlight != 0)
+      if ((*slidesAdditionalHighlight)[i] > 0)
       { std::stringstream highlightStream;
         highlightStream << "{\\only<" << (*slidesAdditionalHighlight)[i] << "->{\\color{orange}}";
-        highlightHead+=highlightStream.str();
-        highlightTail="}"+highlightTail;
+        highlightHead += highlightStream.str();
+        highlightTail = "}" + highlightTail;
       }
-    countMons++;
-    std::string monWithSign=
+    countMons ++;
+    std::string monWithSign =
     Polynomial<Rational>::GetBlendCoeffAndMon
     (thePoly[theIndex], thePoly.theCoeffs[theIndex], true, &this->theFormat);
-    std::string sign=monWithSign.substr(0,1);
-    std::string monNoSign=monWithSign.substr(1);
-    if (sign=="-" || found)
-    { if (fcAnswerSlide!=-1)
+    std::string sign = monWithSign.substr(0, 1);
+    std::string monNoSign = monWithSign.substr(1);
+    if (sign == "-" || found)
+    { if (fcAnswerSlide != - 1)
         out << "\\uncover<" << fcAnswerSlide << "->{";
       out << highlightHead;
       out << "$" << sign << "$";
       out << highlightTail;
-      if (fcAnswerSlide!=-1)
+      if (fcAnswerSlide != - 1)
         out << "}";
     }
-    found=true;
+    found = true;
     if (useColumnSeparator)
       out << "&";
     else
       out << " ";
-    if (fcAnswerSlide!=-1)
+    if (fcAnswerSlide != - 1)
       out << "\\fcAnswer{" << fcAnswerSlide << "}{";
     out << highlightHead << "$" << monNoSign << "$" << highlightTail;
-    if (fcAnswerSlide!=-1)
+    if (fcAnswerSlide != - 1)
       out << "}";
     if (!useColumnSeparator)
       out << " ";
     if (useColumnSeparator)
-      if (i!=this->allMonomials.size-1)
+      if (i != this->allMonomials.size - 1)
         out << "&";
   }
-  if (countMons!=thePoly.size())
+  if (countMons != thePoly.size())
     out << " Programming ERROR!";
   return out.str();
 }
@@ -2255,68 +2255,68 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
 (int remainderIndex, int& currentSlideNumber)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::ComputeHighLightsFromRemainder");
-  if (remainderIndex==0)
-  { for (int i=0; i<this->allMonomials.size; i++)
+  if (remainderIndex == 0)
+  { for (int i = 0; i < this->allMonomials.size; i ++)
       this->highlightMonsRemainders[remainderIndex][i].AddOnTop(currentSlideNumber);
-    currentSlideNumber++;
-    for (int j=0; j<this->theBasiS.size; j++)
-    { for (int i=0; i<this->allMonomials.size; i++)
+    currentSlideNumber ++;
+    for (int j = 0; j < this->theBasiS.size; j ++)
+    { for (int i = 0; i < this->allMonomials.size; i ++)
         this->highlightMonsDivisors[j][i].AddOnTop(currentSlideNumber);
-      currentSlideNumber++;
+      currentSlideNumber ++;
     }
   }
-  for (int i=0; i<this->intermediateHighlightedMons.GetElement()[remainderIndex].size; i++)
-  { int theMonIndex=this->allMonomials.GetIndex
+  for (int i = 0; i < this->intermediateHighlightedMons.GetElement()[remainderIndex].size; i ++)
+  { int theMonIndex = this->allMonomials.GetIndex
     (this->intermediateHighlightedMons.GetElement()[remainderIndex][i]);
-    this->additionalHighlightRemainders[remainderIndex][theMonIndex]=currentSlideNumber;
-    this->additionalHighlightFinalRemainder[theMonIndex]=currentSlideNumber;
-    this->uncoverMonsFinalRemainder[theMonIndex]=currentSlideNumber;
-    currentSlideNumber++;
+    this->additionalHighlightRemainders[remainderIndex][theMonIndex] = currentSlideNumber;
+    this->additionalHighlightFinalRemainder[theMonIndex] = currentSlideNumber;
+    this->uncoverMonsFinalRemainder[theMonIndex] = currentSlideNumber;
+    currentSlideNumber ++;
   }
   MonomialP constMon;
   constMon.MakeOne();
-  int zeroMonIndex=this->allMonomials.GetIndex(constMon);
+  int zeroMonIndex = this->allMonomials.GetIndex(constMon);
   if (this->intermediateRemainders.GetElement()[remainderIndex].IsEqualToZero())
-  { this->additionalHighlightRemainders[remainderIndex][zeroMonIndex]=currentSlideNumber;
-    this->additionalHighlightFinalRemainder[zeroMonIndex]=currentSlideNumber;
-    currentSlideNumber++;
+  { this->additionalHighlightRemainders[remainderIndex][zeroMonIndex] = currentSlideNumber;
+    this->additionalHighlightFinalRemainder[zeroMonIndex] = currentSlideNumber;
+    currentSlideNumber ++;
   }
-  if (remainderIndex==this->intermediateRemainders.GetElement().size-1)
-  { for (int i=0; i<this->theBasiS.size; i++)
-    { this->uncoverAllMonsQuotients[i]=currentSlideNumber;
-      for (int j=0; j<this->allMonomials.size; j++)
+  if (remainderIndex == this->intermediateRemainders.GetElement().size - 1)
+  { for (int i = 0; i < this->theBasiS.size; i ++)
+    { this->uncoverAllMonsQuotients[i] = currentSlideNumber;
+      for (int j = 0; j < this->allMonomials.size; j ++)
         this->highlightMonsQuotients[i][j].AddOnTop(currentSlideNumber);
     }
-    currentSlideNumber++;
-    this->highlightAllMonsFinalRemainder=currentSlideNumber;
+    currentSlideNumber ++;
+    this->highlightAllMonsFinalRemainder = currentSlideNumber;
   }
-  if (remainderIndex>=this->intermediateSelectedDivisors.GetElement().size)
+  if (remainderIndex >= this->intermediateSelectedDivisors.GetElement().size)
     return;
-  Polynomial<coefficient>& currentRemainder=
+  Polynomial<coefficient>& currentRemainder =
   this->intermediateRemainders.GetElement()[remainderIndex];
-  int indexCurrentDivisor=this->intermediateSelectedDivisors.GetElement()[remainderIndex];
-  Polynomial<coefficient>& currentDivisor=this->theBasiS[indexCurrentDivisor];
-  int indexCurrentDivisorLeadingMoN=
+  int indexCurrentDivisor = this->intermediateSelectedDivisors.GetElement()[remainderIndex];
+  Polynomial<coefficient>& currentDivisor = this->theBasiS[indexCurrentDivisor];
+  int indexCurrentDivisorLeadingMoN =
   currentDivisor.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
-  int indexCurrentDivisorLeadingMonInAllMons=this->allMonomials.GetIndex
+  int indexCurrentDivisorLeadingMonInAllMons = this->allMonomials.GetIndex
   (currentDivisor.theMonomials[indexCurrentDivisorLeadingMoN]);
-  int indexCurrentRemainderLeadingMoN=currentRemainder.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
-  const MonomialP& maxMonCurrentRemainder=currentRemainder.theMonomials [indexCurrentRemainderLeadingMoN];
-  coefficient leadingCFCurrentRemainder=currentRemainder.theCoeffs[indexCurrentRemainderLeadingMoN];
-  int indexCurrentRemainderLeadingMonInAllMons=this->allMonomials.GetIndex(maxMonCurrentRemainder);
+  int indexCurrentRemainderLeadingMoN = currentRemainder.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
+  const MonomialP& maxMonCurrentRemainder = currentRemainder.theMonomials [indexCurrentRemainderLeadingMoN];
+  coefficient leadingCFCurrentRemainder = currentRemainder.theCoeffs[indexCurrentRemainderLeadingMoN];
+  int indexCurrentRemainderLeadingMonInAllMons = this->allMonomials.GetIndex(maxMonCurrentRemainder);
   this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].
   AddOnTop(currentSlideNumber);
   this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].AddOnTop(currentSlideNumber);
 
-  if (remainderIndex==0)
+  if (remainderIndex == 0)
   { this->longDivisionLog << "$\\vphantom"
     << "{\\frac{x^1}{x^1}}$";
   }
   this->longDivisionLog << "\\only<" << currentSlideNumber << ","
-  << currentSlideNumber+1 << "| handout:0>{Divide "
+  << currentSlideNumber + 1 << "| handout:0>{Divide "
   << "\\alertNoH{"
   << currentSlideNumber << ","
-  << currentSlideNumber+1 << "}{"
+  << currentSlideNumber + 1 << "}{"
   << "$" << currentRemainder.GetBlendCoeffAndMon
   (maxMonCurrentRemainder, leadingCFCurrentRemainder, false, &this->theFormat)
   << "$ "
@@ -2324,42 +2324,42 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
   << " by "
   << "\\alertNoH{"
   << currentSlideNumber << ","
-  << currentSlideNumber+1 << "}{"
+  << currentSlideNumber + 1 << "}{"
   << "$" << currentRemainder.GetBlendCoeffAndMon
   (currentDivisor.theMonomials[indexCurrentDivisorLeadingMoN],
    currentDivisor.theCoeffs[indexCurrentDivisorLeadingMoN], false, &this->theFormat)
   << "$"
   << "}."
   << "}";
-  currentSlideNumber++;
+  currentSlideNumber ++;
   this->highlightMonsDivisors[indexCurrentDivisor][indexCurrentDivisorLeadingMonInAllMons].
   AddOnTop(currentSlideNumber);
   this->highlightMonsRemainders[remainderIndex][indexCurrentRemainderLeadingMonInAllMons].AddOnTop(currentSlideNumber);
-  int indexCurrentQuotientMonInAllMons=
+  int indexCurrentQuotientMonInAllMons =
   this->allMonomials.GetIndex
   (this->intermediateHighestMonDivHighestMon.GetElement()[remainderIndex]);
-  Polynomial<coefficient>& currentQuotient=this->theQuotients[indexCurrentDivisor];
-  int indexCurrentQuotientMoN=
+  Polynomial<coefficient>& currentQuotient = this->theQuotients[indexCurrentDivisor];
+  int indexCurrentQuotientMoN =
   currentQuotient.theMonomials.GetIndex(this->intermediateHighestMonDivHighestMon.GetElement()[remainderIndex]);
   //stOutput << "DEBUG: Seeking "
   //<< this->intermediateHighestMonDivHighestMon.GetElement()[remainderIndex].ToString()
   //<< " in " << this->theQuotients[indexCurrentDivisor].ToString() << "<br>";
-  this->fcAnswerMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons]=currentSlideNumber;
-  currentSlideNumber++;
+  this->fcAnswerMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons] = currentSlideNumber;
+  currentSlideNumber ++;
   this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons]
   .AddOnTop(currentSlideNumber);
-  for (int i=0; i<this->theBasiS[indexCurrentDivisor].size(); i++)
+  for (int i = 0; i < this->theBasiS[indexCurrentDivisor].size(); i ++)
     this->highlightMonsDivisors[indexCurrentDivisor]
     [this->allMonomials.GetIndex(this->theBasiS[indexCurrentDivisor][i])].
     AddOnTop(currentSlideNumber);
   this->uncoverAllMonsSubtracands[remainderIndex]=currentSlideNumber;
   this->longDivisionLog << "\\only<"
   << currentSlideNumber << ", "
-  << currentSlideNumber+1
+  << currentSlideNumber + 1
   << "| handout:0>{Multiply "
   << "\\alertNoH{"
   << currentSlideNumber << ", "
-  << currentSlideNumber+1
+  << currentSlideNumber + 1
   << "}{$"
   << currentQuotient.GetBlendCoeffAndMon
   (currentQuotient.theMonomials[indexCurrentQuotientMoN],
@@ -2368,44 +2368,44 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
   << " by divisor. "
   << "}";
 
-  currentSlideNumber++;
+  currentSlideNumber ++;
   this->highlightMonsQuotients[indexCurrentDivisor][indexCurrentQuotientMonInAllMons]
   .AddOnTop(currentSlideNumber);
-  for (int i=0; i<this->theBasiS[indexCurrentDivisor].size(); i++)
+  for (int i = 0; i < this->theBasiS[indexCurrentDivisor].size(); i ++)
     this->highlightMonsDivisors[indexCurrentDivisor]
     [this->allMonomials.GetIndex(this->theBasiS[indexCurrentDivisor][i])].
     AddOnTop(currentSlideNumber);
-  if (this->fcAnswerMonsSubtracands[remainderIndex].size!=this->allMonomials.size)
-    this->fcAnswerMonsSubtracands[remainderIndex].initFillInObject(this->allMonomials.size,-1);
-  for (int i=0; i<this->intermediateSubtractands.GetElement()[remainderIndex].size(); i++)
+  if (this->fcAnswerMonsSubtracands[remainderIndex].size != this->allMonomials.size)
+    this->fcAnswerMonsSubtracands[remainderIndex].initFillInObject(this->allMonomials.size, - 1);
+  for (int i = 0; i < this->intermediateSubtractands.GetElement()[remainderIndex].size(); i ++)
     this->fcAnswerMonsSubtracands[remainderIndex]
-    [this->allMonomials.GetIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])]=
+    [this->allMonomials.GetIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])] =
     currentSlideNumber;
-  currentSlideNumber++;
-  for (int i=0; i<this->intermediateRemainders.GetElement()[remainderIndex].size(); i++)
+  currentSlideNumber ++;
+  for (int i = 0; i < this->intermediateRemainders.GetElement()[remainderIndex].size(); i ++)
     this->highlightMonsRemainders[remainderIndex]
     [this->allMonomials.GetIndex(this->intermediateRemainders.GetElement()[remainderIndex][i])]
     .AddOnTop(currentSlideNumber);
-  for (int i=0; i<this->intermediateSubtractands.GetElement()[remainderIndex].size(); i++)
+  for (int i = 0; i < this->intermediateSubtractands.GetElement()[remainderIndex].size(); i ++)
     this->highlightMonsSubtracands[remainderIndex]
     [this->allMonomials.GetIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])]
     .AddOnTop(currentSlideNumber);
-  this->uncoverAllMonsRemainders[remainderIndex+1]=currentSlideNumber;
+  this->uncoverAllMonsRemainders[remainderIndex + 1] = currentSlideNumber;
   this->longDivisionLog << "\\only<" << currentSlideNumber << ", "
-  << currentSlideNumber+1 << "| handout:0>{Subtract last two polynomials.}";
-  currentSlideNumber++;
-  for (int i=0; i<this->intermediateRemainders.GetElement()[remainderIndex].size(); i++)
+  << currentSlideNumber + 1 << "| handout:0>{Subtract last two polynomials.}";
+  currentSlideNumber ++;
+  for (int i = 0; i < this->intermediateRemainders.GetElement()[remainderIndex].size(); i ++)
     this->highlightMonsRemainders[remainderIndex]
     [this->allMonomials.GetIndex(this->intermediateRemainders.GetElement()[remainderIndex][i])]
     .AddOnTop(currentSlideNumber);
-  for (int i=0; i<this->intermediateSubtractands.GetElement()[remainderIndex].size(); i++)
+  for (int i = 0; i < this->intermediateSubtractands.GetElement()[remainderIndex].size(); i ++)
     this->highlightMonsSubtracands[remainderIndex]
     [this->allMonomials.GetIndex(this->intermediateSubtractands.GetElement()[remainderIndex][i])]
     .AddOnTop(currentSlideNumber);
-  if (remainderIndex+1>= this->intermediateRemainders.GetElement().size)
+  if (remainderIndex + 1 >= this->intermediateRemainders.GetElement().size)
     crash << "Something is wrong: not enough intermediate remainders. " << crash;
-  for (int i=0; i<this->intermediateRemainders.GetElement()[remainderIndex+1].size(); i++)
-    this->fcAnswerMonsRemainders[remainderIndex+1]
+  for (int i = 0; i < this->intermediateRemainders.GetElement()[remainderIndex + 1].size(); i ++)
+    this->fcAnswerMonsRemainders[remainderIndex + 1]
     [this->allMonomials.GetIndex(this->intermediateRemainders.GetElement()[remainderIndex + 1][i])] =
     currentSlideNumber;
   if (this->intermediateRemainders.GetElement()[remainderIndex + 1].IsEqualToZero())

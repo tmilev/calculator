@@ -307,6 +307,9 @@ function InputPanelData(input){
   this.calculatorRightString = "";
   this.theLaTeXString = null;
   this.selectionEnd = 0;
+  this.javascriptInsertionAlreadyCalled = false;
+  this.numInsertedJavascriptChildren = 0;
+  this.timerForPreviewAnswers = 0;
 
   if (this.flagCalculatorPanel === undefined){
     this.flagCalculatorPanel = false;
@@ -329,8 +332,58 @@ InputPanelData.prototype.mQHelpCalculator = function(){
   this.ignoreNextMathQuillUpdateEvent = false;
 }
 
+
+InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outputComponent){
+  outputComponent.innerHTML = input;
+  var scripts = spanVerification.getElementsByTagName('script');
+  var theHead = document.getElementsByTagName('head')[0];
+  for (var i = 0; i < this.numInsertedJavascriptChildren; i++){
+    theHead.removeChild(theHead.lastChild);
+  }
+  this.numInsertedJavascriptChildren = 0;
+  for (var i = 0; i < scripts.length; i ++){
+    var scriptChild = document.createElement('script');
+    scriptChild.innerHTML = scripts[i].innerHTML;
+    scriptChild.type = 'text/javascript';
+    theHead.appendChild(scriptChild);
+    this.numInsertedJavascriptChildren++;
+  }
+  this.javascriptInsertionAlreadyCalled = true;
+  MathJax.Hub.Queue(['Typeset', MathJax.Hub, outputComponent]);
+}
+
+InputPanelData.prototype.submitOrPreviewAnswers = function(requestType){
+  clearTimeout(this.timerForPreviewAnswers);
+  var theURL = `${pathnames.calculator}?request=${theRequest}`;
+  
+  var theRequest = "submitExercisePreview"; //"submitProblemPreview"
+  submitGET({
+    url: theURL,
+    progress: "spanProgressCalculatorExamples",
+    callback: this.submitOrPreviewAnswersCallback,
+  });
+
+  inputParams += `&calculatorAnswer${idAnswer}=${encodeURIComponent(spanStudentAnswer.value)};`;
+}
+
+InputPanelData.prototype.giveUp = function(){
+  clearTimeout(this.timerForPreviewAnswers);
+  params= "";
+}
+
+InputPanelData.prototype.showSolution = function(){
+  clearTimeout(this.timerForPreviewAnswers);
+}
+
+InputPanelData.prototype.submitPreview = function() {  
+
+}
+
 InputPanelData.prototype.previewAnswers = function() { // useful event handlers
-  console.log("Here I am");
+  clearTimeout(this.timerForPreviewAnswers);
+  this.timerForPreviewAnswers = setTimeout(function(){
+    this.submitPreview();
+  }, 4000);
 }
 
 InputPanelData.prototype.editLaTeX = function() { // useful event handlers

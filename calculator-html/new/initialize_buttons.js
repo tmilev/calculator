@@ -290,12 +290,19 @@ function initializeCalculatorPage(){
 
 
 function InputPanelData(input){
+  //to serve autocomplete:
   this.idMQSpan = input.idMQSpan;
   this.idMQcomments = input.idMQcomments;
   this.fileName = input.fileName;
 
   this.idPureLatex = input.idPureLatex;
   this.idButtonContainer = input.idButtonContainer;
+  this.idButtonSubmit = input.idButtonSubmit;
+  this.idButtonInterpret = input.idButtonInterpret;
+  this.idButtonAnswer = input.idButtonAnswer;
+  this.idVerificationSpan = input.idVerificationSpan;
+  //just in case we forget some entry above:
+  Object.assign(this, input);
   panelDataRegistry[this.idButtonContainer] = this;
   this.mqObject = null;
   this.ignoreNextMathQuillUpdateEvent = false;
@@ -333,11 +340,14 @@ InputPanelData.prototype.mQHelpCalculator = function(){
 }
 
 
-InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outputComponent){
+InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outputComponent) {
+  if (typeof outputComponent == "string") {
+    outputComponent = document.getElementById(outputComponent);
+  }
   outputComponent.innerHTML = input;
   var scripts = spanVerification.getElementsByTagName('script');
   var theHead = document.getElementsByTagName('head')[0];
-  for (var i = 0; i < this.numInsertedJavascriptChildren; i++){
+  for (var i = 0; i < this.numInsertedJavascriptChildren; i ++) {
     theHead.removeChild(theHead.lastChild);
   }
   this.numInsertedJavascriptChildren = 0;
@@ -346,44 +356,41 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outpu
     scriptChild.innerHTML = scripts[i].innerHTML;
     scriptChild.type = 'text/javascript';
     theHead.appendChild(scriptChild);
-    this.numInsertedJavascriptChildren++;
+    this.numInsertedJavascriptChildren ++;
   }
   this.javascriptInsertionAlreadyCalled = true;
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, outputComponent]);
 }
 
-InputPanelData.prototype.submitOrPreviewAnswers = function(requestType){
+InputPanelData.prototype.submitOrPreviewAnswers = function(requestType) {
   clearTimeout(this.timerForPreviewAnswers);
-  var theURL = `${pathnames.calculator}?request=${theRequest}`;
-  
-  var theRequest = "submitExercisePreview"; //"submitProblemPreview"
+  var studentAnswer = document.getElementById(this.idPureLatex).value;
+  var theURL = `${pathnames.calculator}?request=${requestType}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
   submitGET({
     url: theURL,
     progress: "spanProgressCalculatorExamples",
-    callback: this.submitOrPreviewAnswersCallback,
+    callback: this.submitOrPreviewAnswersCallback.bind(this),
+    result: this.idVerificationSpan
   });
-
-  inputParams += `&calculatorAnswer${idAnswer}=${encodeURIComponent(spanStudentAnswer.value)};`;
 }
 
-InputPanelData.prototype.giveUp = function(){
+InputPanelData.prototype.giveUp = function() {
   clearTimeout(this.timerForPreviewAnswers);
   params= "";
 }
 
-InputPanelData.prototype.showSolution = function(){
+InputPanelData.prototype.showSolution = function() {
   clearTimeout(this.timerForPreviewAnswers);
 }
 
-InputPanelData.prototype.submitPreview = function() {  
-
+InputPanelData.prototype.submitPreview = function() {
+  var theRequest = "submitExercisePreview"; //"submitProblemPreview"
+  this.submitOrPreviewAnswers(theRequest);
 }
 
-InputPanelData.prototype.previewAnswers = function() { // useful event handlers
+InputPanelData.prototype.submitPreviewWithTimeOut = function() { // useful event handlers
   clearTimeout(this.timerForPreviewAnswers);
-  this.timerForPreviewAnswers = setTimeout(function(){
-    this.submitPreview();
-  }, 4000);
+  this.timerForPreviewAnswers = setTimeout(this.submitPreview.bind(this), 4000);
 }
 
 InputPanelData.prototype.editLaTeX = function() { // useful event handlers

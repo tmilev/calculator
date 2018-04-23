@@ -2772,6 +2772,7 @@ JSData CalculatorHTML::GetJavascriptMathQuillBoxesForJSON()
     currentAnswerJS["idButtonInterpret"] = currentAnswer.idButtonInterpret;
     currentAnswerJS["idButtonAnswer"] = currentAnswer.idButtonAnswer;
     currentAnswerJS["idButtonSolution"] = currentAnswer.idButtonSolution;
+    currentAnswerJS["idVerificationSpan"] = currentAnswer.idVerificationSpan;
     ///////////////
     output[i] = currentAnswerJS;
   }

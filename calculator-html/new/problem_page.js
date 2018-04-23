@@ -27,13 +27,21 @@ function updateProblemPageCallback(input, outputComponent){
       idButtonSubmit: answerVectors[counterAnswers].idButtonSubmit,
       idButtonInterpret: answerVectors[counterAnswers].idButtonInterpret,
       idButtonAnswer: answerVectors[counterAnswers].idButtonAnswer,
+      idVerificationSpan: answerVectors[counterAnswers].idVerificationSpan,
       flagAnswerPanel: true,
       flagCalculatorPanel: false,
     });
-    var latexChangeHandler = thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswers].editLaTeX;
-    var handlerBound = latexChangeHandler.bind(thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswers]);
+    var currentAnswerPanel = thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswers];
+    var latexChangeHandler = currentAnswerPanel.editLaTeX;
+    var latexChangeHandlerBound = latexChangeHandler.bind(currentAnswerPanel);
     var theElement = document.getElementById(answerVectors[counterAnswers].answerIdPureLatex);
-    theElement.addEventListener('keyup', handlerBound);
+    theElement.addEventListener('keyup', latexChangeHandlerBound);
+
+    var interpretHandler = currentAnswerPanel.submitPreview;
+    var interpretHandlerBound = interpretHandler.bind(currentAnswerPanel);
+    theElement = document.getElementById(currentAnswerPanel.idButtonInterpret);
+    theElement.addEventListener('click', interpretHandlerBound);
+    
     //theElement.addEventListener('onchange', latexChangeHandler);
     //theElement.attributes.onkeyup = latexChangeHandler;
     //console.log(theElement);

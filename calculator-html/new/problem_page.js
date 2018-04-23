@@ -18,18 +18,21 @@ function updateProblemPageCallback(input, outputComponent){
   thePage.currentProblem[thePage.currentCourse.fileName] = {};
   thePage.currentProblem[thePage.currentCourse.fileName].answers = [];
   var answerVectors = theProblem["answers"];  
-  for (var counterAnswers = 0;  counterAnswers < answerVectors.answerMQspanIds.length; counterAnswers ++){
+  for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++){
     thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswers] = new InputPanelData({
       fileName: thePage.currentCourse.fileName,
-      idMQSpan: answerVectors.answerMQspanIds[counterAnswers],
-      idPureLatex: answerVectors.answerIdsPureLatex[counterAnswers],
-      idButtonContainer: answerVectors.preferredButtonContainers[counterAnswers],
+      idMQSpan: answerVectors[counterAnswers].answerMQspanId,
+      idPureLatex: answerVectors[counterAnswers].answerIdPureLatex,
+      idButtonContainer: answerVectors[counterAnswers].preferredButtonContainer,
+      idButtonSubmit: answerVectors[counterAnswers].idButtonSubmit,
+      idButtonInterpret: answerVectors[counterAnswers].idButtonInterpret,
+      idButtonAnswer: answerVectors[counterAnswers].idButtonAnswer,
       flagAnswerPanel: true,
       flagCalculatorPanel: false,
     });
     var latexChangeHandler = thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswers].editLaTeX;
     var handlerBound = latexChangeHandler.bind(thePage.currentProblem[thePage.currentCourse.fileName].answers[counterAnswers]);
-    var theElement = document.getElementById(answerVectors.answerIdsPureLatex[counterAnswers]);
+    var theElement = document.getElementById(answerVectors[counterAnswers].answerIdPureLatex);
     theElement.addEventListener('keyup', handlerBound);
     //theElement.addEventListener('onchange', latexChangeHandler);
     //theElement.attributes.onkeyup = latexChangeHandler;

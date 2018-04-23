@@ -326,7 +326,7 @@ void LaTeXcrawler::BuildFreecalC()
   }
   int numSlidesToBuild = this->slideTexInputCommands.size;
   this->slideFileNamesVirtualNoPathNoExtensioN.SetSize(this->slideTexInputCommands.size);
-  for (int i = 0; i < this->slideTexInputCommands.size; i++)
+  for (int i = 0; i < this->slideTexInputCommands.size; i ++)
   { this->slideFileNamesVirtualNoPathNoExtensioN[i] = "";
     if (this->slideTexInputCommands[i] == "")
       continue;
@@ -335,8 +335,8 @@ void LaTeXcrawler::BuildFreecalC()
   }
   //executedCommands << "<br>Slides extracted: " << this->theSlides.ToStringCommaDelimited();
   //executedCommands << "<br>Slides names: " << this->theSlideNames.ToStringCommaDelimited();
-  for (int i = 0; i < numSlidesToBuild; i++)
-  { for (int k = 0; k < 2; k++)
+  for (int i = 0; i < numSlidesToBuild; i ++)
+  { for (int k = 0; k < 2; k ++)
     { if (!FileOperations::OpenFileUnsecure(workingFile, this->theFileNameWorkingCopy, false, true, false))
       { resultTable << "<td>-</td><td>-</td><td>Failed to open working file: "
         << this->theFileNameWorkingCopy << ", aborting. </td> </tr>";
@@ -515,7 +515,7 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   }
   this->slideFileNamesWithLatexPathNoExtension.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
   this->latexSnippets.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
-  for (int i = 0; i < this->slideFileNamesVirtualWithPatH.size; i++)
+  for (int i = 0; i < this->slideFileNamesVirtualWithPatH.size; i ++)
   { if (MathRoutines::StringBeginsWith(this->slideFileNamesVirtualWithPatH[i], "LaTeX: ", &this->latexSnippets[i]))
     { if (i == 0)
       { if (commentsOnFailure != 0)
@@ -572,7 +572,7 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
   std::string firstSignificantSlideName = "";
   if (this->slideFileNamesVirtualWithPatH.size >= 1)
     firstSignificantSlideName = this->slideFileNamesVirtualWithPatH[0];
-  for (int i = 1; i < this->slideFileNamesVirtualWithPatH.size; i++)
+  for (int i = 1; i < this->slideFileNamesVirtualWithPatH.size; i ++)
     if (this->latexSnippets[i] == "")
     { firstSignificantSlideName = this->slideFileNamesVirtualWithPatH[i];
       break;
@@ -667,8 +667,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
   std::stringstream crawlingResult;
   std::fstream theFile;
   if (!this->flagCrawlTexSourcesRecursively)
-  { if (!FileOperations::OpenFileVirtual
-        (theFile, this->headerFileNameWithPathVirtual, false, false, false))
+  { if (!FileOperations::OpenFileVirtual(theFile, this->headerFileNameWithPathVirtual, false, false, false))
       return false;
     std::string buffer;
     do
@@ -719,7 +718,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
       { if (this->flagHomeworkRatherThanSlides)
         { bool doIncludeItem = true;
           if (i < this->slideFilesExtraFlags.size)
-            if (this->slideFilesExtraFlags[i]=="true")
+            if (this->slideFilesExtraFlags[i] == "true")
               doIncludeItem = false;
           if (doIncludeItem)
             crawlingResult << "\\item\n";
@@ -801,7 +800,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   if (!topicParser.LoadAndParseTopicList(*commentsOnFailure))
     return false;
   int numSlidePairsToBuild = 0;
-  for (int i = 0; i < topicParser.theTopicS.size(); i++)
+  for (int i = 0; i < topicParser.theTopicS.size(); i ++)
     if (topicParser.theTopicS[i].sourceSlides.size > 0)
       numSlidePairsToBuild++;
   if (commentsGeneral != 0)
@@ -827,7 +826,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
     this->slideFileNamesVirtualWithPatH.SetSize(topicParser.sourcesHomeworkHeaders.size);
     this->slideFilesExtraFlags.SetSize(topicParser.sourcesHomeworkHeaders.size);
     this->slideFileNamesVirtualWithPatH.AddListOnTop(currentElt.sourceHomework);
-    for (int i = 0; i < currentElt.sourceHomeworkIsSolution.size; i++)
+    for (int i = 0; i < currentElt.sourceHomeworkIsSolution.size; i ++)
     { std::string currentFlag = "false";
       if (currentElt.sourceHomeworkIsSolution[i])
         currentFlag = "true";

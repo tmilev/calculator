@@ -322,12 +322,11 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
   thePlotObj.rightPtE = input[3];
   if (input.size() >= 7)
   { if (!input[6].IsOfType<std::string>(&thePlotObj.colorJS))
-      thePlotObj.colorJS=input[6].ToString();
+      thePlotObj.colorJS = input[6].ToString();
   } else
-    thePlotObj.colorJS="blue";
-  thePlotObj.colorRGB=HtmlRoutines::RedGreenBlue(0, 0, 255);
-  DrawingVariables::GetColorIntFromColorString
-  (thePlotObj.colorJS, thePlotObj.colorRGB);
+    thePlotObj.colorJS = "blue";
+  thePlotObj.colorRGB = HtmlRoutines::RedGreenBlue(0, 0, 255);
+  DrawingVariables::GetColorIntFromColorString(thePlotObj.colorJS, thePlotObj.colorRGB);
   thePlotObj.lineWidth = 1;
   if (input.size() >= 8)
     input[7].EvaluatesToDouble(&thePlotObj.lineWidth);
@@ -388,7 +387,7 @@ bool CalculatorFunctionsGeneral::innerPlotDirectionOrVectorField(Calculator& the
     << "<hr>Could not extract a list of elements for the "
     << "number of segments from: " << input[4].ToString();
   thePlotObj.numSegmenTsJS.SetSize(2);
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 2; i ++)
   { if (!CalculatorFunctionsGeneral::innerMakeJavascriptExpression(theCommands, input[4][i + 1], jsConverterE))
       return theCommands << "Failed to convert " << input[4][i + 1].ToString() << " to javascript. ";
     thePlotObj.numSegmenTsJS[i] = jsConverterE.ToString();
@@ -584,7 +583,7 @@ bool CalculatorFunctionsGeneral::innerIsSquareFree(Calculator& theCommands, cons
   if (!theLI.value.Factor(theFactors, theMults))
     return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
   int result = 1;
-  for (int i = 0; i < theMults.size; i++)
+  for (int i = 0; i < theMults.size; i ++)
     if (theMults[i] > 1)
     { result = 0;
       break;
@@ -606,7 +605,7 @@ bool CalculatorFunctionsGeneral::innerIsPower(Calculator& theCommands, const Exp
   int result = 1;
   if (theMults.size > 0)
     result = (theMults[0] > 1);
-  for (int i = 1; i < theMults.size; i++)
+  for (int i = 1; i < theMults.size; i ++)
     if (theMults[i] != theMults[0])
     { result = 0;
       break;

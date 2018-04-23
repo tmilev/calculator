@@ -883,8 +883,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 
 
   out  << theInitFunctionName << "();\n"
-  << "</script>\n"
-  ;
+  << "</script>\n";
 //        stOutput << " got to here pt x2";
 //  if (this->flagIncludeExtraHtmlDescriptions)
 //    out << "INCLUDING XTRAS";
@@ -982,8 +981,8 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << " gives the scalar product of e_i and e_j. If you enter a degenerate or non-positive definite "
   << " symmetric bilinear form"
   << " the javascript might crash. You are expected to enter a symmetric strictly positive definite matrix. <br> \n";
-  for (int i=0; i<this->theBuffer.theBilinearForm.NumRows; i++)
-  { for (int j=0; j<this->theBuffer.theBilinearForm.NumCols; j++)
+  for (int i = 0; i < this->theBuffer.theBilinearForm.NumRows; i ++)
+  { for (int j = 0; j < this->theBuffer.theBilinearForm.NumCols; j ++)
     { std::stringstream tmpStream;
       tmpStream << "textBilinearForm" << timesCalled << "_" << i << "_" << j;
       out << "<textarea rows=\"1\" cols=\"2\" id=\"" << tmpStream.str()
@@ -994,7 +993,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     }
     out << "<br>";
   }
-  out << HtmlRoutines::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "redraw");
+  out << HtmlRoutines::GetHtmlButton("button" + theCanvasId, theDrawFunctionName + "();", "redraw");
   out << "<br>The picture is drawn using javascript."
   << "<br> Left click + hold+ move the mouse on a special vector = rotates the special vector. "
   << "Special vectors, if any, should be labeled according to the author's ``artistic'' inspiration (usually dark red dots).  "
@@ -1006,10 +1005,9 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << "inside the projection plane or the selected vector is orthogonal to the projection plane. "
   << "If one of these cases happens, the picture might jump around a bit."
   << "<br>The mouse wheel zooms in/out. "
-  << " Zooming is tested to work on Firefox and google Chrome browsers on Ubuntu."
-  ;
+  << " Zooming is tested to work on Firefox and google Chrome browsers on Ubuntu.";
   out << "<br>Currently, " << this->theBuffer.IndexNthDrawOperation.size << " elements are drawn. ";
-  if (this->theBuffer.IndexNthDrawOperation.size>500)
+  if (this->theBuffer.IndexNthDrawOperation.size > 500)
     out << " The visualization is javascript/pc processor <b>intensive</b> so it will <b>not work well</b> "
     << " for graphics with lots of elements. This message is displayed only when the number of drawn elements is more than 500.";
   out << "\n<hr>\n";
@@ -1023,14 +1021,14 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << "}\n";
 
 
-  if (this->theBuffer.ProjectionsEiVectors.size!= theDimension || this->theBuffer.theBilinearForm.NumRows!=theDimension)
+  if (this->theBuffer.ProjectionsEiVectors.size != theDimension || this->theBuffer.theBilinearForm.NumRows != theDimension)
   { this->theBuffer.MakeMeAStandardBasis(theDimension);
     //stOutput << "made a standard basis!";
   }
   out << "var BilinearForm" << timesCalled << "= new Array(" << theDimension << ");\n";
-  for (int i=0; i<theDimension; i++)
+  for (int i = 0; i < theDimension; i ++)
   { out << "BilinearForm" << timesCalled << "[" << i << "]=new Array(" << theDimension << ");\n";
-    for (int j=0; j<theDimension; j++)
+    for (int j = 0; j < theDimension; j ++)
       out << "BilinearForm" << timesCalled << "[" << i << "][" << j << "]=" << this->theBuffer.theBilinearForm.elements[i][j] << ";\t";
     out << "\n";
   }
@@ -1044,16 +1042,16 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << "var VectorE1ConeStart" << timesCalled << "= new Array(" << theDimension << ");\n"
   << "var VectorE2ConeStart" << timesCalled << "= new Array(" << theDimension << ");\n";
 
-  for (int i=0; i<theDimension; i++)
+  for (int i = 0; i < theDimension; i ++)
   { out << "VectorE2Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][1][i] << ";\t";
     out << "VectorE1Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][0][i] << ";\n";
   }
   out << "var frameCount" << timesCalled << "=0;\n";
   out << "var frameCountGoesUp" << timesCalled << "=true;\n";
-  int numFramesUserPlane=50;
+  int numFramesUserPlane = 50;
   out << "function startProjectionPlaneUser" << timesCalled << "(){\n"
   << " frameCount" << timesCalled << "=0;\n";
-  for (int i=0; i<theDimension; i++)
+  for (int i = 0; i < theDimension; i ++)
     out
     << "  VectorE1ConeStart" << timesCalled << "[" << i << "]=VectorE1Cone" << timesCalled << "[" << i << "];\n"
     << "  VectorE2ConeStart" << timesCalled << "[" << i << "]=VectorE2Cone" << timesCalled << "[" << i << "];\n"
@@ -1083,13 +1081,13 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << "  " << theDrawFunctionName << "();\n"
   << "  window.setTimeout(\"changeProjectionPlaneUser" << timesCalled << "()\",100);\n"
   << "}";
-  if (this->theBuffer.BasisProjectionPlane.size>2)
+  if (this->theBuffer.BasisProjectionPlane.size > 2)
   { out << "BasisProjectionPlane" << timesCalled << "=new Array(" << this->theBuffer.BasisProjectionPlane.size << ");\n";
-    for (int j=0; j<this->theBuffer.BasisProjectionPlane.size; j++)
+    for (int j = 0; j < this->theBuffer.BasisProjectionPlane.size; j ++)
     { out << "BasisProjectionPlane" << timesCalled << "[" << j << "]=new Array(2);\n";
-      for (int k=0; k<2; k++)
+      for (int k = 0; k < 2; k ++)
       { out << "BasisProjectionPlane" << timesCalled << "[" << j << "][" << k << "]=new Array(" << theDimension << ");\n";
-        for (int l=0; l<theDimension; l++)
+        for (int l = 0; l < theDimension; l ++)
           out << "BasisProjectionPlane" << timesCalled << "[" << j << "][" << k << "][" << l << "]="
           << this->theBuffer.BasisProjectionPlane[j][k][l] << ";\t";
         out << "\n";
@@ -1101,7 +1099,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     << "  frameCount" << timesCalled << "++;\n"
     << "else\n"
     << "  frameCount" << timesCalled << "--;\n"
-    << "if (frameCount" << timesCalled << "==" << this->theBuffer.BasisProjectionPlane.size-1 << " || "
+    << "if (frameCount" << timesCalled << "==" << this->theBuffer.BasisProjectionPlane.size - 1 << " || "
     << "frameCount" << timesCalled << "==0)\n"
     << "{ \n"
     << "  frameCountGoesUp" << timesCalled << "=! frameCountGoesUp" << timesCalled << ";\n"
@@ -1121,25 +1119,25 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
 
   out << "var " << projName << "= new Array(" << theDimension << ");\n";
   out << "var " << eiBasis << "= new Array(" << theDimension << ");\n";
-  for (int i=0; i<theDimension; i++)
+  for (int i = 0; i < theDimension; i ++)
     out << projName << "[" << i << "]= new Array(2);\n";
   out  << "var " << basisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
   out  << "var " << projBasisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
-  for (int i=0; i<this->theBuffer.BasisToDrawCirclesAt.size; i++)
+  for (int i = 0; i < this->theBuffer.BasisToDrawCirclesAt.size; i ++)
   { out << basisCircles << "[" << i << "]=[";
-    for (int j=0; j<theDimension; j++)
+    for (int j = 0; j < theDimension; j ++)
     { out << this->theBuffer.BasisToDrawCirclesAt[i][j];
-      if(j!=theDimension-1)
+      if(j != theDimension - 1)
         out << ",";
      }
     out <<  "];\n";
   }
-  for (int i=0; i<theDimension; i++)
+  for (int i = 0; i < theDimension; i ++)
   { ////////////////////
     out << eiBasis << "[" << i << "]=[";
-    for (int j=0; j<theDimension; j++)
-    { out << ((i==j)? 1 :0);
-      if(j!=theDimension-1)
+    for (int j = 0; j < theDimension; j ++)
+    { out << ((i == j) ? 1 :0);
+      if (j != theDimension - 1)
         out << ",";
      }
     out <<  "];\n";
@@ -1148,23 +1146,21 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   }
   out << "var " << Points1ArrayName << "=new Array(" << this->theFrames.size << ");\n" << "var " << Points2ArrayName << "=new Array(" << this->theFrames.size << ");\n"
   << "var " << circArrayName << "=new Array(" << this->theFrames.size << ");\n" << "var " << circRadiiArrayName << "=new Array(" << this->theFrames.size << ");\n"
-  << "var " << txtArrayName << "=new Array(" << this->theFrames.size << ");\n" << "var " << Points1ArrayNameColors << "=new Array(" << this->theFrames.size << ");\n"
-  ;
-  for (int k=0; k<this->theFrames.size; k++)
-  { DrawOperations& currentOps= this->theFrames[k].theBuffer;
+  << "var " << txtArrayName << "=new Array(" << this->theFrames.size << ");\n" << "var " << Points1ArrayNameColors << "=new Array(" << this->theFrames.size << ");\n";
+  for (int k = 0; k < this->theFrames.size; k ++)
+  { DrawOperations& currentOps = this->theFrames[k].theBuffer;
     out << Points1ArrayName << "[" << k << "]" << "=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n" << Points2ArrayName << "["
     << k << "]=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n" << circArrayName << "[" << k << "]=new Array("
     << currentOps.theDrawCircleAtVectorOperations.size << ");\n" << circRadiiArrayName << "[" << k << "]=new Array(" << currentOps.theDrawCircleAtVectorOperations.size << ");\n"
     << txtArrayName << "[" << k << "]=new Array(" << currentOps.theDrawTextAtVectorOperations.size << ");\n" << Points1ArrayNameColors
-    << "[" << k << "]=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n"
-    ;
-    for (int i=0; i<currentOps.theDrawLineBetweenTwoRootsOperations.size; i++)
-    { Vector<double>& current1=currentOps.theDrawLineBetweenTwoRootsOperations[i].v1;
-      Vector<double>& current2=currentOps.theDrawLineBetweenTwoRootsOperations[i].v2;
+    << "[" << k << "]=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n";
+    for (int i = 0; i < currentOps.theDrawLineBetweenTwoRootsOperations.size; i ++)
+    { Vector<double>& current1 = currentOps.theDrawLineBetweenTwoRootsOperations[i].v1;
+      Vector<double>& current2 = currentOps.theDrawLineBetweenTwoRootsOperations[i].v2;
       out << Points1ArrayName << "[" << k << "]" << "[" << i << "]=[";
-      for (int j=0; j<theDimension; j++)
+      for (int j = 0; j < theDimension; j ++)
       { out << current1[j];
-        if (j!=theDimension-1)
+        if (j != theDimension - 1)
           out << ",";
       }
       out << "];\n";
@@ -1172,30 +1168,30 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
       << boss->GetColorHtmlFromColorIndex(currentOps.theDrawLineBetweenTwoRootsOperations[i].ColorIndex)
       << "\";";
       out << Points2ArrayName << "[" << k << "]" << "[" << i << "]=[";
-      for (int j=0; j<theDimension; j++)
+      for (int j = 0; j < theDimension; j ++)
       { out << current2[j];
-        if (j!=theDimension-1)
+        if (j != theDimension - 1)
           out << ",";
       }
       out << "];\n";
     }
-    for (int i=0; i<currentOps.theDrawCircleAtVectorOperations.size; i++)
-    { Vector<double>& current1=currentOps.theDrawCircleAtVectorOperations[i].theVector;
+    for (int i = 0; i < currentOps.theDrawCircleAtVectorOperations.size; i ++)
+    { Vector<double>& current1 = currentOps.theDrawCircleAtVectorOperations[i].theVector;
       out << circRadiiArrayName << "[" << k << "]" << "[" << i << "]=" << currentOps.theDrawCircleAtVectorOperations[i].radius << ";\n";
       out << circArrayName << "[" << k << "]" << "[" << i << "]=[";
-      for (int j=0; j<theDimension; j++)
+      for (int j = 0; j < theDimension; j ++)
       { out << current1[j];
-        if (j!=theDimension-1)
+        if (j != theDimension - 1)
           out << ",";
       }
       out << "];\n";
     }
-    for (int i=0; i<currentOps.theDrawTextAtVectorOperations.size; i++)
-    { Vector<double>& current1=currentOps.theDrawTextAtVectorOperations [i].theVector;
+    for (int i = 0; i < currentOps.theDrawTextAtVectorOperations.size; i ++)
+    { Vector<double>& current1 = currentOps.theDrawTextAtVectorOperations [i].theVector;
       out << txtArrayName << "[" << k << "]" << "[" << i << "]=[";
-      for (int j=0; j<theDimension; j++)
+      for (int j = 0; j < theDimension; j ++)
       { out << current1[j];
-        if (j!=theDimension-1)
+        if (j != theDimension - 1)
           out << ",";
       }
       out << "];\n";
@@ -1218,7 +1214,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   out << "return result;\n";
   out << "}\n";
   out << "var globalFrameCounter=0;\n";
-  int frameDelay=3000;
+  int frameDelay = 3000;
   out
   << "function incrementGlobalFrameCounter" << timesCalled << "(){\n"
   << "globalFrameCounter++;\n"

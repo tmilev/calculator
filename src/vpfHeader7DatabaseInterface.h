@@ -106,6 +106,10 @@ struct Answer
   std::string answerId;
   std::string varAnswerId;
   std::string idVerificationSpan;
+  std::string idButtonSubmit;
+  std::string idButtonInterpret;
+  std::string idButtonAnswer;
+  std::string idButtonSolution;
   std::string javascriptPreviewAnswer;
   //std::string htmlMQjavascript;
   std::string htmlButtonInterpret;
@@ -149,7 +153,7 @@ struct ProblemDataAdministrative
 public:
   MapLisT<std::string, std::string, MathRoutines::hashString> problemWeightsPerCoursE;
   MapLisT<std::string, std::string, MathRoutines::hashString> deadlinesPerSection;
-  bool GetWeightFromCoursE(const std::string& theCourseNonURLed, Rational& output, std::string* outputAsGivenByInstructor=0);
+  bool GetWeightFromCoursE(const std::string& theCourseNonURLed, Rational& output, std::string* outputAsGivenByInstructor = 0);
   std::string ToString()const;
 };
 

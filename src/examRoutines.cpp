@@ -1448,20 +1448,27 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   << currentA.idVerificationSpan << "');";
 
   currentA.javascriptPreviewAnswer = previewAnswerStream.str();
-  currentA.htmlButtonSubmit = "<button class=\"submitButton\" onclick = \"submitAnswers('"
-  + answerId + "', '" + currentA.idVerificationSpan + "')\">Submit</button>";
-  currentA.htmlButtonInterpret = (std::string)"<button class=\"previewButton\" onclick=\""
-  + "previewAnswersNoTimeOut('" + answerId + "', '"
-  + currentA.idVerificationSpan + "')" + "\">Interpret</button>";
+  currentA.idButtonSubmit = "buttonSubmit" + answerId;
+  currentA.idButtonInterpret = "buttonInterpret" + answerId;
+  currentA.idButtonAnswer = "buttonAnswer" + answerId;
+
+  currentA.htmlButtonSubmit = "<button class=\"submitButton\" id=\"" +
+  currentA.idButtonSubmit + "\"" + " onclick = \"submitAnswers('" +
+  answerId + "', '" + currentA.idVerificationSpan + "')\">Submit</button>";
+  currentA.htmlButtonInterpret = (std::string)"<button class=\"previewButton\" ";
+  currentA.htmlButtonInterpret += " id=\"" + currentA.idButtonInterpret + "\" ";
+  if (!this->flagUseJSON)
+    currentA.htmlButtonInterpret += "onclick=\"previewAnswersNoTimeOut('" + answerId + "', '" + currentA.idVerificationSpan + "')" + "\"";
+  currentA.htmlButtonInterpret += ">Interpret</button>";
   if (!this->flagIsForReal)
   { if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly != "")
-      currentA.htmlButtonAnswer = "<button class=\"showAnswerButton\" onclick=\"giveUp('"
-      + answerId + "', '" + currentA.idVerificationSpan + "')\">Answer</button>";
+      currentA.htmlButtonAnswer = "<button class=\"showAnswerButton\" onclick=\"giveUp('" +
+      answerId + "', '" + currentA.idVerificationSpan + "')\">Answer</button>";
     else
       currentA.htmlButtonAnswer = "No ``give-up'' answer available. ";
     if (currentA.flagSolutionFound)
-      currentA.htmlButtonSolution = "<button class=\"showSolutionButton\" onclick=\"showSolution('" + answerId + "','"
-      + currentA.idSpanSolution + "')\"> Solution</button>";
+      currentA.htmlButtonSolution = "<button class=\"showSolutionButton\" onclick=\"showSolution('" + answerId +
+      "','" + currentA.idSpanSolution + "')\"> Solution</button>";
     else
       currentA.htmlButtonSolution = "";
   }
@@ -2752,70 +2759,24 @@ bool CalculatorHtmlFunctions::innerExtractCalculatorExpressionFromHtml
 
 JSData CalculatorHTML::GetJavascriptMathQuillBoxesForJSON()
 { MacroRegisterFunctionWithName("CalculatorHTML::GetJavascriptMathQuillBoxesForJSON");
-  std::stringstream out;
   ////////////////////////////////////////////////////////////////////
-  JSData output;
-  JSData idMQfields;
-  idMQfields.type = JSData::JSarray;
+  JSData output(JSData::JSarray);
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++)
-    idMQfields[i] = this->theProblemData.theAnswers[i].idMQfield;
-  output["answerMQspanIds"] = idMQfields;
-  JSData preferredButtonContainers(JSData::JSarray);
-  for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++)
-    preferredButtonContainers[i] = this->theProblemData.theAnswers[i].idMQButtonPanelLocation;
-  output["preferredButtonContainers"] = preferredButtonContainers;
-  JSData answerIdsPureLatex(JSData::JSarray);
-  out << "answerIdsPureLatex = [";
-  for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++)
-    answerIdsPureLatex[i] = this->theProblemData.theAnswers[i].answerId;
-  output["answerIdsPureLatex"] = answerIdsPureLatex;
-
-/*  for (int answerCounter = 0; answerCounter < this->theProblemData.theAnswers.size(); answerCounter ++)
-  { Answer& currentA = this->theProblemData.theAnswers[answerCounter];
-    out << "var " << currentA.varMQfield << ";\n";
-    out << "var " << currentA.varAnswerId << ";\n";
-    out
-    << "function " << currentA.MQUpdateFunction << "(){\n"
-    << "ignoreNextMathQuillUpdateEvent=true;\n"
-    << currentA.MQobject << ".latex(" << currentA.varAnswerId << ".value+' ');\n"
-    //<< "alert('writing: ' +" << currentA.varAnswerId  << ".value);\n"
-    //<< currentA.MQobject << ".latex(" << currentA.varAnswerId << ".value);\n"
-    << "ignoreNextMathQuillUpdateEvent=false;\n"
-    << "}\n";
+  { JSData currentAnswerJS;
+    Answer& currentAnswer = this->theProblemData.theAnswers[i];
+    ///////////////
+    currentAnswerJS["answerMQspanId"] = currentAnswer.idMQfield;
+    currentAnswerJS["preferredButtonContainer"] = currentAnswer.idMQButtonPanelLocation;
+    currentAnswerJS["answerIdPureLatex"] = currentAnswer.answerId;
+    currentAnswerJS["idButtonSubmit"] = currentAnswer.idButtonSubmit;
+    currentAnswerJS["idButtonInterpret"] = currentAnswer.idButtonInterpret;
+    currentAnswerJS["idButtonAnswer"] = currentAnswer.idButtonAnswer;
+    currentAnswerJS["idButtonSolution"] = currentAnswer.idButtonSolution;
+    ///////////////
+    output[i] = currentAnswerJS;
   }
-  out
-    << "var ignoreNextMathQuillUpdateEvent=false;\n"
-    << "function initializeMathQuill(){\n";
-
-  for (int answerCounter = 0; answerCounter < this->theProblemData.theAnswers.size(); answerCounter ++)
-  { Answer& currentA = this->theProblemData.theAnswers[answerCounter];
-    out << "////////////////////////\n";
-    out << currentA.varMQfield  << " = document.getElementById('" << currentA.idMQfield << "');\n"
-    << currentA.varAnswerId << " = document.getElementById('" << currentA.answerId << "');\n"
-    << "globalMQ.config({\n"
-    << "  autoFunctionize: 'sin cos tan sec csc cot log ln'\n"
-    << "  });\n"
-    << currentA.MQobject << " = globalMQ.MathField(" << currentA.varMQfield << ", {\n"
-    << "spaceBehavesLikeTab: true, // configurable\n"
-    << "supSubsRequireOperand: true, // configurable\n"
-    << "autoSubscriptNumerals: true, // configurable\n"
-    << "handlers: {\n"
-    << "edit: function() { // useful event handlers\n"
-    << "if (ignoreNextMathQuillUpdateEvent){\n"
-  //  << "  ignoreNextMathQuillUpdateEvent=false;\n"
-    << "  return;\n"
-    << "}\n"
-    << currentA.varAnswerId << ".value = processMathQuillLatex(" << currentA.MQobject << ".latex() ); // simple API\n"
-    << currentA.javascriptPreviewAnswer
-    << "}\n"
-    << "}\n"
-    << "});\n";
-  }
-  out << "}//closing initializeMathQuill\n";
-  out << "</script>";*/
   return output;
 }
-
 
 std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
 { MacroRegisterFunctionWithName("CalculatorHTML::GetJavascriptMathQuillBoxes");

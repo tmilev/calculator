@@ -33,10 +33,9 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 //  stOutput << "<hr>Starting matrix b: " << matb.ToString();
   if (GlobalGoal.IsEqualToZero())
     return false;
-  int NumTrueVariables=matA.NumCols;
+  int NumTrueVariables = matA.NumCols;
   //tempMatb.Assign(matb);
-  tempMatA.init(matA.NumRows, NumTrueVariables+matA.NumRows);
-  MemorySaving<HashedList<Selection> > tempSelList;
+  tempMatA.init(matA.NumRows, NumTrueVariables + matA.NumRows);
   HashedList<Selection> VisitedVertices;
   VisitedVertices.Clear();
   BaseVariables.init(tempMatA.NumCols);
@@ -82,7 +81,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       tempRat.Invert();
   //    if (BaseVariables.elements[LeavingVariableRow]==34)
   //      tempMatA.ComputeDebugString();
-      for (int i=0; i<tempMatA.NumRows; i++)
+      for (int i = 0; i < tempMatA.NumRows; i ++)
         if (!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1))
           crash << crash;
       tempMatA.RowTimesScalar(LeavingVariableRow, tempRat);
@@ -90,25 +89,25 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       //  tempMatA.ComputeDebugString();
       tempTotalChange.Assign(MaxMovement);
       tempTotalChange.MultiplyBy(ChangeGradient);
-      matX[EnteringVariable]+=(MaxMovement);
+      matX[EnteringVariable] += MaxMovement;
       if (!tempTotalChange.IsEqualToZero())
       { VisitedVertices.Clear();
         GlobalGoal.Subtract(tempTotalChange);
       } else
       { //BaseVariables.ComputeDebugString();
-        int tempI= VisitedVertices.GetIndex(BaseVariables);
-        if (tempI==-1)
+        int tempI = VisitedVertices.GetIndex(BaseVariables);
+        if (tempI == - 1)
           VisitedVertices.AddOnTop(BaseVariables);
         else
-          WeHaveNotEnteredACycle=false;
+          WeHaveNotEnteredACycle = false;
       }
       //if (BaseVariables.elements[LeavingVariableRow]==34)
       //  tempMatA.ComputeDebugString();
-      for (int i=0; i<tempMatA.NumRows; i++)
-      { if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i!=LeavingVariableRow)
+      for (int i = 0; i < tempMatA.NumRows; i ++)
+      { if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i != LeavingVariableRow)
         { tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
           tempRat.MultiplyBy(MaxMovement);
-          matX[BaseVariables.elements[i]]-=tempRat;
+          matX[BaseVariables.elements[i]] -= tempRat;
           tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
           tempRat.Minus();
           tempMatA.AddTwoRows(LeavingVariableRow, i, 0, tempRat);
@@ -158,13 +157,13 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 //      out <<"+";
 //  }
 //  tempS=out.str();
-  for(int i=NumTrueVariables; i<matX.size; i++)
+  for (int i = NumTrueVariables; i < matX.size; i ++)
     if (matX[i].IsPositive())
       return false;
-  if (outputSolution!=0)
+  if (outputSolution != 0)
   { outputSolution->SetSize(NumTrueVariables);
-    for (int i=0; i<NumTrueVariables; i++)
-      (*outputSolution)[i]=matX[i];
+    for (int i = 0; i < NumTrueVariables; i ++)
+      (*outputSolution)[i] = matX[i];
   }
   return true;
 }
@@ -174,25 +173,25 @@ bool Vectors<coefficient>::ConesIntersect
 (List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone, Vector<Rational>* outputLinearCombo, Vector<Rational>* outputSplittingNormal)
 { Matrix<Rational> matA;
   Matrix<Rational> matb;
-  if (StrictCone.size==0)
-  { if (outputSplittingNormal!=0)
-      if (NonStrictCone.size>0)
+  if (StrictCone.size == 0)
+  { if (outputSplittingNormal != 0)
+      if (NonStrictCone.size > 0)
         outputSplittingNormal->MakeZero(NonStrictCone[0].size);
     return false;
   }
-  int theDimension= StrictCone[0].size;
-  int numCols= StrictCone.size + NonStrictCone.size;
-  matA.init((int)theDimension+1, (int)numCols);
-  matb.init((int)theDimension+1, 1);
+  int theDimension = StrictCone[0].size;
+  int numCols = StrictCone.size + NonStrictCone.size;
+  matA.init((int) theDimension + 1, (int)numCols);
+  matb.init((int) theDimension + 1, 1);
   matb.MakeZero(); matb.elements[theDimension][0].MakeOne();
-  for (int i=0; i<StrictCone.size; i++)
-  { for (int k=0; k<theDimension; k++)
+  for (int i = 0; i < StrictCone.size; i ++)
+  { for (int k = 0; k < theDimension; k ++)
       matA.elements[k][i].Assign(StrictCone[i][k]);
     matA.elements[theDimension][i].MakeOne();
   }
-  for (int i=0; i<NonStrictCone.size; i++)
-  { int currentCol=i+StrictCone.size;
-    for (int k=0; k<theDimension; k++)
+  for (int i = 0; i < NonStrictCone.size; i ++)
+  { int currentCol = i + StrictCone.size;
+    for (int k = 0; k < theDimension; k ++)
     { matA.elements[k][currentCol].Assign(NonStrictCone[i][k]);
       matA.elements[k][currentCol].Minus();
     }
@@ -202,8 +201,8 @@ bool Vectors<coefficient>::ConesIntersect
   //matb.ComputeDebugString();
   //matX.ComputeDebugString();
   if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA, matb, outputLinearCombo))
-  { if (outputSplittingNormal!=0)
-    { bool tempBool=Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
+  { if (outputSplittingNormal != 0)
+    { bool tempBool = Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal);
       if (!tempBool)
         crash << "This is an algorithmic/mathematical (hence also programming) error: I get that two cones do not intersect, yet there exists no plane separating them. "
         << "Something is wrong with the implementation of the simplex algorithm. The input which manifested the problem was: <br>StrictCone: <br>"
@@ -211,9 +210,9 @@ bool Vectors<coefficient>::ConesIntersect
     }
     return false;
   }
-  if (outputLinearCombo!=0)
-    for (int i=StrictCone.size; i<outputLinearCombo->size; i++)
-      (*outputLinearCombo)[i]*=-1;
+  if (outputLinearCombo != 0)
+    for (int i = StrictCone.size; i < outputLinearCombo->size; i ++)
+      (*outputLinearCombo)[i] *= - 1;
   return true;
 }
 

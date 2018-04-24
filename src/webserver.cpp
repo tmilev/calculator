@@ -5173,11 +5173,12 @@ bool WebServer::initBindToPorts()
   theListeningSocket = &this->listeningSocketHTTP;
   for (int j = 0; j < 2; j ++, thePorts = &this->PortsITryHttpSSL, theListeningSocket = &this->listeningSocketHttpSSL)
     for (int i = 0; i < (*thePorts).size; i ++)
-    { if ((rv = getaddrinfo(NULL, (*thePorts)[i].c_str(), &hints, &servinfo)) != 0)
+    { rv = getaddrinfo(NULL, (*thePorts)[i].c_str(), &hints, &servinfo);
+      if (rv != 0)
       { logWorker << "getaddrinfo: " << gai_strerror(rv) << logger::endL;
         return false;
       }
-      for(p = servinfo; p != NULL; p = p->ai_next)
+      for (p = servinfo; p != NULL; p = p->ai_next)
       { *theListeningSocket = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
         if (*theListeningSocket == - 1)
         { logWorker << "Error: socket failed.\n";
@@ -5193,7 +5194,7 @@ bool WebServer::initBindToPorts()
           continue;
         }
         int setFlagCounter = 0;
-        while (fcntl(*theListeningSocket, F_SETFL, O_NONBLOCK)!=0)
+        while (fcntl(*theListeningSocket, F_SETFL, O_NONBLOCK) != 0)
         { if (++ setFlagCounter > 10)
             crash << "Error: failed to set non-blocking status to listening socket. " << crash;
         }
@@ -5406,7 +5407,7 @@ int WebServer::Run()
       continue;
     }
     inet_ntop
-    (their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), userAddressBuffer, sizeof userAddressBuffer);
+    (their_addr.ss_family, get_in_addr((struct sockaddr *) &their_addr), userAddressBuffer, sizeof userAddressBuffer);
     this->HandleTooManyConnections(userAddressBuffer);
     this->RecycleChildrenIfPossible();
     if (!this->CreateNewActiveWorker())

@@ -13,7 +13,7 @@ class ModuleSSalgebra
   Selection ComputedGeneratorActions;
   Rational hwtaabfSimpleGensOnly
   (const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon, const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon,
-   ProgressReport* theProgressReport=0);
+   ProgressReport* theProgressReport = 0);
   Rational hwTrace
   (const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& thePair, ProgressReport* theProgressReport=0);
   void CheckConsistency(GlobalVariables& theGlobalVariables);
@@ -63,32 +63,30 @@ public:
   void reset();
   bool operator==(const ModuleSSalgebra<coefficient>& other)
   { return
-    this->owner==other.owner && this->theHWFundamentalCoordsBaseField==other.theHWFundamentalCoordsBaseField
-    && this->parabolicSelectionNonSelectedAreElementsLevi==other.parabolicSelectionNonSelectedAreElementsLevi;
+    this->owner == other.owner && this->theHWFundamentalCoordsBaseField == other.theHWFundamentalCoordsBaseField
+    && this->parabolicSelectionNonSelectedAreElementsLevi == other.parabolicSelectionNonSelectedAreElementsLevi;
   }
   bool HasFreeAction(int generatorIndex)const
-  { Vector<Rational> theWeight= this->GetOwner().GetWeightOfGenerator(generatorIndex);
-    for (int i=0; i<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i++)
+  { Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(generatorIndex);
+    for (int i = 0; i < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i ++)
       if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].IsNegative())
         return true;
     return false;
   }
   bool HasZeroActionFDpart(int generatorIndex)const
-  { Vector<Rational> theWeight= this->GetOwner().GetWeightOfGenerator(generatorIndex);
-    for (int i=0; i<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i++)
+  { Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(generatorIndex);
+    for (int i = 0; i < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i ++)
       if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].IsPositive())
         return true;
     return false;
   }
   int GetOffsetFromWeightIndex(int weightIndex)
-  { int result=0;
-    for (int i=0; i<weightIndex; i++)
-      result+=this->theGeneratingWordsGrouppedByWeight[i].size;
+  { int result = 0;
+    for (int i = 0; i < weightIndex; i ++)
+      result += this->theGeneratingWordsGrouppedByWeight[i].size;
     return result;
   }
-  void ApplyTAA
-  (MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon)
-  ;
+  void ApplyTAA(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon);
   void GetFDchar(charSSAlgMod<coefficient>& output);
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
 //  List<ElementUniversalEnveloping<coefficient> > theGeneratingWordsLittelmannForm;
@@ -99,10 +97,10 @@ public:
   MatrixTensor<coefficient>& GetActionSimpleGeneratorIndex(int generatorIndex);
   int GetMinNumVars()
   { if (this->theHWFundamentalCoordsBaseField.size<=0)
-      return -1;
-    int result=0;
-    for (int i=0; i<this->theHWFundamentalCoordsBaseField.size; i++)
-      result=MathRoutines::Maximum
+      return - 1;
+    int result = 0;
+    for (int i = 0; i < this->theHWFundamentalCoordsBaseField.size; i ++)
+      result = MathRoutines::Maximum
       (result, this->theHWFundamentalCoordsBaseField[i].GetMinNumVars());
     return result;
   }
@@ -110,11 +108,11 @@ public:
   { return this->theGeneratingWordsNonReduced.size;
   }
   bool CheckInitialization()const
-  { if (this==0)
+  { if (this == 0)
       crash << "ModuleSSalgebra has zero this pointer. " << crash;
     if (this->flagDeallocated)
       crash << "Use after free of ModuleSSalgebra. " << crash;
-    if (this->owner==0)
+    if (this->owner == 0)
       crash << "ModuleSSalgebra does not have its owner Semisimple algebra properly set. " << crash;
     return true;
   }
@@ -122,9 +120,9 @@ public:
   bool MakeFromHW
   (SemisimpleLieAlgebra& inputAlgebra, Vector<coefficient>& HWFundCoords, const Selection& selNonSelectedAreElementsLevi,
    const coefficient& theRingUnit, const coefficient& theRingZero, std::string* outputReport,
-  bool computeSimpleGens=true);
+  bool computeSimpleGens = true);
   SemisimpleLieAlgebra& GetOwner()const
-  { if (this->owner==0)
+  { if (this->owner == 0)
       crash << "This is a programming error: calling GetOwner() on a non-initialized generalized Verma module. " << crash;
     return *this->owner;
   }
@@ -138,9 +136,9 @@ public:
   void ExpressAsLinearCombinationHomogenousElement
   (ElementUniversalEnveloping<coefficient>& inputHomogeneous, ElementUniversalEnveloping<coefficient>& outputHomogeneous, int indexInputBasis,
    const Vector<coefficient>& subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero);
-  std::string ToString(FormatExpressions* theFormat=0)const;
-  std::string ElementToStringHWV(FormatExpressions* theFormat=0)const
-  { if (this->highestWeightVectorNotation!="")
+  std::string ToString(FormatExpressions* theFormat = 0)const;
+  std::string ElementToStringHWV(FormatExpressions* theFormat = 0)const
+  { if (this->highestWeightVectorNotation != "")
       return this->highestWeightVectorNotation;
     std::stringstream out;
     out << "v_{" << this->theHWFundamentalCoordsBaseField.ToString(theFormat) << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString() << "}";
@@ -150,12 +148,12 @@ public:
   }
   void SplitOverLevi
   (std::string* Report, Selection& splittingParSel,
-   List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors=0, Vectors<coefficient>* outputWeightsFundCoords=0, Vectors<coefficient>* outputEigenSpace=0,
-   charSSAlgMod<coefficient>* outputChar=0);
+   List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors = 0, Vectors<coefficient>* outputWeightsFundCoords = 0, Vectors<coefficient>* outputEigenSpace=0,
+   charSSAlgMod<coefficient>* outputChar = 0);
   void SplitFDpartOverFKLeviRedSubalg
   (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall,
-   List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors=0, Vectors<coefficient>* outputWeightsFundCoords=0,
-   Vectors<coefficient>* outputEigenSpace=0, std::stringstream* comments=0);
+   List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors = 0, Vectors<coefficient>* outputWeightsFundCoords = 0,
+   Vectors<coefficient>* outputEigenSpace = 0, std::stringstream* comments = 0);
   template<class ResultType>
   void GetElementsNilradical
   (List<ElementUniversalEnveloping<ResultType> >& output, bool useNegativeNilradical,

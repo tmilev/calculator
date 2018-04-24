@@ -1264,7 +1264,7 @@ void Polynomial<coefficient>::GetValuesLagrangeInterpolandsAtConsecutivePoints
   { Vector<Rational>& currentInterpoland = outputValuesInterpolands[i];
     currentInterpoland.SetSize(inputPointsOfEvaluation.size);
     for (int j = 0; j < inputConsecutivePointsOfInterpolation.size; j ++)
-      currentInterpoland[j] = (i==j) ? 1 : 0;
+      currentInterpoland[j] = (i == j) ? 1 : 0;
     for (int j = inputConsecutivePointsOfInterpolation.size; j < inputPointsOfEvaluation.size; j ++)
     { currentInterpoland[j] = 1;
       for (int k = 0; k < inputConsecutivePointsOfInterpolation.size; k ++)
@@ -1734,7 +1734,7 @@ bool Calculator::ReadTestStrings(HashedList<std::string, MathRoutines::hashStrin
   outputCommands.SetExpectedSize(this->GetNumBuiltInFunctions());
   outputResults.Reserve(this->GetNumBuiltInFunctions());
   std::string buffer;
-  while (theFileReader.positionInString<(signed) theFileReader.theString.size())
+  while (theFileReader.positionInString < (signed) theFileReader.theString.size())
   { if(!theFileReader.GetStringEnclosedIn("input", buffer))
       break;
 //    stOutput << "<br>adding on top " << buffer;

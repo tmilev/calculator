@@ -2520,17 +2520,17 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
         }
       } else
         incompletely_digested.AddOnTop(spaces[spi]);
-    if(irreps_grcam.size == this->theGroup.ConjugacyClassCount())
+    if (irreps_grcam.size == this->theGroup.ConjugacyClassCount())
       break;
-    for(int spi=0; spi<incompletely_digested.size; spi++)
-      for(int ci=0; ci<this->theGroup.characterTable.size; ci++)
-        if(incompletely_digested[spi].GetCharacter().InnerProduct(this->theGroup.characterTable[ci]) != 0)
+    for (int spi = 0; spi < incompletely_digested.size; spi ++)
+      for (int ci = 0; ci < this->theGroup.characterTable.size; ci ++)
+        if (incompletely_digested[spi].GetCharacter().InnerProduct(this->theGroup.characterTable[ci]) != 0)
         { //stOutput << "incompletely digested " << incompletely_digested[spi].GetCharacter() << " will now be further decomposed " << "\n";
           List<GroupRepresentationCarriesAllMatrices<FiniteGroup<elementSomeGroup>, Rational> > shards = incompletely_digested[spi].DecomposeThomasVersion();
           incompletely_digested.RemoveIndexShiftDown(spi);
-          for(int shi=0; shi<shards.size; shi++)
-            if(shards[shi].GetNumberOfComponents() == 1)
-            { if(!this->theGroup.characterTable.Contains(shards[shi].GetCharacter()))
+          for (int shi = 0; shi < shards.size; shi ++)
+            if (shards[shi].GetNumberOfComponents() == 1)
+            { if (!this->theGroup.characterTable.Contains(shards[shi].GetCharacter()))
               { this->irreps_grcam.AddOnTop(spaces[spi]);
                 this->characterTable.AddOnTop(this->irreps_grcam.LastObject()->theCharacteR);
                 newspaces.AddOnTop(spaces[spi]);
@@ -2544,12 +2544,12 @@ void FiniteGroup<elementSomeGroup>::ComputeIrreducibleRepresentationsThomasVersi
   this->irreps_grcam.QuickSortAscending();
   this->irreps.SetSize(0);
   this->characterTable.SetSize(0);
-  for(int i=0; i<irreps_grcam.size; i++)
+  for (int i = 0; i < irreps_grcam.size; i ++)
   { this->irreps.AddOnTop(this->irreps_grcam[i].MakeOtherGroupRepresentationClass());
     this->characterTable.AddOnTop(&(this->irreps[i].theCharacteR));
   }
-  this->theGroup.flagCharTableIsComputed=true;
-  this->theGroup.flagIrrepsAreComputed=true;
+  this->theGroup.flagCharTableIsComputed = true;
+  this->theGroup.flagIrrepsAreComputed = true;
   //stOutput << this->PrettyPrintCharacterTable();
 }
 
@@ -2571,7 +2571,7 @@ const ClassFunction<somegroup, coefficient>& GroupRepresentationCarriesAllMatric
   this->theCharacteR.data.SetSize(this->ownerGroup->ConjugacyClassCount());
   for(int cci=0; cci < this->ownerGroup->ConjugacyClassCount(); cci++)
     this->theCharacteR.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClasseS[cci].representative).GetTrace();
-  this->flagCharacterIsComputed=true;
+  this->flagCharacterIsComputed = true;
   return this->theCharacteR;
 }
 

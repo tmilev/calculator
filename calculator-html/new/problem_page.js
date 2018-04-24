@@ -41,6 +41,15 @@ function updateProblemPageCallback(input, outputComponent){
     var interpretHandlerBound = interpretHandler.bind(currentAnswerPanel);
     theElement = document.getElementById(currentAnswerPanel.idButtonInterpret);
     theElement.addEventListener('click', interpretHandlerBound);
+    document.getElementById(currentAnswerPanel.idButtonInterpret).addEventListener(
+      'click', currentAnswerPanel.submitPreview.bind(currentAnswerPanel)
+    );
+    document.getElementById(currentAnswerPanel.idButtonSubmit).addEventListener(
+      'click', currentAnswerPanel.submitAnswer.bind(currentAnswerPanel)
+    );
+    document.getElementById(currentAnswerPanel.idButtonAnswer).addEventListener(
+      'click', currentAnswerPanel.submitGiveUp.bind(currentAnswerPanel)
+    );
     
     //theElement.addEventListener('onchange', latexChangeHandler);
     //theElement.attributes.onkeyup = latexChangeHandler;

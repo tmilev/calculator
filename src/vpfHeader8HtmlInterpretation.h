@@ -10,7 +10,8 @@ static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretation(__FILE__, 
 
 class CalculatorHTML;
 
-struct TopicElement{
+struct TopicElement
+{
 public:
   static int scoreButtonCounter;
   int type;

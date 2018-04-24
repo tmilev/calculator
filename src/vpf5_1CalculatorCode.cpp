@@ -240,35 +240,35 @@ bool Calculator::GetListPolysVariableLabelsInLex(const Expression& input, Vector
   Expression theContextStart(*this);
   if (!this->GetVectorFromFunctionArguments(input, output, &theContextStart, 0, CalculatorConversions::innerPolynomial<Rational>))
     return false;
-  if (output.size<2)
+  if (output.size < 2)
     return false;
-  int numVars=theContextStart.ContextGetNumContextVariables();
+  int numVars = theContextStart.ContextGetNumContextVariables();
 //  stOutput << "<hr>DEBIG: output: " << output.ToString();
  // stOutput << "<br>numVArs: " << numVars;
   HashedList<Expression> theVars;
   theVars.SetExpectedSize(numVars);
-  for (int i=0; i<numVars; i++)
+  for (int i = 0; i < numVars; i ++)
     theVars.AddOnTop(theContextStart.ContextGetContextVariable(i));
   theVars.QuickSortAscending();
   //stOutput << "<hr>DEBUG: he vars: " << theVars.ToString();
   PolynomialSubstitution<Rational> theSub;
   theSub.SetSize(numVars);
-  for (int i=0; i<theSub.size; i++)
+  for (int i = 0; i < theSub.size; i ++)
     theSub[i].MakeMonomiaL(theVars.GetIndex(theContextStart.ContextGetContextVariable(i)), 1, 1, numVars);
   outputContext.MakeEmptyContext(*this);
   Expression PolyVarsE, tempE;
   PolyVarsE.reset(*this);
-  PolyVarsE.children.Reserve(numVars+1);
+  PolyVarsE.children.Reserve(numVars + 1);
   tempE.MakeAtom(this->opPolynomialVariables(), *this);
   PolyVarsE.AddChildOnTop(tempE);
-  for (int i=0; i<theVars.size; i++)
+  for (int i = 0; i < theVars.size; i ++)
     PolyVarsE.AddChildOnTop(theVars[i]);
   //stOutput << "<hr>DEBUG: got ere " << theSub.ToString() << "theVars.size="  << theVars.size
   //<< "<br>num vars: " << numVars;
-  for (int i=0; i< output.size; i++)
+  for (int i = 0; i < output.size; i ++)
   { //stOutput << "<hr>DEBUG: adding on top: " << theVars[i].ToString();
     //stOutput << "<hr>got to here 1.5";
-    Polynomial<Rational>& currentP=output[i];
+    Polynomial<Rational>& currentP = output[i];
     //stOutput << "<hr>subbing  in: " << currentP.ToString() << " sub: " << theSub.ToString();
     currentP.Substitution(theSub);
   }
@@ -277,19 +277,19 @@ bool Calculator::GetListPolysVariableLabelsInLex(const Expression& input, Vector
 }
 
 bool DynkinSimpleType::HasEasySubalgebras()const
-{ if (this->theLetter=='F')
+{ if (this->theLetter == 'F')
     return true;
-  if (this->theLetter=='G')
+  if (this->theLetter == 'G')
     return true;
-  if (this->theLetter=='A' && this->theRank<=6)
+  if (this->theLetter == 'A' && this->theRank <= 6)
     return true;
-  if (this->theLetter=='B' && this->theRank<=4)
+  if (this->theLetter == 'B' && this->theRank <= 4)
     return true;
-  if (this->theLetter=='D' && this->theRank<=4)
+  if (this->theLetter == 'D' && this->theRank <= 4)
     return true;
-  if (this->theLetter=='C' && this->theRank<=5)
+  if (this->theLetter == 'C' && this->theRank <= 5)
     return true;
-  if (this->theLetter=='E' && this->theRank==6)
+  if (this->theLetter == 'E' && this->theRank == 6)
     return true;
   return false;
 }
@@ -317,23 +317,23 @@ bool DynkinSimpleType::HasEasySubalgebras()const
 //So, only in this very special circumstance,
 //we can only rely on a hard-wired web address.
 
-std::string GlobalVariables::hopefullyPermanentWebAdress=
+std::string GlobalVariables::hopefullyPermanentWebAdress =
 "https://calculator-algebra.org";
 
-std::string GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable=
+std::string GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable =
 "http://calculator-algebra.org/cgi-bin/calculator";
-std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressOfServerExecutable=
+std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressOfServerExecutable =
 "https://calculator-algebra.org/cgi-bin/calculator";
-std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder=
+std::string GlobalVariables::hopefullyPermanentWebAdressOfServerOutputFolder =
 "http://calculator-algebra.org/";
-std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder=
+std::string GlobalVariables::hopefullyPermanent_HTTPS_WebAdressJavascriptFolder =
 "https://calculator-algebra.org/";
 
 std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat)
-{ (void)theFormat;
+{ (void) theFormat;
   std::stringstream out;
-  std::string theTitlePageFileNameNoPathSlowLoad= "SemisimpleSubalgebras_" + theType.ToString() + ".html";
-  std::string theTitlePageFileNameNoPathFastLoad= "SemisimpleSubalgebras_FastLoad_" + theType.ToString() + ".html";
+  std::string theTitlePageFileNameNoPathSlowLoad = "SemisimpleSubalgebras_" + theType.ToString() + ".html";
+  std::string theTitlePageFileNameNoPathFastLoad = "SemisimpleSubalgebras_FastLoad_" + theType.ToString() + ".html";
   out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
   << "?request=calculator&mainInput=PrintSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">"
@@ -386,7 +386,7 @@ bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const
   theType.MakeSimpleType('F', 4);
   out << theCommands.ToStringLinksToCalculator(theType);
   out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
-  for (int i=6; i<=8; i++)
+  for (int i = 6; i <= 8; i ++)
   { theType.MakeSimpleType('E', i);
     out << theCommands.ToStringLinksToCalculator(theType);
     out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
@@ -394,22 +394,22 @@ bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const
   theType.MakeSimpleType('G', 2);
   out << theCommands.ToStringLinksToCalculator(theType);
   out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
-  for (int i=1; i<=8; i++)
+  for (int i = 1; i <= 8; i ++)
   { theType.MakeSimpleType('A', i);
     out << theCommands.ToStringLinksToCalculator(theType);
     out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
-  for (int i=4; i<=8; i++)
+  for (int i = 4; i <= 8; i ++)
   { theType.MakeSimpleType('D', i);
     out << theCommands.ToStringLinksToCalculator(theType);
     out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
-  for (int i=2; i<=8; i++)
+  for (int i = 2; i <= 8; i ++)
   { theType.MakeSimpleType('B', i);
     out << theCommands.ToStringLinksToCalculator(theType);
     out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
-  for (int i=3; i<=8; i++)
+  for (int i = 3; i <= 8; i ++)
   { theType.MakeSimpleType('C', i);
     out << theCommands.ToStringLinksToCalculator(theType);
     out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
@@ -447,26 +447,26 @@ bool Calculator::innerPrintSSsubalgebras
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
   if (theGlobalVariables.flagAllowProcessMonitoring)
-    if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection!=0)
+    if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != 0)
       theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection();
   std::stringstream out;
-  SemisimpleLieAlgebra* ownerSSPointer=0;
-  bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();
+  SemisimpleLieAlgebra* ownerSSPointer = 0;
+  bool isAlreadySubalgebrasObject = input.IsOfType<SemisimpleSubalgebras>();
   if (!isAlreadySubalgebrasObject)
   { if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
         (CalculatorConversions::innerSSLieAlgebra, input, ownerSSPointer))
       return output.MakeError("Error extracting Lie algebra.", theCommands);
-    if (ownerSSPointer->GetRank()>8)
+    if (ownerSSPointer->GetRank() > 8)
     { out << "<b>This code is completely experimental and has been set to run up to rank 6. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
       return output.AssignValue(out.str(), theCommands);
     } else
       out << "<b>This code is completely experimental. Use the following printouts on your own risk.</b><br>";
   } else
-    ownerSSPointer=input.GetValue<SemisimpleSubalgebras>().owner;
-  if (ownerSSPointer==0)
+    ownerSSPointer = input.GetValue<SemisimpleSubalgebras>().owner;
+  if (ownerSSPointer == 0)
     crash << "Zero pointer to semisimple Lie algebra: this shouldn't happen. " << crash;
-  SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
-  SemisimpleSubalgebras& theSSsubalgebras=
+  SemisimpleLieAlgebra& ownerSS = *ownerSSPointer;
+  SemisimpleSubalgebras& theSSsubalgebras =
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(ownerSS.theWeyl.theDynkinType);
 
   theSSsubalgebras.ToStringExpressionString=CalculatorConversions::innerStringFromSemisimpleSubalgebras;
@@ -479,17 +479,17 @@ bool Calculator::innerPrintSSsubalgebras
   //<< displayFolder << theTitlePageFileNameNoPath
   //<< "\">"
   ;
-  if (!FileOperations::FileExistsVirtual(theSSsubalgebras.VirtualNameMainFile1)|| doForceRecompute)
+  if (!FileOperations::FileExistsVirtual(theSSsubalgebras.VirtualNameMainFile1) || doForceRecompute)
   { if (!isAlreadySubalgebrasObject)
-      theSSsubalgebras.timeComputationStartInSeconds=theGlobalVariables.GetElapsedSeconds();
-    theSSsubalgebras.flagComputeNilradicals=doComputeNilradicals;
-    theSSsubalgebras.flagComputeModuleDecomposition=doComputeModuleDecomposition;
-    theSSsubalgebras.flagAttemptToSolveSystems=doAttemptToSolveSystems;
-    theSSsubalgebras.flagComputePairingTable=doComputePairingTable;
-    theSSsubalgebras.flagAttemptToAdjustCentralizers=doAdjustCentralizers;
+      theSSsubalgebras.timeComputationStartInSeconds = theGlobalVariables.GetElapsedSeconds();
+    theSSsubalgebras.flagComputeNilradicals = doComputeNilradicals;
+    theSSsubalgebras.flagComputeModuleDecomposition = doComputeModuleDecomposition;
+    theSSsubalgebras.flagAttemptToSolveSystems = doAttemptToSolveSystems;
+    theSSsubalgebras.flagComputePairingTable = doComputePairingTable;
+    theSSsubalgebras.flagAttemptToAdjustCentralizers = doAdjustCentralizers;
     theSSsubalgebras.CheckFileWritePermissions();
     if (!isAlreadySubalgebrasObject)
-    { theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
+    { theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = - 1;
       theSSsubalgebras.FindTheSSSubalgebrasFromScratch(ownerSS);
     }
     theSSsubalgebras.WriteReportToFiles();
@@ -505,19 +505,19 @@ bool Calculator::innerPrintSSsubalgebras
 }
 
 bool MathRoutines::IsPrime(int theInt)
-{ if (theInt<=1)
+{ if (theInt <= 1)
     return false;
-  for (int i=2; i*i<=theInt; i+=2)
-    if (theInt% i==0)
+  for (int i = 2; i * i <= theInt; i += 2)
+    if (theInt % i == 0)
       return false;
   return true;
 }
 
 bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerAttemptExtendingEtoHEFwithHinCartan");
-  if (input.children.size!=3)
+  if (input.children.size != 3)
     return output.MakeError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
-  SemisimpleLieAlgebra* ownerSS=0;
+  SemisimpleLieAlgebra* ownerSS = 0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
   //stOutput << "DEBUG: got semisimple Lie algebra of type: "
@@ -526,14 +526,14 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
   if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[2], theErational, *ownerSS))
     return output.MakeError("Failed to extract element of semisimple Lie algebra. ", theCommands);
   ElementSemisimpleLieAlgebra<AlgebraicNumber> theF, theH, theE;
-  theE=theErational;
+  theE = theErational;
   std::stringstream out, logStream;
-  bool success=ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream);
+  bool success = ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream);
 //  stOutput << "<br>The elts: " <<  theOperators.ToString();
 //  stOutput << "<br> The common ad: " << commonAd.ToString();
   if (success)
-    out << HtmlRoutines::GetMathSpanPure("F="+theF.ToString() + ";") << "<br>" << HtmlRoutines::GetMathSpanPure("H="+theH.ToString() + ";") << "<br>"
-    << HtmlRoutines::GetMathSpanPure("E="+theE.ToString() + ";") << "<br><br>The log stream of the computation follows. " << logStream.str();
+    out << HtmlRoutines::GetMathSpanPure("F=" + theF.ToString() + ";") << "<br>" << HtmlRoutines::GetMathSpanPure("H=" + theH.ToString() + ";") << "<br>"
+    << HtmlRoutines::GetMathSpanPure("E=" + theE.ToString() + ";") << "<br><br>The log stream of the computation follows. " << logStream.str();
   else
     out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();
   return output.AssignValue(out.str(), theCommands);
@@ -541,7 +541,7 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
 
 bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerAdCommonEigenSpaces");
-  if (input.children.size<3)
+  if (input.children.size < 3)
     return output.MakeError("Function ad common eigenspaces needs at least 2 arguments - type and at least one element of the algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], ownerSS))
@@ -549,9 +549,9 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
   //stOutput << "DEBUG: got semisimple Lie algebra of type: "
   //<< ownerSS->theWeyl.theDynkinType.ToString();
   List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
-  theOperators.Reserve(input.size()-2);
+  theOperators.Reserve(input.size() - 2);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
-  for (int i=2; i<input.size(); i++)
+  for (int i = 2; i < input.size(); i ++)
   { if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[i], tempElt, *ownerSS))
       return output.MakeError("Failed to extract element of semisimple Lie algebra. ", theCommands);
     theOperators.AddOnTop(tempElt);
@@ -561,10 +561,10 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
 //  stOutput << "<br> The common ad: " << commonAd.ToString();
   std::stringstream out;
   out << "<br>EigenSpace basis (" << outputElts.size << " elements total):<br> (";
-  for (int i=0; i<outputElts.size; i++)
-  { ElementSemisimpleLieAlgebra<Rational>& currentElt=outputElts[i];
+  for (int i = 0; i < outputElts.size; i ++)
+  { ElementSemisimpleLieAlgebra<Rational>& currentElt = outputElts[i];
     out << currentElt.ToString();
-    if (i!=outputElts.size-1)
+    if (i != outputElts.size - 1)
       out << ", ";
   }
   out << ")";
@@ -587,19 +587,19 @@ bool Calculator::innerGroebner
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
   Expression theContext;
-  if (input.children.size<3)
+  if (input.children.size < 3)
     return output.MakeError("Function takes at least two arguments. ", theCommands);
-  const Expression& numComputationsE=input[1];
-  Rational upperBound=0;
+  const Expression& numComputationsE = input[1];
+  Rational upperBound = 0;
   if (!numComputationsE.IsOfType(&upperBound))
     return output.MakeError("Failed to convert the first argument of the expression to rational number.", theCommands);
-  if (upperBound>1000000)
+  if (upperBound > 1000000)
     return output.MakeError
     ("Error: your upper limit of polynomial operations exceeds 1000000, which is too large.\
      You may use negative or zero number give no computation bound, but please don't. ", theCommands);
-  int upperBoundComputations=(int) upperBound.GetDoubleValue();
+  int upperBoundComputations = (int) upperBound.GetDoubleValue();
   output.reset(theCommands);
-  for (int i=1; i<input.children.size; i++)
+  for (int i = 1; i < input.children.size; i ++)
     output.children.AddOnTop(input.children[i]);
   int theMod;
   if (useModZp)
@@ -612,7 +612,7 @@ bool Calculator::innerGroebner
     return output.MakeError("Failed to extract polynomial expressions", theCommands);
   //theCommands.GetVector<Polynomial<Rational> >
   //(output, inputVector, &theContext, -1, CalculatorConversions::innerPolynomial);
-  for (int i=0; i<inputVector.size; i++)
+  for (int i = 0; i < inputVector.size; i ++)
     inputVector[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
   theContext.ContextGetFormatExpressions(theGroebnerComputation.theFormat);
@@ -623,10 +623,10 @@ bool Calculator::innerGroebner
   { ElementZmodP tempElt;
     tempElt.MakeMOne(theMod);
     inputVectorZmodP.SetSize(inputVector.size);
-    for (int i=0; i<inputVector.size; i++)
+    for (int i = 0; i < inputVector.size; i ++)
     { inputVectorZmodP[i].MakeZero();
-      for (int j=0; j<inputVector[i].size(); j++)
-      { tempElt=inputVector[i].theCoeffs[j];
+      for (int j = 0; j < inputVector[i].size(); j ++)
+      { tempElt = inputVector[i].theCoeffs[j];
         inputVectorZmodP[i].AddMonomial(inputVector[i][j], tempElt);
       }
     }
@@ -634,44 +634,42 @@ bool Calculator::innerGroebner
   }
 //  int theNumVars=theContext.VariableImages.size;
   List<Polynomial<AlgebraicNumber> > outputGroebner, outputGroebner2;
-  outputGroebner=inputVector;
-  outputGroebner2=inputVector;
+  outputGroebner = inputVector;
+  outputGroebner2 = inputVector;
 //  stOutput << outputGroebner.ToString(&theFormat);
   if (useGr)
   { if (!useRevLex)
-      theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
+      theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
     else
-      theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest;
+      theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest;
   } else if (!useRevLex)
-    theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableStrongest;
+    theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanLexicographicLastVariableStrongest;
   else
-    theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableWeakest;
-  theGroebnerComputation.theFormat.thePolyMonOrder=theGroebnerComputation.thePolynomialOrder.theMonOrder;
-  theGroebnerComputation.MaxNumGBComputations=upperBoundComputations;
-
-
-  bool success=theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner);
+    theGroebnerComputation.thePolynomialOrder.theMonOrder = MonomialP::LeftGreaterThanLexicographicLastVariableWeakest;
+  theGroebnerComputation.theFormat.thePolyMonOrder = theGroebnerComputation.thePolynomialOrder.theMonOrder;
+  theGroebnerComputation.MaxNumGBComputations = upperBoundComputations;
+  bool success = theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;
   out << theGroebnerComputation.ToStringLetterOrder(false);
   out << "Letter/expression order: ";
-  for (int i=0; i<theContext.ContextGetNumContextVariables(); i++)
+  for (int i = 0; i < theContext.ContextGetNumContextVariables(); i ++)
   { out << theContext.ContextGetContextVariable(i).ToString();
-    if (i!=theContext.ContextGetNumContextVariables()-1)
+    if (i != theContext.ContextGetNumContextVariables() - 1)
       out << (useRevLex ? "&gt;": "&lt;");
   }
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
-  for(int i=0; i<inputVector.size; i++)
+  for (int i = 0; i < inputVector.size; i ++)
     out << "<br>" << HtmlRoutines::GetMathSpanPure(inputVector[i].ToString(&theGroebnerComputation.theFormat));
   if (success)
   { out << "<br>Minimal Groebner basis with " << outputGroebner.size << " elements, computed using algorithm 1, using "
     << theGroebnerComputation.NumberGBComputations << " polynomial operations. ";
-    for(int i=0; i<outputGroebner.size; i++)
+    for (int i = 0; i < outputGroebner.size; i ++)
       out << "<br> " << HtmlRoutines::GetMathSpanPure(outputGroebner[i].ToString(&theGroebnerComputation.theFormat));
     out << "<br>Output in calculator-ready format: ";
     out << "<br>(";
-    for(int i=0; i<outputGroebner.size; i++)
+    for (int i = 0; i < outputGroebner.size; i ++)
     { out << outputGroebner[i].ToString(&theGroebnerComputation.theFormat);
-      if (i!=outputGroebner.size-1)
+      if (i != outputGroebner.size - 1)
         out << ", <br>";
     }
     out << ")";
@@ -680,9 +678,9 @@ bool Calculator::innerGroebner
     out << "<br>An intermediate non-Groebner basis containing total " << theGroebnerComputation.theBasiS.size
     << " basis elements: ";
     out << "<br>GroebnerLexUpperLimit{}(10000, <br>";
-    for (int i=0; i<theGroebnerComputation.theBasiS.size; i++)
+    for (int i = 0; i < theGroebnerComputation.theBasiS.size; i ++)
     { out << theGroebnerComputation.theBasiS[i].ToString(&theGroebnerComputation.theFormat);
-      if (i!=theGroebnerComputation.theBasiS.size-1)
+      if (i != theGroebnerComputation.theBasiS.size - 1)
         out << ", <br>";
     }
     out << ");";
@@ -703,13 +701,12 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
   Matrix<Polynomial<Rational> > matPol;
   Expression theContext;
   if (!theCommands.GetMatriXFromArguments
-      (input, matPol, &theContext, -1,
-       CalculatorConversions::innerPolynomial<Rational>))
+      (input, matPol, &theContext, - 1, CalculatorConversions::innerPolynomial<Rational>))
     return theCommands << "<hr>Failed to convert the input to "
     << "matrix of polynomials. ";
-  if (matPol.NumRows!=matPol.NumCols)
+  if (matPol.NumRows != matPol.NumCols)
     return output.MakeError("<hr>Failed to compute determinant: matrix is non-square. ", theCommands);
-  if (matPol.NumRows>8)
+  if (matPol.NumRows > 8)
     return theCommands << "<hr>Failed to compute determinant: "
     << "matrix is larger than 8 x 8, and your matrix had "
     << matPol.NumRows << " rows. Note that you can compute "
@@ -726,8 +723,7 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
 bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerTranspose");
   //stOutput << "DEBUG: got to here with nput: " << input.ToString();
-  if (!input.IsSequenceNElementS() && !input.IsMatrix()
-      && !input.StartsWithGivenAtom("Transpose") )
+  if (!input.IsSequenceNElementS() && !input.IsMatrix() && !input.StartsWithGivenAtom("Transpose"))
     return false;
   //  stOutput << "DEBUG: got to here";
   Matrix<Expression> theMat;
@@ -753,73 +749,71 @@ void Plot::operator+=(const Plot& other)
   //<< this->canvasName << " to plot with name: "
   //<< other.canvasName << "<hr>";
   if (other.priorityCanvasName>this->priorityCanvasName)
-    this->canvasName=other.canvasName;
-  else if (this->canvasName=="" &&
-           this->priorityCanvasName==other.priorityCanvasName)
-    this->canvasName=other.canvasName;
-  if (other.priorityCanvasName>this->priorityCanvasName)
-    this->priorityCanvasName=other.priorityCanvasName;
-  if (this->priorityCanvasName==0)
-    this->canvasName="";
-  if (this->dimension==-1)
-    this->dimension=other.dimension;
-  if (other.priorityViewRectangle>this->priorityViewRectangle)
-  { this->highBoundY=other.highBoundY;
-    this->lowBoundY=other.lowBoundY;
-    this->theLowerBoundAxes=other.theLowerBoundAxes;
-    this->theUpperBoundAxes=other.theUpperBoundAxes;
+    this->canvasName = other.canvasName;
+  else if (this->canvasName == "" && this->priorityCanvasName == other.priorityCanvasName)
+    this->canvasName = other.canvasName;
+  if (other.priorityCanvasName > this->priorityCanvasName)
+    this->priorityCanvasName = other.priorityCanvasName;
+  if (this->priorityCanvasName == 0)
+    this->canvasName = "";
+  if (this->dimension == - 1)
+    this->dimension = other.dimension;
+  if (other.priorityViewRectangle > this->priorityViewRectangle)
+  { this->highBoundY = other.highBoundY;
+    this->lowBoundY = other.lowBoundY;
+    this->theLowerBoundAxes = other.theLowerBoundAxes;
+    this->theUpperBoundAxes = other.theUpperBoundAxes;
   }
-  if (other.priorityViewRectangle==this->priorityViewRectangle)
-  { this->highBoundY=MathRoutines::Maximum(this->highBoundY, other.highBoundY);
-    this->lowBoundY =MathRoutines::Minimum(this->lowBoundY,  other.lowBoundY);
-    this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, other.theUpperBoundAxes);
-    this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
+  if (other.priorityViewRectangle == this->priorityViewRectangle)
+  { this->highBoundY = MathRoutines::Maximum(this->highBoundY, other.highBoundY);
+    this->lowBoundY = MathRoutines::Minimum(this->lowBoundY,  other.lowBoundY);
+    this->theUpperBoundAxes = MathRoutines::Maximum(this->theUpperBoundAxes, other.theUpperBoundAxes);
+    this->theLowerBoundAxes = MathRoutines::Minimum(this->theLowerBoundAxes, other.theLowerBoundAxes);
   }
   this->thePlots.AddListOnTop(other.thePlots);
-  if (other.priorityWindow>this->priorityWindow)
-  { this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
-    this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
-  } else if (this->priorityWindow==other.priorityWindow)
-  { if (this->DesiredHtmlHeightInPixels<other.DesiredHtmlHeightInPixels)
-      this->DesiredHtmlHeightInPixels=other.DesiredHtmlHeightInPixels;
-    if (this->DesiredHtmlWidthInPixels<other.DesiredHtmlWidthInPixels)
-      this->DesiredHtmlWidthInPixels=other.DesiredHtmlWidthInPixels;
+  if (other.priorityWindow > this->priorityWindow)
+  { this->DesiredHtmlHeightInPixels = other.DesiredHtmlHeightInPixels;
+    this->DesiredHtmlWidthInPixels = other.DesiredHtmlWidthInPixels;
+  } else if (this->priorityWindow == other.priorityWindow)
+  { if (this->DesiredHtmlHeightInPixels < other.DesiredHtmlHeightInPixels)
+      this->DesiredHtmlHeightInPixels = other.DesiredHtmlHeightInPixels;
+    if (this->DesiredHtmlWidthInPixels < other.DesiredHtmlWidthInPixels)
+      this->DesiredHtmlWidthInPixels = other.DesiredHtmlWidthInPixels;
   }
   if (!other.flagIncludeCoordinateSystem)
-    this->flagIncludeCoordinateSystem=false;
+    this->flagIncludeCoordinateSystem = false;
   this->boxesThatUpdateMe.AddOnTopNoRepetition(other.boxesThatUpdateMe);
-  this->priorityWindow=MathRoutines::Maximum(this->priorityWindow, other.priorityWindow);
-  this->priorityViewRectangle=MathRoutines::Maximum(this->priorityViewRectangle, other.priorityViewRectangle);
+  this->priorityWindow = MathRoutines::Maximum(this->priorityWindow, other.priorityWindow);
+  this->priorityViewRectangle = MathRoutines::Maximum(this->priorityViewRectangle, other.priorityViewRectangle);
 }
 
 bool Plot::operator==(const Plot& other)const
 { return
-  this->priorityWindow==other.priorityWindow &&
-  this->priorityCanvasName==other.priorityCanvasName &&
-  this->priorityViewRectangle==other.priorityViewRectangle &&
-  this->DesiredHtmlHeightInPixels==other.DesiredHtmlHeightInPixels &&
-  this->DesiredHtmlWidthInPixels==other.DesiredHtmlWidthInPixels &&
-  this->highBoundY==other.highBoundY &&
-  this->lowBoundY==other.lowBoundY &&
-  this->theLowerBoundAxes==other.theLowerBoundAxes &&
-  this->theUpperBoundAxes==other.theUpperBoundAxes &&
-  this->thePlots==other.thePlots &&
-  this->boxesThatUpdateMe==other.boxesThatUpdateMe &&
-  this->canvasName==other.canvasName &&
-  this->dimension==other.dimension &&
-  this->flagIncludeCoordinateSystem==other.flagIncludeCoordinateSystem
-  ;
+  this->priorityWindow == other.priorityWindow &&
+  this->priorityCanvasName == other.priorityCanvasName &&
+  this->priorityViewRectangle == other.priorityViewRectangle &&
+  this->DesiredHtmlHeightInPixels == other.DesiredHtmlHeightInPixels &&
+  this->DesiredHtmlWidthInPixels == other.DesiredHtmlWidthInPixels &&
+  this->highBoundY == other.highBoundY &&
+  this->lowBoundY == other.lowBoundY &&
+  this->theLowerBoundAxes == other.theLowerBoundAxes &&
+  this->theUpperBoundAxes == other.theUpperBoundAxes &&
+  this->thePlots == other.thePlots &&
+  this->boxesThatUpdateMe == other.boxesThatUpdateMe &&
+  this->canvasName == other.canvasName &&
+  this->dimension == other.dimension &&
+  this->flagIncludeCoordinateSystem == other.flagIncludeCoordinateSystem;
 }
 
 void Plot::operator+=(const PlotObject& other)
-{ if (other.dimension!=-1 && this->dimension!=-1 && this->dimension!=other.dimension)
+{ if (other.dimension != - 1 && this->dimension != - 1 && this->dimension != other.dimension)
     crash << "Attempting to add plot of dimension: "
     << this->dimension << " to a plot of dimension: "
     << other.dimension << ". " << crash;
-  if (this->dimension==-1)
-    this->dimension=other.dimension;
+  if (this->dimension == - 1)
+    this->dimension = other.dimension;
   this->thePlots.AddOnTop(other);
-  this->canvasName="";
+  this->canvasName = "";
 }
 
 bool PlotObject::operator==(const PlotObject& other)const
@@ -879,16 +873,16 @@ PlotObject::PlotObject()
   this->colorRGB     = 0;
   this->lineWidth    = 1;
   this->colorFillRGB = 0;
-  this->dimension    = -1;
-  this->rightBoundaryIsMinusInfinity=false;
-  this->leftBoundaryIsMinusInfinity=false;
+  this->dimension    = - 1;
+  this->rightBoundaryIsMinusInfinity = false;
+  this->leftBoundaryIsMinusInfinity = false;
 }
 
 void PlotObject::ComputeYbounds()
 { MacroRegisterFunctionWithName("PlotObject::ComputeYbounds");
-  for (int i=0; i<this->thePointsDouble.size; i++)
-  { this->yHigh=MathRoutines::Maximum(this->yHigh, this->thePointsDouble[i][1]);
-    this->yLow=MathRoutines::Minimum(this->yLow, this->thePointsDouble[i][1]);
+  for (int i = 0; i < this->thePointsDouble.size; i ++)
+  { this->yHigh = MathRoutines::Maximum(this->yHigh, this->thePointsDouble[i][1]);
+    this->yLow = MathRoutines::Minimum(this->yLow, this->thePointsDouble[i][1]);
   }
 }
 
@@ -911,35 +905,35 @@ std::string PlotObject::GetPlotStringFromFunctionStringAndRanges
 }
 
 Plot::Plot()
-{ this->theLowerBoundAxes=-0.5;
-  this->theUpperBoundAxes=1;
-  this->lowBoundY=-0.5;
-  this->highBoundY=0.5;
-  this->flagIncludeExtraHtmlDescriptions=true;
-  this->DesiredHtmlHeightInPixels=350;
-  this->DesiredHtmlWidthInPixels=350;
-  this->defaultLineColor=0;
-  this->flagPlotShowJavascriptOnly=false;
-  this->priorityWindow=0;
-  this->priorityViewRectangle=0;
-  this->priorityCanvasName=0;
-  this->dimension=-1;
-  this->flagDivAlreadyDisplayed=false;
-  this->flagIncludeCoordinateSystem=true;
+{ this->theLowerBoundAxes = - 0.5;
+  this->theUpperBoundAxes = 1;
+  this->lowBoundY = - 0.5;
+  this->highBoundY = 0.5;
+  this->flagIncludeExtraHtmlDescriptions = true;
+  this->DesiredHtmlHeightInPixels = 350;
+  this->DesiredHtmlWidthInPixels = 350;
+  this->defaultLineColor = 0;
+  this->flagPlotShowJavascriptOnly = false;
+  this->priorityWindow = 0;
+  this->priorityViewRectangle = 0;
+  this->priorityCanvasName = 0;
+  this->dimension = - 1;
+  this->flagDivAlreadyDisplayed = false;
+  this->flagIncludeCoordinateSystem = true;
 }
 
 void Plot::ComputeAxesAndBoundingBox()
 { MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox");
-  this->theLowerBoundAxes=-0.5;
-  this->theUpperBoundAxes=1.1;
-  this->lowBoundY=-0.5;
-  this->highBoundY=1.1;
-  for (int k=0; k<this->thePlots.size; k++)
+  this->theLowerBoundAxes = - 0.5;
+  this->theUpperBoundAxes = 1.1;
+  this->lowBoundY = - 0.5;
+  this->highBoundY = 1.1;
+  for (int k = 0; k < this->thePlots.size; k ++)
   { this->thePlots[k].ComputeYbounds();
-    this->theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[k].xLow, theLowerBoundAxes);
-    this->theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
-    this->lowBoundY=MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
-    this->highBoundY=MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
+    this->theLowerBoundAxes = MathRoutines::Minimum(this->thePlots[k].xLow, theLowerBoundAxes);
+    this->theUpperBoundAxes = MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
+    this->lowBoundY = MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
+    this->highBoundY = MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
 /*    for (int j=0; j<this->thePlots[k].theLines.size; j++)
     { List<Vector<double> > currentLine=this->thePlots[k].theLines[j];
       this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
@@ -951,14 +945,14 @@ void Plot::ComputeAxesAndBoundingBox()
       this->highBoundY=MathRoutines::Maximum (currentLine[0][1], this->highBoundY);
       this->highBoundY=MathRoutines::Maximum (currentLine[1][1], this->highBoundY);
     }*/
-    for (int j=0; j<this->thePlots[k].thePointsDouble.size; j++)
-    { Vector<double>& currentPoint=this->thePlots[k].thePointsDouble[j];
+    for (int j = 0; j < this->thePlots[k].thePointsDouble.size; j ++)
+    { Vector<double>& currentPoint = this->thePlots[k].thePointsDouble[j];
       if (!this->IsOKVector(currentPoint))
         continue;
-      this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
-      this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentPoint[0]);
-      this->lowBoundY =MathRoutines::Minimum (currentPoint[1], this->lowBoundY);
-      this->highBoundY=MathRoutines::Maximum (currentPoint[1], this->highBoundY);
+      this->theLowerBoundAxes = MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
+      this->theUpperBoundAxes = MathRoutines::Maximum(this->theUpperBoundAxes, currentPoint[0]);
+      this->lowBoundY = MathRoutines::Minimum (currentPoint[1], this->lowBoundY);
+      this->highBoundY = MathRoutines::Maximum (currentPoint[1], this->highBoundY);
     }
   }
 
@@ -966,16 +960,16 @@ void Plot::ComputeAxesAndBoundingBox()
 
 void Plot::ComputeAxesAndBoundingBox3d()
 { MacroRegisterFunctionWithName("Plot::ComputeAxesAndBoundingBox3d");
-  this->theLowerBoundAxes=-0.5;
-  this->theUpperBoundAxes=1.1;
-  this->lowBoundY=-0.5;
-  this->highBoundY=1.1;
-  for (int k=0; k<this->thePlots.size; k++)
+  this->theLowerBoundAxes = - 0.5;
+  this->theUpperBoundAxes = 1.1;
+  this->lowBoundY = - 0.5;
+  this->highBoundY = 1.1;
+  for (int k = 0; k < this->thePlots.size; k ++)
   { this->thePlots[k].ComputeYbounds();
-    this->theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[k].xLow, theLowerBoundAxes);
-    this->theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
-    this->lowBoundY=MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
-    this->highBoundY=MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
+    this->theLowerBoundAxes = MathRoutines::Minimum(this->thePlots[k].xLow, theLowerBoundAxes);
+    this->theUpperBoundAxes = MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
+    this->lowBoundY = MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
+    this->highBoundY = MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
 /*    for (int j=0; j<this->thePlots[k].theLines.size; j++)
     { List<Vector<double> > currentLine=this->thePlots[k].theLines[j];
       this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
@@ -987,21 +981,21 @@ void Plot::ComputeAxesAndBoundingBox3d()
       this->highBoundY=MathRoutines::Maximum (currentLine[0][1], this->highBoundY);
       this->highBoundY=MathRoutines::Maximum (currentLine[1][1], this->highBoundY);
     }*/
-    for (int j=0; j<this->thePlots[k].thePointsDouble.size; j++)
-    { Vector<double>& currentPoint=this->thePlots[k].thePointsDouble[j];
+    for (int j = 0; j < this->thePlots[k].thePointsDouble.size; j ++)
+    { Vector<double>& currentPoint = this->thePlots[k].thePointsDouble[j];
       if (!this->IsOKVector(currentPoint))
         continue;
-      this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
-      this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentPoint[0]);
-      this->lowBoundY =MathRoutines::Minimum(currentPoint[1], this->lowBoundY);
-      this->highBoundY=MathRoutines::Maximum(currentPoint[1], this->highBoundY);
+      this->theLowerBoundAxes = MathRoutines::Minimum(this->theLowerBoundAxes, currentPoint[0]);
+      this->theUpperBoundAxes = MathRoutines::Maximum(this->theUpperBoundAxes, currentPoint[0]);
+      this->lowBoundY = MathRoutines::Minimum(currentPoint[1], this->lowBoundY);
+      this->highBoundY = MathRoutines::Maximum(currentPoint[1], this->highBoundY);
     }
   }
 
 }
 
 bool Plot::IsOKVector(const Vector<double>& input)
-{ for (int i=0; i<input.size; i++)
+{ for (int i = 0; i < input.size; i ++)
     if (std::isnan(input[i]))
       return false;
   return true;
@@ -1009,7 +1003,7 @@ bool Plot::IsOKVector(const Vector<double>& input)
 
 std::string Plot::GetPlotHtml3d_New(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml3d_New");
-  owner.flagHasGraphics=true;
+  owner.flagHasGraphics = true;
   std::stringstream out;
   this->ComputeCanvasNameIfNecessary();
   //stOutput << "DEBUG: width: " << this->DesiredHtmlWidthInPixels
@@ -1035,7 +1029,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   std::string canvasFunctionName = "functionMake" + this->canvasName;
   out << "function " << canvasFunctionName << "()\n"
   << "{ ";
-  for (int i = 0; i < this->boxesThatUpdateMe.size; i++)
+  for (int i = 0; i < this->boxesThatUpdateMe.size; i ++)
   { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.GetValueCreate(this->boxesThatUpdateMe[i]);
     out << "  calculatorPlotUpdaters['"
     << currentBox.GetSliderName() << "']=" << "'" << this->canvasName << "'"
@@ -1043,16 +1037,14 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   }
   List<std::string> the3dObjects;
   the3dObjects.SetSize(this->thePlots.size);
-  int funCounter=0;
-  for (int i=0; i<this->thePlots.size; i++)
-  { PlotObject& currentO= this->thePlots[i];
-    if (currentO.thePlotType=="surface")
-    { out << currentO.GetJavascriptSurfaceImmersion(the3dObjects[i], this->canvasName, funCounter) << "\n "
-      ;
+  int funCounter = 0;
+  for (int i = 0; i < this->thePlots.size; i ++)
+  { PlotObject& currentO = this->thePlots[i];
+    if (currentO.thePlotType == "surface")
+    { out << currentO.GetJavascriptSurfaceImmersion(the3dObjects[i], this->canvasName, funCounter) << "\n ";
     }
-    if (currentO.thePlotType=="parametricCurve")
-    { out << currentO.GetJavascriptCurveImmersionIn3d(the3dObjects[i], this->canvasName, funCounter) << "\n "
-      ;
+    if (currentO.thePlotType == "parametricCurve")
+    { out << currentO.GetJavascriptCurveImmersionIn3d(the3dObjects[i], this->canvasName, funCounter) << "\n ";
     }
   }
   out << "calculatorResetCanvas(document.getElementById('"
@@ -1061,24 +1053,22 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   << this->canvasName
   << "'));\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
-  for (int i=0; i<this->thePlots.size; i++)
-  { PlotObject& currentPlot=this->thePlots[i];
-    if (currentPlot.thePlotType=="surface")
+  for (int i = 0; i < this->thePlots.size; i ++)
+  { PlotObject& currentPlot = this->thePlots[i];
+    if (currentPlot.thePlotType == "surface")
     { out
       << "theCanvas.drawSurface("
       <<  the3dObjects[i]
-      << ");\n"
-      ;
+      << ");\n";
     }
-    if (currentPlot.thePlotType=="parametricCurve")
+    if (currentPlot.thePlotType == "parametricCurve")
     { //stOutput << "DEBUG: here be i";
       out
       << "theCanvas.drawCurve("
       <<  the3dObjects[i]
-      << ");\n"
-      ;
+      << ");\n";
     }
-    if (currentPlot.thePlotType=="setProjectionScreen" && currentPlot.thePointsDouble.size>=2)
+    if (currentPlot.thePlotType == "setProjectionScreen" && currentPlot.thePointsDouble.size >= 2)
     { out
       << "theCanvas.screenBasisUserDefault="
       << "["
@@ -1088,7 +1078,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
       << "];\n";
       out << "theCanvas.screenBasisUser=theCanvas.screenBasisUserDefault.slice();\n";
     }
-    if (currentPlot.thePlotType=="label")
+    if (currentPlot.thePlotType == "label")
     { out
       << "theCanvas.drawText({"
       << "location: "
@@ -1101,11 +1091,9 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
       << "'"
       << currentPlot.colorJS
       << "'"
-      << "});\n"
-      ;
-
+      << "});\n";
     }
-    if (currentPlot.thePlotType=="segment" && currentPlot.thePointsDouble.size>=2)
+    if (currentPlot.thePlotType == "segment" && currentPlot.thePointsDouble.size >= 2)
     { out
       << "theCanvas.drawLine("
       << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
@@ -1117,9 +1105,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
       << "'"
       << ", "
       << currentPlot.lineWidth
-      << ");\n"
-      ;
-
+      << ");\n";
     }
   }
   if (owner.flagPlotNoControls)
@@ -1134,19 +1120,17 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   << this->canvasName
   << "')).canvasResetFunction=" << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n"
-  << "</script>"
-  ;
+  << "</script>";
   return out.str();
 }
 
 std::string Plot::ToStringDebug()
 { std::stringstream out;
   out <<  "Objects: " << this->thePlots.size << "<br>";
-  for (int i=0; i<this->thePlots.size; i++)
-  { if (this->thePlots[i].thePlotType=="surface")
-    { PlotObject& theSurface= this->thePlots[i];
+  for (int i = 0; i < this->thePlots.size; i ++)
+  { if (this->thePlots[i].thePlotType == "surface")
+    { PlotObject& theSurface = this->thePlots[i];
       out << theSurface.ToStringDebug();
-      ;
     }
   }
   return out.str();
@@ -1166,17 +1150,15 @@ std::string PlotObject::ToStringDebug()
 }
 
 std::string PlotObject::GetJavascriptCurveImmersionIn3d
-(std::string& outputCurveInstantiationJS, const std::string& canvasName,
- int& funCounter)
+(std::string& outputCurveInstantiationJS, const std::string& canvasName, int& funCounter)
 { MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptCurveImmersionIn3d");
   std::stringstream out;
-  funCounter++;
+  funCounter ++;
   std::stringstream fnNameStream;
-  fnNameStream << "theCanvasSurfaceFn_" << canvasName << "_"
-  << funCounter;
+  fnNameStream << "theCanvasSurfaceFn_" << canvasName << "_" << funCounter;
   std::string fnName=fnNameStream.str();
 
-  if (this->coordinateFunctionsJS.size==3)
+  if (this->coordinateFunctionsJS.size == 3)
   { out << "function " << fnName
     << " (" << this->variablesInPlayJS[0]
     << "){\n";
@@ -1189,21 +1171,17 @@ std::string PlotObject::GetJavascriptCurveImmersionIn3d
     << this->coordinateFunctionsJS.size
     << " elements instead of 3 (expected).\n";
   std::stringstream curveInstStream;
-  curveInstStream << "new CurveThreeD("
-  << fnName
-  << ", " << this->paramLowJS << ", " << this->paramHighJS
-;
-  if (this->numSegmenTsJS.size>0)
+  curveInstStream << "new CurveThreeD(" << fnName
+  << ", " << this->paramLowJS << ", " << this->paramHighJS;
+  if (this->numSegmenTsJS.size > 0)
     curveInstStream << ", " << this->numSegmenTsJS[0];
   else
     curveInstStream << ", 100";
   curveInstStream << ", "
   << "\"" << this->colorJS << "\"";
   curveInstStream << ", " << this->lineWidth;
-  curveInstStream << ")"
-  ;
-  outputCurveInstantiationJS=curveInstStream.str();
-
+  curveInstStream << ")";
+  outputCurveInstantiationJS = curveInstStream.str();
   return out.str();
 }
 
@@ -1212,12 +1190,12 @@ std::string PlotObject::GetJavascriptSurfaceImmersion
  int& funCounter)
 { MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptSurfaceImmersion");
   std::stringstream out;
-  funCounter++;
+  funCounter ++;
   std::stringstream fnNameStream;
   fnNameStream << "theCanvasSurfaceFn_" << canvasName << "_" << funCounter;
-  std::string fnName=fnNameStream.str();
+  std::string fnName = fnNameStream.str();
 
-  if (this->coordinateFunctionsJS.size==3)
+  if (this->coordinateFunctionsJS.size == 3)
   { out << "function " << fnName
     << " (" << this->variablesInPlayJS[0] << ","
     << this->variablesInPlayJS[1] << "){\n";
@@ -1229,9 +1207,9 @@ std::string PlotObject::GetJavascriptSurfaceImmersion
   out << "//this->theCoordinateFunctionsJS has "
   << this->coordinateFunctionsJS.size
   << " elements instead of 3 (expected).\n";
-  if (this->theVarRangesJS.size!=2)
+  if (this->theVarRangesJS.size != 2)
     out << "//this->theVarRangesJS has " << this->theVarRangesJS.size << " elements instead of 2 (expected).";
-  else if (this->theVarRangesJS[0].size!=2 || this->theVarRangesJS[1].size!=2)
+  else if (this->theVarRangesJS[0].size != 2 || this->theVarRangesJS[1].size != 2)
     out << "//this->theVarRangesJS had unexpected value: "
     << this->theVarRangesJS.size;
   else
@@ -1240,38 +1218,36 @@ std::string PlotObject::GetJavascriptSurfaceImmersion
     << fnName
     << ", [[" << this->theVarRangesJS[0][0] << "," << this->theVarRangesJS[1][0] << "],"
     << " ["   << this->theVarRangesJS[0][1] << ", " << this->theVarRangesJS[1][1] << "]], ";
-    if (this->numSegmenTsJS.size>1)
+    if (this->numSegmenTsJS.size > 1)
       surfaceInstStream << "[" << this->numSegmenTsJS[0] << ","
       << this->numSegmenTsJS[1] << "], ";
     else
       surfaceInstStream << "[22, 4], ";
     surfaceInstStream << "{colorContour: \"black\", ";
-    if (this->colorUV!="")
+    if (this->colorUV != "")
       surfaceInstStream << "colorUV: \"" << this->colorUV << "\",";
     else
       surfaceInstStream << "colorUV: \"red\",";
-    if (this->colorVU!="")
+    if (this->colorVU != "")
       surfaceInstStream << "colorVU: \"" << this->colorVU << "\"";
     else
       surfaceInstStream << "colorVU: \"pink\"";
-    surfaceInstStream << "}"
-    << ",";
-    if (this->lineWidthJS!="")
+    surfaceInstStream << "}" << ",";
+    if (this->lineWidthJS != "")
       surfaceInstStream << this->lineWidthJS;
     else
       surfaceInstStream << "1";
-    surfaceInstStream << ")"
-    ;
-    outputSurfaceInstantiationJS=surfaceInstStream.str();
+    surfaceInstStream << ")";
+    outputSurfaceInstantiationJS = surfaceInstStream.str();
   }
   return out.str();
 }
 
 std::string Plot::GetPlotHtml(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml");
-  if (this->dimension==3)
+  if (this->dimension == 3)
     return this->GetPlotHtml3d_New(owner);
-  else if (this->dimension==2)
+  else if (this->dimension == 2)
     return this->GetPlotHtml2d_New(owner);
   else
   { std::stringstream out;
@@ -1280,23 +1256,20 @@ std::string Plot::GetPlotHtml(Calculator& owner)
   }
 }
 
-int Plot::canvasCounteR=0;
+int Plot::canvasCounteR = 0;
 
 std::string PlotObject::GetJavascriptParametricCurve2D
-(std::string& outputPlotInstantiationJS,
- const std::string& canvasName,
- int& funCounter)
+(std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter)
 { MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascript2dPlot");
   std::stringstream out;
   List<std::string> fnNames;
   fnNames.SetSize(this->coordinateFunctionsJS.size);
-  for (int i=0; i<this->coordinateFunctionsJS.size; i++)
-  { funCounter++;
+  for (int i = 0; i < this->coordinateFunctionsJS.size; i ++)
+  { funCounter ++;
     std::stringstream fnNameStream;
-    fnNameStream << "theCanvasCoordinateFn_" << canvasName << "_"
-    << funCounter;
-    fnNames[i]=fnNameStream.str();
-    if (this->variablesInPlayJS.size>0)
+    fnNameStream << "theCanvasCoordinateFn_" << canvasName << "_" << funCounter;
+    fnNames[i] = fnNameStream.str();
+    if (this->variablesInPlayJS.size > 0)
     { out << "function " << fnNames[i]
       << " (" << this->variablesInPlayJS[0] << "){\n";
       out << "return " << this->coordinateFunctionsJS[i] << ";\n";
@@ -1305,8 +1278,8 @@ std::string PlotObject::GetJavascriptParametricCurve2D
     { out << "console.log(\"Error: function with zero variables.\");";
     }
   }
-  if (this->coordinateFunctionsJS.size!=2)
-  { outputPlotInstantiationJS="";
+  if (this->coordinateFunctionsJS.size != 2)
+  { outputPlotInstantiationJS = "";
     return out.str();
   }
   std::stringstream fnInstStream;
@@ -1314,39 +1287,35 @@ std::string PlotObject::GetJavascriptParametricCurve2D
   fnInstStream << "drawCurve("
   << "[" << fnNames[0] << ", " << fnNames[1] << "]"
   << ", " << this->paramLowJS << ", " << this->paramHighJS << ", ";
-  if (this->numSegmenTsJS.size>0)
+  if (this->numSegmenTsJS.size > 0)
     fnInstStream << this->numSegmenTsJS[0] << ", ";
   else
     fnInstStream << "200, ";
   fnInstStream << "'" << this->colorJS << "'";
-  if (this->lineWidthJS!="")
+  if (this->lineWidthJS != "")
     fnInstStream << ", " << this->lineWidthJS;
   else
     fnInstStream << ", " << this->lineWidth;
-  fnInstStream << ");\n"
-  ;
-  outputPlotInstantiationJS=fnInstStream.str();
+  fnInstStream << ");\n";
+  outputPlotInstantiationJS = fnInstStream.str();
   return out.str();
 }
 
 std::string PlotObject::GetJavascriptDirectionField
-(std::string& outputPlotInstantiationJS,
- const std::string& canvasName,
- int& funCounter)
+(std::string& outputPlotInstantiationJS, const std::string& canvasName, int& funCounter)
 { MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascriptDirectionField");
   std::stringstream out;
   std::string fnName;
-  funCounter++;
+  funCounter ++;
   std::stringstream fnNameStream;
-  fnNameStream << "theCanvasCoordinateFn_" << canvasName << "_"
-  << funCounter;
-  fnName=fnNameStream.str();
-  if (this->variablesInPlayJS.size>0)
+  fnNameStream << "theCanvasCoordinateFn_" << canvasName << "_" << funCounter;
+  fnName = fnNameStream.str();
+  if (this->variablesInPlayJS.size > 0)
   { out << "function " << fnName
     << " (";
-    for (int i=0; i<this->variablesInPlayJS.size; i++)
+    for (int i = 0; i < this->variablesInPlayJS.size; i ++)
     { out << this->variablesInPlayJS[i];
-      if (i!=this->variablesInPlayJS.size-1)
+      if (i != this->variablesInPlayJS.size - 1)
         out << ", ";
     }
     out << "){\n";
@@ -1360,13 +1329,12 @@ std::string PlotObject::GetJavascriptDirectionField
   << fnName
   << ", true"
   << ", ";
-  for (int i=0; i<2; i++)
+  for (int i = 0; i < 2; i ++)
   { fnInstStream << "[";
-    for (int j=0; j<this->theVarRangesJS.size; j++)
-    { if (i<this->theVarRangesJS[j].size)
-      { fnInstStream
-        << this->theVarRangesJS[j][i];
-        if (j!=this->theVarRangesJS.size-1)
+    for (int j = 0; j < this->theVarRangesJS.size; j ++)
+    { if (i < this->theVarRangesJS[j].size)
+      { fnInstStream << this->theVarRangesJS[j][i];
+        if (j != this->theVarRangesJS.size - 1)
           fnInstStream << ", ";
       } else
         fnInstStream << "(bad variable range)";
@@ -1374,21 +1342,20 @@ std::string PlotObject::GetJavascriptDirectionField
     fnInstStream << "], ";
   }
   fnInstStream << "[";
-  for (int i=0; i<this->numSegmenTsJS.size; i++)
+  for (int i = 0; i < this->numSegmenTsJS.size; i ++)
   { fnInstStream << this->numSegmenTsJS[i];
-    if (i!=this->numSegmenTsJS.size-1)
+    if (i != this->numSegmenTsJS.size - 1)
       fnInstStream << ", ";
   }
   fnInstStream << "], ";
   fnInstStream << this->defaultLengthJS << ", ";
   fnInstStream << "'" << this->colorJS << "'";
-  if (this->lineWidthJS!="")
+  if (this->lineWidthJS != "")
     fnInstStream << ", " << this->lineWidthJS;
   else
     fnInstStream << ", " << this->lineWidth;
-  fnInstStream << ");\n"
-  ;
-  outputPlotInstantiationJS=fnInstStream.str();
+  fnInstStream << ");\n";
+  outputPlotInstantiationJS = fnInstStream.str();
   return out.str();
 }
 
@@ -1397,11 +1364,11 @@ std::string PlotObject::GetJavascript2dPlot
 { MacroRegisterFunctionWithName("PlotSurfaceIn3d::GetJavascript2dPlot");
   std::stringstream out;
   std::stringstream fnNameStream;
-  funCounter++;
+  funCounter ++;
   fnNameStream << "theCanvasPlotFn_" << canvasName << "_"
   << funCounter;
-  std::string fnName=fnNameStream.str();
-  if (this->variablesInPlayJS.size>0)
+  std::string fnName = fnNameStream.str();
+  if (this->variablesInPlayJS.size > 0)
   { out << "function " << fnName
     << " (" << HtmlRoutines::GetJavascriptVariable(this->variablesInPlayJS[0]) << "){\n";
     out << "return " << this->coordinateFunctionsJS[0] << ";\n";
@@ -1413,18 +1380,17 @@ std::string PlotObject::GetJavascript2dPlot
   fnInstStream << "drawFunction("
   << fnName
   << ", " << this->leftPtJS << ", " << this->rightPtJS << ", ";
-  if (this->numSegmenTsJS.size>0)
+  if (this->numSegmenTsJS.size > 0)
     fnInstStream << this->numSegmenTsJS[0] << ", ";
   else
     fnInstStream << "200, ";
-  fnInstStream << "'" << this->colorJS << "'"
-  << ", ";
-  if (this->lineWidthJS!="")
+  fnInstStream << "'" << this->colorJS << "'" << ", ";
+  if (this->lineWidthJS != "")
     fnInstStream << this->lineWidthJS;
   else
     fnInstStream << this->lineWidth;
   fnInstStream << ");\n";
-  outputPlotInstantiationJS=fnInstStream.str();
+  outputPlotInstantiationJS = fnInstStream.str();
   return out.str();
 }
 
@@ -1436,20 +1402,20 @@ std::string PlotObject::GetJavascriptPoints
   //stOutput << "<hr>DEBUG: Plotting points from: " << this->thePointsJS << "<hr>";
   std::stringstream fnInstStream;
   fnInstStream << "drawPoints([";
-  for (int i=0; i<this->thePointsJS.NumRows; i++)
+  for (int i = 0; i < this->thePointsJS.NumRows; i ++)
   { fnInstStream << "[";
-    for (int j=0; j<this->thePointsJS.NumCols; j++)
+    for (int j = 0; j < this->thePointsJS.NumCols; j ++)
     { fnInstStream << this->thePointsJS(i, j);
-      if (j!=this->thePointsJS.NumCols-1)
+      if (j != this->thePointsJS.NumCols - 1)
         fnInstStream << ", ";
     }
     fnInstStream << "]";
-    if (i!=this->thePointsJS.NumRows-1)
+    if (i != this->thePointsJS.NumRows - 1)
       fnInstStream << ", ";
   }
   fnInstStream << "], ";
   fnInstStream << "'" << this->colorJS << "');\n";
-  outputPlotInstantiationJS=fnInstStream.str();
+  outputPlotInstantiationJS = fnInstStream.str();
   return "";
 }
 
@@ -1457,9 +1423,9 @@ std::string PlotObject::ToStringPointsList()
 { MacroRegisterFunctionWithName("PlotObject::ToStringPointsList");
   std::stringstream out;
   out << "[";
-  for (int j=0; j<this->thePointsDouble.size; j++)
+  for (int j = 0; j < this->thePointsDouble.size; j ++)
   { out << this->thePointsDouble[j].ToStringSquareBracketsBasicType();
-    if (j!=this->thePointsDouble.size-1)
+    if (j != this->thePointsDouble.size - 1)
       out << ",";
   }
   out << "]";
@@ -1468,24 +1434,24 @@ std::string PlotObject::ToStringPointsList()
 }
 
 void Plot::ComputeCanvasNameIfNecessary()
-{ if (this->canvasName!="")
+{ if (this->canvasName != "")
     return;
-  this->canvasCounteR++;
+  this->canvasCounteR ++;
   //out << this->ToStringDebug();
   std::stringstream canvasNameStream;
   canvasNameStream << "theCanvas" << this->canvasCounteR;
-  this->canvasName=canvasNameStream.str();
+  this->canvasName = canvasNameStream.str();
 }
 
 std::string Plot::GetPlotHtml2d_New(Calculator& owner)
 { MacroRegisterFunctionWithName("Plot::GetPlotHtml2d_New");
-  owner.flagHasGraphics=true;
+  owner.flagHasGraphics = true;
   if (this->flagDivAlreadyDisplayed)
     return "[plot alredy displayed]";
-  this->flagDivAlreadyDisplayed=true;
+  this->flagDivAlreadyDisplayed = true;
   this->ComputeCanvasNameIfNecessary();
   std::stringstream out;
-  if (this->priorityViewRectangle<=0)
+  if (this->priorityViewRectangle <= 0)
     this->ComputeAxesAndBoundingBox();
     //out << this->ToStringDebug();
   if (!this->flagPlotShowJavascriptOnly)
@@ -1505,14 +1471,13 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     << "<span id=\"" << this->canvasName << "Controls\"></span>";
     if (!owner.flagPlotNoControls)
       out << "<br>";
-    out << "<span id=\"" << this->canvasName << "Messages\"></span>"
-    ;
+    out << "<span id=\"" << this->canvasName << "Messages\"></span>";
   }
   out << "<script language=\"javascript\">\n";
   std::string canvasFunctionName = "functionMake"+ this->canvasName;
   out << "function " << canvasFunctionName << "()\n"
   << "{ ";
-  for (int i = 0; i < this->boxesThatUpdateMe.size; i++)
+  for (int i = 0; i < this->boxesThatUpdateMe.size; i ++)
   { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.
     GetValueCreate(this->boxesThatUpdateMe[i]);
     out << " calculatorPlotUpdaters['"
@@ -1523,29 +1488,19 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   int funCounter=0;
   List<std::string> theFnPlots;
   theFnPlots.SetSize(this->thePlots.size);
-  for (int i=0; i<this->thePlots.size; i++)
-  { PlotObject& currentPlot= this->thePlots[i];
-    if (currentPlot.thePlotType=="plotFunction")
-    { out << currentPlot.GetJavascript2dPlot
-      (theFnPlots[i], this->canvasName, funCounter)
-      << "\n "
-      ;
+  for (int i = 0; i < this->thePlots.size; i ++)
+  { PlotObject& currentPlot = this->thePlots[i];
+    if (currentPlot.thePlotType == "plotFunction")
+    { out << currentPlot.GetJavascript2dPlot(theFnPlots[i], this->canvasName, funCounter) << "\n ";
     }
-    if (currentPlot.thePlotType=="parametricCurve")
-    { out << currentPlot.GetJavascriptParametricCurve2D
-      (theFnPlots[i], this->canvasName, funCounter)
-      << "\n "
-      ;
+    if (currentPlot.thePlotType == "parametricCurve")
+    { out << currentPlot.GetJavascriptParametricCurve2D(theFnPlots[i], this->canvasName, funCounter) << "\n ";
     }
-    if (currentPlot.thePlotType=="plotDirectionField")
-    { out << currentPlot.GetJavascriptDirectionField
-      (theFnPlots[i], this->canvasName, funCounter)
-      << "\n "
-      ;
+    if (currentPlot.thePlotType == "plotDirectionField")
+    { out << currentPlot.GetJavascriptDirectionField(theFnPlots[i], this->canvasName, funCounter) << "\n ";
     }
-    if (currentPlot.thePlotType=="points")
-      currentPlot.GetJavascriptPoints
-      (theFnPlots[i], this->canvasName, funCounter);
+    if (currentPlot.thePlotType == "points")
+      currentPlot.GetJavascriptPoints(theFnPlots[i], this->canvasName, funCounter);
   }
   out << "calculatorResetCanvas(document.getElementById('"
   << this->canvasName << "'));\n";
@@ -1558,27 +1513,26 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   else
     out << "theCanvas.flagShowPerformance=true;\n";
   out.precision(7);
-  for (int i=0; i<this->thePlots.size; i++)
-  { PlotObject& currentPlot=this->thePlots[i];
-    if (currentPlot.thePlotType=="plotFunction")
+  for (int i = 0; i < this->thePlots.size; i ++)
+  { PlotObject& currentPlot = this->thePlots[i];
+    if (currentPlot.thePlotType == "plotFunction")
     { out << "theCanvas." << theFnPlots[i];
       continue;
     }
-    if (currentPlot.thePlotType=="parametricCurve")
+    if (currentPlot.thePlotType == "parametricCurve")
     { out << "theCanvas." << theFnPlots[i];
       continue;
     }
-    if (currentPlot.thePlotType=="plotDirectionField")
+    if (currentPlot.thePlotType == "plotDirectionField")
     { out << "theCanvas." << theFnPlots[i];
       continue;
     }
-    if (currentPlot.thePlotType=="points")
-    { out
-      << "theCanvas." << theFnPlots[i];
+    if (currentPlot.thePlotType == "points")
+    { out << "theCanvas." << theFnPlots[i];
       continue;
     }
-    if (currentPlot.thePlotType=="label")
-    { if (currentPlot.thePointsDouble.size>0)
+    if (currentPlot.thePlotType == "label")
+    { if (currentPlot.thePointsDouble.size > 0)
         out << "theCanvas.drawText("
         << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
         << ", "
@@ -1587,19 +1541,19 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
         << "'" << currentPlot.colorJS << "');\n" ;
       continue;
     }
-    if (currentPlot.thePlotType=="plotFillStart")
+    if (currentPlot.thePlotType == "plotFillStart")
     { out << "theCanvas.plotFillStart('" << currentPlot.colorFillJS << "');\n";
       continue;
     }
-    if (currentPlot.thePlotType=="plotFillFinish")
+    if (currentPlot.thePlotType == "plotFillFinish")
     { out << "theCanvas.plotFillFinish();\n";
       continue;
     }
-    if (currentPlot.thePlotType=="axesGrid")
+    if (currentPlot.thePlotType == "axesGrid")
     { out << "theCanvas.drawGrid();\n";
       continue;
     }
-    if (currentPlot.thePlotType=="pathFilled")
+    if (currentPlot.thePlotType == "pathFilled")
     { out << "theCanvas.drawPathFilled( ";
       out << currentPlot.ToStringPointsList();
       out << ", "
@@ -1612,12 +1566,12 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     out << "theCanvas.drawPath( ";
     out << currentPlot.ToStringPointsList();
     out << ", " << "\"";
-    if (currentPlot.colorJS=="")
+    if (currentPlot.colorJS == "")
       out << DrawingVariables::GetColorHtmlFromColorIndex (currentPlot.colorRGB);
     else
       out << currentPlot.colorJS;
     out << "\"";
-    if (currentPlot.lineWidthJS!="")
+    if (currentPlot.lineWidthJS != "")
       out << ", " << "\"" << currentPlot.lineWidthJS << "\"";
     else
       out << ", " << "\"" << currentPlot.lineWidth << "\"";
@@ -1633,11 +1587,11 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     out << "theCanvas.drawCoordinateAxes();\n";
   }
   //stOutput << "DEBUG: this->priorityViewRectangle=" << this->priorityViewRectangle;
-  if (this->priorityViewRectangle>0)
+  if (this->priorityViewRectangle > 0)
   { out << "theCanvas.setViewWindow("
-    << "[" << this->theLowerBoundAxes*1.10 << ", " << this->lowBoundY*1.10 << "]"
+    << "[" << this->theLowerBoundAxes * 1.10 << ", " << this->lowBoundY * 1.10 << "]"
     << ", "
-    << "[" << this->theUpperBoundAxes*1.10 << ", " << this->highBoundY*1.10 << "]"
+    << "[" << this->theUpperBoundAxes * 1.10 << ", " << this->highBoundY * 1.10 << "]"
     << ");\n";
   } else
     out << "theCanvas.computeViewWindow();\n";
@@ -1657,7 +1611,7 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
 { MacroRegisterFunctionWithName("Plot::GetPlotStringAddLatexCommands");
   std::stringstream resultStream;
   this->ComputeAxesAndBoundingBox();
-  std::string lineSeparator= useHtml ? "<br>\n" : "\n";
+  std::string lineSeparator = useHtml ? "<br>\n" : "\n";
   resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-math}\\usepackage{pst-plot}";
   resultStream << lineSeparator << "\\newcommand{\\fcLabels}[2]{\\rput[t](#1, -0.1){$x$}\\rput[r](-0.1, #2){$y$}}" << lineSeparator;
   resultStream << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.2cm}\\addtolength{\\textheight}{6.3cm}"
@@ -1667,16 +1621,16 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
   << "\\newcommand{\\fcAxesStandard}[4]{ \\psframe*[linecolor=white](! #1 #2)(! #3 0.1 add #4 01 add) \\psaxes[ticks=none, labels=none]{<->}(0,0)(#1, #2)(#3, #4)\\fcLabels{#3}{#4}}"
   << lineSeparator << " \\psset{xunit=1cm, yunit=1cm}";
   resultStream << lineSeparator;
-  resultStream << "\\begin{pspicture}(" << FloatingPoint::DoubleToString(theLowerBoundAxes-0.4) << ", "
-  << FloatingPoint::DoubleToString(lowBoundY-0.4) << ")("
-  << FloatingPoint::DoubleToString(theUpperBoundAxes+0.4)
-  << "," << FloatingPoint::DoubleToString(highBoundY+0.5) << ")\n\n";
+  resultStream << "\\begin{pspicture}(" << FloatingPoint::DoubleToString(theLowerBoundAxes - 0.4) << ", "
+  << FloatingPoint::DoubleToString(lowBoundY - 0.4) << ")("
+  << FloatingPoint::DoubleToString(theUpperBoundAxes + 0.4)
+  << "," << FloatingPoint::DoubleToString(highBoundY + 0.5) << ")\n\n";
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
-  resultStream << " \\fcAxesStandard{" << FloatingPoint::DoubleToString(theLowerBoundAxes-0.15)
-  << "}{" << FloatingPoint::DoubleToString(lowBoundY-0.15) << "}{"
-  << FloatingPoint::DoubleToString(theUpperBoundAxes+0.15) << "}{"
-  << FloatingPoint::DoubleToString(highBoundY+0.15) << "}" << lineSeparator;
-  for (int i=0; i<this->thePlots.size; i++)
+  resultStream << " \\fcAxesStandard{" << FloatingPoint::DoubleToString(theLowerBoundAxes - 0.15)
+  << "}{" << FloatingPoint::DoubleToString(lowBoundY - 0.15) << "}{"
+  << FloatingPoint::DoubleToString(theUpperBoundAxes + 0.15) << "}{"
+  << FloatingPoint::DoubleToString(highBoundY + 0.15) << "}" << lineSeparator;
+  for (int i = 0; i < this->thePlots.size; i ++)
     if (useHtml)
       resultStream << this->thePlots[i].thePlotStringWithHtml << lineSeparator;
     else
@@ -1695,24 +1649,24 @@ bool Expression::AssignStringParsed(const std::string& theString, MapLisT<std::s
     return false;
   }
   if (commands.StartsWith(owner.opEndStatement(), 2))
-    result=commands[1];
+    result = commands[1];
   else
-    result=commands;
-  if (substitutions!=0)
+    result = commands;
+  if (substitutions != 0)
   { MapLisT<Expression, Expression> theSubs;
-    for (int i=0; i<substitutions->size(); i++)
+    for (int i = 0; i < substitutions->size(); i ++)
     { Expression theSubbed;
       theSubbed.MakeAtom(substitutions->theKeys[i], owner);
       theSubs.SetKeyValue(theSubbed, substitutions->theValues[i]);
     }
     result.SubstituteRecursively(theSubs);
   }
-  *this=result;
+  *this = result;
   return true;
 }
 
 bool Expression::IsSuitableForSubstitution()const
-{ if (this->owner==0)
+{ if (this->owner == 0)
     return false;
   if (this->IsBuiltInTypE() || this->StartsWith(this->owner->opBind()))
     return false;
@@ -1720,10 +1674,9 @@ bool Expression::IsSuitableForSubstitution()const
 }
 
 bool Expression::IsSuitableForRecursion()const
-{ if (this->owner==0)
+{ if (this->owner == 0)
     return false;
-  if (this->IsAtom() || this->IsBuiltInTypE() ||
-     this->StartsWith(this->owner->opBind()))
+  if (this->IsAtom() || this->IsBuiltInTypE() || this->StartsWith(this->owner->opBind()))
     return false;
   return true;
 }
@@ -1740,7 +1693,7 @@ void Expression::SubstituteRecursivelyInChildren(MapLisT<Expression, Expression>
 { if (!this->IsSuitableForSubstitution())
     return;
   Expression tempE;
-  for (int i = 0; i < this->size(); i++)
+  for (int i = 0; i < this->size(); i ++)
     if (theSubs.Contains((*this)[i]))
       this->SetChilD(i, theSubs.GetValueCreate((*this)[i]));
     else
@@ -1752,8 +1705,8 @@ void Expression::SubstituteRecursivelyInChildren(MapLisT<Expression, Expression>
 }
 
 void Expression::SubstituteRecursively(const Expression& toBeSubbed, const Expression& toBeSubbedWith)
-{ if ((*this)==toBeSubbed)
-  { (*this)=toBeSubbedWith;
+{ if ((*this) == toBeSubbed)
+  { (*this) = toBeSubbedWith;
     return;
   }
   this->SubstituteRecursivelyInChildren(toBeSubbed, toBeSubbedWith);
@@ -1763,13 +1716,13 @@ void Expression::SubstituteRecursivelyInChildren(const Expression& toBeSubbed, c
 { if (!this->IsSuitableForSubstitution())
     return;
   Expression tempE;
-  for (int i=0; i<this->size(); i++)
-    if (toBeSubbed==(*this)[i])
+  for (int i = 0; i < this->size(); i ++)
+    if (toBeSubbed == (*this)[i])
       this->SetChilD(i, toBeSubbedWith);
     else
-    { tempE=(*this)[i];
+    { tempE = (*this)[i];
       tempE.SubstituteRecursivelyInChildren(toBeSubbed, toBeSubbedWith);
-      if (!(tempE==(*this)[i]))
+      if (!(tempE == (*this)[i]))
         this->SetChilD(i, tempE);
     }
 }
@@ -1778,93 +1731,93 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
 { MacroRegisterFunctionWithName("Calculator::innerSuffixNotationForPostScript");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
 //  stOutput << "<hr>Converting: " << input.ToString();
-  if (*theCounter.theCounter ==theCommands.MaxRecursionDeptH-2)
+  if (*theCounter.theCounter == theCommands.MaxRecursionDeptH - 2)
     return output.AssignValue((std::string) "...", theCommands);
   std::string currentString;
   if (input.IsAtom(&currentString))
-  { if (input.ToString()=="e")
+  { if (input.ToString() == "e")
       return output.AssignValue<std::string>(" 2.718281828 ", theCommands);
-    if (input.ToString()=="\\pi")
+    if (input.ToString() == "\\pi")
       return output.AssignValue<std::string>(" 3.141592654 ", theCommands);
-    if (input.theData>=theCommands.NumPredefinedAtoms)
+    if (input.theData >= theCommands.NumPredefinedAtoms)
       return output.AssignValue(currentString, theCommands);
-    if (currentString=="|")
+    if (currentString == "|")
       return output.AssignValue<std::string>("abs ", theCommands);
-    if (currentString=="+")
+    if (currentString == "+")
       return output.AssignValue<std::string>("add ", theCommands);
-    if (currentString=="*")
+    if (currentString == "*")
       return output.AssignValue<std::string>("mul ", theCommands);
-    if (currentString=="-")
+    if (currentString == "-")
       return output.AssignValue<std::string>("sub ", theCommands);
-    if (currentString=="/")
+    if (currentString == "/")
       return output.AssignValue<std::string>("div ", theCommands);
-    if (currentString=="^")
+    if (currentString == "^")
       return output.AssignValue<std::string>("exp ", theCommands);
-    if (currentString=="\\log")
+    if (currentString == "\\log")
       return output.AssignValue<std::string>("ln ", theCommands);
-    if (currentString=="\\sin")
+    if (currentString == "\\sin")
       return output.AssignValue<std::string>(" 57.29578 mul sin ", theCommands);
-    if (currentString=="\\cos")
+    if (currentString == "\\cos")
       return output.AssignValue<std::string>(" 57.29578 mul cos ", theCommands);
-    if (currentString=="\\tan")
+    if (currentString == "\\tan")
       return output.AssignValue<std::string>(" 57.29578 mul tan ", theCommands);
-    if (currentString=="\\arctan")
+    if (currentString == "\\arctan")
       return output.AssignValue<std::string>("ATAN ", theCommands);
-    if (currentString=="\\arcsin")
+    if (currentString == "\\arcsin")
       return output.AssignValue<std::string>("ASIN ", theCommands);
-    if (currentString=="\\arccos")
+    if (currentString == "\\arccos")
       return output.AssignValue<std::string>("ACOS ", theCommands);
-    if (currentString=="\\sqrt")
+    if (currentString == "\\sqrt")
       return output.AssignValue<std::string>("sqrt ", theCommands);
     return output.MakeError("Cannot convert "+currentString+ " to suffix notation.", theCommands);
   }
   std::stringstream out;
   out.precision(7);
-  bool hasDoubleValue=false;;
-  double theDoubleValue=-1;
+  bool hasDoubleValue = false;;
+  double theDoubleValue = - 1;
   Rational theRat;
   if (input.IsOfType<Rational>(&theRat))
   { if (theRat.GetDenominator().IsIntegerFittingInInt(0) && theRat.GetNumerator().IsIntegerFittingInInt(0))
     { out << " " << theRat.GetNumerator().ToString() << " " << theRat.GetDenominator() << " div ";
       return output.AssignValue(out.str(), theCommands);
     }
-    hasDoubleValue=true;
-    theDoubleValue=input.GetValue<Rational>().GetDoubleValue();
+    hasDoubleValue = true;
+    theDoubleValue = input.GetValue<Rational>().GetDoubleValue();
   }
   if (input.IsOfType<AlgebraicNumber>())
-    hasDoubleValue=input.GetValue<AlgebraicNumber>().EvaluatesToDouble(&theDoubleValue);
+    hasDoubleValue = input.GetValue<AlgebraicNumber>().EvaluatesToDouble(&theDoubleValue);
   if (input.IsOfType<double>())
-  { hasDoubleValue=true;
-    theDoubleValue=input.GetValue<double>();
+  { hasDoubleValue = true;
+    theDoubleValue = input.GetValue<double>();
   }
   if (hasDoubleValue)
   { out << " " << FloatingPoint::DoubleToString(theDoubleValue);
     return output.AssignValue(out.str(), theCommands);
   }
   Expression currentE;
-  bool useUsualOrder=!input[0].IsAtomGivenData(theCommands.opDivide()) && !input[0].IsAtomGivenData(theCommands.opThePower());
+  bool useUsualOrder = !input[0].IsAtomGivenData(theCommands.opDivide()) && !input[0].IsAtomGivenData(theCommands.opThePower());
 //  if (input[0].IsAtoM(theCommands.opDivide()))
 //    stOutput << input.Lispify();
   if (useUsualOrder)
-    for (int i=input.size()-1; i>=1; i--)
+    for (int i = input.size() - 1; i >= 1; i --)
     { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
-        return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
+        return output.MakeError("Failed to convert " + input[i].ToString(), theCommands);
       if (!currentE.IsOfType(&currentString))
-        return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
+        return output.MakeError("Failed to convert " + input[i].ToString(), theCommands);
       out << currentString << " ";
     }
   else
-    for (int i=1; i<input.size(); i++)
+    for (int i = 1; i < input.size(); i ++)
     { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
-        return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
+        return output.MakeError("Failed to convert " + input[i].ToString(), theCommands);
       if (!currentE.IsOfType(&currentString))
-        return output.MakeError("Failed to convert "+input[i].ToString(), theCommands);
+        return output.MakeError("Failed to convert " + input[i].ToString(), theCommands);
       out << currentString << " ";
     }
   if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[0], currentE))
-    return output.MakeError("Failed to convert "+input[0].ToString(), theCommands);
+    return output.MakeError("Failed to convert " + input[0].ToString(), theCommands);
   if (!currentE.IsOfType(&currentString))
-    return output.MakeError("Failed to convert "+input[0].ToString(), theCommands);
+    return output.MakeError("Failed to convert " + input[0].ToString(), theCommands);
   out << currentString << " ";
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1879,7 +1832,7 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
     return false;
   if (output.IsError())
     return true;
-  if (!parSel.CardinalitySelection==0)
+  if (!parSel.CardinalitySelection == 0)
     return output.MakeError("I know only to compute with finite dimensional characters, for the time being.", theCommands);
   charSSAlgMod<Rational> theElt;
   theElt.MakeFromWeight(ownerSSLiealg->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg);
@@ -1889,7 +1842,7 @@ bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Express
 bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerConesIntersect");
   if (!input.IsListNElements(3))
-    return theCommands << "Function ConesIntersection expects 2 arguments, got " << input.children.size-1 << " instead. ";
+    return theCommands << "Function ConesIntersection expects 2 arguments, got " << input.children.size - 1 << " instead. ";
   Matrix<Rational> coneNonStrictMatForm;
   Matrix<Rational> coneStrictMatForm;
   Vectors<Rational> coneNonStrictGens;
@@ -1899,7 +1852,7 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   if (!theCommands.GetMatrix(input[2], coneNonStrictMatForm))
     return theCommands << "Failed to extract matrix from the second argument, " << input[2].ToString();
   std::stringstream out;
-  if (coneNonStrictMatForm.NumCols!=coneStrictMatForm.NumCols)
+  if (coneNonStrictMatForm.NumCols != coneStrictMatForm.NumCols)
   { out << "I got as input vectors of different dimensions, first groups had vectors of dimension " << coneNonStrictMatForm.NumCols
     << " and second of dimension " << coneStrictMatForm.NumCols << " which is not allowed. ";
     return output.MakeError(out.str(), theCommands);
@@ -1907,20 +1860,20 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   coneNonStrictMatForm.GetVectorsFromRows(coneNonStrictGens);
   coneStrictMatForm.GetVectorsFromRows(coneStrictGens);
   out << "<br>Input non-strict (i.e., over Z_{&gt;=0}) cone: ";
-  for (int i=0; i<coneStrictGens.size; i++)
-    out << "<br>v_{" << i+1 << "}=" << coneStrictGens[i].ToString() << ";";
+  for (int i = 0; i < coneStrictGens.size; i ++)
+    out << "<br>v_{" << i + 1 << "}=" << coneStrictGens[i].ToString() << ";";
   out << "<br>Input strict (i.e., over Z_{&gt;0}) cone: ";
-  for (int i=0; i<coneNonStrictGens.size; i++)
-    out << "<br>v_{" << coneStrictGens.size+ i+1 << "}=" << coneNonStrictGens[i].ToString() << ";";
+  for (int i = 0; i < coneNonStrictGens.size; i ++)
+    out << "<br>v_{" << coneStrictGens.size + i + 1 << "}=" << coneNonStrictGens[i].ToString() << ";";
   Vector<Rational> outputIntersection, outputSeparatingNormal;
   bool conesDoIntersect=coneNonStrictGens.ConesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal);
   if (conesDoIntersect)
   { Vector<Rational> checkVector;
     checkVector.MakeZero(coneStrictMatForm.NumCols);
-    for (int i=0; i<coneStrictGens.size; i++)
-      checkVector+=coneStrictGens[i]*outputIntersection[i];
-    for (int i=0; i<coneNonStrictGens.size; i++)
-      checkVector+=coneNonStrictGens[i]*outputIntersection[coneStrictGens.size+i];
+    for (int i = 0; i < coneStrictGens.size; i ++)
+      checkVector += coneStrictGens[i] * outputIntersection[i];
+    for (int i = 0; i < coneNonStrictGens.size; i ++)
+      checkVector += coneNonStrictGens[i] * outputIntersection[coneStrictGens.size + i];
     if (!checkVector.IsEqualToZero())
       crash << "<br>This is a programming error: the output linear combination" << outputIntersection.ToString()
       << " corresponds to the cone intersection " << checkVector.ToString() << " and is not equal to zero! Here is the cone output so far: "
@@ -1929,10 +1882,10 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   } else
   { out << "<br>Cones have empty intersection.";
     out << "<br> A normal separating the cones is: n=" << outputSeparatingNormal.ToString() << ". Indeed, ";
-    for (int i=0; i<coneStrictGens.size; i++)
-      out << "<br>\\langle v_{" << i+1 << "}, n\\rangle = " << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).ToString();
-    for (int i=0; i<coneNonStrictGens.size; i++)
-      out << "<br>\\langle v_{" << i+1 + coneStrictGens.size << "}, n\\rangle = " << outputSeparatingNormal.ScalarEuclidean(coneNonStrictGens[i]).ToString();
+    for (int i = 0; i < coneStrictGens.size; i ++)
+      out << "<br>\\langle v_{" << i + 1 << "}, n\\rangle = " << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).ToString();
+    for (int i = 0; i < coneNonStrictGens.size; i ++)
+      out << "<br>\\langle v_{" << i + 1 + coneStrictGens.size << "}, n\\rangle = " << outputSeparatingNormal.ScalarEuclidean(coneNonStrictGens[i]).ToString();
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1940,18 +1893,18 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
 bool Calculator::innerReverseOrderRecursively(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerReverseOrderRecursively");
   if (!input.IsSuitableForRecursion())
-  { output=input;
+  { output = input;
     return true;
   }
-  if (input[0]=="ReverseRecursively")
-  { Expression tempE=input;
+  if (input[0] == "ReverseRecursively")
+  { Expression tempE = input;
     tempE.SetChildAtomValue(0, theCommands.opSequence());
     return theCommands.innerReverseOrderRecursively(theCommands, tempE, output);
   }
   output.reset(theCommands, input.size());
   output.AddChildOnTop(input[0]);
-  for (int i=input.size()-1; i>=1; i--)
-  { Expression currentE=input[i];
+  for (int i = input.size() - 1; i >= 1; i --)
+  { Expression currentE = input[i];
     Expression reversedCurrentE;
     if (!theCommands.innerReverseOrderRecursively(theCommands,  currentE, reversedCurrentE))
       return false;
@@ -1963,17 +1916,17 @@ bool Calculator::innerReverseOrderRecursively(Calculator& theCommands, const Exp
 bool Calculator::innerReverseOrdeR(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerReverse");
   if (!input.IsSuitableForRecursion())
-  { output=input;
+  { output = input;
     return true;
   }
-  if (input[0]=="Reverse")
-  { Expression tempE=input;
+  if (input[0] == "Reverse")
+  { Expression tempE = input;
     tempE.SetChildAtomValue(0, theCommands.opSequence());
     return theCommands.innerReverseOrdeR(theCommands, tempE, output);
   }
   output.reset(theCommands, input.size());
   output.AddChildOnTop(input[0]);
-  for (int i=input.size()-1; i>=1; i--)
+  for (int i = input.size() - 1; i >= 1; i --)
     output.AddChildOnTop(input[i]);
   return true;
 }
@@ -1983,16 +1936,16 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(const
 { MacroRegisterFunctionWithName("ElementUniversalEnveloping::GetKillingFormProduct");
   if (this->IsEqualToZero())
     return 0;
-  coefficient result=0;
+  coefficient result = 0;
   ElementUniversalEnveloping<coefficient> adadAppliedToMon, tempElt;
   SemisimpleLieAlgebra* theOwner;
-  theOwner=&this->GetOwner();
+  theOwner = &this->GetOwner();
   MonomialUniversalEnveloping<coefficient> baseGen;
   stOutput << "<hr>";
-  for (int i=0; i<theOwner->GetNumGenerators(); i++)
+  for (int i = 0; i < theOwner->GetNumGenerators(); i ++)
   { baseGen.MakeGenerator(i, *theOwner);
     adadAppliedToMon.MakeZero(*theOwner);
-    adadAppliedToMon.AddMonomial(baseGen,1);
+    adadAppliedToMon.AddMonomial(baseGen, 1);
     right.AdjointRepresentationAction(adadAppliedToMon, tempElt);
     tempElt.Simplify();
     stOutput << "<br>acting by " << right.ToString() << " on " << adadAppliedToMon.ToString() << " to get " << tempElt.ToString();
@@ -2000,7 +1953,7 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(const
     adadAppliedToMon.Simplify();
     stOutput << " acting by " << this->ToString() << " on " << tempElt.ToString() << " to get " << adadAppliedToMon.ToString();
     stOutput << "; coeff of " << baseGen.ToString() << " = " << adadAppliedToMon.GetMonomialCoefficient(baseGen).ToString();
-    result+=adadAppliedToMon.GetMonomialCoefficient(baseGen);
+    result += adadAppliedToMon.GetMonomialCoefficient(baseGen);
   }
   return result;
 }
@@ -2008,16 +1961,16 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(const
 template <class coefficient>
 coefficient SemisimpleLieAlgebra::GetKillingForm(const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::GetKillingForm");
-  coefficient result=0;
+  coefficient result = 0;
   ElementSemisimpleLieAlgebra<coefficient> adadAppliedToMon, tempElt;
   ChevalleyGenerator baseGen;
-  for (int i=0; i<this->GetNumGenerators(); i++)
+  for (int i = 0; i < this->GetNumGenerators(); i ++)
   { baseGen.MakeGenerator(*this, i);
     adadAppliedToMon.MakeZero();
     adadAppliedToMon.AddMonomial(baseGen, 1);
     this->LieBracket(right, adadAppliedToMon, tempElt);
     this->LieBracket(left, tempElt, adadAppliedToMon);
-    result+=adadAppliedToMon.GetMonomialCoefficient(baseGen);
+    result += adadAppliedToMon.GetMonomialCoefficient(baseGen);
   }
   return result;
 }
@@ -2026,19 +1979,19 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
 { MacroRegisterFunctionWithName("Calculator::innerKillingForm");
   if (!input.IsListNElements(3))
     return false;
-  Expression leftE=input[1];
-  Expression rightE=input[2];
+  Expression leftE = input[1];
+  Expression rightE = input[2];
   if (!leftE.IsBuiltInTypE() || !rightE.IsBuiltInTypE())
     return false;
   if (!Expression::MergeContexts(leftE, rightE))
     return false;
-  Expression theContext=leftE.GetContext();
+  Expression theContext = leftE.GetContext();
   ElementUniversalEnveloping<RationalFunctionOld> left, right;
   if (!leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&left) || !rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&right))
     return false;
   if (left.IsEqualToZero() || right.IsEqualToZero())
     return output.AssignValue(0, theCommands);
-  if (&left.GetOwner()!=&right.GetOwner())
+  if (&left.GetOwner() != &right.GetOwner())
     return false;
   ElementSemisimpleLieAlgebra<Rational> leftEltSS, rightEltSS;
   if (left.GetLieAlgebraElementIfPossible(leftEltSS) && right.GetLieAlgebraElementIfPossible(rightEltSS))
@@ -2048,18 +2001,18 @@ bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& inp
 
 bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerRootSubsystem");
-  if (input.children.size<3)
+  if (input.children.size < 3)
     return false;
-  SemisimpleLieAlgebra* theSSlieAlg=0;
+  SemisimpleLieAlgebra* theSSlieAlg = 0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorConversions::innerSSLieAlgebra, input[1], theSSlieAlg))
     return output.MakeError("Error extracting Lie algebra.", theCommands);
-  int theRank=theSSlieAlg->GetRank();
+  int theRank = theSSlieAlg->GetRank();
   Vector<Rational> currentRoot;
   Vectors<Rational> outputRoots;
-  WeylGroupData& theWeyl=theSSlieAlg->theWeyl;
+  WeylGroupData& theWeyl = theSSlieAlg->theWeyl;
   if (!theWeyl.theDynkinType.IsSimple())
     return theCommands << "<hr>Function root subsystem works for simple ambient types only.";
-  for (int i=2; i<input.size(); i++)
+  for (int i = 2; i < input.size(); i ++)
   { if (!theCommands.GetVectoR(input[i], currentRoot, 0, theRank, 0))
       return false;
     if (!theWeyl.RootSystem.Contains(currentRoot))
@@ -2069,7 +2022,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   std::stringstream out;
   DynkinDiagramRootSubalgebra theDiagram;
   theWeyl.TransformToSimpleBasisGenerators(outputRoots, theWeyl.RootSystem);
-  theDiagram.AmbientBilinearForm=theWeyl.CartanSymmetric;
+  theDiagram.AmbientBilinearForm = theWeyl.CartanSymmetric;
   theDiagram.AmbientRootSystem = theWeyl.RootSystem;
   theDiagram.ComputeDiagramInputIsSimple(outputRoots);
   out << "Diagram final: " << theDiagram.ToString()
@@ -2080,9 +2033,9 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
 bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerPerturbSplittingNormal");
   std::stringstream out;
-  if (input.size()!=4)
+  if (input.size() != 4)
   { out << "Perturbing splitting normal takes 3 arguments: normal, positive vectors, and vectors relative to which to perturb. "
-    << "Instead I got " << input.size()-1 << ". ";
+    << "Instead I got " << input.size() - 1 << ". ";
     return output.MakeError(out.str(), theCommands);
   }
   Vector<Rational> splittingNormal;
@@ -2096,8 +2049,8 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   if (!theCommands.GetMatrix(input[3], theMat, 0, splittingNormal.size, 0))
     return output.MakeError("Failed to extract matrix from third argument. ", theCommands);
   VectorsToPerturbRelativeTo.AssignMatrixRows(theMat);
-  for (int i =0; i<NonStrictCone.size; i++)
-    if (splittingNormal.ScalarEuclidean(NonStrictCone[i])<0)
+  for (int i = 0; i < NonStrictCone.size; i ++)
+    if (splittingNormal.ScalarEuclidean(NonStrictCone[i]) < 0)
       return output.MakeError("The normal vector " + splittingNormal.ToString() + " is has negative scalar product with " + NonStrictCone[i].ToString(), theCommands);
   out << "Perturbing " << splittingNormal.ToString() << " relative to cone " << NonStrictCone.ToString() << " and vectors " << VectorsToPerturbRelativeTo.ToString();
   splittingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(NonStrictCone, VectorsToPerturbRelativeTo);
@@ -2107,7 +2060,7 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
 
 bool Expression::GetListExpressionsFromExpressionHistoryRecursiveNested(Expression& outputAppend)const
 { MacroRegisterFunctionWithName("Expression::GetListExpressionsFromExpressionHistoryRecursiveNested");
-  if (this->owner==0)
+  if (this->owner == 0)
   { outputAppend.AddChildOnTop(*this);
     return true;
   }
@@ -2115,25 +2068,25 @@ bool Expression::GetListExpressionsFromExpressionHistoryRecursiveNested(Expressi
   { outputAppend.AddChildOnTop(*this);
     return true;
   }
-  if (this->size()==2)
+  if (this->size() == 2)
     return true;
-  int numTransformationPhases=0;
-  for (int i=0; i<this->size(); i++)
-    if ((*this)[i].IsSequenceNElementS() && (*this)[i].size()>2)
+  int numTransformationPhases = 0;
+  for (int i = 0; i < this->size(); i ++)
+    if ((*this)[i].IsSequenceNElementS() && (*this)[i].size() > 2)
       if ((*this)[i][1].IsEqualToMOne())
-        numTransformationPhases++;
-  if (numTransformationPhases<=1)
+        numTransformationPhases ++;
+  if (numTransformationPhases <= 1)
     return true;
   Expression theTransformations;
   List<Expression> transformationPhases;
   transformationPhases.Reserve(numTransformationPhases);
-  for (int i=0; i<this->size(); i++)
-    if ((*this)[i].IsSequenceNElementS() && (*this)[i].size()>2)
+  for (int i = 0; i < this->size(); i ++)
+    if ((*this)[i].IsSequenceNElementS() && (*this)[i].size() > 2)
       if ((*this)[i][1].IsEqualToMOne())
         transformationPhases.AddOnTop((*this)[i]);
   theTransformations.MakeSequence(*this->owner, &transformationPhases);
   outputAppend.AddChildOnTop(theTransformations);
-  for (int i=0; i<this->size(); i++)
+  for (int i = 0; i < this->size(); i ++)
     if ((*this)[i].IsSequenceNElementS())
       if (!(*this)[i][1].IsEqualToMOne())
         (*this)[i][2].GetListExpressionsFromExpressionHistoryRecursiveNested(outputAppend);
@@ -2143,7 +2096,7 @@ bool Expression::GetListExpressionsFromExpressionHistoryRecursiveNested(Expressi
 std::string Expression::ToStringExpressionHistoryRecursiveNested()
 { MacroRegisterFunctionWithName("Expression::ToStringExpressionHistoryRecursiveNested");
   std::stringstream out;
-  if (this->owner==0)
+  if (this->owner == 0)
     return "(no owner)";
   Expression processedHistory;
   processedHistory.reset(*this->owner);
@@ -2151,16 +2104,16 @@ std::string Expression::ToStringExpressionHistoryRecursiveNested()
   if (!this->GetListExpressionsFromExpressionHistoryRecursiveNested(processedHistory))
     out << "Failed to extract expression tree. ";
   else
-  { for (int i=1; i<processedHistory.size(); i++)
+  { for (int i = 1; i < processedHistory.size(); i ++)
     { out << "Step " << i << ": \\(\\begin{array}{ll|l}&";
-      for (int j=1; j<processedHistory[i].size(); j++)
-      { if (j>1)
+      for (int j = 1; j < processedHistory[i].size(); j ++)
+      { if (j > 1)
           out << "=&";
         out << processedHistory[i][j][2].ToString();
-        if (j+1<processedHistory[i].size())
-          if (processedHistory[i][j+1].size()>3 )
-          { std::string theString=processedHistory[i][j+1][3].ToString();
-            if (theString!="")
+        if (j + 1 < processedHistory[i].size())
+          if (processedHistory[i][j + 1].size() > 3 )
+          { std::string theString=processedHistory[i][j + 1][3].ToString();
+            if (theString != "")
               out << "&\\text{" << theString << "}";
           }
         out << "\\\\";
@@ -2175,13 +2128,13 @@ std::string Expression::ToStringExpressionHistoryRecursiveNested()
 
 void Calculator::ExpressionHistoryAddEmptyHistory()
 { MacroRegisterFunctionWithName("Calculator::ExpressionHistoryAddEmptyHistory");
-  ListReferences<Expression>& currentExpressionHistoryStack=this->historyStack.LastObject();
-  currentExpressionHistoryStack.SetSize(currentExpressionHistoryStack.size+1);
-  Expression& currentExpressionHistory= currentExpressionHistoryStack.LastObject();
+  ListReferences<Expression>& currentExpressionHistoryStack = this->historyStack.LastObject();
+  currentExpressionHistoryStack.SetSize(currentExpressionHistoryStack.size + 1);
+  Expression& currentExpressionHistory = currentExpressionHistoryStack.LastObject();
   currentExpressionHistory.reset(*this);
   currentExpressionHistory.AddChildAtomOnTop(this->opExpressionHistory());
   this->historyRuleNames.LastObject().SetSize(currentExpressionHistoryStack.size);
-  this->historyRuleNames.LastObject().LastObject()=(std::string) "";
+  this->historyRuleNames.LastObject().LastObject() = (std::string) "";
 }
 
 void Calculator::ExpressionHistoryAdd
@@ -2197,19 +2150,19 @@ void Calculator::ExpressionHistoryAdd
   Expression ruleNameE;
   ruleNameE.AssignValue(this->historyRuleNames.LastObject().LastObject() , *this);
   theHistoryE.AddChildOnTop(ruleNameE);
-  this->historyRuleNames.LastObject().LastObject()="";
+  this->historyRuleNames.LastObject().LastObject() = "";
   this->historyStack.LastObject().LastObject().AddChildOnTop(theHistoryE);
 }
 
 void Calculator::ExpressionHistoryPop()
 { MacroRegisterFunctionWithName("Calculator::ExpressionHistoryPop");
-  this->historyStack.LastObject().SetSize(this->historyStack.LastObject().size-1);
+  this->historyStack.LastObject().SetSize(this->historyStack.LastObject().size - 1);
   this->historyRuleNames.LastObject().SetSize(this->historyStack.LastObject().size);
 }
 
 void Calculator::ExpressionHistoryStackAdd()
 { MacroRegisterFunctionWithName("Calculator::ExpressionHistoryStackAdd");
-  this->historyStack.SetSize(this->historyStack.size+1);
+  this->historyStack.SetSize(this->historyStack.size + 1);
   this->historyStack.LastObject().SetSize(0);
   this->historyRuleNames.SetSize(this->historyStack.size);
   this->historyRuleNames.LastObject().SetSize(0);
@@ -2217,24 +2170,24 @@ void Calculator::ExpressionHistoryStackAdd()
 
 void Calculator::ExpressionHistoryStackPop()
 { MacroRegisterFunctionWithName("Calculator::ExpressionHistoryStackPop");
-  this->historyStack.SetSize(this->historyStack.size-1);
+  this->historyStack.SetSize(this->historyStack.size - 1);
   this->historyRuleNames.SetSize(this->historyStack.size);
 }
 
 bool Calculator::innerLogEvaluationStepsHumanReadableNested(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadableNested");
-  Expression inputCopy=input;
+  Expression inputCopy = input;
   Expression outputTransformation;
   if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadableNested"))
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
-  bool notUsed=false;
+  bool notUsed = false;
   theCommands.ExpressionHistoryStackAdd();
-  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed, -1);
+  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed, - 1);
   std::stringstream out;
-  ListReferences<Expression>& currentStack=theCommands.historyStack.LastObject();
-  for (int i=0; i<currentStack.size; i++)
-  { out << "Stack " << i+1 << ":<br>" << currentStack[i].ToStringExpressionHistoryRecursiveNested();
-    if (i!=currentStack.size-1)
+  ListReferences<Expression>& currentStack = theCommands.historyStack.LastObject();
+  for (int i = 0; i < currentStack.size; i ++)
+  { out << "Stack " << i + 1 << ":<br>" << currentStack[i].ToStringExpressionHistoryRecursiveNested();
+    if (i != currentStack.size - 1)
       out << "<hr>";
   }
   theCommands.ExpressionHistoryStackPop();
@@ -2246,7 +2199,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableNested(Calculator& theComma
 struct HistorySubExpression{
 public:
   friend std::ostream& operator << (std::ostream& output, const HistorySubExpression& theH)
-  { if (theH.currentE==0)
+  { if (theH.currentE == 0)
       output << "(no expression)";
     else
       output << theH.currentE->ToString();
@@ -2278,12 +2231,12 @@ public:
   std::stringstream errorStream;
   const Expression* getCurrentE(const List<Expression>& input);
   ExpressionHistoryEnumerator()
-  { this->initialized=false;
-    this->owner=0;
+  { this->initialized = false;
+    this->owner = 0;
   }
   bool IncrementRecursivelyReturnFalseIfPastLast(TreeNode<HistorySubExpression>& currentNode);
   bool CheckInitialization()
-  { if (this->owner==0)
+  { if (this->owner == 0)
       crash << "Expression history enumerator has zero owner. " << crash;
     return true;
   }
@@ -2306,13 +2259,13 @@ bool ExpressionHistoryEnumerator::initialize()
   this->rulesDisplayNamesMap.SetKeyValue("MultiplyByOne","");
   this->rulesDisplayNamesMap.SetKeyValue("AddTerms","");
   this->rulesDisplayNamesMap.SetKeyValue("AssociativeRule","");
-  this->initialized=true;
+  this->initialized = true;
   this->CheckInitialization();
-  if (!this->theHistory.StartsWith(this->owner->opExpressionHistory()) || this->theHistory.size()<2)
+  if (!this->theHistory.StartsWith(this->owner->opExpressionHistory()) || this->theHistory.size() < 2)
   { this->errorStream << "Expression history does not start with the right atom. ";
     return false;
   }
-  if (!this->theHistory[1].StartsWith(this->owner->opSequence()) || this->theHistory[1].size()<3)
+  if (!this->theHistory[1].StartsWith(this->owner->opSequence()) || this->theHistory[1].size() < 3)
   { this->errorStream << "Expression history element is not a sequence. ";
     return false;
   }
@@ -2322,11 +2275,11 @@ bool ExpressionHistoryEnumerator::initialize()
   }
   this->currentSubTree.reset();
   HistorySubExpression currentNode;
-  currentNode.currentE=&this->theHistory;
-  currentNode.lastActiveSubexpression=1;
+  currentNode.currentE = &this->theHistory;
+  currentNode.lastActiveSubexpression = 1;
   this->currentSubTree.ResetAddRoot(currentNode);
-  currentNode.currentE=&this->theHistory[1][2];
-  currentNode.lastActiveSubexpression=-1;
+  currentNode.currentE = &this->theHistory[1][2];
+  currentNode.lastActiveSubexpression = - 1;
   this->currentSubTree.theNodes[0].AddChild(currentNode);
   return true;
 }
@@ -2334,29 +2287,29 @@ bool ExpressionHistoryEnumerator::initialize()
 Expression ExpressionHistoryEnumerator::GetExpression(TreeNode<HistorySubExpression>& currentNode, List<std::string>& outputRuleNames)
 { MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::GetExpression");
   Expression result;
-  if (currentNode.theData.lastActiveSubexpression< currentNode.theData.currentE->size() && currentNode.theData.lastActiveSubexpression>=0)
+  if (currentNode.theData.lastActiveSubexpression< currentNode.theData.currentE->size() && currentNode.theData.lastActiveSubexpression >= 0)
   { const Expression& currentRuleSequence=(*currentNode.theData.currentE)[currentNode.theData.lastActiveSubexpression];
     //stOutput << " current sequence: " << currentRuleSequence.ToString() << "<br>";
-    if (currentRuleSequence.size()>3)
-    { std::string ruleName=currentRuleSequence[3].ToString();
-      if (ruleName!="" && ruleName!="Sub-expression simplification")
+    if (currentRuleSequence.size() > 3)
+    { std::string ruleName = currentRuleSequence[3].ToString();
+      if (ruleName != "" && ruleName != "Sub-expression simplification")
         outputRuleNames.AddOnTop(ruleName);
     }
   }
 
-  if (currentNode.children.size==0)
-  { result=*currentNode.theData.currentE;
+  if (currentNode.children.size == 0)
+  { result = *currentNode.theData.currentE;
     return result;
   }
-  if (currentNode.children.size==1)
-  { result=this->GetExpression(currentNode.GetChild(0), outputRuleNames);
+  if (currentNode.children.size == 1)
+  { result = this->GetExpression(currentNode.GetChild(0), outputRuleNames);
     return result;
   }
   //stOutput << "<hr>Rule names from: " << currentNode.theData.currentE->ToString()
   //<< "<br> lastActive sub: " << currentNode.theData.lastActiveSubexpression << "<br>";
   result.reset(*this->owner);
-  for (int i=0; i<currentNode.children.size; i++)
-  { Expression currentE=this->GetExpression(currentNode.GetChild(i), outputRuleNames);
+  for (int i = 0; i < currentNode.children.size; i ++)
+  { Expression currentE = this->GetExpression(currentNode.GetChild(i), outputRuleNames);
     //stOutput << "<br>Adding expression: " << currentE.ToStringFull();
     result.AddChildOnTop(currentE);
   }
@@ -2373,7 +2326,7 @@ void ExpressionHistoryEnumerator::ComputeAll()
     this->rulesNames.AddOnTop(currentRuleNames);
     this->rulesDisplayNames.SetSize(this->rulesDisplayNames.size + 1);
     this->rulesDisplayNames.LastObject()->SetSize(0);
-    for (int i = 0; i < currentRuleNames.size; i++)
+    for (int i = 0; i < currentRuleNames.size; i ++)
     { std::string currentRule = currentRuleNames[i];
       if (this->rulesDisplayNamesMap.Contains(currentRuleNames[i]))
         currentRule = this->rulesDisplayNamesMap.GetValueCreate(currentRuleNames[i]);
@@ -2388,45 +2341,45 @@ void ExpressionHistoryEnumerator::ComputeAll()
 bool ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast
 (TreeNode<HistorySubExpression>& currentNode)
 { MacroRegisterFunctionWithName("ExpressionHistoryEnumerator::IncrementRecursivelyReturnFalseIfPastLast");
-  bool didWork=false;
-  for (int i=0; i<currentNode.children.size; i++)
+  bool didWork = false;
+  for (int i = 0; i < currentNode.children.size; i ++)
     if (this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[currentNode.children[i]]))
-      didWork=true;
+      didWork = true;
   if (didWork)
     return true;
-  if (!currentNode.theData.currentE->StartsWith(this->owner->opExpressionHistory()) )
+  if (!currentNode.theData.currentE->StartsWith(this->owner->opExpressionHistory()))
     return false;
-  const Expression& currentE=*currentNode.theData.currentE;
+  const Expression& currentE = *currentNode.theData.currentE;
   HistorySubExpression nextChild;
   std::string currentRule;
   while (!didWork)
-  { if (currentNode.theData.lastActiveSubexpression==currentE.size()-1)
+  { if (currentNode.theData.lastActiveSubexpression == currentE.size() - 1)
       return false;
     currentNode.RemoveAllChildren();
-    int nextGoodIndex=currentNode.theData.lastActiveSubexpression+1;
-    for (;nextGoodIndex<currentE.size(); nextGoodIndex++)
-      if (currentE[nextGoodIndex].IsSequenceNElementS() && currentE[nextGoodIndex].size()>2)
+    int nextGoodIndex=currentNode.theData.lastActiveSubexpression + 1;
+    for (; nextGoodIndex < currentE.size(); nextGoodIndex ++)
+      if (currentE[nextGoodIndex].IsSequenceNElementS() && currentE[nextGoodIndex].size() > 2)
       { if (currentE[nextGoodIndex][1].IsEqualToMOne())
-          if (currentNode.children.size>0)
+          if (currentNode.children.size > 0)
             break;
-        if (currentE[nextGoodIndex].size()>3)
+        if (currentE[nextGoodIndex].size() > 3)
           if (currentE[nextGoodIndex][3].IsOfType(&currentRule))
             if (this->rulesToBeIgnored.Contains(currentRule))
               continue;
-        nextChild.currentE=&currentE[nextGoodIndex][2];
-        nextChild.lastActiveSubexpression=0;
+        nextChild.currentE = &currentE[nextGoodIndex][2];
+        nextChild.lastActiveSubexpression = 0;
         currentNode.AddChild(nextChild);
-        currentNode.theData.lastActiveSubexpression=nextGoodIndex;
+        currentNode.theData.lastActiveSubexpression = nextGoodIndex;
         this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[*currentNode.children.LastObject()]);
         if (currentE[nextGoodIndex][1].IsEqualToMOne())
-        { didWork=true;
+        { didWork = true;
           break;
         }
       }
-    for (int i=0; i<currentNode.children.size; i++)
+    for (int i = 0; i < currentNode.children.size; i ++)
       if (this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[currentNode.children[i]]))
-        didWork=true;
-    if (nextGoodIndex>=currentE.size())
+        didWork = true;
+    if (nextGoodIndex >= currentE.size())
       break;
    }
   return didWork;
@@ -2437,9 +2390,9 @@ bool ExpressionHistoryEnumerator::IncrementReturnFalseIfPastLast()
   if (!this->initialized)
     return this->initialize();
   this->CheckInitialization();
-  if (this->currentSubTree.theNodes.size<1)
+  if (this->currentSubTree.theNodes.size < 1)
     return false;
-  bool result=this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[0]);
+  bool result = this->IncrementRecursivelyReturnFalseIfPastLast(this->currentSubTree.theNodes[0]);
   return result;
 }
 
@@ -2447,19 +2400,19 @@ std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged()
 { std::stringstream out;
   out << this->errorStream.str();
   out << "\\(\\begin{array}{ll|l}";
-  std::string prevEstring="";
+  std::string prevEstring = "";
   List<std::string> currentRules;
-  for (int j=0; j<this->output.size; j++)
-  { std::string currentEstring=this->output[j].ToString();
+  for (int j = 0; j < this->output.size; j ++)
+  { std::string currentEstring = this->output[j].ToString();
 
-    if (currentEstring==prevEstring)
+    if (currentEstring == prevEstring)
     { currentRules.AddListOnTop(this->rulesDisplayNames[j]);
       continue;
     }
-    prevEstring=currentEstring;
+    prevEstring = currentEstring;
     currentRules.AddListOnTop(this->rulesDisplayNames[j]);
-    if (j>0)
-    { if (currentRules.size>0)
+    if (j > 0)
+    { if (currentRules.size > 0)
         out << "&\\text{" << currentRules.ToStringCommaDelimited() << "}";
       currentRules.SetSize(0);
       out << "\\\\";
@@ -2467,7 +2420,7 @@ std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged()
     }
     out << "&\n" << currentEstring;
   }
-  if (currentRules.size>0)
+  if (currentRules.size > 0)
     out << "&\\text{apply: " << currentRules.ToStringCommaDelimited() << "}";
   out << "\\end{array}\\)";
   return out.str();
@@ -2475,25 +2428,25 @@ std::string ExpressionHistoryEnumerator::ToStringExpressionHistoryMerged()
 
 bool Calculator::innerLogEvaluationStepsHumanReadableMerged(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerLogEvaluationStepsHumanReadableMerged");
-  Expression inputCopy=input;
+  Expression inputCopy = input;
   Expression outputTransformation;
   if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadableMerged"))
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
   bool notUsed=false;
   theCommands.ExpressionHistoryStackAdd();
-  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed,-1);
+  theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed, - 1);
   std::stringstream out;
-  ListReferences<Expression>& currentStack=theCommands.historyStack.LastObject();
-  for (int i=0; i<currentStack.size; i++)
-  { if (currentStack.size>1)
-      out << "Stack " << i+1 << ":<br>";
+  ListReferences<Expression>& currentStack = theCommands.historyStack.LastObject();
+  for (int i = 0; i < currentStack.size; i ++)
+  { if (currentStack.size > 1)
+      out << "Stack " << i + 1 << ":<br>";
     ExpressionHistoryEnumerator theHistoryEnumerator;
-    theHistoryEnumerator.theHistory=currentStack[i];
-    theHistoryEnumerator.owner=&theCommands;
+    theHistoryEnumerator.theHistory = currentStack[i];
+    theHistoryEnumerator.owner = &theCommands;
     theHistoryEnumerator.ComputeAll();
     out << theHistoryEnumerator.ToStringExpressionHistoryMerged();
     //out << "DEBUG: " << theHistoryEnumerator.theHistory.ToString();
-    if (i!=currentStack.size-1)
+    if (i != currentStack.size - 1)
       out << "<hr>";
   }
   theCommands.ExpressionHistoryStackPop();

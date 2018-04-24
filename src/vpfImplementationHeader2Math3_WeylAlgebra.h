@@ -344,30 +344,30 @@ bool ElementWeylAlgebra<coefficient>::ActOnPolynomial(Polynomial<Rational>& theP
   result.MakeZero();
   MonomialP resultMon;
   Rational coeff;
-  for (int i=0; i<this->size(); i++)
-    for (int j=0; j<thePoly.size(); j++)
-    { const MonomialP& currentPolMon=thePoly[j];
-      const MonomialWeylAlgebra& currentOpMon=(*this)[i];
-      resultMon=currentPolMon;
-      coeff=thePoly.theCoeffs[j];
-      coeff*=this->theCoeffs[i];
-      for (int k=0; k<currentOpMon.GetMinNumVars(); k++)
-      { int numDiff=0;
+  for (int i = 0; i < this->size(); i ++)
+    for (int j = 0; j < thePoly.size(); j ++)
+    { const MonomialP& currentPolMon = thePoly[j];
+      const MonomialWeylAlgebra& currentOpMon = (*this)[i];
+      resultMon = currentPolMon;
+      coeff = thePoly.theCoeffs[j];
+      coeff *= this->theCoeffs[i];
+      for (int k = 0; k < currentOpMon.GetMinNumVars(); k ++)
+      { int numDiff = 0;
         if (!currentOpMon.differentialPart(k).IsSmallInteger(&numDiff))
           return false;
-        for (; numDiff>0; numDiff--)
-        { coeff*=resultMon[k];
+        for (; numDiff > 0; numDiff --)
+        { coeff *= resultMon[k];
           if (coeff.IsEqualToZero())
             break;
-          resultMon[k]-=1;
+          resultMon[k] -= 1;
         }
         if (coeff.IsEqualToZero())
           break;
       }
-      resultMon*=currentOpMon.polynomialPart;
+      resultMon *= currentOpMon.polynomialPart;
       result.AddMonomial(resultMon, coeff);
     }
-  thePoly=result;
+  thePoly = result;
   return true;
 }
 

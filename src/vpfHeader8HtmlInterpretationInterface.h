@@ -8,7 +8,8 @@
 
 static ProjectInformationInstance ProjectInfoHeaderHtmlInterpretationInterface(__FILE__, "Html interpretation interface.");
 
-class HtmlInterpretation{
+class HtmlInterpretation
+{
 public:
   std::string htmlRaw;
   std::string htmlJSbuild;

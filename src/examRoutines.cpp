@@ -1462,7 +1462,8 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.htmlButtonInterpret += ">Interpret</button>";
   if (!this->flagIsForReal)
   { if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly != "")
-      currentA.htmlButtonAnswer = "<button class=\"showAnswerButton\" onclick=\"giveUp('" +
+      currentA.htmlButtonAnswer = "<button id=\"" + currentA.idButtonAnswer +
+      "\" class=\"showAnswerButton\" onclick=\"giveUp('" +
       answerId + "', '" + currentA.idVerificationSpan + "')\">Answer</button>";
     else
       currentA.htmlButtonAnswer = "No ``give-up'' answer available. ";

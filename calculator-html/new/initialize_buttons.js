@@ -339,7 +339,6 @@ InputPanelData.prototype.mQHelpCalculator = function(){
   this.ignoreNextMathQuillUpdateEvent = false;
 }
 
-
 InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outputComponent) {
   if (typeof outputComponent == "string") {
     outputComponent = document.getElementById(outputComponent);
@@ -374,17 +373,33 @@ InputPanelData.prototype.submitOrPreviewAnswers = function(requestType) {
   });
 }
 
-InputPanelData.prototype.giveUp = function() {
-  clearTimeout(this.timerForPreviewAnswers);
-  params= "";
-}
-
 InputPanelData.prototype.showSolution = function() {
   clearTimeout(this.timerForPreviewAnswers);
 }
 
+InputPanelData.prototype.submitAnswer = function() {
+  var theRequest = "";
+  if (thePage.currentProblem[this.fileName].flagForReal) {
+    theRequest = "submitAnswers";
+  } else {
+    theRequest = "submitExercise";
+  }
+   //"submitProblemPreview"
+  this.submitOrPreviewAnswers(theRequest);
+}
+
+InputPanelData.prototype.submitGiveUp = function() {
+  var theRequest = "problemGiveUp"; //"submitProblemPreview"
+  this.submitOrPreviewAnswers(theRequest);
+}
+
 InputPanelData.prototype.submitPreview = function() {
-  var theRequest = "submitExercisePreview"; //"submitProblemPreview"
+  var theRequest = "";
+  if (thePage.currentProblem[this.fileName].flagForReal) {
+    theRequest = "submitProblemPreview";
+  } else {
+    theRequest = "submitExercisePreview";
+  }
   this.submitOrPreviewAnswers(theRequest);
 }
 

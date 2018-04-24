@@ -13,14 +13,14 @@ const int PackedVector<scalar>::size;
 template <typename scalar>
 PackedVector<scalar> PackedVector<scalar>::operator+(const PackedVector<scalar>& w) const
 { PackedVector<scalar> out;
-  for(int i=0; i<this->size; i++)
-    out[i] = this->data[i]+w[i];
+  for (int i = 0; i < this->size; i ++)
+    out[i] = this->data[i] + w[i];
   return out;
 }
 
 template <typename scalar>
 void PackedVector<scalar>::operator+=(const PackedVector<scalar>& w)
-{ for(int i=0; i<this->size; i++)
+{ for(int i = 0; i < this->size; i ++)
     this->data[i] += w[i];
 }
 

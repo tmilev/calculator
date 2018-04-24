@@ -11,15 +11,14 @@ template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::WrapUpGroebnerOnExceedingComputationLimit
 (List<Polynomial<coefficient> >& inputOutpuT)
 { inputOutpuT.Reserve(this->theBasiS.size + this->basisCandidates.size);
-  inputOutpuT=this->theBasiS;
+  inputOutpuT = this->theBasiS;
   inputOutpuT.AddListOnTop(this->basisCandidates);
   return false;
 }
 
 template <class coefficient>
-bool GroebnerBasisComputation<coefficient>::WrapUpOnGroebnerBasisSuccess
-(List<Polynomial<coefficient> >& inputOutpuT)
-{ inputOutpuT=this->theBasiS;
+bool GroebnerBasisComputation<coefficient>::WrapUpOnGroebnerBasisSuccess(List<Polynomial<coefficient> >& inputOutpuT)
+{ inputOutpuT = this->theBasiS;
   return true;
 }
 
@@ -28,7 +27,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedBasis
 (List<Polynomial<coefficient> >& inputOutpuT, int upperLimitPolyComputations)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::TransformToReducedBasis");
   this->initForGroebnerComputation(inputOutpuT.size);
-  this->basisCandidates=inputOutpuT;
+  this->basisCandidates = inputOutpuT;
   ProgressReport theReport1, theReport2;
   if (this->flagDoProgressReport)
   { std::stringstream reportStream;

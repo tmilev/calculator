@@ -152,6 +152,10 @@ public:
   std::string outputHtmlBodyNoTag;
   std::string outputHtmlHeadNoTag;
   std::string outputProblemNavigatioN;
+  std::string outputDeadlineString;
+  std::string outputProblemLabel;
+  std::string outputProblemTitle;
+
   std::stringstream logCommandsProblemGeneratioN;
   std::string courseHome;
   std::string topicListJavascriptWithTag;

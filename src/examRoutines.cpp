@@ -2909,6 +2909,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     if (this->theTopicS.Contains(this->fileName))
     { TopicElement& current = this->theTopicS.GetValueCreate(this->fileName);
       current.ComputeLinks(*this, true);
+      this->outputProblemLabel = current.problemNumberString;
       problemLabel = current.displayTitle + "&nbsp;&nbsp;";
       if (this->flagDoPrependProblemNavigationBar)
         problemLabel += current.displayResourcesLinks;
@@ -2924,13 +2925,15 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       if (theProbData.numCorrectlyAnswered >= theProbData.theAnswers.size())
         problemAlreadySolved = true;
     }
-    std::string theDeadlineString = this->ToStringDeadline(this->fileName, problemAlreadySolved, true, true);
-    if (theDeadlineString == "")
-      outBody << "<span style=\"color:orange\"><b>No deadline yet but scores are recorded. </b></span>";
-    else
-      outBody << "<span style=\"color:brown\"><b>Scores are recorded. </b></span>";
-    outBody << problemLabel;
-    outBody << theDeadlineString << "\n<hr>\n";
+    this->outputDeadlineString = this->ToStringDeadline(this->fileName, problemAlreadySolved, true, true);
+    if (!this->flagUseJSON)
+    { if (this->outputDeadlineString == "")
+        outBody << "<span style=\"color:orange\"><b>No deadline yet but scores are recorded. </b></span>";
+      else
+        outBody << "<span style=\"color:brown\"><b>Scores are recorded. </b></span>";
+      outBody << problemLabel;
+      outBody << this->outputDeadlineString << "\n<hr>\n";
+    }
 #endif
     //outBody << "<br>";
   } else if (!this->flagIsExamHome && !this->flagIsForReal &&
@@ -2938,8 +2941,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
              theGlobalVariables.userCalculatorRequestType != "templateNoLogin" &&
              theGlobalVariables.userCalculatorRequestType != "templateJSON" &&
              theGlobalVariables.userCalculatorRequestType != "templateJSONNoLogin")
-    outBody << "<span style=\"color:green\"><b>Scores not recorded. </b></span>"
-    << problemLabel << "<hr>";
+    if (!this->flagUseJSON)
+      outBody << "<span style=\"color:green\"><b>Scores not recorded. </b></span>"
+      << problemLabel << "<hr>";
   //////////////////////////////
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time after execution");

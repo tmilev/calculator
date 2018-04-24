@@ -12,6 +12,12 @@ function updateProblemPageCallback(input, outputComponent){
   var theProblem = JSON.parse(input);
   var decodedProblem = decodeURIComponent(theProblem["problem"]);
   var scripts = decodeURIComponent(theProblem["scripts"]);
+  var problemLabel = theProblem["problemLabel"];
+  var forReal = theProblem["forReal"];
+  var topPart = "";
+  if (forReal !== true && forReal !== "true"){
+    topPart = "<b style = 'color:green'>Scores not recorded</b>"
+  }
   document.getElementById("divCurrentProblemContentContainer").innerHTML = decodedProblem + scripts;
   thePage.currentProblem = {};
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentProblemContentContainer")]);

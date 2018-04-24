@@ -832,6 +832,16 @@ std::string HtmlInterpretation::GetExamPageJSON()
   if (theFile.flagLoadedSuccessfully)
   { output["scripts"] = HtmlRoutines::ConvertStringToURLString(theFile.outputHtmlHeadNoTag, false);
     output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
+    output["deadline"] = theFile.outputDeadlineString;
+    output["problemLabel"] = theFile.outputProblemLabel;
+    output["title"] = theFile.outputProblemTitle;
+
+    output["forReal"] = theFile.flagIsForReal;
+    if (theFile.flagIsForReal)
+    { std::stringstream randomSeedStream;
+      randomSeedStream << theFile.theProblemData.randomSeed;
+      output["randomSeed"] = randomSeedStream.str();
+    }
   }
   return output.ToString(false, false);
 }

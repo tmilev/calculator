@@ -837,7 +837,7 @@ std::string HtmlInterpretation::GetExamPageJSON()
     output["title"] = theFile.outputProblemTitle;
 
     output["forReal"] = theFile.flagIsForReal;
-    if (theFile.flagIsForReal)
+    if (!theFile.flagIsForReal)
     { std::stringstream randomSeedStream;
       randomSeedStream << theFile.theProblemData.randomSeed;
       output["randomSeed"] = randomSeedStream.str();

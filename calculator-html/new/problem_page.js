@@ -16,9 +16,15 @@ function updateProblemPageCallback(input, outputComponent){
   var forReal = theProblem["forReal"];
   var topPart = "";
   if (forReal !== true && forReal !== "true"){
-    topPart = "<b style = 'color:green'>Scores not recorded</b>"
+    topPart = `<b style = 'color:green'>Scores not recorded.</b> ${theProblem.problemLabel} ${theProblem.title}`;
+  } else {
+    topPart = `<b style = 'color:brown'>Scores are recorded.</b> ${theProblem.problemLabel} ${theProblem.title}`;
   }
-  document.getElementById("divCurrentProblemContentContainer").innerHTML = decodedProblem + scripts;
+  if (!forReal){
+    topPart += `&nbsp; <a class='problemLinkPractice' href=''>#${theProblem.randomSeed}</a>`;
+  }
+  topPart += "<br>";
+  document.getElementById("divCurrentProblemContentContainer").innerHTML = topPart + decodedProblem + scripts;
   thePage.currentProblem = {};
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentProblemContentContainer")]);
   thePage.currentProblem[thePage.currentCourse.fileName] = {};
@@ -53,9 +59,11 @@ function updateProblemPageCallback(input, outputComponent){
     document.getElementById(currentAnswerPanel.idButtonSubmit).addEventListener(
       'click', currentAnswerPanel.submitAnswer.bind(currentAnswerPanel)
     );
-    document.getElementById(currentAnswerPanel.idButtonAnswer).addEventListener(
-      'click', currentAnswerPanel.submitGiveUp.bind(currentAnswerPanel)
-    );
+    if (! forReal){
+      document.getElementById(currentAnswerPanel.idButtonAnswer).addEventListener(
+        'click', currentAnswerPanel.submitGiveUp.bind(currentAnswerPanel)
+      );
+    }
     
     //theElement.addEventListener('onchange', latexChangeHandler);
     //theElement.attributes.onkeyup = latexChangeHandler;

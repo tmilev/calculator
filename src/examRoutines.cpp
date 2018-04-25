@@ -2910,6 +2910,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     { TopicElement& current = this->theTopicS.GetValueCreate(this->fileName);
       current.ComputeLinks(*this, true);
       this->outputProblemLabel = current.problemNumberString;
+      this->outputProblemTitle = current.title;
       problemLabel = current.displayTitle + "&nbsp;&nbsp;";
       if (this->flagDoPrependProblemNavigationBar)
         problemLabel += current.displayResourcesLinks;

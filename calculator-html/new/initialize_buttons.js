@@ -382,14 +382,14 @@ InputPanelData.prototype.submitAnswer = function() {
   if (thePage.currentProblem[this.fileName].flagForReal) {
     theRequest = "submitAnswers";
   } else {
-    theRequest = "submitExercise";
+    theRequest = `submitExercise&randomSeed=${thePage.currentProblem[this.fileName].randomSeed}`;
   }
    //"submitProblemPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 
 InputPanelData.prototype.submitGiveUp = function() {
-  var theRequest = "problemGiveUp"; //"submitProblemPreview"
+  var theRequest = `problemGiveUp&randomSeed=${thePage.currentProblem[this.fileName].randomSeed}`; //"submitProblemPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 

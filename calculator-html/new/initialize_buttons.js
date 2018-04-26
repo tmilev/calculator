@@ -45,80 +45,94 @@ function sleep(ms) {
 
 var MathQuillCommandButtonCollection = {};
 
-function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection){ 
-  var commandObject = {};
-  commandObject.theCommand = inputCommand;
-  commandObject.theLabel = inputLabel;
-  commandObject.isComposite = false;
-  commandObject.extraDirection = inputExtraDirection;
+function MathQuillCommandButton(inputCommand, inputLabel, inputAdditionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection){
+  this.theCommand = inputCommand;
+  this.theLabel = inputLabel;
+  this.isComposite = false;
+  this.extraDirection = inputExtraDirection;
+  this.additionalStyle = inputAdditionalStyle;
   if (typeof(inputCommand) !== "string"){
-    commandObject.isComposite = true;
+    this.isComposite = true;
   }
-  if (!commandObject.isComposite){
-    commandObject.id = commandObject.theCommand;
+  this.id = "";
+  if (!this.isComposite){
+    this.id = this.theCommand;
   } else { 
-    commandObject.id = "";
+    this.id = "";
     for (var i = 0; i < inputCommand.length; i ++){
-      commandObject.id += inputCommand[i];
+      this.id += inputCommand[i];
     }
   }
-//  console.log(commandObject.id);
   if (doWriteInsteadOfCmdInput !== undefined){
-    commandObject.doWriteInsteadOfCmd = doWriteInsteadOfCmdInput;
+    this.doWriteInsteadOfCmd = doWriteInsteadOfCmdInput;
   } else {
-    commandObject.doWriteInsteadOfCmd = false;
+    this.doWriteInsteadOfCmd = false;
   }
-  commandObject.getButton = function (indexMathField){ 
-    var resultString = "";
-    resultString += "<button style='";
-    resultString += "width:25; height:21.2; padding:0; ";
-    if (additionalStyle !== "" && additionalStyle !== undefined){
-      resultString += additionalStyle;
+  this.idEscaped = "";
+  for (var i = 0; i < this.id.length; i ++){ 
+    this.idEscaped += this.id[i];
+    if (this.id[i] === '\\'){
+      this.idEscaped += "\\";
     }
-    resultString += "'";
-    var commandObjectIDescaped = "";
-    for (var i = 0; i < commandObject.id.length; i ++){ 
-      commandObjectIDescaped += commandObject.id[i];
-      if (commandObject.id[i] === '\\'){
-        commandObjectIDescaped += "\\";
+  }
+}
+
+MathQuillCommandButton.prototype.getButtonId = function (inputPanel) {
+  return `${encodeURIComponent(inputPanel.fileName)}_${encodeURIComponent(inputPanel.idButtonContainer)}_${encodeURIComponent(this.id)}`;
+}
+
+MathQuillCommandButton.prototype.getButton = function (inputPanel) {
+  var resultString = "";
+  resultString += "<button style='";
+  resultString += "width:25; height:21.2; padding:0; ";
+  if (this.additionalStyle !== undefined) {
+    resultString += this.additionalStyle;
+  }
+  resultString += "' ";
+  resultString += `id='${this.getButtonId(inputPanel)}'`
+  resultString += " >" +
+  this.theLabel + "</button>";
+  return resultString;
+}
+
+MathQuillCommandButton.prototype.clickFunction = function (inputPanel) {
+  var currentMathField = inputPanel.mqObject;
+  if (!this.isComposite){ 
+    if (!this.doWriteInsteadOfCmd){
+      currentMathField.cmd(this.theCommand);
+    } else {
+      currentMathField.write(this.theCommand);
+    }
+  } else { 
+    for (var i = 0; i < this.theCommand.length; i ++) { 
+      var doCMD = !this.doWriteInsteadOfCmd;
+      if (!doCMD) {
+        if (
+          this.theCommand[i] === '(' ||
+          this.theCommand[i] === ')' ||
+          this.theCommand[i] === ' '
+        ){
+          doCMD = true;
+        }
       }
-    }
-    resultString += " onmousedown=\"MathQuillCommandButtonCollection['" +
-    commandObjectIDescaped + "']." +
-    "clickFunction(answerMathQuillObjects[" + indexMathField + "]);\">" +
-    commandObject.theLabel + "</button>";
-    return resultString;
-  }
-  commandObject.clickFunction = function(currentMathField){ 
-    if (!commandObject.isComposite){ 
-      if (!this.doWriteInsteadOfCmd){
-        currentMathField.cmd(commandObject.theCommand);
+      if (doCMD) {
+        currentMathField.cmd(this.theCommand[i]);
       } else {
-        currentMathField.write(commandObject.theCommand);
-      }
-    } else { 
-      for (var i = 0; i < commandObject.theCommand.length; i ++){ 
-        var doCMD = !this.doWriteInsteadOfCmd;
-        if (!doCMD){
-          if (commandObject.theCommand[i] === '(' ||
-              commandObject.theCommand[i] === ')' ||
-              commandObject.theCommand[i] === ' '){
-            doCMD = true;
-          }
-        }
-        if (doCMD){
-          currentMathField.cmd(commandObject.theCommand[i]);
-        } else {
-          currentMathField.write(commandObject.theCommand[i]);
-        }
+        currentMathField.write(this.theCommand[i]);
       }
     }
-    if (commandObject.extraDirection !== undefined){
-      currentMathField.moveToDirEnd(MQ.L);
-    }
-    currentMathField.focus();
-    event.preventDefault();
   }
+  if (this.extraDirection !== undefined){
+    currentMathField.moveToDirEnd(MQ.L);
+  }
+  currentMathField.focus();
+  event.preventDefault();
+}
+
+function mathQuillCommandButton(inputCommand, inputLabel, additionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection){ 
+  var commandObject = new MathQuillCommandButton(
+    inputCommand, inputLabel, additionalStyle, doWriteInsteadOfCmdInput, inputExtraDirection
+  );
   MathQuillCommandButtonCollection[commandObject.id] = commandObject;
 }
 
@@ -271,7 +285,6 @@ function toggleHeightForTimeout(currentPanel){
   }
 }
 
-
 function initializeCalculatorPage(){ 
   if (calculatorPanel !== null) {
     return;
@@ -287,7 +300,6 @@ function initializeCalculatorPage(){
   });
   calculatorPanel.initialize();
 }
-
 
 function InputPanelData(input){
   //to serve autocomplete:
@@ -413,7 +425,7 @@ InputPanelData.prototype.editLaTeX = function() { // useful event handlers
   this.ignoreNextMathQuillUpdateEvent = true;
   this.mqObject.latex(document.getElementById(this.idPureLatex).value + ' ');
   this.ignoreNextMathQuillUpdateEvent = false;
-  this.previewAnswers();
+  this.submitPreviewWithTimeOut();
 }
 
 InputPanelData.prototype.editMQFunction = function() { // useful event handlers
@@ -422,7 +434,7 @@ InputPanelData.prototype.editMQFunction = function() { // useful event handlers
   }
   if (this.flagAnswerPanel){
     document.getElementById(this.idPureLatex).value = processMathQuillLatex(this.mqObject.latex()); // simple API
-    this.previewAnswers();
+    this.submitPreviewWithTimeOut();
     return;
   }
   if (this.flagCalculatorPanel){
@@ -443,7 +455,7 @@ InputPanelData.prototype.editMQFunction = function() { // useful event handlers
   }
 }
 
-InputPanelData.prototype.initialize = function(){
+InputPanelData.prototype.initialize = function() {
   if (this.flagInitialized){
     return;
   }
@@ -464,19 +476,19 @@ InputPanelData.prototype.initialize = function(){
   this.initializePartTwo(false);
 }
 
-function isSeparatorCharacter(theChar){ 
-  if (theChar[0] >= 'a' && theChar[0] <= 'z'){
+function isSeparatorCharacter(theChar) { 
+  if (theChar[0] >= 'a' && theChar[0] <= 'z') {
     return false;
   }
-  if (theChar[0] >= 'A' && theChar[0] <= 'Z'){
+  if (theChar[0] >= 'A' && theChar[0] <= 'Z') {
     return false;
   }
   return true;
 }
 
-InputPanelData.prototype.chopStrings = function(){ 
+InputPanelData.prototype.chopStrings = function() { 
   var mqCommentsSpan = document.getElementById(this.idMQcomments);
-  if (calculatorRightPosition - calculatorLeftPosition > 1000){ 
+  if (calculatorRightPosition - calculatorLeftPosition > 1000) { 
     this.flagCalculatorMQStringIsOK = false;
     mqCommentsSpan.innerHTML = "<span style='color:red'><b>Formula too big </b></span>";
     return;
@@ -493,55 +505,55 @@ InputPanelData.prototype.chopStrings = function(){
   substring(calculatorRightPosition + 1);
 }
 
-function isKeyWordStartKnownToMathQuill(input){ 
-  for (var i = 0; i < keyWordsKnownToMathQuill.length; i ++){
-    if (keyWordsKnownToMathQuill[i].startsWith(input)){
+function isKeyWordStartKnownToMathQuill(input) { 
+  for (var i = 0; i < keyWordsKnownToMathQuill.length; i ++) {
+    if (keyWordsKnownToMathQuill[i].startsWith(input)) {
       return true;
     }
   }
   return false;
 }
 
-function isKeyWordEndKnownToMathQuill(input){ 
-  for (var i = 0; i < keyWordsKnownToMathQuill.length; i ++){
-    if (keyWordsKnownToMathQuill[i].endsWith(input)){
+function isKeyWordEndKnownToMathQuill(input) { 
+  for (var i = 0; i < keyWordsKnownToMathQuill.length; i ++) {
+    if (keyWordsKnownToMathQuill[i].endsWith(input)) {
       return true;
     }
   }
   return false;
 }
 
-InputPanelData.prototype.getSemiColumnEnclosure = function(){ 
+InputPanelData.prototype.getSemiColumnEnclosure = function() { 
   var startPos = this.selectionEnd;
   var calculatorInput = document.getElementById(this.idPureLatex);
-  for (; startPos > 0 && startPos < calculatorInput.value.length; startPos --){
-    if (isSeparatorCharacter(calculatorInput.value[startPos])){
+  for (; startPos > 0 && startPos < calculatorInput.value.length; startPos --) {
+    if (isSeparatorCharacter(calculatorInput.value[startPos])) {
       break;
     }
   }
-  if (startPos >= calculatorInput.value.length){
+  if (startPos >= calculatorInput.value.length) {
     startPos = calculatorInput.value.length - 1;
   }
   var rightPos = startPos;
   var lastSeparator = startPos;
   var lastWord = '';
   var currentChar = 'a';
-  for (; rightPos < calculatorInput.value.length - 1; rightPos ++){ 
+  for (; rightPos < calculatorInput.value.length - 1; rightPos ++) { 
     currentChar = calculatorInput.value[rightPos];
-    if (currentChar === ';'){ 
-      if (rightPos > 0){
+    if (currentChar === ';') { 
+      if (rightPos > 0) {
         rightPos --;
       }
       break;
     }
-    if (isSeparatorCharacter(currentChar)){ 
+    if (isSeparatorCharacter(currentChar)) { 
       lastWord = '';
       lastSeparator = rightPos;
     } else {
       lastWord += currentChar;
     }
-    if (lastWord.length > 3){
-      if (!isKeyWordStartKnownToMathQuill(lastWord)){ 
+    if (lastWord.length > 3) {
+      if (!isKeyWordStartKnownToMathQuill(lastWord)) { 
         rightPos = lastSeparator;
         break;
       }
@@ -551,76 +563,70 @@ InputPanelData.prototype.getSemiColumnEnclosure = function(){
   var leftPos = rightPos - 1;
   lastWord = '';
   lastSeparator = rightPos;
-  for (; leftPos > 0; leftPos --){ 
+  for (; leftPos > 0; leftPos --) { 
     currentChar = calculatorInput.value[leftPos];
-    if (currentChar === ';'){ 
+    if (currentChar === ';') { 
       leftPos ++;
       break;
     }
-    if (accountCalculatorDelimiterReturnMustEndSelection(calculatorInput.value, calculatorSeparatorCounts, leftPos)){ 
+    if (accountCalculatorDelimiterReturnMustEndSelection(calculatorInput.value, calculatorSeparatorCounts, leftPos)) { 
       leftPos ++;
       break;
     }
-    if (isSeparatorCharacter(currentChar)){ 
+    if (isSeparatorCharacter(currentChar)) { 
       lastWord = '';
       lastSeparator = leftPos;
     } else { 
       lastWord = currentChar + lastWord;
     }
     if (lastWord.length > 3) {
-      if (!isKeyWordEndKnownToMathQuill(lastWord)){ 
+      if (!isKeyWordEndKnownToMathQuill(lastWord)) { 
         leftPos = lastSeparator;
         break;
       }
     }
   }
-  if (leftPos > rightPos){
+  if (leftPos > rightPos) {
     leftPos = rightPos;
   }
-  if (rightPos - leftPos > 1000){
+  if (rightPos - leftPos > 1000) {
     mqProblemSpan.innerHTML = "<span style='color:red'><b></b></span>"
   }
   calculatorLeftPosition = leftPos;
   calculatorRightPosition = rightPos;
   startingCharacterSectionUnderMathQuillEdit = '';
   if (calculatorInput.value[leftPos] === '\n' || calculatorInput.value[leftPos] === ' ' ||
-      calculatorInput.value[leftPos] === '\t'){
+      calculatorInput.value[leftPos] === '\t') {
     startingCharacterSectionUnderMathQuillEdit = calculatorInput.value[leftPos];
   }
   this.chopStrings();
 }
 
-InputPanelData.prototype.initializePartTwo = function(forceShowAll){ 
+InputPanelData.prototype.initializePartTwo = function(forceShowAll) { 
   var currentButtonPanel = document.getElementById(this.idButtonContainer);
   var buttonArray = currentButtonPanel.attributes.buttons.value.toLowerCase().split(/(?:,| )+/);
   //console.log(buttonArray);
   var buttonBindings = [];
-  function addBinding(theFun){ 
-    if (buttonBindings.indexOf(theFun) > - 1){
-      return;
-    }
-    buttonBindings.push(theFun);
-  }
-  function addCommand(theCmd){ 
-    buttonBindings.push(MathQuillCommandButtonCollection[theCmd].getButton);
+  function addCommand(theCmd) { 
+    buttonBindings.push(MathQuillCommandButtonCollection[theCmd]);
   }
   var noOptions = false;
   var includeAll = false;
-  if (forceShowAll){
+  if (forceShowAll) {
     includeAll = true;
   }
-  if (buttonArray.indexOf("all") > - 1){
+  if (buttonArray.indexOf("all") > - 1) {
     includeAll = true;
   }
-  if (buttonArray.length === 0){
+  if (buttonArray.length === 0) {
     noOptions = true;
   }
-  if (buttonArray.length === 1){
-    if (buttonArray[0] === ""){
+  if (buttonArray.length === 1) {
+    if (buttonArray[0] === "") {
       noOptions = true;
     }
   }
-  if (buttonArray.indexOf("algebra") > - 1 || noOptions || includeAll){ 
+  if (buttonArray.indexOf("algebra") > - 1 || noOptions || includeAll) { 
     addCommand("+");
     addCommand("-");
     addCommand("*");
@@ -742,22 +748,27 @@ InputPanelData.prototype.initializePartTwo = function(forceShowAll){
       }
       theContent += "<tr>";
     }
-    theContent += "<td>" + buttonBindings[j](this.idButtonContainer) + "</td>";
+    theContent += "<td>" + buttonBindings[j].getButton(this) + "</td>";
   }
   if (buttonBindings.length > 0){
     theContent += "</tr>";
   }
   theContent += "</table>";
   if (!forceShowAll && !includeAll){
-    theContent+= `<small><a href=\"#\" onclick=\"panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(true);\">Show all</a></small>`;
+    theContent += `<small><a href=\"#\" onclick=\"panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(true);\">Show all</a></small>`;
   } else {
-    theContent+= `<small><a href=\"#\" onclick=\"panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(false);\">Show relevant</a></small>`;
+    theContent += `<small><a href=\"#\" onclick=\"panelDataRegistry['${this.idButtonContainer}'].initializePartTwo(false);\">Show relevant</a></small>`;
   }
   var oldHeight = window.getComputedStyle(currentButtonPanel).height;
   //console.log("oldHeight: " + oldHeight);
   currentButtonPanel.style.maxHeight = "";
   currentButtonPanel.style.height = "";
   currentButtonPanel.innerHTML = theContent;
+  for (var j = 0; j< buttonBindings.length; j ++){
+    document.getElementById(buttonBindings[j].getButtonId(this)).addEventListener(
+      'click', buttonBindings[j].clickFunction.bind(buttonBindings[j], this)
+    );
+  }
   if (oldHeight !== 0 && oldHeight !== "0px"){ 
     var newHeight = window.getComputedStyle(currentButtonPanel).height;
     currentButtonPanel.style.maxHeight = oldHeight ;

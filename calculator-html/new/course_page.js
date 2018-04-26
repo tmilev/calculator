@@ -92,7 +92,7 @@ function afterLoadCoursePage(incomingPage, result){
   }
   //console.log("DEBUG: topic list cookie @ afterLoadCoursePage: " + getCookie("topicList"));
   submitGET({
-    url: `${pathnames.calculator}?request=${theRequest}`,
+    url: `${pathnames.calculatorAPI}?request=${theRequest}`,
     callback: afterLoadTopics,
     progress: "spanProgressReportGeneral"
   });
@@ -105,7 +105,7 @@ function selectCurrentCoursePage(){
     theRequest = "templateJSON";
   }
   submitGET({
-    url: `${pathnames.calculator}?request=${theRequest}`,
+    url: `${pathnames.calculatorAPI}?request=${theRequest}`,
     callback: afterLoadCoursePage,
     progress: "spanProgressReportGeneral"
   });

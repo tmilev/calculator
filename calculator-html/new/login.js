@@ -9,7 +9,7 @@ function loginCalculator(){
   document.getElementById("inputPassword").value = "";
   var username = document.getElementById("inputUsername").value;
   submitGET({
-    "url": `${pathnames.calculator}?request=userInfoJSON&password=${password}&username=${username}`,
+    "url": `${pathnames.calculatorAPI}?request=userInfoJSON&password=${password}&username=${username}`,
     callback: loginWithServerCallback,
     progress: "spanProgressReportGeneral"
   });
@@ -31,7 +31,7 @@ function logout(){
 
 function loginTry(){
   submitGET({
-    "url": `${pathnames.calculator}?request=userInfoJSON`,
+    "url": `${pathnames.calculatorAPI}?request=userInfoJSON`,
     callback: loginWithServerCallback,
     progress: "spanProgressReportGeneral"
   });
@@ -104,7 +104,7 @@ function onGoogleSignIn(googleUser){
     thePage.showProfilePicture();
     showLogoutButton();
     submitGET({
-      "url": `${pathnames.calculator}?request=userInfoJSON`,
+      url: `${pathnames.calculatorAPI}?request=userInfoJSON`,
       callback: loginWithServerCallback,
       progress: "spanProgressReportGeneral"
     });

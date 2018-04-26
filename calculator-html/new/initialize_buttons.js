@@ -376,7 +376,7 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outpu
 InputPanelData.prototype.submitOrPreviewAnswers = function(requestType) {
   clearTimeout(this.timerForPreviewAnswers);
   var studentAnswer = document.getElementById(this.idPureLatex).value;
-  var theURL = `${pathnames.calculator}?request=${requestType}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
+  var theURL = `${pathnames.calculatorAPI}?request=${requestType}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
   submitGET({
     url: theURL,
     progress: "spanProgressCalculatorExamples",
@@ -391,23 +391,24 @@ InputPanelData.prototype.showSolution = function() {
 
 InputPanelData.prototype.submitAnswer = function() {
   var theRequest = "";
-  if (thePage.currentProblem[this.fileName].flagForReal) {
+  var currentProblem = thePage.pages.problemPage.problems[this.fileName];
+  if (currentProblem.flagForReal) {
     theRequest = "submitAnswers";
   } else {
-    theRequest = `submitExercise&randomSeed=${thePage.currentProblem[this.fileName].randomSeed}`;
+    theRequest = `submitExercise&randomSeed=${currentProblem.randomSeed}`;
   }
    //"submitProblemPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 
 InputPanelData.prototype.submitGiveUp = function() {
-  var theRequest = `problemGiveUp&randomSeed=${thePage.currentProblem[this.fileName].randomSeed}`; //"submitProblemPreview"
+  var theRequest = `problemGiveUp&randomSeed=${currentProblem.randomSeed}`; //"submitProblemPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 
 InputPanelData.prototype.submitPreview = function() {
   var theRequest = "";
-  if (thePage.currentProblem[this.fileName].flagForReal) {
+  if (currentProblem.flagForReal) {
     theRequest = "submitProblemPreview";
   } else {
     theRequest = "submitExercisePreview";

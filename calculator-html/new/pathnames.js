@@ -1,7 +1,8 @@
 "use strict";
 
 var pathnames = {
-  calculator: "/cgi-bin/calculator",
+  calculatorAPI: "/cgi-bin/calculator",
+  app: "/appNoCache",
   requestDatabase: "request=databaseJSON",
   databaseTable: "currentDatabaseTable"
 

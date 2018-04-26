@@ -28,7 +28,7 @@ function updateDatabasePageResetCurrentTable(){
 
 function updateDatabasePage(){
   thePage.storeSettingsToLocalStorage();
-  var theUrl = `${pathnames.calculator}?${pathnames.requestDatabase}&${pathnames.databaseTable}=${thePage.pages.database.storage.currentTable}`;
+  var theUrl = `${pathnames.calculatorAPI}?${pathnames.requestDatabase}&${pathnames.databaseTable}=${thePage.pages.database.storage.currentTable}`;
   submitGET({
     url: theUrl,
     callback: updateDatabasePageCallback

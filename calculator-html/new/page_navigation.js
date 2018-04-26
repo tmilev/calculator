@@ -20,11 +20,12 @@ function Page(){
       container: null,
       selectFunction: selectCurrentCoursePage
     },
-    currentProblem : {
-      id: "divCurrentProblem",
-      menuButtonId: "buttonCurrentProblem",
+    problemPage : {
+      id: "divProblemPage",
+      menuButtonId: "buttonProblemPage",
       container: null,
-      selectFunction: updateProblemPage
+      selectFunction: updateProblemPage,
+      problems: {}
     },
     calculator: {
       id: "divCalculatorPage",
@@ -90,7 +91,6 @@ function Page(){
   this.username = null;
   this.authenticationToken = null;
   this.flagUserLoggedIn = false;
-  this.currentProblem = {};
   this.storeSettingsToLocalStorage = function() {
     if (Storage === undefined && localStorage === undefined) {
       return;

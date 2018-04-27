@@ -63,8 +63,8 @@ public:
   Rational totalPointsEarned;
   Rational pointsEarnedInProblemsThatAreImmediateChildren;
   Rational maxPointsInAllChildren;
-//  Rational numAnsweredInAllChildren;
-//  Rational maxCorrectAnswersInAllChildren;
+  //  Rational numAnsweredInAllChildren;
+  //  Rational maxCorrectAnswersInAllChildren;
   void ComputeID();
   void reset(int parentSize);
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt)
@@ -155,6 +155,7 @@ public:
   std::string outputDeadlineString;
   std::string outputProblemLabel;
   std::string outputProblemTitle;
+  MapLisT<std::string, std::string, MathRoutines::hashString> outputScripts;
 
   std::stringstream logCommandsProblemGeneratioN;
   std::string courseHome;
@@ -171,7 +172,7 @@ public:
   List<char> splittingChars;
   List<SyntacticElementHTML> eltsStack;
   List<SyntacticElementHTML> theContent;
-//  List<std::string> answerFirstCorrectSubmission;
+  //  List<std::string> answerFirstCorrectSubmission;
   Selection studentTagsAnswered;
   ProblemData theProblemData;
   List<std::string> answerHighlights;
@@ -241,10 +242,10 @@ public:
   (const JSData& inputJSON,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
    std::stringstream& commentsOnFailure);
-//  bool LoadDeadlineInfoFromJSONStringAppend
-//  (const std::string& inputJSONString,
-//   MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputDeadlineInfo,
-//   std::stringstream& commentsOnFailure);
+  //  bool LoadDeadlineInfoFromJSONStringAppend
+  //  (const std::string& inputJSONString,
+  //   MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputDeadlineInfo,
+  //   std::stringstream& commentsOnFailure);
   void StoreDeadlineInfo
   (JSData& outputData,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);

@@ -149,21 +149,26 @@ Problem.prototype.writeToHTML = function(outputElement) {
 
 }
 
-function updateProblemPageCallback(input, outputComponent){
-  if (thePage.pages.problemPage.problems[thePage.currentCourse.fileName] === undefined) 
+function updateProblemPageCallback(input, outputComponent) {
+  if (thePage.pages.problemPage.problems[thePage.currentCourse.fileName] === undefined) {
     thePage.pages.problemPage.problems[thePage.currentCourse.fileName] = new Problem(thePage.currentCourse.fileName);
+  }
   var currentProblem = thePage.pages.problemPage.problems[thePage.currentCourse.fileName];
   var theProblem = JSON.parse(input);
 
   currentProblem.decodedProblem = decodeURIComponent(theProblem["problem"]);
-  currentProblem.scripts = decodeURIComponent(theProblem["scripts"]);
+  //currentProblem.scripts = decodeURIComponent(theProblem["scripts"]);
+  //var theScripts = currentProblem.scripts.split ("</script>");
+  //for (var counterScripts = 0; counterScripts < theScripts.length; counterScripts++){
+  //  console.log(`Scripts: ${theScripts[counterScripts]}`);
+  //}
   currentProblem.title = theProblem.title;
   currentProblem.problemLabel = theProblem["problemLabel"];
   currentProblem.flagForReal = theProblem["forReal"];
   currentProblem.randomSeed = theProblem.randomSeed;
 
   var answerVectors = theProblem["answers"];  
-  for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++){
+  for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
     currentProblem.answers[counterAnswers] = new InputPanelData({
       fileName: thePage.currentCourse.fileName,
       idMQSpan: answerVectors[counterAnswers].answerMQspanId,

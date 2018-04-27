@@ -1,21 +1,21 @@
 "use strict";
 
 var previousProblem = null;
-function getHTMLSubSection(theSubSection){
+function getHTMLSubSection(theSubSection) {
   var result = "";
   result += `<div class = \"headSubsection\">${theSubSection.problemNumberString} ${theSubSection.title}</div>`;
   result += "<div class = \"bodySubsection\">";
   result += "<table class = \"topicList\"><colgroup><col><col><col><col><col></colgroup>";
   for (var counterSubSection = 0; counterSubSection < theSubSection["children"].length; counterSubSection ++) {
     var currentProblemData = theSubSection["children"][counterSubSection];
-    if (currentProblemData.problem !== ""){
+    if (currentProblemData.problem !== "") {
       var currentProblem = thePage.getProblem(currentProblemData.problem);
       currentProblem.previousProblem = previousProblem;
       if (
         currentProblem.previousProblem !== null && 
         currentProblem.previousProblem !== undefined && 
         currentProblem.previousProblem !== ""
-      ){
+      ) {
         thePage.getProblem(currentProblem.previousProblem).nextProblem = currentProblem.fileName;
       }
       previousProblem = currentProblem.fileName;
@@ -24,7 +24,7 @@ function getHTMLSubSection(theSubSection){
     result += `<td>${currentProblemData.problemNumberString} ${currentProblemData.title}</td>`;
     result += "<td></td>";
     result += "<td>";
-    if (currentProblemData.problem !== ""){
+    if (currentProblemData.problem !== "") {
       if (thePage.flagUserLoggedIn) {
         result += `<a class = "problemLinkQuiz" href = "${currentProblem.getURL(true)}" `; 
         result += `onclick = "selectCurrentProblem('${currentProblemData.problem}', 'scoredQuizJSON');">Quiz</a>`;
@@ -42,11 +42,11 @@ function getHTMLSubSection(theSubSection){
   return result;  
 }
 
-function getHTMLSection(theSection){
+function getHTMLSection(theSection) {
   var result = "";
   result += `<div class=\"headSection\">${theSection.problemNumberString} ${theSection.title}</div>`;
   result += "<div class=\"bodySection\">";
-  for (var counterSection = 0; counterSection < theSection["children"].length; counterSection ++){
+  for (var counterSection = 0; counterSection < theSection["children"].length; counterSection ++) {
     var currentSection = theSection["children"][counterSection];
     result += getHTMLSubSection(currentSection);
   }
@@ -54,11 +54,11 @@ function getHTMLSection(theSection){
   return result;  
 }
 
-function getHTMLChapter(theChapter){
+function getHTMLChapter(theChapter) {
   var result = "";
   result += `<div class=\"headChapter\">${theChapter.problemNumberString} ${theChapter.title}</div>`;
   result += "<div class=\"bodyChapter\">";
-  for (var counterSection = 0; counterSection < theChapter["children"].length; counterSection ++){
+  for (var counterSection = 0; counterSection < theChapter["children"].length; counterSection ++) {
     var currentSection = theChapter["children"][counterSection];
     result += getHTMLSection(currentSection);
   }
@@ -66,19 +66,19 @@ function getHTMLChapter(theChapter){
   return result;
 }
 
-function getHTMLfromTopics(theTopics){
+function getHTMLfromTopics(theTopics) {
   var result = "";
-  for (var counterChapter = 0; counterChapter < theTopics["children"].length; counterChapter ++){
+  for (var counterChapter = 0; counterChapter < theTopics["children"].length; counterChapter ++) {
     var currentChapter = theTopics["children"][counterChapter];
     result += getHTMLChapter(currentChapter);
   }
   return result;
 }
 
-function afterLoadTopics(incomingTopics, result){
+function afterLoadTopics(incomingTopics, result) {
   //console.log("DEBUG: topic list cookie @ afterLoadTopics: " + getCookie("topicList"));
   var topicsElements = document.getElementsByTagName("topicList");
-  if (topicsElements.length === 0){
+  if (topicsElements.length === 0) {
     return;
   }
   var stringHTMLContent = "";
@@ -93,16 +93,16 @@ function afterLoadTopics(incomingTopics, result){
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, topicsElements[0]]);
 }
 
-function afterLoadCoursePage(incomingPage, result){
+function afterLoadCoursePage(incomingPage, result) {
   document.getElementById("divCurrentCourse").innerHTML = incomingPage;
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentCourse")]);
   //MathJax.Hub.Process();
   var theTopics = document.getElementsByTagName("topicList");
   var theRequest = "topicListJSONNoLogin";
-  if (thePage.flagUserLoggedIn){
+  if (thePage.flagUserLoggedIn) {
     theRequest = "topicListJSON";
   }
-  if (theTopics.length  === 0){
+  if (theTopics.length  === 0) {
     return;
   }
   //console.log("DEBUG: topic list cookie @ afterLoadCoursePage: " + getCookie("topicList"));
@@ -113,7 +113,7 @@ function afterLoadCoursePage(incomingPage, result){
   });
 }
 
-function selectCurrentCoursePage(){
+function selectCurrentCoursePage() {
   //console.log("DEBUG: topic list cookie @ selectCurrentCoursePage: " + getCookie("topicList"));
   var theRequest = "templateJSONNoLogin";
   if (thePage.flagUserLoggedIn){

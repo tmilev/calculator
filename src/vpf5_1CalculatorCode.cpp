@@ -1473,67 +1473,68 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
       out << "<br>";
     out << "<span id=\"" << this->canvasName << "Messages\"></span>";
   }
-  out << "<script language=\"javascript\">\n";
-  std::string canvasFunctionName = "functionMake"+ this->canvasName;
-  out << "function " << canvasFunctionName << "()\n"
+  std::stringstream outScript;
+  outScript << "<script language=\"javascript\">\n";
+  std::string canvasFunctionName = "functionMake" + this->canvasName;
+  outScript << "function " << canvasFunctionName << "()\n"
   << "{ ";
   for (int i = 0; i < this->boxesThatUpdateMe.size; i ++)
   { InputBox& currentBox = owner.theObjectContainer.theUserInputTextBoxesWithValues.
     GetValueCreate(this->boxesThatUpdateMe[i]);
-    out << " calculatorPlotUpdaters['"
+    outScript << " calculatorPlotUpdaters['"
     << currentBox.GetSliderName() << "']="
     << "'" << this->canvasName << "'"
     << ";\n";
   }
-  int funCounter=0;
+  int funCounter = 0;
   List<std::string> theFnPlots;
   theFnPlots.SetSize(this->thePlots.size);
   for (int i = 0; i < this->thePlots.size; i ++)
   { PlotObject& currentPlot = this->thePlots[i];
     if (currentPlot.thePlotType == "plotFunction")
-    { out << currentPlot.GetJavascript2dPlot(theFnPlots[i], this->canvasName, funCounter) << "\n ";
+    { outScript << currentPlot.GetJavascript2dPlot(theFnPlots[i], this->canvasName, funCounter) << "\n ";
     }
     if (currentPlot.thePlotType == "parametricCurve")
-    { out << currentPlot.GetJavascriptParametricCurve2D(theFnPlots[i], this->canvasName, funCounter) << "\n ";
+    { outScript << currentPlot.GetJavascriptParametricCurve2D(theFnPlots[i], this->canvasName, funCounter) << "\n ";
     }
     if (currentPlot.thePlotType == "plotDirectionField")
-    { out << currentPlot.GetJavascriptDirectionField(theFnPlots[i], this->canvasName, funCounter) << "\n ";
+    { outScript << currentPlot.GetJavascriptDirectionField(theFnPlots[i], this->canvasName, funCounter) << "\n ";
     }
     if (currentPlot.thePlotType == "points")
       currentPlot.GetJavascriptPoints(theFnPlots[i], this->canvasName, funCounter);
   }
-  out << "calculatorResetCanvas(document.getElementById('"
+  outScript << "calculatorResetCanvas(document.getElementById('"
   << this->canvasName << "'));\n";
-  out << "var theCanvas=calculatorGetCanvasTwoD(document.getElementById('"
+  outScript << "var theCanvas=calculatorGetCanvasTwoD(document.getElementById('"
   << this->canvasName
   << "'));\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
   if (owner.flagPlotNoControls)
-    out << "theCanvas.flagShowPerformance=false;\n";
+    outScript << "theCanvas.flagShowPerformance=false;\n";
   else
-    out << "theCanvas.flagShowPerformance=true;\n";
-  out.precision(7);
+    outScript << "theCanvas.flagShowPerformance=true;\n";
+  outScript.precision(7);
   for (int i = 0; i < this->thePlots.size; i ++)
   { PlotObject& currentPlot = this->thePlots[i];
     if (currentPlot.thePlotType == "plotFunction")
-    { out << "theCanvas." << theFnPlots[i];
+    { outScript << "theCanvas." << theFnPlots[i];
       continue;
     }
     if (currentPlot.thePlotType == "parametricCurve")
-    { out << "theCanvas." << theFnPlots[i];
+    { outScript << "theCanvas." << theFnPlots[i];
       continue;
     }
     if (currentPlot.thePlotType == "plotDirectionField")
-    { out << "theCanvas." << theFnPlots[i];
+    { outScript << "theCanvas." << theFnPlots[i];
       continue;
     }
     if (currentPlot.thePlotType == "points")
-    { out << "theCanvas." << theFnPlots[i];
+    { outScript << "theCanvas." << theFnPlots[i];
       continue;
     }
     if (currentPlot.thePlotType == "label")
     { if (currentPlot.thePointsDouble.size > 0)
-        out << "theCanvas.drawText("
+        outScript << "theCanvas.drawText("
         << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
         << ", "
         << "'" << currentPlot.thePlotString << "'"
@@ -1542,68 +1543,70 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
       continue;
     }
     if (currentPlot.thePlotType == "plotFillStart")
-    { out << "theCanvas.plotFillStart('" << currentPlot.colorFillJS << "');\n";
+    { outScript << "theCanvas.plotFillStart('" << currentPlot.colorFillJS << "');\n";
       continue;
     }
     if (currentPlot.thePlotType == "plotFillFinish")
-    { out << "theCanvas.plotFillFinish();\n";
+    { outScript << "theCanvas.plotFillFinish();\n";
       continue;
     }
     if (currentPlot.thePlotType == "axesGrid")
-    { out << "theCanvas.drawGrid();\n";
+    { outScript << "theCanvas.drawGrid();\n";
       continue;
     }
     if (currentPlot.thePlotType == "pathFilled")
-    { out << "theCanvas.drawPathFilled( ";
-      out << currentPlot.ToStringPointsList();
-      out << ", "
+    { outScript << "theCanvas.drawPathFilled( ";
+      outScript << currentPlot.ToStringPointsList();
+      outScript << ", "
       << "\"" << currentPlot.colorJS << "\""
       << ","
       << "\"" << currentPlot.colorFillJS << "\""
       << ");\n";
       continue;
     }
-    out << "theCanvas.drawPath( ";
-    out << currentPlot.ToStringPointsList();
-    out << ", " << "\"";
+    outScript << "theCanvas.drawPath( ";
+    outScript << currentPlot.ToStringPointsList();
+    outScript << ", " << "\"";
     if (currentPlot.colorJS == "")
-      out << DrawingVariables::GetColorHtmlFromColorIndex (currentPlot.colorRGB);
+      outScript << DrawingVariables::GetColorHtmlFromColorIndex (currentPlot.colorRGB);
     else
-      out << currentPlot.colorJS;
-    out << "\"";
+      outScript << currentPlot.colorJS;
+    outScript << "\"";
     if (currentPlot.lineWidthJS != "")
-      out << ", " << "\"" << currentPlot.lineWidthJS << "\"";
+      outScript << ", " << "\"" << currentPlot.lineWidthJS << "\"";
     else
-      out << ", " << "\"" << currentPlot.lineWidth << "\"";
-    out << ");\n";
+      outScript << ", " << "\"" << currentPlot.lineWidth << "\"";
+    outScript << ");\n";
   }
   if (this->flagIncludeCoordinateSystem)
-  { //out << "theCanvas.drawLine([" << this->theLowerBoundAxes*1.10
+  { //outScript << "theCanvas.drawLine([" << this->theLowerBoundAxes*1.10
     //<< ",0],[" << this->theUpperBoundAxes*1.10 << ",0], 'black',1);\n";
-    //out << "theCanvas.drawLine([0," << this->lowBoundY *1.10
+    //outScript << "theCanvas.drawLine([0," << this->lowBoundY *1.10
     //<< "],[0," << this->highBoundY*1.10 << "], 'black',1);\n";
-    //out << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black',1);\n";
-    //out << "theCanvas.drawText([1,-0.2],'1','black');\n";
-    out << "theCanvas.drawCoordinateAxes();\n";
+    //outScript << "theCanvas.drawLine([1,-0.1],[1,0.1], 'black',1);\n";
+    //outScript << "theCanvas.drawText([1,-0.2],'1','black');\n";
+    outScript << "theCanvas.drawCoordinateAxes();\n";
   }
   //stOutput << "DEBUG: this->priorityViewRectangle=" << this->priorityViewRectangle;
   if (this->priorityViewRectangle > 0)
-  { out << "theCanvas.setViewWindow("
+  { outScript << "theCanvas.setViewWindow("
     << "[" << this->theLowerBoundAxes * 1.10 << ", " << this->lowBoundY * 1.10 << "]"
     << ", "
     << "[" << this->theUpperBoundAxes * 1.10 << ", " << this->highBoundY * 1.10 << "]"
     << ");\n";
   } else
-    out << "theCanvas.computeViewWindow();\n";
-  out
+    outScript << "theCanvas.computeViewWindow();\n";
+  outScript
   << "theCanvas.redraw();\n"
   << "}\n"
   << "calculatorGetCanvasTwoD(document.getElementById('"
   << this->canvasName
   << "')).canvasResetFunction=" << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n"
-  << "</script>"
-  ;
+  << "</script>";
+  owner.theObjectContainer.graphicsScripts.SetKeyValue(this->canvasName, outScript.str());
+
+  out << outScript.str();
   return out.str();
 }
 

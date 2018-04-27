@@ -800,6 +800,7 @@ public:
   ListReferences<Plot> thePlots;
   List<bool> userInputBoxSliderDisplayed;
   MapReferenceS<std::string, InputBox, MathRoutines::hashString> theUserInputTextBoxesWithValues;
+  MapReferenceS<std::string, std::string, MathRoutines::hashString> graphicsScripts;
 
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;

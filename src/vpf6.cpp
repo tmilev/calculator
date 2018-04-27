@@ -2716,6 +2716,7 @@ void ObjectContainer::reset()
   this->theElementsHyperOctGroup.Clear();
   this->CurrentRandomSeed = time(NULL);
   this->theUserInputTextBoxesWithValues.Clear();
+  this->graphicsScripts.Clear();
    //Setting up a random seed.
   srand (this->CurrentRandomSeed);
 }

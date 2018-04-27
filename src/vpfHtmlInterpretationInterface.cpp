@@ -830,7 +830,7 @@ std::string HtmlInterpretation::GetExamPageJSON()
   JSData output;
   output["problem"] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
   if (theFile.flagLoadedSuccessfully)
-  { output["scripts"] = HtmlRoutines::ConvertStringToURLString(theFile.outputHtmlHeadNoTag, false);
+  { //output["scripts"] = HtmlRoutines::ConvertStringToURLString(theFile.outputHtmlHeadNoTag, false);
     output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
     output["deadline"] = theFile.outputDeadlineString;
     output["problemLabel"] = theFile.outputProblemLabel;

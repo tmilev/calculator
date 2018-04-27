@@ -33,16 +33,20 @@ tr.problemContainerRow{
 td.problemContainerCell{
 /*height: 500px;*/
 }
+problemTitle {
+  text-align: center;
+  display: inline-block;
+  margin: 4px;
+  padding: 4px;
+  white-space: nowrap;
+}
 problemNavigation {
   text-align: center;
-  background-color: #f0f0f0;
-  width: 100%;
-  overflow: none;
-  display: block;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  margin: 0;
+  display: inline-block;
+  margin: 4px;
+  padding: 4px;
   white-space: nowrap;
+/*  border: 1px solid black;*/
 }
 problemNavigation:after{
 clear:both;

@@ -1,5 +1,6 @@
 "use strict";
 
+var previousProblem = null;
 function getHTMLSubSection(theSubSection){
   var result = "";
   result += `<div class = \"headSubsection\">${theSubSection.problemNumberString} ${theSubSection.title}</div>`;
@@ -7,20 +8,30 @@ function getHTMLSubSection(theSubSection){
   result += "<table class = \"topicList\"><colgroup><col><col><col><col><col></colgroup>";
   for (var counterSubSection = 0; counterSubSection < theSubSection["children"].length; counterSubSection ++) {
     var currentProblemData = theSubSection["children"][counterSubSection];
-    if (thePage.pages.problemPage.problems[currentProblemData.problem] === undefined) {
-      thePage.pages.problemPage.problems[currentProblemData.problem] = new Problem(currentProblemData.problem);
+    if (currentProblemData.problem !== ""){
+      var currentProblem = thePage.getProblem(currentProblemData.problem);
+      currentProblem.previousProblem = previousProblem;
+      if (
+        currentProblem.previousProblem !== null && 
+        currentProblem.previousProblem !== undefined && 
+        currentProblem.previousProblem !== ""
+      ){
+        thePage.getProblem(currentProblem.previousProblem).nextProblem = currentProblem.fileName;
+      }
+      previousProblem = currentProblem.fileName;
     }
-    var currentProblem = thePage.pages.problemPage.problems[currentProblemData.problem];
     result += "<tr>";
     result += `<td>${currentProblemData.problemNumberString} ${currentProblemData.title}</td>`;
     result += "<td></td>";
     result += "<td>";
-    if (thePage.flagUserLoggedIn) {
-      result += `<a class = "problemLinkQuiz" href = "${currentProblem.getURL(true)}" `; 
-      result += `onclick = "selectCurrentProblem('${currentProblemData.problem}', 'scoredQuizJSON');">Quiz</a>`;
+    if (currentProblemData.problem !== ""){
+      if (thePage.flagUserLoggedIn) {
+        result += `<a class = "problemLinkQuiz" href = "${currentProblem.getURL(true)}" `; 
+        result += `onclick = "selectCurrentProblem('${currentProblemData.problem}', 'scoredQuizJSON');">Quiz</a>`;
+      }
+      result += `<a class = "problemLinkPractice" href = "${currentProblem.getURL(false)}" `;
+      result += `onclick = "selectCurrentProblem('${currentProblemData.problem}', 'exerciseJSON');">Practice</a>`;
     }
-    result += `<a class = "problemLinkPractice" href = "${currentProblem.getURL(false)}" `;
-    result += `onclick = "selectCurrentProblem('${currentProblemData.problem}', 'exerciseJSON');">Practice</a>`;
     result += "</td>";
     result += "<td></td>";
     result += "<td></td>";

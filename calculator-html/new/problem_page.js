@@ -15,6 +15,8 @@ function Problem (inputFileName){
   this.title = "";
   this.problemLabel = "";
   this.flagForReal = true;
+  this.previousProblem = null;
+  this.nextProblem = null;
 
 //  thePage.pages.problemPage.problems[this.fileName] = this;
 }
@@ -56,19 +58,58 @@ Problem.prototype.getURL = function(isScoredQuiz) {
   return result;
 }
 
+Problem.prototype.getProblemNavigation = function() {
+  var result = "";
+  result += "<problemNavigation>";
+  if (this.flagForReal !== true && this.flagForReal !== "true") {
+    result += `<b style = 'color:green'>Scores not recorded. </b>`;
+  } else {
+    result += `<b style = 'color:brown'>Scores are recorded. </b>`;
+  }
+  var defaultRequest = 'exerciseJSON';
+  if (this.flagForReal){
+    defaultRequest = 'scoredQuizJSON';
+  }
+  if (!thePage.flagUserLoggedIn){
+    defaultRequest = 'exerciseNoLoginJSON';
+  }
+  if (this.previousProblem !== null && this.previousProblem !== ""){
+    result+= `<a class='problemLinkPractice' href='#${thePage.getProblem(this.previousProblem).getURLRequestFileCourseTopics()}' 
+onclick = "selectCurrentProblem('${this.previousProblem}' ,'${defaultRequest}')">&#8592;</a>`;
+  }
+
+  if (this.flagForReal && thePage.flagUserLoggedIn){
+    result += 
+`<a class='problemLinkPractice' href='${this.getURL()}' 
+onclick = "selectCurrentProblem('${this.fileName}' ,'exerciseJSON')">Practice</a>`;
+  } else {
+    result += "<b style='color:green'>Practice</b>";
+  }
+  if (!this.flagForReal && thePage.flagUserLoggedIn){ 
+    result += 
+`<a class='problemLinkPractice' href='${this.getURL()}' 
+onclick = "selectCurrentProblem('${this.fileName}' ,'scoredQuizJSON')">Quiz</a>`;
+  } else {
+    if (this.flagForReal){
+      result += "<b style='color:brown'>Quiz</b>";
+    }
+  }
+  if (this.nextProblem !== null && this.nextProblem !== ""){
+    result+= `<a class='problemLinkPractice' href='#${thePage.getProblem(this.nextProblem).getURLRequestFileCourseTopics()}' 
+onclick = "selectCurrentProblem('${this.nextProblem}' ,'${defaultRequest}')">&#8594;</a>`;
+  }
+
+  result += "</problemNavigation>";
+  return result;
+}
+
 Problem.prototype.writeToHTML = function(outputElement) {
   if (typeof outputElement === "string") {
     outputElement = document.getElementById(outputElement);
   }
   var topPart = "";
-  if (this.flagForReal !== true && this.flagForReal !== "true") {
-    topPart = `<b style = 'color:green'>Scores not recorded.</b> ${this.problemLabel} ${this.title}`;
-  } else {
-    topPart = `<b style = 'color:brown'>Scores are recorded.</b> ${this.problemLabel} ${this.title}`;
-  }
-  if (!this.flagForReal){
-    topPart += `&nbsp; <a class='problemLinkPractice' href='${this.getURL()}'>#${this.randomSeed}</a>`;
-  }
+  topPart += `<problemTitle>${this.problemLabel} ${this.title}</problemTitle>`;
+  topPart += this.getProblemNavigation();
   topPart += "<br>";
   outputElement.innerHTML = topPart + this.decodedProblem + this.scripts;
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++){

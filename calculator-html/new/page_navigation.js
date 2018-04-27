@@ -147,31 +147,6 @@ function Page(){
   //Page manipulation functions
   //////////////////////////////////////
   //////////////////////////////////////
-  this.selectPage = function(inputPage) {
-    if (inputPage === undefined || inputPage === null || typeof(inputPage) !== "string") {
-      if (typeof(this.currentPage) === "string") {
-        inputPage = this.currentPage;
-      } else {
-        inputPage = "calculator";
-      }
-    }
-    this.currentPage = inputPage;
-    if (this.pages[this.currentPage] === undefined) {
-      this.currentPage = "calculator";
-    }
-    for (var page in this.pages){
-      this.pages[page].container.style.display = "none";
-      document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");
-    }
-    if (Storage !== undefined && localStorage !== undefined) {
-      localStorage.setItem("currentPage", this.currentPage); 
-    }
-    this.pages[this.currentPage].container.style.display = "";
-    document.getElementById(this.pages[this.currentPage].menuButtonId).classList.add("buttonSelectPageSelected");
-    if (this.pages[this.currentPage].selectFunction !== null && this.pages[this.currentPage].selectFunction !== undefined) {
-      this.pages[this.currentPage].selectFunction();
-    }
-  };
   this.showProfilePicture = function() {
     document.getElementById("divProfilePicture").classList.remove("divInvisible");
     document.getElementById("divProfilePicture").classList.add("divVisible");
@@ -220,6 +195,44 @@ function Page(){
   loginTry();
   document.getElementById("divPage").style.display = "";
   document.getElementById("divPage").className = "divPage";
+}
+
+Page.prototype.selectPage = function(inputPage) {
+  if (inputPage === undefined || inputPage === null || typeof(inputPage) !== "string") {
+    if (typeof(this.currentPage) === "string") {
+      inputPage = this.currentPage;
+    } else {
+      inputPage = "calculator";
+    }
+  }
+  this.currentPage = inputPage;
+  if (this.pages[this.currentPage] === undefined) {
+    this.currentPage = "calculator";
+  }
+  for (var page in this.pages){
+    this.pages[page].container.style.display = "none";
+    document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");
+  }
+  if (Storage !== undefined && localStorage !== undefined) {
+    localStorage.setItem("currentPage", this.currentPage); 
+  }
+  this.pages[this.currentPage].container.style.display = "";
+  document.getElementById(this.pages[this.currentPage].menuButtonId).classList.add("buttonSelectPageSelected");
+  if (this.pages[this.currentPage].selectFunction !== null && this.pages[this.currentPage].selectFunction !== undefined) {
+    this.pages[this.currentPage].selectFunction();
+  }
+  location.href = `#${this.currentPage}`;
+};
+
+Page.prototype.getCurrentProblem = function() {
+  return this.getProblem(this.currentCourse.fileName);
+}
+
+Page.prototype.getProblem = function(fileName) {
+  if (this.pages.problemPage.problems[fileName] === undefined) {
+    this.pages.problemPage.problems[fileName] = new Problem(fileName);
+  }
+  return this.pages.problemPage.problems[fileName];
 }
 
 function loadProfilePic(){

@@ -2815,8 +2815,7 @@ class GroebnerBasisComputation
    List<int>* slidesToUncover,
    List<int>* slidesAdditionalHighlight,
    int slidesToUncoverAllMons,
-   bool useColumnSeparator)
-  ;
+   bool useColumnSeparator);
   void ComputeHighLightsFromRemainder(int remainderIndex, int& currentSlideNumber);
   std::string GetDivisionStringHtml();
   std::string GetDivisionStringLaTeX();
@@ -2830,8 +2829,7 @@ class GroebnerBasisComputation
   bool TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT);
   bool TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, int upperComputationBound=-1);
   void TrySettingValueToVariable
-(List<Polynomial<coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable)
-;
+  (List<Polynomial<coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable);
   bool WrapUpGroebnerOnExceedingComputationLimit(List<Polynomial<coefficient> >& inputOutpuT);
   bool WrapUpOnGroebnerBasisSuccess(List<Polynomial<coefficient> >& inputOutpuT);
   GroebnerBasisComputation();
@@ -2851,8 +2849,7 @@ class GroebnerBasisComputation
   std::string ToStringCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem);
   void SolveSerreLikeSystem(List<Polynomial<coefficient> >& inputSystem);
   bool HasImpliedSubstitutions
-  (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub)
-  ;
+  (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub);
   bool HasSingleMonomialEquation(const List<Polynomial<coefficient> >& inputSystem, MonomialP& outputMon);
   void SetUpRecursiveComputation(GroebnerBasisComputation& toBeModified);
   void ProcessSolvedSubcaseIfSolvedOrProvenToHaveSolution(GroebnerBasisComputation& potentiallySolvedCase);

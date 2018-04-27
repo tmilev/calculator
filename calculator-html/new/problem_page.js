@@ -23,12 +23,36 @@ Problem.prototype.getURLFileCourseTopics = function() {
   return `fileName=${this.fileName}&currentCourse=${thePage.currentCourse.courseHome}&topicList=${thePage.currentCourse.topicList}&`;
 }
 
-Problem.prototype.getURL = function() {
-  var result = `${pathnames.app}#${this.getURLFileCourseTopics()}`;
-  if (this.flagForReal){
-    return result;
+Problem.prototype.getURLRequestFileCourseTopics = function(isScoredQuiz) {
+  var result = "";
+  result += "request=";
+  if (isScoredQuiz){
+    result += "scoredQuizJSON";
+  } else {
+    if (thePage.flagUserLoggedIn){
+      result += "exerciseJSON";
+    } else {
+      result += "exerciseNoLoginJSON";
+    }
   }
-  result += `randomSeed=${this.randomSeed}&`;
+  result += `&${this.getURLFileCourseTopics()}`;
+  return result;
+}
+
+Problem.prototype.getURLRandomSeedRequestFileCourseTopics = function(isScoredQuiz) {
+  var result = this.getURLRequestFileCourseTopics(isScoredQuiz);
+  if (
+    !this.flagForReal && this.randomSeed !== undefined && 
+    this.randomSeed !== "" && this.randomSeed !== null  
+  ){
+    result += `randomSeed=${this.randomSeed}&`;
+  }
+  return result;
+}
+
+Problem.prototype.getURL = function(isScoredQuiz) {
+  var result = "";
+  result += `#problemPage?${this.getURLRequestFileCourseTopics(isScoredQuiz)}`; 
   return result;
 }
 
@@ -85,7 +109,8 @@ Problem.prototype.writeToHTML = function(outputElement) {
 }
 
 function updateProblemPageCallback(input, outputComponent){
-  thePage.pages.problemPage.problems[thePage.currentCourse.fileName] = new Problem(thePage.currentCourse.fileName);
+  if (thePage.pages.problemPage.problems[thePage.currentCourse.fileName] === undefined) 
+    thePage.pages.problemPage.problems[thePage.currentCourse.fileName] = new Problem(thePage.currentCourse.fileName);
   var currentProblem = thePage.pages.problemPage.problems[thePage.currentCourse.fileName];
   var theProblem = JSON.parse(input);
 
@@ -119,11 +144,11 @@ function updateProblemPage(){
     return;
   }
   thePage.flagCurrentProblemLoaded = true;
-  var theURL = `${pathnames.calculatorAPI}?request=${thePage.currentCourse.request}&`;
-  theURL += `fileName=${thePage.currentCourse.fileName}&topicList=${thePage.currentCourse.topicList}&`;
-  theURL += `courseHome=${thePage.currentCourse.courseHome}&`;
+  var theProblem = thePage.getCurrentProblem();
+  var theURL = `${pathnames.calculatorAPI}?request=${thePage.currentCourse.request}&${theProblem.getURLFileCourseTopics()}`;
   submitGET({
     url: theURL,
-    callback: updateProblemPageCallback
+    callback: updateProblemPageCallback,
+    progress: "spanProgressReportGeneral"
   });
 }

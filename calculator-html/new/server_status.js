@@ -6,7 +6,7 @@ function updateServerStatusCallback(input, span){
 
 function updateServerStatus(){
   submitGET({
-    url: `${pathnames.calculator}?request=serverStatusJSON`,
+    url: `${pathnames.calculatorAPI}?request=serverStatusJSON`,
     callback: updateServerStatusCallback,
     progress: "spanProgressReportGeneral"
   });

@@ -1713,19 +1713,19 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
 bool CalculatorFunctionsBinaryOps::innerSetMinus
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerSetMinus");
-  if (input.children.size!=3)
+  if (input.size() != 3)
     return false;
-  const Expression& leftSetE=input[1];
-  const Expression& rightSetE=input[2];
+  const Expression& leftSetE = input[1];
+  const Expression& rightSetE = input[2];
   if (!leftSetE.IsSequenceNElementS() || !rightSetE.IsSequenceNElementS())
     return false;
   if (leftSetE.HasBoundVariables() || rightSetE.HasBoundVariables())
     return false;
   HashedList<Expression> resultEs;
-  resultEs.SetExpectedSize(leftSetE.children.size-1);
-  for (int i=1; i<leftSetE.children.size; i++)
+  resultEs.SetExpectedSize(leftSetE.size() - 1);
+  for (int i = 1; i < leftSetE.size(); i ++)
     resultEs.AddOnTop(leftSetE[i]);
-  for (int i=1; i<rightSetE.children.size; i++)
+  for (int i = 1; i < rightSetE.children.size; i ++)
     if (resultEs.Contains(rightSetE[i]))
       resultEs.RemoveIndexSwapWithLast(resultEs.GetIndex(rightSetE[i]));
   resultEs.QuickSortAscending();
@@ -1736,9 +1736,9 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs(Calculator& theC
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs");
   if (!input.IsListNElements(3))
     return false;
-  Expression leftE=input[1];
-  Expression rightE=input[2];
-  if (!rightE.IsMatrixGivenType<RationalFunctionOld>()|| !leftE.IsMatrixGivenType<RationalFunctionOld>())
+  Expression leftE = input[1];
+  Expression rightE = input[2];
+  if (!rightE.IsMatrixGivenType<RationalFunctionOld>() || !leftE.IsMatrixGivenType<RationalFunctionOld>())
     return false;
   if (!leftE.MergeContexts(leftE, rightE))
     return false;
@@ -1746,25 +1746,25 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRFsToMatrixRFs(Calculator& theC
   rightE.IsMatrixGivenType(0, 0, &rightMat);
   Matrix<RationalFunctionOld> leftMat;
   leftE.IsMatrixGivenType(0, 0, &leftMat);
-  if (rightMat.NumRows!=leftMat.NumRows || rightMat.NumCols!=leftMat.NumCols)
+  if (rightMat.NumRows != leftMat.NumRows || rightMat.NumCols != leftMat.NumCols)
     return false;
-  Matrix<RationalFunctionOld> result=leftMat;
-  result+=rightMat;
-  Expression theContext=leftE.GetContext();
+  Matrix<RationalFunctionOld> result = leftMat;
+  result += rightMat;
+  Expression theContext = leftE.GetContext();
   return output.AssignMatrix(result, theCommands, &theContext);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return false;
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
   if (!rightE.IsOfType<MatrixTensor<Rational> >()|| !leftE.IsOfType<MatrixTensor<Rational> >())
     return false;
-  const MatrixTensor<Rational>& rightMat=rightE.GetValue<MatrixTensor<Rational> >();
-  const MatrixTensor<Rational>& leftMat=leftE.GetValue<MatrixTensor<Rational> >();
-  MatrixTensor<Rational> result=leftMat;
-  result+=rightMat;
+  const MatrixTensor<Rational>& rightMat = rightE.GetValue<MatrixTensor<Rational> >();
+  const MatrixTensor<Rational>& leftMat = leftE.GetValue<MatrixTensor<Rational> >();
+  MatrixTensor<Rational> result = leftMat;
+  result += rightMat;
   return output.AssignValue(result, theCommands);
 }
 
@@ -1773,8 +1773,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByAnyScalar(Calculator& 
   //stOutput << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
   if (!input.IsListNElements(3))
     return false;
-  Expression tempE=input;
-  tempE.children.SwapTwoIndices(1,2);
+  Expression tempE = input;
+  tempE.children.SwapTwoIndices(1, 2);
   return CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(theCommands, tempE, output);
 }
 
@@ -1789,14 +1789,14 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(Calculator& theCom
 //  stOutput << "<br>trouble be triple!";
   if (!input[2].IsSequenceNElementS())
     return false;
-  if (input[2].size()!=input[1].size())
-    return theCommands << "<hr>Attempting to add a sequence of length " << input[1].children.size-1 << "  to a sequence of length "
-    << input[2].size()-1 << ", possible user typo?";
+  if (input[2].size() != input[1].size())
+    return theCommands << "<hr>Attempting to add a sequence of length " << input[1].size() - 1 << "  to a sequence of length "
+    << input[2].size() - 1 << ", possible user typo?";
   output.reset(theCommands);
   output.children.Reserve(input[1].size());
   output.AddChildAtomOnTop(theCommands.opSequence());
   Expression tempSum;
-  for (int i=1; i<input[2].size(); i++)
+  for (int i = 1; i < input[2].size(); i ++)
   { tempSum.MakeXOX(theCommands, theCommands.opPlus(), input[1][i], input[2][i]);
     output.AddChildOnTop(tempSum);
   }
@@ -1804,24 +1804,49 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(Calculator& theCom
 }
 
 bool CalculatorFunctionsBinaryOps::innerNChooseK(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerNChooseK");
-  if (input.size()!=3)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerNChooseK");
+  if (input.size() != 3)
     return false;
   Rational N;
-  int K=-1;
+  int K = - 1;
   if (!input[2].IsSmallInteger(&K))
     return false;
-  if (K<0)
+  if (K < 0)
     return false;
   if (input[1].IsOfType<Rational>(&N))
-  { Rational result= result.NChooseK(N, K);
+  { Rational result = result.NChooseK(N, K);
     return output.AssignValue(result, theCommands);
   }
-  if (K<11)
+  if (K < 11)
   { output.AssignValue(1, theCommands);
-    for (int i=0; i<K; i++)
-      output*=input[1]-i;
+    for (int i = 0; i < K; i ++)
+      output *= input[1] - i;
     return true;
   }
   return false;
+}
+
+bool CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger");
+  if (!input.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  //stOutput << "Got to here!";
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
+  ElementZmodP theElt;
+  if (!leftE.IsOfType(&theElt))
+    return false;
+  int thePower = 0;
+  if (!rightE.IsSmallInteger(& thePower))
+    return false;
+  if (thePower < 0)
+  { ElementZmodP copy = theElt;
+    theElt.MakeOne(theElt.theModulo);
+    theElt /= copy;
+    thePower *= - 1;
+  }
+  ElementZmodP unit;
+  unit.MakeOne(theElt.theModulo);
+  MathRoutines::RaiseToPower(theElt, thePower, unit);
+  return output.AssignValue(theElt, theCommands);
 }

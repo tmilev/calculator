@@ -93,6 +93,8 @@ public:
   static bool innerPowerDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerSequenceOrMatrixByT(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerPowerElementZmodPByInteger(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerNChooseK(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSetMinus(Calculator& theCommands, const Expression& input, Expression& output);
 

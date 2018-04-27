@@ -703,13 +703,13 @@ void Calculator::initPredefinedInnerFunctions()
   ("MakeExpression", CalculatorConversions::innerExpressionFromBuiltInType, "",
    "Creates expression from built-in polynomial. ",
    "MakeExpression(Polynomial{}((x-2y+z-1)^2(x+y-z)));\
-A=\\frac{64 x^{2} y x y+16 x y- y}{-32 x^{2} y x^{2}-8 x^{2}+x};\
-B=MakeRationalFunction(A);\
-C=MakeExpression B;\
-D=MakeRationalFunction {}(\\frac{-2x^{3}y^{2}-\\frac{x y }{2}+\\frac{y }{32}}{x^{4}y +\\frac{x^{2}}{4}-\\frac{x }{32}}) ;\
-MakeExpression {}D-C;\
-D-B;\
-",
+    A=\\frac{64 x^{2} y x y+16 x y- y}{-32 x^{2} y x^{2}-8 x^{2}+x};\
+    B=MakeRationalFunction(A);\
+    C=MakeExpression B;\
+    D=MakeRationalFunction {}(\\frac{-2x^{3}y^{2}-\\frac{x y }{2}+\\frac{y }{32}}{x^{4}y +\\frac{x^{2}}{4}-\\frac{x }{32}}) ;\
+    MakeExpression {}D-C;\
+    D-B;\
+    ",
    true, false, "CalculatorConversions::innerExpressionFromBuiltInType",
    "MakeExpression");
   this->AddOperationInnerHandler
@@ -793,23 +793,23 @@ D-B;\
    "CalculatorFunctionsGeneral::outerPolynomialize",
    "Polynomialize");
 
-     this->AddOperationInnerHandler
-     ("IsAlgebraicRadical", CalculatorFunctionsGeneral::innerIsAlgebraicRadical, "",
-      "Tests whether the expression is an algebraic expression \
-       obtained using radicals and the four arithmetic operations.  ",
-      "IsAlgebraicRadical(\\sqrt{5+\\sqrt{2}}); IsAlgebraicRadical(\\sqrt{x}); \
-       IsAlgebraicRadical(\\sqrt{\\pi+e+1})",
-       true, false,
-       "CalculatorFunctionsGeneral::innerIsAlgebraicRadical",
-       "IsAlgebraicRadical");
-     this->AddOperationInnerHandler
-     ("IsReal", CalculatorFunctionsGeneral::innerIsReal, "",
-      "Tests whether the expression is a real constant.  ",
-      "IsReal(\\sqrt{5+\\sqrt{-1}}); IsReal(\\sqrt{\\sqrt{5}-1}); \
-       IsReal(sqrt(\\sqrt{\\pi}-2) )",
-       true, false,
-       "CalculatorFunctionsGeneral::innerIsReal",
-       "IsReal");
+  this->AddOperationInnerHandler
+  ("IsAlgebraicRadical", CalculatorFunctionsGeneral::innerIsAlgebraicRadical, "",
+   "Tests whether the expression is an algebraic expression \
+    obtained using radicals and the four arithmetic operations.  ",
+   "IsAlgebraicRadical(\\sqrt{5+\\sqrt{2}}); IsAlgebraicRadical(\\sqrt{x}); \
+    IsAlgebraicRadical(\\sqrt{\\pi+e+1})",
+    true, false,
+    "CalculatorFunctionsGeneral::innerIsAlgebraicRadical",
+    "IsAlgebraicRadical");
+  this->AddOperationInnerHandler
+  ("IsReal", CalculatorFunctionsGeneral::innerIsReal, "",
+   "Tests whether the expression is a real constant.  ",
+   "IsReal(\\sqrt{5+\\sqrt{-1}}); IsReal(\\sqrt{\\sqrt{5}-1}); \
+    IsReal(sqrt(\\sqrt{\\pi}-2) )",
+    true, false,
+    "CalculatorFunctionsGeneral::innerIsReal",
+    "IsReal");
 
   this->AddOperationInnerHandler
   ("IsConstant", CalculatorFunctionsGeneral::innerIsConstant, "",
@@ -1028,11 +1028,11 @@ D-B;\
    "IntegratePartialFractions");
 
 
-/*  this->AddOperationInnerHandler
+  /*this->AddOperationInnerHandler
   ("\\diff", CalculatorFunctionsGeneral::innerDifferential, "",
    "Differential.  ",
    "\\diff x;");
-*/
+  */
 
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig, "",
@@ -1189,16 +1189,14 @@ D-B;\
     )",
     true, false,
     "Calculator::innerPerturbSplittingNormal",
-    "PerturbSplittingNormal")
-   ;
+    "PerturbSplittingNormal");
   this->AddOperationInnerHandler
   ("TestSpechtModules", CalculatorFunctionsWeylGroup::innerTestSpechtModules, "",
    "Tests all Specht modules of S_n, where n is the only argument taken by the function.",
    "TestSpechtModules(4); ",
    true, false,
    "CalculatorFunctionsWeylGroup::innerTestSpechtModules",
-   "TestSpechtModules")
-   ;
+   "TestSpechtModules");
   this->AddOperationInnerHandler
   ("MakeElementWeylGroup",
     CalculatorFunctionsWeylGroup::innerWeylGroupElement, "",
@@ -1206,8 +1204,7 @@ D-B;\
    "s_{{i}}=MakeElementWeylGroup{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)",
    true, false,
    "CalculatorFunctionsWeylGroup::innerWeylGroupElement",
-   "MakeElementWeylGroup")
-   ;
+   "MakeElementWeylGroup");
   this->AddOperationInnerHandler
   ("MakeElementWeylGroup",
     CalculatorFunctionsWeylGroup::innerWeylGroupElement, "",
@@ -1215,8 +1212,7 @@ D-B;\
    "s_{{i}}=MakeElementWeylGroup{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)",
    true, false,
    "CalculatorFunctionsWeylGroup::innerWeylGroupElement",
-   "MakeElementWeylGroup")
-   ;
+   "MakeElementWeylGroup");
   this->AddOperationInnerHandler
   ("MakeElementHyperOctahedral",
     CalculatorConversions::innerMakeElementHyperOctahedral, "",
@@ -1226,9 +1222,7 @@ D-B;\
     s*t*s*t",
     true, false,
     "CalculatorConversions::innerMakeElementHyperOctahedral",
-    "MakeElementHyperOctahedral")
-   ;
-
+    "MakeElementHyperOctahedral");
 
   this->AddOperationInnerHandler
   ("WeylGroupClassicalSignMultiplicities", CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers, "",
@@ -1245,8 +1239,7 @@ D-B;\
     \nWeylGroupClassicalSignMultiplicities{}(a_4);",
     true, false,
    "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystemsFromKostkaNumbers",
-   "WeylGroupClassicalSignMultiplicities")
-   ;
+   "WeylGroupClassicalSignMultiplicities");
   this->AddOperationInnerHandler
   ("WeylGroupTauSignatures",
     CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems, "",
@@ -1255,8 +1248,7 @@ D-B;\
    "WeylGroupTauSignatures{}(b_3);",
    true, true,
    "CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems",
-   "WeylGroupTauSignatures")
-   ;
+   "WeylGroupTauSignatures");
 
   this->AddOperationInnerHandler
   ("WeylGroupConjugacyClassesFromAllElements",
@@ -1267,7 +1259,6 @@ D-B;\
    true, true,
    "CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements",
    "WeylGroupConjugacyClassesFromAllElements");
-   ;
   this->AddOperationInnerHandler
   ("WeylGroupOuterConjugacyClassesFromAllElements",
     CalculatorFunctionsWeylGroup::innerWeylGroupOuterConjugacyClassesFromAllElements, "",
@@ -4080,7 +4071,7 @@ void Calculator::initPredefinedStandardOperations()
    "MultiplyMatrixByMatrix");
   this->AddOperationInnerHandler
   ("*",
-  CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix, "",
+   CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix, "",
    "Multiplies matrices.",
    "(1,2)\\begin{pmatrix} 1& 2 \\\\ 3& 5\\end{pmatrix}",
    true, false,
@@ -4803,6 +4794,13 @@ void Calculator::initPredefinedStandardOperations()
    true, false,
    "CalculatorFunctionsBinaryOps::innerPowerMatExpressionsBySmallInteger",
    "PowerMatrixNumbersByLargeIntegerIfPossible");
+  this->AddOperationInnerHandler
+  ("^", CalculatorFunctionsBinaryOps::innerPowerElementZmodPByInteger, "",
+   "Raises an element of Z mod p to an integer power. ",
+   "a=3 mod 7; a^2",
+    true, false,
+   "CalculatorFunctionsGeneral::innerPowerElementZmodPByInteger",
+   "PowerElementZmodPToInteger");
   this->AddOperationInnerHandler
   ("^", CalculatorFunctionsGeneral::innerPowerExponentToLog, "",
    "Replaces e^{\\ln x} by x.",

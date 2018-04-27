@@ -221,7 +221,7 @@ public:
   unsigned int HashFunction()const
   { if (this->theValue.IsEqualToZero())
       return 0;
-    return this->theValue.HashFunction()*SomeRandomPrimes[0] + this->theModulo.HashFunction()*SomeRandomPrimes[1];
+    return this->theValue.HashFunction()*SomeRandomPrimes[0] + this->theModulo.HashFunction() * SomeRandomPrimes[1];
   }
   static unsigned int HashFunction(const ElementZmodP& input)
   { return input.HashFunction();
@@ -230,7 +230,7 @@ public:
   { this->flagDeallocated = false;
   }
   ElementZmodP(const ElementZmodP& other)
-  { this->flagDeallocated=false;
+  { this->flagDeallocated = false;
     this->operator=(other);
   }
   ~ElementZmodP(){this->flagDeallocated=true;}
@@ -253,10 +253,14 @@ public:
     this->theValue = other;
     this->theValue %= this->theModulo;
   }
+  void MakeOne(const LargeIntUnsigned& newModulo)
+  { this->theModulo = newModulo;
+    this->theValue = 1;
+  }
   void MakeMOne(const LargeIntUnsigned& newModulo)
-  { this->theModulo=newModulo;
-    this->theValue=newModulo;
-    this->theValue--;
+  { this->theModulo = newModulo;
+    this->theValue = newModulo;
+    this->theValue --;
   }
   void CheckEqualModuli(const ElementZmodP& other)
   { if (this->theModulo != other.theModulo)

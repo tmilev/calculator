@@ -31,7 +31,8 @@ function Page(){
       id: "divCalculatorPage",
       menuButtonId: "buttonSelectCalculator",
       container: null,
-      selectFunction: null
+      selectFunction: null,
+      scriptIds: []
     },
     database: {
       id: "divDatabase",
@@ -83,6 +84,7 @@ function Page(){
     fileName: "",
     request: ""
   };
+  this.scriptsInjected = {};
   this.flagCurrentProblemLoaded = false;
   this.logoutRequestFromUrl = null;
   this.locationRequestFromUrl = null;
@@ -147,44 +149,9 @@ function Page(){
   //Page manipulation functions
   //////////////////////////////////////
   //////////////////////////////////////
-  this.showProfilePicture = function() {
-    document.getElementById("divProfilePicture").classList.remove("divInvisible");
-    document.getElementById("divProfilePicture").classList.add("divVisible");
-    if (this.googleProfile.picture === undefined){
-      return;
-    }
-    if (document.getElementById("divProfilePicture").children.length > 0) {
-      return;
-    }
-    try {
-      var theProfilePicElement = document.createElement("IMG");
-      theProfilePicElement.setAttribute("src", this.googleProfile.picture);
-      theProfilePicElement.setAttribute("alt", this.googleProfile.name);
-      theProfilePicElement.setAttribute("id", "imgProfilePicture");
-      theProfilePicElement.setAttribute("title", this.googleProfile.name);
-      theProfilePicElement.setAttribute("className", "profilePicture");
-      //theProfilePicElement.setAttribute("width", 50);
-      document.getElementById("divProfilePicture").appendChild(theProfilePicElement);
-    } catch (e) {
-      console.log("Failed to set profile picture: " + e);
-    }
-  }
   this.hideProfilePicture = function() {
     document.getElementById("divProfilePicture").classList.add("divInvisible");
     document.getElementById("divProfilePicture").classList.remove("divVisible");
-  }
-  this.initializeCalculatorPage = function() {
-    initializeButtons();
-    initializeCalculatorPage();
-    console.log("Submit missing");
-    if (document.getElementById('mainInputID').value !== "") {
-      submitStringAsMainInput(
-        document.getElementById('calculatorOutput'),
-        'compute',
-        onLoadDefaultFunction,
-        'mainComputationStatus'
-      );
-    }
   }
   //////////////////////////////////////
   //////////////////////////////////////
@@ -195,6 +162,97 @@ function Page(){
   loginTry();
   document.getElementById("divPage").style.display = "";
   document.getElementById("divPage").className = "divPage";
+}
+
+Page.prototype.showProfilePicture = function() {
+  document.getElementById("divProfilePicture").classList.remove("divInvisible");
+  document.getElementById("divProfilePicture").classList.add("divVisible");
+  if (this.googleProfile.picture === undefined) {
+    return;
+  }
+  if (document.getElementById("divProfilePicture").children.length > 0) {
+    return;
+  }
+  try {
+    var theProfilePicElement = document.createElement("IMG");
+    theProfilePicElement.setAttribute("src", this.googleProfile.picture);
+    theProfilePicElement.setAttribute("alt", this.googleProfile.name);
+    theProfilePicElement.setAttribute("id", "imgProfilePicture");
+    theProfilePicElement.setAttribute("title", this.googleProfile.name);
+    theProfilePicElement.setAttribute("className", "profilePicture");
+    //theProfilePicElement.setAttribute("width", 50);
+    document.getElementById("divProfilePicture").appendChild(theProfilePicElement);
+  } catch (e) {
+    console.log("Failed to set profile picture: " + e);
+  }
+}
+
+Page.prototype.initializeCalculatorPage = function() {
+  initializeButtons();
+  initializeCalculatorPage();
+  console.log("Submit missing");
+  if (document.getElementById('mainInputID').value !== "") {
+    submitStringAsMainInput(
+      document.getElementById('calculatorOutput'),
+      'compute',
+      defaultOnLoadInjectScriptsAndProcessLaTeX,
+      'mainComputationStatus'
+    );
+  }
+}
+
+function defaultOnLoadInjectScriptsAndProcessLaTeX(idElement){ 
+  var spanVerification = document.getElementById(idElement);
+  var incomingScripts = spanVerification.getElementsByTagName('script');
+  var oldScripts = thePage.pages.calculator.scriptIds;
+  thePage.removeScripts(oldScripts);
+  calculatorInputBoxNames = [];
+  calculatorInputBoxToSliderUpdaters = {};
+  calculatorCanvases = {};
+  thePage.pages.calculator.sciptIds = [];
+  for (var i = 0; i < incomingScripts.length; i ++) { 
+    var newId = `calculatorMainPageId_${i}`;
+    thePage.pages.calculator.sciptIds.push(newId);
+    var scriptChild = document.createElement('script');
+    scriptChild.setAttribute('id', newId)
+    scriptChild.innerHTML = incomingScripts[i].innerHTML;
+    scriptChild.type = 'text/javascript';
+    document.getElementsByTagName('head')[0].appendChild(scriptChild);
+    numInsertedJavascriptChildren ++;
+  }
+  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById(idElement)]);
+  MathJax.Hub.Queue([calculatorAddListenersToInputBoxes]);
+//  alert(theString);
+}
+
+function Script() {
+  this.id = "";
+  this.content = "";
+
+} 
+
+Page.prototype.removeOneScript = function(scriptId) {
+  var theScript = document.getElementById(scriptId);
+  var parent = theScript.parentNode;
+  parent.removeChild(theScript);
+}
+
+Page.prototype.removeScripts = function(scriptIds) {
+  for (var counter = 0; counter < scriptIds.length; counter ++) {
+    this.removeOneScript(sciptId);
+  }
+}
+
+Page.prototype.injectScript = function(sciptId, scriptContent) {
+  if (scriptContent !== undefined && scriptContent !== null) {
+    this.scriptsInjected[sciptId] = new Script();
+    var theScript = this.scriptsInjected[sciptId];
+    theScript.id = scriptId;
+    theScript.content = scriptContent;
+  }
+  var theScript = this.scriptsInjected[sciptId];
+
+  
 }
 
 Page.prototype.selectPage = function(inputPage) {

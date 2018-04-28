@@ -213,7 +213,7 @@ function submitCalculatorInputOnEnter(){
 function submitCalculatorComputation(){ 
   submitStringAsMainInput(
     document.getElementById('mainInputID').value,
-    'calculatorOutput', 'compute', onLoadDefaultFunction,
+    'calculatorOutput', 'compute', defaultOnLoadInjectScriptsAndProcessLaTeX,
     'mainComputationStatus'
   );
 }

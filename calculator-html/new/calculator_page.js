@@ -33,28 +33,6 @@ function createSelectionNoFocus(field, start, end) {
   }
 }
 
-function onLoadDefaultFunction(idElement){ 
-  var spanVerification=document.getElementById(idElement);
-  var scripts = spanVerification.getElementsByTagName('script');
-  for (var i = 0; i < numInsertedJavascriptChildren; i ++) { 
-    document.getElementsByTagName('head')[0].removeChild(document.getElementsByTagName('head')[0].lastChild);
-  }
-  numInsertedJavascriptChildren = 0;
-  calculatorInputBoxNames = [];
-  calculatorInputBoxToSliderUpdaters = new Object;
-  calculatorCanvases = new Object;
-  for (var i = 0; i < scripts.length; i ++) { 
-    var scriptChild = document.createElement('script');
-    scriptChild.innerHTML = scripts[i].innerHTML;
-    scriptChild.type = 'text/javascript';
-    document.getElementsByTagName('head')[0].appendChild(scriptChild);
-    numInsertedJavascriptChildren ++;
-  }
-  MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById(idElement)]);
-  MathJax.Hub.Queue([calculatorAddListenersToInputBoxes]);
-//  alert(theString);
-}
-
 function calculatorAddListenersToInputBoxes(){ 
   //var theString=" updating: box names, slider names: ";
   for (var i = 0; i < calculatorInputBoxNames.length; i ++){ 

@@ -67,34 +67,34 @@ Problem.prototype.getProblemNavigation = function() {
     result += `<b style = 'color:brown'>Scores are recorded. </b>`;
   }
   var defaultRequest = 'exerciseJSON';
-  if (this.flagForReal){
+  if (this.flagForReal) {
     defaultRequest = 'scoredQuizJSON';
   }
-  if (!thePage.flagUserLoggedIn){
+  if (!thePage.flagUserLoggedIn) {
     defaultRequest = 'exerciseNoLoginJSON';
   }
-  if (this.previousProblem !== null && this.previousProblem !== ""){
+  if (this.previousProblem !== null && this.previousProblem !== "") {
     result+= `<a class='problemLinkPractice' href='#${thePage.getProblem(this.previousProblem).getURLRequestFileCourseTopics()}' 
 onclick = "selectCurrentProblem('${this.previousProblem}' ,'${defaultRequest}')">&#8592;</a>`;
   }
 
-  if (this.flagForReal && thePage.flagUserLoggedIn){
+  if (this.flagForReal && thePage.flagUserLoggedIn) {
     result += 
 `<a class='problemLinkPractice' href='${this.getURL()}' 
 onclick = "selectCurrentProblem('${this.fileName}' ,'exerciseJSON')">Practice</a>`;
   } else {
     result += "<b style='color:green'>Practice</b>";
   }
-  if (!this.flagForReal && thePage.flagUserLoggedIn){ 
+  if (!this.flagForReal && thePage.flagUserLoggedIn) { 
     result += 
 `<a class='problemLinkPractice' href='${this.getURL()}' 
 onclick = "selectCurrentProblem('${this.fileName}' ,'scoredQuizJSON')">Quiz</a>`;
   } else {
-    if (this.flagForReal){
+    if (this.flagForReal) {
       result += "<b style='color:brown'>Quiz</b>";
     }
   }
-  if (this.nextProblem !== null && this.nextProblem !== ""){
+  if (this.nextProblem !== null && this.nextProblem !== "") {
     result+= `<a class='problemLinkPractice' href='#${thePage.getProblem(this.nextProblem).getURLRequestFileCourseTopics()}' 
 onclick = "selectCurrentProblem('${this.nextProblem}' ,'${defaultRequest}')">&#8594;</a>`;
   }
@@ -112,7 +112,7 @@ Problem.prototype.writeToHTML = function(outputElement) {
   topPart += this.getProblemNavigation();
   topPart += "<br>";
   outputElement.innerHTML = topPart + this.decodedProblem + this.scripts;
-  for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++){
+  for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {
     var currentAnswerPanel = this.answers[counterAnswers];
     var latexChangeHandler = currentAnswerPanel.editLaTeX;
     var latexChangeHandlerBound = latexChangeHandler.bind(currentAnswerPanel);
@@ -130,7 +130,7 @@ Problem.prototype.writeToHTML = function(outputElement) {
     document.getElementById(currentAnswerPanel.idButtonSubmit).addEventListener(
       'click', currentAnswerPanel.submitAnswer.bind(currentAnswerPanel)
     );
-    if (! this.flagForReal){
+    if (! this.flagForReal) {
       document.getElementById(currentAnswerPanel.idButtonAnswer).addEventListener(
         'click', currentAnswerPanel.submitGiveUp.bind(currentAnswerPanel)
       );
@@ -150,14 +150,17 @@ Problem.prototype.writeToHTML = function(outputElement) {
 }
 
 function updateProblemPageCallback(input, outputComponent) {
-  if (thePage.pages.problemPage.problems[thePage.currentCourse.fileName] === undefined) {
-    thePage.pages.problemPage.problems[thePage.currentCourse.fileName] = new Problem(thePage.currentCourse.fileName);
-  }
-  var currentProblem = thePage.pages.problemPage.problems[thePage.currentCourse.fileName];
+  var theFileName = thePage.currentCourse.fileName;
+  var currentProblem = thePage.getProblem(theFileName);
   var theProblem = JSON.parse(input);
 
   currentProblem.decodedProblem = decodeURIComponent(theProblem["problem"]);
-  //currentProblem.scripts = decodeURIComponent(theProblem["scripts"]);
+  currentProblem.scripts = [];
+  for (var script in theProblem.scripts){
+    var newLabel = encodeURIComponent(theFileName + script);
+    currentProblem.scripts.push(newLabel); 
+    thePage.injectScript(newLabel, decodeURIComponent(theProblem.scripts[script]));
+  }
   //var theScripts = currentProblem.scripts.split ("</script>");
   //for (var counterScripts = 0; counterScripts < theScripts.length; counterScripts++){
   //  console.log(`Scripts: ${theScripts[counterScripts]}`);
@@ -185,7 +188,7 @@ function updateProblemPageCallback(input, outputComponent) {
   currentProblem.writeToHTML("divProblemPageContentContainer");
 }
 
-function updateProblemPage(){
+function updateProblemPage() {
   if (thePage.flagCurrentProblemLoaded) {
     return;
   }

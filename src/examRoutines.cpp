@@ -2999,7 +2999,12 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsExamProblem)
   { outHeadPt2 << this->GetJavascriptMathQuillBoxes();
     if (theInterpreter.flagHasGraphics)
-      outHeadPt2 << HtmlRoutines::GetJavascriptCanvasGraphicsLink();
+    { outHeadPt2 << HtmlRoutines::GetJavascriptCanvasGraphicsLink();
+      MapReferenceS<std::string, std::string, MathRoutines::hashString>& theScripts =
+      theInterpreter.theObjectContainer.graphicsScripts;
+      for (int i = 0; i < theScripts.size(); i ++)
+        this->theScripts.SetKeyValue(theScripts.theKeys[i], theScripts.theValues[i]);
+    }
   }
   ////////////////////////////////////////////////////////////////////
   //out << "<hr><hr><hr><hr><hr><hr><hr><hr><hr>The calculator activity:<br>" << theInterpreter.outputString << "<hr>";

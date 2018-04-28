@@ -181,6 +181,7 @@ public:
   std::string topicListFileName;
   HashedList<std::string, MathRoutines::hashString> problemNamesNoTopics;
   MapLisT<std::string, TopicElement, MathRoutines::hashString> theTopicS;
+  MapLisT<std::string, std::string, MathRoutines::hashString> theScripts;
   List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;

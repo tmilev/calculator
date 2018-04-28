@@ -263,7 +263,7 @@ bool CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber(Calc
   }
   leftAN.CheckConsistency();
   rightAN.CheckConsistency();
-  leftAN+=rightAN;
+  leftAN += rightAN;
   leftAN.CheckConsistency();
   return output.AssignValue(leftAN, theCommands);
 }
@@ -285,9 +285,9 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(Calculato
   ElementWeylGroup<WeylGroupData> leftR, rightR;
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
-  if (leftR.owner!=rightR.owner)
+  if (leftR.owner != rightR.owner)
     return theCommands << "<hr>Attempting to multiply elements of different groups, possible user typo?";
-  leftR*=rightR;
+  leftR *= rightR;
   return output.AssignValue(leftR, theCommands);
 }
 
@@ -300,7 +300,7 @@ bool CalculatorFunctionsBinaryOps::innerDivideRatByRat(Calculator& theCommands, 
     return false;
   if (rightR.IsEqualToZero())
     return output.MakeError("Division by zero.", theCommands, true);
-  return output.AssignValue(leftR/rightR, theCommands);
+  return output.AssignValue(leftR / rightR, theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble(Calculator& theCommands, const Expression& input, Expression& output)
@@ -313,17 +313,17 @@ bool CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble(Calculator& theComm
   { if (!input[1].IsOfType(&leftR))
       return false;
     else
-      leftD=leftR.GetDoubleValue();
+      leftD = leftR.GetDoubleValue();
   }
   if (!input[2].IsOfType(&rightD))
   { if (!input[2].IsOfType(&rightR))
       return false;
     else
-      rightD=rightR.GetDoubleValue();
+      rightD = rightR.GetDoubleValue();
   }
-  if (rightD==0)
+  if (rightD == 0)
     return output.MakeError("Division by zero.", theCommands, true);
-  return output.AssignValue(leftD/rightD, theCommands);
+  return output.AssignValue(leftD / rightD, theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(Calculator& theCommands, const Expression& input, Expression& output)
@@ -336,7 +336,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(Calculator& t
   if (!input.MergeContextsMyArumentsAndConvertThem<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(inputConverted, &theCommands.Comments))
     return false;
   ElementTensorsGeneralizedVermas<RationalFunctionOld>
-  resultTensor=inputConverted[1].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+  resultTensor = inputConverted[1].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
   resultTensor.TensorOnTheRight(inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >());
   return output.AssignValueWithContext(resultTensor, inputConverted[1].GetContext(), theCommands);
 }
@@ -363,11 +363,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(Calculator
   if (!inputConverted[1].IsOfType<Polynomial<Rational> >(&theCoefficient))
   { if (!inputConverted[1].IsOfType<Rational>(&cfRat))
       return false;
-    theCoefficient=cfRat;
+    theCoefficient = cfRat;
   }
   if (!inputConverted[2].IsOfType<Weight<Polynomial<Rational> > >(&theWeight))
     return false;
-  theWeight*=theCoefficient;
+  theWeight *= theCoefficient;
   return output.AssignValueWithContext(theWeight, inputConverted[2].GetContext(), theCommands);
 }
 
@@ -387,12 +387,12 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calcula
     return false;
   if (!inputConverted[1].IsOfType<ElementWeylGroup<WeylGroupData> >())
     return false;
-  ElementWeylGroup<WeylGroupData> theElt=inputConverted[1].GetValue<ElementWeylGroup<WeylGroupData> >();
-  if (theElt.owner!=&theWeight.owner->theWeyl)
+  ElementWeylGroup<WeylGroupData> theElt = inputConverted[1].GetValue<ElementWeylGroup<WeylGroupData> >();
+  if (theElt.owner != &theWeight.owner->theWeyl)
     return theCommands << "<hr>Possible user input error: attempting to apply Weyl group element to weight corresponding to different Weyl group.";
-  Vector<Polynomial<Rational> > theWeightSimpleCoords=theElt.owner->GetSimpleCoordinatesFromFundamental(theWeight.weightFundamentalCoordS);
+  Vector<Polynomial<Rational> > theWeightSimpleCoords = theElt.owner->GetSimpleCoordinatesFromFundamental(theWeight.weightFundamentalCoordS);
   theElt.ActOn(theWeightSimpleCoords);
-  theWeight.weightFundamentalCoordS=theElt.owner->GetFundamentalCoordinatesFromSimple(theWeightSimpleCoords);
+  theWeight.weightFundamentalCoordS = theElt.owner->GetFundamentalCoordinatesFromSimple(theWeightSimpleCoords);
   return output.AssignValueWithContext(theWeight, inputConverted[2].GetContext(), theCommands);
 }
 
@@ -412,7 +412,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCo
 //  stOutput << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
 //  stOutput << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
 //  stOutput << "<br>after conversion, before multiplying the tensor, left copy is: " << leftCopy.ToString();
-  SemisimpleLieAlgebra& theSSalg=
+  SemisimpleLieAlgebra& theSSalg =
   inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().GetOwnerSS();
   Expression leftE;
 //  stOutput << "<hr>Got where i needa be";
@@ -424,23 +424,23 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCo
     return false;
   }
 //  stOutput << " ... and got my ue out!";
-  static bool theGhostHasAppeared=false;
+  static bool theGhostHasAppeared = false;
   if (!theGhostHasAppeared)
   { stOutput << "Ere I am J.H. ... The ghost in the machine...<br>";
-    theGhostHasAppeared=true;
+    theGhostHasAppeared = true;
   }
-  const ElementTensorsGeneralizedVermas<RationalFunctionOld>& rightEltETGVM
-  =inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+  const ElementTensorsGeneralizedVermas<RationalFunctionOld>& rightEltETGVM =
+  inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
   ElementTensorsGeneralizedVermas<RationalFunctionOld> outputElt;
   if (rightEltETGVM.IsEqualToZero())
-  { output= inputConverted[2];
+  { output = inputConverted[2];
     return true;
   }
-//  stOutput << "<br>ordering " << theSSalg.ToString();
+  //  stOutput << "<br>ordering " << theSSalg.ToString();
   theSSalg.OrderNilradicalNilWeightAscending
   (rightEltETGVM.GetOwnerModule().parabolicSelectionNonSelectedAreElementsLevi);
-  theSSalg.flagHasNilradicalOrder=true;
-//  stOutput << "<br>Ordering done! ";
+  theSSalg.flagHasNilradicalOrder = true;
+  //  stOutput << "<br>Ordering done! ";
   if (!rightEltETGVM.MultiplyOnTheLeft
       (leftE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >(), outputElt, theSSalg, 1))
   { //stOutput << "<br>failed to multiply on the left";
@@ -451,7 +451,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCo
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   Expression inputContextsMerged;
 //  stOutput << "<hr>Merging contexts: " << input.ToString();
@@ -464,8 +464,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(C
     << " one of the two differential operators has differential operator exponent that is not a small integer. ";
 //  stOutput << "<hr>Multiplying " << inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().ToString()
 //  << " by " << inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >().ToString();
-  ElementWeylAlgebra<Rational> result=inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >();
-  result*=inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >();
+  ElementWeylAlgebra<Rational> result = inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >();
+  result *= inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
@@ -492,12 +492,12 @@ bool CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(Calculator
 bool CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyNumberOrPolyByNumberOrPoly");
   //stOutput << HtmlRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  if (input.children.size<3)
+  if (input.children.size < 3)
     return false;
-  const Expression leftE=input[1];
-  const Expression rightE=input[2];
+  const Expression leftE = input[1];
+  const Expression rightE = input[2];
   if (    leftE.IsOfType<AlgebraicNumber>() || leftE.IsOfType <Polynomial<AlgebraicNumber> >()
-      || rightE.IsOfType<AlgebraicNumber>() || rightE.IsOfType<Polynomial<AlgebraicNumber> >() )
+      || rightE.IsOfType<AlgebraicNumber>() || rightE.IsOfType<Polynomial<AlgebraicNumber> >())
     return CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<Polynomial<AlgebraicNumber> >(theCommands, input, output);
   return CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<Polynomial<Rational> >(theCommands, input, output);
 }
@@ -511,13 +511,13 @@ bool CalculatorFunctionsBinaryOps::innerAddUEToAny(Calculator& theCommands, cons
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyUEByAny");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   Expression inputContextsMerged;
   if (!input.MergeContextsMyArumentsAndConvertThem<ElementUniversalEnveloping<RationalFunctionOld> >(inputContextsMerged, &theCommands.Comments))
     return false;
   ElementUniversalEnveloping<RationalFunctionOld> result=inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
-  result*=inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
+  result *= inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   //stOutput << "before simplification: " << result.ToString() << " and after: " << result.ToString();
   result.Simplify();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
@@ -529,20 +529,20 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO(Calculator& theCommands
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-  output=input[1];
-  Expression rightCopy=input[2];
+  output = input[1];
+  Expression rightCopy = input[2];
   if (!output.IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() ||
       !rightCopy.IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >())
     return false;
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon
-  =output.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon
-  =rightCopy.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
+  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon =
+  output.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
+  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon =
+  rightCopy.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> result;
-  result=leftMon;
-  result*=rightMon;
-  for (int i=0; i<result.generatorsIndices.size; i++)
-    if (result.Powers[i]>100000 || result.Powers[i]<0)
+  result = leftMon;
+  result *= rightMon;
+  for (int i = 0; i < result.generatorsIndices.size; i ++)
+    if (result.Powers[i] > 100000 || result.Powers[i] < 0)
       return output.MakeError
       ("The result of this operation is " + result.ToString() + " which is outside of the allowed range. ", theCommands);
   return output.AssignValue(result, theCommands);
@@ -554,24 +554,24 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(Calculator& theComma
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-  output=input[1];
-  Expression rightCopy=input[2];
+  output = input[1];
+  Expression rightCopy = input[2];
   if (!output.MergeContexts(output, rightCopy))
     return false;
   if (!output.IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() || !rightCopy.IsOfType<LittelmannPath>())
     return false;
-  LittelmannPath result=rightCopy.GetValue<LittelmannPath>();
-  WeylGroupData& theWeyl=*result.owner;
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> theLRO=
+  LittelmannPath result = rightCopy.GetValue<LittelmannPath>();
+  WeylGroupData& theWeyl = *result.owner;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> theLRO =
   output.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
-  for (int i=theLRO.generatorsIndices.size-1; i>=0; i--)
-    if (theLRO.generatorsIndices[i]==0 || theLRO.generatorsIndices[i]< -theWeyl.GetDim() || theLRO.generatorsIndices[i]> theWeyl.GetDim())
+  for (int i = theLRO.generatorsIndices.size - 1; i >= 0; i --)
+    if (theLRO.generatorsIndices[i] == 0 || theLRO.generatorsIndices[i] < - theWeyl.GetDim() || theLRO.generatorsIndices[i] > theWeyl.GetDim())
     { std::stringstream out;
       out << " The Littelmann root operator must have an index whose absolute value is between 1 and the rank of the ambient Lie algebra, instead I get index  "
       << theLRO.generatorsIndices[i];
       return output.MakeError(out.str(), theCommands);
     } else
-      for (int j=0; j<theLRO.Powers[i]; j++)
+      for (int j = 0; j < theLRO.Powers[i]; j ++)
         result.ActByEFDisplayIndex(theLRO.generatorsIndices[i]);
   return output.AssignValue(result, theCommands);
 }
@@ -583,10 +583,10 @@ bool CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor(Calculator& theC
 
 bool CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly");
-  if (input.children.size<3)
+  if (input.size() < 3)
     return false;
-  const Expression leftE=input[1];
-  const Expression rightE=input[2];
+  const Expression leftE = input[1];
+  const Expression rightE = input[2];
   if (    leftE.IsOfType<AlgebraicNumber>() || leftE.IsOfType <Polynomial<AlgebraicNumber> >()
       || rightE.IsOfType<AlgebraicNumber>() || rightE.IsOfType<Polynomial<AlgebraicNumber> >() )
     return CalculatorFunctionsBinaryOps::innerAddTypeToType<Polynomial<AlgebraicNumber> >(theCommands, input, output);
@@ -600,18 +600,18 @@ bool CalculatorFunctionsBinaryOps::innerAddPlotToPlot(Calculator& theCommands, c
   if (!input.IsListNElements(3))
     return false;
   Plot leftPlot, rightPlot;
-  if(!input[1].IsOfType<Plot>(&leftPlot))
+  if (!input[1].IsOfType<Plot>(&leftPlot))
     return false;
-  if(!input[2].IsOfType<Plot>(&rightPlot))
+  if (!input[2].IsOfType<Plot>(&rightPlot))
     return false;
-  if(leftPlot. dimension!=-1 &&
-     rightPlot.dimension!=-1 &&
-     leftPlot. dimension!=rightPlot.dimension)
+  if (leftPlot. dimension != - 1 &&
+      rightPlot.dimension != - 1 &&
+      leftPlot. dimension != rightPlot.dimension)
     return false;
 //  stOutput << "DEBUG Adding plots, input plot dims: left: " << leftPlot.DesiredHtmlWidthInPixels << ", " << leftPlot.DesiredHtmlHeightInPixels
 //  << ", right: "
 //  << rightPlot.DesiredHtmlWidthInPixels << ", " << rightPlot.DesiredHtmlHeightInPixels;
-  leftPlot+=rightPlot;
+  leftPlot += rightPlot;
 //  stOutput << "DEBUG Adding plots, output plot dims: " << leftPlot.DesiredHtmlWidthInPixels << ", " << leftPlot.DesiredHtmlHeightInPixels;
   return output.AssignValue(leftPlot, theCommands);
 }
@@ -622,25 +622,25 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger(Calculator& theC
   if (!input.IsListNElements(3))
     return false;
   Polynomial<Rational> base;
-  int thePower=0;
-  if(!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
+  int thePower = 0;
+  if (!input[1].IsOfType(&base) || !input[2].IsSmallInteger(&thePower))
     return false;
-  if (base.IsEqualToZero() && thePower<=0)
+  if (base.IsEqualToZero() && thePower <= 0)
     return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
-  if (thePower<0)
-  { if (base.size()==1)
+  if (thePower < 0)
+  { if (base.size() == 1)
     { Polynomial<Rational> outputPoly;
-      MonomialP theMon=base[0];
-      Rational theCF=base.theCoeffs[0];
+      MonomialP theMon = base[0];
+      Rational theCF = base.theCoeffs[0];
       theCF.RaiseToPower(thePower);
       theMon.RaiseToPower(thePower);
       outputPoly.MakeZero();
       outputPoly.AddMonomial(theMon, theCF);
       return output.AssignValueWithContext(outputPoly, input[1].GetContext(), theCommands);
     }
-    base.RaiseToPower(-thePower);
+    base.RaiseToPower(- thePower);
     RationalFunctionOld theRF;
-    theRF=base;
+    theRF = base;
     theRF.Invert();
     return output.AssignValueWithContext(theRF, input[1].GetContext(), theCommands);
   }
@@ -657,21 +657,21 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible(
     return false;
   Matrix<Rational> baseRat;
   if (input[1].IsMatrixGivenType(0, 0, &baseRat))
-  { if (!baseRat.IsSquare() || baseRat.NumCols==0)
+  { if (!baseRat.IsSquare() || baseRat.NumCols == 0)
     { std::stringstream errorStream;
       errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
       << "Your matrix, " << baseRat.ToString() << " is not square. ";
       return output.MakeError(errorStream.str(), theCommands, true);
     }
-    Rational theDet= baseRat.GetDeterminant();
-    if (largePower<=0)
-      if (theDet==0 )
+    Rational theDet = baseRat.GetDeterminant();
+    if (largePower <= 0)
+      if (theDet == 0)
         return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
-    if (theDet!=0 && theDet!=-1 && theDet!=1)
+    if (theDet != 0 && theDet != - 1 && theDet != 1)
       return theCommands << "Matrix power too large.";
-    if (largePower<0)
+    if (largePower < 0)
     { baseRat.Invert();
-      largePower*=-1;
+      largePower *= - 1;
     }
     Matrix<Rational> idMat;
     idMat.MakeIdMatrix(baseRat.NumRows);
@@ -680,21 +680,21 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersByLargeIntegerIfPossible(
   }
   Matrix<AlgebraicNumber> baseAlg;
   if (input[1].IsMatrixGivenType(0, 0, &baseAlg))
-  { if (!baseAlg.IsSquare() || baseAlg.NumCols==0)
+  { if (!baseAlg.IsSquare() || baseAlg.NumCols == 0)
     { std::stringstream errorStream;
       errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
       << "Your matrix, " << baseAlg.ToString() << " is not square. ";
       return output.MakeError(errorStream.str(), theCommands);
     }
-    AlgebraicNumber theDet= baseAlg.GetDeterminant();
-    if (largePower<=0)
-      if (theDet==0 )
+    AlgebraicNumber theDet = baseAlg.GetDeterminant();
+    if (largePower <= 0)
+      if (theDet == 0)
         return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
-    if (theDet!=0 && theDet!=-1 && theDet!=1)
+    if (theDet != 0 && theDet != - 1 && theDet != 1)
       return theCommands << "Matrix power too large.";
-    if (largePower<0)
+    if (largePower < 0)
     { baseAlg.Invert();
-      largePower*=-1;
+      largePower *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
     idMat.MakeIdMatrix(baseAlg.NumRows);
@@ -709,25 +709,25 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(Calculator
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
-  int thePower=0;
-  bool powerIsSmall=input[2].IsSmallInteger(&thePower);
+  int thePower = 0;
+  bool powerIsSmall = input[2].IsSmallInteger(&thePower);
   if (!powerIsSmall)
     return false;
   Matrix<Rational> baseRat;
   //stOutput << "DEBUG: here i am";
   if (input[1].IsMatrixGivenType<Rational>(0, 0, &baseRat))
-  { if (!baseRat.IsSquare() || baseRat.NumCols==0)
+  { if (!baseRat.IsSquare() || baseRat.NumCols == 0)
     { std::stringstream errorStream;
       errorStream << "Exponentiating non-square matrices or matrices with zero rows is not allowed. "
       << "Your matrix, " << baseRat.ToString() << " is not square. ";
       return output.MakeError(errorStream.str(), theCommands);
     }
-    if (thePower<=0)
-      if (baseRat.GetDeterminant()==0 )
+    if (thePower <= 0)
+      if (baseRat.GetDeterminant() == 0)
         return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
-    if (thePower<0)
+    if (thePower < 0)
     { baseRat.Invert();
-      thePower*=-1;
+      thePower *= - 1;
     }
     Matrix<Rational> idMat;
     idMat.MakeIdMatrix(baseRat.NumRows);
@@ -736,14 +736,14 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(Calculator
   }
   Matrix<AlgebraicNumber> baseAlg;
   if (input[1].IsMatrixGivenType<AlgebraicNumber>(0, 0, &baseAlg))
-  { if (!baseAlg.IsSquare() || baseAlg.NumCols==0)
+  { if (!baseAlg.IsSquare() || baseAlg.NumCols == 0)
       return output.MakeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", theCommands);
-    if (thePower<=0)
-      if (baseAlg.GetDeterminant()==0 )
+    if (thePower <= 0)
+      if (baseAlg.GetDeterminant() == 0)
         return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
-    if (thePower<0)
+    if (thePower < 0)
     { baseAlg.Invert();
-      thePower*=-1;
+      thePower *= - 1;
     }
     Matrix<AlgebraicNumber> idMat;
     idMat.MakeIdMatrix(baseAlg.NumRows);
@@ -755,10 +755,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatNumbersBySmallInteger(Calculator
     Expression theContext;
     if (!theCommands.GetMatrix(input[1], baseRF, &theContext))
       return false;
-    if (!baseRF.IsSquare() || baseRF.NumCols==0)
+    if (!baseRF.IsSquare() || baseRF.NumCols == 0)
       return output.MakeError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", theCommands, true);
-    if (thePower<=0)
-      if (baseRF.GetDeterminant()==0 )
+    if (thePower <= 0)
+      if (baseRF.GetDeterminant() == 0)
         return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
     if (thePower<0)
       return theCommands << "Raising matrices of rational functions to negative powers not implemented yet.";
@@ -779,12 +779,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger
     return false;
 //  stOutput << "evaluating ..." << input.ToString();
   Polynomial<AlgebraicNumber> base;
-  int thePower=0;
+  int thePower = 0;
   if (!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
     return false;
-  if (thePower<0)
+  if (thePower < 0)
     return false;
-  if (base.IsEqualToZero() && thePower<=0)
+  if (base.IsEqualToZero() && thePower <= 0)
     return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
   base.RaiseToPower(thePower);
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
@@ -800,25 +800,25 @@ bool CalculatorFunctionsBinaryOps::innerPowerAlgebraicNumberBySmallInteger(Calcu
     return false;
   Rational powerRat, baseRat;
   if (input[2].IsRational(&powerRat))
-    if (powerRat.GetDenominator()==2)
+    if (powerRat.GetDenominator() == 2)
       if (base.IsRational(&baseRat))
-        if( base.AssignRationalQuadraticRadical(baseRat, theCommands.theObjectContainer.theAlgebraicClosure))
+        if (base.AssignRationalQuadraticRadical(baseRat, theCommands.theObjectContainer.theAlgebraicClosure))
         { base.CheckConsistency();
-          output=input;
+          output = input;
           Expression newPower, newBase;
-          newPower.AssignValue(powerRat*2, theCommands);
+          newPower.AssignValue(powerRat * 2, theCommands);
           newBase.AssignValue(base, theCommands);
           return output.MakeXOX(theCommands, theCommands.opThePower(), newBase, newPower);
         }
-  int thePower=0;
+  int thePower = 0;
   if (!input[2].IsSmallInteger(&thePower))
     return false;
-  if (base.IsEqualToZero() && thePower<0)
+  if (base.IsEqualToZero() && thePower < 0)
     return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
-  if (base.IsEqualToZero() && thePower==0)
+  if (base.IsEqualToZero() && thePower == 0)
     return output.AssignValue(1, theCommands);
-  if (thePower<0)
-  { thePower*=-1;
+  if (thePower < 0)
+  { thePower *= - 1;
     base.Invert();
   }
   MathRoutines::RaiseToPower(base, thePower, (AlgebraicNumber) 1);
@@ -832,29 +832,29 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(Calculator& theCo
     return false;
 //  stOutput << "raising " << input[1].ToString() << " to power " << input[2].ToString();
   ElementWeylAlgebra<Rational> base;
-  int thePower=0;
-  if(!input[1].IsOfType(&base))
+  int thePower = 0;
+  if (!input[1].IsOfType(&base))
     return false;
-  bool mustCheckForRationalPower=false;
-  mustCheckForRationalPower=!input[2].IsSmallInteger(&thePower);
-  if (mustCheckForRationalPower || thePower<0)
+  bool mustCheckForRationalPower = false;
+  mustCheckForRationalPower = !input[2].IsSmallInteger(&thePower);
+  if (mustCheckForRationalPower || thePower < 0)
   { Rational powerRat;
     if (!input[2].IsOfType<Rational>(&powerRat))
       return false;
-    bool isMon=true;
-    if (base.size()!=1)
-      isMon=false;
-    else if (base.theCoeffs[0]!=1)
-      isMon=false;
+    bool isMon = true;
+    if (base.size() != 1)
+      isMon = false;
+    else if (base.theCoeffs[0] != 1)
+      isMon = false;
     if (!isMon)
       return theCommands << "<hr>Failed to raise " << base.ToString() << " to power " << powerRat.ToString() << ": the exponent is not a "
       << " small integer and the base is not a coefficient one monomial. ";
     ElementWeylAlgebra<Rational> finalOutput;
-    MonomialWeylAlgebra theMon=base[0];
+    MonomialWeylAlgebra theMon = base[0];
     theMon.polynomialPart.RaiseToPower(powerRat);
     theMon.differentialPart.RaiseToPower(powerRat);
-    for (int i=0; i<theMon.polynomialPart.GetMinNumVars(); i++)
-      if (theMon.polynomialPart[i]!=0 && theMon.differentialPart[i]!=0)
+    for (int i = 0; i < theMon.polynomialPart.GetMinNumVars(); i ++)
+      if (theMon.polynomialPart[i] != 0 && theMon.differentialPart[i] != 0)
         return theCommands << "<hr>Failed to raise " << base.ToString() << " to power " << powerRat.ToString() << ": the exponent is not a "
         << " small integer, the base is a monomial, however the monomial contains derivative and polynomial with respect to the same variable. ";
     finalOutput.MakeZero();
@@ -862,10 +862,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(Calculator& theCo
     return output.AssignValueWithContext(finalOutput, input[1].GetContext(), theCommands);
   }
 
-  if (base.IsEqualToZero() )
-  { if (thePower<0)
+  if (base.IsEqualToZero())
+  { if (thePower < 0)
       return output.MakeError("Division by zero: trying to raise 0 to negative power. ", theCommands, true);
-    if (thePower==0)
+    if (thePower == 0)
       return output.AssignValue(1, theCommands);
   }
   base.RaiseToPower(thePower);
@@ -879,7 +879,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByInteger(Calculator& theCo
     return false;
 //  stOutput << "<br>raising " << input[1].ToString() << " to power " << input[2].ToString();
   Rational base, exp;
-  if(!input[1].IsRational(&base))
+  if (!input[1].IsRational(&base))
     return false;
   if (base.IsEqualToOne())
     return output.AssignValue(1, theCommands);
@@ -888,9 +888,9 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByInteger(Calculator& theCo
   int thePower;
   if (!exp.IsSmallInteger(&thePower))
     return false;
-  if (base==0 && thePower==0)
+  if (base == 0 && thePower == 0)
     return output.AssignValue(1, theCommands);
-  if (base==0 && thePower<0)
+  if (base == 0 && thePower < 0)
     return output.MakeError("Division by zero: trying to raise 0 to negative or zero power. ", theCommands, true);
   base.RaiseToPower(thePower);
   return output.AssignValue(base, theCommands);
@@ -1144,15 +1144,15 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat(Calcula
     return false;
   Rational leftR, rightR;
   double leftD, rightD;
-  if(input[1].IsOfType(&leftR))
-    leftD=leftR.GetDoubleValue();
+  if (input[1].IsOfType(&leftR))
+    leftD = leftR.GetDoubleValue();
   else if (!input[1].IsOfType(&leftD))
     return false;
-  if(input[2].IsOfType(&rightR))
-    rightD=rightR.GetDoubleValue();
+  if (input[2].IsOfType(&rightR))
+    rightD = rightR.GetDoubleValue();
   else if (!input[2].IsOfType(&rightD))
     return false;
-  return output.AssignValue(leftD*rightD, theCommands);
+  return output.AssignValue(leftD * rightD, theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1163,15 +1163,15 @@ bool CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat(Calculator& 
 //  stOutput << "Adding " << input[1].ToString() << " 'n " << input[2].ToString();
   Rational leftR, rightR;
   double leftD, rightD;
-  if(input[1].IsOfType(&leftR))
-    leftD=leftR.GetDoubleValue();
+  if (input[1].IsOfType(&leftR))
+    leftD = leftR.GetDoubleValue();
   else if (!input[1].IsOfType(&leftD))
     return false;
-  if(input[2].IsOfType(&rightR))
-    rightD=rightR.GetDoubleValue();
+  if (input[2].IsOfType(&rightR))
+    rightD = rightR.GetDoubleValue();
   else if (!input[2].IsOfType(&rightD))
     return false;
-  return output.AssignValue(leftD+rightD, theCommands);
+  return output.AssignValue(leftD + rightD, theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1184,10 +1184,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(Calcu
     return false;
   if (!input[2].IsOfType(&rightC))
     return false;
-  if (leftC.GetOwner()!=rightC.GetOwner())
+  if (leftC.GetOwner() != rightC.GetOwner())
     return theCommands << "You asked me to multiply characters over different semisimple Lie algebras. Could this be a typo?";
-  std::string successString=(leftC*=rightC);
-  if (successString!="")
+  std::string successString = (leftC *= rightC);
+  if (successString != "")
     return theCommands << "I tried to multiply character " << leftC.ToString() << " by " << rightC.ToString()
     << " but I failed with the following message: " << successString;
   return output.AssignValue(leftC, theCommands);
@@ -1200,19 +1200,19 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarByMatrix(Calculator& th
   if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
 //  stOutput << "<br>trouble be double!";
-  const Expression& theScalarE=input[1];
+  const Expression& theScalarE = input[1];
   if (!theScalarE.IsBuiltInScalar())
     return false;
 //  stOutput << "<br>trouble be triple!";
-  const Expression& theMatE=input[2];
+  const Expression& theMatE = input[2];
   if (!theMatE.IsMatrix())
     return false;
   Matrix<Expression> theMat;
   if (!theCommands.GetMatrixExpressions(theMatE, theMat))
     return false;
-  for (int i=0; i<theMat.NumRows; i++)
-    for (int j=0; j<theMat.NumCols; j++)
-      theMat(i,j)=theScalarE*theMat(i,j);
+  for (int i = 0; i < theMat.NumRows; i ++)
+    for (int j = 0; j < theMat.NumCols; j ++)
+      theMat(i, j) = theScalarE * theMat(i, j);
   return output.AssignMatrixExpressions(theMat, theCommands, false);
 }
 
@@ -1228,10 +1228,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& 
   if (!input[2].IsSequenceNElementS())
     return false;
   output.reset(theCommands);
-  output.children.Reserve(input[2].children.size);
+  output.children.Reserve(input[2].size());
   output.AddChildAtomOnTop(theCommands.opSequence());
   Expression tempProduct;
-  for (int i=1; i<input[2].children.size; i++)
+  for (int i = 1; i < input[2].size(); i++)
   { tempProduct.MakeProducT(theCommands, input[1], input[2][i]);
     output.AddChildOnTop(tempProduct);
   }
@@ -1243,25 +1243,25 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix");
   if (!input.StartsWith(theCommands.opTimes()))
     return false;
-  int numColsFirst=-1;
-  int numRowsSecond=-1;
+  int numColsFirst = - 1;
+  int numRowsSecond = - 1;
   if (!input[1].IsMatrix(0, &numColsFirst) || !input[2].IsMatrix(&numRowsSecond, 0))
     return false;
-  if (numColsFirst!=numRowsSecond)
+  if (numColsFirst != numRowsSecond)
     return theCommands << "WARNING: I encountered a product of a matrix with " << numColsFirst
     << " columns by a matrix with " << numRowsSecond << " rows. ";
   //stOutput << "DEBUG: here i am";
   if (input[1].IsMatrixGivenType<Rational>() && input[2].IsMatrixGivenType<Rational>())
     return CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational(theCommands, input, output);
-  bool invokeAlgMatMultiplication=
-  (input[1].IsMatrixGivenType<Rational>() && input[2].IsMatrixGivenType<AlgebraicNumber>() ) ||
-  (input[1].IsMatrixGivenType<AlgebraicNumber>() && input[2].IsMatrixGivenType<Rational>() ) ||
+  bool invokeAlgMatMultiplication =
+  (input[1].IsMatrixGivenType<Rational>() && input[2].IsMatrixGivenType<AlgebraicNumber>()) ||
+  (input[1].IsMatrixGivenType<AlgebraicNumber>() && input[2].IsMatrixGivenType<Rational>()) ||
   (input[1].IsMatrixGivenType<AlgebraicNumber>() && input[2].IsMatrixGivenType<AlgebraicNumber>() );
   if (invokeAlgMatMultiplication)
     return CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg(theCommands, input, output);
-  bool invokeRFMultiplication=
-  (input[1].IsMatrixGivenType<RationalFunctionOld>() && input[2].IsMatrixGivenType<Rational>() ) ||
-  (input[1].IsMatrixGivenType<Rational>() && input[2].IsMatrixGivenType<RationalFunctionOld>() ) ||
+  bool invokeRFMultiplication =
+  (input[1].IsMatrixGivenType<RationalFunctionOld>() && input[2].IsMatrixGivenType<Rational>()) ||
+  (input[1].IsMatrixGivenType<Rational>() && input[2].IsMatrixGivenType<RationalFunctionOld>()) ||
   (input[1].IsMatrixGivenType<RationalFunctionOld>() && input[2].IsMatrixGivenType<RationalFunctionOld>() );
   if (invokeRFMultiplication)
     return CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(theCommands, input, output);
@@ -1275,15 +1275,15 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix
   Matrix<Expression> outputMat;
   outputMat.init(leftMat.NumRows, rightMat.NumCols);
   Expression leftSummand, rightSummand;
-  for (int i=0; i<leftMat.NumRows; i++)
-    for (int j=0; j<rightMat.NumCols; j++)
-      for (int k=0; k<leftMat.NumCols; k++)
-        if (k==0)
-          outputMat(i,j).MakeProducT(theCommands, leftMat(i,k), rightMat(k,j) );
+  for (int i = 0; i < leftMat.NumRows; i ++)
+    for (int j = 0; j < rightMat.NumCols; j ++)
+      for (int k = 0; k < leftMat.NumCols; k ++)
+        if (k == 0)
+          outputMat(i, j).MakeProducT(theCommands, leftMat(i, k), rightMat(k, j));
         else
-        { rightSummand=outputMat(i, j);
-          leftSummand.MakeProducT(theCommands, leftMat(i,k), rightMat(k,j));
-          outputMat(i,j).MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
+        { rightSummand = outputMat(i, j);
+          leftSummand.MakeProducT(theCommands, leftMat(i, k), rightMat(k, j));
+          outputMat(i, j).MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
         }
   return output.AssignMatrixExpressions(outputMat, theCommands, true);
 }
@@ -1293,19 +1293,19 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByMatrix
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixByMatrix");
   if (!input.StartsWith(theCommands.opTimes()))
     return false;
-  int matRows=-1, matCols=-1;
+  int matRows = - 1, matCols = - 1;
   if (!input[1].IsSequenceNElementS() || !input[2].IsMatrix(&matRows, &matCols))
     return false;
-  if (input[1].size()-1!=matRows)
+  if (input[1].size() - 1 != matRows)
     return false;
   List<Expression> theResult;
   theResult.SetSize(matCols);
-  for (int i=0; i<theResult.size; i++)
-    for (int j=0; j<matRows; j++)
-      if (j==0)
-        theResult[i]=input[1][j+1]*input[2][j+1][i+1];
+  for (int i = 0; i < theResult.size; i ++)
+    for (int j = 0; j < matRows; j ++)
+      if (j == 0)
+        theResult[i] = input[1][j + 1] * input[2][j + 1][i + 1];
       else
-        theResult[i]+=input[1][j+1]*input[2][j+1][i+1];
+        theResult[i] += input[1][j + 1] * input[2][j + 1][i + 1];
   return output.MakeSequence(theCommands, &theResult);
 }
 
@@ -1313,9 +1313,9 @@ bool CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix(Calculator& theComm
 { if (!input.StartsWith(theCommands.opTensor()))
     return false;
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerTensorMatrixByMatrix");
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
-  if ( ( !rightE.IsMatrix() && !rightE.IsSequenceNElementS()) || (!leftE.IsMatrix() && !leftE.IsSequenceNElementS()))
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
+  if ((!rightE.IsMatrix() && !rightE.IsSequenceNElementS()) || (!leftE.IsMatrix() && !leftE.IsSequenceNElementS()))
     return false;
   Matrix<Rational> leftMatRat, rightMatRat;
   if (leftE.IsMatrixGivenType(0, 0, &leftMatRat) && rightE.IsMatrixGivenType(0, 0, &rightMatRat))
@@ -1336,8 +1336,8 @@ bool CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor(Calculator& theComm
 { if (!input.StartsWith(theCommands.opTensor()))
     return false;
   MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerTensorMatByMatTensor");
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
   if (!rightE.IsOfType<MatrixTensor<Rational> >() || !leftE.IsOfType<MatrixTensor<Rational> >())
     return false;
   MatrixTensor<Rational> result;
@@ -1349,10 +1349,10 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(C
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg");
   if (!input.IsListNElements(3))
     return false;
-  const Expression *matE;
-  const Expression *scalarE;
-  matE  =&input[1];
-  scalarE=& input[2];
+  const Expression* matE;
+  const Expression* scalarE;
+  matE = &input[1];
+  scalarE = &input[2];
   if (!matE->IsMatrixGivenType<Rational>() && !matE->IsMatrixGivenType<AlgebraicNumber>())
     MathRoutines::swap(matE, scalarE);
   if (!matE->IsMatrixGivenType<Rational>() && !matE->IsMatrixGivenType<AlgebraicNumber>())
@@ -1362,16 +1362,16 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrAlgebraicByMatRatOrMatAlg(C
   Matrix<Rational> theMatRat;
   Rational theScalarRat;
   if (matE->IsMatrixGivenType(0, 0, &theMatRat))
-    theMatAlg=theMatRat;
+    theMatAlg = theMatRat;
   else
     if (!matE->IsMatrixGivenType(0, 0, &theMatAlg))
       return false;
   if (scalarE->IsOfType(&theScalarRat))
-    theScalar=theScalarRat;
+    theScalar = theScalarRat;
   else
     if (!scalarE->IsOfType(&theScalar))
       return false;
-  theMatAlg*=theScalar;
+  theMatAlg *= theScalar;
   return output.AssignMatrix(theMatAlg, theCommands);
 }
 
@@ -1382,28 +1382,28 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatRatOrMatAlgByMatRatOrMatAlg
     return false;
   Matrix<AlgebraicNumber> matAlgLeft, matAlgRight;
   Matrix<Rational> matRatLeft, matRatRight;
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
-  if (leftE.IsMatrixGivenType<Rational>() && rightE.IsMatrixGivenType<Rational>() )
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
+  if (leftE.IsMatrixGivenType<Rational>() && rightE.IsMatrixGivenType<Rational>())
     return false;
   if (leftE.IsMatrixGivenType(0, 0, &matRatLeft))
-    matAlgLeft=matRatLeft;
+    matAlgLeft = matRatLeft;
   else
     if (!leftE.IsMatrixGivenType(0, 0, &matAlgLeft))
       return false;
   if (rightE.IsMatrixGivenType(0, 0, &matRatRight))
-    matAlgRight=matRatRight;
+    matAlgRight = matRatRight;
   else
     if (!rightE.IsMatrixGivenType(0, 0, &matAlgRight))
       return false;
-  if (matAlgLeft.NumCols!=matAlgRight.NumRows)
+  if (matAlgLeft.NumCols != matAlgRight.NumRows)
   { std::stringstream errorStream;
     errorStream << "Error: attempting to multiply matrix with "
     << matAlgLeft.NumCols << " columns by a "
     << " matrix with " << matAlgRight.NumRows << " rows. ";
     return output.MakeError(errorStream.str(), theCommands, true);
   }
-  matAlgLeft*=matAlgRight;
+  matAlgLeft *= matAlgRight;
   return output.AssignMatrix(matAlgLeft, theCommands);
 }
 
@@ -1411,15 +1411,15 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrix
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrixRational");
   if (!input.IsListNElements(3))
     return false;
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
   if (!rightE.IsMatrixGivenType<Rational>())
     return false;
   Rational theScalar;
   if (leftE.IsOfType<Rational>(&theScalar))
   { Matrix<Rational> result;
     rightE.IsMatrixGivenType(0, 0, &result);
-    result*=theScalar;
+    result *= theScalar;
     return output.AssignMatrix(result, theCommands);
   }
   Matrix<Rational> leftMat, rightMat;
@@ -1427,7 +1427,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRationalOrRationalByMatrix
     return false;
   if (!rightE.IsMatrixGivenType(0, 0, &rightMat))
     return false;
-  if (leftMat.NumCols!=rightMat.NumRows)
+  if (leftMat.NumCols != rightMat.NumRows)
     return false;
   leftMat.MultiplyOnTheRight(rightMat);
   return output.AssignMatrix(leftMat, theCommands);
@@ -1437,8 +1437,8 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(Calculato
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF");
   if (!input.IsListNElements(3))
     return false;
-  Expression leftE=input[1];
-  Expression rightE=input[2];
+  Expression leftE = input[1];
+  Expression rightE = input[2];
     if (!rightE.IsMatrixGivenType<RationalFunctionOld>() ||
         !(leftE.IsOfType<Rational>() ||
           leftE.IsOfType<Polynomial<Rational> >() ||
@@ -1454,19 +1454,19 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixRFOrRFByMatrixRF(Calculato
       return theCommands << "Failed to convert " << leftE.ToString() << " to rational function. ";
     Matrix<RationalFunctionOld> result;
     rightE.IsMatrixGivenType(0, 0, &result);
-    RationalFunctionOld theScalar=leftErfForm.GetValue<RationalFunctionOld>();
-    result*=theScalar;
-    Expression contextE=leftE.GetContext();
+    RationalFunctionOld theScalar = leftErfForm.GetValue<RationalFunctionOld>();
+    result *= theScalar;
+    Expression contextE = leftE.GetContext();
     return output.AssignMatrix(result, theCommands, &contextE);
   }
   Matrix<RationalFunctionOld> rightMat;
   rightE.IsMatrixGivenType(0, 0, &rightMat);
   Matrix<RationalFunctionOld> result;
   leftE.IsMatrixGivenType(0, 0, &result);
-  if (result.NumCols!=rightMat.NumRows)
+  if (result.NumCols != rightMat.NumRows)
     return false;
   result.MultiplyOnTheRight(rightMat);
-  Expression contextE=leftE.GetContext();
+  Expression contextE = leftE.GetContext();
   return output.AssignMatrix(result, theCommands, &contextE);
 }
 
@@ -1474,21 +1474,21 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTe
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyMatrixTensorOrRationalByMatrixTensor");
   if (!input.IsListNElements(3))
     return false;
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
   if (!rightE.IsOfType<MatrixTensor<Rational> >())
     return false;
   Rational theScalar;
   if (leftE.IsOfType<Rational>(&theScalar))
-  { MatrixTensor<Rational> result=rightE.GetValue<MatrixTensor<Rational> >();
-    result*=theScalar;
+  { MatrixTensor<Rational> result = rightE.GetValue<MatrixTensor<Rational> >();
+    result *= theScalar;
     return output.AssignValue(result, theCommands);
   }
   if (!leftE.IsOfType<MatrixTensor<Rational> >())
     return false;
-  const MatrixTensor<Rational>& rightMat=rightE.GetValue<MatrixTensor<Rational> >();
-  MatrixTensor<Rational> result=leftE.GetValue<MatrixTensor<Rational> >();
-  result*=rightMat;
+  const MatrixTensor<Rational>& rightMat = rightE.GetValue<MatrixTensor<Rational> >();
+  MatrixTensor<Rational> result = leftE.GetValue<MatrixTensor<Rational> >();
+  result *= rightMat;
   return output.AssignValue(result, theCommands);
 }
 
@@ -1497,28 +1497,28 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerLieBracketExtractConstant");
   if (!input.StartsWith(theCommands.opLieBracket(), 3))
     return false;
-  Rational theCF=1;
+  Rational theCF = 1;
   Rational tempRat;
-  Expression leftE=input[1], rightE=input[2];
-  bool found=false;
+  Expression leftE = input[1], rightE = input[2];
+  bool found = false;
   if (input[1].StartsWith(theCommands.opTimes(), 3))
-    if(input[1][1].IsOfType(&tempRat))
-    { found=true;
-      theCF*=tempRat;
-      leftE=input[1][2];
+    if (input[1][1].IsOfType(&tempRat))
+    { found = true;
+      theCF *= tempRat;
+      leftE = input[1][2];
     }
   if (input[2].StartsWith(theCommands.opTimes(), 3))
-    if(input[2][1].IsOfType(&tempRat))
-    { found=true;
-      theCF*=tempRat;
-      rightE=input[2][2];
+    if (input[2][1].IsOfType(&tempRat))
+    { found = true;
+      theCF *= tempRat;
+      rightE = input[2][2];
     }
   if (!found)
     return false;
   Expression theBracket;
   theBracket.MakeXOX(theCommands, theCommands.opLieBracket(), leftE, rightE);
   output.AssignValue(theCF, theCommands);
-  output*=theBracket;
+  output *= theBracket;
   return true;
 }
 
@@ -1536,8 +1536,8 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE(Calculator&
   Expression inputConverted;
   if (!input.MergeContextsMyAruments(inputConverted, 0))
     return false;
-  const Expression& leftE=inputConverted[1];
-  const Expression& rightE=inputConverted[2];
+  const Expression& leftE = inputConverted[1];
+  const Expression& rightE = inputConverted[2];
   if (leftE.IsOfType<Rational>() || rightE.IsOfType<Rational>())
     return output.AssignValueWithContext(0, leftE.GetContext() , theCommands);
   if (leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() && rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() )
@@ -1558,7 +1558,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded
     return false;
   if (!input[2].StartsWith(theCommands.opLieBracket()))
     return false;
-  bool doContinue=(input[1]>input[2][1] && input[1]>input[2][2]);
+  bool doContinue = (input[1] > input[2][1] && input[1] > input[2][2]);
   if (!doContinue)
     return false;
   Expression leftE, rightE;
@@ -1567,9 +1567,9 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketJacobiIdentityIfNeeded
   leftE.MakeXOX(theCommands, theCommands.opLieBracket(), input[2][1], lieBracket);
   lieBracket.MakeXOX(theCommands, theCommands.opLieBracket(), input[1],input[2][1]);
   rightE.MakeXOX(theCommands, theCommands.opLieBracket(), input[2][2], lieBracket);
-  leftE=theCommands.EMOne()*leftE;
-  rightE=theCommands.EMOne()*rightE;
-  output=leftE+rightE;
+  leftE = theCommands.EMOne() * leftE;
+  rightE = theCommands.EMOne() * rightE;
+  output = leftE + rightE;
   return true;
 }
 
@@ -1580,13 +1580,13 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketSwapTermsIfNeeded
     return false;
   if (input[1].IsEqualToZero() || input[2].IsEqualToZero())
     return output.AssignValue(0, theCommands);
-  if (input[2]>input[1])
+  if (input[2] > input[1])
     return false;
-  if (input[1]==input[2])
+  if (input[1] == input[2])
     return output.AssignValue(0, theCommands);
   Expression theBracket;
   theBracket.MakeXOX(theCommands, theCommands.opLieBracket(), input[2], input[1]);
-  output=theCommands.EMOne()*theBracket;
+  output = theCommands.EMOne() * theBracket;
   return true;
 }
 
@@ -1597,10 +1597,10 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(C
   Expression inputConverted;
   if (!input.MergeContextsMyAruments(inputConverted, 0))
     return false;
-  const Expression& leftE=inputConverted[1];
-  const Expression& rightE=inputConverted[2];
-  bool leftEisGood =leftE.IsOfType<Rational>()  || leftE.IsOfType<Polynomial<Rational> >()  || leftE.IsOfType<ElementWeylAlgebra<Rational> >();
-  bool rightEisGood=rightE.IsOfType<Rational>() || rightE.IsOfType<Polynomial<Rational> >() || rightE.IsOfType<ElementWeylAlgebra<Rational> >();
+  const Expression& leftE = inputConverted[1];
+  const Expression& rightE = inputConverted[2];
+  bool leftEisGood = leftE.IsOfType<Rational>()   || leftE.IsOfType<Polynomial<Rational> >()  || leftE.IsOfType<ElementWeylAlgebra<Rational> >();
+  bool rightEisGood = rightE.IsOfType<Rational>() || rightE.IsOfType<Polynomial<Rational> >() || rightE.IsOfType<ElementWeylAlgebra<Rational> >();
   if (!leftEisGood || !rightEisGood)
     return false;
   if (!leftE.IsOfType<ElementWeylAlgebra<Rational> >() && !rightE.IsOfType<ElementWeylAlgebra<Rational> >())
@@ -1610,7 +1610,7 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(C
   { theCommands << "<hr>Failed with conversion to Element weyl algebra - possible programming error?";
     return false;
   }
-  ElementWeylAlgebra<Rational> resultE=rightConverted.GetValue<ElementWeylAlgebra<Rational> >();
+  ElementWeylAlgebra<Rational> resultE = rightConverted.GetValue<ElementWeylAlgebra<Rational> >();
   resultE.LieBracketOnTheLeft(leftConverted.GetValue<ElementWeylAlgebra<Rational> >());
   return output.AssignValueWithContext(resultE, leftConverted.GetContext(), theCommands);
 }
@@ -1620,25 +1620,25 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix");
   if (!input.StartsWith(theCommands.opPlus(), 3))
     return false;
-  const Expression& leftE =input[1];
-  const Expression& rightE=input[2];
-  int leftNumRows=-1, leftNumCols=-1, rightNumRows=-1, rightNumCols=-1;
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
+  int leftNumRows = - 1, leftNumCols = - 1, rightNumRows = - 1, rightNumCols = - 1;
   //stOutput << "DEBUG: Got to here 0";
   if (!leftE.IsMatrix(&leftNumRows, &leftNumCols) ||
       !rightE.IsMatrix(&rightNumRows, &rightNumCols))
     return false;
-  if ((leftNumRows!=rightNumRows) || (leftNumCols!=rightNumCols))
+  if ((leftNumRows != rightNumRows) || (leftNumCols != rightNumCols))
     return false;
   Matrix<Expression> leftMat, rightMat;
   //stOutput << "DEBUG: Got to here";
   if (!theCommands.GetMatrixExpressions(leftE, leftMat) ||
       !theCommands.GetMatrixExpressions(rightE, rightMat))
     return false;
-  if (leftMat.NumCols!=rightMat.NumCols || leftMat.NumRows!=rightMat.NumRows)
+  if (leftMat.NumCols != rightMat.NumCols || leftMat.NumRows != rightMat.NumRows)
     return false;
-  for (int i=0; i<leftMat.NumRows; i++)
-    for (int j=0; j<leftMat.NumCols; j++)
-      leftMat(i,j)+=rightMat(i,j);
+  for (int i = 0; i < leftMat.NumRows; i ++)
+    for (int j = 0; j < leftMat.NumCols; j ++)
+      leftMat(i, j) += rightMat(i, j);
   return output.AssignMatrixExpressions(leftMat, theCommands, false);
 }
 
@@ -1647,8 +1647,8 @@ bool CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix");
   if (!input.StartsWith(theCommands.opDirectSum(), 3))
     return false;
-  const Expression& leftE =input[1];
-  const Expression& rightE=input[2];
+  const Expression& leftE = input[1];
+  const Expression& rightE = input[2];
   if (!leftE.IsMatrix() || !rightE.IsMatrix())
     return false;
   Matrix<Expression> leftMat, rightMat;
@@ -1664,8 +1664,8 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddMatrixRationalToMatrixRational");
   if (!input.IsListNElements(3))
     return false;
-  Expression leftE=input[1];
-  Expression rightE=input[2];
+  Expression leftE = input[1];
+  Expression rightE = input[2];
   if (!rightE.IsMatrixGivenType<Rational>()|| !leftE.IsMatrixGivenType<Rational>())
   { if (rightE.IsMatrixGivenType<AlgebraicNumber>())
       MathRoutines::swap(leftE, rightE);
@@ -1676,10 +1676,10 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
       leftE.IsMatrixGivenType(0, 0, &leftMat);
       Matrix<AlgebraicNumber> rightMat;
       rightE.IsMatrixGivenType(0, 0, &rightMat);
-      if (rightMat.NumRows!=leftMat.NumRows || rightMat.NumCols!=leftMat.NumCols)
+      if (rightMat.NumRows != leftMat.NumRows || rightMat.NumCols != leftMat.NumCols)
         return false;
-      Matrix<AlgebraicNumber> result=leftMat;
-      result+=rightMat;
+      Matrix<AlgebraicNumber> result = leftMat;
+      result += rightMat;
       return output.AssignMatrix(result, theCommands);
     }
     if (rightE.IsMatrixGivenType<AlgebraicNumber>())
@@ -1687,10 +1687,10 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
       rightE.IsMatrixGivenType(0, 0, &rightMat);
       Matrix<AlgebraicNumber> leftMat;
       leftE.IsMatrixGivenType(0, 0, &leftMat);
-      if (rightMat.NumRows!=leftMat.NumRows || rightMat.NumCols!=leftMat.NumCols)
+      if (rightMat.NumRows != leftMat.NumRows || rightMat.NumCols != leftMat.NumCols)
         return false;
-      Matrix<AlgebraicNumber> result=leftMat;
-      result+=rightMat;
+      Matrix<AlgebraicNumber> result = leftMat;
+      result += rightMat;
       return output.AssignMatrix(result, theCommands);
     }
     return false;
@@ -1699,14 +1699,14 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixRationalOrAlgebraicToMatrixRati
   rightE.IsMatrixGivenType(0, 0, &rightMat);
   Matrix<Rational> leftMat;
   leftE.IsMatrixGivenType(0, 0, &leftMat);
-  if (rightMat.NumRows!=leftMat.NumRows || rightMat.NumCols!=leftMat.NumCols)
+  if (rightMat.NumRows != leftMat.NumRows || rightMat.NumCols != leftMat.NumCols)
   { std::stringstream errorStream;
     errorStream << "Error: attempting to add a " << rightMat.NumRows << " x " << rightMat.NumCols << " matrix to a "
     << leftMat.NumRows << " x " << leftMat.NumCols << " matrix. ";
     return output.MakeError(errorStream.str(), theCommands, true);
   }
-  Matrix<Rational> result=leftMat;
-  result+=rightMat;
+  Matrix<Rational> result = leftMat;
+  result += rightMat;
   return output.AssignMatrix(result, theCommands);
 }
 

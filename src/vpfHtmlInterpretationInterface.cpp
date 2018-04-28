@@ -830,12 +830,16 @@ std::string HtmlInterpretation::GetExamPageJSON()
   JSData output;
   output["problem"] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
   if (theFile.flagLoadedSuccessfully)
-  { //output["scripts"] = HtmlRoutines::ConvertStringToURLString(theFile.outputHtmlHeadNoTag, false);
-    output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
+  { output["answers"] = theFile.GetJavascriptMathQuillBoxesForJSON();
     output["deadline"] = theFile.outputDeadlineString;
     output["problemLabel"] = theFile.outputProblemLabel;
     output["title"] = theFile.outputProblemTitle;
-
+    JSData theScripts;
+    theScripts.list.SetSize(theFile.theScripts.size());
+    for (int i = 0; i < theFile.theScripts.size(); i ++)
+      theScripts[theFile.theScripts.theKeys[i]] =
+      HtmlRoutines::ConvertStringToURLString(theFile.theScripts.theValues[i], false);
+    output["scripts"] = theScripts;
     output["forReal"] = theFile.flagIsForReal;
     if (!theFile.flagIsForReal)
     { std::stringstream randomSeedStream;

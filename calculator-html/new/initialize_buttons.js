@@ -407,6 +407,7 @@ InputPanelData.prototype.submitGiveUp = function() {
 
 InputPanelData.prototype.submitPreview = function() {
   var theRequest = "";
+  var currentProblem = thePage.pages.problemPage.problems[this.fileName];
   if (currentProblem.flagForReal) {
     theRequest = "submitProblemPreview";
   } else {

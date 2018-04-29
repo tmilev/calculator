@@ -17,6 +17,7 @@ function Problem (inputFileName){
   this.flagForReal = true;
   this.previousProblem = null;
   this.nextProblem = null;
+  this.scriptIds = null;
 
 //  thePage.pages.problemPage.problems[this.fileName] = this;
 }
@@ -105,7 +106,7 @@ Problem.prototype.writeToHTML = function(outputElement) {
   topPart += `<problemTitle>${this.problemLabel} ${this.title}</problemTitle>`;
   topPart += this.getProblemNavigation();
   topPart += "<br>";
-  outputElement.innerHTML = topPart + this.decodedProblem + this.scripts;
+  outputElement.innerHTML = topPart + this.decodedProblem;
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {
     var currentAnswerPanel = this.answers[counterAnswers];
     var latexChangeHandler = currentAnswerPanel.editLaTeX;
@@ -188,11 +189,12 @@ function updateProblemPageCallback(input, outputComponent) {
     });
   }
   currentProblem.writeToHTML("divProblemPageContentContainer");
-  currentProblem.scripts = [];
-  for (var script in theProblem.scripts){
-    var newLabel = encodeURIComponent(theFileName + script);
-    currentProblem.scripts.push(newLabel); 
-    thePage.injectScript(newLabel, decodeURIComponent(theProblem.scripts[script]));
+
+  currentProblem.scriptIds = [];
+  for (var scriptLabel in theProblem.scripts){
+    var newLabel = encodeURIComponent(theFileName + scriptLabel);
+    currentProblem.scriptIds.push(newLabel); 
+    thePage.injectScript(newLabel, decodeURIComponent(theProblem.scripts[scriptLabel]));
   }
 }
 

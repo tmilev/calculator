@@ -213,12 +213,7 @@ function defaultOnLoadInjectScriptsAndProcessLaTeX(idElement){
   for (var i = 0; i < incomingScripts.length; i ++) { 
     var newId = `calculatorMainPageId_${i}`;
     thePage.pages.calculator.sciptIds.push(newId);
-    var scriptChild = document.createElement('script');
-    scriptChild.setAttribute('id', newId)
-    scriptChild.innerHTML = incomingScripts[i].innerHTML;
-    scriptChild.type = 'text/javascript';
-    document.getElementsByTagName('head')[0].appendChild(scriptChild);
-    numInsertedJavascriptChildren ++;
+    thePage.injectScript(newId, incomingScripts[i].innerHTML);
   }
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById(idElement)]);
   MathJax.Hub.Queue([calculatorAddListenersToInputBoxes]);
@@ -233,26 +228,33 @@ function Script() {
 
 Page.prototype.removeOneScript = function(scriptId) {
   var theScript = document.getElementById(scriptId);
+  if (theScript === null){
+    return;
+  }
   var parent = theScript.parentNode;
   parent.removeChild(theScript);
 }
 
 Page.prototype.removeScripts = function(scriptIds) {
   for (var counter = 0; counter < scriptIds.length; counter ++) {
-    this.removeOneScript(sciptId);
+    this.removeOneScript(scriptIds[counter]);
   }
 }
 
-Page.prototype.injectScript = function(sciptId, scriptContent) {
+Page.prototype.injectScript = function(scriptId, scriptContent) {
+  this.removeOneScript(scriptId);
   if (scriptContent !== undefined && scriptContent !== null) {
-    this.scriptsInjected[sciptId] = new Script();
-    var theScript = this.scriptsInjected[sciptId];
+    this.scriptsInjected[scriptId] = new Script();
+    var theScript = this.scriptsInjected[scriptId];
     theScript.id = scriptId;
     theScript.content = scriptContent;
   }
-  var theScript = this.scriptsInjected[sciptId];
-
-  
+  var theScript = this.scriptsInjected[scriptId];
+  var scriptChild = document.createElement('script');
+  scriptChild.setAttribute('id', scriptId)
+  scriptChild.innerHTML = theScript.content;
+  scriptChild.type = 'text/javascript';
+  document.getElementsByTagName('head')[0].appendChild(scriptChild);
 }
 
 Page.prototype.selectPage = function(inputPage) {

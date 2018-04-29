@@ -81,6 +81,7 @@ function afterLoadTopics(incomingTopics, result) {
   if (topicsElements.length === 0) {
     return;
   }
+  previousProblem = null;
   var stringHTMLContent = "";
   try {
     thePage.theTopics = JSON.parse(incomingTopics);
@@ -90,6 +91,7 @@ function afterLoadTopics(incomingTopics, result) {
   }
   stringHTMLContent += "<hr>" + incomingTopics;
   topicsElements[0].innerHTML = stringHTMLContent;
+  previousProblem = null;
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, topicsElements[0]]);
 }
 
@@ -116,7 +118,7 @@ function afterLoadCoursePage(incomingPage, result) {
 function selectCurrentCoursePage() {
   //console.log("DEBUG: topic list cookie @ selectCurrentCoursePage: " + getCookie("topicList"));
   var theRequest = "templateJSONNoLogin";
-  if (thePage.flagUserLoggedIn){
+  if (thePage.flagUserLoggedIn) {
     theRequest = "templateJSON";
   }
   submitGET({

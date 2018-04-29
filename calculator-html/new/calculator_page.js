@@ -7,7 +7,6 @@ var calculatorRightPosition = 0;
 var calculatorPlotUpdaters = {};
 var calculatorInputBoxToSliderUpdaters = {};
 var calculatorInputBoxNames = [];
-var numInsertedJavascriptChildren = 0;
 var startingCharacterSectionUnderMathQuillEdit;
 var calculatorCanvases;
 var keyWordsKnownToMathQuill = ['sqrt', 'frac', 'cdot', 'left', 'right', 'infty', 'otimes', 'times', 'oplus', 'pmatrix','int', 'begin', 'end'];
@@ -48,7 +47,7 @@ function calculatorAddListenersToInputBoxes(){
   }
 }
 
-function updateCalculatorSliderToInputBox(boxName, sliderName){ 
+function updateCalculatorSliderToInputBox(boxName, sliderName) { 
   var theBoxes = document.getElementsByName(boxName);
   var theSlider = document.getElementById(sliderName);
   for (var i = 0; i < theBoxes.length; i ++) {
@@ -64,7 +63,7 @@ function updateCalculatorSliderToInputBox(boxName, sliderName){
   }
 }
 
-function createSelection(field, start, end){ 
+function createSelection(field, start, end) { 
   if (field.createTextRange) { 
     var selRange = field.createTextRange();
     selRange.collapse(true);
@@ -82,7 +81,7 @@ function createSelection(field, start, end){
   }
 }
 
-function exampleCalculatorClick(theLink){
+function exampleCalculatorClick(theLink) {
   var theAtom = decodeURIComponent(theLink.atom);
   var theIndex = theLink.index;
   var isComposite = theLink.composite;
@@ -100,36 +99,26 @@ function exampleCalculatorClick(theLink){
   submitCalculatorComputation();
 }
 
-function processOneFunctionAtom(handlers, isComposite){
+function processOneFunctionAtom(handlers, isComposite) {
   var resultString = "";
-  for (var counterHandlers = 0; counterHandlers < handlers.length; counterHandlers ++){
+  for (var counterHandlers = 0; counterHandlers < handlers.length; counterHandlers ++) {
     resultString += "<br>";
     var currentDescription = handlers[counterHandlers].description;
     var currentExample = handlers[counterHandlers].example;
-    resultString += "<calculatorAtom>" + handlers[counterHandlers].atom + "</calculatorAtom>";
+    resultString += `<calculatorAtom>${handlers[counterHandlers].atom}</calculatorAtom>`;
     resultString += "<calculatorCompositeAtom>(composite)</calculatorCompositeAtom>";
-    resultString += " (" + (counterHandlers + 1) + " out of " + handlers.length + ")";
+    resultString += ` (${counterHandlers + 1} out of ${handlers.length})`;
     var currentId = "example_";
-    if (isComposite){
+    if (isComposite) {
       currentId += "t_";
     } else {
       currentId += "f_";
     }
     var encodedAtom = encodeURIComponent(handlers[counterHandlers].atom);
-    currentId += encodedAtom + "_" +
-    counterHandlers + "_" + handlers.length;
-    resultString += "<a href=\"#\" class=\"linkInfo\" " +
-    "onclick=\"switchMenu('" + currentId + "')\">info</a>";
-    resultString += "<calculatorExampleInfo id=\"" + currentId +
-    "\" class=\"hiddenClass\">" + currentDescription +
-    "<br><b>Example:</b><br>" + currentExample + "</calculatorExampleInfo>";
-    resultString += "<a href=\"#\" class=\"linkInfo\" " +
-    "onclick=\"" +
-    "this.composite=" + isComposite +  ";" +
-    "this.index=" + counterHandlers + "; "+
-    "this.atom='" + encodedAtom + "'; "+
-    " exampleCalculatorClick(this);\"" +
-    "> Example</a>";
+    currentId += `${encodedAtom}_${counterHandlers}_${handlers.length}`;
+    resultString += `<a href='#' class='linkInfo' onclick="switchMenu('${currentId}')">info</a>`;
+    resultString += `<calculatorExampleInfo id="${currentId}" class="hiddenClass">${currentDescription}<br><b>Example:</b><br>${currentExample}</calculatorExampleInfo>`;
+    resultString += `<a href="#" class="linkInfo" onclick="this.composite=${isComposite}; this.index=${counterHandlers}; this.atom='${encodedAtom}'; exampleCalculatorClick(this);"> Example</a>`;
     //resultString += currentExample;
     //console.log(handlers[counterHandlers]);
   }
@@ -138,28 +127,28 @@ function processOneFunctionAtom(handlers, isComposite){
 
 var theCalculatorExamples;
 
-function processExamples(inputJSONtext){
+function processExamples(inputJSONtext) {
   try {
     theCalculatorExamples = JSON.parse(inputJSONtext);
     var examplesString = "";
     var atomsSorted = Object.keys(theCalculatorExamples).slice().sort();
     var numHandlers = 0;
-    for (var counterAtoms = 0; counterAtoms < atomsSorted.length; counterAtoms ++){
+    for (var counterAtoms = 0; counterAtoms < atomsSorted.length; counterAtoms ++) {
       var atom = atomsSorted[counterAtoms];
       examplesString += processOneFunctionAtom(theCalculatorExamples[atom].regular, false);
       examplesString += processOneFunctionAtom(theCalculatorExamples[atom].composite, false);
       numHandlers += theCalculatorExamples[atom].regular.length + theCalculatorExamples[atom].composite.length;
     }
-    var resultString = "" + atomsSorted.length + " built-in atoms, " + numHandlers + " handlers. ";
+    var resultString = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
     resultString += examplesString;
     document.getElementById("divCalculatorExamples").innerHTML = resultString;
   } catch (e) {
-    console.log("Bad json: " + e + "\n Input JSON follows." );
+    console.log(`Bad json: ${e}\n Input JSON follows.`);
     console.log(inputJSONtext);
   }
 }
 
-function toggleCalculatorExamples(theButton){
+function toggleCalculatorExamples(theButton) {
   var theExamples = document.getElementById('divCalculatorExamples');
   if (theExamples.innerHTML.length < 300) {
     submitGET({

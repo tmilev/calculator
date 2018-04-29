@@ -834,7 +834,7 @@ std::string HtmlInterpretation::GetExamPageJSON()
     output["deadline"] = theFile.outputDeadlineString;
     output["problemLabel"] = theFile.outputProblemLabel;
     output["title"] = theFile.outputProblemTitle;
-    JSData theScripts;
+    JSData theScripts(JSData::JSarray);
     theScripts.list.SetSize(theFile.theScripts.size());
     for (int i = 0; i < theFile.theScripts.size(); i ++)
       theScripts[theFile.theScripts.theKeys[i]] =

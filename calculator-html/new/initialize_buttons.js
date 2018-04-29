@@ -327,7 +327,6 @@ function InputPanelData(input){
   this.theLaTeXString = null;
   this.selectionEnd = 0;
   this.javascriptInsertionAlreadyCalled = false;
-  this.numInsertedJavascriptChildren = 0;
   this.timerForPreviewAnswers = 0;
 
   if (this.flagCalculatorPanel === undefined){

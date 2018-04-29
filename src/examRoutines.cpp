@@ -382,7 +382,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
 bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, const std::string& inputRandomSeed)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadMe");
   if (!FileOperations::GetPhysicalFileNameFromVirtualCustomizedReadOnly
-      (this->fileName, this->RelativePhysicalFileNameWithFolder, &comments))
+       (this->fileName, this->RelativePhysicalFileNameWithFolder, &comments))
   { comments << "Failed to get physical file name from " << this->fileName << ". ";
     return false;
   }

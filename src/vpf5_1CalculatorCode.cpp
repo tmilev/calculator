@@ -1474,7 +1474,6 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     out << "<span id=\"" << this->canvasName << "Messages\"></span>";
   }
   std::stringstream outScript;
-  outScript << "<script language=\"javascript\">\n";
   std::string canvasFunctionName = "functionMake" + this->canvasName;
   outScript << "function " << canvasFunctionName << "()\n"
   << "{ ";
@@ -1602,11 +1601,9 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   << "calculatorGetCanvasTwoD(document.getElementById('"
   << this->canvasName
   << "')).canvasResetFunction=" << canvasFunctionName << ";\n"
-  << canvasFunctionName << "();\n"
-  << "</script>";
+  << canvasFunctionName << "();\n";
   owner.theObjectContainer.graphicsScripts.SetKeyValue(this->canvasName, outScript.str());
-
-  out << outScript.str();
+  out << "<script language=\"javascript\">\n" << outScript.str() << "</script>";
   return out.str();
 }
 

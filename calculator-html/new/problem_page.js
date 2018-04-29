@@ -74,29 +74,23 @@ Problem.prototype.getProblemNavigation = function() {
     defaultRequest = 'exerciseNoLoginJSON';
   }
   if (this.previousProblem !== null && this.previousProblem !== "") {
-    result+= `<a class='problemLinkPractice' href='#${thePage.getProblem(this.previousProblem).getURLRequestFileCourseTopics()}' 
-onclick = "selectCurrentProblem('${this.previousProblem}' ,'${defaultRequest}')">&#8592;</a>`;
+    result+= `<a class='problemLinkPractice' href='#${thePage.getProblem(this.previousProblem).getURLRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.previousProblem}' ,'${defaultRequest}')">&#8592;</a>`;
   }
 
   if (this.flagForReal && thePage.flagUserLoggedIn) {
-    result += 
-`<a class='problemLinkPractice' href='${this.getURL()}' 
-onclick = "selectCurrentProblem('${this.fileName}' ,'exerciseJSON')">Practice</a>`;
+    result += `<a class='problemLinkPractice' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.fileName}' ,'exerciseJSON')">Practice</a>`;
   } else {
     result += "<b style='color:green'>Practice</b>";
   }
   if (!this.flagForReal && thePage.flagUserLoggedIn) { 
-    result += 
-`<a class='problemLinkPractice' href='${this.getURL()}' 
-onclick = "selectCurrentProblem('${this.fileName}' ,'scoredQuizJSON')">Quiz</a>`;
+    result += `<a class='problemLinkPractice' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.fileName}' ,'scoredQuizJSON')">Quiz</a>`;
   } else {
     if (this.flagForReal) {
       result += "<b style='color:brown'>Quiz</b>";
     }
   }
   if (this.nextProblem !== null && this.nextProblem !== "") {
-    result+= `<a class='problemLinkPractice' href='#${thePage.getProblem(this.nextProblem).getURLRequestFileCourseTopics()}' 
-onclick = "selectCurrentProblem('${this.nextProblem}' ,'${defaultRequest}')">&#8594;</a>`;
+    result+= `<a class='problemLinkPractice' href='#${thePage.getProblem(this.nextProblem).getURLRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.nextProblem}' ,'${defaultRequest}')">&#8594;</a>`;
   }
 
   result += "</problemNavigation>";
@@ -151,16 +145,24 @@ Problem.prototype.writeToHTML = function(outputElement) {
 
 function updateProblemPageCallback(input, outputComponent) {
   var theFileName = thePage.currentCourse.fileName;
-  var currentProblem = thePage.getProblem(theFileName);
-  var theProblem = JSON.parse(input);
-
-  currentProblem.decodedProblem = decodeURIComponent(theProblem["problem"]);
-  currentProblem.scripts = [];
-  for (var script in theProblem.scripts){
-    var newLabel = encodeURIComponent(theFileName + script);
-    currentProblem.scripts.push(newLabel); 
-    thePage.injectScript(newLabel, decodeURIComponent(theProblem.scripts[script]));
+  if (typeof outputComponent === "string") {
+    outputComponent = document.getElementById(outputComponent);
   }
+  if (outputComponent === null || outputComponent === undefined){
+    outputComponent = document.getElementById("divProblemPageContentContainer");
+  }
+  if (outputComponent.innerHTML === undefined){
+    outputComponent = document.getElementById("divProblemPageContentContainer");
+  }
+  var currentProblem = thePage.getProblem(theFileName);
+  var theProblem = null;
+  try {
+    theProblem = JSON.parse(input);
+  } catch (e) {
+    outputComponent.innerHTML = `Error parsing: ${e}. Failed to parse${input}`;
+    return;
+  }
+  currentProblem.decodedProblem = decodeURIComponent(theProblem["problem"]);
   //var theScripts = currentProblem.scripts.split ("</script>");
   //for (var counterScripts = 0; counterScripts < theScripts.length; counterScripts++){
   //  console.log(`Scripts: ${theScripts[counterScripts]}`);
@@ -186,6 +188,12 @@ function updateProblemPageCallback(input, outputComponent) {
     });
   }
   currentProblem.writeToHTML("divProblemPageContentContainer");
+  currentProblem.scripts = [];
+  for (var script in theProblem.scripts){
+    var newLabel = encodeURIComponent(theFileName + script);
+    currentProblem.scripts.push(newLabel); 
+    thePage.injectScript(newLabel, decodeURIComponent(theProblem.scripts[script]));
+  }
 }
 
 function updateProblemPage() {

@@ -1,6 +1,6 @@
 "use strict";
 
-function selectCourse(courseIndex){
+function selectCourse(courseIndex) {
   var theCourse = thePage.theCourses[courseIndex];
   thePage.currentCourse.courseHome = theCourse.courseHome;
   thePage.currentCourse.topicList = theCourse.topicList;
@@ -10,7 +10,7 @@ function selectCourse(courseIndex){
   thePage.selectPage("currentCourse");
 }
 
-function afterLoadSelectCoursePage(incomingPage, result){
+function afterLoadSelectCoursePage(incomingPage, result) {
   var resultString = "";
   try {
     thePage.theCourses = JSON.parse(incomingPage)["courses"];
@@ -30,7 +30,7 @@ function afterLoadSelectCoursePage(incomingPage, result){
   }
 }
 
-function selectSelectCoursePage(){
+function selectSelectCoursePage() {
   submitGET({
     url: `${pathnames.calculatorAPI}?request=selectCourseJSON`,
     callback: afterLoadSelectCoursePage,

@@ -58,7 +58,7 @@ function recordResult(resultText, resultSpan){
  *   but otherwise non-processed final result.
  *   Pass null or undefined if you don't want to show the result.
  */
-function submitGET(inputObject){
+function submitGET(inputObject) {
   var theAddress = inputObject.url;
   if (theAddress === undefined || theAddress === null) {
     theAddress = `${globalVars.serverInfo.imappServer}${inputObject.service}`;
@@ -82,9 +82,9 @@ function submitGET(inputObject){
 
 var GlobalSubmitStringAsMainInputCounter = 0;
 
-function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus){ 
+function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus) {
   var spanOutput = document.getElementById(idOutput);
-  if (spanOutput === null){ 
+  if (spanOutput === null) {
     spanOutput = document.createElement('span');
     document.body.appendChild(spanOutput);
     spanOutput.innerHTML = `<span style='color:red'> ERROR: span with id ${idOutput} MISSING! </span>`;
@@ -107,7 +107,7 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   "<span style='display:none' id='" + addressDetailsIndicatorID + "'>" + postRequest + "</span>";
   var buttonHandle = document.getElementById(tranmissionIndicatorID);
   var lastRequestCounter = GlobalSubmitStringAsMainInputCounter;
-  https.onload = function(){ 
+  https.onload = function() { 
     if (lastRequestCounter !== GlobalSubmitStringAsMainInputCounter) { 
       statusSpan.innerHTML += "<br><span style='color:red'><b>Old request number " + lastRequestCounter + " just received, output suppressed.</b></span>"
       return;
@@ -213,7 +213,9 @@ function submitCalculatorInputOnEnter(){
 function submitCalculatorComputation(){ 
   submitStringAsMainInput(
     document.getElementById('mainInputID').value,
-    'calculatorOutput', 'compute', defaultOnLoadInjectScriptsAndProcessLaTeX,
+    'calculatorOutput', 
+    'compute', 
+    defaultOnLoadInjectScriptsAndProcessLaTeX,
     'mainComputationStatus'
   );
 }

@@ -1,6 +1,6 @@
 "use srict";
 
-function recordProgressDone(progress){
+function recordProgressDone(progress) {
   if (progress === null || progress === undefined) {
     return;
   }
@@ -11,7 +11,7 @@ function recordProgressDone(progress){
   theButton.innerHTML = "<b style='color:green'>Received</b>";
 }
 
-function recordProgressStarted(progress, address){
+function recordProgressStarted(progress, address) {
   if (progress === null || progress === undefined) {
     return;
   }
@@ -23,7 +23,7 @@ function recordProgressStarted(progress, address){
   <b style="color:orange">Sent</b></button><br><span class="spanProgressReport" style="display:none">${address}</span>`;
 }
 
-function recordResult(resultText, resultSpan){
+function recordResult(resultText, resultSpan) {
   if (resultSpan === null || resultSpan === undefined) {
     return;
   }
@@ -124,7 +124,7 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   ////////////////////////////////////////////
 }
 
-function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus){
+function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
   var inputParams='';
   inputParams += 'request=' + requestType + '&';
   inputParams += '&mainInput=' + encodeURIComponent(theString);
@@ -154,13 +154,13 @@ function progressReport(){
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   https.onload = function() {
     newReportString= https.responseText;
-    if (https.responseText === "finished")
-    { isFinished = true;
+    if (https.responseText === "finished") { 
+      isFinished = true;
       requestStatus.innerHTML = "<span style='color:green'><b>Computation finished.</b></span>";
       return;
     }
-    if (https.responseText !== "")
-    { progReport.innerHTML = newReportString + "<hr>";
+    if (https.responseText !== "") { 
+      progReport.innerHTML = newReportString + "<hr>";
       requestStatus.innerHTML = '';
     } else
       requestStatus.innerHTML = "<span style='color:red'><b>Empty response</b></span>";
@@ -204,8 +204,9 @@ function SendTogglePauseRequest(){
 }
 
 function submitCalculatorInputOnEnter(){ 
-  if (event.keyCode !== 13 || !(event.shiftKey))
+  if (event.keyCode !== 13 || !(event.shiftKey)) {
     return;
+  }
   submitCalculatorComputation();
   event.preventDefault();
 }

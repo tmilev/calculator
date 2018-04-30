@@ -41,6 +41,8 @@ public:
   std::string videoHandwritten;
   std::string slidesProjector;
   std::string handwrittenSolution;
+  std::string linkSlidesTex;
+  std::string linkHomeworkTex;
   List<std::string> sourceSlides;
   List<std::string> sourceHomework;
   List<bool> sourceHomeworkIsSolution;

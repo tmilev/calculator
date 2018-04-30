@@ -4403,8 +4403,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
       << "Lecture "
       << owner.topicLectureCounter
       << "."
-      << titleWithLectureNumber.substr(lectureTagFinish)
-      ;
+      << titleWithLectureNumber.substr(lectureTagFinish);
       this->flagHasLectureTag = true;
       titleWithLectureNumber = newTitle.str();
     }
@@ -4433,7 +4432,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   { std::stringstream
     slideFromSourceStreamHandout, slideFromSourceStreamProjector,
     homeworkFromSourceStreamNoAnswerKey, homeworkFromSourceStreamAnswerKey,
-    sourceStreamSlides, sourceStreamHomework,
+    sourceStreamSlides, sourceStreamSlidesLink, sourceStreamHomework,
     sourceStreamSlidesCommon, sourceStreamHomeworkCommon;
 
     slideFromSourceStreamHandout << "<a href=\""
@@ -4443,17 +4442,11 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     << theGlobalVariables.DisplayNameExecutable
     << "?request=homeworkFromSource&";
 
-    sourceStreamSlides << "<a href=\""
-    << theGlobalVariables.DisplayNameExecutable
-    << "?request=slidesSource&";
-    sourceStreamHomework << "<a href=\""
-    << theGlobalVariables.DisplayNameExecutable
-    << "?request=homeworkSource&";
+    sourceStreamSlidesLink << theGlobalVariables.DisplayNameExecutable << "?request=slidesSource&";
+    sourceStreamHomework << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=homeworkSource&";
 
-    sourceStreamSlidesCommon << "title="
-    << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
-    sourceStreamHomeworkCommon << "title="
-    << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
+    sourceStreamSlidesCommon << "title=" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
+    sourceStreamHomeworkCommon << "title=" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
 
     /////////
     int sourceSlidesCounter = 0;
@@ -4497,7 +4490,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     homeworkFromSourceStreamNoAnswerKey << sourceStreamHomeworkCommon.str();
     homeworkFromSourceStreamAnswerKey << homeworkFromSourceStreamNoAnswerKey.str();
 
-    sourceStreamSlides << sourceStreamSlidesCommon.str();
+    sourceStreamSlidesLink << sourceStreamSlidesCommon.str();
     sourceStreamHomework << sourceStreamHomeworkCommon.str();
 
     slideFromSourceStreamHandout << "layout=printable&";
@@ -4509,31 +4502,30 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
 
     slideFromSourceStreamProjector << "layout=projector&";
     slideFromSourceStreamProjector << "\" class=\"slidesLink\" target=\"_blank\">Slides</a>";
-    sourceStreamSlides << "layout=printable&"
-    << "\" class=\"slidesLink\" download=\""
+
+    sourceStreamSlidesLink << "layout=printable&";
+    this->linkSlidesTex = sourceStreamSlidesLink.str();
+    sourceStreamSlides << "<a href=\""
+    << this->linkSlidesTex
+    << "\" "
+    << "class=\"slidesLink\" download=\""
     << FileOperations::ConvertStringToLatexFileName(this->title)
     << ".tex\">.tex</a>";
+
     sourceStreamHomework << "answerKey=true&"
     << "\" class=\"slidesLink\" download=\""
     << FileOperations::ConvertStringToLatexFileName(this->title)
     << ".tex\">.tex</a>";
+
     this->displaySlidesLink = "";
     if (this->sourceSlides.size > 0)
-    { this->displaySlidesLink +=
-      slideFromSourceStreamHandout.str() +
-      slideFromSourceStreamProjector.str() +
-      sourceStreamSlides.str();
-    }
+      this->displaySlidesLink += slideFromSourceStreamHandout.str() + slideFromSourceStreamProjector.str() + sourceStreamSlides.str();
     if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn())
       this->displaySlidesLink += "<a class=\"slidesLink\" style=\"color:gray; display:none\" href=\"" +
       theGlobalVariables.DisplayNameExecutable +
       "?request=modifySlide&topicID=" + this->id + "\">Modify</a>";
     if (this->sourceHomework.size > 0)
-    { this->displaySlidesLink +=
-      homeworkFromSourceStreamAnswerKey.str() +
-      homeworkFromSourceStreamNoAnswerKey.str() +
-      sourceStreamHomework.str();
-    }
+      this->displaySlidesLink += homeworkFromSourceStreamAnswerKey.str() + homeworkFromSourceStreamNoAnswerKey.str() + sourceStreamHomework.str();
   }
   bool problemSolved = false;
   bool returnEmptyStringIfNoDeadline = false;
@@ -4567,10 +4559,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   { if (this->displayDeadlinE == "")
       this->displayDeadlinE += "Deadline";
     owner.ComputeDeadlineModifyButton
-    (*this, problemSolved,
-     this->type == this->tSubSection ||
-     this->type == this->tSection ||
-     this->type == this->tChapter);
+    (*this, problemSolved, this->type == this->tSubSection || this->type == this->tSection || this->type == this->tChapter);
     //std::stringstream titleAndDeadlineStream;
     //titleAndDeadlineStream
     //<< "<span class=\"deadlineAndTitleContainer\">"
@@ -4614,6 +4603,13 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
   }
   output["title"] = this->title;
   output["problemNumberString"] = this->problemNumberString;
+  output["video"] = this->video;
+  output["videoHandwritten"] = this->videoHandwritten;
+  output["slidesProjector"] = this->slidesProjector;
+  output["slidesPrintable"] = this->slidesPrintable;
+  output["linkSlidesLaTeX"]  = this->linkSlidesTex;
+  output["handwrittenSolution"]  = this->handwrittenSolution;
+
   output["problem"] = this->problem;
   switch (this->type)
   { case TopicElement::tChapter:

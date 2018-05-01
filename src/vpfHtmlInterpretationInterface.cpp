@@ -1581,6 +1581,11 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   return out.str();
 }
 
+std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAddressWithPort)
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageJSON");
+  return HtmlInterpretation::GetAccountsPageBody(hostWebAddressWithPort);
+}
+
 std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAddressWithPort)
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageBody");
   (void) hostWebAddressWithPort;
@@ -1869,7 +1874,7 @@ std::string HtmlInterpretation::ToStringAssignSection()
   << " + '&sections=' + "
   << "encodeURIComponent(document.getElementById('" << idExtraTextarea << "').value),"
   << "'" << idOutput << "',"
-  << " 'setTeacher', '" << idOutput << "'"
+  << " 'setTeacher', null, '" << idOutput << "'"
   << " )\"> Set teacher</button> ";
   out << "<br><span id=\"" << idOutput << "\">\n";
   out << "</span>";

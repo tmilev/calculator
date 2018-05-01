@@ -54,6 +54,12 @@ function Page(){
       menuButtonId: "buttonSelectAccount",
       container: null,
       selectFunction: updateAccountPage
+    },
+    accounts: {
+      id: "divAccounts",
+      menuButtonId: "buttonSelectAccounts",
+      container: null,
+      selectFunction: updateAccountsPage
     }
   }
   addCookie("useJSON", true, 300, false);

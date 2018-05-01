@@ -184,6 +184,7 @@ public:
   int ProcessDatabaseModifyEntry();
   int ProcessDatabaseOneEntry();
   int ProcessAccounts();
+  int ProcessAccountsJSON();
   int ProcessScores();
   int ProcessAbout();
   int ProcessApp(bool appendBuildHash);

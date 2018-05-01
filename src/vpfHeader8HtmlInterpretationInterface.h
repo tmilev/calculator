@@ -50,6 +50,7 @@ public:
   static std::string SubmitProblemPreview();
   static std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetAccountsPage(const std::string& hostWebAddressWithPort);
+  static std::string GetAccountsPageJSON(const std::string& hostWebAddressWithPort);
   static std::string GetAccountsPageBody(const std::string& hostWebAddressWithPort);
   static std::string ToStringAssignSection();
   static std::string ToStringUserDetails

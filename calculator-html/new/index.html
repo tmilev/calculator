@@ -27,6 +27,7 @@
 <script type = "text/javascript" src = "/calculator-html/new/database.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/server_status.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/account.js"> </script>
+<script type = "text/javascript" src = "/calculator-html/new/manage_accounts.js"> </script>
 <script type = "text/javascript">
 var globalMQ = MathQuill.getInterface(2);
 var MathQuillHasMatrixSupport = true;
@@ -189,6 +190,12 @@ ctrl+arrow = select</span>
   <button class = "buttonStandard" onclick = "submitChangePassRequest()">Change email</button>
 </div>
 
+<div id = "divAccounts" class = "divMainPage">
+  <div id = "idAccountsOutput">
+
+  </div>
+</div>
+
 <div id = "divServer" class = "divMainPage">
   <div id = "idServerStatus">
 
@@ -213,6 +220,7 @@ ctrl+arrow = select</span>
 <div class = "divAccountPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectAccount">Account</button></div>
 
 <div class = "divMenuSeparator divAdminPanel divInvisible">Admin</div>
+<div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectAccounts">Accounts</button></div>
 <div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectDatabase">Database</button></div>
 <div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectServer">Server</button></div>
 

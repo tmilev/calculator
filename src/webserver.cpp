@@ -3535,6 +3535,13 @@ int WebWorker::ProcessAccounts()
   return 0;
 }
 
+int WebWorker::ProcessAccountsJSON()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessAccountsJSON");
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::GetAccountsPageJSON(this->hostWithPort);
+  return 0;
+}
+
 int WebWorker::ProcessDatabaseJSON()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseJSON");
   this->SetHeaderOKNoContentLength();
@@ -4176,6 +4183,8 @@ int WebWorker::ServeClient()
     return this->ProcessDatabaseModifyEntry();
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accounts")
     return this->ProcessAccounts();
+  else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "accountsJSON")
+    return this->ProcessAccountsJSON();
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
            theGlobalVariables.userCalculatorRequestType == "navigation")
     return this->ProcessNavigation();

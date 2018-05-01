@@ -6104,6 +6104,8 @@ void GlobalVariables::ComputeConfigurationFlags()
     << "runServerOnEmptyCommandLine is set to true => Starting server with default configuration. "
     << logger::endL;
     theGlobalVariables.flagRunningBuiltInWebServer = true;
+    theGlobalVariables.flagRunningCommandLine = false;
+    theGlobalVariables.flagRunningApache = false;
     theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = 30;
     theWebServer.flagTryToKillOlderProcesses = false;
     theWebServer.flagPort8155 = true;

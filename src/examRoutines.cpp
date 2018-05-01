@@ -4430,17 +4430,14 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     this->handwrittenSolution + "\" class=\"slidesLink\">Handwritten solutions</a>";
   if (this->slidesProjector == "" && this->slidesPrintable == "")
   { std::stringstream
-    slideFromSourceStreamHandout, slideFromSourceStreamProjector,
-    homeworkFromSourceStreamNoAnswerKey, homeworkFromSourceStreamAnswerKey,
+    slideFromSourceStreamHandouT, slideFromSourceStreamHandoutLink,
+    slideFromSourceStreamProjectoR, homeworkFromSourceStreamNoAnswerKey, homeworkFromSourceStreamAnswerKey,
     sourceStreamSlides, sourceStreamSlidesLink, sourceStreamHomework,
     sourceStreamSlidesCommon, sourceStreamHomeworkCommon;
 
-    slideFromSourceStreamHandout << "<a href=\""
-    << theGlobalVariables.DisplayNameExecutable
-    << "?request=slidesFromSource&";
-    homeworkFromSourceStreamNoAnswerKey << "<a href=\""
-    << theGlobalVariables.DisplayNameExecutable
-    << "?request=homeworkFromSource&";
+    slideFromSourceStreamHandouT << "<a href=\"";
+    slideFromSourceStreamHandoutLink << theGlobalVariables.DisplayNameExecutable << "?request=slidesFromSource&";
+    homeworkFromSourceStreamNoAnswerKey << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=homeworkFromSource&";
 
     sourceStreamSlidesLink << theGlobalVariables.DisplayNameExecutable << "?request=slidesSource&";
     sourceStreamHomework << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=homeworkSource&";
@@ -4456,7 +4453,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
       << "=" << HtmlRoutines::ConvertStringToURLString(owner.slidesSourcesHeaders[i], false) << "&";
     }
     for (int i = 0; i < this->sourceSlides.size; i ++)
-    { sourceSlidesCounter++;
+    { sourceSlidesCounter ++;
       sourceStreamSlidesCommon << "file" << sourceSlidesCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(this->sourceSlides[i], false) << "&";
     }
@@ -4484,8 +4481,10 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
       }
     }
     /////////
-    slideFromSourceStreamHandout << sourceStreamSlidesCommon.str();
-    slideFromSourceStreamProjector << slideFromSourceStreamHandout.str();
+    slideFromSourceStreamHandoutLink << sourceStreamSlidesCommon.str();
+    this->slidesProjector = slideFromSourceStreamHandoutLink.str() + "layout=projector&";
+    slideFromSourceStreamProjectoR << "<a href=\"" << this->slidesProjector;
+    slideFromSourceStreamHandoutLink << "layout=printable&";
 
     homeworkFromSourceStreamNoAnswerKey << sourceStreamHomeworkCommon.str();
     homeworkFromSourceStreamAnswerKey << homeworkFromSourceStreamNoAnswerKey.str();
@@ -4493,37 +4492,31 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     sourceStreamSlidesLink << sourceStreamSlidesCommon.str();
     sourceStreamHomework << sourceStreamHomeworkCommon.str();
 
-    slideFromSourceStreamHandout << "layout=printable&";
-    slideFromSourceStreamHandout << "\" class=\"slidesLink\" target=\"_blank\">Printable slides</a>";
+    slideFromSourceStreamHandouT << slideFromSourceStreamHandoutLink.str();
+    slideFromSourceStreamHandouT << "\" class=\"slidesLink\" target=\"_blank\">Printable slides</a>";
     homeworkFromSourceStreamNoAnswerKey << "answerKey=true&";
     homeworkFromSourceStreamNoAnswerKey << "\" class=\"slidesLink\" target=\"_blank\">Homework with answers</a>";
     homeworkFromSourceStreamAnswerKey << "answerKey=false&";
     homeworkFromSourceStreamAnswerKey << "\" class=\"slidesLink\" target=\"_blank\">Homework</a>";
 
-    slideFromSourceStreamProjector << "layout=projector&";
-    slideFromSourceStreamProjector << "\" class=\"slidesLink\" target=\"_blank\">Slides</a>";
+    slideFromSourceStreamProjectoR << "\" class=\"slidesLink\" target=\"_blank\">Slides</a>";
 
     sourceStreamSlidesLink << "layout=printable&";
     this->linkSlidesTex = sourceStreamSlidesLink.str();
-    sourceStreamSlides << "<a href=\""
-    << this->linkSlidesTex
-    << "\" "
-    << "class=\"slidesLink\" download=\""
-    << FileOperations::ConvertStringToLatexFileName(this->title)
-    << ".tex\">.tex</a>";
+    sourceStreamSlides << "<a href=\"" << this->linkSlidesTex << "\" class=\"slidesLink\" download=\""
+    << FileOperations::ConvertStringToLatexFileName(this->title) << ".tex\">.tex</a>";
 
-    sourceStreamHomework << "answerKey=true&"
-    << "\" class=\"slidesLink\" download=\""
-    << FileOperations::ConvertStringToLatexFileName(this->title)
-    << ".tex\">.tex</a>";
+    sourceStreamHomework << "answerKey=true&\" class=\"slidesLink\" download=\""
+    << FileOperations::ConvertStringToLatexFileName(this->title) << ".tex\">.tex</a>";
+
+    this->slidesPrintable = slideFromSourceStreamHandoutLink.str();
 
     this->displaySlidesLink = "";
     if (this->sourceSlides.size > 0)
-      this->displaySlidesLink += slideFromSourceStreamHandout.str() + slideFromSourceStreamProjector.str() + sourceStreamSlides.str();
+      this->displaySlidesLink += slideFromSourceStreamHandouT.str() + slideFromSourceStreamProjectoR.str() + sourceStreamSlides.str();
     if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn())
       this->displaySlidesLink += "<a class=\"slidesLink\" style=\"color:gray; display:none\" href=\"" +
-      theGlobalVariables.DisplayNameExecutable +
-      "?request=modifySlide&topicID=" + this->id + "\">Modify</a>";
+      theGlobalVariables.DisplayNameExecutable + "?request=modifySlide&topicID=" + this->id + "\">Modify</a>";
     if (this->sourceHomework.size > 0)
       this->displaySlidesLink += homeworkFromSourceStreamAnswerKey.str() + homeworkFromSourceStreamNoAnswerKey.str() + sourceStreamHomework.str();
   }
@@ -4542,8 +4535,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   { //std::string theRawSQLink=theGlobalVariables.DisplayNameExecutable +
     //"?request=scoredQuiz&fileName=" + this->problem;
     std::string theRawExerciseLink;
-    theRawExerciseLink = theGlobalVariables.DisplayNameExecutable +
-    "?request=exercise&fileName=" + this->problem;
+    theRawExerciseLink = theGlobalVariables.DisplayNameExecutable + "?request=exercise&fileName=" + this->problem;
     this->displayProblemLink = owner.ToStringLinkFromFileName(this->problem);
     this->displayScore = owner.ToStringProblemScoreShort(this->problem, problemSolved);
     this->displayModifyWeight = owner.ToStringProblemWeightButton(this->problem);
@@ -4553,8 +4545,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   else
     this->displayDeadlinE = owner.ToStringDeadline
     (this->id, problemSolved, returnEmptyStringIfNoDeadline, (this->type != this->tProblem));
-  if (theGlobalVariables.UserDefaultHasAdminRights() &&
-      !theGlobalVariables.UserStudentVieWOn() &&
+  if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn() &&
       theGlobalVariables.userCalculatorRequestType != "templateNoLogin")
   { if (this->displayDeadlinE == "")
       this->displayDeadlinE += "Deadline";
@@ -4576,11 +4567,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   }
   std::stringstream displayResourcesLinksStream;
   displayResourcesLinksStream
-  << this->displayVideoLink
-  << this->displayVideoHandwrittenLink
-  << this->displaySlidesLink
-  << this->displaySlidesPrintableLink
-  << this->displayHandwrittenSolution;
+  << this->displayVideoLink << this->displayVideoHandwrittenLink << this->displaySlidesLink
+  << this->displaySlidesPrintableLink << this->displayHandwrittenSolution;
   this->displayResourcesLinks = displayResourcesLinksStream.str();
   if (this->problem != "")
     owner.NumProblemsFound ++;
@@ -4607,7 +4595,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
   output["videoHandwritten"] = this->videoHandwritten;
   output["slidesProjector"] = this->slidesProjector;
   output["slidesPrintable"] = this->slidesPrintable;
-  output["linkSlidesLaTeX"]  = this->linkSlidesTex;
+  output["linkSlidesLaTeX"] = this->linkSlidesTex;
   output["handwrittenSolution"]  = this->handwrittenSolution;
 
   output["problem"] = this->problem;

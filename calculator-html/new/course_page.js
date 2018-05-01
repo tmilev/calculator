@@ -22,7 +22,10 @@ function getHTMLSubSection(theSubSection) {
     }
     result += "<tr>";
     result += `<td>${currentProblemData.problemNumberString} ${currentProblemData.title}</td>`;
-    result += "<td></td>";
+    result += "<td>";
+    result += `<a class='videoLink' href='${currentProblemData.video}' target = '_blank'>Video</a>`;
+    result += `<a class='slidesLink' href='${currentProblemData.slidesProjector}' target = '_blank'>Printable slides</a><a class='slidesLink' href='${currentProblemData.slidesPrintable}' target = '_blank'>Slides</a>`;
+    result += "</td>";
     result += "<td>";
     if (currentProblemData.problem !== "") {
       if (thePage.flagUserLoggedIn) {

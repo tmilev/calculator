@@ -4595,7 +4595,8 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
   output["videoHandwritten"] = this->videoHandwritten;
   output["slidesProjector"] = this->slidesProjector;
   output["slidesPrintable"] = this->slidesPrintable;
-  output["linkSlidesLaTeX"] = this->linkSlidesTex;
+  if (theGlobalVariables.UserDefaultHasProblemComposingRights())
+    output["linkSlidesLaTeX"] = this->linkSlidesTex;
   output["handwrittenSolution"]  = this->handwrittenSolution;
 
   output["problem"] = this->problem;

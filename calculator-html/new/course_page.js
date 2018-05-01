@@ -1,5 +1,15 @@
 "use strict";
 
+function convertStringToLaTeXFileName(input){
+  var result = encodeURIComponent(input.split(" ").join("-")).split("%").join("-");
+  if (result.length === 0)
+    return "undefined";
+  if (result[0] === "-"){
+    result = "L" + result;
+  }
+  return result;
+}
+
 var previousProblem = null;
 function getHTMLSubSection(theSubSection) {
   var result = "";
@@ -24,7 +34,10 @@ function getHTMLSubSection(theSubSection) {
     result += `<td>${currentProblemData.problemNumberString} ${currentProblemData.title}</td>`;
     result += "<td>";
     result += `<a class='videoLink' href='${currentProblemData.video}' target = '_blank'>Video</a>`;
-    result += `<a class='slidesLink' href='${currentProblemData.slidesProjector}' target = '_blank'>Printable slides</a><a class='slidesLink' href='${currentProblemData.slidesPrintable}' target = '_blank'>Slides</a>`;
+    result += `<a class='slidesLink' href='${currentProblemData.slidesProjector}' target = '_blank'>Printable slides</a>`;
+    result += `<a class='slidesLink' href='${currentProblemData.slidesPrintable}' target = '_blank'>Slides</a>`;
+    if (currentProblemData.linkSlidesLaTeX !== "" && currentProblemData.linkSlidesLaTeX !== undefined)
+      result += `<a class='slidesLink' href='${currentProblemData.linkSlidesLaTeX}' target = '_blank' download='${convertStringToLaTeXFileName(currentProblemData.title)}.tex'>.tex</a>`;
     result += "</td>";
     result += "<td>";
     if (currentProblemData.problem !== "") {

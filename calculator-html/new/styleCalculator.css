@@ -506,6 +506,7 @@ div.bodyChapter{
   padding: 0px; 
   margin: 0px;
   display: block;
+  width: 100%;
   -webkit-transition: all 2s ease;
   -moz-transition: all 2s ease;
   transition: all 2s ease;
@@ -523,6 +524,7 @@ div.bodySection{
   padding: 0px; 
   margin: 0px;
   display: block;
+  width: 100%;
   -webkit-transition: all 2s ease;
   -moz-transition: all 2s ease;
   transition: all 2s ease;
@@ -539,6 +541,7 @@ div.headSubsection{
 div.bodySubsection{
   padding: 0px; 
   margin: 0px;
+  width: 100%;
   display: block;
   -webkit-transition: all 2s ease;
   -moz-transition: all 2s ease;
@@ -651,10 +654,15 @@ table.lectureMaterials th {
   padding-top: 12px;
   padding-bottom: 12px;
 }
-
+topicList {
+  width: 100%;
+}
+#divCurrentCourse{
+  width: 90%;
+}
 table.topicList {
   border-collapse: collapse;
-/*  width: 100%;*/
+  width: 100%;
   font-weight: normal;
   font-size: 1em;
   margin-top: 4px;

@@ -1393,12 +1393,11 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   int numNewUsers = 0;
   int numUpdatedUsers = 0;
   bool createdUsers = DatabaseRoutineS::AddUsersFromEmails
-  (inputEmails, userPasswords, userRole, userGroup, comments,
-   numNewUsers, numUpdatedUsers);
+  (inputEmails, userPasswords, userRole, userGroup, comments, numNewUsers, numUpdatedUsers);
   if (createdUsers)
   { out << "<span style=\"color:green\">Success: "
     << numNewUsers << " new users and " << numUpdatedUsers
-    << " user updates. </span>";
+    << " user updates. </span> User roles: " << userRole;
   } else
     out << "<span style=\"color:red\">Failed to add all users. </span> Errors follow. <hr>"
     << comments.str() << "<hr>";

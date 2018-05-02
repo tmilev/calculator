@@ -874,13 +874,13 @@ bool DatabaseRoutineS::AddUsersFromEmails
       currentUser.email = "";
     } else
       currentUser.email = theEmails[i];
-    JSData updateUser;
+    JSData foundUser;
     List<JSData> findUser;
     findUser.SetSize(2);
     findUser[0][DatabaseStrings::labelUsername] = currentUser.username;
     findUser[1][DatabaseStrings::labelEmail] = currentUser.email;
-    updateUser = currentUser.ToJSON();
-    if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(DatabaseStrings::tableUsers, findUser, updateUser, &comments))
+    stOutput << "DEBUG: user json: " << currentUser.ToJSON();
+    if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(DatabaseStrings::tableUsers, findUser, foundUser, &comments))
     { if (!currentUser.Iexist(&comments))
       { if (!currentUser.StoreToDB(false, &comments))
         { comments << "Failed to create user: " << currentUser.username;
@@ -890,12 +890,14 @@ bool DatabaseRoutineS::AddUsersFromEmails
           outputNumNewUsers ++;
       }
       if (isEmail)
-        DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, updateUser, &comments);
+        DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, foundUser, &comments);
     } else
-      outputNumUpdatedUsers ++;
+    { outputNumUpdatedUsers ++;
     //currentUser may have its updated entries modified by the functions above.
-    if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, updateUser, &comments))
-      result = false;
+      stOutput << "DEBUG: before updating user json: " << currentUser.ToJSON().ToString(false);
+      if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, currentUser.ToJSON(), &comments))
+        result = false;
+    }
     if (thePasswords.size == 0 || thePasswords.size != theEmails.size)
     { if (currentUser.actualShaonedSaltedPassword == "" && currentUser.actualAuthenticationToken == "")
         if (!currentUser.ComputeAndStoreActivationToken(&comments))
@@ -909,8 +911,9 @@ bool DatabaseRoutineS::AddUsersFromEmails
       //<< HtmlRoutines::ConvertStringToURLString(thePasswords[i]) << "<br>";
       if (!currentUser.SetPassword(&comments))
         result = false;
-      updateUser[DatabaseStrings::labelActivationToken] = "activated";
-      DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, updateUser, &comments);
+      JSData activatedJSON;
+      activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
+      DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, activatedJSON, &comments);
       if (currentUser.email != "")
         currentUser.ComputeAndStoreActivationStats(&comments, &comments);
     }

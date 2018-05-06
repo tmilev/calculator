@@ -2,7 +2,12 @@
 
 function selectCurrentProblem(problem, exerciseType) {
   thePage.currentCourse.fileName = problem;
-  thePage.currentCourse.request = exerciseType;
+  var theProblem = thePage.getCurrentProblem();
+  theProblem.flagForReal = false;
+  if (exerciseType === "scoredQuizJSON") {
+    theProblem.flagForReal = true;
+  }
+  //thePage.currentCourse.request = exerciseType;
   thePage.storeSettingsToCookies();
   thePage.flagCurrentProblemLoaded = false;
   thePage.selectPage("problemPage");
@@ -28,15 +33,14 @@ Problem.prototype.getURLFileCourseTopics = function() {
 
 Problem.prototype.getURLRequestFileCourseTopics = function(isScoredQuiz) {
   var result = "";
+  if (isScoredQuiz === undefined) {
+    isScoredQuiz = this.flagForReal;
+  }
   result += "request=";
   if (isScoredQuiz){
     result += "scoredQuizJSON";
   } else {
-    if (thePage.flagUserLoggedIn){
-      result += "exerciseJSON";
-    } else {
-      result += "exerciseNoLoginJSON";
-    }
+    result += "exerciseJSON";
   }
   result += `&${this.getURLFileCourseTopics()}`;
   return result;
@@ -70,14 +74,14 @@ Problem.prototype.getProblemNavigation = function() {
     result += `<b style = 'color:brown'>Scores are recorded. </b>`;
   }
   var defaultRequest = 'exerciseJSON';
-  if (this.flagForReal) {
+  if (this.flagForReal && thePage.flagUserLoggedIn) {
     defaultRequest = 'scoredQuizJSON';
   }
-  if (!thePage.flagUserLoggedIn) {
-    defaultRequest = 'exerciseNoLoginJSON';
-  }
+  //if (!thePage.flagUserLoggedIn) {
+  //  defaultRequest = 'exerciseJSON';
+  //}
   if (this.previousProblem !== null && this.previousProblem !== "") {
-    result+= `<a class='problemLinkPractice' href='#${thePage.getProblem(this.previousProblem).getURLRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.previousProblem}' ,'${defaultRequest}')">&#8592;</a>`;
+    result += `<a class='problemLinkPractice' href='#${thePage.getProblem(this.previousProblem).getURLRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.previousProblem}' ,'${defaultRequest}')">&#8592;</a>`;
   }
 
   if (this.flagForReal && thePage.flagUserLoggedIn) {
@@ -206,7 +210,8 @@ function updateProblemPage() {
   }
   thePage.flagCurrentProblemLoaded = true;
   var theProblem = thePage.getCurrentProblem();
-  var theURL = `${pathnames.calculatorAPI}?request=${thePage.currentCourse.request}&${theProblem.getURLFileCourseTopics()}`;
+  console.log("Current course: " + JSON.stringify(thePage.currentCourse));
+  var theURL = `${pathnames.calculatorAPI}?${theProblem.getURLRequestFileCourseTopics()}`;
   submitGET({
     url: theURL,
     callback: updateProblemPageCallback,

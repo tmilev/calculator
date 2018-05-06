@@ -5,7 +5,6 @@ function selectCourse(courseIndex) {
   thePage.currentCourse.courseHome = theCourse.courseHome;
   thePage.currentCourse.topicList = theCourse.topicList;
   thePage.currentCourse.fileName = "";
-  thePage.currentCourse.request = "";
   thePage.storeSettingsToCookies();
   thePage.selectPage("currentCourse");
 }

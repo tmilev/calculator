@@ -3911,7 +3911,14 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
 { MacroRegisterFunctionWithName("WebWorker::GetLoginPage");
   std::stringstream out;
   if (theGlobalVariables.GetWebInput("useJSON") == "true")
-  { out << "<b style='color:red'>Login required. </b>" << reasonForLogin;
+  { out
+    << "<span id ='spanLoginRequired'><b style='color:red'>Login required.</b> "
+    << "Go to our: <a href="
+    << "'https://" << theGlobalVariables.hostWithPort << "/app'"
+    << ">one-page app</a> or our <a href='"
+    << theGlobalVariables.DisplayNameExecutable << "?request=login&useJSON=false'>old system</a>. "
+    << "</span>"
+    << reasonForLogin;
     return out.str();
   }
   out << "<html><head>\n"

@@ -87,8 +87,7 @@ function Page() {
   this.currentCourse = {
     courseHome: "",
     topicList: "",
-    fileName: "",
-    request: ""
+    fileName: ""
   };
   this.scriptsInjected = {};
   this.flagCurrentProblemLoaded = false;
@@ -99,55 +98,6 @@ function Page() {
   this.username = null;
   this.authenticationToken = null;
   this.flagUserLoggedIn = false;
-  this.storeSettingsToLocalStorage = function() {
-    if (Storage === undefined && localStorage === undefined) {
-      return;
-    }
-    localStorage.googleProfile = JSON.stringify(this.googleProfile);
-    for (label in this.pages) {
-      if (this.pages[label].storage === undefined) {
-        continue;
-      }
-      localStorage[label] = JSON.stringify(this.pages[label].storage);
-    }
-  };
-  this.loadSettingsFromLocalStorage = function() {    
-    if (Storage === undefined && localStorage === undefined){
-      return;
-    }
-    try {
-      this.currentPage = localStorage.currentPage;
-      this.googleProfile = JSON.parse(localStorage.googleProfile); 
-      for (label in this.pages){
-        if (localStorage[label] === undefined || localStorage[label] === null) {
-          continue;
-        }
-        this.pages[label].storage = JSON.parse(localStorage[label]);
-      }
-    } catch (e) {
-      console.log("Error loading settings from local storage: " + e);
-    }
-  };
-  this.storeSettingsToCookies = function() {
-    for (label in this.currentCourse){
-      addCookie(label, this.currentCourse[label], 300);
-    }
-    addCookie("googleToken", this.googleToken, 300, true); 
-    addCookie("username", this.username, 300, true);
-    addCookie("authenticationToken", this.authenticationToken, 300, true);
-  };
-  this.loadSettingsFromCookies = function() {
-    try {
-      for (label in this.currentCourse){
-        this.currentCourse[label] = getCookie(label);
-      }
-      this.googleToken = getCookie("googleToken");
-      this.username = getCookie("username");
-      this.authenticationToken = getCookie("authenticationToken");
-    } catch (e) {
-      console.log("Error loading settings from cookies: " + e);
-    }
-  };
   this.loadSettingsFromCookies();
   this.loadSettingsFromLocalStorage();
   //////////////////////////////////////
@@ -155,10 +105,6 @@ function Page() {
   //Page manipulation functions
   //////////////////////////////////////
   //////////////////////////////////////
-  this.hideProfilePicture = function() {
-    document.getElementById("divProfilePicture").classList.add("divInvisible");
-    document.getElementById("divProfilePicture").classList.remove("divVisible");
-  }
   //////////////////////////////////////
   //////////////////////////////////////
   //Select page on first load
@@ -168,6 +114,71 @@ function Page() {
   loginTry();
   document.getElementById("divPage").style.display = "";
   document.getElementById("divPage").className = "divPage";
+}
+
+Page.prototype.hideProfilePicture = function() {
+  document.getElementById("divProfilePicture").classList.add("divInvisible");
+  document.getElementById("divProfilePicture").classList.remove("divVisible");
+}
+
+Page.prototype.correctSettings = function () {
+}
+
+Page.prototype.loadSettingsFromCookies = function() {
+  try {
+    for (label in this.currentCourse) {
+      this.currentCourse[label] = getCookie(label);
+      //console.log(label);
+    }
+    console.log("Current course: " + JSON.stringify(this.currentCourse));
+    this.googleToken = getCookie("googleToken");
+    this.username = getCookie("username");
+    this.authenticationToken = getCookie("authenticationToken");
+  } catch (e) {
+    console.log("Error loading settings from cookies: " + e);
+  }
+  this.correctSettings();
+}
+
+Page.prototype.storeSettingsToCookies = function() {
+  for (label in this.currentCourse) {
+    addCookie(label, this.currentCourse[label], 300);
+  }
+  console.log(JSON.stringify(this.currentCourse));
+  addCookie("googleToken", this.googleToken, 300, true); 
+  addCookie("username", this.username, 300, true);
+  addCookie("authenticationToken", this.authenticationToken, 300, true);
+}
+
+Page.prototype.loadSettingsFromLocalStorage = function() {    
+  if (Storage === undefined && localStorage === undefined) {
+    return;
+  }
+  try {
+    this.currentPage = localStorage.currentPage;
+    this.googleProfile = JSON.parse(localStorage.googleProfile); 
+    for (label in this.pages){
+      if (localStorage[label] === undefined || localStorage[label] === null) {
+        continue;
+      }
+      this.pages[label].storage = JSON.parse(localStorage[label]);
+    }
+  } catch (e) {
+    console.log("Error loading settings from local storage: " + e);
+  }
+}
+
+Page.prototype.storeSettingsToLocalStorage = function() {
+  if (Storage === undefined && localStorage === undefined) {
+    return;
+  }
+  localStorage.googleProfile = JSON.stringify(this.googleProfile);
+  for (label in this.pages) {
+    if (this.pages[label].storage === undefined) {
+      continue;
+    }
+    localStorage[label] = JSON.stringify(this.pages[label].storage);
+  }
 }
 
 Page.prototype.showProfilePicture = function() {
@@ -275,7 +286,7 @@ Page.prototype.selectPage = function(inputPage) {
   if (this.pages[this.currentPage] === undefined) {
     this.currentPage = "calculator";
   }
-  for (var page in this.pages){
+  for (var page in this.pages) {
     this.pages[page].container.style.display = "none";
     document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");
   }

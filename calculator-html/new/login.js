@@ -1,9 +1,5 @@
 "use strict";
 
-//var auth2Google = null;
-
-
-
 function loginCalculator(){
   var password = document.getElementById("inputPassword").value;
   document.getElementById("inputPassword").value = "";

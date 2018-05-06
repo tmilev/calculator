@@ -72,7 +72,7 @@ function loginWithServerCallback(incomingString, result){
   try {
     var parsedAuthentication = JSON.parse(incomingString);
     if (parsedAuthentication["status"] === "logged in") {
-      status = true;
+      success = true;
       thePage.authenticationToken = parsedAuthentication.authenticationToken;
       thePage.username = parsedAuthentication.username;
       thePage.userRole = parsedAuthentication.userRole;

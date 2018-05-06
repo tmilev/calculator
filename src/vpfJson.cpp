@@ -80,6 +80,12 @@ void JSData::readfile(const char* filename)
   this->readstring(json, false);
 }
 
+void JSData::operator=(const List<JSData>& other)
+{ this->type = this->JSarray;
+  this->list = other;
+  this->objects.Clear();
+}
+
 void JSData::operator=(const Rational& other)
 { this->type = this->JSnumber;
   this->number = other.GetDoubleValue();

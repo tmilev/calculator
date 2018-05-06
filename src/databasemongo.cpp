@@ -106,7 +106,7 @@ public:
   bool flagFindOneOnly;
   MongoQuery();
   ~MongoQuery();
-  bool FindMultiple(List<JSData>& output, std::stringstream* commentsOnFailure);
+  bool FindMultiple(List<JSData>& output, const JSData& inputOptions, std::stringstream* commentsOnFailure);
   bool UpdateOne(std::stringstream* commentsOnFailure);
 };
 
@@ -184,7 +184,7 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
   return true;
 }
 
-bool MongoQuery::FindMultiple(List<JSData>& output, std::stringstream* commentsOnFailure)
+bool MongoQuery::FindMultiple(List<JSData>& output, const JSData& inputOptions, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("MongoQuery::FindMultiple");
   if (!databaseMongo.initialize(commentsOnFailure))
     return false;
@@ -199,7 +199,21 @@ bool MongoQuery::FindMultiple(List<JSData>& output, std::stringstream* commentsO
     logWorker << logger::red << "Mongo error: " << this->theError.message << logger::endL;
     return false;
   }
-  this->cursor = mongoc_collection_find_with_opts(theCollection.collection, this->query, NULL, NULL);
+  if (this->options != 0)
+  { bson_destroy(this->options);
+    this->options = 0;
+  }
+  if (inputOptions.type != JSData::JSUndefined)
+  { std::string optionsString = inputOptions.ToString(false);
+    this->options = bson_new_from_json((const uint8_t*) optionsString.c_str(), optionsString.size(), &this->theError);
+    if (this->options == NULL)
+    { if (commentsOnFailure != 0)
+        *commentsOnFailure << this->theError.message;
+      logWorker << logger::red << "Mongo error: " << this->theError.message << logger::endL;
+      return false;
+    }
+  }
+  this->cursor = mongoc_collection_find_with_opts(theCollection.collection, this->query, this->options, NULL);
   if (this->cursor == NULL)
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "Bad mongoDB cursor. ";
@@ -257,9 +271,38 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString
   (collectionName, theData, output, maxOutputItems, totalItems, commentsOnFailure);
 }
 
+JSData DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(const List<std::string> &fieldsToProjectTo)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames");
+  JSData result;
+  JSData fields;
+  for (int i = 0; i < fieldsToProjectTo.size; i++)
+    fields[fieldsToProjectTo[i]] = 1;
+  result["projection"] = fields;
+  return result;
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection
+(const std::string& collectionName, const JSData& findQuery,
+ List<JSData>& output, List<std::string>& fieldsToProjectTo, int maxOutputItems,
+ long long* totalItems, std::stringstream* commentsOnFailure)
+{ return DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
+  (collectionName, findQuery, output,
+   DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(fieldsToProjectTo),
+   maxOutputItems, totalItems, commentsOnFailure);
+}
+
 bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
 (const std::string& collectionName, const JSData& findQuery,
  List<JSData>& output, int maxOutputItems,
+ long long* totalItems, std::stringstream* commentsOnFailure)
+{ const JSData options(JSData::JSUndefined);
+  return DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
+  (collectionName, findQuery, output, options, maxOutputItems, totalItems, commentsOnFailure);
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
+(const std::string& collectionName, const JSData& findQuery,
+ List<JSData>& output, const JSData& options, int maxOutputItems,
  long long* totalItems, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON");
 #ifdef MACRO_use_MongoDB
@@ -269,7 +312,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
   query.collectionName = collectionName;
   query.findQuery = findQuery.ToString(true);
   query.maxOutputItems = maxOutputItems;
-  bool result = query.FindMultiple(output, commentsOnFailure);
+  bool result = query.FindMultiple(output, options, commentsOnFailure);
   if (totalItems != 0)
     *totalItems = query.totalItems;
   return result;
@@ -341,8 +384,25 @@ bool DatabaseRoutinesGlobalFunctionsMongo::GetOrFindQuery
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString
-(const std::string& collectionName, const std::string& findQuery, JSData &output, std::stringstream *commentsOnFailure)
+(const std::string& collectionName, const std::string& findQuery, JSData& output, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString");
+  JSData options(JSData::JSUndefined);
+  return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
+  (collectionName, findQuery, options, output, commentsOnFailure);
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithProjection
+(const std::string& collectionName, const std::string& findQuery, const List<std::string>& fieldsToProjectTo,
+ JSData& output, std::stringstream* commentsOnFailure)
+{ return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
+  (collectionName, findQuery, DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(fieldsToProjectTo),
+   output, commentsOnFailure);
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
+(const std::string& collectionName, const std::string& findQuery, const JSData& options,
+ JSData& output, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions");
 #ifdef MACRO_use_MongoDB
   MongoQuery query;
   query.collectionName = collectionName;
@@ -350,7 +410,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString
   //logWorker << logger::blue << "DEBUG: Query input: " << query.findQuery << logger::endL;
   query.maxOutputItems = 1;
   List<JSData> outputList;
-  query.FindMultiple(outputList, commentsOnFailure);
+  query.FindMultiple(outputList, options, commentsOnFailure);
   if (outputList.size == 0)
     return false;
   output = outputList[0];

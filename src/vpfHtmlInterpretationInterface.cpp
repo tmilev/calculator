@@ -743,9 +743,14 @@ std::string HtmlInterpretation::GetTopicTableJSON()
 
 std::string HtmlInterpretation::GetJSONUserInfo()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetJSONUserInfo");
-  if (!theGlobalVariables.flagLoggedIn)
-    return "not logged in";
   JSData output;
+  if (!theGlobalVariables.flagLoggedIn)
+  { output["status"] = "not logged in";
+    if (theGlobalVariables.GetWebInput("error") != "")
+      output["error"] = theGlobalVariables.GetWebInput("error");
+    return output.ToString(false);
+  }
+  output["status"] = "logged in";
   output[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
   output[DatabaseStrings::labelAuthenticationToken] = theGlobalVariables.userDefault.actualAuthenticationToken;
   output[DatabaseStrings::labelUserRole] = theGlobalVariables.userDefault.userRole;
@@ -1582,7 +1587,42 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
 
 std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAddressWithPort)
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetAccountsPageJSON");
-  return HtmlInterpretation::GetAccountsPageBody(hostWebAddressWithPort);
+  (void) hostWebAddressWithPort;
+  JSData output;
+#ifdef MACRO_use_MongoDB
+  if (!theGlobalVariables.UserDefaultHasAdminRights() || !theGlobalVariables.flagLoggedIn || !theGlobalVariables.flagUsingSSLinCurrentConnection)
+  { output["error"] = "Must be logged-in admin over ssl.";
+    return output.ToString(false);
+  }
+  std::stringstream commentsOnFailure;
+  JSData findStudents;
+  JSData findAdmins;
+  List<JSData> students;
+  List<JSData> admins;
+  long long totalStudents;
+  findStudents[DatabaseStrings::labelInstructor] = theGlobalVariables.userDefault.username;
+  findAdmins[DatabaseStrings::labelUserRole] = "admin";
+  List<std::string> columnsToRetain;
+  columnsToRetain.AddOnTop(DatabaseStrings::labelUsername);
+  columnsToRetain.AddOnTop(DatabaseStrings::labelEmail);
+  columnsToRetain.AddOnTop(DatabaseStrings::labelActivationToken);
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection
+       (DatabaseStrings::tableUsers, findStudents, students, columnsToRetain, - 1, &totalStudents, &commentsOnFailure))
+  { output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
+    return output.ToString(false);
+  }
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection
+       (DatabaseStrings::tableUsers, findAdmins, admins, columnsToRetain, - 1, 0, &commentsOnFailure))
+  { output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();
+    return output.ToString(false);
+  }
+  output["admins"] = admins;
+  output["students"] = students;
+  return output.ToString(false);
+#else
+  output["error"] = "Database not available.";
+  return output.ToString(false);
+#endif // MACRO_use_MongoDB
 }
 
 std::string HtmlInterpretation::GetAccountsPageBody(const std::string& hostWebAddressWithPort)

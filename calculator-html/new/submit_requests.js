@@ -171,7 +171,7 @@ function progressReport(){
   this.timeoutID = window.setTimeout("progressReport()", timeIncrementInTenthsOfSecond * 100);
 }
 
-function SendTogglePauseRequest(){ 
+function SendTogglePauseRequest() { 
   if (isFinished) {
     return;
   }

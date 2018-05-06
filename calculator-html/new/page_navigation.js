@@ -1,4 +1,4 @@
-function Page(){
+function Page() {
   thePage = this;
   this.pages = {
     login: {
@@ -72,7 +72,7 @@ function Page(){
     this.pages[page].container = document.getElementById(this.pages[page].id);
     var currentButton = document.getElementById(this.pages[page].menuButtonId);
     currentButton.pageToSelect = page;
-    currentButton.addEventListener("click", function(){
+    currentButton.addEventListener("click", function() {
       thePage.selectPage(this.pageToSelect);
     });
   }
@@ -207,7 +207,7 @@ Page.prototype.initializeCalculatorPage = function() {
   }
 }
 
-function defaultOnLoadInjectScriptsAndProcessLaTeX(idElement){ 
+function defaultOnLoadInjectScriptsAndProcessLaTeX(idElement) { 
   var spanVerification = document.getElementById(idElement);
   var incomingScripts = spanVerification.getElementsByTagName('script');
   var oldScripts = thePage.pages.calculator.scriptIds;

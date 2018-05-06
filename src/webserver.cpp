@@ -1246,7 +1246,7 @@ void WebWorker::resetConnection()
   if (theGlobalVariables.userDefault.enteredActivationToken != "" ||
       theGlobalVariables.userDefault.enteredAuthenticationToken != "" ||
       theGlobalVariables.userDefault.enteredGoogleToken != "" ||
-      theGlobalVariables.userDefault.enteredPassword!= "" ||
+      theGlobalVariables.userDefault.enteredPassword != "" ||
       theGlobalVariables.userDefault.enteredShaonedSaltedPassword != "")
     crash << "User default not reset correctly. " << crash;
   theGlobalVariables.flagLoggedIn = false;
@@ -1269,7 +1269,7 @@ void WebWorker::resetMessageComponentsExceptRawMessage()
   this->theMessageHeaderStrings.SetSize(0);
   this->requestHeaders.Clear();
   this->requestTypE = this->requestUnknown;
-  this->ContentLength = -1;
+  this->ContentLength = - 1;
 }
 
 static std::stringstream standardOutputStreamAfterTimeout;
@@ -1384,8 +1384,7 @@ bool WebWorker::ExtractArgumentsFromCookies(std::stringstream& argumentProcessin
 }
 
 bool WebWorker::ExtractArgumentsFromMessage
-(const std::string& input, std::stringstream& argumentProcessingFailureComments,
-int recursionDepth)
+(const std::string& input, std::stringstream& argumentProcessingFailureComments, int recursionDepth)
 { MacroRegisterFunctionWithName("WebWorker::ExtractArgumentsFromMessage");
 //  stOutput << "DEBUG: here I am.";
   if (recursionDepth > 1)
@@ -1544,8 +1543,7 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     );
     theGlobalVariables.SetWebInpuT
     (DatabaseStrings::labelAuthenticationToken,
-     HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false)
-    );
+     HtmlRoutines::ConvertStringToURLString(theUser.actualAuthenticationToken, false));
   } else
     theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("authenticationToken", "0");
   bool shouldDisplayMessage = false;
@@ -4133,6 +4131,7 @@ int WebWorker::ServeClient()
   if (this->ProcessRedirectAwayFromWWW())
     return 0;
   this->flagArgumentsAreOK = this->Login(argumentProcessingFailureComments);
+  //stOutput << "DEBUG: got to here pt 2.";
   this->CorrectRequestsAFTERLoginReturnFalseIfModified();
   if (this->RedirectIfNeeded(argumentProcessingFailureComments))
     return 0;
@@ -4160,6 +4159,7 @@ int WebWorker::ServeClient()
   }
   if (argumentProcessingFailureComments.str() != "" && theUser.flagMustLogin)
     theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
+  //stOutput << "DEBUG: got to here pt 3.";
   if (theUser.flagMustLogin)
     this->errorLogin = argumentProcessingFailureComments.str();
   if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.flagLoggedIn)
@@ -4169,6 +4169,7 @@ int WebWorker::ServeClient()
       //stOutput << "spoofhostname: " << theGlobalVariables.GetWebInput("spoofHostName");
       theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("spoofHostName", theGlobalVariables.hostNoPort);
     }
+  //stOutput << "DEBUG: got to here pt 4.";
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType == "database")
     return this->ProcessDatabase();
@@ -4192,12 +4193,6 @@ int WebWorker::ServeClient()
     return this->ProcessCalculatorExamples();
   else if (theGlobalVariables.userCalculatorRequestType == "calculatorExamplesJSON")
     return this->ProcessCalculatorExamplesJSON();
-  else if (theGlobalVariables.GetWebInput("error") != "")
-    stOutput << "<div style=\"text-align:center\">"
-    << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), false)
-    << "</div>";
-  else if (this->errorLogin != "")
-    stOutput << this->errorLogin;
   else if (theGlobalVariables.userCalculatorRequestType == "toggleMonitoring")
     return this->ProcessToggleMonitoring();
   else if (theGlobalVariables.userCalculatorRequestType == "status")

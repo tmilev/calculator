@@ -1,10 +1,10 @@
 "use strict";
 
-function convertStringToLaTeXFileName(input){
+function convertStringToLaTeXFileName(input) {
   var result = encodeURIComponent(input.split(" ").join("-")).split("%").join("-");
   if (result.length === 0)
     return "undefined";
-  if (result[0] === "-"){
+  if (result[0] === "-") {
     result = "L" + result;
   }
   return result;

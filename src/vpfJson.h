@@ -91,6 +91,7 @@ public:
     this->list = other.list;
     this->objects = other.objects;
   }
+  void operator=(const List<JSData>& other);
   // there has to be a better way to do this
   void operator=(const Rational& other);
 
@@ -112,6 +113,7 @@ public:
   void TryToComputeType();
   static bool Tokenize(const std::string& input, List<JSData>& output);
   void writefile(const char* filename) const;
+  static void FilterColumnsJSDataObjectList(List<JSData>& inputOutput, const List<std::string>& columnsToPreserve);
 };
 
 std::ostream& operator<<(std::ostream& out, const JSData& data);

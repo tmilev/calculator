@@ -1,10 +1,45 @@
 "use strict";
 
-function updateAccountsPageCallback(input, outputComponent){
-  if (typeof outputComponent == "string"){
-    outputComponent = document.getElementById(outputComponent);
+
+function getAccountsTable(inputAccounts) {
+  var result = "";
+  result += "<table><tr><th>username</th><th>Email</th><th>Activated?</th></tr>";
+
+  for (var counterAccounts = 0; counterAccounts < inputAccounts.length; counterAccounts ++){
+    result += "<tr>";
+    var currentUser = inputAccounts[counterAccounts];
+    result += `<td>${currentUser.username}</td>`;
+    if (currentUser.email !== undefined) {
+      result += `<td>${currentUser.email}</td>`;
+    } else {
+      result += `<td>-</td>`;
+    }
+    if (currentUser.activationToken === "activated"){
+      result += `<td><span style = 'color:green'>${currentUser.activationToken}</span></td>`;
+    } else {
+      result += "<td><span style = 'color:red'>Not activated</span></td>";
+    }
+    result += "</tr>";
   }
-  outputComponent.innerHTML = input;
+  result += "</table>";
+  return result;
+}
+
+function updateAccountsPageCallback(input, notUsed) {
+  var outputComponentAdmin = document.getElementById("idOutputAdmins");
+  var outputComponentStudents = document.getElementById("idOutputStudents");
+  var parsedUserInfo = null;
+  console.log(input);
+  try {
+    parsedUserInfo = JSON.parse(input);
+    var admins = parsedUserInfo["admins"];
+    var students = parsedUserInfo["students"];
+    outputComponentAdmin.innerHTML = getAccountsTable(admins);
+    outputComponentStudents.innerHTML = getAccountsTable(students);
+  } catch (e) {
+    outputComponent.innerHTML = e;
+    console.log(e);
+  }
 }
 
 function addEmailsOrUsersCallback(input, outputComponent){
@@ -36,14 +71,29 @@ function addEmailsOrUsers(idEmailList, problemCollectionName, idOutput, userRole
   });
 }
 
+function getTeachersStudentsCallback() { 
+}
+
+function getTeachersStudents() { 
+  var theURL = `${pathnames.calculatorAPI}?request=accountsJSON&`;
+  var inputSections = document.getElementById('inputSections').value;
+  var inputTeachers = document.getElementById('inputSetTeacher').value;
+  theURL += `teachers=${encodeURIComponent(inputTeachers)}&sections=${encodeURIComponent(inputSections)}&`;
+  submitGET({
+    url: theURL,
+    progress: "spanProgressReportGeneral",
+    result: "idOutputSections",
+    callback: getTeachersStudentsCallback
+  });
+
+}
 function updateAccountsPage(){
   var theURL = `${pathnames.calculatorAPI}?request=accountsJSON`;
 
   submitGET({
     url: theURL,
     callback: updateAccountsPageCallback,
-    progress: "spanProgressReportGeneral",
-    result: "idAccountsOutput"
+    progress: "spanProgressReportGeneral"
   });
 
 }

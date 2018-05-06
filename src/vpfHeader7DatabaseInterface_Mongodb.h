@@ -19,8 +19,23 @@ public:
   (const std::string& collectionName, const JSData& findQuery,
    List<JSData>& output, int maxOutputItems = - 1,
    long long* totalItems = 0, std::stringstream* commentsOnFailure = 0);
+  static bool FindFromJSONWithProjection
+  (const std::string& collectionName, const JSData& findQuery,
+   List<JSData>& output, List<std::string>& fieldsToProjectTo, int maxOutputItems = - 1,
+   long long* totalItems = 0, std::stringstream* commentsOnFailure = 0);
+  static bool FindFromJSONWithOptions
+  (const std::string& collectionName, const JSData& findQuery,
+   List<JSData>& output, const JSData& options, int maxOutputItems = - 1,
+   long long* totalItems = 0, std::stringstream* commentsOnFailure = 0);
   static bool FindOneFromQueryString
   (const std::string& collectionName, const std::string& findQuery,
+   JSData& output, std::stringstream* commentsOnFailure = 0);
+  static bool FindOneFromQueryStringWithProjection
+  (const std::string& collectionName, const std::string& findQuery, const List<std::string>& fieldsToProjectTo,
+   JSData& output, std::stringstream* commentsOnFailure = 0);
+  static JSData GetProjectionFromFieldNames(const List<std::string>& fieldsToProjectTo);
+  static bool FindOneFromQueryStringWithOptions
+  (const std::string& collectionName, const std::string& findQuery, const JSData& options,
    JSData& output, std::stringstream* commentsOnFailure = 0);
 
   static bool GetOrFindQuery(const List<JSData>& input, std::string& output, std::stringstream* commentsOnFailure = 0);

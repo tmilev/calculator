@@ -1,6 +1,6 @@
 "use strict";
 
-function selectCurrentProblem(problem, exerciseType){
+function selectCurrentProblem(problem, exerciseType) {
   thePage.currentCourse.fileName = problem;
   thePage.currentCourse.request = exerciseType;
   thePage.storeSettingsToCookies();
@@ -8,7 +8,7 @@ function selectCurrentProblem(problem, exerciseType){
   thePage.selectPage("problemPage");
 }
 
-function Problem (inputFileName){
+function Problem (inputFileName) {
   this.fileName = inputFileName;
   this.randomSeed = null;
   this.answers = [];
@@ -45,9 +45,11 @@ Problem.prototype.getURLRequestFileCourseTopics = function(isScoredQuiz) {
 Problem.prototype.getURLRandomSeedRequestFileCourseTopics = function(isScoredQuiz) {
   var result = this.getURLRequestFileCourseTopics(isScoredQuiz);
   if (
-    !this.flagForReal && this.randomSeed !== undefined && 
-    this.randomSeed !== "" && this.randomSeed !== null  
-  ){
+    !this.flagForReal && 
+    this.randomSeed !== undefined && 
+    this.randomSeed !== "" && 
+    this.randomSeed !== null  
+  ) {
     result += `randomSeed=${this.randomSeed}&`;
   }
   return result;
@@ -149,10 +151,10 @@ function updateProblemPageCallback(input, outputComponent) {
   if (typeof outputComponent === "string") {
     outputComponent = document.getElementById(outputComponent);
   }
-  if (outputComponent === null || outputComponent === undefined){
+  if (outputComponent === null || outputComponent === undefined) {
     outputComponent = document.getElementById("divProblemPageContentContainer");
   }
-  if (outputComponent.innerHTML === undefined){
+  if (outputComponent.innerHTML === undefined) {
     outputComponent = document.getElementById("divProblemPageContentContainer");
   }
   var currentProblem = thePage.getProblem(theFileName);
@@ -191,7 +193,7 @@ function updateProblemPageCallback(input, outputComponent) {
   currentProblem.writeToHTML("divProblemPageContentContainer");
 
   currentProblem.scriptIds = [];
-  for (var scriptLabel in theProblem.scripts){
+  for (var scriptLabel in theProblem.scripts) {
     var newLabel = encodeURIComponent(theFileName + scriptLabel);
     currentProblem.scriptIds.push(newLabel); 
     thePage.injectScript(newLabel, decodeURIComponent(theProblem.scripts[scriptLabel]));

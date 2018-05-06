@@ -12,12 +12,12 @@ std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressio
   out << "Number of generators: " << this->theGenerators.size;
   out << "<br>Number of elements: " << this->theElements.size;
   out << "<br>The elements follow.";
-  int numEltstoDisplay=this->theElements.size;
-  if (numEltstoDisplay>100)
+  int numEltstoDisplay = this->theElements.size;
+  if (numEltstoDisplay > 100)
   { out << "<b>Displaying only the first " << 100 << " elements.</b>";
-    numEltstoDisplay=100;
+    numEltstoDisplay = 100;
   }
-  for (int i=0; i<numEltstoDisplay; i++)
+  for (int i = 0; i < numEltstoDisplay; i ++)
     out << "<br>" << this->theElements[i].ToStringMatForm(theFormat);
   return out.str();
 }
@@ -29,7 +29,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElements
   this->CheckConsistency();
   //double startTimeDebug=theGlobalVariables.GetElapsedSeconds();
   this->sizePrivate = this->SizeByFormulaOrNeg1();
-  if (this->sizePrivate>0 && MaxElements>0 && this->sizePrivate>MaxElements)
+  if (this->sizePrivate > 0 && MaxElements > 0 && this->sizePrivate > MaxElements)
     return false;
   if(!this->ComputeAllElementsLargeGroup(andWords, MaxElements))
     return false;
@@ -40,7 +40,7 @@ template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, int MaxElements)
 { MacroRegisterFunctionWithName("Subgroup::ComputeAllElements");
   this->InitGenerators();
-  if (this->generators.size==0)
+  if (this->generators.size == 0)
     crash << "Groups with zero generators are not allowed: if you wanted to create a trivial group, "
     << " trivial groups are assumed to have a generator (the identity). " << crash;
   this->theElements.Clear();
@@ -54,30 +54,30 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
   }
   ProgressReport theReport;
   //Warning: not checking whether the generators have repetitions.
-  for (int j=0; j<this->theElements.size; j++)
-    for(int i=0; i<this->generators.size; i++)
-    { currentElement=this->generators[i]*this->theElements[j];
+  for (int j = 0; j < this->theElements.size; j ++)
+    for(int i = 0; i < this->generators.size; i ++)
+    { currentElement = this->generators[i] * this->theElements[j];
       if (this->theElements.AddOnTopNoRepetition(currentElement) && andWords)
-      { if (this->GetWordByFormula==0)
+      { if (this->GetWordByFormula == 0)
         { this->theWords.AddOnTop(this->theWords[j]);
           this->theWords.LastObject()->AddOnTop(i);
         } else
-        { this->theWords.SetSize(this->theWords.size+1);
+        { this->theWords.SetSize(this->theWords.size + 1);
           this->GetWordByFormula(*this, currentElement, *this->theWords.LastObject());
         }
       }
       if (theGlobalVariables.flagReportEverything)
-        if (this->theElements.size%100==0)
+        if (this->theElements.size % 100 == 0)
         { std::stringstream reportStream;
-          LargeInt sizeByFla=this->SizeByFormulaOrNeg1();
+          LargeInt sizeByFla = this->SizeByFormulaOrNeg1();
           reportStream << "So far, generated " << this->theElements.size << " elements";
-          if (sizeByFla>0)
+          if (sizeByFla > 0)
             reportStream << " out of " << sizeByFla.ToString();
           reportStream << ".";
           theReport.Report(reportStream.str());
         }
-      if (MaxElements>0)
-        if (this->theElements.size>MaxElements)
+      if (MaxElements > 0)
+        if (this->theElements.size > MaxElements)
           return false;
     }
   if (theGlobalVariables.flagReportEverything)
@@ -85,42 +85,43 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
     reportStream << "Generated group with a total of " << this->theElements.size << " elements. ";
     theReport.Report(reportStream.str());
   }
-  this->sizePrivate=this->theElements.size;
-  this->flagAllElementsAreComputed=true;
+  this->sizePrivate = this->theElements.size;
+  this->flagAllElementsAreComputed = true;
   if (andWords)
-    this->flagWordsComputed=true;
+    this->flagWordsComputed = true;
   return true;
 }
 
 template <class templateWeylGroup>
 ElementWeylGroup<templateWeylGroup> ElementWeylGroup<templateWeylGroup>::operator^(const ElementWeylGroup<templateWeylGroup>& right) const
-{ if(this->owner != right.owner)
+{ if (this->owner != right.owner)
     crash << "Not allowed to conjugate elements of different Weyl groups.  If you did this intentionally, try changing "
-          << __FILE__ << ":" << __LINE__ << crash;
+    << __FILE__ << ":" << __LINE__ << crash;
   ElementWeylGroup<templateWeylGroup> out;
   out.owner = this->owner;
   out.generatorsLastAppliedFirst = right.generatorsLastAppliedFirst;
   out.generatorsLastAppliedFirst.AddListOnTop(this->generatorsLastAppliedFirst);
-  for (int i=right.generatorsLastAppliedFirst.size-1; i>=0; i--)
+  for (int i = right.generatorsLastAppliedFirst.size - 1; i >= 0; i --)
     out.generatorsLastAppliedFirst.AddOnTop(right.generatorsLastAppliedFirst[i]);
   out.MakeCanonical();
   return out;
 }
 
 template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::ConjugationAction(const ElementWeylGroup<templateWeylGroup>& ConjugateWith,
-                                                            const ElementWeylGroup<templateWeylGroup>& ConjugateOn,
-                                                            ElementWeylGroup<templateWeylGroup>& out)
+void ElementWeylGroup<templateWeylGroup>::ConjugationAction
+(const ElementWeylGroup<templateWeylGroup>& ConjugateWith,
+ const ElementWeylGroup<templateWeylGroup>& ConjugateOn,
+ ElementWeylGroup<templateWeylGroup>& out)
 { out = ConjugateOn^ConjugateWith;
 }
 
 template <class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::operator*=(const ElementWeylGroup<WeylGroupData>& other)
-{ if (this->owner!=other.owner)
+{ if (this->owner != other.owner)
     crash << "This is a programming error: attempting to multiply elements belonging to different Weyl groups. " << crash;
   if (&other==this)
-  { ElementWeylGroup<WeylGroupData> otherCopy=other;
-    (*this)*=otherCopy;
+  { ElementWeylGroup<WeylGroupData> otherCopy = other;
+    (*this) *= otherCopy;
     return;
   }
   this->generatorsLastAppliedFirst.AddListOnTop(other.generatorsLastAppliedFirst);
@@ -139,10 +140,10 @@ std::string ElementWeylGroup<templateWeylGroup>::ToString
 (FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("ElementWeylGroup::ToString");
   (void) theFormat;//avoid unused parameter warning, portable
-  if (this->generatorsLastAppliedFirst.size==0)
+  if (this->generatorsLastAppliedFirst.size == 0)
     return "id";
   std::stringstream out;
-  for (int i=0; i<this->generatorsLastAppliedFirst.size; i++)
+  for (int i = 0; i < this->generatorsLastAppliedFirst.size; i ++)
     out << this->generatorsLastAppliedFirst[i].ToString();
   return out.str();
 }
@@ -150,28 +151,28 @@ std::string ElementWeylGroup<templateWeylGroup>::ToString
 template <class templateWeylGroup>
 unsigned int ElementWeylGroup<templateWeylGroup>::HashFunction() const
 { int top = MathRoutines::Minimum(this->generatorsLastAppliedFirst.size, ::SomeRandomPrimesSize);
-  unsigned int result =0;
-  for (int i=0; i<top; i++)
-    result+=this->generatorsLastAppliedFirst[i].HashFunction()*::SomeRandomPrimes[i];
+  unsigned int result = 0;
+  for (int i = 0; i < top; i ++)
+    result += this->generatorsLastAppliedFirst[i].HashFunction() * ::SomeRandomPrimes[i];
   return result;
 }
 
 template <class templateWeylGroup>
 bool ElementWeylGroup<templateWeylGroup>::operator>(const ElementWeylGroup<templateWeylGroup>& other)const
-{ if (this->owner!=other.owner)
+{ if (this->owner != other.owner)
     crash << "Comparing elements of different Weyl groups. " << crash;
   return this->generatorsLastAppliedFirst>other.generatorsLastAppliedFirst;
 }
 
 template <class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::MakeID(templateWeylGroup& inputWeyl)
-{ this->owner=&inputWeyl;
+{ this->owner = &inputWeyl;
   this->generatorsLastAppliedFirst.SetSize(0);
 }
 
 template <class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::MakeID(const FiniteGroup<ElementWeylGroup<templateWeylGroup> >& inputGroup)
-{ this->owner=inputGroup.generators[0].owner;
+{ this->owner = inputGroup.generators[0].owner;
   this->generatorsLastAppliedFirst.SetSize(0);
 }
 

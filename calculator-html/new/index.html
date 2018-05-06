@@ -49,6 +49,7 @@ var MathQuillHasMatrixSupport = true;
       <input class = "textInputUsername" type = "text" id = "inputUsername" name = "username" placeholder = "username" required><br>
       <input class = "textInputUsername" type = "password" id = "inputPassword" name = "password" placeholder = "password" onkeypress = "if (event.keyCode === 13) loginCalculator();" autocomplete = "on"><br>
       <button class = "buttonSelectPage" onclick = "loginCalculator();">Login</button><br>
+      <div id = "spanLoginStatus" style = "height: 10px; width: 190px; text-align: center"></div>
     </div>
     <div class = "divCenteredItem">
       <a href = "#" onclick = "logout();" class = "linkLogoutInactive linkStandardButtonLike" >Log out</a> 
@@ -192,13 +193,54 @@ ctrl+arrow = select</span>
 
 <div id = "divAccounts" class = "divMainPage">
   <div id = "idAccountsOutput">
-
+    Assign section(s) to teacher(s).<br>
+    <textarea width = "500px" id = "inputSetTeacher" placeholder = "email or user list, comma, space or ; separated"></textarea>
+    <textarea width = "500px" id = "inputSections" placeholder = "list of sections"></textarea>
+    <br>
+    <button class = "buttonNormal" onclick = "getTeachersStudents()"> Set teacher</button>
+    <br><span id = "idOutputSections"></span>
+    <br>
+    <ul>
+      <li>Add <b>admin(s)</b> here.</li> 
+      <li>Added/updated users will have their current course set to: <br>
+        <span class="currentCourseIndicator"></span>
+      </li>
+      <li>To change course use the select course link in the navigation panel.</li>
+      <li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>
+      <li>List default passwords with a similarly separated list.</li> 
+      <li>If left blank, password(s) are not (re)set.</li> 
+      <li>If the password entries are not left blank and the number of passwords does not match the number of added users, the operation will fail (no users will be added).</li> 
+    </ul>
+    <textarea width = "500px" id = "inputAddUsersadmin" placeholder = "admin list, comma, space or ; separated"></textarea>
+    <textarea width = "500px" id = "inputAddDefaultPasswordsadmin" placeholder = "default passwords"></textarea>
+    <textarea width = "500px" id = "inputAddExtraInfoadmin" placeholder = "section/class #"></textarea>
+    <br>
+    <button class = "buttonNormal" onclick = "addEmailsOrUsers('inputAddUsersadmin', '', 'idOutputAdmins', 'admin', 'inputAddExtraInfoadmin', 'inputAddDefaultPasswordsadmin', 'addUsers' )"> Add users</button> 
+    <br>
+    <span id = "idOutputAdmins"></span>
+    <ul>
+      <li>Add <b>student(s)</b> here.</li> 
+      <li>Added/updated users will have their current course set to: <br>
+        <span class="currentCourseIndicator"></span>
+      </li>
+      <li>To change course use the select course link in the top panel.</li>
+      <li>List users with a comma/space bar/new line/tab/semicolumn separated list. </li>
+      <li>List default passwords with a similarly separated list.</li> 
+      <li>If left blank, password(s) are not (re)set.</li> 
+      <li>If the password entries are not left blank and the number of passwords does not match the number of added users, the operation will fail (no users will be added).</li> 
+    </ul>
+    <textarea width = "500px" id = "inputAddUsersstudent" placeholder = "user list, comma, space or ; separated"></textarea>
+    <textarea width = "500px" id = "inputAddDefaultPasswordsstudent" placeholder = "default passwords"></textarea>
+    <textarea width = "500px" id = "inputAddExtraInfostudent" placeholder = "section/class #"></textarea>
+    <br>
+    <button class = "normalButton" onclick = "addEmailsOrUsers('inputAddUsersstudent', '', 'idOutputStudents', 'student', 'inputAddExtraInfostudent', 'inputAddDefaultPasswordsstudent', 'addUsers' )"> Add users</button>
+    <br>
+    <span id = "idOutputStudents"></span>
   </div>
 </div>
 
 <div id = "divServer" class = "divMainPage">
   <div id = "idServerStatus">
-
   </div>
 </div>
 

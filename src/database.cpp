@@ -879,7 +879,7 @@ bool DatabaseRoutineS::AddUsersFromEmails
     findUser.SetSize(2);
     findUser[0][DatabaseStrings::labelUsername] = currentUser.username;
     findUser[1][DatabaseStrings::labelEmail] = currentUser.email;
-    stOutput << "DEBUG: user json: " << currentUser.ToJSON();
+    //stOutput << "DEBUG: user json: " << currentUser.ToJSON();
     if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome(DatabaseStrings::tableUsers, findUser, foundUser, &comments))
     { if (!currentUser.Iexist(&comments))
       { if (!currentUser.StoreToDB(false, &comments))
@@ -893,8 +893,8 @@ bool DatabaseRoutineS::AddUsersFromEmails
         DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, foundUser, &comments);
     } else
     { outputNumUpdatedUsers ++;
-    //currentUser may have its updated entries modified by the functions above.
-      stOutput << "DEBUG: before updating user json: " << currentUser.ToJSON().ToString(false);
+      //currentUser may have its updated entries modified by the functions above.
+      //stOutput << "DEBUG: before updating user json: " << currentUser.ToJSON().ToString(false);
       if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON(DatabaseStrings::tableUsers, findUser, currentUser.ToJSON(), &comments))
         result = false;
     }
@@ -960,8 +960,8 @@ bool UserCalculator::SendActivationEmail(std::stringstream& comments)
   std::string activationAddress;
   if (!this->GetActivationAbsoluteAddress(activationAddress, comments))
     return false;
-//  stOutput << "<hr> all result strings: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited();
-//  stOutput << "<br> all result string names: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();
+  //stOutput << "<hr> all result strings: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited();
+  //stOutput << "<br> all result string names: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();
   this->email = this->GetSelectedRowEntry("email");
   //theGlobalVariables.FallAsleep(1000000);
 

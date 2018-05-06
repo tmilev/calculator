@@ -65,7 +65,37 @@ function toggleAdminPanels(){
 }
 
 function loginWithServerCallback(incomingString, result){
-  if (incomingString === "not logged in") {
+  console.log(incomingString);
+  document.getElementById("spanLoginStatus").innerHTML = "";
+  var success = false;
+  var loginErrorMessage = "";
+  try {
+    var parsedAuthentication = JSON.parse(incomingString);
+    if (parsedAuthentication["status"] === "logged in") {
+      status = true;
+      thePage.authenticationToken = parsedAuthentication.authenticationToken;
+      thePage.username = parsedAuthentication.username;
+      thePage.userRole = parsedAuthentication.userRole;
+      thePage.flagUserLoggedIn = true;
+      document.getElementById("spanUserIdInAccountsPage").innerHTML = thePage.username;
+      document.getElementById("inputUsername").value = thePage.username;
+      toggleAccountPanels();
+      toggleAdminPanels();
+      thePage.storeSettingsToCookies();
+      hideLoginCalculatorButtons();
+      showLogoutButton();
+    } else if (parsedAuthentication["status"] === "not logged in"){
+      if (parsedAuthentication["error"] !== undefined) {
+        loginErrorMessage = parsedAuthentication["error"];
+      }
+    }
+  } catch (e) {
+    console.log(`Bad authentication ${e}. Incoming login: ${incomingString}.`);
+  }
+  if (!success) {
+    if (loginErrorMessage!== undefined && loginErrorMessage !== "") {
+      document.getElementById("spanLoginStatus").innerHTML = decodeURIComponent(loginErrorMessage);
+    }
     thePage.authenticationToken = "";
     thePage.username = "";
     thePage.userRole = "";
@@ -74,22 +104,6 @@ function loginWithServerCallback(incomingString, result){
     toggleAccountPanels();
     toggleAdminPanels();
     return;
-  }
-  try {
-    var parsedAuthentication = JSON.parse(incomingString);
-    thePage.authenticationToken = parsedAuthentication.authenticationToken;
-    thePage.username = parsedAuthentication.username;
-    thePage.userRole = parsedAuthentication.userRole;
-    thePage.flagUserLoggedIn = true;
-    document.getElementById("spanUserIdInAccountsPage").innerHTML = thePage.username;
-    document.getElementById("inputUsername").value = thePage.username;
-    toggleAccountPanels();
-    toggleAdminPanels();
-    thePage.storeSettingsToCookies();
-    hideLoginCalculatorButtons();
-    showLogoutButton();
-  } catch (e) {
-    console.log(`Bad authentication ${e}`);
   }
 }
 
@@ -115,32 +129,33 @@ function onGoogleSignIn(googleUser){
 
 function startGoogleLogin() {
   //console.log("Got to here");
-  if (!thePage.pages.login.initialized){
-    gapi.signin2.render('divGoogleLoginButton', {
-      'scope': 'profile email',
-      'onsuccess': onGoogleSignIn,
-      'onfailure': null
+  if (typeof (gapi) !== "undefined") {
+    if (!thePage.pages.login.initialized){
+      gapi.signin2.render('divGoogleLoginButton', {
+        'scope': 'profile email',
+        'onsuccess': onGoogleSignIn,
+        'onfailure': null
+      });
+    }
+    gapi.load('auth2', function() {
+      //auth2Google = 
+      gapi.auth2.init({
+        client_id: '538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com',
+        // Scopes to request in addition to 'profile' and 'email'
+        //scope: 'additional_scope'
+      });
     });
   }
-  gapi.load('auth2', function() {
-    //auth2Google = 
-    gapi.auth2.init({
-      client_id: '538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com',
-      // Scopes to request in addition to 'profile' and 'email'
-      //scope: 'additional_scope'
-    });
-  });
-
 }
 
-function showLoginCalculatorButtons(){
+function showLoginCalculatorButtons() {
   document.getElementById("divLoginCalculatorPanel").classList.remove("divInvisible");
   document.getElementById("divLoginCalculatorPanel").classList.add("divVisible");
   document.getElementById("divLoginPanelUsernameReport").classList.remove("divVisible");
   document.getElementById("divLoginPanelUsernameReport").classList.add("divInvisible");
 }
 
-function hideLoginCalculatorButtons(){
+function hideLoginCalculatorButtons() {
   document.getElementById("divLoginCalculatorPanel").classList.remove("divVisible");
   document.getElementById("divLoginCalculatorPanel").classList.add("divInvisible");
   document.getElementById("divLoginPanelUsernameReport").innerHTML = thePage.username;
@@ -148,7 +163,7 @@ function hideLoginCalculatorButtons(){
   document.getElementById("divLoginPanelUsernameReport").classList.add("divVisible");
 }
 
-function showLogoutButton(){
+function showLogoutButton() {
   for (;;) {
     var theLogoutLinks = document.getElementsByClassName("linkLogoutInactive");
     if (theLogoutLinks.length === 0) {
@@ -159,8 +174,8 @@ function showLogoutButton(){
   }
 }
 
-function hideLogoutButton(){
-  for (;;){
+function hideLogoutButton() {
+  for (;;) {
     var theLogoutLinks = document.getElementsByClassName("linkLogoutActive");
     if (theLogoutLinks.length === 0) {
       break;
@@ -170,12 +185,14 @@ function hideLogoutButton(){
   }
 }
 
-function logoutGoogle(){
+function logoutGoogle() {
   thePage.googleToken = "";
   thePage.googleProfile = {};
   thePage.storeSettingsToCookies();
   thePage.storeSettingsToLocalStorage();
-  gapi.auth2.getAuthInstance().disconnect();
+  if (typeof (gapi) !== "undefined") {
+    gapi.auth2.getAuthInstance().disconnect();
+  }
   hideLogoutButton();
   thePage.hideProfilePicture();
 }
@@ -192,7 +209,7 @@ function getQueryVariable(variable) {
   return null;
 }
 
-function init(){
+function init() {
   logoutRequestFromUrl = getQueryVariable("logout");
   locationRequestFromUrl = getQueryVariable("location");
   if (logoutRequestFromUrl === "true") {

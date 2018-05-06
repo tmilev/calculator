@@ -9,7 +9,7 @@ function selectCurrentProblem(problem, exerciseType) {
   }
   //thePage.currentCourse.request = exerciseType;
   thePage.storeSettingsToCookies();
-  thePage.flagCurrentProblemLoaded = false;
+  thePage.pages.problemPage.flagLoaded = false;
   thePage.selectPage("problemPage");
 }
 
@@ -152,13 +152,10 @@ Problem.prototype.writeToHTML = function(outputElement) {
 
 function updateProblemPageCallback(input, outputComponent) {
   var theFileName = thePage.currentCourse.fileName;
-  if (typeof outputComponent === "string") {
+  if (typeof outputComponent === "string" || outputComponent === undefined || outputComponent === null) {
     outputComponent = document.getElementById(outputComponent);
   }
   if (outputComponent === null || outputComponent === undefined) {
-    outputComponent = document.getElementById("divProblemPageContentContainer");
-  }
-  if (outputComponent.innerHTML === undefined) {
     outputComponent = document.getElementById("divProblemPageContentContainer");
   }
   var currentProblem = thePage.getProblem(theFileName);
@@ -166,7 +163,8 @@ function updateProblemPageCallback(input, outputComponent) {
   try {
     theProblem = JSON.parse(input);
   } catch (e) {
-    outputComponent.innerHTML = `Error parsing: ${e}. Failed to parse${input}`;
+    outputComponent.innerHTML = `Error parsing: ${e}. Failed to parse: ${input}`;
+    thePage.cleanUpLoginSpan(outputComponent);
     return;
   }
   currentProblem.decodedProblem = decodeURIComponent(theProblem["problem"]);
@@ -205,10 +203,10 @@ function updateProblemPageCallback(input, outputComponent) {
 }
 
 function updateProblemPage() {
-  if (thePage.flagCurrentProblemLoaded) {
+  if (thePage.pages.problemPage.flagLoaded) {
     return;
   }
-  thePage.flagCurrentProblemLoaded = true;
+  thePage.pages.problemPage.flagLoaded = true;
   var theProblem = thePage.getCurrentProblem();
   console.log("Current course: " + JSON.stringify(thePage.currentCourse));
   var theURL = `${pathnames.calculatorAPI}?${theProblem.getURLRequestFileCourseTopics()}`;

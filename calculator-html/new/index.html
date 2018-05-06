@@ -49,16 +49,18 @@ var MathQuillHasMatrixSupport = true;
       <input class = "textInputUsername" type = "text" id = "inputUsername" name = "username" placeholder = "username" required><br>
       <input class = "textInputUsername" type = "password" id = "inputPassword" name = "password" placeholder = "password" onkeypress = "if (event.keyCode === 13) loginCalculator();" autocomplete = "on"><br>
       <button class = "buttonSelectPage" onclick = "loginCalculator();">Login</button><br>
-      <div id = "spanLoginStatus" style = "height: 10px; width: 190px; text-align: center"></div>
-    </div>
+    </div> <!--divLoginCalculatorPanel-->
     <div class = "divCenteredItem">
       <a href = "#" onclick = "logout();" class = "linkLogoutInactive linkStandardButtonLike" >Log out</a> 
     </div><!--divCenteredItem-->
     <div class = "divCenteredItem">
-      <b>Google login:</b><br><br>
-    <div id = "divGoogleLoginButton">Google unavailable (did page fully load? Internet?).</div>
-  </div><!--divCenteredItem-->
-</div><!--centerVerticallyInPageContainer-->
+      <b>Google login:</b>
+      <div id = "divGoogleLoginButton">Google unavailable (did page fully load? Internet?).</div>
+    </div><!--divCenteredItem-->
+    <div>
+      <div id = "spanLoginStatus" style = "height: 10px; width: 190px; text-align: center"></div>
+    </div>
+  </div><!--centerVerticallyInPageContainer-->
 </div><!--centerHorizontallyInPageContainer-->
 </div><!--divLoginPage-->
 <div id = "divProblemPage" class = "divMainPage">

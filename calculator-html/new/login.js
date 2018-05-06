@@ -11,12 +11,44 @@ function loginCalculator(){
   });
 }
 
+function doReload(){
+  location.reload();
+}
+
+var reloadPageTimer = null;
+
+function reloadPage(reason, time){
+  clearTimeout(reloadPageTimer);
+  reloadPageTimer = null;
+  if (time < 0){
+    time = 0;
+  }
+  var timeRemaining = time / 1000;
+  document.getElementById("spanLoginStatus").innerHTML = reason + `[in ${timeRemaining} (s)]`; 
+  if (time <= 0){
+    doReload();
+  } else { 
+    reloadPageTimer = setTimeout(reloadPage.bind(null, reason, time - 1000), 1000);
+  }
+}
+
 function logout(){
   logoutGoogle();
+  if (thePage.userRole === "admin") {
+    reloadPage("<b>Logging out admin: mandatory page reload. </b>", 3000);
+  } else { 
+    document.getElementById("spanLoginStatus").innerHTML = `
+<b><a href='#' onclick='reloadPage("<b>User requested reload. </b>", 3000);'>Reload page</a> 
+for complete logout. </b> 
+Do this if using <b>public computer</b>. `;
+  }
   thePage.username = "";
   thePage.userRole = "";
   thePage.flagUserLoggedIn = false;
+  thePage.pages.problemPage.flagLoaded = false;
   document.getElementById("inputPassword").value = "";
+  document.getElementById("divProblemPageContentContainer").innerHTML = "";
+  document.getElementById("divCurrentCourse").innerHTML = "";
   thePage.authenticationToken = "";
   thePage.storeSettingsToCookies();
   thePage.storeSettingsToLocalStorage();

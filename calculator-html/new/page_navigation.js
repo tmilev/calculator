@@ -25,7 +25,8 @@ function Page() {
       menuButtonId: "buttonProblemPage",
       container: null,
       selectFunction: updateProblemPage,
-      problems: {}
+      problems: {},
+      flagLoaded: false
     },
     calculator: {
       id: "divCalculatorPage",
@@ -90,7 +91,6 @@ function Page() {
     fileName: ""
   };
   this.scriptsInjected = {};
-  this.flagCurrentProblemLoaded = false;
   this.logoutRequestFromUrl = null;
   this.locationRequestFromUrl = null;
   this.googleProfile = {};
@@ -299,10 +299,19 @@ Page.prototype.selectPage = function(inputPage) {
     this.pages[this.currentPage].selectFunction();
   }
   location.href = `#${this.currentPage}`;
-};
+}
 
 Page.prototype.getCurrentProblem = function() {
   return this.getProblem(this.currentCourse.fileName);
+}
+
+Page.prototype.cleanUpLoginSpan = function(componentToCleanUp){
+  var loginInfo = document.getElementById("spanLoginRequired");
+  if (loginInfo !== null) {
+    if (loginInfo.parentElement === componentToCleanUp){
+      loginInfo.innerHTML = "<b>...</b>";
+    }
+  }
 }
 
 Page.prototype.getProblem = function(fileName) {

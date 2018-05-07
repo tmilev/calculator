@@ -39,8 +39,7 @@ function logout(){
   } else { 
     document.getElementById("spanLoginStatus").innerHTML = `
 <b><a href='#' onclick='reloadPage("<b>User requested reload. </b>", 3000);'>Reload page</a> 
-for complete logout. </b> 
-Do this if using <b>public computer</b>. `;
+for complete logout (when <span style='color:red'>using public computer</span>).</b>`;
   }
   thePage.username = "";
   thePage.userRole = "";

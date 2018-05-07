@@ -45,8 +45,8 @@ problemTitle {
 problemNavigation {
   text-align: center;
   display: inline-block;
-  margin: 4px;
-  padding: 4px;
+  margin-right: 4px;
+  padding-right: 4px;
   white-space: nowrap;
 /*  border: 1px solid black;*/
 }
@@ -721,6 +721,25 @@ a.linkStandardButtonLike{
 }
 a.linkStandardButtonLike:hover{
   background-color: #dfdfdf;
+}
+span.problemLinkSelectedPractice{
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  text-decoration: none;  
+}
+span.problemLinkSelectedQuiz{
+  display: inline-block;
+  margin:  3px;
+  padding: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  font-weight: bold;
+  text-decoration: none;  
 }
 a.problemLinkQuiz{
   display: inline-block;

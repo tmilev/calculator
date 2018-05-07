@@ -754,6 +754,9 @@ std::string HtmlInterpretation::GetJSONUserInfo()
   output[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
   output[DatabaseStrings::labelAuthenticationToken] = theGlobalVariables.userDefault.actualAuthenticationToken;
   output[DatabaseStrings::labelUserRole] = theGlobalVariables.userDefault.userRole;
+  output[DatabaseStrings::labelInstructor] = theGlobalVariables.userDefault.instructorInDB;
+  output[DatabaseStrings::labelSection] = theGlobalVariables.userDefault.sectionInDB;
+  output[DatabaseStrings::labelCurrentCourses] = theGlobalVariables.userDefault.courseInDB;
   return output.ToString(false);
 }
 
@@ -1606,6 +1609,10 @@ std::string HtmlInterpretation::GetAccountsPageJSON(const std::string& hostWebAd
   columnsToRetain.AddOnTop(DatabaseStrings::labelUsername);
   columnsToRetain.AddOnTop(DatabaseStrings::labelEmail);
   columnsToRetain.AddOnTop(DatabaseStrings::labelActivationToken);
+  columnsToRetain.AddOnTop(DatabaseStrings::labelCurrentCourses);
+  columnsToRetain.AddOnTop(DatabaseStrings::labelInstructor);
+  columnsToRetain.AddOnTop(DatabaseStrings::labelSection);
+  columnsToRetain.AddOnTop(DatabaseStrings::labelSemester);
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection
        (DatabaseStrings::tableUsers, findStudents, students, columnsToRetain, - 1, &totalStudents, &commentsOnFailure))
   { output["error"] = "Failed to load user info. Comments: " + commentsOnFailure.str();

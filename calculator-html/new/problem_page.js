@@ -68,38 +68,39 @@ Problem.prototype.getURL = function(isScoredQuiz) {
 Problem.prototype.getProblemNavigation = function() {
   var result = "";
   result += "<problemNavigation>";
-  if (this.flagForReal !== true && this.flagForReal !== "true") {
-    result += `<b style = 'color:green'>Scores not recorded. </b>`;
-  } else {
-    result += `<b style = 'color:brown'>Scores are recorded. </b>`;
-  }
+  var linkType = "problemLinkPractice";
   var defaultRequest = 'exerciseJSON';
   if (this.flagForReal && thePage.flagUserLoggedIn) {
     defaultRequest = 'scoredQuizJSON';
+    linkType = "problemLinkQuiz"
   }
   //if (!thePage.flagUserLoggedIn) {
   //  defaultRequest = 'exerciseJSON';
   //}
   if (this.previousProblem !== null && this.previousProblem !== "") {
-    result += `<a class='problemLinkPractice' href='#${thePage.getProblem(this.previousProblem).getURLRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.previousProblem}' ,'${defaultRequest}')">&#8592;</a>`;
+    result += `<a class='${linkType}' href='#${thePage.getProblem(this.previousProblem).getURLRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.previousProblem}' ,'${defaultRequest}')">&#8592;</a>`;
   }
 
   if (this.flagForReal && thePage.flagUserLoggedIn) {
     result += `<a class='problemLinkPractice' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.fileName}' ,'exerciseJSON')">Practice</a>`;
   } else {
-    result += "<b style='color:green'>Practice</b>";
+    result += "<span class = 'problemLinkSelectedPractice' style='color:green'>Practice</span>";
   }
   if (!this.flagForReal && thePage.flagUserLoggedIn) { 
-    result += `<a class='problemLinkPractice' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.fileName}' ,'scoredQuizJSON')">Quiz</a>`;
+    result += `<a class='problemLinkQuiz' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.fileName}' ,'scoredQuizJSON')">Quiz</a>`;
   } else {
     if (this.flagForReal) {
-      result += "<b style='color:brown'>Quiz</b>";
+      result += "<span class = 'problemLinkSelectedQuiz' style='color:brown'>Quiz</span>";
     }
   }
   if (this.nextProblem !== null && this.nextProblem !== "") {
-    result+= `<a class='problemLinkPractice' href='#${thePage.getProblem(this.nextProblem).getURLRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.nextProblem}' ,'${defaultRequest}')">&#8594;</a>`;
+    result+= `<a class='${linkType}' href='#${thePage.getProblem(this.nextProblem).getURLRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.nextProblem}' ,'${defaultRequest}')">&#8594;</a>`;
   }
-
+  if (this.flagForReal !== true && this.flagForReal !== "true") {
+    result += `<b style = 'color:green'>Scores not recorded. </b>`;
+  } else {
+    result += `<b style = 'color:brown'>Scores are recorded. </b>`;
+  }
   result += "</problemNavigation>";
   return result;
 }
@@ -109,8 +110,8 @@ Problem.prototype.writeToHTML = function(outputElement) {
     outputElement = document.getElementById(outputElement);
   }
   var topPart = "";
-  topPart += `<problemTitle>${this.problemLabel} ${this.title}</problemTitle>`;
   topPart += this.getProblemNavigation();
+  topPart += `<problemTitle>${this.problemLabel} ${this.title}</problemTitle>`;
   topPart += "<br>";
   outputElement.innerHTML = topPart + this.decodedProblem;
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {

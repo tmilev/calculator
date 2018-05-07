@@ -3,11 +3,11 @@
 
 function getAccountsTable(inputAccounts) {
   var result = "";
-  result += "<table><tr><th>username</th><th>Email</th><th>Activated?</th></tr>";
-
+  result += "<table><tr><th>username</th><th>Email</th><th>Activated?</th><th>Course</th><th>Section</th><th>Semester</th></tr>";
   for (var counterAccounts = 0; counterAccounts < inputAccounts.length; counterAccounts ++){
     result += "<tr>";
     var currentUser = inputAccounts[counterAccounts];
+    console.log("Current user: " + JSON.stringify(currentUser));
     result += `<td>${currentUser.username}</td>`;
     if (currentUser.email !== undefined) {
       result += `<td>${currentUser.email}</td>`;
@@ -18,6 +18,21 @@ function getAccountsTable(inputAccounts) {
       result += `<td><span style = 'color:green'>${currentUser.activationToken}</span></td>`;
     } else {
       result += "<td><span style = 'color:red'>Not activated</span></td>";
+    }
+    if (currentUser.currentCourses !== undefined) {
+      result += `<td>${currentUser.currentCourses}</td>`;
+    } else {
+      result += "<td>-</td>";
+    }
+    if (currentUser.studentSection !== undefined) {
+      result += `<td>${currentUser.studentSection}</td>`;
+    } else {
+      result += "<td>-</td>";
+    }
+    if (currentUser.semester !== undefined) {
+      result += `<td>${currentUser.semester}</td>`;
+    } else {
+      result += "<td>-</td>";
     }
     result += "</tr>";
   }

@@ -4346,7 +4346,7 @@ void ElementZmodP ::operator*=(const ElementZmodP& other)
 
 bool LargeIntUnsigned::IsPossiblyPrimeMillerRabinOnce
 (unsigned int theBase, int theExponentOfThePowerTwoFactorOfNminusOne,
- const LargeIntUnsigned& theOddFactorOfNminusOne)
+ const LargeIntUnsigned& theOddFactorOfNminusOne, std::stringstream* comments)
 { MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabin");
   ElementZmodP thePower, theOne;
   thePower.theModulo = *this;
@@ -4360,7 +4360,27 @@ bool LargeIntUnsigned::IsPossiblyPrimeMillerRabinOnce
   { if (thePower == - 1)
       return true;
     if (i == theExponentOfThePowerTwoFactorOfNminusOne - 1)
+    { if (comments != 0)
+      { std::stringstream theTwoPowerContraStream, theTwoPowerStream;
+        if (i > 0)
+        { theTwoPowerContraStream << "2";
+          if (i > 1)
+            theTwoPowerContraStream << "^{ " << i << "} \\cdot ";
+        }
+        theTwoPowerStream << "2";
+        if (theExponentOfThePowerTwoFactorOfNminusOne > 1)
+          theTwoPowerStream << "^{" << theExponentOfThePowerTwoFactorOfNminusOne << "}";
+        *comments << this->ToString() << " is not prime because \\(" << theBase << "^{"
+        << theTwoPowerContraStream.str()
+        << theOddFactorOfNminusOne.ToString() << "} = " << thePower.theValue.ToString() << " ~ mod ~"
+        << this->ToString() << " \\)"
+        << "<br>If " << this->ToString() << " were prime, we'd have to have that \\("
+        << theBase << "^{" << theTwoPowerStream.str() << "\\cdot" << theOddFactorOfNminusOne
+        << "} = " << theBase << "^{" << this->ToString() << " - 1} = 1 ~mod ~" << this->ToString() << "\\)"
+        << "<br> which can be reasoned to contradict the first equality.";
+      }
       return false;
+    }
     thePower *= thePower;
   }
   return false;
@@ -4395,7 +4415,7 @@ bool LargeIntUnsigned::TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& ou
   return true;
 }
 
-bool LargeIntUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun)
+bool LargeIntUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun, std::stringstream* comments)
 { MacroRegisterFunctionWithName("LargeIntUnsigned::IsPossiblyPrimeMillerRabin");
   if (this->IsEven())
     return *this == 2;
@@ -4403,7 +4423,7 @@ bool LargeIntUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun)
   //std::cout << "got to here 1 \n";
   //std::cout.flush();
   LargeIntUnsigned::GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(100000, aFewPrimes);
-  if (numTimesToRun>aFewPrimes.size)
+  if (numTimesToRun > aFewPrimes.size)
     numTimesToRun = aFewPrimes.size;
   LargeIntUnsigned theOddFactorOfNminusOne = *this;
   int theExponentOfThePowerTwoFactorOfNminusOne = 0;
@@ -4425,7 +4445,7 @@ bool LargeIntUnsigned::IsPossiblyPrimeMillerRabin(int numTimesToRun)
       theReport.Report(reportStream.str());
     }
     if (!this->IsPossiblyPrimeMillerRabinOnce
-        (aFewPrimes[i], theExponentOfThePowerTwoFactorOfNminusOne, theOddFactorOfNminusOne))
+         (aFewPrimes[i], theExponentOfThePowerTwoFactorOfNminusOne, theOddFactorOfNminusOne, comments))
       return false;
   }
   return true;
@@ -4436,7 +4456,7 @@ bool CalculatorFunctionsGeneral::innerIsPrimeMillerRabin(Calculator& theCommands
   LargeInt theInt;
   if (!input.IsInteger(&theInt))
     return false;
-  bool resultBool = theInt.value.IsPossiblyPrimeMillerRabin(10);
+  bool resultBool = theInt.value.IsPossiblyPrimeMillerRabin(10, &theCommands.Comments);
   Rational result = 1;
   if (!resultBool)
     result = 0;

@@ -52,10 +52,10 @@ public:
   bool IsEven()const;
   bool IsPositive()const;
   bool TryToFindWhetherIsPower(bool& outputIsPower, LargeInt& outputBase, int& outputPower)const;
-  bool IsPossiblyPrimeMillerRabin(int numTimesToRun = 1);
+  bool IsPossiblyPrimeMillerRabin(int numTimesToRun = 1, std::stringstream* comments = 0);
   bool IsPossiblyPrimeMillerRabinOnce
   (unsigned int theBase, int theExponentOfThePowerTwoFactorOfNminusOne,
-   const LargeIntUnsigned& theOddFactorOfNminusOne);
+   const LargeIntUnsigned& theOddFactorOfNminusOne, std::stringstream* comments);
   bool IsEqualToOne()const;
   bool IsGEQ(const LargeIntUnsigned& x)const;
   static void GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output);

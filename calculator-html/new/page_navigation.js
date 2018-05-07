@@ -28,6 +28,17 @@ function Page() {
       problems: {},
       flagLoaded: false
     },
+    editPage : {
+      id: "divEditPage",
+      menuButtonId: "buttonEditPage",
+      container: null,
+      selectFunction: selectEditPage,
+      flagLoaded: false,
+      storage: {
+        currentlyEditedPage: null
+      }
+    },
+
     calculator: {
       id: "divCalculatorPage",
       menuButtonId: "buttonSelectCalculator",

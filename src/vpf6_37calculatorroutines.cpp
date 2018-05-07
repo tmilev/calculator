@@ -471,7 +471,7 @@ bool CalculatorFunctionsGeneral::innerHexToInteger(Calculator& theCommands, cons
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerHexToInteger");
   std::string inputString;
   if (!input.IsOfType(&inputString))
-    inputString = input.ToString();
+    return false;
   LargeInt result;
   if (!Crypto::ConvertHexToInteger(inputString, result))
     return theCommands << "Failed to interpret " << inputString

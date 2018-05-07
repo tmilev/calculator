@@ -212,11 +212,16 @@ bool LargeIntUnsigned::operator>(const LargeIntUnsigned& other)const
 { return other < *this;
 }
 
-bool LargeIntUnsigned::IsEven()const
-{ //stOutput << "<br>remainder by 2 is " << ((*this)%2).ToString()
-  //<< " and ((*this)%2)==0 is " << (((*this)%2)==0);
+bool LargeIntUnsigned::IsEven() const
+{ //stOutput << "<br>DEBUG: remainder by 2 is " << ((*this) % 2).ToString()
+  //<< " and ((*this)%2)==0 is " << (((*this) % 2) == 0);
   if (LargeIntUnsigned::CarryOverBound % 2 == 0)
-    return (* this->theDigits.LastObject()) % 2 == 0;
+  { //stOutput << "<br>DEBUG: (* this->theDigits.LastObject()) % 2: " << ((* this->theDigits.LastObject()) % 2);
+    bool result = (this->theDigits[0] % 2) == 0;
+    //stOutput << "<br>DEBUG: result is: " << result << "<br>Last digit: " << (* (this->theDigits.LastObject())) << "<br>"
+    //<< "and so " << this->ToString() << " is even.<br>";
+    return result;
+  }
   return ((*this) % 2) == 0;
 }
 

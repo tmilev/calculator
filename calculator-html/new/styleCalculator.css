@@ -1025,3 +1025,8 @@ font-weight: bold;
   opacity: 0;
   transition: all 1s;
 }
+
+#editor { 
+  height: 380px;
+  font-size: 100%;
+}

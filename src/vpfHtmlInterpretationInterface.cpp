@@ -876,6 +876,57 @@ std::string HtmlInterpretation::GetBrowseProblems()
 
 }
 
+std::string HtmlInterpretation::GetEditPageJSON()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::GetEditPageJSON");
+  JSData output;
+  if ((!theGlobalVariables.flagLoggedIn || !theGlobalVariables.UserDefaultHasAdminRights()) &&
+      !theGlobalVariables.flagRunningApache)
+  { output["error"] ="Only logged-in admins are allowed to edit pages.";
+    return output.ToString(false);
+  }
+  CalculatorHTML theFile;
+  theFile.LoadFileNames();
+  std::stringstream failureStream;
+  if (!theFile.LoadMe(false, failureStream, theGlobalVariables.GetWebInput("randomSeed")))
+  { std::stringstream errorStream;
+    errorStream << " <b>Failed to load file: " << theFile.fileName << ", perhaps the file does not exist. </b>"
+    << failureStream.str();
+    output["error"] = errorStream.str();
+    return output.ToString(false);
+  }
+  if (!theFile.ParseHTML(failureStream))
+  { std::stringstream errorStream;
+    errorStream << "<b>Failed to parse file: " << theFile.fileName
+    << ".</b> Details:<br>" << failureStream.str();
+    output["error"] = errorStream.str();
+    return output.ToString(false);
+  }
+  HashedList<std::string, MathRoutines::hashString> theAutocompleteKeyWords;
+  theFile.initBuiltInSpanClasses();
+  std::stringstream comments;
+  if (theFile.flagIsExamProblem)
+  { Calculator tempCalculator;
+    tempCalculator.init();
+    tempCalculator.ComputeAutoCompleteKeyWords();
+    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClasses);
+    theAutocompleteKeyWords.AddOnTopNoRepetition(tempCalculator.autoCompleteKeyWords);
+    theFile.initAutocompleteExtras();
+    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.autoCompleteExtras);
+  } else
+  { theFile.LoadAndParseTopicList(comments);
+    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClasses);
+    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorClassesAnswerFields);
+    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicElementNames);
+    theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicBundles);
+  }
+  JSData theAutoCompleteWordsJS(JSData::JSarray);
+  for (int i = 0; i < theAutocompleteKeyWords.size; i ++)
+    theAutoCompleteWordsJS[i] = theAutocompleteKeyWords[i];
+  output["autoComplete"] = theAutoCompleteWordsJS;
+  output["content"] = HtmlRoutines::ConvertStringToURLString(theFile.inputHtml, false);
+  return output.ToString(false);
+}
+
 std::string HtmlInterpretation::GetEditPageHTML()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetEditPageHTML");
   std::stringstream ouT, outHead, outBody;

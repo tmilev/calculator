@@ -168,6 +168,7 @@ public:
   int ProcessComputationIndicator();
   int ProcessBrowseProblems();
   int ProcessEditPage();
+  int ProcessEditPageJSON();
   int ProcessFolderOrFile();
   int ProcessFolder();
   int ProcessFile();

@@ -3582,6 +3582,13 @@ int WebWorker::ProcessEditPage()
   return 0;
 }
 
+int WebWorker::ProcessEditPageJSON()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessEditPageJSON");
+  this->SetHeaderOKNoContentLength();
+  stOutput << HtmlInterpretation::GetEditPageJSON();
+  return 0;
+}
+
 #include "vpfHeader2Math10_LaTeXRoutines.h"
 int WebWorker::ProcessSlidesOrHomeworkFromSource()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSlidesOrHomeworkFromSource");
@@ -4290,6 +4297,8 @@ int WebWorker::ServeClient()
     return this->ProcessUserInfoJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "editPage")
     return this->ProcessEditPage();
+  else if (theGlobalVariables.userCalculatorRequestType == "editPageJSON")
+    return this->ProcessEditPageJSON();
   else if (theGlobalVariables.userCalculatorRequestType == "modifyPage")
     return this->ProcessModifyPage();
   else if (theGlobalVariables.userCalculatorRequestType == "slidesFromSource" ||

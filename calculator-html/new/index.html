@@ -4,6 +4,7 @@
 <link type = "text/css" rel = "stylesheet" href = "/html-common/mathquill.css"/>
 <script src = "/html-common/jquery.min.js"></script>
 <script type = "text/javascript" src = "/html-common/ace/src-min/ace.js" charset = "utf-8"></script>
+<script src="/html-common/ace/src-min/ext-language_tools.js"></script>
 <script src = "/html-common/mathquill.min-matrix.js"></script>
 <!--script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
 </script-->
@@ -71,7 +72,11 @@ var MathQuillHasMatrixSupport = true;
 </div><!--divProblemPage-->
 <div id = "divEditPage" class = "divMainPage">
   <div id = "divEditPageContainer">
-    <div id = "editor" name = "editor">
+    <button class = "buttonSaveEdit" onclick = "storeEditedPage();">Save</button> 
+    <span class = "spanLabelEditedPageFileName" id = "spanLabelEditedPageFileName"></span> 
+    <span id = "spanLabelEditedPageComments" class = "divInvisible">To include problem in topic list:</span> <br>
+    <textarea id = "textareaTopicListEntry"></textarea>
+    <div id = "divEditorAce" name = "divEditorAce">
 
     </div>
   </div>

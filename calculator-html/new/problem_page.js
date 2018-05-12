@@ -110,9 +110,14 @@ Problem.prototype.writeToHTML = function(outputElement) {
     outputElement = document.getElementById(outputElement);
   }
   var topPart = "";
+  topPart += "<problemInfoBar>";
   topPart += this.getProblemNavigation();
   topPart += `<problemTitle>${this.problemLabel} ${this.title}</problemTitle>`;
+  topPart += "</problemInfoBar>";
   topPart += "<br>";
+  if (thePage.user.hasProblemEditRights()) {
+    topPart += "Edit panel here";
+  }
   outputElement.innerHTML = topPart + this.decodedProblem;
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {
     var currentAnswerPanel = this.answers[counterAnswers];

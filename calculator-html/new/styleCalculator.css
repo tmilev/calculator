@@ -33,6 +33,12 @@ tr.problemContainerRow{
 td.problemContainerCell{
 /*height: 500px;*/
 }
+
+problemInfoBar{
+  display: block;
+  background-color: #fafafa;
+  width: 100%;
+}
 problemTitle {
   text-align: center;
   display: inline-block;
@@ -1026,7 +1032,16 @@ font-weight: bold;
   transition: all 1s;
 }
 
-#editor { 
-  height: 380px;
+#divEditorAce { 
+  height: 85%;
   font-size: 100%;
+}
+
+span.spanLabelEditedPageFileName {
+  margin:  3px;
+  padding: 3px;
+  background-color: #eaeaea;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+
 }

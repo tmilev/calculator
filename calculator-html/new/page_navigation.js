@@ -1,3 +1,12 @@
+function User(){
+  this.name = "";
+  this.googleProfile = {};
+  this.googleToken = null;
+  this.flagLoggedIn = false;
+  this.authenticationToken = "";
+
+}
+
 function Page() {
   thePage = this;
   this.pages = {
@@ -104,11 +113,7 @@ function Page() {
   this.scriptsInjected = {};
   this.logoutRequestFromUrl = null;
   this.locationRequestFromUrl = null;
-  this.googleProfile = {};
-  this.googleToken = null;
-  this.username = null;
-  this.authenticationToken = null;
-  this.flagUserLoggedIn = false;
+  this.user = new User();
   this.loadSettingsFromCookies();
   this.loadSettingsFromLocalStorage();
   //////////////////////////////////////
@@ -156,9 +161,9 @@ Page.prototype.storeSettingsToCookies = function() {
     addCookie(label, this.currentCourse[label], 300);
   }
   console.log(JSON.stringify(this.currentCourse));
-  addCookie("googleToken", this.googleToken, 300, true); 
-  addCookie("username", this.username, 300, true);
-  addCookie("authenticationToken", this.authenticationToken, 300, true);
+  addCookie("googleToken", this.user.googleToken, 300, true); 
+  addCookie("username", this.user.name, 300, true);
+  addCookie("authenticationToken", this.user.authenticationToken, 300, true);
 }
 
 Page.prototype.loadSettingsFromLocalStorage = function() {    
@@ -323,6 +328,18 @@ Page.prototype.cleanUpLoginSpan = function(componentToCleanUp){
       loginInfo.innerHTML = "<b>...</b>";
     }
   }
+}
+
+User.prototype.isLoggedIn = function(){
+  return this.flagLoggedIn;
+}
+
+User.prototype.hasAdminRights = function(){
+  return this.role === "admin" && this.flagLoggedIn === true;  
+}
+
+User.prototype.hasProblemEditRights = function(){
+  return this.role === "admin" && this.isLoggedIn();  
 }
 
 Page.prototype.getProblem = function(fileName) {

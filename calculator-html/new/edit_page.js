@@ -7,11 +7,14 @@ function getEditPagePanel(filesToEdit) {
   return result;
 }
 
-var AceEditorAutoCompletionWordList = [];
+var aceEditorInformation = {
+  AceEditorAutoCompletionWordList : [],
+  currentlyEditedPage: ""
+}
 
 var staticWordCompleter = {
   getCompletions: function(editor, session, pos, prefix, callback) {
-    callback(null, AceEditorAutoCompletionWordList.map(function(word) {
+    callback(null, aceEditorInformation.AceEditorAutoCompletionWordList.map(function(word) {
       return {
         caption: word,
         value: word,
@@ -33,13 +36,17 @@ function ctrlSPressAceEditorHandler(event){
   submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage', null, 'spanSubmitReport');
 }
 
+function storeEditedPage(){
+
+}
+
 function selectEditPageCallback(input, outputComponent) {
   try {
     var parsedInput = JSON.parse(input);
-    document.getElementById('editor').textContent = decodeURIComponent(parsedInput.content);
+    document.getElementById('divEditorAce').textContent = decodeURIComponent(parsedInput.content);
 
     ace.require("ace/ext/language_tools");
-    var editor = ace.edit("editor");
+    var editor = ace.edit("divEditorAce");
     editor.setTheme("ace/theme/chrome");
     editor.getSession().setMode("ace/mode/xml");
     editor.setOptions({
@@ -60,7 +67,17 @@ function selectEditPage(currentlyEditedPage) {
   if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
     currentlyEditedPage = "/coursesavailable/default.txt";
   }
-  var theURL = `${pathnames.calculatorAPI}?${pathnames.requestEditPage}&fileName=${currentlyEditedPage}`;
+  if (aceEditorInformation.currentlyEditedPage === currentlyEditedPage){
+    return;
+  }
+  aceEditorInformation.currentlyEditedPage = currentlyEditedPage;
+  document.getElementById("spanLabelEditedPageFileName").innerHTML = currentlyEditedPage;
+  document.getElementById("spanLabelEditedPageComments").classList.remove("divInvisible");
+  var theTopicTextArea = document.getElementById("textareaTopicListEntry");
+  theTopicTextArea.value  = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
+  theTopicTextArea.cols = currentlyEditedPage.length + 15;
+
+  var theURL = `${pathnames.calculatorAPI}?${pathnames.requestEditPage}&fileName=${aceEditorInformation.currentlyEditedPage}`;
   submitGET({
     url: theURL,
     callback: selectEditPageCallback

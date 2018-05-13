@@ -38,10 +38,10 @@ function storeEditedPage() {
 function selectEditPageCallback(input, outputComponent) {
   try {
     var parsedInput = JSON.parse(input);
-    document.getElementById('divEditorAce').textContent = decodeURIComponent(parsedInput.content);
-
+    //document.getElementById('divEditorAce').textContent = decodeURIComponent(parsedInput.content);
     ace.require("ace/ext/language_tools");
     var editor = ace.edit("divEditorAce");
+    editor.getSession().setValue(decodeURIComponent(parsedInput.content));
     editor.setTheme("ace/theme/chrome");
     editor.getSession().setMode("ace/mode/xml");
     editor.setOptions({
@@ -63,7 +63,7 @@ function selectEditPage(currentlyEditedPage) {
     currentlyEditedPage = "/coursesavailable/default.txt";
   }
   thePage.pages.editPage.storage.currentlyEditedPage = currentlyEditedPage;
-  if (thePage.currentPage !== "editPage"){
+  if (thePage.currentPage !== "editPage") {
     thePage.selectPage("editPage");
     return;
   }

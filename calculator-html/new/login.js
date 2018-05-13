@@ -100,7 +100,7 @@ function loginWithServerCallback(incomingString, result) {
     var parsedAuthentication = JSON.parse(incomingString);
     if (parsedAuthentication["status"] === "logged in") {
       success = true;
-      thePage.authenticationToken = parsedAuthentication.authenticationToken;
+      thePage.user.authenticationToken = parsedAuthentication.authenticationToken;
       thePage.user.name = parsedAuthentication.username;
       thePage.user.role = parsedAuthentication.userRole;
       thePage.user.flagLoggedIn = true;
@@ -213,15 +213,15 @@ function hideLogoutButton() {
 }
 
 function logoutGoogle() {
-  thePage.googleToken = "";
-  thePage.googleProfile = {};
+  thePage.user.googleToken = "";
+  thePage.user.googleProfile = {};
   thePage.storeSettingsToCookies();
   thePage.storeSettingsToLocalStorage();
   if (typeof (gapi) !== "undefined") {
     gapi.auth2.getAuthInstance().disconnect();
   }
   hideLogoutButton();
-  thePage.hideProfilePicture();
+  thePage.user.hideProfilePicture();
 }
 
 function getQueryVariable(variable) {

@@ -20,19 +20,20 @@ var staticWordCompleter = {
 }
 
 function ctrlSPressAceEditorHandler(event) {
-  if (event.ctrlKey != true){
+  if (event.ctrlKey !== true){
     return;
   }
-  if (event.keyCode != 83){
+  if (event.keyCode !== 83){
     return;
   }
   console.log("not implemented yet");
   event.preventDefault();
-  submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage', null, 'spanSubmitReport');
+  submitStringAsMainInput(editor.getValue(), 'spanSubmitEditPageReport', 'modifyPage', null, 'spanSubmitEditPageReport');
 }
 
 function storeEditedPage() {
-
+  var editor = thePage.pages.editPage.editor;
+  submitStringAsMainInput(editor.getValue(), 'spanSubmitEditPageReport', 'modifyPage', null, 'spanSubmitEditPageReport');
 }
 
 function selectEditPageCallback(input, outputComponent) {
@@ -40,7 +41,10 @@ function selectEditPageCallback(input, outputComponent) {
     var parsedInput = JSON.parse(input);
     //document.getElementById('divEditorAce').textContent = decodeURIComponent(parsedInput.content);
     ace.require("ace/ext/language_tools");
-    var editor = ace.edit("divEditorAce");
+    if (thePage.pages.editPage.editor === null) {
+      thePage.pages.editPage.editor = ace.edit("divEditorAce");
+    }
+    var editor = thePage.pages.editPage.editor;
     editor.getSession().setValue(decodeURIComponent(parsedInput.content));
     editor.setTheme("ace/theme/chrome");
     editor.getSession().setMode("ace/mode/xml");
@@ -67,8 +71,6 @@ function selectEditPage(currentlyEditedPage) {
     thePage.selectPage("editPage");
     return;
   }
-  document.getElementById("spanLabelEditedPageFileName").innerHTML = currentlyEditedPage;
-  document.getElementById("spanLabelEditedPageComments").classList.remove("divInvisible");
   var theTopicTextArea = document.getElementById("textareaTopicListEntry");
   theTopicTextArea.value  = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
   theTopicTextArea.cols = currentlyEditedPage.length + 15;

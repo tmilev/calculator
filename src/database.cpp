@@ -194,11 +194,16 @@ bool ProblemData::CheckConsistency()const
 bool ProblemData::CheckConsistencyMQids()const
 { MacroRegisterFunctionWithName("ProblemData::CheckConsistencyMQids");
   for (int i = 0; i < this->theAnswers.size(); i ++)
-  { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield) == "")
-      crash << "This is not supposed to happen: empty idMQfield. The answer id is: "
-      << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>All the answers are: "
-      << this->ToString() << crash;
-  }
+    if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield) == "")
+    { std::stringstream errorStream;
+      errorStream << "This is not supposed to happen: empty idMQfield. The answer id is: "
+      << this->theAnswers[i].answerId << "<br>" << this->ToString() << "<hr>Answer information: "
+      << this->ToString() << "<br>";
+      if (true)
+        stOutput << errorStream.str();
+      else
+        crash << errorStream.str() << crash;
+    }
   return true;
 }
 
@@ -208,7 +213,7 @@ std::string ProblemData::ToString()const
   << "Random seed: " << this->randomSeed;
   if (this->flagRandomSeedGiven)
     out << " (given)";
-  out << ". ";
+  out << ". <br>";
   for (int i = 0; i < this->theAnswers.size(); i ++)
   { Answer& currentA = this->theAnswers[i];
     out << "AnswerId: " << currentA.answerId;
@@ -219,6 +224,7 @@ std::string ProblemData::ToString()const
       out << "[none yet], ";
     else
       out << "[" << currentA.firstCorrectAnswerClean << "], ";
+    out << "<br>";
   }
   out << "Admin data: " << this->adminData.ToString();
   return out.str();

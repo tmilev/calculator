@@ -125,7 +125,7 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
 }
 
 function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
-  var inputParams='';
+  var inputParams = '';
   inputParams += 'request=' + requestType + '&';
   inputParams += '&mainInput=' + encodeURIComponent(theString);
   submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
@@ -204,7 +204,7 @@ function SendTogglePauseRequest() {
 }
 
 function submitCalculatorInputOnEnter(){ 
-  if (event.keyCode !== 13 || !(event.shiftKey)) {
+  if (event.keyCode !== 13 || !event.shiftKey) {
     return;
   }
   submitCalculatorComputation();

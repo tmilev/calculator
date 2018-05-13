@@ -1,6 +1,5 @@
 function User() {
   this.name = "";
-  this.googleProfile = {};
   this.googleToken = null;
   this.flagLoggedIn = false;
   this.authenticationToken = "";
@@ -18,6 +17,11 @@ User.prototype.hasAdminRights = function() {
 
 User.prototype.hasProblemEditRights = function() {
   return this.role === "admin" && this.isLoggedIn();  
+}
+
+User.prototype.hideProfilePicture = function() {
+  document.getElementById("divProfilePicture").classList.add("divInvisible");
+  document.getElementById("divProfilePicture").classList.remove("divVisible");
 }
 
 function Page() {
@@ -56,6 +60,7 @@ function Page() {
       container: null,
       selectFunction: selectEditPage,
       flagLoaded: false,
+      editor: null,
       storage: {
         currentlyEditedPage: null,
         AceEditorAutoCompletionWordList: []
@@ -145,11 +150,6 @@ function Page() {
   document.getElementById("divPage").className = "divPage";
 }
 
-Page.prototype.hideProfilePicture = function() {
-  document.getElementById("divProfilePicture").classList.add("divInvisible");
-  document.getElementById("divProfilePicture").classList.remove("divVisible");
-}
-
 Page.prototype.correctSettings = function () {
 }
 
@@ -185,7 +185,7 @@ Page.prototype.loadSettingsFromLocalStorage = function() {
   }
   try {
     this.currentPage = localStorage.currentPage;
-    this.googleProfile = JSON.parse(localStorage.googleProfile); 
+    this.user.googleProfile = JSON.parse(localStorage.googleProfile); 
     for (label in this.pages){
       if (localStorage[label] === undefined || localStorage[label] === null) {
         continue;
@@ -201,7 +201,7 @@ Page.prototype.storeSettingsToLocalStorage = function() {
   if (Storage === undefined && localStorage === undefined) {
     return;
   }
-  localStorage.googleProfile = JSON.stringify(this.googleProfile);
+  localStorage.googleProfile = JSON.stringify(this.user.googleProfile);
   for (label in this.pages) {
     if (this.pages[label].storage === undefined) {
       continue;
@@ -213,7 +213,7 @@ Page.prototype.storeSettingsToLocalStorage = function() {
 Page.prototype.showProfilePicture = function() {
   document.getElementById("divProfilePicture").classList.remove("divInvisible");
   document.getElementById("divProfilePicture").classList.add("divVisible");
-  if (this.googleProfile.picture === undefined) {
+  if (this.user.googleProfile.picture === undefined) {
     return;
   }
   if (document.getElementById("divProfilePicture").children.length > 0) {
@@ -221,10 +221,10 @@ Page.prototype.showProfilePicture = function() {
   }
   try {
     var theProfilePicElement = document.createElement("IMG");
-    theProfilePicElement.setAttribute("src", this.googleProfile.picture);
-    theProfilePicElement.setAttribute("alt", this.googleProfile.name);
+    theProfilePicElement.setAttribute("src", this.user.googleProfile.picture);
+    theProfilePicElement.setAttribute("alt", this.user.googleProfile.name);
     theProfilePicElement.setAttribute("id", "imgProfilePicture");
-    theProfilePicElement.setAttribute("title", this.googleProfile.name);
+    theProfilePicElement.setAttribute("title", this.user.googleProfile.name);
     theProfilePicElement.setAttribute("className", "profilePicture");
     //theProfilePicElement.setAttribute("width", 50);
     document.getElementById("divProfilePicture").appendChild(theProfilePicElement);

@@ -1,10 +1,23 @@
-function User(){
+function User() {
   this.name = "";
   this.googleProfile = {};
   this.googleToken = null;
   this.flagLoggedIn = false;
   this.authenticationToken = "";
+  this.googleProfile = null;
+  this.role = "";
+}
 
+User.prototype.isLoggedIn = function() {
+  return this.flagLoggedIn;
+}
+
+User.prototype.hasAdminRights = function() {
+  return this.role === "admin" && this.flagLoggedIn === true;  
+}
+
+User.prototype.hasProblemEditRights = function() {
+  return this.role === "admin" && this.isLoggedIn();  
 }
 
 function Page() {
@@ -44,10 +57,10 @@ function Page() {
       selectFunction: selectEditPage,
       flagLoaded: false,
       storage: {
-        currentlyEditedPage: null
+        currentlyEditedPage: null,
+        AceEditorAutoCompletionWordList: []
       }
     },
-
     calculator: {
       id: "divCalculatorPage",
       menuButtonId: "buttonSelectCalculator",
@@ -147,9 +160,9 @@ Page.prototype.loadSettingsFromCookies = function() {
       //console.log(label);
     }
     console.log("Current course: " + JSON.stringify(this.currentCourse));
-    this.googleToken = getCookie("googleToken");
-    this.username = getCookie("username");
-    this.authenticationToken = getCookie("authenticationToken");
+    this.user.googleToken = getCookie("googleToken");
+    this.user.name = getCookie("username");
+    this.user.authenticationToken = getCookie("authenticationToken");
   } catch (e) {
     console.log("Error loading settings from cookies: " + e);
   }
@@ -321,25 +334,13 @@ Page.prototype.getCurrentProblem = function() {
   return this.getProblem(this.currentCourse.fileName);
 }
 
-Page.prototype.cleanUpLoginSpan = function(componentToCleanUp){
+Page.prototype.cleanUpLoginSpan = function(componentToCleanUp) {
   var loginInfo = document.getElementById("spanLoginRequired");
   if (loginInfo !== null) {
     if (loginInfo.parentElement === componentToCleanUp){
       loginInfo.innerHTML = "<b>...</b>";
     }
   }
-}
-
-User.prototype.isLoggedIn = function(){
-  return this.flagLoggedIn;
-}
-
-User.prototype.hasAdminRights = function(){
-  return this.role === "admin" && this.flagLoggedIn === true;  
-}
-
-User.prototype.hasProblemEditRights = function(){
-  return this.role === "admin" && this.isLoggedIn();  
 }
 
 Page.prototype.getProblem = function(fileName) {

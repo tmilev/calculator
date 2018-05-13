@@ -36,12 +36,13 @@ function getHTMLSubSection(theSubSection) {
     result += `<a class='videoLink' href='${currentProblemData.video}' target = '_blank'>Video</a>`;
     result += `<a class='slidesLink' href='${currentProblemData.slidesProjector}' target = '_blank'>Printable slides</a>`;
     result += `<a class='slidesLink' href='${currentProblemData.slidesPrintable}' target = '_blank'>Slides</a>`;
-    if (currentProblemData.linkSlidesLaTeX !== "" && currentProblemData.linkSlidesLaTeX !== undefined)
+    if (currentProblemData.linkSlidesLaTeX !== "" && currentProblemData.linkSlidesLaTeX !== undefined) {
       result += `<a class='slidesLink' href='${currentProblemData.linkSlidesLaTeX}' target = '_blank' download='${convertStringToLaTeXFileName(currentProblemData.title)}.tex'>.tex</a>`;
+    }
     result += "</td>";
     result += "<td>";
     if (currentProblemData.problem !== "") {
-      if (thePage.flagUserLoggedIn) {
+      if (thePage.user.flagLoggedIn) {
         result += `<a class = "problemLinkQuiz" href = "${currentProblem.getURL(true)}" `; 
         result += `onclick = "selectCurrentProblem('${currentProblemData.problem}', 'scoredQuizJSON');">Quiz</a>`;
       }
@@ -117,7 +118,7 @@ function afterLoadCoursePage(incomingPage, result) {
   //MathJax.Hub.Process();
   var theTopics = document.getElementsByTagName("topicList");
   var theRequest = "topicListJSONNoLogin";
-  if (thePage.flagUserLoggedIn) {
+  if (thePage.user.flagLoggedIn) {
     theRequest = "topicListJSON";
   }
   if (theTopics.length  === 0) {
@@ -134,7 +135,7 @@ function afterLoadCoursePage(incomingPage, result) {
 function selectCurrentCoursePage() {
   //console.log("DEBUG: topic list cookie @ selectCurrentCoursePage: " + getCookie("topicList"));
   var theRequest = "templateJSONNoLogin";
-  if (thePage.flagUserLoggedIn) {
+  if (thePage.user.flagLoggedIn) {
     theRequest = "templateJSON";
   }
   submitGET({

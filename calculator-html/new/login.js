@@ -34,21 +34,21 @@ function reloadPage(reason, time){
 
 function logout(){
   logoutGoogle();
-  if (thePage.userRole === "admin") {
+  if (thePage.user.role === "admin") {
     reloadPage("<b>Logging out admin: mandatory page reload. </b>", 3000);
   } else { 
     document.getElementById("spanLoginStatus").innerHTML = `
 <b><a href='#' onclick='reloadPage("<b>User requested reload. </b>", 3000);'>Reload page</a> 
 for complete logout (when <span style='color:red'>using public computer</span>).</b>`;
   }
-  thePage.username = "";
-  thePage.userRole = "";
-  thePage.flagUserLoggedIn = false;
+  thePage.user.name = "";
+  thePage.user.role = "";
+  thePage.user.flagLoggedIn = false;
   thePage.pages.problemPage.flagLoaded = false;
   document.getElementById("inputPassword").value = "";
   document.getElementById("divProblemPageContentContainer").innerHTML = "";
   document.getElementById("divCurrentCourse").innerHTML = "";
-  thePage.authenticationToken = "";
+  thePage.user.authenticationToken = "";
   thePage.storeSettingsToCookies();
   thePage.storeSettingsToLocalStorage();
   showLoginCalculatorButtons();
@@ -56,7 +56,7 @@ for complete logout (when <span style='color:red'>using public computer</span>).
   toggleAdminPanels();
 }
 
-function loginTry(){
+function loginTry() {
   submitGET({
     "url": `${pathnames.calculatorAPI}?request=userInfoJSON`,
     callback: loginWithServerCallback,
@@ -65,10 +65,10 @@ function loginTry(){
   startGoogleLogin();
 }
 
-function toggleAccountPanels(){
+function toggleAccountPanels() {
   var accountPanels = document.getElementsByClassName("divAccountPanel");
   for (var counterPanels = 0; counterPanels < accountPanels.length; counterPanels ++) {
-    if (thePage.flagUserLoggedIn === true){
+    if (thePage.user.flagLoggedIn === true){
       accountPanels[counterPanels].classList.remove("divInvisible");
       accountPanels[counterPanels].classList.add("divVisible");
     } else {
@@ -78,10 +78,10 @@ function toggleAccountPanels(){
   }
 }
 
-function toggleAdminPanels(){
+function toggleAdminPanels() {
   var adminPanels = document.getElementsByClassName("divAdminPanel");
   for (var counterPanels = 0; counterPanels < adminPanels.length; counterPanels ++) {
-    if (thePage.userRole === "admin"){
+    if (thePage.user.role === "admin"){
       adminPanels[counterPanels].classList.remove("divInvisible");
       adminPanels[counterPanels].classList.add("divVisible");
     } else {
@@ -91,7 +91,7 @@ function toggleAdminPanels(){
   }
 }
 
-function loginWithServerCallback(incomingString, result){
+function loginWithServerCallback(incomingString, result) {
   console.log(incomingString);
   document.getElementById("spanLoginStatus").innerHTML = "";
   var success = false;
@@ -101,11 +101,11 @@ function loginWithServerCallback(incomingString, result){
     if (parsedAuthentication["status"] === "logged in") {
       success = true;
       thePage.authenticationToken = parsedAuthentication.authenticationToken;
-      thePage.username = parsedAuthentication.username;
-      thePage.userRole = parsedAuthentication.userRole;
-      thePage.flagUserLoggedIn = true;
-      document.getElementById("spanUserIdInAccountsPage").innerHTML = thePage.username;
-      document.getElementById("inputUsername").value = thePage.username;
+      thePage.user.name = parsedAuthentication.username;
+      thePage.user.role = parsedAuthentication.userRole;
+      thePage.user.flagLoggedIn = true;
+      document.getElementById("spanUserIdInAccountsPage").innerHTML = thePage.user.name;
+      document.getElementById("inputUsername").value = thePage.user.name;
       toggleAccountPanels();
       toggleAdminPanels();
       thePage.storeSettingsToCookies();
@@ -123,10 +123,10 @@ function loginWithServerCallback(incomingString, result){
     if (loginErrorMessage!== undefined && loginErrorMessage !== "") {
       document.getElementById("spanLoginStatus").innerHTML = decodeURIComponent(loginErrorMessage);
     }
-    thePage.authenticationToken = "";
-    thePage.username = "";
-    thePage.userRole = "";
-    thePage.flagUserLoggedIn = false;
+    thePage.user.authenticationToken = "";
+    thePage.user.name = "";
+    thePage.user.role = "";
+    thePage.user.flagLoggedIn = false;
     showLoginCalculatorButtons();
     toggleAccountPanels();
     toggleAdminPanels();
@@ -136,10 +136,10 @@ function loginWithServerCallback(incomingString, result){
 
 function onGoogleSignIn(googleUser){ 
   var theToken = googleUser.getAuthResponse().id_token;
-  thePage.googleToken = theToken;
-  thePage.username = "";
+  thePage.user.googleToken = theToken;
+  thePage.user.name = "";
   try {
-    thePage.googleProfile = window.calculator.jwt.decode(theToken);
+    thePage.user.googleProfile = window.calculator.jwt.decode(theToken);
     thePage.storeSettingsToCookies();
     thePage.storeSettingsToLocalStorage();
     thePage.showProfilePicture();
@@ -185,7 +185,7 @@ function showLoginCalculatorButtons() {
 function hideLoginCalculatorButtons() {
   document.getElementById("divLoginCalculatorPanel").classList.remove("divVisible");
   document.getElementById("divLoginCalculatorPanel").classList.add("divInvisible");
-  document.getElementById("divLoginPanelUsernameReport").innerHTML = thePage.username;
+  document.getElementById("divLoginPanelUsernameReport").innerHTML = thePage.user.name;
   document.getElementById("divLoginPanelUsernameReport").classList.remove("divInvisible");
   document.getElementById("divLoginPanelUsernameReport").classList.add("divVisible");
 }

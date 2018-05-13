@@ -4,7 +4,7 @@
 function getAccountsTable(inputAccounts) {
   var result = "";
   result += "<table><tr><th>username</th><th>Email</th><th>Activated?</th><th>Course</th><th>Section</th><th>Semester</th></tr>";
-  for (var counterAccounts = 0; counterAccounts < inputAccounts.length; counterAccounts ++){
+  for (var counterAccounts = 0; counterAccounts < inputAccounts.length; counterAccounts ++) {
     result += "<tr>";
     var currentUser = inputAccounts[counterAccounts];
     console.log("Current user: " + JSON.stringify(currentUser));
@@ -65,7 +65,11 @@ function addEmailsOrUsersCallback(input, outputComponent){
 }
 
 
-function addEmailsOrUsers(idEmailList, problemCollectionName, idOutput, userRole, idUserGroup, idPasswords, requestType){
+function addEmailsOrUsers(
+  idEmailList, problemCollectionName, 
+  idOutput, userRole, idUserGroup, 
+  idPasswords, requestType
+) {
   var spanOutput = document.getElementById(idOutput);
   var spanEmailList = document.getElementById(idEmailList);
   var spanUserGroup = document.getElementById(idUserGroup);

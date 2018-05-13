@@ -38,6 +38,7 @@ problemInfoBar{
   display: block;
   background-color: #fafafa;
   width: 100%;
+  margin-bottom: 10px;
 }
 problemTitle {
   text-align: center;

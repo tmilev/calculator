@@ -7,14 +7,9 @@ function getEditPagePanel(filesToEdit) {
   return result;
 }
 
-var aceEditorInformation = {
-  AceEditorAutoCompletionWordList : [],
-  currentlyEditedPage: ""
-}
-
 var staticWordCompleter = {
   getCompletions: function(editor, session, pos, prefix, callback) {
-    callback(null, aceEditorInformation.AceEditorAutoCompletionWordList.map(function(word) {
+    callback(null, thePage.pages.editPage.storage.AceEditorAutoCompletionWordList.map(function(word) {
       return {
         caption: word,
         value: word,
@@ -24,7 +19,7 @@ var staticWordCompleter = {
   }
 }
 
-function ctrlSPressAceEditorHandler(event){
+function ctrlSPressAceEditorHandler(event) {
   if (event.ctrlKey != true){
     return;
   }
@@ -36,7 +31,7 @@ function ctrlSPressAceEditorHandler(event){
   submitStringAsMainInput(editor.getValue(), 'spanSubmitReport', 'modifyPage', null, 'spanSubmitReport');
 }
 
-function storeEditedPage(){
+function storeEditedPage() {
 
 }
 
@@ -67,17 +62,18 @@ function selectEditPage(currentlyEditedPage) {
   if (currentlyEditedPage === undefined || currentlyEditedPage === null) { 
     currentlyEditedPage = "/coursesavailable/default.txt";
   }
-  if (aceEditorInformation.currentlyEditedPage === currentlyEditedPage){
+  thePage.pages.editPage.storage.currentlyEditedPage = currentlyEditedPage;
+  if (thePage.currentPage !== "editPage"){
+    thePage.selectPage("editPage");
     return;
   }
-  aceEditorInformation.currentlyEditedPage = currentlyEditedPage;
   document.getElementById("spanLabelEditedPageFileName").innerHTML = currentlyEditedPage;
   document.getElementById("spanLabelEditedPageComments").classList.remove("divInvisible");
   var theTopicTextArea = document.getElementById("textareaTopicListEntry");
   theTopicTextArea.value  = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
   theTopicTextArea.cols = currentlyEditedPage.length + 15;
 
-  var theURL = `${pathnames.calculatorAPI}?${pathnames.requestEditPage}&fileName=${aceEditorInformation.currentlyEditedPage}`;
+  var theURL = `${pathnames.calculatorAPI}?${pathnames.requestEditPage}&fileName=${thePage.pages.editPage.storage.currentlyEditedPage}`;
   submitGET({
     url: theURL,
     callback: selectEditPageCallback

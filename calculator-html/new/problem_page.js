@@ -70,23 +70,20 @@ Problem.prototype.getProblemNavigation = function() {
   result += "<problemNavigation>";
   var linkType = "problemLinkPractice";
   var defaultRequest = 'exerciseJSON';
-  if (this.flagForReal && thePage.flagUserLoggedIn) {
+  if (this.flagForReal && thePage.user.flagLoggedIn) {
     defaultRequest = 'scoredQuizJSON';
     linkType = "problemLinkQuiz"
   }
-  //if (!thePage.flagUserLoggedIn) {
-  //  defaultRequest = 'exerciseJSON';
-  //}
   if (this.previousProblem !== null && this.previousProblem !== "") {
     result += `<a class='${linkType}' href='#${thePage.getProblem(this.previousProblem).getURLRequestFileCourseTopics()}' onclick = "selectCurrentProblem('${this.previousProblem}' ,'${defaultRequest}')">&#8592;</a>`;
   }
 
-  if (this.flagForReal && thePage.flagUserLoggedIn) {
+  if (this.flagForReal && thePage.user.flagLoggedIn) {
     result += `<a class='problemLinkPractice' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.fileName}' ,'exerciseJSON')">Practice</a>`;
   } else {
     result += "<span class = 'problemLinkSelectedPractice' style='color:green'>Practice</span>";
   }
-  if (!this.flagForReal && thePage.flagUserLoggedIn) { 
+  if (!this.flagForReal && thePage.user.flagLoggedIn) { 
     result += `<a class='problemLinkQuiz' href='${this.getURL()}' onclick = "selectCurrentProblem('${this.fileName}' ,'scoredQuizJSON')">Quiz</a>`;
   } else {
     if (this.flagForReal) {
@@ -105,6 +102,15 @@ Problem.prototype.getProblemNavigation = function() {
   return result;
 }
 
+Problem.prototype.getEditPanel = function() {
+  if (!thePage.user.hasProblemEditRights()) {
+    return "";
+  }
+  var result = "";
+  result += `<button class = "buttonSaveEdit" onclick = "selectEditPage('${this.fileName}')">Edit</button>`;
+  return result;
+}
+
 Problem.prototype.writeToHTML = function(outputElement) {
   if (typeof outputElement === "string") {
     outputElement = document.getElementById(outputElement);
@@ -112,12 +118,10 @@ Problem.prototype.writeToHTML = function(outputElement) {
   var topPart = "";
   topPart += "<problemInfoBar>";
   topPart += this.getProblemNavigation();
+  topPart += this.getEditPanel();
   topPart += `<problemTitle>${this.problemLabel} ${this.title}</problemTitle>`;
   topPart += "</problemInfoBar>";
   topPart += "<br>";
-  if (thePage.user.hasProblemEditRights()) {
-    topPart += "Edit panel here";
-  }
   outputElement.innerHTML = topPart + this.decodedProblem;
   for (var counterAnswers = 0;  counterAnswers < this.answers.length; counterAnswers ++) {
     var currentAnswerPanel = this.answers[counterAnswers];

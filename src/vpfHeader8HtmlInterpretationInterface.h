@@ -22,9 +22,9 @@ public:
   static std::string ClonePageResult();
   static std::string AddTeachersSections();
   static std::string AddUserEmails(const std::string& hostWebAddressWithPort);
-  static std::string SubmitProblem
+  static std::string submitAnswers
   (const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake);
-  static std::string SubmitProblem();
+  static std::string submitAnswers();
   static std::string GetProblemSolution();
   static std::string GetEditPageHTML();
   static std::string GetEditPageJSON();
@@ -48,7 +48,7 @@ public:
   static std::string GetApp(bool appendBuildHash);
   static std::string GetScoresInCoursePage();
   static std::string GetNavigationPanelWithGenerationTime();
-  static std::string SubmitProblemPreview();
+  static std::string submitAnswersPreview();
   static std::string GetSetProblemDatabaseInfoHtml();
   static std::string GetAccountsPage(const std::string& hostWebAddressWithPort);
   static std::string GetAccountsPageJSON(const std::string& hostWebAddressWithPort);

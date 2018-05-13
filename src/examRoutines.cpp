@@ -598,8 +598,8 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   std::string requestTypeSubmit, requestTypePreview, requestGiveUp, requestSolution;
   bool submitRandomSeed = false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
-  { requestTypeSubmit = "submitProblem";
-    requestTypePreview = "submitProblemPreview";
+  { requestTypeSubmit = "submitAnswers";
+    requestTypePreview = "submitAnswersPreview";
   } else if (theGlobalVariables.UserGuestMode())
   { requestTypeSubmit = "submitExerciseNoLogin";
     requestTypePreview = "submitExercisePreviewNoLogin";

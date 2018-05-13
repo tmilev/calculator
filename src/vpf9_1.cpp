@@ -310,8 +310,8 @@ bool GlobalVariables::UserRequestRequiresLoadingRealExamData()
   return this->flagLoggedIn &&
   (this->userCalculatorRequestType == "scoredQuiz" ||
    this->userCalculatorRequestType == "scoredQuizJSON" ||
-   this->userCalculatorRequestType == "submitProblem" ||
-   this->userCalculatorRequestType == "submitProblemPreview");
+   this->userCalculatorRequestType == "submitAnswers" ||
+   this->userCalculatorRequestType == "submitAnswersPreview");
 }
 
 bool GlobalVariables::UserRequestMustBePromptedToLogInIfNotLoggedIn()

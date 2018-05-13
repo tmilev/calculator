@@ -218,8 +218,8 @@ std::string HtmlInterpretation::GetCommentsInterpretation
   return out.str();
 }
 
-std::string HtmlInterpretation::SubmitProblemPreview()
-{ MacroRegisterFunctionWithName("HtmlInterpretation::SubmitProblemPreview");
+std::string HtmlInterpretation::submitAnswersPreview()
+{ MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswersPreview");
   double startTime = theGlobalVariables.GetElapsedSeconds();
   std::string lastStudentAnswerID;
   std::string lastAnswer;
@@ -1059,13 +1059,13 @@ std::string HtmlInterpretation::GetEditPageHTML()
   return ouT.str();
 }
 
-std::string HtmlInterpretation::SubmitProblem()
-{ return HtmlInterpretation::SubmitProblem(theGlobalVariables.GetWebInput("randomSeed"), 0, true);
+std::string HtmlInterpretation::submitAnswers()
+{ return HtmlInterpretation::submitAnswers(theGlobalVariables.GetWebInput("randomSeed"), 0, true);
 }
 
-std::string HtmlInterpretation::SubmitProblem
+std::string HtmlInterpretation::submitAnswers
 (const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake)
-{ MacroRegisterFunctionWithName("HtmlInterpretation::SubmitProblem");
+{ MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswers");
   std::stringstream out;
   double startTime = theGlobalVariables.GetElapsedSeconds();
   CalculatorHTML theProblem;

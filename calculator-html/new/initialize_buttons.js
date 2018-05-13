@@ -396,12 +396,12 @@ InputPanelData.prototype.submitAnswer = function() {
   } else {
     theRequest = `submitExercise&randomSeed=${currentProblem.randomSeed}`;
   }
-   //"submitProblemPreview"
+   //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 
 InputPanelData.prototype.submitGiveUp = function() {
-  var theRequest = `problemGiveUp&randomSeed=${currentProblem.randomSeed}`; //"submitProblemPreview"
+  var theRequest = `problemGiveUp&randomSeed=${currentProblem.randomSeed}`; //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 
@@ -409,7 +409,7 @@ InputPanelData.prototype.submitPreview = function() {
   var theRequest = "";
   var currentProblem = thePage.pages.problemPage.problems[this.fileName];
   if (currentProblem.flagForReal) {
-    theRequest = "submitProblemPreview";
+    theRequest = "submitAnswersPreview";
   } else {
     theRequest = "submitExercisePreview";
   }

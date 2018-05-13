@@ -117,16 +117,16 @@ function afterLoadCoursePage(incomingPage, result) {
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentCourse")]);
   //MathJax.Hub.Process();
   var theTopics = document.getElementsByTagName("topicList");
-  var theRequest = "topicListJSONNoLogin";
+  var submitAnswers = "topicListJSONNoLogin";
   if (thePage.user.flagLoggedIn) {
-    theRequest = "topicListJSON";
+    submitAnswers = "topicListJSON";
   }
   if (theTopics.length  === 0) {
     return;
   }
   //console.log("DEBUG: topic list cookie @ afterLoadCoursePage: " + getCookie("topicList"));
   submitGET({
-    url: `${pathnames.calculatorAPI}?request=${theRequest}`,
+    url: `${pathnames.calculatorAPI}?request=${submitAnswers}`,
     callback: afterLoadTopics,
     progress: "spanProgressReportGeneral"
   });
@@ -134,12 +134,12 @@ function afterLoadCoursePage(incomingPage, result) {
 
 function selectCurrentCoursePage() {
   //console.log("DEBUG: topic list cookie @ selectCurrentCoursePage: " + getCookie("topicList"));
-  var theRequest = "templateJSONNoLogin";
+  var submitAnswers = "templateJSONNoLogin";
   if (thePage.user.flagLoggedIn) {
-    theRequest = "templateJSON";
+    submitAnswers = "templateJSON";
   }
   submitGET({
-    url: `${pathnames.calculatorAPI}?request=${theRequest}`,
+    url: `${pathnames.calculatorAPI}?request=${submitAnswers}`,
     callback: afterLoadCoursePage,
     progress: "spanProgressReportGeneral"
   });

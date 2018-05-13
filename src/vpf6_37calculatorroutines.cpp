@@ -127,7 +127,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     std::string solutionReport;
     for (int j = 0; j < theProblem.theProblemData.theAnswers.size(); j++)
     { std::string currentAnswer;
-      std::string currentKey = "calculatorAnswer"+
+      std::string currentKey = "calculatorAnswer" +
       theProblem.theProblemData.theAnswers[j].answerId;
       theGlobalVariables.SetWebInpuT(currentKey, "1");
       theGlobalVariables.SetWebInpuT("fileName", theProblem.fileName);
@@ -137,7 +137,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
         break;
       theGlobalVariables.SetWebInpuT(currentKey, HtmlRoutines::ConvertStringToURLString(currentAnswer, false));
       solutionReport +=
-      HtmlInterpretation::SubmitProblem(randomSeedCurrent, &answersWork, false) + "<hr>";
+      HtmlInterpretation::submitAnswers(randomSeedCurrent, &answersWork, false) + "<hr>";
       if (!answersWork)
         break;
       globalKeys.RemoveKey(currentKey);
@@ -167,14 +167,11 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
       out << "<td><span style=\"color:green\">Success</span></td>";
     if (numInterpretations <= numSamples)
     { out << "<td><b>Problem</b><hr>" << theProblem.outputHtmlBodyNoTag
-      << "</td>"
-      ;
+      << "</td>";
       out << "<td><b>Answer(s)</b><hr>" << answerGeneration
-      << "</td>"
-      ;
+      << "</td>";
       out << "<td><b>Answer(s) confirmation(s)</b><hr>" << solutionReport
-      << "</td>"
-      ;
+      << "</td>";
     }
     out << "</tr>";
   }

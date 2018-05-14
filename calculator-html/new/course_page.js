@@ -1,5 +1,31 @@
 "use strict";
 
+function toStringProblemWeight(problemData) {
+  var result = "";
+  result+= "<td>";
+  if (problemData.correctlyAnswered !== undefined && problemData.correctlyAnswered !== NaN) {
+    var points = null;
+    var totalPoints = null;
+    if (problemData.weight !== undefined && problemData.totalQuestions !== undefined) {
+      points = ((0.0 + problemData.correctlyAnswered) / problemData.totalQuestions) * problemData.weight;
+      totalPoints = problemData.totalQuestions * problemData.weight;
+    }
+    if (problemData.weight === undefined && problemData.totalQuestions !== undefined) {
+      points = ((0.0 + problemData.correctlyAnswered) / problemData.totalQuestions);
+      totalPoints = problemData.totalQuestions;
+    }
+    if (problemData.weight === undefined && problemData.totalQuestions === undefined) {
+      points = problemData.correctlyAnswered;
+    }
+    if (totalPoints === null) {
+      totalPoints = "?";
+    }
+    result += `${points} out of ${totalPoints}`;
+  }
+  result += "</td>";
+  return result;
+}
+
 function convertStringToLaTeXFileName(input) {
   var result = encodeURIComponent(input.split(" ").join("-")).split("%").join("-");
   if (result.length === 0)
@@ -51,7 +77,7 @@ function getHTMLSubSection(theSubSection) {
       result += `onclick = "selectCurrentProblem('${currentProblemData.problem}', 'exerciseJSON');">Practice</a>`;
     }
     result += "</td>";
-    result += "<td></td>";
+    result += toStringProblemWeight(currentProblemData);
     result += "<td></td>";
     result += "</tr>";
   }

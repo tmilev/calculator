@@ -213,8 +213,8 @@ public:
   int ProcessCompute();
   int ProcessCalculatorExamples();
   int ProcessCalculatorExamplesJSON();
-  int ProcesssubmitAnswers();
-  int ProcesssubmitAnswersPreview();
+  int ProcessSubmitAnswers();
+  int ProcessSubmitAnswersPreview();
   int ProcessProblemGiveUp();
   int ProcessProblemSolution();
   int ProcessPauseWorker();

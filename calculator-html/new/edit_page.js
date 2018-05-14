@@ -45,6 +45,7 @@ function selectEditPageCallback(input, outputComponent) {
       thePage.pages.editPage.editor = ace.edit("divEditorAce");
     }
     var editor = thePage.pages.editPage.editor;
+    editor.$blockScrolling = Infinity;
     editor.getSession().setValue(decodeURIComponent(parsedInput.content));
     editor.setTheme("ace/theme/chrome");
     editor.getSession().setMode("ace/mode/xml");

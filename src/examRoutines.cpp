@@ -1452,9 +1452,10 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.idButtonInterpret = "buttonInterpret" + answerId;
   currentA.idButtonAnswer = "buttonAnswer" + answerId;
 
-  currentA.htmlButtonSubmit = "<button class=\"submitButton\" id=\"" +
-  currentA.idButtonSubmit + "\"" + " onclick = \"submitAnswers('" +
-  answerId + "', '" + currentA.idVerificationSpan + "')\">Submit</button>";
+  currentA.htmlButtonSubmit = "<button class=\"submitButton\" id=\"" + currentA.idButtonSubmit + "\"";
+  if (!this->flagUseJSON)
+    currentA.htmlButtonSubmit += " onclick = \"submitAnswers('" + answerId + "', '" + currentA.idVerificationSpan + "')\"";
+  currentA.htmlButtonSubmit +=  ">Submit</button>";
   currentA.htmlButtonInterpret = (std::string)"<button class=\"previewButton\" ";
   currentA.htmlButtonInterpret += " id=\"" + currentA.idButtonInterpret + "\" ";
   if (!this->flagUseJSON)

@@ -103,12 +103,20 @@ Problem.prototype.getProblemNavigation = function() {
 }
 
 Problem.prototype.getEditPanel = function() {
+  return getEditPanel(this.fileName);
+}
+
+function getEditPanel(fileName) {
   if (!thePage.user.hasProblemEditRights()) {
     return "";
   }
+  if (fileName === "" || fileName === undefined || fileName === null){
+    return "";
+  }
   var result = "";
-  result += `<button class = "buttonSaveEdit" onclick = "selectEditPage('${this.fileName}')">Edit</button>`;
+  result += `<span class = 'spanFileInfo'><button class = "buttonSaveEdit" onclick = "selectEditPage('${fileName}')">Edit</button>${fileName}</span>`;
   return result;
+
 }
 
 Problem.prototype.writeToHTML = function(outputElement) {
@@ -118,8 +126,9 @@ Problem.prototype.writeToHTML = function(outputElement) {
   var topPart = "";
   topPart += "<problemInfoBar>";
   topPart += this.getProblemNavigation();
-  topPart += this.getEditPanel();
   topPart += `<problemTitle>${this.problemLabel} ${this.title}</problemTitle>`;
+  //topPart += "<br>"
+  topPart += this.getEditPanel();
   topPart += "</problemInfoBar>";
   topPart += "<br>";
   outputElement.innerHTML = topPart + this.decodedProblem;

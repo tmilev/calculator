@@ -230,8 +230,7 @@ std::string HtmlInterpretation::submitAnswersPreview()
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "calculatorAnswer", &lastStudentAnswerID))
       lastAnswer = "(" + HtmlRoutines::ConvertURLStringToNormal(theArgs[i], false) + "); ";
   studentAnswerSream << lastAnswer;
-  out << "Your answer(s): \\(\\displaystyle "
-  << lastAnswer << "\\)" << "\n<br>\n";
+  out << "Your answer(s): \\(\\displaystyle " << lastAnswer << "\\)" << "\n<br>\n";
   CalculatorHTML theProblem;
   theProblem.LoadCurrentProblemItem
   (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"));
@@ -1059,11 +1058,11 @@ std::string HtmlInterpretation::GetEditPageHTML()
   return ouT.str();
 }
 
-std::string HtmlInterpretation::submitAnswers()
-{ return HtmlInterpretation::submitAnswers(theGlobalVariables.GetWebInput("randomSeed"), 0, true);
+std::string HtmlInterpretation::SubmitAnswers()
+{ return HtmlInterpretation::SubmitAnswers(theGlobalVariables.GetWebInput("randomSeed"), 0, true);
 }
 
-std::string HtmlInterpretation::submitAnswers
+std::string HtmlInterpretation::SubmitAnswers
 (const std::string& inputRandomSeed, bool* outputIsCorrect, bool timeSafetyBrake)
 { MacroRegisterFunctionWithName("HtmlInterpretation::submitAnswers");
   std::stringstream out;

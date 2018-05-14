@@ -3720,8 +3720,8 @@ int WebWorker::ProcessProblemSolution()
   return 0;
 }
 
-int WebWorker::ProcesssubmitAnswersPreview()
-{ MacroRegisterFunctionWithName("WebWorker::ProcesssubmitAnswersPreview");
+int WebWorker::ProcessSubmitAnswersPreview()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswersPreview");
   this->SetHeaderOKNoContentLength();
   stOutput << HtmlInterpretation::submitAnswersPreview();
   return 0;
@@ -3776,10 +3776,10 @@ std::string WebWorker::GetExamPageInterpreter()
   return HtmlInterpretation::GetExamPageInterpreter();
 }
 
-int WebWorker::ProcesssubmitAnswers()
-{ MacroRegisterFunctionWithName("WebWorker::ProcesssubmitAnswers");
+int WebWorker::ProcessSubmitAnswers()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSubmitAnswers");
   this->SetHeaderOKNoContentLength();
-  stOutput << HtmlInterpretation::submitAnswers();
+  stOutput << HtmlInterpretation::SubmitAnswers();
   return 0;
 }
 
@@ -4254,13 +4254,13 @@ int WebWorker::ServeClient()
   else if ((theGlobalVariables.userCalculatorRequestType == "submitAnswers" ||
             theGlobalVariables.userCalculatorRequestType == "submitExercise")
             && theGlobalVariables.flagLoggedIn)
-    return this->ProcesssubmitAnswers();
+    return this->ProcessSubmitAnswers();
   else if (theGlobalVariables.userCalculatorRequestType == "scores" && theGlobalVariables.flagLoggedIn)
     return this->ProcessScores();
   else if (theGlobalVariables.userCalculatorRequestType == "scoresInCoursePage" && theGlobalVariables.flagLoggedIn)
     return this->ProcessScoresInCoursePage();
   else if (theGlobalVariables.UserGuestMode() && theGlobalVariables.userCalculatorRequestType == "submitExerciseNoLogin")
-    return this->ProcesssubmitAnswers();
+    return this->ProcessSubmitAnswers();
   else if ((theGlobalVariables.userCalculatorRequestType == "problemGiveUp" &&
             theGlobalVariables.flagLoggedIn) ||
             theGlobalVariables.userCalculatorRequestType == "problemGiveUpNoLogin")
@@ -4272,10 +4272,10 @@ int WebWorker::ServeClient()
   else if ((theGlobalVariables.userCalculatorRequestType == "submitAnswersPreview" ||
             theGlobalVariables.userCalculatorRequestType == "submitExercisePreview" ) &&
            theGlobalVariables.flagLoggedIn)
-    return this->ProcesssubmitAnswersPreview();
+    return this->ProcessSubmitAnswersPreview();
   else if (theGlobalVariables.userCalculatorRequestType == "submitExercisePreviewNoLogin" &&
            theGlobalVariables.UserGuestMode())
-    return this->ProcesssubmitAnswersPreview();
+    return this->ProcessSubmitAnswersPreview();
   else if ((theGlobalVariables.userCalculatorRequestType == "scoredQuiz" ||
             theGlobalVariables.userCalculatorRequestType == "exercise"))
   { if (theGlobalVariables.UserSecureNonAdminOperationsAllowed())

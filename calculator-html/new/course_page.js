@@ -18,6 +18,7 @@ function getHTMLSubSection(theSubSection) {
   result += "<table class = \"topicList\"><colgroup><col><col><col><col><col></colgroup>";
   for (var counterSubSection = 0; counterSubSection < theSubSection["children"].length; counterSubSection ++) {
     var currentProblemData = theSubSection["children"][counterSubSection];
+    console.log(JSON.stringify(currentProblemData));
     if (currentProblemData.problem !== "") {
       var currentProblem = thePage.getProblem(currentProblemData.problem);
       currentProblem.previousProblem = previousProblem;

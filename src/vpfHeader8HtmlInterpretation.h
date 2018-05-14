@@ -239,8 +239,8 @@ public:
   bool MergeProblemInfoInDatabase(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
   bool LoadProblemInfoFromURLedInputAppend
   (const std::string& inputInfoString,
-   MapLisT<std::string, ProblemData, MathRoutines::hashString>&
-   outputProblemInfo, std::stringstream& commentsOnFailure);
+   MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
+   std::stringstream& commentsOnFailure);
   bool LoadProblemInfoFromJSONAppend
   (const JSData& inputJSON,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,

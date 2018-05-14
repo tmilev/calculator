@@ -110,10 +110,26 @@ sectionSelection{
   right:0;
 }
 .submitButton{
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  padding:3px;
+  margin: 3px;
+  transition: all 2s;
+  box-shadow: none;
+  border: none;
   color:red;
   width:60px;
 }
 .showSolutionButton{
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: all 2s;
+  padding:3px;
+  margin: 3px;
+  box-shadow: none;
+  border: none;
   color:green;
   width:60px;
 }
@@ -121,6 +137,14 @@ sectionSelection{
   background-color:#878787;
 }
 .previewButton {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: all 2s;
+  padding:3px;
+  margin: 3px;
+  box-shadow: none;
+  border: none;
   color:green;
   width:60px;
 }
@@ -128,6 +152,14 @@ sectionSelection{
   background-color:#878787;
 }
 .showAnswerButton {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: all 2s;
+  padding:3px;
+  margin: 3px;
+  box-shadow: none;
+  border: none;
   color:green;
   width:60px;
 }
@@ -214,7 +246,7 @@ button.buttonSaveEdit{
   transition: 0.6s; 
 }
 button.buttonSaveEdit:hover{
-  background-color: green;
+  background-color: lightgreen;
 }
 button.buttonClone{
   margin:  3px;
@@ -969,6 +1001,21 @@ button.buttonSelectPageSelected{
 }
 button.buttonSelectPage:hover{
   background-color: lightskyblue;
+}
+button.buttonMQ{
+  width: 25px; 
+  height: 21.2px; 
+  padding: 0;
+  box-shadow: none;
+  border: none;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: all 2s;
+  background-color: #e8e8e8;
+}
+button.buttonMQ:hover{
+  background-color: silver;
 }
 lectureTag{
 color: green;

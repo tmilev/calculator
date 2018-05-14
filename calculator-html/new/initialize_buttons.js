@@ -83,15 +83,12 @@ MathQuillCommandButton.prototype.getButtonId = function (inputPanel) {
 
 MathQuillCommandButton.prototype.getButton = function (inputPanel) {
   var resultString = "";
-  resultString += "<button style='";
-  resultString += "width:25; height:21.2; padding:0; ";
+  resultString += "<button class = 'buttonMQ'";
   if (this.additionalStyle !== undefined) {
-    resultString += this.additionalStyle;
+    resultString += ` style='${this.additionalStyle}'`;
   }
-  resultString += "' ";
-  resultString += `id='${this.getButtonId(inputPanel)}'`
-  resultString += " >" +
-  this.theLabel + "</button>";
+  resultString += ` id='${this.getButtonId(inputPanel)}'`
+  resultString += `>${this.theLabel}</button>`;
   return resultString;
 }
 

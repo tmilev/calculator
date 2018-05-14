@@ -3343,8 +3343,7 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
   { ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
     if (!theProbData.flagProblemWeightIsOK)
     { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
-      if (!theProbData.adminData.GetWeightFromCoursE
-          (this->currentUseR.courseComputed, currentWeight))
+      if (!theProbData.adminData.GetWeightFromCoursE(this->currentUseR.courseComputed, currentWeight))
         currentWeight = 0;
       if (theProbData.theAnswers.size() == 1)
       { if (theProbData.numCorrectlyAnswered == 1)
@@ -3385,9 +3384,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   }
   std::stringstream problemWeight;
   ProblemData theProbData;
-  bool showModifyButton =
-  theGlobalVariables.UserDefaultHasAdminRights() &&
-  !theGlobalVariables.UserStudentVieWOn();
+  bool showModifyButton = theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn();
   outputAlreadySolved = false;
   Rational currentWeight;
   std::string currentWeightAsGivenByInstructor;
@@ -4601,6 +4598,19 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
   output["handwrittenSolution"]  = this->handwrittenSolution;
 
   output["problem"] = this->problem;
+  if (owner.currentUseR.theProblemData.Contains(this->problem))
+  { ProblemData& currentData = owner.currentUseR.theProblemData.GetValueCreate(this->problem);
+    output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
+    output["totalQuestions"] = currentData.theAnswers.size();
+    Rational currentWeight;
+    std::string currentWeightAsGivenByInstructor;
+    currentData.flagProblemWeightIsOK =
+    currentData.adminData.GetWeightFromCoursE
+    (owner.currentUseR.courseComputed, currentWeight, &currentWeightAsGivenByInstructor);
+    if (currentData.flagProblemWeightIsOK)
+    { output["weight"] = currentWeightAsGivenByInstructor;
+    }
+  }
   switch (this->type)
   { case TopicElement::tChapter:
       output["type"] = (std::string) "chapter";

@@ -150,7 +150,7 @@ Problem.prototype.writeToHTML = function(outputElement) {
     document.getElementById(currentAnswerPanel.idButtonSubmit).addEventListener(
       'click', currentAnswerPanel.submitAnswer.bind(currentAnswerPanel)
     );
-    if (! this.flagForReal) {
+    if (!this.flagForReal) {
       document.getElementById(currentAnswerPanel.idButtonAnswer).addEventListener(
         'click', currentAnswerPanel.submitGiveUp.bind(currentAnswerPanel)
       );

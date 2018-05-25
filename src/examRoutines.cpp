@@ -4598,6 +4598,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
   output["handwrittenSolution"]  = this->handwrittenSolution;
 
   output["problem"] = this->problem;
+#ifdef MACRO_use_MongoDB
   if (owner.currentUseR.theProblemData.Contains(this->problem))
   { ProblemData& currentData = owner.currentUseR.theProblemData.GetValueCreate(this->problem);
     output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
@@ -4611,6 +4612,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
     { output["weight"] = currentWeightAsGivenByInstructor;
     }
   }
+#endif
   switch (this->type)
   { case TopicElement::tChapter:
       output["type"] = (std::string) "chapter";

@@ -8,6 +8,7 @@
 #include "vpfHeader5Crypto.h"
 #include "vpfHeader8HtmlSnippets.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
+#include <cmath>
 ProjectInformationInstance ProjectInfoVpf6_35cpp(__FILE__, "More calculator built-in functions. ");
 
 struct MeshTriangles{

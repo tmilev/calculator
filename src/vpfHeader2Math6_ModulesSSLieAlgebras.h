@@ -108,9 +108,7 @@ public:
   { return this->theGeneratingWordsNonReduced.size;
   }
   bool CheckInitialization()const
-  { if (this == 0)
-      crash << "ModuleSSalgebra has zero this pointer. " << crash;
-    if (this->flagDeallocated)
+  { if (this->flagDeallocated)
       crash << "Use after free of ModuleSSalgebra. " << crash;
     if (this->owner == 0)
       crash << "ModuleSSalgebra does not have its owner Semisimple algebra properly set. " << crash;

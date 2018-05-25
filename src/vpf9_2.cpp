@@ -1819,16 +1819,16 @@ void SemisimpleLieAlgebraOrdered::initDefaultOrder(SemisimpleLieAlgebra& owner)
 
 template <class coefficient>
 bool ElementSemisimpleLieAlgebra<coefficient>::MustUseBracketsWhenDisplayingMeRaisedToPower()
-{ if (this->size==1)
-    if (this->theCoeffs[0]==1)
+{ if (this->size == 1)
+    if (this->theCoeffs[0] == 1)
       return false;
   return true;
 }
 
 template <class coefficient>
 bool ElementSemisimpleLieAlgebra<coefficient>::IsACoeffOneChevalleyGenerator(int& outputGenerator, SemisimpleLieAlgebra& owner)
-{ if (this->size==1)
-    return this->theCoeffs[0]==1;
+{ if (this->size == 1)
+    return this->theCoeffs[0] == 1;
   return false;
 }
 
@@ -1837,15 +1837,15 @@ void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK
 { outputWeights.SetSize(inputElts.size);
   Rational tempRat;
   ElementSemisimpleLieAlgebra<Rational> tempLieElement;
-  for (int i=0; i<inputElts.size; i++)
-  { Vector<Rational>& currentWeight= outputWeights[i];
+  for (int i = 0; i < inputElts.size; i ++)
+  { Vector<Rational>& currentWeight = outputWeights[i];
     currentWeight.MakeZero(this->theDomain().GetRank());
-    ElementSemisimpleLieAlgebra<Rational>& currentLieElt=inputElts[i];
-    for (int j=0; j<this->theDomain().GetRank(); j++)
+    ElementSemisimpleLieAlgebra<Rational>& currentLieElt = inputElts[i];
+    for (int j = 0; j < this->theDomain().GetRank(); j ++)
     { this->theRange().LieBracket(this->imagesAllChevalleyGenerators[j+this->theDomain().GetNumPosRoots()], currentLieElt, tempLieElement);
-      if(!currentLieElt.IsProportionalTo(tempLieElement, tempRat))
+      if (!currentLieElt.IsProportionalTo(tempLieElement, tempRat))
         crash << crash;
-      currentWeight[j]=tempRat;
+      currentWeight[j] = tempRat;
     }
   }
   Matrix<Rational>  tempMat=this->theDomain().theWeyl.CartanSymmetric;

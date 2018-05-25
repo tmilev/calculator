@@ -230,7 +230,7 @@ public:
     for (int i = 0; i < this->generatorsIndices.size; i++)
       output += this->Powers.TheObjects[i];
   }
-  bool GetElementUniversalEnveloping(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& owner);
+  bool GetElementUniversalEnveloping(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebraOrdered& owner);
   bool IsEqualToZero()const
   { return this->Coefficient.IsEqualToZero();
   }
@@ -381,7 +381,7 @@ public:
     MonomialUniversalEnvelopingOrdered<coefficient> tempMon;
     this->Reserve(other.size);
     for (int i = 0; i < other.size; i ++)
-    { tempMon.AssignChangeCoefficientType<OtherCoefficientType>(other[i]);
+    { tempMon.AssignChangeCoefficientType(other[i]);
       this->AddMonomial(tempMon);
     }
   }
@@ -452,7 +452,7 @@ public:
   }
   template <class CoefficientTypeOther>
   void operator*=(const CoefficientTypeOther& theConst)
-  { this->theElT.operator*=<CoefficientTypeOther>(theConst);
+  { this->theElT.operator*=(theConst);
   }
   void MultiplyOnTheLeft
   (const ElementSemisimpleLieAlgebra<Rational>& other, ElementVermaModuleOrdered<coefficient>& output, const coefficient& theRingUnit,

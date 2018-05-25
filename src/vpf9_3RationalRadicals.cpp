@@ -3,6 +3,7 @@
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
 #include "vpfHeader2Math5_SubsetsSelections.h"
+#include "vpfImplementationHeader2Math0_General.h"
 ProjectInformationInstance ProjectInfoVpf9_3cpp(__FILE__, "Algebraic numbers. ");
 
 std::string MonomialVector::ToString(FormatExpressions* theFormat)const

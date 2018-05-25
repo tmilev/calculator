@@ -242,8 +242,8 @@ public:
   bool CheckConsistency()const
   { if (this->flagDeallocated)
       crash << "This is a programming error: use after free of Finite group. " << crash;
-    if (this==0)
-      crash << "Finite group this pointer is zero. " << crash;
+    //if (this == 0)
+    //  crash << "Finite group this pointer is zero. " << crash;
     return true;
   }
   bool CheckInitialization()const;

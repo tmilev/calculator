@@ -771,37 +771,39 @@ class GeneratorPermutationsOfList
       }
       switch(stack[frame_pointer].program_counter)
       { case pcpositions::beginning:
-        if(stack[frame_pointer].c == 0)
-        { frame_pointer--;
-          return *this;
-        }
-        stack[frame_pointer].loop_i = 0;
-        case pcpositions::loop:
-        if(stack[frame_pointer].loop_i == stack[frame_pointer].c)
-        { stack[frame_pointer].program_counter = pcpositions::afterloop;
+          if(stack[frame_pointer].c == 0)
+          { frame_pointer--;
+            return *this;
+          }
+          stack[frame_pointer].loop_i = 0;
           break;
-        }
-        stack[frame_pointer].program_counter = pcpositions::firstout;
-        frame_pointer++;
-        stack[frame_pointer].c = stack[frame_pointer-1].c-1;
-        stack[frame_pointer].program_counter = pcpositions::beginning;
-        break;
+        case pcpositions::loop:
+          if(stack[frame_pointer].loop_i == stack[frame_pointer].c)
+          { stack[frame_pointer].program_counter = pcpositions::afterloop;
+            break;
+          }
+          stack[frame_pointer].program_counter = pcpositions::firstout;
+          frame_pointer++;
+          stack[frame_pointer].c = stack[frame_pointer-1].c-1;
+          stack[frame_pointer].program_counter = pcpositions::beginning;
+          break;
         case firstout:
-        if(stack[frame_pointer].c%2!=0)
-          l.SwapTwoIndices(l.size-1-stack[frame_pointer].loop_i,l.size-1-stack[frame_pointer].c);
-        else
-          l.SwapTwoIndices(l.size-1,l.size-1-stack[frame_pointer].c);
-        stack[frame_pointer].loop_i++;
-        stack[frame_pointer].program_counter = pcpositions::loop;
-        break;
+          if(stack[frame_pointer].c%2!=0)
+            l.SwapTwoIndices(l.size-1-stack[frame_pointer].loop_i,l.size-1-stack[frame_pointer].c);
+          else
+            l.SwapTwoIndices(l.size-1,l.size-1-stack[frame_pointer].c);
+          stack[frame_pointer].loop_i++;
+          stack[frame_pointer].program_counter = pcpositions::loop;
+          break;
         case afterloop:
-        stack[frame_pointer].program_counter = pcpositions::end;
-        frame_pointer++;
-        stack[frame_pointer].c = stack[frame_pointer-1].c-1;
-        stack[frame_pointer].program_counter = pcpositions::beginning;
-        break;
+          stack[frame_pointer].program_counter = pcpositions::end;
+          frame_pointer++;
+          stack[frame_pointer].c = stack[frame_pointer-1].c-1;
+          stack[frame_pointer].program_counter = pcpositions::beginning;
+          break;
         case end:
-        frame_pointer--;
+          frame_pointer--;
+          break;
       }
     }
   }
@@ -1039,9 +1041,11 @@ class GeneratorElementsSnxSnOnIndicesAndIndices
     { if(frame_pointer == -1)
         return  *this; // seriously tho what the f*** does this even mean
       switch(stack[frame_pointer].program_counter)
-      { case pcpositions::beginning:
+      {
+      case pcpositions::beginning:
         generators[frame_pointer].ResetIteration();
-        case pcpositions::loop:
+          break;
+      case pcpositions::loop:
         if(generators[frame_pointer].DoneIterating())
         { stack[frame_pointer].program_counter = pcpositions::end;
           break;
@@ -1063,11 +1067,12 @@ class GeneratorElementsSnxSnOnIndicesAndIndices
         }
         }
         case pcpositions::midloop:
-        ++generators[frame_pointer];
-        stack[frame_pointer].program_counter = pcpositions::loop;
-        break;
+          ++generators[frame_pointer];
+          stack[frame_pointer].program_counter = pcpositions::loop;
+          break;
         case pcpositions::end:
-        frame_pointer--;
+          frame_pointer--;
+          break;
       }
     }
   }
@@ -1953,7 +1958,7 @@ std::ostream& operator<<(std::ostream& out, const ConjugacyClassR2<elementSomeGr
 template <typename someGroup, typename coefficient>
 bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation()
 { bool badrep = false;
-  if(this->generatorS.size != this->ownerGroup->generatorCommutationRelations.NumRows)
+  if (this->generatorS.size != this->ownerGroup->generatorCommutationRelations.NumRows) {
     this->ownerGroup->ComputeGeneratorCommutationRelations();
     for(int i=0; i<this->generatorS.size; i++)
       for(int j=i; j<this->generatorS.size; j++)
@@ -1975,6 +1980,7 @@ bool GroupRepresentation<someGroup, coefficient>::VerifyRepresentation()
           badrep = true;
         }
       }
+  }
   if(badrep)
   { FiniteGroup<Matrix<Rational> > RG;
     RG.generators = this->generatorS;

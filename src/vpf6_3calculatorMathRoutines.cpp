@@ -13,6 +13,9 @@
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h" // undefined reference to `charSSAlgMod<RationalFunctionOld>::SplitCharOverRedSubalg(std::string*, charSSAlgMod<RationalFunctionOld>&, branchingData&, GlobalVariables&)'
 #include "vpfHeader8HtmlSnippets.h"
 #include "vpfHeader2Math10_LaTeXRoutines.h"
+#include <cmath>
+
+
 ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
 
 template <class theType>

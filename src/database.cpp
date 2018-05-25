@@ -347,6 +347,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
   }
   return true;
 }
+#endif
 
 bool UserCalculatorData::LoadFromJSON(JSData& input)
 { MacroRegisterFunctionWithName("UserCalculatorData::LoadFromJSON");
@@ -404,6 +405,7 @@ JSData UserCalculatorData::ToJSON()
   return result;
 }
 
+#ifdef MACRO_use_MongoDB
 bool UserCalculatorData::ComputeCourseInfo()
 { MacroRegisterFunctionWithName("UserCalculator::ComputeCourseInfo");
   bool isAdmin = (this->userRole == "admin" && this->username == theGlobalVariables.userDefault.username);
@@ -806,6 +808,7 @@ bool UserCalculator::InterpretDatabaseProblemData(const std::string& theInfo, st
   }
   return result;
 }
+#endif
 
 List<JSData> UserCalculatorData::GetFindMeFromUserNameQuery()
 { List<JSData> result;
@@ -824,6 +827,7 @@ List<JSData> UserCalculatorData::GetFindMeFromUserNameQuery()
   return result;
 }
 
+#ifdef MACRO_use_MongoDB
 bool UserCalculator::StoreProblemDataToDatabase(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabase");
   std::stringstream problemDataStream;

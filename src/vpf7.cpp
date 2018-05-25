@@ -386,7 +386,7 @@ std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe(List<in
 template <class coefficient>
 bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimental
 (GlobalVariables* theContext, const Vector<Rational>& theHWsimpleCoords, const coefficient& theRingUnit, const coefficient& theRingZero)
-{ WeylGroupData& theWeyl = this->owner->theOwner.theWeyl;
+{ WeylGroupData& theWeyl = this->owner->theOwner->theWeyl;
   Vector<Rational> theHWsimpleCoordsTrue = theHWsimpleCoords;
   theWeyl.RaiseToDominantWeight(theHWsimpleCoordsTrue);
   Vector<Rational> theHWdualCoords = theWeyl.GetDualCoordinatesFromFundamental
@@ -396,7 +396,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimen
   for (int i = 0; i < theHWdualCoords.size; i ++)
     theSub[i] = theHWdualCoords[i];
   this->ModOutVermaRelations(theContext, &theSub, theRingUnit, theRingZero);
-  int numPosRoots = this->owner->theOwner.GetNumPosRoots();
+  int numPosRoots = this->owner->theOwner->GetNumPosRoots();
   //int theDimension=this->owner->theOwner.GetRank();
   Vector<Rational> currentWeight = theHWsimpleCoordsTrue;
   Vector<Rational> testWeight;
@@ -410,7 +410,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimen
     int thePower = 0;
     if (!this->Powers[k].IsSmallInteger(thePower))
       return false;
-    int rootIndex = this->owner->theOwner.GetRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
+    int rootIndex = this->owner->theOwner->GetRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
     Vector<Rational>& currentRoot = theWeyl.RootSystem[rootIndex];
 //    stOutput << "<hr>The power: " << thePower;
     for (int j = 0; j < thePower; j ++)

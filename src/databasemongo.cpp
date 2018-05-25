@@ -245,7 +245,6 @@ bool MongoQuery::FindMultiple(List<JSData>& output, const JSData& inputOptions, 
   //<< output.ToStringCommaDelimited() << logger::endL;
   return true;
 }
-#endif
 
 void DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex
 (const std::string& collectionName, const std::string& theKey)
@@ -258,17 +257,31 @@ void DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex
   mongoc_database_write_command_with_opts(database, query.command, NULL, query.updateResult, &query.theError);
 }
 
+#endif
 bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString
 (const std::string& collectionName, const std::string& findQuery,
  List<JSData>& output, int maxOutputItems,
  long long* totalItems, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindFromString");
+#ifdef MACRO_use_MongoDB
   JSData theData;
   //logWorker << logger::blue << "Query input: " << findQuery << logger::endL;
   if (!theData.readstring(findQuery, true, commentsOnFailure))
     return false;
+
   return DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON
   (collectionName, theData, output, maxOutputItems, totalItems, commentsOnFailure);
+#else
+  if (commentsOnFailure != 0)
+    *commentsOnFailure << "Error: code compiled without DB support";
+  (void) collectionName;
+  (void) findQuery;
+  (void) output;
+  (void) maxOutputItems;
+  (void) totalItems;
+  return false;
+#endif
+
 }
 
 JSData DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(const List<std::string> &fieldsToProjectTo)
@@ -317,6 +330,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
     *totalItems = query.totalItems;
   return result;
 #else
+  (void) options;
   (void) collectionName;
   (void) findQuery;
   (void) output;
@@ -419,6 +433,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
   (void) collectionName;
   (void) findQuery;
   (void) output;
+  (void) options;
   if (commentsOnFailure != 0)
     *commentsOnFailure << "Project compiled without mongoDB support. ";
   return false;
@@ -494,6 +509,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames");
   if (!databaseMongo.initialize(commentsOnFailure))
     return false;
+#ifdef MACRO_use_MongoDB
   bson_t opts = BSON_INITIALIZER;
   bson_error_t error;
   mongoc_database_get_collection_names_with_opts(database, &opts, &error);
@@ -514,6 +530,12 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames
   }
   bson_destroy(&opts);
   return result;
+#else
+  (void) output;
+  if (commentsOnFailure !=0)
+    *commentsOnFailure << "MongoDB not installed";
+  return false;
+#endif
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::FetchTable

@@ -5,6 +5,7 @@
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader2Math4_Graph.h"
+#include "vpfImplementationHeader2Math0_General.h"
 static ProjectInformationInstance ProjectInfoVpfCharacters(__FILE__, "Finite group characters sandbox. Work in progress by Thomas. ");
 
 extern FormatExpressions consoleFormat;
@@ -875,8 +876,8 @@ SubgroupDataWeylGroup::SubgroupDataWeylGroup()
 }
 
 bool SubgroupDataWeylGroup::CheckInitialization()
-{ if (this==0)
-    crash << "``this'' pointer of SubgroupDataWeylGroup equals zero. " << crash;
+{ //if (this==0)
+  //  crash << "``this'' pointer of SubgroupDataWeylGroup equals zero. " << crash;
   if (this->theWeylData==0)
     crash << "SubgroupDataWeylGroup: non-initialized theWeylData pointer. " << crash;
   return true;
@@ -1112,7 +1113,7 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   signRep.G = &(this->theGroup);
   this->GetSignCharacter(signRep.data);
   Selection parSelrootsAreInLevi;
-  parSelrootsAreInLevi.init(this->GetDim()+1);
+  parSelrootsAreInLevi.init(this->GetDim() + 1);
   Vectors<Rational> extendedBasis, currentBasisExtendedParabolic;
   extendedBasis.MakeEiBasis(this->GetDim());
   extendedBasis.AddOnTop(this->RootSystem[0]);
@@ -1121,17 +1122,17 @@ void WeylGroupData::GetSignSignatureExtendedParabolics(List<SubgroupDataRootRefl
   SubgroupDataRootReflections theSG;
   do
   { extendedBasis.SubSelection(parSelrootsAreInLevi, currentBasisExtendedParabolic);
-    if (currentBasisExtendedParabolic.GetRankOfSpanOfElements()==currentBasisExtendedParabolic.size)
+    if (currentBasisExtendedParabolic.GetRankOfSpanOfElements() == currentBasisExtendedParabolic.size)
     { theSG.MakeFromRoots(*this, currentBasisExtendedParabolic);
-      theSG.flagIsExtendedParabolic=true;
-      theSG.simpleRootsInLeviParabolic=parSelrootsAreInLevi;
+      theSG.flagIsExtendedParabolic = true;
+      theSG.simpleRootsInLeviParabolic = parSelrootsAreInLevi;
       outputSubgroups.AddOnTop(theSG);
     }
   } while (parSelrootsAreInLevi.IncrementReturnFalseIfPastLast());
-  for (int i=0; i<outputSubgroups.size; i++)
+  for (int i = 0; i<outputSubgroups.size; i ++)
     outputSubgroups[i].ComputeCCSizesRepresentativesPreimages();
   this->theGroup.CheckConjugacyClassRepsMatchCCsizes();
-  for(int j=0; j<outputSubgroups.size; j++)
+  for (int j = 0; j<outputSubgroups.size; j ++)
     outputSubgroups[j].ComputeTauSignature();
 }
 

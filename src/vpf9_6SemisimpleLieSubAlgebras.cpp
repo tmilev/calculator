@@ -44,8 +44,8 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra
 }
 
 bool SemisimpleLieAlgebra::CheckConsistency()const
-{ if (this == 0)
-    crash << "This pointer of semisimple Lie algebra is zero. " << crash;
+{ //if (this == 0)
+  //  crash << "This pointer of semisimple Lie algebra is zero. " << crash;
   if (this->flagDeallocated)
     crash << "This is a programming error: use after free of SemisimpleLieAlgebra. " << crash;
   this->theWeyl.CheckConsistency();
@@ -1889,8 +1889,8 @@ Rational DynkinType::GetPrincipalSlTwoCSInverseScale()const
 bool CandidateSSSubalgebra::CheckBasicInitialization()const
 { if (this->flagDeallocated)
     crash << "This is a programming error: use after free of CandidateSSSubalgebra. " << crash;
-  if (this==0)
-    crash << "Use of Candidate subalgebra with zero this pointer. " << crash;
+  //if (this==0)
+  //  crash << "Use of Candidate subalgebra with zero this pointer. " << crash;
   if (this->owner==0)
     crash << "This is a programming error: use of non-initialized semisimple subalgebra candidate. " << crash;
   return true;
@@ -1898,7 +1898,7 @@ bool CandidateSSSubalgebra::CheckBasicInitialization()const
 
 bool CandidateSSSubalgebra::CheckCandidateInitialization()const
 { this->CheckBasicInitialization();
-  if (this->theWeylNonEmbedded==0)
+  if (this->theWeylNonEmbedded == 0)
     crash << "Weyl group data not initialized for "
     << "a semisimple subalgebra candidate. " << crash;
   return true;
@@ -3510,8 +3510,8 @@ bool SemisimpleSubalgebras::CheckInitialization()const
 }
 
 bool SemisimpleSubalgebras::CheckConsistency()const
-{ if (this==0)
-    crash << "Programming error: this pointer is zero." << crash;
+{ //if (this==0)
+  //  crash << "Programming error: this pointer is zero." << crash;
   if (this->flagDeallocated)
     crash << "This is a programming error: use after free of semisimple subalgebras. " << crash;
   return true;

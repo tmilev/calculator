@@ -593,17 +593,18 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
     }
   }
   if (CarryOver != 0)
-    for (int i = x.theDigits.size; i < this->theDigits.size; i ++)
+  { for (int i = x.theDigits.size; i < this->theDigits.size; i ++)
       if (this->theDigits[i] > 0)
       { this->theDigits[i] --;
         break;
       } else
         this->theDigits[i] = LargeIntUnsigned::CarryOverBound - 1;
+  }
   this->FitSize();
 //  if(!this->CheckForConsistensy())crash << crash;
 }
 
-void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const
+void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output) const
 { if (this == &output || &x == &output)
   { LargeIntUnsigned thisCopy = *this;
     LargeIntUnsigned xCopy = x;

@@ -1308,7 +1308,7 @@ std::string WebWorker::GetDatabaseJSON()
 #ifdef MACRO_use_MongoDB
   out << DatabaseRoutinesGlobalFunctionsMongo::ToJSONDatabaseCollection(currentTable);
 #else
-  dbOutput << "<b>Database not available. </b>";
+  out << "<b>Database not available. </b>";
 #endif // MACRO_use_MongoDB
   return out.str();
 }
@@ -3049,7 +3049,6 @@ bool WebWorker::DoSetEmail
   inputOutputUser = userCopy;
   return true;
 #else
-  (void) theRoutines;
   (void) inputOutputUser;
   (void) commentsOnFailure;
   (void) commentsGeneralNonSensitive;
@@ -4913,7 +4912,8 @@ void WebServer::Restart()
   if (this->listeningSocketHTTP != - 1)
     this->Release(this->listeningSocketHTTP);
   if (this->listeningSocketHttpSSL != - 1)
-    this->Release(this->listeningSocketHttpSSL);  std::stringstream theCommand;
+    this->Release(this->listeningSocketHttpSSL);
+  std::stringstream theCommand;
   int timeInteger = (int) theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   logger* currentLog = 0;
   currentLog = &logWorker;

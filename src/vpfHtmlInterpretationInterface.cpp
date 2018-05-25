@@ -1943,6 +1943,9 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
 
   return out.str();
 #else
+  (void) adminsOnly;
+  (void) theUsers;
+  (void) hostWebAddressWithPort;
   return "Compiled without database support. ";
 #endif
 }
@@ -2151,6 +2154,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   }
   return true;
 #else
+  (void) comments;
   return false;
 #endif
 }
@@ -2365,7 +2369,11 @@ std::string HtmlInterpretation::ToStringUserDetails
   out << HtmlInterpretation::ToStringUserDetailsTable(adminsOnly, theUsers, hostWebAddressWithPort);
   out << "</span>";
 #else
+  (void) adminsOnly;
+  (void) theUsers;
+  (void) hostWebAddressWithPort;
   out << "<b>Adding emails not available (database not present).</b> ";
+
 #endif // MACRO_use_MongoDB
   return out.str();
 }

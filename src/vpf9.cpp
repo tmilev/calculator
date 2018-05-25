@@ -6379,8 +6379,8 @@ bool SubgroupWeylGroupOLD::DrawContour
 }
 
 bool SubgroupWeylGroupOLD::CheckInitialization()
-{ if (this == 0)
-    crash << "Subgroup of Weyl Group has 0 this pointer. " << crash;
+{ //if (this == 0)
+  //  crash << "Subgroup of Weyl Group has 0 this pointer. " << crash;
   if (this->AmbientWeyl == 0)
     crash << "Use of non-initialized subgroup of Weyl Group. " << crash;
   if (this->flagDeallocated)

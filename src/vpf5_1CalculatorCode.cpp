@@ -9,6 +9,9 @@
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h" // undefined reference to `WeylGroupRepresentation<Rational>::reset()
 
+#include <cmath>
+#include <cfloat>
+
 static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Calculator built-in functions. ");
 
 template<class Element>

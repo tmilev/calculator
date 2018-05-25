@@ -236,9 +236,10 @@ class HomoSemidirectElement: public GroupConjugacyImplementation<HomoSemidirectE
   }
 
   void Invert()
-  { this->h.Invert();
-    this->k = this->oa(this->h,this->k);
-    this->k.Invert();
+  { crash << "Code commented out due to compilation error with new compiler. " << crash;
+    //this->h.Invert();
+    //this->k = this->oa(this->h,this->k);
+    //this->k.Invert();
   }
 
   void MakeID(const HomoSemidirectElement& prototype)
@@ -251,7 +252,7 @@ class HomoSemidirectElement: public GroupConjugacyImplementation<HomoSemidirectE
     this->k = theKelt;
   }
 
-  void operator==(const HomoSemidirectElement& right) const
+  bool operator==(const HomoSemidirectElement& right) const
   { if(!(this->h == right.h))
       return false;
     if(!(this->k == right.k))
@@ -259,10 +260,10 @@ class HomoSemidirectElement: public GroupConjugacyImplementation<HomoSemidirectE
     return true;
   }
 
-  void operator>(const HomoSemidirectElement& right) const
-  { if(!this->h && right.h)
+  bool operator>(const HomoSemidirectElement& right) const
+  { if (!this->h && right.h)
       return false;
-    if(this->h && !right.h)
+    if (this->h && !right.h)
       return true;
     return this->k > right.k;
   }

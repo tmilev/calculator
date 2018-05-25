@@ -846,19 +846,19 @@ public:
   // VⓧW with basis (v1ⓧw1,v1ⓧw2,...,v2ⓧw1,v2ⓧw2,...vnⓧwn)
   void AssignTensorProduct(const Matrix<coefficient>& left, const Matrix<coefficient>& right);
   void AssignVectorsToRows(const List<Vector<coefficient> >& input)
-  { int numCols=-1;
-    if (input.size>0)
-      numCols=input[0].size;
+  { int numCols = - 1;
+    if (input.size > 0)
+      numCols = input[0].size;
     this->init(input.size, numCols);
-    for (int i=0; i<input.size; i++)
-      for (int j=0; j<numCols; j++)
-        this->elements[i][j]=input[i][j];
+    for (int i = 0; i < input.size; i ++)
+      for (int j = 0; j < numCols; j ++)
+        this->elements[i][j] = input[i][j];
   }
   void AssignVectorsToColumns(const Vectors<coefficient>& input)
   { this->init(input[0].size, input.size);
-    for (int i=0; i<this->NumRows; i++)
-      for (int j=0; j<this->NumCols; j++)
-        (*this)(i,j)=input[j][i];
+    for (int i = 0; i < this->NumRows; i ++)
+      for (int j = 0; j < this->NumCols; j ++)
+        (*this)(i, j) = input[j][i];
   }
   void AssignVectorColumn(const Vector<coefficient>& input)
   { this->init(input.size, 1);
@@ -904,30 +904,30 @@ public:
     return true;
   }
   bool IsEqualToZero()const
-  { for(int i=0; i<this->NumRows; i++)
-      for (int j=0; j<this->NumCols; j++)
-        if (this->elements[i][j]!=0)
+  { for(int i = 0; i < this->NumRows; i ++)
+      for (int j = 0; j < this->NumCols; j ++)
+        if (this->elements[i][j] != 0)
           return false;
     return true;
   }
   bool IsProportionalTo(const Matrix<coefficient>& input, coefficient& outputTimesMeEqualsInput)
-  { if (input.NumCols!=this->NumCols || input.NumRows!=this->NumRows)
+  { if (input.NumCols != this->NumCols || input.NumRows != this->NumRows)
       return false;
-    bool found=false;
-    for (int i=0; i<this->NumRows &&!found; i++)
-      for (int j=0; j<this->NumCols; j++)
+    bool found = false;
+    for (int i = 0; i < this->NumRows && !found; i ++)
+      for (int j = 0; j < this->NumCols; j ++)
         if (!this->elements[i][j].IsEqualToZero())
-        { found=true;
-          outputTimesMeEqualsInput=input.elements[i][j];
-          outputTimesMeEqualsInput/=this->elements[i][j];
+        { found = true;
+          outputTimesMeEqualsInput = input.elements[i][j];
+          outputTimesMeEqualsInput /= this->elements[i][j];
           break;
         }
     if (!found)
       return input.IsEqualToZero();
     Matrix<coefficient> tempMat;
-    tempMat=*this;
-    tempMat*=outputTimesMeEqualsInput;
-    tempMat-=(input);
+    tempMat = *this;
+    tempMat *= outputTimesMeEqualsInput;
+    tempMat -= input;
     return tempMat.IsEqualToZero();
   }
   //returns true if the system has a solution, false otherwise
@@ -942,24 +942,24 @@ public:
   }
   LargeIntUnsigned FindPositiveLCMCoefficientDenominators();
   void operator-=(const Matrix<coefficient>& right)
-  { if (this->NumRows!=right.NumRows || this->NumCols!=right.NumCols)
+  { if (this->NumRows != right.NumRows || this->NumCols != right.NumCols)
       crash << "This is a programming error: attempting to subtract from matrix with " << this->NumRows << " rows and " << this->NumCols
       << " columns a matrix with " << right.NumRows << " rows and " << right.NumCols << " columns. " << crash;
-    for (int i=0; i< this->NumRows; i++)
-      for (int j=0; j<this->NumCols; j++)
-        (*this)(i,j)-=right(i,j);
+    for (int i = 0; i< this->NumRows; i ++)
+      for (int j = 0; j<this->NumCols; j ++)
+        (*this)(i, j) -= right(i, j);
   }
   void WriteToFile(std::fstream& output);
   bool ReadFromFile(std::fstream& input);
   void operator/=(const coefficient& input)
-  { for (int j=0; j<this->NumRows; j++)
-      for (int i=0; i<this->NumCols; i++)
-        this->elements[j][i]/=input;
+  { for (int j = 0; j < this->NumRows; j ++)
+      for (int i = 0; i < this->NumCols; i ++)
+        this->elements[j][i] /= input;
   }
   void operator*=(const coefficient& input)
-  { for (int j=0; j<this->NumRows; j++)
-      for (int i=0; i<this->NumCols; i++)
-        this->elements[j][i]*=input;
+  { for (int j = 0; j < this->NumRows; j ++)
+      for (int i = 0; i < this->NumCols; i ++)
+        this->elements[j][i] *= input;
   }
   void operator*=(const Matrix<coefficient>& input)
   { this->MultiplyOnTheRight(input);
@@ -970,15 +970,15 @@ public:
     *this=tempMat;
   }
   static void LieBracket(const Matrix<coefficient>& left, const Matrix<coefficient>& right, Matrix<coefficient>& output)
-  { if (left.NumCols!=left.NumRows || right.NumCols!=right.NumRows || left.NumCols!=right.NumCols)
+  { if (left.NumCols != left.NumRows || right.NumCols != right.NumRows || left.NumCols != right.NumCols)
       crash << crash;
     Matrix<coefficient> tempPlus, tempMinus;
-    tempPlus=(right);
+    tempPlus = (right);
     tempPlus.MultiplyOnTheLeft(left);
-    tempMinus=(left);
+    tempMinus = (left);
     tempMinus.MultiplyOnTheLeft(right);
-    tempPlus-=(tempMinus);
-    output=tempPlus;
+    tempPlus -= (tempMinus);
+    output = tempPlus;
   }
   //The Gaussian elimination below brings the matrix to a row-echelon form, that is, makes the matrix be something like (example is 4x5):
   //1 0 3 0 0
@@ -989,13 +989,13 @@ public:
   // that do not have a pivot 1 in them.
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
   void GaussianEliminationByRows
-  (Matrix<coefficient>* carbonCopyMat=0, Selection* outputNonPivotColumns=0,
-   Selection* outputPivotColumns=0, std::stringstream* humanReadableReport=0, FormatExpressions* theFormat=0)
+  (Matrix<coefficient>* carbonCopyMat = 0, Selection* outputNonPivotColumns = 0,
+   Selection* outputPivotColumns = 0, std::stringstream* humanReadableReport = 0, FormatExpressions* theFormat = 0)
   ;
   void GaussianEliminationByRowsNoRowSwapPivotPointsByRows(int firstNonProcessedRow, Matrix<coefficient>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized);
   void GaussianEliminationEuclideanDomain
-  (Matrix<coefficient>* otherMatrix=0, const coefficient& theRingMinusUnit=-1, const coefficient& theRingUnit=1,
-   bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right)=0);
+  (Matrix<coefficient>* otherMatrix = 0, const coefficient& theRingMinusUnit = - 1, const coefficient& theRingUnit = 1,
+   bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right) = 0);
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<coefficient>& A, Matrix<coefficient>& b, Matrix<coefficient>& output);
   coefficient GetDeterminant();
   coefficient GetTrace()const;
@@ -1007,12 +1007,12 @@ public:
   void MatrixToRoot(Vector<Rational> & output);
   bool GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(List<Vectors<coefficient> >& output)const;
   void GetZeroEigenSpace(List<Vector<coefficient> >& output)const
-  { Matrix<coefficient> tempMat=*this;
+  { Matrix<coefficient> tempMat = *this;
     tempMat.GetZeroEigenSpaceModifyMe(output);
   }
   void GetZeroEigenSpaceModifyMe(List<Vector<coefficient> >& output);
   void GetEigenspaceModifyMe(const coefficient &inputEigenValue, List<Vector<coefficient> >& outputEigenspace)
-  { for(int i=0; i<this->NumCols; i++)
+  { for(int i = 0; i < this->NumCols; i ++)
       this->elements[i][i] -= inputEigenValue;
     this->GetZeroEigenSpaceModifyMe(outputEigenspace);
   }
@@ -1026,7 +1026,7 @@ public:
   int FindPositiveGCDCoefficientNumeratorsTruncated();
   Matrix<coefficient> operator-(const Matrix<coefficient>& right)const
   { Matrix<coefficient> tempMat=(*this);
-    tempMat-=right;
+    tempMat -= right;
     return tempMat;
   }
   Matrix<coefficient> operator*(const Matrix<coefficient>& right)const;
@@ -1036,9 +1036,9 @@ public:
   template<class otherType>
   void operator=(const Matrix<otherType>& other)
   { this->Resize(other.NumRows, other.NumCols, false);
-    for (int i=0; i<this->NumRows; i++)
-      for (int j=0; j<this->NumCols; j++)
-        (*this)(i,j)=other(i,j);
+    for (int i = 0; i < this->NumRows; i ++)
+      for (int j = 0; j < this->NumCols; j ++)
+        (*this)(i, j) = other(i, j);
   }
   // The following are for compatibility with the FiniteGroup class
   void GetCharacteristicPolyStandardRepresentation(Polynomial<coefficient>& out)
@@ -1052,9 +1052,9 @@ public:
   bool operator>(const Matrix<coefficient>& right) const
   { if(this->NumRows != right.NumRows || this->NumCols != right.NumCols)
       crash << "Not that this operation makes any sense anyway, but an attempt was just made to compare two matrices of different dimensions; presumably this means something is very wrong in some FiniteGroup, see the frames above " << __FILE__ << ":" << __LINE__ << crash;
-    for(int i=0; i<this->NumRows; i++)
-      for(int j=0; j<this->NumCols; j++)
-        if(!(this->elements[i][j] > right.elements[i][j]))
+    for (int i = 0; i < this->NumRows; i ++)
+      for (int j = 0; j < this->NumCols; j ++)
+        if (!(this->elements[i][j] > right.elements[i][j]))
           return false;
     return true;
   }
@@ -1062,15 +1062,15 @@ public:
 
 template <typename Element>
 inline void Matrix<Element>::Resize(int r, int c, bool PReserveValues, const Element* const TheRingZero)
-{ if (r<0)
-    r=0;
-  if (c<0)
-    c=0;
-  if (r==this->NumRows && c== this->NumCols)
+{ if (r < 0)
+    r = 0;
+  if (c < 0)
+    c = 0;
+  if (r == this->NumRows && c == this->NumCols)
     return;
-  if (r==0 || c==0)
-  { this->NumRows=r;
-    this->NumCols=c;
+  if (r == 0 || c == 0)
+  { this->NumRows = r;
+    this->NumCols = c;
     return;
   }
   Element** newElements=0;
@@ -3784,10 +3784,10 @@ class CompleX
 };
 
 template<class coefficient>
-class ElementSemisimpleLieAlgebra :public MonomialCollection<ChevalleyGenerator, coefficient>
+class ElementSemisimpleLieAlgebra : public MonomialCollection<ChevalleyGenerator, coefficient>
 {
 public:
-  bool CheckConsistency()const
+  bool CheckConsistency() const
   { if (this->size() == 0)
       return true;
     SemisimpleLieAlgebra* owner = (*this)[0].owner;
@@ -3799,7 +3799,7 @@ public:
   bool NeedsParenthesisForMultiplication()const;
   Vector<coefficient> GetCartanPart()const;
   void MakeGGenerator(const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner);
-  bool IsElementCartan()const;
+  bool IsElementCartan() const;
   void MakeHgenerator(const Vector<coefficient>& theH, SemisimpleLieAlgebra& inputOwners);
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
   void ElementToVectorNegativeRootSpacesFirst(Vector<coefficient>& output)const;
@@ -3833,7 +3833,7 @@ public:
     other.ElementToVectorNegativeRootSpacesFirst(tempRoot2);
     return tempRoot1.IsProportionalTo(tempRoot2);
   }
-  bool IsProportionalTo(const ElementSemisimpleLieAlgebra& other, Rational& outputTimesMeEqualsInput)const
+  bool IsProportionalTo(const ElementSemisimpleLieAlgebra& other, Rational& outputTimesMeEqualsInput) const
   { Vector<Rational> tempRoot1, tempRoot2;
     this->ElementToVectorNegativeRootSpacesFirst(tempRoot1);
     other.ElementToVectorNegativeRootSpacesFirst(tempRoot2);
@@ -3841,7 +3841,7 @@ public:
   }
   bool MustUseBracketsWhenDisplayingMeRaisedToPower();
   unsigned int HashFunction()const
-  { return this->indexOfOwnerAlgebra*SomeRandomPrimes[0]+this->::MonomialCollection<ChevalleyGenerator, Rational>::HashFunction()*SomeRandomPrimes[1];
+  { return this->indexOfOwnerAlgebra*SomeRandomPrimes[0] + this->::MonomialCollection<ChevalleyGenerator, Rational>::HashFunction() * SomeRandomPrimes[1];
   }
   static unsigned int HashFunction(const ElementSemisimpleLieAlgebra& input)
   { return input.HashFunction();
@@ -3850,7 +3850,7 @@ public:
   void operator=(const otherElement& other)
   { this->::MonomialCollection<ChevalleyGenerator, coefficient>::operator=(other);
   }
-  Vector<Rational> GetRootIMustBeWeight()const;
+  Vector<Rational> GetRootIMustBeWeight() const;
 };
 
 template <class Object>
@@ -6874,8 +6874,8 @@ bool ElementSemisimpleLieAlgebra<coefficient>::GetCoordsInBasis(const List<Eleme
 template <class coefficient>
 void ElementSemisimpleLieAlgebra<coefficient>::MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner)
 { //Changing RootSystem order invalidates this function!
-  if (&inputOwner == 0)
-    crash << " This is a programming error: 0 pointer to Semisimple Lie algebra. " << crash;
+  //if (&inputOwner == 0)
+  //  crash << " This is a programming error: 0 pointer to Semisimple Lie algebra. " << crash;
   this->MakeZero();
   ChevalleyGenerator tempGenerator;
   tempGenerator.MakeGenerator(inputOwner, generatorIndex);

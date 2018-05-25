@@ -1052,11 +1052,12 @@ public:
   int BSInsertDontDup(const Object& o)
   { int n = BSIndexFirstNotLessThan(o);
     for (int i = n; i < this->size; i ++)
-    { if(this->TheObjects[i] == o)
+    { if (this->TheObjects[i] == o)
         return - 1;
-      if(this->TheObjects[i] > o)
-        this->InsertAtIndexShiftElementsUp(o, i);
+      if (this->TheObjects[i] > o)
+      { this->InsertAtIndexShiftElementsUp(o, i);
         return i;
+      }
     }
     this->AddOnTop(o);
     return this->size - 1;
@@ -1070,8 +1071,9 @@ public:
     { if(this->TheObjects[i] == o)
         existing_index = i;
       if(this->TheObjects[i] > o)
-        bin_end_index = i;
+      { bin_end_index = i;
         break;
+      }
     }
     int outdex;
     if(existing_index != - 1)

@@ -543,6 +543,7 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
 
   theEmail.SendEmailWithMailGun(&out, &out);
 #else
+  (void) input;
   out << "Error: database not running. ";
 #endif
   return output.AssignValue(out.str(), theCommands);

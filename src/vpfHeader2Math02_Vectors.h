@@ -895,8 +895,6 @@ bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasi
 { if (inputBasis.size == 0)
     return false;
   MacroRegisterFunctionWithName("Vector::GetCoordsInBasiS");
-  if (this == 0)
-    crash << "This is a programming error: this pointer of a vector is zero when it shouldn't be. " << crash;
   Vectors<coefficient> bufferVectors;
   Matrix<coefficient> bufferMat;
   if (this->size != inputBasis[0].size)
@@ -952,9 +950,9 @@ template <class coefficient>
 bool Vectors<coefficient>::GetCoordsInBasis
 (const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords)
 { MacroRegisterFunctionWithName("Vectors::GetCoordsInBasis");
-  if (this == 0 || &outputCoords == 0 || this == &outputCoords)
-    crash << "This is a programming error: input and output addresses are zero or coincide. this address: "
-    << (unsigned long) this << "; output address: " << (unsigned long)(&outputCoords) << crash;
+  //if (this == 0 || &outputCoords == 0 || this == &outputCoords)
+  //  crash << "This is a programming error: input and output addresses are zero or coincide. this address: "
+  //  << (unsigned long) this << "; output address: " << (unsigned long)(&outputCoords) << crash;
   outputCoords.SetSize(this->size);
   for (int i = 0; i < this->size; i ++)
     if (!(this->operator[](i).GetCoordsInBasiS(inputBasis, outputCoords[i])))

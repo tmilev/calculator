@@ -864,7 +864,7 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::GetElementUniversalEnvelopi
 }
 
 template <class coefficient>
-bool MonomialUniversalEnvelopingOrdered<coefficient>::GetElementUniversalEnveloping(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& inputOwner)
+bool MonomialUniversalEnvelopingOrdered<coefficient>::GetElementUniversalEnveloping(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebraOrdered &inputOwner)
 { ElementUniversalEnveloping<coefficient> Accum;
   ElementUniversalEnveloping<coefficient> tempMon;
   int theIndex;
@@ -876,7 +876,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::GetElementUniversalEnvelop
       tempMon.RaiseToPower(theDegree);
       Accum*=(tempMon);
     } else
-      if (this->owner->theOrder[this->generatorsIndices[i]].IsACoeffOneChevalleyGenerator(theIndex, owner))
+      if (this->owner->theOrder[this->generatorsIndices[i]].IsACoeffOneChevalleyGenerator(theIndex, *inputOwner.theOwner))
       { tempMon.MakeOneGeneratorCoeffOne(theIndex, inputOwner, this->Coefficient.GetOne(), this->Coefficient.GetZero());
         tempMon[0].Powers[0]=this->Powers[i];
         Accum*=(tempMon);
@@ -1371,7 +1371,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::SwitchConsecutiveIndicesIf
   int theLeftGeneratorIndex = this->generatorsIndices[theLeftIndex];
   int theRightGeneratorIndex = this->generatorsIndices[theLeftIndex + 1];
   ElementSemisimpleLieAlgebra<Rational> tempElt;
-  this->owner->theOwner.LieBracket(this->owner->theOrder[theLeftGeneratorIndex], this->owner->theOrder[theRightGeneratorIndex], tempElt);
+  this->owner->theOwner->LieBracket(this->owner->theOrder[theLeftGeneratorIndex], this->owner->theOrder[theRightGeneratorIndex], tempElt);
   if (tempElt.IsEqualToZero())
   { output.generatorsIndices.Reserve(this->generatorsIndices.size);
     output.Powers.Reserve(this->generatorsIndices.size);
@@ -1464,7 +1464,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesR
       }
     acquiredCoefficienT *= theLeftPoweR;
     theLeftPoweR -= 1;
-    this->owner->theOwner.LieBracket(theLeftElt, adResulT, tempElT);
+    this->owner->theOwner->LieBracket(theLeftElt, adResulT, tempElT);
     adResulT = tempElT;
     powerDroP ++;
     acquiredCoefficienT /= powerDroP;
@@ -1531,7 +1531,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesL
       }
     acquiredCoefficient *= theRightPower;
     theRightPower -= 1;
-    this->owner->theOwner.LieBracket(adResult, tempRightElt, tempElt);
+    this->owner->theOwner->LieBracket(adResult, tempRightElt, tempElt);
     adResult = tempElt;
     powerDrop ++;
     acquiredCoefficient /= powerDrop;
@@ -1545,11 +1545,11 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::CommutingLeftIndexAroundRi
   if (theLeftPower.IsSmallInteger(&tempInt))
   { if (theRightPower.IsSmallInteger(&tempInt))
       return true;
-    int numPosRoots = this->owner->theOwner.theWeyl.RootsOfBorel.size;
-    int theDimension = this->owner->theOwner.theWeyl.CartanSymmetric.NumRows;
+    int numPosRoots = this->owner->theOwner->theWeyl.RootsOfBorel.size;
+    int theDimension = this->owner->theOwner->theWeyl.CartanSymmetric.NumRows;
     if (rightGeneratorIndex >= numPosRoots && rightGeneratorIndex < numPosRoots + theDimension)
     { ElementSemisimpleLieAlgebra<Rational> tempElt;
-      this->owner->theOwner.LieBracket(this->owner->theOrder[leftGeneratorIndex], this->owner->theOrder[rightGeneratorIndex], tempElt);
+      this->owner->theOwner->LieBracket(this->owner->theOrder[leftGeneratorIndex], this->owner->theOrder[rightGeneratorIndex], tempElt);
       if (tempElt.IsEqualToZero())
         return true;
       else
@@ -1628,7 +1628,7 @@ std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(bool useLa
   { coefficient& thePower = this->Powers[i];
     int theIndex = this->generatorsIndices[i];
     bool usebrackets = false;
-    tempS = this->owner->theOwner.GetStringFromChevalleyGenerator(theIndex, PolyFormatLocal);
+    tempS = this->owner->theOwner->GetStringFromChevalleyGenerator(theIndex, PolyFormatLocal);
     if (usebrackets)
       out << "(";
     out << tempS;
@@ -1819,8 +1819,8 @@ void ElementUniversalEnvelopingOrdered<coefficient>::ModOutVermaRelations
 template <class coefficient>
 void MonomialUniversalEnvelopingOrdered<coefficient>::ModOutVermaRelations
 (GlobalVariables* theContext, const List<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero)
-{ int numPosRoots = this->owner->theOwner.GetNumPosRoots();
-  int theDimension = this->owner->theOwner.GetRank();
+{ int numPosRoots = this->owner->theOwner->GetNumPosRoots();
+  int theDimension = this->owner->theOwner->GetRank();
   for (int i = this->generatorsIndices.size - 1; i >= 0; i --)
   { int IndexCurrentGenerator = this->generatorsIndices[i];
     if (IndexCurrentGenerator >= numPosRoots + theDimension)
@@ -1838,7 +1838,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::ModOutVermaRelations
         return;
       }
       coefficient theSubbedH = theRingZero;
-      Vector<Rational>& currentH = this->owner->theOrder[IndexCurrentGenerator].Hcomponent;
+      Vector<Rational> currentH = this->owner->theOrder[IndexCurrentGenerator].GetCartanPart();
       for (int j = 0; j < currentH.size; j ++)
         theSubbedH += (*subHiGoesToIthElement)[j] * currentH[j];
       MathRoutines::RaiseToPower(theSubbedH, theDegree, theRingUnit);

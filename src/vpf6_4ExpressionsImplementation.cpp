@@ -9,6 +9,7 @@
 #include "vpfHeader2Math3_SymmetricGroupsAndGeneralizations.h"
 #include "vpfHeader3Calculator4HtmlFunctions.h"
 #include "vpfHeader5Crypto.h"
+#include <cmath>
 ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp(__FILE__, "Calculator expression implementation. ");
 
 Expression operator*(const Expression& left, const Expression& right)
@@ -2632,8 +2633,6 @@ std::string Expression::ToStringAllSlidersInExpression()const
 
 std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression, bool unfoldCommandEnclosures)const
 { MacroRegisterFunctionWithName("Expression::ToString");
-  if (this == 0)
-    crash << "Not supposed to happen: zero this pointer. " << crash;
   MemorySaving<FormatExpressions> tempFormat;
   if (theFormat == 0)
   { theFormat = &tempFormat.GetElement();

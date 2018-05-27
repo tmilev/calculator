@@ -735,7 +735,7 @@ std::string HtmlInterpretation::GetTopicTableJSON()
     out << "\"";
     return out.str();
   }
-  thePage.FigureOutCurrentProblemList(comments);
+  thePage.ComputeTopicListAndPointsEarned(comments);
   out << thePage.ToStringTopicListJSON();
   return out.str();
 }
@@ -1135,8 +1135,7 @@ std::string HtmlInterpretation::SubmitAnswers
 
   completedProblemStream << "CommandEnclosure{}("
   << currentA.answerId << "= (" << currentA.currentAnswerClean << ");"
-  << ");"
-  ;
+  << ");";
   completedProblemStreamNoEnclosures << currentA.answerId << "= (" << currentA.currentAnswerClean << ");";
 
   //stOutput << "DEBUG: " << "adding: commands: " << currentA.commandsCommentsBeforeSubmissionOnly;

@@ -2,25 +2,20 @@
 
 function toStringProblemWeight(problemData) {
   var result = "";
-  result+= "<td>";
+  result += "<td>";
   if (problemData.correctlyAnswered !== undefined && problemData.correctlyAnswered !== NaN) {
-    var points = null;
-    var totalPoints = null;
-    if (problemData.weight !== undefined && problemData.totalQuestions !== undefined) {
-      points = ((0.0 + problemData.correctlyAnswered) / problemData.totalQuestions) * problemData.weight;
-      totalPoints = problemData.totalQuestions * problemData.weight;
+    var numCorrectlyAnswered = problemData.correctlyAnswered;
+    var totalQuestions = problemData.totalQuestions;
+    result += `${numCorrectlyAnswered} out of ${totalQuestions}`;
+    if (problemData.weight !== undefined) {
+      var points = ((0.0 + problemData.correctlyAnswered * problemData.weight) / problemData.totalQuestions);
+      var totalPoints = problemData.weight;
+      points = Number(points.toFixed(2));
+      result += ` = ${points} pts`;
+    } else {
+      result += ` = ? pts`;
     }
-    if (problemData.weight === undefined && problemData.totalQuestions !== undefined) {
-      points = ((0.0 + problemData.correctlyAnswered) / problemData.totalQuestions);
-      totalPoints = problemData.totalQuestions;
-    }
-    if (problemData.weight === undefined && problemData.totalQuestions === undefined) {
-      points = problemData.correctlyAnswered;
-    }
-    if (totalPoints === null) {
-      totalPoints = "?";
-    }
-    result += `${points} out of ${totalPoints}`;
+
   }
   result += "</td>";
   return result;
@@ -44,7 +39,7 @@ function getHTMLSubSection(theSubSection) {
   result += "<table class = \"topicList\"><colgroup><col><col><col><col><col></colgroup>";
   for (var counterSubSection = 0; counterSubSection < theSubSection["children"].length; counterSubSection ++) {
     var currentProblemData = theSubSection["children"][counterSubSection];
-    console.log(JSON.stringify(currentProblemData));
+    console.log("Current problem data: " + JSON.stringify(currentProblemData));
     if (currentProblemData.problem !== "") {
       var currentProblem = thePage.getProblem(currentProblemData.problem);
       currentProblem.previousProblem = previousProblem;
@@ -150,16 +145,16 @@ function afterLoadCoursePage(incomingPage, result) {
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentCourse")]);
   //MathJax.Hub.Process();
   var theTopics = document.getElementsByTagName("topicList");
-  var submitAnswers = "topicListJSONNoLogin";
+  var topicList = "topicListJSONNoLogin";
   if (thePage.user.flagLoggedIn) {
-    submitAnswers = "topicListJSON";
+    topicList = "topicListJSON";
   }
   if (theTopics.length  === 0) {
     return;
   }
   //console.log("DEBUG: topic list cookie @ afterLoadCoursePage: " + getCookie("topicList"));
   submitGET({
-    url: `${pathnames.calculatorAPI}?request=${submitAnswers}`,
+    url: `${pathnames.calculatorAPI}?request=${topicList}`,
     callback: afterLoadTopics,
     progress: "spanProgressReportGeneral"
   });

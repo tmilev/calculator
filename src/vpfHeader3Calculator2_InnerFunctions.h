@@ -83,8 +83,7 @@ public:
   static bool innerChooseCartanSA(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPolynomialDivisionSlidesGrLex
-  (Calculator& theCommands, const Expression& input, Expression& output)
-;
+  (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionRemainder
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionQuotient
@@ -471,8 +470,6 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSendEmailWithMailGun
   (Calculator& theCommands, const Expression& input, Expression& output);
-
-
 };
 
 #endif

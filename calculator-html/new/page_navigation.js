@@ -159,7 +159,7 @@ Page.prototype.loadSettingsFromCookies = function() {
       this.currentCourse[label] = getCookie(label);
       //console.log(label);
     }
-    console.log("Current course: " + JSON.stringify(this.currentCourse));
+    //console.log("DEBUG: Current course: " + JSON.stringify(this.currentCourse));
     this.user.googleToken = getCookie("googleToken");
     this.user.name = getCookie("username");
     this.user.authenticationToken = getCookie("authenticationToken");
@@ -173,7 +173,7 @@ Page.prototype.storeSettingsToCookies = function() {
   for (label in this.currentCourse) {
     addCookie(label, this.currentCourse[label], 300);
   }
-  console.log(JSON.stringify(this.currentCourse));
+  //console.log("DEBUG: storing to cookies: " + JSON.stringify(this.currentCourse));
   addCookie("googleToken", this.user.googleToken, 300, true); 
   addCookie("username", this.user.name, 300, true);
   addCookie("authenticationToken", this.user.authenticationToken, 300, true);
@@ -236,7 +236,7 @@ Page.prototype.showProfilePicture = function() {
 Page.prototype.initializeCalculatorPage = function() {
   initializeButtons();
   initializeCalculatorPage();
-  console.log("Submit missing");
+  //console.log("Submit missing");
   if (document.getElementById('mainInputID').value !== "") {
     submitStringAsMainInput(
       document.getElementById('calculatorOutput'),

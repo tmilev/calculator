@@ -92,7 +92,7 @@ function toggleAdminPanels() {
 }
 
 function loginWithServerCallback(incomingString, result) {
-  console.log(incomingString);
+  //console.log("DEBUG: loginwithservercallback: " + incomingString);
   document.getElementById("spanLoginStatus").innerHTML = "";
   var success = false;
   var loginErrorMessage = "";

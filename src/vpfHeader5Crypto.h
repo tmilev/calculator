@@ -38,11 +38,11 @@ public:
   static void ConvertUint32ToUcharBigendian(const List<uint32_t>& input, List<unsigned char>& output);
   static bool ConvertBase64ToBitStream
   (const std::string& input, List<unsigned char>& output,
-   std::stringstream* commentsOnFailure=0,
-   std::stringstream* commentsGeneral=0);
+   std::stringstream* commentsOnFailure = 0,
+   std::stringstream* commentsGeneral = 0);
   static bool ConvertBase64ToString
-  (const std::string& input, std::string& output, std::stringstream* commentsOnFailure=0,
-   std::stringstream* commentsGeneral=0);
+  (const std::string& input, std::string& output, std::stringstream* commentsOnFailure = 0,
+   std::stringstream* commentsGeneral = 0);
 
   static void ConvertStringToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output);
   static bool ConvertBase58ToLargeIntUnsigned(const std::string& input, LargeIntUnsigned& output);
@@ -102,7 +102,6 @@ public:
   std::string ToString();
   bool VerifyRSA256
   (const LargeIntUnsigned& theModulus, const LargeIntUnsigned& theExponent,
-   std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
-  );
+   std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
 };
 #endif // header_crypto_was_already_defined

@@ -106,42 +106,42 @@ public:
 template <class theType>
 bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyTypeByType");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   Expression inputContextsMerged;
   if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments))
     return false;
 //  stOutput << "Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
-  theType result=inputContextsMerged[1].GetValue<theType>();
-  result*=inputContextsMerged[2].GetValue<theType>();
+  theType result = inputContextsMerged[1].GetValue<theType>();
+  result *= inputContextsMerged[2].GetValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
 template <class theType>
 bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   Expression inputContextsMerged;
   if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments))
     return false;
-  theType result=inputContextsMerged[1].GetValue<theType>();
-  result+=inputContextsMerged[2].GetValue<theType>();
+  theType result = inputContextsMerged[1].GetValue<theType>();
+  result += inputContextsMerged[2].GetValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
 template <class theType>
 bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
-  if (input.size()!=3)
+  if (input.size() != 3)
     return false;
   Expression inputContextsMerged;
   if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged, &theCommands.Comments))
     return false;
   if (inputContextsMerged[2].GetValue<theType>().IsEqualToZero())
     return output.MakeError("Division by zero. ", theCommands, true);
-  theType result=inputContextsMerged[1].GetValue<theType>();
-  result/=inputContextsMerged[2].GetValue<theType>();
+  theType result = inputContextsMerged[1].GetValue<theType>();
+  result /= inputContextsMerged[2].GetValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
@@ -154,7 +154,7 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
     return theCommands << "Max recursion depth of " << theCommands.MaxRecursionDeptH
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
   if (input.IsOfType<Polynomial<coefficient> >())
-  { output=input;
+  { output = input;
     return true;
   }
   if (input.IsOfType<coefficient>() || input.IsOfType<Rational>())
@@ -166,7 +166,7 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
   if (input.IsListStartingWithAtom(theCommands.opTimes()) || input.IsListStartingWithAtom(theCommands.opPlus()))
   { theComputed.reset(theCommands, input.children.size);
     theComputed.AddChildOnTop(input[0]);
-    for (int i=1; i<input.children.size; i++)
+    for (int i = 1; i < input.size(); i++)
     { if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
         return theCommands << "<hr>Failed to extract polynomial from " << input[i].ToString();
       theComputed.AddChildOnTop(theConverted);
@@ -177,42 +177,39 @@ bool CalculatorConversions::innerPolynomial(Calculator& theCommands, const Expre
       return CalculatorFunctionsBinaryOps::innerAddNumberOrPolyToNumberOrPoly(theCommands, theComputed, output);
     crash << "Error, this line of code should never be reached. " << crash;
   }
-  int thePower=-1;
+  int thePower = - 1;
   if (input.StartsWith(theCommands.opThePower(), 3))
     if (input[2].IsSmallInteger(&thePower))
-    { if(!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
+    { if (!CalculatorConversions::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
         return theCommands << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
       Polynomial<coefficient> resultP=theConverted.GetValue<Polynomial<coefficient> >();
-      if (thePower<0)
+      if (thePower < 0)
       { coefficient theConst;
         if (!resultP.IsConstant(&theConst))
         { theCommands << "<hr>Failed to extract polynomial from  "
           << input.ToString() << " because the exponent was negative. "
           << "Please make sure that this is not a typo."
-          << " I am treating " << input.ToString() << " as a single variable. "
-          ;
+          << " I am treating " << input.ToString() << " as a single variable. ";
           Polynomial<coefficient> JustAmonomial;
-          JustAmonomial.MakeMonomiaL(0,1,1);
+          JustAmonomial.MakeMonomiaL(0, 1, 1);
           Expression theContext;
           theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
           return output.AssignValueWithContext(JustAmonomial, theContext, theCommands);
         }
         theConst.Invert();
-        thePower*=-1;
-        resultP=theConst;
+        thePower *= - 1;
+        resultP = theConst;
       }
-      if (thePower==0)
+      if (thePower == 0)
         if (resultP.IsEqualToZero())
           return output.MakeError("Error: 0^0 is undefined in the present version of the calculator. ", theCommands);
       resultP.RaiseToPower(thePower);
       return output.AssignValueWithContext(resultP, theConverted.GetContext(), theCommands);
     }
   Polynomial<coefficient> JustAmonomial;
-  JustAmonomial.MakeMonomiaL(0,1,1);
+  JustAmonomial.MakeMonomiaL(0, 1, 1);
   Expression theContext;
   theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
   return output.AssignValueWithContext(JustAmonomial, theContext, theCommands);
 }
-
-
 #endif

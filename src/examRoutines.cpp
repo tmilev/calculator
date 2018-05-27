@@ -3780,7 +3780,7 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
     return true;
   if (this->topicListContent == "")
     if (!FileOperations::LoadFileToStringVirtualCustomizedReadOnly
-        (this->topicListFileName, this->topicListContent, &comments))
+         (this->topicListFileName, this->topicListContent, &comments))
     { comments << "Failed to load the topic list associated with this course. "
       << "Go to  ``Select course'' from the menu to see a list of available courses. ";
       return false;
@@ -4098,7 +4098,6 @@ std::string TopicElement::ToStringStudentScoreButton()
   << "'studentScoresLoadReport"
   << TopicElement::scoreButtonCounter << "');\">"
   << "Scores</button>";
-  ;
   return out.str();
 }
 
@@ -4174,23 +4173,22 @@ void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput
   inputOutput.interpretedCommand = out.str();
 }
 
-void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
+bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("CalculatorHTML::InterpretTopicList");
-  std::stringstream out, outFinal, outHead;
-  if (this->flagUseJSON)
-  { inputOutput.interpretedCommand = "<topicList></topicList>";
-    return;
+  if (!this->LoadAndParseTopicList(commentsOnFailure))
+    return false;
+  if (!this->LoadDatabaseInfo(commentsOnFailure))
+  { if (!this->flagUseJSON)
+      commentsOnFailure << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
+    else
+      commentsOnFailure << "Error loading problem history. ";
   }
-  if (!this->LoadAndParseTopicList(out))
-  { inputOutput.interpretedCommand = out.str();
-    return;
+  if (!this->PrepareSectionList(commentsOnFailure))
+  { if (!this->flagUseJSON)
+      commentsOnFailure << "<span style=\"color:red\">Error preparing section list.</span> <br>";
+    else
+      commentsOnFailure << "Error preparing section list. ";
   }
-  if (!this->LoadDatabaseInfo(out))
-    out << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
-  if (!this->PrepareSectionList(out))
-    out << "<span style=\"color:red\">Error preparing section list.</span> <br>";
-  //out << "DEBUG: sections: " << this->databaseStudentSections.ToStringCommaDelimited();
-  //out << "DEBUG: prob data: " << this->currentUseR.theProblemData.ToStringHtml();
   #ifdef MACRO_use_MongoDB
   this->flagIncludeStudentScores =
   theGlobalVariables.UserDefaultHasAdminRights() &&
@@ -4201,7 +4199,24 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     if (this->theTopicS[i].type == TopicElement::tProblem)
       gradableProblems.AddOnTopNoRepetition(this->theTopicS[i].id);
   this->currentUseR.ComputePointsEarned(gradableProblems, &this->theTopicS);
-  outHead << this->GetSectionSelector();
+  #endif
+  this->initTopicElementNames();
+  return true;
+}
+
+void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
+{ MacroRegisterFunctionWithName("CalculatorHTML::InterpretTopicList");
+  if (this->flagUseJSON)
+  { inputOutput.interpretedCommand = "<topicList></topicList>";
+    return;
+  }
+  std::stringstream out;
+  if (!this->ComputeTopicListAndPointsEarned(out))
+  { inputOutput.interpretedCommand = out.str();
+    return;
+  }
+  std::stringstream outFinal, outHead;
+#ifdef MACRO_use_MongoDB
   if (this->currentUseR.pointsMax != 0)
   { double percent = 100 * this->currentUseR.pointsEarned.GetDoubleValue() /
     this->currentUseR.pointsMax.GetDoubleValue();
@@ -4217,8 +4232,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     << "If a problem is assigned a new weight, your % score may drop. </small><br>";
     outHead << "<panelCourseInfo>" << this->currentUseR.ToStringCourseInfo() << "</panelCourseInfo></div><br>";
   }
-  #endif
-  this->initTopicElementNames();
+#endif
   out << "<panelProblemLinkStyleSelection>Problem links open in: ";
 //  out << "<br>DEBUG: problinkstyle: "
 //  << theGlobalVariables.GetWebInput("problemLinkStyle")
@@ -4235,8 +4249,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   if (theGlobalVariables.GetWebInput("problemLinkStyle") == "newWindow")
     out << "checked";
   out << ">new tab</input>"
-  << ". </panelProblemLinkStyleSelection>"
- ;
+  << ". </panelProblemLinkStyleSelection>";
   bool plainStyle = (inputOutput.GetKeyValue("topicListStyle") == "plain");
   std::string desiredChapter = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("chapter"), false);
   std::string currentChapter = "";
@@ -4609,8 +4622,7 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
     currentData.adminData.GetWeightFromCoursE
     (owner.currentUseR.courseComputed, currentWeight, &currentWeightAsGivenByInstructor);
     if (currentData.flagProblemWeightIsOK)
-    { output["weight"] = currentWeightAsGivenByInstructor;
-    }
+      output["weight"] = currentWeightAsGivenByInstructor;
   }
 #endif
   switch (this->type)

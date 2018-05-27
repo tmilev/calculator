@@ -3,7 +3,7 @@
 function updateDatabasePageCallback(incoming, output){
   try {
     var theParsed = JSON.parse(incoming);
-    console.log(JSON.stringify(theParsed));
+    console.log("DEBUG: incoming: " + JSON.stringify(theParsed));
     var theOutput = document.getElementById("divDatabaseOutput");
     if ("rows" in theParsed) {
       theOutput.innerHTML = getHtmlFromArrayOfObjects(theParsed.rows);

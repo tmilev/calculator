@@ -275,6 +275,7 @@ public:
   bool PrepareSectionList(std::stringstream& commentsOnFailure);
   void InterpretManageClass(SyntacticElementHTML& inputOutput);
   void InterpretTopicList(SyntacticElementHTML& inputOutput);
+  bool ComputeTopicListAndPointsEarned(std::stringstream& commentsOnFailure);
   void InterpretLectureMaterials(SyntacticElementHTML& inputOutput);
   void InterpretTableOfContents(SyntacticElementHTML& inputOutput);
   std::string GetEditPagePanel();

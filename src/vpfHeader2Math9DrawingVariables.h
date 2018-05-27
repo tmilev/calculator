@@ -10,9 +10,20 @@ static ProjectInformationInstance ProjectInfoVpfHeaderDrawingVars(__FILE__, "Hea
 class DrawTextOperation
 {
 public:
-  double X1; double Y1; std::string theText; int ColorIndex; int fontSize; int TextStyle;
-  void init(double x1, double y1, const std::string& inputText, int color, int theFontSize, int theTextStyle){ this->X1=x1; this->Y1=y1; this->theText=inputText; this->ColorIndex=color; this->fontSize=theFontSize; this->TextStyle=theTextStyle;}
-  void operator=(const DrawTextOperation& other){ this->X1=other.X1; this->Y1=other.Y1; this->theText=other.theText; this->ColorIndex=other.ColorIndex; this->fontSize=other.fontSize; this->TextStyle=other.TextStyle; }
+  double X1;
+  double Y1;
+  std::string theText;
+  int ColorIndex;
+  int fontSize;
+  int TextStyle;
+  void init(double x1, double y1, const std::string& inputText, int color, int theFontSize, int theTextStyle)
+  { this->X1 = x1;
+    this->Y1 = y1;
+    this->theText = inputText;
+    this->ColorIndex = color;
+    this->fontSize = theFontSize;
+    this->TextStyle = theTextStyle;
+  }
 };
 
 class DrawLineOperation
@@ -26,13 +37,13 @@ public:
   int ColorIndex;
   double lineWidth;
   inline void init(double x1, double y1, double x2, double y2, uint32_t PenStyle, int colorIndex, double inputLineWidth)
-  { this->X1=x1;
-    this->Y1= y1;
-    this->X2=x2;
-    this->Y2=y2;
-    this->thePenStyle=PenStyle;
-    this->ColorIndex= colorIndex;
-    this->lineWidth=inputLineWidth;
+  { this->X1 = x1;
+    this->Y1 = y1;
+    this->X2 = x2;
+    this->Y2 = y2;
+    this->thePenStyle = PenStyle;
+    this->ColorIndex = colorIndex;
+    this->lineWidth = inputLineWidth;
   }
 };
 
@@ -72,28 +83,28 @@ public:
   double precomputedX, precomputedY;
   void init(const Vector<Rational>& input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle)
   { this->theVector.SetSize(input.size);
-    for (int i=0; i<input.size; i++)
-      this->theVector[i]=input.TheObjects[i].GetDoubleValue();
-    this->ColorIndex=colorIndex;
-    this->theText=inputText;
-    this->fontSize=theFontSize;
-    this->TextStyle=theTextStyle;
+    for (int i = 0; i < input.size; i ++)
+      this->theVector[i] = input[i].GetDoubleValue();
+    this->ColorIndex = colorIndex;
+    this->theText = inputText;
+    this->fontSize = theFontSize;
+    this->TextStyle = theTextStyle;
   }
   void init(const Vector<double>& input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle)
-  { this->theVector=input;
-    this->ColorIndex=colorIndex;
-    this->theText=inputText;
-    this->fontSize=theFontSize;
-    this->TextStyle=theTextStyle;
+  { this->theVector = input;
+    this->ColorIndex = colorIndex;
+    this->theText = inputText;
+    this->fontSize = theFontSize;
+    this->TextStyle = theTextStyle;
   }
   void operator=(const DrawTextAtVectorOperation& other)
-  { this->theVector=other.theVector;
-    this->ColorIndex=other.ColorIndex;
-    this->theText=other.theText;
-    this->fontSize=other.fontSize;
-    this->TextStyle=other.TextStyle;
-    this->precomputedX=other.precomputedX;
-    this->precomputedY=other.precomputedY;
+  { this->theVector = other.theVector;
+    this->ColorIndex = other.ColorIndex;
+    this->theText = other.theText;
+    this->fontSize = other.fontSize;
+    this->TextStyle = other.TextStyle;
+    this->precomputedX = other.precomputedX;
+    this->precomputedY = other.precomputedY;
   }
 };
 
@@ -108,25 +119,25 @@ public:
   double precomputedX, precomputedY;
   void initFromVectorRational(const Vector<Rational>& input, double inputRadius, uint32_t inputPenStyle, int colorIndex)
   { this->theVector.SetSize(input.size);
-    for (int i=0; i<input.size; i++)
-      this->theVector[i]=input[i].GetDoubleValue();
+    for (int i = 0; i < input.size; i ++)
+      this->theVector[i] = input[i].GetDoubleValue();
     this->initFromVectorDouble(this->theVector, inputRadius, inputPenStyle, colorIndex);
   }
   void initFromVectorDouble(const Vector<double>& input, double inputRadius, uint32_t inputPenStyle, int colorIndex)
-  { this->theVector=input;
-    this->ColorIndex=colorIndex;
-    this->thePenStyle=inputPenStyle;
-    this->radius=inputRadius;
-    this->theMultiplicity=1;
+  { this->theVector = input;
+    this->ColorIndex = colorIndex;
+    this->thePenStyle = inputPenStyle;
+    this->radius = inputRadius;
+    this->theMultiplicity = 1;
   }
   void operator=(const DrawCircleAtVectorOperation& other)
-  { this->theVector=other.theVector;
-    this->ColorIndex=other.ColorIndex;
-    this->thePenStyle=other.thePenStyle;
-    this->radius=other.radius;
-    this->precomputedX=other.precomputedX;
-    this->precomputedY=other.precomputedY;
-    this->theMultiplicity=other.theMultiplicity;
+  { this->theVector = other.theVector;
+    this->ColorIndex = other.ColorIndex;
+    this->thePenStyle = other.thePenStyle;
+    this->radius = other.radius;
+    this->precomputedX = other.precomputedX;
+    this->precomputedY = other.precomputedY;
+    this->theMultiplicity = other.theMultiplicity;
   }
 };
 
@@ -148,7 +159,7 @@ public:
   List<std::string> labelsOfLabeledVectors;
   List<List<double> > ProjectionsEiVectors;
   List<Vectors<double> > BasisProjectionPlane;
-  static const int GraphicsUnitDefault=150;
+  static const int GraphicsUnitDefault = 150;
   int SelectedCircleMinus2noneMinus1Center; //-2= none, -1=center of coordinate system, nonnegative integers= selectedindex
   Vectors<double> BasisToDrawCirclesAt;
   Matrix<double> theBilinearForm;
@@ -168,8 +179,8 @@ public:
   void MakeMeAStandardBasis(int theDim);
   void operator+=(const DrawOperations& other);
   void initDimensions(Matrix<double>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane, int NumAnimationFrames)
-  { this->theBilinearForm=bilinearForm;
-    this->BasisToDrawCirclesAt=draggableBasis;
+  { this->theBilinearForm = bilinearForm;
+    this->BasisToDrawCirclesAt = draggableBasis;
     this->BasisProjectionPlane.initFillInObject(NumAnimationFrames, startingPlane);
     this->centerX.initFillInObject(NumAnimationFrames, 300);
     this->centerY.initFillInObject(NumAnimationFrames, 300);
@@ -179,58 +190,62 @@ public:
   void initDimensions(Matrix<Rational>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane, int NumAnimationFrames)
   { Matrix<double> tempMat;
     tempMat.init(bilinearForm.NumRows, bilinearForm.NumCols);
-    for (int i=0; i<bilinearForm.NumRows; i++)
-      for (int j=0; j<bilinearForm.NumCols; j++)
-        tempMat.elements[i][j]=bilinearForm.elements[i][j].GetDoubleValue();
+    for (int i = 0; i < bilinearForm.NumRows; i ++)
+      for (int j = 0; j < bilinearForm.NumCols; j ++)
+        tempMat.elements[i][j] = bilinearForm.elements[i][j].GetDoubleValue();
     this->initDimensions(tempMat, draggableBasis, startingPlane, NumAnimationFrames);
   }
   void initDimensions(int theDim, int numAnimationFrames);
   int GetDimFirstDimensionDependentOperation();
   int GetDimFromBilinearForm();
   inline void GetCoordsDrawingComputeAll(Vector<double>& input, double& X1, double& Y1)
-  { X1=this->theBilinearForm.ScalarProduct(input, this->BasisProjectionPlane[this->SelectedPlane][0]);
-    Y1=this->theBilinearForm.ScalarProduct(input, this->BasisProjectionPlane[this->SelectedPlane][1]);
-    X1=X1*this->GraphicsUnit[this->SelectedPlane] +this->centerX[this->SelectedPlane];
-    Y1=Y1*this->GraphicsUnit[this->SelectedPlane] +this->centerY[this->SelectedPlane] ;
+  { X1 = this->theBilinearForm.ScalarProduct(input, this->BasisProjectionPlane[this->SelectedPlane][0]);
+    Y1 = this->theBilinearForm.ScalarProduct(input, this->BasisProjectionPlane[this->SelectedPlane][1]);
+    X1 = X1 * this->GraphicsUnit[this->SelectedPlane] + this->centerX[this->SelectedPlane];
+    Y1 = Y1 * this->GraphicsUnit[this->SelectedPlane] + this->centerY[this->SelectedPlane] ;
   }
   inline void GetCoordsForDrawingProjectionsComputed(Vector<double>& input, double& X1, double& Y1)
-  { X1=0; Y1=0;
-    for (int j=0; j<input.size; j++)
-    { X1+=this->ProjectionsEiVectors[j][0]*input[j];
-      Y1+=this->ProjectionsEiVectors[j][1]*input[j];
+  { X1 = 0;
+    Y1 = 0;
+    for (int j = 0; j < input.size; j ++)
+    { X1 += this->ProjectionsEiVectors[j][0] * input[j];
+      Y1 += this->ProjectionsEiVectors[j][1] * input[j];
     }
-    X1=X1*this->GraphicsUnit[this->SelectedPlane] +this->centerX[this->SelectedPlane];
-    Y1=Y1*this->GraphicsUnit[this->SelectedPlane]+this->centerY[this->SelectedPlane];
+    X1 = X1 * this->GraphicsUnit[this->SelectedPlane] + this->centerX[this->SelectedPlane];
+    Y1 = Y1 * this->GraphicsUnit[this->SelectedPlane] + this->centerY[this->SelectedPlane];
   }
   inline void GetCoordsForDrawingProjectionsComputed(Vector<double>& input1, Vector<double>& input2, double& X1, double& Y1, double& X2, double& Y2)
-  { X1=0; X2=0; Y1=0; Y2=0;
-    for (int j=0; j<input1.size; j++)
-    { X1+=this->ProjectionsEiVectors[j][0]*input1[j];
-      Y1+=this->ProjectionsEiVectors[j][1]*input1[j];
-      X2+=this->ProjectionsEiVectors[j][0]*input2[j];
-      Y2+=this->ProjectionsEiVectors[j][1]*input2[j];
+  { X1 = 0;
+    X2 = 0;
+    Y1 = 0;
+    Y2 = 0;
+    for (int j = 0; j < input1.size; j ++)
+    { X1 += this->ProjectionsEiVectors[j][0] * input1[j];
+      Y1 += this->ProjectionsEiVectors[j][1] * input1[j];
+      X2 += this->ProjectionsEiVectors[j][0] * input2[j];
+      Y2 += this->ProjectionsEiVectors[j][1] * input2[j];
     }
-    X1=X1*this->GraphicsUnit[this->SelectedPlane]+this->centerX[this->SelectedPlane];
-    X2=X2*this->GraphicsUnit[this->SelectedPlane]+this->centerX[this->SelectedPlane];
-    Y1=Y1*this->GraphicsUnit[this->SelectedPlane]+this->centerY[this->SelectedPlane];
-    Y2=Y2*this->GraphicsUnit[this->SelectedPlane]+this->centerY[this->SelectedPlane];
+    X1 = X1 * this->GraphicsUnit[this->SelectedPlane] + this->centerX[this->SelectedPlane];
+    X2 = X2 * this->GraphicsUnit[this->SelectedPlane] + this->centerX[this->SelectedPlane];
+    Y1 = Y1 * this->GraphicsUnit[this->SelectedPlane] + this->centerY[this->SelectedPlane];
+    Y2 = Y2 * this->GraphicsUnit[this->SelectedPlane] + this->centerY[this->SelectedPlane];
   }
   void EnsureProperInitialization();
   bool AreWithinClickTolerance(double x1, double y1, double x2, double y2)
-  { x1-=x2;
-    y1-=y2;
-    if (x1<0)
-      x1=-x1;
+  { x1 -= x2;
+    y1 -= y2;
+    if (x1 < 0)
+      x1 = - x1;
     if (y1<0)
-      y1=-y1;
-    return x1<=this->ClickToleranceX && y1<=this->ClickToleranceY;
+      y1 = - y1;
+    return x1 <= this->ClickToleranceX && y1 <= this->ClickToleranceY;
   }
   bool mouseMoveRedraw(int X, int Y)
-  { if (this->SelectedCircleMinus2noneMinus1Center==-2)
+  { if (this->SelectedCircleMinus2noneMinus1Center == - 2)
       return false;
-    if (this->SelectedCircleMinus2noneMinus1Center==-1)
-    { this->centerX[this->SelectedPlane]=X;
-      this->centerY[this->SelectedPlane]=Y;
+    if (this->SelectedCircleMinus2noneMinus1Center == - 1)
+    { this->centerX[this->SelectedPlane] = X;
+      this->centerY[this->SelectedPlane] = Y;
       return true;
     }
     if (this->SelectedCircleMinus2noneMinus1Center>=0)
@@ -266,9 +281,9 @@ public:
   void drawCircleAtVectorBufferDouble(const Vector<double>& input, double radius, uint32_t thePenStyle, int theColor);
   double getAngleFromXandY(double x, double y);
   void ScaleToUnitLength(Vector<double>& theRoot)
-  { double theLength=this->theBilinearForm.ScalarProduct(theRoot, theRoot);
-    theLength=FloatingPoint::sqrt(theLength);
-    theRoot/=theLength;
+  { double theLength = this->theBilinearForm.ScalarProduct(theRoot, theRoot);
+    theLength = FloatingPoint::sqrt(theLength);
+    theRoot /= theLength;
   }
   void RotateOutOfPlane
   (std::stringstream& logger, Vector<double>& input, Vector<double>& output, Vector<double>& orthoBasis1, Vector<double>& orthoBasis2,
@@ -277,11 +292,11 @@ public:
   void ComputeXYsFromProjectionsEisAndGraphicsUnit();
   void ComputeProjectionsEiVectors();
   DrawOperations()
-  { this->SelectedPlane=0;
+  { this->SelectedPlane = 0;
     this->initDimensions(2, 2);
-    this->flagAnimatingMovingCoordSystem=false;
-    this->specialOperationsOnBasisChange=0;
-    this->indexStartingModifiableTextCommands=0;
+    this->flagAnimatingMovingCoordSystem = false;
+    this->specialOperationsOnBasisChange = 0;
+    this->indexStartingModifiableTextCommands = 0;
   }
   void init();
   enum DrawOperationType{ typeDrawLine, typeDrawText, typeDrawLineBetweenTwoVectors, typeDrawTextAtVector, typeDrawCircleAtVector, typeFilledShape};
@@ -296,10 +311,10 @@ public:
   int selectedPlaneInPhysicalDrawOp;
   std::string ToString();
   void operator=(const VirtualDrawOp& other)
-  { this->theVirtualOp=other.theVirtualOp;
-    this->indexPhysicalFrame=other.indexPhysicalFrame;
-    this->indexPhysicalDrawOp=other.indexPhysicalDrawOp;
-    this->selectedPlaneInPhysicalDrawOp=other.selectedPlaneInPhysicalDrawOp;
+  { this->theVirtualOp = other.theVirtualOp;
+    this->indexPhysicalFrame = other.indexPhysicalFrame;
+    this->indexPhysicalDrawOp = other.indexPhysicalDrawOp;
+    this->selectedPlaneInPhysicalDrawOp = other.selectedPlaneInPhysicalDrawOp;
   }
 };
 
@@ -335,7 +350,7 @@ public:
   void AddPause(int numFrames);
   void AddCloneLastFrameAppendOperations(const DrawOperations& other);
   void AddFrameShift(int numFrames);
-  enum{typeDrawOps, typePause, typeClearScreen, typeCloneLastFrameAddOps,};
+  enum {typeDrawOps, typePause, typeClearScreen, typeCloneLastFrameAddOps};
 };
 
 class DrawingVariables
@@ -381,16 +396,16 @@ public:
   { this->initDrawingVariables();
   }
   void SetDrawLineFunction(drawLineFunction theFunction)
-  { this->theDrawLineFunction=theFunction;
+  { this->theDrawLineFunction = theFunction;
   }
   void SetDrawTextFunction(drawTextFunction theFunction)
-  { this->theDrawTextFunction=theFunction;
+  { this->theDrawTextFunction = theFunction;
   }
   void SetDrawCircleFunction(drawCircleFunction theFunction)
-  { this->theDrawCircleFunction=theFunction;
+  { this->theDrawCircleFunction = theFunction;
   }
   void SetDrawClearFunction(drawClearScreenFunction theFunction)
-  { this->theDrawClearScreenFunction=theFunction;
+  { this->theDrawClearScreenFunction = theFunction;
   }
   int GetColorFromChamberIndex(int index);
   static void GetCoordsForDrawing(DrawingVariables& TDV, Vector<Rational>& r, double& x, double& y);
@@ -432,8 +447,8 @@ public:
   void drawCircleAtVectorBufferRational(const Vector<Rational>& point, double radius, uint32_t thePenStyle, int theColor);
   void drawCircleAtVectorBufferDouble(const Vector<double>& point, double radius, uint32_t thePenStyle, int theColor);
   void operator=(const DrawingVariables& other)
-  { this->theDrawLineFunction=other.theDrawLineFunction;
-    this->theDrawTextFunction=other.theDrawTextFunction;
+  { this->theDrawLineFunction = other.theDrawLineFunction;
+    this->theDrawTextFunction = other.theDrawTextFunction;
   }
 };
 #endif

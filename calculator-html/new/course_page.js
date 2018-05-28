@@ -33,13 +33,14 @@ function convertStringToLaTeXFileName(input) {
 
 var previousProblem = null;
 function getHTMLSubSection(theSubSection) {
+  console.log("DEBUG: current subsection: " + JSON.stringify(theSubSection.title) + "; type: " + JSON.stringify(theSubSection.type));
   var result = "";
   result += `<div class = \"headSubsection\">${theSubSection.problemNumberString} ${theSubSection.title}</div>`;
   result += "<div class = \"bodySubsection\">";
   result += "<table class = \"topicList\"><colgroup><col><col><col><col><col></colgroup>";
   for (var counterSubSection = 0; counterSubSection < theSubSection["children"].length; counterSubSection ++) {
     var currentProblemData = theSubSection["children"][counterSubSection];
-    console.log("Current problem data: " + JSON.stringify(currentProblemData));
+    console.log("DEBUG: current problem data: " + JSON.stringify(currentProblemData.title));
     if (currentProblemData.problem !== "") {
       var currentProblem = thePage.getProblem(currentProblemData.problem);
       currentProblem.previousProblem = previousProblem;
@@ -83,11 +84,18 @@ function getHTMLSubSection(theSubSection) {
 
 function getHTMLSection(theSection) {
   var result = "";
-  result += `<div class=\"headSection\">${theSection.problemNumberString} ${theSection.title}</div>`;
+  console.log("DEBUG: current section: " + JSON.stringify(theSection.title) + "; type: " + JSON.stringify(theSection.type));
+  if (theSection.type === "section"){
+    result += `<div class=\"headSection\">${theSection.problemNumberString} ${theSection.title}</div>`;    
+  }
   result += "<div class=\"bodySection\">";
-  for (var counterSection = 0; counterSection < theSection["children"].length; counterSection ++) {
-    var currentSection = theSection["children"][counterSection];
-    result += getHTMLSubSection(currentSection);
+  if (theSection.type === "section") {
+    for (var counterSection = 0; counterSection < theSection["children"].length; counterSection ++) {
+      var currentSection = theSection["children"][counterSection];
+      result += getHTMLSubSection(currentSection);
+    }
+  } else {
+    result += getHTMLSubSection(theSection);
   }
   result += "</div>";
   return result;  
@@ -125,6 +133,7 @@ function afterLoadTopics(incomingTopics, result) {
   try {
     thePage.theTopics = JSON.parse(incomingTopics);
     stringHTMLContent += getHTMLfromTopics(thePage.theTopics);
+    writeEditCoursePagePanel();
   } catch (e) {
     stringHTMLContent = "<b style='color:red'>Data error</b>. " + e;
   }
@@ -134,14 +143,25 @@ function afterLoadTopics(incomingTopics, result) {
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, topicsElements[0]]);
 }
 
+function writeEditCoursePagePanel(){
+  var thePanel = "";
+  thePanel += getEditPanel(thePage.currentCourse.fileName);
+  thePanel += getEditPanel(thePage.currentCourse.topicList);
+  if (
+    thePage.theTopics.topicBundleFile !== undefined && 
+    thePage.theTopics.topicBundleFile !== null &&
+    thePage.theTopics.topicBundleFile !== ""
+  ) {
+    for (var counterTopicBundle = 0; counterTopicBundle < thePage.theTopics.topicBundleFile.length; counterTopicBundle ++) {
+      thePanel += getEditPanel(thePage.theTopics.topicBundleFile[counterTopicBundle]);
+    }
+  }
+  document.getElementById("divCurrentCourseEditPanel").innerHTML = thePanel;
+}
+
 function afterLoadCoursePage(incomingPage, result) {
   var incomingPageWithPanel = "";
-  incomingPageWithPanel += getEditPanel(thePage.currentCourse.fileName);
-  incomingPageWithPanel += getEditPanel(thePage.currentCourse.courseHome);
-  incomingPageWithPanel += getEditPanel(thePage.currentCourse.topicList);
-  incomingPageWithPanel += incomingPage;
-  document.getElementById("divCurrentCourse").innerHTML = incomingPageWithPanel;
-
+  document.getElementById("divCurrentCourseBody").innerHTML = incomingPage;
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, document.getElementById("divCurrentCourse")]);
   //MathJax.Hub.Process();
   var theTopics = document.getElementsByTagName("topicList");
@@ -149,6 +169,7 @@ function afterLoadCoursePage(incomingPage, result) {
   if (thePage.user.flagLoggedIn) {
     topicList = "topicListJSON";
   }
+  writeEditCoursePagePanel();
   if (theTopics.length  === 0) {
     return;
   }

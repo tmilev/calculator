@@ -2685,6 +2685,17 @@ bool CalculatorHTML::ExtractAnswerIds(std::stringstream& comments)
   return true;
 }
 
+bool CalculatorHTML::CheckConsistencyTopics()
+{ for (int i = 0; i < this->theTopicS.size(); i ++)
+    if (this->theTopicS[i].type == TopicElement::tProblem)
+      if (this->theTopicS[i].immediateChildren.size > 0)
+      { crash << "Topic element: " << this->theTopicS[i].ToString()
+        << " has non-zero immediate children. " << crash;
+        return false;
+      }
+  return true;
+}
+
 bool CalculatorHTML::CheckContent(std::stringstream& comments)
 { MacroRegisterFunctionWithName("CalculatorHTML::CheckContent");
   bool result = true;
@@ -3524,14 +3535,35 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicEl
   { inputElt.id += "[Error]";
     inputElt.title = "[Error]: Entry " + inputElt.title + " already present. ";
   }
+  inputElt.indexInParent = output.size();
   output.SetKeyValue(inputElt.id, inputElt);
   if (inputElt.parentTopics.size > 1)
-    output.theValues[inputElt.parentTopics[inputElt.parentTopics.size - 2]]
-    .immediateChildren.AddOnTop(output.GetIndex(inputElt.id));
+  { int indexImmediateParent = - 1;
+    int indexCurrentElement = output.GetIndex(inputElt.id);
+    for (int i = 0; i < inputElt.parentTopics.size; i++)
+      if (inputElt.parentTopics[i] > indexImmediateParent && inputElt.parentTopics[i] < indexCurrentElement)
+        indexImmediateParent = inputElt.parentTopics[i];
+    if (indexImmediateParent > - 1)
+      output.theValues[indexImmediateParent].immediateChildren.AddOnTop(indexCurrentElement);
+  }
+  if (inputElt.immediateChildren.size > 0)
+    crash << "New topic element must have zero children. " << crash;
+  //stOutput << "DEBUG: just added problem: " << inputElt.ToString() << "<br>";
+  //  stOutput << "DEBUG: testing for multiple entries";
+  //  bool found = false;
+  //  for (int i = 0; i < output.size(); i++)
+  //  { if (inputElt.id == output.theKeys[i])
+  //    { if (found)
+  //        crash << "Multiple occurences of " << output.theK
+  //
+  //    }
+  //
+  //  }
 }
 
-void TopicElement::reset(int parentSize)
+void TopicElement::reset(int parentSize, MapLisT<std::string, TopicElement, MathRoutines::hashString>* containerElements)
 { this->type = this->tUndefined;
+  this->indexInParent = - 1;
   this->flagSubproblemHasNoWeight = false;
   this->title = "empty";
   this->id = "";
@@ -3544,7 +3576,7 @@ void TopicElement::reset(int parentSize)
   this->sourceHomeworkIsSolution.SetSize(0);
   this->problem = "";
   this->error = "";
-  if(parentSize != - 1)
+  if (parentSize != - 1)
   { this->parentTopics.SetSize(MathRoutines::Minimum(parentSize, this->parentTopics.size));
     if (this->problemNumber.size < 4)
       this->problemNumber.initFillInObject(4, 0);
@@ -3568,6 +3600,13 @@ void TopicElement::reset(int parentSize)
     this->type = this->tSubSection;
   if (parentSize == 3)
     this->type = this->tProblem;
+  if (containerElements == 0)
+    return;
+  for (int i = 0; i < this->parentTopics.size; i ++)
+    if (containerElements->theValues[this->parentTopics[i]].type >= this->type)
+    { this->parentTopics.PopIndexShiftDown(i);
+      i --;
+    }
 }
 
 bool TopicElement::LoadTopicBundle
@@ -3673,22 +3712,22 @@ void TopicElement::GetTopicList
     { if (found)
         TopicElement::AddTopic(currentElt, output);
       found = true;
-      currentElt.reset(0);
+      currentElt.reset(0, &output);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
     } else if (MathRoutines::StringBeginsWith(currentLine, "Section:", &currentArgument))
     { if (found)
         TopicElement::AddTopic(currentElt, output);
       found = true;
-      currentElt.reset(1);
+      currentElt.reset(1, &output);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.title;
     } else if (MathRoutines::StringBeginsWith(currentLine, "Topic:", &currentArgument))
     { if (found)
         TopicElement::AddTopic(currentElt, output);
-      found=true;
-      currentElt.reset(2);
+      found = true;
+      currentElt.reset(2, &output);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.title;
@@ -3696,7 +3735,7 @@ void TopicElement::GetTopicList
     { if (found)
         TopicElement::AddTopic(currentElt, output);
       found = true;
-      currentElt.reset(3);
+      currentElt.reset(3, &output);
       currentElt.parentTopics.AddOnTop(output.size());
       currentElt.title = MathRoutines::StringTrimWhiteSpace(currentArgument);
       currentElt.id = currentElt.title;
@@ -3747,6 +3786,9 @@ void TopicElement::GetTopicList
       currentElt.type = currentElt.tError;
       found = true;
     }
+    //stOutput << "<br>DEBUG: Current elt: " << currentElt.ToString();
+    //int debugwarning;
+    //owner.CheckConsistencyTopics();
   }
   owner.calculatorTopicBundles.AddOnTopNoRepetition(topicBundles.GetElement().theKeys);
   //stOutput << "DEBUG: topicBundles: " << topicBundles.GetElement().ToStringHtml();
@@ -3788,6 +3830,7 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
   if (this->topicListContent == "")
     return false;
   TopicElement::GetTopicList(this->topicListContent, this->theTopicS, *this);
+  this->CheckConsistencyTopics();
   this->problemNamesNoTopics.Clear();
   for (int i = 0; i < this->theTopicS.size(); i ++)
     if (this->theTopicS[i].problem != "")
@@ -3819,6 +3862,7 @@ bool CalculatorHTML::LoadAndParseTopicList(std::stringstream& comments)
     if (currentElt.flagContainsProblemsNotInSubsection)
       currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
   }
+  this->CheckConsistencyTopics();
   return true;
 }
 
@@ -3868,7 +3912,11 @@ std::string CalculatorHTML::ToStringTopicListJSON()
   std::stringstream out;
   if (!this->LoadAndParseTopicList(out))
     return "\"" + out.str() + "\"";
-  JSData output;
+  JSData output, topicBundles;
+  topicBundles.type = JSData::JSarray;
+  for (int i = 0; i < this->loadedTopicBundles.size; i ++)
+    topicBundles[i] = this->loadedTopicBundles[i];
+  output["topicBundleFile"] = topicBundles;
   output["children"].type = JSData::JSarray;
   for (int i = 0; i < this->theTopicS.size(); i ++)
   { TopicElement& currentElt = this->theTopicS.theValues[i];
@@ -4197,7 +4245,11 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
   HashedList<std::string, MathRoutines::hashString> gradableProblems;
   for (int i = 0; i < this->theTopicS.size(); i ++)
     if (this->theTopicS[i].type == TopicElement::tProblem)
-      gradableProblems.AddOnTopNoRepetition(this->theTopicS[i].id);
+    { gradableProblems.AddOnTopNoRepetition(this->theTopicS[i].id);
+      if (this->theTopicS[i].immediateChildren.size > 0)
+        crash << "Error: problem " << this->theTopicS[i].ToString() << " has children topics which is not allowed. "
+        << crash;
+    }
   this->currentUseR.ComputePointsEarned(gradableProblems, &this->theTopicS);
   #endif
   this->initTopicElementNames();
@@ -4594,13 +4646,41 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
 JSData TopicElement::ToJSON(CalculatorHTML& owner)
 { MacroRegisterFunctionWithName("TopicElement::ToJSON");
   JSData output;
+  output["title"] = this->title;
+  switch (this->type)
+  { case TopicElement::tChapter:
+      output["type"] = (std::string) "chapter";
+      break;
+    case TopicElement::tSection:
+      output["type"] = (std::string) "section";
+      break;
+    case TopicElement::tSubSection:
+      output["type"] = (std::string) "subSection";
+      break;
+    case TopicElement::tProblem:
+      output["type"] = (std::string) "problem";
+      break;
+    case TopicElement::tError:
+      output["type"] = (std::string) "error";
+      break;
+    default:
+      output["type"] = (std::string) "Not documented";
+      break;
+  }
+  //output["DEBUGindicesImmediateChildren"].type = JSData::JSarray;
   output["children"].type = JSData::JSarray;
   this->ComputeLinks(owner, true);
+  if (this->type == TopicElement::tProblem && this->immediateChildren.size > 0)
+  { crash << "Error: Problem " << this->ToString() << " reported to have children topic elements: "
+    << this->immediateChildren.ToStringCommaDelimited() << crash;
+  }
   for (int i = 0; i < this->immediateChildren.size; i ++)
   { TopicElement& currentChild = owner.theTopicS[this->immediateChildren[i]];
+    //std::stringstream out;
+    //out << this->immediateChildren[i];
+    //output["DEBUGindicesImmediateChildren"][i] = out.str();
     output["children"].list.AddOnTop(currentChild.ToJSON(owner));
   }
-  output["title"] = this->title;
   output["problemNumberString"] = this->problemNumberString;
   output["video"] = this->video;
   output["videoHandwritten"] = this->videoHandwritten;
@@ -4625,40 +4705,24 @@ JSData TopicElement::ToJSON(CalculatorHTML& owner)
       output["weight"] = currentWeightAsGivenByInstructor;
   }
 #endif
-  switch (this->type)
-  { case TopicElement::tChapter:
-      output["type"] = (std::string) "chapter";
-      break;
-    case TopicElement::tSection:
-      output["type"] = (std::string) "section";
-      break;
-    case TopicElement::tSubSection:
-      output["type"] = (std::string) "subSection";
-      break;
-    case TopicElement::tProblem:
-      output["type"] = (std::string) "problem";
-      break;
-    case TopicElement::tError:
-      output["type"] = (std::string) "error";
-      break;
-    default:
-      output["type"] = (std::string) "Not documented";
-      break;
-  }
   return output;
 }
 
-std::string TopicElement::ToString()const
+std::string TopicElement::ToString() const
 { std::stringstream out;
-  out << this->title;
+  out << this->title << ", id: " << this->id << " ";
   if (this->title == "")
     out << "-";
+  if (this->type == this->tProblem)
+    out << "(problem)";
   if (this->type == this->tChapter)
     out << "(chapter)";
   if (this->type == this->tSection)
     out << "(section)";
   if (this->type == this->tSubSection)
     out << "(subsection)";
-  out << "<br>Parents: " << this->parentTopics.ToStringCommaDelimited();
+  out << ". Index in parent: " << this->indexInParent;
+  out << ". Parents: " << this->parentTopics.ToStringCommaDelimited()
+  << ". Immediate children: " << this->immediateChildren.ToStringCommaDelimited() << ". ";
   return out.str();
 }

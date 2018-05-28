@@ -20,7 +20,7 @@ function recordProgressStarted(progress, address) {
   }
   progress.innerHTML = `<button class = "buttonProgress" onclick="if (this.nextSibling.nextSibling.style.display === 'none')
   {this.nextSibling.nextSibling.style.display = '';} else {this.nextSibling.nextSibling.style.display = 'none';}">
-  <b style="color:orange">Sent</b></button><br><span class="spanProgressReport" style="display:none">${address}</span>`;
+  <b style="color:orange">Sent</b></button><br><span class="spanProgressReport" style="display:none"><a href='${address}' target='_blank'>${address}</a></span>`;
 }
 
 function recordResult(resultText, resultSpan) {

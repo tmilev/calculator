@@ -166,17 +166,17 @@ public:
   }
   bool operator<(const MonomialTensor<coefficient, inputHashFunction>& right) const
   { coefficient leftrank = 0;
-    for (int i = 0; i < this->Powers.size; i++)
+    for (int i = 0; i < this->Powers.size; i ++)
       leftrank += this->Powers[i];
     coefficient rightrank = 0;
-    for (int i = 0; i < right.Powers.size; i++)
+    for (int i = 0; i < right.Powers.size; i ++)
       rightrank += right.Powers[i];
     if (leftrank < rightrank)
       return true;
     if (rightrank < leftrank)
       return false;
     // this provably does not crash for coefficient = int
-    for (int i = 0; i < this->generatorsIndices.size; i++)
+    for (int i = 0; i < this->generatorsIndices.size; i ++)
     { if (this->generatorsIndices[i] < right.generatorsIndices[i])
         return false;
       if (right.generatorsIndices[i] < this->generatorsIndices[i])
@@ -206,7 +206,7 @@ public:
       { *this->Powers.LastObject() += standsOnTheRight.Powers[0];
         i = 1;
       }
-    for (; i<standsOnTheRight.generatorsIndices.size; i++)
+    for (; i<standsOnTheRight.generatorsIndices.size; i ++)
     { this->Powers.AddOnTop(standsOnTheRight.Powers[i]);
       this->generatorsIndices.AddOnTop(standsOnTheRight.generatorsIndices[i]);
     }
@@ -324,7 +324,7 @@ public:
   static inline unsigned int HashFunction(const MonomialP& input)
   { unsigned int result = 0;
     int numCycles = MathRoutines::Minimum(input.monBody.size, SomeRandomPrimesSize);
-    for (int i = 0; i < numCycles; i++)
+    for (int i = 0; i < numCycles; i ++)
       result += input.monBody[i].HashFunction();
     return result;
   }
@@ -369,7 +369,7 @@ public:
     if (whichLetter == 0)
       whichLetter = &tempI1;
     *whichLetter = - 1;
-    for (int i = 0; i < this->monBody.size; i++)
+    for (int i = 0; i < this->monBody.size; i ++)
       if (this->monBody[i] != 0)
       { if (whichDegree != 0)
           *whichDegree = this->monBody[i];
@@ -385,24 +385,24 @@ public:
   }
   template <class coefficient>
   bool SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output)const;
-  void MakeEi(int LetterIndex, int Power=1, int ExpectedNumVars=0);
+  void MakeEi(int LetterIndex, int Power = 1, int ExpectedNumVars = 0);
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
-  { for (int i=this->monBody.size-1; i>=0; i--)
-      if (this->monBody[i]!=0)
+  { for (int i = this->monBody.size - 1; i >= 0; i --)
+      if (this->monBody[i] != 0)
         return i;
-    return -1;
+    return - 1;
   }
   bool IsGEQpartialOrder(MonomialP& m);
   static bool LeftIsGEQLexicographicLastVariableStrongest(const MonomialP& left, const MonomialP& right)
   { return left.IsGEQLexicographicLastVariableStrongest(right);
   }
   static bool LeftGreaterThanLexicographicLastVariableStrongest(const MonomialP& left, const MonomialP& right)
-  { if (left==(right))
+  { if (left == right)
       return false;
     return left.IsGEQLexicographicLastVariableStrongest(right);
   }
   static bool LeftGreaterThanLexicographicLastVariableWeakest(const MonomialP& left, const MonomialP& right)
-  { if (left==(right))
+  { if (left == right)
       return false;
     return left.IsGEQLexicographicLastVariableWeakest(right);
   }
@@ -410,16 +410,16 @@ public:
   { return left.IsGEQLexicographicLastVariableWeakest(right);
   }
   static bool LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest(const MonomialP& left, const MonomialP& right)
-  { if (left==right)
+  { if (left == right)
       return false;
     return left.IsGEQTotalDegThenLexicographicLastVariableStrongest(right);
   }
   static bool LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest(const MonomialP& left, const MonomialP& right)
-  { if (left==right)
+  { if (left == right)
       return false;
-    if (left.TotalDegree()>right.TotalDegree())
+    if (left.TotalDegree() > right.TotalDegree())
       return true;
-    if (left.TotalDegree() <right.TotalDegree())
+    if (left.TotalDegree() < right.TotalDegree())
       return false;
     return left.IsGEQLexicographicLastVariableWeakest(right);
   }
@@ -432,7 +432,7 @@ public:
   bool IsGEQTotalDegThenLexicographicLastVariableStrongest(const MonomialP& other)const;
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   bool IsConstant()const
-  { for (int i=0; i<this->monBody.size; i++)
+  { for (int i = 0; i < this->monBody.size; i ++)
       if (!this->monBody[i].IsEqualToZero())
         return false;
     return true;
@@ -441,23 +441,23 @@ public:
   { return this->monBody.size;
   }
   void Invert()
-  { for (int i=0; i<this->monBody.size; i++)
+  { for (int i = 0; i < this->monBody.size; i ++)
       this->monBody[i].Minus();
   }
   void DrawElement(DrawElementInputOutput& theDrawData);
   void RaiseToPower(const Rational& thePower)
-  { for (int i=0; i<this->monBody.size; i++)
-      this->monBody[i]*=thePower;
+  { for (int i = 0; i < this->monBody.size; i ++)
+      this->monBody[i] *= thePower;
   }
   void operator*=(const MonomialP& other);
   void operator/=(const MonomialP& other);
   bool operator==(const MonomialP& other)const;
   template <class coefficient>
   void operator=(const Vector<coefficient>& other)
-  { this->monBody=(other);
+  { this->monBody= other;
   }
   void operator=(const MonomialP& other)
-  { this->monBody=(other.monBody);
+  { this->monBody = other.monBody;
   }
   void ReadFromFile(std::fstream& input)
   { this->monBody.ReadFromFile(input);
@@ -469,7 +469,6 @@ public:
 
 template <typename coefficient>
 std::ostream& operator<<  (std::ostream& output, const Matrix<coefficient>& theMat);
-
 
 template <typename coefficient>
 class Matrix
@@ -486,91 +485,93 @@ public:
   void ReleaseMemory();
   bool IsPositiveDefinite();
   bool IsNonNegativeAllEntries()
-  { for (int i=0; i<this->NumRows; i++)
-      for (int j=0; j<this->NumCols; j++)
-        if (this->elements[i][j]<0)
+  { for (int i = 0; i < this->NumRows; i ++)
+      for (int j = 0; j < this->NumCols; j ++)
+        if (this->elements[i][j] < 0)
           return false;
     return true;
   }
-  void Resize(int r, int c, bool PReserveValues, const coefficient* TheRingZero=0);
+  void Resize(int r, int c, bool PReserveValues, const coefficient* TheRingZero = 0);
   inline static std::string GetXMLClassName()
-  { std::string result="Matrix_";
+  { std::string result = "Matrix_";
     result.append(coefficient::GetXMLClassName());
     return result;
   }
-  Matrix():NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(0), flagDeallocated(false){}
+  Matrix(): NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(0), flagDeallocated(false)
+  {
+  }
   Matrix(const Matrix<coefficient>& other):NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(0), flagDeallocated(false)
-  { *this=other;
+  { *this = other;
   }
   ~Matrix()
   { this->ReleaseMemory();
-    this->flagDeallocated=true;
+    this->flagDeallocated = true;
   }
   void Transpose()
-  { if (this->NumCols==this->NumRows)
-    { for (int i=0; i<this->NumRows; i++)
-        for (int j=i+1; j<this->NumCols; j++)
+  { if (this->NumCols == this->NumRows)
+    { for (int i = 0; i < this->NumRows; i ++)
+        for (int j = i + 1; j < this->NumCols; j ++)
           MathRoutines::swap<coefficient>(this->elements[j][i], this->elements[i][j]);
       return;
     }
     Matrix<coefficient> tempMat;
     tempMat.init(this->NumCols, this->NumRows);
-    for (int i=0; i<this->NumRows; i++)
-      for (int j=0; j<this->NumCols; j++)
-        tempMat.elements[j][i]=this->elements[i][j];
-    *this=tempMat;
+    for (int i = 0; i < this->NumRows; i ++)
+      for (int j = 0; j < this->NumCols; j ++)
+        tempMat.elements[j][i] = this->elements[i][j];
+    *this = tempMat;
   }
   void AppendMatrixOnTheRight(const Matrix<coefficient>& standsOnTheRight)
-  { if (&standsOnTheRight==this)
-    { Matrix<coefficient> copyThis=*this;
+  { if (&standsOnTheRight == this)
+    { Matrix<coefficient> copyThis = *this;
       this->AppendMatrixOnTheRight(copyThis);
       return;
     }
-    if (standsOnTheRight.NumRows<this->NumRows)
+    if (standsOnTheRight.NumRows < this->NumRows)
     { coefficient theZero;
-      theZero=0;
-      Matrix<coefficient> standsOnTheRightNew=standsOnTheRight;
+      theZero = 0;
+      Matrix<coefficient> standsOnTheRightNew = standsOnTheRight;
       standsOnTheRightNew.Resize(this->NumRows, standsOnTheRight.NumCols, true, &theZero);
       this->AppendMatrixOnTheRight(standsOnTheRightNew);
       return;
     }
-    if (this->NumRows<standsOnTheRight.NumRows)
+    if (this->NumRows < standsOnTheRight.NumRows)
     { coefficient theZero;
-      theZero=0;
+      theZero = 0;
       this->Resize(standsOnTheRight.NumRows, this->NumCols, true, &theZero);
     }
-    int oldNumCols=this->NumCols;
-    this->Resize(this->NumRows, standsOnTheRight.NumCols+oldNumCols, true);
-    for (int i=0; i<this->NumRows; i++)
-      for (int j=oldNumCols; j<this->NumCols; j++)
-        this->elements[i][j]=standsOnTheRight.elements[i][j-oldNumCols];
+    int oldNumCols = this->NumCols;
+    this->Resize(this->NumRows, standsOnTheRight.NumCols + oldNumCols, true);
+    for (int i = 0; i < this->NumRows; i ++)
+      for (int j = oldNumCols; j < this->NumCols; j ++)
+        this->elements[i][j] = standsOnTheRight.elements[i][j - oldNumCols];
   }
   void AppendMatrixToTheBottom(const Matrix<coefficient>& standsBelow)
-  { if (&standsBelow==this)
-    { Matrix<coefficient> copyThis=*this;
+  { if (&standsBelow == this)
+    { Matrix<coefficient> copyThis = *this;
       this->AppendMatrixToTheBottom(copyThis);
       return;
     }
-    if (standsBelow.NumCols<this->NumCols)
+    if (standsBelow.NumCols < this->NumCols)
     { coefficient theZero;
-      theZero=0;
-      Matrix<coefficient> standsBelowNew=standsBelow;
+      theZero = 0;
+      Matrix<coefficient> standsBelowNew = standsBelow;
       standsBelowNew.Resize(standsBelow.NumRows, this->NumCols, true, &theZero);
       this->AppendMatrixOnTheRight(standsBelowNew);
       return;
     }
-    if (this->NumCols<standsBelow.NumCols)
+    if (this->NumCols < standsBelow.NumCols)
     { coefficient theZero;
-      theZero=0;
+      theZero = 0;
       this->Resize(this->NumRows, standsBelow.NumCols, true, &theZero);
     }
     //So far, we have guaranteed that this and &standsBelow have the same number of columns and
     // are different objects.
     int oldNumRows=this->NumRows;
-    this->Resize(this->NumRows+standsBelow.NumRows, this->NumCols, true);
-    for (int i=oldNumRows; i<this->NumRows; i++)
-      for (int j=0; j<this->NumCols; j++)
-        this->elements[i][j]=standsBelow(i-oldNumRows, j);
+    this->Resize(this->NumRows + standsBelow.NumRows, this->NumCols, true);
+    for (int i = oldNumRows; i < this->NumRows; i ++)
+      for (int j = 0; j < this->NumCols; j ++)
+        this->elements[i][j] = standsBelow(i - oldNumRows, j);
   }
   bool CheckConsistency()const
   { if (this->flagDeallocated)
@@ -581,168 +582,170 @@ public:
   { int d = basis.size;
     output.init(d, d);
     Vector<Rational> tempV;
-    for(int j=0; j<d; j++)
+    for (int j = 0; j < d; j ++)
     { input.ActOnVectorColumn(basis[j], tempV);
-      for(int i=0; i<d; i++)
+      for (int i = 0; i < d; i ++)
         output.elements[i][j] = basis[i].ScalarEuclidean(tempV);
     }
     output.MultiplyOnTheLeft(gramMatrixInverted);
   }
-  void ComputeDeterminantOverwriteMatrix(coefficient& output, const coefficient& theRingOne=1, const coefficient& theRingZero=0);
-  void ActOnVectorROWSOnTheLeft(List<Vector<coefficient> >& standOnTheRightAsVectorRow)const
+  void ComputeDeterminantOverwriteMatrix
+  (coefficient& output, const coefficient& theRingOne = 1, const coefficient& theRingZero = 0);
+  void ActOnVectorROWSOnTheLeft(List<Vector<coefficient> >& standOnTheRightAsVectorRow) const
   { List<Vector<coefficient> > output;
     this->ActOnVectorROWSOnTheLeft(standOnTheRightAsVectorRow, output);
-    standOnTheRightAsVectorRow=output;
+    standOnTheRightAsVectorRow = output;
   }
   void ActOnVectorROWSOnTheLeft(List<Vector<coefficient> >& standOnTheRightAsVectorRow, List<Vector<coefficient> >& output)const
-  { if (this->NumCols!=standOnTheRightAsVectorRow.size)
+  { if (this->NumCols != standOnTheRightAsVectorRow.size)
       crash << "This is a programming error: attempting to multiply a matrix, standing on the left, with "
       << this->NumCols << " columns, by a matrix, standing on the right, with " << standOnTheRightAsVectorRow.size << " rows. "
       << crash;
     output.SetSize(this->NumRows);
-    for (int i=0; i<this->NumRows; i++)
+    for (int i = 0; i < this->NumRows; i ++)
     { output[i].MakeZero(standOnTheRightAsVectorRow[0].size);
-      for (int j=0; j<this->NumCols; j++)
-        output[i]+= standOnTheRightAsVectorRow[j]*(*this)(i,j);
+      for (int j = 0; j < this->NumCols; j ++)
+        output[i] += standOnTheRightAsVectorRow[j] * (*this)(i, j);
     }
   }
   void ActMultiplyVectorRowOnTheRight(Vector<coefficient>& standsOnTheLeft)const
   { Vector<coefficient> output;
     this->ActMultiplyVectorRowOnTheRight(standsOnTheLeft, output);
-    standsOnTheLeft=output;
+    standsOnTheLeft = output;
   }
   void ActMultiplyVectorRowOnTheRight(const Vector<coefficient>& standsOnTheLeft, Vector<coefficient>& output)const
-  { if (&standsOnTheLeft==&output || this->NumRows!=standsOnTheLeft.size)
+  { if (&standsOnTheLeft == &output || this->NumRows != standsOnTheLeft.size)
       crash << crash;
     output.MakeZero(this->NumCols);
     coefficient tempElt;
-    for (int i=0; i<this->NumCols; i++)
-      for (int j=0; j<this->NumRows; j++)
-      { tempElt=this->elements[j][i];
-        tempElt*=standsOnTheLeft[j];
-        output[i]+=tempElt;
+    for (int i = 0; i < this->NumCols; i ++)
+      for (int j = 0; j < this->NumRows; j ++)
+      { tempElt = this->elements[j][i];
+        tempElt *= standsOnTheLeft[j];
+        output[i] += tempElt;
       }
   }
   void GetNSquaredVectorForm(Vector<coefficient>& output)
   { output.SetSize(this->NumRows*this->NumCols);
-    for (int i=0; i<this->NumRows; i++)
-      for (int j=0; j<this->NumCols; j++)
-        output.TheObjects[i*this->NumRows+j]=this->elements[i][j];
+    for (int i = 0; i < this->NumRows; i ++)
+      for (int j = 0; j < this->NumCols; j ++)
+        output.TheObjects[i * this->NumRows + j] = this->elements[i][j];
   }
   template <class otherType>
-  void ActOnVectorColumn(const Vector<otherType>& input, Vector<otherType>& output, const otherType& TheRingZero=0)const
-  { if (&input==&output)
-    { Vector<otherType> inputNew=input;
+  void ActOnVectorColumn(const Vector<otherType>& input, Vector<otherType>& output, const otherType& TheRingZero = 0)const
+  { if (&input == &output)
+    { Vector<otherType> inputNew = input;
       this->ActOnVectorColumn(inputNew, output, TheRingZero);
       return;
     }
-    if (this->NumCols!=input.size)
-    { crash << "This is a programming error: attempting to multiply a matrix with " << this->NumCols << " columns with a vector(column) of "
+    if (this->NumCols != input.size)
+    { crash << "This is a programming error: attempting to multiply a matrix with "
+      << this->NumCols << " columns with a vector(column) of "
       << " dimension " << input.size << ". " << crash;
     }
     output.MakeZero(this->NumRows);
     otherType tempElt;
-    for (int i=0; i<this->NumRows; i++)
-      for (int j=0; j<this->NumCols; j++)
-      { tempElt=this->elements[i][j];
-        tempElt*=input[j];
-        output[i]+=tempElt;
+    for (int i = 0; i < this->NumRows; i ++)
+      for (int j = 0; j < this->NumCols; j ++)
+      { tempElt = this->elements[i][j];
+        tempElt *= input[j];
+        output[i] += tempElt;
       }
   }
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
   static unsigned int HashFunction(const Matrix<coefficient>& input)
-  { unsigned int result=0;
-    int counter=0;
-    for (int i=0; i<input.NumRows; i++, counter++)
-      for (int j=0; j<input.NumCols; j++, counter++)
-        if (counter<SomeRandomPrimesSize)
-          result+=input.elements[i][j].HashFunction()*SomeRandomPrimes[counter];
+  { unsigned int result = 0;
+    int counter = 0;
+    for (int i = 0; i < input.NumRows; i ++, counter ++)
+      for (int j = 0; j < input.NumCols; j ++, counter ++)
+        if (counter < SomeRandomPrimesSize)
+          result += input.elements[i][j].HashFunction() * SomeRandomPrimes[counter];
         else
-          result+=input.elements[i][j].HashFunction()*(i+1)+j;
+          result += input.elements[i][j].HashFunction() * (i + 1) + j;
     return result;
   }
   template <class otherType>
-  void ActOnVectorsColumn(const Vectors<otherType>& input, Vectors<otherType>& output, const otherType& TheRingZero=0)const
-  { if(&input==&output)
+  void ActOnVectorsColumn(const Vectors<otherType>& input, Vectors<otherType>& output, const otherType& TheRingZero = 0)const
+  { if(&input == &output)
       crash << crash;
-    if (input.size==0)
+    if (input.size == 0)
       return;
-    if (this->NumCols!=input.GetDim())
+    if (this->NumCols != input.GetDim())
     { crash << "This is a programming error: attempting to act by " << this->ToString() << "(an " << this->NumRows << " x "
       << this->NumCols << " matrix) on a column vector " << input.ToString() << "(dimension " << input.size << ")." << crash;
     }
     output.SetSize(input.size);
-    for (int i=0; i<input.size; i++)
+    for (int i = 0; i < input.size; i ++)
       this->ActOnVectorColumn(input[i], output[i], TheRingZero);
   }
   template <class otherType>
-  void ActOnVectorColumn(Vector<otherType>& inputOutput, const otherType& TheRingZero=(otherType) 0)const
+  void ActOnVectorColumn(Vector<otherType>& inputOutput, const otherType& TheRingZero = (otherType) 0) const
   { Vector<otherType> buffer;
     this->ActOnVectorColumn(inputOutput, buffer, TheRingZero);
-    inputOutput=buffer;
+    inputOutput = buffer;
   }
   template <class otherType>
-  void ActOnVectorsColumn(Vectors<otherType>& inputOutput, const otherType& TheRingZero=(otherType) 0)const
-  { for (int i=0; i<inputOutput.size; i++)
+  void ActOnVectorsColumn(Vectors<otherType>& inputOutput, const otherType& TheRingZero=(otherType) 0) const
+  { for (int i = 0; i < inputOutput.size; i ++)
       this->ActOnVectorColumn(inputOutput[i], TheRingZero);
   }
-  std::string ToString(FormatExpressions* theFormat=0)const;
-  std::string ToStringLatex(FormatExpressions* theFormat=0)const;
-  std::string ToStringSystemLatex(Matrix<coefficient>* constTerms=0, FormatExpressions* theFormat=0)const;
-  std::string ToStringPlainText(bool jsonFormat=false)const;
-  std::string ToStringOneLine(bool jsonFormat=false)const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ToStringLatex(FormatExpressions* theFormat = 0) const;
+  std::string ToStringSystemLatex(Matrix<coefficient>* constTerms = 0, FormatExpressions* theFormat = 0) const;
+  std::string ToStringPlainText(bool jsonFormat = false) const;
+  std::string ToStringOneLine(bool jsonFormat = false) const;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
-  void MakeIdMatrix(int theDimension, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
+  void MakeIdMatrix(int theDimension, const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0)
   { this->init(theDimension, theDimension);
-    for (int i=0; i<theDimension; i++)
-      for (int j=0; j<theDimension; j++)
-        if (j!=i)
-          this->elements[i][j]=theRingZero;
+    for (int i = 0; i < theDimension; i ++)
+      for (int j = 0; j < theDimension; j ++)
+        if (j != i)
+          this->elements[i][j] = theRingZero;
         else
-          this->elements[i][j]=theRingUnit;
+          this->elements[i][j] = theRingUnit;
   }
-  void MakeZeroMatrix(int theDimension, const coefficient& theRingZero=0)
+  void MakeZeroMatrix(int theDimension, const coefficient& theRingZero = 0)
   { this->init(theDimension, theDimension);
-    for (int i=0; i<theDimension; i++)
-      for (int j=0; j<theDimension; j++)
+    for (int i = 0; i < theDimension; i ++)
+      for (int j = 0; j < theDimension; j ++)
         this->elements[i][j] = theRingZero;
   }
   void ActOnMonomialAsDifferentialOperator(const MonomialP& input, Polynomial<Rational>& output);
   void SwitchTwoRows(int row1, int row2);
   inline void SwitchTwoRowsWithCarbonCopy(int row1, int row2, Matrix<coefficient>* theCarbonCopy)
   { this->SwitchTwoRows(row1, row2);
-    if (theCarbonCopy!=0)
+    if (theCarbonCopy != 0)
       theCarbonCopy->SwitchTwoRows(row1, row2);
   }
   void SetNumVariables(int GoalNumVars)
-  { for (int i=0; i<this->NumRows; i++)
-      for (int j=0; j<this->NumCols; j++)
+  { for (int i = 0; i < this->NumRows; i ++)
+      for (int j = 0; j < this->NumCols; j ++)
         this->elements[i][j].SetNumVariables(GoalNumVars);
   }
-  void Substitution(const PolynomialSubstitution<Rational>& theSub)
-  ;
+  void Substitution(const PolynomialSubstitution<Rational>& theSub);
   inline coefficient ScalarProduct(const Vector<coefficient>& left, const Vector<coefficient>& right)
   { return this->ScalarProduct(left, right, (coefficient) 0);
   }
   coefficient ScalarProduct(const Vector<coefficient>& left, const Vector<coefficient>& right, const coefficient& theRingZero)
-  { if(left.size!=this->NumCols || right.size!=this->NumRows)
+  { if(left.size != this->NumCols || right.size != this->NumRows)
       crash << crash;
     coefficient Result, tempElt;
-    Result=theRingZero;
-    for (int i=0; i<this->NumRows; i++)
-      for (int j=0; j<this->NumCols; j++)
-      { tempElt=left.TheObjects[i];
-        tempElt*=this->elements[i][j];
-        tempElt*=right.TheObjects[j];
-        Result+=tempElt;
+    Result = theRingZero;
+    for (int i = 0; i < this->NumRows; i ++)
+      for (int j = 0; j < this->NumCols; j ++)
+      { tempElt = left[i];
+        tempElt *= this->elements[i][j];
+        tempElt *= right[j];
+        Result += tempElt;
       }
     return Result;
   }
   inline coefficient& operator()(int i, int j)const
-  { if (i<0 || i>=this->NumRows || j<0 || j>=this->NumCols)
-    { crash << "This is a programming error: requesting row, column indexed by " << i+1 << " and " << j+1 << " but I am a matrix with "
+  { if (i < 0 || i >= this->NumRows || j < 0 || j >= this->NumCols)
+    { crash << "This is a programming error: requesting row, column indexed by "
+      << i + 1 << " and " << j + 1 << " but I am a matrix with "
       << this->NumRows << " rows and " << this->NumCols << " colums. " << crash;
     }
     return this->elements[i][j];
@@ -809,7 +812,7 @@ public:
   void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, const coefficient& theRingZero = 0);
   void MultiplyOnTheRight(const Matrix<coefficient>& standsOnTheRight)
   { Matrix<coefficient> temp = *this;
-    *this=standsOnTheRight;
+    *this = standsOnTheRight;
     this->MultiplyOnTheLeft(temp);
   }
   void NonPivotPointsToEigenVectorMatrixForm(Selection& TheNonPivotPoints, Matrix<coefficient>& output);
@@ -827,7 +830,7 @@ public:
 //    (Matrix<coefficient>& inputColumn, Matrix<coefficient>* outputTheGaussianTransformations Matrix<coefficient>& outputColumn);
   bool Invert();
   Matrix<coefficient> Inverse()
-  { Matrix<coefficient> copy=*this;
+  { Matrix<coefficient> copy = *this;
     if (!copy.Invert())
       crash << "Request to invert " << copy.ToString() << " failed. " << crash;
     return copy;
@@ -862,37 +865,37 @@ public:
   }
   void AssignVectorColumn(const Vector<coefficient>& input)
   { this->init(input.size, 1);
-    for (int i=0; i<input.size; i++)
-      this->elements[i][0]=input[i];
+    for (int i = 0; i < input.size; i ++)
+      this->elements[i][0] = input[i];
   }
   void AssignVectorToRowKeepOtherRowsIntactNoInit(int rowIndex, const Vector<coefficient>& input)
-  { if(input.size!=this->NumCols || rowIndex>=this->NumRows || rowIndex<0)
+  { if (input.size != this->NumCols || rowIndex >= this->NumRows || rowIndex < 0)
       crash << "Error: attempting to assign vector " << input.ToString() << " (" << input.size << " coordinates) "
       << " to row with index " << rowIndex << " in a matrix with " << this->NumRows << " rows and " << this->NumCols << " columns. " << crash;
-    for (int i=0; i<this->NumCols; i++)
-      this->elements[rowIndex][i]=input[i];
+    for (int i = 0; i < this->NumCols; i ++)
+      this->elements[rowIndex][i] = input[i];
   }
   void AssignVectorToColumnKeepOtherColsIntactNoInit(int colIndex, const Vector<coefficient>& input)
-  { if(input.size!=this->NumRows || colIndex>=this->NumCols || colIndex<0)
+  { if (input.size != this->NumRows || colIndex >= this->NumCols || colIndex < 0)
       crash << crash;
-    for (int i=0; i<this->NumRows; i++)
-      this->elements[i][colIndex]=input[i];
+    for (int i = 0; i < this->NumRows; i ++)
+      this->elements[i][colIndex] = input[i];
   }
   void AssignBlock(Matrix<coefficient>& block, int starti, int startj)
-  { if(starti+block.NumRows > this->NumRows || startj+block.NumCols > this->NumCols)
+  { if (starti + block.NumRows > this->NumRows || startj + block.NumCols > this->NumCols)
       crash << crash;
-    for(int i=0; i<block.NumRows; i++)
-      for(int j=0; j<block.NumCols; j++)
-        this->elements[starti+i][startj+j] = block.elements[i][j];
+    for (int i = 0; i < block.NumRows; i ++)
+      for (int j = 0; j < block.NumCols; j ++)
+        this->elements[starti + i][startj + j] = block.elements[i][j];
   }
   void AssignVectorRow(const Vector<coefficient>& input)
   { this->init(1, input.size);
-    for (int i=0; i<input.size; i++)
-      this->elements[0][i]=input[i];
+    for (int i = 0; i < input.size; i ++)
+      this->elements[0][i] = input[i];
   }
-  void DirectSumWith(const Matrix<coefficient>& m2, const coefficient& theRingZero=0);
+  void DirectSumWith(const Matrix<coefficient>& m2, const coefficient& theRingZero = 0);
   inline bool operator!=(const Matrix<coefficient>& other)const
-  { return !((*this)==other);
+  { return !((*this) == other);
   }
   bool operator==(const Matrix<coefficient>& other)const
   { if (this->NumRows!=other.NumRows || this->NumCols!=other.NumCols)

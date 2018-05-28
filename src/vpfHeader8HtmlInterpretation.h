@@ -15,7 +15,7 @@ struct TopicElement
 public:
   static int scoreButtonCounter;
   int type;
-  enum topicType{tChapter, tSection, tSubSection, tError, tProblem, tTexHeader, tUndefined};
+  enum topicType {tChapter = 1, tSection = 2, tSubSection = 3, tProblem = 4, tError, tTexHeader, tUndefined};
   bool flagContainsProblemsNotInSubsection;
   bool flagSubproblemHasNoWeight;
   bool flagHasLectureTag;
@@ -23,6 +23,7 @@ public:
   List<int> problemNumber;
   List<int> parentTopics;
   List<int> immediateChildren;
+  int indexInParent;
   int totalSubSectionsUnderME;
   int totalSubSectionsUnderMeIncludingEmptySubsections;
   std::string id; //<- for problems the id is the problem file name. For all other topic
@@ -68,7 +69,7 @@ public:
   //  Rational numAnsweredInAllChildren;
   //  Rational maxCorrectAnswersInAllChildren;
   void ComputeID();
-  void reset(int parentSize);
+  void reset(int parentSize, MapLisT<std::__cxx11::string, TopicElement, MathRoutines::hashString> *containerElements);
   friend std::ostream& operator << (std::ostream& output, const TopicElement& theElt)
   { output << theElt.ToString();
     return output;
@@ -81,7 +82,7 @@ public:
   std::string GetItemFinish(CalculatorHTML& owner);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
   TopicElement()
-  { this->reset(0);
+  { this->reset(0, 0);
   }
   static void GetTopicList
   (const std::string& inputString, MapLisT<std::string, TopicElement, MathRoutines::hashString>& output,
@@ -191,6 +192,7 @@ public:
   std::stringstream comments;
   int GetAnswerIndex(const std::string& desiredAnswerId);
   bool CheckContent(std::stringstream& comments);
+  bool CheckConsistencyTopics();
   bool CanBeMerged(const SyntacticElementHTML& left, const SyntacticElementHTML& right);
   bool LoadMe(bool doLoadDatabase, std::stringstream& comments, const std::string& inputRandomSeed);
   bool LoadAndParseTopicList(std::stringstream& comments);

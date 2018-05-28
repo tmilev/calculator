@@ -57,8 +57,8 @@ struct branchingData
     this->initAssumingParSelAndHmmInittedPart2Subgroups();
   }
   branchingData()
-  { this->flagUseNilWeightGeneratorOrder=false;
-    this->flagAscendingGeneratorOrder=false;
+  { this->flagUseNilWeightGeneratorOrder = false;
+    this->flagAscendingGeneratorOrder = false;
   }
 };
 
@@ -118,8 +118,8 @@ public:
   std::fstream theMultiplicitiesMaxOutputReport2;
   Vectors<Rational> GmodKnegativeWeightS;
   Vectors<Rational> GmodKNegWeightsBasisChanged;
-  Matrix<Rational>  preferredBasisChangE;
-  Matrix<Rational>  preferredBasisChangeInversE;
+  Matrix<Rational> preferredBasisChangE;
+  Matrix<Rational> preferredBasisChangeInversE;
   Vectors<Rational> preferredBasiS;
   Cone PreimageWeylChamberLargerAlgebra;
   Cone WeylChamberSmallerAlgebra;
@@ -175,7 +175,7 @@ public:
   }
   bool ReadFromFileNoComputationPhase(std::fstream& input);
   std::string PrepareReportOneCone(FormatExpressions& theFormat, const Cone& theCone);
-  void GetProjection(int indexOperator, const Vector<Rational> & input, Vector<Rational> & output);
+  void GetProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational> & output);
   void SplitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);
   void InitTheMaxComputation();
   void ComputeQPsFromChamberComplex();
@@ -228,7 +228,7 @@ public:
   void GetDegree(Polynomial<Rational>& output)
   { output.MakeZero(this->Coefficient.NumVars);
     for (int i = 0; i < this->generatorsIndices.size; i++)
-      output += this->Powers.TheObjects[i];
+      output += this->Powers[i];
   }
   bool GetElementUniversalEnveloping(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebraOrdered& owner);
   bool IsEqualToZero()const
@@ -236,13 +236,24 @@ public:
   }
   bool CommutingLeftIndexAroundRightIndexAllowed(coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex);
   bool CommutingRightIndexAroundLeftIndexAllowed(coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex);
-  bool SwitchConsecutiveIndicesIfTheyCommute(int theLeftIndex, MonomialUniversalEnvelopingOrdered<coefficient>& output, GlobalVariables* theContext, const coefficient& theRingZero=0);
-  void MakeConst(const coefficient& theConst, SemisimpleLieAlgebraOrdered& theOwner){this->generatorsIndices.size=0; this->Powers.size=0; this->Coefficient=theConst; this->owner=&theOwner;}
-  void Simplify(ElementUniversalEnvelopingOrdered<coefficient>& output, GlobalVariables* theContext, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  bool SwitchConsecutiveIndicesIfTheyCommute
+  (int theLeftIndex, MonomialUniversalEnvelopingOrdered<coefficient>& output, GlobalVariables* theContext,
+   const coefficient& theRingZero = 0);
+  void MakeConst(const coefficient& theConst, SemisimpleLieAlgebraOrdered& theOwner)
+  { this->generatorsIndices.size = 0;
+    this->Powers.size = 0;
+    this->Coefficient = theConst;
+    this->owner = &theOwner;
+  }
+  void Simplify
+  (ElementUniversalEnvelopingOrdered<coefficient>& output, GlobalVariables* theContext,
+   const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0);
   void CommuteConsecutiveIndicesLeftIndexAroundRight
-  (int theIndeX, ElementUniversalEnvelopingOrdered<coefficient>& output, GlobalVariables* theContext, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  (int theIndeX, ElementUniversalEnvelopingOrdered<coefficient>& output, GlobalVariables* theContext,
+   const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0);
   void CommuteConsecutiveIndicesRightIndexAroundLeft
-  (int theIndeX, ElementUniversalEnvelopingOrdered<coefficient>& output, GlobalVariables* theContext, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  (int theIndeX, ElementUniversalEnvelopingOrdered<coefficient>& output, GlobalVariables* theContext,
+   const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0);
   MonomialUniversalEnvelopingOrdered()
   { this->owner = 0;
   }
@@ -294,7 +305,7 @@ public:
     return tempS;
   }
   bool NeedsParenthesisForMultiplication()const
-  { return this->size>1;
+  { return this->size > 1;
   }
   void ComputeDebugString()
   { FormatExpressions tempFormat;
@@ -442,8 +453,8 @@ public:
   (List<ElementVermaModuleOrdered<coefficient> >& theElements, Vectors<RationalFunctionOld>& outputCoordinates, List<ElementVermaModuleOrdered>& outputTheBasis,
    const RationalFunctionOld& RFOne, const RationalFunctionOld& RFZero);
   bool GetCoordsInBasis
-  (const List<ElementVermaModuleOrdered<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero)const;
-  bool IsProportionalTo(const ElementVermaModuleOrdered<coefficient>& other, coefficient& outputTimesMeEqualsOther, const coefficient& theRingZero)const
+  (const List<ElementVermaModuleOrdered<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero) const;
+  bool IsProportionalTo(const ElementVermaModuleOrdered<coefficient>& other, coefficient& outputTimesMeEqualsOther, const coefficient& theRingZero) const
   { return this->theElT.IsProportionalTo(other.theElT, outputTimesMeEqualsOther, theRingZero);
   }
   void MakeZero(SemisimpleLieAlgebraOrdered& owner, PolynomialSubstitution<Rational>& incomingSub)

@@ -6,6 +6,10 @@ function toStringProblemWeight(problemData) {
   if (problemData.correctlyAnswered !== undefined && problemData.correctlyAnswered !== NaN) {
     var numCorrectlyAnswered = problemData.correctlyAnswered;
     var totalQuestions = problemData.totalQuestions;
+    if (totalQuestions === 0) {
+      totalQuestions = "?";
+    }
+
     result += `${numCorrectlyAnswered} out of ${totalQuestions}`;
     if (problemData.weight !== undefined) {
       var points = ((0.0 + problemData.correctlyAnswered * problemData.weight) / problemData.totalQuestions);
@@ -32,15 +36,13 @@ function convertStringToLaTeXFileName(input) {
 }
 
 var previousProblem = null;
-function getHTMLSubSection(theSubSection) {
-  console.log("DEBUG: current subsection: " + JSON.stringify(theSubSection.title) + "; type: " + JSON.stringify(theSubSection.type));
+function getHTMLProblems(theProblemContainer) {
   var result = "";
-  result += `<div class = \"headSubsection\">${theSubSection.problemNumberString} ${theSubSection.title}</div>`;
   result += "<div class = \"bodySubsection\">";
   result += "<table class = \"topicList\"><colgroup><col><col><col><col><col></colgroup>";
-  for (var counterSubSection = 0; counterSubSection < theSubSection["children"].length; counterSubSection ++) {
-    var currentProblemData = theSubSection["children"][counterSubSection];
-    console.log("DEBUG: current problem data: " + JSON.stringify(currentProblemData.title));
+  for (var counterSubSection = 0; counterSubSection < theProblemContainer["children"].length; counterSubSection ++) {
+    var currentProblemData = theProblemContainer["children"][counterSubSection];
+    //console.log("DEBUG: current problem data: " + JSON.stringify(currentProblemData.title));
     if (currentProblemData.problem !== "") {
       var currentProblem = thePage.getProblem(currentProblemData.problem);
       currentProblem.previousProblem = previousProblem;
@@ -79,7 +81,26 @@ function getHTMLSubSection(theSubSection) {
   }
   result += "</table>";
   result += "</div>";
+  return result;
+}
+
+function getHTMLSubSection(theSubSection) {
+  console.log("DEBUG: current subsection: " + JSON.stringify(theSubSection.title) + "; type: " + JSON.stringify(theSubSection.type));
+  var result = "";
+  result += `<div class = \"headSubsection\">${theSubSection.problemNumberString} ${theSubSection.title}</div>`;
+  result += getHTMLProblems(theSubSection)
   return result;  
+}
+
+function isProblemContainer(section) {
+  if (section["children"].length !== undefined) {
+    if (section["children"].length > 0) {
+      if (section["children"][0].type === "problem") {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 function getHTMLSection(theSection) {
@@ -89,10 +110,12 @@ function getHTMLSection(theSection) {
     result += `<div class=\"headSection\">${theSection.problemNumberString} ${theSection.title}</div>`;    
   }
   result += "<div class=\"bodySection\">";
-  if (theSection.type === "section") {
+  if (isProblemContainer(theSection)) {
+    result += getHTMLProblems(theSection);
+  } else if (theSection.type === "section") {
     for (var counterSection = 0; counterSection < theSection["children"].length; counterSection ++) {
-      var currentSection = theSection["children"][counterSection];
-      result += getHTMLSubSection(currentSection);
+      var currentSubSection = theSection["children"][counterSection];
+      result += getHTMLSubSection(currentSubSection);
     }
   } else {
     result += getHTMLSubSection(theSection);
@@ -105,9 +128,13 @@ function getHTMLChapter(theChapter) {
   var result = "";
   result += `<div class=\"headChapter\">${theChapter.problemNumberString} ${theChapter.title}</div>`;
   result += "<div class=\"bodyChapter\">";
-  for (var counterSection = 0; counterSection < theChapter["children"].length; counterSection ++) {
-    var currentSection = theChapter["children"][counterSection];
-    result += getHTMLSection(currentSection);
+  if (isProblemContainer(theChapter)) {
+    result += getHTMLProblems(theChapter);
+  } else {
+    for (var counterSection = 0; counterSection < theChapter["children"].length; counterSection ++) {
+      var currentSection = theChapter["children"][counterSection];
+      result += getHTMLSection(currentSection);
+    }
   }
   result += "</div>";
   return result;

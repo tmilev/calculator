@@ -53,6 +53,7 @@ public:
   static bool innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBase64ToCharToBase64Test(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBase64ToString(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerConvertStringToHex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConvertBase58ToHex(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLoadKnownCertificates(Calculator& theCommands, const Expression& input, Expression& output);
@@ -61,8 +62,10 @@ public:
   static bool innerRSAencrypt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha224OfString(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha256OfString(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSha256OfStringVerbose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSha1OfString(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerShaX(Calculator& theCommands, const Expression& input, Expression& output, const std::string& shaId);
+  static bool innerShaX
+  (Calculator& theCommands, const Expression& input, Expression& output, const std::string& shaId, bool verbose);
   static bool innerTestJSON(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerBase64ToHex(Calculator& theCommands, const Expression& input, Expression& output );
   static bool innerIntegerToHex(Calculator& theCommands, const Expression& input, Expression& output);

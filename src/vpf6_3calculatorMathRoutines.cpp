@@ -196,23 +196,29 @@ bool CalculatorFunctionsGeneral::innerLoadKnownCertificates(Calculator& theComma
 bool CalculatorFunctionsGeneral::innerSha1OfString
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha1OfString");
-  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA1");
+  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA1", false);
 }
 
 bool CalculatorFunctionsGeneral::innerSha256OfString
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha256OfString");
-  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA256");
+  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA256", false);
+}
+
+bool CalculatorFunctionsGeneral::innerSha256OfStringVerbose
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha256OfString");
+  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA256", true);
 }
 
 bool CalculatorFunctionsGeneral::innerSha224OfString
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSha224OfString");
-  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA224");
+  return CalculatorFunctionsGeneral::innerShaX(theCommands, input, output, "SHA224", false);
 }
 
 bool CalculatorFunctionsGeneral::innerShaX
-(Calculator& theCommands, const Expression& input, Expression& output, const std::string& shaId)
+(Calculator& theCommands, const Expression& input, Expression& output, const std::string& shaId, bool verbose)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerShaX");
   if (!input.IsOfType<std::string>())
     return false;
@@ -222,8 +228,10 @@ bool CalculatorFunctionsGeneral::innerShaX
   for (unsigned i = 0; i < inputString.size(); i ++)
     theBitStream[i] = inputString[i];
   std::stringstream out;
-  out << "<br>Input: " << inputString;
-  out << "<br>Base64 conversion: " << Crypto::ConvertStringToBase64(theBitStream);
+  if (verbose)
+  { out << "<br>Input: " << inputString;
+    out << "<br>Base64 conversion: " << Crypto::ConvertStringToBase64(theBitStream);
+  }
   List<uint32_t> theSha1Uint;
   List<unsigned char> theSha1Uchar;
   std::string theSha1base64string;
@@ -234,11 +242,16 @@ bool CalculatorFunctionsGeneral::innerShaX
   else if (shaId == "SHA224")
     Crypto::computeSha224(inputString, theSha1Uint);
   Crypto::ConvertUint32ToUcharBigendian(theSha1Uint, theSha1Uchar);
-  theSha1base64string=Crypto::ConvertStringToBase64(theSha1Uchar);
-  out << "<br>" << shaId << " in base64: " << theSha1base64string;
-  out << "<br>" << shaId << " hex: ";
-  for (int i = 0; i < theSha1Uint.size; i ++)
-    out << std::hex << theSha1Uint[i];
+  theSha1base64string = Crypto::ConvertStringToBase64(theSha1Uchar);
+  if (verbose)
+  { out << "<br>" << shaId << " in base64: " << theSha1base64string;
+    out << "<br>" << shaId << " hex: ";
+    for (int i = 0; i < theSha1Uint.size; i ++)
+      out << std::hex << theSha1Uint[i];
+    out << "<br>bitstream: ";
+  }
+  for (int i = 0; i < theSha1Uchar.size; i ++)
+    out << theSha1Uchar[i];
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -263,6 +276,12 @@ bool CalculatorFunctionsGeneral::innerConvertBase58ToHex(Calculator& theCommands
   return output.AssignValue(outputString, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerConvertStringToHex(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCharToBase64");
+  if (!input.IsOfType<std::string>())
+    return false;
+  return output.AssignValue(Crypto::ConvertStringToHex(input.GetValue<std::string>()), theCommands);
+}
 
 bool CalculatorFunctionsGeneral::innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCharToBase64");

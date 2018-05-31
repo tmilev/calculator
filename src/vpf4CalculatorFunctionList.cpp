@@ -495,6 +495,14 @@ void Calculator::initPredefinedInnerFunctions()
    "CalculatorFunctionsGeneral::innerSha256OfString",
    "Sha256");
   this->AddOperationInnerHandler
+  ("Sha256Verbose", CalculatorFunctionsGeneral::innerSha256OfStringVerbose, "",
+   "Same as Sha256 but more verbose. ",
+   "Sha256Verbose(\"\");\
+   ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerSha256OfStringVerbose",
+   "Sha256Verbose");
+  this->AddOperationInnerHandler
   ("TestJSON", CalculatorFunctionsGeneral::innerTestJSON, "",
    "Tests the JSON parsing mechanism. Input: json string, use backslash escapes for \
     backslashes and quotes.",
@@ -510,6 +518,14 @@ void Calculator::initPredefinedInnerFunctions()
    true, false,
    "CalculatorFunctionsGeneral::innerBase64ToHex",
    "ConvertBase64ToHex");
+  this->AddOperationInnerHandler
+  ("ConvertStringToHex", CalculatorFunctionsGeneral::innerConvertStringToHex, "",
+   "Converts a bitstream (not necessarily UTF-8 encoded) to hex. ",
+   "ConvertStringToHex(Sha256(Sha256(\"hello\")));\
+   ",
+   true, false,
+   "CalculatorFunctionsGeneral::innerConvertStringToHex",
+   "ConvertStringToHex");
   this->AddOperationInnerHandler
   ("ConvertHexToInteger", CalculatorFunctionsGeneral::innerHexToInteger, "",
    "Converts a hex string to an integer. ",

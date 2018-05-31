@@ -191,12 +191,16 @@ function updateProblemPageCallback(input, outputComponent) {
   //for (var counterScripts = 0; counterScripts < theScripts.length; counterScripts++){
   //  console.log(`Scripts: ${theScripts[counterScripts]}`);
   //}
+  var answerVectors = theProblem["answers"];
+  if (answerVectors === undefined) {
+    currentProblem.writeToHTML("divProblemPageContentContainer");
+    return;    
+  }
   currentProblem.title = theProblem.title;
   currentProblem.problemLabel = theProblem["problemLabel"];
   currentProblem.flagForReal = theProblem["forReal"];
   currentProblem.randomSeed = theProblem.randomSeed;
 
-  var answerVectors = theProblem["answers"];  
   for (var counterAnswers = 0;  counterAnswers < answerVectors.length; counterAnswers ++) {
     currentProblem.answers[counterAnswers] = new InputPanelData({
       fileName: thePage.currentCourse.fileName,

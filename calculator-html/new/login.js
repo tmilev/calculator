@@ -54,6 +54,7 @@ for complete logout (when <span style='color:red'>using public computer</span>).
   showLoginCalculatorButtons();
   toggleAccountPanels();
   toggleAdminPanels();
+  thePage.selectPage("login");
 }
 
 function loginTry() {

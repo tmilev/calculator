@@ -238,10 +238,11 @@ bool JSData::readstring
     readingStack.AddOnTop(emptyElt);
   readingStack.AddOnTop(theTokenS[0]);
   for (int i = 0;;)
-  { JSData& last = readingStack[(int) (readingStack.size - 1)];
-    JSData& secondToLast = readingStack[(int) (readingStack.size - 2)];
-    JSData& thirdToLast  = readingStack[(int) (readingStack.size - 3)];
-    JSData& fourthToLast = readingStack[(int) (readingStack.size - 4)];
+  { int fourthToLastIndex = readingStack.size - 4; //<- used to avoid compiler warning
+    JSData& last = readingStack[fourthToLastIndex + 3];
+    JSData& secondToLast = readingStack[fourthToLastIndex + 2];
+    JSData& thirdToLast  = readingStack[fourthToLastIndex + 1];
+    JSData& fourthToLast = readingStack[fourthToLastIndex];
     //JSData& fifthToLast=theTokenS[i - 4];
     if (fourthToLast.type == JSData::JSopenBrace && thirdToLast.type  == JSData::JSstring &&
         secondToLast.type == JSData::JScolon && last.IsValidElement())

@@ -22,7 +22,7 @@
 FEATUREFLAGS= -std=c++0x -pthread -fopenmp
 CFLAGS=-Wall -Wno-address $(FEATUREFLAGS) -c
 LDFLAGS=$(FEATUREFLAGS)
-LIBRARYINCLUDESEND=
+LIBRARIES_INCLUDED_AT_THE_END=
 
 ifeq ($(hsa), 1)
 	CXX=/home/user/gcc/bin/g++
@@ -73,29 +73,10 @@ ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubun
 endif
 ifneq ($(sslLocation),)
 	CFLAGS+= -DMACRO_use_open_ssl 
-	LIBRARYINCLUDESEND+= -lssl -lcrypto  #WARNING believe it or not, the libraries must come AFTER the executable name 
+	LIBRARIES_INCLUDED_AT_THE_END+= -lssl -lcrypto  #WARNING believe it or not, the libraries must come AFTER the executable name 
 $(info [1;32mOpenssl found.[0m) 
 else
 $(info [1;31mNOT FOUND: Openssl.[0m I will attempt to install it once the calculator is compiled.) 
-endif
-endif
-
-ifeq ($(nosql), 1)
-$(info [1;33mNo mysql requested.[0m) 
-else
-mysqlLocation=
-ifneq ($(wildcard /usr/lib64/mysql),)#location of mysql in CENTOS
-  mysqlLocation=/usr/lib64/mysql
-endif
-ifneq ($(wildcard /usr/lib/mysql),)#location of mysql in Ubuntu
-  mysqlLocation=/usr/lib/mysql
-endif
-ifneq ($(mysqlLocation),)
-  CFLAGS+= -DMACRO_use_MySQL
-  LIBRARYINCLUDESEND+= -L$(mysqlLocation) -lmysqlclient  #WARNING believe it or not, the libraries must come AFTER the executable name
-$(info [1;32mMysql found.[0m) 
-else
-$(info [1;31mNOT FOUND: Mysql.[0m I will attempt to install it once the calculator is compiled.) 
 endif
 endif
 
@@ -110,7 +91,7 @@ endif
 ifneq ($(mongoLocation),)
   CFLAGS+= -DMACRO_use_MongoDB
 #  LDFLAGS+= -L/usr/local/lib
-  LIBRARYINCLUDESEND+= -L/usr/local/lib -lmongoc-1.0 -lbson-1.0
+  LIBRARIES_INCLUDED_AT_THE_END+= -L/usr/local/lib -lmongoc-1.0 -lbson-1.0
 $(info [1;32mMongo found.[0m) 
 else
 $(info [1;31mNOT FOUND: Mongo.[0m I will attempt to install it once the calculator is compiled.) 
@@ -121,61 +102,65 @@ endif
 
 $(info [1;33mCompile flags:  $(CFLAGS)[0m)
 $(info [1;34mLinker flags part 1:  $(LDFLAGS))
-$(info [1;34mLinker flags part 2: $(LIBRARYINCLUDESEND)[0m)
+$(info [1;34mLinker flags part 2: $(LIBRARIES_INCLUDED_AT_THE_END)[0m)
 
 #if this is missing something, add it, or, ls | grep cpp | xargs echo
-SOURCES=\
-./src/databasemongo.cpp \
-./src/database_mongo_calculator.cpp \
-./src/webserver.cpp \
-./src/web-routines-1.cpp \
-./src/database.cpp \
-./src/examRoutines.cpp \
-./src/vpfHtmlInterpretationInterface.cpp \
-./src/vpfHtmlSnippets.cpp \
-./src/test.cpp \
-./src/vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
-./src/vpf4CalculatorFunctionList.cpp \
-./src/vpf5_1CalculatorCode.cpp \
-./src/vpf5_2javascript_graphics.cpp \
-./src/vpf5.cpp \
-./src/vpf6_05evaluationroutines.cpp \
-./src/vpf6_0parsingRoutines.cpp \
-./src/vpf6_1innerTypedFunctions.cpp \
-./src/vpf6_2serialization_code.cpp \
-./src/vpf6_3calculatorMathRoutines.cpp \
-./src/vpf6_35calculatorMathRoutinesPart2.cpp \
-./src/vpf6_36calculatorHtmlRoutines.cpp \
-./src/vpf6_37calculatorroutines.cpp \
-./src/vpf6_38LaTeXRoutines.cpp \
-./src/vpf6_4ExpressionsImplementation.cpp \
-./src/vpf6.cpp \
-./src/vpf7.cpp \
-./src/vpf8.cpp \
-./src/vpf9_1.cpp \
-./src/vpf9_2.cpp \
-./src/vpf9_3RationalRadicals.cpp \
-./src/vpf9_4SemisimpleLieAlgebras.cpp \
-./src/vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp \
-./src/vpf9_6SemisimpleLieSubAlgebras.cpp \
-./src/vpf9_7floating_point_routines.cpp \
-./src/vpf9_8GlobalObjects.cpp \
-./src/vpf9_92multitasking.cpp \
-./src/vpf99_HardcodedData.cpp \
-./src/vpf9_9SystemFunctions.cpp \
-./src/vpf9.cpp \
-./src/vpfCharacters_CalculatorInterface.cpp \
-./src/vpfCharacters.cpp \
-./src/vpfCrypto.cpp \
-./src/vpfFiniteFields.cpp \
-./src/vpfGraph.cpp \
-./src/vpfJson.cpp \
-./src/vpfWebServerInterProcessLogistics.cpp \
-./src/vpf9_85TimeDateWrappers.cpp
+SOURCES_NO_PATH=\
+databasemongo.cpp \
+database_mongo_calculator.cpp \
+webserver.cpp \
+web-routines-1.cpp \
+database.cpp \
+examRoutines.cpp \
+vpfHtmlInterpretationInterface.cpp \
+vpfHtmlSnippets.cpp \
+test.cpp \
+vpf2Math3_SymmetricGroupsAndGeneralizations.cpp \
+vpf4CalculatorFunctionList.cpp \
+vpf5_1CalculatorCode.cpp \
+vpf5_2javascript_graphics.cpp \
+vpf5.cpp \
+vpf6_05evaluationroutines.cpp \
+vpf6_0parsingRoutines.cpp \
+vpf6_1innerTypedFunctions.cpp \
+vpf6_2serialization_code.cpp \
+vpf6_3calculatorMathRoutines.cpp \
+vpf6_35calculatorMathRoutinesPart2.cpp \
+vpf6_36calculatorHtmlRoutines.cpp \
+vpf6_37calculatorroutines.cpp \
+vpf6_38LaTeXRoutines.cpp \
+vpf6_4ExpressionsImplementation.cpp \
+vpf6.cpp \
+vpf7.cpp \
+vpf8.cpp \
+vpf9_1.cpp \
+vpf9_2.cpp \
+vpf9_3RationalRadicals.cpp \
+vpf9_4SemisimpleLieAlgebras.cpp \
+vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp \
+vpf9_6SemisimpleLieSubAlgebras.cpp \
+vpf9_7floating_point_routines.cpp \
+vpf9_8GlobalObjects.cpp \
+vpf9_92multitasking.cpp \
+vpf99_HardcodedData.cpp \
+vpf9_9SystemFunctions.cpp \
+vpf9.cpp \
+vpfCharacters_CalculatorInterface.cpp \
+vpfCharacters.cpp \
+vpfCrypto.cpp \
+vpfFiniteFields.cpp \
+vpfGraph.cpp \
+vpfJson.cpp \
+vpfWebServerInterProcessLogistics.cpp \
+vpf9_85TimeDateWrappers.cpp
 
 
-OBJECTS=$(SOURCES:.cpp=.o) 
-DEPS=$(SOURCES:.cpp=.d)
+OBJECTS=$(addprefix bin/, $(notdir $(SOURCES_NO_PATH:.cpp=.o)))
+DEPENDENCIES=$(addprefix bin/, $(notdir $(SOURCES_NO_PATH:.cpp=.d)))
+#$(info $(OBJECTS))
+#$(info )
+#$(info $(DEPENDENCIES))
+#$(info )
 
 all: directories bin_calculator 
 directories: bin
@@ -183,15 +168,15 @@ bin:
 	mkdir ./bin
 
 bin_calculator: $(OBJECTS)
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o ./bin/calculator $(LIBRARYINCLUDESEND)
+	$(CXX) $(LDFLAGS) $(OBJECTS) -o ./bin/calculator $(LIBRARIES_INCLUDED_AT_THE_END)
 
 testrun: bin/calculator
 	time ./bin/calculator test
 
-%.o:%.cpp
+bin/%.o:src/%.cpp
 	$(CXX) $(CFLAGS) -MMD -MP $< -o $@
 
 clean:
-	rm -f $(OBJECTS) $(DEPS)
+	rm -f $(OBJECTS) $(DEPENDENCIES)
 
--include $(DEPS)
+-include $(DEPENDENCIES)

@@ -238,7 +238,8 @@ public:
   (const std::string& problemName, const std::string& sectionNumber, bool& outputIsInherited);
   bool MergeOneProblemAdminData
   (const std::string& inputProblemName, ProblemData& inputProblemInfo, std::stringstream& commentsOnFailure);
-  bool MergeProblemInfoInDatabase(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
+  //bool MergeProblemInfoInDatabaseURLed(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
+  bool MergeProblemInfoInDatabaseJSON(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure);
   bool LoadProblemInfoFromURLedInputAppend
   (const std::string& inputInfoString,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputProblemInfo,
@@ -251,7 +252,7 @@ public:
   //  (const std::string& inputJSONString,
   //   MapLisT<std::string, ProblemData, MathRoutines::hashString>& outputDeadlineInfo,
   //   std::stringstream& commentsOnFailure);
-  void StoreDeadlineInfo
+  void StoreDeadlineInfoIntoJSON
   (JSData& outputData,
    MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo);
   JSData ToJSONProblemWeights

@@ -31,6 +31,7 @@ function updateDatabasePage(){
   var theUrl = `${pathnames.calculatorAPI}?${pathnames.requestDatabase}&${pathnames.databaseTable}=${thePage.pages.database.storage.currentTable}`;
   submitGET({
     url: theUrl,
+    progress: "spanProgressReportGeneral",
     callback: updateDatabasePageCallback
   });
 }

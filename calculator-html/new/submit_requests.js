@@ -126,8 +126,11 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
 
 function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
   var inputParams = '';
-  inputParams += 'request=' + requestType + '&';
+  inputParams += 'request=' + requestType;
   inputParams += '&mainInput=' + encodeURIComponent(theString);
+  if (thePage.flagDebug === true) {
+    inputParams += "&debugFlag=true";
+  }
   submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
 }
 

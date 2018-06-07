@@ -2,7 +2,6 @@
 
 function toStringProblemWeight(problemData) {
   var result = "";
-  result += "<td>";
   if (problemData.correctlyAnswered !== undefined && problemData.correctlyAnswered !== NaN) {
     var numCorrectlyAnswered = problemData.correctlyAnswered;
     var totalQuestions = problemData.totalQuestions;
@@ -19,9 +18,46 @@ function toStringProblemWeight(problemData) {
     } else {
       result += ` = ? pts`;
     }
-
   }
   result += "</td>";
+  return result;
+}
+
+function modifyWeight(id) {
+  var problemWeightTextareaId = `points${id}`;
+  var incomingPoints = document.getElementById(problemWeightTextareaId).value;
+  var modifyObject = {};
+  console.log("DEBUG: id: " + id);
+  modifyObject[id] = {
+    weight: incomingPoints
+  };
+  submitStringAsMainInput(JSON.stringify(modifyObject), "spanProgressReportGeneral", "setProblemData");
+}
+
+function toStringProblemWeightCell(problemData) {
+  var result = "";
+  if (problemData.problem === "") {
+    return "<td></td>";
+  }
+  var problemWeight = toStringProblemWeight(problemData);
+  result += "<td>";
+  var problemURLEncoded = encodeURIComponent(problemData.problem);
+  var probelmWeightButtonId = `modifyPoints${problemURLEncoded}`;
+  var problemWeightTextareaId = `points${problemURLEncoded}`;
+  console.log("DEBUG: problem:  " + problemURLEncoded);
+  console.log("DEBUG: problemData.problem:  " + problemData.problem);
+
+  result += "<span class = 'panelProblemWeights' style = 'opacity: 1; max-height: 200px;'><br>";
+  result += `Pts: <textarea class = 'textareaStudentPoints' rows = '1' cols = '2' id = '${problemWeightTextareaId}'>`;
+  if (problemData.weight !== undefined) {
+    result += problemData.weight;
+  }
+  result += "</textarea>";
+  result += `<button id = '${probelmWeightButtonId}' onclick = "modifyWeight('${problemURLEncoded}')" >Modify</button>`
+  result += "</span>";
+
+  result += "</td>";
+
   return result;
 }
 
@@ -75,7 +111,7 @@ function getHTMLProblems(theProblemContainer) {
       result += `onclick = "selectCurrentProblem('${currentProblemData.problem}', 'exerciseJSON');">Practice</a>`;
     }
     result += "</td>";
-    result += toStringProblemWeight(currentProblemData);
+    result += toStringProblemWeightCell(currentProblemData);
     result += "<td></td>";
     result += "</tr>";
   }
@@ -85,7 +121,7 @@ function getHTMLProblems(theProblemContainer) {
 }
 
 function getHTMLSubSection(theSubSection) {
-  console.log("DEBUG: current subsection: " + JSON.stringify(theSubSection.title) + "; type: " + JSON.stringify(theSubSection.type));
+  //console.log("DEBUG: current subsection: " + JSON.stringify(theSubSection.title) + "; type: " + JSON.stringify(theSubSection.type));
   var result = "";
   result += `<div class = \"headSubsection\">${theSubSection.problemNumberString} ${theSubSection.title}</div>`;
   result += getHTMLProblems(theSubSection)
@@ -105,7 +141,7 @@ function isProblemContainer(section) {
 
 function getHTMLSection(theSection) {
   var result = "";
-  console.log("DEBUG: current section: " + JSON.stringify(theSection.title) + "; type: " + JSON.stringify(theSection.type));
+  //console.log("DEBUG: current section: " + JSON.stringify(theSection.title) + "; type: " + JSON.stringify(theSection.type));
   if (theSection.type === "section"){
     result += `<div class=\"headSection\">${theSection.problemNumberString} ${theSection.title}</div>`;    
   }

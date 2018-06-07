@@ -123,6 +123,7 @@ function Page() {
   this.theTopics = {};
   this.theCourses = {}; 
   this.currentPage  = null;
+  this.flagDebug = false;
   this.currentCourse = {
     courseHome: "",
     topicList: "",
@@ -146,6 +147,7 @@ function Page() {
   //////////////////////////////////////
   this.selectPage(this.currentPage);
   loginTry();
+  this.setDebugSwitch();
   document.getElementById("divPage").style.display = "";
   document.getElementById("divPage").className = "divPage";
 }
@@ -163,6 +165,7 @@ Page.prototype.loadSettingsFromCookies = function() {
     this.user.googleToken = getCookie("googleToken");
     this.user.name = getCookie("username");
     this.user.authenticationToken = getCookie("authenticationToken");
+    this.flagDebug = getCookie("debugFlag");
   } catch (e) {
     console.log("Error loading settings from cookies: " + e);
   }
@@ -177,6 +180,7 @@ Page.prototype.storeSettingsToCookies = function() {
   addCookie("googleToken", this.user.googleToken, 300, true); 
   addCookie("username", this.user.name, 300, true);
   addCookie("authenticationToken", this.user.authenticationToken, 300, true);
+  addCookie("debugFlag", this.flagDebug);
 }
 
 Page.prototype.loadSettingsFromLocalStorage = function() {    
@@ -245,6 +249,27 @@ Page.prototype.initializeCalculatorPage = function() {
       'mainComputationStatus'
     );
   }
+}
+
+Page.prototype.flipDebugSwitch = function () {
+  this.flagDebug = document.getElementById("sliderDebugFlag").checked;
+  var debugSpan = document.getElementById("spanDebugFlagToggleReport");
+  if (this.flagDebug) {
+    debugSpan.innerHTML = "Debug on";
+  } else {
+    debugSpan.innerHTML = "Debug off";
+  }
+  this.storeSettingsToCookies();
+}
+
+Page.prototype.setDebugSwitch = function () {
+  console.log ("DEBUG flag: " + this.flagDebug);
+  if (this.flagDebug === true || this.flagDebug === "true") {
+    document.getElementById("sliderDebugFlag").checked = true;
+  } else {
+    document.getElementById("sliderDebugFlag").checked = false;
+  }
+  this.flipDebugSwitch();
 }
 
 function defaultOnLoadInjectScriptsAndProcessLaTeX(idElement) { 

@@ -277,7 +277,12 @@ ctrl+arrow = select</span>
 <div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectAccounts">Accounts</button></div>
 <div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectDatabase">Database</button></div>
 <div class = "divAdminPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectServer">Server</button></div>
-
+<div> 
+  <label class = "switch">
+    <input id = "sliderDebugFlag" type = "checkbox" onchange = "thePage.flipDebugSwitch();">
+    <span class = "slider round"></span>
+  </label><span id = "spanDebugFlagToggleReport">-</span>
+</div>
 <div id = "spanProgressReportGeneral"></div>
 </div> <!--divTheMainMenuPanel-->
 

@@ -8485,7 +8485,7 @@ bool HtmlRoutines::IsRepresentedByItselfInURLs(char input)
     return true;
   if (MathRoutines::isALatinLetter(input))
     return true;
-  return input == '.';
+  return input == '.' || input == '-';
 }
 
 std::string HtmlRoutines::ConvertStringToURLStringExceptDashesAndSlashes(const std::string& input)

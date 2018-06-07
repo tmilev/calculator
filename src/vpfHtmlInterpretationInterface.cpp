@@ -135,7 +135,7 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   { out << "Failed to interpret the deadline string. ";
     return out.str();
   }
-  if (theProblem.MergeProblemInfoInDatabase(inputProblemInfo, commentsOnFailure))
+  if (theProblem.MergeProblemInfoInDatabaseJSON(inputProblemInfo, commentsOnFailure))
   { out << "<span style=\"color:green\"><b>Modified. </b></span>";
     //out << "<meta http-equiv=\"refresh\" content=\"0;\">";
   } else

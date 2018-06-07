@@ -208,7 +208,7 @@ JSData CalculatorHTML::ToJSONProblemWeights
   return output;
 }
 
-void CalculatorHTML::StoreDeadlineInfo
+void CalculatorHTML::StoreDeadlineInfoIntoJSON
 (JSData& outputData, MapLisT<std::string, ProblemData, MathRoutines::hashString>& inputProblemInfo)
 { MacroRegisterFunctionWithName("DatabaseRoutines::StoreDeadlineInfo");
   outputData.reset();
@@ -290,7 +290,43 @@ bool CalculatorHTML::MergeOneProblemAdminData
   return true;
 }
 
-bool CalculatorHTML::MergeProblemInfoInDatabase
+bool CalculatorHTML::MergeProblemInfoInDatabaseJSON
+(std::string& incomingProblemInfo, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
+  //stOutput << "DEBUG: Here I am, merging in data: " << incomingProblemInfo;
+  JSData theProblemJSON;
+  if (! theProblemJSON.readstring(incomingProblemInfo, false, &commentsOnFailure))
+    return false;
+  MapLisT<std::string, ProblemData, MathRoutines::hashString> incomingProblems;
+  if (!this->LoadProblemInfoFromJSONAppend(theProblemJSON, incomingProblems, commentsOnFailure))
+  { commentsOnFailure << "Failed to parse your request";
+    return false;
+  }
+  bool result = true;
+  //stOutput << "<hr><hr>Debug: incoming problems: " << incomingProblems.ToStringHtml();
+  for (int i = 0; i < incomingProblems.size(); i ++)
+    if (!this->MergeOneProblemAdminData(incomingProblems.theKeys[i], incomingProblems.theValues[i], commentsOnFailure))
+      result = false;
+  //this->StoreDeadlineInfoIntoJSON(theProblemJSON, this->currentUseR.theProblemData);
+  //stOutput << "<hr>Debug: about to store WEIGHT with row id: "
+  //<< this->currentUseR.problemInfoRowId.value << "<hr>";
+  //stOutput << "<hr>About to transform to database string: "
+  //<< this->currentUseR.theProblemData.ToStringHtml()
+  //<< "<hr>";
+  theGlobalVariables.userDefault.problemWeights = this->ToJSONProblemWeights(this->currentUseR.theProblemData);
+  theGlobalVariables.userDefault.deadlines = this->ToJSONDeadlines(this->currentUseR.theProblemData);
+  //theGlobalVariables.userDefault=this->currentUseR;
+  //stOutput << "<hr>Resulting string: "
+  //<< theGlobalVariables.userDefault.problemInfoString.value
+  //<< "<hr>";
+  //commentsOnFailure << "About to store: " << theGlobalVariables.userDefault.problemWeightString;
+  //return false;
+  if (!DatabaseRoutineS::StoreProblemDatabaseInfo(theGlobalVariables.userDefault, commentsOnFailure))
+    return false;
+  return result;
+}
+
+/*bool CalculatorHTML::MergeProblemInfoInDatabase
 (std::string& incomingProblemInfo, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutines::MergeProblemInfoInDatabase");
   //stOutput << "DEBUG: Here I am, merging in data: " << incomingProblemInfo;
@@ -323,7 +359,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabase
   if (!DatabaseRoutineS::StoreProblemDatabaseInfo(theGlobalVariables.userDefault, commentsOnFailure))
     return false;
   return result;
-}
+}*/
 #endif // MACRO_use_MongoDB
 
 bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)

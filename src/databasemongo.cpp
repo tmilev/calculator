@@ -345,6 +345,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
 bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery
 (const JSData& findQuery, std::stringstream* commentsOnFailure, bool mustBeObject)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery");
+  //logWorker << logger::red << "DEBUG: findQuery in isvalid json: " << findQuery.ToString(false) << logger::endL;
   if (mustBeObject)
   { if (findQuery.type != findQuery.JSObject)
     { if (commentsOnFailure != 0)
@@ -354,7 +355,10 @@ bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery
       return false;
     }
   } else
-  { if (findQuery.type != findQuery.JSstring)
+  { if (findQuery.type == findQuery.JSarray)
+      if (findQuery.list.size == 0)
+        return true;
+    if (findQuery.type != findQuery.JSstring)
     { if (commentsOnFailure != 0)
         *commentsOnFailure << "JSData: "
         << HtmlRoutines::ConvertStringToHtmlString(findQuery.ToString(false), false)
@@ -382,7 +386,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromSome
 bool DatabaseRoutinesGlobalFunctionsMongo::GetOrFindQuery
 (const List<JSData>& input, std::string& output, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::GetOrFindQuery");
-  for (int i = 0; i < input.size; i++)
+  for (int i = 0; i < input.size; i ++)
     if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(input[i], commentsOnFailure, true))
       return false;
   std::stringstream queryStream;
@@ -466,8 +470,8 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
   updateQuery.ToString(true);
   updateQueryStream << "{\"$set\": " << updateQuery.ToString(true) << "}";
   query.updateQuery = updateQueryStream.str();
-  logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
-  logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
   return query.UpdateOne(commentsOnFailure);
 #else
   (void) collectionName;

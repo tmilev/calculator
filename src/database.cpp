@@ -1385,7 +1385,7 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
   if (userWrapper.username == "admin" && userWrapper.enteredPassword != "")
     if (!userWrapper.Iexist(0))
     { if (comments != 0)
-        *comments << "First login of user admin: setting admin pass.";
+        *comments << "First login of user admin: setting admin pass. ";
       //*comments << "DEBUG: user before storing: " << userWrapper.ToJSON().ToString();
       userWrapper.actualActivationToken = "activated";
       userWrapper.userRole = "admin";

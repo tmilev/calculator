@@ -49,7 +49,7 @@ public:
   (const MonomialUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0);
   void ModOutVermaRelations
-  (coefficient& outputCoeff, const Vector<coefficient>* subHiGoesToIthElement = 0, const coefficient& theRingUnit = 1, const coefficient& theRingZero=0);
+  (coefficient& outputCoeff, const Vector<coefficient>* subHiGoesToIthElement = 0, const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0);
   void SetNumVariables(int newNumVars);
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
   unsigned int HashFunction() const
@@ -133,7 +133,7 @@ public:
     return this->HWTAAbilinearForm(tempElt, output, subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, logStream);
   }
   bool NeedsBracketForMultiplication()
-  { return this->size>1;
+  { return this->size > 1;
   }
   bool ApplyMinusTransposeAutoOnMe();
   bool ApplyTransposeAntiAutoOnMe();
@@ -167,7 +167,7 @@ public:
   }
   void MultiplyBy(const MonomialUniversalEnveloping<coefficient>& standsOnTheRight, const coefficient& theCoeff);
   void ModToMinDegreeFormFDRels(const Vector<Rational> & theHWinSimpleCoords, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
-  void ModOutVermaRelations(const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  void ModOutVermaRelations(const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0);
   static void GetCoordinateFormOfSpanOfElements
   (List<ElementUniversalEnveloping<coefficient> >& theElements, Vectors<coefficient>& outputCoordinates, ElementUniversalEnveloping<coefficient>& outputCorrespondingMonomials,
    GlobalVariables& theGlobalVariables);
@@ -186,11 +186,11 @@ public:
   void AssignFromCoordinateFormWRTBasis(List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& input, SemisimpleLieAlgebra& owner);
   void RaiseToPower(int thePower);
   bool IsAPowerOfASingleGenerator()const
-  { if (this->size()!=1)
+  { if (this->size() != 1)
       return false;
     if (!this->theCoeffs[0].IsEqualToOne())
       return false;
-    return (*this)[0].generatorsIndices.size==1;
+    return (*this)[0].generatorsIndices.size == 1;
   }
   void SubstitutionCoefficients(PolynomialSubstitution<Rational>& theSub, GlobalVariables* theContext, const coefficient& theRingUnit, const coefficient& theRingZero);
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
@@ -203,7 +203,7 @@ public:
   void LieBracketOnTheRight(const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output)const;
   void LieBracketOnTheLeft(const ElementSemisimpleLieAlgebra<Rational>& left);
   void AssignInt(int coeff, int numVars, SemisimpleLieAlgebra& theOwner)
-  { Rational tempRat=coeff;
+  { Rational tempRat = coeff;
     this->MakeConst(tempRat, numVars, &theOwner);
   }
   SemisimpleLieAlgebra& GetOwner()const
@@ -211,13 +211,13 @@ public:
   }
   template <class otherType>
   void Assign(const ElementUniversalEnveloping<otherType>& other)
-  { this->owners=other.owners;
-    this->indexInOwners=other.indexInOwners;
+  { this->owners = other.owners;
+    this->indexInOwners = other.indexInOwners;
     MonomialUniversalEnveloping<coefficient> tempMon;
     coefficient theCoeff;
-    for (int i=0; i<other.size; i++)
-    { tempMon=other[i];
-      theCoeff=other.theCoeffs[i];
+    for (int i = 0; i < other.size; i ++)
+    { tempMon = other[i];
+      theCoeff = other.theCoeffs[i];
       this->AddMonomial(tempMon, theCoeff);
     }
   }
@@ -226,7 +226,7 @@ public:
   }
   void operator=(const ElementUniversalEnveloping<coefficient>& other)
   { this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>::operator=(other);
-    this->owner=other.owner;
+    this->owner = other.owner;
   }
   void operator*=(const ElementUniversalEnveloping<coefficient>& standsOnTheRight);
   void operator*=(const coefficient& other)
@@ -238,8 +238,12 @@ public:
   { this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>
     ::operator/=(other);
   }
-  ElementUniversalEnveloping<coefficient>():owner(0){}
-  ElementUniversalEnveloping<coefficient>(const ElementUniversalEnveloping<coefficient>& other){this->operator=(other);}
+  ElementUniversalEnveloping<coefficient>():owner(0)
+  {
+  }
+  ElementUniversalEnveloping<coefficient>(const ElementUniversalEnveloping<coefficient>& other)
+  { this->operator=(other);
+  }
 };
 
 #endif

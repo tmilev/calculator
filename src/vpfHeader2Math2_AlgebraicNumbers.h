@@ -41,22 +41,22 @@ class AlgebraicNumber
   void ExpressViaLatestBasis();
   bool AssignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner);
   bool AssignSinRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner)
-  { Rational rHalf(1,2);
-    return this->AssignCosRationalTimesPi(rHalf-input, inputOwner);
+  { Rational rHalf(1, 2);
+    return this->AssignCosRationalTimesPi(rHalf - input, inputOwner);
   }
-  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const;
-  bool NeedsParenthesisForMultiplication()const;
-  bool CheckConsistency()const;
-  bool CheckNonZeroOwner()const;
-  bool CheckCommonOwner(const AlgebraicNumber& other)const;
-  unsigned int HashFunction()const;
+  bool NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const;
+  bool NeedsParenthesisForMultiplication() const;
+  bool CheckConsistency() const;
+  bool CheckNonZeroOwner() const;
+  bool CheckCommonOwner(const AlgebraicNumber& other) const;
+  unsigned int HashFunction() const;
   static inline unsigned int HashFunction(const AlgebraicNumber& input)
   { return input.HashFunction();
   }
-  inline LargeIntUnsigned GetNumerator()const
+  inline LargeIntUnsigned GetNumerator() const
   { return this->theElT.FindGCDCoefficientNumeratorsOverRationals().GetNumerator().value;
   }
-  inline LargeIntUnsigned GetDenominator()const
+  inline LargeIntUnsigned GetDenominator() const
   { return this->GetDenominatorRationalPart().GetDenominator();
   }
   bool IsPositive()
@@ -93,16 +93,16 @@ class AlgebraicNumber
   }
   bool AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner);
   void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
-  Rational GetDenominatorRationalPart()const;
-  Rational GetNumeratorRationalPart()const;
+  Rational GetDenominatorRationalPart() const;
+  Rational GetNumeratorRationalPart() const;
   void SqrtMeDefault();
-  bool IsSmallInteger(int* whichInteger)const
+  bool IsSmallInteger(int* whichInteger) const
   { Rational theRat;
     if (!this->IsRational(&theRat))
       return false;
     return theRat.IsSmallInteger(whichInteger);
   }
-  bool IsInteger(LargeInt* whichInteger)const
+  bool IsInteger(LargeInt* whichInteger) const
   { Rational theRat;
     if (!this->IsRational(&theRat))
       return false;
@@ -110,25 +110,25 @@ class AlgebraicNumber
   }
   void RadicalMeDefault(int theRad);
   void Invert();
-  bool EvaluatesToDouble(double* outputWhichDouble)const;
+  bool EvaluatesToDouble(double* outputWhichDouble) const;
   void operator/=(const AlgebraicNumber& other);
-  bool operator==(const AlgebraicNumber& other)const;
-  bool operator==(const Rational& other)const;
-  bool operator==(int other)const
+  bool operator==(const AlgebraicNumber& other) const;
+  bool operator==(const Rational& other) const;
+  bool operator==(int other) const
   { return *this==(Rational)other;
   }
 
-  inline bool operator!=(const AlgebraicNumber& other)const
+  inline bool operator!=(const AlgebraicNumber& other) const
   { return !(*this == other);
   }
-  inline bool operator!=(int other)const
+  inline bool operator!=(int other) const
   { return !(*this == other);
   }
   void Minus()
   { this->theElT *= - 1;
   }
   void operator=(const Polynomial<AlgebraicNumber>& other);
-  AlgebraicNumber operator+(const AlgebraicNumber& other)const
+  AlgebraicNumber operator+(const AlgebraicNumber& other) const
   { this->CheckConsistency();
     AlgebraicNumber result = *this;
     result.CheckConsistency();
@@ -137,12 +137,12 @@ class AlgebraicNumber
     result.CheckConsistency();
     return result;
   }
-  AlgebraicNumber operator-(const AlgebraicNumber& other)const
+  AlgebraicNumber operator-(const AlgebraicNumber& other) const
   { AlgebraicNumber result = *this;
     result -= other;
     return result;
   }
-  AlgebraicNumber operator*(const AlgebraicNumber& other)const
+  AlgebraicNumber operator*(const AlgebraicNumber& other) const
   { AlgebraicNumber result = *this;
     result *= other;
     return result;
@@ -165,8 +165,8 @@ class AlgebraicNumber
   void operator*=(int other)
   { this->operator *= ((Rational)other);
   }
-  bool operator>(const AlgebraicNumber& other)const;
-  std::string ToString(FormatExpressions* theFormat = 0)const;
+  bool operator>(const AlgebraicNumber& other) const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
 };
 
 class AlgebraicClosureRationals
@@ -205,7 +205,7 @@ public:
   (const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output);
   bool AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot);
   bool AdjoinRootQuadraticPolyToQuadraticRadicalExtension(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot);
-  std::string ToString(FormatExpressions* theFormat = 0)const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
   bool splitToPartialFractionsOverRealAlgebraicNumbers
   (RationalFunctionOld& inputRF, List<Polynomial<AlgebraicNumber> >& outputNumerators,
    List<Polynomial<AlgebraicNumber> >& outputDenominators,
@@ -218,7 +218,7 @@ public:
   LargeIntUnsigned theModulo;
   LargeIntUnsigned theValue;
   bool flagDeallocated;
-  unsigned int HashFunction()const
+  unsigned int HashFunction() const
   { if (this->theValue.IsEqualToZero())
       return 0;
     return this->theValue.HashFunction()*SomeRandomPrimes[0] + this->theModulo.HashFunction() * SomeRandomPrimes[1];
@@ -313,7 +313,7 @@ public:
     ElementZmodP theCF;
     theCF.theModulo = newModulo;
     output.MakeZero();
-    for (int i = 0; i < input.size(); i++)
+    for (int i = 0; i < input.size(); i ++)
     { theCF = input.theCoeffs[i];
       output.AddMonomial(input[i], theCF);
     }

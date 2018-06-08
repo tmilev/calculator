@@ -483,7 +483,7 @@ private:
     { streamToMoveIn >> tempS;
       if (tempS == tagOpen)
         return true;
-      NumReadWordsExcludingTag++;
+      NumReadWordsExcludingTag ++;
     }
     return false;
   }
@@ -496,12 +496,12 @@ private:
     while (!streamToMoveIn.eof())
     { streamToMoveIn >> tempS;
       if (tempS == tagClose)
-        TagDepth--;
+        TagDepth --;
       if (tempS == tagOpen)
         TagDepth++;
       if (TagDepth == 0)
         return true;
-      NumReadWordsExcludingTag++;
+      NumReadWordsExcludingTag ++;
     }
     return false;
   }

@@ -67,6 +67,7 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend
   //<< "<br>DEBUG: Read json: " << inputJS.ToString(false);
   outputProblemInfo.SetExpectedSize(inputJSON.objects.size());
   ProblemData emptyData;
+  std::string currentCourse = theGlobalVariables.userDefault.courseComputed;
   for (int i = 0; i < inputJSON.objects.size(); i ++)
   { std::string currentProbName = inputJSON.objects.theKeys[i];
     JSData& currentProblem = inputJSON.objects.theValues[i];
@@ -83,13 +84,21 @@ bool CalculatorHTML::LoadProblemInfoFromJSONAppend
     //stOutput << "<br>DEBUG: Current problems: " << currentProblem.ToString(false)
     //<< "<br>Current weight: " << currentWeight.ToString(false);
     //stOutput.Flush();
-    if (currentWeight.type != JSData::JSUndefined)
-    { for (int j = 0; j < currentWeight.objects.size(); j ++)
+    if (currentWeight.type == JSData::JSObject)
+      for (int j = 0; j < currentWeight.objects.size(); j ++)
+      { JSData& currentWeightValue = currentWeight.objects.theValues[j];
+        if (currentWeightValue.type != JSData::JSstring)
+          continue;
         currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
-        (currentWeight.objects.theKeys[j], currentWeight.objects.theValues[j].string);
-      std::string desiredCourse = theGlobalVariables.userDefault.courseComputed;
+        (currentWeight.objects.theKeys[j], currentWeightValue.string);
+      }
+    else if (currentWeight.type == JSData::JSstring)
       currentProblemValue.adminData.problemWeightsPerCoursE.SetKeyValue
-      (desiredCourse, currentWeight.objects.GetValueCreate(desiredCourse).string);
+      (currentCourse, currentWeight.string);
+    else
+    { commentsOnFailure << "Could extract neither weight nor weights-per course from "
+      << currentWeight.ToString(false) << ". ";
+      return false;
     }
     if (currentDeadlines.type != JSData::JSUndefined)
     { for (int j = 0; j < currentDeadlines.objects.size(); j ++)

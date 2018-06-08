@@ -28,9 +28,11 @@ function modifyWeight(id) {
   var incomingPoints = document.getElementById(problemWeightTextareaId).value;
   var modifyObject = {};
   console.log("DEBUG: id: " + id);
-  modifyObject[id] = {
+  var idDecoded = decodeURIComponent(id);
+  modifyObject[idDecoded] = {
     weight: incomingPoints
   };
+  console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
   submitStringAsMainInput(JSON.stringify(modifyObject), "spanProgressReportGeneral", "setProblemData");
 }
 

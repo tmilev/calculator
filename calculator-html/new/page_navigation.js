@@ -263,7 +263,7 @@ Page.prototype.flipDebugSwitch = function () {
 }
 
 Page.prototype.setDebugSwitch = function () {
-  console.log ("DEBUG flag: " + this.flagDebug);
+  //console.log ("DEBUG flag: " + this.flagDebug);
   if (this.flagDebug === true || this.flagDebug === "true") {
     document.getElementById("sliderDebugFlag").checked = true;
   } else {

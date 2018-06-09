@@ -1984,7 +1984,6 @@ std::string HtmlInterpretation::ToStringAssignSection()
 extern logger logWorker;
 int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("ProblemData::getExpectedNumberOfAnswers");
-  logWorker << logger::yellow << "DEBUG: Getting number of answers" << logger::endL;
   if (this->knownNumberOfAnswersFromHD != - 1)
     return this->knownNumberOfAnswersFromHD;
   if (theGlobalVariables.problemExpectedNumberOfAnswers.size() == 0)
@@ -2010,7 +2009,8 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
         if (numAnswers == - 1)
           continue;
         theGlobalVariables.problemExpectedNumberOfAnswers.SetKeyValue(currentProblemName, numAnswers);
-        logWorker << logger::green << "DEBUG: problem: " << currentProblemName << " set num answers: " << numAnswers;
+        logWorker << logger::green << "DEBUG: problem: " << currentProblemName
+        << " got number of answers from DB: " << numAnswers;
       }
   }
   if (theGlobalVariables.problemExpectedNumberOfAnswers.Contains(problemName))

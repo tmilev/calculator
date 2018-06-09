@@ -2019,7 +2019,7 @@ void UserCalculator::ComputePointsEarned
       currentP.totalNumSubmissions += currentP.theAnswers[j].numSubmissions;
     }
     if (currentP.flagProblemWeightIsOK && currentP.theAnswers.size() > 0)
-    { currentP.Points=(currentWeight*currentP.numCorrectlyAnswered)/currentP.theAnswers.size();
+    { currentP.Points = (currentWeight * currentP.numCorrectlyAnswered) / currentP.theAnswers.size();
       this->pointsEarned += currentP.Points;
       //stOutput << "<br>DEBUG: Accounting points: " << currentP.Points
       //<< " to get: " << this->pointsEarned ;

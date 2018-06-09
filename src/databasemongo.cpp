@@ -459,9 +459,9 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
  std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString");
 #ifdef MACRO_use_MongoDB
-  if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(updateQuery, commentsOnFailure, true))
-  { return false;
-  }
+  //if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(updateQuery, commentsOnFailure, true))
+  //{ return false;
+  //}
   MongoQuery query;
   query.findQuery = findQuery;
   query.collectionName = collectionName;

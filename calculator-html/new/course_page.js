@@ -1,5 +1,28 @@
 "use strict";
 
+function ProblemWeight(inputIdURLed, inputWeight) {
+  this.idURLed = inputIdURLed;
+  this.idButton = `modifyPoints${this.idURLed}`;
+  this.idTextarea = `points${this.idURLed}`;
+  this.idModifyReport = `report${this.idURLed}`;
+  this.weight = inputWeight;
+}
+
+ProblemWeight.prototype.toHTML = function() { 
+  //console.log("DEBUG: problem:  " + this.idURLed);
+  var result = "";
+  result += "<span class = 'panelProblemWeights' style = 'opacity: 1; max-height: 200px;'>";
+  result += `Pts: <textarea class = 'textareaStudentPoints' rows = '1' cols = '2' id = '${this.idTextarea}'>`;
+  if (this.weight !== undefined && this.weight !== null) {
+    result += this.weight;
+  }
+  result += "</textarea>";
+  result += `<button id = '${this.idButton}' onclick = "modifyWeight('${this.idURLed}')" >Modify</button><br>`;
+  result += `<span id = '${this.idModifyReport}'></span>`;
+  result += "</span>";
+  return result;
+}
+
 function toStringProblemWeight(problemData) {
   var result = "";
   if (problemData.correctlyAnswered !== undefined && problemData.correctlyAnswered !== NaN) {
@@ -8,32 +31,51 @@ function toStringProblemWeight(problemData) {
     if (totalQuestions === 0) {
       totalQuestions = "?";
     }
-
     result += `${numCorrectlyAnswered} out of ${totalQuestions}`;
+    console.log(`DEBUG: Problem weight: ` + JSON.stringify(problemData.weight));
+    console.log(`DEBUG: correctly answered: ` + problemData.correctlyAnswered);
+    console.log(`DEBUG: total: ` + problemData.totalQuestions);
     if (problemData.weight !== undefined) {
-      var points = ((0.0 + problemData.correctlyAnswered * problemData.weight) / problemData.totalQuestions);
-      var totalPoints = problemData.weight;
+      var problemWeightConverted = parseInt(problemData.weight);
+      console.log("DEBUG: prob weight converted: " + problemWeightConverted + " correctly answered: " + problemData.correctlyAnswered)
+      var points = ((0.0 + problemData.correctlyAnswered * problemWeightConverted) / problemData.totalQuestions);
+      var totalPoints = problemWeightConverted;
       points = Number(points.toFixed(2));
       result += ` = ${points} pts`;
     } else {
       result += ` = ? pts`;
     }
   }
-  result += "</td>";
   return result;
 }
 
+ProblemWeight.prototype.callbackModifyWeight = function(input, output) {
+  console.log("DEBUG: got to mod weight callback. This id: " + this.idURLed);
+  document.getElementById(this.idModifyReport).innerHTML = input;
+}
+var theProblemWeightCollection = {};
+
 function modifyWeight(id) {
+  if (!(id in theProblemWeightCollection)) {
+    theProblemWeightCollection[id] = new ProblemWeight(id);
+  }
+  var theProblemWeight = theProblemWeightCollection[id];
   var problemWeightTextareaId = `points${id}`;
   var incomingPoints = document.getElementById(problemWeightTextareaId).value;
   var modifyObject = {};
   console.log("DEBUG: id: " + id);
   var idDecoded = decodeURIComponent(id);
+  var problemModifyWeightReport = `report${id}`;
   modifyObject[idDecoded] = {
     weight: incomingPoints
   };
   console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
-  submitStringAsMainInput(JSON.stringify(modifyObject), null, "setProblemData", null, "spanProgressReportGeneral");
+  var theURL = `${pathnames.calculatorAPI}?request=setProblemData&mainInput=${encodeURIComponent(JSON.stringify(modifyObject))}`;
+  submitGET({
+    url: theURL,
+    progress: "spanProgressReportGeneral",
+    callback: theProblemWeight.callbackModifyWeight.bind(theProblemWeight)
+  });
 }
 
 function toStringProblemWeightCell(problemData) {
@@ -41,25 +83,10 @@ function toStringProblemWeightCell(problemData) {
   if (problemData.problem === "") {
     return "<td></td>";
   }
-  var problemWeight = toStringProblemWeight(problemData);
-  result += "<td>";
-  var problemURLEncoded = encodeURIComponent(problemData.problem);
-  var probelmWeightButtonId = `modifyPoints${problemURLEncoded}`;
-  var problemWeightTextareaId = `points${problemURLEncoded}`;
-  console.log("DEBUG: problem:  " + problemURLEncoded);
-  console.log("DEBUG: problemData.problem:  " + problemData.problem);
-
-  result += "<span class = 'panelProblemWeights' style = 'opacity: 1; max-height: 200px;'><br>";
-  result += `Pts: <textarea class = 'textareaStudentPoints' rows = '1' cols = '2' id = '${problemWeightTextareaId}'>`;
-  if (problemData.weight !== undefined) {
-    result += problemData.weight;
-  }
-  result += "</textarea>";
-  result += `<button id = '${probelmWeightButtonId}' onclick = "modifyWeight('${problemURLEncoded}')" >Modify</button>`
-  result += "</span>";
-
-  result += "</td>";
-
+  //console.log("DEBUG: problemData.problem:  " + problemData.problem);
+  var pointsString = toStringProblemWeight(problemData);
+  var theProblemWeight = new ProblemWeight(encodeURIComponent(problemData.problem));
+  result += `<td>${pointsString}<br> ${theProblemWeight.toHTML()}</td>`;
   return result;
 }
 

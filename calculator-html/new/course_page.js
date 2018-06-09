@@ -33,7 +33,7 @@ function modifyWeight(id) {
     weight: incomingPoints
   };
   console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
-  submitStringAsMainInput(JSON.stringify(modifyObject), "spanProgressReportGeneral", "setProblemData");
+  submitStringAsMainInput(JSON.stringify(modifyObject), null, "setProblemData", null, "spanProgressReportGeneral");
 }
 
 function toStringProblemWeightCell(problemData) {

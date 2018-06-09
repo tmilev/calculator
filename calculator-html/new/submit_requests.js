@@ -11,16 +11,27 @@ function recordProgressDone(progress) {
   theButton.innerHTML = "<b style='color:green'>Received</b>";
 }
 
-function recordProgressStarted(progress, address) {
+function recordProgressStarted(progress, address, isPost) {
   if (progress === null || progress === undefined) {
     return;
+  }
+  if (isPost === undefined || isPost === null) {
+    isPost = false;
   }
   if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
-  progress.innerHTML = `<button class = "buttonProgress" onclick="if (this.nextSibling.nextSibling.style.display === 'none')
-  {this.nextSibling.nextSibling.style.display = '';} else {this.nextSibling.nextSibling.style.display = 'none';}">
-  <b style="color:orange">Sent</b></button><br><span class="spanProgressReport" style="display:none"><a href='${address}' target='_blank'>${address}</a></span>`;
+  var theHTML = "";
+  theHTML += `<button class = "buttonProgress" onclick = "if (this.nextSibling.nextSibling.style.display === 'none')
+{this.nextSibling.nextSibling.style.display = '';} else {this.nextSibling.nextSibling.style.display = 'none';}">`;
+  theHTML += `<b style="color:orange">Sent</b></button>`;
+  theHTML += `<br><span class="spanProgressReport" style="display:none">`;
+  if (!isPost) {
+    theHTML += `<a href='${address}' target='_blank'>${address}</a></span>`;
+  } else {
+    theHTML += address;
+  }
+  progress.innerHTML = theHTML;
 }
 
 function recordResult(resultText, resultSpan) {
@@ -80,7 +91,6 @@ function submitGET(inputObject) {
   xhr.send();
 }
 
-var GlobalSubmitStringAsMainInputCounter = 0;
 
 function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus) {
   var spanOutput = document.getElementById(idOutput);
@@ -96,29 +106,19 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
     idStatus = idOutput;
   }
   var statusSpan = document.getElementById(idStatus);
+  console.log("DEBUG: id status: " + idStatus);
   timeOutCounter = 0;
-  GlobalSubmitStringAsMainInputCounter ++;
-  var addressDetailsIndicatorID = "addressDetailsID" + GlobalSubmitStringAsMainInputCounter;
-  var tranmissionIndicatorID = "transmissionIndicatorID" + GlobalSubmitStringAsMainInputCounter;
-  var postRequest = `<br>POST ${pathnames.calculatorAPI}<br>${inputParams}`;
-  var stringSwitchMenu = "switchMenu('" + addressDetailsIndicatorID + "');";
-  statusSpan.innerHTML = "<button style = 'background:none; border:0; cursor:pointer' id='" +
-  tranmissionIndicatorID + "' onclick = \"" + stringSwitchMenu + "\">Connection details</button>" +
-  "<span style='display:none' id='" + addressDetailsIndicatorID + "'>" + postRequest + "</span>";
-  var buttonHandle = document.getElementById(tranmissionIndicatorID);
-  var lastRequestCounter = GlobalSubmitStringAsMainInputCounter;
+
+  var postRequest = `POST ${pathnames.calculatorAPI}<br>message: ${inputParams}`;
+  recordProgressStarted(idStatus, postRequest, true);
+
   https.onload = function() { 
-    if (lastRequestCounter !== GlobalSubmitStringAsMainInputCounter) { 
-      statusSpan.innerHTML += "<br><span style='color:red'><b>Old request number " + lastRequestCounter + " just received, output suppressed.</b></span>"
-      return;
-    }
-    buttonHandle.innerHTML = "<span style='color:green'><b>Received</b></span>";
+    recordProgressDone(idStatus);
     spanOutput.innerHTML = https.responseText;
     if (onLoadFunction !== undefined && onLoadFunction !== null && onLoadFunction !== 0) {
       onLoadFunction(idOutput);
     }
   }
-  buttonHandle.innerHTML = "<span style='color:orange'><b>Sent</b></span>";
   ////////////////////////////////////////////
   https.send(inputParams);
   ////////////////////////////////////////////

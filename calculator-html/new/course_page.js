@@ -229,7 +229,7 @@ function afterLoadTopics(incomingTopics, result) {
   } catch (e) {
     stringHTMLContent = "<b style='color:red'>Data error</b>. " + e;
   }
-  stringHTMLContent += "<hr>" + incomingTopics;
+  //stringHTMLContent += "<hr>DEBUG: incoming topics JSON: " + incomingTopics;
   topicsElements[0].innerHTML = stringHTMLContent;
   previousProblem = null;
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, topicsElements[0]]);

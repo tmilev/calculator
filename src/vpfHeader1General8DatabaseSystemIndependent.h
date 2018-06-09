@@ -117,6 +117,10 @@ public:
 ///problem weights info
   static std::string tableProblemWeights;
   static std::string labelProblemWeights;
+///problem information
+  static std::string tableProblemInformation;
+  static std::string labelProblemTotalQuestions;
+  static std::string labelProblemName;
 
   static List<std::string>& GetModifyableColumnsNotThreadSafe();
 

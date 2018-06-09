@@ -519,9 +519,9 @@ div.divTheMainMenu{
   transition: all 1s;
   max-width: 120px;
   width: 10%;
-  position: relative;
+  position: absolute;
   right: 0.8%;
-  overflow:auto;
+  overflow:none;
 }
 div.divMainMenuCollapsed{
   display: flex;

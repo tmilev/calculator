@@ -117,6 +117,10 @@ std::string DatabaseStrings::tableProblemWeights = "problemWeights";
 std::string DatabaseStrings::labelProblemWeightsSchema = "problemWeightsSchema";
 std::string DatabaseStrings::labelProblemWeights = "weight";
 
+std::string DatabaseStrings::tableProblemInformation = "problemInformation";
+std::string DatabaseStrings::labelProblemTotalQuestions = "problemsTotalQuestions";
+std::string DatabaseStrings::labelProblemName = "problemName";
+
 std::string DatabaseStrings::labelSectionsTaught = "sectionsTaught";
 
 std::string DatabaseStrings::tableEmailInfo = "emailInfo";
@@ -139,6 +143,8 @@ ProblemData::ProblemData()
   this->flagRandomSeedGiven = false;
   this->numCorrectlyAnswered = 0;
   this->totalNumSubmissions = 0;
+  this->expectedNumberOfAnswersFromDB = 0;
+  this->knownNumberOfAnswersFromHD = - 1;
   this->flagProblemWeightIsOK = false;
 }
 
@@ -317,6 +323,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
 { MacroRegisterFunctionWithName("UserCalculator::FetchOneUserRow");
   (void) failureStream;
   (void) commentsGeneral;
+  double startTime = theGlobalVariables.GetElapsedSeconds();
   if (!DatabaseRoutinesGlobalFunctionsMongo::LoadUserInfo(*this))
     return false;
   this->ComputeCourseInfo();
@@ -332,19 +339,14 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
   //stOutput << "DEBUG: deadlineInfo: " << this->deadlines.ToString(false);
   //stOutput << "DEBUG: problem info row id: " << this->problemInfoRowId.value;
   if (this->problemWeightSchema != "")
-  { JSData findProblemWeightsQuery, outProblemWeightsQuery;
+  { JSData findProblemWeightsQuery, findProblemInfoQuery, outProblemWeightsQuery;
     //stOutput << "DEBUG: Problem weight schema: " << this->problemWeightSchema;
     findProblemWeightsQuery[DatabaseStrings::labelProblemWeightsSchema] = this->problemWeightSchema;
     if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
         (DatabaseStrings::tableProblemWeights, findProblemWeightsQuery, outProblemWeightsQuery, failureStream))
       this->problemWeights = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights];
-    //else
-    //{ stOutput << "DEBUG: Failed to find";
-    //}
-    //stOutput << "Final problem weight string: " << this->problemWeightString
-    //<< " found with query: " << findProblemWeightsQuery.ToString(false)
-    //<< " that resulted in: " << outProblemWeightsQuery.ToString(false);
   }
+  theGlobalVariables.timeStats["userLoadTime"] = theGlobalVariables.GetElapsedSeconds() - startTime;
   return true;
 }
 #endif

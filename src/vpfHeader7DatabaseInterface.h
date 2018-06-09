@@ -159,6 +159,9 @@ public:
 
 struct ProblemData
 {
+private:
+  int expectedNumberOfAnswersFromDB;
+  int knownNumberOfAnswersFromHD;
 public:
   friend std::ostream& operator << (std::ostream& output, const ProblemData& theData)
   { output << theData.ToString();
@@ -177,6 +180,7 @@ public:
   std::string commandsGenerateProblemLink;
   MapLisT<std::string, Answer, MathRoutines::hashString> theAnswers;
   List<std::string> inputNonAnswerIds;
+  int getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure);
   void AddEmptyAnswerIdOnTop(const std::string& inputAnswerId);
   ProblemData();
   bool CheckConsistency()const;
@@ -225,9 +229,10 @@ public:
   TimeWrapper authenticationCreationTime;
   Rational pointsEarned;
   Rational pointsMax;
+  void ComputeExpectedNumberOfAnswersPerProblem();
   void ComputePointsEarned
   (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
-   MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics);
+   MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics, std::stringstream& commentsOnFailure);
   ProblemData& HasProblemData(const std::string& problemName);
   ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);
   void SetProblemData(const std::string& problemName, const ProblemData& inputData);

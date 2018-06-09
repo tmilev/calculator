@@ -29,7 +29,9 @@ public:
   ~ThreadData();
 };
 
-struct ProcessTypes{
+struct ProcessTypes
+{
+public:
   static std::string worker;
   static std::string server;
   static std::string serverMonitor;
@@ -138,9 +140,12 @@ public:
   MapLisT<std::string, std::string, MathRoutines::hashString> webArguments;
   MapLisT<std::string, std::string, MathRoutines::hashString> CookiesToSetUsingHeaders;
   UserCalculatorData userDefault;
+  MapLisT<std::string, int, MathRoutines::hashString> problemExpectedNumberOfAnswers;
+
   std::string userCalculatorRequestType;
 
   JSData configuration;
+  JSData timeStats;
   PauseThread theLocalPauseController;
 
   static std::string hopefullyPermanentWebAdress;

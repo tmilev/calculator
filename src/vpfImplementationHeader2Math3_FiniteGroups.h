@@ -55,7 +55,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElementsLargeGroup(bool andWords, 
   ProgressReport theReport;
   //Warning: not checking whether the generators have repetitions.
   for (int j = 0; j < this->theElements.size; j ++)
-    for(int i = 0; i < this->generators.size; i ++)
+    for (int i = 0; i < this->generators.size; i ++)
     { currentElement = this->generators[i] * this->theElements[j];
       if (this->theElements.AddOnTopNoRepetition(currentElement) && andWords)
       { if (this->GetWordByFormula == 0)

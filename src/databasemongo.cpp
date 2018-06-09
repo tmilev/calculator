@@ -25,6 +25,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::initialize(std::stringstream* comment
 #ifdef MACRO_use_MongoDB
   if (this->flagInitialized)
     return true;
+  logWorker << logger::blue << "Initializing database. " << logger::endL;
   if (!theGlobalVariables.flagServerForkedIntoWorker)
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "MongoDB not allowed to run before server fork. ";
@@ -38,6 +39,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::initialize(std::stringstream* comment
   DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelEmail);
   DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelInstructor);
   DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableUsers, DatabaseStrings::labelUserRole);
+  DatabaseRoutinesGlobalFunctionsMongo::CreateHashIndex(DatabaseStrings::tableProblemInformation, DatabaseStrings::labelProblemName);
   return true;
 #else
   if (commentsOnFailure != 0)
@@ -173,7 +175,10 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
        this->options, this->updateResult, &this->theError))
   { if (commentsOnFailure != 0)
       *commentsOnFailure << this->theError.message;
-    logWorker << logger::red << "Mongo error: " << this->theError.message << logger::endL;
+    logWorker << logger::red << "While updating: "
+    << this->findQuery << " to: " << this->updateQuery << " inside: "
+    << this->collectionName << " got mongo error: "
+    << this->theError.message << logger::endL;
     return false;
   }
   //char* bufferOutpurStringFormat = 0;
@@ -196,7 +201,10 @@ bool MongoQuery::FindMultiple(List<JSData>& output, const JSData& inputOptions, 
   if (this->query == NULL)
   { if (commentsOnFailure != 0)
       *commentsOnFailure << this->theError.message;
-    logWorker << logger::red << "Mongo error: " << this->theError.message << logger::endL;
+    logWorker << logger::red << "While finding: "
+    << this->findQuery << " inside: "
+    << this->collectionName << " got mongo error: "
+    << this->theError.message << logger::endL;
     return false;
   }
   if (this->options != 0)

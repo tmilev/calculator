@@ -1980,9 +1980,73 @@ std::string HtmlInterpretation::ToStringAssignSection()
 }
 
 #ifdef MACRO_use_MongoDB
+
+extern logger logWorker;
+int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("ProblemData::getExpectedNumberOfAnswers");
+  logWorker << logger::yellow << "DEBUG: Getting number of answers" << logger::endL;
+  if (this->knownNumberOfAnswersFromHD != - 1)
+    return this->knownNumberOfAnswersFromHD;
+  if (theGlobalVariables.problemExpectedNumberOfAnswers.size() == 0)
+  { JSData findProblemInfo;
+    findProblemInfo.type = JSData::JSarray;
+    List<JSData> result;
+    List<std::string> fields;
+    fields.AddOnTop(DatabaseStrings::labelProblemName);
+    fields.AddOnTop(DatabaseStrings::labelProblemTotalQuestions);
+    logWorker << logger::yellow << "DEBUG: About to query db to find problem info." << logger::endL;
+    if (DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection
+         (DatabaseStrings::tableProblemInformation, findProblemInfo, result, fields, - 1, 0, &commentsOnFailure))
+      for (int i = 0; i < result.size; i ++)
+      { const std::string& currentProblemName = result[i][DatabaseStrings::labelProblemName].string;
+        if (currentProblemName == "")
+          continue;
+        const std::string& expectedNumberOfAnswersString = result[i][DatabaseStrings::labelProblemTotalQuestions].string;
+        if (expectedNumberOfAnswersString == "")
+          continue;
+        std::stringstream theStream(expectedNumberOfAnswersString);
+        int numAnswers = - 1;
+        theStream >> numAnswers;
+        if (numAnswers == - 1)
+          continue;
+        theGlobalVariables.problemExpectedNumberOfAnswers.SetKeyValue(currentProblemName, numAnswers);
+        logWorker << logger::green << "DEBUG: problem: " << currentProblemName << " set num answers: " << numAnswers;
+      }
+  }
+  if (theGlobalVariables.problemExpectedNumberOfAnswers.Contains(problemName))
+    return theGlobalVariables.problemExpectedNumberOfAnswers.GetValueCreate(problemName);
+  logWorker << logger::yellow << "DEBUG: couldn't find problem info in DB for: "
+  << problemName << ", trying to read problem from hd. " << logger::endL;
+  CalculatorHTML problemParser;
+  problemParser.fileName = problemName;
+  if (!problemParser.LoadMe(false, commentsOnFailure, ""))
+  { logWorker << logger::yellow << "DEBUG: couldn't parse problem: "
+    << commentsOnFailure.str() << logger::endL;
+    return 0;
+  }
+  if (!problemParser.ParseHTML(commentsOnFailure))
+  { logWorker << logger::red << "<b>Failed to parse file: " << problemParser.fileName
+    << ".</b> Details:<br>" << commentsOnFailure.str();
+    return 0;
+  }
+  this->knownNumberOfAnswersFromHD = problemParser.theProblemData.theAnswers.size();
+  logWorker << logger::yellow << "Loaded problem: " << problemName
+  << "; number of answers: " << this->knownNumberOfAnswersFromHD << logger::endL;
+  this->expectedNumberOfAnswersFromDB = this->knownNumberOfAnswersFromHD;
+  JSData newDBentry, findDBentry;
+  findDBentry[DatabaseStrings::labelProblemName] = problemName;
+  newDBentry[DatabaseStrings::labelProblemName] = problemName;
+  std::stringstream stringConverter;
+  stringConverter << this->knownNumberOfAnswersFromHD;
+  newDBentry[DatabaseStrings::labelProblemTotalQuestions] = stringConverter.str();
+  DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
+  (DatabaseStrings::tableProblemInformation, findDBentry, newDBentry, &commentsOnFailure);
+  return this->knownNumberOfAnswersFromHD;
+}
+
 void UserCalculator::ComputePointsEarned
 (const HashedList<std::string, MathRoutines::hashString>& gradableProblems,
- MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics)
+ MapLisT<std::string, TopicElement, MathRoutines::hashString>* theTopics, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::ComputePointsEarned");
   this->pointsEarned = 0;
   this->pointsMax = 0;
@@ -2013,16 +2077,19 @@ void UserCalculator::ComputePointsEarned
      // stOutput << "Debug: weight IS ok: " << problemName << "<br>";
 
 //    this->problemData[i].numAnswersSought=this->problemData[i].answerIds.size;
-    for (int j = 0; j<currentP.theAnswers.size(); j ++)
+    for (int j = 0; j < currentP.theAnswers.size(); j ++)
     { if (currentP.theAnswers[j].numCorrectSubmissions > 0)
         currentP.numCorrectlyAnswered ++;
       currentP.totalNumSubmissions += currentP.theAnswers[j].numSubmissions;
     }
-    if (currentP.flagProblemWeightIsOK && currentP.theAnswers.size() > 0)
-    { currentP.Points = (currentWeight * currentP.numCorrectlyAnswered) / currentP.theAnswers.size();
-      this->pointsEarned += currentP.Points;
-      //stOutput << "<br>DEBUG: Accounting points: " << currentP.Points
-      //<< " to get: " << this->pointsEarned ;
+    if (currentP.flagProblemWeightIsOK)
+    { int expectedNumberOfAnswers = currentP.getExpectedNumberOfAnswers(problemName, commentsOnFailure);
+      if (expectedNumberOfAnswers > 0)
+      { currentP.Points = (currentWeight * currentP.numCorrectlyAnswered) / expectedNumberOfAnswers;
+        this->pointsEarned += currentP.Points;
+        //stOutput << "<br>DEBUG: Accounting points: " << currentP.Points
+        //<< " to get: " << this->pointsEarned ;
+      }
     }
     if (theTopics != 0)
       if (theTopics->Contains(problemName))
@@ -2072,7 +2139,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   if (!this->theProblem.LoadDatabaseInfo(comments))
     comments << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
   //stOutput << "DEBUG: got to here";
-  theProblem.currentUseR.ComputePointsEarned(theProblem.currentUseR.theProblemData.theKeys, &theProblem.theTopicS);
+  theProblem.currentUseR.ComputePointsEarned(theProblem.currentUseR.theProblemData.theKeys, &theProblem.theTopicS, comments);
   List<std::string> userLabels;
   int usernameIndex = userLabels.GetIndex(DatabaseStrings::labelUsername);
   if (usernameIndex == - 1)
@@ -2133,7 +2200,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
     currentUserRecord.LoadProblemInfoFromJSONAppend
     (theProblem.currentUseR.problemWeights, currentUserRecord.currentUseR.theProblemData, comments);
 //    out << "<br>DEBUG: after ReadProblemInfoAppend: " << currentUserRecord.currentUseR.ToString();
-    currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.theTopicS);
+    currentUserRecord.currentUseR.ComputePointsEarned(theProblem.problemNamesNoTopics, &theProblem.theTopicS, comments);
     this->scoresBreakdown.LastObject()->Clear();
     for (int j = 0; j < theProblem.theTopicS.size(); j ++)
     { TopicElement& currentTopic = theProblem.theTopicS[j];

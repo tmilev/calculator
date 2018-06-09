@@ -4297,7 +4297,7 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
         crash << "Error: problem " << this->theTopicS[i].ToString() << " has children topics which is not allowed. "
         << crash;
     }
-  this->currentUseR.ComputePointsEarned(gradableProblems, &this->theTopicS);
+  this->currentUseR.ComputePointsEarned(gradableProblems, &this->theTopicS, commentsOnFailure);
   #endif
   this->initTopicElementNames();
   return true;

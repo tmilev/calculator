@@ -699,7 +699,7 @@ bool SSLdata::InspectCertificates
       *commentsGeneral << "Peer certificate: "
       << "subject: " << this->otherCertificateSubjectName << "<br>\n";
 
-    tempCharPtr = X509_NAME_oneline (X509_get_issuer_name(this->peer_certificate), 0, 0);
+    tempCharPtr = X509_NAME_oneline(X509_get_issuer_name(this->peer_certificate), 0, 0);
     if (tempCharPtr == 0)
     { if (commentsOnFailure != 0)
         *commentsOnFailure << "X509_NAME_oneline return null; this is not supposed to happen. <br>\n";
@@ -725,7 +725,8 @@ bool SSLdata::InspectCertificates
 int SSLdata::SSLread
 (SSL *theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
  std::stringstream *commentsGeneral, bool includeNoErrorInComments)
-{ int result = SSL_read(theSSL, buffer, bufferSize);
+{ ERR_clear_error();
+  int result = SSL_read(theSSL, buffer, bufferSize);
   this->ClearErrorQueue
   (result, theSSL, commentsOnFailure, commentsGeneral, includeNoErrorInComments);
   return result;
@@ -734,7 +735,8 @@ int SSLdata::SSLread
 int SSLdata::SSLwrite
 (SSL *theSSL, void *buffer, int bufferSize, std::stringstream *commentsOnFailure,
  std::stringstream *commentsGeneral, bool includeNoErrorInComments)
-{ int result = SSL_write(theSSL, buffer, bufferSize);
+{ ERR_clear_error();
+  int result = SSL_write(theSSL, buffer, bufferSize);
   this->ClearErrorQueue
   (result, theSSL, commentsOnFailure, commentsGeneral, includeNoErrorInComments);
   return result;
@@ -802,14 +804,16 @@ void SSLdata::ClearErrorQueue
  std::stringstream* commentsGeneral, bool includeNoErrorInComments)
 { MacroRegisterFunctionWithName("SSLdata::ToStringError");
 #ifdef MACRO_use_open_ssl
-  //for(int i=0; i<20; i++)
-  //{
-    int theCode = SSL_get_error(theSSL, errorCode);
+  int numErrors = 0;
+  //for (int i = 0; i < 20; i ++)
+  { int theCode = SSL_get_error(theSSL, errorCode);
+    ERR_clear_error();
     if (theCode == SSL_ERROR_NONE)
     { if (commentsGeneral != 0 && includeNoErrorInComments)
         *commentsGeneral << "\n<br>\nNo error.\n";
       return;
     }
+    numErrors ++;
     //if (i>0)
     //{ if (commentsOnError!=0)
     //  { *commentsOnError << i+1 << " ssl errors so far. ";
@@ -821,31 +825,38 @@ void SSLdata::ClearErrorQueue
     {
     case SSL_ERROR_ZERO_RETURN:
       if (commentsOnError != 0)
-        *commentsOnError << "SSL_ERROR_ZERO_RETURN: the TLS/SSL connection has been closed. ";
+        *commentsOnError << "Error " << numErrors
+        << ": SSL_ERROR_ZERO_RETURN: the TLS/SSL connection has been closed. ";
       break;
     case SSL_ERROR_WANT_READ:
       if (commentsOnError != 0)
-        *commentsOnError << "SSL_ERROR_WANT_READ: the read operation did not complete. ";
+        *commentsOnError << "Error " << numErrors
+        << ": SSL_ERROR_WANT_READ: the read operation did not complete. ";
       break;
     case SSL_ERROR_WANT_WRITE:
       if (commentsOnError != 0)
-        *commentsOnError << "SSL_ERROR_WANT_WRITE: the write operation did not complete. ";
+        *commentsOnError << "Error " << numErrors
+        << ": SSL_ERROR_WANT_WRITE: the write operation did not complete. ";
       break;
     case SSL_ERROR_WANT_CONNECT:
       if (commentsOnError != 0)
-        *commentsOnError << "SSL_ERROR_WANT_CONNECT: the connect operation did not complete. ";
+        *commentsOnError << "Error " << numErrors
+        << ": SSL_ERROR_WANT_CONNECT: the connect operation did not complete. ";
       break;
     case SSL_ERROR_WANT_ACCEPT:
       if (commentsOnError != 0)
-        *commentsOnError << "SSL_ERROR_WANT_ACCEPT: the accept operation did not complete. ";
+        *commentsOnError << "Error " << numErrors
+        << ": SSL_ERROR_WANT_ACCEPT: the accept operation did not complete. ";
       break;
     case SSL_ERROR_WANT_X509_LOOKUP:
       if (commentsOnError != 0)
-        *commentsOnError << "SSL_ERROR_WANT_X509_LOOKUP: issue with X509 lookup. ";
+        *commentsOnError << "Error " << numErrors
+        << ": SSL_ERROR_WANT_X509_LOOKUP: issue with X509 lookup. ";
       break;
     case SSL_ERROR_SYSCALL:
       if (commentsOnError != 0)
-        *commentsOnError << "SSL_ERROR_SYSCALL: Some I/O error occurred. ";
+        *commentsOnError << "Error " << numErrors
+        << ": SSL_ERROR_SYSCALL: Some I/O error occurred. ";
       extraErrorCode = ERR_get_error();
       if (extraErrorCode == 0)
       { if (commentsOnError != 0)
@@ -858,14 +869,16 @@ void SSLdata::ClearErrorQueue
       break;
     case SSL_ERROR_SSL:
       if (commentsOnError != 0)
-        *commentsOnError << "SSL_ERROR_SSL: ssl error, most likely protocol one. ";
+        *commentsOnError << "Error " << numErrors
+        << ": SSL_ERROR_SSL: ssl error, most likely protocol one. ";
       break;
     default:
       if (commentsOnError != 0)
-        *commentsOnError << "Unknown error code: " << theCode;
+        *commentsOnError << "Error " << numErrors
+        << ": Unknown error code: " << theCode;
       break;
     }
-  //}
+  }
 #endif
 }
 #endif //MACRO_use_open_ssl
@@ -887,14 +900,18 @@ bool WebWorker::ReceiveAllHttpSSL()
   struct timeval tv; //<- code involving tv taken from stackexchange
   tv.tv_sec = 5;  // 30 Secs Timeout
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
-  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO,(void*)(&tv), sizeof(timeval));
+  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_RCVTIMEO, (void*)(&tv), sizeof(timeval));
   std::stringstream errorStream;
-  int numBytesInBuffer = this->parent->theSSLdata.SSLread
-  (this->parent->theSSLdata.sslServeR, &buffer, bufferSize - 1, &errorStream, 0, true);
-  double numSecondsAtStart = theGlobalVariables.GetElapsedSeconds();
   int numFailedReceives = 0;
-  while ((numBytesInBuffer < 0) || (numBytesInBuffer > ((signed)bufferSize)))
-  { numFailedReceives ++;
+  int maxNumFailedReceives = 1;
+  double numSecondsAtStart = theGlobalVariables.GetElapsedSeconds();
+  int numBytesInBuffer = - 1;
+  while (true)
+  { numBytesInBuffer= this->parent->theSSLdata.SSLread
+    (this->parent->theSSLdata.sslServeR, &buffer, bufferSize - 1, &errorStream, 0, true);
+    if (numBytesInBuffer >= 0 && numBytesInBuffer <= (signed) bufferSize)
+      break;
+    numFailedReceives ++;
     std::stringstream out;
     out
     << "WebWorker::ReceiveAllHttpSSL on socket "
@@ -903,19 +920,13 @@ bool WebWorker::ReceiveAllHttpSSL()
     << numFailedReceives << " fails). "
     << "Return value: " << numBytesInBuffer
     << ". Error description: " << errorStream.str();
-    if (numFailedReceives > 5)
-    { out << ". 5+ failed receives so far, aborting. ";
+    if (numFailedReceives > maxNumFailedReceives)
+    { out << maxNumFailedReceives + 1 << " failed receives so far, aborting. ";
       this->error = out.str();
-      logIO << out.str() << logger::endL;
+      //logIO << out.str() << logger::endL;
       numBytesInBuffer = 0;
       return false;
     }
-    logIO << logger::orange << out.str() << logger::endL;
-    //std::string bufferCopy(buffer, bufferSize);
-    logIO
-    << "Number of bytes in buffer so far: " << bufferSize << logger::endL;
-    numBytesInBuffer = this->parent->theSSLdata.SSLread
-    (this->parent->theSSLdata.sslServeR, &buffer, bufferSize - 1, &errorStream, 0, true);
   }
   this->messageHead.assign(buffer, numBytesInBuffer);
   this->ParseMessageHead();
@@ -1015,7 +1026,7 @@ void WebWorker::SendAllBytesHttpSSL()
   tv.tv_usec = 0;  // Not init'ing this can cause strange errors
   int numTimesRunWithoutSending = 0;
   int timeOutInSeconds = 20;
-  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO,(void*)(&tv), sizeof(timeval));
+  setsockopt(this->connectedSocketID, SOL_SOCKET, SO_SNDTIMEO, (void*)(&tv), sizeof(timeval));
   std::stringstream errorStream;
   while (this->remainingBytesToSenD.size > 0)
   { if (theGlobalVariables.GetElapsedSeconds() - startTime > timeOutInSeconds)
@@ -2126,8 +2137,8 @@ int WebWorker::ProcessServerStatusJSON()
     << "</td></tr></table>";
   else
     out << "<b>Viewing server status available only to logged-in admins.</b>";
-  if (theGlobalVariables.flagLoggedIn)
-    out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
+  //if (theGlobalVariables.flagLoggedIn)
+  //  out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
   stOutput << out.str();
   return 0;
 }
@@ -5559,25 +5570,10 @@ int WebWorker::Run()
     this->flagAllBytesSentUsingFile = false;
     this->flagEncounteredErrorWhileServingFile = false;
     if (!this->ReceiveAll())
-    { this->SetHeadeR("HTTP/1.0 400 Bad request", "Content-type: text/html");
-      stOutput << "<html>"
-      << "<head>"
-      << HtmlRoutines::GetCSSLinkCalculator()
-      << "</head>"
-      << "<body>"
-      << "<calculatorNavigation>"
-      << theGlobalVariables.ToStringNavigation()
-      << "</calculatorNavigation>"
-      << "<b>HTTP error 400 (bad request). </b> "
-      << "<br>Possible causes. "
-      << "<br>1. Connection time out, possibly due to high server load or sluggish internet (on either side). "
-      << "<br>2. Programming bug (less likely). "
-      << "<br>Detailed error message follows. <br>"
-      << this->error
-//      << " <hr><hr>The message (part) that was received is: "
-//      << this->ToStringMessageFullUnsafe()
-      << "</body></html>";
-      this->SendAllAndWrapUp();
+    { if (numReceivesThisConnection > 0)
+        return 0;
+      this->WrapUpConnection();
+      logIO << logger::red << "Failed to receive all with error: " << this->error;
       return - 1;
     }
     numReceivesThisConnection ++;

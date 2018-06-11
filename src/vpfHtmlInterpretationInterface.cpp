@@ -1993,7 +1993,7 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
     List<std::string> fields;
     fields.AddOnTop(DatabaseStrings::labelProblemName);
     fields.AddOnTop(DatabaseStrings::labelProblemTotalQuestions);
-    logWorker << logger::yellow << "DEBUG: About to query db to find problem info." << logger::endL;
+    //logWorker << logger::yellow << "DEBUG: About to query db to find problem info." << logger::endL;
     if (DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithProjection
          (DatabaseStrings::tableProblemInformation, findProblemInfo, result, fields, - 1, 0, &commentsOnFailure))
       for (int i = 0; i < result.size; i ++)
@@ -2009,18 +2009,18 @@ int ProblemData::getExpectedNumberOfAnswers(const std::string& problemName, std:
         if (numAnswers == - 1)
           continue;
         theGlobalVariables.problemExpectedNumberOfAnswers.SetKeyValue(currentProblemName, numAnswers);
-        logWorker << logger::green << "DEBUG: problem: " << currentProblemName
-        << " got number of answers from DB: " << numAnswers;
+        //logWorker << logger::green << "DEBUG: problem: " << currentProblemName
+        //<< " got number of answers from DB: " << numAnswers;
       }
   }
   if (theGlobalVariables.problemExpectedNumberOfAnswers.Contains(problemName))
     return theGlobalVariables.problemExpectedNumberOfAnswers.GetValueCreate(problemName);
-  logWorker << logger::yellow << "DEBUG: couldn't find problem info in DB for: "
+  logWorker << logger::yellow << "Couldn't find problem info in DB for: "
   << problemName << ", trying to read problem from hd. " << logger::endL;
   CalculatorHTML problemParser;
   problemParser.fileName = problemName;
   if (!problemParser.LoadMe(false, commentsOnFailure, ""))
-  { logWorker << logger::yellow << "DEBUG: couldn't parse problem: "
+  { logWorker << logger::yellow << "Couldn't parse problem: "
     << commentsOnFailure.str() << logger::endL;
     return 0;
   }

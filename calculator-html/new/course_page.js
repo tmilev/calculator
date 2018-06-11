@@ -32,9 +32,9 @@ function toStringProblemWeight(problemData) {
       totalQuestions = "?";
     }
     result += `${numCorrectlyAnswered} out of ${totalQuestions}`;
-    console.log(`DEBUG: Problem weight: ` + JSON.stringify(problemData.weight));
-    console.log(`DEBUG: correctly answered: ` + problemData.correctlyAnswered);
-    console.log(`DEBUG: total: ` + problemData.totalQuestions);
+    //console.log(`DEBUG: Problem weight: ` + JSON.stringify(problemData.weight));
+    //console.log(`DEBUG: correctly answered: ` + problemData.correctlyAnswered);
+    //console.log(`DEBUG: total: ` + problemData.totalQuestions);
     if (problemData.weight !== undefined) {
       var problemWeightConverted = parseInt(problemData.weight);
       console.log("DEBUG: prob weight converted: " + problemWeightConverted + " correctly answered: " + problemData.correctlyAnswered)
@@ -50,7 +50,7 @@ function toStringProblemWeight(problemData) {
 }
 
 ProblemWeight.prototype.callbackModifyWeight = function(input, output) {
-  console.log("DEBUG: got to mod weight callback. This id: " + this.idURLed);
+  //console.log("DEBUG: got to mod weight callback. This id: " + this.idURLed);
   document.getElementById(this.idModifyReport).innerHTML = input;
 }
 var theProblemWeightCollection = {};
@@ -63,13 +63,13 @@ function modifyWeight(id) {
   var problemWeightTextareaId = `points${id}`;
   var incomingPoints = document.getElementById(problemWeightTextareaId).value;
   var modifyObject = {};
-  console.log("DEBUG: id: " + id);
+  //console.log("DEBUG: id: " + id);
   var idDecoded = decodeURIComponent(id);
   var problemModifyWeightReport = `report${id}`;
   modifyObject[idDecoded] = {
     weight: incomingPoints
   };
-  console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
+  //console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
   var theURL = `${pathnames.calculatorAPI}?request=setProblemData&mainInput=${encodeURIComponent(JSON.stringify(modifyObject))}`;
   submitGET({
     url: theURL,
@@ -84,7 +84,7 @@ function toStringProblemWeightCell(problemData) {
     return "<td></td>";
   }
   //console.log("DEBUG: problemData.problem:  " + problemData.problem);
-  var pointsString = toStringProblemWeight(problemData);
+  var pointsString = `<button class = 'accordionLike' onclick = 'toggleProblemWeights()'> ${toStringProblemWeight(problemData)}</button>`;
   var theProblemWeight = new ProblemWeight(encodeURIComponent(problemData.problem));
   result += `<td>${pointsString}<br> ${theProblemWeight.toHTML()}</td>`;
   return result;
@@ -147,6 +147,34 @@ function getHTMLProblems(theProblemContainer) {
   result += "</table>";
   result += "</div>";
   return result;
+}
+
+var problemWeightsVisible = false;
+
+function initializeProblemWeights() {
+  var theWeights = document.getElementsByClassName('panelProblemWeights');
+  for (var i = 0; i < theWeights.length; i ++) { 
+    //theScores[i].style.transition='opacity 1s linear';
+    theWeights[i].style.maxHeight = '0px';
+  }
+}
+
+function toggleProblemWeights() { 
+  var theWeights = document.getElementsByClassName('panelProblemWeights');
+  if (!problemWeightsVisible) { 
+    for (var i = 0; i < theWeights.length; i ++) { 
+      //theScores[i].style.transition='opacity 1s linear';
+      theWeights[i].style.opacity = '1';
+      theWeights[i].style.maxHeight = '200px';
+    }
+  } else { 
+    for (i = 0; i < theWeights.length; i ++) { 
+      //theScores[i].style.transition='opacity 1s linear';
+      theWeights[i].style.opacity = '0';
+      theWeights[i].style.maxHeight = '0';
+    }
+  }
+  problemWeightsVisible = !problemWeightsVisible;
 }
 
 function getHTMLSubSection(theSubSection) {
@@ -231,6 +259,7 @@ function afterLoadTopics(incomingTopics, result) {
   }
   //stringHTMLContent += "<hr>DEBUG: incoming topics JSON: " + incomingTopics;
   topicsElements[0].innerHTML = stringHTMLContent;
+  initializeProblemWeights();
   previousProblem = null;
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, topicsElements[0]]);
 }

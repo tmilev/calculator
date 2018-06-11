@@ -37,7 +37,7 @@ function toStringProblemWeight(problemData) {
     //console.log(`DEBUG: total: ` + problemData.totalQuestions);
     if (problemData.weight !== undefined) {
       var problemWeightConverted = parseInt(problemData.weight);
-      console.log("DEBUG: prob weight converted: " + problemWeightConverted + " correctly answered: " + problemData.correctlyAnswered)
+      //console.log("DEBUG: prob weight converted: " + problemWeightConverted + " correctly answered: " + problemData.correctlyAnswered)
       var points = ((0.0 + problemData.correctlyAnswered * problemWeightConverted) / problemData.totalQuestions);
       var totalPoints = problemWeightConverted;
       points = Number(points.toFixed(2));

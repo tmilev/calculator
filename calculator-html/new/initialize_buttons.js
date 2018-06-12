@@ -298,7 +298,7 @@ function initializeCalculatorPage(){
   calculatorPanel.initialize();
 }
 
-function InputPanelData(input){
+function InputPanelData(input) {
   //to serve autocomplete:
   this.idMQSpan = input.idMQSpan;
   this.idMQcomments = input.idMQcomments;
@@ -334,7 +334,7 @@ function InputPanelData(input){
   }
 }
 
-InputPanelData.prototype.mQHelpCalculator = function(){ 
+InputPanelData.prototype.mQHelpCalculator = function() { 
   //event.preventDefault();
   this.getSemiColumnEnclosure();
   if (this.mqObject === null) {
@@ -375,7 +375,7 @@ InputPanelData.prototype.submitOrPreviewAnswers = function(requestType) {
   var theURL = `${pathnames.calculatorAPI}?request=${requestType}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
   submitGET({
     url: theURL,
-    progress: "spanProgressCalculatorExamples",
+    progress: "spanProgressReportGeneral",
     callback: this.submitOrPreviewAnswersCallback.bind(this),
     result: this.idVerificationSpan
   });

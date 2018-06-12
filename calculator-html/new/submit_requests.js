@@ -1,6 +1,6 @@
 "use srict";
 
-function recordProgressDone(progress) {
+function recordProgressDone(progress, timeFinished) {
   if (progress === null || progress === undefined) {
     return;
   }
@@ -8,10 +8,11 @@ function recordProgressDone(progress) {
     progress = document.getElementById(progress);
   }
   var theButton = progress.childNodes[0];
-  theButton.innerHTML = "<b style='color:green'>Received</b>";
+  var timeTotal = timeFinished - progress.getAttribute("timeStarted");
+  theButton.innerHTML = `<b style='color:green'>Received</b> ${timeTotal} ms`;
 }
 
-function recordProgressStarted(progress, address, isPost) {
+function recordProgressStarted(progress, address, isPost, timeStarted) {
   if (progress === null || progress === undefined) {
     return;
   }
@@ -21,6 +22,7 @@ function recordProgressStarted(progress, address, isPost) {
   if (typeof progress === "string") {
     progress = document.getElementById(progress);
   }
+  progress.setAttribute("timeStarted", timeStarted);
   var theHTML = "";
   theHTML += `<button class = "buttonProgress" onclick = "if (this.nextSibling.nextSibling.style.display === 'none')
 {this.nextSibling.nextSibling.style.display = '';} else {this.nextSibling.nextSibling.style.display = 'none';}">`;
@@ -78,11 +80,11 @@ function submitGET(inputObject) {
   var result = inputObject.result;
   var callback = inputObject.callback;
   var xhr = new XMLHttpRequest();
-  recordProgressStarted(progress, theAddress);
+  recordProgressStarted(progress, theAddress, false, (new Date()).getTime());
   xhr.open('GET', theAddress, true);
   xhr.setRequestHeader('Accept', 'text/html');
   xhr.onload = function () {
-    recordProgressDone(progress);
+    recordProgressDone(progress, (new Date()).getTime());
     recordResult(xhr.responseText, result);
     if (callback !== undefined && callback !== null) {
       callback(xhr.responseText, result);
@@ -105,15 +107,14 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   if (idStatus === undefined){
     idStatus = idOutput;
   }
-  var statusSpan = document.getElementById(idStatus);
   console.log("DEBUG: id status: " + idStatus);
   timeOutCounter = 0;
 
   var postRequest = `POST ${pathnames.calculatorAPI}<br>message: ${inputParams}`;
-  recordProgressStarted(idStatus, postRequest, true);
+  recordProgressStarted(idStatus, postRequest, true, (new Date()).getTime());
 
   https.onload = function() { 
-    recordProgressDone(idStatus);
+    recordProgressDone(idStatus, (new Date()).getTime());
     spanOutput.innerHTML = https.responseText;
     if (onLoadFunction !== undefined && onLoadFunction !== null && onLoadFunction !== 0) {
       onLoadFunction(idOutput);

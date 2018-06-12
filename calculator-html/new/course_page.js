@@ -25,7 +25,15 @@ ProblemWeight.prototype.toHTML = function() {
 
 function toStringProblemWeight(problemData) {
   var result = "";
+  var color = "brown";
   if (problemData.correctlyAnswered !== undefined && problemData.correctlyAnswered !== NaN) {
+    if (
+      problemData.correctlyAnswered >= problemData.totalQuestions && 
+      problemData.totalQuestions !== undefined &&
+      problemData.totalQuestions !== 0
+    ) {
+      color = "green";
+    } 
     var numCorrectlyAnswered = problemData.correctlyAnswered;
     var totalQuestions = problemData.totalQuestions;
     if (totalQuestions === 0) {
@@ -39,14 +47,16 @@ function toStringProblemWeight(problemData) {
       var problemWeightConverted = parseInt(problemData.weight);
       //console.log("DEBUG: prob weight converted: " + problemWeightConverted + " correctly answered: " + problemData.correctlyAnswered)
       var points = ((0.0 + problemData.correctlyAnswered * problemWeightConverted) / problemData.totalQuestions);
-      var totalPoints = problemWeightConverted;
       points = Number(points.toFixed(2));
       result += ` = ${points} pts`;
+      if (problemData.correctlyAnswered < problemData.totalQuestions) {
+        color = "red";
+      } 
     } else {
       result += ` = ? pts`;
     }
   }
-  return result;
+  return `<b style = "color:${color}">${result}</b>`;
 }
 
 ProblemWeight.prototype.callbackModifyWeight = function(input, output) {

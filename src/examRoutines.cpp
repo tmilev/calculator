@@ -1543,7 +1543,8 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   verifyStream << "<span id=\"" << currentA.idVerificationSpan << "\">";
   int numCorrectSubmissions = currentA.numCorrectSubmissions;
   int numSubmissions = currentA.numSubmissions;
-  if (theGlobalVariables.userCalculatorRequestType == "scoredQuiz")
+  if (theGlobalVariables.userCalculatorRequestType == "scoredQuiz" ||
+      theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON")
   { if (numCorrectSubmissions > 0)
     { verifyStream << "<b><span style=\"color:green\">Correctly answered: \\("
       << currentA.firstCorrectAnswerClean << "\\) </span></b> ";

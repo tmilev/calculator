@@ -3,8 +3,15 @@ var studentScoresInHomePage = [];
 //var lastFocus;
 var charsToSplit = ['x','y'];
 var panelsCollapseStatus = {};
-var calculatorSeparatorLeftDelimiters = ['(', '{'];
-var calculatorSeparatorRightDelimiters = [')', '}'];
+var calculatorSeparatorLeftDelimiters = {
+  '(': true, 
+  '{': true
+};
+var calculatorSeparatorRightDelimiters = {
+  ')': true, 
+  '}': true
+};
+var startingCharacterSectionUnderMathQuillEdit = '';
 var panelDataRegistry = {};
 var calculatorPanel = null;
 
@@ -94,8 +101,8 @@ MathQuillCommandButton.prototype.getButton = function (inputPanel) {
 
 MathQuillCommandButton.prototype.clickFunction = function (inputPanel) {
   var currentMathField = inputPanel.mqObject;
-  if (!this.isComposite){ 
-    if (!this.doWriteInsteadOfCmd){
+  if (!this.isComposite) { 
+    if (!this.doWriteInsteadOfCmd) {
       currentMathField.cmd(this.theCommand);
     } else {
       currentMathField.write(this.theCommand);
@@ -108,7 +115,7 @@ MathQuillCommandButton.prototype.clickFunction = function (inputPanel) {
           this.theCommand[i] === '(' ||
           this.theCommand[i] === ')' ||
           this.theCommand[i] === ' '
-        ){
+        ) {
           doCMD = true;
         }
       }
@@ -119,7 +126,7 @@ MathQuillCommandButton.prototype.clickFunction = function (inputPanel) {
       }
     }
   }
-  if (this.extraDirection !== undefined){
+  if (this.extraDirection !== undefined) {
     currentMathField.moveToDirEnd(MQ.L);
   }
   currentMathField.focus();
@@ -191,29 +198,23 @@ mathQuillCommandButton("\\mathbf{i}", "i", "font-weight: bold");
 mathQuillCommandButton("\\mathbf{j}", "j", "font-weight: bold");
 mathQuillCommandButton("\\mathbf{k}", "k", "font-weight: bold");
 
-function accountCalculatorDelimiterReturnMustEndSelection(text, calculatorSeparatorCounts, thePos){ 
-  var result = false;
-  for (var j = 0; j < calculatorSeparatorLeftDelimiters.length; j ++){ 
-    if (calculatorSeparatorLeftDelimiters[j] === text[thePos]){
-      calculatorSeparatorCounts[j] ++;
-    }
-    if (calculatorSeparatorRightDelimiters[j] === text[thePos]){
-      calculatorSeparatorCounts[j] --;
-    }
-    if (calculatorSeparatorLeftDelimiters[j] > 0){
-      result = true;
-    }
+function accountCalculatorDelimiterReturnMustEndSelection(character, calculatorSeparatorCounts) { 
+  if (character in calculatorSeparatorLeftDelimiters) {
+    calculatorSeparatorCounts.leftSeparators ++;
   }
-  return result;
+  if (character in calculatorSeparatorLeftDelimiters) {
+    calculatorSeparatorCounts.rightSeparators ++;
+  }
+  return calculatorSeparatorCounts.leftSeparators > calculatorSeparatorCounts.rightSeparators;
 }
 
-function initializeAccordionButtons(){ 
+function initializeAccordionButtons() { 
   ///initializing accordions
   if (localStorage !== undefined) {
-    if (localStorage.panels !== undefined){ 
+    if (localStorage.panels !== undefined) { 
       panelsCollapseStatus = JSON.parse(localStorage.panels)
       var theProps=Object.getOwnPropertyNames(panelsCollapseStatus);
-      for (var i = 0; i < theProps.length; i ++){ 
+      for (var i = 0; i < theProps.length; i ++) { 
         var current = panelsCollapseStatus[theProps[i]];
         if (current.isCollapsed) {
           toggleHeight(document.getElementById(current.button),theProps[i]);
@@ -222,12 +223,12 @@ function initializeAccordionButtons(){
     }
   }
   var acc = document.getElementsByClassName("accordion");
-  for (i = 0; i < acc.length; i ++){ 
-    acc[i].onclick = function(){ 
-      if (this.firstLoad === undefined){ 
+  for (i = 0; i < acc.length; i ++) { 
+    acc[i].onclick = function() { 
+      if (this.firstLoad === undefined) { 
         this.firstLoad = true;
         var theDeadlines = this.nextElementSibling.getElementsByClassName("modifyDeadlineInput");
-        for (var j = 0; j < theDeadlines.length; j ++){
+        for (var j = 0; j < theDeadlines.length; j ++) {
           $('#' + theDeadlines[j].id).datepicker();
         }
 //        console.log("first run: "+theDeadlines);
@@ -241,48 +242,48 @@ function initializeAccordionButtons(){
   }
 }
 
-function initializeButtons(){ 
+function initializeButtons() { 
   initializeAccordionButtons();
 }
 
-function registerStatus(thePanel, isCollapsed){ 
+function registerStatus(thePanel, isCollapsed) { 
   panelsCollapseStatus[thePanel.id] = {
     'button' : thePanel.buttonThatModifiesMe.id, 
     'isCollapsed' : isCollapsed
   };
-  if (localStorage === undefined){
+  if (localStorage === undefined) {
     return;
   }
   localStorage.panels = JSON.stringify(panelsCollapseStatus);
 }
 
-function transitionDone(event){ 
+function transitionDone(event) { 
   //console.log("CAlled transitionDone");
   this.removeEventListener("transitionend", transitionDone);
-  if (this.transitionState === "collapsing"){ 
+  if (this.transitionState === "collapsing") { 
     this.style.display = "none";
     this.transitionState = "collapsed";
     registerStatus(this, true)
-  } else if (this.transitionState === "expanding"){ 
+  } else if (this.transitionState === "expanding") { 
     this.style.display = "";
     this.transitionState = "expanded";
     registerStatus(this, false)
   }
 }
 
-function toggleHeightForTimeout(currentPanel){ 
-  if (currentPanel.transitionState === "expanding"){ 
+function toggleHeightForTimeout(currentPanel) { 
+  if (currentPanel.transitionState === "expanding") { 
     currentPanel.style.maxHeight = currentPanel.startingMaxHeight;
     currentPanel.style.height = currentPanel.startingMaxHeight;
     currentPanel.style.opacity = "1";
-  } else if (currentPanel.transitionState === "collapsing"){ 
+  } else if (currentPanel.transitionState === "collapsing") { 
     currentPanel.style.opacity = "0";
     currentPanel.style.maxHeight = "0px";
     currentPanel.style.height = "0px";
   }
 }
 
-function initializeCalculatorPage(){ 
+function initializeCalculatorPage() { 
   if (calculatorPanel !== null) {
     return;
   }
@@ -326,10 +327,10 @@ function InputPanelData(input) {
   this.javascriptInsertionAlreadyCalled = false;
   this.timerForPreviewAnswers = 0;
 
-  if (this.flagCalculatorPanel === undefined){
+  if (this.flagCalculatorPanel === undefined) {
     this.flagCalculatorPanel = false;
   }
-  if (this.idMQcomments === undefined){
+  if (this.idMQcomments === undefined) {
     this.idMQcomments = null;
   }
 }
@@ -358,7 +359,7 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outpu
     theHead.removeChild(theHead.lastChild);
   }
   this.numInsertedJavascriptChildren = 0;
-  for (var i = 0; i < scripts.length; i ++){
+  for (var i = 0; i < scripts.length; i ++) {
     var scriptChild = document.createElement('script');
     scriptChild.innerHTML = scripts[i].innerHTML;
     scriptChild.type = 'text/javascript';
@@ -398,6 +399,7 @@ InputPanelData.prototype.submitAnswer = function() {
 }
 
 InputPanelData.prototype.submitGiveUp = function() {
+  var currentProblem = thePage.pages.problemPage.problems[this.fileName];
   var theRequest = `problemGiveUp&randomSeed=${currentProblem.randomSeed}`; //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
@@ -440,12 +442,12 @@ InputPanelData.prototype.editMQFunction = function() { // useful event handlers
       return;
     }
     var theBoxContent = this.mqObject.latex();
-    if (this.calculatorLeftString === null || this.calculatorRightString === null){
+    if (this.calculatorLeftString === null || this.calculatorRightString === null) {
       this.mQHelpCalculator();
     }
     var theInserted = processMathQuillLatex(theBoxContent);
-    if (theInserted.length > 0 && startingCharacterSectionUnderMathQuillEdit.length > 0){
-      if (theInserted[0] !== ' '){
+    if (theInserted.length > 0 && startingCharacterSectionUnderMathQuillEdit.length > 0) {
+      if (theInserted[0] !== ' ') {
         theInserted = ' ' + theInserted;
       }
     }
@@ -454,7 +456,7 @@ InputPanelData.prototype.editMQFunction = function() { // useful event handlers
 }
 
 InputPanelData.prototype.initialize = function() {
-  if (this.flagInitialized){
+  if (this.flagInitialized) {
     return;
   }
   var currentSpanVariable = document.getElementById(this.idPureLatex);
@@ -467,8 +469,10 @@ InputPanelData.prototype.initialize = function() {
     spaceBehavesLikeTab: true, // configurable
     supSubsRequireOperand: true, // configurable
     autoSubscriptNumerals: true, // configurable
+    restrictMismatchedBrackets: true,
     handlers: {
-      edit: editMQFunctionBound
+      edit: editMQFunctionBound,
+      keypress: editMQFunctionBound
     }
   });
   this.initializePartTwo(false);
@@ -557,7 +561,10 @@ InputPanelData.prototype.getSemiColumnEnclosure = function() {
       }
     }
   }
-  var calculatorSeparatorCounts = new Array(calculatorSeparatorLeftDelimiters.length).fill(0);
+  var calculatorSeparatorCounts = {
+    leftSeparators: 0,
+    rightSeparators: 0
+  };
   var leftPos = rightPos - 1;
   lastWord = '';
   lastSeparator = rightPos;
@@ -567,7 +574,7 @@ InputPanelData.prototype.getSemiColumnEnclosure = function() {
       leftPos ++;
       break;
     }
-    if (accountCalculatorDelimiterReturnMustEndSelection(calculatorInput.value, calculatorSeparatorCounts, leftPos)) { 
+    if (accountCalculatorDelimiterReturnMustEndSelection(calculatorInput.value[leftPos], calculatorSeparatorCounts)) { 
       leftPos ++;
       break;
     }

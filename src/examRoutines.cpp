@@ -1510,15 +1510,20 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.htmlButtonInterpret += ">Interpret</button>";
   if (!this->flagIsForReal)
   { if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly != "")
-      currentA.htmlButtonAnswer = "<button id=\"" + currentA.idButtonAnswer +
-      "\" class=\"showAnswerButton\" onclick=\"giveUp('" +
-      answerId + "', '" + currentA.idVerificationSpan + "')\">Answer</button>";
-    else
+    { currentA.htmlButtonAnswer = "<button id=\"" + currentA.idButtonAnswer +
+      "\" class=\"showAnswerButton\"";
+      if (!this->flagUseJSON)
+        currentA.htmlButtonAnswer += " onclick=\"giveUp('" + answerId + "', '" + currentA.idVerificationSpan + "')\"";
+      currentA.htmlButtonAnswer += ">Answer</button>";
+    } else
       currentA.htmlButtonAnswer = "No ``give-up'' answer available. ";
     if (currentA.flagSolutionFound)
-      currentA.htmlButtonSolution = "<button class=\"showSolutionButton\" onclick=\"showSolution('" + answerId +
-      "','" + currentA.idSpanSolution + "')\"> Solution</button>";
-    else
+    { currentA.htmlButtonSolution = "<button class=\"showSolutionButton\"";
+      if (!this->flagUseJSON)
+        currentA.htmlButtonSolution += " onclick=\"showSolution('" + answerId +
+        "','" + currentA.idSpanSolution + "')\"";
+      currentA.htmlButtonSolution += "> Solution</button>";
+    } else
       currentA.htmlButtonSolution = "";
   }
   if (!this->flagUseJSON)

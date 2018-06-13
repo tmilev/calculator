@@ -207,7 +207,7 @@ function SendTogglePauseRequest() {
   pauseRequest.send(null);
 }
 
-function submitCalculatorInputOnEnter(){ 
+function submitCalculatorInputOnEnter() { 
   if (event.keyCode !== 13 || !event.shiftKey) {
     return;
   }
@@ -215,7 +215,7 @@ function submitCalculatorInputOnEnter(){
   event.preventDefault();
 }
 
-function submitCalculatorComputation(){ 
+function submitCalculatorComputation() { 
   submitStringAsMainInput(
     document.getElementById('mainInputID').value,
     'calculatorOutput', 

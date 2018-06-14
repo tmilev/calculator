@@ -383,10 +383,17 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   //stOutput << "Problem weight schema: " << this->currentUseR.problemWeightSchema
   //<< "Problem weight string: " << this->currentUseR.problemWeightString
   //<< " - of global vars: " << theGlobalVariables.userDefault.problemWeightString;
-  if (!this->currentUseR.InterpretDatabaseProblemData(this->currentUseR.problemDataString, comments))
-  { comments << "Failed to interpret user's problem saved data. ";
-    //stOutput << "Failed to interpret user's problem saved data. ";
-    return false;
+  if (this->currentUseR.problemDataJSON.objects.size() != 0)
+  { if (!this->currentUseR.InterpretDatabaseProblemDataJSON(this->currentUseR.problemDataJSON, comments))
+    { comments << "Failed to interpret user's problem saved data. ";
+      return false;
+    }
+  } else
+  { if (!this->currentUseR.InterpretDatabaseProblemDatA(this->currentUseR.problemDataStrinG, comments))
+    { comments << "Failed to interpret user's problem saved data. ";
+      //stOutput << "Failed to interpret user's problem saved data. ";
+      return false;
+    }
   }
   if (!this->LoadProblemInfoFromJSONAppend
       (this->currentUseR.problemWeights, this->currentUseR.theProblemData, comments))
@@ -1536,8 +1543,8 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.htmlTextareaLatexAnswer =
   inputOutput.ToStringOpenTag("textarea") + inputOutput.ToStringCloseTag("textarea");
   currentA.htmlSpanMQfield =
-  (std::string)"<div class=\"calculatorMQfieldEnclosure\">"+
-  "<span id='" + currentA.idMQfield + "'>" + "</span>"+
+  (std::string)"<div class=\"calculatorMQfieldEnclosure\">" +
+  "<span id='" + currentA.idMQfield + "'>" + "</span>" +
   "</div>";
   //currentA.htmlMQjavascript= CalculatorHtmlFunctions::GetJavascriptMathQuillBox(currentA);
   currentA.htmlSpanMQButtonPanel =
@@ -2001,8 +2008,8 @@ bool CalculatorHTML::InterpretProcessExecutedCommands
       << currentElt.ToStringDebug() << " has wrongly computed commandIndex: "
       << currentElt.commandIndex << ". "
       << "Please report this error to the website admins. </b>";
-      currentElt.interpretedCommand=errorStream.str();
-      result=false;
+      currentElt.interpretedCommand = errorStream.str();
+      result = false;
       continue;
     }
     if (!theInterpreter.theProgramExpression[currentElt.commandIndex].StartsWith(theInterpreter.opCommandEnclosure()) )
@@ -2922,7 +2929,7 @@ bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream& commentsOnFailure
 #ifdef MACRO_use_MongoDB
   this->theProblemData.flagRandomSeedGiven = true;
   this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
-  if (!this->currentUseR.StoreProblemDataToDatabase(commentsOnFailure))
+  if (!this->currentUseR.StoreProblemDataToDatabaseJSON(commentsOnFailure))
   { commentsOnFailure << "<span style=\"color:red\"> <b>"
     << "Error: failed to store problem in database. "
     << "If you see this message, please take a screenshot and email your instructor. "

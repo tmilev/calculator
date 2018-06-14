@@ -93,7 +93,8 @@ std::string DatabaseStrings::labelUserId = "id";
 std::string DatabaseStrings::labelUsername = "username";
 std::string DatabaseStrings::labelPassword = "password";
 std::string DatabaseStrings::labelUserRole = "userRole";
-std::string DatabaseStrings::labelProblemData = "problemData";
+std::string DatabaseStrings::labelProblemDatA = "problemData";
+std::string DatabaseStrings::labelProblemDataJSON = "problemDataJSON";
 std::string DatabaseStrings::labelAuthenticationToken = "authenticationToken";
 std::string DatabaseStrings::labelActivationToken = "activationToken";
 std::string DatabaseStrings::labelTimeOfActivationTokenCreation = "activationTokenCreationTime";
@@ -360,7 +361,8 @@ bool UserCalculatorData::LoadFromJSON(JSData& input)
   this->timeOfActivationTokenCreation     = input[DatabaseStrings::labelTimeOfActivationTokenCreation     ].string;
   this->actualAuthenticationToken         = input[DatabaseStrings::labelAuthenticationToken               ].string;
   this->timeOfAuthenticationTokenCreation = input[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ].string;
-  this->problemDataString                 = input[DatabaseStrings::labelProblemData                       ].string;
+  this->problemDataStrinG                 = input[DatabaseStrings::labelProblemDatA                       ].string;
+  this->problemDataJSON                   = input[DatabaseStrings::labelProblemDataJSON                   ].string;
   this->actualShaonedSaltedPassword       = input[DatabaseStrings::labelPassword                          ].string;
   this->userRole                          = input[DatabaseStrings::labelUserRole                          ].string;
 
@@ -386,7 +388,9 @@ JSData UserCalculatorData::ToJSON()
   result[DatabaseStrings::labelTimeOfActivationTokenCreation     ] = this->timeOfActivationTokenCreation         ;
   result[DatabaseStrings::labelAuthenticationToken               ] = this->actualAuthenticationToken             ;
   result[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ] = this->timeOfAuthenticationTokenCreation     ;
-  result[DatabaseStrings::labelProblemData                       ] = this->problemDataString                     ;
+  if (this->problemDataJSON.objects.size() != 0)
+    result[DatabaseStrings::labelProblemDatA                     ] = this->problemDataStrinG                     ;
+  result[DatabaseStrings::labelProblemDataJSON                   ] = this->problemDataJSON                       ;
   result[DatabaseStrings::labelPassword                          ] = this->actualShaonedSaltedPassword           ;
   result[DatabaseStrings::labelUserRole                          ] = this->userRole                              ;
 
@@ -713,7 +717,7 @@ void UserCalculator::SetProblemData(const std::string& problemName, const Proble
   this->theProblemData.SetKeyValue(problemName, inputData);
 }
 
-bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure)
+bool ProblemData::LoadFroM(const std::string& inputData, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("ProblemData::LoadFrom");
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::ChopCGIString(inputData, theMap, commentsOnFailure))
@@ -740,7 +744,7 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
     this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
     Answer& currentA = *this->theAnswers.theValues.LastObject();
     std::string currentQuestion = HtmlRoutines::ConvertURLStringToNormal(theMap.theValues[i], false);
-    result=HtmlRoutines::ChopCGIString(currentQuestion, currentQuestionMap, commentsOnFailure);
+    result = HtmlRoutines::ChopCGIString(currentQuestion, currentQuestionMap, commentsOnFailure);
     if (!result)
     { commentsOnFailure << "Failed to interpret as key-value pair: "
       << currentQuestion << ". ";
@@ -763,8 +767,49 @@ bool ProblemData::LoadFrom(const std::string& inputData, std::stringstream& comm
   return result;
 }
 
-std::string ProblemData::Store()
-{ MacroRegisterFunctionWithName("ProblemData::Store");
+bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("ProblemData::LoadFromJSON");
+  (void) commentsOnFailure;
+  this->Points = 0;
+  this->numCorrectlyAnswered = 0;
+  this->totalNumSubmissions = 0;
+  this->flagRandomSeedGiven = false;
+  if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
+  { if (inputData.objects.Contains("randomSeed"))
+    { this->randomSeed = atoi(inputData.objects.GetValueConstCrashIfNotPresent("randomSeed").string.c_str());
+      this->flagRandomSeedGiven = true;
+      //stOutput << "<br>DEBUG: random seed found. <br>";
+    } //else
+      //stOutput << "<br>DEBUG: random seed  NOT NOT NOT found. <br>";
+  }
+  this->theAnswers.Clear();
+  bool result = true;
+  for (int i = 0; i < inputData.objects.size(); i ++)
+  { if (inputData.objects.theKeys[i] == "randomSeed")
+      continue;
+    this->AddEmptyAnswerIdOnTop(HtmlRoutines::ConvertURLStringToNormal(inputData.objects.theKeys[i], false));
+    Answer& currentA = *this->theAnswers.theValues.LastObject();
+    JSData currentQuestionJSON = inputData.objects.theValues[i];
+    if (currentQuestionJSON.objects.Contains("numCorrectSubmissions"))
+      currentA.numCorrectSubmissions =
+      atoi(currentQuestionJSON.objects.GetValueConstCrashIfNotPresent("numCorrectSubmissions").string.c_str());
+    if (currentQuestionJSON.objects.Contains("numSubmissions"))
+      currentA.numSubmissions =
+      atoi(currentQuestionJSON.objects.GetValueConstCrashIfNotPresent("numSubmissions").string.c_str());
+    if (currentQuestionJSON.objects.Contains("firstCorrectAnswer"))
+    { currentA.firstCorrectAnswerURLed = currentQuestionJSON.objects.GetValueConstCrashIfNotPresent("firstCorrectAnswer").string;
+      currentA.firstCorrectAnswerClean = HtmlRoutines::ConvertURLStringToNormal(currentA.firstCorrectAnswerURLed, false);
+      currentA.firstCorrectAnswerURLed = HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false); //url-encoding back the cleaned up answer:
+      //this protects from the possibility that currentA.firstCorrectAnswerURLed was not encoded properly,
+      //say, by an older version of the calculator
+    }
+  }
+//  this->CheckConsistency();
+  return result;
+}
+
+std::string ProblemData::StorE()
+{ MacroRegisterFunctionWithName("ProblemData::StorE");
   std::stringstream out;
   if (this->flagRandomSeedGiven)
     out << "randomSeed=" << this->randomSeed;
@@ -783,7 +828,23 @@ std::string ProblemData::Store()
   return out.str();
 }
 
-bool UserCalculator::InterpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure)
+JSData ProblemData::StoreJSON()
+{ MacroRegisterFunctionWithName("ProblemData::StoreJSON");
+  JSData result;
+  if (this->flagRandomSeedGiven)
+    result["randomSeed"] = std::to_string(this->randomSeed);
+  for (int i = 0; i < this->theAnswers.size(); i ++)
+  { Answer& currentA = this->theAnswers[i];
+    JSData currentAnswerJSON;
+    currentAnswerJSON["numCorrectSubmissions"] = std::to_string(currentA.numCorrectSubmissions);
+    currentAnswerJSON["numSubmissions"] = std::to_string(currentA.numSubmissions);
+    currentAnswerJSON["firstCorrectAnswer"] = HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false);
+    result[HtmlRoutines::ConvertStringToURLString(currentA.answerId, false)] = currentAnswerJSON;
+  }
+  return result;
+}
+
+bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemData");
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::ChopCGIString(theInfo, theMap, commentsOnFailure))
@@ -799,11 +860,36 @@ bool UserCalculator::InterpretDatabaseProblemData(const std::string& theInfo, st
   for (int i = 0; i < theMap.size(); i ++)
   { //stOutput << "<hr>Reading data: " << theMap.theKeys[i] << ", value: "
     //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theMap[i]);
-    if (!reader.LoadFrom(HtmlRoutines::ConvertURLStringToNormal(theMap[i], false), commentsOnFailure))
+    if (!reader.LoadFroM(HtmlRoutines::ConvertURLStringToNormal(theMap[i], false), commentsOnFailure))
     { result = false;
       continue;
     }
     probNameNoWhiteSpace = MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(theMap.theKeys[i], false));
+    if (probNameNoWhiteSpace == "")
+      continue;
+    this->theProblemData.SetKeyValue(probNameNoWhiteSpace, reader);
+  }
+  return result;
+}
+
+bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("UserCalculator::InterpretDatabaseProblemDataJSON");
+  this->theProblemData.Clear();
+  this->theProblemData.SetExpectedSize(theData.objects.size());
+  bool result = true;
+  //stOutput << "<hr>DEBUG: Interpreting: <br>" << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theInfo)
+  //<< "<br>Map has: "
+  //<< theMap.size() << " entries. ";
+  ProblemData reader;
+  std::string probNameNoWhiteSpace;
+  for (int i = 0; i < theData.objects.size(); i ++)
+  { //stOutput << "<hr>Reading data: " << theMap.theKeys[i] << ", value: "
+    //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theMap[i]);
+    if (!reader.LoadFromJSON(theData.objects.theValues[i], commentsOnFailure))
+    { result = false;
+      continue;
+    }
+    probNameNoWhiteSpace = MathRoutines::StringTrimWhiteSpace(HtmlRoutines::ConvertURLStringToNormal(theData.objects.theKeys[i], false));
     if (probNameNoWhiteSpace == "")
       continue;
     this->theProblemData.SetKeyValue(probNameNoWhiteSpace, reader);
@@ -830,17 +916,29 @@ List<JSData> UserCalculatorData::GetFindMeFromUserNameQuery()
 }
 
 #ifdef MACRO_use_MongoDB
-bool UserCalculator::StoreProblemDataToDatabase(std::stringstream& commentsOnFailure)
+bool UserCalculator::StoreProblemDataToDatabasE(std::stringstream& commentsOnFailure)
 { MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabase");
   std::stringstream problemDataStream;
   for (int i = 0; i < this->theProblemData.size(); i ++)
     problemDataStream << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false) << "="
-    << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theValues[i].Store(), false) << "&";
+    << HtmlRoutines::ConvertStringToURLString(this->theProblemData.theValues[i].StorE(), false) << "&";
 //  stOutput << "DEBUG: storing in database ... stack trace: "
 //  << crash.GetStackTraceEtcErrorMessage();
   //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(problemDataStream.str());
   JSData setQuery;
-  setQuery[DatabaseStrings::labelProblemData] = problemDataStream.str();
+  setQuery[DatabaseStrings::labelProblemDatA] = problemDataStream.str();
+  return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
+  (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure);
+}
+
+bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream& commentsOnFailure)
+{ MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabase");
+  JSData problemData;
+  for (int i = 0; i < this->theProblemData.size(); i ++)
+    problemData[HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false)] =
+    this->theProblemData.theValues[i].StoreJSON();
+  JSData setQuery;
+  setQuery[DatabaseStrings::labelProblemDataJSON] = problemData;
   return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
   (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure);
 }

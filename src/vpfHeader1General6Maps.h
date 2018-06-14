@@ -24,9 +24,15 @@ public:
     this->theKeys.RemoveIndexSwapWithLast(theIndex);
     this->theValues.RemoveIndexSwapWithLast(theIndex);
   }
+  const value& GetValueConstCrashIfNotPresent(const key& input) const
+  { int theIndex = this->theKeys.GetIndex(input);
+    if (theIndex == - 1)
+      crash << "Map does not contain key at a place where that is not allowed. " << crash;
+    return this->theValues[theIndex];
+  }
   value& GetValueCreate(const key& input)
   { int theIndex = this->theKeys.GetIndex(input);
-    if (theIndex == -1)
+    if (theIndex == - 1)
     { theIndex = this->theKeys.size;
       this->theKeys.AddOnTop(input);
       value object;

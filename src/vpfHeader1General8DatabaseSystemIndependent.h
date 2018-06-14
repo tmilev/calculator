@@ -19,7 +19,8 @@ class UserCalculatorData
   std::string enteredActivationToken;
   std::string enteredAuthenticationToken;
   std::string actualAuthenticationToken;
-  std::string problemDataString;
+  std::string problemDataStrinG;
+  JSData problemDataJSON;
 
   std::string enteredPassword;
   std::string actualShaonedSaltedPassword;
@@ -92,7 +93,8 @@ public:
 
   static std::string labelActivationToken;
   static std::string labelUserRole;
-  static std::string labelProblemData;
+  static std::string labelProblemDatA;
+  static std::string labelProblemDataJSON;
   static std::string labelTimeOfActivationTokenCreation;
   static std::string labelTimeOfAuthenticationTokenCreation;
 

@@ -185,8 +185,10 @@ public:
   ProblemData();
   bool CheckConsistency()const;
   bool CheckConsistencyMQids()const;
-  bool LoadFrom(const std::string& inputData, std::stringstream& commentsOnFailure);
-  std::string Store();
+  bool LoadFroM(const std::string& inputData, std::stringstream& commentsOnFailure);
+  bool LoadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure);
+  std::string StorE();
+  JSData StoreJSON();
   std::string ToString()const;
   std::string ToStringAvailableAnswerIds();
 };
@@ -237,8 +239,10 @@ public:
   ProblemData& GetProblemDataAddIfNotPresent(const std::string& problemName);
   void SetProblemData(const std::string& problemName, const ProblemData& inputData);
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
-  bool InterpretDatabaseProblemData(const std::string& theInfo, std::stringstream& commentsOnFailure);
-  bool StoreProblemDataToDatabase(std::stringstream& commentsOnFailure);
+  bool InterpretDatabaseProblemDatA(const std::string& theInfo, std::stringstream& commentsOnFailure);
+  bool InterpretDatabaseProblemDataJSON(const JSData& theData, std::stringstream& commentsOnFailure);
+  bool StoreProblemDataToDatabasE(std::stringstream& commentsOnFailure);
+  bool StoreProblemDataToDatabaseJSON(std::stringstream& commentsOnFailure);
   std::string GetSelectedRowEntry(const std::string& theKey);
   std::string GetMySQLclauseIdentifyingUserByEmailOrID();
   bool LoadFromDB(std::stringstream* failureStream, std::stringstream* commentsGeneral = 0);

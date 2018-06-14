@@ -1160,8 +1160,6 @@ std::string HtmlInterpretation::SubmitAnswers
     << HtmlRoutines::ConvertStringToURLString(completedProblemStreamNoEnclosures.str(), false)
     << "\">Input link</a>";
   }
-
-
   //stOutput << "<br>DEBUG: input to the calculator: " << completedProblemStream.str() << "<hr>";
   if (timeSafetyBrake)
     theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=theGlobalVariables.GetElapsedSeconds() + 20;
@@ -1307,7 +1305,7 @@ std::string HtmlInterpretation::SubmitAnswers
     theUser.SetProblemData(theProblem.fileName, currentProblemData);
     //if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
     //  stOutput << "<hr>result: " << theUser.theProblemData.GetValueCreateIfNotPresent(theProblem.fileName).ToString() << "<hr>";
-    if (!theUser.StoreProblemDataToDatabase(comments))
+    if (!theUser.StoreProblemDataToDatabaseJSON(comments))
       out << "<tr><td><b>This shouldn't happen and may be a bug: failed to store your answer in the database. "
       << CalculatorHTML::BugsGenericMessage << "</b><br>Comments: "
       << comments.str() << "</td></tr>";
@@ -2116,7 +2114,7 @@ public:
   std::string currentSection;
   std::string currentCourse;
   List<MapLisT<std::string, Rational, MathRoutines::hashString> > scoresBreakdown;
-  List<List<std::string> > userTablE;
+  List<JSData> userProblemData;
   List<Rational> userScores;
   List<std::string> userInfos;
   List<std::string> userNames;
@@ -2144,17 +2142,17 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   int usernameIndex = userLabels.GetIndex(DatabaseStrings::labelUsername);
   if (usernameIndex == - 1)
     return "Could not find username column. ";
-  int problemDataIndex = userLabels.GetIndex("problemData");
+  int problemDataIndex = userLabels.GetIndex(DatabaseStrings::labelProblemDataJSON);
   if (problemDataIndex == - 1)
     return "Could not find problem data column. ";
 //  int courseInfoIndex = userLabels.GetIndex(DatabaseStrings::labelCourseInfo);
 //  if (courseInfoIndex == - 1)
 //    return "Could not find course info column. ";
   CalculatorHTML currentUserRecord;
-  this->userScores.Reserve(userTablE.size);
-  this->userNames.Reserve(userTablE.size);
-  this->userInfos.Reserve(userTablE.size);
-  this->scoresBreakdown.Reserve(userTablE.size);
+  this->userScores.Reserve(this->userProblemData.size);
+  this->userNames.Reserve(this->userProblemData.size);
+  this->userInfos.Reserve(this->userProblemData.size);
+  this->scoresBreakdown.Reserve(this->userProblemData.size);
   this->userScores.SetSize(0);
   this->userNames.SetSize(0);
   this->userInfos.SetSize(0);
@@ -2171,7 +2169,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
     (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false));
   //stOutput << "<br>DEBUG: ignoreSectionIdontTEach: " << ignoreSectionsIdontTeach;
   //stOutput << "<br>DEBUG: currentSection: " << this->currentSection;
-  for (int i = 0; i < this->userTablE.size; i ++)
+  for (int i = 0; i < this->userProblemData.size; i ++)
   { //currentUserRecord.currentUseR.courseInfo.rawStringStoredInDB = this->userTablE[i][courseInfoIndex];
     //currentUserRecord.currentUseR.AssignCourseInfoString(&comments);
     if (ignoreSectionsIdontTeach)
@@ -2186,15 +2184,15 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
       }
     }
     this->userScores.AddOnTop(- 1);
-    this->userNames.AddOnTop(this->userTablE[i][usernameIndex]);
+    this->userNames.AddOnTop(this->userProblemData[i][DatabaseStrings::labelUsername].string);
     this->userInfos.AddOnTop(currentUserRecord.currentUseR.sectionInDB);
     this->scoresBreakdown.SetSize(this->scoresBreakdown.size + 1);
-    currentUserRecord.currentUseR.username = this->userTablE[i][usernameIndex];
+    currentUserRecord.currentUseR.username = this->userProblemData[i][DatabaseStrings::labelUsername].string;
 
 //    out << "<hr>Debug: reading db problem data from: "
 //    << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(userTable[i][problemDataIndex]) << "<br>";
-    if (!currentUserRecord.currentUseR.InterpretDatabaseProblemData
-        (this->userTablE[i][problemDataIndex], comments))
+    if (!currentUserRecord.currentUseR.InterpretDatabaseProblemDataJSON
+         (this->userProblemData[i][DatabaseStrings::labelProblemDataJSON], comments))
       continue;
 //    out << "<br>DEBUG: after db data read: " << currentUserRecord.currentUseR.ToString();
     currentUserRecord.LoadProblemInfoFromJSONAppend

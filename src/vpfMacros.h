@@ -98,7 +98,7 @@ class StdoutClass
 public:
   template <typename anyType>
   StdoutClass& operator<<(const anyType& toBePiped)
-  { if (this->theOutputFunction==0)
+  { if (this->theOutputFunction == 0)
       std::cout << toBePiped;
     else
     { std::stringstream out;
@@ -109,7 +109,7 @@ public:
   }
   template <typename anyType>
   StdoutClass& operator<<(anyType& toBePiped)
-  { if (this->theOutputFunction==0)
+  { if (this->theOutputFunction == 0)
       std::cout << toBePiped;
     else
     { std::stringstream out;
@@ -122,7 +122,7 @@ public:
   void (*flushOutputFunction)();
   StdoutClass(): theOutputFunction(0), flushOutputFunction(0){}
   void Flush()
-  { if (this->flushOutputFunction==0)
+  { if (this->flushOutputFunction == 0)
     { std::cout.flush();
       return;
     }

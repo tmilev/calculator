@@ -129,14 +129,23 @@ std::string DatabaseStrings::labelLastActivationEmailTime = "lastActivationEmail
 std::string DatabaseStrings::labelNumActivationEmails = "numActivationEmails";
 std::string DatabaseStrings::labelUsernameAssociatedWithToken = "usernameAssociatedWithToken";
 
-List<std::string> DatabaseStrings::modifyableColumns;
+std::string DatabaseStrings::anyDatabaseField = "ANY";
 
-List<std::string>& DatabaseStrings::GetModifyableColumnsNotThreadSafe()
-{ MacroRegisterFunctionWithName("DatabaseStrings::GetModifyableColumnsNotThreadSafe");
-  //if (DatabaseStrings::modifyableColumns.size == 0) //<-warning: this is not thread-safe
-  //{ DatabaseStrings::modifyableColumns.AddOnTop(DatabaseStrings::labelCourseInfo);
-  //}
-  return DatabaseStrings::modifyableColumns;
+void GlobalVariables::initModifiableDatabaseFields()
+{ MacroRegisterFunctionWithName("GlobalVariables::initModifiableDatabaseFields");
+  JSData& modifiableData = theGlobalVariables.databaseModifiableFields;
+  modifiableData.type = JSData::JSarray;
+  JSData newEntry;
+  JSData& tableUsers = newEntry[DatabaseStrings::tableUsers];
+  JSData& problemData = tableUsers[DatabaseStrings::labelProblemDataJSON];
+  problemData[DatabaseStrings::anyDatabaseField] = "true";
+  modifiableData.list.AddOnTop(newEntry);
+  std::fstream outputFile;
+  FileOperations::OpenFileCreateIfNotPresentVirtual(outputFile, "/calculator-html/new/modifiable_database_fields.js", false, true, false);
+  JSData toWrite;
+  toWrite["universalSelector"] = DatabaseStrings::anyDatabaseField;
+  toWrite["modifiableFields"] = modifiableData;
+  outputFile << "var modifiableDatabaseData = " << toWrite.ToString(true) << ";";
 }
 
 ProblemData::ProblemData()

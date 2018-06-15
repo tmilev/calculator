@@ -65,7 +65,6 @@ void InitializeGlobalObjects()
   theGlobalVariables.pointerCallSystemNoOutput = &CallSystemWrapperNoOutput;
   theGlobalVariables.pointerCallSystemWithOutput = &CallSystemWrapperReturnStandardOutput;
   theGlobalVariables.pointerCallChDir = &CallChDirWrapper;
-
   //stOutput << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
   //Change the below line to modify the computation time of the calculator.
   consoleFormat.flagUseHTML = false;

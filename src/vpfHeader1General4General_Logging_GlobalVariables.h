@@ -146,6 +146,7 @@ public:
 
   JSData configuration;
   JSData timeStats;
+  JSData databaseModifiableFields;
   PauseThread theLocalPauseController;
 
   static std::string hopefullyPermanentWebAdress;
@@ -203,6 +204,8 @@ public:
   ~GlobalVariables();
   static HashedList<FileInformation>& theSourceCodeFiles();
   void WriteSourceCodeFilesJS();
+  //These functions were written before std::chrono was available.
+  //To do: get rid of them in favor of std::chrono.
   void SetTimerFunction(double (*timerFunction)())
   { this->getElapsedTimePrivate = timerFunction;
   }
@@ -225,6 +228,7 @@ public:
   static std::string GetDateTime();
   void SetWebInpuT(const std::string& inputName, const std::string& inputValue);
   std::string GetWebInput(const std::string& inputName);
+  void initModifiableDatabaseFields();
   void initDefaultFolderAndFileNames
   (const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow);
   void initOutputReportAndCrashFileNames

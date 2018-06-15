@@ -5345,7 +5345,8 @@ int WebServer::Run()
   theParser->init();
   theParser->ComputeAutoCompleteKeyWords();
   theParser->WriteAutoCompleteKeyWordsToFile();
-  theGlobalVariables.WriteSourceCodeFilesJS();
+  //theGlobalVariables.WriteSourceCodeFilesJS();
+  theGlobalVariables.initModifiableDatabaseFields();
   HtmlRoutines::LoadStrings();
   theParser->flagShowCalculatorExamples = false;
   if (!this->initPrepareWebServerALL())

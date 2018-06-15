@@ -123,8 +123,6 @@ public:
   static std::string tableProblemInformation;
   static std::string labelProblemTotalQuestions;
   static std::string labelProblemName;
-
-  static List<std::string>& GetModifyableColumnsNotThreadSafe();
-
+  static std::string anyDatabaseField;
 };
 #endif

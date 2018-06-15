@@ -1,37 +1,47 @@
 "use srict";
 
-function writeJSONtoDOMComponent(inputJSON, theDomComponent){
-  if (typeof theDomComponent === "string"){
+function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
+  if (typeof theDomComponent === "string") {
     theDomComponent = document.getElementById(theDomComponent);
   }
   theDomComponent.innerHTML = getHtmlFromArrayOfObjects(inputJSON);
 }
 
-function getTableHorizontallyLaidFromJSON(input){
-  if (typeof input === "string"){
+function hasDistinguishedAncestry(parentFields) {
+  return true;
+}
+
+function getTableHorizontallyLaidFromJSON(input, parentFields) {
+  if (typeof input === "string") {
     return input;
   }
-  if (typeof input === "number"){
+  if (typeof input === "number") {
     return input;
   }
-  if (typeof input === "boolean"){
+  if (typeof input === "boolean") {
     return input;
   }  
-  if (Array.isArray(input)){
+  if (Array.isArray(input)) {
     var result = "";
     result += "<table class='tableJSONItem'>";
-    for (item in input){
+    for (var counterInput = 0; counterInput < input.length; counterInput ++) {
+      var item = input[counterInput];
       result += `<tr><td> <tiny>${item}</tiny></td><td>${getTableHorizontallyLaidFromJSON(input[item])}</td></tr>`; 
     }
     result += "</table>";
     return result;
   }
 
-  if (typeof input === "object"){
+  if (typeof input === "object") {
     var result = "";
     result += "<table class='tableJSONItem'>";
-    for (item in input){
-      result += `<tr><td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item])}</td></tr>`; 
+    for (item in input) {
+      result += `<tr>`;
+      result += `<td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item])}</td>`;
+      if (hasDistinguishedAncestry(parentFields)) {
+        result += "<td><button>Modify</button></td>";
+      }
+      result += `</tr>`; 
     }
     result += "</table>";
     return result;
@@ -40,14 +50,14 @@ function getTableHorizontallyLaidFromJSON(input){
   return typeof input;
 }
 
-function getLabelsRows(input){
+function getLabelsRows(input) {
   var result = {
     labels: [],
     rows: []
   };
   var labelFinder = {};
   for (var counterRow = 0; counterRow < input.length; counterRow ++) {
-    if (typeof input[counterRow] !== "object"){
+    if (typeof input[counterRow] !== "object") {
       return null;
     }
     for (var label in input[counterRow]) {
@@ -61,7 +71,7 @@ function getLabelsRows(input){
     var currentOutputItem = result.rows[result.rows.length - 1];
     for (var counterLabel = 0; counterLabel < result.labels.length; counterLabel ++) {
       var label = result.labels[counterLabel];
-      if (label in currentInputItem){
+      if (label in currentInputItem) {
         currentOutputItem.push(currentInputItem[label]);
       } else {
         currentOutputItem.push("");
@@ -71,34 +81,34 @@ function getLabelsRows(input){
   return result;
 }
 
-function getHtmlFromArrayOfObjects(input){
+function getHtmlFromArrayOfObjects(input) {
   var inputJSON = input;
-  if (typeof inputJSON === "string"){
+  if (typeof inputJSON === "string") {
     inputJSON = input.replace(/[\r\n]/g, " "); 
-    if (inputJSON[0] !== "{" && inputJSON[0] !== "[" && input[0] !== "\""){
+    if (inputJSON[0] !== "{" && inputJSON[0] !== "[" && input[0] !== "\"") {
       inputJSON = `"${inputJSON}"`;
     }
     try {
       inputJSON = JSON.parse(inputJSON);
-    } catch (e){
+    } catch (e) {
       return `<error>Error while parsing ${escape(inputJSON)}: ${e}</error>`;
     }
   }
   var result = "";
-  if (typeof inputJSON === "object" && !Array.isArray(inputJSON)){
+  if (typeof inputJSON === "object" && !Array.isArray(inputJSON)) {
     inputJSON = [inputJSON];
   }
-  if (Array.isArray(inputJSON)){
+  if (Array.isArray(inputJSON)) {
     var labelsRows = getLabelsRows(inputJSON);
     if (labelsRows !== null) { 
       result += "<table class='tableJSON'>";
       result += "<tr>";
-      for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++){
+      for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
         result += `<th>${labelsRows.labels[counterColumn]}</th>`;
       }
-      for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++){
+      for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++) {
         result += "<tr>";
-        for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++){
+        for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
           result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn])}</td>`;
         }
         result += "</tr>";

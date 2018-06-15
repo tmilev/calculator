@@ -74,7 +74,6 @@ unsigned long long int Rational::TotalSmallAdditions = 0;
 unsigned long long int Rational::TotalSmallGCDcalls = 0;
 unsigned long long int Rational::TotalSmallMultiplications = 0;
 
-
 void GlobalVariables::CallSystemNoOutput(const std::string& systemCommand, bool ignoreNonZeroReturn)
 { if (this->pointerCallSystemNoOutput != 0)
     this->pointerCallSystemNoOutput(systemCommand, ignoreNonZeroReturn);

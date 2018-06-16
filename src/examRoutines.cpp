@@ -3531,13 +3531,8 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
   if (!weightIsOK && problemWeightAsGivenByInstructor != "")
     out << "<span style =\"color:red\"><b>Error</b></span>";
   out << "<button id =\"" << idButtonModifyPoints << "\" "
-  << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
-  << "='+encodeURIComponent('weight ='+  getElementById('" << idPoints << "').value)"
-//  << "  +encodeURIComponent('numTries ='+getElementById('"
-  << ", '"
-  << idPointsModOutput << "', 'setProblemData');"
-  << "\""
-  << ">";
+  << "onclick=\"" << "modifyWeight('" << urledProblem << "');\""
+  << " disabled>";
   out << "Modify";
   out << "</button>";
   out << "<span id =\"" << idPointsModOutput << "\">" << "</span>";

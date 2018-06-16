@@ -634,9 +634,9 @@ std::string HtmlInterpretation::GetSelectCourse()
   out << "<div style =\"text-align:center\">";
   for (int i = 0; i < theCourses.theCourses.size; i ++)
   { out << "<a class =\"courseLink\" href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=template&courseHome= coursetemplates/"
+    << "?request=template&courseHome=coursetemplates/"
     << theCourses.theCourses[i].courseTemplate
-    << "&topicList= topiclists/"
+    << "&topicList=topiclists/"
     << theCourses.theCourses[i].courseTopics
     << "\">" << theCourses.theCourses[i].title << "</a>";
     if (i != theCourses.theCourses.size - 1)

@@ -81,6 +81,11 @@ function toggleStudentScores
 
 var problemWeightsVisible=false;
 
+function modifyWeight(id) {
+  //console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
+  var theURL = `/cgi-bin/calculator?request=setProblemData&mainInput=${encodeURIComponent(JSON.stringify(modifyObject))}`;
+}
+
 function toggleProblemWeights
 (studentScoreLoadRep, scoresInCoursePage, studentScoresLoadReport)
 { var theWeights=document.getElementsByClassName('panelProblemWeights');

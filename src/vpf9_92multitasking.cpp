@@ -165,7 +165,7 @@ bool PauseThread::IsPausedWhileRunning() const
 
 ThreadData::ThreadData()
 { this->index = 0;
-//  this->theId= 0;
+//  this->theId = 0;
 }
 
 ThreadData::~ThreadData()
@@ -173,7 +173,7 @@ ThreadData::~ThreadData()
 }
 
 GlobalVariables::~GlobalVariables()
-{ //double startTime= this->GetElapsedSeconds();
+{ //double startTime = this->GetElapsedSeconds();
 //  logBlock << logger::yellow << "joining threads ..." << logger::endL;
   this->flagComputationFinishedAllOutputSentClosing = true;
   for (int i = 1; i < this->theThreads.size; i ++)
@@ -222,10 +222,10 @@ int ThreadData::getCurrentThreadId()
 std::string ThreadData::ToStringHtml() const
 { std::stringstream out;
   if (this->getCurrentThreadId() == this->index)
-    out << "<span style=\"color:green\"><b>Current thread </b></span> ";
+    out << "<span style =\"color:green\"><b>Current thread </b></span> ";
   else
     out << "Thread ";
-  out << "<span style=\"color:red\">";
+  out << "<span style =\"color:red\">";
   if (this->name == "")
     out << "(thread name not set)";
   else

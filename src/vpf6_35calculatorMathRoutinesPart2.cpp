@@ -80,7 +80,7 @@ void MeshTriangles::PlotGrid(int theColor)
     pointsVector[3] = this->theTriangles[i][0];
     this->theGrid.thePlots.AddOnTop(currentLinePlot);
   }
-//  this->theGrid.the= theColor;
+//  this->theGrid.the = theColor;
 }
 
 double MeshTriangles::GetValueAtPoint(const Vector<double>& thePoint)
@@ -798,7 +798,7 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard
   if (!allowedFreeVars.Contains(presentFreeVars))
   { out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
-    << "<br><span style='color:red'><b>contains the unexpected variable(s):</b></span><br><b>";
+    << "<br><span style ='color:red'><b>contains the unexpected variable(s):</b></span><br><b>";
     bool found = false;
     for (int i = 0; i < presentFreeVars.size; i ++)
       if (!allowedFreeVars.Contains(presentFreeVars[i]))
@@ -809,9 +809,9 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnStandard
       }
     out << "</b>.";
     out << "<br>The expected variables are: " << allowedFreeVars.ToStringCommaDelimited() << ". ";
-    out << "<br>Beware of typos such as:<br>[wrong:] <span style='color:red'>lnx, sqrt2</span>  "
-    << "<br>[correct:] <span style='color:green'>ln(x)</span> or <span style='color:green'>ln x</span>, "
-    << "<span style='color:green'>sqrt(2)</span> or <span style='color:green'>sqrt 2</span>.<hr>";
+    out << "<br>Beware of typos such as:<br>[wrong:] <span style ='color:red'>lnx, sqrt2</span>  "
+    << "<br>[correct:] <span style ='color:green'>ln(x)</span> or <span style ='color:green'>ln x</span>, "
+    << "<span style ='color:green'>sqrt(2)</span> or <span style ='color:green'>sqrt 2</span>.<hr>";
     return output.AssignValue(out.str(), theCommands);
   }
   return output.AssignValue(out.str(), theCommands);
@@ -879,7 +879,7 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
   if (!presentFreeVars.Contains(mandatoryFreeVars))
   { out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
-    << "<br><span style='color:red'><b>is required to contain the variables:</b></span><br><b>";
+    << "<br><span style ='color:red'><b>is required to contain the variables:</b></span><br><b>";
     bool found = false;
     for (int i = 0; i < mandatoryFreeVars.size; i ++)
       if (!presentFreeVars.Contains(mandatoryFreeVars[i]))
@@ -894,7 +894,7 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
   if (!allowedFreeVars.Contains(presentFreeVars))
   { out << "<hr>";
     out << "Your expression:<br>\\(" << input[1].ToString() << "\\)"
-    << "<br><span style='color:red'><b>contains the unexpected variable(s):</b></span><br><b>";
+    << "<br><span style ='color:red'><b>contains the unexpected variable(s):</b></span><br><b>";
     bool found = false;
     for (int i = 0; i < presentFreeVars.size; i ++)
       if (!allowedFreeVars.Contains(presentFreeVars[i]))
@@ -907,9 +907,9 @@ bool CalculatorFunctionsGeneral::innerEnsureExpressionDependsOnlyOnMandatoryVari
     out << "<br>The expected variables are: " << allowedFreeVars.ToStringCommaDelimited() << ". ";
   }
   if (out.str() != "")
-    out << "<br>Beware of typos such as:<br>[wrong:] <span style='color:red'>lnx, sqrt2</span>  "
-    << "<br>[correct:] <span style='color:green'>ln(x)</span> or <span style='color:green'>ln x</span>, "
-    << "<span style='color:green'>sqrt(2)</span> or <span style='color:green'>sqrt 2</span>.<hr>";
+    out << "<br>Beware of typos such as:<br>[wrong:] <span style ='color:red'>lnx, sqrt2</span>  "
+    << "<br>[correct:] <span style ='color:green'>ln(x)</span> or <span style ='color:green'>ln x</span>, "
+    << "<span style ='color:green'>sqrt(2)</span> or <span style ='color:green'>sqrt 2</span>.<hr>";
 
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1115,7 +1115,7 @@ bool CalculatorFunctionsGeneral::innerDistributeExponent(Calculator& theCommands
     return false;
   if (!base[1].IsConstantNumber())
     return false;
-  bool isGood=base[1].IsPositiveNumber() || base[2].IsPositiveNumber();
+  bool isGood =base[1].IsPositiveNumber() || base[2].IsPositiveNumber();
   if (!isGood)
   { if (exponentE.IsInteger())
       isGood = true;
@@ -1212,7 +1212,7 @@ bool CalculatorFunctionsGeneral::innerRound(Calculator& theCommands, const Expre
       result ++;
     return output.AssignValue(result, theCommands);
   }
-  double theDouble= 0;
+  double theDouble = 0;
   if (input.EvaluatesToDouble(&theDouble))
     return output.AssignValue((int) std::round(theDouble), theCommands);
   return false;
@@ -1615,7 +1615,7 @@ bool CalculatorFunctionsGeneral::innerMakeJavascriptExpression(Calculator& theCo
       }
     }
     if (input.size() == 2)
-    { std::string theFunName="";
+    { std::string theFunName ="";
       if (opString == "\\sin" || opString == "\\cos" ||
           opString == "\\log" || opString == "\\tan" ||
           opString == "\\cot")
@@ -1764,10 +1764,10 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
       if (input[i][2].size() != 3)
         continue;
       for (int j = 0; j < 2; j ++)
-      { bool isGood=CalculatorFunctionsGeneral::innerMakeJavascriptExpression
+      { bool isGood =CalculatorFunctionsGeneral::innerMakeJavascriptExpression
         (theCommands, input[i][2][j + 1], jsConverter);
         if (isGood)
-          isGood=jsConverter.IsOfType<std::string>(&thePlot.theVarRangesJS[theIndex][j]);
+          isGood = jsConverter.IsOfType<std::string>(&thePlot.theVarRangesJS[theIndex][j]);
         if (!isGood)
           return theCommands << "Failed to convert "
           << input[i][2][j + 1].ToString() << " to a javascript expression. ";
@@ -1811,7 +1811,7 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
   { return theCommands << "Could not extract variable ranges, got the var ranges: "
     << thePlot.theVarRangesJS;
   }
-  thePlot.thePlotType="surface";
+  thePlot.thePlotType ="surface";
   thePlot.dimension = thePlot.coordinateFunctionsE.size;
   Plot result;
   result += thePlot;
@@ -1867,7 +1867,7 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
         useHighlightStyle = true;
     out << "<td" << extraStyle << ">";
     if (useHighlightStyle)
-      out << "<span style=\"color:red\">";
+      out << "<span style =\"color:red\">";
     if (this->theFormat.flagUseLatex)
       out << HtmlRoutines::GetMathSpanPure(Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat));
     else
@@ -1890,7 +1890,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
   List<Polynomial<Rational> >& theRemainders = this->intermediateRemainders.GetElement();
   List<Polynomial<Rational> >& theSubtracands = this->intermediateSubtractands.GetElement();
   this->theFormat.thePolyMonOrder = this->thePolynomialOrder.theMonOrder;
-  std::string underlineStyle = " style=\"white-space: nowrap; border-bottom:1px solid black;\"";
+  std::string underlineStyle = " style =\"white-space: nowrap; border-bottom:1px solid black;\"";
   this->allMonomials.Clear();
   this->allMonomials.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
   for (int i = 0; i < theRemainders.size; i ++)
@@ -1906,12 +1906,12 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
   out << this->ToStringLetterOrder(false);
   out << "<br>";
   out << theRemainders.size << " division steps total.<br>";
-  out << "<table style=\"white-space: nowrap; border:1px solid black;\">";
+  out << "<table style =\"white-space: nowrap; border:1px solid black;\">";
   out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
   out << this->GetPolynomialStringSpacedMonomialsHtml
   (this->remainderDivision, underlineStyle, &this->remainderDivision.theMonomials)
   << "</td></tr>";
-  out << "<tr><td style=\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan =\""
+  out << "<tr><td style =\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan =\""
   << this->allMonomials.size + 1 << "\"><b>Quotient(s) </b></td>"
   << "</tr>";
   //stOutput << "<br>DEBUG: got to here, pt - 1.";
@@ -1919,13 +1919,13 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
   { //if (i == this->theBasiS.size- 1)
 //    else
     out << "<tr>";
-    out << "<td style=\"border-right:1px solid black; border-bottom: 1px solid gray;\">";
+    out << "<td style =\"border-right:1px solid black; border-bottom: 1px solid gray;\">";
     if (this->theFormat.flagUseLatex)
       out << HtmlRoutines::GetMathSpanPure(this->theBasiS[i].ToString(&this->theFormat), - 1);
     else
       out << this->theBasiS[i].ToString(&this->theFormat);
     out << "</td>";
-    out << "<td style=\"border-bottom:1px solid gray;\" colspan =\""
+    out << "<td style =\"border-bottom:1px solid gray;\" colspan =\""
     << this->allMonomials.size + 1 << "\">";
     out << HtmlRoutines::GetMathSpanPure(this->theQuotients[i].ToString(&this->theFormat));
     out << "</td></tr>";
@@ -2067,7 +2067,7 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
     if (useHighlightStyle)
       out << "\\color{" << *highlightColor << "}{";
     out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat);
-    found= true;
+    found = true;
     if (useHighlightStyle)
       out << "}\\color{black}";
     out << "$ ";
@@ -2180,7 +2180,7 @@ std::string GroebnerBasisComputation<coefficient>::GetSpacedMonomialsWithHighlig
     return out.str();
   }
   for (int i = 0; i < this->allMonomials.size; i ++)
-  { int theIndex= thePoly.theMonomials.GetIndex(this->allMonomials[i]);
+  { int theIndex = thePoly.theMonomials.GetIndex(this->allMonomials[i]);
     if (theIndex == - 1)
     { if (useColumnSeparator)
         if (i != this->allMonomials.size - 1)
@@ -2353,7 +2353,7 @@ void GroebnerBasisComputation<coefficient>::ComputeHighLightsFromRemainder
     this->highlightMonsDivisors[indexCurrentDivisor]
     [this->allMonomials.GetIndex(this->theBasiS[indexCurrentDivisor][i])].
     AddOnTop(currentSlideNumber);
-  this->uncoverAllMonsSubtracands[remainderIndex]=currentSlideNumber;
+  this->uncoverAllMonsSubtracands[remainderIndex]= currentSlideNumber;
   this->longDivisionLog << "\\only<"
   << currentSlideNumber << ", "
   << currentSlideNumber + 1

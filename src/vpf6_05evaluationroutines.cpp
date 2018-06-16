@@ -137,7 +137,7 @@ void Calculator::DoLogEvaluationIfNeedBe(Function& inputF)
   << " second(s) since last log entry. "
   << "Rule stack id: "
   << this->RuleStackCacheIndex << ", stack size: " << this->RuleStack.size();
-  this->LastLogEvaluationTime= theGlobalVariables.GetElapsedSeconds();
+  this->LastLogEvaluationTime = theGlobalVariables.GetElapsedSeconds();
 }
 
 bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable)
@@ -216,7 +216,7 @@ bool Calculator::ExpressionMatchesPattern
     << "is a stack trace, however beware that the error might be in code preceding the stack loading. "
     << crash;
 //  static int ExpressionMatchesPatternDebugCounter = - 1;
-  //ExpressionMatchesPatternDebugCounter++;
+  //ExpressionMatchesPatternDebugCounter ++;
 //  stOutput << " ExpressionMatchesPatternDebugCounter: " << ExpressionMatchesPatternDebugCounter;
 //  printLocalDebugInfo=(ExpressionMatchesPatternDebugCounter>- 1);
   if (commentsGeneral!= 0)
@@ -231,7 +231,7 @@ bool Calculator::ExpressionMatchesPattern
     this->evaluationErrors.AddOnTop(out.str());
     return false;
   }
-//  if (this->opDefine()==input.theOperation)
+//  if (this->opDefine()== input.theOperation)
 //    return false;
   int opVarB = this->opBind();
   if (thePattern.IsListStartingWithAtom(opVarB))
@@ -466,7 +466,7 @@ bool Calculator::EvaluateExpression
     theCommands.flagAbortComputationASAP = true;
     return output.MakeError(errorStream.str(), theCommands);
   }
-  //bool logEvaluationStepsRequested= theCommands.logEvaluationSteps.size>0;
+  //bool logEvaluationStepsRequested = theCommands.logEvaluationSteps.size>0;
   theCommands.EvaluatedExpressionsStack.AddOnTop(input);
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(theCommands, 3);
@@ -694,7 +694,7 @@ bool Calculator::EvaluateExpression
   }
   //if (logEvaluationStepsRequested && counterNumTransformations>1)
   //{ logStream << "<br>";
-  //  *theCommands.logEvaluationSteps.LastObject()=logStream.str()+*theCommands.logEvaluationSteps.LastObject();
+  //  *theCommands.logEvaluationSteps.LastObject()=logStream.str() +*theCommands.logEvaluationSteps.LastObject();
   //}
   return true;
 }

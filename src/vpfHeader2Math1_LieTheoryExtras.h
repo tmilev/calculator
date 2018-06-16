@@ -459,7 +459,7 @@ public:
   }
   void MakeZero(SemisimpleLieAlgebraOrdered& owner, PolynomialSubstitution<Rational>& incomingSub)
   { this->theElT.MakeZero(owner);
-    this->theSubNthElementIsImageNthCoordSimpleBasis =incomingSub;
+    this->theSubNthElementIsImageNthCoordSimpleBasis = incomingSub;
   }
   template <class CoefficientTypeOther>
   void operator*=(const CoefficientTypeOther& theConst)

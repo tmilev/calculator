@@ -92,9 +92,9 @@ MathQuillCommandButton.prototype.getButton = function (inputPanel) {
   var resultString = "";
   resultString += "<button class = 'buttonMQ'";
   if (this.additionalStyle !== undefined) {
-    resultString += ` style='${this.additionalStyle}'`;
+    resultString += ` style ='${this.additionalStyle}'`;
   }
-  resultString += ` id='${this.getButtonId(inputPanel)}'`
+  resultString += ` id ='${this.getButtonId(inputPanel)}'`
   resultString += `>${this.theLabel}</button>`;
   return resultString;
 }
@@ -373,7 +373,7 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outpu
 InputPanelData.prototype.submitOrPreviewAnswers = function(requestType) {
   clearTimeout(this.timerForPreviewAnswers);
   var studentAnswer = document.getElementById(this.idPureLatex).value;
-  var theURL = `${pathnames.calculatorAPI}?request =${requestType}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
+  var theURL = `${pathnames.calculatorAPI}?request=${requestType}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
   submitGET({
     url: theURL,
     progress: "spanProgressReportGeneral",
@@ -392,7 +392,7 @@ InputPanelData.prototype.submitAnswer = function() {
   if (currentProblem.flagForReal) {
     theRequest = "submitAnswers";
   } else {
-    theRequest = `submitExercise&randomSeed=${currentProblem.randomSeed}`;
+    theRequest = `submitExercise&randomSeed =${currentProblem.randomSeed}`;
   }
    //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
@@ -400,7 +400,7 @@ InputPanelData.prototype.submitAnswer = function() {
 
 InputPanelData.prototype.submitGiveUp = function() {
   var currentProblem = thePage.pages.problemPage.problems[this.fileName];
-  var theRequest = `problemGiveUp&randomSeed=${currentProblem.randomSeed}`; //"submitAnswersPreview"
+  var theRequest = `problemGiveUp&randomSeed =${currentProblem.randomSeed}`; //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 
@@ -492,7 +492,7 @@ InputPanelData.prototype.chopStrings = function() {
   var mqCommentsSpan = document.getElementById(this.idMQcomments);
   if (calculatorRightPosition - calculatorLeftPosition > 1000) { 
     this.flagCalculatorMQStringIsOK = false;
-    mqCommentsSpan.innerHTML = "<span style='color:red'><b>Formula too big </b></span>";
+    mqCommentsSpan.innerHTML = "<span style ='color:red'><b>Formula too big </b></span>";
     return;
   }
   this.flagCalculatorMQStringIsOK = true;
@@ -595,7 +595,7 @@ InputPanelData.prototype.getSemiColumnEnclosure = function() {
     leftPos = rightPos;
   }
   if (rightPos - leftPos > 1000) {
-    mqProblemSpan.innerHTML = "<span style='color:red'><b></b></span>"
+    mqProblemSpan.innerHTML = "<span style ='color:red'><b></b></span>"
   }
   calculatorLeftPosition = leftPos;
   calculatorRightPosition = rightPos;
@@ -609,7 +609,7 @@ InputPanelData.prototype.getSemiColumnEnclosure = function() {
 
 InputPanelData.prototype.initializePartTwo = function(forceShowAll) { 
   var currentButtonPanel = document.getElementById(this.idButtonContainer);
-  var buttonArray = currentButtonPanel.attributes.buttons.value.toLowerCase().split(/(?:,| )+/);
+  var buttonArray = currentButtonPanel.attributes.buttons.value.toLowerCase().split(/(?:,| ) +/);
   //console.log(buttonArray);
   var buttonBindings = [];
   function addCommand(theCmd) { 

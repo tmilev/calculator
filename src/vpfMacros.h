@@ -43,7 +43,7 @@
 //If you do not want to use these counters, turn them off by commenting the first definition
 //and uncommenting the second, and vice versus.
 #ifndef MacroIncrementCounter
-#define MacroIncrementCounter(x) x++
+#define MacroIncrementCounter(x) x ++
 //#define MacroIncrementCounter(x)
 #endif
 

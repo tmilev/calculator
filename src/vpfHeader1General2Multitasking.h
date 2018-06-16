@@ -55,7 +55,7 @@ public:
   { this->initConstructorCallOnly();
   }
   MutexRecursiveWrapper(const std::string& inputMutexName)
-  { this->mutexName=inputMutexName;
+  { this->mutexName = inputMutexName;
     this->initConstructorCallOnly();
   }
   ~MutexRecursiveWrapper();
@@ -66,12 +66,12 @@ class MutexLockGuard{
 public:
   MutexRecursiveWrapper* theMutex;
   MutexLockGuard(MutexRecursiveWrapper& inputMutex)
-  { this->theMutex= &inputMutex;
+  { this->theMutex = &inputMutex;
     this->theMutex->LockMe();
   }
   ~MutexLockGuard()
   { this->theMutex->UnlockMe();
-    this->theMutex= 0;
+    this->theMutex = 0;
   }
 };
 

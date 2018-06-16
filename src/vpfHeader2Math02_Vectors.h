@@ -1085,8 +1085,8 @@ bool affineHyperplane<coefficient>::operator==(const affineHyperplane& right)
 
 template <class coefficient>
 Vector<coefficient> affineHyperplane<coefficient>::ProjectOnMe(Vector<coefficient>& input) const
-{ //output =input+x*normal  and <input+x*normal, normal>= 0 =>
-  //x= -<input, normal>/<normal,normal>
+{ //output = input +x*normal  and <input +x*normal, normal>= 0 =>
+  //x = -<input, normal>/<normal,normal>
   coefficient theNormalCoeff = - input.ScalarEuclidean(this->normal) / this->normal.ScalarEuclidean(this->normal);
   Vector<coefficient> output;
   output = input + this->normal * theNormalCoeff;

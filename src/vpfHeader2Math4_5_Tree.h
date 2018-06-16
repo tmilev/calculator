@@ -51,7 +51,7 @@ public:
 
 template <typename data>
 void TreeNode<data>::AddChild(const data& inputData)
-{ int newNodeIndex= this->owner->theNodes.size;
+{ int newNodeIndex = this->owner->theNodes.size;
   this->owner->theNodes.SetSize(this->owner->theNodes.size + 1);
   this->owner->theNodes[newNodeIndex].children.SetSize(0);
   this->owner->theNodes[newNodeIndex].owner = this->owner;

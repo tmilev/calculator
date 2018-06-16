@@ -54,10 +54,9 @@ public:
   void FreeAddressInfo();
   void FetchWebPage(std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool VerifyRecaptcha
-(std::stringstream* commentsOnFailure,
- std::stringstream* commentsGeneralNONsensitive,
- std::stringstream* commentsGeneralSensitive)
- ;
+  (std::stringstream* commentsOnFailure,
+   std::stringstream* commentsGeneralNONsensitive,
+   std::stringstream* commentsGeneralSensitive);
 };
 
 class WebServerMonitor{
@@ -85,7 +84,7 @@ void WebServerMonitor::BackupDatabaseIfNeeded()
       (24 * 3600))
     return;
   std::stringstream commandStream;
-  commandStream << "mongodump --db calculator --archive="
+  commandStream << "mongodump --db calculator --archive ="
   << theGlobalVariables.PhysicalPathProjectBase
   << "database-backups/dbBackup"
   << theGlobalVariables.GetDateForLogFiles() << ".mongo";
@@ -154,7 +153,7 @@ void WebServerMonitor::Monitor()
       << ", restarting. " << logger::endL;
       FileOperations::OpenFileCreateIfNotPresentVirtual
       (theFile,"LogFiles/server_starts_and_unexpected_restarts.html", true, false, false, true);
-      theFile << "<b style='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: "
+      theFile << "<b style ='color:red'>Unexpected server restart: server stopped responding (locked pipe?). Time: "
       << now.ToStringHumanReadable() << "</b><br>\n";
       theFile.flush();
       theWebServer.Restart();
@@ -284,7 +283,7 @@ void WebCrawler::PingCalculatorStatus()
       continue;
     } else
       reportStream << "<br>connected: " << this->addressToConnectTo << " port: " << this->portOrService << ". ";
-    std::string getMessage = "GET /cgi-bin/calculator?request =statusPublic";
+    std::string getMessage = "GET /cgi-bin/calculator?request=statusPublic";
     std::stringstream errorStream1;
     int numBytes = Pipe::WriteWithTimeoutViaSelect(this->theSocket,getMessage, 1, 10, &errorStream1);
     if ((unsigned) numBytes != getMessage.size())
@@ -459,7 +458,7 @@ void WebCrawler::FetchWebPagePart2
   unsigned bodyStart = 0;
   int numcrlfs = 0;
   //std::stringstream tempStream;
-  for (; bodyStart < this->headerReceived.size(); bodyStart++)
+  for (; bodyStart < this->headerReceived.size(); bodyStart ++)
   { if (numcrlfs >= 4)
       break;
     if (this->headerReceived[bodyStart] == '\n' ||
@@ -540,9 +539,9 @@ void WebCrawler::FetchWebPagePart2
     << this->bodyReceiveD.size()
     << ")<br>" << this->bodyReceiveD;
     if (this->bodyReceivedOutsideOfExpectedLength.size() == 0)
-      *commentsGeneral << "<br><span style=\"color:green\"><b>No extraneous data received</b></span>";
+      *commentsGeneral << "<br><span style =\"color:green\"><b>No extraneous data received</b></span>";
     else
-      *commentsGeneral<< "<br><span style=\"color:red\"><b>Received more data than expected "
+      *commentsGeneral<< "<br><span style =\"color:red\"><b>Received more data than expected "
       << "(perhaps due to a protocol error?).</b></span>"
       << "<br>" << this->bodyReceivedOutsideOfExpectedLength;
   }
@@ -710,7 +709,7 @@ bool Crypto::VerifyJWTagainstKnownKeys
   //stOutput << "DEBUG:Got to here";
   int theIndex = - 1;
   if (commentsGeneral != 0)
-    *commentsGeneral << "Seeking key: <span style=\"color:brown\"><b>"
+    *commentsGeneral << "Seeking key: <span style =\"color:brown\"><b>"
     << keyIDstring << "</b></span>. ";
   for (int i = 0; i < 2; i ++)
   { Crypto::LoadKnownCertificates(commentsOnFailure, commentsGeneral);
@@ -727,7 +726,7 @@ bool Crypto::VerifyJWTagainstKnownKeys
     if (theIndex != - 1 || i == 1)
       break;
     if (commentsGeneral != 0 && i == 0)
-      *commentsGeneral << "<br><span style=\"color:red\"><b>Couldn't find key ID: "
+      *commentsGeneral << "<br><span style =\"color:red\"><b>Couldn't find key ID: "
       << keyIDstring << " from cached certificate.</b></span>";
     if (commentsGeneral != 0 )
       *commentsGeneral << "<br>Reloading google public keys. ";
@@ -739,12 +738,12 @@ bool Crypto::VerifyJWTagainstKnownKeys
   //  *commentsOnFailure << "<hr>DEBUG: got to here, PART 2.";
   if (theIndex == - 1)
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "<span style=\"color:red\"><b>Could not find key id: "
+      *commentsOnFailure << "<span style =\"color:red\"><b>Could not find key id: "
       << keyIDstring << "</b></span>. ";
     return false;
   }
   if (commentsGeneral != 0)
-    *commentsGeneral << "<span style=\"color:green\"><b>Found key id: "
+    *commentsGeneral << "<span style =\"color:green\"><b>Found key id: "
     << keyIDstring << ".</b></span>";
   Certificate& currentCert = Crypto::knownCertificates[theIndex];
   return theToken.VerifyRSA256
@@ -764,7 +763,7 @@ bool WebCrawler::VerifyRecaptcha
   if (!FileOperations::LoadFileToStringVirtual
       ("certificates/recaptcha-secret.txt", secret, true, true, commentsOnFailure))
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "<span style=\"color:red\"><b>"
+      *commentsOnFailure << "<span style =\"color:red\"><b>"
       << "Failed to load recaptcha secret."
       << " </b></span>";
     return false;
@@ -774,10 +773,10 @@ bool WebCrawler::VerifyRecaptcha
     *commentsGeneralSensitive << "Recaptcha: " << recaptchaURLencoded;
   if (recaptchaURLencoded == "")
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "<span style=\"color:red\"><b>Recaptcha appears to be missing. </b></span>";
+      *commentsOnFailure << "<span style =\"color:red\"><b>Recaptcha appears to be missing. </b></span>";
     return false;
   }
-  messageToSendStream << "response="
+  messageToSendStream << "response ="
   << recaptchaURLencoded
   << "&"
   << "secret ="
@@ -793,7 +792,7 @@ bool WebCrawler::VerifyRecaptcha
   JSData theJSparser;
   if (!theJSparser.readstring(response, false, commentsOnFailure))
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "<span style=\"color:red\">"
+      *commentsOnFailure << "<span style =\"color:red\">"
       << "<b>" << "Failed to extract response token from captcha verification. "
       << "</b>"
       << " <br>The response string was: "
@@ -804,7 +803,7 @@ bool WebCrawler::VerifyRecaptcha
   if (!theJSparser.HasKey("success"))
   { if (commentsOnFailure != 0)
       *commentsOnFailure
-      << "<span style=\"color:red\">"
+      << "<span style =\"color:red\">"
       << "<b>" << "Captcha failure: could not find key 'success'."
       << "</b>"
       << "</span>";
@@ -814,7 +813,7 @@ bool WebCrawler::VerifyRecaptcha
   theSuccess = theJSparser.GetValue("success");
   if (theSuccess.type != theJSparser.JSbool || theSuccess.boolean != true)
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "<br><span style=\"color:red\">"
+      *commentsOnFailure << "<br><span style =\"color:red\">"
       << "<b>" << "Could not verify your captcha solution. "
       << "</b>"
       << "The response from google was: "
@@ -824,7 +823,7 @@ bool WebCrawler::VerifyRecaptcha
   } else
   { if (commentsGeneralNONsensitive != 0)
       *commentsGeneralNONsensitive
-      << "<br><span style=\"color:green\">"
+      << "<br><span style =\"color:green\">"
       << "<b>" << "Your recaptcha answer appears to be valid. "
       << "</b></span>\n<br>\n";
     if (commentsGeneralSensitive != 0)
@@ -837,7 +836,7 @@ bool WebCrawler::VerifyRecaptcha
 
 int WebWorker::ProcessSignUP()
 { MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
-  //double startTime=theGlobalVariables.GetElapsedSeconds();
+  //double startTime =theGlobalVariables.GetElapsedSeconds();
   this->SetHeaderOKNoContentLength();
 #ifdef MACRO_use_MongoDB
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
@@ -855,18 +854,18 @@ int WebWorker::ProcessSignUP()
     return 0;
   }
   if (theUser.username == "")
-  { stOutput << "<span style=\"color:red\"><b>"
+  { stOutput << "<span style =\"color:red\"><b>"
     << "Empty username not allowed. "
     << "</b></span>";
     return 0;
   }
   if (!EmailRoutines::IsOKEmail(theUser.email, &out))
-  { stOutput << "<span style=\"color:red\"><b>Your email address does not appear to be valid. "
+  { stOutput << "<span style =\"color:red\"><b>Your email address does not appear to be valid. "
     << out.str() << "</b></span>";
     return 0;
   }
   if (theUser.Iexist(&out))
-  { stOutput << "<span style=\"color:red\"><b>"
+  { stOutput << "<span style =\"color:red\"><b>"
     << "Either the username ("
     << theUser.username
     << ") or the email ("
@@ -874,7 +873,7 @@ int WebWorker::ProcessSignUP()
     << ") you requested is already taken.</b></span>";
     return 0;
   } else
-    stOutput << "<span style=\"color:green\"><b>"
+    stOutput << "<span style =\"color:green\"><b>"
     << "Username ("
     << theUser.username
     << ") with email ("
@@ -899,7 +898,7 @@ int WebWorker::ProcessSignUP()
 
 int WebWorker::ProcessForgotLogin()
 { MacroRegisterFunctionWithName("WebWorker::ProcessForgotLogin");
-  //double startTime=theGlobalVariables.GetElapsedSeconds();
+  //double startTime =theGlobalVariables.GetElapsedSeconds();
   this->SetHeaderOKNoContentLength();
 #ifdef MACRO_use_MongoDB
   std::stringstream out;
@@ -924,21 +923,21 @@ int WebWorker::ProcessForgotLogin()
       ((std::string) "email", theUser.email,
        (std::string) "emailActivationStats", (std::string) "usernameAssociatedWithToken",
         theUser.username.value, &out))
-  { out << "<br><span style=\"color:red\"><b>"
+  { out << "<br><span style =\"color:red\"><b>"
     << "We failed to find your email in our records. "
     << "</b></span>";
     stOutput << out.str();
     return 0;
   }
   if (!theUser.Iexist(theRoutines, &out))
-  { stOutput << "<span style=\"color:red\"><b>"
+  { stOutput << "<span style =\"color:red\"><b>"
     << "We have your email on record but we can't find the username: "
     << theUser.username.value
     << " which is supposed to be associated with it. This should be an error. "
     << "</b></span>";
     return 0;
   }
-  stOutput << "<b style=\"color:green\">"
+  stOutput << "<b style =\"color:green\">"
   << "Your email is on record. "
   << "</b>";
   if (!theGlobalVariables.UserDefaultHasAdminRights())

@@ -11,7 +11,7 @@ bool CalculatorConversions::innerExpressionFromChevalleyGenerator(Calculator& th
   input.CheckInitialization();
   output.reset(theCommands, 2);
   Expression generatorLetterE, generatorIndexE;
-  if (input.theGeneratorIndex>=input.owner->GetNumPosRoots() && input.theGeneratorIndex< input.owner->GetNumPosRoots()+input.owner->GetRank())
+  if (input.theGeneratorIndex>= input.owner->GetNumPosRoots() && input.theGeneratorIndex< input.owner->GetNumPosRoots() + input.owner->GetRank())
     generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("h"), theCommands);
   else
     generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
@@ -44,21 +44,21 @@ bool CalculatorConversions::innerDynkinSimpleType(Calculator& theCommands, const
 { MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DeSerializeMon_DynkinSimpleType");
   Expression rankE, typeLetterE, scaleE;
   if (input.StartsWith(theCommands.opUnderscore(),3))
-  { rankE=input[2];
-    typeLetterE=input[1];
+  { rankE= input[2];
+    typeLetterE= input[1];
     if (typeLetterE.StartsWith(theCommands.opThePower(),3))
     { scaleE= typeLetterE[2];
       typeLetterE= typeLetterE[1];
     } else
       scaleE.AssignValue(1, theCommands);
   } else if (input.StartsWith(theCommands.opThePower(),3))
-  { scaleE=input[2];
+  { scaleE= input[2];
     if (!input[1].StartsWith(theCommands.opUnderscore(), 3))
       return theCommands << "<hr>Failed to extract rank, type from "
       << input[1].ToString()
       << ". The expression does not have two children.";
-    rankE=input[1][2];
-    typeLetterE=input[1][1];
+    rankE= input[1][2];
+    typeLetterE= input[1][1];
   } else
     return theCommands << "<hr>Failed to extract rank, type, "
     << "first co-root length from: " << input.ToString() << ". ";
@@ -109,9 +109,9 @@ bool CalculatorConversions::innerDynkinType(Calculator& theCommands, const Expre
   for (int i = 0; i <theType.size(); i ++)
   { if (!CalculatorConversions::innerDynkinSimpleType(theCommands, theType[i], simpleComponent))
       return false;
-    int theMultiplicity= - 1;
+    int theMultiplicity = - 1;
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
-      theMultiplicity= - 1;
+      theMultiplicity = - 1;
     if (theMultiplicity<0)
       return theCommands << "<hr>Failed to convert the coefficient " << theType.theCoeffs[i] << " of " << theType[i].ToString()
       << " to a small positive integer. ";
@@ -139,7 +139,7 @@ bool CalculatorConversions::innerSSLieAlgebra(Calculator& theCommands, const Exp
     << "table of RAM memory, which means the RAM memory rises with the 4^th power of rank(g). "
     << " You have been warned. Alternatively, you may want to implement a sparse structure constant table "
     << "(write me an email if you want to do that, I will help you). ";
-  bool newlyCreated=!theCommands.theObjectContainer.theSSLieAlgebras.Contains(theDynkinType);
+  bool newlyCreated =!theCommands.theObjectContainer.theSSLieAlgebras.Contains(theDynkinType);
   outputPointer = &theCommands.theObjectContainer.GetLieAlgebraCreateIfNotPresent(theDynkinType);
   outputPointer->CheckConsistency();
   output.AssignValue(*outputPointer, theCommands);
@@ -169,7 +169,7 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType
 { MacroRegisterFunctionWithName("CalculatorBuiltInTypeConversions::DynkinSimpleType");
   Expression letterE, rankE, letterAndIndexE, indexE;
   std::string letterS;
-  letterS=input.theLetter;
+  letterS= input.theLetter;
   letterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(letterS), theCommands);
   indexE.AssignValue(input.CartanSymmetricInverseScale, theCommands);
   rankE.AssignValue(input.theRank, theCommands);
@@ -182,7 +182,7 @@ bool CalculatorConversions::innerExpressionFromDynkinSimpleType
 bool CalculatorConversions::innerStoreSemisimpleLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsOfType<SemisimpleLieAlgebra>())
     return output.MakeError("Asking to store non-semisimple Lie algebra as such is not allowed. ", theCommands);
-  SemisimpleLieAlgebra& owner =input.GetValueNonConst<SemisimpleLieAlgebra>();
+  SemisimpleLieAlgebra& owner = input.GetValueNonConst<SemisimpleLieAlgebra>();
   return CalculatorConversions::innerExpressionFromDynkinType(theCommands, owner.theWeyl.theDynkinType, output);
 }
 
@@ -228,13 +228,13 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(Calculator& theComma
 { MacroRegisterFunctionWithName("CalculatorConversions::innerLoadFromObject slTwoSubalgebra");
   if (!input.IsListNElements(4))
     return theCommands << "<hr>input of innerLoadFromObject has " << input.children.size << " children, 4 expected. ";
-  const Expression& theOwnerE=input[1];
+  const Expression& theOwnerE= input[1];
   Expression tempE;
   if (!CalculatorConversions::innerSSLieAlgebra(theCommands, theOwnerE, tempE, output.owner))
     return theCommands << "<hr>Failed to extract semisimple Lie algebra from " << theOwnerE.ToString()
     << " while extracting its sl(2) subalgebra.";
-  const Expression& theF=input[2];
-  const Expression& theE=input[3];
+  const Expression& theF= input[2];
+  const Expression& theE= input[3];
   ElementSemisimpleLieAlgebra<Rational> eltF, eltE;
   if (!CalculatorConversions::innerElementSemisimpleLieAlgebraRationalCoeffs(theCommands, theF, eltF, *output.owner))
     return theCommands << "<hr>Failed to extract f element while loading sl(2) subalgebra<hr>";
@@ -249,7 +249,7 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(Calculator& theComma
   output.theE=eltE;
   output.theF=eltF;
   output.owner =eltE.GetOwner();
-  DynkinType& theType= output.owner->theWeyl.theDynkinType;
+  DynkinType& theType = output.owner->theWeyl.theDynkinType;
   SemisimpleSubalgebras& ownerSubalgebras =
   theCommands.theObjectContainer.GetSemisimpleSubalgebrasCreateIfNotPresent(theType);
   output.container = &ownerSubalgebras.theSl2s;
@@ -267,12 +267,12 @@ bool CalculatorConversions::innerSlTwoSubalgebraPrecomputed(Calculator& theComma
 bool CalculatorConversions::innerAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerAlgebraicNumber");
   if (input.IsOfType<AlgebraicNumber>())
-  { output =input;
+  { output = input;
     return true;
   }
   if (input.IsOfType<Rational>())
   { AlgebraicNumber theNum;
-    theNum=input.GetValue<Rational>();
+    theNum= input.GetValue<Rational>();
     return output.AssignValue(theNum, theCommands);
   }
   return false;
@@ -290,7 +290,7 @@ bool CalculatorConversions::innerLoadKeysFromStatementList
   std::string keyName;
   for (int i = 0; i <outputExpressionFormat.theKeys.size; i ++)
   { if (!outputExpressionFormat.theKeys[i].IsOfType<std::string>(&keyName))
-      keyName= outputExpressionFormat.theKeys[i].ToString();
+      keyName = outputExpressionFormat.theKeys[i].ToString();
     output.SetKeyValue(keyName, outputExpressionFormat[i]);
   }
   return true;
@@ -325,7 +325,7 @@ bool CalculatorConversions::innerLoadKey
   for (int i = 0; i <inputStatementList.children.size; i ++)
     if (inputStatementList[i].StartsWith(theCommands.opDefine(), 3))
       if (inputStatementList[i][1]== theKeyE)
-      { output =inputStatementList[i][2];
+      { output = inputStatementList[i][2];
         return true;
       }
   return theCommands << "<hr>Key " << inputKey << " not found in expression " << inputStatementList.ToString() << ".";
@@ -372,7 +372,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   DynkinType theNonEmbeddedDynkinType;
   if (!CalculatorConversions::innerDynkinType(theCommands, DynkinTypeE, theNonEmbeddedDynkinType))
     return theCommands << "<hr> Failed to load dynkin type of candidate subalgebra from " << DynkinTypeE.ToString() << "<hr>";
-  outputSubalgebra.theWeylNonEmbedded= &
+  outputSubalgebra.theWeylNonEmbedded = &
   theCommands.theObjectContainer.GetWeylGroupDataCreateIfNotPresent(theNonEmbeddedDynkinType);
   outputSubalgebra.theWeylNonEmbedded->MakeFromDynkinType(theNonEmbeddedDynkinType);
 
@@ -392,11 +392,11 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   int counter = - 1;
   for (int i = 0; i <theMults.size; i ++)
     for (int j = 0; j<theMults[i]; j ++)
-    { componentCounter++;
+    { componentCounter ++;
       Vectors<Rational>& currentComponent = outputSubalgebra.CartanSAsByComponentScaledToActByTwo[componentCounter];
       currentComponent.SetSize(theRanks[i]);
       for (int k= 0; k<theRanks[i]; k++)
-      { counter++;
+      { counter ++;
         theHs.GetVectorFromRow(counter, currentComponent[k]);
       }
     }
@@ -414,7 +414,7 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
         outputSubalgebra.thePosGens.AddOnTop(curGenAlgebraic);
     }
     outputSubalgebra.flagSystemProvedToHaveNoSolution = false;
-    outputSubalgebra.flagSystemSolved= true;
+    outputSubalgebra.flagSystemSolved = true;
   } else
     return theCommands << "<hr>Failed to extract subalgebra generators from expression " << input.ToString() << ". ";
   SemisimpleLieAlgebra& currentNonEmbededSA =
@@ -427,13 +427,13 @@ bool CalculatorConversions::innerCandidateSAPrecomputed(Calculator& theCommands,
   //some time soon.
   //stOutput << "Before calling compute system, output subalgebra is: " << outputSubalgebra.ToString();
   outputSubalgebra.ComputeHsAndHsScaledToActByTwoFromComponents();
-  outputSubalgebra.flagSubalgebraPreloadedButNotVerified= true;
+  outputSubalgebra.flagSubalgebraPreloadedButNotVerified = true;
   return output.MakeError("Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ", theCommands);
 }
 
 bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theCommands, const Expression& inpuT, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerLoadSemisimpleSubalgebras");
-  Expression input =inpuT;
+  Expression input = inpuT;
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit = - 1;
   Expression theAmbientTypeE, numExploredHsE, numExploredTypesE, theSAsE, currentChainE;
   if (!CalculatorConversions::innerLoadKey(theCommands, input, "AmbientDynkinType", theAmbientTypeE))
@@ -484,7 +484,7 @@ bool CalculatorConversions::innerLoadSemisimpleSubalgebras(Calculator& theComman
   theSAs.theSubalgebrasNonEmbedded->SetExpectedSize(theSAsE.children.size- 1);
   theSAs.flagAttemptToSolveSystems = true;
   theSAs.flagComputeModuleDecomposition = true;
-  theSAs.flagComputePairingTable= false;
+  theSAs.flagComputePairingTable = false;
   theSAs.flagComputeNilradicals = false;
   theSAs.timeComputationStartInSeconds = theGlobalVariables.GetElapsedSeconds();
   reportStream << " done. <br>Total subalgebras: " << theSAsE.children.size- 1 << ". ";
@@ -572,7 +572,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(Calculator& theComma
   Expression numTypesExploredE;
   numTypesExploredE.MakeSequence(theCommands);
   for (int i = 0; i <input.currentNumLargerTypesExplored.size; i ++)
-  { numericalConvertorE=input.currentNumLargerTypesExplored[i];
+  { numericalConvertorE= input.currentNumLargerTypesExplored[i];
     numTypesExploredE.AddChildOnTop(numericalConvertorE);
   }
   theKeys.AddOnTop("NumExploredTypes");
@@ -580,7 +580,7 @@ bool CalculatorConversions::innerStoreSemisimpleSubalgebras(Calculator& theComma
   Expression numHsExploredE;
   numHsExploredE.MakeSequence(theCommands);
   for (int i = 0; i <input.currentNumHcandidatesExplored.size; i ++)
-  { numericalConvertorE=input.currentNumHcandidatesExplored[i];
+  { numericalConvertorE= input.currentNumHcandidatesExplored[i];
     numHsExploredE.AddChildOnTop(numericalConvertorE);
   }
   theKeys.AddOnTop("NumExploredHs");
@@ -606,11 +606,11 @@ bool CalculatorConversions::innerExpressionFromMonomialUE
   if (input.IsConstant())
     return output.AssignValue(1, theCommands);
   ChevalleyGenerator theGen;
-  theGen.owner =input.owner;
+  theGen.owner = input.owner;
   Expression chevGenE, powerE, termE;
   List<Expression> theTerms;
   for (int i = 0; i <input.generatorsIndices.size; i ++)
-  { theGen.theGeneratorIndex=input.generatorsIndices[i];
+  { theGen.theGeneratorIndex = input.generatorsIndices[i];
     CalculatorConversions::innerExpressionFromChevalleyGenerator(theCommands, theGen, chevGenE);
     CalculatorConversions::innerExpressionFromRF(theCommands, input.Powers[i], powerE, inputContext);
     termE.MakeXOX(theCommands, theCommands.opThePower(), chevGenE, powerE);
@@ -657,9 +657,9 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
 { MacroRegisterFunctionWithName("CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers");
   Expression polyFormE;
   Polynomial<AlgebraicNumber> polyForm;
-  bool polyFormGood=CalculatorConversions::innerPolynomial<AlgebraicNumber>(theCommands, input, polyFormE);
+  bool polyFormGood =CalculatorConversions::innerPolynomial<AlgebraicNumber>(theCommands, input, polyFormE);
   if (polyFormGood)
-    polyFormGood=polyFormE.IsOfType<Polynomial<AlgebraicNumber> >(&polyForm);
+    polyFormGood =polyFormE.IsOfType<Polynomial<AlgebraicNumber> >(&polyForm);
   if (!polyFormGood)
     return theCommands << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
   ChevalleyGenerator theChevGen;
@@ -669,7 +669,7 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
   Expression theContext =polyFormE.GetContext();
   for (int j = 0; j<polyForm.size(); j ++)
   { const MonomialP& currentMon =polyForm[j];
-    int theGenIndex= 0;
+    int theGenIndex = 0;
     if (!currentMon.IsOneLetterFirstDegree(&theGenIndex))
       return theCommands << "<hr>Failed to convert semisimple Lie algebra input to linear poly: " << input.ToString() << ".<hr>";
     Expression singleChevGenE= theContext.ContextGetContextVariable(theGenIndex);
@@ -684,24 +684,24 @@ bool CalculatorConversions::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
       return theCommands << "<hr>Failed to convert summand "
       << singleChevGenE.ToString() << " to Chevalley generator of "
       << owner.GetLieAlgebraName();
-    bool isGood= true;
+    bool isGood = true;
     if (theLetter =="g")
-    { theChevGen.theGeneratorIndex= owner.GetGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
+    { theChevGen.theGeneratorIndex = owner.GetGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
       if (theChevGen.theGeneratorIndex<0 || theChevGen.theGeneratorIndex>= owner.GetNumGenerators())
-        isGood= false;
+        isGood = false;
       output.AddMonomial(theChevGen, polyForm.theCoeffs[j]);
     } else if (theLetter =="h")
     { //stOutput << "HERE I AM";
-      int theRootIndex= owner.GetRootIndexFromDisplayIndex(theChevGen.theGeneratorIndex);
+      int theRootIndex = owner.GetRootIndexFromDisplayIndex(theChevGen.theGeneratorIndex);
       if (theRootIndex<0)
-        isGood= false;
+        isGood = false;
       else
       { currentElt.MakeHgenerator(owner.theWeyl.RootSystem[theRootIndex], owner);
         currentElt*=polyForm.theCoeffs[j];
-        output+=currentElt;
+        output += currentElt;
       }
     } else
-      isGood= false;
+      isGood = false;
     if (!isGood)
       return theCommands << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
       << owner.GetLieAlgebraName();
@@ -747,17 +747,17 @@ bool CalculatorConversions::innerElementUE(Calculator& theCommands, const Expres
       if (!singleChevGenE[0].IsAtom(&theLetter) || !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
         return theCommands << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
         << owner.GetLieAlgebraName();
-      bool isGood= true;
+      bool isGood = true;
       bool isHonestElementUE= true;
       if (theLetter =="g")
-      { theChevGen.theGeneratorIndex= owner.GetGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
+      { theChevGen.theGeneratorIndex = owner.GetGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
         if (theChevGen.theGeneratorIndex<0 || theChevGen.theGeneratorIndex>= owner.GetNumGenerators())
-          isGood= false;
+          isGood = false;
       } else if (theLetter =="h")
       { if (theChevGen.theGeneratorIndex <1 || theChevGen.theGeneratorIndex>owner.GetRank())
-          isGood= false;
+          isGood = false;
         else
-          theChevGen.theGeneratorIndex= theChevGen.theGeneratorIndex+owner.GetNumPosRoots()- 1;
+          theChevGen.theGeneratorIndex = theChevGen.theGeneratorIndex +owner.GetNumPosRoots()- 1;
       } else
         isHonestElementUE= false;
       if (!isGood)
@@ -766,12 +766,12 @@ bool CalculatorConversions::innerElementUE(Calculator& theCommands, const Expres
       if (isHonestElementUE)
       { currentMultiplicand.MakeOneGenerator(theChevGen.theGeneratorIndex, owner, 1);
         currentMultiplicand.RaiseToPower(thePower);
-        currentSummand*=currentMultiplicand;
+        currentSummand*= currentMultiplicand;
       } else
-      { int varIndex= outputPolyVars.GetIndexChild(singleChevGenE);
-        if (varIndex== - 1)
+      { int varIndex = outputPolyVars.GetIndexChild(singleChevGenE);
+        if (varIndex == - 1)
         { outputPolyVars.AddChildOnTop(singleChevGenE);
-          varIndex= outputPolyVars.children.size- 1;
+          varIndex = outputPolyVars.children.size- 1;
         } else
           varIndex--;
         currentMultiplicandRFpartMon[varIndex]= thePower;
@@ -779,9 +779,9 @@ bool CalculatorConversions::innerElementUE(Calculator& theCommands, const Expres
     }
     currentPMultiplicand.MakeZero();
     currentPMultiplicand.AddMonomial(currentMultiplicandRFpartMon, 1);
-    currentMultiplicandRFpart =currentPMultiplicand;
-    currentSummand*=currentMultiplicandRFpart;
-    outputUE+=currentSummand;
+    currentMultiplicandRFpart = currentPMultiplicand;
+    currentSummand*= currentMultiplicandRFpart;
+    outputUE+= currentSummand;
   }
 //  stOutput << "<hr>outputUE: " << outputUE.ToString();
   Expression outputContext;
@@ -798,8 +798,8 @@ bool CalculatorConversions::innerExpressionFromPoly
 { MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromPoly");
   if (!input.IsOfType<Polynomial<coefficient> >() )
     return false;
-  const Polynomial<coefficient>& thePoly=input.GetValue<Polynomial<coefficient> >();
-  Expression theContext =input.GetContext();
+  const Polynomial<coefficient>& thePoly = input.GetValue<Polynomial<coefficient> >();
+  Expression theContext = input.GetContext();
   return CalculatorConversions::innerExpressionFromPoly(theCommands, thePoly, output, &theContext);
 }
 
@@ -818,10 +818,10 @@ bool CalculatorConversions::innerExpressionFromPoly
       theTerms.AddMonomial(currentTerm, input.theCoeffs[i]);
       continue;
     }
-    bool found= false;
+    bool found = false;
     for (int j = 0; j<input[i].GetMinNumVars(); j ++)
       if (input[i](j)!= 0)
-      { if (inputContext!= 0)
+      { if (inputContext != 0)
           currentBase = inputContext->ContextGetContextVariable(j);
         else
         { currentBase.reset(theCommands);
@@ -829,16 +829,16 @@ bool CalculatorConversions::innerExpressionFromPoly
           currentBase.AddChildValueOnTop((Rational) j);
         }
         if (input[i](j)==1)
-          currentMultTermE=currentBase;
+          currentMultTermE= currentBase;
         else
         { currentPower.AssignValue(input[i](j), theCommands);
           currentMultTermE.MakeXOX(theCommands, theCommands.opThePower(), currentBase, currentPower);
         }
         if (!found)
-          currentTerm=currentMultTermE;
+          currentTerm= currentMultTermE;
         else
-          currentTerm*=currentMultTermE;
-        found= true;
+          currentTerm*= currentMultTermE;
+        found = true;
       }
     theTerms.AddMonomial(currentTerm, input.theCoeffs[i]);
   }
@@ -849,7 +849,7 @@ bool CalculatorConversions::innerExpressionFromPoly
 bool CalculatorConversions::innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromBuiltInType");
   if (input.IsOfType<Rational>() || input.IsOfType<double>() || input.IsOfType<AlgebraicNumber>())
-  { output =input;
+  { output = input;
     return true;
   }
   if (input.IsOfType<Polynomial<Rational> >())
@@ -874,7 +874,7 @@ bool CalculatorConversions::innerExpressionFromRF(Calculator& theCommands, const
 { MacroRegisterFunctionWithName("CalculatorConversions::innerExpressionFromRF");
   if (!input.IsOfType<RationalFunctionOld>() )
     return false;
-  const RationalFunctionOld& theRF=input.GetValue<RationalFunctionOld>();
+  const RationalFunctionOld& theRF= input.GetValue<RationalFunctionOld>();
   Expression theContext = input.GetContext();
   return CalculatorConversions::innerExpressionFromRF(theCommands, theRF, output, &theContext);
 }
@@ -888,14 +888,14 @@ bool CalculatorConversions::innerExpressionFromRF
   Polynomial<Rational> numP, denP;
   input.GetNumerator(numP);
 
-  if (input.IsConstant() || input.expressionType==input.typePoly)
+  if (input.IsConstant() || input.expressionType == input.typePoly)
     return CalculatorConversions::innerExpressionFromPoly<Rational>(theCommands, numP, output, inputContext);
   Expression numE, denE;
   input.GetDenominator(denP);
-  Polynomial<Rational> numRescaled=numP;
-  Polynomial<Rational> denRescaled=denP;
-  Rational topMultiple=  numRescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-  Rational bottomMultiple=denRescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  Polynomial<Rational> numRescaled = numP;
+  Polynomial<Rational> denRescaled =denP;
+  Rational topMultiple =  numRescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  Rational bottomMultiple =denRescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   Rational multipleTopBottom=bottomMultiple/topMultiple;
   numRescaled*=multipleTopBottom.GetNumerator();
   denRescaled*=multipleTopBottom.GetDenominator();
@@ -1047,7 +1047,7 @@ bool CalculatorConversions::innerLoadFileIntoString(Calculator& theCommands, con
   std::string theRelativeFileName;
   if (!input.IsOfType<std::string>(&theRelativeFileName))
   { theCommands << "Input of load file string command is supposed to be a string. Converting your expression to a string and using that instead. ";
-    theRelativeFileName=input.ToString();
+    theRelativeFileName = input.ToString();
   }
   std::string outputString;
   if (!FileOperations::LoadFileToStringVirtual(theRelativeFileName, outputString, false, false, &theCommands.Comments))

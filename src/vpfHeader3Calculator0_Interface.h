@@ -53,7 +53,7 @@ private:
   //This is GUARANTEED, and you MAY assume it.
   //If you want to have a list of mathematical objects, use the Sequence
   //data structure. A sequence is a List whose first entry is an atom whose value
-  //is Sequence=Calculator::opSequence().
+  //is Sequence =Calculator::opSequence().
   //
   //-------------------------------------------------------
   //
@@ -625,7 +625,7 @@ class SyntacticElement
   List<Expression> dataList;
   std::string ToStringHumanReadable(Calculator& theBoss, bool includeLispifiedExpressions) const;
   SyntacticElement()
-  { this->controlIndex = 0;//controlIndex= 0 *MUST* point to the empty control sequence.
+  { this->controlIndex = 0;//controlIndex = 0 *MUST* point to the empty control sequence.
     this->errorString = "";
     this->numNonBoundVariablesInherited = - 1; // - 1 stands for unknown
     this->numBoundVariablesInherited = - 1; // - 1 stands for unknown
@@ -1122,7 +1122,7 @@ public:
       return true;
     if ((*this->CurrentSyntacticStacK).size - decrease <= 0)
       crash << crash;
-//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease- 1].IndexLastCharPlusOne=
+//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease- 1].IndexLastCharPlusOne =
 //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size- 1].IndexLastCharPlusOne;
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size - decrease);
     return true;
@@ -1958,7 +1958,7 @@ public:
   static bool innerGroebnerModZpLex(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerGroebner(theCommands, input, output, false, false, true);
   }
-  static bool innerGroebner(Calculator& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex= false, bool useModZp = false);
+  static bool innerGroebner(Calculator& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex = false, bool useModZp = false);
   static bool innerKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output);
   //  static bool innerSSLieAlgebra
   //  (Calculator& theCommands, const Expression& input, Expression& output)

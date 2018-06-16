@@ -20,16 +20,16 @@ public:
   //On a 32 bit machine any number smaller than or equal to 2^30 will work.
   //If you got no clue what to put just leave CarryOverBound as it is below.
   List<int32_t> theDigits;
-  //static const int CarryOverBound=10; //<-for extreme "corner case" testing
+  //static const int CarryOverBound =10; //<-for extreme "corner case" testing
   static const int CarryOverBound = 1000000000;
   //the above choice of CarryOverBound facilitates very quick conversions of Large integers into decimal, with
   //relatively small loss of speed and RAM memory.
-//  static const unsigned int CarryOverBound=2147483648UL; //=2^31
+//  static const unsigned int CarryOverBound =2147483648UL; //=2^31
   //The following must be less than or equal to the square root of CarryOverBound.
   //It is used for quick multiplication of Rational-s.
-  //static const int SquareRootOfCarryOverBound=3;//<-for extreme "corner case" testing
+  //static const int SquareRootOfCarryOverBound =3;//<-for extreme "corner case" testing
   static const int SquareRootOfCarryOverBound = 31000; //31000*31000=961000000<1000000000
-//  static const int SquareRootOfCarryOverBound=32768; //=2^15
+//  static const int SquareRootOfCarryOverBound =32768; //=2^15
   friend bool operator<(int left, const LargeIntUnsigned& right)
   { return right > left;
   }
@@ -303,7 +303,7 @@ public:
     this->sign*= other.sign;
     LargeIntUnsigned quotient, remainder;
     this->value.DivPositive(other.value, quotient, remainder);
-    this->value=quotient;
+    this->value =quotient;
   }
   inline bool operator>(const LargeInt& other) const
   { return other < *this;
@@ -804,7 +804,7 @@ public:
   Rational(const std::string& input): NumShort(0), DenShort(0), Extended(0)
   { this->AssignString(input);
   }
-//  Rational(int x){this->Extended= 0; this->AssignInteger(x); };
+//  Rational(int x){this->Extended = 0; this->AssignInteger(x); };
   ~Rational()
   { this->FreeExtended();
   }

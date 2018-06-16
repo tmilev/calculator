@@ -32,7 +32,7 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
   for (int i = 0; i < inputOutputElts.size; i ++)
     for (int j = i; j < inputOutputElts.size; j ++)
     { theBinaryOperation(inputOutputElts[i], inputOutputElts[j], theOpResult);
-      //int oldNumElts =inputOutputElts.size;
+      //int oldNumElts = inputOutputElts.size;
       theEltsForGaussianElimination.AddOnTop(theOpResult);
       theEltsForGaussianElimination[0].GaussianEliminationByRowsDeleteZeroRows(theEltsForGaussianElimination);
       if (theEltsForGaussianElimination.size > inputOutputElts.size)
@@ -158,7 +158,7 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
   List<std::string> theCerts, theShas, certsAndShas;
   List<List<unsigned char> > theCertsRAWuchars;
   List<std::string> theCertsRAWstrings;
-  const int sampleSize=100;
+  const int sampleSize =100;
   theCerts.SetSize(sampleSize);
   theShas.SetSize(sampleSize);
   certsAndShas.SetSize(sampleSize);
@@ -174,7 +174,7 @@ bool CalculatorFunctionsGeneral::innerX509certificateCrunch(Calculator& theComma
     MathRoutines::SplitStringInTwo(certsAndShas[i], commaPosition + 1, theShas[i], theCerts[i]);
     if (theShas[i].size() > 0)
       theShas[i].resize(theShas[i].size() - 1);
-    out << "Raw cert+sha:<br>" << certsAndShas[i] << "<br>Certificate " << i + 1
+    out << "Raw cert +sha:<br>" << certsAndShas[i] << "<br>Certificate " << i + 1
     << " (base64):<br>" << theCerts[i] << "<br>Sha1:<br>" << theShas[i]
     << "<br>Comments while extracting the raw certificate: ";
     Crypto::ConvertBase64ToBitStream(theCerts[i], theCertsRAWuchars[i], &out);
@@ -306,7 +306,7 @@ bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCo
   std::string theConvertedBack = Crypto::ConvertStringToBase64(theBitStream);
   out << "Original string: " << input.GetValue<std::string>()
   << "<br>Converted to bitstream and back: " << theConvertedBack;
-  if (theConvertedBack!=input.GetValue<std::string>())
+  if (theConvertedBack!= input.GetValue<std::string>())
     out << "<br><b>The input is not the same as the output!</b>";
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1315,7 +1315,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
 
   this->contextE.ContextGetFormatExpressions(this->currentFormaT);
   if (this->theRF.GetMinNumVars() < 1 || this->theRF.expressionType == this->theRF.typeRational ||
-      this->theRF.expressionType== this->theRF.typePoly)
+      this->theRF.expressionType == this->theRF.typePoly)
   { this->printoutPFsHtml << this->theRF.ToString(&this->currentFormaT) << " is already split into partial fractions. ";
     return true;
   }
@@ -1375,7 +1375,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
   theDenominatorFactorsWithMultsCopy.MakeZero();
   for (int i = 0; i < this->theFactors.size; i ++)
   { theDenominatorFactorsWithMultsCopy.AddMonomial(this->theFactors[i], 1);
-    //this->currentFormaT.flagSuppressOneIn1overXtimesY= false;
+    //this->currentFormaT.flagSuppressOneIn1overXtimesY = false;
 //    stOutput << "<br>Factor: " << theFactors[i].ToString(&this->currentFormaT);
   }
   theDenominatorFactorsWithMultsCopy.QuickSortAscending();
@@ -1390,7 +1390,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     { this->theDenominatorFactorsWithMults.AddMonomial(currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.theCoeffs[i]);
       continue;
     }
-    Rational theDiscriminant =currentSecondDegreePoly.GetDiscriminant();
+    Rational theDiscriminant = currentSecondDegreePoly.GetDiscriminant();
 //    stOutput << "The discriminant: " << theDiscriminant.ToString();
     if (theDiscriminant < 0)
     { this->theDenominatorFactorsWithMults.AddMonomial(currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.theCoeffs[i]);
@@ -1414,7 +1414,7 @@ bool IntegralRFComputation::ComputePartialFractionDecomposition()
     currentLinPoly -= (- b - theDiscriminantSqrt) / (a * 2);
     this->theDenominatorFactorsWithMults.AddMonomial(currentLinPoly, theDenominatorFactorsWithMultsCopy.theCoeffs[i]);
     additionalMultiple *= a;
-//    Rational c =currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0,0));
+//    Rational c = currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0,0));
   }
   this->theDenominatorFactorsWithMults.QuickSortAscending();
 //  this->printoutPFsHtml << "<hr>this->theDenominatorFactorsWithMults: " << this->theDenominatorFactorsWithMults.ToString();
@@ -1609,12 +1609,12 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
   theFileStream << "calculator: ";
   for (int i = 0; i < cppFilesNoExtension.size; i ++)
     theFileStream << cppFilesNoExtension[i] << ".o ";
-  theFileStream << "\n\tg++ -std=c++ 11 -pthread ";
+  theFileStream << "\n\tg++ -std = c++ 11 -pthread ";
   for (int i = 0; i < cppFilesNoExtension.size; i ++)
     theFileStream << cppFilesNoExtension[i] << ".o ";
   theFileStream << "-o ./bin/calculator\n\n";
   for (int i = 0; i < cppFilesNoExtension.size; i ++)
-    theFileStream << cppFilesNoExtension[i] << ".o: " << cppFilesNoExtension[i] << ".cpp\n\tg++ -std=c++0x -pthread -c " << cppFilesNoExtension[i] << ".cpp\n\n";
+    theFileStream << cppFilesNoExtension[i] << ".o: " << cppFilesNoExtension[i] << ".cpp\n\tg++ -std = c++ 0x -pthread -c " << cppFilesNoExtension[i] << ".cpp\n\n";
   outHtml << "<a href=\" " << theGlobalVariables.DisplayPathOutputFolder << "makefile" << "\"> makefile </a>";
   return output.AssignValue(outHtml.str(), theCommands);
 }
@@ -2200,8 +2200,8 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBNONCommutative(Calcul
   leftSummand.MakeXOX(theCommands, theCommands.opDivide(), changedMultiplicand, theArgument[2]);
   bPrime.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
   bInverse.MakeXOX(theCommands, theCommands.opThePower(), theArgument[2], eMOne);
-  rightSummand.MakeXOX(theCommands, theCommands.opTimes(), bPrime, bInverse); //rightSummand= b' b^{- 1}
-  changedMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), bInverse, rightSummand); //changedMultiplicand= b^- 1 b' b^- 1
+  rightSummand.MakeXOX(theCommands, theCommands.opTimes(), bPrime, bInverse); //rightSummand = b' b^{- 1}
+  changedMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), bInverse, rightSummand); //changedMultiplicand = b^- 1 b' b^- 1
   rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand);
   return output.MakeXOX(theCommands, theCommands.opMinus(), leftSummand, rightSummand);
 }
@@ -2501,7 +2501,7 @@ bool CalculatorFunctionsGeneral::innerCompareExpressionsNumerically
       }
 /*    stOutput << "<br>Substitutions: " << knownEs.ToStringCommaDelimited()
     << ", values: " << knownValues.ToStringCommaDelimited()
-    << ".  Output: <span style=\"color:red\">failed.</span> ";*/
+    << ".  Output: <span style =\"color:red\">failed.</span> ";*/
     }
 /*    stOutput << "<br>Substitutions: " << knownEs.ToStringCommaDelimited()
     << ", values: " << knownValues.ToStringCommaDelimited()
@@ -3278,7 +3278,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateRationalFunctionBuidingBlockIIb(C
   quadraticPowerOneMinusN.MakeXOX(theCommands, theCommands.opThePower(), theQuadraticDiva, oneE - nE);
   remainingFunctionToIntegrate = oneE / quadraticPowerN;
   remainingIntegral.MakeIntegral(theCommands, integrationSetE, remainingFunctionToIntegrate, x);
-//  Expression xplusbdiv2a = x+b/(twoE*a);
+//  Expression xplusbdiv2a = x +b/(twoE*a);
 //  Expression D=(fourE*a*c-bSquared)/(fourE*aSquared);
   Expression C = B - (A * b) / (twoE * a);
   oneE.CheckInitializationRecursively();
@@ -3667,7 +3667,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateTanPowerNSecPowerM
       currentIntegrandE.AddChildAtomOnTop("Polynomialize");
       currentIntegrandE.AddChildOnTop(currentIntegrandNonPolynomializedE);
       currentIntegral.MakeIntegral(theCommands, integrationSet, currentIntegrandE, theVariableE);
-      outputCandidate +=currentIntegral;
+      outputCandidate += currentIntegral;
       continue;*/
     }
     currentIntegrandNonPolynomializedE = currentCF * currentIntegrandTanPart*currentIntegrandSecPart;
@@ -4056,7 +4056,7 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGrowDynkinType");
   if (input.size() != 3)
     return false;
-  const Expression& theSmallerTypeE=input[1];
+  const Expression& theSmallerTypeE= input[1];
   DynkinType theSmallDynkinType;
   if (!CalculatorConversions::innerDynkinType(theCommands, theSmallerTypeE, theSmallDynkinType))
     return false;
@@ -4616,8 +4616,8 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
   int firstGoodXIndex = indexXinitial;
   double maxYallowed = (rightEndpoint - leftEndpoint) * 2 + yInitial;
   double minYallowed = - (rightEndpoint - leftEndpoint) * 2 + yInitial;
-  //stOutput << "maxYallowed=" << maxYallowed;
-  //stOutput << "minYallowed=" << minYallowed;
+  //stOutput << "maxYallowed =" << maxYallowed;
+  //stOutput << "minYallowed =" << minYallowed;
   for (int direction = - 1; direction < 2; direction += 2)
     for (int i = indexXinitial + direction; i >= 0 && i < XValues.size; i += direction)
     { knownValues[knownValues.size - 2] = XValues[i];
@@ -4625,7 +4625,7 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
       for (int counter = 0; ; counter ++)
       { knownValues[knownValues.size - 1] = YValues[i];
         if (!functionE.EvaluatesToDoubleUnderSubstitutions(knownConsts, knownValues, &currentYprimeApprox))
-          return theCommands << "Failed to evaluate yPrime approximation at x=" << XValues[i];
+          return theCommands << "Failed to evaluate yPrime approximation at x =" << XValues[i];
         double adjustment = delta * direction * currentYprimeApprox;
         double ynew = YValues[i - direction] + adjustment;
         double difference = ynew - YValues[i];
@@ -4634,7 +4634,7 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
           if (difference > - 0.01 && difference < 0.01)//<-if changes are smaller than 0.01 we assume success.
             break;
         if (counter > 200) //<- we ran Euler algorithm 100 times, but the difference is still greater than 0.01. Something is wrong, we abort
-        { theCommands << "Euler method: no convergence. At x=" << XValues[i] << ", y="
+        { theCommands << "Euler method: no convergence. At x =" << XValues[i] << ", y ="
           << YValues[i] << ", the change in y is: " << difference << " after " << counter << " iterations. ";
           if (counter > 205)
           { isGood = false;
@@ -4645,7 +4645,7 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
       if (isGood)
       { isGood = (YValues[i] <= maxYallowed && YValues[i] >= minYallowed);
         if (!isGood)
-        { theCommands << "Euler method: y values outside of the bounding box. At x=" << XValues[i]
+        { theCommands << "Euler method: y values outside of the bounding box. At x =" << XValues[i]
           << ", the y value is: " << YValues[i] << ". Max y is  " << maxYallowed << " and min y is " << minYallowed << ". ";
         }
       }
@@ -5082,7 +5082,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   std::stringstream outTex, outHtml;
   for (int k = 0; k < 2; k ++)
     for (int i = 0; i < xValues.size; i ++)
-    { //bool includePsLine= false;
+    { //bool includePsLine = false;
       bool useNegativePattern = (fValuesLower[i] > fValuesUpper[i]);
       if (k == 0 && useNegativePattern)
       { outTex << "\\psline*[linecolor =\\fcColorNegativeAreaUnderGraph, linewidth= 0.1pt]";
@@ -5794,7 +5794,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant
   { theCommands << "Requesting to compute determinant of the non-square "
     << matRat.NumRows << " by "
     << matRat.NumCols << " matrix: " << input.ToString();
-    return output.MakeError("Requesting to compute determinant of non-square matrix given by:  "+input.ToString(), theCommands, true);
+    return output.MakeError("Requesting to compute determinant of non-square matrix given by:  "+ input.ToString(), theCommands, true);
   }
 }
 
@@ -6063,7 +6063,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
   const ElementTensorsGeneralizedVermas<RationalFunctionOld>& theHWfd = hwvFD.GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
 
   ModuleSSalgebra<RationalFunctionOld>& theGenMod = theHWgenVerma[0].theMons[0].GetOwner();
-  //int indexGenMod= theHWgenVerma[0].theMons[0].indexInOwner;
+  //int indexGenMod = theHWgenVerma[0].theMons[0].indexInOwner;
   ModuleSSalgebra<RationalFunctionOld>& theFDMod = theHWfd[0].theMons[0].GetOwner();
   if (theGenMod.owner != theFDMod.owner ||
       theGenMod.GetOwner().GetRank() != theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize ||
@@ -6071,7 +6071,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
     crash << "This is a programming error: the two modules have owners, " << theFDMod.GetOwner().theWeyl.theDynkinType.ToString()
     << " and " << theGenMod.GetOwner().theWeyl.theDynkinType.ToString() << ", and parabolic selections of max size "
     << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << crash;
-  //int indexFDMod= theHWfd[0].theMons[0].indexInOwner;
+  //int indexFDMod = theHWfd[0].theMons[0].indexInOwner;
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir, theCasimirMinusChar;
   charSSAlgMod<RationalFunctionOld> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
   theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theSSalgebra);
@@ -6846,7 +6846,7 @@ bool CalculatorFunctionsGeneral::innerBuildFreecalcSlidesOnTopic(Calculator& the
   LaTeXcrawler theCrawler;
   theCrawler.flagBuildSingleSlides = true;
   theCrawler.ownerCalculator = &theCommands;
-  //theCrawler.topicListToBuild=input.GetValue<std::string>();
+  //theCrawler.topicListToBuild = input.GetValue<std::string>();
   std::stringstream out;
   theCrawler.BuildTopicList(&out, &out);
   return output.AssignValue(out.str(), theCommands);
@@ -6966,7 +6966,7 @@ bool CalculatorFunctionsGeneral::innerFindProductDistanceModN(Calculator& theCom
         { numElementsNotAddedToStack ++;
           if (numElementsNotAddedToStack % 50000 == 0)
           { std::stringstream out;
-            out << "While computing product distance, explored " << i+ 1 << " out of "
+            out << "While computing product distance, explored " << i + 1 << " out of "
             << theIndexStack.size << " indices. " << numElementsNotAddedToStack << " candidates were not added to the stack. "
             << "Number of elements reached: " << numElementsCovered << ". "
             << "Max distance generated while searching: " << maxDistanceGenerated.ToString();
@@ -7263,11 +7263,11 @@ std::string charSSAlgMod<coefficient>::ToStringFullCharacterWeightsTable()
       (outputChar[k], theSimpleRootFundCoords);
     }
     if (outputSimpleStringCoords != outputChar[k].weightFundamentalCoordS)
-      out << "<td><span style=\"color:#FF0000\"><b>" << outputSimpleStringCoords.ToString() << "</b></span></td>" ;
+      out << "<td><span style =\"color:#FF0000\"><b>" << outputSimpleStringCoords.ToString() << "</b></span></td>" ;
     else
       out << "<td>" << outputSimpleStringCoords.ToString() << "</td>";
     if (outputSimpleHalfStringCoords != outputChar[k].weightFundamentalCoordS)
-      out << "<td><span style=\"color:#FF0000\"><b>" << outputSimpleHalfStringCoords.ToString() << "</b></span></td>" ;
+      out << "<td><span style =\"color:#FF0000\"><b>" << outputSimpleHalfStringCoords.ToString() << "</b></span></td>" ;
     else
       out << "<td>" << outputSimpleHalfStringCoords.ToString() << "</td>";
     out << "</tr>";
@@ -7507,8 +7507,8 @@ public:
     }
 //    double& theGraphicsUnit = theDV.theBuffer.GraphicsUnit[0];
 //    theGraphicsUnit =100;
-//    theDV.DefaultHtmlHeight =(int)( (this->layerHeight* (this->LayerSizes.size- 1)*theGraphicsUnit+ 100).GetDoubleValue());
-//    theDV.DefaultHtmlWidth=(int)( (this->widthMaxLayer*theGraphicsUnit+40).GetDoubleValue());
+//    theDV.DefaultHtmlHeight =(int)( (this->layerHeight* (this->LayerSizes.size- 1)*theGraphicsUnit + 100).GetDoubleValue());
+//    theDV.DefaultHtmlWidth=(int)( (this->widthMaxLayer*theGraphicsUnit +40).GetDoubleValue());
 //    theDV.theBuffer.centerX.SetSize(1);
 //    theDV.theBuffer.centerY.SetSize(1);
 //    theDV.theBuffer.centerX[0]= (this->widthMaxLayer/2).GetDoubleValue()*theGraphicsUnit;

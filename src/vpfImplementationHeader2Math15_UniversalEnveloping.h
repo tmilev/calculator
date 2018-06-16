@@ -63,7 +63,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimirWRTLeviParabolic(Semisi
     theCF = theOwner.GetKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
 //    stOutput << "<hr>Killing product: " << leftE.ToString() << " and " << rightE.ToString() << " = " << theCF.ToString();
     theCF.Invert();
-//    theCFconverted= theCF;
+//    theCFconverted = theCF;
     this->AddMonomial(theMon, theCF);
   }
   Matrix<Rational> killingRestrictedToCartan;
@@ -181,14 +181,14 @@ void ElementUniversalEnveloping<coefficient>::Simplify(const coefficient& theRin
           reductionOccurred = true;
           break;
         }
-        if (tempMon.CommutingAnBtoBAnPlusLowerOrderAllowed(tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+ 1], tempMon.generatorsIndices[i+ 1]))
+        if (tempMon.CommutingAnBtoBAnPlusLowerOrderAllowed(tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i + 1], tempMon.generatorsIndices[i + 1]))
         { tempMon.CommuteAnBtoBAnPlusLowerOrder(i, buffer, theRingUnit);
           buffer *= currentCoeff;
           *this += buffer;
           reductionOccurred = true;
           break;
         }
-        if (tempMon.CommutingABntoBnAPlusLowerOrderAllowed(tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+ 1], tempMon.generatorsIndices[i+ 1]))
+        if (tempMon.CommutingABntoBnAPlusLowerOrderAllowed(tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i + 1], tempMon.generatorsIndices[i + 1]))
         { tempMon.CommuteABntoBnAPlusLowerOrder(i, buffer, theRingUnit);
           buffer *= currentCoeff;
           *this += buffer;
@@ -270,7 +270,7 @@ void MonomialUniversalEnveloping<coefficient>::CommuteAnBtoBAnPlusLowerOrder
   //Formula realized:
   //a^n b =\sum_{i = 0}^\infty \binom{n}{i} (\ad a)^i (b)a^{n-i}
   //Proof (Dixmier): let L_x stand for left multiplication by x and R_x stand for right multiplication.
-  //Then L_x and R_x commute and L_x-R_x=ad_x, i.e.
+  //Then L_x and R_x commute and L_x-R_x =ad_x, i.e.
   //(L_a)^n =(R_a +ad_a)^n.
   do
   { for (int i = 0; i < adAToTheIthOfB.size(); i ++)
@@ -335,7 +335,7 @@ void MonomialUniversalEnveloping<coefficient>::CommuteABntoBnAPlusLowerOrder
   //Formula realized:
   //a b^n  &= &\sum_{i = 0}^\infty b^{n-i}(-\ad b)^i (a) \binom{n}{i} .
   //Proof (Dixmier): let L_x stand for left multiplication by x and R_x stand for right multiplication.
-  //Then L_x and R_x commute and L_x-R_x=ad_x, i.e.
+  //Then L_x and R_x commute and L_x-R_x =ad_x, i.e.
   //(L_b-ad_b)^n =R_b^n.
   do
   { for (int i = 0; i < adResult.size(); i ++)
@@ -493,7 +493,7 @@ void MonomialUniversalEnveloping<coefficient>::ModOutVermaRelations
 { int numPosRoots = this->GetOwner().GetNumPosRoots();
   int theDimension = this->GetOwner().GetRank();
   outputCoeff = theRingUnit;
-//  if (subHiGoesToIthElement!= 0)
+//  if (subHiGoesToIthElement != 0)
 //    stOutput << "<br>The subHiGoesToIthElement: " << subHiGoesToIthElement->ToString();
   for (int i = this->generatorsIndices.size - 1; i >= 0; i --)
   { int IndexCurrentGenerator = this->generatorsIndices[i];
@@ -552,7 +552,7 @@ template <class coefficient>
 void MonomialUniversalEnveloping<coefficient>::SetNumVariables(int newNumVars)
 {//the below code is wrong messed up with substitutions!
   //Left in comments to remind you of what you shouldnt do.
-  // if (this->Coefficient.NumVars ==newNumVars)
+  // if (this->Coefficient.NumVars == newNumVars)
   //  return;
   for (int i = 0; i < this->generatorsIndices.size; i ++)
     this->Powers.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(newNumVars);
@@ -641,19 +641,19 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
   { //Implementation without the ninja formula:
 //    tempRat = 0;
 //    Vector<Rational> & theRoot = theWeyl.RootSystem.TheObjects[i];
-//    int indexOfOpposite= theWeyl.RootSystem.GetIndex(-theRoot);
-//    Vector<Rational> & theOpposite= theWeyl.RootSystem.TheObjects[indexOfOpposite];
+//    int indexOfOpposite = theWeyl.RootSystem.GetIndex(-theRoot);
+//    Vector<Rational> & theOpposite = theWeyl.RootSystem.TheObjects[indexOfOpposite];
 //    for (int j = 0; j<theWeyl.RootSystem.size; j ++)
 //    { Vector<Rational> & current = theWeyl.RootSystem.TheObjects[j];
 //      if (current == theOpposite)
-//        tempRat+=2;
+//        tempRat +=2;
 //       else
-//       { int indexOfSum= theWeyl.RootSystem.GetIndex(current+theRoot);
+//       { int indexOfSum= theWeyl.RootSystem.GetIndex(current +theRoot);
 //         if (indexOfSum!= - 1)
-//           tempRat+=(theOwner.ChevalleyConstants.elements[i][j]*theOwner.ChevalleyConstants.elements[indexOfOpposite][indexOfSum]);
+//           tempRat +=(theOwner.ChevalleyConstants.elements[i][j]*theOwner.ChevalleyConstants.elements[indexOfOpposite][indexOfSum]);
 //       }
 //     }
-//     tempRat+=2;
+//     tempRat +=2;
 //     tempRat = 1/tempRat;
 //     tempElt2.MakeOneGeneratorCoeffOne(theOpposite, numVars, theOwner);
 //     tempElt1.MakeOneGeneratorCoeffOne(theRoot, numVars, theOwner);
@@ -684,7 +684,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
 //  { tempRoot.MakeEi(theDimension, i);
 //    if (!length1Explored)
 //    { length1= theWeyl.RootScalarCartanRoot(tempRoot, tempRoot);
-//      length1Explored= true;
+//      length1Explored = true;
 //      coefficient1= 0;
 //      for (int j = 0; j<theWeyl.RootsOfBorel.size; j ++)
 //      { coefficient1+= theWeyl.RootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.TheObjects[j])*theWeyl.RootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.TheObjects[j]);
@@ -887,7 +887,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::GetElementUniversalEnvelop
 template <class coefficient>
 void MonomialUniversalEnvelopingOrdered<coefficient>::SetNumVariables(int newNumVars)
 { //the below commented out code causes problems in substitution code!
-  //if (this->Coefficient.NumVars ==newNumVars)
+  //if (this->Coefficient.NumVars == newNumVars)
   //  return;
   this->Coefficient.SetNumVariablesSubDeletedVarsByOne((int)newNumVars);
   for (int i = 0; i < this->generatorsIndices.size; i ++)
@@ -1305,7 +1305,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::operator*=(const ElementUni
 template <class coefficient>
 void ElementUniversalEnvelopingOrdered<coefficient>::AddMonomialNoCleanUpZeroCoeff(const MonomialUniversalEnvelopingOrdered<coefficient>& input)
 { //MonomialUniversalEnvelopingOrdered<coefficient> tempMon;
-  //tempMon =input;
+  //tempMon = input;
   //tempMon.ComputeDebugString();
   //this->ComputeDebugString();
   int theIndex = this->GetIndex(input);
@@ -1348,7 +1348,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::SimplifyAccumulateInOutput
             for (int j = 0; j < buffer2.size; j ++)
               output.AddMonomialNoCleanUpZeroCoeff(buffer2[j]);
 //            output.ComputeDebugString();
-            reductionOccurred= true;
+            reductionOccurred = true;
             break;
           }
         }

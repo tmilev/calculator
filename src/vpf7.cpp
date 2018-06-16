@@ -254,8 +254,8 @@ void LittelmannPath::Simplify()
   }
   leftIndex ++;
   this->Waypoints[leftIndex] = *this->Waypoints.LastObject();
-/*  if (leftIndex+ 1< this->Waypoints.size)
-  { this->Waypoints.SetSize(leftIndex+ 1);
+/*  if (leftIndex + 1< this->Waypoints.size)
+  { this->Waypoints.SetSize(leftIndex + 1);
     tempStream << " reduced to " << this->ToString();
     stOutput << tempStream.str();
   }*/
@@ -361,7 +361,7 @@ bool LittelmannPath::GenerateOrbit
           currentPath.ActByFalpha(theIndex);
           if (!currentPath.IsEqualToZero())
             if (hashedOutput.AddOnTopNoRepetition(currentPath))
-            { found= true;
+            { found = true;
               currentSequence.AddOnTop(- theIndex - 1);
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral())
@@ -814,7 +814,7 @@ bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsign
     //stOutput << tempPath.ToString();
     if (!tempPath2.IsEqualToZero())
       return false;
-    //if (i!= theString.generatorsIndices.size- 1)
+    //if (i != theString.generatorsIndices.size- 1)
     //  stOutput << "<br>";
   }
   return true;

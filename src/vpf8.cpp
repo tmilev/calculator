@@ -830,7 +830,7 @@ void LargeIntUnsigned::AssignFactorial(unsigned int x)
     *this *= tempInt;
 /*    if (theGlobalVariables!= 0)
     { std::stringstream out;
-      out << "processing prime " << thePrime << " (" << i+ 1 << " out of " << primesBelowX.size << ").";
+      out << "processing prime " << thePrime << " (" << i + 1 << " out of " << primesBelowX.size << ").";
       theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]= out.str();
       theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh= true;
       theGlobalVariables->MakeReport();
@@ -883,7 +883,7 @@ bool LargeInt::IsIntegerFittingInInt(int* whichInt)
 }
 
 void LargeInt::MultiplyByInt(int x)
-{//  if (this->value.size== 0) return;
+{//  if (this->value.size == 0) return;
   LargeInt tempI;
   tempI.AssignInt(x);
   *this *= tempI;
@@ -1346,7 +1346,7 @@ Rational Rational::NChooseK(const Rational& n, int k)
 { Rational result;
   result.MakeOne();
   for (int i = 0; i < k; i ++)
-  { //stOutput << "<br>" << result.ToString() << " * " << (n-i).ToString() << "/" << i+ 1;
+  { //stOutput << "<br>" << result.ToString() << " * " << (n-i).ToString() << "/" << i + 1;
     result *= n - i;
     result.DivideByInteger(i + 1);
     //stOutput << "=" << result.ToString();

@@ -57,7 +57,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   int totalToInterpret = 0;
   for (int i = 0; i < theFileNames.size; i ++)
     if (theFileTypes[i] == ".html")
-      totalToInterpret++;
+      totalToInterpret ++;
   totalToInterpret = MathRoutines::Minimum(numDesiredTests, totalToInterpret);
   MapLisT<std::string, std::string, MathRoutines::hashString>&
   globalKeys = theGlobalVariables.webArguments;
@@ -99,10 +99,10 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     out << "<td>" << numInterpretations << ". <td>";
     out << "<td>"
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request =exerciseNoLogin"
+    << "?request=exerciseNoLogin"
     << "&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
-    << "fileName=" << theProblem.fileName << "&randomSeed="
+    << "fileName =" << theProblem.fileName << "&randomSeed ="
     << randomSeedCurrent << "\">"
     << theFileNames[i]
     << "</a>"
@@ -113,14 +113,14 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
       out << "</tr>";
       break;
     } else
-      out << "<td><span style=\"color:green\">Success</span></td>";
+      out << "<td><span style =\"color:green\">Success</span></td>";
     if (!isGoodInterpretation)
-    { out << "<td><span style=\"color:red\"><b>Failure.</b></span> "
+    { out << "<td><span style =\"color:red\"><b>Failure.</b></span> "
       << "Comments: " << problemComments.str();
       out << "</td></tr>";
       break;
     } else
-      out << "<td><span style=\"color:green\">Success</span></td>";
+      out << "<td><span style =\"color:green\">Success</span></td>";
     bool answerGenerated = false;
     bool answersWork = false;
     std::string answerGeneration;
@@ -144,7 +144,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     }
     if (!answerGenerated)
     { if (theProblem.theProblemData.theAnswers.size() > 0)
-      { out << "<td><span style=\"color:red\"><b>Failure.</b></span>";
+      { out << "<td><span style =\"color:red\"><b>Failure.</b></span>";
         out << "</td>"
         << "<td>"
         << answerGeneration
@@ -152,19 +152,19 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
         << "</tr>";
         break;
       } else
-        out << "<td><b style=\"color:brown\">No built-in answer.</b></td>";
+        out << "<td><b style =\"color:brown\">No built-in answer.</b></td>";
     } else
-      out << "<td><span style=\"color:green\">Success</span></td>";
+      out << "<td><span style =\"color:green\">Success</span></td>";
     if (!answersWork)
     { if (theProblem.theProblemData.theAnswers.size() > 0)
-      { out << "<td><span style=\"color:red\"><b>Failure.</b></span>";
+      { out << "<td><span style =\"color:red\"><b>Failure.</b></span>";
         //<< "DEBUG: " << theProblem.theProblemData.theAnswers.size() << " answers."//;
         out << "</td></tr>";
         break;
       } else
         out << "<td>-</td>";
     } else
-      out << "<td><span style=\"color:green\">Success</span></td>";
+      out << "<td><span style =\"color:green\">Success</span></td>";
     if (numInterpretations <= numSamples)
     { out << "<td><b>Problem</b><hr>" << theProblem.outputHtmlBodyNoTag
       << "</td>";
@@ -776,7 +776,7 @@ bool CalculatorFunctionsGeneral::innerArccosAlgebraic(Calculator& theCommands, c
       return true;
     }
     candidate *= - 1;
-    if (candidate==argument)
+    if (candidate ==argument)
     { output.MakeAtom(theCommands.opPi(), theCommands);
       output /= 4;
       output *= 3;
@@ -1335,7 +1335,7 @@ bool CalculatorFunctionsGeneral::innerIsLinearOrConstantIn(Calculator& theComman
     return theCommands << "Failed to extract sum from "
     << input[2].ToString();
   for (int i = 0; i < theSummands.size; i ++)
-  { bool found= false;
+  { bool found = false;
     for (int j = 0; j < theSummands[i].size; j ++)
       if (theSummands[i][j] == input[1])
       { if (found)
@@ -1520,7 +1520,7 @@ bool CalculatorFunctionsGeneral::innerExpressionToUTF8String
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionToUTF8String");
   if (input.StartsWithGivenAtom("ToUTF8String"))
-  { Expression inputCopy=input;
+  { Expression inputCopy = input;
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
     return output.AssignValue(inputCopy.ToUTF8String(), theCommands);
   }
@@ -1677,7 +1677,7 @@ bool CalculatorFunctionsGeneral::innerNewtonsMethod(Calculator& theCommands, con
   theSub.SetKeyValue("numIterations", input[3]);
 
   return output.AssignStringParsed(
-  "(NewtonMap{}{{a}}= DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x={{a}}; iteratedMap )_3); \
+  "(NewtonMap{}{{a}}= DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x ={{a}}; iteratedMap )_3); \
    y_{0} = startingPoint;\
    y_{{a}}=NewtonMap{}(y_{a- 1});\
    y_{numIterations})_4"

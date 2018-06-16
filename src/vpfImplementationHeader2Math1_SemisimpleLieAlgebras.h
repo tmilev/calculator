@@ -174,7 +174,7 @@ void charSSAlgMod<coefficient>::GetDual(charSSAlgMod<coefficient>& output) const
 template <class coefficient>
 void charSSAlgMod<coefficient>::MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner)
 { this->MakeZero();
-  if (inputWeightSimpleCoords.size!=inputOwner->GetRank())
+  if (inputWeightSimpleCoords.size!= inputOwner->GetRank())
     crash << "This is a programming error: attempting to create a character from highest weight in simple coords "
     << inputWeightSimpleCoords.ToString() << "(" << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
     << " Lie algebra is of rank " << (inputOwner->GetRank()) << crash;

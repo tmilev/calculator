@@ -611,7 +611,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
       } else if (40 <= j and j < 60)
       { f = (b bitand c) bitor (b bitand d) bitor (c bitand d);
         k = 0x8F1BBCDC;
-      } else //60<=j
+      } else //60<= j
       { f = b xor c xor d;
         k = 0xCA62C1D6;
       }
@@ -838,7 +838,7 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
   }
   Crypto::initSha256();
   //stOutput << "DEBUG: start string length: " << inputString.size();
-  uint64_t messageLength=inputString.size() * 8;//*sizeof(char);
+  uint64_t messageLength= inputString.size() * 8;//*sizeof(char);
   std::string inputStringPreprocessed = inputString;
   inputStringPreprocessed.push_back(0x80);
   unsigned numbytesMod64 = inputStringPreprocessed.size() % 64;
@@ -1130,9 +1130,9 @@ bool JSONWebToken::VerifyRSA256
     Crypto::ConvertStringToHex(RSAresultLast32bytes, RSAresultTrimmedHex);
     Crypto::ConvertLargeUnsignedIntToHex(theShaUI, theShaHex);
     if (!result && commentsOnFailure != 0)
-      *commentsOnFailure << "<br><b><span style=\"color:red\">Token invalid: the SHA does not match the RSA result. </span></b>";
+      *commentsOnFailure << "<br><b><span style =\"color:red\">Token invalid: the SHA does not match the RSA result. </span></b>";
     else if (commentsGeneral != 0)
-      *commentsGeneral << "<b><span style=\"color:green\">Validated. </span></b>";
+      *commentsGeneral << "<b><span style =\"color:green\">Validated. </span></b>";
     if (commentsGeneral != 0)
       *commentsGeneral
       << "<br>Sha integer: " << theShaUI.ToString()

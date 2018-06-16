@@ -117,8 +117,8 @@ function processOneFunctionAtom(handlers, isComposite) {
     var encodedAtom = encodeURIComponent(handlers[counterHandlers].atom);
     currentId += `${encodedAtom}_${counterHandlers}_${handlers.length}`;
     resultString += `<a href='#' class ='linkInfo' onclick="switchMenu('${currentId}')">info</a>`;
-    resultString += `<calculatorExampleInfo id="${currentId}" class ="hiddenClass">${currentDescription}<br><b>Example:</b><br>${currentExample}</calculatorExampleInfo>`;
-    resultString += `<a href="#" class ="linkInfo" onclick="this.composite=${isComposite}; this.index=${counterHandlers}; this.atom='${encodedAtom}'; exampleCalculatorClick(this);"> Example</a>`;
+    resultString += `<calculatorExampleInfo id ="${currentId}" class ="hiddenClass">${currentDescription}<br><b>Example:</b><br>${currentExample}</calculatorExampleInfo>`;
+    resultString += `<a href="#" class ="linkInfo" onclick="this.composite =${isComposite}; this.index =${counterHandlers}; this.atom='${encodedAtom}'; exampleCalculatorClick(this);"> Example</a>`;
     //resultString += currentExample;
     //console.log(handlers[counterHandlers]);
   }
@@ -152,7 +152,7 @@ function toggleCalculatorExamples(theButton) {
   var theExamples = document.getElementById('divCalculatorExamples');
   if (theExamples.innerHTML.length < 300) {
     submitGET({
-      url: `${pathnames.calculatorAPI}?request =calculatorExamplesJSON`,
+      url: `${pathnames.calculatorAPI}?request= calculatorExamplesJSON`,
       callback: processExamples,
       progress: "spanProgressCalculatorExamples"
     });

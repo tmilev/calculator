@@ -84,7 +84,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
 { MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra");
   this->CheckInitialization();
   std::stringstream out;
-//  double startTime= theGlobalVariables.GetElapsedSeconds();
+//  double startTime = theGlobalVariables.GetElapsedSeconds();
 //  stOutput << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
@@ -113,7 +113,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
 //  stOutput << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   for (int lowestUnexploredHeightDiff = 0; lowestUnexploredHeightDiff <= theTopHeightSimpleCoords;
        lowestUnexploredHeightDiff ++)
-  { //double startCycleTime= theGlobalVariables.GetElapsedSeconds();
+  { //double startCycleTime = theGlobalVariables.GetElapsedSeconds();
     if (upperBoundDominantWeights > 0 && numTotalWeightsFound > upperBoundDominantWeights)
       break;
     int bufferIndexShift = lowestUnexploredHeightDiff % topHeightRootSystemPlusOne;
@@ -142,7 +142,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
     outputWeightsSimpleCoords.AddOnTop(currentHashes);
 //    stOutput << ". Time spent after accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
-//    startCycleTime= theGlobalVariables.GetElapsedSeconds();
+//    startCycleTime = theGlobalVariables.GetElapsedSeconds();
     outputWeightsSimpleCoords.AdjustHashes();
     currentHashes.Clear();
 //    stOutput << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
@@ -228,7 +228,7 @@ std::string HtmlRoutines::GetSliderSpanStartsHidden(const std::string& content, 
     idStringStream << "UnnamedSpan" << HtmlRoutines::GlobalGeneralPurposeID;
   out << "<a href=\"javascript:;\" onmusedown =\"document.getElementById('"
   << idStringStream.str() << "').slideToggle('slow');\">Expand/collapse</a>";
-  out << "<span id=\"" << idStringStream.str() << "\" style=\"display:none\">" << content << "</span>";
+  out << "<span id =\"" << idStringStream.str() << "\" style =\"display:none\">" << content << "</span>";
   return out.str();
 }
 
@@ -306,7 +306,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate()
     tempMon = theGens[i];
     tempMon.generatorsIndices.ReverseOrderElements();
     tempMon.Powers.ReverseOrderElements();
-    bool isadapted= tempPath.IsAdaptedString(tempMon);
+    bool isadapted = tempPath.IsAdaptedString(tempMon);
     out << "<tr><td>" << tempMon.ToString() << "</td><td>" << (isadapted ? "is adapted to" : "is not adapted to" ) <<  "</td><td>"
     << tempPath.ToString() << "</td><td>";
     for (int j = 0; j < this->owner->GetDim(); j ++)
@@ -454,7 +454,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
   out << "<br>Your ready for LaTeX consumption text follows.<br>";
   out << readyForLatexComsumption.str();
 //  if (outputEigenSpace!= 0)
-//  { stOutput << "<br> outputEigenSpace->size=" << outputEigenSpace->size << "; outputEigenVectors->size=" << outputEigenVectors->size;
+//  { stOutput << "<br> outputEigenSpace->size =" << outputEigenSpace->size << "; outputEigenVectors->size =" << outputEigenVectors->size;
 //  }
   theReport.Report("SplitFDpartOverFKLeviRedSubalg done!");
   if (comments != 0)
@@ -609,7 +609,7 @@ bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, co
         latexTable << "$\\begin{array}{l}" << theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].ToString(&theG2B3Data.theFormat) << "\\end{array}$ \n";
         if (!isFD)
         { std::string tempS1 = theG2B3Data.GetStringCasimirProjector(eigenIndexcounter, 12);
-          std::string tempS2 = "("+ theG2B3Data.theUEelts[eigenIndexcounter].ToString(&theG2B3Data.theFormat)+ ")\\cdot v_\\lambda";
+          std::string tempS2 = "("+ theG2B3Data.theUEelts[eigenIndexcounter].ToString(&theG2B3Data.theFormat) + ")\\cdot v_\\lambda";
           out << "<td>" << HtmlRoutines::GetMathSpanPure(tempS1) << "</td>";
           out << "<td>" << theG2B3Data.additionalMultipliers[eigenIndexcounter].ToString() << "</td>";
           out << "<td>" << HtmlRoutines::GetMathSpanPure(tempS2) << "</td>";
@@ -651,10 +651,10 @@ bool Calculator::innerPrintB3G2branchingIntermediate(Calculator& theCommands, co
           latexTable << "\\cline{3-7}";
       }
     }
-//    if (i!= theHWs.size- 1)
+//    if (i != theHWs.size- 1)
 //      latexTable << "\\arrayrulecolor{gray} ";
     latexTable << "\\hline";
-//    if (i!= theHWs.size- 1)
+//    if (i != theHWs.size- 1)
 //      latexTable << "\\arrayrulecolor{black} ";
   }
   latexTable << "\\hline";
@@ -727,7 +727,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
     << "\\hline $V_\\lambda(\\mathfrak l)$ " << "& Decomposition over $\\bar { \\mathfrak l}$ "
     << "\\endhead \\hline\n<br>";
   }
-  theg2b3data.theFormat.flagUseLatex= true;
+  theg2b3data.theFormat.flagUseLatex = true;
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir, theCentralCharacter, resultChar;
   HashedList<ElementUniversalEnveloping<RationalFunctionOld> > theCentralChars;
   theCasimir.MakeCasimir(theg2b3data.theHmm.theDomain());
@@ -763,7 +763,7 @@ bool Calculator::innerPrintB3G2branchingTableCharsOnly(Calculator& theCommands, 
       for (int j = 0; j < outputChar.size(); j ++)
       { rightWeightSimple = smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
         rightWeightDual = smallWeyl.GetDualCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
-//        if (i!=j)
+//        if (i != j)
         if ((rightWeightSimple - leftWeightSimple).IsPositive())
         { resultChar = theCasimir;
           theCentralCharacter = theCasimir;
@@ -848,7 +848,7 @@ bool Calculator::innerSplitFDpartB3overG2inner(Calculator& theCommands, branchin
   splittingParSel = theG2B3Data.SelSplittingParSel;
 
   theCommands.theObjectContainer.theCategoryOmodules.AddNoRepetitionOrReturnIndexFirst(theModCopy);
-  int theModIndex= theCommands.theObjectContainer.theCategoryOmodules.GetIndex(theModCopy);
+  int theModIndex = theCommands.theObjectContainer.theCategoryOmodules.GetIndex(theModCopy);
   ModuleSSalgebra<RationalFunctionOld>& theMod =
   theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   theMod.GetOwner().flagHasNilradicalOrder = true;
@@ -1177,7 +1177,7 @@ bool Calculator::innerTestMonomialBaseConjecture(Calculator& theCommands, const 
       { latexReport << " & \\textbf{BAD}";
         out << "<td><b>Is bad!!!!</b></td>";
         theReport.Report("BAD BAD BAD!!!");
-        foundBad= true;
+        foundBad = true;
         break;
       }*/
 //      tmp:
@@ -1211,7 +1211,7 @@ bool Calculator::innerLittelmannOperator(Calculator& theCommands, const Expressi
     return false;
   int theIndex = 0;
   if (!input.IsSmallInteger(&theIndex))
-    return output.MakeError("The argument of the Littelmann root operator is expected to be a small integer, instead you gave me"+input.ToString(), theCommands);
+    return output.MakeError("The argument of the Littelmann root operator is expected to be a small integer, instead you gave me"+ input.ToString(), theCommands);
   if (theIndex == 0)
     return output.MakeError("The index of the Littelmann root operator is expected to be non-zero", theCommands);
   return output.AssignValue(theIndex, theCommands);
@@ -1703,8 +1703,8 @@ bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input
 { MacroRegisterFunctionWithName("Calculator::innerEWAorPoly");
   if (!input.IsListNElements(3))
     return false;
-  //const Expression& diffE=input[1];
-  //const Expression& polyE=input[2];
+  //const Expression& diffE= input[1];
+  //const Expression& polyE= input[2];
   //if (diffE.HasBoundVariables() || polyE.HasBoundVariables())
   //  return false;
   Vector<Polynomial<Rational> > inputPolForm;
@@ -1795,11 +1795,11 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   List<std::string> newCommands;
 //  stOutput << knownCommands.size << " known commands must be " << commandStrings.size;
 //  for (int i = 0; i < knownCommands.size; i ++)
-//    stOutput << "<br>known command " << i+ 1 << ":" << knownCommands[i] << ", known result: " << i+ 1 << ":" << knownResults[i];
+//    stOutput << "<br>known command " << i + 1 << ":" << knownCommands[i] << ", known result: " << i + 1 << ":" << knownResults[i];
   for (int i = 0; i < commandStrings.size; i ++)
   { if (!knownCommands.Contains(commandStrings[i]))
     { newCommands.AddOnTop(commandStrings[i]);
-      //stOutput << "<br>Command <span style=\"color:#FF0000\">" << commandStrings[i] << "</span> not present in test file: <span style=\"color:#FF0000\">"
+      //stOutput << "<br>Command <span style =\"color:#FF0000\">" << commandStrings[i] << "</span> not present in test file: <span style =\"color:#FF0000\">"
       //<< knownCommands[i] << "</span> sits there instead. ";
       if (knownCommands[i] == commandStrings[i])
         crash << crash;
@@ -1814,7 +1814,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   }
   bool allWentGreat = true;
   if (numInconsistencies > 0)
-  { out << "<span style=\"color:#FF0000\"><b>The test file results do not match the current results. </b></span> There were "
+  { out << "<span style =\"color:#FF0000\"><b>The test file results do not match the current results. </b></span> There were "
     << numInconsistencies << " inconsistencies out of " << knownCommands.size << " input strings. The inconsistent result table follows. "
     << "\n<hr>\n<table><tr><td>Input</td><td>Desired result</td><td>Computed result</td></tr>" << errorTableStream.str() << "</table>\n<hr>\n";
     allWentGreat = false;
@@ -1832,7 +1832,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
     allWentGreat = false;
   }
   if (allWentGreat)
-    out << "<span style=\"color:#0000FF\">All " << commandStrings.size << " results coincide with previously recorded values.</span> ";
+    out << "<span style =\"color:#0000FF\">All " << commandStrings.size << " results coincide with previously recorded values.</span> ";
   out << "<br>The command for updating the test file is " << theCommands.GetCalculatorLink("AutomatedTestSetKnownGoodCopy 0");
   out << "<br>Total time for the test: " << theGlobalVariables.GetElapsedSeconds() - startingTime;
   return output.AssignValue(out.str(), theCommands);

@@ -32,7 +32,7 @@ std::string FloatingPoint::DoubleToString(double input)
   for (firstNonZeroIndex = result.size() - 1; firstNonZeroIndex >= 0; firstNonZeroIndex --)
   { if (result[firstNonZeroIndex] == '.')
     { result.resize(firstNonZeroIndex);
-//      result+="+\\varepsilon";
+//      result +="+\\varepsilon";
       return result;
       //firstNonZeroIndex--;
       //break;

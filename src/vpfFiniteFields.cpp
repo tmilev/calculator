@@ -65,7 +65,7 @@ void f65521::Invert()
   if (m>= 0)
     n = m;
   else
-    n = m+65521;
+    n = m +65521;
 }
 
 f65521 f65521::operator/(const f65521 right) const
@@ -197,7 +197,7 @@ void f211::Invert()
   if (m>= 0)
     n = m;
   else
-    n = m+211;
+    n = m +211;
 }
 
 f211 f211::operator/(const f211 right) const

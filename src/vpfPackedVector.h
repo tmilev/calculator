@@ -1030,7 +1030,7 @@ void LoadAndPrintTauSignatures(char letter, int number)
       // data goes out here
       std::cout << "\\\\" << std::endl;
       for (int i = 0; i <ts.size; i ++)
-      { for (int j =numCycles; j<numCycles+numCycles- 1; j ++)
+      { for (int j = numCycles; j<numCycles+numCycles- 1; j ++)
         { std::cout << '&';
           std::cout << ts[i][j] << '\t';
         }

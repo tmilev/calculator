@@ -220,7 +220,7 @@ void ElementWeylGroup<templateWeylGroup>::MakeFromRhoImage(const Vector<Rational
       if (this->owner->GetScalarProdSimpleRoot(theVector, i) < 0)
       { this->owner->SimpleReflection(i, theVector);
         theGen.MakeSimpleReflection(i);
-        //stOutput << "--"  << i+ 1 << "-- > " << theVector.ToString() ;
+        //stOutput << "--"  << i + 1 << "-- > " << theVector.ToString() ;
         this->generatorsLastAppliedFirst.AddOnTop(theGen);
         break;
       }
@@ -960,7 +960,7 @@ LargeInt WeylGroupData::GetOrbitSize(Vector<coefficient>& theWeight)
   if (doDebug)
     if (result < 100000)
     { HashedList<Vector<coefficient> > comparisonOrbit;
-//      double DEbugStartTime= theGlobalVariables.GetElapsedSeconds();
+//      double DEbugStartTime = theGlobalVariables.GetElapsedSeconds();
 //      stOutput << "<br>DEBUG: calling generateOrbit for input: " << theWeight.ToString();
       this->GenerateOrbit(theWeight, false, comparisonOrbit, false, - 1, 0, - 1);
 //      stOutput << "<br>Orbit generated in " << theGlobalVariables.GetElapsedSeconds()-DEbugStartTime << " seconds. ";
@@ -1383,7 +1383,7 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM
 (Vector<coefficient>& highestWeightSimpleCoords, HashedList<Vector<coefficient> >& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string* outputDetails)
 { std::stringstream out;
-//  double startTime= theGlobalVariables.GetElapsedSeconds();
+//  double startTime = theGlobalVariables.GetElapsedSeconds();
 //  stOutput << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   Vector<coefficient> highestWeightTrue;
   highestWeightTrue = highestWeightSimpleCoords;
@@ -1416,7 +1416,7 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM
   Vector<coefficient> currentWeight;
 //  stOutput << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   for (int lowestUnexploredHeightDiff = 0; lowestUnexploredHeightDiff <= theTopHeightSimpleCoords; lowestUnexploredHeightDiff ++)
-  { //double startCycleTime= theGlobalVariables.GetElapsedSeconds();
+  { //double startCycleTime = theGlobalVariables.GetElapsedSeconds();
     if (upperBoundDominantWeights > 0 && numTotalWeightsFound > upperBoundDominantWeights)
       break;
     int bufferIndexShift = lowestUnexploredHeightDiff % topHeightRootSystemPlusOne;
@@ -1441,7 +1441,7 @@ bool WeylGroupData::GetAlLDominantWeightsHWFDIM
 //    stOutput << ". Time spent after accounting at height level "
 //    << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
-//    startCycleTime= theGlobalVariables.GetElapsedSeconds();
+//    startCycleTime = theGlobalVariables.GetElapsedSeconds();
     outputWeightsSimpleCoords.AdjustHashes();
     currentHashes.Clear();
 //    stOutput << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
@@ -1701,7 +1701,7 @@ std::string GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::ToStr
     { std::stringstream tempStream;
       tempStream << "s_" << i + 1 << "=MatrixRationals{}" << this->generatorS[i].ToString(theFormat) << "; \\\\\n";
       forYourCopyConvenience << tempStream.str();
-      out << HtmlRoutines::GetMathSpanPure("\\begin{array}{l}"+ tempStream.str()+"\\end{array}", 3000);
+      out << HtmlRoutines::GetMathSpanPure("\\begin{array}{l}"+ tempStream.str() +"\\end{array}", 3000);
     } else
       out << "Simple generator " << i + 1 << "} not computed ";
   out << "<br>For your copy convenience: <br>" << forYourCopyConvenience.str();
@@ -1792,7 +1792,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM
   std::stringstream out;
   this->CheckInitialization();
   this->ComputeRootSubsystem();
-//  double startTime= theGlobalVariables.GetElapsedSeconds();
+//  double startTime = theGlobalVariables.GetElapsedSeconds();
 //  stOutput << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   Vector<coefficient> highestWeightTrue = highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
@@ -1818,7 +1818,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM
 //  stOutput << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   for (int lowestUnexploredHeightDiff = 0; lowestUnexploredHeightDiff <= theTopHeightSimpleCoords;
        lowestUnexploredHeightDiff ++)
-  { //double startCycleTime= theGlobalVariables.GetElapsedSeconds();
+  { //double startCycleTime = theGlobalVariables.GetElapsedSeconds();
     if (upperBoundDominantWeights > 0 && numTotalWeightsFound > upperBoundDominantWeights)
       break;
     int bufferIndexShift = lowestUnexploredHeightDiff % topHeightRootSystemPlusOne;
@@ -1842,7 +1842,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM
     outputWeightsSimpleCoords.AddOnTop(currentHashes);
 //    stOutput << ". Time spent after accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
-//    startCycleTime= theGlobalVariables.GetElapsedSeconds();
+//    startCycleTime = theGlobalVariables.GetElapsedSeconds();
     outputWeightsSimpleCoords.AdjustHashes();
     currentHashes.Clear();
 //    stOutput << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
@@ -1894,7 +1894,7 @@ bool SubgroupWeylGroupOLD::GenerateOrbitReturnFalseIfTruncated(const Vector<coef
   for (int i = 0; i < theOrbit.size; i ++)
   { for (int j = 0; j < this->simpleGenerators.size; j ++)
     { this->AmbientWeyl->ReflectBetaWRTAlpha(this->simpleGenerators[j], theOrbit[i], false, tempRoot);
-//      int oldsize= theOrbit.size;
+//      int oldsize = theOrbit.size;
 //      std::string debugString= tempRoot.ToString() ;
       theOrbit.AddOnTopNoRepetition(tempRoot);
 //      if (oldsize<theOrbit.size)
@@ -2410,7 +2410,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
 //    stOutput << "<br>getting matrix of virtual char " << virtualChar << "\n";
     this->GetClassFunctionMatrix(virtualChar, splittingOperatorMatrix);
 //    FormatExpressions tempFormat;
-//    tempFormat.flagUseLatex= true;
+//    tempFormat.flagUseLatex = true;
 //    stOutput << "... and the result is:<br>" << splittingOperatorMatrix.ToString(&tempFormat);
     bool tempB = splittingOperatorMatrix.GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(theSubRepsBasis);
     if (!tempB)
@@ -2444,7 +2444,7 @@ bool GroupRepresentationCarriesAllMatrices<somegroup, coefficient>::DecomposeTod
 //  stOutput << "<br>Spreading: " << average.ToString();
 /*  Vectors<coefficient> theSpread;
   this->SpreadVector(average, theSpread);
-  if (theSpread.size== this->GetDim())
+  if (theSpread.size == this->GetDim())
     crash << "<hr><b>I was horribly wrong!</b>" << crash;
   else
   { stOutput << "<hr>The image of the spread is " << theSpread.size << " dimensional. ";

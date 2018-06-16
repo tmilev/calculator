@@ -758,11 +758,11 @@ public:
    GlobalVariables* theGlobalVariables = 0);
   template <class coefficient>
   bool GenerateOrbit
-  (Vectors<coefficient>& theWeights, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize= - 1,
+  (Vectors<coefficient>& theWeights, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize = - 1,
    HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset = 0, int UpperLimitNumElements = - 1);
   template <class coefficient>
   bool GenerateOrbit
-  (Vector<coefficient>& theWeight, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize= - 1,
+  (Vector<coefficient>& theWeight, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize = - 1,
    HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset = 0, int UpperLimitNumElements = - 1)
   { Vectors<coefficient> theWeights;
     theWeights.AddOnTop(theWeight);
@@ -802,7 +802,7 @@ public:
   template <class coefficient>
   void ActOn(const ElementWeylGroup<WeylGroupData>& theGroupElement, const Vector<coefficient>& inputVector, Vector<coefficient>& outputVector) const
   { //if (&inputVector == &outputVector)
-    //{ Vector<coefficient> inputCopy=inputVector;
+    //{ Vector<coefficient> inputCopy = inputVector;
     //  this->ActOn(theGroupElement, inputCopy, outputVector);
     //  return;
     //}
@@ -1449,8 +1449,8 @@ bool SubgroupData<someGroup, elementSomeGroup>::VerifyNormal()
       csmt(i, j) = QIDMul(i, j);
   stOutput << "Coset multiplication table\n" << csmt.ToStringPlainText() << '\n';
   for (int i = 0; i <cosets.size; i ++)
-    for (int j =i; j<cosets.size; j ++)
-      for (int k=j; k<cosets.size; k++)
+    for (int j = i; j<cosets.size; j ++)
+      for (int k= j; k<cosets.size; k++)
         if (csmt(i,csmt(j,k)) != csmt(csmt(i, j),k))
           return false;
   return true;
@@ -1691,7 +1691,7 @@ public:
   }
   Vector<Rational> GetRho();
   template <class coefficient>
-  void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign = 0, bool* stabilizerFound= 0);
+  void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign = 0, bool* stabilizerFound = 0);
   template <class coefficient>
   bool FreudenthalEvalIrrepIsWRTLeviPart
   (const Vector<coefficient>& inputHWfundamentalCoords, HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoords,
@@ -1766,7 +1766,7 @@ void ElementWeylGroupRing<coefficient>::MakeEi(WeylGroupData* GG, int i)
 
 template <typename coefficient>
 void ElementWeylGroupRing<coefficient>::MakeFromClassFunction(const ClassFunction<WeylGroupData, coefficient>& l)
-{ MakeFromClassFunction(l.G,l.data);
+{ MakeFromClassFunction(l.G, l.data);
 }
 
 template <typename coefficient>
@@ -1776,9 +1776,9 @@ void ElementWeylGroupRing<coefficient>::MakeFromClassFunction(WeylGroupData* GG,
     crash << "Weyl group pointer not allowed to be zero. " << crash;
   this->MakeZero();
   ElementWeylGroup<WeylGroupData> theMon;
-  for (int i = 0; i <GG->theGroup.ConjugacyClassCount(); i ++)
+  for (int i = 0; i < GG->theGroup.ConjugacyClassCount(); i ++)
     if (l[i] != 0)
-      for (int j = 0; j<GG->theGroup.conjugacyClasseS.size; j ++)
+      for (int j = 0; j < GG->theGroup.conjugacyClasseS.size; j ++)
         this->AddMonomial(GG->theGroup.conjugacyClasseS[i].theElements[j], l[i]);
 }
 
@@ -1804,8 +1804,8 @@ coefficient ClassFunction<someFiniteGroup, coefficient>::Norm() const
 
 template<class someFiniteGroup, typename coefficient>
 ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::operator*(const ClassFunction<someFiniteGroup, coefficient>& other) const
-{ ClassFunction<someFiniteGroup, coefficient> result =*this;
-  result*= other;
+{ ClassFunction<someFiniteGroup, coefficient> result = *this;
+  result *= other;
   return result;
 }
 
@@ -1839,7 +1839,7 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
 
 template<class someFiniteGroup, typename coefficient>
 ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::operator+(const ClassFunction<someFiniteGroup, coefficient>& other) const
-{ ClassFunction<someFiniteGroup, coefficient> l =*this;
+{ ClassFunction<someFiniteGroup, coefficient> l = *this;
   l.data += other.data;
   //this is slightly faster, but way too much code:
   /*l.G = this->G;
@@ -1851,7 +1851,7 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
 
 template<class someFiniteGroup, typename coefficient>
 ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::operator-(const ClassFunction &other) const
-{ ClassFunction<someFiniteGroup, coefficient> l =*this;
+{ ClassFunction<someFiniteGroup, coefficient> l = *this;
   l.data += other.data;
   //this is slightly faster, but way too much code:
   /*l.G = G;
@@ -1877,7 +1877,7 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
   ClassFunction X2;
   int n;
   do
-  { for (int i = 0; i <chars.size; i ++)
+  { for (int i = 0; i < chars.size; i ++)
     { do
       { innerChanged = false;
         X2 = X - chars[i];
@@ -1989,12 +1989,12 @@ void UDPolynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input)
   Matrix<coefficient> acc;
   acc = input;
   for (int i = 1; i < n; i ++)
-  { this->data[i] = -acc.GetTrace()/i;
-    for (int j = 0; j<n; j ++)
+  { this->data[i] = -acc.GetTrace() / i;
+    for (int j = 0; j < n; j ++)
       acc.elements[j][j] += this->data[i];
     acc.MultiplyOnTheLeft(input);
   }
-  this->data[n] = -acc.GetTrace()/n;
+  this->data[n] = -acc.GetTrace() / n;
 }
 
 template <typename coefficient>
@@ -2037,13 +2037,13 @@ void UDPolynomial<coefficient>::operator-=(const UDPolynomial<coefficient>& righ
   if (data.size < t)
     t = data.size;
 
-  for (int i = 0; i <t; i ++)
+  for (int i = 0; i < t; i ++)
     data[i] -= right.data[i];
 
   if (right.data.size > data.size)
   {  int n = data.size;
      data.SetSize(right.data.size);
-     for (int i =n; i <right.data.size; i ++)
+     for (int i = n; i < right.data.size; i ++)
        data[i] = -right.data[i];
   }
   else
@@ -2058,8 +2058,8 @@ UDPolynomial<coefficient> UDPolynomial<coefficient>::operator*(const UDPolynomia
    for (int i = 0; i <out.data.size; i ++)
       out.data[i] = 0;
    for (int i = 0; i < data.size; i ++)
-      for (int j = 0; j< right.data.size; j ++)
-         out.data[i+j] += data[i]*right.data[j];
+      for (int j = 0; j < right.data.size; j ++)
+         out.data[i + j] += data[i] * right.data[j];
    return out;
 }
 
@@ -2070,7 +2070,7 @@ UDPolynomial<coefficient> UDPolynomial<coefficient>::TimesXn(int n) const
    for (int i = 0; i < n; i ++)
      out.data[i] = 0;
    // not memcpy()
-   for (int i = 0; i <data.size; i ++)
+   for (int i = 0; i < data.size; i ++)
       out.data[i + n] = data[i];
 
    return out;
@@ -2078,7 +2078,7 @@ UDPolynomial<coefficient> UDPolynomial<coefficient>::TimesXn(int n) const
 
 template <typename coefficient>
 void UDPolynomial<coefficient>::operator*=(const coefficient& right)
-{  for (int i = 0; i <data.size; i ++)
+{  for (int i = 0; i < data.size; i ++)
       data[i] *= right;
 }
 

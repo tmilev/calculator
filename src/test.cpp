@@ -102,7 +102,7 @@ class AtomicString: public MilevObject<AtomicString>
 
 
   template <typename somestream>
-  somestream IntoStream(somestream& out, GlobalVariables* unused= 0);
+  somestream IntoStream(somestream& out, GlobalVariables* unused = 0);
 };
 
 class GlobalAtomicStringVoidPointerTableClass
@@ -164,7 +164,7 @@ class GenericElement: public MilevObject<GenericElement>, public GroupConjugacyI
   void* data;
   bool ownsData;
 
-  GenericElement(){type= 0; data = 0; ownsData = false;}
+  GenericElement(){type = 0; data = 0; ownsData = false;}
   ~GenericElement(){if (ownsData) delete data;}
   GenericElement operator*(const GenericElement& right) const
   { static AtomicString* typecache;
@@ -430,9 +430,9 @@ bool CharacterComparator(const Vector<Rational>& left, const Vector<Rational>& r
 template <>
 unsigned int Vector<int>::HashFunction() const
 { unsigned int result = 0;
-  int theSize= MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
+  int theSize = MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
   for (int i = 0; i <theSize; i ++)
-    result+=  (unsigned int) this->TheObjects[i] *  SomeRandomPrimes[i];
+    result +=  (unsigned int) this->TheObjects[i] *  SomeRandomPrimes[i];
   return result;
 }
 
@@ -496,14 +496,14 @@ void ListListInt::SetSize(int newsz)
 int& SubListListInt::operator[](int in)
 { int slp = viewed->things[sublist];
   if ((viewed->size- 1) == sublist)
-  { if (slp+in >= viewed->things.size)
+  { if (slp+ in >= viewed->things.size)
       crash << "Attempt to access out of bounds index " << in << " from sublist " << sublist << crash;
   } else
-  { int nslp = viewed->things[sublist+ 1];
-    if (slp+in >= nslp)
+  { int nslp = viewed->things[sublist + 1];
+    if (slp+ in >= nslp)
       crash << "Attempt to access out of bounds index " << in << " from sublist " << sublist << crash;
   }
-  return viewed->things[slp+in];
+  return viewed->things[slp+ in];
 }
 
 void SubListListInt::SetSize(int newsz)
@@ -512,7 +512,7 @@ void SubListListInt::SetSize(int newsz)
   { viewed->things.SetSize(slp+newsz);
     return;
   }
-  int nslp = viewed->things[sublist+ 1];
+  int nslp = viewed->things[sublist + 1];
   int sz = (nslp - slp);
   int deltas = newsz - sz;
   if (deltas == 0)
@@ -543,7 +543,7 @@ void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroupData>& g, Per
       accountedFor[j] = true;
       j = g.owner->RootSystem.GetIndex(g*g.owner->RootSystem[j]);
     }
-    while (j!=i);
+    while (j != i);
     if (p.cycles[p.cycles.size- 1].size == 1)
       p.cycles.SetSize(p.cycles.size- 1);
   }
@@ -554,7 +554,7 @@ void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroupData>& g, Per
 //  { out << '(';
 //    for (int j = 0; j<p.cycles[i].size; j ++)
 //    { out << p.cycles[i][j];
-//      if (j!=p.cycles[i].size- 1)
+//      if (j !=p.cycles[i].size- 1)
 //        out << ' ';
 //    }
 //    out << ')';
@@ -683,9 +683,9 @@ void ComputeIrreps(FiniteGroup<elementSomeGroup>& G)
   Rational SizeG = G.GetSize();
   for (int i = 0; i <G.characterTable.size; i ++)
     for (int j = 0; j<G.characterTable.size; j ++)
-      M(j,i) = G.characterTable[j][i]*G.conjugacyClasseS[i].size/SizeG;
+      M(j, i) = G.characterTable[j][i]*G.conjugacyClasseS[i].size/SizeG;
   for (int i = 0; i <G.characterTable.size; i ++)
-    for (int j =i; j<G.characterTable.size; j ++)
+    for (int j = i; j<G.characterTable.size; j ++)
     { stOutput << i << "⊗" << j << ": " << M*(G.characterTable[i]*G.characterTable[j]).data << "\n";
     }
 }
@@ -699,7 +699,7 @@ void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, SubgroupRoo
   out.generatorPreimages.SetSize(d);
   // not sure if this is actually how this works
   for (int i = 0; i <d- 1; i ++)
-    out.generatorPreimages[i] = i+ 1;
+    out.generatorPreimages[i] = i + 1;
 
   out.SubCartanSymmetric.init(d,d);
   for (int ii = 0; ii <d- 1; ii ++)
@@ -848,7 +848,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
       // data goes out here
       stOutput << "\\\\" << "\n";
       for (int i = 0; i <ts.size; i ++)
-      { for (int j =numCycles; j<numCycles+numCycles- 1; j ++)
+      { for (int j = numCycles; j<numCycles+numCycles- 1; j ++)
         { stOutput << '&';
           stOutput << ts[i][j] << '\t';
         }
@@ -1030,7 +1030,7 @@ class polynom1al
 
 
   void AddMonomial(coefficient c, int i)
-  { while (this->data.size < i+ 1)
+  { while (this->data.size < i + 1)
     { this->data.AddOnTop(0);
     }
     this->data[i] += c;
@@ -1155,7 +1155,7 @@ List<Vector<coefficient> > getunion(const List<Vector<coefficient> > &V, const L
       M.elements[i][j] = V[i][j];
   for (int i = 0; i <W.size; i ++)
     for (int j = 0; j<d; j ++)
-      M.elements[V.size +i][j] = W[i][j];
+      M.elements[V.size + i][j] = W[i][j];
   M.GaussianEliminationByRows();
   List<Vector<coefficient> > out;
   for (int i = 0; i <M.NumRows; i ++)
@@ -1172,7 +1172,7 @@ List<Vector<coefficient> > getunion(const List<Vector<coefficient> > &V, const L
 
 template<typename coefficient>
 List<Vector<coefficient> > intersection(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W)
-{ if ((V.size== 0) or (W.size== 0))
+{ if ((V.size == 0) or (W.size == 0))
   { List<Vector<coefficient> > out;
     return out;
   }
@@ -1207,7 +1207,7 @@ List<Vector<coefficient> > intersection(const List<Vector<coefficient> > &V, con
 template <typename coefficient>
 List<Vector<coefficient> > orthogonal_complement(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &WW)
 { List<Vector<coefficient> > W = intersection(V,WW);
-  if (W.size== 0)
+  if (W.size == 0)
     return V;
   int d = W[0].size;
   Matrix<coefficient> GM;
@@ -1594,18 +1594,18 @@ bool GetCoordsInBasisInputIsGaussianEliminated
  const MonomialCollection<templateMonomial, coefficient> & input,
  Vector<coefficient>* outputCoordinatesInBasis = 0)
 { MacroRegisterFunctionWithName("GetCoordsInBasiS");
-  MonomialCollection<templateMonomial, coefficient>  summand, v=input;
+  MonomialCollection<templateMonomial, coefficient>  summand, v= input;
   coefficient currentCoeff;
   if (outputCoordinatesInBasis!= 0)
     outputCoordinatesInBasis->MakeZero(inputReducedBasis.size);
   for (int i = 0; i <inputReducedBasis.size; i ++)
   { currentCoeff=v.GetMonomialCoefficient(inputReducedBasis[i].GetMaxMonomial());
     if (!currentCoeff.IsEqualToZero())
-    { summand=inputReducedBasis[i];
+    { summand = inputReducedBasis[i];
       if (outputCoordinatesInBasis!= 0)
-        (*outputCoordinatesInBasis)[i]=currentCoeff;
+        (*outputCoordinatesInBasis)[i]= currentCoeff;
       currentCoeff*= - 1;
-      summand*=currentCoeff;
+      summand*= currentCoeff;
       v-=summand;
     }
   }
@@ -1618,18 +1618,18 @@ bool GetCoordsInBasisInputIsGaussianEliminated
  const Polynomial<coefficient> & input,
  Vector<coefficient>* outputCoordinatesInBasis = 0)
 { MacroRegisterFunctionWithName("GetCoordsInBasiS");
-  Polynomial<coefficient>  summand, v=input;
+  Polynomial<coefficient>  summand, v= input;
   coefficient currentCoeff;
   if (outputCoordinatesInBasis!= 0)
     outputCoordinatesInBasis->MakeZero(inputReducedBasis.size);
   for (int i = 0; i <inputReducedBasis.size; i ++)
   { currentCoeff=v.GetMonomialCoefficient(inputReducedBasis[i].GetMaxMonomial());
     if (!currentCoeff.IsEqualToZero())
-    { summand=inputReducedBasis[i];
+    { summand = inputReducedBasis[i];
       if (outputCoordinatesInBasis!= 0)
-        (*outputCoordinatesInBasis)[i]=currentCoeff;
+        (*outputCoordinatesInBasis)[i]= currentCoeff;
       currentCoeff*= - 1;
-      summand*=currentCoeff;
+      summand*= currentCoeff;
       v-=summand;
     }
   }
@@ -1652,7 +1652,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
 
   for (int k= 0; k<theRootSAs.theSubalgebras.size; k++)
   { rootSubalgebra& currentRootSA= theRootSAs.theSubalgebras[k];
-    roots =currentRootSA.PositiveRootsK;
+    roots = currentRootSA.PositiveRootsK;
     Polynomial<Rational> macdonaldPoly;
     make_macdonald_polynomial(W,roots,macdonaldPoly);
     stOutput << macdonaldPoly << "\n";
@@ -1665,7 +1665,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
     int mcs = 0;
     do
     { mcs = module.size;
-      for (int i =1; i <W.GetDim()+ 1; i ++)
+      for (int i =1; i <W.GetDim() + 1; i ++)
       { W.GetStandardRepresentationMatrix(i,m);
         for (int j = 0; j<mcs; j ++){
           matrix_acts_on_polynomial(m,module[j],p);
@@ -1679,7 +1679,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
     rep.init(W);
     rep.names.SetSize(1);
     rep.names[0] = currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
-    for (int i =1; i <W.GetDim()+ 1; i ++)
+    for (int i =1; i <W.GetDim() + 1; i ++)
     { Matrix<Rational> rm;
       rm.init(module.size, module.size);
       W.GetStandardRepresentationMatrix(i,m);
@@ -1774,7 +1774,7 @@ get_macdonald_representation(WeylGroupData& W, const List<Vector<Rational> >& ro
 
   GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational> rep;
   rep.init(W.theGroup);
-  for (int i =1; i <W.GetDim()+ 1; i ++)
+  for (int i =1; i <W.GetDim() + 1; i ++)
   { Matrix<Rational> m;
     W.GetStandardRepresentationMatrix(i,m);
     Matrix<Rational> rm;
@@ -1837,7 +1837,7 @@ Vector<int> pointi(int d, int i)
     return out;
   }
   for (int ii = 0; ii <d; ii ++)
-  { int m=i%5;
+  { int m= i%5;
     out[ii] = m-2;
     i/=5;
   }
@@ -1904,7 +1904,7 @@ template<>
     out << "(";
     for (int i = 0; i < this->size; i ++)
     { out << this->TheObjects[i];
-      if (i!= this->size- 1)
+      if (i != this->size- 1)
         out << ", ";
     }
     out << ")";
@@ -1975,7 +1975,7 @@ Vector<int> pointi_slow(int d, int i)
 /*
 int pointis(int d, int n)
 { int acc = 0;
-  for (int r =1; r<d; r++)
+  for (int r =1; r<d; r ++)
   { MathRoutines::NChooseK(n- 1,r) * MathRoutines
   }
 
@@ -1997,7 +1997,7 @@ int pointis(int d, int n)
   }
   i -= d;
   if (i <d*(d- 1))
-  { int j =i/d;
+  { int j = i/d;
     int k=1%d;
     if (j<k)
     {out[j] += 1;
@@ -2063,7 +2063,7 @@ int pointis(int d, int n)
     //        pw = ways_of_placing(partition,d) # (d choose partition.rows)
     //        for wp in pw:
     //          cnt += len(ways_of_placing(negpart, d-nonzero_entries(wp))) # (d choose negpart.rows)
-    for (int m= 0; m<n + 1; m++)
+    for (int m= 0; m<n + 1; m ++)
     {
       // vectors(n = abs sum,m = number of positives)
 
@@ -2198,7 +2198,7 @@ int pointis(int d, int n)
 //  for (int i = 0; i <monomials.size; i ++)
 //  { int images_old_size = images65521[i].size;
 //    images65521[i].SetSize(number_of_images);
-//    for (int j =images_old_size; j<number_of_images; j ++)
+//    for (int j = images_old_size; j<number_of_images; j ++)
 //    { Vector<int> point = pointi(W.GetDim(),j);
 //      f65521 p =1;
 //      for (int k1= 0; k1<monomials[i].size; k1++)
@@ -2256,7 +2256,7 @@ int pointis(int d, int n)
 //
 //  WeylGroupRepresentation<f65521> rep65521;
 //  rep65521.init(W);
-//  for (int i =1; i <W.GetDim()+ 1; i ++)
+//  for (int i =1; i <W.GetDim() + 1; i ++)
 //  { Matrix<Rational> m;
 //    W.GetStandardRepresentationMatrix(i,m);
 //    Matrix<f65521> rm;
@@ -2315,7 +2315,7 @@ int pointis(int d, int n)
 //      int w = W.theDynkinType.GetCoxeterEdgeWeight(i, j);
 //      if (w <= 2)
 //        continue;
-//      Matrix<f65521> M1 = rep65521.GetMatrixElement(i+ 1);
+//      Matrix<f65521> M1 = rep65521.GetMatrixElement(i + 1);
 //      Matrix<f65521> M2 = rep65521.GetMatrixElement(j+ 1);
 //      Matrix<f65521> M3 = M1*M2;
 //      MathRoutines::RaiseToPower(M3,w,idr65521);
@@ -2332,7 +2332,7 @@ int pointis(int d, int n)
 //  for (int i = 0; i <monomials.size; i ++)
 //  { int images_old_size = images[i].size;
 //    images[i].SetSize(number_of_images);
-//    for (int j =images_old_size; j<number_of_images; j ++)
+//    for (int j = images_old_size; j<number_of_images; j ++)
 //    { Vector<int> point = pointi(W.GetDim(),j);
 //      Rational p =1;
 //      for (int k1= 0; k1<monomials[i].size; k1++)
@@ -2351,7 +2351,7 @@ int pointis(int d, int n)
 //
 //  WeylGroupRepresentation<Rational> rep;
 //  rep.init(W);
-//  for (int i =1; i <W.GetDim()+ 1; i ++)
+//  for (int i =1; i <W.GetDim() + 1; i ++)
 //  { Matrix<Rational> m;
 //    W.GetStandardRepresentationMatrix(i,m);
 //    Matrix<Rational> rm;
@@ -2400,7 +2400,7 @@ int pointis(int d, int n)
 //      int w = W.theDynkinType.GetCoxeterEdgeWeight(i, j);
 //      if (w <= 2)
 //        continue;
-//      Matrix<Rational> M1 = rep.GetMatrixElement(i+ 1);
+//      Matrix<Rational> M1 = rep.GetMatrixElement(i + 1);
 //      Matrix<Rational> M2 = rep.GetMatrixElement(j+ 1);
 //      Matrix<Rational> M3 = M1*M2;
 //      MathRoutines::RaiseToPower(M3,w,idr);
@@ -2429,7 +2429,7 @@ int pointis(int d, int n)
 //
 //  for (int k= 0; k<theRootSAs.theSubalgebras.size; k++)
 //  { rootSubalgebra& currentRootSA= theRootSAs.theSubalgebras[k];
-//    roots =currentRootSA.PositiveRootsK;
+//    roots = currentRootSA.PositiveRootsK;
 //    stOutput << "I am processing root subalgebra of type "
 //              << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
 //    WeylGroupRepresentation<Rational> rep = get_macdonald_representation_v2(W,roots);
@@ -2458,7 +2458,7 @@ void lie_bracket_relations(Vector<Polynomial<Rational> >& out, int N)
         Vector<Polynomial<Rational> > w;
         w.MakeZero(N);
         for (int l = 0; l<N; l ++)
-          for (int m= 0; m<N; m++)
+          for (int m= 0; m<N; m ++)
           { Polynomial<Rational> p;
             p = brackets.elements[i][j][l];
             p *= brackets.elements[k][m][l];
@@ -2540,7 +2540,7 @@ void TestCountPermutations(int N)
   GeneratorPermutationsOfList<int> perms;
   for (perms.Initialize(N); !perms.DoneIterating(); ++perms)
     //stOutput << (*perms).ToStringCommaDelimited() << '\n';
-    cnt++;
+    cnt ++;
   stOutput << "Generated " << cnt << " permutations of " << N << " objects\n";
 }
 
@@ -2584,7 +2584,7 @@ void TestPartitionsTableaux()
   List<List<int> > columns = T.GetColumns();
   for (int i = 0; i <columns.size; i ++)
   { stOutput << "[" << columns[i].ToStringCommaDelimited() << "]";
-    if (i!=columns.size- 1)
+    if (i != columns.size- 1)
       stOutput << ", ";
   }
   stOutput << "]\n";
@@ -2816,7 +2816,7 @@ void TestInduction(int n =4, int m=3)
       stOutput << G[0] << '\n' << G[1] << '\n' << G[2] << '\n' << "\n";
       M = GetMatrixOfElement(G,G[6]);
       stOutput << GetMatrixOfElement(G,G[6]) << "\n";
-      stOutput << G[6] << ' ' << M.GetDeterminant() << ' ' << M(0,0)+M(1,1)+M(2,2) << "\n";
+      stOutput << G[6] << ' ' << M.GetDeterminant() << ' ' << M(0,0) +M(1,1) +M(2,2) << "\n";
   */
   /*
 
@@ -3194,7 +3194,7 @@ void TestInduction(int n =4, int m=3)
       { ClassFunction<Rational> X;
         X.G = &G;
         for (int ii = 0; ii <G.ccCount; ii ++)
-        { if (ii ==ci)
+        { if (ii == ci)
             X.data.AddOnTop(one);
             continue;
           X.data.AddOnTop(zero);
@@ -3257,12 +3257,12 @@ void TestInduction(int n =4, int m=3)
             break;
         }
         stOutput << "finding next character" << "\n";
-        if (ci!= 0)
+        if (ci != 0)
         { ci--;
           cj ++;
           chars[ci].AddOnTop(chars[ci][cj- 1]*Xcs);
         } else
-        { ci =cj+ 1;
+        { ci = cj+ 1;
           cj = 0;
           List<ClassFunction<Rational> > cil;
           cil.AddOnTop(chars[ci- 1][0]*Xs);

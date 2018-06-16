@@ -189,7 +189,7 @@ public:
     return false;
   }
   inline void operator*=(const MonomialTensor<coefficient, inputHashFunction>& standsOnTheRight)
-  { if (standsOnTheRight.generatorsIndices.size== 0)
+  { if (standsOnTheRight.generatorsIndices.size == 0)
       return;
     if (this == &standsOnTheRight)
     { MonomialTensor<coefficient, inputHashFunction> tempMon;
@@ -454,7 +454,7 @@ public:
   bool operator==(const MonomialP& other) const;
   template <class coefficient>
   void operator=(const Vector<coefficient>& other)
-  { this->monBody= other;
+  { this->monBody = other;
   }
   void operator=(const MonomialP& other)
   { this->monBody = other.monBody;
@@ -838,7 +838,7 @@ public:
   Matrix<coefficient> operator^(const Matrix<coefficient>& right) const;
   static void ConjugationAction(const Matrix<coefficient>& conjugateMe, const Matrix<coefficient>& conjugateBy, Matrix<coefficient>& out);
   void MakeZero(const coefficient& theRingZero= 0);
-  void MakeID(const Matrix<coefficient>& prototype, const coefficient& theRingZero= 0, const coefficient& theRingOne=1);
+  void MakeID(const Matrix<coefficient>& prototype, const coefficient& theRingZero= 0, const coefficient& theRingOne =1);
   //if m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below function
   //corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
@@ -2311,7 +2311,7 @@ public:
   }
   void MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat);
   void MakeConst(const coefficient& theConst, int ExpectedNumVars = 0)
-  {// int commentGrandMasterChecksWhenDone= - 1;
+  {// int commentGrandMasterChecksWhenDone = - 1;
     //this->GrandMasterConsistencyCheck();
     this->MakeZero();
     //this->GrandMasterConsistencyCheck();
@@ -2836,7 +2836,7 @@ class GroebnerBasisComputation
   (List<Polynomial<coefficient> >& inputOutpuT, int upperLimitPolyComputations);
 
   bool TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT);
-  bool TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, int upperComputationBound= - 1);
+  bool TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, int upperComputationBound = - 1);
   void TrySettingValueToVariable
   (List<Polynomial<coefficient> >& inputSystem, const Rational& aValueToTryOnPreferredVariable);
   bool WrapUpGroebnerOnExceedingComputationLimit(List<Polynomial<coefficient> >& inputOutpuT);
@@ -2969,7 +2969,7 @@ public:
   RationalFunctionOld(const Rational& other);
   Rational RationalValue() const;
   void RaiseToPower(int thePower);
-//  RationalFunctionOld(const RationalFunctionOld& other){this->NumVars = 0; this->expressionType= this->typeRational; this->ratValue.MakeZero(); this->operator=(other);}
+//  RationalFunctionOld(const RationalFunctionOld& other){this->NumVars = 0; this->expressionType = this->typeRational; this->ratValue.MakeZero(); this->operator=(other);}
   void ReduceMemory()
   { this->ReduceRFToPoly();
     this->ReducePolyToRational();
@@ -3070,7 +3070,7 @@ public:
 //  void operator-=(const Rational& theConstant)
 //  { RationalFunctionOld tempRF;
 //    tempRF.MakeConst(this->NumVars, -theConstant, this->context);
-//    (*this)+= tempRF;
+//    (*this) += tempRF;
 //  }
   bool operator<(const RationalFunctionOld& other) const
   { return other > *this;
@@ -3129,7 +3129,7 @@ public:
   { return this->expressionType == this->typeRational && this->ratValue.IsEqualToZero();
   }
   bool IsEqualToOne() const
-  { return this->expressionType== this->typeRational && this->ratValue.IsEqualToOne();
+  { return this->expressionType == this->typeRational && this->ratValue.IsEqualToOne();
   }
   bool IsEqualTo(const RationalFunctionOld& other) const
   { if (this->expressionType != other.expressionType)
@@ -3716,7 +3716,7 @@ class CompleX
     return tempStream.str();
   }
   friend std::iostream& operator<<(std::iostream& output, const CompleX<coefficient>& input)
-  { output << input.Re << "+i" << input.Im;
+  { output << input.Re << "+ i" << input.Im;
     return output;
   }
   void operator*=(const CompleX<coefficient>& other)
@@ -4015,7 +4015,7 @@ bool Vectors<coefficient>::GetNormalSeparatingCones
 { Matrix<Rational> matA;
   Matrix<Rational> matb;
   Vector<Rational> matX;
-  int theDimension =coneStrictlyPositiveCoeffs[0].size;
+  int theDimension = coneStrictlyPositiveCoeffs[0].size;
   if (coneStrictlyPositiveCoeffs.size == 0)
   { if (coneNonNegativeCoeffs.size > 0)
       outputNormal.MakeZero(coneNonNegativeCoeffs[0].size);
@@ -4156,7 +4156,7 @@ std::string Vectors<coefficient>::ToString(FormatExpressions* theFormat) const
   if (theFormat != 0)
   { useLaTeX = theFormat->flagUseLatex;
     useHtml = theFormat->flagUseHTML;
-//    makeTable= theFormat->flagma
+//    makeTable = theFormat->flagma
   }
   if (!useLaTeX && !useHtml)
     out << this->size << " vectors: \n";
@@ -6240,7 +6240,7 @@ class MonomialGeneralizedVerma
   bool operator>(const MonomialGeneralizedVerma<coefficient>& other)
   { if (this->owner != other.owner)
   // use of ulong is correct on i386, amd64, and a number of other popular platforms
-  // uintptr_t is only available in c++0x
+  // uintptr_t is only available in c++ 0x
       return (unsigned long) this->owner > (unsigned long) other.owner;
     if (this->indexFDVector != other.indexFDVector)
       return this->indexFDVector > other.indexFDVector;

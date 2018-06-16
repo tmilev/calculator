@@ -50,7 +50,7 @@ public:
   { int tempI= ::MathRoutines::Minimum((int) this->DebugString.length(), ::SomeRandomPrimesSize);
     unsigned int result = 0;
     for (int i = 0; i <tempI; i ++)
-      result+= this->DebugString[i]*::SomeRandomPrimes[i];
+      result += this->DebugString[i]*::SomeRandomPrimes[i];
     return result;
   }
   static inline unsigned int HashFunction(const coneRelation& input)
@@ -166,7 +166,7 @@ public:
 //  int indexInOwners;
   rootSubalgebra();
   ~rootSubalgebra()
-  { this->flagDeallocated= true;
+  { this->flagDeallocated = true;
   }
   WeylGroupData& GetAmbientWeyl() const;
   SemisimpleLieAlgebra& GetOwnerSSalg() const;
@@ -387,11 +387,11 @@ public:
   bool flagDeallocated;
   void init();
   slTwoSubalgebra()
-  { this->flagDeallocated= false;
+  { this->flagDeallocated = false;
     this->init();
   }
   ~slTwoSubalgebra()
-  { this->flagDeallocated= true;
+  { this->flagDeallocated = true;
   }
   bool CheckConsistency() const;
 
@@ -442,7 +442,7 @@ public:
   { int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
     int result = 0;
     for (int i = 0; i <tempI; i ++)
-      result+= this->hCharacteristic[i].NumShort*SomeRandomPrimes[i];
+      result += this->hCharacteristic[i].NumShort*SomeRandomPrimes[i];
     return result;
   }
   static inline unsigned int HashFunction(const slTwoSubalgebra& input)
@@ -462,7 +462,7 @@ public:
   rootSubalgebras theRootSAs;
   bool flagDeallocated;
   ~SltwoSubalgebras()
-  { this->flagDeallocated= true;
+  { this->flagDeallocated = true;
   }
   SltwoSubalgebras(): owner(0), flagDeallocated(false){}
   SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner), flagDeallocated(false)

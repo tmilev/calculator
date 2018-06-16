@@ -128,7 +128,7 @@ void PauseProcess::PauseIfRequested(bool restartServerOnFail, bool dontCrashOnFa
 { this->CheckConsistency();
   if (this->CheckPauseIsRequested(restartServerOnFail, dontCrashOnFail, false))
     logBlock << logger::blue << this->currentProcessName << "blocking on " << this->ToString() << logger::endL;
-  bool pauseWasRequested= !this->thePausePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
+  bool pauseWasRequested = !this->thePausePipe.ReadIfFailThenCrash(restartServerOnFail, dontCrashOnFail);
   if (!pauseWasRequested)
     this->thePausePipe.WriteIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
 }
@@ -257,7 +257,7 @@ int Pipe::ReadWithTimeOutViaSelect
     << strerror(errno) << ". \n";
     numFails ++;
   } while (numSelected < 0);
-  //numSelected== 0 most probably means timeout has expired.
+  //numSelected == 0 most probably means timeout has expired.
   if (numSelected <= 0)
   { if (commentsOnFailure != 0)
       *commentsOnFailure << failStream.str();
@@ -381,7 +381,7 @@ bool PipePrimitive::WriteIfFailThenCrash(const std::string& toBeSent, bool resta
   }
   if (toBeSent.size() == 0)
     return true;
-//  std::string toBeSentCopy= toBeSent;
+//  std::string toBeSentCopy = toBeSent;
   int numBytesWritten = 0;
   int numBadAttempts = 0;
   for (;;)
@@ -577,7 +577,7 @@ void logger::reset()
   this->flagStopWritingToFile = false;
   this->MaxLogSize = //10000
   50000000;
-  if (theGlobalVariables.flagRunningApache || this->theFileName=="")
+  if (theGlobalVariables.flagRunningApache || this->theFileName =="")
   { this->flagStopWritingToFile = true;
     return;
   }
@@ -692,27 +692,27 @@ std::string logger::openTagHtml()
   out << logger::closeTagHtml();
   switch (this->currentColor)
   { case logger::red:
-      out << "<span style=\"color:red\">";
+      out << "<span style =\"color:red\">";
       this->flagTagColorHtmlOpened = true;
       return out.str();
     case logger::green:
-      out << "<span style=\"color:green\">";
+      out << "<span style =\"color:green\">";
       this->flagTagColorHtmlOpened = true;
       return out.str();
     case logger::blue:
-      out << "<span style=\"color:blue\">";
+      out << "<span style =\"color:blue\">";
       this->flagTagColorHtmlOpened = true;
       return out.str();
     case logger::yellow:
-      out << "<span style=\"color:yellow\">";
+      out << "<span style =\"color:yellow\">";
       this->flagTagColorHtmlOpened = true;
       return out.str();
     case logger::orange:
-      out << "<span style=\"color:orange\">";
+      out << "<span style =\"color:orange\">";
       this->flagTagColorHtmlOpened = true;
       return out.str();
     case logger::purple:
-      out << "<span style=\"color:purple\">";
+      out << "<span style =\"color:purple\">";
       this->flagTagColorHtmlOpened = true;
       return out.str();
     default:

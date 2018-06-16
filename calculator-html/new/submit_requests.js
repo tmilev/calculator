@@ -9,7 +9,7 @@ function recordProgressDone(progress, timeFinished) {
   }
   var theButton = progress.childNodes[0];
   var timeTotal = timeFinished - progress.getAttribute("timeStarted");
-  theButton.innerHTML = `<b style='color:green'>Received</b> ${timeTotal} ms`;
+  theButton.innerHTML = `<b style ='color:green'>Received</b> ${timeTotal} ms`;
 }
 
 function recordProgressStarted(progress, address, isPost, timeStarted) {
@@ -26,8 +26,8 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   var theHTML = "";
   theHTML += `<button class = "buttonProgress" onclick = "if (this.nextSibling.nextSibling.style.display === 'none')
 {this.nextSibling.nextSibling.style.display = '';} else {this.nextSibling.nextSibling.style.display = 'none';}">`;
-  theHTML += `<b style="color:orange">Sent</b></button>`;
-  theHTML += `<br><span class ="spanProgressReport" style="display:none">`;
+  theHTML += `<b style ="color:orange">Sent</b></button>`;
+  theHTML += `<br><span class ="spanProgressReport" style ="display:none">`;
   if (!isPost) {
     theHTML += `<a href='${address}' target ='_blank'>${address}</a></span>`;
   } else {
@@ -99,7 +99,7 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   if (spanOutput === null) {
     spanOutput = document.createElement('span');
     document.body.appendChild(spanOutput);
-    spanOutput.innerHTML = `<span style='color:red'> ERROR: span with id ${idOutput} MISSING! </span>`;
+    spanOutput.innerHTML = `<span style ='color:red'> ERROR: span with id ${idOutput} MISSING! </span>`;
   }
   var https = new XMLHttpRequest();
   https.open("POST", pathnames.calculatorAPI, true);
@@ -127,7 +127,7 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
 
 function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
   var inputParams = '';
-  inputParams += 'request =' + requestType;
+  inputParams += 'request=' + requestType;
   inputParams += '&mainInput =' + encodeURIComponent(theString);
   if (thePage.flagDebug === true) {
     inputParams += "&debugFlag= true";
@@ -152,7 +152,7 @@ function progressReport(){
   progReportTimer.innerHTML = "<hr>Refreshing every " + timeIncrementInTenthsOfSecond / 10 +
   " second(s). Client time: ~" + Math.floor(timeOutCounter / 10) + " second(s)<br>";
   timeOutCounter += timeIncrementInTenthsOfSecond;
-  var sURL  = `${pathnames.calculatorAPI}?request =indicator&mainInput =${currentWorkerNumber}`;
+  var sURL  = `${pathnames.calculatorAPI}?request= indicator&mainInput =${currentWorkerNumber}`;
   var https = new XMLHttpRequest();
   https.open("GET", sURL, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -160,17 +160,17 @@ function progressReport(){
     newReportString= https.responseText;
     if (https.responseText === "finished") { 
       isFinished = true;
-      requestStatus.innerHTML = "<span style='color:green'><b>Computation finished.</b></span>";
+      requestStatus.innerHTML = "<span style ='color:green'><b>Computation finished.</b></span>";
       return;
     }
     if (https.responseText !== "") { 
       progReport.innerHTML = newReportString + "<hr>";
       requestStatus.innerHTML = '';
     } else
-      requestStatus.innerHTML = "<span style='color:red'><b>Empty response</b></span>";
+      requestStatus.innerHTML = "<span style ='color:red'><b>Empty response</b></span>";
   }
   ////////////////////////////////////////////
-  requestStatus.innerHTML = "<span style='color:orange'><b>Request sent</b></span>";
+  requestStatus.innerHTML = "<span style ='color:orange'><b>Request sent</b></span>";
   https.send(null);
   this.timeoutID = window.setTimeout("progressReport()", timeIncrementInTenthsOfSecond * 100);
 }
@@ -181,7 +181,7 @@ function SendTogglePauseRequest() {
   }
   var requestStatus = document.getElementById("idProgressReportRequestStatus");
   var pauseRequest = new XMLHttpRequest();
-  var pauseURL = `${pathnames.calculatorAPI}?request =pause&mainInput =${currentWorkerNumber}`;
+  var pauseURL = `${pathnames.calculatorAPI}?request=pause&mainInput =${currentWorkerNumber}`;
   pauseRequest.open("GET", pauseURL, true);
   pauseRequest.onload = function() {
     if (pauseRequest.status !== 200) {

@@ -496,7 +496,7 @@ PlotObject
 { this->CheckInitialization();
   Plot plotContainer;
 //  stOutput << "DEBUG: Calling addplot";
-  plotContainer+=inputValue;
+  plotContainer+= inputValue;
   return this->owner->theObjectContainer.thePlots
   .AddNoRepetitionOrReturnIndexFirst(plotContainer);
 }
@@ -1873,7 +1873,7 @@ bool Expression::ContextGetPolySubFromSuperContext(const Expression& largerConte
 
 bool Expression::ContextGetPolyAndEWASubFromSuperContextNoFailure
 (const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputEWApart) const
-{ bool mustBeTrue= this->ContextGetPolyAndEWASubFromSuperContext(largerContext, outputPolyPart, outputEWApart);
+{ bool mustBeTrue = this->ContextGetPolyAndEWASubFromSuperContext(largerContext, outputPolyPart, outputEWApart);
   if (!mustBeTrue)
     crash << "This is a programming error: I was not able to extract a polynomial/differential operator substitution from smaller context "
     << this->ToString() << " relative to larger context " << largerContext.ToString() << crash;
@@ -2034,7 +2034,7 @@ bool Expression::operator>(const Expression& other) const
   { //double aaa;
     //if (false )
     if (std::isnan(left) && std::isnan(right))
-      return false; //WARNING nan ==nan evaluates to false!
+      return false; //WARNING nan == nan evaluates to false!
     if (left != right)
     { if (std::isnan(left))
         return true;
@@ -2230,7 +2230,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     result = true;
   } /*else if (this->IsMatrixGivenType<Rational>())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
-    contextFormat.GetElement().flagUseLatex= true;
+    contextFormat.GetElement().flagUseLatex = true;
     contextFormat.GetElement().flagUseHTML= false;
     Matrix<Rational> theMat;
     this->IsMatrixGivenType(0, 0, &theMat);
@@ -2244,7 +2244,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     result = true;
   } else if (this->IsMatrixGivenType<AlgebraicNumber>())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
-    contextFormat.GetElement().flagUseLatex= true;
+    contextFormat.GetElement().flagUseLatex = true;
     contextFormat.GetElement().flagUseHTML= false;
     Matrix<AlgebraicNumber> theMat;
     this->IsMatrixGivenType(0, 0, &theMat);
@@ -2535,7 +2535,7 @@ bool Calculator::innerFlattenCommandEnclosuresOneLayer(Calculator& theCommands, 
   //if (*theCounter.theCounter>theCommands.MaxRecursionDeptH)
   //  return theCommands << "Max recursion depth exceeded. ";
   //if (input.IsBuiltInType() || input.IsAtom())
-  //{ output =input;
+  //{ output = input;
   //  return true;
   //}
 //  stOutput << "<br>DEBUG: Flattening: " << input.ToString();
@@ -2606,22 +2606,22 @@ std::string Expression::ToStringAllSlidersInExpression() const
     this->owner->theObjectContainer.userInputBoxSliderDisplayed[theIndex] = true;
     InputBox& theBox = theSliders.theValues[theIndex];
     std::string theSliderName = theBox.GetSliderName();
-    out << "<input id=\""
+    out << "<input id =\""
     << theSliderName
-    << "\" type=\"range\"";
+    << "\" type =\"range\"";
     double theReader = 0;
     out << std::fixed;
     out.precision(4);
     if (theBox.min.EvaluatesToDouble(&theReader))
       out << "min =\"" << theReader << "\" ";
     if (theBox.max.EvaluatesToDouble(&theReader))
-      out << "max=\"" << theReader << "\" ";
+      out << "max =\"" << theReader << "\" ";
     if (theBox.step.EvaluatesToDouble(&theReader))
       out << "step =\"" << theReader << "\" ";
     if (theBox.value.EvaluatesToDouble(&theReader))
-      out << "value=\"" << theReader << "\" ";
+      out << "value =\"" << theReader << "\" ";
     else
-      out << "value=\"1\" ";
+      out << "value =\"1\" ";
     out << "oninput =\"updateCalculatorSliderToInputBox('"
     << boxNames[i]
     << "','"
@@ -2657,7 +2657,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   std::stringstream out;
 //  AddBrackets = true;
 //  if (this->owner->flagLogSyntaxRules && recursionDepth<=1)
-//  { out << "(ContextIndex=" << this->IndexBoundVars << ")";
+//  { out << "(ContextIndex =" << this->IndexBoundVars << ")";
 //  }
   bool isFinal = theFormat->flagExpressionIsFinal;
   bool allowNewLine = theFormat->flagExpressionNewLineAllowed;

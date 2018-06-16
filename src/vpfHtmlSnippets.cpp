@@ -16,24 +16,24 @@ std::string HtmlRoutines::GetJavascriptSubmitEmails()
   std::string deadlineInfoRowId = "defaultDeadlines";
   std::string problemInfoRowId = "defaultProblemInfo";
   out
-  << "<script type=\"text/javascript\" id=\"scriptSubmitEmails\"> \n"
+  << "<script type =\"text/javascript\" id =\"scriptSubmitEmails\"> \n"
   << "function addEmailsOrUsers(idEmailList, problemCollectionName, idOutput, userRole, idUserGroup, idPasswords, requestType){\n"
   << "  spanOutput = document.getElementById(idOutput);\n"
-  << "  if (spanOutput ==null){\n"
+  << "  if (spanOutput == null){\n"
   << "    spanOutput = document.createElement('span');\n"
   << "    document.body.appendChild(spanOutput);\n"
-  << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
+  << "    spanOutput.innerHTML= \"<span style ='color:red'> ERROR: span with id \" + idEmailList + \"MISSING! </span>\";\n"
   << "  }\n"
   << "  spanEmailList = document.getElementById(idEmailList);\n"
   << "  spanUserGroup = document.getElementById(idUserGroup);\n"
   << "  spanPasswords = document.getElementById(idPasswords);\n"
-  << "  params ='request ='+requestType +'&';\n"
-  << "  params+='userRole='+userRole;\n"
+  << "  params ='request='+requestType +'&';\n"
+  << "  params+='userRole ='+userRole;\n"
   << "  params+='&userList =' + encodeURIComponent(spanEmailList.value);\n"
   << "  params+='&" << DatabaseStrings::labelSection << "=' + encodeURIComponent(spanUserGroup.value);\n"
   << "  params+='&passwordList =' + encodeURIComponent(spanPasswords.value);\n"
-  << "  params+='&deadlineInfoRowId=' + encodeURIComponent('" << deadlineInfoRowId << "');\n"
-  << "  params+='&problemInfoRowId=' + encodeURIComponent('" << problemInfoRowId << "');\n"
+  << "  params+='&deadlineInfoRowId =' + encodeURIComponent('" << deadlineInfoRowId << "');\n"
+  << "  params+='&problemInfoRowId =' + encodeURIComponent('" << problemInfoRowId << "');\n"
   << "  params+='&filterAccounts =' + '" << theGlobalVariables.GetWebInput("filterAccounts") << "';\n"
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", '" << theGlobalVariables.DisplayNameExecutable << "', true);\n"
@@ -50,7 +50,7 @@ std::string HtmlRoutines::GetJavascriptSubmitEmails()
 std::string HtmlRoutines::GetJavascriptHideHtmlWithTags()
 { std::stringstream output;
   output << " <!>\n";
-  output << " <script type=\"text/javascript\"> \n";
+  output << " <script type =\"text/javascript\"> \n";
   output << "\"use strict\";\n";
   output << " function switchMenu(obj)\n";
   output << " { var el = document.getElementById(obj);	\n";
@@ -60,10 +60,10 @@ std::string HtmlRoutines::GetJavascriptHideHtmlWithTags()
   output << "     el.style.display = '';\n";
   output << " }\n";
   output << " function hideItem(obj)\n";
-  output << " { document.getElementById(obj).style.display=\"none\";\n";
+  output << " { document.getElementById(obj).style.display =\"none\";\n";
   output << " }\n";
   output << " function showItem(obj)\n";
-  output << " { document.getElementById(obj).style.display=\"\";\n";
+  output << " { document.getElementById(obj).style.display =\"\";\n";
   output << " }\n";
   output << " </script>\n";
   return output.str();
@@ -138,10 +138,10 @@ std::string HtmlRoutines::GetDatePickerJavascriptInit()
     out
     << "<link rel =\"stylesheet\" href=\"//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css\">\n"
     << "<script src =\"https://code.jquery.com/jquery-3.1.0.min.js\" "
-    << "integrity=\"sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s =\" "
+    << "integrity =\"sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s =\" "
     << "crossorigin =\"anonymous\"></script>\n"
     << "<script src =\"https://code.jquery.com/ui/1.12.0/jquery-ui.min.js\"   "
-    << "integrity=\"sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E=\" crossorigin =\"anonymous\"></script>\n";
+    << "integrity =\"sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E=\" crossorigin =\"anonymous\"></script>\n";
   else
     out
     << "<link rel =\"stylesheet\" href=\"/html-common/jquery-ui.css\">\n"
@@ -262,7 +262,7 @@ const std::string& HtmlRoutines::GetJavascriptAceEditorScriptWithTags()
 { if (HtmlRoutines::preLoadedFiles.Contains("AceEditor"))
     return HtmlRoutines::preLoadedFiles.GetValueCreateNoInit("AceEditor");
   std::stringstream out;
-  out << "<script type=\"text/javascript\" src =\""
+  out << "<script type =\"text/javascript\" src =\""
   << FileOperations::GetVirtualNameWithHash("/html-common/ace/src-min/ace.js")
   << "\" charset =\"utf-8\"></script>";
   out << HtmlRoutines::GetJavascriptAddScriptTags("/html-common/ace-editor-settings.js");
@@ -289,7 +289,7 @@ const std::string& HtmlRoutines::GetFile
     if (theGlobalVariables.processType == ProcessTypes::server)
       logServer << logger::red << "File: "
       << fileNameVirtual << " not found. " << commentsOnFailure.str() << logger::endL;
-    out << "<b style=\"color:red\">Failed to load file: " << fileNameVirtual
+    out << "<b style =\"color:red\">Failed to load file: " << fileNameVirtual
     << ". Comments: " << commentsOnFailure.str() << "</b>";
   }
   HtmlRoutines::preLoadedFiles.SetKeyValue(theID, out.str());
@@ -313,7 +313,7 @@ std::string HtmlRoutines::GetCSSLink(const std::string& fileNameVirtual)
 { MacroRegisterFunctionWithName("HtmlRoutines::GetCSSLink");
   std::stringstream out;
   std::string theFileName = FileOperations::GetVirtualNameWithHash(fileNameVirtual);
-  out << "<link rel =\"stylesheet\" href= \"" << theFileName << "\">\n";
+  out << "<link rel = \"stylesheet\" href= \"" << theFileName << "\">\n";
   return out.str();
 }
 
@@ -364,7 +364,7 @@ std::string HtmlRoutines::GetJavascriptMathQuillDefaultFull()
   << FileOperations::GetVirtualNameWithHash("/html-common/jquery.min.js")
   << "\"></script>\n"
   << HtmlRoutines::GetJavascriptMathQuillDefaultLink() << "\n"
-  << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport = false;</script>";
+  << "<script type =\"text/javascript\">var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport = false;</script>";
   return out.str();
 }
 
@@ -372,7 +372,7 @@ std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportFull()
 { std::stringstream out;
   out << "<script src =\"/html-common/jquery.min.js\"></script>\n"
   << HtmlRoutines::GetJavascriptMathQuillMatrixSupportLink() << "\n"
-  << "<script type=\"text/javascript\">var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport = true;</script>";
+  << "<script type =\"text/javascript\">var globalMQ = MathQuill.getInterface(2); var MathQuillHasMatrixSupport = true;</script>";
   return out.str();
 }
 
@@ -390,7 +390,7 @@ const std::string& HtmlRoutines::GetJavascriptSha1()
 
 std::string HtmlRoutines::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)
 { std::stringstream out;
-  out << "<a href=\"" << DisplayNameCalculator << "?request =calculator&mainInput ="
+  out << "<a href=\"" << DisplayNameCalculator << "?request= calculator&mainInput ="
   << HtmlRoutines::ConvertStringToURLString(input, false) << "\"> " << input << "</a>";
   return out.str();
 }
@@ -405,8 +405,8 @@ std::string HtmlRoutines::GetCalculatorLinkUnclosedPostArguments(const std::stri
   int linkCounter = ++ globalLinkCounter; //<-Using linkCounter should be thread safer than using globalLinkCounter.
   //No need to make it really thread safe as this function is not critical and it is unlikely it will ever get
   //used by more than one thread.
-  out << "<form id=\"submissionForm" << linkCounter << "\" method=\"POST\" action =\"" << DisplayNameCalculator << "\">";
-  out << "<input type=\"hidden\" name=\"doubleURLencodedInput\" value=\""
+  out << "<form id =\"submissionForm" << linkCounter << "\" method =\"POST\" action =\"" << DisplayNameCalculator << "\">";
+  out << "<input type =\"hidden\" name =\"doubleURLencodedInput\" value =\""
   << HtmlRoutines::ConvertStringToURLString(input, false) << "\">";
   out << "</form>";
   out << "<a href=\"document.getElementById('submissionForm" << linkCounter << "').submit();\"> ";
@@ -437,10 +437,10 @@ std::string HtmlRoutines::GetMathMouseHover(const std::string& input, int upperN
 //  if (HtmlRoutines::GlobalMathSpanID==1)
 //    out << "<span class =\"math\"></span>"; //<- empty math span class forces jsMath to load.
 //  idSpanStream << "mathFormula" << HtmlRoutines::GlobalMathSpanID;
-//  std::string containterString="container"+idSpanStream.str();
-//  out << "<span id=\"" << containterString << "\">"  << "<span id=\"" << idSpanStream.str()
-//  out << "<span><span onmouseover =\"if (this.parentNode.className=='math') return; "
-//  << "this.className='math'; this.parentNode.className='math';"
+//  std::string containterString="container"+ idSpanStream.str();
+//  out << "<span id =\"" << containterString << "\">"  << "<span id =\"" << idSpanStream.str()
+//  out << "<span><span onmouseover =\"if (this.parentNode.className =='math') return; "
+//  << "this.className ='math'; this.parentNode.className ='math';"
 //  << "window.alert('Calling jsmath.Process'); "
 //  << "jsMath.Process(this.parentNode);\" >"
   out << "\\(" << input << "\\)";// << "</span></span>";
@@ -512,8 +512,8 @@ const std::string& HtmlRoutines::GetJavascriptMathjax()
   std::stringstream out;
   std::string mathjaxSetupScript = FileOperations::GetVirtualNameWithHash
   ("/calculator-html/new/mathjax-calculator-setup.js");
-  out << "<script type=\"text/javascript\">MathJaxSetupScriptURL=\"" << mathjaxSetupScript << "\"</script>";
-  out << "<script type=\"text/javascript\" src =\"/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full"
+  out << "<script type =\"text/javascript\">MathJaxSetupScriptURL=\"" << mathjaxSetupScript << "\"</script>";
+  out << "<script type =\"text/javascript\" src =\"/MathJax-2.7-latest/MathJax.js?config=TeX-AMS_HTML-full"
 //  << ","
 //  << mathjaxSetupScript
   << "\"></script>\n";

@@ -267,7 +267,7 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
   { const MonomialP& currentMon = (*this)[i];
     int numCycles = 0;
     if (!currentMon(0).IsSmallInteger(&numCycles) )
-      crash << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i+ 1 << "^{th} variable is raised to the power "
+      crash << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i + 1 << "^{th} variable is raised to the power "
       << currentMon(0).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "
       << "If the user has requested such an operation, it *must* be intercepted at an earlier level (and the user must be informed)."
       << crash;

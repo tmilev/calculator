@@ -142,7 +142,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants()
     { tempRat = posRoots[nonExploredRoots.elements[i]].SumCoords();
       if (theHeight.IsGreaterThan(tempRat))
       { theHeight = tempRat;
-        theBorelIndex=nonExploredRoots.elements[i];
+        theBorelIndex = nonExploredRoots.elements[i];
       }
     }
     Vector<Rational>& theRoot = posRoots[theBorelIndex];
@@ -166,8 +166,8 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants()
           if (FirstIndexFirstPosChoice == - 1)
           { FirstIndexFirstPosChoice = FirstPosIndex;
             SecondIndexFirstPosChoice = SecondPosIndex;
-//             FirstIndexFirstNegChoice=FirstNegIndex;
-//             SecondIndexFirstNegChoice= SecondNegIndex;
+//             FirstIndexFirstNegChoice =FirstNegIndex;
+//             SecondIndexFirstNegChoice = SecondNegIndex;
             int thePower;
             this->GetMaxQForWhichBetaMinusQAlphaIsARoot(smallRoot1, smallRoot2, thePower);
             this->ChevalleyConstants.elements[FirstNegIndex][SecondNegIndex] = - 1 - thePower;
@@ -243,7 +243,7 @@ void SemisimpleLieAlgebra::ComputeMultTable()
           int rightIndex = this->GetRootIndexFromGenerator(j);
           this->theLiebrackets.elements[i][j] *= this->ChevalleyConstants.elements[leftIndex][rightIndex];
         } else
-        { if (!(leftWeight+rightWeight).IsEqualToZero())
+        { if (!(leftWeight +rightWeight).IsEqualToZero())
             this->theLiebrackets.elements[i][j].MakeZero();
           else
           { ElementSemisimpleLieAlgebra<Rational>& current = this->theLiebrackets.elements[i][j];

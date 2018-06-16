@@ -13,7 +13,7 @@ std::string CreateJavaScriptVectors(Vectors<double>& inputVectors, const std::st
   out << "\n";
   if (useVar)
     out << "var ";
-  out << arrayName << "=new Array(" << inputVectors.size << ");\n";
+  out << arrayName << "= new Array(" << inputVectors.size << ");\n";
   int theDimension = inputVectors[0].size;
   for (int i = 0; i < inputVectors.size; i ++)
   { out << arrayName << "[" << i << "]=[";
@@ -33,8 +33,8 @@ std::string CreateStaticJavaScriptVectorsArrayWithProjection
   if (inputVectors.size == 0)
     return "";
   std::stringstream out;
-  out << "\nvar " << arrayName << "=new Array(" << inputVectors.size << ");\n";
-  out << "var " << projectionsName << "=new Array(" << inputVectors.size << ");\n";
+  out << "\nvar " << arrayName << "= new Array(" << inputVectors.size << ");\n";
+  out << "var " << projectionsName << "= new Array(" << inputVectors.size << ");\n";
 
   int theDimension = inputVectors[0].size;
   for (int i = 0; i < inputVectors.size; i ++)
@@ -48,7 +48,7 @@ std::string CreateStaticJavaScriptVectorsArrayWithProjection
   }
   for (int i = 0; i < inputVectors.size; i ++)
   { ////////////////////
-//    out << projectionsName << "[" << i << "]=new Array(2);\n";
+//    out << projectionsName << "[" << i << "]= new Array(2);\n";
     out << projectionsName << "[" << i << "]=[0,0];\n";
   }
   return out.str();
@@ -60,8 +60,8 @@ std::string CreateStaticJavaScriptListVectorsWithProjection
   if (inputVectors.size == 0)
     return "";
   std::stringstream out;
-  out << "\nvar " << arrayName << "=new Array(" << inputVectors.size << ");\n";
-  out << "var " << projectionsName << "=new Array(" << inputVectors.size << ");\n";
+  out << "\nvar " << arrayName << "= new Array(" << inputVectors.size << ");\n";
+  out << "var " << projectionsName << "= new Array(" << inputVectors.size << ");\n";
   for (int i = 0; i < inputVectors.size; i ++)
   { std::stringstream projNamesWithIndex, arrayNameWithIndex;
     arrayNameWithIndex << arrayName << "[" << i << "]";
@@ -76,7 +76,7 @@ std::string CreateJavaScriptListVectors(List<Vectors<double> >& inputVectors, co
   if (inputVectors.size == 0)
     return "";
   std::stringstream out;
-  out << "\nvar " << arrayName << "=new Array(" << inputVectors.size << ");\n";
+  out << "\nvar " << arrayName << "= new Array(" << inputVectors.size << ");\n";
   for (int i = 0; i < inputVectors.size; i ++)
   { std::stringstream arrayNameWithIndex;
     arrayNameWithIndex << arrayName << "[" << i << "]";
@@ -90,7 +90,7 @@ std::string CreateStaticJavaScriptTextArray(List<std::string>& theLabels, const 
   if (theLabels.size == 0)
     return "";
   std::stringstream out;
-  out << "var " << arrayName << "=new Array(" << theLabels.size << ");\n";
+  out << "var " << arrayName << "= new Array(" << theLabels.size << ");\n";
   for (int i = 0; i < theLabels.size; i ++)
     out << arrayName << "[" << i << "]=\"" << theLabels[i] << "\";\n";
   return out.str();
@@ -127,13 +127,13 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   if (!this->flagPlotShowJavascriptOnly)
   { out << "<table> "
     << "<tr><td> <canvas width=\"" << this->DefaultHtmlWidth << "\" height =\""
-    << this->DefaultHtmlHeight << "\" style=\"border:solid 1px\" id=\"" << theCanvasId
+    << this->DefaultHtmlHeight << "\" style =\"border:solid 1px\" id =\"" << theCanvasId
     << "\" onmousedown =\"clickCanvasCone" << timesCalled
     << "(event.clientX, event.clientY);\" onmouseup =\"selectedBasisIndexCone" << timesCalled
-    << "= - 1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
+    << "= - 1;\" onmousemove =\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
     << "onmousewheel =\"mouseHandleWheelCone" << timesCalled << "(event);\""
     << ">Your browser does not support the HTML5 canvas tag.</canvas></td>";
-    out << "<td style=\"min-width: 300px; vertical-align:top;\"><span id=\"canvas"
+    out << "<td style =\"min-width: 300px; vertical-align:top;\"><span id =\"canvas"
     << timesCalled << "Notes\"></span></td></tr></table>";
   }
   List<List<std::string> > textEbasisNamesUserInput;
@@ -151,7 +151,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     { std::stringstream tmpStream;
       tmpStream << "textEbasisReadOnly" << timesCalled << "_" << i << "_" << j;
       textEbasisNamesReadOnly[i][j] = tmpStream.str();
-      out << "<span id=\"" << textEbasisNamesReadOnly[i][j] << "\"> </span>\n";
+      out << "<span id =\"" << textEbasisNamesReadOnly[i][j] << "\"> </span>\n";
     }
     out << "<br>";
   }
@@ -161,7 +161,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     { std::stringstream tmpStream;
       tmpStream << "textEbasisUserInput" << timesCalled << "_" << i << "_" << j;
       textEbasisNamesUserInput[i][j] = tmpStream.str();
-      out << "<textarea rows =\"1\" cols =\"2\" id=\"" << textEbasisNamesUserInput[i][j] << "\">";
+      out << "<textarea rows =\"1\" cols =\"2\" id =\"" << textEbasisNamesUserInput[i][j] << "\">";
       if (this->flagFillUserDefinedProjection)
         out << this->FillUserDefinedProjection[i][j].GetDoubleValue();
       out << "</textarea>\n";
@@ -173,9 +173,9 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "();\">Change to basis</button><br>";
   out <<"<button onclick=\"snapShotLaTeX" << timesCalled << "();\">LaTeX snapshot</button>\n"
   << "<p>\n"
-  << "<span id=\"snapShotLateXspan" << timesCalled << "\"> </span>\n"
+  << "<span id =\"snapShotLateXspan" << timesCalled << "\"> </span>\n"
   << "</p>\n"
-  << "<script type=\"text/javascript\">"
+  << "<script type =\"text/javascript\">"
   << "function snapShotLaTeX" << timesCalled << "(){\n"
   << "theText =document.getElementById(\"snapShotLateXspan" << timesCalled << "\");\n"
   << "theText.innerHTML=\"\\\\documentclass{article} \\\\usepackage{auto-pst-pdf}<br>\\n%\\\\usepackage{pst-plot}<br>\\n\\\\begin{document}<br>\\n\";\n"
@@ -189,7 +189,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         out << "theText.innerHTML+=\""
         << this->GetColorPsTricksFromColorIndex(this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].ColorIndex)
         << "<br>\";\n";
-        out << "theText.innerHTML+=\"\\\\psline[linecolor =currentColor](\"+ "
+        out << "theText.innerHTML+=\"\\\\psline[linecolor = currentColor](\"+ "
         << functionConvertToXYName << "( " << Points1ArrayName << "[" << currentIndex<< "])[0]"
         << "+\",\"+"
         << functionConvertToXYName << "( " << Points1ArrayName << "["
@@ -204,7 +204,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         out << "theText.innerHTML+=\""
         << this->GetColorPsTricksFromColorIndex(this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].ColorIndex)
         << "<br>\";\n";
-        out << "theText.innerHTML+=\"\\\\pscircle[linecolor =currentColor](\"+ "
+        out << "theText.innerHTML+=\"\\\\pscircle[linecolor = currentColor](\"+ "
         << functionConvertToXYName << "( " << circArrayName << "["
         << currentIndex << "])[0]" << "+\",\"+"
         << functionConvertToXYName << "( " << circArrayName << "["
@@ -216,13 +216,13 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         << this->GetColorPsTricksFromColorIndex
         (this->theBuffer.theParallelograms[currentIndex].ColorIndex)
         << "<br>\";\n";
-        out << "theText.innerHTML+=\"\\\\pscustom[linecolor =currentColor](\"+ "
+        out << "theText.innerHTML+=\"\\\\pscustom[linecolor = currentColor](\"+ "
         << functionConvertToXYName << "( " << circArrayName << "["
         << currentIndex << "])[0]" << "+\",\"+"
         << functionConvertToXYName << "( " << circArrayName << "["
         << currentIndex << "])[1]*- 1" << "+ \"){\"+"
         << (((double)this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].radius)/40) << "+\"}<br>\";\n";*/
-        nonImplementedFound= true;
+        nonImplementedFound = true;
         break;
       case DrawOperations::typeDrawTextAtVector:
         out << "theText.innerHTML+=\""
@@ -255,8 +255,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   { for (int j = 0; j < this->theBuffer.theBilinearForm.NumCols; j ++)
     { std::stringstream tmpStream;
       tmpStream << "textBilinearForm" << timesCalled << "_" << i << "_" << j;
-      out << "<textarea rows =\"1\" cols =\"2\" id=\"" << tmpStream.str()
-      << "\" \n onChange=\"BilinearForm"
+      out << "<textarea rows =\"1\" cols =\"2\" id =\"" << tmpStream.str()
+      << "\" \n onChange =\"BilinearForm"
       << timesCalled << "[" << i << "]["
       << j << "]=document.getElementById('" << tmpStream.str() << "').value;\">"
       << this->theBuffer.theBilinearForm.elements[i][j] << "</textarea>\n";
@@ -285,11 +285,11 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "<hr>";
   }
 //  stOutput << " got to here pt 2";
-  out << "<script type=\"text/javascript\">\n";
+  out << "<script type =\"text/javascript\">\n";
   out << "function " << cloneVector << " (inputVector){\n"
-  << "output =new Array(" << theDimension << ");\n"
+  << "output = new Array(" << theDimension << ");\n"
   << "for (i = 0; i <" << theDimension << "; i ++)\n"
-  << "  output[i]=inputVector[i];\n"
+  << "  output[i]= inputVector[i];\n"
   << "return output;\n"
   << "}\n";
 
@@ -299,7 +299,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   }
   out << "var BilinearForm" << timesCalled << "= new Array(" << theDimension << ");\n";
   for (int i = 0; i < theDimension; i ++)
-  { out << "BilinearForm" << timesCalled << "[" << i << "]=new Array(" << theDimension << ");\n";
+  { out << "BilinearForm" << timesCalled << "[" << i << "]= new Array(" << theDimension << ");\n";
     for (int j = 0; j < theDimension; j ++)
       out << "BilinearForm" << timesCalled << "[" << i << "][" << j << "]=" << this->theBuffer.theBilinearForm.elements[i][j] << ";\t";
     out << "\n";
@@ -356,11 +356,11 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "}";
 //  stOutput << "<hr>DEBUG: got to here pt 4";
   if (this->theBuffer.BasisProjectionPlane.size > 2)
-  { out << "BasisProjectionPlane" << timesCalled << "=new Array(" << this->theBuffer.BasisProjectionPlane.size << ");\n";
+  { out << "BasisProjectionPlane" << timesCalled << "= new Array(" << this->theBuffer.BasisProjectionPlane.size << ");\n";
     for (int j = 0; j < this->theBuffer.BasisProjectionPlane.size; j ++)
-    { out << "BasisProjectionPlane" << timesCalled << "[" << j << "]=new Array(2);\n";
+    { out << "BasisProjectionPlane" << timesCalled << "[" << j << "]= new Array(2);\n";
       for (int k = 0; k < 2; k ++)
-      { out << "BasisProjectionPlane" << timesCalled << "[" << j << "][" << k << "]=new Array(" << theDimension << ");\n";
+      { out << "BasisProjectionPlane" << timesCalled << "[" << j << "][" << k << "]= new Array(" << theDimension << ");\n";
         for (int l = 0; l < theDimension; l ++)
           out << "BasisProjectionPlane" << timesCalled << "[" << j << "][" << k << "][" << l << "]="
           << this->theBuffer.BasisProjectionPlane[j][k][l] << ";\t";
@@ -402,8 +402,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "var " << eiBasis << "= new Array(" << theDimension << ");\n";
   for (int i = 0; i < theDimension; i ++)
     out << projName << "[" << i << "]= new Array(2);\n";
-  out << "var " << basisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
-  out << "var " << projBasisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
+  out << "var " << basisCircles << "= new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
+  out << "var " << projBasisCircles << "= new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
 //  stOutput << "<hr>DEBUG: got to here pt 6.5";
   for (int i = 0; i < this->theBuffer.BasisToDrawCirclesAt.size; i ++)
   { out << basisCircles << "[" << i << "]=[";
@@ -427,10 +427,10 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     //////////////////
     out << projBasisCircles << "[" << i << "]= new Array(2);\n";
   }
-  out << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n";
-  out << "var " << circArrayName << "=new Array(" << this->theBuffer.theDrawCircleAtVectorOperations.size << ");\n";
-  out << "var " << txtArrayName << "=new Array(" << this->theBuffer.theDrawTextAtVectorOperations.size << ");\n";
-  out << "var " << filledShapes << "=new Array(" << this->theBuffer.theShapes.size << ");\n";
+  out << "var " << Points2ArrayName << "= new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n";
+  out << "var " << circArrayName << "= new Array(" << this->theBuffer.theDrawCircleAtVectorOperations.size << ");\n";
+  out << "var " << txtArrayName << "= new Array(" << this->theBuffer.theDrawTextAtVectorOperations.size << ");\n";
+  out << "var " << filledShapes << "= new Array(" << this->theBuffer.theShapes.size << ");\n";
   for (int i = 0; i < this->theBuffer.theShapes.size; i ++)
   { out << filledShapes << "[" << i << "]=[";
     DrawFilledShapeOperation& currentShape = this->theBuffer.theShapes[i];
@@ -482,8 +482,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "var " << shiftY << "=" << this->theBuffer.centerY[0] << ";\n";
   out << "var GraphicsUnitCone" << timesCalled << "=" << this->theBuffer.GraphicsUnit[0] << ";\n";
   out << "function " << functionConvertToXYName << "(vector){\n"
-  << "  resultX=" << shiftX << ";\n"
-  << "  resultY=" << shiftY << ";\n"
+  << "  resultX =" << shiftX << ";\n"
+  << "  resultY =" << shiftY << ";\n"
   << "  for (i = 0; i <" << theDimension << "; i ++){\n"
   << "    resultX+=vector[i]*" << projName << "[i][0];\n"
   << "    resultY+=vector[i]*" << projName << "[i][1];\n"
@@ -496,7 +496,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "for (var i = 0; i <" << this->theBuffer.labeledVectors.size << "; i ++)\n"
   << "  if (selectedLabels" << timesCalled << "[i])\n"
   << "    for (var j = 0; j<highlight" << labeledVectorsVarName << "[i].length; j ++)\n"
-  << "    { " << theSurfaceName << ".strokeStyle=\"#555555\";\n "
+  << "    { " << theSurfaceName << ".strokeStyle =\"#555555\";\n "
   << "      " << theSurfaceName << ".beginPath();\n "
   << "      " << theSurfaceName << ".arc("
   << functionConvertToXYName << "(highlight" << labeledVectorsVarName << "[i][j])[0],"
@@ -509,7 +509,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  if (" << theSurfaceName << "== 0)\n"
   << "    " << theInitFunctionName << "();\n"
   << "ComputeProjections" << timesCalled << "();\n";
-  out << theSurfaceName << ".fillStyle=\"#FFFFFF\";\n";
+  out << theSurfaceName << ".fillStyle =\"#FFFFFF\";\n";
   out << theSurfaceName << ".fillRect(0,0," << this->DefaultHtmlWidth  << " ," << this->DefaultHtmlHeight << ");\n";
   //stOutput << "<hr>DEBUG: got to here pt 9";
   for (int i = 0; i < this->theBuffer.IndexNthDrawOperation.size; i ++)
@@ -517,7 +517,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     switch (theBuffer.TypeNthDrawOperation[i])
     { case DrawOperations::typeDrawLineBetweenTwoVectors:
         out << theSurfaceName << ".beginPath();\n ";
-        out << theSurfaceName << ".strokeStyle=\""
+        out << theSurfaceName << ".strokeStyle =\""
         << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].ColorIndex)
         << "\"; ";
         out << theSurfaceName << ".lineWidth="
@@ -539,7 +539,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         if (theDimension != 2)
           break;
         out << theSurfaceName << ".beginPath();\n ";
-        out << theSurfaceName << ".fillStyle=\""
+        out << theSurfaceName << ".fillStyle =\""
         << this->GetColorHtmlFromColorIndex(this->theBuffer.theShapes[currentIndex].ColorFillIndex)
         << "\";\n";
         out << theSurfaceName << ".lineWidth="
@@ -557,13 +557,13 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 //        << functionConvertToXYName << "( " << filledShapes << "[" << currentIndex << "][0])[1]);\n ";
         out << theSurfaceName << ".closePath();\n";
         out << theSurfaceName << ".fill();\n";
-        out << theSurfaceName << ".strokeStyle=\""
+        out << theSurfaceName << ".strokeStyle =\""
         << this->GetColorHtmlFromColorIndex(this->theBuffer.theShapes[currentIndex].ColorIndex)
         << "\";\n";
         out << theSurfaceName << ".stroke();\n";
         break;
       case DrawOperations::typeDrawCircleAtVector:
-        out << theSurfaceName << ".strokeStyle=\""
+        out << theSurfaceName << ".strokeStyle =\""
         << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].ColorIndex)
         << "\"; ";
         out << theSurfaceName << ".beginPath(); ";
@@ -576,7 +576,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         out << theSurfaceName << ".stroke();\n";
         break;
       case DrawOperations::typeDrawTextAtVector:
-        out << theSurfaceName << ".strokeStyle=\""
+        out << theSurfaceName << ".strokeStyle =\""
         << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawTextAtVectorOperations[currentIndex].ColorIndex)
         << "\"; ";
         out << theSurfaceName << ".strokeText(\"" << this->theBuffer.theDrawTextAtVectorOperations[currentIndex].theText << "\", "
@@ -598,17 +598,17 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "var selectedBasisIndexCone" << timesCalled << "= - 1;\n";
   out << "var xShiftPointer" << timesCalled << "= 0;\n";
   out << "var yShiftPointer" << timesCalled << "= 0;\n";
-  out << "var clickTolerance=5;\n"
+  out << "var clickTolerance =5;\n"
   << "function ptsWithinClickToleranceCone" << timesCalled << "(x1, y1, x2, y2)\n"
   << "{ if (x1-x2>clickTolerance || x2-x1>clickTolerance || y1-y2>clickTolerance || y2-y1>clickTolerance )\n    return false;\n  return true;\n}";
 
   out << "function MultiplyVector" << timesCalled << "(output, coeff)"
   << "{ for (var i = 0; i <output.length; i ++)\n"
-  << "  output[i]*=coeff;\n"
+  << "  output[i]*= coeff;\n"
   << "}\n"
   << "function AddVectorTimes" << timesCalled << "(output, inputVector, coeff)\n"
   << "{ for (var i = 0; i <output.length; i ++)\n"
-  << "  output[i]+=inputVector[i]*coeff;\n"
+  << "  output[i]+= inputVector[i]*coeff;\n"
   << "}\n"
   << "function ScaleToUnitLength" << timesCalled << "(vector)\n"
   << "{ MultiplyVector" << timesCalled << "(vector, 1/Math.sqrt(getScalarProduct" << timesCalled << "(vector,vector)));\n"
@@ -621,18 +621,18 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  MultiplyVector" << timesCalled << "(projection, scal1);\n"
   << "  AddVectorTimes" << timesCalled << "(projection, orthoBasis2, scal2);\n"
   << "  AddVectorTimes" << timesCalled << "(vComponent, projection, - 1);\n"
-  << "  var oldAngle=Math.atan(Math.sqrt(oldTanSquared));\n"
-  << "  var newAngle=Math.atan(Math.sqrt(newTanSquared));\n"
+  << "  var oldAngle =Math.atan(Math.sqrt(oldTanSquared));\n"
+  << "  var newAngle =Math.atan(Math.sqrt(newTanSquared));\n"
   << "  if (isNaN(oldAngle) || isNaN(newAngle))\n"
   << "    return input;\n"
-  << "  var angleChange= -oldAngle +newAngle;\n"
+  << "  var angleChange = -oldAngle +newAngle;\n"
   << "  if (newX*oldX<0 && newY*oldY<0)\n"
 //  <<  " {
-//  << "    angleChange= oldAngle +newAngle;\n"
+//  << "    angleChange = oldAngle +newAngle;\n"
   << "    angleChange*= - 1;\n"
 //  << "  };"
-//  << "  topBound=Math.PI/2;\n"
-//  << "  bottomBound= -Math.PI/2;\n"
+//  << "  topBound =Math.PI/2;\n"
+//  << "  bottomBound = -Math.PI/2;\n"
 //  << "  while (angleChange>= topBound || angleChange<bottomBound)\n"
 //  << "    if (angleChange>= topBound)\n"
 //  << "      angleChange-=Math.PI;\n"
@@ -693,7 +693,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "{ var result = 0;\n"
   << "  for (var i = 0; i <" << theDimension << "; i ++)\n"
   << "    for (var j = 0; j<" << theDimension << "; j ++)\n"
-  << "      result+= root1[i]*root2[j]*BilinearForm" << timesCalled << "[i][j];\n"
+  << "      result += root1[i]*root2[j]*BilinearForm" << timesCalled << "[i][j];\n"
   << "  return result;\n"
   << "}\n";
   out << "function getAngleFromXandY" << timesCalled << "(x, y, neighborX, neighborY)\n"
@@ -710,28 +710,28 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "function getAngleChange" << timesCalled << "(newX, newY, oldX, oldY)\n"
   << "{ var result =getAngleFromXandY" << timesCalled
   << "(newX, newY, oldX, oldY)-getAngleFromXandY" << timesCalled << "(oldX, oldY, newX, newY);\n"
-  << "  topBound=Math.PI/2;\n"
-  << "  bottomBound= -Math.PI/2;\n"
+  << "  topBound =Math.PI/2;\n"
+  << "  bottomBound = -Math.PI/2;\n"
   << "  while (result>topBound || result< bottomBound)\n"
   << "    if (result>topBound)\n"
   << "      result-=Math.PI;\n"
   << "    else\n"
-  << "      result+=Math.PI;\n"
+  << "      result +=Math.PI;\n"
   << "  return result;\n"
   << "}\n";
   out << "\nfunction changeBasis" << timesCalled <<  "(selectedIndex, newX, newY)\n"
-  << "{ if (newX== 0 && newY== 0)\n"
+  << "{ if (newX == 0 && newY == 0)\n"
   << "    return;\n"
   << "  var selectedRoot =" << basisCircles << "[selectedIndex];\n"
   << "  var selectedRootLength=getScalarProduct" << timesCalled << "(selectedRoot,selectedRoot);\n"
-  << "  var projectionSelected=" << projBasisCircles << "[selectedIndex];\n"
-  << "  var oldX=projectionSelected[0]/GraphicsUnitCone" << timesCalled << ";\n"
-  << "  var oldY= -projectionSelected[1]/GraphicsUnitCone" << timesCalled << ";\n"
+  << "  var projectionSelected =" << projBasisCircles << "[selectedIndex];\n"
+  << "  var oldX =projectionSelected[0]/GraphicsUnitCone" << timesCalled << ";\n"
+  << "  var oldY = -projectionSelected[1]/GraphicsUnitCone" << timesCalled << ";\n"
   << "  newX/= GraphicsUnitCone" << timesCalled << ";\n"
   << "  newY/= GraphicsUnitCone" << timesCalled << ";\n"
   << "  var epsilon = 0.000000015;\n"
   << "  if (newX*newX+newY*newY>0.003)\n"
-  << "  { var AngleChange= -getAngleChange" << timesCalled << "(newX, newY, oldX, oldY);\n"
+  << "  { var AngleChange = -getAngleChange" << timesCalled << "(newX, newY, oldX, oldY);\n"
   << "    var NewVectorE1=" << cloneVector << "(VectorE1Cone" << timesCalled << ");\n"
   << "    var NewVectorE2= " << cloneVector << "(VectorE2Cone" << timesCalled << ");\n"
   << "    MultiplyVector" << timesCalled << "(NewVectorE1, Math.cos(AngleChange));\n"
@@ -759,7 +759,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   }
   out << "    if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>epsilon || getScalarProduct" << timesCalled
   << "(vOrthogonal, vOrthogonal)<-epsilon)\n"
-  << "    { if (oldRatioProjectionOverHeightSquared== 0)\n"
+  << "    { if (oldRatioProjectionOverHeightSquared == 0)\n"
   << "      { vProjection =" << cloneVector << "(VectorE1Cone" << timesCalled << ");\n"
   << "        MultiplyVector" << timesCalled << "(vProjection, -newX);\n"
   << "        AddVectorTimes" << timesCalled << "(vProjection, VectorE2Cone" << timesCalled << ", newY" << ");\n"
@@ -799,22 +799,22 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  }\n"
   << "}\n";
   out << "\nfunction getPosXPosY" << timesCalled << "(cx,cy){\n"
-  << "  divPosX= 0;\n"
-  << "  divPosY= 0;\n"
+  << "  divPosX = 0;\n"
+  << "  divPosY = 0;\n"
   << "  thePointer = document.getElementById(\"idCanvasCone" << timesCalled << "\");\n"
   << "  while (thePointer)  {\n"
   << "    divPosX += thePointer.offsetLeft;\n"
   << "    divPosY += thePointer.offsetTop;\n"
   << "    thePointer = thePointer.offsetParent;\n  "
   << "  }\n"
-  << "  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");\n"
-  << "  posy=(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n"
+  << "  posx =(cx-divPosX+document.body.scrollLeft-" << shiftX << ");\n"
+  << "  posy =(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n"
   << "  return [posx,posy];\n"
   << "}\n"
   ;
   out << "\nfunction clickCanvasCone" << timesCalled << "(cx,cy){\n"
-  << "  posx=getPosXPosY" << timesCalled << "(cx,cy)[0];\n"
-  << "  posy=getPosXPosY" << timesCalled << "(cx,cy)[1];\n"
+  << "  posx =getPosXPosY" << timesCalled << "(cx,cy)[0];\n"
+  << "  posy =getPosXPosY" << timesCalled << "(cx,cy)[1];\n"
   << "  selectedBasisIndexCone" << timesCalled <<"= - 1;\n";
   if (!this->flagAllowMovingCoordinateSystemFromArbitraryClick)
     out << "if (ptsWithinClickToleranceCone" << timesCalled << "(posx, posy, 0, 0))\n"
@@ -830,12 +830,12 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "   if (ptsWithinClickToleranceCone" << timesCalled
   << "(posx, posy, " << projBasisCircles << "[i][0]" << ", " << projBasisCircles
   << "[i][1]" << "))\n"
-  << "  selectedBasisIndexCone" << timesCalled << "=i;\n"
+  << "  selectedBasisIndexCone" << timesCalled << "= i;\n"
   << "}\n"
   << "}\n"
   << "function mouseMoveRedrawCone" << timesCalled << "(cx, cy){\n"
-  << "  posx=getPosXPosY" << timesCalled << "(cx,cy)[0];\n"
-  << "  posy= -getPosXPosY" << timesCalled << "(cx,cy)[1];\n"
+  << "  posx =getPosXPosY" << timesCalled << "(cx,cy)[0];\n"
+  << "  posy = -getPosXPosY" << timesCalled << "(cx,cy)[1];\n"
   << "  processMousePosition" << timesCalled << "(posx, -posy);\n"
   << "  if (selectedBasisIndexCone" << timesCalled << "== - 1)\n"
   << "    return;\n"
@@ -856,8 +856,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  theEvent.stopPropagation();\n"
   << "  theWheelDelta = theEvent.detail ? theEvent.detail * - 1 : theEvent.wheelDelta / 40;\n"
 
-  << "  posX=getPosXPosY" << timesCalled << "(theEvent.clientX, theEvent.clientY)[0];\n"
-  << "  posY= -getPosXPosY" << timesCalled << "(theEvent.clientX, theEvent.clientY)[1];\n"
+  << "  posX =getPosXPosY" << timesCalled << "(theEvent.clientX, theEvent.clientY)[0];\n"
+  << "  posY = -getPosXPosY" << timesCalled << "(theEvent.clientX, theEvent.clientY)[1];\n"
 
   << "  posXnew=posX/" << "GraphicsUnitCone" << timesCalled << ";\n"
   << "  posYnew=posY/" << "GraphicsUnitCone" << timesCalled << ";\n"
@@ -926,7 +926,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   std::string circRadiiArrayName = tempStream11_1.str();
 
   tempStream12 << "txt" << timesCalled;
-  std::string txtArrayName= tempStream12.str();
+  std::string txtArrayName = tempStream12.str();
 
   tempStream6 << "basisCircles" << timesCalled;
   std::string basisCircles = tempStream6.str();
@@ -947,9 +947,9 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   tempStream9 << "convXY" << timesCalled;
   std::string functionConvertToXYName = tempStream9.str();
 
-  out << "<canvas width=\"" << boss->DefaultHtmlWidth << "\" height =\"" << boss->DefaultHtmlHeight << "\" border =\"solid 1px\" id=\"" << theCanvasId
+  out << "<canvas width=\"" << boss->DefaultHtmlWidth << "\" height =\"" << boss->DefaultHtmlHeight << "\" border =\"solid 1px\" id =\"" << theCanvasId
   << "\" onmousedown =\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup =\"selectedBasisIndexCone" << timesCalled
-  << "= - 1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
+  << "= - 1;\" onmousemove =\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
   << "onmousewheel =\"mouseHandleWheelCone" << timesCalled << "(event);\"" << "></canvas>";
   out << "<br>The projection plane (drawn on the screen) is spanned by the following two vectors<br> \n";
   List<List<std::string> > textEbasisNamesUserInput;
@@ -962,7 +962,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     { std::stringstream tmpStream;
       tmpStream << "textEbasisReadOnly" << timesCalled << "_" << i << "_" << j;
       textEbasisNamesReadOnly[i][j] = tmpStream.str();
-      out << "<span id=\"" << textEbasisNamesReadOnly[i][j] << "\"> </span>\n";
+      out << "<span id =\"" << textEbasisNamesReadOnly[i][j] << "\"> </span>\n";
     }
     out << "<br>";
   }
@@ -972,7 +972,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     { std::stringstream tmpStream;
       tmpStream << "textEbasisUserInput" << timesCalled << "_" << i << "_" << j;
       textEbasisNamesUserInput[i][j] = tmpStream.str();
-      out << "<textarea rows =\"1\" cols =\"2\" id=\"" << textEbasisNamesUserInput[i][j] << "\">" << "</textarea>\n";
+      out << "<textarea rows =\"1\" cols =\"2\" id =\"" << textEbasisNamesUserInput[i][j] << "\">" << "</textarea>\n";
     }
     out << "<br>";
   }
@@ -985,8 +985,8 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   { for (int j = 0; j < this->theBuffer.theBilinearForm.NumCols; j ++)
     { std::stringstream tmpStream;
       tmpStream << "textBilinearForm" << timesCalled << "_" << i << "_" << j;
-      out << "<textarea rows =\"1\" cols =\"2\" id=\"" << tmpStream.str()
-      << "\" \n onChange=\"BilinearForm"
+      out << "<textarea rows =\"1\" cols =\"2\" id =\"" << tmpStream.str()
+      << "\" \n onChange =\"BilinearForm"
       << timesCalled << "[" << i << "]["
       << j << "]=document.getElementById('" << tmpStream.str() << "').value;\">"
       << this->theBuffer.theBilinearForm.elements[i][j] << "</textarea>\n";
@@ -1012,11 +1012,11 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     << " for graphics with lots of elements. This message is displayed only when the number of drawn elements is more than 500.";
   out << "\n<hr>\n";
 
-  out << "<script type=\"text/javascript\">\n";
+  out << "<script type =\"text/javascript\">\n";
   out << "function " << cloneVector << " (inputVector){\n"
-  << "output =new Array(" << theDimension << ");\n"
+  << "output = new Array(" << theDimension << ");\n"
   << "for (i = 0; i <" << theDimension << "; i ++)\n"
-  << "  output[i]=inputVector[i];\n"
+  << "  output[i]= inputVector[i];\n"
   << "return output;\n"
   << "}\n";
 
@@ -1027,7 +1027,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   }
   out << "var BilinearForm" << timesCalled << "= new Array(" << theDimension << ");\n";
   for (int i = 0; i < theDimension; i ++)
-  { out << "BilinearForm" << timesCalled << "[" << i << "]=new Array(" << theDimension << ");\n";
+  { out << "BilinearForm" << timesCalled << "[" << i << "]= new Array(" << theDimension << ");\n";
     for (int j = 0; j < theDimension; j ++)
       out << "BilinearForm" << timesCalled << "[" << i << "][" << j << "]=" << this->theBuffer.theBilinearForm.elements[i][j] << ";\t";
     out << "\n";
@@ -1082,11 +1082,11 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << "  window.setTimeout(\"changeProjectionPlaneUser" << timesCalled << "()\",100);\n"
   << "}";
   if (this->theBuffer.BasisProjectionPlane.size > 2)
-  { out << "BasisProjectionPlane" << timesCalled << "=new Array(" << this->theBuffer.BasisProjectionPlane.size << ");\n";
+  { out << "BasisProjectionPlane" << timesCalled << "= new Array(" << this->theBuffer.BasisProjectionPlane.size << ");\n";
     for (int j = 0; j < this->theBuffer.BasisProjectionPlane.size; j ++)
-    { out << "BasisProjectionPlane" << timesCalled << "[" << j << "]=new Array(2);\n";
+    { out << "BasisProjectionPlane" << timesCalled << "[" << j << "]= new Array(2);\n";
       for (int k = 0; k < 2; k ++)
-      { out << "BasisProjectionPlane" << timesCalled << "[" << j << "][" << k << "]=new Array(" << theDimension << ");\n";
+      { out << "BasisProjectionPlane" << timesCalled << "[" << j << "][" << k << "]= new Array(" << theDimension << ");\n";
         for (int l = 0; l < theDimension; l ++)
           out << "BasisProjectionPlane" << timesCalled << "[" << j << "][" << k << "][" << l << "]="
           << this->theBuffer.BasisProjectionPlane[j][k][l] << ";\t";
@@ -1121,8 +1121,8 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   out << "var " << eiBasis << "= new Array(" << theDimension << ");\n";
   for (int i = 0; i < theDimension; i ++)
     out << projName << "[" << i << "]= new Array(2);\n";
-  out  << "var " << basisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
-  out  << "var " << projBasisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
+  out  << "var " << basisCircles << "= new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
+  out  << "var " << projBasisCircles << "= new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
   for (int i = 0; i < this->theBuffer.BasisToDrawCirclesAt.size; i ++)
   { out << basisCircles << "[" << i << "]=[";
     for (int j = 0; j < theDimension; j ++)
@@ -1144,16 +1144,16 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     //////////////////
     out << projBasisCircles << "[" << i << "]= new Array(2);\n";
   }
-  out << "var " << Points1ArrayName << "=new Array(" << this->theFrames.size << ");\n" << "var " << Points2ArrayName << "=new Array(" << this->theFrames.size << ");\n"
-  << "var " << circArrayName << "=new Array(" << this->theFrames.size << ");\n" << "var " << circRadiiArrayName << "=new Array(" << this->theFrames.size << ");\n"
-  << "var " << txtArrayName << "=new Array(" << this->theFrames.size << ");\n" << "var " << Points1ArrayNameColors << "=new Array(" << this->theFrames.size << ");\n";
+  out << "var " << Points1ArrayName << "= new Array(" << this->theFrames.size << ");\n" << "var " << Points2ArrayName << "= new Array(" << this->theFrames.size << ");\n"
+  << "var " << circArrayName << "= new Array(" << this->theFrames.size << ");\n" << "var " << circRadiiArrayName << "= new Array(" << this->theFrames.size << ");\n"
+  << "var " << txtArrayName << "= new Array(" << this->theFrames.size << ");\n" << "var " << Points1ArrayNameColors << "= new Array(" << this->theFrames.size << ");\n";
   for (int k = 0; k < this->theFrames.size; k ++)
   { DrawOperations& currentOps = this->theFrames[k].theBuffer;
-    out << Points1ArrayName << "[" << k << "]" << "=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n" << Points2ArrayName << "["
-    << k << "]=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n" << circArrayName << "[" << k << "]=new Array("
-    << currentOps.theDrawCircleAtVectorOperations.size << ");\n" << circRadiiArrayName << "[" << k << "]=new Array(" << currentOps.theDrawCircleAtVectorOperations.size << ");\n"
-    << txtArrayName << "[" << k << "]=new Array(" << currentOps.theDrawTextAtVectorOperations.size << ");\n" << Points1ArrayNameColors
-    << "[" << k << "]=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n";
+    out << Points1ArrayName << "[" << k << "]" << "= new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n" << Points2ArrayName << "["
+    << k << "]= new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n" << circArrayName << "[" << k << "]= new Array("
+    << currentOps.theDrawCircleAtVectorOperations.size << ");\n" << circRadiiArrayName << "[" << k << "]= new Array(" << currentOps.theDrawCircleAtVectorOperations.size << ");\n"
+    << txtArrayName << "[" << k << "]= new Array(" << currentOps.theDrawTextAtVectorOperations.size << ");\n" << Points1ArrayNameColors
+    << "[" << k << "]= new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n";
     for (int i = 0; i < currentOps.theDrawLineBetweenTwoRootsOperations.size; i ++)
     { Vector<double>& current1 = currentOps.theDrawLineBetweenTwoRootsOperations[i].v1;
       Vector<double>& current2 = currentOps.theDrawLineBetweenTwoRootsOperations[i].v2;
@@ -1207,7 +1207,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << ";\n";
   out << "var GraphicsUnitCone" << timesCalled << "=" << this->theBuffer.GraphicsUnit[0] << ";\n";
   out << "function " << functionConvertToXYName << "(vector){\n";
-  out << "resultX=" << shiftX << "; resultY=" << shiftY << ";\nfor (i = 0; i <" << theDimension << "; i ++){\n";
+  out << "resultX =" << shiftX << "; resultY =" << shiftY << ";\nfor (i = 0; i <" << theDimension << "; i ++){\n";
   out << "resultX+=vector[i]*" << projName << "[i][0];\n";
   out << "resultY+=vector[i]*" << projName << "[i][1];\n}\n";
   out << "result =[resultX, resultY];\n";
@@ -1217,7 +1217,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   int frameDelay = 3000;
   out
   << "function incrementGlobalFrameCounter" << timesCalled << "(){\n"
-  << "globalFrameCounter++;\n"
+  << "globalFrameCounter ++;\n"
   << "if (globalFrameCounter>=" << this->theFrames.size << ")\n"
   << "globalFrameCounter = 0;\n"
   << "  ComputeProjections" << timesCalled << "();\n"
@@ -1230,12 +1230,12 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << "  if (" << theSurfaceName << "== 0)\n"
   << "    " << theInitFunctionName << "();\n"
   << "ComputeProjections" << timesCalled << "();\n";
-  out << theSurfaceName << ".fillStyle=\"#FFFFFF\";\n";
+  out << theSurfaceName << ".fillStyle =\"#FFFFFF\";\n";
   out << theSurfaceName << ".fillRect(0,0," << boss->DefaultHtmlWidth  << ", " << boss->DefaultHtmlHeight << ");\n";
   out
   << "for (s = 0; s<" << Points1ArrayName << "[globalFrameCounter].length" << "; s++ ){\n  "
   << theSurfaceName << ".beginPath();\n"
-  << theSurfaceName << ".strokeStyle=" << Points1ArrayNameColors <<  "[globalFrameCounter][s];\n"
+  << theSurfaceName << ".strokeStyle =" << Points1ArrayNameColors <<  "[globalFrameCounter][s];\n"
   << theSurfaceName << ".moveTo("
   << functionConvertToXYName << "( " << Points1ArrayName << "[globalFrameCounter][s])[0],"
   << functionConvertToXYName << "( " << Points1ArrayName << "[globalFrameCounter][s])[1]); "
@@ -1247,7 +1247,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   out
   << "for (s = 0; s<" << circArrayName << "[globalFrameCounter].length" << "; s++ ){\n  "
   << theSurfaceName << ".beginPath(); "
-  << theSurfaceName << ".strokeStyle=\"#ff0000\"; "
+  << theSurfaceName << ".strokeStyle =\"#ff0000\"; "
   << theSurfaceName << ".arc("
   << functionConvertToXYName << "( " << circArrayName <<"[globalFrameCounter]" << "["
   << "s" << "])[0],"
@@ -1268,17 +1268,17 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     out <<"window.setTimeout(\"incrementGlobalFrameCounter" << timesCalled << "()\"," << frameDelay << ");\n";
   out << " }\n";
   out << "var selectedBasisIndexCone" << timesCalled << "= - 1;\n"
-  << "var clickTolerance=5;\n"
+  << "var clickTolerance =5;\n"
   << "function ptsWithinClickToleranceCone" << timesCalled << "(x1, y1, x2, y2)\n"
   << "{ if (x1-x2>clickTolerance || x2-x1>clickTolerance || y1-y2>clickTolerance || y2-y1>clickTolerance )\n    return false;\n  return true;\n}";
 
   out << "function MultiplyVector" << timesCalled << "(output, coeff)"
   << "{ for (var i = 0; i <output.length; i ++)\n"
-  << "  output[i]*=coeff;\n"
+  << "  output[i]*= coeff;\n"
   << "}\n"
   << "function AddVectorTimes" << timesCalled << "(output, inputVector, coeff)\n"
   << "{ for (var i = 0; i <output.length; i ++)\n"
-  << "  output[i]+=inputVector[i]*coeff;\n"
+  << "  output[i]+= inputVector[i]*coeff;\n"
   << "}\n"
   << "function ScaleToUnitLength" << timesCalled << "(vector)\n"
   << "{ MultiplyVector" << timesCalled << "(vector, 1/Math.sqrt(getScalarProduct" << timesCalled << "(vector,vector)));\n"
@@ -1292,18 +1292,18 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << "  MultiplyVector" << timesCalled << "(projection, scal1);\n"
   << "  AddVectorTimes" << timesCalled << "(projection, orthoBasis2, scal2);\n"
   << "  AddVectorTimes" << timesCalled << "(vComponent, projection, - 1);\n"
-  << "  var oldAngle=Math.atan(Math.sqrt(oldTanSquared));\n"
-  << "  var newAngle=Math.atan(Math.sqrt(newTanSquared));\n"
+  << "  var oldAngle =Math.atan(Math.sqrt(oldTanSquared));\n"
+  << "  var newAngle =Math.atan(Math.sqrt(newTanSquared));\n"
   << "  if (isNaN(oldAngle) || isNaN(newAngle))\n"
   << "    return input;\n"
-  << "  var angleChange= -oldAngle +newAngle;\n"
+  << "  var angleChange = -oldAngle +newAngle;\n"
   << "  if (newX*oldX<0 && newY*oldY<0)\n"
 //  <<  " {
-//  << "    angleChange= oldAngle +newAngle;\n"
+//  << "    angleChange = oldAngle +newAngle;\n"
   << "    angleChange*= - 1;\n"
 //  << "  };"
-//  << "  topBound=Math.PI/2;\n"
-//  << "  bottomBound= -Math.PI/2;\n"
+//  << "  topBound =Math.PI/2;\n"
+//  << "  bottomBound = -Math.PI/2;\n"
 //  << "  while (angleChange>= topBound || angleChange<bottomBound)\n"
 //  << "    if (angleChange>= topBound)\n"
 //  << "      angleChange-=Math.PI;\n"
@@ -1349,7 +1349,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << "{ var result = 0;\n"
   << "  for (var i = 0; i <" << theDimension << "; i ++)\n"
   << "    for (var j = 0; j<" << theDimension << "; j ++)\n"
-  << "      result+= root1[i]*root2[j]*BilinearForm" << timesCalled << "[i][j];\n"
+  << "      result += root1[i]*root2[j]*BilinearForm" << timesCalled << "[i][j];\n"
   << "  return result;\n"
   << "}\n";
   out
@@ -1368,28 +1368,28 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << "function getAngleChange" << timesCalled << "(newX, newY, oldX, oldY)\n"
   << "{ var result =getAngleFromXandY" << timesCalled
   << "(newX, newY, oldX, oldY)-getAngleFromXandY" << timesCalled << "(oldX, oldY, newX, newY);\n"
-  << "  topBound=Math.PI/2;\n"
-  << "  bottomBound= -Math.PI/2;\n"
+  << "  topBound =Math.PI/2;\n"
+  << "  bottomBound = -Math.PI/2;\n"
   << "  while (result>topBound || result< bottomBound)\n"
   << "    if (result>topBound)\n"
   << "      result-=Math.PI;\n"
   << "    else\n"
-  << "      result+=Math.PI;\n"
+  << "      result +=Math.PI;\n"
   << "  return result;\n"
   << "}\n";
   out << "\nfunction changeBasis" << timesCalled <<  "(selectedIndex, newX, newY)\n"
-  << "{ if (newX== 0 && newY== 0)\n"
+  << "{ if (newX == 0 && newY == 0)\n"
   << "    return;\n"
   << "  var selectedRoot =" << basisCircles << "[selectedIndex];\n"
   << "  var selectedRootLength=getScalarProduct" << timesCalled << "(selectedRoot,selectedRoot);\n"
-  << "  var projectionSelected=" << projBasisCircles << "[selectedIndex];\n"
-  << "  var oldX=projectionSelected[0]/GraphicsUnitCone" << timesCalled << ";\n"
-  << "  var oldY= -projectionSelected[1]/GraphicsUnitCone" << timesCalled << ";\n"
+  << "  var projectionSelected =" << projBasisCircles << "[selectedIndex];\n"
+  << "  var oldX =projectionSelected[0]/GraphicsUnitCone" << timesCalled << ";\n"
+  << "  var oldY = -projectionSelected[1]/GraphicsUnitCone" << timesCalled << ";\n"
   << "  newX/= GraphicsUnitCone" << timesCalled << ";\n"
   << "  newY/= GraphicsUnitCone" << timesCalled << ";\n"
   << "  var epsilon = 0.000000015;\n"
   << "  if (newX*newX+newY*newY>0.003)\n"
-  << "  { var AngleChange= -getAngleChange" << timesCalled << "(newX, newY, oldX, oldY);\n"
+  << "  { var AngleChange = -getAngleChange" << timesCalled << "(newX, newY, oldX, oldY);\n"
   << "    var NewVectorE1=" << cloneVector << "(VectorE1Cone" << timesCalled << ");\n"
   << "    var NewVectorE2= " << cloneVector << "(VectorE2Cone" << timesCalled << ");\n"
   << "    MultiplyVector" << timesCalled << "(NewVectorE1, Math.cos(AngleChange));\n"
@@ -1419,7 +1419,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   out
   << "    if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>epsilon || getScalarProduct" << timesCalled
   << "(vOrthogonal, vOrthogonal)<-epsilon)\n"
-  << "    { if (oldRatioProjectionOverHeightSquared== 0)\n"
+  << "    { if (oldRatioProjectionOverHeightSquared == 0)\n"
   << "      { vProjection =" << cloneVector << "(VectorE1Cone" << timesCalled << ");\n"
   << "        MultiplyVector" << timesCalled << "(vProjection, -newX);\n"
   << "        AddVectorTimes" << timesCalled << "(vProjection, VectorE2Cone" << timesCalled << ", newY" << ");\n"
@@ -1437,21 +1437,21 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << "}\n";
 
   out << "\nfunction clickCanvasCone" << timesCalled << "(cx,cy)\n"
-  << "{ divPosX= 0;\n  divPosY= 0;\n  thePointer = document.getElementById(\"idCanvasCone" << timesCalled << "\");\n"
+  << "{ divPosX = 0;\n  divPosY = 0;\n  thePointer = document.getElementById(\"idCanvasCone" << timesCalled << "\");\n"
   << "  while (thePointer)  {\n  divPosX += thePointer.offsetLeft;\n  divPosY += thePointer.offsetTop;\n  thePointer = thePointer.offsetParent;\n  }"
-  << "\n  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");"
-  << "\n  posy=(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n  selectedBasisIndexCone" << timesCalled <<"= - 1;\n"
+  << "\n  posx =(cx-divPosX+document.body.scrollLeft-" << shiftX << ");"
+  << "\n  posy =(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n  selectedBasisIndexCone" << timesCalled <<"= - 1;\n"
   << "if (ptsWithinClickToleranceCone" << timesCalled << "(posx,posy,0,0))" << "\nselectedBasisIndexCone" << timesCalled << "= -2;\n"
   <<  "for (i = 0; i <" << theDimension << ";i ++)  {\n if (ptsWithinClickToleranceCone" << timesCalled
   << "(posx, posy, " << projBasisCircles << "[i][0]" << ", " << projBasisCircles
   << "[i][1]" << "))\n"
-  << "  selectedBasisIndexCone" << timesCalled << "=i;  \n}\n}\nfunction mouseMoveRedrawCone" << timesCalled << "(cx, cy)\n"
+  << "  selectedBasisIndexCone" << timesCalled << "= i;  \n}\n}\nfunction mouseMoveRedrawCone" << timesCalled << "(cx, cy)\n"
   << "{"
-  << "\n if (selectedBasisIndexCone" << timesCalled << "== - 1)\n    return;\n  divPosX= 0;\n  divPosY= 0;\n"
+  << "\n if (selectedBasisIndexCone" << timesCalled << "== - 1)\n    return;\n  divPosX = 0;\n  divPosY = 0;\n"
   << "  thePointer = document.getElementById(\"idCanvasCone"<< timesCalled << "\");\n  while (thePointer)\n  { divPosX += thePointer.offsetLeft;\n"
   << "    divPosY += thePointer.offsetTop;\n    thePointer = thePointer.offsetParent;\n  }\n"
-  << "  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");\n"
-  << "  posy= -(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n"
+  << "  posx =(cx-divPosX+document.body.scrollLeft-" << shiftX << ");\n"
+  << "  posy = -(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n"
   << "if (selectedBasisIndexCone" << timesCalled << "== -2)\n{ shiftXCone" << timesCalled << "=(cx-divPosX+document.body.scrollLeft);\n"
   << shiftY << "=(cy-divPosY+document.body.scrollTop);\n  }  else\n"
   << "{ changeBasis" << timesCalled << "(selectedBasisIndexCone" << timesCalled << ", posx, posy);\n  }\n  "

@@ -41,7 +41,7 @@ bool WebWorker::ReceiveAll()
     crash << "Attempting to receive on a socket with ID equal to - 1. " << crash;
   if (theGlobalVariables.flagUsingSSLinCurrentConnection)
     return this->ReceiveAllHttpSSL();
-  //logWorker << logger::red << "DEBUG: Worker " << this->indexInParent+ 1 << " receiving all. " << logger::endL;
+  //logWorker << logger::red << "DEBUG: Worker " << this->indexInParent + 1 << " receiving all. " << logger::endL;
   return this->ReceiveAllHttp();
 }
 
@@ -73,12 +73,12 @@ bool WebWorker::IsAllowedAsRequestCookie(const std::string& input)
 std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
 { std::stringstream out;
   out
-  << "<script type=\"text/javascript\"> \n"
+  << "<script type =\"text/javascript\"> \n"
   << HtmlRoutines::GetJavascriptCookieFunctionSNoTags()
   << "function storeSettings()\n"
   << "{ theCalculatorForm=document.getElementById(\"mainInputID\");  \n"
   << "  //alert(theCalculatorForm.style.width);\n"
-  << "  if (theCalculatorForm!=null){\n"
+  << "  if (theCalculatorForm!= null){\n"
   << "    addCookie(\"widthCalculatorText\", theCalculatorForm.style.width, 100);  \n"
   << "    addCookie(\"heightCalculatorText\", theCalculatorForm.style.height, 100);\n"
   << "  }\n"
@@ -116,56 +116,56 @@ std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << "}\n";
   out
 //  << "function getCalculatorCGIsettings(){\n"
-//  << "  result =\"examStatus =\"+getCookie(\"examStatus\");\n"
-//  << "  result+=\"&username=\"+getCookie(\"username\");\n"
-//  << "  result+=\"&authenticationToken =\"+getCookie(\"authenticationToken\");\n"
-//  << "  result+=\"&fileName=\"+getCookie(\"fileName\");\n"
+//  << "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"
+//  << "  result +=\"&username=\"+getCookie(\"username\");\n"
+//  << "  result +=\"&authenticationToken =\"+getCookie(\"authenticationToken\");\n"
+//  << "  result +=\"&fileName =\"+getCookie(\"fileName\");\n"
 //  << "  return result;\n"
 //  << "}\n"
   << "var setProblemLinkStyle;\n"
   << "function loadSettings(){\n"
   << "  storeSettingsProgress();\n"
   << "  theCalculatorForm=document.getElementById(\"mainInputID\");  \n"
-  << "  if (theCalculatorForm!=null){\n"
+  << "  if (theCalculatorForm!= null){\n"
   << "    theOldWidth=getCookie(\"widthCalculatorText\");\n"
   << "    theOldHeight =getCookie(\"heightCalculatorText\");\n"
   << "    theCalculatorForm.style.width  = theOldWidth;\n"
   << "    theCalculatorForm.style.height = theOldHeight;\n"
   << "  }\n"
-  << "  if (document.getElementById(\"debugFlag\")!=null)\n "
+  << "  if (document.getElementById(\"debugFlag\")!= null)\n "
   << "    if (getCookie(\"debugFlag\")!='')\n"
-  << "      document.getElementById(\"debugFlag\").value=getCookie(\"debugFlag\");\n"
+  << "      document.getElementById(\"debugFlag\").value =getCookie(\"debugFlag\");\n"
   << "  if (getCookie(\"problemLinkStyle\")!='')\n"
   << "  { if (setProblemLinkStyle!==undefined)\n"
      "      setProblemLinkStyle(getCookie(\"problemLinkStyle\"));\n"
   << "  }\n"
-  << "  if (document.getElementById(\"studentView\")!=null)\n "
+  << "  if (document.getElementById(\"studentView\")!= null)\n "
   << "    if (getCookie(\"studentView\")!='')\n"
-  << "      document.getElementById(\"studentView\").value=getCookie(\"studentView\");\n"
-  << "  if (document.getElementById(\"studentSection\")!=null)\n "
+  << "      document.getElementById(\"studentView\").value =getCookie(\"studentView\");\n"
+  << "  if (document.getElementById(\"studentSection\")!= null)\n "
   << "    if (getCookie(\"studentSection\")!='')\n"
-  << "      document.getElementById(\"studentSection\").value=getCookie(\"studentSection\");\n"
-  << "  if (document.getElementById(\"request\")!=null)\n "
+  << "      document.getElementById(\"studentSection\").value =getCookie(\"studentSection\");\n"
+  << "  if (document.getElementById(\"request\")!= null)\n "
   << "    if (getCookie(\"request\")!='')\n"
   << "    { var theReq=getCookie(\"request\");\n"
   << "      if (theReq=='template' || theReq=='calculator' || theReq=='exercise' || "
   << "         theReq=='scoredQuiz' || theReq=='exerciseNoLogin')\n"
-  << "        document.getElementById(\"request\").value=getCookie(\"request\");\n"
+  << "        document.getElementById(\"request\").value =getCookie(\"request\");\n"
   << "    }"
-  << "  if (document.getElementById(\"fileName\")!=null)\n "
+  << "  if (document.getElementById(\"fileName\")!= null)\n "
   << "    if (getCookie(\"fileName\")!='')\n"
-  << "      document.getElementById(\"fileName\").value=getCookie(\"fileName\");\n"
-  << "  if (document.getElementById(\"courseHome\")!=null)\n "
+  << "      document.getElementById(\"fileName\").value =getCookie(\"fileName\");\n"
+  << "  if (document.getElementById(\"courseHome\")!= null)\n "
   << "    if (getCookie(\"courseHome\")!='')\n"
-  << "      document.getElementById(\"courseHome\").value=getCookie(\"courseHome\");\n"
-  << "  if (document.getElementById(\"authenticationToken\")!=null)\n"
+  << "      document.getElementById(\"courseHome\").value =getCookie(\"courseHome\");\n"
+  << "  if (document.getElementById(\"authenticationToken\")!= null)\n"
   << "    if (getCookie(\"authenticationToken\")!='')\n"
-  << "      document.getElementById(\"authenticationToken\").value=getCookie(\"authenticationToken\");\n ";
+  << "      document.getElementById(\"authenticationToken\").value =getCookie(\"authenticationToken\");\n ";
   out
-  << "  if (document.getElementById(\"username\")!=null)\n"
-  << "    if (document.getElementById(\"username\").value=='' || document.getElementById(\"username\").value==null)\n "
+  << "  if (document.getElementById(\"username\")!= null)\n"
+  << "    if (document.getElementById(\"username\").value =='' || document.getElementById(\"username\").value == null)\n "
   << "      if (getCookie(\"username\")!='')\n"
-  << "        document.getElementById(\"username\").value=getCookie(\"username\");\n ";
+  << "        document.getElementById(\"username\").value =getCookie(\"username\");\n ";
   out << "}\n";
   out << " </script>\n";
   return out.str();
@@ -174,10 +174,10 @@ std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
 std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
 { MacroRegisterFunctionWithName("WebWorker::GetJavaScriptIndicatorBuiltInServer");
   std::stringstream out;
-  out << "\n<script type=\"text/javascript\" id=\"progressReportJavascript\"> \n";
-  out << "var isPaused= false;\n";
-  out << "var isFinished= false;\n";
-  out << "var timeIncrementInTenthsOfSecond=20;//measured in tenths of a second\n";
+  out << "\n<script type =\"text/javascript\" id =\"progressReportJavascript\"> \n";
+  out << "var isPaused = false;\n";
+  out << "var isFinished = false;\n";
+  out << "var timeIncrementInTenthsOfSecond =20;//measured in tenths of a second\n";
   out << "var timeOutCounter = 0;//measured in tenths of a second\n";
   out << "var currentWorkerNumber = - 1;//\n";
   out << "\nfunction progressReport()\n";
@@ -189,10 +189,10 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "  var progReportTimer = document.getElementById(\"idProgressReportTimer\");	\n";
   out << "  if (isPaused)\n";
   out << "    return;\n";
-  out << "  progReportTimer.innerHTML =\"<hr>Refreshing every \"+timeIncrementInTenthsOfSecond/10+\" second(s). Client time: ~\"+ Math.floor(timeOutCounter/10)+\" second(s)<br>\";\n";
+  out << "  progReportTimer.innerHTML =\"<hr>Refreshing every \"+timeIncrementInTenthsOfSecond/10+\" second(s). Client time: ~\"+ Math.floor(timeOutCounter/10) +\" second(s)<br>\";\n";
   out << "  timeOutCounter+= timeIncrementInTenthsOfSecond;\n";
   out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable
-  << "?request =indicator&mainInput =\"+currentWorkerNumber;\n";
+  << "?request= indicator&mainInput =\"+currentWorkerNumber;\n";
   out << "  var https = new XMLHttpRequest();\n";
   //out << "alert(sURL);\n";
   out << "  https.open(\"GET\",sURL,true);\n"
@@ -200,18 +200,18 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   << "  https.onload = function() {\n"
   << "    newReportString= https.responseText;\n"
   << "    if (https.responseText ==\"finished\")\n"
-  << "    { isFinished= true;\n"
-  << "      requestStatus.innerHTML=\"<span style='color:green'><b>Computation finished.</b></span>\";\n"
+  << "    { isFinished = true;\n"
+  << "      requestStatus.innerHTML=\"<span style ='color:green'><b>Computation finished.</b></span>\";\n"
   << "      return;\n"
   << "    }\n"
-  << "    if (https.responseText!=\"\")\n"
-  << "    { progReport.innerHTML=newReportString+\"<hr>\";\n"
+  << "    if (https.responseText !=\"\")\n"
+  << "    { progReport.innerHTML= newReportString+\"<hr>\";\n"
   << "      requestStatus.innerHTML='';"
   << "    }else"
-  << "      requestStatus.innerHTML=\"<span style='color:red'><b>Empty response</b></span>\";"
+  << "      requestStatus.innerHTML=\"<span style ='color:red'><b>Empty response</b></span>\";"
   << "  }\n"
   ////////////////////////////////////////////
-//  << "  requestStatus.innerHTML = \"<span style='color:orange'><b>Request sent</b></span>\";\n"
+//  << "  requestStatus.innerHTML = \"<span style ='color:orange'><b>Request sent</b></span>\";\n"
   << "  https.send(null);\n";
 //  out << "  if (oRequest.status ==200)\n";
   out << "   this.timeoutID =window.setTimeout(\"progressReport()\",timeIncrementInTenthsOfSecond*100);\n";
@@ -222,16 +222,16 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "  var requestStatus = document.getElementById(\"idProgressReportRequestStatus\");	\n";
   out << "  var pauseRequest = new XMLHttpRequest();\n";
   out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameExecutable
-  << "?request =pause&mainInput =\"+currentWorkerNumber;\n";
+  << "?request=pause&mainInput =\"+currentWorkerNumber;\n";
   out << "  pauseRequest.open(\"GET\",pauseURL,true);\n";
   out << "  pauseRequest.onload = function() {\n";
   out << "    if (pauseRequest.status!=200)\n";
   out << "      return;\n";
   out << "    requestStatus.innerHTML=pauseRequest.responseText;\n";
   out << "    if (pauseRequest.responseText ==\"paused\")\n";
-  out << "      isPaused= true;\n";
+  out << "      isPaused = true;\n";
   out << "    if (pauseRequest.responseText ==\"unpaused\")\n";
-  out << "      isPaused= false;\n";
+  out << "      isPaused = false;\n";
   out << "    if (isPaused)\n";
   out << "      document.getElementById(\"idButtonSendTogglePauseRequest\").innerHTML=\"Continue\";\n";
   out << "    else\n";
@@ -436,7 +436,7 @@ void SSLdata::initSSLserver()
 //{ this->initSSLlibrary();
 //  if (this->theSSLClientMethod!= 0)
 //    return;
-//  this->theSSLClientMethod= SSLv23_client_method();
+//  this->theSSLClientMethod = SSLv23_client_method();
 //  this->contextClient = SSL_CTX_new(this->theSSLClientMethod);   /* Create new context */
 //  if (this->contextClient == 0)
 //  { ERR_print_errors_fp(stderr);
@@ -593,7 +593,7 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup
       { if (commentsOnFailure != 0)
           *commentsOnFailure << "Attempt " << i + 1
           << ": SSL handshake not successfull in a "
-          << "controlled fashion (errorCode= 0). <br>";
+          << "controlled fashion (errorCode = 0). <br>";
       } else
       { if (commentsOnFailure != 0)
           *commentsOnFailure << "Attempt " << i + 1
@@ -661,10 +661,10 @@ bool SSLdata::HandShakeIamClientNoSocketCleanup
   }
   if (this->flagSSLHandshakeSuccessful)
   { if (commentsGeneral != 0)
-      *commentsGeneral << "<span style=\"color:green\">SSL handshake successfull.</span>\n<br>\n";
+      *commentsGeneral << "<span style =\"color:green\">SSL handshake successfull.</span>\n<br>\n";
   } else
   { if (commentsOnFailure != 0)
-      *commentsOnFailure << "<span style=\"color:red\">SSL handshake failed.</span>\n<br>\n";
+      *commentsOnFailure << "<span style =\"color:red\">SSL handshake failed.</span>\n<br>\n";
     return false;
   }
   //CHK_SSL(err);
@@ -816,9 +816,9 @@ void SSLdata::ClearErrorQueue
     numErrors ++;
     //if (i>0)
     //{ if (commentsOnError!= 0)
-    //  { *commentsOnError << i+ 1 << " ssl errors so far. ";
+    //  { *commentsOnError << i + 1 << " ssl errors so far. ";
     //  }
-    // logOpenSSL << logger::red << i+ 1 << " ssl errors so far. " << logger::endL;
+    // logOpenSSL << logger::red << i + 1 << " ssl errors so far. " << logger::endL;
     //}
     int extraErrorCode = 0;
     switch (theCode)
@@ -1156,7 +1156,7 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 //          this->theWorkers[i].pipeWorkerToServerControls.WriteAfterEmptying("close", false, true);
 //          logProcessStats << logger::green << this->ToStringActiveWorker()
 //          << " Close message sent through pipe successfully. " << logger::endL;
-//          this->theWorkers[i].flagInUse= false;
+//          this->theWorkers[i].flagInUse = false;
 //          this->currentlyConnectedAddresses.SubtractMonomial(this->theWorkers[i].userAddress, 1);
 //          this->NumProcessesReaped++;
 //        }
@@ -1294,17 +1294,17 @@ std::string WebWorker::GetNavigationPage()
 { MacroRegisterFunctionWithName("WebWorker::GetNavigationPage");
   std::stringstream out;
   out << "<html><body>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =accounts" << "\">Accounts</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts" << "\">Accounts</a>";
   out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =logout" << "\">Log out</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout" << "\">Log out</a>";
   out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =database" << "\">Database</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database" << "\">Database</a>";
   out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =changePasswordPage" << "\">Change password</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request= changePasswordPage" << "\">Change password</a>";
   out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =statusPublic" << "\">Server status</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=statusPublic" << "\">Server status</a>";
   out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =calculator" << "\">Calculator</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request= calculator" << "\">Calculator</a>";
   out << "</body></html>";
   return out.str();
 }
@@ -1348,7 +1348,7 @@ std::string WebWorker::GetDatabasePage()
 #endif // MACRO_use_MongoDB
   out << HtmlRoutines::GetJavascriptDatabaseRoutinesLink();
   out << "</head>"
-  << "<body onload=\"loadSettings();\">\n";
+  << "<body onload =\"loadSettings();\">\n";
   out << HtmlInterpretation::GetNavigationPanelWithGenerationTime();
   out << dbOutput.str();
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
@@ -1585,18 +1585,18 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
     return "";
   std::stringstream out;
   if (includeAuthenticationToken)
-    out << "<input type=\"hidden\" id=\"authenticationToken\" name=\"authenticationToken\">\n";
+    out << "<input type =\"hidden\" id =\"authenticationToken\" name =\"authenticationToken\">\n";
   if (includeUserName)
-    out << "<input type=\"hidden\" id=\"username\" name=\"username\">\n";
+    out << "<input type =\"hidden\" id =\"username\" name =\"username\">\n";
   //the values of the hidden inputs will be filled in via javascript
   if (this->flagFoundMalformedFormInput)
     out << "<b>Your input formed had malformed entries.</b>";
   out
-//  << "<input type=\"hidden\" id=\"debugFlag\" name=\"debugFlag\">\n"
-  << "<input type=\"hidden\" id=\"studentView\" name=\"studentView\">\n"
-  << "<input type=\"hidden\" id=\"studentSection\" name=\"studentSection\">\n"
-  << "<input type=\"hidden\" id=\"courseHome\" name=\"courseHome\">\n"
-  << "<input type=\"hidden\" id=\"fileName\" name=\"fileName\">\n";
+//  << "<input type =\"hidden\" id =\"debugFlag\" name =\"debugFlag\">\n"
+  << "<input type =\"hidden\" id =\"studentView\" name =\"studentView\">\n"
+  << "<input type =\"hidden\" id =\"studentSection\" name =\"studentSection\">\n"
+  << "<input type =\"hidden\" id =\"courseHome\" name =\"courseHome\">\n"
+  << "<input type =\"hidden\" id =\"fileName\" name =\"fileName\">\n";
   return out.str();
 }
 
@@ -2112,7 +2112,7 @@ int WebWorker::ProcessServerStatus()
   << "<body>";
   std::stringstream pageBody;
   if (theGlobalVariables.UserDefaultHasAdminRights())
-    pageBody << " <table><tr><td style=\"vertical-align:top\">"
+    pageBody << " <table><tr><td style =\"vertical-align:top\">"
     << this->parent->ToStringStatusAll() << "</td><td>"
     << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
     << "</td></tr></table>";
@@ -2131,7 +2131,7 @@ int WebWorker::ProcessServerStatusJSON()
   this->SetHeaderOKNoContentLength();
   std::stringstream out;
   if (theGlobalVariables.UserDefaultHasAdminRights())
-    out << " <table><tr><td style=\"vertical-align:top\">"
+    out << " <table><tr><td style =\"vertical-align:top\">"
     << this->parent->ToStringStatusAll() << "</td><td>"
     << theGlobalVariables.ToStringHTMLTopCommandLinuxSystem()
     << "</td></tr></table>";
@@ -2198,7 +2198,7 @@ int WebWorker::ProcessMonitor()
   << "<body>";
   stOutput << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation() << "</calculatorNavigation>";
   if (theGlobalVariables.flagAllowProcessMonitoring && theGlobalVariables.UserDefaultHasAdminRights())
-    stOutput << "<script language=\"javascript\">\n"
+    stOutput << "<script language =\"javascript\">\n"
     << "currentWorkerNumber =" << inputWebWorkerNumber << ";\n"
     << "progressReport();\n"
     << " </script>";
@@ -2230,7 +2230,7 @@ int WebWorker::ProcessComputationIndicator()
   }
   std::stringstream theErrorMessageStream;
   theErrorMessageStream
-  << "<span style=\"color:red\">Your computation may have terminated unexpectedly. The maximum number of "
+  << "<span style =\"color:red\">Your computation may have terminated unexpectedly. The maximum number of "
   << " connections/computations you can run is: "
   << theWebServer.MaxNumWorkersPerIPAdress << ". </span>"
   << "At the time of writing, you use up 1 connection per computation, "
@@ -2302,7 +2302,7 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
     return;
   MacroRegisterFunctionWithName("WebWorker::PipeProgressReportToParentProcess");
 //  static int counter = 0;
-//  counter++;
+//  counter ++;
   this->PauseIndicatorPipeInUse.RequestPausePauseIfLocked(false, false);
 //    logWorker << "about to potentially block " << logger::endL;
   //debugStream2 << "PipeProgressReportToParentProcess called "
@@ -2453,7 +2453,7 @@ int WebWorker::ProcessFile()
   << "Access-Control-Allow-Origin: *\r\n";
   for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++)
     if (MathRoutines::StringBeginsWith(this->VirtualFileName, this->parent->addressStartsSentWithCacheMaxAge[i]))
-    { theHeader << "Cache-Control: max-age=129600000, public\r\n";
+    { theHeader << "Cache-Control: max-age =129600000, public\r\n";
       withCacheHeader = true;
       break;
     }
@@ -2480,7 +2480,7 @@ int WebWorker::ProcessFile()
   theHeader << "Content-length: " << totalLength << "\r\n";
   if (!this->flagKeepAlive)
     theHeader << this->GetHeaderConnectionClose() << "\r\n";
-  //std::string theCookie= this->GetHeaderSetCookie();
+  //std::string theCookie = this->GetHeaderSetCookie();
   //if (theCookie!="")
   //  theHeader << theCookie << "\r\n";
   theHeader << "\r\n";
@@ -2666,7 +2666,7 @@ bool WebWorker::ShouldDisplayLoginPage()
 std::string WebWorker::GetJavaScriptIndicatorFromHD()
 { std::stringstream out;
   out << " <!>\n";
-  out << " <script type=\"text/javascript\"> \n";
+  out << " <script type =\"text/javascript\"> \n";
   out << " var timeOutCounter = 0;\n";
 //  out << " var newReportString=\"\";\n";
   out << " var showProgress = false;";
@@ -2677,7 +2677,7 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
   out << "    return;";
   out << "  }\n";
   out << "  el.style.display = '';\n";
-  out << "  timeOutCounter++;\n";
+  out << "  timeOutCounter ++;\n";
   out << "  var oRequest = new XMLHttpRequest();\n";
   out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable << "\";\n";
   out << "  oRequest.open(\"GET\",sURL,false);\n";
@@ -2694,7 +2694,7 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
   ("progressReportButton", "showProgress =!showProgress; progressReport()", "expand/collapse progress report");
   out << "<br><div "
   //<< "src =\"" << this->indicatorFileNameDisplaY << "\" "
-  << "id=\"idProgressReport\" style=\"display:none\">\n";
+  << "id =\"idProgressReport\" style =\"display:none\">\n";
   out << " </div>\n";
   out << " \n";
   out << " \n";
@@ -2714,17 +2714,17 @@ std::string WebWorker::GetAuthenticationToken(const std::string& reasonForNoAuth
 std::string WebWorker::GetJavascriptSubmitLoginInfo()
 { std::stringstream out;
   out
-  << "<script type=\"text/javascript\"> \n"
+  << "<script type =\"text/javascript\"> \n"
   << "function submitLoginInfo(){\n"
   << "  spanOutput = document.getElementById('loginResult');\n"
-  << "  if (spanOutput ==null){\n"
+  << "  if (spanOutput == null){\n"
   << "    spanOutput = document.createElement('span');\n"
   << "    document.body.appendChild(spanOutput);\n"
-  << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id loginResult MISSING! </span>\";\n"
+  << "    spanOutput.innerHTML= \"<span style ='color:red'> ERROR: span with id loginResult MISSING! </span>\";\n"
   << "  }\n"
   << "  theRequest ='getAuthenticationToken?';\n"
-  << "  theRequest+='username=' + encodeURIComponent(document.getElementById('username').value)+'&';\n"
-  << "  theRequest+='password='+ encodeURIComponent(document.getElementById('password').value);\n"
+  << "  theRequest +='username=' + encodeURIComponent(document.getElementById('username').value) +'&';\n"
+  << "  theRequest +='password='+ encodeURIComponent(document.getElementById('password').value);\n"
   << "  var https = new XMLHttpRequest();\n"
 ////////////////////////////////////////////
   << "  https.open(\"GET\", theRequest, true);\n"
@@ -2755,11 +2755,11 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
     out
 //    << "DEBUG: reasonforlogin<br>" << theGlobalVariables.CookiesToSetUsingHeaders.ToStringHtml() << "<br>"
 
-    << "<div style=\"text-align:center\">"
+    << "<div style =\"text-align:center\">"
     << reasonForLogin
     << "</div>";
   if (theGlobalVariables.GetWebInput("error") != "")
-    out << "<div style=\"text-align:center\">"
+    out << "<div style =\"text-align:center\">"
     << HtmlRoutines::ConvertStringToHtmlString
     (HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("error"), false), true)
     << "</div>";
@@ -2767,27 +2767,27 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
       theGlobalVariables.userCalculatorRequestType == "exercise")
   { std::string topicList = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("topicList"), false);
     std::string courseHome = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
-    out << "<div style=\"text-align:center\">"
+    out << "<div style =\"text-align:center\">"
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?"
-    << "request =" << theGlobalVariables.userCalculatorRequestType << "NoLogin"
+    << "request=" << theGlobalVariables.userCalculatorRequestType << "NoLogin"
     << "&"
     << "topicList =" << topicList << "&"
-    << "courseHome=" << courseHome << "&"
+    << "courseHome =" << courseHome << "&"
     << "\" class =\"courseLink\">Proceed without login</a><br>"
-    << "<b style=\"color:red\">Your scores will not be recorded.</b>"
+    << "<b style =\"color:red\">Your scores will not be recorded.</b>"
     << "<br><br><b>OR</b><br></div>";
   }
-  out << "<br><div class =\"divLogin\"><form class =\"formLogin\" name=\"login\" id=\"login\">";
+  out << "<br><div class =\"divLogin\"><form class =\"formLogin\" name =\"login\" id =\"login\">";
   out << "<table class =\"tableLogin\">";
   out
   << "<tr><td>"
   << "<b>User:</b>"
   << "</td>"
   << "<td>"
-  << "<input class =\"textInputUsername\" type=\"text\" id=\"username\" name=\"username\" placeholder =\"username\" ";
+  << "<input class =\"textInputUsername\" type =\"text\" id =\"username\" name =\"username\" placeholder =\"username\" ";
   if (theGlobalVariables.GetWebInput("username") != "")
-    out << "value=\"" << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("username"), false) << "\" ";
+    out << "value =\"" << HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("username"), false) << "\" ";
   out << "required>";
   out << "</input>\n";
   out << "</td></tr>";
@@ -2798,62 +2798,62 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "</td>";
   out
   << "<td>"
-  << "<input class =\"textInputUsername\" type=\"password\" id=\"password\" name=\"password\" placeholder =\"password\" autocomplete=\"on\">"
+  << "<input class =\"textInputUsername\" type =\"password\" id =\"password\" name =\"password\" placeholder =\"password\" autocomplete =\"on\">"
   << "</td></tr>";
 //  out << "<tr><td></td><td>";
 //  out << "</td></tr>";
   out << "</table>";
   out << this->GetHtmlHiddenInputs(false, false);
-  out << "<input type=\"hidden\" name=\"request\" id=\"request\"";
+  out << "<input type =\"hidden\" name =\"request\" id =\"request\"";
   if (theGlobalVariables.userCalculatorRequestType != "logout" &&
       theGlobalVariables.userCalculatorRequestType != "login")
-    out << " value=\"" << theGlobalVariables.userCalculatorRequestType << "\"";
+    out << " value =\"" << theGlobalVariables.userCalculatorRequestType << "\"";
   else
-    out << "value=\"selectCourse\"";
+    out << "value =\"selectCourse\"";
   out << ">";
-  out << "<input type=\"hidden\" name=\"googleToken\" id=\"googleToken\" value=\"\">";
+  out << "<input type =\"hidden\" name =\"googleToken\" id =\"googleToken\" value =\"\">";
   out << "<br>";
-  out << "<button class =\"buttonLogin\" type=\"submit\" value=\"Submit\" ";
+  out << "<button class =\"buttonLogin\" type =\"submit\" value =\"Submit\" ";
   out << "action =\"" << theWebServer.GetActiveWorker().addressComputed;
   out << "\"";
   out << ">Login</button>";
   out << "</form>";
-  out << "<span id=\"loginResult\"></span>";
+  out << "<span id =\"loginResult\"></span>";
   out << "</div>";
   out << "<br>"
   << "<div class =\"divForgotLogin\">"
-  << "<a class =\"linkForgotLoginPass\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request = forgotLoginPage\">"
+  << "<a class =\"linkForgotLoginPass\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request= forgotLoginPage\">"
   << "Forgot login/password?</a></div>";
   /////////////////////////
   out << "<br><div class =\"divSignUp\">"
   << "<a class =\"linkSignUp\" href=\""
-  << theGlobalVariables.DisplayNameExecutable << "?request =signUpPage"
+  << theGlobalVariables.DisplayNameExecutable << "?request=signUpPage"
   << "\">Sign up</a></div>";
   /////////////////////////
   out << "<br>";
   out << "<div class =\"divExternalLogin\">";
   out << "<script src =\"https://apis.google.com/js/platform.js\" async defer></script>";
-  out << "<meta name=\"google-signin-client_id\" content =\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
+  out << "<meta name =\"google-signin-client_id\" content =\"538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com\">";
   out << "<div class =\"g-signin2\" data-onsuccess =\"onSignIn\">Google login unavailable (no Internet?).</div> "
-  << "<br><br><button class =\"buttonLogin\" style=\"opacity:0; transition: 0.6s\" id=\"doSignInWithGoogleToken\" "
+  << "<br><br><button class =\"buttonLogin\" style =\"opacity:0; transition: 0.6s\" id =\"doSignInWithGoogleToken\" "
   << "onclick=\""
-  << "document.getElementById('username').required= false;"
-  << "document.getElementById('username').value='';"
-  << "document.getElementById('password').value='';"
+  << "document.getElementById('username').required = false;"
+  << "document.getElementById('username').value ='';"
+  << "document.getElementById('password').value ='';"
   << "document.getElementById('login').submit();"
   << "\">Proceed with Google</button>";
-  out << "<script language=\"javascript\">\n"
+  out << "<script language =\"javascript\">\n"
   << "function onSignIn(googleUser)\n"
-  << "{ document.getElementById(\"googleToken\").value=googleUser.getAuthResponse().id_token;\n"
+  << "{ document.getElementById(\"googleToken\").value =googleUser.getAuthResponse().id_token;\n"
   << "  addCookie(\"googleToken\", googleUser.getAuthResponse().id_token, 5, true);\n"
-  << "  document.getElementById(\"doSignInWithGoogleToken\").style.opacity=\"1\";\n"
-//  << "  document.getElementById(\"doSignInWithGoogleToken\").style.visibility=\"visible\";\n"
+  << "  document.getElementById(\"doSignInWithGoogleToken\").style.opacity =\"1\";\n"
+//  << "  document.getElementById(\"doSignInWithGoogleToken\").style.visibility =\"visible\";\n"
   << "}\n"
   << "</script>\n";
 
   out << "<br><small>Log-in with google: if not already present, creates account automatically. "
   << "<br>Your username will be set to your gmail address. <br> "
-  << "<b style=\"color:green\">We do not store any personal information from google except your gmail address. "
+  << "<b style =\"color:green\">We do not store any personal information from google except your gmail address. "
   << "<br>We do not have access (and don't wish to have one) "
   << "<br>to your google password or other sensitive information. </span></b><br>"
   << "<br></small>"
@@ -2872,7 +2872,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("activationToken"), false);
   std::string claimedEmail =
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
-  out << "<input type=\"hidden\" id=\"activationToken\" value=\""
+  out << "<input type =\"hidden\" id =\"activationToken\" value =\""
   << claimedActivationToken
   << "\">";
   if (claimedActivationToken == "" || claimedEmail == "")
@@ -2881,52 +2881,52 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   }
   std::string actualEmailActivationToken, usernameAssociatedWithToken;
   if (theGlobalVariables.userDefault.email == claimedEmail)
-  { out << "\n<b><span style=\"color:green\">Email "
+  { out << "\n<b><span style =\"color:green\">Email "
     << claimedEmail << " already updated. </span></b>";
     return out.str();
   }
   JSData findEmail, emailInfo, findUser, userInfo;
   findEmail[DatabaseStrings::labelEmail] = claimedEmail;
   if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableEmailInfo, findEmail, emailInfo, &out))
-  { out << "\n<span style=\"color:red\"><b>Failed to fetch email activation token. </b></span>";
+  { out << "\n<span style =\"color:red\"><b>Failed to fetch email activation token. </b></span>";
     return out.str();
   }
   usernameAssociatedWithToken = emailInfo[DatabaseStrings::labelUsernameAssociatedWithToken].string;
   actualEmailActivationToken = emailInfo[DatabaseStrings::labelActivationToken].string;
   if (actualEmailActivationToken != claimedActivationToken)
-  { out << "\n<span style=\"color:red\"><b>Bad activation token. Could not activate your email. </b></span>";
+  { out << "\n<span style =\"color:red\"><b>Bad activation token. Could not activate your email. </b></span>";
     //out << "DEBUG: actual token: " << actualEmailActivationToken << ". Claimed token: " << claimedActivationToken;
     return out.str();
   }
   if (usernameAssociatedWithToken != theGlobalVariables.userDefault.username)
-  { out << "\n<span style=\"color:red\"><b>Activation token was issued for another user. </b></span>";
+  { out << "\n<span style =\"color:red\"><b>Activation token was issued for another user. </b></span>";
     return out.str();
   }
   emailInfo[DatabaseStrings::labelActivationToken] = "";
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableEmailInfo, findEmail, emailInfo, &out))
-  { out << "\n<span style=\"color:red\"><b>Could not reset the activation token (database is down?). </b></span>";
+  { out << "\n<span style =\"color:red\"><b>Could not reset the activation token (database is down?). </b></span>";
     return out.str();
   }
   userInfo[DatabaseStrings::labelEmail] = claimedEmail;
   findUser[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, userInfo, &out))
-  { out << "\n<span style=\"color:red\"><b>Could not store your email (database is down?). </b></span>";
+  { out << "\n<span style =\"color:red\"><b>Could not store your email (database is down?). </b></span>";
     return out.str();
   }
   theGlobalVariables.userDefault.email = claimedEmail;
-  out << "\n<span style=\"color:green\"><b>Email successfully updated. </b></span>";
+  out << "\n<span style =\"color:green\"><b>Email successfully updated. </b></span>";
   if (theGlobalVariables.userDefault.actualActivationToken != "" &&
       theGlobalVariables.userDefault.actualActivationToken != "activated" &&
       theGlobalVariables.userDefault.actualShaonedSaltedPassword != "")
   { out << "<br>It appears your password is already set. "
     << "<br>If you'd like to change it using your old password, "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request =changePasswordPage\">click here</a>. ";
+    << "?request= changePasswordPage\">click here</a>. ";
     outputDoShowPasswordChangeField = false;
     userInfo[DatabaseStrings::labelActivationToken] = "activated";
   } else
   { out << "<br>"
-    << "<span style=\"color:orange\">To fully activate your account, please choose a password.</span></b>";
+    << "<span style =\"color:orange\">To fully activate your account, please choose a password.</span></b>";
   }
   return out.str();
 }
@@ -2949,18 +2949,18 @@ std::string WebWorker::GetChangePasswordPage()
   }
 //    << "  window.location ='calculator?username='+GlobalUser+'&authenticationToken ='+GlobalAuthenticationToken;";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-//  out << "<form name=\"login\" id=\"login\" action =\"calculator\" method=\"GET\" accept-charset =\"utf-8\">";
+//  out << "<form name =\"login\" id =\"login\" action =\"calculator\" method =\"GET\" accept-charset =\"utf-8\">";
   out
   <<  "User: " << theGlobalVariables.userDefault.username
-  << "<input type=\"hidden\" id=\"username\" placeholder =\"username\" "
-  << "value=\"" << theGlobalVariables.userDefault.username << "\" "
+  << "<input type =\"hidden\" id =\"username\" placeholder =\"username\" "
+  << "value =\"" << theGlobalVariables.userDefault.username << "\" "
   << "required>";
   bool doShowPasswordChangeField = true;
   out << "<table>";
   JSData findUser, updateUser;
   if (theGlobalVariables.userDefault.flagUserHasActivationToken)
     out << "<tr><td colspan =\"2\">"
-    << "<b><span style=\"color:orange\">"
+    << "<b><span style =\"color:orange\">"
     << "To fully activate your account, "
     << "please choose a password.</span></b></td></tr>";
   if (theGlobalVariables.userCalculatorRequestType == "activateAccount")
@@ -2976,9 +2976,9 @@ std::string WebWorker::GetChangePasswordPage()
       findUser[DatabaseStrings::labelUsername] = theGlobalVariables.userDefault.username;
       updateUser[DatabaseStrings::labelActivationToken] = "activated";
       if (! DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findUser, updateUser, &out))
-        out << " <span style=\"color:red\"><b>Failed to activate your account. </b></span>";
+        out << " <span style =\"color:red\"><b>Failed to activate your account. </b></span>";
       else
-        out << " <span style=\"color:green\"><b>Your account is now marked as activated.</b></span>";
+        out << " <span style =\"color:green\"><b>Your account is now marked as activated.</b></span>";
       out << "</td></tr>";
     }
     out
@@ -2986,7 +2986,7 @@ std::string WebWorker::GetChangePasswordPage()
     << "Old password:\n "
     << "</td>"
     << "<td>"
-    << "<input type=\"password\" id=\"password\" placeholder =\"password\">\n"
+    << "<input type =\"password\" id =\"password\" placeholder =\"password\">\n"
     << "</td></tr>";
   }
   if (doShowPasswordChangeField)
@@ -2996,12 +2996,12 @@ std::string WebWorker::GetChangePasswordPage()
     << "New password:\n"
     << "</td>"
     << "<td>"
-    << "<input type=\"password\" id=\"newPassword\" placeholder =\"new password\">\n"
+    << "<input type =\"password\" id =\"newPassword\" placeholder =\"new password\">\n"
     << "</td></tr>"
     << "<tr><td>"
     << "Re-enter new password: \n"
     << "</td><td>"
-    << "<input type=\"password\"  id=\"reenteredPassword\" placeholder =\"re-enter\" "
+    << "<input type =\"password\"  id =\"reenteredPassword\" placeholder =\"re-enter\" "
     << "onkeyup =\"if (event.keyCode == 13) submitChangePassRequest('passwordChangeResult');\">\n"
     << "</td></tr>";
   }
@@ -3009,15 +3009,15 @@ std::string WebWorker::GetChangePasswordPage()
   << "</table>";
   if (doShowPasswordChangeField)
   { out << "<button  onclick=\"submitChangePassRequest('passwordChangeResult') \"> Submit</button>\n"
-    << "<span id=\"passwordChangeResult\"> </span>\n"
+    << "<span id =\"passwordChangeResult\"> </span>\n"
 //  << "</form>"
     ;
     out << "<hr>"
     << "Email: " << theGlobalVariables.userDefault.email
     << "<br>\n"
-    << "Change/set email: <input type=\"email\" id=\"emailInputID\">\n "
+    << "Change/set email: <input type =\"email\" id =\"emailInputID\">\n "
     << "<button onclick=\"submitChangePassRequest('emailChangeResult') \"> Submit</button>\n";
-    out << "<span id=\"emailChangeResult\"></span>\n";
+    out << "<span id =\"emailChangeResult\"></span>\n";
   }
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
 #else
@@ -3074,7 +3074,7 @@ int WebWorker::SetEmail(const std::string& input)
   (void) input;
 #ifdef MACRO_use_MongoDB
   std::stringstream out, debugStream;
-  //double startTime= theGlobalVariables.GetElapsedSeconds();
+  //double startTime = theGlobalVariables.GetElapsedSeconds();
   theGlobalVariables.userDefault.email = input;
   std::stringstream* adminOutputStream = 0;
   if (theGlobalVariables.UserDefaultHasAdminRights())
@@ -3101,11 +3101,11 @@ int WebWorker::ProcessChangePassword()
   UserCalculatorData& theUser = theGlobalVariables.userDefault;
   theUser.enteredAuthenticationToken = "";
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
-  { stOutput << "<span style=\"color:red\"><b>Please use secure connection.</b></span>";
+  { stOutput << "<span style =\"color:red\"><b>Please use secure connection.</b></span>";
     return 0;
   }
   if (!theGlobalVariables.flagLoggedIn)
-  { stOutput << "<span style=\"color:red\"><b>Please enter (old) password.</b></span>";
+  { stOutput << "<span style =\"color:red\"><b>Please enter (old) password.</b></span>";
     return 0;
   }
   std::string newPassword =
@@ -3127,21 +3127,21 @@ int WebWorker::ProcessChangePassword()
   { JSData queryEmailTaken, notUsed;
     queryEmailTaken[DatabaseStrings::labelEmail] = newEmail;
     if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableUsers, queryEmailTaken, notUsed, 0))
-    { stOutput << "<b style=\"color:red\">It appears the email is already taken. </b>";
+    { stOutput << "<b style =\"color:red\">It appears the email is already taken. </b>";
       return 0;
     }
   }
   if (newPassword == "" && reenteredPassword == "" && newEmail != "")
     return this->SetEmail(newEmail);
   if (newPassword != reenteredPassword)
-  { stOutput << "<b style=\"color:red\">Passwords don't match. </b>";
+  { stOutput << "<b style =\"color:red\">Passwords don't match. </b>";
     return 0;
   }
   std::stringstream commentsOnFailure;
   std::string newAuthenticationToken;
   if (!DatabaseRoutinesGlobalFunctions::SetPassword
       (theUser.username, newPassword, newAuthenticationToken, commentsOnFailure))
-  { stOutput << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
+  { stOutput << "<span style =\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
     return 0;
   }
   JSData findQuery, setQuery;
@@ -3149,16 +3149,16 @@ int WebWorker::ProcessChangePassword()
   setQuery[DatabaseStrings::labelActivationToken] = "activated";
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
        (DatabaseStrings::tableUsers, findQuery, setQuery, &commentsOnFailure))
-    stOutput << "<span style=\"color:red\"><b>Failed to set activationToken: "
+    stOutput << "<span style =\"color:red\"><b>Failed to set activationToken: "
     << commentsOnFailure.str() << "</b></span>";
 
-  stOutput << "<span style=\"color:green\"> <b>Password change successful. </b></span>";
+  stOutput << "<span style =\"color:green\"> <b>Password change successful. </b></span>";
   //stOutput << "DEBUG: computed sha1salted, entered: " << theUser.actualShaonedSaltedPassword
   //<< ", " << theUser.enteredShaonedSaltedPassword;
   if (theGlobalVariables.GetWebInput("doReload") != "false")
   { stOutput
     << "<meta http-equiv=\"refresh\" content =\"0; url ='"
-    << theGlobalVariables.DisplayNameExecutable  << "?request =logout"
+    << theGlobalVariables.DisplayNameExecutable  << "?request=logout"
     << "&username="
     << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.userDefault.username, false)
     << "&activationToken = &authenticationToken = &"
@@ -3224,7 +3224,7 @@ int WebWorker::ProcessCalculator()
   stOutput << this->GetJavaScriptIndicatorBuiltInServer();
   stOutput << HtmlRoutines::GetJavascriptCalculatorPageLink();
 
-  stOutput << "\n\n<script language=\"javascript\">\n"
+  stOutput << "\n\n<script language =\"javascript\">\n"
   << "  var theAutocompleteDictionary = [\n  ";
   for (int i = 0; i < theParser->autoCompleteKeyWords.size; i ++)
     if (theParser->autoCompleteKeyWords[i].size() > 2)
@@ -3235,7 +3235,7 @@ int WebWorker::ProcessCalculator()
   stOutput << "];\n";
   stOutput << "</script>\n";
 
-  stOutput << "\n</head>\n<body onload=\"loadSettings(); initializeButtons(); initializeCalculatorPage();";
+  stOutput << "\n</head>\n<body onload =\"loadSettings(); initializeButtons(); initializeCalculatorPage();";
   if (theParser->inputString != "")
   { stOutput << "submitStringAsMainInput"
     << "(document.getElementById('mainInputID').value, "
@@ -3246,25 +3246,25 @@ int WebWorker::ProcessCalculator()
 
 
   out << this->openIndentTag("<table><!-- Outermost table, 3 cells (3 columns 1 row)-->");
-  out << this->openIndentTag("<tr style=\"vertical-align:top\">");
+  out << this->openIndentTag("<tr style =\"vertical-align:top\">");
   out << this->openIndentTag("<td><!-- Cell containing the output table-->");
   out << this->openIndentTag("<table><!-- Output table, 2 cells (1 column 2-3 rows) -->");
 
   int startingIndent = this->indentationLevelHTML;
-  out << this->openIndentTag("<tr style=\"vertical-align:top\">");
+  out << this->openIndentTag("<tr style =\"vertical-align:top\">");
   out << this->openIndentTag("<td><!-- cell with input, autocomplete space and output-->");
   out << this->openIndentTag("<table><!--table with input, autocomplete space and output-->");
   out << this->openIndentTag("<tr>");
-  out << this->openIndentTag("<td style=\"vertical-align:top\"><!-- input form here -->");
+  out << this->openIndentTag("<td style =\"vertical-align:top\"><!-- input form here -->");
   std::string civilizedInputSafish;
   bool hashtmlChars =
   HtmlRoutines::ConvertStringToHtmlStringReturnTrueIfModified(theParser->inputString, civilizedInputSafish, false);
 
 
   out << this->GetHtmlHiddenInputs(true, true);
-  out << "<input type=\"hidden\" name=\"request\" id=\"request\" value=\"compute\">\n";
+  out << "<input type =\"hidden\" name =\"request\" id =\"request\" value =\"compute\">\n";
   out << "<textarea class =\"textareaCalculatorMain\" rows =\"3\" cols =\"30\"";
-  out << "name=\"mainInput\" id=\"mainInputID\" ";
+  out << "name =\"mainInput\" id =\"mainInputID\" ";
   out << "onkeypress =\"if (event.keyCode == 13 && event.shiftKey) {"
   << "submitStringAsMainInput(document.getElementById('mainInputID').value,"
   << " 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus');"
@@ -3283,37 +3283,37 @@ int WebWorker::ProcessCalculator()
     out << "Your input had some html characters (such as &lt;). <br>"
     << "I've encoded your input in html format.<br>";
 
-  out << "<button title=\"Shift+Enter =shortcut from input text box. \" "
-  << "name=\"Go\" onclick=\""
+  out << "<button title =\"Shift +Enter =shortcut from input text box. \" "
+  << "name =\"Go\" onclick=\""
   << "submitStringAsMainInput(document.getElementById('mainInputID').value, 'calculatorOutput', 'compute', onLoadDefaultFunction, 'mainComputationStatus'); event.preventDefault();"
   << "\"> ";
   out << "Go" << "</button>"
-  << "<span id=\"mainComputationStatus\"></span>";
+  << "<span id =\"mainComputationStatus\"></span>";
   out << this->closeIndentTag("</td>");
 
-  out << this->openIndentTag("<td style=\"vertical-align:top\">");
-  out << "<table style=\"vertical-align:top\"><tr><td style=\"vertical-align:top\">";
-  out << "<span id=\"mqProblemSpan\" style=\"white-space:nowrap\">Equation assistant</span>";
+  out << this->openIndentTag("<td style =\"vertical-align:top\">");
+  out << "<table style =\"vertical-align:top\"><tr><td style =\"vertical-align:top\">";
+  out << "<span id =\"mqProblemSpan\" style =\"white-space:nowrap\">Equation assistant</span>";
   out << "</td></tr><tr>";
-  out << "<td style=\"vertical-align:top\">";
-  out << "<span style=\"vertical-align:top\" id=\"mainInputMQfield\"></span>";
+  out << "<td style =\"vertical-align:top\">";
+  out << "<span style =\"vertical-align:top\" id =\"mainInputMQfield\"></span>";
   out << "</td>";
-  out << "<td style=\"vertical-align:top\">";
-  out << "<div class =\"mqButtonPanel\" style=\"vertical-align:top\" id=\"mainInputMQfieldButtons\" buttons =\"algebra, logarithms, integrals, matrices\"></div>";
+  out << "<td style =\"vertical-align:top\">";
+  out << "<div class =\"mqButtonPanel\" style =\"vertical-align:top\" id =\"mainInputMQfieldButtons\" buttons =\"algebra, logarithms, integrals, matrices\"></div>";
   out << "</td>";
   out << "</tr></table>";
   out << this->closeIndentTag("</td>");
 
 
-  out << this->openIndentTag("<td style=\"vertical-align:top\"><!--Autocomplete space here -->");
-  out << "<span style=\"white-space:nowrap\" id=\"idAutocompleteHints\">"
+  out << this->openIndentTag("<td style =\"vertical-align:top\"><!--Autocomplete space here -->");
+  out << "<span style =\"white-space:nowrap\" id =\"idAutocompleteHints\">"
   << "Ctrl+space = autocomplete<br>ctrl+arrow = select</span>";
   out << "<br>";
-  out << "<div id=\"idAutocompleteSpan\" "
-  << "style=\"vertical-align:top; display:block; overflow:auto;\" "
+  out << "<div id =\"idAutocompleteSpan\" "
+  << "style =\"vertical-align:top; display:block; overflow:auto;\" "
   << " height =\"100px\" "
   << "></div>";
-  out << "<span id=\"idAutocompleteDebug\"></span>";
+  out << "<span id =\"idAutocompleteDebug\"></span>";
   out << this->closeIndentTag("</td>");
   out << this->closeIndentTag("</tr>");
   out << this->closeIndentTag("</table>");
@@ -3325,14 +3325,14 @@ int WebWorker::ProcessCalculator()
   theGlobalVariables.flagComputationCompletE = true;
   out << this->openIndentTag("<tr>");
   out << this->openIndentTag("<td>");
-  out << "<span id=\"calculatorOutput\"></span>";
+  out << "<span id =\"calculatorOutput\"></span>";
   out << this->closeIndentTag("</td>");
   out << this->closeIndentTag("</tr>");
   out << this->closeIndentTag("</table><!--table with input, autocomplete space and output-->");
   out << this->closeIndentTag("</td>");
 
-//  bool displayClientMessage= theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!= - 1;
-  //displayClientMessage= false;
+//  bool displayClientMessage = theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!= - 1;
+  //displayClientMessage = false;
   out << "<td valign =\"top\">";
   theGlobalVariables.theSourceCodeFiles().QuickSortAscending();
   out << theGlobalVariables.ToStringSourceCodeInfo();
@@ -3764,12 +3764,12 @@ std::string HtmlInterpretation::ModifyProblemReport()
   }
   std::fstream theFile;
   if (!FileOperations::OpenFileVirtualCustomizedWriteOnly(theFile, fileName, false, true, false, &out))
-  { out << "<b><span style=\"color:red\">Failed to open file: " << fileName << ". </span></b>";
+  { out << "<b><span style =\"color:red\">Failed to open file: " << fileName << ". </span></b>";
     return out.str();
   }
   theFile << mainInput;
   theFile.close();
-  out << "<b><span style=\"color:green\"> Written content to file: "
+  out << "<b><span style =\"color:green\"> Written content to file: "
   << fileName << ". </span></b>";
   return out.str();
 }
@@ -3805,9 +3805,9 @@ std::string HtmlInterpretation::GetCaptchaDiv()
   std::stringstream out;
   std::string recaptchaPublic;
   if (!FileOperations::LoadFileToStringVirtual("certificates/recaptcha-public.txt", recaptchaPublic, true, true, &out))
-    out << "<span style=\"color:red\"><b>Couldn't find the recaptcha key in file: certificates/recaptcha-public.txt. </b></span>";
+    out << "<span style =\"color:red\"><b>Couldn't find the recaptcha key in file: certificates/recaptcha-public.txt. </b></span>";
   else
-    out << "<div class =\"g-recaptcha\" data-sitekey=\"" << recaptchaPublic << "\"></div>";
+    out << "<div class =\"g-recaptcha\" data-sitekey =\"" << recaptchaPublic << "\"></div>";
   return out.str();
 }
 
@@ -3825,20 +3825,20 @@ std::string WebWorker::GetForgotLoginPage()
   << theGlobalVariables.ToStringNavigation()
   << "</calculatorNavigation>\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-  out << "<form name=\"forgotlogWorkerin\" id=\"login\">";
+  out << "<form name =\"forgotlogWorkerin\" id =\"login\">";
   out << "<table>"
   << "<tr>"
   << "<td> Email:</td>"
-  << "<td> <input type=\"text\" id=\"email\" name=\"email\" placeholder =\"email\">\n</td>\n"
+  << "<td> <input type =\"text\" id =\"email\" name =\"email\" placeholder =\"email\">\n</td>\n"
   << "</tr>"
   << "</table>"
   ;
   out << HtmlInterpretation::GetCaptchaDiv();
   out << "</form>";
   out << "<button onclick=\"submitForgotLogin();\">Send recovery email</button>"
-  << "<span id=\"forgotLoginResultReport\"></span>"
+  << "<span id =\"forgotLoginResultReport\"></span>"
   << "\n<br>\n"
-  << "<span id=\"forgotLoginResult\"></span>"
+  << "<span id =\"forgotLoginResult\"></span>"
   ;
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
@@ -3853,7 +3853,7 @@ std::string WebWorker::GetSignUpPage()
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << HtmlRoutines::GetJavascriptHideHtmlWithTags()
   << HtmlRoutines::GetCSSLinkCalculator();
-  out << "<script language=\"javascript\">\n";
+  out << "<script language =\"javascript\">\n";
   out
   << "function resetRecaptchaOnLoad()\n"
   << "{ grecaptcha.reset();\n"
@@ -3863,21 +3863,21 @@ std::string WebWorker::GetSignUpPage()
 //  << " document.getElementById('desiredAccount')"
   //out << "  var grecaptcha;\n";
   out
-  << "  var theInput =\"request =signUp&\";\n"
-  << "  theInput+=\"desiredUsername=\" +encodeURIComponent(document.getElementById('desiredUsername').value) + \"&\";\n"
-  << "  theInput+=\"email =\" +encodeURIComponent(document.getElementById('email').value) + \"&\";\n"
-  << "  if (grecaptcha ===undefined || grecaptcha ===null)\n"
+  << "  var theInput =\"request=signUp&\";\n"
+  << "  theInput +=\"desiredUsername =\" +encodeURIComponent(document.getElementById('desiredUsername').value) + \"&\";\n"
+  << "  theInput +=\"email =\" +encodeURIComponent(document.getElementById('email').value) + \"&\";\n"
+  << "  if (grecaptcha ===undefined || grecaptcha === null)\n"
   << "  { document.getElementById('signUpResult').innerHTML="
-  << "\"<span style='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
+  << "\"<span style ='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
   << "   return false;\n"
   << "  }\n"
   << "  var theToken =grecaptcha.getResponse();\n"
-  << "  if (theToken ==='' || theToken ===null)"
+  << "  if (theToken ==='' || theToken === null)"
   << "  { document.getElementById('signUpResult').innerHTML="
-  << "\"<span style='color:red'><b>Please don't forget to solve the captcha. </b></span>\";\n"
+  << "\"<span style ='color:red'><b>Please don't forget to solve the captcha. </b></span>\";\n"
   << "    return false;\n"
   << "  }\n"
-  << "  theInput+=\"recaptchaToken =\" +encodeURIComponent(theToken) + \"&\";\n"
+  << "  theInput +=\"recaptchaToken =\" +encodeURIComponent(theToken) + \"&\";\n"
   << "  submitStringCalculatorArgument(theInput, 'signUpResult', resetRecaptchaOnLoad, 'signUpResultReport');\n"
   << "}\n";
   out << "</script>";
@@ -3886,22 +3886,22 @@ std::string WebWorker::GetSignUpPage()
   out << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</calculatorNavigation>\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
-  out << "<form name=\"desiredAccount\" id=\"login\">";
+  out << "<form name =\"desiredAccount\" id =\"login\">";
   out <<  "<table>"
   << "<tr>"
   << "<td> Desired user name:</td>"
-  << "<td> <input type=\"text\" id=\"desiredUsername\" name=\"desiredUsername\" placeholder =\"username\">\n</td>\n"
+  << "<td> <input type =\"text\" id =\"desiredUsername\" name =\"desiredUsername\" placeholder =\"username\">\n</td>\n"
   << "</tr>"
   << "<tr>"
   << "<td> Email:</td>"
-  << "<td> <input type=\"text\" id=\"email\" name=\"email\" placeholder =\"email\">\n</td>\n"
+  << "<td> <input type =\"text\" id =\"email\" name =\"email\" placeholder =\"email\">\n</td>\n"
   << "</tr>"
 //  << "<tr>"
 //  << "<td>"
 //  << "Password:"
 //  << "</td>\n"
 //  << "<td>"
-//  << "<input type=\"password\" id=\"desiredPassword\" name=\"desiredPassword\" placeholder =\"password\">\n"
+//  << "<input type =\"password\" id =\"desiredPassword\" name =\"desiredPassword\" placeholder =\"password\">\n"
 //  << "</td>\n"
 //  << "</tr>"
 //  << "<tr>"
@@ -3909,16 +3909,16 @@ std::string WebWorker::GetSignUpPage()
 //  <<  "Repeat password:\n"
 //  << "\n</td>"
 //  << "<td>\n"
-//  << "<input type=\"password\" id=\"reenteredPassword\" name=\"reenteredPassword\" placeholder =\"re-enter password\">\n<br>\n"
+//  << "<input type =\"password\" id =\"reenteredPassword\" name =\"reenteredPassword\" placeholder =\"re-enter password\">\n<br>\n"
 //  << "</td>\n"
 //  << "</tr>"
   << "</table>";
   out << HtmlInterpretation::GetCaptchaDiv();
   out << "</form>";
   out << "<button onclick=\"submitSignUpInfo();\">Sign up</button>"
-  << "<span id=\"signUpResultReport\"></span>"
+  << "<span id =\"signUpResultReport\"></span>"
   << "\n<br>\n"
-  << "<span id=\"signUpResult\"></span>";
+  << "<span id =\"signUpResult\"></span>";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
   return out.str();
@@ -3929,11 +3929,11 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   std::stringstream out;
   if (theGlobalVariables.GetWebInput("useJSON") == "true")
   { out
-    << "<span id ='spanLoginRequired'><b style='color:red'>Login required.</b> "
+    << "<span id ='spanLoginRequired'><b style ='color:red'>Login required.</b> "
     << "Go to our: <a href="
     << "'https://" << theGlobalVariables.hostWithPort << "/app'"
     << ">one-page app</a> or our <a href='"
-    << theGlobalVariables.DisplayNameExecutable << "?request =login&useJSON= false'>old system</a>. "
+    << theGlobalVariables.DisplayNameExecutable << "?request=login&useJSON = false'>old system</a>. "
     << "</span>"
     << reasonForLogin;
     return out.str();
@@ -3943,7 +3943,7 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
   << WebWorker::GetJavascriptSubmitLoginInfo()
   << HtmlRoutines::GetCSSLinkCalculator()
   << "\n</head><body";
-  out << " onload=\"loadSettings();";
+  out << " onload =\"loadSettings();";
   out << "\"";
   out << ">\n";
   theWebServer.CheckExecutableVersionAndRestartIfNeeded(true);
@@ -3983,7 +3983,7 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
     return false;
   std::stringstream redirectedAddress;
   if (this->addressComputed == theGlobalVariables.DisplayNameExecutable)
-    redirectedAddress << theGlobalVariables.DisplayNameExecutable << "?request ="
+    redirectedAddress << theGlobalVariables.DisplayNameExecutable << "?request="
     << theGlobalVariables.userCalculatorRequestType << "&";
   else
     redirectedAddress << this->addressComputed << "?";
@@ -4094,14 +4094,14 @@ int WebWorker::ProcessLoginNeededOverUnsecureConnection()
   } else
   { this->SetHeaderOKNoContentLength();
     stOutput << "<html><body>Address available through secure (SSL) connection only. <br>"
-    << "<b style='color:red'>In the web address, please change http to https. </b><br>"
+    << "<b style ='color:red'>In the web address, please change http to https. </b><br>"
     << "Unfortunately, I can't redirect you automatically as your browser did not tell me "
     << "under what domain name it sees me, and the server responds to multiple domain names. ";
 
   }
 //  stOutput << "<br>" << redirectStream.str();
   if (theGlobalVariables.flagRunningApache)
-    stOutput << "To avoid seeing this message, <b><span \"style=color:red\">please use the secure version:</span></b> "
+    stOutput << "To avoid seeing this message, <b><span \"style = color:red\">please use the secure version:</span></b> "
     << "<a href=\"https://" << this->hostNoPort << "\">https://" << this->hostNoPort
     << "</a>. If using bookmarks, don't forget to re-bookmark to the secure site. ";
   stOutput << "</body></html>";
@@ -4415,17 +4415,17 @@ void WebWorker::OutputShowIndicatorOnTimeout()
 //  out << "\n<br>\n<button onclick=\"progressReport()\">Manual report</button>";
   if (this->indexInParent < 0)
     crash << "Index of worker is smaller than 0, this shouldn't happen. " << crash;
-  stOutput << "\n<script language=\"javascript\">\n"
-  << "isFinished= false;\n "
-  << "isPaused= false;\n "
+  stOutput << "\n<script language =\"javascript\">\n"
+  << "isFinished = false;\n "
+  << "isPaused = false;\n "
   << "currentWorkerNumber =" << this->indexInParent + 1 << ";\n "
   << "progressReport();\n"
   << "</script>"
   ;
-  stOutput << "\n<br>\n<button id=\"idButtonSendTogglePauseRequest\" onclick=\"SendTogglePauseRequest()\">Pause</button>";
-  stOutput << "\n<span id=\"idProgressReportRequestStatus\"></span>";
-  stOutput << "<span id=\"idProgressReportTimer\"></span>\n";
-  stOutput << "\n<br>\n<div id=\"idProgressReport\"></div>\n";
+  stOutput << "\n<br>\n<button id =\"idButtonSendTogglePauseRequest\" onclick=\"SendTogglePauseRequest()\">Pause</button>";
+  stOutput << "\n<span id =\"idProgressReportRequestStatus\"></span>";
+  stOutput << "<span id =\"idProgressReportTimer\"></span>\n";
+  stOutput << "\n<br>\n<div id =\"idProgressReport\"></div>\n";
 
   this->SendAllBytesWithHeaders();
   for (int i = 0; i < this->parent->theWorkers.size; i ++)
@@ -4458,15 +4458,15 @@ std::string WebWorker::ToStringStatus() const
   out << "<br>Worker " << this->indexInParent + 1;
   if (this->flagInUse)
   { if (this->parent->activeWorker == this->indexInParent)
-      out << ", <span style=\"color:green\"><b>current process</b></span>";
+      out << ", <span style =\"color:green\"><b>current process</b></span>";
     else
       out << ", <b>in use</b>";
-    out << ", <a href=\"calculator?request =monitor&mainInput =" << this->indexInParent + 1 << "\">monitor process "
+    out << ", <a href=\"calculator?request=monitor&mainInput =" << this->indexInParent + 1 << "\">monitor process "
     << this->indexInParent + 1 << "</a>";
   } else
     out << ", not in use";
   if (this->displayUserInput != "")
-    out << ", user input: <span style=\"color:blue\">" << this->displayUserInput << "</span>";
+    out << ", user input: <span style =\"color:blue\">" << this->displayUserInput << "</span>";
   out << ", connection " << this->connectionID << ", process ID: ";
   if (this->ProcessPID != 0)
     out << this->ProcessPID;
@@ -4482,7 +4482,7 @@ std::string WebWorker::ToStringStatus() const
   if (this->pingMessage != "")
     out << " Message at last ping: " << this->pingMessage;
   if (this->status != "")
-    out << "<br><span style=\"color:red\"><b> Status: " << this->status << "</b></span><br>";
+    out << "<br><span style =\"color:red\"><b> Status: " << this->status << "</b></span><br>";
   out << "Pipes: " << this->pipeWorkerToServerControls.ToString()
   << ", " << this->pipeWorkerToServerTimerPing.ToString()
   << ", " << this->pipeWorkerToWorkerRequestIndicator.ToString()
@@ -4900,10 +4900,10 @@ void WebServer::CheckExecutableVersionAndRestartIfNeeded(bool callReload)
     { stOutput << "<b>The server executable was updated, but the server has not been restarted yet. "
       << "Restarting in 0.5 seconds...</b>";
       if (callReload)
-        stOutput << "<script language=\"javascript\">setTimeout(resubmit, 500); "
+        stOutput << "<script language =\"javascript\">setTimeout(resubmit, 500); "
         << " function resubmit() { location.reload(true);}</script>";
       else
-        stOutput << "<script language=\"javascript\">setTimeout(resubmit, 500); "
+        stOutput << "<script language =\"javascript\">setTimeout(resubmit, 500); "
         << " function resubmit() { document.getElementById('formCalculator').submit();}</script>";
       if (this->activeWorker != - 1)
       { this->GetActiveWorker().SendAllBytesWithHeaders();
@@ -5142,7 +5142,7 @@ void WebServer::RecycleChildrenIfPossible()
           << ", pid: "
           << this->theWorkers[i].ProcessPID << ". ";
           logProcessKills << logger::red << pingTimeoutStream.str() << logger::endL;
-          this->theWorkers[i].pingMessage = "<span style=\"color:red\"><b>" + pingTimeoutStream.str() + "</b></span>";
+          this->theWorkers[i].pingMessage = "<span style =\"color:red\"><b>" + pingTimeoutStream.str() + "</b></span>";
           numInUse --;
           this->NumProcessAssassinated ++;
         }
@@ -5806,7 +5806,7 @@ void WebServer::AnalyzeMainArguments(int argC, char **argv)
   //std::cout << "Program arguments: \n";
   for (int i = 0; i < argC; i ++)
   { theGlobalVariables.programArguments[i] = argv[i];
-    //std::cout << "Argument " << i+ 1 << ": " << theGlobalVariables.programArguments[i] << "\n";
+    //std::cout << "Argument " << i + 1 << ": " << theGlobalVariables.programArguments[i] << "\n";
   }
   ////////////////////////////////////////////////////
   theGlobalVariables.flagRunningAce = true;
@@ -6372,7 +6372,7 @@ void WebWorker::PrepareFullMessageHeaderAndFooter()
   for (unsigned i = 0; i < contentLengthString.size(); i ++)
     this->remainingBytesToSenD.AddOnTop(contentLengthString[i]);
   //std::string debugString(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
-  //std::cout << "DEBUG: headers+ body="
+  //std::cout << "DEBUG: headers+ body ="
   //<< this->remainingBytesToSenD.size << " + "
   //<< this->remainingBodyToSend.size << "\n" << debugString;
   if (this->requestTypE != this->requestHead)
@@ -6382,11 +6382,11 @@ void WebWorker::PrepareFullMessageHeaderAndFooter()
 
 void WebWorker::SendAllBytesWithHeaders()
 { MacroRegisterFunctionWithName("WebWorker::SendAllBytesWithHeaders");
-//  static bool calledOnce= false;
+//  static bool calledOnce = false;
 //  if (calledOnce)
 //  { crash << "WebWorker::SendAllBytesNoHeaders called more than once" << crash;
 //  }
-//  calledOnce= true;
+//  calledOnce = true;
   this->PrepareFullMessageHeaderAndFooter();
   //std::string tempS(this->remainingBytesToSenD.TheObjects, this->remainingBytesToSenD.size);
   //logWorker << logger::red << "DEBUG Message:\n" << logger::normalColor << tempS << logger::endL;

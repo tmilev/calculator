@@ -433,8 +433,8 @@ void Matrix<coefficient>::GaussianEliminationByRows
   ProgressReport theReport;
   if (humanReadableReport != 0)
   { if (useHtmlInReport)
-      *humanReadableReport << "\n\n\n\n<table><tr><td style=\"border-bottom:3pt solid black;\">System status</td>"
-      << "<td style=\"border-bottom:3pt solid black;\">action</td></tr>";
+      *humanReadableReport << "\n\n\n\n<table><tr><td style =\"border-bottom:3pt solid black;\">System status</td>"
+      << "<td style =\"border-bottom:3pt solid black;\">action</td></tr>";
     else
       *humanReadableReport << "\n\n\\begin{longtable}{cc} System status&Action \\\\\\hline\n";
   }
@@ -454,12 +454,12 @@ void Matrix<coefficient>::GaussianEliminationByRows
     }
     if (humanReadableReport != 0)
     { if (useHtmlInReport)
-      { *humanReadableReport << "<tr><td style=\"border-bottom:1pt solid black;\">";
+      { *humanReadableReport << "<tr><td style =\"border-bottom:1pt solid black;\">";
         if (formatAsLinearSystem)
           *humanReadableReport << HtmlRoutines::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat), - 1);
         else
           *humanReadableReport << HtmlRoutines::GetMathSpanPure(this->ToStringLatex(theFormat), - 1);
-        *humanReadableReport << "</td><td style=\"border-bottom:1pt solid black;\">Selected pivot column "
+        *humanReadableReport << "</td><td style =\"border-bottom:1pt solid black;\">Selected pivot column "
         << i + 1 << ". ";
         if (NumFoundPivots != tempI)
           *humanReadableReport << "Swapping rows so the pivot row is number " << NumFoundPivots << ". ";

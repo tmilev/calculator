@@ -45,7 +45,7 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   theFile << fileContent;
   theFile.flush();
   theFile.close();
-  systemCommand1 << " latex -output-directory=" << baseFolder << " " << fileName.str() << ".tex";
+  systemCommand1 << " latex -output-directory =" << baseFolder << " " << fileName.str() << ".tex";
   theGlobalVariables.CallSystemNoOutput(systemCommand1.str(), false);
   if (useLatexDviPSpsToPNG)
   { systemCommand2 << " dvips -o " << fileNameWithPathPhysical << ".ps "
@@ -150,7 +150,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
     varShift = this->GetMinNumVars();
   int numVars = varShift + eltsNilrad.size;
   for (int i = 0; i < eltsNilrad.size; i ++)
-  { tempRF.MakeMonomiaL(i+varShift, 1, 1, numVars);
+  { tempRF.MakeMonomiaL(i +varShift, 1, 1, numVars);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
   tempRF.MakeOne(numVars);
@@ -290,7 +290,7 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(List<quasiDiffOp<coeffici
   while (foundNew)
   { foundNew = false;
     for (int i = 0; i < theEltsConverted.size; i ++)
-      for (int j =i + 1; j < theEltsConverted.size; j ++)
+      for (int j = i + 1; j < theEltsConverted.size; j ++)
       { tempQDO = theEltsConverted[i];
         std::stringstream report;
         report << "Lie bracketing elements " << " of indices " << i + 1 << " and " << j + 1 << " out of " << theEltsConverted.size << "<br> "
@@ -389,7 +389,7 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(const MonomialP& t
     currentMonContribution.Makexidj(i, i, 0);
     currentMonContribution.RaiseToPower(powerMonCoeff);
     outputDO *= currentMonContribution;
-    //stOutput << "<br>Accounted index " << i+ 1 << "  out of " << theCoeff.GetMinNumVars()
+    //stOutput << "<br>Accounted index " << i + 1 << "  out of " << theCoeff.GetMinNumVars()
     //<< ", power is " << powerMonCoeff << ", current output DO has "
     //<< outputDO.size << " monomials.";
   }
@@ -427,12 +427,12 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
   Polynomial<Rational> tempP1, negativeExponentDenominatorContribution, theCoeff;
   quasiDiffMon monQDO, monQDO2;
   //static int problemCounter = 0;
-  //problemCounter++;
+  //problemCounter ++;
   Rational tempRat;
   output.MakeZero();
   Rational currentShift;
   for (int i = 0; i < result.size(); i ++)
-  { //problemCounter++;
+  { //problemCounter ++;
     const MonomialUniversalEnveloping<Polynomial<Rational> >& currentMon = result[i];
     endoPart = idMT;
     for (int j = currentMon.Powers.size - 1; j >= indicesNilrad.size; j --)
@@ -455,7 +455,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
     for (int j = 0; j < indicesNilrad.size; j ++)
     { //if (problemCounter ==249)
         //stOutput << "ere be problem!";
-      //problemCounter++;
+      //problemCounter ++;
       currentMon.Powers[j].GetConstantTerm(currentShift);
       ElementWeylAlgebra<Rational>::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
       (currentShift, j + varShift, oneIndexContribution, negativeExponentDenominatorContribution);
@@ -471,7 +471,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
 //    stOutput << "<br>Exponent contribution of " << currentMon.ToString() << ": "
 //    << exponentContribution.ToString();
     for (int l = 0; l < theCoeff.size(); l ++)
-    { //problemCounter++;
+    { //problemCounter ++;
       //if (problemCounter ==249)
         //stOutput << "ere be problem!";
       if (!this->GetActionEulerOperatorPart(theCoeff[l], eulerOperatorContribution))
@@ -635,7 +635,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
         theSSalgebra.OrderNilradical(theMod.parabolicSelectionNonSelectedAreElementsLevi, useNilWeight, ascending);
         actionOnGenericElt.Simplify();
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 2;
-        out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}") << "</td>";
+        out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat) +"\\end{array}") << "</td>";
         theUEformat.NumAmpersandsPerNewLineForLaTeX = 0;
         latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.ToString(&theUEformat) << "\\end{array}$ ";
       }
@@ -662,7 +662,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       totalTime += theGlobalVariables.GetElapsedSeconds() - currentTime;
       theWeylFormat.CustomCoeffMonSeparator = "\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 2;
-      out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}")
+      out << "<td>" << HtmlRoutines::GetMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat) +"\\end{array}")
       << "</td>";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX = 0;
       theWeylFormat.MaxLineLength = 300;
@@ -889,7 +889,7 @@ bool Calculator::RecursionDepthExceededHandleRoughly(const std::string& addition
 { if (this->RecursionDeptH <= this->MaxRecursionDeptH)
     return false;
   if (!this->flagMaxRecursionErrorEncountered)
-    *this << additionalErrorInfo << "<span style=\"color:#FF0000\"><b> Maximum recursion depth of " << this->MaxRecursionDeptH
+    *this << additionalErrorInfo << "<span style =\"color:#FF0000\"><b> Maximum recursion depth of " << this->MaxRecursionDeptH
     << " exceeded. </b></span>" << "Aborting computation ASAP. ";
   this->flagAbortComputationASAP = true;
   this->flagMaxRecursionErrorEncountered = true;
@@ -1110,7 +1110,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
   out << "<table>";
   for (int i = 0; i < fundamentalWeights.size; i ++)
-  { out << "<tr><td style=\"white-space: nowrap\">" << fundamentalWeights[i].ToString() << "</td><td> =</td><td style=\"white-space: nowrap\"> " << HtmlRoutines::GetMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
+  { out << "<tr><td style =\"white-space: nowrap\">" << fundamentalWeights[i].ToString() << "</td><td> =</td><td style =\"white-space: nowrap\"> " << HtmlRoutines::GetMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -1123,7 +1123,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   simpleBasis.MakeEiBasis(theWeyl.GetDim());
   theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
   for (int i = 0; i < simplebasisEpsCoords.size; i ++)
-  { out << "<tr><td style=\"white-space: nowrap\">" << simpleBasis[i].ToString() << " </td><td>=</td> <td style=\"white-space: nowrap\">" << HtmlRoutines::GetMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
+  { out << "<tr><td style =\"white-space: nowrap\">" << simpleBasis[i].ToString() << " </td><td>=</td> <td style =\"white-space: nowrap\">" << HtmlRoutines::GetMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -1521,7 +1521,7 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft
   if (constantsOnly)
     if (!input[2].IsConstantNumber())
       return false;
-//  int theFormat =input.format;
+//  int theFormat = input.format;
   Expression leftE, rightE;
   leftE.MakeXOX(theCommands, theMultiplicativeOp, input[1][1], input[2]);
   rightE.MakeXOX(theCommands, theMultiplicativeOp, input[1][2], input[2]);
@@ -1543,7 +1543,7 @@ bool Calculator::outerRightDistributeBracketIsOnTheRight
   if (constantsOnly)
     if (!input[1].IsConstantNumber())
       return false;
-//  int theFormat =input.format;
+//  int theFormat = input.format;
   Expression leftE, rightE;
   leftE.MakeXOX(theCommands, theMultiplicativeOp, input[1], input[2][1]);
   rightE.MakeXOX(theCommands, theMultiplicativeOp, input[1], input[2][2]);
@@ -2189,9 +2189,9 @@ void Calculator::AddOperationComposite
 
 std::string Calculator::ElementToStringNonBoundVars()
 { std::stringstream out;
-  std::string openTag1 = "<span style=\"color:#0000FF\">";
+  std::string openTag1 = "<span style =\"color:#0000FF\">";
   std::string closeTag1 ="</span>";
-  std::string openTag2 = "<span style=\"color:#FF0000\">";
+  std::string openTag2 = "<span style =\"color:#FF0000\">";
   std::string closeTag2 = "</span>";
   out << "<br>\n" << this->theAtoms.size << " atoms " << " (= " << this->NumPredefinedAtoms << " predefined atoms+ "
   << this->theAtoms.size - this->NumPredefinedAtoms << " user-or-run-time defined). <br>Predefined: \n<br>\n";
@@ -2205,7 +2205,7 @@ std::string Calculator::ElementToStringNonBoundVars()
           out << "(inner)";
         else
           out << "(outer)";
-        if (j!= this->FunctionHandlers[i].size - 1)
+        if (j != this->FunctionHandlers[i].size - 1)
           out << ", ";
       }
       out << "]";
@@ -2236,12 +2236,12 @@ std::string Function::ToStringShort() const
     return "(non-initialized)";
   std::stringstream out;
   if (this->flagIsCompositeHandler)
-    out << "<span style=\"color:#FF0000\">" << this->owner->operationsComposite[this->indexOperation]
-    << " </span><span style=\"color:#00FF00\">(composite)</span> ("
+    out << "<span style =\"color:#FF0000\">" << this->owner->operationsComposite[this->indexOperation]
+    << " </span><span style =\"color:#00FF00\">(composite)</span> ("
     << this->indexAmongOperationHandlers + 1 << " out of "
     << this->owner->operationsCompositeHandlers[this->indexOperation].size << ") ";
   else
-    out << "<span style=\"color:#FF0000\">" << this->owner->theAtoms[this->indexOperation]
+    out << "<span style =\"color:#FF0000\">" << this->owner->theAtoms[this->indexOperation]
     << "</span> (" << this->indexAmongOperationHandlers + 1 << " out of "
     << this->owner->FunctionHandlers[this->indexOperation].size << "). ";
   return out.str();
@@ -2253,7 +2253,7 @@ std::string Function::ToStringSummary() const
   std::stringstream out;
   out << this->ToStringShort();
   if (this->calculatorIdentifier != "")
-    out << "Rule name: <span style='color:blue'>" << this->calculatorIdentifier << "</span>. ";
+    out << "Rule name: <span style ='color:blue'>" << this->calculatorIdentifier << "</span>. ";
   if (this->additionalIdentifier != "")
     out << "Handler: " << this->additionalIdentifier << ". ";
   return out.str();
@@ -2326,7 +2326,7 @@ std::string Function::ToStringFull() const
     out << this->theDescription;
 //    out << " \nFunction memory address: " << std::hex << (int) this->theFunction << ". ";
     // use of unsigned long is correct on i386 and amd64
-    // uintptr_t is only available in c++0x
+    // uintptr_t is only available in c++ 0x
     if (this->calculatorIdentifier != "")
       out << "Rule name: " << this->calculatorIdentifier << ". ";
     if (this->additionalIdentifier != "")
@@ -2339,7 +2339,7 @@ std::string Function::ToStringFull() const
     out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample != "")
       out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request =calculator&showExamples = true&mainInput ="
+      << "?request= calculator&showExamples = true&mainInput ="
       << HtmlRoutines::ConvertStringToURLString(this->theExample, false)
       << "\"> " << " Example" << "</a>" ;
   } else
@@ -2379,11 +2379,11 @@ std::string Calculator::ToStringOutputAndSpecials()
   std::string urledInput = HtmlRoutines::ConvertStringToURLString(this->inputString, false);
   if (this->inputString != "")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request =calculator&mainInput ="
+    << "?request= calculator&mainInput ="
     << urledInput << "\">Link to your input (reloads page).</a><br>";
-  out <<  "<table style=\"vertical-align: top\"><tr><td style=\"vertical-align: top\">"
+  out <<  "<table style =\"vertical-align: top\"><tr><td style =\"vertical-align: top\">"
   << this->outputString << "</td>"
-  << "<td style=\"vertical-align: top\">"
+  << "<td style =\"vertical-align: top\">"
   ;
 
   out << this->ToStringPerformance();
@@ -2493,7 +2493,7 @@ std::string Calculator::ToStringPerformance()
 std::string Calculator::ToString()
 { MacroRegisterFunctionWithName("Calculator::ToString");
   std::stringstream out2;
-  std::string openTag1 = "<span style=\"color:#0000FF\">";
+  std::string openTag1 = "<span style =\"color:#0000FF\">";
   std::string closeTag1 = "</span>";
   if (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit > 0)
     out2 << "Computation time limit: "
@@ -2523,7 +2523,7 @@ std::string Calculator::ToString()
     << "  switchMenu('calculatorExamples');"
     ;
     out2 << HtmlRoutines::GetHtmlButton("ShowCalculatorExamplesButton", theExampleInjector.str(), "Examples.");
-    out2 << "<span id=\"calculatorExamples\"></span>";
+    out2 << "<span id =\"calculatorExamples\"></span>";
   }
   if (!theGlobalVariables.UserDebugFlagOn())
     return out2.str();
@@ -2585,7 +2585,7 @@ std::string Calculator::ToStringSyntacticStackHumanReadable
   { out << this->CurrentSyntacticStacK->LastObject()->ToStringHumanReadable(*this, includeLispifiedExpressions);
     return out.str();
   }
-  out << "<table style=\"vertical-align:top;border-spacing:0px 0px;\"><tr>";
+  out << "<table style =\"vertical-align:top;border-spacing:0px 0px;\"><tr>";
   int counter = 0;
   for (int i = this->numEmptyTokensStart; i < (*this->CurrentSyntacticStacK).size; i ++)
   { SyntacticElement& currentElt = (*this->CurrentSyntacticStacK)[i];
@@ -2600,7 +2600,7 @@ std::string Calculator::ToStringSyntacticStackHumanReadable
               continue;
       }
     out
-    << "<td style=\"vertical-align:top;background-color:"
+    << "<td style =\"vertical-align:top;background-color:"
     << ((counter % 2 == 0) ? "#FAFAFA" : "#F0F0F0" ) << "\">"
     << currentElt.ToStringHumanReadable(*this, includeLispifiedExpressions)
     << "</td>";
@@ -2927,18 +2927,18 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
   for (int i = 1; i < input.children.size; i ++)
   { const Expression& currentChild = input[i];
     if (!currentChild.IsMeltable())
-    { //output.SetChild(i+shift, input.children[i]);
+    { //output.SetChild(i +shift, input.children[i]);
       output.AddChildOnTop(input[i]);
       continue;
     }
 //    stOutput << "<br>shift:" << shift;
     if (!currentChild[1].StartsWith(theCommands.opEndStatement()))
-    { //output.SetChild(i+shift, currentChild.children[1]);
+    { //output.SetChild(i +shift, currentChild.children[1]);
       output.AddChildOnTop(currentChild[1]);
       continue;
     }
     for (int j = 1; j < currentChild[1].children.size; j ++)
-    { //output.SetChild(i+shift, currentChild[1].children[j]);
+    { //output.SetChild(i +shift, currentChild[1].children[j]);
       output.AddChildOnTop(currentChild[1][j]);
     }
   }

@@ -622,7 +622,7 @@ std::string DatabaseRoutinesGlobalFunctionsMongo::ToHtmlDatabaseCollection(const
       for (int i = 0; i < theCollectionNames.size; i ++)
       { out << "<br>";
         out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-        << "?request =database&currentDatabaseTable="
+        << "?request=database&currentDatabaseTable ="
         << theCollectionNames[i] << "\">" << theCollectionNames[i] << "</a>";
       }
     }

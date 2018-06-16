@@ -106,9 +106,9 @@ public:
   { return this->GetIndex(input)!= - 1;
   }
   value& GetValueCreateIfNotPresent(const key& input)
-  { int theIndex= this->theKeys.GetIndex(input);
-    if (theIndex== - 1)
-    { theIndex= this->theKeys.size;
+  { int theIndex = this->theKeys.GetIndex(input);
+    if (theIndex == - 1)
+    { theIndex = this->theKeys.size;
       this->theKeys.AddOnTop(input);
       this->theValues.SetSize(this->theValues.size + 1);
     }
@@ -116,7 +116,7 @@ public:
   }
   void SetValue(const value& inputValue, const key& inputKey)
   { if (this->Contains(inputKey))
-    { this->theValues[this->theKeys.GetIndex(inputKey)]=inputValue;
+    { this->theValues[this->theKeys.GetIndex(inputKey)]= inputValue;
       return;
     }
     this->theValues.AddOnTop(inputValue);

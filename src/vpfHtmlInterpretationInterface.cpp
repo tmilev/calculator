@@ -73,7 +73,7 @@ std::string HtmlInterpretation::GetProblemSolution()
   << currentA.commandsSolutionOnly;
   theInterpreteR.Evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors != "")
-  { out << "<span style=\"color:red\"><b>Failed to compose the solution. "
+  { out << "<span style =\"color:red\"><b>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, false);
@@ -81,7 +81,7 @@ std::string HtmlInterpretation::GetProblemSolution()
     return out.str();
   }
   if (theInterpreteR.flagAbortComputationASAP)
-  { out << "<span style=\"color:red\"><b>Failed to compose the solution. "
+  { out << "<span style =\"color:red\"><b>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b></span>"
     << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
     << theInterpreteR.outputString
@@ -99,7 +99,7 @@ std::string HtmlInterpretation::GetProblemSolution()
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     out << "<hr>"
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request =calculator&mainInput ="
+    << "?request= calculator&mainInput ="
     << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosures.str(), false)
     << "\">Input link</a>"
     <<  "<br>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
@@ -122,7 +122,7 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
   theProblem.currentUseR.UserCalculatorData::operator=(theGlobalVariables.userDefault);
   std::stringstream out;
   if (!theProblem.PrepareSectionList(commentsOnFailure))
-  { out << "<span style=\"color:red\"><b>Failed to prepare section list. </b></span>" << commentsOnFailure.str();
+  { out << "<span style =\"color:red\"><b>Failed to prepare section list. </b></span>" << commentsOnFailure.str();
     return out.str();
   }
   if (!theProblem.LoadProblemInfoFromJSONAppend
@@ -136,10 +136,10 @@ std::string HtmlInterpretation::GetSetProblemDatabaseInfoHtml()
     return out.str();
   }
   if (theProblem.MergeProblemInfoInDatabaseJSON(inputProblemInfo, commentsOnFailure))
-  { out << "<span style=\"color:green\"><b>Modified. </b></span>";
+  { out << "<span style =\"color:green\"><b>Modified. </b></span>";
     //out << "<meta http-equiv=\"refresh\" content =\"0;\">";
   } else
-    out << "<span style=\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
+    out << "<span style =\"color:red\"><b>" << commentsOnFailure.str() << "</b></span>";
   //out << "<br>Debug message:<br>inputProblemInfo raw: " << inputProblemInfo << "<br>Processed: "
   //<< HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(inputProblemInfo)
   //<< "<br>inputProblemHome: " << inputProblemHome;
@@ -271,12 +271,12 @@ std::string HtmlInterpretation::submitAnswersPreview()
 
   theInterpreteR.Evaluate(studentAnswerWithComments.str());
   if (theInterpreteR.syntaxErrors != "")
-  { out << "<span style=\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
+  { out << "<span style =\"color:red\"><b>Failed to parse your answer, got:</b></span><br>"
     << theInterpreteR.ToStringSyntacticStackHumanReadable(false, true);
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
   } else if (theInterpreteR.flagAbortComputationASAP)
-  { out << "<span style=\"color:red\"><b>Failed to evaluate your answer, got:</b></span><br>"
+  { out << "<span style =\"color:red\"><b>Failed to evaluate your answer, got:</b></span><br>"
     << theInterpreteR.outputString;
     out << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() - startTime << " second(s).";
     return out.str();
@@ -286,7 +286,7 @@ std::string HtmlInterpretation::submitAnswersPreview()
   theFormat.flagUsePmatrix = true;
   const Expression& studentAnswerNoContextE =
   theInterpreteR.theProgramExpression[theInterpreteR.theProgramExpression.size() - 1];
-  out << "<span style=\"color:magenta\"><b>Interpreting as:</b></span><br>";
+  out << "<span style =\"color:magenta\"><b>Interpreting as:</b></span><br>";
   out << "\\(\\displaystyle "
   << studentAnswerNoContextE.ToString(&theFormat) << "\\)";
   Calculator theInterpreterWithAdvice;
@@ -322,12 +322,12 @@ std::string HtmlInterpretation::submitAnswersPreview()
   std::stringstream problemLinkStream;
   problemLinkStream
   << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-  << "?request =calculator&mainInput ="
+  << "?request= calculator&mainInput ="
   << HtmlRoutines::ConvertStringToURLString(calculatorInputStreamNoEnclosures.str(), false)
   << "\">Input link</a>";
   theInterpreterWithAdvice.Evaluate(calculatorInputStream.str());
   if (theInterpreterWithAdvice.syntaxErrors != "")
-  { out << "<br><span style=\"color:red\"><b>"
+  { out << "<br><span style =\"color:red\"><b>"
     << "Something went wrong when parsing your answer "
     << "in the context of the current problem. "
     << "</b></span>";
@@ -340,7 +340,7 @@ std::string HtmlInterpretation::submitAnswersPreview()
     return out.str();
   }
   if (theInterpreterWithAdvice.flagAbortComputationASAP )
-  { out << "<br><span style=\"color:red\"><b>"
+  { out << "<br><span style =\"color:red\"><b>"
     << "Something went wrong when interpreting your answer "
     << "in the context of the current problem. "
     << "</b></span>";
@@ -393,7 +393,7 @@ std::string HtmlInterpretation::ClonePageResult()
     return out.str();
   }
   if (!FileOperations::OpenFileCreateIfNotPresentVirtual(theFile, fileNameResulT, false, false, false))
-  { out << "<b><span style=\"color:red\">Failed to open output file: " << fileNameResulT << ". </span></b>";
+  { out << "<b><span style =\"color:red\">Failed to open output file: " << fileNameResulT << ". </span></b>";
     return out.str();
   }
   theFile << startingFileString;
@@ -412,7 +412,7 @@ std::string HtmlInterpretation::ClonePageResult()
     commandResult << "SVN: Could not get physical file name from virtual. ";
   CalculatorHTML linkInterpreter;
   out << "<br>" << linkInterpreter.ToStringLinkFromFileName(fileNameResulT);
-  out << "<br><b><span style=\"color:green\">Written content to file: "
+  out << "<br><b><span style =\"color:green\">Written content to file: "
   << fileNameResulT << ". </span></b>" << "<br> " << commandResult.str();
   return out.str();
 }
@@ -445,7 +445,7 @@ std::string HtmlInterpretation::GetAboutPage()
   if (!isGood)
     isGood = FileOperations::LoadFileToStringVirtual("/html/about.html", theFile, false, false, &commentsOnFailure);
   if (!isGood)
-  { out << "<span style=\"color:red\"><b>"
+  { out << "<span style =\"color:red\"><b>"
     << commentsOnFailure.str()
     << "</b></span>";
   } else
@@ -631,10 +631,10 @@ std::string HtmlInterpretation::GetSelectCourse()
   }
   CourseList theCourses;
   theCourses.LoadFromString(theTopicFile, &out);
-  out << "<div style=\"text-align:center\">";
+  out << "<div style =\"text-align:center\">";
   for (int i = 0; i < theCourses.theCourses.size; i ++)
   { out << "<a class =\"courseLink\" href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request = template&courseHome=coursetemplates/"
+    << "?request= template&courseHome = coursetemplates/"
     << theCourses.theCourses[i].courseTemplate
     << "&topicList = topiclists/"
     << theCourses.theCourses[i].courseTopics
@@ -706,7 +706,7 @@ std::string HtmlInterpretation::GetPageFromTemplate()
     out << HtmlRoutines::GetJavascriptTopicListLink();
   out << "</head><!-- tag added automatically; user-specified head tag ignored-->\n";
   out << "<body" //<< ">"
-  << " onload=\"loadSettings();";
+  << " onload =\"loadSettings();";
   out << " initializeButtonsCommon(); ";
   out <<"\"><!-- tag added automatically; user-specified body tag ignored-->\n";
   if (thePage.flagDoPrependCalculatorNavigationBar)
@@ -809,7 +809,7 @@ std::string HtmlInterpretation::GetExamPage()
     out << theFile.outputHtmlHeadNoTag;
   //<-must come after theFile.outputHtmlHeadNoTag
   out << "</head>"
-  << "<body onload=\"loadSettings(); initializeMathQuill(); ";
+  << "<body onload =\"loadSettings(); initializeMathQuill(); ";
   out << "initializeButtons();";
   out << "\">\n";
   out << problemBody;
@@ -822,7 +822,7 @@ std::string HtmlInterpretation::GetExamPageJSON()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPageJSON");
   std::stringstream out;
   if (!theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON")
-  { out << "<b style='color:red'>Scored quiz requires login</b>";
+  { out << "<b style ='color:red'>Scored quiz requires login</b>";
     return out.str();
   }
   CalculatorHTML theFile;
@@ -941,14 +941,14 @@ std::string HtmlInterpretation::GetEditPageHTML()
   //  << HtmlRoutines::GetCalculatorStyleSheetWithTags()
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << HtmlRoutines::GetCSSLinkCalculator()
-  << "<style type=\"text/css\" media =\"screen\">\n"
+  << "<style type =\"text/css\" media =\"screen\">\n"
   << "    #editor { \n"
   << "      height: 380px;\n"
   << "      font-size: 100%;\n"
   << "   }\n"
   << "</style>\n";
   outHead << HtmlRoutines::GetJavascriptAceEditorScriptWithTags();
-  outBody << "<body onload=\"loadSettings();\">\n";
+  outBody << "<body onload =\"loadSettings();\">\n";
   outBody << "<calculatorNavigation>" << theGlobalVariables.ToStringNavigation()
   << "</calculatorNavigation>";
   std::stringstream failureStream;
@@ -982,7 +982,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicElementNames);
     theAutocompleteKeyWords.AddOnTopNoRepetition(theFile.calculatorTopicBundles);
   }
-  outHead << "<script type=\"text/javascript\">\n";
+  outHead << "<script type =\"text/javascript\">\n";
   outHead << "var AceEditorAutoCompletionWordList =[";
   bool found = false;
   for (int i = 0; i < theAutocompleteKeyWords.size; i ++)
@@ -1002,7 +1002,7 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "<button class =\"buttonSaveEdit\" "
   << "onclick=\"" << submitModPageJS.str() << "\" >Save changes</button>";
   //  out << "<form>";
-  //  out << "<input type=\"submit\" value=\"Save changes\"> ";
+  //  out << "<input type =\"submit\" value =\"Save changes\"> ";
   outBody << buttonStream.str();
   outBody << "To include the problem in your topic list, add the following two lines. <br>"
   << "<textarea cols =\"140\", rows =\"2\">"
@@ -1013,14 +1013,14 @@ std::string HtmlInterpretation::GetEditPageHTML()
 //  outBody << "<br>\n";
   outBody
   << "Many thanks to the <a href=\"https://ace.c9.io\">ace editor</a> project. <br>"
-  << "<div id=\"editor\" onkeydown =\"ctrlSPress(event);\" name=\"editor\">"
-  //<< "<textarea cols =\"150\", rows =\"30\" id=\"mainInput\" name=\"mainInput\" onkeydown =\"ctrlSPress(event);\">"
+  << "<div id =\"editor\" onkeydown =\"ctrlSPress(event);\" name =\"editor\">"
+  //<< "<textarea cols =\"150\", rows =\"30\" id =\"mainInput\" name =\"mainInput\" onkeydown =\"ctrlSPress(event);\">"
   ;
   outBody
   //<< "</textarea>"
   << "</div>"
   << "\n<br>\n";
-  outBody << "<script type=\"text/javascript\"> \n"
+  outBody << "<script type =\"text/javascript\"> \n"
   << "function ctrlSPress(event){\n"
   << "   if (event.ctrlKey!= true)\n"
   << "     return;\n"
@@ -1032,8 +1032,8 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "</script>\n";
   outBody
   << "<script src =\"/html-common/ace/src-min/ext-language_tools.js\"></script>";
-  outBody << "<script type=\"text/javascript\"> \n"
-  //<< " document.getElementById('mainInput').value=decodeURIComponent(\""
+  outBody << "<script type =\"text/javascript\"> \n"
+  //<< " document.getElementById('mainInput').value =decodeURIComponent(\""
   << " document.getElementById('editor').textContent =decodeURIComponent(\""
   << HtmlRoutines::ConvertStringToURLString(theFile.inputHtml, false)
   << "\");\n"
@@ -1049,9 +1049,9 @@ std::string HtmlInterpretation::GetEditPageHTML()
   << "    editor.$blockScrolling = Infinity;"
   << "</script>\n";
   outBody << buttonStream.str();
-  outBody << "<span id=\"spanSubmitReport\"></span><br>";
+  outBody << "<span id =\"spanSubmitReport\"></span><br>";
   outBody << theFile.ToStringLinkFromFileName(theFile.fileName);
-  //  out << "<input type=\"submit\" value=\"Save changes\">";
+  //  out << "<input type =\"submit\" value =\"Save changes\">";
   //  out << "</form>";
   outBody << "</body>";
   ouT << outHead.str() << outBody.str() << "</html>";
@@ -1156,7 +1156,7 @@ std::string HtmlInterpretation::SubmitAnswers
   { debugInputStream
     << "Input, no enclosures, direct link: "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request =calculator&mainInput ="
+    << "?request= calculator&mainInput ="
     << HtmlRoutines::ConvertStringToURLString(completedProblemStreamNoEnclosures.str(), false)
     << "\">Input link</a>";
   }
@@ -1172,7 +1172,7 @@ std::string HtmlInterpretation::SubmitAnswers
   if (theInterpreter.flagAbortComputationASAP || theInterpreter.syntaxErrors != "")
   { if (theInterpreter.errorsPublic.str() != "")
       out << "While checking your answer, got the error: "
-      << "<br><b><span style=\"color:red\">"
+      << "<br><b><span style =\"color:red\">"
       << theInterpreter.errorsPublic.str()
       << "</span></b> "
       << "<br><b>Most likely your answer is wrong. </b>";
@@ -1217,7 +1217,7 @@ std::string HtmlInterpretation::SubmitAnswers
   FormatExpressions theFormat;
   out << "<table width=\"300\">";
   if (!(*outputIsCorrect))
-  { out << "<tr><td><span style=\"color:red\"><b>Your answer appears to be incorrect. </b></span></td></tr>";
+  { out << "<tr><td><span style =\"color:red\"><b>Your answer appears to be incorrect. </b></span></td></tr>";
     if (theGlobalVariables.UserDefaultHasAdminRights() && theGlobalVariables.UserDebugFlagOn())
     { out << "<tr><td>Admin view internals. "
       << "<hr>" << debugInputStream.str()
@@ -1229,7 +1229,7 @@ std::string HtmlInterpretation::SubmitAnswers
       << theInterpreter.inputString << "<hr></td></tr>";
     }
   } else
-  { out << "<tr><td><span style=\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
+  { out << "<tr><td><span style =\"color:green\"><b>Correct! </b></span>" << "</td></tr>";
   }
   if (hasCommentsBeforeSubmission)
     out << "<tr><td>" << HtmlInterpretation::GetCommentsInterpretation
@@ -1268,7 +1268,7 @@ std::string HtmlInterpretation::SubmitAnswers
         if (!deadline.AssignMonthDayYear(theDeadlineString, badDateStream))
         { out << "<tr><td><b>Problem reading deadline. </b> The deadline string was: "
           << theDeadlineString << ". Comments: "
-          << "<span style=\"color:red\">" << badDateStream.str() << "</span>"
+          << "<span style =\"color:red\">" << badDateStream.str() << "</span>"
           << "</td></tr><tr><td> This should not happen. " << CalculatorHTML::BugsGenericMessage << "</td></tr>";
           return out.str();
         }
@@ -1280,7 +1280,7 @@ std::string HtmlInterpretation::SubmitAnswers
       }
     }
     if (deadLinePassed)
-      out << "<tr><td><span style=\"color:red\"><b>Deadline passed, attempt not recorded.</b></span></td></tr>";
+      out << "<tr><td><span style =\"color:red\"><b>Deadline passed, attempt not recorded.</b></span></td></tr>";
     else
     { currentA.numSubmissions ++;
       if ((*outputIsCorrect))
@@ -1317,15 +1317,15 @@ std::string HtmlInterpretation::SubmitAnswers
     { if (secondsTillDeadline < 0)
         secondsTillDeadline *= - 1;
       if (deadLinePassed)
-        out << "<tr><td><span style=\"color:red\"><b>Submission "
+        out << "<tr><td><span style =\"color:red\"><b>Submission "
         << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, false)
         << " after deadline. </b></span></td></tr>";
       else
-        out << "<tr><td><span style=\"color:green\"><b>Submission "
+        out << "<tr><td><span style =\"color:green\"><b>Submission "
         << TimeWrapper::ToStringSecondsToDaysHoursSecondsString(secondsTillDeadline, false, false)
         << " before deadline. </b></span></td></tr>";
     } else
-      out << "<tr><td><span style=\"color:green\"><b>No deadline yet.</b></span></td></tr>";
+      out << "<tr><td><span style =\"color:green\"><b>No deadline yet.</b></span></td></tr>";
   } //else
     //stOutput << "<tr><td><b>Submitting problem solutions allowed only for logged-in users. </b></td></tr>";
 #endif
@@ -1340,7 +1340,7 @@ std::string HtmlInterpretation::SubmitAnswers
     << "<hr><b>If you entered this expression through the keyboard (without copying + pasting) this is a bug: "
     << "please report it to the web site administrator. Don't forget to mention your keyboard/character setup. "
     << "Are you using the standard English keyboard? Cyrillic, Chinese, etc. characters are not accepted. </b> "
-    << "<hr><span style=\"color:red\"><b>Copying and pasting an answer not computed by yourself "
+    << "<hr><span style =\"color:red\"><b>Copying and pasting an answer not computed by yourself "
     << " is considered cheating (example: answer from an online program for doing homework).</b> </span>";
   out << "</td></tr>";
   out << "</table>";
@@ -1391,7 +1391,7 @@ std::string HtmlInterpretation::AddTeachersSections()
   { out << "<b>Could not extract teachers from " << desiredUsers << ".</b>";
     return out.str();
   }
-//  if (theSections.size== 0)
+//  if (theSections.size == 0)
 //  { out << "<b>Could not extract sections from " << desiredSections << ".</b>";
 //    return out.str();
 //  }
@@ -1400,7 +1400,7 @@ std::string HtmlInterpretation::AddTeachersSections()
   { currentTeacher.reset();
     currentTeacher.username = theTeachers[i];
     if (!currentTeacher.LoadFromDB(&out, &out))
-    { out << "<span style=\"color:red\">Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
+    { out << "<span style =\"color:red\">Failed to fetch teacher: " << theTeachers[i] << "</span><br>";
       continue;
     }
     currentTeacher.sectionsTaught = desiredSectionsList;
@@ -1408,9 +1408,9 @@ std::string HtmlInterpretation::AddTeachersSections()
     findQuery[DatabaseStrings::labelUsername] = currentTeacher.username;
     setQuery = currentTeacher.ToJSON();
     if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableUsers, findQuery, setQuery, &out))
-      out << "<span style=\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
+      out << "<span style =\"color:red\">Failed to store course info of instructor: " << theTeachers[i] << ". </span><br>";
     else
-      out << "<span style=\"color:green\">Assigned " << theTeachers[i] << " to section(s): "
+      out << "<span style =\"color:green\">Assigned " << theTeachers[i] << " to section(s): "
       << desiredSectionsList << "</span><br>";
   }
   return out.str();
@@ -1450,17 +1450,17 @@ std::string HtmlInterpretation::AddUserEmails(const std::string& hostWebAddressW
   bool createdUsers = DatabaseRoutineS::AddUsersFromEmails
   (inputEmails, userPasswords, userRole, userGroup, comments, numNewUsers, numUpdatedUsers);
   if (createdUsers)
-  { out << "<span style=\"color:green\">Success: "
+  { out << "<span style =\"color:green\">Success: "
     << numNewUsers << " new users and " << numUpdatedUsers
     << " user updates. </span> User roles: " << userRole;
   } else
-    out << "<span style=\"color:red\">Failed to add all users. </span> Errors follow. <hr>"
+    out << "<span style =\"color:red\">Failed to add all users. </span> Errors follow. <hr>"
     << comments.str() << "<hr>";
   if (doSendEmails)
   { if (sentEmails)
-      out << "<span style=\"color:green\">Activation emails successfully sent. </span>";
+      out << "<span style =\"color:green\">Activation emails successfully sent. </span>";
     else
-      out << "<span style=\"color:red\">Failed to send all activation emails. </span>";
+      out << "<span style =\"color:red\">Failed to send all activation emails. </span>";
   }
 //  bool usersAreAdmins = (userRole == "admin");
   //out << "<b>Further comments missing</b>";
@@ -1549,11 +1549,11 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   answerCommandsNoEnclosure << currentA.commandsNoEnclosureAnswerOnGiveUpOnly;
   theInterpreteR.Evaluate(answerCommands.str());
   if (theInterpreteR.syntaxErrors != "")
-  { out << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
+  { out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>";
     if (theGlobalVariables.UserDefaultHasProblemComposingRights())
       out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request =calculator&"
+      << "?request= calculator&"
       << "mainInput ="
       << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str(), false)
       << "\">Calculator input no enclosures</a>";
@@ -1563,11 +1563,11 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     return out.str();
   }
   if (theInterpreteR.flagAbortComputationASAP)
-  { out << "<span style=\"color:red\"><b>Failed to evaluate the default answer. "
+  { out << "<span style =\"color:red\"><b>Failed to evaluate the default answer. "
     << "Likely there is a bug with the problem. </b></span>";
     if (theGlobalVariables.UserDefaultHasProblemComposingRights())
       out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request =calculator&"
+      << "?request= calculator&"
       << "mainInput ="
       << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str(), false)
       << "\">Calculator input no enclosures</a>";
@@ -1612,7 +1612,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
         out << currentE[j].GetValue<std::string>();
       else
         out << "\\(\\displaystyle " << currentE[j].ToString(&theFormat) << "\\)";
-//      if (j ==currentE.size()- 1)
+//      if (j == currentE.size()- 1)
       if (isFirst)
       { if (outputNakedAnswer != 0)
           *outputNakedAnswer = currentE[j].ToString(&theFormat);
@@ -1625,7 +1625,7 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     out
     << "<hr><a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request =calculator&"
+    << "?request= calculator&"
     << "mainInput ="
     << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str() ,false)
     << "\">Calculator input no enclosures</a>"
@@ -1738,7 +1738,7 @@ std::string HtmlInterpretation::GetScoresPage()
   << HtmlRoutines::GetJavascriptStandardCookiesWithTags()
   << "<link rel =\"stylesheet\" href=\"/calculator-html/styleScorePage.css\">"
   << "</head>"
-  << "<body onload=\"loadSettings();\">\n";
+  << "<body onload =\"loadSettings();\">\n";
   CalculatorHTML thePage;
   thePage.LoadDatabaseInfo(out);
   std::string theScoresHtml = HtmlInterpretation::ToStringUserScores();
@@ -1761,7 +1761,7 @@ std::string HtmlInterpretation::GetAccountsPage(const std::string& hostWebAddres
   << HtmlRoutines::GetJavascriptSubmitEmails()
   << HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "</head>"
-  << "<body onload=\"loadSettings();\">\n";
+  << "<body onload =\"loadSettings();\">\n";
   bool isOK = theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights();
   std::string accountsPageBody;
   if (isOK)
@@ -1792,10 +1792,10 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   std::string currentCourse =
   HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("courseHome"), false);
   if (flagFilterCourse)
-  { out << "<br>Displaying only students in course: <span style=\"color:blue\"><b>"
+  { out << "<br>Displaying only students in course: <span style =\"color:blue\"><b>"
     << currentCourse << "</b></span>. "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request =accounts&"
+    << "?request=accounts&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
     << "filterAccounts = false&Z"
     << "\">Show all. </a>"
@@ -1830,7 +1830,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   for (int i = 0; i < theUsers.size; i ++)
   { currentUser.LoadFromJSON(theUsers[i]);
     if (currentUser.courseInDB.find('%') != std::string::npos)
-    { out << "<span style=\"color:red\"><b>Non-expected behavior: user: "
+    { out << "<span style =\"color:red\"><b>Non-expected behavior: user: "
       << currentUser.username
       << "current course: "
       << currentUser.courseInDB
@@ -1845,7 +1845,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     if (currentUser.actualActivationToken != "activated" && currentUser.actualActivationToken != "error")
     { isActivated = false;
       numActivatedUsers ++;
-      oneTableLineStream << "<td><span style=\"color:red\">not activated</span></td>";
+      oneTableLineStream << "<td><span style =\"color:red\">not activated</span></td>";
       if (currentUser.actualActivationToken != "")
         oneTableLineStream << "<td>"
         << "<a href=\""
@@ -1859,7 +1859,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
       << "<a href=\"mailto:" << currentUser.email
       << "?subject =Math 140 Homework account activation&";
 
-      oneTableLineStream << "body=";
+      oneTableLineStream << "body =";
       std::stringstream emailBody;
       emailBody << "Dear user,\n you have not activated your homework server account yet. \n"
       << "To activate your account and set your password please use the link: "
@@ -1880,9 +1880,9 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     } else if (currentUser.actualActivationToken == "error")
       oneTableLineStream << "<td>error</td><td></td>";
     else
-      oneTableLineStream << "<td><span style=\"color:green\">activated</span></td><td></td><td></td>";
+      oneTableLineStream << "<td><span style =\"color:green\">activated</span></td><td></td><td></td>";
     std::stringstream oneLink;
-    oneLink << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =login&username="
+    oneLink << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=login&username="
     << currentUser.username << "\">" << currentUser.username << "</a>";
     oneTableLineStream << "<td>" << oneLink.str() << "</td>";
     //oneTableLineStream << "<td>" << userTable[i][indexCourseInfo] << "</td>";
@@ -1910,14 +1910,14 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   for (int i = 0; i < nonActivatedAccountBucketsBySection.size; i ++)
   { if (!adminsOnly)
       if (nonActivatedAccountBucketsBySection[i].size > 0)
-        tableStream << "<tr><td colspan =\"6\" style=\"text-align:center\">" << theSections[i] << "</td></tr>";
+        tableStream << "<tr><td colspan =\"6\" style =\"text-align:center\">" << theSections[i] << "</td></tr>";
     for (int j = 0; j < nonActivatedAccountBucketsBySection[i].size; j ++)
       tableStream << nonActivatedAccountBucketsBySection[i][j];
   }
   for (int i = 0; i < activatedAccountBucketsBySection.size; i ++)
   { if (!adminsOnly)
       if (activatedAccountBucketsBySection[i].size > 0)
-        tableStream << "<tr><td colspan =\"7\" style=\"text-align:center\">"
+        tableStream << "<tr><td colspan =\"7\" style =\"text-align:center\">"
         << theSections[i] << "</td></tr>";
     for (int j = 0; j < activatedAccountBucketsBySection[i].size; j ++)
       tableStream << activatedAccountBucketsBySection[i][j];
@@ -1934,7 +1934,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
   }
   out << "\n" << theUsers.size << " user(s)";
   if (numActivatedUsers > 0)
-    out << ", <span style=\"color:red\">" << numActivatedUsers
+    out << ", <span style =\"color:red\">" << numActivatedUsers
     << " have not activated their accounts. </span>";
   out << tableStream.str() << preFilledLoginLinks.str();
 
@@ -1955,11 +1955,11 @@ std::string HtmlInterpretation::ToStringAssignSection()
   std::string idOutput = "idOutputSections";
   out << "Assign section(s) to teacher(s)<br> ";
   out << "<textarea width=\"500px\" ";
-  out << "id=\"" << idAddressTextarea << "\"";
+  out << "id =\"" << idAddressTextarea << "\"";
   out << "placeholder =\"email or user list, comma, space or ; separated\">";
   out << "</textarea>";
   out << "<textarea width=\"500px\" ";
-  out << "id=\"" << idExtraTextarea << "\"";
+  out << "id =\"" << idExtraTextarea << "\"";
   out << " placeholder =\"list of sections\">";
   out << "</textarea>";
   out << "<br>";
@@ -1972,7 +1972,7 @@ std::string HtmlInterpretation::ToStringAssignSection()
   << "'" << idOutput << "',"
   << " 'setTeacher', null, '" << idOutput << "'"
   << " )\"> Set teacher</button> ";
-  out << "<br><span id=\"" << idOutput << "\">\n";
+  out << "<br><span id =\"" << idOutput << "\">\n";
   out << "</span>";
   return out.str();
 }
@@ -2135,7 +2135,7 @@ bool UserScores::ComputeScoresAndStats(std::stringstream& comments)
   if (!this->theProblem.PrepareSectionList(comments))
     return false;
   if (!this->theProblem.LoadDatabaseInfo(comments))
-    comments << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
+    comments << "<span style =\"color:red\">Could not load your problem history.</span> <br>";
   //stOutput << "DEBUG: got to here";
   theProblem.currentUseR.ComputePointsEarned(theProblem.currentUseR.theProblemData.theKeys, &theProblem.theTopicS, comments);
   List<std::string> userLabels;
@@ -2254,8 +2254,8 @@ std::string HtmlInterpretation::GetScoresInCoursePage()
   //<< theScores.numStudentsSolvedNothingInTopic[0]
   //<< ". ";
 
-  out << "<script type=\"text/javascript\">\n";
-  out << "studentScoresInHomePage= new Array("
+  out << "<script type =\"text/javascript\">\n";
+  out << "studentScoresInHomePage = new Array("
   << theScores.theProblem.theTopicS.size() << ");\n";
   for (int i = 0; i < theScores.theProblem.theTopicS.size(); i ++)
   { TopicElement& currentElt = theScores.theProblem.theTopicS[i];
@@ -2264,7 +2264,7 @@ std::string HtmlInterpretation::GetScoresInCoursePage()
       out << "studentScoresInHomePage[" << i << "].weightsOK= false;\n";
     else
       out << "studentScoresInHomePage[" << i << "].weightsOK= true;\n";
-    out << "studentScoresInHomePage[" << i << "].theId="
+    out << "studentScoresInHomePage[" << i << "].theId ="
     << "'"
     << currentElt.studentScoresSpanId
     << "';\n";
@@ -2274,7 +2274,7 @@ std::string HtmlInterpretation::GetScoresInCoursePage()
     out << "studentScoresInHomePage[" << i << "].numSolvedPart ="
     << theScores.numStudentsSolvedPartOfTopic[i]
     << ";\n";
-    out << "studentScoresInHomePage[" << i << "].numSolvedNone="
+    out << "studentScoresInHomePage[" << i << "].numSolvedNone ="
     << theScores.numStudentsSolvedNothingInTopic[i]
     << ";\n";
   }
@@ -2407,15 +2407,15 @@ std::string HtmlInterpretation::ToStringUserDetails
   << "does not match the number of added users, the operation will fail (no users will be added).</li> "
   << "</ul>\n";
   out << "<textarea width=\"500px\" ";
-  out << "id=\"" << idAddressTextarea << "\"";
+  out << "id =\"" << idAddressTextarea << "\"";
   out << "placeholder =\"user list, comma, space or ; separated\">";
   out << "</textarea>";
   out << "<textarea width=\"500px\" ";
-  out << "id=\"" << idPasswordTextarea << "\"";
+  out << "id =\"" << idPasswordTextarea << "\"";
   out << " placeholder =\"default passwords\">";
   out << "</textarea>";
   out << "<textarea width=\"500px\" ";
-  out << "id=\"" << idExtraTextarea << "\"";
+  out << "id =\"" << idExtraTextarea << "\"";
   out << " placeholder =\"section/class #\">";
   out << "</textarea>";
   out << "<br>";
@@ -2429,7 +2429,7 @@ std::string HtmlInterpretation::ToStringUserDetails
   << "', '" << idPasswordTextarea
   << "', 'addUsers'"
   << " )\"> Add users</button> ";
-  out << "<br><span id=\"" << idOutput << "\">\n";
+  out << "<br><span id =\"" << idOutput << "\">\n";
   out << HtmlInterpretation::ToStringUserDetailsTable(adminsOnly, theUsers, hostWebAddressWithPort);
   out << "</span>";
 #else
@@ -2465,37 +2465,37 @@ std::string HtmlInterpretation::ToStringNavigation()
       std::string section = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable;
       if (theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin")
-        out << "?request = templateNoLogin";
+        out << "?request= templateNoLogin";
       else
-        out << "?request = template";
+        out << "?request= template";
       out << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "studentView=" << studentView << "&";
       if (section != "")
         out << "studentSection ="
         << theGlobalVariables.GetWebInput("studentSection") << "&";
       out << "topicList =" << topicList << "&";
-      out << "courseHome=" << courseHome << "&";
-      out << "fileName=" << courseHome << "&\">Home</a>"
+      out << "courseHome =" << courseHome << "&";
+      out << "fileName =" << courseHome << "&\">Home</a>"
       << linkSeparator;
     }
   }
   if (theGlobalVariables.userCalculatorRequestType == "selectCourse")
     out << "<b>Select course</b>" << linkBigSeparator;
   else
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =selectCourse\">Select course</a>" << linkBigSeparator;
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=selectCourse\">Select course</a>" << linkBigSeparator;
   if (theGlobalVariables.flagLoggedIn)
   { out << "User";
     if (theGlobalVariables.UserDefaultHasAdminRights())
       out << " <b>(admin)</b>";
     out << ": " << theGlobalVariables.userDefault.username << linkSeparator;
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =logout&";
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=logout&";
     out << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">Log out</a>" << linkSeparator;
     if (theGlobalVariables.userCalculatorRequestType == "changePasswordPage")
     { out << "<b>Account";
       out << "</b>" << linkSeparator;
     } else
     { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =changePasswordPage&"
+        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request= changePasswordPage&"
         << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << "\">Account</a>" << linkSeparator;
       else
         out << "<b>Account settings: requires secure connection</b>" << linkSeparator;
@@ -2508,42 +2508,42 @@ std::string HtmlInterpretation::ToStringNavigation()
     //  << theGlobalVariables.userDefault.currentCourses.value
     //  << linkSeparator;
   } else
-    out << "<b style='color:red'>logged out</b>" << linkSeparator;
+    out << "<b style ='color:red'>logged out</b>" << linkSeparator;
   if (theGlobalVariables.UserDefaultHasAdminRights())
   { if (theGlobalVariables.userCalculatorRequestType != "accounts")
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request =accounts&"
+      << "?request=accounts&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "&filterAccounts = true"
       << "\">Accounts</a>" << linkSeparator;
     else
       out << "<b>Accounts</b>" << linkSeparator;
     if (theGlobalVariables.userCalculatorRequestType != "scores")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =scores&"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scores&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "\">Scores</a>" << linkSeparator;
     else
       out << "<b>Scores</b>" << linkSeparator;
     if (theGlobalVariables.userCalculatorRequestType != "status")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =status&"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=status&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "\">Server</a>" << linkSeparator;
     else
       out << "<b>Server</b>" << linkBigSeparator;
     if (theGlobalVariables.userCalculatorRequestType != "database")
-      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =database&"
+      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "\">Database</a>" << linkBigSeparator;
     else
       out << "<b>Database</b>" << linkBigSeparator;
   }
   if (theGlobalVariables.userCalculatorRequestType != "calculator")
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =calculator&"
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request= calculator&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">Calculator</a>" << linkBigSeparator;
   else
     out << "<b>Calculator</b> " << linkBigSeparator;
   if (theGlobalVariables.userCalculatorRequestType != "about")
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =about&"
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=about&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">About</a>" << linkBigSeparator;
   else
     out << "<b>About</b> " << linkBigSeparator;
@@ -2553,17 +2553,17 @@ std::string HtmlInterpretation::ToStringNavigation()
   if (!theGlobalVariables.flagRunningApache)
   { if (theGlobalVariables.flagAllowProcessMonitoring)
     { if (!theGlobalVariables.UserDefaultHasAdminRights())
-        out << "<span style=\"color:red\"><b>Monitoring on</b></span>" << linkSeparator;
+        out << "<span style =\"color:red\"><b>Monitoring on</b></span>" << linkSeparator;
       else
-        out << "<a style=\"color:red\" href=\""
+        out << "<a style =\"color:red\" href=\""
         << theGlobalVariables.DisplayNameExecutable
-        << "?request = toggleMonitoring\""
+        << "?request= toggleMonitoring\""
         << "><b>Monitoring on</b></a>" << linkSeparator;
     } else
       if (theGlobalVariables.UserDefaultHasAdminRights())
-        out << "<a style=\"color:green\" href=\""
+        out << "<a style =\"color:green\" href=\""
         << theGlobalVariables.DisplayNameExecutable
-        << "?request = toggleMonitoring\""
+        << "?request= toggleMonitoring\""
         << "><b>Monitoring off</b></a>" << linkSeparator;
   }
 

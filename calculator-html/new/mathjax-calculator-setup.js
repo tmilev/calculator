@@ -182,7 +182,7 @@ function configureMathJaxForCalculator()
 var waitingForMathJaxCounter = 0;
 
 function waitForMathJax()
-{ waitingForMathJaxCounter++;
+{ waitingForMathJaxCounter ++;
   if (waitingForMathJaxCounter>100)
     return;
   if ((typeof MathJax)==="undefined")

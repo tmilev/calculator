@@ -116,12 +116,12 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
     }
     if (UpperLimitNumElements>0)
       if (this->size>=UpperLimitNumElements)
-      { this->truncated= true;
+      { this->truncated = true;
         return false;
       }
 /*    if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!= 0)
     { std::stringstream out;
-      out << "Generated: " << i+ 1<<" elements";
+      out << "Generated: " << i + 1<<" elements";
       theGlobalVariables.theIndicatorVariables.StatusString1= out.str();
       theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh= true;
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -149,34 +149,34 @@ void DrawOperations::drawLineBetweenTwoVectorsBufferDouble
 
 void DrawLineBetweenTwoRootsOperation::init
 (const Vector<Rational>& input1, const Vector<Rational>& input2, uint32_t PenStyle, int colorIndex, double inputLineWidth)
-{ if (input1.size!=input2.size)
+{ if (input1.size!= input2.size)
     crash << crash;
-  int theDimension =input1.size;
+  int theDimension = input1.size;
   this->v1.SetSize(theDimension);
   this->v2.SetSize(theDimension);
   for (int i = 0; i <theDimension; i ++)
-  { this->v1[i]=input1[i].GetDoubleValue();
-    this->v2[i]=input2[i].GetDoubleValue();
+  { this->v1[i]= input1[i].GetDoubleValue();
+    this->v2[i]= input2[i].GetDoubleValue();
   }
-  this->thePenStyle=PenStyle;
-  this->ColorIndex=colorIndex;
-  this->lineWidth=inputLineWidth;
+  this->thePenStyle =PenStyle;
+  this->ColorIndex = colorIndex;
+  this->lineWidth= inputLineWidth;
 }
 
 void DrawLineBetweenTwoRootsOperation::init
 (const Vector<double>& input1, const Vector<double>& input2, uint32_t PenStyle, int colorIndex, double inputLineWidth)
-{ if (input1.size!=input2.size)
+{ if (input1.size!= input2.size)
     crash << crash;
-  int theDimension =input1.size;
+  int theDimension = input1.size;
   this->v1.SetSize(theDimension);
   this->v2.SetSize(theDimension);
   for (int i = 0; i <theDimension; i ++)
-  { this->v1[i]=input1[i];
-    this->v2[i]=input2[i];
+  { this->v1[i]= input1[i];
+    this->v2[i]= input2[i];
   }
-  this->thePenStyle=PenStyle;
-  this->ColorIndex=colorIndex;
-  this->lineWidth=inputLineWidth;
+  this->thePenStyle =PenStyle;
+  this->ColorIndex = colorIndex;
+  this->lineWidth= inputLineWidth;
 }
 
 void DrawOperations::drawCircleAtVectorBufferRational
@@ -203,9 +203,9 @@ void DrawOperations::drawParallelogram
   this->IndexNthDrawOperation.AddOnTop(this->theShapes.size);
   this->theShapes.AddObjectOnTopCreateNew();
   DrawFilledShapeOperation& theOp = *this->theShapes.LastObject();
-  theOp.ColorIndex=ColorIndex;
-  theOp.ColorFillIndex= fillColorIndex;
-  theOp.thePenStyle= thePenStyle;
+  theOp.ColorIndex =ColorIndex;
+  theOp.ColorFillIndex = fillColorIndex;
+  theOp.thePenStyle = thePenStyle;
   theOp.lineWidth=lineWidth;
   theOp.theCorners.SetSize(5);
   theOp.theCorners[0] =lowerLeftCorner;
@@ -222,9 +222,9 @@ void DrawOperations::drawFilledShape
   this->IndexNthDrawOperation.AddOnTop(this->theShapes.size);
   this->theShapes.AddObjectOnTopCreateNew();
   DrawFilledShapeOperation& theOp = *this->theShapes.LastObject();
-  theOp.ColorIndex=ColorIndex;
-  theOp.ColorFillIndex= fillColorIndex;
-  theOp.thePenStyle= thePenStyle;
+  theOp.ColorIndex =ColorIndex;
+  theOp.ColorFillIndex = fillColorIndex;
+  theOp.thePenStyle = thePenStyle;
   theOp.lineWidth=lineWidth;
   theOp.theCorners = theCorners;
 }
@@ -280,8 +280,8 @@ void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
     { case DrawOperations::typeDrawText:
         if (this->theDrawTextFunction!= 0)
         { DrawTextOperation& theDrawTextOp = theOps.theDrawTextOperations[theOps.IndexNthDrawOperation[i]];
-          currentTextStyle= this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
-          if (currentTextStyle== this->TextStyleInvisible)
+          currentTextStyle = this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
+          if (currentTextStyle == this->TextStyleInvisible)
             break;
           this->theDrawTextFunction(theDrawTextOp.X1, theDrawTextOp.Y1, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex, theDrawTextOp.fontSize);
         }
@@ -289,8 +289,8 @@ void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
       case DrawOperations::typeDrawLine:
         if (this->theDrawLineFunction!= 0)
         { DrawLineOperation& theDrawLineOp = theOps.theDrawLineOperations[theOps.IndexNthDrawOperation[i]];
-          currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawLineOp.thePenStyle);
-          if (currentPenStyle== this->PenStyleInvisible)
+          currentPenStyle = this->GetActualPenStyleFromFlagsAnd(theDrawLineOp.thePenStyle);
+          if (currentPenStyle == this->PenStyleInvisible)
             break;
           this->theDrawLineFunction(theDrawLineOp.X1, theDrawLineOp.Y1, theDrawLineOp.X2, theDrawLineOp.Y2, currentPenStyle, theDrawLineOp.ColorIndex);
         }
@@ -298,8 +298,8 @@ void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
       case DrawOperations::typeDrawLineBetweenTwoVectors:
         if (this->theDrawLineFunction!= 0)
         { DrawLineBetweenTwoRootsOperation& theDrawLineBnTwoOp = theOps.theDrawLineBetweenTwoRootsOperations[theOps.IndexNthDrawOperation.TheObjects[i]];
-          currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawLineBnTwoOp.thePenStyle);
-          if (currentPenStyle== this->PenStyleInvisible)
+          currentPenStyle = this->GetActualPenStyleFromFlagsAnd(theDrawLineBnTwoOp.thePenStyle);
+          if (currentPenStyle == this->PenStyleInvisible)
             break;
           this->theDrawLineFunction(theDrawLineBnTwoOp.precomputedX1, theDrawLineBnTwoOp.precomputedY1, theDrawLineBnTwoOp.precomputedX2, theDrawLineBnTwoOp.precomputedY2, currentPenStyle, theDrawLineBnTwoOp.ColorIndex);
         }
@@ -307,8 +307,8 @@ void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
       case DrawOperations::typeDrawTextAtVector:
         if (this->theDrawTextFunction!= 0)
         { DrawTextAtVectorOperation& theDrawTextOp = theOps.theDrawTextAtVectorOperations[theOps.IndexNthDrawOperation.TheObjects[i]];
-          currentTextStyle= this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
-          if (currentTextStyle== this->TextStyleInvisible)
+          currentTextStyle = this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
+          if (currentTextStyle == this->TextStyleInvisible)
             break;
           this->theDrawTextFunction(theDrawTextOp.precomputedX, theDrawTextOp.precomputedY, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex, theDrawTextOp.fontSize);
         }
@@ -316,8 +316,8 @@ void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
       case DrawOperations::typeDrawCircleAtVector:
         if (this->theDrawCircleFunction!= 0)
         { DrawCircleAtVectorOperation& theDrawCircleOp = theOps.theDrawCircleAtVectorOperations.TheObjects[theOps.IndexNthDrawOperation.TheObjects[i]];
-          currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawCircleOp.thePenStyle);
-          if (currentPenStyle== this->PenStyleInvisible)
+          currentPenStyle = this->GetActualPenStyleFromFlagsAnd(theDrawCircleOp.thePenStyle);
+          if (currentPenStyle == this->PenStyleInvisible)
             break;
           this->theDrawCircleFunction(theDrawCircleOp.precomputedX, theDrawCircleOp.precomputedY, theDrawCircleOp.radius, theDrawCircleOp.thePenStyle, theDrawCircleOp.ColorIndex);
         }
@@ -328,36 +328,36 @@ void DrawingVariables::drawBufferNoIniT(DrawOperations& theOps)
 }
 
 int DrawingVariables::GetActualPenStyleFromFlagsAnd(int inputPenStyle)
-{ if (inputPenStyle== this->PenStyleInvisible)
+{ if (inputPenStyle == this->PenStyleInvisible)
     return this->PenStyleInvisible;
-  if (inputPenStyle== this->PenStyleDashed)
+  if (inputPenStyle == this->PenStyleDashed)
     return this->PenStyleDashed;
-  if (inputPenStyle== this->PenStyleDotted)
+  if (inputPenStyle == this->PenStyleDotted)
     return this->PenStyleDotted;
-  if (inputPenStyle== this->PenStyleNormal)
+  if (inputPenStyle == this->PenStyleNormal)
     return this->PenStyleNormal;
   if (!this->flagDrawingInvisibles)
     if (inputPenStyle == this->PenStyleLinkToOriginPermanentlyZeroChamber || inputPenStyle == this->PenStyleLinkToOriginZeroChamber || inputPenStyle == this->PenStyleZeroChamber || inputPenStyle == this->PenStylePermanentlyZeroChamber)
       return this->PenStyleInvisible;
-  if (inputPenStyle== this->PenStyleLinkToOrigin || inputPenStyle== this->PenStyleLinkToOriginPermanentlyZeroChamber || inputPenStyle== this->PenStyleLinkToOriginZeroChamber)
+  if (inputPenStyle == this->PenStyleLinkToOrigin || inputPenStyle == this->PenStyleLinkToOriginPermanentlyZeroChamber || inputPenStyle == this->PenStyleLinkToOriginZeroChamber)
   { if (this->flagDrawingLinkToOrigin)
       return this->PenStyleDashed;
     else
       return this->PenStyleInvisible;
   }
-  if (inputPenStyle== this->PenStylePermanentlyZeroChamber || inputPenStyle== this->PenStyleZeroChamber)
+  if (inputPenStyle == this->PenStylePermanentlyZeroChamber || inputPenStyle == this->PenStyleZeroChamber)
     return this->PenStyleDotted;
   return this->PenStyleNormal;
 }
 
 int DrawingVariables::GetActualTextStyleFromFlagsAnd(int inputTextStyle)
-{ if (inputTextStyle== this->TextStyleInvisible)
+{ if (inputTextStyle == this->TextStyleInvisible)
     return this->TextStyleInvisible;
-  if (inputTextStyle== this->TextStyleNormal)
+  if (inputTextStyle == this->TextStyleNormal)
     return this->TextStyleNormal;
-  if (!this->flagDrawChamberIndices && (inputTextStyle== this->TextStyleChamber || inputTextStyle== this->TextStylePermanentlyZeroChamber || inputTextStyle== this->TextStyleZeroChamber))
+  if (!this->flagDrawChamberIndices && (inputTextStyle == this->TextStyleChamber || inputTextStyle == this->TextStylePermanentlyZeroChamber || inputTextStyle == this->TextStyleZeroChamber))
     return this->TextStyleInvisible;
-  if (!this->flagDrawingInvisibles && (inputTextStyle== this->TextStylePermanentlyZeroChamber || inputTextStyle== this->TextStyleZeroChamber))
+  if (!this->flagDrawingInvisibles && (inputTextStyle == this->TextStylePermanentlyZeroChamber || inputTextStyle == this->TextStyleZeroChamber))
     return this->TextStyleInvisible;
   return this->TextStyleNormal;
 }
@@ -377,8 +377,8 @@ void DrawingVariables::drawString(DrawElementInputOutput& theDrawData, const std
     return;
   for (unsigned int i = 0; i <input.size(); i ++)
   { std::string tempS;
-    tempS=input.at(i);
-    this->theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX, theDrawData.outputHeight+theDrawData.TopLeftCornerY, tempS, 0, theFontSize, theTextStyle);
+    tempS= input.at(i);
+    this->theBuffer.drawTextBuffer(theDrawData.outputWidth+theDrawData.TopLeftCornerX, theDrawData.outputHeight +theDrawData.TopLeftCornerY, tempS, 0, theFontSize, theTextStyle);
     theDrawData.outputWidth+=(int)(((double) theFontSize)/1.15);
   }
 }
@@ -416,9 +416,9 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
   SubgroupWeylGroupOLD theAutos;
   theRootSA.GenerateAutomorphismsPreservingBorel(theAutos);
   Matrix<Rational> mapOnRootSpaces;
-  int theAutoIndex= theAutos.ExternalAutomorphisms.size>1? 1 : 0;
+  int theAutoIndex = theAutos.ExternalAutomorphisms.size>1? 1 : 0;
   /*if (this->theWeyl.WeylLetter =='D' && theDimension ==4)
-    theAutoIndex=2;
+    theAutoIndex =2;
 */
   mapOnRootSpaces.AssignVectorsToRows(theAutos.ExternalAutomorphisms[theAutoIndex]);
   mapOnRootSpaces.Transpose();
@@ -442,11 +442,11 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
   { domainRoot.MakeEi(theDimension, i);
     mapOnRootSpaces.ActOnVectorColumn(domainRoot, rangeRoot);
     tempElt.MakeHgenerator(domainRoot, *this);
-    Domain[numRoots+i]= tempElt;
+    Domain[numRoots+ i]= tempElt;
     tempElt.MakeHgenerator(rangeRoot, *this);
-    Range[numRoots+i]= tempElt;
+    Range[numRoots+ i]= tempElt;
     for (int i = 0; i <2; i ++, domainRoot.Minus(), rangeRoot.Minus())
-    { int theIndex= this->theWeyl.RootSystem.GetIndex(rangeRoot);
+    { int theIndex = this->theWeyl.RootSystem.GetIndex(rangeRoot);
       tempElt.MakeGGenerator(rangeRoot, *this);
       Range[theIndex]= tempElt;
       tempElt.MakeGGenerator(domainRoot, *this);
@@ -464,8 +464,8 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(Matrix<Rational>& outputAuto, 
         for (int k= 0; k<2; k++, left.Minus())
         { right = current-left;
           if (this->theWeyl.IsARoot(right))
-          { int leftIndex= this->theWeyl.RootSystem.GetIndex(left);
-            int rightIndex= this->theWeyl.RootSystem.GetIndex(right);
+          { int leftIndex = this->theWeyl.RootSystem.GetIndex(left);
+            int rightIndex = this->theWeyl.RootSystem.GetIndex(right);
             if (!NonExplored.selected[rightIndex])
             { ElementSemisimpleLieAlgebra<Rational>& leftDomainElt =Domain[leftIndex];
               ElementSemisimpleLieAlgebra<Rational>& rightDomainElt = Domain[rightIndex];
@@ -514,7 +514,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
   List<bool> Explored;
   Explored.initFillInObject(this->theWeyl.RootSystem.size, false);
-  int numExplored= 0;
+  int numExplored = 0;
   for (int i = 0; i < this->theWeyl.RootSystem.size; i ++)
   { Vector<Rational>& current = this->theWeyl.RootSystem.TheObjects[i];
     if (current.SumCoordinates()==1 || current.SumCoordinates()== - 1)
@@ -524,8 +524,8 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
       currentMat.init(weightSupport.size, weightSupport.size);
       currentMat.MakeZero();
       for (int j = 0; j<weightSupport.size; j ++)
-      { int indexTarget = weightSupport.GetIndex(current+weightSupport.TheObjects[j]);
-        if (indexTarget!= - 1)
+      { int indexTarget = weightSupport.GetIndex(current +weightSupport.TheObjects[j]);
+        if (indexTarget != - 1)
         { highestWeight = - 1+ this->GetLengthStringAlongAlphaThroughBeta(current, weightSupport.TheObjects[j], distanceToHW, weightSupport);
           if (current.IsNegativeOrZero())
             currentMat.elements[indexTarget][j]=1;
@@ -544,7 +544,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
           if (Explored.TheObjects[j])
           { Vector<Rational> tempRoot = this->theWeyl.RootSystem.TheObjects[i]+this->theWeyl.RootSystem.TheObjects[j];
             if (this->theWeyl.IsARoot(tempRoot))
-            { int index= this->theWeyl.RootSystem.GetIndex(tempRoot);
+            { int index = this->theWeyl.RootSystem.GetIndex(tempRoot);
               if (!Explored.TheObjects[index])
               { Explored.TheObjects[index]= true;
                 numExplored++;
@@ -569,9 +569,9 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
 int SemisimpleLieAlgebra::GetLengthStringAlongAlphaThroughBeta(Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport)
 { Vector<Rational> tempRoot =beta;
   for (int i = 0; ; i ++)
-  { tempRoot+= alpha;
+  { tempRoot += alpha;
     if (!weightSupport.Contains(tempRoot))
-    { distanceToHighestWeight =i;
+    { distanceToHighestWeight = i;
       break;
     }
   }
@@ -601,12 +601,12 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   for (int i = 0; i <theDomainDimension; i ++)
   { tempRoot.MakeEi(theDomainDimension, i);
     for (int j = 0; j<2; j ++, tempRoot.Minus())
-    { int index= this->theDomain().theWeyl.RootSystem.GetIndex(tempRoot);
+    { int index = this->theDomain().theWeyl.RootSystem.GetIndex(tempRoot);
       tempDomain[index].MakeZero();
       ChevalleyGenerator tempGen;
       tempGen.MakeGenerator(this->theDomain(), this->theDomain().GetGeneratorFromRoot(tempRoot));
       tempDomain[index].AddMonomial(tempGen, 1);
-      tempRange[index] = this->imagesSimpleChevalleyGenerators[i+j*theDomainDimension];
+      tempRange[index] = this->imagesSimpleChevalleyGenerators[i +j*theDomainDimension];
       NonExplored.RemoveSelection(index);
 //      stOutput <<"<br>" << tempDomain.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theDomain);
 //      stOutput <<"->" << tempRange.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theRange);
@@ -694,13 +694,13 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 { ElementUniversalEnveloping<RationalFunctionOld> tempElt;
   output.MakeZero(this->theRange());
   RationalFunctionOld polyOne;
-  polyOne= theCoeff.GetOne();
+  polyOne = theCoeff.GetOne();
   output.MakeConst(theCoeff, this->theRange());
   for (int i = 0; i <input.generatorsIndices.size; i ++)
   { if (input.generatorsIndices[i]>= this->imagesAllChevalleyGenerators.size)
       return false;
     tempElt.AssignElementLieAlgebra(this->imagesAllChevalleyGenerators[input.generatorsIndices[i]], this->theRange(), polyOne);
-    RationalFunctionOld& thePower =input.Powers[i];
+    RationalFunctionOld& thePower = input.Powers[i];
     int theIntegralPower;
     if (!thePower.IsSmallInteger(&theIntegralPower))
       return false;
@@ -715,8 +715,8 @@ void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(const ElementSemisimple
     crash << crash;
   output.MakeZero();
   for (int i = 0; i <input.size(); i ++)
-  { int currentIndex=input[i].theGeneratorIndex;
-    output+= this->imagesAllChevalleyGenerators[currentIndex]*input.theCoeffs[i];
+  { int currentIndex = input[i].theGeneratorIndex;
+    output += this->imagesAllChevalleyGenerators[currentIndex]*input.theCoeffs[i];
   }
 }
 
@@ -740,7 +740,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
   for (int i = 0; i <input.size(); i ++)
   { if (!this->ApplyHomomorphism(input[i], input.theCoeffs[i], tempElt))
       return false;
-    output+= tempElt;
+    output += tempElt;
   }
   return true;
 }
@@ -767,8 +767,8 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
   for (int i = 0; i <theWeylDim; i ++)
   { ElementSemisimpleLieAlgebra<Rational>& tempElt1= this->imagesSimpleChevalleyGenerators[i];
     tempElt1.MakeGenerator(i, this->theRange());
-    ElementSemisimpleLieAlgebra<Rational>& tempElt2= this->imagesSimpleChevalleyGenerators[theWeylDim+i];
-    tempElt2.MakeGenerator(i+numPosRoots, this->theRange());
+    ElementSemisimpleLieAlgebra<Rational>& tempElt2= this->imagesSimpleChevalleyGenerators[theWeylDim + i];
+    tempElt2.MakeGenerator(i +numPosRoots, this->theRange());
   }
 //  stOutput << this->ToString(theGlobalVariables);
 }
@@ -821,7 +821,7 @@ void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmall
   }
   this->ImagesCartanDomain.SetSize(rankSA);
   for (int i = 0; i <rankSA; i ++)
-    this->ImagesCartanDomain[i]= this->imagesAllChevalleyGenerators[i+numPosRootsDomain].GetCartanPart();
+    this->ImagesCartanDomain[i]= this->imagesAllChevalleyGenerators[i +numPosRootsDomain].GetCartanPart();
 }
 
 bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket()
@@ -869,11 +869,11 @@ std::string SemisimpleLieAlgebra::GetStringFromChevalleyGenerator(int theIndex, 
   if (thePolynomialFormat == 0)
     thePolynomialFormat = &tempFormat.GetElement();
   if (this->IsGeneratorFromCartan(theIndex))
-    out << thePolynomialFormat->chevalleyHgeneratorLetter << "_{" << theIndex-this->GetNumPosRoots()+ 1 << "}";
+    out << thePolynomialFormat->chevalleyHgeneratorLetter << "_{" << theIndex-this->GetNumPosRoots() + 1 << "}";
   else
   { out << thePolynomialFormat->chevalleyGgeneratorLetter << "_{";
     if (theIndex>= this->GetNumPosRoots())
-      out << theIndex-this->GetNumPosRoots()-this->GetRank()+ 1;
+      out << theIndex-this->GetNumPosRoots()-this->GetRank() + 1;
     else
       out << theIndex-this->GetNumPosRoots();
     out << "}";
@@ -896,7 +896,7 @@ void SemisimpleLieAlgebra::OrderNilradicalFirstTotalWeightAscending(const Select
   tempVect =parSelZeroMeansLeviPart;
   for (int i = 0; i < this->GetNumGenerators(); i ++)
     if (this->GetWeightOfGenerator(i).ScalarEuclidean(tempVect)<0)
-      this->UEGeneratorOrderIncludingCartanElts[i]=i-this->GetNumGenerators()*5;
+      this->UEGeneratorOrderIncludingCartanElts[i]= i-this->GetNumGenerators()*5;
 }
 
 void SemisimpleLieAlgebra::OrderNilradicalNilWeightAscending(const Selection& parSelZeroMeansLeviPart)
@@ -905,7 +905,7 @@ void SemisimpleLieAlgebra::OrderNilradicalNilWeightAscending(const Selection& pa
   for (int i = 0; i < this->GetNumGenerators(); i ++)
   { Rational translationCoeff= this->GetWeightOfGenerator(i).ScalarEuclidean(tempVect)* this->GetNumPosRoots();
     if (translationCoeff<0)
-      this->UEGeneratorOrderIncludingCartanElts[i]=i+translationCoeff.NumShort* this->GetNumGenerators()*5;
+      this->UEGeneratorOrderIncludingCartanElts[i]= i +translationCoeff.NumShort* this->GetNumGenerators()*5;
   }
 }
 
@@ -915,7 +915,7 @@ void SemisimpleLieAlgebra::OrderNilradicalNilWeightDescending(const Selection& p
   for (int i = 0; i < this->GetNumGenerators(); i ++)
   { Rational translationCoeff= this->GetWeightOfGenerator(i).ScalarEuclidean(tempVect)* this->GetNumPosRoots();
     if (translationCoeff<0)
-      this->UEGeneratorOrderIncludingCartanElts[i]= -i+translationCoeff.NumShort* this->GetNumGenerators()*5;
+      this->UEGeneratorOrderIncludingCartanElts[i]= -i +translationCoeff.NumShort* this->GetNumGenerators()*5;
   }
 }
 
@@ -942,13 +942,13 @@ void SemisimpleLieAlgebra::OrderSSalgebraForHWbfComputation()
 void SemisimpleLieAlgebra::OrderStandardAscending()
 { int numGens = this->GetNumGenerators();
   for (int i = 0; i <numGens; i ++)
-    this->UEGeneratorOrderIncludingCartanElts[i]=i;
+    this->UEGeneratorOrderIncludingCartanElts[i]= i;
 }
 
 void SemisimpleLieAlgebra::OrderStandardDescending()
 { int numGens = this->GetNumGenerators();
   for (int i = 0; i <numGens; i ++)
-    this->UEGeneratorOrderIncludingCartanElts[i]=numGens-i- 1;
+    this->UEGeneratorOrderIncludingCartanElts[i]= numGens-i- 1;
 }
 
 bool SemisimpleLieAlgebra::AreOrderedProperly(int leftIndex, int rightIndex)
@@ -958,15 +958,15 @@ bool SemisimpleLieAlgebra::AreOrderedProperly(int leftIndex, int rightIndex)
 int SemisimpleLieAlgebra::GetRootIndexFromDisplayIndex(int theIndex)
 { int numPosRoots = this->theWeyl.RootsOfBorel.size;
   if (theIndex<0)
-    return theIndex+numPosRoots;
+    return theIndex +numPosRoots;
   if (theIndex>0)
-    return theIndex+numPosRoots- 1;
+    return theIndex +numPosRoots- 1;
   return - 1;
 }
 
 int SemisimpleLieAlgebra::GetDisplayIndexFromRootIndex(int theIndex) const
 { int numPosRoots = this->theWeyl.RootsOfBorel.size;
-  if (theIndex>=numPosRoots)
+  if (theIndex>= numPosRoots)
     return theIndex-numPosRoots+ 1;
   if (theIndex<numPosRoots)
     return theIndex-numPosRoots;
@@ -978,8 +978,8 @@ int SemisimpleLieAlgebra::GetGeneratorFromRootIndex(int theIndex) const
     return - 1;
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
   int numPosRoots = this->theWeyl.RootsOfBorel.size;
-  if (theIndex>=numPosRoots)
-    return theIndex+theDimension;
+  if (theIndex>= numPosRoots)
+    return theIndex +theDimension;
   return theIndex;
 }
 
@@ -988,7 +988,7 @@ int SemisimpleLieAlgebra::GetRootIndexFromGenerator(int theIndex) const
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
   if (theIndex<numPosRoots)
     return theIndex;
-  if (theIndex>=numPosRoots+theDimension)
+  if (theIndex>= numPosRoots+theDimension)
     return theIndex-theDimension;
   return - 1;
 }
@@ -1028,12 +1028,12 @@ bool VectorPartition::init(const Vectors<Rational>& inputPartitioningRoots, cons
   for (int i = 0; i <inputPartitioningRoots.size; i ++)
     if (!inputPartitioningRoots[i].IsPositive())
       return false;
-  this->PartitioningRoots =inputPartitioningRoots;
-  if (this->PartitioningRoots.size== 0)
+  this->PartitioningRoots = inputPartitioningRoots;
+  if (this->PartitioningRoots.size == 0)
     return false;
   if (this->goalVector.IsEqualToZero())
     return false;
-  this->goalVector =inputRoot;
+  this->goalVector = inputRoot;
   this->currentPartition.initFillInObject(this->PartitioningRoots.size, 0);
   this->currentPartitionSum.MakeZero(this->goalVector.size);
   return true;
@@ -1043,7 +1043,7 @@ Vector<Rational> VectorPartition::GetPartitionSum()
 { Vector<Rational> result;
   result.MakeZero(this->goalVector.size);
   for (int i = 0; i < this->currentPartition.size; i ++)
-    result+= this->PartitioningRoots[i]*this->currentPartition[i];
+    result += this->PartitioningRoots[i]*this->currentPartition[i];
   return result;
 }
 
@@ -1051,8 +1051,8 @@ void VectorPartition::BeefUpPartition()
 { MacroRegisterFunctionWithName("VectorPartition::BeefUpPartition");
   Vector<Rational> remainder = this->goalVector-this->currentPartitionSum;
   while ((remainder-*this->PartitioningRoots.LastObject()).IsPositiveOrZero())
-  { (*this->currentPartition.LastObject())++;
-    this->currentPartitionSum+=*(this->PartitioningRoots.LastObject());
+  { (*this->currentPartition.LastObject()) ++;
+    this->currentPartitionSum +=*(this->PartitioningRoots.LastObject());
     remainder-=*this->PartitioningRoots.LastObject();
   }
 }
@@ -1062,7 +1062,7 @@ bool VectorPartition::NudgePartition()
   int indexFirstNonZero= - 1;
   for (int i = this->currentPartition.size- 1; i>= 0; i--)
     if (this->currentPartition[i]!= 0)
-    { indexFirstNonZero=i;
+    { indexFirstNonZero= i;
       break;
     }
   if (indexFirstNonZero== - 1)
@@ -1070,7 +1070,7 @@ bool VectorPartition::NudgePartition()
   if (indexFirstNonZero== 0)
     return false;
   this->currentPartition[indexFirstNonZero- 1]++;
-  this->currentPartitionSum+= this->PartitioningRoots[indexFirstNonZero- 1];
+  this->currentPartitionSum += this->PartitioningRoots[indexFirstNonZero- 1];
   this->currentPartitionSum-= this->PartitioningRoots[indexFirstNonZero]* this->currentPartition[indexFirstNonZero];
   this->currentPartition[indexFirstNonZero]= 0;
   return true;
@@ -1095,7 +1095,7 @@ std::string VectorPartition::ToStringPartitioningVectors()
 { MacroRegisterFunctionWithName("VectorPartition::ToStringPartitioningVectors");
   std::stringstream out;
   for (int i = 0; i < this->PartitioningRoots.size; i ++)
-    out << "e_{" << i+ 1 << "}=" << this->PartitioningRoots[i].ToString() << "<br>";
+    out << "e_{" << i + 1 << "}=" << this->PartitioningRoots[i].ToString() << "<br>";
   out << "<hr>";
   out << "Looking for partitions of: " << this->goalVector.ToString();
   out << "<hr>";
@@ -1104,7 +1104,7 @@ std::string VectorPartition::ToStringPartitioningVectors()
 
 std::string VectorPartition::ToStringOnePartition(const List<int>& currentPartition)
 { Vector<Rational> theV;
-  theV=currentPartition;
+  theV= currentPartition;
   return theV.ToStringLetterFormat("e");
 }
 
@@ -1127,14 +1127,14 @@ std::string VectorPartition::ToStringAllPartitions(bool useHtml)
 bool RationalFunctionOld::ConvertToType(int theType)
 { if (theType< this->expressionType)
     return false;
-  if (theType== this->expressionType)
+  if (theType == this->expressionType)
     return true;
-  if (this->expressionType== this->typeRational && this->expressionType<theType)
-  { this->expressionType= this->typePoly;
+  if (this->expressionType == this->typeRational && this->expressionType<theType)
+  { this->expressionType = this->typePoly;
     this->Numerator.GetElement().MakeConst(this->ratValue);
   }
-  if (this->expressionType== this->typePoly && this->expressionType<theType)
-  { this->expressionType= this->typeRationalFunction;
+  if (this->expressionType == this->typePoly && this->expressionType<theType)
+  { this->expressionType = this->typeRationalFunction;
     this->Denominator.GetElement().MakeConst(1);
   }
   return true;
@@ -1144,19 +1144,19 @@ void RationalFunctionOld::Invert()
 { //stOutput << "inverting " << this->ToString();
   if (!this->checkConsistency())
     crash << crash;
-  if (this->expressionType== this->typeRational)
+  if (this->expressionType == this->typeRational)
   { if (this->ratValue.IsEqualToZero())
       crash  << "This is a programming error: division by zero. Division by zero errors must be caught earlier in the program and "
       << "handled gracefully. Crashing ungracefully. " << crash;
     this->ratValue.Invert();
     return;
   }
-  if (this->expressionType== this->typePoly)
+  if (this->expressionType == this->typePoly)
     this->ConvertToType(this->typeRationalFunction);
   if (this->Numerator.GetElement().IsEqualToZero())
     crash << crash;
   MathRoutines::swap(this->Numerator.GetElement(), this->Denominator.GetElement());
-  this->expressionType= this->typeRationalFunction;
+  this->expressionType = this->typeRationalFunction;
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
   if (!this->checkConsistency())
@@ -1165,7 +1165,7 @@ void RationalFunctionOld::Invert()
 }
 
 bool RationalFunctionOld::checkConsistency() const
-{ if (this->expressionType== this->typePoly)
+{ if (this->expressionType == this->typePoly)
   { if (this->Numerator.IsZeroPointer())
     { crash << "This is a programming error: a rational function is flagged as being a non-constant polynomial, but the numerator pointer is zero. " << crash;
       return false;
@@ -1177,7 +1177,7 @@ bool RationalFunctionOld::checkConsistency() const
 //      int commentMeOutWhenDoneDebugging= - 1;
 //      this->Numerator.GetElementConst().GrandMasterConsistencyCheck();
   }
-  if (this->expressionType== this->typeRationalFunction)
+  if (this->expressionType == this->typeRationalFunction)
   { if (this->Numerator.IsZeroPointer() || this->Denominator.IsZeroPointer())
     { crash << "This is a programming error: a rational function is flagged as having non-constant denominator, but either the numerator or the denominator pointer is zero. "
       << crash;
@@ -1237,7 +1237,7 @@ void RationalFunctionOld::MakeOne()
 }
 
 void RationalFunctionOld::MakeZero()
-{ this->expressionType= this->typeRational;
+{ this->expressionType = this->typeRational;
   this->ratValue.MakeZero();
   this->Numerator.FreeMemory();
   this->Denominator.FreeMemory();
@@ -1248,7 +1248,7 @@ void RationalFunctionOld::MakeZero()
 void RationalFunctionOld::operator+=(int theConstant)
 { RationalFunctionOld tempRF;
   tempRF.MakeConst((Rational) theConstant);
-  (*this)+= tempRF;
+  (*this) += tempRF;
 }
 
 Rational RationalFunctionOld::RationalValue() const
@@ -1263,17 +1263,17 @@ Rational RationalFunctionOld::RationalValue() const
 }
 
 RationalFunctionOld::RationalFunctionOld()
-{ this->expressionType= this->typeError;
+{ this->expressionType = this->typeError;
   this->ratValue.MakeZero();
 }
 
 RationalFunctionOld::RationalFunctionOld(int other)
-{ this->expressionType= this->typeRational;
+{ this->expressionType = this->typeRational;
   this->operator=(other);
 }
 
 RationalFunctionOld::RationalFunctionOld(const Rational& other)
-{ this->expressionType= this->typeRational;
+{ this->expressionType = this->typeRational;
   this->operator=(other);
 }
 
@@ -1297,11 +1297,11 @@ RationalFunctionOld RationalFunctionOld::GetOne() const
 
 std::string RationalFunctionOld::ToString(FormatExpressions* theFormat) const
 { //out << "( Number variables: " << this->NumVars << ", hash: " << this->HashFunction() << ")";
-  if (this->expressionType== this->typeRational)
+  if (this->expressionType == this->typeRational)
   { //out << "(type: rational)";
     return this->ratValue.ToString();
   }
-  if (this->expressionType== this->typePoly)
+  if (this->expressionType == this->typePoly)
     return this->Numerator.GetElementConst().ToString(theFormat);
   std::stringstream out;
   bool useFrac = theFormat == 0 ? false : theFormat->flagUseFrac;
@@ -1350,8 +1350,8 @@ void RationalFunctionOld::gcd(const Polynomial<Rational>& left, const Polynomial
 void RationalFunctionOld::MakeOneLetterMoN(int theIndex, const Rational& theCoeff, int ExpectedNumVars)
 { if ( theIndex<0)
     crash << "This is a programming error: I am asked to create Monomial which has a variable of negative index " << theIndex << ". " << crash;
-  this->expressionType= this->typePoly;
-  ExpectedNumVars =MathRoutines::Maximum(theIndex+ 1, ExpectedNumVars);
+  this->expressionType = this->typePoly;
+  ExpectedNumVars =MathRoutines::Maximum(theIndex + 1, ExpectedNumVars);
   this->Numerator.GetElement().MakeDegreeOne(ExpectedNumVars, theIndex, theCoeff);
 }
 
@@ -1359,7 +1359,7 @@ void RationalFunctionOld::MakeMonomiaL
 (int LetterIndex, const Rational& Power, const Rational& Coeff, int ExpectedNumVars)
 { if (LetterIndex<0)
     crash << "This is a programming error: I am asked to create Monomial which has a variable of negative index " << LetterIndex << ". " << crash;
-  this->expressionType= this->typePoly;
+  this->expressionType = this->typePoly;
   this->Numerator.GetElement().MakeMonomiaL(LetterIndex, Power, Coeff, ExpectedNumVars);
 }
 
@@ -1377,10 +1377,10 @@ void RationalFunctionOld::operator=(const RationalFunctionOld& other)
 {// int commentmewhendone2;
   //other.checkConsistency();
   //this->checkConsistency();
-  this->expressionType= other.expressionType;
+  this->expressionType = other.expressionType;
   switch (this->expressionType)
   { case RationalFunctionOld::typeRational:
-      this->ratValue= other.ratValue;
+      this->ratValue = other.ratValue;
       //The below is for testing purposes. I think it is generally better to comment those lines!
       //this->Numerator.FreeMemory();
       //this->Denominator.FreeMemory();
@@ -1424,7 +1424,7 @@ void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial
   tempP*= - 1;
   tempP+=1;
   rightTemp*=(tempP);
-  theBasis.size= 0;
+  theBasis.size = 0;
   theBasis.AddOnTop(leftTemp);
   theBasis.AddOnTop(rightTemp);
 //  stOutput << "<br>In the beginning: <br>";
@@ -1442,22 +1442,22 @@ void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial
 //  for (int i = 0; i <theBasis.size; i ++)
 //  { stOutput << theBasis[i].ToString() << "<hr>\n";
 //  }
-  int maxMonNoTIndex= - 1;
+  int maxMonNoTIndex = - 1;
   Rational MaxTotalDeg;
   for (int i = 0; i <theBasis.size; i ++)
   { const MonomialP& currentMon = theBasis[i][theBasis[i].GetIndexMaxMonomialLexicographicLastVariableStrongest()];
     if (currentMon(theNumVars)== 0)
-    { if (maxMonNoTIndex== - 1)
+    { if (maxMonNoTIndex == - 1)
       { MaxTotalDeg= currentMon.TotalDegree();
-        maxMonNoTIndex=i;
+        maxMonNoTIndex = i;
       }
       if (MaxTotalDeg<currentMon.TotalDegree())
-      { MaxTotalDeg=currentMon.TotalDegree();
-        maxMonNoTIndex=i;
+      { MaxTotalDeg= currentMon.TotalDegree();
+        maxMonNoTIndex = i;
       }
     }
   }
-  if (maxMonNoTIndex== - 1)
+  if (maxMonNoTIndex == - 1)
   { crash << "This is a programming error: failed to obtain lcm of two rational functions. The list of polynomials is: ";
     for (int i = 0; i <theBasis.size; i ++)
       crash << theBasis[i].ToString() << ", ";
@@ -1483,9 +1483,9 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
   { this->MakeZero();
     return;
   }
-  if (this->expressionType== this->typeRational)
+  if (this->expressionType == this->typeRational)
     this->ConvertToType(this->typePoly);
-  if (this->expressionType== this->typePoly)
+  if (this->expressionType == this->typePoly)
   { this->Numerator.GetElement()*= other;
     this->ReduceMemory();
     return;
@@ -1567,11 +1567,11 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
   { this->MakeZero();
     return;
   }
-  if (other.expressionType== this->typeRational)
+  if (other.expressionType == this->typeRational)
   { this->operator*=(other.ratValue);
     return;
   }
-  if (other.expressionType== this->typePoly)
+  if (other.expressionType == this->typePoly)
   { this->operator*=(other.Numerator.GetElementConst());
     return;
   }
@@ -1582,7 +1582,7 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
     this->operator*=(tempRat);
     return;
   }
-  if (this->expressionType== this->typePoly)
+  if (this->expressionType == this->typePoly)
   { Polynomial<Rational>  tempP;
     tempP= this->Numerator.GetElement();
     this->operator=(other);
@@ -1647,7 +1647,7 @@ void RationalFunctionOld::operator+=(const RationalFunctionOld& other)
       crash << crash;
     return;
   }
-  if (this->expressionType== other.expressionType)
+  if (this->expressionType == other.expressionType)
   { //std::string tempS;
     //tempS= other.ToString();
     this->AddSameTypes(other);
@@ -1667,7 +1667,7 @@ void RationalFunctionOld::operator+=(const RationalFunctionOld& other)
 
 void RationalFunctionOld::Simplify()
 { MacroRegisterFunctionWithName("RationalFunctionOld::Simplify");
-  if (this->expressionType== this->typeRationalFunction)
+  if (this->expressionType == this->typeRationalFunction)
     if (!this->Numerator.GetElement().IsEqualToZero())
     { Polynomial<Rational> theGCD, tempP, tempP2;
 //      stOutput << "<br>fetching gcd of " << this->Numerator.GetElement().ToString() << " and "
@@ -1701,10 +1701,10 @@ void RationalFunctionOld::SimplifyLeadingCoefficientOnly()
   this->Denominator.GetElement()*=(tempRat);
   this->Numerator.GetElement()*=(tempRat);
   if (this->Denominator.GetElement().IsEqualToOne())
-  { this->expressionType= this->typePoly;
+  { this->expressionType = this->typePoly;
     if (this->Numerator.GetElement().IsConstant(&tempRat))
-    { this->ratValue= tempRat;
-      this->expressionType= this->typeRational;
+    { this->ratValue = tempRat;
+      this->expressionType = this->typeRational;
     }
   }
 }
@@ -1712,7 +1712,7 @@ void RationalFunctionOld::SimplifyLeadingCoefficientOnly()
 void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational> & output)
 { int theRank= theAlgebra.theWeyl.CartanSymmetric.NumRows;
   int numPosRoots = theAlgebra.theWeyl.RootsOfBorel.size;
-  output.MakeDegreeOne((int)(theRank+numPosRoots), theIndex+theRank, (Rational) 1);
+  output.MakeDegreeOne((int)(theRank+numPosRoots), theIndex +theRank, (Rational) 1);
 }
 
 template <class coefficient>
@@ -1737,7 +1737,7 @@ void RationalFunctionOld::ScaleClearDenominator(List<RationalFunctionOld>& input
   buffer =(input);
   for (int i = 0; i <buffer.size; i ++)
   { RationalFunctionOld& current =buffer.TheObjects[i];
-    if (current.expressionType==RationalFunctionOld::typeRationalFunction)
+    if (current.expressionType ==RationalFunctionOld::typeRationalFunction)
     { tempP.operator=(current.Denominator.GetElement());
       for (int j = 0; j<buffer.size; j ++)
         buffer[j].operator*=(tempP);
@@ -1762,23 +1762,23 @@ void SemisimpleLieAlgebraOrdered::GetLinearCombinationFrom(ElementSemisimpleLieA
 { this->CheckInitialization();
   theCoeffs.MakeZero(this->theOwner->GetNumGenerators());
   for (int i = 0; i <input.size(); i ++)
-  { int theIndex=input[i].theGeneratorIndex;
-    theCoeffs[this->theOwner->GetGeneratorFromRootIndex(theIndex)]=input.theCoeffs[i];
+  { int theIndex = input[i].theGeneratorIndex;
+    theCoeffs[this->theOwner->GetGeneratorFromRootIndex(theIndex)]= input.theCoeffs[i];
   }
   int numPosRoots = this->theOwner->GetNumPosRoots();
-  Vector<Rational> tempH=input.GetCartanPart();
+  Vector<Rational> tempH= input.GetCartanPart();
   for (int i = 0; i < this->theOwner->GetRank(); i ++)
-    theCoeffs[numPosRoots+i]= tempH[i];
+    theCoeffs[numPosRoots+ i]= tempH[i];
   this->ChevalleyGeneratorsInCurrentCoords.ActOnVectorColumn(theCoeffs);
 }
 
 int SemisimpleLieAlgebraOrdered::GetDisplayIndexFromGeneratorIndex(int GeneratorIndex)
 { int numPosRoots = this->theOwner->GetNumPosRoots();
-  int posRootsPlusRank=numPosRoots+this->theOwner->GetRank();
+  int posRootsPlusRank= numPosRoots+this->theOwner->GetRank();
   if (GeneratorIndex>= posRootsPlusRank )
     return GeneratorIndex-posRootsPlusRank+ 1;
-  if (GeneratorIndex>=numPosRoots)
-    return GeneratorIndex+ 1;
+  if (GeneratorIndex>= numPosRoots)
+    return GeneratorIndex + 1;
   return -numPosRoots+GeneratorIndex;
 }
 
@@ -1788,7 +1788,7 @@ void SemisimpleLieAlgebraOrdered::init
   if (inputOrder.size!= owner.GetNumGenerators())
     return;
   this->theOwner = &owner;
-  this->theOrder =inputOrder;
+  this->theOrder = inputOrder;
   this->ChevalleyGeneratorsInCurrentCoords.init(owner.GetNumGenerators(), owner.GetNumGenerators());
   this->ChevalleyGeneratorsInCurrentCoords.MakeZero();
   ElementSemisimpleLieAlgebra<Rational> tempElt;
@@ -1798,7 +1798,7 @@ void SemisimpleLieAlgebraOrdered::init
   { currentElt.MakeGenerator(i, owner);
     currentElt.GetCoordsInBasis(this->theOrder, coordsInCurrentBasis);
     for (int j = 0; j<coordsInCurrentBasis.size; j ++)
-      this->ChevalleyGeneratorsInCurrentCoords.elements[j][i]=coordsInCurrentBasis[j];
+      this->ChevalleyGeneratorsInCurrentCoords.elements[j][i]= coordsInCurrentBasis[j];
 //    stOutput << "<br> " << currentElt.ToString() << " in new coords becomes: " << coordsInCurrentBasis.ToString();
   }
 //  stOutput << this->ChevalleyGeneratorsInCurrentCoords.ToString(true, false) << "<br><br>";
@@ -1964,15 +1964,15 @@ void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(Matrix<Rational>& inpu
     crash << "input coincides with output. " << crash;
   Rational currentWeight;
   Matrix<Rational> ::LieBracket(this->theH, input, output);
-  bool tempBool =input.IsProportionalTo(output, currentWeight);
+  bool tempBool = input.IsProportionalTo(output, currentWeight);
   if (!tempBool)
     stOutput << "<br>oh no! climbing down is f***ed up!";
   Rational RaiseCoeff;
   RaiseCoeff.MakeZero();
   outputCoeff.MakeOne();
-  output =input;
+  output = input;
   for (int i = 0; i <generatorPower; i ++)
-  { RaiseCoeff+=currentWeight;
+  { RaiseCoeff+= currentWeight;
     currentWeight-=2;
     outputCoeff*=RaiseCoeff;
     Matrix<Rational> ::LieBracket(this->theF, output, output);
@@ -1984,24 +1984,24 @@ std::string slTwoInSlN::ElementModuleIndexToString(int input, bool useHtml)
   if (useHtml)
   { beginMath= "<span class =\"math\">";
     endMath= "</span>";
-    newLine="<br>";
+    newLine ="<br>";
   } else
   { beginMath="$";
     endMath="$";
-    newLine="\n\n\n";
+    newLine ="\n\n\n";
   }
   Matrix<Rational> & currentHW= this->theHighestWeightVectors.TheObjects[input];
   int currentEtaHw= this->theGmodKModules.TheObjects[input].size- 1;
-  //currentEtaHw-=currentEtaHw/2;
+  //currentEtaHw-= currentEtaHw/2;
   int firstNonZeroRow= - 1, firstNonZeroColumn = - 1;
-  bool found= false;
+  bool found = false;
   for (int i = 0; i <currentHW.NumRows; i ++)
   { if (found)
       break;
     for (int j = 0; j<currentHW.NumCols; j ++)
       if (!currentHW.elements[i][j].IsEqualToZero())
-      { firstNonZeroColumn =j;
-        firstNonZeroRow=i;
+      { firstNonZeroColumn = j;
+        firstNonZeroRow= i;
         found = true;
         break;
       }
@@ -2024,11 +2024,11 @@ std::string slTwoInSlN::ElementModuleIndexToString(int input, bool useHtml)
 
 void slTwoInSlN::GetIsPlusKIndexingFrom(int input, int& s, int& k)
 { s = 0;
-  k=input;
+  k= input;
   if (input >= this->theDimension || input <0)
     return;
-  for (int offset = 0; offset<=input; offset+= this->thePartition.TheObjects[s- 1])
-  { k=input-offset;
+  for (int offset = 0; offset<= input; offset += this->thePartition.TheObjects[s- 1])
+  { k= input-offset;
     s++;
   }
 }
@@ -2038,19 +2038,19 @@ std::string slTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational> & inp
   if (useHtml)
   { beginMath= "<span class =\"math\">";
     endMath= "</span>";
-    newLine="<br>";
+    newLine ="<br>";
   } else
   { beginMath="$";
     endMath="$";
-    newLine="\n\n\n";
+    newLine ="\n\n\n";
   }
   std::stringstream out;
   std::string tempS;
-  bool found= false;
+  bool found = false;
   for (int i = 0; i <input.NumRows; i ++)
     for (int j = 0; j<input.NumCols; j ++)
       if (!input.elements[i][j].IsEqualToZero())
-      { tempS=input.elements[i][j].ToString();
+      { tempS= input.elements[i][j].ToString();
         if (tempS=="- 1")
           tempS="-";
         if (tempS=="1")
@@ -2061,7 +2061,7 @@ std::string slTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational> & inp
           if (found)
             if (tempS[0]!='-')
               out << "+";
-        found= true;
+        found = true;
         out << tempS;
         int sI, kI, sJ, kJ;
         this->GetIsPlusKIndexingFrom(i, sI, kI);
@@ -2078,8 +2078,8 @@ std::string slTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational> & inp
 }
 
 void slTwoInSlN::ExtractHighestWeightVectorsFromVector(Matrix<Rational> & input, List<Matrix<Rational> >& outputDecompositionOfInput, List<Matrix<Rational> >& outputTheHWVectors)
-{ outputDecompositionOfInput.size= 0; outputTheHWVectors.size= 0;
-  Matrix<Rational>  remainder; remainder =input;
+{ outputDecompositionOfInput.size = 0; outputTheHWVectors.size = 0;
+  Matrix<Rational>  remainder; remainder = input;
   Matrix<Rational>  component, highestWeightVector, tempMat;
   Rational theCoeff, tempRat;
   int largestPowerNotKillingInput;
@@ -2116,10 +2116,10 @@ void slTwoInSlN::ClimbUpFromVector(Matrix<Rational>& input, Matrix<Rational>& ou
 { Matrix<Rational>  tempMat;
   if (&input == &outputLastNonZero)
     crash << crash;
-  outputLastNonZero=input;
+  outputLastNonZero= input;
   largestPowerNotKillingInput = 0;
   for (Matrix<Rational> ::LieBracket(this->theE, outputLastNonZero, tempMat); !tempMat.IsEqualToZero(); Matrix<Rational> ::LieBracket(this->theE, outputLastNonZero, tempMat))
-  { largestPowerNotKillingInput++;
+  { largestPowerNotKillingInput ++;
     outputLastNonZero= tempMat;
   }
 }
@@ -2130,19 +2130,19 @@ std::string slTwoInSlN::GetNotationString(bool useHtml)
   if (useHtml)
   { beginMath= "<span class =\"math\">";
     endMath= "</span>";
-    newLine="<br>";
+    newLine ="<br>";
   } else
   { beginMath="$";
     endMath="$";
-    newLine="\n\n\n";
+    newLine ="\n\n\n";
   }
   out << newLine << "Let the starting index of the j-th block be " << beginMath << "i_j" << endMath;
   out << "." << newLine << "In particular let: ";
   int offset =1;
   for (int i = 0; i < this->thePartition.size; i ++)
-  { out << beginMath << "i_" << i+ 1 << "=" << offset << endMath << " ";
+  { out << beginMath << "i_" << i + 1 << "=" << offset << endMath << " ";
     out << " (size of block = " << this->thePartition.TheObjects[i] << "), ";
-    offset+= this->thePartition.TheObjects[i];
+    offset += this->thePartition.TheObjects[i];
   }
   out << newLine << "Let " << beginMath << "\\eta" << endMath << " be the weight corresponding to h.";
   out << newLine << "Let " << beginMath << "\\zeta_{j}" << endMath << " be the weight corresponding to the j-th block";
@@ -2165,42 +2165,42 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   if (useHtml)
   { beginMath= "<span class =\"math\">";
     endMath= "</span>";
-    newLine="<br>";
+    newLine ="<br>";
   } else
   { beginMath="$";
     endMath="$";
-    newLine="\n\n\n";
+    newLine ="\n\n\n";
   }
   for (int i = 0; i < this->thePartition.size; i ++)
   { this->theProjectors[i].init(this->theDimension, this->theDimension);
     this->theProjectors[i].MakeZero();
     for (int j = 0; j< this->thePartition[i]; j ++)
-    { theH.elements[currentOffset+j][currentOffset+j]= this->thePartition[i]- 1-2*j;
-      this->theProjectors[i].elements[currentOffset+j][currentOffset+j]=1;
-      if (j!= this->thePartition[i]- 1)
+    { theH.elements[currentOffset +j][currentOffset +j]= this->thePartition[i]- 1-2*j;
+      this->theProjectors[i].elements[currentOffset +j][currentOffset +j]=1;
+      if (j != this->thePartition[i]- 1)
       { theF.elements[currentOffset +j+ 1][currentOffset +j]=1;
         theE.elements[currentOffset +j][currentOffset +j+ 1]=(j+ 1)*(this->thePartition[i]-j- 1);
       }
     }
-    currentOffset+= this->thePartition[i];
+    currentOffset += this->thePartition[i];
   }
   out << newLine << beginMath << "h=" << this->ElementMatrixToTensorString(this->theH, useHtml) << "="
   << this->theH.ElementToStringWithBlocks(this->thePartition) << endMath;
-  out << newLine << beginMath << "e=" << this->ElementMatrixToTensorString(this->theE, useHtml) << "="
+  out << newLine << beginMath << "e =" << this->ElementMatrixToTensorString(this->theE, useHtml) << "="
   << this->theE.ElementToStringWithBlocks(this->thePartition) << endMath;
   out << newLine << beginMath << "f=" << this->ElementMatrixToTensorString(this->theF, useHtml) << "="
   << this->theF.ElementToStringWithBlocks(this->thePartition) << endMath;
   Matrix<Rational>  tempMat;
   tempMat.init(this->theDimension, this->theDimension);
   List<Matrix<Rational> > Decomposition, theHwCandidatesBeforeProjection, theHwCandidatesProjected;
-  this->theHighestWeightVectors.size= 0;
-  this->theGmodKModules.size= 0;
+  this->theHighestWeightVectors.size = 0;
+  this->theGmodKModules.size = 0;
   for (int i = 0; i < this->theDimension; i ++)
     for (int j = 0; j< this->theDimension; j ++)
     { tempMat.MakeZero();
       tempMat.elements[i][j]=1;
       this->ExtractHighestWeightVectorsFromVector(tempMat, Decomposition, theHwCandidatesBeforeProjection);
-      theHwCandidatesProjected.size= 0;
+      theHwCandidatesProjected.size = 0;
       for (int k= 0; k<theHwCandidatesBeforeProjection.size; k++)
         for (int l = 0; l< this->theProjectors.size; l ++)
         { tempMat = theHwCandidatesBeforeProjection[k];
@@ -2213,9 +2213,9 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
         { Matrix<Rational>& currentHighest = theHwCandidatesProjected[k];
           this->theHighestWeightVectors.AddOnTop(currentHighest);
           this->theGmodKModules.ExpandOnTop(1);
-          List<Matrix<Rational> >& currentMod=*this->theGmodKModules.LastObject();
-          currentMod.size= 0;
-          for (tempMat =currentHighest; !tempMat.IsEqualToZero(); Matrix<Rational> ::LieBracket(this->theF, tempMat, tempMat))
+          List<Matrix<Rational> >& currentMod =*this->theGmodKModules.LastObject();
+          currentMod.size = 0;
+          for (tempMat = currentHighest; !tempMat.IsEqualToZero(); Matrix<Rational> ::LieBracket(this->theF, tempMat, tempMat))
             currentMod.AddOnTop(tempMat);
         }
     }
@@ -2251,19 +2251,19 @@ std::string slTwoInSlN::initPairingTable(bool useHtml)
 std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rightIndex, bool useHtml)
 { std::string beginMath, endMath, newLine;
   FormatExpressions latexFormat;
-  latexFormat.flagUseLatex= true;
+  latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML= false;
   if (useHtml)
   { beginMath= "<span class =\"math\">";
     endMath= "</span>";
-    newLine="<br>";
+    newLine ="<br>";
   } else
   { beginMath="$";
     endMath="$";
-    newLine="\n\n\n";
+    newLine ="\n\n\n";
   }
   std::stringstream out;
-  output.size= 0;
+  output.size = 0;
   List<Matrix<Rational> >& leftElements = this->theGmodKModules[leftIndex];
   List<Matrix<Rational> >& rightElements = this->theGmodKModules[rightIndex];
   Matrix<Rational> tempMat;
@@ -2288,7 +2288,7 @@ std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
   << beginMath << this->ElementModuleIndexToString(rightIndex, useHtml) << endMath << " pair to: ";
   for (int i = 0; i <output.size; i ++)
   { out << beginMath << this->ElementModuleIndexToString(output[i], useHtml) << endMath;
-    if (i!= output.size- 1)
+    if (i != output.size- 1)
       out << beginMath << "\\oplus" << endMath;
   }
   if (output.size>0)
@@ -2311,7 +2311,7 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
     buffer = this->Denominator.GetElement();
     this->Numerator.GetElement()*=(other.Denominator.GetElementConst());
     buffer*=(other.Numerator.GetElementConst());
-    this->Numerator.GetElement()+=(buffer);
+    this->Numerator.GetElement() +=(buffer);
     this->Denominator.GetElement()*=(other.Denominator.GetElementConst());
     if (this->Denominator.GetElement().IsEqualToZero())
       crash << crash;
@@ -2321,7 +2321,7 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
   { //stOutput << "Adding " << this->ToString() << " + " << other.ToString();
     this->Numerator.GetElement()*=(tempRat);
     this->Denominator.GetElement()*=(tempRat);
-    this->Numerator.GetElement()+=(other.Numerator.GetElementConst());
+    this->Numerator.GetElement() +=(other.Numerator.GetElementConst());
     this->ReduceMemory();
     this->SimplifyLeadingCoefficientOnly();
   }
@@ -2330,7 +2330,7 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
 }
 
 void MonomialP::MakeEi(int LetterIndex, int Power, int ExpectedNumVars)
-{ ExpectedNumVars =MathRoutines::Maximum(ExpectedNumVars, LetterIndex+ 1);
+{ ExpectedNumVars =MathRoutines::Maximum(ExpectedNumVars, LetterIndex + 1);
   this->MakeOne(ExpectedNumVars);
   (*this)[LetterIndex]=Power;
 }
@@ -2341,7 +2341,7 @@ void MonomialP::ExponentMeBy(const Rational& theExp)
 }
 
 bool MonomialP::operator>(const MonomialP& other) const
-{ if (this->monBody== other.monBody)
+{ if (this->monBody == other.monBody)
     return false;
   return this->IsGEQTotalDegThenLexicographicLastVariableStrongest(other);
 }
@@ -2364,7 +2364,7 @@ bool MonomialP::operator==(const MonomialP& other) const
   for (int i = this->monBody.size- 1; i>= other.monBody.size; i--)
     if (this->monBody[i]!= 0)
       return false;
-  int highestIndex=MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars())- 1;
+  int highestIndex =MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars())- 1;
   for (int i =highestIndex; i>= 0; i--)
     if (this->monBody[i]!= other.monBody[i])
       return false;
@@ -2384,7 +2384,7 @@ bool MonomialP::IsGEQLexicographicLastVariableStrongest(const MonomialP& other) 
     if (this->monBody[i]<0)
       return false;
   }
-  int highestIndex=MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars())- 1;
+  int highestIndex =MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars())- 1;
   for (int i =highestIndex; i>= 0; i--)
   { if (this->monBody[i]>other.monBody[i])
       return true;
@@ -2395,7 +2395,7 @@ bool MonomialP::IsGEQLexicographicLastVariableStrongest(const MonomialP& other) 
 }
 
 bool MonomialP::IsGEQLexicographicLastVariableWeakest(const MonomialP& other) const
-{ int commonSize=MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars());
+{ int commonSize =MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars());
   for (int i = 0; i <commonSize; i ++)
   { if (this->monBody[i]>other.monBody[i])
       return true;
@@ -2449,7 +2449,7 @@ void MonomialP::operator/=(const MonomialP& other)
 void MonomialP::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
 { if (newNumVars<0)
     newNumVars = 0;
-  int oldSize= this->monBody.size;
+  int oldSize = this->monBody.size;
   this->monBody.SetSize(newNumVars);
   for (int i = oldSize; i < this->monBody.size; i ++)
     (*this)[i]= 0;

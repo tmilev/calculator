@@ -516,7 +516,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands,
   Expression inputContextsMerged;
   if (!input.MergeContextsMyArumentsAndConvertThem<ElementUniversalEnveloping<RationalFunctionOld> >(inputContextsMerged, &theCommands.Comments))
     return false;
-  ElementUniversalEnveloping<RationalFunctionOld> result =inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
+  ElementUniversalEnveloping<RationalFunctionOld> result = inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   result *= inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   //stOutput << "before simplification: " << result.ToString() << " and after: " << result.ToString();
   result.Simplify();

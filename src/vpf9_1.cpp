@@ -20,7 +20,7 @@ Crasher::Crasher()
 
 void Crasher::FirstRun()
 { if (!this->flagCrashInitiateD && (theGlobalVariables.flagRunningApache || theGlobalVariables.flagRunningBuiltInWebServer) )
-    this->theCrashReport << "\n<span style=\"color:red\"><b>Crash</b></span> "
+    this->theCrashReport << "\n<span style =\"color:red\"><b>Crash</b></span> "
     << theGlobalVariables.GetElapsedSeconds() << " second(s) from the start.<hr>";
   this->flagCrashInitiateD = true;
 }
@@ -197,7 +197,7 @@ std::string GlobalVariables::ToStringProgressReportHtml()
     }
     for (int i = 0; i < this->ProgressReportStringS[threadIndex].size; i ++)
       if (this->ProgressReportStringS[threadIndex][i] != "")
-        reportStream << "\n<div id=\"divProgressReport" << i << "\">"
+        reportStream << "\n<div id =\"divProgressReport" << i << "\">"
         << this->ProgressReportStringS[threadIndex][i] << "\n</div>\n<hr>";
   }
   if (!crash.flagCrashInitiateD)
@@ -397,7 +397,7 @@ std::string GlobalVariables::ToStringSourceCodeInfo()
 { std::stringstream out;
   out << "<button " << HtmlRoutines::GetStyleButtonLikeHtml()
   << " onclick=\"switchMenu('sourceDetails');\" >Source code</button>";
-  out << "<div id=\"sourceDetails\" style=\"display: none\">";
+  out << "<div id =\"sourceDetails\" style =\"display: none\">";
   out << "<br>The calculator is a standalone application that can either be used "
   << " as a web server (similarly to SAGE) or "
   << " via an <a href=\"http://httpd.apache.org/\">Apache web server</a>. "
@@ -721,7 +721,7 @@ std::string DynkinDiagramRootSubalgebra::ToString(FormatExpressions* theFormat) 
 
 bool DynkinDiagramRootSubalgebra::CheckInitialization() const
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::CheckInitialization");
-//  if (this->AmbientRootSystem.size== 0 )
+//  if (this->AmbientRootSystem.size == 0 )
 //    crash << "Cannot compute Dynkin diagram root subalgebra: ambient root system not initialized" << crash;
   if (this->AmbientRootSystem.size != 0)
     if (this->AmbientBilinearForm.NumRows != this->AmbientRootSystem[0].size)
@@ -1155,11 +1155,11 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex()
     { QuasiPolynomial& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i];
       this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
       this->thePfs.GetVectorPartitionFunction(currentQPNoSub, this->thePfs.theChambersOld.TheObjects[i]->InternalPoint);
-      out << "\nChamber " << i+ 1 << " with internal point " << this->thePfs.theChambersOld.TheObjects[i]->InternalPoint.ToString() << " the quasipoly is: " << currentQPNoSub.ToString(false, false);
+      out << "\nChamber " << i + 1 << " with internal point " << this->thePfs.theChambersOld.TheObjects[i]->InternalPoint.ToString() << " the quasipoly is: " << currentQPNoSub.ToString(false, false);
       for (int k= 0; k< this->theLinearOperators.size; k++)
       { QuasiPolynomial& currentQPSub= this->theQPsSubstituted.TheObjects[i].TheObjects[k];
         std::stringstream tempStream;
-        tempStream << "Processing chamber " << i+ 1 << " linear operator " << k+ 1;
+        tempStream << "Processing chamber " << i + 1 << " linear operator " << k+ 1;
         theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= tempStream.str();
         theGlobalVariables.MakeReport();
         currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub);
@@ -1309,7 +1309,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
 /*    if (i ==2)
     { DrawingVariables tempDrawOps;
       tempDrawOps.NumHtmlGraphics =500;
-      stOutput << "<hr><hr> <b>Index: " << i+ 1 << " out of " << this->theLinearOperators.size << "</b> <hr>";
+      stOutput << "<hr><hr> <b>Index: " << i + 1 << " out of " << this->theLinearOperators.size << "</b> <hr>";
       Accum.DrawMe(tempDrawOps);
       stOutput << tempDrawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
     }
@@ -1533,7 +1533,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
 //  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots);
   this->log << "projections: " << tempRoots.ToString();
   theWeYl.theGroup.ComputeAllElements(false);
-  this->NonIntegralOriginModificationBasisChanged="(1/2,1/2)";
+  this->NonIntegralOriginModificationBasisChanged ="(1/2,1/2)";
   Matrix<Rational> theProjectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;
   FormatExpressions theFormat;
@@ -1739,7 +1739,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   tempMat.Transpose();
   tempMat.ActOnVectorsColumn(this->PreimageWeylChamberSmallerAlgebra);
   for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.size; i ++)
-  { this->PreimageWeylChamberSmallerAlgebra.TheObjects[i].SetSize(input.theRange.GetRank()+input.theDomain.GetRank()+ 1);
+  { this->PreimageWeylChamberSmallerAlgebra.TheObjects[i].SetSize(input.theRange.GetRank() + input.theDomain.GetRank() + 1);
     *this->PreimageWeylChamberSmallerAlgebra.TheObjects[i].LastObject()= 0;
   }*/
   for (int i = 0; i < this->PreimageWeylChamberSmallerAlgebra.Normals.size; i ++)
@@ -1747,7 +1747,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
     for (int j = 0; j < input.theDomain().GetRank(); j ++)
       tempRoot.TheObjects[j] = this->PreimageWeylChamberSmallerAlgebra.Normals[i][j];
   //  for (int j = 0; j<input.theRange.GetRank(); j ++)
-   //   tempRoot.TheObjects[j+input.theDomain.GetRank()]= tempRoot2.TheObjects[j];
+   //   tempRoot.TheObjects[j+ input.theDomain.GetRank()]= tempRoot2.TheObjects[j];
     this->PreimageWeylChamberSmallerAlgebra.Normals[i] = tempRoot;
   }
 
@@ -1810,12 +1810,12 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport()
   out << "Normals& Multiplicity of module with highest weight $(x_1,x_2)$\\endhead\n";
  /* for (int i = 0; i < this->projectivezedChambersSplitByMultFreeWalls.size; i ++)
   { tempRoot = this->projectivezedChambersSplitByMultFreeWalls.TheObjects[i].GetInternalPoint();
-    bool found= false;
+    bool found = false;
     for (int j = 0; j< this->projectivizedChamber.size; j ++)
       if (this->projectivizedChamber.TheObjects[j].IsInCone(tempRoot))
       { if (found)
           crash << crash;
-        found= true;
+        found = true;
       }
   }
   for (int i = 0; i < this->projectivizedChamber.size; i ++)
@@ -1827,11 +1827,11 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport()
         if (this->projectivizedChamber.TheObjects[i].IsInCone(tempRoot))
         { Rational tempRat;
           tempRat =*tempRoot.LastObject();
-          if (tempRat!= 0)
+          if (tempRat != 0)
             tempRoot/= tempRat;
           theMult.valueOnEachLatticeShift.TheObjects[0].Evaluate(tempRoot, tempRat);
           if (tempRat<1)
-          { indexMultFreeChamber =j;
+          { indexMultFreeChamber = j;
             break;
           }
         }
@@ -1859,7 +1859,7 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation()
   this->theMaxComputation.LPtoMaximizeLargerDim.SetSize(0);
   Lattice ZnLattice;
   int theAffineDim = 5;
-//  int theProjectivizedDim= theAffineDim+ 1;
+//  int theProjectivizedDim= theAffineDim + 1;
   ZnLattice.MakeZn(theAffineDim);
   this->numNonZeroMults = 0;
   ProgressReport theReport;

@@ -88,7 +88,7 @@ class AlgebraicNumber
   bool ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner);
   bool ConstructFromMinPoly(const Polynomial<Rational>& thePoly, AlgebraicClosureRationals& inputOwner)
   { Polynomial<AlgebraicNumber> polyConverted;
-    polyConverted= thePoly;
+    polyConverted = thePoly;
     return this->ConstructFromMinPoly(polyConverted, inputOwner);
   }
   bool AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner);
@@ -115,7 +115,7 @@ class AlgebraicNumber
   bool operator==(const AlgebraicNumber& other) const;
   bool operator==(const Rational& other) const;
   bool operator==(int other) const
-  { return *this ==(Rational)other;
+  { return *this == (Rational) other;
   }
 
   inline bool operator!=(const AlgebraicNumber& other) const
@@ -221,7 +221,7 @@ public:
   unsigned int HashFunction() const
   { if (this->theValue.IsEqualToZero())
       return 0;
-    return this->theValue.HashFunction()*SomeRandomPrimes[0] + this->theModulo.HashFunction() * SomeRandomPrimes[1];
+    return this->theValue.HashFunction() * SomeRandomPrimes[0] + this->theModulo.HashFunction() * SomeRandomPrimes[1];
   }
   static unsigned int HashFunction(const ElementZmodP& input)
   { return input.HashFunction();
@@ -233,7 +233,9 @@ public:
   { this->flagDeallocated = false;
     this->operator=(other);
   }
-  ~ElementZmodP(){this->flagDeallocated= true;}
+  ~ElementZmodP()
+  { this->flagDeallocated = true;
+  }
   void CheckIamInitialized() const
   { if (this->theModulo.IsEqualToZero())
       crash << "This is a programming error: computing with non-initialized element the ring Z mod p (the number p has not been initialized!)." << crash;

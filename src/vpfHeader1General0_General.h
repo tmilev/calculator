@@ -141,7 +141,7 @@ class Expression;
 class RegisterFunctionCall
 { public:
   int threadIndex;
-  RegisterFunctionCall(const char* fileName, int line, const std::string& functionName="");
+  RegisterFunctionCall(const char* fileName, int line, const std::string& functionName ="");
   ~RegisterFunctionCall();
 };
 
@@ -178,7 +178,7 @@ public:
     vP[0] = 1;
     vP[1] = 0; // at any given moment, p =vP[0]*N+vP[1]*X
     vD[0] = 0;
-    vD[1] = 1;   // at any given moment, d=vD[0]*N+vD[1]*X
+    vD[1] = 1;   // at any given moment, d =vD[0]*N+vD[1]*X
     p = N;
     d = X;
     d %= N;
@@ -239,7 +239,7 @@ public:
   static bool GenerateVectorSpaceClosedWRTOperation
   (List<theType>& inputOutputElts, int upperDimensionBound, void (*theBinaryOperation)(const theType& left, const theType& right, theType& output));
 //  static void NChooseK(int n, int k, LargeInt& output);//
-  static bool StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd= 0);
+  static bool StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd = 0);
   static bool StringEndsWith(const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning= 0);
   static char ConvertHumanReadableHexToCharValue(char input);
   static void StringSplitDefaultDelimiters(const std::string& inputString, List<std::string>& output);
@@ -798,9 +798,9 @@ public:
   }
   //List(List<Object>&& other)
   //{ this->initConstructorCallOnly();
-  //  this->size= other.size;
+  //  this->size = other.size;
   //  this->TheObjects = other.TheObjects;
-  //  other.size= 0;
+  //  other.size = 0;
   //  other.TheObjects = 0;
   //}
   List(const ListLight<Object>& other)
@@ -857,7 +857,7 @@ public:
     // informed some other object of the object's address, then moving an object
     // without using assignment operator would cause trouble
     // this->SetSize(this->size + 1);
-    // memmove(this->TheObjects+desiredIndex+ 1, this->TheObjects+desiredIndex, num_to_move*sizeof(o));
+    // memmove(this->TheObjects+desiredIndex + 1, this->TheObjects+desiredIndex, num_to_move*sizeof(o));
     // std::copy_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size- 1, this->TheObjects+this->size);
     // std::move_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size- 1, this->TheObjects+this->size);
     // this->TheObjects[desiredIndex] = o;
@@ -1112,11 +1112,11 @@ public:
   //    return;
   //  this->ReleaseMemory();
   //  this->TheObjects =right.TheObjects;
-  //  this->size=right.size;
-  //  this->ActualSize=right.ActualSize;
+  //  this->size =right.size;
+  //  this->ActualSize =right.ActualSize;
   //  right.TheObjects = 0;
-  //  right.size= 0;
-  //  right.ActualSize= 0;
+  //  right.size = 0;
+  //  right.ActualSize = 0;
   //}
   void operator=(const List<Object>& right)
   { if (this == &right)
@@ -1152,7 +1152,7 @@ public:
   { return !this->IsEqualTo(other);
   }
   bool operator==(const std::string& other)
-  { //std::cout << "CALLING COMPARISON OPERATOR, this->size= " << this->size << " a = " << a << std::endl;
+  { //std::cout << "CALLING COMPARISON OPERATOR, this->size = " << this->size << " a = " << a << std::endl;
     if (((unsigned) this->size) != other.size())
       return false;
     for (int i = 0; i < this->size; i ++)
@@ -1175,7 +1175,7 @@ public:
     for (int i = 0; i < this->size; i ++)
       this->TheObjects[i] = input[i];
   }
-  List();//<-newly constructed lists start with size= 0; This default is used in critical places in HashedList and other classes, do not change!
+  List();//<-newly constructed lists start with size = 0; This default is used in critical places in HashedList and other classes, do not change!
   ~List();
   void AssignListList(const List<List<Object> >& input)
   { int count = 0;
@@ -1439,7 +1439,7 @@ public:
     for (int i = 0; i < this->TheHashedArrays[hashIndex].size; i ++)
     { int j = this->TheHashedArrays[hashIndex].TheObjects[i];
       if (j >= this->size)
-        crash << "This is a programming error: corrupt hash table: at hashindex= " << hashIndex << " I get instructed to look up index " << j
+        crash << "This is a programming error: corrupt hash table: at hashindex = " << hashIndex << " I get instructed to look up index " << j
         << " but I have only " << this->size << " elements. " << crash;
       if ((*this)[j] == o)
         return j;
@@ -1498,7 +1498,7 @@ public:
         this->TheHashedArrays[theIndex].AddOnTop(i);
       }
   }
-  template<typename otherType=int>
+  template<typename otherType = int>
   void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder = 0, List<otherType>* carbonCopy = 0)
   { List<Object> theList;
     theList = *this;
@@ -2121,7 +2121,7 @@ void List<Object>::ExpandArrayOnTop(int increase)
   { newArray = new Object[this->ActualSize + increase];
   }
   catch(std::bad_alloc& theBA)
-  { crash << "Memory allocation failure: failed to allocate " << this->ActualSize +increase << " objects. " << crash;
+  { crash << "Memory allocation failure: failed to allocate " << this->ActualSize + increase << " objects. " << crash;
   }
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter += this->ActualSize + increase;
@@ -2145,7 +2145,7 @@ void List<Object>::ExpandArrayOnTop(int increase)
 // This doesn't actually work too well; valgrind --tool =massif is better
 #ifdef AllocationStatistics
   static unsigned int total_allocations_unreliable_counter;
-  total_allocations_unreliable_counter++;
+  total_allocations_unreliable_counter ++;
   if ((total_allocations_unreliable_counter & 0xFFFFFFF) == 0)
   { stOutput << "0x1000,0000th allocation, stack trace is ";
     StackTraceOut();

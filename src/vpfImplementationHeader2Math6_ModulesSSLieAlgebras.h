@@ -23,7 +23,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace
   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& oldRight = thePair.Object2;
   newLeft = thePair.Object1;
   (*newLeft.Powers.LastObject()) -= 1;
-  int theIndex= *newLeft.generatorsIndices.LastObject();
+  int theIndex = *newLeft.generatorsIndices.LastObject();
   if (*newLeft.Powers.LastObject() == 0)
   { newLeft.generatorsIndices.size --;
     newLeft.Powers.size --;
@@ -43,7 +43,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace
 //    stOutput << "<hr><hr>";
 //  stOutput << "<br>Computing (" << thePair.Object1 << ", " << thePair.Object2 << ")";
 //  if (this->cachedPairs.size< this->MaxNumCachedPairs)
-//  { indexInCache= this->cachedPairs.size;
+//  { indexInCache = this->cachedPairs.size;
 //    this->cachedPairs.AddOnTop(thePair);
 //    this->cachedTraces.AddOnTop(0);
 //  }
@@ -136,7 +136,7 @@ void ModuleSSalgebra<coefficient>::Substitution(const PolynomialSubstitution<Rat
       for (int k = 0; k < this->actionsGeneratorS[i][j].size; k ++)
         this->actionsGeneratorS[i][j][k].Substitution(theSub);
   List<MonomialUniversalEnveloping<coefficient> > oldGeneratingWordsNonReduced;
-  oldGeneratingWordsNonReduced=(this->theGeneratingWordsNonReduced);
+  oldGeneratingWordsNonReduced =(this->theGeneratingWordsNonReduced);
   this->theGeneratingWordsNonReduced.Clear();
   for (int i = 0; i < oldGeneratingWordsNonReduced.size; i ++)
   { oldGeneratingWordsNonReduced[i].Substitution(theSub);
@@ -673,7 +673,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
     currentList.QuickSortDescending();
     currentListInt.QuickSortDescending();
     for (int j = 0; j < currentList.size; j ++)
-    { //wordCounter++;
+    { //wordCounter ++;
       this->theGeneratingWordsNonReduced.AddOnTop(currentList[j]);
       this->theGeneratingWordsNonReducedInt.AddOnTop(currentListInt[j]);
       this->theGeneratingWordsWeightsPlusWeightFDpart.AddOnTop(this->theModuleWeightsSimpleCoords[i]);
@@ -765,7 +765,7 @@ void ModuleSSalgebra<coefficient>::IntermediateStepForMakeFromHW
     currentBF.init(currentWordList.size, currentWordList.size);
     for (int i = 0; i < currentWordList.size; i ++)
       for (int j = i; j < currentWordList.size; j ++)
-      { //stOutput << "<br>word " << i+ 1 << ": " << currentWordList[i].ToString(&theGlobalVariables.theDefaultLieFormat);
+      { //stOutput << "<br>word " << i + 1 << ": " << currentWordList[i].ToString(&theGlobalVariables.theDefaultLieFormat);
         //stOutput << "<br>word " << j+ 1 << ": " << currentWordList[j].ToString(&theGlobalVariables.theDefaultLieFormat);
         std::stringstream tempStream;
         tempStream << " Computing Shapovalov form layer " << l << " out of " << this->theGeneratingWordsGrouppedByWeight.size
@@ -814,7 +814,7 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical
   output.SetSize(0);
   output.Reserve(ownerSS.GetNumPosRoots());
 
-  int theBeginning = useNegativeNilradical ? 0: ownerSS.GetNumPosRoots()+ownerSS.GetRank();
+  int theBeginning = useNegativeNilradical ? 0: ownerSS.GetNumPosRoots() +ownerSS.GetRank();
   MemorySaving<List<int> > tempList;
   if (outputListOfGenerators == 0)
     outputListOfGenerators = &tempList.GetElement();
@@ -1066,7 +1066,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
       { const MonomialTensorGeneralizedVermas<coefficient>& currentMon = (*this)[j];
         if (currentMon.theMons.size != 1)
           return false;
-        MonomialGeneralizedVerma<coefficient>& currentSingleMon =currentMon.theMons[0];
+        MonomialGeneralizedVerma<coefficient>& currentSingleMon = currentMon.theMons[0];
         if (j == 0)
           tempOutput.MakeZero();
         tempOutput.AddMonomial(currentSingleMon, this->theCoeffs[j]);
@@ -1089,7 +1089,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
   }
   return true;
   //for (int i = 0; i <theOwner.size; i ++)
-  //{ //stOutput << "<hr><hr>Module" << i+ 1 << "<br>" << theOwner[i].ToString();
+  //{ //stOutput << "<hr><hr>Module" << i + 1 << "<br>" << theOwner[i].ToString();
   //}
 }
 
@@ -1115,7 +1115,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
     crash << "Output equals input, this is not supposed to happen. " << crash;
 //  int commentmewhendone;
 //  static int problemCounter = 0;
-//  problemCounter++;
+//  problemCounter ++;
 //  output.checkConsistency();
 //  std::string debugString;
 //  if (problemCounter ==44)
@@ -1182,7 +1182,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg
         output.AddMonomial(monActedOn, currentCoeff);
 //        stOutput << "<br>to get " << output.ToString();
       }
-      accumMon*=currentMon.theMons[j];
+      accumMon*= currentMon.theMons[j];
     }
   }
 }

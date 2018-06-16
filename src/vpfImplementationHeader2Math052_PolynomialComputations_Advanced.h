@@ -111,7 +111,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis
         //  this->basisCandidates.AddOnTop(this->remainderDivision);
         //if (this->basisCandidates.size>this->theBasiS.size)
         //  if (this->AddPolysAndReduceBasis(theGlobalVariables))
-        //    changed= true;
+        //    changed = true;
         this->basisCandidates.AddOnTop(this->SoPolyBuf);
         this->NumberGBComputations ++;
         if (this->MaxNumGBComputations > 0)
@@ -120,7 +120,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis
 //        if (this->AddPolyAndReduceBasis(theGlobalVariables))
 //        { i = 0;
 //          j = - 1;
-//          changed= true;
+//          changed = true;
 //        }
       }
     if (this->AddPolysAndReduceBasis())
@@ -501,7 +501,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
           <<  " by " << theBasiS[i].ToString() << "<br>i.e. subtracting "
           << this->bufPoly.ToString() ;
           Polynomial<Rational> currentRemainder1;
-          currentRemainder1=currentRemainder;
+          currentRemainder1= currentRemainder;
           currentRemainder1-= this->bufPoly;
           stOutput << " I must get: " << currentRemainder1.ToString();
         }*/
@@ -517,7 +517,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
         divisionOcurred = true;
 /*        if (this->NumberOfComputations>this->MaxNumGBComputations+ 1000)
         { stOutput << "<br>Result:<br> " << currentRemainder.ToString()
-          << "<br>Current divisor index: " << i+ 1;
+          << "<br>Current divisor index: " << i + 1;
           if (this->NumberOfComputations>this->MaxNumGBComputations+ 1010)
             crash
             << "<br>This may or may not be a programming error. While handling computation excess limit, "
@@ -787,7 +787,7 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly(Polynom
   tempP.MakeMonomiaL(theIndex, 1, 1);
   if (thePoly == tempP)
     return;
-  //stOutput << "<hr> Back substituting in x_{" << theIndex+ 1 << "}=" << thePoly.ToString();
+  //stOutput << "<hr> Back substituting in x_{" << theIndex + 1 << "}=" << thePoly.ToString();
   thePoly.Substitution(theFinalSub);
   bool changed = false;
   for (int i = 0; i < thePoly.size(); i ++)
@@ -995,7 +995,7 @@ void GroebnerBasisComputation<coefficient>::ProcessSolvedSubcaseIfSolvedOrProven
   if (potentiallySolvedCase.flagSystemSolvedOverBaseField)
   { //stOutput << "<hr>System solved after first recursive call. The input system before back sub: " << HtmlRoutines::GetMathSpanPure(inputSystem.ToString());
     potentiallySolvedCase.NumberSerreSystemComputations = this->NumberSerreSystemComputations;
-//    List<PolynomialSubstitution<coefficient> > impliedSubsCopy= this->theImpliedSubS;
+//    List<PolynomialSubstitution<coefficient> > impliedSubsCopy = this->theImpliedSubS;
 //    stOutput << "<br>potentially solved case: system solution:  "
 //    << potentiallySolvedCase.systemSolution.GetElement().ToStringCommaDelimited();
     this->solutionsFound = potentiallySolvedCase.solutionsFound;
@@ -1003,7 +1003,7 @@ void GroebnerBasisComputation<coefficient>::ProcessSolvedSubcaseIfSolvedOrProven
     this->flagSystemProvenToHaveNoSolution = potentiallySolvedCase.flagSystemProvenToHaveNoSolution;
     this->flagSystemProvenToHaveSolution = potentiallySolvedCase.flagSystemProvenToHaveSolution;
     this->flagSystemSolvedOverBaseField = potentiallySolvedCase.flagSystemSolvedOverBaseField;
-//    this->theImpliedSubS=impliedSubsCopy;
+//    this->theImpliedSubS= impliedSubsCopy;
 //    stOutput << "<br>this: system solution:  "
 //    << this->systemSolution.GetElement().ToStringCommaDelimited();
     this->BackSubstituteIntoPolySystem(this->theImpliedSubS);
@@ -1138,7 +1138,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List
     theReport2.Report(out.str());
 //    stOutput << out.str();
   }
-  List<Polynomial<coefficient> > systemBeforeHeuristics =inputSystem;
+  List<Polynomial<coefficient> > systemBeforeHeuristics = inputSystem;
   MonomialP singleMonEquation;
   if (this->flagUseTheMonomialBranchingOptimization)
     if (this->HasSingleMonomialEquation(inputSystem, singleMonEquation))

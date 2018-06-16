@@ -80,7 +80,7 @@ function modifyWeight(id) {
     weight: incomingPoints
   };
   //console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
-  var theURL = `${pathnames.calculatorAPI}?request =setProblemData&mainInput =${encodeURIComponent(JSON.stringify(modifyObject))}`;
+  var theURL = `${pathnames.calculatorAPI}?request=setProblemData&mainInput =${encodeURIComponent(JSON.stringify(modifyObject))}`;
   submitGET({
     url: theURL,
     progress: "spanProgressReportGeneral",
@@ -137,7 +137,7 @@ function getHTMLProblems(theProblemContainer) {
     result += `<a class ='slidesLink' href='${currentProblemData.slidesProjector}' target = '_blank'>Printable slides</a>`;
     result += `<a class ='slidesLink' href='${currentProblemData.slidesPrintable}' target = '_blank'>Slides</a>`;
     if (currentProblemData.linkSlidesLaTeX !== "" && currentProblemData.linkSlidesLaTeX !== undefined) {
-      result += `<a class ='slidesLink' href='${currentProblemData.linkSlidesLaTeX}' target = '_blank' download='${convertStringToLaTeXFileName(currentProblemData.title)}.tex'>.tex</a>`;
+      result += `<a class ='slidesLink' href='${currentProblemData.linkSlidesLaTeX}' target = '_blank' download ='${convertStringToLaTeXFileName(currentProblemData.title)}.tex'>.tex</a>`;
     }
     result += "</td>";
     result += "<td>";
@@ -265,7 +265,7 @@ function afterLoadTopics(incomingTopics, result) {
     stringHTMLContent += getHTMLfromTopics(thePage.theTopics);
     writeEditCoursePagePanel();
   } catch (e) {
-    stringHTMLContent = "<b style='color:red'>Data error</b>. " + e;
+    stringHTMLContent = "<b style ='color:red'>Data error</b>. " + e;
   }
   //stringHTMLContent += "<hr>DEBUG: incoming topics JSON: " + incomingTopics;
   topicsElements[0].innerHTML = stringHTMLContent;
@@ -306,7 +306,7 @@ function afterLoadCoursePage(incomingPage, result) {
   }
   //console.log("DEBUG: topic list cookie @ afterLoadCoursePage: " + getCookie("topicList"));
   submitGET({
-    url: `${pathnames.calculatorAPI}?request =${topicList}`,
+    url: `${pathnames.calculatorAPI}?request=${topicList}`,
     callback: afterLoadTopics,
     progress: "spanProgressReportGeneral"
   });
@@ -319,7 +319,7 @@ function selectCurrentCoursePage() {
     topicRequest = "templateJSON";
   }
   submitGET({
-    url: `${pathnames.calculatorAPI}?request =${topicRequest}`,
+    url: `${pathnames.calculatorAPI}?request=${topicRequest}`,
     callback: afterLoadCoursePage,
     progress: "spanProgressReportGeneral"
   });

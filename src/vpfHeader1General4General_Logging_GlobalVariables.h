@@ -177,7 +177,7 @@ public:
   std::string DisplayNameExtraOutputWithPath;
   //To contain the url of the executable.
   // Example:
-  // DisplayNameExecutable="/cgi-bin/calculator";
+  // DisplayNameExecutable ="/cgi-bin/calculator";
   std::string DisplayNameExecutable;
 
   std::string IPAdressCaller;

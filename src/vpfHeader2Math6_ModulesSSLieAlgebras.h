@@ -141,12 +141,12 @@ public:
     std::stringstream out;
     out << "v_{" << this->theHWFundamentalCoordsBaseField.ToString(theFormat) << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString() << "}";
     return out.str();
-//    return "hwv{}("+ this->GetOwner().GetLieAlgebraName(false)+ "," + this->theHWFundamentalCoordsBaseField.ToString(theFormat) + ","
+//    return "hwv{}("+ this->GetOwner().GetLieAlgebraName(false) + "," + this->theHWFundamentalCoordsBaseField.ToString(theFormat) + ","
 //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).ToString(theFormat) + ")";
   }
   void SplitOverLevi
   (std::string* Report, Selection& splittingParSel,
-   List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors = 0, Vectors<coefficient>* outputWeightsFundCoords = 0, Vectors<coefficient>* outputEigenSpace= 0,
+   List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors = 0, Vectors<coefficient>* outputWeightsFundCoords = 0, Vectors<coefficient>* outputEigenSpace = 0,
    charSSAlgMod<coefficient>* outputChar = 0);
   void SplitFDpartOverFKLeviRedSubalg
   (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall,

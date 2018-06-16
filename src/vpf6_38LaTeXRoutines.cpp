@@ -238,7 +238,7 @@ void LaTeXcrawler::BuildFreecalC()
   }
   this->theFileNameWorkingCopy = "working_file_" + this->theFileNameToCrawlPhysicalNoPathName;
   std::string theFileNameWorkingCopyPDF = "working_file_"
-  + this->theFileNameToCrawlPhysicalNoPathName.substr(0, this->theFileNameToCrawlPhysicalNoPathName.size() - 3)+"pdf";
+  + this->theFileNameToCrawlPhysicalNoPathName.substr(0, this->theFileNameToCrawlPhysicalNoPathName.size() - 3) +"pdf";
   int numLecturesToProcess = theLectureNumbers.size;
 
   //numLecturesToProcess =1;

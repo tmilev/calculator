@@ -830,7 +830,7 @@ std::string ProblemData::StorE()
 { MacroRegisterFunctionWithName("ProblemData::StorE");
   std::stringstream out;
   if (this->flagRandomSeedGiven)
-    out << "randomSeed=" << this->randomSeed;
+    out << "randomSeed =" << this->randomSeed;
   for (int i = 0; i < this->theAnswers.size(); i ++)
   { Answer& currentA = this->theAnswers[i];
     if (this->flagRandomSeedGiven || i != 0)
@@ -1321,7 +1321,7 @@ bool EmailRoutines::SendEmailWithMailGun
       isBad = true;
     *commentsGeneral << "<br>Result:<br>";
     if (isBad)
-      *commentsGeneral << "<span style=\"color:red\"><b>";
+      *commentsGeneral << "<span style =\"color:red\"><b>";
     *commentsGeneral << HtmlRoutines::ConvertStringToHtmlString(commandResult, true);
     if (isBad)
       *commentsGeneral << "</b></span>";
@@ -1387,9 +1387,9 @@ std::string EmailRoutines::GetCommandToSendEmailWithMailX()
   << "\" "
   << "-S smtp-use-starttls -S smtp-auth=login -S smtp-auth-user =\""
   << this->fromEmail
-  << "\" -S smtp-auth-password=\""
+  << "\" -S smtp-auth-password =\""
   << this->fromEmailAuth
-  << "\" -S ssl-verify=ignore "
+  << "\" -S ssl-verify = ignore "
   << "-S nss-config-dir =/etc/pki/nssdb/ "
   << this->toEmail;
   return out.str();
@@ -1552,11 +1552,11 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   else
     out << theGlobalVariables.hopefullyPermanentWebAdress;
   out << theGlobalVariables.DisplayNameExecutable
-  << "?request =activateAccount&username="
+  << "?request=activateAccount&username="
   << HtmlRoutines::ConvertStringToURLString(inputUserNameUnsafe, false);
   if (inputEmailUnsafe != "")
-    out << "&email =" << HtmlRoutines::ConvertStringToURLString(inputEmailUnsafe, false);
-  out << "&activationToken =" << HtmlRoutines::ConvertStringToURLString(theActivationToken, false);
+    out << "&email=" << HtmlRoutines::ConvertStringToURLString(inputEmailUnsafe, false);
+  out << "&activationToken=" << HtmlRoutines::ConvertStringToURLString(theActivationToken, false);
   return out.str();
 }
 

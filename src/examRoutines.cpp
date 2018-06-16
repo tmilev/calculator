@@ -502,11 +502,11 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(bool needToLo
     if (!this->flagIsForReal)
       out
       << "If you specified the problem through the 'problem link' link,"
-      << " please go back to the course page. Alternatively, remove the randomSeed=... "
+      << " please go back to the course page. Alternatively, remove the randomSeed =... "
       << "portion of the page address and reload the page (with the randomSeed portion removed). ";
     else
       out << "<b>Your random seed must have been reset. </b>";
-    out << "<br><span style=\"color:red\"><b>If the problem persists after a couple of page refreshes, "
+    out << "<br><span style =\"color:red\"><b>If the problem persists after a couple of page refreshes, "
     << "it's a bug. Please take a screenshot and email the site admin/your instructor. </b></span>";
     if (theGlobalVariables.UserDefaultHasProblemComposingRights())
       out << "<hr> <b>Comments, admin view only.</b><br> " << this->comments.str();
@@ -556,11 +556,11 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
     if (!this->flagIsForReal)
       out
       << "If you specified the problem through the 'problem link' link,"
-      << " please go back to the course page. Alternatively, remove the randomSeed=... "
+      << " please go back to the course page. Alternatively, remove the randomSeed =... "
       << "portion of the page address and reload the page (with the randomSeed portion removed). ";
     else
       out << "<b>Your random seed must have been reset. </b>";
-    out << "<br><span style=\"color:red\"><b>If the problem persists after a couple of page refreshes, "
+    out << "<br><span style =\"color:red\"><b>If the problem persists after a couple of page refreshes, "
     << "it's a bug. Please take a screenshot and email the site admin/your instructor. </b></span>";
     if (theGlobalVariables.UserDefaultHasProblemComposingRights())
       out << "<hr> <b>Comments, admin view only.</b><br> " << this->comments.str();
@@ -623,7 +623,7 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
       << "</problemNavigation>";
       this->comments << commentsStream.str();
       this->comments << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request =selectCourse\">Go to course list page.</a>";
+      << "?request=selectCourse\">Go to course list page.</a>";
     }
   }
   this->theProblemData.CheckConsistency();
@@ -657,7 +657,7 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   } else if (theGlobalVariables.UserGuestMode())
   { requestTypeSubmit = "submitExerciseNoLogin";
     requestTypePreview = "submitExercisePreviewNoLogin";
-    submitRandomSeed= true;
+    submitRandomSeed = true;
   } else
   { requestTypeSubmit = "submitExercise";
     requestTypePreview = "submitExercisePreview";
@@ -672,9 +672,9 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   else
     requestSolution = "problemSolutionNoLogin";
   out
-  << "<script type=\"text/javascript\"> \n"
+  << "<script type =\"text/javascript\"> \n"
   << "var JavascriptInsertionAlreadyCalled;\n"
-  << "JavascriptInsertionAlreadyCalled= false;\n"
+  << "JavascriptInsertionAlreadyCalled = false;\n"
   << "var numInsertedJavascriptChildren;\n"
   << "var numInsertedJavascriptChildren = 0;\n"
   << "var timerForPreviewAnswers;\n"
@@ -713,10 +713,10 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams, requestType){\n";
   out << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  spanVerification = document.getElementById(idVerification);\n"
-  << "  if (spanVerification ==null){\n"
+  << "  if (spanVerification == null){\n"
   << "    spanVerification = document.createElement('span');\n"
   << "    document.body.appendChild(spanVerification);\n"
-  << "    spanVerification.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idVerification + \"MISSING! </span>\";\n"
+  << "    spanVerification.innerHTML= \"<span style ='color:red'> ERROR: span with id \" + idVerification + \"MISSING! </span>\";\n"
   << "  }\n"
   << "  spanStudentAnswer = document.getElementById(idAnswer);\n"
   << "  inputParams+=\"&calculatorAnswer\" + idAnswer\n"
@@ -730,7 +730,7 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"GET\", ";
   out << "\"" << theGlobalVariables.DisplayNameExecutable << "\"";
-  out << " + \"?\"+inputParams, true);\n"
+  out << " + \"?\"+ inputParams, true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n";
   //Old code, submits all answers. May need to be used as an alternative
   //submission option.
@@ -748,13 +748,13 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   << "    }\n"
   << "    numInsertedJavascriptChildren = 0;\n"
   << "    for (i = 0; i <scripts.length; i ++){\n"
-  << "      scriptChild= document.createElement('script');\n"
+  << "      scriptChild = document.createElement('script');\n"
   << "      scriptChild.innerHTML=scripts[i].innerHTML;\n"
-  << "      scriptChild.type='text/javascript';\n"
+  << "      scriptChild.type ='text/javascript';\n"
   << "      document.getElementsByTagName( 'head' )[0].appendChild(scriptChild);\n"
   << "      numInsertedJavascriptChildren ++;\n "
   << "    }\n"
-  << "    JavascriptInsertionAlreadyCalled= true;\n"
+  << "    JavascriptInsertionAlreadyCalled = true;\n"
   << "    MathJax.Hub.Queue(['Typeset', MathJax.Hub, spanVerification]);\n"
   << "  }\n"
 //  << "  https.send(inputParams);\n"
@@ -797,15 +797,15 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "";
   std::stringstream out;
-  out << "<a class =\"linkStandardButtonLike\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request ="
+  out << "<a class =\"linkStandardButtonLike\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
   << theGlobalVariables.userCalculatorRequestType << "&";
   std::string urledProblem = HtmlRoutines::ConvertStringToURLString(this->fileName, false);
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
-  out << "fileName=" << urledProblem << "&"
+  out << "fileName =" << urledProblem << "&"
   << theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (includeRandomSeed)
-    out << "randomSeed=" << this->theProblemData.randomSeed << "&";
+    out << "randomSeed =" << this->theProblemData.randomSeed << "&";
   if (setDebugFlag)
     out << "debugFlag= true&";
   else
@@ -813,7 +813,7 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin
   if (this->topicListFileName != "")
     out << "topicList =" << this->topicListFileName << "&";
   if (this->courseHome != "")
-    out << "courseHome=" << this->courseHome << "&";
+    out << "courseHome =" << this->courseHome << "&";
   if (theGlobalVariables.UserStudentVieWOn())
   { out << "studentView= true&";
     if (theGlobalVariables.GetWebInput("studentSection") != "")
@@ -828,7 +828,7 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
   std::string urledProblem = HtmlRoutines::ConvertStringToURLString(theFileName, false);
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
-  << "fileName=" << urledProblem << "&";
+  << "fileName =" << urledProblem << "&";
   if (theGlobalVariables.UserStudentVieWOn())
   { refStreamNoRequest << "studentView= true&";
     if (theGlobalVariables.GetWebInput("studentSection")!="")
@@ -838,20 +838,20 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   if (this->topicListFileName != "")
     refStreamNoRequest << "topicList =" << this->topicListFileName << "&";
   if (this->courseHome != "")
-    refStreamNoRequest << "courseHome=" << this->courseHome << "&";
+    refStreamNoRequest << "courseHome =" << this->courseHome << "&";
   if (theFileName == this->topicListFileName || theFileName == this->courseHome ||
       MathRoutines::StringEndsWith(theFileName, ".txt"))
   { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request = template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
+    << "?request= template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
     return out.str();
   }
   if (!theGlobalVariables.UserGuestMode())
   { refStreamExercise << theGlobalVariables.DisplayNameExecutable
-    << "?request =exercise&" << refStreamNoRequest.str();
+    << "?request=exercise&" << refStreamNoRequest.str();
     refStreamForReal << theGlobalVariables.DisplayNameExecutable
-    << "?request =scoredQuiz&" << refStreamNoRequest.str();
+    << "?request=scoredQuiz&" << refStreamNoRequest.str();
   } else
-    refStreamExercise << "?request =exerciseNoLogin&" << refStreamNoRequest.str();
+    refStreamExercise << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
   if (!theGlobalVariables.UserGuestMode())
     out << "<b><a class =\"problemLinkQuiz\" href=\"" << refStreamForReal.str() << "\">"
     << CalculatorHTML::stringScoredQuizzes << "</a></b>";
@@ -1004,7 +1004,7 @@ std::string SyntacticElementHTML::ToStringDebug()
   if (this->syntacticRole == "")
     return HtmlRoutines::ConvertStringToHtmlString(this->ToStringTagAndContent(), false);
   std::stringstream out;
-  out << "<span style=\"color:green\">";
+  out << "<span style =\"color:green\">";
   out << HtmlRoutines::ConvertStringToHtmlString(this->syntacticRole, false);
   out << "</span>";
   out << "[" << HtmlRoutines::ConvertStringToHtmlString(this->ToStringTagAndContent(), false) << "]";
@@ -1171,9 +1171,9 @@ std::string CalculatorHTML::PrepareUserInputBoxes()
   for (int i = 0; i < theArgs.size(); i ++)
     if (MathRoutines::StringBeginsWith(theArgs.theKeys[i], "userInputBox", &inputNonAnswerReader))
       if (inputNonAnswerReader != "" && theArgs.theValues[i] != "")
-      { out << "setInputBox(name="
+      { out << "setInputBox(name ="
         << inputNonAnswerReader
-        << ", value=" << HtmlRoutines::ConvertURLStringToNormal(theArgs.theValues[i], false)
+        << ", value =" << HtmlRoutines::ConvertURLStringToNormal(theArgs.theValues[i], false)
         << "); ";
       }
   return out.str();
@@ -1218,7 +1218,7 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
   this->theProblemData.commandsGenerateProblemNoEnclosures = streamCommandsNoEnclosures.str();
   std::stringstream debugStream;
   debugStream << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-  << "?request =calculator&mainInput ="
+  << "?request= calculator&mainInput ="
   << HtmlRoutines::ConvertStringToURLString(this->theProblemData.commandsGenerateProblemNoEnclosures, false)
   << "\"> "
   << "Input link </a>";
@@ -1339,7 +1339,7 @@ bool CalculatorHTML::PrepareCommandsSolution
       << this->CleanUpCommandString(currentElt.content) << "); ";
     }
   }
-  theAnswer.commandsSolutionOnly=streamCommands.str();
+  theAnswer.commandsSolutionOnly =streamCommands.str();
   //stOutput << "<br>Final give up command: " << theAnswer.commandsNoEnclosureAnswerOnGiveUpOnly;
   return true;
 }
@@ -1410,7 +1410,7 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   { comments << "<br>Failed to interpret your file. "
     << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
-    << "?request =calculator&mainInput ="
+    << "?request= calculator&mainInput ="
     << HtmlRoutines::ConvertStringToURLString( this->theProblemData.commandsGenerateProblemNoEnclosures,false)
     << "\">Input link</a><br>"
     << "The interpretation input was:<br> "
@@ -1460,7 +1460,7 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
     return;
 #ifdef MACRO_use_MongoDB
   std::stringstream out;
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =accounts\"> Manage accounts</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\"> Manage accounts</a>";
   inputOutput.interpretedCommand = out.str();
 #else
   inputOutput.interpretedCommand = "<b>Managing class not available (no database).</b>";
@@ -1506,18 +1506,18 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.idButtonInterpret = "buttonInterpret" + answerId;
   currentA.idButtonAnswer = "buttonAnswer" + answerId;
 
-  currentA.htmlButtonSubmit = "<button class =\"submitButton\" id=\"" + currentA.idButtonSubmit + "\"";
+  currentA.htmlButtonSubmit = "<button class =\"submitButton\" id =\"" + currentA.idButtonSubmit + "\"";
   if (!this->flagUseJSON)
     currentA.htmlButtonSubmit += " onclick = \"submitAnswers('" + answerId + "', '" + currentA.idVerificationSpan + "')\"";
   currentA.htmlButtonSubmit +=  ">Submit</button>";
   currentA.htmlButtonInterpret = (std::string)"<button class =\"previewButton\" ";
-  currentA.htmlButtonInterpret += " id=\"" + currentA.idButtonInterpret + "\" ";
+  currentA.htmlButtonInterpret += " id =\"" + currentA.idButtonInterpret + "\" ";
   if (!this->flagUseJSON)
     currentA.htmlButtonInterpret += "onclick=\"previewAnswersNoTimeOut('" + answerId + "', '" + currentA.idVerificationSpan + "')" + "\"";
   currentA.htmlButtonInterpret += ">Interpret</button>";
   if (!this->flagIsForReal)
   { if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly != "")
-    { currentA.htmlButtonAnswer = "<button id=\"" + currentA.idButtonAnswer +
+    { currentA.htmlButtonAnswer = "<button id =\"" + currentA.idButtonAnswer +
       "\" class =\"showAnswerButton\"";
       if (!this->flagUseJSON)
         currentA.htmlButtonAnswer += " onclick=\"giveUp('" + answerId + "', '" + currentA.idVerificationSpan + "')\"";
@@ -1544,31 +1544,31 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   inputOutput.ToStringOpenTag("textarea") + inputOutput.ToStringCloseTag("textarea");
   currentA.htmlSpanMQfield =
   (std::string)"<div class =\"calculatorMQfieldEnclosure\">" +
-  "<span id='" + currentA.idMQfield + "'>" + "</span>" +
+  "<span id ='" + currentA.idMQfield + "'>" + "</span>" +
   "</div>";
   //currentA.htmlMQjavascript = CalculatorHtmlFunctions::GetJavascriptMathQuillBox(currentA);
   currentA.htmlSpanMQButtonPanel =
-  "<div class =\"mqButtonPanel\" id=\"" + currentA.idMQButtonPanelLocation + "\" "+  "buttons =\"" +
+  "<div class =\"mqButtonPanel\" id =\"" + currentA.idMQButtonPanelLocation + "\" "+  "buttons =\"" +
   currentA.MQpanelButtonOptions + "\"></div>";
-  currentA.htmlSpanSolution = "<span id=\"" + currentA.idSpanSolution + "\"></span>";
+  currentA.htmlSpanSolution = "<span id =\"" + currentA.idSpanSolution + "\"></span>";
   std::stringstream verifyStream;
-  verifyStream << "<span id=\"" << currentA.idVerificationSpan << "\">";
+  verifyStream << "<span id =\"" << currentA.idVerificationSpan << "\">";
   int numCorrectSubmissions = currentA.numCorrectSubmissions;
   int numSubmissions = currentA.numSubmissions;
   if (theGlobalVariables.userCalculatorRequestType == "scoredQuiz" ||
       theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON")
   { if (numCorrectSubmissions > 0)
-    { verifyStream << "<b><span style=\"color:green\">Correctly answered: \\("
+    { verifyStream << "<b><span style =\"color:green\">Correctly answered: \\("
       << currentA.firstCorrectAnswerClean << "\\) </span></b> ";
       if (numSubmissions > 0)
         verifyStream << "<br>Used: " << numSubmissions << " attempt(s) (" << numCorrectSubmissions << " correct).";
     } else
-    { verifyStream << " <b><span style=\"color:brown\">Waiting for answer. </span></b>";
+    { verifyStream << " <b><span style =\"color:brown\">Waiting for answer. </span></b>";
       if (numSubmissions > 0)
         verifyStream << numSubmissions << " attempt(s) so far. ";
     }
   } else
-    verifyStream << " <b><span style=\"color:brown\">Waiting for answer [unlimited tries]</span></b>";
+    verifyStream << " <b><span style =\"color:brown\">Waiting for answer [unlimited tries]</span></b>";
   verifyStream << "</span>";
   currentA.htmlSpanVerifyAnswer = verifyStream.str();
   return true;
@@ -1676,7 +1676,7 @@ std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
         inputLink[firstMeaningfulChar] != '\t' &&
         inputLink[firstMeaningfulChar] != ' ')
       break;
-  unsigned lastMeaningfulChar =inputLink.size() - 1;
+  unsigned lastMeaningfulChar = inputLink.size() - 1;
   for (; lastMeaningfulChar > firstMeaningfulChar; lastMeaningfulChar --)
     if (inputLink[lastMeaningfulChar] != '\n' &&
         inputLink[lastMeaningfulChar] != '\r' &&
@@ -1730,7 +1730,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   if (currentDeadline == "")
   { if (returnEmptyStringIfNoDeadline)
       return "";
-    out << "<span style=\"color:orange\">No deadline yet</span>";
+    out << "<span style =\"color:orange\">No deadline yet</span>";
     //out << "DEBUG: section: " << sectionNumber;
     return out.str();
   }
@@ -1739,7 +1739,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   //<-For the time being, we hard-code it to month/day/year format (no time to program it better).
   std::stringstream badDateStream;
   if (!deadline.AssignMonthDayYear(currentDeadline, badDateStream))
-    out << "<span style=\"color:red\">" << badDateStream.str() << "</span>";
+    out << "<span style =\"color:red\">" << badDateStream.str() << "</span>";
   //  out << "deadline.date: " << deadline.theTime.tm_mday;
   now.AssignLocalTime();
   //  out << "Now: " << asctime (&now.theTime) << " mktime: " << mktime(&now.theTime)
@@ -1759,7 +1759,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
     out << "Deadline: ";
   if (!deadlineHasPassed)
   { if (deadlineIsNear)
-      hoursTillDeadlineStream << "<span style=\"color:red\">"
+      hoursTillDeadlineStream << "<span style =\"color:red\">"
       << TimeWrapper::ToStringSecondsToDaysHoursSecondsString
       (secondsTillDeadline, false, true) << "</span>";
     else
@@ -1769,19 +1769,19 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   } else
     hoursTillDeadlineStream << "[passed].";
   if (deadlineHasPassed && !problemAlreadySolved)
-  { out << "<span style=\"color:blue\">" << currentDeadline << "</span> ";
-    out << "<span style=\"red\"><b>[passed].</b></span>";
+  { out << "<span style =\"color:blue\">" << currentDeadline << "</span> ";
+    out << "<span style =\"red\"><b>[passed].</b></span>";
   } else
   { if (problemAlreadySolved && !isSection)
-      out << "<span style=\"color:green\">" << currentDeadline << "</span> ";
+      out << "<span style =\"color:green\">" << currentDeadline << "</span> ";
     else if (deadlineIsNear && !isSection)
-      out << "<span style=\"color:red\">" << currentDeadline << "</span> ";
+      out << "<span style =\"color:red\">" << currentDeadline << "</span> ";
     else
-      out << "<span style=\"color:brown\">" << currentDeadline << "</span> ";
+      out << "<span style =\"color:brown\">" << currentDeadline << "</span> ";
     out << hoursTillDeadlineStream.str();
   }
   return
-  //"[<span style=\"color:green\"><b>disabled</b> </span>] "+
+  //"[<span style =\"color:green\"><b>disabled</b> </span>] "+
   out.str();
 #else
   out  << "Database not running: no deadlines";
@@ -1846,7 +1846,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   Crypto::computeSha1outputBase64(inputOutput.id);
   inputOutput.idDeadlineButton = "deadlineButton" +
   Crypto::computeSha1outputBase64(inputOutput.id);
-  deadlineStream << "<table class =\"deadlineTable\" id=\""
+  deadlineStream << "<table class =\"deadlineTable\" id =\""
   << inputOutput.idDeadlineTable
   << "\">";
   deadlineStream << "<tr><th>Grp.</th><th>Deadline</th></tr>";
@@ -1883,8 +1883,8 @@ void CalculatorHTML::ComputeDeadlineModifyButton
     (inputOutput.id, this->databaseStudentSections[i],
      problemAlreadySolved, false, isProblemGroup);
     deadlineStream
-    << "<td> <input class =\"modifyDeadlineInput\" type=\"text\" id=\""
-    << currentDeadlineId << "\" value=\"";
+    << "<td> <input class =\"modifyDeadlineInput\" type =\"text\" id =\""
+    << currentDeadlineId << "\" value =\"";
     if (!inputOutput.deadlinesAreInherited[i])
       deadlineStream << inputOutput.deadlinesPerSectioN[i];
     deadlineStream << "\"> " ;
@@ -1914,7 +1914,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
     << HtmlRoutines::ConvertStringToURLString(this->databaseStudentSections[i], false)
     << "='";
     deadlineStream << "+ encodeURIComponent(document.getElementById('"
-    << inputOutput.idsDeadlines[i] << "').value)+'&'";
+    << inputOutput.idsDeadlines[i] << "').value) +'&'";
   }
   deadlineStream << ")), '" << inputOutput.idDeadlineReport << "',"
   << " 'setProblemData', "
@@ -1927,7 +1927,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   deadlineStream << "<b>Set</b></button>";
   deadlineStream << "</td>";
   deadlineStream << "<td>";
-  deadlineStream << "<span id=\"" << inputOutput.idDeadlineReport << "\"></span>";
+  deadlineStream << "<span id =\"" << inputOutput.idDeadlineReport << "\"></span>";
   deadlineStream << "</td>";
   deadlineStream << "</tr>";
   if (!isProblemGroup)
@@ -1938,7 +1938,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
 //  out << deadlineStream.str();
 //  out << "<table>";
 //  out << "<tr><td>";
-  out << "<button class =\"accordion\" id=\""
+  out << "<button class =\"accordion\" id =\""
   << inputOutput.idDeadlineButton
   << "\">"
   << inputOutput.displayDeadlinE << "</button>"
@@ -2138,7 +2138,7 @@ std::string CalculatorHTML::ToStringParsingStack(List<SyntacticElementHTML>& the
   std::stringstream out;
   out << "#Non-dummy elts: " << theStack.size - SyntacticElementHTML::ParsingNumDummyElements << ". ";
   for (int i = SyntacticElementHTML::ParsingNumDummyElements; i < theStack.size; i ++)
-  { out << "<span style=\"color:" << ((i % 2 == 0) ? "orange" : "blue") << "\">";
+  { out << "<span style =\"color:" << ((i % 2 == 0) ? "orange" : "blue") << "\">";
     std::string theContent = theStack[i].ToStringDebug();
     if (theContent.size() == 0)
       theContent = "<b>empty</b>";
@@ -2444,7 +2444,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       continue;
     }
     if (thirdToLast.syntacticRole == "<openTag" && secondToLast.syntacticRole == "" && last.syntacticRole == "" &&
-        secondToLast != "=" && secondToLast != "\"" && last != "=" && last!="\"")
+        secondToLast != "=" && secondToLast != "\"" && last != "=" && last !="\"")
     { thirdToLast.tagKeysWithoutValue.AddOnTop(secondToLast.content);
       eltsStack[eltsStack.size - 2] = *eltsStack.LastObject();
       eltsStack.RemoveLastObject();
@@ -2529,7 +2529,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
           if (MathRoutines::StringBeginsWith(tagClass, "calculator"))
             if (!this->calculatorClasses.Contains(tagClass))
               comments
-              << "<hr><b><span style=\"color:red\">Warning: found class tag: "
+              << "<hr><b><span style =\"color:red\">Warning: found class tag: "
               << tagClass
               << ". The name of this class starts with calculator yet this is not"
               << " a calculator class. This may be a typo. "
@@ -2856,7 +2856,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
 { MacroRegisterFunctionWithName("CalculatorHTML::GetJavascriptMathQuillBoxes");
   std::stringstream out;
   ////////////////////////////////////////////////////////////////////
-  out << "<script type=\"text/javascript\">\n";
+  out << "<script type =\"text/javascript\">\n";
   out << "answerMQspanIds = [";
   for (int i = 0; i < this->theProblemData.theAnswers.size(); i ++)
   { out << "\"" << this->theProblemData.theAnswers[i].idMQfield << "\"";
@@ -2930,7 +2930,7 @@ bool CalculatorHTML::StoreRandomSeedCurrent(std::stringstream& commentsOnFailure
   this->theProblemData.flagRandomSeedGiven = true;
   this->currentUseR.SetProblemData(this->fileName, this->theProblemData);
   if (!this->currentUseR.StoreProblemDataToDatabaseJSON(commentsOnFailure))
-  { commentsOnFailure << "<span style=\"color:red\"> <b>"
+  { commentsOnFailure << "<span style =\"color:red\"> <b>"
     << "Error: failed to store problem in database. "
     << "If you see this message, please take a screenshot and email your instructor. "
     << "</b></span>";
@@ -3001,9 +3001,9 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     this->outputDeadlineString = this->ToStringDeadline(this->fileName, problemAlreadySolved, true, true);
     if (!this->flagUseJSON)
     { if (this->outputDeadlineString == "")
-        outBody << "<span style=\"color:orange\"><b>No deadline yet but scores are recorded. </b></span>";
+        outBody << "<span style =\"color:orange\"><b>No deadline yet but scores are recorded. </b></span>";
       else
-        outBody << "<span style=\"color:brown\"><b>Scores are recorded. </b></span>";
+        outBody << "<span style =\"color:brown\"><b>Scores are recorded. </b></span>";
       outBody << problemLabel;
       outBody << this->outputDeadlineString << "\n<hr>\n";
     }
@@ -3015,7 +3015,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
              theGlobalVariables.userCalculatorRequestType != "templateJSON" &&
              theGlobalVariables.userCalculatorRequestType != "templateJSONNoLogin")
     if (!this->flagUseJSON)
-      outBody << "<span style=\"color:green\"><b>Scores not recorded. </b></span>"
+      outBody << "<span style =\"color:green\"><b>Scores not recorded. </b></span>"
       << problemLabel << "<hr>";
   //////////////////////////////
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
@@ -3091,13 +3091,13 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   if (this->flagIsForReal && this->NumAttemptsToInterpret > 1)
   { shouldResetTheRandomSeed = true;
     outBody
-    << "<hr><span style=\"color:red\"><b>"
+    << "<hr><span style =\"color:red\"><b>"
     << "Your problem's random seed was just reset. </b></span> "
     << "You should be seeing this message very rarely, "
     << "<b>ONLY IF</b> your problem was changed by your instructor "
     << "<b>AFTER</b> you started solving it. "
     << "You should not be seeing this message a second time. "
-    << "<span style=\"color:red\"><b>If you see this message every "
+    << "<span style =\"color:red\"><b>If you see this message every "
     << "time you reload the problem "
     << "this is a bug. Please take a screenshot and send it to your instructor. </b></span>";
   }
@@ -3151,23 +3151,23 @@ std::string CalculatorHTML::ToStringProblemNavigation() const
     out << "<b>Guest mode</b>" << linkSeparator;
   if (!theGlobalVariables.flagLoggedIn)
      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-     << "?request =login\">Log in</a> " << linkSeparator;
+     << "?request=login\">Log in</a> " << linkSeparator;
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
   std::string calcArgsNoPassExamDetails =
   theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType == "exercise")
-    { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =scoredQuiz&"
+    { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&"
       << this->ToStringCalculatorArgumentsForProblem("scoredQuiz", studentView)
       << "\">" << this->stringScoredQuizzes << "</a>" << linkSeparator;
-      out << "<span style=\"color:green\"><b>" << this->stringPracticE << "</b>"
+      out << "<span style =\"color:green\"><b>" << this->stringPracticE << "</b>"
       << "</span>" << linkSeparator;
     } else if (theGlobalVariables.userCalculatorRequestType == "scoredQuiz")
-    { out << "<span style=\"color:brown\"><b>"
+    { out << "<span style =\"color:brown\"><b>"
       << this->stringScoredQuizzes << "</b></span>" << linkSeparator;
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request =exercise&"
+      << "?request=exercise&"
       << this->ToStringCalculatorArgumentsForProblem("exercise", studentView)
       << "\">" << this->stringPracticE << "</a>" << linkSeparator;
     }
@@ -3178,38 +3178,38 @@ std::string CalculatorHTML::ToStringProblemNavigation() const
       out << "<b>Problem not in course</b>" << linkSeparator;
     else
     { if (indexInParent > 0)
-      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request ="
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
         << theGlobalVariables.userCalculatorRequestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection") != "")
           out << "studentSection =" << theGlobalVariables.GetWebInput("studentSection") << "&";
         out << "topicList =" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
-        out << "courseHome=" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
-        out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent - 1], false)
+        out << "courseHome =" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
+        out << "fileName =" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent - 1], false)
         << "\">&#8592;</a>" << linkSeparator;
       } else
-        out << "<a disabled=\"disabled\">&#8592;</a>" << linkSeparator;
+        out << "<a disabled =\"disabled\">&#8592;</a>" << linkSeparator;
       if (indexInParent < this->problemNamesNoTopics.size - 1)
-      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request ="
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
         << theGlobalVariables.userCalculatorRequestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection") != "")
           out << "studentSection =" << theGlobalVariables.GetWebInput("studentSection") << "&";
         out << "topicList =" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
-        out << "courseHome=" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
-        out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent + 1], false)
+        out << "courseHome =" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
+        out << "fileName =" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent + 1], false)
         << "\">&#8594;</a>" << linkSeparator;
       } else
-        out << "<a disabled=\"disabled\">&#8594;</a>" << linkSeparator;
+        out << "<a disabled =\"disabled\">&#8594;</a>" << linkSeparator;
     }
   }
   if (this->flagIsExamProblem &&
       (theGlobalVariables.userCalculatorRequestType == "exercise" ||
        theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin"))
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request =" << theGlobalVariables.userCalculatorRequestType << "&"
+    << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
     << "\">" << this->stringProblemLink << " (#"
     << this->theProblemData.randomSeed << ")</a>" << linkBigSeparator;
@@ -3266,23 +3266,23 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
   if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode())
     return "";
   std::stringstream out;
-  out << "request =" << requestType << "&";
+  out << "request=" << requestType << "&";
   List<std::string> excludedTags;
   excludedTags.AddOnTop("randomSeed");
   out << theGlobalVariables.ToStringCalcArgsNoNavigation(&excludedTags)
-  << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
+  << "courseHome =" << theGlobalVariables.GetWebInput("courseHome") << "&";
   if (!theGlobalVariables.flagRunningApache && this->fileName != "")
-    out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->fileName, false) << "&";
+    out << "fileName =" << HtmlRoutines::ConvertStringToURLString(this->fileName, false) << "&";
   else
-    out << "fileName=" << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.GetWebInput("fileName"), false)
+    out << "fileName =" << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.GetWebInput("fileName"), false)
     << "&";
   out << "topicList =" << theGlobalVariables.GetWebInput("topicList") << "&";
   out << "studentView=" << studentView << "&";
   if (studentSection != "")
     out << "studentSection =" << HtmlRoutines::ConvertStringToURLString(studentSection, false) << "&";
   if (includeRandomSeedIfAppropriate)
-    out << "randomSeed=" << this->theProblemData.randomSeed << "&";
-//  out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->fileName) << "&";
+    out << "randomSeed =" << this->theProblemData.randomSeed << "&";
+//  out << "fileName =" << HtmlRoutines::ConvertStringToURLString(this->fileName) << "&";
   return out.str();
 }
 
@@ -3290,7 +3290,7 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
   out << "\n<a class =\"linkStandardButtonLike\" href=\""
-  << theGlobalVariables.DisplayNameExecutable << "?request =editPage&";
+  << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
   std::string urledProblem = HtmlRoutines::ConvertStringToURLString(desiredFileName, false);
   std::stringstream refStreamNoRequest;
   std::string spanCloningAttemptResultID = "spanCloningAttemptResultID" + desiredFileName;
@@ -3298,11 +3298,11 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   //  out << "cleaned up link: " << cleaneduplink;
   //  out << "<br>urled link: " <<  urledProblem;
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
-  << "fileName=" << urledProblem << "&"
+  << "fileName =" << urledProblem << "&"
   << "topicList =" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&"
-  << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
+  << "courseHome =" << theGlobalVariables.GetWebInput("courseHome") << "&";
   out << refStreamNoRequest.str() << "\">" << "Edit" << "</a>";
-  out << "<textarea class =\"currentFileNameArea\" id=\"" << clonePageAreaID << "\" cols =\""
+  out << "<textarea class =\"currentFileNameArea\" id =\"" << clonePageAreaID << "\" cols =\""
   << desiredFileName.size() + 7 << "\">" << desiredFileName << "</textarea>\n";
   if (includeCloneButton)
     out
@@ -3313,7 +3313,7 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
     << spanCloningAttemptResultID
     << "'"
     << ");"
-    << "\" >Clone</button> <span id=\"" << spanCloningAttemptResultID <<"\"></span>";
+    << "\" >Clone</button> <span id =\"" << spanCloningAttemptResultID <<"\"></span>";
   return out.str();
 }
 
@@ -3324,10 +3324,10 @@ std::string HtmlRoutines::GetJavascriptSubmitURLString()
   << "var GlobalSubmitStringAsMainInputCounter = 0;\n"
   << "function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus)\n"
   << "{ var spanOutput = document.getElementById(idOutput);\n"
-  << "  if (spanOutput ==null)\n"
+  << "  if (spanOutput == null)\n"
   << "  { spanOutput = document.createElement('span');\n"
   << "    document.body.appendChild(spanOutput);\n"
-  << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idOutput + \"MISSING! </span>\";\n"
+  << "    spanOutput.innerHTML= \"<span style ='color:red'> ERROR: span with id \" + idOutput + \"MISSING! </span>\";\n"
   << "  }\n";
 
   ////////////////////////////////////////////
@@ -3336,10 +3336,10 @@ std::string HtmlRoutines::GetJavascriptSubmitURLString()
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutable << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
   << "  if (idStatus ===undefined)\n"
-  << "    idStatus =idOutput;\n"
+  << "    idStatus = idOutput;\n"
   << "  var statusSpan =document.getElementById(idStatus);\n "
   << "  timeOutCounter = 0;"
-  << "  GlobalSubmitStringAsMainInputCounter++;\n"
+  << "  GlobalSubmitStringAsMainInputCounter ++;\n"
   << "  var addressDetailsIndicatorID=\"addressDetailsID\"+GlobalSubmitStringAsMainInputCounter;\n"
   << "  var tranmissionIndicatorID=\"transmissionIndicatorID\"+GlobalSubmitStringAsMainInputCounter;\n"
   << "  var postRequest ="
@@ -3350,24 +3350,24 @@ std::string HtmlRoutines::GetJavascriptSubmitURLString()
   << "  var stringSwitchMenu='switchMenu(\\\"'+"
   << "  addressDetailsIndicatorID+'\\\");';\n"
   << "  statusSpan.innerHTML="
-  << "\"<button style='background:none; border:0; cursor:pointer' id='\"+tranmissionIndicatorID + \"'' "
+  << "\"<button style ='background:none; border:0; cursor:pointer' id ='\"+tranmissionIndicatorID + \"'' "
   << "onclick='\"+ stringSwitchMenu+\"'>Connection details</button>\""
-  << "+ \"<span style='display:none' id='\"+ addressDetailsIndicatorID + \"'>\"+"
-  << "postRequest+ \"</span>\""
+  << "+ \"<span style ='display:none' id ='\"+ addressDetailsIndicatorID + \"'>\"+"
+  << "postRequest + \"</span>\""
   << ";\n"
-  << "  var buttonHandle=document.getElementById(tranmissionIndicatorID);"
+  << "  var buttonHandle =document.getElementById(tranmissionIndicatorID);"
   << "  var lastRequestCounter = GlobalSubmitStringAsMainInputCounter;\n"
   << "  https.onload = function()\n"
   << "  { if (lastRequestCounter!== GlobalSubmitStringAsMainInputCounter)\n"
-  << "    { statusSpan.innerHTML+=\"<br><span style='color:red'><b>Old request number \" + lastRequestCounter +\" just received, output suppressed.</b></span>\" \n"
+  << "    { statusSpan.innerHTML+=\"<br><span style ='color:red'><b>Old request number \" + lastRequestCounter +\" just received, output suppressed.</b></span>\" \n"
   << "      return;\n"
   << "    }\n"
-  << "    buttonHandle.innerHTML=\"<span style='color:green'><b>Received</b></span>\";\n"
+  << "    buttonHandle.innerHTML=\"<span style ='color:green'><b>Received</b></span>\";\n"
   << "    spanOutput.innerHTML=https.responseText;\n"
-  << "    if (onLoadFunction!==undefined && onLoadFunction!==null && onLoadFunction!== 0)\n"
+  << "    if (onLoadFunction!==undefined && onLoadFunction!== null && onLoadFunction!== 0)\n"
   << "      onLoadFunction(idOutput);\n"
   << "  }\n"
-  << " buttonHandle.innerHTML=\"<span style='color:orange'><b>Sent</b></span>\";\n"
+  << " buttonHandle.innerHTML=\"<span style ='color:orange'><b>Sent</b></span>\";\n"
   ////////////////////////////////////////////
   << "  https.send(inputParams);\n"
   /////////////////or/////////////////////////
@@ -3381,17 +3381,17 @@ std::string HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile");
   std::stringstream out;
   out
-  << "<script type=\"text/javascript\"> \n";
+  << "<script type =\"text/javascript\"> \n";
   out << "\"use srict\";\n";
   out << HtmlRoutines::GetJavascriptSubmitURLString()
   << "function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus){\n"
   << "  var inputParams ='';\n"
-  << "  inputParams+='request ='+requestType +'&';\n"
+  << "  inputParams+='request='+requestType +'&';\n"
   << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << "';\n"
 //  << "  inputParams+='&debugFlag= true';\n"
-  << "  inputParams+='&fileName=" << theGlobalVariables.GetWebInput("fileName") << "';\n"
+  << "  inputParams+='&fileName =" << theGlobalVariables.GetWebInput("fileName") << "';\n"
   << "  inputParams+='&topicList =" << theGlobalVariables.GetWebInput("topicList") << "';\n"
-  << "  inputParams+='&courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "';\n"
+  << "  inputParams+='&courseHome =" << theGlobalVariables.GetWebInput("courseHome") << "';\n"
   << "  inputParams+='&mainInput =' + encodeURIComponent(theString);\n"
   << "  submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);\n"
   << "}\n"
@@ -3413,7 +3413,7 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
   if (this->currentUseR.theProblemData.Contains(theFileName))
   { ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(theFileName);
     if (!theProbData.flagProblemWeightIsOK)
-    { out << "<span style=\"color:orange\">No point weight assigned yet. </span>";
+    { out << "<span style =\"color:orange\">No point weight assigned yet. </span>";
       if (!theProbData.adminData.GetWeightFromCoursE(this->currentUseR.courseComputed, currentWeight))
         currentWeight = 0;
       if (theProbData.theAnswers.size() == 1)
@@ -3426,17 +3426,17 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
         << " out of "<< theProbData.theAnswers.size() << " subproblems correctly answered. ";
     } else if (theProbData.totalNumSubmissions != 0)
     { if (theProbData.numCorrectlyAnswered < theProbData.theAnswers.size())
-      { out << "<span style=\"color:red\"><b> "
+      { out << "<span style =\"color:red\"><b> "
         << theProbData.Points << " out of "
         << currentWeight << " point(s). </b></span>";
       } else if (theProbData.numCorrectlyAnswered == theProbData.theAnswers.size())
-      { out << "<span style=\"color:green\"><b> "
+      { out << "<span style =\"color:green\"><b> "
         << theProbData.Points << " out of "
         << currentWeight << " point(s). </b></span>";
       }
     }
   } else
-  { out << "<span style=\"color:brown\"><b>No submissions.</b> </span>" ;
+  { out << "<span style =\"color:brown\"><b>No submissions.</b> </span>" ;
   }
   #endif // MACRO_use_MongoDB
   return out.str();
@@ -3469,7 +3469,7 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
     if (!theProbData.flagProblemWeightIsOK)
     { problemWeight << "?";
       if (currentWeightAsGivenByInstructor != "")
-        problemWeight << "<span style=\"color:red\">"
+        problemWeight << "<span style =\"color:red\">"
         << currentWeightAsGivenByInstructor << "(Error)</span>";
     } else
     { problemWeight << currentWeight;
@@ -3478,17 +3478,17 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
     outputAlreadySolved = (percentSolved == 1);
     if (!outputAlreadySolved)
     { if (!theProbData.flagProblemWeightIsOK)
-        out << "<span style=\"color:brown\"><b>" << percentSolved << " out of " << problemWeight.str() << "</b></span>";
+        out << "<span style =\"color:brown\"><b>" << percentSolved << " out of " << problemWeight.str() << "</b></span>";
       else
-        out << "<span style=\"color:red\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
+        out << "<span style =\"color:red\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
     } else
     { if (!theProbData.flagProblemWeightIsOK)
-        out << "<span style=\"color:green\"><b>solved</b></span>";
+        out << "<span style =\"color:green\"><b>solved</b></span>";
       else
-        out << "<span style=\"color:green\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
+        out << "<span style =\"color:green\"><b>" << totalPoints << " out of " << problemWeight.str() << "</b></span>";
     }
   } else
-    out << "<span style=\"color:brown\"><b>need to solve</b></span>";
+    out << "<span style =\"color:brown\"><b>need to solve</b></span>";
   if (!showModifyButton)
     return out.str();
   std::stringstream finalOut;
@@ -3518,7 +3518,7 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
 //  std::string idNumTries = "numTries"+urledProblem;
   std::string idButtonModifyPoints = "modifyPoints" + urledProblem;
   std::string idPointsModOutput = "modifyPointsOutputSpan" + urledProblem;
-  out << "Pts: <textarea class =\"textareaStudentPoints\" rows =\"1\" cols =\"2\" id=\"" << idPoints << "\">";
+  out << "Pts: <textarea class =\"textareaStudentPoints\" rows =\"1\" cols =\"2\" id =\"" << idPoints << "\">";
   bool weightIsOK = false;
   std::string problemWeightAsGivenByInstructor;
   #ifdef MACRO_use_MongoDB
@@ -3529,8 +3529,8 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
   #endif
   out << "</textarea>";
   if (!weightIsOK && problemWeightAsGivenByInstructor != "")
-    out << "<span style=\"color:red\"><b>Error</b></span>";
-  out << "<button id=\"" << idButtonModifyPoints << "\" "
+    out << "<span style =\"color:red\"><b>Error</b></span>";
+  out << "<button id =\"" << idButtonModifyPoints << "\" "
   << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
   << "='+encodeURIComponent('weight ='+  getElementById('" << idPoints << "').value)"
 //  << "  +encodeURIComponent('numTries ='+getElementById('"
@@ -3540,7 +3540,7 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
   << ">";
   out << "Modify";
   out << "</button>";
-  out << "<span id=\"" << idPointsModOutput << "\">" << "</span>";
+  out << "<span id =\"" << idPointsModOutput << "\">" << "</span>";
   return out.str();
 }
 
@@ -3694,7 +3694,7 @@ bool TopicElement::LoadTopicBundle
     { if (bundleNameStack.size > 0)
         bundleNameStack.RemoveLastObject();
       else
-      { errorStream << "<b style=\"color:red\">BundleEnd command without BungleBegin.</b>";
+      { errorStream << "<b style =\"color:red\">BundleEnd command without BungleBegin.</b>";
         return false;
       }
     } else
@@ -3869,9 +3869,9 @@ void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inpu
     inputOutput.interpretedCommand = out.str();
     return;
   }
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =changePasswordPage\">Change password</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request= changePasswordPage\">Change password</a>";
   if (theGlobalVariables.UserDefaultHasAdminRights())
-    out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =accounts\">Manage accounts</a>";
+    out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\">Manage accounts</a>";
   inputOutput.interpretedCommand = out.str();
   return;
 }
@@ -3999,7 +3999,7 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   out << "\n\n\n<!--Topic list automatically generated from topic list: " << this->topicListFileName
   << ".-->";
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-  << "?request = template&fileName=" << this->fileName << "&"
+  << "?request= template&fileName =" << this->fileName << "&"
   << "topicList =" << this->topicListFileName << "&" << "\">All topics</a>";
   out << "<ul>";
   for (int i = 0; i < this->theTopicS.size(); i ++)
@@ -4018,7 +4018,7 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
         out << "</ul></li>";
     if (currentElt.type == currentElt.tChapter)
     { out << "<li>" << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request = template&fileName=" << this->fileName << "&"
+      << "?request= template&fileName =" << this->fileName << "&"
       << "topicList =" << this->topicListFileName << "&" << "chapter =" << currentElt.title
       << "\">" << currentElt.title << "</a>" << "<br>\n";
       chapterStarted = true;
@@ -4139,7 +4139,7 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
         << "</tr>";
     }
     out << "<tr class =\"calculatorProblem\" "
-    << "id=\"" << this->idBase64 << "\"" << ">\n";
+    << "id =\"" << this->idBase64 << "\"" << ">\n";
     out << "  <td>\n";
     out << this->displayTitle;
     if (owner.flagIncludeStudentScores)
@@ -4160,12 +4160,12 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
     return out.str();
   }
   out << "\n<div class =\"head" << theClass << "\" "
-  << "id=\"" << this->idBase64 << "\"" << ">";
+  << "id =\"" << this->idBase64 << "\"" << ">";
   out << "\n<table class =\"tableItem\">";
   out << "<colgroup><col><col><col><col><col></colgroup>\n";
   out << "<tr>"
   << "<td>" << this->displayTitle;
-  out << "<button id=\"buttonToggle" << this->idBase64
+  out << "<button id =\"buttonToggle" << this->idBase64
   << "\" class =\"buttonToggleTopics\" onclick=\"toggleHeight(this, 'body" << this->idBase64 << "');\">&#9650;</button>";
   if (doIncludeScoreButton)
     out << this->ToStringStudentScoreReportPanel();
@@ -4178,7 +4178,7 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
     out << "<td></td>";
   out << "<td class =\"deadlineCell\">" << this->displayDeadlinE << "</td>";
   out << "</tr></table></div>\n";
-  out << "<div class =\"body" << theClass << "\" id=\"body" << this->idBase64 << "\">";
+  out << "<div class =\"body" << theClass << "\" id =\"body" << this->idBase64 << "\">";
   return out.str();
 }
 
@@ -4188,11 +4188,11 @@ std::string TopicElement::ToStringStudentScoreReportPanel()
 { std::stringstream out;
   TopicElement::scoreButtonCounter ++;
   out << "<span class =\"studentScoresWrapper\">";
-  out << "<span id='studentScoresLoadReport"
+  out << "<span id ='studentScoresLoadReport"
   << scoreButtonCounter << "'></span>"
-  << "<span class ='studentScoreOutputJavascriptSpan' id='studentScoresOutput"
+  << "<span class ='studentScoreOutputJavascriptSpan' id ='studentScoresOutput"
   << scoreButtonCounter << "'></span>"
-  << "<span class ='studentScoresContent' id='" << this->studentScoresSpanId << "'></span>"
+  << "<span class ='studentScoresContent' id ='" << this->studentScoresSpanId << "'></span>"
   << "</span>";
   return out.str();
 }
@@ -4217,7 +4217,7 @@ std::string CalculatorHTML::GetSectionSelector()
   std::stringstream out;
   out << "<sectionSelection>Sections: ";
   for (int i = 0; i < this->databaseStudentSections.size; i ++)
-  { out << "<input type=\"radio\" name=\"sectionSelector\" "
+  { out << "<input type =\"radio\" name =\"sectionSelector\" "
     << "onclick=\"populateTopicList("
     << "'"
     << this->databaseStudentSections[i]
@@ -4250,9 +4250,9 @@ void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput
   }
   bool plainStyle = (inputOutput.GetKeyValue("topicListStyle") == "plain");
   out << "<div class =\"headChapter\">Lecture materials "
-  << "<button id=\"buttonToggleCourseInfo\" class =\"buttonToggleTopics\" "
+  << "<button id =\"buttonToggleCourseInfo\" class =\"buttonToggleTopics\" "
   << "onclick=\"toggleHeight(this,'tableWithLectureMaterialsFull')\">&#9650;</button>"
-  << "<span style=\"font-weight:normal; font-size:small\">(&larr; click to (un)hide)</span><br>\n"
+  << "<span style =\"font-weight:normal; font-size:small\">(&larr; click to (un)hide)</span><br>\n"
   << "</div>";
   out
   << "\n<div class =\"bodyChapter\" id =\"tableWithLectureMaterialsFull\">"
@@ -4287,13 +4287,13 @@ bool CalculatorHTML::ComputeTopicListAndPointsEarned(std::stringstream& comments
     return false;
   if (!this->LoadDatabaseInfo(commentsOnFailure))
   { if (!this->flagUseJSON)
-      commentsOnFailure << "<span style=\"color:red\">Could not load your problem history.</span> <br>";
+      commentsOnFailure << "<span style =\"color:red\">Could not load your problem history.</span> <br>";
     else
       commentsOnFailure << "Error loading problem history. ";
   }
   if (!this->PrepareSectionList(commentsOnFailure))
   { if (!this->flagUseJSON)
-      commentsOnFailure << "<span style=\"color:red\">Error preparing section list.</span> <br>";
+      commentsOnFailure << "<span style =\"color:red\">Error preparing section list.</span> <br>";
     else
       commentsOnFailure << "Error preparing section list. ";
   }
@@ -4338,7 +4338,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     outHead << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
     << " out of " << this->currentUseR.pointsMax.GetDoubleValue()
     << " points earned.</panelStudentScores>"
-    << "<button id=\"buttonToggleCourseInfo\" class =\"buttonToggleTopics\" onclick=\"toggleHeight(this,'bodyCourseInformation')\">&#9650;</button><br>\n";
+    << "<button id =\"buttonToggleCourseInfo\" class =\"buttonToggleTopics\" onclick=\"toggleHeight(this,'bodyCourseInformation')\">&#9650;</button><br>\n";
     outHead << "<div class =\"bodySection\" id = \"bodyCourseInformation\">"
     << "<small>Includes problems without deadline, but not problems without weights.<br> "
     << "If a problem is assigned a new weight, your % score may drop. </small><br>";
@@ -4349,15 +4349,15 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
 //  out << "<br>DEBUG: problinkstyle: "
 //  << theGlobalVariables.GetWebInput("problemLinkStyle")
 //  << "<br>";
-  out << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('accordion');\" ";
+  out << "<input type =\"radio\" name =\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('accordion');\" ";
   if (theGlobalVariables.GetWebInput("problemLinkStyle") == "accordion")
     out << "checked";
   out << ">same tab, under topics</input>";
-  out << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('sameWindow');\" ";
+  out << "<input type =\"radio\" name =\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('sameWindow');\" ";
   if (theGlobalVariables.GetWebInput("problemLinkStyle") == "sameWindow")
     out << "checked";
   out << ">same tab, replace topics</input>";
-  out << "<input type=\"radio\" name=\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('newWindow');\" ";
+  out << "<input type =\"radio\" name =\"problemLinkStyleSelector\" onclick=\"setProblemLinkStyle('newWindow');\" ";
   if (theGlobalVariables.GetWebInput("problemLinkStyle") == "newWindow")
     out << "checked";
   out << ">new tab</input>"
@@ -4397,7 +4397,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   outFinal << outHead.str() << out.str();
   inputOutput.interpretedCommand = outFinal.str();
   std::stringstream topicListJS;
-  topicListJS << "<script type=\"text/javascript\">";
+  topicListJS << "<script type =\"text/javascript\">";
 
   topicListJS << "var currentStudentSection =";
 #ifdef MACRO_use_MongoDB
@@ -4559,14 +4559,14 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     sourceStreamSlidesCommon, sourceStreamHomeworkCommon;
 
     slideFromSourceStreamHandouT << "<a href=\"";
-    slideFromSourceStreamHandoutLink << theGlobalVariables.DisplayNameExecutable << "?request =slidesFromSource&";
-    homeworkFromSourceStreamNoAnswerKey << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =homeworkFromSource&";
+    slideFromSourceStreamHandoutLink << theGlobalVariables.DisplayNameExecutable << "?request=slidesFromSource&";
+    homeworkFromSourceStreamNoAnswerKey << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=homeworkFromSource&";
 
-    sourceStreamSlidesLink << theGlobalVariables.DisplayNameExecutable << "?request =slidesSource&";
-    sourceStreamHomework << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =homeworkSource&";
+    sourceStreamSlidesLink << theGlobalVariables.DisplayNameExecutable << "?request=slidesSource&";
+    sourceStreamHomework << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=homeworkSource&";
 
-    sourceStreamSlidesCommon << "title=" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
-    sourceStreamHomeworkCommon << "title=" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
+    sourceStreamSlidesCommon << "title =" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
+    sourceStreamHomeworkCommon << "title =" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
 
     /////////
     int sourceSlidesCounter = 0;
@@ -4617,19 +4617,19 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
 
     slideFromSourceStreamHandouT << slideFromSourceStreamHandoutLink.str();
     slideFromSourceStreamHandouT << "\" class =\"slidesLink\" target =\"_blank\">Printable slides</a>";
-    homeworkFromSourceStreamNoAnswerKey << "answerKey= true&";
+    homeworkFromSourceStreamNoAnswerKey << "answerKey = true&";
     homeworkFromSourceStreamNoAnswerKey << "\" class =\"slidesLink\" target =\"_blank\">Homework with answers</a>";
-    homeworkFromSourceStreamAnswerKey << "answerKey= false&";
+    homeworkFromSourceStreamAnswerKey << "answerKey = false&";
     homeworkFromSourceStreamAnswerKey << "\" class =\"slidesLink\" target =\"_blank\">Homework</a>";
 
     slideFromSourceStreamProjectoR << "\" class =\"slidesLink\" target =\"_blank\">Slides</a>";
 
     sourceStreamSlidesLink << "layout =printable&";
     this->linkSlidesTex = sourceStreamSlidesLink.str();
-    sourceStreamSlides << "<a href=\"" << this->linkSlidesTex << "\" class =\"slidesLink\" download=\""
+    sourceStreamSlides << "<a href=\"" << this->linkSlidesTex << "\" class =\"slidesLink\" download =\""
     << FileOperations::ConvertStringToLatexFileName(this->title) << ".tex\">.tex</a>";
 
-    sourceStreamHomework << "answerKey= true&\" class =\"slidesLink\" download=\""
+    sourceStreamHomework << "answerKey = true&\" class =\"slidesLink\" download =\""
     << FileOperations::ConvertStringToLatexFileName(this->title) << ".tex\">.tex</a>";
 
     this->slidesPrintable = slideFromSourceStreamHandoutLink.str();
@@ -4638,8 +4638,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     if (this->sourceSlides.size > 0)
       this->displaySlidesLink += slideFromSourceStreamHandouT.str() + slideFromSourceStreamProjectoR.str() + sourceStreamSlides.str();
     if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn())
-      this->displaySlidesLink += "<a class =\"slidesLink\" style=\"color:gray; display:none\" href=\"" +
-      theGlobalVariables.DisplayNameExecutable + "?request =modifySlide&topicID=" + this->id + "\">Modify</a>";
+      this->displaySlidesLink += "<a class =\"slidesLink\" style =\"color:gray; display:none\" href=\"" +
+      theGlobalVariables.DisplayNameExecutable + "?request=modifySlide&topicID=" + this->id + "\">Modify</a>";
     if (this->sourceHomework.size > 0)
       this->displaySlidesLink += homeworkFromSourceStreamAnswerKey.str() + homeworkFromSourceStreamNoAnswerKey.str() + sourceStreamHomework.str();
   }
@@ -4656,9 +4656,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     returnEmptyStringIfNoDeadline = true;
   } else
   { //std::string theRawSQLink= theGlobalVariables.DisplayNameExecutable +
-    //"?request =scoredQuiz&fileName=" + this->problem;
+    //"?request=scoredQuiz&fileName =" + this->problem;
     std::string theRawExerciseLink;
-    theRawExerciseLink = theGlobalVariables.DisplayNameExecutable + "?request =exercise&fileName=" + this->problem;
+    theRawExerciseLink = theGlobalVariables.DisplayNameExecutable + "?request=exercise&fileName =" + this->problem;
     this->displayProblemLink = owner.ToStringLinkFromFileName(this->problem);
     this->displayScore = owner.ToStringProblemScoreShort(this->problem, problemSolved);
     this->displayModifyWeight = owner.ToStringProblemWeightButton(this->problem);
@@ -4679,14 +4679,14 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     //<< "<span class =\"deadlineAndTitleContainer\">"
     //<< "<span class =\"titleContainer\">" << this->displayTitle
     //<< "</span>"
-    //<< "&nbsp;&nbsp;<span style=\"font-weight:normal; font-size: medium\">"
+    //<< "&nbsp;&nbsp;<span style =\"font-weight:normal; font-size: medium\">"
     //<< this->displaySlidesLink
     //<< "</span>"
     //<< "" << this->displayDeadlinE << "</span>"
     //<< "</span>"
     //
     //;
-    //this->displayTitleWithDeadline= titleAndDeadlineStream.str();
+    //this->displayTitleWithDeadline = titleAndDeadlineStream.str();
   }
   std::stringstream displayResourcesLinksStream;
   displayResourcesLinksStream

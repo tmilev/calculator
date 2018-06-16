@@ -54,7 +54,7 @@ void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals()
   do
   { std::stringstream out;
     //for (int i = 0; i <theSel.CardinalitySelection; i ++)
-    //{ const LargeInt& theRad= this->theQuadraticRadicals[theSel.elements[i]];
+    //{ const LargeInt& theRad = this->theQuadraticRadicals[theSel.elements[i]];
     //  out << "\\sqrt{" << theRad.ToString() << "}";
     //}
     LargeInt theRad = 1;
@@ -244,7 +244,7 @@ bool AlgebraicClosureRationals::ReduceMe()
   if (!mustBeTrue)
     crash << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString() << crash;
   smallestFactor = theFactors[0];
-//  stOutput << "<br>After factoring, min poly=" << theMinPoly.ToString() << " factor = " << smallestFactor.ToString();
+//  stOutput << "<br>After factoring, min poly =" << theMinPoly.ToString() << " factor = " << smallestFactor.ToString();
   if (smallestFactor.TotalDegreeInt() == theDim)
     return true;
 //  stOutput << "<br>Min poly factors.";
@@ -252,9 +252,9 @@ bool AlgebraicClosureRationals::ReduceMe()
   theBasisChangeMat.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
   theBasisChangeMatInverse = theBasisChangeMat;
   theBasisChangeMatInverse.Invert();
-//  if (injectionFromLeftParent!= 0)
+//  if (injectionFromLeftParent != 0)
 //    injectionFromLeftParent->MultiplyOnTheLeft(theBasisChangeMatInverse);
-//  if (injectionFromRightParent!= 0)
+//  if (injectionFromRightParent != 0)
 //    injectionFromRightParent->MultiplyOnTheLeft(theBasisChangeMatInverse);
   Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
   MatrixTensor<Rational> theProjection;
@@ -824,7 +824,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
     theReport.Report(reportStream.str());
   }
   this->CheckCommonOwner(other);
-//  AlgebraicNumber otherCopy= other;
+//  AlgebraicNumber otherCopy = other;
 //  stOutput << "Converting <hr>" << HtmlRoutines::GetMathSpanPure(this->ToString()) << " and <br><br>\n\n\n\n<br><br>"
 //  << HtmlRoutines::GetMathSpanPure(otherCopy.ToString());
 //  stOutput << " <br><br>To get: " << HtmlRoutines::GetMathSpanPure(this->ToString()) << "<br>\n\n and  <br><br>\n\n\n\n<br><br> \n"
@@ -832,7 +832,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
   //stOutput << " <hr>multiplying " << this->theElt.ToString() << " by " << other.theElt.ToString() << " ";
   MatrixTensor<Rational> leftMat, rightMat;
 //  FormatExpressions tempformat;
-//  tempformat.flagUseLatex= true;
+//  tempformat.flagUseLatex = true;
 //  tempformat.flagUseHTML= false;
   this->owner->GetMultiplicationBy(*this, leftMat);
   this->owner->GetMultiplicationBy(other, rightMat);
@@ -963,7 +963,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
     primeFactors[i].RaiseToPower(theMults[i] / 2);
     squareRootRationalPart *= primeFactors[i];
   }
-//  squareRootRationalPart/=input.GetDenominator();
+//  squareRootRationalPart/= input.GetDenominator();
 
   if (!squareFreeInput.IsEqualToOne())
     theFactors.AddOnTop(squareFreeInput);
@@ -1010,8 +1010,8 @@ void AlgebraicNumber::RadicalMeDefault(int theRad)
     tempM.ExponentMeBy(theRad);
     newMinPoly.AddMonomial(tempM, this->GetMinPoly().theCoeffs[i]);
   }
-  this->rootIndex= 0;
-  this->minPolyIndex= this->theRegistry->theMinPolys.AddNoRepetitionOrReturnIndexFirst(newMinPoly);*/
+  this->rootIndex = 0;
+  this->minPolyIndex = this->theRegistry->theMinPolys.AddNoRepetitionOrReturnIndexFirst(newMinPoly);*/
 }
 
 std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat) const

@@ -27,15 +27,15 @@ function initializeAutocomplete() {
   theAutocompleteDictionaryByKey = new Array;
   theText = document.getElementById('mainInputID');
   theSuggestions = new Array;
-  theSuggestionsHighlighted= new Array;
-  theAutoComplete=document.getElementById('idAutocompleteSpan');
+  theSuggestionsHighlighted = new Array;
+  theAutoComplete =document.getElementById('idAutocompleteSpan');
   theAutoCompleteHints =document.getElementById('idAutocompleteHints');
-  indexInAutocomplete= - 1;
+  indexInAutocomplete = - 1;
   autocompleteDebugWindow=document.getElementById('idAutocompleteDebug');
   theLastWord = new String;
   ignoreOninput = false;
   DebugCounter = 0;
-  //theAutoCompleteHints.style.visibility="hidden";
+  //theAutoCompleteHints.style.visibility ="hidden";
   for (var i = 0; i <theAutocompleteDictionary.length; i ++)
     theAutocompleteDictionaryLowerCase.push(theAutocompleteDictionary[i].toLowerCase());
   for (i = 0; i <theAutocompleteDictionary.length; i ++)
@@ -49,10 +49,10 @@ function displayDictionary() {
   result ="";
   counter = 0;
   for (var i in theAutocompleteDictionaryByKey)
-  { result+=i+" "+ theAutocompleteDictionaryByKey[i]+ " <br />";
-    counter++;
+  { result += i +" "+ theAutocompleteDictionaryByKey[i]+ " <br />";
+    counter ++;
     if (counter>= 15)
-    { result+="... displaying first 15 out of a total of "+ Object.keys(theAutocompleteDictionaryByKey).length + " words in the dictionary.";
+    { result +="... displaying first 15 out of a total of "+ Object.keys(theAutocompleteDictionaryByKey).length + " words in the dictionary.";
       break;
     }
   }
@@ -78,31 +78,31 @@ function isSeparator(theChar)
 
 function getLastWord()
 { var theLastWordReversed;
-  theLastWordReversed="";
+  theLastWordReversed ="";
   var cursorPosition = theText.selectionEnd;
   lastWordStart = - 1;
-  for (var i =cursorPosition- 1; i>= 0; i--)
+  for (var i = cursorPosition- 1; i>= 0; i--)
   { if (isSeparator(theText.value[i]))
       break;
     theLastWordReversed+=(theText.value[i]);
   }
-  theLastWord="";
-  lastWordStart =i;
+  theLastWord ="";
+  lastWordStart = i;
   for (i = theLastWordReversed.length- 1; i>= 0; i--)
     theLastWord+= theLastWordReversed[i];
-  for (i =cursorPosition; i <theText.value.length; i ++)
+  for (i = cursorPosition; i <theText.value.length; i ++)
     if (isSeparator(theText.value[i]))
       break;
     else
       theLastWord+= theText.value[i];
-  DebugCounter++;
-//  autocompleteDebugWindow.innerHTML= theLastWord+ "<br>cursorPosition ="+ cursorPosition + "<br>theText.selectionEnd=" +theText.selectionEnd+  "theText.selectionStart ="+theText.selectionStart+ "<br>DebugCounter ="+DebugCounter;
+  DebugCounter ++;
+//  autocompleteDebugWindow.innerHTML= theLastWord+ "<br>cursorPosition ="+ cursorPosition + "<br>theText.selectionEnd =" +theText.selectionEnd+  "theText.selectionStart ="+theText.selectionStart + "<br>DebugCounter ="+DebugCounter;
 }
 
 function clearAutocompleteTab()
 { theAutoComplete.innerHTML="";
-//  theAutoCompleteHints.style.visibility="hidden";  
-  indexInAutocomplete= - 1;
+//  theAutoCompleteHints.style.visibility ="hidden";  
+  indexInAutocomplete = - 1;
   theSuggestions.length= 0;
   theSuggestionsHighlighted.length= 0;
 }
@@ -111,12 +111,12 @@ function suggestWord()
 { if (!initializeAutocomplete())
     return;
   getLastWord();
-  if (oldLastWord=== theLastWord)
+  if (oldLastWord === theLastWord)
     return;
-  oldLastWord= theLastWord;
+  oldLastWord = theLastWord;
   theSuggestions.length= 0;
   theSuggestionsHighlighted.length= 0;
-  if (theLastWord=="")
+  if (theLastWord =="")
   { clearAutocompleteTab();
     return;
   }
@@ -125,11 +125,11 @@ function suggestWord()
     return;
   }  
   for (var i = 0; i <theAutocompleteDictionary.length; i ++)
-  { if (theLastWord== theAutocompleteDictionary[i])
+  { if (theLastWord == theAutocompleteDictionary[i])
     { clearAutocompleteTab();
       return;
     }
-    var lastWordLowerCase= theLastWord.toLowerCase();
+    var lastWordLowerCase = theLastWord.toLowerCase();
     var startpos = theAutocompleteDictionaryLowerCase[i].indexOf(lastWordLowerCase);
     if (startpos === - 1)
       continue;
@@ -148,13 +148,13 @@ function displaySuggestions()
 { theAutoComplete.innerHTML="";
   if (theSuggestionsHighlighted.length>0)
   { if (indexInAutocomplete<0) 
-      indexInAutocomplete= theSuggestionsHighlighted.length- 1;
+      indexInAutocomplete = theSuggestionsHighlighted.length- 1;
     if (indexInAutocomplete>= theSuggestionsHighlighted.length)
-      indexInAutocomplete= 0;
+      indexInAutocomplete = 0;
   }
   for (var i = 0; i <theSuggestionsHighlighted.length; i ++)
     if (i === indexInAutocomplete)
-      theAutoComplete.innerHTML+="<span style='background:silver'>"+theSuggestionsHighlighted[i]+"</span><br>";
+      theAutoComplete.innerHTML+="<span style ='background:silver'>"+theSuggestionsHighlighted[i]+"</span><br>";
     else  
       theAutoComplete.innerHTML+= theSuggestionsHighlighted[i] + "<br>";
   //theAutoComplete.innerHTML+="theindex: " + indexInAutocomplete;
@@ -165,19 +165,19 @@ function replaceLastWord()
     return;
   if (indexInAutocomplete<0 || indexInAutocomplete>= theSuggestions.length)
     return;
-  theText.value= theText.value.substring(0, lastWordStart+ 1)+ theSuggestions[indexInAutocomplete]+
-  theText.value.substring(1+lastWordStart+theLastWord.length);
-  setCursorPosition(lastWordStart+theSuggestions[indexInAutocomplete].length+ 1);
+  theText.value = theText.value.substring(0, lastWordStart + 1) + theSuggestions[indexInAutocomplete]+
+  theText.value.substring(1+lastWordStart +theLastWord.length);
+  setCursorPosition(lastWordStart +theSuggestions[indexInAutocomplete].length+ 1);
 }
 
 function arrowAction(event)
 { if (event.ctrlKey!== true)
     return;
-  if (event.keyCode===32)//32-space bar, 13-enter key, 9-tab key
+  if (event.keyCode ===32)//32-space bar, 13-enter key, 9-tab key
     replaceLastWord();
-  if (event.keyCode==38)//up arrow
+  if (event.keyCode ==38)//up arrow
     indexInAutocomplete--;
-  else if (event.keyCode==40)//down arrow
+  else if (event.keyCode ==40)//down arrow
     indexInAutocomplete ++;
   else 
     return;
@@ -189,7 +189,7 @@ function arrowAction(event)
 
 function accountWordAtCursor(amount)
 { getLastWord();
-  if (theLastWord==="" || theLastWord===null)
+  if (theLastWord ==="" || theLastWord === null)
     return;
   theAutoComplete.textContent = theLastWord;
   if (typeof(theAutocompleteDictionary[theLastWord])!="number")

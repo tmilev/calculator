@@ -1,14 +1,16 @@
 "use strict";
 
-function updateDatabasePageCallback(incoming, output){
+function updateDatabasePageCallback(incoming, output) {
   try {
+    var currentTable = thePage.pages.database.storage.currentTable;
     var theParsed = JSON.parse(incoming);
-    console.log("DEBUG: incoming: " + JSON.stringify(theParsed));
+    //console.log("DEBUG: incoming: " + JSON.stringify(theParsed));
     var theOutput = document.getElementById("divDatabaseOutput");
     if ("rows" in theParsed) {
-      theOutput.innerHTML = getHtmlFromArrayOfObjects(theParsed.rows);
+      theOutput.innerHTML = getHtmlFromArrayOfObjects(theParsed.rows, [currentTable]);
+
     } else {
-      for (var counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection ++){
+      for (var counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection ++) {
         var currentCollection = theParsed.collections[counterCollection]; 
         theParsed.collections[counterCollection] = `
         <a href = "#" onclick =
@@ -21,12 +23,12 @@ function updateDatabasePageCallback(incoming, output){
   }
 }
 
-function updateDatabasePageResetCurrentTable(){
+function updateDatabasePageResetCurrentTable() {
   thePage.pages.database.storage.currentTable = "";
   updateDatabasePage();
 }
 
-function updateDatabasePage(){
+function updateDatabasePage() {
   thePage.storeSettingsToLocalStorage();
   var theUrl = `${pathnames.calculatorAPI}?${pathnames.requestDatabase}&${pathnames.databaseTable}=${thePage.pages.database.storage.currentTable}`;
   submitGET({

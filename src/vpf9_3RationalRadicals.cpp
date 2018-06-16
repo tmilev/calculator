@@ -6,7 +6,7 @@
 #include "vpfImplementationHeader2Math0_General.h"
 ProjectInformationInstance ProjectInfoVpf9_3cpp(__FILE__, "Algebraic numbers. ");
 
-std::string MonomialVector::ToString(FormatExpressions* theFormat)const
+std::string MonomialVector::ToString(FormatExpressions* theFormat) const
 { if (theFormat != 0)
     if (this->theIndex < theFormat->vectorSpaceEiBasisNames.size && this->theIndex >= 0)
       return theFormat->vectorSpaceEiBasisNames[this->theIndex];
@@ -15,7 +15,7 @@ std::string MonomialVector::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-bool AlgebraicClosureRationals::CheckConsistency()const
+bool AlgebraicClosureRationals::CheckConsistency() const
 { return true;
 }
 
@@ -53,8 +53,8 @@ void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals()
   theSel.init(this->theQuadraticRadicals.size);
   do
   { std::stringstream out;
-    //for (int i=0; i<theSel.CardinalitySelection; i++)
-    //{ const LargeInt& theRad=this->theQuadraticRadicals[theSel.elements[i]];
+    //for (int i = 0; i <theSel.CardinalitySelection; i ++)
+    //{ const LargeInt& theRad= this->theQuadraticRadicals[theSel.elements[i]];
     //  out << "\\sqrt{" << theRad.ToString() << "}";
     //}
     LargeInt theRad = 1;
@@ -186,7 +186,7 @@ void AlgebraicClosureRationals::ChooseGeneratingElement()
   this->theGeneratingElementPowersBasis.SetSize(0);
   Vector<Rational> currentVect;
 //  stOutput << "Dim over rationals: " << this->DimOverRationals;
-//  int counter =0;
+//  int counter = 0;
   this->GeneratingElemenT.owner = this;
   this->GeneratingElemenT.basisIndex = this->theBasesAdditive.size - 1;
   for (theSel.IncrementReturnFalseIfPastLast(); ; theSel.IncrementReturnFalseIfPastLast())
@@ -198,7 +198,7 @@ void AlgebraicClosureRationals::ChooseGeneratingElement()
     }
 //    stOutput << "<br>selection: " << theSel.ToString() << ", generator: " << this->GeneratingElemenT.theElt.ToString();
     this->GetMultiplicationBy(this->GeneratingElemenT, this->GeneratingElementTensorForm);
-//    stOutput << ", current generator= " << this->GeneratingElementTensorForm.ToStringMatForm();
+//    stOutput << ", current generator = " << this->GeneratingElementTensorForm.ToStringMatForm();
     this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, DimOverRationals);
 //    stOutput << ", in mat form= " << this->GeneratingElementMatForm.ToString();
     this->theGeneratingElementPowersBasis.SetSize(0);
@@ -224,12 +224,12 @@ void AlgebraicClosureRationals::ChooseGeneratingElement()
 
 bool AlgebraicClosureRationals::ReduceMe()
 { MacroRegisterFunctionWithName("AlgebraicExtensionRationals::ReduceMe");
-//  double timeStart=0;
-//  if (this->owner!=0)
+//  double timeStart = 0;
+//  if (this->owner!= 0)
 //    if (theGlobalVariables.flagReportEverything)
-//      timeStart=this->owner->theGlobalVariables->GetElapsedSeconds();
+//      timeStart = this->owner->theGlobalVariables->GetElapsedSeconds();
   this->ChooseGeneratingElement();
-//  if (this->owner!=0)
+//  if (this->owner!= 0)
 //    if (theGlobalVariables.flagReportEverything)
 //      stOutput << "<hr> Time needed to chose generating element: " << this->owner->theGlobalVariables->GetElapsedSeconds()-timeStart;
 //  stOutput << "Reducing: " << this->ToString();
@@ -244,7 +244,7 @@ bool AlgebraicClosureRationals::ReduceMe()
   if (!mustBeTrue)
     crash << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString() << crash;
   smallestFactor = theFactors[0];
-//  stOutput << "<br>After factoring, min poly=" << theMinPoly.ToString() << " factor= " << smallestFactor.ToString();
+//  stOutput << "<br>After factoring, min poly=" << theMinPoly.ToString() << " factor = " << smallestFactor.ToString();
   if (smallestFactor.TotalDegreeInt() == theDim)
     return true;
 //  stOutput << "<br>Min poly factors.";
@@ -252,9 +252,9 @@ bool AlgebraicClosureRationals::ReduceMe()
   theBasisChangeMat.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
   theBasisChangeMatInverse = theBasisChangeMat;
   theBasisChangeMatInverse.Invert();
-//  if (injectionFromLeftParent!=0)
+//  if (injectionFromLeftParent!= 0)
 //    injectionFromLeftParent->MultiplyOnTheLeft(theBasisChangeMatInverse);
-//  if (injectionFromRightParent!=0)
+//  if (injectionFromRightParent!= 0)
 //    injectionFromRightParent->MultiplyOnTheLeft(theBasisChangeMatInverse);
   Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
   MatrixTensor<Rational> theProjection;
@@ -348,7 +348,7 @@ void AlgebraicClosureRationals::GetMultiplicationBy
   }
 }
 
-Rational AlgebraicNumber::GetDenominatorRationalPart()const
+Rational AlgebraicNumber::GetDenominatorRationalPart() const
 { if (this->owner == 0)
   { if (this->theElT.IsEqualToZero())
       return 1;
@@ -430,7 +430,7 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
   return false;
 }
 
-Rational AlgebraicNumber::GetNumeratorRationalPart()const
+Rational AlgebraicNumber::GetNumeratorRationalPart() const
 { if (this->owner == 0)
   { if (this->theElT.IsEqualToZero())
       return 0;
@@ -449,7 +449,7 @@ Rational AlgebraicNumber::GetNumeratorRationalPart()const
   return resultGCD;
 }
 
-unsigned int AlgebraicNumber::HashFunction()const
+unsigned int AlgebraicNumber::HashFunction() const
 { //crash << crash;
   //WARNING. Algebraic numbers, as they are recorded in memory at the moment,
   //do not have unique presentations, so we return 0 as their hash function.
@@ -459,7 +459,7 @@ unsigned int AlgebraicNumber::HashFunction()const
   return 0;
 }
 
-bool AlgebraicNumber::operator==(const Rational& other)const
+bool AlgebraicNumber::operator==(const Rational& other) const
 { if (this->theElT.IsEqualToZero())
     return other == 0;
   if (this->theElT.size() != 1)
@@ -469,7 +469,7 @@ bool AlgebraicNumber::operator==(const Rational& other)const
   return this->theElT.theCoeffs[0] == other;
 }
 
-bool AlgebraicNumber::NeedsParenthesisForMultiplication()const
+bool AlgebraicNumber::NeedsParenthesisForMultiplication() const
 { if (this->owner == 0)
     return false;
   VectorSparse<Rational> additiveForm;
@@ -478,7 +478,7 @@ bool AlgebraicNumber::NeedsParenthesisForMultiplication()const
   return (additiveForm.size() > 1);
 }
 
-bool AlgebraicNumber::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost()const
+bool AlgebraicNumber::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost() const
 { if (this->owner == 0)
   { Rational tempRat;
     if (this->IsRational(&tempRat))
@@ -493,7 +493,7 @@ bool AlgebraicNumber::NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost
   return additiveForm.theCoeffs[0].NeedsParenthesisForMultiplicationWhenSittingOnTheRightMost();
 }
 
-bool AlgebraicNumber::CheckNonZeroOwner()const
+bool AlgebraicNumber::CheckNonZeroOwner() const
 { if (this->owner == 0)
     crash << "This is a programming error: algebraic number with non-initialized owner not permitted in the current context." << crash;
   return true;
@@ -706,7 +706,7 @@ void AlgebraicNumber::operator*=(const Rational& other)
 { this->theElT *= other;
 }
 
-bool AlgebraicNumber::CheckCommonOwner(const AlgebraicNumber& other)const
+bool AlgebraicNumber::CheckCommonOwner(const AlgebraicNumber& other) const
 { if (this->owner == 0 || other.owner == 0)
     return true;
   if (this->owner != other.owner)
@@ -771,7 +771,7 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
   this->CheckConsistency();
 }
 
-bool AlgebraicNumber::CheckConsistency()const
+bool AlgebraicNumber::CheckConsistency() const
 { if (this->flagDeallocated)
     crash << "This is a programming error: use after free of AlgebraicNumber. " << crash;
   if (this->owner == 0)
@@ -824,7 +824,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
     theReport.Report(reportStream.str());
   }
   this->CheckCommonOwner(other);
-//  AlgebraicNumber otherCopy=other;
+//  AlgebraicNumber otherCopy= other;
 //  stOutput << "Converting <hr>" << HtmlRoutines::GetMathSpanPure(this->ToString()) << " and <br><br>\n\n\n\n<br><br>"
 //  << HtmlRoutines::GetMathSpanPure(otherCopy.ToString());
 //  stOutput << " <br><br>To get: " << HtmlRoutines::GetMathSpanPure(this->ToString()) << "<br>\n\n and  <br><br>\n\n\n\n<br><br> \n"
@@ -832,8 +832,8 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
   //stOutput << " <hr>multiplying " << this->theElt.ToString() << " by " << other.theElt.ToString() << " ";
   MatrixTensor<Rational> leftMat, rightMat;
 //  FormatExpressions tempformat;
-//  tempformat.flagUseLatex=true;
-//  tempformat.flagUseHTML=false;
+//  tempformat.flagUseLatex= true;
+//  tempformat.flagUseHTML= false;
   this->owner->GetMultiplicationBy(*this, leftMat);
   this->owner->GetMultiplicationBy(other, rightMat);
   leftMat.CheckConsistencyGrandMaster();
@@ -856,7 +856,7 @@ void AlgebraicNumber::SqrtMeDefault()
 { this->RadicalMeDefault(2);
 }
 
-bool AlgebraicNumber::operator>(const AlgebraicNumber& other)const
+bool AlgebraicNumber::operator>(const AlgebraicNumber& other) const
 { Rational left, right;
   if (this->IsRational(&left) && other.IsRational(&right))
     return left > right;
@@ -870,7 +870,7 @@ void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRati
   this->theElT.MaKeEi(0, input);
 }
 
-bool AlgebraicNumber::IsExpressedViaLatestBasis()const
+bool AlgebraicNumber::IsExpressedViaLatestBasis() const
 { if (this->owner == 0)
     return true;
   return this->basisIndex == this->owner->theBasesAdditive.size - 1;
@@ -885,7 +885,7 @@ void AlgebraicNumber::ExpressViaLatestBasis()
   this->basisIndex = this->owner->theBasesAdditive.size - 1;
 }
 
-bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble)const
+bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble) const
 { MacroRegisterFunctionWithName("AlgebraicNumber::EvaluatesToDouble");
   if (!this->IsExpressedViaLatestBasis())
   { AlgebraicNumber thisCopy = *this;
@@ -973,7 +973,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
     this->CheckConsistency();
     return true;
   }
-  if(!inputOwner.MergeRadicals(theFactors))
+  if (!inputOwner.MergeRadicals(theFactors))
     return false;
 //  stOutput << "After merging radicals, the field is: " << inputOwner.ToString();
   Selection FactorSel;
@@ -1005,16 +1005,16 @@ void AlgebraicNumber::RadicalMeDefault(int theRad)
 /*  MatrixTensor<Rational> theRadicalOp;
   theRadicalOp.MakeZero();
   MonomialTensor tempM;
-  for (int i=0; i<this->GetMinPoly().size; i++)
-  { tempM=this->GetMinPoly()[i];
+  for (int i = 0; i < this->GetMinPoly().size; i ++)
+  { tempM= this->GetMinPoly()[i];
     tempM.ExponentMeBy(theRad);
     newMinPoly.AddMonomial(tempM, this->GetMinPoly().theCoeffs[i]);
   }
-  this->rootIndex=0;
+  this->rootIndex= 0;
   this->minPolyIndex= this->theRegistry->theMinPolys.AddNoRepetitionOrReturnIndexFirst(newMinPoly);*/
 }
 
-std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)const
+std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat) const
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::ToString");
   (void) theFormat;//remove unused parameter warning, portable.
   std::stringstream out;
@@ -1067,7 +1067,7 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
   return out.str();
 }
 
-bool AlgebraicNumber::IsRational(Rational* whichRational)const
+bool AlgebraicNumber::IsRational(Rational* whichRational) const
 { //stOutput << "<br>Checking whether " << this->ToString() << " is rational... ";
   if (this->IsEqualToZero())
   { if (whichRational != 0)
@@ -1082,17 +1082,17 @@ bool AlgebraicNumber::IsRational(Rational* whichRational)const
 
     } else if (whichRational != 0)
       *whichRational = this->theElT.theCoeffs[i];
-//  if (this->basisIndex!=0)
+//  if (this->basisIndex!= 0)
 //    crash << "Rational algebraic number: must have basis index 0" << crash;
   //stOutput << "it is!";
   return true;
 }
 
-bool AlgebraicNumber::IsEqualToZero()const
+bool AlgebraicNumber::IsEqualToZero() const
 { return this->theElT.IsEqualToZero();
 }
 
-std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
+std::string AlgebraicNumber::ToString(FormatExpressions* theFormat) const
 { if (this->owner == 0)
   { if (this->theElT.IsEqualToZero())
       return "0";
@@ -1109,7 +1109,7 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-bool AlgebraicNumber::operator==(const AlgebraicNumber& other)const
+bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const
 { Rational ratValue;
   this->CheckConsistency();
   other.CheckConsistency();
@@ -1144,7 +1144,7 @@ void AlgebraicNumber::operator=(const Rational& other)
   this->basisIndex = 0;
 }
 
-std::string ElementZmodP::ToString(FormatExpressions* theFormat)const
+std::string ElementZmodP::ToString(FormatExpressions* theFormat) const
 { (void) theFormat; //remove unused parameter warnign portable.
   std::stringstream out;
   out << "(" << this->theValue.ToString() << " ~mod~ " << this->theModulo.ToString() << ")";

@@ -48,7 +48,7 @@ bool LaTeXcrawler::ExtractFileNamesFromRelativeFileName(std::stringstream* comme
   }
   FileOperations::GetPhysicalFileNameFromVirtual
   (this->theFileNameToCrawlRelative, this->theFileNameToCrawlPhysicalWithPath, true, false, commentsOnFailure);
-//  =theGlobalVariables.PhysicalPathProjectBase+ "../freecalc/" +
+//  = theGlobalVariables.PhysicalPathProjectBase + "../freecalc/" +
 //  this->theFileNameToCrawlRelative;
   this->baseFolderStartFilePhysical =
   FileOperations::GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe
@@ -137,7 +137,7 @@ void LaTeXcrawler::BuildFreecalC()
     std::getline(inputFile, buffer);
     std::string desiredName;
     if (!MathRoutines::StringBeginsWith(buffer, "%DesiredLectureName: ", &desiredName))
-      if(!MathRoutines::StringBeginsWith(buffer, "%DesiredHomeworkName: ", &desiredName))
+      if (!MathRoutines::StringBeginsWith(buffer, "%DesiredHomeworkName: ", &desiredName))
         desiredName = "";
     for (unsigned i = 0; i < desiredName.size(); i ++)
       if (desiredName[i] == '.' || desiredName[i] == '/' || desiredName[i] == '\\')
@@ -243,7 +243,7 @@ void LaTeXcrawler::BuildFreecalC()
 
   //numLecturesToProcess =1;
   std::fstream workingFile;
-  for (int i = 0; i < numLecturesToProcess; i++)
+  for (int i = 0; i < numLecturesToProcess; i ++)
   { reportStream << "<br>Processing lecture " << i + 1 << " out of " << theLectureNumbers.size << ". ";
     resultTable << "<tr>";
     resultTable << "<td>" << theLectureNumbers[i] << "</td>";
@@ -485,7 +485,7 @@ void LaTeXcrawler::CrawlRecursive(std::stringstream& crawlingResult, const std::
         buffer = buffer.substr(foundInput);
         unsigned i = 0;
         newFileName = "";
-        for (i = 7; buffer[i] != '}' && i < buffer.size(); i++)
+        for (i = 7; buffer[i] != '}' && i < buffer.size(); i ++)
           newFileName += buffer[i];
         newFileName = MathRoutines::StringTrimWhiteSpace(newFileName);
         std::string newFileNameEnd;
@@ -618,7 +618,7 @@ std::string LaTeXcrawler::AdjustDisplayTitle(const std::string& input, bool isHo
   ignoredTags.AddOnTop("lectureTag");
   ignoredTags.AddOnTop("advancedTopic");
   ignoredTags.AddOnTop("reviewProblem");
-  for (int i = 0; i < ignoredTags.size; i++)
+  for (int i = 0; i < ignoredTags.size; i ++)
   { std::string closeTag = "</" + ignoredTags[i] + ">";
     std::string openTag  = "<"  + ignoredTags[i] + ">";
     if (input.find(openTag) != std::string::npos && input.find(closeTag) != std::string::npos)
@@ -713,7 +713,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
       crawlingResult << "\\lect{\\semester}{" << this->desiredPresentationTitle << "}{1}{\n";
     else
       crawlingResult << "\\homeworkOnATopic{}{" << this->desiredPresentationTitle << "}{1}{\n";
-    for (int i = 1; i < this->slideFileNamesVirtualWithPatH.size; i++)
+    for (int i = 1; i < this->slideFileNamesVirtualWithPatH.size; i ++)
       if (this->latexSnippets[i] == "")
       { if (this->flagHomeworkRatherThanSlides)
         { bool doIncludeItem = true;
@@ -737,7 +737,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
   if (this->flagCrawlTexSourcesRecursively || this->flagSourceOnly)
   { this->targetLaTeX = crawlingResult.str();
     //this->targetLaTeX += "Got to here";
-    //if (commentsGeneral!=0)
+    //if (commentsGeneral!= 0)
     //  *commentsGeneral << "<br>Target .tex:<hr>" << HtmlRoutines::ConvertStringToHtmlString(this->targetLaTeX, true);
     return true;
   }
@@ -814,7 +814,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   this->slideFilesExtraFlags.initFillInObject(this->slideFileNamesVirtualWithPatH.size, "");
   for (int i = 0; i < topicParser.theTopicS.size()
 //  && numProcessed < 2
-  ; i++)
+  ; i ++)
   { TopicElement& currentElt = topicParser.theTopicS[i];
     if (currentElt.sourceHomework.size == 0)
       continue;
@@ -857,7 +857,7 @@ bool LaTeXcrawler::BuildTopicList(std::stringstream* commentsOnFailure, std::str
   this->slideFileNamesVirtualWithPatH.AddListOnTop(topicParser.slidesSourcesHeaders);
   for (int i = 0; i < topicParser.theTopicS.size()
   //&& numProcessed < 0
-  ; i++)
+  ; i ++)
   { TopicElement& currentElt = topicParser.theTopicS[i];
     if (currentElt.sourceSlides.size == 0)
       continue;

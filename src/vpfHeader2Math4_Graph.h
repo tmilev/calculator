@@ -33,23 +33,23 @@ struct GraphEdge
   int vStart;
   int vEnd;
   std::string label;
-  GraphEdge():vStart(-1), vEnd(-1) {}
+  GraphEdge():vStart(- 1), vEnd(- 1) {}
   GraphEdge(int inputStart, int inputEnd):vStart(inputStart), vEnd(inputEnd) {}
   GraphEdge(int inputStart, int inputEnd, const std::string& inputLabel)
   :vStart(inputStart), vEnd(inputEnd), label(inputLabel) {}
-  std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
   static unsigned int HashFunction(const GraphEdge& input)
   { return input.HashFunction();
   }
-  unsigned int HashFunction()const
-  { return vStart+vEnd*SomeRandomPrimes[0];
+  unsigned int HashFunction() const
+  { return vStart + vEnd * SomeRandomPrimes[0];
   }
   inline static bool IsMonEqualToZero()
   { return false;
   }
-  bool operator==(const GraphEdge& other)const
-  { return this->vStart==other.vStart && this->vEnd==other.vEnd
-    && this->label==other.label;
+  bool operator==(const GraphEdge& other) const
+  { return this->vStart == other.vStart && this->vEnd == other.vEnd
+    && this->label == other.label;
   }
 };
 
@@ -68,8 +68,8 @@ public:
   List<int> positionInDisplayGroup;
   List<int> displayGroupIndices;
   List<int> connectedComponentSizes;
-  Graph(): numNodes(-1), groupMaxSize(-1){}
-  bool CheckConsistency()const;
+  Graph(): numNodes(- 1), groupMaxSize(- 1){}
+  bool CheckConsistency() const;
   void AddEdge(int i, int j);
   void ComputeEdgesPerNodesNoMultiplicities();
   double GetXnode(int groupIndex, int indexInGroup);
@@ -81,7 +81,7 @@ public:
   void AddEdge(int i, int j, const std::string& inputLabel);
   std::string ToStringPsTricks(FormatExpressions* theFormat);
   std::string ToStringNodesAndEdges(FormatExpressions* theFormat);
-  std::string ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat=0);
+  std::string ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat = 0);
 };
 
 #endif

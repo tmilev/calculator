@@ -15,7 +15,7 @@ class ModuleSSalgebra
   (const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon, const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon,
    ProgressReport* theProgressReport = 0);
   Rational hwTrace
-  (const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& thePair, ProgressReport* theProgressReport=0);
+  (const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& thePair, ProgressReport* theProgressReport = 0);
   void CheckConsistency(GlobalVariables& theGlobalVariables);
 public:
   SemisimpleLieAlgebra* owner;
@@ -66,14 +66,14 @@ public:
     this->owner == other.owner && this->theHWFundamentalCoordsBaseField == other.theHWFundamentalCoordsBaseField
     && this->parabolicSelectionNonSelectedAreElementsLevi == other.parabolicSelectionNonSelectedAreElementsLevi;
   }
-  bool HasFreeAction(int generatorIndex)const
+  bool HasFreeAction(int generatorIndex) const
   { Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(generatorIndex);
     for (int i = 0; i < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i ++)
       if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].IsNegative())
         return true;
     return false;
   }
-  bool HasZeroActionFDpart(int generatorIndex)const
+  bool HasZeroActionFDpart(int generatorIndex) const
   { Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(generatorIndex);
     for (int i = 0; i < this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i ++)
       if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].IsPositive())
@@ -96,7 +96,7 @@ public:
   MatrixTensor<coefficient>& GetActionGeneratorIndeX(int generatorIndex);
   MatrixTensor<coefficient>& GetActionSimpleGeneratorIndex(int generatorIndex);
   int GetMinNumVars()
-  { if (this->theHWFundamentalCoordsBaseField.size<=0)
+  { if (this->theHWFundamentalCoordsBaseField.size <= 0)
       return - 1;
     int result = 0;
     for (int i = 0; i < this->theHWFundamentalCoordsBaseField.size; i ++)
@@ -104,10 +104,10 @@ public:
       (result, this->theHWFundamentalCoordsBaseField[i].GetMinNumVars());
     return result;
   }
-  int GetDim()const
+  int GetDim() const
   { return this->theGeneratingWordsNonReduced.size;
   }
-  bool CheckInitialization()const
+  bool CheckInitialization() const
   { if (this->flagDeallocated)
       crash << "Use after free of ModuleSSalgebra. " << crash;
     if (this->owner == 0)
@@ -119,7 +119,7 @@ public:
   (SemisimpleLieAlgebra& inputAlgebra, Vector<coefficient>& HWFundCoords, const Selection& selNonSelectedAreElementsLevi,
    const coefficient& theRingUnit, const coefficient& theRingZero, std::string* outputReport,
   bool computeSimpleGens = true);
-  SemisimpleLieAlgebra& GetOwner()const
+  SemisimpleLieAlgebra& GetOwner() const
   { if (this->owner == 0)
       crash << "This is a programming error: calling GetOwner() on a non-initialized generalized Verma module. " << crash;
     return *this->owner;
@@ -134,8 +134,8 @@ public:
   void ExpressAsLinearCombinationHomogenousElement
   (ElementUniversalEnveloping<coefficient>& inputHomogeneous, ElementUniversalEnveloping<coefficient>& outputHomogeneous, int indexInputBasis,
    const Vector<coefficient>& subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero);
-  std::string ToString(FormatExpressions* theFormat = 0)const;
-  std::string ElementToStringHWV(FormatExpressions* theFormat = 0)const
+  std::string ToString(FormatExpressions* theFormat = 0) const;
+  std::string ElementToStringHWV(FormatExpressions* theFormat = 0) const
   { if (this->highestWeightVectorNotation != "")
       return this->highestWeightVectorNotation;
     std::stringstream out;
@@ -146,7 +146,7 @@ public:
   }
   void SplitOverLevi
   (std::string* Report, Selection& splittingParSel,
-   List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors = 0, Vectors<coefficient>* outputWeightsFundCoords = 0, Vectors<coefficient>* outputEigenSpace=0,
+   List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors = 0, Vectors<coefficient>* outputWeightsFundCoords = 0, Vectors<coefficient>* outputEigenSpace= 0,
    charSSAlgMod<coefficient>* outputChar = 0);
   void SplitFDpartOverFKLeviRedSubalg
   (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall,
@@ -175,7 +175,7 @@ public:
   {
   }
   ~ModuleSSalgebra()
-  { this->flagDeallocated=true;
+  { this->flagDeallocated = true;
   }
 };
 
@@ -186,18 +186,18 @@ public MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coeffici
 public:
   bool MultiplyOnTheLeft
   (const ElementUniversalEnveloping<coefficient>& theUE, ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra,
-   const coefficient& theRingUnit)const;
+   const coefficient& theRingUnit) const;
   bool MultiplyOnTheLeft
   (const MonomialUniversalEnveloping<coefficient>& theUE, ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra,
-   const coefficient& theRingUnit)const;
+   const coefficient& theRingUnit) const;
   void TensorOnTheRight
   (const ElementTensorsGeneralizedVermas<coefficient>& right);
   void MultiplyByElementLieAlg
   (ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra, int indexGenerator,
-   const coefficient& theRingUnit)const;
+   const coefficient& theRingUnit) const;
   void MultiplyBy(const ElementTensorsGeneralizedVermas<coefficient>& standsOnTheRight);
-  bool IsHWV()const
-  { if (this->theCoeffs.size!=1)
+  bool IsHWV() const
+  { if (this->theCoeffs.size != 1)
       return false;
     if (!this->theCoeffs[0].IsEqualToOne())
       return false;
@@ -206,33 +206,33 @@ public:
   void MakeHWV(ModuleSSalgebra<coefficient>& theOwner, const coefficient& theRingUnit);
   void Substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods);
   void SetNumVariables(int GoalNumVars)
-  { for (int i=0; i<this->size; i++)
+  { for (int i = 0; i < this->size; i ++)
       this->TheObjects[i].SetNumVariables(GoalNumVars);
   }
-  SemisimpleLieAlgebra& GetOwnerSS()const
+  SemisimpleLieAlgebra& GetOwnerSS() const
   { return this->GetOwnerModule().GetOwner();
   }
-  ModuleSSalgebra<coefficient>& GetOwnerModule()const
-  { if (this->size() <=0)
+  ModuleSSalgebra<coefficient>& GetOwnerModule() const
+  { if (this->size() <= 0)
       crash << "This is a programming error: calling GetOwnerModule() on a tensor element which has no monomials."
       << " This is not allowed as the index of the owner modules are stored in the monomials. " << crash;
-    const MonomialTensorGeneralizedVermas<coefficient>& theMon=(*this)[0];
-    if (theMon.theMons.size<=0)
+    const MonomialTensorGeneralizedVermas<coefficient>& theMon = (*this)[0];
+    if (theMon.theMons.size <= 0)
       crash << "This is a programming error: calling GetOwnerModule() on a tensor element which has a constant monomial."
       << " This is not allowed: constant monomials do not have owners. " << crash;
-    MonomialGeneralizedVerma<coefficient>& theGmon=theMon.theMons[0];
+    MonomialGeneralizedVerma<coefficient>& theGmon = theMon.theMons[0];
     return *theGmon.owner;
   }
   int GetNumVars()
-  { if (this->size==0)
-      return -1;
-    int theAnswer=this->TheObjects[0].GetNumVars();
-    for (int i=1; i<this->size; i++)
-      if (theAnswer!=this->TheObjects[i].GetNumVars())
-        return -1;
+  { if (this->size == 0)
+      return - 1;
+    int theAnswer = this->TheObjects[0].GetNumVars();
+    for (int i = 1; i < this->size; i ++)
+      if (theAnswer != this->TheObjects[i].GetNumVars())
+        return - 1;
     return theAnswer;
   }
-  unsigned int HashFunction()const
+  unsigned int HashFunction() const
   { return this->:: MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coefficient >::HashFunction();
   }
   void operator=(const ElementTensorsGeneralizedVermas<coefficient>& other)

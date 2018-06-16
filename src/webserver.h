@@ -71,7 +71,7 @@ public:
     this->peer_certificate = 0;
     this->theSSLMethod = 0;
     this->contextServer = 0;
-//    this->contextClient=0;
+//    this->contextClient = 0;
     this->flagSSLHandshakeSuccessful = false;
   }
   ~SSLdata();
@@ -295,10 +295,10 @@ public:
   bool ReceiveAllHttpSSL();
   void ReportDisplayUserInput();
   enum requestTypes {requestUnknown, requestGet, requestPost, requestHead, requestChunked};
-  std::string ToStringStatus()const;
-  std::string ToStringMessageUnsafe(bool useHTML = true)const;
-  std::string ToStringMessageShortUnsafe(FormatExpressions* theFormat = 0)const;
-  std::string ToStringMessageFullUnsafe(bool useHTML = true)const;
+  std::string ToStringStatus() const;
+  std::string ToStringMessageUnsafe(bool useHTML = true) const;
+  std::string ToStringMessageShortUnsafe(FormatExpressions* theFormat = 0) const;
+  std::string ToStringMessageFullUnsafe(bool useHTML = true) const;
   void ParseMessageHead();
   void ExtractHostInfo();
   void ExtractAddressParts();

@@ -78,7 +78,7 @@ public:
   }
   JSData(const char* other)
   { this->reset();
-    this->operator =(other);
+    this->operator=(other);
   }
   JSData(char other)
   { this->reset(other);
@@ -92,7 +92,14 @@ public:
     this->objects = other.objects;
   }
   void operator=(const List<JSData>& other);
-  // there has to be a better way to do this
+  template <typename any>
+  void operator=(const List<any>& other)
+  { this->reset();
+    this->type = this->JSarray;
+    this->list.SetSize(other.size);
+    for (int i = 0; i < other.size; i ++)
+      this->list[i] = other[i];
+  }
   void operator=(const Rational& other);
 
   void operator=(const List<int>& other);

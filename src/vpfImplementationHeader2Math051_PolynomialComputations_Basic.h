@@ -7,7 +7,7 @@
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialComputationsBasic(__FILE__, "Implementation header, basic polynomial computations. ");
 
 template <class coefficient>
-bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output)const
+bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output) const
 { MacroRegisterFunctionWithName("MonomialP::Substitution");
   output.MakeConst(1);
   if (this->IsConstant())
@@ -47,7 +47,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
 }
 
 template<class coefficient>
-bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable)const
+bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable) const
 { int tempInt;
   if (whichVariable == 0)
     whichVariable = &tempInt;
@@ -82,7 +82,7 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polyn
       theMonomial *= theMat(j, permutationIndices[j]);
     //the following can be made much faster, but no need right now as it won't be a bottleneck.
     int sign = 1;
-    for(int j = 0; j < permutationIndices.size; j ++)
+    for (int j = 0; j < permutationIndices.size; j ++)
       for (int k = j + 1; k < permutationIndices.size; k ++)
         if (permutationIndices[k]<permutationIndices[j])
           sign *= - 1;
@@ -125,7 +125,7 @@ void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs()
 }
 
 template <class coefficient>
-Rational Polynomial<coefficient>::TotalDegree()const
+Rational Polynomial<coefficient>::TotalDegree() const
 { Rational result = 0;
   for (int i = 0; i < this->size(); i ++)
     result = MathRoutines::Maximum((*this)[i].TotalDegree(), result);
@@ -133,7 +133,7 @@ Rational Polynomial<coefficient>::TotalDegree()const
 }
 
 template <class coefficient>
-int Polynomial<coefficient>::TotalDegreeInt()const
+int Polynomial<coefficient>::TotalDegreeInt() const
 { int result = - 1;
   if (!this->TotalDegree().IsSmallInteger(&result))
     crash << "This is a programming error: requested total degree of a polynomial in int formal, but the degree of the polynomial is not a small integer. " << crash;
@@ -267,7 +267,7 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
   { const MonomialP& currentMon = (*this)[i];
     int numCycles = 0;
     if (!currentMon(0).IsSmallInteger(&numCycles) )
-      crash << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i+1 << "^{th} variable is raised to the power "
+      crash << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i+ 1 << "^{th} variable is raised to the power "
       << currentMon(0).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "
       << "If the user has requested such an operation, it *must* be intercepted at an earlier level (and the user must be informed)."
       << crash;
@@ -285,7 +285,7 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
 }
 
 template <class coefficient>
-int Polynomial<coefficient>::GetIndexMaxMonomialLexicographicLastVariableStrongest()const
+int Polynomial<coefficient>::GetIndexMaxMonomialLexicographicLastVariableStrongest() const
 { return this->GetIndexMaxMonomial(MonomialP::LeftGreaterThanLexicographicLastVariableStrongest);
 }
 
@@ -301,7 +301,7 @@ void Polynomial<coefficient>::ScaleToPositiveMonomials(MonomialP& outputScale)
 }
 
 template <class coefficient>
-bool Polynomial<coefficient>::IsProportionalTo(const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit)const
+bool Polynomial<coefficient>::IsProportionalTo(const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit) const
 { if (this->size() != other.size())
     return false;
   if (other.size() == 0)
@@ -322,7 +322,7 @@ bool Polynomial<coefficient>::IsProportionalTo(const Polynomial<coefficient>& ot
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivisor, Polynomial<coefficient>& outputQuotient, Polynomial<coefficient>& outputRemainder)const
+void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivisor, Polynomial<coefficient>& outputQuotient, Polynomial<coefficient>& outputRemainder) const
 { MacroRegisterFunctionWithName("Polynomial::DivideBy");
   if (&outputRemainder == this || &outputQuotient == this || &outputRemainder == &inputDivisor || &outputQuotient == &inputDivisor)
   { Polynomial<coefficient> newQuot, newRemaind;
@@ -375,7 +375,7 @@ void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivis
     tempP.MultiplyBy(tempMon, tempCoeff);
 /*    stOutput << "<br>hash function tempMon: " <<  tempMon.HashFunction();
     stOutput << "<br>HashFunctions of outputRemainder monomials: ";
-    for (int i=0; i<outputRemainder.size; i++)
+    for (int i = 0; i <outputRemainder.size; i ++)
       stOutput << outputRemainder[i].HashFunction() << ", ";
     stOutput << "<br>subbing " << tempP.ToString() << " from remainder " << outputRemainder.ToString();*/
     outputRemainder -= tempP;
@@ -477,7 +477,7 @@ int Polynomial<coefficient>::GetMaxPowerOfVariableIndex(int VariableIndex)
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::GetConstantTerm(coefficient& output, const coefficient& theRingZero)const
+void Polynomial<coefficient>::GetConstantTerm(coefficient& output, const coefficient& theRingZero) const
 { MonomialP tempM;
   tempM.MakeOne();
   int i = this->theMonomials.GetIndex(tempM);

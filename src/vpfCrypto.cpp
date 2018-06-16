@@ -4,7 +4,7 @@
 #include "vpfHeader1General7FileOperations_Encodings.h"
 #include "vpfJson.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
-ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA-1 and base64 implementation.");
+ProjectInformationInstance projectInfoCryptoFile1(__FILE__, "SHA- 1 and base64 implementation.");
 
 unsigned char Crypto::GetCharFrom6bit(uint32_t input)
 { switch (input)
@@ -260,7 +260,7 @@ bool Crypto::ConvertBase64ToBitStream
     if (numBitsInStack == 12)
     { output.AddOnTop(theStack / 16);
       numBitsInStack = 4;
-      theStack=theStack % 16;
+      theStack= theStack % 16;
     }
     if (numBitsInStack == 8)
     { output.AddOnTop(theStack);
@@ -560,7 +560,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
   //Wikipedia appears to claim that if the message
   //is a multiple of 8 bits, padding with the bit 1
   //is not necessary. This appears to be false:
-  //adding: if (messageLength%256==0)
+  //adding: if (messageLength%256== 0)
   //appears to produce wrong results.
   inputStringPreprocessed.push_back(0x80);
   unsigned numbytesMod64 = inputStringPreprocessed.size() % 64;
@@ -615,7 +615,7 @@ void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output)
       { f = b xor c xor d;
         k = 0xCA62C1D6;
       }
-      temp= Crypto::leftRotateAsIfBigEndian(a, 5) + f + e + k + currentChunk[j];
+      temp = Crypto::leftRotateAsIfBigEndian(a, 5) + f + e + k + currentChunk[j];
       e = d;
       d = c;
       c = Crypto::leftRotateAsIfBigEndian(b, 30);
@@ -761,7 +761,7 @@ void Crypto::ConvertListUintToLargeUInt(List<uint32_t>& input, LargeIntUnsigned&
 
 void Crypto::ConvertBitStreamToLargeUnsignedInt(const List<unsigned char>& input, LargeIntUnsigned& output)
 { output = 0;
-  for (int i=0; i < input.size; i ++)
+  for (int i = 0; i < input.size; i ++)
   { output *= 256;
     output += ((unsigned int) input[i]);
   }
@@ -852,7 +852,7 @@ void Crypto::computeSha2xx(const std::string& inputString, List<uint32_t>& outpu
   Crypto::ConvertUint64toBigendianStringAppendResult(messageLength, inputStringPreprocessed);
 ////////////////////////
 //  std::stringstream tempSTream;
-//  for (unsigned i=0; i<inputStringPreprocessed.size(); i++)
+//  for (unsigned i = 0; i <inputStringPreprocessed.size(); i ++)
 //  {
 //    tempSTream << std::hex << inputStringPreprocessed[i];
 //  }
@@ -1082,7 +1082,7 @@ bool JSONWebToken::VerifyRSA256
   { *commentsGeneral << "<br>Payload: " << payload;
     //List<int> intValues;
     //intValues.SetSize(payload.size());
-    //for (unsigned i=0; i< payload.size(); i++)
+    //for (unsigned i = 0; i < payload.size(); i ++)
     //  intValues[i]=payload[i];
     //*commentsGeneral << "<br>Payload, json: " << intValues.ToStringCommaDelimited();
   }

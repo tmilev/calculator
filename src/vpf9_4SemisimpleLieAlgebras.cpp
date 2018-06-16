@@ -36,14 +36,14 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   theTableLateXStream << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
   for (int i = 0; i < numRoots + theDimension; i ++)
   { tempElt1.MakeGenerator(i, *this);
-    tempS=tempElt1.ToString(theFormat);
+    tempS= tempElt1.ToString(theFormat);
     theHtmlStream << "<td>" << tempS << "</td>";
     theTableLateXStream << " & ";
     theTableLateXStream << tempS;
   }
   theTableLateXStream << "\\\\\n";
   theHtmlStream << "</tr>";
-  //int lineCounter=0;
+  //int lineCounter = 0;
   for (int i = 0; i < theDimension + numRoots; i ++)
   { tempRoot = this->GetWeightOfGenerator(i);
     theTableLateXStream << tempRoot.ToString() << "&";
@@ -52,7 +52,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
     theTableLateXStream << tempRoot2.ToStringLetterFormat("\\varepsilon") << "&";
     theHtmlStream << "<td>" << tempRoot2.ToStringLetterFormat("e") << "</td>";
     tempElt1.MakeGenerator(i, *this);
-    tempS=tempElt1.ToString(theFormat);
+    tempS= tempElt1.ToString(theFormat);
     theTableLateXStream << tempS;
     theHtmlStream << "<td>" << tempS << "</td>";
     for (int j = 0; j < numRoots + theDimension; j ++)
@@ -69,7 +69,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   theHtmlStream << "</table>";
   theTableLateXStream << "\\end{array}";
   if (this->GetNumGenerators() < 22)
-  { out << "<div class=\"math\">" << theTableLateXStream.str() << "</div>";
+  { out << "<div class =\"math\">" << theTableLateXStream.str() << "</div>";
     return out.str();
   }
   out << "<br><b> The Lie bracket table is too large to be rendered in LaTeX, displaying in"
@@ -212,8 +212,8 @@ void SemisimpleLieAlgebra::ComputeMultTable()
   this->theLiebrackets.init(numGenerators, numGenerators);
 //  this->theLiebracketPairingIndices.init(numGenerators, numGenerators);
   this->UEGeneratorOrderIncludingCartanElts.initFillInObject(numGenerators, - 1);
-//  this->theLiebracketPairingIndices.MakeZero(-1);
-//  this->OppositeRootSpaces.initFillInObject(numRoots+theDimension, -1);
+//  this->theLiebracketPairingIndices.MakeZero(- 1);
+//  this->OppositeRootSpaces.initFillInObject(numRoots+theDimension, - 1);
   Vector<Rational> leftWeight, rightWeight, hRoot;
   for (int i = 0; i < numGenerators; i ++)
   { leftWeight = this->GetWeightOfGenerator(i);
@@ -273,7 +273,7 @@ void SemisimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int ind
   //this->ComputeDebugString();
   this->ExploitSymmetryChevalleyConstants(indexI, indexJ);
   //this->ComputeDebugString();
-  //int indexRootIPlusRootJ=this->theWeyl.RootSystem.GetIndex(rootI+rootJ);
+  //int indexRootIPlusRootJ= this->theWeyl.RootSystem.GetIndex(rootI+rootJ);
   int indexMinusIMinusJ = this->theWeyl.RootSystem.GetIndex(- rootI - rootJ);
   this->ExploitTheCyclicTrick(indexI, indexJ, indexMinusIMinusJ);
   //this->ComputeDebugString();
@@ -329,7 +329,7 @@ void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
 }
 
 bool SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot
-(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output)const
+(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output) const
 { output = - 1;
   Vector<Rational> tempRoot = beta;
   if (alpha.IsEqualToZero())
@@ -382,8 +382,8 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant
 }
 
 bool SemisimpleLieAlgebra::TestForConsistency()
-{ //HashedList<Vector<Rational> >& theRoots=this->theWeyl.RootSystem;
-  FormatExpressions& theFormat=theGlobalVariables.theDefaultFormat.GetElement();
+{ //HashedList<Vector<Rational> >& theRoots = this->theWeyl.RootSystem;
+  FormatExpressions& theFormat = theGlobalVariables.theDefaultFormat.GetElement();
   ElementSemisimpleLieAlgebra<Rational> g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, theGlobalVariables);
   for (int i = 0; i < this->GetNumGenerators(); i ++)

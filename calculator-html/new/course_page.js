@@ -80,7 +80,7 @@ function modifyWeight(id) {
     weight: incomingPoints
   };
   //console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
-  var theURL = `${pathnames.calculatorAPI}?request=setProblemData&mainInput=${encodeURIComponent(JSON.stringify(modifyObject))}`;
+  var theURL = `${pathnames.calculatorAPI}?request =setProblemData&mainInput =${encodeURIComponent(JSON.stringify(modifyObject))}`;
   submitGET({
     url: theURL,
     progress: "spanProgressReportGeneral",
@@ -133,11 +133,11 @@ function getHTMLProblems(theProblemContainer) {
     result += "<tr>";
     result += `<td>${currentProblemData.problemNumberString} ${currentProblemData.title}</td>`;
     result += "<td>";
-    result += `<a class='videoLink' href='${currentProblemData.video}' target = '_blank'>Video</a>`;
-    result += `<a class='slidesLink' href='${currentProblemData.slidesProjector}' target = '_blank'>Printable slides</a>`;
-    result += `<a class='slidesLink' href='${currentProblemData.slidesPrintable}' target = '_blank'>Slides</a>`;
+    result += `<a class ='videoLink' href='${currentProblemData.video}' target = '_blank'>Video</a>`;
+    result += `<a class ='slidesLink' href='${currentProblemData.slidesProjector}' target = '_blank'>Printable slides</a>`;
+    result += `<a class ='slidesLink' href='${currentProblemData.slidesPrintable}' target = '_blank'>Slides</a>`;
     if (currentProblemData.linkSlidesLaTeX !== "" && currentProblemData.linkSlidesLaTeX !== undefined) {
-      result += `<a class='slidesLink' href='${currentProblemData.linkSlidesLaTeX}' target = '_blank' download='${convertStringToLaTeXFileName(currentProblemData.title)}.tex'>.tex</a>`;
+      result += `<a class ='slidesLink' href='${currentProblemData.linkSlidesLaTeX}' target = '_blank' download='${convertStringToLaTeXFileName(currentProblemData.title)}.tex'>.tex</a>`;
     }
     result += "</td>";
     result += "<td>";
@@ -164,7 +164,7 @@ var problemWeightsVisible = false;
 function initializeProblemWeights() {
   var theWeights = document.getElementsByClassName('panelProblemWeights');
   for (var i = 0; i < theWeights.length; i ++) { 
-    //theScores[i].style.transition='opacity 1s linear';
+    //theScores[i].style.transition ='opacity 1s linear';
     theWeights[i].style.maxHeight = '0px';
   }
 }
@@ -173,13 +173,13 @@ function toggleProblemWeights() {
   var theWeights = document.getElementsByClassName('panelProblemWeights');
   if (!problemWeightsVisible) { 
     for (var i = 0; i < theWeights.length; i ++) { 
-      //theScores[i].style.transition='opacity 1s linear';
+      //theScores[i].style.transition ='opacity 1s linear';
       theWeights[i].style.opacity = '1';
       theWeights[i].style.maxHeight = '200px';
     }
   } else { 
     for (i = 0; i < theWeights.length; i ++) { 
-      //theScores[i].style.transition='opacity 1s linear';
+      //theScores[i].style.transition ='opacity 1s linear';
       theWeights[i].style.opacity = '0';
       theWeights[i].style.maxHeight = '0';
     }
@@ -210,9 +210,9 @@ function getHTMLSection(theSection) {
   var result = "";
   //console.log("DEBUG: current section: " + JSON.stringify(theSection.title) + "; type: " + JSON.stringify(theSection.type));
   if (theSection.type === "section"){
-    result += `<div class=\"headSection\">${theSection.problemNumberString} ${theSection.title}</div>`;    
+    result += `<div class =\"headSection\">${theSection.problemNumberString} ${theSection.title}</div>`;    
   }
-  result += "<div class=\"bodySection\">";
+  result += "<div class =\"bodySection\">";
   if (isProblemContainer(theSection)) {
     result += getHTMLProblems(theSection);
   } else if (theSection.type === "section") {
@@ -229,8 +229,8 @@ function getHTMLSection(theSection) {
 
 function getHTMLChapter(theChapter) {
   var result = "";
-  result += `<div class=\"headChapter\">${theChapter.problemNumberString} ${theChapter.title}</div>`;
-  result += "<div class=\"bodyChapter\">";
+  result += `<div class =\"headChapter\">${theChapter.problemNumberString} ${theChapter.title}</div>`;
+  result += "<div class =\"bodyChapter\">";
   if (isProblemContainer(theChapter)) {
     result += getHTMLProblems(theChapter);
   } else {
@@ -306,7 +306,7 @@ function afterLoadCoursePage(incomingPage, result) {
   }
   //console.log("DEBUG: topic list cookie @ afterLoadCoursePage: " + getCookie("topicList"));
   submitGET({
-    url: `${pathnames.calculatorAPI}?request=${topicList}`,
+    url: `${pathnames.calculatorAPI}?request =${topicList}`,
     callback: afterLoadTopics,
     progress: "spanProgressReportGeneral"
   });
@@ -319,7 +319,7 @@ function selectCurrentCoursePage() {
     topicRequest = "templateJSON";
   }
   submitGET({
-    url: `${pathnames.calculatorAPI}?request=${topicRequest}`,
+    url: `${pathnames.calculatorAPI}?request =${topicRequest}`,
     callback: afterLoadCoursePage,
     progress: "spanProgressReportGeneral"
   });

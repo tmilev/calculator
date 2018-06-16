@@ -137,7 +137,7 @@ void Calculator::DoLogEvaluationIfNeedBe(Function& inputF)
   << " second(s) since last log entry. "
   << "Rule stack id: "
   << this->RuleStackCacheIndex << ", stack size: " << this->RuleStack.size();
-  this->LastLogEvaluationTime=theGlobalVariables.GetElapsedSeconds();
+  this->LastLogEvaluationTime= theGlobalVariables.GetElapsedSeconds();
 }
 
 bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression& input, Expression& output, int opIndexParentIfAvailable)
@@ -170,10 +170,10 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
       if (!outerFun.ShouldBeApplied(opIndexParentIfAvailable))
         continue;
       if (outerFun.theFunction(theCommands, input, output))
-        if(output != input)
+        if (output != input)
         { output.CheckConsistency();
           theCommands.DoLogEvaluationIfNeedBe(outerFun);
-//          if (input.Lispify()==output.Lispify())
+//          if (input.Lispify()== output.Lispify())
 //            crash << "Temporary check failed. " << crash;
 //          stOutput << "<hr>DEBUG: Subbing: input: " << input.ToString()
 //          << " by: " << output.ToString();
@@ -215,11 +215,11 @@ bool Calculator::ExpressionMatchesPattern
     << input.ToString() << ". The error is certainly in the preceding code; here "
     << "is a stack trace, however beware that the error might be in code preceding the stack loading. "
     << crash;
-//  static int ExpressionMatchesPatternDebugCounter=-1;
+//  static int ExpressionMatchesPatternDebugCounter = - 1;
   //ExpressionMatchesPatternDebugCounter++;
 //  stOutput << " ExpressionMatchesPatternDebugCounter: " << ExpressionMatchesPatternDebugCounter;
-//  printLocalDebugInfo=(ExpressionMatchesPatternDebugCounter>-1);
-  if (commentsGeneral!=0)
+//  printLocalDebugInfo=(ExpressionMatchesPatternDebugCounter>- 1);
+  if (commentsGeneral!= 0)
   { *commentsGeneral << " <hr> current input: " << input.ToString() << "<br>current pattern: " << thePattern.ToString();
     *commentsGeneral << "<br> current matched expressions: " << matchedExpressions.ToStringHtml();
   }
@@ -270,7 +270,7 @@ bool Calculator::ExpressionMatchesPattern
 }
 
 void StateMaintainerCalculator::AddRule(const Expression& theRule)
-{ if (this->owner==0)
+{ if (this->owner == 0)
     crash << "StackMaintainerCalculator has zero owner. " << crash;
   this->owner->RuleStack.AddChildOnTop(theRule);
   std::string currentRule;
@@ -281,12 +281,12 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule)
         continue;
       if (!this->owner->namedRules.Contains(currentRule))
         continue;
-      this->owner->GetFunctionHandlerFromNamedRule(currentRule).flagDisabledByUser=
+      this->owner->GetFunctionHandlerFromNamedRule(currentRule).flagDisabledByUser =
       theRule.StartsWith(this->owner->opRulesOff());
     }
   this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.GetIndex(this->owner->RuleStack);
   if (this->owner->RuleStackCacheIndex == - 1)
-    if (this->owner->cachedRuleStacks.size<this->owner->MaxCachedExpressionPerRuleStack)
+    if (this->owner->cachedRuleStacks.size< this->owner->MaxCachedExpressionPerRuleStack)
     { this->owner->RuleStackCacheIndex = this->owner->cachedRuleStacks.size;
       this->owner->cachedRuleStacks.AddOnTop(this->owner->RuleStack);
     }
@@ -297,7 +297,7 @@ void StateMaintainerCalculator::AddRule(const Expression& theRule)
 
 Expression& StateMaintainerCalculator::GetCurrentHistory()
 { MacroRegisterFunctionWithName("StateMaintainerCalculator::GetCurrentHistory");
-  return this->owner->historyStack[this->historyOuterSize-1][this->historyMiddleSize-1];
+  return this->owner->historyStack[this->historyOuterSize- 1][this->historyMiddleSize- 1];
 }
 
 std::string& StateMaintainerCalculator::GetCurrentHistoryRuleNames()
@@ -466,7 +466,7 @@ bool Calculator::EvaluateExpression
     theCommands.flagAbortComputationASAP = true;
     return output.MakeError(errorStream.str(), theCommands);
   }
-  //bool logEvaluationStepsRequested=theCommands.logEvaluationSteps.size>0;
+  //bool logEvaluationStepsRequested= theCommands.logEvaluationSteps.size>0;
   theCommands.EvaluatedExpressionsStack.AddOnTop(input);
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(theCommands, 3);
@@ -570,7 +570,7 @@ bool Calculator::EvaluateExpression
       break;
     }
     //////------End of handling naughty expressions------
-    //bool foundError=false;
+    //bool foundError = false;
     /////-------Children evaluation-------
     ProgressReport theReport;
     bool HistoryShouldBeRecorded = false;
@@ -634,7 +634,7 @@ bool Calculator::EvaluateExpression
         theCommands.ExpressionHistoryAdd(output, - 1);
       } else
       { if (historyStackSizeAtStart > theRuleStackMaintainer.GetCurrentHistory().size())
-          crash << "Error: we have historyStackSizeAtStart= " << historyStackSizeAtStart
+          crash << "Error: we have historyStackSizeAtStart = " << historyStackSizeAtStart
           << " yet the expression history has size: "
           << theRuleStackMaintainer.GetCurrentHistory().size()
           << "<br>Expression history so far: "
@@ -710,7 +710,7 @@ Expression* Calculator::PatternMatch
     theExpression.MakeError(out.str(), *this);
     return 0;
   }
-//  if (theExpression.ToString()=="f{}((a))=a+5")
+//  if (theExpression.ToString()=="f{}((a))=a +5")
 //  { stOutput << "!here";
 //  }
   thePattern.CheckInitialization();
@@ -746,7 +746,7 @@ void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapLisT<Expressio
   if (toBeSubbedIn.IsListOfTwoAtomsStartingWith(this->opBind()))
   { if (matchedPairs.Contains(toBeSubbedIn))
     { toBeSubbedIn = matchedPairs.GetValueCreate(toBeSubbedIn);
-      //this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
+      //this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+ 1, MaxRecursionDepth);
       return;
     }
   }
@@ -756,7 +756,7 @@ void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, MapLisT<Expressio
     this->SpecializeBoundVars(subbedE, matchedPairs);
     toBeSubbedIn.SetChilD(i, subbedE);
   }
-//  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
+//  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+ 1, MaxRecursionDepth);
 }
 
 bool Calculator::ProcessOneExpressionOnePatternOneSub

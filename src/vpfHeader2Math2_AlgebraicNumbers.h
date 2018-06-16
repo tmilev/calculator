@@ -37,7 +37,7 @@ class AlgebraicNumber
   AlgebraicNumber(const AlgebraicNumber& other):owner(0), basisIndex(0), flagDeallocated(false)
   { this->operator=(other);
   }
-  bool IsExpressedViaLatestBasis()const;
+  bool IsExpressedViaLatestBasis() const;
   void ExpressViaLatestBasis();
   bool AssignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner);
   bool AssignSinRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner)
@@ -65,15 +65,15 @@ class AlgebraicNumber
       return ratPart.IsPositive();
     return false;
   }
-  bool IsRational(Rational* whichRational=0)const;
-  bool IsNegative()const
+  bool IsRational(Rational* whichRational = 0) const;
+  bool IsNegative() const
   { Rational theRationalValue;
     if (this->IsRational(&theRationalValue))
       return theRationalValue.IsNegative();
     return false;
   }
-  bool IsEqualToZero()const;
-  bool IsEqualToOne()const
+  bool IsEqualToZero() const;
+  bool IsEqualToOne() const
   { return (*this == 1);
   }
   void operator=(const AlgebraicNumber& other)
@@ -88,7 +88,7 @@ class AlgebraicNumber
   bool ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner);
   bool ConstructFromMinPoly(const Polynomial<Rational>& thePoly, AlgebraicClosureRationals& inputOwner)
   { Polynomial<AlgebraicNumber> polyConverted;
-    polyConverted=thePoly;
+    polyConverted= thePoly;
     return this->ConstructFromMinPoly(polyConverted, inputOwner);
   }
   bool AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner);
@@ -115,7 +115,7 @@ class AlgebraicNumber
   bool operator==(const AlgebraicNumber& other) const;
   bool operator==(const Rational& other) const;
   bool operator==(int other) const
-  { return *this==(Rational)other;
+  { return *this ==(Rational)other;
   }
 
   inline bool operator!=(const AlgebraicNumber& other) const
@@ -147,7 +147,7 @@ class AlgebraicNumber
     result *= other;
     return result;
   }
-  AlgebraicNumber operator/(const AlgebraicNumber& other)const
+  AlgebraicNumber operator/(const AlgebraicNumber& other) const
   { this->CheckConsistency();
     other.CheckConsistency();
     AlgebraicNumber result = *this;
@@ -187,7 +187,7 @@ public:
 
   void RegisterNewBasis(const MatrixTensor<Rational>& theInjection);
   void reset();
-  bool CheckConsistency()const;
+  bool CheckConsistency() const;
   AlgebraicClosureRationals()
   { this->reset();
   }
@@ -233,15 +233,15 @@ public:
   { this->flagDeallocated = false;
     this->operator=(other);
   }
-  ~ElementZmodP(){this->flagDeallocated=true;}
-  void CheckIamInitialized()const
+  ~ElementZmodP(){this->flagDeallocated= true;}
+  void CheckIamInitialized() const
   { if (this->theModulo.IsEqualToZero())
       crash << "This is a programming error: computing with non-initialized element the ring Z mod p (the number p has not been initialized!)." << crash;
     if (this->flagDeallocated)
       crash << "This is a programming error: use after free of element z mod p. " << crash;
   }
-  std::string ToString(FormatExpressions* theFormat = 0)const;
-  bool IsEqualToZero()const
+  std::string ToString(FormatExpressions* theFormat = 0) const;
+  bool IsEqualToZero() const
   { return this->theValue.IsEqualToZero();
   }
   void operator=(const ElementZmodP& other)
@@ -267,8 +267,8 @@ public:
       crash << "This is a programming error: attempting to make an operation with two elemetns of Z mod P with different moduli, "
       << this->theModulo.ToString() << " and " << other.theModulo.ToString() << ". " << crash;
   }
-  bool operator==(int other)const;
-  bool operator==(const ElementZmodP& other)const;
+  bool operator==(int other) const;
+  bool operator==(const ElementZmodP& other) const;
   void operator*=(const ElementZmodP& other);
   void operator*=(const LargeInt& other)
   { this->theValue *= other.value;
@@ -291,7 +291,7 @@ public:
   { this->CheckIamInitialized();
     this->theValue = other.value;
     this->theValue %= this->theModulo;
-    if (other.sign == -1)
+    if (other.sign == - 1)
     { ElementZmodP mOne;
       mOne.MakeMOne(this->theModulo);
       *this *= mOne;
@@ -302,7 +302,7 @@ public:
   { bool tempB = this->AssignRational(other);
     if (!tempB)
       crash << "This is a programming error: using ElementZmodP::operator= to assign a Rational number failed. "
-      << " Operator= does not allow failure. " << crash;
+      << " Operator = does not allow failure. " << crash;
   }
   bool operator/=(const ElementZmodP& den);
   void ScaleToIntegralMinHeightAndGetPoly(const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntUnsigned& newModulo)

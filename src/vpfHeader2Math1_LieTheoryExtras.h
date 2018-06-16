@@ -68,7 +68,7 @@ public:
   SemisimpleLieAlgebra* theOwner;
   //the format of the order is arbitrary except for the following requirements:
   //-All elements of the order must be either 1) nilpotent or 2) elements of the Cartan
-  //-Let the number of positive roots be N and the rank be K. Then the indices N,..., N+K-1 must
+  //-Let the number of positive roots be N and the rank be K. Then the indices N,..., N+K- 1 must
   //   correspond to the elements of the Cartan.
   List<ElementSemisimpleLieAlgebra<Rational> > theOrder;
   //The order of chevalley generators is as follows. First come negative roots,
@@ -81,7 +81,7 @@ public:
   { output.operator=(this->theOrder[theIndex]);
   }
   SemisimpleLieAlgebraOrdered();
-  bool CheckInitialization()const;
+  bool CheckInitialization() const;
   int GetDisplayIndexFromGeneratorIndex(int GeneratorIndex);
   void GetLinearCombinationFrom(ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& theCoeffs);
   void init(List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder, SemisimpleLieAlgebra& owner);
@@ -155,7 +155,7 @@ public:
   void IncrementComputation(Vector<Rational>& parabolicSel);
   std::string PrepareReport();
   GeneralizedVermaModuleCharacters();
-  bool CheckInitialization()const;
+  bool CheckInitialization() const;
   void ReadFromDefaultFile();
   void WriteToDefaultFile();
   void WriteToFile(std::fstream& output);
@@ -195,12 +195,12 @@ class ElementUniversalEnvelopingOrdered;
 template<class coefficient>
 class MonomialUniversalEnvelopingOrdered
 {
-  void SimplifyAccumulateInOutputNoOutputInit(ElementUniversalEnvelopingOrdered<coefficient>& output, GlobalVariables* theContext, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  void SimplifyAccumulateInOutputNoOutputInit(ElementUniversalEnvelopingOrdered<coefficient>& output, GlobalVariables* theContext, const coefficient& theRingUnit =1, const coefficient& theRingZero= 0);
   MonomialUniversalEnvelopingOrdered(const MonomialUniversalEnvelopingOrdered& other);
 public:
   SemisimpleLieAlgebraOrdered* owner;
   std::string DebugString;
-  std::string ToString(bool useLatex, bool useCalculatorFormat, FormatExpressions* PolyFormatLocal)const;
+  std::string ToString(bool useLatex, bool useCalculatorFormat, FormatExpressions* PolyFormatLocal) const;
   void ComputeDebugString()
   { GlobalVariables theGlobalVariables;
     FormatExpressions PolyFormatLocal;
@@ -227,11 +227,11 @@ public:
   }
   void GetDegree(Polynomial<Rational>& output)
   { output.MakeZero(this->Coefficient.NumVars);
-    for (int i = 0; i < this->generatorsIndices.size; i++)
+    for (int i = 0; i < this->generatorsIndices.size; i ++)
       output += this->Powers[i];
   }
   bool GetElementUniversalEnveloping(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebraOrdered& owner);
-  bool IsEqualToZero()const
+  bool IsEqualToZero() const
   { return this->Coefficient.IsEqualToZero();
   }
   bool CommutingLeftIndexAroundRightIndexAllowed(coefficient& theLeftPower, int leftGeneratorIndex, coefficient& theRightPower, int rightGeneratorIndex);
@@ -258,8 +258,8 @@ public:
   { this->owner = 0;
   }
   void SubstitutionCoefficients(PolynomialSubstitution<Rational>& theSub);
-  bool operator==(const MonomialUniversalEnvelopingOrdered& other)const
-  { if(this->owner != other.owner)
+  bool operator==(const MonomialUniversalEnvelopingOrdered& other) const
+  { if (this->owner != other.owner)
       crash << crash;
     return this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
   }
@@ -293,18 +293,18 @@ private:
 public:
   std::string DebugString;
   GlobalVariables* context;
-  void ToString(std::string& output, bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal)const;
-  std::string ToString(bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal)const
+  void ToString(std::string& output, bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal) const;
+  std::string ToString(bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal) const
   { std::string tempS;
     this->ToString(tempS, useLatex, useCalculatorFormat, PolyFormatLocal, theGlobalVariables);
     return tempS;
   }
-  std::string ToString(FormatExpressions& PolyFormatLocal)const
+  std::string ToString(FormatExpressions& PolyFormatLocal) const
   { std::string tempS;
     this->ToString(tempS, true, true, PolyFormatLocal);
     return tempS;
   }
-  bool NeedsParenthesisForMultiplication()const
+  bool NeedsParenthesisForMultiplication() const
   { return this->size > 1;
   }
   void ComputeDebugString()
@@ -327,11 +327,11 @@ public:
   (MonomialUniversalEnveloping<coefficient>& input, const coefficient& inputCoeff, SemisimpleLieAlgebraOrdered& owner, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables* theContext);
   bool ModOutFDRelationsExperimental
   (GlobalVariables* theContext, const Vector<Rational> & theHWsimpleCoords, const coefficient& theRingUnit = 1, const coefficient& theRingZero = 0);
-  bool IsEqualToZero()const
+  bool IsEqualToZero() const
   { return this->size == 0;
   }
   bool GetElementUniversalEnveloping(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& inputOwner);
-  bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output)const;
+  bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
   void SubstitutionCoefficients(PolynomialSubstitution<Rational>& theSub, GlobalVariables* theContext);
   void MakeConst(const coefficient& coeff, SemisimpleLieAlgebraOrdered& theOwner)
   { this->MakeZero(theOwner);
@@ -340,7 +340,7 @@ public:
     this->AddMonomial(tempMon);
   }
   void Simplify(GlobalVariables* theContext, const coefficient& theRingUnit = 1,  const coefficient& theRingZero = 0);
-  int GetNumVars()const
+  int GetNumVars() const
   { if (this->size == 0)
       return 0;
     else
@@ -359,7 +359,7 @@ public:
   static void GetBasisFromSpanOfElements
   (List<ElementUniversalEnvelopingOrdered>& theElements, Vectors<Polynomial<coefficient> >& outputCoordinates, List<ElementUniversalEnvelopingOrdered>& outputTheBasis);
   bool GetCoordsInBasis
-  (List<ElementUniversalEnvelopingOrdered<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero)const;
+  (List<ElementUniversalEnvelopingOrdered<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero) const;
   static void GetCoordinateFormOfSpanOfElements
   (int numVars, List<ElementUniversalEnvelopingOrdered>& theElements, Vectors<Polynomial<coefficient> >& outputCoordinates, ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials);
 //  static void GetCoordinateFormOfSpanOfElements
@@ -408,7 +408,7 @@ public:
   ElementUniversalEnvelopingOrdered()
   { this->owner = 0;
   }
-  bool IsProportionalTo(const ElementUniversalEnvelopingOrdered<coefficient>& other, coefficient& outputTimesMeEqualsOther, const coefficient& theRingZero)const;
+  bool IsProportionalTo(const ElementUniversalEnvelopingOrdered<coefficient>& other, coefficient& outputTimesMeEqualsOther, const coefficient& theRingZero) const;
   ElementUniversalEnvelopingOrdered(const ElementUniversalEnvelopingOrdered& other)
   { this->operator=(other);
   }
@@ -437,18 +437,18 @@ public:
   { FormatExpressions tempFormat;
     this->DebugString = this->ToString(tempFormat);
   }
-  std::string ToString(const FormatExpressions& theFormat)const;
-  void ToString(std::string& output)const
+  std::string ToString(const FormatExpressions& theFormat) const;
+  void ToString(std::string& output) const
   { output = this->ToString();
   }
-  bool IsEqualToZero()const
+  bool IsEqualToZero() const
   { return this->theElT.IsEqualToZero();
   }
-  bool NeedsParenthesisForMultiplication()const;
+  bool NeedsParenthesisForMultiplication() const;
   void AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
   (ElementUniversalEnvelopingOrdered<coefficient>& input, const ElementVermaModuleOrdered<coefficient>& theRingZero, GlobalVariables* theContext, const coefficient& theRingUnit);
   void ActOnMe
-  (const ElementSemisimpleLieAlgebra<Rational>& actingElt, ElementVermaModuleOrdered<coefficient>& output, SemisimpleLieAlgebra& owner, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables* theContext)const;
+  (const ElementSemisimpleLieAlgebra<Rational>& actingElt, ElementVermaModuleOrdered<coefficient>& output, SemisimpleLieAlgebra& owner, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables* theContext) const;
   static void GetBasisFromSpanOfElements
   (List<ElementVermaModuleOrdered<coefficient> >& theElements, Vectors<RationalFunctionOld>& outputCoordinates, List<ElementVermaModuleOrdered>& outputTheBasis,
    const RationalFunctionOld& RFOne, const RationalFunctionOld& RFZero);
@@ -459,7 +459,7 @@ public:
   }
   void MakeZero(SemisimpleLieAlgebraOrdered& owner, PolynomialSubstitution<Rational>& incomingSub)
   { this->theElT.MakeZero(owner);
-    this->theSubNthElementIsImageNthCoordSimpleBasis=incomingSub;
+    this->theSubNthElementIsImageNthCoordSimpleBasis =incomingSub;
   }
   template <class CoefficientTypeOther>
   void operator*=(const CoefficientTypeOther& theConst)

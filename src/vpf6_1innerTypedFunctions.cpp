@@ -30,7 +30,7 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
     return false;
   bool result = false;
   //  stOutput << "<br>handling base extraction of: " << input.ToString();
-  //handle Anything*Rational=Rational*Anything
+  //handle Anything*Rational =Rational*Anything
   output = input;
 //  if (hereBeTrouble)
 //    stOutput << "handling: " << input.ToString() << ", semilisp: " << input.ToStringSemiFull() << ", lisp: " << input.ToStringFull();
@@ -44,8 +44,8 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
     result = true;
 //    stOutput << "swapped " << leftE.ToString() << " and " << rightE.ToString();
   }
-//  Expression leftE=output[1];
-//  Expression rightE=output[2];
+//  Expression leftE= output[1];
+//  Expression rightE= output[2];
   if (output[2].IsListStartingWithAtom(theCommands.opTimes()))
   { if (output[2].children.size != 3)
       return result;
@@ -56,7 +56,7 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
     { Expression tempRight;
       tempRight.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][2]);
       output.MakeXOX(theCommands, theCommands.opTimes(), output[2][1], tempRight);
-      result=true;
+      result = true;
 //      stOutput << " swapped " << rightLeftE.ToString() << " and " << leftE.ToString();
     }
     //<- handle a*(b*anything)
@@ -68,7 +68,7 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
       result = true;
     }
   }
-  //handle 0*anything=0
+  //handle 0*anything= 0
   if (output[1].IsEqualToZero())
     return output.AssignValue(0, theCommands);
   return result;
@@ -516,7 +516,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands,
   Expression inputContextsMerged;
   if (!input.MergeContextsMyArumentsAndConvertThem<ElementUniversalEnveloping<RationalFunctionOld> >(inputContextsMerged, &theCommands.Comments))
     return false;
-  ElementUniversalEnveloping<RationalFunctionOld> result=inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
+  ElementUniversalEnveloping<RationalFunctionOld> result =inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   result *= inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   //stOutput << "before simplification: " << result.ToString() << " and after: " << result.ToString();
   result.Simplify();
@@ -883,7 +883,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByInteger(Calculator& theCo
     return false;
   if (base.IsEqualToOne())
     return output.AssignValue(1, theCommands);
-  if(!input[2].IsRational(&exp))
+  if (!input[2].IsRational(&exp))
     return false;
   int thePower;
   if (!exp.IsSmallInteger(&thePower))
@@ -999,7 +999,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
   if (exponentWorking.GetDenominator() == 2)
     return false;
   //if (exponentWorking<0)
-  //{ exponentWorking*=-1;
+  //{ exponentWorking*= - 1;
   //  base.Invert();
   //}
   LargeIntUnsigned exponentDenominator = exponentWorking.GetDenominator();
@@ -1012,7 +1012,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
     numeratorPowers[i] *= exponentNumeratorNoSign;
   for (int i = 0; i < denominatorFactors.size; i ++)
     denominatorPowers[i] *= exponentNumeratorNoSign;
-  //stOutput << "DEBUG: part -1: exponent working: " << exponentWorking;
+  //stOutput << "DEBUG: part - 1: exponent working: " << exponentWorking;
   exponentWorking /= exponentNumeratorNoSign;
   //stOutput << "DEBUG: part 0: exponent working: " << exponentWorking;
   Rational outsideOfTheRadical = 1;
@@ -1072,7 +1072,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRationalByRationalReducePrimeFactor
       return false;
   }
   for (int i = 0; i < denominatorPowers.size; i ++)
-  { currentContribution=denominatorFactors[i];
+  { currentContribution =denominatorFactors[i];
     if (!denominatorPowers[i].IsIntegerFittingInInt(&currentExpSmallInt))
       return false;
     currentContribution.RaiseToPower(currentExpSmallInt);
@@ -1115,12 +1115,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(Calculator
     baseDouble = base.GetDoubleValue();
   else if (!input[1].IsOfType(&baseDouble))
     return false;
-  if(input[2].IsRational(&exp))
+  if (input[2].IsRational(&exp))
     expDouble = exp.GetDoubleValue();
   else if (!input[2].IsOfType(&expDouble))
     return false;
   if (baseDouble < 0)
-  { if(!input[2].IsRational())
+  { if (!input[2].IsRational())
       return false;
     int thePower = 0;
     if (exp.IsEven())
@@ -1231,7 +1231,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& 
   output.children.Reserve(input[2].size());
   output.AddChildAtomOnTop(theCommands.opSequence());
   Expression tempProduct;
-  for (int i = 1; i < input[2].size(); i++)
+  for (int i = 1; i < input[2].size(); i ++)
   { tempProduct.MakeProducT(theCommands, input[1], input[2][i]);
     output.AddChildOnTop(tempProduct);
   }

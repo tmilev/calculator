@@ -52,7 +52,7 @@ void PackedVector<scalar>::operator+=(const PackedVector<scalar>& w)
 template <typename scalar>
 PackedVector<scalar> PackedVector<scalar>::operator*(scalar x) const
 { PackedVector<scalar> out;
-  for(int i=0; i<this->size; i++)
+  for (int i = 0; i < this->size; i ++)
     out[i] = this->data[i] * x;
   return out;
 }
@@ -75,11 +75,11 @@ template <typename scalar>
 scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const PackedVector* B) const
 { PackedVector<scalar> Bv;
   Bv.MakeZero();
-  for(int i=0; i<this->size; i++)
-    for(int j=0; j<this->size; j++)
+  for (int i = 0; i < this->size; i ++)
+    for (int j = 0; j< this->size; j ++)
       Bv[i] += B[i][j]*v[j]
   scalar wBv = 0;
-  for(int i=0; i<B.NumRows; i++)
+  for (int i = 0; i <B.NumRows; i ++)
     wBv += this->data[i]*Bv[i];
   return wBv;
 }
@@ -162,7 +162,7 @@ std::ostream& operator<<(std::ostream& out, const PackedVector<scalar>& v)
 { out << '(';
   for (int i = 0; i < v.size; i ++)
   { out << v[i];
-    if(i != v.size - 1)
+    if (i != v.size - 1)
       out << ", ";
   }
   out << ')';
@@ -325,7 +325,7 @@ void AnotherWeylGroup<scalar, vector>::ComputeRho()
         den = MathRoutines::lcm(den,CartanSymmetric.elements[i][j].GetDenominator().GetUnsignedIntValueTruncated());
     unrationalCartanSymmetric.init(CartanSymmetric.NumRows, CartanSymmetric.NumCols);
     //this->ucsm = malloc(CartanSymmetric.NumRows*sizeof(vector));
-    //for(int i=0; i<CartanSymmetric.NumRows; i++)
+    //for (int i = 0; i <CartanSymmetric.NumRows; i ++)
     //  this->ucsm[i].SetSize(CartanSymmetric.NumCols);
     for (int i = 0; i < CartanSymmetric.NumRows; i ++)
       for (int j = 0; j < CartanSymmetric.NumCols; j ++)
@@ -455,7 +455,7 @@ void AnotherWeylGroup<scalar, vector>::ComputeClassMap()
 template<typename scalar, typename vector>
 Matrix<Rational>& AnotherWeylGroup<scalar, vector>::GetClassMatrix(int cc)
 { if (this->classMatrices.size == 0)
-  { if(this->conjugacyClasses.size == 0)
+  { if (this->conjugacyClasses.size == 0)
       this.ComputeConjugacyClasses();
     this->classMatrices.SetSize(this->conjugacyClasses.size);
   }
@@ -501,7 +501,7 @@ void AnotherWeylGroup<scalar, vector>::GetSignCharacter(Vector<Rational>& out)
     if (yn == 0)
       out[i] = 1;
     else
-      out[i] = -1;
+      out[i] = - 1;
   }
 }
 
@@ -604,20 +604,20 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
     chars[i] = spaces[i].GetCanonicalBasisVector(0);
   /*  HashedList<VectorSpace<Rational> > sps;
     List<Vector<Rational> > chars;
-    for(int i=0; i<G.conjugacyClasses.size; i++)
+    for (int i = 0; i <G.conjugacyClasses.size; i ++)
     { Matrix<Rational> M;
       M = GetClassMatrix(G,i);
       std::cout << M.ToString(&consoleFormat) << std::endl;
       List<VectorSpace<Rational> > spsi = GetEigenspaces(M);
-      for(int spi=0; spi<spsi.size; spi++)
+      for (int spi = 0; spi <spsi.size; spi ++)
         sps.AddOnTop(spsi[spi]);
     }
-    for(int i=0; i<sps.size; i++)
-      if(sps[i].rank == 1){
+    for (int i = 0; i <sps.size; i ++)
+      if (sps[i].rank == 1){
         Vector<Rational> X = sps[i].GetCanonicalBasisVector(0);
-        if(!chars.Contains(X))
+        if (!chars.Contains(X))
         { chars.AddOnTop(sps[i].GetCanonicalBasisVector(0));
-          if(chars.size == G.conjugacyClasses.size)
+          if (chars.size == G.conjugacyClasses.size)
             goto got_chars;
         }
       }
@@ -625,19 +625,19 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
     { // to scope newspaces so that the compiler doesn't complain about the goto
       // skipping its initialization
     List<VectorSpace<Rational> > newspaces = sps;
-    while(newspaces.size > 0)
+    while (newspaces.size > 0)
     { VectorSpace<Rational> sp = newspaces.PopLastObject();
-      for(int i=0; i<sps.size; i++)
+      for (int i = 0; i <sps.size; i ++)
       { VectorSpace<Rational> sp2 = sp.Intersection(sps[i]);
-        if(sps.GetIndex(sp2) == -1)
+        if (sps.GetIndex(sp2) == - 1)
         { sps.AddOnTop(sp2);
           newspaces.AddOnTop(sp2);
-          if(sp2.rank == 1)
+          if (sp2.rank == 1)
           { Vector<Rational> X = sp2.GetCanonicalBasisVector(0);
-            if(!chars.Contains(X))
+            if (!chars.Contains(X))
             { chars.AddOnTop(X);
               std::cout << chars.size << ' ';
-              if(chars.size == G.conjugacyClasses.size)
+              if (chars.size == G.conjugacyClasses.size)
               { goto got_chars;
               }
             }
@@ -725,7 +725,7 @@ bool Subgroup<somegroup>::MakeFrom(somegroup &G, const List<int>& generators, in
       if (this->theElements.GetIndex(h) == - 1)
       { this->theElements.AddOnTop(h);
         this->lengths.AddOnTop(this->lengths[gi] + 1);
-        if (MaxElements >=0 && this->theElements.size > MaxElements)
+        if (MaxElements >= 0 && this->theElements.size > MaxElements)
           return false;
         int hi = this->theElements.GetIndex(h);
         newElements.AddOnTop(hi);
@@ -790,7 +790,7 @@ template <typename weylgroup>
 void GetTauSignaturesFromSubgroup(weylgroup& G, const List<int>& gens, List<bool>& out)
 { /*List<ElementWeylGroup> genes;
   genes.SetSize(gens.size);
-  for(int i=0; i<gens.size; i++)
+  for (int i = 0; i <gens.size; i ++)
     genes[i] = G.theElements[gens[i]];
   FiniteGroup<ElementWeylGroup> H;
   H.MakeFrom(genes);
@@ -831,7 +831,7 @@ void GetTauSignaturesFromSubgroup(weylgroup& G, const List<int>& gens, List<bool
 
 
 template <typename weylgroup>
-void ComputeTauSignatures(weylgroup* G, List<List<bool> >& tauSignatures, bool pseudo=false)
+void ComputeTauSignatures(weylgroup* G, List<List<bool> >& tauSignatures, bool pseudo= false)
 { Selection sel;
   sel.init(G->CartanSymmetric.NumCols);
   int numCycles = MathRoutines::TwoToTheNth(sel.MaxSize);
@@ -856,7 +856,7 @@ void ComputeTauSignatures(weylgroup* G, List<List<bool> >& tauSignatures, bool p
 
   if (pseudo)
   { std::cout << "pseudo-parabolics" << std::endl;
-    int hr = G->GetRootReflection(G->RootSystem.size-1);
+    int hr = G->GetRootReflection(G->RootSystem.size- 1);
     sel.init(G->CartanSymmetric.NumCols);
     for (int i = 0; i < numCycles - 1; i ++)
     { List<int> gens;
@@ -874,11 +874,11 @@ void ComputeTauSignatures(weylgroup* G, List<List<bool> >& tauSignatures, bool p
 
 
   tauSignatures.SetSize(G->characterTable.size);
-  for(int i=0; i<G->characterTable.size; i++)
-  { tauSignatures[i].SetSize(tss.size+1);
+  for (int i = 0; i <G->characterTable.size; i ++)
+  { tauSignatures[i].SetSize(tss.size + 1);
     tauSignatures[i][0] = 1;
-    for(int j=1; j<tss.size+1; j++)
-      tauSignatures[i][j] = tss[j-1][i];
+    for (int j =1; j<tss.size + 1; j ++)
+      tauSignatures[i][j] = tss[j- 1][i];
   }
 
   for (int i = 0; i < G->characterTable.size; i ++)
@@ -997,30 +997,30 @@ void LoadAndPrintTauSignatures(char letter, int number)
   std::cout << "</table>" << std::endl;
 /*
 // now the pseudo tau signatures
-  if(pseudo)
+  if (pseudo)
   {
 
-    if(ts[0].size > numCycles)
+    if (ts[0].size > numCycles)
     { std::cout << "hr is ";
 // WeylGroup is alittle different from AnotherWeylGroup<derp>
-//    ElementWeylGroup hr = G.theElements[G.GetRootReflection(G.RootSystem.size-1)];
+//    ElementWeylGroup hr = G.theElements[G.GetRootReflection(G.RootSystem.size- 1)];
       List<int> hr;
-      G.GetGeneratorList(G.GetRootReflection(G.RootSystem.size-1), hr);
-      for(int i=0; i<hr.size; i++)
+      G.GetGeneratorList(G.GetRootReflection(G.RootSystem.size- 1), hr);
+      for (int i = 0; i <hr.size; i ++)
         std::cout << hr[i] << ' ';
       std::cout << std::endl;
 
       // make enough columns
       std::cout << "\\[ \\begin{array}{";
-      for(int i=0; i<numCycles; i++)
+      for (int i = 0; i <numCycles; i ++)
         std::cout << 'c';
       std::cout << "}\n";
 
       // labels at the top
       sel.init(G.CartanSymmetric.NumCols);
-      for(int i=0; i<numCycles-1; i++)
+      for (int i = 0; i <numCycles- 1; i ++)
       { std::cout << "&\\rotatebox{90}{(";
-        for(int j=0; j<sel.CardinalitySelection; j++)
+        for (int j = 0; j<sel.CardinalitySelection; j ++)
           std::cout << sel.elements[j] << ' ';
         std::cout << "hr";
         std::cout << ")}\t";
@@ -1029,8 +1029,8 @@ void LoadAndPrintTauSignatures(char letter, int number)
 
       // data goes out here
       std::cout << "\\\\" << std::endl;
-      for(int i=0; i<ts.size; i++)
-      { for(int j=numCycles; j<numCycles+numCycles-1; j++)
+      for (int i = 0; i <ts.size; i ++)
+      { for (int j =numCycles; j<numCycles+numCycles- 1; j ++)
         { std::cout << '&';
           std::cout << ts[i][j] << '\t';
         }

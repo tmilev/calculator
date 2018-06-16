@@ -24,16 +24,18 @@ class ClassFunction
 public:
   someFiniteGroup *G;
   Vector<coefficient> data;
-  ClassFunction():G(0){} //the syntax :G(0) initializes the pointer G with 0.
+  ClassFunction(): G(0)
+  {
+  } //the syntax :G(0) initializes the pointer G with 0.
   //Although there may be a minor speed penalty
   //(such a speed penalty is system dependent and possibly
   //even hardware dependent),
   //it is worth it to initialize all pointers with 0.
   void MakeZero(someFiniteGroup& inputWeyl);
-  bool IsEqualToZero()const
+  bool IsEqualToZero() const
   { return this->data.IsEqualToZero();
   }
-  bool IsMonEqualToZero()const
+  bool IsMonEqualToZero() const
   { return this->data.IsEqualToZero();
   }
   coefficient InnerProduct(const ClassFunction &other) const;
@@ -45,33 +47,33 @@ public:
   ClassFunction operator-(const ClassFunction &other) const;
   ClassFunction ReducedWithChars(const List<ClassFunction> chars = 0);
   coefficient& operator[](int i) const;
-  std::string ToString(FormatExpressions* theFormat=0) const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
   static unsigned int HashFunction(const ClassFunction& input);
-  inline unsigned int HashFunction()const
+  inline unsigned int HashFunction() const
   { return this->HashFunction(*this);
   }
   void operator*=(const coefficient& inputCF)
-  { this->data*=inputCF;
+  { this->data *= inputCF;
   }
-  ClassFunction operator*(const coefficient& inputCF)const
-  { ClassFunction result=*this;
-    result.data*=inputCF;
+  ClassFunction operator*(const coefficient& inputCF) const
+  { ClassFunction result = *this;
+    result.data *= inputCF;
     return result;
   }
   void operator+=(const ClassFunction& right)
-  { this->data+=right.data;
+  { this->data += right.data;
   }
   void operator-=(const ClassFunction& right)
-  { this->data-=right.data;
+  { this->data -= right.data;
   }
   void operator*=(const ClassFunction& right);
   bool operator==(const ClassFunction& other) const;
   bool operator!=(const ClassFunction& other) const
-  { return ! (*this==other);
+  { return ! (*this == other);
   }
   bool operator>(const ClassFunction& right) const;
   bool operator<(const ClassFunction& right) const
-  { if (*this==right || *this>right)
+  { if (*this == right || *this > right)
       return false;
     return true;
   }
@@ -169,8 +171,8 @@ public:
     }
   public:
     ConjugacyClass()
-    { this->flagRepresentativeComputed=false;
-      this->flagElementsComputed=false;
+    { this->flagRepresentativeComputed = false;
+      this->flagElementsComputed = false;
     }
     LargeInt size;
     List<int> indicesEltsInOwner;
@@ -181,13 +183,13 @@ public:
     bool flagElementsComputed;
     bool flagRepresentativeWordComputed;
     List<int> representativeWord;
-    std::string ToString(FormatExpressions* theFormat=0)const
+    std::string ToString(FormatExpressions* theFormat = 0) const
     { (void) theFormat;//avoid unused parameter warning, portable
       std::stringstream out;
       out << "Conj. class size: " << this->size.ToString();
       return out.str();
     }
-    bool operator>(const ConjugacyClass& other)const
+    bool operator>(const ConjugacyClass& other) const
     { return this->representative>other.representative;
     }
   };
@@ -235,35 +237,36 @@ public:
   { this->init();
   }
   virtual ~FiniteGroup()
-  { this->flagDeallocated=true;
+  { this->flagDeallocated = true;
   }
   virtual void InitGenerators()
-  {}
-  bool CheckConsistency()const
+  {
+  }
+  bool CheckConsistency() const
   { if (this->flagDeallocated)
       crash << "This is a programming error: use after free of Finite group. " << crash;
     //if (this == 0)
     //  crash << "Finite group this pointer is zero. " << crash;
     return true;
   }
-  bool CheckInitialization()const;
+  bool CheckInitialization() const;
   // WARNING:  This recalculates conjugacy classes, screwing up their order for other methods
   bool CheckConjugacyClassRepsMatchCCsizes();
   bool CheckOrthogonalityCharTable();
   void SetSizE(const LargeInt& inputSize)
-  { this->sizePrivate=inputSize;
+  { this->sizePrivate = inputSize;
   }
   void init();
-  std::string ToString(FormatExpressions* theFormat=0);
-  std::string ToStringElements(FormatExpressions* theFormat=0)const;
-  std::string ToStringConjugacyClasses(FormatExpressions* theFormat=0);
-  int ConjugacyClassCount()const;
+  std::string ToString(FormatExpressions* theFormat = 0);
+  std::string ToStringElements(FormatExpressions* theFormat = 0) const;
+  std::string ToStringConjugacyClasses(FormatExpressions* theFormat = 0);
+  int ConjugacyClassCount() const;
   LargeInt GetSize();
   LargeInt SizeByFormulaOrNeg1()
   { this->CheckConsistency();
-    if(this->GetSizeByFormula!=0)
+    if (this->GetSizeByFormula != 0)
       return GetSizeByFormula(*this);
-    return -1;
+    return - 1;
   } //non-positive result means no formula is known.
 
   bool (*AreConjugateByFormula)(const elementSomeGroup& x, const elementSomeGroup& y);
@@ -271,37 +274,30 @@ public:
   LargeInt (*GetSizeByFormula)(FiniteGroup<elementSomeGroup>& G);
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
   bool AreConjugate_OLD_Deprecated_Version_By_Todor(const elementSomeGroup& left, const elementSomeGroup& right);
-
   bool ComputeAllElements
-  (bool andWords, int MaxElements=1000000);
+  (bool andWords, int MaxElements = 1000000);
   //MaxElements gives an upper bound to the number of elements this function will try to find.
-  //Set MaxElements=-1 for "unlimited" upper bound.
-  bool ComputeAllElementsLargeGroup(bool andWords, int MaxElements=1000000);
+  //Set MaxElements = - 1 for "unlimited" upper bound.
+  bool ComputeAllElementsLargeGroup(bool andWords, int MaxElements = 1000000);
   //MaxElements gives an upper bound to the number of elements this function will try to find.
-  //Set MaxElements=-1 for "unlimited" upper bound.
+  //Set MaxElements = - 1 for "unlimited" upper bound.
 
   // Historical note: this was from Thomas' second finite group class, and is
-  // as of 2015-11 the only way to generate the words and conjugacy information
+  // as of 2015- 11 the only way to generate the words and conjugacy information
   void ComputeCCfromAllElements
   ();
   void ComputeCCfromCCindicesInAllElements(const List<List<int> >& ccIndices);
 
   void ComputeCCSizeOrCCFromRepresentative
-(ConjugacyClass& inputOutputClass, bool storeCC)
-;
+  (ConjugacyClass& inputOutputClass, bool storeCC);
   bool RegisterCCclass
-(const elementSomeGroup& theRepresentative, bool dontAddIfSameInvariants)
- ;
-  bool ComputeCCRepresentatives
-  ()
-  ;
-  void ComputeGeneratorsConjugacyClasses
-  ()
-  ;
-  void ComputeCCSizesAndRepresentatives(bool useComputeCCSizesRepresentativesWords=true);
+  (const elementSomeGroup& theRepresentative, bool dontAddIfSameInvariants);
+  bool ComputeCCRepresentatives();
+  void ComputeGeneratorsConjugacyClasses();
+  void ComputeCCSizesAndRepresentatives(bool useComputeCCSizesRepresentativesWords = true);
   void ComputeCCSizesAndRepresentativesWithOrbitIterator();
   void ComputeCCSizesRepresentativesWords();
-  bool CheckInitializationFDrepComputation()const;
+  bool CheckInitializationFDrepComputation() const;
   void ComputeSquaresCCReps();
   bool HasElement(const elementSomeGroup& g);
   bool GetWord(const elementSomeGroup& g, List<int>& out);
@@ -325,7 +321,7 @@ public:
   // these methods are refugees from the WeylGroup class
   int MultiplyElements(int left, int right) const;
   int Invert(int g) const;
-  bool CheckInitializationConjugacyClasses()const;
+  bool CheckInitializationConjugacyClasses() const;
   // This method needs some initial irreps to be seeded in either the irreps or the irreps_grcam locations
   void ComputeIrreducibleRepresentationsTodorsVersion();
   // In order for this to work, the starting irrep must be one whose n-fold tensor products contain every other irrep
@@ -360,27 +356,27 @@ struct simpleReflectionOrOuterAuto
 {
   bool flagIsOuter;
   int index;
-  simpleReflectionOrOuterAuto(): flagIsOuter(false), index(-1)
+  simpleReflectionOrOuterAuto(): flagIsOuter(false), index(- 1)
   {
   }
-  std::string ToString()const;
+  std::string ToString() const;
   void MakeOuterAuto(int inputIndex)
-  { this->flagIsOuter=true;
-    this->index=inputIndex;
+  { this->flagIsOuter = true;
+    this->index = inputIndex;
   }
   void MakeSimpleReflection(int inputIndex)
-  { this->flagIsOuter=false;
-    this->index=inputIndex;
+  { this->flagIsOuter = false;
+    this->index = inputIndex;
   }
-  unsigned int HashFunction()const
-  { return index+100*flagIsOuter;
+  unsigned int HashFunction() const
+  { return index + 100 * flagIsOuter;
   }
-  bool operator==(const simpleReflectionOrOuterAuto& other)const
-  { return this->flagIsOuter==other.flagIsOuter && this->index==other.index;
+  bool operator==(const simpleReflectionOrOuterAuto& other) const
+  { return this->flagIsOuter == other.flagIsOuter && this->index == other.index;
   }
-  bool operator>(const simpleReflectionOrOuterAuto& right)const
-  { if (right.flagIsOuter!=this->flagIsOuter)
-      return this->flagIsOuter> right.flagIsOuter;
+  bool operator>(const simpleReflectionOrOuterAuto& right) const
+  { if (right.flagIsOuter != this->flagIsOuter)
+      return this->flagIsOuter > right.flagIsOuter;
     return this->index>right.index;
   }
 };
@@ -397,18 +393,18 @@ public:
   List<simpleReflectionOrOuterAuto> generatorsLastAppliedFirst;
   bool flagDeallocated;
   ElementWeylGroup(const ElementWeylGroup& other)
-  { this->flagDeallocated=false;
+  { this->flagDeallocated = false;
     this->operator=(other);
   }
-  ElementWeylGroup():owner(0), flagDeallocated(false)
+  ElementWeylGroup(): owner(0), flagDeallocated(false)
   {
   }
   ~ElementWeylGroup()
-  { this->flagDeallocated=true;
+  { this->flagDeallocated = true;
   }
   void operator=(const ElementWeylGroup& other)
-  { this->owner=other.owner;
-    this->generatorsLastAppliedFirst=other.generatorsLastAppliedFirst;
+  { this->owner = other.owner;
+    this->generatorsLastAppliedFirst = other.generatorsLastAppliedFirst;
   }
   template<class coefficient>
   static void ActOn(const ElementWeylGroup& inputElt, const Vector<coefficient>& inputV, Vector<coefficient>& output)
@@ -416,26 +412,26 @@ public:
     inputElt.owner->ActOn(inputElt, inputV, output);
   }
   template<class coefficient>
-  void ActOn(Vector<coefficient>& inputOutput)const
+  void ActOn(Vector<coefficient>& inputOutput) const
   { this->CheckInitialization();
     this->owner->ActOn(*this, inputOutput, inputOutput);
   }
-  bool CheckConsistency()const
+  bool CheckConsistency() const
   { if (this->flagDeallocated)
       crash << "Programming error: use after free of class ElementWeylGroup" << crash;
     return true;
   }
-  bool CheckInitialization()const
+  bool CheckInitialization() const
   { this->CheckConsistency();
-    if (this->owner==0)
+    if (this->owner == 0)
     { crash << "This is a programming error: non-initialized element Weyl group. " << crash;
       return false;
     }
     this->owner->CheckConsistency();
     return true;
   }
-  int Sign()const
-  { return this->generatorsLastAppliedFirst.size %2 ==0 ? 1 : -1;
+  int Sign() const
+  { return this->generatorsLastAppliedFirst.size % 2 == 0 ? 1 : - 1;
   }
   void MultiplyOnTheRightBySimpleReflection(int reflectionIndex)
   { simpleReflectionOrOuterAuto theGen;
@@ -444,8 +440,8 @@ public:
   }
   void MultiplyOnTheRightByOuterAuto(int outerAutoIndex)
   { simpleReflectionOrOuterAuto theGen;
-    theGen.index=outerAutoIndex;
-    theGen.flagIsOuter=true;
+    theGen.index = outerAutoIndex;
+    theGen.flagIsOuter = true;
     this->generatorsLastAppliedFirst.AddOnTop(theGen);
   }
 //  static void Conjugate(const ElementWeylGroup& conjugateMe, const ElementWeylGroup& conjugateBy, ElementWeylGroup& output);
@@ -462,33 +458,33 @@ public:
   void MakeID(const FiniteGroup<ElementWeylGroup<templateWeylGroup> >& inputGroup);
   void MakeID(const ElementWeylGroup& initializeFrom);
   bool IsID();
-  std::string ToStringInvariants(FormatExpressions* theFormat)const;
-  std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToStringInvariants(FormatExpressions* theFormat) const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
   unsigned int HashFunction() const;
   static inline unsigned int HashFunction(const ElementWeylGroup<templateWeylGroup>& input)
   { return input.HashFunction();
   }
   void operator*=(const ElementWeylGroup<WeylGroupData>& other);
   ElementWeylGroup<WeylGroupData> operator*(const ElementWeylGroup<WeylGroupData>& other) const
-  { ElementWeylGroup<WeylGroupData> result=*this;
-    result*=other;
+  { ElementWeylGroup<WeylGroupData> result = *this;
+    result *= other;
     return result;
   }
   static inline bool IsMonEqualToZero()
   { return false;
   }
-  void GetCycleStructure(VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult)const;
+  void GetCycleStructure(VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult) const;
   Vector<Rational> operator*(const Vector<Rational>& v) const;
   ElementWeylGroup<WeylGroupData> Inverse() const;
-  bool HasDifferentConjugacyInvariantsFrom(const ElementWeylGroup<templateWeylGroup>& right)const;
-  void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& output)const;
-  bool operator==(const ElementWeylGroup<WeylGroupData>& other)const
-  { if (this->owner!=other.owner)
+  bool HasDifferentConjugacyInvariantsFrom(const ElementWeylGroup<templateWeylGroup>& right) const;
+  void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& output) const;
+  bool operator==(const ElementWeylGroup<WeylGroupData>& other) const
+  { if (this->owner != other.owner)
       return false;
-    return this->generatorsLastAppliedFirst==other.generatorsLastAppliedFirst;
+    return this->generatorsLastAppliedFirst == other.generatorsLastAppliedFirst;
   }
   void MakeFromReadableReflections(WeylGroupData& input, bool dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK, const std::string& inputReflections);
-  bool operator>(const ElementWeylGroup<templateWeylGroup>& other)const;
+  bool operator>(const ElementWeylGroup<templateWeylGroup>& other) const;
 };
 
 template <class coefficient>
@@ -498,7 +494,7 @@ class FinitelyGeneratedMatrixMonoid
   List<MatrixTensor<coefficient> > theGenerators;
   HashedList<MatrixTensor<coefficient> > theElements;
   bool GenerateElements(int upperBoundNonPositiveMeansNoLimit);
-  std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
 };
 
 template <class coefficient>
@@ -507,13 +503,13 @@ bool FinitelyGeneratedMatrixMonoid<coefficient>::GenerateElements(int upperBound
   this->theElements.Clear();
   this->theElements.AddOnTopNoRepetition(theGenerators);
   MatrixTensor<coefficient> currentElement;
-  for (int i=0; i<this->theElements.size; i++)
-    for (int j=0; j<this->theGenerators.size; j++)
-    { currentElement=this->theGenerators[j];
-      currentElement*=this->theElements[i];
+  for (int i = 0; i < this->theElements.size; i ++)
+    for (int j = 0; j < this->theGenerators.size; j ++)
+    { currentElement = this->theGenerators[j];
+      currentElement *= this->theElements[i];
       this->theElements.AddOnTopNoRepetition(currentElement);
-      if (upperBoundNonPositiveMeansNoLimit>0)
-        if (this->theElements.size>upperBoundNonPositiveMeansNoLimit)
+      if (upperBoundNonPositiveMeansNoLimit > 0)
+        if (this->theElements.size > upperBoundNonPositiveMeansNoLimit)
           return false;
     }
   return true;
@@ -542,9 +538,9 @@ class WeylGroupData
     this->GetFundamentalWeightsInSimpleCoordinates(fundamentalBasis);
     this->FundamentalToSimpleCoords.AssignVectorsToRows(fundamentalBasis);
     this->FundamentalToSimpleCoords.Transpose();
-    this->SimpleToFundamentalCoords=this->FundamentalToSimpleCoords;
+    this->SimpleToFundamentalCoords = this->FundamentalToSimpleCoords;
     this->SimpleToFundamentalCoords.Invert();
-    this->flagFundamentalToSimpleMatricesAreComputed=true;
+    this->flagFundamentalToSimpleMatricesAreComputed = true;
   }
   bool LoadConjugacyClasses();
   bool LoadCharTable();
@@ -581,20 +577,20 @@ public:
   void GetSignSignatureRootSubgroups(List<SubgroupDataRootReflections>& outputSubgroups, const List<Vectors<Rational> >& rootsGeneratingReflections);
   bool LoadConjugacyClassesHelper();
   bool LoadSignSignatures(List<SubgroupDataRootReflections>& outputSubgroups);
-  void ComputeOrLoadCharacterTable(std::stringstream* reportStream=0);
-  void ComputeOrLoadConjugacyClasses(std::stringstream* reportStream=0);
+  void ComputeOrLoadCharacterTable(std::stringstream* reportStream = 0);
+  void ComputeOrLoadConjugacyClasses(std::stringstream* reportStream = 0);
   static void ComputeIrreducibleRepresentationsWithFormulasImplementation
   (FiniteGroup<ElementWeylGroup<WeylGroupData> >& G);
   void ComputeExtremeRootInTheSameKMod(const Vectors<Rational>& inputSimpleBasisK, const Vector<Rational>& inputRoot, Vector<Rational>& output, bool lookingForHighest);
   void AddCharacter(const ClassFunction<WeylGroupData::WeylGroupBase, Rational>& X);
   void ComputeRho(bool Recompute);
-  std::string ToStringRootsAndRootReflections(FormatExpressions* theFormat=0);
-  std::string ToString(FormatExpressions* theFormat=0);
-  std::string ToStringCppConjugacyClasses(FormatExpressions* theFormat=0);
-  std::string ToStringCppCharTable(FormatExpressions* theFormat=0);
+  std::string ToStringRootsAndRootReflections(FormatExpressions* theFormat = 0);
+  std::string ToString(FormatExpressions* theFormat = 0);
+  std::string ToStringCppConjugacyClasses(FormatExpressions* theFormat = 0);
+  std::string ToStringCppCharTable(FormatExpressions* theFormat = 0);
   std::string ToStringIrrepLabel(int irrepIndex);
   std::string ToStringSignSignatureRootSubsystem(const List<SubgroupDataRootReflections>& inputSubgroups);
-  void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
+  void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared = 0);
   void MakeFromDynkinType(const DynkinType& inputType);
   void MakeFinalSteps();
   void InitGenerators();
@@ -605,14 +601,14 @@ public:
   void ComputeCoCartanSymmetricFromCartanSymmetric();
   void ComputeOuterAutoGenerators();
   void ComputeOuterAutos();
-  bool CheckConsistency()const;
+  bool CheckConsistency() const;
   static bool GetWordByFormulaImplementation(FiniteGroup<ElementWeylGroup<WeylGroupData> >& G, const ElementWeylGroup<WeylGroupData>& g, List<int>& out);
   void GetSignCharacter(Vector<Rational>& out);
   void GetStandardRepresentation(GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& output);
   void GetSignRepresentation(GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& output);
   void GetTrivialRepresentation(GroupRepresentationCarriesAllMatrices<FiniteGroup<ElementWeylGroup<WeylGroupData> >, Rational>& output);
   void GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output);
-  bool LoadGAPRootSystem(HashedList<Vector<Rational> >& outputPositiveRootSystem)const;
+  bool LoadGAPRootSystem(HashedList<Vector<Rational> >& outputPositiveRootSystem) const;
   Rational GetKillingDivTraceRatio();
   Rational EstimateNumDominantWeightsBelow(Vector<Rational>& inputHWsimpleCoords);
   bool ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input);
@@ -622,16 +618,16 @@ public:
   static unsigned int HashFunction(const WeylGroupData& input)
   { return input.CartanSymmetric.HashFunction();
   }
-  unsigned int HashFunction()const
+  unsigned int HashFunction() const
   { return this->HashFunction(*this);
   }
   WeylGroupData(): flagDeallocated(false)
   { this->init();
   }
   ~WeylGroupData()
-  { this->flagDeallocated=true;
+  { this->flagDeallocated = true;
   }
-  bool IsOfSimpleType(char desiredType, int desiredRank)const
+  bool IsOfSimpleType(char desiredType, int desiredRank) const
   { return this->theDynkinType.IsOfSimpleType(desiredType, desiredRank);
   }
   Matrix<Rational>* GetMatrixFundamentalToSimpleCoords()
@@ -658,46 +654,46 @@ public:
   }
   template <class coefficient>
   Vector<coefficient> GetDualCoordinatesFromFundamental(const Vector<coefficient>& inputInFundamentalCoords)
-  { Vector<coefficient> result=inputInFundamentalCoords;
-    if (result.size!=this->GetDim())
+  { Vector<coefficient> result = inputInFundamentalCoords;
+    if (result.size != this->GetDim())
       crash << "This is a programming error. The input fundamental weight has " << result.size << " coordinates, while the rank of the Weyl group is "
       << this->GetDim() << ". " << crash;
-    for (int i=0; i<result.size; i++)
-      result[i]*=this->CartanSymmetric.elements[i][i]/2;
+    for (int i = 0; i < result.size; i ++)
+      result[i] *= this->CartanSymmetric.elements[i][i] / 2;
     return result;
   }
   template <class coefficient>
-  coefficient GetScalarProdSimpleRoot(const Vector<coefficient>& input, int indexSimpleRoot)const
-  { if (indexSimpleRoot<0 || indexSimpleRoot>=this->GetDim())
+  coefficient GetScalarProdSimpleRoot(const Vector<coefficient>& input, int indexSimpleRoot) const
+  { if (indexSimpleRoot < 0 || indexSimpleRoot >= this->GetDim())
       crash << "This is a programming error. Attempting to take scalar product with simple root of index " << indexSimpleRoot
       << " which is impossible, as the rank of the Weyl group is " << this->GetDim() << ". " << crash;
     coefficient result, buffer;
-    result=0;
-    Rational* currentRow=this->CartanSymmetric.elements[indexSimpleRoot];
-    for (int i=0; i<input.size; i++)
-    { buffer=input[i];
-      buffer*=currentRow[i];
-      result+=buffer;
+    result = 0;
+    Rational* currentRow = this->CartanSymmetric.elements[indexSimpleRoot];
+    for (int i = 0; i < input.size; i ++)
+    { buffer = input[i];
+      buffer *= currentRow[i];
+      result += buffer;
     }
     return result;
   }
   template <class coefficient>
-  coefficient WeylDimFormulaSimpleCoords(Vector<coefficient>& theWeightInSimpleCoords, const coefficient& theRingUnit=1);
+  coefficient WeylDimFormulaSimpleCoords(Vector<coefficient>& theWeightInSimpleCoords, const coefficient& theRingUnit =1);
   template <class coefficient>
   coefficient WeylDimFormulaFundamentalCoords(Vector<coefficient>& weightFundCoords);
   template <class coefficient>
-  void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign=0, bool* stabilizerFound=0, ElementWeylGroup<WeylGroupData>* raisingElt=0);
+  void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign = 0, bool* stabilizerFound = 0, ElementWeylGroup<WeylGroupData>* raisingElt = 0);
   bool AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool useOuterAutos);
   template <class coefficient>
   void RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights, bool useOuterAutos);
   void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2);
-  void GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output)const;
+  void GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output) const;
   ElementWeylGroup<WeylGroupData> SimpleConjugation(int i, const ElementWeylGroup<WeylGroupData>& vv);
-  Matrix<Rational> SimpleReflectionMatrix(int indexSimpleRoot)const;
+  Matrix<Rational> SimpleReflectionMatrix(int indexSimpleRoot) const;
   void GetStandardRepresentationMatrix(int g, Matrix<Rational>& output) const;
   void DrawRootSystem
-  (DrawingVariables& outputDV, bool wipeCanvas, bool drawWeylChamber, Vector<Rational> * bluePoint=0,
-  bool LabelDynkinDiagramVertices=false, Vectors<Rational>* predefinedProjectionPlane=0);
+  (DrawingVariables& outputDV, bool wipeCanvas, bool drawWeylChamber, Vector<Rational>* bluePoint = 0,
+  bool LabelDynkinDiagramVertices = false, Vectors<Rational>* predefinedProjectionPlane = 0);
   bool HasStronglyPerpendicularDecompositionWRT
   (Vector<Rational>& input, int UpperBoundNumBetas, Vectors<Rational>& theSet, Vectors<Rational>& output,
    List<Rational>& outputCoeffs, bool IntegralCoefficientsOnly);
@@ -714,7 +710,7 @@ public:
   template <class coefficient>
   void GetEpsilonCoords(const Vector<coefficient>& input, Vector<coefficient>& output)
   { this->ComputeEpsilonMatrix();
-    output=input;
+    output = input;
     this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement().ActOnVectorColumn(output);
   }
   void GetEpsilonCoords(const List<Vector<Rational> >& input, Vectors<Rational>& output);
@@ -744,30 +740,30 @@ public:
   (Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights);
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   void GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output);
-  inline int GetDim()const
+  inline int GetDim() const
   { return this->CartanSymmetric.NumRows;
   }
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
   static LargeInt GetSizeByFormulaImplementation(FiniteGroup<ElementWeylGroup<WeylGroupData> >& G);
   static LargeInt SizeByFormulaOrNeg1(char weylLetter, int theDim);
-  bool IsARoot(const Vector<Rational>& input)const
+  bool IsARoot(const Vector<Rational>& input) const
   { return this->RootSystem.Contains(input);
   }
   void GenerateRootSubsystem(Vectors<Rational>& theRoots);
   template <class coefficient>
   bool GenerateOuterOrbit
   (Vectors<coefficient>& theWeights, HashedList<Vector<coefficient> >& output,
-   HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset=0,  int UpperLimitNumElements=-1,
-   GlobalVariables* theGlobalVariables=0);
+   HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset = 0,  int UpperLimitNumElements = - 1,
+   GlobalVariables* theGlobalVariables = 0);
   template <class coefficient>
   bool GenerateOrbit
-  (Vectors<coefficient>& theWeights, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize=-1,
-   HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset=0, int UpperLimitNumElements=-1);
+  (Vectors<coefficient>& theWeights, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize= - 1,
+   HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset = 0, int UpperLimitNumElements = - 1);
   template <class coefficient>
   bool GenerateOrbit
-  (Vector<coefficient>& theWeight, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize=-1,
-   HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset=0, int UpperLimitNumElements=-1)
+  (Vector<coefficient>& theWeight, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize= - 1,
+   HashedList<ElementWeylGroup<WeylGroupData> >* outputSubset = 0, int UpperLimitNumElements = - 1)
   { Vectors<coefficient> theWeights;
     theWeights.AddOnTop(theWeight);
     return this->GenerateOrbit(theWeights, RhoAction, output, UseMinusRho, expectedOrbitSize, outputSubset, UpperLimitNumElements);
@@ -779,8 +775,8 @@ public:
   void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho);
   void ProjectOnTwoPlane(Vector<Rational>& orthonormalBasisVector1, Vector<Rational>& orthonormalBasisVector2);
   void GetLowestElementInOrbit
-  (Vector<Rational>& inputOutput, ElementWeylGroup<WeylGroupData>* outputWeylElt, Vectors<Rational>& bufferEiBAsis, bool RhoAction, bool UseMinusRho, int* sign=0,
-   bool* stabilizerFound=0)
+  (Vector<Rational>& inputOutput, ElementWeylGroup<WeylGroupData>* outputWeylElt, Vectors<Rational>& bufferEiBAsis, bool RhoAction, bool UseMinusRho, int* sign = 0,
+   bool* stabilizerFound = 0)
   { this->GetExtremeElementInOrbit(inputOutput, outputWeylElt, bufferEiBAsis, true, RhoAction, UseMinusRho, sign, stabilizerFound);
   }
   void GetHighestElementInOrbit
@@ -795,23 +791,23 @@ public:
   bool IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input);
   void GetCoxeterElement(ElementWeylGroup<WeylGroupData>& outputWeylElt)
   { outputWeylElt.generatorsLastAppliedFirst.SetSize(this->GetDim());
-    for (int i=0; i<outputWeylElt.generatorsLastAppliedFirst.size; i++)
+    for (int i = 0; i < outputWeylElt.generatorsLastAppliedFirst.size; i ++)
       outputWeylElt.generatorsLastAppliedFirst[i].MakeSimpleReflection(i);
   }
   Vector<Rational> ApplyReflectionList(const List<int>& rightReflectionsActFirst, const Vector<Rational> &vv) const;
   template <class coefficient>
-  void ActOn(const ElementWeylGroup<WeylGroupData>& theGroupElement, Vector<coefficient>& inputOutput)const
+  void ActOn(const ElementWeylGroup<WeylGroupData>& theGroupElement, Vector<coefficient>& inputOutput) const
   { this->ActOn(theGroupElement, inputOutput, inputOutput);
   }
   template <class coefficient>
-  void ActOn(const ElementWeylGroup<WeylGroupData>& theGroupElement, const Vector<coefficient>& inputVector, Vector<coefficient>& outputVector)const
-  { //if (&inputVector==&outputVector)
+  void ActOn(const ElementWeylGroup<WeylGroupData>& theGroupElement, const Vector<coefficient>& inputVector, Vector<coefficient>& outputVector) const
+  { //if (&inputVector == &outputVector)
     //{ Vector<coefficient> inputCopy=inputVector;
     //  this->ActOn(theGroupElement, inputCopy, outputVector);
     //  return;
     //}
-    outputVector=inputVector;
-    for (int i=theGroupElement.generatorsLastAppliedFirst.size-1; i>=0; i--)
+    outputVector = inputVector;
+    for (int i = theGroupElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --)
       if (!theGroupElement.generatorsLastAppliedFirst[i].flagIsOuter)
         this->SimpleReflection(theGroupElement.generatorsLastAppliedFirst[i].index, outputVector);
       else
@@ -824,19 +820,19 @@ public:
           << " does not have its outer autos computed at a place where it should. " << crash;
   }
   template <class coefficient>
-  void ActOnRhoModified(const ElementWeylGroup<WeylGroupData>& theGroupElement, Vector<coefficient>& theVector)const
+  void ActOnRhoModified(const ElementWeylGroup<WeylGroupData>& theGroupElement, Vector<coefficient>& theVector) const
   { Vector<coefficient> tempV;
-    theVector+=this->rho;
+    theVector += this->rho;
     this->ActOn(theGroupElement, theVector, tempV);
-    theVector=tempV;
-    theVector-=this->rho;
+    theVector = tempV;
+    theVector -= this->rho;
   }
   template <class coefficient>
-  void ActOnRhoModified(int indexOfWeylElement, Vector<coefficient>& theVector)const
+  void ActOnRhoModified(int indexOfWeylElement, Vector<coefficient>& theVector) const
   { this->ActOnRhoModified(this->theGroup.theElements[indexOfWeylElement], theVector);
   }
   template <class coefficient>
-  void ActOn(int indexOfWeylElement, Vector<coefficient>& theVector)const
+  void ActOn(int indexOfWeylElement, Vector<coefficient>& theVector) const
   { this->ActOn(this->theGroup.theElements[indexOfWeylElement], theVector, theVector);
   }
   template <class coefficient>
@@ -848,24 +844,24 @@ public:
   void ActOnDualSpaceElementByGroupElement(int index, Vector<Rational>& theDualSpaceElement, bool RhoAction);
   void SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho);
   template <class coefficient>
-  void SimpleReflection(int index, Vector<coefficient>& theVector)const;
+  void SimpleReflection(int index, Vector<coefficient>& theVector) const;
   template <class coefficient>
-  void SimpleReflectionRhoModified(int index, Vector<coefficient>& theVector)const;
+  void SimpleReflectionRhoModified(int index, Vector<coefficient>& theVector) const;
   template <class coefficient>
-  void SimpleReflectionMinusRhoModified(int index, Vector<coefficient>& theVector)const;
+  void SimpleReflectionMinusRhoModified(int index, Vector<coefficient>& theVector) const;
   ElementWeylGroup<WeylGroupData> GetRootReflection(int rootIndex);
-  void GetWord(int g, List<int>& out)const;
-  void GetWord(ElementWeylGroup<WeylGroupData> g, List<int>& out)const
+  void GetWord(int g, List<int>& out) const;
+  void GetWord(ElementWeylGroup<WeylGroupData> g, List<int>& out) const
   { out.SetSize(g.generatorsLastAppliedFirst.size);
-    for(int i=0; i<g.generatorsLastAppliedFirst.size; i++)
-    { if(g.generatorsLastAppliedFirst[i].flagIsOuter)
+    for (int i = 0; i <g.generatorsLastAppliedFirst.size; i ++)
+    { if (g.generatorsLastAppliedFirst[i].flagIsOuter)
         crash << "group::GetWord(element, List<int>) called on an element that isn't described by a simple word in generators or whatever.  You probably meant to do something else, and at any rate need to do some refactoring to do this " << __FILE__ << ":" << __LINE__ << crash;
       out[i] = g.generatorsLastAppliedFirst[i].index;
     }
   }
-  Matrix<Rational> GetMatrixStandardRep(int elementIndex)const;
-  void GetMatrixStandardRep(const ElementWeylGroup<WeylGroupData>& input, Matrix<Rational>& outputMatrix)const;
-  Matrix<Rational> GetMatrixStandardRep(const ElementWeylGroup<WeylGroupData>& input)const
+  Matrix<Rational> GetMatrixStandardRep(int elementIndex) const;
+  void GetMatrixStandardRep(const ElementWeylGroup<WeylGroupData>& input, Matrix<Rational>& outputMatrix) const;
+  Matrix<Rational> GetMatrixStandardRep(const ElementWeylGroup<WeylGroupData>& input) const
   { Matrix<Rational> result;
     this->GetMatrixStandardRep(input, result);
     return result;
@@ -877,11 +873,11 @@ public:
   { return this->RootScalarCartanRoot(input, theH).IsPositiveOrZero();
   }
   template<class coefficient>
-  void ReflectBetaWRTAlpha(const Vector<Rational>& alpha, const Vector<coefficient>& Beta, bool RhoAction, Vector<coefficient>& Output)const;
+  void ReflectBetaWRTAlpha(const Vector<Rational>& alpha, const Vector<coefficient>& Beta, bool RhoAction, Vector<coefficient>& Output) const;
   bool IsRegular(Vector<Rational>& input, int* indexFirstPerpendicularRoot);
   template <class leftType, class rightType>
-  void RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output)const;
-  double RootScalarCartanRoot(const Vector<double>& r1, const Vector<double>& r2)const
+  void RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output) const;
+  double RootScalarCartanRoot(const Vector<double>& r1, const Vector<double>& r2) const
   { if (r1.size != r2.size || r1.size != this->GetDim())
     { crash.theCrashReport << "This is a programming error: attempting to take the root system scalar product of "
       << "vectors of different dimension or of dimension different from that of the ambient Lie algebra. The two input vectors were "
@@ -895,7 +891,7 @@ public:
     return result;
   }
   template <class leftType, class rightType>
-  leftType RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2)const
+  leftType RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2) const
   { leftType tempRat;
     this->RootScalarCartanRoot(r1, r2, tempRat);
     return tempRat;
@@ -911,7 +907,7 @@ public:
   static void TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem);
   void TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH);
   int operator()(int i, int j) const;
-  bool operator==(const WeylGroupData& other)const;
+  bool operator==(const WeylGroupData& other) const;
   void operator+=(const WeylGroupData& other);
 };
 
@@ -924,15 +920,15 @@ class GroupHomomorphism
   elementSecondGroup operator()(const elementFirstGroup& g) const
   { List<int> word;
     this->preimageGroup->GetWord(g,word);
-    if(word.size == 0)
+    if (word.size == 0)
     { elementSecondGroup out;
       out.MakeID(generatorImages[0]);
       return out;
     }
-    if(word.size == 1)
+    if (word.size == 1)
       return generatorImages[word[0]];
     elementSecondGroup h = generatorImages[word[0]];
-    for(int i=1; i<word.size; i++)
+    for (int i = 1; i < word.size; i ++)
       h = h * generatorImages[word[i]];
     return h;
   }
@@ -943,7 +939,7 @@ class GroupHomomorphism
     out.ownerGroup = this->preimageGroup;
     out.identifyingString = M2.identifyingString;
     out.generatorS.SetSize(this->preimageGroup->generators.size);
-    for(int i=0; i<this->preimageGroup->generators.size; i++)
+    for (int i = 0; i < this->preimageGroup->generators.size; i ++)
     { elementSecondGroup ki = (*this)(this->preimageGroup->generators[i]);
       M2.GetMatrixOfElement(ki,out.generatorS[i]);
     }
@@ -962,7 +958,7 @@ class GroupRepresentation
 
   GroupRepresentation()
   { this->ownerGroup = NULL;
-    this->flagCharacterIsComputed=false;
+    this->flagCharacterIsComputed = false;
   }
 
   bool CheckInitialization() const;
@@ -971,7 +967,10 @@ class GroupRepresentation
   bool GetMatrixOfElement(const elementSomeGroup& g, Matrix<coefficient>& out);
 
   void ComputeCharacter() const;
-  ClassFunction<someGroup, coefficient> GetCharacter(){this->ComputeCharacter(); return this->theCharacteR;}
+  ClassFunction<someGroup, coefficient> GetCharacter()
+  { this->ComputeCharacter();
+    return this->theCharacteR;
+  }
 
   bool operator>(const GroupRepresentation& right) const;
 
@@ -982,11 +981,11 @@ class GroupRepresentation
   bool VerifyRepresentationExpensive()
   { List<Matrix<coefficient> > repms;
     repms.SetSize(this->ownerGroup->theElements.size);
-    for(int i=0; i < this->ownerGroup->theElements.size; i++)
+    for (int i = 0; i < this->ownerGroup->theElements.size; i ++)
       this->GetMatrixOfElement(this->ownerGroup->theElements[i], repms[i]);
-    for(int i = 0; i < this->ownerGroup->theElements.size; i++)
-      for(int j = 0; j < this->ownerGroup->theElements.size; j++)
-        if(repms[i]*repms[j] != repms[this->ownerGroup->theElements.GetIndex(this->ownerGroup->theElements[i]*this->ownerGroup->theElements[j])])
+    for (int i = 0; i < this->ownerGroup->theElements.size; i ++)
+      for (int j = 0; j < this->ownerGroup->theElements.size; j ++)
+        if (repms[i]*repms[j] != repms[this->ownerGroup->theElements.GetIndex(this->ownerGroup->theElements[i]*this->ownerGroup->theElements[j])])
           crash << "bad rep" << crash;
     stOutput << "Expensive verification complete, this is indeed a representation\n";
     return true;
@@ -997,21 +996,21 @@ class GroupRepresentation
   JSData JSOut();
 
   template <typename somestream>
-  somestream& IntoStream(somestream& out)const;
-  std::string ToString(FormatExpressions* fmt=0)const;
+  somestream& IntoStream(somestream& out) const;
+  std::string ToString(FormatExpressions* fmt = 0) const;
   friend std::ostream& operator<< (std::ostream& out, GroupRepresentation<someGroup, coefficient>& data)
   { return data.IntoStream(out);
   }
-  bool operator==(const GroupRepresentation<someGroup, coefficient>& right)const
+  bool operator==(const GroupRepresentation<someGroup, coefficient>& right) const
   { if (this->ownerGroup!=right.ownerGroup)
       return false;
     if (this->generatorS!=right.generatorS)
       return false;
     return true;
     // if it ever becomes useful to compare element matrices...
-    /*for(int i=0; i<this->ownerGroup.)
+    /*for (int i = 0; i < this->ownerGroup.)
     right.GetMatrixOfElement(this->ownerGroup.generators[i], M)
-    if(M != this->generatorS[i])
+    if (M != this->generatorS[i])
       return false;*/
 
   }
@@ -1024,7 +1023,7 @@ class GroupRepresentation
   { GroupRepresentationCarriesAllMatrices<someGroup, coefficient> out;
     out.generatorS = this->generatorS;
     out.flagCharacterIsComputed = this->flagCharacterIsComputed;
-    if(this->identifyingString.size() > 0)
+    if (this->identifyingString.size() > 0)
       out.names.AddOnTop(this->identifyingString);
     out.theCharacteR = this->theCharacteR;
     return out;
@@ -1042,9 +1041,9 @@ template <typename elementSomeGroup>
 bool GroupRepresentation<someGroup, coefficient>::GetMatrixOfElement(const elementSomeGroup& g, Matrix<coefficient>& out)
 { out.MakeID(this->generatorS[0]);
   List<int> word;
-  if(!this->ownerGroup->GetWord(g, word))
+  if (!this->ownerGroup->GetWord(g, word))
     return false;
-  for(int i=0; i<word.size; i++)
+  for (int i = 0; i <word.size; i ++)
     out *= this->generatorS[word[i]];
   return true;
   //stOutput << "GroupRepresentation::GetMatrixOfElement: Assembled for element " << g << " having word " << word.ToStringCommaDelimited() << " the matrix\n" << out.ToStringPlainText() << '\n';
@@ -1052,27 +1051,27 @@ bool GroupRepresentation<someGroup, coefficient>::GetMatrixOfElement(const eleme
 
 template <typename someGroup, typename coefficient>
 bool GroupRepresentation<someGroup, coefficient>::CheckInitialization() const
-{ if (this->ownerGroup==0)
+{ if (this->ownerGroup == 0)
     crash << "This is a programming error: group not initialized at a place where it should be." << crash;
   return true;
 }
 
 template <typename someGroup, typename coefficient>
 void GroupRepresentation<someGroup, coefficient>::ComputeCharacter() const
-{ if(this->flagCharacterIsComputed)
+{ if (this->flagCharacterIsComputed)
     return;
   this->CheckInitialization();
-  if(!this->ownerGroup->flagCCsComputed)
+  if (!this->ownerGroup->flagCCsComputed)
     this->ownerGroup->ComputeCCSizesAndRepresentatives();
   this->theCharacteR.G = ownerGroup;
   this->theCharacteR.data.SetSize(this->ownerGroup->conjugacyClasseS.size);
-  for(int cci=0; cci < this->ownerGroup->conjugacyClasseS.size; cci++)
+  for (int cci = 0; cci < this->ownerGroup->conjugacyClasseS.size; cci ++)
   { Matrix<coefficient> M;
     M.MakeID(this->generatorS[0]);
     List<int> ccirWord;
     //    this->GetMatrixOfElement(this->ownerGroup->conjugacyClasseS[cci].representative);
     this->ownerGroup->GetWord(this->ownerGroup->conjugacyClasseS[cci].representative, ccirWord);
-    for(int i=0; i<ccirWord.size; i++)
+    for (int i = 0; i <ccirWord.size; i ++)
       M *= this->generatorS[ccirWord[i]];
     this->theCharacteR.data[cci] = M.GetTrace();
   }
@@ -1085,9 +1084,9 @@ void GroupRepresentation<someGroup, coefficient>::ComputeCharacter() const
 // the usual way character tables are displayed
 template <typename someGroup, typename coefficient>
 bool GroupRepresentation<someGroup, coefficient>::operator>(const GroupRepresentation<someGroup, coefficient>& right) const
-{ if(!this->flagCharacterIsComputed)
+{ if (!this->flagCharacterIsComputed)
     this->ComputeCharacter();
-  if(!right.flagCharacterIsComputed)
+  if (!right.flagCharacterIsComputed)
     right.ComputeCharacter();
   return this->theCharacteR > right.theCharacteR;
 }
@@ -1096,7 +1095,7 @@ template <typename someGroup, typename coefficient>
 void GroupRepresentation<someGroup, coefficient>::MakeTensorRepresentation(GroupRepresentation<someGroup, coefficient> &right, GroupRepresentation<someGroup, coefficient> &left)
 { ownerGroup = right.ownerGroup;
   generatorS.SetSize(right.generatorS.size);
-  for(int i=0; i<right.generatorS.size; i++)
+  for (int i = 0; i <right.generatorS.size; i ++)
     generatorS[i].AssignTensorProduct(right.generatorS[i], left.generatorS[i]);
 }
 
@@ -1110,8 +1109,8 @@ void GroupRepresentation<someGroup, coefficient>::SetElementImage(int i, Matrix<
 
 template <typename someGroup, typename coefficient>
 template <typename somestream>
-somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& out)const
-{ if(!this->flagCharacterIsComputed)
+somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& out) const
+{ if (!this->flagCharacterIsComputed)
   { //this->ComputeCharacter();
     out << "Representation of the character not computed yet.";
     return out;
@@ -1119,14 +1118,14 @@ somestream& GroupRepresentation<someGroup, coefficient>::IntoStream(somestream& 
 // WeylGroup needs to be printable
 // WeylGroup really needs to be printable lol
   out << "Representation of group " << ownerGroup->ToString();
-  if(!this->identifyingString.empty())
+  if (!this->identifyingString.empty())
     out << "identified as " << identifyingString;
   out << " with character " << this->theCharacteR;
   return out;
 }
 
 template <typename someGroup, typename coefficient>
-std::string GroupRepresentation<someGroup, coefficient>::ToString(FormatExpressions* fmt)const
+std::string GroupRepresentation<someGroup, coefficient>::ToString(FormatExpressions* fmt) const
 { (void) fmt;//portable way of avoiding unused parameter warning
   std::stringstream out;
   this->IntoStream(out);
@@ -1137,11 +1136,11 @@ template <typename someGroup, typename coefficient>
 JSData GroupRepresentation<someGroup, coefficient>::JSOut()
 { JSData out;
   out["identifyingString"] = identifyingString;
-  if(this->flagCharacterIsComputed)
+  if (this->flagCharacterIsComputed)
     out["character"] = this->theCharacteR.data;
   else
     out["character"].type = JSData::JSnull;
-  for(int i=0; i<generatorS.size; i++)
+  for (int i = 0; i <generatorS.size; i ++)
     out["generators"][i] = generatorS[i];
   return out;
 }
@@ -1184,8 +1183,8 @@ public:
   // If you compare hash values from two groups which calculated their conjugacy classes in a different way,
   // you must ensure they are in the same order, or hashing won't work as expected.
   unsigned int HashFunction() const;
-  bool CheckInitialization()const;
-  bool CheckAllSimpleGensAreOK()const;
+  bool CheckInitialization() const;
+  bool CheckAllSimpleGensAreOK() const;
   static unsigned int HashFunction(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& input)
   { return input.HashFunction();
   }
@@ -1193,23 +1192,21 @@ public:
   const ClassFunction<somegroup, coefficient>& GetCharacter();
   VectorSpace<coefficient> FindDecentBasis() const;
   void MultiplyBy(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other, GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output) const;
-  void GetLargestDenominatorSimpleGens(LargeIntUnsigned& outputLCM, LargeIntUnsigned& outputDen)const;
+  void GetLargestDenominatorSimpleGens(LargeIntUnsigned& outputLCM, LargeIntUnsigned& outputDen) const;
 
   void reset();
   void init(somegroup& inputOwner);
   void CheckRepIsMultiplicativelyClosed();
   void GetClassFunctionMatrix(ClassFunction<somegroup, coefficient>& inputChar, Matrix<coefficient>& outputMat);
   void ClassFunctionMatrix(ClassFunction<somegroup, coefficient>& inputCF, Matrix<coefficient>& outputMat);
-  int GetDim()const;
+  int GetDim() const;
   void Restrict
   (const Vectors<coefficient>& VectorSpaceBasisSubrep, const ClassFunction<somegroup, Rational>& remainingCharacter, GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& output);
   bool DecomposeTodorsVersionRecursive
-  (VirtualRepresentation<somegroup, coefficient>& outputIrrepMults, List<GroupRepresentation<somegroup, coefficient> >& appendOnlyIrrepList, List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >* appendOnlyGRCAMSList=0)
-  ;
+  (VirtualRepresentation<somegroup, coefficient>& outputIrrepMults, List<GroupRepresentation<somegroup, coefficient> >& appendOnlyIrrepList, List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >* appendOnlyGRCAMSList = 0);
   bool DecomposeTodorsVersion
   (VirtualRepresentation<somegroup, coefficient>& outputIrrepMults,
-   List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >* appendOnlyIrrepsList=0)
-  ;
+   List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> >* appendOnlyIrrepsList = 0);
 
 
   List<GroupRepresentationCarriesAllMatrices<somegroup, coefficient> > DecomposeThomasVersion();
@@ -1218,17 +1215,17 @@ public:
 
   coefficient GetNumberOfComponents();
   void operator*=(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other);
-  GroupRepresentationCarriesAllMatrices<somegroup, coefficient> operator*(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other)const
-  { GroupRepresentationCarriesAllMatrices<somegroup, coefficient> result=*this;
-    result*=other;
+  GroupRepresentationCarriesAllMatrices<somegroup, coefficient> operator*(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other) const
+  { GroupRepresentationCarriesAllMatrices<somegroup, coefficient> result =*this;
+    result*= other;
     return result;
   }
-  bool operator==(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other)const
-  { return this->ownerGroup==other.ownerGroup && this->theCharacteR==other.theCharacteR;
+  bool operator==(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other) const
+  { return this->ownerGroup == other.ownerGroup && this->theCharacteR== other.theCharacteR;
   }
   void SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace);
   std::string GetName() const;
-  std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
   Matrix<coefficient>& GetMatrixElement(int groupElementIndex);
   template <typename elementSomeGroup>
   void GetMatrixElement(const elementSomeGroup& input, Matrix<coefficient>& output);
@@ -1241,8 +1238,8 @@ public:
   void SetGenerator(int generatorIndex, const Matrix<coefficient>& input)
   { this->generatorS[generatorIndex] = input;
   }
-  bool operator>(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other)const;
-//  bool operator<(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other)const;
+  bool operator>(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other) const;
+//  bool operator<(const GroupRepresentationCarriesAllMatrices<somegroup, coefficient>& other) const;
 };
 
 template <class somegroup, class coefficient>
@@ -1255,7 +1252,7 @@ public:
   inline static unsigned int HashFunction(const VirtualRepresentation<somegroup, coefficient>& input)
   { return input.HashFunction();
   }
-  inline unsigned int HashFunction()const
+  inline unsigned int HashFunction() const
   { return this->::MonomialCollection<ClassFunction<somegroup, coefficient>, Rational>::HashFunction();
   }
 };
@@ -1285,11 +1282,11 @@ public:
   }
   std::string ToStringLayerSize() const;
   void reset()
-  { this->previousLayer=&this->privateLayer1;
-    this->currentLayer=&this->privateLayer2;
-    this->nextLayer=&this->privateLayer3;
-    this->theGroupAction=0;
-    this->indexCurrentElement=-1;
+  { this->previousLayer = &this->privateLayer1;
+    this->currentLayer = &this->privateLayer2;
+    this->nextLayer = &this->privateLayer3;
+    this->theGroupAction = 0;
+    this->indexCurrentElement = - 1;
   }
   const elementRepresentation& GetCurrentElement();
   bool IncrementReturnFalseIfPastLastFALSE();
@@ -1320,8 +1317,8 @@ public:
   void reset();
   bool IncrementReturnFalseIfPastLast();
   const Vector<Rational>& GetCurrentElement();
-  std::string ToString()const;
-  std::string ToStringSize()const;
+  std::string ToString() const;
+  std::string ToStringSize() const;
   bool CheckConsistency();
   void init();
   void init
@@ -1347,7 +1344,7 @@ template <typename elementSomeGroup>
 std::string Coset<elementSomeGroup>::ToString() const
 { std::stringstream out;
   out << "Coset with representative " << representative;
-  if(supergroupIndices.size != 0)
+  if (supergroupIndices.size != 0)
     out << " and " << supergroupIndices.size << " elements";
   return out.str();
 }
@@ -1377,8 +1374,8 @@ public:
     this->theGroup = &G;
     this->theSubgroup = &this->theSubgroupMayBeHere;
   }
-  LargeInt SizeByFormulaOrNeg1()const
-  { return -1;
+  LargeInt SizeByFormulaOrNeg1() const
+  { return - 1;
   }
   void initFromGroupAndGenerators(someGroup& inputGroup, const List<elementSomeGroup>& inputGenerators);
   void MakeTranslatableWordsSubgroup(someGroup& inputGroup, const List<elementSomeGroup>& subGenerators);
@@ -1421,9 +1418,9 @@ bool TranslatableWordsSubgroupElementGetWord(FiniteGroup<elementSomeGroup>& H, c
 { List<int> superword;
   H.parentRelationship->theGroup->GetWord(g, superword);
   out.SetSize(0);
-  for(int i=0; i<superword.size; i++)
-  { if(!H.parentRelationship->superGeneratorSubWordExists[superword[i]])
-    { if(!H.HasElement(g))
+  for (int i = 0; i < superword.size; i ++)
+  { if (!H.parentRelationship->superGeneratorSubWordExists[superword[i]])
+    { if (!H.HasElement(g))
         stOutput << "element " << g << " isn't even a member of " << H << '\n';
       crash << "element " << g << " is assigned parent word " << superword.ToStringCommaDelimited()
             << " containing generator not found in subgroup " << superword[i]
@@ -1447,55 +1444,55 @@ template <typename someGroup, typename elementSomeGroup>
 bool SubgroupData<someGroup, elementSomeGroup>::VerifyNormal()
 { Matrix<int> csmt;
   csmt.init(cosets.size, cosets.size);
-  for(int i=0; i<cosets.size; i++)
-    for(int j=0; j<cosets.size; j++)
-      csmt(i,j) = QIDMul(i,j);
+  for (int i = 0; i <cosets.size; i ++)
+    for (int j = 0; j<cosets.size; j ++)
+      csmt(i, j) = QIDMul(i, j);
   stOutput << "Coset multiplication table\n" << csmt.ToStringPlainText() << '\n';
-  for(int i=0; i<cosets.size; i++)
-    for(int j=i; j<cosets.size; j++)
-      for(int k=j; k<cosets.size; k++)
-        if(csmt(i,csmt(j,k)) != csmt(csmt(i,j),k))
+  for (int i = 0; i <cosets.size; i ++)
+    for (int j =i; j<cosets.size; j ++)
+      for (int k=j; k<cosets.size; k++)
+        if (csmt(i,csmt(j,k)) != csmt(csmt(i, j),k))
           return false;
   return true;
 }
 
 template <typename someGroup, typename elementSomeGroup>
 bool SubgroupData<someGroup, elementSomeGroup>::SameCosetAs(elementSomeGroup& g1, elementSomeGroup& g2)
-{ if(this->SameCosetAsByFormula)
+{ if (this->SameCosetAsByFormula)
     return SameCosetAsByFormula(this, g1, g2);
   this->ComputeCosets();
   int g1i = this->theGroup->theElements.GetIndex(g1);
   int g2i = this->theGroup->theElements.GetIndex(g2);
-  for(int i=0; i<this->cosets.size; i++)
-    if(this->cosets[i].BSContains(g1i))
-      if(this->cosets[i].BSContains(g2i))
+  for (int i = 0; i < this->cosets.size; i ++)
+    if (this->cosets[i].BSContains(g1i))
+      if (this->cosets[i].BSContains(g2i))
         return true;
   return false;
 }
 
 template <typename someGroup, typename elementSomeGroup>
 int SubgroupData<someGroup, elementSomeGroup>::GetCosetId(elementSomeGroup& g)
-{ int gi=-1;
-  if(this->CosetRepresentativeEnumerator && this->SameCosetAsByFormula)
-  { if(!this->flagCosetRepresentativesComputed)
+{ int gi = - 1;
+  if (this->CosetRepresentativeEnumerator && this->SameCosetAsByFormula)
+  { if (!this->flagCosetRepresentativesComputed)
       this->CosetRepresentativeEnumerator(this);
   }
   else
-  { if(!flagCosetSetsComputed)
+  { if (!flagCosetSetsComputed)
       this->ComputeCosets();
     gi = this->theGroup->theElements.GetIndex(g);
   }
-  for(int i=0; i<this->cosets.size; i++)
-  { if(this->SameCosetAsByFormula)
-    { if(this->SameCosetAsByFormula(this, this->cosets[i].representative, g))
+  for (int i = 0; i < this->cosets.size; i ++)
+  { if (this->SameCosetAsByFormula)
+    { if (this->SameCosetAsByFormula(this, this->cosets[i].representative, g))
         return i;
     } else
-      if(this->cosets[i].supergroupIndices.BSContains(gi))
+      if (this->cosets[i].supergroupIndices.BSContains(gi))
         return i;
   }
   //crash << "Error: element " << g << " not found in cosets of " << *this << " in group " << *parent << __FILE__ << ":" << __LINE__ << crash;
   crash << "Error: element " << g << " (possible index " << gi << ") not found in cosets.  also some groups are unprintable " << __FILE__ << ":" << __LINE__ << crash;
-  return -1;
+  return - 1;
 }
 
 template <typename someGroup, typename elementSomeGroup>
@@ -1506,10 +1503,10 @@ void SubgroupData<someGroup, elementSomeGroup>::QuotientGroupPermutationRepresen
   out.identifyingString = "Quotient permutation representation";
   stOutput << "Subgroup::QuotientGroupPermutationRepresentation: Permuting " << cosets.size << " cosets.\n";
   out.generatorS.SetSize(this->theGroup->generators.size);
-  for(int i=0; i<this->theGroup->generators.size; i++)
+  for (int i = 0; i < this->theGroup->generators.size; i ++)
   { out.generatorS[i].init(this->cosets.size, this->cosets.size);
     out.generatorS[i].MakeZero();
-    for(int ci=0; ci<out.generatorS[i].NumCols; ci++)
+    for (int ci = 0; ci <out.generatorS[i].NumCols; ci ++)
     { elementSomeGroup g =  this->theGroup->generators[i] * this->cosets[ci].representative;
       int j = this->GetCosetId(g);
       out.generatorS[i](j,ci) = 1;
@@ -1532,17 +1529,17 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
   sr.ownerGroup = this->theGroup;
   sr.generatorS.SetSize(this->theGroup->generators.size);
   stOutput << "inducing from subgroup representation: " << /* in TODO: make random FiniteGroups capable of finding their conjugacy classes in less than at least 5 minutes << */ "\n";
-  for(int i=0; i<this->theSubgroup->generators.size; i++)
+  for (int i = 0; i < this->theSubgroup->generators.size; i ++)
     stOutput << this->theSubgroup->generators[i] << '\n' << in.generatorS[i].ToStringPlainText() << '\n';
-  for(int i=0; i<this->theGroup->generators.size; i++)
+  for (int i = 0; i < this->theGroup->generators.size; i ++)
   { elementSomeGroup g;
     int csi = this->GetCosetId(this->theGroup->generators[i]);
-    if(csi == 0)
+    if (csi == 0)
       g = this->theGroup->generators[i];
     else
     { elementSomeGroup cg = cosets[csi].representative;
       cg.Invert();
-      g = cg*this->theGroup->generators[i];
+      g = cg * this->theGroup->generators[i];
     }
     stOutput << "element " << this->theGroup->generators[i] << " belongs to coset " << csi;
     stOutput << " represented by " << cosets[csi].representative << " and corresponds to subgroup element " << g;
@@ -1552,13 +1549,13 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
   GroupRepresentation<someGroup, coefficient> out;
   out.MakeTensorRepresentation(qr,sr);
   stOutput << "Subgroup representation: " << sr.ToString() << "\n";
-  for(int i=0; i<this->theGroup->generators.size; i++)
+  for (int i = 0; i < this->theGroup->generators.size; i ++)
     stOutput << this->theGroup->generators[i] << ' ' << sr.generatorS[i].GetTrace() << '\n' << sr.generatorS[i].ToStringPlainText() << '\n';
   stOutput << "Quotient representation: " << qr.ToString() << "\n";
-  for(int i=0; i<this->theGroup->generators.size; i++)
+  for (int i = 0; i < this->theGroup->generators.size; i ++)
     stOutput << this->theGroup->generators[i] << ' ' << qr.generatorS[i].GetTrace() << '\n' << qr.generatorS[i].ToStringPlainText() << '\n';
   stOutput << "Induced representation: " << out.ToString() << '\n';
-  for(int i=0; i<out.generatorS.size; i++)
+  for (int i = 0; i <out.generatorS.size; i ++)
     stOutput << this->theGroup->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n' << out.generatorS[i].ToStringPlainText() << '\n';
   return out;
 }
@@ -1569,17 +1566,17 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
     (GroupRepresentation<someGroup, coefficient>& in)
 { GroupRepresentation<someGroup, coefficient> out;
   out.generatorS.SetSize(this->theGroup->generators.size);
-  for(int i=0; i<this->theGroup->generators.size; i++)
+  for (int i = 0; i < this->theGroup->generators.size; i ++)
   { this->ComputeCosets();
     // parent->generators[i] = cg * h
     // g1 * g2 = cg1 * h1 * cg2 * h2
     elementSomeGroup g = this->theGroup->generators[i];
 
-    if(in.generatorS.size == 0)
-      out.generatorS[i].MakeZeroMatrix(1*this->cosets.size);
+    if (in.generatorS.size == 0)
+      out.generatorS[i].MakeZeroMatrix(1 * this->cosets.size);
     else
-      out.generatorS[i].MakeZeroMatrix(in.generatorS[0].NumRows*this->cosets.size);
-    for(int ci=0; ci<cosets.size; ci++)
+      out.generatorS[i].MakeZeroMatrix(in.generatorS[0].NumRows * this->cosets.size);
+    for (int ci = 0; ci <cosets.size; ci ++)
     { elementSomeGroup k = g * cosets[ci].representative;
       int kcsi = this->GetCosetId(k);
       elementSomeGroup ck = cosets[kcsi].representative;
@@ -1590,16 +1587,16 @@ GroupRepresentation<someGroup, coefficient> SubgroupData<someGroup, elementSomeG
       //         << " multiplied on the left by " << g << " returns " << k << "which belongs to coset "
       //         << kcsi << " and is designated (" << ck << ", " << hk << ")\n";
       Matrix<coefficient> ikblock;
-      in.GetMatrixOfElement(hk,ikblock);
-      out.generatorS[i].AssignBlock(ikblock, kcsi*ikblock.NumRows, ci*ikblock.NumCols);
+      in.GetMatrixOfElement(hk, ikblock);
+      out.generatorS[i].AssignBlock(ikblock, kcsi * ikblock.NumRows, ci * ikblock.NumCols);
     }
   }
   out.ownerGroup = this->theGroup;
   //stOutput << "Induced representation: " << out.ToString() << '\n';
-  for(int i=0; i<out.generatorS.size; i++)
+  for (int i = 0; i <out.generatorS.size; i ++)
     stOutput << this->theGroup->generators[i] << ' ' << out.generatorS[i].GetTrace() << '\n' << out.generatorS[i].ToStringPlainText() << '\n';
-  if(!out.VerifyRepresentation())
-  { if(!in.VerifyRepresentationExpensive())
+  if (!out.VerifyRepresentation())
+  { if (!in.VerifyRepresentationExpensive())
       stOutput << "Well, we weren't given a proper representation either.";
     FiniteGroup<Matrix<coefficient> > ingroup;
     ingroup.generators = in.generatorS;
@@ -1630,7 +1627,7 @@ public:
   void ComputeTauSignature();
   void GetSignCharacter(Vector<Rational>& out);
   SubgroupDataWeylGroup();
-  std::string ToString(FormatExpressions* theFormat=0);
+  std::string ToString(FormatExpressions* theFormat = 0);
 };
 
 class SubgroupDataRootReflections : public SubgroupDataWeylGroup
@@ -1646,7 +1643,7 @@ public:
   void InitGenerators();
   void MakeParabolicSubgroup(WeylGroupData& G, const Selection& inputGeneratingSimpleRoots);
   void MakeFromRoots(WeylGroupData& G, const Vectors<Rational>& inputRootReflections);
-  LargeInt SizeByFormulaOrNeg1()const
+  LargeInt SizeByFormulaOrNeg1() const
   { return this->theDynkinType.GetWeylGroupSizeByFormula();
   }
   void MakeFromHardCodedStrings
@@ -1655,10 +1652,10 @@ public:
   void ComputeDynkinType();
   void ComputeCCSizesRepresentativesPreimages();
   SubgroupDataRootReflections()
-  { this->flagIsParabolic=false;
-    this->flagIsExtendedParabolic=false;
+  { this->flagIsParabolic = false;
+    this->flagIsExtendedParabolic = false;
   }
-  std::string ToString(FormatExpressions* theFormat=0);
+  std::string ToString(FormatExpressions* theFormat = 0);
 };
 
 class SubgroupWeylGroupOLD: public HashedList<ElementWeylGroup<WeylGroupData> >
@@ -1679,7 +1676,7 @@ public:
   HashedList<Vector<Rational> > RootSubsystem;
   Vectors<Rational> RootsOfBorel;
   SubgroupWeylGroupOLD()
-  { this->AmbientWeyl=0;
+  { this->AmbientWeyl = 0;
   }
   bool CheckInitialization();
   void ToString(std::string& output, bool displayElements);
@@ -1687,14 +1684,14 @@ public:
   std::string ElementToStringBruhatGraph();
   std::string ElementToStringCosetGraph();
   std::string ElementToStringFromLayersAndArrows(List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices);
-  std::string ToString(bool displayElements=true)
+  std::string ToString(bool displayElements = true)
   { std::string tempS;
     this->ToString(tempS, displayElements);
     return tempS;
   }
   Vector<Rational> GetRho();
   template <class coefficient>
-  void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign=0, bool* stabilizerFound=0);
+  void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign = 0, bool* stabilizerFound= 0);
   template <class coefficient>
   bool FreudenthalEvalIrrepIsWRTLeviPart
   (const Vector<coefficient>& inputHWfundamentalCoords, HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoords,
@@ -1721,9 +1718,9 @@ public:
   template <class coefficient>
   bool IsDominantWRTgenerator(const Vector<coefficient>& theWeight, int generatorIndex);
   template <class coefficient>
-  coefficient WeylDimFormulaSimpleCoords(const Vector<coefficient>& theWeightInSimpleCoords, const coefficient& theRingUnit=1);
+  coefficient WeylDimFormulaSimpleCoords(const Vector<coefficient>& theWeightInSimpleCoords, const coefficient& theRingUnit =1);
   void FindQuotientRepresentatives(int UpperLimit);
-  void GetMatrixOfElement(const ElementWeylGroup<WeylGroupData>& input, Matrix<Rational>& outputMatrix)const;
+  void GetMatrixOfElement(const ElementWeylGroup<WeylGroupData>& input, Matrix<Rational>& outputMatrix) const;
   template <class coefficient>
   bool GenerateOrbitReturnFalseIfTruncated(const Vector<coefficient>& input, Vectors<coefficient>& outputOrbit, int UpperLimitNumElements);
   bool ComputeSubGroupFromGeneratingReflections
@@ -1731,19 +1728,19 @@ public:
    bool recomputeAmbientRho);
   void ComputeRootSubsystem();
   template <class coefficient>
-  void ActByElement(int index, Vector<coefficient>& theRoot)const;
+  void ActByElement(int index, Vector<coefficient>& theRoot) const;
   template <class coefficient>
-  void ActByElement(int index, Vector<coefficient>& input, Vector<coefficient>& output)const;
+  void ActByElement(int index, Vector<coefficient>& input, Vector<coefficient>& output) const;
   template <class coefficient>
   void ActByElement
-  (const ElementWeylGroup<WeylGroupData>& theElement, const Vector<coefficient>& input, Vector<coefficient>& output)const;
+  (const ElementWeylGroup<WeylGroupData>& theElement, const Vector<coefficient>& input, Vector<coefficient>& output) const;
   template <class coefficient>
-  void ActByElement(int index, const Vectors<coefficient>& input, Vectors<coefficient>& output)const
+  void ActByElement(int index, const Vectors<coefficient>& input, Vectors<coefficient>& output) const
   { this->ActByElement(this->TheObjects[index], input, output);
   }
   template <class coefficient>
   void ActByElement
-  (const ElementWeylGroup<WeylGroupData>& theElement, const Vectors<coefficient>& input, Vectors<coefficient>& output)const;
+  (const ElementWeylGroup<WeylGroupData>& theElement, const Vectors<coefficient>& input, Vectors<coefficient>& output) const;
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
 };
@@ -1761,10 +1758,10 @@ template <typename coefficient>
 std::ostream& operator<<(std::ostream& out, const ElementWeylGroupRing<coefficient> g);
 
 template <typename coefficient>
-void ElementWeylGroupRing<coefficient>::MakeEi(WeylGroupData *GG, int i)
+void ElementWeylGroupRing<coefficient>::MakeEi(WeylGroupData* GG, int i)
 { ElementWeylGroup<WeylGroupData> theMon;
-  theMon=GG->theGroup.theElements[i];
-  *this=theMon;
+  theMon = GG->theGroup.theElements[i];
+  *this = theMon;
 }
 
 template <typename coefficient>
@@ -1775,13 +1772,13 @@ void ElementWeylGroupRing<coefficient>::MakeFromClassFunction(const ClassFunctio
 template <typename coefficient>
 void ElementWeylGroupRing<coefficient>::MakeFromClassFunction(WeylGroupData* GG, const List<coefficient>& l)
 { MacroRegisterFunctionWithName("ElementWeylGroupRing::MakeFromClassFunction");
-  if (GG==0)
+  if (GG == 0)
     crash << "Weyl group pointer not allowed to be zero. " << crash;
   this->MakeZero();
   ElementWeylGroup<WeylGroupData> theMon;
-  for(int i=0; i<GG->theGroup.ConjugacyClassCount(); i++)
-    if (l[i]!=0)
-      for(int j=0; j<GG->theGroup.conjugacyClasseS.size; j++)
+  for (int i = 0; i <GG->theGroup.ConjugacyClassCount(); i ++)
+    if (l[i] != 0)
+      for (int j = 0; j<GG->theGroup.conjugacyClasseS.size; j ++)
         this->AddMonomial(GG->theGroup.conjugacyClasseS[i].theElements[j], l[i]);
 }
 
@@ -1807,17 +1804,17 @@ coefficient ClassFunction<someFiniteGroup, coefficient>::Norm() const
 
 template<class someFiniteGroup, typename coefficient>
 ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::operator*(const ClassFunction<someFiniteGroup, coefficient>& other) const
-{ ClassFunction<someFiniteGroup, coefficient> result=*this;
-  result*=other;
+{ ClassFunction<someFiniteGroup, coefficient> result =*this;
+  result*= other;
   return result;
 }
 
 template<class someFiniteGroup, typename coefficient>
 void ClassFunction<someFiniteGroup, coefficient>::operator*=(const ClassFunction<someFiniteGroup, coefficient>& right)
-{ if (this->G!=right.G)
+{ if (this->G != right.G)
     crash << "Attempting to multiply class functions belonging to different groups.";
-  for(int i=0; i<this->data.size; i++)
-    this->data[i]*=right[i];
+  for (int i = 0; i < this->data.size; i ++)
+    this->data[i] *= right[i];
 }
 
 template<class someFiniteGroup, typename coefficient>
@@ -1825,7 +1822,7 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
 { ClassFunction<someFiniteGroup, coefficient> l;
   l.G = G;
   l.data.SetExpectedSize(G->ConjugacyClassCount());
-  for(int i=0; i<G->ConjugacyClassCount(); i++)
+  for (int i = 0; i < G->ConjugacyClassCount(); i ++)
     l.data.AddOnTop((this->data[i] * this->data[i] + this->data[G->squaresFirstConjugacyClassRep[i]])/2);
   return l;
 }
@@ -1835,31 +1832,31 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
 { ClassFunction<someFiniteGroup, coefficient> l;
   l.G = G;
   l.data.SetExpectedSize(G->ConjugacyClassCount());
-  for(int i=0; i<G->ConjugacyClassCount(); i++)
+  for (int i = 0; i < G->ConjugacyClassCount(); i ++)
     l.data.AddOnTop((this->data[i] * this->data[i] - this->data[G->squaresFirstConjugacyClassRep[i]])/2);
   return l;
 }
 
 template<class someFiniteGroup, typename coefficient>
 ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::operator+(const ClassFunction<someFiniteGroup, coefficient>& other) const
-{ ClassFunction<someFiniteGroup, coefficient> l=*this;
-  l.data+=other.data;
+{ ClassFunction<someFiniteGroup, coefficient> l =*this;
+  l.data += other.data;
   //this is slightly faster, but way too much code:
-  /*l.G=this->G;
+  /*l.G = this->G;
   l.data.SetSize(G->ConjugacyClassCount());
-  for(int i=0; i<G->ConjugacyClassCount(); i++)
-    l.data[i]=this->data[i] + other[i];*/
+  for (int i = 0; i <G->ConjugacyClassCount(); i ++)
+    l.data[i]= this->data[i] + other[i];*/
   return l;
 }
 
 template<class someFiniteGroup, typename coefficient>
 ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::operator-(const ClassFunction &other) const
-{ ClassFunction<someFiniteGroup, coefficient> l=*this;
-  l.data+=other.data;
+{ ClassFunction<someFiniteGroup, coefficient> l =*this;
+  l.data += other.data;
   //this is slightly faster, but way too much code:
   /*l.G = G;
   l.data.SetExpectedSize(G->ccCount);
-  for(int i=0; i<G->ccCount; i++){
+  for (int i = 0; i <G->ccCount; i ++){
         l.data.AddOnTop(this->data[i] - other[i]);
     }*/
   return l;
@@ -1868,10 +1865,10 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
 template<class someFiniteGroup, typename coefficient>
 ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::ReducedWithChars(const List<ClassFunction<someFiniteGroup, coefficient> > cchars)
 { ClassFunction<someFiniteGroup, coefficient> X = *this;
-  if(X.Norm() == 0)
+  if (X.Norm() == 0)
     return X;
   List<ClassFunction<someFiniteGroup, coefficient> > chars;
-  if(cchars == 0)
+  if (cchars == 0)
     chars = this->G->characterTable;
   else
     chars = cchars;
@@ -1880,33 +1877,33 @@ ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coeff
   ClassFunction X2;
   int n;
   do
-  { for(int i=0; i<chars.size; i++)
+  { for (int i = 0; i <chars.size; i ++)
     { do
       { innerChanged = false;
         X2 = X - chars[i];
         // No virtual characters allowed
         coefficient n = X2[0];
-        if(n<0)
+        if (n < 0)
           continue;
         bool bad = false;
-        for(int iii=0; iii<X2.data.size; iii++){
-          if(n<X2[iii]||n<-X2[iii])
+        for (int iii = 0; iii < X2.data.size; iii ++){
+          if (n < X2[iii]||n < - X2[iii])
             bad = true;
         }
-        if(bad)
+        if (bad)
           continue;
-        if(X2.Norm() < X.Norm())
+        if (X2.Norm() < X.Norm())
         { X = X2;
-          if(X.Norm() == 0)
+          if (X.Norm() == 0)
             return X;
           innerChanged = true;
-//          if(X[0]<0) // negative virtual character alert
-//            for(int i=0; i<X.data.size; i++)
+//          if (X[0]<0) // negative virtual character alert
+//            for (int i = 0; i <X.data.size; i ++)
 //              X.data[i] = -X.data[i];
         }
-      } while(innerChanged);
+      } while (innerChanged);
     }
-  } while(outerChanged);
+  } while (outerChanged);
   return X;
 }
 
@@ -1917,9 +1914,11 @@ class UDPolynomial
 public:
    // "So the last shall be first, and the first last" -- Matthew 20:12
   List<coefficient> data;
-  UDPolynomial(){}
+  UDPolynomial()
+  {
+  }
   UDPolynomial(const UDPolynomial<coefficient>& other)
-  { this->data=other.data;
+  { this->data = other.data;
   }
 //  UDPolynomial<coefficient> operator+(const UDPolynomial<coefficient>& right) const;
   void operator+=(const UDPolynomial<coefficient>& right);
@@ -1929,7 +1928,7 @@ public:
 //  UDPolynomial<coefficient> operator*(const coefficient& right) const;
   void operator*=(const coefficient& right);
   void operator*=(const UDPolynomial<coefficient>& other)
-  { *this=(*this)*other;
+  { *this = (*this) * other;
   }
   UDPolynomial<coefficient> TimesXn(int n) const;
 // Quick divisibility test
@@ -1939,7 +1938,7 @@ public:
   UDPolynomial<coefficient> operator%(const UDPolynomial<coefficient>& divisor) const;
   void operator/=(const coefficient& right);
   void operator/=(const UDPolynomial<coefficient>& right)
-  { *this=(*this/right);
+  { *this = (*this / right);
   }
   coefficient operator()(const coefficient& x) const;
   void ClearDenominators();
@@ -1951,7 +1950,7 @@ public:
   coefficient& operator[](int i) const;
   bool operator<(const UDPolynomial<coefficient>& right) const;
   bool operator==(int other) const;
-  std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
   void AssignMinPoly(const Matrix<coefficient>& input);
   void AssignCharPoly(const Matrix<coefficient>& input); // method due to Urbain Le Verrier
 };
@@ -1961,22 +1960,22 @@ void UDPolynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
 { int n = input.NumCols;
   this->data.SetSize(1);
   this->data[0] = 1;
-  for(int col = 0; col < n; col++)
+  for (int col = 0; col < n; col ++)
   { VectorSpace<coefficient> vs;
-    Vector<coefficient> v,w;
-    v.MakeEi(n,col);
+    Vector<coefficient> v, w;
+    v.MakeEi(n, col);
     vs.AddVectorToBasis(v);
-    for(int i=0; i<n; i++)
-    { w = input*v;
-      if(!vs.AddVectorToBasis(w))
+    for (int i = 0; i < n; i ++)
+    { w = input * v;
+      if (!vs.AddVectorToBasis(w))
         break;
       v = w;
     }
     Vector<coefficient> p = vs.basis.PutInBasis(w);
     UDPolynomial<coefficient> out;
-    out.data.SetSize(p.size+1);
-    for(int i=0; i<p.size; i++)
-      out.data[i] = -p[i];
+    out.data.SetSize(p.size + 1);
+    for (int i = 0; i <p.size; i ++)
+      out.data[i] = - p[i];
     out.data[p.size] = 1;
     *this = MathRoutines::lcm (*this, out);
   }
@@ -1985,13 +1984,13 @@ void UDPolynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
 template <typename coefficient>
 void UDPolynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input)
 { int n = input.NumCols;
-  this->data.SetSize(n+1);
+  this->data.SetSize(n + 1);
   this->data[0] = 1;
   Matrix<coefficient> acc;
   acc = input;
-  for(int i=1; i<n; i++)
+  for (int i = 1; i < n; i ++)
   { this->data[i] = -acc.GetTrace()/i;
-    for(int j=0; j<n; j++)
+    for (int j = 0; j<n; j ++)
       acc.elements[j][j] += this->data[i];
     acc.MultiplyOnTheLeft(input);
   }
@@ -2007,8 +2006,8 @@ template <typename coefficient>
 coefficient UDPolynomial<coefficient>::operator()(const coefficient &x) const
 {  coefficient acc = 0;
    coefficient y = 1;
-   for(int i=0; i<data.size; i++)
-   {  acc += y*data[i];
+   for (int i = 0; i <data.size; i ++)
+   {  acc += y * data[i];
       y *= x;
    }
    return acc;
@@ -2017,17 +2016,17 @@ coefficient UDPolynomial<coefficient>::operator()(const coefficient &x) const
 template <typename coefficient>
 void UDPolynomial<coefficient>::operator+=(const UDPolynomial<coefficient>& right)
 {  int t = min(right.data.size, data.size);
-   for(int i=0; i<t; i++)
+   for (int i = 0; i < t; i ++)
       data[i] += right.data[i];
 
-   if(right.data.size > data.size)
+   if (right.data.size > data.size)
    {  int n = data.size;
       data.SetSize(right.data.size);
-      for(int i=n; i<right.data.size; i++)
+      for (int i = n; i < right.data.size; i ++)
          data[i] = right.data[i];
    }
    else
-      while((data.size != 0) and (data[data.size-1] != 0))
+      while ((data.size != 0) and (data[data.size- 1] != 0))
          data.size--;
 }
 
@@ -2035,31 +2034,31 @@ template <typename coefficient>
 void UDPolynomial<coefficient>::operator-=(const UDPolynomial<coefficient>& right)
 {  // int t = min(right.data.size, data.size); // wtf lol
   int t = right.data.size;
-  if(data.size < t)
+  if (data.size < t)
     t = data.size;
 
-  for(int i=0; i<t; i++)
+  for (int i = 0; i <t; i ++)
     data[i] -= right.data[i];
 
-  if(right.data.size > data.size)
+  if (right.data.size > data.size)
   {  int n = data.size;
      data.SetSize(right.data.size);
-     for(int i=n; i<right.data.size; i++)
+     for (int i =n; i <right.data.size; i ++)
        data[i] = -right.data[i];
   }
   else
-    while((data.size != 0) and (data[data.size-1] == 0))
+    while ((data.size != 0) and (data[data.size - 1] == 0))
       data.size--;
 }
 
 template <typename coefficient>
 UDPolynomial<coefficient> UDPolynomial<coefficient>::operator*(const UDPolynomial<coefficient>& right) const
 {  UDPolynomial<coefficient> out;
-   out.data.SetSize(data.size+right.data.size-1);
-   for(int i=0; i<out.data.size; i++)
+   out.data.SetSize(data.size + right.data.size - 1);
+   for (int i = 0; i <out.data.size; i ++)
       out.data[i] = 0;
-   for(int i=0; i<data.size; i++)
-      for(int j=0; j<right.data.size; j++)
+   for (int i = 0; i < data.size; i ++)
+      for (int j = 0; j< right.data.size; j ++)
          out.data[i+j] += data[i]*right.data[j];
    return out;
 }
@@ -2067,28 +2066,28 @@ UDPolynomial<coefficient> UDPolynomial<coefficient>::operator*(const UDPolynomia
 template <typename coefficient>
 UDPolynomial<coefficient> UDPolynomial<coefficient>::TimesXn(int n) const
 {  UDPolynomial<coefficient> out;
-   out.data.SetSize(data.size+n);
-   for(int i=0; i<n; i++)
+   out.data.SetSize(data.size + n);
+   for (int i = 0; i < n; i ++)
      out.data[i] = 0;
    // not memcpy()
-   for(int i=0; i<data.size; i++)
-      out.data[i+n] = data[i];
+   for (int i = 0; i <data.size; i ++)
+      out.data[i + n] = data[i];
 
    return out;
 }
 
 template <typename coefficient>
 void UDPolynomial<coefficient>::operator*=(const coefficient& right)
-{  for(int i=0; i<data.size; i++)
+{  for (int i = 0; i <data.size; i ++)
       data[i] *= right;
 }
 
 template <class coefficient>
-std::string UDPolynomial<coefficient>::ToString(FormatExpressions* theFormat)const
+std::string UDPolynomial<coefficient>::ToString(FormatExpressions* theFormat) const
 { Polynomial<coefficient> tempP;
   tempP.MakeZero();
   MonomialP tempM;
-  for (int i=0; i<this->data.size; i++)
+  for (int i = 0; i < this->data.size; i ++)
   { tempM.MakeEi(0, i, 1);
     tempP.AddMonomial(tempM, this->data[i]);
   }
@@ -2099,7 +2098,7 @@ template <typename coefficient>
 std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p)
 { FormatExpressions tempFormat;
   tempFormat.polyAlphabeT.SetSize(1);
-  tempFormat.polyAlphabeT[0]="q";
+  tempFormat.polyAlphabeT[0] = "q";
   return out << p.ToString(&tempFormat);
 }
 
@@ -2107,14 +2106,14 @@ template <class elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat)
 { std::stringstream out;
   out << this->ToStringElements(theFormat);
-  if(this->flagCCRepresentativesComputed)
+  if (this->flagCCRepresentativesComputed)
     out << this->ToStringConjugacyClasses(theFormat);
   return out.str();
 }
 
 template <typename elementSomeGroup>
 int FiniteGroup<elementSomeGroup>::MultiplyElements(int indexLeft, int indexRight) const
-{ return this->theElements.GetIndex(this->theElements[indexLeft]*this->theElements[indexRight]);
+{ return this->theElements.GetIndex(this->theElements[indexLeft] * this->theElements[indexRight]);
 }
 
 template <typename elementSomeGroup>

@@ -123,6 +123,6 @@ public:
   static std::string tableProblemInformation;
   static std::string labelProblemTotalQuestions;
   static std::string labelProblemName;
-  static std::string anyDatabaseField;
+  static std::string anyField;
 };
 #endif

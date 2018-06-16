@@ -133,7 +133,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha)
     precedingIndex ++;
     minIndex ++;
 //    stOutput << "<br>fake waypoint added: " << this->ToString();
-//    Rational scalarNext=theWeyl.RootScalarCartanRoot(this->Waypoints[precedingIndex],alphaScaled);
+//    Rational scalarNext = theWeyl.RootScalarCartanRoot(this->Waypoints[precedingIndex],alphaScaled);
     Vector<Rational>& r1 = this->Waypoints[precedingIndex];
     Vector<Rational>& r2 = this->Waypoints[precedingIndex - 1];
     Rational s1 = theWeyl.RootScalarCartanRoot(r1, alphaScaled);
@@ -144,7 +144,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha)
 //  stOutput << "<br>Min waypoint:" << this->Waypoints[minIndex].ToString();
   Vectors<Rational> differences;
   differences.SetSize(minIndex-precedingIndex);
-  Rational currentDist= 0;
+  Rational currentDist = 0;
   Rational minDist = 0;
   for (int i = 0; i < differences.size; i ++)
   { differences[i] = this->Waypoints[i + precedingIndex + 1] - this->Waypoints[i + precedingIndex];
@@ -254,8 +254,8 @@ void LittelmannPath::Simplify()
   }
   leftIndex ++;
   this->Waypoints[leftIndex] = *this->Waypoints.LastObject();
-/*  if (leftIndex+1<this->Waypoints.size)
-  { this->Waypoints.SetSize(leftIndex+1);
+/*  if (leftIndex+ 1< this->Waypoints.size)
+  { this->Waypoints.SetSize(leftIndex+ 1);
     tempStream << " reduced to " << this->ToString();
     stOutput << tempStream.str();
   }*/
@@ -361,7 +361,7 @@ bool LittelmannPath::GenerateOrbit
           currentPath.ActByFalpha(theIndex);
           if (!currentPath.IsEqualToZero())
             if (hashedOutput.AddOnTopNoRepetition(currentPath))
-            { found=true;
+            { found= true;
               currentSequence.AddOnTop(- theIndex - 1);
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral())
@@ -397,7 +397,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimen
     theSub[i] = theHWdualCoords[i];
   this->ModOutVermaRelations(theContext, &theSub, theRingUnit, theRingZero);
   int numPosRoots = this->owner->theOwner->GetNumPosRoots();
-  //int theDimension=this->owner->theOwner.GetRank();
+  //int theDimension = this->owner->theOwner.GetRank();
   Vector<Rational> currentWeight = theHWsimpleCoordsTrue;
   Vector<Rational> testWeight;
   for (int k = this->generatorsIndices.size - 1; k >= 0; k --)
@@ -452,9 +452,9 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperiment
 template <class coefficient>
 bool ElementUniversalEnveloping<coefficient>::GetCoordsInBasis
 (List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero,
- GlobalVariables& theGlobalVariables)const
+ GlobalVariables& theGlobalVariables) const
 { List<ElementUniversalEnveloping<coefficient> > tempBasis, tempElts;
-  tempBasis=theBasis;
+  tempBasis = theBasis;
   tempBasis.AddOnTop(*this);
   Vectors<coefficient> tempCoords;
   if (!this->GetBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, theRingUnit, theRingZero))
@@ -480,7 +480,7 @@ bool ElementUniversalEnveloping<coefficient>::GetBasisFromSpanOfElements
     for (int j = 0; j < theElements[i].size; j ++)
       outputCorrespondingMonomials.AddOnTopNoRepetition(theElements[i][j]);
   outputCoordsBeforeReduction.SetSize(theElements.size);
-  for (int i =0; i < theElements.size; i ++)
+  for (int i = 0; i < theElements.size; i ++)
   { Vector<CoefficientTypeQuotientField>& currentList = outputCoordsBeforeReduction[i];
     currentList.MakeZero(outputCorrespondingMonomials.size);
     ElementUniversalEnveloping<coefficient>& currentElt = theElements[i];
@@ -574,7 +574,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm
   if (logStream != 0)
   { *logStream << "backtraced elt: " << MTright.ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
     *logStream << "this element: " << this->ToString(&theGlobalVariables.theDefaultFormat.GetElement()) << "<br>";
-   // for (int i=0; i<subHiGoesToIthElement->size; i++)
+   // for (int i = 0; i <subHiGoesToIthElement->size; i ++)
    // { *logStream << subHiGoesToIthElement->TheObjects[i].ToString();
    // }
   }
@@ -694,7 +694,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups()
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   WeylGroupData& theLargeWeyl = this->theHmm.theRange().theWeyl;
   WeylGroupData& theSmallWeyl = this->theHmm.theDomain().theWeyl;
-  int numB3NegGenerators=this->theHmm.theRange().GetNumPosRoots();
+  int numB3NegGenerators = this->theHmm.theRange().GetNumPosRoots();
   int numG2NegGenerators = this->theHmm.theDomain().GetNumPosRoots();
   for (int i = 0; i < numB3NegGenerators; i ++)
   { const Vector<Rational>& currentWeight = theLargeWeyl.RootSystem[i];
@@ -814,7 +814,7 @@ bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsign
     //stOutput << tempPath.ToString();
     if (!tempPath2.IsEqualToZero())
       return false;
-    //if (i!=theString.generatorsIndices.size-1)
+    //if (i!= theString.generatorsIndices.size- 1)
     //  stOutput << "<br>";
   }
   return true;
@@ -832,7 +832,7 @@ void SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup(List<ElementWey
   indexShifts.SetSize(this->simpleGenerators.size);
   for (int i = 0; i < this->simpleGenerators.size; i ++)
     indexShifts[i] = this->simpleGenerators[i].GetIndexFirstNonZeroCoordinate();
-  for (int i = 0; i<this->size; i ++)
+  for (int i = 0; i < this->size; i ++)
   { tempElt = (*this)[i];
     for (int j = 0; j < tempElt.generatorsLastAppliedFirst.size; j ++)
       tempElt.generatorsLastAppliedFirst[j].index = indexShifts[tempElt.generatorsLastAppliedFirst[j].index];
@@ -840,7 +840,7 @@ void SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup(List<ElementWey
   }
 }
 
-std::string LittelmannPath::ToString(bool useSimpleCoords, bool useArrows, bool includeDominance)const
+std::string LittelmannPath::ToString(bool useSimpleCoords, bool useArrows, bool includeDominance) const
 { if (this->Waypoints.size == 0)
     return "0";
   std::stringstream out;

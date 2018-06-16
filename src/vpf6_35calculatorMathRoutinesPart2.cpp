@@ -80,7 +80,7 @@ void MeshTriangles::PlotGrid(int theColor)
     pointsVector[3] = this->theTriangles[i][0];
     this->theGrid.thePlots.AddOnTop(currentLinePlot);
   }
-//  this->theGrid.the=theColor;
+//  this->theGrid.the= theColor;
 }
 
 double MeshTriangles::GetValueAtPoint(const Vector<double>& thePoint)
@@ -146,7 +146,7 @@ void MeshTriangles::AddPointFromVerticesValues
 
 int MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex)
 { MacroRegisterFunctionWithName("MeshTriangles::CleanUpTrianglesReturnUpdatedCurrentIndex");
-  if (this->flagTriangleLimitReached || this->theTriangles.size<this->maxNumTriangles * 2)
+  if (this->flagTriangleLimitReached || this->theTriangles.size< this->maxNumTriangles * 2)
     return currentIndex;
   //clean up carried out only when we have twice exceeded the triangle limit
   //this way clean up will be carried only after we have generated at least maxNumTriangles since the last cleanup
@@ -428,7 +428,7 @@ bool CalculatorFunctionsGeneral::innerIntegratePullConstant(Calculator& theComma
   Expression theNewIntegralE;
   theNewIntegralE.MakeIntegral(theCommands, theSetE, theFunNoCoeff, theVariableE);
   //stOutput << "theNewIntegralE:" << theNewIntegralE.ToString();
-  output=theFunCoeff*theNewIntegralE;
+  output = theFunCoeff*theNewIntegralE;
   return true;
 }
 
@@ -1212,7 +1212,7 @@ bool CalculatorFunctionsGeneral::innerRound(Calculator& theCommands, const Expre
       result ++;
     return output.AssignValue(result, theCommands);
   }
-  double theDouble=0;
+  double theDouble= 0;
   if (input.EvaluatesToDouble(&theDouble))
     return output.AssignValue((int) std::round(theDouble), theCommands);
   return false;
@@ -1493,11 +1493,11 @@ bool CalculatorFunctionsGeneral::innerLogBaseSimpleCases(Calculator& theCommands
   return true;
 }
 
-std::string InputBox::GetSliderName()const
+std::string InputBox::GetSliderName() const
 { return this->name + Crypto::computeSha1outputBase64(this->name);
 }
 
-std::string InputBox::GetUserInputBox()const
+std::string InputBox::GetUserInputBox() const
 { MacroRegisterFunctionWithName("InputBox::GetUserInputBox");
   std::stringstream out;
   double theReader = 0;
@@ -1812,7 +1812,7 @@ bool CalculatorFunctionsGeneral::innerPlotSurface(Calculator& theCommands, const
     << thePlot.theVarRangesJS;
   }
   thePlot.thePlotType="surface";
-  thePlot.dimension=thePlot.coordinateFunctionsE.size;
+  thePlot.dimension = thePlot.coordinateFunctionsE.size;
   Plot result;
   result += thePlot;
   input.HasInputBoxVariables(&result.boxesThatUpdateMe);
@@ -1902,7 +1902,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
   //basisColorStyles.SetSize(this->theBasiS.size);
   this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
 //  stOutput << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
-//  int numVars=this->GetNumVars();
+//  int numVars = this->GetNumVars();
   out << this->ToStringLetterOrder(false);
   out << "<br>";
   out << theRemainders.size << " division steps total.<br>";
@@ -1911,12 +1911,12 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
   out << this->GetPolynomialStringSpacedMonomialsHtml
   (this->remainderDivision, underlineStyle, &this->remainderDivision.theMonomials)
   << "</td></tr>";
-  out << "<tr><td style=\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan=\""
+  out << "<tr><td style=\"border-right:1px solid black;\"><b>Divisor(s)</b></td><td colspan =\""
   << this->allMonomials.size + 1 << "\"><b>Quotient(s) </b></td>"
   << "</tr>";
-  //stOutput << "<br>DEBUG: got to here, pt -1.";
+  //stOutput << "<br>DEBUG: got to here, pt - 1.";
   for (int i = 0; i < this->theBasiS.size; i ++)
-  { //if (i==this->theBasiS.size-1)
+  { //if (i == this->theBasiS.size- 1)
 //    else
     out << "<tr>";
     out << "<td style=\"border-right:1px solid black; border-bottom: 1px solid gray;\">";
@@ -1925,7 +1925,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringHtml()
     else
       out << this->theBasiS[i].ToString(&this->theFormat);
     out << "</td>";
-    out << "<td style=\"border-bottom:1px solid gray;\" colspan=\""
+    out << "<td style=\"border-bottom:1px solid gray;\" colspan =\""
     << this->allMonomials.size + 1 << "\">";
     out << HtmlRoutines::GetMathSpanPure(this->theQuotients[i].ToString(&this->theFormat));
     out << "</td></tr>";
@@ -2067,7 +2067,7 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
     if (useHighlightStyle)
       out << "\\color{" << *highlightColor << "}{";
     out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], found, &this->theFormat);
-    found=true;
+    found= true;
     if (useHighlightStyle)
       out << "}\\color{black}";
     out << "$ ";
@@ -2096,7 +2096,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionStringLaTeX()
   //basisColorStyles.SetSize(this->theBasiS.size);
   this->allMonomials.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
 //  stOutput << "<hr>The monomials in play ordered: " << this->allMonomials.ToString(theFormat);
-//  int numVars=this->GetNumVars();
+//  int numVars = this->GetNumVars();
   this->theFormat.flagUseLatex = true;
   out << this->ToStringLetterOrder(true);
   out << theRemainders.size << " division steps total.";
@@ -2481,7 +2481,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
     out << "@{}c";
   out << "}";
   if (!oneDivisor)
-  { //out << " \\cline{2-" << this->allMonomials.size*2+1 << "}";
+  { //out << " \\cline{2-" << this->allMonomials.size*2+ 1 << "}";
     out << "{\\color{orange}\\textbf{Remainder:} }&"
     << this->GetSpacedMonomialsWithHighlightLaTeX
     (this->remainderDivision, 0, 0, &this->uncoverMonsFinalRemainder,
@@ -2489,7 +2489,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
     << "\\\\\\hline";
   }
   if (!oneDivisor)
-  { //out << " \\cline{2-" << this->allMonomials.size*2+1 << "}";
+  { //out << " \\cline{2-" << this->allMonomials.size*2+ 1 << "}";
     out << "\\textbf{Divisor(s)} &" << "\\multicolumn{"
     << this->allMonomials.size * 2 << "}{c}{"
     << "\\alertNoH{" << this->uncoverAllMonsQuotients[0] << "}{"
@@ -2547,7 +2547,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
      &this->fcAnswerMonsRemainders[i], 0, &this->additionalHighlightRemainders[i],
      this->uncoverAllMonsRemainders[i], true)
     << "\\\\";
-    if (i<theSubtracands.size)
+    if (i <theSubtracands.size)
     { out << "\\uncover<" << this->uncoverAllMonsSubtracands[i] << "->{";
 //      if (!oneDivisor)
       out << "\\uncover<" << this->uncoverAllMonsSubtracands[i] + 2
@@ -2608,8 +2608,8 @@ bool CalculatorFunctionsGeneral::innerPolynomialDivisionSlidesGrLex
   << "\\usepackage{longtable}\\usepackage{xcolor}\\usepackage{multicol}\n"
   << "\\newcommand{\\alertNoH}[2]{\\alert<handout:0|#1>{#2}}\n"
   << "\\newcommand{\\fcAnswer}[2]{"
-  << "\\uncover<handout:0|\\the\\numexpr#1-1\\relax>{"
-  << "\\alertNoH{\\the\\numexpr#1-1\\relax}{\\textbf{?}}}"
+  << "\\uncover<handout:0|\\the\\numexpr#1- 1\\relax>{"
+  << "\\alertNoH{\\the\\numexpr#1- 1\\relax}{\\textbf{?}}}"
   << "{\\uncover<#1->{\\alertNoH{#1}{\\!\\!\\!#2}}}}\r\n"
   << "\\begin{document} "
   << "\\begin{frame}"

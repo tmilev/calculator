@@ -77,7 +77,7 @@ public:
   std::string GetItemStart(CalculatorHTML& owner, bool doIncludeScoreButton, bool plainStyle);
   std::string ToStringStudentScoreButton();
   std::string ToStringStudentScoreReportPanel();
-  std::string ToString()const;
+  std::string ToString() const;
   JSData ToJSON(CalculatorHTML& owner);
   std::string GetItemFinish(CalculatorHTML& owner);
   void ComputeLinks(CalculatorHTML& owner, bool plainStyle);
@@ -298,10 +298,10 @@ public:
   static unsigned int HashFunction(const CalculatorHTML& input)
   { return input.HashFunction();
   }
-  unsigned int HashFunction()const
+  unsigned int HashFunction() const
   { return MathRoutines::hashString(this->fileName);
   }
-  bool operator==(const CalculatorHTML& other)const
+  bool operator==(const CalculatorHTML& other) const
   { return this->fileName == other.fileName;
   }
   std::string ToStringAllSectionDeadlines(const std::string& topicID, bool isSection);
@@ -310,8 +310,8 @@ public:
   bool problemAlreadySolved, bool returnEmptyStringIfNoDeadline, bool isSection);
   std::string ToStringCalculatorArgumentsForProblem
   (const std::string& requestType, const std::string& studentView,
-   const std::string& studentSection = "", bool includeRandomSeedIfAppropriate = false)const;
-  std::string ToStringProblemNavigation()const;
+   const std::string& studentSection = "", bool includeRandomSeedIfAppropriate = false) const;
+  std::string ToStringProblemNavigation() const;
   std::string ToStringExtractedCommands();
   std::string ToStringContent();
   std::string ToStringParsingStack(List<SyntacticElementHTML>& theStack);

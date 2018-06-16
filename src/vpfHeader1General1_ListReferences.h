@@ -39,14 +39,14 @@ public:
   bool flagDeallocated;
   List<Object*> theReferences;
   int size;
-  Object& operator[](int i)const
+  Object& operator[](int i) const
   { if (i < 0 || i >= this->size)
       crash << "This is a programing error: attempting to access element of index " << i << " in ListReferences that has only " << this->size << " elements. " << crash;
     if (this->theReferences[i] == 0)
       crash << "This is a programing error: element of index " << i << " in ListReferences has zero pointer. This is not allowed. " << crash;
     return *this->theReferences[i];
   }
-  bool Contains(const Object& theObject)const
+  bool Contains(const Object& theObject) const
   { for (int i = 0; i < this->size; i ++)
       if ((*this)[i] == theObject)
         return true;
@@ -82,8 +82,8 @@ public:
     this->theReferences[i] = 0;
   }
   void AddOnTop(const Object& o);
-  int GetIndex(const Object& o)const;
-  bool ContainsExactlyOnce(const Object& o)const
+  int GetIndex(const Object& o) const;
+  bool ContainsExactlyOnce(const Object& o) const
   { bool result = false;
     for (int i = 0; i < this->size; i ++)
       if ((*this)[i] == o)
@@ -109,7 +109,7 @@ public:
     for (int i = 0; i < other.size; i ++)
       this->AddOnTop(other[i]);
   }
-  Object& LastObject()const
+  Object& LastObject() const
   { return (*this)[this->size - 1];
   }
   template <class otherType = Object>
@@ -196,19 +196,19 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   inline void AddOnTop(const List<Object>& theList)
   { this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddOnTop(theList);
   }
-  inline bool Contains(const Object& o)const
+  inline bool Contains(const Object& o) const
   { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::Contains(o);
   }
-  inline bool Contains(const List<Object>& theList)const
+  inline bool Contains(const List<Object>& theList) const
   { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::Contains(theList);
   }
-  Object& GetElement(int theObjectIndex)const
+  Object& GetElement(int theObjectIndex) const
   { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetElement(theObjectIndex);
   }
-  int GetIndex(const Object& o)const
+  int GetIndex(const Object& o) const
   { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetIndex(o);
   }
-  inline int GetIndexIMustContainTheObject(const Object& o)const
+  inline int GetIndexIMustContainTheObject(const Object& o) const
   { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetIndexIMustContainTheObject(o);
   }
   inline int AddNoRepetitionOrReturnIndexFirst(const Object& o)

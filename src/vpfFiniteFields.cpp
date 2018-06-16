@@ -3,7 +3,7 @@
 
 f65521 f65521::operator+(const f65521 right) const
 { f65521 out;
-  out.n = (n+right.n)%65521;
+  out.n = (n +right.n)%65521;
   return out;
 }
 
@@ -49,7 +49,7 @@ void f65521::Invert()
   int b = n;
   int l = 1;
   int m = 0;
-  while(b != 0)
+  while (b != 0)
   { int q = a / b;
     int r = a % b;
     a = b;
@@ -62,7 +62,7 @@ void f65521::Invert()
     y = t;
   }
 
-  if(m>=0)
+  if (m>= 0)
     n = m;
   else
     n = m+65521;
@@ -81,11 +81,11 @@ void f65521::operator/=(const f65521 right)
 }
 
 bool f65521::IsEqualToZero() const
-{ return n==0;
+{ return n == 0;
 }
 
 bool f65521::IsEqualToOne() const
-{ return n==1;
+{ return n ==1;
 }
 
 bool f65521::operator==(const f65521 rhs) const
@@ -98,7 +98,7 @@ bool f65521::operator!=(const f65521 rhs) const
 
 void f65521::operator=(const int rhs)
 { int tmp = rhs%65521;
-  if(tmp<0)
+  if (tmp<0)
     tmp += 65521;
   n = tmp;
 }
@@ -181,7 +181,7 @@ void f211::Invert()
   int b = n;
   int l = 1;
   int m = 0;
-  while(b != 0)
+  while (b != 0)
   { int q = a / b;
     int r = a % b;
     a = b;
@@ -194,7 +194,7 @@ void f211::Invert()
     y = t;
   }
 
-  if(m>=0)
+  if (m>= 0)
     n = m;
   else
     n = m+211;
@@ -213,11 +213,11 @@ void f211::operator/=(const f211 right)
 }
 
 bool f211::IsEqualToZero() const
-{ return n==0;
+{ return n == 0;
 }
 
 bool f211::IsEqualToOne() const
-{ return n==1;
+{ return n ==1;
 }
 
 bool f211::operator==(const f211 rhs) const
@@ -230,7 +230,7 @@ bool f211::operator!=(const f211 rhs) const
 
 void f211::operator=(const int rhs)
 { int tmp = rhs % 211;
-  if(tmp<0)
+  if (tmp<0)
     tmp += 211;
   n = tmp;
 }
@@ -242,35 +242,35 @@ void f211::operator=(const Rational rhs)
 }
 
 bool f211::operator<(int rhs) const
-{ if(rhs != 0)
+{ if (rhs != 0)
   { stOutput << "finite fields are not ordered (if you think they are, modify around " << __FILE__ << ':' << __LINE__ << ", and may God have mercy on your soul)" << "\n";
     assert(false);
   }
-  if(n>104)
+  if (n>104)
     return true;
   else
     return false;
 }
 
 bool f211::operator>(int rhs) const
-{ if(rhs != 0)
+{ if (rhs != 0)
   { stOutput << "finite fields are not ordered (if you think they are, modify around " << __FILE__ << ':' << __LINE__ << ", and may God have mercy on your soul)" << "\n";
     assert(false);
   }
-  if(n<105)
+  if (n<105)
     return true;
   else
     return false;
 }
 
 bool f211::operator>(f211 rhs) const
-{ if(this->n > rhs.n)
+{ if (this->n > rhs.n)
     return true;
   return false;
 }
 
 bool f211::operator<(f211 rhs) const
-{ if(this->n < rhs.n)
+{ if (this->n < rhs.n)
     return true;
   return false;
 }

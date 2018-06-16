@@ -27,9 +27,9 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   theHTML += `<button class = "buttonProgress" onclick = "if (this.nextSibling.nextSibling.style.display === 'none')
 {this.nextSibling.nextSibling.style.display = '';} else {this.nextSibling.nextSibling.style.display = 'none';}">`;
   theHTML += `<b style="color:orange">Sent</b></button>`;
-  theHTML += `<br><span class="spanProgressReport" style="display:none">`;
+  theHTML += `<br><span class ="spanProgressReport" style="display:none">`;
   if (!isPost) {
-    theHTML += `<a href='${address}' target='_blank'>${address}</a></span>`;
+    theHTML += `<a href='${address}' target ='_blank'>${address}</a></span>`;
   } else {
     theHTML += address;
   }
@@ -127,10 +127,10 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
 
 function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus) {
   var inputParams = '';
-  inputParams += 'request=' + requestType;
-  inputParams += '&mainInput=' + encodeURIComponent(theString);
+  inputParams += 'request =' + requestType;
+  inputParams += '&mainInput =' + encodeURIComponent(theString);
   if (thePage.flagDebug === true) {
-    inputParams += "&debugFlag=true";
+    inputParams += "&debugFlag= true";
   }
   submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);
 }
@@ -152,7 +152,7 @@ function progressReport(){
   progReportTimer.innerHTML = "<hr>Refreshing every " + timeIncrementInTenthsOfSecond / 10 +
   " second(s). Client time: ~" + Math.floor(timeOutCounter / 10) + " second(s)<br>";
   timeOutCounter += timeIncrementInTenthsOfSecond;
-  var sURL  = `${pathnames.calculatorAPI}?request=indicator&mainInput=${currentWorkerNumber}`;
+  var sURL  = `${pathnames.calculatorAPI}?request =indicator&mainInput =${currentWorkerNumber}`;
   var https = new XMLHttpRequest();
   https.open("GET", sURL, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -181,7 +181,7 @@ function SendTogglePauseRequest() {
   }
   var requestStatus = document.getElementById("idProgressReportRequestStatus");
   var pauseRequest = new XMLHttpRequest();
-  var pauseURL = `${pathnames.calculatorAPI}?request=pause&mainInput=${currentWorkerNumber}`;
+  var pauseURL = `${pathnames.calculatorAPI}?request =pause&mainInput =${currentWorkerNumber}`;
   pauseRequest.open("GET", pauseURL, true);
   pauseRequest.onload = function() {
     if (pauseRequest.status !== 200) {

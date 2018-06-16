@@ -26,7 +26,7 @@ void JSData::operator=(const double other)
 
 void JSData::operator=(const char* other)
 { std::string otherString(other);
-  this->operator =(otherString);
+  this->operator=(otherString);
 }
 
 void JSData::operator=(const std::string& other)
@@ -243,7 +243,7 @@ bool JSData::readstring
     JSData& secondToLast = readingStack[fourthToLastIndex + 2];
     JSData& thirdToLast  = readingStack[fourthToLastIndex + 1];
     JSData& fourthToLast = readingStack[fourthToLastIndex];
-    //JSData& fifthToLast=theTokenS[i - 4];
+    //JSData& fifthToLast = theTokenS[i - 4];
     if (fourthToLast.type == JSData::JSopenBrace && thirdToLast.type  == JSData::JSstring &&
         secondToLast.type == JSData::JScolon && last.IsValidElement())
     { fourthToLast.objects.SetKeyValue(thirdToLast.string, last);
@@ -290,7 +290,7 @@ bool JSData::readstring
       *commentsOnFailure << "<hr>Failed to parse your JSON. Input:\n<br>\n "
       << "<a href=\""
       << theGlobalVariables.DisplayNameExecutable
-      << "?request=calculator&mainInput="
+      << "?request =calculator&mainInput ="
       << HtmlRoutines::ConvertStringToURLString(calculatorInput.str(), false)
       << "\">"
       << HtmlRoutines::ConvertStringToHtmlString(json, true)
@@ -342,7 +342,7 @@ somestream& JSData::IntoStream(somestream& out, bool percentEncodeStrings, int i
       out << "[" << newLine;
       for (int i = 0; i < this->list.size; i ++)
       { this->list[i].IntoStream(out, percentEncodeStrings, indentation, useHTML);
-        if(i != this->list.size - 1)
+        if (i != this->list.size - 1)
           out << ", ";
       }
       out << newLine << ']';

@@ -18,7 +18,7 @@ std::string FloatingPoint::DoubleToString(double input)
   out.precision(8);
   out << std::fixed << input;
   //out << " (" << std::scientific << input << ")";
-  std::string result=out.str();
+  std::string result = out.str();
 //  stOutput << "got as input " << input << ", before resizing got: " << result << "";
   bool hasDot = false;
   for (int i = result.size() - 1; i >= 0; i --)

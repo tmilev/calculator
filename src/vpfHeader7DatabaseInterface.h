@@ -154,7 +154,7 @@ public:
   MapLisT<std::string, std::string, MathRoutines::hashString> problemWeightsPerCoursE;
   MapLisT<std::string, std::string, MathRoutines::hashString> deadlinesPerSection;
   bool GetWeightFromCoursE(const std::string& theCourseNonURLed, Rational& output, std::string* outputAsGivenByInstructor = 0);
-  std::string ToString()const;
+  std::string ToString() const;
 };
 
 struct ProblemData
@@ -183,13 +183,13 @@ public:
   int getExpectedNumberOfAnswers(const std::string& problemName, std::stringstream& commentsOnFailure);
   void AddEmptyAnswerIdOnTop(const std::string& inputAnswerId);
   ProblemData();
-  bool CheckConsistency()const;
-  bool CheckConsistencyMQids()const;
+  bool CheckConsistency() const;
+  bool CheckConsistencyMQids() const;
   bool LoadFroM(const std::string& inputData, std::stringstream& commentsOnFailure);
   bool LoadFromJSON(const JSData& inputData, std::stringstream& commentsOnFailure);
   std::string StorE();
   JSData StoreJSON();
-  std::string ToString()const;
+  std::string ToString() const;
   std::string ToStringAvailableAnswerIds();
 };
 

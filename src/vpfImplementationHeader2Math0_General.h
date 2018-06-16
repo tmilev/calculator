@@ -64,7 +64,7 @@ std::ostream& operator<< (std::ostream& output, const Matrix<coefficient>& theMa
   int lastMatRowIndexToHide = theMat.NumRows;
   int firstMatColIndexToHide = theMat.NumCols;
   int lastMatColIndexToHide = theMat.NumCols;
-  FormatExpressions& theFormat=theGlobalVariables.theDefaultFormat.GetElement();
+  FormatExpressions& theFormat = theGlobalVariables.theDefaultFormat.GetElement();
   if (theFormat.flagSuppressLongMatrices)
   { if (theMat.NumRows > theFormat.MaxMatrixDisplayedRows)
     { firstMatRowIndexToHide = theFormat.MaxMatrixDisplayedRows / 2;
@@ -161,7 +161,7 @@ void MathRoutines::RaiseToPower
 template <class templateMonomial, class coefficient>
 void ElementMonomialAlgebra<templateMonomial, coefficient>::MultiplyBy
 (const ElementMonomialAlgebra<templateMonomial, coefficient>& other, ElementMonomialAlgebra<templateMonomial, coefficient>& output,
- ElementMonomialAlgebra<templateMonomial, coefficient>& bufferPoly, templateMonomial& bufferMon)const
+ ElementMonomialAlgebra<templateMonomial, coefficient>& bufferPoly, templateMonomial& bufferMon) const
 { MacroRegisterFunctionWithName("ElementMonomialAlgebra::MultiplyBy");
   if (other.IsEqualToZero())
   { output.MakeZero();
@@ -228,11 +228,11 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain
   int col = 0;
   coefficient tempElt;
   int row = 0;
-  while(row < this->NumRows && col < this->NumCols)
+  while (row < this->NumRows && col < this->NumCols)
   { //stOutput << "<br>****************row: " << row << " status: " << this->ToString(true, false);
     int foundPivotRow = - 1;
     for (int i = row; i < this->NumRows; i ++)
-      if(!this->elements[i][col].IsEqualToZero())
+      if (!this->elements[i][col].IsEqualToZero())
       { foundPivotRow = i;
         break;
       }
@@ -254,7 +254,7 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain
         this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
       int ExploringRow = row + 1;
 //      stOutput << "<br>before second while: " << this->ToString(true, false);
-      while (ExploringRow<this->NumRows)
+      while (ExploringRow< this->NumRows)
       { if (theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination)
         { std::stringstream out;
           out << "Pivotting on row of index " << row + 1 << " with exploring row of index "
@@ -318,7 +318,7 @@ void Vectors<coefficient>::SelectABasisInSubspace
   MacroRegisterFunctionWithName("Vectors::SelectABasisInSubspace");
   ProgressReport theReport;
   int theDim = input[0].size;
-  bool doProgressReport=theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination;
+  bool doProgressReport = theGlobalVariables.flagReportEverything || theGlobalVariables.flagReportGaussianElimination;
   if (doProgressReport)
   { std::stringstream reportStream;
     reportStream << "Selecting a basis of a vector space with " << input.size
@@ -358,9 +358,9 @@ bool List<Object>::ReadFromFile(std::fstream& input, int UpperLimitForDebugPurpo
   if (NumWordsBeforeTag != 0)
     crash << "Bad file input. " << crash;
   input >> tempS >> ActualListSize;
-  if(tempS != "size:")
+  if (tempS != "size:")
     crash << crash;
-  if(tempS != "size:")
+  if (tempS != "size:")
     return false;
   int CappedListSize = ActualListSize;
   if (UpperLimitForDebugPurposes > 0 && UpperLimitForDebugPurposes < CappedListSize)
@@ -498,7 +498,7 @@ void Matrix<coefficient>::GaussianEliminationByRows
           this->AddTwoRows(NumFoundPivots, j, i, tempElement);
           if (carbonCopyMat != 0)
             carbonCopyMat->AddTwoRows(NumFoundPivots, j, 0, tempElement);
-          //if(!tempElement.checkConsistency())
+          //if (!tempElement.checkConsistency())
           //  crash << crash;
           //this->ComputeDebugString();
         }
@@ -513,7 +513,7 @@ void Matrix<coefficient>::GaussianEliminationByRows
   if (humanReadableReport != 0)
   { if (useHtmlInReport)
     { if (formatAsLinearSystem)
-        *humanReadableReport << "<tr><td>" << HtmlRoutines::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),-1)
+        *humanReadableReport << "<tr><td>" << HtmlRoutines::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),- 1)
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       else
         *humanReadableReport << "<tr><td>" << HtmlRoutines::GetMathSpanPure(this->ToStringLatex(theFormat))

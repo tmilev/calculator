@@ -17,7 +17,7 @@ static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Calculator bui
 template<class Element>
 bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
 (Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution)
-//this function return true if Ax=b>=0 has a solution with x>=0 and records a solution x at outputPoint
+//this function return true if Ax=b>= 0 has a solution with x>= 0 and records a solution x at outputPoint
 //else returns false, where b is a given nonnegative column vector, A is an n by m matrix
 //and x is a column vector with m entries
 { Matrix<Rational> tempMatA;
@@ -29,7 +29,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     crash << crash;
   for (int j = 0; j < matb.NumRows; j ++)
   { GlobalGoal += matb.elements[j][0];
-    if(matb.elements[j][0].IsNegative())
+    if (matb.elements[j][0].IsNegative())
       crash << crash;
   }
 //  stOutput << "<hr>Starting matrix A: " << matA.ToString();
@@ -56,10 +56,10 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   Rational ChangeGradient; //Change, PotentialChange;
   int EnteringVariable = 0;
   bool WeHaveNotEnteredACycle = true;
-//  int ProblemCounter=0;
+//  int ProblemCounter = 0;
   while (EnteringVariable != - 1 && WeHaveNotEnteredACycle && GlobalGoal.IsPositive())
   {//  ProblemCounter++;
-  //  if (ProblemCounter==8)
+  //  if (ProblemCounter ==8)
     //{ BaseVariables.ComputeDebugString();
     //}
     //tempMatA.ComputeDebugString(); matX.ComputeDebugString();
@@ -120,14 +120,14 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
         //tempMatA.ComputeDebugString();
         //matX.ComputeDebugString();
       }
-      if(!matX[BaseVariables.elements[LeavingVariableRow]].IsEqualToZero())
+      if (!matX[BaseVariables.elements[LeavingVariableRow]].IsEqualToZero())
         crash << crash;
       BaseVariables.selected[BaseVariables.elements[LeavingVariableRow]] = false;
       BaseVariables.elements[LeavingVariableRow] = EnteringVariable;
       BaseVariables.selected[EnteringVariable] = true;
       //BaseVariables.ComputeDebugString();
       for (int i = 0; i < tempMatA.NumRows; i ++)
-        if(!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1))
+        if (!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1))
           crash << crash;
     }
 //    if (::Matrix<Rational> ::flagAnErrorHasOccurredTimeToPanic)
@@ -137,29 +137,29 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 //      tempDebugMat.ComputeDebugString();
 //      tempMat.MultiplyOnTheLeft(tempDebugMat);
 //      tempMat.ComputeDebugString();
-//      if(!tempMat.IsEqualTo(matb)) crash << crash;
+//      if (!tempMat.IsEqualTo(matb)) crash << crash;
 //    }
   }
 //  std::string tempS;
 //  std::stringstream out;
-//  for (int i=0; i<BaseVariables.CardinalitySelection; i++)
+//  for (int i = 0; i <BaseVariables.CardinalitySelection; i ++)
 //  { int tempI=BaseVariables.elements[i];
 //    matX.elements[tempI][0].ToString(tempS);
 //    out << tempS <<"(";
 //    if (tempI<matA.NumCols)
-//    {  for (int j=0; j<matA.NumRows; j++)
+//    {  for (int j = 0; j<matA.NumRows; j ++)
 //      { matA.elements[j][tempI].ToString(tempS);
 //        out << tempS;
-//        if (j!=matA.NumRows-1)
+//        if (j!=matA.NumRows- 1)
 //          out <<", ";
 //      }
 //    } else
 //      out<<"dummy column " << i <<" ";
 //    out <<")";
-//    if (i!=BaseVariables.CardinalitySelection-1)
+//    if (i!=BaseVariables.CardinalitySelection- 1)
 //      out <<"+";
 //  }
-//  tempS=out.str();
+//  tempS= out.str();
   for (int i = NumTrueVariables; i < matX.size; i ++)
     if (matX[i].IsPositive())
       return false;
@@ -279,7 +279,7 @@ bool Calculator::GetListPolysVariableLabelsInLex(const Expression& input, Vector
   return outputContext.AddChildOnTop(PolyVarsE);
 }
 
-bool DynkinSimpleType::HasEasySubalgebras()const
+bool DynkinSimpleType::HasEasySubalgebras() const
 { if (this->theLetter == 'F')
     return true;
   if (this->theLetter == 'G')
@@ -338,7 +338,7 @@ std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType
   std::string theTitlePageFileNameNoPathSlowLoad = "SemisimpleSubalgebras_" + theType.ToString() + ".html";
   std::string theTitlePageFileNameNoPathFastLoad = "SemisimpleSubalgebras_FastLoad_" + theType.ToString() + ".html";
   out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=calculator&mainInput=PrintSemisimpleLieAlgebra%7B%7D"
+  << "?request =calculator&mainInput =PrintSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">"
   << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras())
@@ -352,10 +352,10 @@ std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType
   else
     out << "<td>Not available</td>\n";
   out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=calculator&mainInput=printSlTwoSubalgebras%7B%7D%28"
+  << "?request =calculator&mainInput =printSlTwoSubalgebras%7B%7D%28"
   << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
   out << "<td><a href=\""
-  << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=calculator&mainInput=printRootSubalgebras%7B%7D%28"
+  << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request =calculator&mainInput =printRootSubalgebras%7B%7D%28"
   << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }
@@ -364,16 +364,16 @@ std::string Calculator::ToStringLinksToCalculator(const DynkinType& theType, For
 { (void) theFormat;//avoid unused parameter warning, portable
   std::stringstream out;
   out << "<tr><td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable
-  << "?request=calculator&mainInput=PrintSemisimpleLieAlgebra%7B%7D"
+  << "?request =calculator&mainInput =PrintSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras())
-    out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=calculator&mainInput=printSemisimpleSubalgebras%7B%7D%28"
+    out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request =calculator&mainInput =printSemisimpleSubalgebras%7B%7D%28"
     << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a></td>\n ";
   else
     out << "<td>Not available</td>\n";
-  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=calculator&mainInput=printSlTwoSubalgebras%7B%7D%28"
+  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request =calculator&mainInput =printSlTwoSubalgebras%7B%7D%28"
   << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
-  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request=calculator&mainInput=printRootSubalgebras%7B%7D%28"
+  out << "<td><a href=\"" << GlobalVariables::hopefullyPermanentWebAdressOfServerExecutable << "?request =calculator&mainInput =printRootSubalgebras%7B%7D%28"
   << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }
@@ -447,7 +447,7 @@ bool Calculator::innerPrintSSsubalgebrasRegular(Calculator& theCommands, const E
 bool Calculator::innerPrintSSsubalgebras
 (Calculator& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,
  bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals, bool doAdjustCentralizers)
-{ //bool showIndicator=true;
+{ //bool showIndicator = true;
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
   if (theGlobalVariables.flagAllowProcessMonitoring)
     if (theGlobalVariables.WebServerReturnDisplayIndicatorCloseConnection != 0)
@@ -478,7 +478,7 @@ bool Calculator::innerPrintSSsubalgebras
   //  << "= --ReservedCountDownToRefresh;}, 1000); </script>";
   //  out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"ReservedCountDownToRefresh\">5</span></span> "
   //  << "seconds...  </b>"
-  //<< "<meta http-equiv=\"refresh\" content=\"5; url="
+  //<< "<meta http-equiv=\"refresh\" content =\"5; url ="
   //<< displayFolder << theTitlePageFileNameNoPath
   //<< "\">"
   ;
@@ -579,7 +579,7 @@ bool Calculator::innerGroebner
 (Calculator& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex, bool useModZp)
 { MacroRegisterFunctionWithName("Calculator::innerGroebner");
  /* if (input.IsSequenceNElementS())
-  { output=input;
+  { output =input;
     if (!useGr && !useRevLex)
       return output.SetChildAtomValue(0, "GroebnerLexUpperLimit");
     if (!useGr && useRevLex)
@@ -611,10 +611,10 @@ bool Calculator::innerGroebner
     if (!MathRoutines::IsPrime(theMod))
       return output.MakeError("Error: modulus not prime. ", theCommands);
   }
-  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(output, inputVector, &theContext, -1, CalculatorConversions::innerPolynomial<Rational>))
+  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(output, inputVector, &theContext, - 1, CalculatorConversions::innerPolynomial<Rational>))
     return output.MakeError("Failed to extract polynomial expressions", theCommands);
   //theCommands.GetVector<Polynomial<Rational> >
-  //(output, inputVector, &theContext, -1, CalculatorConversions::innerPolynomial);
+  //(output, inputVector, &theContext, - 1, CalculatorConversions::innerPolynomial);
   for (int i = 0; i < inputVector.size; i ++)
     inputVector[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
@@ -635,7 +635,7 @@ bool Calculator::innerGroebner
     }
     GroebnerBasisComputation<ElementZmodP> theGroebnerComputationZmodP;
   }
-//  int theNumVars=theContext.VariableImages.size;
+//  int theNumVars = theContext.VariableImages.size;
   List<Polynomial<AlgebraicNumber> > outputGroebner, outputGroebner2;
   outputGroebner = inputVector;
   outputGroebner2 = inputVector;
@@ -692,7 +692,7 @@ bool Calculator::innerGroebner
 (outputGroebner2, &theGlobalVariables);
 
   out << "<br>Minimal Groebner basis algorithm 2 (" << outputGroebner2.size << " elements):";
-  for(int i=0; i<outputGroebner2.size; i++)
+  for (int i = 0; i <outputGroebner2.size; i ++)
     out << "<br> "
     << HtmlRoutines::GetHtmlMathSpanNoButtonAddBeginArrayL(outputGroebner2[i].ToString(&theFormat))
   ;*/
@@ -790,7 +790,7 @@ void Plot::operator+=(const Plot& other)
   this->priorityViewRectangle = MathRoutines::Maximum(this->priorityViewRectangle, other.priorityViewRectangle);
 }
 
-bool Plot::operator==(const Plot& other)const
+bool Plot::operator==(const Plot& other) const
 { return
   this->priorityWindow == other.priorityWindow &&
   this->priorityCanvasName == other.priorityCanvasName &&
@@ -819,7 +819,7 @@ void Plot::operator+=(const PlotObject& other)
   this->canvasName = "";
 }
 
-bool PlotObject::operator==(const PlotObject& other)const
+bool PlotObject::operator==(const PlotObject& other) const
 { return
   this->thePlotString                == other.thePlotString                &&
   this->fillStyle                    == other.fillStyle                    &&
@@ -901,7 +901,7 @@ std::string PlotObject::GetPlotStringFromFunctionStringAndRanges
   //out << "\\rput(1,3){$y=" << functionStringCalculatorFormat << "$}\n\n";
   //if (useHtml)
   //  out << "<br>\n";
-  out << "\\psplot[linecolor=\\fcColorGraph, plotpoints=1000]{"
+  out << "\\psplot[linecolor =\\fcColorGraph, plotpoints =1000]{"
   << FloatingPoint::DoubleToString(inputLowerBound) << "}{" << FloatingPoint::DoubleToString(inputUpperBound) << "}{";
   out << functionStringPostfixNotation << "}";
   return out.str();
@@ -937,12 +937,12 @@ void Plot::ComputeAxesAndBoundingBox()
     this->theUpperBoundAxes = MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
     this->lowBoundY = MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
     this->highBoundY = MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
-/*    for (int j=0; j<this->thePlots[k].theLines.size; j++)
-    { List<Vector<double> > currentLine=this->thePlots[k].theLines[j];
-      this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
-      this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
-      this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[0][0]);
-      this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[1][0]);
+/*    for (int j = 0; j< this->thePlots[k].theLines.size; j ++)
+    { List<Vector<double> > currentLine= this->thePlots[k].theLines[j];
+      this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
+      this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
+      this->theUpperBoundAxes =MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[0][0]);
+      this->theUpperBoundAxes =MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[1][0]);
       this->lowBoundY=MathRoutines::Minimum  (currentLine[0][1], this->lowBoundY);
       this->lowBoundY=MathRoutines::Minimum  (currentLine[1][1], this->lowBoundY);
       this->highBoundY=MathRoutines::Maximum (currentLine[0][1], this->highBoundY);
@@ -973,12 +973,12 @@ void Plot::ComputeAxesAndBoundingBox3d()
     this->theUpperBoundAxes = MathRoutines::Maximum(this->thePlots[k].xHigh, theUpperBoundAxes);
     this->lowBoundY = MathRoutines::Minimum(this->thePlots[k].yLow, this->lowBoundY);
     this->highBoundY = MathRoutines::Maximum(this->thePlots[k].yHigh, this->highBoundY);
-/*    for (int j=0; j<this->thePlots[k].theLines.size; j++)
-    { List<Vector<double> > currentLine=this->thePlots[k].theLines[j];
-      this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
-      this->theLowerBoundAxes=MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
-      this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[0][0]);
-      this->theUpperBoundAxes=MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[1][0]);
+/*    for (int j = 0; j< this->thePlots[k].theLines.size; j ++)
+    { List<Vector<double> > currentLine= this->thePlots[k].theLines[j];
+      this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[0][0]);
+      this->theLowerBoundAxes =MathRoutines::Minimum(this->theLowerBoundAxes, currentLine[1][0]);
+      this->theUpperBoundAxes =MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[0][0]);
+      this->theUpperBoundAxes =MathRoutines::Maximum(this->theUpperBoundAxes, currentLine[1][0]);
       this->lowBoundY=MathRoutines::Minimum  (currentLine[0][1], this->lowBoundY);
       this->lowBoundY=MathRoutines::Minimum  (currentLine[1][1], this->lowBoundY);
       this->highBoundY=MathRoutines::Maximum (currentLine[0][1], this->highBoundY);
@@ -1013,16 +1013,16 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   //<< " height: " << this->DesiredHtmlHeightInPixels;
   if (!owner.flagPlotShowJavascriptOnly)
   { out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
-    << "\" height=\"" << this->DesiredHtmlHeightInPixels << "\" "
+    << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
     << "style=\"border:solid 1px\" id=\""
     << this->canvasName
     << "\" "
-    << "onmousedown=\"calculatorCanvasClick(this, event);\" "
-    << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
+    << "onmousedown =\"calculatorCanvasClick(this, event);\" "
+    << "onmouseup =\"calculatorCanvasMouseUp(this);\" "
     << "onmousemove=\"calculatorCanvasMouseMoveRedraw"
     << "(this, event.clientX, event.clientY);\""
-    << " onmousewheel=\"calculatorCanvasMouseWheel(event);\""
-    << " onDOMMouseScroll=\"calculatorCanvasMouseWheel(event);\""
+    << " onmousewheel =\"calculatorCanvasMouseWheel(event);\""
+    << " onDOMMouseScroll =\"calculatorCanvasMouseWheel(event);\""
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
     << "<span id=\"" << this->canvasName << "Controls\"></span>"
@@ -1052,7 +1052,7 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
   }
   out << "calculatorResetCanvas(document.getElementById('"
   << this->canvasName << "'));\n";
-  out << "var theCanvas=calculatorGetCanvas(document.getElementById('"
+  out << "var theCanvas =calculatorGetCanvas(document.getElementById('"
   << this->canvasName
   << "'));\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
@@ -1073,13 +1073,13 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     }
     if (currentPlot.thePlotType == "setProjectionScreen" && currentPlot.thePointsDouble.size >= 2)
     { out
-      << "theCanvas.screenBasisUserDefault="
+      << "theCanvas.screenBasisUserDefault ="
       << "["
       << currentPlot.thePointsDouble[0].ToStringSquareBracketsBasicType()
       << ","
       << currentPlot.thePointsDouble[1].ToStringSquareBracketsBasicType()
       << "];\n";
-      out << "theCanvas.screenBasisUser=theCanvas.screenBasisUserDefault.slice();\n";
+      out << "theCanvas.screenBasisUser = theCanvas.screenBasisUserDefault.slice();\n";
     }
     if (currentPlot.thePlotType == "label")
     { out
@@ -1112,16 +1112,16 @@ std::string Plot::GetPlotHtml3d_New(Calculator& owner)
     }
   }
   if (owner.flagPlotNoControls)
-    out << "theCanvas.flagShowPerformance=false;\n";
+    out << "theCanvas.flagShowPerformance= false;\n";
   else
-    out << "theCanvas.flagShowPerformance=true;\n";
+    out << "theCanvas.flagShowPerformance= true;\n";
   out << "theCanvas.setBoundingBoxAsDefaultViewWindow();\n";
   out
   << "theCanvas.redraw();\n"
   << "}\n"
   << "calculatorGetCanvas(document.getElementById('"
   << this->canvasName
-  << "')).canvasResetFunction=" << canvasFunctionName << ";\n"
+  << "')).canvasResetFunction =" << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n"
   << "</script>";
   return out.str();
@@ -1159,7 +1159,7 @@ std::string PlotObject::GetJavascriptCurveImmersionIn3d
   funCounter ++;
   std::stringstream fnNameStream;
   fnNameStream << "theCanvasSurfaceFn_" << canvasName << "_" << funCounter;
-  std::string fnName=fnNameStream.str();
+  std::string fnName= fnNameStream.str();
 
   if (this->coordinateFunctionsJS.size == 3)
   { out << "function " << fnName
@@ -1254,7 +1254,7 @@ std::string Plot::GetPlotHtml(Calculator& owner)
     return this->GetPlotHtml2d_New(owner);
   else
   { std::stringstream out;
-    out << "Error:dimension=" << this->dimension;
+    out << "Error:dimension =" << this->dimension;
     return out.str();
   }
 }
@@ -1459,16 +1459,16 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
     //out << this->ToStringDebug();
   if (!this->flagPlotShowJavascriptOnly)
   { out << "<canvas width=\"" << this->DesiredHtmlWidthInPixels
-    << "\" height=\"" << this->DesiredHtmlHeightInPixels << "\" "
+    << "\" height =\"" << this->DesiredHtmlHeightInPixels << "\" "
     << "style=\"border:solid 1px\" id=\""
     << this->canvasName
     << "\" "
-    << "onmousedown=\"calculatorCanvasClick(this, event);\" "
-    << "onmouseup=\"calculatorCanvasMouseUp(this);\" "
+    << "onmousedown =\"calculatorCanvasClick(this, event);\" "
+    << "onmouseup =\"calculatorCanvasMouseUp(this);\" "
     << "onmousemove=\"calculatorCanvasMouseMoveRedraw"
     << "(this, event.clientX, event.clientY);\""
-    << " onmousewheel=\"calculatorCanvasMouseWheel(event);\""
-    << " onDOMMouseScroll=\"calculatorCanvasMouseWheel(event);\""
+    << " onmousewheel =\"calculatorCanvasMouseWheel(event);\""
+    << " onDOMMouseScroll =\"calculatorCanvasMouseWheel(event);\""
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
     << "<span id=\"" << this->canvasName << "Controls\"></span>";
@@ -1507,14 +1507,14 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   }
   outScript << "calculatorResetCanvas(document.getElementById('"
   << this->canvasName << "'));\n";
-  outScript << "var theCanvas=calculatorGetCanvasTwoD(document.getElementById('"
+  outScript << "var theCanvas =calculatorGetCanvasTwoD(document.getElementById('"
   << this->canvasName
   << "'));\n"
   << "theCanvas.init('" << this->canvasName << "');\n";
   if (owner.flagPlotNoControls)
-    outScript << "theCanvas.flagShowPerformance=false;\n";
+    outScript << "theCanvas.flagShowPerformance= false;\n";
   else
-    outScript << "theCanvas.flagShowPerformance=true;\n";
+    outScript << "theCanvas.flagShowPerformance= true;\n";
   outScript.precision(7);
   for (int i = 0; i < this->thePlots.size; i ++)
   { PlotObject& currentPlot = this->thePlots[i];
@@ -1603,7 +1603,7 @@ std::string Plot::GetPlotHtml2d_New(Calculator& owner)
   << "}\n"
   << "calculatorGetCanvasTwoD(document.getElementById('"
   << this->canvasName
-  << "')).canvasResetFunction=" << canvasFunctionName << ";\n"
+  << "')).canvasResetFunction =" << canvasFunctionName << ";\n"
   << canvasFunctionName << "();\n";
   owner.theObjectContainer.graphicsScripts.SetKeyValue(this->canvasName, outScript.str());
   out << "<script language=\"javascript\">\n" << outScript.str() << "</script>";
@@ -1621,8 +1621,8 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
   << lineSeparator;
   resultStream << "\\newcommand{\\fcColorGraph}{red}" << lineSeparator << "\\begin{document} \\pagestyle{empty}" << lineSeparator
   << "\\newcommand{\\fcColorAreaUnderGraph}{cyan}" << lineSeparator << "\\newcommand{\\fcColorNegativeAreaUnderGraph}{orange}"
-  << "\\newcommand{\\fcAxesStandard}[4]{ \\psframe*[linecolor=white](! #1 #2)(! #3 0.1 add #4 01 add) \\psaxes[ticks=none, labels=none]{<->}(0,0)(#1, #2)(#3, #4)\\fcLabels{#3}{#4}}"
-  << lineSeparator << " \\psset{xunit=1cm, yunit=1cm}";
+  << "\\newcommand{\\fcAxesStandard}[4]{ \\psframe*[linecolor =white](! #1 #2)(! #3 0.1 add #4 01 add) \\psaxes[ticks =none, labels =none]{<->}(0,0)(#1, #2)(#3, #4)\\fcLabels{#3}{#4}}"
+  << lineSeparator << " \\psset{xunit =1cm, yunit =1cm}";
   resultStream << lineSeparator;
   resultStream << "\\begin{pspicture}(" << FloatingPoint::DoubleToString(theLowerBoundAxes - 0.4) << ", "
   << FloatingPoint::DoubleToString(lowBoundY - 0.4) << ")("
@@ -1668,7 +1668,7 @@ bool Expression::AssignStringParsed(const std::string& theString, MapLisT<std::s
   return true;
 }
 
-bool Expression::IsSuitableForSubstitution()const
+bool Expression::IsSuitableForSubstitution() const
 { if (this->owner == 0)
     return false;
   if (this->IsBuiltInTypE() || this->StartsWith(this->owner->opBind()))
@@ -1676,7 +1676,7 @@ bool Expression::IsSuitableForSubstitution()const
   return true;
 }
 
-bool Expression::IsSuitableForRecursion()const
+bool Expression::IsSuitableForRecursion() const
 { if (this->owner == 0)
     return false;
   if (this->IsAtom() || this->IsBuiltInTypE() || this->StartsWith(this->owner->opBind()))
@@ -1862,14 +1862,14 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
   }
   coneNonStrictMatForm.GetVectorsFromRows(coneNonStrictGens);
   coneStrictMatForm.GetVectorsFromRows(coneStrictGens);
-  out << "<br>Input non-strict (i.e., over Z_{&gt;=0}) cone: ";
+  out << "<br>Input non-strict (i.e., over Z_{&gt;= 0}) cone: ";
   for (int i = 0; i < coneStrictGens.size; i ++)
     out << "<br>v_{" << i + 1 << "}=" << coneStrictGens[i].ToString() << ";";
   out << "<br>Input strict (i.e., over Z_{&gt;0}) cone: ";
   for (int i = 0; i < coneNonStrictGens.size; i ++)
     out << "<br>v_{" << coneStrictGens.size + i + 1 << "}=" << coneNonStrictGens[i].ToString() << ";";
   Vector<Rational> outputIntersection, outputSeparatingNormal;
-  bool conesDoIntersect=coneNonStrictGens.ConesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal);
+  bool conesDoIntersect =coneNonStrictGens.ConesIntersect(coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal);
   if (conesDoIntersect)
   { Vector<Rational> checkVector;
     checkVector.MakeZero(coneStrictMatForm.NumCols);
@@ -1884,7 +1884,7 @@ bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& 
     out << "<br>Cones intersect, here is one intersection: 0= " << outputIntersection.ToStringLetterFormat("v");
   } else
   { out << "<br>Cones have empty intersection.";
-    out << "<br> A normal separating the cones is: n=" << outputSeparatingNormal.ToString() << ". Indeed, ";
+    out << "<br> A normal separating the cones is: n =" << outputSeparatingNormal.ToString() << ". Indeed, ";
     for (int i = 0; i < coneStrictGens.size; i ++)
       out << "<br>\\langle v_{" << i + 1 << "}, n\\rangle = " << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).ToString();
     for (int i = 0; i < coneNonStrictGens.size; i ++)
@@ -1935,7 +1935,7 @@ bool Calculator::innerReverseOrdeR(Calculator& theCommands, const Expression& in
 }
 
 template <class coefficient>
-coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(const ElementUniversalEnveloping<coefficient>& right)const
+coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(const ElementUniversalEnveloping<coefficient>& right) const
 { MacroRegisterFunctionWithName("ElementUniversalEnveloping::GetKillingFormProduct");
   if (this->IsEqualToZero())
     return 0;
@@ -2061,7 +2061,7 @@ bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expr
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Expression::GetListExpressionsFromExpressionHistoryRecursiveNested(Expression& outputAppend)const
+bool Expression::GetListExpressionsFromExpressionHistoryRecursiveNested(Expression& outputAppend) const
 { MacroRegisterFunctionWithName("Expression::GetListExpressionsFromExpressionHistoryRecursiveNested");
   if (this->owner == 0)
   { outputAppend.AddChildOnTop(*this);
@@ -2111,7 +2111,7 @@ std::string Expression::ToStringExpressionHistoryRecursiveNested()
     { out << "Step " << i << ": \\(\\begin{array}{ll|l}&";
       for (int j = 1; j < processedHistory[i].size(); j ++)
       { if (j > 1)
-          out << "=&";
+          out << "= &";
         out << processedHistory[i][j][2].ToString();
         if (j + 1 < processedHistory[i].size())
           if (processedHistory[i][j + 1].size() > 3 )
@@ -2212,7 +2212,7 @@ public:
   }
   const Expression* currentE;
   int lastActiveSubexpression;
-  HistorySubExpression(): currentE(0), lastActiveSubexpression(-1)
+  HistorySubExpression(): currentE(0), lastActiveSubexpression(- 1)
   {
   }
 };
@@ -2273,7 +2273,7 @@ bool ExpressionHistoryEnumerator::initialize()
     return false;
   }
   if (!this->theHistory[1][1].IsEqualToMOne())
-  { this->errorStream << "Expression history element at start is not labeled by -1. ";
+  { this->errorStream << "Expression history element at start is not labeled by - 1. ";
     return false;
   }
   this->currentSubTree.reset();
@@ -2435,7 +2435,7 @@ bool Calculator::innerLogEvaluationStepsHumanReadableMerged(Calculator& theComma
   Expression outputTransformation;
   if (inputCopy.StartsWithGivenAtom("LogEvaluationStepsHumanReadableMerged"))
     inputCopy.SetChildAtomValue(0, theCommands.opSequence());
-  bool notUsed=false;
+  bool notUsed= false;
   theCommands.ExpressionHistoryStackAdd();
   theCommands.EvaluateExpression(theCommands, inputCopy, outputTransformation, notUsed, - 1);
   std::stringstream out;

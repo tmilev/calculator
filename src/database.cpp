@@ -129,22 +129,31 @@ std::string DatabaseStrings::labelLastActivationEmailTime = "lastActivationEmail
 std::string DatabaseStrings::labelNumActivationEmails = "numActivationEmails";
 std::string DatabaseStrings::labelUsernameAssociatedWithToken = "usernameAssociatedWithToken";
 
-std::string DatabaseStrings::anyDatabaseField = "ANY";
+std::string DatabaseStrings::anyField = "ANY";
 
 void GlobalVariables::initModifiableDatabaseFields()
 { MacroRegisterFunctionWithName("GlobalVariables::initModifiableDatabaseFields");
-  JSData& modifiableData = theGlobalVariables.databaseModifiableFields;
-  modifiableData.type = JSData::JSarray;
-  JSData newEntry;
-  JSData& tableUsers = newEntry[DatabaseStrings::tableUsers];
-  JSData& problemData = tableUsers[DatabaseStrings::labelProblemDataJSON];
-  problemData[DatabaseStrings::anyDatabaseField] = "true";
-  modifiableData.list.AddOnTop(newEntry);
+  List<List<std::string> >& modifiableData = theGlobalVariables.databaseModifiableFields;
+  List<std::string> currentEntry;
+  modifiableData.Reserve(10);
+  currentEntry.AddOnTop(DatabaseStrings::tableUsers);
+  currentEntry.AddOnTop(DatabaseStrings::anyField);
+  currentEntry.AddOnTop(DatabaseStrings::labelProblemDataJSON);
+  currentEntry.AddOnTop(DatabaseStrings::anyField);
+  modifiableData.AddOnTop(currentEntry);
+  currentEntry.SetSize(0);
+  currentEntry.AddOnTop(DatabaseStrings::tableUsers);
+  currentEntry.AddOnTop(DatabaseStrings::anyField);
+  currentEntry.AddOnTop(DatabaseStrings::labelProblemDatA);
+  modifiableData.AddOnTop(currentEntry);
   std::fstream outputFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual(outputFile, "/calculator-html/new/modifiable_database_fields.js", false, true, false);
+
+  JSData modifiableDataJSON;
+  modifiableDataJSON = modifiableData;
   JSData toWrite;
-  toWrite["universalSelector"] = DatabaseStrings::anyDatabaseField;
-  toWrite["modifiableFields"] = modifiableData;
+  toWrite["universalSelector"] = DatabaseStrings::anyField;
+  toWrite["modifiableFields"] = modifiableDataJSON;
   outputFile << "var modifiableDatabaseData = " << toWrite.ToString(true) << ";";
 }
 
@@ -187,14 +196,14 @@ bool ProblemDataAdministrative::GetWeightFromCoursE
   return output.AssignStringFailureAllowed(*outputAsGivenByInstructor);
 }
 
-std::string ProblemDataAdministrative::ToString()const
+std::string ProblemDataAdministrative::ToString() const
 { std::stringstream out;
   out << this->deadlinesPerSection.ToStringHtml();
   out << this->problemWeightsPerCoursE.ToStringHtml();
   return out.str();
 }
 
-bool ProblemData::CheckConsistency()const
+bool ProblemData::CheckConsistency() const
 { MacroRegisterFunctionWithName("ProblemData::CheckConsistency");
   for (int i = 0; i < this->theAnswers.size(); i ++)
   { if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].answerId) == "")
@@ -207,7 +216,7 @@ bool ProblemData::CheckConsistency()const
   return true;
 }
 
-bool ProblemData::CheckConsistencyMQids()const
+bool ProblemData::CheckConsistencyMQids() const
 { MacroRegisterFunctionWithName("ProblemData::CheckConsistencyMQids");
   for (int i = 0; i < this->theAnswers.size(); i ++)
     if (MathRoutines::StringTrimWhiteSpace(this->theAnswers[i].idMQfield) == "")
@@ -223,7 +232,7 @@ bool ProblemData::CheckConsistencyMQids()const
   return true;
 }
 
-std::string ProblemData::ToString()const
+std::string ProblemData::ToString() const
 { std::stringstream out;
   out << "Problem data. "
   << "Random seed: " << this->randomSeed;
@@ -382,7 +391,7 @@ bool UserCalculatorData::LoadFromJSON(JSData& input)
   this->sectionsTaught.SetSize(0);
   JSData sectionsTaughtList = input[DatabaseStrings::labelSectionsTaught];
   if (sectionsTaughtList.type == JSData::JSarray)
-    for (int i = 0; i < sectionsTaughtList.list.size; i++)
+    for (int i = 0; i < sectionsTaughtList.list.size; i ++)
       this->sectionsTaught.AddOnTop(sectionsTaughtList.list[i].string);
   return true;
 }
@@ -412,7 +421,7 @@ JSData UserCalculatorData::ToJSON()
   for (int i = 0; i < this->sectionsTaught.size; i ++)
     sectionsTaughtList[i] = this->sectionsTaught[i];
   result[DatabaseStrings::labelSectionsTaught] = sectionsTaughtList;
-  for (int i = result.objects.size() - 1; i >=0; i --)
+  for (int i = result.objects.size() - 1; i >= 0; i --)
   { JSData& currentValue = result.objects.theValues[i];
     if (currentValue.string == "" && currentValue.type == JSData::JSstring)
       result.objects.RemoveKey(result.objects.theKeys[i]);
@@ -829,9 +838,9 @@ std::string ProblemData::StorE()
     out << HtmlRoutines::ConvertStringToURLString(currentA.answerId, false) << "=";
     std::stringstream questionsStream;
     questionsStream
-    << "numCorrectSubmissions=" << currentA.numCorrectSubmissions
-    << "&numSubmissions=" << currentA.numSubmissions
-    << "&firstCorrectAnswer=" << HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false);
+    << "numCorrectSubmissions =" << currentA.numCorrectSubmissions
+    << "&numSubmissions =" << currentA.numSubmissions
+    << "&firstCorrectAnswer =" << HtmlRoutines::ConvertStringToURLString(currentA.firstCorrectAnswerClean, false);
     out << HtmlRoutines::ConvertStringToURLString(questionsStream.str(), false);
   }
   return out.str();
@@ -1167,7 +1176,7 @@ bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords
     return output.AssignValue(out.str(), theCommands);
   }
   HashedList<std::string, MathRoutines::hashString> emailsRegistered;
-  for (int i = 0; i < theUserTable.size; i++)
+  for (int i = 0; i < theUserTable.size; i ++)
   { std::string currentEmail = theUserTable[i][emailColumn];
     if (emailsRegistered.Contains(currentEmail))
     { out << "Fatal error: email " << currentEmail << "repeated. ";
@@ -1297,9 +1306,9 @@ bool EmailRoutines::SendEmailWithMailGun
   //to execute arbitrary code.
   commandToExecute << "-F to=\""
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->toEmail) << "\" "
-  << "-F subject=\""
+  << "-F subject =\""
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->subject) << "\" "
-  << "-F text=\""
+  << "-F text =\""
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->emailContent)
   << "\""
   ;
@@ -1329,7 +1338,7 @@ List<bool>& EmailRoutines::GetRecognizedEmailChars()
     theChars += "@";
     theChars += "!#$%&'*+-/=?.";
     for (unsigned i = 0; i < theChars.size(); i ++)
-      recognizedEmailCharacters[((unsigned char)theChars[i])]=true;
+      recognizedEmailCharacters[((unsigned char)theChars[i])]= true;
   }
   return EmailRoutines::recognizedEmailCharacters;
 }
@@ -1344,7 +1353,7 @@ bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* comme
   }
   int numAts = 0;
   for (unsigned i = 0; i < input.size(); i ++)
-  { if(!EmailRoutines::GetRecognizedEmailChars()[((unsigned char) input[i])])
+  { if (!EmailRoutines::GetRecognizedEmailChars()[((unsigned char) input[i])])
     { if (commentsOnError != 0)
         *commentsOnError << "Email: " << input << " contains the unrecognized character "
         << input[i] << ". ";
@@ -1373,22 +1382,22 @@ std::string EmailRoutines::GetCommandToSendEmailWithMailX()
   << " -c \""
   << this->ccEmail
   << "\" "
-  << "-S smtp=\""
+  << "-S smtp =\""
   << this->smtpWithPort
   << "\" "
-  << "-S smtp-use-starttls -S smtp-auth=login -S smtp-auth-user=\""
+  << "-S smtp-use-starttls -S smtp-auth=login -S smtp-auth-user =\""
   << this->fromEmail
   << "\" -S smtp-auth-password=\""
   << this->fromEmailAuth
   << "\" -S ssl-verify=ignore "
-  << "-S nss-config-dir=/etc/pki/nssdb/ "
+  << "-S nss-config-dir =/etc/pki/nssdb/ "
   << this->toEmail;
   return out.str();
 }
 
 EmailRoutines::EmailRoutines()
 { this->fromEmail = "calculator.todor.milev@gmail.com";
-  //this->ccEmail="todor.milev@gmail.com";
+  //this->ccEmail ="todor.milev@gmail.com";
   this->smtpWithPort = "smtp.gmail.com:587";
   this->fromEmailAuth = Crypto::ConvertStringToBase64("A good day to use a computer algebra system");
 }
@@ -1521,7 +1530,7 @@ bool UserCalculator::StoreToDB(bool doSetPassword, std::stringstream* commentsOn
   JSData findUser;
   findUser[DatabaseStrings::labelUsername] = this->username;
   if (this->enteredPassword != "" && doSetPassword)
-  { //*commentsOnFailure << " DEBUG: Computing sha-1 salted pass from: " << this->enteredPassword;
+  { //*commentsOnFailure << " DEBUG: Computing sha- 1 salted pass from: " << this->enteredPassword;
     this->ComputeShaonedSaltedPassword();
     this->actualShaonedSaltedPassword = this->enteredShaonedSaltedPassword;
   }
@@ -1543,11 +1552,11 @@ std::string UserCalculator::GetActivationAddressFromActivationToken
   else
     out << theGlobalVariables.hopefullyPermanentWebAdress;
   out << theGlobalVariables.DisplayNameExecutable
-  << "?request=activateAccount&username="
+  << "?request =activateAccount&username="
   << HtmlRoutines::ConvertStringToURLString(inputUserNameUnsafe, false);
   if (inputEmailUnsafe != "")
-    out << "&email=" << HtmlRoutines::ConvertStringToURLString(inputEmailUnsafe, false);
-  out << "&activationToken=" << HtmlRoutines::ConvertStringToURLString(theActivationToken, false);
+    out << "&email =" << HtmlRoutines::ConvertStringToURLString(inputEmailUnsafe, false);
+  out << "&activationToken =" << HtmlRoutines::ConvertStringToURLString(theActivationToken, false);
   return out.str();
 }
 

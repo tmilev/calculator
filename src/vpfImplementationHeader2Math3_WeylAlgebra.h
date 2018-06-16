@@ -21,7 +21,7 @@ bool ElementWeylAlgebra<coefficient>::IsPolynomial(Polynomial<coefficient>* whic
 }
 
 template <class coefficient>
-bool ElementWeylAlgebra<coefficient>::HasNonSmallPositiveIntegerDerivation()const
+bool ElementWeylAlgebra<coefficient>::HasNonSmallPositiveIntegerDerivation() const
 { for (int i = 0; i < this->size(); i ++)
     if ((*this)[i].HasNonSmallPositiveIntegerDerivation())
       return true;
@@ -29,7 +29,7 @@ bool ElementWeylAlgebra<coefficient>::HasNonSmallPositiveIntegerDerivation()cons
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output)const
+void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output) const
 { SelectionWithDifferentMaxMultiplicities tempSel;
   int theDimensioN = MathRoutines::Maximum(left.GetMinNumVars(), right.GetMinNumVars());
   tempSel.Multiplicities.initFillInObject(theDimensioN, 0);
@@ -52,8 +52,8 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlg
   output.SetExpectedSize(theExpectedSize);
   for (int i = 0; i < numCycles; i ++)
   { coeffBuff = 1;
-    for (int k=0; k<theDimensioN; k ++)
-    { int multDrop=tempSel.Multiplicities[k];
+    for (int k= 0; k<theDimensioN; k ++)
+    { int multDrop = tempSel.Multiplicities[k];
       Rational theDOPower = left.differentialPart(k);
       Rational thePolPower = right.polynomialPart(k);
       coeffBuff *= Rational::NChooseK(theDOPower, multDrop) * Rational::NChooseK(thePolPower, multDrop) * Rational::Factorial(multDrop);
@@ -193,7 +193,7 @@ void ElementWeylAlgebra<coefficient>::MakeGMinusEpsMinusEpsInTypeD(int i, int j,
 { this->MakeZero();
   MonomialWeylAlgebra tempMon;
   tempMon.MakeOne(NumVars);
-  tempMon.polynomialPart[i + NumVars]=1;
+  tempMon.polynomialPart[i + NumVars] = 1;
   tempMon.differentialPart[j] = 1;
   this->AddMonomial(tempMon, 1);
   tempMon.MakeOne(NumVars);
@@ -308,7 +308,7 @@ bool ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coefficient>& output)const
+void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coefficient>& output) const
 { MacroRegisterFunctionWithName("ElementWeylAlgebra::FourierTransformMe");
   if (&output == this)
   { ElementWeylAlgebra thisCopy = *this;
@@ -321,9 +321,9 @@ void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coeffi
   MonomialWeylAlgebra theMon;
   for (int i = 0; i < this->size(); i ++)
   { const MonomialWeylAlgebra& currentMon = (*this)[i];
-    if (!(currentMon.polynomialPart.TotalDegree()+currentMon.differentialPart.TotalDegree()).IsInteger(&totalDeg))
+    if (!(currentMon.polynomialPart.TotalDegree() + currentMon.differentialPart.TotalDegree()).IsInteger(&totalDeg))
       crash << "This is a programming error: calling Fourier transoform on differential operator with non-integral exponents. " << crash;
-//    stOutput << "<br>totalDeg: " << totalDeg.ToString() << ", is even=" << totalDeg.IsEven();
+//    stOutput << "<br>totalDeg: " << totalDeg.ToString() << ", is even =" << totalDeg.IsEven();
     theMon.differentialPart = currentMon.polynomialPart;
     theMon.polynomialPart = currentMon.differentialPart;
     theCoeff = this->theCoeffs[i];
@@ -331,7 +331,7 @@ void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coeffi
       theCoeff *= - 1;
 //    totalDeg%=4;
 //    if (totalDeg==2 || totalDeg==3)
-//      theCoeff*=-1;
+//      theCoeff*= - 1;
     //if (totalDeg==1 || totalDeg==3)
       //theCoeff*=ImaginaryUnit;
     output.AddMonomial(theMon, theCoeff);
@@ -339,7 +339,7 @@ void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coeffi
 }
 
 template <class coefficient>
-bool ElementWeylAlgebra<coefficient>::ActOnPolynomial(Polynomial<Rational>& thePoly)const
+bool ElementWeylAlgebra<coefficient>::ActOnPolynomial(Polynomial<Rational>& thePoly) const
 { Polynomial<Rational> result;
   result.MakeZero();
   MonomialP resultMon;

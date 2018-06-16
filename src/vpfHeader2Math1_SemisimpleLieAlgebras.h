@@ -18,7 +18,7 @@ public:
   //the Chevalley constants are listed in the same order as the root system of the Weyl group
   // i.e. if \alpha is the root at the i^th position in this->theWyl.RootSystem and \beta -
   //the root  at the j^th position, then
-  //the chevalley constant N_{\alpha\beta} given by [g^\alpha, g^\beta]=N_{\alpha\beta}g^{\alpha+\beta}
+  //the chevalley constant N_{\alpha\beta} given by [g^\alpha, g^\beta]=N_{\alpha\beta}g^{\alpha +\beta}
   //will be located at the ij^{th} entry in the below matrix.
   //Let $\alpha$ be a root . Then our choice of the elements of the Cartan subalgebra is such that
   //1.   [g^{\alpha}, g^{-\alpha}]=h_\alpha * (2/ \langle\alpha,\alpha\rangle)
@@ -39,7 +39,7 @@ public:
 
   bool flagHasNilradicalOrder;
   bool flagDeallocated;
-  unsigned int HashFunction()const
+  unsigned int HashFunction() const
   { return this->HashFunction(*this);
   }
   static unsigned int HashFunction(const SemisimpleLieAlgebra& input)
@@ -47,7 +47,7 @@ public:
   }
   void ComputeFolderNames();
   template <class coefficient>
-  void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar=0)
+  void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar = 0)
   { output.MakeZero();
     ChevalleyGenerator theGen;
     Polynomial<coefficient> theCf;
@@ -58,7 +58,7 @@ public:
     }
   }
   template <class coefficient>
-  void GetGenericElementNegativeBorelNilradical(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar=0)
+  void GetGenericElementNegativeBorelNilradical(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar = 0)
   { output.MakeZero();
     ChevalleyGenerator theGen;
     Polynomial<coefficient> theCf;
@@ -100,7 +100,7 @@ public:
   bool CommutatorIsNonZero(int leftIndex, int rightIndex)
   { return !this->theLiebrackets.elements[leftIndex][rightIndex].IsEqualToZero();
   }
-  std::string GetLieAlgebraName()const
+  std::string GetLieAlgebraName() const
   { return this->theWeyl.theDynkinType.GetLieAlgebraName();
   }
   void GetMinusTransposeAuto(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
@@ -108,10 +108,10 @@ public:
   inline int GetNumGenerators() const
   { return this->theWeyl.CartanSymmetric.NumRows + this->theWeyl.RootSystem.size;
   }
-  inline int GetNumPosRoots()const
+  inline int GetNumPosRoots() const
   { return this->theWeyl.RootsOfBorel.size;
   }
-  inline int GetRank()const
+  inline int GetRank() const
   { return this->theWeyl.CartanSymmetric.NumRows;
   }
   void OrderNilradical(const Selection& parSelZeroMeansLeviPart, bool useNilWeight, bool ascending);
@@ -135,14 +135,14 @@ public:
       return theIndex + this->GetNumPosRoots();
     return theIndex + this->GetNumPosRoots() + this->GetRank() - 1;
   }
-  int GetGeneratorFromRootIndex(int theIndex)const;
-  int GetDisplayIndexFromRootIndex(int theIndex)const;
+  int GetGeneratorFromRootIndex(int theIndex) const;
+  int GetDisplayIndexFromRootIndex(int theIndex) const;
   //the below function returns an negative number if the chevalley generator is an element of the Cartan subalgebra
   int GetRootIndexFromGenerator(int theIndex) const;
   int GetCartanIndexFromGenerator(int theIndex)
   { return theIndex + this->theWeyl.RootsOfBorel.size;
   }
-  int GetDisplayIndexFromGenerator(int theIndex)const
+  int GetDisplayIndexFromGenerator(int theIndex) const
   { //stOutput << "<br>num pos roots: " <<  this->GetNumPosRoots();
    // stOutput << " rank: "<< this->GetRank();
     if (theIndex < this->GetNumPosRoots())
@@ -152,7 +152,7 @@ public:
     return theIndex - this->GetNumPosRoots();
   }
   bool AreOrderedProperly(int leftIndex, int rightIndex);
-  bool IsGeneratorFromCartan(int theIndex)const
+  bool IsGeneratorFromCartan(int theIndex) const
   { return theIndex >= this->GetNumPosRoots() && theIndex < this->GetNumPosRoots() + this->GetRank();
   }
   bool AreOppositeRootSpaces(int leftIndex, int rightIndex)
@@ -171,13 +171,13 @@ public:
   (const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right, const Selection& rootsNotInLevi);
   template<class coefficient>
   void LieBracket(const ElementSemisimpleLieAlgebra<coefficient>& g1, const ElementSemisimpleLieAlgebra<coefficient>& g2, ElementSemisimpleLieAlgebra<coefficient>& output);
-  //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a Vector<Rational> .
+  //Setup: \gamma +\delta =\epsilon +\zeta =\eta is a Vector<Rational> .
   //then the below function computes n_{-\epsilon, -\zeta}
   void ComputeOneChevalleyConstant(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta);
   void ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void ExploitSymmetryChevalleyConstants(int indexI, int indexJ);
   void ExploitTheCyclicTrick(int i, int j, int k);
-  bool GetMaxQForWhichBetaMinusQAlphaIsARoot(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output)const;
+  bool GetMaxQForWhichBetaMinusQAlphaIsARoot(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output) const;
   Rational GetConstant(const Vector<Rational>& root1, const Vector<Rational>& root2);
   bool CheckClosedness(std::string& output);
   void ElementToStringVermaMonomials(std::string& output);
@@ -216,7 +216,7 @@ public:
   void CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& theHighestWeight);
   int GetLengthStringAlongAlphaThroughBeta(Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport);
   void ComputeOneAutomorphism(Matrix<Rational>& outputAuto,  bool useNegativeRootsFirst);
-  bool operator==(const SemisimpleLieAlgebra& other)const
+  bool operator==(const SemisimpleLieAlgebra& other) const
   { return this->theWeyl == other.theWeyl;
   }
 };
@@ -237,7 +237,7 @@ public:
   Weight() : owner(0)
   {
   }
-  void CheckNonZeroOwner()const
+  void CheckNonZeroOwner() const
   { if (this->owner != 0)
       return;
     crash << "This is a programming error: Monomial char has zero owner, which is not allowed by the current function call. " << crash;
@@ -246,7 +246,7 @@ public:
   (const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
    Rational& theMult, charSSAlgMod<coefficient>& outputAccum) const;
   std::string TensorAndDecompose(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output) const;
-  std::string ToString(FormatExpressions* theFormat = 0)const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
   inline unsigned int HashFunction() const
   { return weightFundamentalCoordS.HashFunction();
   }
@@ -273,7 +273,7 @@ template <class coefficient>
 class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
 {
   public:
-  void CheckConsistency()const
+  void CheckConsistency() const
   { if (this->size() == 0)
       return;
     const SemisimpleLieAlgebra* owner = (*this)[0].owner;
@@ -281,7 +281,7 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
       if ((*this)[i].owner != owner)
         crash << "This is a programming error: charSSAlgMod contains elements belonging to different semisimple Lie algebras. " << crash;
   }
-  void CheckNonZeroOwner()const
+  void CheckNonZeroOwner() const
   { this->CheckConsistency();
     if (this->GetOwner() == 0)
       crash << "This is a programming error: charSSAlgMod has no owner semisimple Lie algebra, which is not allowed at by the calling function. " << crash;
@@ -289,13 +289,13 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
   bool IsEqualToZero()
   { return this->size() == 0;
   }
-  unsigned int HashFunction()const
+  unsigned int HashFunction() const
   { return this->HashFunction(*this);
   }
   static unsigned int HashFunction(const charSSAlgMod<coefficient>& input)
   { return input.::MonomialCollection<Weight<coefficient>, coefficient>::HashFunction(input);
   }
-  void GetDual(charSSAlgMod<coefficient>& output)const;
+  void GetDual(charSSAlgMod<coefficient>& output) const;
   void MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);
   bool SplitCharOverRedSubalg(std::string* Report, charSSAlgMod& output, branchingData& inputData);
   bool GetDominantCharacterWRTsubalgebra
@@ -324,7 +324,7 @@ class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
   bool SplitOverLeviMonsEncodeHIGHESTWeight
   (std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
    SubgroupWeylGroupOLD& outputWeylSub);
-  int GetIndexExtremeWeightRelativeToWeyl(WeylGroupData& theWeyl)const;
+  int GetIndexExtremeWeightRelativeToWeyl(WeylGroupData& theWeyl) const;
   void MakeTrivial(SemisimpleLieAlgebra& inputOwner);
   std::string MultiplyBy(const charSSAlgMod& other);
   std::string operator*=(const charSSAlgMod& other);

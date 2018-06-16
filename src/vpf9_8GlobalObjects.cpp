@@ -75,7 +75,7 @@ void HtmlRoutines::MakeReportIndicatorFile(const std::string& input)
 { //calling stOutput forbidden! stOutput itself calls HtmlRoutines::MakeReportIndicatorFile.
   static int counter = - 1;
   counter ++;
-  //  if (counter%10!=0)
+  //  if (counter%10!= 0)
   //    return;
   //std::cout << "Making report " << counter << " in file " << theGlobalVariables.PhysicalNameIndicatorWithPath << "<br>";
   std::fstream theFile;

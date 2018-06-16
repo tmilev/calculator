@@ -20,7 +20,7 @@ public:
   void AddSelectionAppendNewIndex(int index);
   void RemoveLastSelection();
   void RemoveSelection(int index)
-  { this->selected[index]=false;
+  { this->selected[index]= false;
     this->ComputeIndicesFromSelection();
   }
   void MakeFullSelection(int inputMaxSize)
@@ -34,7 +34,7 @@ public:
     }
     this->CardinalitySelection = this->MaxSize;
   }
-  bool IsSubset(const Selection& other)const
+  bool IsSubset(const Selection& other) const
   { if (this->MaxSize != other.MaxSize)
       return false;
     for (int i = 0; i < this->CardinalitySelection; i ++)
@@ -49,7 +49,7 @@ public:
   static inline unsigned int HashFunction(const Selection& input)
   { return input.HashFunction();
   }
-  std::string ToString()const;
+  std::string ToString() const;
   void incrementSelection();
   bool IncrementReturnFalseIfPastLast()
   { this->incrementSelection();
@@ -191,7 +191,7 @@ class SelectionOneItem
   { this->MaxMultiplicity = theMult;
     this->SelectedMult = 0;
   }
-  std::string ToString()const
+  std::string ToString() const
   { std::stringstream out;
     out << this->SelectedMult << " out of " << this->MaxMultiplicity;
     return out.str();
@@ -231,7 +231,7 @@ class Incrementable
     for (int i = 0; i < this->theElements.size; i ++)
       this->theElements[i].initFromMults(input[i]);
   }
-  std::string ToString()const
+  std::string ToString() const
   { std::stringstream out;
     out << "(";
     for (int i = 0; i < this->theElements.size; i ++)
@@ -255,7 +255,7 @@ public:
     return result;
   }
   void SetNumItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems)
-  { if(inputDesiredSubsetSize < 0 || inputNumItems < 0)
+  { if (inputDesiredSubsetSize < 0 || inputNumItems < 0)
       crash << "This is a programming error: requesting to initialize a selection of size " << inputDesiredSubsetSize << " out of "
       << inputNumItems << " elements, which does not make sense. " << crash;
     this->theSelection.init(inputNumItems);
@@ -263,7 +263,7 @@ public:
     if (this->DesiredSubsetSize > 0)
       this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
   }
-  std::string ToString()const
+  std::string ToString() const
   { return this->theSelection.ToString();
   }
   bool IncrementReturnFalseIfPastLast()
@@ -364,16 +364,16 @@ void Vectors<coefficient>::SelectionToMatrixAppend(Selection& theSelection, int 
 { for (int i = 0; i < theSelection.CardinalitySelection; i ++)
   { Vector<coefficient>& tempRoot = this->TheObjects[theSelection.elements[i]];
     for (int j = 0; j < OutputDimension; j ++)
-      output.elements[StartRowIndex + i][j]=tempRoot[j];
+      output.elements[StartRowIndex + i][j]= tempRoot[j];
   }
 }
 
 template <typename coefficient>
 void Vectors<coefficient>::SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex)
-{ for(int i = 0; i < theSelection.CardinalitySelection; i ++)
+{ for (int i = 0; i < theSelection.CardinalitySelection; i ++)
   { Vector<Rational>& tempRoot = this->TheObjects[theSelection.elements[i]];
     for (int j = 0; j < OutputDimension; j ++)
-      output.elements[StartRowIndex + i][j]=tempRoot[j];
+      output.elements[StartRowIndex + i][j] = tempRoot[j];
   }
 }
 
@@ -386,10 +386,10 @@ bool Vectors<coefficient>::ComputeNormalExcludingIndex(Vector<coefficient>& outp
   output.SetSize(theDimension);
   bufferMatrix.init((int) this->size - 1, (int) theDimension);
   int k = - 1;
-  for(int i = 0; i < this->size; i ++)
+  for (int i = 0; i < this->size; i ++)
     if (i != index)
     { k ++;
-      for(int j = 0; j < theDimension; j ++)
+      for (int j = 0; j < theDimension; j ++)
         bufferMatrix.elements[k][j] = (*this)[i][j];
     }
   bufferMatrix.GaussianEliminationByRows(0, &NonPivotPoints);
@@ -422,7 +422,7 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
   Matrix<coefficient> matOutputEmpty;
-  Selection& NonPivotPoints=bufferSel;
+  Selection& NonPivotPoints =bufferSel;
   bufferMatrix.init((int) theSelection.CardinalitySelection + 1, (int) theDimension);
   matOutputEmpty.init(- 1, - 1);
   for (int j = 0; j < theDimension; j ++)
@@ -448,7 +448,7 @@ void Vectors<coefficient>::GaussianEliminationForNormalComputation(Matrix<coeffi
 }
 
 template <class coefficient>
-int Vectors<coefficient>::GetRankOfSpanOfElements(Matrix<coefficient>* buffer, Selection* bufferSelection)const
+int Vectors<coefficient>::GetRankOfSpanOfElements(Matrix<coefficient>* buffer, Selection* bufferSelection) const
 { if (this->size == 0)
     return 0;
   int theDimension = this->TheObjects[0].size;
@@ -483,7 +483,7 @@ void Vector<coefficient>::operator=(const Selection& other)
     return;
   }
   this->SetSize(other.MaxSize);
-  for(int i = 0; i < other.MaxSize; i ++)
+  for (int i = 0; i < other.MaxSize; i ++)
     if (other.selected[i])
       this->TheObjects[i] = 1;
     else
@@ -493,7 +493,7 @@ void Vector<coefficient>::operator=(const Selection& other)
 template <class coefficient>
 void Vector<coefficient>::operator=(const SelectionWithMultiplicities& other)
 { this->SetSize(other.Multiplicities.size);
-  for(int i = 0; i < other.Multiplicities.size; i ++)
+  for (int i = 0; i < other.Multiplicities.size; i ++)
     this->TheObjects[i] = other.Multiplicities[i];
 }
 
@@ -503,7 +503,7 @@ bool Vectors<coefficient>::LinearAlgebraForVertexComputation(Selection& theSelec
     return false;
   int theDimension = this->TheObjects[0].size;
   output.SetSize(theDimension);
-  if(theDimension - 1 != theSelection.CardinalitySelection)
+  if (theDimension - 1 != theSelection.CardinalitySelection)
     crash << crash;
   buffer.init((int) (theDimension - 1), (int) theDimension);
   for (int i = 0; i < theDimension - 1; i ++)

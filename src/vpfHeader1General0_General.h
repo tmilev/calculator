@@ -176,7 +176,7 @@ public:
   { coefficient q, r, p, d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
     coefficient vD[2], vP[2], temp;
     vP[0] = 1;
-    vP[1] = 0; // at any given moment, p=vP[0]*N+vP[1]*X
+    vP[1] = 0; // at any given moment, p =vP[0]*N+vP[1]*X
     vD[0] = 0;
     vD[1] = 1;   // at any given moment, d=vD[0]*N+vD[1]*X
     p = N;
@@ -190,7 +190,7 @@ public:
       r = p % d;
       p = d;
       d = r;
-      for(int i = 0; i < 2; i++)
+      for (int i = 0; i < 2; i ++)
       { temp = vP[i];
         vP[i] = vD[i];
         vD[i] = temp - q * vD[i];
@@ -201,14 +201,14 @@ public:
     p = vP[1] % N;
     if (p < 0)
       p += N;
-    output=p;
+    output =p;
     return true;
   }
   static int lcm(int a, int b);
   template <typename integral>
   static integral gcd(integral a, integral b)
   { integral temp;
-    while(!(b == 0))
+    while (!(b == 0))
     { temp = a % b;
       a = b;
       b = temp;
@@ -239,8 +239,8 @@ public:
   static bool GenerateVectorSpaceClosedWRTOperation
   (List<theType>& inputOutputElts, int upperDimensionBound, void (*theBinaryOperation)(const theType& left, const theType& right, theType& output));
 //  static void NChooseK(int n, int k, LargeInt& output);//
-  static bool StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd=0);
-  static bool StringEndsWith(const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning=0);
+  static bool StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd= 0);
+  static bool StringEndsWith(const std::string& theString, const std::string& desiredEnd, std::string* outputStringBeginning= 0);
   static char ConvertHumanReadableHexToCharValue(char input);
   static void StringSplitDefaultDelimiters(const std::string& inputString, List<std::string>& output);
   static void StringSplitExcludeDelimiter(const std::string& inputString, char delimiter, List<std::string>& output);
@@ -261,7 +261,7 @@ public:
   { return 3.141592653589793238462643383279;
   }
 // the MS compiler refuses to compile the following (WTF?), hence the above line.
-//  static const double Pi=(double)3.141592653589793238462643383279;
+//  static const double Pi =(double)3.141592653589793238462643383279;
   static int KToTheNth(int k, int n);
   static void KToTheNth(int k, int n, LargeInt& output);
   inline static int parity(int n);
@@ -533,16 +533,16 @@ public:
     else
       this->FreeMemory();
   }
-  const Object& GetElementConst()const;
+  const Object& GetElementConst() const;
   Object& GetElement();
-  bool operator==(const MemorySaving<Object>& other)const
+  bool operator==(const MemorySaving<Object>& other) const
   { if (this->IsZeroPointer() != other.IsZeroPointer())
       return false;
     if (this->IsZeroPointer())
       return true;
     return this->GetElementConst() == other.GetElementConst();
   }
-  int HashFunction()const
+  int HashFunction() const
   { if (this->IsZeroPointer())
       return 0;
     return this->GetElementConst().HashFunction();
@@ -550,7 +550,7 @@ public:
   static inline int HashFunction(const MemorySaving<Object>& input)
   { return input.HashFunction();
   }
-  bool IsZeroPointer()const
+  bool IsZeroPointer() const
   { return this->theValue == 0;
   }
   void FreeMemory();
@@ -610,12 +610,12 @@ public:
   void CopyFromHeavy(const List<Object>& from);
   void CopyFromLight(const ListLight<Object>& from);
   void PopIndexSwapWithLastLight(int index);
-  int SizeWithoutObjects()const;
+  int SizeWithoutObjects() const;
   int IndexInList(const Object& o)
   { for (int i = 0; i < this->size; i ++)
       if (this->TheObjects[i] == o)
         return i;
-    return -1;
+    return - 1;
   }
   inline bool Contains(const Object& o)
   { return this->IndexInList(o) != - 1;
@@ -626,16 +626,16 @@ public:
     for (int i = 0; i < this->size; i ++)
       this->TheObjects[i] = o;
   }
-  inline Object& operator[](int i)const
+  inline Object& operator[](int i) const
   { return this->TheObjects[i];
   }
-  void operator = (const ListLight<Object>& right);
-  void operator = (const List<Object>& right)
+  void operator= (const ListLight<Object>& right);
+  void operator= (const List<Object>& right)
   { this->SetSize(right.size);
     for (int i = 0; i < right.size; i ++)
       this->TheObjects[i] = right[i];
   }
-  inline bool operator == (const ListLight<Object>& right) const
+  inline bool operator== (const ListLight<Object>& right) const
   { if (this->size != right.size)
       return false;
     for (int i = 0; i < this->size; i ++)
@@ -643,7 +643,7 @@ public:
         return false;
     return true;
   }
-  inline Object* LastObject()const
+  inline Object* LastObject() const
   { return &this->TheObjects[this->size - 1];
   }
   ListLight();
@@ -663,7 +663,7 @@ void ListLight<Object>::PopIndexSwapWithLastLight(int index)
 }
 
 template <class Object>
-inline void ListLight<Object>::operator = (const ListLight<Object>& right)
+inline void ListLight<Object>::operator= (const ListLight<Object>& right)
 { this->CopyFromLight(right);
 }
 
@@ -734,7 +734,7 @@ void ListLight<Object>::CopyFromLight(const ListLight<Object>& from)
 }
 
 template <class Object>
-int ListLight<Object>::SizeWithoutObjects()const
+int ListLight<Object>::SizeWithoutObjects() const
 { return sizeof(Object*) * this->size + sizeof(int);
 }
 
@@ -757,7 +757,7 @@ std::iostream& operator>>(std::iostream& input, List<Object>& theList)
   if (tempS != "size:")
     crash << crash;
   theList.SetSize(tempI);
-  for (int i = 0; i < theList.size; i++)
+  for (int i = 0; i < theList.size; i ++)
     input >> theList[i];
   return input;
 }
@@ -798,16 +798,16 @@ public:
   }
   //List(List<Object>&& other)
   //{ this->initConstructorCallOnly();
-  //  this->size=other.size;
-  //  this->TheObjects=other.TheObjects;
-  //  other.size=0;
-  //  other.TheObjects=0;
+  //  this->size= other.size;
+  //  this->TheObjects = other.TheObjects;
+  //  other.size= 0;
+  //  other.TheObjects = 0;
   //}
   List(const ListLight<Object>& other)
   { this->initConstructorCallOnly();
     this->AssignLight(other);
   }
-  bool CheckConsistency()const
+  bool CheckConsistency() const
   { if (this->flagDeallocated)
     { crash << "This is a programming error: use after free of List. " << crash;
     }
@@ -856,10 +856,10 @@ public:
     // to do to milev objects?  what if the assignment operator as a side effect
     // informed some other object of the object's address, then moving an object
     // without using assignment operator would cause trouble
-    // this->SetSize(this->size+1);
-    // memmove(this->TheObjects+desiredIndex+1, this->TheObjects+desiredIndex, num_to_move*sizeof(o));
-    // std::copy_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size-1, this->TheObjects+this->size);
-    // std::move_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size-1, this->TheObjects+this->size);
+    // this->SetSize(this->size + 1);
+    // memmove(this->TheObjects+desiredIndex+ 1, this->TheObjects+desiredIndex, num_to_move*sizeof(o));
+    // std::copy_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size- 1, this->TheObjects+this->size);
+    // std::move_backward(this->TheObjects+desiredIndex, this->TheObjects+this->size- 1, this->TheObjects+this->size);
     // this->TheObjects[desiredIndex] = o;
     // ok whatever if this program was supposed to be fast it would be optimizable
     this->ShiftUpExpandOnTop(desiredIndex);
@@ -948,18 +948,18 @@ public:
   void SwapTwoIndices(int index1, int index2);
   void CycleIndices(const List<int>& cycle);
   void PermuteIndices(const List<List<int> >& cycles);
-  std::string ToString(FormatExpressions* theFormat)const;
-  std::string ToString()const;
-  std::string ToStringCommaDelimited(FormatExpressions* theFormat)const;
-  std::string ToStringCommaDelimited()const;
-  void ToString(std::string& output, FormatExpressions* theFormat = 0)const
+  std::string ToString(FormatExpressions* theFormat) const;
+  std::string ToString() const;
+  std::string ToStringCommaDelimited(FormatExpressions* theFormat) const;
+  std::string ToStringCommaDelimited() const;
+  void ToString(std::string& output, FormatExpressions* theFormat = 0) const
   { output = this->ToString(theFormat);
   }
   int GetIndex(const Object& o) const;
-  bool Contains(const Object& o)const
-  { return this->GetIndex(o) != -1;
+  bool Contains(const Object& o) const
+  { return this->GetIndex(o) != - 1;
   }
-  bool ContainsAtLeastOneCopyOfEach(const List<Object>& other)const
+  bool ContainsAtLeastOneCopyOfEach(const List<Object>& other) const
   { for (int i = 0; i < other.size; i ++)
       if (!this->Contains(other[i]))
         return false;
@@ -972,7 +972,7 @@ public:
   // The objective is fast, stable insertion sorting of partially ordered data.
   // The data that has x <= y and y <= x is called a bin.  The methods
   // BSIndexFirstGreaterThan and BSIndexFirstNotLessThan find the edges of the bin.
-  // The insertion methods return the index at which the object was inserted, or -1
+  // The insertion methods return the index at which the object was inserted, or - 1
   // BSInsert inserts the element at the end of the bin.
   // BSInsertDontDup searches the bin for the element before inserting.
   // BSInsertNextTo searches the bin for an equal element and inserts the new element
@@ -980,11 +980,11 @@ public:
   // BSGetIndex searches the bin for the element and returns its index
   // BSContains searches the bin for the element and returns whether it was found.
   int BSIndexFirstNotLessThan(const Object& o) const
-  { if(this->size == 0)
+  { if (this->size == 0)
       return 0;
     int start = 0;
     int end = this->size;
-    while(true)
+    while (true)
     { int halflength = (end - start) / 2;
       if (halflength == 0)
       { if ((start == this->size )|| (o > this->TheObjects[start]))
@@ -1005,10 +1005,10 @@ public:
       return 0;
     int start = 0;
     int end = this->size;
-    while(true)
+    while (true)
     { int halflength = (end - start) / 2;
       if (halflength == 0)
-      { if(!(this->TheObjects[start] > o))
+      { if (!(this->TheObjects[start] > o))
           return end;
         else
           return start;
@@ -1030,7 +1030,7 @@ public:
     for (int i = n - 1; i > - 1; i--)
     { if (this->TheObjects[i] == o)
         return i;
-      if(o > this->TheObjects[i])
+      if (o > this->TheObjects[i])
         return - 1;
     }
     return - 1;
@@ -1067,18 +1067,18 @@ public:
   { int n = BSIndexFirstNotLessThan(o);
     int existing_index = - 1;
     int bin_end_index = - 1;
-    for(int i = n; i < this->size; i ++)
-    { if(this->TheObjects[i] == o)
+    for (int i = n; i < this->size; i ++)
+    { if (this->TheObjects[i] == o)
         existing_index = i;
-      if(this->TheObjects[i] > o)
+      if (this->TheObjects[i] > o)
       { bin_end_index = i;
         break;
       }
     }
     int outdex;
-    if(existing_index != - 1)
+    if (existing_index != - 1)
       outdex = existing_index + 1;
-    else if(bin_end_index != - 1)
+    else if (bin_end_index != - 1)
       outdex = bin_end_index;
     else
       outdex = this->size;
@@ -1090,13 +1090,13 @@ public:
   { std::rotate(this->TheObjects, this->TheObjects + r, this->TheObjects + (this->size - 1));
   }
   bool ReadFromFile(std::fstream& input, int UpperLimitForDebugPurposes = - 1);
-  void WriteToFile(std::fstream& output, int UpperLimitForDebugPurposes = - 1)const;
-//  inline bool Contains(Object& o){return this->Contains(o)!=-1; };
-  int SizeWithoutObjects()const;
-  inline Object* LastObject()const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  void WriteToFile(std::fstream& output, int UpperLimitForDebugPurposes = - 1) const;
+//  inline bool Contains(Object& o){return this->Contains(o)!= - 1; };
+  int SizeWithoutObjects() const;
+  inline Object* LastObject() const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void ReleaseMemory();
 
-  unsigned int HashFunction()const
+  unsigned int HashFunction() const
   { int numCycles = MathRoutines::Minimum(SomeRandomPrimesSize, this->size);
     int result = 0;
     for (int i = 0; i < numCycles; i ++)
@@ -1106,17 +1106,17 @@ public:
   static inline unsigned int HashFunction(const List<Object>& input)
   { return input.HashFunction();
   }
-  void IntersectWith(const List<Object>& other, List<Object>& output)const;
+  void IntersectWith(const List<Object>& other, List<Object>& output) const;
   //void operator=(List<Object>&& right)
-  //{ if (this==&right)
+  //{ if (this == &right)
   //    return;
   //  this->ReleaseMemory();
-  //  this->TheObjects=right.TheObjects;
+  //  this->TheObjects =right.TheObjects;
   //  this->size=right.size;
   //  this->ActualSize=right.ActualSize;
-  //  right.TheObjects=0;
-  //  right.size=0;
-  //  right.ActualSize=0;
+  //  right.TheObjects = 0;
+  //  right.size= 0;
+  //  right.ActualSize= 0;
   //}
   void operator=(const List<Object>& right)
   { if (this == &right)
@@ -1134,7 +1134,7 @@ public:
   static void swap(List<Object>& l1, List<Object>& l2);
   void ReverseOrderElements();
   void ReverseRange(int rangeBegin, int rangeEnd);
-  bool IsEqualTo(const List<Object>& Other)const
+  bool IsEqualTo(const List<Object>& Other) const
   { if (this->size != Other.size)
       return false;
     for (int i = 0; i < Other.size; i ++)
@@ -1142,29 +1142,29 @@ public:
         return false;
     return true;
   }
-  Object& operator[](int i)const
+  Object& operator[](int i) const
   { this->CheckConsistency();
     if (((int) i >= (int) this->size) || ((int) i < 0))
       crash << "Programming error: attempting to access the entry of index " << i << " in an array of " << this->size << " elements. " << crash;
     return this->TheObjects[i];
   }
-  inline bool operator!=(const List<Object>& other)const
+  inline bool operator!=(const List<Object>& other) const
   { return !this->IsEqualTo(other);
   }
   bool operator==(const std::string& other)
-  { //std::cout << "CALLING COMPARISON OPERATOR, this->size= " << this->size << " a= " << a << std::endl;
+  { //std::cout << "CALLING COMPARISON OPERATOR, this->size= " << this->size << " a = " << a << std::endl;
     if (((unsigned) this->size) != other.size())
       return false;
-    for (int i = 0; i < this->size; i++)
+    for (int i = 0; i < this->size; i ++)
       if (!(this->TheObjects[i] == other[i]))
         return false;
     return true;
   }
-  inline bool operator==(const List<Object>& other)const
+  inline bool operator==(const List<Object>& other) const
   { return this->IsEqualTo(other);
   }
-  bool operator>(const List<Object>& other)const;
-  bool operator<(const List<Object>& other)const;
+  bool operator>(const List<Object>& other) const;
+  bool operator<(const List<Object>& other) const;
   void ShiftUpExpandOnTop(int StartingIndex);
   void Slice(int StartingIndex, int SizeOfSlice);
   List(int StartingSize);
@@ -1175,7 +1175,7 @@ public:
     for (int i = 0; i < this->size; i ++)
       this->TheObjects[i] = input[i];
   }
-  List();//<-newly constructed lists start with size=0; This default is used in critical places in HashedList and other classes, do not change!
+  List();//<-newly constructed lists start with size= 0; This default is used in critical places in HashedList and other classes, do not change!
   ~List();
   void AssignListList(const List<List<Object> >& input)
   { int count = 0;
@@ -1206,14 +1206,14 @@ public:
   { return SomeRandomPrimes[0] * hashFunction1(input.Object1) +
     SomeRandomPrimes[1] * hashFunction2(input.Object2);
   }
-  unsigned int HashFunction()const
+  unsigned int HashFunction() const
   { return Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>::HashFunction(*this);
   }
   void operator=(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other)
   { this->Object1 = other.Object1;
     this->Object2 = other.Object2;
   }
-  bool operator==(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other)const
+  bool operator==(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other) const
   { return this->Object1 == other.Object1 && this->Object2 == other.Object2;
   }
   bool operator>(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other)
@@ -1250,7 +1250,7 @@ public:
     result.append(Object::GetXMLClassName());
     return result;
   }
-  inline unsigned int GetHash(const Object& input)const
+  inline unsigned int GetHash(const Object& input) const
   { unsigned int result = hashFunction(input);
     result %= this->TheHashedArrays.size; // how did TheHashedArrays.size == 0?
     if (result < 0)
@@ -1310,10 +1310,10 @@ public:
       return;
     this->RemoveIndexSwapWithLast(theIndex);
   }
-  const List<int>& GetHashArray(int hashIndex)const
+  const List<int>& GetHashArray(int hashIndex) const
   { return this->TheHashedArrays[hashIndex];
   }
-  void GrandMasterConsistencyCheck()const
+  void GrandMasterConsistencyCheck() const
   { for (int i = 0; i < this->TheHashedArrays.size; i ++)
     { List<int>& current = this->TheHashedArrays[i];
       for (int j = 0; j < current.size; j ++)
@@ -1358,7 +1358,7 @@ public:
     return true;
   }
   bool AddOnTopNoRepetitionMustBeNewCrashIfNot(const Object& o)
-  { if (this->GetIndex(o) != -1)
+  { if (this->GetIndex(o) != - 1)
     { std::stringstream crashStream;
       crashStream << "This is a programming error: the programmer requested to add the object " << o << " without repetition "
       << " to the hashed list with a function that does not allow repetition, but the hashed list already contains the object. ";
@@ -1425,10 +1425,10 @@ public:
     this->TheHashedArrays[i1Hash].AddOnTop(i2);
     this->TheHashedArrays[i2Hash].AddOnTop(i1);
   }
-  inline bool Contains(const Object& o)const
+  inline bool Contains(const Object& o) const
   { return this->GetIndex(o) != - 1;
   }
-  inline bool Contains(const List<Object>& theList)const
+  inline bool Contains(const List<Object>& theList) const
   { for (int i = 0; i < theList.size; i ++)
       if (this->GetIndex(theList[i]) == - 1)
         return false;
@@ -1441,7 +1441,7 @@ public:
       if (j >= this->size)
         crash << "This is a programming error: corrupt hash table: at hashindex= " << hashIndex << " I get instructed to look up index " << j
         << " but I have only " << this->size << " elements. " << crash;
-      if((*this)[j] == o)
+      if ((*this)[j] == o)
         return j;
     }
     return - 1;
@@ -1467,10 +1467,10 @@ public:
       this->PopLastObject();
   }
 
-  inline bool IsSparseRelativeToExpectedSize(int expectedSize)const
+  inline bool IsSparseRelativeToExpectedSize(int expectedSize) const
   { return expectedSize * 3 < this->TheHashedArrays.size;
   }
-  inline bool IsSparse()const
+  inline bool IsSparse() const
   { return this->IsSparseRelativeToExpectedSize(this->size);
   }
   void SetExpectedSize(int expectedSize)
@@ -1523,10 +1523,10 @@ public:
   HashTemplate()
   { this->initHashesToOne();
   }
-  std::string ToString(FormatExpressions* theFormat)const
+  std::string ToString(FormatExpressions* theFormat) const
   { return this->List<Object>::ToString(theFormat);
   }
-  std::string ToString()const
+  std::string ToString() const
   { return this->List<Object>::ToString();
   }
   void operator=(const HashedList<Object, hashFunction>& From)
@@ -1544,10 +1544,10 @@ public:
     else
       this->TheHashedArrays = From.TheHashedArrays;
   }
-  const Object& operator[](int i)const
+  const Object& operator[](int i) const
   { return TemplateList::operator[](i);
   }
-  Object& GetElement(int theObjectIndex)const
+  Object& GetElement(int theObjectIndex) const
   { return TemplateList::operator[](theObjectIndex);
   }
   void operator=(const TemplateList& other)
@@ -1591,13 +1591,13 @@ public:
   inline void AddOnTop(const List<Object>& theList)
   { this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTop(theList);
   }
-  inline bool Contains(const Object& o)const
+  inline bool Contains(const Object& o) const
   { return this->::HashTemplate<Object, List<Object>, hashFunction>::Contains(o);
   }
-  inline bool Contains(const List<Object>& theList)const
+  inline bool Contains(const List<Object>& theList) const
   { return this->::HashTemplate<Object, List<Object>, hashFunction>::Contains(theList);
   }
-  Object& GetElement(int theObjectIndex)const
+  Object& GetElement(int theObjectIndex) const
   { return this->::HashTemplate<Object, List<Object>, hashFunction>::GetElement(theObjectIndex);
   }
   void SetObjectAtIndex(int index, const Object& theObject)
@@ -1661,7 +1661,7 @@ class FileInformation
   public:
   std::string FileName;
   std::string FileDescription;
-  std::string ToString()const
+  std::string ToString() const
   { std::stringstream out;
     out << "file: " << this->FileName << ", description: " << this->FileDescription;
     return out.str();
@@ -1669,7 +1669,7 @@ class FileInformation
   bool operator>(const FileInformation& other)
   { return this->FileName>other.FileName;
   }
-  bool operator==(const FileInformation& other)const
+  bool operator==(const FileInformation& other) const
   { return this->FileName == other.FileName;
   }
   static unsigned int HashFunction(const FileInformation& input)
@@ -1779,20 +1779,20 @@ template<class Object>
 void List<Object>::CycleIndices(const List<int>& cycle)
 { if (cycle.size < 2)
     return;
-  for (int i = 0; i < cycle.size; i++)
+  for (int i = 0; i < cycle.size; i ++)
     if ((cycle[i] >= this->size) || (cycle[i] < 0))
       crash << "Programming error: request to cycle indices " << cycle << " in list of " << this->size << " elements." << crash;
   // ironically, it's easier to program the cycles to go backwards XD
   Object tail;
   tail = this->TheObjects[cycle[cycle.size - 1]];
-  for(int i = cycle.size - 1; i != 0; i --)
+  for (int i = cycle.size - 1; i != 0; i --)
     this->TheObjects[cycle[i]] = this->TheObjects[cycle[i - 1]];
   this->TheObjects[cycle[0]] = tail;
 }
 
 template<class Object>
 void List<Object>::PermuteIndices(const List<List<int> >& cycles)
-{ for(int i = 0; i < cycles.size; i ++)
+{ for (int i = 0; i < cycles.size; i ++)
     this->CycleIndices(cycles[i]);
 }
 
@@ -1820,23 +1820,23 @@ void List<Object>::swap(List<Object>& l1, List<Object>& l2)
   }
   smallL->SetSize(bigL->size);
   Object tempO;
-  for(int i = 0; i < smallSize; i ++)
+  for (int i = 0; i < smallSize; i ++)
   { tempO = smallL->TheObjects[i];
     smallL->TheObjects[i] = bigL->TheObjects[i];
     bigL->TheObjects[i] = tempO;
   }
-  for(int i = smallSize; i < bigL->size; i ++)
+  for (int i = smallSize; i < bigL->size; i ++)
     smallL->TheObjects[i] = bigL->TheObjects[i];
   bigL->size = smallSize;
 }
 
 template <class Object>
-int List<Object>::SizeWithoutObjects()const
+int List<Object>::SizeWithoutObjects() const
 { return sizeof(this->ActualSize) + sizeof(this->size) + sizeof(this->TheObjects);
 }
 
 template <class Object>
-bool List<Object>::operator>(const List<Object>& other)const
+bool List<Object>::operator>(const List<Object>& other) const
 { if (this->size > other.size)
     return true;
   if (other.size > this->size)
@@ -1851,7 +1851,7 @@ bool List<Object>::operator>(const List<Object>& other)const
 }
 
 template <class Object>
-bool List<Object>::operator<(const List<Object>& other)const
+bool List<Object>::operator<(const List<Object>& other) const
 { if (this->size > other.size)
     return false;
   if (other.size > this->size)
@@ -1901,7 +1901,7 @@ bool List<Object>::AddOnTopNoRepetition(const Object& o)
 }
 
 template <class Object>
-inline Object* List<Object>::LastObject()const
+inline Object* List<Object>::LastObject() const
 { // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size <= 0)
     crash << "This is a programming error: trying to fetch the last object of an array with " << this->size << " elements. " << crash;
@@ -1951,7 +1951,7 @@ void List<Object>::SetSize(int theSize)
 }
 
 template <class Object>
-std::string List<Object>::ToString()const
+std::string List<Object>::ToString() const
 { std::stringstream out;
   for (int i = 0; i < this->size; i ++)
     out << this->TheObjects[i].ToString() << "\n";
@@ -1959,9 +1959,9 @@ std::string List<Object>::ToString()const
 }
 
 template <class Object>
-std::string List<Object>::ToStringCommaDelimited()const
+std::string List<Object>::ToStringCommaDelimited() const
 { std::stringstream out;
-  for (int i = 0; i < this->size; i++)
+  for (int i = 0; i < this->size; i ++)
   { out << this->TheObjects[i]; // was this calling ToString() for a reason other than not having decided to implement operator<< on all objects?
     if (i != this->size - 1)
       out << ", ";
@@ -1970,7 +1970,7 @@ std::string List<Object>::ToStringCommaDelimited()const
 }
 
 template <class Object>
-std::string List<Object>::ToString(FormatExpressions* theFormat)const
+std::string List<Object>::ToString(FormatExpressions* theFormat) const
 { std::stringstream out;
   for (int i = 0; i < this->size; i ++)
     out << this->TheObjects[i].ToString(theFormat) << "\n";
@@ -1978,9 +1978,9 @@ std::string List<Object>::ToString(FormatExpressions* theFormat)const
 }
 
 template <class Object>
-std::string List<Object>::ToStringCommaDelimited(FormatExpressions* theFormat)const
+std::string List<Object>::ToStringCommaDelimited(FormatExpressions* theFormat) const
 { std::stringstream out;
-  for (int i = 0; i < this->size; i++)
+  for (int i = 0; i < this->size; i ++)
   { out << this->TheObjects[i].ToString(theFormat);
     if (i != this->size - 1)
       out << ", ";
@@ -2076,7 +2076,7 @@ inline void StackTraceOut()
   std::cerr << "Obtained " << size << " stack frames.\n";
 //  backtrace_symbols_fd(array, size, STDERR_FILENO); // #STDERR_FILENO undeclared ???
 
-  for (i = 0; i < size; i++)
+  for (i = 0; i < size; i ++)
   {// stOutput << strings[i] << '\n';
     int symstart = 0;
     for (int j = 0; strings[i][j + 1] != 0; j ++)
@@ -2087,13 +2087,13 @@ inline void StackTraceOut()
     // that code up there never fails
     int symend = symstart;
     for (int j = symend; strings[i][j + 1] != 0; j ++)
-      if(strings[i][j] == ')' && strings[i][j + 1] == ' ')
+      if (strings[i][j] == ')' && strings[i][j + 1] == ' ')
       { symend = j;
         break;
       }
     int offsetstart = 0;
-    for(int j = symend; j > 0; j --)
-      if(strings[i][j] == '+')
+    for (int j = symend; j > 0; j --)
+      if (strings[i][j] == '+')
       { offsetstart = j;
         break;
       }
@@ -2121,7 +2121,7 @@ void List<Object>::ExpandArrayOnTop(int increase)
   { newArray = new Object[this->ActualSize + increase];
   }
   catch(std::bad_alloc& theBA)
-  { crash << "Memory allocation failure: failed to allocate " << this->ActualSize+increase << " objects. " << crash;
+  { crash << "Memory allocation failure: failed to allocate " << this->ActualSize +increase << " objects. " << crash;
   }
 #ifdef AllocationLimitsSafeguard
   ParallelComputing::GlobalPointerCounter += this->ActualSize + increase;
@@ -2142,11 +2142,11 @@ void List<Object>::ExpandArrayOnTop(int increase)
 #endif
   this->ActualSize += increase;
 
-// This doesn't actually work too well; valgrind --tool=massif is better
+// This doesn't actually work too well; valgrind --tool =massif is better
 #ifdef AllocationStatistics
   static unsigned int total_allocations_unreliable_counter;
   total_allocations_unreliable_counter++;
-  if((total_allocations_unreliable_counter & 0xFFFFFFF) == 0)
+  if ((total_allocations_unreliable_counter & 0xFFFFFFF) == 0)
   { stOutput << "0x1000,0000th allocation, stack trace is ";
     StackTraceOut();
   }
@@ -2162,7 +2162,7 @@ void List<Object>::ExpandArrayOnTop(int increase)
 template <class Object>
 void List<Object>::ReverseOrderElements()
 { int tempI = this->size / 2;
-  for (int i = 0; i < tempI; i++)
+  for (int i = 0; i < tempI; i ++)
     this->SwapTwoIndices(i, this->size - i - 1);
 }
 

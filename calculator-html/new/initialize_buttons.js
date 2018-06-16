@@ -213,7 +213,7 @@ function initializeAccordionButtons() {
   if (localStorage !== undefined) {
     if (localStorage.panels !== undefined) { 
       panelsCollapseStatus = JSON.parse(localStorage.panels)
-      var theProps=Object.getOwnPropertyNames(panelsCollapseStatus);
+      var theProps =Object.getOwnPropertyNames(panelsCollapseStatus);
       for (var i = 0; i < theProps.length; i ++) { 
         var current = panelsCollapseStatus[theProps[i]];
         if (current.isCollapsed) {
@@ -235,7 +235,7 @@ function initializeAccordionButtons() {
         this.nextElementSibling.style.display = "inline-block";
         //await sleep(400);
       }
-      //this.nextElementSibling.style.transition="0.6s linear";
+      //this.nextElementSibling.style.transition ="0.6s linear";
       this.classList.toggle("active");
       this.nextElementSibling.classList.toggle("show");
     }
@@ -373,7 +373,7 @@ InputPanelData.prototype.submitOrPreviewAnswersCallback = function (input, outpu
 InputPanelData.prototype.submitOrPreviewAnswers = function(requestType) {
   clearTimeout(this.timerForPreviewAnswers);
   var studentAnswer = document.getElementById(this.idPureLatex).value;
-  var theURL = `${pathnames.calculatorAPI}?request=${requestType}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
+  var theURL = `${pathnames.calculatorAPI}?request =${requestType}&calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}`;  
   submitGET({
     url: theURL,
     progress: "spanProgressReportGeneral",

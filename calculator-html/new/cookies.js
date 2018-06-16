@@ -19,7 +19,7 @@ function addCookie(theName, theValue, exdays, secure){
   if (theValue === false){
     theValue = "false";
   }
-  c_value = escape(theValue) + ((exdays === null) ? "" : "; expires=" + exdate.toUTCString());
+  c_value = escape(theValue) + ((exdays === null) ? "" : "; expires =" + exdate.toUTCString());
   if (secure){
     c_value += "; Secure";
   }

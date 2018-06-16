@@ -324,7 +324,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabaseJSON
   //<< "<hr>";
   theGlobalVariables.userDefault.problemWeights = this->ToJSONProblemWeights(this->currentUseR.theProblemData);
   theGlobalVariables.userDefault.deadlines = this->ToJSONDeadlines(this->currentUseR.theProblemData);
-  //theGlobalVariables.userDefault=this->currentUseR;
+  //theGlobalVariables.userDefault = this->currentUseR;
   //stOutput << "<hr>Resulting string: "
   //<< theGlobalVariables.userDefault.problemInfoString.value
   //<< "<hr>";
@@ -359,7 +359,7 @@ bool CalculatorHTML::MergeProblemInfoInDatabaseJSON
   //<< "<hr>";
   theGlobalVariables.userDefault.problemWeights = this->ToJSONProblemWeights(this->currentUseR.theProblemData);
   theGlobalVariables.userDefault.deadlines = this->ToJSONDeadlines(this->currentUseR.theProblemData);
-  //theGlobalVariables.userDefault=this->currentUseR;
+  //theGlobalVariables.userDefault = this->currentUseR;
   //stOutput << "<hr>Resulting string: "
   //<< theGlobalVariables.userDefault.problemInfoString.value
   //<< "<hr>";
@@ -512,7 +512,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(bool needToLo
       out << "<hr> <b>Comments, admin view only.</b><br> " << this->comments.str();
     return out.str();
   }
-  //out << "DEBUG: flagMathQuillWithMatrices=" << this->flagMathQuillWithMatrices << "<br>";
+  //out << "DEBUG: flagMathQuillWithMatrices =" << this->flagMathQuillWithMatrices << "<br>";
   if (this->flagDoPrependCalculatorNavigationBar)
   { out << "<calculatorNavigation>"
     << theGlobalVariables.ToStringNavigation()
@@ -566,7 +566,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
       out << "<hr> <b>Comments, admin view only.</b><br> " << this->comments.str();
     return out.str();
   }
-  //out << "DEBUG: flagMathQuillWithMatrices=" << this->flagMathQuillWithMatrices << "<br>";
+  //out << "DEBUG: flagMathQuillWithMatrices =" << this->flagMathQuillWithMatrices << "<br>";
   if (this->flagDoPrependCalculatorNavigationBar)
   { out << "<calculatorNavigation>"
     << theGlobalVariables.ToStringNavigation()
@@ -623,7 +623,7 @@ void CalculatorHTML::LoadCurrentProblemItem(bool needToLoadDatabaseMayIgnore, co
       << "</problemNavigation>";
       this->comments << commentsStream.str();
       this->comments << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request=selectCourse\">Go to course list page.</a>";
+      << "?request =selectCourse\">Go to course list page.</a>";
     }
   }
   this->theProblemData.CheckConsistency();
@@ -657,7 +657,7 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   } else if (theGlobalVariables.UserGuestMode())
   { requestTypeSubmit = "submitExerciseNoLogin";
     requestTypePreview = "submitExercisePreviewNoLogin";
-    submitRandomSeed=true;
+    submitRandomSeed= true;
   } else
   { requestTypeSubmit = "submitExercise";
     requestTypePreview = "submitExercisePreview";
@@ -674,46 +674,46 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   out
   << "<script type=\"text/javascript\"> \n"
   << "var JavascriptInsertionAlreadyCalled;\n"
-  << "JavascriptInsertionAlreadyCalled=false;\n"
+  << "JavascriptInsertionAlreadyCalled= false;\n"
   << "var numInsertedJavascriptChildren;\n"
-  << "var numInsertedJavascriptChildren=0;\n"
+  << "var numInsertedJavascriptChildren = 0;\n"
   << "var timerForPreviewAnswers;\n"
   << "function previewAnswers(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  timerForPreviewAnswers=setTimeout(function(){\n"
-  << "    params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview, "true", "", submitRandomSeed) << "\";\n"
+  << "  timerForPreviewAnswers =setTimeout(function(){\n"
+  << "    params =\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview, "true", "", submitRandomSeed) << "\";\n"
   << "    submitOrPreviewAnswers(idAnswer, idVerification, params,\"" << requestTypePreview
   << "\");\n"
   << "  }, 4000);"
   << "}\n"
   << "function previewAnswersNoTimeOut(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview, "true", "", submitRandomSeed) << "\";\n"
+  << "  params =\"" << this->ToStringCalculatorArgumentsForProblem(requestTypePreview, "true", "", submitRandomSeed) << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params,\""
   << requestTypePreview << "\");\n"
   << "}\n"
   << "function submitAnswers(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestTypeSubmit, "true", "", submitRandomSeed) << "\";\n"
+  << "  params =\"" << this->ToStringCalculatorArgumentsForProblem(requestTypeSubmit, "true", "", submitRandomSeed) << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params, \""
   << requestTypeSubmit << "\");\n"
   << "}\n"
   << "function giveUp(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestGiveUp, "true", "", submitRandomSeed) << "\";\n"
+  << "  params =\"" << this->ToStringCalculatorArgumentsForProblem(requestGiveUp, "true", "", submitRandomSeed) << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params, \""
   << requestGiveUp << "\");\n"
   << "}\n"
   << "function showSolution(idAnswer, idVerification){\n"
   << "  clearTimeout(timerForPreviewAnswers);\n"
-  << "  params=\"" << this->ToStringCalculatorArgumentsForProblem(requestSolution, "true", "", submitRandomSeed) << "\";\n"
+  << "  params =\"" << this->ToStringCalculatorArgumentsForProblem(requestSolution, "true", "", submitRandomSeed) << "\";\n"
   << "  submitOrPreviewAnswers(idAnswer, idVerification, params, \""
   << requestSolution << "\");\n"
   << "}\n"
   << "function submitOrPreviewAnswers(idAnswer, idVerification, inputParams, requestType){\n";
   out << "  clearTimeout(timerForPreviewAnswers);\n"
   << "  spanVerification = document.getElementById(idVerification);\n"
-  << "  if (spanVerification==null){\n"
+  << "  if (spanVerification ==null){\n"
   << "    spanVerification = document.createElement('span');\n"
   << "    document.body.appendChild(spanVerification);\n"
   << "    spanVerification.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idVerification + \"MISSING! </span>\";\n"
@@ -734,7 +734,7 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n";
   //Old code, submits all answers. May need to be used as an alternative
   //submission option.
-  //  for (int i=0; i<this->theContent.size; i++)
+  //  for (int i = 0; i < this->theContent.size; i ++)
   //    if (this->IsStudentAnswer(this->theContent[i]))
   //      out << "  inputParams+=\"&calculatorAnswer" << this->theContent[i].GetKeyValue("id") << "=\"+encodeURIComponent("
   //      << "document.getElementById('" << this->theContent[i].GetKeyValue("id") << "').value);\n";
@@ -742,19 +742,19 @@ std::string CalculatorHTML::GetJavascriptSubmitAnswers()
   << "  https.onload = function() {\n"
   << "    spanVerification.innerHTML=https.responseText;\n"
   << "    var scripts = spanVerification.getElementsByTagName('script');\n"
-  << "    for (i=0; i<numInsertedJavascriptChildren; i++)\n"
+  << "    for (i = 0; i <numInsertedJavascriptChildren; i ++)\n"
   << "    { document.getElementsByTagName( 'head' )[0].removeChild(document.getElementsByTagName( 'head' )[0].lastChild);\n"
   << "      document.getElementsByTagName( 'head' )[0].appendChild(scriptChild);\n"
   << "    }\n"
-  << "    numInsertedJavascriptChildren=0;\n"
-  << "    for (i=0; i<scripts.length; i++){\n"
+  << "    numInsertedJavascriptChildren = 0;\n"
+  << "    for (i = 0; i <scripts.length; i ++){\n"
   << "      scriptChild= document.createElement('script');\n"
   << "      scriptChild.innerHTML=scripts[i].innerHTML;\n"
   << "      scriptChild.type='text/javascript';\n"
   << "      document.getElementsByTagName( 'head' )[0].appendChild(scriptChild);\n"
-  << "      numInsertedJavascriptChildren++;\n "
+  << "      numInsertedJavascriptChildren ++;\n "
   << "    }\n"
-  << "    JavascriptInsertionAlreadyCalled=true;\n"
+  << "    JavascriptInsertionAlreadyCalled= true;\n"
   << "    MathJax.Hub.Queue(['Typeset', MathJax.Hub, spanVerification]);\n"
   << "  }\n"
 //  << "  https.send(inputParams);\n"
@@ -775,7 +775,7 @@ std::string Answer::ToString()
 std::string CalculatorHTML::ToStringCalculatorProblemSourceFromFileName(const std::string& theFileName)
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringCalculatorProblemSourceFromFileName");
   std::stringstream out;
-  out //<< "<span class=\"calculatorExamProblem\">\n"
+  out //<< "<span class =\"calculatorExamProblem\">\n"
   << "Title: " << theFileName << "\n"
   << "Problem: " << theFileName << "\n"
   //<< "\n</span>"
@@ -797,7 +797,7 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin
   if (!theGlobalVariables.UserDefaultHasAdminRights())
     return "";
   std::stringstream out;
-  out << "<a class=\"linkStandardButtonLike\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
+  out << "<a class =\"linkStandardButtonLike\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request ="
   << theGlobalVariables.userCalculatorRequestType << "&";
   std::string urledProblem = HtmlRoutines::ConvertStringToURLString(this->fileName, false);
   List<std::string> randomSeedContainer;
@@ -807,17 +807,17 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin
   if (includeRandomSeed)
     out << "randomSeed=" << this->theProblemData.randomSeed << "&";
   if (setDebugFlag)
-    out << "debugFlag=true&";
+    out << "debugFlag= true&";
   else
-    out << "debugFlag=false&";
+    out << "debugFlag= false&";
   if (this->topicListFileName != "")
-    out << "topicList=" << this->topicListFileName << "&";
+    out << "topicList =" << this->topicListFileName << "&";
   if (this->courseHome != "")
     out << "courseHome=" << this->courseHome << "&";
   if (theGlobalVariables.UserStudentVieWOn())
-  { out << "studentView=true&";
+  { out << "studentView= true&";
     if (theGlobalVariables.GetWebInput("studentSection") != "")
-      out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+      out << "studentSection =" << theGlobalVariables.GetWebInput("studentSection") << "&";
   }
   out << "\">" << displayString << "</a>";
   return out.str();
@@ -830,32 +830,32 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
   << "fileName=" << urledProblem << "&";
   if (theGlobalVariables.UserStudentVieWOn())
-  { refStreamNoRequest << "studentView=true&";
+  { refStreamNoRequest << "studentView= true&";
     if (theGlobalVariables.GetWebInput("studentSection")!="")
-      refStreamNoRequest << "studentSection="
+      refStreamNoRequest << "studentSection ="
       << theGlobalVariables.GetWebInput("studentSection") << "&";
   }
   if (this->topicListFileName != "")
-    refStreamNoRequest << "topicList=" << this->topicListFileName << "&";
+    refStreamNoRequest << "topicList =" << this->topicListFileName << "&";
   if (this->courseHome != "")
     refStreamNoRequest << "courseHome=" << this->courseHome << "&";
   if (theFileName == this->topicListFileName || theFileName == this->courseHome ||
       MathRoutines::StringEndsWith(theFileName, ".txt"))
   { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
+    << "?request = template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
     return out.str();
   }
   if (!theGlobalVariables.UserGuestMode())
   { refStreamExercise << theGlobalVariables.DisplayNameExecutable
-    << "?request=exercise&" << refStreamNoRequest.str();
+    << "?request =exercise&" << refStreamNoRequest.str();
     refStreamForReal << theGlobalVariables.DisplayNameExecutable
-    << "?request=scoredQuiz&" << refStreamNoRequest.str();
+    << "?request =scoredQuiz&" << refStreamNoRequest.str();
   } else
-    refStreamExercise << "?request=exerciseNoLogin&" << refStreamNoRequest.str();
+    refStreamExercise << "?request =exerciseNoLogin&" << refStreamNoRequest.str();
   if (!theGlobalVariables.UserGuestMode())
-    out << "<b><a class=\"problemLinkQuiz\" href=\"" << refStreamForReal.str() << "\">"
+    out << "<b><a class =\"problemLinkQuiz\" href=\"" << refStreamForReal.str() << "\">"
     << CalculatorHTML::stringScoredQuizzes << "</a></b>";
-  out << "<a class=\"problemLinkPractice\" href=\"" << refStreamExercise.str() << "\">"
+  out << "<a class =\"problemLinkPractice\" href=\"" << refStreamExercise.str() << "\">"
   << CalculatorHTML::stringPracticE << "</a>";
   //out << "DEBUG: topiclist: " << this->topicListFileName << " courseHome: " << this->courseHome
   //<< " filename: " << theFileName;
@@ -1011,7 +1011,7 @@ std::string SyntacticElementHTML::ToStringDebug()
   return out.str();
 }
 
-std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey)const
+std::string SyntacticElementHTML::GetKeyValue(const std::string& theKey) const
 { MacroRegisterFunctionWithName("SyntacticElementHTML::GetKeyValue");
   int theIndex = this->tagKeys.GetIndex(theKey);
   if (theIndex == - 1)
@@ -1218,7 +1218,7 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
   this->theProblemData.commandsGenerateProblemNoEnclosures = streamCommandsNoEnclosures.str();
   std::stringstream debugStream;
   debugStream << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-  << "?request=calculator&mainInput="
+  << "?request =calculator&mainInput ="
   << HtmlRoutines::ConvertStringToURLString(this->theProblemData.commandsGenerateProblemNoEnclosures, false)
   << "\"> "
   << "Input link </a>";
@@ -1410,7 +1410,7 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   { comments << "<br>Failed to interpret your file. "
     << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
-    << "?request=calculator&mainInput="
+    << "?request =calculator&mainInput ="
     << HtmlRoutines::ConvertStringToURLString( this->theProblemData.commandsGenerateProblemNoEnclosures,false)
     << "\">Input link</a><br>"
     << "The interpretation input was:<br> "
@@ -1460,7 +1460,7 @@ void CalculatorHTML::InterpretManageClass(SyntacticElementHTML& inputOutput)
     return;
 #ifdef MACRO_use_MongoDB
   std::stringstream out;
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\"> Manage accounts</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =accounts\"> Manage accounts</a>";
   inputOutput.interpretedCommand = out.str();
 #else
   inputOutput.interpretedCommand = "<b>Managing class not available (no database).</b>";
@@ -1506,11 +1506,11 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.idButtonInterpret = "buttonInterpret" + answerId;
   currentA.idButtonAnswer = "buttonAnswer" + answerId;
 
-  currentA.htmlButtonSubmit = "<button class=\"submitButton\" id=\"" + currentA.idButtonSubmit + "\"";
+  currentA.htmlButtonSubmit = "<button class =\"submitButton\" id=\"" + currentA.idButtonSubmit + "\"";
   if (!this->flagUseJSON)
     currentA.htmlButtonSubmit += " onclick = \"submitAnswers('" + answerId + "', '" + currentA.idVerificationSpan + "')\"";
   currentA.htmlButtonSubmit +=  ">Submit</button>";
-  currentA.htmlButtonInterpret = (std::string)"<button class=\"previewButton\" ";
+  currentA.htmlButtonInterpret = (std::string)"<button class =\"previewButton\" ";
   currentA.htmlButtonInterpret += " id=\"" + currentA.idButtonInterpret + "\" ";
   if (!this->flagUseJSON)
     currentA.htmlButtonInterpret += "onclick=\"previewAnswersNoTimeOut('" + answerId + "', '" + currentA.idVerificationSpan + "')" + "\"";
@@ -1518,14 +1518,14 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   if (!this->flagIsForReal)
   { if (currentA.commandsNoEnclosureAnswerOnGiveUpOnly != "")
     { currentA.htmlButtonAnswer = "<button id=\"" + currentA.idButtonAnswer +
-      "\" class=\"showAnswerButton\"";
+      "\" class =\"showAnswerButton\"";
       if (!this->flagUseJSON)
         currentA.htmlButtonAnswer += " onclick=\"giveUp('" + answerId + "', '" + currentA.idVerificationSpan + "')\"";
       currentA.htmlButtonAnswer += ">Answer</button>";
     } else
       currentA.htmlButtonAnswer = "No ``give-up'' answer available. ";
     if (currentA.flagSolutionFound)
-    { currentA.htmlButtonSolution = "<button class=\"showSolutionButton\"";
+    { currentA.htmlButtonSolution = "<button class =\"showSolutionButton\"";
       if (!this->flagUseJSON)
         currentA.htmlButtonSolution += " onclick=\"showSolution('" + answerId +
         "','" + currentA.idSpanSolution + "')\"";
@@ -1543,12 +1543,12 @@ bool CalculatorHTML::ComputeAnswerRelatedStrings(SyntacticElementHTML& inputOutp
   currentA.htmlTextareaLatexAnswer =
   inputOutput.ToStringOpenTag("textarea") + inputOutput.ToStringCloseTag("textarea");
   currentA.htmlSpanMQfield =
-  (std::string)"<div class=\"calculatorMQfieldEnclosure\">" +
+  (std::string)"<div class =\"calculatorMQfieldEnclosure\">" +
   "<span id='" + currentA.idMQfield + "'>" + "</span>" +
   "</div>";
-  //currentA.htmlMQjavascript= CalculatorHtmlFunctions::GetJavascriptMathQuillBox(currentA);
+  //currentA.htmlMQjavascript = CalculatorHtmlFunctions::GetJavascriptMathQuillBox(currentA);
   currentA.htmlSpanMQButtonPanel =
-  "<div class=\"mqButtonPanel\" id=\"" + currentA.idMQButtonPanelLocation + "\" "+  "buttons=\"" +
+  "<div class =\"mqButtonPanel\" id=\"" + currentA.idMQButtonPanelLocation + "\" "+  "buttons =\"" +
   currentA.MQpanelButtonOptions + "\"></div>";
   currentA.htmlSpanSolution = "<span id=\"" + currentA.idSpanSolution + "\"></span>";
   std::stringstream verifyStream;
@@ -1586,14 +1586,14 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     return;
   }
   std::stringstream out;
-  out << "<br><span class=\"panelAnswer\">";
+  out << "<br><span class =\"panelAnswer\">";
   out << "<table>";
   out << "<tr><td>";
   out << "<table><tr>";
   if (currentA.htmlAnswerHighlight != "")
     out << "<td><answerCalculatorHighlight>" << currentA.htmlAnswerHighlight << "</answerCalculatorHighlight></td>";
   if (currentA.flagAutoGenerateMQfield)
-    out << "<td class=\"tableCellMQfield\">" << currentA.htmlSpanMQfield  << "</td>";
+    out << "<td class =\"tableCellMQfield\">" << currentA.htmlSpanMQfield  << "</td>";
   if (currentA.flagAutoGenerateMQButtonPanel)
     out << "<td>" << currentA.htmlSpanMQButtonPanel << "</td>";
   out << "</tr></table>";
@@ -1617,8 +1617,8 @@ void CalculatorHTML::InterpretGenerateStudentAnswerButton(SyntacticElementHTML& 
     out << "</td>";
   }
   out << "<td>";
-  out << "<button class=\"accordion\">details</button>";
-//  out << "<div class=\"panel\">";
+  out << "<button class =\"accordion\">details</button>";
+//  out << "<div class =\"panel\">";
   out << currentA.htmlTextareaLatexAnswer;
 //  out << "</div>";
   out << "</td>";
@@ -1676,7 +1676,7 @@ std::string CalculatorHTML::CleanUpFileName(const std::string& inputLink)
         inputLink[firstMeaningfulChar] != '\t' &&
         inputLink[firstMeaningfulChar] != ' ')
       break;
-  unsigned lastMeaningfulChar=inputLink.size() - 1;
+  unsigned lastMeaningfulChar =inputLink.size() - 1;
   for (; lastMeaningfulChar > firstMeaningfulChar; lastMeaningfulChar --)
     if (inputLink[lastMeaningfulChar] != '\n' &&
         inputLink[lastMeaningfulChar] != '\r' &&
@@ -1703,7 +1703,7 @@ std::string CalculatorHTML::GetDeadline
   if (topicIndex == - 1)
     return problemName + " not found in topic list. ";
   TopicElement& currentTopic = this->theTopicS.GetValueCreate(problemName);
-  for(int i = currentTopic.parentTopics.size - 1; i >= 0; i --)
+  for (int i = currentTopic.parentTopics.size - 1; i >= 0; i --)
   { const std::string& containerName = this->theTopicS.theKeys[currentTopic.parentTopics[i]];
     if (this->currentUseR.theProblemData.Contains(containerName))
     { ProblemDataAdministrative& currentProb =
@@ -1750,7 +1750,7 @@ std::string CalculatorHTML::ToStringOnEDeadlineFormatted
   bool deadlineIsNear = secondsTillDeadline < 24 * 3600 && !problemAlreadySolved && !isSection;
   bool deadlineHasPassed = (secondsTillDeadline < 0);
   //if (isSection)
-  //  out << "DEBUG: isSection=true";
+  //  out << "DEBUG: isSection = true";
   if (deadlineIsInherited && !theGlobalVariables.UserStudentVieWOn())
     out << "Inherited: ";
   else if (deadlineIsInherited && isSection && returnEmptyStringIfNoDeadline)
@@ -1846,7 +1846,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   Crypto::computeSha1outputBase64(inputOutput.id);
   inputOutput.idDeadlineButton = "deadlineButton" +
   Crypto::computeSha1outputBase64(inputOutput.id);
-  deadlineStream << "<table class=\"deadlineTable\" id=\""
+  deadlineStream << "<table class =\"deadlineTable\" id=\""
   << inputOutput.idDeadlineTable
   << "\">";
   deadlineStream << "<tr><th>Grp.</th><th>Deadline</th></tr>";
@@ -1883,7 +1883,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
     (inputOutput.id, this->databaseStudentSections[i],
      problemAlreadySolved, false, isProblemGroup);
     deadlineStream
-    << "<td> <input class=\"modifyDeadlineInput\" type=\"text\" id=\""
+    << "<td> <input class =\"modifyDeadlineInput\" type=\"text\" id=\""
     << currentDeadlineId << "\" value=\"";
     if (!inputOutput.deadlinesAreInherited[i])
       deadlineStream << inputOutput.deadlinesPerSectioN[i];
@@ -1902,7 +1902,7 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   deadlineStream << "<button onclick=\"";
   deadlineStream << "submitStringAsMainInput('"
   << HtmlRoutines::ConvertStringToURLString(inputOutput.id, false)
-  << "='+encodeURIComponent('deadlines='+encodeURIComponent(";
+  << "='+encodeURIComponent('deadlines ='+encodeURIComponent(";
   bool isFirst = true;
   for (int i = 0; i < this->databaseStudentSections.size; i ++)
   { if (this->databaseStudentSections[i] == "")
@@ -1931,27 +1931,27 @@ void CalculatorHTML::ComputeDeadlineModifyButton
   deadlineStream << "</td>";
   deadlineStream << "</tr>";
   if (!isProblemGroup)
-    deadlineStream << "<tr><td colspan=\"2\">(overrides section deadline).</td></tr> ";
+    deadlineStream << "<tr><td colspan =\"2\">(overrides section deadline).</td></tr> ";
   else
-    deadlineStream << "<tr><td colspan=\"2\">(overriden by per-problem-deadline).</td></tr>";
+    deadlineStream << "<tr><td colspan =\"2\">(overriden by per-problem-deadline).</td></tr>";
   deadlineStream << "</table>";
 //  out << deadlineStream.str();
 //  out << "<table>";
 //  out << "<tr><td>";
-  out << "<button class=\"accordion\" id=\""
+  out << "<button class =\"accordion\" id=\""
   << inputOutput.idDeadlineButton
   << "\">"
   << inputOutput.displayDeadlinE << "</button>"
 //  << "</td></tr>"
   ;
-//  out << "<tr class=\"panel\"><td>";
-  out << "<span class=\"panel\">";
+//  out << "<tr class =\"panel\"><td>";
+  out << "<span class =\"panel\">";
   out << deadlineStream.str();
   out << "</span>";
 //  out << "</td></tr>";
 //  out << "</table>";
 
-//  out << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "deadline+ ");
+//  out << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(deadlineStream.str(), "deadline + ");
   inputOutput.displayDeadlinE = out.str();
 }
 
@@ -1972,7 +1972,7 @@ std::string CalculatorHTML::ToStringInterprettedCommands(Calculator &theInterpre
       continue;
     }
     for (; commandCounter > 1; commandCounter --)
-    { std::string currentString=theInterpreter.theProgramExpression[commandCounter].ToString();
+    { std::string currentString= theInterpreter.theProgramExpression[commandCounter].ToString();
       out << "<tr><td>" << currentEltString << "</td><td>"
       << currentString << "</td></tr>";
       if (currentString == "SeparatorBetweenSpans")
@@ -2046,7 +2046,7 @@ void CalculatorHTML::LogProblemGenerationObsolete(Calculator &theInterpreter)
 { if (! theGlobalVariables.UserDebugFlagOn() || !theGlobalVariables.UserDefaultHasProblemComposingRights())
     return;
   std::stringstream streamLog;
-  streamLog << "<table border='1'>";
+  streamLog << "<table border ='1'>";
   for (int i = 0; i < theInterpreter.theProgramExpression.size(); i ++)
   { streamLog << "<tr>";
     for (int j = 0; j < this->theContent.size; j ++)
@@ -2524,7 +2524,7 @@ bool CalculatorHTML::ParseHTML(std::stringstream& comments)
       } else if (this->SetTagClassFromOpenTag(secondToLast))
         secondToLast.syntacticRole = "command";
       else
-      { secondToLast.content=secondToLast.ToStringOpenTag("");
+      { secondToLast.content =secondToLast.ToStringOpenTag("");
         if (theGlobalVariables.UserDefaultHasProblemComposingRights())
           if (MathRoutines::StringBeginsWith(tagClass, "calculator"))
             if (!this->calculatorClasses.Contains(tagClass))
@@ -2884,15 +2884,15 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
     out << "var " << currentA.varAnswerId << ";\n";
     out
     << "function " << currentA.MQUpdateFunction << "(){\n"
-    << "ignoreNextMathQuillUpdateEvent=true;\n"
-    << currentA.MQobject << ".latex(" << currentA.varAnswerId << ".value+' ');\n"
+    << "ignoreNextMathQuillUpdateEvent = true;\n"
+    << currentA.MQobject << ".latex(" << currentA.varAnswerId << ".value +' ');\n"
     //<< "alert('writing: ' +" << currentA.varAnswerId  << ".value);\n"
     //<< currentA.MQobject << ".latex(" << currentA.varAnswerId << ".value);\n"
-    << "ignoreNextMathQuillUpdateEvent=false;\n"
+    << "ignoreNextMathQuillUpdateEvent = false;\n"
     << "}\n";
   }
   out
-    << "var ignoreNextMathQuillUpdateEvent=false;\n"
+    << "var ignoreNextMathQuillUpdateEvent = false;\n"
     << "function initializeMathQuill(){\n";
 
   for (int answerCounter = 0; answerCounter < this->theProblemData.theAnswers.size(); answerCounter ++)
@@ -2910,7 +2910,7 @@ std::string CalculatorHTML::GetJavascriptMathQuillBoxes()
     << "handlers: {\n"
     << "edit: function() { // useful event handlers\n"
     << "if (ignoreNextMathQuillUpdateEvent){\n"
-  //  << "  ignoreNextMathQuillUpdateEvent=false;\n"
+  //  << "  ignoreNextMathQuillUpdateEvent = false;\n"
     << "  return;\n"
     << "}\n"
     << currentA.varAnswerId << ".value = processMathQuillLatex(" << currentA.MQobject << ".latex() ); // simple API\n"
@@ -3138,7 +3138,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   return true;
 }
 
-std::string CalculatorHTML::ToStringProblemNavigation()const
+std::string CalculatorHTML::ToStringProblemNavigation() const
 { MacroRegisterFunctionWithName("CalculatorHTML::ToStringProblemNavigation");
   std::stringstream out;
   std::string exerciseRequest = "exercise";
@@ -3151,14 +3151,14 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     out << "<b>Guest mode</b>" << linkSeparator;
   if (!theGlobalVariables.flagLoggedIn)
      out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-     << "?request=login\">Log in</a> " << linkSeparator;
+     << "?request =login\">Log in</a> " << linkSeparator;
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
   std::string calcArgsNoPassExamDetails =
   theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (this->flagIsExamProblem)
   { if (theGlobalVariables.userCalculatorRequestType == "exercise")
-    { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=scoredQuiz&"
+    { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =scoredQuiz&"
       << this->ToStringCalculatorArgumentsForProblem("scoredQuiz", studentView)
       << "\">" << this->stringScoredQuizzes << "</a>" << linkSeparator;
       out << "<span style=\"color:green\"><b>" << this->stringPracticE << "</b>"
@@ -3167,7 +3167,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
     { out << "<span style=\"color:brown\"><b>"
       << this->stringScoredQuizzes << "</b></span>" << linkSeparator;
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request=exercise&"
+      << "?request =exercise&"
       << this->ToStringCalculatorArgumentsForProblem("exercise", studentView)
       << "\">" << this->stringPracticE << "</a>" << linkSeparator;
     }
@@ -3178,26 +3178,26 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       out << "<b>Problem not in course</b>" << linkSeparator;
     else
     { if (indexInParent > 0)
-      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request ="
         << theGlobalVariables.userCalculatorRequestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection") != "")
-          out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
+          out << "studentSection =" << theGlobalVariables.GetWebInput("studentSection") << "&";
+        out << "topicList =" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
         out << "courseHome=" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
         out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent - 1], false)
         << "\">&#8592;</a>" << linkSeparator;
       } else
         out << "<a disabled=\"disabled\">&#8592;</a>" << linkSeparator;
       if (indexInParent < this->problemNamesNoTopics.size - 1)
-      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request="
+      { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request ="
         << theGlobalVariables.userCalculatorRequestType;
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection") != "")
-          out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
+          out << "studentSection =" << theGlobalVariables.GetWebInput("studentSection") << "&";
+        out << "topicList =" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
         out << "courseHome=" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
         out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent + 1], false)
         << "\">&#8594;</a>" << linkSeparator;
@@ -3209,7 +3209,7 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
       (theGlobalVariables.userCalculatorRequestType == "exercise" ||
        theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin"))
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=" << theGlobalVariables.userCalculatorRequestType << "&"
+    << "?request =" << theGlobalVariables.userCalculatorRequestType << "&"
     << this->ToStringCalculatorArgumentsForProblem(exerciseRequest, studentView, "", true)
     << "\">" << this->stringProblemLink << " (#"
     << this->theProblemData.randomSeed << ")</a>" << linkBigSeparator;
@@ -3261,12 +3261,12 @@ std::string CalculatorHTML::ToStringProblemNavigation()const
 
 std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
 (const std::string& requestType, const std::string& studentView,
- const std::string& studentSection, bool includeRandomSeedIfAppropriate)const
+ const std::string& studentSection, bool includeRandomSeedIfAppropriate) const
 { MacroRegisterFunctionWithName("WebWorker::ToStringCalculatorArgumentsForProblem");
   if (!theGlobalVariables.flagLoggedIn && !theGlobalVariables.UserGuestMode())
     return "";
   std::stringstream out;
-  out << "request=" << requestType << "&";
+  out << "request =" << requestType << "&";
   List<std::string> excludedTags;
   excludedTags.AddOnTop("randomSeed");
   out << theGlobalVariables.ToStringCalcArgsNoNavigation(&excludedTags)
@@ -3276,10 +3276,10 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
   else
     out << "fileName=" << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.GetWebInput("fileName"), false)
     << "&";
-  out << "topicList=" << theGlobalVariables.GetWebInput("topicList") << "&";
+  out << "topicList =" << theGlobalVariables.GetWebInput("topicList") << "&";
   out << "studentView=" << studentView << "&";
   if (studentSection != "")
-    out << "studentSection=" << HtmlRoutines::ConvertStringToURLString(studentSection, false) << "&";
+    out << "studentSection =" << HtmlRoutines::ConvertStringToURLString(studentSection, false) << "&";
   if (includeRandomSeedIfAppropriate)
     out << "randomSeed=" << this->theProblemData.randomSeed << "&";
 //  out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->fileName) << "&";
@@ -3289,8 +3289,8 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
 std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName, bool includeCloneButton)
 { MacroRegisterFunctionWithName("CalculatorHTML::GetEditPageButton");
   std::stringstream out;
-  out << "\n<a class=\"linkStandardButtonLike\" href=\""
-  << theGlobalVariables.DisplayNameExecutable << "?request=editPage&";
+  out << "\n<a class =\"linkStandardButtonLike\" href=\""
+  << theGlobalVariables.DisplayNameExecutable << "?request =editPage&";
   std::string urledProblem = HtmlRoutines::ConvertStringToURLString(desiredFileName, false);
   std::stringstream refStreamNoRequest;
   std::string spanCloningAttemptResultID = "spanCloningAttemptResultID" + desiredFileName;
@@ -3299,14 +3299,14 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   //  out << "<br>urled link: " <<  urledProblem;
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
   << "fileName=" << urledProblem << "&"
-  << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&"
+  << "topicList =" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&"
   << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
   out << refStreamNoRequest.str() << "\">" << "Edit" << "</a>";
-  out << "<textarea class=\"currentFileNameArea\" id=\"" << clonePageAreaID << "\" cols=\""
+  out << "<textarea class =\"currentFileNameArea\" id=\"" << clonePageAreaID << "\" cols =\""
   << desiredFileName.size() + 7 << "\">" << desiredFileName << "</textarea>\n";
   if (includeCloneButton)
     out
-    << "<button class=\"buttonClone\" onclick=\""
+    << "<button class =\"buttonClone\" onclick=\""
     << "submitStringAsMainInput(document.getElementById('"
     << clonePageAreaID << "').value, '" << spanCloningAttemptResultID << "', 'clonePage'"
     << ", '"
@@ -3321,10 +3321,10 @@ std::string HtmlRoutines::GetJavascriptSubmitURLString()
 { MacroRegisterFunctionWithName("HtmlRoutines::GetJavascriptSubmitURLString");
   std::stringstream out;
   out
-  << "var GlobalSubmitStringAsMainInputCounter=0;\n"
+  << "var GlobalSubmitStringAsMainInputCounter = 0;\n"
   << "function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus)\n"
   << "{ var spanOutput = document.getElementById(idOutput);\n"
-  << "  if (spanOutput==null)\n"
+  << "  if (spanOutput ==null)\n"
   << "  { spanOutput = document.createElement('span');\n"
   << "    document.body.appendChild(spanOutput);\n"
   << "    spanOutput.innerHTML= \"<span style='color:red'> ERROR: span with id \" + idOutput + \"MISSING! </span>\";\n"
@@ -3335,14 +3335,14 @@ std::string HtmlRoutines::GetJavascriptSubmitURLString()
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", \"" << theGlobalVariables.DisplayNameExecutable << "\", true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
-  << "  if (idStatus===undefined)\n"
-  << "    idStatus=idOutput;\n"
-  << "  var statusSpan=document.getElementById(idStatus);\n "
-  << "  timeOutCounter=0;"
+  << "  if (idStatus ===undefined)\n"
+  << "    idStatus =idOutput;\n"
+  << "  var statusSpan =document.getElementById(idStatus);\n "
+  << "  timeOutCounter = 0;"
   << "  GlobalSubmitStringAsMainInputCounter++;\n"
   << "  var addressDetailsIndicatorID=\"addressDetailsID\"+GlobalSubmitStringAsMainInputCounter;\n"
   << "  var tranmissionIndicatorID=\"transmissionIndicatorID\"+GlobalSubmitStringAsMainInputCounter;\n"
-  << "  var postRequest="
+  << "  var postRequest ="
   << "'<br>POST "
   << theGlobalVariables.DisplayNameExecutable
   << "'+\n '<br>'"
@@ -3356,15 +3356,15 @@ std::string HtmlRoutines::GetJavascriptSubmitURLString()
   << "postRequest+ \"</span>\""
   << ";\n"
   << "  var buttonHandle=document.getElementById(tranmissionIndicatorID);"
-  << "  var lastRequestCounter=GlobalSubmitStringAsMainInputCounter;\n"
+  << "  var lastRequestCounter = GlobalSubmitStringAsMainInputCounter;\n"
   << "  https.onload = function()\n"
-  << "  { if (lastRequestCounter!==GlobalSubmitStringAsMainInputCounter)\n"
+  << "  { if (lastRequestCounter!== GlobalSubmitStringAsMainInputCounter)\n"
   << "    { statusSpan.innerHTML+=\"<br><span style='color:red'><b>Old request number \" + lastRequestCounter +\" just received, output suppressed.</b></span>\" \n"
   << "      return;\n"
   << "    }\n"
   << "    buttonHandle.innerHTML=\"<span style='color:green'><b>Received</b></span>\";\n"
   << "    spanOutput.innerHTML=https.responseText;\n"
-  << "    if(onLoadFunction!==undefined && onLoadFunction!==null && onLoadFunction!==0)\n"
+  << "    if (onLoadFunction!==undefined && onLoadFunction!==null && onLoadFunction!== 0)\n"
   << "      onLoadFunction(idOutput);\n"
   << "  }\n"
   << " buttonHandle.innerHTML=\"<span style='color:orange'><b>Sent</b></span>\";\n"
@@ -3385,14 +3385,14 @@ std::string HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   out << "\"use srict\";\n";
   out << HtmlRoutines::GetJavascriptSubmitURLString()
   << "function submitStringAsMainInput(theString, idOutput, requestType, onLoadFunction, idStatus){\n"
-  << "  var inputParams='';\n"
-  << "  inputParams+='request='+requestType+'&';\n"
+  << "  var inputParams ='';\n"
+  << "  inputParams+='request ='+requestType +'&';\n"
   << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << "';\n"
-//  << "  inputParams+='&debugFlag=true';\n"
+//  << "  inputParams+='&debugFlag= true';\n"
   << "  inputParams+='&fileName=" << theGlobalVariables.GetWebInput("fileName") << "';\n"
-  << "  inputParams+='&topicList=" << theGlobalVariables.GetWebInput("topicList") << "';\n"
+  << "  inputParams+='&topicList =" << theGlobalVariables.GetWebInput("topicList") << "';\n"
   << "  inputParams+='&courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "';\n"
-  << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
+  << "  inputParams+='&mainInput =' + encodeURIComponent(theString);\n"
   << "  submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);\n"
   << "}\n"
   << "</script>";
@@ -3407,7 +3407,7 @@ std::string CalculatorHTML::ToStringProblemScoreFull(const std::string& theFileN
   { out << "scores require login";
     return out.str();
   }
-  //stOutput << "<hr>CurrentUser.problemNames=" << this->currentUser.problemNames.ToStringCommaDelimited();
+  //stOutput << "<hr>CurrentUser.problemNames =" << this->currentUser.problemNames.ToStringCommaDelimited();
   #ifdef MACRO_use_MongoDB
   Rational currentWeight;
   if (this->currentUseR.theProblemData.Contains(theFileName))
@@ -3492,10 +3492,10 @@ std::string CalculatorHTML::ToStringProblemScoreShort(const std::string& theFile
   if (!showModifyButton)
     return out.str();
   std::stringstream finalOut;
-  finalOut << "<button class=\"accordionLike\" onclick=\"toggleProblemWeights();\">"
+  finalOut << "<button class =\"accordionLike\" onclick=\"toggleProblemWeights();\">"
   << out.str()
   << "</button>";
-  finalOut << "<span class=\"panelProblemWeights\"><br>"
+  finalOut << "<span class =\"panelProblemWeights\"><br>"
   << this->ToStringProblemWeightButton(theFileName)
   << "</span>";
   return finalOut.str();
@@ -3515,10 +3515,10 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
   //stOutput << "<br>this->databaseProblemWeights is: " << this->databaseProblemWeights.ToStringCommaDelimited();
   //stOutput << "<br> cleanedupLink: " << cleaneduplink;
   std::string idPoints = "points" + urledProblem;
-//  std::string idNumTries= "numTries"+urledProblem;
+//  std::string idNumTries = "numTries"+urledProblem;
   std::string idButtonModifyPoints = "modifyPoints" + urledProblem;
   std::string idPointsModOutput = "modifyPointsOutputSpan" + urledProblem;
-  out << "Pts: <textarea class=\"textareaStudentPoints\" rows=\"1\" cols=\"2\" id=\"" << idPoints << "\">";
+  out << "Pts: <textarea class =\"textareaStudentPoints\" rows =\"1\" cols =\"2\" id=\"" << idPoints << "\">";
   bool weightIsOK = false;
   std::string problemWeightAsGivenByInstructor;
   #ifdef MACRO_use_MongoDB
@@ -3532,8 +3532,8 @@ std::string CalculatorHTML::ToStringProblemWeightButton(const std::string& theFi
     out << "<span style=\"color:red\"><b>Error</b></span>";
   out << "<button id=\"" << idButtonModifyPoints << "\" "
   << "onclick=\"" << "submitStringAsMainInput('" << urledProblem
-  << "='+encodeURIComponent('weight='+  getElementById('" << idPoints << "').value)"
-//  << "  +encodeURIComponent('numTries='+getElementById('"
+  << "='+encodeURIComponent('weight ='+  getElementById('" << idPoints << "').value)"
+//  << "  +encodeURIComponent('numTries ='+getElementById('"
   << ", '"
   << idPointsModOutput << "', 'setProblemData');"
   << "\""
@@ -3600,7 +3600,7 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicEl
   if (inputElt.parentTopics.size > 1)
   { int indexImmediateParent = - 1;
     int indexCurrentElement = output.GetIndex(inputElt.id);
-    for (int i = 0; i < inputElt.parentTopics.size; i++)
+    for (int i = 0; i < inputElt.parentTopics.size; i ++)
       if (inputElt.parentTopics[i] > indexImmediateParent && inputElt.parentTopics[i] < indexCurrentElement)
         indexImmediateParent = inputElt.parentTopics[i];
     if (indexImmediateParent > - 1)
@@ -3611,7 +3611,7 @@ void TopicElement::AddTopic(TopicElement& inputElt, MapLisT<std::string, TopicEl
   //stOutput << "DEBUG: just added problem: " << inputElt.ToString() << "<br>";
   //  stOutput << "DEBUG: testing for multiple entries";
   //  bool found = false;
-  //  for (int i = 0; i < output.size(); i++)
+  //  for (int i = 0; i < output.size(); i ++)
   //  { if (inputElt.id == output.theKeys[i])
   //    { if (found)
   //        crash << "Multiple occurences of " << output.theK
@@ -3838,7 +3838,7 @@ void TopicElement::GetTopicList
         << "Here is a correctly entered example:"
         << "<br>Title: Complex multiplication"
         << "<br>Problem: DefaultProblemLocation/Complex-multiplication-z-times-w.html"
-        << "<br>SlidesSource: freecalc/modules/complex-numbers/complex-numbers-addition-multiplication-example-1"
+        << "<br>SlidesSource: freecalc/modules/complex-numbers/complex-numbers-addition-multiplication-example- 1"
         << "<br>\n";
       }
       showedAllowedDataEntries = true;
@@ -3869,9 +3869,9 @@ void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inpu
     inputOutput.interpretedCommand = out.str();
     return;
   }
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage\">Change password</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =changePasswordPage\">Change password</a>";
   if (theGlobalVariables.UserDefaultHasAdminRights())
-    out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\">Manage accounts</a>";
+    out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =accounts\">Manage accounts</a>";
   inputOutput.interpretedCommand = out.str();
   return;
 }
@@ -3999,8 +3999,8 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   out << "\n\n\n<!--Topic list automatically generated from topic list: " << this->topicListFileName
   << ".-->";
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-  << "?request=template&fileName=" << this->fileName << "&"
-  << "topicList=" << this->topicListFileName << "&" << "\">All topics</a>";
+  << "?request = template&fileName=" << this->fileName << "&"
+  << "topicList =" << this->topicListFileName << "&" << "\">All topics</a>";
   out << "<ul>";
   for (int i = 0; i < this->theTopicS.size(); i ++)
   { TopicElement& currentElt = this->theTopicS.theValues[i];
@@ -4018,8 +4018,8 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
         out << "</ul></li>";
     if (currentElt.type == currentElt.tChapter)
     { out << "<li>" << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request=template&fileName=" << this->fileName << "&"
-      << "topicList=" << this->topicListFileName << "&" << "chapter=" << currentElt.title
+      << "?request = template&fileName=" << this->fileName << "&"
+      << "topicList =" << this->topicListFileName << "&" << "chapter =" << currentElt.title
       << "\">" << currentElt.title << "</a>" << "<br>\n";
       chapterStarted = true;
       sectionStarted = false;
@@ -4098,7 +4098,7 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
   } else if (this->type == this->tSection)
   { theClass = "Section";
     if (!owner.flagTopicChapterStarted)
-      out << "\n<div class=\"bodyChapter\">";
+      out << "\n<div class =\"bodyChapter\">";
     owner.flagTopicChapterStarted = true;
     owner.flagTopicSectionStarted = true;
     owner.flagTopicSubSectionStarted = false;
@@ -4106,9 +4106,9 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
   } else if (this->type == this->tSubSection)
   { theClass = "Subsection";
     if (!owner.flagTopicChapterStarted)
-      out << "\n<div class=\"bodyChapter\">";
+      out << "\n<div class =\"bodyChapter\">";
     if (!owner.flagTopicSectionStarted)
-      out << "\n<div class=\"bodySection\">";
+      out << "\n<div class =\"bodySection\">";
     owner.flagTopicChapterStarted = true;
     owner.flagTopicSectionStarted = true;
     owner.flagTopicSubSectionStarted = true;
@@ -4116,18 +4116,18 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
   } else
   { if (!owner.flagTopicTableStarted)
     { if (!owner.flagTopicChapterStarted)
-        out << "\n<div class=\"bodyChapter\">";
+        out << "\n<div class =\"bodyChapter\">";
       if (!owner.flagTopicSectionStarted)
-        out << "\n<div class=\"bodySection\">";
+        out << "\n<div class =\"bodySection\">";
       if (!owner.flagTopicSubSectionStarted)
-        out << "\n<div class=\"bodySubsection\">";
+        out << "\n<div class =\"bodySubsection\">";
       owner.flagTopicChapterStarted = true;
       owner.flagTopicSectionStarted = true;
       owner.flagTopicSubSectionStarted = true;
       owner.flagTopicTableStarted = true;
       out
-      << "\n<div class=\"bodyItem\">"
-      << "\n<table class=\"topicList\">";
+      << "\n<div class =\"bodyItem\">"
+      << "\n<table class =\"topicList\">";
       out << "\n<colgroup><col><col><col><col><col></colgroup>";
       out << "\n<tbody>\n";
       if (!plainStyle)
@@ -4138,7 +4138,7 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
         << "<th>Deadlines</th>"
         << "</tr>";
     }
-    out << "<tr class=\"calculatorProblem\" "
+    out << "<tr class =\"calculatorProblem\" "
     << "id=\"" << this->idBase64 << "\"" << ">\n";
     out << "  <td>\n";
     out << this->displayTitle;
@@ -4155,18 +4155,18 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
     else
       out << this->displayScore;
     out << "  </td>\n";
-    out << "  <td class=\"deadlineCell\">\n" << this->displayDeadlinE << " </td>\n";
+    out << "  <td class =\"deadlineCell\">\n" << this->displayDeadlinE << " </td>\n";
     out << "</tr>\n";
     return out.str();
   }
-  out << "\n<div class=\"head" << theClass << "\" "
+  out << "\n<div class =\"head" << theClass << "\" "
   << "id=\"" << this->idBase64 << "\"" << ">";
-  out << "\n<table class=\"tableItem\">";
+  out << "\n<table class =\"tableItem\">";
   out << "<colgroup><col><col><col><col><col></colgroup>\n";
   out << "<tr>"
   << "<td>" << this->displayTitle;
   out << "<button id=\"buttonToggle" << this->idBase64
-  << "\" class=\"buttonToggleTopics\" onclick=\"toggleHeight(this, 'body" << this->idBase64 << "');\">&#9650;</button>";
+  << "\" class =\"buttonToggleTopics\" onclick=\"toggleHeight(this, 'body" << this->idBase64 << "');\">&#9650;</button>";
   if (doIncludeScoreButton)
     out << this->ToStringStudentScoreReportPanel();
   out  << "</td>";
@@ -4176,9 +4176,9 @@ std::string TopicElement::GetItemStart(CalculatorHTML& owner, bool doIncludeScor
     out << "<td>" << this->ToStringStudentScoreButton() << "</td>";
   else
     out << "<td></td>";
-  out << "<td class=\"deadlineCell\">" << this->displayDeadlinE << "</td>";
+  out << "<td class =\"deadlineCell\">" << this->displayDeadlinE << "</td>";
   out << "</tr></table></div>\n";
-  out << "<div class=\"body" << theClass << "\" id=\"body" << this->idBase64 << "\">";
+  out << "<div class =\"body" << theClass << "\" id=\"body" << this->idBase64 << "\">";
   return out.str();
 }
 
@@ -4187,19 +4187,19 @@ int TopicElement::scoreButtonCounter = 0;
 std::string TopicElement::ToStringStudentScoreReportPanel()
 { std::stringstream out;
   TopicElement::scoreButtonCounter ++;
-  out << "<span class=\"studentScoresWrapper\">";
+  out << "<span class =\"studentScoresWrapper\">";
   out << "<span id='studentScoresLoadReport"
   << scoreButtonCounter << "'></span>"
-  << "<span class='studentScoreOutputJavascriptSpan' id='studentScoresOutput"
+  << "<span class ='studentScoreOutputJavascriptSpan' id='studentScoresOutput"
   << scoreButtonCounter << "'></span>"
-  << "<span class='studentScoresContent' id='" << this->studentScoresSpanId << "'></span>"
+  << "<span class ='studentScoresContent' id='" << this->studentScoresSpanId << "'></span>"
   << "</span>";
   return out.str();
 }
 
 std::string TopicElement::ToStringStudentScoreButton()
 { std::stringstream out;
-  out << "<button class=\"studentScoresButton\" "
+  out << "<button class =\"studentScoresButton\" "
   << "onclick=\"toggleStudentScores"
   << "('studentScoresLoadReport" << TopicElement::scoreButtonCounter << "', "
   << "'scoresInCoursePage',"
@@ -4249,14 +4249,14 @@ void CalculatorHTML::InterpretLectureMaterials(SyntacticElementHTML& inputOutput
     return;
   }
   bool plainStyle = (inputOutput.GetKeyValue("topicListStyle") == "plain");
-  out << "<div class=\"headChapter\">Lecture materials "
-  << "<button id=\"buttonToggleCourseInfo\" class=\"buttonToggleTopics\" "
+  out << "<div class =\"headChapter\">Lecture materials "
+  << "<button id=\"buttonToggleCourseInfo\" class =\"buttonToggleTopics\" "
   << "onclick=\"toggleHeight(this,'tableWithLectureMaterialsFull')\">&#9650;</button>"
   << "<span style=\"font-weight:normal; font-size:small\">(&larr; click to (un)hide)</span><br>\n"
   << "</div>";
   out
-  << "\n<div class=\"bodyChapter\" id =\"tableWithLectureMaterialsFull\">"
-  << "\n<table class=\"lectureMaterials\">";
+  << "\n<div class =\"bodyChapter\" id =\"tableWithLectureMaterialsFull\">"
+  << "\n<table class =\"lectureMaterials\">";
   out << "\n<colgroup><col><col><col></colgroup>";
   out << "\n<tbody>\n";
   if (!plainStyle)
@@ -4338,7 +4338,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
     outHead << std::fixed << this->currentUseR.pointsEarned.GetDoubleValue()
     << " out of " << this->currentUseR.pointsMax.GetDoubleValue()
     << " points earned.</panelStudentScores>"
-    << "<button id=\"buttonToggleCourseInfo\" class=\"buttonToggleTopics\" onclick=\"toggleHeight(this,'bodyCourseInformation')\">&#9650;</button><br>\n";
+    << "<button id=\"buttonToggleCourseInfo\" class =\"buttonToggleTopics\" onclick=\"toggleHeight(this,'bodyCourseInformation')\">&#9650;</button><br>\n";
     outHead << "<div class =\"bodySection\" id = \"bodyCourseInformation\">"
     << "<small>Includes problems without deadline, but not problems without weights.<br> "
     << "If a problem is assigned a new weight, your % score may drop. </small><br>";
@@ -4399,13 +4399,13 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
   std::stringstream topicListJS;
   topicListJS << "<script type=\"text/javascript\">";
 
-  topicListJS << "var currentStudentSection=";
+  topicListJS << "var currentStudentSection =";
 #ifdef MACRO_use_MongoDB
   topicListJS << "'" << this->currentUseR.sectionComputed << "'" << ";\n";
 #else
   topicListJS << "''" << ";\n";
 #endif
-  topicListJS << "var studentSections=[";
+  topicListJS << "var studentSections =[";
   for (int i = 0; i < this->databaseStudentSections.size; i ++)
   { topicListJS
     << "'"
@@ -4415,7 +4415,7 @@ void CalculatorHTML::InterpretTopicList(SyntacticElementHTML& inputOutput)
       topicListJS << ", ";
   }
   topicListJS << "];\n";
-  topicListJS << "var listTopics=[";
+  topicListJS << "var listTopics =[";
   for (int i = 0; i < this->theTopicS.size(); i ++)
   { TopicElement& currentE = this->theTopicS[i];
     if (currentE.type == currentE.tTexHeader)
@@ -4538,19 +4538,19 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
   if (this->video == "" || this->video == "-" || this->video == "--")
     this->displayVideoLink = "";
   else
-    this->displayVideoLink = "<a href=\"" + this->video + "\" class=\"videoLink\" class=\"videoLink\" target=\"_blank\">Video</a>";
+    this->displayVideoLink = "<a href=\"" + this->video + "\" class =\"videoLink\" class =\"videoLink\" target =\"_blank\">Video</a>";
   if (this->videoHandwritten == "" || this->videoHandwritten == "-" || this->videoHandwritten == "--")
     this->displayVideoHandwrittenLink = "";
   else
     this->displayVideoHandwrittenLink = "<a href=\"" +
-    this->videoHandwritten + "\" class=\"videoLink\" class=\"videoLink\" target=\"_blank\">Video <b>(H)</b></a>";
+    this->videoHandwritten + "\" class =\"videoLink\" class =\"videoLink\" target =\"_blank\">Video <b>(H)</b></a>";
   if (this->slidesProjector != "")
-    this->displaySlidesLink = "<a href=\"" + this->slidesProjector + "\" class=\"slidesLink\">Slides</a>";
+    this->displaySlidesLink = "<a href=\"" + this->slidesProjector + "\" class =\"slidesLink\">Slides</a>";
   if (this->slidesPrintable != "")
-    this->displaySlidesPrintableLink = "<a href=\"" + this->slidesPrintable + "\" class=\"slidesLink\">Printable slides</a>";
+    this->displaySlidesPrintableLink = "<a href=\"" + this->slidesPrintable + "\" class =\"slidesLink\">Printable slides</a>";
   if (this->handwrittenSolution != "")
     this->displayHandwrittenSolution = "<a href=\"" +
-    this->handwrittenSolution + "\" class=\"slidesLink\">Handwritten solutions</a>";
+    this->handwrittenSolution + "\" class =\"slidesLink\">Handwritten solutions</a>";
   if (this->slidesProjector == "" && this->slidesPrintable == "")
   { std::stringstream
     slideFromSourceStreamHandouT, slideFromSourceStreamHandoutLink,
@@ -4559,11 +4559,11 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     sourceStreamSlidesCommon, sourceStreamHomeworkCommon;
 
     slideFromSourceStreamHandouT << "<a href=\"";
-    slideFromSourceStreamHandoutLink << theGlobalVariables.DisplayNameExecutable << "?request=slidesFromSource&";
-    homeworkFromSourceStreamNoAnswerKey << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=homeworkFromSource&";
+    slideFromSourceStreamHandoutLink << theGlobalVariables.DisplayNameExecutable << "?request =slidesFromSource&";
+    homeworkFromSourceStreamNoAnswerKey << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =homeworkFromSource&";
 
-    sourceStreamSlidesLink << theGlobalVariables.DisplayNameExecutable << "?request=slidesSource&";
-    sourceStreamHomework << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=homeworkSource&";
+    sourceStreamSlidesLink << theGlobalVariables.DisplayNameExecutable << "?request =slidesSource&";
+    sourceStreamHomework << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request =homeworkSource&";
 
     sourceStreamSlidesCommon << "title=" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
     sourceStreamHomeworkCommon << "title=" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
@@ -4586,7 +4586,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     { sourceHomeworkCounter ++;
       sourceStreamHomeworkCommon << "file" << sourceHomeworkCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(owner.sourcesHomeworkHeaders[i], false) << "&isSolutionFile"
-      << sourceHomeworkCounter << "=false&";
+      << sourceHomeworkCounter << "= false&";
     }
     for (int i = 0; i < this->sourceHomework.size; i ++)
     { sourceHomeworkCounter ++;
@@ -4594,9 +4594,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
       << "=" << HtmlRoutines::ConvertStringToURLString(this->sourceHomework[i], false) << "&";
       if (i < this->sourceHomeworkIsSolution.size)
       { if (this->sourceHomeworkIsSolution[i])
-          sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "=true&";
+          sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "= true&";
         else
-          sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "=false&";
+          sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "= false&";
       } else
       { stOutput << "<b>ERROR: </b>this->sourceHomeworkIsSolution is: "
         << this->sourceHomeworkIsSolution.ToStringCommaDelimited()
@@ -4605,9 +4605,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     }
     /////////
     slideFromSourceStreamHandoutLink << sourceStreamSlidesCommon.str();
-    this->slidesProjector = slideFromSourceStreamHandoutLink.str() + "layout=projector&";
+    this->slidesProjector = slideFromSourceStreamHandoutLink.str() + "layout =projector&";
     slideFromSourceStreamProjectoR << "<a href=\"" << this->slidesProjector;
-    slideFromSourceStreamHandoutLink << "layout=printable&";
+    slideFromSourceStreamHandoutLink << "layout =printable&";
 
     homeworkFromSourceStreamNoAnswerKey << sourceStreamHomeworkCommon.str();
     homeworkFromSourceStreamAnswerKey << homeworkFromSourceStreamNoAnswerKey.str();
@@ -4616,20 +4616,20 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     sourceStreamHomework << sourceStreamHomeworkCommon.str();
 
     slideFromSourceStreamHandouT << slideFromSourceStreamHandoutLink.str();
-    slideFromSourceStreamHandouT << "\" class=\"slidesLink\" target=\"_blank\">Printable slides</a>";
-    homeworkFromSourceStreamNoAnswerKey << "answerKey=true&";
-    homeworkFromSourceStreamNoAnswerKey << "\" class=\"slidesLink\" target=\"_blank\">Homework with answers</a>";
-    homeworkFromSourceStreamAnswerKey << "answerKey=false&";
-    homeworkFromSourceStreamAnswerKey << "\" class=\"slidesLink\" target=\"_blank\">Homework</a>";
+    slideFromSourceStreamHandouT << "\" class =\"slidesLink\" target =\"_blank\">Printable slides</a>";
+    homeworkFromSourceStreamNoAnswerKey << "answerKey= true&";
+    homeworkFromSourceStreamNoAnswerKey << "\" class =\"slidesLink\" target =\"_blank\">Homework with answers</a>";
+    homeworkFromSourceStreamAnswerKey << "answerKey= false&";
+    homeworkFromSourceStreamAnswerKey << "\" class =\"slidesLink\" target =\"_blank\">Homework</a>";
 
-    slideFromSourceStreamProjectoR << "\" class=\"slidesLink\" target=\"_blank\">Slides</a>";
+    slideFromSourceStreamProjectoR << "\" class =\"slidesLink\" target =\"_blank\">Slides</a>";
 
-    sourceStreamSlidesLink << "layout=printable&";
+    sourceStreamSlidesLink << "layout =printable&";
     this->linkSlidesTex = sourceStreamSlidesLink.str();
-    sourceStreamSlides << "<a href=\"" << this->linkSlidesTex << "\" class=\"slidesLink\" download=\""
+    sourceStreamSlides << "<a href=\"" << this->linkSlidesTex << "\" class =\"slidesLink\" download=\""
     << FileOperations::ConvertStringToLatexFileName(this->title) << ".tex\">.tex</a>";
 
-    sourceStreamHomework << "answerKey=true&\" class=\"slidesLink\" download=\""
+    sourceStreamHomework << "answerKey= true&\" class =\"slidesLink\" download=\""
     << FileOperations::ConvertStringToLatexFileName(this->title) << ".tex\">.tex</a>";
 
     this->slidesPrintable = slideFromSourceStreamHandoutLink.str();
@@ -4638,8 +4638,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     if (this->sourceSlides.size > 0)
       this->displaySlidesLink += slideFromSourceStreamHandouT.str() + slideFromSourceStreamProjectoR.str() + sourceStreamSlides.str();
     if (theGlobalVariables.UserDefaultHasAdminRights() && !theGlobalVariables.UserStudentVieWOn())
-      this->displaySlidesLink += "<a class=\"slidesLink\" style=\"color:gray; display:none\" href=\"" +
-      theGlobalVariables.DisplayNameExecutable + "?request=modifySlide&topicID=" + this->id + "\">Modify</a>";
+      this->displaySlidesLink += "<a class =\"slidesLink\" style=\"color:gray; display:none\" href=\"" +
+      theGlobalVariables.DisplayNameExecutable + "?request =modifySlide&topicID=" + this->id + "\">Modify</a>";
     if (this->sourceHomework.size > 0)
       this->displaySlidesLink += homeworkFromSourceStreamAnswerKey.str() + homeworkFromSourceStreamNoAnswerKey.str() + sourceStreamHomework.str();
   }
@@ -4655,10 +4655,10 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     problemSolved = false;
     returnEmptyStringIfNoDeadline = true;
   } else
-  { //std::string theRawSQLink=theGlobalVariables.DisplayNameExecutable +
-    //"?request=scoredQuiz&fileName=" + this->problem;
+  { //std::string theRawSQLink= theGlobalVariables.DisplayNameExecutable +
+    //"?request =scoredQuiz&fileName=" + this->problem;
     std::string theRawExerciseLink;
-    theRawExerciseLink = theGlobalVariables.DisplayNameExecutable + "?request=exercise&fileName=" + this->problem;
+    theRawExerciseLink = theGlobalVariables.DisplayNameExecutable + "?request =exercise&fileName=" + this->problem;
     this->displayProblemLink = owner.ToStringLinkFromFileName(this->problem);
     this->displayScore = owner.ToStringProblemScoreShort(this->problem, problemSolved);
     this->displayModifyWeight = owner.ToStringProblemWeightButton(this->problem);
@@ -4676,8 +4676,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     (*this, problemSolved, this->type == this->tSubSection || this->type == this->tSection || this->type == this->tChapter);
     //std::stringstream titleAndDeadlineStream;
     //titleAndDeadlineStream
-    //<< "<span class=\"deadlineAndTitleContainer\">"
-    //<< "<span class=\"titleContainer\">" << this->displayTitle
+    //<< "<span class =\"deadlineAndTitleContainer\">"
+    //<< "<span class =\"titleContainer\">" << this->displayTitle
     //<< "</span>"
     //<< "&nbsp;&nbsp;<span style=\"font-weight:normal; font-size: medium\">"
     //<< this->displaySlidesLink
@@ -4686,7 +4686,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     //<< "</span>"
     //
     //;
-    //this->displayTitleWithDeadline=titleAndDeadlineStream.str();
+    //this->displayTitleWithDeadline= titleAndDeadlineStream.str();
   }
   std::stringstream displayResourcesLinksStream;
   displayResourcesLinksStream

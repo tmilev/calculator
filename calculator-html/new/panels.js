@@ -19,7 +19,7 @@ function toggleHeight(currentButton, currentPanelID){
   var currentContainer = currentPanel;
   while (true){ 
     currentContainer = currentContainer.parentNode;
-    //console.log("processing "+ currentContainer.tagName+"."+ currentContainer.className);
+    //console.log("processing "+ currentContainer.tagName +"."+ currentContainer.className);
     if (!currentContainer.className.startsWith("body")){
       break;
     }

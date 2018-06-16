@@ -63,7 +63,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimirWRTLeviParabolic(Semisi
     theCF = theOwner.GetKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
 //    stOutput << "<hr>Killing product: " << leftE.ToString() << " and " << rightE.ToString() << " = " << theCF.ToString();
     theCF.Invert();
-//    theCFconverted=theCF;
+//    theCFconverted= theCF;
     this->AddMonomial(theMon, theCF);
   }
   Matrix<Rational> killingRestrictedToCartan;
@@ -129,7 +129,7 @@ void ElementUniversalEnveloping<coefficient>::LieBracketOnTheLeft(const ElementS
 
 template<class coefficient>
 bool MonomialUniversalEnveloping<coefficient>::AdjointRepresentationAction
-(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output)const
+(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output) const
 { output.MakeZero(*this->owner);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   output = input;
@@ -147,8 +147,8 @@ bool MonomialUniversalEnveloping<coefficient>::AdjointRepresentationAction
 
 template<class coefficient>
 bool ElementUniversalEnveloping<coefficient>::AdjointRepresentationAction
-(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output)const
-{ if (&input==&output)
+(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output) const
+{ if (&input == &output)
     crash << crash;
   output.MakeZero(*this->owner);
   ElementUniversalEnveloping<coefficient> summand;
@@ -181,14 +181,14 @@ void ElementUniversalEnveloping<coefficient>::Simplify(const coefficient& theRin
           reductionOccurred = true;
           break;
         }
-        if (tempMon.CommutingAnBtoBAnPlusLowerOrderAllowed(tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+1], tempMon.generatorsIndices[i+1]))
+        if (tempMon.CommutingAnBtoBAnPlusLowerOrderAllowed(tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+ 1], tempMon.generatorsIndices[i+ 1]))
         { tempMon.CommuteAnBtoBAnPlusLowerOrder(i, buffer, theRingUnit);
           buffer *= currentCoeff;
           *this += buffer;
           reductionOccurred = true;
           break;
         }
-        if (tempMon.CommutingABntoBnAPlusLowerOrderAllowed(tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+1], tempMon.generatorsIndices[i+1]))
+        if (tempMon.CommutingABntoBnAPlusLowerOrderAllowed(tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+ 1], tempMon.generatorsIndices[i+ 1]))
         { tempMon.CommuteABntoBnAPlusLowerOrder(i, buffer, theRingUnit);
           buffer *= currentCoeff;
           *this += buffer;
@@ -196,7 +196,7 @@ void ElementUniversalEnveloping<coefficient>::Simplify(const coefficient& theRin
           break;
         }
       }
-    if(!reductionOccurred)
+    if (!reductionOccurred)
       outpuT.AddMonomial(tempMon, currentCoeff);
 //    stOutput << "-<br>(" << (*this+outpuT).ToString() << ")<br>(this should simplify to zero).";
   }
@@ -215,7 +215,7 @@ bool MonomialUniversalEnveloping<coefficient>::CommutingABntoBnAPlusLowerOrderAl
     return false;
   if (leftPower < 0)
     return false;
-  if(theRightPower.IsSmallInteger(&rightPower))
+  if (theRightPower.IsSmallInteger(&rightPower))
     if (rightPower >= 0)
       return true;
   int numPosRoots = this->GetOwner().theWeyl.RootsOfBorel.size;
@@ -268,10 +268,10 @@ void MonomialUniversalEnveloping<coefficient>::CommuteAnBtoBAnPlusLowerOrder
   adAToTheIthOfB.MakeGenerator(rightGeneratorIndeX, *this->owner);
   aElt.MakeGenerator(leftGeneratorIndeX, *this->owner);
   //Formula realized:
-  //a^n b =\sum_{i=0}^\infty \binom{n}{i} (\ad a)^i (b)a^{n-i}
+  //a^n b =\sum_{i = 0}^\infty \binom{n}{i} (\ad a)^i (b)a^{n-i}
   //Proof (Dixmier): let L_x stand for left multiplication by x and R_x stand for right multiplication.
   //Then L_x and R_x commute and L_x-R_x=ad_x, i.e.
-  //(L_a)^n=(R_a+ad_a)^n.
+  //(L_a)^n =(R_a +ad_a)^n.
   do
   { for (int i = 0; i < adAToTheIthOfB.size(); i ++)
     { int theNewGeneratorIndex = adAToTheIthOfB[i].theGeneratorIndex;
@@ -298,7 +298,7 @@ void MonomialUniversalEnveloping<coefficient>::CommuteAnBtoBAnPlusLowerOrder
 //    aElt.checkConsistency();
 //    adAToTheIthOfB.checkConsistency();
 //    stOutput << adAToTheIthOfB.ToString(0);
-  } while(!adAToTheIthOfB.IsEqualToZero() && !acquiredCoefficienT.IsEqualToZero());
+  } while (!adAToTheIthOfB.IsEqualToZero() && !acquiredCoefficienT.IsEqualToZero());
 //  stOutput << "<hr>final output: " << this->ToString() << " = " << output.ToString();
 }
 
@@ -333,10 +333,10 @@ void MonomialUniversalEnveloping<coefficient>::CommuteABntoBnAPlusLowerOrder
   rightGeneratorElt.MakeGenerator(rightGeneratorIndex, *this->owner);
 //  stOutput << this->ToString() << "=";
   //Formula realized:
-  //a b^n  &=&\sum_{i=0}^\infty b^{n-i}(-\ad b)^i (a) \binom{n}{i} .
+  //a b^n  &= &\sum_{i = 0}^\infty b^{n-i}(-\ad b)^i (a) \binom{n}{i} .
   //Proof (Dixmier): let L_x stand for left multiplication by x and R_x stand for right multiplication.
   //Then L_x and R_x commute and L_x-R_x=ad_x, i.e.
-  //(L_b-ad_b)^n=R_b^n.
+  //(L_b-ad_b)^n =R_b^n.
   do
   { for (int i = 0; i < adResult.size(); i ++)
     { int theNewGeneratorIndex = adResult[i].theGeneratorIndex;
@@ -386,7 +386,7 @@ bool ElementUniversalEnveloping<coefficient>::ApplyTransposeAntiAutoOnMe()
     tempMon.owner = currentMon.owner;
     tempMon.Powers.size = 0;
     tempMon.generatorsIndices.size = 0;
-//    for (int j=0; j<currentMon.Powers.size; j++)
+//    for (int j = 0; j<currentMon.Powers.size; j ++)
     for (int j = currentMon.Powers.size - 1; j >= 0; j --)
     { int thePower;
       if (!currentMon.Powers[j].IsSmallInteger(&thePower))
@@ -398,7 +398,7 @@ bool ElementUniversalEnveloping<coefficient>::ApplyTransposeAntiAutoOnMe()
         theGenerator = - theGenerator + 2 * numPosRoots + theRank - 1;
       tempMon.MultiplyByGeneratorPowerOnTheRight(theGenerator, currentMon.Powers[j]);
 //      if (thePower%2==1)
-//        tempMon.Coefficient*=-1;
+//        tempMon.Coefficient*= - 1;
 //      ;
     }
     result.AddMonomial(tempMon, theCoeff);
@@ -410,7 +410,7 @@ bool ElementUniversalEnveloping<coefficient>::ApplyTransposeAntiAutoOnMe()
 template <class coefficient>
 bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm
 (const ElementUniversalEnveloping<coefficient>& right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement,
- const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream)const
+ const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream) const
 { output = theRingZero;
   ElementUniversalEnveloping<coefficient> TAleft;
 //  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
@@ -482,7 +482,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm
   if (logStream != 0)
     *logStream << "final UE element: " << Accum.ToString(&theGlobalVariables.theDefaultFormat.GetElement());
   this->GetOwner().UEGeneratorOrderIncludingCartanElts = oldOrder;
-//  if (logStream!=0)
+//  if (logStream!= 0)
 //    stOutput << "<hr>" << logStream->str();
   return true;
 }
@@ -493,7 +493,7 @@ void MonomialUniversalEnveloping<coefficient>::ModOutVermaRelations
 { int numPosRoots = this->GetOwner().GetNumPosRoots();
   int theDimension = this->GetOwner().GetRank();
   outputCoeff = theRingUnit;
-//  if (subHiGoesToIthElement!=0)
+//  if (subHiGoesToIthElement!= 0)
 //    stOutput << "<br>The subHiGoesToIthElement: " << subHiGoesToIthElement->ToString();
   for (int i = this->generatorsIndices.size - 1; i >= 0; i --)
   { int IndexCurrentGenerator = this->generatorsIndices[i];
@@ -538,7 +538,7 @@ void ElementUniversalEnveloping<coefficient>::Substitution(const PolynomialSubst
     tempCF.Substitution(theSub);
     output.AddMonomial(theMon, tempCF);
   }
-  *this=output;
+  *this = output;
 }
 
 template <class coefficient>
@@ -552,14 +552,14 @@ template <class coefficient>
 void MonomialUniversalEnveloping<coefficient>::SetNumVariables(int newNumVars)
 {//the below code is wrong messed up with substitutions!
   //Left in comments to remind you of what you shouldnt do.
-  // if (this->Coefficient.NumVars==newNumVars)
+  // if (this->Coefficient.NumVars ==newNumVars)
   //  return;
   for (int i = 0; i < this->generatorsIndices.size; i ++)
     this->Powers.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(newNumVars);
 }
 
 template <class coefficient>
-std::string MonomialUniversalEnveloping<coefficient>::ToString(FormatExpressions* theFormat)const
+std::string MonomialUniversalEnveloping<coefficient>::ToString(FormatExpressions* theFormat) const
 { std::stringstream out;
   std::string tempS;
   if (this->owner == 0)
@@ -596,12 +596,12 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
   Vector<Rational> tempRoot1, tempRoot2;
 //  Matrix<Rational> killingForm;
 //  killingForm.init(theDimension, theDimension);
-//  for (int i=0; i<theDimension; i++)
+//  for (int i = 0; i <theDimension; i ++)
 //  { tempRoot1.MakeEi(theDimension, i);
-//    for (int j=0; j<theDimension; j++)
-//    { killingForm.elements[i][j]=0;
+//    for (int j = 0; j<theDimension; j ++)
+//    { killingForm.elements[i][j]= 0;
 //      tempRoot2.MakeEi(theDimension, j);
-//      for (int k=0; k<theWeyl.RootSystem.size; k++)
+//      for (int k= 0; k<theWeyl.RootSystem.size; k++)
 //        killingForm.elements[i][j]+= theWeyl.RootScalarCartanRoot(tempRoot1, theWeyl.RootSystem.TheObjects[k])* theWeyl.RootScalarCartanRoot(tempRoot2, theWeyl.RootSystem.TheObjects[k]);
 //    }
 //  }
@@ -626,8 +626,8 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
 //    killingForm.ActOnVectorColumn(tempRoot1, tempRoot2);
 //    tempElt1.MakeHgenerator(tempRoot1, numVars, theOwner);
 //    tempElt2.MakeHgenerator(tempRoot2, numVars, theOwner);
-//    tempElt1*=tempElt2;
-//    *this+=tempElt1;
+//    tempElt1*= tempElt2;
+//    *this+= tempElt1;
 // Alternative implementation using a ninja formula I cooked up after looking at the printouts:
     invertedSymCartan.ActOnVectorColumn(tempRoot1, tempRoot2);
     tempElt1.MakeHgenerator(tempRoot1, theOwner);
@@ -639,28 +639,28 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
   //Vector<Rational> theSum;
   for (int i = 0; i < theWeyl.RootSystem.size; i ++)
   { //Implementation without the ninja formula:
-//    tempRat=0;
-//    Vector<Rational> & theRoot=theWeyl.RootSystem.TheObjects[i];
-//    int indexOfOpposite=theWeyl.RootSystem.GetIndex(-theRoot);
+//    tempRat = 0;
+//    Vector<Rational> & theRoot = theWeyl.RootSystem.TheObjects[i];
+//    int indexOfOpposite= theWeyl.RootSystem.GetIndex(-theRoot);
 //    Vector<Rational> & theOpposite= theWeyl.RootSystem.TheObjects[indexOfOpposite];
-//    for (int j=0; j<theWeyl.RootSystem.size; j++)
-//    { Vector<Rational> & current=theWeyl.RootSystem.TheObjects[j];
-//      if (current==theOpposite)
+//    for (int j = 0; j<theWeyl.RootSystem.size; j ++)
+//    { Vector<Rational> & current = theWeyl.RootSystem.TheObjects[j];
+//      if (current == theOpposite)
 //        tempRat+=2;
 //       else
-//       { int indexOfSum=theWeyl.RootSystem.GetIndex(current+theRoot);
-//         if (indexOfSum!=-1)
+//       { int indexOfSum= theWeyl.RootSystem.GetIndex(current+theRoot);
+//         if (indexOfSum!= - 1)
 //           tempRat+=(theOwner.ChevalleyConstants.elements[i][j]*theOwner.ChevalleyConstants.elements[indexOfOpposite][indexOfSum]);
 //       }
 //     }
 //     tempRat+=2;
-//     tempRat= 1/tempRat;
+//     tempRat = 1/tempRat;
 //     tempElt2.MakeOneGeneratorCoeffOne(theOpposite, numVars, theOwner);
 //     tempElt1.MakeOneGeneratorCoeffOne(theRoot, numVars, theOwner);
-//     tempElt2*=tempElt1;
+//     tempElt2*= tempElt1;
 //
-//     tempElt2*=tempRat;
-//     *this+=tempElt2;
+//     tempElt2*= tempRat;
+//     *this+= tempElt2;
     //The ninja formula alternative implementation:
     const Vector<Rational>& theRoot = theWeyl.RootSystem[i];
     tempElt2.MakeOneGeneratorCoeffOne(- theRoot, theOwner);
@@ -677,17 +677,17 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir(SemisimpleLieAlgebra& 
 //  stOutput << "<br>casimir: " << this->ToString(false, false, theGlobalVariables, tempPolyFormat);
 //  stOutput << "<br>check element: " << checkElement.ToString(false, false, theGlobalVariables, tempPolyFormat);
 
-//  stOutput << "<br> check element minus casimir=" << checkElement.ToString(false, false, theGlobalVariables, tempPolyFormat);
-  //this->DebugString=out.str();
+//  stOutput << "<br> check element minus casimir =" << checkElement.ToString(false, false, theGlobalVariables, tempPolyFormat);
+  //this->DebugString= out.str();
 //  Vector<Rational> tempRoot;
-//  for (int i=0; i<theDimension; i++)
+//  for (int i = 0; i <theDimension; i ++)
 //  { tempRoot.MakeEi(theDimension, i);
 //    if (!length1Explored)
 //    { length1= theWeyl.RootScalarCartanRoot(tempRoot, tempRoot);
-//      length1Explored=true;
-//      coefficient1=0;
-//      for (int j=0; j<theWeyl.RootsOfBorel.size; j++)
-//      { coefficient1+=theWeyl.RootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.TheObjects[j])*theWeyl.RootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.TheObjects[j]);
+//      length1Explored= true;
+//      coefficient1= 0;
+//      for (int j = 0; j<theWeyl.RootsOfBorel.size; j ++)
+//      { coefficient1+= theWeyl.RootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.TheObjects[j])*theWeyl.RootScalarCartanRoot(tempRoot, theWeyl.RootsOfBorel.TheObjects[j]);
 //        coef
 //      }
 //    }
@@ -717,7 +717,7 @@ void ElementUniversalEnveloping<coefficient>::SubstitutionCoefficients
 }
 
 template <class coefficient>
-void ElementUniversalEnveloping<coefficient>::LieBracketOnTheRight(const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output)const
+void ElementUniversalEnveloping<coefficient>::LieBracketOnTheRight(const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output) const
 { ElementUniversalEnveloping<coefficient> tempElt, tempElt2;
   tempElt = *this;
   tempElt *= right;
@@ -758,10 +758,10 @@ void ElementUniversalEnveloping<coefficient>::MakeOneGeneratorCoeffOne
 }
 
 template <class coefficient>
-bool ElementUniversalEnveloping<coefficient>::GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output)const
+bool ElementUniversalEnveloping<coefficient>::GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const
 { output.MakeZero();
-//  SemisimpleLieAlgebra& theOwner=this->owners->TheObjects[this->indexInOwners];
-//  int numPosRoots=theOwner.theWeyl.RootsOfBorel.size;
+//  SemisimpleLieAlgebra& theOwner = this->owners->TheObjects[this->indexInOwners];
+//  int numPosRoots = theOwner.theWeyl.RootsOfBorel.size;
   coefficient theExponent;
   ChevalleyGenerator tempChevalley;
   for (int i = 0; i < this->size(); i ++)
@@ -887,7 +887,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::GetElementUniversalEnvelop
 template <class coefficient>
 void MonomialUniversalEnvelopingOrdered<coefficient>::SetNumVariables(int newNumVars)
 { //the below commented out code causes problems in substitution code!
-  //if (this->Coefficient.NumVars==newNumVars)
+  //if (this->Coefficient.NumVars ==newNumVars)
   //  return;
   this->Coefficient.SetNumVariablesSubDeletedVarsByOne((int)newNumVars);
   for (int i = 0; i < this->generatorsIndices.size; i ++)
@@ -897,7 +897,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::SetNumVariables(int newNum
 template <class coefficient>
 bool ElementUniversalEnvelopingOrdered<coefficient>::GetCoordsInBasis
 (List<ElementUniversalEnvelopingOrdered<coefficient> >& theBasis, Vector<coefficient>& output,
- const coefficient& theRingUnit, const coefficient& theRingZero)const
+ const coefficient& theRingUnit, const coefficient& theRingZero) const
 { List<ElementUniversalEnvelopingOrdered<coefficient> > tempBasis, tempElts;
   tempBasis = theBasis;
   tempBasis.AddOnTop(*this);
@@ -1039,7 +1039,7 @@ void ElementVermaModuleOrdered<coefficient>::GetBasisFromSpanOfElements
 
 template<class coefficient>
 bool ElementVermaModuleOrdered<coefficient>::GetCoordsInBasis
-(const List<ElementVermaModuleOrdered<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero)const
+(const List<ElementVermaModuleOrdered<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero) const
 { List<ElementUniversalEnvelopingOrdered<coefficient> > theEltsUEform;
   theEltsUEform.SetSize(theBasis.size);
   for (int i = 0; i < theBasis.size; i ++)
@@ -1049,7 +1049,7 @@ bool ElementVermaModuleOrdered<coefficient>::GetCoordsInBasis
 }
 
 template<class coefficient>
-bool ElementVermaModuleOrdered<coefficient>::NeedsParenthesisForMultiplication()const
+bool ElementVermaModuleOrdered<coefficient>::NeedsParenthesisForMultiplication() const
 { return this->theElT.NeedsParenthesisForMultiplication();
 }
 
@@ -1080,7 +1080,7 @@ void ElementVermaModuleOrdered<coefficient>::MultiplyOnTheLeft
 }
 
 template <class coefficient>
-std::string ElementVermaModuleOrdered<coefficient>::ToString(const FormatExpressions& theFormat)const
+std::string ElementVermaModuleOrdered<coefficient>::ToString(const FormatExpressions& theFormat) const
 { std::stringstream out;
   std::string tempS = MathRoutines::ElementToStringBrackets(this->theElT, theFormat);
   if (tempS.size() > 1)
@@ -1097,7 +1097,7 @@ std::string ElementVermaModuleOrdered<coefficient>::ToString(const FormatExpress
 template<class coefficient>
 void ElementVermaModuleOrdered<coefficient>::ActOnMe
 (const ElementSemisimpleLieAlgebra<Rational>& actingElt, ElementVermaModuleOrdered<coefficient>& output, SemisimpleLieAlgebra& owner,
- const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables* theContext)const
+ const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables* theContext) const
 { ElementUniversalEnvelopingOrdered<coefficient> tempElt;
   tempElt.AssignElementLieAlgebra(actingElt, theRingUnit, theRingZero, *this->theElT.owner);
 //  stOutput << "<br>" << actingElt.ToString() << " acts on " << this->ToString();
@@ -1105,7 +1105,7 @@ void ElementVermaModuleOrdered<coefficient>::ActOnMe
   output.theElT.Simplify(theContext, theRingUnit, theRingZero);
   output.theSubNthElementIsImageNthCoordSimpleBasis = this->theSubNthElementIsImageNthCoordSimpleBasis;
 //  stOutput << "<br>and the result before modding out is: " << output.ToString();
-//  int numVars=output.theElt.GetNumVars();
+//  int numVars = output.theElt.GetNumVars();
   output.theElT.ModOutVermaRelationSOld(false, this->theSubNthElementIsImageNthCoordSimpleBasis, theContext, theRingUnit);
 //  stOutput << "<br>and after modding out we get: " << output.ToString();
 }
@@ -1194,7 +1194,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::operator+=(const ElementUni
 
 template <class coefficient>
 void ElementUniversalEnvelopingOrdered<coefficient>::operator-=(const ElementUniversalEnvelopingOrdered<coefficient>& other)
-{ this->Reserve(this->size+other.size);
+{ this->Reserve(this->size +other.size);
   MonomialUniversalEnvelopingOrdered<coefficient> tempMon;
   for (int i = 0; i < other.size; i ++)
   { tempMon = other.TheObjects[i];
@@ -1234,7 +1234,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::MultiplyByNoSimplify(const
   int firstIndex = other.generatorsIndices[0];
   int i = 0;
 //  std::string tempS;
-//  tempS=other.ToString();
+//  tempS= other.ToString();
   if (this->generatorsIndices.size > 0)
     if (firstIndex == (*this->generatorsIndices.LastObject()))
     { //this->ComputeDebugString();
@@ -1249,7 +1249,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::MultiplyByNoSimplify(const
 
 template <class coefficient>
 bool ElementUniversalEnvelopingOrdered<coefficient>::IsProportionalTo
-(const ElementUniversalEnvelopingOrdered<coefficient>& other, coefficient& outputTimesMeEqualsOther, const coefficient& theRingZero)const
+(const ElementUniversalEnvelopingOrdered<coefficient>& other, coefficient& outputTimesMeEqualsOther, const coefficient& theRingZero) const
 { if (this->IsEqualToZero())
   { if (other.IsEqualToZero())
       return true;
@@ -1305,7 +1305,7 @@ void ElementUniversalEnvelopingOrdered<coefficient>::operator*=(const ElementUni
 template <class coefficient>
 void ElementUniversalEnvelopingOrdered<coefficient>::AddMonomialNoCleanUpZeroCoeff(const MonomialUniversalEnvelopingOrdered<coefficient>& input)
 { //MonomialUniversalEnvelopingOrdered<coefficient> tempMon;
-  //tempMon=input;
+  //tempMon =input;
   //tempMon.ComputeDebugString();
   //this->ComputeDebugString();
   int theIndex = this->GetIndex(input);
@@ -1348,7 +1348,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::SimplifyAccumulateInOutput
             for (int j = 0; j < buffer2.size; j ++)
               output.AddMonomialNoCleanUpZeroCoeff(buffer2[j]);
 //            output.ComputeDebugString();
-            reductionOccurred=true;
+            reductionOccurred= true;
             break;
           }
         }
@@ -1414,7 +1414,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesR
 //  if (this->flagAnErrorHasOccurredTimeToPanic)
 //  if (this->ToString()=="2f_{5}f_{-5}f_{-4}" || this->ToString()=="2f_{11}f_{-4}")
 //  { stOutput << "here we are!";
-//    this->flagAnErrorHasOccurredTimeToPanic=true;
+//    this->flagAnErrorHasOccurredTimeToPanic = true;
 //  }
 
   coefficient acquiredCoefficienT;
@@ -1468,7 +1468,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesR
     acquiredCoefficienT /= powerDroP;
 //    if (this->flagAnErrorHasOccurredTimeToPanic)
 //      adResulT.ComputeDebugString(false, false);
-  } while(!adResulT.IsEqualToZero() && !acquiredCoefficienT.IsEqualToZero());
+  } while (!adResulT.IsEqualToZero() && !acquiredCoefficienT.IsEqualToZero());
 }
 
 template <class coefficient>
@@ -1492,7 +1492,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesL
   int powerDrop = 0;
  /* if (this->ToString()=="2f_{5}f_{-5}f_{-4}" || this->ToString()=="2f_{11}f_{-4}")
   { stOutput << "here we are!";
-    this->flagAnErrorHasOccurredTimeToPanic=true;
+    this->flagAnErrorHasOccurredTimeToPanic = true;
   }*/
 
   coefficient acquiredCoefficient;
@@ -1502,7 +1502,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesL
     tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
   tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[theIndeX], theLeftPower);
   MonomialUniversalEnvelopingOrdered startMon, tempMon2;
-  startMon=tempMon;
+  startMon = tempMon;
   ElementSemisimpleLieAlgebra<Rational> adResult, tempElt, tempRightElt;
   this->owner->AssignGeneratorCoeffOne(leftGeneratorIndex, adResult);
   this->owner->AssignGeneratorCoeffOne(rightGeneratorIndex, tempRightElt);
@@ -1534,7 +1534,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::CommuteConsecutiveIndicesL
     powerDrop ++;
     acquiredCoefficient /= powerDrop;
     //adResult.ComputeDebugString(*this->owner, false, false);
-  } while(!adResult.IsEqualToZero() && !acquiredCoefficient.IsEqualToZero());
+  } while (!adResult.IsEqualToZero() && !acquiredCoefficient.IsEqualToZero());
 }
 
 template <class coefficient>
@@ -1606,7 +1606,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::MultiplyByGeneratorPowerOn
 }
 
 template <class coefficient>
-std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(bool useLatex, bool useCalculatorFormat, FormatExpressions* PolyFormatLocal)const
+std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(bool useLatex, bool useCalculatorFormat, FormatExpressions* PolyFormatLocal) const
 { if (this->owner == 0)
     return "faulty monomial non-initialized owner. Slap the programmer.";
   if (this->IsEqualToZero())
@@ -1617,12 +1617,12 @@ std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(bool useLa
   { tempS = MathRoutines::ElementToStringBrackets(this->Coefficient, PolyFormatLocal);
     if (tempS == "1")
       tempS = "";
-    if (tempS == "-1")
+    if (tempS == "- 1")
       tempS = "-";
   } else
     tempS = this->Coefficient.ToString(PolyFormatLocal);
   out << tempS;
-  for (int i = 0; i < this->generatorsIndices.size; i++)
+  for (int i = 0; i < this->generatorsIndices.size; i ++)
   { coefficient& thePower = this->Powers[i];
     int theIndex = this->generatorsIndices[i];
     bool usebrackets = false;
@@ -1649,7 +1649,7 @@ std::string MonomialUniversalEnvelopingOrdered<coefficient>::ToString(bool useLa
 
 template <class coefficient>
 void ElementUniversalEnvelopingOrdered<coefficient>::ToString
-(std::string& output, bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal)const
+(std::string& output, bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal) const
 { std::stringstream out;
   std::string tempS;
   if (this->size == 0)
@@ -1677,7 +1677,7 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::AssignElementUniversalEnvel
 { ElementUniversalEnvelopingOrdered<coefficient> tempElt;
   this->MakeZero(owner);
   for (int i = 0; i < input.size; i ++)
-  { if(!tempElt.AssignMonomialUniversalEnveloping
+  { if (!tempElt.AssignMonomialUniversalEnveloping
         (input.TheObjects[i], input.theCoeffs[i], owner, theRingUnit, theRingZero, theContext))
       return false;
     this->operator+=(tempElt);

@@ -76,7 +76,7 @@ class NilradicalCandidate
 class SubalgebraSemisimpleLieAlgebra
 {
 public:
-  std::string ToString(FormatExpressions* theFormat=0);
+  std::string ToString(FormatExpressions* theFormat = 0);
   SemisimpleLieAlgebra* owner;
   GlobalVariables* theGlobalVariables;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theGenerators;
@@ -294,7 +294,7 @@ public:
   std::string ToStringModuleDecompoLaTeX(FormatExpressions* theFormat = 0) const;
   std::string ToStringDrawWeights(FormatExpressions* theFormat = 0) const;
   std::string ToStringDrawWeightsHelper(int indexModule, const Vector<Rational>& theWeight) const;
-  //std::string ToStringDrawWeightsVersion2(FormatExpressions* theFormat = 0)const;
+  //std::string ToStringDrawWeightsVersion2(FormatExpressions* theFormat = 0) const;
   bool operator>(const CandidateSSSubalgebra& other) const;
 
 };
@@ -315,7 +315,7 @@ public:
   HashedList<Rational> theOrbitHelementLengths;
   HashedList<DynkinSimpleType> theOrbitDynkinIndices;
 //  List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
-  //if an entry in orbit sizes is -1 this means the corresponding orbit size has not been computed yet.
+  //if an entry in orbit sizes is - 1 this means the corresponding orbit size has not been computed yet.
   int maxStoredOrbitSize;
   std::string comments;
   std::string fileNameToLogComments;
@@ -420,7 +420,7 @@ public:
   std::string ToStringSSsumaryHTML(FormatExpressions* theFormat = 0) const;
   void ComputePairingTablesAndFKFTtypes();
   void GetCentralizerChains(List<List<int> >& outputChains);
-  int GetIndexFullSubalgebra()const;
+  int GetIndexFullSubalgebra() const;
   //const HashedList<ElementWeylGroup<WeylGroup> >& GetOrbitSl2HelementWeylGroupElt(int indexSl2);
   bool RanksAndIndicesFit(const DynkinType& input) const;
   bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputImagesSimpleRoots) const;

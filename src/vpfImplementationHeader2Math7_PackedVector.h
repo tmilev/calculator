@@ -20,7 +20,7 @@ PackedVector<scalar> PackedVector<scalar>::operator+(const PackedVector<scalar>&
 
 template <typename scalar>
 void PackedVector<scalar>::operator+=(const PackedVector<scalar>& w)
-{ for(int i = 0; i < this->size; i ++)
+{ for (int i = 0; i < this->size; i ++)
     this->data[i] += w[i];
 }
 
@@ -49,11 +49,11 @@ template <typename scalar>
 scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const PackedVector* B) const
 { PackedVector<scalar> Bv;
   Bv.MakeZero();
-  for(int i=0; i<this->size; i++)
-    for(int j=0; j<this->size; j++)
+  for (int i = 0; i < this->size; i ++)
+    for (int j = 0; j< this->size; j ++)
       Bv[i] += B[i][j]*v[j]
   scalar wBv = 0;
-  for(int i=0; i<B.NumRows; i++)
+  for (int i = 0; i <B.NumRows; i ++)
     wBv += this->data[i]*Bv[i];
   return wBv;
 }

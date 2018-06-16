@@ -12,7 +12,7 @@ class MonomialUniversalEnveloping : public MonomialTensor<coefficient>
 {
 private:
 public:
-  std::string ToString(FormatExpressions* theFormat = 0)const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
@@ -20,20 +20,20 @@ public:
   { output << theMon.ToString();
     return output;
   }
-  bool IsConstant()const
+  bool IsConstant() const
   { return this->IsEqualToOne();
   }
   static bool IsMonEqualToZero()
   { return false;
   }
-  bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output)const;
+  bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output) const;
   template<class otherType>
   void operator=(const MonomialUniversalEnveloping<otherType>& other)
   { this->MonomialTensor<coefficient>::operator=(other);
     this->owners = other.owners;
     this->indexInOwners = other.indexInOwners;
   }
-  SemisimpleLieAlgebra& GetOwner()const
+  SemisimpleLieAlgebra& GetOwner() const
   { return *this->owner;
   }
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner)
@@ -58,7 +58,7 @@ public:
   static inline unsigned int HashFunction(const MonomialUniversalEnveloping<coefficient>& input)
   { return input.HashFunction();
   }
-  void GetDegree(coefficient& output)const
+  void GetDegree(coefficient& output) const
   { if (this->Powers.size == 0)
     { output.MakeZero();
       return;
@@ -92,12 +92,12 @@ public:
   bool operator>(const MonomialUniversalEnveloping& other)
   { return this->::MonomialTensor<coefficient>::operator>(other);
   }
-  bool operator==(const MonomialUniversalEnveloping& other)const
+  bool operator==(const MonomialUniversalEnveloping& other) const
   { return this->owner == other.owner && this->Powers == other.Powers && this->generatorsIndices == other.generatorsIndices;
   }
   inline void operator=(const MonomialUniversalEnveloping& other)
   { this->::MonomialTensor<coefficient>::operator=(other);
-    this->owner=other.owner;
+    this->owner = other.owner;
   }
   inline void operator*=(const MonomialUniversalEnveloping& other)
   { this->::MonomialTensor<coefficient>::operator*=(other);
@@ -112,9 +112,9 @@ private:
   friend class MonomialUniversalEnveloping<coefficient>;
 public:
   SemisimpleLieAlgebra* owner;
-  bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output)const;
+  bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output) const;
   bool ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output);
-  bool IsEqualToZero()const
+  bool IsEqualToZero() const
   { return this->size() == 0;
   }
   bool HWMTAbilinearForm
@@ -124,9 +124,9 @@ public:
   (const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero);
   bool HWTAAbilinearForm
   (const ElementUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement,
-   const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0)const;
+   const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream = 0) const;
   bool HWTAAbilinearForm
-  (const MonomialUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream=0)const
+  (const MonomialUniversalEnveloping<coefficient>&right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream= 0) const
   { ElementUniversalEnveloping<coefficient> tempElt;
     tempElt.MakeZero(*this->owner);
     tempElt.AddMonomial(right, theRingUnit);
@@ -138,17 +138,17 @@ public:
   bool ApplyMinusTransposeAutoOnMe();
   bool ApplyTransposeAntiAutoOnMe();
   void MakeHgenerator(const Vector<Rational>& input, SemisimpleLieAlgebra& inputOwner);
-  void AssignElementLieAlgebra(const ElementSemisimpleLieAlgebra<Rational>& input, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit=1);
+  void AssignElementLieAlgebra(const ElementSemisimpleLieAlgebra<Rational>& input, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit =1);
   bool GetWithSimpleGeneratorsOnly(MonomialCollection<MonomialTensor<coefficient>, coefficient>& output);
   void MakeOneGenerator(int theIndex, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit);
-  void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& inputOwners, const coefficient& theRingUnit=1);
+  void MakeOneGeneratorCoeffOne(int theIndex, SemisimpleLieAlgebra& inputOwners, const coefficient& theRingUnit =1);
   void MakeOneGeneratorCoeffOne(int theIndex, int numVars, SemisimpleLieAlgebra& inputOwner);
-  void MakeOneGeneratorCoeffOne(const Vector<Rational>& rootSpace, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit=1)
+  void MakeOneGeneratorCoeffOne(const Vector<Rational>& rootSpace, SemisimpleLieAlgebra& inputOwner, const coefficient& theRingUnit =1)
   { this->MakeOneGeneratorCoeffOne(inputOwner.GetGeneratorFromRoot(rootSpace), inputOwner, theRingUnit);
   }
-  coefficient GetKillingFormProduct(const ElementUniversalEnveloping<coefficient>& right)const;
+  coefficient GetKillingFormProduct(const ElementUniversalEnveloping<coefficient>& right) const;
   void MakeZero(SemisimpleLieAlgebra& inputOwner);
-  bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output)const;
+  bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output) const;
   void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebra& inputOwner);
   void MakeConst(const coefficient& coeff, SemisimpleLieAlgebra& inputOwner)
   { this->MakeZero(inputOwner);
@@ -156,8 +156,8 @@ public:
     tempMon.MakeOne(inputOwner);
     this->AddMonomial(tempMon, coeff);
   }
-  void Simplify(const coefficient& theRingUnit=1);
-  int GetMinNumVars()const
+  void Simplify(const coefficient& theRingUnit =1);
+  int GetMinNumVars() const
   { int result = 0;
     for (int i = 0; i < this->size; i ++)
     { result = MathRoutines::Maximum(result, this->theCoeffs[i].GetMinNumVars());
@@ -172,11 +172,11 @@ public:
   (List<ElementUniversalEnveloping<coefficient> >& theElements, Vectors<coefficient>& outputCoordinates, ElementUniversalEnveloping<coefficient>& outputCorrespondingMonomials,
    GlobalVariables& theGlobalVariables);
   bool GetCoordsInBasis
-  (List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables& theGlobalVariables)const;
+  (List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables& theGlobalVariables) const;
   static inline unsigned int HashFunction (const ElementUniversalEnveloping<coefficient>& input)
   { return input.HashFunction();
   }
-  unsigned int HashFunction()const
+  unsigned int HashFunction() const
   { return this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>::HashFunction();
   }
   template<class CoefficientTypeQuotientField>
@@ -185,7 +185,7 @@ public:
    const CoefficientTypeQuotientField& theFieldUnit, const CoefficientTypeQuotientField& theFieldZero, GlobalVariables& theGlobalVariables);
   void AssignFromCoordinateFormWRTBasis(List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& input, SemisimpleLieAlgebra& owner);
   void RaiseToPower(int thePower);
-  bool IsAPowerOfASingleGenerator()const
+  bool IsAPowerOfASingleGenerator() const
   { if (this->size() != 1)
       return false;
     if (!this->theCoeffs[0].IsEqualToOne())
@@ -200,13 +200,13 @@ public:
   { left.LieBracketOnTheRight(right, output);
     output.Simplify();
   }
-  void LieBracketOnTheRight(const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output)const;
+  void LieBracketOnTheRight(const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output) const;
   void LieBracketOnTheLeft(const ElementSemisimpleLieAlgebra<Rational>& left);
   void AssignInt(int coeff, int numVars, SemisimpleLieAlgebra& theOwner)
   { Rational tempRat = coeff;
     this->MakeConst(tempRat, numVars, &theOwner);
   }
-  SemisimpleLieAlgebra& GetOwner()const
+  SemisimpleLieAlgebra& GetOwner() const
   { return *this->owner;
   }
   template <class otherType>

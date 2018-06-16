@@ -11,6 +11,10 @@ function hasDistinguishedAncestry(parentFields) {
   return true;
 }
 
+function deleteDatabaseItem() {
+
+}
+
 function getTableHorizontallyLaidFromJSON(input, parentFields) {
   if (typeof input === "string") {
     return input;
@@ -39,7 +43,7 @@ function getTableHorizontallyLaidFromJSON(input, parentFields) {
       result += `<tr>`;
       result += `<td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item])}</td>`;
       if (hasDistinguishedAncestry(parentFields)) {
-        result += "<td><button>Modify</button></td>";
+        result += `<td><button onclick='deleteDatabaseItem()'>Delete</button></td>`;
       }
       result += `</tr>`; 
     }
@@ -81,7 +85,7 @@ function getLabelsRows(input) {
   return result;
 }
 
-function getHtmlFromArrayOfObjects(input) {
+function getHtmlFromArrayOfObjects(input, parentFields) {
   var inputJSON = input;
   if (typeof inputJSON === "string") {
     inputJSON = input.replace(/[\r\n]/g, " "); 
@@ -95,6 +99,7 @@ function getHtmlFromArrayOfObjects(input) {
     }
   }
   var result = "";
+  //var 
   if (typeof inputJSON === "object" && !Array.isArray(inputJSON)) {
     inputJSON = [inputJSON];
   }

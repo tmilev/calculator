@@ -27,7 +27,7 @@ PipePrimitive::PipePrimitive()
   this->pipeEnds.initFillInObject(2, - 1);
 }
 
-std::string PipePrimitive::ToString()const
+std::string PipePrimitive::ToString() const
 { if (this->pipeEnds.size == 0)
     return "pipe: non-initialized";
   if (this->pipeEnds[0] == - 1)
@@ -91,12 +91,12 @@ bool PipePrimitive::CreateMe
     return false;
   }
   if (!readEndBlocks)
-    if(!this->SetPipeReadNonBlockingIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
+    if (!this->SetPipeReadNonBlockingIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
     { this->Release();
       return false;
     }
   if (!writeEndBlocks)
-    if(!this->SetPipeWriteNonBlockingIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
+    if (!this->SetPipeWriteNonBlockingIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
     { this->Release();
       return false;
     }
@@ -145,7 +145,7 @@ bool PauseProcess::PauseIfRequestedWithTimeOut(bool restartServerOnFail, bool do
   timeout.tv_usec = 0;
   if (this->CheckPauseIsRequested(restartServerOnFail, dontCrashOnFail, false))
     logBlock << logger::blue << this->currentProcessName << "Blocking on " << this->ToString() << logger::endL;
-  if (!(select(this->thePausePipe.pipeEnds[0]+1, &read_fds, &write_fds, &except_fds, &timeout) == 1))
+  if (!(select(this->thePausePipe.pipeEnds[0]+ 1, &read_fds, &write_fds, &except_fds, &timeout) == 1))
   { logBlock << logger::green << this->currentProcessName << "Blocking on " << this->ToString() << logger::green
     << " timed out. " << logger::endL;
     return false;
@@ -177,7 +177,7 @@ bool PauseProcess::CheckPauseIsRequested(bool restartServerOnFail, bool dontCras
     return false;
   bool result = (this->thePausePipe.lastRead.size == 0);
   if (!result)
-    if(!this->thePausePipe.WriteIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail))
+    if (!this->thePausePipe.WriteIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail))
       return false;
   if (!this->thePausePipe.SetPipeReadBlockingModeIfFailThenCrash(restartServerOnFail, dontCrashOnFail))
     return false;
@@ -191,7 +191,7 @@ void PauseProcess::ResumePausedProcessesIfAny(bool restartServerOnFail, bool don
   this->thePausePipe.WriteIfFailThenCrash("!", restartServerOnFail, dontCrashOnFail);
 }
 
-std::string PauseProcess::ToString()const
+std::string PauseProcess::ToString() const
 { std::stringstream out;
   if (this->name != "")
     out << this->name << ": ";
@@ -257,7 +257,7 @@ int Pipe::ReadWithTimeOutViaSelect
     << strerror(errno) << ". \n";
     numFails ++;
   } while (numSelected < 0);
-  //numSelected==0 most probably means timeout has expired.
+  //numSelected== 0 most probably means timeout has expired.
   if (numSelected <= 0)
   { if (commentsOnFailure != 0)
       *commentsOnFailure << failStream.str();
@@ -341,7 +341,7 @@ int Pipe::WriteNoInterrupts(int theFD, const std::string& input)
 }
 
 void Pipe::WriteAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail)
-{ //logWorker << "Step -1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
+{ //logWorker << "Step - 1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
   MacroRegisterFunctionWithName("Pipe::WriteAfterEmptying");
   //logWorker << "Step 1: Pipe::WriteAfterEmptying: outputFunction: " << (int) stOutput.theOutputFunction;
   MutexLockGuard safety(theGlobalVariables.MutexWebWorkerPipeWriteLock);
@@ -381,7 +381,7 @@ bool PipePrimitive::WriteIfFailThenCrash(const std::string& toBeSent, bool resta
   }
   if (toBeSent.size() == 0)
     return true;
-//  std::string toBeSentCopy=toBeSent;
+//  std::string toBeSentCopy= toBeSent;
   int numBytesWritten = 0;
   int numBadAttempts = 0;
   for (;;)
@@ -427,7 +427,7 @@ bool PipePrimitive::WriteIfFailThenCrash(const std::string& toBeSent, bool resta
   return true;
 }
 
-std::string Pipe::ToString()const
+std::string Pipe::ToString() const
 { std::stringstream out;
   if (this->name != "")
     out << this->name << ": information pipe: ";

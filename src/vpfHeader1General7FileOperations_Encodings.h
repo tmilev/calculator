@@ -53,7 +53,7 @@ public:
   static bool IsFolderUnsecure(const std::string& theFolderName);
   static bool GetFolderFileNamesUnsecure
   (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
-   List<std::string>* outputFileTypes=0);
+   List<std::string>* outputFileTypes = 0);
   static std::string GetCurrentFolder();
   static std::string GetWouldBeFolderAfterHypotheticalChdirNonThreadSafe(const std::string& wouldBePath);
   static bool GetFolderFileNamesVirtual
@@ -75,19 +75,19 @@ public:
    std::stringstream* commentsOnFailure);
 
   static bool OpenFileCreateIfNotPresentUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
-  static bool OpenFileCreateIfNotPresentVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders=false);
-  static bool OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders=false);
+  static bool OpenFileCreateIfNotPresentVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders = false);
+  static bool OpenFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders = false);
 
   static bool OpenFileUnsecure(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
   static bool OpenFileUnsecureReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary);
-  static bool OpenFileVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders=false);
+  static bool OpenFileVirtual(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary, bool accessSensitiveFolders = false);
   static bool OpenFileVirtualCustomizedReadOnly
   (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode,
    bool truncate, bool openAsBinary, std::stringstream* commentsOnFailure);
   static bool OpenFileVirtualCustomizedWriteOnly
   (std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode,
    bool truncate, bool openAsBinary, std::stringstream* commentsOnFailure);
-  static bool OpenFileVirtualReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary, bool accessSensitiveFolders=false);
+  static bool OpenFileVirtualReadOnly(std::ifstream& theFile, const std::string& theFileName, bool openAsBinary, bool accessSensitiveFolders = false);
 };
 
 struct StateMaintainerCurrentFolder

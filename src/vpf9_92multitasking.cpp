@@ -38,10 +38,10 @@ void MutexRecursiveWrapper::CheckConsistency()
 
 void MutexRecursiveWrapper::initConstructorCallOnly()
 { //    std::cout << "MutexRecursiveWrapper::MutexRecursiveWrapper. theMutexesGlobal.size: " << theMutexesGlobal.size << std::endl;
-//  static bool allowToRun=true;
+//  static bool allowToRun = true;
 //  while (!allowToRun)
 //  {}
-//  allowToRun=false;
+//  allowToRun = false;
 
   this->flagDeallocated = false;
   this->flagInitialized = false;
@@ -159,13 +159,13 @@ PauseThread::PauseThread()
   this->flagIsPausedWhileRunning = false;
 }
 
-bool PauseThread::IsPausedWhileRunning()const
+bool PauseThread::IsPausedWhileRunning() const
 { return this->flagIsPausedWhileRunning;
 }
 
 ThreadData::ThreadData()
 { this->index = 0;
-//  this->theId=0;
+//  this->theId= 0;
 }
 
 ThreadData::~ThreadData()
@@ -173,7 +173,7 @@ ThreadData::~ThreadData()
 }
 
 GlobalVariables::~GlobalVariables()
-{ //double startTime=this->GetElapsedSeconds();
+{ //double startTime= this->GetElapsedSeconds();
 //  logBlock << logger::yellow << "joining threads ..." << logger::endL;
   this->flagComputationFinishedAllOutputSentClosing = true;
   for (int i = 1; i < this->theThreads.size; i ++)
@@ -219,7 +219,7 @@ int ThreadData::getCurrentThreadId()
   return - 1;
 }
 
-std::string ThreadData::ToStringHtml()const
+std::string ThreadData::ToStringHtml() const
 { std::stringstream out;
   if (this->getCurrentThreadId() == this->index)
     out << "<span style=\"color:green\"><b>Current thread </b></span> ";
@@ -235,7 +235,7 @@ std::string ThreadData::ToStringHtml()const
   return out.str();
 }
 
-std::string ThreadData::ToStringConsole()const
+std::string ThreadData::ToStringConsole() const
 { std::stringstream out;
   out << "Thread ";
   if (this->name == "")

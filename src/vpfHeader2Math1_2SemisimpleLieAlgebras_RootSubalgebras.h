@@ -48,8 +48,8 @@ public:
   }
   unsigned int HashFunction() const
   { int tempI= ::MathRoutines::Minimum((int) this->DebugString.length(), ::SomeRandomPrimesSize);
-    unsigned int result=0;
-    for (int i=0; i<tempI; i++)
+    unsigned int result = 0;
+    for (int i = 0; i <tempI; i ++)
       result+= this->DebugString[i]*::SomeRandomPrimes[i];
     return result;
   }
@@ -57,7 +57,7 @@ public:
   { return input.HashFunction();
   }
   coneRelation()
-  {this->IndexOwnerRootSubalgebra=-1;
+  {this->IndexOwnerRootSubalgebra = - 1;
   }
 };
 
@@ -78,10 +78,10 @@ public:
   void ReadFromFile(std::fstream& input, rootSubalgebras& owner);
   void AddRelationNoRepetition(coneRelation& input, rootSubalgebras& owners);
   coneRelations()
-  { this->NumAllowedLatexLines=40;
-    this->flagIncludeSmallerRelations=true;
-    this->flagIncludeCoordinateRepresentation=false;
-    this->flagIncludeSubalgebraDataInDebugString=false;
+  { this->NumAllowedLatexLines =40;
+    this->flagIncludeSmallerRelations = true;
+    this->flagIncludeCoordinateRepresentation = false;
+    this->flagIncludeSubalgebraDataInDebugString= false;
   }
 };
 
@@ -166,17 +166,17 @@ public:
 //  int indexInOwners;
   rootSubalgebra();
   ~rootSubalgebra()
-  { this->flagDeallocated=true;
+  { this->flagDeallocated= true;
   }
-  WeylGroupData& GetAmbientWeyl()const;
-  SemisimpleLieAlgebra& GetOwnerSSalg()const;
-  //returns -1 if the weight/root  is not in g/k
-  bool CheckInitialization()const;
-  bool CheckConsistency()const;
-  bool CheckScalarProdMatrixOrdered()const;
-  Vector<Rational> GetFundamentalCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords)const;
-  Vector<Rational> GetSimpleCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords)const;
-  inline int GetNumModules()const
+  WeylGroupData& GetAmbientWeyl() const;
+  SemisimpleLieAlgebra& GetOwnerSSalg() const;
+  //returns - 1 if the weight/root  is not in g/k
+  bool CheckInitialization() const;
+  bool CheckConsistency() const;
+  bool CheckScalarProdMatrixOrdered() const;
+  Vector<Rational> GetFundamentalCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const;
+  Vector<Rational> GetSimpleCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords) const;
+  inline int GetNumModules() const
   { return this->HighestVectors.size;
   }
   int GetIndexKmoduleContainingRoot(const Vector<Rational>& input);
@@ -184,7 +184,7 @@ public:
   void GetCoxeterElement(Matrix<Rational>& output);
   void ComputePotentialExtensions();
   void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexRootSAinContainer);
-  bool IsEquivalentToByDiagramsAndDimensions(const rootSubalgebra& other)const;
+  bool IsEquivalentToByDiagramsAndDimensions(const rootSubalgebra& other) const;
   void ComputeOuterSAautosExtendingToAmbientAutosGenerators();
   bool IsGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots);
   bool rootIsInCentralizer(const Vector<Rational>& input);
@@ -227,14 +227,14 @@ public:
   bool ConeConditionHolds(rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
   bool ConeConditionHolds(rootSubalgebras& owner, int indexInOwner, Vectors<Rational>& NilradicalRoots, Vectors<Rational>& Ksingular, bool doExtractRelations);
   void PossibleNilradicalComputation(Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
-  std::string ToString(FormatExpressions* theFormat=0);
+  std::string ToString(FormatExpressions* theFormat = 0);
   void ToHTML(int index, FormatExpressions* theFormat);
   std::string ToStringMultTable(bool useLaTeX, bool useHtml, rootSubalgebra& owner);
   bool RootsDefineASubalgebra(Vectors<Rational>& theRoots);
   void GenerateKmodMultTable(List<List<List<int> > >& output, List<int>& oppositeKmods);
   void KmodTimesKmod(int index1, int index2, List<int>& oppositeKmods, List<int>& output);
   void ComputeDynkinDiagramKandCentralizer();
-  bool CheckRankInequality()const;
+  bool CheckRankInequality() const;
   bool ComputeEssentialsIfNew();
   void ComputeEssentialS();
   bool CheckForMaximalDominanceCartanSA();
@@ -257,7 +257,7 @@ public:
   bool LinCombToStringDistinguishedIndex(int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational> & linComb, std::string& output);
   void WriteMultTableAndOppositeKmodsToFile(std::fstream& output, List<List<List<int> > >& inMultTable, List<int>& inOpposites);
   void ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites);
-  bool operator>(const rootSubalgebra& other)const;
+  bool operator>(const rootSubalgebra& other) const;
 };
 
 class rootSubalgebras
@@ -303,10 +303,10 @@ public:
   bool flagStoringNilradicals;
   bool flagPrintGAPinput;
   bool flagPrintParabolicPseudoParabolicInfo;
-  SemisimpleLieAlgebra& GetOwnerSSalgebra()const;
-  WeylGroupData& GetOwnerWeyl()const;
-  bool CheckInitialization()const;
-  bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputPermutationSimpleRoots)const;
+  SemisimpleLieAlgebra& GetOwnerSSalgebra() const;
+  WeylGroupData& GetOwnerWeyl() const;
+  bool CheckInitialization() const;
+  bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputPermutationSimpleRoots) const;
   void ComputeKmodMultTables();
   bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel);
   bool ApproveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel);
@@ -387,30 +387,30 @@ public:
   bool flagDeallocated;
   void init();
   slTwoSubalgebra()
-  { this->flagDeallocated=false;
+  { this->flagDeallocated= false;
     this->init();
   }
   ~slTwoSubalgebra()
-  { this->flagDeallocated=true;
+  { this->flagDeallocated= true;
   }
-  bool CheckConsistency()const;
+  bool CheckConsistency() const;
 
   SltwoSubalgebras& GetContainerSl2s()
-  { if (this->container==0)
+  { if (this->container == 0)
       crash << "This is a programming error: attempting to access the container list of a non-initialized sl(2)-subalgebra. " << crash;
     return *this->container;
   }
   WeylGroupData& GetOwnerWeyl();
   SemisimpleLieAlgebra& GetOwnerSSAlgebra()
-  { if (this->owner==0)
+  { if (this->owner == 0)
       crash << "This is a programming error: attempting to access the ambient Lie algebra of a non-initialized sl(2)-subalgebra. " << crash;
     return *this->owner;
   }
-  std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToString(FormatExpressions* theFormat = 0) const;
   void GetInvolvedPosGenerators(List<ChevalleyGenerator>& output);
   void GetInvolvedNegGenerators(List<ChevalleyGenerator>& output);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs
-  (bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)const;
+  (bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output) const;
   void ComputeModuleDecomposition
   (Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA,
    charSSAlgMod<Rational>& outputHWs, List<int>& outputModuleDimensions)
@@ -428,7 +428,7 @@ public:
 
   void ComputeModuleDecompositionOfMinimalContainingRegularSAs
   (SltwoSubalgebras& owne);
-  bool ModuleDecompositionFitsInto(const slTwoSubalgebra& other)const;
+  bool ModuleDecompositionFitsInto(const slTwoSubalgebra& other) const;
   static bool ModuleDecompositionLeftFitsIntoRight
   (const charSSAlgMod<Rational>& moduleDecompoLeft,
    const charSSAlgMod<Rational>& moduleDecompoRight);
@@ -436,12 +436,12 @@ public:
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroupData& theWeyl);
   void ToHTML(std::string& filePath);
-  bool operator==(const slTwoSubalgebra& right)const;
-  bool operator>(const slTwoSubalgebra& right)const;
+  bool operator==(const slTwoSubalgebra& right) const;
+  bool operator>(const slTwoSubalgebra& right) const;
   unsigned int HashFunction() const
   { int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
-    int result=0;
-    for (int i=0; i<tempI; i++)
+    int result = 0;
+    for (int i = 0; i <tempI; i ++)
       result+= this->hCharacteristic[i].NumShort*SomeRandomPrimes[i];
     return result;
   }
@@ -462,27 +462,27 @@ public:
   rootSubalgebras theRootSAs;
   bool flagDeallocated;
   ~SltwoSubalgebras()
-  { this->flagDeallocated=true;
+  { this->flagDeallocated= true;
   }
   SltwoSubalgebras(): owner(0), flagDeallocated(false){}
   SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner), flagDeallocated(false)
   {}
-  bool operator==(const SltwoSubalgebras& other)const
-  { if (this->owner==0)
-      return other.owner==0;
-    if (other.owner==0)
+  bool operator==(const SltwoSubalgebras& other) const
+  { if (this->owner == 0)
+      return other.owner == 0;
+    if (other.owner == 0)
       return false;
-    return this->GetOwner()==other.GetOwner();
+    return this->GetOwner()== other.GetOwner();
   }
-  bool CheckConsistency()const;
-  void CheckForCorrectInitializationCrashIfNot()const
-  { if (this->owner==0)
+  bool CheckConsistency() const;
+  void CheckForCorrectInitializationCrashIfNot() const
+  { if (this->owner == 0)
       crash << "<br>This is a programming error. Object SltwoSubalgebras is not initialized, although it is supposed to be. " << crash;
   }
-  WeylGroupData& GetOwnerWeyl()const
+  WeylGroupData& GetOwnerWeyl() const
   { return this->GetOwner().theWeyl;
   }
-  SemisimpleLieAlgebra& GetOwner()const
+  SemisimpleLieAlgebra& GetOwner() const
   { this->CheckForCorrectInitializationCrashIfNot();
     return *this->owner;
   }
@@ -491,10 +491,10 @@ public:
   void ComputeDebugStringCurrent();
   bool ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);
-  void ToHTML(FormatExpressions* theFormat=0);
-  std::string ToStringSummary(FormatExpressions* theFormat=0);
+  void ToHTML(FormatExpressions* theFormat = 0);
+  std::string ToStringSummary(FormatExpressions* theFormat = 0);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
-  std::string ToString(FormatExpressions* theFormat=0);
+  std::string ToString(FormatExpressions* theFormat = 0);
 };
 
 #endif

@@ -66,12 +66,12 @@ class MutexLockGuard{
 public:
   MutexRecursiveWrapper* theMutex;
   MutexLockGuard(MutexRecursiveWrapper& inputMutex)
-  { this->theMutex=&inputMutex;
+  { this->theMutex= &inputMutex;
     this->theMutex->LockMe();
   }
   ~MutexLockGuard()
   { this->theMutex->UnlockMe();
-    this->theMutex=0;
+    this->theMutex= 0;
   }
 };
 
@@ -82,7 +82,7 @@ class PauseThread
   MutexRecursiveWrapper mutexSignalMeWhenReachingSafePoint;
   bool flagIsRunning;
   bool flagIsPausedWhileRunning;
-  bool IsPausedWhileRunning()const;
+  bool IsPausedWhileRunning() const;
   void operator=(const PauseThread& other);
   PauseThread(const PauseThread& other);
 public:

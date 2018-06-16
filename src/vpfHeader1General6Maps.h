@@ -11,10 +11,10 @@ class MapTemplatE
 public:
   HashedList<key, hashFunction> theKeys;
   listType theValues;
-  int GetIndex(const key& input)const
+  int GetIndex(const key& input) const
   { return this->theKeys.GetIndex(input);
   }
-  bool Contains(const key& inputKey)const
+  bool Contains(const key& inputKey) const
   { return this->GetIndex(inputKey) != - 1;
   }
   void RemoveKey(const key& theKey)
@@ -65,13 +65,13 @@ public:
   { this->theKeys.Clear();
     this->theValues.SetSize(0);
   }
-  int size()const
+  int size() const
   { return this->theValues.size;
   }
-  value& operator[](int i)const
+  value& operator[](int i) const
   { return this->theValues[i];
   }
-  std::string ToStringHtml()const
+  std::string ToStringHtml() const
   { std::stringstream out;
     out << "{";
     for (int i = 0; i < this->size(); i ++)
@@ -85,7 +85,7 @@ public:
 
 };
 
-//using C++11, not sure if that is a good idea:
+//using C++ 11, not sure if that is a good idea:
 //In case this does not compile, please see the commented code below.
 template <class key, class value, unsigned int hashFunction(const key&) = key::HashFunction>
 using MapReferenceS = MapTemplatE<ListReferences<value>, key, value, hashFunction>;
@@ -99,18 +99,18 @@ class MapReferences
 public:
   HashedList<key, hashFunction> theKeys;
   ListReferences<value> theValues;
-  int GetIndex(const key& input)const
+  int GetIndex(const key& input) const
   { return this->theKeys.GetIndex(input);
   }
-  bool Contains(const key& input)const
-  { return this->GetIndex(input)!=-1;
+  bool Contains(const key& input) const
+  { return this->GetIndex(input)!= - 1;
   }
   value& GetValueCreateIfNotPresent(const key& input)
-  { int theIndex=this->theKeys.GetIndex(input);
-    if (theIndex==-1)
-    { theIndex=this->theKeys.size;
+  { int theIndex= this->theKeys.GetIndex(input);
+    if (theIndex== - 1)
+    { theIndex= this->theKeys.size;
       this->theKeys.AddOnTop(input);
-      this->theValues.SetSize(this->theValues.size+1);
+      this->theValues.SetSize(this->theValues.size + 1);
     }
     return this->theValues[theIndex];
   }
@@ -130,7 +130,7 @@ public:
   { this->theKeys.Clear();
     this->theValues.SetSize(0);
   }
-  value& operator[](int i)const
+  value& operator[](int i) const
   { return this->theValues[i];
   }
 };

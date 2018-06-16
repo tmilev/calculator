@@ -296,7 +296,7 @@ JSData DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(const L
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames");
   JSData result;
   JSData fields;
-  for (int i = 0; i < fieldsToProjectTo.size; i++)
+  for (int i = 0; i < fieldsToProjectTo.size; i ++)
     fields[fieldsToProjectTo[i]] = 1;
   result["projection"] = fields;
   return result;
@@ -547,7 +547,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchCollectionNames
   return result;
 #else
   (void) output;
-  if (commentsOnFailure !=0)
+  if (commentsOnFailure != 0)
     *commentsOnFailure << "MongoDB not installed";
   return false;
 #endif
@@ -563,7 +563,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FetchTable
   DatabaseRoutinesGlobalFunctionsMongo::FindFromJSON(tableName, findQuery, rowsJSON, 200, totalItems, commentsOnFailure);
   HashedList<std::string, MathRoutines::hashString> theLabels;
   for (int i = 0; i < rowsJSON.size; i ++)
-    for (int j = 0; j < rowsJSON[i].objects.size(); j++)
+    for (int j = 0; j < rowsJSON[i].objects.size(); j ++)
       theLabels.AddOnTopNoRepetition(rowsJSON[i].objects.theKeys[j]);
   outputLabels = theLabels;
   outputRows.SetSize(rowsJSON.size);
@@ -622,7 +622,7 @@ std::string DatabaseRoutinesGlobalFunctionsMongo::ToHtmlDatabaseCollection(const
       for (int i = 0; i < theCollectionNames.size; i ++)
       { out << "<br>";
         out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-        << "?request=database&currentDatabaseTable="
+        << "?request =database&currentDatabaseTable="
         << theCollectionNames[i] << "\">" << theCollectionNames[i] << "</a>";
       }
     }

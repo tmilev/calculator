@@ -17,8 +17,8 @@ public:
   std::thread::id theId;
   int index;
   std::string name;
-  std::string ToStringHtml()const;
-  std::string ToStringConsole()const;
+  std::string ToStringHtml() const;
+  std::string ToStringConsole() const;
   static int getCurrentThreadId();
   static void RegisterFirstThread(const std::string& inputName = "");
   static ThreadData& RegisterNewThread(const std::string& inputName = "");
@@ -146,7 +146,7 @@ public:
 
   JSData configuration;
   JSData timeStats;
-  JSData databaseModifiableFields;
+  List<List<std::string> > databaseModifiableFields;
   PauseThread theLocalPauseController;
 
   static std::string hopefullyPermanentWebAdress;
@@ -213,7 +213,7 @@ public:
   double GetElapsedSeconds()
   { if (this->getElapsedTimePrivate != 0)
       return this->getElapsedTimePrivate();
-    return -1;
+    return - 1;
   }
   static void InitThreadsExecutableStart();
   bool UserDefaultHasAdminRights();
@@ -239,8 +239,8 @@ public:
   bool UserDebugFlagOn();
   bool UserStudentVieWOn();
 //  void operator=(const GlobalVariables& other)
-//  { this->IndicatorStringOutputFunction=other.IndicatorStringOutputFunction;
-//    this->theDrawingVariables=other.theDrawingVariables;
+//  { this->IndicatorStringOutputFunction = other.IndicatorStringOutputFunction;
+//    this->theDrawingVariables = other.theDrawingVariables;
 //  }
 //  inline void DrawBufferNoIniT()
 //  { this->theDrawingVariables.drawBufferNoIniT();
@@ -250,7 +250,7 @@ public:
   void ChDir(const std::string& systemCommand);
   std::string ToStringHTMLTopCommandLinuxSystem();
   std::string ToStringSourceCodeInfo();
-  std::string ToStringFolderInfo()const;
+  std::string ToStringFolderInfo() const;
   std::string ToStringProgressReportHtml();
   std::string ToStringProgressReportConsole();
   inline void MakeReport(const std::string& input)

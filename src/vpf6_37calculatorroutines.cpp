@@ -23,8 +23,8 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   if (input.size() != 4)
     return theCommands
     << "I expected three arguments: "
-    << "1) first problem number to test (1 or less= start at the beginning) "
-    << "2) number of tests to run (0 or less= run all) and "
+    << "1) first problem number to test (1 or less = start at the beginning) "
+    << "2) number of tests to run (0 or less = run all) and "
     << "3) number of tests to interpret. ";
   std::stringstream out;
   ProgressReport theReport;
@@ -39,7 +39,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
   ("DefaultProblemLocation/", theFileNames, &theFileTypes, false);
   std::stringstream randSeedStreaM;
   randSeedStreaM << theCommands.theObjectContainer.CurrentRandomSeed;
-  std::string randomSeedCurrent=randSeedStreaM.str();
+  std::string randomSeedCurrent =randSeedStreaM.str();
   out << "Random seed at start: " << randomSeedCurrent << "<br>";
   out << "<table>";
   out << "<tr><th></th>"
@@ -55,13 +55,13 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     firstTestToRun = 1;
   int numInterpretations = 0;
   int totalToInterpret = 0;
-  for (int i = 0; i < theFileNames.size; i++)
+  for (int i = 0; i < theFileNames.size; i ++)
     if (theFileTypes[i] == ".html")
       totalToInterpret++;
   totalToInterpret = MathRoutines::Minimum(numDesiredTests, totalToInterpret);
   MapLisT<std::string, std::string, MathRoutines::hashString>&
   globalKeys = theGlobalVariables.webArguments;
-  for (int i = 0; i < theFileNames.size; i++)
+  for (int i = 0; i < theFileNames.size; i ++)
   { if (numInterpretations >= numDesiredTests)
       break;
     if (theFileTypes[i] != ".html")
@@ -99,7 +99,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     out << "<td>" << numInterpretations << ". <td>";
     out << "<td>"
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request=exerciseNoLogin"
+    << "?request =exerciseNoLogin"
     << "&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
     << "fileName=" << theProblem.fileName << "&randomSeed="
@@ -125,7 +125,7 @@ bool CalculatorFunctionsGeneral::innerAutomatedTestProblemInterpretation
     bool answersWork = false;
     std::string answerGeneration;
     std::string solutionReport;
-    for (int j = 0; j < theProblem.theProblemData.theAnswers.size(); j++)
+    for (int j = 0; j < theProblem.theProblemData.theAnswers.size(); j ++)
     { std::string currentAnswer;
       std::string currentKey = "calculatorAnswer" +
       theProblem.theProblemData.theAnswers[j].answerId;
@@ -217,7 +217,7 @@ bool CalculatorFunctionsGeneral::innerGetFirstSummandContaining(Calculator& theC
     return false;
   List<Expression> theSummands;
   theCommands.CollectOpands(input[1], theCommands.opPlus(), theSummands);
-  for (int i = 0; i < theSummands.size; i++)
+  for (int i = 0; i < theSummands.size; i ++)
     if (theSummands[i].ContainsAsSubExpressionNoBuiltInTypes(input[2]))
     { output = theSummands[i];
       return true;
@@ -239,7 +239,7 @@ bool CalculatorFunctionsGeneral::innerGetSummand(Calculator& theCommands, const 
     List<Expression> theSummands;
     List<Expression> theSums;
     theCommands.CollectOpands(theExpression, theCommands.opPlus(), theSummands);
-    for (int i = 0; i < theSummands.size; i++)
+    for (int i = 0; i < theSummands.size; i ++)
       if (theSummands[i].ContainsAsSubExpressionNoBuiltInTypes(theCommands.opSum()))
       { theSums.AddOnTop(theSummands[i]);
         theSummands.RemoveIndexShiftDown(i);
@@ -563,7 +563,7 @@ bool CalculatorFunctionsGeneral::innerIsSquare(Calculator& theCommands, const Ex
   if (!theLI.value.Factor(theFactors, theMults))
     return theCommands << "Failed to factor: " << theLI.ToString() << " (may be too large?).";
   int result = 1;
-  for (int i = 0; i < theMults.size; i++)
+  for (int i = 0; i < theMults.size; i ++)
     if ((theMults[i] % 2) != 0)
     { result = 0;
       break;
@@ -666,7 +666,7 @@ bool CalculatorFunctionsGeneral::innerSubList(Calculator& theCommands, const Exp
   if (!input[1].IsSequenceNElementS())
     return false;
   HashedList<Expression> boundVars;
-  if(!input[2].GetBoundVariables(boundVars))
+  if (!input[2].GetBoundVariables(boundVars))
     return theCommands << "Could not get bound variables from: " << input[2].ToString();
   if (input[2].IsEqualToOne())
   { output = input[1];
@@ -1335,7 +1335,7 @@ bool CalculatorFunctionsGeneral::innerIsLinearOrConstantIn(Calculator& theComman
     return theCommands << "Failed to extract sum from "
     << input[2].ToString();
   for (int i = 0; i < theSummands.size; i ++)
-  { bool found=false;
+  { bool found= false;
     for (int j = 0; j < theSummands[i].size; j ++)
       if (theSummands[i][j] == input[1])
       { if (found)
@@ -1609,7 +1609,7 @@ bool CalculatorFunctionsGeneral::innerScaleToLeadingUnit(Calculator& theCommands
     return false;
   MonomialCollection<Expression, Rational> theCollection;
   theCommands.CollectSummands(theCommands, input, theCollection);
-  theCollection/=theCollection.GetLeadingCoefficient();
+  theCollection/= theCollection.GetLeadingCoefficient();
   return output.MakeSum(theCommands, theCollection);
 }
 
@@ -1677,9 +1677,9 @@ bool CalculatorFunctionsGeneral::innerNewtonsMethod(Calculator& theCommands, con
   theSub.SetKeyValue("numIterations", input[3]);
 
   return output.AssignStringParsed(
-  "(NewtonMap{}{{a}}= DoubleValue( (iteratedMap=x- f/ Differentiate{}(x, f); x={{a}}; iteratedMap )_3); \
+  "(NewtonMap{}{{a}}= DoubleValue( (iteratedMap =x- f/ Differentiate{}(x, f); x={{a}}; iteratedMap )_3); \
    y_{0} = startingPoint;\
-   y_{{a}}=NewtonMap{}(y_{a-1});\
+   y_{{a}}=NewtonMap{}(y_{a- 1});\
    y_{numIterations})_4"
 
   , &theSub, theCommands);

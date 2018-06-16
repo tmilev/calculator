@@ -93,7 +93,7 @@ void WebServerMonitor::BackupDatabaseIfNeeded()
   logServerMonitor << commandStream.str() << logger::endL;
   theGlobalVariables.CallSystemWithOutput(commandStream.str());
   logServerMonitor << logger::green << "Backing up completed. " << logger::endL;
-  this->timeAtLastBackup=theGlobalVariables.GetElapsedSeconds();
+  this->timeAtLastBackup =theGlobalVariables.GetElapsedSeconds();
 }
 
 void WebServerMonitor::Monitor()
@@ -225,7 +225,7 @@ void WebCrawler::PingCalculatorStatus()
   struct addrinfo *p = 0;  // will point to the results
   this->theSocket = - 1;
   char ipString[INET6_ADDRSTRLEN];
-  for(p = this->serverInfo; p != 0; p = p->ai_next, close(this->theSocket))
+  for (p = this->serverInfo; p != 0; p = p->ai_next, close(this->theSocket))
   { void *theAddress = 0;
     this->theSocket = - 1;
     // get the pointer to the address itself,
@@ -275,7 +275,7 @@ void WebCrawler::PingCalculatorStatus()
       } else
         connectionResult = connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
     }
-    if (connectionResult == -1)
+    if (connectionResult == - 1)
     { reportStream << "<br>Failed to connect: address: " << this->addressToConnectTo << " port: "
       << this->portOrService << ". ";
 //      << explain_errno_connect(this->theSocket, this->serverInfo->ai_addr, this->serverInfo->ai_addrlen);
@@ -284,7 +284,7 @@ void WebCrawler::PingCalculatorStatus()
       continue;
     } else
       reportStream << "<br>connected: " << this->addressToConnectTo << " port: " << this->portOrService << ". ";
-    std::string getMessage = "GET /cgi-bin/calculator?request=statusPublic";
+    std::string getMessage = "GET /cgi-bin/calculator?request =statusPublic";
     std::stringstream errorStream1;
     int numBytes = Pipe::WriteWithTimeoutViaSelect(this->theSocket,getMessage, 1, 10, &errorStream1);
     if ((unsigned) numBytes != getMessage.size())
@@ -339,7 +339,7 @@ void WebCrawler::FetchWebPage
   this->theSocket = - 1;
   char ipString[INET6_ADDRSTRLEN];
   timeval timeOut;
-  for(p = this->serverInfo; p != 0; p = p->ai_next, close(this->theSocket))
+  for (p = this->serverInfo; p != 0; p = p->ai_next, close(this->theSocket))
   { void *theAddress = 0;
     this->theSocket = - 1;
     // get the pointer to the address itself,
@@ -354,7 +354,7 @@ void WebCrawler::FetchWebPage
     { // IPv6
       struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *) p->ai_addr;
       theAddress = &(ipv6->sin6_addr);
-      if (commentsGeneral!=0)
+      if (commentsGeneral!= 0)
         *commentsGeneral << "IPv6: ";
     }
     // convert the IP to a string and print it:
@@ -457,7 +457,7 @@ void WebCrawler::FetchWebPagePart2
        commentsOnFailure, commentsGeneral, true))
     return;
   unsigned bodyStart = 0;
-  int numcrlfs =0;
+  int numcrlfs = 0;
   //std::stringstream tempStream;
   for (; bodyStart < this->headerReceived.size(); bodyStart++)
   { if (numcrlfs >= 4)
@@ -506,7 +506,7 @@ void WebCrawler::FetchWebPagePart2
     return;
   }
   this->flagContinueWasNeeded = true;
-  //if (this->bodyReceivedWithHeader=="")
+  //if (this->bodyReceivedWithHeader =="")
   //{
   theContinueHeader << "HTTP/1.0 100 Continue\r\n\r\n";
   //theContinueHeader << "\r\n\r\n";
@@ -685,9 +685,9 @@ bool Crypto::VerifyJWTagainstKnownKeys
   //This is system dependent and a lot of work-> not doing now, but will do
   //in the future as the need arises.
   JSONWebToken theToken;
-  //if (commentsGeneral!=0)
+  //if (commentsGeneral!= 0)
   //  *commentsGeneral << "DEBUG: inputToken: " << inputToken;
-  //stOutput << "DEBUG:Got to here, part -1";
+  //stOutput << "DEBUG:Got to here, part - 1";
   if (!theToken.AssignString(inputToken, commentsOnFailure))
     return false;
   //stOutput << "DEBUG:Got to here, part -0.5";
@@ -714,12 +714,12 @@ bool Crypto::VerifyJWTagainstKnownKeys
     << keyIDstring << "</b></span>. ";
   for (int i = 0; i < 2; i ++)
   { Crypto::LoadKnownCertificates(commentsOnFailure, commentsGeneral);
-    //if (commentsOnFailure!=0)
+    //if (commentsOnFailure!= 0)
     //  *commentsOnFailure << "DEBUG: got to after loading certificates.";
     for (int j = 0; j < Crypto::knownCertificates.size; j ++)
       if (keyIDstring == Crypto::knownCertificates[j].keyid)
       { theIndex = j;
-        //if (commentsGeneral!=0)
+        //if (commentsGeneral!= 0)
         //  *commentsGeneral << "<br>DEBUG: current keyid: "
         //  << Crypto::knownCertificates[j].keyid;
         break;
@@ -735,7 +735,7 @@ bool Crypto::VerifyJWTagainstKnownKeys
     theCrawler.UpdatePublicKeys(commentsOnFailure, commentsGeneral);
   }
   //stOutput << "DEBUG:Got to here, part 2";
-  //if (commentsOnFailure!=0)
+  //if (commentsOnFailure!= 0)
   //  *commentsOnFailure << "<hr>DEBUG: got to here, PART 2.";
   if (theIndex == - 1)
   { if (commentsOnFailure != 0)
@@ -780,7 +780,7 @@ bool WebCrawler::VerifyRecaptcha
   messageToSendStream << "response="
   << recaptchaURLencoded
   << "&"
-  << "secret="
+  << "secret ="
   << secret;
   this->flagDoUseGET = true;
   this->addressToConnectTo = "https://www.google.com/recaptcha/api/siteverify";;

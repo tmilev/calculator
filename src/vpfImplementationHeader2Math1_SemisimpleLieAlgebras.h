@@ -9,7 +9,7 @@
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderSemisimpleLieAlgebras(__FILE__, "Implementation header, semisimple Lie algebra routines. ");
 
 template <class coefficient>
-std::string Weight<coefficient>::ToString(FormatExpressions* theFormat)const
+std::string Weight<coefficient>::ToString(FormatExpressions* theFormat) const
 { std::stringstream out;
   bool formatWeightAsIndexVectorSpace = theFormat == 0 ? true : theFormat->flagFormatWeightAsVectorSpaceIndex;
   if (!formatWeightAsIndexVectorSpace)
@@ -42,7 +42,7 @@ std::string Weight<coefficient>::ToString(FormatExpressions* theFormat)const
 template <class coefficient>
 void Weight<coefficient>::AccountSingleWeight
 (const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
- Rational& theMult, charSSAlgMod<coefficient>& outputAccum)const
+ Rational& theMult, charSSAlgMod<coefficient>& outputAccum) const
 { //This is the Brauer-Klimyk formula. Reference:
   //Humphreys J., Introduction to Lie algebras and representation theory
   //page 142, exercise 9.
@@ -67,7 +67,7 @@ void Weight<coefficient>::AccountSingleWeight
     return;
   Weight<Rational> tempMon;
   tempMon.owner = this->owner;
-  tempMon.weightFundamentalCoordS=theWeyl.GetFundamentalCoordinatesFromSimple(dominant);
+  tempMon.weightFundamentalCoordS= theWeyl.GetFundamentalCoordinatesFromSimple(dominant);
   coefficient coeffChange;
   coeffChange = theMult;
   coeffChange *= sign;
@@ -78,7 +78,7 @@ void Weight<coefficient>::AccountSingleWeight
 
 template <class coefficient>
 std::string Weight<coefficient>::TensorAndDecompose
-(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output)const
+(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output) const
 { //This is the Brauer-Klimyk formula. Reference:
   //Humphreys J. Introduction to Lie algebras and representation theory
   //page 142, exercise 9.
@@ -107,8 +107,8 @@ std::string Weight<coefficient>::TensorAndDecompose
   }
   HashedList<Vector<Rational> > currentOrbit;
   const int OrbitSizeHardLimit = 10000000;
-//  int theRank=theWeyl.GetDim();
-  Vector<Rational> rightHWSimpleCoords=theWeyl.GetSimpleCoordinatesFromFundamental(rightHWFundCoords);
+//  int theRank= theWeyl.GetDim();
+  Vector<Rational> rightHWSimpleCoords = theWeyl.GetSimpleCoordinatesFromFundamental(rightHWFundCoords);
   Vectors<Rational> tempRoots;
   tempRoots.SetSize(1);
 //  stOutput << "weights of smaller module: " << weightsLeftSimpleCoords.ToString();
@@ -156,7 +156,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeFullCharacter
 }
 
 template <class coefficient>
-void charSSAlgMod<coefficient>::GetDual(charSSAlgMod<coefficient>& output)const
+void charSSAlgMod<coefficient>::GetDual(charSSAlgMod<coefficient>& output) const
 { if (&output == this)
   { charSSAlgMod<coefficient> thisCopy = *this;
     thisCopy.GetDual(output);
@@ -253,7 +253,7 @@ template <class coefficient>
 void SemisimpleLieAlgebra::GetCommonCentralizer
 (const List<ElementSemisimpleLieAlgebra<coefficient> >& inputElementsToCentralize, List<ElementSemisimpleLieAlgebra<coefficient> >& outputCentralizingElements)
 { Matrix<coefficient> tempAd, commonAd;
-  for (int i = 0; i<inputElementsToCentralize.size; i ++)
+  for (int i = 0; i <inputElementsToCentralize.size; i ++)
   { this->GetAd(tempAd, inputElementsToCentralize[i]);
     //tempAd.Transpose();
     commonAd.AppendMatrixToTheBottom(tempAd);
@@ -264,7 +264,7 @@ void SemisimpleLieAlgebra::GetCommonCentralizer
 //  stOutput << "<br>Eigenvectors: " << outputV.ToString();
   outputCentralizingElements.SetSize(outputV.size);
   for (int i = 0; i < outputV.size; i ++)
-  { ElementSemisimpleLieAlgebra<coefficient>& currentElt=outputCentralizingElements[i];
+  { ElementSemisimpleLieAlgebra<coefficient>& currentElt = outputCentralizingElements[i];
     currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputV[i], *this);
   }
 }
@@ -308,7 +308,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::ActOnMe
 }
 
 template <class coefficient>
-Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart()const
+Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart() const
 { Vector<coefficient> result;
   if (this->IsEqualToZero())
   { result.MakeZero(0);
@@ -333,7 +333,7 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart()con
 }
 
 template <class coefficient>
-void ElementSemisimpleLieAlgebra<coefficient>::ElementToVectorNegativeRootSpacesFirst(Vector<coefficient>& output)const
+void ElementSemisimpleLieAlgebra<coefficient>::ElementToVectorNegativeRootSpacesFirst(Vector<coefficient>& output) const
 { if (this->IsEqualToZero())
   { output.MakeZero(0);
     return;
@@ -361,7 +361,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::AssignVectorNegRootSpacesCartanPo
 }
 
 template<class coefficient>
-bool ElementSemisimpleLieAlgebra<coefficient>::IsElementCartan()const
+bool ElementSemisimpleLieAlgebra<coefficient>::IsElementCartan() const
 { if (this->size() == 0)
     return true;
   SemisimpleLieAlgebra* owner = (*this)[0].owner;
@@ -424,7 +424,7 @@ bool charSSAlgMod<coefficient>::DrawMe
 }
 
 template <class coefficient>
-void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, DrawingVariables& theDrawingVars)const
+void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(WeylGroupData& actualAmbientWeyl, DrawingVariables& theDrawingVars) const
 { if (actualAmbientWeyl.GetDim() < 2)
     return;
   Vector<coefficient> actualWeight;
@@ -537,7 +537,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
 //    stOutput << "<hr>the orbit with highest weight "
 //    << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoords).ToString()
 //    << " is: ";
-//    for (int l=0; l<orbitDom.size; l++)
+//    for (int l = 0; l<orbitDom.size; l ++)
 //      stOutput <<"<br>" << orbitDom[l].ToString();
 //    stOutput << "<hr>of them dominant are: <br>";
     tempMon.owner = this->GetOwner();
@@ -574,7 +574,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
 // (remainingCharProjected.ToString());
   Vector<coefficient> simpleGeneratorBaseField;
   output.MakeZero();
-  while(!remainingCharProjected.IsEqualToZero())
+  while (!remainingCharProjected.IsEqualToZero())
   { localHighest = *remainingCharProjected.theMonomials.LastObject();
     for (bool Found = true; Found;)
     { Found = false;
@@ -617,7 +617,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     }
 //    stOutput << "<br>remaining character after accounting:<br>" << remainingCharProjected.ToString();
   }
-  theFormat.fundamentalWeightLetter="\\psi";
+  theFormat.fundamentalWeightLetter ="\\psi";
   out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: " << HtmlRoutines::GetMathSpanPure(output.ToString(&theFormat));
 //  stOutput << "<br>Character w.r.t Levi part: " << HtmlRoutines::GetMathSpanPure
 //  (output.ToString())
@@ -652,8 +652,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     Vector<Rational> tempRoot;
     out << "<hr>In the following weight visualization, a yellow line is drawn if the corresponding weights are "
     << " simple reflections of one another, with respect to a simple Vector<Rational> of the Levi part of the parabolic subalgebra. ";
-    for (int i=0; i<output.size; i++)
-    { tempRoot=theWeyl.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoords).GetVectorRational();
+    for (int i = 0; i <output.size; i ++)
+    { tempRoot = theWeyl.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoords).GetVectorRational();
       outputSubGroup.DrawContour
       (tempRoot, theDV2, HtmlRoutines::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;

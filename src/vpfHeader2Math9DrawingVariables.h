@@ -160,7 +160,7 @@ public:
   List<List<double> > ProjectionsEiVectors;
   List<Vectors<double> > BasisProjectionPlane;
   static const int GraphicsUnitDefault = 150;
-  int SelectedCircleMinus2noneMinus1Center; //-2= none, -1=center of coordinate system, nonnegative integers= selectedindex
+  int SelectedCircleMinus2noneMinus1Center; //-2= none, - 1=center of coordinate system, nonnegative integers = selectedindex
   Vectors<double> BasisToDrawCirclesAt;
   Matrix<double> theBilinearForm;
   double ClickToleranceX;
@@ -248,7 +248,7 @@ public:
       this->centerY[this->SelectedPlane] = Y;
       return true;
     }
-    if (this->SelectedCircleMinus2noneMinus1Center>=0)
+    if (this->SelectedCircleMinus2noneMinus1Center>= 0)
     { if (this->flagRotatingPreservingAngles)
       { this->changeBasisPReserveAngles((double) X , (double) Y);
         return true;

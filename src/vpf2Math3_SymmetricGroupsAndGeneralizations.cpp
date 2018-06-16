@@ -23,20 +23,20 @@ int Partition::Fulton61z() const
 int acc = 1;
   List<int> nums;
   List<int> counts;
-  for(int i=0; i<this->p.size; i++)
+  for (int i = 0; i < this->p.size; i ++)
   { int numdex = nums.GetIndex(this->p[i]);
-    if(numdex == -1)
+    if (numdex == - 1)
     { nums.AddOnTop(this->p[i]);
       counts.AddOnTop(1);
     } else
     { counts[numdex] += 1;
     }
   }
-  for(int i=0; i<nums.size; i++)
+  for (int i = 0; i <nums.size; i ++)
   { int acci = 1;
-    for(int j=0; j<counts[i]; j++)
+    for (int j = 0; j<counts[i]; j ++)
       acci *= nums[i];
-    for(int j=1; j<counts[i]; j++)
+    for (int j =1; j<counts[i]; j ++)
       acci *= j;
     acc *= acci;
   }
@@ -50,35 +50,35 @@ int& Partition::operator[](int i) const
 void Partition::FromListInt(const List<int> &in, int lastElement)
 { this->n = 0;
   this->p.SetSize(0);
-  int l = -1;
-  int i=0;
-  if(lastElement == -1)
+  int l = - 1;
+  int i = 0;
+  if (lastElement == - 1)
     lastElement = in.size;
   bool needsSorting;
-  for(; i<lastElement; i++)
-  { if(in[i] < 0)
+  for (; i <lastElement; i ++)
+  { if (in[i] < 0)
       crash << "Partitions should not have negative numbers in them";
-    if((in[i] > l) && (l != -1))
+    if ((in[i] > l) && (l != - 1))
       needsSorting = true;
     l = in[i];
-    if(in[i] == 0)
+    if (in[i] == 0)
       continue;
     this->n += in[i];
     this->p.AddOnTop(in[i]);
   }
-  if(needsSorting)
+  if (needsSorting)
     p.QuickSortDescending();
 }
 
 void Partition::GetPartitions(List<Partition>& out, int n)
 { out.SetSize(0);
-  if(n==0)
+  if (n == 0)
   { out.SetSize(1);
     out[0].n = 0;
     out[0].p.SetSize(0);
     return;
   }
-  if(n==1)
+  if (n ==1)
   { out.SetSize(1);
     out[0].n = 1;
     out[0].p.SetSize(0);
@@ -89,12 +89,12 @@ void Partition::GetPartitions(List<Partition>& out, int n)
   p.initFillInObject(n,0);
   p[1] = n;
   int k = 1;
-  while(k != 0)
-  { int x = p[k-1] + 1;
+  while (k != 0)
+  { int x = p[k- 1] + 1;
     int y = p[k] - 1;
     k -= 1;
 //    stOutput << "x: " << x << "<br>y: " << y << "<br>p: " << p << "<br>k: " << k << "<hr>";
-    while(x <= y)
+    while (x <= y)
     { p[k] = x;
       y -= x;
       k += 1;
@@ -102,19 +102,19 @@ void Partition::GetPartitions(List<Partition>& out, int n)
     }
     p[k] = x+y;
 //    stOutput << "x: " << x << "<br>y: " << y << "<br>p: " << p << "<br>k: " << k << "<hr>";
-    //out.SetSize(out.size+1);
-    //out[out.size-1].FromListInt(p,k+1);
+    //out.SetSize(out.size + 1);
+    //out[out.size- 1].FromListInt(p,k+ 1);
     int s = out.size;
-    out.SetSize(s+1);
-    out[s].p.SetSize(k+1);
-    for(int i=0; i<k+1; i++)
+    out.SetSize(s+ 1);
+    out[s].p.SetSize(k+ 1);
+    for (int i = 0; i <k+ 1; i ++)
       out[s].p[i] = p[k-i];
     out[s].n = n;
   }
 }
 
 void Partition::Transpose()
-{ if (this->n==0)
+{ if (this->n == 0)
     return;
   //if a partition is laid out like this:
   // example: partition [4,2,1]:
@@ -129,25 +129,25 @@ void Partition::Transpose()
   // *
   Partition myCopy=*this;
   this->p.SetSize(myCopy.p[0]);
-  for (int i=0; i<*myCopy.p.LastObject(); i++)
+  for (int i = 0; i <*myCopy.p.LastObject(); i ++)
     this->p[i]=myCopy.p.size;
   int currentIndex=*myCopy.p.LastObject();
-  for (int i=myCopy.p.size-2; i>=0; i--)
-    for (int j=0; j<myCopy.p[i]-myCopy.p[i+1]; j++)
-    { this->p[currentIndex]=i+1;
+  for (int i =myCopy.p.size-2; i>= 0; i--)
+    for (int j = 0; j<myCopy.p[i]-myCopy.p[i+ 1]; j ++)
+    { this->p[currentIndex]=i+ 1;
       currentIndex++;
     }
 }
 
 void Partition::FillTableau(Tableau& out, List<int>& stuffing) const
-{ if(stuffing.size < this->n)
+{ if (stuffing.size < this->n)
     crash << "need at least " << this->n << " things to stuff tableau with partition " << *this << " but you provided only " << stuffing.size << '\n' << crash;
 
   out.t.SetSize(this->p.size);
   int cur = 0;
-  for(int i=0; i<this->p.size; i++)
+  for (int i = 0; i < this->p.size; i ++)
   { out.t[i].SetSize(this->p[i]);
-    for(int j=0; j<this->p[i]; j++)
+    for (int j = 0; j< this->p[i]; j ++)
     { out.t[i][j] = stuffing[cur];
       cur++;
     }
@@ -158,9 +158,9 @@ void Partition::FillTableau(Tableau& out, List<int>& stuffing) const
 void Partition::FillTableauOrdered(Tableau& in) const
 { in.t.SetSize(this->p.size);
   int cur = 0;
-  for(int i=0; i<this->p.size; i++)
+  for (int i = 0; i < this->p.size; i ++)
   { in.t[i].SetSize(this->p[i]);
-    for(int j=0; j<this->p[i]; j++)
+    for (int j = 0; j< this->p[i]; j ++)
     { in.t[i][j] = cur;
       cur++;
     }
@@ -170,10 +170,10 @@ void Partition::FillTableauOrdered(Tableau& in) const
 void Partition::GetAllStandardTableaux(List<Tableau>& out) const
 { //stOutput << "Debugging Partition::GetAllStandardTableaux with partition " << *this << "\n";
   GeneratorPermutationsOfList<int> perms;
-  for(perms.Initialize(this->n); !perms.DoneIterating(); ++perms)
+  for (perms.Initialize(this->n); !perms.DoneIterating(); ++perms)
   { Tableau theTableau;
     this->FillTableau(theTableau,*perms);
-    if(theTableau.IsStandard())
+    if (theTableau.IsStandard())
       out.AddOnTop(theTableau);
   }
 }
@@ -183,9 +183,9 @@ void Partition::TestAllSpechtModules(int n)
   List<Partition> partitions;
   Partition::GetPartitions(partitions, n);
   int fac = 1;
-  for(int i=1; i<=n; i++)
+  for (int i =1; i <=n; i ++)
     fac *= i;
-  for(int i=0; i<partitions.size; i++)
+  for (int i = 0; i <partitions.size; i ++)
   { //std::cout << partitions[i] << "\n";
     stOutput << partitions[i] << "\n";
     //std::cout << "got to here\n";
@@ -194,13 +194,13 @@ void Partition::TestAllSpechtModules(int n)
     //std::cout << "got to here2\n";
     partitions[i].SpechtModuleMatricesOfTranspositionsjjplusone(repgens);
     //std::cout << "got to here3\n";
-    for(int ri=0; ri<repgens.size; ri++)
+    for (int ri = 0; ri <repgens.size; ri ++)
     { //std::cout << "got to here4\n";
       stOutput << repgens[ri].ToStringPlainText();
       //std::cout << "got to here5\n";
       Rational det = repgens[ri].GetDeterminant();
       stOutput << " determinant is " << det << "\n\n";
-      if((det != 1) && (det != -1))
+      if ((det != 1) && (det != - 1))
         crash << "invalid determinant" << crash;
     }
     std::cout << "got to here7\n";
@@ -212,8 +212,8 @@ void Partition::TestAllSpechtModules(int n)
     std::cout << "got to here10\n";
     stOutput << outg << "\n\n\n";
     std::cout << "got to here11\n";
-    if (outg.theElements.size!=0)
-      if((fac % outg.theElements.size) != 0)
+    if (outg.theElements.size!= 0)
+      if ((fac % outg.theElements.size) != 0)
         crash << "invalid elements count" << crash;
   }
 }
@@ -228,28 +228,28 @@ bool Partition::operator!=(const Partition& right) const
 
 // largest numbers first
 bool Partition::operator<(const Partition& right) const
-{ if(this->n < right.n)
+{ if (this->n < right.n)
     return true;
-  if(this->n > right.n)
+  if (this->n > right.n)
     return false;
   // largest first
-  if(this->p > right.p)
+  if (this->p > right.p)
     return true;
-  if(this->p < right.p)
+  if (this->p < right.p)
     return false;
   return false;
 }
 
 // is there a better way to do this then copypasting codes?
 bool Partition::operator>(const Partition& right) const
-{ if(this->n < right.n)
+{ if (this->n < right.n)
     return false;
-  if(this->n > right.n)
+  if (this->n > right.n)
     return true;
   // largest first
-  if(this->p > right.p)
+  if (this->p > right.p)
     return false;
-  if(this->p < right.p)
+  if (this->p < right.p)
     return true;
   return false;
 }
@@ -263,13 +263,13 @@ std::string Partition::ToString() const
 std::string Partition::ToStringForArticles
 (const std::string& leftParenthesis,
  const std::string& rightParenthesis) const
-{ if (this->n==0)
+{ if (this->n == 0)
     return "\\emptyset";
   std::stringstream out;
   out << leftParenthesis;
-  for (int i=0; i<this->p.size; i++)
+  for (int i = 0; i < this->p.size; i ++)
   { out << this->p[i];
-    if (i!=this->p.size-1)
+    if (i!= this->p.size- 1)
       out << ", ";
   }
   out << rightParenthesis;
@@ -280,19 +280,19 @@ std::string Partition::ToStringForArticles
 
 List<int> Tableau::TurnIntoList() const
 { List<int> out;
-  for(int i=0; i<this->t.size; i++)
-    for(int j=0; j<this->t[i].size; j++)
+  for (int i = 0; i < this->t.size; i ++)
+    for (int j = 0; j< this->t[i].size; j ++)
       out.AddOnTop(this->t[i][j]);
   return out;
 }
 
 List<List<int> > Tableau::GetColumns() const
 { List<List<int> > out;
-  if(this->t.size == 0)
+  if (this->t.size == 0)
     return out;
   out.SetSize(this->t[0].size);
-  for(int i=0; i<this->t[0].size; i++)
-  { for(int j=0; j<t.size && t[j].size > i; j++)
+  for (int i = 0; i < this->t[0].size; i ++)
+  { for (int j = 0; j<t.size && t[j].size > i; j ++)
     { out[i].AddOnTop(t[j][i]);
     }
   }
@@ -302,34 +302,34 @@ List<List<int> > Tableau::GetColumns() const
 bool Tableau::IsStandard() const
 {// stOutput << "Debugging Tableau::IsStandard: ";
  // stOutput << *this << " is ";
-  if(this->t.size == 0)
+  if (this->t.size == 0)
   {// stOutput << "standard.\n";
     return true;
   }
-  for(int i=0; i<this->t.size; i++)
-  { int cur=-1;
-    for(int j=0; j<this->t[i].size; j++)
-    { if(!(cur < this->t[i][j]))
+  for (int i = 0; i < this->t.size; i ++)
+  { int cur = - 1;
+    for (int j = 0; j< this->t[i].size; j ++)
+    { if (!(cur < this->t[i][j]))
       {// stOutput << "not standard (row " << i << ").\n";
         return false;
       }
       cur = this->t[i][j];
     }
   }
-  for(int i=0; i<this->t[0].size; i++)
-  { int cur = -1;
-    int j=0;
-    while(true)
-    { if(j == this->t.size)
+  for (int i = 0; i < this->t[0].size; i ++)
+  { int cur = - 1;
+    int j = 0;
+    while (true)
+    { if (j == this->t.size)
         break;
-      if(this->t[j].size <= i)
+      if (this->t[j].size <= i)
         break;
-      if(!(cur <= this->t[j][i]))
+      if (!(cur <= this->t[j][i]))
       {// stOutput << "not standard (column " << i << ").\n";
         return false;
       }
       cur = this->t[j][i];
-      j++;
+      j ++;
     }
   }
   //stOutput << "standard.\n";
@@ -337,27 +337,27 @@ bool Tableau::IsStandard() const
 }
 
 void Tableau::RowStabilizer(FiniteGroup<PermutationR2>& in) const
-{ for(int i=0; i<this->t.size; i++)
-  { if(this->t[i].size == 1)
+{ for (int i = 0; i < this->t.size; i ++)
+  { if (this->t[i].size == 1)
       continue;
-    for(int j=1; j<this->t[i].size; j++)
-    { in.generators.SetSize(in.generators.size+1);
-      in.generators[in.generators.size-1].BuildTransposition(this->t[i][0],this->t[i][j]);
+    for (int j =1; j< this->t[i].size; j ++)
+    { in.generators.SetSize(in.generators.size + 1);
+      in.generators[in.generators.size- 1].BuildTransposition(this->t[i][0],this->t[i][j]);
     }
   }
 }
 
 void Tableau::ColumnStabilizer(FiniteGroup<PermutationR2>& in) const
-{ if(this->t.size == 0)
+{ if (this->t.size == 0)
     return;
-  for(int i=0; i<this->t[0].size; i++)
-  { int j=1;
-    while(true)
-    { if((j==this->t.size) || (this->t[j].size <= i))
+  for (int i = 0; i < this->t[0].size; i ++)
+  { int j =1;
+    while (true)
+    { if ((j == this->t.size) || (this->t[j].size <= i))
         break;
-      in.generators.SetSize(in.generators.size+1);
-      in.generators[in.generators.size-1].BuildTransposition(this->t[0][i],this->t[j][i]);
-      j++;
+      in.generators.SetSize(in.generators.size + 1);
+      in.generators[in.generators.size- 1].BuildTransposition(this->t[0][i],this->t[j][i]);
+      j ++;
     }
   }
 }
@@ -377,38 +377,38 @@ std::string Tableau::ToString() const
 void PermutationR2::MakeCanonical()
 { int bon = this->BiggestOccurringNumber();
   List<bool> used;
-  used.initFillInObject(bon+1,false);
-  for(int i=0; i<used.size; i++)
+  used.initFillInObject(bon + 1,false);
+  for (int i = 0; i <used.size; i ++)
     used[i] = false;
   List<List<int> > tmp;
-  for(int i=0; i<=bon; i++)
-  { if(used[i])
+  for (int i = 0; i <=bon; i ++)
+  { if (used[i])
       continue;
     int head = i;
     int cur = head;
     bool incycle = false;
-    while(true)
+    while (true)
     { // same as int operator*(int) but without the short circuit
-      for(int j=this->cycles.size-1; j>=0; j--)
-      { for(int k=0; k<this->cycles[j].size; k++)
-        { if(this->cycles[j][k] != cur)
+      for (int j = this->cycles.size- 1; j>= 0; j--)
+      { for (int k= 0; k< this->cycles[j].size; k++)
+        { if (this->cycles[j][k] != cur)
             continue;
-          if(k != this->cycles[j].size-1)
-            cur = this->cycles[j][k+1];
+          if (k != this->cycles[j].size- 1)
+            cur = this->cycles[j][k+ 1];
           else
             cur = this->cycles[j][0];
         break;
         }
       }
-      if(cur == head)
+      if (cur == head)
         break;
-      if(!incycle)
+      if (!incycle)
       { tmp.SetSize(tmp.size + 1);
-        tmp[tmp.size-1].AddOnTop(head);
+        tmp[tmp.size- 1].AddOnTop(head);
         used[head] = true;
         incycle = true;
       }
-      tmp[tmp.size-1].AddOnTop(cur);
+      tmp[tmp.size- 1].AddOnTop(cur);
       used[cur] = true;
     }
   }
@@ -418,20 +418,20 @@ void PermutationR2::MakeCanonical()
 }
 
 int PermutationR2::BiggestOccurringNumber() const
-{ int bon=0;
-  for(int i=0; i<this->cycles.size; i++)
-    for(int j=0; j<this->cycles[i].size; j++)
-      if(bon < this->cycles[i][j])
+{ int bon = 0;
+  for (int i = 0; i < this->cycles.size; i ++)
+    for (int j = 0; j< this->cycles[i].size; j ++)
+      if (bon < this->cycles[i][j])
         bon = this->cycles[i][j];
   return bon;
 }
 
 int PermutationR2::operator*(int cur) const
-{ for(int i=0; i<this->cycles.size; i++)
-    for(int j=0; j<this->cycles[i].size; j++)
-      if(this->cycles[i][j] == cur)
-      { if(j+1 != this->cycles[i].size)
-          cur = this->cycles[i][j+1];
+{ for (int i = 0; i < this->cycles.size; i ++)
+    for (int j = 0; j< this->cycles[i].size; j ++)
+      if (this->cycles[i][j] == cur)
+      { if (j+ 1 != this->cycles[i].size)
+          cur = this->cycles[i][j+ 1];
         else
           cur = this->cycles[i][0];
         break;
@@ -444,30 +444,30 @@ int PermutationR2::MakeFromMul(const PermutationR2& left, const PermutationR2& r
   int rbon = right.BiggestOccurringNumber();
   int bon = (lbon > rbon)?lbon:rbon;
   List<bool> unused;
-  unused.SetSize(bon+1);
-  for(int i=0; i<bon; i++)
+  unused.SetSize(bon + 1);
+  for (int i = 0; i <bon; i ++)
     unused[i] = true;
   bool incycle = false;
   this->cycles.SetSize(0);
-  for(int head=0; head<bon; head++)
-  { if(!unused[head])
+  for (int head= 0; head<bon; head++)
+  { if (!unused[head])
       continue;
     unused[head] = false;
     int cur = head;
-    while(true)
+    while (true)
     { cur = right*cur;
       cur = left*cur;
-      if(cur == head)
+      if (cur == head)
       { incycle = false;
         break;
       }
-      if(!incycle)
-      { this->cycles.SetSize(this->cycles.size+1);
-        this->cycles[this->cycles.size-1].SetSize(0);
-        this->cycles[this->cycles.size-1].AddOnTop(head);
+      if (!incycle)
+      { this->cycles.SetSize(this->cycles.size + 1);
+        this->cycles[this->cycles.size- 1].SetSize(0);
+        this->cycles[this->cycles.size- 1].AddOnTop(head);
         incycle = true;
       }
-      this->cycles[this->cycles.size-1].AddOnTop(cur);
+      this->cycles[this->cycles.size- 1].AddOnTop(cur);
       unused[cur] = false;
     }
   }
@@ -487,8 +487,8 @@ void PermutationR2::MakeID(const PermutationR2& unused)
 
 void PermutationR2::Invert()
 { //stOutput << "Inverting permutation: " << *this;
-  for(int i=0; i<this->cycles.size; i++)
-  { if(this->cycles[i].size == 2)
+  for (int i = 0; i < this->cycles.size; i ++)
+  { if (this->cycles[i].size == 2)
       continue;
     this->cycles[i].ReverseRange(1,this->cycles[i].size);
   }
@@ -509,16 +509,16 @@ bool PermutationR2::AreConjugate(const PermutationR2& x, const PermutationR2& y)
 { List<int> xcsh, ycsh;
   x.GetCycleStructure(xcsh);
   y.GetCycleStructure(ycsh);
-  if(xcsh != ycsh)
+  if (xcsh != ycsh)
     return false;
   return true;
 }
 
 int PermutationR2::Sign() const
 { int sign = 1;
-  for(int i=0; i<this->cycles.size; i++)
-    if(!(this->cycles[i].size % 2))
-      sign *= -1;
+  for (int i = 0; i < this->cycles.size; i ++)
+    if (!(this->cycles[i].size % 2))
+      sign *= - 1;
   return sign;
 }
 
@@ -527,9 +527,9 @@ void PermutationR2::BuildCycle(const List<int>& cycle)
 }
 
 void PermutationR2::BuildTransposition(int i, int j)
-{ this->cycles.SetSize(this->cycles.size+1);
+{ this->cycles.SetSize(this->cycles.size + 1);
   this->cycles[0].SetSize(2);
-  if(i<j)
+  if (i <j)
   { this->cycles[0][0] = i;
     this->cycles[0][1] = j;
   }
@@ -545,7 +545,7 @@ void PermutationR2::AddCycle(const List<int>& cycle)
 }
 
 void PermutationR2::AddTransposition(int i, int j)
-{ this->BuildTransposition(i,j);
+{ this->BuildTransposition(i, j);
   this->MakeCanonical();
 }
 
@@ -556,31 +556,31 @@ void PermutationR2::MakeFromListOfCycles(const List<List<int> >& inCycles)
 
 // same code as operator* lolol
 void PermutationR2::MakeFromActionDescription(const List<int>& actionDescription)
-{ int bon = actionDescription.size-1;
+{ int bon = actionDescription.size- 1;
   List<bool> unused;
-  unused.SetSize(bon+1);
-  for(int i=0; i<bon; i++)
+  unused.SetSize(bon + 1);
+  for (int i = 0; i <bon; i ++)
     unused[i] = true;
   bool incycle = false;
   this->cycles.SetSize(0);
-  for(int head=0; head<bon; head++)
-  { if(!unused[head])
+  for (int head= 0; head<bon; head++)
+  { if (!unused[head])
       continue;
     unused[head] = false;
     int cur = head;
-    while(true)
+    while (true)
     { cur = actionDescription[cur];
-      if(cur == head)
+      if (cur == head)
       { incycle = false;
         break;
       }
-      if(!incycle)
-      { this->cycles.SetSize(this->cycles.size+1);
-        this->cycles[this->cycles.size-1].SetSize(0);
-        this->cycles[this->cycles.size-1].AddOnTop(head);
+      if (!incycle)
+      { this->cycles.SetSize(this->cycles.size + 1);
+        this->cycles[this->cycles.size- 1].SetSize(0);
+        this->cycles[this->cycles.size- 1].AddOnTop(head);
         incycle = true;
       }
-      this->cycles[this->cycles.size-1].AddOnTop(cur);
+      this->cycles[this->cycles.size- 1].AddOnTop(cur);
       unused[cur] = false;
     }
   }
@@ -590,27 +590,27 @@ void PermutationR2::MakeFromString(const std::string& cppin)
 { const char* in = cppin.c_str();
   int insize = cppin.length();
   List<List<int> > cycles;
-  int curintstart=-1;
-  for(int i=0; i<insize; i++)
+  int curintstart = - 1;
+  for (int i = 0; i <insize; i ++)
   { switch(in[i])
     {
     case '(':
-    { cycles.SetSize(cycles.size+1);
-      curintstart = i+1;
+    { cycles.SetSize(cycles.size + 1);
+      curintstart = i+ 1;
       continue;
     }
     case ')':
-    { if(curintstart != i)
+    { if (curintstart != i)
       { std::string ss = cppin.substr(curintstart, i);
         cycles.LastObject()->AddOnTop(atoi(ss.c_str()));
       } else
-        cycles.SetSize(cycles.size-1);
+        cycles.SetSize(cycles.size- 1);
       continue;
     }
     case ',':
     { std::string ss = cppin.substr(curintstart, i);
       cycles.LastObject()->AddOnTop(atoi(ss.c_str()));
-      curintstart = i+1;
+      curintstart = i+ 1;
       continue;
     }
     }
@@ -620,30 +620,30 @@ void PermutationR2::MakeFromString(const std::string& cppin)
 
 void PermutationR2::GetCycleStructure(List<int>& out) const
 { int N = 0;
-  for(int i=0; i<this->cycles.size; i++)
-    if(N<this->cycles[i].size)
+  for (int i = 0; i < this->cycles.size; i ++)
+    if (N< this->cycles[i].size)
       N = this->cycles[i].size;
-  out.initFillInObject(N+1,0);
+  out.initFillInObject(N+ 1,0);
 
-  for(int i=0; i<this->cycles.size; i++)
+  for (int i = 0; i < this->cycles.size; i ++)
     out[this->cycles[i].size] += 1;
 }
 
 void PermutationR2::GetCycleStructure(Partition& out, int n_in_Sn) const
 { // unless otherwise specified, use the smallest group we are
   // canonically an element of
-  if(n_in_Sn == -1)
+  if (n_in_Sn == - 1)
     n_in_Sn = this->BiggestOccurringNumber();
   out.n = n_in_Sn;
   out.p.SetSize(this->cycles.size);
-  for(int i=0; i<this->cycles.size; i++)
+  for (int i = 0; i < this->cycles.size; i ++)
     out.p[i] = this->cycles[i].size;
   out.p.QuickSortDescending();
 }
 
 void PermutationR2::MakeFromTableauRows(const Tableau& in)
 { this->cycles.SetSize(in.t.size);
-  for(int i=0; i<in.t.size; i++)
+  for (int i = 0; i <in.t.size; i ++)
     this->cycles[i] = in.t[i];
   this->MakeCanonical();
 }
@@ -659,11 +659,11 @@ bool PermutationR2::IsID() const
 unsigned int PermutationR2::HashFunction() const
 { unsigned int acc = 0;
   unsigned int n = 0;
-  for(int i=0; i<this->cycles.size; i++)
-    for(int j=0; j<this->cycles[i].size; j++)
+  for (int i = 0; i < this->cycles.size; i ++)
+    for (int j = 0; j< this->cycles[i].size; j ++)
     { acc += SomeRandomPrimes[n] * this->cycles[i][j];
-      n++;
-      if(n >= (unsigned) SomeRandomPrimesSize)
+      n ++;
+      if (n >= (unsigned) SomeRandomPrimesSize)
         n = 0;
     }
   return acc;
@@ -672,13 +672,13 @@ unsigned int PermutationR2::HashFunction() const
 
 std::string PermutationR2::ToString(FormatExpressions* format) const
 { std::stringstream out;
-  if (format!=0)
+  if (format!= 0)
   { out << "(";
-    for(int i=0; i<this->cycles.size; i++)
+    for (int i = 0; i < this->cycles.size; i ++)
     { out << "(";
-      for(int j=0; j<this->cycles[i].size; j++)
-      { out << this->cycles[i][j]+1;
-        if(j!=this->cycles[i].size-1)
+      for (int j = 0; j< this->cycles[i].size; j ++)
+      { out << this->cycles[i][j]+ 1;
+        if (j!= this->cycles[i].size- 1)
           out << ", ";
       }
       out << ")";
@@ -697,62 +697,62 @@ std::string PermutationR2::ToString(FormatExpressions* format) const
 // should this get stuffed in MonomialTensor?
 void PermutationR2::ActOnMonomialTensor(MonomialTensor<int,MathRoutines::IntUnsignIdentity>& out, const MonomialTensor<int,MathRoutines::IntUnsignIdentity>& in) const
 {// stOutput << "Debugging PermutationR2::ActOnMonomialTensor: " << *this << " acting on " << in << "\n";
-  int rank=0;
-  for(int i=0; i<in.Powers.size; i++)
+  int rank= 0;
+  for (int i = 0; i <in.Powers.size; i ++)
     rank += in.Powers[i];
   List<int> expanded;
   expanded.SetSize(rank);
-  for(int i=0,cur=0; i<in.generatorsIndices.size; i++)
-     for(int j=0; j<in.Powers[i]; j++)
+  for (int i = 0,cur = 0; i <in.generatorsIndices.size; i ++)
+     for (int j = 0; j<in.Powers[i]; j ++)
      { expanded[cur] = in.generatorsIndices[i];
          cur++;
      }
   //stOutput << "Exponents expanded: ";
-  //for(int i=0; i<expanded.size; i++)
+  //for (int i = 0; i <expanded.size; i ++)
   //  stOutput << expanded[i] << " ";
   this->ActOnList(expanded);
   //stOutput << "\nIndices permuted:   ";
-  //for(int i=0; i<expanded.size; i++)
+  //for (int i = 0; i <expanded.size; i ++)
   //  stOutput << expanded[i] << " ";
   //stOutput << "\n";
-  int i=0, xi=0;
-  while(xi < expanded.size)
+  int i = 0, xi = 0;
+  while (xi < expanded.size)
   { out.generatorsIndices.AddOnTop(expanded[xi]);
-    xi++;
-    for(int j=1; ; j++,xi++)
-      if((xi==expanded.size) || (expanded[xi]!=out.generatorsIndices[i]))
+    xi ++;
+    for (int j =1; ; j ++,xi ++)
+      if ((xi ==expanded.size) || (expanded[xi]!= out.generatorsIndices[i]))
       { out.Powers.AddOnTop(j);
         break;
       }
-    i++;
+    i ++;
   }
   //stOutput << "Reassembled: " << out << "\n";
 }
 
 void PermutationR2::GetWordjjPlus1(List<int>& word) const
 { List<int> transpositions;
-  for(int i=0; i<this->cycles.size; i++)
-  { for(int j=0; j<this->cycles[i].size-1; j++)
+  for (int i = 0; i < this->cycles.size; i ++)
+  { for (int j = 0; j< this->cycles[i].size- 1; j ++)
     { transpositions.AddOnTop(this->cycles[i][j]);
-      transpositions.AddOnTop(this->cycles[i][j+1]);
+      transpositions.AddOnTop(this->cycles[i][j+ 1]);
     }
   }
-  for(int i=0; i<transpositions.size; i+=2)
+  for (int i = 0; i <transpositions.size; i+=2)
   { int ti = transpositions[i];
-    int tj = transpositions[i+1];
-    if(ti > tj)
+    int tj = transpositions[i+ 1];
+    if (ti > tj)
     { int tk = ti;
       ti = tj;
       tj = tk;
     }
-    int tl = tj - ti -1;
-    for(int tt=0; tt<tl; tt++)
+    int tl = tj - ti - 1;
+    for (int tt = 0; tt<tl; tt++)
       word.AddOnTop(ti+tt);
-    word.AddOnTop(tj-1);
+    word.AddOnTop(tj- 1);
     int end = word.size-2;
-    for(int tt=0; tt<tl; tt++)
-    { word.SetSize(word.size+1);
-      word[word.size-1] = word[end-tt];
+    for (int tt = 0; tt<tl; tt++)
+    { word.SetSize(word.size + 1);
+      word[word.size- 1] = word[end-tt];
     }
   }
   //stOutput << *this << " has transpositions " << transpositions.ToStringCommaDelimited() << " and word " << word.ToStringCommaDelimited() << '\n';
@@ -761,9 +761,9 @@ void PermutationR2::GetWordjjPlus1(List<int>& word) const
 
 void PermutationGroupData::MakeSymmetricGroup(int n)
 { this->theGroup = &this->theGroupMayBeHereNameIsLongToDiscourageUse;
-  this->theGroup->generators.SetSize(n-1);
-  for(int i=0; i<n-1; i++)
-  { this->theGroup->generators[i].AddTransposition(0,i+1);
+  this->theGroup->generators.SetSize(n- 1);
+  for (int i = 0; i <n- 1; i ++)
+  { this->theGroup->generators[i].AddTransposition(0,i+ 1);
   }
   this->flagIsSymmetricGroup = true;
   this->flagHasGenerators1j = true;
@@ -775,9 +775,9 @@ void PermutationGroupData::MakeSymmetricGroup(int n)
 
 void PermutationGroupData::MakeSymmetricGroupGeneratorsjjPlus1(int n)
 { this->theGroup = &this->theGroupMayBeHereNameIsLongToDiscourageUse;
-  this->theGroup->generators.SetSize(n-1);
-  for(int i=0; i<n-1; i++)
-  { this->theGroup->generators[i].AddTransposition(i,i+1);
+  this->theGroup->generators.SetSize(n- 1);
+  for (int i = 0; i <n- 1; i ++)
+  { this->theGroup->generators[i].AddTransposition(i,i+ 1);
   }
   this->flagIsSymmetricGroup = true;
   this->flagHasGeneratorsjjPlus1 = true;
@@ -789,24 +789,24 @@ void PermutationGroupData::MakeSymmetricGroupGeneratorsjjPlus1(int n)
 }
 
 /*bool PermutationGroup::AreConjugate(const PermutationR2& x, const PermutationR2& y)
-{ if(this->isSymmetricGroup)
+{ if (this->isSymmetricGroup)
     return PermutationR2::AreConjugate(x,y);
   return this->SimpleFiniteGroup<PermutationR2>::AreConjugate(x,y);
 }*/
 
 LargeInt PermutationGroupData::GetSizeByFormulaImplementation(FiniteGroup<PermutationR2>& G)
 { PermutationGroupData* PD = (PermutationGroupData*) G.specificDataPointer;
-  if(!PD || !PD->flagIsSymmetricGroup)
+  if (!PD || !PD->flagIsSymmetricGroup)
   { crash << "This method should not have been called " << __FILE__ << ":" << __LINE__ << crash;
     // control reaches end of non-void function
-    return -1;
+    return - 1;
   }
   return MathRoutines::Factorial(G.generators.size + 1);
 }
 
 void PermutationGroupData::ComputeCCSizesAndRepresentativesByFormulaImplementation(FiniteGroup<PermutationR2>& G)
 { PermutationGroupData* PD = (PermutationGroupData*) G.specificDataPointer;
-  if(!PD || !PD->flagIsSymmetricGroup)
+  if (!PD || !PD->flagIsSymmetricGroup)
     crash << "This should not have been called" << __FILE__ << ":" << __LINE__ << crash;
   G.flagCCsComputed = true;
   G.flagCCRepresentativesComputed = true;
@@ -815,7 +815,7 @@ void PermutationGroupData::ComputeCCSizesAndRepresentativesByFormulaImplementati
   Partition::GetPartitions(parts, N);
   G.conjugacyClasseS.SetSize(parts.size);
   int facn = MathRoutines::Factorial(N);
-  for(int i=0; i<parts.size; i++)
+  for (int i = 0; i <parts.size; i ++)
   { Tableau t;
     parts[i].FillTableauOrdered(t);
     G.conjugacyClasseS[i].representative.MakeFromTableauRows(t);
@@ -826,7 +826,7 @@ void PermutationGroupData::ComputeCCSizesAndRepresentativesByFormulaImplementati
 }
 
 /*void PermutationGroup::GetWord(const PermutationR2& g, List<int>& word)
-{ if(this->isSymmetricGroup && this->hasGeneratorsjjPlus1)
+{ if (this->isSymmetricGroup && this->hasGeneratorsjjPlus1)
     return g.GetWordjjPlus1(word);
   crash << "Maybe try implementing PermutationR2::GetWord1j or for whatever generator set you have " << __FILE__ << ":" << __LINE__ << crash;
 }*/
@@ -845,9 +845,9 @@ std::string PermutationGroupData::ToString()
 
 void PermutationGroupData::ComputeSpechtModules()
 { List<Partition> ps;
-  Partition::GetPartitions(ps,this->theGroup->generators.size+1);
+  Partition::GetPartitions(ps,this->theGroup->generators.size + 1);
   this->theGroup->irreps.SetSize(ps.size);
-  for(int i=0; i<ps.size; i++)
+  for (int i = 0; i <ps.size; i ++)
     this->SpechtModuleOfPartition(ps[i], this->theGroup->irreps[i]);
   this->theGroup->irreps.QuickSortAscending();
 }
@@ -862,34 +862,34 @@ void ElementHyperoctahedralGroup::MakeFromBits(const List<bool>& in)
 }
 
 void ElementHyperoctahedralGroup::AddTransposition(int i, int j)
-{ this->p.AddTransposition(i,j);
+{ this->p.AddTransposition(i, j);
 }
 
 void ElementHyperoctahedralGroup::ToggleBit(int i)
-{ if(i+1<this->s.size);
+{ if (i+ 1< this->s.size);
   { int n = this->s.size;
-    this->s.SetSize(i+1);
-    for(int j=n; j<i+1; j++)
-      this->s[j]=false;
+    this->s.SetSize(i+ 1);
+    for (int j =n; j<i+ 1; j ++)
+      this->s[j]= false;
   }
   this->s[i] = !this->s[i];
 }
 
 bool NeedRankAdjustment(const ElementHyperoctahedralGroup& left, const ElementHyperoctahedralGroup& right)
 { int theRank=left.s.size;
-  if (theRank==0)
+  if (theRank== 0)
     theRank = right.s.size;
-  if (theRank==0)
+  if (theRank== 0)
     return false;
-  if (left.s.size==0)
+  if (left.s.size== 0)
     return true;
   else
-    if (left.s.size!=theRank)
+    if (left.s.size!= theRank)
       crash <<"Change here and maybe elsewhere if you want to do stuff with multiple ranks of ElementHyperoctahedralGroup" << crash;
-  if (right.s.size==0)
+  if (right.s.size== 0)
     return true;
   else
-    if (right.s.size!=theRank)
+    if (right.s.size!= theRank)
       crash <<"Change here and maybe elsewhere if you want to do stuff with multiple ranks of ElementHyperoctahedralGroup" << crash;
   return false;
 }
@@ -897,25 +897,25 @@ bool NeedRankAdjustment(const ElementHyperoctahedralGroup& left, const ElementHy
 
 void EnsureSameRank(ElementHyperoctahedralGroup& left, ElementHyperoctahedralGroup& right)
 { int theRank=left.s.size;
-  if (theRank==0)
+  if (theRank== 0)
     theRank = right.s.size;
-  if (theRank==0)
+  if (theRank== 0)
     return;
-  if (left.s.size==0)
+  if (left.s.size== 0)
     left.s.initFillInObject(theRank, false);
-  if (right.s.size==0)
+  if (right.s.size== 0)
     right.s.initFillInObject(theRank, false);
 }
 
 void ElementHyperoctahedralGroup::MakeFromMul(const ElementHyperoctahedralGroup& left, const ElementHyperoctahedralGroup& right)
 { this->p.MakeFromMul(left.p,right.p);
-  int rightprank = right.p.BiggestOccurringNumber()+1;
+  int rightprank = right.p.BiggestOccurringNumber()+ 1;
   int thisssize = std::max(left.s.size,rightprank);
   thisssize = std::max(thisssize, right.s.size);
   this->s.SetSize(thisssize);
-  for(int i=0; i<left.s.size; i++)
+  for (int i = 0; i <left.s.size; i ++)
     this->s[i] = left.s[i];
-  for(int i=left.s.size; i<thisssize; i++)
+  for (int i =left.s.size; i <thisssize; i ++)
     this->s[i] = false;
   // see the documentation for ElementHyperoctahedralGroup if you
   // don't understand why the right wants to act on the left in this way
@@ -924,24 +924,24 @@ void ElementHyperoctahedralGroup::MakeFromMul(const ElementHyperoctahedralGroup&
   auto pp = right.p;
   pp.Invert();
   pp.ActOnList(this->s);
-  for(int i=0; i<right.s.size; i++)
+  for (int i = 0; i <right.s.size; i ++)
     this->s[i] ^= right.s[i];
 
   int lastset = 0;
-  for(int i=0; i<this->s.size; i++)
-    if(this->s[i])
+  for (int i = 0; i < this->s.size; i ++)
+    if (this->s[i])
       lastset = i;
-  this->s.SetSize(lastset+1);
+  this->s.SetSize(lastset+ 1);
   //stOutput << left << "*" << right << "=" << *this << "   ";
 }
 
 int ElementHyperoctahedralGroup::SmallestN()  const
-{ int pn = this->p.BiggestOccurringNumber()+1;
-  if(this->p.cycles.size == 0)
+{ int pn = this->p.BiggestOccurringNumber()+ 1;
+  if (this->p.cycles.size == 0)
     pn = 0;
   int sn = 0;
-  for(int i=0; i<this->s.size; i++)
-    if(this->s[i])
+  for (int i = 0; i < this->s.size; i ++)
+    if (this->s[i])
       sn = i;
   return pn > sn ? pn : sn;
 }
@@ -958,10 +958,10 @@ void ElementHyperoctahedralGroup::MakeID(const ElementHyperoctahedralGroup& unus
 }
 
 bool ElementHyperoctahedralGroup::IsID() const
-{ if(!this->p.IsID())
+{ if (!this->p.IsID())
     return false;
-  for(int i=0; i<this->s.size; i++)
-    if(this->s[i])
+  for (int i = 0; i < this->s.size; i ++)
+    if (this->s[i])
       return false;
   return true;
 }
@@ -984,8 +984,8 @@ ElementHyperoctahedralGroup ElementHyperoctahedralGroup::operator^(const Element
 
 int ElementHyperoctahedralGroup::CountSetBits() const
 { int cnt = 0;
-  for(int i=0; i<this->s.size; i++)
-    if(this->s[i])
+  for (int i = 0; i < this->s.size; i ++)
+    if (this->s[i])
       cnt++;
   return cnt;
 }
@@ -998,7 +998,7 @@ bool ElementHyperoctahedralGroup::HasDifferentConjugacyInvariantsFrom(const Elem
 bool ElementHyperoctahedralGroup::AreConjugate(const ElementHyperoctahedralGroup& x, const ElementHyperoctahedralGroup& y)
 { int xsp = x.CountSetBits();
   int ysp = y.CountSetBits();
-  if(xsp != ysp)
+  if (xsp != ysp)
     return false;
   return PermutationR2::AreConjugate(x.p,y.p);
 }
@@ -1006,15 +1006,15 @@ bool ElementHyperoctahedralGroup::AreConjugate(const ElementHyperoctahedralGroup
 void ElementHyperoctahedralGroup::GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& out) const
 { Matrix<Rational> M;
   int n = this->SmallestN();
-  if(n==0) // this is the identity element.  it thinks it lives in the zero group, because it lives in all the groups
+  if (n == 0) // this is the identity element.  it thinks it lives in the zero group, because it lives in all the groups
   { out.MakeConst(1);
     return;
   }
   M.init(n,n);
   M.MakeZero();
-  for(int i=0; i<n; i++)
+  for (int i = 0; i <n; i ++)
   { int a = this->p*i;
-    M.elements[i][a] = (this->s[i])?-1:1; // ahaha 0 is false
+    M.elements[i][a] = (this->s[i])?- 1:1; // ahaha 0 is false
   }
   out.AssignCharPoly(M);
 }
@@ -1022,14 +1022,14 @@ void ElementHyperoctahedralGroup::GetCharacteristicPolyStandardRepresentation(Po
 
 bool ElementHyperoctahedralGroup::operator==(const ElementHyperoctahedralGroup& right) const
 { int sharedsize = std::min(this->s.size, right.s.size);
-  for(int i=0; i<sharedsize; i++)
-    if(this->s[i] != right.s[i])
+  for (int i = 0; i <sharedsize; i ++)
+    if (this->s[i] != right.s[i])
       return false;
-  for(int i=sharedsize; i<this->s.size; i++)
-    if(this->s[i])
+  for (int i =sharedsize; i < this->s.size; i ++)
+    if (this->s[i])
       return false;
-  for(int i=sharedsize; i<right.s.size; i++)
-    if(right.s[i])
+  for (int i =sharedsize; i <right.s.size; i ++)
+    if (right.s[i])
       return false;
   return this->p == right.p;
 }
@@ -1042,7 +1042,7 @@ unsigned int ElementHyperoctahedralGroup::HashFunction() const
   // class types or whatever
   // its ok though because I need to be sure that a string of false at the end
   // hashes to the exact same thing as not having a string of false at the end
-  for(int i=0; (i<this->s.size)&&(i<SomeRandomPrimesSize); i++)
+  for (int i = 0; (i < this->s.size)&&(i <SomeRandomPrimesSize); i ++)
     acc += this->s[i] ? SomeRandomPrimes[i] : 0;
   return acc;
 }
@@ -1052,25 +1052,25 @@ bool ElementHyperoctahedralGroup::operator>(const ElementHyperoctahedralGroup& r
   // the following register load and jump instructions will likely never be used
   // but they are fast
   int nr = right.s.size;
-  if(n > nr)
+  if (n > nr)
     return true;
-  if(n<nr)
+  if (n<nr)
     return false;
   // ok back to stuff that gets used
   Partition l,r;
   this->p.GetCycleStructure(l,n);
   right.p.GetCycleStructure(r,n);
-  if(l>r)
+  if (l>r)
     return true;
-  if(r>l)
+  if (r>l)
     return false;
-  if(this->p.cycles>right.p.cycles)
+  if (this->p.cycles>right.p.cycles)
     return true;
-  if(this->p.cycles<right.p.cycles)
+  if (this->p.cycles<right.p.cycles)
     return false;
-  if(this->s>right.s)
+  if (this->s>right.s)
     return true;
-  if(this->s<right.s)
+  if (this->s<right.s)
     return false;
   return false;
 }
@@ -1091,29 +1091,29 @@ std::string ElementHyperoctahedralGroup::ToString(FormatExpressions* unused) con
   this->GetWordByFormula = HyperoctahedralGroup::GetWordByFormulaImplementation;
   this->GetSizeByFormula = HyperoctahedralGroup::GetSizeByFormulaImplementation;
   this->N = n;
-  this->generators.SetSize(n-1+n);
-  for(int i=0; i<n-1; i++)
-  { this->generators[i].p.AddTransposition(i,i+1);
+  this->generators.SetSize(n- 1+n);
+  for (int i = 0; i <n- 1; i ++)
+  { this->generators[i].p.AddTransposition(i,i+ 1);
     this->generators[i].s.SetSize(n);
-    for(int j=0; j<n; j++)
+    for (int j = 0; j<n; j ++)
       this->generators[i].s[j] = false;
   }
-  for(int i=0; i<n; i++)
-  { this->generators[i+n-1].s.SetSize(n);
-    for(int j=0; j<n; j++)
-    { this->generators[i+n-1].s[j] = false;
+  for (int i = 0; i <n; i ++)
+  { this->generators[i+n- 1].s.SetSize(n);
+    for (int j = 0; j<n; j ++)
+    { this->generators[i+n- 1].s[j] = false;
     }
-    this->generators[i+n-1].s[i] = true;
+    this->generators[i+n- 1].s[i] = true;
   }
 }
 
 void HyperoctahedralGroup::MakeBn(int n)
 { this->isEntireHyperoctahedralGroup = true;
   this->N = n;
-  this->generators.SetSize(n-1);
-  for(int i=0; i<this->generators.size; i++)
-    this->generators[i].AddTransposition(i,i+1);
-  if(this->generators.size > 0)
+  this->generators.SetSize(n- 1);
+  for (int i = 0; i < this->generators.size; i ++)
+    this->generators[i].AddTransposition(i,i+ 1);
+  if (this->generators.size > 0)
     this->generators[0].ToggleBit(0);
 }
 
@@ -1122,7 +1122,7 @@ void HyperoctahedralGroup::MakeBn(int n)
 void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, const Partition &negative,
                                                      GroupRepresentation<SimpleFiniteGroup<ElementHyperoctahedralGroup>, Rational> &out,
                                                      PermutationGroup *subsn)
-{ if(this->generators.size > this->N)
+{ if (this->generators.size > this->N)
     this->SpechtModuleOfPartititonsSymmetricPlusGenerators(positive, negative, out, subsn);
   else
     this->SpechtModuleOfPartitionsBnGenerators(positive, negative, out, subsn);
@@ -1138,12 +1138,12 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
 
   Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup> Sn;
   auto Sngens = this->generators;
-  Sngens.SetSize(this->N-1);
+  Sngens.SetSize(this->N- 1);
   Sn.MakeTranslatableWordsSubgroup(*this,Sngens);
 
   Subgroup<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, ElementHyperoctahedralGroup> PxM;
   auto PxMgens = Sn.generators;
-  if((positive.n > 0) && (negative.n > 0))
+  if ((positive.n > 0) && (negative.n > 0))
     PxMgens.RemoveIndexShiftDown(positive.n);
   PxM.MakeTranslatableWordsSubgroup(Sn,PxMgens);
 
@@ -1161,7 +1161,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   std::stringstream ids;
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
-  if(!out.VerifyRepresentation())
+  if (!out.VerifyRepresentation())
     crash << crash;
 }
 
@@ -1175,16 +1175,16 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup> PxM;
   List<ElementHyperoctahedralGroup> subgens;
   subgens.SetSize(this->generators.size);
-  for(int i=0; i<this->generators.size; i++)
+  for (int i = 0; i < this->generators.size; i ++)
     subgens[i] = this->generators[i];
-  if((positive.n > 0) && (negative.n > 0))
-    subgens.RemoveIndexShiftDown(positive.n-1);
+  if ((positive.n > 0) && (negative.n > 0))
+    subgens.RemoveIndexShiftDown(positive.n- 1);
   PxM.MakeTranslatableWordsSubgroup(*this, subgens);
   stOutput << "Generating subgroup:\n";
-  for(int i=0; i<this->generators.size; i++)
+  for (int i = 0; i < this->generators.size; i ++)
     stOutput << i << " " << this->generators[i] << " " << PxM.superGeneratorSubWordExists[i] << " "
              << PxM.superGeneratorSubWords[i].ToStringCommaDelimited() << '\n';
-  for(int i=0; i<PxM.generators.size; i++)
+  for (int i = 0; i <PxM.generators.size; i ++)
     stOutput << i << " " << PxM.generators[i] << '\n';
 
   GroupRepresentation<Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup>, Rational> pxmr;
@@ -1195,16 +1195,16 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   int cur = pxmr.generatorS.size;
   pxmr.generatorS.SetSize(PxM.generators.size);
   int repRank = pxmr.generatorS[0].NumRows;
-  if(repRank == 0)
+  if (repRank == 0)
     repRank = 1;
-  for(int i=0; i<this->N; i++)
-    if(i < positive.n)
+  for (int i = 0; i < this->N; i ++)
+    if (i < positive.n)
       pxmr.generatorS[cur+i].MakeIdMatrix(repRank);
     else
     { pxmr.generatorS[cur+i].MakeIdMatrix(repRank);
-      pxmr.generatorS[cur+i] *= -1;
+      pxmr.generatorS[cur+i] *= - 1;
     }
-  if(!pxmr.VerifyRepresentation())
+  if (!pxmr.VerifyRepresentation())
     crash << "lol" << crash;
   auto outreboxme = PxM.InduceRepresentation(pxmr);
   out.ownerGroup = this;
@@ -1212,7 +1212,7 @@ void HyperoctahedralGroup::SpechtModuleOfPartititons(const Partition &positive, 
   std::stringstream ids;
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
-  if(!out.VerifyRepresentation())
+  if (!out.VerifyRepresentation())
     crash << crash;
 }*/
 
@@ -1224,10 +1224,10 @@ void HyperoctahedralGroupData::SpechtModuleOfPartititons(const Partition &positi
   positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
   negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
   List<int> subgenids;
-  for(int i=0; i<this->theGroup->generators.size; i++)
+  for (int i = 0; i < this->theGroup->generators.size; i ++)
     subgenids.AddOnTop(i);
-  if((positive.n > 0) && (negative.n > 0))
-    subgenids.RemoveIndexShiftDown(positive.n-1);
+  if ((positive.n > 0) && (negative.n > 0))
+    subgenids.RemoveIndexShiftDown(positive.n- 1);
   auto PxM = this->theGroup->ParabolicKindaSubgroupGeneratorSubset(subgenids);
   auto pxmr = PxM.theSubgroup->GetEmptyRationalRepresentation();
   pxmr.generatorS.SetExpectedSize(PxM.theSubgroup->generators.size);
@@ -1236,23 +1236,23 @@ void HyperoctahedralGroupData::SpechtModuleOfPartititons(const Partition &positi
   int cur = pxmr.generatorS.size;
   pxmr.generatorS.SetSize(PxM.theSubgroup->generators.size);
   int repRank = pxmr.generatorS[0].NumRows;
-  if(repRank == 0)
+  if (repRank == 0)
     repRank = 1;
-  for(int i=0; i<this->N; i++)
-    if(i < positive.n)
+  for (int i = 0; i < this->N; i ++)
+    if (i < positive.n)
       pxmr.generatorS[cur+i].MakeIdMatrix(repRank);
     else
     { pxmr.generatorS[cur+i].MakeIdMatrix(repRank);
-      pxmr.generatorS[cur+i] *= -1;
+      pxmr.generatorS[cur+i] *= - 1;
     }
-  if(!pxmr.VerifyRepresentation())
+  if (!pxmr.VerifyRepresentation())
     crash << "lol" << crash;
   out = PxM.InduceRepresentation(pxmr);
   out.ownerGroup = this->theGroup;
   std::stringstream ids;
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
-  if(!out.VerifyRepresentation())
+  if (!out.VerifyRepresentation())
     crash << crash;
 }
 
@@ -1266,30 +1266,30 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
   positive.SpechtModuleMatricesOfTranspositionsjjplusone(pozm);
   negative.SpechtModuleMatricesOfTranspositionsjjplusone(negm);
 
-  if(subsn == NULL)
+  if (subsn == NULL)
   { Subgroup<HyperoctahedralGroup, ElementHyperoctahedralGroup> sn;
     subsn = &sn;
   }
-  if(subsn->generators.size == 0)
+  if (subsn->generators.size == 0)
   { List<ElementHyperoctahedralGroup> subgens;
-    subgens.SetSize(this->N-1);
-    for(int i=0; i<this->N-1; i++)
+    subgens.SetSize(this->N- 1);
+    for (int i = 0; i < this->N- 1; i ++)
       subgens[i] = this->generators[i];
     subsn->MakeTranslatableWordsSubgroup(*this, subgens);
   }
   Subgroup<PermutationGroup, PermutationR2> PxM;
   List<int> subgens;
   subgens.SetSize(subsn->generators.size);
-  for(int i=0; i<subsn->generators.size; i++)
+  for (int i = 0; i <subsn->generators.size; i ++)
     subgens[i] = i;
-  if(pozm.size + negm.size != subsn->generators.size)
+  if (pozm.size + negm.size != subsn->generators.size)
     subgens.RemoveIndexShiftDown(pozm.size);
   PxM.MakeTranslatableWordsSubgroup(*subsn, subgens);
   stOutput << "Generating subgroup:\n";
-  for(int i=0; i<subsn->generators.size; i++)
+  for (int i = 0; i <subsn->generators.size; i ++)
     stOutput << i << " " << subsn->generators[i] << " " << PxM.superGeneratorSubWordExists[i] << " "
              << PxM.superGeneratorSubWords[i].ToStringCommaDelimited() << '\n';
-  for(int i=0; i<PxM.generators.size; i++)
+  for (int i = 0; i <PxM.generators.size; i ++)
     stOutput << i << " " << PxM.generators[i] << '\n';
   //PxM.CosetRepresentativeEnumerator = HyperoctahedralGroup::ParabolicSubgroupCosetRepresentativeEnumerator;
   PxM.GetWordByFormula = MissingGeneratorsSubgroupElementGetWord<PermutationGroup, PermutationR2>;
@@ -1297,20 +1297,20 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
   pxmr.ownerGroup = &PxM;
   pxmr.generatorS.SetSize(PxM.generators.size);
   Matrix<Rational> hid, kid;
-  if(pozm.size == 0)
+  if (pozm.size == 0)
     hid.MakeIdMatrix(1);
   else
     hid.MakeID(pozm[0]);
-  if(negm.size == 0)
+  if (negm.size == 0)
     kid.MakeIdMatrix(1);
   else
     kid.MakeID(negm[0]);
-  int i=0;
-  for(int pi=0; pi<pozm.size; i++, pi++)
+  int i = 0;
+  for (int pi = 0; pi <pozm.size; i ++, pi ++)
     pxmr.generatorS[i].AssignTensorProduct(pozm[pi], kid);
-  for(int ni=0; ni<negm.size; i++, ni++)
+  for (int ni = 0; ni <negm.size; i ++, ni ++)
   { pxmr.generatorS[i].AssignTensorProduct(hid, negm[ni]);
-    pxmr.generatorS[i] *= -1;
+    pxmr.generatorS[i] *= - 1;
   }
   GroupRepresentation<PermutationGroup, Rational> subsnr;
   PxM.InduceRepresentation(pxmr,subsnr);
@@ -1319,19 +1319,19 @@ void HyperoctahedralGroup::SomeModuleOfPartititons(const Partition& positive, co
   ids << negative << ", " << positive;
   out.identifyingString = ids.str();
   out.ownerGroup = this;
-  if(!out.VerifyRepresentation())
+  if (!out.VerifyRepresentation())
     crash << crash;
 }
 
 void HyperoctahedralGroup::AllSpechtModules()
 { int N = this->GetN();
-  for(int p=0; p<=N; p++)
+  for (int p = 0; p<=N; p++)
   { List<Partition> nps;
     Partition::GetPartitions(nps,p);
-    for(int npi=0; npi<nps.size; npi++)
+    for (int npi = 0; npi <nps.size; npi ++)
     { List<Partition> pps;
       Partition::GetPartitions(pps,N-p);
-      for(int ppi=0; ppi<pps.size; ppi++)
+      for (int ppi = 0; ppi <pps.size; ppi ++)
       { GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroup>, Rational> sm;
         stOutput << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
         this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
@@ -1347,13 +1347,13 @@ void HyperoctahedralGroup::AllSpechtModules()
 }*/
 
 void HyperoctahedralGroupData::AllSpechtModules()
-{ for(int p=0; p<=this->N; p++)
+{ for (int p = 0; p<= this->N; p++)
   { List<Partition> nps;
     Partition::GetPartitions(nps,p);
-    for(int npi=0; npi<nps.size; npi++)
+    for (int npi = 0; npi <nps.size; npi ++)
     { List<Partition> pps;
       Partition::GetPartitions(pps,this->N-p);
-      for(int ppi=0; ppi<pps.size; ppi++)
+      for (int ppi = 0; ppi <pps.size; ppi ++)
       { GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> sm;
         //stOutput << "Computing representation {" << nps[npi] << "}, {" << pps[ppi] << "}\n";
         this->SpechtModuleOfPartititons(pps[ppi],nps[npi],sm);
@@ -1369,12 +1369,12 @@ void HyperoctahedralGroupData::AllSpechtModules()
 
 /*
 int HyperoctahedralGroup::GetN()
-{ if(isEntireHyperoctahedralGroup)
+{ if (isEntireHyperoctahedralGroup)
     return this->N;
   this->N = 0;
-  for(int i=0; i<this->generators.size; i++)
+  for (int i = 0; i < this->generators.size; i ++)
   { int gn = generators[i].SmallestN();
-    if(gn > this->N)
+    if (gn > this->N)
       this->N = gn;
   }
   return this->N;
@@ -1384,25 +1384,25 @@ int HyperoctahedralGroup::GetN()
 LargeInt HyperoctahedralGroupData::GetSizeByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G)
 { HyperoctahedralGroupData* HD = (HyperoctahedralGroupData*) G.specificDataPointer;
   //stOutput << "HyperoctahedralGroup::GetSize() called.  N=" << HD->N << '\n';
-  if(!HD)
+  if (!HD)
     crash << "consistency error " << __FILE__ << ":" << __LINE__ << crash;
-  if(HD->flagIsEntireHyperoctahedralGroup)
+  if (HD->flagIsEntireHyperoctahedralGroup)
     return MathRoutines::Factorial(HD->N) * (1<<HD->N);
-  if(HD->flagIsEntireDn)
+  if (HD->flagIsEntireDn)
     return MathRoutines::Factorial(HD->N) * (1<<HD->N) / 2;
   crash << "This method should not have been called " << __FILE__ << ":" << __LINE__ << crash;
   // control reaches end of non-void function
-  return -1;
+  return - 1;
 }
 
 /*
 bool HyperoctahedralGroup::GetWordByFormulaImplementation(void* GG, const ElementHyperoctahedralGroup& g, List<int>& word)
 { HyperoctahedralGroup* G = (HyperoctahedralGroup*) GG;
-  if(G->isEntireHyperoctahedralGroup)
+  if (G->isEntireHyperoctahedralGroup)
   { g.p.GetWordjjPlus1(word);
-    for(int i=0; i<g.s.size; i++)
-      if(g.s[i])
-        word.AddOnTop(G->N-1+i);
+    for (int i = 0; i <g.s.size; i ++)
+      if (g.s[i])
+        word.AddOnTop(G->N- 1+i);
     return true;
   }
   crash << "This method should not have been called " << __FILE__ << ":" << __LINE__ << crash;
@@ -1412,11 +1412,11 @@ bool HyperoctahedralGroup::GetWordByFormulaImplementation(void* GG, const Elemen
 bool HyperoctahedralGroupData::GetWordByFormulaImplementation(FiniteGroup<ElementHyperoctahedralGroupR2>& G,
                                                               const ElementHyperoctahedralGroupR2& g, List<int>& word)
 { HyperoctahedralGroupData* HD = (HyperoctahedralGroupData*) G.specificDataPointer;
-  if(HD->flagIsEntireHyperoctahedralGroup)
+  if (HD->flagIsEntireHyperoctahedralGroup)
   { g.h.GetWordjjPlus1(word);
-    for(int i=0; i<g.k.bits.size; i++)
-      if(g.k.bits[i])
-        word.AddOnTop(HD->N-1+i);
+    for (int i = 0; i <g.k.bits.size; i ++)
+      if (g.k.bits[i])
+        word.AddOnTop(HD->N- 1+i);
     return true;
   }
   crash << "This method should not have been called " << __FILE__ << ":" << __LINE__ << crash;
@@ -1429,42 +1429,42 @@ bool HyperoctahedralGroupData::GetWordByFormulaImplementation(FiniteGroup<Elemen
 // number of elements of conjugacy classes: n!/(elements in row)/(same rows)! * (n choose k)
 void HyperoctahedralGroup::ComputeCCSizesAndRepresentativesByFormulaImplementation(void* GG)
 { HyperoctahedralGroup* G = (HyperoctahedralGroup*) GG;
-  if(!G->isEntireHyperoctahedralGroup)
+  if (!G->isEntireHyperoctahedralGroup)
     return G->ComputeCCSizesAndRepresentatives(0);
   List<Partition> ccp;
   Partition::GetPartitions(ccp, G->N);
   int psize = ccp.size;
-  int ssize = G->N+1;
+  int ssize = G->N+ 1;
   int nfac = 1;
-  for(int i=2; i<=G->N; i++)
+  for (int i =2; i <= G->N; i ++)
     nfac *= i;
   G->conjugacyClasseS.SetSize(psize * ssize);
-  for(int pi=0; pi<psize; pi++)
+  for (int pi = 0; pi <psize; pi ++)
   { int p61z = ccp[pi].Fulton61z();
     int snccsz = nfac / p61z;
-    for(int si=0; si<ssize; si++)
+    for (int si = 0; si <ssize; si ++)
     { Tableau t;
       ccp[pi].FillTableauOrdered(t);
       G->conjugacyClasseS[pi*ssize + si].representative.p.MakeFromTableauRows(t);
       G->conjugacyClasseS[pi*ssize + si].representative.s.SetSize(G->N);
-      for(int i=0; i<G->N; i++)
-        if(i<si)
+      for (int i = 0; i <G->N; i ++)
+        if (i <si)
           G->conjugacyClasseS[pi*ssize + si].representative.s[i] = true;
         else
           G->conjugacyClasseS[pi*ssize + si].representative.s[i] = false;
       G->conjugacyClasseS[pi*ssize + si].size = snccsz;
-      G->conjugacyClasseS[pi*ssize+si].size *= MathRoutines::NChooseK(G->N, si);
-      G->conjugacyClasseS[pi*ssize+si].flagRepresentativeWordComputed = true;
-      G->GetWord(G->conjugacyClasseS[pi*ssize+si].representative, G->conjugacyClasseS[pi*ssize+si].representativeWord);
+      G->conjugacyClasseS[pi*ssize +si].size *= MathRoutines::NChooseK(G->N, si);
+      G->conjugacyClasseS[pi*ssize +si].flagRepresentativeWordComputed = true;
+      G->GetWord(G->conjugacyClasseS[pi*ssize +si].representative, G->conjugacyClasseS[pi*ssize +si].representativeWord);
     }
   }
   G->flagCCsComputed = true;
   G->flagCCRepresentativesComputed = true;
   // VerifyFormulaCCRepresentatives
-  //if(this->easyConjugacyDetermination)
-  //  for(int i=0; i<this->conjugacyClasseS.size; i++)
-  //    for(int j=i+1; j<this->conjugacyClasseS.size; j++)
-  //      if(this->AreConjugate(this->conjugacyClasseS[i].representative, this->conjugacyClasseS[j].representative))
+  //if (this->easyConjugacyDetermination)
+  //  for (int i = 0; i < this->conjugacyClasseS.size; i ++)
+  //    for (int j =i+ 1; j< this->conjugacyClasseS.size; j ++)
+  //      if (this->AreConjugate(this->conjugacyClasseS[i].representative, this->conjugacyClasseS[j].representative))
   //        crash << "Claimed conjugacy class representatives are actually conjugate " << __FILE__ << ":" << __LINE__ << crash;
 
 }
@@ -1489,9 +1489,9 @@ template <>
 void ElementHyperoctahedralGroupR2::MakeFromString(const std::string& in)
 { int sep = in.find_last_of(',');
   stOutput << in.substr(1,sep) << '\n';
-  stOutput << in.substr(sep,in.size()-1) << '\n';
+  stOutput << in.substr(sep,in.size()- 1) << '\n';
   this->h.MakeFromString(in.substr(1,sep));
-  this->k.MakeFromString(in.substr(sep,in.size()-1));
+  this->k.MakeFromString(in.substr(sep,in.size()- 1));
 }
 
 ElementHyperoctahedralGroupR2 operator"" _EHOG(const char *in, size_t insize)

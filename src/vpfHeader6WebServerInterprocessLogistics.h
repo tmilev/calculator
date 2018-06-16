@@ -44,7 +44,7 @@ public:
   bool WriteAfterEmptying(const std::string& input, bool restartServerOnFail, bool dontCrashOnFail);
   bool ReadWithoutEmptying(bool restartServerOnFail, bool dontCrashOnFail);
 
-  std::string ToString()const;
+  std::string ToString() const;
   PipePrimitive();
   ~PipePrimitive();
 };
@@ -58,7 +58,7 @@ public:
   std::string name;
   MemorySaving<MutexRecursiveWrapper> mutexForProcessBlocking; //<- to avoid two threads from the same process blocking the process.
   bool flagDeallocated;
-  std::string ToString()const;
+  std::string ToString() const;
   void Release();
   bool CreateMe(const std::string& inputName, bool restartServerOnFail, bool dontCrashOnFail);
   bool ResetNoAllocation();
@@ -100,12 +100,12 @@ public:
 
   static int WriteNoInterrupts(int theFD, const std::string& input);
   static int WriteWithTimeoutViaSelect
-  (int theFD, const std::string& input, int timeOutInSeconds, int maxNumTries=10, std::stringstream* commentsOnFailure=0);
+  (int theFD, const std::string& input, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = 0);
   static int ReadWithTimeOutViaSelect
-  (int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries=10, std::stringstream* commentsOnFailure=0);
+  (int theFD, List<char>& output, int timeOutInSeconds, int maxNumTries = 10, std::stringstream* commentsOnFailure = 0);
   void WriteAfterEmptying(const std::string& toBeSent, bool restartServerOnFail, bool dontCrashOnFail);
 
-  std::string ToString()const;
+  std::string ToString() const;
   void Release();
   bool CheckConsistency();
   bool CreateMe(const std::string& inputPipeName);

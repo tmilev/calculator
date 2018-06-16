@@ -502,7 +502,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(bool needToLo
     if (!this->flagIsForReal)
       out
       << "If you specified the problem through the 'problem link' link,"
-      << " please go back to the course page. Alternatively, remove the randomSeed =... "
+      << " please go back to the course page. Alternatively, remove the randomSeed=... "
       << "portion of the page address and reload the page (with the randomSeed portion removed). ";
     else
       out << "<b>Your random seed must have been reset. </b>";
@@ -556,7 +556,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItem(bool needToLoadDa
     if (!this->flagIsForReal)
       out
       << "If you specified the problem through the 'problem link' link,"
-      << " please go back to the course page. Alternatively, remove the randomSeed =... "
+      << " please go back to the course page. Alternatively, remove the randomSeed=... "
       << "portion of the page address and reload the page (with the randomSeed portion removed). ";
     else
       out << "<b>Your random seed must have been reset. </b>";
@@ -802,22 +802,22 @@ std::string CalculatorHTML::ToStringLinkCurrentAdmin
   std::string urledProblem = HtmlRoutines::ConvertStringToURLString(this->fileName, false);
   List<std::string> randomSeedContainer;
   randomSeedContainer.AddOnTop("randomSeed");
-  out << "fileName =" << urledProblem << "&"
+  out << "fileName=" << urledProblem << "&"
   << theGlobalVariables.ToStringCalcArgsNoNavigation(&randomSeedContainer);
   if (includeRandomSeed)
-    out << "randomSeed =" << this->theProblemData.randomSeed << "&";
+    out << "randomSeed=" << this->theProblemData.randomSeed << "&";
   if (setDebugFlag)
-    out << "debugFlag= true&";
+    out << "debugFlag=true&";
   else
-    out << "debugFlag= false&";
+    out << "debugFlag=false&";
   if (this->topicListFileName != "")
-    out << "topicList =" << this->topicListFileName << "&";
+    out << "topicList=" << this->topicListFileName << "&";
   if (this->courseHome != "")
-    out << "courseHome =" << this->courseHome << "&";
+    out << "courseHome=" << this->courseHome << "&";
   if (theGlobalVariables.UserStudentVieWOn())
-  { out << "studentView= true&";
+  { out << "studentView=true&";
     if (theGlobalVariables.GetWebInput("studentSection") != "")
-      out << "studentSection =" << theGlobalVariables.GetWebInput("studentSection") << "&";
+      out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
   }
   out << "\">" << displayString << "</a>";
   return out.str();
@@ -828,21 +828,21 @@ std::string CalculatorHTML::ToStringLinkFromFileName(const std::string& theFileN
   std::stringstream out, refStreamNoRequest, refStreamExercise, refStreamForReal;
   std::string urledProblem = HtmlRoutines::ConvertStringToURLString(theFileName, false);
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
-  << "fileName =" << urledProblem << "&";
+  << "fileName=" << urledProblem << "&";
   if (theGlobalVariables.UserStudentVieWOn())
-  { refStreamNoRequest << "studentView= true&";
+  { refStreamNoRequest << "studentView=true&";
     if (theGlobalVariables.GetWebInput("studentSection")!="")
-      refStreamNoRequest << "studentSection ="
+      refStreamNoRequest << "studentSection="
       << theGlobalVariables.GetWebInput("studentSection") << "&";
   }
   if (this->topicListFileName != "")
-    refStreamNoRequest << "topicList =" << this->topicListFileName << "&";
+    refStreamNoRequest << "topicList=" << this->topicListFileName << "&";
   if (this->courseHome != "")
-    refStreamNoRequest << "courseHome =" << this->courseHome << "&";
+    refStreamNoRequest << "courseHome=" << this->courseHome << "&";
   if (theFileName == this->topicListFileName || theFileName == this->courseHome ||
       MathRoutines::StringEndsWith(theFileName, ".txt"))
   { out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request= template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
+    << "?request=template&" << refStreamNoRequest.str() << "\">" << "Home" << "</a> ";
     return out.str();
   }
   if (!theGlobalVariables.UserGuestMode())
@@ -1218,7 +1218,7 @@ bool CalculatorHTML::PrepareCommandsGenerateProblem(std::stringstream &comments)
   this->theProblemData.commandsGenerateProblemNoEnclosures = streamCommandsNoEnclosures.str();
   std::stringstream debugStream;
   debugStream << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-  << "?request= calculator&mainInput ="
+  << "?request=calculator&mainInput="
   << HtmlRoutines::ConvertStringToURLString(this->theProblemData.commandsGenerateProblemNoEnclosures, false)
   << "\"> "
   << "Input link </a>";
@@ -1410,7 +1410,7 @@ bool CalculatorHTML::PrepareAndExecuteCommands(Calculator& theInterpreter, std::
   { comments << "<br>Failed to interpret your file. "
     << "<a href=\""
     << theGlobalVariables.DisplayNameExecutable
-    << "?request= calculator&mainInput ="
+    << "?request=calculator&mainInput="
     << HtmlRoutines::ConvertStringToURLString( this->theProblemData.commandsGenerateProblemNoEnclosures,false)
     << "\">Input link</a><br>"
     << "The interpretation input was:<br> "
@@ -3183,10 +3183,10 @@ std::string CalculatorHTML::ToStringProblemNavigation() const
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection") != "")
-          out << "studentSection =" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out << "topicList =" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
-        out << "courseHome =" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
-        out << "fileName =" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent - 1], false)
+          out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+        out << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
+        out << "courseHome=" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
+        out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent - 1], false)
         << "\">&#8592;</a>" << linkSeparator;
       } else
         out << "<a disabled =\"disabled\">&#8592;</a>" << linkSeparator;
@@ -3196,10 +3196,10 @@ std::string CalculatorHTML::ToStringProblemNavigation() const
         out << "&" << calcArgsNoPassExamDetails
         << "studentView=" << studentView << "&";
         if (theGlobalVariables.GetWebInput("studentSection") != "")
-          out << "studentSection =" << theGlobalVariables.GetWebInput("studentSection") << "&";
-        out << "topicList =" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
-        out << "courseHome =" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
-        out << "fileName =" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent + 1], false)
+          out << "studentSection=" << theGlobalVariables.GetWebInput("studentSection") << "&";
+        out << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&";
+        out << "courseHome=" << HtmlRoutines::ConvertStringToURLString(this->courseHome, false) << "&";
+        out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->problemNamesNoTopics[indexInParent + 1], false)
         << "\">&#8594;</a>" << linkSeparator;
       } else
         out << "<a disabled =\"disabled\">&#8594;</a>" << linkSeparator;
@@ -3270,19 +3270,19 @@ std::string CalculatorHTML::ToStringCalculatorArgumentsForProblem
   List<std::string> excludedTags;
   excludedTags.AddOnTop("randomSeed");
   out << theGlobalVariables.ToStringCalcArgsNoNavigation(&excludedTags)
-  << "courseHome =" << theGlobalVariables.GetWebInput("courseHome") << "&";
+  << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
   if (!theGlobalVariables.flagRunningApache && this->fileName != "")
-    out << "fileName =" << HtmlRoutines::ConvertStringToURLString(this->fileName, false) << "&";
+    out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->fileName, false) << "&";
   else
-    out << "fileName =" << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.GetWebInput("fileName"), false)
+    out << "fileName=" << HtmlRoutines::ConvertStringToURLString(theGlobalVariables.GetWebInput("fileName"), false)
     << "&";
-  out << "topicList =" << theGlobalVariables.GetWebInput("topicList") << "&";
+  out << "topicList=" << theGlobalVariables.GetWebInput("topicList") << "&";
   out << "studentView=" << studentView << "&";
   if (studentSection != "")
-    out << "studentSection =" << HtmlRoutines::ConvertStringToURLString(studentSection, false) << "&";
+    out << "studentSection=" << HtmlRoutines::ConvertStringToURLString(studentSection, false) << "&";
   if (includeRandomSeedIfAppropriate)
-    out << "randomSeed =" << this->theProblemData.randomSeed << "&";
-//  out << "fileName =" << HtmlRoutines::ConvertStringToURLString(this->fileName) << "&";
+    out << "randomSeed=" << this->theProblemData.randomSeed << "&";
+//  out << "fileName=" << HtmlRoutines::ConvertStringToURLString(this->fileName) << "&";
   return out.str();
 }
 
@@ -3298,9 +3298,9 @@ std::string CalculatorHTML::GetEditPageButton(const std::string& desiredFileName
   //  out << "cleaned up link: " << cleaneduplink;
   //  out << "<br>urled link: " <<  urledProblem;
   refStreamNoRequest << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
-  << "fileName =" << urledProblem << "&"
-  << "topicList =" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&"
-  << "courseHome =" << theGlobalVariables.GetWebInput("courseHome") << "&";
+  << "fileName=" << urledProblem << "&"
+  << "topicList=" << HtmlRoutines::ConvertStringToURLString(this->topicListFileName, false) << "&"
+  << "courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "&";
   out << refStreamNoRequest.str() << "\">" << "Edit" << "</a>";
   out << "<textarea class =\"currentFileNameArea\" id =\"" << clonePageAreaID << "\" cols =\""
   << desiredFileName.size() + 7 << "\">" << desiredFileName << "</textarea>\n";
@@ -3389,10 +3389,10 @@ std::string HtmlRoutines::GetJavascriptSubmitMainInputIncludeCurrentFile()
   << "  inputParams+='request='+requestType +'&';\n"
   << "  inputParams+='" << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << "';\n"
 //  << "  inputParams+='&debugFlag= true';\n"
-  << "  inputParams+='&fileName =" << theGlobalVariables.GetWebInput("fileName") << "';\n"
-  << "  inputParams+='&topicList =" << theGlobalVariables.GetWebInput("topicList") << "';\n"
-  << "  inputParams+='&courseHome =" << theGlobalVariables.GetWebInput("courseHome") << "';\n"
-  << "  inputParams+='&mainInput =' + encodeURIComponent(theString);\n"
+  << "  inputParams+='&fileName=" << theGlobalVariables.GetWebInput("fileName") << "';\n"
+  << "  inputParams+='&topicList=" << theGlobalVariables.GetWebInput("topicList") << "';\n"
+  << "  inputParams+='&courseHome=" << theGlobalVariables.GetWebInput("courseHome") << "';\n"
+  << "  inputParams+='&mainInput=' + encodeURIComponent(theString);\n"
   << "  submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus);\n"
   << "}\n"
   << "</script>";
@@ -3869,7 +3869,7 @@ void CalculatorHTML::InterpretAccountInformationLinks(SyntacticElementHTML& inpu
     inputOutput.interpretedCommand = out.str();
     return;
   }
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request= changePasswordPage\">Change password</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage\">Change password</a>";
   if (theGlobalVariables.UserDefaultHasAdminRights())
     out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=accounts\">Manage accounts</a>";
   inputOutput.interpretedCommand = out.str();
@@ -3999,8 +3999,8 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
   out << "\n\n\n<!--Topic list automatically generated from topic list: " << this->topicListFileName
   << ".-->";
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-  << "?request= template&fileName =" << this->fileName << "&"
-  << "topicList =" << this->topicListFileName << "&" << "\">All topics</a>";
+  << "?request=template&fileName=" << this->fileName << "&"
+  << "topicList=" << this->topicListFileName << "&" << "\">All topics</a>";
   out << "<ul>";
   for (int i = 0; i < this->theTopicS.size(); i ++)
   { TopicElement& currentElt = this->theTopicS.theValues[i];
@@ -4018,8 +4018,8 @@ void CalculatorHTML::InterpretTableOfContents(SyntacticElementHTML& inputOutput)
         out << "</ul></li>";
     if (currentElt.type == currentElt.tChapter)
     { out << "<li>" << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request= template&fileName =" << this->fileName << "&"
-      << "topicList =" << this->topicListFileName << "&" << "chapter =" << currentElt.title
+      << "?request=template&fileName=" << this->fileName << "&"
+      << "topicList=" << this->topicListFileName << "&" << "chapter =" << currentElt.title
       << "\">" << currentElt.title << "</a>" << "<br>\n";
       chapterStarted = true;
       sectionStarted = false;
@@ -4656,9 +4656,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     returnEmptyStringIfNoDeadline = true;
   } else
   { //std::string theRawSQLink= theGlobalVariables.DisplayNameExecutable +
-    //"?request=scoredQuiz&fileName =" + this->problem;
+    //"?request=scoredQuiz&fileName=" + this->problem;
     std::string theRawExerciseLink;
-    theRawExerciseLink = theGlobalVariables.DisplayNameExecutable + "?request=exercise&fileName =" + this->problem;
+    theRawExerciseLink = theGlobalVariables.DisplayNameExecutable + "?request=exercise&fileName=" + this->problem;
     this->displayProblemLink = owner.ToStringLinkFromFileName(this->problem);
     this->displayScore = owner.ToStringProblemScoreShort(this->problem, problemSolved);
     this->displayModifyWeight = owner.ToStringProblemWeightButton(this->problem);

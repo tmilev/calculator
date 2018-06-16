@@ -2339,7 +2339,7 @@ std::string Function::ToStringFull() const
     out2 << HtmlRoutines::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample != "")
       out2 << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request= calculator&showExamples = true&mainInput ="
+      << "?request=calculator&showExamples = true&mainInput="
       << HtmlRoutines::ConvertStringToURLString(this->theExample, false)
       << "\"> " << " Example" << "</a>" ;
   } else
@@ -2379,7 +2379,7 @@ std::string Calculator::ToStringOutputAndSpecials()
   std::string urledInput = HtmlRoutines::ConvertStringToURLString(this->inputString, false);
   if (this->inputString != "")
     out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request= calculator&mainInput ="
+    << "?request=calculator&mainInput="
     << urledInput << "\">Link to your input (reloads page).</a><br>";
   out <<  "<table style =\"vertical-align: top\"><tr><td style =\"vertical-align: top\">"
   << this->outputString << "</td>"

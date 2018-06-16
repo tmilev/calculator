@@ -99,7 +99,7 @@ std::string HtmlInterpretation::GetProblemSolution()
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     out << "<hr>"
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request= calculator&mainInput ="
+    << "?request=calculator&mainInput="
     << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosures.str(), false)
     << "\">Input link</a>"
     <<  "<br>" << theInterpreteR.outputString << "<hr>" << theInterpreteR.outputCommentsString
@@ -322,7 +322,7 @@ std::string HtmlInterpretation::submitAnswersPreview()
   std::stringstream problemLinkStream;
   problemLinkStream
   << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-  << "?request= calculator&mainInput ="
+  << "?request=calculator&mainInput="
   << HtmlRoutines::ConvertStringToURLString(calculatorInputStreamNoEnclosures.str(), false)
   << "\">Input link</a>";
   theInterpreterWithAdvice.Evaluate(calculatorInputStream.str());
@@ -634,9 +634,9 @@ std::string HtmlInterpretation::GetSelectCourse()
   out << "<div style =\"text-align:center\">";
   for (int i = 0; i < theCourses.theCourses.size; i ++)
   { out << "<a class =\"courseLink\" href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request= template&courseHome = coursetemplates/"
+    << "?request=template&courseHome= coursetemplates/"
     << theCourses.theCourses[i].courseTemplate
-    << "&topicList = topiclists/"
+    << "&topicList= topiclists/"
     << theCourses.theCourses[i].courseTopics
     << "\">" << theCourses.theCourses[i].title << "</a>";
     if (i != theCourses.theCourses.size - 1)
@@ -1156,7 +1156,7 @@ std::string HtmlInterpretation::SubmitAnswers
   { debugInputStream
     << "Input, no enclosures, direct link: "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request= calculator&mainInput ="
+    << "?request=calculator&mainInput="
     << HtmlRoutines::ConvertStringToURLString(completedProblemStreamNoEnclosures.str(), false)
     << "\">Input link</a>";
   }
@@ -1361,7 +1361,7 @@ std::string HtmlInterpretation::AddTeachersSections()
   { out << "<b>Only admins may assign sections to teachers.</b>";
     return out.str();
   }
-  std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  std::string mainInput=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::ChopCGIString(mainInput, theMap, out))
   { out << "<b>Failed to extract input from: " << mainInput << ".</b>";
@@ -1553,8 +1553,8 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     << "Likely there is a bug with the problem. </b></span>";
     if (theGlobalVariables.UserDefaultHasProblemComposingRights())
       out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request= calculator&"
-      << "mainInput ="
+      << "?request=calculator&"
+      << "mainInput="
       << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str(), false)
       << "\">Calculator input no enclosures</a>";
     out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
@@ -1567,8 +1567,8 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
     << "Likely there is a bug with the problem. </b></span>";
     if (theGlobalVariables.UserDefaultHasProblemComposingRights())
       out << "<br>\n<a href=\"" << theGlobalVariables.DisplayNameExecutable
-      << "?request= calculator&"
-      << "mainInput ="
+      << "?request=calculator&"
+      << "mainInput="
       << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str(), false)
       << "\">Calculator input no enclosures</a>";
     out << "<br>" << CalculatorHTML::BugsGenericMessage << "<br>Details: <br>"
@@ -1625,8 +1625,8 @@ std::string HtmlInterpretation::GetAnswerOnGiveUp
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
     out
     << "<hr><a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request= calculator&"
-    << "mainInput ="
+    << "?request=calculator&"
+    << "mainInput="
     << HtmlRoutines::ConvertStringToURLString(answerCommandsNoEnclosure.str() ,false)
     << "\">Calculator input no enclosures</a>"
     << theInterpreteR.outputString << "<hr>"
@@ -1797,7 +1797,7 @@ std::string HtmlInterpretation::ToStringUserDetailsTable
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
     << "?request=accounts&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
-    << "filterAccounts = false&Z"
+    << "filterAccounts=false&"
     << "\">Show all. </a>"
     << "<br>";
   }
@@ -2465,17 +2465,17 @@ std::string HtmlInterpretation::ToStringNavigation()
       std::string section = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("studentSection"), false);
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable;
       if (theGlobalVariables.userCalculatorRequestType == "exerciseNoLogin")
-        out << "?request= templateNoLogin";
+        out << "?request=templateNoLogin";
       else
-        out << "?request= template";
+        out << "?request=template";
       out << "&" << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
       << "studentView=" << studentView << "&";
       if (section != "")
-        out << "studentSection ="
+        out << "studentSection="
         << theGlobalVariables.GetWebInput("studentSection") << "&";
-      out << "topicList =" << topicList << "&";
-      out << "courseHome =" << courseHome << "&";
-      out << "fileName =" << courseHome << "&\">Home</a>"
+      out << "topicList=" << topicList << "&";
+      out << "courseHome=" << courseHome << "&";
+      out << "fileName=" << courseHome << "&\">Home</a>"
       << linkSeparator;
     }
   }
@@ -2495,7 +2495,7 @@ std::string HtmlInterpretation::ToStringNavigation()
       out << "</b>" << linkSeparator;
     } else
     { if (theGlobalVariables.flagUsingSSLinCurrentConnection)
-        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request= changePasswordPage&"
+        out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage&"
         << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << "\">Account</a>" << linkSeparator;
       else
         out << "<b>Account settings: requires secure connection</b>" << linkSeparator;
@@ -2514,7 +2514,7 @@ std::string HtmlInterpretation::ToStringNavigation()
       out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
       << "?request=accounts&"
       << theGlobalVariables.ToStringCalcArgsNoNavigation(0)
-      << "&filterAccounts = true"
+      << "&filterAccounts=true"
       << "\">Accounts</a>" << linkSeparator;
     else
       out << "<b>Accounts</b>" << linkSeparator;
@@ -2538,7 +2538,7 @@ std::string HtmlInterpretation::ToStringNavigation()
       out << "<b>Database</b>" << linkBigSeparator;
   }
   if (theGlobalVariables.userCalculatorRequestType != "calculator")
-    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request= calculator&"
+    out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=calculator&"
     << theGlobalVariables.ToStringCalcArgsNoNavigation(0) << " \">Calculator</a>" << linkBigSeparator;
   else
     out << "<b>Calculator</b> " << linkBigSeparator;
@@ -2557,13 +2557,13 @@ std::string HtmlInterpretation::ToStringNavigation()
       else
         out << "<a style =\"color:red\" href=\""
         << theGlobalVariables.DisplayNameExecutable
-        << "?request= toggleMonitoring\""
+        << "?request=toggleMonitoring\""
         << "><b>Monitoring on</b></a>" << linkSeparator;
     } else
       if (theGlobalVariables.UserDefaultHasAdminRights())
         out << "<a style =\"color:green\" href=\""
         << theGlobalVariables.DisplayNameExecutable
-        << "?request= toggleMonitoring\""
+        << "?request=toggleMonitoring\""
         << "><b>Monitoring off</b></a>" << linkSeparator;
   }
 

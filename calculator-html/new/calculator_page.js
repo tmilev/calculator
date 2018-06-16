@@ -94,7 +94,7 @@ function exampleCalculatorClick(theLink) {
   }
 
 //console.log(theHandler);
-  var mainInput = document.getElementById("mainInputID");
+  var mainInput=document.getElementById("mainInputID");
   mainInput.value = theHandler.example;
   submitCalculatorComputation();
 }
@@ -152,7 +152,7 @@ function toggleCalculatorExamples(theButton) {
   var theExamples = document.getElementById('divCalculatorExamples');
   if (theExamples.innerHTML.length < 300) {
     submitGET({
-      url: `${pathnames.calculatorAPI}?request= calculatorExamplesJSON`,
+      url: `${pathnames.calculatorAPI}?request=calculatorExamplesJSON`,
       callback: processExamples,
       progress: "spanProgressCalculatorExamples"
     });

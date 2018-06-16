@@ -392,7 +392,7 @@ InputPanelData.prototype.submitAnswer = function() {
   if (currentProblem.flagForReal) {
     theRequest = "submitAnswers";
   } else {
-    theRequest = `submitExercise&randomSeed =${currentProblem.randomSeed}`;
+    theRequest = `submitExercise&randomSeed=${currentProblem.randomSeed}`;
   }
    //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
@@ -400,7 +400,7 @@ InputPanelData.prototype.submitAnswer = function() {
 
 InputPanelData.prototype.submitGiveUp = function() {
   var currentProblem = thePage.pages.problemPage.problems[this.fileName];
-  var theRequest = `problemGiveUp&randomSeed =${currentProblem.randomSeed}`; //"submitAnswersPreview"
+  var theRequest = `problemGiveUp&randomSeed=${currentProblem.randomSeed}`; //"submitAnswersPreview"
   this.submitOrPreviewAnswers(theRequest);
 }
 

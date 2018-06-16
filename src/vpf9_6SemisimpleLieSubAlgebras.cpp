@@ -4488,7 +4488,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat)
   outNotation << "Notation, structure constants and Weyl group info: "
   << HtmlRoutines::GetCalculatorLink(theGlobalVariables.DisplayNameExecutable, outNotationCommand.str())
   << "<br> <a href=\"" << theGlobalVariables.DisplayNameExecutable
-  << "?request= calculator"
+  << "?request=calculator"
   << "\"> Calculator main page</a><br><a href=\"../rootSubalgebras.html\">Root subsystem table</a><br>";
   std::string notation = outNotation.str();
   out << this->ToString(theFormat);

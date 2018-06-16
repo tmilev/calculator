@@ -80,7 +80,7 @@ function modifyWeight(id) {
     weight: incomingPoints
   };
   //console.log("DEBUG: about to fire up: " + JSON.stringify(modifyObject));
-  var theURL = `${pathnames.calculatorAPI}?request=setProblemData&mainInput =${encodeURIComponent(JSON.stringify(modifyObject))}`;
+  var theURL = `${pathnames.calculatorAPI}?request=setProblemData&mainInput=${encodeURIComponent(JSON.stringify(modifyObject))}`;
   submitGET({
     url: theURL,
     progress: "spanProgressReportGeneral",

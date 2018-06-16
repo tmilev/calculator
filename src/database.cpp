@@ -830,7 +830,7 @@ std::string ProblemData::StorE()
 { MacroRegisterFunctionWithName("ProblemData::StorE");
   std::stringstream out;
   if (this->flagRandomSeedGiven)
-    out << "randomSeed =" << this->randomSeed;
+    out << "randomSeed=" << this->randomSeed;
   for (int i = 0; i < this->theAnswers.size(); i ++)
   { Answer& currentA = this->theAnswers[i];
     if (this->flagRandomSeedGiven || i != 0)

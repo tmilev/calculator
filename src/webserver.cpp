@@ -119,7 +119,7 @@ std::string HtmlRoutines::GetJavascriptStandardCookiesWithTags()
 //  << "  result =\"examStatus=\"+getCookie(\"examStatus\");\n"
 //  << "  result +=\"&username=\"+getCookie(\"username\");\n"
 //  << "  result +=\"&authenticationToken =\"+getCookie(\"authenticationToken\");\n"
-//  << "  result +=\"&fileName =\"+getCookie(\"fileName\");\n"
+//  << "  result +=\"&fileName=\"+getCookie(\"fileName\");\n"
 //  << "  return result;\n"
 //  << "}\n"
   << "var setProblemLinkStyle;\n"
@@ -192,7 +192,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "  progReportTimer.innerHTML =\"<hr>Refreshing every \"+timeIncrementInTenthsOfSecond/10+\" second(s). Client time: ~\"+ Math.floor(timeOutCounter/10) +\" second(s)<br>\";\n";
   out << "  timeOutCounter+= timeIncrementInTenthsOfSecond;\n";
   out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable
-  << "?request= indicator&mainInput =\"+currentWorkerNumber;\n";
+  << "?request=indicator&mainInput=\"+currentWorkerNumber;\n";
   out << "  var https = new XMLHttpRequest();\n";
   //out << "alert(sURL);\n";
   out << "  https.open(\"GET\",sURL,true);\n"
@@ -222,7 +222,7 @@ std::string WebWorker::GetJavaScriptIndicatorBuiltInServer()
   out << "  var requestStatus = document.getElementById(\"idProgressReportRequestStatus\");	\n";
   out << "  var pauseRequest = new XMLHttpRequest();\n";
   out << "  pauseURL  = \"" << theGlobalVariables.DisplayNameExecutable
-  << "?request=pause&mainInput =\"+currentWorkerNumber;\n";
+  << "?request=pause&mainInput=\"+currentWorkerNumber;\n";
   out << "  pauseRequest.open(\"GET\",pauseURL,true);\n";
   out << "  pauseRequest.onload = function() {\n";
   out << "    if (pauseRequest.status!=200)\n";
@@ -1300,11 +1300,11 @@ std::string WebWorker::GetNavigationPage()
   out << "<br>";
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=database" << "\">Database</a>";
   out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request= changePasswordPage" << "\">Change password</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=changePasswordPage" << "\">Change password</a>";
   out << "<br>";
   out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=statusPublic" << "\">Server status</a>";
   out << "<br>";
-  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request= calculator" << "\">Calculator</a>";
+  out << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=calculator" << "\">Calculator</a>";
   out << "</body></html>";
   return out.str();
 }
@@ -2772,8 +2772,8 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
     << "?"
     << "request=" << theGlobalVariables.userCalculatorRequestType << "NoLogin"
     << "&"
-    << "topicList =" << topicList << "&"
-    << "courseHome =" << courseHome << "&"
+    << "topicList=" << topicList << "&"
+    << "courseHome=" << courseHome << "&"
     << "\" class =\"courseLink\">Proceed without login</a><br>"
     << "<b style =\"color:red\">Your scores will not be recorded.</b>"
     << "<br><br><b>OR</b><br></div>";
@@ -2822,7 +2822,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   out << "</div>";
   out << "<br>"
   << "<div class =\"divForgotLogin\">"
-  << "<a class =\"linkForgotLoginPass\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request= forgotLoginPage\">"
+  << "<a class =\"linkForgotLoginPass\" href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=forgotLoginPage\">"
   << "Forgot login/password?</a></div>";
   /////////////////////////
   out << "<br><div class =\"divSignUp\">"
@@ -2921,7 +2921,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   { out << "<br>It appears your password is already set. "
     << "<br>If you'd like to change it using your old password, "
     << "<a href=\"" << theGlobalVariables.DisplayNameExecutable
-    << "?request= changePasswordPage\">click here</a>. ";
+    << "?request=changePasswordPage\">click here</a>. ";
     outputDoShowPasswordChangeField = false;
     userInfo[DatabaseStrings::labelActivationToken] = "activated";
   } else
@@ -3755,7 +3755,7 @@ std::string HtmlInterpretation::ModifyProblemReport()
     shouldProceed = theGlobalVariables.flagUsingSSLinCurrentConnection;
   if (!shouldProceed)
     return "<b>Modifying problems allowed only for logged-in admins under ssl connection. </b>";
-  std::string mainInput = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
+  std::string mainInput=HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("mainInput"), false);
   std::string fileName = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("fileName"), false);
   std::stringstream out;
   if (!FileOperations::FileExistsVirtualCustomizedReadOnly(fileName, &out))
@@ -3933,7 +3933,7 @@ std::string WebWorker::GetLoginPage(const std::string& reasonForLogin)
     << "Go to our: <a href="
     << "'https://" << theGlobalVariables.hostWithPort << "/app'"
     << ">one-page app</a> or our <a href='"
-    << theGlobalVariables.DisplayNameExecutable << "?request=login&useJSON = false'>old system</a>. "
+    << theGlobalVariables.DisplayNameExecutable << "?request=login&useJSON=false'>old system</a>. "
     << "</span>"
     << reasonForLogin;
     return out.str();
@@ -4461,7 +4461,7 @@ std::string WebWorker::ToStringStatus() const
       out << ", <span style =\"color:green\"><b>current process</b></span>";
     else
       out << ", <b>in use</b>";
-    out << ", <a href=\"calculator?request=monitor&mainInput =" << this->indexInParent + 1 << "\">monitor process "
+    out << ", <a href=\"calculator?request=monitor&mainInput=" << this->indexInParent + 1 << "\">monitor process "
     << this->indexInParent + 1 << "</a>";
   } else
     out << ", not in use";

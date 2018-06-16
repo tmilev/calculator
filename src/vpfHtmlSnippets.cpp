@@ -34,7 +34,7 @@ std::string HtmlRoutines::GetJavascriptSubmitEmails()
   << "  params+='&passwordList =' + encodeURIComponent(spanPasswords.value);\n"
   << "  params+='&deadlineInfoRowId =' + encodeURIComponent('" << deadlineInfoRowId << "');\n"
   << "  params+='&problemInfoRowId =' + encodeURIComponent('" << problemInfoRowId << "');\n"
-  << "  params+='&filterAccounts =' + '" << theGlobalVariables.GetWebInput("filterAccounts") << "';\n"
+  << "  params+='&filterAccounts=' + '" << theGlobalVariables.GetWebInput("filterAccounts") << "';\n"
   << "  var https = new XMLHttpRequest();\n"
   << "  https.open(\"POST\", '" << theGlobalVariables.DisplayNameExecutable << "', true);\n"
   << "  https.setRequestHeader(\"Content-type\",\"application/x-www-form-urlencoded\");\n"
@@ -390,7 +390,7 @@ const std::string& HtmlRoutines::GetJavascriptSha1()
 
 std::string HtmlRoutines::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)
 { std::stringstream out;
-  out << "<a href=\"" << DisplayNameCalculator << "?request= calculator&mainInput ="
+  out << "<a href=\"" << DisplayNameCalculator << "?request=calculator&mainInput="
   << HtmlRoutines::ConvertStringToURLString(input, false) << "\"> " << input << "</a>";
   return out.str();
 }

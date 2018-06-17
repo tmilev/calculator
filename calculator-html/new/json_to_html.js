@@ -7,8 +7,17 @@ function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
   theDomComponent.innerHTML = getHtmlFromArrayOfObjects(inputJSON);
 }
 
+function deleteDatabaseItemCallback(input, output) {
+  console.log (`Debug: result: ${input}`);
+}
+
 function deleteDatabaseItem(labels) {
-  console.log (`Debug: requesting to delete: ${labels.join(",")}`);
+  var theURL = `${pathnames.calculatorAPI}?request=databaseDeleteOneEntry&item=${escape(JSON.stringify(labels))}`;
+  submitGET({
+    url: theURL,
+    callback: deleteDatabaseItemCallback,
+    progress: "spanProgressReportGeneral"
+  });  
 }
 
 function matchesPattern(currentLabels, pattern) {
@@ -27,6 +36,9 @@ function matchesPattern(currentLabels, pattern) {
 }
 
 function isDeleteable(currentLabels) {
+  if (currentLabels === null || currentLabels === undefined) {
+    return false;
+  }
   for (var counterModifiable = 0; counterModifiable < modifiableDatabaseData.modifiableFields.length; counterModifiable ++) {
     if (matchesPattern(currentLabels, modifiableDatabaseData.modifiableFields[counterModifiable])) {
       return true;
@@ -61,7 +73,7 @@ function getTableHorizontallyLaidFromJSON(input, currentLabels) {
         newLabels[newLabels.length - 1] = `${counterInput}`;
       }
       var item = input[counterInput];
-      result += `<tr><td> <tiny>${item}</tiny></td><td>${getTableHorizontallyLaidFromJSON(input[item], newLabels)}</td></tr>`; 
+      result += `<tr><td> <tiny>${counterInput}</tiny></td><td>${getTableHorizontallyLaidFromJSON(item, newLabels)}</td></tr>`; 
     }
     result += "</table>";
     return result;
@@ -131,6 +143,7 @@ function getLabelsRows(input) {
 
 function getHtmlFromArrayOfObjects(input, currentLabelsMerged) {
   var inputJSON = input;
+  var hasLabels = (currentLabelsMerged !== null && currentLabelsMerged !== undefined);
 
   if (typeof inputJSON === "string") {
     inputJSON = input.replace(/[\r\n]/g, " "); 
@@ -148,9 +161,12 @@ function getHtmlFromArrayOfObjects(input, currentLabelsMerged) {
     inputJSON = [inputJSON];
   }
   if (Array.isArray(inputJSON)) {
-    var newLabel = currentLabelsMerged.slice();
-    newLabel.push(0);
-    newLabel.push("");
+    var newLabel = null;
+    if (hasLabels) {
+      newLabel = currentLabelsMerged.slice();
+      newLabel.push(0);
+      newLabel.push("");
+    }
     var labelsRows = getLabelsRows(inputJSON);
     if (labelsRows !== null) { 
       result += "<table class='tableJSON'>";
@@ -159,10 +175,12 @@ function getHtmlFromArrayOfObjects(input, currentLabelsMerged) {
         result += `<th>${labelsRows.labels[counterColumn]}</th>`;
       }
       for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++) {
-        if (labelsRows.idRow != - 1) {
-          newLabel[newLabel.length - 2] = labelsRows.rows[counterRow][labelsRows.idRow]["$oid"];
-        } else {
-          newLabel[newLabel.length - 2] = `${counterRow}`;
+        if (hasLabels) {
+          if (labelsRows.idRow != - 1) {
+            newLabel[newLabel.length - 2] = labelsRows.rows[counterRow][labelsRows.idRow]["$oid"];
+          } else {
+            newLabel[newLabel.length - 2] = `${counterRow}`;
+          }
         }
         result += "<tr>";
         for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {

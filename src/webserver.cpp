@@ -1167,10 +1167,10 @@ void ProgressReportWebServer::SetStatus(const std::string& inputStatus)
 //}
 
 // get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
+void *get_in_addr(struct sockaddr* sa)
 { if (sa->sa_family == AF_INET)
-    return &(((struct sockaddr_in*)sa)->sin_addr);
-  return &(((struct sockaddr_in6*)sa)->sin6_addr);
+    return &(((struct sockaddr_in*) sa)->sin_addr);
+  return &(((struct sockaddr_in6*) sa)->sin6_addr);
 }
 
 std::string WebWorker::ToStringMessageShortUnsafe(FormatExpressions* theFormat) const
@@ -1322,6 +1322,30 @@ std::string WebWorker::GetDatabaseJSON()
   out << "<b>Database not available. </b>";
 #endif // MACRO_use_MongoDB
   return out.str();
+}
+
+std::string WebWorker::GetDatabaseDeleteOneItem()
+{ MacroRegisterFunctionWithName("WebWorker::GetDatabaseDeleteOneItem");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+    return "Only logged-in admins can execute the delete command. ";
+  std::stringstream commentsStream;
+  std::string inputEncoded = theGlobalVariables.GetWebInput("item");
+  std::string inputString = HtmlRoutines::ConvertURLStringToNormal(inputEncoded, false);
+  commentsStream << "DEBUG: Encoded input: " << inputEncoded << " decodes to: " << inputString;
+  JSData inputParsed;
+  if (!inputParsed.readstring(inputString, false, &commentsStream))
+  { commentsStream << "Failed to parse input string. ";
+    return commentsStream.str();
+  }
+  commentsStream << "Parsed input string: " << inputParsed.ToString(false, false);
+  if (DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(inputParsed, &commentsStream))
+    return "success";
+#ifdef MACRO_use_MongoDB
+
+#else
+  commentsStream << "<b>Database not available. </b>";
+#endif // MACRO_use_MongoDB
+  return commentsStream.str();
 }
 
 std::string WebWorker::GetDatabasePage()
@@ -3564,6 +3588,13 @@ int WebWorker::ProcessDatabase()
   return 0;
 }
 
+int WebWorker::ProcessDatabaseDeleteEntry()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseDeleteEntry");
+  this->SetHeaderOKNoContentLength();
+  stOutput << this->GetDatabaseDeleteOneItem();
+  return 0;
+}
+
 int WebWorker::ProcessDatabaseModifyEntry()
 { MacroRegisterFunctionWithName("WebWorker::ProcessDatabaseModifyEntry");
   this->SetHeaderOKNoContentLength();
@@ -4200,6 +4231,9 @@ int WebWorker::ServeClient()
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
       theGlobalVariables.userCalculatorRequestType == "databaseJSON")
     return this->ProcessDatabaseJSON();
+  else if (theGlobalVariables.flagLoggedIn &&
+           theGlobalVariables.userCalculatorRequestType == "databaseDeleteOneEntry")
+    return this->ProcessDatabaseDeleteEntry();
   else if (theGlobalVariables.flagLoggedIn && theGlobalVariables.UserDefaultHasAdminRights() &&
            theGlobalVariables.userCalculatorRequestType == "databaseOneEntry")
     return this->ProcessDatabaseOneEntry();

@@ -462,6 +462,68 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
   return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString(collectionName, findQuery.ToString(true), output, commentsOnFailure);
 }
 
+bool DatabaseRoutinesGlobalFunctionsMongo::matchesPattern
+(const List<std::string>& fieldLabel, const List<std::string>& pattern)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::matchesPattern");
+  if (fieldLabel.size != pattern.size)
+    return false;
+  for (int i = 0; i < fieldLabel.size; i++)
+  { if (pattern[i] == DatabaseStrings::anyField)
+      continue;
+    if (fieldLabel[i] != pattern[i])
+      return false;
+  }
+  return true;
+
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable(const List<std::string>& theLabels, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::isDeleteable");
+  for (int i = 0; i < theGlobalVariables.databaseModifiableFields.size; i++)
+    if (DatabaseRoutinesGlobalFunctionsMongo::matchesPattern(theLabels, theGlobalVariables.databaseModifiableFields[i]))
+      return true;
+  if (commentsOnFailure != 0)
+    *commentsOnFailure << "Labels: " << theLabels.ToStringCommaDelimited() << " do not match any modifiable field pattern. ";
+  return false;
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::isDeleteable(const JSData& theEntry, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::isDeleteable");
+  if (theEntry.type != JSData::JSarray)
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "The labels json is required to be an array of strings. ";
+    return false;
+  }
+  List<std::string> theLabels;
+  for (int i = 0; i < theEntry.list.size; i++)
+  { if (theEntry.list[i].type != JSData::JSstring)
+    { if (commentsOnFailure != 0)
+        *commentsOnFailure << "Label index " << i << " is not of type string as required. ";
+      return false;
+    }
+    theLabels.AddOnTop(theEntry.list[i].string);
+  }
+  return DatabaseRoutinesGlobalFunctionsMongo::isDeleteable(theLabels, commentsOnFailure);
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry");
+  if (!theGlobalVariables.UserDefaultHasAdminRights())
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "Only logged-in admins can delete DB entries.";
+    return false;
+  }
+  if (!isDeleteable(theEntry, commentsOnFailure))
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "Entry: " << theEntry.ToString(false, false) << " not deleteable";
+    return false;
+  }
+  if (commentsOnFailure != 0)
+    *commentsOnFailure << "Not implemented yet. ";
+
+  return false;
+}
+
 bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
 (const std::string& collectionName, const std::string& findQuery, const JSData& updateQuery,
  std::stringstream* commentsOnFailure)

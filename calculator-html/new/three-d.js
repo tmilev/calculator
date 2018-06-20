@@ -24,172 +24,198 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 var calculatorCanvases = new Object;
-var firstCriticalRunTimeError ="";
-var firstCanvas =undefined;
+var firstCriticalRunTimeError = "";
+var firstCanvas = undefined;
 
-function calculatorError(x)
-{ console.log(x);
-  if (firstCriticalRunTimeError!="")
+function calculatorError(x) { 
+  console.log(x);
+  if (firstCriticalRunTimeError !== "") {
     return;  
-  firstCriticalRunTimeError =x;
-  if (firstCriticalRunTimeError!="" && firstCanvas!=undefined)
-  { firstCanvas.textErrors = firstCriticalRunTimeError+" All further error messages are suppressed.";
+  }
+  firstCriticalRunTimeError = x;
+  if (firstCriticalRunTimeError !== "" && firstCanvas !== undefined) { 
+    firstCanvas.textErrors = firstCriticalRunTimeError + " All further error messages are suppressed.";
     firstCanvas.showMessages();
   }
 }
 
-function vectorScalarVector(s,t)
-{ var result = 0;
-  if (s.length!== t.length)
+function vectorScalarVector(s, t){ 
+  var result = 0;
+  if (s.length !== t.length) {
     calculatorError("Scalar product of vectors of different length: " + s + " and " + t + ".");
-  for (var i = 0; i <s.length; i ++)
-    result +=s[i]*t[i];
+  }
+  for (var i = 0; i < s.length; i ++) {
+    result += s[i] * t[i];
+  }
   return result;
 }
 
-function vectorTimesScalar(vector, s)
-{ for (var i = 0;i <vector.length; i ++)
-    vector[i]*=s;
+function vectorTimesScalar(vector, s) { 
+  for (var i = 0; i < vector.length; i ++) {
+    vector[i] *= s;
+  }
 }
 
-function vectorPlusVector(left, right)
-{ var output = new Array(left.length);
-  for (var i = 0;i <left.length; i ++)
-    output[i]=left[i]+right[i];
+function vectorPlusVector(left, right) { 
+  var output = new Array(left.length);
+  for (var i = 0; i < left.length; i ++) {
+    output[i] = left[i] + right[i];
+  }
   return output;
 }
 
-function vectorCrossVector(left, right)
-{ return [left[1]*right[2]-left[2]*right[1], -left[0]*right[2]+left[2]*right[0], left[0]*right[1]-left[1]*right[0] ];
+function vectorCrossVector(left, right) { 
+  return [left[1] * right[2] - left[2] * right[1], -left[0] * right[2] + left[2] * right[0], left[0] * right[1] - left[1] * right[0] ];
 }
 
-function vectorMinusVector(left, right)
-{ var output = new Array(left.length);
-  for (var i = 0;i <left.length; i ++)
-    output[i]=left[i]-right[i];
+function vectorMinusVector(left, right) { 
+  var output = new Array(left.length);
+  for (var i = 0; i < left.length; i ++) {
+    output[i] = left[i] - right[i];
+  }
   return output;
 }
 
-function vectorAddVectorTimesScalar(output, otherVector, scalar)
-{ for (var i = 0;i <output.length; i ++)
-    output[i]+= otherVector[i]*scalar;
+function vectorAddVectorTimesScalar(output, otherVector, scalar) { 
+  for (var i = 0; i < output.length; i ++) {
+    output[i] += otherVector[i] * scalar;
+  }
 }
 
-function vectorLength(vector)
-{ return Math.sqrt(vectorScalarVector(vector, vector));
+function vectorLength(vector) { 
+  return Math.sqrt(vectorScalarVector(vector, vector));
 }
 
-function deepCopy(from, to)
-{ to = new Array(from.length)
-  for (var i = 0; i <from.length; i ++)
-    if (from[i] instanceof Array)
+function deepCopy(from, to) { 
+  to = new Array(from.length);
+  for (var i = 0; i < from.length; i ++) {
+    if (from[i] instanceof Array) {
       deepCopy(from[i], to[i]);
-    else
-      to[i]= from[i];
+    } else {
+      to[i] = from[i];
+    }
+  }
 }
 
-function vectorRound(vector)
-{ for (var i = 0; i <vector.length; i ++)
-    vector[i]=Math.round(vector[i]);
+function vectorRound(vector) { 
+  for (var i = 0; i < vector.length; i ++) {
+    vector[i] = Math.round(vector[i]);
+  }
 }
 
-function vectorNormalize(vector)
-{ vectorTimesScalar(vector, 1/vectorLength(vector));
+function vectorNormalize(vector) { 
+  vectorTimesScalar(vector, 1 / vectorLength(vector));
 }
 
-function getPosXPosYObject(theObject, cx,cy)
-{ var divPosX = 0;
+function getPosXPosYObject(theObject, cx, cy) { 
+  var divPosX = 0;
   var divPosY = 0;
   var thePointer = theObject;
-  while (thePointer)
-  { divPosX += thePointer.offsetLeft;
+  while (thePointer) { 
+    divPosX += thePointer.offsetLeft;
     divPosY += thePointer.offsetTop;
     thePointer = thePointer.offsetParent;
   }
-  return [cx-divPosX+document.body.scrollLeft,
-          cy-divPosY+document.body.scrollTop];
+  return [cx - divPosX + document.body.scrollLeft, cy - divPosY + document.body.scrollTop];
 }
 
-function getAngleChangeMathScreen(newX, newY, oldX, oldY)
-{ var result = Math.atan2(newY, newX) - Math.atan2(oldY, oldX);
-  if (result>Math.PI)
-    result-=Math.PI;
-  else if (result< -Math.PI)
-    result +=Math.PI;
+function getAngleChangeMathScreen(newX, newY, oldX, oldY) { 
+  var result = Math.atan2(newY, newX) - Math.atan2(oldY, oldX);
+  if (result > Math.PI) {
+    result-= Math.PI;
+  } else if (result< -Math.PI) {
+    result += Math.PI;
+  }
   return result;
 }
 
-function testFunctionPlot(v)
-{ return Math.sin(v);
+function testFunctionPlot(v) { 
+  return Math.sin(v);
 }
 
-function testFunctionPlot2(v)
-{ return Math.sin(2*v) +2;
+function testFunctionPlot2(v) { 
+  return Math.sin(2 * v) + 2;
 }
 
-function testMoebiusStripEmbedding(u,v)
-{ var z=(v)*Math.sin(u/2);
-  var x =(2+(v)*Math.cos(u/2))*Math.cos(u);
-  var y =(2+(v)*Math.cos(u/2))*Math.sin(u);
+function testMoebiusStripEmbedding(u, v) { 
+  var z = v * Math.sin(u / 2);
+  var x =(2 + (v) * Math.cos(u / 2)) * Math.cos(u);
+  var y =(2 + (v) * Math.cos(u / 2)) * Math.sin(u);
   //var z=v/2;//*Math.sin(u);
   //var x =(u)/10+v/2;// (2+(v)*Math.cos(u))*Math.cos(u);
   //var y =(u/11);// (2+(v)*Math.cos(u))*Math.sin(u);
-  return [x,y,z];
+  return [x, y, z];
 }
 
-function testMoebiusStripEmbedding2(u,v)
-{ var first = testMoebiusStripEmbedding(u,v);
+function testMoebiusStripEmbedding2(u, v) { 
+  var first = testMoebiusStripEmbedding(u, v);
   var x = first[0];
   var y = first[1];
-  var z= first[2];
-  return [x +2,z, y];
+  var z = first[2];
+  return [x + 2, z, y];
 }
 
-function testGetMoebiusSurface()
-{ var colors ={colorContour: "black", colorUV: "blue", colorVU: "cyan"};
-  var result = new Surface(testMoebiusStripEmbedding, [[0,-0.6], [Math.PI*2, 0.6]], [22,4], colors,2);
+function testGetMoebiusSurface() { 
+  var colors = {
+    colorContour: "black", 
+    colorUV: "blue", 
+    colorVU: "cyan"
+  };
+  var result = new Surface(testMoebiusStripEmbedding, [[0, - 0.6], [Math.PI * 2, 0.6]], [22, 4], colors, 2);
   return result;
 }
 
-function testGetMoebiusSurface2()
-{ var colors ={colorContour: "black", colorUV: "red", colorVU: "pink"};
-  var result = new Surface(testMoebiusStripEmbedding2, [[0,-0.6], [Math.PI*2, 0.6]], [22,4], colors,0.5);
+function testGetMoebiusSurface2() { 
+  var colors = {
+    colorContour: "black", 
+    colorUV: "red", 
+    colorVU: "pink"
+  };
+  var result = new Surface(testMoebiusStripEmbedding2, [[0,- 0.6], [Math.PI * 2, 0.6]], [22, 4], colors, 0.5);
   return result;
 }
 
-function testVectorField2d(x,y)
-{ return [ -y,x];
+function testVectorField2d(x, y) { 
+  return [- y, x];
 }
 
-function testGetTestPlane()
-{ var colors ={colorContour: "black", colorUV: "blue", colorVU: "cyan"};
-  var result = new Surface(function(u,v){return [u,0.9*v,1+u+v]; }, [[- 1.2,-0.7], [1,1]], [5,5], colors);
+function testGetTestPlane() { 
+  var colors = {
+    colorContour: "black", 
+    colorUV: "blue", 
+    colorVU: "cyan"
+  };
+  var result = new Surface(function(u, v) {
+    return [u, 0.9 * v, 1 + u + v]; 
+  }, [[- 1.2, - 0.7], [1, 1]], [5, 5], colors);
   return result;
 }
 
-function CurveThreeD(inputCoordinateFunctions, inputLeftPt, inputRightPt,
-                     inputNumSegments, inputColor, inputLineWidth)
-{ this.coordinateFunctions = inputCoordinateFunctions;
+function CurveThreeD(
+  inputCoordinateFunctions, inputLeftPt, inputRightPt,
+  inputNumSegments, inputColor, inputLineWidth
+) { 
+  this.coordinateFunctions = inputCoordinateFunctions;
   this.leftPt = inputLeftPt;
   this.rightPt = inputRightPt;
   this.color = colorToRGB(inputColor);
   this.numSegments = inputNumSegments;
   this.lineWidth= inputLineWidth;
-  this.accountBoundingBox = function(inputOutputBox)
-  { var theT= this.leftPt;
+  this.accountBoundingBox = function(inputOutputBox) { 
+    var theT = this.leftPt;
     var theX = this.coordinateFunctions[0](theT);
     var theY = this.coordinateFunctions[1](theT);
     accountBoundingBox([theX, theY], inputOutputBox);
-    for (var i = 0; i <this.numSegments; i ++)
-    { var theRatio= i/(this.numSegments- 1);
-      theT= this.leftPt *(1-theRatio) +  this.rightPt*theRatio;
+    for (var i = 0; i < this.numSegments; i ++) { 
+      var theRatio = i / (this.numSegments - 1);
+      theT = this.leftPt * (1 - theRatio) +  this.rightPt * theRatio;
       theX = this.coordinateFunctions[0](theT);
       theY = this.coordinateFunctions[1](theT);
       accountBoundingBox([theX, theY], inputOutputBox);
     }
   };
-  this.drawNoFinish= function(theCanvas, startByMoving)
-  { var theSurface = theCanvas.surface;
+  this.drawNoFinish = function(theCanvas, startByMoving){ 
+    var theSurface = theCanvas.surface;
     theSurface.strokeStyle = colorRGBToString(this.color);
     theSurface.fillStyle = colorRGBToString(this.color);
     var theT= this.leftPt;

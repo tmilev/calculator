@@ -1,6 +1,6 @@
 "use strict";
 
-function loginCalculator(){
+function loginCalculator() {
   var password = document.getElementById("inputPassword").value;
   document.getElementById("inputPassword").value = "";
   var username = document.getElementById("inputUsername").value;
@@ -11,28 +11,28 @@ function loginCalculator(){
   });
 }
 
-function doReload(){
+function doReload() {
   location.reload();
 }
 
 var reloadPageTimer = null;
 
-function reloadPage(reason, time){
+function reloadPage(reason, time) {
   clearTimeout(reloadPageTimer);
   reloadPageTimer = null;
-  if (time < 0){
+  if (time < 0) {
     time = 0;
   }
   var timeRemaining = time / 1000;
   document.getElementById("spanLoginStatus").innerHTML = reason + `[in ${timeRemaining} (s)]`; 
-  if (time <= 0){
+  if (time <= 0) {
     doReload();
   } else { 
     reloadPageTimer = setTimeout(reloadPage.bind(null, reason, time - 1000), 1000);
   }
 }
 
-function logout(){
+function logout() {
   logoutGoogle();
   if (thePage.user.role === "admin") {
     reloadPage("<b>Logging out admin: mandatory page reload. </b>", 3000);
@@ -135,7 +135,7 @@ function loginWithServerCallback(incomingString, result) {
   }
 }
 
-function onGoogleSignIn(googleUser){ 
+function onGoogleSignIn(googleUser) { 
   var theToken = googleUser.getAuthResponse().id_token;
   thePage.user.googleToken = theToken;
   thePage.user.name = "";
@@ -158,7 +158,7 @@ function onGoogleSignIn(googleUser){
 function startGoogleLogin() {
   //console.log("Got to here");
   if (typeof (gapi) !== "undefined") {
-    if (!thePage.pages.login.initialized){
+    if (!thePage.pages.login.initialized) {
       gapi.signin2.render('divGoogleLoginButton', {
         'scope': 'profile email',
         'onsuccess': onGoogleSignIn,

@@ -102,8 +102,9 @@ function toStringProblemWeightCell(problemData) {
 
 function convertStringToLaTeXFileName(input) {
   var result = encodeURIComponent(input.split(" ").join("-")).split("%").join("-");
-  if (result.length === 0)
+  if (result.length === 0) {
     return "undefined";
+  }
   if (result[0] === "-") {
     result = "L" + result;
   }
@@ -209,7 +210,7 @@ function isProblemContainer(section) {
 function getHTMLSection(theSection) {
   var result = "";
   //console.log("DEBUG: current section: " + JSON.stringify(theSection.title) + "; type: " + JSON.stringify(theSection.type));
-  if (theSection.type === "section"){
+  if (theSection.type === "section") {
     result += `<div class =\"headSection\">${theSection.problemNumberString} ${theSection.title}</div>`;    
   }
   result += "<div class =\"bodySection\">";
@@ -274,7 +275,7 @@ function afterLoadTopics(incomingTopics, result) {
   MathJax.Hub.Queue(['Typeset', MathJax.Hub, topicsElements[0]]);
 }
 
-function writeEditCoursePagePanel(){
+function writeEditCoursePagePanel() {
   var thePanel = "";
   thePanel += getEditPanel(thePage.currentCourse.fileName);
   thePanel += getEditPanel(thePage.currentCourse.topicList);

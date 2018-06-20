@@ -11,8 +11,14 @@ function deleteDatabaseItemCallback(input, output) {
   console.log (`Debug: result: ${input}`);
 }
 
-function deleteDatabaseItem(labels) {
-  var theURL = `${pathnames.calculatorAPI}?request=databaseDeleteOneEntry&item=${escape(JSON.stringify(labels))}`;
+function deleteDatabaseItem(labels, selector) {
+  var finalSelector = {
+    table: selector.table,
+    object: selector.object,
+    fields: labels
+  }
+  var theURL = `${pathnames.calculatorAPI}?request=databaseDeleteOneEntry&item=${escape(JSON.stringify(finalSelector))}`;
+  console.log("DEBUG: final selector: " + JSON.stringify(finalSelector));
   submitGET({
     url: theURL,
     callback: deleteDatabaseItemCallback,
@@ -20,42 +26,49 @@ function deleteDatabaseItem(labels) {
   });  
 }
 
-function matchesPattern(currentLabels, pattern) {
-  if (currentLabels.length !== pattern.length) {
+function matchesPattern(currentLabels, selector, pattern) {
+  if (currentLabels.length !== pattern.length - 1) {
     return false;
   }
-  for (var counterLabel = 0; counterLabel < currentLabels.length; counterLabel ++) {
+  //console.log(`DEBUG: Does ${currentLabels.join(", ")} match ${pattern.join(", ")}`);
+  if (pattern.length < 1) {
+    return false;
+  }
+  if (selector.table !== pattern[0]) {
+    return false;
+  }
+  for (var counterLabel = 1; counterLabel < pattern.length; counterLabel ++) {
     if (pattern[counterLabel] === modifiableDatabaseData.universalSelector) {
       continue;
     }
-    if (pattern[counterLabel] !== currentLabels[counterLabel]) {
+    if (pattern[counterLabel] !== currentLabels[counterLabel - 1]) {
       return false;
     }
   }
   return true;
 }
 
-function isDeleteable(currentLabels) {
-  if (currentLabels === null || currentLabels === undefined) {
+function isDeleteable(currentLabels, selector) {
+  if (currentLabels === null || currentLabels === undefined || selector === null || selector === undefined) {
     return false;
   }
   for (var counterModifiable = 0; counterModifiable < modifiableDatabaseData.modifiableFields.length; counterModifiable ++) {
-    if (matchesPattern(currentLabels, modifiableDatabaseData.modifiableFields[counterModifiable])) {
+    if (matchesPattern(currentLabels, selector, modifiableDatabaseData.modifiableFields[counterModifiable])) {
       return true;
     }
   }
   return false;
 }
 
-function getDeleteButtonFromLabels(theLabels) {
-  return `<button onclick='deleteDatabaseItem(${JSON.stringify(theLabels)})'>Delete</button>`;
+function getDeleteButtonFromLabels(theLabels, selector) {
+  return `<button onclick='deleteDatabaseItem(${JSON.stringify(theLabels)}, ${JSON.stringify(selector)})'>Delete</button>`;
 }
 
-function getTableHorizontallyLaidFromJSON(input, currentLabels) {
+function getTableHorizontallyLaidFromJSON(input, currentLabels, selector) {
   var inputType = typeof input; 
   if (inputType === "string" || inputType === "number" || inputType === "boolean") {
-    if (isDeleteable(currentLabels)) {
-      return `${input} ${getDeleteButtonFromLabels(currentLabels)}`;
+    if (isDeleteable(currentLabels, selector)) {
+      return `${input} ${getDeleteButtonFromLabels(currentLabels, selector)}`;
     }
     return input;
   }  
@@ -73,7 +86,7 @@ function getTableHorizontallyLaidFromJSON(input, currentLabels) {
         newLabels[newLabels.length - 1] = `${counterInput}`;
       }
       var item = input[counterInput];
-      result += `<tr><td> <tiny>${counterInput}</tiny></td><td>${getTableHorizontallyLaidFromJSON(item, newLabels)}</td></tr>`; 
+      result += `<tr><td> <tiny>${counterInput}</tiny></td><td>${getTableHorizontallyLaidFromJSON(item, newLabels, selector)}</td></tr>`; 
     }
     result += "</table>";
     return result;
@@ -91,9 +104,9 @@ function getTableHorizontallyLaidFromJSON(input, currentLabels) {
         newLabels[newLabels.length - 1] = item;
       }
       result += `<tr>`;
-      result += `<td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item], newLabels)}</td>`;
-      if (isDeleteable(newLabels)) {
-        result += `<td>${getDeleteButtonFromLabels(newLabels)}</td>`;
+      result += `<td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item], newLabels, selector)}</td>`;
+      if (isDeleteable(newLabels, selector)) {
+        result += `<td>${getDeleteButtonFromLabels(newLabels, selector)}</td>`;
       }
       result += `</tr>`; 
     }
@@ -141,9 +154,9 @@ function getLabelsRows(input) {
   return result;
 }
 
-function getHtmlFromArrayOfObjects(input, currentLabelsMerged) {
+function getHtmlFromArrayOfObjects(input, selector) {
   var inputJSON = input;
-  var hasLabels = (currentLabelsMerged !== null && currentLabelsMerged !== undefined);
+  var hasLabels = (selector !== null && selector !== undefined);
 
   if (typeof inputJSON === "string") {
     inputJSON = input.replace(/[\r\n]/g, " "); 
@@ -162,11 +175,6 @@ function getHtmlFromArrayOfObjects(input, currentLabelsMerged) {
   }
   if (Array.isArray(inputJSON)) {
     var newLabel = null;
-    if (hasLabels) {
-      newLabel = currentLabelsMerged.slice();
-      newLabel.push(0);
-      newLabel.push("");
-    }
     var labelsRows = getLabelsRows(inputJSON);
     if (labelsRows !== null) { 
       result += "<table class='tableJSON'>";
@@ -177,15 +185,15 @@ function getHtmlFromArrayOfObjects(input, currentLabelsMerged) {
       for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++) {
         if (hasLabels) {
           if (labelsRows.idRow != - 1) {
-            newLabel[newLabel.length - 2] = labelsRows.rows[counterRow][labelsRows.idRow]["$oid"];
-          } else {
-            newLabel[newLabel.length - 2] = `${counterRow}`;
-          }
+            selector.object = labelsRows.rows[counterRow][labelsRows.idRow]["$oid"];
+          } 
         }
         result += "<tr>";
         for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
-          newLabel[newLabel.length - 1] = labelsRows.labels[counterColumn];
-          result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], newLabel)}</td>`;
+          if (hasLabels) {
+            newLabel = [ labelsRows.labels[counterColumn] ];
+          }
+          result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], newLabel, selector)}</td>`;
         }
         result += "</tr>";
       }

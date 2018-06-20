@@ -67,9 +67,9 @@ public:
   JSData& operator[](int i);
   JSData& operator[](const std::string& s);
   JSData GetValue(const std::string& key);
-  bool HasKey(const std::string& key);
+  bool HasKey(const std::string& key) const;
   void SetKeyValue(const std::string& key, const JSData& value);
-  int GetKeyIndex(const std::string& key);
+  int GetKeyIndex(const std::string& key) const;
   JSData()
   { this->reset();
   }

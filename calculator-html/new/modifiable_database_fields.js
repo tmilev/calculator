@@ -1,1 +1,1 @@
-var modifiableDatabaseData = {"universalSelector":"ANY", "modifiableFields":[["users", "ANY", "problemDataJSON", "ANY"], ["users", "ANY", "problemData"]]};
+var modifiableDatabaseData = {"universalSelector":"ANY", "modifiableFields":[["users", "problemDataJSON", "ANY"], ["users", "problemData"]]};

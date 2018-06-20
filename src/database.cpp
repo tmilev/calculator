@@ -129,7 +129,14 @@ std::string DatabaseStrings::labelLastActivationEmailTime = "lastActivationEmail
 std::string DatabaseStrings::labelNumActivationEmails = "numActivationEmails";
 std::string DatabaseStrings::labelUsernameAssociatedWithToken = "usernameAssociatedWithToken";
 
+std::string DatabaseStrings::tableDeleted = "deleted";
+
 std::string DatabaseStrings::anyField = "ANY";
+std::string DatabaseStrings::objectSelector = "object";
+std::string DatabaseStrings::objectSelectorMongo = "$oid";
+std::string DatabaseStrings::labelFields = "fields";
+std::string DatabaseStrings::labelTable = "table";
+std::string DatabaseStrings::labelIdMongo = "_id";
 
 void GlobalVariables::initModifiableDatabaseFields()
 { MacroRegisterFunctionWithName("GlobalVariables::initModifiableDatabaseFields");
@@ -137,13 +144,11 @@ void GlobalVariables::initModifiableDatabaseFields()
   List<std::string> currentEntry;
   modifiableData.Reserve(10);
   currentEntry.AddOnTop(DatabaseStrings::tableUsers);
-  currentEntry.AddOnTop(DatabaseStrings::anyField);
   currentEntry.AddOnTop(DatabaseStrings::labelProblemDataJSON);
   currentEntry.AddOnTop(DatabaseStrings::anyField);
   modifiableData.AddOnTop(currentEntry);
   currentEntry.SetSize(0);
   currentEntry.AddOnTop(DatabaseStrings::tableUsers);
-  currentEntry.AddOnTop(DatabaseStrings::anyField);
   currentEntry.AddOnTop(DatabaseStrings::labelProblemDatA);
   modifiableData.AddOnTop(currentEntry);
   std::fstream outputFile;
@@ -1284,8 +1289,7 @@ bool EmailRoutines::SendEmailWithMailGun
   commandToExecute
   << "https://api.mailgun.net/v3/mail2."
   << hostnameToSendEmailFrom
-  << "/messages "
-  ;
+  << "/messages ";
   commandToExecute << "-F from='Automated Email "
   << "<noreply@mail2."
   << hostnameToSendEmailFrom
@@ -1310,8 +1314,7 @@ bool EmailRoutines::SendEmailWithMailGun
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->subject) << "\" "
   << "-F text =\""
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->emailContent)
-  << "\""
-  ;
+  << "\"";
   std::string commandResult = theGlobalVariables.CallSystemWithOutput(commandToExecute.str());
   if (commentsGeneral != 0)
   { if (includeEmailCommandInComments)

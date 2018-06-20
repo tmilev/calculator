@@ -123,6 +123,14 @@ public:
   static std::string tableProblemInformation;
   static std::string labelProblemTotalQuestions;
   static std::string labelProblemName;
+///deleted fields
   static std::string anyField;
+  static std::string labelFields;
+  static std::string labelTable;
+  static std::string objectSelector;
+  static std::string objectSelectorMongo;
+  static std::string labelIdMongo;
+///deleted info
+  static std::string tableDeleted;
 };
 #endif

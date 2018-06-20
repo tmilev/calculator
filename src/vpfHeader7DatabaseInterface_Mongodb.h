@@ -61,13 +61,15 @@ public:
   (const std::string& tableName, List<std::string>& outputLabels, List<List<std::string> >& outputRows,
    long long* totalItems = 0, std::stringstream* commentsOnFailure = 0);
   static bool DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure);
+  static bool DeleteOneEntryUnsecure(const JSData& theEntry, std::stringstream* commentsOnFailure);
   static std::string ToHtmlDatabaseCollection(const std::string& currentTable);
   static std::string ToJSONDatabaseCollection(const std::string& currentTable);
   void CreateHashIndex(const std::string& collectionName, const std::string& theKey);
-  static bool isDeleteable(const List<std::string>& theLabels, std::stringstream* commentsOnFailure);
-  static bool isDeleteable(const JSData& theEntry, std::stringstream* commentsOnFailure);
+  static bool getLabels(const JSData& fieldEntries, List<std::string>& theLabels, std::stringstream* commentsOnFailure);
+  static bool isDeleteable(const std::string& tableName, const List<std::string>& theLabels, List<std::string>** outputPattern, std::stringstream* commentsOnFailure);
+  static bool isDeleteable(const JSData& theEntry, List<std::string>** outputPattern, std::stringstream* commentsOnFailure);
   static bool matchesPattern
-  (const List<std::string>& fieldLabel, const List<std::string>& pattern);
+  (const std::string &tableName, const List<std::string>& fieldLabel, const List<std::string>& pattern);
   DatabaseRoutinesGlobalFunctionsMongo();
   ~DatabaseRoutinesGlobalFunctionsMongo();
 };

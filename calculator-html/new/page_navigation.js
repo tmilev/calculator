@@ -362,7 +362,7 @@ Page.prototype.getCurrentProblem = function() {
 Page.prototype.cleanUpLoginSpan = function(componentToCleanUp) {
   var loginInfo = document.getElementById("spanLoginRequired");
   if (loginInfo !== null) {
-    if (loginInfo.parentElement === componentToCleanUp){
+    if (loginInfo.parentElement === componentToCleanUp) {
       loginInfo.innerHTML = "<b>...</b>";
     }
   }

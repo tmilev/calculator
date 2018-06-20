@@ -1331,13 +1331,13 @@ std::string WebWorker::GetDatabaseDeleteOneItem()
   std::stringstream commentsStream;
   std::string inputEncoded = theGlobalVariables.GetWebInput("item");
   std::string inputString = HtmlRoutines::ConvertURLStringToNormal(inputEncoded, false);
-  commentsStream << "DEBUG: Encoded input: " << inputEncoded << " decodes to: " << inputString;
+  commentsStream << "DEBUG: Encoded input: " << inputEncoded << " decodes to: " << inputString << "\n";
   JSData inputParsed;
   if (!inputParsed.readstring(inputString, false, &commentsStream))
   { commentsStream << "Failed to parse input string. ";
     return commentsStream.str();
   }
-  commentsStream << "Parsed input string: " << inputParsed.ToString(false, false);
+  commentsStream << "Parsed input string: " << inputParsed.ToString(false, false) << "\n";
   if (DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(inputParsed, &commentsStream))
     return "success";
 #ifdef MACRO_use_MongoDB

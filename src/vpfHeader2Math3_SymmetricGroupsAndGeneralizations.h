@@ -403,8 +403,8 @@ class DirectProductElement: SemidirectProductElement<helt, kelt, TrivialOuterAut
 template <typename hg, typename kg, typename helt, typename kelt, typename oa>
 class SemidirectProductGroup: public FiniteGroup<SemidirectProductElement<helt, kelt, oa> >
 { public:
-  hg * H;
-  kg * K;
+  hg* H;
+  kg* K;
 
   void init(hg* inH, kg* inK);
   void GetWord(SemidirectProductElement<helt, kelt, oa>& g, List<int>& out);

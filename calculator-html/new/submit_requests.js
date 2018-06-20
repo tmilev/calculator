@@ -104,7 +104,7 @@ function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, i
   var https = new XMLHttpRequest();
   https.open("POST", pathnames.calculatorAPI, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  if (idStatus === undefined){
+  if (idStatus === undefined) {
     idStatus = idOutput;
   }
   console.log("DEBUG: id status: " + idStatus);
@@ -140,15 +140,17 @@ var isFinished = false;
 var timeIncrementInTenthsOfSecond = 20; //measured in tenths of a second\n";
 var timeOutCounter = 0; //measured in tenths of a second\n";
 var currentWorkerNumber = - 1;
-function progressReport(){ 
-  if (isFinished)
+function progressReport() { 
+  if (isFinished) {
     return;
+  }
   clearTimeout(this.timeoutID);
   var progReport = document.getElementById("idProgressReport");
   var requestStatus = document.getElementById("idProgressReportRequestStatus");
   var progReportTimer = document.getElementById("idProgressReportTimer");
-  if (isPaused)
+  if (isPaused) {
     return;
+  }
   progReportTimer.innerHTML = "<hr>Refreshing every " + timeIncrementInTenthsOfSecond / 10 +
   " second(s). Client time: ~" + Math.floor(timeOutCounter / 10) + " second(s)<br>";
   timeOutCounter += timeIncrementInTenthsOfSecond;
@@ -157,7 +159,7 @@ function progressReport(){
   https.open("GET", sURL, true);
   https.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   https.onload = function() {
-    newReportString= https.responseText;
+    newReportString = https.responseText;
     if (https.responseText === "finished") { 
       isFinished = true;
       requestStatus.innerHTML = "<span style ='color:green'><b>Computation finished.</b></span>";
@@ -166,8 +168,9 @@ function progressReport(){
     if (https.responseText !== "") { 
       progReport.innerHTML = newReportString + "<hr>";
       requestStatus.innerHTML = '';
-    } else
+    } else {
       requestStatus.innerHTML = "<span style ='color:red'><b>Empty response</b></span>";
+    }
   }
   ////////////////////////////////////////////
   requestStatus.innerHTML = "<span style ='color:orange'><b>Request sent</b></span>";

@@ -51,11 +51,11 @@ JSData JSData::GetValue(const std::string& key)
   return result;
 }
 
-bool JSData::HasKey(const std::string& key)
+bool JSData::HasKey(const std::string& key) const
 { return this->GetKeyIndex(key) != - 1;
 }
 
-int JSData::GetKeyIndex(const std::string& key)
+int JSData::GetKeyIndex(const std::string& key) const
 { return this->objects.GetIndex(key);
 }
 

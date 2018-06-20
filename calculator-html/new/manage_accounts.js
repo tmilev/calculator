@@ -14,7 +14,7 @@ function getAccountsTable(inputAccounts) {
     } else {
       result += `<td>-</td>`;
     }
-    if (currentUser.activationToken === "activated"){
+    if (currentUser.activationToken === "activated") {
       result += `<td><span style = 'color:green'>${currentUser.activationToken}</span></td>`;
     } else {
       result += "<td><span style = 'color:red'>Not activated</span></td>";
@@ -57,8 +57,8 @@ function updateAccountsPageCallback(input, notUsed) {
   }
 }
 
-function addEmailsOrUsersCallback(input, outputComponent){
-  if (typeof outputComponent == "string"){
+function addEmailsOrUsersCallback(input, outputComponent) {
+  if (typeof outputComponent == "string") {
     outputComponent = document.getElementById(outputComponent);
   }
   outputComponent.innerHTML = decodeURIComponent(input);
@@ -106,7 +106,7 @@ function getTeachersStudents() {
   });
 
 }
-function updateAccountsPage(){
+function updateAccountsPage() {
   var theURL = `${pathnames.calculatorAPI}?request=accountsJSON`;
 
   submitGET({

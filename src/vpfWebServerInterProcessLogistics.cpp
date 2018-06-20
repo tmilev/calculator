@@ -88,6 +88,7 @@ bool PipePrimitive::CreateMe
   if (pipe(this->pipeEnds.TheObjects) < 0)
   { logServer << logger::red << "FAILED to create pipe: " << this->name << ". " << logger::endL;
     this->Release();
+    theWebServer.Restart();
     return false;
   }
   if (!readEndBlocks)

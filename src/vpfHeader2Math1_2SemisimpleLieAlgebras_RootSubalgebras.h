@@ -44,12 +44,12 @@ public:
   bool CheckForBugs(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
   void SortRelation(rootSubalgebra& owner);
   bool operator==(const coneRelation& right)
-  { return this->DebugString==right.DebugString;
+  { return this->DebugString == right.DebugString;
   }
   unsigned int HashFunction() const
   { int tempI= ::MathRoutines::Minimum((int) this->DebugString.length(), ::SomeRandomPrimesSize);
     unsigned int result = 0;
-    for (int i = 0; i <tempI; i ++)
+    for (int i = 0; i < tempI; i ++)
       result += this->DebugString[i]*::SomeRandomPrimes[i];
     return result;
   }
@@ -78,10 +78,10 @@ public:
   void ReadFromFile(std::fstream& input, rootSubalgebras& owner);
   void AddRelationNoRepetition(coneRelation& input, rootSubalgebras& owners);
   coneRelations()
-  { this->NumAllowedLatexLines =40;
+  { this->NumAllowedLatexLines = 40;
     this->flagIncludeSmallerRelations = true;
     this->flagIncludeCoordinateRepresentation = false;
-    this->flagIncludeSubalgebraDataInDebugString= false;
+    this->flagIncludeSubalgebraDataInDebugString = false;
   }
 };
 
@@ -439,9 +439,9 @@ public:
   bool operator==(const slTwoSubalgebra& right) const;
   bool operator>(const slTwoSubalgebra& right) const;
   unsigned int HashFunction() const
-  { int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
+  { int tempI = MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
     int result = 0;
-    for (int i = 0; i <tempI; i ++)
+    for (int i = 0; i < tempI; i ++)
       result += this->hCharacteristic[i].NumShort*SomeRandomPrimes[i];
     return result;
   }
@@ -464,15 +464,18 @@ public:
   ~SltwoSubalgebras()
   { this->flagDeallocated = true;
   }
-  SltwoSubalgebras(): owner(0), flagDeallocated(false){}
+  SltwoSubalgebras(): owner(0), flagDeallocated(false)
+  {
+  }
   SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner), flagDeallocated(false)
-  {}
+  {
+  }
   bool operator==(const SltwoSubalgebras& other) const
   { if (this->owner == 0)
       return other.owner == 0;
     if (other.owner == 0)
       return false;
-    return this->GetOwner()== other.GetOwner();
+    return this->GetOwner() == other.GetOwner();
   }
   bool CheckConsistency() const;
   void CheckForCorrectInitializationCrashIfNot() const

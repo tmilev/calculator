@@ -37,7 +37,7 @@ Problem.prototype.getURLRequestFileCourseTopics = function(isScoredQuiz) {
     isScoredQuiz = this.flagForReal;
   }
   result += "request=";
-  if (isScoredQuiz){
+  if (isScoredQuiz) {
     result += "scoredQuizJSON";
   } else {
     result += "exerciseJSON";
@@ -110,7 +110,7 @@ function getEditPanel(fileName) {
   if (!thePage.user.hasProblemEditRights()) {
     return "";
   }
-  if (fileName === "" || fileName === undefined || fileName === null){
+  if (fileName === "" || fileName === undefined || fileName === null) {
     return "";
   }
   var result = "";

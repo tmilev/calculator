@@ -20,10 +20,10 @@ var staticWordCompleter = {
 }
 
 function ctrlSPressAceEditorHandler(event) {
-  if (event.ctrlKey !== true){
+  if (event.ctrlKey !== true) {
     return;
   }
-  if (event.keyCode !== 83){
+  if (event.keyCode !== 83) {
     return;
   }
   console.log("not implemented yet");

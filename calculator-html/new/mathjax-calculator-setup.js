@@ -27,8 +27,8 @@
  *  limitations under the License.
  */
 
-function selectElementContents(el)
-{ var range = document.createRange();
+function selectElementContents(el) { 
+  var range = document.createRange();
   range.selectNodeContents(el);
   var sel = window.getSelection();
   sel.removeAllRanges();
@@ -36,17 +36,19 @@ function selectElementContents(el)
   el.focus();
 }
 
-function showTex(originalTex, item, event)
-{ if (item['calculatorTexShown']===undefined)
+function showTex(originalTex, item, event) { 
+  if (item['calculatorTexShown'] === undefined) {
     item['calculatorTexShown'] = false;
+  }
   item['calculatorTexShown'] = !item['calculatorTexShown'];
-  if (!item['calculatorTexShown'])
-  { item.parentNode.removeChild(item.nextSibling);
+  if (!item['calculatorTexShown']) { 
+    item.parentNode.removeChild(item.nextSibling);
     return;
   }
   flaSpan =document.createElement('span');
-  if (originalTex.startsWith("\\displaystyle "))
+  if (originalTex.startsWith("\\displaystyle ")) {
     originalTex = originalTex.slice(14);
+  }
   flaSpan.textContent = originalTex;
   item.parentNode.insertBefore(flaSpan, item.nextSibling);
   item.blur();
@@ -54,8 +56,8 @@ function showTex(originalTex, item, event)
   //MathJax.Menu.ShowSource.Text(originalTex||"No Original Source to Show", event);
 }
 
-function configureMathJaxForCalculator()
-{ //mathjax configuration comes before loading the mathjax script, as requested by the documentation.
+function configureMathJaxForCalculator() { 
+  //mathjax configuration comes before loading the mathjax script, as requested by the documentation.
   MathJax.Hub.Config({
     extensions: ["tex2jax.js"],
     jax: ["input/TeX", "output/HTML-CSS"],
@@ -86,13 +88,12 @@ function configureMathJaxForCalculator()
     //  It calls on the MathJax.Menu code, so make sure that is loaded and
     //  if not, load it and call the double-click handler again afterward.
     //
-    EVENT.DblClick = function(event)
-    { if (MENU)
-      { var jax = HUB.getJaxFor(this);
+    EVENT.DblClick = function(event) { 
+      if (MENU) { 
+        var jax = HUB.getJaxFor(this);
         showTex(jax.originalText, this, event);
-      } else
-      { MathJax.Callback.Queue(["Require", MathJax.Ajax, "[MathJax]/extensions/MathMenu.js"],
-          ["DblClick",this,{}]);
+      } else { 
+        MathJax.Callback.Queue(["Require", MathJax.Ajax, "[MathJax]/extensions/MathMenu.js"], ["DblClick",this,{}]);
       }
       return EVENT.False(event);
     }
@@ -101,7 +102,9 @@ function configureMathJaxForCalculator()
     //  and disable the zoom trigger menu item.
     //  Also set the MENU item so that it will be available above.
     //
-    if (MENUSETTINGS.zoom === "Double-Click") MENUSETTINGS.zoom = "None";
+    if (MENUSETTINGS.zoom === "Double-Click") { 
+      MENUSETTINGS.zoom = "None";
+    }
     MathJax.Hub.Register.StartupHook("MathMenu Ready", function () {
       MENU = MathJax.Menu;
       MENU.menu.Find("Math Settings", "Zoom Trigger","Double-Click").disabled = true;
@@ -133,7 +136,7 @@ function configureMathJaxForCalculator()
    *  of the location of this file on your server.
    */
   MathJax.Callback.Queue(
-  MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
+  MathJax.Hub.Register.StartupHook("TeX Jax Ready", function() {
     var VERSION = "1.0";
 
     var TEX = MathJax.InputJax.TeX,
@@ -153,11 +156,21 @@ function configureMathJaxForCalculator()
             cls = this.GetBrackets(name),
             id = this.GetArgument(name);
         //alert("name: " + name + " size: "+ size + " cls: " + cls + " val: " + val + " id: "+ id);
-        if (size == null || size === "") {size = "2"}
-        if (val == null) {val = ""}
-        cls = ("MathJax_Input "+(cls||"")).replace(/ +$/,"");
-        var input = HTML.Element("input",
-        {type:"text", name:id, id:id, size:size, className:cls, value:val});
+        if (size == null || size === "") {
+          size = "2";
+        }
+        if (val == null) {
+          val = "";
+        }
+        cls = ("MathJax_Input " + (cls||"")).replace(/ +$/,"");
+        var input = HTML.Element("input", {
+          type: "text", 
+          name: id, 
+          id: id, 
+          size: size, 
+          className: cls, 
+          value: val
+        });
         input.setAttribute("xmlns","http://www.w3.org/1999/xhtml");
         var mml = MML["annotation-xml"](MML.xml(input)).With({encoding:"application/xhtml+xml",isToken:true});
         this.Push(MML.semantics(mml));
@@ -181,12 +194,13 @@ function configureMathJaxForCalculator()
 
 var waitingForMathJaxCounter = 0;
 
-function waitForMathJax()
-{ waitingForMathJaxCounter ++;
-  if (waitingForMathJaxCounter>100)
+function waitForMathJax() { 
+  waitingForMathJaxCounter ++;
+  if (waitingForMathJaxCounter > 100) {
     return;
-  if ((typeof MathJax)==="undefined")
-  { setTimeout(waitForMathJax,100);
+  }
+  if (MathJax === undefined) { 
+    setTimeout(waitForMathJax, 100);
     return;
   }
   configureMathJaxForCalculator();

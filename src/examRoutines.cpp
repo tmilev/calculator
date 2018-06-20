@@ -54,6 +54,8 @@ CalculatorHTML::CalculatorHTML()
   this->topicLectureCounter = 0;
 }
 
+extern logger logWorker;
+
 #ifdef MACRO_use_MongoDB
 bool CalculatorHTML::LoadProblemInfoFromJSONAppend
 (const JSData& inputJSON,
@@ -383,6 +385,7 @@ bool CalculatorHTML::LoadDatabaseInfo(std::stringstream& comments)
   //stOutput << "Problem weight schema: " << this->currentUseR.problemWeightSchema
   //<< "Problem weight string: " << this->currentUseR.problemWeightString
   //<< " - of global vars: " << theGlobalVariables.userDefault.problemWeightString;
+  logWorker << "About to load db info from: " << this->currentUseR.problemDataJSON.ToString(false) << logger::endL;
   if (this->currentUseR.problemDataJSON.objects.size() != 0)
   { if (!this->currentUseR.InterpretDatabaseProblemDataJSON(this->currentUseR.problemDataJSON, comments))
     { comments << "Failed to interpret user's problem saved data. ";
@@ -473,7 +476,6 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, co
   return true;
 }
 
-extern logger logWorker;
 std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON");
   double startTime = theGlobalVariables.GetElapsedSeconds();
@@ -3096,7 +3098,8 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before database storage");
 #ifdef MACRO_use_MongoDB
-  logWorker << logger::red << "DEBUG: got to second mongo section. " << logger::endL;
+  logWorker << logger::red << "DEBUG: got to second mongo section. " << logger::yellow
+  << " Randon seed given: " << this->theProblemData.flagRandomSeedGiven << logger::endL;
   bool shouldResetTheRandomSeed = false;
   if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven)
     shouldResetTheRandomSeed = true;

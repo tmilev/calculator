@@ -377,6 +377,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
 
 bool UserCalculatorData::LoadFromJSON(JSData& input)
 { MacroRegisterFunctionWithName("UserCalculatorData::LoadFromJSON");
+  logWorker << logger::yellow << "Loading from json: " << logger::blue << input.ToString(false) << logger::endL;
   this->userId                            = input[DatabaseStrings::labelUserId                            ].string;
   this->username                          = input[DatabaseStrings::labelUsername                          ].string;
   this->email                             = input[DatabaseStrings::labelEmail                             ].string;
@@ -385,7 +386,7 @@ bool UserCalculatorData::LoadFromJSON(JSData& input)
   this->actualAuthenticationToken         = input[DatabaseStrings::labelAuthenticationToken               ].string;
   this->timeOfAuthenticationTokenCreation = input[DatabaseStrings::labelTimeOfAuthenticationTokenCreation ].string;
   this->problemDataStrinG                 = input[DatabaseStrings::labelProblemDatA                       ].string;
-  this->problemDataJSON                   = input[DatabaseStrings::labelProblemDataJSON                   ].string;
+  this->problemDataJSON                   = input[DatabaseStrings::labelProblemDataJSON                   ]       ;
   this->actualShaonedSaltedPassword       = input[DatabaseStrings::labelPassword                          ].string;
   this->userRole                          = input[DatabaseStrings::labelUserRole                          ].string;
 
@@ -798,7 +799,8 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
-  { if (inputData.objects.Contains("randomSeed"))
+  { logWorker << logger::blue << "DEBUG: inputData: " << logger::green << inputData.ToString(false) << logger::endL;
+    if (inputData.objects.Contains("randomSeed"))
     { this->randomSeed = atoi(inputData.objects.GetValueConstCrashIfNotPresent("randomSeed").string.c_str());
       this->flagRandomSeedGiven = true;
       //stOutput << "<br>DEBUG: random seed found. <br>";
@@ -873,6 +875,7 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::ChopCGIString(theInfo, theMap, commentsOnFailure))
     return false;
+  logWorker << logger::yellow << "This code should run only once per user. " << logger::red << "If not, BAD!" << logger::endL;
   this->theProblemData.Clear();
   this->theProblemData.SetExpectedSize(theMap.size());
   bool result = true;
@@ -901,6 +904,8 @@ bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std
   this->theProblemData.Clear();
   this->theProblemData.SetExpectedSize(theData.objects.size());
   bool result = true;
+  logWorker << logger::green << "Loading interpret database problem data json, theDAta: "
+  << logger::yellow << theData.ToString(false) << logger::endL;
   //stOutput << "<hr>DEBUG: Interpreting: <br>" << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theInfo)
   //<< "<br>Map has: "
   //<< theMap.size() << " entries. ";
@@ -964,6 +969,7 @@ bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream& commentsO
       continue;
     problemData[HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false)] = nextProblem;
   }
+  theGlobalVariables.userDefault.problemDataJSON = problemData;
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemDataJSON] = problemData;
   logWorker << logger::red << "DEBUG: prob data: " << setQuery.ToString(false) << logger::endL;

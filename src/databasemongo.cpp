@@ -354,7 +354,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
 bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery
 (const JSData& findQuery, std::stringstream* commentsOnFailure, bool mustBeObject)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery");
-  //logWorker << logger::red << "DEBUG: findQuery in isvalid json: " << findQuery.ToString(false) << logger::endL;
+  logWorker << logger::red << "DEBUG: findQuery in isvalid json: " << findQuery.ToString(false) << logger::endL;
   if (mustBeObject)
   { if (findQuery.type != findQuery.JSObject)
     { if (commentsOnFailure != 0)
@@ -367,18 +367,17 @@ bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery
   { if (findQuery.type == findQuery.JSarray)
       if (findQuery.list.size == 0)
         return true;
-    if (findQuery.type != findQuery.JSstring)
+    if (findQuery.type != findQuery.JSstring && findQuery.type != findQuery.JSObject)
     { if (commentsOnFailure != 0)
         *commentsOnFailure << "JSData: "
         << HtmlRoutines::ConvertStringToHtmlString(findQuery.ToString(false), false)
-        << " expected to be a string. ";
+        << " expected to be a string or an object. ";
       return false;
     }
   }
   for (int i = 0; i < findQuery.objects.size(); i ++)
-  { if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(findQuery.objects.theValues[i], commentsOnFailure, false))
+    if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(findQuery.objects.theValues[i], commentsOnFailure, false))
       return false;
-  }
   return true;
 }
 
@@ -614,7 +613,13 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON");
   std::string queryString;
   if (!DatabaseRoutinesGlobalFunctionsMongo::GetOrFindQuery(findOrQueries, queryString, commentsOnFailure))
+  { logWorker << logger::blue << "DEBUG: GetOrFindQuery, comments: " << commentsOnFailure->str() << logger::endL;
     return false;
+  }
+  if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(updateQuery, commentsOnFailure, false))
+  { logWorker << logger::green << "Not valid json mongo query, comments: " << commentsOnFailure->str() << logger::endL;
+    return false;
+  }
   return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString(collectionName, queryString, updateQuery, commentsOnFailure);
 }
 

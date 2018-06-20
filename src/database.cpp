@@ -854,6 +854,7 @@ std::string ProblemData::StorE()
 JSData ProblemData::StoreJSON()
 { MacroRegisterFunctionWithName("ProblemData::StoreJSON");
   JSData result;
+  result.type = JSData::JSObject;
   if (this->flagRandomSeedGiven)
     result["randomSeed"] = std::to_string(this->randomSeed);
   for (int i = 0; i < this->theAnswers.size(); i ++)
@@ -958,10 +959,14 @@ bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream& commentsO
 { MacroRegisterFunctionWithName("UserCalculator::StoreProblemDataToDatabase");
   JSData problemData;
   for (int i = 0; i < this->theProblemData.size(); i ++)
-    problemData[HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false)] =
-    this->theProblemData.theValues[i].StoreJSON();
+  { JSData nextProblem = this->theProblemData.theValues[i].StoreJSON();
+    if (nextProblem.objects.size() == 0)
+      continue;
+    problemData[HtmlRoutines::ConvertStringToURLString(this->theProblemData.theKeys[i], false)] = nextProblem;
+  }
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemDataJSON] = problemData;
+  logWorker << logger::red << "DEBUG: prob data: " << setQuery.ToString(false) << logger::endL;
   return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
   (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure);
 }

@@ -818,9 +818,12 @@ std::string HtmlInterpretation::GetExamPage()
   return out.str();
 }
 
+extern logger logWorker;
+
 std::string HtmlInterpretation::GetExamPageJSON()
 { MacroRegisterFunctionWithName("HtmlInterpretation::GetExamPageJSON");
   std::stringstream out;
+  logWorker << "DEBUG: Got to here. " << logger::endL;
   if (!theGlobalVariables.flagLoggedIn && theGlobalVariables.userCalculatorRequestType == "scoredQuizJSON")
   { out << "<b style ='color:red'>Scored quiz requires login</b>";
     return out.str();
@@ -832,8 +835,11 @@ std::string HtmlInterpretation::GetExamPageJSON()
   std::string problemBody = theFile.LoadAndInterpretCurrentProblemItemJSON
   (theGlobalVariables.UserRequestRequiresLoadingRealExamData(), theGlobalVariables.GetWebInput("randomSeed"));
   //<-must come after theFile.outputHtmlHeadNoTag
+  logWorker << "DEBUG: Got to after userrequestrequiresloading real data. " << logger::endL;
   out << problemBody;
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
+  logWorker << "DEBUG: Got to after tostring. " << logger::endL;
+
   JSData output;
   output["problem"] = HtmlRoutines::ConvertStringToURLString(out.str(), false);
   if (theFile.flagLoadedSuccessfully)
@@ -854,6 +860,8 @@ std::string HtmlInterpretation::GetExamPageJSON()
       output["randomSeed"] = randomSeedStream.str();
     }
   }
+  logWorker << "DEBUG: Got to before return. " << logger::endL;
+
   return output.ToString(false, false);
 }
 

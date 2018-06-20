@@ -473,11 +473,15 @@ bool CalculatorHTML::LoadMe(bool doLoadDatabase, std::stringstream& comments, co
   return true;
 }
 
+extern logger logWorker;
 std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(bool needToLoadDatabaseMayIgnore, const std::string& desiredRandomSeed)
 { MacroRegisterFunctionWithName("CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON");
   double startTime = theGlobalVariables.GetElapsedSeconds();
 //  this->theProblemData.CheckConsistency();
+  logWorker << logger::red << "DEBUG: Got to before load current prob item. " << logger::endL;
+
   this->LoadCurrentProblemItem(needToLoadDatabaseMayIgnore, desiredRandomSeed);
+  logWorker << logger::red << "DEBUG: Got to AFTER load current prob item. " << logger::endL;
 //  this->theProblemData.CheckConsistency();
   if (!this->flagLoadedSuccessfully)
     return this->comments.str();
@@ -512,6 +516,7 @@ std::string CalculatorHTML::LoadAndInterpretCurrentProblemItemJSON(bool needToLo
       out << "<hr> <b>Comments, admin view only.</b><br> " << this->comments.str();
     return out.str();
   }
+  logWorker << logger::red << "DEBUG: Got to after interpretation. " << logger::endL;
   //out << "DEBUG: flagMathQuillWithMatrices =" << this->flagMathQuillWithMatrices << "<br>";
   if (this->flagDoPrependCalculatorNavigationBar)
   { out << "<calculatorNavigation>"
@@ -2077,6 +2082,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
     this->timeToParseHtml = theGlobalVariables.GetElapsedSeconds() - startTime;
     return false;
   }
+  logWorker << logger::red << "DEBUG: Got to so far" << logger::endL;
   //stOutput << "<hr>DEBUG: about to check 2nd time<hr>";
   //this->theProblemData.CheckConsistency();
   //stOutput << "<hr>DEBUG: Checking consistency 2 passed<hr>";
@@ -2098,6 +2104,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
   this->NumAttemptsToInterpret = 0;
   while (this->NumAttemptsToInterpret < this->MaxInterpretationAttempts)
   { startTime = theGlobalVariables.GetElapsedSeconds();
+    logWorker << logger::red << "DEBUG: number attempts to interpret: " << this->NumAttemptsToInterpret << logger::endL;
     this->timeIntermediatePerAttempt.SetSize(this->timeIntermediatePerAttempt.size + 1);
     this->timeIntermediatePerAttempt.LastObject()->SetSize(0);
     this->timeIntermediateComments.SetSize(this->timeIntermediateComments.size + 1);
@@ -2116,6 +2123,7 @@ bool CalculatorHTML::InterpretHtml(std::stringstream& comments)
     if (this->NumAttemptsToInterpret >= this->MaxInterpretationAttempts)
       comments << commentsOnLastFailure.str();
   }
+  logWorker << logger::red << "DEBUG: Interpreted, just ok" << logger::endL;
   comments << "<hr>Failed to evaluate the commands: " << this->NumAttemptsToInterpret
   << " attempts made. ";
   if (this->flagIsForReal)
@@ -2952,6 +2960,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   theGlobalVariables.userCalculatorRequestType == "template" ||
   theGlobalVariables.userCalculatorRequestType == "templateNoLogin";
   this->theProblemData.randomSeed = this->randomSeedsIfInterpretationFails[this->NumAttemptsToInterpret - 1];
+  logWorker << logger::red << "DEBUG: got to before figure out prob list" << logger::endL;
   this->FigureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before after loading problem list");
@@ -2992,6 +3001,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       theGlobalVariables.userCalculatorRequestType != "templateNoLogin")
   {
 #ifdef MACRO_use_MongoDB
+    logWorker << logger::red << "DEBUG: got to before mongo. " << logger::endL;
     bool problemAlreadySolved = false;
     if (this->currentUseR.theProblemData.Contains(this->fileName))
     { ProblemData& theProbData = this->currentUseR.theProblemData.GetValueCreate(this->fileName);
@@ -3007,6 +3017,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
       outBody << problemLabel;
       outBody << this->outputDeadlineString << "\n<hr>\n";
     }
+    logWorker << logger::red << "DEBUG: got to after mongo. " << logger::endL;
 #endif
     //outBody << "<br>";
   } else if (!this->flagIsExamHome && !this->flagIsForReal &&
@@ -3085,6 +3096,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   this->timeIntermediatePerAttempt.LastObject()->AddOnTop(theGlobalVariables.GetElapsedSeconds() - startTime);
   this->timeIntermediateComments.LastObject()->AddOnTop("Time before database storage");
 #ifdef MACRO_use_MongoDB
+  logWorker << logger::red << "DEBUG: got to second mongo section. " << logger::endL;
   bool shouldResetTheRandomSeed = false;
   if (this->flagIsForReal && !this->theProblemData.flagRandomSeedGiven)
     shouldResetTheRandomSeed = true;
@@ -3102,7 +3114,11 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
     << "this is a bug. Please take a screenshot and send it to your instructor. </b></span>";
   }
   if (shouldResetTheRandomSeed)
-  { this->StoreRandomSeedCurrent(comments);
+  { logWorker << logger::blue << "DEBUG: before store random seed. " << logger::endL;
+    bool successStoringSeed = this->StoreRandomSeedCurrent(comments);
+    if (!successStoringSeed)
+      logWorker << logger::red << "FAILED to store random seed!" << logger::endL << logger::yellow << comments.str() << logger::endL;
+    logWorker << logger::blue << "DEBUG: after store random seed. " << logger::endL;
     //stOutput << "This is for real!<br>";
   }
   if (theGlobalVariables.UserDebugFlagOn() && theGlobalVariables.UserDefaultHasAdminRights())
@@ -3125,6 +3141,7 @@ bool CalculatorHTML::InterpretHtmlOneAttempt(Calculator& theInterpreter, std::st
   }
   //out << "Current collection problems: " << this->databaseProblemList.ToStringCommaDelimited()
   //<< " with weights: " << this->databaseProblemWeights.ToStringCommaDelimited();
+  logWorker << logger::red << "DEBUG: got to second mongo section end. " << logger::endL;
 #endif // MACRO_use_MongoDB
   std::stringstream navigationAndEditTagStream;
   if (this->flagDoPrependProblemNavigationBar)

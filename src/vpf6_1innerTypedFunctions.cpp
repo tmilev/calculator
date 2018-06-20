@@ -1623,14 +1623,12 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixToMatrix
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
   int leftNumRows = - 1, leftNumCols = - 1, rightNumRows = - 1, rightNumCols = - 1;
-  //stOutput << "DEBUG: Got to here 0";
   if (!leftE.IsMatrix(&leftNumRows, &leftNumCols) ||
       !rightE.IsMatrix(&rightNumRows, &rightNumCols))
     return false;
   if ((leftNumRows != rightNumRows) || (leftNumCols != rightNumCols))
     return false;
   Matrix<Expression> leftMat, rightMat;
-  //stOutput << "DEBUG: Got to here";
   if (!theCommands.GetMatrixExpressions(leftE, leftMat) ||
       !theCommands.GetMatrixExpressions(rightE, rightMat))
     return false;
@@ -1652,7 +1650,6 @@ bool CalculatorFunctionsBinaryOps::innerDirectSumMatrixWithMatrix
   if (!leftE.IsMatrix() || !rightE.IsMatrix())
     return false;
   Matrix<Expression> leftMat, rightMat;
-  //stOutput << "DEBUG: Got to here";
   if (!theCommands.GetMatrixExpressions(leftE, leftMat) ||
       !theCommands.GetMatrixExpressions(rightE, rightMat))
     return false;

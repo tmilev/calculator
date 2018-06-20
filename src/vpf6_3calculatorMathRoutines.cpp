@@ -3816,11 +3816,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateEpowerAxDiffX(Calculator& theComm
   Expression thePowerCoeff, thePowerNoCoeff;
   theFunNoCoeff[2].GetCoefficientMultiplicandForm(thePowerCoeff, thePowerNoCoeff);
   if (thePowerNoCoeff != theVariableE)
-  { //stOutput << "DEBUG: Got to here before the times, thepowernocoeff="
-    //<< thePowerNoCoeff.ToString();
-    if (thePowerNoCoeff.StartsWith(theCommands.opTimes(), 3))
-    { //stOutput << "DEBUG: Got to here";
-      if (thePowerNoCoeff[1].IsAtomGivenData(theCommands.opImaginaryUnit()) &&
+  { if (thePowerNoCoeff.StartsWith(theCommands.opTimes(), 3))
+    { if (thePowerNoCoeff[1].IsAtomGivenData(theCommands.opImaginaryUnit()) &&
           thePowerNoCoeff[2] == theVariableE)
       { output = thePowerNoCoeff[1] * (- 1) * theFunctionE / thePowerCoeff;
         output.CheckConsistency();

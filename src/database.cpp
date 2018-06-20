@@ -71,7 +71,6 @@ bool DatabaseRoutinesGlobalFunctions::LogoutViaDatabase()
 {
 #ifdef MACRO_use_MongoDB
   MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctions::LogoutViaDatabase");
-  //stOutput << "<br>DEBUG: Got to logout";
   if (!theGlobalVariables.flagLoggedIn)
   { //stOutput << "but not resetting token. ";
     return true;
@@ -377,7 +376,6 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
 
 bool UserCalculatorData::LoadFromJSON(JSData& input)
 { MacroRegisterFunctionWithName("UserCalculatorData::LoadFromJSON");
-  logWorker << logger::yellow << "Loading from json: " << logger::blue << input.ToString(false) << logger::endL;
   this->userId                            = input[DatabaseStrings::labelUserId                            ].string;
   this->username                          = input[DatabaseStrings::labelUsername                          ].string;
   this->email                             = input[DatabaseStrings::labelEmail                             ].string;
@@ -663,7 +661,6 @@ bool UserCalculator::ComputeAndStoreActivationStats
   emailStatQuery[DatabaseStrings::labelUsernameAssociatedWithToken] = this->username;
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON(DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, commentsOnFailure))
     return false;
-  //stOutput << "DEBUG: Got to here. ";
   this->activationEmailSubject = "NO REPLY: Activation of your Math homework account. ";
   std::stringstream emailBody;
   emailBody << "Dear user,"
@@ -799,8 +796,7 @@ bool ProblemData::LoadFromJSON(const JSData& inputData, std::stringstream& comme
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
   if (theGlobalVariables.UserRequestRequiresLoadingRealExamData())
-  { logWorker << logger::blue << "DEBUG: inputData: " << logger::green << inputData.ToString(false) << logger::endL;
-    if (inputData.objects.Contains("randomSeed"))
+  { if (inputData.objects.Contains("randomSeed"))
     { this->randomSeed = atoi(inputData.objects.GetValueConstCrashIfNotPresent("randomSeed").string.c_str());
       this->flagRandomSeedGiven = true;
       //stOutput << "<br>DEBUG: random seed found. <br>";
@@ -875,7 +871,6 @@ bool UserCalculator::InterpretDatabaseProblemDatA(const std::string& theInfo, st
   MapLisT<std::string, std::string, MathRoutines::hashString> theMap;
   if (!HtmlRoutines::ChopCGIString(theInfo, theMap, commentsOnFailure))
     return false;
-  logWorker << logger::yellow << "This code should run only once per user. " << logger::red << "If not, BAD!" << logger::endL;
   this->theProblemData.Clear();
   this->theProblemData.SetExpectedSize(theMap.size());
   bool result = true;
@@ -904,8 +899,6 @@ bool UserCalculator::InterpretDatabaseProblemDataJSON(const JSData& theData, std
   this->theProblemData.Clear();
   this->theProblemData.SetExpectedSize(theData.objects.size());
   bool result = true;
-  logWorker << logger::green << "Loading interpret database problem data json, theDAta: "
-  << logger::yellow << theData.ToString(false) << logger::endL;
   //stOutput << "<hr>DEBUG: Interpreting: <br>" << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(theInfo)
   //<< "<br>Map has: "
   //<< theMap.size() << " entries. ";
@@ -972,7 +965,6 @@ bool UserCalculator::StoreProblemDataToDatabaseJSON(std::stringstream& commentsO
   theGlobalVariables.userDefault.problemDataJSON = problemData;
   JSData setQuery;
   setQuery[DatabaseStrings::labelProblemDataJSON] = problemData;
-  logWorker << logger::red << "DEBUG: prob data: " << setQuery.ToString(false) << logger::endL;
   return DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
   (DatabaseStrings::tableUsers, this->GetFindMeFromUserNameQuery(), setQuery, &commentsOnFailure);
 }

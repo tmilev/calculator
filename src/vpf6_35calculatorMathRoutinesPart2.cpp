@@ -569,11 +569,8 @@ bool CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral(Calculator& theC
   indefiniteExpression.MakeAtom(theCommands.opIndefiniteIndicator(), theCommands);
   theIndefiniteIntegral.MakeIntegral(theCommands, indefiniteExpression, theFunctionE, theVariableE);
   Expression solvedIntegral;
-  //stOutput << "<br>DEBUG: Got to here at " << theGlobalVariables.GetElapsedSeconds();
-  //stOutput << "DEBUG: trying to solve: " << theIndefiniteIntegral.ToString();
   if (!theCommands.EvaluateExpression(theCommands, theIndefiniteIntegral, solvedIntegral))
     return false;
-  //stOutput << "<br>DEBUG: Got to here at after evaluating. Time: " << theGlobalVariables.GetElapsedSeconds();
   if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opIntegral()))
     return false;
   if (solvedIntegral.ContainsAsSubExpressionNoBuiltInTypes(theCommands.opDivide()))
@@ -584,7 +581,6 @@ bool CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral(Calculator& theC
   List<double> theValue;
   theVar.AddOnTop(theVariableE);
   theValue.AddOnTop(0);
-  //stOutput << "<br>DEBUG: Got to before evaluates to double at " << theGlobalVariables.GetElapsedSeconds();
   for (int i = 1; i <= 2; i ++)
     if (theSetE[i].EvaluatesToDouble(&theValue[0]))
     { double theResult = 0;
@@ -595,7 +591,6 @@ bool CalculatorFunctionsGeneral::innerIntegrateDefiniteIntegral(Calculator& theC
       //<< " evaluates to: "
       //<< theResult;
     }
-  //stOutput << "<br>DEBUG: Got to here part 2. " << theGlobalVariables.GetElapsedSeconds();
   Expression theSubTop(theCommands), theSubBottom(theCommands);
   theSubTop.AddChildAtomOnTop(theCommands.opDefine());
   theSubTop.AddChildOnTop(theVariableE);
@@ -2524,7 +2519,6 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionLaTeXSlide()
   }
   out << " \\cline{2-" << this->allMonomials.size * 2 + 1 << "}"
   << " \\cline{2-" << this->allMonomials.size * 2 + 1 << "}";
-  //stOutput << "<br>DEBUG: Got to here\n";
   for (int i = 0; i < theRemainders.size; i ++)
   { if (i == 0)
     { if (oneDivisor)

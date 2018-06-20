@@ -354,7 +354,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromJSONWithOptions
 bool DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery
 (const JSData& findQuery, std::stringstream* commentsOnFailure, bool mustBeObject)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery");
-  logWorker << logger::red << "DEBUG: findQuery in isvalid json: " << findQuery.ToString(false) << logger::endL;
+  //logWorker << logger::red << "DEBUG: findQuery in isvalid json: " << findQuery.ToString(false) << logger::endL;
   if (mustBeObject)
   { if (findQuery.type != findQuery.JSObject)
     { if (commentsOnFailure != 0)

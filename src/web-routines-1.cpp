@@ -697,7 +697,6 @@ bool Crypto::VerifyJWTagainstKnownKeys
       *commentsOnFailure << "Couldn't load JSON from the user token.";
     return false;
   }
-  //stOutput << "DEBUG: Got to here, part 0";
   if (header.type == header.JSObject)
     if (header.HasKey("kid"))
       keyIDstring = header.GetValue("kid").string;

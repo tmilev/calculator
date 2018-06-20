@@ -924,7 +924,6 @@ bool CalculatorFunctionsGeneral::innerGreaterThanOrEqualTo(Calculator& theComman
     return output.AssignValue(0, theCommands);
   }
   double leftD, rightD;
-//  stOutput << "DEBUG: Got to here, comparing " << left.ToString() << " to " << right.ToString();
   if (left.EvaluatesToDouble(&leftD) && right.EvaluatesToDouble(&rightD))
   { if (leftD >= rightD)
       return output.AssignValue(1, theCommands);
@@ -946,7 +945,6 @@ bool CalculatorFunctionsGeneral::innerGreaterThan(Calculator& theCommands, const
     return output.AssignValue(0, theCommands);
   }
   double leftD, rightD;
-//  stOutput << "DEBUG: Got to here, comparing " << left.ToString() << " to " << right.ToString();
   if (left.EvaluatesToDouble(&leftD) && right.EvaluatesToDouble(&rightD))
   { if (leftD > rightD)
       return output.AssignValue(1, theCommands);

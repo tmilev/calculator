@@ -1105,9 +1105,7 @@ bool JSONWebToken::VerifyRSA256
       << "The mod is: " << theModulus << "; the exponent is: " << theExponent;
     return false;
   }
-  //stOutput << "DEBUG: Got to here";
   LargeIntUnsigned RSAresult = Crypto::RSAencrypt(theModulus, theExponent, theSignatureInt);
-  //stOutput << "<br>DEBUG: Got to here pt 2";
   if (commentsGeneral != 0)
     *commentsGeneral << "<br>RSA encryption took: "
     << theGlobalVariables.GetElapsedSeconds() - timeStart << " second(s).<br>";

@@ -1487,7 +1487,6 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   //<-INCOMING pluses in passwords MUST be decoded as spaces, this is how form.submit() works!
   //<-Incoming pluses must be re-coded as spaces (%20).
 
-  //stOutput << "DEBUG: Got to here - 1, login: " << theGlobalVariables.flagLoggedIn;
   theUser.flagEnteredPassword = (theUser.enteredPassword != "");
   if (theUser.flagEnteredPassword)
   { theUser.flagMustLogin = true;
@@ -1527,7 +1526,6 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
   if (!theGlobalVariables.flagUsingSSLinCurrentConnection)
     return false;
   bool doAttemptGoogleTokenLogin = false;
-  //stOutput << "<br>DEBUG: Got to here 0, login: " << theGlobalVariables.flagLoggedIn;
   if (theUser.enteredGoogleToken != "")
   { if (theUser.enteredActivationToken == "" &&
         theUser.enteredPassword == "" &&
@@ -1538,13 +1536,11 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
     if (theUser.username == "")
       doAttemptGoogleTokenLogin = true;
   } else if (theUser.username == "")
-  { //stOutput << "<br>DEBUG: Got to here ABD, login: " << theGlobalVariables.flagLoggedIn;
-    return !theUser.flagMustLogin;
+  { return !theUser.flagMustLogin;
   }
   /////////////////
   //doAttemptGoogleTokenLogin = false;
   ////////////////////////////
-  //stOutput << "<br>DEBUG: Got to here xx, login: " << theGlobalVariables.flagLoggedIn;
   bool changingPass = theGlobalVariables.userCalculatorRequestType == "changePassword" ||
   theGlobalVariables.userCalculatorRequestType == "activateAccount";
   if (changingPass)
@@ -1559,7 +1555,6 @@ bool WebWorker::Login(std::stringstream& argumentProcessingFailureComments)
              theUser.enteredActivationToken != "")
     theGlobalVariables.flagLoggedIn = DatabaseRoutinesGlobalFunctions::LoginViaDatabase
     (theUser, &argumentProcessingFailureComments);
-  //stOutput << "<br>DEBUG: Got to here, login: " << theGlobalVariables.flagLoggedIn;
 
   theGlobalVariables.CookiesToSetUsingHeaders.SetKeyValue("username",
    HtmlRoutines::ConvertStringToURLString(theUser.username, false)

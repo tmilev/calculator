@@ -356,7 +356,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
     JSData findDeadlinesQuery, outDeadlinesQuery;
     findDeadlinesQuery[DatabaseStrings::labelDeadlinesSchema] = this->deadlineSchema;
     if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
-        (DatabaseStrings::tableDeadlines, findDeadlinesQuery, outDeadlinesQuery, failureStream))
+        (DatabaseStrings::tableDeadlines, findDeadlinesQuery, outDeadlinesQuery, failureStream, true))
       this->deadlines = outDeadlinesQuery[DatabaseStrings::labelDeadlines];
   }
   //stOutput << "DEBUG: deadlineInfo: " << this->deadlines.ToString(false);
@@ -366,7 +366,7 @@ bool UserCalculator::LoadFromDB(std::stringstream* failureStream, std::stringstr
     //stOutput << "DEBUG: Problem weight schema: " << this->problemWeightSchema;
     findProblemWeightsQuery[DatabaseStrings::labelProblemWeightsSchema] = this->problemWeightSchema;
     if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
-        (DatabaseStrings::tableProblemWeights, findProblemWeightsQuery, outProblemWeightsQuery, failureStream))
+        (DatabaseStrings::tableProblemWeights, findProblemWeightsQuery, outProblemWeightsQuery, failureStream, true))
       this->problemWeights = outProblemWeightsQuery[DatabaseStrings::labelProblemWeights];
   }
   theGlobalVariables.timeStats["userLoadTime"] = theGlobalVariables.GetElapsedSeconds() - startTime;
@@ -611,7 +611,7 @@ bool UserCalculator::ComputeAndStoreActivationStats
   JSData findQuery, emailStatQuery;
   findQuery[DatabaseStrings::labelEmail] = this->email;
   DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
-  (DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, commentsOnFailure);
+  (DatabaseStrings::tableEmailInfo, findQuery, emailStatQuery, commentsOnFailure, true);
 
   std::string lastEmailTime, emailCountForThisEmail;
   lastEmailTime = emailStatQuery[DatabaseStrings::labelLastActivationEmailTime].string;

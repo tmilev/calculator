@@ -41,7 +41,7 @@ public:
   static bool GetOrFindQuery(const List<JSData>& input, std::string& output, std::stringstream* commentsOnFailure = 0);
   static bool FindOneFromJSON
   (const std::string& collectionName, const JSData& findQuery,
-   JSData& output, std::stringstream* commentsOnFailure = 0);
+   JSData& output, std::stringstream* commentsOnFailure, bool doEncodeFindFields);
   static bool FindOneFromSome
   (const std::string& collectionName, const List<JSData>& findOrQueries,
    JSData& output, std::stringstream* commentsOnFailure = 0);
@@ -61,7 +61,7 @@ public:
   (const std::string& tableName, List<std::string>& outputLabels, List<List<std::string> >& outputRows,
    long long* totalItems = 0, std::stringstream* commentsOnFailure = 0);
   static bool DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure);
-  static bool DeleteOneEntryUnsecure(const JSData& theEntry, std::stringstream* commentsOnFailure);
+  static bool DeleteOneEntryUnsecure(const std::string& tableName, const JSData& findQuery, List<std::string>& selector, std::stringstream* commentsOnFailure);
   static std::string ToHtmlDatabaseCollection(const std::string& currentTable);
   static std::string ToJSONDatabaseCollection(const std::string& currentTable);
   void CreateHashIndex(const std::string& collectionName, const std::string& theKey);

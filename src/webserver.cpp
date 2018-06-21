@@ -2906,7 +2906,7 @@ std::string WebWorker::GetChangePasswordPagePartOne(bool& outputDoShowPasswordCh
   }
   JSData findEmail, emailInfo, findUser, userInfo;
   findEmail[DatabaseStrings::labelEmail] = claimedEmail;
-  if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableEmailInfo, findEmail, emailInfo, &out))
+  if (!DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableEmailInfo, findEmail, emailInfo, &out, true))
   { out << "\n<span style =\"color:red\"><b>Failed to fetch email activation token. </b></span>";
     return out.str();
   }
@@ -3145,7 +3145,7 @@ int WebWorker::ProcessChangePassword()
   if (newEmail != "")
   { JSData queryEmailTaken, notUsed;
     queryEmailTaken[DatabaseStrings::labelEmail] = newEmail;
-    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableUsers, queryEmailTaken, notUsed, 0))
+    if (DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON(DatabaseStrings::tableUsers, queryEmailTaken, notUsed, 0, true))
     { stOutput << "<b style =\"color:red\">It appears the email is already taken. </b>";
       return 0;
     }

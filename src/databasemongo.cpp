@@ -110,7 +110,9 @@ public:
   MongoQuery();
   ~MongoQuery();
   bool FindMultiple(List<JSData>& output, const JSData& inputOptions, std::stringstream* commentsOnFailure);
-  bool UpdateOne(std::stringstream* commentsOnFailure);
+  bool UpdateOneWithOptions(std::stringstream* commentsOnFailure);
+  bool UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert);
+  bool UpdateOneNoOptions(std::stringstream* commentsOnFailure);
 };
 
 MongoQuery::MongoQuery()
@@ -154,7 +156,7 @@ MongoQuery::~MongoQuery()
   }
 }
 
-bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
+bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert)
 { MacroRegisterFunctionWithName("MongoQuery::UpdateOne");
   if (!databaseMongo.initialize(commentsOnFailure))
     return false;
@@ -167,13 +169,20 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
   ((const uint8_t*) this->findQuery.c_str(), this->findQuery.size(), &this->theError);
   this->update = bson_new_from_json
   ((const uint8_t*) this->updateQuery.c_str(), this->updateQuery.size(), &this->theError);
-  this->optionsQuery = "{\"upsert\": true}";
-  this->options = bson_new_from_json
-  ((const uint8_t*) this->optionsQuery.c_str(), this->optionsQuery.size(), &this->theError);
+  if (doUpsert)
+  { this->optionsQuery = "{\"upsert\": true}";
+    this->options = bson_new_from_json
+    ((const uint8_t*) this->optionsQuery.c_str(), this->optionsQuery.size(), &this->theError);
+  }
   this->updateResult = bson_new();
-  if (!mongoc_collection_update_one
-      (theCollection.collection, this->query, this->update,
-       this->options, this->updateResult, &this->theError))
+  bool result = false;
+  if (doUpsert)
+    result = mongoc_collection_update_one
+    (theCollection.collection, this->query, this->update, this->options, this->updateResult, &this->theError);
+  else
+    result = mongoc_collection_update_one
+    (theCollection.collection, this->query, this->update, 0, this->updateResult, &this->theError);
+  if (!result)
   { if (commentsOnFailure != 0)
       *commentsOnFailure << this->theError.message;
     logWorker << logger::red << "While updating: "
@@ -188,6 +197,14 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure)
   //bson_free(bufferOutpurStringFormat);
   //logWorker << logger::red << "Update result: " << updateResultString << logger::endL;
   return true;
+}
+
+bool MongoQuery::UpdateOneNoOptions(std::stringstream* commentsOnFailure)
+{ return this->UpdateOne(commentsOnFailure, false);
+}
+
+bool MongoQuery::UpdateOneWithOptions(std::stringstream* commentsOnFailure)
+{ return this->UpdateOne(commentsOnFailure, true);
 }
 
 bool MongoQuery::FindMultiple(List<JSData>& output, const JSData& inputOptions, std::stringstream* commentsOnFailure)
@@ -433,7 +450,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
   MongoQuery query;
   query.collectionName = collectionName;
   query.findQuery = findQuery;
-  //logWorker << logger::blue << "DEBUG: Query input: " << query.findQuery << logger::endL;
+  logWorker << logger::blue << "DEBUG: Query input: " << query.findQuery << logger::endL;
   query.maxOutputItems = 1;
   List<JSData> outputList;
   query.FindMultiple(outputList, options, commentsOnFailure);
@@ -455,11 +472,12 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
 
 bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
 (const std::string& collectionName, const JSData& findQuery,
- JSData& output, std::stringstream* commentsOnFailure)
+ JSData& output, std::stringstream* commentsOnFailure, bool doEncodeFindFields)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON");
   if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(findQuery, commentsOnFailure, true))
     return false;
-  return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString(collectionName, findQuery.ToString(true), output, commentsOnFailure);
+  logWorker << logger::red << "DEbug: find one from json with: " << findQuery.ToString(doEncodeFindFields) << logger::endL;
+  return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString(collectionName, findQuery.ToString(doEncodeFindFields), output, commentsOnFailure);
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::matchesPattern
@@ -549,32 +567,58 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry
     return false;
   }
   JSData findQuery;
-  findQuery[DatabaseStrings::labelIdMongo][DatabaseStrings::objectSelectorMongo] =
+  findQuery[DatabaseStrings::labelIdMongo]
+  [DatabaseStrings::objectSelectorMongo] =
   theEntry.objects.GetValueConstCrashIfNotPresent(DatabaseStrings::objectSelector);
   std::string tableName = theEntry.objects.GetValueConstCrashIfNotPresent(DatabaseStrings::labelTable).string;
-//  JSData* nextQuery = &findQuery;
-//  std::string tableName = theLabels[0];
-//  for (int counterLabels = 1; counterLabels < theLabels.size; counterLabels ++)
-//  { (*nextQuery)[theLabels[counterLabels]].type = JSData::JSObject;
-//    nextQuery = &(*nextQuery)[theLabels[counterLabels]];
-//  }
   JSData foundItem;
-  if (!FindOneFromJSON(tableName, findQuery, foundItem, commentsOnFailure))
+  if (!FindOneFromJSON(tableName, findQuery, foundItem, commentsOnFailure, false))
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "Query: " << findQuery.ToString(false, false) << " returned no hits in table: "
       << tableName;
     return false;
   }
   if (commentsOnFailure != 0)
-    *commentsOnFailure << "DEBUG: found item: " << foundItem.ToString(false);
- // DatabaseRoutinesGlobalFunctionsMongo::FindFromString(theLabels[0],)
+  { *commentsOnFailure << "DEBUG: found item: " << foundItem.ToString(false);
+    /*JSData selectorQuery;
+    JSData* nextQuery = &selectorQuery;
+    for (int counterLabels = 0; counterLabels < theLabels.size; counterLabels ++)
+    { (*nextQuery)[theLabels[counterLabels]].type = JSData::JSObject;
+      nextQuery = &(*nextQuery)[theLabels[counterLabels]];
+      if (counterLabels == theLabels.size - 1)
+      { nextQuery->type = JSData::JSstring;
+        nextQuery->string = "";
+      }
+    }
+    *commentsOnFailure << "DEBUG: selector query:  " << selectorQuery.ToString(false);*/
+    DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsecure(tableName, findQuery, theLabels, commentsOnFailure);
+  }
+    // DatabaseRoutinesGlobalFunctionsMongo::FindFromString(theLabels[0],)
 
   return false;
 }
 
-bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsecure(const JSData& findQuery, std::stringstream* commentsOnFailure)
+bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsecure
+(const std::string& tableName, const JSData& findQuery, List<std::string>& selector, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsecure");
 
+
+  MongoQuery query;
+  query.findQuery = findQuery.ToString(false);
+  query.collectionName = tableName;
+  std::stringstream updateQueryStream;
+  std::stringstream selectorStream;
+  for (int i = 0; i < selector.size; i ++)
+  { selectorStream << HtmlRoutines::ConvertStringToURLStringIncludingDots(selector[i], false);
+    if (i != selector.size - 1)
+      selectorStream << ".";
+  }
+  updateQueryStream << "{\"$unset\": {\"" << selectorStream.str() << "\":\"\"}}";
+  query.updateQuery = updateQueryStream.str();
+  logWorker << logger::red << "DEBUG: update query: " << logger::blue << query.updateQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
+  return query.UpdateOneNoOptions(commentsOnFailure);
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
@@ -590,12 +634,11 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
   query.collectionName = collectionName;
   std::stringstream updateQueryStream;
 //  logWorker << logger::blue << "DEBUG: GOT to here: " << logger::endL;
-  updateQuery.ToString(true);
   updateQueryStream << "{\"$set\": " << updateQuery.ToString(true) << "}";
   query.updateQuery = updateQueryStream.str();
   //logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
   //logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
-  return query.UpdateOne(commentsOnFailure);
+  return query.UpdateOneWithOptions(commentsOnFailure);
 #else
   (void) collectionName;
   (void) findQuery;

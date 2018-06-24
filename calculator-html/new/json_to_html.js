@@ -8,23 +8,35 @@ function writeJSONtoDOMComponent(inputJSON, theDomComponent) {
 }
 
 function deleteDatabaseItemCallback(input, output) {
+  document.getElementById(this).remove();
   console.log (`Debug: result: ${input}`);
+  //this.parentElement.innerHTML = "";
 }
 
-function deleteDatabaseItem(labels, selector) {
+function deleteDatabaseItem(containerLabel, labels, selector) {
   var finalSelector = {
     table: selector.table,
     object: selector.object,
     fields: labels
   }
   var theURL = `${pathnames.calculatorAPI}?request=databaseDeleteOneEntry&item=${escape(JSON.stringify(finalSelector))}`;
-  console.log("DEBUG: final selector: " + JSON.stringify(finalSelector));
+  //console.log("DEBUG: final selector: " + JSON.stringify(finalSelector));
   submitGET({
     url: theURL,
-    callback: deleteDatabaseItemCallback,
+    callback: deleteDatabaseItemCallback.bind(containerLabel),
     progress: "spanProgressReportGeneral"
   });  
 }
+
+var minimizableDatabase = [
+  ["users", "problemDataJSON"]
+];
+
+var abbreviatedDatabase = [
+  ["users", "activationToken"],
+  ["users", "authenticationToken"],
+  ["users", "password"]
+];
 
 function matchesPattern(currentLabels, selector, pattern) {
   if (currentLabels.length !== pattern.length - 1) {
@@ -49,24 +61,42 @@ function matchesPattern(currentLabels, selector, pattern) {
 }
 
 function isDeleteable(currentLabels, selector) {
+  return fitsPattern(currentLabels, selector, modifiableDatabaseData.modifiableFields);
+}
+
+function isMinimizable(currentLabels, selector) {
+  return fitsPattern(currentLabels, selector, minimizableDatabase);
+}
+
+function shouldBeAbbreviated(currentLabels, selector) {
+  return fitsPattern(currentLabels, selector, abbreviatedDatabase);
+}
+
+function fitsPattern(currentLabels, selector, pattern) {
   if (currentLabels === null || currentLabels === undefined || selector === null || selector === undefined) {
     return false;
   }
-  for (var counterModifiable = 0; counterModifiable < modifiableDatabaseData.modifiableFields.length; counterModifiable ++) {
-    if (matchesPattern(currentLabels, selector, modifiableDatabaseData.modifiableFields[counterModifiable])) {
+  for (var counterMinimizing = 0; counterMinimizing < pattern.length; counterMinimizing ++) {
+    if (matchesPattern(currentLabels, selector, pattern[counterMinimizing])) {
       return true;
     }
   }
   return false;
 }
 
-function getDeleteButtonFromLabels(theLabels, selector) {
-  return `<button onclick='deleteDatabaseItem(${JSON.stringify(theLabels)}, ${JSON.stringify(selector)})'>Delete</button>`;
+function getDeleteButtonFromLabels(theLabels, selector, containerLabel) {
+  return `<button onclick='deleteDatabaseItem("${containerLabel}", ${JSON.stringify(theLabels)}, ${JSON.stringify(selector)})'>Delete</button>`;
 }
+
+var counterDatabaseTables = 0;
 
 function getTableHorizontallyLaidFromJSON(input, currentLabels, selector) {
   var inputType = typeof input; 
   if (inputType === "string" || inputType === "number" || inputType === "boolean") {
+    if (shouldBeAbbreviated(currentLabels, selector)) {
+      label = shortenString(input, 4);
+      input = getToggleButton(input, label);
+    }
     if (isDeleteable(currentLabels, selector)) {
       return `${input} ${getDeleteButtonFromLabels(currentLabels, selector)}`;
     }
@@ -75,42 +105,60 @@ function getTableHorizontallyLaidFromJSON(input, currentLabels, selector) {
   var hasLabels = (currentLabels !== undefined && currentLabels !== null);
   if (Array.isArray(input)) {
     var result = "";
-    result += "<table class='tableJSONItem'>";
     var newLabels = null;
     if (hasLabels) {
       newLabels = currentLabels.slice();
       newLabels.push("");
     }
+    //if (isMinimizable(newLabels, selector)) {
+    //  result += `min`;
+    //}
+    result += "<table class='tableJSONItem'>";
     for (var counterInput = 0; counterInput < input.length; counterInput ++) {
       if (hasLabels) {
         newLabels[newLabels.length - 1] = `${counterInput}`;
       }
       var item = input[counterInput];
-      result += `<tr><td> <tiny>${counterInput}</tiny></td><td>${getTableHorizontallyLaidFromJSON(item, newLabels, selector)}</td></tr>`; 
+      result += `<tr><td><tiny>${counterInput}</tiny></td><td>${getTableHorizontallyLaidFromJSON(item, newLabels, selector)}</td></tr>`; 
     }
     result += "</table>";
     return result;
   }
   if (typeof input === "object") {
     var result = "";
-    result += "<table class='tableJSONItem'>";
     var newLabels = null;
     if (hasLabels) {
       newLabels = currentLabels.slice();
       newLabels.push("");
     }
+    var flagIsDeleteable = false;
+    result += "<table class='tableJSONItem'>"; 
+    if (isDeleteable(newLabels, selector)) {
+      flagIsDeleteable = true;
+    }
     for (item in input) {
       if (hasLabels) {
         newLabels[newLabels.length - 1] = item;
       }
-      result += `<tr>`;
+      var tableLabel = "";
+      if (flagIsDeleteable) {
+        counterDatabaseTables ++;
+        tableLabel += `databaseItem${counterDatabaseTables}`;
+        result += `<tr id='${tableLabel}'>`;
+      } else {
+        result += `<tr>`;
+      }
       result += `<td>${item}</td><td>${getTableHorizontallyLaidFromJSON(input[item], newLabels, selector)}</td>`;
-      if (isDeleteable(newLabels, selector)) {
-        result += `<td>${getDeleteButtonFromLabels(newLabels, selector)}</td>`;
+      if (flagIsDeleteable) {
+        result += `<td>${getDeleteButtonFromLabels(newLabels, selector, tableLabel)}</td>`;
       }
       result += `</tr>`; 
     }
     result += "</table>";
+    if (isMinimizable(currentLabels, selector)) {
+      result = getToggleButton(result, "show");
+    }
+
     return result;
   }  
   return typeof input;

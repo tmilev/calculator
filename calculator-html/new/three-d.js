@@ -1581,25 +1581,28 @@ function Canvas(inputCanvas)
       result--;
     return result;
   };
-  this.coordsMathScreenToBufferIndicesCOLSFloat = function (input)
-  { return (this.zBufferColCount)*(input-this.boundingBoxMathScreen[0][0])/(this.boundingBoxMathScreen[1][0]-this.boundingBoxMathScreen[0][0]);
+  this.coordsMathScreenToBufferIndicesCOLSFloat = function (input) { 
+    return (this.zBufferColCount) * (input-this.boundingBoxMathScreen[0][0]) / (this.boundingBoxMathScreen[1][0] - this.boundingBoxMathScreen[0][0]);
   };
-  this.coordsMathScreenToBufferIndicesCOLS= function (input)
-  { var result =Math.floor(this.coordsMathScreenToBufferIndicesCOLSFloat(input));
-    if (result>= this.zBufferColCount)
-      result--;
+  this.coordsMathScreenToBufferIndicesCOLS = function (input) { 
+    var result = Math.floor(this.coordsMathScreenToBufferIndicesCOLSFloat(input));
+    if (result >= this.zBufferColCount) {
+      result --;
+    }
     return result;
   };
-  this.coordsMathScreenToBufferIndices = function (input)
-  { var row= this.coordsMathScreenToBufferIndicesROWS(input[1]);
+  this.coordsMathScreenToBufferIndices = function (input) { 
+    var row = this.coordsMathScreenToBufferIndicesROWS(input[1]);
     var col = this.coordsMathScreenToBufferIndicesCOLS(input[0]);
-    if (row<0 || row>= this.zBufferRowCount || col<0 || col>= this.zBufferColCount)
+    if (row < 0 || row >= this.zBufferRowCount || col < 0 || col >= this.zBufferColCount) {
       console.log("point with math-screen coords: " + input + " is out of the bounding box");
+    }
     return [row,col];
   };
-  this.accountOnePointMathCoordsInBufferStrip = function(row, thePoint, patchIndex)
-  { if (row<0 || row>= this.zBufferIndexStrip.length)
+  this.accountOnePointMathCoordsInBufferStrip = function(row, thePoint, patchIndex) { 
+    if (row < 0 || row >= this.zBufferIndexStrip.length) {
       return;
+    }
     var bufferCoords = this.coordsMathScreenToBufferIndices(this.coordsMathToMathScreen(thePoint));
     //If there were no rounding errors, row would be equal
     //to bufferCoords[0]. However since there will be rounding errors,
@@ -2231,35 +2234,37 @@ function Canvas(inputCanvas)
     this.spanMessages.innerHTML= theHTML;
     ;
   };
-  this.logPatchInfo= function()
-  { this.textPatchInfo="";
-    this.textPatchInfo+="Z-depth: " + this.boundingSegmentZ + "<br>";
+  this.logPatchInfo= function() { 
+    this.textPatchInfo="";
+    this.textPatchInfo += "Z-depth: " + this.boundingSegmentZ + "<br>";
     var thePatches = this.theIIIdObjects.thePatches;
-    for (var i = 0; i <thePatches.length; i ++)
-    { var currentPatch= thePatches[i];
-      for (var j = 0; j<currentPatch.patchesAboveMe.length; j ++)
-      { this.textPatchInfo += currentPatch.patchesAboveMe[j];
-        if (j !== currentPatch.patchesAboveMe.length- 1)
-          this.textPatchInfo+=", ";
-        else
-          this.textPatchInfo+="->";
+    for (var i = 0; i <thePatches.length; i ++) { 
+      var currentPatch = thePatches[i];
+      for (var j = 0; j < currentPatch.patchesAboveMe.length; j ++) { 
+        this.textPatchInfo += currentPatch.patchesAboveMe[j];
+        if (j !== currentPatch.patchesAboveMe.length- 1) {
+          this.textPatchInfo += ", ";
+        } else {
+          this.textPatchInfo += "->";
+        }
       }
       this.textPatchInfo+="<b>"+ i + "</b>";
-      if (currentPatch.patchesBelowMe.length>0)
+      if (currentPatch.patchesBelowMe.length > 0)
         this.textPatchInfo+="->";
       for (j = 0; j<currentPatch.patchesBelowMe.length; j ++)
       { this.textPatchInfo += currentPatch.patchesBelowMe[j];
         if (j !== currentPatch.patchesBelowMe.length)
           this.textPatchInfo+=", ";
       }
-      this.textPatchInfo+="; contours: ";
-      for (j = 0; j< currentPatch.adjacentContours.length; j ++)
-      { this.textPatchInfo+= currentPatch.adjacentContours[j];
-        if (j !== currentPatch.adjacentContours.length- 1)
+      this.textPatchInfo += "; contours: ";
+      for (j = 0; j< currentPatch.adjacentContours.length; j ++) { 
+        this.textPatchInfo+= currentPatch.adjacentContours[j];
+        if (j !== currentPatch.adjacentContours.length - 1)
           this.textPatchInfo+=", ";
       }
-      if (i != thePatches.length- 1)
-        this.textPatchInfo+="<br>";
+      if (i != thePatches.length - 1) {
+        this.textPatchInfo += "<br>";
+      }
     }
     this.textPatchInfo+="<style>#patchInfo{ border: 1px solid black;}</style>";
     this.textPatchInfo+="<table id =\"patchInfo\">";
@@ -2278,15 +2283,16 @@ function Canvas(inputCanvas)
     }
     this.textPatchInfo+="</table>";
   };
-  this.logStatus = function()
-  { this.textMouseInfo="";
+  this.logStatus = function() { 
+    this.textMouseInfo = "";
     var thePatches = this.theIIIdObjects.thePatches;
-    if (this.numAccountedPatches<thePatches.length)
-      this.textMouseInfo+= "<span style ='color:red'><b>Error: only " + this.numAccountedPatches +" out of " +
+    if (this.numAccountedPatches<thePatches.length) {
+      this.textMouseInfo += "<span style ='color:red'><b>Error: only " + this.numAccountedPatches + " out of " +
       this.theIIIdObjects.thePatches.length + " patches accounted. "+ "</b></span><br>";
-    this.textMouseInfo+=
-    "time last redraw: " + this.redrawTime +" ms " + "(~" + (1000/this.redrawTime).toFixed(1) + " f.p.s.)"+
-    "<br>selected element: " + this.selectedElement +
+    }
+    this.textMouseInfo += `time last redraw: ${this.redrawTime} ms `; 
+    this.textMouseInfo += `(~${(1000/this.redrawTime).toFixed(1)} f.p.s.)`;
+    this.testMouseInfo += "<br>selected element: " + this.selectedElement +
     "<br>mouse coordinates: " + this.mousePosition +
     "<br>clicked coordinates: " + this.clickedPosition +
     "<br>delta of position: " + this.positionDelta +
@@ -2296,10 +2302,8 @@ function Canvas(inputCanvas)
     + " (" + (this.angleNormal*180/Math.PI).toFixed(1) + " deg)"
     + " = " +
     this.oldAngleNormal.toFixed(3) + " (" + (this.oldAngleNormal*180/Math.PI).toFixed(1) + " deg)"
-    + "-"+
-    this.newAngleNormal.toFixed(3) + " (" + (this.newAngleNormal*180/Math.PI).toFixed(1) + " deg)"
-
-    ;
+    + "-" +
+    this.newAngleNormal.toFixed(3) + " (" + (this.newAngleNormal*180/Math.PI).toFixed(1) + " deg)";
     if (1)
       this.logPatchInfo();
     this.showMessages();

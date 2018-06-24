@@ -8,7 +8,6 @@ function updateDatabasePageCallback(incoming, output) {
     var theOutput = document.getElementById("divDatabaseOutput");
     if ("rows" in theParsed) {
       theOutput.innerHTML = getHtmlFromArrayOfObjects(theParsed.rows, {table: currentTable});
-
     } else {
       for (var counterCollection = 0; counterCollection < theParsed.collections.length; counterCollection ++) {
         var currentCollection = theParsed.collections[counterCollection]; 

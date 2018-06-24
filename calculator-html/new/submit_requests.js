@@ -9,7 +9,31 @@ function recordProgressDone(progress, timeFinished) {
   }
   var theButton = progress.childNodes[0];
   var timeTotal = timeFinished - progress.getAttribute("timeStarted");
-  theButton.innerHTML = `<b style ='color:green'>Received</b> ${timeTotal} ms`;
+  theButton.childNodes[0].innerHTML = `<b style ='color:green'>Received</b> ${timeTotal} ms`;
+}
+
+function doToggleContent(button) {
+  var theSpan = button.nextSibling.nextSibling;
+  if (theSpan.classList.contains("panelExpandableCollapsed")) {
+    theSpan.classList.remove("panelExpandableCollapsed");
+    theSpan.classList.add("panelExpandableExpanded");
+    button.childNodes[1].innerHTML = "&#9662;";
+  } else {
+    theSpan.classList.remove("panelExpandableExpanded");
+    theSpan.classList.add("panelExpandableCollapsed");
+    button.childNodes[1].innerHTML = "&#9666;";
+  }
+}
+
+function getToggleButton(address, label) {
+  var result = "";
+  result += `<button class = "buttonProgress accordionLikeIndividual" onclick = "doToggleContent(this);">`;
+  result += `<span>${label}</span><span>&#9666;</span>`;
+  result += "</button>";
+  result += `<br><span class = "spanProgressReport panelExpandable panelExpandableCollapsed">`;
+  result += address;
+  result += "</span>"
+  return result;
 }
 
 function recordProgressStarted(progress, address, isPost, timeStarted) {
@@ -24,15 +48,14 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   }
   progress.setAttribute("timeStarted", timeStarted);
   var theHTML = "";
-  theHTML += `<button class = "buttonProgress" onclick = "if (this.nextSibling.nextSibling.style.display === 'none')
-{this.nextSibling.nextSibling.style.display = '';} else {this.nextSibling.nextSibling.style.display = 'none';}">`;
-  theHTML += `<b style ="color:orange">Sent</b></button>`;
-  theHTML += `<br><span class ="spanProgressReport" style ="display:none">`;
+  var content = "";
+  var label = '<b style ="color:orange">Sent</b>';
   if (!isPost) {
-    theHTML += `<a href='${address}' target ='_blank'>${address}</a></span>`;
+    content += `<a href='${address}' target ='_blank'>${address}</a></span>`;
   } else {
-    theHTML += address;
+    content += address;
   }
+  theHTML += getToggleButton(content, label);
   progress.innerHTML = theHTML;
 }
 

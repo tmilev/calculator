@@ -351,11 +351,11 @@ const std::string HtmlRoutines::GetJavascriptMathQuillDefaultLink()
 }
 
 const std::string& HtmlRoutines::GetJavascriptMathQuillMatrixSupporTWithTags()
-{ return  HtmlRoutines::GetJavascriptAddScriptTags("/html-common/mathquill.min-matrix.js");
+{ return  HtmlRoutines::GetJavascriptAddScriptTags("/html-common/mathquill.min.js");
 }
 
 const std::string HtmlRoutines::GetJavascriptMathQuillMatrixSupportLink()
-{ return  HtmlRoutines::GetJavascriptLink("/html-common/mathquill.min-matrix.js");
+{ return  HtmlRoutines::GetJavascriptLink("/html-common/mathquill.min.js");
 }
 
 std::string HtmlRoutines::GetJavascriptMathQuillDefaultFull()

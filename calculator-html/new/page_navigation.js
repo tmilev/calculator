@@ -242,8 +242,10 @@ Page.prototype.initializeCalculatorPage = function() {
   initializeCalculatorPage();
   //console.log("Submit missing");
   if (document.getElementById('mainInputID').value !== "") {
+    console.log("Debug: about to submit: " + document.getElementById('mainInputID').value);
     submitStringAsMainInput(
       document.getElementById('calculatorOutput'),
+      'calculatorOutput', 
       'compute',
       defaultOnLoadInjectScriptsAndProcessLaTeX,
       'mainComputationStatus'

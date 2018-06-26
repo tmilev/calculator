@@ -471,6 +471,24 @@ span.titleContainer{
 span.spanProgressReport{
   word-wrap: break-word;
 }
+#idAutocompletePanel{
+  overflow: none;
+  display: inline-block;
+  max-height: 150px;
+  vertical-align:top;
+  white-space:nowrap;
+}
+#idAutocompleteSpan{
+  overflow: auto;
+  max-height: 100px;
+}
+
+.tableCalculatorInputs{
+display: inline-table;
+}
+.tableCalculatorInputs td{
+  vertical-align: top;
+}
 table.tableCalculatorOutput{
   border-collapse: collapse;
 }
@@ -546,6 +564,7 @@ div.divPage{
 }
 div.divMainPage{
   width: 90%;
+  height: 100%;
   overflow: auto;
 }
 div.divTheMainMenu{

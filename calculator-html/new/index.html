@@ -149,7 +149,56 @@ var MathQuillHasMatrixSupport = true;
   <span id = "calculatorOutput"></span>
 
 </div><!--divCalculatorPage-->
+<div id = "divAboutPage" class = "divMainPage">
 
+
+    <h2> Project mission</h2>
+    The mission of the calculator project is, to the extent possible,
+    <blockquote>
+    to develop a universally accessible, free and open source computer algebra system covering
+    all computational aspects of mathematical research and math education, 
+    using an intuitive and user friendly interface that gives 
+    full programmatic control over the system to its users.
+    </blockquote>
+    
+    <h2>About the software</h2>
+    The source code of the calculator can be found here. 
+    <br>
+    <a href="https://github.com/tmilev/calculator" target="_blank">Calculator source code</a>
+    <br>
+    The code is to be compiled on a Linux machine.
+    
+    <br>
+    <br>
+    Most of the functionality of the system should work out of the box
+    (if not, it's a bug).
+    However, for obvious reasons, parts of the calculator will not work immediately 
+    - for example, the officially signed security certificates of calculator-algebra.org 
+    are kept secret. If you need help setting up the calculator on your machine, write me an email
+    (todor.milev at google's email).
+    
+    <h3>Software license</h3>
+    You are free to use the calculator, install it on your machine, and 
+    modify it's source code under the Apache License, Version 2.0 (a permissive free software license). 
+    <br>
+    <br>
+    The calculator is fully functional without any homework problem files, 
+    and provides facilities for creating such files 
+    (I create my own homework files through the calculator interface). 
+    Should you install the calculator on your own machine and 
+    create your own homework problems, 
+    you own the copyright to the resulting files; those are not subject  
+    to the Apache License. 
+    <br>
+    <br>
+    The homework problems located at www.calculator-algebra.org are private and are not subject to the 
+    Apache License.
+    
+    If you have any questions about this project, write me an email (todor.milev at google's email). I am interested in both academic and business opportunities for developing 
+    both educational and general mathematical software. 
+
+
+</div><!--divAboutPage-->
 <div id = "divDatabase" class = "divMainPage">
   <button class = "buttonStandard" onclick = "updateDatabasePageResetCurrentTable();">Tables</button>
 <div id = "divDatabaseOutput"> </div>
@@ -259,6 +308,7 @@ var MathQuillHasMatrixSupport = true;
 <div><button class = "buttonSelectPage" id = "buttonCurrentCourse">Current course</button></div>
 <div><button class = "buttonSelectPage" id = "buttonSelectCourse">Select course</button></div>
 <div><button class = "buttonSelectPage" id = "buttonSelectCalculator">Calculator</button></div>
+<div><button class = "buttonSelectPage" id = "buttonAboutPage">About</button></div>
 <div class = "divMenuSeparator divAccountPanel divInvisible">Account</div>
 <div class = "divAccountPanel divInvisible"><button class = "buttonSelectPage" id = "buttonSelectAccount">Account</button></div>
 

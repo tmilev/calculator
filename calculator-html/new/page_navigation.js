@@ -73,6 +73,12 @@ function Page() {
       selectFunction: null,
       scriptIds: []
     },
+    about: {
+      id: "divAboutPage",
+      menuButtonId: "buttonAboutPage",
+      container: null,
+      selectFunction: null
+    },
     database: {
       id: "divDatabase",
       menuButtonId: "buttonSelectDatabase",

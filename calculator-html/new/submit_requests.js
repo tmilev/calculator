@@ -51,7 +51,7 @@ function recordProgressStarted(progress, address, isPost, timeStarted) {
   var content = "";
   var label = '<b style ="color:orange">Sent</b>';
   if (!isPost) {
-    content += `<a href='${address}' target ='_blank'>${address}</a></span>`;
+    content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${address}</a></span>`;
   } else {
     content += address;
   }

@@ -567,6 +567,10 @@ div.divMainPage{
   height: 100%;
   overflow: auto;
 }
+#spanProgressReportGeneral{
+  max-width: 120px;
+  overflow-wrap: break-word;
+}
 div.divTheMainMenu{
   display: flex;
   flex-direction: column;
@@ -840,6 +844,11 @@ span.problemLinkSelectedQuiz{
   border-radius: 3px;
   font-weight: bold;
   text-decoration: none;  
+}
+a.linkProgressReport{
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  font-size: small;
 }
 a.problemLinkQuiz{
   display: inline-block;

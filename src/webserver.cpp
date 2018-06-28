@@ -5752,11 +5752,20 @@ void WebServer::CheckMongoDBSetup()
   theGlobalVariables.ChDir("./mongo-c-driver-1.9.3");
   theGlobalVariables.CallSystemNoOutput("./configure", true);
   theGlobalVariables.CallSystemNoOutput("make -j8", true);
+  logServer  << "Need sudo access for command: "
+  << logger::red << "sudo make install" << logger::endL;
   theGlobalVariables.CallSystemNoOutput("sudo make install", true);
   theGlobalVariables.ChDir("../libbson-1.9.3");
   theGlobalVariables.CallSystemNoOutput("./configure", true);
   theGlobalVariables.CallSystemNoOutput("make -j8", true);
+  logServer  << "Need sudo access for command: "
+  << logger::red << "sudo make install" << logger::endL;
   theGlobalVariables.CallSystemNoOutput("sudo make install", true);
+  theGlobalVariables.ChDir("../../bin");
+  logServer  << "Need sudo access for command to configure linker to use local usr/local/lib path (needed by mongo): "
+  << logger::red << "sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/" << logger::endL;
+  theGlobalVariables.CallSystemNoOutput("sudo cp ../external-source/usr_local_lib_for_mongo.conf /etc/ld.so.conf.d/", true);
+  logServer  << "Need sudo access for command: " << logger::red << "sudo ldconfig" << logger::endL;
   theGlobalVariables.CallSystemNoOutput("sudo ldconfig", true);
   theGlobalVariables.configuration["mongoDBSetup"] = "Setup complete";
   theGlobalVariables.StoreConfiguration();

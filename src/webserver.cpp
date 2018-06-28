@@ -5742,18 +5742,18 @@ void WebServer::CheckMongoDBSetup()
   theGlobalVariables.ChDir("../external-source");
 
   std::stringstream commandUnzipMongoC, commandUnzipLibbson;
-  commandUnzipMongoC << "tar -xvzf mongo-c-driver- 1.9.3.tar.gz";
+  commandUnzipMongoC << "tar -xvzf mongo-c-driver-1.9.3.tar.gz";
   logServer << logger::green << commandUnzipMongoC.str() << logger::endL;
   logServer << theGlobalVariables.CallSystemWithOutput(commandUnzipMongoC.str());
-  commandUnzipLibbson << "tar -xvzf libbson- 1.9.3.tar.gz";
+  commandUnzipLibbson << "tar -xvzf libbson-1.9.3.tar.gz";
   logServer << logger::green << commandUnzipLibbson.str() << logger::endL;
   logServer << theGlobalVariables.CallSystemWithOutput(commandUnzipLibbson.str());
 
-  theGlobalVariables.ChDir("./mongo-c-driver- 1.9.3");
+  theGlobalVariables.ChDir("./mongo-c-driver-1.9.3");
   theGlobalVariables.CallSystemNoOutput("./configure", true);
   theGlobalVariables.CallSystemNoOutput("make -j8", true);
   theGlobalVariables.CallSystemNoOutput("sudo make install", true);
-  theGlobalVariables.ChDir("../libbson- 1.9.3");
+  theGlobalVariables.ChDir("../libbson-1.9.3");
   theGlobalVariables.CallSystemNoOutput("./configure", true);
   theGlobalVariables.CallSystemNoOutput("make -j8", true);
   theGlobalVariables.CallSystemNoOutput("sudo make install", true);

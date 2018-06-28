@@ -450,7 +450,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
   MongoQuery query;
   query.collectionName = collectionName;
   query.findQuery = findQuery;
-  logWorker << logger::blue << "DEBUG: Query input: " << query.findQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: Query input: " << query.findQuery << logger::endL;
   query.maxOutputItems = 1;
   List<JSData> outputList;
   query.FindMultiple(outputList, options, commentsOnFailure);
@@ -476,7 +476,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON");
   if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(findQuery, commentsOnFailure, true))
     return false;
-  logWorker << logger::red << "DEbug: find one from json with: " << findQuery.ToString(doEncodeFindFields) << logger::endL;
+  //logWorker << logger::red << "DEbug: find one from json with: " << findQuery.ToString(doEncodeFindFields) << logger::endL;
   return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryString(collectionName, findQuery.ToString(doEncodeFindFields), output, commentsOnFailure);
 }
 

@@ -132,7 +132,7 @@ function Page() {
   //////////////////////////////////////
   for (var page in this.pages) {
     this.pages[page].container = document.getElementById(this.pages[page].id);
-    if (this.pages[page].menuButtonId === null && this.pages[page].menuButtonId !== undefined) {
+    if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
       var currentButton = document.getElementById(this.pages[page].menuButtonId);
       currentButton.pageToSelect = page;
       currentButton.addEventListener("click", function() {

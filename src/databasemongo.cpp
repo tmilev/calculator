@@ -601,8 +601,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry
 bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsecure
 (const std::string& tableName, const JSData& findQuery, List<std::string>& selector, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsecure");
-
-
+#ifdef MACRO_use_MongoDB
   MongoQuery query;
   query.findQuery = findQuery.ToString(false);
   query.collectionName = tableName;
@@ -619,6 +618,14 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsecure
   //logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
   //logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
   return query.UpdateOneNoOptions(commentsOnFailure);
+#else
+  (void) tableName;
+  (void) findQuery;
+  (void) selector;
+  if (commentsOnFailure != 0)
+    *commentsOnFailure << "Project compiled without mongoDB support. ";
+  return false;
+#endif
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
@@ -647,7 +654,6 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
     *commentsOnFailure << "Project compiled without mongoDB support. ";
   return false;
 #endif
-
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON

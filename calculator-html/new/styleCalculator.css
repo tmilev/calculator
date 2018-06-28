@@ -1047,6 +1047,23 @@ font-size: 1.1em;
 table.tableLogin{
 margin: 0 auto;
 }
+button.buttonSignUp{
+  display: inline-block;
+  box-shadow: none;
+  border: none;
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  background-color: #efefef;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  transition: 1.5s;
+}
+button.buttonSignUp:hover{ 
+  background-color: lightgreen;
+}
 button.buttonSelectPage{
   border-radius: 3px;
   background-color: lightblue;

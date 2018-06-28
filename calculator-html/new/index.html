@@ -29,6 +29,7 @@
 <script type = "text/javascript" src = "/calculator-html/new/problem_page.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/select_course.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/login.js"> </script>
+<script type = "text/javascript" src = "/calculator-html/new/signup.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/database.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/server_status.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/account.js"> </script>
@@ -55,6 +56,7 @@ var MathQuillHasMatrixSupport = true;
       <input class = "textInputUsername" type = "text" id = "inputUsername" name = "username" placeholder = "username" required><br>
       <input class = "textInputUsername" type = "password" id = "inputPassword" name = "password" placeholder = "password" onkeypress = "if (event.keyCode === 13) loginCalculator();" autocomplete = "on"><br>
       <button class = "buttonSelectPage" onclick = "loginCalculator();">Login</button><br>
+      <button class = "buttonSignUp" onclick = "signUp();">Sign up</button><br>
     </div> <!--divLoginCalculatorPanel-->
     <div class = "divCenteredItem">
       <a href = "#" onclick = "logout();" class = "linkLogoutInactive linkStandardButtonLike" >Log out</a> 
@@ -69,6 +71,9 @@ var MathQuillHasMatrixSupport = true;
   </div><!--centerVerticallyInPageContainer-->
 </div><!--centerHorizontallyInPageContainer-->
 </div><!--divLoginPage-->
+<div id = "divSignUpPage" class = "divMainPage">
+
+</div>
 <div id = "divProblemPage" class = "divMainPage">
   <div id = "divProblemPageContentContainer">
   </div><!--divProblemPageContentContainer-->

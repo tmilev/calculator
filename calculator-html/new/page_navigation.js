@@ -28,6 +28,7 @@ function Page() {
   thePage = this;
   this.pages = {
     login: {
+      name: "login", //<-for autocomplete
       id: "divLoginPage", 
       menuButtonId: "buttonLoginPage",
       container: null,
@@ -35,18 +36,21 @@ function Page() {
       initialized: false
     },
     selectCourse : {
+      name: "selectCourse", //<-for autocomplete
       id: "divSelectCourse",
       menuButtonId: "buttonSelectCourse",
       container: null,
       selectFunction: selectSelectCoursePage
     },
     currentCourse : {
+      name: "currentCourse", //<-for autocomplete
       id: "divCurrentCourse",
       menuButtonId: "buttonCurrentCourse",
       container: null,
       selectFunction: selectCurrentCoursePage
     },
     problemPage : {
+      name: "problemPage", //<-for autocomplete
       id: "divProblemPage",
       menuButtonId: "buttonProblemPage",
       container: null,
@@ -55,6 +59,7 @@ function Page() {
       flagLoaded: false
     },
     editPage : {
+      name: "editPage", //<-for autocomplete
       id: "divEditPage",
       menuButtonId: "buttonEditPage",
       container: null,
@@ -67,19 +72,28 @@ function Page() {
       }
     },
     calculator: {
+      name: "calculator", //<-for autocomplete
       id: "divCalculatorPage",
       menuButtonId: "buttonSelectCalculator",
       container: null,
       selectFunction: null,
       scriptIds: []
     },
+    signUp: {
+      name: "signUp", //<-for autocomplete
+      id: "divSignUpPage",
+      container: null,
+      selectFunction: null
+    },
     about: {
+      name: "about", //<-for autocomplete
       id: "divAboutPage",
       menuButtonId: "buttonAboutPage",
       container: null,
       selectFunction: null
     },
     database: {
+      name: "database", //<-for autocomplete
       id: "divDatabase",
       menuButtonId: "buttonSelectDatabase",
       container: null,
@@ -89,18 +103,21 @@ function Page() {
       }
     },
     server: {
+      name: "server", //<-for autocomplete
       id: "divServer",
       menuButtonId: "buttonSelectServer",
       container: null,
       selectFunction: updateServerStatus
     },
     account: {
+      name: "account", //<-for autocomplete
       id: "divAccount",
       menuButtonId: "buttonSelectAccount",
       container: null,
       selectFunction: updateAccountPage
     },
     accounts: {
+      name: "accounts", //<-for autocomplete
       id: "divAccounts",
       menuButtonId: "buttonSelectAccounts",
       container: null,
@@ -115,11 +132,13 @@ function Page() {
   //////////////////////////////////////
   for (var page in this.pages) {
     this.pages[page].container = document.getElementById(this.pages[page].id);
-    var currentButton = document.getElementById(this.pages[page].menuButtonId);
-    currentButton.pageToSelect = page;
-    currentButton.addEventListener("click", function() {
-      thePage.selectPage(this.pageToSelect);
-    });
+    if (this.pages[page].menuButtonId === null && this.pages[page].menuButtonId !== undefined) {
+      var currentButton = document.getElementById(this.pages[page].menuButtonId);
+      currentButton.pageToSelect = page;
+      currentButton.addEventListener("click", function() {
+        thePage.selectPage(this.pageToSelect);
+      });
+    }
   }
   //////////////////////////////////////
   //////////////////////////////////////
@@ -350,13 +369,17 @@ Page.prototype.selectPage = function(inputPage) {
   }
   for (var page in this.pages) {
     this.pages[page].container.style.display = "none";
-    document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");
+    if (this.pages[page].menuButtonId !== null && this.pages[page].menuButtonId !== undefined) {
+      document.getElementById(this.pages[page].menuButtonId).classList.remove("buttonSelectPageSelected");
+    }
   }
   if (Storage !== undefined && localStorage !== undefined) {
     localStorage.setItem("currentPage", this.currentPage); 
   }
   this.pages[this.currentPage].container.style.display = "";
-  document.getElementById(this.pages[this.currentPage].menuButtonId).classList.add("buttonSelectPageSelected");
+  if (this.pages[this.currentPage].menuButtonId !== null && this.pages[this.currentPage].menuButtonId !== undefined) {
+    document.getElementById(this.pages[this.currentPage].menuButtonId).classList.add("buttonSelectPageSelected");
+  }
   if (this.pages[this.currentPage].selectFunction !== null && this.pages[this.currentPage].selectFunction !== undefined) {
     this.pages[this.currentPage].selectFunction();
   }

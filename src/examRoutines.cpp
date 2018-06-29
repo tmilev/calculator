@@ -4600,9 +4600,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
 
     slideFromSourceStreamHandouT << slideFromSourceStreamHandoutLink.str();
     slideFromSourceStreamHandouT << "\" class =\"slidesLink\" target =\"_blank\">Printable slides</a>";
-    homeworkFromSourceStreamNoAnswerKey << "answerKey = true&";
+    homeworkFromSourceStreamNoAnswerKey << "answerKey=true&";
     homeworkFromSourceStreamNoAnswerKey << "\" class =\"slidesLink\" target =\"_blank\">Homework with answers</a>";
-    homeworkFromSourceStreamAnswerKey << "answerKey = false&";
+    homeworkFromSourceStreamAnswerKey << "answerKey=false&";
     homeworkFromSourceStreamAnswerKey << "\" class =\"slidesLink\" target =\"_blank\">Homework</a>";
 
     slideFromSourceStreamProjectoR << "\" class =\"slidesLink\" target =\"_blank\">Slides</a>";

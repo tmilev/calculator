@@ -1510,10 +1510,15 @@ bool DatabaseRoutinesGlobalFunctions::LoginViaDatabase(UserCalculatorData& theUs
     if (!userWrapper.Iexist(0))
     { if (comments != 0)
         *comments << "First login of user admin: setting admin pass. ";
+      logWorker << logger::yellow << "First login of user admin: setting admin pass. " << logger::endL;
       //*comments << "DEBUG: user before storing: " << userWrapper.ToJSON().ToString();
       userWrapper.actualActivationToken = "activated";
       userWrapper.userRole = "admin";
-      userWrapper.StoreToDB(true, comments);
+      if (!userWrapper.StoreToDB(true, comments))
+      { logWorker << logger::red << "Failed to store admin pass to database. ";
+        if (comments != 0)
+          logWorker << comments->str();
+      }
       //*comments << "DEBUG: admin user: " << userWrapper.ToJSON().ToString() ;
       theUseR = userWrapper;
       return true;

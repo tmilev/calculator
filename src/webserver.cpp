@@ -4023,7 +4023,7 @@ bool WebWorker::RedirectIfNeeded(std::stringstream& argumentProcessingFailureCom
       redirectedAddress << theGlobalVariables.webArguments.theKeys[i] << "="
       << theGlobalVariables.webArguments.theValues[i] << "&";
   if (argumentProcessingFailureComments.str() != "")
-    redirectedAddress << "error ="
+    redirectedAddress << "error="
     << HtmlRoutines::ConvertStringToURLString(argumentProcessingFailureComments.str(), false)
     << "&";
   std::stringstream headerStream;
@@ -4184,7 +4184,9 @@ int WebWorker::ServeClient()
   //stOutput << "DEBUG: got to here pt 2.";
   this->CorrectRequestsAFTERLoginReturnFalseIfModified();
   if (this->RedirectIfNeeded(argumentProcessingFailureComments))
+  { logWorker << "DEBUG: redirecting as needed: " <<  argumentProcessingFailureComments.str() << logger::endL;
     return 0;
+  }
   theUser.flagStopIfNoLogin =
   (!theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection &&
    theUser.flagMustLogin);
@@ -4207,8 +4209,11 @@ int WebWorker::ServeClient()
       theGlobalVariables.SetWebInpuT("authenticationToken", "");
     return this->ProcessLoginPage(argumentProcessingFailureComments.str());
   }
-  if (argumentProcessingFailureComments.str() != "" && theUser.flagMustLogin)
-    theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
+  logWorker << "DEBUG: argumentProcessingFailureComments: " <<  argumentProcessingFailureComments.str() << logger::endL;
+  if (argumentProcessingFailureComments.str() != "" &&  (theUser.flagMustLogin || theGlobalVariables.userCalculatorRequestType == "userInfoJSON"))
+  { theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
+    logWorker << "DEBUG: set global error" << logger::endL;
+  }
   //stOutput << "DEBUG: got to here pt 3.";
   if (theUser.flagMustLogin)
     this->errorLogin = argumentProcessingFailureComments.str();

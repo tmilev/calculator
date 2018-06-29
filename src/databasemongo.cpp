@@ -161,8 +161,8 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert)
   if (!databaseMongo.initialize(commentsOnFailure))
     return false;
   MongoCollection theCollection(this->collectionName);
-  //logWorker << "Update: " << this->findQuery << " to: "
-  //<< this->updateQuery << " inside: " << this->collectionName << logger::endL;
+  logWorker << "DEBUG: Update: " << this->findQuery << " to: "
+  << this->updateQuery << " inside: " << this->collectionName << logger::endL;
   if (this->query != 0)
     crash << "At this point of code, query is supposed to be 0. " << crash;
   this->query = bson_new_from_json
@@ -633,18 +633,18 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
  std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString");
 #ifdef MACRO_use_MongoDB
-  //if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(updateQuery, commentsOnFailure, true))
-  //{ return false;
-  //}
+  if (!DatabaseRoutinesGlobalFunctionsMongo::IsValidJSONMongoQuery(updateQuery, commentsOnFailure, true))
+  { return false;
+  }
   MongoQuery query;
   query.findQuery = findQuery;
   query.collectionName = collectionName;
   std::stringstream updateQueryStream;
-//  logWorker << logger::blue << "DEBUG: GOT to here: " << logger::endL;
+  logWorker << logger::blue << "DEBUG: GOT to here: " << logger::endL;
   updateQueryStream << "{\"$set\": " << updateQuery.ToString(true) << "}";
   query.updateQuery = updateQueryStream.str();
-  //logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
-  //logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
+  logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
+  logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
   return query.UpdateOneWithOptions(commentsOnFailure);
 #else
   (void) collectionName;
@@ -660,6 +660,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON
 (const std::string& collectionName, const List<JSData>& findOrQueries, const JSData& updateQuery,
  std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromSomeJSON");
+  logWorker << "DEBUG: HEre I am!" << logger::endL;
   std::string queryString;
   if (!DatabaseRoutinesGlobalFunctionsMongo::GetOrFindQuery(findOrQueries, queryString, commentsOnFailure))
   { logWorker << logger::blue << "DEBUG: GetOrFindQuery, comments: " << commentsOnFailure->str() << logger::endL;

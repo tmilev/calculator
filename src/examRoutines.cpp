@@ -4548,8 +4548,8 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     sourceStreamSlidesLink << theGlobalVariables.DisplayNameExecutable << "?request=slidesSource&";
     sourceStreamHomework << "<a href=\"" << theGlobalVariables.DisplayNameExecutable << "?request=homeworkSource&";
 
-    sourceStreamSlidesCommon << "title =" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
-    sourceStreamHomeworkCommon << "title =" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
+    sourceStreamSlidesCommon << "title=" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
+    sourceStreamHomeworkCommon << "title=" << HtmlRoutines::ConvertStringToURLString(this->title, false) << "&";
 
     /////////
     int sourceSlidesCounter = 0;
@@ -4569,7 +4569,7 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     { sourceHomeworkCounter ++;
       sourceStreamHomeworkCommon << "file" << sourceHomeworkCounter
       << "=" << HtmlRoutines::ConvertStringToURLString(owner.sourcesHomeworkHeaders[i], false) << "&isSolutionFile"
-      << sourceHomeworkCounter << "= false&";
+      << sourceHomeworkCounter << "=false&";
     }
     for (int i = 0; i < this->sourceHomework.size; i ++)
     { sourceHomeworkCounter ++;
@@ -4577,9 +4577,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
       << "=" << HtmlRoutines::ConvertStringToURLString(this->sourceHomework[i], false) << "&";
       if (i < this->sourceHomeworkIsSolution.size)
       { if (this->sourceHomeworkIsSolution[i])
-          sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "= true&";
+          sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "=true&";
         else
-          sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "= false&";
+          sourceStreamHomeworkCommon << "isSolutionFile" << sourceHomeworkCounter << "=false&";
       } else
       { stOutput << "<b>ERROR: </b>this->sourceHomeworkIsSolution is: "
         << this->sourceHomeworkIsSolution.ToStringCommaDelimited()
@@ -4588,9 +4588,9 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
     }
     /////////
     slideFromSourceStreamHandoutLink << sourceStreamSlidesCommon.str();
-    this->slidesProjector = slideFromSourceStreamHandoutLink.str() + "layout =projector&";
+    this->slidesProjector = slideFromSourceStreamHandoutLink.str() + "layout=projector&";
     slideFromSourceStreamProjectoR << "<a href=\"" << this->slidesProjector;
-    slideFromSourceStreamHandoutLink << "layout =printable&";
+    slideFromSourceStreamHandoutLink << "layout=printable&";
 
     homeworkFromSourceStreamNoAnswerKey << sourceStreamHomeworkCommon.str();
     homeworkFromSourceStreamAnswerKey << homeworkFromSourceStreamNoAnswerKey.str();
@@ -4607,12 +4607,12 @@ void TopicElement::ComputeLinks(CalculatorHTML& owner, bool plainStyle)
 
     slideFromSourceStreamProjectoR << "\" class =\"slidesLink\" target =\"_blank\">Slides</a>";
 
-    sourceStreamSlidesLink << "layout =printable&";
+    sourceStreamSlidesLink << "layout=printable&";
     this->linkSlidesTex = sourceStreamSlidesLink.str();
     sourceStreamSlides << "<a href=\"" << this->linkSlidesTex << "\" class =\"slidesLink\" download =\""
     << FileOperations::ConvertStringToLatexFileName(this->title) << ".tex\">.tex</a>";
 
-    sourceStreamHomework << "answerKey = true&\" class =\"slidesLink\" download =\""
+    sourceStreamHomework << "answerKey=true&\" class =\"slidesLink\" download=\""
     << FileOperations::ConvertStringToLatexFileName(this->title) << ".tex\">.tex</a>";
 
     this->slidesPrintable = slideFromSourceStreamHandoutLink.str();

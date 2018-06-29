@@ -4184,7 +4184,7 @@ int WebWorker::ServeClient()
   //stOutput << "DEBUG: got to here pt 2.";
   this->CorrectRequestsAFTERLoginReturnFalseIfModified();
   if (this->RedirectIfNeeded(argumentProcessingFailureComments))
-  { logWorker << "DEBUG: redirecting as needed: " <<  argumentProcessingFailureComments.str() << logger::endL;
+  { //logWorker << "DEBUG: redirecting as needed: " <<  argumentProcessingFailureComments.str() << logger::endL;
     return 0;
   }
   theUser.flagStopIfNoLogin =
@@ -4209,10 +4209,10 @@ int WebWorker::ServeClient()
       theGlobalVariables.SetWebInpuT("authenticationToken", "");
     return this->ProcessLoginPage(argumentProcessingFailureComments.str());
   }
-  logWorker << "DEBUG: argumentProcessingFailureComments: " <<  argumentProcessingFailureComments.str() << logger::endL;
+  //logWorker << "DEBUG: argumentProcessingFailureComments: " <<  argumentProcessingFailureComments.str() << logger::endL;
   if (argumentProcessingFailureComments.str() != "" &&  (theUser.flagMustLogin || theGlobalVariables.userCalculatorRequestType == "userInfoJSON"))
   { theGlobalVariables.SetWebInpuT("error", argumentProcessingFailureComments.str());
-    logWorker << "DEBUG: set global error" << logger::endL;
+    //logWorker << "DEBUG: set global error" << logger::endL;
   }
   //stOutput << "DEBUG: got to here pt 3.";
   if (theUser.flagMustLogin)

@@ -413,6 +413,10 @@ JSData UserCalculatorData::ToJSON()
   if (this->problemDataJSON.objects.size() != 0)
     result[DatabaseStrings::labelProblemDatA                     ] = this->problemDataStrinG                     ;
   result[DatabaseStrings::labelProblemDataJSON                   ] = this->problemDataJSON                       ;
+  if (this->problemDataJSON.type == JSData::JSUndefined) {
+    result[DatabaseStrings::labelProblemDataJSON].type = JSData::JSarray;
+    result[DatabaseStrings::labelProblemDataJSON].list.SetSize(0);
+  }
   result[DatabaseStrings::labelPassword                          ] = this->actualShaonedSaltedPassword           ;
   result[DatabaseStrings::labelUserRole                          ] = this->userRole                              ;
 

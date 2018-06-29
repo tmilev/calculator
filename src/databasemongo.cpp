@@ -161,8 +161,8 @@ bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert)
   if (!databaseMongo.initialize(commentsOnFailure))
     return false;
   MongoCollection theCollection(this->collectionName);
-  logWorker << "DEBUG: Update: " << this->findQuery << " to: "
-  << this->updateQuery << " inside: " << this->collectionName << logger::endL;
+  //logWorker << "DEBUG: Update: " << this->findQuery << " to: "
+  //<< this->updateQuery << " inside: " << this->collectionName << logger::endL;
   if (this->query != 0)
     crash << "At this point of code, query is supposed to be 0. " << crash;
   this->query = bson_new_from_json
@@ -640,11 +640,11 @@ bool DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromQueryString
   query.findQuery = findQuery;
   query.collectionName = collectionName;
   std::stringstream updateQueryStream;
-  logWorker << logger::blue << "DEBUG: GOT to here: " << logger::endL;
+  //logWorker << logger::blue << "DEBUG: GOT to here: " << logger::endL;
   updateQueryStream << "{\"$set\": " << updateQuery.ToString(true) << "}";
   query.updateQuery = updateQueryStream.str();
-  logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
-  logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
   return query.UpdateOneWithOptions(commentsOnFailure);
 #else
   (void) collectionName;

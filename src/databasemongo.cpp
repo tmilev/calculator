@@ -113,6 +113,7 @@ public:
   bool UpdateOneWithOptions(std::stringstream* commentsOnFailure);
   bool RemoveOne(std::stringstream* commentsOnFailure);
   bool UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert);
+  bool InsertOne(const JSData& incoming, std::stringstream* commentsOnFailure);
   bool UpdateOneNoOptions(std::stringstream* commentsOnFailure);
 };
 
@@ -184,6 +185,43 @@ bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure)
   //bson_free(bufferOutpurStringFormat);
   //logWorker << logger::red << "Update result: " << updateResultString << logger::endL;
   return true;
+}
+
+bool MongoQuery::InsertOne(const JSData& incoming, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("MongoQuery::InsertOne");
+  if (!databaseMongo.initialize(commentsOnFailure))
+    return false;
+  MongoCollection theCollection(this->collectionName);
+  //logWorker << "DEBUG: Update: " << this->findQuery << " to: "
+  //<< this->updateQuery << " inside: " << this->collectionName << logger::endL;
+  if (this->query != 0)
+    crash << "At this point of code, query is supposed to be 0. " << crash;
+  std::string incomingJSONString = incoming.ToString(true, false);
+  this->update = bson_new_from_json
+  ((const uint8_t*) incomingJSONString.c_str(), incomingJSONString.size(), &this->theError);
+  if (this->update == NULL)
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "Failed to create insertion bson.";
+    return false;
+  }
+  this->updateResult = bson_new();
+  bool result = mongoc_collection_insert_one(theCollection.collection, this->update, NULL, this->updateResult, &this->theError);
+  if (!result)
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << this->theError.message;
+    logWorker << logger::red << "While updating: "
+    << this->findQuery << " to: " << this->updateQuery << " inside: "
+    << this->collectionName << " got mongo error: "
+    << this->theError.message << logger::endL;
+    return false;
+  }
+  //char* bufferOutpurStringFormat = 0;
+  //bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
+  //std::string updateResultString(bufferOutpurStringFormat);
+  //bson_free(bufferOutpurStringFormat);
+  //logWorker << logger::red << "Update result: " << updateResultString << logger::endL;
+  return true;
+
 }
 
 bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert)
@@ -608,14 +646,21 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry
   }
 
   if (theLabels.size == 0)
-    return DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById(tableName, findQuery, commentsOnFailure);
+    return DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById(tableName, findQuery, foundItem, commentsOnFailure);
   return  DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(tableName, findQuery, theLabels, commentsOnFailure);
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById
-(const std::string& tableName, const JSData& findQuery, std::stringstream* commentsOnFailure)
+(const std::string& tableName, const JSData& findQuery, const JSData& foundItem,
+ std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById");
 #ifdef MACRO_use_MongoDB
+  MongoQuery queryInsertIntoDeletedTable;
+  JSData deletedEntry;
+  deletedEntry["deleted"] = foundItem;
+  queryInsertIntoDeletedTable.collectionName = DatabaseStrings::tableDeleted;
+  if (!queryInsertIntoDeletedTable.InsertOne(deletedEntry, commentsOnFailure))
+    return false;
   MongoQuery query;
   query.findQuery = findQuery.ToString(false);
   query.collectionName = tableName;

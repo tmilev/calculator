@@ -61,7 +61,9 @@ public:
   (const std::string& tableName, List<std::string>& outputLabels, List<List<std::string> >& outputRows,
    long long* totalItems = 0, std::stringstream* commentsOnFailure = 0);
   static bool DeleteOneEntry(const JSData& theEntry, std::stringstream* commentsOnFailure);
-  static bool DeleteOneEntryById(const std::string &tableName, const JSData& findQuery, std::stringstream* commentsOnFailure);
+  static bool DeleteOneEntryById
+  (const std::string& tableName, const JSData& findQuery,const JSData& foundItem,
+   std::stringstream* commentsOnFailure);
   static bool DeleteOneEntryUnsetUnsecure(const std::string& tableName, const JSData& findQuery, List<std::string>& selector, std::stringstream* commentsOnFailure);
   static std::string ToHtmlDatabaseCollection(const std::string& currentTable);
   static std::string ToJSONDatabaseCollection(const std::string& currentTable);

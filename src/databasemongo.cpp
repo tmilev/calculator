@@ -510,6 +510,17 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithProjection
    output, commentsOnFailure);
 }
 
+bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSONWithProjection
+(const std::string& collectionName, const JSData& findQuery, const List<std::string>& fieldsToProjectTo,
+ JSData& output, std::stringstream* commentsOnFailure, bool doEncodeFindFields)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSONWithOptions");
+  JSData theProjection = DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(fieldsToProjectTo);
+  std::string findQueryString = findQuery.ToString(doEncodeFindFields);
+
+ return DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
+ (collectionName, findQueryString, theProjection, output, commentsOnFailure);
+}
+
 bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
 (const std::string& collectionName, const std::string& findQuery, const JSData& options,
  JSData& output, std::stringstream* commentsOnFailure)
@@ -535,7 +546,6 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromQueryStringWithOptions
     *commentsOnFailure << "Project compiled without mongoDB support. ";
   return false;
 #endif
-
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::FindOneFromJSON
@@ -630,10 +640,19 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry
         theLabels, commentsOnFailure))
     return false;
   JSData findQuery;
-  findQuery[DatabaseStrings::labelIdMongo]
-  [DatabaseStrings::objectSelectorMongo] =
+  findQuery[DatabaseStrings::labelIdMongo][DatabaseStrings::objectSelectorMongo] =
   theEntry.objects.GetValueConstCrashIfNotPresent(DatabaseStrings::objectSelector);
   std::string tableName = theEntry.objects.GetValueConstCrashIfNotPresent(DatabaseStrings::labelTable).string;
+  if (theLabels.size == 0)
+    return DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById
+    (tableName, findQuery, commentsOnFailure);
+  return  DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(tableName, findQuery, theLabels, commentsOnFailure);
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById
+(const std::string& tableName, const JSData& findQuery, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById");
+#ifdef MACRO_use_MongoDB
   JSData foundItem;
   if (!FindOneFromJSON(tableName, findQuery, foundItem, commentsOnFailure, false))
   { if (commentsOnFailure != 0)
@@ -642,19 +661,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry
     return false;
   }
   if (commentsOnFailure != 0)
-  { *commentsOnFailure << "DEBUG: found item: " << foundItem.ToString(false);
-  }
-
-  if (theLabels.size == 0)
-    return DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById(tableName, findQuery, foundItem, commentsOnFailure);
-  return  DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(tableName, findQuery, theLabels, commentsOnFailure);
-}
-
-bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById
-(const std::string& tableName, const JSData& findQuery, const JSData& foundItem,
- std::stringstream* commentsOnFailure)
-{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById");
-#ifdef MACRO_use_MongoDB
+    *commentsOnFailure << "DEBUG: found item: " << foundItem.ToString(false);
   MongoQuery queryInsertIntoDeletedTable;
   JSData deletedEntry;
   deletedEntry["deleted"] = foundItem;
@@ -679,19 +686,41 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById
 }
 
 bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure
-(const std::string& tableName, const JSData& findQuery, List<std::string>& selector, std::stringstream* commentsOnFailure)
+(const std::string& tableName, const JSData& findQuery, List<std::string>& selector,
+ std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsecure");
 #ifdef MACRO_use_MongoDB
-  MongoQuery query;
-  query.findQuery = findQuery.ToString(false);
-  query.collectionName = tableName;
-  std::stringstream updateQueryStream;
+
   std::stringstream selectorStream;
   for (int i = 0; i < selector.size; i ++)
   { selectorStream << HtmlRoutines::ConvertStringToURLStringIncludingDots(selector[i], false);
     if (i != selector.size - 1)
       selectorStream << ".";
   }
+
+  JSData foundItem;
+  bool didFindItem = FindOneFromJSONWithProjection(tableName, findQuery, selector, foundItem, commentsOnFailure, false);
+  if (!didFindItem)
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "Query: " << findQuery.ToString(false, false) << " returned no hits in table: "
+      << tableName;
+    return false;
+  }
+  if (commentsOnFailure != 0)
+    *commentsOnFailure << "DEBUG: found item projected: " << foundItem.ToString(false);
+  MongoQuery queryBackUp;
+  queryBackUp.collectionName = DatabaseStrings::tableDeleted;
+  JSData backUp;
+  backUp["deleted"] = foundItem;
+  if (!queryBackUp.InsertOne(backUp, commentsOnFailure))
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << "Failed to insert backup: " << backUp.ToString(false);
+    return false;
+  }
+  MongoQuery query;
+  query.findQuery = findQuery.ToString(false);
+  query.collectionName = tableName;
+  std::stringstream updateQueryStream;
   updateQueryStream << "{\"$unset\": {\"" << selectorStream.str() << "\":\"\"}}";
   query.updateQuery = updateQueryStream.str();
   logWorker << logger::red << "DEBUG: update query: " << logger::blue << query.updateQuery << logger::endL;

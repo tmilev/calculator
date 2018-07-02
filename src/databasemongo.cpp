@@ -111,6 +111,7 @@ public:
   ~MongoQuery();
   bool FindMultiple(List<JSData>& output, const JSData& inputOptions, std::stringstream* commentsOnFailure);
   bool UpdateOneWithOptions(std::stringstream* commentsOnFailure);
+  bool RemoveOne(std::stringstream* commentsOnFailure);
   bool UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert);
   bool UpdateOneNoOptions(std::stringstream* commentsOnFailure);
 };
@@ -154,6 +155,35 @@ MongoQuery::~MongoQuery()
   { bson_destroy(this->query);
     this->query = 0;
   }
+}
+
+bool MongoQuery::RemoveOne(std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("MongoQuery::UpdateOne");
+  if (!databaseMongo.initialize(commentsOnFailure))
+    return false;
+  MongoCollection theCollection(this->collectionName);
+  //logWorker << "DEBUG: Update: " << this->findQuery << " to: "
+  //<< this->updateQuery << " inside: " << this->collectionName << logger::endL;
+  if (this->query != 0)
+    crash << "At this point of code, query is supposed to be 0. " << crash;
+  this->query = bson_new_from_json
+  ((const uint8_t*) this->findQuery.c_str(), this->findQuery.size(), &this->theError);
+  bool result = mongoc_collection_remove(theCollection.collection, MONGOC_REMOVE_SINGLE_REMOVE, this->query, NULL, &this->theError);
+  if (!result)
+  { if (commentsOnFailure != 0)
+      *commentsOnFailure << this->theError.message;
+    logWorker << logger::red << "While removing: "
+    << this->findQuery << " inside: "
+    << this->collectionName << " got mongo error: "
+    << this->theError.message << logger::endL;
+    return false;
+  }
+  //char* bufferOutpurStringFormat = 0;
+  //bufferOutpurStringFormat = bson_as_canonical_extended_json(this->updateResult, NULL);
+  //std::string updateResultString(bufferOutpurStringFormat);
+  //bson_free(bufferOutpurStringFormat);
+  //logWorker << logger::red << "Update result: " << updateResultString << logger::endL;
+  return true;
 }
 
 bool MongoQuery::UpdateOne(std::stringstream* commentsOnFailure, bool doUpsert)
@@ -561,11 +591,6 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry
        (theEntry.objects.GetValueConstCrashIfNotPresent(DatabaseStrings::labelFields),
         theLabels, commentsOnFailure))
     return false;
-  if (theLabels.size == 0)
-  { if (commentsOnFailure != 0)
-      *commentsOnFailure << "Not expected: zero labels extracted from selector. ";
-    return false;
-  }
   JSData findQuery;
   findQuery[DatabaseStrings::labelIdMongo]
   [DatabaseStrings::objectSelectorMongo] =
@@ -580,25 +605,35 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntry(const JSData& theEntry
   }
   if (commentsOnFailure != 0)
   { *commentsOnFailure << "DEBUG: found item: " << foundItem.ToString(false);
-    /*JSData selectorQuery;
-    JSData* nextQuery = &selectorQuery;
-    for (int counterLabels = 0; counterLabels < theLabels.size; counterLabels ++)
-    { (*nextQuery)[theLabels[counterLabels]].type = JSData::JSObject;
-      nextQuery = &(*nextQuery)[theLabels[counterLabels]];
-      if (counterLabels == theLabels.size - 1)
-      { nextQuery->type = JSData::JSstring;
-        nextQuery->string = "";
-      }
-    }
-    *commentsOnFailure << "DEBUG: selector query:  " << selectorQuery.ToString(false);*/
-    DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsecure(tableName, findQuery, theLabels, commentsOnFailure);
   }
-    // DatabaseRoutinesGlobalFunctionsMongo::FindFromString(theLabels[0],)
 
-  return false;
+  if (theLabels.size == 0)
+    return DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById(tableName, findQuery, commentsOnFailure);
+  return  DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure(tableName, findQuery, theLabels, commentsOnFailure);
 }
 
-bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsecure
+bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById
+(const std::string& tableName, const JSData& findQuery, std::stringstream* commentsOnFailure)
+{ MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryById");
+#ifdef MACRO_use_MongoDB
+  MongoQuery query;
+  query.findQuery = findQuery.ToString(false);
+  query.collectionName = tableName;
+  logWorker << logger::red << "DEBUG: remove query: " << logger::blue << query.findQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: the find query: " << query.findQuery << logger::endL;
+  //logWorker << logger::blue << "DEBUG: the update query: " << query.updateQuery << logger::endL;
+  return query.RemoveOne(commentsOnFailure);
+#else
+  (void) tableName;
+  (void) findQuery;
+  if (commentsOnFailure != 0)
+    *commentsOnFailure << "Project compiled without mongoDB support. ";
+  return false;
+#endif
+
+}
+
+bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure
 (const std::string& tableName, const JSData& findQuery, List<std::string>& selector, std::stringstream* commentsOnFailure)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsecure");
 #ifdef MACRO_use_MongoDB

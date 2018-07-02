@@ -116,7 +116,6 @@ function submitGET(inputObject) {
   xhr.send();
 }
 
-
 function submitStringCalculatorArgument(inputParams, idOutput, onLoadFunction, idStatus) {
   var spanOutput = document.getElementById(idOutput);
   if (spanOutput === null) {

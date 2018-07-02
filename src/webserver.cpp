@@ -1611,7 +1611,7 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
   if (this->flagFoundMalformedFormInput)
     out << "<b>Your input formed had malformed entries.</b>";
   out
-//  << "<input type =\"hidden\" id =\"debugFlag\" name =\"debugFlag\">\n"
+  //<< "<input type =\"hidden\" id =\"debugFlag\" name =\"debugFlag\">\n"
   << "<input type =\"hidden\" id =\"studentView\" name =\"studentView\">\n"
   << "<input type =\"hidden\" id =\"studentSection\" name =\"studentSection\">\n"
   << "<input type =\"hidden\" id =\"courseHome\" name =\"courseHome\">\n"
@@ -1622,13 +1622,13 @@ std::string WebWorker::GetHtmlHiddenInputs(bool includeUserName, bool includeAut
 void WebWorker::OutputResultAfterTimeout()
 { MacroRegisterFunctionWithName("WebWorker::OutputResultAfterTimeout");
   std::stringstream out;
-//  out << theParser.ToStringOutputSpecials();
+  //out << theParser.ToStringOutputSpecials();
   std::string theFileName = "output/" + theGlobalVariables.RelativePhysicalNameOutpuT;
   std::string theLink = "output/" + HtmlRoutines::ConvertStringToURLString
   (theGlobalVariables.RelativePhysicalNameOutpuT, false);
   out << "Output written in: <a href=\"/"
   << theLink << "\"> " << theLink << "</a><br>";
-//  out <<  "DEBUG: filename: " << theFileName << "<br>";
+  //out <<  "DEBUG: filename: " << theFileName << "<br>";
   if (standardOutputStreamAfterTimeout.str().size() != 0)
     out << standardOutputStreamAfterTimeout.str() << "<hr>";
   out << theParser->ToStringOutputAndSpecials();
@@ -1665,7 +1665,7 @@ void WebWorker::OutputSendAfterTimeout(const std::string& input)
   {//requesting pause which will be cleared by the receiver of pipeWorkerToWorkerIndicatorData
     theWebServer.GetActiveWorker().PauseComputationReportReceived.RequestPausePauseIfLocked(false, false);
   }
-//  logWorker << logger::red << "Result data is received, sending \"finished\"." << logger::endL;
+  //logWorker << logger::red << "Result data is received, sending \"finished\"." << logger::endL;
   theWebServer.GetActiveWorker().pipeWorkerToWorkerIndicatorData.WriteAfterEmptying("finished", false, false);
   logWorker << logger::red << "\"finished\" sent through indicator pipe, waiting." << logger::endL;
   theWebServer.GetActiveWorker().PauseComputationReportReceived.PauseIfRequestedWithTimeOut(false, false);
@@ -2334,8 +2334,8 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
     this->WriteProgressReportToFile(input);
   }
   this->PauseWorker.PauseIfRequested(false, false);     //if pause was requested, here we block
-//    logWorker << "(possible) block passed" << logger::endL;
-//  theReport.SetStatus("PipeProgressReportToParentProcess: computing...");
+  //  logWorker << "(possible) block passed" << logger::endL;
+  //theReport.SetStatus("PipeProgressReportToParentProcess: computing...");
   this->pipeWorkerToWorkerRequestIndicator.Read(false, false);
   if (this->pipeWorkerToWorkerRequestIndicator.thePipe.lastRead.size == 0)
   { this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny(false, false);
@@ -2345,8 +2345,8 @@ void WebWorker::PipeProgressReportToParentProcess(const std::string& input)
   { this->PauseIndicatorPipeInUse.ResumePausedProcessesIfAny(false, false);
     return;
   }
-//  if (theGlobalVariables.flagLogInterProcessCommunication)
-//  logWorker << " data written!";
+  //if (theGlobalVariables.flagLogInterProcessCommunication)
+  //logWorker << " data written!";
   //theReport.SetStatus("PipeProgressReportToParentProcess: piping computation process...");
   this->pipeWorkerToWorkerIndicatorData.WriteAfterEmptying(input, false, false);
   //theReport.SetStatus("PipeProgressReportToParentProcess: exiting 1...");
@@ -2384,12 +2384,12 @@ int WebWorker::ProcessFolder()
   for (int i = 0; i < theFileNames.size; i ++)
   { std::stringstream currentStream;
     bool isDir = (theFileTypes[i] == ".d");
-//    logWorker << logger::red << "Current file name: " << HtmlRoutines::ConvertStringToURLString(theFileNames[i]) << logger::endL;
+    //logWorker << logger::red << "Current file name: " << HtmlRoutines::ConvertStringToURLString(theFileNames[i]) << logger::endL;
     currentStream << "<a href=\"" << this->addressGetOrPost << HtmlRoutines::ConvertStringToURLString(theFileNames[i], false);
     if (isDir)
       currentStream << "/";
-//    else
-//      logWorker <<
+    //else
+    //  logWorker <<
     currentStream << "\">" << theFileNames[i];
     if (isDir)
       currentStream << "/";
@@ -2516,10 +2516,10 @@ int WebWorker::ProcessFile()
   theFile.read(&this->bufferFileIO[0], this->bufferFileIO.size);
   int numBytesRead = theFile.gcount();
   ///////////////////
-//  logWorker << "*****Message summary begin\r\n" << theHeader.str();
-//  logWorker << "Sending file  " << this->RelativePhysicalFileName; << " with file extension " << fileExtension
-//  << ", file size: " << fileSize;
-//  logWorker << "\r\n*****Message summary end\r\n";
+  //logWorker << "*****Message summary begin\r\n" << theHeader.str();
+  //logWorker << "Sending file  " << this->RelativePhysicalFileName; << " with file extension " << fileExtension
+  //<< ", file size: " << fileSize;
+  //logWorker << "\r\n*****Message summary end\r\n";
   ///////////////////
 
   while (numBytesRead != 0)
@@ -2687,7 +2687,7 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
   out << " <!>\n";
   out << " <script type =\"text/javascript\"> \n";
   out << " var timeOutCounter = 0;\n";
-//  out << " var newReportString=\"\";\n";
+  //  out << " var newReportString=\"\";\n";
   out << " var showProgress = false;";
   out << " function progressReport()\n";
   out << "{ var el = document.getElementById(\"idProgressReport\");	\n";
@@ -2700,7 +2700,7 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
   out << "  var oRequest = new XMLHttpRequest();\n";
   out << "  var sURL  = \"" << theGlobalVariables.DisplayNameExecutable << "\";\n";
   out << "  oRequest.open(\"GET\",sURL,false);\n";
-//  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
+  //  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
   out << "  oRequest.send(null)\n";
   out << "  if (oRequest.status ==200)\n";
   out << "  { newReportString= oRequest.responseText;\n";
@@ -2722,9 +2722,9 @@ std::string WebWorker::GetJavaScriptIndicatorFromHD()
 
 std::string WebWorker::GetAuthenticationToken(const std::string& reasonForNoAuthentication)
 { MacroRegisterFunctionWithName("WebWorker::GetAuthenticationToken");
-//  std::stringstream out;
-//  out << "DEBUG: username: " << theGlobalVariables.userDefault
-//  << "\npassword: " << theGlobalVariables.GetWebInput("password");
+  //  std::stringstream out;
+  //  out << "DEBUG: username: " << theGlobalVariables.userDefault
+  //  << "\npassword: " << theGlobalVariables.GetWebInput("password");
   if (theGlobalVariables.flagLoggedIn && theGlobalVariables.flagUsingSSLinCurrentConnection)
     return theGlobalVariables.userDefault.actualActivationToken;
   return reasonForNoAuthentication;
@@ -2875,8 +2875,7 @@ std::string WebWorker::GetLoginHTMLinternal(const std::string& reasonForLogin)
   << "<b style =\"color:green\">We do not store any personal information from google except your gmail address. "
   << "<br>We do not have access (and don't wish to have one) "
   << "<br>to your google password or other sensitive information. </span></b><br>"
-  << "<br></small>"
-  ;
+  << "<br></small>";
   out << "</div>";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
 
@@ -3857,15 +3856,13 @@ std::string WebWorker::GetForgotLoginPage()
   << "<td> Email:</td>"
   << "<td> <input type =\"text\" id =\"email\" name =\"email\" placeholder =\"email\">\n</td>\n"
   << "</tr>"
-  << "</table>"
-  ;
+  << "</table>";
   out << HtmlInterpretation::GetCaptchaDiv();
   out << "</form>";
   out << "<button onclick=\"submitForgotLogin();\">Send recovery email</button>"
   << "<span id =\"forgotLoginResultReport\"></span>"
   << "\n<br>\n"
-  << "<span id =\"forgotLoginResult\"></span>"
-  ;
+  << "<span id =\"forgotLoginResult\"></span>";
   out << HtmlInterpretation::ToStringCalculatorArgumentsHumanReadable();
   out << "</body></html>";
 
@@ -3890,8 +3887,8 @@ std::string WebWorker::GetSignUpPage()
   //out << "  var grecaptcha;\n";
   out
   << "  var theInput =\"request=signUp&\";\n"
-  << "  theInput +=\"desiredUsername =\" +encodeURIComponent(document.getElementById('desiredUsername').value) + \"&\";\n"
-  << "  theInput +=\"email =\" +encodeURIComponent(document.getElementById('email').value) + \"&\";\n"
+  << "  theInput +=\"desiredUsername=\" +encodeURIComponent(document.getElementById('desiredUsername').value) + \"&\";\n"
+  << "  theInput +=\"email=\" +encodeURIComponent(document.getElementById('email').value) + \"&\";\n"
   << "  if (grecaptcha ===undefined || grecaptcha === null)\n"
   << "  { document.getElementById('signUpResult').innerHTML="
   << "\"<span style ='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>\";\n"
@@ -3903,7 +3900,7 @@ std::string WebWorker::GetSignUpPage()
   << "\"<span style ='color:red'><b>Please don't forget to solve the captcha. </b></span>\";\n"
   << "    return false;\n"
   << "  }\n"
-  << "  theInput +=\"recaptchaToken =\" +encodeURIComponent(theToken) + \"&\";\n"
+  << "  theInput +=\"recaptchaToken=\" +encodeURIComponent(theToken) + \"&\";\n"
   << "  submitStringCalculatorArgument(theInput, 'signUpResult', resetRecaptchaOnLoad, 'signUpResultReport');\n"
   << "}\n";
   out << "</script>";
@@ -4805,8 +4802,7 @@ std::string WebServer::ToStringStatusForLogFile()
   out << "~" << numConnectionsSoFarApprox << " actual connections + ~"
   << approxNumPings << " self-test-pings (" << this->NumConnectionsSoFar << " connections total)"
   << " served since last restart. "
-  << "This counts one connection per problem answer preview, page visit, progress report ping, etc. "
-  ;
+  << "This counts one connection per problem answer preview, page visit, progress report ping, etc. ";
   int numInUse = 0;
   for (int i = 0; i < this->theWorkers.size; i ++)
     if (this->theWorkers[i].flagInUse)
@@ -4821,8 +4817,7 @@ std::string WebServer::ToStringStatusForLogFile()
   << "When the limit is exceeded, all connections except a randomly chosen one will be terminated. "
   << "<br> " << this->MaxNumWorkersPerIPAdress
   << " maximum simultaneous connection per IP address. "
-  << "When the limit is exceeded, all connections from that IP address are terminated. "
-  ;
+  << "When the limit is exceeded, all connections from that IP address are terminated. ";
   out
   << "<br>kill commands: " << this->NumProcessAssassinated
   << ", processes reaped: " << this->NumProcessesReaped
@@ -4869,8 +4864,7 @@ std::string WebServer::ToStringStatusPublicNoTop()
   << "When the limit is exceeded, all connections except a randomly chosen one will be terminated. "
   << "<br> " << this->MaxNumWorkersPerIPAdress
   << " maximum simultaneous connection per IP address. "
-  << "When the limit is exceeded, all connections from that IP address are terminated. "
-  ;
+  << "When the limit is exceeded, all connections from that IP address are terminated. ";
   return out.str();
 }
 
@@ -5140,7 +5134,7 @@ void WebServer::RecycleChildrenIfPossible()
         << i + 1 << " done with message: "
         << messageStr
         << ". Marking for reuse. " << logger::endL;
-        numInUse--;
+        numInUse --;
         this->NumWorkersNormallyExited ++;
         if (messageStr == "toggleMonitoring")
           this->ToggleProcessMonitoring();
@@ -5169,7 +5163,7 @@ void WebServer::RecycleChildrenIfPossible()
         { this->TerminateChildSystemCall(i);
           std::stringstream pingTimeoutStream;
           pingTimeoutStream
-          << theGlobalVariables.GetElapsedSeconds()-this->theWorkers[i].timeOfLastPingServerSideOnly
+          << theGlobalVariables.GetElapsedSeconds() - this->theWorkers[i].timeOfLastPingServerSideOnly
           << " seconds passed since worker " << i + 1
           << " last pinged the server; killing connection "
           << this->theWorkers[i].connectionID
@@ -5488,8 +5482,7 @@ int WebServer::Run()
     this->GetActiveWorker().connectedSocketID = newConnectedSocket;
     this->GetActiveWorker().flagUsingSSLInWorkerProcess = theGlobalVariables.flagUsingSSLinCurrentConnection;
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease = newConnectedSocket;
-    this->GetActiveWorker().timeServerAtWorkerStart =
-    theGlobalVariables.GetElapsedSeconds();
+    this->GetActiveWorker().timeServerAtWorkerStart = theGlobalVariables.GetElapsedSeconds();
     this->GetActiveWorker().timeOfLastPingServerSideOnly =
     this->GetActiveWorker().timeServerAtWorkerStart;
     this->NumConnectionsSoFar ++;

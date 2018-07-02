@@ -150,6 +150,9 @@ void GlobalVariables::initModifiableDatabaseFields()
   currentEntry.AddOnTop(DatabaseStrings::tableUsers);
   currentEntry.AddOnTop(DatabaseStrings::labelProblemDatA);
   modifiableData.AddOnTop(currentEntry);
+  currentEntry.SetSize(0);
+  currentEntry.AddOnTop(DatabaseStrings::tableEmailInfo);
+  modifiableData.AddOnTop(currentEntry);
   std::fstream outputFile;
   FileOperations::OpenFileCreateIfNotPresentVirtual(outputFile, "/calculator-html/new/modifiable_database_fields.js", false, true, false);
 

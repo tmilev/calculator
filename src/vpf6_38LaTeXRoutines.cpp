@@ -566,6 +566,9 @@ bool LaTeXcrawler::ExtractPresentationFileNames(std::stringstream* commentsOnFai
       *commentsOnFailure << "Failed to extract physical path from: " << this->headerFilePathVirtual;
     return false;
   }
+  if (commentsGeneral != 0)
+    *commentsGeneral << "Working file path physical: " << this->workingFilePathPhysical
+    << " extracted from virtual path: " << this->headerFilePathVirtual << "\n";
   FileOperations::GetFileExtensionWithDot(this->headerFileNameNoPath, &this->headerFileNameNoPathNoExtension);
   this->workingFileNameNoPathTex = "workingfile" + this->headerFileNameNoPathNoExtension + ".tex";
   this->workingFileNameNoPathPDF = "workingfile" + this->headerFileNameNoPathNoExtension + ".pdf";
@@ -657,8 +660,7 @@ bool LaTeXcrawler::BuildOrFetchFromCachePDF
     { if (commentsOnFailure != 0)
         *commentsOnFailure << "Pdf of slides not created. Only logged-in admins can compile pdfs. "
         << "Computed file name: <br>"
-        << HtmlRoutines::ConvertStringToHtmlString(this->targetPDFFileNameWithPathVirtual, false)
-        ;
+        << HtmlRoutines::ConvertStringToHtmlString(this->targetPDFFileNameWithPathVirtual, false);
       return false;
     }
   std::stringstream tempStream;

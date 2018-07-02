@@ -42,6 +42,9 @@ var MathQuillHasMatrixSupport = true;
 <script type = "text/javascript" src = "/calculator-html/new/calculator_page.js"> </script>
 <script type = "text/javascript" src = "/calculator-html/new/app.js"></script>
 <script type = "text/javascript" src = "/calculator-html/new/external/build/output.js"></script>
+
+<script src ='https://www.google.com/recaptcha/api.js'></script>
+
 <meta name = "google-signin-client_id" content = "538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com">
 </head>
 <body onload = "initializePage();">
@@ -72,8 +75,24 @@ var MathQuillHasMatrixSupport = true;
 </div><!--centerHorizontallyInPageContainer-->
 </div><!--divLoginPage-->
 <div id = "divSignUpPage" class = "divMainPage">
-
-</div>
+  <table>
+    <tr>
+    <td>Desired user name:</td>
+    <td>
+      <input type = "text" id = "desiredUsername" name = "desiredUsername" placeholder = "username">
+    </td>
+    </tr>
+    <tr>
+      <td>Email:</td>
+      <td><input type = "text" id = "email" name = "email" placeholder = "email"></td>
+    </tr>
+  </table>
+  <div class = "g-recaptcha" data-sitekey = "6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql"></div>
+  <button onclick="submitSignUpInfo();">Sign up</button>
+  <span id = "signUpResultReport"></span>
+  <br>
+  <span id = "signUpResult"></span>
+</div><!--divSignUpPage-->
 <div id = "divProblemPage" class = "divMainPage">
   <div id = "divProblemPageContentContainer">
   </div><!--divProblemPageContentContainer-->

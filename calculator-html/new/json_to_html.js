@@ -230,22 +230,35 @@ function getHtmlFromArrayOfObjects(input, selector) {
       for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
         result += `<th>${labelsRows.labels[counterColumn]}</th>`;
       }
+      result += "</tr>";
       for (var counterRow = 0; counterRow < labelsRows.rows.length; counterRow ++) {
+        var currentIsDeleteable = false; 
         if (hasLabels) {
           if (labelsRows.idRow != - 1) {
             selector.object = labelsRows.rows[counterRow][labelsRows.idRow]["$oid"];
+            currentIsDeleteable = isDeleteable([], selector);
           } 
         }
-        result += "<tr>";
+        var trIdIfNeeded = "";
+        if (currentIsDeleteable) {
+          trIdIfNeeded = `trOid${selector.object}`;
+          result += `<tr id = "${trIdIfNeeded}">`;
+        } else {
+          result += "<tr>";
+        }
         for (var counterColumn = 0; counterColumn < labelsRows.labels.length; counterColumn ++) {
           if (hasLabels) {
-            newLabel = [ labelsRows.labels[counterColumn] ];
+            newLabel = [labelsRows.labels[counterColumn]];
           }
-          result += `<td>${getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], newLabel, selector)}</td>`;
+          result += "<td>";
+          result += getTableHorizontallyLaidFromJSON(labelsRows.rows[counterRow][counterColumn], newLabel, selector);
+          if (currentIsDeleteable && counterColumn === labelsRows.idRow) {
+            result += getDeleteButtonFromLabels([], selector, trIdIfNeeded);
+          }
+          result += "</td>";
         }
         result += "</tr>";
       }
-      result += "</tr>";
       result += "</table>";
     } else {
       result += getTableHorizontallyLaidFromJSON(inputJSON);

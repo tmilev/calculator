@@ -57,7 +57,7 @@ function updateAccountsPageCallback(input, notUsed) {
   }
 }
 
-function addEmailsOrUsersCallback(input, outputComponent) {
+function callbackAddEmailsOrUsers(input, outputComponent) {
   if (typeof outputComponent == "string") {
     outputComponent = document.getElementById(outputComponent);
   }
@@ -86,7 +86,7 @@ function addEmailsOrUsers(
     url: theURL,
     progress: "spanProgressReportGeneral",
     result: idOutput,
-    callback: addEmailsOrUsersCallback
+    callback: callbackAddEmailsOrUsers
   });
 }
 

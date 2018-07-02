@@ -59,7 +59,8 @@ public:
    std::stringstream* commentsGeneralSensitive);
 };
 
-class WebServerMonitor{
+class WebServerMonitor
+{
 public:
   void BackupDatabaseIfNeeded();
   double timeAtLastBackup;
@@ -80,8 +81,7 @@ WebServerMonitor::WebServerMonitor()
 void WebServerMonitor::BackupDatabaseIfNeeded()
 { MacroRegisterFunctionWithName("WebServer::BackupDatabaseIfNeeded");
   if (this->timeAtLastBackup > 0 &&
-      theGlobalVariables.GetElapsedSeconds() - this->timeAtLastBackup <
-      (24 * 3600))
+      theGlobalVariables.GetElapsedSeconds() - this->timeAtLastBackup < (24 * 3600))
     return;
   std::stringstream commandStream;
   commandStream << "mongodump --db calculator --archive ="
@@ -92,7 +92,7 @@ void WebServerMonitor::BackupDatabaseIfNeeded()
   logServerMonitor << commandStream.str() << logger::endL;
   theGlobalVariables.CallSystemWithOutput(commandStream.str());
   logServerMonitor << logger::green << "Backing up completed. " << logger::endL;
-  this->timeAtLastBackup =theGlobalVariables.GetElapsedSeconds();
+  this->timeAtLastBackup = theGlobalVariables.GetElapsedSeconds();
 }
 
 void WebServerMonitor::Monitor()
@@ -184,7 +184,7 @@ void WebCrawler::init()
   if (!theWebServer.flagPort8155)
   { this->portOrService = "8080";
 //    this->addressToConnectTo="localhost";
-    this->addressToConnectTo="127.0.0.1";
+    this->addressToConnectTo = "127.0.0.1";
   } else
   { this->portOrService = "8155";
     this->addressToConnectTo = "127.0.0.1";
@@ -422,7 +422,8 @@ void WebCrawler::FetchWebPage
 void WebCrawler::FetchWebPagePart2
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral)
 { MacroRegisterFunctionWithName("WebCrawler::FetchWebPagePart2");
-  (void) commentsOnFailure; (void) commentsGeneral;
+  (void) commentsOnFailure;
+  (void) commentsGeneral;
 #ifdef MACRO_use_open_ssl
   std::stringstream theMessageHeader, theContinueHeader;
   if (this->flagDoUseGET)
@@ -452,7 +453,7 @@ void WebCrawler::FetchWebPagePart2
        commentsOnFailure, commentsGeneral, true))
     return;
   if (!theWebServer.theSSLdata.SSLreadLoop
-      (10,theWebServer.theSSLdata.sslClient, this->headerReceived, 0,
+      (10, theWebServer.theSSLdata.sslClient, this->headerReceived, 0,
        commentsOnFailure, commentsGeneral, true))
     return;
   unsigned bodyStart = 0;
@@ -511,7 +512,7 @@ void WebCrawler::FetchWebPagePart2
   //theContinueHeader << "\r\n\r\n";
   if (!theWebServer.theSSLdata.SSLwriteLoop
       (10, theWebServer.theSSLdata.sslClient, theContinueHeader.str(),
-      commentsOnFailure, commentsGeneral, true))
+       commentsOnFailure, commentsGeneral, true))
     return;
   //}
   std::string secondPart;
@@ -660,8 +661,7 @@ void WebCrawler::UpdatePublicKeys(std::stringstream* commentsOnFailure, std::str
   << this->bodyReceivedOutsideOfExpectedLength
   << "\n"
   << "\nHeader:\n "
-  << this->headerReceived
-  ;
+  << this->headerReceived;
   googleKeysFile.flush();
 }
 
@@ -775,10 +775,10 @@ bool WebCrawler::VerifyRecaptcha
       *commentsOnFailure << "<span style =\"color:red\"><b>Recaptcha appears to be missing. </b></span>";
     return false;
   }
-  messageToSendStream << "response ="
+  messageToSendStream << "response="
   << recaptchaURLencoded
   << "&"
-  << "secret ="
+  << "secret="
   << secret;
   this->flagDoUseGET = true;
   this->addressToConnectTo = "https://www.google.com/recaptcha/api/siteverify";;
@@ -833,65 +833,81 @@ bool WebCrawler::VerifyRecaptcha
   return true;
 }
 
-int WebWorker::ProcessSignUP()
-{ MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
+std::string WebWorker::GetSignUpRequestResult()
+{ MacroRegisterFunctionWithName("WebWorker::GetSignUpRequestResult");
   //double startTime =theGlobalVariables.GetElapsedSeconds();
-  this->SetHeaderOKNoContentLength();
 #ifdef MACRO_use_MongoDB
   DatabaseRoutinesGlobalFunctions::LogoutViaDatabase();
   UserCalculator theUser;
   theUser.username = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("desiredUsername"), false);
   theUser.email = HtmlRoutines::ConvertURLStringToNormal(theGlobalVariables.GetWebInput("email"), false);
-  std::stringstream out;
-  out << "<br><b> "
-  << "Please excuse our verbose messages, they are used"
-  << " for debugging and will soon be turned off. </b>"
+  JSData result;
+  std::stringstream generalCommentsStream;
+  std::stringstream outputStream;
+  std::stringstream errorStream;
+  generalCommentsStream
+  << "<b>Please excuse our verbose messages, they are used "
+  << "for debugging and will soon be turned off.</b>"
   << "<br>Our code works just fine but we are still checking for unexpected bugs ...";
   WebCrawler theCrawler;
-  if (!theCrawler.VerifyRecaptcha(&out, &out, 0))
-  { stOutput << out.str();
-    return 0;
+  if (!theCrawler.VerifyRecaptcha(&errorStream, &generalCommentsStream, 0))
+  { result["error"] = errorStream.str();
+    result["comments"] = generalCommentsStream.str();
+    return result.ToString(false);
   }
   if (theUser.username == "")
-  { stOutput << "<span style =\"color:red\"><b>"
-    << "Empty username not allowed. "
-    << "</b></span>";
-    return 0;
+  { errorStream << "Empty username not allowed. ";
+    result["error"] = errorStream.str();
+    result["comments"] = generalCommentsStream.str();
+    return result.ToString(false);
   }
-  if (!EmailRoutines::IsOKEmail(theUser.email, &out))
-  { stOutput << "<span style =\"color:red\"><b>Your email address does not appear to be valid. "
-    << out.str() << "</b></span>";
-    return 0;
+  if (!EmailRoutines::IsOKEmail(theUser.email, &generalCommentsStream))
+  { errorStream << "Your email address does not appear to be valid. ";
+    result["error"] = errorStream.str();
+    result["comments"] = generalCommentsStream.str();
+    return result.ToString(false);
   }
-  if (theUser.Iexist(&out))
-  { stOutput << "<span style =\"color:red\"><b>"
+  if (theUser.Iexist(&generalCommentsStream))
+  { errorStream
     << "Either the username ("
     << theUser.username
     << ") or the email ("
     << theUser.email
-    << ") you requested is already taken.</b></span>";
-    return 0;
+    << ") you requested is already taken.";
+    result["error"] = errorStream.str();
+    result["comments"] = generalCommentsStream.str();
+    return result.ToString(false);
   } else
-    stOutput << "<span style =\"color:green\"><b>"
+  { outputStream << "<span style =\"color:green\"><b>"
     << "Username ("
     << theUser.username
     << ") with email ("
     << theUser.email
     << ") is available. </b></span>";
-  if (!theUser.StoreToDB(false, &out))
-  { stOutput << out.str();
-    return 0;
+  }
+  if (!theUser.StoreToDB(false, &errorStream))
+  { result["error"] = errorStream.str();
+    result["comments"] = generalCommentsStream.str();
+    result["result"] = outputStream.str();
+    return result.ToString(false);
   }
   std::stringstream* adminOutputStream = 0;
   if (theGlobalVariables.UserDefaultHasAdminRights())
-    adminOutputStream = &out;
-  this->DoSetEmail(theUser, &out, &out, adminOutputStream);
-  stOutput << out.str();
-  stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
-  << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
+    adminOutputStream = &generalCommentsStream;
+  this->DoSetEmail(theUser, &errorStream, &generalCommentsStream, adminOutputStream);
+  result["error"] = errorStream.str();
+  result["comments"] = generalCommentsStream.str();
+  result["result"] = outputStream.str();
 #else
-  stOutput << "Error: database not available. ";
+  result["error"] = "Error: database not available. ";
 #endif
+  return errorStream.str();
+}
+
+int WebWorker::ProcessSignUP()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessSignUP");
+  this->SetHeaderOKNoContentLength();
+  stOutput << this->GetSignUpRequestResult();
   return 0;
 }
 

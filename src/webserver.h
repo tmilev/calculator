@@ -267,6 +267,7 @@ public:
   std::string GetModifyProblemReport();
   std::string GetLoginPage(const std::string& reasonForLogin = "");
   std::string GetForgotLoginPage();
+  std::string GetSignUpRequestResult();
   std::string GetSignUpPage();
   std::string GetLoginHTMLinternal(const std::string& reasonForLogin = "");
   std::string GetAuthenticationToken(const std::string& reasonForNoAuthentication = "");

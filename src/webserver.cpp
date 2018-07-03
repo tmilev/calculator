@@ -860,7 +860,7 @@ void SSLdata::ClearErrorQueue
       extraErrorCode = ERR_get_error();
       if (extraErrorCode == 0)
       { if (commentsOnError != 0)
-          *commentsOnError << "Bad eof.";
+          *commentsOnError << "Bad eof. ";
       } else if (extraErrorCode == - 1)
       { if (commentsOnError != 0)
           *commentsOnError << "I/O error outside of ssl. "

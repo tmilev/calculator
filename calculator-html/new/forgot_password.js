@@ -1,32 +1,6 @@
 "use strict";
 
-function signUp() {
-  thePage.selectPage(thePage.pages.signUp.name);
-}
-
-function resetRecaptchaOnLoad() { 
-  grecaptcha.reset();
-}
-
-function callbackSignUp(input, output) {
-  if (typeof output === "string") {
-    output = document.getElementById(output);
-  }
-  try {
-    var inputParsed = JSON.parse(decodeURIComponent(input));
-    var result = "";
-    if (inputParsed.result !== undefined) {
-      result += `${inputParsed.result}<hr>`;
-    }
-    result += `<span style='color:red; font-weight:bold;'>${inputParsed.error}</span>`;
-    result += `<hr>${inputParsed.comments}`;
-    output.innerHTML = result;
-  } catch (e) {
-    output.innerHTML = `Result:${input}. Error: ${e}`;    
-  }
-}
-
-function submitSignUpInfo() {  
+function submitForgotPassword() {  
   if (grecaptcha === undefined || grecaptcha === null) { 
     document.getElementById('signUpResult').innerHTML = "<span style ='color:red'><b>The google captcha script appears to be missing (no Internet?). </b></span>";
     return false;

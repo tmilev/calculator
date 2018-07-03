@@ -85,6 +85,12 @@ function Page() {
       container: null,
       selectFunction: null
     },
+    forgotLogin: {
+      name: "forgotLogin",
+      id: "divForgotLogin",
+      container: null,
+      selectFunction: null      
+    },
     about: {
       name: "about", //<-for autocomplete
       id: "divAboutPage",

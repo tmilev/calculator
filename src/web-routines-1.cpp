@@ -933,37 +933,23 @@ int WebWorker::ProcessForgotLogin()
     return 0;
   }
 
-/*
-  if ( !
-  !theRoutines.FetchEntry
-      ((std::string) "email", theUser.email,
-       (std::string) "emailActivationStats", (std::string) "usernameAssociatedWithToken",
-        theUser.username.value, &out))
+  if (!theUser.Iexist(& out))
   { out << "<br><span style =\"color:red\"><b>"
-    << "We failed to find your email in our records. "
+    << "We failed to find your email: " << theUser.email << " in our records. "
     << "</b></span>";
     stOutput << out.str();
-    return 0;
-  }
-  if (!theUser.Iexist(theRoutines, &out))
-  { stOutput << "<span style =\"color:red\"><b>"
-    << "We have your email on record but we can't find the username: "
-    << theUser.username.value
-    << " which is supposed to be associated with it. This should be an error. "
-    << "</b></span>";
     return 0;
   }
   stOutput << "<b style =\"color:green\">"
   << "Your email is on record. "
   << "</b>";
   if (!theGlobalVariables.UserDefaultHasAdminRights())
-    this->DoSetEmail(theRoutines, theUser, &out, &out, 0);
+    this->DoSetEmail(theUser, &out, &out, 0);
   else
-    this->DoSetEmail(theRoutines, theUser, &out, &out, &out);
+    this->DoSetEmail(theUser, &out, &out, &out);
   stOutput << out.str();
   stOutput << "<br>Response time: " << theGlobalVariables.GetElapsedSeconds() << " second(s); "
-  << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";*/
-  crash << "Not implemented yet" << crash;
+  << theGlobalVariables.GetElapsedSeconds() << " second(s) spent creating account. ";
 #else
   stOutput << "Error: database not running. ";
 #endif

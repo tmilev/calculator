@@ -657,7 +657,7 @@ bool UserCalculator::ComputeAndStoreActivationStats
     return false;
   }
   if (!DatabaseRoutinesGlobalFunctionsMongo::UpdateOneFromJSON
-      (DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, commentsOnFailure))
+       (DatabaseStrings::tableUsers, findQueryInUsers, setQueryInUsers, commentsOnFailure))
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "Failed to set activationTokenCreationTime. ";
     return false;

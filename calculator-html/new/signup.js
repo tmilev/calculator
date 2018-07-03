@@ -1,6 +1,12 @@
 "use strict";
 
+var recaptchaRenderedSignUp = false;
+
 function signUp() {
+  if (!recaptchaRenderedSignUp) {
+    grecaptcha.render("recaptchaSignUp", {'sitekey' : '6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql'});
+    recaptchaRenderedSignUp = true;
+  }
   thePage.selectPage(thePage.pages.signUp.name);
 }
 
@@ -32,7 +38,7 @@ function submitSignUpInfo() {
     return false;
   }
   var desiredUsernameEncoded = encodeURIComponent(document.getElementById('desiredUsername').value);
-  var desiredEmailEncoded = encodeURIComponent(document.getElementById('email').value);
+  var desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForSignUp').value);
   var theURL = `${pathnames.calculatorAPI}?request=signUp&desiredUsername=${desiredUsernameEncoded}&`;
   theURL += `email=${desiredEmailEncoded}&`;
   var theToken = grecaptcha.getResponse();

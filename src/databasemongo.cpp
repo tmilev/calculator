@@ -378,7 +378,7 @@ bool DatabaseRoutinesGlobalFunctionsMongo::FindFromString
 
 }
 
-JSData DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(const List<std::string> &fieldsToProjectTo)
+JSData DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames(const List<std::string>& fieldsToProjectTo)
 { MacroRegisterFunctionWithName("DatabaseRoutinesGlobalFunctionsMongo::GetProjectionFromFieldNames");
   JSData result;
   JSData fields;
@@ -699,15 +699,17 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure
   }
 
   JSData foundItem;
-  bool didFindItem = FindOneFromJSONWithProjection(tableName, findQuery, selector, foundItem, commentsOnFailure, false);
+  List<std::string> selectorsCombined;
+  selectorsCombined.AddOnTop(selectorStream.str());
+  bool didFindItem = FindOneFromJSONWithProjection
+  (tableName, findQuery, selectorsCombined, foundItem, commentsOnFailure, false);
+
   if (!didFindItem)
   { if (commentsOnFailure != 0)
       *commentsOnFailure << "Query: " << findQuery.ToString(false, false) << " returned no hits in table: "
       << tableName;
     return false;
   }
-  if (commentsOnFailure != 0)
-    *commentsOnFailure << "DEBUG: found item projected: " << foundItem.ToString(false);
   MongoQuery queryBackUp;
   queryBackUp.collectionName = DatabaseStrings::tableDeleted;
   JSData backUp;
@@ -717,6 +719,8 @@ bool DatabaseRoutinesGlobalFunctionsMongo::DeleteOneEntryUnsetUnsecure
       *commentsOnFailure << "Failed to insert backup: " << backUp.ToString(false);
     return false;
   }
+  //stOutput << "DEBUG: found item projected: " << foundItem.ToString(false)
+  //<< "backup query: " << backUp.ToString(true);
   MongoQuery query;
   query.findQuery = findQuery.ToString(false);
   query.collectionName = tableName;

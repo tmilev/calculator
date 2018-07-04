@@ -164,8 +164,9 @@ function Page() {
   this.logoutRequestFromUrl = null;
   this.locationRequestFromUrl = null;
   this.user = new User();
-  this.loadSettingsFromCookies();
-  this.loadSettingsFromLocalStorage();
+  this.loadSettingsFromLocalStorage(); 
+  this.loadSettingsFromCookies(); //<-variables stored in cookies override local storage variables.
+  this.loadSettingsFromURL(); //<-variables stored in url override local storage and cookie variables.
   //////////////////////////////////////
   //////////////////////////////////////
   //Page manipulation functions
@@ -184,6 +185,29 @@ function Page() {
 }
 
 Page.prototype.correctSettings = function () {
+}
+
+Page.prototype.getHash = function () {
+  var result = {};
+  result.currentPage = this.currentPage;
+  return encodeURIComponent(JSON.stringify(result));
+}
+
+Page.prototype.loadSettingsFromURL = function() {    
+  try {
+    var hashEncoded = window.location.hash.substr(1);
+    var hashDecoded = decodeURIComponent(hashEncoded);
+    var hashParsed = JSON.parse(hashDecoded);
+    console.log(`DEBUG: hashEncoded: ${hashEncoded}, decodes to: ${hashDecoded}, parses to: ${JSON.stringify(hashParsed)}`);
+
+    if ("currentPage" in hashParsed) {
+      this.currentPage = hashParsed["currentPage"];
+    }
+  } catch (e) {
+    console.log("Error loading settings from cookies: " + e);
+  }
+  this.correctSettings();
+
 }
 
 Page.prototype.loadSettingsFromCookies = function() {
@@ -221,10 +245,7 @@ Page.prototype.loadSettingsFromLocalStorage = function() {
   try {
     this.currentPage = localStorage.currentPage;
     this.user.googleProfile = JSON.parse(localStorage.googleProfile); 
-    for (label in this.pages){
-      if (localStorage[label] === undefined || localStorage[label] === null) {
-        continue;
-      }
+    for (label in this.pages) {
       this.pages[label].storage = JSON.parse(localStorage[label]);
     }
   } catch (e) {
@@ -389,7 +410,7 @@ Page.prototype.selectPage = function(inputPage) {
   if (this.pages[this.currentPage].selectFunction !== null && this.pages[this.currentPage].selectFunction !== undefined) {
     this.pages[this.currentPage].selectFunction();
   }
-  location.href = `#${this.currentPage}`;
+  location.href = `#${this.getHash()}`;
 }
 
 Page.prototype.getCurrentProblem = function() {

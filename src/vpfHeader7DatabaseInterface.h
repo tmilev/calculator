@@ -210,7 +210,6 @@ public:
   EmailRoutines();
   //bool IsValidForMailgunCommand(std::stringstream* commentsOnFailure);
   static bool IsOKEmail(const std::string& input, std::stringstream* commentsOnError);
-  std::string GetCommandToSendEmailWithMailX();
   bool SendEmailWithMailGun
   (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral,
    std::stringstream* commentsGeneralSensitive);
@@ -271,7 +270,6 @@ public:
   (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
   bool ComputeAndStoreActivationStats
   (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral);
-  bool SendActivationEmail(std::stringstream& comments);
   std::string ToString();
   std::string ToStringSelectedColumns();
   UserCalculator();

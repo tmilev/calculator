@@ -950,12 +950,8 @@ int WebWorker::ProcessForgotLogin()
   stOutput << "<b style =\"color:green\">"
   << "Your email is on record. "
   << "</b>";
-  int fixThis;
   if (!theGlobalVariables.UserDefaultHasAdminRights())
-    this->DoSetEmail(theUser, &out, &out,
-    //0
-    &out
-    );
+    this->DoSetEmail(theUser, &out, &out, 0);
   else
     this->DoSetEmail(theUser, &out, &out, &out);
   stOutput << out.str();

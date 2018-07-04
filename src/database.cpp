@@ -1098,47 +1098,6 @@ bool UserCalculator::GetActivationAddress
   return true;
 }
 
-bool UserCalculator::SendActivationEmail(std::stringstream& comments)
-{ MacroRegisterFunctionWithName("UserCalculator::SendActivationEmail");
-  std::string activationAddress;
-  if (!this->GetActivationAbsoluteAddress(activationAddress, comments))
-    return false;
-  //stOutput << "<hr> all result strings: " << this->selectedRowFieldNamesUnsafe.ToStringCommaDelimited();
-  //stOutput << "<br> all result string names: " << this->selectedRowFieldsUnsafe.ToStringCommaDelimited();
-  this->email = this->GetSelectedRowEntry("email");
-  //theGlobalVariables.FallAsleep(1000000);
-
-  if (this->email == "")
-  { comments << "\nNo email address for user: " << this->username << ". ";
-    return false;
-  }
-  EmailRoutines theEmailRoutines;
-  theEmailRoutines.toEmail = this->email;
-  theEmailRoutines.subject = "NO REPLY: Activation of a Math homework account. ";
-  theEmailRoutines.emailContent = "Activation link: " + activationAddress;
-//  std::stringstream emailStream;
-//  emailStream << "Dear student,\nthis is an automated email sent with an activation token for your "
-//  << " math homework account. To activate your account and set up your password, please follow the link below. "
-//  << " If you have any technical problems or have questions, please DO NOT HIT the REPLY BUTTON; "
-//  << " instead, post your quesiton on piazza.com or email your question to "
-//  << " todor.milev@gmail.com\n\n";
-//  emailStream << this->activationTokenUnsafe << "\n\nGood luck with our course, \n Your calculus instructors.";
-  std::string emailLog = theGlobalVariables.CallSystemWithOutput(theEmailRoutines.GetCommandToSendEmailWithMailX());
-  size_t indexGoAhead = emailLog.find("Go ahead");
-  bool result = true;
-  if (indexGoAhead == std::string::npos)
-    result = false;
-  else
-  { std::string choppedEmailLog=emailLog.substr(indexGoAhead + 8);
-    result = (choppedEmailLog.find("OK") != std::string::npos);
-  }
-  //stOutput << "Calling system with:<br>" << theEmailRoutines.GetCommandToSendEmailWithMailX()
-  //<< "<br>\n to get output: \n<br>" << emailLog;
-  if (!result)
-    comments << "\nFailed to send email to " << this->username << ". Details: \n" << emailLog;
-  return result;
-}
-
 #include "vpfHeader7DatabaseInterface_Mongodb.h"
 #include "vpfHeader3Calculator5_Database_Mongo.h"
 
@@ -1320,9 +1279,9 @@ bool EmailRoutines::SendEmailWithMailGun
   //to execute arbitrary code.
   commandToExecute << "-F to=\""
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->toEmail) << "\" "
-  << "-F subject =\""
+  << "-F subject=\""
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->subject) << "\" "
-  << "-F text =\""
+  << "-F text=\""
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->emailContent)
   << "\"";
   std::string commandResult = theGlobalVariables.CallSystemWithOutput(commandToExecute.str());
@@ -1378,33 +1337,6 @@ bool EmailRoutines::IsOKEmail(const std::string& input, std::stringstream* comme
     *commentsOnError << "Email: "
     << input << " is required to have exactly one @ character. ";
   return numAts == 1;
-}
-
-std::string EmailRoutines::GetCommandToSendEmailWithMailX()
-{ MacroRegisterFunctionWithName("EmailRoutines::GetCommandToSendEmailWithMailX");
-  std::stringstream out;
-  out << "echo "
-  << "\""
-  << this->emailContent
-  << "\" "
-  << "| mailx -v -s "
-  << "\""
-  << this->subject
-  << "\" "
-  << " -c \""
-  << this->ccEmail
-  << "\" "
-  << "-S smtp =\""
-  << this->smtpWithPort
-  << "\" "
-  << "-S smtp-use-starttls -S smtp-auth=login -S smtp-auth-user =\""
-  << this->fromEmail
-  << "\" -S smtp-auth-password =\""
-  << this->fromEmailAuth
-  << "\" -S ssl-verify = ignore "
-  << "-S nss-config-dir =/etc/pki/nssdb/ "
-  << this->toEmail;
-  return out.str();
 }
 
 EmailRoutines::EmailRoutines()

@@ -3064,7 +3064,7 @@ bool WebWorker::DoSetEmail
   theEmail.subject = userCopy.activationEmailSubject;
   if (commentsGeneralNonSensitive != 0)
     *commentsGeneralNonSensitive << "<br><b>Sending email... </b>";
-  theEmail.SendEmailWithMailGun(commentsOnFailure, commentsGeneralSensitive, theGlobalVariables.UserDefaultHasAdminRights());
+  theEmail.SendEmailWithMailGun(commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive);
   if (commentsGeneralSensitive != 0)
   { if (theGlobalVariables.UserDefaultHasAdminRights())
       *commentsGeneralSensitive << "<hr>Content of sent email (admin view only):<br>"

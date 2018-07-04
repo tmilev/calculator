@@ -213,7 +213,7 @@ public:
   std::string GetCommandToSendEmailWithMailX();
   bool SendEmailWithMailGun
   (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral,
-   bool includeEmailCommandInComments = false);
+   std::stringstream* commentsGeneralSensitive);
 };
 
 class TopicElement;

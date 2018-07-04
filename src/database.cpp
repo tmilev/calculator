@@ -643,7 +643,7 @@ bool UserCalculator::ComputeAndStoreActivationStats
   if (commentsGeneral != 0)
     *commentsGeneral
     << "<br>Total activations (attempted on) this email: "
-    << numActivationsThisEmail.ToString() << ".\n <br>\n";
+    << numActivationsThisEmail.ToString() << ".\n<br>\n";
   JSData findQueryInUsers, setQueryInUsers;
   setQueryInUsers[DatabaseStrings::labelTimeOfActivationTokenCreation] = now.ToString();
   if (this->userId != "")
@@ -1267,7 +1267,7 @@ bool CalculatorDatabaseFunctions::innerRepairDatabaseEmailRecords
 
 bool EmailRoutines::SendEmailWithMailGun
 (std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral,
- bool includeEmailCommandInComments)
+ std::stringstream* commentsGeneralSensitive)
 { MacroRegisterFunctionWithName("EmailRoutines::SendEmailWithMailGun");
   std::string mailGunKey, hostnameToSendEmailFrom;
   if (!FileOperations::LoadFileToStringVirtual("certificates/mailgun-api.txt", mailGunKey, true, true, commentsOnFailure))
@@ -1326,18 +1326,17 @@ bool EmailRoutines::SendEmailWithMailGun
   << HtmlRoutines::ConvertStringEscapeQuotesAndBackslashes(this->emailContent)
   << "\"";
   std::string commandResult = theGlobalVariables.CallSystemWithOutput(commandToExecute.str());
-  if (commentsGeneral != 0)
-  { if (includeEmailCommandInComments)
-      *commentsGeneral << "Command: " << HtmlRoutines::ConvertStringToHtmlString(commandToExecute.str(), true);
+  if (commentsGeneralSensitive != 0)
+  { *commentsGeneralSensitive << "Command: " << HtmlRoutines::ConvertStringToHtmlString(commandToExecute.str(), true);
     bool isBad = false;
     if (commandResult.find("Forbidden") != std::string::npos)
       isBad = true;
-    *commentsGeneral << "<br>Result:<br>";
+    *commentsGeneralSensitive << "<br>Result:<br>";
     if (isBad)
-      *commentsGeneral << "<span style =\"color:red\"><b>";
-    *commentsGeneral << HtmlRoutines::ConvertStringToHtmlString(commandResult, true);
+      *commentsGeneralSensitive << "<span style =\"color:red\"><b>";
+    *commentsGeneralSensitive << HtmlRoutines::ConvertStringToHtmlString(commandResult, true);
     if (isBad)
-      *commentsGeneral << "</b></span>";
+      *commentsGeneralSensitive << "</b></span>";
   }
   return true;
 }

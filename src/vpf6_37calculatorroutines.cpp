@@ -541,7 +541,7 @@ bool CalculatorFunctionsGeneral::innerSendEmailWithMailGun
     << input.ToString()
     << "expected to be strings (enclose in \"\" please). ";
 
-  theEmail.SendEmailWithMailGun(&out, &out);
+  theEmail.SendEmailWithMailGun(&out, &out, &out);
 #else
   (void) input;
   out << "Error: database not running. ";

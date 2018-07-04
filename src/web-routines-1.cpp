@@ -933,18 +933,29 @@ int WebWorker::ProcessForgotLogin()
     return 0;
   }
 
-  if (!theUser.Iexist(& out))
-  { out << "<br><span style =\"color:red\"><b>"
+  if (!theUser.Iexist(&out))
+  { out << "<br><b style =\"color:red\">"
     << "We failed to find your email: " << theUser.email << " in our records. "
-    << "</b></span>";
+    << "</b>";
+    stOutput << out.str();
+    return 0;
+  }
+  if (!theUser.LoadFromDB(&out, &out))
+  { out << "<br><b style='color:red'>"
+    << "Failed to fetch user info for email: " << theUser.email
+    << "</b>";
     stOutput << out.str();
     return 0;
   }
   stOutput << "<b style =\"color:green\">"
   << "Your email is on record. "
   << "</b>";
+  int fixThis;
   if (!theGlobalVariables.UserDefaultHasAdminRights())
-    this->DoSetEmail(theUser, &out, &out, 0);
+    this->DoSetEmail(theUser, &out, &out,
+    //0
+    &out
+    );
   else
     this->DoSetEmail(theUser, &out, &out, &out);
   stOutput << out.str();
